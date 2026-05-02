@@ -1,7 +1,7 @@
-package com.auth.service.system.admin.feign;
+package com.auth.service.system.admin.user.feign;
 
 import com.auth.common.core.model.response.Result;
-import com.auth.service.system.admin.feign.fallback.AuthenticationInnerFeignClientFallback;
+import com.auth.service.system.admin.user.feign.fallback.AuthenticationInnerFeignClientFallback;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,12 +16,13 @@ import java.util.List;
 @FeignClient(name = "service-auth", path = "/api/auth/inner", fallback = AuthenticationInnerFeignClientFallback.class)
 public interface AuthenticationInnerFeignClient {
 
-	/**
-	 * 刷新用户缓存
-	 * @param userIds 用户ID列表
-	 * @return 刷新结果
-	 */
-	@PostMapping("/cache/refresh")
-	Result<String> refreshUserCache(@RequestBody List<Long> userIds);
+    /**
+     * 刷新用户缓存
+     *
+     * @param userIds 用户ID列表
+     * @return 刷新结果
+     */
+    @PostMapping("/cache/refresh")
+    Result<String> refreshUserCache(@RequestBody List<Long> userIds);
 
 }
