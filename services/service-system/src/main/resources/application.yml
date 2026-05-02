@@ -1,0 +1,107 @@
+server:
+  port: 20002
+  tomcat:
+    threads:
+      max: 300
+      min-spare: 30
+    accept-count: 200
+    max-connections: 10000
+  servlet:
+    session:
+      timeout: 40m
+  reactive:
+    session:
+      timeout: 40m
+
+spring:
+  application:
+    name: service-system
+  config:
+    import:
+      - nacos:common-config.yaml?group=AUTH_COMMON
+  profiles:
+    active: dev
+
+  mail:
+    default-encoding: UTF-8
+    ssl:
+      enabled: true
+
+  cloud:
+    nacos:
+      server-addr: 192.168.3.19:8848
+      discovery:
+        namespace: ${spring.profiles.active:dev}
+        group: DEFAULT_GROUP
+      config:
+        import-check:
+          enabled: true
+        namespace: ${spring.profiles.active:dev}
+        group: SERVICE_SYSTEM
+        file-extension: yaml
+
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 100MB
+
+  messages:
+    encoding: UTF-8
+    cache-duration: 3600
+    # 如果当前语言不存在是否应用系统语言
+    fallback-to-system-locale: false
+    # basename: i18n/messages
+
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+
+  # Quartz：JDBC JobStore + 集群（禁止 RAMJobStore；运行时数据持久化到 QRTZ_* 表）
+  quartz:
+    job-store-type: jdbc
+    jdbc:
+      initialize-schema: never
+    overwrite-existing-jobs: false
+    properties:
+      org.quartz.scheduler.instanceName: AuthClusteredScheduler
+      org.quartz.scheduler.instanceId: AUTO
+      org.quartz.jobStore.class: org.springframework.scheduling.quartz.LocalDataSourceJobStore
+      org.quartz.jobStore.driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+      org.quartz.jobStore.useProperties: "false"
+      org.quartz.jobStore.tablePrefix: QRTZ_
+      org.quartz.jobStore.isClustered: "true"
+      org.quartz.jobStore.clusterCheckinInterval: "20000"
+      org.quartz.threadPool.class: org.quartz.simpl.SimpleThreadPool
+      org.quartz.threadPool.threadCount: 10
+      org.quartz.threadPool.threadPriority: 5
+
+mybatis-plus:
+  mapper-locations:
+    - "classpath*:/mapper/**/*.xml"
+  global-config:
+    db-config:
+      id-type: assign_id
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+      logic-delete-field: isDeleted
+
+auth:
+  common:
+    jwt:
+      algorithm: HS256
+  system:
+    # 定时任务熔断：连续失败次数达到阈值后自动 pauseJob 并更新 sys_job.status=0
+    schedule:
+      job:
+        consecutive-failure-threshold: 5
+        success-enabled: false
+
+# 默认关闭 knife4j
+knife4j:
+  basic:
+    enable: false
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

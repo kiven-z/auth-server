@@ -1,0 +1,156 @@
+package com.auth.service.system.schedule.service.impl;
+
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.text.CharSequenceUtil;
+import com.auth.common.data.model.PageResponse;
+import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.common.helper.PageResultHelper;
+import com.auth.service.system.schedule.mapper.SysJobGroupMapper;
+import com.auth.service.system.schedule.mapper.SysJobMapper;
+import com.auth.service.system.schedule.model.entity.SysJobEntity;
+import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
+import com.auth.service.system.schedule.model.form.SysJobGroupForm;
+import com.auth.service.system.schedule.model.form.SysJobGroupUpdateForm;
+import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
+import com.auth.service.system.schedule.model.vo.SysJobGroupPageResponse;
+import com.auth.service.system.schedule.service.SysJobGroupService;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+import static com.auth.service.system.common.exception.SystemResultCodeEnum.DATA_NOT_EXIST;
+import static com.auth.service.system.common.exception.SystemResultCodeEnum.JOB_GROUP_CODE_DUPLICATE;
+import static com.auth.service.system.common.exception.SystemResultCodeEnum.JOB_GROUP_HAS_ACTIVE_JOBS;
+import static com.auth.service.system.common.exception.SystemResultCodeEnum.JOB_GROUP_SYSTEM_PROTECTED;
+
+/**
+ * 任务分组实现
+ *
+ * @author Bunny
+ */
+@Service
+@Transactional(rollbackFor = Exception.class)
+public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJobGroupEntity>
+		implements SysJobGroupService {
+
+	private final PageResultHelper pageResultHelper;
+
+	private final SysJobMapper sysJobMapper;
+
+	public SysJobGroupServiceImpl(PageResultHelper pageResultHelper, SysJobMapper sysJobMapper) {
+		this.pageResultHelper = pageResultHelper;
+		this.sysJobMapper = sysJobMapper;
+	}
+
+	/**
+	 * 分页查询
+	 * @param pageParams 分页参数
+	 * @param query 查询参数
+	 * @return 分页数据
+	 */
+	@Override
+	public PageResponse<SysJobGroupPageResponse> getPage(Page<SysJobGroupEntity> pageParams, SysJobGroupQuery query) {
+		IPage<SysJobGroupPageResponse> page = baseMapper.selectListByPage(pageParams, query);
+		pageResultHelper.setUpdateWithCreateUsername(page);
+
+		return PageResponse.of(page);
+	}
+
+	/**
+	 * 启用状态分组下拉/远程搜索（仅 status=1）
+	 * @param keyword 关键字（可空）
+	 * @param limit 最大条数
+	 * @return 列表
+	 */
+	@Override
+	public List<SysJobGroupPageResponse> listEnabledOptions(String keyword, int limit) {
+		int maxLimit = Math.min(Math.max(limit, 1), 100);
+		String searchKeyword = CharSequenceUtil.isBlank(keyword) ? null : keyword.trim();
+
+		return baseMapper.selectEnabledOptions(searchKeyword, maxLimit);
+	}
+
+	/**
+	 * 新增分组
+	 * @param form 表单
+	 */
+	@Override
+	public void create(SysJobGroupForm form) {
+		// 验证分组编码是否已存在
+		LambdaQueryWrapper<SysJobGroupEntity> queryWrapper = new LambdaQueryWrapper<>();
+		queryWrapper.eq(SysJobGroupEntity::getGroupCode, form.getGroupCode());
+		long exists = count(queryWrapper);
+		if (exists > 0) {
+			throw new SystemBusinessException(JOB_GROUP_CODE_DUPLICATE);
+		}
+
+		// 复制表单数据到实体
+		SysJobGroupEntity jobGroup = new SysJobGroupEntity();
+		BeanUtil.copyProperties(form, jobGroup);
+
+		// 设置默认值，is_system 默认值为 0
+		if (jobGroup.getIsSystem() == null) {
+			jobGroup.setIsSystem(0);
+		}
+
+		// order_num 默认值为 0
+		if (jobGroup.getOrderNum() == null) {
+			jobGroup.setOrderNum(0);
+		}
+
+		save(jobGroup);
+	}
+
+	/**
+	 * 修改分组（不含 group_code）
+	 * @param form 表单
+	 */
+	@Override
+	public void update(SysJobGroupUpdateForm form) {
+		SysJobGroupEntity jobGroup = getById(form.getId());
+		if (jobGroup == null) {
+			throw new SystemBusinessException(DATA_NOT_EXIST);
+		}
+
+		jobGroup.setGroupName(form.getGroupName());
+		jobGroup.setDescription(form.getDescription());
+		jobGroup.setOrderNum(form.getOrderNum());
+		jobGroup.setStatus(form.getStatus());
+		updateById(jobGroup);
+	}
+
+	/**
+	 * 删除分组（非内置、且无关联任务）
+	 * @param id 主键
+	 */
+	@Override
+	public void deleteById(Long id) {
+		SysJobGroupEntity jobGroup = getById(id);
+
+		// 查询该分组是否存在
+		if (jobGroup == null) {
+			throw new SystemBusinessException(DATA_NOT_EXIST);
+		}
+
+		// 查询当前是否为系统任务，如果系统任务则不允许删除
+		if (jobGroup.getIsSystem() != null && jobGroup.getIsSystem() == 1) {
+			throw new SystemBusinessException(JOB_GROUP_SYSTEM_PROTECTED);
+		}
+
+		// 验证分组下无任务，如果存在则不允许删除
+		LambdaQueryWrapper<SysJobEntity> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+		lambdaQueryWrapper.eq(SysJobEntity::getJobGroup, jobGroup.getGroupCode());
+		long cnt = sysJobMapper.selectCount(lambdaQueryWrapper);
+		if (cnt > 0) {
+			throw new SystemBusinessException(JOB_GROUP_HAS_ACTIVE_JOBS, cnt);
+		}
+
+		removeById(id);
+	}
+
+}

@@ -1,0 +1,68 @@
+server:
+  port: 8081
+
+spring:
+  cloud:
+    nacos:
+      server-addr: 192.168.3.19:8848
+      username: nacos
+      password: Dev1234!
+
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://192.168.3.19:3306/auth_admin_base?serverTimezone=GMT%2B8&useSSL=false&characterEncoding=utf-8&allowPublicKeyRetrieval=true
+    username: root
+    password: Authtest123
+    hikari:
+      maximum-pool-size: 20
+      connection-timeout: 30000
+
+  data:
+    redis:
+      host: 192.168.3.19
+      port: 6379
+      database: 1
+      password: "Dev1234!"
+      jedis:
+        pool:
+          enabled: true
+          # 最大连接数
+          max-active: 8
+          # 最大阻塞等待时间(负数表示没限制)
+          max-wait: -1ms
+          # 最大空闲
+          max-idle: 8
+          # 最小空闲
+          min-idle: 0
+      lettuce:
+        pool:
+          enabled: true
+          # 最大连接数
+          max-active: 8
+          # 最大阻塞等待时间(负数表示没限制)
+          max-wait: -1ms
+          # 最大空闲
+          max-idle: 8
+          # 最小空闲
+          min-idle: 0
+logging:
+  level:
+    root: info
+    com.auth: debug
+    org.springframework.security: debug
+    com.github.gavlyukovskiy: debug
+
+# 关闭 knife4j
+knife4j:
+  basic:
+    enable: false
+springdoc:
+  api-docs:
+    # 是否启用OpenAPI JSON端点
+    enabled: false
+  swagger-ui:
+    # 是否启用Swagger UI可视化界面
+    enabled: false
+    try-it-out-enabled: false
+    display-request-duration: false

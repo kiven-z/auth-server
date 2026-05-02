@@ -1,0 +1,325 @@
+package com.auth.service.system.schedule.support;
+
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.BooleanUtil;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
+import com.auth.service.system.schedule.model.constans.SysJobQuartzDataKeys;
+import com.auth.service.system.schedule.model.entity.SysJobEntity;
+import com.auth.service.system.schedule.task.mode.bean.BeanInvokeEntryJob;
+import com.auth.service.system.schedule.task.mode.custom.DelegatingCustomEntryJob;
+import lombok.extern.slf4j.Slf4j;
+import org.quartz.*;
+import org.quartz.impl.matchers.GroupMatcher;
+import org.springframework.stereotype.Component;
+
+import java.util.Date;
+import java.util.Objects;
+import java.util.TimeZone;
+
+import static com.auth.service.system.schedule.model.constans.SysJobQuartzDataKeys.JOB_ZONE;
+import static com.auth.service.system.schedule.model.constans.SysJobQuartzDataKeys.TRIGGER_SUFFIX;
+
+/**
+ * 将 {@link SysJobEntity} 与 Quartz {@link Scheduler} 同步（增删改、暂停、恢复、立即执行）
+ *
+ * @author Bunny
+ */
+@Slf4j
+@Component
+public class SysJobSchedulerManager {
+
+	private final Scheduler scheduler;
+
+	public SysJobSchedulerManager(Scheduler scheduler) {
+		this.scheduler = scheduler;
+	}
+
+	// =============== 静态工具方法 ===============
+
+	/**
+	 * Trigger 名称规则：{@code jobName + "_TRIGGER"}
+	 * @param jobName 任务名
+	 * @return Trigger 名
+	 */
+	public static String triggerName(String jobName) {
+		return jobName + TRIGGER_SUFFIX;
+	}
+
+	/**
+	 * 合并 JSON 参数到 JobDataMap
+	 * @param map JobDataMap
+	 * @param jobParamsJson 参数 JSON 字符串
+	 */
+	private static void mergeJsonParams(JobDataMap map, String jobParamsJson) {
+		// 如果 jobParamsJson 为空，则返回
+		if (CharSequenceUtil.isBlank(jobParamsJson)) {
+			return;
+		}
+
+		try {
+			// JSONObject 实现了 Map 接口
+			JSONObject json = JSONUtil.parseObj(jobParamsJson);
+			map.putAll(json);
+		}
+		catch (Exception e) {
+			log.warn("解析 job_params 失败: {}", jobParamsJson, e);
+			map.put("jobParamsRaw", jobParamsJson);
+		}
+	}
+
+	/**
+	 * 应用 Misfire 策略 - 1 表示补跑所有 - 2 表示补跑一次 - 3 表示不补跑
+	 * @param cron CronScheduleBuilder
+	 * @param policy Misfire 策略
+	 * @return CronScheduleBuilder
+	 */
+	private static CronScheduleBuilder applyMisfire(CronScheduleBuilder cron, Integer policy) {
+		// 如果 policy 为空，则默认值为 2 （补跑一次）
+		int p = Objects.requireNonNullElse(policy, 2);
+
+		// 根据 policy 返回不同的 CronScheduleBuilder
+		return switch (p) {
+			// 补跑所有
+			case 1 -> cron.withMisfireHandlingInstructionIgnoreMisfires();
+			// 补跑一次
+			case 2 -> cron.withMisfireHandlingInstructionFireAndProceed();
+			// 不补跑
+			case 3 -> cron.withMisfireHandlingInstructionDoNothing();
+			// 默认值为 2 （补跑一次）
+			default -> cron.withMisfireHandlingInstructionFireAndProceed();
+		};
+	}
+
+	// =============== 调度管理方法 ===============
+
+	/**
+	 * 删除 Quartz 中的 Job （若存在）
+	 * @param jobKey 任务键
+	 */
+	public void deleteJobIfExists(JobKey jobKey) throws SchedulerException {
+		boolean exists = scheduler.checkExists(jobKey);
+		if (exists) {
+			scheduler.deleteJob(jobKey);
+		}
+	}
+
+	/**
+	 * 按当前实体状态重建调度：先删后建；若 {@code status != 1} 则仅删除不落调度
+	 * @param job 任务实体
+	 */
+	public void scheduleOrReplace(SysJobEntity job) throws SchedulerException {
+		String jobName = job.getJobName();
+		String jobGroup = job.getJobGroup();
+		Boolean jobStatus = job.getStatus();
+
+		// 当前任务存在并且为暂停直接返回，不做任何操作
+		JobKey jobKey = JobKey.jobKey(jobName, jobGroup);
+		boolean exists = scheduler.checkExists(jobKey);
+		if (exists && BooleanUtil.isFalse(jobStatus)) {
+			return;
+		}
+
+		// 先删除 Job
+		deleteJobIfExists(jobKey);
+		// 构建 JobDetail
+		JobDetail detail = buildJobDetail(job);
+
+		// 构建 CronTrigger
+		CronTrigger trigger = buildCronTrigger(job, jobKey);
+
+		// 调度 Job
+		scheduler.scheduleJob(detail, trigger);
+	}
+
+	/**
+	 * 仅重排触发器（不删 JobDetail ），用于已存在任务修改 Cron/策略/时间窗
+	 * @param job 任务实体
+	 */
+	public void rescheduleTrigger(SysJobEntity job) throws SchedulerException {
+		// 构建 JobKey
+		JobKey jk = JobKey.jobKey(job.getJobName(), job.getJobGroup());
+		// 如果 Job 不存在，则重建调度
+		if (!scheduler.checkExists(jk)) {
+			scheduleOrReplace(job);
+			return;
+		}
+
+		// 构建 TriggerKey
+		TriggerKey tk = TriggerKey.triggerKey(triggerName(job.getJobName()), job.getJobGroup());
+		// 构建 CronTrigger
+		CronTrigger newTrigger = buildCronTrigger(job, jk);
+
+		// 如果 Trigger 存在，则重排触发器
+		if (scheduler.checkExists(tk)) {
+			scheduler.rescheduleJob(tk, newTrigger);
+		}
+
+		// 如果 Trigger 不存在，则调度 Job
+		else {
+			scheduler.scheduleJob(newTrigger);
+		}
+	}
+
+	/**
+	 * 暂停调度
+	 * @param jobName 任务名
+	 * @param jobGroup 分组
+	 */
+	public void pauseJob(String jobName, String jobGroup) throws SchedulerException {
+		// 构建 JobKey
+		JobKey jk = JobKey.jobKey(jobName, jobGroup);
+
+		// 如果 Job 存在，则暂停调度
+		if (scheduler.checkExists(jk)) {
+			scheduler.pauseJob(jk);
+		}
+	}
+
+	/**
+	 * 恢复调度
+	 * @param jobName 任务名
+	 * @param jobGroup 分组
+	 */
+	public void resumeJob(String jobName, String jobGroup) throws SchedulerException {
+		// 构建 JobKey
+		JobKey jk = JobKey.jobKey(jobName, jobGroup);
+
+		// 如果 Job 存在，则恢复调度
+		if (scheduler.checkExists(jk)) {
+			scheduler.resumeJob(jk);
+		}
+	}
+
+	/**
+	 * 恢复整个分组下的所有任务（仅恢复 Quartz 调度状态，不重建 Trigger）
+	 * @param groupCode 分组编码
+	 */
+	public void resumeGroup(String groupCode) throws SchedulerException {
+		// 如果分组编码为空，则返回
+		if (groupCode == null || groupCode.isBlank()) {
+			return;
+		}
+
+		// 恢复分组下的所有任务
+		scheduler.resumeJobs(GroupMatcher.groupEquals(groupCode));
+	}
+
+	/**
+	 * 立即触发一次（不影响 Cron）
+	 * @param jobName 任务名
+	 * @param jobGroup 分组
+	 */
+	public void triggerJob(String jobName, String jobGroup) throws SchedulerException {
+		// 构建 JobKey
+		JobKey jk = JobKey.jobKey(jobName, jobGroup);
+
+		// 如果 Job 不存在，则抛出异常
+		if (!scheduler.checkExists(jk)) {
+			throw new SchedulerException("Job 不存在: " + jk);
+		}
+
+		// 触发 Job
+		scheduler.triggerJob(jk);
+	}
+
+	/**
+	 * 确保 JobDetail 存在（不创建 Trigger），用于立即执行等场景
+	 * @param job 任务实体
+	 */
+	public void ensureJobDetail(SysJobEntity job) throws SchedulerException {
+		// 构建 JobKey
+		JobKey jk = JobKey.jobKey(job.getJobName(), job.getJobGroup());
+
+		// 如果 Job 存在，则返回
+		if (scheduler.checkExists(jk)) {
+			return;
+		}
+
+		// 构建 JobDetail
+		JobDetail detail = buildJobDetail(job);
+
+		// 添加 Job
+		scheduler.addJob(detail, false);
+	}
+
+	/**
+	 * 构建 JobDetail
+	 * @param job 任务实体
+	 * @return JobDetail
+	 */
+	private JobDetail buildJobDetail(SysJobEntity job) {
+		Long id = job.getId();
+		String invokeTarget = job.getInvokeTarget();
+		String jobParams = job.getJobParams();
+		String jobName = job.getJobName();
+		String jobGroup = job.getJobGroup();
+		Boolean jobConcurrent = job.getConcurrent();
+
+		// 判断是否为自定义模式
+		boolean customMode = CharSequenceUtil.isBlank(invokeTarget);
+		// 判断是否并发
+		boolean concurrent = BooleanUtil.isTrue(jobConcurrent);
+		// 根据模式和并发状态返回不同的 Job 类
+		Class<? extends Job> jobClass = customMode
+				? (concurrent ? DelegatingCustomEntryJob.class : DelegatingCustomEntryJob.Disallow.class)
+				: (concurrent ? BeanInvokeEntryJob.class : BeanInvokeEntryJob.Disallow.class);
+
+		// 构建 JobDataMap
+		JobDataMap map = new JobDataMap();
+		// 添加任务 ID
+		map.put(SysJobQuartzDataKeys.SYS_JOB_ID, String.valueOf(id));
+		// 添加调用目标
+		map.put(SysJobQuartzDataKeys.INVOKE_TARGET, invokeTarget);
+		// 添加任务类
+		map.put(SysJobQuartzDataKeys.JOB_CLASS, job.getJobClass());
+
+		// 合并 JSON 参数
+		mergeJsonParams(map, jobParams);
+		// 构建 JobDetail
+
+		return JobBuilder.newJob(jobClass).withIdentity(jobName, jobGroup).usingJobData(map).storeDurably().build();
+	}
+
+	/**
+	 * 构建 CronTrigger
+	 * @param job 任务实体
+	 * @param jobKey 任务键
+	 * @return CronTrigger
+	 */
+	private CronTrigger buildCronTrigger(SysJobEntity job, JobKey jobKey) {
+		String cronExpression = job.getCronExpression();
+		Integer misfirePolicy = job.getMisfirePolicy();
+		String jobName = job.getJobName();
+		String jobGroup = job.getJobGroup();
+
+		// 构建 CronScheduleBuilder
+		CronScheduleBuilder cron = CronScheduleBuilder.cronSchedule(cronExpression)
+			.inTimeZone(TimeZone.getTimeZone(JOB_ZONE));
+		// 应用 Misfire 策略
+		cron = applyMisfire(cron, misfirePolicy);
+
+		// 构建 TriggerBuilder
+
+		TriggerBuilder<CronTrigger> tb = TriggerBuilder.newTrigger()
+			.withIdentity(triggerName(jobName), jobGroup)
+			// 添加任务键
+			.forJob(jobKey)
+			// 添加 CronScheduleBuilder
+			.withSchedule(cron);
+
+		// 添加开始时间
+		if (job.getStartTime() != null) {
+			tb.startAt(Date.from(job.getStartTime().atZone(JOB_ZONE).toInstant()));
+		}
+
+		// 添加结束时间
+		if (job.getEndTime() != null) {
+			tb.endAt(Date.from(job.getEndTime().atZone(JOB_ZONE).toInstant()));
+		}
+
+		// 构建 CronTrigger
+		return tb.build();
+	}
+
+}

@@ -1,0 +1,77 @@
+server:
+  port: 20001
+  tomcat:
+    threads:
+      max: 300
+      min-spare: 30
+    accept-count: 200
+    max-connections: 10000
+  servlet:
+    session:
+      timeout: 40m
+  reactive:
+    session:
+      timeout: 40m
+
+spring:
+  application:
+    name: service-auth
+  config:
+    import:
+      - nacos:common-config.yaml?group=AUTH_COMMON
+  profiles:
+    active: dev
+
+  cloud:
+    nacos:
+      server-addr: 192.168.3.19:8848
+      discovery:
+        namespace: ${spring.profiles.active:dev}
+        group: DEFAULT_GROUP
+      config:
+        import-check:
+          enabled: true
+        namespace: ${spring.profiles.active:dev}
+        group: SERVICE_AUTH
+        file-extension: yaml
+
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 100MB
+
+  messages:
+    encoding: UTF-8
+    cache-duration: 3600
+    # 如果当前语言不存在是否应用系统语言
+    fallback-to-system-locale: false
+    # basename: i18n/messages
+
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+
+mybatis-plus:
+  mapper-locations:
+    - "classpath*:/mapper/**/*.xml"
+  global-config:
+    db-config:
+      id-type: assign_id
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+      logic-delete-field: isDeleted
+
+# 默认关闭 knife4j
+knife4j:
+  basic:
+    enable: false
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+auth:
+  common:
+    jwt:
+      algorithm: HS256

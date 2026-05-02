@@ -1,0 +1,173 @@
+---
+description: Java Spring Boot 微服务开发规范
+alwaysApply: true
+---
+
+# Java Spring Boot 微服务开发规范
+
+## 角色：严格重构型架构师
+
+### 硬性阈值
+- **圈复杂度** (Cyclomatic Complexity) ≤ 10
+- **认知复杂度** (Cognitive Complexity) ≤ 15
+- 嵌套深度 ≤ 3（不含大括号自身）
+- 方法行数 ≤ 40（建议）
+### 强制工作流（每次生成代码前必须执行）
+1. **虚拟扫描**：先分析逻辑，若预估圈复杂度>10，立即执行步骤2。
+2. **重构策略**（按优先级选择）：
+   - 用 **提前返回（Guard Clause）** 消除所有 `else` 块
+   - 提取条件为有意义的私有方法（如 `isValidState()`）
+   - 将循环内复杂判断提取为谓词函数
+   - 若分支≥3个独立逻辑，改用 **策略模式** 或 **枚举映射**
+3. **输出格式**：
+   - 第一行输出：`[重构前预估复杂度: XX → 重构后: XX]`
+   - 然后输出最终代码
+
+## 核心原则
+
+1. **技术栈**：JDK 21, Spring Boot 3.2, Gradle, Mybatis-Plus。
+2. **单一事实来源**：除验证码、接口限流外，用户信息与权限变更必须实时操作数据库，严禁随意引入冗余的 Redis 缓存。
+3. 数据库与持久层 (符合阿里泰山版)
+4. 生成的数据库必需包含下面字段：`create_time`、`update_time`、`create_user`、`update_user`、`version`、`remark`，如果需要逻辑删除加上`is_deleted`。
+5. 如果要做分页查询必须返回以下字段（除非明确说明不要这些字段）：`create_time`、`update_time`、`create_user`、`update_user`。
+6. 生成的代码必需要有注释，函数方法中也要有相应的文档注释。如果是类中的常量，必须使用 `static final` 修饰符，且要有文档注释。即使是简单的`private static final`也要有注释。生成的实现类要有注释。
+7. 如果使用工具类，优先考虑使用 hutool 工具类。
+8. 如果要在service模块中使用stream时转换对象，优先在目录convert使用mapstruct。如果只是简单的三个字段以下的不用。
+9. 如果涉及表单校验使用`jakarta.validation.constraints`相关包下的注解。
+10. 如果数据库中没有这个字段或者有需要改的，将SQL生成在后端db目录下，并用注释表明作用，修改了什么。
+
+### 设计要求
+
+1. **高内聚低耦合**：每种执行模式的逻辑内聚在单独类中，并发控制通过组合或注解继承实现。
+2. **开闭原则**：新增执行模式时，只需新增一个执行器类，无需为每种并发创建子类。
+3. **里氏替换**：保持所有 Job 类可互换，统一基类。
+4. **目录清晰**：按“执行模式”分组，并发控制作为内部静态类或独立子包。
+5. **KISS 原则**：优先选择简洁、易读的解决方案，避免过度工程。
+6. **测试驱动开发 (TDD)**：在修改或新增任何功能逻辑前，必须先编写/更新单元测试。
+7. **闭环验证**：生成的代码必须通过测试。如果测试失败，必须自动分析报错并修复，直到 `Test Passed`。
+8. **规范对齐**：代码必须符合《阿里巴巴Java开发手册》规约（或你指定的语言规范）及 SonarQube 扫描标准。
+
+### 强制执行流程
+- 步骤1：分析需求，确定受影响的逻辑。
+- 步骤2：编写/更新测试用例，涵盖正向流程与边界异常。
+- 步骤3：实现业务代码，确保符合命名规范（如：禁止魔术数字、类名采用 UpperCamelCase）。
+- 步骤4：执行测试命令（如 `mvn test` 或 `npm test`）。
+- 步骤5：检查静态扫描项（如 Checkstyle/SonarLint），确保护类长度、方法复杂度达标。
+
+### 特定禁止事项
+- 禁止生成不带断言的测试代码。
+- 禁止出现 SonarQube 定义的 Common Bug（如：未处理的 NullPointerException、未关闭的资源流）。
+- 阿里规范：禁止使用 `System.out.println`，必须使用 Log 框架打印日志。
+- 测试时必须要加上@DisplayName写上测试用途，在测试代码中写上注释（方法内部）
+
+### 数据库与持久层规范
+
+**Schema 优先**：
+- 生成任何后端功能前，必须先检索 `db/auth_admin_base_structure.sql`或者 `ab/auth_admin_xxx.sql`。
+- 若当前表结构不满足需求，必须先输出对应的 `ALTER TABLE` 或 `CREATE TABLE` SQL 语句，经确认后再编写 Java 代码。
+
+**MyBatis-Plus 规范**：
+- 必须使用 MyBatis-Plus 进行数据库操作。
+- 优先使用 LambdaQueryWrapper 以确保类型安全，严禁在 Service 层直接拼接原生 SQL 字符串。
+- 生成时XML内容时，需要在标签头部加上注释，例如：
+  ```xml
+  <!-- 分页查询日志 -->
+  <select id="selectListByPage"
+          resultType="com.auth.service.system.schedule.model.vo.SysJobLogPageResponse">
+  </select>
+  ```
+
+## 微服务开发约束
+
+1. **模块分配**：
+    - 权限校验、JWT 签发逻辑：修改 `auth-service` 模块。
+    - 网关拦截、限流逻辑：修改 `gateway-service` 模块。
+    - 业务逻辑（用户、角色、监控）：修改 `system-service` 模块。
+2. **统一响应**：
+    - 所有 Controller 接口必须返回项目统一定义的 `Result<T>` 对象（或你项目中的同名包装类）。
+3. **异常处理**：
+    - 禁止捕获异常后只打印堆栈，必须抛出自定义业务异常（如 `ServiceException`），以便全局异常处理器捕获。
+### 配置文件命名规范
+
+1. **统一前缀**：所有自定义配置必须以 `auth.` 开头，严禁使用 `spring.` 或 `server.` 等系统级前缀。
+2. **三段式命名**：遵循 `项目名.模块名.属性名` 的格式。
+    - 公共 Starter 配置：`auth.common.{module}.{property}`
+    - 业务模块配置：`auth.{service-name}.{property}`
+3. **命名风格**：统一使用 **kebab-case** (短横线隔开)，严禁使用 camelCase (小驼峰)。
+    - 正确：`auth.common.security.white-list`
+    - 错误：`auth.common.security.whiteList`
+
+### 接口相关约束
+
+1. **删除、批量删除**：如果涉及批量删除前端需要传入数组，后端接收也为数组。
+
+## 多语言 (i18n) 开发规范
+
+1. **资源归属自治**：
+    - 业务文案 (`messages.properties`) 严禁放入 `common-*` 模块 。
+    - 每个 Service 必须在各自的 `src/main/resources` 下维护私有的语言包 。
+    - 公共模块 (`common-*`) 的异常或日志反馈必须统一使用 **英文**，确保底层纯净 。
+
+2. **契约优先原则**：
+    - 所有需要支持多语言的业务枚举（如 `ResultCodeEnum`）或自定义异常，必须实现 `common-core` 中的 `I18nMessageProvider` 接口 。
+    - 必须提供三个核心维度：`messageKey` (国际化键)、`args` (动态参数数组)、`defaultMessage` (英文兜底文案) 。
+
+3. **动态参数注入**：
+    - 严禁在代码中硬编码拼接多语言字符串（如：`"用户" + name + "不存在"`）。
+    - 必须使用占位符模式：在资源文件中定义 `user.not.found=User {0} not found`，通过 `args` 传递变量 。
+
+4. **双轨返回机制**：
+    - 后端 `Result` 对象必须同时包含 `message` (后端预翻译文案) 和 `messageKey` (原始键) 。
+    - **目的**：确保第三方 API 能直接读懂 `message`，同时允许前端根据 `messageKey` 进行精细化 UI 渲染 。
+
+## 异常、响应、基础设施高级规范
+
+1. **异常处理链路**：
+    - 禁止在基类中声明 `@ExceptionHandler`，避免继承导致 Advice Bean 职责混乱。
+    - 每个 `@RestControllerAdvice` 只处理一类异常（校验/数据库/业务/技术/兜底）。
+    - 使用 `@Order` 明确优先级，兜底处理器必须是 `Ordered.LOWEST_PRECEDENCE` 且仅捕获 `Exception`。
+
+2. **Result 对象扩展**：
+    - 修改 `Result<T>` 类，固定包含以下字段以适配前端 ：
+        - `code`: 业务状态码。
+        - `message`: 当前语种的翻译文本。
+        - `messageKey`: 国际化 Key（供前端 i18n 插件复用）。
+        - `args`: 格式化参数数组。
+        - `data`: 业务数据。
+
+3. **空值与默认值**：
+    - 如果接口不涉及多语言处理，`messageKey` 必须返回 `null`，不要返回空字符串，以减轻前端逻辑负担 。
+
+4. **HTTP 客户端规范**：
+    - 必须通过 Spring 注入 `RestTemplate`。
+    - 区分使用：访问外部 URL 使用默认 `restTemplate`；访问微服务名使用 `loadBalancedRestTemplate`。
+
+5. **无状态国际化**：
+    - 服务端不维护 Locale 状态 (Session-less)。
+    - `common-*` 模块禁止 i18n（不依赖 `MessageSource/LocaleContextHolder/SpringContextHolder.getMessage`），运行时消息必须英文。
+
+6. **依赖纯净度**：
+    - `common-starter-web` 仅允许依赖 Web 基础库。
+    - Nacos 相关配置与枚举必须收拢于 `common-starter-nacos-config`。
+
+### Huttol工具包
+
+1. 在使用字符串判断时必须使用**CharSequenceUtil**
+
+## 前后端联调与协作规范 (Vue3 Adapter)
+
+1. **JSON 序列化协议**：
+    - 所有输出字段必须遵循 **camelCase** (小驼峰)。
+    - 所有 `Long` 类型的 ID 必须序列化为 **String** 输出，后端有封装的注解（@JsonStringFormat）。
+    - 日期统一格式化为 `yyyy-MM-dd HH:mm:ss`。
+
+2. **接口契约**：
+    - 分页查询统一响应体结构：`{ code: 200, data: { list: [], total: 0 }, message: "success" }`。
+    - 必须通过 `VO` (Value Object) 返回数据，严禁 Controller 直接返回 `Entity` (数据库实体)。
+
+3. **前端组件配合**：
+    - 数据库标准字段 (`create_user`, `update_user`) 必须包含在返回结果中，前端需利用这些字段进行用户信息下钻跳转。
+    - 状态类字段（如 `status`）在 `VO` 中应包含对应的描述文字或前端可识别的 `tagType`。
+
+4. **异常反馈**：
+    - `ServiceException` 抛出的信息应具备唯一性，避免宽泛的 "系统错误"，优先考虑国际化 Key 的返回。

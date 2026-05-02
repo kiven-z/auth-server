@@ -1,0 +1,42 @@
+package com.auth.common.jwt.model;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+/**
+ * Access Token 载荷映射 / 签发入参；Refresh 解析后仅部分字段有值 用户身份信息的载体（userId, username, roles,
+ * permissions, audience, uaFp），用于构建和解析 JWT 中的自定义 Claims
+ *
+ * @author Bunny
+ */
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class JwtUserToken {
+
+	private Long userId;
+
+	/**
+	 * 签发者：指明该 JWT 的签发方（例如身份认证服务或应用标识）
+	 */
+	private String iss;
+
+	/**
+	 * 主题：通常表示 Token 所针对的用户或实体（例如用户 ID、设备 ID）
+	 */
+	private String sub;
+
+	/**
+	 * Jwt Id JWT {@code jti}（JWT ID）用于将 access token 与服务端会话（sessionId）绑定
+	 */
+	private String jti;
+
+	/**
+	 * 预期接收者 对应 JWT {@code aud}（单值场景下写入一个 audience 字符串）
+	 */
+	private String audience;
+
+}

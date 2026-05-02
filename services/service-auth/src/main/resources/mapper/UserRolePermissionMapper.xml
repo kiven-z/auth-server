@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.auth.service.auth.mapper.UserRolePermissionMapper">
+
+    <resultMap id="rolePermissionMap"
+               type="com.auth.service.auth.model.projection.RolePermissionProjection">
+        <id property="profileId" column="profile_id"/>
+        <collection property="roles"
+                    ofType="string"
+                    javaType="java.util.ArrayList"
+                    notNullColumn="role_code">
+            <result column="role_code"/>
+        </collection>
+        <collection property="permissions"
+                    ofType="string"
+                    javaType="java.util.ArrayList"
+                    notNullColumn="permission_code">
+            <result column="permission_code"/>
+        </collection>
+    </resultMap>
+
+    <!-- 用户角色来源 CTE：直接 USER、部门 DEPT、岗位 POST 三类 subject 汇总 grant_table 的 role_code -->
+    <sql id="userRolesCte">
+        user_roles AS (SELECT gt.role_code
+                       FROM grant_table gt
+                       WHERE gt.subject_type = 'USER'
+                         AND gt.subject_id = #{userId}
+                       UNION ALL
+
+                       SELECT gt.role_code
+                       FROM grant_table gt
+                                JOIN user_dept ud ON ud.dept_id = gt.subject_id
+                       WHERE gt.subject_type = 'DEPT'
+                         AND ud.user_id = #{userId}
+                         AND ud.status = 0
+                       UNION ALL
+
+                       SELECT gt.role_code
+                       FROM grant_table gt
+                                JOIN user_post up ON up.post_id = gt.subject_id
+                       WHERE gt.subject_type = 'POST'
+                         AND up.user_id = #{userId}
+                         AND (up.status IS NULL OR up.status = 0))
+    </sql>
+
+    <!-- 单次查询用户角色与权限（UNION 多行 + resultMap collection 折叠） -->
+    <select id="selectRolePermissionByUserId" resultMap="rolePermissionMap">
+        WITH <include refid="userRolesCte"/>,
+             distinct_roles AS (SELECT DISTINCT r.role_code
+                                FROM user_roles ur
+                                         JOIN sys_role r ON r.role_code = ur.role_code
+                                WHERE r.status = 0),
+
+             distinct_permissions AS (SELECT DISTINCT p.permission_code
+                                      FROM distinct_roles dr
+                                               JOIN sys_role_permission rp ON rp.role_code = dr.role_code
+                                               JOIN sys_permission p ON p.permission_code = rp.permission_code
+                                      WHERE p.status = 1)
+
+        SELECT 1 AS profile_id, dr.role_code AS role_code, NULL AS permission_code
+        FROM distinct_roles dr
+        UNION ALL
+        SELECT 1 AS profile_id, NULL AS role_code, dp.permission_code AS permission_code
+        FROM distinct_permissions dp
+    </select>
+
+    <!-- 查询生效数据权限：用户覆盖优先，角色兜底 -->
+    <select id="selectEffectiveDataScopesByUserId"
+            resultType="com.auth.service.auth.model.projection.DataScopeProjection">
+        WITH <include refid="userRolesCte"/>,
+             user_scope_rows AS (SELECT 1                               AS source_level,
+                                        us.scope_type                   AS scope_type,
+                                        CAST(us.scope_dept_ids AS CHAR) AS scope_dept_ids,
+                                        us.policy_code                  AS policy_code
+                                 FROM user_scope us
+                                 WHERE us.user_id = #{userId}),
+             role_scope_rows AS (SELECT 2                               AS source_level,
+                                        rs.scope_type                   AS scope_type,
+                                        CAST(rs.scope_dept_ids AS CHAR) AS scope_dept_ids,
+                                        rs.policy_code                  AS policy_code
+                                 FROM role_scope rs
+                                          JOIN (SELECT DISTINCT role_code FROM user_roles) ur
+                                               ON ur.role_code = rs.role_code)
+        SELECT usr.source_level, usr.scope_type, usr.scope_dept_ids, usr.policy_code
+        FROM user_scope_rows usr
+        UNION ALL
+        SELECT rsr.source_level, rsr.scope_type, rsr.scope_dept_ids, rsr.policy_code
+        FROM role_scope_rows rsr
+        WHERE NOT EXISTS (SELECT 1 FROM user_scope_rows)
+        ORDER BY source_level
+    </select>
+
+    <!-- 查询生效策略：角色绑定 + 策略定义，按优先级排序 -->
+    <select id="selectEffectivePoliciesByUserId"
+            resultType="com.auth.service.auth.model.projection.PolicyProjection">
+        WITH <include refid="userRolesCte"/>,
+             effective_role_policy AS (SELECT rp.role_code,
+                                              rp.policy_code,
+                                              rp.priority,
+                                              rp.condition_override,
+                                              rp.action_override
+                                       FROM role_policy rp
+                                                JOIN (SELECT DISTINCT role_code FROM user_roles) ur
+                                                     ON ur.role_code = rp.role_code
+                                       WHERE rp.is_deleted = 0
+                                         AND (rp.effective_from IS NULL OR rp.effective_from <![CDATA[<=]]> NOW())
+                                         AND (rp.effective_until IS NULL OR rp.effective_until <![CDATA[>=]]> NOW())),
+             effective_policy_definition AS (SELECT pd.policy_code,
+                                                    pd.policy_type,
+                                                    pd.condition_type,
+                                                    pd.condition_expression,
+                                                    pd.action_on_violation,
+                                                    CAST(pd.config AS CHAR) AS config,
+                                                    pd.priority
+                                             FROM policy_definition pd
+                                             WHERE pd.is_deleted = 0
+                                               AND pd.is_enabled = 1
+                                               AND (pd.effective_from IS NULL OR pd.effective_from <![CDATA[<=]]> NOW())
+                                               AND (pd.effective_until IS NULL OR pd.effective_until <![CDATA[>=]]> NOW()))
+        SELECT epd.policy_code,
+               epd.policy_type,
+               COALESCE(erp.action_override, epd.action_on_violation)     AS final_action,
+               epd.condition_type,
+               COALESCE(erp.condition_override, epd.condition_expression) AS final_condition_expression,
+               epd.config
+        FROM effective_role_policy erp
+                 JOIN effective_policy_definition epd ON epd.policy_code = erp.policy_code
+        ORDER BY erp.priority, epd.priority, epd.policy_code
+    </select>
+</mapper>

@@ -1,0 +1,58 @@
+package com.auth.module.security.autoconfig.autoconfigure.pipeline;
+
+import com.auth.module.security.autoconfig.pipeline.resolver.HandlerMethodResolver;
+import com.auth.module.security.autoconfig.pipeline.resolver.SecurityRequirementResolver;
+import com.auth.module.security.autoconfig.pipeline.resolver.SecurityRequirementRule;
+import com.auth.module.security.autoconfig.pipeline.rule.AuthenticatedApiRule;
+import com.auth.module.security.autoconfig.pipeline.rule.InternalApiRule;
+import com.auth.module.security.autoconfig.pipeline.rule.PublicApiRule;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.HandlerMapping;
+
+import java.util.List;
+
+/**
+ * 安全需求解析：将 HandlerMethod 解析为 SecurityRequirement。
+ *
+ * @author Bunny
+ */
+@Configuration
+class SecurityRequirementResolverConfiguration {
+
+	@Bean
+	HandlerMethodResolver handlerMethodResolver(List<HandlerMapping> handlerMappings) {
+		return new HandlerMethodResolver(handlerMappings);
+	}
+
+	@Bean
+	PublicApiRule publicApiRule() {
+		return new PublicApiRule();
+	}
+
+	@Bean
+	AuthenticatedApiRule authenticatedApiRule() {
+		return new AuthenticatedApiRule();
+	}
+
+	@Bean
+	InternalApiRule internalApiRule() {
+		return new InternalApiRule();
+	}
+
+	/**
+	 * 规则集合：按优先级参与 SecurityRequirement 推导。
+	 */
+	@Bean
+	List<SecurityRequirementRule> securityRequirementRules(PublicApiRule publicApiRule, InternalApiRule internalApiRule,
+			AuthenticatedApiRule authenticatedApiRule) {
+		return List.of(publicApiRule, internalApiRule, authenticatedApiRule);
+	}
+
+	@Bean
+	SecurityRequirementResolver securityRequirementResolver(HandlerMethodResolver handlerMethodResolver,
+			List<SecurityRequirementRule> securityRequirementRules) {
+		return new SecurityRequirementResolver(handlerMethodResolver, securityRequirementRules);
+	}
+
+}

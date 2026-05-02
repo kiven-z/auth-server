@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.auth</groupId>
+        <artifactId>modules</artifactId>
+        <version>0.0.2-beta</version>
+    </parent>
+
+    <artifactId>module-security-web-starter</artifactId>
+    <packaging>jar</packaging>
+    <name>module-security-starter</name>
+    <description>Dependency aggregator for security integration</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.auth</groupId>
+            <artifactId>module-security-autoconfigure</artifactId>
+        </dependency>
+    </dependencies>
+</project>

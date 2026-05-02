@@ -1,0 +1,46 @@
+server:
+  port: 20009
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 10
+    accept-count: 100
+    max-connections: 5000
+  servlet:
+    session:
+      timeout: 40m
+
+spring:
+  application:
+    name: service-example
+  config:
+    import:
+      - nacos:common-config.yaml?group=AUTH_COMMON
+  profiles:
+    active: dev
+
+  cloud:
+    nacos:
+      server-addr: 192.168.3.19:8848
+      discovery:
+        namespace: ${spring.profiles.active:dev}
+        group: DEFAULT_GROUP
+      config:
+        import-check:
+          enabled: true
+        namespace: ${spring.profiles.active:dev}
+        group: SERVICE_EXAMPLE
+        file-extension: yaml
+
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+
+knife4j:
+  basic:
+    enable: false
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

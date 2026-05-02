@@ -1,0 +1,72 @@
+package com.auth.module.security.autoconfig.pipeline.resolver;
+
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.HandlerExecutionChain;
+import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+import org.springframework.web.util.ServletRequestPathUtils;
+
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * 从当前请求解析 MVC {@link HandlerMethod}（用于注解决策）
+ *
+ * <p>
+ * 在 Spring Security 过滤器链中执行时，请求通常尚未经过 {@code DispatcherServlet}，因此可能尚未缓存
+ * {@link org.springframework.http.server.RequestPath}{@link RequestMappingHandlerMapping#getHandler}
+ * 在 PathPattern 模式下依赖该缓存，故此处在解析前按需 {@link ServletRequestPathUtils#parseAndCache}，并在本方法结束时
+ * 若由本方法创建缓存则 {@link ServletRequestPathUtils#clearParsedRequestPath}，避免干扰后续 Servlet 正常解析
+ * </p>
+ *
+ * @author Bunny
+ */
+@Slf4j
+public final class HandlerMethodResolver {
+
+	private final List<HandlerMapping> handlerMappings;
+
+	public HandlerMethodResolver(List<HandlerMapping> handlerMappings) {
+		this.handlerMappings = handlerMappings;
+	}
+
+	/**
+	 * 解析处理器方法
+	 * @param request HTTP 请求
+	 * @return 处理器方法；无法解析时为空
+	 */
+	public Optional<HandlerMethod> resolve(HttpServletRequest request) {
+		boolean cleanupRequired = false;
+		try {
+			if (!ServletRequestPathUtils.hasParsedRequestPath(request)) {
+				ServletRequestPathUtils.parseAndCache(request);
+				cleanupRequired = true;
+			}
+			for (HandlerMapping mapping : handlerMappings) {
+				try {
+					HandlerExecutionChain chain = mapping.getHandler(request);
+					if (chain == null) {
+						continue;
+					}
+					Object handler = chain.getHandler();
+					if (handler instanceof HandlerMethod hm) {
+						return Optional.of(hm);
+					}
+				}
+				catch (Exception exception) {
+					// 解析失败时继续尝试下一个 HandlerMapping
+					log.debug("Resolve handler method failed: {}", exception.getMessage());
+				}
+			}
+			return Optional.empty();
+		}
+		finally {
+			if (cleanupRequired) {
+				ServletRequestPathUtils.clearParsedRequestPath(request);
+			}
+		}
+	}
+
+}
