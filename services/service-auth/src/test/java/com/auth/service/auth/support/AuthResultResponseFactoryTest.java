@@ -79,4 +79,18 @@ class AuthResultResponseFactoryTest {
 				AuthResultResponseFactory.resolveHttpStatus(AuthResultCode.SERVER_ERROR));
 	}
 
+	@Test
+	@DisplayName("resolveHttpStatus：账号锁定 -> 403")
+	void resolveHttpStatus_userLocked_forbidden() {
+		assertEquals(HttpStatus.FORBIDDEN,
+				AuthResultResponseFactory.resolveHttpStatus(AuthResultCode.USER_LOCKED));
+	}
+
+	@Test
+	@DisplayName("resolveHttpStatus：JSON 解析失败 -> 400")
+	void resolveHttpStatus_jsonParser_badRequest() {
+		assertEquals(HttpStatus.BAD_REQUEST,
+				AuthResultResponseFactory.resolveHttpStatus(AuthResultCode.JSON_PARSER_EXCEPTION));
+	}
+
 }

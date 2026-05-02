@@ -368,7 +368,7 @@ public enum SystemResultCodeEnum {
     /**
      * 3位数字组合: {@code CAT*100+SEQ} (模块10是单独前缀的)
      */
-    private final int catSeq;
+    private final int code;
 
     /**
      * 错误信息
@@ -384,13 +384,13 @@ public enum SystemResultCodeEnum {
      * 构造函数
      *
      * @param httpStatus HTTP状态码
-     * @param catSeq     模块序号
+     * @param code       模块序号
      * @param error      错误信息
      * @param messageKey 国际化键
      */
-    SystemResultCodeEnum(int httpStatus, int catSeq, String error, String messageKey) {
+    SystemResultCodeEnum(int httpStatus, int code, String error, String messageKey) {
         this.httpStatus = httpStatus;
-        this.catSeq = catSeq;
+        this.code = code;
         this.error = error;
         this.messageKey = messageKey;
     }
@@ -401,7 +401,7 @@ public enum SystemResultCodeEnum {
      * @return 业务代码
      */
     public int getBizCode() {
-        return 100_000 + catSeq;
+        return 100_000 + code;
     }
 
     /**

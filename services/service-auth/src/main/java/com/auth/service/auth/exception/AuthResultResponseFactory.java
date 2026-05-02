@@ -44,40 +44,17 @@ public class AuthResultResponseFactory {
 	}
 
 	/**
-	 * 由 {@link AuthResultCode} 解析语义化 HTTP 状态（与历史 {@code AuthExceptionHandler} 映射一致）。
+	 * 由 {@link AuthResultCode#getHttpStatus()} 解析 {@link HttpStatus}；无法解析时回退 400。
 	 * @param resultCode 结果码
 	 * @return HTTP 状态
 	 */
 	public static HttpStatus resolveHttpStatus(AuthResultCode resultCode) {
 		Objects.requireNonNull(resultCode, "resultCode");
-		return switch (resultCode) {
-			// 429 Too Many Requests
-			case TOO_MANY_REQUESTS -> HttpStatus.TOO_MANY_REQUESTS;
-
-			// 403 Forbidden
-			case USER_LOCKED, FAIL_NO_ACCESS_DENIED, USER_LOCKED_WITH_MINUTES, USER_DISABLED,
-					MAX_SESSION_LIMIT_EXCEEDED ->
-				HttpStatus.FORBIDDEN;
-
-			// 401 Unauthorized
-			case LOGIN_AUTH, TOKEN_IS_NULL, TOKEN_PARSING_FAILED, REFRESH_TOKEN_MISSING, REFRESH_TOKEN_EXPIRED,
-					REFRESH_TOKEN_MALFORMED, USER_NOT_FOUND, AUTH_CODE_ERROR, USERNAME_OR_PASSWORD_ERROR,
-					USERNAME_OR_PASSWORD_ERROR_WITH_REMAINING, SESSION_KICKED ->
-				HttpStatus.UNAUTHORIZED;
-
-			// 400 Bad Request
-			case JSON_PARSER_EXCEPTION, BAD_REQUEST_MISSING_EMAIL_EXCEPTION, AUTH_TYPE_UNSUPPORTED,
-					AUTH_REQUEST_TYPE_UNSUPPORTED ->
-				HttpStatus.BAD_REQUEST;
-
-			// 500 Internal Server Error
-			case DATABASE_ERROR, REDIS_UNAVAILABLE, SERVER_ERROR -> HttpStatus.INTERNAL_SERVER_ERROR;
-
-			// 503 Service Unavailable
-			case SERVICE_UNAVAILABLE -> HttpStatus.SERVICE_UNAVAILABLE;
-
-			default -> HttpStatus.BAD_REQUEST;
-		};
+		HttpStatus resolved = HttpStatus.resolve(resultCode.getHttpStatus());
+		if (resolved != null) {
+			return resolved;
+		}
+		return HttpStatus.BAD_REQUEST;
 	}
 
 }
