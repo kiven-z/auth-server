@@ -10,38 +10,37 @@ import lombok.Getter;
 @Getter
 public enum GenderStatus {
 
-    /**
-     * 未知
-     */
-    UNKNOWN(0, "未知"),
+	/**
+	 * 未知
+	 */
+	UNKNOWN(0, "未知"),
 
-    /**
-     * 男
-     */
-    MALE(1, "男"),
+	/**
+	 * 男
+	 */
+	MALE(1, "男"),
 
-    /**
-     * 女
-     */
-    FEMALE(2, "女"),
-    ;
+	/**
+	 * 女
+	 */
+	FEMALE(2, "女"),;
 
-    private final int code;
+	private final int code;
 
-    private final String desc;
+	private final String desc;
 
-    GenderStatus(int code, String desc) {
-        this.code = code;
-        this.desc = desc;
-    }
+	GenderStatus(int code, String desc) {
+		this.code = code;
+		this.desc = desc;
+	}
 
-    public static String getDesc(int code) {
-        for (GenderStatus value : values()) {
-            if (value.code == code) {
-                return value.desc;
-            }
-        }
-        return null;
-    }
+	public static String getDesc(int code) {
+		for (GenderStatus value : values()) {
+			if (value.code == code) {
+				return value.desc;
+			}
+		}
+		return null;
+	}
 
 }

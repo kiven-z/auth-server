@@ -3,6 +3,7 @@ package com.auth.service.system.admin.menu.model.vo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -16,6 +17,7 @@ import java.util.List;
 @Schema(title = "动态路由节点")
 @Getter
 @Setter
+@ToString
 public class RouteNodeVO implements Serializable {
 
 	@Serial
@@ -38,4 +40,5 @@ public class RouteNodeVO implements Serializable {
 
 	@Schema(title = "子路由")
 	private List<RouteNodeVO> children;
+
 }

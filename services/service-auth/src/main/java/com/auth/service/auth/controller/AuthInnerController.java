@@ -2,6 +2,8 @@ package com.auth.service.auth.controller;
 
 import java.util.List;
 
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -9,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.module.security.autoconfig.annotation.InternalApi;
+import com.auth.service.auth.model.vo.inner.EffectiveCodesVO;
 import com.auth.service.auth.service.AuthInnerService;
 
 import cn.hutool.core.collection.CollUtil;
@@ -53,6 +56,14 @@ public class AuthInnerController {
 		authInnerService.kickAllSessions(userIds);
 
 		return Result.success();
+	}
+
+	@InternalApi
+	@Operation(summary = "查询用户生效角色码与权限码（供 system 动态菜单等内部调用）")
+	@GetMapping("/principal/{userId}/effective-codes")
+	public Result<EffectiveCodesVO> effectiveCodes(@PathVariable("userId") Long userId) {
+		EffectiveCodesVO body = authInnerService.resolveEffectiveCodes(userId);
+		return Result.success(body);
 	}
 
 }

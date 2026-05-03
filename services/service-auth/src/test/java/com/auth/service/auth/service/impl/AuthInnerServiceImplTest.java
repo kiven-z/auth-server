@@ -1,21 +1,23 @@
 package com.auth.service.auth.service.impl;
 
-import com.auth.module.security.contract.api.authorization.AuthProfile;
-import com.auth.service.auth.TestConstants;
-import com.auth.service.auth.infrastructure.profile.AuthProfileCache;
-import com.auth.service.auth.infrastructure.profile.AuthProfileService;
-import com.auth.service.auth.infrastructure.session.UserSessionIndexSession;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Arrays;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.mockito.Mockito.*;
+import com.auth.module.security.contract.api.authorization.AuthProfile;
+import com.auth.service.auth.TestConstants;
+import com.auth.service.auth.infrastructure.profile.AuthProfileCache;
+import com.auth.service.auth.infrastructure.profile.AuthProfileService;
+import com.auth.service.auth.infrastructure.session.UserSessionIndexSession;
+import com.auth.service.auth.model.vo.inner.EffectiveCodesVO;
 
 /**
  * AuthInnerServiceImpl 单元测试
@@ -70,6 +72,27 @@ class AuthInnerServiceImplTest {
 		doThrow(new RuntimeException("boom")).when(userSessionIndexSession).deleteAllSessions(TestConstants.USER_ID);
 		assertDoesNotThrow(() -> service.kickAllSessions(Arrays.asList(null, TestConstants.USER_ID)));
 		verify(userSessionIndexSession).deleteAllSessions(TestConstants.USER_ID);
+	}
+
+	@Test
+	@DisplayName("resolveEffectiveCodes：委托 AuthProfileService 并拷贝角色与权限列表")
+	void resolveEffectiveCodes_mapsProfileRolesAndPermissions() {
+		AuthInnerServiceImpl service = new AuthInnerServiceImpl(userSessionIndexSession, authProfileService,
+				authProfileCache);
+		AuthProfile profile = AuthProfile.builder()
+			.userId(TestConstants.USER_ID)
+			.username("u1")
+			.roles(List.of("ADMIN"))
+			.permissions(List.of("*"))
+			.build();
+		when(authProfileService.buildByUserId(TestConstants.USER_ID)).thenReturn(profile);
+
+		EffectiveCodesVO vo = service.resolveEffectiveCodes(TestConstants.USER_ID);
+
+		assertEquals(List.of("ADMIN"), vo.getRoleCodes());
+		assertEquals(List.of("*"), vo.getPermissionCodes());
+		verify(authProfileService).buildByUserId(TestConstants.USER_ID);
+		verifyNoInteractions(authProfileCache);
 	}
 
 }

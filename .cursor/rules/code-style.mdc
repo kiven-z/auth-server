@@ -8,29 +8,34 @@ alwaysApply: true
 ## 角色：严格重构型架构师
 
 ### 硬性阈值
-- **圈复杂度** (Cyclomatic Complexity) ≤ 10
-- **认知复杂度** (Cognitive Complexity) ≤ 15
+
+- **圈复杂度**(Cyclomatic Complexity) ≤ 10
+- **认知复杂度**(Cognitive Complexity) ≤ 15
 - 嵌套深度 ≤ 3（不含大括号自身）
-- 方法行数 ≤ 40（建议）
+- 方法行数 ≤ 50（建议）
+
 ### 强制工作流（每次生成代码前必须执行）
+
 1. **虚拟扫描**：先分析逻辑，若预估圈复杂度>10，立即执行步骤2。
 2. **重构策略**（按优先级选择）：
-   - 用 **提前返回（Guard Clause）** 消除所有 `else` 块
-   - 提取条件为有意义的私有方法（如 `isValidState()`）
-   - 将循环内复杂判断提取为谓词函数
-   - 若分支≥3个独立逻辑，改用 **策略模式** 或 **枚举映射**
+    - 用 **提前返回（Guard Clause）** 消除所有 `else` 块
+    - 提取条件为有意义的私有方法（如 `isValidState()`）
+    - 将循环内复杂判断提取为谓词函数
+    - 若分支≥3个独立逻辑，改用 **策略模式** 或 **枚举映射**
 3. **输出格式**：
-   - 第一行输出：`[重构前预估复杂度: XX → 重构后: XX]`
-   - 然后输出最终代码
+    - 第一行输出：`[重构前预估复杂度: XX → 重构后: XX]`
+    - 然后输出最终代码
 
 ## 核心原则
 
-1. **技术栈**：JDK 21, Spring Boot 3.2, Gradle, Mybatis-Plus。
+1. **技术栈**：JDK 17, Spring Boot 3.2, Gradle, Mybatis-Plus。
 2. **单一事实来源**：除验证码、接口限流外，用户信息与权限变更必须实时操作数据库，严禁随意引入冗余的 Redis 缓存。
 3. 数据库与持久层 (符合阿里泰山版)
-4. 生成的数据库必需包含下面字段：`create_time`、`update_time`、`create_user`、`update_user`、`version`、`remark`，如果需要逻辑删除加上`is_deleted`。
+4. 生成的数据库必需包含下面字段：`create_time`、`update_time`、`create_user`、`update_user`、`version`、`remark`，如果需要逻辑删除加上
+   `is_deleted`。
 5. 如果要做分页查询必须返回以下字段（除非明确说明不要这些字段）：`create_time`、`update_time`、`create_user`、`update_user`。
-6. 生成的代码必需要有注释，函数方法中也要有相应的文档注释。如果是类中的常量，必须使用 `static final` 修饰符，且要有文档注释。即使是简单的`private static final`也要有注释。生成的实现类要有注释。
+6. 生成的代码必需要有注释，函数方法中也要有相应的文档注释。如果是类中的常量，必须使用 `static final` 修饰符，且要有文档注释。即使是简单的
+   `private static final`也要有注释。生成的实现类要有注释。
 7. 如果使用工具类，优先考虑使用 hutool 工具类。
 8. 如果要在service模块中使用stream时转换对象，优先在目录convert使用mapstruct。如果只是简单的三个字段以下的不用。
 9. 如果涉及表单校验使用`jakarta.validation.constraints`相关包下的注解。
@@ -48,6 +53,7 @@ alwaysApply: true
 8. **规范对齐**：代码必须符合《阿里巴巴Java开发手册》规约（或你指定的语言规范）及 SonarQube 扫描标准。
 
 ### 强制执行流程
+
 - 步骤1：分析需求，确定受影响的逻辑。
 - 步骤2：编写/更新测试用例，涵盖正向流程与边界异常。
 - 步骤3：实现业务代码，确保符合命名规范（如：禁止魔术数字、类名采用 UpperCamelCase）。
@@ -55,6 +61,7 @@ alwaysApply: true
 - 步骤5：检查静态扫描项（如 Checkstyle/SonarLint），确保护类长度、方法复杂度达标。
 
 ### 特定禁止事项
+
 - 禁止生成不带断言的测试代码。
 - 禁止出现 SonarQube 定义的 Common Bug（如：未处理的 NullPointerException、未关闭的资源流）。
 - 阿里规范：禁止使用 `System.out.println`，必须使用 Log 框架打印日志。
@@ -63,10 +70,12 @@ alwaysApply: true
 ### 数据库与持久层规范
 
 **Schema 优先**：
+
 - 生成任何后端功能前，必须先检索 `db/auth_admin_base_structure.sql`或者 `ab/auth_admin_xxx.sql`。
 - 若当前表结构不满足需求，必须先输出对应的 `ALTER TABLE` 或 `CREATE TABLE` SQL 语句，经确认后再编写 Java 代码。
 
 **MyBatis-Plus 规范**：
+
 - 必须使用 MyBatis-Plus 进行数据库操作。
 - 优先使用 LambdaQueryWrapper 以确保类型安全，严禁在 Service 层直接拼接原生 SQL 字符串。
 - 生成时XML内容时，需要在标签头部加上注释，例如：
@@ -87,6 +96,7 @@ alwaysApply: true
     - 所有 Controller 接口必须返回项目统一定义的 `Result<T>` 对象（或你项目中的同名包装类）。
 3. **异常处理**：
     - 禁止捕获异常后只打印堆栈，必须抛出自定义业务异常（如 `ServiceException`），以便全局异常处理器捕获。
+
 ### 配置文件命名规范
 
 1. **统一前缀**：所有自定义配置必须以 `auth.` 开头，严禁使用 `spring.` 或 `server.` 等系统级前缀。
@@ -109,7 +119,8 @@ alwaysApply: true
     - 公共模块 (`common-*`) 的异常或日志反馈必须统一使用 **英文**，确保底层纯净 。
 
 2. **契约优先原则**：
-    - 所有需要支持多语言的业务枚举（如 `ResultCodeEnum`）或自定义异常，必须实现 `common-core` 中的 `I18nMessageProvider` 接口 。
+    - 所有需要支持多语言的业务枚举（如 `ResultCodeEnum`）或自定义异常，必须实现 `common-core` 中的 `I18nMessageProvider`
+      接口 。
     - 必须提供三个核心维度：`messageKey` (国际化键)、`args` (动态参数数组)、`defaultMessage` (英文兜底文案) 。
 
 3. **动态参数注入**：

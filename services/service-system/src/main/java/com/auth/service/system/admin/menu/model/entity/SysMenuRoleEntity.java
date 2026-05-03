@@ -22,4 +22,5 @@ public class SysMenuRoleEntity extends BaseEntity {
 
 	@Schema(title = "角色编码")
 	private String roleCode;
+
 }

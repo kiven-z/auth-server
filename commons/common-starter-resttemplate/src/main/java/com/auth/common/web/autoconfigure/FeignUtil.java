@@ -1,0 +1,26 @@
+package com.auth.common.web.autoconfigure;
+
+import com.auth.common.core.model.response.Result;
+import lombok.experimental.UtilityClass;
+
+/**
+ * 远程调用工具
+ *
+ * @author Bunny
+ */
+@UtilityClass
+public class FeignUtil {
+
+	/**
+	 * 判断远程调用是否成功
+	 * @param result 远程调用结果
+	 * @return 是否成功
+	 */
+	public static boolean isOk(Result<?> result) {
+		if (result == null) {
+			return false;
+		}
+		return Integer.valueOf(200).equals(result.getCode()) && result.getData() != null;
+	}
+
+}

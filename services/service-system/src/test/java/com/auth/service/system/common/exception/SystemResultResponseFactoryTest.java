@@ -65,7 +65,8 @@ class SystemResultResponseFactoryTest {
 		when(messageSource.getMessage(eq(key), any(), eq(key), eq(Locale.ENGLISH))).thenReturn("tpl-missing");
 		when(messageSource.getMessage(eq(key), any(), eq("tpl-missing"), eq(Locale.ENGLISH))).thenReturn("tpl-missing");
 
-		SystemBusinessException ex = new SystemBusinessException(SystemResultCodeEnum.EMAIL_TEMPLATE_NOT_FOUND, "tpl-1");
+		SystemBusinessException ex = new SystemBusinessException(SystemResultCodeEnum.EMAIL_TEMPLATE_NOT_FOUND,
+				"tpl-1");
 		Result<Object> result = SystemResultResponseFactory.build(messageSource, ex);
 
 		assertEquals(SystemResultCodeEnum.EMAIL_TEMPLATE_NOT_FOUND.getBizCode(), result.getCode());
@@ -93,7 +94,8 @@ class SystemResultResponseFactoryTest {
 	@Test
 	@DisplayName("resolveHttpStatus：404 数据不存在 -> 404")
 	void resolveHttpStatus_dataNotExist() {
-		assertEquals(HttpStatus.NOT_FOUND, SystemResultResponseFactory.resolveHttpStatus(SystemResultCodeEnum.DATA_NOT_EXIST));
+		assertEquals(HttpStatus.NOT_FOUND,
+				SystemResultResponseFactory.resolveHttpStatus(SystemResultCodeEnum.DATA_NOT_EXIST));
 	}
 
 	@Test
@@ -109,4 +111,5 @@ class SystemResultResponseFactoryTest {
 		assertEquals(HttpStatus.SERVICE_UNAVAILABLE,
 				SystemResultResponseFactory.resolveHttpStatus(SystemResultCodeEnum.SERVICE_UNAVAILABLE));
 	}
+
 }

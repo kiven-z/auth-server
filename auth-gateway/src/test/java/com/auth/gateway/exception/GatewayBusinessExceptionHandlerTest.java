@@ -67,7 +67,8 @@ class GatewayBusinessExceptionHandlerTest {
 		String key = "gateway.internal.error";
 		String defaultEn = GatewayResultCodeEnum.INTERNAL_ERROR.getDefaultMessageEn();
 		when(messageSource.getMessage(eq(key), any(), eq(defaultEn), eq(Locale.ENGLISH))).thenReturn("INTERNAL_MSG");
-		when(messageSource.getMessage(eq(key), any(), eq("INTERNAL_MSG"), eq(Locale.ENGLISH))).thenReturn("INTERNAL_MSG");
+		when(messageSource.getMessage(eq(key), any(), eq("INTERNAL_MSG"), eq(Locale.ENGLISH)))
+			.thenReturn("INTERNAL_MSG");
 
 		ResponseEntity<Result<Object>> response = handler.exceptionHandler(ex);
 		assertEquals(500, response.getStatusCode().value());
@@ -78,4 +79,5 @@ class GatewayBusinessExceptionHandlerTest {
 		assertEquals(GatewayResultCodeEnum.INTERNAL_ERROR.getError(), body.getError());
 		assertEquals("INTERNAL_MSG", body.getMessage());
 	}
+
 }

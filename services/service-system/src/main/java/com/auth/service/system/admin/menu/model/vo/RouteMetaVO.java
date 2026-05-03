@@ -3,6 +3,7 @@ package com.auth.service.system.admin.menu.model.vo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -16,6 +17,7 @@ import java.util.List;
 @Schema(title = "路由 Meta")
 @Getter
 @Setter
+@ToString
 public class RouteMetaVO implements Serializable {
 
 	@Serial
@@ -68,4 +70,5 @@ public class RouteMetaVO implements Serializable {
 
 	@Schema(title = "固定标签")
 	private Boolean fixedTag;
+
 }

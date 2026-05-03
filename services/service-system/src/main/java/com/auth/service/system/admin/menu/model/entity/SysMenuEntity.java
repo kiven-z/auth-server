@@ -93,4 +93,5 @@ public class SysMenuEntity extends BaseEntity {
 	@Schema(title = "逻辑删除：0 否 1 是")
 	@TableLogic(value = "0", delval = "1")
 	private Boolean isDeleted;
+
 }

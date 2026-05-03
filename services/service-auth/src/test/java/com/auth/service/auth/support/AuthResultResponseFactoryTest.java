@@ -82,8 +82,7 @@ class AuthResultResponseFactoryTest {
 	@Test
 	@DisplayName("resolveHttpStatus：账号锁定 -> 403")
 	void resolveHttpStatus_userLocked_forbidden() {
-		assertEquals(HttpStatus.FORBIDDEN,
-				AuthResultResponseFactory.resolveHttpStatus(AuthResultCode.USER_LOCKED));
+		assertEquals(HttpStatus.FORBIDDEN, AuthResultResponseFactory.resolveHttpStatus(AuthResultCode.USER_LOCKED));
 	}
 
 	@Test

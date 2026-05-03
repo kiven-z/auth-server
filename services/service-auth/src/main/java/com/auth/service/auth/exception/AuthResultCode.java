@@ -132,7 +132,8 @@ public enum AuthResultCode {
 	SERVICE_UNAVAILABLE(503, 1103, "SERVICE_UNAVAILABLE", "service.unavailable");
 
 	/**
-	 * 建议的 HTTP 状态码（与 {@link AuthResultResponseFactory#resolveHttpStatus(AuthResultCode)} 一致）
+	 * 建议的 HTTP 状态码（与 {@link AuthResultResponseFactory#resolveHttpStatus(AuthResultCode)}
+	 * 一致）
 	 */
 	private final int httpStatus;
 
@@ -153,8 +154,8 @@ public enum AuthResultCode {
 
 	/**
 	 * @param httpStatus 建议 HTTP 状态码
-	 * @param code       业务码
-	 * @param error      稳定错误标识
+	 * @param code 业务码
+	 * @param error 稳定错误标识
 	 * @param messageKey i18n 键
 	 */
 	AuthResultCode(int httpStatus, Integer code, String error, String messageKey) {

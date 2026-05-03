@@ -16,7 +16,8 @@ class GatewayResultFactoryTest {
 	@Test
 	@DisplayName("resolveHttpStatus：路由未找到 -> 404")
 	void resolveHttpStatus_routeNotFound() {
-		assertEquals(HttpStatus.NOT_FOUND, GatewayResultFactory.resolveHttpStatus(GatewayResultCodeEnum.ROUTE_NOT_FOUND));
+		assertEquals(HttpStatus.NOT_FOUND,
+				GatewayResultFactory.resolveHttpStatus(GatewayResultCodeEnum.ROUTE_NOT_FOUND));
 	}
 
 	@Test
@@ -32,4 +33,5 @@ class GatewayResultFactoryTest {
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR,
 				GatewayResultFactory.resolveHttpStatus(GatewayResultCodeEnum.INTERNAL_ERROR));
 	}
+
 }

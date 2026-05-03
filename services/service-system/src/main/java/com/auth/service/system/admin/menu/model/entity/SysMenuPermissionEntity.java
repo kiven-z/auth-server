@@ -22,4 +22,5 @@ public class SysMenuPermissionEntity extends BaseEntity {
 
 	@Schema(title = "权限编码")
 	private String permissionCode;
+
 }

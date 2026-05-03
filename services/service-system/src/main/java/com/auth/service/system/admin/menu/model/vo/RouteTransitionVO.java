@@ -3,6 +3,7 @@ package com.auth.service.system.admin.menu.model.vo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -15,6 +16,7 @@ import java.io.Serializable;
 @Schema(title = "路由过渡动画")
 @Getter
 @Setter
+@ToString
 public class RouteTransitionVO implements Serializable {
 
 	@Serial
@@ -28,4 +30,5 @@ public class RouteTransitionVO implements Serializable {
 
 	@Schema(title = "离场 animate.css 类名")
 	private String leaveTransition;
+
 }

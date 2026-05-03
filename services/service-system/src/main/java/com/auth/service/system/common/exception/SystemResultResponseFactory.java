@@ -21,9 +21,8 @@ public class SystemResultResponseFactory {
 
 	/**
 	 * 构建系统服务错误响应体（业务异常）
-	 *
 	 * @param messageSource 消息源
-	 * @param exception     业务异常
+	 * @param exception 业务异常
 	 * @return Result
 	 */
 	public static Result<Object> build(MessageSource messageSource, SystemBusinessException exception) {
@@ -36,10 +35,9 @@ public class SystemResultResponseFactory {
 
 	/**
 	 * 由枚举与占位参数直接构建错误体（技术异常等场景）
-	 *
 	 * @param messageSource 消息源
-	 * @param rc            结果码枚举
-	 * @param args          i18n 参数
+	 * @param rc 结果码枚举
+	 * @param args i18n 参数
 	 * @return Result
 	 */
 	public static Result<Object> build(MessageSource messageSource, SystemResultCodeEnum rc, Object... args) {
@@ -51,10 +49,9 @@ public class SystemResultResponseFactory {
 
 	/**
 	 * 公共拼装：当前线程 Locale + 两段式 MessageSource + Result.error + ext
-	 *
 	 * @param messageSource 消息源
-	 * @param resultCode    结果码
-	 * @param args          i18n 参数（已非 null）
+	 * @param resultCode 结果码
+	 * @param args i18n 参数（已非 null）
 	 * @return Result
 	 */
 	private static Result<Object> buildBody(MessageSource messageSource, SystemResultCodeEnum resultCode,
@@ -71,7 +68,6 @@ public class SystemResultResponseFactory {
 
 	/**
 	 * 将枚举上的 HTTP 状态解析为 {@link HttpStatus}；无法解析时回退为 400。
-	 *
 	 * @param resultCode 结果码
 	 * @return HTTP 状态
 	 */
