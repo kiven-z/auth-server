@@ -1,10 +1,12 @@
 package com.auth.service.system.admin.menu.service.impl;
 
 import com.auth.common.core.model.response.Result;
+import com.auth.module.security.contract.constants.PermissionConstant;
 import com.auth.service.system.admin.menu.feign.AuthInnerPrincipalFeignClient;
 import com.auth.service.system.admin.menu.feign.dto.EffectiveCodesVO;
 import com.auth.service.system.admin.menu.model.vo.RouteNodeVO;
 import com.auth.service.system.admin.menu.service.MenuWebRouteService;
+import com.auth.service.system.admin.menu.service.MenuWebRouteTreeBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +16,7 @@ import java.util.List;
 import static com.auth.common.web.autoconfigure.FeignUtil.isOk;
 
 /**
- * 门户动态路由查询实现：已接入 auth 生效编码 Feign，建树与菜单过滤后续迭代。
+ * 门户动态路由：拉取 auth 生效编码后构建菜单路由树
  *
  * @author Bunny
  */
@@ -24,32 +26,40 @@ public class MenuWebRouteServiceImpl implements MenuWebRouteService {
 
 	private final AuthInnerPrincipalFeignClient authInnerPrincipalFeignClient;
 
-	public MenuWebRouteServiceImpl(AuthInnerPrincipalFeignClient authInnerPrincipalFeignClient) {
+	private final MenuWebRouteTreeBuilder menuWebRouteTreeBuilder;
+
+	public MenuWebRouteServiceImpl(AuthInnerPrincipalFeignClient authInnerPrincipalFeignClient,
+			MenuWebRouteTreeBuilder menuWebRouteTreeBuilder) {
 		this.authInnerPrincipalFeignClient = authInnerPrincipalFeignClient;
+		this.menuWebRouteTreeBuilder = menuWebRouteTreeBuilder;
 	}
 
-	/**
-	 * 拉取生效角色/权限码后返回占位空树；后续在此拼接 sys_menu 过滤与 VO 映射。
-	 * @param userId 用户 ID
-	 * @return 当前为空列表
-	 */
 	@Override
 	public List<RouteNodeVO> listWebRoutes(Long userId) {
+		// 用户Id不能为空
 		if (userId == null) {
 			return Collections.emptyList();
 		}
 
+		// 查询当前用户角色
 		Result<EffectiveCodesVO> result = authInnerPrincipalFeignClient.getEffectiveCodes(userId);
-		if (isOk(result)) {
+		if (!isOk(result)) {
+			log.warn("Menu web route: effective codes unavailable userId={}", userId);
 			return Collections.emptyList();
 		}
 
+		// 判断当前用户是否是管理员
 		EffectiveCodesVO data = result.getData();
 		List<String> roleCodes = data.getRoleCodes();
 		List<String> permissionCodes = data.getPermissionCodes();
-		log.debug("Menu web route: effective roleCount={}, permissionCount={} (tree assembly pending)",
+		boolean isAdmin = PermissionConstant.isAdmin(userId, roleCodes);
+		log.debug("Menu web route: userId={} admin={} roleCount={} permissionCount={}", userId, isAdmin,
 				roleCodes.size(), permissionCodes.size());
-		return Collections.emptyList();
+
+		// 管理员走管理员的菜单，非管理员走非管理员原生的菜单
+		List<RouteNodeVO> routeNodeVOS = isAdmin ? menuWebRouteTreeBuilder.buildAdminRoutes()
+				: menuWebRouteTreeBuilder.buildRoutes();
+		return routeNodeVOS;
 	}
 
 }

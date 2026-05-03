@@ -7,10 +7,10 @@ import lombok.ToString;
 import java.util.Arrays;
 
 /**
- * 网关业务异常，语义以 {@link GatewayResultCodeEnum} 为唯一来源，可选携带 i18n 占位参数。
+ * 网关业务异常，语义以 {@link GatewayResultCodeEnum} 为唯一来源，可选携带 i18n 占位参数
  * <p>
  * 实现 {@link I18nMessageProvider}，与业务服务侧 {@code *BusinessException} 契约一致，便于统一组装
- * {@code Result}。
+ * {@code Result}
  * </p>
  *
  * @author Bunny

@@ -1,15 +1,13 @@
 package com.auth.service.system.admin.menu.feign.fallback;
 
-import org.springframework.stereotype.Component;
-
 import com.auth.common.core.model.response.Result;
 import com.auth.service.system.admin.menu.feign.AuthInnerPrincipalFeignClient;
 import com.auth.service.system.admin.menu.feign.dto.EffectiveCodesVO;
-
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 /**
- * {@link AuthInnerPrincipalFeignClient} 降级：返回空编码列表，避免门户路由接口整体失败。
+ * {@link AuthInnerPrincipalFeignClient} 降级：返回空编码列表，避免门户路由接口整体失败
  *
  * @author Bunny
  */

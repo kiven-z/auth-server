@@ -10,7 +10,7 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * 动态路由 meta，供前端菜单与按钮权限展示；roles/auths 来自关联表聚合。
+ * 动态路由 meta，供前端菜单与按钮权限展示；roles/auths 来自关联表聚合
  *
  * @author Bunny
  */

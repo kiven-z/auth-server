@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 /**
  * 系统业务异常处理器（与 {@code AuthExceptionHandler} 一致：{@link MessageSource} +
- * {@link SystemResultResponseFactory}）。
+ * {@link SystemResultResponseFactory}）
  *
  * @author Bunny
  */

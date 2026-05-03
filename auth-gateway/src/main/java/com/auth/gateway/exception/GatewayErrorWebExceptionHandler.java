@@ -15,7 +15,7 @@ import org.springframework.web.reactive.function.server.*;
 import reactor.core.publisher.Mono;
 
 /**
- * 响应式全局错误处理器，用于 Spring Cloud Gateway（GlobalFilter 等链路上的错误）。
+ * 响应式全局错误处理器，用于 Spring Cloud Gateway（GlobalFilter 等链路上的错误）
  *
  * @author Bunny
  */

@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * 菜单与权限编码关联（页面按钮子集），对应 sys_menu_permission。
+ * 菜单与权限编码关联（页面按钮子集），对应 sys_menu_permission
  *
  * @author Bunny
  */

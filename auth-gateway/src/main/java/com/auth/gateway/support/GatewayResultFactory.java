@@ -14,7 +14,7 @@ import java.util.Locale;
 import java.util.Objects;
 
 /**
- * 构建网关响应体负载（i18n + ext），MessageSource 解析与 system/auth 侧两段式英文兜底一致。
+ * 构建网关响应体负载（i18n + ext），MessageSource 解析与 system/auth 侧两段式英文兜底一致
  *
  * @author Bunny
  */
@@ -35,7 +35,7 @@ public class GatewayResultFactory {
 	/**
 	 * 基于
 	 * {@link GatewayBusinessException}（{@link com.auth.common.core.i18n.I18nMessageProvider}）构建响应体；无
-	 * {@link ServerWebExchange} 时使用英语环境。
+	 * {@link ServerWebExchange} 时使用英语环境
 	 * @param messageSource 消息源
 	 * @param ex 网关业务异常
 	 * @return 网关响应体负载
@@ -46,7 +46,7 @@ public class GatewayResultFactory {
 	}
 
 	/**
-	 * 基于 {@link GatewayBusinessException} 构建响应体，区域取自请求头 {@code Accept-Language}。
+	 * 基于 {@link GatewayBusinessException} 构建响应体，区域取自请求头 {@code Accept-Language}
 	 * @param exchange 交换机
 	 * @param messageSource 消息源
 	 * @param ex 网关业务异常
@@ -98,7 +98,7 @@ public class GatewayResultFactory {
 	}
 
 	/**
-	 * 将枚举上的 HTTP 状态解析为 {@link HttpStatus}；无法解析时回退为 500（网关历史行为）。
+	 * 将枚举上的 HTTP 状态解析为 {@link HttpStatus}；无法解析时回退为 500（网关历史行为）
 	 * @param resultCode 结果码
 	 * @return HTTP 状态
 	 */

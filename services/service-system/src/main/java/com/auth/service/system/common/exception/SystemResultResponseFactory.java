@@ -12,7 +12,7 @@ import java.util.Objects;
 
 /**
  * 将 {@link SystemBusinessException} / {@link SystemResultCodeEnum} 转为统一 {@link Result}（与
- * {@code AuthResultResponseFactory} 轮廓一致：MessageSource 文案 + ext i18n）。
+ * {@code AuthResultResponseFactory} 轮廓一致：MessageSource 文案 + ext i18n）
  *
  * @author Bunny
  */
@@ -67,7 +67,7 @@ public class SystemResultResponseFactory {
 	}
 
 	/**
-	 * 将枚举上的 HTTP 状态解析为 {@link HttpStatus}；无法解析时回退为 400。
+	 * 将枚举上的 HTTP 状态解析为 {@link HttpStatus}；无法解析时回退为 400
 	 * @param resultCode 结果码
 	 * @return HTTP 状态
 	 */

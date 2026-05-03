@@ -10,7 +10,7 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * Feign 反序列化用：与 auth 服务 {@code EffectiveCodesVO} JSON 字段一致（roleCodes / permissionCodes）。
+ * Feign 反序列化用：与 auth 服务 {@code EffectiveCodesVO} JSON 字段一致（roleCodes / permissionCodes）
  *
  * @author Bunny
  */

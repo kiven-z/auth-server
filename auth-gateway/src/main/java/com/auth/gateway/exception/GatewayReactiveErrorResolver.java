@@ -22,7 +22,7 @@ public class GatewayReactiveErrorResolver {
 	private static final int MAX_CAUSE_DEPTH = 20;
 
 	/**
-	 * 解析错误：若为GatewayBusinessException则使用其枚举与参数；否则按基础设施异常映射。
+	 * 解析错误：若为GatewayBusinessException则使用其枚举与参数；否则按基础设施异常映射
 	 * @param ex 当前错误
 	 * @return 解析结果（不可为 null）
 	 */
@@ -37,7 +37,7 @@ public class GatewayReactiveErrorResolver {
 	}
 
 	/**
-	 * 在自身与 cause 链上查找 {@link GatewayBusinessException}。
+	 * 在自身与 cause 链上查找 {@link GatewayBusinessException}
 	 * @param ex 当前错误
 	 * @return 第一个匹配的网关业务异常，若无则 null
 	 */

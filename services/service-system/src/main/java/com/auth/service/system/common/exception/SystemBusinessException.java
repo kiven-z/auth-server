@@ -8,10 +8,10 @@ import java.util.Objects;
 
 /**
  * 系统业务异常：语义以 {@link SystemResultCodeEnum} 为唯一来源，可选携带 i18n 占位参数（与
- * {@code AuthBusinessException} 同构）。
+ * {@code AuthBusinessException} 同构）
  * <p>
  * 对外 API 的 {@code message} 由 {@link SystemResultResponseFactory} 结合
- * {@link org.springframework.context.MessageSource} 解析；{@link #getMessage()} 用于日志/调试。
+ * {@link org.springframework.context.MessageSource} 解析；{@link #getMessage()} 用于日志/调试
  * </p>
  *
  * @author Bunny

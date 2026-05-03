@@ -106,7 +106,7 @@ public abstract class AbstractAuthenticationStrategy<T extends AbstractAuthentic
 		catch (AuthBusinessException ex) {
 			if (isLockResultCode(ex.getResultCode())) {
 				loginLogService.recordLoginLog(request, loginLogType(), AuthLoginLogResult.ACCOUNT_LOCKED, userId,
-						LoginAuditSupport.principalFromUser(user), ex.getMessageKey(), null);
+						user.getUsername(), ex.getMessageKey(), null);
 			}
 			throw ex;
 		}
@@ -131,7 +131,7 @@ public abstract class AbstractAuthenticationStrategy<T extends AbstractAuthentic
 	private AuthBusinessException badCredentialsAfterAudit(HttpServletRequest request, Long userId, UserEntity user) {
 		int remaining = loginFailureRateLimiter.recordFailure(userId);
 		loginLogService.recordLoginLog(request, loginLogType(), AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR, userId,
-				LoginAuditSupport.principalFromUser(user), "remainingAttempts=" + remaining, null);
+				user.getUsername(), "remainingAttempts=" + remaining, null);
 		return new AuthBusinessException(AuthResultCode.USERNAME_OR_PASSWORD_ERROR_WITH_REMAINING, remaining);
 	}
 
@@ -147,12 +147,12 @@ public abstract class AbstractAuthenticationStrategy<T extends AbstractAuthentic
 		AuthResultCode code = ex.getResultCode();
 		if (code == AuthResultCode.AUTH_CODE_ERROR) {
 			loginLogService.recordLoginLog(request, loginLogType(), AuthLoginLogResult.CAPTCHA_ERROR, userId,
-					LoginAuditSupport.principalFromUser(user), ex.getMessageKey(), null);
+					user.getUsername(), ex.getMessageKey(), null);
 			return;
 		}
 		if (code == AuthResultCode.USER_DISABLED) {
 			loginLogService.recordLoginLog(request, loginLogType(), AuthLoginLogResult.ACCOUNT_DISABLED, userId,
-					LoginAuditSupport.principalFromUser(user), ex.getMessageKey(), null);
+					user.getUsername(), ex.getMessageKey(), null);
 		}
 	}
 

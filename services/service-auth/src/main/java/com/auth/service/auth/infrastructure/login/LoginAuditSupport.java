@@ -1,7 +1,6 @@
 package com.auth.service.auth.infrastructure.login;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import com.auth.module.security.starter.model.UserEntity;
 import com.auth.service.auth.exception.AuthResultCode;
 import com.auth.service.auth.model.enums.AuthLoginLogResult;
 import com.auth.service.auth.model.enums.AuthLoginLogType;
@@ -43,21 +42,6 @@ public class LoginAuditSupport {
 			return AuthLoginLogType.LOGIN_EMAIL;
 		}
 		return AuthLoginLogType.LOGIN_PASSWORD;
-	}
-
-	/**
-	 * 从用户实体解析冗余展示名：优先用户名，其次邮箱。
-	 * @param user 用户实体
-	 * @return 主体字符串
-	 */
-	public static String principalFromUser(UserEntity user) {
-		if (user == null) {
-			return null;
-		}
-		if (CharSequenceUtil.isNotBlank(user.getUsername())) {
-			return user.getUsername();
-		}
-		return blankToNull(user.getEmail());
 	}
 
 	/**

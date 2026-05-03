@@ -1,6 +1,5 @@
 package com.auth.service.auth.service.impl;
 
-import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.ip.IpAddressService;
 import com.auth.common.ip.IpInfo;
 import com.auth.common.web.model.entity.UserAgent;
@@ -59,12 +58,12 @@ public class LoginLogServiceImpl extends ServiceImpl<LoginLogMapper, LoginLogEnt
 
 		try {
 			entity.setUserId(userId);
-			entity.setUsername(CharSequenceUtil.isNotBlank(principal) ? principal : null);
+			entity.setUsername(principal);
 			entity.setLoginType(eventType.name());
 			entity.setLoginResult(result.getCode());
-			entity.setFailureReason(CharSequenceUtil.isNotBlank(failureReason) ? failureReason : null);
+			entity.setFailureReason(failureReason);
 			entity.setLoginTime(LocalDateTime.now());
-			entity.setSessionId(CharSequenceUtil.isNotBlank(sessionId) ? sessionId : null);
+			entity.setSessionId(sessionId);
 
 			// 设置更新用户和创建用户，因为部分登录不存在用户信息
 			entity.setCreateUser(userId);

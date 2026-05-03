@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * 菜单与角色编码关联，对应 sys_menu_role。
+ * 菜单与角色编码关联，对应 sys_menu_role
  *
  * @author Bunny
  */

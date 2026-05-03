@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
- * 菜单角色关联 Mapper。
+ * 菜单角色关联 Mapper
  *
  * @author Bunny
  */

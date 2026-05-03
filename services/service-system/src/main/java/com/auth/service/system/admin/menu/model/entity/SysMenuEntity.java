@@ -8,7 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * 系统菜单（路由）主表，对应 sys_menu。
+ * 系统菜单（路由）主表，对应 sys_menu
  *
  * @author Bunny
  */
@@ -90,8 +90,8 @@ public class SysMenuEntity extends BaseEntity {
 	@Schema(title = "扩展 meta JSON")
 	private String extraMeta;
 
-	@Schema(title = "逻辑删除：0 否 1 是")
 	@TableLogic(value = "0", delval = "1")
+	@Schema(title = "逻辑删除：0 否 1 是")
 	private Boolean isDeleted;
 
 }
