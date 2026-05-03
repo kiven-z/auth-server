@@ -4,9 +4,13 @@ import com.auth.common.core.model.response.Result;
 import com.auth.module.security.contract.constants.PermissionConstant;
 import com.auth.service.system.admin.menu.feign.AuthInnerPrincipalFeignClient;
 import com.auth.service.system.admin.menu.feign.dto.EffectiveCodesVO;
+import com.auth.service.system.admin.menu.mapper.SysMenuMapper;
+import com.auth.service.system.admin.menu.model.entity.SysMenuEntity;
 import com.auth.service.system.admin.menu.model.vo.RouteNodeVO;
 import com.auth.service.system.admin.menu.service.MenuWebRouteService;
 import com.auth.service.system.admin.menu.service.MenuWebRouteTreeBuilder;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +26,7 @@ import static com.auth.common.web.autoconfigure.FeignUtil.isOk;
  */
 @Slf4j
 @Service
-public class MenuWebRouteServiceImpl implements MenuWebRouteService {
+public class MenuWebRouteServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuEntity> implements MenuWebRouteService {
 
 	private final AuthInnerPrincipalFeignClient authInnerPrincipalFeignClient;
 
@@ -56,10 +60,11 @@ public class MenuWebRouteServiceImpl implements MenuWebRouteService {
 		log.debug("Menu web route: userId={} admin={} roleCount={} permissionCount={}", userId, isAdmin,
 				roleCodes.size(), permissionCodes.size());
 
+		List<SysMenuEntity> menuList = list(Wrappers.<SysMenuEntity>lambdaQuery().eq(SysMenuEntity::getStatus, 0));
+
 		// 管理员走管理员的菜单，非管理员走非管理员原生的菜单
-		List<RouteNodeVO> routeNodeVOS = isAdmin ? menuWebRouteTreeBuilder.buildAdminRoutes()
-				: menuWebRouteTreeBuilder.buildRoutes();
-		return routeNodeVOS;
+		return isAdmin ? menuWebRouteTreeBuilder.buildAdminRoutes(menuList)
+				: menuWebRouteTreeBuilder.buildRoutes(menuList);
 	}
 
 }

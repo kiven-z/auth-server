@@ -1,15 +1,17 @@
 package com.auth.service.system.admin.menu.service;
 
-import java.util.List;
-
+import com.auth.service.system.admin.menu.model.entity.SysMenuEntity;
 import com.auth.service.system.admin.menu.model.vo.RouteNodeVO;
+import com.baomidou.mybatisplus.extension.service.IService;
+
+import java.util.List;
 
 /**
  * 门户动态路由（当前用户可见菜单树）查询服务
  *
  * @author Bunny
  */
-public interface MenuWebRouteService {
+public interface MenuWebRouteService extends IService<SysMenuEntity> {
 
 	/**
 	 * 查询指定用户可见的 Web 动态路由列表（顶级节点列表）

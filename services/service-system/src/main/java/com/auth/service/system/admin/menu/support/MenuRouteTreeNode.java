@@ -9,8 +9,7 @@ import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * 建树中间节点：承载 {@link SysMenuEntity} 与排序字段，供
- * {@link com.auth.common.core.utils.TreeNodeProcessorUtil} 使用
+ * 建树中间节点 TreeNodeProcessorUtil 使用
  *
  * @author Bunny
  */
@@ -32,8 +31,9 @@ public class MenuRouteTreeNode extends TreeNode<MenuRouteTreeNode> implements Se
 	 */
 	public static MenuRouteTreeNode fromEntity(SysMenuEntity entity) {
 		MenuRouteTreeNode node = new MenuRouteTreeNode();
-		node.setId(entity.getId());
+
 		Long parentId = entity.getParentId();
+		node.setId(entity.getId());
 		node.setParentId(parentId == null ? 0L : parentId);
 		node.setMenuRank(entity.getMenuRank());
 		node.setMenu(entity);

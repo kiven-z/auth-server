@@ -2,6 +2,7 @@ package com.auth.service.auth.service.impl;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.jwt.model.JwtUserToken;
+import com.auth.module.security.autoconfig.web.SecurityUserUtils;
 import com.auth.module.security.contract.api.SecurityTokenKind;
 import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
@@ -186,10 +187,11 @@ public class AuthServiceImpl implements AuthService {
 	private void revokeExternalAccessSession(HttpServletRequest request, JwtUserToken userToken) {
 		String jti = userToken.getJti();
 		Long userId = userToken.getUserId();
+		String username = SecurityUserUtils.getUsername();
 		userSessionIndexSession.deleteSession(jti);
 		userSessionIndexSession.removeActiveSession(userId, jti);
-		loginLogService.recordLoginLog(request, AuthLoginLogType.LOGOUT, AuthLoginLogResult.SUCCESS, userId, null, null,
-				jti);
+		loginLogService.recordLoginLog(request, AuthLoginLogType.LOGOUT, AuthLoginLogResult.SUCCESS, userId, username,
+				null, jti);
 	}
 
 }
