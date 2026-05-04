@@ -11,7 +11,7 @@ import org.mapstruct.Mapping;
  *
  * @author Bunny
  */
-@Mapper(componentModel = "spring")
+@Mapper()
 public interface MenuRouteMetaConverter {
 
 	/**

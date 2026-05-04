@@ -39,13 +39,10 @@ public class MenuWebRouteTreeBuilderImpl extends ServiceImpl<SysMenuMapper, SysM
 
 	private final SysMenuPermissionMapper sysMenuPermissionMapper;
 
-	private final MenuRouteNodeConverter menuRouteNodeConverter;
-
 	public MenuWebRouteTreeBuilderImpl(SysMenuRoleMapper sysMenuRoleMapper,
-			SysMenuPermissionMapper sysMenuPermissionMapper, MenuRouteNodeConverter menuRouteNodeConverter) {
+			SysMenuPermissionMapper sysMenuPermissionMapper) {
 		this.sysMenuRoleMapper = sysMenuRoleMapper;
 		this.sysMenuPermissionMapper = sysMenuPermissionMapper;
-		this.menuRouteNodeConverter = menuRouteNodeConverter;
 	}
 
 	/**
@@ -142,7 +139,7 @@ public class MenuWebRouteTreeBuilderImpl extends ServiceImpl<SysMenuMapper, SysM
 	 */
 	private List<RouteNodeVO> convertTreeToVO(List<MenuRouteTreeNode> nodes, MenuConvertContext context) {
 		return nodes.stream().map(node -> {
-			RouteNodeVO vo = menuRouteNodeConverter.toRouteNodeVO(node, context);
+			RouteNodeVO vo = MenuRouteNodeConverter.INSTANCE.toRouteNodeVO(node, context);
 			if (CollUtil.isNotEmpty(node.getChildren())) {
 				List<RouteNodeVO> children = convertTreeToVO(node.getChildren(), context);
 				vo.setChildren(children);

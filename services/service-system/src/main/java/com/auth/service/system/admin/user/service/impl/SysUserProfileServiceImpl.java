@@ -10,9 +10,8 @@ import com.auth.service.system.admin.user.service.SysUserProfileService;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.SystemResultCodeEnum;
 import com.auth.service.system.common.mapper.UserMapper;
-import lombok.RequiredArgsConstructor;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -22,16 +21,14 @@ import java.util.Objects;
  *
  * @author Bunny
  */
-@RequiredArgsConstructor
 @Service
-@Transactional(readOnly = true, rollbackFor = Exception.class)
-public class SysUserProfileServiceImpl implements SysUserProfileService {
-
-	private final UserMapper userMapper;
+public class SysUserProfileServiceImpl extends ServiceImpl<UserMapper, UserEntity> implements SysUserProfileService {
 
 	private final SysUserProfileMapper sysUserProfileMapper;
 
-	private final SysUserProfileConverter sysUserProfileConverter;
+	public SysUserProfileServiceImpl(SysUserProfileMapper sysUserProfileMapper) {
+		this.sysUserProfileMapper = sysUserProfileMapper;
+	}
 
 	/**
 	 * 查询用户档案（基本信息、部门、岗位）
@@ -43,13 +40,13 @@ public class SysUserProfileServiceImpl implements SysUserProfileService {
 		if (userId == null) {
 			throw new SystemBusinessException(SystemResultCodeEnum.ILLEGAL_USER_ID_NOT_NULL);
 		}
-		UserEntity user = userMapper.selectById(userId);
+		UserEntity user = baseMapper.selectById(userId);
 		if (user == null) {
 			throw new SystemBusinessException(SystemResultCodeEnum.USER_NOT_FOUND, userId);
 		}
 
 		// 构建基础用户信息
-		SysUserProfileResponse response = sysUserProfileConverter.toProfileResponse(user);
+		SysUserProfileResponse response = SysUserProfileConverter.INSTANCE.toProfileResponse(user);
 
 		// 查询部门信息
 		List<SysUserDeptProfileItemResponse> deptList = sysUserProfileMapper.selectDeptProfileByUserId(userId);

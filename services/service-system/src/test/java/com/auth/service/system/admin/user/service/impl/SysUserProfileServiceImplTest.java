@@ -1,20 +1,6 @@
 package com.auth.service.system.admin.user.service.impl;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-import java.time.LocalDate;
-import java.util.List;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
 import com.auth.module.security.starter.model.UserEntity;
-import com.auth.service.system.admin.user.convert.SysUserProfileConverter;
 import com.auth.service.system.admin.user.mapper.SysUserProfileMapper;
 import com.auth.service.system.admin.user.model.vo.SysUserDeptProfileItemResponse;
 import com.auth.service.system.admin.user.model.vo.SysUserPostProfileItemResponse;
@@ -22,14 +8,28 @@ import com.auth.service.system.admin.user.model.vo.SysUserProfileResponse;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.SystemResultCodeEnum;
 import com.auth.service.system.common.mapper.UserMapper;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link SysUserProfileServiceImpl} 单元测试
  *
  * @author Bunny
  */
-@ExtendWith(MockitoExtension.class)
 @DisplayName("SysUserProfileServiceImpl 用户档案")
+@ExtendWith(MockitoExtension.class)
 class SysUserProfileServiceImplTest {
 
 	@Mock
@@ -42,8 +42,7 @@ class SysUserProfileServiceImplTest {
 
 	@BeforeEach
 	void setUp() {
-		sysUserProfileService = new SysUserProfileServiceImpl(userMapper, sysUserProfileMapper,
-				SysUserProfileConverter.INSTANCE);
+		sysUserProfileService = new SysUserProfileServiceImpl(sysUserProfileMapper);
 	}
 
 	@Test

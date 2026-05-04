@@ -1,13 +1,15 @@
 package com.auth.service.system.admin.user.service;
 
+import com.auth.module.security.starter.model.UserEntity;
 import com.auth.service.system.admin.user.model.vo.SysUserProfileResponse;
+import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
  * 用户档案查询
  *
  * @author Bunny
  */
-public interface SysUserProfileService {
+public interface SysUserProfileService extends IService<UserEntity> {
 
 	/**
 	 * 查询用户档案（基本信息、部门、岗位）

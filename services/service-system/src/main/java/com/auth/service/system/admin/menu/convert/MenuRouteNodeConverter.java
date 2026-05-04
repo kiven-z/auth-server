@@ -5,6 +5,7 @@ import com.auth.service.system.admin.menu.support.MenuRouteTreeNode;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.factory.Mappers;
 
 /**
  * MapStruct 转换器
@@ -14,8 +15,10 @@ import org.mapstruct.Mapping;
  *
  * @author Bunny
  */
-@Mapper(componentModel = "spring", uses = { MenuRouteMetaConverter.class })
+@Mapper(uses = { MenuRouteMetaConverter.class })
 public interface MenuRouteNodeConverter {
+
+	MenuRouteNodeConverter INSTANCE = Mappers.getMapper(MenuRouteNodeConverter.class);
 
 	/**
 	 * 将树节点转为路由 VO（单层，不含 children 递归）
