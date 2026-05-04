@@ -1,16 +1,19 @@
 package com.auth.service.auth.service.impl;
 
+import java.util.List;
+import java.util.Objects;
+
+import org.springframework.stereotype.Service;
+
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.infrastructure.profile.AuthProfileCache;
 import com.auth.service.auth.infrastructure.profile.AuthProfileService;
 import com.auth.service.auth.infrastructure.session.UserSessionIndexSession;
+import com.auth.service.auth.mapper.UserRolePermissionMapper;
 import com.auth.service.auth.model.vo.inner.EffectiveCodesVO;
 import com.auth.service.auth.service.AuthInnerService;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Objects;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 内部认证服务实现
@@ -27,11 +30,14 @@ public class AuthInnerServiceImpl implements AuthInnerService {
 
 	private final AuthProfileCache authProfileCache;
 
+	private final UserRolePermissionMapper userRolePermissionMapper;
+
 	public AuthInnerServiceImpl(UserSessionIndexSession userSessionIndexSession, AuthProfileService authProfileService,
-			AuthProfileCache authProfileCache) {
+			AuthProfileCache authProfileCache, UserRolePermissionMapper userRolePermissionMapper) {
 		this.userSessionIndexSession = userSessionIndexSession;
 		this.authProfileService = authProfileService;
 		this.authProfileCache = authProfileCache;
+		this.userRolePermissionMapper = userRolePermissionMapper;
 	}
 
 	/**
@@ -85,6 +91,16 @@ public class AuthInnerServiceImpl implements AuthInnerService {
 		vo.setRoleCodes(Objects.requireNonNullElse(profile.getRoles(), List.of()));
 		vo.setPermissionCodes(Objects.requireNonNullElse(profile.getPermissions(), List.of()));
 		return vo;
+	}
+
+	/**
+	 * 查询持有指定角色的所有用户 ID（通过 USER / DEPT / POST 三类主体汇总）
+	 * @param roleCode 角色编码
+	 * @return 用户 ID 列表
+	 */
+	@Override
+	public List<Long> listUserIdsByRoleCode(String roleCode) {
+		return userRolePermissionMapper.selectUserIdsByRoleCode(roleCode);
 	}
 
 }

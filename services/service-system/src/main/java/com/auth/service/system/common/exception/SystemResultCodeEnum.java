@@ -1,10 +1,12 @@
 package com.auth.service.system.common.exception;
 
-import com.auth.common.web.context.SpringContextHolder;
-import lombok.Getter;
+import java.util.Locale;
+
 import org.springframework.context.i18n.LocaleContextHolder;
 
-import java.util.Locale;
+import com.auth.common.web.context.SpringContextHolder;
+
+import lombok.Getter;
 
 /**
  * 系统服务结果代码(模块 {@code 10})
@@ -360,7 +362,40 @@ public enum SystemResultCodeEnum {
 	/**
 	 * 技术: Redis基础设施错误(HTTP 503)
 	 */
-	REDIS_SYSTEM_ERROR(503, 103, "REDIS_SYSTEM_ERROR", "system.redis.unavailable");
+	REDIS_SYSTEM_ERROR(503, 103, "REDIS_SYSTEM_ERROR", "system.redis.unavailable"),
+
+	// --- Role Management (263+)
+	/**
+	 * 角色不存在
+	 */
+	ROLE_NOT_FOUND(404, 263, "ROLE_NOT_FOUND", "system.role.not_found"),
+	/**
+	 * 角色编码已存在
+	 */
+	ROLE_CODE_DUPLICATE(409, 264, "ROLE_CODE_DUPLICATE", "system.role.code_duplicate"),
+	/**
+	 * 系统角色不可删除
+	 */
+	ROLE_SYSTEM_CANNOT_DELETE(400, 265, "ROLE_SYSTEM_CANNOT_DELETE", "system.role.system_cannot_delete"),
+	/**
+	 * 系统角色不可禁用
+	 */
+	ROLE_SYSTEM_CANNOT_DISABLE(400, 266, "ROLE_SYSTEM_CANNOT_DISABLE", "system.role.system_cannot_disable"),
+	/**
+	 * 系统角色不可修改类型
+	 */
+	ROLE_SYSTEM_CANNOT_CHANGE_TYPE(400, 267, "ROLE_SYSTEM_CANNOT_CHANGE_TYPE",
+			"system.role.system_cannot_change_type"),
+	/**
+	 * 角色已被引用，不可删除
+	 */
+	ROLE_IN_USE(409, 268, "ROLE_IN_USE", "system.role.in_use"),
+
+	// --- User Profile (269–)
+	/**
+	 * 用户已存在
+	 */
+	USER_ALREADY_EXISTS(409, 269, "USER_ALREADY_EXISTS", "user.already.exists");
 
 	private final int httpStatus;
 

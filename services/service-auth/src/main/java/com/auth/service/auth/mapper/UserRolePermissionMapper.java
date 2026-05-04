@@ -1,12 +1,13 @@
 package com.auth.service.auth.mapper;
 
-import com.auth.service.auth.model.projection.DataScopeProjection;
-import com.auth.service.auth.model.projection.PolicyProjection;
-import com.auth.service.auth.model.projection.RolePermissionProjection;
+import java.util.List;
+
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import java.util.List;
+import com.auth.service.auth.model.projection.DataScopeProjection;
+import com.auth.service.auth.model.projection.PolicyProjection;
+import com.auth.service.auth.model.projection.RolePermissionProjection;
 
 /**
  * 用户角色权限 Mapper（认证专用）
@@ -36,5 +37,12 @@ public interface UserRolePermissionMapper {
 	 * @return 策略行
 	 */
 	List<PolicyProjection> selectEffectivePoliciesByUserId(@Param("userId") long userId);
+
+	/**
+	 * 查询持有指定角色的所有用户 ID（通过 USER / DEPT / POST 三类主体汇总）
+	 * @param roleCode 角色编码
+	 * @return 用户 ID 列表
+	 */
+	List<Long> selectUserIdsByRoleCode(@Param("roleCode") String roleCode);
 
 }

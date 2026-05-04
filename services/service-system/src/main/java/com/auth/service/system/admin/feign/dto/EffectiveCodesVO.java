@@ -1,4 +1,4 @@
-package com.auth.service.system.admin.menu.feign.dto;
+package com.auth.service.system.admin.feign.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,11 +20,11 @@ import java.util.List;
 @NoArgsConstructor
 public class EffectiveCodesVO implements Serializable {
 
-	@Serial
-	private static final long serialVersionUID = 1L;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-	private List<String> roleCodes;
+    private List<String> roleCodes;
 
-	private List<String> permissionCodes;
+    private List<String> permissionCodes;
 
 }

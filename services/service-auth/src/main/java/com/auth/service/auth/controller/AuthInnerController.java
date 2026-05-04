@@ -66,4 +66,12 @@ public class AuthInnerController {
 		return Result.success(body);
 	}
 
+	@InternalApi
+	@Operation(summary = "查询持有指定角色的所有用户 ID（供 system 角色变更后缓存刷新用）")
+	@GetMapping("/role/{roleCode}/users")
+	public Result<List<Long>> listUserIdsByRoleCode(@PathVariable("roleCode") String roleCode) {
+		List<Long> userIds = authInnerService.listUserIdsByRoleCode(roleCode);
+		return Result.success(userIds);
+	}
+
 }
