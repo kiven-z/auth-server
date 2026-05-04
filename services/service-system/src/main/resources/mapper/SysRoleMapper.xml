@@ -38,58 +38,6 @@
         ORDER BY ${orderBySql}
     </select>
 
-    <!-- 统计 grant_table 中对指定 role_code 的引用数 -->
-    <select id="countGrantTableRefByRoleCode" resultType="java.lang.Integer">
-        SELECT COUNT(1)
-        FROM grant_table
-        WHERE role_code = #{roleCode}
-        LIMIT 1
-    </select>
-
-    <!-- 逻辑删除单条角色 -->
-    <update id="logicDeleteById">
-        UPDATE sys_role
-        SET is_deleted = 1
-        WHERE id = #{id}
-    </update>
-
-    <!-- 批量逻辑删除角色 -->
-    <update id="logicDeleteBatchByIds">
-        UPDATE sys_role SET is_deleted = 1 WHERE id IN
-        <foreach collection="ids" item="id" open="(" separator="," close=")">
-            #{id}
-        </foreach>
-    </update>
-
-    <!-- 更新角色状态 -->
-    <update id="updateStatusById">
-        UPDATE sys_role
-        SET status = #{status}
-        WHERE id = #{id}
-    </update>
-
-    <!--
-        级联更新所有关联表的 role_code。
-        事务内执行，任一失败自动回滚。
-    -->
-    <update id="cascadeUpdateRoleCode">
-        UPDATE sys_role_permission
-        SET role_code = #{newRoleCode}
-        WHERE role_code = #{oldRoleCode};
-        UPDATE role_scope
-        SET role_code = #{newRoleCode}
-        WHERE role_code = #{oldRoleCode};
-        UPDATE role_policy
-        SET role_code = #{newRoleCode}
-        WHERE role_code = #{oldRoleCode};
-        UPDATE grant_table
-        SET role_code = #{newRoleCode}
-        WHERE role_code = #{oldRoleCode};
-        UPDATE sys_menu_role
-        SET role_code = #{newRoleCode}
-        WHERE role_code = #{oldRoleCode}
-    </update>
-
     <!-- 批量自增用户权限版本号（perm_version + 1） -->
     <update id="batchIncrementPermVersion">
         UPDATE sys_user SET perm_version = perm_version + 1 WHERE id IN
@@ -97,4 +45,23 @@
             #{userId}
         </foreach>
     </update>
+
+    <!-- 查询角色下拉选项 -->
+    <select id="selectRoleOptions" resultType="com.auth.service.system.admin.role.model.vo.SysRoleOptionVO">
+        SELECT id, role_code, role_name FROM sys_role
+        <where>
+            is_deleted = 0
+            <if test="roleName != null and roleName != ''">AND role_name LIKE CONCAT('%', #{roleName}, '%')</if>
+            <if test="roleCode != null and roleCode != ''">AND role_code LIKE CONCAT('%', #{roleCode}, '%')</if>
+        </where>
+        ORDER BY order_num LIMIT 15
+    </select>
+
+    <!-- 统计 grant_table 中对指定 role_code 的引用数 -->
+    <select id="countGrantTableRefByRoleCode" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM grant_table
+        WHERE role_code = #{roleCode}
+        LIMIT 1
+    </select>
 </mapper>

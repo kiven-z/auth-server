@@ -134,14 +134,14 @@
         FROM grant_table gt
         WHERE gt.role_code = #{roleCode}
           AND gt.subject_type = 'USER'
-        UNION
+        UNION ALL
         SELECT DISTINCT ud.user_id
         FROM grant_table gt
                  JOIN user_dept ud ON ud.dept_id = gt.subject_id
         WHERE gt.role_code = #{roleCode}
           AND gt.subject_type = 'DEPT'
           AND ud.status = 0
-        UNION
+        UNION ALL
         SELECT DISTINCT up.user_id
         FROM grant_table gt
                  JOIN user_post up ON up.post_id = gt.subject_id

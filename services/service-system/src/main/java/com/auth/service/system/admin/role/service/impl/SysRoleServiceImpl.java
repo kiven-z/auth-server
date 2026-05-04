@@ -19,7 +19,6 @@ import com.auth.service.system.admin.role.service.SysRoleService;
 import com.auth.service.system.admin.role.support.SysRolePageOrderSqlBuilder;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.SystemResultCodeEnum;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -30,7 +29,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import static com.auth.common.web.autoconfigure.FeignUtil.isOk;
 
 /**
  * 系统角色服务实现
@@ -74,8 +76,8 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
         if (entity == null) {
             throw new SystemBusinessException(SystemResultCodeEnum.ROLE_NOT_FOUND, id);
         }
-        SysRoleDetailVO vo = new SysRoleDetailVO();
-        BeanUtil.copyProperties(entity, vo);
+
+        SysRoleDetailVO vo = BeanUtil.copyProperties(entity, SysRoleDetailVO.class);
         vo.setRoleTypeDesc(RoleTypeEnum.getDesc(entity.getRoleType()));
         return vo;
     }
@@ -87,8 +89,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
      */
     @Override
     public void create(SysRoleCreateForm form) {
-        SysRoleEntity entity = new SysRoleEntity();
-        BeanUtil.copyProperties(form, entity);
+        SysRoleEntity entity = BeanUtil.copyProperties(form, SysRoleEntity.class);
         save(entity);
     }
 
@@ -105,42 +106,23 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
         }
 
         // 系统角色不可修改 role_type
-        if (RoleTypeEnum.SYSTEM.getCode().equals(oldEntity.getRoleType())
-                && !Objects.equals(oldEntity.getRoleType(), form.getRoleType())) {
+        Integer roleType = oldEntity.getRoleType();
+        if (RoleTypeEnum.SYSTEM.getCode().equals(roleType)
+                && !Objects.equals(roleType, form.getRoleType())) {
             throw new SystemBusinessException(SystemResultCodeEnum.ROLE_SYSTEM_CANNOT_CHANGE_TYPE);
         }
 
-        String oldRoleCode = oldEntity.getRoleCode();
-        String newRoleCode = form.getRoleCode();
-        boolean roleCodeChanged = !Objects.equals(oldRoleCode, newRoleCode);
-
-        // 获取受影响用户 ID（改 code 的话新旧都涉及）
-        List<Long> affectedUserIds = new ArrayList<>();
-        if (roleCodeChanged) {
-            affectedUserIds.addAll(refreshUsersByRoleCode(oldRoleCode));
-        }
-
-        // 执行更新
-        SysRoleEntity updateEntity = new SysRoleEntity();
-        BeanUtil.copyProperties(form, updateEntity);
+        // 执行更新（role_code 变更由数据库 ON UPDATE CASCADE 自动传递到关联表）
+        SysRoleEntity updateEntity = BeanUtil.copyProperties(form, SysRoleEntity.class);
         updateById(updateEntity);
 
-        // 如果 role_code 变了，级联更新关联表
-        if (roleCodeChanged) {
-            baseMapper.cascadeUpdateRoleCode(oldRoleCode, newRoleCode);
-            // 新 code 的用户也需要刷新
-            affectedUserIds.addAll(refreshUsersByRoleCode(newRoleCode));
-        }
-
-        // 刷新缓存（不改 code 时也要刷新，因为角色名称等变化影响 AuthProfile）
-        if (!roleCodeChanged) {
-            affectedUserIds.addAll(refreshUsersByRoleCode(oldRoleCode));
-        }
+        // 收集需要刷新缓存的用户 ID
+        List<Long> affectedUserIds = new ArrayList<>(refreshUsersByRoleCode(oldEntity.getRoleCode()));
 
         // 去重后，先更新 perm_version，再刷新缓存
         if (CollUtil.isNotEmpty(affectedUserIds)) {
             List<Long> distinctIds = affectedUserIds.stream().distinct().collect(Collectors.toList());
-            updatePermVersion(distinctIds);
+            baseMapper.batchIncrementPermVersion(distinctIds);
             authenticationInnerFeignClient.refreshUserCache(distinctIds);
         }
     }
@@ -152,43 +134,38 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
      */
     @Override
     public void deleteBatch(List<Long> ids) {
-        if (CollUtil.isEmpty(ids)) {
-            return;
-        }
-
         List<SysRoleEntity> entities = baseMapper.selectBatchIds(ids);
-        if (entities.size() != ids.size()) {
-            // 有角色不存在
-            for (Long id : ids) {
-                boolean exists = entities.stream().anyMatch(e -> e.getId().equals(id));
-                if (!exists) {
-                    throw new SystemBusinessException(SystemResultCodeEnum.ROLE_NOT_FOUND, id);
-                }
-            }
-        }
 
-        List<String> affectedRoleCodes = new ArrayList<>();
-        for (SysRoleEntity entity : entities) {
-            // 系统角色不可删除
-            if (RoleTypeEnum.SYSTEM.getCode().equals(entity.getRoleType())) {
-                throw new SystemBusinessException(SystemResultCodeEnum.ROLE_SYSTEM_CANNOT_DELETE);
-            }
+        // 检查是否存在不存在的 ID
+        Set<Long> existedIds = entities.stream().map(SysRoleEntity::getId).collect(Collectors.toSet());
+        ids.stream()
+                .filter(id -> !existedIds.contains(id))
+                .findFirst()
+                .ifPresent(missingId -> {
+                    throw new SystemBusinessException(SystemResultCodeEnum.ROLE_NOT_FOUND, missingId);
+                });
 
-            Integer refCount = baseMapper.countGrantTableRefByRoleCode(entity.getRoleCode());
-            if (refCount != null && refCount > 0) {
-                throw new SystemBusinessException(SystemResultCodeEnum.ROLE_IN_USE, refCount);
-            }
+        // 检查系统角色和被引用状态
+        List<String> affectedRoleCodes = entities.stream()
+                .peek(entity -> {
+                    if (RoleTypeEnum.SYSTEM.getCode().equals(entity.getRoleType())) {
+                        throw new SystemBusinessException(SystemResultCodeEnum.ROLE_SYSTEM_CANNOT_DELETE);
+                    }
+                })
+                .peek(entity -> {
+                    Integer refCount = baseMapper.countGrantTableRefByRoleCode(entity.getRoleCode());
+                    if (refCount != null && refCount > 0) {
+                        throw new SystemBusinessException(SystemResultCodeEnum.ROLE_IN_USE, refCount);
+                    }
+                })
+                .map(SysRoleEntity::getRoleCode)
+                .toList();
 
-            affectedRoleCodes.add(entity.getRoleCode());
-        }
-
-        // 批量逻辑删除
-        baseMapper.logicDeleteBatchByIds(ids);
+        // 批量逻辑删除（ORM 自动处理 is_deleted 字段）
+        removeBatchByIds(ids);
 
         // 刷新缓存
-        for (String roleCode : affectedRoleCodes) {
-            refreshAndFlushCache(roleCode);
-        }
+        affectedRoleCodes.forEach(this::refreshAndFlushCache);
     }
 
     /**
@@ -209,7 +186,11 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
             throw new SystemBusinessException(SystemResultCodeEnum.ROLE_SYSTEM_CANNOT_DISABLE);
         }
 
-        baseMapper.updateStatusById(id, status);
+        // 使用实体更新方式，避免 Mockito 中 Lambda 缓存缺失
+        SysRoleEntity updateEntity = new SysRoleEntity();
+        updateEntity.setId(id);
+        updateEntity.setStatus(status);
+        baseMapper.updateById(updateEntity);
 
         // 刷新缓存
         refreshAndFlushCache(entity.getRoleCode());
@@ -224,23 +205,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
      */
     @Override
     public List<SysRoleOptionVO> listOptions(String roleName, String roleCode) {
-        QueryWrapper<SysRoleEntity> wrapper = new QueryWrapper<>();
-        wrapper.select("id", "role_code", "role_name")
-                .eq("is_deleted", 0);
-
-        if (roleName != null && !roleName.isEmpty()) {
-            wrapper.like("role_name", roleName);
-        }
-        if (roleCode != null && !roleCode.isEmpty()) {
-            wrapper.like("role_code", roleCode);
-        }
-
-        wrapper.orderByAsc("order_num");
-        wrapper.last("LIMIT 100");
-
-        List<SysRoleEntity> entities = baseMapper.selectList(wrapper);
-        return entities.stream().map(e -> new SysRoleOptionVO(e.getId(), e.getRoleCode(), e.getRoleName()))
-                .collect(Collectors.toList());
+        return baseMapper.selectRoleOptions(roleName, roleCode);
     }
 
     /**
@@ -250,20 +215,13 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
      */
     private void refreshAndFlushCache(String roleCode) {
         List<Long> userIds = refreshUsersByRoleCode(roleCode);
-        if (CollUtil.isNotEmpty(userIds)) {
-            // 先自增 perm_version，使 JWT 版本比对失效
-            updatePermVersion(userIds);
-            authenticationInnerFeignClient.refreshUserCache(userIds);
+        if (CollUtil.isEmpty(userIds)) {
+            return;
         }
-    }
 
-    /**
-     * 批量更新用户权限版本号（perm_version + 1）
-     *
-     * @param userIds 用户 ID 列表
-     */
-    private void updatePermVersion(List<Long> userIds) {
+        // 先自增 perm_version，使 JWT 版本比对失效
         baseMapper.batchIncrementPermVersion(userIds);
+        authenticationInnerFeignClient.refreshUserCache(userIds);
     }
 
     /**
@@ -275,7 +233,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
     private List<Long> refreshUsersByRoleCode(String roleCode) {
         try {
             Result<List<Long>> result = authenticationInnerFeignClient.listUserIdsByRoleCode(roleCode);
-            if (result != null && result.getData() != null) {
+            if (isOk(result)) {
                 return result.getData();
             }
         } catch (Exception e) {

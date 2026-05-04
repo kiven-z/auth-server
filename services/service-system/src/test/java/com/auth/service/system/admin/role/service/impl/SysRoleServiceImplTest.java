@@ -1,5 +1,21 @@
 package com.auth.service.system.admin.role.service.impl;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+import java.util.Collections;
+import java.util.List;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
+
 import com.auth.common.core.model.query.SortDirection;
 import com.auth.common.core.model.query.SortSpec;
 import com.auth.common.core.model.response.Result;
@@ -16,25 +32,7 @@ import com.auth.service.system.admin.role.model.vo.SysRolePageResponse;
 import com.auth.service.system.admin.role.support.SysRolePageOrderSqlBuilder;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.SystemResultCodeEnum;
-import com.auth.service.system.common.mapper.UserMapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
-
-import java.util.Collections;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * 角色服务单元测试
@@ -51,9 +49,6 @@ class SysRoleServiceImplTest {
 
     @Mock
     private AuthenticationInnerFeignClient authInnerFeignClient;
-
-    @Mock
-    private UserMapper userMapper;
 
     private SysRoleServiceImpl sysRoleService;
 
@@ -271,7 +266,7 @@ class SysRoleServiceImplTest {
     // ==================== 修改（改 code） ====================
 
     @Test
-    @DisplayName("update 改 role_code 时级联更新并刷新新旧用户")
+    @DisplayName("update 改 role_code 时由外键 ON UPDATE CASCADE 自动同步，不调用手动级联 SQL")
     void updateWithCodeChange() {
         SysRoleEntity oldEntity = new SysRoleEntity();
         oldEntity.setId(1L);
@@ -283,8 +278,7 @@ class SysRoleServiceImplTest {
         when(sysRoleMapper.selectById(1L)).thenReturn(oldEntity);
         when(authInnerFeignClient.listUserIdsByRoleCode("OLD_CODE"))
                 .thenReturn(Result.success(List.of(101L)));
-        when(authInnerFeignClient.listUserIdsByRoleCode("NEW_CODE"))
-                .thenReturn(Result.success(List.of(102L)));
+        when(sysRoleMapper.updateById(any(SysRoleEntity.class))).thenReturn(1);
 
         SysRoleUpdateForm form = new SysRoleUpdateForm();
         form.setId(1L);
@@ -295,12 +289,9 @@ class SysRoleServiceImplTest {
 
         sysRoleService.update(form);
 
-        // 验证级联更新
-        verify(sysRoleMapper).cascadeUpdateRoleCode("OLD_CODE", "NEW_CODE");
-        // 验证 perm_version +1（新旧去重后）
-        verify(sysRoleMapper).batchIncrementPermVersion(argThat(ids -> ids.containsAll(List.of(101L, 102L))));
-        // 验证 Feign 刷新
-        verify(authInnerFeignClient).refreshUserCache(argThat(ids -> ids.containsAll(List.of(101L, 102L))));
+        // 旧 code 涉及的用户仍需刷新（外键 ON UPDATE CASCADE 自动处理关联表）
+        verify(sysRoleMapper).batchIncrementPermVersion(List.of(101L));
+        verify(authInnerFeignClient).refreshUserCache(List.of(101L));
     }
 
     @Test
@@ -324,65 +315,67 @@ class SysRoleServiceImplTest {
                 .hasFieldOrPropertyWithValue("resultCode", SystemResultCodeEnum.ROLE_SYSTEM_CANNOT_CHANGE_TYPE);
     }
 
-    // ==================== 删除（单条） ====================
+    // ==================== 批量删除 ====================
 
     @Test
-    @DisplayName("deleteById 正常删除并刷新缓存")
-    void deleteByIdSuccess() {
+    @DisplayName("deleteBatch 正常删除并刷新缓存")
+    void deleteBatchSuccess() {
         SysRoleEntity entity = new SysRoleEntity();
         entity.setId(1L);
         entity.setRoleCode("NORMAL_ROLE");
         entity.setRoleType(2);
 
-        when(sysRoleMapper.selectById(1L)).thenReturn(entity);
+        when(sysRoleMapper.selectBatchIds(List.of(1L))).thenReturn(List.of(entity));
         when(sysRoleMapper.countGrantTableRefByRoleCode("NORMAL_ROLE")).thenReturn(0);
         when(authInnerFeignClient.listUserIdsByRoleCode("NORMAL_ROLE"))
                 .thenReturn(Result.success(List.of(101L)));
 
-        sysRoleService.deleteById(1L);
+        sysRoleService.deleteBatch(List.of(1L));
 
-        verify(sysRoleMapper).logicDeleteById(1L);
+        // ORM 删除（removeBatchByIds 内部调用 deleteByIds）
+        verify(sysRoleMapper).deleteByIds(List.of(1L));
+        // 刷新缓存
         verify(sysRoleMapper).batchIncrementPermVersion(List.of(101L));
         verify(authInnerFeignClient).refreshUserCache(List.of(101L));
     }
 
     @Test
-    @DisplayName("deleteById 系统角色不可删除")
-    void deleteByIdSystemRole() {
+    @DisplayName("deleteBatch 系统角色不可删除")
+    void deleteBatchSystemRole() {
         SysRoleEntity entity = new SysRoleEntity();
         entity.setId(1L);
         entity.setRoleCode("SYSTEM");
         entity.setRoleType(1);
 
-        when(sysRoleMapper.selectById(1L)).thenReturn(entity);
+        when(sysRoleMapper.selectBatchIds(List.of(1L))).thenReturn(List.of(entity));
 
-        assertThatThrownBy(() -> sysRoleService.deleteById(1L))
+        assertThatThrownBy(() -> sysRoleService.deleteBatch(List.of(1L)))
                 .isInstanceOf(SystemBusinessException.class)
                 .hasFieldOrPropertyWithValue("resultCode", SystemResultCodeEnum.ROLE_SYSTEM_CANNOT_DELETE);
     }
 
     @Test
-    @DisplayName("deleteById 引用中的角色不可删除")
-    void deleteByIdRoleInUse() {
+    @DisplayName("deleteBatch 引用中的角色不可删除")
+    void deleteBatchRoleInUse() {
         SysRoleEntity entity = new SysRoleEntity();
         entity.setId(1L);
         entity.setRoleCode("IN_USE_ROLE");
         entity.setRoleType(2);
 
-        when(sysRoleMapper.selectById(1L)).thenReturn(entity);
+        when(sysRoleMapper.selectBatchIds(List.of(1L))).thenReturn(List.of(entity));
         when(sysRoleMapper.countGrantTableRefByRoleCode("IN_USE_ROLE")).thenReturn(5);
 
-        assertThatThrownBy(() -> sysRoleService.deleteById(1L))
+        assertThatThrownBy(() -> sysRoleService.deleteBatch(List.of(1L)))
                 .isInstanceOf(SystemBusinessException.class)
                 .hasFieldOrPropertyWithValue("resultCode", SystemResultCodeEnum.ROLE_IN_USE);
     }
 
     @Test
-    @DisplayName("deleteById 角色不存在抛异常")
-    void deleteByIdNotFound() {
-        when(sysRoleMapper.selectById(999L)).thenReturn(null);
+    @DisplayName("deleteBatch 角色不存在抛异常")
+    void deleteBatchNotFound() {
+        when(sysRoleMapper.selectBatchIds(List.of(999L))).thenReturn(Collections.emptyList());
 
-        assertThatThrownBy(() -> sysRoleService.deleteById(999L))
+        assertThatThrownBy(() -> sysRoleService.deleteBatch(List.of(999L)))
                 .isInstanceOf(SystemBusinessException.class)
                 .hasFieldOrPropertyWithValue("resultCode", SystemResultCodeEnum.ROLE_NOT_FOUND);
     }
@@ -403,7 +396,9 @@ class SysRoleServiceImplTest {
 
         sysRoleService.updateStatus(1L, 1);
 
-        verify(sysRoleMapper).updateStatusById(1L, 1);
+        // ORM 更新状态（updateById 方式避免 lambda 缓存问题）
+        verify(sysRoleMapper).updateById(any(SysRoleEntity.class));
+        // 验证刷新缓存
         verify(sysRoleMapper).batchIncrementPermVersion(List.of(101L));
         verify(authInnerFeignClient).refreshUserCache(List.of(101L));
     }
@@ -438,17 +433,10 @@ class SysRoleServiceImplTest {
     @Test
     @DisplayName("listOptions 返回正常数据")
     void listOptionsSuccess() {
-        SysRoleEntity e1 = new SysRoleEntity();
-        e1.setId(1L);
-        e1.setRoleCode("ADMIN");
-        e1.setRoleName("管理员");
+        SysRoleOptionVO vo1 = new SysRoleOptionVO(1L, "ADMIN", "管理员");
+        SysRoleOptionVO vo2 = new SysRoleOptionVO(2L, "USER", "普通用户");
 
-        SysRoleEntity e2 = new SysRoleEntity();
-        e2.setId(2L);
-        e2.setRoleCode("USER");
-        e2.setRoleName("普通用户");
-
-        when(sysRoleMapper.selectList(any())).thenReturn(List.of(e1, e2));
+        when(sysRoleMapper.selectRoleOptions(isNull(), isNull())).thenReturn(List.of(vo1, vo2));
 
         List<SysRoleOptionVO> options = sysRoleService.listOptions(null, null);
 
