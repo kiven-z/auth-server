@@ -384,8 +384,7 @@ public enum SystemResultCodeEnum {
 	/**
 	 * 系统角色不可修改类型
 	 */
-	ROLE_SYSTEM_CANNOT_CHANGE_TYPE(400, 267, "ROLE_SYSTEM_CANNOT_CHANGE_TYPE",
-			"system.role.system_cannot_change_type"),
+	ROLE_SYSTEM_CANNOT_CHANGE_TYPE(400, 267, "ROLE_SYSTEM_CANNOT_CHANGE_TYPE", "system.role.system_cannot_change_type"),
 	/**
 	 * 角色已被引用，不可删除
 	 */

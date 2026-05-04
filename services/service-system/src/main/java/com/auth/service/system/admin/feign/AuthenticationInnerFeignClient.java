@@ -17,33 +17,31 @@ import java.util.List;
  * @author Bunny
  */
 @FeignClient(name = "service-auth", contextId = "authenticationInnerCache", path = "/api/auth/inner",
-        fallback = AuthenticationInnerFeignClientFallback.class)
+		fallback = AuthenticationInnerFeignClientFallback.class)
 public interface AuthenticationInnerFeignClient {
 
-    /**
-     * 刷新用户缓存
-     *
-     * @param userIds 用户ID列表
-     * @return 刷新结果
-     */
-    @PostMapping("/cache/refresh")
-    Result<String> refreshUserCache(@RequestBody List<Long> userIds);
+	/**
+	 * 刷新用户缓存
+	 * @param userIds 用户ID列表
+	 * @return 刷新结果
+	 */
+	@PostMapping("/cache/refresh")
+	Result<String> refreshUserCache(@RequestBody List<Long> userIds);
 
-    /**
-     * 查询用户生效角色码与权限码
-     *
-     * @param userId 用户 ID
-     * @return 统一响应体
-     */
-    @GetMapping("/principal/{userId}/effective-codes")
-    Result<EffectiveCodesVO> getEffectiveCodes(@PathVariable("userId") Long userId);
+	/**
+	 * 查询用户生效角色码与权限码
+	 * @param userId 用户 ID
+	 * @return 统一响应体
+	 */
+	@GetMapping("/principal/{userId}/effective-codes")
+	Result<EffectiveCodesVO> getEffectiveCodes(@PathVariable("userId") Long userId);
 
-    /**
-     * 查询持有指定角色的所有用户 ID
-     *
-     * @param roleCode 角色编码
-     * @return 用户 ID 列表
-     */
-    @GetMapping("/role/{roleCode}/users")
-    Result<List<Long>> listUserIdsByRoleCode(@PathVariable("roleCode") String roleCode);
+	/**
+	 * 查询持有指定角色的所有用户 ID
+	 * @param roleCode 角色编码
+	 * @return 用户 ID 列表
+	 */
+	@GetMapping("/role/{roleCode}/users")
+	Result<List<Long>> listUserIdsByRoleCode(@PathVariable("roleCode") String roleCode);
+
 }

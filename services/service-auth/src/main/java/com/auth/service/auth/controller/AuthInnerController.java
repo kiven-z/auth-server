@@ -1,22 +1,15 @@
 package com.auth.service.auth.controller;
 
-import java.util.List;
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
+import cn.hutool.core.collection.CollUtil;
 import com.auth.common.core.model.response.Result;
 import com.auth.module.security.autoconfig.annotation.InternalApi;
 import com.auth.service.auth.model.vo.inner.EffectiveCodesVO;
 import com.auth.service.auth.service.AuthInnerService;
-
-import cn.hutool.core.collection.CollUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * 认证服务内部接口（缓存刷新、会话踢出等

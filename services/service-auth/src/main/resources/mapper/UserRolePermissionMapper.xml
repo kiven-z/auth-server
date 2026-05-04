@@ -49,7 +49,8 @@
              distinct_roles AS (SELECT DISTINCT r.role_code
                                 FROM user_roles ur
                                          JOIN sys_role r ON r.role_code = ur.role_code
-                                WHERE r.status = 0),
+                                WHERE r.status = 0
+                                  AND r.is_deleted = 0),
 
              distinct_permissions AS (SELECT DISTINCT p.permission_code
                                       FROM distinct_roles dr
