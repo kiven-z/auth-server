@@ -24,25 +24,24 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class SysRoleController {
 
-    private final SysRoleService sysRoleService;
+	private final SysRoleService sysRoleService;
 
-    public SysRoleController(SysRoleService sysRoleService) {
-        this.sysRoleService = sysRoleService;
-    }
+	public SysRoleController(SysRoleService sysRoleService) {
+		this.sysRoleService = sysRoleService;
+	}
 
-    /**
-     * 分页查询角色
-     *
-     * @param query 查询与分页参数
-     * @return 分页列表
-     */
-    @Operation(summary = "分页查询角色")
-    @PreAuthorize("@auth.decide('sysRole:query')")
-    @GetMapping("page")
-    public Result<PageResponse<SysRolePageResponse>> page(SysRoleQuery query) {
-        Page<SysRoleEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
-        PageResponse<SysRolePageResponse> response = sysRoleService.getPage(pageParams, query);
-        return Result.success(response);
-    }
+	/**
+	 * 分页查询角色
+	 * @param query 查询与分页参数
+	 * @return 分页列表
+	 */
+	@Operation(summary = "分页查询角色")
+	@PreAuthorize("@auth.decide('sysRole:query')")
+	@GetMapping("page")
+	public Result<PageResponse<SysRolePageResponse>> page(SysRoleQuery query) {
+		Page<SysRoleEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
+		PageResponse<SysRolePageResponse> response = sysRoleService.getPage(pageParams, query);
+		return Result.success(response);
+	}
 
 }

@@ -47,8 +47,7 @@ class SysUserProfileServiceImplTest {
 	@Test
 	@DisplayName("userId 为空时抛出 ILLEGAL_USER_ID_NOT_NULL")
 	void getProfileRejectsNullUserId() {
-		assertThatThrownBy(() -> sysUserProfileService.getProfile(null))
-			.isInstanceOf(SystemBusinessException.class)
+		assertThatThrownBy(() -> sysUserProfileService.getProfile(null)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemResultCodeEnum.ILLEGAL_USER_ID_NOT_NULL);
 	}
@@ -58,8 +57,7 @@ class SysUserProfileServiceImplTest {
 	void getProfileRejectsMissingUser() {
 		when(userMapper.selectById(99L)).thenReturn(null);
 
-		assertThatThrownBy(() -> sysUserProfileService.getProfile(99L))
-			.isInstanceOf(SystemBusinessException.class)
+		assertThatThrownBy(() -> sysUserProfileService.getProfile(99L)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemResultCodeEnum.USER_NOT_FOUND);
 	}

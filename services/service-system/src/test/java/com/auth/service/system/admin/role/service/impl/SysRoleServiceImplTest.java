@@ -143,13 +143,12 @@ class SysRoleServiceImplTest {
 	@Test
 	@DisplayName("查询条件传入后原样交给 Mapper")
 	void getPagePassesQueryToMapper() {
-		when(sysRoleMapper.selectListByPage(any(Page.class), any(SysRoleQuery.class), any()))
-			.thenAnswer(invocation -> {
-				Page<SysRoleEntity> page = invocation.getArgument(0);
-				page.setTotal(0L);
-				page.setRecords(Collections.emptyList());
-				return page;
-			});
+		when(sysRoleMapper.selectListByPage(any(Page.class), any(SysRoleQuery.class), any())).thenAnswer(invocation -> {
+			Page<SysRoleEntity> page = invocation.getArgument(0);
+			page.setTotal(0L);
+			page.setRecords(Collections.emptyList());
+			return page;
+		});
 
 		SysRoleQuery query = new SysRoleQuery();
 		query.setRoleCode("ADM");

@@ -23,13 +23,9 @@ public final class SysRolePageOrderSqlBuilder {
 	 */
 	public static final String DEFAULT_ORDER_BY_SQL = "r.order_num ASC, r.create_time DESC";
 
-	private static final Map<String, String> FIELD_TO_COLUMN = Map.ofEntries(
-			Map.entry("orderNum", "r.order_num"),
-			Map.entry("createTime", "r.create_time"),
-			Map.entry("updateTime", "r.update_time"),
-			Map.entry("roleCode", "r.role_code"),
-			Map.entry("roleName", "r.role_name"),
-			Map.entry("status", "r.status"),
+	private static final Map<String, String> FIELD_TO_COLUMN = Map.ofEntries(Map.entry("orderNum", "r.order_num"),
+			Map.entry("createTime", "r.create_time"), Map.entry("updateTime", "r.update_time"),
+			Map.entry("roleCode", "r.role_code"), Map.entry("roleName", "r.role_name"), Map.entry("status", "r.status"),
 			Map.entry("roleType", "r.role_type"));
 
 	private SysRolePageOrderSqlBuilder() {
@@ -37,7 +33,6 @@ public final class SysRolePageOrderSqlBuilder {
 
 	/**
 	 * 根据前端传入的排序规则生成 ORDER BY 子句（不含 ORDER BY 关键字）。
-	 *
 	 * @param sort 排序列表，可为 null
 	 * @return 安全列名片段
 	 */
@@ -45,15 +40,12 @@ public final class SysRolePageOrderSqlBuilder {
 		if (CollUtil.isEmpty(sort)) {
 			return DEFAULT_ORDER_BY_SQL;
 		}
-		String joined = sort.stream()
-				.flatMap(spec -> toSegment(spec).stream())
-				.collect(Collectors.joining(", "));
+		String joined = sort.stream().flatMap(spec -> toSegment(spec).stream()).collect(Collectors.joining(", "));
 		return CharSequenceUtil.isBlank(joined) ? DEFAULT_ORDER_BY_SQL : joined;
 	}
-	
+
 	/**
 	 * 将排序规则转换为 SQL 片段
-	 * 
 	 * @param spec 排序规则
 	 * @return SQL 片段
 	 */
@@ -68,4 +60,5 @@ public final class SysRolePageOrderSqlBuilder {
 		SortDirection direction = spec.getDirection() != null ? spec.getDirection() : SortDirection.DESC;
 		return Optional.of(column + " " + direction.name());
 	}
+
 }

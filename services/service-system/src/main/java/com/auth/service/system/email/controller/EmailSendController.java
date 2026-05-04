@@ -23,26 +23,25 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class EmailSendController {
 
-    private final EmailSendService emailSendService;
+	private final EmailSendService emailSendService;
 
-    public EmailSendController(EmailSendService emailSendService) {
-        this.emailSendService = emailSendService;
-    }
+	public EmailSendController(EmailSendService emailSendService) {
+		this.emailSendService = emailSendService;
+	}
 
-    /**
-     * 发送模板邮件
-     * <p>
-     * 支持多收件人 / 抄送 / 密送 / Base64、字节数组、URL 附件
-     * </p>
-     *
-     * @param dto 邮件发送请求
-     * @return 发送结果
-     */
-    @Operation(summary = "发送模板邮件", description = "基于 sys_email_template + FreeMarker 渲染并发送邮件")
-    @PostMapping("/send")
-    public Result<String> sendEmail(@Valid @RequestBody EmailSendDTO dto) {
-        emailSendService.sendByTemplate(dto);
-        return Result.success("邮件发送请求已受理");
-    }
+	/**
+	 * 发送模板邮件
+	 * <p>
+	 * 支持多收件人 / 抄送 / 密送 / Base64、字节数组、URL 附件
+	 * </p>
+	 * @param dto 邮件发送请求
+	 * @return 发送结果
+	 */
+	@Operation(summary = "发送模板邮件", description = "基于 sys_email_template + FreeMarker 渲染并发送邮件")
+	@PostMapping("/send")
+	public Result<String> sendEmail(@Valid @RequestBody EmailSendDTO dto) {
+		emailSendService.sendByTemplate(dto);
+		return Result.success("邮件发送请求已受理");
+	}
 
 }

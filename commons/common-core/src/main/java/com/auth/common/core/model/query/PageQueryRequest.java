@@ -14,22 +14,22 @@ import java.util.List;
 @Data
 public class PageQueryRequest implements Serializable {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+	@Serial
+	private static final long serialVersionUID = 1L;
 
-    /**
-     * 当前页
-     */
-    private Integer pageIndex = 1;
+	/**
+	 * 当前页
+	 */
+	private Integer pageIndex = 1;
 
-    /**
-     * 分页大小
-     */
-    private Integer pageSize = 30;
+	/**
+	 * 分页大小
+	 */
+	private Integer pageSize = 30;
 
-    /**
-     * 排序字段
-     */
-    private List<SortSpec> sort;
+	/**
+	 * 排序字段
+	 */
+	private List<SortSpec> sort;
 
 }

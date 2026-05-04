@@ -16,12 +16,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class AuthAuditHandler implements AuthorizationAuditHandler {
 
-    @Override
-    @Async
-    public void handle(SecurityAuthorizationAuditPayloadEvent event) {
-        log.info("================System================");
-        log.info("{}", JSON.toJSONString(event));
-        log.info("================System================");
-    }
+	@Override
+	@Async
+	public void handle(SecurityAuthorizationAuditPayloadEvent event) {
+		log.info("================System================");
+		log.info("{}", JSON.toJSONString(event));
+		log.info("================System================");
+	}
 
 }
