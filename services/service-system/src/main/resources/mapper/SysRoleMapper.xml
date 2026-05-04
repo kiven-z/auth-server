@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.auth.service.system.admin.role.mapper.SysRoleMapper">
+
+    <!-- 角色分页列表：左连接用户表取用户名；不使用 AS 关键字，依赖下划线转小驼峰 -->
+    <select id="selectListByPage" resultType="com.auth.service.system.admin.role.model.vo.SysRolePageResponse">
+        SELECT
+        r.id,
+        r.role_code,
+        r.role_name,
+        r.status,
+        r.role_type,
+        r.order_num,
+        r.create_time,
+        r.update_time,
+        r.create_user,
+        r.update_user,
+        IF(cu.id IS NULL OR cu.is_deleted = 1, NULL, cu.username) create_username,
+        IF(uu.id IS NULL OR uu.is_deleted = 1, NULL, uu.username) update_username
+        FROM sys_role r
+        LEFT JOIN sys_user cu ON r.create_user = cu.id
+        LEFT JOIN sys_user uu ON r.update_user = uu.id
+        <where>
+            r.is_deleted = 0
+            <if test="query.roleCode != null and query.roleCode != ''">
+                AND r.role_code LIKE CONCAT('%', #{query.roleCode}, '%')
+            </if>
+            <if test="query.roleName != null and query.roleName != ''">
+                AND r.role_name LIKE CONCAT('%', #{query.roleName}, '%')
+            </if>
+            <if test="query.status != null">
+                AND r.status = #{query.status}
+            </if>
+            <if test="query.roleType != null">
+                AND r.role_type = #{query.roleType}
+            </if>
+        </where>
+        ORDER BY ${orderBySql}
+    </select>
+</mapper>
