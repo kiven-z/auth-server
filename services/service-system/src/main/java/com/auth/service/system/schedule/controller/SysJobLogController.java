@@ -23,60 +23,60 @@ import static com.auth.service.system.common.exception.SystemResultCodeEnum.DELE
  * @author Bunny
  */
 @Tag(name = "定时任务-日志", description = "log_job")
-@RequestMapping("/api/system/v1/job-log")
+@RequestMapping("/api/system/job-log")
 @RestController
 public class SysJobLogController {
 
-	private final SysJobLogService sysJobLogService;
+    private final SysJobLogService sysJobLogService;
 
-	public SysJobLogController(SysJobLogService sysJobLogService) {
-		this.sysJobLogService = sysJobLogService;
-	}
+    public SysJobLogController(SysJobLogService sysJobLogService) {
+        this.sysJobLogService = sysJobLogService;
+    }
 
-	@Operation(summary = "分页查询任务日志")
-	@PreAuthorize("@auth.decide('sysJobLog:query')")
-	@GetMapping
-	public Result<PageResponse<SysJobLogPageResponse>> page(SysJobLogQuery query) {
-		Page<SysJobLogEntity> page = new Page<>(query.getPageIndex(), query.getPageSize());
-		PageResponse<SysJobLogPageResponse> response = sysJobLogService.getPage(page, query);
+    @Operation(summary = "分页查询任务日志")
+    @PreAuthorize("@auth.decide('sysJobLog:query')")
+    @GetMapping
+    public Result<PageResponse<SysJobLogPageResponse>> page(SysJobLogQuery query) {
+        Page<SysJobLogEntity> page = new Page<>(query.getPageIndex(), query.getPageSize());
+        PageResponse<SysJobLogPageResponse> response = sysJobLogService.getPage(page, query);
 
-		return Result.success(response);
-	}
+        return Result.success(response);
+    }
 
-	@Operation(summary = "日志详情")
-	@PreAuthorize("@auth.decide('sysJobLog:detail')")
-	@GetMapping("{id}")
-	public Result<SysJobLogDetailVO> detail(@PathVariable("id") Long id) {
-		SysJobLogDetailVO detailVO = sysJobLogService.getDetail(id);
+    @Operation(summary = "日志详情")
+    @PreAuthorize("@auth.decide('sysJobLog:detail')")
+    @GetMapping("{id}")
+    public Result<SysJobLogDetailVO> detail(@PathVariable("id") Long id) {
+        SysJobLogDetailVO detailVO = sysJobLogService.getDetail(id);
 
-		return Result.success(detailVO);
-	}
+        return Result.success(detailVO);
+    }
 
-	@Operation(summary = "批量删除日志")
-	@PreAuthorize("@auth.decide('sysJobLog:delete')")
-	@DeleteMapping
-	public Result<String> batchDelete(@RequestBody List<Long> ids) {
-		sysJobLogService.removeBatch(ids);
+    @Operation(summary = "批量删除日志")
+    @PreAuthorize("@auth.decide('sysJobLog:delete')")
+    @DeleteMapping
+    public Result<String> batchDelete(@RequestBody List<Long> ids) {
+        sysJobLogService.removeBatch(ids);
 
-		return Result.success(DELETE_SUCCESS.getBizCode(), DELETE_SUCCESS.getMessage());
-	}
+        return Result.success(DELETE_SUCCESS.getBizCode(), DELETE_SUCCESS.getMessage());
+    }
 
-	@Operation(summary = "发送清空日志验证码")
-	@PreAuthorize("@auth.decide('sysJobLog:clearAll')")
-	@PostMapping("send-code")
-	public Result<String> sendCode() {
-		sysJobLogService.sendClearLogVerificationCode();
+    @Operation(summary = "发送清空日志验证码")
+    @PreAuthorize("@auth.decide('sysJobLog:clearAll')")
+    @PostMapping("send-code")
+    public Result<String> sendCode() {
+        sysJobLogService.sendClearLogVerificationCode();
 
-		return Result.success();
-	}
+        return Result.success();
+    }
 
-	@Operation(summary = "清空全部日志")
-	@PreAuthorize("@auth.decide('sysJobLog:clearAll')")
-	@DeleteMapping("clear")
-	public Result<String> clearAll(@RequestParam("code") String code) {
-		sysJobLogService.clearAll(code);
+    @Operation(summary = "清空全部日志")
+    @PreAuthorize("@auth.decide('sysJobLog:clearAll')")
+    @DeleteMapping("clear")
+    public Result<String> clearAll(@RequestParam("code") String code) {
+        sysJobLogService.clearAll(code);
 
-		return Result.success(DELETE_SUCCESS.getBizCode(), DELETE_SUCCESS.getMessage());
-	}
+        return Result.success(DELETE_SUCCESS.getBizCode(), DELETE_SUCCESS.getMessage());
+    }
 
 }

@@ -27,59 +27,59 @@ import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
  * @author Bunny
  */
 @Tag(name = "定时任务-分组", description = "sys_job_group")
-@RequestMapping("/api/system/v1/job-group")
+@RequestMapping("/api/system/job-group")
 @RestController
 public class SysJobGroupController {
 
-	private final SysJobGroupService sysJobGroupService;
+    private final SysJobGroupService sysJobGroupService;
 
-	public SysJobGroupController(SysJobGroupService sysJobGroupService) {
-		this.sysJobGroupService = sysJobGroupService;
-	}
+    public SysJobGroupController(SysJobGroupService sysJobGroupService) {
+        this.sysJobGroupService = sysJobGroupService;
+    }
 
-	@Operation(summary = "分页查询任务分组")
-	@PreAuthorize("@auth.decide('sysJobGroup:query')")
-	@GetMapping
-	public Result<PageResponse<SysJobGroupPageResponse>> page(SysJobGroupQuery query) {
-		Page<SysJobGroupEntity> page = new Page<>(query.getPageIndex(), query.getPageSize());
-		PageResponse<SysJobGroupPageResponse> response = sysJobGroupService.getPage(page, query);
+    @Operation(summary = "分页查询任务分组")
+    @PreAuthorize("@auth.decide('sysJobGroup:query')")
+    @GetMapping
+    public Result<PageResponse<SysJobGroupPageResponse>> page(SysJobGroupQuery query) {
+        Page<SysJobGroupEntity> page = new Page<>(query.getPageIndex(), query.getPageSize());
+        PageResponse<SysJobGroupPageResponse> response = sysJobGroupService.getPage(page, query);
 
-		return Result.success(response);
-	}
+        return Result.success(response);
+    }
 
-	@Operation(summary = "启用分组下拉/远程搜索")
-	@PreAuthorize("@auth.decide('sysJobGroup:query')")
-	@GetMapping("options")
-	public Result<List<SysJobGroupPageResponse>> options(
-			@RequestParam(value = "keyword", required = false) String keyword,
-			@RequestParam(value = "limit", defaultValue = "20") int limit) {
-		List<SysJobGroupPageResponse> responses = sysJobGroupService.listEnabledOptions(keyword, limit);
+    @Operation(summary = "启用分组下拉/远程搜索")
+    @PreAuthorize("@auth.decide('sysJobGroup:query')")
+    @GetMapping("options")
+    public Result<List<SysJobGroupPageResponse>> options(
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "limit", defaultValue = "20") int limit) {
+        List<SysJobGroupPageResponse> responses = sysJobGroupService.listEnabledOptions(keyword, limit);
 
-		return Result.success(responses);
-	}
+        return Result.success(responses);
+    }
 
-	@Operation(summary = "新增任务分组")
-	@PreAuthorize("@auth.decide('sysJobGroup:create')")
-	@PostMapping
-	public Result<String> create(@Validated(CreateGroup.class) @RequestBody SysJobGroupForm form) {
-		sysJobGroupService.create(form);
-		return Result.success(ADD_SUCCESS.getBizCode(), ADD_SUCCESS.getMessage());
-	}
+    @Operation(summary = "新增任务分组")
+    @PreAuthorize("@auth.decide('sysJobGroup:create')")
+    @PostMapping
+    public Result<String> create(@Validated(CreateGroup.class) @RequestBody SysJobGroupForm form) {
+        sysJobGroupService.create(form);
+        return Result.success(ADD_SUCCESS.getBizCode(), ADD_SUCCESS.getMessage());
+    }
 
-	@Operation(summary = "修改任务分组")
-	@PreAuthorize("@auth.decide('sysJobGroup:update')")
-	@PutMapping
-	public Result<String> update(@Validated(UpdateGroup.class) @RequestBody SysJobGroupUpdateForm form) {
-		sysJobGroupService.update(form);
-		return Result.success(UPDATE_SUCCESS.getBizCode(), UPDATE_SUCCESS.getMessage());
-	}
+    @Operation(summary = "修改任务分组")
+    @PreAuthorize("@auth.decide('sysJobGroup:update')")
+    @PutMapping
+    public Result<String> update(@Validated(UpdateGroup.class) @RequestBody SysJobGroupUpdateForm form) {
+        sysJobGroupService.update(form);
+        return Result.success(UPDATE_SUCCESS.getBizCode(), UPDATE_SUCCESS.getMessage());
+    }
 
-	@Operation(summary = "删除任务分组")
-	@PreAuthorize("@auth.decide('sysJobGroup:delete')")
-	@DeleteMapping("{id}")
-	public Result<String> delete(@PathVariable("id") Long id) {
-		sysJobGroupService.deleteById(id);
-		return Result.success(DELETE_SUCCESS.getBizCode(), DELETE_SUCCESS.getMessage());
-	}
+    @Operation(summary = "删除任务分组")
+    @PreAuthorize("@auth.decide('sysJobGroup:delete')")
+    @DeleteMapping("{id}")
+    public Result<String> delete(@PathVariable("id") Long id) {
+        sysJobGroupService.deleteById(id);
+        return Result.success(DELETE_SUCCESS.getBizCode(), DELETE_SUCCESS.getMessage());
+    }
 
 }

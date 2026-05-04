@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.auth.service.system.admin.user.mapper.SysUserProfileMapper">
+
+    <!-- 用户档案：部门列表（user_dept JOIN sys_dept） -->
+    <select id="selectDeptProfileByUserId" resultType="com.auth.service.system.admin.user.model.vo.SysUserDeptProfileItemResponse">
+        SELECT
+        d.id AS dept_id,
+        d.dept_name AS dept_name,
+        d.dept_code AS dept_code,
+        ud.is_primary AS is_primary,
+        ud.status AS status,
+        ud.position AS position,
+        ud.join_time AS join_time
+        FROM user_dept ud
+        INNER JOIN sys_dept d ON ud.dept_id = d.id AND d.is_deleted = 0 AND d.status = 0
+        WHERE ud.user_id = #{userId}
+        ORDER BY ud.is_primary DESC, ud.join_time DESC
+    </select>
+
+    <!-- 用户档案：岗位列表（user_post JOIN sys_post） -->
+    <select id="selectPostProfileByUserId" resultType="com.auth.service.system.admin.user.model.vo.SysUserPostProfileItemResponse">
+        SELECT
+        up.id AS id,
+        up.post_id AS post_id,
+        sp.post_name AS post_name,
+        sp.post_code AS post_code,
+        up.is_primary AS is_primary,
+        up.status AS status
+        FROM user_post up
+        INNER JOIN sys_post sp ON up.post_id = sp.id AND sp.status = 0
+        WHERE up.user_id = #{userId}
+        ORDER BY up.is_primary DESC, up.assignment_date DESC
+    </select>
+</mapper>
