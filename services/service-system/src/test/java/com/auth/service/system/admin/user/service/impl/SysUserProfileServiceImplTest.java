@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.auth.module.security.starter.model.UserEntity;
+import com.auth.service.system.admin.user.convert.SysUserProfileConverter;
 import com.auth.service.system.admin.user.mapper.SysUserProfileMapper;
 import com.auth.service.system.admin.user.model.vo.SysUserDeptProfileItemResponse;
 import com.auth.service.system.admin.user.model.vo.SysUserPostProfileItemResponse;
@@ -41,7 +42,8 @@ class SysUserProfileServiceImplTest {
 
 	@BeforeEach
 	void setUp() {
-		sysUserProfileService = new SysUserProfileServiceImpl(userMapper, sysUserProfileMapper);
+		sysUserProfileService = new SysUserProfileServiceImpl(userMapper, sysUserProfileMapper,
+				SysUserProfileConverter.INSTANCE);
 	}
 
 	@Test
