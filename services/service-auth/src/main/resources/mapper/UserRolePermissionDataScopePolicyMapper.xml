@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.auth.service.auth.mapper.UserRolePermissionDataScopePolicyMapper">
+
+    <!-- 查询用户角色码 -->
+    <select id="selectRolesByUserId" resultType="java.lang.String">
+        <include refid="com.auth.service.auth.mapper.UserRolesCteMapper.selectRolesAndPermissionsByUserIdCte"/>
+        -- 根据主体映射获取所有角色编码
+        SELECT DISTINCT gt.role_code
+        FROM grant_table gt
+        JOIN user_subjects us ON gt.subject_type = us.sub_type AND gt.subject_id = us.sub_id
+        JOIN sys_role r ON r.role_code = gt.role_code
+        WHERE r.status = 0
+        AND r.is_deleted = 0
+    </select>
+
+    <!-- 根据用户ID查询所有有效权限 -->
+    <select id="selectPermissionsByUserId" resultType="java.lang.String">
+        <include refid="com.auth.service.auth.mapper.UserRolesCteMapper.selectRolesAndPermissionsByUserIdCte"/>,
+        all_role_codes AS (
+        -- 根据主体映射获取所有角色编码
+        SELECT DISTINCT gt.role_code
+        FROM grant_table gt
+        JOIN user_subjects us ON gt.subject_type = us.sub_type AND gt.subject_id = us.sub_id
+        JOIN sys_role r ON r.role_code = gt.role_code
+        WHERE r.status = 0
+        AND r.is_deleted = 0)
+        -- 最终关联权限表
+        SELECT DISTINCT p.permission_code
+        FROM sys_role_permission rp
+        JOIN all_role_codes arc ON rp.role_code = arc.role_code
+        JOIN sys_permission p ON p.permission_code = rp.permission_code
+        WHERE p.status = 1;
+    </select>
+
+    <!-- 查询生效数据权限：用户覆盖优先，角色兜底 -->
+
+</mapper>

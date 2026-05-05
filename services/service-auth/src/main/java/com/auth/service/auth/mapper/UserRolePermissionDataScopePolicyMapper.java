@@ -1,0 +1,38 @@
+package com.auth.service.auth.mapper;
+
+import com.auth.service.auth.model.projection.DataScopeProjection;
+import com.auth.service.auth.model.projection.PolicyProjection;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
+
+/**
+ * 用户角色权限 Mapper（认证专用） 查询用户角色 查询用户权限 查询用户数据权限范围 查询用户策略
+ *
+ * @author Bunny
+ */
+@Mapper
+public interface UserRolePermissionDataScopePolicyMapper {
+
+	/**
+	 * 查询用户角色码
+	 * @param userId 用户Id
+	 * @return 角色列表
+	 */
+	List<String> selectRolesByUserId(@Param("userId") Long userId);
+
+	/**
+	 * 查询用户权限码
+	 * @param userId 用户Id
+	 * @return 权限列表
+	 */
+	List<String> selectPermissionsByUserId(@Param("userId") Long userId);
+
+	// TODO 待完成数据权限查询
+	List<DataScopeProjection> selectEffectiveDataScopesByUserId(@Param("userId") Long userId);
+
+	// TODO 需要和 AuthProfile 对齐
+	List<PolicyProjection> selectEffectivePoliciesByUserId(@Param("userId") Long userId);
+
+}

@@ -1,4 +1,4 @@
-package com.auth.module.security.contract.api.authorization;
+package com.auth.module.security.contract.api.granttable;
 
 /**
  * 授权范围类型（按能力定义，而非绑定具体维度语义）

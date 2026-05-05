@@ -2,15 +2,15 @@ package com.auth.service.auth.infrastructure.profile;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.security.contract.api.authorization.*;
+import com.auth.module.security.contract.api.granttable.ScopeGrantType;
 import com.auth.module.security.contract.constants.PermissionConstant;
 import com.auth.module.security.starter.model.UserEntity;
 import com.auth.service.auth.exception.AuthBusinessException;
 import com.auth.service.auth.exception.AuthResultCode;
 import com.auth.service.auth.mapper.UserMapper;
-import com.auth.service.auth.mapper.UserRolePermissionMapper;
+import com.auth.service.auth.mapper.UserRolePermissionDataScopePolicyMapper;
 import com.auth.service.auth.model.projection.DataScopeProjection;
 import com.auth.service.auth.model.projection.PolicyProjection;
-import com.auth.service.auth.model.projection.RolePermissionProjection;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
@@ -31,15 +31,15 @@ public class AuthProfileService {
 	private static final TypeReference<Map<String, Object>> MAP_OBJECT_TYPE = new TypeReference<>() {
 	};
 
-	private final UserRolePermissionMapper userRolePermissionMapper;
+	private final UserRolePermissionDataScopePolicyMapper userRolePermissionDataScopePolicyMapper;
 
 	private final ObjectMapper objectMapper;
 
 	private final UserMapper userMapper;
 
-	public AuthProfileService(UserRolePermissionMapper userRolePermissionMapper, ObjectMapper objectMapper,
-			UserMapper userMapper) {
-		this.userRolePermissionMapper = userRolePermissionMapper;
+	public AuthProfileService(UserRolePermissionDataScopePolicyMapper userRolePermissionDataScopePolicyMapper,
+			ObjectMapper objectMapper, UserMapper userMapper) {
+		this.userRolePermissionDataScopePolicyMapper = userRolePermissionDataScopePolicyMapper;
 		this.objectMapper = objectMapper;
 		this.userMapper = userMapper;
 	}
@@ -69,14 +69,8 @@ public class AuthProfileService {
 		long userId = user.getId();
 
 		// 查询角色和权限
-		RolePermissionProjection rolePermissionProjection = userRolePermissionMapper
-			.selectRolePermissionByUserId(userId);
-		List<String> roles = Optional.ofNullable(rolePermissionProjection)
-			.map(RolePermissionProjection::getRoles)
-			.orElseGet(List::of);
-		List<String> permissions = Optional.ofNullable(rolePermissionProjection)
-			.map(RolePermissionProjection::getPermissions)
-			.orElseGet(List::of);
+		List<String> roles = userRolePermissionDataScopePolicyMapper.selectRolesByUserId(userId);
+		List<String> permissions = userRolePermissionDataScopePolicyMapper.selectPermissionsByUserId(userId);
 
 		// 如果是ADMIN需要设置前端的管理员权限使用方式
 		if (PermissionConstant.isAdmin(userId, roles)) {
@@ -85,11 +79,13 @@ public class AuthProfileService {
 		}
 
 		// 查询数据范围
-		List<DataScopeProjection> dataScopeItems = userRolePermissionMapper.selectEffectiveDataScopesByUserId(userId);
+		List<DataScopeProjection> dataScopeItems = userRolePermissionDataScopePolicyMapper
+			.selectEffectiveDataScopesByUserId(userId);
 		Map<String, ScopeGrant> dataScopes = buildDataScopes(dataScopeItems);
 
 		// 查询策略
-		List<PolicyProjection> policyItems = userRolePermissionMapper.selectEffectivePoliciesByUserId(userId);
+		List<PolicyProjection> policyItems = userRolePermissionDataScopePolicyMapper
+			.selectEffectivePoliciesByUserId(userId);
 		PolicyBundle policyBundle = buildPolicyBundle(policyItems);
 
 		return AuthProfile.builder()

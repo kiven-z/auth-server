@@ -15,6 +15,7 @@ import java.io.Serializable;
 @Setter
 public class PolicyProjection implements Serializable {
 
+	// TODO 需要和 AuthProfile 对齐
 	@Serial
 	private static final long serialVersionUID = 1L;
 

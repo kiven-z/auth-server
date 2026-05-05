@@ -1,5 +1,6 @@
 package com.auth.module.security.contract.api.authorization;
 
+import com.auth.module.security.contract.api.granttable.ScopeGrantType;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.Builder;
 import lombok.Getter;

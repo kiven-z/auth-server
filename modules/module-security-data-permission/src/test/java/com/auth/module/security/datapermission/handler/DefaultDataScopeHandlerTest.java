@@ -2,8 +2,8 @@ package com.auth.module.security.datapermission.handler;
 
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
-import com.auth.module.security.contract.api.authorization.ScopeGrantType;
 import com.auth.module.security.contract.api.authorization.ScopeMode;
+import com.auth.module.security.contract.api.granttable.ScopeGrantType;
 import com.auth.module.security.datapermission.annotation.DataScope;
 import org.junit.jupiter.api.Test;
 
