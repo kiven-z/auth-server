@@ -1,12 +1,15 @@
 package com.auth.service.system.admin.feign.fallback;
 
+import java.util.List;
+
+import org.springframework.stereotype.Component;
+
 import com.auth.common.core.model.response.Result;
 import com.auth.service.system.admin.feign.AuthenticationInnerFeignClient;
 import com.auth.service.system.admin.feign.dto.EffectiveCodesVO;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+import com.auth.service.system.admin.feign.dto.GrantSubjectInnerRequest;
 
-import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Bunny
@@ -42,6 +45,43 @@ public class AuthenticationInnerFeignClientFallback implements AuthenticationInn
 	@Override
 	public Result<List<Long>> listUserIdsByRoleCode(String roleCode) {
 		log.error("AuthenticationInnerFeignClientFallback-查询角色用户ID 失败，roleCode：{}", roleCode);
+		return Result.success(List.of());
+	}
+
+	@Override
+	public Result<List<Long>> listUserIdsByRoleCodes(List<String> roleCodes) {
+		log.error("AuthenticationInnerFeignClientFallback-listUserIdsByRoleCodes 失败，size={}",
+				roleCodes == null ? null : roleCodes.size());
+		return Result.success(List.of());
+	}
+
+	@Override
+	public Result<List<Long>> listUserIdsByPermissionCodes(List<String> permissionCodes) {
+		log.error("AuthenticationInnerFeignClientFallback-listUserIdsByPermissionCodes 失败");
+		return Result.success(List.of());
+	}
+
+	@Override
+	public Result<List<Long>> listUserIdsByPolicyCodes(List<String> policyCodes) {
+		log.error("AuthenticationInnerFeignClientFallback-listUserIdsByPolicyCodes 失败");
+		return Result.success(List.of());
+	}
+
+	@Override
+	public Result<List<Long>> listUserIdsByDeptIds(List<Long> deptIds) {
+		log.error("AuthenticationInnerFeignClientFallback-listUserIdsByDeptIds 失败");
+		return Result.success(List.of());
+	}
+
+	@Override
+	public Result<List<Long>> listUserIdsByPostIds(List<Long> postIds) {
+		log.error("AuthenticationInnerFeignClientFallback-listUserIdsByPostIds 失败");
+		return Result.success(List.of());
+	}
+
+	@Override
+	public Result<List<Long>> listUserIdsByGrantSubjects(List<GrantSubjectInnerRequest> subjects) {
+		log.error("AuthenticationInnerFeignClientFallback-listUserIdsByGrantSubjects 失败");
 		return Result.success(List.of());
 	}
 

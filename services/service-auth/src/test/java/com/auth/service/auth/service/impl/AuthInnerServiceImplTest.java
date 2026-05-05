@@ -17,7 +17,6 @@ import com.auth.service.auth.TestConstants;
 import com.auth.service.auth.infrastructure.profile.AuthProfileCache;
 import com.auth.service.auth.infrastructure.profile.AuthProfileService;
 import com.auth.service.auth.infrastructure.session.UserSessionIndexSession;
-import com.auth.service.auth.mapper.UserRolePermissionMapper;
 import com.auth.service.auth.model.vo.inner.EffectiveCodesVO;
 
 /**
@@ -37,21 +36,15 @@ class AuthInnerServiceImplTest {
 	@Mock
 	private AuthProfileCache authProfileCache;
 
-	@Mock
-	private UserRolePermissionMapper userRolePermissionMapper;
-
 	@Test
 	@DisplayName("刷新缓存：入参为空/含 null 时不抛异常且跳过 null")
 	void refreshUserCache_shouldIgnoreEmptyAndNullAndSwallowExceptions() {
-		// Arrange
 		AuthInnerServiceImpl service = new AuthInnerServiceImpl(userSessionIndexSession, authProfileService,
-				authProfileCache, userRolePermissionMapper);
+				authProfileCache);
 
-		// empty
 		assertDoesNotThrow(() -> service.refreshUserCache(List.of()));
 		verifyNoInteractions(authProfileService, authProfileCache);
 
-		// contains null + exception
 		AuthProfile profile = mock(AuthProfile.class);
 		when(authProfileService.buildByUserId(TestConstants.USER_ID)).thenReturn(profile);
 		doThrow(new RuntimeException("boom")).when(authProfileCache).createCacheAuthProfile(profile);
@@ -64,15 +57,12 @@ class AuthInnerServiceImplTest {
 	@Test
 	@DisplayName("踢会话：入参为空/含 null 时不抛异常且跳过 null；下游异常会被吞掉")
 	void kickAllSessions_shouldIgnoreEmptyAndNullAndSwallowExceptions() {
-		// Arrange
 		AuthInnerServiceImpl service = new AuthInnerServiceImpl(userSessionIndexSession, authProfileService,
-				authProfileCache, userRolePermissionMapper);
+				authProfileCache);
 
-		// empty
 		assertDoesNotThrow(() -> service.kickAllSessions(List.of()));
 		verifyNoInteractions(userSessionIndexSession);
 
-		// contains null + exception
 		doThrow(new RuntimeException("boom")).when(userSessionIndexSession).deleteAllSessions(TestConstants.USER_ID);
 		assertDoesNotThrow(() -> service.kickAllSessions(Arrays.asList(null, TestConstants.USER_ID)));
 		verify(userSessionIndexSession).deleteAllSessions(TestConstants.USER_ID);
@@ -82,7 +72,7 @@ class AuthInnerServiceImplTest {
 	@DisplayName("resolveEffectiveCodes：委托 AuthProfileService 并拷贝角色与权限列表")
 	void resolveEffectiveCodes_mapsProfileRolesAndPermissions() {
 		AuthInnerServiceImpl service = new AuthInnerServiceImpl(userSessionIndexSession, authProfileService,
-				authProfileCache, userRolePermissionMapper);
+				authProfileCache);
 		AuthProfile profile = AuthProfile.builder()
 			.userId(TestConstants.USER_ID)
 			.username("u1")
@@ -97,20 +87,6 @@ class AuthInnerServiceImplTest {
 		assertEquals(List.of("*"), vo.getPermissionCodes());
 		verify(authProfileService).buildByUserId(TestConstants.USER_ID);
 		verifyNoInteractions(authProfileCache);
-	}
-
-	@Test
-	@DisplayName("listUserIdsByRoleCode 委托 Mapper 查询用户 ID 列表")
-	void listUserIdsByRoleCode_delegatesToMapper() {
-		AuthInnerServiceImpl service = new AuthInnerServiceImpl(userSessionIndexSession, authProfileService,
-				authProfileCache, userRolePermissionMapper);
-		List<Long> mockResult = List.of(101L, 102L);
-		when(userRolePermissionMapper.selectUserIdsByRoleCode("ADMIN")).thenReturn(mockResult);
-
-		List<Long> result = service.listUserIdsByRoleCode("ADMIN");
-
-		assertEquals(mockResult, result);
-		verify(userRolePermissionMapper).selectUserIdsByRoleCode("ADMIN");
 	}
 
 }

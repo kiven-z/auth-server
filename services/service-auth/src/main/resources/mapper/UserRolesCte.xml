@@ -2,102 +2,178 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.auth.service.auth.mapper.UserRolesCteMapper">
     <!--
-    这是公共的SQL查询片段，不实现SQL语句，只提供SQL片段
-    若以后要更新SQL片段只需要更新这里即可
-    用户角色来源 CTE：直接 USER、部门 DEPT、岗位 POST 等，subject 汇总 grant_table 的 role_code
-  -->
+    公共片段：画像查询与影响面反查共用 grant_table + USER/DEPT/POST 语义（不使用 dept_closure）。
+    修改授权展开规则时只维护本文件。
+-->
+    <!-- 单用户：user_roles CTE，参数 userId -->
     <sql id="userRolesCte">
         user_roles AS (SELECT gt.role_code
-                       FROM grant_table gt
-                       WHERE gt.subject_type = 'USER'
-                         AND gt.subject_id =
-        #{userId}
-        UNION
-        ALL
+        FROM grant_table gt
+        WHERE gt.subject_type = 'USER'
+        AND gt.subject_id = #{userId}
+        UNION ALL
+        SELECT gt.role_code
+        FROM grant_table gt
+        JOIN user_dept ud ON ud.dept_id = gt.subject_id
+        WHERE gt.subject_type = 'DEPT'
+        AND ud.user_id = #{userId}
+        AND ud.status = 0
+        UNION ALL
+        SELECT gt.role_code
+        FROM grant_table gt
+        JOIN user_post up ON up.post_id = gt.subject_id
+        WHERE gt.subject_type = 'POST'
+        AND up.user_id = #{userId}
+        AND (up.status IS NULL OR up.status = 0))
+    </sql>
 
-        SELECT
-        gt
-        .
-        role_code
-        FROM
-        grant_table
-        gt
-        JOIN
-        user_dept
-        ud
-        ON
-        ud
-        .
-        dept_id
-        =
-        gt
-        .
-        subject_id
-        WHERE
-        gt
-        .
-        subject_type
-        =
-        'DEPT'
-        AND
-        ud
-        .
-        user_id
-        =
-        #{userId}
-        AND
-        ud
-        .
-        status
-        =
-        0
-        UNION
-        ALL
+    <!-- 影响面：单个 roleCode，列 uid -->
+    <sql id="impactUserIdsByRoleCodeGrant">
+        SELECT DISTINCT gt.subject_id AS uid
+        FROM grant_table gt
+        WHERE gt.role_code = #{roleCode}
+        AND gt.subject_type = 'USER'
+        UNION ALL
+        SELECT DISTINCT ud.user_id AS uid
+        FROM grant_table gt
+        JOIN user_dept ud ON ud.dept_id = gt.subject_id
+        WHERE gt.role_code = #{roleCode}
+        AND gt.subject_type = 'DEPT'
+        AND ud.status = 0
+        UNION ALL
+        SELECT DISTINCT up.user_id AS uid
+        FROM grant_table gt
+        JOIN user_post up ON up.post_id = gt.subject_id
+        WHERE gt.role_code = #{roleCode}
+        AND gt.subject_type = 'POST'
+        AND (up.status IS NULL OR up.status = 0)
+    </sql>
 
-        SELECT
-        gt
-        .
-        role_code
-        FROM
-        grant_table
-        gt
-        JOIN
-        user_post
-        up
-        ON
-        up
-        .
-        post_id
-        =
-        gt
-        .
-        subject_id
-        WHERE
-        gt
-        .
-        subject_type
-        =
-        'POST'
-        AND
-        up
-        .
-        user_id
-        =
-        #{userId}
-        AND
-        (
-        up
-        .
-        status
-        IS
-        NULL
-        OR
-        up
-        .
-        status
-        =
-        0
-        )
-        )
+    <!-- 影响面：多个 roleCodes，列 uid -->
+    <sql id="impactUserIdsByRoleCodesInGrant">
+        SELECT DISTINCT gt.subject_id AS uid
+        FROM grant_table gt
+        WHERE gt.subject_type = 'USER'
+        AND gt.role_code IN
+        <foreach collection="roleCodes" item="rc" open="(" separator="," close=")">
+            #{rc}
+        </foreach>
+        UNION ALL
+
+        SELECT DISTINCT ud.user_id AS uid
+        FROM grant_table gt
+        JOIN user_dept ud ON ud.dept_id = gt.subject_id
+        WHERE gt.subject_type = 'DEPT'
+        AND ud.status = 0
+        AND gt.role_code IN
+        <foreach collection="roleCodes" item="rc" open="(" separator="," close=")">
+            #{rc}
+        </foreach>
+        UNION ALL
+
+        SELECT DISTINCT up.user_id AS uid
+        FROM grant_table gt
+        JOIN user_post up ON up.post_id = gt.subject_id
+        WHERE gt.subject_type = 'POST'
+        AND (up.status IS NULL OR up.status = 0)
+        AND gt.role_code IN
+        <foreach collection="roleCodes" item="rc" open="(" separator="," close=")">
+            #{rc}
+        </foreach>
+    </sql>
+
+    <!-- 影响面：多个 permissionCodes（启用权限），列 uid -->
+    <sql id="impactUserIdsByPermissionCodesGrant">
+        SELECT DISTINCT gt.subject_id AS uid
+        FROM grant_table gt
+        INNER JOIN (
+        SELECT DISTINCT rp.role_code
+        FROM sys_role_permission rp
+        INNER JOIN sys_permission p ON p.permission_code = rp.permission_code
+        WHERE p.status = 1
+        AND rp.permission_code IN
+        <foreach collection="permissionCodes" item="pc" open="(" separator="," close=")">
+            #{pc}
+        </foreach>
+        ) br ON br.role_code = gt.role_code
+        WHERE gt.subject_type = 'USER'
+        UNION ALL
+        SELECT DISTINCT ud.user_id AS uid
+        FROM grant_table gt
+        INNER JOIN (
+        SELECT DISTINCT rp.role_code
+        FROM sys_role_permission rp
+        INNER JOIN sys_permission p ON p.permission_code = rp.permission_code
+        WHERE p.status = 1
+        AND rp.permission_code IN
+        <foreach collection="permissionCodes" item="pc" open="(" separator="," close=")">
+            #{pc}
+        </foreach>
+        ) br ON br.role_code = gt.role_code
+        JOIN user_dept ud ON ud.dept_id = gt.subject_id
+        WHERE gt.subject_type = 'DEPT'
+        AND ud.status = 0
+        UNION ALL
+        SELECT DISTINCT up.user_id AS uid
+        FROM grant_table gt
+        INNER JOIN (
+        SELECT DISTINCT rp.role_code
+        FROM sys_role_permission rp
+        INNER JOIN sys_permission p ON p.permission_code = rp.permission_code
+        WHERE p.status = 1
+        AND rp.permission_code IN
+        <foreach collection="permissionCodes" item="pc" open="(" separator="," close=")">
+            #{pc}
+        </foreach>
+        ) br ON br.role_code = gt.role_code
+        JOIN user_post up ON up.post_id = gt.subject_id
+        WHERE gt.subject_type = 'POST'
+        AND (up.status IS NULL OR up.status = 0)
+    </sql>
+
+    <!-- 影响面：多个 policyCodes（role_policy 未删除），列 uid -->
+    <sql id="impactUserIdsByPolicyCodesGrant">
+        SELECT DISTINCT gt.subject_id AS uid
+        FROM grant_table gt
+        INNER JOIN (
+        SELECT DISTINCT rp.role_code
+        FROM role_policy rp
+        WHERE rp.is_deleted = 0
+        AND rp.policy_code IN
+        <foreach collection="policyCodes" item="pcode" open="(" separator="," close=")">
+            #{pcode}
+        </foreach>
+        ) br ON br.role_code = gt.role_code
+        WHERE gt.subject_type = 'USER'
+        UNION ALL
+        SELECT DISTINCT ud.user_id AS uid
+        FROM grant_table gt
+        INNER JOIN (
+        SELECT DISTINCT rp.role_code
+        FROM role_policy rp
+        WHERE rp.is_deleted = 0
+        AND rp.policy_code IN
+        <foreach collection="policyCodes" item="pcode" open="(" separator="," close=")">
+            #{pcode}
+        </foreach>
+        ) br ON br.role_code = gt.role_code
+        JOIN user_dept ud ON ud.dept_id = gt.subject_id
+        WHERE gt.subject_type = 'DEPT'
+        AND ud.status = 0
+        UNION ALL
+        SELECT DISTINCT up.user_id AS uid
+        FROM grant_table gt
+        INNER JOIN (
+        SELECT DISTINCT rp.role_code
+        FROM role_policy rp
+        WHERE rp.is_deleted = 0
+        AND rp.policy_code IN
+        <foreach collection="policyCodes" item="pcode" open="(" separator="," close=")">
+            #{pcode}
+        </foreach>
+        ) br ON br.role_code = gt.role_code
+        JOIN user_post up ON up.post_id = gt.subject_id
+        WHERE gt.subject_type = 'POST'
+        AND (up.status IS NULL OR up.status = 0)
     </sql>
 </mapper>

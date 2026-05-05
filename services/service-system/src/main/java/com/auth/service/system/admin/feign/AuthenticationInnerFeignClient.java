@@ -1,15 +1,17 @@
 package com.auth.service.system.admin.feign;
 
-import com.auth.common.core.model.response.Result;
-import com.auth.service.system.admin.feign.dto.EffectiveCodesVO;
-import com.auth.service.system.admin.feign.fallback.AuthenticationInnerFeignClientFallback;
+import java.util.List;
+
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.List;
+import com.auth.common.core.model.response.Result;
+import com.auth.service.system.admin.feign.dto.EffectiveCodesVO;
+import com.auth.service.system.admin.feign.dto.GrantSubjectInnerRequest;
+import com.auth.service.system.admin.feign.fallback.AuthenticationInnerFeignClientFallback;
 
 /**
  * 鉴权服务内部服务,鉴权服务内部服务接口
@@ -43,5 +45,23 @@ public interface AuthenticationInnerFeignClient {
 	 */
 	@GetMapping("/role/{roleCode}/users")
 	Result<List<Long>> listUserIdsByRoleCode(@PathVariable("roleCode") String roleCode);
+
+	@PostMapping("/impact/users/by-role-codes")
+	Result<List<Long>> listUserIdsByRoleCodes(@RequestBody List<String> roleCodes);
+
+	@PostMapping("/impact/users/by-permission-codes")
+	Result<List<Long>> listUserIdsByPermissionCodes(@RequestBody List<String> permissionCodes);
+
+	@PostMapping("/impact/users/by-policy-codes")
+	Result<List<Long>> listUserIdsByPolicyCodes(@RequestBody List<String> policyCodes);
+
+	@PostMapping("/impact/users/by-dept-ids")
+	Result<List<Long>> listUserIdsByDeptIds(@RequestBody List<Long> deptIds);
+
+	@PostMapping("/impact/users/by-post-ids")
+	Result<List<Long>> listUserIdsByPostIds(@RequestBody List<Long> postIds);
+
+	@PostMapping("/impact/users/by-grant-subjects")
+	Result<List<Long>> listUserIdsByGrantSubjects(@RequestBody List<GrantSubjectInnerRequest> subjects);
 
 }
