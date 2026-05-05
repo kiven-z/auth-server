@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.auth.service.auth.mapper.AuthorizationImpactMapper">
+
+    <!-- 根据角色 code 查询所有持有该角色的用户 ID（通过 USER/DEPT/POST 汇总） -->
+    <select id="selectUserIdsByRoleCode" resultType="java.lang.Long">
+        SELECT DISTINCT gt.subject_id
+        FROM grant_table gt
+        WHERE gt.role_code = #{roleCode}
+          AND gt.subject_type = 'USER'
+        UNION ALL
+        SELECT DISTINCT ud.user_id
+        FROM grant_table gt
+                 JOIN user_dept ud ON ud.dept_id = gt.subject_id
+        WHERE gt.role_code = #{roleCode}
+          AND gt.subject_type = 'DEPT'
+          AND ud.status = 0
+        UNION ALL
+        SELECT DISTINCT up.user_id
+        FROM grant_table gt
+                 JOIN user_post up ON up.post_id = gt.subject_id
+        WHERE gt.role_code = #{roleCode}
+          AND gt.subject_type = 'POST'
+          AND (up.status IS NULL OR up.status = 0)
+    </select>
+</mapper>

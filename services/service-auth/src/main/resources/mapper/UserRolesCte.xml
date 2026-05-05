@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.auth.service.auth.mapper.UserRolesCteMapper">
+    <!--
+    这是公共的SQL查询片段，不实现SQL语句，只提供SQL片段
+    若以后要更新SQL片段只需要更新这里即可
+    用户角色来源 CTE：直接 USER、部门 DEPT、岗位 POST 等，subject 汇总 grant_table 的 role_code
+  -->
+    <sql id="userRolesCte">
+        user_roles AS (SELECT gt.role_code
+                       FROM grant_table gt
+                       WHERE gt.subject_type = 'USER'
+                         AND gt.subject_id =
+        #{userId}
+        UNION
+        ALL
+
+        SELECT
+        gt
+        .
+        role_code
+        FROM
+        grant_table
+        gt
+        JOIN
+        user_dept
+        ud
+        ON
+        ud
+        .
+        dept_id
+        =
+        gt
+        .
+        subject_id
+        WHERE
+        gt
+        .
+        subject_type
+        =
+        'DEPT'
+        AND
+        ud
+        .
+        user_id
+        =
+        #{userId}
+        AND
+        ud
+        .
+        status
+        =
+        0
+        UNION
+        ALL
+
+        SELECT
+        gt
+        .
+        role_code
+        FROM
+        grant_table
+        gt
+        JOIN
+        user_post
+        up
+        ON
+        up
+        .
+        post_id
+        =
+        gt
+        .
+        subject_id
+        WHERE
+        gt
+        .
+        subject_type
+        =
+        'POST'
+        AND
+        up
+        .
+        user_id
+        =
+        #{userId}
+        AND
+        (
+        up
+        .
+        status
+        IS
+        NULL
+        OR
+        up
+        .
+        status
+        =
+        0
+        )
+        )
+    </sql>
+</mapper>
