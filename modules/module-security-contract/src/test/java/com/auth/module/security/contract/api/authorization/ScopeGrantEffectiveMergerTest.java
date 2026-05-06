@@ -1,16 +1,15 @@
 package com.auth.module.security.contract.api.authorization;
 
-import com.auth.module.security.contract.api.granttable.DataScopeGrantTableSubjectType;
-import com.auth.module.security.contract.api.granttable.ScopeGrantEffectiveMerger;
-import com.auth.module.security.contract.api.granttable.ScopeGrantType;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import com.auth.module.security.contract.api.granttable.ScopeGrantEffectiveMerger;
+import com.auth.module.security.contract.api.granttable.ScopeGrantType;
 
 class ScopeGrantEffectiveMergerTest {
 
@@ -36,10 +35,10 @@ class ScopeGrantEffectiveMergerTest {
     @Test
     @DisplayName("部门列合并忽略 POST 主体桶")
     void mergeLooseForDeptColumn_skipsPostBucket() {
-        Map<DataScopeGrantTableSubjectType, ScopeGrant> map = Map.of(
-                DataScopeGrantTableSubjectType.POST,
+        Map<String, ScopeGrant> map = Map.of(
+                "POST",
                 ScopeGrant.builder().scopeType(ScopeGrantType.CUSTOM).values(List.of("99")).build(),
-                DataScopeGrantTableSubjectType.DEPT,
+                "DEPT",
                 ScopeGrant.builder().scopeType(ScopeGrantType.NODE_ONLY).values(List.of("1")).build());
         ScopeGrant merged = ScopeGrantEffectiveMerger.mergeLooseForDeptColumn(map);
         assertEquals(ScopeGrantType.CUSTOM, merged.getScopeType());

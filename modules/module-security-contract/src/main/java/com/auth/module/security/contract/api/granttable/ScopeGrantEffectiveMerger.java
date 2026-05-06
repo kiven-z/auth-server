@@ -76,7 +76,7 @@ public class ScopeGrantEffectiveMerger {
      * @param dataScopes 画像中的按主体类型分桶范围
      * @return 合并后的有效范围
      */
-    public static ScopeGrant mergeLooseForDeptColumn(Map<DataScopeGrantTableSubjectType, ScopeGrant> dataScopes) {
+    public static ScopeGrant mergeLooseForDeptColumn(Map<String, ScopeGrant> dataScopes) {
         if (CollUtil.isEmpty(dataScopes)) {
             return null;
         }
@@ -87,7 +87,7 @@ public class ScopeGrantEffectiveMerger {
                 DataScopeGrantTableSubjectType.USER,
                 DataScopeGrantTableSubjectType.ROLE,
                 DataScopeGrantTableSubjectType.DEPT)) {
-            ScopeGrant grant = dataScopes.get(subjectType);
+            ScopeGrant grant = dataScopes.get(subjectType.name());
             if (grant != null) {
                 parts.add(grant);
             }

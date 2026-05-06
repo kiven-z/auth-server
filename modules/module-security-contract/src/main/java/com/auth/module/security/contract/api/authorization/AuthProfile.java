@@ -1,15 +1,14 @@
 package com.auth.module.security.contract.api.authorization;
 
-import com.auth.module.security.contract.api.granttable.DataScopeGrantTableSubjectType;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * 用户授权画像（契约层，缓存/JWT 下游可消费的稳定模型）
@@ -39,10 +38,14 @@ public class AuthProfile implements Serializable {
     private final List<String> permissions = Collections.emptyList();
 
     /**
-     * 数据权限：按 （库 subject_type）分桶，每桶内已宽松合并。
+     * 数据权限：按库 {@code subject_type} 分桶，每桶内已宽松合并。
+     * <p>
+     * key 须与库中 {@code subject_type} 一致（大写枚举名），如 {@code USER}、{@code DEPT}、{@code POST}、{@code ROLE}，
+     * 以便与 {@link com.auth.module.security.contract.api.granttable.ScopeGrantEffectiveMerger#mergeLooseForDeptColumn} 等消费方对齐。
+     * </p>
      */
     @Builder.Default
-    private final Map<DataScopeGrantTableSubjectType, ScopeGrant> dataScopes = Collections.emptyMap();
+    private final Map<String, ScopeGrant> dataScopes = Collections.emptyMap();
 
     /**
      * 轻量策略：类型化 + 参数化，方便未来扩展
