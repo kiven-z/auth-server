@@ -2,16 +2,18 @@ package com.auth.service.auth.infrastructure.profile;
 
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.module.security.contract.api.authorization.PolicyBundle;
+import com.auth.module.security.contract.api.authorization.ScopeGrant;
 import com.auth.module.security.contract.constants.PermissionConstant;
 import com.auth.module.security.starter.model.UserEntity;
 import com.auth.service.auth.exception.AuthBusinessException;
 import com.auth.service.auth.exception.AuthResultCode;
+import com.auth.service.auth.infrastructure.profile.datascope.DataScopeEffectiveResolver;
 import com.auth.service.auth.mapper.UserMapper;
 import com.auth.service.auth.mapper.UserRolePermissionDataScopePolicyMapper;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 只做 AuthProfile 构建 创建认证授权画像，授权画像构建服务实现
@@ -25,10 +27,13 @@ public class AuthProfileService {
 
 	private final UserMapper userMapper;
 
+	private final DataScopeEffectiveResolver dataScopeEffectiveResolver;
+
 	public AuthProfileService(UserRolePermissionDataScopePolicyMapper userRolePermissionDataScopePolicyMapper,
-			UserMapper userMapper) {
+			UserMapper userMapper, DataScopeEffectiveResolver dataScopeEffectiveResolver) {
 		this.userRolePermissionDataScopePolicyMapper = userRolePermissionDataScopePolicyMapper;
 		this.userMapper = userMapper;
+		this.dataScopeEffectiveResolver = dataScopeEffectiveResolver;
 	}
 
 	/**
@@ -63,14 +68,14 @@ public class AuthProfileService {
 			roles = PermissionConstant.ADMIN_ROLES;
 			permissions = PermissionConstant.ADMIN_WILDCARD_PERMISSIONS;
 		}
+		Map<String, ScopeGrant> dataScopes = dataScopeEffectiveResolver.resolveByUserId(userId);
 
 		return AuthProfile.builder()
 			.userId(user.getId())
 			.username(user.getUsername())
 			.roles(roles)
 			.permissions(permissions)
-			// TODO 现在需要完善，在 DataScopeBuilder 中构建完成后使用
-			.dataScopes(new HashMap<>(0))
+			.dataScopes(dataScopes)
 			// TODO 后面完成
 			.policies(PolicyBundle.empty())
 			.permVersion(user.getPermVersion())

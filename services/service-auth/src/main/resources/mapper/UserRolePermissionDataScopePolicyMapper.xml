@@ -33,4 +33,26 @@
         WHERE p.status = 1
     </select>
 
+    <!-- 查询用户生效数据权限片段 -->
+    <select id="selectEffectiveDataScopesByUserId"
+            resultType="com.auth.service.auth.model.projection.DataScopeProjection">
+        <include refid="com.auth.service.auth.mapper.UserRolesCteMapper.selectDataScopeSubjectsByUserIdCte"/>
+        SELECT ds.subject_type,
+        ds.scope_resource_code,
+        'DEPT',
+        ds.scope_type,
+        ds.scope_subject_ids
+        FROM data_scope_grant_table ds
+        JOIN all_subjects s ON ds.subject_type = s.sub_type AND ds.subject_id = s.sub_id
+        WHERE ds.is_deleted = 0
+        ORDER BY ds.scope_resource_code,
+        CASE ds.subject_type
+        WHEN 'USER' THEN 1
+        WHEN 'ROLE' THEN 2
+        WHEN 'DEPT' THEN 3
+        WHEN 'POST' THEN 4
+        ELSE 9
+        END
+    </select>
+
 </mapper>

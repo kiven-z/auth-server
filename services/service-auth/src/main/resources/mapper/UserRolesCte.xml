@@ -28,4 +28,40 @@
             -- UNION ALL SELECT 'PROJECT', project_id FROM user_project ...
         )
     </sql>
+
+    <!--
+        数据权限主体展开：在 base_subjects(USER/DEPT/POST) 基础上额外补齐 ROLE 主体。
+        说明：功能权限 CTE 不含 ROLE 主体；数据权限 CTE 含 ROLE 主体。
+    -->
+    <sql id="selectDataScopeSubjectsByUserIdCte">
+        WITH base_subjects AS (
+            -- 1. 用户主体本身
+            SELECT 'USER' AS sub_type, #{userId} AS sub_id
+            UNION ALL
+            -- 2. 用户所属部门及其所有上级部门 (实现部门继承)
+            SELECT 'DEPT' AS sub_type, dc.ancestor_id AS sub_id
+            FROM user_dept ud
+                     JOIN dept_closure dc ON ud.dept_id = dc.descendant_id
+            WHERE ud.user_id = #{userId}
+              AND ud.status = 0
+            UNION ALL
+            -- 3. 用户所属岗位
+            SELECT 'POST' AS sub_type, up.post_id AS sub_id
+            FROM user_post up
+            WHERE up.user_id = #{userId}
+              AND up.status = 0),
+             role_subjects AS (
+                 -- 4. 展开当前用户可命中的角色主体（供 data_scope_grant_table 上 ROLE 授权复用）
+                 SELECT DISTINCT 'ROLE' AS sub_type, sr.id AS sub_id
+                 FROM grant_table gt
+                          JOIN base_subjects bs ON gt.subject_type = bs.sub_type AND gt.subject_id = bs.sub_id
+                          JOIN sys_role sr ON sr.role_code = gt.role_code
+                 WHERE sr.status = 0
+                   AND sr.is_deleted = 0),
+             all_subjects AS (SELECT bs.sub_type, bs.sub_id
+                              FROM base_subjects bs
+                              UNION ALL
+                              SELECT rs.sub_type, rs.sub_id
+                              FROM role_subjects rs)
+    </sql>
 </mapper>

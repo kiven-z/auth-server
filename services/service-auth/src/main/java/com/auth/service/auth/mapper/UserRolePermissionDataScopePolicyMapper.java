@@ -1,9 +1,11 @@
 package com.auth.service.auth.mapper;
 
+import java.util.List;
+
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import java.util.List;
+import com.auth.service.auth.model.projection.DataScopeProjection;
 
 /**
  * 用户角色权限 Mapper（认证专用） 查询用户角色 查询用户权限 查询用户数据权限范围 查询用户策略
@@ -26,5 +28,12 @@ public interface UserRolePermissionDataScopePolicyMapper {
 	 * @return 权限列表
 	 */
 	List<String> selectPermissionsByUserId(@Param("userId") Long userId);
+
+	/**
+	 * 查询用户生效数据权限片段（按主体展开后）
+	 * @param userId 用户 ID
+	 * @return 原始数据权限片段
+	 */
+	List<DataScopeProjection> selectEffectiveDataScopesByUserId(@Param("userId") Long userId);
 
 }

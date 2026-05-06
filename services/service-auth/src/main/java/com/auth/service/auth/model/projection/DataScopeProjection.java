@@ -24,6 +24,16 @@ public class DataScopeProjection implements Serializable {
 	private String subjectType;
 
 	/**
+	 * 数据范围资源键（与注解中的 resourceCode 对齐）
+	 */
+	private String scopeResourceCode;
+
+	/**
+	 * 数据维度类型（如 DEPT / POST）
+	 */
+	private String dimensionType;
+
+	/**
 	 * 范围类型（库内存量字符串）
 	 */
 	private String scopeType;
