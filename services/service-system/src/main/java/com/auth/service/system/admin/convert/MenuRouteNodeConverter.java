@@ -15,24 +15,23 @@ import org.mapstruct.factory.Mappers;
  *
  * @author Bunny
  */
-@Mapper(uses = {MenuRouteMetaConverter.class})
+@Mapper(uses = { MenuRouteMetaConverter.class })
 public interface MenuRouteNodeConverter {
 
-    MenuRouteNodeConverter INSTANCE = Mappers.getMapper(MenuRouteNodeConverter.class);
+	MenuRouteNodeConverter INSTANCE = Mappers.getMapper(MenuRouteNodeConverter.class);
 
-    /**
-     * 将树节点转为路由 VO（单层，不含 children 递归）
-     *
-     * @param node    建树中间节点
-     * @param context 转换上下文（角色 / 权限 Map）
-     * @return 路由 VO
-     */
-    @Mapping(target = "path", source = "node.menu.path")
-    @Mapping(target = "name", source = "node.menu.name")
-    @Mapping(target = "redirect", source = "node.menu.redirect")
-    @Mapping(target = "component", source = "node.menu.component")
-    @Mapping(target = "meta", source = "node.menu")
-    @Mapping(target = "children", ignore = true)
-    RouteNodeVO toRouteNodeVO(MenuRouteTreeNode node, @Context MenuConvertContext context);
+	/**
+	 * 将树节点转为路由 VO（单层，不含 children 递归）
+	 * @param node 建树中间节点
+	 * @param context 转换上下文（角色 / 权限 Map）
+	 * @return 路由 VO
+	 */
+	@Mapping(target = "path", source = "node.menu.path")
+	@Mapping(target = "name", source = "node.menu.name")
+	@Mapping(target = "redirect", source = "node.menu.redirect")
+	@Mapping(target = "component", source = "node.menu.component")
+	@Mapping(target = "meta", source = "node.menu")
+	@Mapping(target = "children", ignore = true)
+	RouteNodeVO toRouteNodeVO(MenuRouteTreeNode node, @Context MenuConvertContext context);
 
 }

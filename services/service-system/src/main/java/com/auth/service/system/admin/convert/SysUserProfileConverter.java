@@ -13,14 +13,13 @@ import org.mapstruct.factory.Mappers;
 @Mapper()
 public interface SysUserProfileConverter {
 
-    SysUserProfileConverter INSTANCE = Mappers.getMapper(SysUserProfileConverter.class);
+	SysUserProfileConverter INSTANCE = Mappers.getMapper(SysUserProfileConverter.class);
 
-    /**
-     * 将用户实体转换为档案基本信息 VO
-     *
-     * @param user 用户实体
-     * @return 档案 VO
-     */
-    SysUserProfileResponse toProfileResponse(UserEntity user);
+	/**
+	 * 将用户实体转换为档案基本信息 VO
+	 * @param user 用户实体
+	 * @return 档案 VO
+	 */
+	SysUserProfileResponse toProfileResponse(UserEntity user);
 
 }

@@ -1,0 +1,32 @@
+package com.auth.service.system.message.model.form;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.List;
+
+/**
+ * 邮件模板批量启用/禁用表单
+ *
+ * @author Bunny
+ */
+@Schema(name = "EmailTemplateStatusForm", title = "邮件模板批量启用/禁用表单", description = "用于邮件模板批量启用/禁用")
+@Data
+public class EmailTemplateStatusForm implements Serializable {
+
+	@Serial
+	private static final long serialVersionUID = 1L;
+
+	@Schema(name = "ids", title = "模板ID列表")
+	@NotEmpty(message = "模板ID列表不能为空")
+	private List<Long> ids;
+
+	@Schema(name = "status", title = "状态(0=禁用,1=启用)")
+	@NotNull(message = "状态不能为空")
+	private Boolean status;
+
+}

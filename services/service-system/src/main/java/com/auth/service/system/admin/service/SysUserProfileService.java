@@ -11,12 +11,11 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface SysUserProfileService extends IService<UserEntity> {
 
-    /**
-     * 查询用户档案（基本信息、部门、岗位）
-     *
-     * @param userId 用户ID
-     * @return 聚合结果
-     */
-    SysUserProfileResponse getProfile(Long userId);
+	/**
+	 * 查询用户档案（基本信息、部门、岗位）
+	 * @param userId 用户ID
+	 * @return 聚合结果
+	 */
+	SysUserProfileResponse getProfile(Long userId);
 
 }

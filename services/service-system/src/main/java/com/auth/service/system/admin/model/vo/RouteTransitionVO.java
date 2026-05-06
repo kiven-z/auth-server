@@ -19,16 +19,16 @@ import java.io.Serializable;
 @ToString
 public class RouteTransitionVO implements Serializable {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+	@Serial
+	private static final long serialVersionUID = 1L;
 
-    @Schema(title = "Vue 内置 transition name")
-    private String name;
+	@Schema(title = "Vue 内置 transition name")
+	private String name;
 
-    @Schema(title = "进场 animate.css 类名")
-    private String enterTransition;
+	@Schema(title = "进场 animate.css 类名")
+	private String enterTransition;
 
-    @Schema(title = "离场 animate.css 类名")
-    private String leaveTransition;
+	@Schema(title = "离场 animate.css 类名")
+	private String leaveTransition;
 
 }

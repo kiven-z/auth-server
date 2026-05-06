@@ -10,18 +10,18 @@ import org.apache.poi.ss.usermodel.IndexedColors;
  */
 public class RoleTypeColorCellWriteHandler extends AbstractColorCellWriteHandler {
 
-    public RoleTypeColorCellWriteHandler(int roleTypeColumnIndex) {
-        super(roleTypeColumnIndex);
-    }
+	public RoleTypeColorCellWriteHandler(int roleTypeColumnIndex) {
+		super(roleTypeColumnIndex);
+	}
 
-    @Override
-    public WriteFont createWriteFont(String roleTypeValue) {
-        return switch (roleTypeValue) {
-            case "业务角色" -> createColoredWriteFont(IndexedColors.SKY_BLUE);
-            case "系统角色" -> createColoredWriteFont(IndexedColors.CORAL);
-            case "自定义角色" -> createColoredWriteFont(IndexedColors.SEA_GREEN);
-            default -> createColoredWriteFont(IndexedColors.GREY_25_PERCENT);
-        };
-    }
+	@Override
+	public WriteFont createWriteFont(String roleTypeValue) {
+		return switch (roleTypeValue) {
+			case "业务角色" -> createColoredWriteFont(IndexedColors.SKY_BLUE);
+			case "系统角色" -> createColoredWriteFont(IndexedColors.CORAL);
+			case "自定义角色" -> createColoredWriteFont(IndexedColors.SEA_GREEN);
+			default -> createColoredWriteFont(IndexedColors.GREY_25_PERCENT);
+		};
+	}
 
 }

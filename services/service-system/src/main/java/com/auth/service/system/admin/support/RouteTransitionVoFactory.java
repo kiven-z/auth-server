@@ -13,37 +13,36 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class RouteTransitionVoFactory {
 
-    /**
-     * 由菜单实体生成 meta.transition
-     *
-     * @param entity 菜单
-     * @return 过渡 VO，字段均可为空
-     */
-    public static RouteTransitionVO fromMenuEntity(SysMenuEntity entity) {
-        if (entity == null) {
-            return null;
-        }
-        RouteTransitionVO vo = new RouteTransitionVO();
-        vo.setName(processTransitionName(entity.getTransitionName()));
-        vo.setEnterTransition(processAnimateValue(entity.getEnterTransition()));
-        vo.setLeaveTransition(processAnimateValue(entity.getLeaveTransition()));
-        boolean blank = CharSequenceUtil.isBlank(vo.getName()) && CharSequenceUtil.isBlank(vo.getEnterTransition())
-                && CharSequenceUtil.isBlank(vo.getLeaveTransition());
-        return blank ? null : vo;
-    }
+	/**
+	 * 由菜单实体生成 meta.transition
+	 * @param entity 菜单
+	 * @return 过渡 VO，字段均可为空
+	 */
+	public static RouteTransitionVO fromMenuEntity(SysMenuEntity entity) {
+		if (entity == null) {
+			return null;
+		}
+		RouteTransitionVO vo = new RouteTransitionVO();
+		vo.setName(processTransitionName(entity.getTransitionName()));
+		vo.setEnterTransition(processAnimateValue(entity.getEnterTransition()));
+		vo.setLeaveTransition(processAnimateValue(entity.getLeaveTransition()));
+		boolean blank = CharSequenceUtil.isBlank(vo.getName()) && CharSequenceUtil.isBlank(vo.getEnterTransition())
+				&& CharSequenceUtil.isBlank(vo.getLeaveTransition());
+		return blank ? null : vo;
+	}
 
-    private static String processTransitionName(String name) {
-        if (CharSequenceUtil.isBlank(name)) {
-            return name;
-        }
-        return "animate__animated animate__" + name + " ";
-    }
+	private static String processTransitionName(String name) {
+		if (CharSequenceUtil.isBlank(name)) {
+			return name;
+		}
+		return "animate__animated animate__" + name + " ";
+	}
 
-    private static String processAnimateValue(String value) {
-        if (CharSequenceUtil.isBlank(value)) {
-            return value;
-        }
-        return "animate__" + value;
-    }
+	private static String processAnimateValue(String value) {
+		if (CharSequenceUtil.isBlank(value)) {
+			return value;
+		}
+		return "animate__" + value;
+	}
 
 }

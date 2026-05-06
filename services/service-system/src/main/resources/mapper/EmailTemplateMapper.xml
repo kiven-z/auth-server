@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.auth.service.system.email.mapper.EmailTemplateMapper">
+<mapper namespace="com.auth.service.system.message.mapper.EmailTemplateMapper">
     <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="com.auth.service.system.email.model.EmailTemplateEntity">
+    <resultMap id="BaseResultMap" type="com.auth.service.system.message.model.EmailTemplateEntity">
         <id column="id" property="id"/>
         <id column="template_code" property="templateCode"/>
         <id column="template_name" property="templateName"/>
@@ -36,21 +36,21 @@
     </sql>
 
     <!-- 根据模板编号查询 -->
-    <select id="selectTemplateByTemplateCode" resultType="com.auth.service.system.email.model.EmailTemplateEntity">
+    <select id="selectTemplateByTemplateCode" resultType="com.auth.service.system.message.model.EmailTemplateEntity">
         SELECT *
         FROM sys_email_template
         WHERE template_code = #{templateCode}
-        AND status = 1
-        AND priority = (SELECT MAX(priority)
-        FROM sys_email_template
-        WHERE template_code = #{templateCode}
-        AND status = 1)
+          AND status = 1
+          AND priority = (SELECT MAX(priority)
+                          FROM sys_email_template
+                          WHERE template_code = #{templateCode}
+                            AND status = 1)
         LIMIT 1
     </select>
 
     <!-- 邮件模板分页列表 -->
     <select id="selectListByPage"
-            resultType="com.auth.service.system.email.model.vo.EmailTemplatePageResponse">
+            resultType="com.auth.service.system.message.model.vo.EmailTemplatePageResponse">
         SELECT id,
         template_code AS templateCode,
         template_name AS templateName,

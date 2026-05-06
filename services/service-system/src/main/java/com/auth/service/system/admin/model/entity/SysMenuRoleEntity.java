@@ -17,10 +17,10 @@ import lombok.Setter;
 @Setter
 public class SysMenuRoleEntity extends BaseEntity {
 
-    @Schema(title = "菜单ID")
-    private Long menuId;
+	@Schema(title = "菜单ID")
+	private Long menuId;
 
-    @Schema(title = "角色编码")
-    private String roleCode;
+	@Schema(title = "角色编码")
+	private String roleCode;
 
 }

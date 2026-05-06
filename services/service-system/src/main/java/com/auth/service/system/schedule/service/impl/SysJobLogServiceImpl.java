@@ -10,7 +10,7 @@ import com.auth.module.security.autoconfig.web.SecurityUserUtils;
 import com.auth.module.security.starter.model.UserEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.mapper.UserMapper;
-import com.auth.service.system.email.service.EmailSendService;
+import com.auth.service.system.message.service.EmailSendService;
 import com.auth.service.system.schedule.mapper.SysJobLogMapper;
 import com.auth.service.system.schedule.model.entity.SysJobLogEntity;
 import com.auth.service.system.schedule.model.query.SysJobLogQuery;

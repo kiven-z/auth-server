@@ -23,19 +23,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class SysUserController {
 
-    private final SysUserProfileService sysUserProfileService;
+	private final SysUserProfileService sysUserProfileService;
 
-    /**
-     * 查询用户档案（基本信息、部门、岗位）
-     *
-     * @param userId 用户ID
-     * @return 聚合数据
-     */
-    @Operation(summary = "用户档案")
-    @PreAuthorize("@auth.decide('sysUser:query')")
-    @GetMapping("/{userId}/profile")
-    public Result<SysUserProfileResponse> profile(@PathVariable("userId") Long userId) {
-        return Result.success(sysUserProfileService.getProfile(userId));
-    }
+	/**
+	 * 查询用户档案（基本信息、部门、岗位）
+	 * @param userId 用户ID
+	 * @return 聚合数据
+	 */
+	@Operation(summary = "用户档案")
+	@PreAuthorize("@auth.decide('sysUser:query')")
+	@GetMapping("/{userId}/profile")
+	public Result<SysUserProfileResponse> profile(@PathVariable("userId") Long userId) {
+		return Result.success(sysUserProfileService.getProfile(userId));
+	}
 
 }

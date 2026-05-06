@@ -17,28 +17,27 @@ import java.io.Serializable;
 @Setter
 public class MenuRouteTreeNode extends TreeNode<MenuRouteTreeNode> implements Serializable {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+	@Serial
+	private static final long serialVersionUID = 1L;
 
-    private Integer menuRank;
+	private Integer menuRank;
 
-    private SysMenuEntity menu;
+	private SysMenuEntity menu;
 
-    /**
-     * 由菜单实体构造树节点（id/parentId 与实体一致）
-     *
-     * @param entity 菜单行
-     * @return 树节点
-     */
-    public static MenuRouteTreeNode fromEntity(SysMenuEntity entity) {
-        MenuRouteTreeNode node = new MenuRouteTreeNode();
+	/**
+	 * 由菜单实体构造树节点（id/parentId 与实体一致）
+	 * @param entity 菜单行
+	 * @return 树节点
+	 */
+	public static MenuRouteTreeNode fromEntity(SysMenuEntity entity) {
+		MenuRouteTreeNode node = new MenuRouteTreeNode();
 
-        Long parentId = entity.getParentId();
-        node.setId(entity.getId());
-        node.setParentId(parentId == null ? 0L : parentId);
-        node.setMenuRank(entity.getMenuRank());
-        node.setMenu(entity);
-        return node;
-    }
+		Long parentId = entity.getParentId();
+		node.setId(entity.getId());
+		node.setParentId(parentId == null ? 0L : parentId);
+		node.setMenuRank(entity.getMenuRank());
+		node.setMenu(entity);
+		return node;
+	}
 
 }

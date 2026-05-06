@@ -17,10 +17,10 @@ import lombok.Setter;
 @Setter
 public class SysMenuPermissionEntity extends BaseEntity {
 
-    @Schema(title = "菜单ID")
-    private Long menuId;
+	@Schema(title = "菜单ID")
+	private Long menuId;
 
-    @Schema(title = "权限编码")
-    private String permissionCode;
+	@Schema(title = "权限编码")
+	private String permissionCode;
 
 }

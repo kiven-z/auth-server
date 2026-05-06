@@ -20,25 +20,25 @@ import java.util.List;
 @ToString
 public class RouteNodeVO implements Serializable {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+	@Serial
+	private static final long serialVersionUID = 1L;
 
-    @Schema(title = "路径")
-    private String path;
+	@Schema(title = "路径")
+	private String path;
 
-    @Schema(title = "路由 name")
-    private String name;
+	@Schema(title = "路由 name")
+	private String name;
 
-    @Schema(title = "重定向")
-    private String redirect;
+	@Schema(title = "重定向")
+	private String redirect;
 
-    @Schema(title = "组件路径（Vite glob）")
-    private String component;
+	@Schema(title = "组件路径（Vite glob）")
+	private String component;
 
-    @Schema(title = "元信息")
-    private RouteMetaVO meta;
+	@Schema(title = "元信息")
+	private RouteMetaVO meta;
 
-    @Schema(title = "子路由")
-    private List<RouteNodeVO> children;
+	@Schema(title = "子路由")
+	private List<RouteNodeVO> children;
 
 }

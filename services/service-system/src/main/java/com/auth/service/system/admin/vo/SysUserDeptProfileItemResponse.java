@@ -18,30 +18,30 @@ import java.time.LocalDateTime;
 @Data
 public class SysUserDeptProfileItemResponse implements Serializable {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+	@Serial
+	private static final long serialVersionUID = 1L;
 
-    @JsonStringFormat
-    @Schema(title = "部门ID")
-    private Long deptId;
+	@JsonStringFormat
+	@Schema(title = "部门ID")
+	private Long deptId;
 
-    @Schema(title = "部门名称")
-    private String deptName;
+	@Schema(title = "部门名称")
+	private String deptName;
 
-    @Schema(title = "部门编码")
-    private String deptCode;
+	@Schema(title = "部门编码")
+	private String deptCode;
 
-    @Schema(title = "是否主部门")
-    private Boolean isPrimary;
+	@Schema(title = "是否主部门")
+	private Boolean isPrimary;
 
-    @Schema(title = "关联状态(0=正常,1=已调离,2=兼职)")
-    private Integer status;
+	@Schema(title = "关联状态(0=正常,1=已调离,2=兼职)")
+	private Integer status;
 
-    @Schema(title = "在部门内职务")
-    private String position;
+	@Schema(title = "在部门内职务")
+	private String position;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @Schema(title = "加入部门时间")
-    private LocalDateTime joinTime;
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@Schema(title = "加入部门时间")
+	private LocalDateTime joinTime;
 
 }

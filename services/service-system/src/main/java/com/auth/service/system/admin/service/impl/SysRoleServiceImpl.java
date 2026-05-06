@@ -34,64 +34,61 @@ import java.util.List;
 @Transactional(rollbackFor = Exception.class)
 public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity> implements SysRoleService {
 
-    private final AuthenticationInnerFeignClient authenticationInnerFeignClient;
+	private final AuthenticationInnerFeignClient authenticationInnerFeignClient;
 
-    public SysRoleServiceImpl(AuthenticationInnerFeignClient authenticationInnerFeignClient) {
-        this.authenticationInnerFeignClient = authenticationInnerFeignClient;
-    }
+	public SysRoleServiceImpl(AuthenticationInnerFeignClient authenticationInnerFeignClient) {
+		this.authenticationInnerFeignClient = authenticationInnerFeignClient;
+	}
 
-    /**
-     * 分页查询角色
-     *
-     * @param pageParams 分页
-     * @param query      条件
-     * @return 分页结果
-     */
-    @Override
-    public PageResponse<SysRolePageResponse> getPage(Page<SysRoleEntity> pageParams, SysRoleQuery query) {
-        String orderBySql = SysRolePageOrderSqlBuilder.buildOrderBySql(query.getSort());
-        IPage<SysRolePageResponse> page = baseMapper.selectListByPage(pageParams, query, orderBySql);
-        return PageResponse.of(page);
-    }
+	/**
+	 * 分页查询角色
+	 * @param pageParams 分页
+	 * @param query 条件
+	 * @return 分页结果
+	 */
+	@Override
+	public PageResponse<SysRolePageResponse> getPage(Page<SysRoleEntity> pageParams, SysRoleQuery query) {
+		String orderBySql = SysRolePageOrderSqlBuilder.buildOrderBySql(query.getSort());
+		IPage<SysRolePageResponse> page = baseMapper.selectListByPage(pageParams, query, orderBySql);
+		return PageResponse.of(page);
+	}
 
-    /**
-     * 获取角色详情
-     *
-     * @param id 角色ID
-     * @return 角色详情
-     */
-    @Override
-    public SysRoleDetailVO getDetail(Long id) {
-        SysRoleEntity entity = baseMapper.selectById(id);
-        if (entity == null) {
-            throw new SystemBusinessException(SystemResultCodeEnum.ROLE_NOT_FOUND, id);
-        }
+	/**
+	 * 获取角色详情
+	 * @param id 角色ID
+	 * @return 角色详情
+	 */
+	@Override
+	public SysRoleDetailVO getDetail(Long id) {
+		SysRoleEntity entity = baseMapper.selectById(id);
+		if (entity == null) {
+			throw new SystemBusinessException(SystemResultCodeEnum.ROLE_NOT_FOUND, id);
+		}
 
-        SysRoleDetailVO vo = BeanUtil.copyProperties(entity, SysRoleDetailVO.class);
-        vo.setRoleTypeDesc(RoleTypeEnum.getDesc(entity.getRoleType()));
-        return vo;
-    }
+		SysRoleDetailVO vo = BeanUtil.copyProperties(entity, SysRoleDetailVO.class);
+		vo.setRoleTypeDesc(RoleTypeEnum.getDesc(entity.getRoleType()));
+		return vo;
+	}
 
-    /**
-     * 新增角色
-     *
-     * @param form 新增表单
-     */
-    @Override
-    public void create(SysRoleCreateForm form) {
-        SysRoleEntity entity = BeanUtil.copyProperties(form, SysRoleEntity.class);
-        save(entity);
-    }
+	/**
+	 * 新增角色
+	 * @param form 新增表单
+	 */
+	@Override
+	public void create(SysRoleCreateForm form) {
+		SysRoleEntity entity = BeanUtil.copyProperties(form, SysRoleEntity.class);
+		save(entity);
+	}
 
-    /**
-     * 查询角色下拉选项
-     *
-     * @param roleName 角色名称（可选模糊）
-     * @param roleCode 角色编码（可选模糊）
-     * @return 下拉选项列表
-     */
-    @Override
-    public List<SysRoleOptionVO> listOptions(String roleName, String roleCode) {
-        return baseMapper.selectRoleOptions(roleName, roleCode);
-    }
+	/**
+	 * 查询角色下拉选项
+	 * @param roleName 角色名称（可选模糊）
+	 * @param roleCode 角色编码（可选模糊）
+	 * @return 下拉选项列表
+	 */
+	@Override
+	public List<SysRoleOptionVO> listOptions(String roleName, String roleCode) {
+		return baseMapper.selectRoleOptions(roleName, roleCode);
+	}
+
 }

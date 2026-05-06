@@ -13,11 +13,11 @@ import java.io.Serializable;
 @Data
 public class GrantSubjectInnerRequest implements Serializable {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+	@Serial
+	private static final long serialVersionUID = 1L;
 
-    private String subjectType;
+	private String subjectType;
 
-    private Long subjectId;
+	private Long subjectId;
 
 }

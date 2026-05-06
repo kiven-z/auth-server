@@ -19,16 +19,16 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class SysRoleOptionVO implements Serializable {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+	@Serial
+	private static final long serialVersionUID = 1L;
 
-    @Schema(title = "主键ID")
-    private Long id;
+	@Schema(title = "主键ID")
+	private Long id;
 
-    @Schema(title = "角色编码")
-    private String roleCode;
+	@Schema(title = "角色编码")
+	private String roleCode;
 
-    @Schema(title = "角色名称")
-    private String roleName;
+	@Schema(title = "角色名称")
+	private String roleName;
 
 }

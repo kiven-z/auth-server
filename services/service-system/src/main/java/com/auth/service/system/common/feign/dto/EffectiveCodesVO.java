@@ -20,11 +20,11 @@ import java.util.List;
 @NoArgsConstructor
 public class EffectiveCodesVO implements Serializable {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+	@Serial
+	private static final long serialVersionUID = 1L;
 
-    private List<String> roleCodes;
+	private List<String> roleCodes;
 
-    private List<String> permissionCodes;
+	private List<String> permissionCodes;
 
 }

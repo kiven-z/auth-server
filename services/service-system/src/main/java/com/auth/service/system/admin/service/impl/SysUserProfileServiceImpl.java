@@ -24,39 +24,38 @@ import java.util.Objects;
 @Service
 public class SysUserProfileServiceImpl extends ServiceImpl<UserMapper, UserEntity> implements SysUserProfileService {
 
-    private final SysUserProfileMapper sysUserProfileMapper;
+	private final SysUserProfileMapper sysUserProfileMapper;
 
-    public SysUserProfileServiceImpl(SysUserProfileMapper sysUserProfileMapper) {
-        this.sysUserProfileMapper = sysUserProfileMapper;
-    }
+	public SysUserProfileServiceImpl(SysUserProfileMapper sysUserProfileMapper) {
+		this.sysUserProfileMapper = sysUserProfileMapper;
+	}
 
-    /**
-     * 查询用户档案（基本信息、部门、岗位）
-     *
-     * @param userId 用户ID
-     * @return 聚合结果
-     */
-    @Override
-    public SysUserProfileResponse getProfile(Long userId) {
-        if (userId == null) {
-            throw new SystemBusinessException(SystemResultCodeEnum.ILLEGAL_USER_ID_NOT_NULL);
-        }
-        UserEntity user = baseMapper.selectById(userId);
-        if (user == null) {
-            throw new SystemBusinessException(SystemResultCodeEnum.USER_NOT_FOUND, userId);
-        }
+	/**
+	 * 查询用户档案（基本信息、部门、岗位）
+	 * @param userId 用户ID
+	 * @return 聚合结果
+	 */
+	@Override
+	public SysUserProfileResponse getProfile(Long userId) {
+		if (userId == null) {
+			throw new SystemBusinessException(SystemResultCodeEnum.ILLEGAL_USER_ID_NOT_NULL);
+		}
+		UserEntity user = baseMapper.selectById(userId);
+		if (user == null) {
+			throw new SystemBusinessException(SystemResultCodeEnum.USER_NOT_FOUND, userId);
+		}
 
-        // 构建基础用户信息
-        SysUserProfileResponse response = SysUserProfileConverter.INSTANCE.toProfileResponse(user);
+		// 构建基础用户信息
+		SysUserProfileResponse response = SysUserProfileConverter.INSTANCE.toProfileResponse(user);
 
-        // 查询部门信息
-        List<SysUserDeptProfileItemResponse> deptList = sysUserProfileMapper.selectDeptProfileByUserId(userId);
-        // 查询岗位信息
-        List<SysUserPostProfileItemResponse> postList = sysUserProfileMapper.selectPostProfileByUserId(userId);
-        response.setDeptList(Objects.requireNonNullElse(deptList, List.of()));
-        response.setPostList(Objects.requireNonNullElse(postList, List.of()));
+		// 查询部门信息
+		List<SysUserDeptProfileItemResponse> deptList = sysUserProfileMapper.selectDeptProfileByUserId(userId);
+		// 查询岗位信息
+		List<SysUserPostProfileItemResponse> postList = sysUserProfileMapper.selectPostProfileByUserId(userId);
+		response.setDeptList(Objects.requireNonNullElse(deptList, List.of()));
+		response.setPostList(Objects.requireNonNullElse(postList, List.of()));
 
-        return response;
-    }
+		return response;
+	}
 
 }

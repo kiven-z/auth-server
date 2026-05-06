@@ -13,20 +13,18 @@ import java.util.List;
  */
 public interface MenuWebRouteTreeBuilder extends IService<SysMenuEntity> {
 
-    /**
-     * 构建管理员可见的动态路由（顶级节点列表）
-     *
-     * @param menuList 菜单列表
-     * @return 路由树根列表
-     */
-    List<RouteNodeVO> buildAdminRoutes(List<SysMenuEntity> menuList);
+	/**
+	 * 构建管理员可见的动态路由（顶级节点列表）
+	 * @param menuList 菜单列表
+	 * @return 路由树根列表
+	 */
+	List<RouteNodeVO> buildAdminRoutes(List<SysMenuEntity> menuList);
 
-    /**
-     * 构建当前用户可见的动态路由（顶级节点列表）
-     *
-     * @param menuList 菜单列表
-     * @return 路由树根列表
-     */
-    List<RouteNodeVO> buildRoutes(List<SysMenuEntity> menuList);
+	/**
+	 * 构建当前用户可见的动态路由（顶级节点列表）
+	 * @param menuList 菜单列表
+	 * @return 路由树根列表
+	 */
+	List<RouteNodeVO> buildRoutes(List<SysMenuEntity> menuList);
 
 }

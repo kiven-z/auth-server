@@ -16,27 +16,27 @@ import java.io.Serializable;
 @Data
 public class SysUserPostProfileItemResponse implements Serializable {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+	@Serial
+	private static final long serialVersionUID = 1L;
 
-    @JsonStringFormat
-    @Schema(title = "用户-岗位关联主键")
-    private Long id;
+	@JsonStringFormat
+	@Schema(title = "用户-岗位关联主键")
+	private Long id;
 
-    @JsonStringFormat
-    @Schema(title = "岗位ID")
-    private Long postId;
+	@JsonStringFormat
+	@Schema(title = "岗位ID")
+	private Long postId;
 
-    @Schema(title = "岗位名称")
-    private String postName;
+	@Schema(title = "岗位名称")
+	private String postName;
 
-    @Schema(title = "岗位编码")
-    private String postCode;
+	@Schema(title = "岗位编码")
+	private String postCode;
 
-    @Schema(title = "是否主岗位")
-    private Boolean isPrimary;
+	@Schema(title = "是否主岗位")
+	private Boolean isPrimary;
 
-    @Schema(title = "关联状态(0=正常,1=已调离,2=兼职)")
-    private Integer status;
+	@Schema(title = "关联状态(0=正常,1=已调离,2=兼职)")
+	private Integer status;
 
 }

@@ -10,17 +10,17 @@ import org.apache.poi.ss.usermodel.IndexedColors;
  */
 public class PermissionTypeColorCellWriteHandler extends AbstractColorCellWriteHandler {
 
-    public PermissionTypeColorCellWriteHandler(int permissionTypeColumnIndex) {
-        super(permissionTypeColumnIndex);
-    }
+	public PermissionTypeColorCellWriteHandler(int permissionTypeColumnIndex) {
+		super(permissionTypeColumnIndex);
+	}
 
-    @Override
-    public WriteFont createWriteFont(String permissionTypeValue) {
-        return switch (permissionTypeValue) {
-            case "API权限" -> createColoredWriteFont(IndexedColors.SKY_BLUE);
-            case "按钮权限" -> createColoredWriteFont(IndexedColors.SEA_GREEN);
-            default -> createColoredWriteFont(IndexedColors.GREY_25_PERCENT);
-        };
-    }
+	@Override
+	public WriteFont createWriteFont(String permissionTypeValue) {
+		return switch (permissionTypeValue) {
+			case "API权限" -> createColoredWriteFont(IndexedColors.SKY_BLUE);
+			case "按钮权限" -> createColoredWriteFont(IndexedColors.SEA_GREEN);
+			default -> createColoredWriteFont(IndexedColors.GREY_25_PERCENT);
+		};
+	}
 
 }

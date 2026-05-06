@@ -23,23 +23,22 @@ import java.util.List;
 @RestController
 public class MenuWebController {
 
-    private final MenuWebRouteService menuWebRouteService;
+	private final MenuWebRouteService menuWebRouteService;
 
-    public MenuWebController(MenuWebRouteService menuWebRouteService) {
-        this.menuWebRouteService = menuWebRouteService;
-    }
+	public MenuWebController(MenuWebRouteService menuWebRouteService) {
+		this.menuWebRouteService = menuWebRouteService;
+	}
 
-    /**
-     * 获取当前用户的动态路由树（顶级列表）
-     *
-     * @return 统一响应包动态路由
-     */
-    @AuthenticatedApi
-    @Operation(summary = "动态路由列表（占位返回空）")
-    @GetMapping("/web-routes")
-    public Result<List<RouteNodeVO>> getWebRoutes() {
-        Long userId = SecurityUserUtils.getUserId();
-        return Result.success(menuWebRouteService.listWebRoutes(userId));
-    }
+	/**
+	 * 获取当前用户的动态路由树（顶级列表）
+	 * @return 统一响应包动态路由
+	 */
+	@AuthenticatedApi
+	@Operation(summary = "动态路由列表（占位返回空）")
+	@GetMapping("/web-routes")
+	public Result<List<RouteNodeVO>> getWebRoutes() {
+		Long userId = SecurityUserUtils.getUserId();
+		return Result.success(menuWebRouteService.listWebRoutes(userId));
+	}
 
 }

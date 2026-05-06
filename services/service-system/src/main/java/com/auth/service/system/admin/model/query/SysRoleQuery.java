@@ -18,19 +18,19 @@ import java.io.Serializable;
 @EqualsAndHashCode(callSuper = true)
 public class SysRoleQuery extends PageQueryRequest implements Serializable {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+	@Serial
+	private static final long serialVersionUID = 1L;
 
-    @Schema(title = "角色编码（模糊）")
-    private String roleCode;
+	@Schema(title = "角色编码（模糊）")
+	private String roleCode;
 
-    @Schema(title = "角色名称（模糊）")
-    private String roleName;
+	@Schema(title = "角色名称（模糊）")
+	private String roleName;
 
-    @Schema(title = "状态(0=正常，1=禁用)")
-    private Integer status;
+	@Schema(title = "状态(0=正常，1=禁用)")
+	private Integer status;
 
-    @Schema(title = "角色类型(1-4)")
-    private Integer roleType;
+	@Schema(title = "角色类型(1-4)")
+	private Integer roleType;
 
 }
