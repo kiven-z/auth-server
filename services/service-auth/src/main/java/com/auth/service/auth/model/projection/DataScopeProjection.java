@@ -7,7 +7,7 @@ import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * 数据权限行数据
+ * data_scope_grant_table 查询投影（与 Mapper 列别名一致）。
  *
  * @author Bunny
  */
@@ -15,28 +15,22 @@ import java.io.Serializable;
 @Setter
 public class DataScopeProjection implements Serializable {
 
-	// TODO 需要和 AuthProfile 对齐
 	@Serial
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * 来源优先级：1=用户覆盖，2=角色兜底
+	 * 授权主体类型：USER / DEPT / POST / ROLE...
 	 */
-	private Integer sourceLevel;
+	private String subjectType;
 
 	/**
-	 * 范围类型：SELF/DEPT/DEPT_AND_CHILD/ALL/CUSTOM_POLICY
+	 * 范围类型（库内存量字符串）
 	 */
 	private String scopeType;
 
 	/**
-	 * 部门范围值（JSON 数组）
+	 * scope_subject_ids JSON 序列化字符串
 	 */
-	private String scopeDeptIds;
-
-	/**
-	 * 自定义策略编码
-	 */
-	private String policyCode;
+	private String scopeSubjectIds;
 
 }

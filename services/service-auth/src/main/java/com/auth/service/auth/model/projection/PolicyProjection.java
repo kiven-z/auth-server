@@ -1,10 +1,10 @@
 package com.auth.service.auth.model.projection;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import java.io.Serial;
 import java.io.Serializable;
+
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * 策略行数据
@@ -15,7 +15,6 @@ import java.io.Serializable;
 @Setter
 public class PolicyProjection implements Serializable {
 
-	// TODO 需要和 AuthProfile 对齐
 	@Serial
 	private static final long serialVersionUID = 1L;
 

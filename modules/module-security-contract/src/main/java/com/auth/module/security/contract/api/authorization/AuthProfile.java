@@ -24,38 +24,40 @@ import lombok.Setter;
 @Builder
 public class AuthProfile implements Serializable {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+	@Serial
+	private static final long serialVersionUID = 1L;
 
-    private final Long userId;
+	private final Long userId;
 
-    private final String username;
+	private final String username;
 
-    @Builder.Default
-    private final List<String> roles = Collections.emptyList();
+	@Builder.Default
+	private final List<String> roles = Collections.emptyList();
 
-    @Builder.Default
-    private final List<String> permissions = Collections.emptyList();
+	@Builder.Default
+	private final List<String> permissions = Collections.emptyList();
 
-    /**
-     * 数据权限：按库 {@code subject_type} 分桶，每桶内已宽松合并。
-     * <p>
-     * key 须与库中 {@code subject_type} 一致（大写枚举名），如 {@code USER}、{@code DEPT}、{@code POST}、{@code ROLE}，
-     * 以便与 {@link com.auth.module.security.contract.api.granttable.ScopeGrantEffectiveMerger#mergeLooseForDeptColumn} 等消费方对齐。
-     * </p>
-     */
-    @Builder.Default
-    private final Map<String, ScopeGrant> dataScopes = Collections.emptyMap();
+	/**
+	 * 数据权限：按库 {@code subject_type} 分桶，每桶内已宽松合并。
+	 * <p>
+	 * key 须与库中 {@code subject_type} 一致（大写枚举名），如
+	 * {@code USER}、{@code DEPT}、{@code POST}、{@code ROLE}， 以便与
+	 * {@link com.auth.module.security.contract.api.granttable.ScopeGrantEffectiveMerger#mergeLooseForDeptColumn}
+	 * 等消费方对齐。
+	 * </p>
+	 */
+	@Builder.Default
+	private final Map<String, ScopeGrant> dataScopes = Collections.emptyMap();
 
-    /**
-     * 轻量策略：类型化 + 参数化，方便未来扩展
-     */
-    @Builder.Default
-    private final PolicyBundle policies = PolicyBundle.empty();
+	/**
+	 * 轻量策略：类型化 + 参数化，方便未来扩展
+	 */
+	@Builder.Default
+	private final PolicyBundle policies = PolicyBundle.empty();
 
-    /**
-     * 权限/画像版本号（用于与 Redis 中的 permVersion 对比）
-     */
-    private final Long permVersion;
+	/**
+	 * 权限/画像版本号（用于与 Redis 中的 permVersion 对比）
+	 */
+	private final Long permVersion;
 
 }

@@ -25,6 +25,9 @@ class SecurityRequirementResolverConfiguration {
 		return new HandlerMethodResolver(handlerMappings);
 	}
 
+	/**
+	 * 自定义注解
+	 */
 	@Bean
 	PublicApiRule publicApiRule() {
 		return new PublicApiRule();

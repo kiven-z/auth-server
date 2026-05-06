@@ -1,7 +1,20 @@
 package com.auth.service.auth.infrastructure.profile;
 
-import cn.hutool.core.text.CharSequenceUtil;
-import com.auth.module.security.contract.api.authorization.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.stereotype.Service;
+
+import com.auth.module.security.contract.api.authorization.AuthProfile;
+import com.auth.module.security.contract.api.authorization.PolicyBundle;
+import com.auth.module.security.contract.api.authorization.PolicyRule;
+import com.auth.module.security.contract.api.authorization.ScopeGrant;
+import com.auth.module.security.contract.api.granttable.DataScopeGrantTableSubjectType;
+import com.auth.module.security.contract.api.granttable.ScopeGrantEffectiveMerger;
 import com.auth.module.security.contract.api.granttable.ScopeGrantType;
 import com.auth.module.security.contract.constants.PermissionConstant;
 import com.auth.module.security.starter.model.UserEntity;
@@ -13,9 +26,8 @@ import com.auth.service.auth.model.projection.DataScopeProjection;
 import com.auth.service.auth.model.projection.PolicyProjection;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.stereotype.Service;
 
-import java.util.*;
+import cn.hutool.core.text.CharSequenceUtil;
 
 /**
  * 只做 AuthProfile 构建 创建认证授权画像，授权画像构建服务实现
@@ -68,22 +80,18 @@ public class AuthProfileService {
 		}
 		long userId = user.getId();
 
-		// 查询角色和权限
 		List<String> roles = userRolePermissionDataScopePolicyMapper.selectRolesByUserId(userId);
 		List<String> permissions = userRolePermissionDataScopePolicyMapper.selectPermissionsByUserId(userId);
 
-		// 如果是ADMIN需要设置前端的管理员权限使用方式
 		if (PermissionConstant.isAdmin(userId, roles)) {
 			roles = PermissionConstant.ADMIN_ROLES;
 			permissions = PermissionConstant.ADMIN_WILDCARD_PERMISSIONS;
 		}
 
-		// 查询数据范围
 		List<DataScopeProjection> dataScopeItems = userRolePermissionDataScopePolicyMapper
 			.selectEffectiveDataScopesByUserId(userId);
 		Map<String, ScopeGrant> dataScopes = buildDataScopes(dataScopeItems);
 
-		// 查询策略
 		List<PolicyProjection> policyItems = userRolePermissionDataScopePolicyMapper
 			.selectEffectivePoliciesByUserId(userId);
 		PolicyBundle policyBundle = buildPolicyBundle(policyItems);
@@ -99,34 +107,52 @@ public class AuthProfileService {
 			.build();
 	}
 
-	/**
-	 * 构建数据权限维度对象
-	 * @param items 数据权限行
-	 * @return 维度映射
-	 */
 	private Map<String, ScopeGrant> buildDataScopes(List<DataScopeProjection> items) {
 		if (items == null || items.isEmpty()) {
 			return Collections.emptyMap();
 		}
-		DataScopeProjection effective = items.get(0);
-		List<String> values = parseStringList(effective.getScopeDeptIds());
-		ScopeGrant scopeGrant = ScopeGrant.builder()
-			.mode(ScopeMode.TREE)
-			.scopeType(toScopeGrantType(effective.getScopeType()))
-			.values(values)
-			.expandedValues(values)
-			.build();
-
-		Map<String, ScopeGrant> dataScopes = new LinkedHashMap<>();
-		dataScopes.put("dept", scopeGrant);
-		return dataScopes;
+		Map<String, List<DataScopeProjection>> groupedKey = new LinkedHashMap<>();
+		for (DataScopeProjection row : items) {
+			String rawType = row.getSubjectType();
+			if (CharSequenceUtil.isBlank(rawType)) {
+				continue;
+			}
+			groupedKey.computeIfAbsent(rawType.trim(), ignored -> new ArrayList<>()).add(row);
+		}
+		Map<String, ScopeGrant> result = new LinkedHashMap<>();
+		for (Map.Entry<String, List<DataScopeProjection>> entry : groupedKey.entrySet()) {
+			DataScopeGrantTableSubjectType subjectKey = parseSubjectType(entry.getKey());
+			if (subjectKey == null) {
+				continue;
+			}
+			ScopeGrant merged = mergeProjectionBucket(entry.getValue());
+			if (merged != null) {
+				result.put(subjectKey.name(), merged);
+			}
+		}
+		return result;
 	}
 
-	/**
-	 * 构建策略集合
-	 * @param items 策略行
-	 * @return 策略包
-	 */
+	private DataScopeGrantTableSubjectType parseSubjectType(String raw) {
+		try {
+			return DataScopeGrantTableSubjectType.valueOf(raw);
+		}
+		catch (IllegalArgumentException ex) {
+			return null;
+		}
+	}
+
+	private ScopeGrant mergeProjectionBucket(List<DataScopeProjection> rows) {
+		List<ScopeGrant> grants = new ArrayList<>(rows.size());
+		for (DataScopeProjection row : rows) {
+			grants.add(ScopeGrant.builder()
+				.scopeType(toScopeGrantType(row.getScopeType()))
+				.values(parseStringList(row.getScopeSubjectIds()))
+				.build());
+		}
+		return ScopeGrantEffectiveMerger.mergeLoose(grants);
+	}
+
 	private PolicyBundle buildPolicyBundle(List<PolicyProjection> items) {
 		if (items == null || items.isEmpty()) {
 			return PolicyBundle.empty();
@@ -151,48 +177,37 @@ public class AuthProfileService {
 		return PolicyBundle.builder().allow(allow).deny(deny).build();
 	}
 
-	/**
-	 * scope_type 到 ScopeGrantType 的映射
-	 * @param scopeType scope_type
-	 * @return 枚举类型
-	 */
 	private ScopeGrantType toScopeGrantType(String scopeType) {
 		if (CharSequenceUtil.isBlank(scopeType)) {
 			return ScopeGrantType.ALL;
 		}
-		return switch (scopeType) {
+		return switch (scopeType.trim()) {
 			case "ALL" -> ScopeGrantType.ALL;
 			case "SELF" -> ScopeGrantType.SELF;
-			case "DEPT" -> ScopeGrantType.NODE_ONLY;
-			case "DEPT_AND_CHILD" -> ScopeGrantType.NODE_AND_DESC;
+			case "DEPT", "CURRENT_ONLY" -> ScopeGrantType.NODE_ONLY;
+			case "DEPT_AND_CHILD", "CURRENT_AND_CHILD" -> ScopeGrantType.NODE_AND_DESC;
 			case "CUSTOM_POLICY" -> ScopeGrantType.CUSTOM_POLICY;
 			default -> ScopeGrantType.CUSTOM;
 		};
 	}
 
-	/**
-	 * 解析 JSON 数组为字符串列表
-	 * @param json JSON 数组
-	 * @return 字符串列表
-	 */
 	private List<String> parseStringList(String json) {
 		if (CharSequenceUtil.isBlank(json)) {
 			return Collections.emptyList();
 		}
 		try {
 			List<Object> values = objectMapper.readValue(json, LIST_OBJECT_TYPE);
-			return values.stream().map(String::valueOf).toList();
+			List<String> out = new ArrayList<>(values.size());
+			for (Object value : values) {
+				out.add(String.valueOf(value));
+			}
+			return List.copyOf(new LinkedHashSet<>(out));
 		}
 		catch (Exception ignored) {
 			return Collections.emptyList();
 		}
 	}
 
-	/**
-	 * 解析 JSON 对象为参数映射
-	 * @param json JSON 字符串
-	 * @return 参数映射
-	 */
 	private Map<String, Object> parseMap(String json) {
 		if (CharSequenceUtil.isBlank(json)) {
 			return new LinkedHashMap<>();

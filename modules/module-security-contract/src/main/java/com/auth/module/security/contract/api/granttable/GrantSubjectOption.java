@@ -12,8 +12,8 @@ import lombok.Setter;
 @Setter
 public class GrantSubjectOption {
 
-    private String subject;
+	private String subject;
 
-    private String description;
+	private String description;
 
 }

@@ -28,8 +28,7 @@ class DefaultDataScopeHandlerTest {
 	void self_shouldUseUserColumn() throws Exception {
 		AuthProfile user = AuthProfile.builder()
 			.userId(10L)
-			.dataScopes(Map.of("DEPT",
-				ScopeGrant.builder().scopeType(ScopeGrantType.SELF).values(List.of()).build()))
+			.dataScopes(Map.of("DEPT", ScopeGrant.builder().scopeType(ScopeGrantType.SELF).values(List.of()).build()))
 			.build();
 		String cond = new DefaultDataScopeHandler().buildCondition(user, ann());
 		assertEquals("create_user = 10", cond);
@@ -40,7 +39,7 @@ class DefaultDataScopeHandlerTest {
 		AuthProfile profile = AuthProfile.builder()
 			.userId(10L)
 			.dataScopes(Map.of("DEPT",
-				ScopeGrant.builder().scopeType(ScopeGrantType.NODE_ONLY).values(List.of("1", "2")).build()))
+					ScopeGrant.builder().scopeType(ScopeGrantType.NODE_ONLY).values(List.of("1", "2")).build()))
 			.build();
 		String cond = new DefaultDataScopeHandler().buildCondition(profile, ann());
 		assertEquals("dept_id IN (1,2)", cond);
@@ -50,8 +49,8 @@ class DefaultDataScopeHandlerTest {
 	void emptyDeptIds_shouldFailClosed() throws Exception {
 		AuthProfile profile = AuthProfile.builder()
 			.userId(10L)
-			.dataScopes(Map.of("DEPT",
-				ScopeGrant.builder().scopeType(ScopeGrantType.NODE_ONLY).values(List.of()).build()))
+			.dataScopes(
+					Map.of("DEPT", ScopeGrant.builder().scopeType(ScopeGrantType.NODE_ONLY).values(List.of()).build()))
 			.build();
 		String cond = new DefaultDataScopeHandler().buildCondition(profile, ann());
 		assertEquals("1 = 0", cond);
@@ -61,8 +60,7 @@ class DefaultDataScopeHandlerTest {
 	void all_shouldReturnNull() throws Exception {
 		AuthProfile profile = AuthProfile.builder()
 			.userId(10L)
-			.dataScopes(Map.of("ROLE",
-				ScopeGrant.builder().scopeType(ScopeGrantType.ALL).values(List.of()).build()))
+			.dataScopes(Map.of("ROLE", ScopeGrant.builder().scopeType(ScopeGrantType.ALL).values(List.of()).build()))
 			.build();
 		String cond = new DefaultDataScopeHandler().buildCondition(profile, ann());
 		assertNull(cond);

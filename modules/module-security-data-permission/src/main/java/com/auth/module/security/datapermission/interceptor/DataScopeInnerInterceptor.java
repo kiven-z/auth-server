@@ -13,6 +13,7 @@ import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -63,7 +64,7 @@ public class DataScopeInnerInterceptor implements InnerInterceptor {
 
 	private static void trySetSql(BoundSql boundSql, String sql) {
 		try {
-			java.lang.reflect.Field f = boundSql.getClass().getDeclaredField("sql");
+			Field f = boundSql.getClass().getDeclaredField("sql");
 			f.setAccessible(true);
 			f.set(boundSql, sql);
 		}

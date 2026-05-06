@@ -2,10 +2,10 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.auth.service.auth.mapper.UserRolesCteMapper">
     <!--
-        公共片段：画像查询与影响面反查共用 grant_table + USER/DEPT/POST 语义（不使用 dept_closure）。
-        修改授权展开规则时只维护本文件。
+        公共片段：画像查询与影响面反查共用 grant_table + USER/DEPT/POST 语义。
+        部门主体由 user_dept 与 dept_closure 解析祖先部门；修改授权展开规则时只维护本文件。
     -->
-    <!-- 单用户查询角色、权限 -->
+    <!-- 单用户查询角色、权限；user_subjects 中部门行依赖 dept_closure。片段内步骤 4 的 PROJECT 扩展注释为使用说明，请勿删除。 -->
     <sql id="selectRolesAndPermissionsByUserIdCte">
         -- 根据用户ID查询所有有效权限（考虑部门继承、岗位、用户直连）
         WITH user_subjects AS (
@@ -29,101 +29,41 @@
         )
     </sql>
 
-    <!-- 单用户：user_roles CTE，参数 userId -->
-    <sql id="userRolesCte">
-        user_roles AS (SELECT gt.role_code
-        FROM grant_table gt
-        WHERE gt.subject_type = 'USER'
-        AND gt.subject_id =
-        #{userId}
-        UNION
-        ALL
-        SELECT
-        gt
-        .
-        role_code
-        FROM
-        grant_table
-        gt
-        JOIN
-        user_dept
-        ud
-        ON
-        ud
-        .
-        dept_id
-        =
-        gt
-        .
-        subject_id
-        WHERE
-        gt
-        .
-        subject_type
-        =
-        'DEPT'
-        AND
-        ud
-        .
-        user_id
-        =
-        #{userId}
-        AND
-        ud
-        .
-        status
-        =
-        0
-        UNION
-        ALL
-        SELECT
-        gt
-        .
-        role_code
-        FROM
-        grant_table
-        gt
-        JOIN
-        user_post
-        up
-        ON
-        up
-        .
-        post_id
-        =
-        gt
-        .
-        subject_id
-        WHERE
-        gt
-        .
-        subject_type
-        =
-        'POST'
-        AND
-        up
-        .
-        user_id
-        =
-        #{userId}
-        AND
-        (
-        up
-        .
-        status
-        IS
-        NULL
-        OR
-        up
-        .
-        status
-        =
-        0
-        )
+    <!--
+        数据权限专用主体全集：base_subjects 语义与 selectRolesAndPermissionsByUserIdCte.user_subjects 一致（含 dept_closure），
+        再 ∪ ROLE(sys_role.id，经由 grant_table 与 base_subjects 推导）。
+        PROJECT 扩展请同步两处片段的步骤 4 注释。
+    -->
+    <sql id="selectDataScopeSubjectsByUserIdCte">
+        WITH base_subjects AS (
+            SELECT 'USER' AS sub_type, #{userId} AS sub_id
+            UNION ALL
+            SELECT 'DEPT' AS sub_type, dc.ancestor_id AS sub_id
+            FROM user_dept ud
+                     JOIN dept_closure dc ON ud.dept_id = dc.descendant_id
+            WHERE ud.user_id = #{userId}
+              AND ud.status = 0
+            UNION ALL
+            SELECT 'POST' AS sub_type, up.post_id AS sub_id
+            FROM user_post up
+            WHERE up.user_id = #{userId}
+              AND up.status = 0
+            -- 4. 未来扩展：在此处 UNION ALL 增加 PROJECT 或其他主体即可
+            -- UNION ALL SELECT 'PROJECT', project_id FROM user_project ...
+        ),
+        all_subjects AS (
+            SELECT sub_type, sub_id FROM base_subjects
+            UNION
+            SELECT DISTINCT 'ROLE' AS sub_type, r.id AS sub_id
+            FROM grant_table gt
+                     JOIN sys_role r ON gt.role_code = r.role_code
+                     JOIN base_subjects bs ON gt.subject_type = bs.sub_type AND gt.subject_id = bs.sub_id
+            WHERE r.status = 0
+              AND r.is_deleted = 0
         )
     </sql>
 
-    <!-- 影响面：单个 roleCode，列 uid -->
+    <!-- 影响面：单个 roleCode，列 uid；DEPT 命中下级部门用户依赖 dept_closure -->
     <sql id="impactUserIdsByRoleCodeGrant">
         SELECT DISTINCT gt.subject_id AS uid
         FROM grant_table gt
@@ -132,7 +72,8 @@
         UNION ALL
         SELECT DISTINCT ud.user_id AS uid
         FROM grant_table gt
-                 JOIN user_dept ud ON ud.dept_id = gt.subject_id
+                 JOIN dept_closure dc ON dc.ancestor_id = gt.subject_id
+                 JOIN user_dept ud ON ud.dept_id = dc.descendant_id
         WHERE gt.role_code = #{roleCode}
           AND gt.subject_type = 'DEPT'
           AND ud.status = 0
@@ -158,7 +99,8 @@
 
         SELECT DISTINCT ud.user_id AS uid
         FROM grant_table gt
-        JOIN user_dept ud ON ud.dept_id = gt.subject_id
+        JOIN dept_closure dc ON dc.ancestor_id = gt.subject_id
+        JOIN user_dept ud ON ud.dept_id = dc.descendant_id
         WHERE gt.subject_type = 'DEPT'
         AND ud.status = 0
         AND gt.role_code IN
@@ -206,7 +148,8 @@
             #{pc}
         </foreach>
         ) br ON br.role_code = gt.role_code
-        JOIN user_dept ud ON ud.dept_id = gt.subject_id
+        JOIN dept_closure dc ON dc.ancestor_id = gt.subject_id
+        JOIN user_dept ud ON ud.dept_id = dc.descendant_id
         WHERE gt.subject_type = 'DEPT'
         AND ud.status = 0
         UNION ALL
@@ -253,7 +196,8 @@
             #{pcode}
         </foreach>
         ) br ON br.role_code = gt.role_code
-        JOIN user_dept ud ON ud.dept_id = gt.subject_id
+        JOIN dept_closure dc ON dc.ancestor_id = gt.subject_id
+        JOIN user_dept ud ON ud.dept_id = dc.descendant_id
         WHERE gt.subject_type = 'DEPT'
         AND ud.status = 0
         UNION ALL

@@ -1,9 +1,9 @@
 package com.auth.service.auth.service.impl;
 
 import com.auth.common.jwt.model.JwtUserToken;
-import com.auth.module.security.contract.api.SecurityTokenKind;
 import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
+import com.auth.module.security.contract.constants.SecurityTokenKind;
 import com.auth.module.security.core.token.model.SecurityTokenResult;
 import com.auth.service.auth.TestConstants;
 import com.auth.service.auth.exception.AuthBusinessException;
