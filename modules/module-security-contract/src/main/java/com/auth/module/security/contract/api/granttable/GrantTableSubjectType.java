@@ -13,38 +13,40 @@ import java.util.List;
 @Getter
 public enum GrantTableSubjectType {
 
-	/**
-	 * 用户
-	 */
-	USER("用户"),
+    /**
+     * 用户
+     */
+    USER("用户"),
 
-	/**
-	 * 部门
-	 */
-	DEPT("部门"),
+    /**
+     * 部门
+     */
+    DEPT("部门"),
 
-	/**
-	 * 岗位
-	 */
-	POST("岗位"),;
+    /**
+     * 岗位
+     */
+    POST("岗位"),
+    ;
 
-	private final String description;
+    private final String description;
 
-	GrantTableSubjectType(String description) {
-		this.description = description;
-	}
+    GrantTableSubjectType(String description) {
+        this.description = description;
+    }
 
-	/**
-	 * 查询所有授权主体
-	 * @return 授权主体列表
-	 */
-	public static List<GrantSubject> grantSubjectList() {
-		return Arrays.stream(GrantTableSubjectType.values()).map(grantTableSubjectType -> {
-			GrantSubject grantSubject = new GrantSubject();
-			grantSubject.setSubject(grantTableSubjectType.name());
-			grantSubject.setDescription(grantTableSubjectType.getDescription());
-			return grantSubject;
-		}).toList();
-	}
+    /**
+     * 查询所有授权主体
+     *
+     * @return 授权主体列表
+     */
+    public static List<GrantSubjectOption> grantSubjectList() {
+        return Arrays.stream(GrantTableSubjectType.values()).map(grantTableSubjectType -> {
+            GrantSubjectOption grantSubjectOption = new GrantSubjectOption();
+            grantSubjectOption.setSubject(grantTableSubjectType.name());
+            grantSubjectOption.setDescription(grantTableSubjectType.getDescription());
+            return grantSubjectOption;
+        }).toList();
+    }
 
 }

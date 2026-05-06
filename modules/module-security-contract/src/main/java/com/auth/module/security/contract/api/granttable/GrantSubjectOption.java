@@ -10,10 +10,10 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class GrantSubject {
+public class GrantSubjectOption {
 
-	private String subject;
+    private String subject;
 
-	private String description;
+    private String description;
 
 }
