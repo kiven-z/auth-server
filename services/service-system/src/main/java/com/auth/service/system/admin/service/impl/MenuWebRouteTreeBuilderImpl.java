@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import com.auth.common.core.utils.TreeNodeProcessorUtil;
 import com.auth.module.security.contract.constants.PermissionConstant;
 import com.auth.service.system.admin.convert.MenuConvertContext;
+import com.auth.service.system.admin.convert.MenuRouteMetaConverter;
 import com.auth.service.system.admin.convert.MenuRouteNodeConverter;
 import com.auth.service.system.admin.mapper.SysMenuMapper;
 import com.auth.service.system.admin.mapper.SysMenuPermissionMapper;
@@ -11,6 +12,7 @@ import com.auth.service.system.admin.mapper.SysMenuRoleMapper;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.admin.model.entity.SysMenuPermissionEntity;
 import com.auth.service.system.admin.model.entity.SysMenuRoleEntity;
+import com.auth.service.system.admin.model.vo.RouteMetaVO;
 import com.auth.service.system.admin.model.vo.RouteNodeVO;
 import com.auth.service.system.admin.service.MenuWebRouteTreeBuilder;
 import com.auth.service.system.admin.support.MenuRouteTreeNode;
@@ -87,6 +89,7 @@ public class MenuWebRouteTreeBuilderImpl extends ServiceImpl<SysMenuMapper, SysM
 		Map<Long, List<String>> roleMap = queryRoleMap(menuIds);
 		Map<Long, List<String>> permissionMap = queryPermissionMap(menuIds);
 		MenuConvertContext context = new MenuConvertContext(roleMap, permissionMap);
+
 		return buildRouteTree(menuList, context);
 	}
 
@@ -139,7 +142,10 @@ public class MenuWebRouteTreeBuilderImpl extends ServiceImpl<SysMenuMapper, SysM
 	 */
 	private List<RouteNodeVO> convertTreeToVO(List<MenuRouteTreeNode> nodes, MenuConvertContext context) {
 		return nodes.stream().map(node -> {
+			RouteMetaVO routeMetaVO = MenuRouteMetaConverter.INSTANCE.toRouteMetaVO(node.getMenu(), context);
 			RouteNodeVO vo = MenuRouteNodeConverter.INSTANCE.toRouteNodeVO(node, context);
+			vo.setMeta(routeMetaVO);
+
 			if (CollUtil.isNotEmpty(node.getChildren())) {
 				List<RouteNodeVO> children = convertTreeToVO(node.getChildren(), context);
 				vo.setChildren(children);

@@ -5,6 +5,7 @@ import com.auth.service.system.admin.model.vo.RouteMetaVO;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.factory.Mappers;
 
 /**
  * MapStruct 转换器
@@ -13,6 +14,8 @@ import org.mapstruct.Mapping;
  */
 @Mapper()
 public interface MenuRouteMetaConverter {
+
+	MenuRouteMetaConverter INSTANCE = Mappers.getMapper(MenuRouteMetaConverter.class);
 
 	/**
 	 * 将菜单实体转为路由元信息 VO
@@ -26,7 +29,7 @@ public interface MenuRouteMetaConverter {
 	@Mapping(target = "auths",
 			expression = "java(context.permissionMap().getOrDefault(menu.getId(), java.util.Collections.emptyList()))")
 	@Mapping(target = "transition",
-			expression = "java(com.auth.service.system.admin.menu.support.RouteTransitionVoFactory.fromMenuEntity(menu))")
+			expression = "java(com.auth.service.system.admin.support.RouteTransitionVoFactory.fromMenuEntity(menu))")
 	RouteMetaVO toRouteMetaVO(SysMenuEntity menu, @Context MenuConvertContext context);
 
 }

@@ -2,7 +2,6 @@ package com.auth.service.system.common.feign;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.service.system.common.feign.dto.EffectiveCodesVO;
-import com.auth.service.system.common.feign.dto.GrantSubjectInnerRequest;
 import com.auth.service.system.common.feign.fallback.AuthenticationInnerFeignClientFallback;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,31 +35,5 @@ public interface AuthenticationInnerFeignClient {
 	 */
 	@GetMapping("/principal/{userId}/effective-codes")
 	Result<EffectiveCodesVO> getEffectiveCodes(@PathVariable("userId") Long userId);
-
-	/**
-	 * 查询持有指定角色的所有用户 ID
-	 * @param roleCode 角色编码
-	 * @return 用户 ID 列表
-	 */
-	@GetMapping("/role/{roleCode}/users")
-	Result<List<Long>> listUserIdsByRoleCode(@PathVariable("roleCode") String roleCode);
-
-	@PostMapping("/impact/users/by-role-codes")
-	Result<List<Long>> listUserIdsByRoleCodes(@RequestBody List<String> roleCodes);
-
-	@PostMapping("/impact/users/by-permission-codes")
-	Result<List<Long>> listUserIdsByPermissionCodes(@RequestBody List<String> permissionCodes);
-
-	@PostMapping("/impact/users/by-policy-codes")
-	Result<List<Long>> listUserIdsByPolicyCodes(@RequestBody List<String> policyCodes);
-
-	@PostMapping("/impact/users/by-dept-ids")
-	Result<List<Long>> listUserIdsByDeptIds(@RequestBody List<Long> deptIds);
-
-	@PostMapping("/impact/users/by-post-ids")
-	Result<List<Long>> listUserIdsByPostIds(@RequestBody List<Long> postIds);
-
-	@PostMapping("/impact/users/by-grant-subjects")
-	Result<List<Long>> listUserIdsByGrantSubjects(@RequestBody List<GrantSubjectInnerRequest> subjects);
 
 }

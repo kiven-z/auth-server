@@ -3,17 +3,11 @@ package com.auth.module.security.datapermission.autoconfigure;
 import com.auth.module.security.datapermission.context.LoginUserProvider;
 import com.auth.module.security.datapermission.context.SecurityContextLoginUserProvider;
 import com.auth.module.security.datapermission.interceptor.DataScopeInnerInterceptor;
-import com.auth.module.security.datapermission.policy.DefaultUserPolicyProvider;
-import com.auth.module.security.datapermission.policy.PolicyDataScopeHandler;
-import com.auth.module.security.datapermission.policy.PolicyHandlerRegistry;
-import com.auth.module.security.datapermission.policy.UserPolicyProvider;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
-
-import java.util.List;
 
 /**
  * 数据权限模块自动配置
@@ -32,27 +26,6 @@ public class DataPermissionAutoConfiguration {
 	@Bean
 	LoginUserProvider loginUserProvider() {
 		return new SecurityContextLoginUserProvider();
-	}
-
-	/**
-	 * 用户策略提供者
-	 * @return 用户策略提供者
-	 */
-	@ConditionalOnMissingBean
-	@Bean
-	UserPolicyProvider userPolicyProvider() {
-		return new DefaultUserPolicyProvider();
-	}
-
-	/**
-	 * 策略处理器注册
-	 * @param handlers 处理器列表
-	 * @return 策略处理器注册
-	 */
-	@ConditionalOnMissingBean
-	@Bean
-	PolicyHandlerRegistry policyHandlerRegistry(List<PolicyDataScopeHandler> handlers) {
-		return new PolicyHandlerRegistry(handlers);
 	}
 
 	/**

@@ -14,14 +14,13 @@ import com.auth.service.system.common.model.ModuleOption;
  */
 public interface SystemModuleService {
 
-    /**
-     * 获取模块选项列表（支持远程搜索）。
-     *
-     * @param keyword 搜索关键词，模糊匹配枚举 name 或中文描述（为空时返回全部）
-     * @param type    模块分类筛选（SYS / USER / GRANT / POLICY / AUDIT / LOG）
-     * @param limit   返回条数上限
-     * @return 模块选项列表
-     */
-    List<ModuleOption> list(String keyword, String type, Integer limit);
+	/**
+	 * 获取模块选项列表（支持远程搜索）。
+	 * @param keyword 搜索关键词，模糊匹配枚举 name 或中文描述（为空时返回全部）
+	 * @param type 模块分类筛选（SYS / USER / GRANT / POLICY / AUDIT / LOG）
+	 * @param limit 返回条数上限
+	 * @return 模块选项列表
+	 */
+	List<ModuleOption> list(String keyword, String type, Integer limit);
 
 }

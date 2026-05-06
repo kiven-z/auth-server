@@ -25,7 +25,6 @@ public class ScopeGrantEffectiveMerger {
 			return null;
 		}
 		boolean anyAll = false;
-		boolean anyPolicy = false;
 		boolean anySelf = false;
 		boolean restrictiveWithoutIds = false;
 		LinkedHashSet<String> unionIds = new LinkedHashSet<>();
@@ -37,7 +36,6 @@ public class ScopeGrantEffectiveMerger {
 			// 授权范围
 			switch (grant.getScopeType()) {
 				case ALL -> anyAll = true;
-				case CUSTOM_POLICY -> anyPolicy = true;
 				// 只能看自己
 				case SELF -> anySelf = true;
 				case NODE_ONLY, NODE_AND_DESC, CUSTOM -> {
@@ -53,9 +51,6 @@ public class ScopeGrantEffectiveMerger {
 
 		if (anyAll) {
 			return ScopeGrant.builder().scopeType(ScopeGrantType.ALL).build();
-		}
-		if (anyPolicy) {
-			return ScopeGrant.builder().scopeType(ScopeGrantType.CUSTOM_POLICY).build();
 		}
 		if (!unionIds.isEmpty()) {
 			return ScopeGrant.builder().scopeType(ScopeGrantType.CUSTOM).values(List.copyOf(unionIds)).build();

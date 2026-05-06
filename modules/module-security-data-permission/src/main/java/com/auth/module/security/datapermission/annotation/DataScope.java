@@ -16,33 +16,38 @@ import java.lang.annotation.*;
 public @interface DataScope {
 
 	/**
-	 * 所有者列用于 SELF 范围
+	 * 用户所有者列，用于 SELF 范围过滤，默认 create_user
 	 */
 	String userColumn() default "create_user";
 
 	/**
-	 * 组织列用于部门范围
+	 * 维度列名，例如 dept_id、post_id
 	 */
-	String deptColumn() default "dept_id";
+	String dimensionColumn() default "dept_id";
 
 	/**
-	 * 目标表的表别名（可选）
+	 * 表别名
 	 */
-	String alias() default "";
+	String alias() default "d";
 
 	/**
-	 * 用于构建 SQL 条件的处理器
+	 * SQL 处理器
 	 */
 	Class<? extends DataScopeHandler> handler() default DefaultDataScopeHandler.class;
 
 	/**
-	 * 当为 true 时，处理器强制用户自定义策略（注解列被忽略）
+	 * 要匹配的数据资源键
 	 */
-	boolean mandatory() default false;
+	String resourceCode() default "default";
 
 	/**
-	 * 自定义策略匹配时的策略代码当 {@code mandatory=true} 时
+	 * 数据维度类型，如 DEPT、POST
 	 */
-	String policyCode() default "";
+	String dimension() default "DEPT";
+
+	/**
+	 * 是否忽略管理员
+	 */
+	boolean ignoreSuperAdmin() default false;
 
 }

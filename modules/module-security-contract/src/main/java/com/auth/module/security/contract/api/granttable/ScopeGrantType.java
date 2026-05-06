@@ -32,9 +32,4 @@ public enum ScopeGrantType {
 	 */
 	CUSTOM,
 
-	/**
-	 * 自定义策略：委托给 PolicyDecisionManager 决策
-	 */
-	CUSTOM_POLICY
-
 }
