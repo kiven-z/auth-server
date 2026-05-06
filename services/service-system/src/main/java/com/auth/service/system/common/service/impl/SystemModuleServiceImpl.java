@@ -1,16 +1,14 @@
 package com.auth.service.system.common.service.impl;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Stream;
-
-import org.springframework.stereotype.Service;
-
+import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.common.model.ModuleOption;
 import com.auth.service.system.common.model.SystemModule;
 import com.auth.service.system.common.service.SystemModuleService;
+import org.springframework.stereotype.Service;
 
-import cn.hutool.core.text.CharSequenceUtil;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * 系统模块服务实现。
@@ -45,8 +43,7 @@ public class SystemModuleServiceImpl implements SystemModuleService {
         if (CharSequenceUtil.isNotBlank(keyword)) {
             String kw = keyword.trim().toLowerCase();
             stream = stream.filter(m ->
-                    m.name().toLowerCase().contains(kw)
-                            || m.getDescription().contains(kw)
+                    m.name().toLowerCase().contains(kw) || m.getDescription().contains(kw)
             );
         }
 
