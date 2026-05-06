@@ -3,10 +3,10 @@ package com.auth.service.system.common.model;
 import lombok.Getter;
 
 /**
- * 系统模块枚举，映射数据库中的业务表。
+ * 系统模块枚举。
  * <p>
- * 用于前端远程搜索下拉、权限配置等场景，value 对应实际的数据库表名（含前缀），
- * type 为模块分类，便于前端分组显示。
+ * 枚举 name 为模块标识（如 SYS_USER），type 为模块分类，description 为中文展示名称。
+ * 用于前端远程搜索下拉、权限配置等场景。
  * </p>
  *
  * @author Bunny
@@ -15,106 +15,105 @@ import lombok.Getter;
 public enum SystemModule {
 
     // ========== 系统业务（SYS） ==========
-
     /**
-     * 部门表
+     * 部门
      */
     SYS_DEPT("SYS", "部门"),
     /**
-     * 岗位表
+     * 岗位
      */
     SYS_POST("SYS", "岗位"),
     /**
-     * 用户主表
+     * 用户
      */
     SYS_USER("SYS", "用户"),
     /**
-     * 角色表
+     * 角色
      */
     SYS_ROLE("SYS", "角色"),
     /**
-     * 菜单表
+     * 菜单
      */
     SYS_MENU("SYS", "菜单"),
     /**
-     * 菜单-权限关联表
+     * 菜单权限
      */
     SYS_MENU_PERMISSION("SYS", "菜单权限"),
     /**
-     * 菜单-角色关联表
+     * 菜单角色
      */
     SYS_MENU_ROLE("SYS", "菜单角色"),
     /**
-     * 权限表（按钮/接口级）
+     * 权限
      */
     SYS_PERMISSION("SYS", "权限"),
     /**
-     * 角色-权限关联表
+     * 角色权限
      */
     SYS_ROLE_PERMISSION("SYS", "角色权限"),
     /**
-     * 部门闭包表（树形结构）
+     * 部门闭包
      */
     DEPT_CLOSURE("SYS", "部门闭包"),
     /**
-     * 邮件模板配置表
+     * 邮件模板
      */
     SYS_EMAIL_TEMPLATE("SYS", "邮件模板"),
     /**
-     * 定时任务表
+     * 定时任务
      */
     SYS_JOB("SYS", "定时任务"),
     /**
-     * 定时任务分组表
+     * 定时任务分组
      */
     SYS_JOB_GROUP("SYS", "定时任务分组"),
     /**
-     * 文件表
+     * 文件
      */
     SYS_FILES("SYS", "文件"),
     /**
-     * 文件分片详情表
+     * 文件分片详情
      */
     SYS_FILES_PART_DETAIL("SYS", "文件分片详情"),
 
     // ========== 用户相关（USER） ==========
 
     /**
-     * 用户-部门关联表
+     * 用户部门关联
      */
     USER_DEPT("USER", "用户部门关联"),
     /**
-     * 用户-岗位关联表
+     * 用户岗位关联
      */
     USER_POST("USER", "用户岗位关联"),
     /**
-     * 用户密码历史表
+     * 密码历史
      */
     USER_PASSWORD_HISTORY("USER", "密码历史"),
 
     // ========== 权限/授权（GRANT） ==========
 
     /**
-     * 授权主体表（Grant Table）
+     * 授权主体
      */
     GRANT_TABLE("GRANT", "授权主体"),
     /**
-     * 数据范围授权表
+     * 数据范围授权
      */
     DATA_SCOPE_GRANT_TABLE("GRANT", "数据范围授权"),
 
     // ========== 访问策略（POLICY） ==========
 
     /**
-     * 用户访问策略绑定表
+     * 访问策略绑定
      */
     USER_ACCESS_POLICY_BINDING("POLICY", "访问策略绑定"),
     /**
-     * 用户访问策略定义表
+     * 访问策略定义
      */
     USER_ACCESS_POLICY_DEFINITION("POLICY", "访问策略定义"),
     /**
-     * 用户访问策略维度表
+     * 访问策略维度
      */
     USER_ACCESS_POLICY_DIMENSION("POLICY", "访问策略维度"),
 

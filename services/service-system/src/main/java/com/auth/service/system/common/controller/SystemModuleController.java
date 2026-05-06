@@ -36,11 +36,15 @@ public class SystemModuleController {
     @Operation(summary = "获取系统模块选项列表", description = "支持关键词远程搜索、分类筛选，用于下拉选择器")
     @GetMapping("/list")
     public Result<List<ModuleOption>> list(
-            @Parameter(description = "搜索关键词，模糊匹配表名、描述或分类")
+            @Parameter(description = "搜索关键词，模糊匹配枚举 name 或中文描述")
             @RequestParam(required = false) String keyword,
+
+            @Parameter(description = "模块分类筛选：SYS-系统业务、USER-用户相关、GRANT-授权、POLICY-策略、AUDIT-审计日志、LOG-操作日志")
+            @RequestParam(required = false) String type,
+
             @Parameter(description = "返回条数上限")
             @RequestParam(required = false, defaultValue = "15") Integer limit) {
-        List<ModuleOption> list = systemModuleService.list(keyword, limit);
+        List<ModuleOption> list = systemModuleService.list(keyword, type, limit);
         return Result.success(list);
     }
 

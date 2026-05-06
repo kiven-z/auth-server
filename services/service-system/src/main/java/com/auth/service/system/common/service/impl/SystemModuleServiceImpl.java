@@ -1,14 +1,16 @@
 package com.auth.service.system.common.service.impl;
 
-import cn.hutool.core.text.CharSequenceUtil;
-import com.auth.service.system.common.model.ModuleOption;
-import com.auth.service.system.common.model.SystemModule;
-import com.auth.service.system.common.service.SystemModuleService;
-import org.springframework.stereotype.Service;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
+
+import org.springframework.stereotype.Service;
+
+import com.auth.service.system.common.model.ModuleOption;
+import com.auth.service.system.common.model.SystemModule;
+import com.auth.service.system.common.service.SystemModuleService;
+
+import cn.hutool.core.text.CharSequenceUtil;
 
 /**
  * 系统模块服务实现。
@@ -25,13 +27,13 @@ public class SystemModuleServiceImpl implements SystemModuleService {
     /**
      * 获取模块选项列表。
      *
-     * @param keyword 搜索关键词，按表名、描述、分类模糊匹配；为空时不作为过滤条件
+     * @param keyword 搜索关键词，模糊匹配枚举 name 或中文描述（label）；为空时不作为过滤条件
      * @param type    模块分类筛选；为空时不作为过滤条件
      * @param limit   返回条数上限
      * @return 匹配的模块选项列表
      */
     @Override
-    public List<ModuleOption> list(String keyword, Integer limit) {
+    public List<ModuleOption> list(String keyword, String type, Integer limit) {
         Stream<SystemModule> stream = Arrays.stream(SystemModule.values());
 
         // 按分类筛选
@@ -39,13 +41,12 @@ public class SystemModuleServiceImpl implements SystemModuleService {
             stream = stream.filter(m -> type.equals(m.getType()));
         }
 
-        // 按关键词模糊匹配（表名、描述、分类）
+        // 按关键词模糊匹配（枚举 name 或中文描述）
         if (CharSequenceUtil.isNotBlank(keyword)) {
             String kw = keyword.trim().toLowerCase();
             stream = stream.filter(m ->
-                    m.getTable().toLowerCase().contains(kw)
+                    m.name().toLowerCase().contains(kw)
                             || m.getDescription().contains(kw)
-                            || m.getType().toLowerCase().contains(kw)
             );
         }
 
@@ -55,9 +56,9 @@ public class SystemModuleServiceImpl implements SystemModuleService {
         }
 
         return stream.map(m -> ModuleOption.builder()
-                        .label(m.getDescription())
+                        .name(m.name())
                         .type(m.getType())
-                        .description(m.getDescription())
+                        .label(m.getDescription())
                         .build())
                 .toList();
     }
