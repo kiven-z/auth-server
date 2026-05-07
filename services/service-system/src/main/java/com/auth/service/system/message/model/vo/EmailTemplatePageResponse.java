@@ -1,11 +1,16 @@
 package com.auth.service.system.message.model.vo;
 
-import com.auth.common.core.model.response.BaseResponse;
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.*;
-
 import java.io.Serial;
 import java.io.Serializable;
+
+import com.auth.common.core.model.response.BaseResponse;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 /**
  * 邮件模板分页返回对象
@@ -35,8 +40,8 @@ public class EmailTemplatePageResponse extends BaseResponse implements Serializa
 	@Schema(name = "priority", title = "发送优先级")
 	private Integer priority;
 
-	@Schema(name = "status", title = "状态(0=禁用,1=启用)")
-	private Integer status;
+	@Schema(title = "启用状态(true=启用模板，false=停用)")
+	private Boolean status;
 
 	@Schema(name = "description", title = "模板描述")
 	private String description;

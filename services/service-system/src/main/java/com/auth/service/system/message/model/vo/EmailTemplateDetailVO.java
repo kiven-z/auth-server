@@ -1,16 +1,17 @@
 package com.auth.service.system.message.model.vo;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.List;
+
 import com.auth.common.core.model.response.BaseResponse;
 import com.auth.service.system.message.model.EmailTemplateRequireFieldRow;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.List;
 
 /**
  * 邮件模板详情返回对象（含 require_fields 解析结果）
@@ -48,7 +49,7 @@ public class EmailTemplateDetailVO extends BaseResponse implements Serializable 
 	@Schema(name = "priority", title = "发送优先级")
 	private Integer priority;
 
-	@Schema(name = "status", title = "状态(0=禁用,1=启用)")
-	private Integer status;
+	@Schema(name = "status", title = "启用状态(true=启用模板，false=停用)")
+	private Boolean status;
 
 }

@@ -1,15 +1,16 @@
 package com.auth.service.system.schedule.model.form;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
 import com.auth.common.web.valid.group.CreateGroup;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.LocalDateTime;
 
 /**
  * 新增定时任务（JobKey 创建后不可改）
@@ -61,9 +62,9 @@ public class SysJobCreateForm implements Serializable {
 	@Schema(title = "结束时间")
 	private LocalDateTime endTime;
 
-	@Schema(title = "状态(0暂停 1正常)")
+	@Schema(title = "运行状态(true=正常调度，false=暂停)")
 	@NotNull(groups = CreateGroup.class)
-	private Integer status;
+	private Boolean status;
 
 	@Schema(title = "执行参数 JSON")
 	private String jobParams;

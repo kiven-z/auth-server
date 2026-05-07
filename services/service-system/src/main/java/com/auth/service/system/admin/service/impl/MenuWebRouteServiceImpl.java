@@ -60,7 +60,8 @@ public class MenuWebRouteServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuE
 		log.debug("Menu web route: userId={} admin={} roleCount={} permissionCount={}", userId, isAdmin,
 				roleCodes.size(), permissionCodes.size());
 
-		List<SysMenuEntity> menuList = list(Wrappers.<SysMenuEntity>lambdaQuery().eq(SysMenuEntity::getStatus, 0));
+		List<SysMenuEntity> menuList = list(
+				Wrappers.<SysMenuEntity>lambdaQuery().eq(SysMenuEntity::getStatus, Boolean.TRUE));
 
 		// 管理员走管理员的菜单，非管理员走非管理员原生的菜单
 		return isAdmin ? menuWebRouteTreeBuilder.buildAdminRoutes(menuList)

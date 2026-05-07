@@ -1,12 +1,13 @@
 package com.auth.service.system.admin.model.query;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 import com.auth.common.core.model.query.PageQueryRequest;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * 角色分页查询条件
@@ -27,8 +28,8 @@ public class SysRoleQuery extends PageQueryRequest implements Serializable {
 	@Schema(title = "角色名称（模糊）")
 	private String roleName;
 
-	@Schema(title = "状态(0=正常，1=禁用)")
-	private Integer status;
+	@Schema(title = "启用状态(true=正常启用，false=停用)")
+	private Boolean status;
 
 	@Schema(title = "角色类型(1-4)")
 	private Integer roleType;

@@ -1,7 +1,12 @@
 package com.auth.service.system.schedule.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.text.CharSequenceUtil;
+import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.helper.PageResultHelper;
@@ -18,15 +23,10 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.DATA_NOT_EXIST;
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.JOB_GROUP_CODE_DUPLICATE;
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.JOB_GROUP_HAS_ACTIVE_JOBS;
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.JOB_GROUP_SYSTEM_PROTECTED;
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.BooleanUtil;
 
 /**
  * 任务分组实现
@@ -62,7 +62,7 @@ public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJo
 	}
 
 	/**
-	 * 启用状态分组下拉/远程搜索（仅 status=1）
+	 * 启用状态分组下拉/远程搜索（仅分组 status 已启用）
 	 * @param keyword 关键字（可空）
 	 * @param limit 最大条数
 	 * @return 列表
@@ -95,7 +95,7 @@ public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJo
 
 		// 设置默认值，is_system 默认值为 0
 		if (jobGroup.getIsSystem() == null) {
-			jobGroup.setIsSystem(0);
+			jobGroup.setIsSystem(false);
 		}
 
 		// order_num 默认值为 0
@@ -138,7 +138,8 @@ public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJo
 		}
 
 		// 查询当前是否为系统任务，如果系统任务则不允许删除
-		if (jobGroup.getIsSystem() != null && jobGroup.getIsSystem() == 1) {
+		Boolean isSystem = jobGroup.getIsSystem();
+		if (BooleanUtil.isTrue(isSystem)) {
 			throw new SystemBusinessException(JOB_GROUP_SYSTEM_PROTECTED);
 		}
 

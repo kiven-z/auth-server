@@ -1,15 +1,16 @@
 package com.auth.service.system.schedule.model.form;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 import com.auth.common.web.valid.group.CreateGroup;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-
-import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * 新增任务分组
@@ -38,9 +39,9 @@ public class SysJobGroupForm implements Serializable {
 	@Size(max = 255)
 	private String description;
 
-	@Schema(title = "状态(1启用 0禁用)")
+	@Schema(title = "启用状态(true=启用分组，false=停用)")
 	@NotNull(groups = CreateGroup.class)
-	private Integer status;
+	private Boolean status;
 
 	@Schema(title = "排序号")
 	private Integer orderNum;

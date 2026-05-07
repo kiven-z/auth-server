@@ -1,12 +1,13 @@
 package com.auth.service.system.schedule.model.entity;
 
+import java.time.LocalDateTime;
+
 import com.auth.common.data.model.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.time.LocalDateTime;
 
 /**
  * 定时任务业务主表（与 QRTZ_* 中 JobKey 一致）
@@ -46,7 +47,7 @@ public class SysJobEntity extends BaseEntity {
 	@Schema(title = "结束时间")
 	private LocalDateTime endTime;
 
-	@Schema(title = "状态(0暂停 1正常)")
+	@Schema(title = "运行状态(true=正常调度，false=暂停)")
 	private Boolean status;
 
 	@Schema(title = "执行参数 JSON")

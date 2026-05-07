@@ -40,7 +40,7 @@ public class EmailTemplateEntity extends BaseEntity {
 	@Schema(name = "priority", title = "发送优先级(1-10,数字越大优先级越高)")
 	private Integer priority;
 
-	@Schema(name = "status", title = "状态(0=禁用,1=启用)")
+	@Schema(name = "status", title = "启用状态(true=启用模板，false=停用)")
 	private Boolean status;
 
 }

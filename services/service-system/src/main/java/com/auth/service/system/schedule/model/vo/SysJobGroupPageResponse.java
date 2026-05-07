@@ -1,12 +1,13 @@
 package com.auth.service.system.schedule.model.vo;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 import com.auth.common.core.model.response.BaseResponse;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * 任务分组分页行
@@ -30,11 +31,11 @@ public class SysJobGroupPageResponse extends BaseResponse implements Serializabl
 	@Schema(title = "描述")
 	private String description;
 
-	@Schema(title = "状态(1启用 0禁用)")
-	private Integer status;
+	@Schema(title = "启用状态(true=启用，false=停用)")
+	private Boolean status;
 
 	@Schema(title = "是否系统内置")
-	private Integer isSystem;
+	private Boolean isSystem;
 
 	@Schema(title = "排序号")
 	private Integer orderNum;

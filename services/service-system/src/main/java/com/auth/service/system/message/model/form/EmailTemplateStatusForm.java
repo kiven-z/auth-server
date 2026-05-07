@@ -25,7 +25,7 @@ public class EmailTemplateStatusForm implements Serializable {
 	@NotEmpty(message = "模板ID列表不能为空")
 	private List<Long> ids;
 
-	@Schema(name = "status", title = "状态(0=禁用,1=启用)")
+	@Schema(name = "status", title = "启用状态(true=启用模板，false=停用)")
 	@NotNull(message = "状态不能为空")
 	private Boolean status;
 

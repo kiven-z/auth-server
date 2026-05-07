@@ -3,6 +3,7 @@ package com.auth.service.system.admin.model.entity;
 import com.auth.common.data.model.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -84,8 +85,8 @@ public class SysMenuEntity extends BaseEntity {
 	@Schema(title = "固定标签")
 	private Boolean fixedTag;
 
-	@Schema(title = "状态：0 启用 1 禁用")
-	private Integer status;
+	@Schema(title = "启用状态(true=启用菜单，false=停用)")
+	private Boolean status;
 
 	@Schema(title = "扩展 meta JSON")
 	private String extraMeta;

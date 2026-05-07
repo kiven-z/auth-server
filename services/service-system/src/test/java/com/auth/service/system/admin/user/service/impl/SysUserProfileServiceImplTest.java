@@ -9,6 +9,7 @@ import com.auth.service.system.admin.vo.SysUserProfileResponse;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.SystemResultCodeEnum;
 import com.auth.service.system.common.mapper.UserMapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -42,8 +44,11 @@ class SysUserProfileServiceImplTest {
 	private SysUserProfileServiceImpl sysUserProfileService;
 
 	@BeforeEach
-	void setUp() {
+	void setUp() throws Exception {
 		sysUserProfileService = new SysUserProfileServiceImpl(sysUserProfileMapper);
+		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
+		baseMapperField.setAccessible(true);
+		baseMapperField.set(sysUserProfileService, userMapper);
 	}
 
 	@Test

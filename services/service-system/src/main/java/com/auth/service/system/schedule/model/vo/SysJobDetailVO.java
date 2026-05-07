@@ -1,11 +1,11 @@
 package com.auth.service.system.schedule.model.vo;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
 
 /**
  * 定时任务详情（Descriptions 用，可不含审计字段由前端排除）
@@ -49,8 +49,8 @@ public class SysJobDetailVO implements Serializable {
 	@Schema(title = "结束时间")
 	private LocalDateTime endTime;
 
-	@Schema(title = "状态")
-	private Integer status;
+	@Schema(title = "运行状态(true=正常调度，false=暂停)")
+	private Boolean status;
 
 	@Schema(title = "执行参数 JSON")
 	private String jobParams;

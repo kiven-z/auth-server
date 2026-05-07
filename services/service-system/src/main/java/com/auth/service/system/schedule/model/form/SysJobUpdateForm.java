@@ -46,7 +46,7 @@ public class SysJobUpdateForm implements Serializable {
 	@Schema(title = "结束时间")
 	private LocalDateTime endTime;
 
-	@Schema(title = "状态(0暂停 1正常)")
+	@Schema(title = "运行状态(true=正常调度，false=暂停)")
 	@NotNull(groups = UpdateGroup.class)
 	private Boolean status;
 

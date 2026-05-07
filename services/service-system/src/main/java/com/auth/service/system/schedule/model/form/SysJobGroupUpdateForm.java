@@ -1,14 +1,15 @@
 package com.auth.service.system.schedule.model.form;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 import com.auth.common.web.valid.group.UpdateGroup;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-
-import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * 修改任务分组（不允许改 group_code）
@@ -39,8 +40,8 @@ public class SysJobGroupUpdateForm implements Serializable {
 	@NotNull(groups = UpdateGroup.class)
 	private Integer orderNum;
 
-	@Schema(title = "状态(1启用 0禁用)")
+	@Schema(title = "启用状态(true=启用分组，false=停用)")
 	@NotNull(groups = UpdateGroup.class)
-	private Integer status;
+	private Boolean status;
 
 }

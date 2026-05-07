@@ -1,12 +1,13 @@
 package com.auth.service.system.schedule.model.query;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 import com.auth.common.core.model.query.PageQueryRequest;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * 定时任务分页查询
@@ -27,7 +28,7 @@ public class SysJobQuery extends PageQueryRequest implements Serializable {
 	@Schema(title = "任务分组")
 	private String jobGroup;
 
-	@Schema(title = "状态(0暂停 1正常)")
-	private Integer status;
+	@Schema(title = "运行状态(true=正常调度，false=暂停)")
+	private Boolean status;
 
 }

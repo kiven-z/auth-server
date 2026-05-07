@@ -1,6 +1,13 @@
 package com.auth.service.system.admin.service.impl;
 
-import cn.hutool.core.collection.CollUtil;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Component;
+
 import com.auth.common.core.utils.TreeNodeProcessorUtil;
 import com.auth.module.security.contract.constants.PermissionConstant;
 import com.auth.service.system.admin.convert.MenuConvertContext;
@@ -18,14 +25,9 @@ import com.auth.service.system.admin.service.MenuWebRouteTreeBuilder;
 import com.auth.service.system.admin.support.MenuRouteTreeNode;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import cn.hutool.core.collection.CollUtil;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 动态菜单路由树构建（启用菜单、角色过滤、祖先补全、排序、VO 映射）
@@ -52,7 +54,7 @@ public class MenuWebRouteTreeBuilderImpl extends ServiceImpl<SysMenuMapper, SysM
 	 * <p>
 	 * 管理员拥有全部角色与权限，查询所有启用菜单并填充完整的 roles / auths
 	 * </p>
-	 * @param menuList 已按 status = 0 过滤的菜单列表
+	 * @param menuList 已按 status = 启用(true) 过滤的菜单列表
 	 * @return 路由树根列表
 	 */
 	@Override
@@ -76,7 +78,7 @@ public class MenuWebRouteTreeBuilderImpl extends ServiceImpl<SysMenuMapper, SysM
 	 * <p>
 	 * 当前版本与管理员相同逻辑：返回全部启用菜单并填充 roles / auths， 前端根据用户角色自主判断菜单可见性。 后续可在此方法中按角色过滤菜单列表。
 	 * </p>
-	 * @param menuList 已按 status = 0 过滤的菜单列表
+	 * @param menuList 已按 status = 启用(true) 过滤的菜单列表
 	 * @return 路由树根列表
 	 */
 	@Override

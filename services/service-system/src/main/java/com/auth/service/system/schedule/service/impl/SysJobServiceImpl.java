@@ -1,6 +1,25 @@
 package com.auth.service.system.schedule.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
+import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
+import static com.auth.service.system.schedule.model.constans.SysJobQuartzDataKeys.*;
+
+import java.lang.reflect.Method;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+
+import org.quartz.JobKey;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.Trigger;
+import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.helper.PageResultHelper;
@@ -23,46 +42,10 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.BooleanUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.quartz.JobKey;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
-import org.quartz.Trigger;
-import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.lang.reflect.Method;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.DATA_NOT_EXIST;
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.JOB_BEAN_NOT_WHITELISTED;
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.JOB_BEAN_TYPE_MISMATCH;
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.JOB_CLASS_EMPTY;
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.JOB_CLASS_LOAD_FAILED;
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.JOB_CLASS_NOT_WHITELISTED;
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.JOB_CUSTOM_MUST_IMPLEMENT_QUARTZ_JOB;
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.JOB_GROUP_NOT_AVAILABLE;
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.JOB_INVOKE_PARAM_NOT_SUPPORTED;
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.JOB_INVOKE_TARGET_MALFORMED;
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.JOB_INVOKE_TARGET_PAREN_MISMATCH;
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.JOB_METHOD_NAME_EMPTY;
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.JOB_METHOD_OR_PARAM_MISMATCH;
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.JOB_MODE_BEAN_REQUIRES_INVOKE_TARGET;
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.JOB_MODE_CUSTOM_FORBIDS_INVOKE_TARGET;
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.JOB_QUARTZ_DELETE_FAILED;
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.JOB_QUARTZ_REGISTER_FAILED;
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.JOB_QUARTZ_RUN_ONCE_FAILED;
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.JOB_QUARTZ_UPDATE_FAILED;
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.JOB_SPRING_BEAN_NOT_FOUND;
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.JOB_TARGET_METHOD_NOT_FOUND;
-import static com.auth.service.system.schedule.model.constans.SysJobQuartzDataKeys.JOB_ZONE;
 
 /**
  * 定时任务与 Quartz 同步实现
@@ -178,7 +161,7 @@ public class SysJobServiceImpl extends ServiceImpl<SysJobMapper, SysJobEntity> i
 		validateGroupEnabled(form.getJobGroup());
 
 		// 验证任务类和执行目标
-		validateModeAndSecurity(form.getJobClass(), form.getInvokeTarget(), form.getConcurrent());
+		validateModeAndSecurity(form.getJobClass(), form.getInvokeTarget());
 
 		SysJobEntity sysJob = BeanUtil.copyProperties(form, SysJobEntity.class);
 		save(sysJob);
@@ -214,7 +197,7 @@ public class SysJobServiceImpl extends ServiceImpl<SysJobMapper, SysJobEntity> i
 			}
 			// Bean 模式允许修改 invoke_target
 			if (form.getInvokeTarget() != null) {
-				validateModeAndSecurity(sysJob.getJobClass(), form.getInvokeTarget(), sysJob.getConcurrent());
+				validateModeAndSecurity(sysJob.getJobClass(), form.getInvokeTarget());
 				sysJob.setInvokeTarget(form.getInvokeTarget());
 			}
 		}
@@ -305,7 +288,7 @@ public class SysJobServiceImpl extends ServiceImpl<SysJobMapper, SysJobEntity> i
 		if (db == null) {
 			throw new SystemBusinessException(DATA_NOT_EXIST);
 		}
-		validateModeAndSecurity(db.getJobClass(), db.getInvokeTarget(), db.getConcurrent());
+		validateModeAndSecurity(db.getJobClass(), db.getInvokeTarget());
 		try {
 			// 立即执行不应改变任务的暂停/启用状态，也不应重建 Cron Trigger；仅确保 JobDetail 存在即可
 			quartzAdmin.ensureJobDetail(db);
@@ -367,7 +350,7 @@ public class SysJobServiceImpl extends ServiceImpl<SysJobMapper, SysJobEntity> i
 			.eq(SysJobGroupEntity::getGroupCode, groupCode);
 		SysJobGroupEntity sysJobGroup = sysJobGroupMapper.selectOne(lambdaQueryWrapper);
 
-		if (sysJobGroup == null || sysJobGroup.getStatus() == null || sysJobGroup.getStatus() != 1) {
+		if (sysJobGroup == null || !BooleanUtil.isTrue(sysJobGroup.getStatus())) {
 			throw new SystemBusinessException(JOB_GROUP_NOT_AVAILABLE);
 		}
 	}
@@ -377,7 +360,7 @@ public class SysJobServiceImpl extends ServiceImpl<SysJobMapper, SysJobEntity> i
 	 * @param jobClassName 任务类名
 	 * @param invokeTarget 执行目标
 	 */
-	private void validateModeAndSecurity(String jobClassName, String invokeTarget, Boolean concurrent) {
+	private void validateModeAndSecurity(String jobClassName, String invokeTarget) {
 		if (jobClassName == null || jobClassName.isBlank()) {
 			throw new SystemBusinessException(JOB_CLASS_EMPTY);
 		}

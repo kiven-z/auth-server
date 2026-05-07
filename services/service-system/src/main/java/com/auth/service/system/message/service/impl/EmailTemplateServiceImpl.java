@@ -117,14 +117,15 @@ public class EmailTemplateServiceImpl extends ServiceImpl<EmailTemplateMapper, E
 		if (exists == null) {
 			throw new SystemBusinessException(DATA_NOT_EXIST);
 		}
-		update(Wrappers.<EmailTemplateEntity>lambdaUpdate()
-			.eq(EmailTemplateEntity::getId, form.getId())
-			.set(EmailTemplateEntity::getTemplateCode, form.getTemplateCode())
-			.set(EmailTemplateEntity::getTemplateName, form.getTemplateName())
-			.set(EmailTemplateEntity::getDescription, form.getDescription())
-			.set(EmailTemplateEntity::getSubject, form.getSubject())
-			.set(EmailTemplateEntity::getPriority, form.getPriority())
-			.set(EmailTemplateEntity::getStatus, form.getStatus()));
+
+		exists.setTemplateCode(form.getTemplateCode());
+		exists.setTemplateName(form.getTemplateName());
+		exists.setDescription(form.getDescription());
+		exists.setSubject(form.getSubject());
+		exists.setPriority(form.getPriority());
+		exists.setStatus(form.getStatus());
+
+		updateById(exists);
 	}
 
 	/**
@@ -138,9 +139,9 @@ public class EmailTemplateServiceImpl extends ServiceImpl<EmailTemplateMapper, E
 		if (exists == null) {
 			throw new SystemBusinessException(DATA_NOT_EXIST);
 		}
-		update(Wrappers.<EmailTemplateEntity>lambdaUpdate()
-			.eq(EmailTemplateEntity::getId, id)
-			.set(EmailTemplateEntity::getContent, form.getContent()));
+
+		exists.setContent(form.getContent());
+		updateById(exists);
 	}
 
 	/**
@@ -154,7 +155,9 @@ public class EmailTemplateServiceImpl extends ServiceImpl<EmailTemplateMapper, E
 		if (entity == null) {
 			throw new SystemBusinessException(DATA_NOT_EXIST);
 		}
-		entity.setRequireFields(EmailTemplateRequireFieldsJsonSupport.toJson(form.getRequireFields()));
+
+		String json = EmailTemplateRequireFieldsJsonSupport.toJson(form.getRequireFields());
+		entity.setRequireFields(json);
 		updateById(entity);
 	}
 
@@ -180,6 +183,7 @@ public class EmailTemplateServiceImpl extends ServiceImpl<EmailTemplateMapper, E
 		if (entity == null) {
 			return null;
 		}
+
 		List<EmailTemplateRequireFieldRow> rows = EmailTemplateRequireFieldsJsonSupport
 			.parse(entity.getRequireFields());
 		Map<String, Object> model = EmailTemplateRequireFieldsJsonSupport.toExampleModel(rows);

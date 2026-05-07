@@ -2,6 +2,7 @@ package com.auth.service.system.schedule.model.entity;
 
 import com.auth.common.data.model.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,11 +29,11 @@ public class SysJobGroupEntity extends BaseEntity {
 	@Schema(title = "描述")
 	private String description;
 
-	@Schema(title = "状态(1启用 0禁用)")
-	private Integer status;
+	@Schema(title = "启用状态(true=启用分组，false=停用)")
+	private Boolean status;
 
-	@Schema(title = "是否系统内置(1是)")
-	private Integer isSystem;
+	@Schema(title = "系统内置分组(true 表示内置)")
+	private Boolean isSystem;
 
 	@Schema(title = "排序号")
 	private Integer orderNum;

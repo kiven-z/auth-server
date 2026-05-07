@@ -1,7 +1,11 @@
 package com.auth.service.system.admin.model.form;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.io.Serial;
@@ -29,11 +33,9 @@ public class SysRoleCreateForm implements Serializable {
 	@NotBlank(message = "角色名称不能为空")
 	private String roleName;
 
-	@Schema(title = "状态(0=正常，1=禁用)", requiredMode = Schema.RequiredMode.REQUIRED)
-	@Max(value = 1, message = "状态值无效")
-	@Min(value = 0, message = "状态值无效")
+	@Schema(title = "启用状态(true=正常启用，false=停用)", requiredMode = Schema.RequiredMode.REQUIRED)
 	@NotNull(message = "状态不能为空")
-	private Integer status;
+	private Boolean status;
 
 	@Schema(title = "角色类型(1=系统,2=菜单,3=业务,4=自定义)", requiredMode = Schema.RequiredMode.REQUIRED)
 	@Max(value = 4, message = "角色类型值无效")

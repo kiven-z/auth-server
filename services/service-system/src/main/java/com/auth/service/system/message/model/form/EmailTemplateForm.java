@@ -46,7 +46,7 @@ public class EmailTemplateForm implements Serializable {
 	@Schema(name = "description", title = "模板描述")
 	private String description;
 
-	@Schema(name = "status", title = "状态(0=禁用,1=启用)")
+	@Schema(name = "status", title = "启用状态(true=启用模板，false=停用)")
 	@NotNull(message = "状态不能为空", groups = CreateGroup.class)
 	private Boolean status;
 

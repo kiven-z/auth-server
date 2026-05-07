@@ -1,5 +1,7 @@
 package com.auth.service.system.schedule.service;
 
+import java.util.List;
+
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
 import com.auth.service.system.schedule.model.form.SysJobGroupForm;
@@ -7,8 +9,6 @@ import com.auth.service.system.schedule.model.form.SysJobGroupUpdateForm;
 import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
 import com.auth.service.system.schedule.model.vo.SysJobGroupPageResponse;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-
-import java.util.List;
 
 /**
  * 任务分组维护
@@ -26,7 +26,7 @@ public interface SysJobGroupService {
 	PageResponse<SysJobGroupPageResponse> getPage(Page<SysJobGroupEntity> pageParams, SysJobGroupQuery query);
 
 	/**
-	 * 启用状态分组下拉/远程搜索（仅 status=1）
+	 * 启用状态分组下拉/远程搜索（仅分组已启用 {@code status == true}）
 	 * @param keyword 关键字（可空）
 	 * @param limit 最大条数
 	 * @return 列表

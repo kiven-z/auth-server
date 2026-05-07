@@ -1,12 +1,13 @@
 package com.auth.service.system.message.model.query;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 import com.auth.common.core.model.query.PageQueryRequest;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * 邮件模板查询
@@ -30,7 +31,7 @@ public class EmailTemplateQuery extends PageQueryRequest implements Serializable
 	@Schema(name = "subject", title = "邮件主题")
 	private String subject;
 
-	@Schema(name = "status", title = "状态(0=禁用,1=启用)")
-	private Integer status;
+	@Schema(name = "status", title = "启用状态(true=启用模板，false=停用)")
+	private Boolean status;
 
 }
