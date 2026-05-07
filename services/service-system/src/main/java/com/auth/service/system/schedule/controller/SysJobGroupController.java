@@ -1,5 +1,21 @@
 package com.auth.service.system.schedule.controller;
 
+import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
+
+import java.util.List;
+
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.common.web.valid.group.CreateGroup;
@@ -11,15 +27,9 @@ import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
 import com.auth.service.system.schedule.model.vo.SysJobGroupPageResponse;
 import com.auth.service.system.schedule.service.SysJobGroupService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
 
 /**
  * 定时任务分组接口
@@ -63,7 +73,7 @@ public class SysJobGroupController {
 	@PostMapping
 	public Result<String> create(@Validated(CreateGroup.class) @RequestBody SysJobGroupForm form) {
 		sysJobGroupService.create(form);
-		return Result.success(ADD_SUCCESS.getBizCode(), ADD_SUCCESS.getMessage());
+		return Result.successMessage(ADD_SUCCESS.getMessage());
 	}
 
 	@Operation(summary = "修改任务分组")
@@ -71,7 +81,7 @@ public class SysJobGroupController {
 	@PutMapping
 	public Result<String> update(@Validated(UpdateGroup.class) @RequestBody SysJobGroupUpdateForm form) {
 		sysJobGroupService.update(form);
-		return Result.success(UPDATE_SUCCESS.getBizCode(), UPDATE_SUCCESS.getMessage());
+		return Result.successMessage(UPDATE_SUCCESS.getMessage());
 	}
 
 	@Operation(summary = "删除任务分组")
@@ -79,7 +89,7 @@ public class SysJobGroupController {
 	@DeleteMapping("{id}")
 	public Result<String> delete(@PathVariable("id") Long id) {
 		sysJobGroupService.deleteById(id);
-		return Result.success(DELETE_SUCCESS.getBizCode(), DELETE_SUCCESS.getMessage());
+		return Result.successMessage(DELETE_SUCCESS.getMessage());
 	}
 
 }

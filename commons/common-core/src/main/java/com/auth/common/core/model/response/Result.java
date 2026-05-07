@@ -23,6 +23,11 @@ public class Result<T> implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	/**
+	 * 全项目统一的业务成功码（与 HTTP 2xx 配合使用；失败码由各模块枚举定义，非 0）。
+	 */
+	public static final int SUCCESS_CODE = 0;
+
+	/**
 	 * 状态码
 	 */
 	private Integer code;
@@ -88,42 +93,31 @@ public class Result<T> implements Serializable {
 	 * @param data 返回体
 	 */
 	public static <T> Result<T> success(T data) {
-		return build(data, 200, "success");
+		return build(data, SUCCESS_CODE, "success");
 	}
 
 	/**
-	 * 操作失败-自定义返回数据和状态码
+	 * 无负载的业务成功
 	 */
 	public static <T> Result<T> success() {
-		return build(null, 200, "success");
+		return build(null, SUCCESS_CODE, "success");
 	}
 
 	/**
-	 * 操作失败-自定义返回数据和状态码
+	 * 业务成功，自定义消息（例如增删改后的 i18n 文案）
 	 * @param data 返回体
-	 * @param message 错误信息
+	 * @param message 提示信息
 	 */
 	public static <T> Result<T> success(T data, String message) {
-		return build(data, 200, message);
+		return build(data, SUCCESS_CODE, message);
 	}
 
 	/**
-	 * 操作失败-自定义返回数据和状态码
-	 * @param code 状态码
-	 * @param message 错误信息
+	 * 无数据负载，仅返回成功消息（code 为 {@link #SUCCESS_CODE}）
+	 * @param message 提示信息
 	 */
-	public static Result<String> success(Integer code, String message) {
-		return build(null, code, message);
-	}
-
-	/**
-	 * 操作失败-自定义返回数据和状态码
-	 * @param data 返回体
-	 * @param code 状态码
-	 * @param message 错误信息
-	 */
-	public static <T> Result<T> success(T data, Integer code, String message) {
-		return build(data, code, message);
+	public static Result<String> successMessage(String message) {
+		return build(null, SUCCESS_CODE, message);
 	}
 
 	/**

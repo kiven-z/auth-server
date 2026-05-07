@@ -1,6 +1,7 @@
 package com.auth.common.web.autoconfigure;
 
 import com.auth.common.core.model.response.Result;
+
 import lombok.experimental.UtilityClass;
 
 /**
@@ -20,7 +21,7 @@ public class FeignUtil {
 		if (result == null) {
 			return false;
 		}
-		return Integer.valueOf(200).equals(result.getCode()) && result.getData() != null;
+		return Integer.valueOf(Result.SUCCESS_CODE).equals(result.getCode()) && result.getData() != null;
 	}
 
 }

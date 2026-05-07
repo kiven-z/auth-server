@@ -1,25 +1,40 @@
 package com.auth.service.system.message.controller;
 
+import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
+
+import java.util.List;
+
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.common.web.valid.group.CreateGroup;
 import com.auth.common.web.valid.group.UpdateGroup;
 import com.auth.service.system.message.model.EmailTemplateEntity;
-import com.auth.service.system.message.model.form.*;
+import com.auth.service.system.message.model.form.EmailTemplateContentForm;
+import com.auth.service.system.message.model.form.EmailTemplateForm;
+import com.auth.service.system.message.model.form.EmailTemplateMetadataForm;
+import com.auth.service.system.message.model.form.EmailTemplateRenderForm;
+import com.auth.service.system.message.model.form.EmailTemplateRequireFieldsForm;
+import com.auth.service.system.message.model.form.EmailTemplateStatusForm;
+import com.auth.service.system.message.model.form.EmailTemplateTestSendForm;
 import com.auth.service.system.message.model.query.EmailTemplateQuery;
 import com.auth.service.system.message.model.vo.EmailTemplateDetailVO;
 import com.auth.service.system.message.model.vo.EmailTemplatePageResponse;
 import com.auth.service.system.message.service.EmailTemplateService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
 
 /**
  * 邮件模板 前端控制器
@@ -61,9 +76,7 @@ public class EmailTemplateController {
 	public Result<String> testSend(@Validated @RequestBody EmailTemplateTestSendForm form) {
 		emailTemplateService.testSend(form);
 
-		Integer code = UPDATE_SUCCESS.getBizCode();
-		String message = UPDATE_SUCCESS.getMessage();
-		return Result.success(code, message);
+		return Result.successMessage(UPDATE_SUCCESS.getMessage());
 	}
 
 	@Operation(summary = "邮件模板详情", description = "邮件模板详情")
@@ -88,9 +101,7 @@ public class EmailTemplateController {
 	public Result<String> create(@Validated(CreateGroup.class) @RequestBody EmailTemplateForm dto) {
 		emailTemplateService.create(dto);
 
-		Integer code = ADD_SUCCESS.getBizCode();
-		String message = ADD_SUCCESS.getMessage();
-		return Result.success(code, message);
+		return Result.successMessage(ADD_SUCCESS.getMessage());
 	}
 
 	@Operation(summary = "更新邮件模板元数据", description = "仅更新编码、名称、描述、主题、优先级、状态，不修改正文与变量")
@@ -99,9 +110,7 @@ public class EmailTemplateController {
 	public Result<String> updateMetadata(@Validated(UpdateGroup.class) @RequestBody EmailTemplateMetadataForm dto) {
 		emailTemplateService.updateMetadata(dto);
 
-		Integer code = UPDATE_SUCCESS.getBizCode();
-		String message = UPDATE_SUCCESS.getMessage();
-		return Result.success(code, message);
+		return Result.successMessage(UPDATE_SUCCESS.getMessage());
 	}
 
 	@Operation(summary = "仅更新邮件模板正文", description = "仅更新 content 字段")
@@ -111,9 +120,7 @@ public class EmailTemplateController {
 			@Validated @RequestBody EmailTemplateContentForm dto) {
 		emailTemplateService.updateContent(id, dto);
 
-		Integer code = UPDATE_SUCCESS.getBizCode();
-		String message = UPDATE_SUCCESS.getMessage();
-		return Result.success(code, message);
+		return Result.successMessage(UPDATE_SUCCESS.getMessage());
 	}
 
 	@Operation(summary = "仅更新变量列表 require_fields", description = "仅更新变量列表 require_fields")
@@ -123,9 +130,7 @@ public class EmailTemplateController {
 			@Validated @RequestBody EmailTemplateRequireFieldsForm form) {
 		emailTemplateService.updateRequireFields(id, form);
 
-		Integer code = UPDATE_SUCCESS.getBizCode();
-		String message = UPDATE_SUCCESS.getMessage();
-		return Result.success(code, message);
+		return Result.successMessage(UPDATE_SUCCESS.getMessage());
 	}
 
 	@Operation(summary = "删除邮件模板", description = "删除邮件模板")
@@ -134,9 +139,7 @@ public class EmailTemplateController {
 	public Result<String> batchDelete(@RequestBody List<Long> ids) {
 		emailTemplateService.removeBatchByIds(ids);
 
-		Integer code = DELETE_SUCCESS.getBizCode();
-		String message = DELETE_SUCCESS.getMessage();
-		return Result.success(code, message);
+		return Result.successMessage(DELETE_SUCCESS.getMessage());
 	}
 
 	@Operation(summary = "批量启用/禁用邮件模板", description = "批量启用/禁用邮件模板")
@@ -145,9 +148,7 @@ public class EmailTemplateController {
 	public Result<String> batchUpdateStatus(@Validated @RequestBody EmailTemplateStatusForm form) {
 		emailTemplateService.batchUpdateStatus(form);
 
-		Integer code = UPDATE_SUCCESS.getBizCode();
-		String message = UPDATE_SUCCESS.getMessage();
-		return Result.success(code, message);
+		return Result.successMessage(UPDATE_SUCCESS.getMessage());
 	}
 
 }

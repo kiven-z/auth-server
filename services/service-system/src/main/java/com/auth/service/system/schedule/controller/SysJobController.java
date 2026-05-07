@@ -1,5 +1,20 @@
 package com.auth.service.system.schedule.controller;
 
+import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
+
+import java.util.List;
+
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.common.web.valid.group.CreateGroup;
@@ -15,15 +30,9 @@ import com.auth.service.system.schedule.model.vo.SysJobPageResponse;
 import com.auth.service.system.schedule.service.SysJobService;
 import com.auth.service.system.schedule.support.QuartzTaskRegistry;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
 
 /**
  * 定时任务与 Quartz 操作接口
@@ -78,7 +87,7 @@ public class SysJobController {
 	public Result<String> create(@Validated(CreateGroup.class) @RequestBody SysJobCreateForm form) {
 		sysJobService.create(form);
 
-		return Result.success(ADD_SUCCESS.getBizCode(), ADD_SUCCESS.getMessage());
+		return Result.successMessage(ADD_SUCCESS.getMessage());
 	}
 
 	@Operation(summary = "修改定时任务")
@@ -87,7 +96,7 @@ public class SysJobController {
 	public Result<String> update(@Validated(UpdateGroup.class) @RequestBody SysJobUpdateForm form) {
 		sysJobService.update(form);
 
-		return Result.success(UPDATE_SUCCESS.getBizCode(), UPDATE_SUCCESS.getMessage());
+		return Result.successMessage(UPDATE_SUCCESS.getMessage());
 	}
 
 	@Operation(summary = "删除定时任务")
@@ -96,7 +105,7 @@ public class SysJobController {
 	public Result<String> delete(@PathVariable("id") Long id) {
 		sysJobService.deleteById(id);
 
-		return Result.success(DELETE_SUCCESS.getBizCode(), DELETE_SUCCESS.getMessage());
+		return Result.successMessage(DELETE_SUCCESS.getMessage());
 	}
 
 	@Operation(summary = "批量启停任务")
@@ -105,7 +114,7 @@ public class SysJobController {
 	public Result<String> batchStatus(@Validated @RequestBody SysJobStatusForm form) {
 		sysJobService.batchUpdateStatus(form);
 
-		return Result.success(UPDATE_SUCCESS.getBizCode(), UPDATE_SUCCESS.getMessage());
+		return Result.successMessage(UPDATE_SUCCESS.getMessage());
 	}
 
 	@Operation(summary = "立即执行一次")
@@ -114,7 +123,7 @@ public class SysJobController {
 	public Result<String> runOnce(@PathVariable("id") Long id) {
 		sysJobService.runOnce(id);
 
-		return Result.success(UPDATE_SUCCESS.getBizCode(), UPDATE_SUCCESS.getMessage());
+		return Result.successMessage(UPDATE_SUCCESS.getMessage());
 	}
 
 	@Operation(summary = "按分组一键暂停")
@@ -123,7 +132,7 @@ public class SysJobController {
 	public Result<String> pauseGroup(@PathVariable("groupCode") String groupCode) {
 		sysJobService.pauseAllInGroup(groupCode);
 
-		return Result.success(UPDATE_SUCCESS.getBizCode(), UPDATE_SUCCESS.getMessage());
+		return Result.successMessage(UPDATE_SUCCESS.getMessage());
 	}
 
 	@Operation(summary = "按分组一键恢复")
@@ -132,7 +141,7 @@ public class SysJobController {
 	public Result<String> resumeGroup(@PathVariable("groupCode") String groupCode) {
 		sysJobService.resumeAllInGroup(groupCode);
 
-		return Result.success(UPDATE_SUCCESS.getBizCode(), UPDATE_SUCCESS.getMessage());
+		return Result.successMessage(UPDATE_SUCCESS.getMessage());
 	}
 
 }
