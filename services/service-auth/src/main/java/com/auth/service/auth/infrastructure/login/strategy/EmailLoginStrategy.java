@@ -1,4 +1,4 @@
-package com.auth.service.auth.infrastructure.strategy;
+package com.auth.service.auth.infrastructure.login.strategy;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.crypto.digest.MD5;

@@ -8,6 +8,7 @@ import com.auth.service.auth.exception.AuthResultCode;
 import com.auth.service.auth.exception.BadCredentialsException;
 import com.auth.service.auth.infrastructure.login.LoginFailureRateLimiter;
 import com.auth.service.auth.infrastructure.login.LoginResult;
+import com.auth.service.auth.infrastructure.login.strategy.AbstractAuthenticationStrategy;
 import com.auth.service.auth.infrastructure.profile.AuthProfileService;
 import com.auth.service.auth.model.enums.AuthLoginLogResult;
 import com.auth.service.auth.model.enums.AuthLoginLogType;

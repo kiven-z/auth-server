@@ -1,4 +1,4 @@
-package com.auth.service.auth.infrastructure.strategy;
+package com.auth.service.auth.infrastructure.login.strategy;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.auth.module.security.contract.api.authorization.AuthProfile;

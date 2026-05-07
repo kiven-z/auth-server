@@ -1,4 +1,4 @@
-package com.auth.service.auth.infrastructure.strategy;
+package com.auth.service.auth.infrastructure.login.strategy;
 
 import com.auth.module.security.starter.model.UserEntity;
 import com.auth.service.auth.exception.AuthBusinessException;

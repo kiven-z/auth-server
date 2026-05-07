@@ -4,6 +4,7 @@ import com.auth.module.security.starter.model.UserEntity;
 import com.auth.service.auth.exception.AuthBusinessException;
 import com.auth.service.auth.exception.AuthResultCode;
 import com.auth.service.auth.infrastructure.login.LoginFailureRateLimiter;
+import com.auth.service.auth.infrastructure.login.strategy.UsernamePasswordLoginStrategy;
 import com.auth.service.auth.infrastructure.profile.AuthProfileService;
 import com.auth.service.auth.mapper.UserMapper;
 import com.auth.service.auth.model.enums.AuthLoginLogResult;

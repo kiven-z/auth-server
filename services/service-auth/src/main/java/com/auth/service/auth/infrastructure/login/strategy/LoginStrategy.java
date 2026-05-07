@@ -1,4 +1,4 @@
-package com.auth.service.auth.infrastructure.strategy;
+package com.auth.service.auth.infrastructure.login.strategy;
 
 import com.auth.service.auth.infrastructure.login.LoginResult;
 import com.auth.service.auth.model.request.AbstractAuthentication;
