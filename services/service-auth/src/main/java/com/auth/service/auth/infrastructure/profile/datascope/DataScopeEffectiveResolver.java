@@ -14,7 +14,7 @@ import java.util.Map;
  * 用户数据权限生效范围解析器
  *
  * <p>
- * 负责聚合 USER/ROLE/DEPT/POST 授权片段并生成最终生效授权，供登录画像构建复用。
+ * 负责聚合 USER/ROLE/DEPT/POST... 授权片段并生成最终生效授权，供登录画像构建复用。
  * </p>
  *
  * @author Bunny
@@ -23,40 +23,45 @@ import java.util.Map;
 @Service
 public class DataScopeEffectiveResolver {
 
-	private final UserRolePermissionDataScopePolicyMapper mapper;
+    private final UserRolePermissionDataScopePolicyMapper mapper;
 
-	public DataScopeEffectiveResolver(UserRolePermissionDataScopePolicyMapper mapper) {
-		this.mapper = mapper;
-	}
+    public DataScopeEffectiveResolver(UserRolePermissionDataScopePolicyMapper mapper) {
+        this.mapper = mapper;
+    }
 
-	/**
-	 * 查询并构建用户生效数据权限
-	 * @param userId 用户 ID
-	 * @return 生效数据权限
-	 */
-	public Map<String, ScopeGrant> resolveByUserId(Long userId) {
-		return resolveWithTrace(userId).getDataScopes();
-	}
+    /**
+     * 查询并构建用户生效数据权限
+     *
+     * @param userId 用户 ID
+     * @return 生效数据权限
+     */
+    public Map<String, ScopeGrant> resolveByUserId(Long userId) {
+        return resolveWithTrace(userId).getDataScopes();
+    }
 
-	/**
-	 * 查询并构建用户生效数据权限（含轨迹）
-	 * @param userId 用户 ID
-	 * @return 生效数据权限构建结果
-	 */
-	public BuildResult resolveWithTrace(Long userId) {
-		if (userId == null) {
-			return BuildResult.builder().dataScopes(Map.of()).traces(List.of()).build();
-		}
-		List<DataScopeProjection> projections = mapper.selectEffectiveDataScopesByUserId(userId);
-		if (CollUtil.isEmpty(projections)) {
-			BuildResult emptyResult = BuildResult.builder().dataScopes(Map.of()).traces(List.of()).build();
-			log.debug("Resolved data scopes for userId={}, scopeSize=0", userId);
-			return emptyResult;
-		}
-		BuildResult result = DataScopeBuilder.buildDataScopesWithTrace(projections);
-		log.debug("Resolved data scopes for userId={}, scopeSize={}, traceSize={}", userId,
-				result.getDataScopes().size(), result.getTraces().size());
-		return result;
-	}
+    /**
+     * 查询并构建用户生效数据权限（含轨迹）
+     *
+     * @param userId 用户 ID
+     * @return 生效数据权限构建结果
+     */
+    public BuildResult resolveWithTrace(Long userId) {
+        if (userId == null) {
+            return BuildResult.builder().dataScopes(Map.of()).traces(List.of()).build();
+        }
+        List<DataScopeProjection> projections = mapper.selectEffectiveDataScopesByUserId(userId);
+
+        // 查询出来结果不为空
+        if (CollUtil.isEmpty(projections)) {
+            BuildResult emptyResult = BuildResult.builder().dataScopes(Map.of()).traces(List.of()).build();
+            log.debug("Resolved data scopes for userId={}, scopeSize=0", userId);
+            return emptyResult;
+        }
+
+        BuildResult result = DataScopeBuilder.buildDataScopesWithTrace(projections);
+        log.debug("Resolved data scopes for userId={}, scopeSize={}, traceSize={}", userId,
+                result.getDataScopes().size(), result.getTraces().size());
+        return result;
+    }
 
 }

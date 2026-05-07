@@ -16,14 +16,14 @@ import java.util.Map;
 @Builder
 public class BuildResult {
 
-	/**
-	 * 生效数据权限
-	 */
-	private final Map<String, ScopeGrant> dataScopes;
+    /**
+     * 生效数据权限
+     */
+    private final Map<String, ScopeGrant> dataScopes;
 
-	/**
-	 * 规则命中轨迹
-	 */
-	private final List<ResolveTrace> traces;
+    /**
+     * 规则命中轨迹
+     */
+    private final List<ResolveTrace> traces;
 
 }
