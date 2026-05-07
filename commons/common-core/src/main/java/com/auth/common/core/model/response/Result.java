@@ -19,13 +19,13 @@ import java.util.Map;
 @AllArgsConstructor
 public class Result<T> implements Serializable {
 
-	@Serial
-	private static final long serialVersionUID = 1L;
-
 	/**
 	 * 全项目统一的业务成功码（与 HTTP 2xx 配合使用；失败码由各模块枚举定义，非 0）。
 	 */
 	public static final int SUCCESS_CODE = 0;
+
+	@Serial
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * 状态码
@@ -110,14 +110,6 @@ public class Result<T> implements Serializable {
 	 */
 	public static <T> Result<T> success(T data, String message) {
 		return build(data, SUCCESS_CODE, message);
-	}
-
-	/**
-	 * 无数据负载，仅返回成功消息（code 为 {@link #SUCCESS_CODE}）
-	 * @param message 提示信息
-	 */
-	public static Result<String> successMessage(String message) {
-		return build(null, SUCCESS_CODE, message);
 	}
 
 	/**
