@@ -92,25 +92,6 @@ public class TokenService {
 	}
 
 	/**
-	 * 允许过期的访问令牌解析（永不抛出异常）
-	 * @param token 访问令牌原始字符串
-	 * @return 用户载荷
-	 */
-	public Optional<JwtUserToken> parseExpiredAccessToken(String token) {
-		if (CharSequenceUtil.isBlank(token)) {
-			return Optional.empty();
-		}
-		try {
-			JwtUserToken userToken = accessTokenProvider.parseTokenAllowExpired(token).getUserToken();
-			return Optional.of(requireUserToken(userToken, AuthResultCode.TOKEN_PARSING_FAILED));
-		}
-		catch (Exception exception) {
-			log.error(exception.getMessage(), exception);
-			return Optional.empty();
-		}
-	}
-
-	/**
 	 * 解析刷新令牌
 	 * @param token 刷新令牌原始字符串
 	 * @return 用户载荷

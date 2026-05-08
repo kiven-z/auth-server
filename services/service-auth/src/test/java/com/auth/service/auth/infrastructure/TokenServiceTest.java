@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -92,21 +91,6 @@ class TokenServiceTest {
 		assertTrue(service.parseAccessTokenSafe(null).isEmpty());
 		assertTrue(service.parseAccessTokenSafe(" ").isEmpty());
 		assertTrue(service.parseAccessTokenSafe("bad").isEmpty());
-	}
-
-	@Test
-	@DisplayName("parseExpiredAccessToken：调用允许过期解析")
-	void parseExpiredAccessToken_shouldUseAllowExpiredProvider() {
-		JwtUserToken userToken = JwtUserToken.builder().userId(TestConstants.USER_ID).jti(TestConstants.JTI).build();
-		SecurityTokenResult result = SecurityTokenResult.builder().userToken(userToken).build();
-		when(accessTokenProvider.parseTokenAllowExpired("expired")).thenReturn(result);
-		TokenService service = new TokenService(accessTokenProvider, refreshTokenProvider, jwtProperties);
-
-		Optional<JwtUserToken> optional = service.parseExpiredAccessToken("expired");
-
-		assertTrue(optional.isPresent());
-		assertEquals(TestConstants.USER_ID, optional.get().getUserId());
-		verify(accessTokenProvider).parseTokenAllowExpired("expired");
 	}
 
 	@Test

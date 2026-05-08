@@ -34,52 +34,52 @@ import reactor.core.publisher.Mono;
 @Component
 public class JwtValidateGlobalFilter implements GlobalFilter {
 
-    private final AccessTokenProvider accessTokenProvider;
+	private final AccessTokenProvider accessTokenProvider;
 
-    private final GatewaySecurityProperties gatewaySecurityProperties;
+	private final GatewaySecurityProperties gatewaySecurityProperties;
 
-    public JwtValidateGlobalFilter(AccessTokenProvider accessTokenProvider,
-            GatewaySecurityProperties gatewaySecurityProperties) {
-        this.accessTokenProvider = accessTokenProvider;
-        this.gatewaySecurityProperties = gatewaySecurityProperties;
-    }
+	public JwtValidateGlobalFilter(AccessTokenProvider accessTokenProvider,
+			GatewaySecurityProperties gatewaySecurityProperties) {
+		this.accessTokenProvider = accessTokenProvider;
+		this.gatewaySecurityProperties = gatewaySecurityProperties;
+	}
 
-    /**
-     * 网关 JWT 校验
-     *
-     * @param exchange the current server exchange
-     * @param chain    provides a way to delegate to the next filter
-     * @return Mono
-     */
-    @Override
-    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        ServerHttpRequest request = exchange.getRequest();
-        String path = request.getURI().getPath();
-        boolean strictPath = gatewaySecurityProperties.isStrictPath(path);
+	/**
+	 * 网关 JWT 校验
+	 * @param exchange the current server exchange
+	 * @param chain provides a way to delegate to the next filter
+	 * @return Mono
+	 */
+	@Override
+	public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+		ServerHttpRequest request = exchange.getRequest();
+		String path = request.getURI().getPath();
+		boolean strictPath = gatewaySecurityProperties.isStrictPath(path);
 
-        // 外部Token轻量检查：仅当 Authorization 存在时进行可解析校验
-        String authorization = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-        if (CharSequenceUtil.isBlank(authorization)) {
-            if (strictPath) {
-                return Mono.error(new GatewayBusinessException(SecurityTokenExceptionToGatewayResultCodeMapper
-                        .map(new SecurityTokenException(SecurityResultCodeEnum.TOKEN_MISSING, "Token is missing."))));
-            }
-            return chain.filter(exchange);
-        }
+		// 外部Token轻量检查：仅当 Authorization 存在时进行可解析校验
+		String authorization = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+		if (CharSequenceUtil.isBlank(authorization)) {
+			if (strictPath) {
+				return Mono.error(new GatewayBusinessException(SecurityTokenExceptionToGatewayResultCodeMapper
+					.map(new SecurityTokenException(SecurityResultCodeEnum.TOKEN_MISSING, "Token is missing."))));
+			}
+			return chain.filter(exchange);
+		}
 
-        try {
-            // 解析外部访问令牌
-            accessTokenProvider.parseToken(authorization);
-        } catch (SecurityTokenException ex) {
-            if (!strictPath && ex.getResultCode() == SecurityResultCodeEnum.TOKEN_EXPIRED) {
-                log.debug("Gateway token is expired but allowed in light mode, path={}", path);
-                return chain.filter(exchange);
-            }
-            log.debug("Gateway token parse failed: code={}, path={}", ex.getCode(),
-                    exchange.getRequest().getURI().getPath());
-            return Mono.error(new GatewayBusinessException(SecurityTokenExceptionToGatewayResultCodeMapper.map(ex)));
-        }
-        return chain.filter(exchange);
-    }
+		try {
+			// 解析外部访问令牌
+			accessTokenProvider.parseToken(authorization);
+		}
+		catch (SecurityTokenException ex) {
+			if (!strictPath && ex.getResultCode() == SecurityResultCodeEnum.TOKEN_EXPIRED) {
+				log.debug("Gateway token is expired but allowed in light mode, path={}", path);
+				return chain.filter(exchange);
+			}
+			log.debug("Gateway token parse failed: code={}, path={}", ex.getCode(),
+					exchange.getRequest().getURI().getPath());
+			return Mono.error(new GatewayBusinessException(SecurityTokenExceptionToGatewayResultCodeMapper.map(ex)));
+		}
+		return chain.filter(exchange);
+	}
 
 }

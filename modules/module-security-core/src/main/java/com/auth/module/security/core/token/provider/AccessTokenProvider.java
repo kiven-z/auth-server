@@ -74,7 +74,8 @@ public class AccessTokenProvider extends AbstractSecurityTokenProvider {
 			return;
 		}
 
-		Claims claims = allowExpired ? jwtTokenProvider.getClaimsAllowExpired(token) : jwtTokenProvider.getClaims(token);
+		Claims claims = allowExpired ? jwtTokenProvider.getClaimsAllowExpired(token)
+				: jwtTokenProvider.getClaims(token);
 		Object raw = claims.get(PERM_VERSION);
 		Long permVersion = parsePermVersionClaim(raw);
 		builder.permVersion(permVersion);

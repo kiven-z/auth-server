@@ -74,9 +74,10 @@ class JwtValidateGlobalFilterTest {
 	@DisplayName("测试轻校验路径在令牌过期时放行")
 	void filter_shouldPass_whenLightPathAndTokenExpired() {
 		JwtValidateGlobalFilter filter = newFilter(true, List.of("/strict/**"));
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.method(HttpMethod.GET, "/open/api")
-			.header(HttpHeaders.AUTHORIZATION, "Bearer expired-token")
-			.build());
+		MockServerWebExchange exchange = MockServerWebExchange
+			.from(MockServerHttpRequest.method(HttpMethod.GET, "/open/api")
+				.header(HttpHeaders.AUTHORIZATION, "Bearer expired-token")
+				.build());
 		when(accessTokenProvider.parseToken("Bearer expired-token"))
 			.thenThrow(new SecurityTokenException(SecurityResultCodeEnum.TOKEN_EXPIRED, "Token has expired."));
 		when(filterChain.filter(exchange)).thenReturn(Mono.empty());
@@ -90,9 +91,10 @@ class JwtValidateGlobalFilterTest {
 	@DisplayName("测试严格路径在令牌过期时拒绝请求")
 	void filter_shouldReject_whenStrictPathAndTokenExpired() {
 		JwtValidateGlobalFilter filter = newFilter(true, List.of("/strict/**"));
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.method(HttpMethod.GET, "/strict/api")
-			.header(HttpHeaders.AUTHORIZATION, "Bearer expired-token")
-			.build());
+		MockServerWebExchange exchange = MockServerWebExchange
+			.from(MockServerHttpRequest.method(HttpMethod.GET, "/strict/api")
+				.header(HttpHeaders.AUTHORIZATION, "Bearer expired-token")
+				.build());
 		when(accessTokenProvider.parseToken("Bearer expired-token"))
 			.thenThrow(new SecurityTokenException(SecurityResultCodeEnum.TOKEN_EXPIRED, "Token has expired."));
 
@@ -106,9 +108,10 @@ class JwtValidateGlobalFilterTest {
 	@DisplayName("测试轻校验路径在令牌无效时拒绝请求")
 	void filter_shouldReject_whenTokenInvalid() {
 		JwtValidateGlobalFilter filter = newFilter(false, List.of("/strict/**"));
-		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.method(HttpMethod.GET, "/open/api")
-			.header(HttpHeaders.AUTHORIZATION, "Bearer invalid-token")
-			.build());
+		MockServerWebExchange exchange = MockServerWebExchange
+			.from(MockServerHttpRequest.method(HttpMethod.GET, "/open/api")
+				.header(HttpHeaders.AUTHORIZATION, "Bearer invalid-token")
+				.build());
 		when(accessTokenProvider.parseToken("Bearer invalid-token"))
 			.thenThrow(new SecurityTokenException(SecurityResultCodeEnum.TOKEN_INVALID, "Token is invalid."));
 

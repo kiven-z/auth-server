@@ -1,8 +1,10 @@
 package com.auth.service.auth.service.impl;
 
-import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.util.BooleanUtil;
-import cn.hutool.crypto.digest.MD5;
+import java.time.Duration;
+import java.util.Objects;
+
+import org.springframework.stereotype.Service;
+
 import com.auth.common.jwt.autoconfigure.JwtProperties;
 import com.auth.common.jwt.model.JwtUserToken;
 import com.auth.module.security.contract.api.UserSessionIndex;
@@ -18,11 +20,11 @@ import com.auth.service.auth.model.enums.AuthLoginLogType;
 import com.auth.service.auth.model.response.RefreshTokenResponse;
 import com.auth.service.auth.service.AuthLoginAuditService;
 import com.auth.service.auth.service.RefreshTokenService;
-import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.stereotype.Service;
 
-import java.time.Duration;
-import java.util.Objects;
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.BooleanUtil;
+import cn.hutool.crypto.digest.MD5;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * 用户刷新Token
@@ -54,20 +56,18 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 	/**
 	 * 刷新令牌
 	 * @param refreshToken 刷新令牌
-	 * @param authorizationHeader 必填访问令牌
 	 * @param request HTTP 请求
 	 * @return 刷新令牌响应
 	 */
 	@Override
-	public RefreshTokenResponse refreshToken(String refreshToken, String authorizationHeader,
-			HttpServletRequest request) {
+	public RefreshTokenResponse refreshToken(String refreshToken, HttpServletRequest request) {
 		try {
-			return refreshTokenInternal(refreshToken, authorizationHeader, request);
+			return refreshTokenInternal(refreshToken, request);
 		}
 		catch (AuthBusinessException ex) {
 			Long userId = tryResolveUserIdFromRefreshToken(refreshToken);
 			loginLogService.recordLoginLog(request, AuthLoginLogType.REFRESH_TOKEN,
-					AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR, userId, null, ex.getMessageKey(), null);
+					AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR, userId, "/", ex.getMessageKey(), null);
 			throw ex;
 		}
 	}
@@ -75,27 +75,19 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 	/**
 	 * 刷新令牌内部实现
 	 * @param refreshToken 刷新令牌
-	 * @param authorizationHeader 访问令牌
 	 * @param request HTTP 请求
 	 * @return 刷新令牌响应
 	 */
-	private RefreshTokenResponse refreshTokenInternal(String refreshToken, String authorizationHeader,
-			HttpServletRequest request) {
-		// 刷新Token和Access Token都要存在
+	private RefreshTokenResponse refreshTokenInternal(String refreshToken, HttpServletRequest request) {
+		// 刷新Token必须存在
 		if (CharSequenceUtil.isBlank(refreshToken)) {
 			throw new AuthBusinessException(AuthResultCode.REFRESH_TOKEN_MISSING);
-		}
-		if (CharSequenceUtil.isBlank(authorizationHeader)) {
-			throw new AuthBusinessException(AuthResultCode.TOKEN_PARSING_FAILED);
 		}
 
 		// 解析刷新Token是否合法、过期
 		JwtUserToken refreshUserToken = tokenService.parseRefreshToken(refreshToken);
 		Long refreshUserId = refreshUserToken.getUserId();
 		String refreshJti = refreshUserToken.getJti();
-		JwtUserToken accessUserToken = tokenService.parseExpiredAccessToken(authorizationHeader)
-			.orElseThrow(() -> new AuthBusinessException(AuthResultCode.TOKEN_PARSING_FAILED));
-		assertAccessRefreshIdentityMatched(refreshUserToken, accessUserToken);
 
 		// 加载会话索引
 		UserSessionIndex sessionIndex = userSessionIndexSession.loadUserSessionIndex(refreshJti)
@@ -142,22 +134,6 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 	}
 
 	/**
-	 * 断言访问令牌与刷新令牌身份一致
-	 * @param refreshUserToken 刷新令牌载荷
-	 * @param accessUserToken 访问令牌载荷
-	 */
-	private void assertAccessRefreshIdentityMatched(JwtUserToken refreshUserToken, JwtUserToken accessUserToken) {
-		Long refreshUserId = refreshUserToken.getUserId();
-		Long accessUserId = accessUserToken.getUserId();
-		String refreshJti = refreshUserToken.getJti();
-		String accessJti = accessUserToken.getJti();
-		boolean matched = Objects.equals(refreshUserId, accessUserId) && Objects.equals(refreshJti, accessJti);
-		if (BooleanUtil.isFalse(matched)) {
-			throw new AuthBusinessException(AuthResultCode.TOKEN_PARSING_FAILED);
-		}
-	}
-
-	/**
 	 * 断言刷新令牌与会话中存储的哈希及过期时间一致。
 	 * <p>
 	 * 过期仅抛错；哈希为空或与请求令牌摘要不一致时视为脏会话，先撤销服务端会话再抛错（与文档强会话绑定一致）。
@@ -170,11 +146,17 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 	private void assertRefreshTokenMatches(Long userId, String jti, UserSessionIndex sessionIndex,
 			String refreshToken) {
 		Long expiresAt = sessionIndex.getRefreshTokenExpiresAt();
+		Long sessionUserId = sessionIndex.getUserId();
 		String redisHash = sessionIndex.getRefreshTokenHash();
 		String requestHash = MD5.create().digestHex16(refreshToken);
 		long now = System.currentTimeMillis();
 
 		if (expiresAt == null || expiresAt <= now) {
+			throw new AuthBusinessException(AuthResultCode.REFRESH_TOKEN_EXPIRED);
+		}
+		if (BooleanUtil.isFalse(Objects.equals(userId, sessionUserId))) {
+			userSessionIndexSession.deleteSession(jti);
+			userSessionIndexSession.removeActiveSession(userId, jti);
 			throw new AuthBusinessException(AuthResultCode.REFRESH_TOKEN_EXPIRED);
 		}
 

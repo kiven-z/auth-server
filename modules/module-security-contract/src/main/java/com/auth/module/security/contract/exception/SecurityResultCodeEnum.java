@@ -1,8 +1,8 @@
 package com.auth.module.security.contract.exception;
 
-import lombok.Getter;
-
 import java.util.Map;
+
+import lombok.Getter;
 
 /**
  * SecurityResultCodeEnum 是安全模块的公共业务代码，用于表示安全模块的错误状态 (module=00).
@@ -65,6 +65,10 @@ public enum SecurityResultCodeEnum {
 	 */
 	TOKEN_KIND_MISMATCH(401, 409, "TOKEN_KIND_MISMATCH", "security.token.kind.mismatch",
 			"Token kind is not supported."),
+	/**
+	 * 未认证（当前请求未建立有效认证主体；不等同于令牌格式错误或验签失败）
+	 */
+	NOT_AUTHENTICATED(401, 410, "NOT_AUTHENTICATED", "security.not.authenticated", "Not authenticated."),
 
 	/**
 	 * 未知错误（兜底；{@link #getError()} 与 {@link #TOKEN_INVALID} 相同以保持历史默认行为）

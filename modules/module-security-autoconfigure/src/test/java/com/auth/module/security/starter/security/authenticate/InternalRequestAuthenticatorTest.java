@@ -20,50 +20,51 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class InternalRequestAuthenticatorTest {
 
-    @Mock
-    private InternalTokenProvider internalTokenProvider;
+	@Mock
+	private InternalTokenProvider internalTokenProvider;
 
-    @Test
-    @DisplayName("测试支持判断：存在 X-Internal-JWT 时返回 true")
-    void supports_shouldReturnTrue_whenInternalHeaderPresent() {
-        InternalRequestAuthenticator authenticator = new InternalRequestAuthenticator(internalTokenProvider);
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        request.addHeader(SecurityInternalTokenConstants.INTERNAL_HEADER, "internal-token");
+	@Test
+	@DisplayName("测试支持判断：存在 X-Internal-JWT 时返回 true")
+	void supports_shouldReturnTrue_whenInternalHeaderPresent() {
+		InternalRequestAuthenticator authenticator = new InternalRequestAuthenticator(internalTokenProvider);
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addHeader(SecurityInternalTokenConstants.INTERNAL_HEADER, "internal-token");
 
-        assertTrue(authenticator.supports(request));
-    }
+		assertTrue(authenticator.supports(request));
+	}
 
-    @Test
-    @DisplayName("测试内部服务令牌认证成功并写入服务角色")
-    void authenticate_shouldReturnServiceProfile_whenPrincipalTypeIsService() {
-        InternalRequestAuthenticator authenticator = new InternalRequestAuthenticator(internalTokenProvider);
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        request.addHeader(SecurityInternalTokenConstants.INTERNAL_HEADER, "internal-token");
-        when(internalTokenProvider.parseToken("internal-token")).thenReturn(SecurityTokenResult.builder()
-                .principalType(SecurityInternalTokenConstants.PRINCIPAL_TYPE_SERVICE)
-                .serviceId("service-auth")
-                .build());
+	@Test
+	@DisplayName("测试内部服务令牌认证成功并写入服务角色")
+	void authenticate_shouldReturnServiceProfile_whenPrincipalTypeIsService() {
+		InternalRequestAuthenticator authenticator = new InternalRequestAuthenticator(internalTokenProvider);
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addHeader(SecurityInternalTokenConstants.INTERNAL_HEADER, "internal-token");
+		when(internalTokenProvider.parseToken("internal-token")).thenReturn(SecurityTokenResult.builder()
+			.principalType(SecurityInternalTokenConstants.PRINCIPAL_TYPE_SERVICE)
+			.serviceId("service-auth")
+			.build());
 
-        var profile = authenticator.authenticate(request);
+		var profile = authenticator.authenticate(request);
 
-        assertEquals("service-auth", profile.getUsername());
-        assertNotNull(profile.getRoles());
-        assertTrue(profile.getRoles().contains(SecurityInternalTokenConstants.ROLE_INTERNAL_SERVICE));
-        verify(internalTokenProvider).parseToken("internal-token");
-    }
+		assertEquals("service-auth", profile.getUsername());
+		assertNotNull(profile.getRoles());
+		assertTrue(profile.getRoles().contains(SecurityInternalTokenConstants.ROLE_INTERNAL_SERVICE));
+		verify(internalTokenProvider).parseToken("internal-token");
+	}
 
-    @Test
-    @DisplayName("测试内部接口拒绝用户主体令牌")
-    void authenticate_shouldThrowTokenInvalid_whenPrincipalTypeIsUser() {
-        InternalRequestAuthenticator authenticator = new InternalRequestAuthenticator(internalTokenProvider);
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        request.addHeader(SecurityInternalTokenConstants.INTERNAL_HEADER, "user-token");
-        when(internalTokenProvider.parseToken("user-token")).thenReturn(SecurityTokenResult.builder()
-                .principalType(SecurityInternalTokenConstants.PRINCIPAL_TYPE_USER)
-                .build());
+	@Test
+	@DisplayName("测试内部接口拒绝用户主体令牌")
+	void authenticate_shouldThrowTokenInvalid_whenPrincipalTypeIsUser() {
+		InternalRequestAuthenticator authenticator = new InternalRequestAuthenticator(internalTokenProvider);
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.addHeader(SecurityInternalTokenConstants.INTERNAL_HEADER, "user-token");
+		when(internalTokenProvider.parseToken("user-token")).thenReturn(SecurityTokenResult.builder()
+			.principalType(SecurityInternalTokenConstants.PRINCIPAL_TYPE_USER)
+			.build());
 
-        SecurityTokenException ex = assertThrows(SecurityTokenException.class, () -> authenticator.authenticate(request));
-        assertEquals(SecurityResultCodeEnum.TOKEN_INVALID, ex.getResultCode());
-    }
+		SecurityTokenException ex = assertThrows(SecurityTokenException.class,
+				() -> authenticator.authenticate(request));
+		assertEquals(SecurityResultCodeEnum.TOKEN_INVALID, ex.getResultCode());
+	}
 
 }

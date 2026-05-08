@@ -2,7 +2,6 @@ package com.auth.service.auth.controller;
 
 import static com.auth.common.jwt.provider.AbstractJwtTokenProvider.*;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -67,8 +66,7 @@ public class AuthController {
 	public Result<RefreshTokenResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest requestBody,
 			HttpServletRequest request) {
 		String refreshToken = requestBody.getRefreshToken();
-		String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
-		RefreshTokenResponse data = refreshTokenService.refreshToken(refreshToken, authorization, request);
+		RefreshTokenResponse data = refreshTokenService.refreshToken(refreshToken, request);
 
 		return Result.success(data);
 	}
