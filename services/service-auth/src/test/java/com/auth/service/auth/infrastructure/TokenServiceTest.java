@@ -99,14 +99,14 @@ class TokenServiceTest {
 	void parseExpiredAccessToken_shouldUseAllowExpiredProvider() {
 		JwtUserToken userToken = JwtUserToken.builder().userId(TestConstants.USER_ID).jti(TestConstants.JTI).build();
 		SecurityTokenResult result = SecurityTokenResult.builder().userToken(userToken).build();
-		when(accessTokenProvider.parseToken("expired")).thenReturn(result);
+		when(accessTokenProvider.parseTokenAllowExpired("expired")).thenReturn(result);
 		TokenService service = new TokenService(accessTokenProvider, refreshTokenProvider, jwtProperties);
 
 		Optional<JwtUserToken> optional = service.parseExpiredAccessToken("expired");
 
 		assertTrue(optional.isPresent());
 		assertEquals(TestConstants.USER_ID, optional.get().getUserId());
-		verify(accessTokenProvider).parseToken("expired");
+		verify(accessTokenProvider).parseTokenAllowExpired("expired");
 	}
 
 	@Test

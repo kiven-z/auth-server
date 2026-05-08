@@ -1,17 +1,19 @@
 package com.auth.service.auth.infrastructure.login;
 
-import cn.hutool.core.text.CharSequenceUtil;
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+import org.springframework.stereotype.Component;
+
 import com.auth.common.jwt.autoconfigure.JwtProperties;
 import com.auth.common.jwt.model.JwtUserToken;
 import com.auth.module.security.core.token.provider.AccessTokenProvider;
 import com.auth.module.security.core.token.provider.RefreshTokenProvider;
 import com.auth.service.auth.exception.AuthBusinessException;
 import com.auth.service.auth.exception.AuthResultCode;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
-import java.util.Optional;
+import cn.hutool.core.text.CharSequenceUtil;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 令牌服务：负责访问令牌与刷新令牌的签发、过期时间计算及后续解析。
@@ -99,7 +101,7 @@ public class TokenService {
 			return Optional.empty();
 		}
 		try {
-			JwtUserToken userToken = accessTokenProvider.parseToken(token).getUserToken();
+			JwtUserToken userToken = accessTokenProvider.parseTokenAllowExpired(token).getUserToken();
 			return Optional.of(requireUserToken(userToken, AuthResultCode.TOKEN_PARSING_FAILED));
 		}
 		catch (Exception exception) {

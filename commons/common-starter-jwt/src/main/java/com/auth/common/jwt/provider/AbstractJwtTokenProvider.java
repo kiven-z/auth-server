@@ -1,6 +1,9 @@
 package com.auth.common.jwt.provider;
 
-import cn.hutool.core.text.CharSequenceUtil;
+import java.util.Date;
+
+import org.springframework.util.Assert;
+
 import com.auth.common.jwt.api.JwtTokenProvider;
 import com.auth.common.jwt.autoconfigure.JwtProperties;
 import com.auth.common.jwt.exception.InvalidTokenException;
@@ -8,11 +11,11 @@ import com.auth.common.jwt.exception.JwtExpiredException;
 import com.auth.common.jwt.model.JwtUserToken;
 import com.auth.common.jwt.support.JwtAudienceCodec;
 import com.auth.common.jwt.support.JwtExceptionTranslator;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtParser;
-import org.springframework.util.Assert;
 
-import java.util.Date;
+import cn.hutool.core.text.CharSequenceUtil;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtParser;
 
 /**
  * JJWT 0.12 模板：子类绑定算法与密钥材料
@@ -85,6 +88,16 @@ public abstract class AbstractJwtTokenProvider implements JwtTokenProvider {
 	@Override
 	public JwtUserToken parseToken(String token) {
 		Claims claims = getClaims(token);
+		return parseUserTokenFromClaims(claims);
+	}
+
+	@Override
+	public JwtUserToken parseTokenAllowExpired(String token) {
+		Claims claims = getClaimsAllowExpired(token);
+		return parseUserTokenFromClaims(claims);
+	}
+
+	private JwtUserToken parseUserTokenFromClaims(Claims claims) {
 		try {
 			String subject = claims.getSubject();
 			long userId = requireNumericUserIdSubject(subject);
@@ -111,6 +124,24 @@ public abstract class AbstractJwtTokenProvider implements JwtTokenProvider {
 		try {
 			String normalized = normalizeToken(token);
 			return createParser().parseSignedClaims(normalized).getPayload();
+		}
+		catch (Exception ex) {
+			throw JwtExceptionTranslator.translate(ex);
+		}
+	}
+
+	@Override
+	public Claims getClaimsAllowExpired(String token) {
+		try {
+			String normalized = normalizeToken(token);
+			return createParser().parseSignedClaims(normalized).getPayload();
+		}
+		catch (ExpiredJwtException ex) {
+			Claims claims = ex.getClaims();
+			if (claims != null) {
+				return claims;
+			}
+			throw JwtExceptionTranslator.translate(ex);
 		}
 		catch (Exception ex) {
 			throw JwtExceptionTranslator.translate(ex);

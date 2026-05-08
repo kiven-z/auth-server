@@ -1,19 +1,20 @@
 package com.auth.module.security.core.token.provider;
 
+import static com.auth.module.security.contract.constants.SecurityExternalTokenConstants.*;
+
+import java.util.Date;
+import java.util.Map;
+import java.util.Objects;
+
 import com.auth.common.jwt.api.JwtTokenProvider;
 import com.auth.common.jwt.autoconfigure.JwtProperties;
 import com.auth.common.jwt.model.JwtUserToken;
 import com.auth.module.security.contract.constants.SecurityTokenKind;
 import com.auth.module.security.core.token.model.SecurityTokenResult;
 import com.auth.module.security.core.token.model.SecurityTokenResult.SecurityTokenResultBuilder;
+
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
-
-import java.util.Date;
-import java.util.Map;
-import java.util.Objects;
-
-import static com.auth.module.security.contract.constants.SecurityExternalTokenConstants.TOKEN_TYPE;
 
 /**
  * 刷新令牌
@@ -74,7 +75,7 @@ public class RefreshTokenProvider extends AbstractSecurityTokenProvider {
 	 */
 	@Override
 	protected void enrichTokenResult(SecurityTokenResultBuilder builder, String token, JwtUserToken jwtUserToken,
-			SecurityTokenKind kind) {
+			SecurityTokenKind kind, boolean allowExpired) {
 		// Refresh Token does not carry perm_version
 	}
 

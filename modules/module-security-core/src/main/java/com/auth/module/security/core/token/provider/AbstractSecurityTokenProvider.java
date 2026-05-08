@@ -68,13 +68,23 @@ public abstract class AbstractSecurityTokenProvider implements SecurityTokenProv
 	 */
 	@Override
 	public SecurityTokenResult parseToken(String token) {
+		return parseTokenInternal(token, false);
+	}
+
+	@Override
+	public SecurityTokenResult parseTokenAllowExpired(String token) {
+		return parseTokenInternal(token, true);
+	}
+
+	private SecurityTokenResult parseTokenInternal(String token, boolean allowExpired) {
 		String normalizedToken = normalizeToken(token);
 		if (CharSequenceUtil.isBlank(normalizedToken)) {
 			throw new SecurityTokenException(SecurityResultCodeEnum.TOKEN_MISSING, "Token is missing.");
 		}
 
 		try {
-			Claims claims = jwtTokenProvider.getClaims(normalizedToken);
+			Claims claims = allowExpired ? jwtTokenProvider.getClaimsAllowExpired(normalizedToken)
+					: jwtTokenProvider.getClaims(normalizedToken);
 			Object raw = claims.get(TOKEN_TYPE);
 			String tokenKind = getTokenKind();
 
@@ -82,7 +92,8 @@ public abstract class AbstractSecurityTokenProvider implements SecurityTokenProv
 				throw new SecurityTokenException(SecurityResultCodeEnum.TOKEN_KIND_MISMATCH, "Token kind mismatch.");
 			}
 
-			JwtUserToken jwtUserToken = jwtTokenProvider.parseToken(normalizedToken);
+			JwtUserToken jwtUserToken = allowExpired ? jwtTokenProvider.parseTokenAllowExpired(normalizedToken)
+					: jwtTokenProvider.parseToken(normalizedToken);
 
 			SecurityTokenKind kind = SecurityTokenKind.of(tokenKind);
 			if (kind == null) {
@@ -93,7 +104,7 @@ public abstract class AbstractSecurityTokenProvider implements SecurityTokenProv
 				.kind(kind)
 				.rawToken(normalizedToken)
 				.userToken(jwtUserToken);
-			enrichTokenResult(builder, normalizedToken, jwtUserToken, kind);
+			enrichTokenResult(builder, normalizedToken, jwtUserToken, kind, allowExpired);
 			return builder.build();
 		}
 		catch (SecurityTokenException ex) {
@@ -129,8 +140,9 @@ public abstract class AbstractSecurityTokenProvider implements SecurityTokenProv
 	 * @param token 令牌
 	 * @param jwtUserToken JWT用户令牌
 	 * @param kind 令牌类型
+	 * @param allowExpired 是否允许过期
 	 */
 	protected abstract void enrichTokenResult(SecurityTokenResult.SecurityTokenResultBuilder builder, String token,
-			JwtUserToken jwtUserToken, SecurityTokenKind kind);
+			JwtUserToken jwtUserToken, SecurityTokenKind kind, boolean allowExpired);
 
 }
