@@ -5,7 +5,7 @@ import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.email.model.EmailSendDTO;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.common.helper.PageResultHelper;
+import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.message.mapper.EmailTemplateMapper;
 import com.auth.service.system.message.model.EmailTemplateEntity;
 import com.auth.service.system.message.model.EmailTemplateRequireFieldRow;
@@ -41,18 +41,17 @@ import static com.auth.service.system.common.exception.SystemResultCodeEnum.DATA
 public class EmailTemplateServiceImpl extends ServiceImpl<EmailTemplateMapper, EmailTemplateEntity>
 		implements EmailTemplateService {
 
-	/**
-	 * 分页结果辅助：填充创建人/更新人用户名等展示字段
-	 */
-	private final PageResultHelper pageResultHelper;
+	/** 审计用户展示名：填充创建人/更新人用户名 */
+	private final AuditUserDisplayService auditUserDisplayService;
 
 	private final EmailSendService emailSendService;
 
 	/**
-	 * @param pageResultHelper 分页展示辅助
+	 * @param auditUserDisplayService 创建人/更新人用户名解析
 	 */
-	public EmailTemplateServiceImpl(PageResultHelper pageResultHelper, EmailSendService emailSendService) {
-		this.pageResultHelper = pageResultHelper;
+	public EmailTemplateServiceImpl(AuditUserDisplayService auditUserDisplayService,
+			EmailSendService emailSendService) {
+		this.auditUserDisplayService = auditUserDisplayService;
 		this.emailSendService = emailSendService;
 	}
 
@@ -66,7 +65,7 @@ public class EmailTemplateServiceImpl extends ServiceImpl<EmailTemplateMapper, E
 	public PageResponse<EmailTemplatePageResponse> getEmailTemplatePage(Page<EmailTemplateEntity> pageParams,
 			EmailTemplateQuery query) {
 		IPage<EmailTemplatePageResponse> page = baseMapper.selectListByPage(pageParams, query);
-		pageResultHelper.setUpdateWithCreateUsername(page);
+		auditUserDisplayService.enrichAuditUsernames(page);
 		return PageResponse.of(page);
 	}
 

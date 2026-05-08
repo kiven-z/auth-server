@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.common.helper.PageResultHelper;
+import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.schedule.mapper.SysJobGroupMapper;
 import com.auth.service.system.schedule.mapper.SysJobLogMapper;
 import com.auth.service.system.schedule.mapper.SysJobMapper;
@@ -63,7 +63,7 @@ public class SysJobServiceImpl extends ServiceImpl<SysJobMapper, SysJobEntity> i
 
 	private final ApplicationContext applicationContext;
 
-	private final PageResultHelper pageResultHelper;
+	private final AuditUserDisplayService auditUserDisplayService;
 
 	private final SysJobGroupMapper sysJobGroupMapper;
 
@@ -72,12 +72,12 @@ public class SysJobServiceImpl extends ServiceImpl<SysJobMapper, SysJobEntity> i
 	private final Scheduler scheduler;
 
 	public SysJobServiceImpl(SysJobSchedulerManager quartzAdmin, QuartzTaskRegistry quartzTaskRegistry,
-			ApplicationContext applicationContext, PageResultHelper pageResultHelper,
+			ApplicationContext applicationContext, AuditUserDisplayService auditUserDisplayService,
 			SysJobGroupMapper sysJobGroupMapper, SysJobLogMapper sysJobLogMapper, Scheduler scheduler) {
 		this.quartzAdmin = quartzAdmin;
 		this.quartzTaskRegistry = quartzTaskRegistry;
 		this.applicationContext = applicationContext;
-		this.pageResultHelper = pageResultHelper;
+		this.auditUserDisplayService = auditUserDisplayService;
 		this.sysJobGroupMapper = sysJobGroupMapper;
 		this.sysJobLogMapper = sysJobLogMapper;
 		this.scheduler = scheduler;
@@ -115,7 +115,7 @@ public class SysJobServiceImpl extends ServiceImpl<SysJobMapper, SysJobEntity> i
 	@Override
 	public PageResponse<SysJobPageResponse> getPage(Page<SysJobEntity> pageParams, SysJobQuery query) {
 		IPage<SysJobPageResponse> page = baseMapper.selectListByPage(pageParams, query);
-		pageResultHelper.setUpdateWithCreateUsername(page);
+		auditUserDisplayService.enrichAuditUsernames(page);
 		for (SysJobPageResponse row : page.getRecords()) {
 			enrichFireTimes(row);
 		}

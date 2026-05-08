@@ -1,11 +1,15 @@
 package com.auth.service.system.schedule.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.util.BooleanUtil;
+import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.common.helper.PageResultHelper;
+import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.schedule.mapper.SysJobGroupMapper;
 import com.auth.service.system.schedule.mapper.SysJobMapper;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
@@ -19,12 +23,10 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.BooleanUtil;
 
 /**
  * 任务分组实现
@@ -36,12 +38,12 @@ import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
 public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJobGroupEntity>
 		implements SysJobGroupService {
 
-	private final PageResultHelper pageResultHelper;
+	private final AuditUserDisplayService auditUserDisplayService;
 
 	private final SysJobMapper sysJobMapper;
 
-	public SysJobGroupServiceImpl(PageResultHelper pageResultHelper, SysJobMapper sysJobMapper) {
-		this.pageResultHelper = pageResultHelper;
+	public SysJobGroupServiceImpl(AuditUserDisplayService auditUserDisplayService, SysJobMapper sysJobMapper) {
+		this.auditUserDisplayService = auditUserDisplayService;
 		this.sysJobMapper = sysJobMapper;
 	}
 
@@ -54,7 +56,7 @@ public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJo
 	@Override
 	public PageResponse<SysJobGroupPageResponse> getPage(Page<SysJobGroupEntity> pageParams, SysJobGroupQuery query) {
 		IPage<SysJobGroupPageResponse> page = baseMapper.selectListByPage(pageParams, query);
-		pageResultHelper.setUpdateWithCreateUsername(page);
+		auditUserDisplayService.enrichAuditUsernames(page);
 
 		return PageResponse.of(page);
 	}
