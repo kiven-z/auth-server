@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -179,7 +180,7 @@ public class EmailSendServiceImpl implements EmailSendService {
 			}
 
 			// MultipartFile 实现了 InputStreamSource，file 已在上方做空值检查
-			helper.addAttachment(filename, file);
+			helper.addAttachment(Objects.requireNonNull(filename), Objects.requireNonNull(file));
 		}
 	}
 

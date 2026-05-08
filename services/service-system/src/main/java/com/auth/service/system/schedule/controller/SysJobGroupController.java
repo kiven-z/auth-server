@@ -53,6 +53,8 @@ public class SysJobGroupController {
 	public Result<List<SysJobGroupPageResponse>> options(
 			@RequestParam(value = "keyword", required = false) String keyword,
 			@RequestParam(value = "limit", defaultValue = "20") int limit) {
+		int max = Math.max(limit, 1);
+		limit = Math.min(max, 60);
 		List<SysJobGroupPageResponse> responses = sysJobGroupService.listEnabledOptions(keyword, limit);
 
 		return Result.success(responses);

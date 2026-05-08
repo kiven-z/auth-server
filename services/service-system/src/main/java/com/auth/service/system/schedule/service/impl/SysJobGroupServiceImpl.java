@@ -1,12 +1,8 @@
 package com.auth.service.system.schedule.service.impl;
 
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
-
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.BooleanUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
@@ -23,10 +19,12 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.util.BooleanUtil;
+import java.util.List;
+
+import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
 
 /**
  * 任务分组实现
@@ -69,9 +67,10 @@ public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJo
 	 */
 	@Override
 	public List<SysJobGroupPageResponse> listEnabledOptions(String keyword, int limit) {
-		int maxLimit = Math.min(Math.max(limit, 1), 60);
 		String searchKeyword = CharSequenceUtil.trim(keyword);
-		return baseMapper.selectEnabledOptions(searchKeyword, maxLimit);
+		List<SysJobGroupPageResponse> list = baseMapper.selectEnabledOptions(searchKeyword, limit);
+		auditUserDisplayService.enrichAuditUsernames(list);
+		return list;
 	}
 
 	/**

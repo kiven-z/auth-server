@@ -33,9 +33,9 @@ class SystemModuleServiceImplTest {
 
 		// ── 基础查询 ──────────────────────────────────────────────
 		result = service.list(null, null, null);
-		assertThat(result).hasSize(29);
-		assertThat(result).allSatisfy(opt -> assertAll(() -> assertThat(opt.getName()).isNotBlank(),
-				() -> assertThat(opt.getType()).isNotBlank(), () -> assertThat(opt.getLabel()).isNotBlank()));
+		assertThat(result).hasSize(29)
+			.allSatisfy(opt -> assertAll(() -> assertThat(opt.getName()).isNotBlank(),
+					() -> assertThat(opt.getType()).isNotBlank(), () -> assertThat(opt.getLabel()).isNotBlank()));
 
 		// limit=5 时只返回 5 条
 		result = service.list(null, null, 5);
@@ -47,16 +47,13 @@ class SystemModuleServiceImplTest {
 
 		// ── 按分类筛选 ────────────────────────────────────────────
 		result = service.list(null, "SYS", null);
-		assertThat(result).hasSize(15);
-		assertThat(result).allMatch(opt -> "SYS".equals(opt.getType()));
+		assertThat(result).hasSize(15).allMatch(opt -> "SYS".equals(opt.getType()));
 
 		result = service.list(null, "USER", null);
-		assertThat(result).hasSize(3);
-		assertThat(result).allMatch(opt -> "USER".equals(opt.getType()));
+		assertThat(result).hasSize(3).allMatch(opt -> "USER".equals(opt.getType()));
 
 		result = service.list(null, "LOG", null);
-		assertThat(result).hasSize(3);
-		assertThat(result).allMatch(opt -> "LOG".equals(opt.getType()));
+		assertThat(result).hasSize(3).allMatch(opt -> "LOG".equals(opt.getType()));
 
 		result = service.list(null, "GRANT", null);
 		assertThat(result).hasSize(2);
@@ -74,18 +71,15 @@ class SystemModuleServiceImplTest {
 		// ── 关键词模糊匹配 ────────────────────────────────────────
 		// 关键词模糊匹配枚举 name，例如 'USER' 匹配出 USER 相关模块
 		result = service.list("USER", null, null);
-		assertThat(result).isNotEmpty();
-		assertThat(result).allMatch(opt -> opt.getName().contains("USER"));
+		assertThat(result).isNotEmpty().allMatch(opt -> opt.getName().contains("USER"));
 
 		// 关键词模糊匹配中文描述，例如 '日志' 匹配出所有日志模块
 		result = service.list("日志", null, null);
-		assertThat(result).isNotEmpty();
-		assertThat(result).allMatch(opt -> opt.getLabel().contains("日志"));
+		assertThat(result).isNotEmpty().allMatch(opt -> opt.getLabel().contains("日志"));
 
 		// 关键词忽略大小写匹配枚举 name，例如 'sys' 匹配 SYS 开头模块
 		result = service.list("sys", null, null);
-		assertThat(result).isNotEmpty();
-		assertThat(result).allMatch(opt -> opt.getName().startsWith("SYS"));
+		assertThat(result).isNotEmpty().allMatch(opt -> opt.getName().startsWith("SYS"));
 
 		// 关键词无匹配时返回空列表
 		result = service.list("__不存在的关键词__", null, null);
@@ -94,20 +88,16 @@ class SystemModuleServiceImplTest {
 		// ── 组合筛选 ──────────────────────────────────────────────
 		// 关键词+分类组合：SYS 中搜索 '用户' 仅匹配 SYS_USER
 		result = service.list("用户", "SYS", null);
-		assertThat(result).hasSize(1);
-		assertThat(result.get(0).getName()).isEqualTo("SYS_USER");
+		assertThat(result).hasSize(1).allMatch(opt -> opt.getName().equals("SYS_USER"));
 
 		// 关键词+分类+limit 组合：AUDIT 中搜索 '日志' 限制 2 条
 		result = service.list("日志", "AUDIT", 2);
-		assertThat(result).hasSize(2);
-		assertThat(result).allMatch(opt -> "AUDIT".equals(opt.getType()));
-		assertThat(result).allMatch(opt -> opt.getLabel().contains("日志"));
+		assertThat(result).hasSize(2).allMatch(opt -> "AUDIT".equals(opt.getType()) && opt.getLabel().contains("日志"));
 
 		// ── 特殊处理 ──────────────────────────────────────────────
 		// 关键词有前后空格时自动去除空白
 		result = service.list("  角色  ", null, null);
-		assertThat(result).isNotEmpty();
-		assertThat(result).allMatch(opt -> opt.getName().contains("ROLE"));
+		assertThat(result).isNotEmpty().allMatch(opt -> opt.getName().contains("ROLE"));
 	}
 
 }

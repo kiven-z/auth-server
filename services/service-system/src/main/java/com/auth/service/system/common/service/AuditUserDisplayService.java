@@ -1,6 +1,7 @@
 package com.auth.service.system.common.service;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import com.auth.common.core.model.response.BaseResponse;
@@ -26,5 +27,12 @@ public interface AuditUserDisplayService {
 	 * @param <T> 继承 {@link BaseResponse} 的行类型
 	 */
 	<T extends BaseResponse> void enrichAuditUsernames(IPage<T> page);
+
+	/**
+	 * 为列表中的每条 {@link BaseResponse} 填充
+	 * {@code createUsername}、{@code updateUsername}（与分页查询同源逻辑）。
+	 * @param records 行列表；为 {@code null} 或空时不处理
+	 */
+	void enrichAuditUsernames(List<? extends BaseResponse> records);
 
 }

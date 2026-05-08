@@ -59,8 +59,7 @@ class AuditUserDisplayServiceImplTest {
 
 		when(userMapper.selectBatchIds(List.of(1L, 2L))).thenReturn(List.of(u1, u2));
 
-		Map<Long, String> result = auditUserDisplayService
-			.mapUsernamesByIds(Arrays.asList(1L, null, 1L, 2L));
+		Map<Long, String> result = auditUserDisplayService.mapUsernamesByIds(Arrays.asList(1L, null, 1L, 2L));
 
 		assertThat(result).containsExactlyInAnyOrderEntriesOf(Map.of(1L, "alice", 2L, "bob"));
 	}
@@ -93,6 +92,46 @@ class AuditUserDisplayServiceImplTest {
 
 		assertThat(row.getCreateUsername()).isEqualTo("alice");
 		assertThat(row.getUpdateUsername()).isEqualTo("bob");
+	}
+
+	@Test
+	@DisplayName("enrichAuditUsernames(List)：非分页列表同样填充用户名")
+	void enrichAuditUsernamesListSetsUsernamesOnRecords() {
+		BaseResponse row = new BaseResponse();
+		row.setCreateUser(1L);
+		row.setUpdateUser(2L);
+		List<BaseResponse> list = List.of(row);
+
+		UserEntity u1 = new UserEntity();
+		u1.setId(1L);
+		u1.setUsername("alice");
+		UserEntity u2 = new UserEntity();
+		u2.setId(2L);
+		u2.setUsername("bob");
+		when(userMapper.selectBatchIds(List.of(1L, 2L))).thenReturn(List.of(u1, u2));
+
+		auditUserDisplayService.enrichAuditUsernames(list);
+
+		assertThat(row.getCreateUsername()).isEqualTo("alice");
+		assertThat(row.getUpdateUsername()).isEqualTo("bob");
+	}
+
+	@Test
+	@DisplayName("enrichAuditUsernames(IPage)：page 为 null 时不访问数据库")
+	void enrichAuditUsernamesPageNullSkipsDb() {
+		auditUserDisplayService.enrichAuditUsernames((Page<BaseResponse>) null);
+		verifyNoInteractions(userMapper);
+	}
+
+	@Test
+	@DisplayName("enrichAuditUsernames(IPage)：当前页无记录时不访问用户表")
+	void enrichAuditUsernamesPageEmptyRecordsSkipsDb() {
+		Page<BaseResponse> page = new Page<>();
+		page.setRecords(Collections.emptyList());
+
+		auditUserDisplayService.enrichAuditUsernames(page);
+
+		verifyNoInteractions(userMapper);
 	}
 
 }

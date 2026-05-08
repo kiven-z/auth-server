@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.auth.service.system.admin.mapper.SysRoleMapper">
 
-    <!-- 角色分页列表：左连接用户表取用户名；不使用 AS 关键字，依赖下划线转小驼峰 -->
+    <!-- 角色分页列表：仅查业务表；创建人/更新人用户名由 {@link com.auth.service.system.common.service.AuditUserDisplayService} 批量补全 -->
     <select id="selectListByPage" resultType="com.auth.service.system.admin.model.vo.SysRolePageResponse">
         SELECT
         r.id,
@@ -14,12 +14,8 @@
         r.create_time,
         r.update_time,
         r.create_user,
-        r.update_user,
-        IF(cu.id IS NULL OR cu.is_deleted = 1, NULL, cu.username) create_username,
-        IF(uu.id IS NULL OR uu.is_deleted = 1, NULL, uu.username) update_username
+        r.update_user
         FROM sys_role r
-        LEFT JOIN sys_user cu ON r.create_user = cu.id
-        LEFT JOIN sys_user uu ON r.update_user = uu.id
         <where>
             r.is_deleted = 0
             <if test="query.roleCode != null and query.roleCode != ''">
