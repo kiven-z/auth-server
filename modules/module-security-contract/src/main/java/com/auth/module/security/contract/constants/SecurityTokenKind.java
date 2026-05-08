@@ -1,5 +1,7 @@
 package com.auth.module.security.contract.constants;
 
+import cn.hutool.core.text.CharSequenceUtil;
+
 /**
  * 令牌类型（从请求上下文中解析）
  *
@@ -28,7 +30,7 @@ public enum SecurityTokenKind {
 	 * @return 令牌类型
 	 */
 	public static SecurityTokenKind of(String token) {
-		if (token == null || token.isBlank()) {
+		if (CharSequenceUtil.isBlank(token)) {
 			return null;
 		}
 		try {

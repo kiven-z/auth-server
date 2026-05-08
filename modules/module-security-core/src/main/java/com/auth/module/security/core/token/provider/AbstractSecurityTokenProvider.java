@@ -1,8 +1,8 @@
 package com.auth.module.security.core.token.provider;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.util.BooleanUtil;
 import com.auth.common.jwt.api.JwtTokenProvider;
+import com.auth.common.jwt.exception.JwtExpiredException;
 import com.auth.common.jwt.model.JwtUserToken;
 import com.auth.module.security.contract.constants.SecurityTokenKind;
 import com.auth.module.security.contract.exception.SecurityResultCodeEnum;
@@ -12,6 +12,7 @@ import io.jsonwebtoken.Claims;
 
 import java.util.Date;
 
+import static com.auth.common.jwt.provider.AbstractJwtTokenProvider.BEARER_PREFIX;
 import static com.auth.module.security.contract.constants.SecurityExternalTokenConstants.TOKEN_TYPE;
 
 /**
@@ -44,34 +45,13 @@ public abstract class AbstractSecurityTokenProvider implements SecurityTokenProv
 	 */
 	@Override
 	public boolean verifyToken(String token) {
-		if (CharSequenceUtil.isBlank(token)) {
+		try {
+			parseToken(token);
+			return true;
+		}
+		catch (Exception ex) {
 			return false;
 		}
-		// 验证令牌是否合法
-		boolean validated = jwtTokenProvider.validateToken(token);
-		if (BooleanUtil.isFalse(validated)) {
-			return false;
-		}
-
-		// 是否过期
-		long remainingSeconds = jwtTokenProvider.getRemainingSeconds(token);
-		if (remainingSeconds <= 0) {
-			return false;
-		}
-
-		// 是否是对应的类型
-		Claims claims = jwtTokenProvider.getClaims(token);
-		Object object = claims.get(TOKEN_TYPE);
-		if (object == null) {
-			return false;
-		}
-		String value = object.toString();
-		boolean valueIsNull = CharSequenceUtil.equalsIgnoreCase(value, "null");
-		if (valueIsNull) {
-			return false;
-		}
-
-		return CharSequenceUtil.equals(value, getTokenKind());
 	}
 
 	/**
@@ -87,37 +67,44 @@ public abstract class AbstractSecurityTokenProvider implements SecurityTokenProv
 	 */
 	@Override
 	public SecurityTokenResult parseToken(String token) {
-		// 验证令牌是否为空
-		if (CharSequenceUtil.isBlank(token)) {
+		String normalizedToken = CharSequenceUtil.subSuf(token, BEARER_PREFIX.length());
+		if (CharSequenceUtil.isBlank(normalizedToken)) {
 			throw new SecurityTokenException(SecurityResultCodeEnum.TOKEN_MISSING, "Token is missing.");
 		}
 
-		// 过期优先（便于调用方区分 expired vs invalid）
-		long remainingSeconds = jwtTokenProvider.getRemainingSeconds(token);
-		if (remainingSeconds <= 0) {
+		try {
+			Claims claims = jwtTokenProvider.getClaims(normalizedToken);
+			Object raw = claims.get(TOKEN_TYPE);
+			String tokenKind = getTokenKind();
+
+			if (!CharSequenceUtil.equals(raw.toString(), tokenKind, true)) {
+				throw new SecurityTokenException(SecurityResultCodeEnum.TOKEN_KIND_MISMATCH, "Token kind mismatch.");
+			}
+
+			JwtUserToken jwtUserToken = jwtTokenProvider.parseToken(normalizedToken);
+
+			SecurityTokenKind kind = SecurityTokenKind.of(tokenKind);
+			if (kind == null) {
+				throw new SecurityTokenException(SecurityResultCodeEnum.TOKEN_KIND_MISMATCH,
+						"Token kind is not supported: " + tokenKind);
+			}
+			SecurityTokenResult.SecurityTokenResultBuilder builder = SecurityTokenResult.builder()
+				.kind(kind)
+				.rawToken(normalizedToken)
+				.userToken(jwtUserToken);
+			enrichTokenResult(builder, normalizedToken, jwtUserToken, kind);
+			return builder.build();
+		}
+		catch (SecurityTokenException ex) {
+			throw ex;
+		}
+		catch (JwtExpiredException ex) {
 			throw new SecurityTokenException(SecurityResultCodeEnum.TOKEN_EXPIRED, "Token has expired.");
 		}
-
-		// 验证令牌是否有效
-		boolean verified = verifyToken(token);
-		if (BooleanUtil.isFalse(verified)) {
+		catch (Exception ex) {
 			throw new SecurityTokenException(SecurityResultCodeEnum.TOKEN_INVALID, "Token is invalid.");
 		}
 
-		// 解析令牌
-		JwtUserToken jwtUserToken = jwtTokenProvider.parseToken(token);
-		String tokenKind = getTokenKind();
-		SecurityTokenKind kind = SecurityTokenKind.of(tokenKind);
-		if (kind == null) {
-			throw new SecurityTokenException(SecurityResultCodeEnum.TOKEN_KIND_MISMATCH,
-					"Token kind is not supported: " + tokenKind);
-		}
-		SecurityTokenResult.SecurityTokenResultBuilder builder = SecurityTokenResult.builder()
-			.kind(kind)
-			.rawToken(token)
-			.userToken(jwtUserToken);
-		enrichTokenResult(builder, token, jwtUserToken, kind);
-		return builder.build();
 	}
 
 	/**

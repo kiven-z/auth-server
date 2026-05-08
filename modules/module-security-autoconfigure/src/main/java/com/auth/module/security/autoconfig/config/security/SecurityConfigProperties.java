@@ -1,11 +1,12 @@
 package com.auth.module.security.autoconfig.config.security;
 
-import lombok.Getter;
-import lombok.Setter;
+import java.util.List;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 
-import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * 安全配置属性（路径匹配与审计策略） 说明：此处的“路径”通常用于 Spring Security 的 request matcher（如 Ant 风格路径），
@@ -28,11 +29,6 @@ public class SecurityConfigProperties {
 	 * 审计策略
 	 */
 	private AuditPolicy auditPolicy = AuditPolicy.ALL_RECORD;
-
-	/**
-	 * 权限版本不匹配策略
-	 */
-	private VersionMismatchStrategy versionMismatchStrategy = VersionMismatchStrategy.REQUIRE_REFRESH;
 
 	/**
 	 * 是否开启全量审计 兼容历史实现中以 {@code fullAudit} 作为开关的写法

@@ -24,78 +24,98 @@ import java.util.Optional;
 @Component
 public class TokenService {
 
-	private final AccessTokenProvider accessTokenProvider;
+    private final AccessTokenProvider accessTokenProvider;
 
-	private final RefreshTokenProvider refreshTokenProvider;
+    private final RefreshTokenProvider refreshTokenProvider;
 
-	private final JwtProperties properties;
+    private final JwtProperties properties;
 
-	public TokenService(AccessTokenProvider accessTokenProvider, RefreshTokenProvider refreshTokenProvider,
-			JwtProperties properties) {
-		this.accessTokenProvider = accessTokenProvider;
-		this.refreshTokenProvider = refreshTokenProvider;
-		this.properties = properties;
-	}
+    public TokenService(AccessTokenProvider accessTokenProvider, RefreshTokenProvider refreshTokenProvider,
+                        JwtProperties properties) {
+        this.accessTokenProvider = accessTokenProvider;
+        this.refreshTokenProvider = refreshTokenProvider;
+        this.properties = properties;
+    }
 
-	/**
-	 * 为登录响应填充访问令牌、刷新令牌及过期时间
-	 * @param response 用户登录响应（将被修改）
-	 * @param jti 会话唯一标识
-	 * @param permVersion 权限版本快照
-	 */
-	public void buildToken(UserLoginResponse response, String jti, long permVersion) {
-		Long userId = response.getId();
+    /**
+     * 为登录响应填充访问令牌、刷新令牌及过期时间
+     *
+     * @param response    用户登录响应（将被修改）
+     * @param jti         会话唯一标识
+     * @param permVersion 权限版本快照
+     */
+    public void buildToken(UserLoginResponse response, String jti, long permVersion) {
+        Long userId = response.getId();
 
-		// 设置访问令牌
-		String accessToken = accessTokenProvider.buildToken(userId, jti, permVersion);
-		response.setAccessToken(accessToken);
+        // 设置访问令牌
+        String accessToken = accessTokenProvider.buildToken(userId, jti, permVersion);
+        response.setAccessToken(accessToken);
 
-		// 设置刷新令牌
-		String refreshToken = refreshTokenProvider.buildToken(userId, jti, null);
-		response.setRefreshToken(refreshToken);
+        // 设置刷新令牌
+        String refreshToken = refreshTokenProvider.buildToken(userId, jti, null);
+        response.setRefreshToken(refreshToken);
 
-		// 设置访问令牌过期时间
-		long accessExpired = properties.getAccessExpired();
-		response.setExpires(LocalDateTime.now().plusSeconds(accessExpired));
-	}
+        // 设置访问令牌过期时间
+        long accessExpired = properties.getAccessExpired();
+        response.setExpires(LocalDateTime.now().plusSeconds(accessExpired));
+    }
 
-	/**
-	 * 解析访问令牌
-	 * @param token 访问令牌原始字符串
-	 * @return 解析结果
-	 */
-	public SecurityTokenResult parseAccessToken(String token) {
-		return accessTokenProvider.parseToken(token);
-	}
+    /**
+     * 解析访问令牌
+     *
+     * @param token 访问令牌原始字符串
+     * @return 解析结果
+     */
+    public SecurityTokenResult parseAccessToken(String token) {
+        return accessTokenProvider.parseToken(token);
+    }
 
-	/**
-	 * 容错解析访问令牌（永不抛出异常）。
-	 *
-	 * <p>
-	 * 适用于登出等「解析失败即视为无服务端会话可清理」的场景；需要严格失败语义时请使用 {@link #parseAccessToken(String)}。
-	 * </p>
-	 * @param token 访问令牌原始字符串
-	 * @return 解析成功且非 {@code null} 时为 {@link Optional#of(Object)}，否则为空
-	 */
-	public Optional<SecurityTokenResult> parseAccessTokenOptional(String token) {
-		if (CharSequenceUtil.isBlank(token)) {
-			return Optional.empty();
-		}
-		try {
-			return Optional.ofNullable(accessTokenProvider.parseToken(token));
-		}
-		catch (Exception ignored) {
-			return Optional.empty();
-		}
-	}
+    /**
+     * 容错解析访问令牌（永不抛出异常）。
+     *
+     * <p>
+     * 适用于登出等「解析失败即视为无服务端会话可清理」的场景；需要严格失败语义时请使用 {@link #parseAccessToken(String)}。
+     * </p>
+     *
+     * @param token 访问令牌原始字符串
+     * @return 解析成功且非 {@code null} 时为 {@link Optional#of(Object)}，否则为空
+     */
+    public Optional<SecurityTokenResult> parseAccessTokenOptional(String token) {
+        if (CharSequenceUtil.isBlank(token)) {
+            return Optional.empty();
+        }
+        try {
+            return Optional.ofNullable(accessTokenProvider.parseToken(token));
+        } catch (Exception ignored) {
+            return Optional.empty();
+        }
+    }
 
-	/**
-	 * 解析刷新令牌
-	 * @param token 刷新令牌原始字符串
-	 * @return 解析结果
-	 */
-	public SecurityTokenResult parseRefreshToken(String token) {
-		return refreshTokenProvider.parseToken(token);
-	}
+    /**
+     * 容错解析访问令牌（允许过期，永不抛出异常）。
+     *
+     * @param token 访问令牌原始字符串
+     * @return 解析成功且非 {@code null} 时为 {@link Optional#of(Object)}，否则为空
+     */
+    public Optional<SecurityTokenResult> parseAccessTokenAllowExpiredOptional(String token) {
+        if (CharSequenceUtil.isBlank(token)) {
+            return Optional.empty();
+        }
+        try {
+            return Optional.ofNullable(accessTokenProvider.parseToken(token));
+        } catch (Exception ignored) {
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * 解析刷新令牌
+     *
+     * @param token 刷新令牌原始字符串
+     * @return 解析结果
+     */
+    public SecurityTokenResult parseRefreshToken(String token) {
+        return refreshTokenProvider.parseToken(token);
+    }
 
 }

@@ -7,8 +7,8 @@ import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.module.security.contract.constants.SecurityInternalTokenConstants;
 import com.auth.module.security.contract.exception.SecurityResultCodeEnum;
 import com.auth.module.security.contract.exception.SecurityTokenException;
-import com.auth.module.security.core.token.facade.SecurityTokenHandlerFacade;
 import com.auth.module.security.core.token.model.SecurityTokenResult;
+import com.auth.module.security.core.token.provider.InternalTokenProvider;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
@@ -20,13 +20,13 @@ import java.util.List;
  */
 public final class InternalRequestAuthenticator implements RequestAuthenticator {
 
-	private final SecurityTokenHandlerFacade tokenHandlerFacade;
+	private final InternalTokenProvider internalTokenProvider;
 
 	private final AuthProfileCacheService authProfileCacheService;
 
-	public InternalRequestAuthenticator(SecurityTokenHandlerFacade tokenHandlerFacade,
+	public InternalRequestAuthenticator(InternalTokenProvider internalTokenProvider,
 			AuthProfileCacheService authProfileCacheService) {
-		this.tokenHandlerFacade = tokenHandlerFacade;
+		this.internalTokenProvider = internalTokenProvider;
 		this.authProfileCacheService = authProfileCacheService;
 	}
 
@@ -49,7 +49,7 @@ public final class InternalRequestAuthenticator implements RequestAuthenticator 
 	public AuthProfile authenticate(HttpServletRequest request) {
 		// 获取内部的Token
 		String internal = request.getHeader(SecurityInternalTokenConstants.INTERNAL_HEADER).trim();
-		SecurityTokenResult result = tokenHandlerFacade.validateInternal(internal);
+		SecurityTokenResult result = internalTokenProvider.parseToken(internal);
 
 		// 当前是内部交给内部进行验证
 		if (SecurityInternalTokenConstants.PRINCIPAL_TYPE_SERVICE.equals(result.getPrincipalType())) {

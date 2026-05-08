@@ -1,6 +1,7 @@
 package com.auth.service.auth.service;
 
 import com.auth.service.auth.model.response.RefreshTokenResponse;
+
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
@@ -13,9 +14,10 @@ public interface RefreshTokenService {
 	/**
 	 * 刷新令牌
 	 * @param refreshToken 刷新令牌
+	 * @param authorizationHeader 可选访问令牌（用于一致性比对）
 	 * @param request 当前 HTTP 请求（审计 IP/UA）；允许为 null
 	 * @return 刷新令牌响应
 	 */
-	RefreshTokenResponse refreshToken(String refreshToken, HttpServletRequest request);
+	RefreshTokenResponse refreshToken(String refreshToken, String authorizationHeader, HttpServletRequest request);
 
 }

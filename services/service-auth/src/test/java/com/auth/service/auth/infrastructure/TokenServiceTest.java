@@ -57,21 +57,6 @@ class TokenServiceTest {
 	}
 
 	@Test
-	@DisplayName("parse：委托给 provider")
-	void parse_shouldDelegateToProvider() {
-		// Arrange
-		TokenService service = new TokenService(accessTokenProvider, refreshTokenProvider, jwtProperties);
-		SecurityTokenResult accessResult = mock(SecurityTokenResult.class);
-		SecurityTokenResult refreshResult = mock(SecurityTokenResult.class);
-		when(accessTokenProvider.parseToken("a")).thenReturn(accessResult);
-		when(refreshTokenProvider.parseToken("r")).thenReturn(refreshResult);
-
-		// Act & Assert
-		assertSame(accessResult, service.parseAccessToken("a"));
-		assertSame(refreshResult, service.parseRefreshToken("r"));
-	}
-
-	@Test
 	@DisplayName("parseAccessTokenOptional：空白 token 返回 empty")
 	void parseAccessTokenOptional_shouldReturnEmpty_whenTokenBlank() {
 		TokenService service = new TokenService(accessTokenProvider, refreshTokenProvider, jwtProperties);

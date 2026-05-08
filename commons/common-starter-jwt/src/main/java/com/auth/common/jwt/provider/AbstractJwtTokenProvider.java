@@ -82,23 +82,18 @@ public abstract class AbstractJwtTokenProvider implements JwtTokenProvider {
 		}
 	}
 
-	/**
-	 * 解析 Token
-	 * @param token Token
-	 * @return 用户信息
-	 */
 	@Override
 	public JwtUserToken parseToken(String token) {
+		Claims claims = getClaims(token);
 		try {
-			Claims payload = getClaims(token);
-			String subject = payload.getSubject();
+			String subject = claims.getSubject();
 			long userId = requireNumericUserIdSubject(subject);
 			return JwtUserToken.builder()
 				.userId(userId)
-				.iss(payload.getIssuer())
+				.iss(claims.getIssuer())
 				.sub(subject)
-				.jti(payload.getId())
-				.audience(JwtAudienceCodec.first(payload))
+				.jti(claims.getId())
+				.audience(JwtAudienceCodec.first(claims))
 				.build();
 		}
 		catch (Exception ex) {

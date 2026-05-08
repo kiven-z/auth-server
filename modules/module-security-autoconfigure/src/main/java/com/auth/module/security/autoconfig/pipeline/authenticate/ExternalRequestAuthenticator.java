@@ -2,15 +2,13 @@ package com.auth.module.security.autoconfig.pipeline.authenticate;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.jwt.model.JwtUserToken;
-import com.auth.module.security.autoconfig.config.security.SecurityConfigProperties;
-import com.auth.module.security.autoconfig.config.security.VersionMismatchStrategy;
 import com.auth.module.security.autoconfig.service.AuthProfileCacheService;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.module.security.contract.constants.SecurityInternalTokenConstants;
 import com.auth.module.security.contract.exception.SecurityResultCodeEnum;
 import com.auth.module.security.contract.exception.SecurityTokenException;
-import com.auth.module.security.core.token.facade.SecurityTokenHandlerFacade;
 import com.auth.module.security.core.token.model.SecurityTokenResult;
+import com.auth.module.security.core.token.provider.AccessTokenProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
 
@@ -23,10 +21,7 @@ import java.util.Objects;
  */
 public final class ExternalRequestAuthenticator implements RequestAuthenticator {
 
-	/**
-	 * 令牌处理器
-	 */
-	private final SecurityTokenHandlerFacade tokenHandlerFacade;
+	private final AccessTokenProvider accessTokenProvider;
 
 	/**
 	 * 授权画像缓存服务
@@ -39,17 +34,13 @@ public final class ExternalRequestAuthenticator implements RequestAuthenticator 
 	private final SessionCountChecker sessionCountChecker;
 
 	/**
-	 * 安全配置属性
+	 * 构造函数
 	 */
-	private final SecurityConfigProperties securityConfigProperties;
-
-	public ExternalRequestAuthenticator(SecurityTokenHandlerFacade tokenHandlerFacade,
-			AuthProfileCacheService authProfileCacheService, SessionCountChecker sessionCountChecker,
-			SecurityConfigProperties securityConfigProperties) {
-		this.tokenHandlerFacade = tokenHandlerFacade;
+	public ExternalRequestAuthenticator(AccessTokenProvider accessTokenProvider,
+			AuthProfileCacheService authProfileCacheService, SessionCountChecker sessionCountChecker) {
+		this.accessTokenProvider = accessTokenProvider;
 		this.authProfileCacheService = authProfileCacheService;
 		this.sessionCountChecker = sessionCountChecker;
-		this.securityConfigProperties = securityConfigProperties;
 	}
 
 	/**
@@ -77,7 +68,7 @@ public final class ExternalRequestAuthenticator implements RequestAuthenticator 
 	public AuthProfile authenticate(HttpServletRequest request) {
 		// 解析请求头内容，解析当前用户传递的Token
 		String authorization = request.getHeader(HttpHeaders.AUTHORIZATION);
-		SecurityTokenResult result = tokenHandlerFacade.validateExternal(authorization);
+		SecurityTokenResult result = accessTokenProvider.parseToken(authorization);
 		JwtUserToken userToken = result.getUserToken();
 		Long userId = userToken.getUserId();
 
@@ -110,20 +101,8 @@ public final class ExternalRequestAuthenticator implements RequestAuthenticator 
 		if (Objects.equals(snapshot, current)) {
 			return;
 		}
-		VersionMismatchStrategy strategy = securityConfigProperties.getVersionMismatchStrategy();
-		if (strategy == null) {
-			strategy = VersionMismatchStrategy.REQUIRE_REFRESH;
-		}
-
-		// 按配置抛出异常
-		throw switch (strategy) {
-			case REQUIRE_REFRESH -> new SecurityTokenException(SecurityResultCodeEnum.PERMISSION_VERSION_MISMATCH,
-					"Permission version mismatch.");
-			case DENY -> new SecurityTokenException(SecurityResultCodeEnum.PERMISSION_VERSION_ACCESS_DENIED,
-					"Permission version mismatch.");
-			case FORCE_REAUTH -> new SecurityTokenException(SecurityResultCodeEnum.PERMISSION_VERSION_REAUTH_REQUIRED,
-					"Permission version mismatch; re-authentication required.");
-		};
+		throw new SecurityTokenException(SecurityResultCodeEnum.PERMISSION_VERSION_MISMATCH,
+				"Permission version mismatch.");
 	}
 
 }
