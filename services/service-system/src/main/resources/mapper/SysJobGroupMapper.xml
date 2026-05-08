@@ -27,7 +27,7 @@
                 AND status = #{query.status}
             </if>
         </where>
-        ORDER BY order_num ASC, id ASC
+        ORDER BY order_num
     </select>
 
     <select id="selectEnabledOptions" resultType="com.auth.service.system.schedule.model.vo.SysJobGroupPageResponse">
@@ -48,7 +48,7 @@
         <if test="keyword != null and keyword != ''">
             AND (group_code LIKE CONCAT('%', #{keyword}, '%') OR group_name LIKE CONCAT('%', #{keyword}, '%'))
         </if>
-        ORDER BY order_num ASC, id ASC
+        ORDER BY order_num
         LIMIT #{limit}
     </select>
 </mapper>

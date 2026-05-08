@@ -1,12 +1,8 @@
 package com.auth.service.system.schedule.service.impl;
 
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
-
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.BooleanUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.helper.PageResultHelper;
@@ -19,14 +15,16 @@ import com.auth.service.system.schedule.model.form.SysJobGroupUpdateForm;
 import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
 import com.auth.service.system.schedule.model.vo.SysJobGroupPageResponse;
 import com.auth.service.system.schedule.service.SysJobGroupService;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.util.BooleanUtil;
+import java.util.List;
+
+import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
 
 /**
  * 任务分组实现
@@ -69,9 +67,8 @@ public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJo
 	 */
 	@Override
 	public List<SysJobGroupPageResponse> listEnabledOptions(String keyword, int limit) {
-		int maxLimit = Math.min(Math.max(limit, 1), 100);
-		String searchKeyword = CharSequenceUtil.isBlank(keyword) ? null : keyword.trim();
-
+		int maxLimit = Math.min(Math.max(limit, 1), 60);
+		String searchKeyword = CharSequenceUtil.trim(keyword);
 		return baseMapper.selectEnabledOptions(searchKeyword, maxLimit);
 	}
 
@@ -82,9 +79,8 @@ public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJo
 	@Override
 	public void create(SysJobGroupForm form) {
 		// 验证分组编码是否已存在
-		LambdaQueryWrapper<SysJobGroupEntity> queryWrapper = new LambdaQueryWrapper<>();
-		queryWrapper.eq(SysJobGroupEntity::getGroupCode, form.getGroupCode());
-		long exists = count(queryWrapper);
+		long exists = count(
+				Wrappers.<SysJobGroupEntity>lambdaQuery().eq(SysJobGroupEntity::getGroupCode, form.getGroupCode()));
 		if (exists > 0) {
 			throw new SystemBusinessException(JOB_GROUP_CODE_DUPLICATE);
 		}
@@ -144,9 +140,8 @@ public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJo
 		}
 
 		// 验证分组下无任务，如果存在则不允许删除
-		LambdaQueryWrapper<SysJobEntity> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-		lambdaQueryWrapper.eq(SysJobEntity::getJobGroup, jobGroup.getGroupCode());
-		long cnt = sysJobMapper.selectCount(lambdaQueryWrapper);
+		long cnt = sysJobMapper
+			.selectCount(Wrappers.<SysJobEntity>lambdaQuery().eq(SysJobEntity::getJobGroup, jobGroup.getGroupCode()));
 		if (cnt > 0) {
 			throw new SystemBusinessException(JOB_GROUP_HAS_ACTIVE_JOBS, cnt);
 		}
