@@ -12,11 +12,7 @@ import org.springframework.util.ReflectionUtils;
 import java.lang.reflect.Method;
 import java.util.Objects;
 
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.JOB_INVOKE_PARAM_NOT_SUPPORTED;
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.JOB_INVOKE_TARGET_EMPTY;
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.JOB_INVOKE_TARGET_FORMAT;
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.JOB_INVOKE_TARGET_PAREN_MISMATCH;
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.JOB_REFLECT_METHOD_NOT_FOUND;
+import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
 import static com.auth.service.system.schedule.model.constans.SysJobQuartzDataKeys.BEAN_NAME;
 import static com.auth.service.system.schedule.model.constans.SysJobQuartzDataKeys.METHOD_NAME;
 
@@ -71,7 +67,7 @@ public class QuartzBeanInvoker {
 		if (CharSequenceUtil.isBlank(inner)) {
 			return new Object[0];
 		}
-		String t = inner.trim();
+		String t = CharSequenceUtil.trim(inner);
 
 		// 2. 尝试移除引号（支持双引号或单引号）
 		String unwrapped = CharSequenceUtil.unWrap(t, '"');

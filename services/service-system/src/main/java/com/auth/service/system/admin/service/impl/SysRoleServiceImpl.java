@@ -14,7 +14,6 @@ import com.auth.service.system.admin.service.SysRoleService;
 import com.auth.service.system.admin.support.SysRolePageOrderSqlBuilder;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.SystemResultCodeEnum;
-import com.auth.service.system.common.feign.AuthenticationInnerFeignClient;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -33,12 +32,6 @@ import java.util.List;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity> implements SysRoleService {
-
-	private final AuthenticationInnerFeignClient authenticationInnerFeignClient;
-
-	public SysRoleServiceImpl(AuthenticationInnerFeignClient authenticationInnerFeignClient) {
-		this.authenticationInnerFeignClient = authenticationInnerFeignClient;
-	}
 
 	/**
 	 * 分页查询角色
