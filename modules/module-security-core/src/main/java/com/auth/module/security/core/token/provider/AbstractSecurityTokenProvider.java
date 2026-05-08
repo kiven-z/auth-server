@@ -1,6 +1,10 @@
 package com.auth.module.security.core.token.provider;
 
-import cn.hutool.core.text.CharSequenceUtil;
+import static com.auth.common.jwt.provider.AbstractJwtTokenProvider.*;
+import static com.auth.module.security.contract.constants.SecurityExternalTokenConstants.*;
+
+import java.util.Date;
+
 import com.auth.common.jwt.api.JwtTokenProvider;
 import com.auth.common.jwt.exception.JwtExpiredException;
 import com.auth.common.jwt.model.JwtUserToken;
@@ -8,12 +12,9 @@ import com.auth.module.security.contract.constants.SecurityTokenKind;
 import com.auth.module.security.contract.exception.SecurityResultCodeEnum;
 import com.auth.module.security.contract.exception.SecurityTokenException;
 import com.auth.module.security.core.token.model.SecurityTokenResult;
+
+import cn.hutool.core.text.CharSequenceUtil;
 import io.jsonwebtoken.Claims;
-
-import java.util.Date;
-
-import static com.auth.common.jwt.provider.AbstractJwtTokenProvider.BEARER_PREFIX;
-import static com.auth.module.security.contract.constants.SecurityExternalTokenConstants.TOKEN_TYPE;
 
 /**
  * 抽象令牌提供者
@@ -67,7 +68,7 @@ public abstract class AbstractSecurityTokenProvider implements SecurityTokenProv
 	 */
 	@Override
 	public SecurityTokenResult parseToken(String token) {
-		String normalizedToken = CharSequenceUtil.subSuf(token, BEARER_PREFIX.length());
+		String normalizedToken = normalizeToken(token);
 		if (CharSequenceUtil.isBlank(normalizedToken)) {
 			throw new SecurityTokenException(SecurityResultCodeEnum.TOKEN_MISSING, "Token is missing.");
 		}
@@ -77,7 +78,7 @@ public abstract class AbstractSecurityTokenProvider implements SecurityTokenProv
 			Object raw = claims.get(TOKEN_TYPE);
 			String tokenKind = getTokenKind();
 
-			if (!CharSequenceUtil.equals(raw.toString(), tokenKind, true)) {
+			if (raw == null || !CharSequenceUtil.equals(raw.toString(), tokenKind, true)) {
 				throw new SecurityTokenException(SecurityResultCodeEnum.TOKEN_KIND_MISMATCH, "Token kind mismatch.");
 			}
 
@@ -105,6 +106,21 @@ public abstract class AbstractSecurityTokenProvider implements SecurityTokenProv
 			throw new SecurityTokenException(SecurityResultCodeEnum.TOKEN_INVALID, "Token is invalid.");
 		}
 
+	}
+
+	/**
+	 * 归一化令牌：仅在 Bearer 前缀存在时裁剪前缀。
+	 * @param token 令牌
+	 * @return 归一化后的令牌
+	 */
+	private String normalizeToken(String token) {
+		String trimmedToken = CharSequenceUtil.trim(token);
+		if (CharSequenceUtil.isBlank(trimmedToken)) {
+			return trimmedToken;
+		}
+		return CharSequenceUtil.startWithIgnoreCase(trimmedToken, BEARER_PREFIX)
+				? CharSequenceUtil.trim(CharSequenceUtil.removePrefixIgnoreCase(trimmedToken, BEARER_PREFIX))
+				: trimmedToken;
 	}
 
 	/**

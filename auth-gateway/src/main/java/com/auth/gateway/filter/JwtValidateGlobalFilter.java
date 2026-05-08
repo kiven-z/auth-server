@@ -1,12 +1,5 @@
 package com.auth.gateway.filter;
 
-import cn.hutool.core.text.CharSequenceUtil;
-import com.auth.common.jwt.exception.JwtExpiredException;
-import com.auth.gateway.exception.GatewayBusinessException;
-import com.auth.gateway.support.SecurityTokenExceptionToGatewayResultCodeMapper;
-import com.auth.module.security.contract.exception.SecurityTokenException;
-import com.auth.module.security.core.token.provider.AccessTokenProvider;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -15,6 +8,16 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
+
+import com.auth.gateway.config.GatewaySecurityProperties;
+import com.auth.gateway.exception.GatewayBusinessException;
+import com.auth.gateway.support.SecurityTokenExceptionToGatewayResultCodeMapper;
+import com.auth.module.security.contract.exception.SecurityResultCodeEnum;
+import com.auth.module.security.contract.exception.SecurityTokenException;
+import com.auth.module.security.core.token.provider.AccessTokenProvider;
+
+import cn.hutool.core.text.CharSequenceUtil;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 /**
@@ -33,8 +36,12 @@ public class JwtValidateGlobalFilter implements GlobalFilter {
 
     private final AccessTokenProvider accessTokenProvider;
 
-    public JwtValidateGlobalFilter(AccessTokenProvider accessTokenProvider) {
+    private final GatewaySecurityProperties gatewaySecurityProperties;
+
+    public JwtValidateGlobalFilter(AccessTokenProvider accessTokenProvider,
+            GatewaySecurityProperties gatewaySecurityProperties) {
         this.accessTokenProvider = accessTokenProvider;
+        this.gatewaySecurityProperties = gatewaySecurityProperties;
     }
 
     /**
@@ -47,19 +54,27 @@ public class JwtValidateGlobalFilter implements GlobalFilter {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest request = exchange.getRequest();
+        String path = request.getURI().getPath();
+        boolean strictPath = gatewaySecurityProperties.isStrictPath(path);
 
         // 外部Token轻量检查：仅当 Authorization 存在时进行可解析校验
         String authorization = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         if (CharSequenceUtil.isBlank(authorization)) {
+            if (strictPath) {
+                return Mono.error(new GatewayBusinessException(SecurityTokenExceptionToGatewayResultCodeMapper
+                        .map(new SecurityTokenException(SecurityResultCodeEnum.TOKEN_MISSING, "Token is missing."))));
+            }
             return chain.filter(exchange);
         }
 
         try {
-            // 解析外部访问令牌（允许过期）
+            // 解析外部访问令牌
             accessTokenProvider.parseToken(authorization);
-        } catch (JwtExpiredException ex) {
-            log.warn(ex.getMessage(), ex);
         } catch (SecurityTokenException ex) {
+            if (!strictPath && ex.getResultCode() == SecurityResultCodeEnum.TOKEN_EXPIRED) {
+                log.debug("Gateway token is expired but allowed in light mode, path={}", path);
+                return chain.filter(exchange);
+            }
             log.debug("Gateway token parse failed: code={}, path={}", ex.getCode(),
                     exchange.getRequest().getURI().getPath());
             return Mono.error(new GatewayBusinessException(SecurityTokenExceptionToGatewayResultCodeMapper.map(ex)));

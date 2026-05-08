@@ -58,3 +58,10 @@ springdoc:
     enabled: false
   swagger-ui:
     enabled: false
+auth:
+  gateway:
+    security:
+      # 回滚开关：关闭后所有路径回到轻校验模式
+      strict-enabled: false
+      # 灰度时先配置 1-2 条高风险路径，再逐步扩大范围
+      strict-patterns: [ ]

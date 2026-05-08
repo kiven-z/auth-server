@@ -1,17 +1,16 @@
 package com.auth.module.security.autoconfig.pipeline.authenticate;
 
-import cn.hutool.core.text.CharSequenceUtil;
-import com.auth.common.jwt.model.JwtUserToken;
-import com.auth.module.security.autoconfig.service.AuthProfileCacheService;
+import java.util.List;
+
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.module.security.contract.constants.SecurityInternalTokenConstants;
 import com.auth.module.security.contract.exception.SecurityResultCodeEnum;
 import com.auth.module.security.contract.exception.SecurityTokenException;
 import com.auth.module.security.core.token.model.SecurityTokenResult;
 import com.auth.module.security.core.token.provider.InternalTokenProvider;
-import jakarta.servlet.http.HttpServletRequest;
 
-import java.util.List;
+import cn.hutool.core.text.CharSequenceUtil;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * 内部JWT认证
@@ -22,12 +21,8 @@ public final class InternalRequestAuthenticator implements RequestAuthenticator 
 
 	private final InternalTokenProvider internalTokenProvider;
 
-	private final AuthProfileCacheService authProfileCacheService;
-
-	public InternalRequestAuthenticator(InternalTokenProvider internalTokenProvider,
-			AuthProfileCacheService authProfileCacheService) {
+	public InternalRequestAuthenticator(InternalTokenProvider internalTokenProvider) {
 		this.internalTokenProvider = internalTokenProvider;
-		this.authProfileCacheService = authProfileCacheService;
 	}
 
 	/**
@@ -51,25 +46,12 @@ public final class InternalRequestAuthenticator implements RequestAuthenticator 
 		String internal = request.getHeader(SecurityInternalTokenConstants.INTERNAL_HEADER).trim();
 		SecurityTokenResult result = internalTokenProvider.parseToken(internal);
 
-		// 当前是内部交给内部进行验证
-		if (SecurityInternalTokenConstants.PRINCIPAL_TYPE_SERVICE.equals(result.getPrincipalType())) {
-			return buildServiceProfile(result.getServiceId());
-		}
-
-		// 如果内部Token传递了用户信息，进行用户信息的解析
-		JwtUserToken userToken = result.getUserToken();
-		Long userId = userToken.getUserId();
-
-		// 在传递内部Token时，若是内部用户请求，会携带当前用户信息
-		if (userId == null) {
+		// 仅允许服务身份的内部令牌访问 @InternalApi
+		if (!SecurityInternalTokenConstants.PRINCIPAL_TYPE_SERVICE.equals(result.getPrincipalType())) {
 			throw new SecurityTokenException(SecurityResultCodeEnum.TOKEN_INVALID,
-					"Internal token user id is missing.");
+					"Internal endpoint requires service principal token.");
 		}
-		AuthProfile profile = authProfileCacheService.load(userId);
-		if (profile == null) {
-			throw new SecurityTokenException(SecurityResultCodeEnum.SESSION_MISSING, "Auth profile is missing.");
-		}
-		return profile;
+		return buildServiceProfile(result.getServiceId());
 	}
 
 	/**

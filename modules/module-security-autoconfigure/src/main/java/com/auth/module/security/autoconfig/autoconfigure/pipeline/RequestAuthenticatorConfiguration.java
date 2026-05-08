@@ -1,5 +1,10 @@
 package com.auth.module.security.autoconfig.autoconfigure.pipeline;
 
+import java.util.List;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
 import com.auth.module.security.autoconfig.pipeline.authenticate.ExternalRequestAuthenticator;
 import com.auth.module.security.autoconfig.pipeline.authenticate.InternalRequestAuthenticator;
 import com.auth.module.security.autoconfig.pipeline.authenticate.RequestAuthenticator;
@@ -7,10 +12,6 @@ import com.auth.module.security.autoconfig.pipeline.authenticate.SessionCountChe
 import com.auth.module.security.autoconfig.service.AuthProfileCacheService;
 import com.auth.module.security.core.token.provider.AccessTokenProvider;
 import com.auth.module.security.core.token.provider.InternalTokenProvider;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
-import java.util.List;
 
 /**
  * 请求认证器装配：内部/外部请求的认证入口。
@@ -21,9 +22,8 @@ import java.util.List;
 class RequestAuthenticatorConfiguration {
 
 	@Bean
-	InternalRequestAuthenticator internalRequestAuthenticator(InternalTokenProvider internalTokenProvider,
-			AuthProfileCacheService authProfileCacheService) {
-		return new InternalRequestAuthenticator(internalTokenProvider, authProfileCacheService);
+	InternalRequestAuthenticator internalRequestAuthenticator(InternalTokenProvider internalTokenProvider) {
+		return new InternalRequestAuthenticator(internalTokenProvider);
 	}
 
 	@Bean

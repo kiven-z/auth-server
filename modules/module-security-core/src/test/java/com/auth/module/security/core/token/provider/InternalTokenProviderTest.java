@@ -1,5 +1,14 @@
 package com.auth.module.security.core.token.provider;
 
+import static com.auth.module.security.contract.constants.SecurityExternalTokenConstants.*;
+import static com.auth.module.security.contract.constants.SecurityInternalTokenConstants.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.Date;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
 import com.auth.common.jwt.autoconfigure.JwtProperties;
 import com.auth.common.jwt.key.HmacSecretKeys;
 import com.auth.common.jwt.model.SignatureAlgorithm;
@@ -7,15 +16,6 @@ import com.auth.common.jwt.provider.HmacJwtTokenProvider;
 import com.auth.module.security.contract.constants.SecurityInternalTokenConstants;
 import com.auth.module.security.contract.constants.SecurityTokenKind;
 import com.auth.module.security.core.token.model.SecurityTokenResult;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
-import java.util.Date;
-
-import static com.auth.module.security.contract.constants.SecurityExternalTokenConstants.TOKEN_TYPE;
-import static com.auth.module.security.contract.constants.SecurityInternalTokenConstants.PRINCIPAL_TYPE;
-import static com.auth.module.security.contract.constants.SecurityInternalTokenConstants.PRINCIPAL_TYPE_USER;
-import static org.junit.jupiter.api.Assertions.*;
 
 class InternalTokenProviderTest {
 
@@ -120,6 +120,22 @@ class InternalTokenProviderTest {
 
 		assertEquals(SecurityInternalTokenConstants.PRINCIPAL_TYPE_SERVICE, result.getPrincipalType());
 		assertEquals("auth-server", result.getServiceId());
+	}
+
+	@Test
+	@DisplayName("测试解析内部令牌时同时兼容原始 JWT 与 Bearer 前缀")
+	void parseToken_shouldSupportRawAndBearerToken() {
+		JwtProperties props = hmacJwtProperties();
+		InternalTokenProvider provider = newProvider(props);
+		String rawToken = provider.buildServiceToken("auth-server", "jti-bearer");
+
+		SecurityTokenResult rawResult = provider.parseToken(rawToken);
+		SecurityTokenResult bearerResult = provider.parseToken("Bearer " + rawToken);
+
+		assertEquals(SecurityInternalTokenConstants.PRINCIPAL_TYPE_SERVICE, rawResult.getPrincipalType());
+		assertEquals(SecurityInternalTokenConstants.PRINCIPAL_TYPE_SERVICE, bearerResult.getPrincipalType());
+		assertEquals("auth-server", rawResult.getServiceId());
+		assertEquals("auth-server", bearerResult.getServiceId());
 	}
 
 }
