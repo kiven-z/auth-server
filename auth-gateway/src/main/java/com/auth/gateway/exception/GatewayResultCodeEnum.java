@@ -77,15 +77,10 @@ public enum GatewayResultCodeEnum {
 	UNAUTHORIZED_SESSION_LIMIT_EXCEEDED(401, 209, "GATEWAY_SESSION_LIMIT_EXCEEDED", "gateway.session.limit.exceeded",
 			"Concurrent session limit exceeded."),
 	/**
-	 * 权限版本不匹配且策略要求重新认证（网关侧透传）
+	 * 权限版本不匹配（网关侧透传）
 	 */
-	UNAUTHORIZED_PERMISSION_VERSION_REAUTH_REQUIRED(401, 210, "GATEWAY_PERMISSION_VERSION_REAUTH_REQUIRED",
-			"gateway.permission.version.reauth.required", "Permission version mismatch, re-authentication required."),
-	/**
-	 * 权限版本不匹配且策略拒绝访问（网关侧透传）
-	 */
-	FORBIDDEN_PERMISSION_VERSION_ACCESS_DENIED(403, 211, "GATEWAY_PERMISSION_VERSION_ACCESS_DENIED",
-			"gateway.permission.version.access.denied", "Permission version mismatch, access denied.");
+	UNAUTHORIZED_PERMISSION_VERSION_MISMATCH(409, 210, "GATEWAY_PERMISSION_VERSION_MISMATCH",
+			"gateway.permission.version.mismatch", "Permission version mismatch, please refresh.");
 
 	/**
 	 * HTTP状态码

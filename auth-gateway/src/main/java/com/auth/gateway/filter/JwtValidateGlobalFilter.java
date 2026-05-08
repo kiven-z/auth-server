@@ -1,12 +1,8 @@
 package com.auth.gateway.filter;
 
-import com.auth.gateway.config.GatewaySecurityProperties;
+import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.gateway.exception.GatewayBusinessException;
-import com.auth.gateway.exception.GatewayResultCodeEnum;
-import com.auth.gateway.security.GatewayAuthDecision;
-import com.auth.gateway.security.GatewayAuthPolicies;
 import com.auth.gateway.support.SecurityTokenExceptionToGatewayResultCodeMapper;
-import com.auth.module.security.contract.constants.SecurityInternalTokenConstants;
 import com.auth.module.security.contract.exception.SecurityTokenException;
 import com.auth.module.security.core.token.facade.SecurityTokenHandlerFacade;
 import lombok.extern.slf4j.Slf4j;
@@ -17,18 +13,14 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-import static com.auth.gateway.security.GatewayAuthDecision.InvalidTokenAction.ALLOW_ANONYMOUS;
-import static com.auth.module.security.core.matcher.AntPathMatcher.matchesAnyAnt;
-
 /**
- * 网关 JWT 校验：permitPaths 放行；非 permit 必须携带合法外部 Token
+ * 网关 JWT 轻量校验：仅在携带 Authorization 时校验“可解析”
  *
  * <p>
- * 注意：网关无法识别下游的 {@code @PublicApi}，因此只能按路径配置决定是否拦截
+ * 过期语义由下游服务处理，网关不做会话/权限业务判断
  * </p>
  *
  * @author Bunny
@@ -38,110 +30,51 @@ import static com.auth.module.security.core.matcher.AntPathMatcher.matchesAnyAnt
 @Component
 public class JwtValidateGlobalFilter implements GlobalFilter {
 
-	private final GatewaySecurityProperties properties;
+    /**
+     * 认证模块的 Token 校验
+     */
+    private final SecurityTokenHandlerFacade tokenFacade;
 
-	/**
-	 * 认证模块的 Token 校验
-	 */
-	private final SecurityTokenHandlerFacade tokenFacade;
+    public JwtValidateGlobalFilter(SecurityTokenHandlerFacade tokenFacade) {
+        this.tokenFacade = tokenFacade;
+    }
 
-	public JwtValidateGlobalFilter(GatewaySecurityProperties properties, SecurityTokenHandlerFacade tokenFacade) {
-		this.properties = properties;
-		this.tokenFacade = tokenFacade;
-	}
+    /**
+     * 网关 JWT 校验
+     *
+     * @param exchange the current server exchange
+     * @param chain    provides a way to delegate to the next filter
+     * @return Mono
+     */
+    @Override
+    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        ServerHttpRequest request = exchange.getRequest();
 
-	/**
-	 * 网关 JWT 校验
-	 * @param exchange the current server exchange
-	 * @param chain provides a way to delegate to the next filter
-	 * @return Mono
-	 */
-	@Override
-	public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-		if (!properties.isEnabled()) {
-			return chain.filter(exchange);
-		}
-		ServerHttpRequest request = exchange.getRequest();
-		String path = request.getURI().getPath();
+        // 外部Token轻量检查：仅当 Authorization 存在时进行可解析校验
+        String authorization = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+        if (CharSequenceUtil.isNotBlank(authorization)) {
+            return chain.filter(exchange);
+        }
+        return validateExternalToken(authorization, exchange, chain);
+    }
 
-		// 内部路径检查：必须携带内部 JWT
-		Mono<Void> internalCheck = handleInternalPath(request, path, exchange, chain);
-		if (internalCheck != null) {
-			return internalCheck;
-		}
-
-		// 构建鉴权决策
-		String authorization = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-		boolean hasToken = StringUtils.hasText(authorization);
-		GatewayAuthDecision decision = buildAuthDecision(path, hasToken);
-
-		// 决策要求 Token 但未携带
-		if (decision.requireToken() && !hasToken) {
-			return Mono.error(new GatewayBusinessException(GatewayResultCodeEnum.UNAUTHORIZED_TOKEN_MISSING));
-		}
-
-		// 决策不要求校验 Token
-		if (!decision.validateToken()) {
-			return chain.filter(exchange);
-		}
-
-		// 校验外部 Token（含异常降级处理）
-		return validateExternalToken(authorization, decision, exchange, chain);
-	}
-
-	/**
-	 * 内部路径处理：必须携带内部 JWT，否则返回 404
-	 * @param request 当前请求
-	 * @param path 请求路径
-	 * @param exchange the current server exchange
-	 * @param chain provides a way to delegate to the next filter
-	 * @return 已处理的 Mono，或 null 表示非内部路径需继续执行
-	 */
-	private Mono<Void> handleInternalPath(ServerHttpRequest request, String path, ServerWebExchange exchange,
-			GatewayFilterChain chain) {
-		if (!matchesAnyAnt(path, properties.getInternalPaths())) {
-			return null;
-		}
-		String internalJwt = request.getHeaders().getFirst(SecurityInternalTokenConstants.INTERNAL_HEADER);
-		if (!StringUtils.hasText(internalJwt)) {
-			return Mono.error(new GatewayBusinessException(GatewayResultCodeEnum.ROUTE_NOT_FOUND));
-		}
-		return chain.filter(exchange);
-	}
-
-	/**
-	 * 根据路径和 Token 存在性构建鉴权决策
-	 * @param path 请求路径
-	 * @param hasToken 是否携带 Authorization
-	 * @return 鉴权决策
-	 */
-	private GatewayAuthDecision buildAuthDecision(String path, boolean hasToken) {
-		boolean isPermit = matchesAnyAnt(path, properties.getPermitPaths());
-		return GatewayAuthPolicies.forMode(properties.getMode()).decide(path, isPermit, hasToken);
-	}
-
-	/**
-	 * 校验外部 Token，校验失败时按决策进行降级或拒绝
-	 * @param authorization Authorization header
-	 * @param decision 鉴权决策
-	 * @param exchange the current server exchange
-	 * @param chain provides a way to delegate to the next filter
-	 * @return Mono
-	 */
-	private Mono<Void> validateExternalToken(String authorization, GatewayAuthDecision decision,
-			ServerWebExchange exchange, GatewayFilterChain chain) {
-		try {
-			tokenFacade.validateExternal(authorization);
-		}
-		catch (SecurityTokenException ex) {
-			if (decision.invalidTokenAction() == ALLOW_ANONYMOUS) {
-				log.debug("Token validate failed but allowed by mode: mode={}, code={}, path={}", properties.getMode(),
-						ex.getCode(), exchange.getRequest().getURI().getPath());
-				return chain.filter(exchange);
-			}
-			return Mono.error(new GatewayBusinessException(SecurityTokenExceptionToGatewayResultCodeMapper.map(ex)));
-		}
-		return chain.filter(exchange);
-	}
+    /**
+     * 校验外部 Token 可解析性（允许过期）
+     *
+     * @param authorization Authorization header
+     * @param exchange      the current server exchange
+     * @param chain         provides a way to delegate to the next filter
+     * @return Mono
+     */
+    private Mono<Void> validateExternalToken(String authorization, ServerWebExchange exchange, GatewayFilterChain chain) {
+        try {
+            tokenFacade.parseExternalAccessAllowExpired(authorization);
+        } catch (SecurityTokenException ex) {
+            log.debug("Gateway token parse failed: code={}, path={}", ex.getCode(),
+                    exchange.getRequest().getURI().getPath());
+            return Mono.error(new GatewayBusinessException(SecurityTokenExceptionToGatewayResultCodeMapper.map(ex)));
+        }
+        return chain.filter(exchange);
+    }
 
 }

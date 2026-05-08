@@ -23,13 +23,10 @@ class SecurityTokenExceptionToGatewayResultCodeMapperTest {
 	@Test
 	@DisplayName("测试权限版本策略映射到网关权限版本子码")
 	void map_permissionVersionStrategyErrors_shouldReturnGatewayStrategyCode() {
-		GatewayResultCodeEnum reauthMapped = SecurityTokenExceptionToGatewayResultCodeMapper
-			.map(new SecurityTokenException(SecurityResultCodeEnum.PERMISSION_VERSION_REAUTH_REQUIRED, "reauth"));
-		GatewayResultCodeEnum denyMapped = SecurityTokenExceptionToGatewayResultCodeMapper
-			.map(new SecurityTokenException(SecurityResultCodeEnum.PERMISSION_VERSION_ACCESS_DENIED, "deny"));
+		GatewayResultCodeEnum mapped = SecurityTokenExceptionToGatewayResultCodeMapper
+			.map(new SecurityTokenException(SecurityResultCodeEnum.PERMISSION_VERSION_MISMATCH, "mismatch"));
 
-		assertEquals(GatewayResultCodeEnum.UNAUTHORIZED_PERMISSION_VERSION_REAUTH_REQUIRED, reauthMapped);
-		assertEquals(GatewayResultCodeEnum.FORBIDDEN_PERMISSION_VERSION_ACCESS_DENIED, denyMapped);
+		assertEquals(GatewayResultCodeEnum.UNAUTHORIZED_PERMISSION_VERSION_MISMATCH, mapped);
 	}
 
 }
