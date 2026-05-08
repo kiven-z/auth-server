@@ -1,12 +1,10 @@
 package com.auth.service.system.common.exception;
 
-import java.util.Locale;
-
+import com.auth.common.web.context.SpringContextHolder;
+import lombok.Getter;
 import org.springframework.context.i18n.LocaleContextHolder;
 
-import com.auth.common.web.context.SpringContextHolder;
-
-import lombok.Getter;
+import java.util.Locale;
 
 /**
  * 系统服务结果代码(模块 {@code 10})
@@ -459,7 +457,7 @@ public enum SystemResultCodeEnum {
 	 * 便捷方法: 渲染当前区域的消息，无需额外参数
 	 */
 	public String getMessage() {
-		return getMessage(new Object[0]);
+		return getMessage(new Object[] {});
 	}
 
 }

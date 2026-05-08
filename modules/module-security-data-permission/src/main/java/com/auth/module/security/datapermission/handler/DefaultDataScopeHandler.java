@@ -30,7 +30,7 @@ public class DefaultDataScopeHandler implements DataScopeHandler {
 
 	private static final String FAIL_CLOSE_CONDITION = "1 = 0";
 
-	private static final Pattern SAFE_IDENTIFIER = Pattern.compile("^[A-Za-z_][A-Za-z0-9_]*$");
+	private static final Pattern SAFE_IDENTIFIER = Pattern.compile("^[A-Za-z_]\\w*$");
 
 	private final Map<ScopeGrantType, ScopeSqlStrategy> strategyRegistry;
 
