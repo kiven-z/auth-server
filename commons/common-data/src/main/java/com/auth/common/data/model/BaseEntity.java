@@ -1,10 +1,7 @@
 package com.auth.common.data.model;
 
 import com.auth.common.core.annotation.JsonStringFormat;
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,50 +18,51 @@ import java.time.LocalDateTime;
 @Setter
 public class BaseEntity implements Serializable {
 
-	@Serial
-	private static final long serialVersionUID = 1L;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-	/**
-	 * 唯一标识
-	 */
-	@JsonStringFormat
-	@TableId(value = "id", type = IdType.ASSIGN_ID)
-	private Long id;
+    /**
+     * 唯一标识
+     */
+    @JsonStringFormat
+    @TableId(value = "id", type = IdType.ASSIGN_ID)
+    private Long id;
 
-	/**
-	 * 创建时间
-	 */
-	@TableField(fill = FieldFill.INSERT)
-	private LocalDateTime createTime;
+    /**
+     * 创建时间
+     */
+    @TableField(fill = FieldFill.INSERT)
+    private LocalDateTime createTime;
 
-	/**
-	 * 更新时间
-	 */
-	@TableField(fill = FieldFill.INSERT_UPDATE)
-	private LocalDateTime updateTime;
+    /**
+     * 更新时间
+     */
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private LocalDateTime updateTime;
 
-	/**
-	 * 创建用户
-	 */
-	@JsonStringFormat
-	@TableField(fill = FieldFill.INSERT)
-	private Long createUser;
+    /**
+     * 创建用户
+     */
+    @JsonStringFormat
+    @TableField(fill = FieldFill.INSERT)
+    private Long createUser;
 
-	/**
-	 * 操作用户
-	 */
-	@JsonStringFormat
-	@TableField(fill = FieldFill.INSERT_UPDATE)
-	private Long updateUser;
+    /**
+     * 操作用户
+     */
+    @JsonStringFormat
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private Long updateUser;
 
-	/**
-	 * 乐观锁版本号
-	 */
-	private Long version;
+    /**
+     * 乐观锁版本号
+     */
+    @Version
+    private Long version;
 
-	/**
-	 * 备注
-	 */
-	private String remark;
+    /**
+     * 备注
+     */
+    private String remark;
 
 }
