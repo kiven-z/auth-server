@@ -1,8 +1,8 @@
 package com.auth.module.security.contract.exception;
 
-import java.util.Map;
-
 import lombok.Getter;
+
+import java.util.Map;
 
 /**
  * SecurityResultCodeEnum 是安全模块的公共业务代码，用于表示安全模块的错误状态 (module=00).
@@ -107,12 +107,6 @@ public enum SecurityResultCodeEnum {
 	 * @return 对应枚举
 	 */
 	public static SecurityResultCodeEnum fromError(String error) {
-		if (error == null || error.isBlank()) {
-			return UNKNOWN;
-		}
-		if ("PERMISSION_VERSION_ACCESS_DENIED".equals(error) || "PERMISSION_VERSION_REAUTH_REQUIRED".equals(error)) {
-			return PERMISSION_VERSION_MISMATCH;
-		}
 		for (SecurityResultCodeEnum candidate : values()) {
 			if (candidate == UNKNOWN) {
 				continue;

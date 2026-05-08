@@ -23,44 +23,11 @@ public final class SecurityErrorResponseSupport {
 	public static final String ATTR_SECURITY_ERROR = "security.error";
 
 	/**
-	 * 解析安全结果代码枚举
-	 * @param request 请求
-	 * @param fallbackError 回退错误
-	 * @return 安全结果代码枚举
-	 */
-	private static SecurityResultCodeEnum resolveRc(HttpServletRequest request, String fallbackError) {
-		Object raw = request != null ? request.getAttribute(ATTR_SECURITY_ERROR) : null;
-		String error = raw instanceof String s ? s : null;
-		if (error == null || error.isBlank()) {
-			error = fallbackError;
-		}
-		return SecurityResultCodeEnum.fromError(error);
-	}
-
-	/**
-	 * 写入安全错误响应
-	 * @param response 响应
-	 * @param rc 安全结果代码枚举
-	 */
-	private static void write(HttpServletResponse response, SecurityResultCodeEnum rc) {
-		if (response == null || rc == null) {
-			return;
-		}
-
-		response.setStatus(rc.getHttpStatus());
-		ResponseUtil.out(response, build(rc));
-	}
-
-	/**
 	 * 构建安全错误响应体（供 MVC Advice / FilterChain 复用）
 	 * @param rc 安全结果代码枚举
 	 * @return Result 响应体
 	 */
 	public static Result<Object> build(SecurityResultCodeEnum rc) {
-		if (rc == null) {
-			return null;
-		}
-
 		String message = rc.getDefaultMessage();
 		Result<Object> body = Result.error(rc.getBizCode(), rc.getError(), message);
 		body.setExt(rc.ext());
@@ -80,8 +47,12 @@ public final class SecurityErrorResponseSupport {
 	 * @param fallbackError 回退错误
 	 */
 	public static void write(HttpServletRequest request, HttpServletResponse response, String fallbackError) {
-		SecurityResultCodeEnum rc = resolveRc(request, fallbackError);
-		write(response, rc);
+		Object raw = request != null ? request.getAttribute(ATTR_SECURITY_ERROR) : null;
+		String error = raw instanceof String s ? s : fallbackError;
+		SecurityResultCodeEnum rc = SecurityResultCodeEnum.fromError(error);
+
+		response.setStatus(rc.getHttpStatus());
+		ResponseUtil.out(response, build(rc));
 	}
 
 }

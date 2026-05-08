@@ -31,41 +31,40 @@ import reactor.core.publisher.Mono;
 @Component
 public class JwtValidateGlobalFilter implements GlobalFilter {
 
-	private final AccessTokenProvider accessTokenProvider;
+    private final AccessTokenProvider accessTokenProvider;
 
-	public JwtValidateGlobalFilter(AccessTokenProvider accessTokenProvider) {
-		this.accessTokenProvider = accessTokenProvider;
-	}
+    public JwtValidateGlobalFilter(AccessTokenProvider accessTokenProvider) {
+        this.accessTokenProvider = accessTokenProvider;
+    }
 
-	/**
-	 * 网关 JWT 校验
-	 * @param exchange the current server exchange
-	 * @param chain provides a way to delegate to the next filter
-	 * @return Mono
-	 */
-	@Override
-	public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-		ServerHttpRequest request = exchange.getRequest();
+    /**
+     * 网关 JWT 校验
+     *
+     * @param exchange the current server exchange
+     * @param chain    provides a way to delegate to the next filter
+     * @return Mono
+     */
+    @Override
+    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        ServerHttpRequest request = exchange.getRequest();
 
-		// 外部Token轻量检查：仅当 Authorization 存在时进行可解析校验
-		String authorization = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-		if (CharSequenceUtil.isNotBlank(authorization)) {
-			return chain.filter(exchange);
-		}
+        // 外部Token轻量检查：仅当 Authorization 存在时进行可解析校验
+        String authorization = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+        if (CharSequenceUtil.isBlank(authorization)) {
+            return chain.filter(exchange);
+        }
 
-		try {
-			// 解析外部访问令牌（允许过期）
-			accessTokenProvider.parseToken(authorization);
-		}
-		catch (JwtExpiredException ex) {
-			log.warn(ex.getMessage(), ex);
-		}
-		catch (SecurityTokenException ex) {
-			log.debug("Gateway token parse failed: code={}, path={}", ex.getCode(),
-					exchange.getRequest().getURI().getPath());
-			return Mono.error(new GatewayBusinessException(SecurityTokenExceptionToGatewayResultCodeMapper.map(ex)));
-		}
-		return chain.filter(exchange);
-	}
+        try {
+            // 解析外部访问令牌（允许过期）
+            accessTokenProvider.parseToken(authorization);
+        } catch (JwtExpiredException ex) {
+            log.warn(ex.getMessage(), ex);
+        } catch (SecurityTokenException ex) {
+            log.debug("Gateway token parse failed: code={}, path={}", ex.getCode(),
+                    exchange.getRequest().getURI().getPath());
+            return Mono.error(new GatewayBusinessException(SecurityTokenExceptionToGatewayResultCodeMapper.map(ex)));
+        }
+        return chain.filter(exchange);
+    }
 
 }

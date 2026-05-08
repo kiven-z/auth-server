@@ -1,22 +1,27 @@
 package com.auth.service.auth.infrastructure;
 
-import com.auth.common.jwt.autoconfigure.JwtProperties;
-import com.auth.module.security.core.token.model.SecurityTokenResult;
-import com.auth.module.security.core.token.provider.AccessTokenProvider;
-import com.auth.module.security.core.token.provider.RefreshTokenProvider;
-import com.auth.service.auth.TestConstants;
-import com.auth.service.auth.infrastructure.login.TokenService;
-import com.auth.service.auth.model.response.UserLoginResponse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import com.auth.common.jwt.autoconfigure.JwtProperties;
+import com.auth.common.jwt.model.JwtUserToken;
+import com.auth.module.security.core.token.model.SecurityTokenResult;
+import com.auth.module.security.core.token.provider.AccessTokenProvider;
+import com.auth.module.security.core.token.provider.RefreshTokenProvider;
+import com.auth.service.auth.TestConstants;
+import com.auth.service.auth.exception.AuthBusinessException;
+import com.auth.service.auth.exception.AuthResultCode;
+import com.auth.service.auth.infrastructure.login.TokenPair;
+import com.auth.service.auth.infrastructure.login.TokenService;
 
 /**
  * TokenService 单元测试
@@ -36,67 +41,94 @@ class TokenServiceTest {
 	private JwtProperties jwtProperties;
 
 	@Test
-	@DisplayName("buildToken：填充 accessToken/refreshToken/expires")
-	void buildToken_shouldFillAccessRefreshAndExpires() {
+	@DisplayName("buildTokenPair：签发访问与刷新令牌")
+	void buildTokenPair_shouldReturnTokenPair() {
 		// Arrange
 		when(jwtProperties.getAccessExpired()).thenReturn(60L);
 		when(accessTokenProvider.buildToken(TestConstants.USER_ID, TestConstants.JTI, 7L)).thenReturn("acc");
 		when(refreshTokenProvider.buildToken(TestConstants.USER_ID, TestConstants.JTI, null)).thenReturn("ref");
 
 		TokenService service = new TokenService(accessTokenProvider, refreshTokenProvider, jwtProperties);
-		UserLoginResponse response = new UserLoginResponse();
-		response.setId(TestConstants.USER_ID);
 
 		// Act
-		service.buildToken(response, TestConstants.JTI, 7L);
+		TokenPair tokenPair = service.buildTokenPair(TestConstants.USER_ID, TestConstants.JTI, 7L);
 
 		// Assert
-		assertEquals("acc", response.getAccessToken());
-		assertEquals("ref", response.getRefreshToken());
-		assertNotNull(response.getExpires());
+		assertEquals("acc", tokenPair.accessToken());
+		assertEquals("ref", tokenPair.refreshToken());
+		assertNotNull(tokenPair.accessExpiresAt());
 	}
 
 	@Test
-	@DisplayName("parseAccessTokenOptional：空白 token 返回 empty")
-	void parseAccessTokenOptional_shouldReturnEmpty_whenTokenBlank() {
+	@DisplayName("parseAccessToken：解析成功时返回用户载荷")
+	void parseAccessToken_shouldReturnUserToken_whenSuccess() {
+		JwtUserToken userToken = JwtUserToken.builder().userId(TestConstants.USER_ID).jti(TestConstants.JTI).build();
+		SecurityTokenResult result = SecurityTokenResult.builder().userToken(userToken).build();
+		when(accessTokenProvider.parseToken("ok")).thenReturn(result);
 		TokenService service = new TokenService(accessTokenProvider, refreshTokenProvider, jwtProperties);
 
-		assertTrue(service.parseAccessTokenOptional(null).isEmpty());
-		assertTrue(service.parseAccessTokenOptional("").isEmpty());
-		assertTrue(service.parseAccessTokenOptional("   ").isEmpty());
-		verifyNoInteractions(accessTokenProvider);
+		JwtUserToken parsed = service.parseAccessToken("ok");
+
+		assertEquals(TestConstants.USER_ID, parsed.getUserId());
+		assertEquals(TestConstants.JTI, parsed.getJti());
 	}
 
 	@Test
-	@DisplayName("parseAccessTokenOptional：provider 抛异常时返回 empty")
-	void parseAccessTokenOptional_shouldReturnEmpty_whenProviderThrows() {
+	@DisplayName("parseAccessToken：provider 异常时抛 TOKEN_PARSING_FAILED")
+	void parseAccessToken_shouldThrowBusinessException_whenProviderThrows() {
 		when(accessTokenProvider.parseToken("bad")).thenThrow(new RuntimeException("invalid jwt"));
 		TokenService service = new TokenService(accessTokenProvider, refreshTokenProvider, jwtProperties);
 
-		assertTrue(service.parseAccessTokenOptional("bad").isEmpty());
-		verify(accessTokenProvider).parseToken("bad");
+		AuthBusinessException ex = assertThrows(AuthBusinessException.class, () -> service.parseAccessToken("bad"));
+		assertEquals(AuthResultCode.TOKEN_PARSING_FAILED, ex.getResultCode());
 	}
 
 	@Test
-	@DisplayName("parseAccessTokenOptional：provider 返回 null 时返回 empty")
-	void parseAccessTokenOptional_shouldReturnEmpty_whenProviderReturnsNull() {
-		when(accessTokenProvider.parseToken("x")).thenReturn(null);
+	@DisplayName("parseAccessTokenSafe：空白或异常时返回 empty")
+	void parseAccessTokenSafe_shouldReturnEmpty_whenBlankOrThrows() {
 		TokenService service = new TokenService(accessTokenProvider, refreshTokenProvider, jwtProperties);
+		when(accessTokenProvider.parseToken("bad")).thenThrow(new RuntimeException("invalid jwt"));
 
-		assertTrue(service.parseAccessTokenOptional("x").isEmpty());
+		assertTrue(service.parseAccessTokenSafe(null).isEmpty());
+		assertTrue(service.parseAccessTokenSafe(" ").isEmpty());
+		assertTrue(service.parseAccessTokenSafe("bad").isEmpty());
 	}
 
 	@Test
-	@DisplayName("parseAccessTokenOptional：解析成功时返回非空 Optional")
-	void parseAccessTokenOptional_shouldReturnPresent_whenProviderReturnsResult() {
-		SecurityTokenResult expected = mock(SecurityTokenResult.class);
-		when(accessTokenProvider.parseToken("ok")).thenReturn(expected);
+	@DisplayName("parseExpiredAccessToken：调用允许过期解析")
+	void parseExpiredAccessToken_shouldUseAllowExpiredProvider() {
+		JwtUserToken userToken = JwtUserToken.builder().userId(TestConstants.USER_ID).jti(TestConstants.JTI).build();
+		SecurityTokenResult result = SecurityTokenResult.builder().userToken(userToken).build();
+		when(accessTokenProvider.parseToken("expired")).thenReturn(result);
 		TokenService service = new TokenService(accessTokenProvider, refreshTokenProvider, jwtProperties);
 
-		Optional<SecurityTokenResult> optional = service.parseAccessTokenOptional("ok");
+		Optional<JwtUserToken> optional = service.parseExpiredAccessToken("expired");
 
 		assertTrue(optional.isPresent());
-		assertSame(expected, optional.get());
+		assertEquals(TestConstants.USER_ID, optional.get().getUserId());
+		verify(accessTokenProvider).parseToken("expired");
+	}
+
+	@Test
+	@DisplayName("parseRefreshToken：解析失败时抛 REFRESH_TOKEN_MALFORMED")
+	void parseRefreshToken_shouldThrowBusinessException_whenParseFailed() {
+		when(refreshTokenProvider.parseToken("bad")).thenThrow(new RuntimeException("bad refresh"));
+		TokenService service = new TokenService(accessTokenProvider, refreshTokenProvider, jwtProperties);
+
+		AuthBusinessException ex = assertThrows(AuthBusinessException.class, () -> service.parseRefreshToken("bad"));
+		assertEquals(AuthResultCode.REFRESH_TOKEN_MALFORMED, ex.getResultCode());
+	}
+
+	@Test
+	@DisplayName("getAccessExpiresAt：根据配置计算过期时间")
+	void getAccessExpiresAt_shouldReturnFutureTime() {
+		when(jwtProperties.getAccessExpired()).thenReturn(30L);
+		TokenService service = new TokenService(accessTokenProvider, refreshTokenProvider, jwtProperties);
+
+		LocalDateTime now = LocalDateTime.now();
+		LocalDateTime expiresAt = service.getAccessExpiresAt();
+
+		assertTrue(expiresAt.isAfter(now));
 	}
 
 }

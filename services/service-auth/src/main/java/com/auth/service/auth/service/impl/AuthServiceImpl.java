@@ -1,16 +1,23 @@
 package com.auth.service.auth.service.impl;
 
-import cn.hutool.core.text.CharSequenceUtil;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+
 import com.auth.common.jwt.model.JwtUserToken;
 import com.auth.module.security.autoconfig.web.SecurityUserUtils;
 import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
-import com.auth.module.security.contract.constants.SecurityTokenKind;
 import com.auth.service.auth.exception.AuthBusinessException;
 import com.auth.service.auth.exception.AuthResultCode;
 import com.auth.service.auth.infrastructure.login.LoginAuditSupport;
 import com.auth.service.auth.infrastructure.login.LoginFailureRateLimiter;
 import com.auth.service.auth.infrastructure.login.LoginResult;
+import com.auth.service.auth.infrastructure.login.TokenPair;
 import com.auth.service.auth.infrastructure.login.TokenService;
 import com.auth.service.auth.infrastructure.login.strategy.LoginStrategy;
 import com.auth.service.auth.infrastructure.profile.AuthProfileCache;
@@ -23,16 +30,9 @@ import com.auth.service.auth.model.request.AbstractAuthentication;
 import com.auth.service.auth.model.response.UserLoginResponse;
 import com.auth.service.auth.service.AuthLoginAuditService;
 import com.auth.service.auth.service.AuthService;
+
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * 认证服务实现
@@ -101,7 +101,10 @@ public class AuthServiceImpl implements AuthService {
 			authProfileCache.createCacheAuthProfile(profile);
 
 			// 构建令牌
-			tokenService.buildToken(response, jti, permVersion);
+			TokenPair tokenPair = tokenService.buildTokenPair(userId, jti, permVersion);
+			response.setAccessToken(tokenPair.accessToken());
+			response.setRefreshToken(tokenPair.refreshToken());
+			response.setExpires(tokenPair.accessExpiresAt());
 
 			// 构建会话索引
 			UserSessionIndex sessionIndex = userSessionIndexService.buildUserSessionIndex(request, userId, jti,
@@ -168,10 +171,7 @@ public class AuthServiceImpl implements AuthService {
 	@Override
 	public void logout(String accessToken, HttpServletRequest request) {
 		try {
-			tokenService.parseAccessTokenOptional(accessToken)
-				.filter(result -> result.getKind() == SecurityTokenKind.EXTERNAL_ACCESS)
-				.flatMap(result -> Optional.ofNullable(result.getUserToken()))
-				.filter(userToken -> userToken.getUserId() != null && CharSequenceUtil.isNotBlank(userToken.getJti()))
+			tokenService.parseAccessTokenSafe(accessToken)
 				.ifPresent(userToken -> revokeExternalAccessSession(request, userToken));
 		}
 		catch (Exception ex) {

@@ -5,7 +5,6 @@ import com.auth.module.security.autoconfig.web.error.SecurityErrorResponseSuppor
 import com.auth.module.security.contract.exception.SecurityResultCodeEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
@@ -31,9 +30,10 @@ public class SecurityExceptionHandler {
 	public ResponseEntity<Result<Object>> handleAccessDenied(Exception exception) {
 		log.warn("Access denied: {}", exception.getMessage());
 
-		Result<Object> body = SecurityErrorResponseSupport.build(SecurityResultCodeEnum.ACCESS_DENIED);
+		SecurityResultCodeEnum accessDenied = SecurityResultCodeEnum.ACCESS_DENIED;
+		Result<Object> body = SecurityErrorResponseSupport.build(accessDenied);
 
-		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
+		return ResponseEntity.status(accessDenied.getHttpStatus()).body(body);
 	}
 
 }

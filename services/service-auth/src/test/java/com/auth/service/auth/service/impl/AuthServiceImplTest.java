@@ -1,15 +1,29 @@
 package com.auth.service.auth.service.impl;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.auth.common.jwt.model.JwtUserToken;
 import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
-import com.auth.module.security.contract.constants.SecurityTokenKind;
-import com.auth.module.security.core.token.model.SecurityTokenResult;
 import com.auth.service.auth.TestConstants;
 import com.auth.service.auth.exception.AuthBusinessException;
 import com.auth.service.auth.exception.AuthResultCode;
 import com.auth.service.auth.infrastructure.login.LoginFailureRateLimiter;
 import com.auth.service.auth.infrastructure.login.LoginResult;
+import com.auth.service.auth.infrastructure.login.TokenPair;
 import com.auth.service.auth.infrastructure.login.TokenService;
 import com.auth.service.auth.infrastructure.login.strategy.LoginStrategy;
 import com.auth.service.auth.infrastructure.profile.AuthProfileCache;
@@ -22,21 +36,8 @@ import com.auth.service.auth.model.request.AbstractAuthentication;
 import com.auth.service.auth.model.request.UsernamePasswordAuth;
 import com.auth.service.auth.model.response.UserLoginResponse;
 import com.auth.service.auth.service.AuthLoginAuditService;
+
 import jakarta.servlet.http.HttpServletRequest;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InOrder;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
 
 /**
  * AuthServiceImpl 单元测试
@@ -108,13 +109,8 @@ class AuthServiceImplTest {
 		when(userSessionIndexService.buildUserSessionIndex(any(), anyLong(), anyString(), anyString()))
 			.thenReturn(sessionIndex);
 
-		doAnswer(invocation -> {
-			UserLoginResponse target = invocation.getArgument(0);
-			target.setAccessToken(TestConstants.ACCESS_TOKEN);
-			target.setRefreshToken(TestConstants.REFRESH_TOKEN);
-			target.setExpires(LocalDateTime.now().plusMinutes(5));
-			return null;
-		}).when(tokenService).buildToken(any(UserLoginResponse.class), anyString(), anyLong());
+		when(tokenService.buildTokenPair(anyLong(), anyString(), anyLong())).thenReturn(new TokenPair(
+				TestConstants.ACCESS_TOKEN, TestConstants.REFRESH_TOKEN, LocalDateTime.now().plusMinutes(5)));
 
 		AuthServiceImpl service = new AuthServiceImpl(List.of(strategy), authProfileCache, userSessionIndexService,
 				userSessionIndexSession, sessionLimitManager, tokenService, loginFailureRateLimiter, loginLogService);
@@ -132,7 +128,7 @@ class AuthServiceImplTest {
 				userSessionIndexSession, loginFailureRateLimiter, loginLogService);
 		inOrder.verify(sessionLimitManager).assertSessionLimit(TestConstants.USER_ID);
 		inOrder.verify(authProfileCache).createCacheAuthProfile(profile);
-		inOrder.verify(tokenService).buildToken(same(response), anyString(), eq(1L));
+		inOrder.verify(tokenService).buildTokenPair(eq(TestConstants.USER_ID), anyString(), eq(1L));
 		inOrder.verify(userSessionIndexService)
 			.buildUserSessionIndex(same(httpServletRequest), eq(TestConstants.USER_ID), anyString(),
 					eq(TestConstants.REFRESH_TOKEN));
@@ -176,13 +172,8 @@ class AuthServiceImplTest {
 
 		when(userSessionIndexService.buildUserSessionIndex(any(), anyLong(), anyString(), anyString()))
 			.thenReturn(new UserSessionIndex());
-		doAnswer(invocation -> {
-			UserLoginResponse target = invocation.getArgument(0);
-			target.setRefreshToken(TestConstants.REFRESH_TOKEN);
-			target.setAccessToken(TestConstants.ACCESS_TOKEN);
-			target.setExpires(LocalDateTime.now().plusMinutes(1));
-			return null;
-		}).when(tokenService).buildToken(any(UserLoginResponse.class), anyString(), anyLong());
+		when(tokenService.buildTokenPair(anyLong(), anyString(), anyLong())).thenReturn(new TokenPair(
+				TestConstants.ACCESS_TOKEN, TestConstants.REFRESH_TOKEN, LocalDateTime.now().plusMinutes(1)));
 
 		AuthServiceImpl service = new AuthServiceImpl(List.of(strategy), authProfileCache, userSessionIndexService,
 				userSessionIndexSession, sessionLimitManager, tokenService, loginFailureRateLimiter, loginLogService);
@@ -225,21 +216,13 @@ class AuthServiceImplTest {
 				userSessionIndexSession, sessionLimitManager, tokenService, loginFailureRateLimiter, loginLogService);
 
 		service.logout(" ", null);
-		verify(tokenService).parseAccessTokenOptional(" ");
+		verify(tokenService).parseAccessTokenSafe(" ");
 		verifyNoInteractions(userSessionIndexSession);
 
 		reset(tokenService, userSessionIndexSession);
-		when(tokenService.parseAccessTokenOptional("x")).thenReturn(Optional.empty());
+		when(tokenService.parseAccessTokenSafe("x")).thenReturn(Optional.empty());
 		service.logout("x", null);
-		verify(tokenService).parseAccessTokenOptional("x");
-		verifyNoInteractions(userSessionIndexSession);
-
-		reset(tokenService, userSessionIndexSession);
-		SecurityTokenResult tokenResult = mock(SecurityTokenResult.class);
-		when(tokenResult.getKind()).thenReturn(SecurityTokenKind.EXTERNAL_REFRESH);
-		when(tokenService.parseAccessTokenOptional("y")).thenReturn(Optional.of(tokenResult));
-		service.logout("y", null);
-		verify(tokenService).parseAccessTokenOptional("y");
+		verify(tokenService).parseAccessTokenSafe("x");
 		verifyNoInteractions(userSessionIndexSession);
 	}
 
@@ -254,10 +237,7 @@ class AuthServiceImplTest {
 		when(jwtUserToken.getJti()).thenReturn(TestConstants.JTI);
 		when(jwtUserToken.getUserId()).thenReturn(TestConstants.USER_ID);
 
-		SecurityTokenResult tokenResult = mock(SecurityTokenResult.class);
-		when(tokenResult.getKind()).thenReturn(SecurityTokenKind.EXTERNAL_ACCESS);
-		when(tokenResult.getUserToken()).thenReturn(jwtUserToken);
-		when(tokenService.parseAccessTokenOptional(TestConstants.ACCESS_TOKEN)).thenReturn(Optional.of(tokenResult));
+		when(tokenService.parseAccessTokenSafe(TestConstants.ACCESS_TOKEN)).thenReturn(Optional.of(jwtUserToken));
 
 		// Act
 		service.logout(TestConstants.ACCESS_TOKEN, null);
