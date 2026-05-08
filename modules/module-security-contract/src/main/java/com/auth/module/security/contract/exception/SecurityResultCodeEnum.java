@@ -29,6 +29,31 @@ public enum SecurityResultCodeEnum {
 	 * 令牌无效
 	 */
 	TOKEN_INVALID(401, 401, "TOKEN_INVALID", "security.token.invalid", "Token is invalid."),
+
+	/**
+	 * 权限版本不匹配且策略为强制重新认证
+	 */
+	PERMISSION_VERSION_REAUTH_REQUIRED(401, 411, "PERMISSION_VERSION_REAUTH_REQUIRED",
+			"security.permission.version.reauth.required", "Permission version mismatch, re-authentication required."),
+	/**
+	 * 令牌种类与期望不匹配（如内部/外部 Token 混用）
+	 */
+	TOKEN_KIND_MISMATCH(401, 409, "TOKEN_KIND_MISMATCH", "security.token.kind.mismatch",
+			"Token kind is not supported."),
+	/**
+	 * 会话数据不一致
+	 */
+	SESSION_INCONSISTENT(401, 407, "SESSION_INCONSISTENT", "security.session.inconsistent",
+			"Session data inconsistent, please re-authenticate."),
+	/**
+	 * 并发会话数超过限制
+	 */
+	SESSION_LIMIT_EXCEEDED(401, 408, "SESSION_LIMIT_EXCEEDED", "security.session.limit.exceeded",
+			"Concurrent session limit exceeded."),
+	/**
+	 * 未知错误（兜底；{@link #getError()} 与 {@link #TOKEN_INVALID} 相同以保持历史默认行为）
+	 */
+	UNKNOWN(401, 499, "TOKEN_INVALID", "security.unauthorized", "Unauthorized."),
 	/**
 	 * 令牌过期
 	 */
@@ -37,6 +62,11 @@ public enum SecurityResultCodeEnum {
 	 * 会话缺失
 	 */
 	SESSION_MISSING(401, 403, "SESSION_MISSING", "security.session.missing", "Session is missing."),
+	/**
+	 * 权限版本不匹配且策略为拒绝访问
+	 */
+	PERMISSION_VERSION_ACCESS_DENIED(403, 410, "PERMISSION_VERSION_ACCESS_DENIED",
+			"security.permission.version.access.denied", "Permission version mismatch, access denied."),
 	/**
 	 * 会话禁用
 	 */
@@ -51,12 +81,6 @@ public enum SecurityResultCodeEnum {
 	PERMISSION_VERSION_MISMATCH(409, 406, "PERMISSION_VERSION_MISMATCH", "security.permission.version.mismatch",
 			"Permission version mismatch, please refresh."),
 
-	/**
-	 * 令牌种类与期望不匹配（如内部/外部 Token 混用）
-	 */
-	TOKEN_KIND_MISMATCH(401, 409, "TOKEN_KIND_MISMATCH", "security.token.kind.mismatch",
-			"Token kind is not supported."),
-
 	// 00 + 1 + xx : 系统错误
 	/**
 	 * Redis 不可用
@@ -67,22 +91,7 @@ public enum SecurityResultCodeEnum {
 	 * 授权画像反序列化失败
 	 */
 	PROFILE_DESERIALIZE_FAILED(500, 102, "PROFILE_DESERIALIZE_FAILED", "security.profile.deserialize.failed",
-			"Failed to deserialize AuthProfile."),
-
-	/**
-	 * 会话数据不一致
-	 */
-	SESSION_INCONSISTENT(401, 407, "SESSION_INCONSISTENT", "security.session.inconsistent",
-			"Session data inconsistent, please re-authenticate."),
-	/**
-	 * 并发会话数超过限制
-	 */
-	SESSION_LIMIT_EXCEEDED(401, 408, "SESSION_LIMIT_EXCEEDED", "security.session.limit.exceeded",
-			"Concurrent session limit exceeded."),
-	/**
-	 * 未知错误（兜底；{@link #getError()} 与 {@link #TOKEN_INVALID} 相同以保持历史默认行为）
-	 */
-	UNKNOWN(401, 499, "TOKEN_INVALID", "security.unauthorized", "Unauthorized.");
+			"Failed to deserialize AuthProfile."),;
 
 	private final int httpStatus;
 

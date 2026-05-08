@@ -119,9 +119,9 @@ public final class ExternalRequestAuthenticator implements RequestAuthenticator 
 		throw switch (strategy) {
 			case REQUIRE_REFRESH -> new SecurityTokenException(SecurityResultCodeEnum.PERMISSION_VERSION_MISMATCH,
 					"Permission version mismatch.");
-			case DENY ->
-				new SecurityTokenException(SecurityResultCodeEnum.ACCESS_DENIED, "Permission version mismatch.");
-			case FORCE_REAUTH -> new SecurityTokenException(SecurityResultCodeEnum.SESSION_DISABLED,
+			case DENY -> new SecurityTokenException(SecurityResultCodeEnum.PERMISSION_VERSION_ACCESS_DENIED,
+					"Permission version mismatch.");
+			case FORCE_REAUTH -> new SecurityTokenException(SecurityResultCodeEnum.PERMISSION_VERSION_REAUTH_REQUIRED,
 					"Permission version mismatch; re-authentication required.");
 		};
 	}

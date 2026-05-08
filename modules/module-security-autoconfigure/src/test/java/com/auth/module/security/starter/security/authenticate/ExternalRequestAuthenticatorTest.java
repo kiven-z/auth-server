@@ -1,5 +1,14 @@
 package com.auth.module.security.starter.security.authenticate;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpHeaders;
+
 import com.auth.common.jwt.model.JwtUserToken;
 import com.auth.module.security.autoconfig.config.security.SecurityConfigProperties;
 import com.auth.module.security.autoconfig.config.security.VersionMismatchStrategy;
@@ -13,15 +22,8 @@ import com.auth.module.security.contract.exception.SecurityResultCodeEnum;
 import com.auth.module.security.contract.exception.SecurityTokenException;
 import com.auth.module.security.core.token.facade.SecurityTokenHandlerFacade;
 import com.auth.module.security.core.token.model.SecurityTokenResult;
-import jakarta.servlet.http.HttpServletRequest;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpHeaders;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import jakarta.servlet.http.HttpServletRequest;
 
 class ExternalRequestAuthenticatorTest {
 
@@ -133,7 +135,7 @@ class ExternalRequestAuthenticatorTest {
 
 		SecurityTokenException ex = assertThrows(SecurityTokenException.class,
 				() -> authenticator.authenticate(request));
-		assertEquals(SecurityResultCodeEnum.ACCESS_DENIED, ex.getResultCode());
+		assertEquals(SecurityResultCodeEnum.PERMISSION_VERSION_ACCESS_DENIED, ex.getResultCode());
 	}
 
 	@Test
@@ -154,7 +156,7 @@ class ExternalRequestAuthenticatorTest {
 
 		SecurityTokenException ex = assertThrows(SecurityTokenException.class,
 				() -> authenticator.authenticate(request));
-		assertEquals(SecurityResultCodeEnum.SESSION_DISABLED, ex.getResultCode());
+		assertEquals(SecurityResultCodeEnum.PERMISSION_VERSION_REAUTH_REQUIRED, ex.getResultCode());
 	}
 
 	@Test

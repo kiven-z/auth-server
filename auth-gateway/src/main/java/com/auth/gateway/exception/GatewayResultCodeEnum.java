@@ -1,8 +1,8 @@
 package com.auth.gateway.exception;
 
-import lombok.Getter;
-
 import java.util.Map;
+
+import lombok.Getter;
 
 /**
  * 网关公共业务代码，模块前缀为{@code 00}
@@ -51,7 +51,41 @@ public enum GatewayResultCodeEnum {
 	/**
 	 * 访问令牌过期（网关侧校验）
 	 */
-	UNAUTHORIZED_TOKEN_EXPIRED(401, 204, "GATEWAY_TOKEN_EXPIRED", "gateway.token.expired", "Token has expired.");
+	UNAUTHORIZED_TOKEN_EXPIRED(401, 204, "GATEWAY_TOKEN_EXPIRED", "gateway.token.expired", "Token has expired."),
+	/**
+	 * 访问令牌类型不匹配（网关侧校验）
+	 */
+	UNAUTHORIZED_TOKEN_KIND_MISMATCH(401, 205, "GATEWAY_TOKEN_KIND_MISMATCH", "gateway.token.kind.mismatch",
+			"Token kind is not supported."),
+	/**
+	 * 会话缺失（网关侧校验）
+	 */
+	UNAUTHORIZED_SESSION_MISSING(401, 206, "GATEWAY_SESSION_MISSING", "gateway.session.missing", "Session is missing."),
+	/**
+	 * 会话禁用（网关侧校验）
+	 */
+	UNAUTHORIZED_SESSION_DISABLED(401, 207, "GATEWAY_SESSION_DISABLED", "gateway.session.disabled",
+			"Session is disabled."),
+	/**
+	 * 会话数据不一致（网关侧校验）
+	 */
+	UNAUTHORIZED_SESSION_INCONSISTENT(401, 208, "GATEWAY_SESSION_INCONSISTENT", "gateway.session.inconsistent",
+			"Session data inconsistent, please re-authenticate."),
+	/**
+	 * 并发会话超限（网关侧校验）
+	 */
+	UNAUTHORIZED_SESSION_LIMIT_EXCEEDED(401, 209, "GATEWAY_SESSION_LIMIT_EXCEEDED", "gateway.session.limit.exceeded",
+			"Concurrent session limit exceeded."),
+	/**
+	 * 权限版本不匹配且策略要求重新认证（网关侧透传）
+	 */
+	UNAUTHORIZED_PERMISSION_VERSION_REAUTH_REQUIRED(401, 210, "GATEWAY_PERMISSION_VERSION_REAUTH_REQUIRED",
+			"gateway.permission.version.reauth.required", "Permission version mismatch, re-authentication required."),
+	/**
+	 * 权限版本不匹配且策略拒绝访问（网关侧透传）
+	 */
+	FORBIDDEN_PERMISSION_VERSION_ACCESS_DENIED(403, 211, "GATEWAY_PERMISSION_VERSION_ACCESS_DENIED",
+			"gateway.permission.version.access.denied", "Permission version mismatch, access denied.");
 
 	/**
 	 * HTTP状态码
