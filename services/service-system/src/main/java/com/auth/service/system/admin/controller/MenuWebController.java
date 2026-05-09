@@ -38,7 +38,8 @@ public class MenuWebController {
 	@GetMapping("/web-routes")
 	public Result<List<RouteNodeVO>> getWebRoutes() {
 		Long userId = SecurityUserUtils.getUserId();
-		return Result.success(menuWebRouteService.listWebRoutes(userId));
+		List<RouteNodeVO> menuList = menuWebRouteService.listWebRoutes(userId);
+		return Result.success(menuList);
 	}
 
 }

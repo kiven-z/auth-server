@@ -1,8 +1,8 @@
 package com.auth.service.system.common.model;
 
-import lombok.Getter;
-
 import static com.auth.service.system.common.model.SystemModule.SystemModuleConstant.*;
+
+import lombok.Getter;
 
 /**
  * 系统模块枚举。
@@ -131,7 +131,7 @@ public enum SystemModule {
 	/**
 	 * 密码历史
 	 */
-	LOG_USER_PASSWORD_HISTORY(USER, "密码历史日志"),
+	LOG_USER_PASSWORD_HISTORY(AUDIT, "密码历史日志"),
 
 	// ========== 操作日志（LOG） ==========
 
