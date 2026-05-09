@@ -177,6 +177,9 @@ public enum SystemModule {
 
 		protected static final String LOG = "LOG";
 
+		private SystemModuleConstant() {
+		}
+
 	}
 
 }

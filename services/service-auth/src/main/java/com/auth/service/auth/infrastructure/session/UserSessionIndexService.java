@@ -46,6 +46,7 @@ public class UserSessionIndexService {
 
 		// 设置刷新TokenHash等
 		String refreshTokenHash = MD5.create().digestHex16(refreshToken);
+
 		userSessionIndex.setRefreshTokenHash(refreshTokenHash);
 		long refreshExpiredSeconds = properties.getRefreshExpired();
 		long refreshTokenExpiresAtMillis = System.currentTimeMillis() + refreshExpiredSeconds * 1000L;

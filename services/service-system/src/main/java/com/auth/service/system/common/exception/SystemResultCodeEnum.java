@@ -456,8 +456,9 @@ public enum SystemResultCodeEnum {
 	/**
 	 * 便捷方法: 渲染当前区域的消息，无需额外参数
 	 */
+	@SuppressWarnings("java:S3878")
 	public String getMessage() {
-		return getMessage(new Object[] {});
+		return getMessage(new Object[0]);
 	}
 
 }

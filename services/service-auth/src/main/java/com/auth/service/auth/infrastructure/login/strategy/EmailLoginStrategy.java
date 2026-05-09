@@ -70,8 +70,8 @@ public class EmailLoginStrategy extends AbstractAuthenticationStrategy<EmailAuth
 		// 验证码错误：不走 BadCredentialsException，直接返回验证码业务错误码
 		String email = Objects.requireNonNull(auth.getEmail());
 		String code = Objects.requireNonNull(auth.getCode());
-		code = MD5.create().digestHex16(code);
 
+		code = MD5.create().digestHex16(code);
 		// 查询当前验证码是否正确
 		@NotNull
 		String redisKey = EMAIL_CODE.key(email);
