@@ -35,47 +35,4 @@ public enum PermissionTypeEnum {
 		return null;
 	}
 
-	/**
-	 * 用户状态枚举
-	 *
-	 * @author Bunny
-	 */
-	@Getter
-	public enum UserStatusEnums {
-
-		/**
-		 * 禁用
-		 */
-		DISABLED(0, "禁用"),
-
-		/**
-		 * 正常
-		 */
-		NORMAL(1, "正常"),
-
-		/**
-		 * 锁定
-		 */
-		LOCKED(2, "锁定");
-
-		private final int code;
-
-		private final String desc;
-
-		UserStatusEnums(int code, String desc) {
-			this.code = code;
-			this.desc = desc;
-		}
-
-		public static String getDesc(int code) {
-			for (UserStatusEnums value : values()) {
-				if (value.code == code) {
-					return value.desc;
-				}
-			}
-			return null;
-		}
-
-	}
-
 }

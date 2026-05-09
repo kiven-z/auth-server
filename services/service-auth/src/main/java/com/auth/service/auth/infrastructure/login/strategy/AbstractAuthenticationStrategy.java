@@ -1,6 +1,7 @@
 package com.auth.service.auth.infrastructure.login.strategy;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.auth.common.data.model.UserStatus;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.module.security.starter.model.UserEntity;
 import com.auth.service.auth.exception.AuthBusinessException;
@@ -52,11 +53,10 @@ public abstract class AbstractAuthenticationStrategy<T extends AbstractAuthentic
 	public LoginResult authenticate(T auth, HttpServletRequest request) {
 		UserEntity user = resolveUserOrAuditAndRethrow(auth, request);
 		Long userId = user.getId();
-		assertNotLockedOrAuditAndRethrow(request, user, userId);
+		assertNotLockedOrAuditAndRethrow(request, user);
 
 		try {
 			AuthLoginLogType resolvedLoginLogType = doAuthenticate(auth, user);
-
 			AuthProfile profile = authProfileService.buildByUser(user);
 
 			UserLoginResponse response = BeanUtil.copyProperties(user, UserLoginResponse.class);
@@ -108,10 +108,22 @@ public abstract class AbstractAuthenticationStrategy<T extends AbstractAuthentic
 	 * 校验用户是否锁定并记录审计日志。
 	 * @param request HTTP 请求
 	 * @param user 用户实体
-	 * @param userId 用户ID
 	 */
-	private void assertNotLockedOrAuditAndRethrow(HttpServletRequest request, UserEntity user, Long userId) {
+	private void assertNotLockedOrAuditAndRethrow(HttpServletRequest request, UserEntity user) {
+		Long userId = user.getId();
+		UserStatus status = UserStatus.of(user.getStatus());
 		try {
+			if (status == UserStatus.DISABLED) {
+				loginLogService.recordLoginLog(request, loginLogType(), AuthLoginLogResult.ACCOUNT_DISABLED, userId,
+						user.getUsername(), AuthResultCode.USER_DISABLED.getMessageKey(), null);
+				throw new AuthBusinessException(AuthResultCode.USER_DISABLED);
+			}
+			if (status == UserStatus.LOCKED) {
+				loginLogService.recordLoginLog(request, loginLogType(), AuthLoginLogResult.ACCOUNT_LOCKED, userId,
+						user.getUsername(), "account.status.locked", null);
+				throw new AuthBusinessException(AuthResultCode.USER_LOCKED);
+			}
+
 			loginFailureRateLimiter.assertNotLocked(userId);
 		}
 		catch (AuthBusinessException ex) {
