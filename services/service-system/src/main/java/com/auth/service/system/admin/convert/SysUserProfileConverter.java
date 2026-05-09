@@ -1,7 +1,7 @@
 package com.auth.service.system.admin.convert;
 
 import com.auth.module.security.starter.model.UserEntity;
-import com.auth.service.system.admin.vo.SysUserProfileResponse;
+import com.auth.service.system.common.model.vo.SysUserProfileResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 

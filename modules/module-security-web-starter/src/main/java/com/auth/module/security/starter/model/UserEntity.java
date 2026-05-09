@@ -56,7 +56,7 @@ public class UserEntity extends BaseEntity {
 	private String avatar;
 
 	/**
-	 * 状态(0=正常,1=禁用,2=锁定)
+	 * 状态(0=禁用,1=正常,2=锁定)
 	 */
 	private Integer status;
 

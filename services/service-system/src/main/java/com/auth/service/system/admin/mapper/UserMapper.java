@@ -1,4 +1,4 @@
-package com.auth.service.system.common.mapper;
+package com.auth.service.system.admin.mapper;
 
 import com.auth.module.security.starter.model.UserEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;

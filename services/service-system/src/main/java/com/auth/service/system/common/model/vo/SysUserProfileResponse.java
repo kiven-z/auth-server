@@ -1,4 +1,4 @@
-package com.auth.service.system.admin.vo;
+package com.auth.service.system.common.model.vo;
 
 import com.auth.common.core.annotation.JsonStringFormat;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -43,7 +43,7 @@ public class SysUserProfileResponse implements Serializable {
 	@Schema(title = "头像URL")
 	private String avatar;
 
-	@Schema(title = "状态(0=正常,1=禁用,2=锁定)")
+	@Schema(title = "状态(0=禁用,1=正常,2=锁定)")
 	private Integer status;
 
 	@Schema(title = "性别(0=未知,1=男,2=女)")

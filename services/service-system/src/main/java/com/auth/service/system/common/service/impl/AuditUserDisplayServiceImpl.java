@@ -1,22 +1,16 @@
 package com.auth.service.system.common.service.impl;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import org.springframework.stereotype.Service;
-
+import cn.hutool.core.collection.CollUtil;
 import com.auth.common.core.model.response.BaseResponse;
 import com.auth.module.security.starter.model.UserEntity;
-import com.auth.service.system.common.mapper.UserMapper;
+import com.auth.service.system.admin.mapper.UserMapper;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import org.springframework.stereotype.Service;
 
-import cn.hutool.core.collection.CollUtil;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 审计用户展示名：基于用户表批量解析用户名。

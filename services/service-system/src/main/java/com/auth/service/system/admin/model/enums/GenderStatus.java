@@ -1,4 +1,4 @@
-package com.auth.service.system.admin.enums;
+package com.auth.service.system.admin.model.enums;
 
 import lombok.Getter;
 

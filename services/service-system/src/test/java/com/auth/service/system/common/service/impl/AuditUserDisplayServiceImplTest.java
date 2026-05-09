@@ -1,13 +1,9 @@
 package com.auth.service.system.common.service.impl;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
+import com.auth.common.core.model.response.BaseResponse;
+import com.auth.module.security.starter.model.UserEntity;
+import com.auth.service.system.admin.mapper.UserMapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,10 +11,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.auth.common.core.model.response.BaseResponse;
-import com.auth.module.security.starter.model.UserEntity;
-import com.auth.service.system.common.mapper.UserMapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link AuditUserDisplayServiceImpl} 单元测试。

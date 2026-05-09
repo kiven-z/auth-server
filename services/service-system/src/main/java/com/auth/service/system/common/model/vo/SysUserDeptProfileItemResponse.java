@@ -1,4 +1,4 @@
-package com.auth.service.system.admin.vo;
+package com.auth.service.system.common.model.vo;
 
 import com.auth.common.core.annotation.JsonStringFormat;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -34,7 +34,7 @@ public class SysUserDeptProfileItemResponse implements Serializable {
 	@Schema(title = "是否主部门")
 	private Boolean isPrimary;
 
-	@Schema(title = "关联状态(0=正常,1=已调离,2=兼职)")
+	@Schema(title = "关联状态(0=已调离,1=正常,2=兼职)")
 	private Integer status;
 
 	@Schema(title = "在部门内职务")

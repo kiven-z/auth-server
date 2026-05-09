@@ -1,4 +1,4 @@
-package com.auth.service.system.admin.vo;
+package com.auth.service.system.common.model.vo;
 
 import com.auth.common.core.annotation.JsonStringFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -36,7 +36,7 @@ public class SysUserPostProfileItemResponse implements Serializable {
 	@Schema(title = "是否主岗位")
 	private Boolean isPrimary;
 
-	@Schema(title = "关联状态(0=正常,1=已调离,2=兼职)")
+	@Schema(title = "关联状态(0=已调离,1=正常,2=兼职)")
 	private Integer status;
 
 }
