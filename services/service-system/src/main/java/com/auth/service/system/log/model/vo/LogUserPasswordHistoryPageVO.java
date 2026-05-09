@@ -3,8 +3,9 @@ package com.auth.service.system.log.model.vo;
 import com.auth.common.core.annotation.JsonStringFormat;
 import com.auth.common.core.model.response.BaseResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.io.Serial;
 import java.time.LocalDateTime;
@@ -15,8 +16,9 @@ import java.time.LocalDateTime;
  * @author Bunny
  */
 @Schema(name = "LogUserPasswordHistoryPageVO", title = "密码历史日志分页行")
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
+@ToString
 public class LogUserPasswordHistoryPageVO extends BaseResponse {
 
 	@Serial

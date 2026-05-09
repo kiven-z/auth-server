@@ -35,7 +35,7 @@ public class LogUserPasswordHistoryController {
 
 	@Operation(summary = "分页查询密码历史日志")
 	@PreAuthorize("@auth.decide('sysLogPasswordHistory:query')")
-	@GetMapping
+	@GetMapping("page")
 	public Result<PageResponse<LogUserPasswordHistoryPageVO>> page(LogUserPasswordHistoryQuery query) {
 		Page<LogUserPasswordHistoryEntity> page = new Page<>(query.getPageIndex(), query.getPageSize());
 		PageResponse<LogUserPasswordHistoryPageVO> response = logUserPasswordHistoryService.getPage(page, query);
@@ -54,7 +54,7 @@ public class LogUserPasswordHistoryController {
 	@PreAuthorize("@auth.decide('sysLogPasswordHistory:delete')")
 	@DeleteMapping
 	public Result<String> batchDelete(@RequestBody List<Long> ids) {
-		logUserPasswordHistoryService.removeBatch(ids);
+		logUserPasswordHistoryService.removeBatchByIds(ids);
 		return Result.success(null, DELETE_SUCCESS.getMessage());
 	}
 

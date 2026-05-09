@@ -1,20 +1,19 @@
 package com.auth.service.system.log.service;
 
-import java.util.List;
-
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.log.model.entity.LogUserPasswordHistoryEntity;
 import com.auth.service.system.log.model.query.LogUserPasswordHistoryQuery;
 import com.auth.service.system.log.model.vo.LogUserPasswordHistoryDetailVO;
 import com.auth.service.system.log.model.vo.LogUserPasswordHistoryPageVO;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
  * 密码历史日志 Service
  *
  * @author Bunny
  */
-public interface LogUserPasswordHistoryService {
+public interface LogUserPasswordHistoryService extends IService<LogUserPasswordHistoryEntity> {
 
 	/**
 	 * 分页查询密码历史日志
@@ -31,11 +30,5 @@ public interface LogUserPasswordHistoryService {
 	 * @return 详情
 	 */
 	LogUserPasswordHistoryDetailVO getDetail(Long id);
-
-	/**
-	 * 批量删除
-	 * @param ids 主键集合
-	 */
-	void removeBatch(List<Long> ids);
 
 }

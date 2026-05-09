@@ -32,9 +32,15 @@ public class LogUserPasswordHistoryDetailVO implements Serializable {
 	private String username;
 
 	@Schema(title = "修改时间")
-	private LocalDateTime createTime;
+	private LocalDateTime changeTime;
 
 	@Schema(title = "修改IP地址")
 	private String changeIp;
+
+	@Schema(title = "修改时间")
+	private LocalDateTime createTime;
+
+	@Schema(title = "更新时间")
+	private LocalDateTime updateTime;
 
 }

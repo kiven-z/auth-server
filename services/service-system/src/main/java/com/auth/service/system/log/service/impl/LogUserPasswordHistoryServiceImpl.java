@@ -1,6 +1,5 @@
 package com.auth.service.system.log.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
@@ -16,8 +15,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 import static com.auth.service.system.common.exception.SystemResultCodeEnum.DATA_NOT_EXIST;
 
@@ -60,22 +57,11 @@ public class LogUserPasswordHistoryServiceImpl
 	 */
 	@Override
 	public LogUserPasswordHistoryDetailVO getDetail(Long id) {
-		LogUserPasswordHistoryEntity entity = getById(id);
-		if (entity == null) {
+		LogUserPasswordHistoryDetailVO vo = baseMapper.selectDetailById(id);
+		if (vo == null) {
 			throw new SystemBusinessException(DATA_NOT_EXIST);
 		}
-		LogUserPasswordHistoryDetailVO vo = new LogUserPasswordHistoryDetailVO();
-		BeanUtil.copyProperties(entity, vo);
 		return vo;
-	}
-
-	/**
-	 * 批量删除
-	 * @param ids 主键集合
-	 */
-	@Override
-	public void removeBatch(List<Long> ids) {
-		removeBatchByIds(ids);
 	}
 
 }
