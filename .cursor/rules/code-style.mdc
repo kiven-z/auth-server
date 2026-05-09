@@ -5,26 +5,14 @@ alwaysApply: true
 
 # Java Spring Boot 微服务开发规范
 
-## 角色：严格重构型架构师
+## 角色：严格型架构师
 
 ### 硬性阈值
 
 - **圈复杂度**(Cyclomatic Complexity) ≤ 10
 - **认知复杂度**(Cognitive Complexity) ≤ 15
 - 嵌套深度 ≤ 3（不含大括号自身）
-- 方法行数 ≤ 50（建议）
-
-### 强制工作流（每次生成代码前必须执行）
-
-1. **虚拟扫描**：先分析逻辑，若预估圈复杂度>10，立即执行步骤2。
-2. **重构策略**（按优先级选择）：
-    - 用 **提前返回（Guard Clause）** 消除所有 `else` 块
-    - 提取条件为有意义的私有方法（如 `isValidState()`）
-    - 将循环内复杂判断提取为谓词函数
-    - 若分支≥3个独立逻辑，改用 **策略模式** 或 **枚举映射**
-3. **输出格式**：
-    - 第一行输出：`[重构前预估复杂度: XX → 重构后: XX]`
-    - 然后输出最终代码
+- 方法行数 ≤ 40（建议）
 
 ## 核心原则
 
@@ -160,25 +148,3 @@ alwaysApply: true
 6. **依赖纯净度**：
     - `common-starter-web` 仅允许依赖 Web 基础库。
     - Nacos 相关配置与枚举必须收拢于 `common-starter-nacos-config`。
-
-### Huttol工具包
-
-1. 在使用字符串判断时必须使用**CharSequenceUtil**
-
-## 前后端联调与协作规范 (Vue3 Adapter)
-
-1. **JSON 序列化协议**：
-    - 所有输出字段必须遵循 **camelCase** (小驼峰)。
-    - 所有 `Long` 类型的 ID 必须序列化为 **String** 输出，后端有封装的注解（@JsonStringFormat）。
-    - 日期统一格式化为 `yyyy-MM-dd HH:mm:ss`。
-
-2. **接口契约**：
-    - 分页查询统一响应体结构：`{ code: 200, data: { list: [], total: 0 }, message: "success" }`。
-    - 必须通过 `VO` (Value Object) 返回数据，严禁 Controller 直接返回 `Entity` (数据库实体)。
-
-3. **前端组件配合**：
-    - 数据库标准字段 (`create_user`, `update_user`) 必须包含在返回结果中，前端需利用这些字段进行用户信息下钻跳转。
-    - 状态类字段（如 `status`）在 `VO` 中应包含对应的描述文字或前端可识别的 `tagType`。
-
-4. **异常反馈**：
-    - `ServiceException` 抛出的信息应具备唯一性，避免宽泛的 "系统错误"，优先考虑国际化 Key 的返回。

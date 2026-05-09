@@ -5,10 +5,8 @@ import com.auth.common.core.model.response.Result;
 import com.auth.module.security.autoconfig.annotation.AuthenticatedApi;
 import com.auth.module.security.autoconfig.annotation.PublicApi;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
-import com.auth.module.security.core.token.model.RefreshTokenRequest;
 import com.auth.service.example.feign.ExampleAuthInnerFeignClient;
 import io.swagger.v3.oas.annotations.Operation;
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -93,8 +91,8 @@ public class ExampleController {
 	@AuthenticatedApi
 	@Operation(summary = "8-刷新Token")
 	@PostMapping("/trigger-feign")
-	public Result<Object> triggerFeign(@Valid @RequestBody RefreshTokenRequest request) {
-		return exampleAuthInnerFeignClient.refreshToken(request);
+	public Result<Object> triggerFeign() {
+		return exampleAuthInnerFeignClient.refreshToken();
 	}
 
 }

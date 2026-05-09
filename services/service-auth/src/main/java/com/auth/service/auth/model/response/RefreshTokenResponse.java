@@ -1,6 +1,7 @@
 package com.auth.service.auth.model.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -28,8 +29,9 @@ public class RefreshTokenResponse implements Serializable {
 	private String accessToken;
 
 	/**
-	 * 刷新令牌
+	 * 刷新令牌（仅服务端 Cookie 下发使用，不对前端 JSON 暴露）
 	 */
+	@JsonIgnore
 	private String refreshToken;
 
 	/**
