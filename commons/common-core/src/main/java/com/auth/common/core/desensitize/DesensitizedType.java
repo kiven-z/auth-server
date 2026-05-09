@@ -33,6 +33,11 @@ public enum DesensitizedType {
     BANK_CARD,
 
     /**
+     * IP 地址（自动识别 IPv4 / IPv6，均使用 Hutool 脱敏规则）
+     */
+    IP_ADDRESS,
+
+    /**
      * 自定义保留前后缀规则，配合注解上的 prefixLen、suffixLen、symbol
      */
     CUSTOM

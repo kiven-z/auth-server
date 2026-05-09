@@ -111,6 +111,34 @@ class DesensitizedJsonSerializerTest {
 		assertEquals("", mapper.readTree(json).get("phone").asText());
 	}
 
+	@Test
+	@DisplayName("IP_ADDRESS：IPv4 与 Hutool ipv4 一致")
+	void ipV4MatchesHutool() throws JsonProcessingException {
+		IpDto dto = new IpDto();
+		dto.setIp("192.168.1.100");
+		String json = mapper.writeValueAsString(dto);
+		// 与 Hutool 脱敏结果一致
+		assertEquals(DesensitizedUtil.ipv4("192.168.1.100"), mapper.readTree(json).get("ip").asText());
+	}
+
+	@Test
+	@DisplayName("IP_ADDRESS：IPv6 与 Hutool ipv6 一致")
+	void ipV6MatchesHutool() throws JsonProcessingException {
+		IpDto dto = new IpDto();
+		dto.setIp("2001:0db8:85a3::8a2e:0370:7334");
+		String json = mapper.writeValueAsString(dto);
+		assertEquals(DesensitizedUtil.ipv6("2001:0db8:85a3::8a2e:0370:7334"), mapper.readTree(json).get("ip").asText());
+	}
+
+	@Test
+	@DisplayName("IP_ADDRESS：非 IP 字符串输出固定占位")
+	void ipUnknownUsesPlaceholder() throws JsonProcessingException {
+		IpDto dto = new IpDto();
+		dto.setIp("not-an-ip");
+		String json = mapper.writeValueAsString(dto);
+		assertEquals("******", mapper.readTree(json).get("ip").asText());
+	}
+
 	@Data
 	private static class MobileDto {
 		@Desensitized(DesensitizedType.MOBILE_PHONE)
@@ -151,5 +179,11 @@ class DesensitizedJsonSerializerTest {
 	private static class CustomHashDto {
 		@Desensitized(value = DesensitizedType.CUSTOM, prefixLen = 2, suffixLen = 2, symbol = "#")
 		private String code;
+	}
+
+	@Data
+	private static class IpDto {
+		@Desensitized(DesensitizedType.IP_ADDRESS)
+		private String ip;
 	}
 }
