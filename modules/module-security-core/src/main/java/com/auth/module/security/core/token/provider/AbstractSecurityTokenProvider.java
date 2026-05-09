@@ -1,10 +1,6 @@
 package com.auth.module.security.core.token.provider;
 
-import static com.auth.common.jwt.provider.AbstractJwtTokenProvider.*;
-import static com.auth.module.security.contract.constants.SecurityExternalTokenConstants.*;
-
-import java.util.Date;
-
+import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.jwt.api.JwtTokenProvider;
 import com.auth.common.jwt.exception.JwtExpiredException;
 import com.auth.common.jwt.model.JwtUserToken;
@@ -12,9 +8,12 @@ import com.auth.module.security.contract.constants.SecurityTokenKind;
 import com.auth.module.security.contract.exception.SecurityResultCodeEnum;
 import com.auth.module.security.contract.exception.SecurityTokenException;
 import com.auth.module.security.core.token.model.SecurityTokenResult;
-
-import cn.hutool.core.text.CharSequenceUtil;
 import io.jsonwebtoken.Claims;
+
+import java.util.Date;
+
+import static com.auth.common.jwt.provider.AbstractJwtTokenProvider.BEARER_PREFIX;
+import static com.auth.module.security.contract.constants.SecurityExternalTokenConstants.TOKEN_TYPE;
 
 /**
  * 抽象令牌提供者
@@ -68,23 +67,14 @@ public abstract class AbstractSecurityTokenProvider implements SecurityTokenProv
 	 */
 	@Override
 	public SecurityTokenResult parseToken(String token) {
-		return parseTokenInternal(token, false);
-	}
 
-	@Override
-	public SecurityTokenResult parseTokenAllowExpired(String token) {
-		return parseTokenInternal(token, true);
-	}
-
-	private SecurityTokenResult parseTokenInternal(String token, boolean allowExpired) {
 		String normalizedToken = normalizeToken(token);
 		if (CharSequenceUtil.isBlank(normalizedToken)) {
 			throw new SecurityTokenException(SecurityResultCodeEnum.TOKEN_MISSING, "Token is missing.");
 		}
 
 		try {
-			Claims claims = allowExpired ? jwtTokenProvider.getClaimsAllowExpired(normalizedToken)
-					: jwtTokenProvider.getClaims(normalizedToken);
+			Claims claims = jwtTokenProvider.getClaims(normalizedToken);
 			Object raw = claims.get(TOKEN_TYPE);
 			String tokenKind = getTokenKind();
 
@@ -92,8 +82,7 @@ public abstract class AbstractSecurityTokenProvider implements SecurityTokenProv
 				throw new SecurityTokenException(SecurityResultCodeEnum.TOKEN_KIND_MISMATCH, "Token kind mismatch.");
 			}
 
-			JwtUserToken jwtUserToken = allowExpired ? jwtTokenProvider.parseTokenAllowExpired(normalizedToken)
-					: jwtTokenProvider.parseToken(normalizedToken);
+			JwtUserToken jwtUserToken = jwtTokenProvider.parseToken(normalizedToken);
 
 			SecurityTokenKind kind = SecurityTokenKind.of(tokenKind);
 			if (kind == null) {
@@ -104,7 +93,7 @@ public abstract class AbstractSecurityTokenProvider implements SecurityTokenProv
 				.kind(kind)
 				.rawToken(normalizedToken)
 				.userToken(jwtUserToken);
-			enrichTokenResult(builder, normalizedToken, jwtUserToken, kind, allowExpired);
+			enrichTokenResult(builder, normalizedToken, jwtUserToken, kind);
 			return builder.build();
 		}
 		catch (SecurityTokenException ex) {
@@ -116,7 +105,6 @@ public abstract class AbstractSecurityTokenProvider implements SecurityTokenProv
 		catch (Exception ex) {
 			throw new SecurityTokenException(SecurityResultCodeEnum.TOKEN_INVALID, "Token is invalid.");
 		}
-
 	}
 
 	/**
@@ -140,9 +128,8 @@ public abstract class AbstractSecurityTokenProvider implements SecurityTokenProv
 	 * @param token 令牌
 	 * @param jwtUserToken JWT用户令牌
 	 * @param kind 令牌类型
-	 * @param allowExpired 是否允许过期
 	 */
 	protected abstract void enrichTokenResult(SecurityTokenResult.SecurityTokenResultBuilder builder, String token,
-			JwtUserToken jwtUserToken, SecurityTokenKind kind, boolean allowExpired);
+			JwtUserToken jwtUserToken, SecurityTokenKind kind);
 
 }

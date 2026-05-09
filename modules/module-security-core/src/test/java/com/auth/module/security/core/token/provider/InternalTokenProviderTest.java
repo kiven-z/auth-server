@@ -1,26 +1,21 @@
 package com.auth.module.security.core.token.provider;
 
-import static com.auth.module.security.contract.constants.SecurityExternalTokenConstants.*;
-import static com.auth.module.security.contract.constants.SecurityInternalTokenConstants.*;
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.util.Date;
-import java.util.Map;
-
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
 import com.auth.common.jwt.autoconfigure.JwtProperties;
 import com.auth.common.jwt.key.HmacSecretKeys;
 import com.auth.common.jwt.model.SignatureAlgorithm;
 import com.auth.common.jwt.provider.HmacJwtTokenProvider;
 import com.auth.module.security.contract.constants.SecurityInternalTokenConstants;
 import com.auth.module.security.contract.constants.SecurityTokenKind;
-import com.auth.module.security.contract.exception.SecurityResultCodeEnum;
-import com.auth.module.security.contract.exception.SecurityTokenException;
 import com.auth.module.security.core.token.model.SecurityTokenResult;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import io.jsonwebtoken.Jwts;
+import java.util.Date;
+
+import static com.auth.module.security.contract.constants.SecurityExternalTokenConstants.TOKEN_TYPE;
+import static com.auth.module.security.contract.constants.SecurityInternalTokenConstants.PRINCIPAL_TYPE;
+import static com.auth.module.security.contract.constants.SecurityInternalTokenConstants.PRINCIPAL_TYPE_USER;
+import static org.junit.jupiter.api.Assertions.*;
 
 class InternalTokenProviderTest {
 
@@ -141,31 +136,6 @@ class InternalTokenProviderTest {
 		assertEquals(SecurityInternalTokenConstants.PRINCIPAL_TYPE_SERVICE, bearerResult.getPrincipalType());
 		assertEquals("auth-server", rawResult.getServiceId());
 		assertEquals("auth-server", bearerResult.getServiceId());
-	}
-
-	@Test
-	@DisplayName("测试允许过期解析：内部过期令牌可读取服务主体")
-	void parseTokenAllowExpired_shouldParseExpiredInternalToken() {
-		JwtProperties props = hmacJwtProperties();
-		var key = HmacSecretKeys.fromUtf8Secret(HMAC_SECRET);
-		HmacJwtTokenProvider jwt = new HmacJwtTokenProvider(props, key);
-		InternalTokenProvider provider = new InternalTokenProvider(jwt, props);
-
-		String expiredToken = jwt.generatorJwtToken(Jwts.builder()
-			.id("jti-expired")
-			.issuer("test-issuer")
-			.subject(String.valueOf(SecurityInternalTokenConstants.SERVICE_SUB_PLACEHOLDER))
-			.issuedAt(new Date(System.currentTimeMillis() - 240_000L))
-			.claims(Map.of(TOKEN_TYPE, SecurityTokenKind.INTERNAL.name(), PRINCIPAL_TYPE, PRINCIPAL_TYPE_SERVICE,
-					SERVICE_ID, "auth-server"))
-			.expiration(new Date(System.currentTimeMillis() - 120_000L)));
-
-		SecurityTokenException strictEx = assertThrows(SecurityTokenException.class,
-				() -> provider.parseToken(expiredToken));
-		assertEquals(SecurityResultCodeEnum.TOKEN_EXPIRED, strictEx.getResultCode());
-		SecurityTokenResult result = provider.parseTokenAllowExpired(expiredToken);
-		assertEquals(PRINCIPAL_TYPE_SERVICE, result.getPrincipalType());
-		assertEquals("auth-server", result.getServiceId());
 	}
 
 }

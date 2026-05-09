@@ -66,13 +66,12 @@ public class InternalTokenProvider extends AbstractSecurityTokenProvider {
 	 */
 	@Override
 	protected void enrichTokenResult(SecurityTokenResult.SecurityTokenResultBuilder builder, String token,
-			JwtUserToken jwtUserToken, SecurityTokenKind kind, boolean allowExpired) {
+			JwtUserToken jwtUserToken, SecurityTokenKind kind) {
 		if (kind != SecurityTokenKind.INTERNAL) {
 			return;
 		}
 
-		Claims claims = allowExpired ? super.jwtTokenProvider.getClaimsAllowExpired(token)
-				: super.jwtTokenProvider.getClaims(token);
+		Claims claims = super.jwtTokenProvider.getClaims(token);
 		Object principalType = claims.get(PRINCIPAL_TYPE);
 		if (principalType != null) {
 			builder.principalType(principalType.toString());

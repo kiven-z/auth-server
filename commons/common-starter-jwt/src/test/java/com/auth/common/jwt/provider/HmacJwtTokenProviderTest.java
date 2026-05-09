@@ -1,20 +1,17 @@
 package com.auth.common.jwt.provider;
 
-import static com.auth.common.jwt.model.SignatureAlgorithm.*;
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.util.Date;
-
+import cn.hutool.core.util.IdUtil;
+import com.auth.common.jwt.autoconfigure.JwtProperties;
+import com.auth.common.jwt.key.HmacSecretKeys;
+import io.jsonwebtoken.JwtBuilder;
+import io.jsonwebtoken.Jwts;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import com.auth.common.jwt.autoconfigure.JwtProperties;
-import com.auth.common.jwt.exception.JwtExpiredException;
-import com.auth.common.jwt.key.HmacSecretKeys;
+import java.util.Date;
 
-import cn.hutool.core.util.IdUtil;
-import io.jsonwebtoken.JwtBuilder;
-import io.jsonwebtoken.Jwts;
+import static com.auth.common.jwt.model.SignatureAlgorithm.HS256;
+import static org.junit.jupiter.api.Assertions.*;
 
 class HmacJwtTokenProviderTest {
 
@@ -59,31 +56,6 @@ class HmacJwtTokenProviderTest {
 		assertTrue(provider.validateToken(refresh));
 		assertFalse(provider.validateToken(""));
 		assertFalse(provider.validateToken(null));
-	}
-
-	@Test
-	@DisplayName("允许过期解析：过期令牌可读取 claims 与 userToken")
-	void parseAllowExpired_shouldReadClaimsAndUserToken_whenTokenExpired() {
-		JwtProperties props = new JwtProperties();
-		props.setAlgorithm(HS256);
-		props.setIssuer(issuer);
-		props.setSecret("0123456789abcdef0123456789abcdef0123456789abcdef0123456789ab");
-		props.setAccessExpired(3600);
-		props.setRefreshExpired(7200);
-		props.validate();
-		HmacJwtTokenProvider provider = new HmacJwtTokenProvider(props,
-				HmacSecretKeys.fromUtf8Secret(props.getSecret()));
-
-		String expiredToken = provider.generatorJwtToken(Jwts.builder()
-			.id(IdUtil.fastSimpleUUID())
-			.issuer(issuer)
-			.subject(String.valueOf(userId))
-			.issuedAt(new Date(System.currentTimeMillis() - 240_000))
-			.expiration(new Date(System.currentTimeMillis() - 120_000)));
-
-		assertThrows(JwtExpiredException.class, () -> provider.parseToken(expiredToken));
-		assertEquals(String.valueOf(userId), provider.getClaimsAllowExpired(expiredToken).getSubject());
-		assertEquals(userId, provider.parseTokenAllowExpired(expiredToken).getUserId());
 	}
 
 }

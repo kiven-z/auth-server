@@ -1,21 +1,21 @@
 package com.auth.module.security.core.token.provider;
 
-import static com.auth.module.security.contract.constants.SecurityExternalTokenConstants.*;
-import static com.auth.module.security.core.token.support.SecurityTokenSupport.*;
-
-import java.util.Date;
-import java.util.Map;
-import java.util.Objects;
-
 import com.auth.common.jwt.api.JwtTokenProvider;
 import com.auth.common.jwt.autoconfigure.JwtProperties;
 import com.auth.common.jwt.model.JwtUserToken;
 import com.auth.module.security.contract.constants.SecurityTokenKind;
 import com.auth.module.security.core.token.model.SecurityTokenResult;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
+
+import java.util.Date;
+import java.util.Map;
+import java.util.Objects;
+
+import static com.auth.module.security.contract.constants.SecurityExternalTokenConstants.PERM_VERSION;
+import static com.auth.module.security.contract.constants.SecurityExternalTokenConstants.TOKEN_TYPE;
+import static com.auth.module.security.core.token.support.SecurityTokenSupport.parsePermVersionClaim;
 
 /**
  * 访问令牌支持
@@ -69,13 +69,12 @@ public class AccessTokenProvider extends AbstractSecurityTokenProvider {
 	@Override
 	@SuppressWarnings("java:S1854")
 	protected void enrichTokenResult(SecurityTokenResult.SecurityTokenResultBuilder builder, String token,
-			JwtUserToken jwtUserToken, SecurityTokenKind kind, boolean allowExpired) {
+			JwtUserToken jwtUserToken, SecurityTokenKind kind) {
 		if (kind != SecurityTokenKind.EXTERNAL_ACCESS) {
 			return;
 		}
 
-		Claims claims = allowExpired ? jwtTokenProvider.getClaimsAllowExpired(token)
-				: jwtTokenProvider.getClaims(token);
+		Claims claims = jwtTokenProvider.getClaims(token);
 		Object raw = claims.get(PERM_VERSION);
 		Long permVersion = parsePermVersionClaim(raw);
 		builder.permVersion(permVersion);

@@ -32,13 +32,4 @@ public interface SecurityTokenProvider {
 	 */
 	SecurityTokenResult parseToken(String token);
 
-	/**
-	 * 允许过期地解析令牌（用于 refresh 等需读取过期令牌主体的场景）
-	 * @param token 令牌
-	 * @return 解析结果
-	 */
-	default SecurityTokenResult parseTokenAllowExpired(String token) {
-		return parseToken(token);
-	}
-
 }

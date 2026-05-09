@@ -33,25 +33,11 @@ public interface JwtTokenProvider {
 	JwtUserToken parseToken(String token);
 
 	/**
-	 * 允许过期地解析 Token（用于 refresh 等需读取过期令牌主体的场景）
-	 * @param token Token
-	 * @return 用户信息
-	 */
-	JwtUserToken parseTokenAllowExpired(String token);
-
-	/**
 	 * 获取 Claims
 	 * @param token Token
 	 * @return Claims
 	 */
 	Claims getClaims(String token);
-
-	/**
-	 * 允许过期地获取 Claims（用于 refresh 等需读取过期令牌主体的场景）
-	 * @param token Token
-	 * @return Claims
-	 */
-	Claims getClaimsAllowExpired(String token);
 
 	/**
 	 * 获取剩余秒数
