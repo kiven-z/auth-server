@@ -45,7 +45,8 @@ class DesensitizedJsonSerializerTest {
 		IdDto dto = new IdDto();
 		dto.setIdNo("110101199003076789");
 		String json = mapper.writeValueAsString(dto);
-		assertEquals(DesensitizedUtil.idCardNum("110101199003076789", 6, 4), mapper.readTree(json).get("idNo").asText());
+		assertEquals(DesensitizedUtil.idCardNum("110101199003076789", 6, 4),
+				mapper.readTree(json).get("idNo").asText());
 	}
 
 	@Test
@@ -139,51 +140,172 @@ class DesensitizedJsonSerializerTest {
 		assertEquals("******", mapper.readTree(json).get("ip").asText());
 	}
 
+	@Test
+	@DisplayName("CAR_LICENSE：与 Hutool carLicense 一致")
+	void carLicenseMatchesHutool() throws JsonProcessingException {
+		PlateDto dto = new PlateDto();
+		dto.setPlate("苏D40000");
+		String json = mapper.writeValueAsString(dto);
+		assertEquals(DesensitizedUtil.carLicense("苏D40000"), mapper.readTree(json).get("plate").asText());
+	}
+
+	@Test
+	@DisplayName("ADDRESS：默认 sensitiveSize=8 与 Hutool ADDRESS 策略一致")
+	void addressMatchesHutoolDefault() throws JsonProcessingException {
+		AddrDto dto = new AddrDto();
+		dto.setAddr("北京市海淀区马连洼街道289号");
+		String json = mapper.writeValueAsString(dto);
+		String expected = DesensitizedUtil.desensitized("北京市海淀区马连洼街道289号", DesensitizedUtil.DesensitizedType.ADDRESS);
+		assertEquals(expected, mapper.readTree(json).get("addr").asText());
+	}
+
+	@Test
+	@DisplayName("PASSWORD：非空统一输出六位星号")
+	void passwordFixedMask() throws JsonProcessingException {
+		PwdDto dto = new PwdDto();
+		dto.setPwd("any-length-secret-!@#");
+		String json = mapper.writeValueAsString(dto);
+		assertEquals("******", mapper.readTree(json).get("pwd").asText());
+	}
+
+	@Test
+	@DisplayName("CREDIT_CODE：与 Hutool creditCode 一致")
+	void creditCodeMatchesHutool() throws JsonProcessingException {
+		UsccDto dto = new UsccDto();
+		dto.setCode("91110108MA01ABCDE7");
+		String json = mapper.writeValueAsString(dto);
+		assertEquals(DesensitizedUtil.creditCode("91110108MA01ABCDE7"), mapper.readTree(json).get("code").asText());
+	}
+
+	@Test
+	@DisplayName("MONEY_DECIMAL：千分位金额掩码小数数字")
+	void moneyDecimalMasksFraction() throws JsonProcessingException {
+		MoneyDto dto = new MoneyDto();
+		dto.setAmount("1,234.56");
+		String json = mapper.writeValueAsString(dto);
+		assertEquals("1,234.**", mapper.readTree(json).get("amount").asText());
+	}
+
+	@Test
+	@DisplayName("MONEY_DECIMAL：多位小数逐位掩码")
+	void moneyDecimalThreeFractionDigits() throws JsonProcessingException {
+		MoneyDto dto = new MoneyDto();
+		dto.setAmount("1,234.567");
+		String json = mapper.writeValueAsString(dto);
+		assertEquals("1,234.***", mapper.readTree(json).get("amount").asText());
+	}
+
+	@Test
+	@DisplayName("MONEY_DECIMAL：无小数点时原样")
+	void moneyDecimalNoDotUnchanged() throws JsonProcessingException {
+		MoneyDto dto = new MoneyDto();
+		dto.setAmount("1234");
+		String json = mapper.writeValueAsString(dto);
+		assertEquals("1234", mapper.readTree(json).get("amount").asText());
+	}
+
 	@Data
 	private static class MobileDto {
+
 		@Desensitized(DesensitizedType.MOBILE_PHONE)
 		private String phone;
+
 	}
 
 	@Data
 	private static class NameDto {
+
 		@Desensitized(DesensitizedType.CHINESE_NAME)
 		private String name;
+
 	}
 
 	@Data
 	private static class IdDto {
+
 		@Desensitized(DesensitizedType.ID_CARD)
 		private String idNo;
+
 	}
 
 	@Data
 	private static class MailDto {
+
 		@Desensitized(DesensitizedType.EMAIL)
 		private String email;
+
 	}
 
 	@Data
 	private static class CardDto {
+
 		@Desensitized(DesensitizedType.BANK_CARD)
 		private String card;
+
 	}
 
 	@Data
 	private static class CustomDto {
+
 		@Desensitized(value = DesensitizedType.CUSTOM, prefixLen = 2, suffixLen = 1, symbol = "#")
 		private String secret;
+
 	}
 
 	@Data
 	private static class CustomHashDto {
+
 		@Desensitized(value = DesensitizedType.CUSTOM, prefixLen = 2, suffixLen = 2, symbol = "#")
 		private String code;
+
 	}
 
 	@Data
 	private static class IpDto {
+
 		@Desensitized(DesensitizedType.IP_ADDRESS)
 		private String ip;
+
 	}
+
+	@Data
+	private static class PlateDto {
+
+		@Desensitized(DesensitizedType.CAR_LICENSE)
+		private String plate;
+
+	}
+
+	@Data
+	private static class AddrDto {
+
+		@Desensitized(DesensitizedType.ADDRESS)
+		private String addr;
+
+	}
+
+	@Data
+	private static class PwdDto {
+
+		@Desensitized(DesensitizedType.PASSWORD)
+		private String pwd;
+
+	}
+
+	@Data
+	private static class UsccDto {
+
+		@Desensitized(DesensitizedType.CREDIT_CODE)
+		private String code;
+
+	}
+
+	@Data
+	private static class MoneyDto {
+
+		@Desensitized(DesensitizedType.MONEY_DECIMAL)
+		private String amount;
+
+	}
+
 }

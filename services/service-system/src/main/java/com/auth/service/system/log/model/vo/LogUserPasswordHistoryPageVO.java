@@ -1,7 +1,10 @@
 package com.auth.service.system.log.model.vo;
 
+import com.auth.common.core.annotation.Desensitized;
 import com.auth.common.core.annotation.JsonStringFormat;
+import com.auth.common.core.desensitize.DesensitizedType;
 import com.auth.common.core.model.response.BaseResponse;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -31,10 +34,12 @@ public class LogUserPasswordHistoryPageVO extends BaseResponse {
 	@Schema(title = "用户名")
 	private String username;
 
-	@Schema(title = "修改时间")
-	private LocalDateTime changeTime;
-
+	@Desensitized(DesensitizedType.IP_ADDRESS)
 	@Schema(title = "修改IP地址")
 	private String changeIp;
+
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@Schema(title = "修改时间")
+	private LocalDateTime changeTime;
 
 }

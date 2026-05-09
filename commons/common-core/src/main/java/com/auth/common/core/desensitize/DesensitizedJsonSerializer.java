@@ -25,16 +25,24 @@ public class DesensitizedJsonSerializer extends JsonSerializer<String> implement
 
 	private static final int ID_CARD_SUFFIX_KEEP = 4;
 
-	/** Mask for values that are not valid IPv4 or IPv6 when {@link DesensitizedType#IP_ADDRESS} is used. */
+	/**
+	 * Mask for values that are not valid IPv4 or IPv6 when
+	 * {@link DesensitizedType#IP_ADDRESS} is used.
+	 */
 	private static final String UNKNOWN_IP_MASK = "******";
+
+	/**
+	 * Fixed mask for {@link DesensitizedType#PASSWORD} (does not mirror Hutool
+	 * variable-length password).
+	 */
+	private static final String PASSWORD_MASK = "******";
 
 	private Desensitized config;
 
 	/**
 	 * 序列化字符串
-	 *
 	 * @param value 字符串
-	 * @param gen  JSON生成器
+	 * @param gen JSON生成器
 	 * @param serializers 序列化提供者
 	 * @throws IOException 如果发生IO异常
 	 */
@@ -53,7 +61,6 @@ public class DesensitizedJsonSerializer extends JsonSerializer<String> implement
 
 	/**
 	 * 掩码处理
-	 *
 	 * @param value 字符串
 	 * @return 掩码处理后的字符串
 	 */
@@ -65,12 +72,18 @@ public class DesensitizedJsonSerializer extends JsonSerializer<String> implement
 			case EMAIL -> DesensitizedUtil.email(value);
 			case BANK_CARD -> DesensitizedUtil.bankCard(value);
 			case IP_ADDRESS -> maskIpAddress(value);
+			case CAR_LICENSE -> DesensitizedUtil.carLicense(value);
+			case ADDRESS -> DesensitizedUtil.address(CharSequenceUtil.trim(value), config.addressSensitiveSize());
+			case PASSWORD -> PASSWORD_MASK;
+			case CREDIT_CODE -> DesensitizedUtil.creditCode(value);
+			case MONEY_DECIMAL -> DesensitizedStrings.maskDecimalDisplay(value);
 			case CUSTOM -> DesensitizedStrings.custom(value, config.prefixLen(), config.suffixLen(), config.symbol());
 		};
 	}
 
 	/**
-	 * Detect IPv4 / IPv6 via Hutool {@link Validator}; unknown formats return a fixed mask.
+	 * Detect IPv4 / IPv6 via Hutool {@link Validator}; unknown formats return a fixed
+	 * mask.
 	 */
 	private static String maskIpAddress(String value) {
 		String trimmed = CharSequenceUtil.trim(value);
@@ -85,7 +98,6 @@ public class DesensitizedJsonSerializer extends JsonSerializer<String> implement
 
 	/**
 	 * 创建上下文序列化器
-	 *
 	 * @param prov 序列化提供者
 	 * @param property 属性
 	 * @return 上下文序列化器
@@ -105,4 +117,5 @@ public class DesensitizedJsonSerializer extends JsonSerializer<String> implement
 		ser.config = ann;
 		return ser;
 	}
+
 }

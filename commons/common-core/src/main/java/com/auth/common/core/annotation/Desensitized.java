@@ -45,4 +45,13 @@ public @interface Desensitized {
 	 * 自定义脱敏时中间替换字符，默认 {@code *}。
 	 */
 	String symbol() default "*";
+
+	/**
+	 * 仅 {@link DesensitizedType#ADDRESS} 生效：掩码末尾敏感字符长度，与 Hutool
+	 * {@link cn.hutool.core.util.DesensitizedUtil#address(String, int)} 一致；默认 8 与
+	 * {@code DesensitizedUtil.desensitized(s, DesensitizedUtil.DesensitizedType.ADDRESS)}
+	 * 行为对齐。
+	 */
+	int addressSensitiveSize() default 8;
+
 }

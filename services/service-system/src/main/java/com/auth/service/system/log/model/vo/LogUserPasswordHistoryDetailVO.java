@@ -1,6 +1,8 @@
 package com.auth.service.system.log.model.vo;
 
+import com.auth.common.core.annotation.Desensitized;
 import com.auth.common.core.annotation.JsonStringFormat;
+import com.auth.common.core.desensitize.DesensitizedType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -34,6 +36,7 @@ public class LogUserPasswordHistoryDetailVO implements Serializable {
 	@Schema(title = "修改时间")
 	private LocalDateTime changeTime;
 
+	@Desensitized(DesensitizedType.IP_ADDRESS)
 	@Schema(title = "修改IP地址")
 	private String changeIp;
 
