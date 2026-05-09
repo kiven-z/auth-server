@@ -1,0 +1,155 @@
+package com.auth.common.core.desensitize;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import com.auth.common.core.annotation.Desensitized;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import cn.hutool.core.util.DesensitizedUtil;
+import lombok.Data;
+
+/**
+ * {@link DesensitizedJsonSerializer} 与 {@link Desensitized} 组合行为测试。
+ */
+class DesensitizedJsonSerializerTest {
+
+	private final ObjectMapper mapper = new ObjectMapper();
+
+	@Test
+	@DisplayName("MOBILE_PHONE：与 Hutool mobilePhone 一致")
+	void mobilePhoneMatchesHutool() throws JsonProcessingException {
+		MobileDto dto = new MobileDto();
+		dto.setPhone("13812345678");
+		String json = mapper.writeValueAsString(dto);
+		JsonNode node = mapper.readTree(json);
+		assertEquals(DesensitizedUtil.mobilePhone("13812345678"), node.get("phone").asText());
+	}
+
+	@Test
+	@DisplayName("CHINESE_NAME：与 Hutool chineseName 一致")
+	void chineseNameMatchesHutool() throws JsonProcessingException {
+		NameDto dto = new NameDto();
+		dto.setName("张三丰");
+		String json = mapper.writeValueAsString(dto);
+		assertEquals(DesensitizedUtil.chineseName("张三丰"), mapper.readTree(json).get("name").asText());
+	}
+
+	@Test
+	@DisplayName("ID_CARD：固定保留 6+4 与 Hutool idCardNum 一致")
+	void idCardMatchesHutool() throws JsonProcessingException {
+		IdDto dto = new IdDto();
+		dto.setIdNo("110101199003076789");
+		String json = mapper.writeValueAsString(dto);
+		assertEquals(DesensitizedUtil.idCardNum("110101199003076789", 6, 4), mapper.readTree(json).get("idNo").asText());
+	}
+
+	@Test
+	@DisplayName("EMAIL：与 Hutool email 一致")
+	void emailMatchesHutool() throws JsonProcessingException {
+		MailDto dto = new MailDto();
+		dto.setEmail("zhang.san@example.com");
+		String json = mapper.writeValueAsString(dto);
+		assertEquals(DesensitizedUtil.email("zhang.san@example.com"), mapper.readTree(json).get("email").asText());
+	}
+
+	@Test
+	@DisplayName("BANK_CARD：与 Hutool bankCard 一致")
+	void bankCardMatchesHutool() throws JsonProcessingException {
+		CardDto dto = new CardDto();
+		dto.setCard("6222021234567890123");
+		String json = mapper.writeValueAsString(dto);
+		assertEquals(DesensitizedUtil.bankCard("6222021234567890123"), mapper.readTree(json).get("card").asText());
+	}
+
+	@Test
+	@DisplayName("CUSTOM：按前后缀与 symbol 掩码")
+	void customMask() throws JsonProcessingException {
+		CustomDto dto = new CustomDto();
+		dto.setSecret("abcdefghij");
+		String json = mapper.writeValueAsString(dto);
+		assertEquals("ab#######j", mapper.readTree(json).get("secret").asText());
+	}
+
+	@Test
+	@DisplayName("CUSTOM：自定义 symbol 为 #")
+	void customSymbolHash() throws JsonProcessingException {
+		CustomHashDto dto = new CustomHashDto();
+		dto.setCode("1234567890");
+		String json = mapper.writeValueAsString(dto);
+		assertEquals("12######90", mapper.readTree(json).get("code").asText());
+	}
+
+	@Test
+	@DisplayName("CUSTOM：长度不超过 prefix+suffix 时保持原文")
+	void customTooShortReturnsOriginal() throws JsonProcessingException {
+		CustomDto dto = new CustomDto();
+		dto.setSecret("ab");
+		String json = mapper.writeValueAsString(dto);
+		assertEquals("ab", mapper.readTree(json).get("secret").asText());
+	}
+
+	@Test
+	@DisplayName("null 字段序列化为 JSON null")
+	void nullFieldWritesJsonNull() throws JsonProcessingException {
+		MobileDto dto = new MobileDto();
+		dto.setPhone(null);
+		String json = mapper.writeValueAsString(dto);
+		assertTrue(mapper.readTree(json).get("phone").isNull());
+	}
+
+	@Test
+	@DisplayName("空字符串原样写出")
+	void emptyStringUnchanged() throws JsonProcessingException {
+		MobileDto dto = new MobileDto();
+		dto.setPhone("");
+		String json = mapper.writeValueAsString(dto);
+		assertEquals("", mapper.readTree(json).get("phone").asText());
+	}
+
+	@Data
+	private static class MobileDto {
+		@Desensitized(DesensitizedType.MOBILE_PHONE)
+		private String phone;
+	}
+
+	@Data
+	private static class NameDto {
+		@Desensitized(DesensitizedType.CHINESE_NAME)
+		private String name;
+	}
+
+	@Data
+	private static class IdDto {
+		@Desensitized(DesensitizedType.ID_CARD)
+		private String idNo;
+	}
+
+	@Data
+	private static class MailDto {
+		@Desensitized(DesensitizedType.EMAIL)
+		private String email;
+	}
+
+	@Data
+	private static class CardDto {
+		@Desensitized(DesensitizedType.BANK_CARD)
+		private String card;
+	}
+
+	@Data
+	private static class CustomDto {
+		@Desensitized(value = DesensitizedType.CUSTOM, prefixLen = 2, suffixLen = 1, symbol = "#")
+		private String secret;
+	}
+
+	@Data
+	private static class CustomHashDto {
+		@Desensitized(value = DesensitizedType.CUSTOM, prefixLen = 2, suffixLen = 2, symbol = "#")
+		private String code;
+	}
+}
