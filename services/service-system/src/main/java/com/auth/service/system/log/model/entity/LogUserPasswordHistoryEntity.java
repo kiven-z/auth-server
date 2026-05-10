@@ -1,11 +1,8 @@
 package com.auth.service.system.log.model.entity;
 
-import java.io.Serial;
-
 import com.auth.common.data.model.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,26 +23,14 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class LogUserPasswordHistoryEntity extends BaseEntity {
 
-	@Serial
-	private static final long serialVersionUID = 1L;
+    @Schema(title = "用户ID")
+    private Long userId;
 
-	/**
-	 * 用户ID
-	 */
-	@Schema(title = "用户ID")
-	private Long userId;
+    @JsonIgnore
+    @Schema(title = "密码Hash值")
+    private String passwordHash;
 
-	/**
-	 * 密码Hash值（BCrypt 加密）
-	 */
-	@JsonIgnore
-	@Schema(title = "密码Hash值")
-	private String passwordHash;
-
-	/**
-	 * 修改密码时的IP地址
-	 */
-	@Schema(title = "修改IP地址")
-	private String changeIp;
+    @Schema(title = "修改IP地址")
+    private String changeIp;
 
 }

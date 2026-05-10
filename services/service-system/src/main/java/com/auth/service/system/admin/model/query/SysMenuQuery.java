@@ -18,25 +18,22 @@ import java.io.Serializable;
 @EqualsAndHashCode(callSuper = true)
 public class SysMenuQuery extends PageQueryRequest implements Serializable {
 
-	@Serial
-	private static final long serialVersionUID = 1L;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-	@Schema(title = "路由名称（模糊）")
-	private String name;
+    @Schema(title = "路由名称（模糊）")
+    private String name;
 
-	@Schema(title = "菜单标题（模糊）")
-	private String title;
+    @Schema(title = "菜单标题（模糊）")
+    private String title;
 
-	@Schema(title = "菜单类型：0 菜单 1 iframe 2 外链")
-	private Integer menuType;
+    @Schema(title = "菜单类型：0 菜单 1 iframe 2 外链")
+    private Integer menuType;
 
-	/**
-	 * 状态筛选：0=启用 1=禁用（与前端表格一致）
-	 */
-	@Schema(title = "状态：0 启用 1 禁用")
-	private Integer status;
+    @Schema(title = "状态：0 启用 1 禁用")
+    private Boolean status;
 
-	@Schema(title = "组件路径（模糊）")
-	private String component;
+    @Schema(title = "组件路径（模糊）")
+    private String component;
 
 }

@@ -19,16 +19,16 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class SysMenuAssignedPermissionRow implements Serializable {
 
-	@Serial
-	private static final long serialVersionUID = 1L;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-	@Schema(title = "权限编码")
-	private String permissionCode;
+    @Schema(title = "权限编码")
+    private String permissionCode;
 
-	@Schema(title = "权限名称")
-	private String permissionName;
+    @Schema(title = "权限名称")
+    private String permissionName;
 
-	@Schema(title = "是否已关联当前菜单")
-	private boolean assigned;
+    @Schema(title = "是否已关联当前菜单")
+    private Boolean assigned;
 
 }

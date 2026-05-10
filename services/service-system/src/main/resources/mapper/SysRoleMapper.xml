@@ -3,7 +3,7 @@
 <mapper namespace="com.auth.service.system.admin.mapper.SysRoleMapper">
 
     <!-- 角色分页列表：仅查业务表；创建人/更新人用户名由 {@link com.auth.service.system.common.service.AuditUserDisplayService} 批量补全 -->
-    <select id="selectListByPage" resultType="com.auth.service.system.admin.model.vo.SysRolePageResponse">
+    <select id="selectListByPage" resultType="com.auth.service.system.admin.model.vo.role.SysRolePageResponse">
         SELECT
         r.id,
         r.role_code,
@@ -35,7 +35,7 @@
     </select>
 
     <!-- 查询角色下拉选项 -->
-    <select id="selectRoleOptions" resultType="com.auth.service.system.admin.model.vo.SysRoleOptionVO">
+    <select id="selectRoleOptions" resultType="com.auth.service.system.admin.model.vo.role.SysRoleOptionVO">
         SELECT id, role_code, role_name FROM sys_role
         <where>
             is_deleted = 0

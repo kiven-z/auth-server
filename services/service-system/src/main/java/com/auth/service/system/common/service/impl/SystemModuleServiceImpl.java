@@ -22,36 +22,32 @@ import java.util.stream.Stream;
 @Service
 public class SystemModuleServiceImpl implements SystemModuleService {
 
-	/**
-	 * 获取模块选项列表。
-	 * @param keyword 搜索关键词，模糊匹配枚举 name 或中文描述（label）；为空时不作为过滤条件
-	 * @param type 模块分类筛选；为空时不作为过滤条件
-	 * @param limit 返回条数上限
-	 * @return 匹配的模块选项列表
-	 */
-	@Override
-	public List<ModuleOption> list(String keyword, String type, Integer limit) {
-		Stream<SystemModule> stream = Arrays.stream(SystemModule.values());
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<ModuleOption> list(String keyword, String type, Integer limit) {
+        Stream<SystemModule> stream = Arrays.stream(SystemModule.values());
 
-		// 按分类筛选
-		if (CharSequenceUtil.isNotBlank(type)) {
-			stream = stream.filter(m -> type.equals(m.getType()));
-		}
+        // 按分类筛选
+        if (CharSequenceUtil.isNotBlank(type)) {
+            stream = stream.filter(m -> type.equals(m.getType()));
+        }
 
-		// 按关键词模糊匹配（枚举 name 或中文描述）
-		if (CharSequenceUtil.isNotBlank(keyword)) {
-			String kw = keyword.trim().toLowerCase();
-			stream = stream.filter(m -> m.name().toLowerCase().contains(kw) || m.getDescription().contains(kw));
-		}
+        // 按关键词模糊匹配（枚举 name 或中文描述）
+        if (CharSequenceUtil.isNotBlank(keyword)) {
+            String kw = keyword.trim().toLowerCase();
+            stream = stream.filter(m -> m.name().toLowerCase().contains(kw) || m.getDescription().contains(kw));
+        }
 
-		// 应用条数上限（如果 limit 为 null 或小于等于 0，不限制）
-		if (limit != null && limit > 0) {
-			stream = stream.limit(limit);
-		}
+        // 应用条数上限（如果 limit 为 null 或小于等于 0，不限制）
+        if (limit != null && limit > 0) {
+            stream = stream.limit(limit);
+        }
 
-		return stream
-			.map(m -> ModuleOption.builder().name(m.name()).type(m.getType()).label(m.getDescription()).build())
-			.toList();
-	}
+        return stream
+                .map(m -> ModuleOption.builder().name(m.name()).type(m.getType()).label(m.getDescription()).build())
+                .toList();
+    }
 
 }

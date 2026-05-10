@@ -34,120 +34,112 @@ import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJobGroupEntity>
-		implements SysJobGroupService {
+        implements SysJobGroupService {
 
-	private final AuditUserDisplayService auditUserDisplayService;
+    private final AuditUserDisplayService auditUserDisplayService;
 
-	private final SysJobMapper sysJobMapper;
+    private final SysJobMapper sysJobMapper;
 
-	public SysJobGroupServiceImpl(AuditUserDisplayService auditUserDisplayService, SysJobMapper sysJobMapper) {
-		this.auditUserDisplayService = auditUserDisplayService;
-		this.sysJobMapper = sysJobMapper;
-	}
+    public SysJobGroupServiceImpl(AuditUserDisplayService auditUserDisplayService, SysJobMapper sysJobMapper) {
+        this.auditUserDisplayService = auditUserDisplayService;
+        this.sysJobMapper = sysJobMapper;
+    }
 
-	/**
-	 * 分页查询
-	 * @param pageParams 分页参数
-	 * @param query 查询参数
-	 * @return 分页数据
-	 */
-	@Override
-	public PageResponse<SysJobGroupPageResponse> getPage(Page<SysJobGroupEntity> pageParams, SysJobGroupQuery query) {
-		IPage<SysJobGroupPageResponse> page = baseMapper.selectListByPage(pageParams, query);
-		auditUserDisplayService.enrichAuditUsernames(page);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public PageResponse<SysJobGroupPageResponse> getPage(Page<SysJobGroupEntity> pageParams, SysJobGroupQuery query) {
+        IPage<SysJobGroupPageResponse> page = baseMapper.selectListByPage(pageParams, query);
+        auditUserDisplayService.enrichAuditUsernames(page);
 
-		return PageResponse.of(page);
-	}
+        return PageResponse.of(page);
+    }
 
-	/**
-	 * 启用状态分组下拉/远程搜索（仅分组 status 已启用）
-	 * @param keyword 关键字（可空）
-	 * @param limit 最大条数
-	 * @return 列表
-	 */
-	@Override
-	public List<SysJobGroupPageResponse> listEnabledOptions(String keyword, int limit) {
-		String searchKeyword = CharSequenceUtil.trim(keyword);
-		List<SysJobGroupPageResponse> list = baseMapper.selectEnabledOptions(searchKeyword, limit);
-		auditUserDisplayService.enrichAuditUsernames(list);
-		return list;
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<SysJobGroupPageResponse> listEnabledOptions(String keyword, int limit) {
+        String searchKeyword = CharSequenceUtil.trim(keyword);
+        List<SysJobGroupPageResponse> list = baseMapper.selectEnabledOptions(searchKeyword, limit);
+        auditUserDisplayService.enrichAuditUsernames(list);
 
-	/**
-	 * 新增分组
-	 * @param form 表单
-	 */
-	@Override
-	public void create(SysJobGroupForm form) {
-		// 验证分组编码是否已存在
-		long exists = count(
-				Wrappers.<SysJobGroupEntity>lambdaQuery().eq(SysJobGroupEntity::getGroupCode, form.getGroupCode()));
-		if (exists > 0) {
-			throw new SystemBusinessException(JOB_GROUP_CODE_DUPLICATE);
-		}
+        return list;
+    }
 
-		// 复制表单数据到实体
-		SysJobGroupEntity jobGroup = new SysJobGroupEntity();
-		BeanUtil.copyProperties(form, jobGroup);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void create(SysJobGroupForm form) {
+        // 验证分组编码是否已存在
+        long exists = count(
+                Wrappers.<SysJobGroupEntity>lambdaQuery().eq(SysJobGroupEntity::getGroupCode, form.getGroupCode()));
+        if (exists > 0) {
+            throw new SystemBusinessException(JOB_GROUP_CODE_DUPLICATE);
+        }
 
-		// 设置默认值，is_system 默认值为 0
-		if (jobGroup.getIsSystem() == null) {
-			jobGroup.setIsSystem(false);
-		}
+        // 复制表单数据到实体
+        SysJobGroupEntity jobGroup = new SysJobGroupEntity();
+        BeanUtil.copyProperties(form, jobGroup);
 
-		// order_num 默认值为 0
-		if (jobGroup.getOrderNum() == null) {
-			jobGroup.setOrderNum(0);
-		}
+        // 设置默认值，is_system 默认值为 0
+        if (jobGroup.getIsSystem() == null) {
+            jobGroup.setIsSystem(false);
+        }
 
-		save(jobGroup);
-	}
+        // order_num 默认值为 0
+        if (jobGroup.getOrderNum() == null) {
+            jobGroup.setOrderNum(0);
+        }
 
-	/**
-	 * 修改分组（不含 group_code）
-	 * @param form 表单
-	 */
-	@Override
-	public void update(SysJobGroupUpdateForm form) {
-		SysJobGroupEntity jobGroup = getById(form.getId());
-		if (jobGroup == null) {
-			throw new SystemBusinessException(DATA_NOT_EXIST);
-		}
+        save(jobGroup);
+    }
 
-		jobGroup.setGroupName(form.getGroupName());
-		jobGroup.setDescription(form.getDescription());
-		jobGroup.setOrderNum(form.getOrderNum());
-		jobGroup.setStatus(form.getStatus());
-		updateById(jobGroup);
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void update(SysJobGroupUpdateForm form) {
+        SysJobGroupEntity jobGroup = getById(form.getId());
+        if (jobGroup == null) {
+            throw new SystemBusinessException(DATA_NOT_EXIST);
+        }
 
-	/**
-	 * 删除分组（非内置、且无关联任务）
-	 * @param id 主键
-	 */
-	@Override
-	public void deleteById(Long id) {
-		SysJobGroupEntity jobGroup = getById(id);
+        jobGroup.setGroupName(form.getGroupName());
+        jobGroup.setDescription(form.getDescription());
+        jobGroup.setOrderNum(form.getOrderNum());
+        jobGroup.setStatus(form.getStatus());
+        updateById(jobGroup);
+    }
 
-		// 查询该分组是否存在
-		if (jobGroup == null) {
-			throw new SystemBusinessException(DATA_NOT_EXIST);
-		}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void deleteById(Long id) {
+        SysJobGroupEntity jobGroup = getById(id);
 
-		// 查询当前是否为系统任务，如果系统任务则不允许删除
-		Boolean isSystem = jobGroup.getIsSystem();
-		if (BooleanUtil.isTrue(isSystem)) {
-			throw new SystemBusinessException(JOB_GROUP_SYSTEM_PROTECTED);
-		}
+        // 查询该分组是否存在
+        if (jobGroup == null) {
+            throw new SystemBusinessException(DATA_NOT_EXIST);
+        }
 
-		// 验证分组下无任务，如果存在则不允许删除
-		long cnt = sysJobMapper
-			.selectCount(Wrappers.<SysJobEntity>lambdaQuery().eq(SysJobEntity::getJobGroup, jobGroup.getGroupCode()));
-		if (cnt > 0) {
-			throw new SystemBusinessException(JOB_GROUP_HAS_ACTIVE_JOBS, cnt);
-		}
+        // 查询当前是否为系统任务，如果系统任务则不允许删除
+        Boolean isSystem = jobGroup.getIsSystem();
+        if (BooleanUtil.isTrue(isSystem)) {
+            throw new SystemBusinessException(JOB_GROUP_SYSTEM_PROTECTED);
+        }
 
-		removeById(id);
-	}
+        // 验证分组下无任务，如果存在则不允许删除
+        long cnt = sysJobMapper
+                .selectCount(Wrappers.<SysJobEntity>lambdaQuery().eq(SysJobEntity::getJobGroup, jobGroup.getGroupCode()));
+        if (cnt > 0) {
+            throw new SystemBusinessException(JOB_GROUP_HAS_ACTIVE_JOBS, cnt);
+        }
+
+        removeById(id);
+    }
 
 }
