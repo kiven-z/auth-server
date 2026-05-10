@@ -1,10 +1,12 @@
 package com.auth.service.system.admin.model.query;
 
-import java.io.Serial;
-import java.io.Serializable;
-
+import com.auth.common.core.model.query.PageQueryRequest;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * 菜单扁平列表查询（无分页，供树形构建）
@@ -13,7 +15,8 @@ import lombok.Data;
  */
 @Schema(name = "SysMenuListQuery", title = "菜单列表查询")
 @Data
-public class SysMenuListQuery implements Serializable {
+@EqualsAndHashCode(callSuper = true)
+public class SysMenuQuery extends PageQueryRequest implements Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 1L;

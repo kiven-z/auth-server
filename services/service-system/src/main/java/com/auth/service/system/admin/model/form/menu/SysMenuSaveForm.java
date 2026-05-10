@@ -54,11 +54,11 @@ public class SysMenuSaveForm implements Serializable {
 
 	@Schema(title = "是否在菜单中显示：0 否 1 是", requiredMode = Schema.RequiredMode.REQUIRED)
 	@NotNull(message = "showLink is required")
-	private Integer showLink;
+	private Boolean showLink;
 
 	@Schema(title = "排序，越大越靠后", requiredMode = Schema.RequiredMode.REQUIRED)
 	@NotNull(message = "menuRank is required")
-	private Integer menuRank;
+	private Boolean menuRank;
 
 	@Schema(title = "额外图标")
 	private String extraIcon;
@@ -68,13 +68,13 @@ public class SysMenuSaveForm implements Serializable {
 
 	@Schema(title = "是否缓存：0 否 1 是", requiredMode = Schema.RequiredMode.REQUIRED)
 	@NotNull(message = "keepAlive is required")
-	private Integer keepAlive;
+	private Boolean keepAlive;
 
 	@Schema(title = "iframe 地址")
 	private String frameSrc;
 
 	@Schema(title = "iframe 首次加载动画：0 否 1 是")
-	private Integer frameLoading;
+	private Boolean frameLoading;
 
 	@Schema(title = "Vue Transition 名称")
 	private String transitionName;
@@ -86,7 +86,7 @@ public class SysMenuSaveForm implements Serializable {
 	private String leaveTransition;
 
 	@Schema(title = "禁止加入标签页：0 否 1 是")
-	private Integer hiddenTag;
+	private Boolean hiddenTag;
 
 	@Schema(title = "动态标签层级")
 	private Integer dynamicLevel;
@@ -95,11 +95,11 @@ public class SysMenuSaveForm implements Serializable {
 	private String activePath;
 
 	@Schema(title = "固定标签：0 否 1 是")
-	private Integer fixedTag;
+	private Boolean fixedTag;
 
 	@Schema(title = "状态：0 启用 1 禁用", requiredMode = Schema.RequiredMode.REQUIRED)
 	@NotNull(message = "status is required")
-	private Integer status;
+	private Boolean status;
 
 	@Schema(title = "备注")
 	private String remark;

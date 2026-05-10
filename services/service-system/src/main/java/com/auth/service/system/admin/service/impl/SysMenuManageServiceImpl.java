@@ -5,7 +5,6 @@ import com.auth.service.system.admin.mapper.*;
 import com.auth.service.system.admin.model.entity.*;
 import com.auth.service.system.admin.model.form.menu.SysMenuAssignPermissionForm;
 import com.auth.service.system.admin.model.form.menu.SysMenuAssignRoleForm;
-import com.auth.service.system.admin.model.form.menu.SysMenuBatchStatusForm;
 import com.auth.service.system.admin.model.vo.menu.SysMenuAssignedPermissionRow;
 import com.auth.service.system.admin.model.vo.menu.SysMenuAssignedRoleRow;
 import com.auth.service.system.admin.service.SysMenuManageService;
@@ -51,20 +50,6 @@ public class SysMenuManageServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu
 	}
 
 	/**
-	 * 批量更新状态（0=启用 1=禁用）
-	 * @param form 请求体
-	 */
-	@Override
-	public void batchUpdateStatus(SysMenuBatchStatusForm form) {
-		boolean enabled = form.getStatus() != null && form.getStatus() == 0;
-		for (String idStr : form.getIds()) {
-			Long id = Long.valueOf(idStr);
-			requireMenu(id);
-			lambdaUpdate().eq(SysMenuEntity::getId, id).set(SysMenuEntity::getStatus, enabled).update();
-		}
-	}
-
-	/**
 	 * 当前菜单已分配角色（供前端与角色分页合并展示）
 	 * @param menuId 菜单主键
 	 * @return 已分配行，{@code assigned} 恒为 true
@@ -72,6 +57,7 @@ public class SysMenuManageServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu
 	@Override
 	public List<SysMenuAssignedRoleRow> listAssignedRoles(Long menuId) {
 		requireMenu(menuId);
+
 		List<SysMenuRoleEntity> links = sysMenuRoleMapper
 			.selectList(Wrappers.<SysMenuRoleEntity>lambdaQuery().eq(SysMenuRoleEntity::getMenuId, menuId));
 		List<SysMenuAssignedRoleRow> rows = new ArrayList<>();

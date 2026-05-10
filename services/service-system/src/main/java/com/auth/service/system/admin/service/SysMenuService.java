@@ -2,9 +2,9 @@ package com.auth.service.system.admin.service;
 
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
+import com.auth.service.system.admin.model.form.menu.SysMenuBatchStatusForm;
 import com.auth.service.system.admin.model.form.menu.SysMenuSaveForm;
-import com.auth.service.system.admin.model.query.SysMenuListQuery;
-import com.auth.service.system.admin.model.query.SysMenuPageQuery;
+import com.auth.service.system.admin.model.query.SysMenuQuery;
 import com.auth.service.system.admin.model.vo.menu.SysMenuDetailVO;
 import com.auth.service.system.admin.model.vo.menu.SysMenuListVO;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -24,7 +24,7 @@ public interface SysMenuService extends IService<SysMenuEntity> {
 	 * @param query 筛选条件
 	 * @return 菜单行
 	 */
-	List<SysMenuListVO> listFlat(SysMenuListQuery query);
+	List<SysMenuListVO> listFlat(SysMenuQuery query);
 
 	/**
 	 * 分页查询菜单（表格视图）
@@ -32,7 +32,7 @@ public interface SysMenuService extends IService<SysMenuEntity> {
 	 * @param query 筛选与分页
 	 * @return 分页结果
 	 */
-	PageResponse<SysMenuListVO> pageFlat(Page<SysMenuEntity> pageParams, SysMenuPageQuery query);
+	PageResponse<SysMenuListVO> pageFlat(Page<SysMenuEntity> pageParams, SysMenuQuery query);
 
 	/**
 	 * 菜单详情
@@ -55,9 +55,9 @@ public interface SysMenuService extends IService<SysMenuEntity> {
 	void update(SysMenuSaveForm form);
 
 	/**
-	 * 批量逻辑删除
-	 * @param ids 主键列表
+	 * 批量更新状态（0=启用 1=禁用）
+	 * @param form 请求体
 	 */
-	void removeByIds(List<Long> ids);
+	void batchUpdateStatus(SysMenuBatchStatusForm form);
 
 }

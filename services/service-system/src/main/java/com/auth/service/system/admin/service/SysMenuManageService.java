@@ -3,7 +3,6 @@ package com.auth.service.system.admin.service;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.admin.model.form.menu.SysMenuAssignPermissionForm;
 import com.auth.service.system.admin.model.form.menu.SysMenuAssignRoleForm;
-import com.auth.service.system.admin.model.form.menu.SysMenuBatchStatusForm;
 import com.auth.service.system.admin.model.vo.menu.SysMenuAssignedPermissionRow;
 import com.auth.service.system.admin.model.vo.menu.SysMenuAssignedRoleRow;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -16,12 +15,6 @@ import java.util.List;
  * @author Bunny
  */
 public interface SysMenuManageService extends IService<SysMenuEntity> {
-
-	/**
-	 * 批量更新状态（0=启用 1=禁用）
-	 * @param form 请求体
-	 */
-	void batchUpdateStatus(SysMenuBatchStatusForm form);
 
 	/**
 	 * 当前菜单已分配角色（供前端与角色分页合并展示）

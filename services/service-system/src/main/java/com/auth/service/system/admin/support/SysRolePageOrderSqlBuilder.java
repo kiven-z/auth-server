@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.core.model.query.SortDirection;
 import com.auth.common.core.model.query.SortSpec;
+import lombok.experimental.UtilityClass;
 
 import java.util.List;
 import java.util.Map;
@@ -15,7 +16,8 @@ import java.util.stream.Collectors;
  *
  * @author Bunny
  */
-public final class SysRolePageOrderSqlBuilder {
+@UtilityClass
+public class SysRolePageOrderSqlBuilder {
 
 	/**
 	 * 默认排序：显示顺序升序，创建时间降序。
@@ -26,9 +28,6 @@ public final class SysRolePageOrderSqlBuilder {
 			Map.entry("createTime", "r.create_time"), Map.entry("updateTime", "r.update_time"),
 			Map.entry("roleCode", "r.role_code"), Map.entry("roleName", "r.role_name"), Map.entry("status", "r.status"),
 			Map.entry("roleType", "r.role_type"));
-
-	private SysRolePageOrderSqlBuilder() {
-	}
 
 	/**
 	 * 根据前端传入的排序规则生成 ORDER BY 子句（不含 ORDER BY 关键字）。

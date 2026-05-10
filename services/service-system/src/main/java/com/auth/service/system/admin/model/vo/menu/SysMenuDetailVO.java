@@ -32,7 +32,7 @@ public class SysMenuDetailVO extends SysMenuListVO {
 	 * 0=否 1=是
 	 */
 	@Schema(title = "是否显示父级菜单：0 否 1 是")
-	private Integer showParent;
+	private Boolean showParent;
 
 	@Schema(title = "iframe 地址")
 	private String frameSrc;
@@ -41,7 +41,7 @@ public class SysMenuDetailVO extends SysMenuListVO {
 	 * 0=否 1=是
 	 */
 	@Schema(title = "iframe 首次加载动画：0 否 1 是")
-	private Integer frameLoading;
+	private Boolean frameLoading;
 
 	@Schema(title = "Vue Transition 名称")
 	private String transitionName;
@@ -56,7 +56,7 @@ public class SysMenuDetailVO extends SysMenuListVO {
 	 * 0=否 1=是
 	 */
 	@Schema(title = "禁止加入标签页：0 否 1 是")
-	private Integer hiddenTag;
+	private Boolean hiddenTag;
 
 	@Schema(title = "动态标签层级")
 	private Integer dynamicLevel;
