@@ -1,5 +1,6 @@
 package com.auth.common.data.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
@@ -12,6 +13,7 @@ import lombok.Getter;
  * @author Bunny
  */
 @Getter
+@AllArgsConstructor
 public enum UserStatus {
 
 	/**
@@ -32,11 +34,6 @@ public enum UserStatus {
 	private final int code;
 
 	private final String desc;
-
-	UserStatus(int code, String desc) {
-		this.code = code;
-		this.desc = desc;
-	}
 
 	/**
 	 * 根据 code 解析枚举。

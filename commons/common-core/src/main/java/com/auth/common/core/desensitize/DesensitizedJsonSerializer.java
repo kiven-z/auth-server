@@ -1,7 +1,8 @@
 package com.auth.common.core.desensitize;
 
-import java.io.IOException;
-
+import cn.hutool.core.lang.Validator;
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.DesensitizedUtil;
 import com.auth.common.core.annotation.Desensitized;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.BeanProperty;
@@ -10,9 +11,7 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.ContextualSerializer;
 
-import cn.hutool.core.lang.Validator;
-import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.util.DesensitizedUtil;
+import java.io.IOException;
 
 /**
  * 将 {@link String} 按 {@link Desensitized} 策略在 JSON 输出时脱敏。
@@ -25,19 +24,24 @@ public class DesensitizedJsonSerializer extends JsonSerializer<String> implement
 
 	private static final int ID_CARD_SUFFIX_KEEP = 4;
 
-	/**
-	 * Mask for values that are not valid IPv4 or IPv6 when
-	 * {@link DesensitizedType#IP_ADDRESS} is used.
-	 */
-	private static final String UNKNOWN_IP_MASK = "******";
-
-	/**
-	 * Fixed mask for {@link DesensitizedType#PASSWORD} (does not mirror Hutool
-	 * variable-length password).
-	 */
-	private static final String PASSWORD_MASK = "******";
+	private static final String UNKNOWN_MASK = "******";
 
 	private Desensitized config;
+
+	/**
+	 * Detect IPv4 / IPv6 via Hutool {@link Validator}; unknown formats return a fixed
+	 * mask.
+	 */
+	private static String maskIpAddress(String value) {
+		String trimmed = CharSequenceUtil.trim(value);
+		if (Validator.isIpv4(trimmed)) {
+			return DesensitizedUtil.ipv4(trimmed);
+		}
+		if (Validator.isIpv6(trimmed)) {
+			return DesensitizedUtil.ipv6(trimmed);
+		}
+		return UNKNOWN_MASK;
+	}
 
 	/**
 	 * 序列化字符串
@@ -74,26 +78,11 @@ public class DesensitizedJsonSerializer extends JsonSerializer<String> implement
 			case IP_ADDRESS -> maskIpAddress(value);
 			case CAR_LICENSE -> DesensitizedUtil.carLicense(value);
 			case ADDRESS -> DesensitizedUtil.address(CharSequenceUtil.trim(value), config.addressSensitiveSize());
-			case PASSWORD -> PASSWORD_MASK;
+			case PASSWORD -> UNKNOWN_MASK;
 			case CREDIT_CODE -> DesensitizedUtil.creditCode(value);
 			case MONEY_DECIMAL -> DesensitizedStrings.maskDecimalDisplay(value);
 			case CUSTOM -> DesensitizedStrings.custom(value, config.prefixLen(), config.suffixLen(), config.symbol());
 		};
-	}
-
-	/**
-	 * Detect IPv4 / IPv6 via Hutool {@link Validator}; unknown formats return a fixed
-	 * mask.
-	 */
-	private static String maskIpAddress(String value) {
-		String trimmed = CharSequenceUtil.trim(value);
-		if (Validator.isIpv4(trimmed)) {
-			return DesensitizedUtil.ipv4(trimmed);
-		}
-		if (Validator.isIpv6(trimmed)) {
-			return DesensitizedUtil.ipv6(trimmed);
-		}
-		return UNKNOWN_IP_MASK;
 	}
 
 	/**

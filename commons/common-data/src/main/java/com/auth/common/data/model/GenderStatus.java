@@ -1,5 +1,6 @@
 package com.auth.common.data.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
@@ -8,6 +9,7 @@ import lombok.Getter;
  * @author Bunny
  */
 @Getter
+@AllArgsConstructor
 public enum GenderStatus {
 
 	/**
@@ -28,11 +30,6 @@ public enum GenderStatus {
 	private final int code;
 
 	private final String desc;
-
-	GenderStatus(int code, String desc) {
-		this.code = code;
-		this.desc = desc;
-	}
 
 	public static String getDesc(int code) {
 		for (GenderStatus value : values()) {

@@ -1,21 +1,21 @@
 package com.auth.common.core.desensitize;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
+import cn.hutool.core.util.DesensitizedUtil;
 import com.auth.common.core.annotation.Desensitized;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import cn.hutool.core.util.DesensitizedUtil;
 import lombok.Data;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * {@link DesensitizedJsonSerializer} 与 {@link Desensitized} 组合行为测试。
  */
+@SuppressWarnings("java:S5976")
 class DesensitizedJsonSerializerTest {
 
 	private final ObjectMapper mapper = new ObjectMapper();

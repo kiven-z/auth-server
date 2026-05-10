@@ -84,7 +84,6 @@ public class AnnotationOverridingAuthorizationManager implements AuthorizationMa
 	 */
 	@Override
 	@Deprecated
-	@SuppressWarnings("java:S6355")
 	public AuthorizationDecision check(Supplier<Authentication> authentication, RequestAuthorizationContext context) {
 		AuthorizationResult r = authorize(authentication, context);
 		if (r instanceof AuthorizationDecision ad) {

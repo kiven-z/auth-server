@@ -1,6 +1,6 @@
 package com.auth.service.system.common.service.impl;
 
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.security.starter.model.UserEntity;
 import com.auth.service.system.admin.convert.SysUserProfileConverter;
 import com.auth.service.system.common.exception.SystemBusinessException;
@@ -13,7 +13,6 @@ import com.auth.service.system.common.model.vo.SysUserProfileResponse;
 import com.auth.service.system.common.service.SysUserQueryService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -84,14 +83,12 @@ public class SysUserQueryServiceImpl extends ServiceImpl<SysUserQueryMapper, Use
 	 */
 	@Override
 	public List<SysUserSearchItemResponse> searchByKeyword(String keyword, Integer limit) {
-		if (!StringUtils.hasText(keyword)) {
+		keyword = CharSequenceUtil.trim(keyword);
+		if (CharSequenceUtil.isEmpty(keyword)) {
 			return Collections.emptyList();
 		}
-		String trimmed = StrUtil.trim(keyword);
-		if (trimmed.isEmpty()) {
-			return Collections.emptyList();
-		}
-		return sysUserQueryMapper.searchByKeyword(trimmed, resolveSearchLimit(limit));
+
+		return sysUserQueryMapper.searchByKeyword(keyword, resolveSearchLimit(limit));
 	}
 
 }
