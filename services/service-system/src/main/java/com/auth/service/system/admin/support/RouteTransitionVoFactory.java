@@ -2,7 +2,7 @@ package com.auth.service.system.admin.support;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
-import com.auth.service.system.admin.model.vo.RouteTransitionVO;
+import com.auth.service.system.admin.model.vo.menu.RouteTransitionVO;
 import lombok.experimental.UtilityClass;
 
 /**

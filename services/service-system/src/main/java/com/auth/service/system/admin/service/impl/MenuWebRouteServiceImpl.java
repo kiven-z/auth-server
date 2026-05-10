@@ -4,7 +4,7 @@ import com.auth.common.core.model.response.Result;
 import com.auth.module.security.contract.constants.PermissionConstant;
 import com.auth.service.system.admin.mapper.SysMenuMapper;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
-import com.auth.service.system.admin.model.vo.RouteNodeVO;
+import com.auth.service.system.admin.model.vo.menu.RouteNodeVO;
 import com.auth.service.system.admin.service.MenuWebRouteService;
 import com.auth.service.system.admin.service.MenuWebRouteTreeBuilder;
 import com.auth.service.system.common.feign.AuthenticationInnerFeignClient;

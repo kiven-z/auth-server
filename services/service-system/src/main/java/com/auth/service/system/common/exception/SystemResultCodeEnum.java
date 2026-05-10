@@ -1,10 +1,12 @@
 package com.auth.service.system.common.exception;
 
-import com.auth.common.web.context.SpringContextHolder;
-import lombok.Getter;
+import java.util.Locale;
+
 import org.springframework.context.i18n.LocaleContextHolder;
 
-import java.util.Locale;
+import com.auth.common.web.context.SpringContextHolder;
+
+import lombok.Getter;
 
 /**
  * 系统服务结果代码(模块 {@code 10})
@@ -392,7 +394,21 @@ public enum SystemResultCodeEnum {
 	/**
 	 * 用户已存在
 	 */
-	USER_ALREADY_EXISTS(409, 269, "USER_ALREADY_EXISTS", "user.already.exists"),;
+	USER_ALREADY_EXISTS(409, 269, "USER_ALREADY_EXISTS", "user.already.exists"),
+
+	// --- Menu (270+)
+	/**
+	 * 菜单不存在
+	 */
+	MENU_NOT_FOUND(404, 270, "MENU_NOT_FOUND", "system.menu.not_found"),
+	/**
+	 * 角色编码在系统中不存在
+	 */
+	MENU_ROLE_CODE_INVALID(422, 271, "MENU_ROLE_CODE_INVALID", "system.menu.role_code_invalid"),
+	/**
+	 * 权限编码在系统中不存在
+	 */
+	MENU_PERMISSION_CODE_INVALID(422, 272, "MENU_PERMISSION_CODE_INVALID", "system.menu.permission_code_invalid"),;
 
 	private final int httpStatus;
 

@@ -3,7 +3,7 @@ package com.auth.service.system.admin.controller;
 import com.auth.common.core.model.response.Result;
 import com.auth.module.security.autoconfig.annotation.AuthenticatedApi;
 import com.auth.module.security.autoconfig.web.SecurityUserUtils;
-import com.auth.service.system.admin.model.vo.RouteNodeVO;
+import com.auth.service.system.admin.model.vo.menu.RouteNodeVO;
 import com.auth.service.system.admin.service.MenuWebRouteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

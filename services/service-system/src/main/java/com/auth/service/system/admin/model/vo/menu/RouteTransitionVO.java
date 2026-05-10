@@ -1,4 +1,4 @@
-package com.auth.service.system.admin.model.vo;
+package com.auth.service.system.admin.model.vo.menu;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;

@@ -1,7 +1,7 @@
 package com.auth.service.system.admin.service;
 
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
-import com.auth.service.system.admin.model.vo.RouteNodeVO;
+import com.auth.service.system.admin.model.vo.menu.RouteNodeVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;

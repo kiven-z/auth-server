@@ -1,13 +1,6 @@
 package com.auth.service.system.admin.service.impl;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Component;
-
+import cn.hutool.core.collection.CollUtil;
 import com.auth.common.core.utils.TreeNodeProcessorUtil;
 import com.auth.module.security.contract.constants.PermissionConstant;
 import com.auth.service.system.admin.convert.MenuConvertContext;
@@ -19,15 +12,20 @@ import com.auth.service.system.admin.mapper.SysMenuRoleMapper;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.admin.model.entity.SysMenuPermissionEntity;
 import com.auth.service.system.admin.model.entity.SysMenuRoleEntity;
-import com.auth.service.system.admin.model.vo.RouteMetaVO;
-import com.auth.service.system.admin.model.vo.RouteNodeVO;
+import com.auth.service.system.admin.model.vo.menu.RouteMetaVO;
+import com.auth.service.system.admin.model.vo.menu.RouteNodeVO;
 import com.auth.service.system.admin.service.MenuWebRouteTreeBuilder;
 import com.auth.service.system.admin.support.MenuRouteTreeNode;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-
-import cn.hutool.core.collection.CollUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 动态菜单路由树构建（启用菜单、角色过滤、祖先补全、排序、VO 映射）

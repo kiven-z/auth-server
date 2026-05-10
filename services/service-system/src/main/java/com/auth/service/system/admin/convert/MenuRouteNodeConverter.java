@@ -1,6 +1,6 @@
 package com.auth.service.system.admin.convert;
 
-import com.auth.service.system.admin.model.vo.RouteNodeVO;
+import com.auth.service.system.admin.model.vo.menu.RouteNodeVO;
 import com.auth.service.system.admin.support.MenuRouteTreeNode;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
