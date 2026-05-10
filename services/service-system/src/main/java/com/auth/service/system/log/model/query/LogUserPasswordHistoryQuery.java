@@ -19,19 +19,19 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = true)
 public class LogUserPasswordHistoryQuery extends PageQueryRequest implements Serializable {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+	@Serial
+	private static final long serialVersionUID = 1L;
 
-    @Schema(title = "用户ID")
-    private Long userId;
+	@Schema(title = "用户ID")
+	private Long userId;
 
-    @Schema(title = "修改时间(开始)")
-    private LocalDateTime changeTimeStart;
+	@Schema(title = "修改时间(开始)")
+	private LocalDateTime changeTimeStart;
 
-    @Schema(title = "修改时间(结束)")
-    private LocalDateTime changeTimeEnd;
+	@Schema(title = "修改时间(结束)")
+	private LocalDateTime changeTimeEnd;
 
-    @Schema(title = "修改IP地址")
-    private String changeIp;
+	@Schema(title = "修改IP地址")
+	private String changeIp;
 
 }

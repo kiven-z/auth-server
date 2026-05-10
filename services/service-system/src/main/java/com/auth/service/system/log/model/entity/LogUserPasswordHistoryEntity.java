@@ -23,14 +23,14 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class LogUserPasswordHistoryEntity extends BaseEntity {
 
-    @Schema(title = "用户ID")
-    private Long userId;
+	@Schema(title = "用户ID")
+	private Long userId;
 
-    @JsonIgnore
-    @Schema(title = "密码Hash值")
-    private String passwordHash;
+	@JsonIgnore
+	@Schema(title = "密码Hash值")
+	private String passwordHash;
 
-    @Schema(title = "修改IP地址")
-    private String changeIp;
+	@Schema(title = "修改IP地址")
+	private String changeIp;
 
 }

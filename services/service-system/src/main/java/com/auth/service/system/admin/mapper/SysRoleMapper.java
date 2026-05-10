@@ -20,24 +20,22 @@ import java.util.List;
 @Mapper
 public interface SysRoleMapper extends BaseMapper<SysRoleEntity> {
 
-    /**
-     * 分页查询角色（含创建人、更新人用户名展示列）
-     *
-     * @param page       分页参数
-     * @param query      筛选条件
-     * @param orderBySql 已由白名单校验的 ORDER BY 片段（仅列名与 ASC/DESC）
-     * @return 分页结果
-     */
-    IPage<SysRolePageResponse> selectListByPage(@Param("page") Page<SysRoleEntity> page,
-                                                @Param("query") SysRoleQuery query, @Param("orderBySql") String orderBySql);
+	/**
+	 * 分页查询角色（含创建人、更新人用户名展示列）
+	 * @param page 分页参数
+	 * @param query 筛选条件
+	 * @param orderBySql 已由白名单校验的 ORDER BY 片段（仅列名与 ASC/DESC）
+	 * @return 分页结果
+	 */
+	IPage<SysRolePageResponse> selectListByPage(@Param("page") Page<SysRoleEntity> page,
+			@Param("query") SysRoleQuery query, @Param("orderBySql") String orderBySql);
 
-    /**
-     * 查询角色下拉选项
-     *
-     * @param roleName 角色名称（可选模糊）
-     * @param roleCode 角色编码（可选模糊）
-     * @return 角色选项列表
-     */
-    List<SysRoleOptionVO> selectRoleOptions(@Param("roleName") String roleName, @Param("roleCode") String roleCode);
+	/**
+	 * 查询角色下拉选项
+	 * @param roleName 角色名称（可选模糊）
+	 * @param roleCode 角色编码（可选模糊）
+	 * @return 角色选项列表
+	 */
+	List<SysRoleOptionVO> selectRoleOptions(@Param("roleName") String roleName, @Param("roleCode") String roleCode);
 
 }

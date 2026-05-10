@@ -28,41 +28,41 @@ import static com.auth.service.system.common.exception.SystemResultCodeEnum.ASSI
 @RestController
 public class SysMenuManageController {
 
-    private final SysMenuManageService sysMenuManageService;
+	private final SysMenuManageService sysMenuManageService;
 
-    public SysMenuManageController(SysMenuManageService sysMenuManageService) {
-        this.sysMenuManageService = sysMenuManageService;
-    }
+	public SysMenuManageController(SysMenuManageService sysMenuManageService) {
+		this.sysMenuManageService = sysMenuManageService;
+	}
 
-    @Operation(summary = "查询菜单已分配角色")
-    @PreAuthorize("@auth.decide('sysMenu:query')")
-    @GetMapping("/{id}/roles")
-    public Result<List<SysMenuAssignedRoleRow>> listRoles(@PathVariable("id") Long id) {
-        return Result.success(sysMenuManageService.listAssignedRoles(id));
-    }
+	@Operation(summary = "查询菜单已分配角色")
+	@PreAuthorize("@auth.decide('sysMenu:query')")
+	@GetMapping("/{id}/roles")
+	public Result<List<SysMenuAssignedRoleRow>> listRoles(@PathVariable("id") Long id) {
+		return Result.success(sysMenuManageService.listAssignedRoles(id));
+	}
 
-    @Operation(summary = "覆盖分配菜单角色（写入 sys_menu_role）")
-    @PreAuthorize("@auth.decide('sysMenu:update')")
-    @PutMapping("/{id}/roles")
-    public Result<String> replaceRoles(@PathVariable("id") Long id, @Valid @RequestBody SysMenuAssignRoleForm form) {
-        sysMenuManageService.replaceMenuRoles(id, form);
-        return Result.success(null, ASSIGN_SUCCESS.getMessage());
-    }
+	@Operation(summary = "覆盖分配菜单角色（写入 sys_menu_role）")
+	@PreAuthorize("@auth.decide('sysMenu:update')")
+	@PutMapping("/{id}/roles")
+	public Result<String> replaceRoles(@PathVariable("id") Long id, @Valid @RequestBody SysMenuAssignRoleForm form) {
+		sysMenuManageService.replaceMenuRoles(id, form);
+		return Result.success(null, ASSIGN_SUCCESS.getMessage());
+	}
 
-    @Operation(summary = "查询权限列表并标记菜单是否已关联（sys_menu_permission）")
-    @PreAuthorize("@auth.decide('sysMenu:query')")
-    @GetMapping("/{id}/permissions")
-    public Result<List<SysMenuAssignedPermissionRow>> listPermissions(@PathVariable("id") Long id) {
-        return Result.success(sysMenuManageService.listPermissionsWithAssignFlags(id));
-    }
+	@Operation(summary = "查询权限列表并标记菜单是否已关联（sys_menu_permission）")
+	@PreAuthorize("@auth.decide('sysMenu:query')")
+	@GetMapping("/{id}/permissions")
+	public Result<List<SysMenuAssignedPermissionRow>> listPermissions(@PathVariable("id") Long id) {
+		return Result.success(sysMenuManageService.listPermissionsWithAssignFlags(id));
+	}
 
-    @Operation(summary = "覆盖分配菜单权限（写入 sys_menu_permission）")
-    @PreAuthorize("@auth.decide('sysMenu:update')")
-    @PutMapping("/{id}/permissions")
-    public Result<String> replacePermissions(@PathVariable("id") Long id,
-                                             @Valid @RequestBody SysMenuAssignPermissionForm form) {
-        sysMenuManageService.replaceMenuPermissions(id, form);
-        return Result.success(null, ASSIGN_SUCCESS.getMessage());
-    }
+	@Operation(summary = "覆盖分配菜单权限（写入 sys_menu_permission）")
+	@PreAuthorize("@auth.decide('sysMenu:update')")
+	@PutMapping("/{id}/permissions")
+	public Result<String> replacePermissions(@PathVariable("id") Long id,
+			@Valid @RequestBody SysMenuAssignPermissionForm form) {
+		sysMenuManageService.replaceMenuPermissions(id, form);
+		return Result.success(null, ASSIGN_SUCCESS.getMessage());
+	}
 
 }

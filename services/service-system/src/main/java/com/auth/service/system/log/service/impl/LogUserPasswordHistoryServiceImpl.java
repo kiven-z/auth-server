@@ -27,36 +27,36 @@ import static com.auth.service.system.common.exception.SystemResultCodeEnum.DATA
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class LogUserPasswordHistoryServiceImpl
-        extends ServiceImpl<LogUserPasswordHistoryMapper, LogUserPasswordHistoryEntity>
-        implements LogUserPasswordHistoryService {
+		extends ServiceImpl<LogUserPasswordHistoryMapper, LogUserPasswordHistoryEntity>
+		implements LogUserPasswordHistoryService {
 
-    private final AuditUserDisplayService auditUserDisplayService;
+	private final AuditUserDisplayService auditUserDisplayService;
 
-    public LogUserPasswordHistoryServiceImpl(AuditUserDisplayService auditUserDisplayService) {
-        this.auditUserDisplayService = auditUserDisplayService;
-    }
+	public LogUserPasswordHistoryServiceImpl(AuditUserDisplayService auditUserDisplayService) {
+		this.auditUserDisplayService = auditUserDisplayService;
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public PageResponse<LogUserPasswordHistoryPageVO> getPage(Page<LogUserPasswordHistoryEntity> pageParams,
-                                                              LogUserPasswordHistoryQuery query) {
-        IPage<LogUserPasswordHistoryPageVO> page = baseMapper.selectListByPage(pageParams, query);
-        auditUserDisplayService.enrichAuditUsernames(page);
-        return PageResponse.of(page);
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public PageResponse<LogUserPasswordHistoryPageVO> getPage(Page<LogUserPasswordHistoryEntity> pageParams,
+			LogUserPasswordHistoryQuery query) {
+		IPage<LogUserPasswordHistoryPageVO> page = baseMapper.selectListByPage(pageParams, query);
+		auditUserDisplayService.enrichAuditUsernames(page);
+		return PageResponse.of(page);
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public LogUserPasswordHistoryDetailVO getDetail(Long id) {
-        LogUserPasswordHistoryDetailVO vo = baseMapper.selectDetailById(id);
-        if (vo == null) {
-            throw new SystemBusinessException(DATA_NOT_EXIST);
-        }
-        return vo;
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public LogUserPasswordHistoryDetailVO getDetail(Long id) {
+		LogUserPasswordHistoryDetailVO vo = baseMapper.selectDetailById(id);
+		if (vo == null) {
+			throw new SystemBusinessException(DATA_NOT_EXIST);
+		}
+		return vo;
+	}
 
 }

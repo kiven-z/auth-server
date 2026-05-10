@@ -19,16 +19,16 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class SysMenuAssignedRoleRow implements Serializable {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+	@Serial
+	private static final long serialVersionUID = 1L;
 
-    @Schema(title = "角色编码")
-    private String roleCode;
+	@Schema(title = "角色编码")
+	private String roleCode;
 
-    @Schema(title = "角色名称")
-    private String roleName;
+	@Schema(title = "角色名称")
+	private String roleName;
 
-    @Schema(title = "是否已分配给当前菜单")
-    private Boolean assigned;
+	@Schema(title = "是否已分配给当前菜单")
+	private Boolean assigned;
 
 }

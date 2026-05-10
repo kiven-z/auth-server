@@ -23,59 +23,58 @@ import java.util.stream.Stream;
 @Service
 public class AuditUserDisplayServiceImpl implements AuditUserDisplayService {
 
-    private final UserMapper userMapper;
+	private final UserMapper userMapper;
 
-    public AuditUserDisplayServiceImpl(UserMapper userMapper) {
-        this.userMapper = userMapper;
-    }
+	public AuditUserDisplayServiceImpl(UserMapper userMapper) {
+		this.userMapper = userMapper;
+	}
 
-    /**
-     * 从行列表中收集创建人、更新人用户 ID（去重、非空）。
-     *
-     * @param records 行列表
-     * @return 用户主键列表
-     */
-    private static List<Long> collectAuditUserIds(List<? extends BaseResponse> records) {
-        return records.stream()
-                .flatMap(vo -> Stream.of(vo.getCreateUser(), vo.getUpdateUser()).filter(Objects::nonNull))
-                .distinct()
-                .toList();
-    }
+	/**
+	 * 从行列表中收集创建人、更新人用户 ID（去重、非空）。
+	 * @param records 行列表
+	 * @return 用户主键列表
+	 */
+	private static List<Long> collectAuditUserIds(List<? extends BaseResponse> records) {
+		return records.stream()
+			.flatMap(vo -> Stream.of(vo.getCreateUser(), vo.getUpdateUser()).filter(Objects::nonNull))
+			.distinct()
+			.toList();
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Map<Long, String> mapUsernamesByIds(Collection<Long> userIds) {
-        return userMapper.selectBatchIds(userIds)
-                .stream()
-                .collect(Collectors.toMap(UserEntity::getId, UserEntity::getUsername));
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Map<Long, String> mapUsernamesByIds(Collection<Long> userIds) {
+		return userMapper.selectBatchIds(userIds)
+			.stream()
+			.collect(Collectors.toMap(UserEntity::getId, UserEntity::getUsername));
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public <T extends BaseResponse> void enrichAuditUsernames(IPage<T> page) {
-        if (page == null) {
-            return;
-        }
-        enrichAuditUsernames(page.getRecords());
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public <T extends BaseResponse> void enrichAuditUsernames(IPage<T> page) {
+		if (page == null) {
+			return;
+		}
+		enrichAuditUsernames(page.getRecords());
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void enrichAuditUsernames(List<? extends BaseResponse> records) {
-        if (CollUtil.isEmpty(records)) {
-            return;
-        }
-        Map<Long, String> usernameMap = mapUsernamesByIds(collectAuditUserIds(records));
-        for (BaseResponse vo : records) {
-            vo.setCreateUsername(usernameMap.get(vo.getCreateUser()));
-            vo.setUpdateUsername(usernameMap.get(vo.getUpdateUser()));
-        }
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void enrichAuditUsernames(List<? extends BaseResponse> records) {
+		if (CollUtil.isEmpty(records)) {
+			return;
+		}
+		Map<Long, String> usernameMap = mapUsernamesByIds(collectAuditUserIds(records));
+		for (BaseResponse vo : records) {
+			vo.setCreateUsername(usernameMap.get(vo.getCreateUser()));
+			vo.setUpdateUsername(usernameMap.get(vo.getUpdateUser()));
+		}
+	}
 
 }

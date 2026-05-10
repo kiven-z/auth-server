@@ -38,95 +38,95 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class SysRoleServiceImplTest {
 
-    @Mock
-    private SysRoleMapper sysRoleMapper;
+	@Mock
+	private SysRoleMapper sysRoleMapper;
 
-    @Mock
-    private AuditUserDisplayService auditUserDisplayService;
+	@Mock
+	private AuditUserDisplayService auditUserDisplayService;
 
-    private SysRoleServiceImpl sysRoleService;
+	private SysRoleServiceImpl sysRoleService;
 
-    @BeforeEach
-    void setUp() throws Exception {
-        sysRoleService = new SysRoleServiceImpl(auditUserDisplayService);
-        Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
-        baseMapperField.setAccessible(true);
-        baseMapperField.set(sysRoleService, sysRoleMapper);
-    }
+	@BeforeEach
+	void setUp() throws Exception {
+		sysRoleService = new SysRoleServiceImpl(auditUserDisplayService);
+		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
+		baseMapperField.setAccessible(true);
+		baseMapperField.set(sysRoleService, sysRoleMapper);
+	}
 
-    @Test
-    @DisplayName("分页查询：Mapper 分页后调用审计用户展示名补全")
-    void getPageDelegatesEnrichToAuditUserDisplayService() {
-        Page<SysRoleEntity> pageParams = new Page<>(1, 10);
-        SysRoleQuery query = new SysRoleQuery();
-        Page<SysRolePageResponse> mpPage = new Page<>(1, 10);
-        mpPage.setRecords(List.of(new SysRolePageResponse()));
-        when(sysRoleMapper.selectListByPage(eq(pageParams), eq(query), anyString())).thenReturn(mpPage);
+	@Test
+	@DisplayName("分页查询：Mapper 分页后调用审计用户展示名补全")
+	void getPageDelegatesEnrichToAuditUserDisplayService() {
+		Page<SysRoleEntity> pageParams = new Page<>(1, 10);
+		SysRoleQuery query = new SysRoleQuery();
+		Page<SysRolePageResponse> mpPage = new Page<>(1, 10);
+		mpPage.setRecords(List.of(new SysRolePageResponse()));
+		when(sysRoleMapper.selectListByPage(eq(pageParams), eq(query), anyString())).thenReturn(mpPage);
 
-        PageResponse<SysRolePageResponse> result = sysRoleService.getPage(pageParams, query);
+		PageResponse<SysRolePageResponse> result = sysRoleService.getPage(pageParams, query);
 
-        assertThat(result.getList()).hasSize(1);
-        verify(auditUserDisplayService).enrichAuditUsernames(mpPage);
-    }
+		assertThat(result.getList()).hasSize(1);
+		verify(auditUserDisplayService).enrichAuditUsernames(mpPage);
+	}
 
-    @Test
-    @DisplayName("详情：角色不存在时抛出 ROLE_NOT_FOUND")
-    void getDetailThrowsWhenRoleMissing() {
-        when(sysRoleMapper.selectById(404L)).thenReturn(null);
+	@Test
+	@DisplayName("详情：角色不存在时抛出 ROLE_NOT_FOUND")
+	void getDetailThrowsWhenRoleMissing() {
+		when(sysRoleMapper.selectById(404L)).thenReturn(null);
 
-        assertThatThrownBy(() -> sysRoleService.getDetail(404L)).isInstanceOf(SystemBusinessException.class)
-                .extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-                .isEqualTo(SystemResultCodeEnum.ROLE_NOT_FOUND);
-    }
+		assertThatThrownBy(() -> sysRoleService.getDetail(404L)).isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemResultCodeEnum.ROLE_NOT_FOUND);
+	}
 
-    @Test
-    @DisplayName("详情：复制实体并填充 roleTypeDesc")
-    void getDetailReturnsVoWithRoleTypeDesc() {
-        SysRoleEntity entity = new SysRoleEntity();
-        entity.setId(1L);
-        entity.setRoleCode("ADMIN");
-        entity.setRoleName("管理员");
-        entity.setStatus(true);
-        entity.setRoleType(1);
-        entity.setOrderNum(2);
-        when(sysRoleMapper.selectById(1L)).thenReturn(entity);
+	@Test
+	@DisplayName("详情：复制实体并填充 roleTypeDesc")
+	void getDetailReturnsVoWithRoleTypeDesc() {
+		SysRoleEntity entity = new SysRoleEntity();
+		entity.setId(1L);
+		entity.setRoleCode("ADMIN");
+		entity.setRoleName("管理员");
+		entity.setStatus(true);
+		entity.setRoleType(1);
+		entity.setOrderNum(2);
+		when(sysRoleMapper.selectById(1L)).thenReturn(entity);
 
-        SysRoleDetailVO vo = sysRoleService.getDetail(1L);
+		SysRoleDetailVO vo = sysRoleService.getDetail(1L);
 
-        assertThat(vo.getRoleCode()).isEqualTo("ADMIN");
-        assertThat(vo.getRoleName()).isEqualTo("管理员");
-        assertThat(vo.getRoleTypeDesc()).isEqualTo("系统角色");
-    }
+		assertThat(vo.getRoleCode()).isEqualTo("ADMIN");
+		assertThat(vo.getRoleName()).isEqualTo("管理员");
+		assertThat(vo.getRoleTypeDesc()).isEqualTo("系统角色");
+	}
 
-    @Test
-    @DisplayName("新增：持久化由 save → insert 完成")
-    void createPersistsViaInsert() {
-        SysRoleCreateForm form = new SysRoleCreateForm();
-        form.setRoleCode("CUSTOM_R1");
-        form.setRoleName("自定义");
-        form.setStatus(true);
-        form.setRoleType(4);
-        form.setOrderNum(0);
-        when(sysRoleMapper.insert(org.mockito.ArgumentMatchers.<SysRoleEntity>any())).thenReturn(1);
+	@Test
+	@DisplayName("新增：持久化由 save → insert 完成")
+	void createPersistsViaInsert() {
+		SysRoleCreateForm form = new SysRoleCreateForm();
+		form.setRoleCode("CUSTOM_R1");
+		form.setRoleName("自定义");
+		form.setStatus(true);
+		form.setRoleType(4);
+		form.setOrderNum(0);
+		when(sysRoleMapper.insert(org.mockito.ArgumentMatchers.<SysRoleEntity>any())).thenReturn(1);
 
-        sysRoleService.create(form);
+		sysRoleService.create(form);
 
-        verify(sysRoleMapper).insert(argThat((SysRoleEntity e) -> "CUSTOM_R1".equals(e.getRoleCode())
-                && Integer.valueOf(4).equals(e.getRoleType())));
-    }
+		verify(sysRoleMapper).insert(argThat((SysRoleEntity e) -> "CUSTOM_R1".equals(e.getRoleCode())
+				&& Integer.valueOf(4).equals(e.getRoleType())));
+	}
 
-    @Test
-    @DisplayName("下拉选项：委托 Mapper 查询")
-    void listOptionsDelegatesToMapper() {
-        SysRoleOptionVO opt = new SysRoleOptionVO();
-        opt.setId(1L);
-        when(sysRoleMapper.selectRoleOptions("a", "b")).thenReturn(List.of(opt));
+	@Test
+	@DisplayName("下拉选项：委托 Mapper 查询")
+	void listOptionsDelegatesToMapper() {
+		SysRoleOptionVO opt = new SysRoleOptionVO();
+		opt.setId(1L);
+		when(sysRoleMapper.selectRoleOptions("a", "b")).thenReturn(List.of(opt));
 
-        List<SysRoleOptionVO> list = sysRoleService.listOptions("a", "b");
+		List<SysRoleOptionVO> list = sysRoleService.listOptions("a", "b");
 
-        assertThat(list).hasSize(1);
-        assertThat(list.get(0).getId()).isEqualTo(1L);
-        verify(sysRoleMapper).selectRoleOptions("a", "b");
-    }
+		assertThat(list).hasSize(1);
+		assertThat(list.get(0).getId()).isEqualTo(1L);
+		verify(sysRoleMapper).selectRoleOptions("a", "b");
+	}
 
 }
