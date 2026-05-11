@@ -1,24 +1,12 @@
 package com.auth.service.auth.service.impl;
 
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Service;
-
 import com.auth.common.jwt.model.JwtUserToken;
 import com.auth.module.security.autoconfig.web.SecurityUserUtils;
 import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.exception.AuthBusinessException;
 import com.auth.service.auth.exception.AuthResultCode;
-import com.auth.service.auth.infrastructure.login.LoginAuditSupport;
-import com.auth.service.auth.infrastructure.login.LoginFailureRateLimiter;
-import com.auth.service.auth.infrastructure.login.LoginResult;
-import com.auth.service.auth.infrastructure.login.TokenPair;
-import com.auth.service.auth.infrastructure.login.TokenService;
+import com.auth.service.auth.infrastructure.login.*;
 import com.auth.service.auth.infrastructure.login.strategy.LoginStrategy;
 import com.auth.service.auth.infrastructure.profile.AuthProfileCache;
 import com.auth.service.auth.infrastructure.session.SessionLimitManager;
@@ -30,9 +18,15 @@ import com.auth.service.auth.model.request.AbstractAuthentication;
 import com.auth.service.auth.model.response.UserLoginResponse;
 import com.auth.service.auth.service.AuthLoginAuditService;
 import com.auth.service.auth.service.AuthService;
-
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * 认证服务实现
@@ -75,10 +69,7 @@ public class AuthServiceImpl implements AuthService {
 	}
 
 	/**
-	 * 登录：策略查找 → 执行认证 → 会话上限检查 → 缓存画像 → 签发令牌 → 持久化会话索引 → 清除失败计数 → 审计成功
-	 * @param auth 认证信息
-	 * @param request 请求
-	 * @return 登录响应
+	 * {@inheritDoc}
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
@@ -165,8 +156,7 @@ public class AuthServiceImpl implements AuthService {
 	}
 
 	/**
-	 * 登出当前会话（永远不抛出异常） 幂等：会话不存在/索引不存在都视为成功 永远成功：token 无效/过期/解析失败时不抛错，仅执行客户端登出
-	 * @param accessToken Access Token（不含 Bearer 前缀）
+	 * {@inheritDoc}
 	 */
 	@Override
 	public void logout(String accessToken, HttpServletRequest request) {

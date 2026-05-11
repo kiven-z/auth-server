@@ -27,8 +27,7 @@ public class AuthMessageServiceImpl implements AuthMessageService {
 	}
 
 	/**
-	 * 发送邮箱验证码
-	 * @param email 邮箱
+	 * {@inheritDoc}
 	 */
 	@Override
 	public void sendEmailCode(String email) {

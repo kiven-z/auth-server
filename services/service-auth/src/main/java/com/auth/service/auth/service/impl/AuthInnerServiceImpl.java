@@ -30,8 +30,7 @@ public class AuthInnerServiceImpl implements AuthInnerService {
 	private final AuthProfileCache authProfileCache;
 
 	/**
-	 * 刷新用户缓存
-	 * @param userIds 用户ID列表
+	 * {@inheritDoc}
 	 */
 	@Override
 	public void refreshUserCache(List<Long> userIds) {
@@ -47,8 +46,7 @@ public class AuthInnerServiceImpl implements AuthInnerService {
 	}
 
 	/**
-	 * 踢出所有会话
-	 * @param userIds 用户ID列表
+	 * {@inheritDoc}
 	 */
 	@Override
 	public void kickAllSessions(List<Long> userIds) {
@@ -63,9 +61,7 @@ public class AuthInnerServiceImpl implements AuthInnerService {
 	}
 
 	/**
-	 * 通过授权画像构建服务解析生效编码，保证与 JWT/缓存画像一致。
-	 * @param userId 用户 ID
-	 * @return 角色码与权限码 VO
+	 * {@inheritDoc}
 	 */
 	@Override
 	public EffectiveCodesVO resolveEffectiveCodes(Long userId) {

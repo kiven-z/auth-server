@@ -1,10 +1,8 @@
 package com.auth.service.auth.service.impl;
 
-import java.time.Duration;
-import java.util.Objects;
-
-import org.springframework.stereotype.Service;
-
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.BooleanUtil;
+import cn.hutool.crypto.digest.MD5;
 import com.auth.common.jwt.autoconfigure.JwtProperties;
 import com.auth.common.jwt.model.JwtUserToken;
 import com.auth.module.security.contract.api.UserSessionIndex;
@@ -20,11 +18,11 @@ import com.auth.service.auth.model.enums.AuthLoginLogType;
 import com.auth.service.auth.model.response.RefreshTokenResponse;
 import com.auth.service.auth.service.AuthLoginAuditService;
 import com.auth.service.auth.service.RefreshTokenService;
-
-import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.util.BooleanUtil;
-import cn.hutool.crypto.digest.MD5;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.stereotype.Service;
+
+import java.time.Duration;
+import java.util.Objects;
 
 /**
  * 用户刷新Token
@@ -54,10 +52,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 	}
 
 	/**
-	 * 刷新令牌
-	 * @param refreshToken 刷新令牌
-	 * @param request HTTP 请求
-	 * @return 刷新令牌响应
+	 * {@inheritDoc}
 	 */
 	@Override
 	public RefreshTokenResponse refreshToken(String refreshToken, HttpServletRequest request) {

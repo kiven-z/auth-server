@@ -1,10 +1,12 @@
 package com.auth.service.auth.model.response;
 
+import java.util.List;
+
 import com.auth.common.core.annotation.JsonStringFormat;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.List;
 
 /**
  * 用户登录响应
@@ -15,35 +17,23 @@ import java.util.List;
 @Setter
 public class UserLoginResponse extends RefreshTokenResponse {
 
-	/**
-	 * 用户ID
-	 */
+	@Schema(description = "用户ID")
 	@JsonStringFormat
 	private Long id;
 
-	/**
-	 * 用户名
-	 */
+	@Schema(description = "用户名")
 	private String username;
 
-	/**
-	 * 昵称
-	 */
+	@Schema(description = "昵称")
 	private String nickname;
 
-	/**
-	 * 头像
-	 */
+	@Schema(description = "头像")
 	private String avatar;
 
-	/**
-	 * 角色
-	 */
+	@Schema(description = "角色")
 	private List<String> roles;
 
-	/**
-	 * 权限
-	 */
+	@Schema(description = "权限")
 	private List<String> permissions;
 
 }
