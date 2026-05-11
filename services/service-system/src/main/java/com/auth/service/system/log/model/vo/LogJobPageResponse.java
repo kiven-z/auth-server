@@ -1,4 +1,4 @@
-package com.auth.service.system.schedule.model.vo;
+package com.auth.service.system.log.model.vo;
 
 import com.auth.common.core.annotation.JsonStringFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -13,9 +13,9 @@ import java.time.LocalDateTime;
  *
  * @author Bunny
  */
-@Schema(name = "SysJobLogPageResponse", title = "任务日志分页行")
+@Schema(name = "LogJobPageResponse", title = "任务日志分页行")
 @Data
-public class SysJobLogPageResponse implements Serializable {
+public class LogJobPageResponse implements Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 1L;

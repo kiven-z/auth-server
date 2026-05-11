@@ -1,27 +1,29 @@
-package com.auth.service.system.schedule.model.vo;
+package com.auth.service.system.log.model.entity;
 
-import com.auth.common.core.model.response.BaseResponse;
+import com.auth.common.data.model.BaseEntity;
+import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 
 import java.io.Serial;
-import java.time.LocalDateTime;
 
 /**
- * 任务日志详情（含异常堆栈）
+ * 定时任务执行日志（无逻辑删除字段）
  *
  * @author Bunny
  */
-@Schema(name = "SysJobLogDetailVO", title = "任务日志详情")
-@Data
-@EqualsAndHashCode(callSuper = true)
-public class SysJobLogDetailVO extends BaseResponse {
+@TableName("log_job")
+@Getter
+@Setter
+@Accessors(chain = true)
+public class JobLogEntity extends BaseEntity {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
 
-	@Schema(title = "任务名称")
+	@Schema(title = "任务名")
 	private String jobName;
 
 	@Schema(title = "任务分组")
@@ -34,15 +36,12 @@ public class SysJobLogDetailVO extends BaseResponse {
 	private String jobMessage;
 
 	@Schema(title = "状态(0成功 1失败)")
-	private Integer status;
+	private Boolean status;
 
 	@Schema(title = "异常信息")
 	private String exceptionInfo;
 
 	@Schema(title = "耗时毫秒")
 	private Long elapsedTime;
-
-	@Schema(title = "记录时间")
-	private LocalDateTime createTime;
 
 }

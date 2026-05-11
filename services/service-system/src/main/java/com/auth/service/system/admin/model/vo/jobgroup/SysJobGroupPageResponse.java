@@ -1,13 +1,12 @@
-package com.auth.service.system.schedule.model.vo;
-
-import java.io.Serial;
-import java.io.Serializable;
+package com.auth.service.system.admin.model.vo.jobgroup;
 
 import com.auth.common.core.model.response.BaseResponse;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * 任务分组分页行

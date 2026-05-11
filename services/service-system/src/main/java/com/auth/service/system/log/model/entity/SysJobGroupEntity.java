@@ -1,8 +1,7 @@
-package com.auth.service.system.schedule.model.entity;
+package com.auth.service.system.log.model.entity;
 
 import com.auth.common.data.model.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;

@@ -1,15 +1,15 @@
-package com.auth.service.system.schedule.controller;
+package com.auth.service.system.admin.controller;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.common.web.valid.group.CreateGroup;
 import com.auth.common.web.valid.group.UpdateGroup;
-import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
-import com.auth.service.system.schedule.model.form.SysJobGroupForm;
-import com.auth.service.system.schedule.model.form.SysJobGroupUpdateForm;
-import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
-import com.auth.service.system.schedule.model.vo.SysJobGroupPageResponse;
-import com.auth.service.system.schedule.service.SysJobGroupService;
+import com.auth.service.system.admin.model.form.jobgroup.SysJobGroupForm;
+import com.auth.service.system.admin.model.form.jobgroup.SysJobGroupUpdateForm;
+import com.auth.service.system.admin.model.query.SysJobGroupQuery;
+import com.auth.service.system.admin.model.vo.jobgroup.SysJobGroupPageResponse;
+import com.auth.service.system.admin.service.SysJobGroupService;
+import com.auth.service.system.log.model.entity.SysJobGroupEntity;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

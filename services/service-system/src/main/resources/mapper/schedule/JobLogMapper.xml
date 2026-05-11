@@ -4,7 +4,7 @@
 
     <!-- 按任务取最近若干条 -->
     <select id="selectRecentByJobNameAndGroup"
-            resultType="com.auth.service.system.schedule.model.entity.JobLogEntity">
+            resultType="com.auth.service.system.log.model.entity.JobLogEntity">
         SELECT id,
         job_name,
         job_group,

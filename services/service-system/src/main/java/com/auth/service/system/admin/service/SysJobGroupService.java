@@ -1,14 +1,14 @@
-package com.auth.service.system.schedule.service;
-
-import java.util.List;
+package com.auth.service.system.admin.service;
 
 import com.auth.common.data.model.PageResponse;
-import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
-import com.auth.service.system.schedule.model.form.SysJobGroupForm;
-import com.auth.service.system.schedule.model.form.SysJobGroupUpdateForm;
-import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
-import com.auth.service.system.schedule.model.vo.SysJobGroupPageResponse;
+import com.auth.service.system.admin.model.form.jobgroup.SysJobGroupForm;
+import com.auth.service.system.admin.model.form.jobgroup.SysJobGroupUpdateForm;
+import com.auth.service.system.admin.model.query.SysJobGroupQuery;
+import com.auth.service.system.admin.model.vo.jobgroup.SysJobGroupPageResponse;
+import com.auth.service.system.log.model.entity.SysJobGroupEntity;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+
+import java.util.List;
 
 /**
  * 任务分组维护

@@ -1,10 +1,9 @@
-package com.auth.service.system.schedule.convert;
+package com.auth.service.system.log.convert;
 
+import com.auth.service.system.log.model.vo.LogJobPageResponse;
+import com.auth.service.system.schedule.model.po.SysJobLogPageRowPO;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
-
-import com.auth.service.system.schedule.model.po.SysJobLogPageRowPO;
-import com.auth.service.system.schedule.model.vo.SysJobLogPageResponse;
 
 /**
  * 任务日志转换器
@@ -21,6 +20,6 @@ public interface SysJobLogConvert {
 	 * @param po 持久层查询投影
 	 * @return 分页返回对象
 	 */
-	SysJobLogPageResponse toPageResponse(SysJobLogPageRowPO po);
+	LogJobPageResponse toPageResponse(SysJobLogPageRowPO po);
 
 }

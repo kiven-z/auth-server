@@ -1,13 +1,13 @@
-package com.auth.service.system.schedule.model.po;
-
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.LocalDateTime;
+package com.auth.service.system.log.model.po;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * 定时任务分页行（持久层查询投影，非 API 出参）

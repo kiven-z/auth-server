@@ -1,6 +1,6 @@
 package com.auth.service.system.schedule.mapper;
 
-import com.auth.service.system.schedule.model.entity.JobLogEntity;
+import com.auth.service.system.log.model.entity.JobLogEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;

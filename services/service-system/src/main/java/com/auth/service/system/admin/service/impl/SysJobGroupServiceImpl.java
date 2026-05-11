@@ -1,33 +1,31 @@
-package com.auth.service.system.schedule.service.impl;
+package com.auth.service.system.admin.service.impl;
 
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
-
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.BooleanUtil;
 import com.auth.common.data.model.PageResponse;
+import com.auth.service.system.admin.convert.SysJobGroupConverter;
+import com.auth.service.system.admin.mapper.SysJobGroupMapper;
+import com.auth.service.system.admin.model.form.jobgroup.SysJobGroupForm;
+import com.auth.service.system.admin.model.form.jobgroup.SysJobGroupUpdateForm;
+import com.auth.service.system.admin.model.po.jobgroup.SysJobGroupPageRowPO;
+import com.auth.service.system.admin.model.query.SysJobGroupQuery;
+import com.auth.service.system.admin.model.vo.jobgroup.SysJobGroupPageResponse;
+import com.auth.service.system.admin.service.SysJobGroupService;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
-import com.auth.service.system.schedule.convert.SysJobGroupConverter;
-import com.auth.service.system.schedule.mapper.SysJobGroupMapper;
+import com.auth.service.system.log.model.entity.SysJobGroupEntity;
 import com.auth.service.system.schedule.mapper.SysJobMapper;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
-import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
-import com.auth.service.system.schedule.model.form.SysJobGroupForm;
-import com.auth.service.system.schedule.model.form.SysJobGroupUpdateForm;
-import com.auth.service.system.schedule.model.po.SysJobGroupPageRowPO;
-import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
-import com.auth.service.system.schedule.model.vo.SysJobGroupPageResponse;
-import com.auth.service.system.schedule.service.SysJobGroupService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.util.BooleanUtil;
+import java.util.List;
+
+import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
 
 /**
  * 任务分组实现

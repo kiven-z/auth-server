@@ -1,16 +1,15 @@
-package com.auth.service.system.schedule.model.form;
-
-import java.io.Serial;
-import java.io.Serializable;
+package com.auth.service.system.admin.model.form.jobgroup;
 
 import com.auth.common.web.valid.group.CreateGroup;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * 新增任务分组

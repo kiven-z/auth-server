@@ -1,4 +1,4 @@
-package com.auth.service.system.schedule.model.query;
+package com.auth.service.system.log.model.query;
 
 import com.auth.common.core.model.query.PageQueryRequest;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -13,10 +13,10 @@ import java.io.Serializable;
  *
  * @author Bunny
  */
-@Schema(name = "SysJobLogQuery", title = "任务日志查询")
+@Schema(name = "LogJobQuery", title = "任务日志查询")
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class SysJobLogQuery extends PageQueryRequest implements Serializable {
+public class LogJobQuery extends PageQueryRequest implements Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 1L;

@@ -9,15 +9,15 @@ import com.auth.module.security.autoconfig.web.SecurityUserUtils;
 import com.auth.module.security.starter.model.UserEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.mapper.SysUserQueryMapper;
+import com.auth.service.system.log.convert.SysJobLogConvert;
 import com.auth.service.system.log.mapper.LogJobMapper;
+import com.auth.service.system.log.model.entity.JobLogEntity;
+import com.auth.service.system.log.model.query.LogJobQuery;
+import com.auth.service.system.log.model.vo.LogJobDetailVO;
+import com.auth.service.system.log.model.vo.LogJobPageResponse;
 import com.auth.service.system.log.service.LogJobService;
 import com.auth.service.system.message.service.EmailSendService;
-import com.auth.service.system.schedule.convert.SysJobLogConvert;
-import com.auth.service.system.schedule.model.entity.JobLogEntity;
 import com.auth.service.system.schedule.model.po.SysJobLogPageRowPO;
-import com.auth.service.system.schedule.model.query.SysJobLogQuery;
-import com.auth.service.system.schedule.model.vo.SysJobLogDetailVO;
-import com.auth.service.system.schedule.model.vo.SysJobLogPageResponse;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -59,10 +59,10 @@ public class LogJobServiceImpl extends ServiceImpl<LogJobMapper, JobLogEntity> i
 	 * {@inheritDoc}
 	 */
 	@Override
-	public PageResponse<SysJobLogPageResponse> getPage(Page<JobLogEntity> pageParams, SysJobLogQuery query) {
+	public PageResponse<LogJobPageResponse> getPage(Page<JobLogEntity> pageParams, LogJobQuery query) {
 		IPage<SysJobLogPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
 		// PO 转 VO
-		IPage<SysJobLogPageResponse> voPage = page.convert(SysJobLogConvert.INSTANCE::toPageResponse);
+		IPage<LogJobPageResponse> voPage = page.convert(SysJobLogConvert.INSTANCE::toPageResponse);
 
 		return PageResponse.of(voPage);
 	}
@@ -71,7 +71,7 @@ public class LogJobServiceImpl extends ServiceImpl<LogJobMapper, JobLogEntity> i
 	 * {@inheritDoc}
 	 */
 	@Override
-	public SysJobLogDetailVO getDetail(Long id) {
+	public LogJobDetailVO getDetail(Long id) {
 		// 查询并验证日志是否存在
 		JobLogEntity sysJobLog = getById(id);
 		if (sysJobLog == null) {
@@ -79,7 +79,7 @@ public class LogJobServiceImpl extends ServiceImpl<LogJobMapper, JobLogEntity> i
 		}
 
 		// 复制数据到VO
-		SysJobLogDetailVO vo = new SysJobLogDetailVO();
+		LogJobDetailVO vo = new LogJobDetailVO();
 		BeanUtil.copyProperties(sysJobLog, vo);
 		return vo;
 	}

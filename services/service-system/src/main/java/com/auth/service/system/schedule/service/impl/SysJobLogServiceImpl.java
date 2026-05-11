@@ -1,8 +1,8 @@
 package com.auth.service.system.schedule.service.impl;
 
 import cn.hutool.core.exceptions.ExceptionUtil;
+import com.auth.service.system.log.model.entity.JobLogEntity;
 import com.auth.service.system.schedule.mapper.JobLogMapper;
-import com.auth.service.system.schedule.model.entity.JobLogEntity;
 import com.auth.service.system.schedule.service.SysJobLogService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;

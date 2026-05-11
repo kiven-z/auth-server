@@ -1,15 +1,14 @@
-package com.auth.service.system.schedule.convert;
+package com.auth.service.system.admin.convert;
 
+import com.auth.service.system.admin.model.form.jobgroup.SysJobGroupForm;
+import com.auth.service.system.admin.model.form.jobgroup.SysJobGroupUpdateForm;
+import com.auth.service.system.admin.model.po.jobgroup.SysJobGroupPageRowPO;
+import com.auth.service.system.admin.model.vo.jobgroup.SysJobGroupPageResponse;
+import com.auth.service.system.log.model.entity.SysJobGroupEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.factory.Mappers;
-
-import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
-import com.auth.service.system.schedule.model.form.SysJobGroupForm;
-import com.auth.service.system.schedule.model.form.SysJobGroupUpdateForm;
-import com.auth.service.system.schedule.model.po.SysJobGroupPageRowPO;
-import com.auth.service.system.schedule.model.vo.SysJobGroupPageResponse;
 
 /**
  * 任务分组转换器

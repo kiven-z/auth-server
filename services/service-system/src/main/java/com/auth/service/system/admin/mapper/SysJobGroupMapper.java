@@ -1,16 +1,15 @@
-package com.auth.service.system.schedule.mapper;
+package com.auth.service.system.admin.mapper;
 
-import java.util.List;
-
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-
-import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
-import com.auth.service.system.schedule.model.po.SysJobGroupPageRowPO;
-import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
+import com.auth.service.system.admin.model.po.jobgroup.SysJobGroupPageRowPO;
+import com.auth.service.system.admin.model.query.SysJobGroupQuery;
+import com.auth.service.system.log.model.entity.SysJobGroupEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * 任务分组 Mapper

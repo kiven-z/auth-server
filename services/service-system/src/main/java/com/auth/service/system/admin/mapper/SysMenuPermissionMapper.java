@@ -1,8 +1,8 @@
 package com.auth.service.system.admin.mapper;
 
 import com.auth.service.system.admin.model.entity.SysMenuPermissionEntity;
-import com.auth.service.system.admin.model.po.SysMenuAssignedPermissionPO;
-import com.auth.service.system.admin.model.po.SysMenuPermissionLinkRowPO;
+import com.auth.service.system.admin.model.po.menu.SysMenuAssignedPermissionPO;
+import com.auth.service.system.admin.model.po.menu.SysMenuPermissionLinkRowPO;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;

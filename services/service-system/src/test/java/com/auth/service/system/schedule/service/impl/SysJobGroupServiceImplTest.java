@@ -1,13 +1,17 @@
 package com.auth.service.system.schedule.service.impl;
 
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
-import java.lang.reflect.Field;
-import java.util.List;
-
+import com.auth.service.system.admin.mapper.SysJobGroupMapper;
+import com.auth.service.system.admin.model.form.jobgroup.SysJobGroupForm;
+import com.auth.service.system.admin.model.po.jobgroup.SysJobGroupPageRowPO;
+import com.auth.service.system.admin.model.query.SysJobGroupQuery;
+import com.auth.service.system.admin.service.impl.SysJobGroupServiceImpl;
+import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.common.service.AuditUserDisplayService;
+import com.auth.service.system.log.model.entity.SysJobGroupEntity;
+import com.auth.service.system.schedule.mapper.SysJobMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,17 +19,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.common.service.AuditUserDisplayService;
-import com.auth.service.system.schedule.mapper.SysJobGroupMapper;
-import com.auth.service.system.schedule.mapper.SysJobMapper;
-import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
-import com.auth.service.system.schedule.model.form.SysJobGroupForm;
-import com.auth.service.system.schedule.model.po.SysJobGroupPageRowPO;
-import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import java.lang.reflect.Field;
+import java.util.List;
+
+import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link SysJobGroupServiceImpl} 单元测试。
@@ -46,6 +49,17 @@ class SysJobGroupServiceImplTest {
 	private AuditUserDisplayService auditUserDisplayService;
 
 	private SysJobGroupServiceImpl sysJobGroupService;
+
+	/**
+	 * 最小合法新增表单
+	 */
+	private static SysJobGroupForm minimalForm(String groupCode, String groupName) {
+		SysJobGroupForm form = new SysJobGroupForm();
+		form.setGroupCode(groupCode);
+		form.setGroupName(groupName);
+		form.setStatus(true);
+		return form;
+	}
 
 	@BeforeEach
 	void setUp() throws Exception {
@@ -170,15 +184,6 @@ class SysJobGroupServiceImplTest {
 		sysJobGroupService.deleteById(3L);
 
 		verify(sysJobGroupMapper).deleteById(3L);
-	}
-
-	/** 最小合法新增表单 */
-	private static SysJobGroupForm minimalForm(String groupCode, String groupName) {
-		SysJobGroupForm form = new SysJobGroupForm();
-		form.setGroupCode(groupCode);
-		form.setGroupName(groupName);
-		form.setStatus(true);
-		return form;
 	}
 
 }

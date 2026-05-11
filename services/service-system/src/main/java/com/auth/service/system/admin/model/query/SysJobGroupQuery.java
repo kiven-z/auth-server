@@ -1,13 +1,12 @@
-package com.auth.service.system.schedule.model.query;
-
-import java.io.Serial;
-import java.io.Serializable;
+package com.auth.service.system.admin.model.query;
 
 import com.auth.common.core.model.query.PageQueryRequest;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * 任务分组分页查询

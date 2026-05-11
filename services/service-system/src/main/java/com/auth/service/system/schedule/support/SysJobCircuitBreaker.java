@@ -1,10 +1,10 @@
 package com.auth.service.system.schedule.support;
 
 import cn.hutool.core.util.BooleanUtil;
+import com.auth.service.system.log.model.entity.JobLogEntity;
 import com.auth.service.system.schedule.config.ScheduleJobProperties;
 import com.auth.service.system.schedule.mapper.JobLogMapper;
 import com.auth.service.system.schedule.mapper.SysJobMapper;
-import com.auth.service.system.schedule.model.entity.JobLogEntity;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.extern.slf4j.Slf4j;

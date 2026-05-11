@@ -1,6 +1,6 @@
 package com.auth.service.system.schedule.service;
 
-import com.auth.service.system.schedule.model.entity.JobLogEntity;
+import com.auth.service.system.log.model.entity.JobLogEntity;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.quartz.JobExecutionException;
 

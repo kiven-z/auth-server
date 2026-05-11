@@ -2,11 +2,11 @@ package com.auth.service.system.log.controller;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
+import com.auth.service.system.log.model.entity.JobLogEntity;
+import com.auth.service.system.log.model.query.LogJobQuery;
+import com.auth.service.system.log.model.vo.LogJobDetailVO;
+import com.auth.service.system.log.model.vo.LogJobPageResponse;
 import com.auth.service.system.log.service.LogJobService;
-import com.auth.service.system.schedule.model.entity.JobLogEntity;
-import com.auth.service.system.schedule.model.query.SysJobLogQuery;
-import com.auth.service.system.schedule.model.vo.SysJobLogDetailVO;
-import com.auth.service.system.schedule.model.vo.SysJobLogPageResponse;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -36,9 +36,9 @@ public class LogJobController {
 	@Operation(summary = "分页查询任务日志")
 	@PreAuthorize("@auth.decide('sysJobLog:query')")
 	@GetMapping
-	public Result<PageResponse<SysJobLogPageResponse>> page(SysJobLogQuery query) {
+	public Result<PageResponse<LogJobPageResponse>> page(LogJobQuery query) {
 		Page<JobLogEntity> page = new Page<>(query.getPageIndex(), query.getPageSize());
-		PageResponse<SysJobLogPageResponse> response = logJobService.getPage(page, query);
+		PageResponse<LogJobPageResponse> response = logJobService.getPage(page, query);
 
 		return Result.success(response);
 	}
@@ -46,8 +46,8 @@ public class LogJobController {
 	@Operation(summary = "日志详情")
 	@PreAuthorize("@auth.decide('sysJobLog:detail')")
 	@GetMapping("{id}")
-	public Result<SysJobLogDetailVO> detail(@PathVariable("id") Long id) {
-		SysJobLogDetailVO detailVO = logJobService.getDetail(id);
+	public Result<LogJobDetailVO> detail(@PathVariable("id") Long id) {
+		LogJobDetailVO detailVO = logJobService.getDetail(id);
 
 		return Result.success(detailVO);
 	}

@@ -72,7 +72,7 @@ alwaysApply: true
   ```xml
   <!-- 分页查询日志 -->
   <select id="selectListByPage"
-          resultType="com.auth.service.system.schedule.model.vo.SysJobLogPageResponse">
+          resultType="com.auth.service.system.log.model.vo.LogJobPageResponse">
   </select>
   ```
 

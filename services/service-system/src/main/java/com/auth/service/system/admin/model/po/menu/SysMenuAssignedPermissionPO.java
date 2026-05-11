@@ -1,10 +1,10 @@
-package com.auth.service.system.admin.model.po;
-
-import java.io.Serial;
-import java.io.Serializable;
+package com.auth.service.system.admin.model.po.menu;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * 菜单已分配权限 DTO（Mapper JOIN 查询结果，不与 VO 直接耦合）
