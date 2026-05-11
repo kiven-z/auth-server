@@ -31,7 +31,7 @@ public interface SysRoleMapper extends BaseMapper<SysRoleEntity> {
 			@Param("query") SysRoleQuery query, @Param("orderBySql") String orderBySql);
 
 	/**
-	 * 查询角色下拉选项
+	 * 查询角色下拉选项 —— 不包含禁用
 	 * @param roleName 角色名称（可选模糊）
 	 * @param roleCode 角色编码（可选模糊）
 	 * @return 角色选项列表

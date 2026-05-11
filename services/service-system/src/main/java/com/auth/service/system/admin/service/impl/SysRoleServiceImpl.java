@@ -1,6 +1,10 @@
 package com.auth.service.system.admin.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.mapper.SysRoleMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
@@ -18,11 +22,9 @@ import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import cn.hutool.core.bean.BeanUtil;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 系统角色服务实现
@@ -41,10 +43,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 	}
 
 	/**
-	 * 分页查询角色
-	 * @param pageParams 分页
-	 * @param query 条件
-	 * @return 分页结果
+	 * {@inheritDoc}
 	 */
 	@Override
 	public PageResponse<SysRolePageResponse> getPage(Page<SysRoleEntity> pageParams, SysRoleQuery query) {
@@ -55,9 +54,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 	}
 
 	/**
-	 * 获取角色详情
-	 * @param id 角色ID
-	 * @return 角色详情
+	 * {@inheritDoc}
 	 */
 	@Override
 	public SysRoleDetailVO getDetail(Long id) {
@@ -72,8 +69,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 	}
 
 	/**
-	 * 新增角色
-	 * @param form 新增表单
+	 * {@inheritDoc}
 	 */
 	@Override
 	public void create(SysRoleCreateForm form) {
@@ -82,10 +78,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 	}
 
 	/**
-	 * 查询角色下拉选项
-	 * @param roleName 角色名称（可选模糊）
-	 * @param roleCode 角色编码（可选模糊）
-	 * @return 下拉选项列表
+	 * {@inheritDoc}
 	 */
 	@Override
 	public List<SysRoleOptionVO> listOptions(String roleName, String roleCode) {

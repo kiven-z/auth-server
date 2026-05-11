@@ -27,76 +27,65 @@ import java.util.List;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class SysMenuManageServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuEntity>
-        implements SysMenuManageService {
+		implements SysMenuManageService {
 
-    private final SysMenuRoleMapper sysMenuRoleMapper;
+	private final SysMenuRoleMapper sysMenuRoleMapper;
 
-    private final SysMenuPermissionMapper sysMenuPermissionMapper;
+	private final SysMenuPermissionMapper sysMenuPermissionMapper;
 
-    public SysMenuManageServiceImpl(SysMenuRoleMapper sysMenuRoleMapper,
-                                    SysMenuPermissionMapper sysMenuPermissionMapper) {
-        this.sysMenuRoleMapper = sysMenuRoleMapper;
-        this.sysMenuPermissionMapper = sysMenuPermissionMapper;
-    }
+	public SysMenuManageServiceImpl(SysMenuRoleMapper sysMenuRoleMapper,
+			SysMenuPermissionMapper sysMenuPermissionMapper) {
+		this.sysMenuRoleMapper = sysMenuRoleMapper;
+		this.sysMenuPermissionMapper = sysMenuPermissionMapper;
+	}
 
-    /**
-     * 当前菜单已分配角色（供前端与角色分页合并展示）
-     *
-     * @param menuId 菜单主键
-     * @return 已分配行，{@code assigned} 恒为 true
-     */
-    @Override
-    public List<SysMenuAssignedRoleRow> listAssignedRoles(Long menuId) {
-        List<SysMenuAssignedRoleDTO> dtoList = sysMenuRoleMapper.selectAssignedRolesByMenuId(menuId);
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public List<SysMenuAssignedRoleRow> listAssignedRoles(Long menuId) {
+		List<SysMenuAssignedRoleDTO> dtoList = sysMenuRoleMapper.selectAssignedRolesByMenuId(menuId);
 
-        return dtoList.stream().map(dto -> {
-            String roleCode = dto.getRoleCode();
-            String roleName = dto.getRoleName();
-            return new SysMenuAssignedRoleRow(roleCode, roleName, true);
-        }).toList();
-    }
+		return dtoList.stream().map(dto -> {
+			String roleCode = dto.getRoleCode();
+			String roleName = dto.getRoleName();
+			return new SysMenuAssignedRoleRow(roleCode, roleName, true);
+		}).toList();
+	}
 
-    /**
-     * 覆盖写入菜单-角色关联
-     *
-     * @param menuId 菜单主键
-     * @param form   角色编码列表
-     */
-    @Override
-    public void replaceMenuRoles(Long menuId, SysMenuAssignRoleForm form) {
-        List<String> roleCodes = form.getRoleCodes();
-        sysMenuRoleMapper.deleteByMenuId(menuId);
-        sysMenuRoleMapper.batchInsertMenuRoles(menuId, roleCodes);
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void replaceMenuRoles(Long menuId, SysMenuAssignRoleForm form) {
+		List<String> roleCodes = form.getRoleCodes();
+		sysMenuRoleMapper.deleteByMenuId(menuId);
+		sysMenuRoleMapper.batchInsertMenuRoles(menuId, roleCodes);
 
-    }
+	}
 
-    /**
-     * 全量权限列表并标记当前菜单是否已关联（供分配抽屉）
-     *
-     * @param menuId 菜单主键
-     * @return 权限行
-     */
-    @Override
-    public List<SysMenuAssignedPermissionRow> listPermissionsWithAssignFlags(Long menuId) {
-        List<SysMenuAssignedPermissionDTO> dtoList = sysMenuPermissionMapper.selectAssignedPermissionByMenuId(menuId);
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public List<SysMenuAssignedPermissionRow> listPermissionsWithAssignFlags(Long menuId) {
+		List<SysMenuAssignedPermissionDTO> dtoList = sysMenuPermissionMapper.selectAssignedPermissionByMenuId(menuId);
 
-        return dtoList.stream().map(dto -> {
-            String permissionCode = dto.getPermissionCode();
-            String permissionName = dto.getPermissionName();
-            return new SysMenuAssignedPermissionRow(permissionCode, permissionName, true);
-        }).toList();
-    }
+		return dtoList.stream().map(dto -> {
+			String permissionCode = dto.getPermissionCode();
+			String permissionName = dto.getPermissionName();
+			return new SysMenuAssignedPermissionRow(permissionCode, permissionName, true);
+		}).toList();
+	}
 
-    /**
-     * 覆盖写入菜单-权限关联
-     *
-     * @param menuId 菜单主键
-     * @param form   权限编码列表
-     */
-    @Override
-    public void replaceMenuPermissions(Long menuId, SysMenuAssignPermissionForm form) {
-        List<String> permissionCodes = form.getPermissionCodes();
-        sysMenuPermissionMapper.deleteByMenuId(menuId);
-        sysMenuPermissionMapper.batchInsertMenuPermissions(menuId, permissionCodes);
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void replaceMenuPermissions(Long menuId, SysMenuAssignPermissionForm form) {
+		List<String> permissionCodes = form.getPermissionCodes();
+		sysMenuPermissionMapper.deleteByMenuId(menuId);
+		sysMenuPermissionMapper.batchInsertMenuPermissions(menuId, permissionCodes);
+	}
+
 }

@@ -27,7 +27,7 @@ public interface SysRoleService {
 	PageResponse<SysRolePageResponse> getPage(Page<SysRoleEntity> pageParams, SysRoleQuery query);
 
 	/**
-	 * 获取角色详情
+	 * 获取角色详情 包含禁用
 	 * @param id 角色ID
 	 * @return 角色详情
 	 */

@@ -17,7 +17,7 @@ import java.util.List;
 public interface SysMenuManageService extends IService<SysMenuEntity> {
 
 	/**
-	 * 当前菜单已分配角色（供前端与角色分页合并展示）
+	 * 当前菜单已分配角色（供前端与角色分页合并展示） 不包含禁用
 	 * @param menuId 菜单主键
 	 * @return 已分配行，{@code assigned} 恒为 true
 	 */
@@ -31,7 +31,7 @@ public interface SysMenuManageService extends IService<SysMenuEntity> {
 	void replaceMenuRoles(Long menuId, SysMenuAssignRoleForm form);
 
 	/**
-	 * 全量权限列表并标记当前菜单是否已关联（供分配抽屉）
+	 * 全量权限列表并标记当前菜单是否已关联（供分配抽屉） 不包含 API 权限 不包含禁用
 	 * @param menuId 菜单主键
 	 * @return 权限行
 	 */

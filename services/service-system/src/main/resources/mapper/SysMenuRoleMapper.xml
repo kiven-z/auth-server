@@ -13,11 +13,6 @@
         ORDER BY r.order_num
     </select>
 
-    <!-- 根据菜单ID删除所有角色关联 -->
-    <delete id="deleteByMenuId">
-        DELETE FROM sys_menu_role WHERE menu_id = #{menuId}
-    </delete>
-
     <!-- 批量插入菜单-角色关联 -->
     <insert id="batchInsertMenuRoles">
         INSERT INTO sys_menu_role (menu_id, role_code) VALUES

@@ -1,6 +1,14 @@
 package com.auth.service.system.admin.service.impl;
 
-import cn.hutool.core.util.ObjectUtil;
+import static com.auth.common.web.autoconfigure.FeignUtil.*;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.constants.PermissionConstant;
@@ -22,15 +30,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+
+import cn.hutool.core.util.ObjectUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-
-import static com.auth.common.web.autoconfigure.FeignUtil.isOk;
 
 /**
  * 菜单服务实现
@@ -90,9 +92,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuEntity
 	}
 
 	/**
-	 * 条件查询全部菜单（扁平，供前端建树）
-	 * @param query 筛选条件
-	 * @return 菜单行
+	 * {@inheritDoc}
 	 */
 	@Override
 	public List<SysMenuListVO> listFlat(SysMenuQuery query) {
@@ -102,10 +102,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuEntity
 	}
 
 	/**
-	 * 分页查询菜单（表格视图）
-	 * @param pageParams 分页参数
-	 * @param query 筛选与分页
-	 * @return 分页结果
+	 * {@inheritDoc}
 	 */
 	@Override
 	public PageResponse<SysMenuListVO> pageFlat(Page<SysMenuEntity> pageParams, SysMenuQuery query) {
@@ -115,9 +112,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuEntity
 	}
 
 	/**
-	 * 菜单详情
-	 * @param id 主键
-	 * @return 详情
+	 * {@inheritDoc}
 	 */
 	@Override
 	public SysMenuDetailVO getDetail(Long id) {
@@ -126,9 +121,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuEntity
 	}
 
 	/**
-	 * 新增菜单
-	 * @param form 表单
-	 * @return 新菜单主键字符串（与前端约定）
+	 * {@inheritDoc}
 	 */
 	@Override
 	public String create(SysMenuSaveForm form) {
@@ -141,8 +134,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuEntity
 	}
 
 	/**
-	 * 更新菜单
-	 * @param form 表单（含 id）
+	 * {@inheritDoc}
 	 */
 	@Override
 	public void update(SysMenuSaveForm form) {
@@ -152,8 +144,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuEntity
 	}
 
 	/**
-	 * 批量更新状态（0=启用 1=禁用）
-	 * @param form 请求体
+	 * {@inheritDoc}
 	 */
 	@Override
 	public void batchUpdateStatus(SysMenuBatchStatusForm form) {

@@ -48,12 +48,7 @@ public class MenuWebRouteTreeBuilderImpl extends ServiceImpl<SysMenuMapper, SysM
 	}
 
 	/**
-	 * 构建管理员可见的动态路由（顶级节点列表）
-	 * <p>
-	 * 管理员拥有全部角色与权限，查询所有启用菜单并填充完整的 roles / auths
-	 * </p>
-	 * @param menuList 已按 status = 启用(true) 过滤的菜单列表
-	 * @return 路由树根列表
+	 * {@inheritDoc}
 	 */
 	@Override
 	public List<RouteNodeVO> buildAdminRoutes(List<SysMenuEntity> menuList) {
@@ -72,12 +67,7 @@ public class MenuWebRouteTreeBuilderImpl extends ServiceImpl<SysMenuMapper, SysM
 	}
 
 	/**
-	 * 构建当前用户可见的动态路由（顶级节点列表）
-	 * <p>
-	 * 当前版本与管理员相同逻辑：返回全部启用菜单并填充 roles / auths， 前端根据用户角色自主判断菜单可见性。 后续可在此方法中按角色过滤菜单列表。
-	 * </p>
-	 * @param menuList 已按 status = 启用(true) 过滤的菜单列表
-	 * @return 路由树根列表
+	 * {@inheritDoc}
 	 */
 	@Override
 	public List<RouteNodeVO> buildRoutes(List<SysMenuEntity> menuList) {

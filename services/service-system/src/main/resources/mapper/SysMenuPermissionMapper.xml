@@ -5,19 +5,17 @@
     <!-- 查询菜单已分配权限（左连 sys_permission 获取权限名称） -->
     <select id="selectAssignedPermissionByMenuId"
             resultType="com.auth.service.system.admin.model.dto.menu.SysMenuAssignedPermissionDTO">
-        SELECT
-        mp.permission_code,
-        p.permission_name
+        SELECT mp.permission_code,
+               p.permission_name
         FROM sys_menu_permission mp
-        LEFT JOIN sys_permission p ON p.permission_code = mp.permission_code AND p.status = 1
+                 LEFT JOIN sys_permission p
+                           ON p.permission_code = mp.permission_code
+                               AND p.permission_type = 0
+                               AND p.status = 1
+                               AND p.is_deleted = 0
         WHERE mp.menu_id = #{menuId}
         ORDER BY p.permission_code
     </select>
-
-    <!-- 根据菜单ID删除所有权限关联 -->
-    <delete id="deleteByMenuId">
-        DELETE FROM sys_menu_permission WHERE menu_id = #{menuId}
-    </delete>
 
     <!-- 批量插入菜单-权限关联 -->
     <insert id="batchInsertMenuPermissions">
