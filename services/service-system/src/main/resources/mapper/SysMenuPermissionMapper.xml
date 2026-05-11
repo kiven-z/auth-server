@@ -5,14 +5,14 @@
     <!-- 查询菜单已分配权限（左连 sys_permission 获取权限名称；仅展示按钮类且启用未删的权限元数据） -->
     <select id="selectAssignedPermissionByMenuId"
             resultType="com.auth.service.system.admin.model.po.SysMenuAssignedPermissionPO">
-        SELECT mp.permission_code,
+        SELECT p.permission_code,
                p.permission_name
         FROM sys_menu_permission mp
-                 LEFT JOIN sys_permission p
-                           ON p.permission_code = mp.permission_code
-                               AND p.permission_type = 0
-                               AND p.status = 1
-                               AND p.is_deleted = 0
+                 JOIN sys_permission p
+                      ON p.permission_code = mp.permission_code
+                          AND p.permission_type = 0
+                          AND p.status = 1
+                          AND p.is_deleted = 0
         WHERE mp.menu_id = #{menuId}
         ORDER BY p.permission_code
     </select>

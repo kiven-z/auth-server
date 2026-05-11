@@ -41,7 +41,8 @@ public class SysUserQueryController {
 			@Parameter(description = "返回条数上限，默认 20，最大 50") @RequestParam(required = false,
 					defaultValue = "20") Integer limit) {
 
-		return Result.success(sysUserQueryService.searchByKeyword(keyword, limit));
+		List<SysUserSearchItemResponse> data = sysUserQueryService.searchByKeyword(keyword, limit);
+		return Result.success(data);
 	}
 
 }

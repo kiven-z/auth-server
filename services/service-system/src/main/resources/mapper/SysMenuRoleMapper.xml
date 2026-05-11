@@ -5,10 +5,11 @@
     <!-- 查询菜单已分配角色（左连 sys_role 获取角色名称） -->
     <select id="selectAssignedRolesByMenuId"
             resultType="com.auth.service.system.admin.model.po.SysMenuAssignedRolePO">
-        SELECT mr.role_code,
+        SELECT r.role_code,
                r.role_name
         FROM sys_menu_role mr
-                 LEFT JOIN sys_role r ON r.role_code = mr.role_code AND r.status = 1 AND r.is_deleted = 0
+                 JOIN sys_role r
+                      ON r.role_code = mr.role_code AND r.role_type = 2 AND r.status = 1 AND r.is_deleted = 0
         WHERE mr.menu_id = #{menuId}
         ORDER BY r.order_num
     </select>

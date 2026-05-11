@@ -8,6 +8,7 @@
         m.parent_id,
         m.name,
         m.title,
+        m.icon,
         m.path,
         m.component,
         m.menu_type,

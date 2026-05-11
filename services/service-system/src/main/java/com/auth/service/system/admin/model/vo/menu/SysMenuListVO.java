@@ -29,6 +29,9 @@ public class SysMenuListVO extends BaseResponse {
 	@Schema(title = "菜单标题")
 	private String title;
 
+	@Schema(title = "图标")
+	private String icon;
+
 	@Schema(title = "路由路径")
 	private String path;
 
