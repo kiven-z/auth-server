@@ -1,15 +1,14 @@
 package com.auth.service.system.log.mapper;
 
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-
-import com.auth.service.system.log.model.entity.LogLoginLogEntity;
+import com.auth.service.system.log.model.entity.LogLoginEntity;
 import com.auth.service.system.log.model.po.LogLoginLogDetailRowPO;
 import com.auth.service.system.log.model.po.LogLoginLogPageRowPO;
 import com.auth.service.system.log.model.query.LogLoginLogQuery;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * 登录日志 Mapper（system-service 查询与删除）
@@ -17,7 +16,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
  * @author Bunny
  */
 @Mapper
-public interface LogLoginLogMapper extends BaseMapper<LogLoginLogEntity> {
+public interface LogLoginLogMapper extends BaseMapper<LogLoginEntity> {
 
 	/**
 	 * 分页查询登录日志
@@ -25,7 +24,7 @@ public interface LogLoginLogMapper extends BaseMapper<LogLoginLogEntity> {
 	 * @param query 查询条件
 	 * @return 分页结果
 	 */
-	IPage<LogLoginLogPageRowPO> selectListByPage(@Param("page") Page<LogLoginLogEntity> page,
+	IPage<LogLoginLogPageRowPO> selectListByPage(@Param("page") Page<LogLoginEntity> page,
 			@Param("query") LogLoginLogQuery query);
 
 	/**

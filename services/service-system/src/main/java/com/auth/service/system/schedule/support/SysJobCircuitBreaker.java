@@ -4,8 +4,8 @@ import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.system.schedule.config.ScheduleJobProperties;
 import com.auth.service.system.schedule.mapper.SysJobLogMapper;
 import com.auth.service.system.schedule.mapper.SysJobMapper;
+import com.auth.service.system.schedule.model.entity.JobLogEntity;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
-import com.auth.service.system.schedule.model.entity.SysJobLogEntity;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobKey;
@@ -73,7 +73,7 @@ public class SysJobCircuitBreaker {
 		}
 
 		// 2. 查询最近连续失败日志
-		List<SysJobLogEntity> recent = sysJobLogMapper.selectRecentByJobNameAndGroup(jobName, jobGroup, threshold);
+		List<JobLogEntity> recent = sysJobLogMapper.selectRecentByJobNameAndGroup(jobName, jobGroup, threshold);
 		if (recent.size() < threshold) {
 			return;
 		}

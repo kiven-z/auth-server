@@ -1,36 +1,15 @@
 package com.auth.service.system.schedule.service;
 
-import com.auth.common.data.model.PageResponse;
-import com.auth.service.system.schedule.model.entity.SysJobLogEntity;
-import com.auth.service.system.schedule.model.query.SysJobLogQuery;
-import com.auth.service.system.schedule.model.vo.SysJobLogDetailVO;
-import com.auth.service.system.schedule.model.vo.SysJobLogPageResponse;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.auth.service.system.schedule.model.entity.JobLogEntity;
+import com.baomidou.mybatisplus.extension.service.IService;
 import org.quartz.JobExecutionException;
-
-import java.util.List;
 
 /**
  * 定时任务执行日志
  *
  * @author Bunny
  */
-public interface SysJobLogService {
-
-	/**
-	 * 分页查询
-	 * @param pageParams 分页
-	 * @param query 条件
-	 * @return 分页数据
-	 */
-	PageResponse<SysJobLogPageResponse> getPage(Page<SysJobLogEntity> pageParams, SysJobLogQuery query);
-
-	/**
-	 * 详情（含异常堆栈）
-	 * @param id 主键
-	 * @return 详情
-	 */
-	SysJobLogDetailVO getDetail(Long id);
+public interface SysJobLogService extends IService<JobLogEntity> {
 
 	/**
 	 * 记录成功日志（由 Quartz 监听调用）
@@ -55,22 +34,5 @@ public interface SysJobLogService {
 	 */
 	void recordFailure(Long jobId, String jobName, String jobGroup, String invokeTarget, long elapsedMs,
 			JobExecutionException ex);
-
-	/**
-	 * 批量删除
-	 * @param ids 主键
-	 */
-	void removeBatch(List<Long> ids);
-
-	/**
-	 * 发送清空日志验证码
-	 */
-	void sendClearLogVerificationCode();
-
-	/**
-	 * 清空全部日志
-	 * @param verificationCode 验证码
-	 */
-	void clearAll(String verificationCode);
 
 }

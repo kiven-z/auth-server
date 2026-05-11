@@ -1,15 +1,14 @@
 package com.auth.service.system.log.model.entity;
 
-import java.io.Serial;
-import java.time.LocalDateTime;
-
 import com.auth.common.data.model.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+
+import java.io.Serial;
+import java.time.LocalDateTime;
 
 /**
  * 登录日志，对应 {@code log_login}。
@@ -24,7 +23,7 @@ import lombok.experimental.Accessors;
 @Getter
 @Setter
 @Accessors(chain = true)
-public class LogLoginLogEntity extends BaseEntity {
+public class LogLoginEntity extends BaseEntity {
 
 	@Serial
 	private static final long serialVersionUID = 1L;

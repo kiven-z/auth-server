@@ -19,7 +19,7 @@ import java.io.Serial;
 @Getter
 @Setter
 @Accessors(chain = true)
-public class SysJobLogEntity extends BaseEntity {
+public class JobLogEntity extends BaseEntity {
 
 	@Serial
 	private static final long serialVersionUID = 1L;

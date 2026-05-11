@@ -1,25 +1,23 @@
 package com.auth.service.system.log.service.impl;
 
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
+import cn.hutool.core.bean.BeanUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.log.convert.LogLoginLogConvert;
 import com.auth.service.system.log.mapper.LogLoginLogMapper;
-import com.auth.service.system.log.model.entity.LogLoginLogEntity;
+import com.auth.service.system.log.model.entity.LogLoginEntity;
 import com.auth.service.system.log.model.po.LogLoginLogDetailRowPO;
 import com.auth.service.system.log.model.po.LogLoginLogPageRowPO;
 import com.auth.service.system.log.model.query.LogLoginLogQuery;
 import com.auth.service.system.log.model.vo.LogLoginLogDetailVO;
 import com.auth.service.system.log.model.vo.LogLoginLogPageVO;
-import com.auth.service.system.log.service.LogLoginLogService;
+import com.auth.service.system.log.service.LogLoginService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-
-import cn.hutool.core.bean.BeanUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 登录日志 Service 实现
@@ -29,12 +27,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 @Transactional(rollbackFor = Exception.class)
-public class LogLoginLogServiceImpl extends ServiceImpl<LogLoginLogMapper, LogLoginLogEntity>
-		implements LogLoginLogService {
+public class LogLoginServiceImpl extends ServiceImpl<LogLoginLogMapper, LogLoginEntity> implements LogLoginService {
 
 	private final AuditUserDisplayService auditUserDisplayService;
 
-	public LogLoginLogServiceImpl(AuditUserDisplayService auditUserDisplayService) {
+	public LogLoginServiceImpl(AuditUserDisplayService auditUserDisplayService) {
 		this.auditUserDisplayService = auditUserDisplayService;
 	}
 
@@ -42,7 +39,7 @@ public class LogLoginLogServiceImpl extends ServiceImpl<LogLoginLogMapper, LogLo
 	 * {@inheritDoc}
 	 */
 	@Override
-	public PageResponse<LogLoginLogPageVO> getPage(Page<LogLoginLogEntity> pageParams, LogLoginLogQuery query) {
+	public PageResponse<LogLoginLogPageVO> getPage(Page<LogLoginEntity> pageParams, LogLoginLogQuery query) {
 		IPage<LogLoginLogPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
 		// PO 转 VO（PageResponse.of 复用 records）
 		IPage<LogLoginLogPageVO> voPage = page.convert(LogLoginLogConvert.INSTANCE::toPageVO);

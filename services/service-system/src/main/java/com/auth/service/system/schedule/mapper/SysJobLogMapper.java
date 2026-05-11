@@ -1,16 +1,11 @@
 package com.auth.service.system.schedule.mapper;
 
-import java.util.List;
-
+import com.auth.service.system.schedule.model.entity.JobLogEntity;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import com.auth.service.system.schedule.model.entity.SysJobLogEntity;
-import com.auth.service.system.schedule.model.po.SysJobLogPageRowPO;
-import com.auth.service.system.schedule.model.query.SysJobLogQuery;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import java.util.List;
 
 /**
  * 任务日志 Mapper
@@ -18,16 +13,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
  * @author Bunny
  */
 @Mapper
-public interface SysJobLogMapper extends BaseMapper<SysJobLogEntity> {
-
-	/**
-	 * 分页查询日志
-	 * @param page 分页
-	 * @param query 条件
-	 * @return 分页结果
-	 */
-	IPage<SysJobLogPageRowPO> selectListByPage(@Param("page") Page<SysJobLogEntity> page,
-			@Param("query") SysJobLogQuery query);
+public interface SysJobLogMapper extends BaseMapper<JobLogEntity> {
 
 	/**
 	 * 按任务取最近若干条（按时间倒序），用于熔断判断
@@ -36,13 +22,8 @@ public interface SysJobLogMapper extends BaseMapper<SysJobLogEntity> {
 	 * @param limit 条数
 	 * @return 日志列表
 	 */
-	List<SysJobLogEntity> selectRecentByJobNameAndGroup(@Param("jobName") String jobName,
+	List<JobLogEntity> selectRecentByJobNameAndGroup(@Param("jobName") String jobName,
 			@Param("jobGroup") String jobGroup, @Param("limit") int limit);
-
-	/**
-	 * 物理清空日志表（一键清空）
-	 */
-	void deleteAll();
 
 	/**
 	 * 按任务键物理删除所有日志（用于删除任务时级联清理）

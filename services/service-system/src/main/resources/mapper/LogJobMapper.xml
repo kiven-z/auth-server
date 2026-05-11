@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.auth.service.system.log.mapper.LogJobMapper">
+
+    <!-- 分页查询日志 -->
+    <select id="selectListByPage"
+            resultType="com.auth.service.system.schedule.model.po.SysJobLogPageRowPO">
+        SELECT id,
+        job_name , job_group , invoke_target , job_message , status, elapsed_time , create_time FROM
+        log_job
+        <where>
+            <if test="query.jobName != null and query.jobName != ''">AND job_name LIKE CONCAT('%',
+            #{query.jobName}, '%')
+            </if>
+            <if test="query.jobGroup != null and query.jobGroup != ''">AND
+                job_group LIKE CONCAT('%', #{query.jobGroup}, '%')
+            </if>
+            <if test="query.invokeTarget != null and query.invokeTarget != ''">AND invoke_target
+                LIKE CONCAT('%', #{query.invokeTarget}, '%')
+            </if>
+            <if test="query.status != null">AND
+                status = #{query.status}
+            </if>
+            <if test="query.elapsedTime != null">AND elapsed_time =
+            #{query.elapsedTime}
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 物理清空日志表 -->
+    <delete id="deleteAll">
+        TRUNCATE TABLE log_job;
+    </delete>
+</mapper>
