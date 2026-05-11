@@ -1,9 +1,17 @@
 package com.auth.service.system.admin.convert;
 
 import com.auth.module.security.starter.model.UserEntity;
+import com.auth.service.system.common.model.SysUserSearchItemResponse;
+import com.auth.service.system.common.model.po.UserDeptProfilePO;
+import com.auth.service.system.common.model.po.UserPostProfilePO;
+import com.auth.service.system.common.model.po.UserSearchItemPO;
+import com.auth.service.system.common.model.vo.SysUserDeptProfileItemResponse;
+import com.auth.service.system.common.model.vo.SysUserPostProfileItemResponse;
 import com.auth.service.system.common.model.vo.SysUserProfileResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
+
+import java.util.List;
 
 /**
  * 用户实体与档案 VO 转换
@@ -21,5 +29,26 @@ public interface SysUserProfileConverter {
 	 * @return 档案 VO
 	 */
 	SysUserProfileResponse toProfileResponse(UserEntity user);
+
+	/**
+	 * 将用户部门档案列表转换为 VO 列表
+	 * @param list 用户部门档案列表
+	 * @return 用户部门档案 VO 列表
+	 */
+	List<SysUserDeptProfileItemResponse> toDeptItemResponseList(List<UserDeptProfilePO> list);
+
+	/**
+	 * 将用户岗位档案列表转换为 VO 列表
+	 * @param list 用户岗位档案列表
+	 * @return 用户岗位档案 VO 列表
+	 */
+	List<SysUserPostProfileItemResponse> toPostItemResponseList(List<UserPostProfilePO> list);
+
+	/**
+	 * 将用户搜索档案列表转换为 VO 列表
+	 * @param list 用户搜索档案列表
+	 * @return 用户搜索档案 VO 列表
+	 */
+	List<SysUserSearchItemResponse> toSearchItemResponseList(List<UserSearchItemPO> list);
 
 }

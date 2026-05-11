@@ -1,6 +1,13 @@
 package com.auth.service.system.admin.service.impl;
 
-import cn.hutool.core.collection.CollUtil;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Component;
+
 import com.auth.common.core.utils.TreeNodeProcessorUtil;
 import com.auth.module.security.contract.constants.PermissionConstant;
 import com.auth.service.system.admin.convert.MenuConvertContext;
@@ -9,23 +16,17 @@ import com.auth.service.system.admin.convert.MenuRouteNodeConverter;
 import com.auth.service.system.admin.mapper.SysMenuMapper;
 import com.auth.service.system.admin.mapper.SysMenuPermissionMapper;
 import com.auth.service.system.admin.mapper.SysMenuRoleMapper;
+import com.auth.service.system.admin.model.dto.menu.SysMenuPermissionLinkRow;
+import com.auth.service.system.admin.model.dto.menu.SysMenuRoleLinkRow;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
-import com.auth.service.system.admin.model.entity.SysMenuPermissionEntity;
-import com.auth.service.system.admin.model.entity.SysMenuRoleEntity;
 import com.auth.service.system.admin.model.vo.menu.RouteMetaVO;
 import com.auth.service.system.admin.model.vo.menu.RouteNodeVO;
 import com.auth.service.system.admin.service.MenuWebRouteTreeBuilder;
 import com.auth.service.system.admin.support.MenuRouteTreeNode;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import cn.hutool.core.collection.CollUtil;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 动态菜单路由树构建（启用菜单、角色过滤、祖先补全、排序、VO 映射）
@@ -104,11 +105,13 @@ public class MenuWebRouteTreeBuilderImpl extends ServiceImpl<SysMenuMapper, SysM
 	 * @return menuId -> roleCode 列表
 	 */
 	private Map<Long, List<String>> queryRoleMap(List<Long> menuIds) {
-		List<SysMenuRoleEntity> menuRoles = sysMenuRoleMapper
-			.selectList(Wrappers.<SysMenuRoleEntity>lambdaQuery().in(SysMenuRoleEntity::getMenuId, menuIds));
+		if (CollUtil.isEmpty(menuIds)) {
+			return Collections.emptyMap();
+		}
+		List<SysMenuRoleLinkRow> menuRoles = sysMenuRoleMapper.selectActiveRoleLinksByMenuIds(menuIds);
 		return menuRoles.stream()
-			.collect(Collectors.groupingBy(SysMenuRoleEntity::getMenuId,
-					Collectors.mapping(SysMenuRoleEntity::getRoleCode, Collectors.toList())));
+			.collect(Collectors.groupingBy(SysMenuRoleLinkRow::getMenuId,
+					Collectors.mapping(SysMenuRoleLinkRow::getRoleCode, Collectors.toList())));
 	}
 
 	/**
@@ -117,11 +120,14 @@ public class MenuWebRouteTreeBuilderImpl extends ServiceImpl<SysMenuMapper, SysM
 	 * @return menuId -> permissionCode 列表
 	 */
 	private Map<Long, List<String>> queryPermissionMap(List<Long> menuIds) {
-		List<SysMenuPermissionEntity> menuPermissions = sysMenuPermissionMapper.selectList(
-				Wrappers.<SysMenuPermissionEntity>lambdaQuery().in(SysMenuPermissionEntity::getMenuId, menuIds));
+		if (CollUtil.isEmpty(menuIds)) {
+			return Collections.emptyMap();
+		}
+		List<SysMenuPermissionLinkRow> menuPermissions = sysMenuPermissionMapper
+			.selectActiveButtonPermissionLinksByMenuIds(menuIds);
 		return menuPermissions.stream()
-			.collect(Collectors.groupingBy(SysMenuPermissionEntity::getMenuId,
-					Collectors.mapping(SysMenuPermissionEntity::getPermissionCode, Collectors.toList())));
+			.collect(Collectors.groupingBy(SysMenuPermissionLinkRow::getMenuId,
+					Collectors.mapping(SysMenuPermissionLinkRow::getPermissionCode, Collectors.toList())));
 	}
 
 	/**

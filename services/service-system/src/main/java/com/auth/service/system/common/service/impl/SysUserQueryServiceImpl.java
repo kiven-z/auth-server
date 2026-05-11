@@ -7,8 +7,6 @@ import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.SystemResultCodeEnum;
 import com.auth.service.system.common.mapper.SysUserQueryMapper;
 import com.auth.service.system.common.model.SysUserSearchItemResponse;
-import com.auth.service.system.common.model.vo.SysUserDeptProfileItemResponse;
-import com.auth.service.system.common.model.vo.SysUserPostProfileItemResponse;
 import com.auth.service.system.common.model.vo.SysUserProfileResponse;
 import com.auth.service.system.common.service.SysUserQueryService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -44,11 +42,10 @@ public class SysUserQueryServiceImpl extends ServiceImpl<SysUserQueryMapper, Use
 		}
 
 		SysUserProfileResponse response = SysUserProfileConverter.INSTANCE.toProfileResponse(user);
-
-		List<SysUserDeptProfileItemResponse> deptList = sysUserQueryMapper.selectDeptProfileByUserId(userId);
-		List<SysUserPostProfileItemResponse> postList = sysUserQueryMapper.selectPostProfileByUserId(userId);
-		response.setDeptList(Objects.requireNonNullElse(deptList, List.of()));
-		response.setPostList(Objects.requireNonNullElse(postList, List.of()));
+		response.setDeptList(SysUserProfileConverter.INSTANCE.toDeptItemResponseList(
+				Objects.requireNonNullElse(sysUserQueryMapper.selectDeptProfileByUserId(userId), List.of())));
+		response.setPostList(SysUserProfileConverter.INSTANCE.toPostItemResponseList(
+				Objects.requireNonNullElse(sysUserQueryMapper.selectPostProfileByUserId(userId), List.of())));
 
 		return response;
 	}
@@ -63,7 +60,9 @@ public class SysUserQueryServiceImpl extends ServiceImpl<SysUserQueryMapper, Use
 			return Collections.emptyList();
 		}
 
-		return sysUserQueryMapper.searchByKeyword(keyword, limit == null ? 20 : Math.max(1, Math.min(limit, 50)));
+		return SysUserProfileConverter.INSTANCE.toSearchItemResponseList(Objects.requireNonNullElse(
+				sysUserQueryMapper.searchByKeyword(keyword, limit == null ? 20 : Math.max(1, Math.min(limit, 50))),
+				List.of()));
 	}
 
 }

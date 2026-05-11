@@ -44,13 +44,13 @@
 
     <!-- 菜单扁平列表查询（无分页，供树形构建） -->
     <select id="selectListByQuery"
-            resultType="com.auth.service.system.admin.model.vo.menu.SysMenuListVO">
+            resultType="com.auth.service.system.admin.model.entity.SysMenuEntity">
         <include refid="listWhere"/>
     </select>
 
     <!-- 分页查询菜单 -->
     <select id="selectPageByQuery"
-            resultType="com.auth.service.system.admin.model.vo.menu.SysMenuListVO">
+            resultType="com.auth.service.system.admin.model.entity.SysMenuEntity">
         <include refid="listWhere"/>
     </select>
 

@@ -3,7 +3,7 @@
 <mapper namespace="com.auth.service.system.admin.mapper.SysRoleMapper">
 
     <!-- 角色分页列表：仅查业务表；创建人/更新人用户名由 {@link com.auth.service.system.common.service.AuditUserDisplayService} 批量补全 -->
-    <select id="selectListByPage" resultType="com.auth.service.system.admin.model.vo.role.SysRolePageResponse">
+    <select id="selectListByPage" resultType="com.auth.service.system.admin.model.entity.SysRoleEntity">
         SELECT
         r.id,
         r.role_code,
@@ -35,10 +35,10 @@
     </select>
 
     <!-- 查询角色下拉选项 -->
-    <select id="selectRoleOptions" resultType="com.auth.service.system.admin.model.vo.role.SysRoleOptionVO">
+    <select id="selectRoleOptions" resultType="com.auth.service.system.admin.model.entity.SysRoleEntity">
         SELECT id, role_code, role_name FROM sys_role
         <where>
-            status = 0 AND is_deleted = 0
+            status = 1 AND is_deleted = 0
             <if test="roleName != null and roleName != ''">AND role_name LIKE CONCAT('%', #{roleName}, '%')</if>
             <if test="roleCode != null and roleCode != ''">AND role_code LIKE CONCAT('%', #{roleCode}, '%')</if>
         </where>

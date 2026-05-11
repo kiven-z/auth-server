@@ -34,7 +34,7 @@
         SELECT
         <include refid="Base_Column_List"/>
         FROM sys_user
-        WHERE is_deleted = 0 AND username = #{username}
+        WHERE is_deleted = 0 AND status = 1 AND username = #{username}
     </select>
 
     <!-- 根据邮箱查询用户信息 -->
@@ -42,7 +42,7 @@
         SELECT
         <include refid="Base_Column_List"/>
         FROM sys_user
-        WHERE is_deleted = 0 AND email = #{email}
+        WHERE is_deleted = 0 AND status = 1 AND email = #{email}
     </select>
 
 </mapper>

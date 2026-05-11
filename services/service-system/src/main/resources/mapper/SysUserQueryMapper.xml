@@ -4,7 +4,7 @@
 
     <!-- 用户档案：部门列表（user_dept JOIN sys_dept） -->
     <select id="selectDeptProfileByUserId"
-            resultType="com.auth.service.system.common.model.vo.SysUserDeptProfileItemResponse">
+            resultType="com.auth.service.system.common.model.po.UserDeptProfilePO">
         SELECT d.id          AS dept_id,
                d.dept_name   AS dept_name,
                d.dept_code   AS dept_code,
@@ -20,7 +20,7 @@
 
     <!-- 用户档案：岗位列表（user_post JOIN sys_post） -->
     <select id="selectPostProfileByUserId"
-            resultType="com.auth.service.system.common.model.vo.SysUserPostProfileItemResponse">
+            resultType="com.auth.service.system.common.model.po.UserPostProfilePO">
         SELECT up.id         AS id,
                up.post_id    AS post_id,
                sp.post_name  AS post_name,
@@ -35,7 +35,7 @@
 
     <!-- 管理端用户远程搜索：未删除且状态正常，关键词模糊匹配多字段 -->
     <select id="searchByKeyword"
-            resultType="com.auth.service.system.common.model.SysUserSearchItemResponse">
+            resultType="com.auth.service.system.common.model.po.UserSearchItemPO">
         SELECT id,
                username,
                nickname

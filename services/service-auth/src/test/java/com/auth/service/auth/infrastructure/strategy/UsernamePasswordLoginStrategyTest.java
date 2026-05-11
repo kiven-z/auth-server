@@ -1,5 +1,16 @@
 package com.auth.service.auth.infrastructure.strategy;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import com.auth.module.security.starter.model.UserEntity;
 import com.auth.service.auth.exception.AuthBusinessException;
 import com.auth.service.auth.exception.AuthResultCode;
@@ -11,18 +22,8 @@ import com.auth.service.auth.model.enums.AuthLoginLogResult;
 import com.auth.service.auth.model.enums.AuthLoginLogType;
 import com.auth.service.auth.model.request.UsernamePasswordAuth;
 import com.auth.service.auth.service.AuthLoginAuditService;
-import jakarta.servlet.http.HttpServletRequest;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * UsernamePasswordLoginStrategy 单元测试
@@ -92,6 +93,7 @@ class UsernamePasswordLoginStrategyTest {
 		user.setId(1L);
 		user.setUsername("u");
 		user.setPassword("encoded");
+		user.setStatus(1);
 		when(userMapper.selectUserByUsername("u")).thenReturn(user);
 
 		when(passwordEncoder.matches("p", "encoded")).thenReturn(false);

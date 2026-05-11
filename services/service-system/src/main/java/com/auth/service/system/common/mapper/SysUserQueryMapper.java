@@ -1,15 +1,14 @@
 package com.auth.service.system.common.mapper;
 
-import java.util.List;
-
+import com.auth.module.security.starter.model.UserEntity;
+import com.auth.service.system.common.model.po.UserDeptProfilePO;
+import com.auth.service.system.common.model.po.UserPostProfilePO;
+import com.auth.service.system.common.model.po.UserSearchItemPO;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import com.auth.module.security.starter.model.UserEntity;
-import com.auth.service.system.common.model.SysUserSearchItemResponse;
-import com.auth.service.system.common.model.vo.SysUserDeptProfileItemResponse;
-import com.auth.service.system.common.model.vo.SysUserPostProfileItemResponse;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import java.util.List;
 
 /**
  * 用户只读查询（档案部门/岗位、关键词搜索）
@@ -24,14 +23,14 @@ public interface SysUserQueryMapper extends BaseMapper<UserEntity> {
 	 * @param userId 用户ID
 	 * @return 部门项
 	 */
-	List<SysUserDeptProfileItemResponse> selectDeptProfileByUserId(@Param("userId") Long userId);
+	List<UserDeptProfilePO> selectDeptProfileByUserId(@Param("userId") Long userId);
 
 	/**
 	 * 按用户ID查询岗位关联列表
 	 * @param userId 用户ID
 	 * @return 岗位项
 	 */
-	List<SysUserPostProfileItemResponse> selectPostProfileByUserId(@Param("userId") Long userId);
+	List<UserPostProfilePO> selectPostProfileByUserId(@Param("userId") Long userId);
 
 	/**
 	 * 关键词模糊搜索用户（未删除、状态正常），匹配用户名/昵称/邮箱/手机/工号。
@@ -39,6 +38,6 @@ public interface SysUserQueryMapper extends BaseMapper<UserEntity> {
 	 * @param limit 最大返回条数
 	 * @return 用户列表，不含密码等敏感列
 	 */
-	List<SysUserSearchItemResponse> searchByKeyword(@Param("keyword") String keyword, @Param("limit") int limit);
+	List<UserSearchItemPO> searchByKeyword(@Param("keyword") String keyword, @Param("limit") int limit);
 
 }

@@ -1,5 +1,19 @@
 package com.auth.service.system.admin.service.impl;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+import java.lang.reflect.Field;
+import java.util.List;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.mapper.SysRoleMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
@@ -11,23 +25,9 @@ import com.auth.service.system.admin.model.vo.role.SysRolePageResponse;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.SystemResultCodeEnum;
 import com.auth.service.system.common.service.AuditUserDisplayService;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.lang.reflect.Field;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * {@link SysRoleServiceImpl} 单元测试（分页补全用户名委托 {@link AuditUserDisplayService}）。
@@ -59,14 +59,17 @@ class SysRoleServiceImplTest {
 	void getPageDelegatesEnrichToAuditUserDisplayService() {
 		Page<SysRoleEntity> pageParams = new Page<>(1, 10);
 		SysRoleQuery query = new SysRoleQuery();
-		Page<SysRolePageResponse> mpPage = new Page<>(1, 10);
-		mpPage.setRecords(List.of(new SysRolePageResponse()));
+		Page<SysRoleEntity> mpPage = new Page<>(1, 10);
+		SysRoleEntity entityRow = new SysRoleEntity();
+		entityRow.setId(1L);
+		mpPage.setRecords(List.of(entityRow));
 		when(sysRoleMapper.selectListByPage(eq(pageParams), eq(query), anyString())).thenReturn(mpPage);
 
 		PageResponse<SysRolePageResponse> result = sysRoleService.getPage(pageParams, query);
 
 		assertThat(result.getList()).hasSize(1);
-		verify(auditUserDisplayService).enrichAuditUsernames(mpPage);
+		verify(auditUserDisplayService)
+			.enrichAuditUsernames(org.mockito.ArgumentMatchers.<IPage<SysRolePageResponse>>any());
 	}
 
 	@Test
@@ -116,16 +119,19 @@ class SysRoleServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("下拉选项：委托 Mapper 查询")
+	@DisplayName("下拉选项：委托 Mapper 查询并映射为 VO")
 	void listOptionsDelegatesToMapper() {
-		SysRoleOptionVO opt = new SysRoleOptionVO();
-		opt.setId(1L);
-		when(sysRoleMapper.selectRoleOptions("a", "b")).thenReturn(List.of(opt));
+		SysRoleEntity entity = new SysRoleEntity();
+		entity.setId(1L);
+		entity.setRoleCode("R1");
+		entity.setRoleName("角色1");
+		when(sysRoleMapper.selectRoleOptions("a", "b")).thenReturn(List.of(entity));
 
 		List<SysRoleOptionVO> list = sysRoleService.listOptions("a", "b");
 
 		assertThat(list).hasSize(1);
 		assertThat(list.get(0).getId()).isEqualTo(1L);
+		assertThat(list.get(0).getRoleCode()).isEqualTo("R1");
 		verify(sysRoleMapper).selectRoleOptions("a", "b");
 	}
 

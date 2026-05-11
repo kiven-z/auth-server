@@ -96,7 +96,8 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuEntity
 	 */
 	@Override
 	public List<SysMenuListVO> listFlat(SysMenuQuery query) {
-		List<SysMenuListVO> list = baseMapper.selectListByQuery(query);
+		List<SysMenuEntity> entities = baseMapper.selectListByQuery(query);
+		List<SysMenuListVO> list = SysMenuConverter.INSTANCE.toListVoList(entities);
 		auditUserDisplayService.enrichAuditUsernames(list);
 		return list;
 	}
@@ -106,7 +107,8 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuEntity
 	 */
 	@Override
 	public PageResponse<SysMenuListVO> pageFlat(Page<SysMenuEntity> pageParams, SysMenuQuery query) {
-		IPage<SysMenuListVO> result = baseMapper.selectPageByQuery(pageParams, query);
+		IPage<SysMenuEntity> entityPage = baseMapper.selectPageByQuery(pageParams, query);
+		IPage<SysMenuListVO> result = entityPage.convert(SysMenuConverter.INSTANCE::toListVo);
 		auditUserDisplayService.enrichAuditUsernames(result);
 		return PageResponse.of(result);
 	}

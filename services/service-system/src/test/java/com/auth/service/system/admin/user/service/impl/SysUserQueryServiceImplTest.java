@@ -1,13 +1,16 @@
 package com.auth.service.system.admin.user.service.impl;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
-import java.lang.reflect.Field;
-import java.time.LocalDate;
-import java.util.List;
-
+import com.auth.module.security.starter.model.UserEntity;
+import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.common.exception.SystemResultCodeEnum;
+import com.auth.service.system.common.mapper.SysUserQueryMapper;
+import com.auth.service.system.common.model.SysUserSearchItemResponse;
+import com.auth.service.system.common.model.po.UserDeptProfilePO;
+import com.auth.service.system.common.model.po.UserPostProfilePO;
+import com.auth.service.system.common.model.po.UserSearchItemPO;
+import com.auth.service.system.common.model.vo.SysUserProfileResponse;
+import com.auth.service.system.common.service.impl.SysUserQueryServiceImpl;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,16 +19,14 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.auth.module.security.starter.model.UserEntity;
-import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.common.exception.SystemResultCodeEnum;
-import com.auth.service.system.common.mapper.SysUserQueryMapper;
-import com.auth.service.system.common.model.SysUserSearchItemResponse;
-import com.auth.service.system.common.model.vo.SysUserDeptProfileItemResponse;
-import com.auth.service.system.common.model.vo.SysUserPostProfileItemResponse;
-import com.auth.service.system.common.model.vo.SysUserProfileResponse;
-import com.auth.service.system.common.service.impl.SysUserQueryServiceImpl;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import java.lang.reflect.Field;
+import java.time.LocalDate;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link SysUserQueryServiceImpl} 单元测试
@@ -87,12 +88,12 @@ class SysUserQueryServiceImplTest {
 
 		when(sysUserQueryMapper.selectById(1L)).thenReturn(user);
 
-		SysUserDeptProfileItemResponse deptRow = new SysUserDeptProfileItemResponse();
+		UserDeptProfilePO deptRow = new UserDeptProfilePO();
 		deptRow.setDeptId(10L);
 		deptRow.setDeptName("研发部");
 		when(sysUserQueryMapper.selectDeptProfileByUserId(1L)).thenReturn(List.of(deptRow));
 
-		SysUserPostProfileItemResponse postRow = new SysUserPostProfileItemResponse();
+		UserPostProfilePO postRow = new UserPostProfilePO();
 		postRow.setId(100L);
 		postRow.setPostId(20L);
 		postRow.setPostName("工程师");
@@ -178,7 +179,7 @@ class SysUserQueryServiceImplTest {
 	@Test
 	@DisplayName("返回 Mapper 查询结果")
 	void searchReturnsMapperRows() {
-		SysUserSearchItemResponse row = new SysUserSearchItemResponse();
+		UserSearchItemPO row = new UserSearchItemPO();
 		row.setId(1L);
 		row.setUsername("u1");
 		when(sysUserQueryMapper.searchByKeyword("kw", 15)).thenReturn(List.of(row));

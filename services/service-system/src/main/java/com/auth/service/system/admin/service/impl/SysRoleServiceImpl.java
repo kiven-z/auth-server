@@ -48,7 +48,12 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 	@Override
 	public PageResponse<SysRolePageResponse> getPage(Page<SysRoleEntity> pageParams, SysRoleQuery query) {
 		String orderBySql = SysRolePageOrderSqlBuilder.buildOrderBySql(query.getSort());
-		IPage<SysRolePageResponse> page = baseMapper.selectListByPage(pageParams, query, orderBySql);
+		IPage<SysRoleEntity> entityPage = baseMapper.selectListByPage(pageParams, query, orderBySql);
+		IPage<SysRolePageResponse> page = entityPage.convert(entity -> {
+			SysRolePageResponse row = new SysRolePageResponse();
+			BeanUtil.copyProperties(entity, row);
+			return row;
+		});
 		auditUserDisplayService.enrichAuditUsernames(page);
 		return PageResponse.of(page);
 	}
@@ -82,7 +87,13 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 	 */
 	@Override
 	public List<SysRoleOptionVO> listOptions(String roleName, String roleCode) {
-		return baseMapper.selectRoleOptions(roleName, roleCode);
+		return baseMapper.selectRoleOptions(roleName, roleCode).stream().map(entity -> {
+			SysRoleOptionVO vo = new SysRoleOptionVO();
+			vo.setId(entity.getId());
+			vo.setRoleCode(entity.getRoleCode());
+			vo.setRoleName(entity.getRoleName());
+			return vo;
+		}).toList();
 	}
 
 }

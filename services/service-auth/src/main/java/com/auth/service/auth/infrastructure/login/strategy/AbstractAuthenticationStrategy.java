@@ -1,7 +1,6 @@
 package com.auth.service.auth.infrastructure.login.strategy;
 
 import cn.hutool.core.bean.BeanUtil;
-import com.auth.common.data.model.UserStatus;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.module.security.starter.model.UserEntity;
 import com.auth.service.auth.exception.AuthBusinessException;
@@ -29,6 +28,16 @@ import jakarta.servlet.http.HttpServletRequest;
  * @author Bunny
  */
 public abstract class AbstractAuthenticationStrategy<T extends AbstractAuthentication> implements LoginStrategy<T> {
+
+	/**
+	 * 与 {@link UserEntity#getStatus()} 对齐：0=禁用
+	 */
+	private static final int SYS_USER_STATUS_DISABLED = 0;
+
+	/**
+	 * 与 {@link UserEntity#getStatus()} 对齐：2=锁定
+	 */
+	private static final int SYS_USER_STATUS_LOCKED = 2;
 
 	protected final LoginFailureRateLimiter loginFailureRateLimiter;
 
@@ -111,14 +120,14 @@ public abstract class AbstractAuthenticationStrategy<T extends AbstractAuthentic
 	 */
 	private void assertNotLockedOrAuditAndRethrow(HttpServletRequest request, UserEntity user) {
 		Long userId = user.getId();
-		UserStatus status = UserStatus.of(user.getStatus());
+		Integer rawStatus = user.getStatus();
 		try {
-			if (status == UserStatus.DISABLED) {
+			if (rawStatus == null || rawStatus == SYS_USER_STATUS_DISABLED) {
 				loginLogService.recordLoginLog(request, loginLogType(), AuthLoginLogResult.ACCOUNT_DISABLED, userId,
 						user.getUsername(), AuthResultCode.USER_DISABLED.getMessageKey(), null);
 				throw new AuthBusinessException(AuthResultCode.USER_DISABLED);
 			}
-			if (status == UserStatus.LOCKED) {
+			if (rawStatus == SYS_USER_STATUS_LOCKED) {
 				loginLogService.recordLoginLog(request, loginLogType(), AuthLoginLogResult.ACCOUNT_LOCKED, userId,
 						user.getUsername(), "account.status.locked", null);
 				throw new AuthBusinessException(AuthResultCode.USER_LOCKED);

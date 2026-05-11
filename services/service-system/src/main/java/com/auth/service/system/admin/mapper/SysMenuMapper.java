@@ -7,7 +7,6 @@ import org.apache.ibatis.annotations.Param;
 
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.admin.model.query.SysMenuQuery;
-import com.auth.service.system.admin.model.vo.menu.SysMenuListVO;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
@@ -24,7 +23,7 @@ public interface SysMenuMapper extends BaseMapper<SysMenuEntity> {
 	 * @param query 查询条件
 	 * @return 菜单列表
 	 */
-	List<SysMenuListVO> selectListByQuery(@Param("query") SysMenuQuery query);
+	List<SysMenuEntity> selectListByQuery(@Param("query") SysMenuQuery query);
 
 	/**
 	 * 分页查询菜单
@@ -32,6 +31,6 @@ public interface SysMenuMapper extends BaseMapper<SysMenuEntity> {
 	 * @param query 查询条件
 	 * @return 分页菜单列表
 	 */
-	IPage<SysMenuListVO> selectPageByQuery(IPage<SysMenuEntity> page, @Param("query") SysMenuQuery query);
+	IPage<SysMenuEntity> selectPageByQuery(IPage<SysMenuEntity> page, @Param("query") SysMenuQuery query);
 
 }

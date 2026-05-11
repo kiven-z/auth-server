@@ -1,10 +1,14 @@
 package com.auth.service.system.admin.convert;
 
+import java.util.List;
+
+import org.mapstruct.Mapper;
+import org.mapstruct.factory.Mappers;
+
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.admin.model.form.menu.SysMenuSaveForm;
 import com.auth.service.system.admin.model.vo.menu.SysMenuDetailVO;
-import org.mapstruct.Mapper;
-import org.mapstruct.factory.Mappers;
+import com.auth.service.system.admin.model.vo.menu.SysMenuListVO;
 
 /**
  * 菜单转换器
@@ -23,6 +27,20 @@ public interface SysMenuConverter {
 	 * @return 详情 VO
 	 */
 	SysMenuDetailVO toDetailVo(SysMenuEntity entity);
+
+	/**
+	 * 列表行 VO
+	 * @param entity 菜单实体
+	 * @return 列表 VO
+	 */
+	SysMenuListVO toListVo(SysMenuEntity entity);
+
+	/**
+	 * 列表行 VO 批量
+	 * @param entities 菜单实体列表
+	 * @return 列表 VO
+	 */
+	List<SysMenuListVO> toListVoList(List<SysMenuEntity> entities);
 
 	/**
 	 * 映射基本字段
