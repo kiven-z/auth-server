@@ -5,16 +5,16 @@
     <select id="selectListByPage" resultType="com.auth.service.system.schedule.model.vo.SysJobGroupPageResponse">
         SELECT
         id,
-        group_code AS groupCode,
-        group_name AS groupName,
+        group_code,
+        group_name,
         description,
         status,
-        is_system AS isSystem,
-        order_num AS orderNum,
-        create_time AS createTime,
-        update_time AS updateTime,
-        create_user AS createUser,
-        update_user AS updateUser
+        is_system,
+        order_num,
+        create_time,
+        update_time,
+        create_user,
+        update_user
         FROM sys_job_group
         <where>
             <if test="query.groupCode != null and query.groupCode != ''">
@@ -33,16 +33,16 @@
     <select id="selectEnabledOptions" resultType="com.auth.service.system.schedule.model.vo.SysJobGroupPageResponse">
         SELECT
         id,
-        group_code AS groupCode,
-        group_name AS groupName,
+        group_code,
+        group_name,
         description,
         status,
-        is_system AS isSystem,
-        order_num AS orderNum,
-        create_time AS createTime,
-        update_time AS updateTime,
-        create_user AS createUser,
-        update_user AS updateUser
+        is_system,
+        order_num,
+        create_time,
+        update_time,
+        create_user,
+        update_user
         FROM sys_job_group
         WHERE status = 1
         <if test="keyword != null and keyword != ''">

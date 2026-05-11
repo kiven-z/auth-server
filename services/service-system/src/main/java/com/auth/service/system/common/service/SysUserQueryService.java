@@ -1,11 +1,11 @@
 package com.auth.service.system.common.service;
 
-import java.util.List;
-
 import com.auth.module.security.starter.model.UserEntity;
 import com.auth.service.system.common.model.SysUserSearchItemResponse;
 import com.auth.service.system.common.model.vo.SysUserProfileResponse;
 import com.baomidou.mybatisplus.extension.service.IService;
+
+import java.util.List;
 
 /**
  * 系统用户只读查询（档案聚合、关键词搜索等）。
@@ -15,7 +15,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 public interface SysUserQueryService extends IService<UserEntity> {
 
 	/**
-	 * 查询用户档案（基本信息、部门、岗位）
+	 * 查询用户档案（基本信息、部门、岗位） 包含当前用户禁用
 	 * @param userId 用户ID
 	 * @return 聚合结果
 	 */

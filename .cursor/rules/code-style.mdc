@@ -28,6 +28,8 @@ alwaysApply: true
 8. 如果要在service模块中使用stream时转换对象，优先在目录convert使用mapstruct。如果只是简单的三个字段以下的不用。
 9. 如果涉及表单校验使用`jakarta.validation.constraints`相关包下的注解。
 10. 如果数据库中没有这个字段或者有需要改的，将SQL生成在后端db目录下，并用注释表明作用，修改了什么。
+11. **数据库层（Mapper）与展现层（VO/Response）之间不能直接耦合**。Mapper 层应面向 Entity 或 PO（Persistent Object），VO 应只在
+    Service/Controller 层组装。%% %%
 
 ### 设计要求
 

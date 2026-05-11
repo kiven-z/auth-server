@@ -28,7 +28,7 @@ public interface LogUserPasswordHistoryMapper extends BaseMapper<LogUserPassword
 			@Param("query") LogUserPasswordHistoryQuery query);
 
 	/**
-	 * 根据ID查询密码历史日志详情
+	 * 根据ID查询密码历史日志详情 用户状态可被禁用、删除等
 	 * @param id ID
 	 * @return 密码历史日志详情
 	 */

@@ -27,10 +27,6 @@ import java.util.Objects;
 public class SysUserQueryServiceImpl extends ServiceImpl<SysUserQueryMapper, UserEntity>
 		implements SysUserQueryService {
 
-	private static final int DEFAULT_SEARCH_LIMIT = 20;
-
-	private static final int MAX_SEARCH_LIMIT = 50;
-
 	private final SysUserQueryMapper sysUserQueryMapper;
 
 	public SysUserQueryServiceImpl(SysUserQueryMapper sysUserQueryMapper) {
@@ -38,26 +34,10 @@ public class SysUserQueryServiceImpl extends ServiceImpl<SysUserQueryMapper, Use
 	}
 
 	/**
-	 * 将搜索条数限制在 [1, MAX_SEARCH_LIMIT]；null 时使用默认值。
-	 */
-	private static int resolveSearchLimit(Integer limit) {
-		if (limit == null) {
-			return DEFAULT_SEARCH_LIMIT;
-		}
-		if (limit < 1) {
-			return 1;
-		}
-		return Math.min(limit, MAX_SEARCH_LIMIT);
-	}
-
-	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public SysUserProfileResponse getProfile(Long userId) {
-		if (userId == null) {
-			throw new SystemBusinessException(SystemResultCodeEnum.ILLEGAL_USER_ID_NOT_NULL);
-		}
 		UserEntity user = baseMapper.selectById(userId);
 		if (user == null) {
 			throw new SystemBusinessException(SystemResultCodeEnum.USER_NOT_FOUND, userId);
@@ -83,7 +63,7 @@ public class SysUserQueryServiceImpl extends ServiceImpl<SysUserQueryMapper, Use
 			return Collections.emptyList();
 		}
 
-		return sysUserQueryMapper.searchByKeyword(keyword, resolveSearchLimit(limit));
+		return sysUserQueryMapper.searchByKeyword(keyword, limit == null ? 20 : Math.max(1, Math.min(limit, 50)));
 	}
 
 }
