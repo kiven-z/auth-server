@@ -1,15 +1,16 @@
 package com.auth.service.system.common.feign;
 
-import com.auth.common.core.model.response.Result;
-import com.auth.service.system.common.feign.dto.EffectiveCodesVO;
-import com.auth.service.system.common.feign.fallback.AuthenticationInnerFeignClientFallback;
+import java.util.List;
+
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.List;
+import com.auth.common.core.model.response.Result;
+import com.auth.service.system.common.feign.dto.EffectiveCodesInnerDTO;
+import com.auth.service.system.common.feign.fallback.AuthenticationInnerFeignClientFallback;
 
 /**
  * 鉴权服务内部服务,鉴权服务内部服务接口
@@ -34,6 +35,6 @@ public interface AuthenticationInnerFeignClient {
 	 * @return 统一响应体
 	 */
 	@GetMapping("/principal/{userId}/effective-codes")
-	Result<EffectiveCodesVO> getEffectiveCodes(@PathVariable("userId") Long userId);
+	Result<EffectiveCodesInnerDTO> getEffectiveCodes(@PathVariable("userId") Long userId);
 
 }

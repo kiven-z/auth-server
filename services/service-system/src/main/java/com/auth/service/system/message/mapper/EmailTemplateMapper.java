@@ -1,8 +1,8 @@
 package com.auth.service.system.message.mapper;
 
 import com.auth.service.system.message.model.EmailTemplateEntity;
+import com.auth.service.system.message.model.po.EmailTemplatePageRowPO;
 import com.auth.service.system.message.model.query.EmailTemplateQuery;
-import com.auth.service.system.message.model.vo.EmailTemplatePageResponse;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -30,7 +30,7 @@ public interface EmailTemplateMapper extends BaseMapper<EmailTemplateEntity> {
 	 * @param query 查询条件
 	 * @return 邮件模板分页结果
 	 */
-	IPage<EmailTemplatePageResponse> selectListByPage(@Param("page") Page<EmailTemplateEntity> pageParams,
+	IPage<EmailTemplatePageRowPO> selectListByPage(@Param("page") Page<EmailTemplateEntity> pageParams,
 			@Param("query") EmailTemplateQuery query);
 
 }

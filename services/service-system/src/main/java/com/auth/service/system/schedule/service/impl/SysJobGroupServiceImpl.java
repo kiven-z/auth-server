@@ -17,6 +17,7 @@ import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
 import com.auth.service.system.schedule.model.form.SysJobGroupForm;
 import com.auth.service.system.schedule.model.form.SysJobGroupUpdateForm;
+import com.auth.service.system.schedule.model.po.SysJobGroupPageRowPO;
 import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
 import com.auth.service.system.schedule.model.vo.SysJobGroupPageResponse;
 import com.auth.service.system.schedule.service.SysJobGroupService;
@@ -25,6 +26,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.BooleanUtil;
 
@@ -52,10 +54,13 @@ public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJo
 	 */
 	@Override
 	public PageResponse<SysJobGroupPageResponse> getPage(Page<SysJobGroupEntity> pageParams, SysJobGroupQuery query) {
-		IPage<SysJobGroupPageResponse> page = baseMapper.selectListByPage(pageParams, query);
-		auditUserDisplayService.enrichAuditUsernames(page);
+		IPage<SysJobGroupPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
+		// PO 转 VO
+		IPage<SysJobGroupPageResponse> voPage = page
+			.convert(po -> BeanUtil.copyProperties(po, SysJobGroupPageResponse.class));
+		auditUserDisplayService.enrichAuditUsernames(voPage);
 
-		return PageResponse.of(page);
+		return PageResponse.of(voPage);
 	}
 
 	/**
@@ -64,10 +69,13 @@ public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJo
 	@Override
 	public List<SysJobGroupPageResponse> listEnabledOptions(String keyword, int limit) {
 		String searchKeyword = CharSequenceUtil.trim(keyword);
-		List<SysJobGroupPageResponse> list = baseMapper.selectEnabledOptions(searchKeyword, limit);
-		auditUserDisplayService.enrichAuditUsernames(list);
+		List<SysJobGroupPageRowPO> list = baseMapper.selectEnabledOptions(searchKeyword, limit);
+		List<SysJobGroupPageResponse> voList = list.stream()
+			.map(po -> BeanUtil.copyProperties(po, SysJobGroupPageResponse.class))
+			.toList();
+		auditUserDisplayService.enrichAuditUsernames(voList);
 
-		return list;
+		return voList;
 	}
 
 	/**

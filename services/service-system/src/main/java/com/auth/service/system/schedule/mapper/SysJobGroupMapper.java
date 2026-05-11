@@ -1,15 +1,16 @@
 package com.auth.service.system.schedule.mapper;
 
-import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
-import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
-import com.auth.service.system.schedule.model.vo.SysJobGroupPageResponse;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import java.util.List;
+
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import java.util.List;
+import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
+import com.auth.service.system.schedule.model.po.SysJobGroupPageRowPO;
+import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 /**
  * 任务分组 Mapper
@@ -25,7 +26,7 @@ public interface SysJobGroupMapper extends BaseMapper<SysJobGroupEntity> {
 	 * @param query 条件
 	 * @return 分页结果
 	 */
-	IPage<SysJobGroupPageResponse> selectListByPage(@Param("page") Page<SysJobGroupEntity> page,
+	IPage<SysJobGroupPageRowPO> selectListByPage(@Param("page") Page<SysJobGroupEntity> page,
 			@Param("query") SysJobGroupQuery query);
 
 	/**
@@ -34,6 +35,6 @@ public interface SysJobGroupMapper extends BaseMapper<SysJobGroupEntity> {
 	 * @param limit 限制数量
 	 * @return 分组下拉
 	 */
-	List<SysJobGroupPageResponse> selectEnabledOptions(@Param("keyword") String keyword, @Param("limit") int limit);
+	List<SysJobGroupPageRowPO> selectEnabledOptions(@Param("keyword") String keyword, @Param("limit") int limit);
 
 }

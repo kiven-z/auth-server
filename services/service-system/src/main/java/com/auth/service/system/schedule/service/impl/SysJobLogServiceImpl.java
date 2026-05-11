@@ -1,9 +1,20 @@
 package com.auth.service.system.schedule.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.exceptions.ExceptionUtil;
-import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.util.RandomUtil;
+import static com.auth.module.email.model.TemplateType.*;
+import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.quartz.JobExecutionException;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.email.model.EmailSendDTO;
 import com.auth.module.security.autoconfig.web.SecurityUserUtils;
@@ -13,6 +24,7 @@ import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.message.service.EmailSendService;
 import com.auth.service.system.schedule.mapper.SysJobLogMapper;
 import com.auth.service.system.schedule.model.entity.SysJobLogEntity;
+import com.auth.service.system.schedule.model.po.SysJobLogPageRowPO;
 import com.auth.service.system.schedule.model.query.SysJobLogQuery;
 import com.auth.service.system.schedule.model.vo.SysJobLogDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobLogPageResponse;
@@ -20,21 +32,12 @@ import com.auth.service.system.schedule.service.SysJobLogService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.exceptions.ExceptionUtil;
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.RandomUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.quartz.JobExecutionException;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static com.auth.module.email.model.TemplateType.CLEAR_DATABASE_CONFIRM;
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
 
 /**
  * 任务执行日志实现
@@ -69,9 +72,12 @@ public class SysJobLogServiceImpl extends ServiceImpl<SysJobLogMapper, SysJobLog
 	 */
 	@Override
 	public PageResponse<SysJobLogPageResponse> getPage(Page<SysJobLogEntity> pageParams, SysJobLogQuery query) {
-		IPage<SysJobLogPageResponse> page = baseMapper.selectListByPage(pageParams, query);
+		IPage<SysJobLogPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
+		// PO 转 VO
+		IPage<SysJobLogPageResponse> voPage = page
+			.convert(po -> BeanUtil.copyProperties(po, SysJobLogPageResponse.class));
 
-		return PageResponse.of(page);
+		return PageResponse.of(voPage);
 	}
 
 	/**

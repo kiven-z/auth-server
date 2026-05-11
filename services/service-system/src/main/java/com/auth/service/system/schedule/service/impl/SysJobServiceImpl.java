@@ -31,6 +31,7 @@ import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
 import com.auth.service.system.schedule.model.form.SysJobCreateForm;
 import com.auth.service.system.schedule.model.form.SysJobStatusForm;
 import com.auth.service.system.schedule.model.form.SysJobUpdateForm;
+import com.auth.service.system.schedule.model.po.SysJobPageRowPO;
 import com.auth.service.system.schedule.model.query.SysJobQuery;
 import com.auth.service.system.schedule.model.vo.SysJobDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobPageResponse;
@@ -114,12 +115,16 @@ public class SysJobServiceImpl extends ServiceImpl<SysJobMapper, SysJobEntity> i
 	 */
 	@Override
 	public PageResponse<SysJobPageResponse> getPage(Page<SysJobEntity> pageParams, SysJobQuery query) {
-		IPage<SysJobPageResponse> page = baseMapper.selectListByPage(pageParams, query);
-		auditUserDisplayService.enrichAuditUsernames(page);
-		for (SysJobPageResponse row : page.getRecords()) {
-			enrichFireTimes(row);
-		}
-		return PageResponse.of(page);
+		IPage<SysJobPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
+		// PO 转 VO
+		IPage<SysJobPageResponse> voPage = page.convert(po -> {
+			SysJobPageResponse vo = new SysJobPageResponse();
+			BeanUtils.copyProperties(po, vo);
+			enrichFireTimes(vo);
+			return vo;
+		});
+		auditUserDisplayService.enrichAuditUsernames(voPage);
+		return PageResponse.of(voPage);
 	}
 
 	/**

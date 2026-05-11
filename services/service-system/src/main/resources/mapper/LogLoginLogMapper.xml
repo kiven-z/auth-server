@@ -4,7 +4,7 @@
 
     <!-- 分页查询登录日志 -->
     <select id="selectListByPage"
-            resultType="com.auth.service.system.log.model.vo.LogLoginLogPageVO">
+            resultType="com.auth.service.system.log.model.po.LogLoginLogPageRowPO">
         SELECT
             ll.id,
             ll.user_id,
@@ -40,7 +40,7 @@
 
     <!-- 根据ID查询登录日志详情 -->
     <select id="selectDetailById"
-            resultType="com.auth.service.system.log.model.vo.LogLoginLogDetailVO">
+            resultType="com.auth.service.system.log.model.po.LogLoginLogDetailRowPO">
         SELECT
             ll.id,
             ll.user_id,

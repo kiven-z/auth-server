@@ -4,7 +4,7 @@
 
     <!-- 分页查询日志 -->
     <select id="selectListByPage"
-            resultType="com.auth.service.system.schedule.model.vo.SysJobLogPageResponse">
+            resultType="com.auth.service.system.schedule.model.po.SysJobLogPageRowPO">
         SELECT id,
         job_name , job_group , invoke_target , job_message , status, elapsed_time , create_time FROM
         log_job

@@ -1,17 +1,17 @@
 package com.auth.service.system.admin.model.po;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
-
 import java.io.Serial;
 import java.io.Serializable;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
 
 /**
  * 菜单已分配权限 DTO（Mapper JOIN 查询结果，不与 VO 直接耦合）
  *
  * @author Bunny
  */
-@Schema(name = "SysMenuAssignedPermissionDTO", title = "菜单已分配权限 DTO")
+@Schema(name = "SysMenuAssignedPermissionPO", title = "菜单已分配权限 PO")
 @Data
 public class SysMenuAssignedPermissionPO implements Serializable {
 

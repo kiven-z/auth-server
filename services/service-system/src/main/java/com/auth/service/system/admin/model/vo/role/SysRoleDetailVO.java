@@ -1,10 +1,11 @@
 package com.auth.service.system.admin.model.vo.role;
 
+import com.auth.common.core.model.response.BaseResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * 角色详情 VO
@@ -13,13 +14,11 @@ import java.io.Serializable;
  */
 @Schema(name = "SysRoleDetailVO", title = "角色详情")
 @Data
-public class SysRoleDetailVO implements Serializable {
+@EqualsAndHashCode(callSuper = true)
+public class SysRoleDetailVO extends BaseResponse {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
-
-	@Schema(title = "主键ID")
-	private Long id;
 
 	@Schema(title = "角色编码")
 	private String roleCode;

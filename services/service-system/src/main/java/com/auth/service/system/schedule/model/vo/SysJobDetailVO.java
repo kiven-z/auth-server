@@ -1,26 +1,26 @@
 package com.auth.service.system.schedule.model.vo;
 
 import java.io.Serial;
-import java.io.Serializable;
 import java.time.LocalDateTime;
+
+import com.auth.common.core.model.response.BaseResponse;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
- * 定时任务详情（Descriptions 用，可不含审计字段由前端排除）
+ * 定时任务详情
  *
  * @author Bunny
  */
 @Schema(name = "SysJobDetailVO", title = "定时任务详情")
 @Data
-public class SysJobDetailVO implements Serializable {
+@EqualsAndHashCode(callSuper = true)
+public class SysJobDetailVO extends BaseResponse {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
-
-	@Schema(title = "主键")
-	private Long id;
 
 	@Schema(title = "任务名称")
 	private String jobName;

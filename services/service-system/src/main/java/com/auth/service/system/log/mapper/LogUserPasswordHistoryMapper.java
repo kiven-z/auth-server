@@ -1,14 +1,15 @@
 package com.auth.service.system.log.mapper;
 
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
 import com.auth.service.system.log.model.entity.LogUserPasswordHistoryEntity;
+import com.auth.service.system.log.model.po.LogUserPasswordHistoryDetailRowPO;
+import com.auth.service.system.log.model.po.LogUserPasswordHistoryPageRowPO;
 import com.auth.service.system.log.model.query.LogUserPasswordHistoryQuery;
-import com.auth.service.system.log.model.vo.LogUserPasswordHistoryDetailVO;
-import com.auth.service.system.log.model.vo.LogUserPasswordHistoryPageVO;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
 
 /**
  * 密码历史日志 Mapper
@@ -24,7 +25,7 @@ public interface LogUserPasswordHistoryMapper extends BaseMapper<LogUserPassword
 	 * @param query 查询条件
 	 * @return 分页结果
 	 */
-	IPage<LogUserPasswordHistoryPageVO> selectListByPage(@Param("page") Page<LogUserPasswordHistoryEntity> page,
+	IPage<LogUserPasswordHistoryPageRowPO> selectListByPage(@Param("page") Page<LogUserPasswordHistoryEntity> page,
 			@Param("query") LogUserPasswordHistoryQuery query);
 
 	/**
@@ -32,6 +33,6 @@ public interface LogUserPasswordHistoryMapper extends BaseMapper<LogUserPassword
 	 * @param id ID
 	 * @return 密码历史日志详情
 	 */
-	LogUserPasswordHistoryDetailVO selectDetailById(@Param("id") Long id);
+	LogUserPasswordHistoryDetailRowPO selectDetailById(@Param("id") Long id);
 
 }

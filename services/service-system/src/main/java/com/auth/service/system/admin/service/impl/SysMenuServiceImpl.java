@@ -24,7 +24,7 @@ import com.auth.service.system.admin.model.vo.menu.SysMenuListVO;
 import com.auth.service.system.admin.service.MenuWebRouteTreeBuilder;
 import com.auth.service.system.admin.service.SysMenuService;
 import com.auth.service.system.common.feign.AuthenticationInnerFeignClient;
-import com.auth.service.system.common.feign.dto.EffectiveCodesVO;
+import com.auth.service.system.common.feign.dto.EffectiveCodesInnerDTO;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -69,14 +69,14 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuEntity
 		}
 
 		// 查询当前用户角色
-		Result<EffectiveCodesVO> result = authenticationInnerFeignClient.getEffectiveCodes(userId);
+		Result<EffectiveCodesInnerDTO> result = authenticationInnerFeignClient.getEffectiveCodes(userId);
 		if (!isOk(result)) {
 			log.warn("Menu web route: effective codes unavailable userId={}", userId);
 			return Collections.emptyList();
 		}
 
 		// 判断当前用户是否是管理员
-		EffectiveCodesVO data = result.getData();
+		EffectiveCodesInnerDTO data = result.getData();
 		List<String> roleCodes = data.getRoleCodes();
 		List<String> permissionCodes = data.getPermissionCodes();
 		boolean isAdmin = PermissionConstant.isAdmin(userId, roleCodes);

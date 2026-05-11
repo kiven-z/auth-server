@@ -1,9 +1,14 @@
 package com.auth.service.system.log.service.impl;
 
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.log.mapper.LogUserPasswordHistoryMapper;
 import com.auth.service.system.log.model.entity.LogUserPasswordHistoryEntity;
+import com.auth.service.system.log.model.po.LogUserPasswordHistoryDetailRowPO;
+import com.auth.service.system.log.model.po.LogUserPasswordHistoryPageRowPO;
 import com.auth.service.system.log.model.query.LogUserPasswordHistoryQuery;
 import com.auth.service.system.log.model.vo.LogUserPasswordHistoryDetailVO;
 import com.auth.service.system.log.model.vo.LogUserPasswordHistoryPageVO;
@@ -11,9 +16,9 @@ import com.auth.service.system.log.service.LogUserPasswordHistoryService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+
+import cn.hutool.core.bean.BeanUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 密码历史日志 Service 实现
@@ -39,9 +44,12 @@ public class LogUserPasswordHistoryServiceImpl
 	@Override
 	public PageResponse<LogUserPasswordHistoryPageVO> getPage(Page<LogUserPasswordHistoryEntity> pageParams,
 			LogUserPasswordHistoryQuery query) {
-		IPage<LogUserPasswordHistoryPageVO> page = baseMapper.selectListByPage(pageParams, query);
-		auditUserDisplayService.enrichAuditUsernames(page);
-		return PageResponse.of(page);
+		IPage<LogUserPasswordHistoryPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
+		// PO 转 VO
+		IPage<LogUserPasswordHistoryPageVO> voPage = page
+			.convert(po -> BeanUtil.copyProperties(po, LogUserPasswordHistoryPageVO.class));
+		auditUserDisplayService.enrichAuditUsernames(voPage);
+		return PageResponse.of(voPage);
 	}
 
 	/**
@@ -49,7 +57,8 @@ public class LogUserPasswordHistoryServiceImpl
 	 */
 	@Override
 	public LogUserPasswordHistoryDetailVO getDetail(Long id) {
-		return baseMapper.selectDetailById(id);
+		LogUserPasswordHistoryDetailRowPO po = baseMapper.selectDetailById(id);
+		return BeanUtil.copyProperties(po, LogUserPasswordHistoryDetailVO.class);
 	}
 
 }

@@ -30,7 +30,7 @@
 
     <!-- 邮件模板分页列表 -->
     <select id="selectListByPage"
-            resultType="com.auth.service.system.message.model.vo.EmailTemplatePageResponse">
+            resultType="com.auth.service.system.message.model.po.EmailTemplatePageRowPO">
         SELECT id,
         template_code AS templateCode,
         template_name AS templateName,

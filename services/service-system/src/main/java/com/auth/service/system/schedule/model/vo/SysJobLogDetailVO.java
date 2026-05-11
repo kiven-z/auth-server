@@ -1,10 +1,11 @@
 package com.auth.service.system.schedule.model.vo;
 
+import com.auth.common.core.model.response.BaseResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serial;
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
@@ -14,13 +15,11 @@ import java.time.LocalDateTime;
  */
 @Schema(name = "SysJobLogDetailVO", title = "任务日志详情")
 @Data
-public class SysJobLogDetailVO implements Serializable {
+@EqualsAndHashCode(callSuper = true)
+public class SysJobLogDetailVO extends BaseResponse {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
-
-	@Schema(title = "主键")
-	private Long id;
 
 	@Schema(title = "任务名称")
 	private String jobName;

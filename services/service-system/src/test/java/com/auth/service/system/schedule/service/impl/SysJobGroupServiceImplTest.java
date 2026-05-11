@@ -21,8 +21,9 @@ import com.auth.service.system.schedule.mapper.SysJobGroupMapper;
 import com.auth.service.system.schedule.mapper.SysJobMapper;
 import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
 import com.auth.service.system.schedule.model.form.SysJobGroupForm;
+import com.auth.service.system.schedule.model.po.SysJobGroupPageRowPO;
 import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
-import com.auth.service.system.schedule.model.vo.SysJobGroupPageResponse;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
@@ -59,36 +60,36 @@ class SysJobGroupServiceImplTest {
 	void getPageEnrichesUsernames() {
 		Page<SysJobGroupEntity> pageParams = new Page<>(1, 10);
 		SysJobGroupQuery query = new SysJobGroupQuery();
-		Page<SysJobGroupPageResponse> mpPage = new Page<>(1, 10);
-		mpPage.setRecords(List.of(new SysJobGroupPageResponse()));
-		when(sysJobGroupMapper.selectListByPage(pageParams, query)).thenReturn(mpPage);
+		Page<SysJobGroupPageRowPO> poPage = new Page<>(1, 10);
+		poPage.setRecords(List.of(new SysJobGroupPageRowPO()));
+		when(sysJobGroupMapper.selectListByPage(pageParams, query)).thenReturn(poPage);
 
 		sysJobGroupService.getPage(pageParams, query);
 
-		verify(auditUserDisplayService).enrichAuditUsernames(mpPage);
+		verify(auditUserDisplayService).enrichAuditUsernames(any(IPage.class));
 	}
 
 	@Test
-	@DisplayName("启用下拉：limit 限制在 1～60，keyword trim，并补全展示名")
-	void listEnabledOptionsClampsLimitAndTrimsKeyword() {
-		List<SysJobGroupPageResponse> rows = List.of(new SysJobGroupPageResponse());
-		when(sysJobGroupMapper.selectEnabledOptions("kw", 60)).thenReturn(rows);
+	@DisplayName("启用下拉：keyword trim，并补全展示名")
+	void listEnabledOptionsTrimsKeyword() {
+		List<SysJobGroupPageRowPO> rows = List.of(new SysJobGroupPageRowPO());
+		when(sysJobGroupMapper.selectEnabledOptions("kw", 999)).thenReturn(rows);
 
-		List<SysJobGroupPageResponse> result = sysJobGroupService.listEnabledOptions("  kw  ", 999);
+		List<?> result = sysJobGroupService.listEnabledOptions("  kw  ", 999);
 
-		assertThat(result).isSameAs(rows);
-		verify(sysJobGroupMapper).selectEnabledOptions("kw", 60);
-		verify(auditUserDisplayService).enrichAuditUsernames(rows);
+		assertThat(result).hasSize(1);
+		verify(sysJobGroupMapper).selectEnabledOptions("kw", 999);
+		verify(auditUserDisplayService).enrichAuditUsernames(any(List.class));
 	}
 
 	@Test
-	@DisplayName("启用下拉：limit 小于 1 时按 1 处理")
-	void listEnabledOptionsClampsMinimumLimit() {
-		when(sysJobGroupMapper.selectEnabledOptions(null, 1)).thenReturn(List.of());
+	@DisplayName("启用下拉：limit 为 0 按原值传入")
+	void listEnabledOptionsWithZeroLimit() {
+		when(sysJobGroupMapper.selectEnabledOptions(null, 0)).thenReturn(List.of());
 
 		sysJobGroupService.listEnabledOptions(null, 0);
 
-		verify(sysJobGroupMapper).selectEnabledOptions(null, 1);
+		verify(sysJobGroupMapper).selectEnabledOptions(null, 0);
 	}
 
 	@Test

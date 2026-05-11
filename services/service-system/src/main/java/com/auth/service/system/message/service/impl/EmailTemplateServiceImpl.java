@@ -10,6 +10,7 @@ import com.auth.service.system.message.mapper.EmailTemplateMapper;
 import com.auth.service.system.message.model.EmailTemplateEntity;
 import com.auth.service.system.message.model.EmailTemplateRequireFieldRow;
 import com.auth.service.system.message.model.form.*;
+import com.auth.service.system.message.model.po.EmailTemplatePageRowPO;
 import com.auth.service.system.message.model.query.EmailTemplateQuery;
 import com.auth.service.system.message.model.vo.EmailTemplateDetailVO;
 import com.auth.service.system.message.model.vo.EmailTemplatePageResponse;
@@ -57,9 +58,12 @@ public class EmailTemplateServiceImpl extends ServiceImpl<EmailTemplateMapper, E
 	@Override
 	public PageResponse<EmailTemplatePageResponse> getEmailTemplatePage(Page<EmailTemplateEntity> pageParams,
 			EmailTemplateQuery query) {
-		IPage<EmailTemplatePageResponse> page = baseMapper.selectListByPage(pageParams, query);
-		auditUserDisplayService.enrichAuditUsernames(page);
-		return PageResponse.of(page);
+		IPage<EmailTemplatePageRowPO> page = baseMapper.selectListByPage(pageParams, query);
+		// PO 转 VO
+		IPage<EmailTemplatePageResponse> voPage = page
+			.convert(po -> BeanUtil.copyProperties(po, EmailTemplatePageResponse.class));
+		auditUserDisplayService.enrichAuditUsernames(voPage);
+		return PageResponse.of(voPage);
 	}
 
 	/**

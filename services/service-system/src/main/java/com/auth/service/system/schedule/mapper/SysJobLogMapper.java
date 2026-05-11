@@ -1,15 +1,16 @@
 package com.auth.service.system.schedule.mapper;
 
-import com.auth.service.system.schedule.model.entity.SysJobLogEntity;
-import com.auth.service.system.schedule.model.query.SysJobLogQuery;
-import com.auth.service.system.schedule.model.vo.SysJobLogPageResponse;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import java.util.List;
+
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import java.util.List;
+import com.auth.service.system.schedule.model.entity.SysJobLogEntity;
+import com.auth.service.system.schedule.model.po.SysJobLogPageRowPO;
+import com.auth.service.system.schedule.model.query.SysJobLogQuery;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 /**
  * 任务日志 Mapper
@@ -25,7 +26,7 @@ public interface SysJobLogMapper extends BaseMapper<SysJobLogEntity> {
 	 * @param query 条件
 	 * @return 分页结果
 	 */
-	IPage<SysJobLogPageResponse> selectListByPage(@Param("page") Page<SysJobLogEntity> page,
+	IPage<SysJobLogPageRowPO> selectListByPage(@Param("page") Page<SysJobLogEntity> page,
 			@Param("query") SysJobLogQuery query);
 
 	/**

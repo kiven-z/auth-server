@@ -11,7 +11,7 @@ import java.io.Serializable;
  *
  * @author Bunny
  */
-@Schema(name = "SysMenuAssignedRoleDTO", title = "菜单已分配角色 DTO")
+@Schema(name = "SysMenuAssignedRolePO", title = "菜单已分配角色 PO")
 @Data
 public class SysMenuAssignedRolePO implements Serializable {
 
