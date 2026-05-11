@@ -1,7 +1,9 @@
 package com.auth.service.system.admin.model.entity;
 
 import com.auth.common.data.model.BaseEntity;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,7 +25,17 @@ public class SysPermissionEntity extends BaseEntity {
 	@Schema(title = "权限名称")
 	private String permissionName;
 
+	@Schema(title = "权限类型(0=按钮, 1=API)")
+	private Integer permissionType;
+
+	@Schema(title = "显示顺序")
+	private Integer orderNum;
+
 	@Schema(title = "启用状态(true=启用)")
 	private Boolean status;
+
+	@TableLogic
+	@Schema(title = "删除标志(0=未删除, 1=已删除)")
+	private Boolean isDeleted;
 
 }

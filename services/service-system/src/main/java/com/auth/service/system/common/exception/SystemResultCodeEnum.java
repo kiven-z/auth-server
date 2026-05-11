@@ -408,7 +408,17 @@ public enum SystemResultCodeEnum {
 	/**
 	 * 权限编码在系统中不存在
 	 */
-	MENU_PERMISSION_CODE_INVALID(422, 272, "MENU_PERMISSION_CODE_INVALID", "system.menu.permission_code_invalid"),;
+	MENU_PERMISSION_CODE_INVALID(422, 272, "MENU_PERMISSION_CODE_INVALID", "system.menu.permission_code_invalid"),
+
+	// --- Permission Management (273+)
+	/**
+	 * 权限不存在
+	 */
+	PERMISSION_NOT_FOUND(404, 273, "PERMISSION_NOT_FOUND", "system.permission.not_found"),
+	/**
+	 * 权限编码已存在
+	 */
+	PERMISSION_CODE_DUPLICATE(409, 274, "PERMISSION_CODE_DUPLICATE", "system.permission.code_duplicate"),;
 
 	private final int httpStatus;
 
