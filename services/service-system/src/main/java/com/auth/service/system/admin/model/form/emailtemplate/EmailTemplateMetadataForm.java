@@ -1,4 +1,4 @@
-package com.auth.service.system.message.model.form;
+package com.auth.service.system.admin.model.form.emailtemplate;
 
 import com.auth.common.web.valid.group.UpdateGroup;
 import io.swagger.v3.oas.annotations.media.Schema;

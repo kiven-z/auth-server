@@ -1,16 +1,22 @@
 package com.auth.service.system.message.service.impl;
 
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-
+import cn.hutool.core.codec.Base64;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.PrimitiveArrayUtil;
+import com.auth.module.email.model.AttachmentDTO;
+import com.auth.module.email.model.EmailSendDTO;
+import com.auth.module.email.model.InMemoryMultipartFile;
+import com.auth.service.system.admin.mapper.EmailTemplateMapper;
+import com.auth.service.system.admin.model.entity.EmailTemplateEntity;
+import com.auth.service.system.admin.model.vo.emailtemplate.EmailTemplateRequireFieldRow;
+import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.message.service.EmailSendService;
+import com.auth.service.system.message.support.EmailTemplateRequireFieldsJsonSupport;
+import com.auth.service.system.message.utils.MailFreeMarkUtil;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -19,24 +25,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.auth.module.email.model.AttachmentDTO;
-import com.auth.module.email.model.EmailSendDTO;
-import com.auth.module.email.model.InMemoryMultipartFile;
-import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.message.mapper.EmailTemplateMapper;
-import com.auth.service.system.message.model.EmailTemplateEntity;
-import com.auth.service.system.message.model.EmailTemplateRequireFieldRow;
-import com.auth.service.system.message.service.EmailSendService;
-import com.auth.service.system.message.support.EmailTemplateRequireFieldsJsonSupport;
-import com.auth.service.system.message.utils.MailFreeMarkUtil;
+import java.util.*;
 
-import cn.hutool.core.codec.Base64;
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.util.PrimitiveArrayUtil;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
-import lombok.extern.slf4j.Slf4j;
+import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
 
 /**
  * 通用邮件发送服务实现

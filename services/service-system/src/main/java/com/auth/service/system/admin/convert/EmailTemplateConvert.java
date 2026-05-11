@@ -1,10 +1,9 @@
-package com.auth.service.system.message.convert;
+package com.auth.service.system.admin.convert;
 
+import com.auth.service.system.admin.model.po.emailtemplate.EmailTemplatePageRowPO;
+import com.auth.service.system.admin.model.vo.emailtemplate.EmailTemplatePageResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
-
-import com.auth.service.system.message.model.po.EmailTemplatePageRowPO;
-import com.auth.service.system.message.model.vo.EmailTemplatePageResponse;
 
 /**
  * 邮件模板转换器

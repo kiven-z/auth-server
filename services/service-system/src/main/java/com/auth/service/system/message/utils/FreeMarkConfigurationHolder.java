@@ -1,6 +1,6 @@
 package com.auth.service.system.message.utils;
 
-import com.auth.service.system.message.exception.FreeMarkerConfigException;
+import com.auth.service.system.common.exception.FreeMarkerConfigException;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateExceptionHandler;
 import lombok.experimental.UtilityClass;

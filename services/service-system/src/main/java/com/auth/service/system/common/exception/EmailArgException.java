@@ -1,4 +1,4 @@
-package com.auth.service.system.message.exception;
+package com.auth.service.system.common.exception;
 
 /**
  * 邮件参数异常

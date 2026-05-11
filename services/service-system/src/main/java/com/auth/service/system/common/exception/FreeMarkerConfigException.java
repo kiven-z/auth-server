@@ -1,4 +1,4 @@
-package com.auth.service.system.message.exception;
+package com.auth.service.system.common.exception;
 
 /**
  * freemarker 配置异常

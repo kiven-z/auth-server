@@ -1,45 +1,37 @@
-package com.auth.service.system.message.service.impl;
+package com.auth.service.system.admin.service.impl;
 
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.email.model.EmailSendDTO;
+import com.auth.service.system.admin.convert.EmailTemplateConvert;
+import com.auth.service.system.admin.mapper.EmailTemplateMapper;
+import com.auth.service.system.admin.model.entity.EmailTemplateEntity;
+import com.auth.service.system.admin.model.form.emailtemplate.*;
+import com.auth.service.system.admin.model.po.emailtemplate.EmailTemplatePageRowPO;
+import com.auth.service.system.admin.model.query.EmailTemplateQuery;
+import com.auth.service.system.admin.model.vo.emailtemplate.EmailTemplateDetailVO;
+import com.auth.service.system.admin.model.vo.emailtemplate.EmailTemplatePageResponse;
+import com.auth.service.system.admin.model.vo.emailtemplate.EmailTemplateRequireFieldRow;
+import com.auth.service.system.admin.service.EmailTemplateService;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
-import com.auth.service.system.message.convert.EmailTemplateConvert;
-import com.auth.service.system.message.mapper.EmailTemplateMapper;
-import com.auth.service.system.message.model.EmailTemplateEntity;
-import com.auth.service.system.message.model.EmailTemplateRequireFieldRow;
-import com.auth.service.system.message.model.form.EmailTemplateContentForm;
-import com.auth.service.system.message.model.form.EmailTemplateForm;
-import com.auth.service.system.message.model.form.EmailTemplateMetadataForm;
-import com.auth.service.system.message.model.form.EmailTemplateRenderForm;
-import com.auth.service.system.message.model.form.EmailTemplateRequireFieldsForm;
-import com.auth.service.system.message.model.form.EmailTemplateStatusForm;
-import com.auth.service.system.message.model.form.EmailTemplateTestSendForm;
-import com.auth.service.system.message.model.po.EmailTemplatePageRowPO;
-import com.auth.service.system.message.model.query.EmailTemplateQuery;
-import com.auth.service.system.message.model.vo.EmailTemplateDetailVO;
-import com.auth.service.system.message.model.vo.EmailTemplatePageResponse;
 import com.auth.service.system.message.service.EmailSendService;
-import com.auth.service.system.message.service.EmailTemplateService;
 import com.auth.service.system.message.support.EmailTemplateRequireFieldsJsonSupport;
 import com.auth.service.system.message.utils.MailFreeMarkUtil;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.text.CharSequenceUtil;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import static com.auth.service.system.common.exception.SystemResultCodeEnum.DATA_NOT_EXIST;
 
 /**
  * 邮件模板业务实现：分页查询、详情、增删改、必填变量维护、FreeMarker 预览/渲染及测试发送

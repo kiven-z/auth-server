@@ -1,6 +1,6 @@
 package com.auth.service.system.message.utils;
 
-import com.auth.service.system.message.exception.EmailTemplateException;
+import com.auth.service.system.common.exception.EmailTemplateException;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import lombok.experimental.UtilityClass;

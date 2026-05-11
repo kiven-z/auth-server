@@ -1,15 +1,15 @@
-package com.auth.service.system.message.controller;
+package com.auth.service.system.admin.controller;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.common.web.valid.group.CreateGroup;
 import com.auth.common.web.valid.group.UpdateGroup;
-import com.auth.service.system.message.model.EmailTemplateEntity;
-import com.auth.service.system.message.model.form.*;
-import com.auth.service.system.message.model.query.EmailTemplateQuery;
-import com.auth.service.system.message.model.vo.EmailTemplateDetailVO;
-import com.auth.service.system.message.model.vo.EmailTemplatePageResponse;
-import com.auth.service.system.message.service.EmailTemplateService;
+import com.auth.service.system.admin.model.entity.EmailTemplateEntity;
+import com.auth.service.system.admin.model.form.emailtemplate.*;
+import com.auth.service.system.admin.model.query.EmailTemplateQuery;
+import com.auth.service.system.admin.model.vo.emailtemplate.EmailTemplateDetailVO;
+import com.auth.service.system.admin.model.vo.emailtemplate.EmailTemplatePageResponse;
+import com.auth.service.system.admin.service.EmailTemplateService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

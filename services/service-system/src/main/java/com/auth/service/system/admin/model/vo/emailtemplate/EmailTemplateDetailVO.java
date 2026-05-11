@@ -1,17 +1,15 @@
-package com.auth.service.system.message.model.vo;
-
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.List;
+package com.auth.service.system.admin.model.vo.emailtemplate;
 
 import com.auth.common.core.model.response.BaseResponse;
-import com.auth.service.system.message.model.EmailTemplateRequireFieldRow;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * 邮件模板详情返回对象（含 require_fields 解析结果）

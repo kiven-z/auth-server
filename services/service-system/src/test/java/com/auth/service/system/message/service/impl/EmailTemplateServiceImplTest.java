@@ -1,11 +1,12 @@
 package com.auth.service.system.message.service.impl;
 
+import com.auth.service.system.admin.mapper.EmailTemplateMapper;
+import com.auth.service.system.admin.model.entity.EmailTemplateEntity;
+import com.auth.service.system.admin.model.po.emailtemplate.EmailTemplatePageRowPO;
+import com.auth.service.system.admin.model.query.EmailTemplateQuery;
+import com.auth.service.system.admin.model.vo.emailtemplate.EmailTemplateDetailVO;
+import com.auth.service.system.admin.service.impl.EmailTemplateServiceImpl;
 import com.auth.service.system.common.service.AuditUserDisplayService;
-import com.auth.service.system.message.mapper.EmailTemplateMapper;
-import com.auth.service.system.message.model.EmailTemplateEntity;
-import com.auth.service.system.message.model.po.EmailTemplatePageRowPO;
-import com.auth.service.system.message.model.query.EmailTemplateQuery;
-import com.auth.service.system.message.model.vo.EmailTemplateDetailVO;
 import com.auth.service.system.message.service.EmailSendService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;

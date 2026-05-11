@@ -1,8 +1,8 @@
 package com.auth.service.system.binarystatus;
 
 import com.auth.service.system.admin.model.form.role.SysRoleCreateForm;
+import com.auth.service.system.admin.model.query.EmailTemplateQuery;
 import com.auth.service.system.admin.model.query.SysRoleQuery;
-import com.auth.service.system.message.model.query.EmailTemplateQuery;
 import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;

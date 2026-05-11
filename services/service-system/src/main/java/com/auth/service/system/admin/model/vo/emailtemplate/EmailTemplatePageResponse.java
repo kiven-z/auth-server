@@ -1,16 +1,11 @@
-package com.auth.service.system.message.model.vo;
+package com.auth.service.system.admin.model.vo.emailtemplate;
+
+import com.auth.common.core.model.response.BaseResponse;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.*;
 
 import java.io.Serial;
 import java.io.Serializable;
-
-import com.auth.common.core.model.response.BaseResponse;
-
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 
 /**
  * 邮件模板分页返回对象
