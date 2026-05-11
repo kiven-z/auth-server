@@ -1,12 +1,12 @@
 package com.auth.service.system.admin.model.vo.menu;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * 菜单已分配角色行（抽屉：与前端 {@code SysMenuAssignedRoleRow} 对齐）
@@ -15,8 +15,8 @@ import java.io.Serializable;
  */
 @Schema(name = "SysMenuAssignedRoleRow", title = "菜单角色分配行")
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class SysMenuAssignedRoleRow implements Serializable {
 
 	@Serial
