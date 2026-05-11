@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.common.service.AuditUserDisplayService;
+import com.auth.service.system.log.convert.LogUserPasswordHistoryConvert;
 import com.auth.service.system.log.mapper.LogUserPasswordHistoryMapper;
 import com.auth.service.system.log.model.entity.LogUserPasswordHistoryEntity;
 import com.auth.service.system.log.model.po.LogUserPasswordHistoryDetailRowPO;
@@ -46,8 +47,7 @@ public class LogUserPasswordHistoryServiceImpl
 			LogUserPasswordHistoryQuery query) {
 		IPage<LogUserPasswordHistoryPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
 		// PO 转 VO
-		IPage<LogUserPasswordHistoryPageVO> voPage = page
-			.convert(po -> BeanUtil.copyProperties(po, LogUserPasswordHistoryPageVO.class));
+		IPage<LogUserPasswordHistoryPageVO> voPage = page.convert(LogUserPasswordHistoryConvert.INSTANCE::toPageVO);
 		auditUserDisplayService.enrichAuditUsernames(voPage);
 		return PageResponse.of(voPage);
 	}

@@ -33,63 +33,63 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class EmailTemplateServiceImplTest {
 
-    @Mock
-    private EmailTemplateMapper emailTemplateMapper;
+	@Mock
+	private EmailTemplateMapper emailTemplateMapper;
 
-    @Mock
-    private AuditUserDisplayService auditUserDisplayService;
+	@Mock
+	private AuditUserDisplayService auditUserDisplayService;
 
-    @Mock
-    private EmailSendService emailSendService;
+	@Mock
+	private EmailSendService emailSendService;
 
-    private EmailTemplateServiceImpl emailTemplateService;
+	private EmailTemplateServiceImpl emailTemplateService;
 
-    @BeforeEach
-    void setUp() throws Exception {
-        emailTemplateService = new EmailTemplateServiceImpl(auditUserDisplayService, emailSendService);
-        Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
-        baseMapperField.setAccessible(true);
-        baseMapperField.set(emailTemplateService, emailTemplateMapper);
-    }
+	@BeforeEach
+	void setUp() throws Exception {
+		emailTemplateService = new EmailTemplateServiceImpl(auditUserDisplayService, emailSendService);
+		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
+		baseMapperField.setAccessible(true);
+		baseMapperField.set(emailTemplateService, emailTemplateMapper);
+	}
 
-    @Test
-    @DisplayName("分页查询：Mapper 分页后委托审计用户展示名补全")
-    void getEmailTemplatePageEnrichesAuditUsernames() {
-        Page<EmailTemplateEntity> pageParams = new Page<>(1, 20);
-        EmailTemplateQuery query = new EmailTemplateQuery();
-        Page<EmailTemplatePageRowPO> poPage = new Page<>(1, 20);
-        when(emailTemplateMapper.selectListByPage(pageParams, query)).thenReturn(poPage);
+	@Test
+	@DisplayName("分页查询：Mapper 分页后委托审计用户展示名补全")
+	void getEmailTemplatePageEnrichesAuditUsernames() {
+		Page<EmailTemplateEntity> pageParams = new Page<>(1, 20);
+		EmailTemplateQuery query = new EmailTemplateQuery();
+		Page<EmailTemplatePageRowPO> poPage = new Page<>(1, 20);
+		when(emailTemplateMapper.selectListByPage(pageParams, query)).thenReturn(poPage);
 
-        emailTemplateService.getEmailTemplatePage(pageParams, query);
+		emailTemplateService.getEmailTemplatePage(pageParams, query);
 
-        verify(auditUserDisplayService).enrichAuditUsernames(any(IPage.class));
-    }
+		verify(auditUserDisplayService).enrichAuditUsernames(any(IPage.class));
+	}
 
-    @Test
-    @DisplayName("按 id 查询：无记录时返回 null，不调用补全")
-    void getEmailTemplateByIdReturnsNullWhenMissing() {
-        when(emailTemplateMapper.selectById(100L)).thenReturn(null);
+	@Test
+	@DisplayName("按 id 查询：无记录时返回 null，不调用补全")
+	void getEmailTemplateByIdReturnsNullWhenMissing() {
+		when(emailTemplateMapper.selectById(100L)).thenReturn(null);
 
-        assertThat(emailTemplateService.getEmailTemplateById(100L)).isNull();
-        verifyNoInteractions(auditUserDisplayService);
-    }
+		assertThat(emailTemplateService.getEmailTemplateById(100L)).isNull();
+		verifyNoInteractions(auditUserDisplayService);
+	}
 
-    @Test
-    @DisplayName("按 id 查询：组装详情后补全创建人/更新人用户名")
-    void getEmailTemplateByIdEnrichesSingletonList() {
-        EmailTemplateEntity entity = new EmailTemplateEntity();
-        entity.setId(1L);
-        entity.setTemplateCode("T1");
-        entity.setCreateUser(7L);
-        entity.setUpdateUser(8L);
-        entity.setRequireFields(null);
-        when(emailTemplateMapper.selectById(1L)).thenReturn(entity);
+	@Test
+	@DisplayName("按 id 查询：组装详情后补全创建人/更新人用户名")
+	void getEmailTemplateByIdEnrichesSingletonList() {
+		EmailTemplateEntity entity = new EmailTemplateEntity();
+		entity.setId(1L);
+		entity.setTemplateCode("T1");
+		entity.setCreateUser(7L);
+		entity.setUpdateUser(8L);
+		entity.setRequireFields(null);
+		when(emailTemplateMapper.selectById(1L)).thenReturn(entity);
 
-        EmailTemplateDetailVO vo = emailTemplateService.getEmailTemplateById(1L);
+		EmailTemplateDetailVO vo = emailTemplateService.getEmailTemplateById(1L);
 
-        assertThat(vo).isNotNull();
-        assertThat(vo.getTemplateCode()).isEqualTo("T1");
-        verify(auditUserDisplayService).enrichAuditUsernames(anyList());
-    }
+		assertThat(vo).isNotNull();
+		assertThat(vo.getTemplateCode()).isEqualTo("T1");
+		verify(auditUserDisplayService).enrichAuditUsernames(anyList());
+	}
 
 }

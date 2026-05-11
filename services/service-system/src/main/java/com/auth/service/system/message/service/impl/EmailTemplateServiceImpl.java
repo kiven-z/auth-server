@@ -1,15 +1,30 @@
 package com.auth.service.system.message.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.text.CharSequenceUtil;
+import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.email.model.EmailSendDTO;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
+import com.auth.service.system.message.convert.EmailTemplateConvert;
 import com.auth.service.system.message.mapper.EmailTemplateMapper;
 import com.auth.service.system.message.model.EmailTemplateEntity;
 import com.auth.service.system.message.model.EmailTemplateRequireFieldRow;
-import com.auth.service.system.message.model.form.*;
+import com.auth.service.system.message.model.form.EmailTemplateContentForm;
+import com.auth.service.system.message.model.form.EmailTemplateForm;
+import com.auth.service.system.message.model.form.EmailTemplateMetadataForm;
+import com.auth.service.system.message.model.form.EmailTemplateRenderForm;
+import com.auth.service.system.message.model.form.EmailTemplateRequireFieldsForm;
+import com.auth.service.system.message.model.form.EmailTemplateStatusForm;
+import com.auth.service.system.message.model.form.EmailTemplateTestSendForm;
 import com.auth.service.system.message.model.po.EmailTemplatePageRowPO;
 import com.auth.service.system.message.model.query.EmailTemplateQuery;
 import com.auth.service.system.message.model.vo.EmailTemplateDetailVO;
@@ -22,15 +37,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.DATA_NOT_EXIST;
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 
 /**
  * 邮件模板业务实现：分页查询、详情、增删改、必填变量维护、FreeMarker 预览/渲染及测试发送
@@ -60,8 +69,7 @@ public class EmailTemplateServiceImpl extends ServiceImpl<EmailTemplateMapper, E
 			EmailTemplateQuery query) {
 		IPage<EmailTemplatePageRowPO> page = baseMapper.selectListByPage(pageParams, query);
 		// PO 转 VO
-		IPage<EmailTemplatePageResponse> voPage = page
-			.convert(po -> BeanUtil.copyProperties(po, EmailTemplatePageResponse.class));
+		IPage<EmailTemplatePageResponse> voPage = page.convert(EmailTemplateConvert.INSTANCE::toPageResponse);
 		auditUserDisplayService.enrichAuditUsernames(voPage);
 		return PageResponse.of(voPage);
 	}

@@ -22,6 +22,7 @@ import com.auth.module.security.starter.model.UserEntity;
 import com.auth.service.system.admin.mapper.UserMapper;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.message.service.EmailSendService;
+import com.auth.service.system.schedule.convert.SysJobLogConvert;
 import com.auth.service.system.schedule.mapper.SysJobLogMapper;
 import com.auth.service.system.schedule.model.entity.SysJobLogEntity;
 import com.auth.service.system.schedule.model.po.SysJobLogPageRowPO;
@@ -74,8 +75,7 @@ public class SysJobLogServiceImpl extends ServiceImpl<SysJobLogMapper, SysJobLog
 	public PageResponse<SysJobLogPageResponse> getPage(Page<SysJobLogEntity> pageParams, SysJobLogQuery query) {
 		IPage<SysJobLogPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
 		// PO 转 VO
-		IPage<SysJobLogPageResponse> voPage = page
-			.convert(po -> BeanUtil.copyProperties(po, SysJobLogPageResponse.class));
+		IPage<SysJobLogPageResponse> voPage = page.convert(SysJobLogConvert.INSTANCE::toPageResponse);
 
 		return PageResponse.of(voPage);
 	}

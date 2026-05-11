@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.common.service.AuditUserDisplayService;
+import com.auth.service.system.log.convert.LogLoginLogConvert;
 import com.auth.service.system.log.mapper.LogLoginLogMapper;
 import com.auth.service.system.log.model.entity.LogLoginLogEntity;
 import com.auth.service.system.log.model.po.LogLoginLogDetailRowPO;
@@ -44,7 +45,7 @@ public class LogLoginLogServiceImpl extends ServiceImpl<LogLoginLogMapper, LogLo
 	public PageResponse<LogLoginLogPageVO> getPage(Page<LogLoginLogEntity> pageParams, LogLoginLogQuery query) {
 		IPage<LogLoginLogPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
 		// PO 转 VO（PageResponse.of 复用 records）
-		IPage<LogLoginLogPageVO> voPage = page.convert(po -> BeanUtil.copyProperties(po, LogLoginLogPageVO.class));
+		IPage<LogLoginLogPageVO> voPage = page.convert(LogLoginLogConvert.INSTANCE::toPageVO);
 		auditUserDisplayService.enrichAuditUsernames(voPage);
 		return PageResponse.of(voPage);
 	}

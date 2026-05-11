@@ -26,7 +26,6 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.BooleanUtil;
 
@@ -56,8 +55,7 @@ public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJo
 	public PageResponse<SysJobGroupPageResponse> getPage(Page<SysJobGroupEntity> pageParams, SysJobGroupQuery query) {
 		IPage<SysJobGroupPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
 		// PO 转 VO
-		IPage<SysJobGroupPageResponse> voPage = page
-			.convert(po -> BeanUtil.copyProperties(po, SysJobGroupPageResponse.class));
+		IPage<SysJobGroupPageResponse> voPage = page.convert(SysJobGroupConverter.INSTANCE::toPageResponse);
 		auditUserDisplayService.enrichAuditUsernames(voPage);
 
 		return PageResponse.of(voPage);
@@ -71,7 +69,7 @@ public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJo
 		String searchKeyword = CharSequenceUtil.trim(keyword);
 		List<SysJobGroupPageRowPO> list = baseMapper.selectEnabledOptions(searchKeyword, limit);
 		List<SysJobGroupPageResponse> voList = list.stream()
-			.map(po -> BeanUtil.copyProperties(po, SysJobGroupPageResponse.class))
+			.map(SysJobGroupConverter.INSTANCE::toPageResponse)
 			.toList();
 		auditUserDisplayService.enrichAuditUsernames(voList);
 

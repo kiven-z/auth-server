@@ -8,6 +8,8 @@ import org.mapstruct.factory.Mappers;
 import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
 import com.auth.service.system.schedule.model.form.SysJobGroupForm;
 import com.auth.service.system.schedule.model.form.SysJobGroupUpdateForm;
+import com.auth.service.system.schedule.model.po.SysJobGroupPageRowPO;
+import com.auth.service.system.schedule.model.vo.SysJobGroupPageResponse;
 
 /**
  * 任务分组转换器
@@ -35,5 +37,12 @@ public interface SysJobGroupConverter {
 	@Mapping(target = "groupCode", ignore = true)
 	@Mapping(target = "isSystem", ignore = true)
 	void updateEntity(SysJobGroupUpdateForm form, @MappingTarget SysJobGroupEntity entity);
+
+	/**
+	 * 任务分组分页行 PO → 分页返回 VO
+	 * @param po 持久层查询投影
+	 * @return 分页返回对象
+	 */
+	SysJobGroupPageResponse toPageResponse(SysJobGroupPageRowPO po);
 
 }
