@@ -13,7 +13,7 @@ import java.util.List;
  * @author Bunny
  */
 @Mapper
-public interface SysJobLogMapper extends BaseMapper<JobLogEntity> {
+public interface JobLogMapper extends BaseMapper<JobLogEntity> {
 
 	/**
 	 * 按任务取最近若干条（按时间倒序），用于熔断判断

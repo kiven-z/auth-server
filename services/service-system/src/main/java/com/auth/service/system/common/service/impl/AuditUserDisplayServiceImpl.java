@@ -3,7 +3,7 @@ package com.auth.service.system.common.service.impl;
 import cn.hutool.core.collection.CollUtil;
 import com.auth.common.core.model.response.BaseResponse;
 import com.auth.module.security.starter.model.UserEntity;
-import com.auth.service.system.admin.mapper.UserMapper;
+import com.auth.service.system.admin.mapper.SysUserMapper;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.springframework.stereotype.Service;
@@ -23,10 +23,10 @@ import java.util.stream.Stream;
 @Service
 public class AuditUserDisplayServiceImpl implements AuditUserDisplayService {
 
-	private final UserMapper userMapper;
+	private final SysUserMapper sysUserMapper;
 
-	public AuditUserDisplayServiceImpl(UserMapper userMapper) {
-		this.userMapper = userMapper;
+	public AuditUserDisplayServiceImpl(SysUserMapper sysUserMapper) {
+		this.sysUserMapper = sysUserMapper;
 	}
 
 	/**
@@ -46,7 +46,7 @@ public class AuditUserDisplayServiceImpl implements AuditUserDisplayService {
 	 */
 	@Override
 	public Map<Long, String> mapUsernamesByIds(Collection<Long> userIds) {
-		return userMapper.selectBatchIds(userIds)
+		return sysUserMapper.selectBatchIds(userIds)
 			.stream()
 			.collect(Collectors.toMap(UserEntity::getId, UserEntity::getUsername));
 	}

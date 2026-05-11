@@ -7,8 +7,8 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.module.email.model.EmailSendDTO;
 import com.auth.module.security.autoconfig.web.SecurityUserUtils;
 import com.auth.module.security.starter.model.UserEntity;
-import com.auth.service.system.admin.mapper.UserMapper;
 import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.common.mapper.SysUserQueryMapper;
 import com.auth.service.system.log.mapper.LogJobMapper;
 import com.auth.service.system.log.service.LogJobService;
 import com.auth.service.system.message.service.EmailSendService;
@@ -46,13 +46,13 @@ public class LogJobServiceImpl extends ServiceImpl<LogJobMapper, JobLogEntity> i
 
 	private final EmailSendService emailSendService;
 
-	private final UserMapper userMapper;
+	private final SysUserQueryMapper sysUserMapper;
 
 	public LogJobServiceImpl(RedisTemplate<String, Object> redisTemplate, EmailSendService emailSendService,
-			UserMapper userMapper) {
+			SysUserQueryMapper sysUserMapper) {
 		this.redisTemplate = redisTemplate;
 		this.emailSendService = emailSendService;
-		this.userMapper = userMapper;
+		this.sysUserMapper = sysUserMapper;
 	}
 
 	/**
@@ -96,7 +96,7 @@ public class LogJobServiceImpl extends ServiceImpl<LogJobMapper, JobLogEntity> i
 		}
 
 		// 查询并验证用户是否存在
-		UserEntity user = userMapper.selectById(userId);
+		UserEntity user = sysUserMapper.selectById(userId);
 		if (user == null || CharSequenceUtil.isBlank(user.getEmail())) {
 			throw new SystemBusinessException(USER_EMAIL_NOT_BIND);
 		}

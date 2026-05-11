@@ -10,6 +10,6 @@ import org.apache.ibatis.annotations.Mapper;
  * @author Bunny
  */
 @Mapper
-public interface UserMapper extends BaseMapper<UserEntity> {
+public interface SysUserMapper extends BaseMapper<UserEntity> {
 
 }

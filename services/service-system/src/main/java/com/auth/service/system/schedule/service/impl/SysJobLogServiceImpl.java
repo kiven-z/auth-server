@@ -1,7 +1,7 @@
 package com.auth.service.system.schedule.service.impl;
 
 import cn.hutool.core.exceptions.ExceptionUtil;
-import com.auth.service.system.schedule.mapper.SysJobLogMapper;
+import com.auth.service.system.schedule.mapper.JobLogMapper;
 import com.auth.service.system.schedule.model.entity.JobLogEntity;
 import com.auth.service.system.schedule.service.SysJobLogService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 @Slf4j
 @Service
 @Transactional(rollbackFor = Exception.class)
-public class SysJobLogServiceImpl extends ServiceImpl<SysJobLogMapper, JobLogEntity> implements SysJobLogService {
+public class SysJobLogServiceImpl extends ServiceImpl<JobLogMapper, JobLogEntity> implements SysJobLogService {
 
 	/**
 	 * {@inheritDoc}

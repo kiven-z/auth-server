@@ -2,7 +2,7 @@ package com.auth.service.system.schedule.support;
 
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.system.schedule.config.ScheduleJobProperties;
-import com.auth.service.system.schedule.mapper.SysJobLogMapper;
+import com.auth.service.system.schedule.mapper.JobLogMapper;
 import com.auth.service.system.schedule.mapper.SysJobMapper;
 import com.auth.service.system.schedule.model.entity.JobLogEntity;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
@@ -38,18 +38,18 @@ public class SysJobCircuitBreaker {
 	/**
 	 * 系统任务日志Mapper
 	 */
-	private final SysJobLogMapper sysJobLogMapper;
+	private final JobLogMapper jobLogMapper;
 
 	/**
 	 * 定时任务配置
 	 */
 	private final ScheduleJobProperties scheduleJobProperties;
 
-	public SysJobCircuitBreaker(@Lazy Scheduler scheduler, SysJobMapper sysJobMapper, SysJobLogMapper sysJobLogMapper,
+	public SysJobCircuitBreaker(@Lazy Scheduler scheduler, SysJobMapper sysJobMapper, JobLogMapper jobLogMapper,
 			ScheduleJobProperties scheduleJobProperties) {
 		this.scheduler = scheduler;
 		this.sysJobMapper = sysJobMapper;
-		this.sysJobLogMapper = sysJobLogMapper;
+		this.jobLogMapper = jobLogMapper;
 		this.scheduleJobProperties = scheduleJobProperties;
 	}
 
@@ -73,7 +73,7 @@ public class SysJobCircuitBreaker {
 		}
 
 		// 2. 查询最近连续失败日志
-		List<JobLogEntity> recent = sysJobLogMapper.selectRecentByJobNameAndGroup(jobName, jobGroup, threshold);
+		List<JobLogEntity> recent = jobLogMapper.selectRecentByJobNameAndGroup(jobName, jobGroup, threshold);
 		if (recent.size() < threshold) {
 			return;
 		}

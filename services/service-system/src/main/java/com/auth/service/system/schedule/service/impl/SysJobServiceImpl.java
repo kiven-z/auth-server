@@ -1,30 +1,12 @@
 package com.auth.service.system.schedule.service.impl;
 
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
-import static com.auth.service.system.schedule.model.constans.SysJobQuartzDataKeys.*;
-
-import java.lang.reflect.Method;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-
-import org.quartz.JobKey;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
-import org.quartz.Trigger;
-import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.BooleanUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
+import com.auth.service.system.schedule.mapper.JobLogMapper;
 import com.auth.service.system.schedule.mapper.SysJobGroupMapper;
-import com.auth.service.system.schedule.mapper.SysJobLogMapper;
 import com.auth.service.system.schedule.mapper.SysJobMapper;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
@@ -43,10 +25,26 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-
-import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.util.BooleanUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.quartz.JobKey;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.Trigger;
+import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.lang.reflect.Method;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+
+import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
+import static com.auth.service.system.schedule.model.constans.SysJobQuartzDataKeys.JOB_ZONE;
 
 /**
  * 定时任务与 Quartz 同步实现
@@ -68,19 +66,19 @@ public class SysJobServiceImpl extends ServiceImpl<SysJobMapper, SysJobEntity> i
 
 	private final SysJobGroupMapper sysJobGroupMapper;
 
-	private final SysJobLogMapper sysJobLogMapper;
+	private final JobLogMapper jobLogMapper;
 
 	private final Scheduler scheduler;
 
 	public SysJobServiceImpl(SysJobSchedulerManager quartzAdmin, QuartzTaskRegistry quartzTaskRegistry,
 			ApplicationContext applicationContext, AuditUserDisplayService auditUserDisplayService,
-			SysJobGroupMapper sysJobGroupMapper, SysJobLogMapper sysJobLogMapper, Scheduler scheduler) {
+			SysJobGroupMapper sysJobGroupMapper, JobLogMapper jobLogMapper, Scheduler scheduler) {
 		this.quartzAdmin = quartzAdmin;
 		this.quartzTaskRegistry = quartzTaskRegistry;
 		this.applicationContext = applicationContext;
 		this.auditUserDisplayService = auditUserDisplayService;
 		this.sysJobGroupMapper = sysJobGroupMapper;
-		this.sysJobLogMapper = sysJobLogMapper;
+		this.jobLogMapper = jobLogMapper;
 		this.scheduler = scheduler;
 	}
 
@@ -248,7 +246,7 @@ public class SysJobServiceImpl extends ServiceImpl<SysJobMapper, SysJobEntity> i
 
 		// 级联物理删除日志（日志可丢失，不强制与主表同事务强一致）
 		try {
-			sysJobLogMapper.deleteByJobNameAndGroup(jobName, jobGroup);
+			jobLogMapper.deleteByJobNameAndGroup(jobName, jobGroup);
 		}
 		catch (Exception exception) {
 			log.error("级联物理删除日志失败", exception);
