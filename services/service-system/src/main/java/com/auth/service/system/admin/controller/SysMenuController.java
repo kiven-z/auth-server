@@ -12,7 +12,6 @@ import com.auth.service.system.admin.model.query.SysMenuQuery;
 import com.auth.service.system.admin.model.vo.menu.RouteNodeVO;
 import com.auth.service.system.admin.model.vo.menu.SysMenuDetailVO;
 import com.auth.service.system.admin.model.vo.menu.SysMenuListVO;
-import com.auth.service.system.admin.service.MenuWebRouteService;
 import com.auth.service.system.admin.service.SysMenuService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,12 +35,9 @@ import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
 @RestController
 public class SysMenuController {
 
-	private final MenuWebRouteService menuWebRouteService;
-
 	private final SysMenuService sysMenuService;
 
-	public SysMenuController(MenuWebRouteService menuWebRouteService, SysMenuService sysMenuService) {
-		this.menuWebRouteService = menuWebRouteService;
+	public SysMenuController(SysMenuService sysMenuService) {
 		this.sysMenuService = sysMenuService;
 	}
 
@@ -50,7 +46,7 @@ public class SysMenuController {
 	@GetMapping("/web-routes")
 	public Result<List<RouteNodeVO>> getWebRoutes() {
 		Long userId = SecurityUserUtils.getUserId();
-		List<RouteNodeVO> menuList = menuWebRouteService.listWebRoutes(userId);
+		List<RouteNodeVO> menuList = sysMenuService.listWebRoutes(userId);
 		return Result.success(menuList);
 	}
 
