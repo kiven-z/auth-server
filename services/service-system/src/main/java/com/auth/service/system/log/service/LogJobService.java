@@ -8,6 +8,11 @@ import com.auth.service.system.schedule.model.vo.SysJobLogPageResponse;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+/**
+ * 定时任务日志服务
+ *
+ * @author Bunny
+ */
 public interface LogJobService extends IService<JobLogEntity> {
 
 	/**

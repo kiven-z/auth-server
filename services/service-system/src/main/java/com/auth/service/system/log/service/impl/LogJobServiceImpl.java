@@ -32,6 +32,11 @@ import java.util.Map;
 import static com.auth.module.email.model.TemplateType.CLEAR_DATABASE_CONFIRM;
 import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
 
+/**
+ * 定时任务日志服务实现
+ *
+ * @author Bunny
+ */
 @Service
 public class LogJobServiceImpl extends ServiceImpl<LogJobMapper, JobLogEntity> implements LogJobService {
 
