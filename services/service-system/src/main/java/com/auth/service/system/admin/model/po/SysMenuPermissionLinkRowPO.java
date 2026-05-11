@@ -1,10 +1,10 @@
-package com.auth.service.system.admin.model.dto.menu;
-
-import java.io.Serial;
-import java.io.Serializable;
+package com.auth.service.system.admin.model.po;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * 菜单与权限编码关联行（持久层查询投影，供动态路由批量加载）
@@ -13,7 +13,7 @@ import lombok.Data;
  */
 @Schema(name = "SysMenuPermissionLinkRow", title = "菜单-权限关联行")
 @Data
-public class SysMenuPermissionLinkRow implements Serializable {
+public class SysMenuPermissionLinkRowPO implements Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 1L;

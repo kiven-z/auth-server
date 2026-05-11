@@ -18,33 +18,29 @@ import java.util.stream.Collectors;
 @UtilityClass
 public class SysPermissionPageOrderSqlBuilder extends AbstractOderSqlBuilder {
 
-    /**
-     * 默认排序：显示顺序升序，创建时间降序。
-     */
-    public static final String DEFAULT_ORDER_BY_SQL = "p.order_num ASC, p.create_time DESC";
+	/**
+	 * 默认排序：显示顺序升序，创建时间降序。
+	 */
+	public static final String DEFAULT_ORDER_BY_SQL = "p.order_num ASC, p.create_time DESC";
 
-    private static final Map<String, String> FIELD_TO_COLUMN = Map.ofEntries(
-            Map.entry("orderNum", "p.order_num"),
-            Map.entry("createTime", "p.create_time"),
-            Map.entry("updateTime", "p.update_time"),
-            Map.entry("permissionCode", "p.permission_code"),
-            Map.entry("permissionName", "p.permission_name"),
-            Map.entry("permissionType", "p.permission_type"),
-            Map.entry("status", "p.status"));
+	private static final Map<String, String> FIELD_TO_COLUMN = Map.ofEntries(Map.entry("orderNum", "p.order_num"),
+			Map.entry("createTime", "p.create_time"), Map.entry("updateTime", "p.update_time"),
+			Map.entry("permissionCode", "p.permission_code"), Map.entry("permissionName", "p.permission_name"),
+			Map.entry("permissionType", "p.permission_type"), Map.entry("status", "p.status"));
 
-    /**
-     * 根据前端传入的排序规则生成 ORDER BY 子句（不含 ORDER BY 关键字）。
-     *
-     * @param sort 排序列表，可为 null
-     * @return 安全列名片段
-     */
-    public static String buildOrderBySql(List<SortSpec> sort) {
-        if (CollUtil.isEmpty(sort)) {
-            return DEFAULT_ORDER_BY_SQL;
-        }
-        String joined = sort.stream()
-                .flatMap(spec -> toSegment(spec, FIELD_TO_COLUMN).stream())
-                .collect(Collectors.joining(", "));
-        return CharSequenceUtil.isBlank(joined) ? DEFAULT_ORDER_BY_SQL : joined;
-    }
+	/**
+	 * 根据前端传入的排序规则生成 ORDER BY 子句（不含 ORDER BY 关键字）。
+	 * @param sort 排序列表，可为 null
+	 * @return 安全列名片段
+	 */
+	public static String buildOrderBySql(List<SortSpec> sort) {
+		if (CollUtil.isEmpty(sort)) {
+			return DEFAULT_ORDER_BY_SQL;
+		}
+		String joined = sort.stream()
+			.flatMap(spec -> toSegment(spec, FIELD_TO_COLUMN).stream())
+			.collect(Collectors.joining(", "));
+		return CharSequenceUtil.isBlank(joined) ? DEFAULT_ORDER_BY_SQL : joined;
+	}
+
 }

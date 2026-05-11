@@ -1,4 +1,4 @@
-package com.auth.service.system.admin.model.dto.menu;
+package com.auth.service.system.admin.model.po;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -13,7 +13,7 @@ import java.io.Serializable;
  */
 @Schema(name = "SysMenuAssignedPermissionDTO", title = "菜单已分配权限 DTO")
 @Data
-public class SysMenuAssignedPermissionDTO implements Serializable {
+public class SysMenuAssignedPermissionPO implements Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 1L;

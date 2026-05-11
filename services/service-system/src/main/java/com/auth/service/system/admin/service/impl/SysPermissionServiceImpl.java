@@ -25,25 +25,26 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, SysPermissionEntity>
-        implements SysPermissionService {
+		implements SysPermissionService {
 
-    private final AuditUserDisplayService auditUserDisplayService;
+	private final AuditUserDisplayService auditUserDisplayService;
 
-    public SysPermissionServiceImpl(AuditUserDisplayService auditUserDisplayService) {
-        this.auditUserDisplayService = auditUserDisplayService;
-    }
+	public SysPermissionServiceImpl(AuditUserDisplayService auditUserDisplayService) {
+		this.auditUserDisplayService = auditUserDisplayService;
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public PageResponse<SysPermissionPageResponse> getPage(Page<SysPermissionEntity> pageParams, SysPermissionQuery query) {
-        String orderBySql = SysPermissionPageOrderSqlBuilder.buildOrderBySql(query.getSort());
-        IPage<SysPermissionEntity> entityPage = baseMapper.selectListByPage(pageParams, query, orderBySql);
-        IPage<SysPermissionPageResponse> page = entityPage.convert(SysPermissionConverter.INSTANCE::toPageResponse);
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public PageResponse<SysPermissionPageResponse> getPage(Page<SysPermissionEntity> pageParams,
+			SysPermissionQuery query) {
+		String orderBySql = SysPermissionPageOrderSqlBuilder.buildOrderBySql(query.getSort());
+		IPage<SysPermissionEntity> entityPage = baseMapper.selectListByPage(pageParams, query, orderBySql);
+		IPage<SysPermissionPageResponse> page = entityPage.convert(SysPermissionConverter.INSTANCE::toPageResponse);
 
-        auditUserDisplayService.enrichAuditUsernames(page);
-        return PageResponse.of(page);
-    }
+		auditUserDisplayService.enrichAuditUsernames(page);
+		return PageResponse.of(page);
+	}
 
 }

@@ -4,7 +4,7 @@
 
     <!-- 查询菜单已分配角色（左连 sys_role 获取角色名称） -->
     <select id="selectAssignedRolesByMenuId"
-            resultType="com.auth.service.system.admin.model.dto.menu.SysMenuAssignedRoleDTO">
+            resultType="com.auth.service.system.admin.model.po.SysMenuAssignedRolePO">
         SELECT mr.role_code,
                r.role_name
         FROM sys_menu_role mr
@@ -15,7 +15,7 @@
 
     <!-- 批量查询菜单关联角色编码（仅启用且未删除的角色；供动态路由 meta） -->
     <select id="selectActiveRoleLinksByMenuIds"
-            resultType="com.auth.service.system.admin.model.dto.menu.SysMenuRoleLinkRow">
+            resultType="com.auth.service.system.admin.model.po.SysMenuRoleLinkRowPO">
         SELECT mr.menu_id AS menuId,
                mr.role_code AS roleCode
         FROM sys_menu_role mr

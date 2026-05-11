@@ -3,11 +3,11 @@ package com.auth.service.system.admin.service.impl;
 import com.auth.service.system.admin.mapper.SysMenuMapper;
 import com.auth.service.system.admin.mapper.SysMenuPermissionMapper;
 import com.auth.service.system.admin.mapper.SysMenuRoleMapper;
-import com.auth.service.system.admin.model.dto.menu.SysMenuAssignedPermissionDTO;
-import com.auth.service.system.admin.model.dto.menu.SysMenuAssignedRoleDTO;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.admin.model.form.menu.SysMenuAssignPermissionForm;
 import com.auth.service.system.admin.model.form.menu.SysMenuAssignRoleForm;
+import com.auth.service.system.admin.model.po.SysMenuAssignedPermissionPO;
+import com.auth.service.system.admin.model.po.SysMenuAssignedRolePO;
 import com.auth.service.system.admin.model.vo.menu.SysMenuAssignedPermissionRow;
 import com.auth.service.system.admin.model.vo.menu.SysMenuAssignedRoleRow;
 import com.auth.service.system.admin.service.SysMenuManageService;
@@ -44,7 +44,7 @@ public class SysMenuManageServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu
 	 */
 	@Override
 	public List<SysMenuAssignedRoleRow> listAssignedRoles(Long menuId) {
-		List<SysMenuAssignedRoleDTO> dtoList = sysMenuRoleMapper.selectAssignedRolesByMenuId(menuId);
+		List<SysMenuAssignedRolePO> dtoList = sysMenuRoleMapper.selectAssignedRolesByMenuId(menuId);
 
 		return dtoList.stream().map(dto -> {
 			String roleCode = dto.getRoleCode();
@@ -69,7 +69,7 @@ public class SysMenuManageServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu
 	 */
 	@Override
 	public List<SysMenuAssignedPermissionRow> listPermissionsWithAssignFlags(Long menuId) {
-		List<SysMenuAssignedPermissionDTO> dtoList = sysMenuPermissionMapper.selectAssignedPermissionByMenuId(menuId);
+		List<SysMenuAssignedPermissionPO> dtoList = sysMenuPermissionMapper.selectAssignedPermissionByMenuId(menuId);
 
 		return dtoList.stream().map(dto -> {
 			String permissionCode = dto.getPermissionCode();

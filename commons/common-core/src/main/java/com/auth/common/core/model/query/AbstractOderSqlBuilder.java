@@ -11,21 +11,22 @@ import java.util.Optional;
  * @author Bunny
  */
 public abstract class AbstractOderSqlBuilder {
-    /**
-     * 将排序规则转换为 SQL 片段
-     *
-     * @param spec 排序规则
-     * @return SQL 片段
-     */
-    protected static Optional<String> toSegment(SortSpec spec, Map<String, String> map) {
-        if (spec == null || CharSequenceUtil.isBlank(spec.getField())) {
-            return Optional.empty();
-        }
-        String column = map.get(spec.getField());
-        if (column == null) {
-            return Optional.empty();
-        }
-        SortDirection direction = spec.getDirection() != null ? spec.getDirection() : SortDirection.DESC;
-        return Optional.of(column + " " + direction.name());
-    }
+
+	/**
+	 * 将排序规则转换为 SQL 片段
+	 * @param spec 排序规则
+	 * @return SQL 片段
+	 */
+	protected static Optional<String> toSegment(SortSpec spec, Map<String, String> map) {
+		if (spec == null || CharSequenceUtil.isBlank(spec.getField())) {
+			return Optional.empty();
+		}
+		String column = map.get(spec.getField());
+		if (column == null) {
+			return Optional.empty();
+		}
+		SortDirection direction = spec.getDirection() != null ? spec.getDirection() : SortDirection.DESC;
+		return Optional.of(column + " " + direction.name());
+	}
+
 }

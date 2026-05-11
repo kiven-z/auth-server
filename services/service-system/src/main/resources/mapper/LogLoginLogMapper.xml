@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.auth.service.system.log.mapper.LogLoginLogMapper">
+
+    <!-- 分页查询登录日志 -->
+    <select id="selectListByPage"
+            resultType="com.auth.service.system.log.model.vo.LogLoginLogPageVO">
+        SELECT
+            ll.id,
+            ll.user_id,
+            ll.username,
+            ll.login_result,
+            ll.login_time,
+            ll.login_region,
+            ll.login_type,
+            ll.create_time,
+            ll.update_time,
+            ll.create_user,
+            ll.update_user
+        FROM log_login ll
+        <where>
+            <if test="query.userId != null">
+                AND ll.user_id = #{query.userId}
+            </if>
+            <if test="query.loginResult != null">
+                AND ll.login_result = #{query.loginResult}
+            </if>
+            <if test="query.loginTimeStart != null">
+                AND ll.login_time &gt;= #{query.loginTimeStart}
+            </if>
+            <if test="query.loginTimeEnd != null">
+                AND ll.login_time &lt;= #{query.loginTimeEnd}
+            </if>
+            <if test="query.loginType != null and query.loginType != ''">
+                AND ll.login_type = #{query.loginType}
+            </if>
+        </where>
+        ORDER BY ll.login_time DESC, ll.create_time DESC
+    </select>
+
+    <!-- 根据ID查询登录日志详情 -->
+    <select id="selectDetailById"
+            resultType="com.auth.service.system.log.model.vo.LogLoginLogDetailVO">
+        SELECT
+            ll.id,
+            ll.user_id,
+            ll.username,
+            ll.login_result,
+            ll.failure_reason,
+            ll.login_time,
+            ll.login_ip,
+            ll.login_region,
+            ll.user_agent,
+            ll.device_type,
+            ll.os_type,
+            ll.browser_type,
+            ll.login_type,
+            ll.session_id,
+            ll.create_time,
+            ll.update_time
+        FROM log_login ll
+        WHERE ll.id = #{id}
+    </select>
+
+</mapper>

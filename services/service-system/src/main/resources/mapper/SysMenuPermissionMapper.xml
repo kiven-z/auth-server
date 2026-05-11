@@ -4,7 +4,7 @@
 
     <!-- 查询菜单已分配权限（左连 sys_permission 获取权限名称；仅展示按钮类且启用未删的权限元数据） -->
     <select id="selectAssignedPermissionByMenuId"
-            resultType="com.auth.service.system.admin.model.dto.menu.SysMenuAssignedPermissionDTO">
+            resultType="com.auth.service.system.admin.model.po.SysMenuAssignedPermissionPO">
         SELECT mp.permission_code,
                p.permission_name
         FROM sys_menu_permission mp
@@ -19,7 +19,7 @@
 
     <!-- 批量查询菜单关联的操作权限编码（permission_type=0 按钮，且启用、未删除；供动态路由 meta） -->
     <select id="selectActiveButtonPermissionLinksByMenuIds"
-            resultType="com.auth.service.system.admin.model.dto.menu.SysMenuPermissionLinkRow">
+            resultType="com.auth.service.system.admin.model.po.SysMenuPermissionLinkRowPO">
         SELECT mp.menu_id AS menuId,
                mp.permission_code AS permissionCode
         FROM sys_menu_permission mp

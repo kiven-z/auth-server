@@ -1,13 +1,6 @@
 package com.auth.service.system.admin.service.impl;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Component;
-
+import cn.hutool.core.collection.CollUtil;
 import com.auth.common.core.utils.TreeNodeProcessorUtil;
 import com.auth.module.security.contract.constants.PermissionConstant;
 import com.auth.service.system.admin.convert.MenuConvertContext;
@@ -16,17 +9,22 @@ import com.auth.service.system.admin.convert.MenuRouteNodeConverter;
 import com.auth.service.system.admin.mapper.SysMenuMapper;
 import com.auth.service.system.admin.mapper.SysMenuPermissionMapper;
 import com.auth.service.system.admin.mapper.SysMenuRoleMapper;
-import com.auth.service.system.admin.model.dto.menu.SysMenuPermissionLinkRow;
-import com.auth.service.system.admin.model.dto.menu.SysMenuRoleLinkRow;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
+import com.auth.service.system.admin.model.po.SysMenuPermissionLinkRowPO;
+import com.auth.service.system.admin.model.po.SysMenuRoleLinkRowPO;
 import com.auth.service.system.admin.model.vo.menu.RouteMetaVO;
 import com.auth.service.system.admin.model.vo.menu.RouteNodeVO;
 import com.auth.service.system.admin.service.MenuWebRouteTreeBuilder;
 import com.auth.service.system.admin.support.MenuRouteTreeNode;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-
-import cn.hutool.core.collection.CollUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 动态菜单路由树构建（启用菜单、角色过滤、祖先补全、排序、VO 映射）
@@ -108,10 +106,10 @@ public class MenuWebRouteTreeBuilderImpl extends ServiceImpl<SysMenuMapper, SysM
 		if (CollUtil.isEmpty(menuIds)) {
 			return Collections.emptyMap();
 		}
-		List<SysMenuRoleLinkRow> menuRoles = sysMenuRoleMapper.selectActiveRoleLinksByMenuIds(menuIds);
+		List<SysMenuRoleLinkRowPO> menuRoles = sysMenuRoleMapper.selectActiveRoleLinksByMenuIds(menuIds);
 		return menuRoles.stream()
-			.collect(Collectors.groupingBy(SysMenuRoleLinkRow::getMenuId,
-					Collectors.mapping(SysMenuRoleLinkRow::getRoleCode, Collectors.toList())));
+			.collect(Collectors.groupingBy(SysMenuRoleLinkRowPO::getMenuId,
+					Collectors.mapping(SysMenuRoleLinkRowPO::getRoleCode, Collectors.toList())));
 	}
 
 	/**
@@ -123,11 +121,11 @@ public class MenuWebRouteTreeBuilderImpl extends ServiceImpl<SysMenuMapper, SysM
 		if (CollUtil.isEmpty(menuIds)) {
 			return Collections.emptyMap();
 		}
-		List<SysMenuPermissionLinkRow> menuPermissions = sysMenuPermissionMapper
+		List<SysMenuPermissionLinkRowPO> menuPermissions = sysMenuPermissionMapper
 			.selectActiveButtonPermissionLinksByMenuIds(menuIds);
 		return menuPermissions.stream()
-			.collect(Collectors.groupingBy(SysMenuPermissionLinkRow::getMenuId,
-					Collectors.mapping(SysMenuPermissionLinkRow::getPermissionCode, Collectors.toList())));
+			.collect(Collectors.groupingBy(SysMenuPermissionLinkRowPO::getMenuId,
+					Collectors.mapping(SysMenuPermissionLinkRowPO::getPermissionCode, Collectors.toList())));
 	}
 
 	/**
