@@ -41,8 +41,8 @@ public class SysJobPageResponse extends BaseResponse implements Serializable {
 	@Schema(title = "错失策略")
 	private Integer misfirePolicy;
 
-	@Schema(title = "是否并发")
-	private Integer concurrent;
+	@Schema(title = "是否并发(true=允许并发执行，false=禁止)")
+	private Boolean concurrent;
 
 	@Schema(title = "开始时间")
 	private LocalDateTime startTime;

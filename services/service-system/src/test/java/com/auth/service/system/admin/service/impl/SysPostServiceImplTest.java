@@ -109,7 +109,7 @@ class SysPostServiceImplTest {
 
 		verify(sysPostMapper).insert(argThat(
 				(SysPostEntity e) -> Long.valueOf(2L).equals(e.getDeptId()) && "NEW_CODE".equals(e.getPostCode())
-						&& Integer.valueOf(1).equals(e.getStatus()) && Integer.valueOf(0).equals(e.getOrderNum())));
+						&& Boolean.TRUE.equals(e.getStatus()) && Integer.valueOf(0).equals(e.getOrderNum())));
 	}
 
 	private static SysPostCreateForm minimalForm(Long deptId, String postCode, String postName) {
@@ -117,7 +117,7 @@ class SysPostServiceImplTest {
 		form.setDeptId(deptId);
 		form.setPostCode(postCode);
 		form.setPostName(postName);
-		form.setStatus(1);
+		form.setStatus(true);
 		form.setOrderNum(0);
 		return form;
 	}

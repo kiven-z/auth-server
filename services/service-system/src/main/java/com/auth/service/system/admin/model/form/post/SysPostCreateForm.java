@@ -1,8 +1,6 @@
 package com.auth.service.system.admin.model.form.post;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -37,11 +35,9 @@ public class SysPostCreateForm implements Serializable {
 	@Size(max = 128, message = "岗位名称长度不能超过128个字符")
 	private String postName;
 
-	@Schema(title = "状态(0=禁用,1=启用)", requiredMode = Schema.RequiredMode.REQUIRED)
+	@Schema(title = "启用状态(true=启用，false=停用)", requiredMode = Schema.RequiredMode.REQUIRED)
 	@NotNull(message = "状态不能为空")
-	@Min(value = 0, message = "状态值无效")
-	@Max(value = 1, message = "状态值无效")
-	private Integer status;
+	private Boolean status;
 
 	@Schema(title = "显示顺序")
 	private Integer orderNum;

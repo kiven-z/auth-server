@@ -31,7 +31,7 @@ public class SysPostQuery extends PageQueryRequest implements Serializable {
 	@Schema(title = "部门名称（模糊）")
 	private String deptName;
 
-	@Schema(title = "状态(0=禁用,1=启用)")
-	private Integer status;
+	@Schema(title = "启用状态(true=启用，false=停用)")
+	private Boolean status;
 
 }
