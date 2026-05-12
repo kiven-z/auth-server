@@ -33,4 +33,10 @@ public class LogUserPasswordHistoryEntity extends BaseEntity {
 	@Schema(title = "修改IP地址")
 	private String changeIp;
 
+	/**
+	 * 逻辑删除标记（查询 SQL 显式带 {@code is_deleted = 0}；未使用 {@code @TableLogic}，便于后续一键启用）
+	 */
+	@Schema(title = "逻辑删除")
+	private Boolean isDeleted;
+
 }

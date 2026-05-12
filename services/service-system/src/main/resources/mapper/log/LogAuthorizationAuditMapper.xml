@@ -31,9 +31,6 @@
             <if test="query.createUserId != null">
                 AND laa.create_user = #{query.createUserId}
             </if>
-            <if test="query.operatorUsername != null and query.operatorUsername != ''">
-                AND u.username LIKE CONCAT('%', #{query.operatorUsername}, '%')
-            </if>
         </where>
         ORDER BY laa.create_time DESC
     </select>

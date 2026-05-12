@@ -33,7 +33,4 @@ public class LogAuthorizationAuditQuery extends PageQueryRequest implements Seri
 	@Schema(title = "操作人用户 ID（对应 create_user）")
 	private Long createUserId;
 
-	@Schema(title = "操作人用户名（远程搜索，模糊匹配 sys_user.username）")
-	private String operatorUsername;
-
 }
