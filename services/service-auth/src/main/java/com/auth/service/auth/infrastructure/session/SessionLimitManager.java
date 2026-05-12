@@ -5,6 +5,7 @@ import com.auth.module.security.autoconfigure.config.user.UserConfigProperties;
 import com.auth.service.auth.exception.AuthBusinessException;
 import com.auth.service.auth.exception.AuthResultCode;
 import com.auth.service.auth.infrastructure.login.LoginFailureRateLimiter;
+import com.auth.service.auth.infrastructure.session.redis.RedisUserSessionIndexRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
@@ -25,13 +26,13 @@ public class SessionLimitManager {
 	 */
 	private static final String USER_ID_NOT_NULL = "userId must not be null";
 
-	private final UserSessionIndexSession userSessionIndexSession;
+	private final RedisUserSessionIndexRepository redisUserSessionIndexRepository;
 
 	private final UserConfigProperties userConfigProperties;
 
-	public SessionLimitManager(UserSessionIndexSession userSessionIndexSession,
+	public SessionLimitManager(RedisUserSessionIndexRepository redisUserSessionIndexRepository,
 			UserConfigProperties userConfigProperties) {
-		this.userSessionIndexSession = userSessionIndexSession;
+		this.redisUserSessionIndexRepository = redisUserSessionIndexRepository;
 		this.userConfigProperties = userConfigProperties;
 	}
 
@@ -42,12 +43,12 @@ public class SessionLimitManager {
 	 */
 	public void assertSessionLimit(Long userId) {
 		Assert.notNull(userId, USER_ID_NOT_NULL);
-		userSessionIndexSession.cleanupStaleActiveSessions(userId);
+		redisUserSessionIndexRepository.cleanupStaleActiveSessions(userId);
 		Integer maxSessionCount = userConfigProperties.getMaxSessionCount();
 		if (maxSessionCount == null || maxSessionCount <= 0) {
 			return;
 		}
-		long sessionCount = userSessionIndexSession.countActiveSessions(userId);
+		long sessionCount = redisUserSessionIndexRepository.countActiveSessions(userId);
 
 		// 无会话或未达上限：直接放行
 		if (sessionCount < maxSessionCount) {
@@ -63,8 +64,8 @@ public class SessionLimitManager {
 			case REJECT_LOGIN -> throw new AuthBusinessException(AuthResultCode.MAX_SESSION_LIMIT_EXCEEDED);
 			// 达到上限时踢出最旧会话
 			case EVICT_OLDEST -> {
-				userSessionIndexSession.evictOldestActiveSession(userId);
-				long sessionCountAfterEvict = userSessionIndexSession.countActiveSessions(userId);
+				redisUserSessionIndexRepository.evictOldestActiveSession(userId);
+				long sessionCountAfterEvict = redisUserSessionIndexRepository.countActiveSessions(userId);
 				if (sessionCountAfterEvict >= maxSessionCount) {
 					throw new AuthBusinessException(AuthResultCode.MAX_SESSION_LIMIT_EXCEEDED);
 				}

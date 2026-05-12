@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 /**
- * 认证服务业务异常处理：统一使用 {@link AuthResultResponseFactory} 与 {@link MessageSource} 拼装
+ * 认证服务业务异常处理：统一使用 {@link AuthBusinessExceptionResultBuilder} 与 {@link MessageSource} 拼装
  * {@link Result}。
  *
  * @author Bunny
@@ -54,13 +54,13 @@ public class AuthExceptionHandler extends ValidationExceptionHandler {
 		if (resultCode == null) {
 			log.warn("Auth business exception without resultCode", exception);
 			AuthBusinessException fallback = new AuthBusinessException(AuthResultCode.SERVER_ERROR);
-			Result<Object> body = AuthResultResponseFactory.build(messageSource, fallback);
+			Result<Object> body = AuthBusinessExceptionResultBuilder.build(messageSource, fallback);
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
 		}
 
-		Result<Object> body = AuthResultResponseFactory.build(messageSource, exception);
+		Result<Object> body = AuthBusinessExceptionResultBuilder.build(messageSource, exception);
 		log.warn("Auth business exception: {} ({})", resultCode.getError(), resultCode.getCode(), exception);
-		return ResponseEntity.status(AuthResultResponseFactory.resolveHttpStatus(resultCode)).body(body);
+		return ResponseEntity.status(AuthBusinessExceptionResultBuilder.resolveHttpStatus(resultCode)).body(body);
 	}
 
 }

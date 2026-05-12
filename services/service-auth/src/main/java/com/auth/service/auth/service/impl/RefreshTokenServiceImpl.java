@@ -12,7 +12,7 @@ import com.auth.service.auth.exception.AuthResultCode;
 import com.auth.service.auth.infrastructure.login.TokenPair;
 import com.auth.service.auth.infrastructure.login.TokenService;
 import com.auth.service.auth.infrastructure.profile.AuthProfileCache;
-import com.auth.service.auth.infrastructure.session.UserSessionIndexSession;
+import com.auth.service.auth.infrastructure.session.redis.RedisUserSessionIndexRepository;
 import com.auth.service.auth.model.enums.AuthLoginLogResult;
 import com.auth.service.auth.model.enums.AuthLoginLogType;
 import com.auth.service.auth.model.response.RefreshTokenResponse;
@@ -34,7 +34,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
 	private final AuthProfileCache authProfileCache;
 
-	private final UserSessionIndexSession userSessionIndexSession;
+	private final RedisUserSessionIndexRepository redisUserSessionIndexRepository;
 
 	private final TokenService tokenService;
 
@@ -42,10 +42,11 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
 	private final AuthLoginAuditService loginLogService;
 
-	public RefreshTokenServiceImpl(AuthProfileCache authProfileCache, UserSessionIndexSession userSessionIndexSession,
-			TokenService tokenService, JwtProperties jwtProperties, AuthLoginAuditService loginLogService) {
+	public RefreshTokenServiceImpl(AuthProfileCache authProfileCache,
+			RedisUserSessionIndexRepository redisUserSessionIndexRepository, TokenService tokenService,
+			JwtProperties jwtProperties, AuthLoginAuditService loginLogService) {
 		this.authProfileCache = authProfileCache;
-		this.userSessionIndexSession = userSessionIndexSession;
+		this.redisUserSessionIndexRepository = redisUserSessionIndexRepository;
 		this.tokenService = tokenService;
 		this.jwtProperties = jwtProperties;
 		this.loginLogService = loginLogService;
@@ -85,7 +86,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 		String refreshJti = refreshUserToken.getJti();
 
 		// 加载会话索引
-		UserSessionIndex sessionIndex = userSessionIndexSession.loadUserSessionIndex(refreshJti)
+		UserSessionIndex sessionIndex = redisUserSessionIndexRepository.loadUserSessionIndex(refreshJti)
 			.orElseThrow(() -> new AuthBusinessException(AuthResultCode.REFRESH_TOKEN_EXPIRED));
 		assertRefreshTokenMatches(refreshUserId, refreshJti, sessionIndex, refreshToken);
 
@@ -150,16 +151,16 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 			throw new AuthBusinessException(AuthResultCode.REFRESH_TOKEN_EXPIRED);
 		}
 		if (BooleanUtil.isFalse(Objects.equals(userId, sessionUserId))) {
-			userSessionIndexSession.deleteSession(jti);
-			userSessionIndexSession.removeActiveSession(userId, jti);
+			redisUserSessionIndexRepository.deleteSession(jti);
+			redisUserSessionIndexRepository.removeActiveSession(userId, jti);
 			throw new AuthBusinessException(AuthResultCode.REFRESH_TOKEN_EXPIRED);
 		}
 
 		// 刷新令牌与会话哈希不一致时撤销会话详情与活跃索引（幂等）
 		boolean hashMatches = CharSequenceUtil.isNotBlank(redisHash) && Objects.equals(redisHash, requestHash);
 		if (BooleanUtil.isFalse(hashMatches)) {
-			userSessionIndexSession.deleteSession(jti);
-			userSessionIndexSession.removeActiveSession(userId, jti);
+			redisUserSessionIndexRepository.deleteSession(jti);
+			redisUserSessionIndexRepository.removeActiveSession(userId, jti);
 			throw new AuthBusinessException(AuthResultCode.REFRESH_TOKEN_EXPIRED);
 		}
 	}
@@ -175,7 +176,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 		long refreshTokenExpiresAt = System.currentTimeMillis() + refreshExpiredSeconds * 1000L;
 		Duration ttl = Duration.ofSeconds(refreshExpiredSeconds);
 
-		userSessionIndexSession.updateRefreshInfo(jti, refreshTokenHash, refreshTokenExpiresAt, ttl);
+		redisUserSessionIndexRepository.updateRefreshInfo(jti, refreshTokenHash, refreshTokenExpiresAt, ttl);
 	}
 
 }

@@ -2,8 +2,8 @@ package com.auth.service.auth.support;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.service.auth.exception.AuthBusinessException;
+import com.auth.service.auth.exception.AuthBusinessExceptionResultBuilder;
 import com.auth.service.auth.exception.AuthResultCode;
-import com.auth.service.auth.exception.AuthResultResponseFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,11 +24,11 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 /**
- * {@link AuthResultResponseFactory} 单元测试
+ * {@link AuthBusinessExceptionResultBuilder} 单元测试
  */
 @DisplayName("AuthResultResponseFactory")
 @ExtendWith(MockitoExtension.class)
-class AuthResultResponseFactoryTest {
+class AuthBusinessExceptionResultBuilderTest {
 
 	@Mock
 	private MessageSource messageSource;
@@ -48,7 +48,7 @@ class AuthResultResponseFactoryTest {
 		when(messageSource.getMessage(eq(key), any(), eq("resolved-en"), eq(Locale.ENGLISH))).thenReturn("resolved-en");
 
 		AuthBusinessException ex = new AuthBusinessException(AuthResultCode.USERNAME_OR_PASSWORD_ERROR);
-		Result<Object> result = AuthResultResponseFactory.build(messageSource, ex);
+		Result<Object> result = AuthBusinessExceptionResultBuilder.build(messageSource, ex);
 
 		assertEquals(AuthResultCode.USERNAME_OR_PASSWORD_ERROR.getCode(), result.getCode());
 		assertEquals(AuthResultCode.USERNAME_OR_PASSWORD_ERROR.getError(), result.getError());
@@ -62,34 +62,35 @@ class AuthResultResponseFactoryTest {
 	@DisplayName("resolveHttpStatus：用户名密码错误 -> 401")
 	void resolveHttpStatus_usernamePassword_unauthorized() {
 		assertEquals(HttpStatus.UNAUTHORIZED,
-				AuthResultResponseFactory.resolveHttpStatus(AuthResultCode.USERNAME_OR_PASSWORD_ERROR));
+				AuthBusinessExceptionResultBuilder.resolveHttpStatus(AuthResultCode.USERNAME_OR_PASSWORD_ERROR));
 	}
 
 	@Test
 	@DisplayName("resolveHttpStatus：限流 -> 429")
 	void resolveHttpStatus_rateLimit() {
 		assertEquals(HttpStatus.TOO_MANY_REQUESTS,
-				AuthResultResponseFactory.resolveHttpStatus(AuthResultCode.TOO_MANY_REQUESTS));
+				AuthBusinessExceptionResultBuilder.resolveHttpStatus(AuthResultCode.TOO_MANY_REQUESTS));
 	}
 
 	@Test
 	@DisplayName("resolveHttpStatus：服务器内部错误 -> 500")
 	void resolveHttpStatus_serverError() {
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR,
-				AuthResultResponseFactory.resolveHttpStatus(AuthResultCode.SERVER_ERROR));
+				AuthBusinessExceptionResultBuilder.resolveHttpStatus(AuthResultCode.SERVER_ERROR));
 	}
 
 	@Test
 	@DisplayName("resolveHttpStatus：账号锁定 -> 403")
 	void resolveHttpStatus_userLocked_forbidden() {
-		assertEquals(HttpStatus.FORBIDDEN, AuthResultResponseFactory.resolveHttpStatus(AuthResultCode.USER_LOCKED));
+		assertEquals(HttpStatus.FORBIDDEN,
+				AuthBusinessExceptionResultBuilder.resolveHttpStatus(AuthResultCode.USER_LOCKED));
 	}
 
 	@Test
 	@DisplayName("resolveHttpStatus：JSON 解析失败 -> 400")
 	void resolveHttpStatus_jsonParser_badRequest() {
 		assertEquals(HttpStatus.BAD_REQUEST,
-				AuthResultResponseFactory.resolveHttpStatus(AuthResultCode.JSON_PARSER_EXCEPTION));
+				AuthBusinessExceptionResultBuilder.resolveHttpStatus(AuthResultCode.JSON_PARSER_EXCEPTION));
 	}
 
 }

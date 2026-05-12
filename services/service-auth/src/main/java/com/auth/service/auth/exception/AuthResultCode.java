@@ -132,8 +132,8 @@ public enum AuthResultCode {
 	SERVICE_UNAVAILABLE(503, 1103, "SERVICE_UNAVAILABLE", "service.unavailable");
 
 	/**
-	 * 建议的 HTTP 状态码（与 {@link AuthResultResponseFactory#resolveHttpStatus(AuthResultCode)}
-	 * 一致）
+	 * 建议的 HTTP 状态码（与
+	 * {@link AuthBusinessExceptionResultBuilder#resolveHttpStatus(AuthResultCode)} 一致）
 	 */
 	private final int httpStatus;
 

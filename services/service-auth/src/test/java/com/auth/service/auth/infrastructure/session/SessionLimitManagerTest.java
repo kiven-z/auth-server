@@ -5,6 +5,7 @@ import com.auth.module.security.autoconfigure.config.user.UserConfigProperties;
 import com.auth.service.auth.TestConstants;
 import com.auth.service.auth.exception.AuthBusinessException;
 import com.auth.service.auth.exception.AuthResultCode;
+import com.auth.service.auth.infrastructure.session.redis.RedisUserSessionIndexRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,7 +25,7 @@ import static org.mockito.Mockito.*;
 class SessionLimitManagerTest {
 
 	@Mock
-	private UserSessionIndexSession userSessionIndexSession;
+	private RedisUserSessionIndexRepository redisUserSessionIndexRepository;
 
 	@Mock
 	private UserConfigProperties userConfigProperties;
@@ -34,21 +35,21 @@ class SessionLimitManagerTest {
 	void assertSessionLimit_shouldReturn_whenMaxSessionCountNullOrLe0() {
 		// Arrange
 		when(userConfigProperties.getMaxSessionCount()).thenReturn(null);
-		SessionLimitManager manager = new SessionLimitManager(userSessionIndexSession, userConfigProperties);
+		SessionLimitManager manager = new SessionLimitManager(redisUserSessionIndexRepository, userConfigProperties);
 
 		// Act
 		manager.assertSessionLimit(TestConstants.USER_ID);
 
 		// Assert
-		verify(userSessionIndexSession).cleanupStaleActiveSessions(TestConstants.USER_ID);
-		verify(userSessionIndexSession, never()).countActiveSessions(anyLong());
+		verify(redisUserSessionIndexRepository).cleanupStaleActiveSessions(TestConstants.USER_ID);
+		verify(redisUserSessionIndexRepository, never()).countActiveSessions(anyLong());
 
 		// <=0
-		reset(userSessionIndexSession);
+		reset(redisUserSessionIndexRepository);
 		when(userConfigProperties.getMaxSessionCount()).thenReturn(0);
 		manager.assertSessionLimit(TestConstants.USER_ID);
-		verify(userSessionIndexSession).cleanupStaleActiveSessions(TestConstants.USER_ID);
-		verify(userSessionIndexSession, never()).countActiveSessions(anyLong());
+		verify(redisUserSessionIndexRepository).cleanupStaleActiveSessions(TestConstants.USER_ID);
+		verify(redisUserSessionIndexRepository, never()).countActiveSessions(anyLong());
 	}
 
 	@Test
@@ -56,17 +57,17 @@ class SessionLimitManagerTest {
 	void assertSessionLimit_shouldReturn_whenCountBelowMax() {
 		// Arrange
 		when(userConfigProperties.getMaxSessionCount()).thenReturn(3);
-		when(userSessionIndexSession.countActiveSessions(TestConstants.USER_ID)).thenReturn(2L);
+		when(redisUserSessionIndexRepository.countActiveSessions(TestConstants.USER_ID)).thenReturn(2L);
 
-		SessionLimitManager manager = new SessionLimitManager(userSessionIndexSession, userConfigProperties);
+		SessionLimitManager manager = new SessionLimitManager(redisUserSessionIndexRepository, userConfigProperties);
 
 		// Act
 		manager.assertSessionLimit(TestConstants.USER_ID);
 
 		// Assert
-		verify(userSessionIndexSession).cleanupStaleActiveSessions(TestConstants.USER_ID);
-		verify(userSessionIndexSession).countActiveSessions(TestConstants.USER_ID);
-		verify(userSessionIndexSession, never()).evictOldestActiveSession(anyLong());
+		verify(redisUserSessionIndexRepository).cleanupStaleActiveSessions(TestConstants.USER_ID);
+		verify(redisUserSessionIndexRepository).countActiveSessions(TestConstants.USER_ID);
+		verify(redisUserSessionIndexRepository, never()).evictOldestActiveSession(anyLong());
 	}
 
 	@Test
@@ -74,11 +75,11 @@ class SessionLimitManagerTest {
 	void assertSessionLimit_shouldThrow_whenStrategyNullOrRejectLogin() {
 		// Arrange
 		when(userConfigProperties.getMaxSessionCount()).thenReturn(1);
-		when(userSessionIndexSession.countActiveSessions(TestConstants.USER_ID)).thenReturn(1L);
+		when(redisUserSessionIndexRepository.countActiveSessions(TestConstants.USER_ID)).thenReturn(1L);
 
 		// strategy null
 		when(userConfigProperties.getSessionLimitStrategy()).thenReturn(null);
-		SessionLimitManager manager = new SessionLimitManager(userSessionIndexSession, userConfigProperties);
+		SessionLimitManager manager = new SessionLimitManager(redisUserSessionIndexRepository, userConfigProperties);
 		assertEquals(AuthResultCode.MAX_SESSION_LIMIT_EXCEEDED,
 				assertThrows(AuthBusinessException.class, () -> manager.assertSessionLimit(TestConstants.USER_ID))
 					.getResultCode());
@@ -98,9 +99,9 @@ class SessionLimitManagerTest {
 		// Arrange
 		when(userConfigProperties.getMaxSessionCount()).thenReturn(1);
 		when(userConfigProperties.getSessionLimitStrategy()).thenReturn(SessionLimitStrategy.EVICT_OLDEST);
-		when(userSessionIndexSession.countActiveSessions(TestConstants.USER_ID)).thenReturn(1L, 1L);
+		when(redisUserSessionIndexRepository.countActiveSessions(TestConstants.USER_ID)).thenReturn(1L, 1L);
 
-		SessionLimitManager manager = new SessionLimitManager(userSessionIndexSession, userConfigProperties);
+		SessionLimitManager manager = new SessionLimitManager(redisUserSessionIndexRepository, userConfigProperties);
 
 		// Act
 		AuthBusinessException exception = assertThrows(AuthBusinessException.class,
@@ -108,7 +109,7 @@ class SessionLimitManagerTest {
 
 		// Assert
 		assertEquals(AuthResultCode.MAX_SESSION_LIMIT_EXCEEDED, exception.getResultCode());
-		verify(userSessionIndexSession).evictOldestActiveSession(TestConstants.USER_ID);
+		verify(redisUserSessionIndexRepository).evictOldestActiveSession(TestConstants.USER_ID);
 	}
 
 }

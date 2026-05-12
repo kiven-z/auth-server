@@ -8,7 +8,7 @@ import java.util.Arrays;
 /**
  * 认证服务业务异常：语义以 {@link AuthResultCode} 为唯一来源，可选携带 i18n 占位参数。
  * <p>
- * {@link #getMessage()} 可用于日志/调试；对外 API 文案由 {@link AuthResultResponseFactory} 结合
+ * {@link #getMessage()} 可用于日志/调试；对外 API 文案由 {@link AuthBusinessExceptionResultBuilder} 结合
  * {@link org.springframework.context.MessageSource} 解析。
  * </p>
  *

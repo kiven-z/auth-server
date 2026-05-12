@@ -10,8 +10,8 @@ import com.auth.service.auth.infrastructure.login.*;
 import com.auth.service.auth.infrastructure.login.strategy.LoginStrategy;
 import com.auth.service.auth.infrastructure.profile.AuthProfileCache;
 import com.auth.service.auth.infrastructure.session.SessionLimitManager;
-import com.auth.service.auth.infrastructure.session.UserSessionIndexService;
-import com.auth.service.auth.infrastructure.session.UserSessionIndexSession;
+import com.auth.service.auth.infrastructure.session.UserSessionIndexFactory;
+import com.auth.service.auth.infrastructure.session.redis.RedisUserSessionIndexRepository;
 import com.auth.service.auth.model.enums.AuthLoginLogResult;
 import com.auth.service.auth.model.enums.AuthLoginLogType;
 import com.auth.service.auth.model.request.AbstractAuthentication;
@@ -41,9 +41,9 @@ public class AuthServiceImpl implements AuthService {
 
 	private final AuthProfileCache authProfileCache;
 
-	private final UserSessionIndexService userSessionIndexService;
+	private final UserSessionIndexFactory userSessionIndexFactory;
 
-	private final UserSessionIndexSession userSessionIndexSession;
+	private final RedisUserSessionIndexRepository redisUserSessionIndexRepository;
 
 	private final SessionLimitManager sessionLimitManager;
 
@@ -54,14 +54,15 @@ public class AuthServiceImpl implements AuthService {
 	private final AuthLoginAuditService loginLogService;
 
 	public AuthServiceImpl(List<LoginStrategy<?>> strategies, AuthProfileCache authProfileCache,
-			UserSessionIndexService userSessionIndexService, UserSessionIndexSession userSessionIndexSession,
-			SessionLimitManager sessionLimitManager, TokenService tokenService,
-			LoginFailureRateLimiter loginFailureRateLimiter, AuthLoginAuditService loginLogService) {
+			UserSessionIndexFactory userSessionIndexFactory,
+			RedisUserSessionIndexRepository redisUserSessionIndexRepository, SessionLimitManager sessionLimitManager,
+			TokenService tokenService, LoginFailureRateLimiter loginFailureRateLimiter,
+			AuthLoginAuditService loginLogService) {
 		this.strategyRegistry = strategies.stream()
 			.collect(Collectors.toUnmodifiableMap(LoginStrategy::supports, Function.identity()));
 		this.authProfileCache = authProfileCache;
-		this.userSessionIndexService = userSessionIndexService;
-		this.userSessionIndexSession = userSessionIndexSession;
+		this.userSessionIndexFactory = userSessionIndexFactory;
+		this.redisUserSessionIndexRepository = redisUserSessionIndexRepository;
 		this.sessionLimitManager = sessionLimitManager;
 		this.tokenService = tokenService;
 		this.loginFailureRateLimiter = loginFailureRateLimiter;
@@ -98,9 +99,9 @@ public class AuthServiceImpl implements AuthService {
 			response.setExpires(tokenPair.accessExpiresAt());
 
 			// 构建会话索引
-			UserSessionIndex sessionIndex = userSessionIndexService.buildUserSessionIndex(request, userId, jti,
+			UserSessionIndex sessionIndex = userSessionIndexFactory.buildUserSessionIndex(request, userId, jti,
 					response.getRefreshToken());
-			userSessionIndexSession.createUserSessionIndex(sessionIndex);
+			redisUserSessionIndexRepository.createUserSessionIndex(sessionIndex);
 
 			// 记录成功
 			loginFailureRateLimiter.recordSuccess(userId);
@@ -178,8 +179,8 @@ public class AuthServiceImpl implements AuthService {
 		String jti = userToken.getJti();
 		Long userId = userToken.getUserId();
 		String username = SecurityUserUtils.getUsername();
-		userSessionIndexSession.deleteSession(jti);
-		userSessionIndexSession.removeActiveSession(userId, jti);
+		redisUserSessionIndexRepository.deleteSession(jti);
+		redisUserSessionIndexRepository.removeActiveSession(userId, jti);
 		loginLogService.recordLoginLog(request, AuthLoginLogType.LOGOUT, AuthLoginLogResult.SUCCESS, userId, username,
 				null, jti);
 	}

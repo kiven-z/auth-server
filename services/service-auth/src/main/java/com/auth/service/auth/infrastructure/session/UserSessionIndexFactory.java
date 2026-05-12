@@ -15,13 +15,13 @@ import org.springframework.stereotype.Service;
  * @author Bunny
  */
 @Service
-public class UserSessionIndexService {
+public class UserSessionIndexFactory {
 
 	private final IpAddressService ipAddressService;
 
 	private final JwtProperties properties;
 
-	public UserSessionIndexService(IpAddressService ipAddressService, JwtProperties properties) {
+	public UserSessionIndexFactory(IpAddressService ipAddressService, JwtProperties properties) {
 		this.ipAddressService = ipAddressService;
 		this.properties = properties;
 	}

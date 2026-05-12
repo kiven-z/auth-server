@@ -17,7 +17,7 @@ import java.util.Objects;
  * @author Bunny
  */
 @UtilityClass
-public class AuthResultResponseFactory {
+public class AuthBusinessExceptionResultBuilder {
 
 	/**
 	 * 构建认证服务错误响应体

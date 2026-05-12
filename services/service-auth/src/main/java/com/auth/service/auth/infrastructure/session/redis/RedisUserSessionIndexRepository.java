@@ -1,4 +1,4 @@
-package com.auth.service.auth.infrastructure.session;
+package com.auth.service.auth.infrastructure.session.redis;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
@@ -21,11 +21,11 @@ import static com.auth.module.security.contract.redis.SecurityRedisKey.USER_SESS
  * @author Bunny
  */
 @Service
-public class UserSessionIndexSession {
+public class RedisUserSessionIndexRepository {
 
 	private final RedisTemplate<String, Object> redisTemplate;
 
-	public UserSessionIndexSession(RedisTemplate<String, Object> redisTemplate) {
+	public RedisUserSessionIndexRepository(RedisTemplate<String, Object> redisTemplate) {
 		this.redisTemplate = redisTemplate;
 	}
 

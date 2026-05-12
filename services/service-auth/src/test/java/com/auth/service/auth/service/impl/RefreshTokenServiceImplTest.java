@@ -11,7 +11,7 @@ import com.auth.service.auth.exception.AuthResultCode;
 import com.auth.service.auth.infrastructure.login.TokenPair;
 import com.auth.service.auth.infrastructure.login.TokenService;
 import com.auth.service.auth.infrastructure.profile.AuthProfileCache;
-import com.auth.service.auth.infrastructure.session.UserSessionIndexSession;
+import com.auth.service.auth.infrastructure.session.redis.RedisUserSessionIndexRepository;
 import com.auth.service.auth.model.enums.AuthLoginLogResult;
 import com.auth.service.auth.model.enums.AuthLoginLogType;
 import com.auth.service.auth.model.response.RefreshTokenResponse;
@@ -38,7 +38,7 @@ class RefreshTokenServiceImplTest {
 	private AuthProfileCache authProfileCache;
 
 	@Mock
-	private UserSessionIndexSession userSessionIndexSession;
+	private RedisUserSessionIndexRepository redisUserSessionIndexRepository;
 
 	@Mock
 	private TokenService tokenService;
@@ -54,15 +54,15 @@ class RefreshTokenServiceImplTest {
 	}
 
 	private RefreshTokenServiceImpl newService() {
-		return new RefreshTokenServiceImpl(authProfileCache, userSessionIndexSession, tokenService, jwtProperties,
-				loginLogService);
+		return new RefreshTokenServiceImpl(authProfileCache, redisUserSessionIndexRepository, tokenService,
+				jwtProperties, loginLogService);
 	}
 
 	@Test
 	@DisplayName("刷新：会话不存在时抛 REFRESH_TOKEN_EXPIRED")
 	void refresh_shouldThrowExpired_whenSessionMissing() {
 		when(tokenService.parseRefreshToken(TestConstants.REFRESH_TOKEN)).thenReturn(token());
-		when(userSessionIndexSession.loadUserSessionIndex(TestConstants.JTI)).thenReturn(Optional.empty());
+		when(redisUserSessionIndexRepository.loadUserSessionIndex(TestConstants.JTI)).thenReturn(Optional.empty());
 		RefreshTokenServiceImpl service = newService();
 
 		AuthBusinessException ex = assertThrows(AuthBusinessException.class,
@@ -80,7 +80,7 @@ class RefreshTokenServiceImplTest {
 		session.setUserId(TestConstants.USER_ID);
 		session.setRefreshTokenExpiresAt(System.currentTimeMillis() + 60_000);
 		session.setRefreshTokenHash("deadbeef");
-		when(userSessionIndexSession.loadUserSessionIndex(TestConstants.JTI)).thenReturn(Optional.of(session));
+		when(redisUserSessionIndexRepository.loadUserSessionIndex(TestConstants.JTI)).thenReturn(Optional.of(session));
 
 		RefreshTokenServiceImpl service = newService();
 
@@ -88,8 +88,8 @@ class RefreshTokenServiceImplTest {
 				() -> service.refreshToken(TestConstants.REFRESH_TOKEN, null));
 
 		assertEquals(AuthResultCode.REFRESH_TOKEN_EXPIRED, ex.getResultCode());
-		verify(userSessionIndexSession).deleteSession(TestConstants.JTI);
-		verify(userSessionIndexSession).removeActiveSession(TestConstants.USER_ID, TestConstants.JTI);
+		verify(redisUserSessionIndexRepository).deleteSession(TestConstants.JTI);
+		verify(redisUserSessionIndexRepository).removeActiveSession(TestConstants.USER_ID, TestConstants.JTI);
 	}
 
 	@Test
@@ -101,7 +101,7 @@ class RefreshTokenServiceImplTest {
 		session.setUserId(TestConstants.USER_ID + 1L);
 		session.setRefreshTokenExpiresAt(System.currentTimeMillis() + 60_000);
 		session.setRefreshTokenHash(MD5.create().digestHex16(TestConstants.REFRESH_TOKEN));
-		when(userSessionIndexSession.loadUserSessionIndex(TestConstants.JTI)).thenReturn(Optional.of(session));
+		when(redisUserSessionIndexRepository.loadUserSessionIndex(TestConstants.JTI)).thenReturn(Optional.of(session));
 
 		RefreshTokenServiceImpl service = newService();
 
@@ -109,8 +109,8 @@ class RefreshTokenServiceImplTest {
 				() -> service.refreshToken(TestConstants.REFRESH_TOKEN, null));
 
 		assertEquals(AuthResultCode.REFRESH_TOKEN_EXPIRED, ex.getResultCode());
-		verify(userSessionIndexSession).deleteSession(TestConstants.JTI);
-		verify(userSessionIndexSession).removeActiveSession(TestConstants.USER_ID, TestConstants.JTI);
+		verify(redisUserSessionIndexRepository).deleteSession(TestConstants.JTI);
+		verify(redisUserSessionIndexRepository).removeActiveSession(TestConstants.USER_ID, TestConstants.JTI);
 	}
 
 	@Test
@@ -152,7 +152,7 @@ class RefreshTokenServiceImplTest {
 		session.setUserId(TestConstants.USER_ID);
 		session.setRefreshTokenExpiresAt(System.currentTimeMillis() + 60_000);
 		session.setRefreshTokenHash(MD5.create().digestHex16(TestConstants.REFRESH_TOKEN));
-		when(userSessionIndexSession.loadUserSessionIndex(TestConstants.JTI)).thenReturn(Optional.of(session));
+		when(redisUserSessionIndexRepository.loadUserSessionIndex(TestConstants.JTI)).thenReturn(Optional.of(session));
 
 		AuthProfile profile = mock(AuthProfile.class);
 		when(profile.getPermVersion()).thenReturn(9L);
@@ -169,7 +169,7 @@ class RefreshTokenServiceImplTest {
 		assertEquals("new-access", response.getAccessToken());
 		assertEquals("new-refresh", response.getRefreshToken());
 		assertEquals(expires, response.getExpires());
-		verify(userSessionIndexSession).updateRefreshInfo(eq(TestConstants.JTI),
+		verify(redisUserSessionIndexRepository).updateRefreshInfo(eq(TestConstants.JTI),
 				eq(MD5.create().digestHex16("new-refresh")), anyLong(), eq(Duration.ofSeconds(120L)));
 	}
 

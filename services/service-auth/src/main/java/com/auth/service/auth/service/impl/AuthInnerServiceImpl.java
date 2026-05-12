@@ -3,7 +3,7 @@ package com.auth.service.auth.service.impl;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.infrastructure.profile.AuthProfileCache;
 import com.auth.service.auth.infrastructure.profile.AuthProfileService;
-import com.auth.service.auth.infrastructure.session.UserSessionIndexSession;
+import com.auth.service.auth.infrastructure.session.redis.RedisUserSessionIndexRepository;
 import com.auth.service.auth.model.vo.inner.EffectiveCodesVO;
 import com.auth.service.auth.service.AuthInnerService;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ import java.util.Objects;
 @Service
 public class AuthInnerServiceImpl implements AuthInnerService {
 
-	private final UserSessionIndexSession userSessionIndexSession;
+	private final RedisUserSessionIndexRepository redisUserSessionIndexRepository;
 
 	private final AuthProfileService authProfileService;
 
@@ -52,7 +52,7 @@ public class AuthInnerServiceImpl implements AuthInnerService {
 	public void kickAllSessions(List<Long> userIds) {
 		userIds.stream().filter(Objects::nonNull).forEach(userId -> {
 			try {
-				userSessionIndexSession.deleteAllSessions(userId);
+				redisUserSessionIndexRepository.deleteAllSessions(userId);
 			}
 			catch (RuntimeException ex) {
 				log.warn("Failed to kick all sessions for userId={}: {}", userId, ex.getMessage());
