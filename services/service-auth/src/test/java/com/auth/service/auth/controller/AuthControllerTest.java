@@ -1,11 +1,15 @@
 package com.auth.service.auth.controller;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
-import java.time.LocalDateTime;
-
+import com.auth.common.jwt.autoconfigure.JwtProperties;
+import com.auth.service.auth.model.request.login.EmailLoginRequest;
+import com.auth.service.auth.model.request.login.UsernamePasswordLoginRequest;
+import com.auth.service.auth.model.response.RefreshTokenResponse;
+import com.auth.service.auth.model.response.UserLoginResponse;
+import com.auth.service.auth.service.AuthService;
+import com.auth.service.auth.service.RefreshTokenService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,17 +19,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpHeaders;
 
-import com.auth.common.jwt.autoconfigure.JwtProperties;
-import com.auth.service.auth.model.request.EmailAuth;
-import com.auth.service.auth.model.request.UsernamePasswordAuth;
-import com.auth.service.auth.model.response.RefreshTokenResponse;
-import com.auth.service.auth.model.response.UserLoginResponse;
-import com.auth.service.auth.service.AuthService;
-import com.auth.service.auth.service.RefreshTokenService;
+import java.time.LocalDateTime;
 
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * AuthController 单元测试：验证 Cookie 读写、登录/刷新/登出流程编排。
@@ -57,7 +55,7 @@ class AuthControllerTest {
 	@DisplayName("用户名密码登录：成功后写入 Cookie 并返回登录响应")
 	void loginByUsername_shouldWriteCookieAndReturnResponse() {
 		// Arrange
-		UsernamePasswordAuth auth = new UsernamePasswordAuth();
+		UsernamePasswordLoginRequest auth = new UsernamePasswordLoginRequest();
 		auth.setUsername("user");
 		auth.setPassword("pass");
 
@@ -89,7 +87,7 @@ class AuthControllerTest {
 	@DisplayName("邮箱登录：成功后写入 Cookie 并返回登录响应")
 	void loginByEmail_shouldWriteCookieAndReturnResponse() {
 		// Arrange
-		EmailAuth auth = new EmailAuth();
+		EmailLoginRequest auth = new EmailLoginRequest();
 		auth.setEmail("test@example.com");
 		auth.setCode("123456");
 

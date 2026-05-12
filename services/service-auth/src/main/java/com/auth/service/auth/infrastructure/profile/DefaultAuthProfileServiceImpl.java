@@ -8,8 +8,9 @@ import com.auth.module.security.contract.constants.PermissionConstant;
 import com.auth.service.auth.exception.AuthBusinessException;
 import com.auth.service.auth.exception.AuthResultCode;
 import com.auth.service.auth.infrastructure.profile.datascope.DataScopeEffectiveResolver;
+import com.auth.service.auth.mapper.UserAuthorizationGrantMapper;
 import com.auth.service.auth.mapper.UserMapper;
-import com.auth.service.auth.mapper.UserRolePermissionDataScopePolicyMapper;
+import com.auth.service.auth.service.AuthProfileQueryService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,17 +22,17 @@ import java.util.Map;
  * @author Bunny
  */
 @Service
-public class AuthProfileService {
+public class DefaultAuthProfileServiceImpl implements AuthProfileQueryService {
 
-	private final UserRolePermissionDataScopePolicyMapper userRolePermissionDataScopePolicyMapper;
+	private final UserAuthorizationGrantMapper userAuthorizationGrantMapper;
 
 	private final UserMapper userMapper;
 
 	private final DataScopeEffectiveResolver dataScopeEffectiveResolver;
 
-	public AuthProfileService(UserRolePermissionDataScopePolicyMapper userRolePermissionDataScopePolicyMapper,
+	public DefaultAuthProfileServiceImpl(UserAuthorizationGrantMapper userAuthorizationGrantMapper,
 			UserMapper userMapper, DataScopeEffectiveResolver dataScopeEffectiveResolver) {
-		this.userRolePermissionDataScopePolicyMapper = userRolePermissionDataScopePolicyMapper;
+		this.userAuthorizationGrantMapper = userAuthorizationGrantMapper;
 		this.userMapper = userMapper;
 		this.dataScopeEffectiveResolver = dataScopeEffectiveResolver;
 	}
@@ -41,6 +42,7 @@ public class AuthProfileService {
 	 * @param userId 用户ID
 	 * @return 授权画像
 	 */
+	@Override
 	public AuthProfile buildByUserId(Long userId) {
 		UserEntity user = userMapper.selectById(userId);
 		if (user == null) {
@@ -54,6 +56,7 @@ public class AuthProfileService {
 	 * @param user 用户信息
 	 * @return 授权画像
 	 */
+	@Override
 	public AuthProfile buildByUser(UserEntity user) {
 		if (user == null || user.getId() == null) {
 			throw new AuthBusinessException(AuthResultCode.USER_NOT_FOUND);
@@ -61,8 +64,8 @@ public class AuthProfileService {
 		long userId = user.getId();
 
 		// 获取功能权限
-		List<String> roles = userRolePermissionDataScopePolicyMapper.selectRolesByUserId(userId);
-		List<String> permissions = userRolePermissionDataScopePolicyMapper.selectPermissionsByUserId(userId);
+		List<String> roles = userAuthorizationGrantMapper.selectRolesByUserId(userId);
+		List<String> permissions = userAuthorizationGrantMapper.selectPermissionsByUserId(userId);
 
 		if (PermissionConstant.isAdmin(userId, roles)) {
 			roles = PermissionConstant.ADMIN_ROLES;

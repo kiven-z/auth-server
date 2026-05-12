@@ -9,7 +9,7 @@ import java.util.List;
  *
  * @author Bunny
  */
-public interface AuthInnerService {
+public interface InternalAuthCoordinationService {
 
 	/**
 	 * 刷新用户缓存

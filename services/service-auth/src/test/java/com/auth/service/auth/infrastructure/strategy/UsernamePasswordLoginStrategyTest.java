@@ -5,11 +5,11 @@ import com.auth.service.auth.exception.AuthBusinessException;
 import com.auth.service.auth.exception.AuthResultCode;
 import com.auth.service.auth.infrastructure.login.LoginFailureRateLimiter;
 import com.auth.service.auth.infrastructure.login.strategy.UsernamePasswordLoginStrategy;
-import com.auth.service.auth.infrastructure.profile.AuthProfileService;
+import com.auth.service.auth.infrastructure.profile.DefaultAuthProfileServiceImpl;
 import com.auth.service.auth.mapper.UserMapper;
 import com.auth.service.auth.model.enums.AuthLoginLogResult;
 import com.auth.service.auth.model.enums.AuthLoginLogType;
-import com.auth.service.auth.model.request.UsernamePasswordAuth;
+import com.auth.service.auth.model.request.login.UsernamePasswordLoginRequest;
 import com.auth.service.auth.service.AuthLoginAuditService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.DisplayName;
@@ -39,7 +39,7 @@ class UsernamePasswordLoginStrategyTest {
 	private LoginFailureRateLimiter loginFailureRateLimiter;
 
 	@Mock
-	private AuthProfileService authProfileService;
+	private DefaultAuthProfileServiceImpl defaultAuthProfileServiceImpl;
 
 	@Mock
 	private PasswordEncoder passwordEncoder;
@@ -56,9 +56,9 @@ class UsernamePasswordLoginStrategyTest {
 		// Arrange
 		when(userMapper.selectUserByUsername("u")).thenReturn(null);
 		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(userMapper, loginFailureRateLimiter,
-				authProfileService, passwordEncoder, loginLogService);
+				defaultAuthProfileServiceImpl, passwordEncoder, loginLogService);
 
-		UsernamePasswordAuth auth = new UsernamePasswordAuth();
+		UsernamePasswordLoginRequest auth = new UsernamePasswordLoginRequest();
 		auth.setUsername("u");
 		auth.setPassword("p");
 
@@ -78,10 +78,10 @@ class UsernamePasswordLoginStrategyTest {
 	void supports_shouldReturnUsernamePasswordAuth() {
 		// Arrange
 		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(userMapper, loginFailureRateLimiter,
-				authProfileService, passwordEncoder, loginLogService);
+				defaultAuthProfileServiceImpl, passwordEncoder, loginLogService);
 
 		// Act & Assert
-		assertEquals(UsernamePasswordAuth.class, strategy.supports());
+		assertEquals(UsernamePasswordLoginRequest.class, strategy.supports());
 	}
 
 	@Test
@@ -100,9 +100,9 @@ class UsernamePasswordLoginStrategyTest {
 		when(loginFailureRateLimiter.recordFailure(1L)).thenReturn(2);
 
 		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(userMapper, loginFailureRateLimiter,
-				authProfileService, passwordEncoder, loginLogService);
+				defaultAuthProfileServiceImpl, passwordEncoder, loginLogService);
 
-		UsernamePasswordAuth auth = new UsernamePasswordAuth();
+		UsernamePasswordLoginRequest auth = new UsernamePasswordLoginRequest();
 		auth.setUsername("u");
 		auth.setPassword("p");
 

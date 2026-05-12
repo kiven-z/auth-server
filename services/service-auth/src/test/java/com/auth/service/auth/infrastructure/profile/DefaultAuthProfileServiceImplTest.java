@@ -3,8 +3,8 @@ package com.auth.service.auth.infrastructure.profile;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
 import com.auth.service.auth.infrastructure.profile.datascope.DataScopeEffectiveResolver;
+import com.auth.service.auth.mapper.UserAuthorizationGrantMapper;
 import com.auth.service.auth.mapper.UserMapper;
-import com.auth.service.auth.mapper.UserRolePermissionDataScopePolicyMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,10 +19,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class AuthProfileServiceTest {
+class DefaultAuthProfileServiceImplTest {
 
 	@Mock
-	private UserRolePermissionDataScopePolicyMapper userRolePermissionDataScopePolicyMapper;
+	private UserAuthorizationGrantMapper userAuthorizationGrantMapper;
 
 	@Mock
 	private UserMapper userMapper;
@@ -37,14 +37,13 @@ class AuthProfileServiceTest {
 		UserEntity user = new UserEntity();
 		user.setId(10L);
 		user.setUsername("u10");
-		when(userRolePermissionDataScopePolicyMapper.selectRolesByUserId(10L)).thenReturn(List.of("COMMON"));
-		when(userRolePermissionDataScopePolicyMapper.selectPermissionsByUserId(10L))
-			.thenReturn(List.of("system:user:list"));
+		when(userAuthorizationGrantMapper.selectRolesByUserId(10L)).thenReturn(List.of("COMMON"));
+		when(userAuthorizationGrantMapper.selectPermissionsByUserId(10L)).thenReturn(List.of("system:user:list"));
 		ScopeGrant grant = ScopeGrant.builder().build();
 		when(dataScopeEffectiveResolver.resolveByUserId(10L)).thenReturn(Map.of("DEPT::default", grant));
 
-		AuthProfileService service = new AuthProfileService(userRolePermissionDataScopePolicyMapper, userMapper,
-				dataScopeEffectiveResolver);
+		DefaultAuthProfileServiceImpl service = new DefaultAuthProfileServiceImpl(userAuthorizationGrantMapper,
+				userMapper, dataScopeEffectiveResolver);
 		Map<String, ScopeGrant> dataScopes = service.buildByUser(user).getDataScopes();
 
 		assertEquals(1, dataScopes.size());

@@ -22,11 +22,12 @@ import java.time.LocalDateTime;
  */
 @Slf4j
 @Service
-public class LoginLogServiceImpl extends ServiceImpl<LoginLogMapper, LoginLogEntity> implements AuthLoginAuditService {
+public class AuthLoginAuditServiceImpl extends ServiceImpl<LoginLogMapper, LoginLogEntity>
+		implements AuthLoginAuditService {
 
 	private final IpAddressService ipAddressService;
 
-	public LoginLogServiceImpl(IpAddressService ipAddressService) {
+	public AuthLoginAuditServiceImpl(IpAddressService ipAddressService) {
 		this.ipAddressService = ipAddressService;
 	}
 

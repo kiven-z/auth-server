@@ -9,6 +9,6 @@ import org.apache.ibatis.annotations.Mapper;
  * @author Bunny
  */
 @Mapper
-public interface UserRolesCteMapper {
+public interface UserGrantSqlFragmentMapper {
 
 }

@@ -1,4 +1,4 @@
-package com.auth.service.auth.model.request;
+package com.auth.service.auth.model.request.login;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -14,7 +14,7 @@ import java.io.Serializable;
  */
 @Getter
 @Setter
-public abstract class AbstractAuthentication implements Serializable {
+public abstract class AbstractLoginRequest implements Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 1L;

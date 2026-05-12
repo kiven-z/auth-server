@@ -17,8 +17,8 @@ import com.auth.service.auth.infrastructure.session.UserSessionIndexFactory;
 import com.auth.service.auth.infrastructure.session.redis.RedisUserSessionIndexRepository;
 import com.auth.service.auth.model.enums.AuthLoginLogResult;
 import com.auth.service.auth.model.enums.AuthLoginLogType;
-import com.auth.service.auth.model.request.AbstractAuthentication;
-import com.auth.service.auth.model.request.UsernamePasswordAuth;
+import com.auth.service.auth.model.request.login.AbstractLoginRequest;
+import com.auth.service.auth.model.request.login.UsernamePasswordLoginRequest;
 import com.auth.service.auth.model.response.UserLoginResponse;
 import com.auth.service.auth.service.AuthLoginAuditService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -73,7 +73,7 @@ class AuthServiceImplTest {
 	@DisplayName("登录：策略精确匹配时，按编排顺序执行并返回响应")
 	void login_shouldOrchestrateInOrder_whenStrategyMatchesExactly() {
 		// Arrange
-		UsernamePasswordAuth auth = new UsernamePasswordAuth();
+		UsernamePasswordLoginRequest auth = new UsernamePasswordLoginRequest();
 		auth.setUsername("user");
 		auth.setPassword("pass");
 
@@ -87,14 +87,14 @@ class AuthServiceImplTest {
 
 		LoginResult loginResult = new LoginResult(response, profile, AuthLoginLogType.LOGIN_PASSWORD);
 
-		LoginStrategy<UsernamePasswordAuth> strategy = new LoginStrategy<>() {
+		LoginStrategy<UsernamePasswordLoginRequest> strategy = new LoginStrategy<>() {
 			@Override
-			public Class<UsernamePasswordAuth> supports() {
-				return UsernamePasswordAuth.class;
+			public Class<UsernamePasswordLoginRequest> supports() {
+				return UsernamePasswordLoginRequest.class;
 			}
 
 			@Override
-			public LoginResult authenticate(UsernamePasswordAuth requestAuth, HttpServletRequest request) {
+			public LoginResult authenticate(UsernamePasswordLoginRequest requestAuth, HttpServletRequest request) {
 				return loginResult;
 			}
 		};
@@ -142,11 +142,11 @@ class AuthServiceImplTest {
 	@DisplayName("登录：无精确匹配时，允许父类/接口匹配兜底")
 	void login_shouldFallbackToAssignableStrategy_whenExactClassNotFound() {
 		// Arrange
-		class MyAuth extends UsernamePasswordAuth {
+		class MyLoginRequest extends UsernamePasswordLoginRequest {
 
 		}
 
-		MyAuth auth = new MyAuth();
+		MyLoginRequest auth = new MyLoginRequest();
 		auth.setUsername("user");
 		auth.setPassword("pass");
 
@@ -157,14 +157,14 @@ class AuthServiceImplTest {
 		UserLoginResponse response = new UserLoginResponse();
 		response.setId(TestConstants.USER_ID);
 
-		LoginStrategy<UsernamePasswordAuth> strategy = new LoginStrategy<>() {
+		LoginStrategy<UsernamePasswordLoginRequest> strategy = new LoginStrategy<>() {
 			@Override
-			public Class<UsernamePasswordAuth> supports() {
-				return UsernamePasswordAuth.class;
+			public Class<UsernamePasswordLoginRequest> supports() {
+				return UsernamePasswordLoginRequest.class;
 			}
 
 			@Override
-			public LoginResult authenticate(UsernamePasswordAuth requestAuth, HttpServletRequest request) {
+			public LoginResult authenticate(UsernamePasswordLoginRequest requestAuth, HttpServletRequest request) {
 				return new LoginResult(response, profile, AuthLoginLogType.LOGIN_PASSWORD);
 			}
 		};
@@ -190,7 +190,7 @@ class AuthServiceImplTest {
 	@DisplayName("登录：无任何策略时，抛出 AUTH_TYPE_UNSUPPORTED 并写审计")
 	void login_shouldThrowAuthTypeUnsupported_whenNoStrategy() {
 		// Arrange
-		AbstractAuthentication auth = new AbstractAuthentication() {
+		AbstractLoginRequest auth = new AbstractLoginRequest() {
 		};
 
 		AuthServiceImpl service = new AuthServiceImpl(List.of(), authProfileCache, userSessionIndexFactory,

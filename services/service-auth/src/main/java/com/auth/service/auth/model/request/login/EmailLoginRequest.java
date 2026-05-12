@@ -1,4 +1,4 @@
-package com.auth.service.auth.model.request;
+package com.auth.service.auth.model.request.login;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
@@ -16,7 +16,7 @@ import java.io.Serial;
 @Schema(name = "EmailAuth", title = "邮箱登录认证请求", description = "邮箱登录认证请求")
 @Getter
 @Setter
-public class EmailAuth extends AbstractAuthentication {
+public class EmailLoginRequest extends AbstractLoginRequest {
 
 	@Serial
 	private static final long serialVersionUID = 1L;

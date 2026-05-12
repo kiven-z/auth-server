@@ -4,7 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import com.auth.common.core.model.response.Result;
 import com.auth.module.security.autoconfigure.annotation.InternalApi;
 import com.auth.service.auth.model.vo.inner.EffectiveCodesVO;
-import com.auth.service.auth.service.AuthInnerService;
+import com.auth.service.auth.service.InternalAuthCoordinationService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,9 +21,9 @@ import java.util.List;
 @Slf4j
 @RequestMapping("/api/auth/inner")
 @RestController
-public class AuthInnerController {
+public class InternalAuthController {
 
-	private final AuthInnerService authInnerService;
+	private final InternalAuthCoordinationService internalAuthCoordinationService;
 
 	@InternalApi
 	@Operation(summary = "刷新用户授权画像缓存（AuthProfile）")
@@ -32,7 +32,7 @@ public class AuthInnerController {
 		if (CollUtil.isEmpty(userIds)) {
 			return Result.success();
 		}
-		authInnerService.refreshUserCache(userIds);
+		internalAuthCoordinationService.refreshUserCache(userIds);
 
 		return Result.success();
 	}
@@ -44,7 +44,7 @@ public class AuthInnerController {
 		if (CollUtil.isEmpty(userIds)) {
 			return Result.success();
 		}
-		authInnerService.kickAllSessions(userIds);
+		internalAuthCoordinationService.kickAllSessions(userIds);
 
 		return Result.success();
 	}
@@ -53,7 +53,7 @@ public class AuthInnerController {
 	@Operation(summary = "查询用户生效角色码与权限码（供 system 动态菜单等内部调用）")
 	@GetMapping("/principal/{userId}/effective-codes")
 	public Result<EffectiveCodesVO> effectiveCodes(@PathVariable("userId") Long userId) {
-		EffectiveCodesVO body = authInnerService.resolveEffectiveCodes(userId);
+		EffectiveCodesVO body = internalAuthCoordinationService.resolveEffectiveCodes(userId);
 		return Result.success(body);
 	}
 

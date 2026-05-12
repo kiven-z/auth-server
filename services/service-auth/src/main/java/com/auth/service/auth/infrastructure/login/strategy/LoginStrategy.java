@@ -1,7 +1,7 @@
 package com.auth.service.auth.infrastructure.login.strategy;
 
 import com.auth.service.auth.infrastructure.login.LoginResult;
-import com.auth.service.auth.model.request.AbstractAuthentication;
+import com.auth.service.auth.model.request.login.AbstractLoginRequest;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
@@ -9,7 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
  *
  * @author Bunny
  */
-public interface LoginStrategy<T extends AbstractAuthentication> {
+public interface LoginStrategy<T extends AbstractLoginRequest> {
 
 	/**
 	 * 当前策略支持的认证请求类型（作为注册表 key）

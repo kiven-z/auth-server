@@ -28,7 +28,7 @@ import static org.mockito.Mockito.verify;
  * @author Bunny
  */
 @ExtendWith(MockitoExtension.class)
-class LoginLogServiceImplTest {
+class AuthLoginAuditServiceImplTest {
 
 	@Mock
 	private IpAddressService ipAddressService;
@@ -36,11 +36,11 @@ class LoginLogServiceImplTest {
 	@Mock
 	private LoginLogMapper loginLogMapper;
 
-	private LoginLogServiceImpl loginLogService;
+	private AuthLoginAuditServiceImpl loginLogService;
 
 	@BeforeEach
 	void setUp() throws Exception {
-		loginLogService = new LoginLogServiceImpl(ipAddressService);
+		loginLogService = new AuthLoginAuditServiceImpl(ipAddressService);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(loginLogService, loginLogMapper);

@@ -37,8 +37,8 @@ public class AuthExceptionHandler extends ValidationExceptionHandler {
 	 * @param exception 原始异常
 	 * @return 响应实体
 	 */
-	@ExceptionHandler(BadCredentialsException.class)
-	public ResponseEntity<Result<Object>> handleBadCredentialsException(BadCredentialsException exception) {
+	@ExceptionHandler(AuthBadCredentialsException.class)
+	public ResponseEntity<Result<Object>> handleBadCredentialsException(AuthBadCredentialsException exception) {
 		log.warn("Bad credentials exception: {}", exception.getMessage());
 		return toResponse(new AuthBusinessException(AuthResultCode.USERNAME_OR_PASSWORD_ERROR));
 	}

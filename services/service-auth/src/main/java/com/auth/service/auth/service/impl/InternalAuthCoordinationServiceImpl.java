@@ -2,10 +2,10 @@ package com.auth.service.auth.service.impl;
 
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.infrastructure.profile.AuthProfileCache;
-import com.auth.service.auth.infrastructure.profile.AuthProfileService;
+import com.auth.service.auth.infrastructure.profile.DefaultAuthProfileServiceImpl;
 import com.auth.service.auth.infrastructure.session.redis.RedisUserSessionIndexRepository;
 import com.auth.service.auth.model.vo.inner.EffectiveCodesVO;
-import com.auth.service.auth.service.AuthInnerService;
+import com.auth.service.auth.service.InternalAuthCoordinationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,11 +21,11 @@ import java.util.Objects;
 @RequiredArgsConstructor
 @Slf4j
 @Service
-public class AuthInnerServiceImpl implements AuthInnerService {
+public class InternalAuthCoordinationServiceImpl implements InternalAuthCoordinationService {
 
 	private final RedisUserSessionIndexRepository redisUserSessionIndexRepository;
 
-	private final AuthProfileService authProfileService;
+	private final DefaultAuthProfileServiceImpl defaultAuthProfileServiceImpl;
 
 	private final AuthProfileCache authProfileCache;
 
@@ -36,7 +36,7 @@ public class AuthInnerServiceImpl implements AuthInnerService {
 	public void refreshUserCache(List<Long> userIds) {
 		userIds.stream().filter(Objects::nonNull).forEach(userId -> {
 			try {
-				AuthProfile profile = authProfileService.buildByUserId(userId);
+				AuthProfile profile = defaultAuthProfileServiceImpl.buildByUserId(userId);
 				authProfileCache.createCacheAuthProfile(profile);
 			}
 			catch (RuntimeException ex) {
@@ -65,7 +65,7 @@ public class AuthInnerServiceImpl implements AuthInnerService {
 	 */
 	@Override
 	public EffectiveCodesVO resolveEffectiveCodes(Long userId) {
-		AuthProfile profile = authProfileService.buildByUserId(userId);
+		AuthProfile profile = defaultAuthProfileServiceImpl.buildByUserId(userId);
 		EffectiveCodesVO vo = new EffectiveCodesVO();
 		if (profile == null) {
 			vo.setRoleCodes(List.of());

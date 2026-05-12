@@ -6,10 +6,10 @@ import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.auth.exception.AuthBusinessException;
 import com.auth.service.auth.exception.AuthResultCode;
 import com.auth.service.auth.infrastructure.login.LoginFailureRateLimiter;
-import com.auth.service.auth.infrastructure.profile.AuthProfileService;
+import com.auth.service.auth.infrastructure.profile.DefaultAuthProfileServiceImpl;
 import com.auth.service.auth.mapper.UserMapper;
 import com.auth.service.auth.model.enums.AuthLoginLogType;
-import com.auth.service.auth.model.request.EmailAuth;
+import com.auth.service.auth.model.request.login.EmailLoginRequest;
 import com.auth.service.auth.service.AuthLoginAuditService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -25,16 +25,16 @@ import static com.auth.module.security.contract.redis.SecurityRedisKey.EMAIL_COD
  * @author Bunny
  */
 @Component
-public class EmailLoginStrategy extends AbstractAuthenticationStrategy<EmailAuth> {
+public class EmailLoginStrategy extends AbstractAuthenticationStrategy<EmailLoginRequest> {
 
 	private final RedisTemplate<String, Object> redisTemplate;
 
 	private final UserMapper userMapper;
 
-	public EmailLoginStrategy(AuthProfileService authProfileService, RedisTemplate<String, Object> redisTemplate,
-			UserMapper userMapper, LoginFailureRateLimiter loginFailureRateLimiter,
-			AuthLoginAuditService loginLogService) {
-		super(loginFailureRateLimiter, authProfileService, loginLogService);
+	public EmailLoginStrategy(DefaultAuthProfileServiceImpl defaultAuthProfileServiceImpl,
+			RedisTemplate<String, Object> redisTemplate, UserMapper userMapper,
+			LoginFailureRateLimiter loginFailureRateLimiter, AuthLoginAuditService loginLogService) {
+		super(loginFailureRateLimiter, defaultAuthProfileServiceImpl, loginLogService);
 		this.redisTemplate = redisTemplate;
 		this.userMapper = userMapper;
 	}
@@ -50,7 +50,7 @@ public class EmailLoginStrategy extends AbstractAuthenticationStrategy<EmailAuth
 	 * @return 用户ID
 	 */
 	@Override
-	protected UserEntity resolveUser(EmailAuth auth) {
+	protected UserEntity resolveUser(EmailLoginRequest auth) {
 		String email = auth.getEmail();
 		UserEntity user = userMapper.selectUserByEmail(email);
 		if (user == null) {
@@ -66,7 +66,7 @@ public class EmailLoginStrategy extends AbstractAuthenticationStrategy<EmailAuth
 	 * @param user 用户实体
 	 */
 	@Override
-	protected AuthLoginLogType doAuthenticate(EmailAuth auth, UserEntity user) {
+	protected AuthLoginLogType doAuthenticate(EmailLoginRequest auth, UserEntity user) {
 		// 验证码错误：不走 BadCredentialsException，直接返回验证码业务错误码
 		String email = Objects.requireNonNull(auth.getEmail());
 		String code = Objects.requireNonNull(auth.getCode());
@@ -105,8 +105,8 @@ public class EmailLoginStrategy extends AbstractAuthenticationStrategy<EmailAuth
 	 * @return EmailAuth
 	 */
 	@Override
-	public Class<EmailAuth> supports() {
-		return EmailAuth.class;
+	public Class<EmailLoginRequest> supports() {
+		return EmailLoginRequest.class;
 	}
 
 }

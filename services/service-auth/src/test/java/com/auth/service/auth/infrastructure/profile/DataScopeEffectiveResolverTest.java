@@ -3,9 +3,9 @@ package com.auth.service.auth.infrastructure.profile;
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
 import com.auth.module.security.contract.api.granttable.DataScopeKeyUtil;
 import com.auth.module.security.contract.api.granttable.ScopeGrantType;
-import com.auth.service.auth.infrastructure.profile.datascope.BuildResult;
+import com.auth.service.auth.infrastructure.profile.datascope.DataScopeBuildResult;
 import com.auth.service.auth.infrastructure.profile.datascope.DataScopeEffectiveResolver;
-import com.auth.service.auth.mapper.UserRolePermissionDataScopePolicyMapper;
+import com.auth.service.auth.mapper.UserAuthorizationGrantMapper;
 import com.auth.service.auth.model.projection.DataScopeProjection;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,14 +24,14 @@ import static org.mockito.Mockito.*;
 class DataScopeEffectiveResolverTest {
 
 	@Mock
-	private UserRolePermissionDataScopePolicyMapper mapper;
+	private UserAuthorizationGrantMapper mapper;
 
 	@Test
 	@DisplayName("用户ID为空时返回空结果")
 	void nullUserId_shouldReturnEmptyResult() {
 		// userId 为空时不查询数据库，直接返回空范围
 		DataScopeEffectiveResolver resolver = new DataScopeEffectiveResolver(mapper);
-		BuildResult result = resolver.resolveWithTrace(null);
+		DataScopeBuildResult result = resolver.resolveWithTrace(null);
 		assertTrue(result.getDataScopes().isEmpty());
 		assertTrue(result.getTraces().isEmpty());
 	}
@@ -49,7 +49,7 @@ class DataScopeEffectiveResolverTest {
 		when(mapper.selectEffectiveDataScopesByUserId(10L)).thenReturn(List.of(projection));
 
 		DataScopeEffectiveResolver resolver = new DataScopeEffectiveResolver(mapper);
-		BuildResult result = resolver.resolveWithTrace(10L);
+		DataScopeBuildResult result = resolver.resolveWithTrace(10L);
 		Map<String, ScopeGrant> scopes = result.getDataScopes();
 
 		assertEquals(ScopeGrantType.CUSTOM, scopes.get(DataScopeKeyUtil.compose("DEPT", "order")).getScopeType());

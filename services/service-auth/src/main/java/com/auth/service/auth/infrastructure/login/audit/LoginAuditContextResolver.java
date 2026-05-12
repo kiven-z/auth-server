@@ -1,12 +1,12 @@
-package com.auth.service.auth.infrastructure.login;
+package com.auth.service.auth.infrastructure.login.audit;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.auth.exception.AuthResultCode;
 import com.auth.service.auth.model.enums.AuthLoginLogResult;
 import com.auth.service.auth.model.enums.AuthLoginLogType;
-import com.auth.service.auth.model.request.AbstractAuthentication;
-import com.auth.service.auth.model.request.EmailAuth;
-import com.auth.service.auth.model.request.UsernamePasswordAuth;
+import com.auth.service.auth.model.request.login.AbstractLoginRequest;
+import com.auth.service.auth.model.request.login.EmailLoginRequest;
+import com.auth.service.auth.model.request.login.UsernamePasswordLoginRequest;
 import lombok.experimental.UtilityClass;
 
 /**
@@ -15,19 +15,19 @@ import lombok.experimental.UtilityClass;
  * @author Bunny
  */
 @UtilityClass
-public class LoginAuditSupport {
+public class LoginAuditContextResolver {
 
 	/**
 	 * 从认证请求体解析登录主体（用户名或邮箱），用于尚未解析到 UserEntity 时的审计。
 	 * @param auth 认证请求
 	 * @return 主体字符串，无法解析时返回 null
 	 */
-	public static String principal(AbstractAuthentication auth) {
-		if (auth instanceof UsernamePasswordAuth usernamePasswordAuth) {
-			return blankToNull(usernamePasswordAuth.getUsername());
+	public static String principal(AbstractLoginRequest auth) {
+		if (auth instanceof UsernamePasswordLoginRequest usernamePasswordLoginRequest) {
+			return blankToNull(usernamePasswordLoginRequest.getUsername());
 		}
-		if (auth instanceof EmailAuth emailAuth) {
-			return blankToNull(emailAuth.getEmail());
+		if (auth instanceof EmailLoginRequest emailLoginRequest) {
+			return blankToNull(emailLoginRequest.getEmail());
 		}
 		return null;
 	}
@@ -37,8 +37,8 @@ public class LoginAuditSupport {
 	 * @param auth 认证请求
 	 * @return 事件类型；未知类型时回退为密码登录类型
 	 */
-	public static AuthLoginLogType eventTypeFromAuth(AbstractAuthentication auth) {
-		if (auth instanceof EmailAuth) {
+	public static AuthLoginLogType eventTypeFromAuth(AbstractLoginRequest auth) {
+		if (auth instanceof EmailLoginRequest) {
 			return AuthLoginLogType.LOGIN_EMAIL;
 		}
 		return AuthLoginLogType.LOGIN_PASSWORD;

@@ -1,4 +1,4 @@
-package com.auth.service.auth.model.request;
+package com.auth.service.auth.model.request.login;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -15,7 +15,7 @@ import java.io.Serial;
 @Schema(name = "UsernamePasswordAuth", title = "用户名密码登录认证请求", description = "用户名密码登录认证请求")
 @Getter
 @Setter
-public class UsernamePasswordAuth extends AbstractAuthentication {
+public class UsernamePasswordLoginRequest extends AbstractLoginRequest {
 
 	@Serial
 	private static final long serialVersionUID = 1L;

@@ -3,7 +3,7 @@ package com.auth.service.auth.infrastructure.profile;
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
 import com.auth.module.security.contract.api.granttable.DataScopeKeyUtil;
 import com.auth.module.security.contract.api.granttable.ScopeGrantType;
-import com.auth.service.auth.infrastructure.profile.datascope.BuildResult;
+import com.auth.service.auth.infrastructure.profile.datascope.DataScopeBuildResult;
 import com.auth.service.auth.infrastructure.profile.datascope.DataScopeBuilder;
 import com.auth.service.auth.model.projection.DataScopeProjection;
 import org.junit.jupiter.api.DisplayName;
@@ -21,8 +21,8 @@ class DataScopeBuilderTest {
 	@DisplayName("用户授权优先于角色授权")
 	void userScope_shouldOverrideRoleScope() {
 		// 同一资源键下存在 USER 和 ROLE 时，优先使用 USER
-		List<DataScopeProjection> projections = List.of(projection("USER", "default", "DEPT", "SELF", "[]"),
-				projection("ROLE", "default", "DEPT", "ALL", "[]"));
+		List<DataScopeProjection> projections = List.of(projection("USER", "default", "SELF", "[]"),
+				projection("ROLE", "default", "ALL", "[]"));
 
 		Map<String, ScopeGrant> scopes = DataScopeBuilder.buildDataScopes(projections);
 		ScopeGrant grant = scopes.get(DataScopeKeyUtil.compose("DEPT", "default"));
@@ -34,9 +34,8 @@ class DataScopeBuilderTest {
 	@DisplayName("角色侧缺少用户直连时执行宽松合并")
 	void roleScopes_shouldMergeLoosely() {
 		// 无 USER 直连时，ROLE/DEPT 片段应按宽松规则合并
-		List<DataScopeProjection> projections = List.of(
-				projection("ROLE", "order", "DEPT", "NODE_ONLY", "[\"1\",\"2\"]"),
-				projection("DEPT", "order", "DEPT", "CUSTOM", "[\"2\",\"3\"]"));
+		List<DataScopeProjection> projections = List.of(projection("ROLE", "order", "NODE_ONLY", "[\"1\",\"2\"]"),
+				projection("DEPT", "order", "CUSTOM", "[\"2\",\"3\"]"));
 
 		Map<String, ScopeGrant> scopes = DataScopeBuilder.buildDataScopes(projections);
 		ScopeGrant grant = scopes.get(DataScopeKeyUtil.compose("DEPT", "order"));
@@ -57,9 +56,9 @@ class DataScopeBuilderTest {
 	@DisplayName("构建轨迹包含命中来源与生效类型")
 	void buildWithTrace_shouldExposeResolutionTrace() {
 		// 构建轨迹应包含来源与最终类型，便于运维排查
-		List<DataScopeProjection> projections = List.of(projection("ROLE", "default", "DEPT", "NODE_ONLY", "[\"10\"]"));
+		List<DataScopeProjection> projections = List.of(projection("ROLE", "default", "NODE_ONLY", "[\"10\"]"));
 
-		BuildResult result = DataScopeBuilder.buildDataScopesWithTrace(projections);
+		DataScopeBuildResult result = DataScopeBuilder.buildDataScopesWithTrace(projections);
 
 		assertEquals(1, result.getDataScopes().size());
 		assertEquals(1, result.getTraces().size());
@@ -67,12 +66,11 @@ class DataScopeBuilderTest {
 		assertEquals(ScopeGrantType.CUSTOM.name(), result.getTraces().get(0).getEffectiveScopeType());
 	}
 
-	private DataScopeProjection projection(String subjectType, String resourceCode, String dimensionType,
-			String scopeType, String values) {
+	private DataScopeProjection projection(String subjectType, String resourceCode, String scopeType, String values) {
 		DataScopeProjection projection = new DataScopeProjection();
 		projection.setSubjectType(subjectType);
 		projection.setScopeResourceCode(resourceCode);
-		projection.setDimensionType(dimensionType);
+		projection.setDimensionType("DEPT");
 		projection.setScopeType(scopeType);
 		projection.setScopeSubjectIds(values);
 		return projection;

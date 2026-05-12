@@ -14,7 +14,7 @@ import java.util.Map;
  */
 @Getter
 @Builder
-public class BuildResult {
+public class DataScopeBuildResult {
 
 	/**
 	 * 生效数据权限

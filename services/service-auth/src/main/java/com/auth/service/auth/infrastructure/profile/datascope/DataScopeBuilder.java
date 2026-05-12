@@ -40,9 +40,9 @@ public class DataScopeBuilder {
 	 * @param projections 原始授权片段
 	 * @return 构建结果
 	 */
-	public static BuildResult buildDataScopesWithTrace(List<DataScopeProjection> projections) {
+	public static DataScopeBuildResult buildDataScopesWithTrace(List<DataScopeProjection> projections) {
 		if (CollUtil.isEmpty(projections)) {
-			return BuildResult.builder().dataScopes(Map.of()).traces(List.of()).build();
+			return DataScopeBuildResult.builder().dataScopes(Map.of()).traces(List.of()).build();
 		}
 
 		Map<String, List<DataScopeProjection>> grouped = groupByDimensionAndResource(projections);
@@ -60,7 +60,7 @@ public class DataScopeBuilder {
 			dataScopes.put(key, effective);
 			traces.add(buildTrace(key, group, candidates, effective));
 		}
-		return BuildResult.builder().dataScopes(Map.copyOf(dataScopes)).traces(List.copyOf(traces)).build();
+		return DataScopeBuildResult.builder().dataScopes(Map.copyOf(dataScopes)).traces(List.copyOf(traces)).build();
 	}
 
 	/**

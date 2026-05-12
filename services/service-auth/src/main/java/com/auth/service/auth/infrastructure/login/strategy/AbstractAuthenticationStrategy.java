@@ -3,16 +3,16 @@ package com.auth.service.auth.infrastructure.login.strategy;
 import cn.hutool.core.bean.BeanUtil;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
+import com.auth.service.auth.exception.AuthBadCredentialsException;
 import com.auth.service.auth.exception.AuthBusinessException;
 import com.auth.service.auth.exception.AuthResultCode;
-import com.auth.service.auth.exception.BadCredentialsException;
-import com.auth.service.auth.infrastructure.login.LoginAuditSupport;
 import com.auth.service.auth.infrastructure.login.LoginFailureRateLimiter;
 import com.auth.service.auth.infrastructure.login.LoginResult;
-import com.auth.service.auth.infrastructure.profile.AuthProfileService;
+import com.auth.service.auth.infrastructure.login.audit.LoginAuditContextResolver;
+import com.auth.service.auth.infrastructure.profile.DefaultAuthProfileServiceImpl;
 import com.auth.service.auth.model.enums.AuthLoginLogResult;
 import com.auth.service.auth.model.enums.AuthLoginLogType;
-import com.auth.service.auth.model.request.AbstractAuthentication;
+import com.auth.service.auth.model.request.login.AbstractLoginRequest;
 import com.auth.service.auth.model.response.UserLoginResponse;
 import com.auth.service.auth.service.AuthLoginAuditService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,7 +27,7 @@ import jakarta.servlet.http.HttpServletRequest;
  *
  * @author Bunny
  */
-public abstract class AbstractAuthenticationStrategy<T extends AbstractAuthentication> implements LoginStrategy<T> {
+public abstract class AbstractAuthenticationStrategy<T extends AbstractLoginRequest> implements LoginStrategy<T> {
 
 	/**
 	 * 与 {@link UserEntity#getStatus()} 对齐：0=禁用
@@ -41,14 +41,14 @@ public abstract class AbstractAuthenticationStrategy<T extends AbstractAuthentic
 
 	protected final LoginFailureRateLimiter loginFailureRateLimiter;
 
-	private final AuthProfileService authProfileService;
+	private final DefaultAuthProfileServiceImpl defaultAuthProfileServiceImpl;
 
 	private final AuthLoginAuditService loginLogService;
 
 	protected AbstractAuthenticationStrategy(LoginFailureRateLimiter loginFailureRateLimiter,
-			AuthProfileService authProfileService, AuthLoginAuditService loginLogService) {
+			DefaultAuthProfileServiceImpl defaultAuthProfileServiceImpl, AuthLoginAuditService loginLogService) {
 		this.loginFailureRateLimiter = loginFailureRateLimiter;
-		this.authProfileService = authProfileService;
+		this.defaultAuthProfileServiceImpl = defaultAuthProfileServiceImpl;
 		this.loginLogService = loginLogService;
 	}
 
@@ -66,7 +66,7 @@ public abstract class AbstractAuthenticationStrategy<T extends AbstractAuthentic
 
 		try {
 			AuthLoginLogType resolvedLoginLogType = doAuthenticate(auth, user);
-			AuthProfile profile = authProfileService.buildByUser(user);
+			AuthProfile profile = defaultAuthProfileServiceImpl.buildByUser(user);
 
 			UserLoginResponse response = BeanUtil.copyProperties(user, UserLoginResponse.class);
 			response.setRoles(profile.getRoles());
@@ -74,7 +74,7 @@ public abstract class AbstractAuthenticationStrategy<T extends AbstractAuthentic
 
 			return new LoginResult(response, profile, resolvedLoginLogType);
 		}
-		catch (BadCredentialsException ex) {
+		catch (AuthBadCredentialsException ex) {
 			int remaining = loginFailureRateLimiter.recordFailure(userId);
 			loginLogService.recordLoginLog(request, loginLogType(), AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR,
 					userId, user.getUsername(), "remainingAttempts=" + remaining, null);
@@ -107,7 +107,7 @@ public abstract class AbstractAuthenticationStrategy<T extends AbstractAuthentic
 		catch (AuthBusinessException ex) {
 			if (ex.getResultCode() == AuthResultCode.USERNAME_OR_PASSWORD_ERROR) {
 				loginLogService.recordLoginLog(request, loginLogType(), AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR,
-						null, LoginAuditSupport.principal(auth), ex.getMessageKey(), null);
+						null, LoginAuditContextResolver.principal(auth), ex.getMessageKey(), null);
 			}
 			throw ex;
 		}
@@ -155,7 +155,7 @@ public abstract class AbstractAuthenticationStrategy<T extends AbstractAuthentic
 	protected abstract UserEntity resolveUser(T auth);
 
 	/**
-	 * 校验凭证；密码不匹配时抛出 {@link BadCredentialsException}。
+	 * 校验凭证；密码不匹配时抛出 {@link AuthBadCredentialsException}。
 	 * @param auth 登录请求
 	 * @param user 已解析用户
 	 * @return 登录类型（与审计类型一致）

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.auth.service.auth.mapper.UserRolePermissionDataScopePolicyMapper">
+<mapper namespace="com.auth.service.auth.mapper.UserAuthorizationGrantMapper">
 
     <!-- 查询用户角色码 -->
     <select id="selectRolesByUserId" resultType="java.lang.String">
-        <include refid="com.auth.service.auth.mapper.UserRolesCteMapper.selectRolesAndPermissionsByUserIdCte"/>
+        <include refid="com.auth.service.auth.mapper.UserGrantSqlFragmentMapper.selectRolesAndPermissionsByUserIdCte"/>
         -- 根据主体映射获取所有角色编码
         SELECT DISTINCT gt.role_code
         FROM grant_table gt
@@ -16,7 +16,7 @@
 
     <!-- 根据用户ID查询所有有效权限 -->
     <select id="selectPermissionsByUserId" resultType="java.lang.String">
-        <include refid="com.auth.service.auth.mapper.UserRolesCteMapper.selectRolesAndPermissionsByUserIdCte"/>,
+        <include refid="com.auth.service.auth.mapper.UserGrantSqlFragmentMapper.selectRolesAndPermissionsByUserIdCte"/>,
         all_role_codes AS (
         -- 根据主体映射获取所有角色编码
         SELECT DISTINCT gt.role_code
@@ -37,7 +37,7 @@
     <!-- 查询用户生效数据权限片段 -->
     <select id="selectEffectiveDataScopesByUserId"
             resultType="com.auth.service.auth.model.projection.DataScopeProjection">
-        <include refid="com.auth.service.auth.mapper.UserRolesCteMapper.selectDataScopeSubjectsByUserIdCte"/>
+        <include refid="com.auth.service.auth.mapper.UserGrantSqlFragmentMapper.selectDataScopeSubjectsByUserIdCte"/>
         SELECT ds.policy_holder_type,
         ds.scope_resource_code,
         ds.scope_dimension_type,

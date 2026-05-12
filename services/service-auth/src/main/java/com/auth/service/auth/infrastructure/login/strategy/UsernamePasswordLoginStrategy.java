@@ -1,14 +1,14 @@
 package com.auth.service.auth.infrastructure.login.strategy;
 
 import com.auth.module.platform.persistence.model.UserEntity;
+import com.auth.service.auth.exception.AuthBadCredentialsException;
 import com.auth.service.auth.exception.AuthBusinessException;
 import com.auth.service.auth.exception.AuthResultCode;
-import com.auth.service.auth.exception.BadCredentialsException;
 import com.auth.service.auth.infrastructure.login.LoginFailureRateLimiter;
-import com.auth.service.auth.infrastructure.profile.AuthProfileService;
+import com.auth.service.auth.infrastructure.profile.DefaultAuthProfileServiceImpl;
 import com.auth.service.auth.mapper.UserMapper;
 import com.auth.service.auth.model.enums.AuthLoginLogType;
-import com.auth.service.auth.model.request.UsernamePasswordAuth;
+import com.auth.service.auth.model.request.login.UsernamePasswordLoginRequest;
 import com.auth.service.auth.service.AuthLoginAuditService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -18,13 +18,13 @@ import org.springframework.stereotype.Component;
  *
  * <p>
  * 通过用户名查询用户，使用 {@link PasswordEncoder} 校验明文密码。 密码错误时抛出
- * {@link BadCredentialsException}，由模板方法统一转换为带剩余尝试次数的业务异常。
+ * {@link AuthBadCredentialsException}，由模板方法统一转换为带剩余尝试次数的业务异常。
  * </p>
  *
  * @author Bunny
  */
 @Component
-public class UsernamePasswordLoginStrategy extends AbstractAuthenticationStrategy<UsernamePasswordAuth> {
+public class UsernamePasswordLoginStrategy extends AbstractAuthenticationStrategy<UsernamePasswordLoginRequest> {
 
 	private final UserMapper userMapper;
 
@@ -34,9 +34,9 @@ public class UsernamePasswordLoginStrategy extends AbstractAuthenticationStrateg
 	private final PasswordEncoder passwordEncoder;
 
 	public UsernamePasswordLoginStrategy(UserMapper userMapper, LoginFailureRateLimiter loginFailureRateLimiter,
-			AuthProfileService authProfileService, PasswordEncoder passwordEncoder,
+			DefaultAuthProfileServiceImpl defaultAuthProfileServiceImpl, PasswordEncoder passwordEncoder,
 			AuthLoginAuditService loginLogService) {
-		super(loginFailureRateLimiter, authProfileService, loginLogService);
+		super(loginFailureRateLimiter, defaultAuthProfileServiceImpl, loginLogService);
 		this.userMapper = userMapper;
 		this.passwordEncoder = passwordEncoder;
 	}
@@ -52,7 +52,7 @@ public class UsernamePasswordLoginStrategy extends AbstractAuthenticationStrateg
 	 * @return 用户ID
 	 */
 	@Override
-	protected UserEntity resolveUser(UsernamePasswordAuth auth) {
+	protected UserEntity resolveUser(UsernamePasswordLoginRequest auth) {
 		String username = auth.getUsername();
 		UserEntity user = userMapper.selectUserByUsername(username);
 		if (user == null) {
@@ -68,12 +68,12 @@ public class UsernamePasswordLoginStrategy extends AbstractAuthenticationStrateg
 	 * @param user 已解析的用户
 	 */
 	@Override
-	protected AuthLoginLogType doAuthenticate(UsernamePasswordAuth auth, UserEntity user) {
+	protected AuthLoginLogType doAuthenticate(UsernamePasswordLoginRequest auth, UserEntity user) {
 		String encodedPassword = user.getPassword();
 
 		// 校验明文密码是否匹配密文
 		if (!passwordEncoder.matches(auth.getPassword(), encodedPassword)) {
-			throw new BadCredentialsException("Password mismatch");
+			throw new AuthBadCredentialsException("Password mismatch");
 		}
 
 		return AuthLoginLogType.LOGIN_PASSWORD;
@@ -84,8 +84,8 @@ public class UsernamePasswordLoginStrategy extends AbstractAuthenticationStrateg
 	 * @return UsernamePasswordAuth
 	 */
 	@Override
-	public Class<UsernamePasswordAuth> supports() {
-		return UsernamePasswordAuth.class;
+	public Class<UsernamePasswordLoginRequest> supports() {
+		return UsernamePasswordLoginRequest.class;
 	}
 
 }

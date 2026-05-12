@@ -6,7 +6,11 @@ import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.exception.AuthBusinessException;
 import com.auth.service.auth.exception.AuthResultCode;
-import com.auth.service.auth.infrastructure.login.*;
+import com.auth.service.auth.infrastructure.login.LoginFailureRateLimiter;
+import com.auth.service.auth.infrastructure.login.LoginResult;
+import com.auth.service.auth.infrastructure.login.TokenPair;
+import com.auth.service.auth.infrastructure.login.TokenService;
+import com.auth.service.auth.infrastructure.login.audit.LoginAuditContextResolver;
 import com.auth.service.auth.infrastructure.login.strategy.LoginStrategy;
 import com.auth.service.auth.infrastructure.profile.AuthProfileCache;
 import com.auth.service.auth.infrastructure.session.SessionLimitManager;
@@ -14,7 +18,7 @@ import com.auth.service.auth.infrastructure.session.UserSessionIndexFactory;
 import com.auth.service.auth.infrastructure.session.redis.RedisUserSessionIndexRepository;
 import com.auth.service.auth.model.enums.AuthLoginLogResult;
 import com.auth.service.auth.model.enums.AuthLoginLogType;
-import com.auth.service.auth.model.request.AbstractAuthentication;
+import com.auth.service.auth.model.request.login.AbstractLoginRequest;
 import com.auth.service.auth.model.response.UserLoginResponse;
 import com.auth.service.auth.service.AuthLoginAuditService;
 import com.auth.service.auth.service.AuthService;
@@ -37,7 +41,7 @@ import java.util.stream.Collectors;
 @Service
 public class AuthServiceImpl implements AuthService {
 
-	private final Map<Class<? extends AbstractAuthentication>, LoginStrategy<?>> strategyRegistry;
+	private final Map<Class<? extends AbstractLoginRequest>, LoginStrategy<?>> strategyRegistry;
 
 	private final AuthProfileCache authProfileCache;
 
@@ -74,10 +78,10 @@ public class AuthServiceImpl implements AuthService {
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	public UserLoginResponse login(AbstractAuthentication auth, HttpServletRequest request) {
+	public UserLoginResponse login(AbstractLoginRequest auth, HttpServletRequest request) {
 		LoginStrategy<?> raw = lookupStrategyWithAudit(auth, request);
 
-		LoginResult loginResult = ((LoginStrategy<AbstractAuthentication>) raw).authenticate(auth, request);
+		LoginResult loginResult = ((LoginStrategy<AbstractLoginRequest>) raw).authenticate(auth, request);
 		AuthProfile profile = loginResult.authProfile();
 		UserLoginResponse response = loginResult.response();
 		Long userId = profile.getUserId();
@@ -114,8 +118,8 @@ public class AuthServiceImpl implements AuthService {
 		catch (AuthBusinessException ex) {
 			// 记录失败日志
 			loginLogService.recordLoginLog(request, loginResult.loginLogType(),
-					LoginAuditSupport.resultForOrchestrationFailure(ex.getResultCode()), userId, response.getUsername(),
-					ex.getMessageKey(), null);
+					LoginAuditContextResolver.resultForOrchestrationFailure(ex.getResultCode()), userId,
+					response.getUsername(), ex.getMessageKey(), null);
 			throw ex;
 		}
 	}
@@ -126,13 +130,13 @@ public class AuthServiceImpl implements AuthService {
 	 * @param request HTTP 请求
 	 * @return 登录策略
 	 */
-	private LoginStrategy<?> lookupStrategyWithAudit(AbstractAuthentication auth, HttpServletRequest request) {
+	private LoginStrategy<?> lookupStrategyWithAudit(AbstractLoginRequest auth, HttpServletRequest request) {
 		try {
 			return lookupStrategy(auth);
 		}
 		catch (AuthBusinessException ex) {
-			loginLogService.recordLoginLog(request, LoginAuditSupport.eventTypeFromAuth(auth),
-					AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR, null, LoginAuditSupport.principal(auth),
+			loginLogService.recordLoginLog(request, LoginAuditContextResolver.eventTypeFromAuth(auth),
+					AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR, null, LoginAuditContextResolver.principal(auth),
 					ex.getMessageKey(), null);
 			throw ex;
 		}
@@ -143,7 +147,7 @@ public class AuthServiceImpl implements AuthService {
 	 * @param auth 认证请求
 	 * @return 匹配的登录策略
 	 */
-	private LoginStrategy<?> lookupStrategy(AbstractAuthentication auth) {
+	private LoginStrategy<?> lookupStrategy(AbstractLoginRequest auth) {
 		LoginStrategy<?> raw = strategyRegistry.get(auth.getClass());
 		if (raw == null) {
 			raw = strategyRegistry.entrySet()

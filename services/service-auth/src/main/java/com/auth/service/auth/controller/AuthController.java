@@ -4,8 +4,8 @@ import com.auth.common.core.model.response.Result;
 import com.auth.common.jwt.autoconfigure.JwtProperties;
 import com.auth.module.security.autoconfigure.annotation.PublicApi;
 import com.auth.service.auth.infrastructure.cookie.RefreshTokenCookieUtil;
-import com.auth.service.auth.model.request.EmailAuth;
-import com.auth.service.auth.model.request.UsernamePasswordAuth;
+import com.auth.service.auth.model.request.login.EmailLoginRequest;
+import com.auth.service.auth.model.request.login.UsernamePasswordLoginRequest;
 import com.auth.service.auth.model.response.RefreshTokenResponse;
 import com.auth.service.auth.model.response.UserLoginResponse;
 import com.auth.service.auth.service.AuthService;
@@ -48,7 +48,7 @@ public class AuthController {
 	@PublicApi
 	@Operation(summary = "用户名密码登录")
 	@PostMapping("login/username")
-	public Result<UserLoginResponse> loginByUsername(@Valid @RequestBody UsernamePasswordAuth auth,
+	public Result<UserLoginResponse> loginByUsername(@Valid @RequestBody UsernamePasswordLoginRequest auth,
 			HttpServletRequest request, HttpServletResponse response) {
 		UserLoginResponse login = authService.login(auth, request);
 
@@ -61,8 +61,8 @@ public class AuthController {
 	@PublicApi
 	@Operation(summary = "邮箱登录")
 	@PostMapping("login/email")
-	public Result<UserLoginResponse> loginByEmail(@Valid @RequestBody EmailAuth auth, HttpServletRequest request,
-			HttpServletResponse response) {
+	public Result<UserLoginResponse> loginByEmail(@Valid @RequestBody EmailLoginRequest auth,
+			HttpServletRequest request, HttpServletResponse response) {
 		UserLoginResponse login = authService.login(auth, request);
 
 		RefreshTokenCookieUtil.writeToken(response, request, login.getRefreshToken(),

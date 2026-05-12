@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class AuthAuditHandler implements AuthorizationAuditHandler {
+public class LoggingAuthorizationAuditHandler implements AuthorizationAuditHandler {
 
 	@Override
 	@Async
