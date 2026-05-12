@@ -1,4 +1,4 @@
-package com.auth.module.security.starter.model;
+package com.auth.service.system.log.model.entity;
 
 import com.auth.common.data.model.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableLogic;

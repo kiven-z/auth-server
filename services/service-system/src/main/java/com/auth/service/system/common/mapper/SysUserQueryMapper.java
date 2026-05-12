@@ -1,6 +1,6 @@
 package com.auth.service.system.common.mapper;
 
-import com.auth.module.security.starter.model.UserEntity;
+import com.auth.module.platform.persistence.UserEntity;
 import com.auth.service.system.common.model.po.UserDeptProfilePO;
 import com.auth.service.system.common.model.po.UserPostProfilePO;
 import com.auth.service.system.common.model.po.UserSearchItemPO;

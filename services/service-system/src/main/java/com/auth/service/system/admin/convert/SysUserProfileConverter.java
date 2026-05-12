@@ -1,12 +1,6 @@
 package com.auth.service.system.admin.convert;
 
-import java.util.List;
-
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
-
-import com.auth.module.security.starter.model.UserEntity;
+import com.auth.module.platform.persistence.UserEntity;
 import com.auth.service.system.common.model.SysUserSearchItemResponse;
 import com.auth.service.system.common.model.po.UserDeptProfilePO;
 import com.auth.service.system.common.model.po.UserPostProfilePO;
@@ -14,6 +8,11 @@ import com.auth.service.system.common.model.po.UserSearchItemPO;
 import com.auth.service.system.common.model.vo.SysUserDeptProfileItemResponse;
 import com.auth.service.system.common.model.vo.SysUserPostProfileItemResponse;
 import com.auth.service.system.common.model.vo.SysUserProfileResponse;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.factory.Mappers;
+
+import java.util.List;
 
 /**
  * 用户实体与档案 VO 转换

@@ -21,18 +21,22 @@
         <dependency>
             <groupId>com.auth</groupId>
             <artifactId>common-starter-web</artifactId>
+            <version>0.0.2-beta</version>
         </dependency>
         <dependency>
             <groupId>com.auth</groupId>
             <artifactId>common-starter-nacos-config</artifactId>
+            <version>0.0.2-beta</version>
         </dependency>
         <dependency>
             <groupId>com.auth</groupId>
             <artifactId>common-starter-webdoc</artifactId>
+            <version>0.0.2-beta</version>
         </dependency>
         <dependency>
             <groupId>com.auth</groupId>
             <artifactId>module-security-core</artifactId>
+            <version>0.0.2-beta</version>
         </dependency>
 
         <!-- 单元测试 -->

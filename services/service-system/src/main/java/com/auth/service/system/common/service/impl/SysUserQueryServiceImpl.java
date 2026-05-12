@@ -1,12 +1,7 @@
 package com.auth.service.system.common.service.impl;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-
-import org.springframework.stereotype.Service;
-
-import com.auth.module.security.starter.model.UserEntity;
+import cn.hutool.core.text.CharSequenceUtil;
+import com.auth.module.platform.persistence.UserEntity;
 import com.auth.service.system.admin.convert.SysUserProfileConverter;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.SystemResultCodeEnum;
@@ -15,8 +10,11 @@ import com.auth.service.system.common.model.SysUserSearchItemResponse;
 import com.auth.service.system.common.model.vo.SysUserProfileResponse;
 import com.auth.service.system.common.service.SysUserQueryService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.stereotype.Service;
 
-import cn.hutool.core.text.CharSequenceUtil;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * 系统用户只读查询实现

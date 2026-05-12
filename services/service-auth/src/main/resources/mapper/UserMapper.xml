@@ -30,7 +30,7 @@
     </sql>
 
     <!-- 根据用户名查询用户信息 -->
-    <select id="selectUserByUsername" resultType="com.auth.module.security.starter.model.UserEntity">
+    <select id="selectUserByUsername" resultType="com.auth.module.platform.persistence.UserEntity">
         SELECT
         <include refid="Base_Column_List"/>
         FROM sys_user
@@ -38,7 +38,7 @@
     </select>
 
     <!-- 根据邮箱查询用户信息 -->
-    <select id="selectUserByEmail" resultType="com.auth.module.security.starter.model.UserEntity">
+    <select id="selectUserByEmail" resultType="com.auth.module.platform.persistence.UserEntity">
         SELECT
         <include refid="Base_Column_List"/>
         FROM sys_user

@@ -1,6 +1,6 @@
 package com.auth.service.system.admin.user.service.impl;
 
-import com.auth.module.security.starter.model.UserEntity;
+import com.auth.module.platform.persistence.UserEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.SystemResultCodeEnum;
 import com.auth.service.system.common.mapper.SysUserQueryMapper;

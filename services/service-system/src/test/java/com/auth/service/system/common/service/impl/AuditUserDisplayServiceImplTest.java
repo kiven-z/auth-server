@@ -1,7 +1,7 @@
 package com.auth.service.system.common.service.impl;
 
 import com.auth.common.core.model.response.BaseResponse;
-import com.auth.module.security.starter.model.UserEntity;
+import com.auth.module.platform.persistence.UserEntity;
 import com.auth.service.system.admin.mapper.SysUserMapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.junit.jupiter.api.DisplayName;

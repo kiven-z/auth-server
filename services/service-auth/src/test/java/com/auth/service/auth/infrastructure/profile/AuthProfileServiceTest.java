@@ -1,7 +1,7 @@
 package com.auth.service.auth.infrastructure.profile;
 
+import com.auth.module.platform.persistence.UserEntity;
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
-import com.auth.module.security.starter.model.UserEntity;
 import com.auth.service.auth.infrastructure.profile.datascope.DataScopeEffectiveResolver;
 import com.auth.service.auth.mapper.UserMapper;
 import com.auth.service.auth.mapper.UserRolePermissionDataScopePolicyMapper;

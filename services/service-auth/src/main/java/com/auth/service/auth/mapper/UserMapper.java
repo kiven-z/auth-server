@@ -1,6 +1,6 @@
 package com.auth.service.auth.mapper;
 
-import com.auth.module.security.starter.model.UserEntity;
+import com.auth.module.platform.persistence.UserEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;

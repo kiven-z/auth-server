@@ -18,10 +18,12 @@
         <dependency>
             <groupId>com.auth</groupId>
             <artifactId>common-starter-jwt</artifactId>
+            <version>0.0.2-beta</version>
         </dependency>
         <dependency>
             <groupId>com.auth</groupId>
             <artifactId>module-security-contract</artifactId>
+            <version>0.0.2-beta</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>

@@ -1,6 +1,6 @@
 package com.auth.service.system.common.service;
 
-import com.auth.module.security.starter.model.UserEntity;
+import com.auth.module.platform.persistence.UserEntity;
 import com.auth.service.system.common.model.SysUserSearchItemResponse;
 import com.auth.service.system.common.model.vo.SysUserProfileResponse;
 import com.baomidou.mybatisplus.extension.service.IService;
