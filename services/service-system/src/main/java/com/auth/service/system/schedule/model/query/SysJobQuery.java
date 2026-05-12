@@ -1,13 +1,13 @@
 package com.auth.service.system.schedule.model.query;
 
+import com.auth.common.core.model.query.PageQueryRequest;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.Serial;
 import java.io.Serializable;
-
-import com.auth.common.core.model.query.PageQueryRequest;
-
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 /**
  * 定时任务分页查询
@@ -15,7 +15,8 @@ import lombok.EqualsAndHashCode;
  * @author Bunny
  */
 @Schema(name = "SysJobQuery", title = "定时任务查询")
-@Data
+@Getter
+@Setter
 @EqualsAndHashCode(callSuper = true)
 public class SysJobQuery extends PageQueryRequest implements Serializable {
 

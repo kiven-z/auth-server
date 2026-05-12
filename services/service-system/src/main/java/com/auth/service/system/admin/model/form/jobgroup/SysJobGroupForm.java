@@ -6,7 +6,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -19,7 +20,8 @@ import static com.auth.common.web.validation.ValidationPatterns.UPPER_ALNUM_UNDE
  * @author Bunny
  */
 @Schema(name = "SysJobGroupForm", title = "新增任务分组")
-@Data
+@Getter
+@Setter
 public class SysJobGroupForm implements Serializable {
 
 	@Serial

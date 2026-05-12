@@ -1,7 +1,8 @@
 package com.auth.service.system.common.model.po;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -11,7 +12,8 @@ import java.io.Serializable;
  *
  * @author Bunny
  */
-@Data
+@Getter
+@Setter
 public class UserSearchItemPO implements Serializable {
 
 	@Serial

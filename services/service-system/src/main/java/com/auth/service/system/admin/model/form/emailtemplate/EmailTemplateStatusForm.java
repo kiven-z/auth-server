@@ -3,7 +3,8 @@ package com.auth.service.system.admin.model.form.emailtemplate;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -15,7 +16,8 @@ import java.util.List;
  * @author Bunny
  */
 @Schema(name = "EmailTemplateStatusForm", title = "邮件模板批量启用/禁用表单", description = "用于邮件模板批量启用/禁用")
-@Data
+@Getter
+@Setter
 public class EmailTemplateStatusForm implements Serializable {
 
 	@Serial

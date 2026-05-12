@@ -1,7 +1,8 @@
 package com.auth.service.system.admin.model.po.menu;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -12,7 +13,8 @@ import java.io.Serializable;
  * @author Bunny
  */
 @Schema(name = "SysMenuAssignedPermissionPO", title = "菜单已分配权限 PO")
-@Data
+@Getter
+@Setter
 public class SysMenuAssignedPermissionPO implements Serializable {
 
 	@Serial

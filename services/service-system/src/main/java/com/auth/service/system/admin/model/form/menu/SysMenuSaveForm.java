@@ -4,7 +4,8 @@ import com.auth.common.web.valid.group.UpdateGroup;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -15,7 +16,8 @@ import java.io.Serializable;
  * @author Bunny
  */
 @Schema(name = "SysMenuSaveForm", title = "菜单保存表单")
-@Data
+@Getter
+@Setter
 public class SysMenuSaveForm implements Serializable {
 
 	@Serial

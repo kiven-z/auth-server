@@ -4,7 +4,8 @@ import com.auth.service.system.admin.model.vo.emailtemplate.EmailTemplateRequire
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -16,7 +17,8 @@ import java.util.List;
  * @author Bunny
  */
 @Schema(name = "EmailTemplateRequireFieldsForm", title = "邮件模板变量列表表单")
-@Data
+@Getter
+@Setter
 public class EmailTemplateRequireFieldsForm implements Serializable {
 
 	@Serial

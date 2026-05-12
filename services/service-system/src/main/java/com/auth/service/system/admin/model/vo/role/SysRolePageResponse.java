@@ -2,8 +2,9 @@ package com.auth.service.system.admin.model.vo.role;
 
 import com.auth.common.core.model.response.BaseResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -14,7 +15,8 @@ import java.io.Serializable;
  * @author Bunny
  */
 @Schema(name = "SysRolePageResponse", title = "角色分页行")
-@Data
+@Getter
+@Setter
 @EqualsAndHashCode(callSuper = true)
 public class SysRolePageResponse extends BaseResponse implements Serializable {
 

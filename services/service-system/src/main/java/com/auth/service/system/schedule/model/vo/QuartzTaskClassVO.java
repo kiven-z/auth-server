@@ -1,9 +1,9 @@
 package com.auth.service.system.schedule.model.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -14,9 +14,9 @@ import java.io.Serializable;
  * @author Bunny
  */
 @Schema(name = "QuartzTaskClassVO", title = "可调度任务类")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter
+@Setter
+@ToString
 public class QuartzTaskClassVO implements Serializable {
 
 	@Serial

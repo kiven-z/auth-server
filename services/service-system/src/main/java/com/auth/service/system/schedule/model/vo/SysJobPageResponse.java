@@ -1,14 +1,14 @@
 package com.auth.service.system.schedule.model.vo;
 
+import com.auth.common.core.model.response.BaseResponse;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
-
-import com.auth.common.core.model.response.BaseResponse;
-
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 /**
  * 定时任务分页行（含 Quartz 运行态补充字段）
@@ -16,7 +16,8 @@ import lombok.EqualsAndHashCode;
  * @author Bunny
  */
 @Schema(name = "SysJobPageResponse", title = "定时任务分页行")
-@Data
+@Getter
+@Setter
 @EqualsAndHashCode(callSuper = true)
 public class SysJobPageResponse extends BaseResponse implements Serializable {
 

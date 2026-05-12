@@ -13,7 +13,6 @@ import java.io.Serial;
  *
  * @author Bunny
  */
-@Schema(name = "EmailAuth", title = "邮箱登录认证请求", description = "邮箱登录认证请求")
 @Getter
 @Setter
 public class EmailLoginRequest extends AbstractLoginRequest {

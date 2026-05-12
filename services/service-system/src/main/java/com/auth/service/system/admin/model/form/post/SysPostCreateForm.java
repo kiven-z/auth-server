@@ -4,7 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -15,7 +16,8 @@ import java.io.Serializable;
  * @author Bunny
  */
 @Schema(name = "SysPostCreateForm", title = "岗位新增表单")
-@Data
+@Getter
+@Setter
 public class SysPostCreateForm implements Serializable {
 
 	@Serial
@@ -26,13 +28,13 @@ public class SysPostCreateForm implements Serializable {
 	private Long deptId;
 
 	@Schema(title = "岗位编码", requiredMode = Schema.RequiredMode.REQUIRED)
-	@NotBlank(message = "岗位编码不能为空")
 	@Size(max = 64, message = "岗位编码长度不能超过64个字符")
+	@NotBlank(message = "岗位编码不能为空")
 	private String postCode;
 
 	@Schema(title = "岗位名称", requiredMode = Schema.RequiredMode.REQUIRED)
-	@NotBlank(message = "岗位名称不能为空")
 	@Size(max = 128, message = "岗位名称长度不能超过128个字符")
+	@NotBlank(message = "岗位名称不能为空")
 	private String postName;
 
 	@Schema(title = "启用状态(true=启用，false=停用)", requiredMode = Schema.RequiredMode.REQUIRED)

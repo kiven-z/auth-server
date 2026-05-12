@@ -2,7 +2,8 @@ package com.auth.service.system.admin.model.form.role;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -13,7 +14,8 @@ import java.io.Serializable;
  * @author Bunny
  */
 @Schema(name = "SysRoleCreateForm", title = "角色新增表单")
-@Data
+@Getter
+@Setter
 public class SysRoleCreateForm implements Serializable {
 
 	@Serial

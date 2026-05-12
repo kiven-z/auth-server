@@ -1,8 +1,10 @@
 package com.auth.service.system.admin.model.vo.menu;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.io.Serial;
 
@@ -12,7 +14,9 @@ import java.io.Serial;
  * @author Bunny
  */
 @Schema(name = "SysMenuDetailVO", title = "菜单详情")
-@Data
+@Getter
+@Setter
+@ToString
 @EqualsAndHashCode(callSuper = true)
 public class SysMenuDetailVO extends SysMenuListVO {
 

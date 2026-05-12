@@ -1,11 +1,12 @@
 package com.auth.service.system.common.model;
 
-import java.io.Serial;
-import java.io.Serializable;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * 系统模块选项 VO。
@@ -15,7 +16,8 @@ import lombok.Data;
  *
  * @author Bunny
  */
-@Data
+@Getter
+@Setter
 @Builder
 public class ModuleOption implements Serializable {
 

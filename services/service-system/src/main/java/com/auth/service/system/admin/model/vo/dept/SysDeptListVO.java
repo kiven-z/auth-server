@@ -3,8 +3,10 @@ package com.auth.service.system.admin.model.vo.dept;
 import com.auth.common.core.annotation.JsonStringFormat;
 import com.auth.common.core.model.response.BaseResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 /**
  * 部门列表行（扁平；供前端表格 / 建树）。
@@ -12,7 +14,9 @@ import lombok.EqualsAndHashCode;
  * @author Bunny
  */
 @Schema(name = "SysDeptListVO", title = "部门列表行")
-@Data
+@Getter
+@Setter
+@ToString
 @EqualsAndHashCode(callSuper = true)
 public class SysDeptListVO extends BaseResponse {
 

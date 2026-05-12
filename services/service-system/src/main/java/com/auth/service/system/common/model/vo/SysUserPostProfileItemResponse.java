@@ -2,7 +2,8 @@ package com.auth.service.system.common.model.vo;
 
 import com.auth.common.core.annotation.JsonStringFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -13,7 +14,8 @@ import java.io.Serializable;
  * @author Bunny
  */
 @Schema(name = "SysUserPostProfileItemResponse", title = "用户档案-岗位项")
-@Data
+@Getter
+@Setter
 public class SysUserPostProfileItemResponse implements Serializable {
 
 	@Serial

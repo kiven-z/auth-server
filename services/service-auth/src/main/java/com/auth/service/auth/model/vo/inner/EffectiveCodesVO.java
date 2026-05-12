@@ -1,8 +1,9 @@
 package com.auth.service.auth.model.vo.inner;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -14,8 +15,9 @@ import java.util.List;
  * @author Bunny
  */
 @Schema(title = "生效角色与权限码")
-@Data
-@NoArgsConstructor
+@Getter
+@Setter
+@ToString
 public class EffectiveCodesVO implements Serializable {
 
 	@Serial

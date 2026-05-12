@@ -2,7 +2,8 @@ package com.auth.common.core.model.response;
 
 import com.auth.common.core.annotation.JsonStringFormat;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -13,7 +14,8 @@ import java.time.LocalDateTime;
  *
  * @author Bunny
  */
-@Data
+@Getter
+@Setter
 public class BaseResponse implements Serializable {
 
 	@Serial

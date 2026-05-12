@@ -1,9 +1,8 @@
 package com.auth.service.system.admin.model.vo.menu;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -14,9 +13,8 @@ import java.io.Serializable;
  * @author Bunny
  */
 @Schema(name = "SysMenuAssignedPermissionRow", title = "菜单权限分配行")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter
+@Setter
 public class SysMenuAssignedPermissionRow implements Serializable {
 
 	@Serial

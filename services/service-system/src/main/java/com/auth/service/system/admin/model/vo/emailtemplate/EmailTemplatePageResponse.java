@@ -2,7 +2,9 @@ package com.auth.service.system.admin.model.vo.emailtemplate;
 
 import com.auth.common.core.model.response.BaseResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -13,11 +15,9 @@ import java.io.Serializable;
  * @author Bunny
  */
 @Schema(name = "EmailTemplatePageResponse", title = "邮件模板分页返回对象", description = "用于邮件模板分页查询返回数据")
-@Data
-@Builder
+@Getter
+@Setter
 @EqualsAndHashCode(callSuper = true)
-@NoArgsConstructor
-@AllArgsConstructor
 public class EmailTemplatePageResponse extends BaseResponse implements Serializable {
 
 	@Serial

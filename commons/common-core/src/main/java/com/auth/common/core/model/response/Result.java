@@ -1,8 +1,9 @@
 package com.auth.common.core.model.response;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -14,7 +15,8 @@ import java.util.Map;
  * @param <T> 传入数据类型
  * @author Bunny
  */
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Result<T> implements Serializable {

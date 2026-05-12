@@ -5,7 +5,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -17,7 +18,8 @@ import java.time.LocalDateTime;
  * @author Bunny
  */
 @Schema(name = "SysJobUpdateForm", title = "修改定时任务")
-@Data
+@Getter
+@Setter
 public class SysJobUpdateForm implements Serializable {
 
 	@Serial

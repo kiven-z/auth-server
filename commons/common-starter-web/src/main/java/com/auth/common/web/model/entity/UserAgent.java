@@ -2,9 +2,9 @@ package com.auth.common.web.model.entity;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Serial;
@@ -15,8 +15,8 @@ import java.io.Serializable;
  *
  * @author Bunny
  */
-@Data
-@Builder
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserAgent implements Serializable {

@@ -1,10 +1,9 @@
 package com.auth.module.file.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.poi.ss.usermodel.IndexedColors;
 
 import java.io.Serial;
@@ -16,10 +15,9 @@ import java.io.Serializable;
  * @author Bunny
  */
 @Schema(title = "斑马线样式配置")
-@Data
+@Getter
+@Setter
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class ZebraStripeStyle implements Serializable {
 
 	@Serial

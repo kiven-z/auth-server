@@ -4,7 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -15,7 +16,8 @@ import java.io.Serializable;
  * @author Bunny
  */
 @Schema(name = "EmailTemplateRequireFieldRow", title = "邮件模板变量声明")
-@Data
+@Getter
+@Setter
 public class EmailTemplateRequireFieldRow implements Serializable {
 
 	@Serial

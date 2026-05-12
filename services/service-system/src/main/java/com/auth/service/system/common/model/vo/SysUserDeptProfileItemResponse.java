@@ -3,7 +3,8 @@ package com.auth.service.system.common.model.vo;
 import com.auth.common.core.annotation.JsonStringFormat;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -15,7 +16,8 @@ import java.time.LocalDateTime;
  * @author Bunny
  */
 @Schema(name = "SysUserDeptProfileItemResponse", title = "用户档案-部门项")
-@Data
+@Getter
+@Setter
 public class SysUserDeptProfileItemResponse implements Serializable {
 
 	@Serial

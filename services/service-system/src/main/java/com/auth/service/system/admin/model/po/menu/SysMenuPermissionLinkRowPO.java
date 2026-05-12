@@ -1,7 +1,8 @@
 package com.auth.service.system.admin.model.po.menu;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -12,7 +13,8 @@ import java.io.Serializable;
  * @author Bunny
  */
 @Schema(name = "SysMenuPermissionLinkRow", title = "菜单-权限关联行")
-@Data
+@Getter
+@Setter
 public class SysMenuPermissionLinkRowPO implements Serializable {
 
 	@Serial

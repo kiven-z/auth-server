@@ -47,9 +47,11 @@ public class SysMenuManageServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu
 		List<SysMenuAssignedRolePO> dtoList = sysMenuRoleMapper.selectAssignedRolesByMenuId(menuId);
 
 		return dtoList.stream().map(dto -> {
-			String roleCode = dto.getRoleCode();
-			String roleName = dto.getRoleName();
-			return new SysMenuAssignedRoleRow(roleCode, roleName, true);
+			SysMenuAssignedRoleRow row = new SysMenuAssignedRoleRow();
+			row.setRoleCode(dto.getRoleCode());
+			row.setRoleName(dto.getRoleName());
+			row.setAssigned(true);
+			return row;
 		}).toList();
 	}
 
@@ -72,9 +74,11 @@ public class SysMenuManageServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu
 		List<SysMenuAssignedPermissionPO> dtoList = sysMenuPermissionMapper.selectAssignedPermissionByMenuId(menuId);
 
 		return dtoList.stream().map(dto -> {
-			String permissionCode = dto.getPermissionCode();
-			String permissionName = dto.getPermissionName();
-			return new SysMenuAssignedPermissionRow(permissionCode, permissionName, true);
+			SysMenuAssignedPermissionRow row = new SysMenuAssignedPermissionRow();
+			row.setPermissionCode(dto.getPermissionCode());
+			row.setPermissionName(dto.getPermissionName());
+			row.setAssigned(true);
+			return row;
 		}).toList();
 	}
 

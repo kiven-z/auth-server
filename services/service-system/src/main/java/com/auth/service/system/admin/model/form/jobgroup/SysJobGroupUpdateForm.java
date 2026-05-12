@@ -5,7 +5,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -16,7 +17,8 @@ import java.io.Serializable;
  * @author Bunny
  */
 @Schema(name = "SysJobGroupUpdateForm", title = "修改任务分组")
-@Data
+@Getter
+@Setter
 public class SysJobGroupUpdateForm implements Serializable {
 
 	@Serial

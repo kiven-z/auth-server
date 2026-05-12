@@ -1,13 +1,13 @@
 package com.auth.service.system.admin.model.vo.permission;
 
+import com.auth.common.core.model.response.BaseResponse;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.Serial;
 import java.io.Serializable;
-
-import com.auth.common.core.model.response.BaseResponse;
-
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 /**
  * 权限分页行
@@ -15,7 +15,8 @@ import lombok.EqualsAndHashCode;
  * @author Bunny
  */
 @Schema(name = "SysPermissionPageResponse", title = "权限分页行")
-@Data
+@Getter
+@Setter
 @EqualsAndHashCode(callSuper = true)
 public class SysPermissionPageResponse extends BaseResponse implements Serializable {
 

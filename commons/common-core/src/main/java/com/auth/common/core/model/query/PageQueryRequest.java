@@ -1,6 +1,7 @@
 package com.auth.common.core.model.query;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -11,7 +12,8 @@ import java.util.List;
  *
  * @author Bunny
  */
-@Data
+@Getter
+@Setter
 public class PageQueryRequest implements Serializable {
 
 	@Serial

@@ -1,6 +1,7 @@
 package com.auth.service.system.schedule.config;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -8,7 +9,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  *
  * @author Bunny
  */
-@Data
+@Getter
+@Setter
 @ConfigurationProperties(prefix = "auth.system.schedule.job")
 public class ScheduleJobProperties {
 

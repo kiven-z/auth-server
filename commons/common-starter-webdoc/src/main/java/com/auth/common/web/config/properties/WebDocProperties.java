@@ -1,6 +1,7 @@
 package com.auth.common.web.config.properties;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.ArrayList;
@@ -11,7 +12,8 @@ import java.util.List;
  *
  * @author Bunny
  */
-@Data
+@Getter
+@Setter
 @ConfigurationProperties(prefix = "auth.common.webdoc")
 public class WebDocProperties {
 
@@ -55,7 +57,8 @@ public class WebDocProperties {
 		return List.of(web, inner);
 	}
 
-	@Data
+	@Getter
+	@Setter
 	public static class ApiGroup {
 
 		private String group;

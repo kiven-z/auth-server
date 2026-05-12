@@ -1,9 +1,8 @@
 package com.auth.common.ip;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -22,10 +21,9 @@ import java.io.Serializable;
  *
  * @author Bunny
  */
-@Data
+@Getter
+@Setter
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class IpInfo implements Serializable {
 
 	@Serial

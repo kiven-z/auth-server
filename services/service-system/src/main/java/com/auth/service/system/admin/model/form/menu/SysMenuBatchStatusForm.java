@@ -3,7 +3,8 @@ package com.auth.service.system.admin.model.form.menu;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -15,7 +16,8 @@ import java.util.List;
  * @author Bunny
  */
 @Schema(name = "SysMenuBatchStatusForm", title = "菜单批量状态")
-@Data
+@Getter
+@Setter
 public class SysMenuBatchStatusForm implements Serializable {
 
 	@Serial

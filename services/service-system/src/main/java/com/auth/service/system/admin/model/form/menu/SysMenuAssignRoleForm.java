@@ -2,7 +2,8 @@ package com.auth.service.system.admin.model.form.menu;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -14,7 +15,8 @@ import java.util.List;
  * @author Bunny
  */
 @Schema(name = "SysMenuAssignRoleForm", title = "菜单分配角色")
-@Data
+@Getter
+@Setter
 public class SysMenuAssignRoleForm implements Serializable {
 
 	@Serial

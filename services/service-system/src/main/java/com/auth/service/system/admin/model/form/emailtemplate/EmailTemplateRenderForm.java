@@ -5,7 +5,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -17,7 +18,8 @@ import java.util.List;
  * @author Bunny
  */
 @Schema(name = "EmailTemplateRenderForm", title = "邮件模板渲染请求")
-@Data
+@Getter
+@Setter
 public class EmailTemplateRenderForm implements Serializable {
 
 	@Serial

@@ -3,7 +3,8 @@ package com.auth.service.system.schedule.model.form;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -15,7 +16,8 @@ import java.util.List;
  * @author Bunny
  */
 @Schema(name = "SysJobStatusForm", title = "任务状态批量变更")
-@Data
+@Getter
+@Setter
 public class SysJobStatusForm implements Serializable {
 
 	@Serial

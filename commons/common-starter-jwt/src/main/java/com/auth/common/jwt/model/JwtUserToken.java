@@ -1,9 +1,8 @@
 package com.auth.common.jwt.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Access Token 载荷映射 / 签发入参；Refresh 解析后仅部分字段有值 用户身份信息的载体（userId, username, roles,
@@ -11,10 +10,9 @@ import lombok.NoArgsConstructor;
  *
  * @author Bunny
  */
-@Data
+@Getter
+@Setter
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class JwtUserToken {
 
 	private Long userId;

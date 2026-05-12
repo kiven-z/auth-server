@@ -1,7 +1,8 @@
 package com.auth.service.auth.model.dto.inner;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -11,8 +12,9 @@ import java.io.Serializable;
  *
  * @author Bunny
  */
-@Data
 @Schema(name = "GrantSubjectRequest", title = "授权主体")
+@Getter
+@Setter
 public class GrantSubjectRequest implements Serializable {
 
 	@Serial

@@ -2,8 +2,9 @@ package com.auth.service.system.admin.model.query;
 
 import com.auth.common.core.model.query.PageQueryRequest;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -14,7 +15,8 @@ import java.io.Serializable;
  * @author Bunny
  */
 @Schema(name = "EmailTemplateQuery", title = "邮件模板查询", description = "邮件模板分页查询参数")
-@Data
+@Getter
+@Setter
 @EqualsAndHashCode(callSuper = true)
 public class EmailTemplateQuery extends PageQueryRequest implements Serializable {
 

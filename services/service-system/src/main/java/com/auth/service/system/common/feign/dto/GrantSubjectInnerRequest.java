@@ -1,6 +1,7 @@
 package com.auth.service.system.common.feign.dto;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -10,7 +11,8 @@ import java.io.Serializable;
  *
  * @author Bunny
  */
-@Data
+@Getter
+@Setter
 public class GrantSubjectInnerRequest implements Serializable {
 
 	@Serial

@@ -2,8 +2,9 @@ package com.auth.service.system.log.model.query;
 
 import com.auth.common.core.model.query.PageQueryRequest;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -15,7 +16,8 @@ import java.time.LocalDateTime;
  * @author Bunny
  */
 @Schema(name = "LogUserPasswordHistoryQuery", title = "密码历史日志查询")
-@Data
+@Getter
+@Setter
 @EqualsAndHashCode(callSuper = true)
 public class LogUserPasswordHistoryQuery extends PageQueryRequest implements Serializable {
 
