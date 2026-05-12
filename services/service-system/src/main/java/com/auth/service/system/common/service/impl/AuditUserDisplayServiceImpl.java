@@ -1,19 +1,22 @@
 package com.auth.service.system.common.service.impl;
 
-import cn.hutool.core.collection.CollUtil;
-import com.auth.common.core.model.response.BaseResponse;
-import com.auth.module.security.starter.model.UserEntity;
-import com.auth.service.system.admin.mapper.SysUserMapper;
-import com.auth.service.system.common.service.AuditUserDisplayService;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import org.springframework.stereotype.Service;
-
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.springframework.stereotype.Service;
+
+import com.auth.common.core.model.response.BaseResponse;
+import com.auth.module.security.starter.model.UserEntity;
+import com.auth.service.system.admin.mapper.SysUserMapper;
+import com.auth.service.system.common.service.AuditUserDisplayService;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+
+import cn.hutool.core.collection.CollUtil;
 
 /**
  * 审计用户展示名：基于用户表批量解析用户名。
@@ -46,7 +49,14 @@ public class AuditUserDisplayServiceImpl implements AuditUserDisplayService {
 	 */
 	@Override
 	public Map<Long, String> mapUsernamesByIds(Collection<Long> userIds) {
-		return sysUserMapper.selectBatchIds(userIds)
+		if (CollUtil.isEmpty(userIds)) {
+			return Collections.emptyMap();
+		}
+		List<Long> distinctIds = userIds.stream().filter(Objects::nonNull).distinct().toList();
+		if (CollUtil.isEmpty(distinctIds)) {
+			return Collections.emptyMap();
+		}
+		return sysUserMapper.selectBatchIds(distinctIds)
 			.stream()
 			.collect(Collectors.toMap(UserEntity::getId, UserEntity::getUsername));
 	}

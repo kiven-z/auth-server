@@ -1,6 +1,7 @@
 package com.auth.service.system.admin.convert;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
@@ -21,6 +22,8 @@ public interface SysPermissionConverter {
 	 * @param entity 权限实体
 	 * @return 分页行 VO
 	 */
+	@Mapping(target = "createUsername", ignore = true)
+	@Mapping(target = "updateUsername", ignore = true)
 	SysPermissionPageResponse toPageResponse(SysPermissionEntity entity);
 
 }

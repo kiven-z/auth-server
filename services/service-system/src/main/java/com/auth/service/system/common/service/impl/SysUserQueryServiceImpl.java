@@ -1,6 +1,11 @@
 package com.auth.service.system.common.service.impl;
 
-import cn.hutool.core.text.CharSequenceUtil;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+
+import org.springframework.stereotype.Service;
+
 import com.auth.module.security.starter.model.UserEntity;
 import com.auth.service.system.admin.convert.SysUserProfileConverter;
 import com.auth.service.system.common.exception.SystemBusinessException;
@@ -10,11 +15,8 @@ import com.auth.service.system.common.model.SysUserSearchItemResponse;
 import com.auth.service.system.common.model.vo.SysUserProfileResponse;
 import com.auth.service.system.common.service.SysUserQueryService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import cn.hutool.core.text.CharSequenceUtil;
 
 /**
  * 系统用户只读查询实现
@@ -36,6 +38,9 @@ public class SysUserQueryServiceImpl extends ServiceImpl<SysUserQueryMapper, Use
 	 */
 	@Override
 	public SysUserProfileResponse getProfile(Long userId) {
+		if (userId == null) {
+			throw new SystemBusinessException(SystemResultCodeEnum.ILLEGAL_USER_ID_NOT_NULL);
+		}
 		UserEntity user = baseMapper.selectById(userId);
 		if (user == null) {
 			throw new SystemBusinessException(SystemResultCodeEnum.USER_NOT_FOUND, userId);

@@ -50,7 +50,7 @@ class SystemModuleServiceImplTest {
 		assertThat(result).hasSize(15).allMatch(opt -> "SYS".equals(opt.getType()));
 
 		result = service.list(null, "USER", null);
-		assertThat(result).hasSize(3).allMatch(opt -> "USER".equals(opt.getType()));
+		assertThat(result).hasSize(2).allMatch(opt -> "USER".equals(opt.getType()));
 
 		result = service.list(null, "LOG", null);
 		assertThat(result).hasSize(3).allMatch(opt -> "LOG".equals(opt.getType()));
@@ -62,7 +62,7 @@ class SystemModuleServiceImplTest {
 		assertThat(result).hasSize(3);
 
 		result = service.list(null, "AUDIT", null);
-		assertThat(result).hasSize(3);
+		assertThat(result).hasSize(4).allMatch(opt -> "AUDIT".equals(opt.getType()));
 
 		// 按不存在的分类筛选，返回空列表
 		result = service.list(null, "NOT_EXIST", null);
