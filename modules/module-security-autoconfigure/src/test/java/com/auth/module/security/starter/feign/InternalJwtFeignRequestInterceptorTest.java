@@ -1,20 +1,20 @@
 package com.auth.module.security.starter.feign;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
-import java.util.Collection;
-
+import com.auth.module.security.autoconfigure.feign.InternalJwtFeignRequestInterceptor;
+import com.auth.module.security.contract.constants.SecurityInternalTokenConstants;
+import com.auth.module.security.core.token.provider.InternalTokenProvider;
+import feign.RequestTemplate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 
-import com.auth.module.security.autoconfig.feign.InternalJwtFeignRequestInterceptor;
-import com.auth.module.security.contract.constants.SecurityInternalTokenConstants;
-import com.auth.module.security.core.token.provider.InternalTokenProvider;
+import java.util.Collection;
 
-import feign.RequestTemplate;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 class InternalJwtFeignRequestInterceptorTest {
 

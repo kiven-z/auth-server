@@ -1,9 +1,8 @@
 package com.auth.module.security.starter.security.authorize;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.util.List;
-
+import com.auth.module.security.autoconfigure.config.security.SecurityConfigProperties;
+import com.auth.module.security.autoconfigure.security.AnnotationOverridingAuthorizationManager;
+import com.auth.module.security.autoconfigure.security.SecurityRequirement;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -13,9 +12,9 @@ import org.springframework.security.authorization.AuthorizationResult;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 
-import com.auth.module.security.autoconfig.config.security.SecurityConfigProperties;
-import com.auth.module.security.autoconfig.security.AnnotationOverridingAuthorizationManager;
-import com.auth.module.security.autoconfig.security.SecurityRequirement;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class AnnotationOverridingAuthorizationManagerTest {
 

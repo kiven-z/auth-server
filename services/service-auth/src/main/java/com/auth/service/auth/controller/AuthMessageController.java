@@ -1,7 +1,7 @@
 package com.auth.service.auth.controller;
 
 import com.auth.common.core.model.response.Result;
-import com.auth.module.security.autoconfig.annotation.PublicApi;
+import com.auth.module.security.autoconfigure.annotation.PublicApi;
 import com.auth.service.auth.annotation.RateLimit;
 import com.auth.service.auth.service.AuthMessageService;
 import io.swagger.v3.oas.annotations.Operation;

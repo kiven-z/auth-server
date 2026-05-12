@@ -2,7 +2,7 @@ package com.auth.service.auth.controller;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.common.jwt.autoconfigure.JwtProperties;
-import com.auth.module.security.autoconfig.annotation.PublicApi;
+import com.auth.module.security.autoconfigure.annotation.PublicApi;
 import com.auth.service.auth.infrastructure.cookie.RefreshTokenCookieUtil;
 import com.auth.service.auth.model.request.EmailAuth;
 import com.auth.service.auth.model.request.UsernamePasswordAuth;

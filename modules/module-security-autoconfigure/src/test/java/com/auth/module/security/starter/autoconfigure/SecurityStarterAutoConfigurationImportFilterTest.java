@@ -1,11 +1,10 @@
 package com.auth.module.security.starter.autoconfigure;
 
-import com.auth.module.security.autoconfig.autoconfigure.filter.SecurityStarterAutoConfigurationImportFilter;
+import com.auth.module.security.autoconfigure.autoconfigure.filter.SecurityStarterAutoConfigurationImportFilter;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
-
-import org.junit.jupiter.api.DisplayName;
 
 class SecurityStarterAutoConfigurationImportFilterTest {
 

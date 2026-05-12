@@ -1,6 +1,6 @@
 package com.auth.module.security.starter.service;
 
-import com.auth.module.security.autoconfig.service.AuthProfileCacheService;
+import com.auth.module.security.autoconfigure.service.AuthProfileCacheService;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.module.security.contract.exception.SecurityResultCodeEnum;
 import com.auth.module.security.contract.exception.SecurityTokenException;

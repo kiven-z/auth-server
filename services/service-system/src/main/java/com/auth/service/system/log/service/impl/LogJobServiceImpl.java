@@ -6,7 +6,7 @@ import cn.hutool.core.util.RandomUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.email.model.EmailSendDTO;
 import com.auth.module.platform.persistence.model.UserEntity;
-import com.auth.module.security.autoconfig.web.SecurityUserUtils;
+import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.mapper.SysUserQueryMapper;
 import com.auth.service.system.log.convert.SysJobLogConvert;

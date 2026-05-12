@@ -1,10 +1,7 @@
 package com.auth.module.security.starter.security.authenticate;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.util.Collection;
-import java.util.List;
-
+import com.auth.module.security.autoconfigure.pipeline.authenticate.AuthProfileSecurityContextPopulator;
+import com.auth.module.security.contract.api.authorization.AuthProfile;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,8 +9,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import com.auth.module.security.autoconfig.pipeline.authenticate.AuthProfileSecurityContextPopulator;
-import com.auth.module.security.contract.api.authorization.AuthProfile;
+import java.util.Collection;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class AuthProfileSecurityContextPopulatorTest {
 

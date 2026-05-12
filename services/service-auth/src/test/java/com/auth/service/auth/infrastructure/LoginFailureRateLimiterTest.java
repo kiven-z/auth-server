@@ -1,6 +1,6 @@
 package com.auth.service.auth.infrastructure;
 
-import com.auth.module.security.autoconfig.config.user.UserConfigProperties;
+import com.auth.module.security.autoconfigure.config.user.UserConfigProperties;
 import com.auth.service.auth.TestConstants;
 import com.auth.service.auth.exception.AuthBusinessException;
 import com.auth.service.auth.exception.AuthResultCode;

@@ -1,10 +1,7 @@
 package com.auth.module.security.starter.security.resolve;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.util.List;
-import java.util.Optional;
-
+import com.auth.module.security.autoconfigure.pipeline.resolver.HandlerMethodResolver;
+import com.auth.module.security.starter.fixture.ProbeMvcFixtureController;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +11,11 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.util.ServletRequestPathUtils;
 
-import com.auth.module.security.autoconfig.pipeline.resolver.HandlerMethodResolver;
-import com.auth.module.security.starter.fixture.ProbeMvcFixtureController;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @WebMvcTest(controllers = ProbeMvcFixtureController.class)
 class HandlerMethodResolverTest {

@@ -2,7 +2,7 @@ package com.auth.service.auth.controller;
 
 import cn.hutool.core.collection.CollUtil;
 import com.auth.common.core.model.response.Result;
-import com.auth.module.security.autoconfig.annotation.InternalApi;
+import com.auth.module.security.autoconfigure.annotation.InternalApi;
 import com.auth.service.auth.model.vo.inner.EffectiveCodesVO;
 import com.auth.service.auth.service.AuthInnerService;
 import io.swagger.v3.oas.annotations.Operation;

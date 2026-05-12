@@ -1,12 +1,12 @@
 package com.auth.module.security.starter.security.resolve;
 
-import com.auth.module.security.autoconfig.pipeline.resolver.HandlerMethodResolver;
-import com.auth.module.security.autoconfig.pipeline.resolver.SecurityRequirementResolver;
-import com.auth.module.security.autoconfig.pipeline.resolver.SecurityRequirementRule;
-import com.auth.module.security.autoconfig.pipeline.rule.AuthenticatedApiRule;
-import com.auth.module.security.autoconfig.pipeline.rule.InternalApiRule;
-import com.auth.module.security.autoconfig.pipeline.rule.PublicApiRule;
-import com.auth.module.security.autoconfig.security.SecurityRequirement;
+import com.auth.module.security.autoconfigure.pipeline.resolver.HandlerMethodResolver;
+import com.auth.module.security.autoconfigure.pipeline.resolver.SecurityRequirementResolver;
+import com.auth.module.security.autoconfigure.pipeline.resolver.SecurityRequirementRule;
+import com.auth.module.security.autoconfigure.pipeline.rule.AuthenticatedApiRule;
+import com.auth.module.security.autoconfigure.pipeline.rule.InternalApiRule;
+import com.auth.module.security.autoconfigure.pipeline.rule.PublicApiRule;
+import com.auth.module.security.autoconfigure.security.SecurityRequirement;
 import com.auth.module.security.starter.fixture.InternalApiFixtureController;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.DisplayName;

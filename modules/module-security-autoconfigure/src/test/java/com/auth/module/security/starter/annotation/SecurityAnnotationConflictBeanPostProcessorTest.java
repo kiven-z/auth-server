@@ -1,11 +1,10 @@
 package com.auth.module.security.starter.annotation;
 
-import com.auth.module.security.autoconfig.annotation.AuthenticatedApi;
-import com.auth.module.security.autoconfig.annotation.InternalApi;
-import com.auth.module.security.autoconfig.annotation.PublicApi;
-import com.auth.module.security.autoconfig.annotation.processor.MutuallyExclusiveAnnotationsRule;
-import com.auth.module.security.autoconfig.annotation.processor.SecurityAnnotationConflictBeanPostProcessor;
-
+import com.auth.module.security.autoconfigure.annotation.AuthenticatedApi;
+import com.auth.module.security.autoconfigure.annotation.InternalApi;
+import com.auth.module.security.autoconfigure.annotation.PublicApi;
+import com.auth.module.security.autoconfigure.annotation.processor.MutuallyExclusiveAnnotationsRule;
+import com.auth.module.security.autoconfigure.annotation.processor.SecurityAnnotationConflictBeanPostProcessor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.access.prepost.PreAuthorize;

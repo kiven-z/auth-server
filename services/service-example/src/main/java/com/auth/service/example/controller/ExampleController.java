@@ -2,8 +2,8 @@ package com.auth.service.example.controller;
 
 import com.alibaba.fastjson2.JSON;
 import com.auth.common.core.model.response.Result;
-import com.auth.module.security.autoconfig.annotation.AuthenticatedApi;
-import com.auth.module.security.autoconfig.annotation.PublicApi;
+import com.auth.module.security.autoconfigure.annotation.AuthenticatedApi;
+import com.auth.module.security.autoconfigure.annotation.PublicApi;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.example.feign.ExampleAuthInnerFeignClient;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,7 +12,10 @@ import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 安全集成验证用 HTTP 接口

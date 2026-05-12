@@ -1,9 +1,9 @@
 package com.auth.module.security.starter.security.authenticate;
 
-import static com.auth.module.security.contract.redis.SecurityRedisKey.*;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
+import com.auth.module.security.autoconfigure.config.user.UserConfigProperties;
+import com.auth.module.security.autoconfigure.pipeline.authenticate.SessionCountChecker;
+import com.auth.module.security.contract.exception.SecurityResultCodeEnum;
+import com.auth.module.security.contract.exception.SecurityTokenException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,10 +11,11 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.ValueOperations;
 
-import com.auth.module.security.autoconfig.config.user.UserConfigProperties;
-import com.auth.module.security.autoconfig.pipeline.authenticate.SessionCountChecker;
-import com.auth.module.security.contract.exception.SecurityResultCodeEnum;
-import com.auth.module.security.contract.exception.SecurityTokenException;
+import static com.auth.module.security.contract.redis.SecurityRedisKey.USER_SESSION;
+import static com.auth.module.security.contract.redis.SecurityRedisKey.USER_SESSIONS;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class SessionCountCheckerTest {
 

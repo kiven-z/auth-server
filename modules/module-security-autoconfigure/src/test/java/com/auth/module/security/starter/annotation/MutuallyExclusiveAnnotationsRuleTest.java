@@ -1,17 +1,16 @@
 package com.auth.module.security.starter.annotation;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.lang.reflect.Method;
-import java.util.Set;
-
+import com.auth.module.security.autoconfigure.annotation.AuthenticatedApi;
+import com.auth.module.security.autoconfigure.annotation.PublicApi;
+import com.auth.module.security.autoconfigure.annotation.processor.MutuallyExclusiveAnnotationsRule;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.access.prepost.PreAuthorize;
 
-import com.auth.module.security.autoconfig.annotation.AuthenticatedApi;
-import com.auth.module.security.autoconfig.annotation.PublicApi;
-import com.auth.module.security.autoconfig.annotation.processor.MutuallyExclusiveAnnotationsRule;
+import java.lang.reflect.Method;
+import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class MutuallyExclusiveAnnotationsRuleTest {
 
