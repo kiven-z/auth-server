@@ -3,10 +3,10 @@ package com.auth.service.system.log.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.platform.persistence.model.LoginLogEntity;
+import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.log.convert.LogLoginLogConvert;
 import com.auth.service.system.log.mapper.LogLoginLogMapper;
-import com.auth.service.system.log.model.po.LogLoginLogDetailRowPO;
 import com.auth.service.system.log.model.po.LogLoginLogPageRowPO;
 import com.auth.service.system.log.model.query.LogLoginLogQuery;
 import com.auth.service.system.log.model.vo.LogLoginLogDetailVO;
@@ -18,6 +18,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static com.auth.service.system.common.exception.SystemResultCodeEnum.DATA_NOT_EXIST;
 
 /**
  * 登录日志 Service 实现
@@ -52,8 +54,11 @@ public class LogLoginServiceImpl extends ServiceImpl<LogLoginLogMapper, LoginLog
 	 */
 	@Override
 	public LogLoginLogDetailVO getDetail(Long id) {
-		LogLoginLogDetailRowPO po = baseMapper.selectDetailById(id);
-		return BeanUtil.copyProperties(po, LogLoginLogDetailVO.class);
+		LoginLogEntity entity = getById(id);
+		if (entity == null) {
+			throw new SystemBusinessException(DATA_NOT_EXIST);
+		}
+		return BeanUtil.copyProperties(entity, LogLoginLogDetailVO.class);
 	}
 
 }

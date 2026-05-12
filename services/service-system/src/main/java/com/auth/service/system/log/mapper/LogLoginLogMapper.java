@@ -1,7 +1,6 @@
 package com.auth.service.system.log.mapper;
 
 import com.auth.module.platform.persistence.model.LoginLogEntity;
-import com.auth.service.system.log.model.po.LogLoginLogDetailRowPO;
 import com.auth.service.system.log.model.po.LogLoginLogPageRowPO;
 import com.auth.service.system.log.model.query.LogLoginLogQuery;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -26,12 +25,5 @@ public interface LogLoginLogMapper extends BaseMapper<LoginLogEntity> {
 	 */
 	IPage<LogLoginLogPageRowPO> selectListByPage(@Param("page") Page<LoginLogEntity> page,
 			@Param("query") LogLoginLogQuery query);
-
-	/**
-	 * 根据 ID 查询登录日志详情
-	 * @param id 主键
-	 * @return 登录日志详情
-	 */
-	LogLoginLogDetailRowPO selectDetailById(@Param("id") Long id);
 
 }

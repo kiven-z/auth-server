@@ -35,7 +35,7 @@ public class LogJobController {
 
 	@Operation(summary = "分页查询任务日志")
 	@PreAuthorize("@auth.decide('sysJobLog:query')")
-	@GetMapping
+	@GetMapping("page")
 	public Result<PageResponse<LogJobPageResponse>> page(LogJobQuery query) {
 		Page<JobLogEntity> page = new Page<>(query.getPageIndex(), query.getPageSize());
 		PageResponse<LogJobPageResponse> response = logJobService.getPage(page, query);

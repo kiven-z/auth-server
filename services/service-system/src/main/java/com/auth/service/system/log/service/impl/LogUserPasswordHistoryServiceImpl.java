@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.auth.common.data.model.PageResponse;
+import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.log.convert.LogUserPasswordHistoryConvert;
 import com.auth.service.system.log.mapper.LogUserPasswordHistoryMapper;
@@ -20,6 +21,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import cn.hutool.core.bean.BeanUtil;
 import lombok.extern.slf4j.Slf4j;
+
+import static com.auth.service.system.common.exception.SystemResultCodeEnum.DATA_NOT_EXIST;
 
 /**
  * 密码历史日志 Service 实现
@@ -58,6 +61,9 @@ public class LogUserPasswordHistoryServiceImpl
 	@Override
 	public LogUserPasswordHistoryDetailVO getDetail(Long id) {
 		LogUserPasswordHistoryDetailRowPO po = baseMapper.selectDetailById(id);
+		if (po == null) {
+			throw new SystemBusinessException(DATA_NOT_EXIST);
+		}
 		return BeanUtil.copyProperties(po, LogUserPasswordHistoryDetailVO.class);
 	}
 

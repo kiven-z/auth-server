@@ -39,28 +39,4 @@
         ORDER BY ll.login_time DESC, ll.create_time DESC
     </select>
 
-    <!-- 根据ID查询登录日志详情 -->
-    <select id="selectDetailById"
-            resultType="com.auth.service.system.log.model.po.LogLoginLogDetailRowPO">
-        SELECT
-            ll.id,
-            ll.user_id,
-            ll.username,
-            ll.login_result,
-            ll.failure_reason,
-            ll.login_time,
-            ll.login_ip,
-            ll.login_region,
-            ll.user_agent,
-            ll.device_type,
-            ll.os_type,
-            ll.browser_type,
-            ll.login_type,
-            ll.session_id,
-            ll.create_time,
-            ll.update_time
-        FROM log_login ll
-        WHERE ll.id = #{id}
-    </select>
-
 </mapper>

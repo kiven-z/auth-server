@@ -15,10 +15,10 @@ import java.time.LocalDateTime;
  *
  * @author Bunny
  */
+@Schema(name = "LogAuthorizationAuditPageRowPO", title = "权限决策审计分页行（PO）")
 @Getter
 @Setter
 @ToString
-@Schema(name = "LogAuthorizationAuditPageRowPO", title = "权限决策审计分页行（PO）")
 public class LogAuthorizationAuditPageRowPO implements Serializable {
 
 	@Serial
@@ -46,8 +46,10 @@ public class LogAuthorizationAuditPageRowPO implements Serializable {
 	@Schema(title = "更新时间")
 	private LocalDateTime updateTime;
 
+	@Schema(title = "创建用户")
 	private Long createUser;
 
+	@Schema(title = "更新用户")
 	private Long updateUser;
 
 }

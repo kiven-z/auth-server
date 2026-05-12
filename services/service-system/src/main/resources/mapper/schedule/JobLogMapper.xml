@@ -16,7 +16,6 @@
         create_time
         FROM log_job
         <where>
-            status = 1
             <if test="jobName != null and jobName != ''">
                 AND job_name = #{jobName}
             </if>

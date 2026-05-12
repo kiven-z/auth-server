@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.io.Serial;
-import java.time.LocalDateTime;
 
 /**
  * 任务日志详情（含异常堆栈）
@@ -41,8 +40,5 @@ public class LogJobDetailVO extends BaseResponse {
 
 	@Schema(title = "耗时毫秒")
 	private Long elapsedTime;
-
-	@Schema(title = "记录时间")
-	private LocalDateTime createTime;
 
 }

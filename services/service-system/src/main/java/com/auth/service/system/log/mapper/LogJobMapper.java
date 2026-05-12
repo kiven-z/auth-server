@@ -17,19 +17,18 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface LogJobMapper extends BaseMapper<JobLogEntity> {
 
-    /**
-     * 分页查询日志
-     *
-     * @param page  分页
-     * @param query 条件
-     * @return 分页结果
-     */
-    IPage<SysJobLogPageRowPO> selectListByPage(@Param("page") Page<JobLogEntity> page,
-                                               @Param("query") LogJobQuery query);
+	/**
+	 * 分页查询日志
+	 * @param page 分页
+	 * @param query 条件
+	 * @return 分页结果
+	 */
+	IPage<SysJobLogPageRowPO> selectListByPage(@Param("page") Page<JobLogEntity> page,
+			@Param("query") LogJobQuery query);
 
-    /**
-     * 物理清空日志表（一键清空）
-     */
-    void deleteAll();
+	/**
+	 * 物理清空日志表（一键清空）
+	 */
+	void deleteAll();
 
 }
