@@ -1,0 +1,53 @@
+package com.auth.service.system.log.model.po;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
+/**
+ * 权限决策审计分页行（持久层投影）
+ *
+ * @author Bunny
+ */
+@Getter
+@Setter
+@ToString
+@Schema(name = "LogAuthorizationAuditPageRowPO", title = "权限决策审计分页行（PO）")
+public class LogAuthorizationAuditPageRowPO implements Serializable {
+
+	@Serial
+	private static final long serialVersionUID = 1L;
+
+	private Long id;
+
+	@Schema(title = "事件类型")
+	private String eventType;
+
+	@Schema(title = "决策原因")
+	private String decisionReason;
+
+	@Schema(title = "Controller 类名")
+	private String className;
+
+	@Schema(title = "方法名")
+	private String methodName;
+
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@Schema(title = "创建时间")
+	private LocalDateTime createTime;
+
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@Schema(title = "更新时间")
+	private LocalDateTime updateTime;
+
+	private Long createUser;
+
+	private Long updateUser;
+
+}

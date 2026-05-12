@@ -1,11 +1,10 @@
 package com.auth.service.system.log.convert;
 
+import com.auth.service.system.log.model.po.LogUserPasswordHistoryPageRowPO;
+import com.auth.service.system.log.model.vo.LogUserPasswordHistoryPageVO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
-
-import com.auth.service.system.log.model.po.LogUserPasswordHistoryPageRowPO;
-import com.auth.service.system.log.model.vo.LogUserPasswordHistoryPageVO;
 
 /**
  * 密码历史日志转换器
@@ -24,6 +23,7 @@ public interface LogUserPasswordHistoryConvert {
 	 */
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "changeTime", source = "createTime")
 	LogUserPasswordHistoryPageVO toPageVO(LogUserPasswordHistoryPageRowPO po);
 
 }

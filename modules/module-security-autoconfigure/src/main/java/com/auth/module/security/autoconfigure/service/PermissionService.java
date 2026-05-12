@@ -3,6 +3,7 @@ package com.auth.module.security.autoconfigure.service;
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.module.security.autoconfigure.config.security.AuditPolicy;
 import com.auth.module.security.autoconfigure.config.security.SecurityConfigProperties;
+import com.auth.module.security.autoconfigure.pipeline.resolver.HandlerMethodResolver;
 import com.auth.module.security.autoconfigure.security.SecurityRequirement;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.module.security.contract.event.SecurityAuthorizationAuditPayloadEvent;
@@ -10,12 +11,14 @@ import com.auth.module.security.contract.event.SecurityEventType;
 import com.auth.module.security.contract.spi.AuthorizationAuditHandler;
 import com.auth.module.security.core.matcher.PermissionMatcher;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.auth.module.security.autoconfigure.web.SecurityUserUtils.currentAuthProfile;
 import static com.auth.module.security.contract.constants.PermissionConstant.isAdmin;
@@ -35,11 +38,15 @@ public class PermissionService {
 
 	private final List<AuthorizationAuditHandler> auditHandlers;
 
+	private final ObjectProvider<HandlerMethodResolver> handlerMethodResolver;
+
 	public PermissionService(ApplicationEventPublisher publisher, SecurityConfigProperties securityConfigProperties,
-			List<AuthorizationAuditHandler> auditHandlers) {
+			List<AuthorizationAuditHandler> auditHandlers,
+			ObjectProvider<HandlerMethodResolver> handlerMethodResolver) {
 		this.publisher = publisher;
 		this.securityConfigProperties = securityConfigProperties;
 		this.auditHandlers = auditHandlers;
+		this.handlerMethodResolver = handlerMethodResolver;
 	}
 
 	/**
@@ -104,16 +111,54 @@ public class PermissionService {
 		if (BooleanUtil.isFalse(shouldAudit())) {
 			return;
 		}
-		SecurityAuthorizationAuditPayloadEvent event = SecurityAuthorizationAuditPayloadEvent.builder()
+		SecurityAuthorizationAuditPayloadEvent.SecurityAuthorizationAuditPayloadEventBuilder builder = SecurityAuthorizationAuditPayloadEvent
+			.builder()
 			.eventType(type)
 			.userId(userId)
 			.username(username)
 			.requiredAuthority(required)
 			.decisionReason(reason)
-			.exceptionMessage(null)
-			.build();
+			.exceptionMessage(null);
+		enrichAuditPayloadFromRequest(builder);
+		SecurityAuthorizationAuditPayloadEvent event = builder.build();
 		publisher.publishEvent(event);
 		auditHandlers.forEach(h -> h.handle(event));
+	}
+
+	/**
+	 * 从当前 Web 请求补充审计字段（HTTP、Handler 等）
+	 * @param builder 事件构造器
+	 */
+	private void enrichAuditPayloadFromRequest(
+			SecurityAuthorizationAuditPayloadEvent.SecurityAuthorizationAuditPayloadEventBuilder builder) {
+		ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+		HttpServletRequest request = attrs != null ? attrs.getRequest() : null;
+		if (request == null) {
+			return;
+		}
+		builder.requestMethod(request.getMethod());
+		builder.requestUri(request.getRequestURI());
+		builder.requestIp(resolveClientIp(request));
+		Optional.ofNullable(handlerMethodResolver.getIfAvailable())
+			.flatMap(resolver -> resolver.resolve(request))
+			.ifPresent(handlerMethod -> builder.className(handlerMethod.getBeanType().getName())
+				.methodName(handlerMethod.getMethod().getName()));
+	}
+
+	/**
+	 * 解析客户端 IP（优先 X-Forwarded-For 首段）
+	 * @param request 请求
+	 * @return IP 或 null
+	 */
+	private static String resolveClientIp(HttpServletRequest request) {
+		String forwarded = request.getHeader("X-Forwarded-For");
+		if (forwarded != null && !forwarded.isBlank()) {
+			String first = forwarded.split(",")[0].trim();
+			if (!first.isEmpty() && !"unknown".equalsIgnoreCase(first)) {
+				return first;
+			}
+		}
+		return request.getRemoteAddr();
 	}
 
 	/**

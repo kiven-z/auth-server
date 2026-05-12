@@ -2,12 +2,14 @@ package com.auth.module.security.starter.service;
 
 import com.auth.module.security.autoconfigure.config.security.AuditPolicy;
 import com.auth.module.security.autoconfigure.config.security.SecurityConfigProperties;
+import com.auth.module.security.autoconfigure.pipeline.resolver.HandlerMethodResolver;
 import com.auth.module.security.autoconfigure.service.PermissionService;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.module.security.contract.event.SecurityAuthorizationAuditPayloadEvent;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,7 +24,10 @@ class PermissionServiceTest {
 	private PermissionService createPermissionService(ApplicationEventPublisher publisher) {
 		SecurityConfigProperties configProperties = new SecurityConfigProperties();
 		configProperties.setAuditPolicy(AuditPolicy.ALL_RECORD);
-		return new PermissionService(publisher, configProperties, List.of());
+		@SuppressWarnings("unchecked")
+		ObjectProvider<HandlerMethodResolver> handlerMethodResolver = mock(ObjectProvider.class);
+		when(handlerMethodResolver.getIfAvailable()).thenReturn(null);
+		return new PermissionService(publisher, configProperties, List.of(), handlerMethodResolver);
 	}
 
 	@AfterEach

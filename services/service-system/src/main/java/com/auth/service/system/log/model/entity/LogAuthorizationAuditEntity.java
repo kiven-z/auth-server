@@ -3,6 +3,7 @@ package com.auth.service.system.log.model.entity;
 import com.auth.common.data.model.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -10,7 +11,7 @@ import lombok.experimental.Accessors;
 import java.io.Serial;
 
 /**
- * 权限决策审计日志
+ * 权限决策审计日志，对应 {@code log_authorization_audit}；主体用户见 {@code create_user}。
  *
  * @author Bunny
  */
@@ -18,109 +19,57 @@ import java.io.Serial;
 @Getter
 @Setter
 @Accessors(chain = true)
-public class AuthLogEntity extends BaseEntity {
+public class LogAuthorizationAuditEntity extends BaseEntity {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
 
-	/**
-	 * 事件类型：GRANTED / DENIED
-	 */
+	@Schema(title = "事件类型：GRANTED / DENIED")
 	private String eventType;
 
-	/**
-	 * 用户ID（未认证时为 NULL）
-	 */
-	private Long userId;
-
-	/**
-	 * 用户名
-	 */
-	private String username;
-
-	/**
-	 * 会话ID（关联 user_session）
-	 */
+	@Schema(title = "会话 ID")
 	private String sessionId;
 
-	/**
-	 * 所需权限码（如 sys:user:add）
-	 */
+	@Schema(title = "所需权限码（如 sys:user:add）")
 	private String requiredPermission;
 
-	/**
-	 * HTTP 请求方法
-	 */
+	@Schema(title = "HTTP 请求方法")
 	private String requestMethod;
 
-	/**
-	 * 请求 URI
-	 */
+	@Schema(title = "HTTP 请求 URI")
 	private String requestUri;
 
-	/**
-	 * 请求 IP
-	 */
+	@Schema(title = "HTTP 请求 IP")
 	private String requestIp;
 
-	/**
-	 * 决策原因（枚举值）
-	 */
+	@Schema(title = "决策原因")
 	private String decisionReason;
 
-	/**
-	 * 决策详情
-	 */
+	@Schema(title = "决策详情")
 	private String decisionDetail;
 
-	/**
-	 * 用户权限摘要
-	 */
+	@Schema(title = "用户权限摘要")
 	private String userPermissionsSummary;
 
-	/**
-	 * 用户角色列表（逗号分隔）
-	 */
-	private String userRoles;
-
-	/**
-	 * 命中豁免配置：USER_ID/ROLE_CODE/PATH
-	 */
-	private String exemptConfigHit;
-
-	/**
-	 * 策略编码（ARBAC 场景）
-	 */
+	@Schema(title = "策略编码")
 	private String policyCode;
 
-	/**
-	 * 策略决策结果（ARBAC 场景）
-	 */
+	@Schema(title = "策略决策结果")
 	private Boolean policyDecision;
 
-	/**
-	 * Controller 类名
-	 */
+	@Schema(title = "类名")
 	private String className;
 
-	/**
-	 * 方法名
-	 */
+	@Schema(title = "方法名")
 	private String methodName;
 
-	/**
-	 * 方法参数摘要（JSON）
-	 */
+	@Schema(title = "方法参数")
 	private String methodParams;
 
-	/**
-	 * 异常消息
-	 */
+	@Schema(title = "异常消息")
 	private String exceptionMessage;
 
-	/**
-	 * 逻辑删除标记
-	 */
+	@Schema(title = "逻辑删除标记")
 	@TableLogic(value = "0", delval = "1")
 	private Boolean isDeleted;
 

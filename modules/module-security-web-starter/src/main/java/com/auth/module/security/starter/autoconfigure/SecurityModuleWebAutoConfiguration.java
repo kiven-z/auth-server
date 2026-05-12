@@ -10,9 +10,9 @@ import org.springframework.context.annotation.Import;
  *
  * @author Bunny
  */
-@Import({MybatisPlusConfig.class,
-        // 异常捕获
-        SecurityExceptionHandler.class,})
+@Import({ MybatisPlusConfig.class,
+		// 异常捕获
+		SecurityExceptionHandler.class, })
 @Configuration
 public class SecurityModuleWebAutoConfiguration {
 
