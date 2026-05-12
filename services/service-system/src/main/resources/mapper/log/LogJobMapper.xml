@@ -4,10 +4,20 @@
 
     <!-- 分页查询日志 -->
     <select id="selectListByPage"
-            resultType="com.auth.service.system.schedule.model.po.SysJobLogPageRowPO">
+            resultType="com.auth.service.system.log.model.po.SysJobLogPageRowPO">
         SELECT id,
-        job_name , job_group , invoke_target , job_message , status, elapsed_time , create_time FROM
-        log_job
+               job_name,
+               job_group,
+               invoke_target,
+               job_message,
+               status,
+               exception_info,
+               elapsed_time,
+               create_time,
+               update_time,
+               create_user,
+               update_user
+        FROM log_job
         <where>
             AND is_deleted = 0
             <if test="query.jobName != null and query.jobName != ''">
