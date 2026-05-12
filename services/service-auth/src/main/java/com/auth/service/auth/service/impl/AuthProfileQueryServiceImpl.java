@@ -1,4 +1,4 @@
-package com.auth.service.auth.infrastructure.profile;
+package com.auth.service.auth.service.impl;
 
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
@@ -6,10 +6,10 @@ import com.auth.module.security.contract.api.authorization.PolicyBundle;
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
 import com.auth.module.security.contract.constants.PermissionConstant;
 import com.auth.service.auth.exception.AuthBusinessException;
-import com.auth.service.auth.exception.AuthResultCode;
 import com.auth.service.auth.infrastructure.profile.datascope.DataScopeEffectiveResolver;
 import com.auth.service.auth.mapper.UserAuthorizationGrantMapper;
 import com.auth.service.auth.mapper.UserMapper;
+import com.auth.service.auth.model.enums.AuthResultCode;
 import com.auth.service.auth.service.AuthProfileQueryService;
 import org.springframework.stereotype.Service;
 
@@ -17,12 +17,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 只做 AuthProfile 构建 创建认证授权画像，授权画像构建服务实现
+ * 构建 {@link AuthProfile}：聚合角色、权限与生效数据权限。
  *
  * @author Bunny
  */
 @Service
-public class DefaultAuthProfileServiceImpl implements AuthProfileQueryService {
+public class AuthProfileQueryServiceImpl implements AuthProfileQueryService {
 
 	private final UserAuthorizationGrantMapper userAuthorizationGrantMapper;
 
@@ -30,8 +30,8 @@ public class DefaultAuthProfileServiceImpl implements AuthProfileQueryService {
 
 	private final DataScopeEffectiveResolver dataScopeEffectiveResolver;
 
-	public DefaultAuthProfileServiceImpl(UserAuthorizationGrantMapper userAuthorizationGrantMapper,
-			UserMapper userMapper, DataScopeEffectiveResolver dataScopeEffectiveResolver) {
+	public AuthProfileQueryServiceImpl(UserAuthorizationGrantMapper userAuthorizationGrantMapper, UserMapper userMapper,
+			DataScopeEffectiveResolver dataScopeEffectiveResolver) {
 		this.userAuthorizationGrantMapper = userAuthorizationGrantMapper;
 		this.userMapper = userMapper;
 		this.dataScopeEffectiveResolver = dataScopeEffectiveResolver;

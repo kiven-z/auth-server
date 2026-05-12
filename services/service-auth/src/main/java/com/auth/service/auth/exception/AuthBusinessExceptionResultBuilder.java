@@ -1,6 +1,7 @@
 package com.auth.service.auth.exception;
 
 import com.auth.common.core.model.response.Result;
+import com.auth.service.auth.model.enums.AuthResultCode;
 import lombok.experimental.UtilityClass;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;

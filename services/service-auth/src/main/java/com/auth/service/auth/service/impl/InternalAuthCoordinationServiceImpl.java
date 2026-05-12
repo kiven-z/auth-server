@@ -2,9 +2,9 @@ package com.auth.service.auth.service.impl;
 
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.infrastructure.profile.AuthProfileCache;
-import com.auth.service.auth.infrastructure.profile.DefaultAuthProfileServiceImpl;
 import com.auth.service.auth.infrastructure.session.redis.RedisUserSessionIndexRepository;
 import com.auth.service.auth.model.vo.inner.EffectiveCodesVO;
+import com.auth.service.auth.service.AuthProfileQueryService;
 import com.auth.service.auth.service.InternalAuthCoordinationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +25,7 @@ public class InternalAuthCoordinationServiceImpl implements InternalAuthCoordina
 
 	private final RedisUserSessionIndexRepository redisUserSessionIndexRepository;
 
-	private final DefaultAuthProfileServiceImpl defaultAuthProfileServiceImpl;
+	private final AuthProfileQueryService authProfileQueryService;
 
 	private final AuthProfileCache authProfileCache;
 
@@ -36,7 +36,7 @@ public class InternalAuthCoordinationServiceImpl implements InternalAuthCoordina
 	public void refreshUserCache(List<Long> userIds) {
 		userIds.stream().filter(Objects::nonNull).forEach(userId -> {
 			try {
-				AuthProfile profile = defaultAuthProfileServiceImpl.buildByUserId(userId);
+				AuthProfile profile = authProfileQueryService.buildByUserId(userId);
 				authProfileCache.createCacheAuthProfile(profile);
 			}
 			catch (RuntimeException ex) {
@@ -65,7 +65,7 @@ public class InternalAuthCoordinationServiceImpl implements InternalAuthCoordina
 	 */
 	@Override
 	public EffectiveCodesVO resolveEffectiveCodes(Long userId) {
-		AuthProfile profile = defaultAuthProfileServiceImpl.buildByUserId(userId);
+		AuthProfile profile = authProfileQueryService.buildByUserId(userId);
 		EffectiveCodesVO vo = new EffectiveCodesVO();
 		if (profile == null) {
 			vo.setRoleCodes(List.of());

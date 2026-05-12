@@ -1,4 +1,4 @@
-package com.auth.service.auth.infrastructure.profile;
+package com.auth.service.auth.service.impl;
 
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
@@ -19,7 +19,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class DefaultAuthProfileServiceImplTest {
+class AuthProfileQueryServiceImplTest {
 
 	@Mock
 	private UserAuthorizationGrantMapper userAuthorizationGrantMapper;
@@ -42,8 +42,8 @@ class DefaultAuthProfileServiceImplTest {
 		ScopeGrant grant = ScopeGrant.builder().build();
 		when(dataScopeEffectiveResolver.resolveByUserId(10L)).thenReturn(Map.of("DEPT::default", grant));
 
-		DefaultAuthProfileServiceImpl service = new DefaultAuthProfileServiceImpl(userAuthorizationGrantMapper,
-				userMapper, dataScopeEffectiveResolver);
+		AuthProfileQueryServiceImpl service = new AuthProfileQueryServiceImpl(userAuthorizationGrantMapper, userMapper,
+				dataScopeEffectiveResolver);
 		Map<String, ScopeGrant> dataScopes = service.buildByUser(user).getDataScopes();
 
 		assertEquals(1, dataScopes.size());

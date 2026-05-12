@@ -1,9 +1,9 @@
 package com.auth.service.auth.infrastructure.login.audit;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import com.auth.service.auth.exception.AuthResultCode;
 import com.auth.service.auth.model.enums.AuthLoginLogResult;
 import com.auth.service.auth.model.enums.AuthLoginLogType;
+import com.auth.service.auth.model.enums.AuthResultCode;
 import com.auth.service.auth.model.request.login.AbstractLoginRequest;
 import com.auth.service.auth.model.request.login.EmailLoginRequest;
 import com.auth.service.auth.model.request.login.UsernamePasswordLoginRequest;

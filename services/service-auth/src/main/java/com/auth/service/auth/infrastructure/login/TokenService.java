@@ -10,7 +10,7 @@ import com.auth.common.jwt.model.JwtUserToken;
 import com.auth.module.security.core.token.provider.AccessTokenProvider;
 import com.auth.module.security.core.token.provider.RefreshTokenProvider;
 import com.auth.service.auth.exception.AuthBusinessException;
-import com.auth.service.auth.exception.AuthResultCode;
+import com.auth.service.auth.model.enums.AuthResultCode;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import lombok.extern.slf4j.Slf4j;

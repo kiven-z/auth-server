@@ -18,7 +18,7 @@ import com.auth.module.security.core.token.provider.AccessTokenProvider;
 import com.auth.module.security.core.token.provider.RefreshTokenProvider;
 import com.auth.service.auth.TestConstants;
 import com.auth.service.auth.exception.AuthBusinessException;
-import com.auth.service.auth.exception.AuthResultCode;
+import com.auth.service.auth.model.enums.AuthResultCode;
 import com.auth.service.auth.infrastructure.login.TokenPair;
 import com.auth.service.auth.infrastructure.login.TokenService;
 

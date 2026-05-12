@@ -3,13 +3,13 @@ package com.auth.service.auth.infrastructure.login.strategy;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.auth.exception.AuthBadCredentialsException;
 import com.auth.service.auth.exception.AuthBusinessException;
-import com.auth.service.auth.exception.AuthResultCode;
 import com.auth.service.auth.infrastructure.login.LoginFailureRateLimiter;
-import com.auth.service.auth.infrastructure.profile.DefaultAuthProfileServiceImpl;
 import com.auth.service.auth.mapper.UserMapper;
 import com.auth.service.auth.model.enums.AuthLoginLogType;
+import com.auth.service.auth.model.enums.AuthResultCode;
 import com.auth.service.auth.model.request.login.UsernamePasswordLoginRequest;
 import com.auth.service.auth.service.AuthLoginAuditService;
+import com.auth.service.auth.service.AuthProfileQueryService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +24,7 @@ import org.springframework.stereotype.Component;
  * @author Bunny
  */
 @Component
-public class UsernamePasswordLoginStrategy extends AbstractAuthenticationStrategy<UsernamePasswordLoginRequest> {
+public class UsernamePasswordLoginStrategy extends AbstractLoginStrategy<UsernamePasswordLoginRequest> {
 
 	private final UserMapper userMapper;
 
@@ -34,9 +34,9 @@ public class UsernamePasswordLoginStrategy extends AbstractAuthenticationStrateg
 	private final PasswordEncoder passwordEncoder;
 
 	public UsernamePasswordLoginStrategy(UserMapper userMapper, LoginFailureRateLimiter loginFailureRateLimiter,
-			DefaultAuthProfileServiceImpl defaultAuthProfileServiceImpl, PasswordEncoder passwordEncoder,
+			AuthProfileQueryService authProfileQueryService, PasswordEncoder passwordEncoder,
 			AuthLoginAuditService loginLogService) {
-		super(loginFailureRateLimiter, defaultAuthProfileServiceImpl, loginLogService);
+		super(loginFailureRateLimiter, authProfileQueryService, loginLogService);
 		this.userMapper = userMapper;
 		this.passwordEncoder = passwordEncoder;
 	}
@@ -81,7 +81,7 @@ public class UsernamePasswordLoginStrategy extends AbstractAuthenticationStrateg
 
 	/**
 	 * 当前策略支持的认证请求类型（作为注册表 key）
-	 * @return UsernamePasswordAuth
+	 * @return UsernamePasswordLoginRequest
 	 */
 	@Override
 	public Class<UsernamePasswordLoginRequest> supports() {

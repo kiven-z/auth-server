@@ -47,7 +47,7 @@ public class DataScopeBuilder {
 
 		Map<String, List<DataScopeProjection>> grouped = groupByDimensionAndResource(projections);
 		Map<String, ScopeGrant> dataScopes = new LinkedHashMap<>(grouped.size());
-		List<ResolveTrace> traces = new ArrayList<>(grouped.size());
+		List<DataScopeResolveTrace> traces = new ArrayList<>(grouped.size());
 
 		for (Map.Entry<String, List<DataScopeProjection>> entry : grouped.entrySet()) {
 			String key = entry.getKey();
@@ -71,7 +71,7 @@ public class DataScopeBuilder {
 	 * @param effective 生效范围
 	 * @return 轨迹
 	 */
-	private static ResolveTrace buildTrace(String key, List<DataScopeProjection> all,
+	private static DataScopeResolveTrace buildTrace(String key, List<DataScopeProjection> all,
 			List<DataScopeProjection> candidates, ScopeGrant effective) {
 		String source;
 		if (all.stream().anyMatch(p -> "USER".equalsIgnoreCase(p.getSubjectType()))) {
@@ -83,7 +83,7 @@ public class DataScopeBuilder {
 		if (CollUtil.isEmpty(candidates)) {
 			source = "SELF_FALLBACK";
 		}
-		return ResolveTrace.builder()
+		return DataScopeResolveTrace.builder()
 			.scopeKey(key)
 			.source(source)
 			.totalPieces(all.size())

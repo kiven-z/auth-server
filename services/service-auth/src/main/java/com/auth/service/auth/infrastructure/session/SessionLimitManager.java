@@ -3,7 +3,7 @@ package com.auth.service.auth.infrastructure.session;
 import com.auth.module.security.autoconfigure.config.user.SessionLimitStrategy;
 import com.auth.module.security.autoconfigure.config.user.UserConfigProperties;
 import com.auth.service.auth.exception.AuthBusinessException;
-import com.auth.service.auth.exception.AuthResultCode;
+import com.auth.service.auth.model.enums.AuthResultCode;
 import com.auth.service.auth.infrastructure.login.LoginFailureRateLimiter;
 import com.auth.service.auth.infrastructure.session.redis.RedisUserSessionIndexRepository;
 import org.springframework.stereotype.Component;

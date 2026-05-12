@@ -46,8 +46,11 @@ public class QuartzTaskRegistry {
 			}
 			QuartzTask ann = AnnotationUtils.findAnnotation(type, QuartzTask.class);
 			if (ann != null) {
-				allowedClasses.put(type.getName(),
-						new QuartzTaskClassVO(type.getName(), ann.name(), ann.description()));
+				QuartzTaskClassVO vo = new QuartzTaskClassVO();
+				vo.setClassName(type.getName());
+				vo.setName(ann.name());
+				vo.setDescription(ann.description());
+				allowedClasses.put(type.getName(), vo);
 			}
 		}
 	}

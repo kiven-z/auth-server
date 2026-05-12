@@ -5,15 +5,15 @@ import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.TestConstants;
 import com.auth.service.auth.exception.AuthBadCredentialsException;
 import com.auth.service.auth.exception.AuthBusinessException;
-import com.auth.service.auth.exception.AuthResultCode;
 import com.auth.service.auth.infrastructure.login.LoginFailureRateLimiter;
 import com.auth.service.auth.infrastructure.login.LoginResult;
-import com.auth.service.auth.infrastructure.login.strategy.AbstractAuthenticationStrategy;
-import com.auth.service.auth.infrastructure.profile.DefaultAuthProfileServiceImpl;
+import com.auth.service.auth.infrastructure.login.strategy.AbstractLoginStrategy;
 import com.auth.service.auth.model.enums.AuthLoginLogResult;
 import com.auth.service.auth.model.enums.AuthLoginLogType;
+import com.auth.service.auth.model.enums.AuthResultCode;
 import com.auth.service.auth.model.request.login.AbstractLoginRequest;
 import com.auth.service.auth.service.AuthLoginAuditService;
+import com.auth.service.auth.service.AuthProfileQueryService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,13 +23,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * AbstractAuthenticationStrategy 单元测试
+ * {@link AbstractLoginStrategy} 单元测试
  *
  * @author Bunny
  */
@@ -40,7 +44,7 @@ class AbstractLoginRequestStrategyTest {
 	private LoginFailureRateLimiter loginFailureRateLimiter;
 
 	@Mock
-	private DefaultAuthProfileServiceImpl defaultAuthProfileServiceImpl;
+	private AuthProfileQueryService authProfileQueryService;
 
 	@Mock
 	private AuthLoginAuditService loginLogService;
@@ -63,17 +67,17 @@ class AbstractLoginRequestStrategyTest {
 			.permissions(List.of("P1"))
 			.permVersion(1L)
 			.build();
-		when(defaultAuthProfileServiceImpl.buildByUser(user)).thenReturn(profile);
+		when(authProfileQueryService.buildByUser(user)).thenReturn(profile);
 
-		TestStrategy strategy = new TestStrategy(loginFailureRateLimiter, defaultAuthProfileServiceImpl,
-				loginLogService, user, null);
+		TestStrategy strategy = new TestStrategy(loginFailureRateLimiter, authProfileQueryService, loginLogService,
+				user, null);
 
 		// Act
 		LoginResult result = strategy.authenticate(new TestAuth(), httpServletRequest);
 
 		// Assert
 		verify(loginFailureRateLimiter).assertNotLocked(TestConstants.USER_ID);
-		verify(defaultAuthProfileServiceImpl).buildByUser(user);
+		verify(authProfileQueryService).buildByUser(user);
 		assertNotNull(result);
 		assertEquals(TestConstants.USER_ID, result.authProfile().getUserId());
 		assertEquals(List.of("R1"), result.response().getRoles());
@@ -91,8 +95,8 @@ class AbstractLoginRequestStrategyTest {
 
 		when(loginFailureRateLimiter.recordFailure(TestConstants.USER_ID)).thenReturn(3);
 
-		TestStrategy strategy = new TestStrategy(loginFailureRateLimiter, defaultAuthProfileServiceImpl,
-				loginLogService, user, new AuthBadCredentialsException("bad"));
+		TestStrategy strategy = new TestStrategy(loginFailureRateLimiter, authProfileQueryService, loginLogService,
+				user, new AuthBadCredentialsException("bad"));
 
 		TestAuth testAuth = new TestAuth();
 
@@ -112,16 +116,16 @@ class AbstractLoginRequestStrategyTest {
 
 	}
 
-	static class TestStrategy extends AbstractAuthenticationStrategy<TestAuth> {
+	static class TestStrategy extends AbstractLoginStrategy<TestAuth> {
 
 		private final UserEntity userToReturn;
 
 		private final RuntimeException authenticateException;
 
-		TestStrategy(LoginFailureRateLimiter loginFailureRateLimiter,
-				DefaultAuthProfileServiceImpl defaultAuthProfileServiceImpl, AuthLoginAuditService loginLogService,
-				UserEntity userToReturn, RuntimeException authenticateException) {
-			super(loginFailureRateLimiter, defaultAuthProfileServiceImpl, loginLogService);
+		TestStrategy(LoginFailureRateLimiter loginFailureRateLimiter, AuthProfileQueryService authProfileQueryService,
+				AuthLoginAuditService loginLogService, UserEntity userToReturn,
+				RuntimeException authenticateException) {
+			super(loginFailureRateLimiter, authProfileQueryService, loginLogService);
 			this.userToReturn = userToReturn;
 			this.authenticateException = authenticateException;
 		}

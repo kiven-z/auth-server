@@ -5,20 +5,20 @@ import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.exception.AuthBadCredentialsException;
 import com.auth.service.auth.exception.AuthBusinessException;
-import com.auth.service.auth.exception.AuthResultCode;
 import com.auth.service.auth.infrastructure.login.LoginFailureRateLimiter;
 import com.auth.service.auth.infrastructure.login.LoginResult;
 import com.auth.service.auth.infrastructure.login.audit.LoginAuditContextResolver;
-import com.auth.service.auth.infrastructure.profile.DefaultAuthProfileServiceImpl;
 import com.auth.service.auth.model.enums.AuthLoginLogResult;
 import com.auth.service.auth.model.enums.AuthLoginLogType;
+import com.auth.service.auth.model.enums.AuthResultCode;
 import com.auth.service.auth.model.request.login.AbstractLoginRequest;
 import com.auth.service.auth.model.response.UserLoginResponse;
 import com.auth.service.auth.service.AuthLoginAuditService;
+import com.auth.service.auth.service.AuthProfileQueryService;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
- * 认证模板：解析用户 → 锁定检查 → 子类校验凭证 → 构建画像与响应；失败路径写入审计日志。
+ * 登录策略模板：解析用户 → 锁定检查 → 子类校验凭证 → 构建画像与响应；失败路径写入审计日志。
  *
  * <p>
  * 会话容量由 {@link com.auth.service.auth.infrastructure.session.SessionLimitManager}
@@ -27,7 +27,7 @@ import jakarta.servlet.http.HttpServletRequest;
  *
  * @author Bunny
  */
-public abstract class AbstractAuthenticationStrategy<T extends AbstractLoginRequest> implements LoginStrategy<T> {
+public abstract class AbstractLoginStrategy<T extends AbstractLoginRequest> implements LoginStrategy<T> {
 
 	/**
 	 * 与 {@link UserEntity#getStatus()} 对齐：0=禁用
@@ -41,14 +41,14 @@ public abstract class AbstractAuthenticationStrategy<T extends AbstractLoginRequ
 
 	protected final LoginFailureRateLimiter loginFailureRateLimiter;
 
-	private final DefaultAuthProfileServiceImpl defaultAuthProfileServiceImpl;
+	private final AuthProfileQueryService authProfileQueryService;
 
 	private final AuthLoginAuditService loginLogService;
 
-	protected AbstractAuthenticationStrategy(LoginFailureRateLimiter loginFailureRateLimiter,
-			DefaultAuthProfileServiceImpl defaultAuthProfileServiceImpl, AuthLoginAuditService loginLogService) {
+	protected AbstractLoginStrategy(LoginFailureRateLimiter loginFailureRateLimiter,
+			AuthProfileQueryService authProfileQueryService, AuthLoginAuditService loginLogService) {
 		this.loginFailureRateLimiter = loginFailureRateLimiter;
-		this.defaultAuthProfileServiceImpl = defaultAuthProfileServiceImpl;
+		this.authProfileQueryService = authProfileQueryService;
 		this.loginLogService = loginLogService;
 	}
 
@@ -66,7 +66,7 @@ public abstract class AbstractAuthenticationStrategy<T extends AbstractLoginRequ
 
 		try {
 			AuthLoginLogType resolvedLoginLogType = doAuthenticate(auth, user);
-			AuthProfile profile = defaultAuthProfileServiceImpl.buildByUser(user);
+			AuthProfile profile = authProfileQueryService.buildByUser(user);
 
 			UserLoginResponse response = BeanUtil.copyProperties(user, UserLoginResponse.class);
 			response.setRoles(profile.getRoles());

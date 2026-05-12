@@ -2,15 +2,15 @@ package com.auth.service.auth.infrastructure.strategy;
 
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.auth.exception.AuthBusinessException;
-import com.auth.service.auth.exception.AuthResultCode;
 import com.auth.service.auth.infrastructure.login.LoginFailureRateLimiter;
 import com.auth.service.auth.infrastructure.login.strategy.UsernamePasswordLoginStrategy;
-import com.auth.service.auth.infrastructure.profile.DefaultAuthProfileServiceImpl;
 import com.auth.service.auth.mapper.UserMapper;
 import com.auth.service.auth.model.enums.AuthLoginLogResult;
 import com.auth.service.auth.model.enums.AuthLoginLogType;
+import com.auth.service.auth.model.enums.AuthResultCode;
 import com.auth.service.auth.model.request.login.UsernamePasswordLoginRequest;
 import com.auth.service.auth.service.AuthLoginAuditService;
+import com.auth.service.auth.service.AuthProfileQueryService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,11 +21,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
- * UsernamePasswordLoginStrategy 单元测试
+ * {@link UsernamePasswordLoginStrategy} ????
  *
  * @author Bunny
  */
@@ -39,7 +43,7 @@ class UsernamePasswordLoginStrategyTest {
 	private LoginFailureRateLimiter loginFailureRateLimiter;
 
 	@Mock
-	private DefaultAuthProfileServiceImpl defaultAuthProfileServiceImpl;
+	private AuthProfileQueryService authProfileQueryService;
 
 	@Mock
 	private PasswordEncoder passwordEncoder;
@@ -51,12 +55,12 @@ class UsernamePasswordLoginStrategyTest {
 	private HttpServletRequest httpServletRequest;
 
 	@Test
-	@DisplayName("用户名密码：用户不存在时抛 USERNAME_OR_PASSWORD_ERROR（隐藏账号存在性）并写审计")
+	@DisplayName("????????????? USERNAME_OR_PASSWORD_ERROR?????????????")
 	void resolveUser_shouldThrow_whenUserNotFound() {
 		// Arrange
 		when(userMapper.selectUserByUsername("u")).thenReturn(null);
 		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(userMapper, loginFailureRateLimiter,
-				defaultAuthProfileServiceImpl, passwordEncoder, loginLogService);
+				authProfileQueryService, passwordEncoder, loginLogService);
 
 		UsernamePasswordLoginRequest auth = new UsernamePasswordLoginRequest();
 		auth.setUsername("u");
@@ -74,18 +78,18 @@ class UsernamePasswordLoginStrategyTest {
 	}
 
 	@Test
-	@DisplayName("supports：返回 UsernamePasswordAuth.class")
-	void supports_shouldReturnUsernamePasswordAuth() {
+	@DisplayName("supports??? UsernamePasswordLoginRequest.class")
+	void supports_shouldReturnUsernamePasswordLoginRequestClass() {
 		// Arrange
 		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(userMapper, loginFailureRateLimiter,
-				defaultAuthProfileServiceImpl, passwordEncoder, loginLogService);
+				authProfileQueryService, passwordEncoder, loginLogService);
 
 		// Act & Assert
 		assertEquals(UsernamePasswordLoginRequest.class, strategy.supports());
 	}
 
 	@Test
-	@DisplayName("用户名密码：密码不匹配时抛 USERNAME_OR_PASSWORD_ERROR_WITH_REMAINING")
+	@DisplayName("????????????? USERNAME_OR_PASSWORD_ERROR_WITH_REMAINING")
 	void authenticate_shouldThrowRemaining_whenPasswordMismatch() {
 		// Arrange
 		UserEntity user = new UserEntity();
@@ -100,7 +104,7 @@ class UsernamePasswordLoginStrategyTest {
 		when(loginFailureRateLimiter.recordFailure(1L)).thenReturn(2);
 
 		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(userMapper, loginFailureRateLimiter,
-				defaultAuthProfileServiceImpl, passwordEncoder, loginLogService);
+				authProfileQueryService, passwordEncoder, loginLogService);
 
 		UsernamePasswordLoginRequest auth = new UsernamePasswordLoginRequest();
 		auth.setUsername("u");

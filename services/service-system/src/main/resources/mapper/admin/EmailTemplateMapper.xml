@@ -32,16 +32,16 @@
     <select id="selectListByPage"
             resultType="com.auth.service.system.admin.model.po.emailtemplate.EmailTemplatePageRowPO">
         SELECT id,
-        template_code AS templateCode,
-        template_name AS templateName,
-        description AS description,
-        subject AS subject,
-        priority AS priority,
-        status AS status,
-        create_time AS createTime,
-        update_time AS updateTime,
-        create_user AS createUser,
-        update_user AS updateUser
+        template_code,
+        template_name,
+        description,
+        subject,
+        priority,
+        status,
+        create_time,
+        update_time,
+        create_user,
+        update_user
         FROM sys_email_template
         <where>
             <if test="query.templateCode != null and query.templateCode != ''">

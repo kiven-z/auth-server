@@ -1,4 +1,4 @@
-package com.auth.service.auth.exception;
+package com.auth.service.auth.model.enums;
 
 import com.auth.common.web.context.SpringContextHolder;
 import lombok.Getter;
@@ -133,7 +133,8 @@ public enum AuthResultCode {
 
 	/**
 	 * 建议的 HTTP 状态码（与
-	 * {@link AuthBusinessExceptionResultBuilder#resolveHttpStatus(AuthResultCode)} 一致）
+	 * {@link com.auth.service.auth.exception.AuthBusinessExceptionResultBuilder#resolveHttpStatus(AuthResultCode)}
+	 * 一致）
 	 */
 	private final int httpStatus;
 

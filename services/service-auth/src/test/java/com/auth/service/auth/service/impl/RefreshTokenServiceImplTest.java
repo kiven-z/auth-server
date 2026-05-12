@@ -7,7 +7,7 @@ import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.TestConstants;
 import com.auth.service.auth.exception.AuthBusinessException;
-import com.auth.service.auth.exception.AuthResultCode;
+import com.auth.service.auth.model.enums.AuthResultCode;
 import com.auth.service.auth.infrastructure.login.TokenPair;
 import com.auth.service.auth.infrastructure.login.TokenService;
 import com.auth.service.auth.infrastructure.profile.AuthProfileCache;

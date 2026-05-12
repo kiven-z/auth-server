@@ -4,13 +4,13 @@ import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.crypto.digest.MD5;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.auth.exception.AuthBusinessException;
-import com.auth.service.auth.exception.AuthResultCode;
 import com.auth.service.auth.infrastructure.login.LoginFailureRateLimiter;
-import com.auth.service.auth.infrastructure.profile.DefaultAuthProfileServiceImpl;
 import com.auth.service.auth.mapper.UserMapper;
 import com.auth.service.auth.model.enums.AuthLoginLogType;
+import com.auth.service.auth.model.enums.AuthResultCode;
 import com.auth.service.auth.model.request.login.EmailLoginRequest;
 import com.auth.service.auth.service.AuthLoginAuditService;
+import com.auth.service.auth.service.AuthProfileQueryService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
@@ -25,16 +25,16 @@ import static com.auth.module.security.contract.redis.SecurityRedisKey.EMAIL_COD
  * @author Bunny
  */
 @Component
-public class EmailLoginStrategy extends AbstractAuthenticationStrategy<EmailLoginRequest> {
+public class EmailLoginStrategy extends AbstractLoginStrategy<EmailLoginRequest> {
 
 	private final RedisTemplate<String, Object> redisTemplate;
 
 	private final UserMapper userMapper;
 
-	public EmailLoginStrategy(DefaultAuthProfileServiceImpl defaultAuthProfileServiceImpl,
+	public EmailLoginStrategy(AuthProfileQueryService authProfileQueryService,
 			RedisTemplate<String, Object> redisTemplate, UserMapper userMapper,
 			LoginFailureRateLimiter loginFailureRateLimiter, AuthLoginAuditService loginLogService) {
-		super(loginFailureRateLimiter, defaultAuthProfileServiceImpl, loginLogService);
+		super(loginFailureRateLimiter, authProfileQueryService, loginLogService);
 		this.redisTemplate = redisTemplate;
 		this.userMapper = userMapper;
 	}
@@ -102,7 +102,7 @@ public class EmailLoginStrategy extends AbstractAuthenticationStrategy<EmailLogi
 
 	/**
 	 * 当前策略支持的认证请求类型（作为注册表 key）
-	 * @return EmailAuth
+	 * @return {@link EmailLoginRequest}
 	 */
 	@Override
 	public Class<EmailLoginRequest> supports() {

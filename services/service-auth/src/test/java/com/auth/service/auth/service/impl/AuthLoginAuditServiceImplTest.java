@@ -23,7 +23,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
 /**
- * LoginLogServiceImpl 单元测试
+ * {@link AuthLoginAuditServiceImpl} 单元测试
  *
  * @author Bunny
  */

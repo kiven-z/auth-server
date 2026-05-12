@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 构建结果
+ * 数据权限构建结果（生效范围与解析轨迹）。
  *
  * @author Bunny
  */
@@ -24,6 +24,6 @@ public class DataScopeBuildResult {
 	/**
 	 * 规则命中轨迹
 	 */
-	private final List<ResolveTrace> traces;
+	private final List<DataScopeResolveTrace> traces;
 
 }
