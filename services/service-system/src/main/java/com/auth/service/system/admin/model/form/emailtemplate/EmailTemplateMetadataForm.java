@@ -10,7 +10,7 @@ import lombok.Data;
 import java.io.Serial;
 import java.io.Serializable;
 
-import static com.auth.common.web.model.enums.RegexConstantsEnum.LETTER_UNDERSCORE_HYPHEN_REQUIRE_LETTER;
+import static com.auth.common.web.validation.ValidationPatterns.LETTER_UNDERSCORE_HYPHEN_REQUIRE_LETTER;
 
 /**
  * 邮件模板元数据更新表单（不含 content、require_fields）

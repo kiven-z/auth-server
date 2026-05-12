@@ -1,5 +1,6 @@
 package com.auth.common.data.model;
 
+import com.auth.common.data.model.enums.DatabaseAuditMetaFieldEnum;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;

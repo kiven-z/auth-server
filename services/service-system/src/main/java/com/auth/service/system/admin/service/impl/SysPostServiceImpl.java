@@ -30,49 +30,49 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(rollbackFor = Exception.class)
 public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity> implements SysPostService {
 
-    private final AuditUserDisplayService auditUserDisplayService;
+	private final AuditUserDisplayService auditUserDisplayService;
 
-    public SysPostServiceImpl(AuditUserDisplayService auditUserDisplayService) {
-        this.auditUserDisplayService = auditUserDisplayService;
-    }
+	public SysPostServiceImpl(AuditUserDisplayService auditUserDisplayService) {
+		this.auditUserDisplayService = auditUserDisplayService;
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public PageResponse<SysPostPageResponse> getPage(Page<SysPostEntity> pageParams, SysPostQuery query) {
-        String orderBySql = SysPostPageOrderSqlBuilder.buildOrderBySql(query.getSort());
-        IPage<SysPostPageRowPO> page = baseMapper.selectListByPage(pageParams, query, orderBySql);
-        IPage<SysPostPageResponse> voPage = page.convert(SysPostConverter.INSTANCE::toPageResponse);
-        auditUserDisplayService.enrichAuditUsernames(voPage);
-        return PageResponse.of(voPage);
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public PageResponse<SysPostPageResponse> getPage(Page<SysPostEntity> pageParams, SysPostQuery query) {
+		String orderBySql = SysPostPageOrderSqlBuilder.buildOrderBySql(query.getSort());
+		IPage<SysPostPageRowPO> page = baseMapper.selectListByPage(pageParams, query, orderBySql);
+		IPage<SysPostPageResponse> voPage = page.convert(SysPostConverter.INSTANCE::toPageResponse);
+		auditUserDisplayService.enrichAuditUsernames(voPage);
+		return PageResponse.of(voPage);
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void create(SysPostCreateForm form) {
-        if (baseMapper.countAssignableDept(form.getDeptId()) == 0) {
-            throw new SystemBusinessException(SystemResultCodeEnum.POST_DEPT_NOT_FOUND, form.getDeptId());
-        }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void create(SysPostCreateForm form) {
+		if (baseMapper.countAssignableDept(form.getDeptId()) == 0) {
+			throw new SystemBusinessException(SystemResultCodeEnum.POST_DEPT_NOT_FOUND, form.getDeptId());
+		}
 
-        String postCode = CharSequenceUtil.trim(form.getPostCode());
-        long exists = count(Wrappers.<SysPostEntity>lambdaQuery()
-                .eq(SysPostEntity::getDeptId, form.getDeptId())
-                .eq(SysPostEntity::getPostCode, postCode));
-        if (exists > 0) {
-            throw new SystemBusinessException(SystemResultCodeEnum.POST_CODE_DUPLICATE_IN_DEPT, form.getDeptId(),
-                    postCode);
-        }
+		String postCode = CharSequenceUtil.trim(form.getPostCode());
+		long exists = count(Wrappers.<SysPostEntity>lambdaQuery()
+			.eq(SysPostEntity::getDeptId, form.getDeptId())
+			.eq(SysPostEntity::getPostCode, postCode));
+		if (exists > 0) {
+			throw new SystemBusinessException(SystemResultCodeEnum.POST_CODE_DUPLICATE_IN_DEPT, form.getDeptId(),
+					postCode);
+		}
 
-        SysPostEntity entity = SysPostConverter.INSTANCE.toEntity(form);
-        entity.setPostCode(postCode);
-        if (entity.getOrderNum() == null) {
-            entity.setOrderNum(0);
-        }
+		SysPostEntity entity = SysPostConverter.INSTANCE.toEntity(form);
+		entity.setPostCode(postCode);
+		if (entity.getOrderNum() == null) {
+			entity.setOrderNum(0);
+		}
 
-        save(entity);
-    }
+		save(entity);
+	}
 
 }

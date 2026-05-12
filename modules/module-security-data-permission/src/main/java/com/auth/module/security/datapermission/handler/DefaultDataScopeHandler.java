@@ -11,6 +11,7 @@ import com.auth.module.security.contract.api.authorization.ScopeGrant;
 import com.auth.module.security.contract.api.granttable.DataScopeKeyUtil;
 import com.auth.module.security.contract.api.granttable.ScopeGrantType;
 import com.auth.module.security.contract.constants.PermissionConstant;
+import com.auth.module.security.contract.constants.SqlIdentifierPatterns;
 import com.auth.module.security.datapermission.annotation.DataScope;
 import com.auth.module.security.datapermission.strategy.AllScopeSqlStrategy;
 import com.auth.module.security.datapermission.strategy.DimensionValuesScopeSqlStrategy;
@@ -30,7 +31,7 @@ public class DefaultDataScopeHandler implements DataScopeHandler {
 
 	private static final String FAIL_CLOSE_CONDITION = "1 = 0";
 
-	private static final Pattern SAFE_IDENTIFIER = Pattern.compile("^[A-Za-z_]\\w*$");
+	private static final Pattern SAFE_IDENTIFIER = Pattern.compile(SqlIdentifierPatterns.SAFE_IDENTIFIER);
 
 	private final Map<ScopeGrantType, ScopeSqlStrategy> strategyRegistry;
 

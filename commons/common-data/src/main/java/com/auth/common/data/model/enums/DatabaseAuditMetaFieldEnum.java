@@ -1,4 +1,4 @@
-package com.auth.common.data.model;
+package com.auth.common.data.model.enums;
 
 import lombok.Getter;
 

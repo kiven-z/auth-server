@@ -11,6 +11,8 @@ import lombok.Data;
 import java.io.Serial;
 import java.io.Serializable;
 
+import static com.auth.common.web.validation.ValidationPatterns.UPPER_ALNUM_UNDERSCORE;
+
 /**
  * 新增任务分组
  *
@@ -25,7 +27,7 @@ public class SysJobGroupForm implements Serializable {
 
 	@Schema(title = "分组编码")
 	@Size(max = 64, groups = CreateGroup.class)
-	@Pattern(regexp = "^[A-Z0-9_]+$", message = "仅允许大写字母、数字、下划线", groups = CreateGroup.class)
+	@Pattern(regexp = UPPER_ALNUM_UNDERSCORE, message = "仅允许大写字母、数字、下划线", groups = CreateGroup.class)
 	@NotBlank(groups = CreateGroup.class)
 	private String groupCode;
 

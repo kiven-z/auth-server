@@ -13,7 +13,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
-import static com.auth.common.web.model.enums.RegexConstantsEnum.LETTER_UNDERSCORE_HYPHEN_REQUIRE_LETTER;
+import static com.auth.common.web.validation.ValidationPatterns.LETTER_UNDERSCORE_HYPHEN_REQUIRE_LETTER;
 
 /**
  * 邮件模板表单

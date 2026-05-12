@@ -26,8 +26,8 @@ public interface SysPostMapper extends BaseMapper<SysPostEntity> {
 	 * @param orderBySql 已由白名单校验的 ORDER BY 片段（仅列名与 ASC/DESC）
 	 * @return 分页结果
 	 */
-	IPage<SysPostPageRowPO> selectListByPage(@Param("page") Page<SysPostEntity> page, @Param("query") SysPostQuery query,
-			@Param("orderBySql") String orderBySql);
+	IPage<SysPostPageRowPO> selectListByPage(@Param("page") Page<SysPostEntity> page,
+			@Param("query") SysPostQuery query, @Param("orderBySql") String orderBySql);
 
 	/**
 	 * 统计可用于挂载岗位的部门（存在、启用、未删除）

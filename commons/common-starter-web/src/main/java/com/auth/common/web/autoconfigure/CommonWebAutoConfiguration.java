@@ -1,6 +1,5 @@
 package com.auth.common.web.autoconfigure;
 
-import com.auth.common.web.config.AsyncTaskConfig;
 import com.auth.common.web.config.ControllerStringParamTrimConfig;
 import com.auth.common.web.config.WebConfig;
 import com.auth.common.web.context.SpringContextHolder;
@@ -25,7 +24,7 @@ import org.springframework.context.annotation.Import;
 @AutoConfiguration(before = { WebMvcAutoConfiguration.class })
 @ConditionalOnBooleanProperty(prefix = "auth.common.web", name = "enabled", matchIfMissing = true)
 @EnableConfigurationProperties()
-@Import({ AsyncTaskConfig.class, ControllerStringParamTrimConfig.class, WebConfig.class, SpringContextHolder.class,
+@Import({ ControllerStringParamTrimConfig.class, WebConfig.class, SpringContextHolder.class,
 		// 导入异常处理器
 		ValidationExceptionHandler.class, FallbackExceptionHandler.class, MyBatisDatabaseExceptionHandler.class })
 public class CommonWebAutoConfiguration implements ApplicationRunner {

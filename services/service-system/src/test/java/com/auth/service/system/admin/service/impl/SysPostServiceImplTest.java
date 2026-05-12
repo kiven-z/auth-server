@@ -70,7 +70,8 @@ class SysPostServiceImplTest {
 		PageResponse<SysPostPageResponse> result = sysPostService.getPage(pageParams, query);
 
 		assertThat(result.getList()).hasSize(1);
-		verify(auditUserDisplayService).enrichAuditUsernames(org.mockito.ArgumentMatchers.<IPage<SysPostPageResponse>>any());
+		verify(auditUserDisplayService)
+			.enrichAuditUsernames(org.mockito.ArgumentMatchers.<IPage<SysPostPageResponse>>any());
 	}
 
 	@Test
@@ -106,9 +107,9 @@ class SysPostServiceImplTest {
 
 		sysPostService.create(form);
 
-		verify(sysPostMapper).insert(argThat((SysPostEntity e) -> Long.valueOf(2L).equals(e.getDeptId())
-				&& "NEW_CODE".equals(e.getPostCode()) && Integer.valueOf(1).equals(e.getStatus())
-				&& Integer.valueOf(0).equals(e.getOrderNum())));
+		verify(sysPostMapper).insert(argThat(
+				(SysPostEntity e) -> Long.valueOf(2L).equals(e.getDeptId()) && "NEW_CODE".equals(e.getPostCode())
+						&& Integer.valueOf(1).equals(e.getStatus()) && Integer.valueOf(0).equals(e.getOrderNum())));
 	}
 
 	private static SysPostCreateForm minimalForm(Long deptId, String postCode, String postName) {

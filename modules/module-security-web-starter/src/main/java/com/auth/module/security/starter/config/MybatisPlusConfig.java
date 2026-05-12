@@ -1,7 +1,7 @@
 package com.auth.module.security.starter.config;
 
 import com.auth.common.data.config.BaseMybatisPlusConfig;
-import com.auth.common.data.model.DatabaseAuditMetaFieldEnum;
+import com.auth.common.data.model.enums.DatabaseAuditMetaFieldEnum;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import org.apache.ibatis.reflection.MetaObject;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;

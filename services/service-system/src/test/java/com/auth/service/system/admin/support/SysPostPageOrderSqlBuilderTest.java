@@ -23,7 +23,8 @@ class SysPostPageOrderSqlBuilderTest {
 	void buildOrderBySqlUsesDefaultWhenSortEmpty() {
 		assertThat(SysPostPageOrderSqlBuilder.buildOrderBySql(null))
 			.isEqualTo(SysPostPageOrderSqlBuilder.DEFAULT_ORDER_BY_SQL);
-		assertThat(SysPostPageOrderSqlBuilder.buildOrderBySql(List.of())).isEqualTo(SysPostPageOrderSqlBuilder.DEFAULT_ORDER_BY_SQL);
+		assertThat(SysPostPageOrderSqlBuilder.buildOrderBySql(List.of()))
+			.isEqualTo(SysPostPageOrderSqlBuilder.DEFAULT_ORDER_BY_SQL);
 	}
 
 	@Test
