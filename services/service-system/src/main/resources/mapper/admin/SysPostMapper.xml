@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.auth.service.system.admin.mapper.SysPostMapper">
+
+    <!-- 岗位分页列表：关联部门名称；逻辑删除过滤 -->
+    <select id="selectListByPage" resultType="com.auth.service.system.admin.model.po.post.SysPostPageRowPO">
+        SELECT
+        p.id,
+        p.dept_id,
+        d.dept_name,
+        p.post_code,
+        p.post_name,
+        p.status,
+        p.order_num,
+        p.create_time,
+        p.update_time,
+        p.create_user,
+        p.update_user
+        FROM sys_post p
+        INNER JOIN sys_dept d ON p.dept_id = d.id AND d.is_deleted = 0
+        <where>
+            p.is_deleted = 0
+            <if test="query.postCode != null and query.postCode != ''">
+                AND p.post_code LIKE CONCAT('%', #{query.postCode}, '%')
+            </if>
+            <if test="query.postName != null and query.postName != ''">
+                AND p.post_name LIKE CONCAT('%', #{query.postName}, '%')
+            </if>
+            <if test="query.deptName != null and query.deptName != ''">
+                AND d.dept_name LIKE CONCAT('%', #{query.deptName}, '%')
+            </if>
+            <if test="query.status != null">
+                AND p.status = #{query.status}
+            </if>
+        </where>
+        ORDER BY ${orderBySql}
+    </select>
+
+    <!-- 校验部门是否可用于挂载岗位 -->
+    <select id="countAssignableDept" resultType="int">
+        SELECT COUNT(1)
+        FROM sys_dept
+        WHERE id = #{deptId}
+          AND status = 1
+          AND is_deleted = 0
+    </select>
+</mapper>

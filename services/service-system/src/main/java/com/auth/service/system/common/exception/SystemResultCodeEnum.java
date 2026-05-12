@@ -418,7 +418,17 @@ public enum SystemResultCodeEnum {
 	/**
 	 * 权限编码已存在
 	 */
-	PERMISSION_CODE_DUPLICATE(409, 274, "PERMISSION_CODE_DUPLICATE", "system.permission.code_duplicate"),;
+	PERMISSION_CODE_DUPLICATE(409, 274, "PERMISSION_CODE_DUPLICATE", "system.permission.code_duplicate"),
+
+	// --- Post Management (275+)
+	/**
+	 * 部门不存在、已停用或已删除，不可挂载岗位
+	 */
+	POST_DEPT_NOT_FOUND(404, 275, "POST_DEPT_NOT_FOUND", "system.post.dept_not_found"),
+	/**
+	 * 同一部门下岗位编码已存在
+	 */
+	POST_CODE_DUPLICATE_IN_DEPT(409, 276, "POST_CODE_DUPLICATE_IN_DEPT", "system.post.code_duplicate_in_dept");
 
 	private final int httpStatus;
 

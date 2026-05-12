@@ -1,0 +1,41 @@
+package com.auth.service.system.admin.model.entity;
+
+import com.auth.common.data.model.BaseEntity;
+import com.baomidou.mybatisplus.annotation.TableLogic;
+import com.baomidou.mybatisplus.annotation.TableName;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Getter;
+import lombok.Setter;
+
+/**
+ * 系统岗位主表，对应 {@code sys_post}。
+ *
+ * @author Bunny
+ */
+@TableName("sys_post")
+@Schema(name = "SysPostEntity", title = "系统岗位")
+@Getter
+@Setter
+public class SysPostEntity extends BaseEntity {
+
+	@Schema(title = "所属部门ID")
+	private Long deptId;
+
+	@Schema(title = "岗位编码")
+	private String postCode;
+
+	@Schema(title = "岗位名称")
+	private String postName;
+
+	@Schema(title = "状态(0=禁用,1=启用)")
+	private Integer status;
+
+	@Schema(title = "显示顺序")
+	private Integer orderNum;
+
+	@TableLogic(value = "0", delval = "1")
+	@Schema(title = "逻辑删除(0=否,1=是)")
+	private Integer isDeleted;
+
+}

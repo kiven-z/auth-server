@@ -1,0 +1,59 @@
+package com.auth.service.system.admin.model.po.post;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
+/**
+ * 岗位分页行（持久层查询投影，非 API 出参）
+ *
+ * @author Bunny
+ */
+@Schema(name = "SysPostPageRowPO", title = "岗位分页行（PO）")
+@Getter
+@Setter
+@ToString
+public class SysPostPageRowPO implements Serializable {
+
+	@Serial
+	private static final long serialVersionUID = 1L;
+
+	@Schema(title = "主键")
+	private Long id;
+
+	@Schema(title = "所属部门ID")
+	private Long deptId;
+
+	@Schema(title = "部门名称")
+	private String deptName;
+
+	@Schema(title = "岗位编码")
+	private String postCode;
+
+	@Schema(title = "岗位名称")
+	private String postName;
+
+	@Schema(title = "状态(0=禁用,1=启用)")
+	private Integer status;
+
+	@Schema(title = "排序号")
+	private Integer orderNum;
+
+	@Schema(title = "创建时间")
+	private LocalDateTime createTime;
+
+	@Schema(title = "更新时间")
+	private LocalDateTime updateTime;
+
+	@Schema(title = "创建用户")
+	private Long createUser;
+
+	@Schema(title = "更新用户")
+	private Long updateUser;
+
+}

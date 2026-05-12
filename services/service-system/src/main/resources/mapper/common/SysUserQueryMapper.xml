@@ -28,7 +28,7 @@
                up.is_primary AS is_primary,
                up.status     AS status
         FROM user_post up
-                 INNER JOIN sys_post sp ON up.post_id = sp.id AND sp.status = 1
+                 INNER JOIN sys_post sp ON up.post_id = sp.id AND sp.status = 1 AND sp.is_deleted = 0
         WHERE up.user_id = #{userId}
         ORDER BY up.is_primary DESC, up.assignment_date DESC
     </select>

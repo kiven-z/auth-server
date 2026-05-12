@@ -1,0 +1,37 @@
+package com.auth.service.system.admin.model.query;
+
+import java.io.Serial;
+import java.io.Serializable;
+
+import com.auth.common.core.model.query.PageQueryRequest;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+/**
+ * 岗位分页查询条件
+ *
+ * @author Bunny
+ */
+@Schema(name = "SysPostQuery", title = "岗位分页查询")
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class SysPostQuery extends PageQueryRequest implements Serializable {
+
+	@Serial
+	private static final long serialVersionUID = 1L;
+
+	@Schema(title = "岗位编码（模糊）")
+	private String postCode;
+
+	@Schema(title = "岗位名称（模糊）")
+	private String postName;
+
+	@Schema(title = "部门名称（模糊）")
+	private String deptName;
+
+	@Schema(title = "状态(0=禁用,1=启用)")
+	private Integer status;
+
+}
