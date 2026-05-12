@@ -2,10 +2,10 @@ package com.auth.service.system.log.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.auth.common.data.model.PageResponse;
+import com.auth.module.platform.persistence.model.LoginLogEntity;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.log.convert.LogLoginLogConvert;
 import com.auth.service.system.log.mapper.LogLoginLogMapper;
-import com.auth.service.system.log.model.entity.LogLoginEntity;
 import com.auth.service.system.log.model.po.LogLoginLogDetailRowPO;
 import com.auth.service.system.log.model.po.LogLoginLogPageRowPO;
 import com.auth.service.system.log.model.query.LogLoginLogQuery;
@@ -27,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @Transactional(rollbackFor = Exception.class)
-public class LogLoginServiceImpl extends ServiceImpl<LogLoginLogMapper, LogLoginEntity> implements LogLoginService {
+public class LogLoginServiceImpl extends ServiceImpl<LogLoginLogMapper, LoginLogEntity> implements LogLoginService {
 
 	private final AuditUserDisplayService auditUserDisplayService;
 
@@ -39,7 +39,7 @@ public class LogLoginServiceImpl extends ServiceImpl<LogLoginLogMapper, LogLogin
 	 * {@inheritDoc}
 	 */
 	@Override
-	public PageResponse<LogLoginLogPageVO> getPage(Page<LogLoginEntity> pageParams, LogLoginLogQuery query) {
+	public PageResponse<LogLoginLogPageVO> getPage(Page<LoginLogEntity> pageParams, LogLoginLogQuery query) {
 		IPage<LogLoginLogPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
 		// PO 转 VO（PageResponse.of 复用 records）
 		IPage<LogLoginLogPageVO> voPage = page.convert(LogLoginLogConvert.INSTANCE::toPageVO);

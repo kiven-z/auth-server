@@ -53,7 +53,7 @@ public class LoginLogEntity extends BaseEntity {
 	private LocalDateTime loginTime;
 
 	/**
-	 * 登录 IP
+	 * 登录 IP（脱敏展示）
 	 */
 	private String loginIp;
 
@@ -88,7 +88,7 @@ public class LoginLogEntity extends BaseEntity {
 	private String loginType;
 
 	/**
-	 * 登录成功后的会话ID
+	 * 登录成功后的会话 ID
 	 */
 	private String sessionId;
 

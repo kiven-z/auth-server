@@ -1,6 +1,6 @@
 package com.auth.service.system.log.mapper;
 
-import com.auth.service.system.log.model.entity.LogLoginEntity;
+import com.auth.module.platform.persistence.model.LoginLogEntity;
 import com.auth.service.system.log.model.po.LogLoginLogDetailRowPO;
 import com.auth.service.system.log.model.po.LogLoginLogPageRowPO;
 import com.auth.service.system.log.model.query.LogLoginLogQuery;
@@ -16,7 +16,7 @@ import org.apache.ibatis.annotations.Param;
  * @author Bunny
  */
 @Mapper
-public interface LogLoginLogMapper extends BaseMapper<LogLoginEntity> {
+public interface LogLoginLogMapper extends BaseMapper<LoginLogEntity> {
 
 	/**
 	 * 分页查询登录日志
@@ -24,7 +24,7 @@ public interface LogLoginLogMapper extends BaseMapper<LogLoginEntity> {
 	 * @param query 查询条件
 	 * @return 分页结果
 	 */
-	IPage<LogLoginLogPageRowPO> selectListByPage(@Param("page") Page<LogLoginEntity> page,
+	IPage<LogLoginLogPageRowPO> selectListByPage(@Param("page") Page<LoginLogEntity> page,
 			@Param("query") LogLoginLogQuery query);
 
 	/**

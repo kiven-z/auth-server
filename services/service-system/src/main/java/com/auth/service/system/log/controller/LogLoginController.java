@@ -2,7 +2,7 @@ package com.auth.service.system.log.controller;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
-import com.auth.service.system.log.model.entity.LogLoginEntity;
+import com.auth.module.platform.persistence.model.LoginLogEntity;
 import com.auth.service.system.log.model.query.LogLoginLogQuery;
 import com.auth.service.system.log.model.vo.LogLoginLogDetailVO;
 import com.auth.service.system.log.model.vo.LogLoginLogPageVO;
@@ -37,7 +37,7 @@ public class LogLoginController {
 	@PreAuthorize("@auth.decide('sysLogLogin:query')")
 	@GetMapping("page")
 	public Result<PageResponse<LogLoginLogPageVO>> page(LogLoginLogQuery query) {
-		Page<LogLoginEntity> page = new Page<>(query.getPageIndex(), query.getPageSize());
+		Page<LoginLogEntity> page = new Page<>(query.getPageIndex(), query.getPageSize());
 		PageResponse<LogLoginLogPageVO> response = logLoginService.getPage(page, query);
 		return Result.success(response);
 	}
