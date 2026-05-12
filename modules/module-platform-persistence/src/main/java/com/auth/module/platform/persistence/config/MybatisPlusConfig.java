@@ -1,4 +1,4 @@
-package com.auth.module.security.starter.config;
+package com.auth.module.platform.persistence.config;
 
 import com.auth.common.data.config.BaseMybatisPlusConfig;
 import com.auth.common.data.model.DatabaseAuditMetaFieldEnum;

@@ -1,6 +1,6 @@
 package com.auth.service.system.admin.convert;
 
-import com.auth.module.platform.persistence.UserEntity;
+import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.common.model.SysUserSearchItemResponse;
 import com.auth.service.system.common.model.po.UserDeptProfilePO;
 import com.auth.service.system.common.model.po.UserPostProfilePO;

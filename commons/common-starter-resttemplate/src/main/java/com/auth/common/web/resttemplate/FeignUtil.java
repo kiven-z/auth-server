@@ -1,7 +1,6 @@
-package com.auth.common.web.autoconfigure;
+package com.auth.common.web.resttemplate;
 
 import com.auth.common.core.model.response.Result;
-
 import lombok.experimental.UtilityClass;
 
 /**

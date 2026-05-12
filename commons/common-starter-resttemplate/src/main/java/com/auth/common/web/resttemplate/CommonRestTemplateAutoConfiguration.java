@@ -1,4 +1,4 @@
-package com.auth.common.web.autoconfigure;
+package com.auth.common.web.resttemplate;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;

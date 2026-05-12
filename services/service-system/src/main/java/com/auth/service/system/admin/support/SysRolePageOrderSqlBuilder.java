@@ -2,7 +2,7 @@ package com.auth.service.system.admin.support;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
-import com.auth.common.core.model.query.AbstractOderSqlBuilder;
+import com.auth.common.core.model.query.AbstractOrderSqlBuilder;
 import com.auth.common.core.model.query.SortSpec;
 import lombok.experimental.UtilityClass;
 
@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
  * @author Bunny
  */
 @UtilityClass
-public class SysRolePageOrderSqlBuilder extends AbstractOderSqlBuilder {
+public class SysRolePageOrderSqlBuilder extends AbstractOrderSqlBuilder {
 
 	/**
 	 * 默认排序：显示顺序升序，创建时间降序。

@@ -1,7 +1,7 @@
 package com.auth.service.system.common.service.impl;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import com.auth.module.platform.persistence.UserEntity;
+import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.admin.convert.SysUserProfileConverter;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.SystemResultCodeEnum;

@@ -1,7 +1,7 @@
 package com.auth.service.auth.infrastructure.login.strategy;
 
 import cn.hutool.core.bean.BeanUtil;
-import com.auth.module.platform.persistence.UserEntity;
+import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.exception.AuthBusinessException;
 import com.auth.service.auth.exception.AuthResultCode;

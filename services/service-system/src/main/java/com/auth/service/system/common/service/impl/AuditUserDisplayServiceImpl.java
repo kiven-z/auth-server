@@ -2,7 +2,7 @@ package com.auth.service.system.common.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import com.auth.common.core.model.response.BaseResponse;
-import com.auth.module.platform.persistence.UserEntity;
+import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.admin.mapper.SysUserMapper;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;

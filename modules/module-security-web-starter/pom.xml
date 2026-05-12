@@ -11,7 +11,7 @@
 
     <artifactId>module-security-web-starter</artifactId>
     <packaging>jar</packaging>
-    <name>module-security-starter</name>
+    <name>module-security-web-starter</name>
     <description>Dependency aggregator for security integration</description>
 
     <dependencies>

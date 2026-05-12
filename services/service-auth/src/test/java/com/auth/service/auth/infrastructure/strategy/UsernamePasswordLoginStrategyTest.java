@@ -1,6 +1,6 @@
 package com.auth.service.auth.infrastructure.strategy;
 
-import com.auth.module.platform.persistence.UserEntity;
+import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.auth.exception.AuthBusinessException;
 import com.auth.service.auth.exception.AuthResultCode;
 import com.auth.service.auth.infrastructure.login.LoginFailureRateLimiter;

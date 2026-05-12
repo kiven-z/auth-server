@@ -1,4 +1,4 @@
-package com.auth.module.platform.persistence;
+package com.auth.module.platform.persistence.model;
 
 import com.auth.common.data.model.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;

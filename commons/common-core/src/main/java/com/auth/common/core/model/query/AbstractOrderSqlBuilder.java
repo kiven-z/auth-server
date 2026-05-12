@@ -10,7 +10,7 @@ import java.util.Optional;
  *
  * @author Bunny
  */
-public abstract class AbstractOderSqlBuilder {
+public abstract class AbstractOrderSqlBuilder {
 
 	/**
 	 * 将排序规则转换为 SQL 片段
