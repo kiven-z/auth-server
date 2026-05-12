@@ -57,9 +57,6 @@ mybatis-plus:
   global-config:
     db-config:
       id-type: assign_id
-      logic-delete-value: 1
-      logic-not-delete-value: 0
-      logic-delete-field: isDeleted
 
 # 默认关闭 knife4j
 knife4j:

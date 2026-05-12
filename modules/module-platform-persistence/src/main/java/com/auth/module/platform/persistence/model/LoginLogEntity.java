@@ -92,4 +92,9 @@ public class LoginLogEntity extends BaseEntity {
 	 */
 	private String sessionId;
 
+	/**
+	 * 逻辑删除标记 物理删除
+	 */
+	private Boolean isDeleted;
+
 }

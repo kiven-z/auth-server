@@ -47,6 +47,7 @@ public class LogAuthorizationAuditServiceImpl extends
 			LogAuthorizationAuditQuery query) {
 		IPage<LogAuthorizationAuditPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
 		IPage<LogAuthorizationAuditPageVO> voPage = page.convert(LogAuthorizationAuditConvert.INSTANCE::toPageVO);
+
 		auditUserDisplayService.enrichAuditUsernames(voPage);
 		return PageResponse.of(voPage);
 	}

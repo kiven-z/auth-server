@@ -44,4 +44,7 @@ public class JobLogEntity extends BaseEntity {
 	@Schema(title = "耗时毫秒")
 	private Long elapsedTime;
 
+	@Schema(title = "逻辑删除：0 否 1 是", description = "物理删除")
+	private Boolean isDeleted;
+
 }

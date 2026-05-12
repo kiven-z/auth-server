@@ -1,7 +1,6 @@
 package com.auth.service.system.log.model.entity;
 
 import com.auth.common.data.model.BaseEntity;
-import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
@@ -69,8 +68,7 @@ public class LogAuthorizationAuditEntity extends BaseEntity {
 	@Schema(title = "异常消息")
 	private String exceptionMessage;
 
-	@Schema(title = "逻辑删除标记")
-	@TableLogic(value = "0", delval = "1")
+	@Schema(title = "逻辑删除标记", description = "物理删除")
 	private Boolean isDeleted;
 
 }

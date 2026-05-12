@@ -79,9 +79,7 @@ public class LogJobServiceImpl extends ServiceImpl<LogJobMapper, JobLogEntity> i
 		}
 
 		// 复制数据到VO
-		LogJobDetailVO vo = new LogJobDetailVO();
-		BeanUtil.copyProperties(sysJobLog, vo);
-		return vo;
+		return BeanUtil.copyProperties(sysJobLog, LogJobDetailVO.class);
 	}
 
 	/**

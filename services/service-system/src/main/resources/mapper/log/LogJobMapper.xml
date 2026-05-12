@@ -9,20 +9,21 @@
         job_name , job_group , invoke_target , job_message , status, elapsed_time , create_time FROM
         log_job
         <where>
-            <if test="query.jobName != null and query.jobName != ''">AND job_name LIKE CONCAT('%',
-            #{query.jobName}, '%')
+            AND is_deleted = 0
+            <if test="query.jobName != null and query.jobName != ''">
+                AND job_name LIKE CONCAT('%',#{query.jobName}, '%')
             </if>
-            <if test="query.jobGroup != null and query.jobGroup != ''">AND
-                job_group LIKE CONCAT('%', #{query.jobGroup}, '%')
+            <if test="query.jobGroup != null and query.jobGroup != ''">
+                AND job_group LIKE CONCAT('%',#{query.jobGroup},'%')
             </if>
-            <if test="query.invokeTarget != null and query.invokeTarget != ''">AND invoke_target
-                LIKE CONCAT('%', #{query.invokeTarget}, '%')
+            <if test="query.invokeTarget != null and query.invokeTarget != ''">
+                AND invoke_target LIKE CONCAT('%', #{query.invokeTarget}, '%')
             </if>
-            <if test="query.status != null">AND
-                status = #{query.status}
+            <if test="query.status != null">
+                AND status = #{query.status}
             </if>
-            <if test="query.elapsedTime != null">AND elapsed_time =
-            #{query.elapsedTime}
+            <if test="query.elapsedTime != null">
+                AND elapsed_time = #{query.elapsedTime}
             </if>
         </where>
         ORDER BY create_time DESC

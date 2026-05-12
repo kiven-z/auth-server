@@ -10,8 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 /**
- * 翻译成中文：
- * 测试 {@link TrimmingStringDeserializer} 的 JSON 字符串值的修剪功能。
+ * 翻译成中文： 测试 {@link TrimmingStringDeserializer} 的 JSON 字符串值的修剪功能。
  */
 class TrimmingStringDeserializerTest {
 

@@ -1,8 +1,6 @@
 package com.auth.service.system.log.model.vo;
 
-import com.auth.common.core.annotation.Desensitized;
 import com.auth.common.core.annotation.JsonStringFormat;
-import com.auth.common.core.desensitize.DesensitizedType;
 import com.auth.common.core.model.response.BaseResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -34,7 +32,6 @@ public class LogUserPasswordHistoryDetailVO extends BaseResponse {
 	@Schema(title = "修改时间")
 	private LocalDateTime changeTime;
 
-	@Desensitized(DesensitizedType.IP_ADDRESS)
 	@Schema(title = "修改IP地址")
 	private String changeIp;
 

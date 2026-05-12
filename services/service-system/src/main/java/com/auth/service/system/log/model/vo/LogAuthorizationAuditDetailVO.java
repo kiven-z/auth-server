@@ -1,7 +1,5 @@
 package com.auth.service.system.log.model.vo;
 
-import com.auth.common.core.annotation.Desensitized;
-import com.auth.common.core.desensitize.DesensitizedType;
 import com.auth.common.core.model.response.BaseResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -37,7 +35,6 @@ public class LogAuthorizationAuditDetailVO extends BaseResponse {
 	@Schema(title = "请求 URI")
 	private String requestUri;
 
-	@Desensitized(DesensitizedType.IP_ADDRESS)
 	@Schema(title = "请求 IP")
 	private String requestIp;
 

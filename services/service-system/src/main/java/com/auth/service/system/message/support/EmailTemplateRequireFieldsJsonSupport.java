@@ -27,6 +27,8 @@ public class EmailTemplateRequireFieldsJsonSupport {
 
 	/**
 	 * 将变量列表序列化为 JSON 字符串（写入数据库）
+	 * @param rows 变量列表
+	 * @return JSON 字符串
 	 */
 	public static String toJson(List<EmailTemplateRequireFieldRow> rows) {
 		if (rows == null) {
@@ -43,6 +45,8 @@ public class EmailTemplateRequireFieldsJsonSupport {
 
 	/**
 	 * 解析数据库中的 JSON，校验结构与 key 唯一性
+	 * @param json JSON 字符串
+	 * @return 变量列表
 	 */
 	public static List<EmailTemplateRequireFieldRow> parse(String json) {
 		if (CharSequenceUtil.isBlank(json)) {
@@ -66,6 +70,7 @@ public class EmailTemplateRequireFieldsJsonSupport {
 
 	/**
 	 * 业务校验：列表非空、key 非空且唯一、exampleValue 非空
+	 * @param rows 变量列表
 	 */
 	public static void validate(List<EmailTemplateRequireFieldRow> rows) {
 		if (CollUtil.isEmpty(rows)) {
@@ -88,6 +93,8 @@ public class EmailTemplateRequireFieldsJsonSupport {
 
 	/**
 	 * 将变量列表转为 FreeMarker 数据模型（使用每条记录的 exampleValue）
+	 * @param rows 变量列表
+	 * @return 数据模型
 	 */
 	public static Map<String, Object> toExampleModel(List<EmailTemplateRequireFieldRow> rows) {
 		if (rows == null) {
