@@ -31,7 +31,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import static com.auth.common.web.resttemplate.FeignUtil.isSuccess;
+import static com.auth.common.web.resttemplate.FeignUtil.isSuccessWithData;
 
 /**
  * 菜单服务实现
@@ -69,7 +69,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuEntity
 
 		// 查询当前用户角色
 		Result<EffectiveCodesInnerDTO> result = authenticationInnerFeignClient.getEffectiveCodes(userId);
-		if (BooleanUtil.isFalse(isSuccess(result))) {
+		if (BooleanUtil.isFalse(isSuccessWithData(result))) {
 			log.warn("Menu web route: effective codes unavailable userId={}", userId);
 			return Collections.emptyList();
 		}

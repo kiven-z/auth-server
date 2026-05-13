@@ -141,6 +141,10 @@ public class OperationLogAspect {
 	 */
 	private void publishPayload(ProceedingJoinPoint joinPoint, OperationLog meta, Object result, Throwable failure,
 			long startNs) {
+		// 无处理器时跳过
+		if (operationLogHandler == null) {
+			return;
+		}
 		// 当前请求属性
 		ServletRequestAttributes attributes = currentRequestAttributes();
 		if (attributes == null) {

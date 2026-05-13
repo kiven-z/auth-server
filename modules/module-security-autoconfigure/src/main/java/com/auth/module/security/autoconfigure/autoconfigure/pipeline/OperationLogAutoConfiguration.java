@@ -5,6 +5,7 @@ import com.auth.module.security.autoconfigure.audit.OperationLogAspect;
 import com.auth.module.security.autoconfigure.service.NoopOperationLogHandler;
 import com.auth.module.security.contract.spi.OperationLogHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -38,9 +39,10 @@ public class OperationLogAutoConfiguration {
 	 */
 	@ConditionalOnBean(ObjectMapper.class)
 	@Bean
-	OperationLogAspect operationLogAspect(OperationLogHandler operationLogHandler, ObjectMapper objectMapper,
-			IpAddressService ipAddressService) {
-		return new OperationLogAspect(operationLogHandler, objectMapper, ipAddressService);
+	OperationLogAspect operationLogAspect(ObjectProvider<OperationLogHandler> operationLogHandlerProvider,
+			ObjectMapper objectMapper, IpAddressService ipAddressService) {
+		OperationLogHandler handler = operationLogHandlerProvider.getIfUnique();
+		return new OperationLogAspect(handler, objectMapper, ipAddressService);
 	}
 
 }
