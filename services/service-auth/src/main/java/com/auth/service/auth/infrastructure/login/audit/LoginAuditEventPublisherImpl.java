@@ -14,26 +14,25 @@ import org.springframework.stereotype.Service;
 @Service
 public class LoginAuditEventPublisherImpl implements LoginAuditEventPublisher {
 
-    private final ApplicationEventPublisher applicationEventPublisher;
+	private final ApplicationEventPublisher applicationEventPublisher;
 
-    private final LoginAuditSnapshotFactory loginAuditSnapshotFactory;
+	private final LoginAuditSnapshotFactory loginAuditSnapshotFactory;
 
-    public LoginAuditEventPublisherImpl(ApplicationEventPublisher applicationEventPublisher,
-                                        LoginAuditSnapshotFactory loginAuditSnapshotFactory) {
-        this.applicationEventPublisher = applicationEventPublisher;
-        this.loginAuditSnapshotFactory = loginAuditSnapshotFactory;
-    }
+	public LoginAuditEventPublisherImpl(ApplicationEventPublisher applicationEventPublisher,
+			LoginAuditSnapshotFactory loginAuditSnapshotFactory) {
+		this.applicationEventPublisher = applicationEventPublisher;
+		this.loginAuditSnapshotFactory = loginAuditSnapshotFactory;
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void publish(HttpServletRequest request, AuthLoginLogType eventType, AuthLoginLogResult result, Long userId,
-                        String principal, String failureReason, String sessionId) {
-        LoginAuditSnapshot snapshot = loginAuditSnapshotFactory.build(request);
-        applicationEventPublisher.publishEvent(
-                new LoginAuditEvent(snapshot, eventType, result, userId, principal, failureReason, sessionId)
-        );
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void publish(HttpServletRequest request, AuthLoginLogType eventType, AuthLoginLogResult result, Long userId,
+			String principal, String failureReason, String sessionId) {
+		LoginAuditSnapshot snapshot = loginAuditSnapshotFactory.build(request);
+		applicationEventPublisher.publishEvent(
+				new LoginAuditEvent(snapshot, eventType, result, userId, principal, failureReason, sessionId));
+	}
 
 }

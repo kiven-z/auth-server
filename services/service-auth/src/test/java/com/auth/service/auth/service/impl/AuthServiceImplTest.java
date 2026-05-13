@@ -134,8 +134,8 @@ class AuthServiceImplTest {
 		inOrder.verify(redisUserSessionIndexRepository).createUserSessionIndex(sessionIndex);
 		inOrder.verify(loginFailureRateLimiter).recordSuccess(TestConstants.USER_ID);
 		inOrder.verify(loginAuditEventPublisher)
-			.publish(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_PASSWORD),
-					eq(AuthLoginLogResult.SUCCESS), eq(TestConstants.USER_ID), eq("user"), isNull(), anyString());
+			.publish(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_PASSWORD), eq(AuthLoginLogResult.SUCCESS),
+					eq(TestConstants.USER_ID), eq("user"), isNull(), anyString());
 	}
 
 	@Test

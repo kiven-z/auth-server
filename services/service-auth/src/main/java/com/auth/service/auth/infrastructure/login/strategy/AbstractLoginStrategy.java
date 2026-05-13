@@ -106,8 +106,9 @@ public abstract class AbstractLoginStrategy<T extends AbstractLoginRequest> impl
 		}
 		catch (AuthBusinessException ex) {
 			if (ex.getResultCode() == AuthResultCode.USERNAME_OR_PASSWORD_ERROR) {
-				loginAuditEventPublisher.publish(request, loginLogType(), AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR,
-						null, LoginAuditContextResolver.principal(auth), ex.getMessageKey(), null);
+				loginAuditEventPublisher.publish(request, loginLogType(),
+						AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR, null,
+						LoginAuditContextResolver.principal(auth), ex.getMessageKey(), null);
 			}
 			throw ex;
 		}

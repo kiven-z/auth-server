@@ -69,9 +69,9 @@ class AuthLoginAuditServiceImplTest {
 	void record_LoginLog_shouldSwallowException_whenMapperFails() {
 		doThrow(new RuntimeException("db down")).when(loginLogMapper).insert(any(LoginLogEntity.class));
 
-		assertDoesNotThrow(() -> loginLogService.recordLoginLog((HttpServletRequest) null,
-				AuthLoginLogType.REFRESH_TOKEN, AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR, null, null,
-				"token.invalid", null));
+		assertDoesNotThrow(
+				() -> loginLogService.recordLoginLog((HttpServletRequest) null, AuthLoginLogType.REFRESH_TOKEN,
+						AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR, null, null, "token.invalid", null));
 
 		verify(loginLogMapper).insert(any(LoginLogEntity.class));
 	}
@@ -81,8 +81,8 @@ class AuthLoginAuditServiceImplTest {
 	void recordLoginLog_shouldPersistSnapshotFields_whenSnapshotProvided() {
 		LoginAuditSnapshot snapshot = new LoginAuditSnapshot("203.0.113.1", "TestRegion", "TestUA", "Desktop", "Linux",
 				"Firefox");
-		loginLogService.recordLoginLog(snapshot, AuthLoginLogType.LOGIN_EMAIL, AuthLoginLogResult.SUCCESS, 2L, "e@x.com",
-				null, null);
+		loginLogService.recordLoginLog(snapshot, AuthLoginLogType.LOGIN_EMAIL, AuthLoginLogResult.SUCCESS, 2L,
+				"e@x.com", null, null);
 
 		ArgumentCaptor<LoginLogEntity> captor = ArgumentCaptor.forClass(LoginLogEntity.class);
 		verify(loginLogMapper).insert(captor.capture());

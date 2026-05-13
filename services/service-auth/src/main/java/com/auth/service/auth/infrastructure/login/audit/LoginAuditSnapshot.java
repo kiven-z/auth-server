@@ -12,8 +12,8 @@ package com.auth.service.auth.infrastructure.login.audit;
  * @param browserType 浏览器
  * @author Bunny
  */
-public record LoginAuditSnapshot(String loginIp, String loginRegion, String userAgent, String deviceType,
-		String osType, String browserType) {
+public record LoginAuditSnapshot(String loginIp, String loginRegion, String userAgent, String deviceType, String osType,
+		String browserType) {
 
 	/**
 	 * 无 HTTP 请求时的空快照（字段均为 null）。
