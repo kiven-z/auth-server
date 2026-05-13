@@ -15,7 +15,7 @@ import java.lang.annotation.*;
 public @interface OperationLog {
 
 	/**
-	 * 业务模块编码，写入 {@code log_operation.module} FIXME 使用枚举方式
+	 * 业务模块编码，写入 {@code log_operation.module}
 	 * @return 模块编码，如 USER_ROLE
 	 */
 	String module();

@@ -1,5 +1,6 @@
 package com.auth.module.security.autoconfigure.autoconfigure.pipeline;
 
+import com.auth.common.ip.IpAddressService;
 import com.auth.module.security.autoconfigure.audit.OperationLogAspect;
 import com.auth.module.security.autoconfigure.service.NoopOperationLogHandler;
 import com.auth.module.security.contract.spi.OperationLogHandler;
@@ -33,12 +34,13 @@ public class OperationLogAutoConfiguration {
 	}
 
 	/**
-	 * 操作日志切面（依赖 Jackson {@link ObjectMapper}）
+	 * 操作日志切面
 	 */
 	@ConditionalOnBean(ObjectMapper.class)
 	@Bean
-	OperationLogAspect operationLogAspect(OperationLogHandler operationLogHandler, ObjectMapper objectMapper) {
-		return new OperationLogAspect(operationLogHandler, objectMapper);
+	OperationLogAspect operationLogAspect(OperationLogHandler operationLogHandler, ObjectMapper objectMapper,
+			IpAddressService ipAddressService) {
+		return new OperationLogAspect(operationLogHandler, objectMapper, ipAddressService);
 	}
 
 }

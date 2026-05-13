@@ -3,6 +3,7 @@ package com.auth.service.system.admin.convert;
 import com.auth.service.system.admin.model.po.emailtemplate.EmailTemplatePageRowPO;
 import com.auth.service.system.admin.model.vo.emailtemplate.EmailTemplatePageResponse;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 /**
@@ -20,6 +21,8 @@ public interface EmailTemplateConvert {
 	 * @param po 持久层查询投影
 	 * @return 分页返回对象
 	 */
+	@Mapping(target = "createUsername", ignore = true)
+	@Mapping(target = "updateUsername", ignore = true)
 	EmailTemplatePageResponse toPageResponse(EmailTemplatePageRowPO po);
 
 }

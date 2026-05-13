@@ -1,26 +1,20 @@
 package com.auth.module.security.datapermission.handler;
 
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.regex.Pattern;
-
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
 import com.auth.module.security.contract.api.granttable.DataScopeKeyUtil;
 import com.auth.module.security.contract.api.granttable.ScopeGrantType;
 import com.auth.module.security.contract.constants.PermissionConstant;
-import com.auth.module.security.contract.constants.SqlIdentifierPatterns;
 import com.auth.module.security.datapermission.annotation.DataScope;
-import com.auth.module.security.datapermission.strategy.AllScopeSqlStrategy;
-import com.auth.module.security.datapermission.strategy.DimensionValuesScopeSqlStrategy;
-import com.auth.module.security.datapermission.strategy.ScopeSqlBuildContext;
-import com.auth.module.security.datapermission.strategy.ScopeSqlStrategy;
-import com.auth.module.security.datapermission.strategy.SelfScopeSqlStrategy;
+import com.auth.module.security.datapermission.strategy.*;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.text.CharSequenceUtil;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.regex.Pattern;
 
 /**
  * 默认处理器用于部门/自身过滤
@@ -31,7 +25,7 @@ public class DefaultDataScopeHandler implements DataScopeHandler {
 
 	private static final String FAIL_CLOSE_CONDITION = "1 = 0";
 
-	private static final Pattern SAFE_IDENTIFIER = Pattern.compile(SqlIdentifierPatterns.SAFE_IDENTIFIER);
+	private static final Pattern SAFE_IDENTIFIER = Pattern.compile("^[A-Za-z_]\\w*$");
 
 	private final Map<ScopeGrantType, ScopeSqlStrategy> strategyRegistry;
 

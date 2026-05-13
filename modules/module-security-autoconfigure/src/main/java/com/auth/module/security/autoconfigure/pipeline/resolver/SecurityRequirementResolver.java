@@ -30,10 +30,18 @@ public final class SecurityRequirementResolver {
 	 * @return 安全要求；无注解或无法解析 handler 时为 {@link SecurityRequirement#FALLBACK_TO_PATH}
 	 */
 	public SecurityRequirement resolve(HttpServletRequest request) {
+		// 解析 handler method
 		Optional<HandlerMethod> handlerMethod = handlerMethodResolver.resolve(request);
+
+		// 第一个匹配规则
 		return handlerMethod.flatMap(this::firstMatchingRule).orElse(SecurityRequirement.FALLBACK_TO_PATH);
 	}
 
+	/**
+	 * 第一个匹配规则
+	 * @param hm HandlerMethod
+	 * @return 安全要求
+	 */
 	private Optional<SecurityRequirement> firstMatchingRule(HandlerMethod hm) {
 		return rules.stream().map(rule -> rule.match(hm)).flatMap(Optional::stream).findFirst();
 	}

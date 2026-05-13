@@ -6,8 +6,7 @@ import org.springframework.boot.autoconfigure.AutoConfigurationMetadata;
 import java.util.Set;
 
 /**
- * 因为在此处使用了SpringSecurity，在每个服务引入时会在控制台输出密码，虽然不会影响程序的运行也不会有什么额外影响，只是看起来不输出
- * 同时为了防止在每个服务中挨个排除包，所以在此处使用了这个类，让其不会在控制台中输出密码
+ * 因为在此处使用了SpringSecurity，在每个服务引入时会在控制台输出密码，虽然不会影响程序的运行也不会有什么额外影响
  *
  * @author Bunny
  */

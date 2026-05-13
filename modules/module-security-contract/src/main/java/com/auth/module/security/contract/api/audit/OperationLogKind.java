@@ -11,18 +11,22 @@ public enum OperationLogKind {
 	 * 新增
 	 */
 	CREATE,
+
 	/**
 	 * 更新
 	 */
 	UPDATE,
+
 	/**
 	 * 删除
 	 */
 	DELETE,
+
 	/**
 	 * 查询
 	 */
 	QUERY,
+
 	/**
 	 * 导出
 	 */
