@@ -22,16 +22,12 @@ class OperationLogPayloadTest {
 			.operationType("QUERY")
 			.module("USER_ROLE")
 			.targetType("User")
-			.targetId("1")
 			.requestMethod("GET")
 			.requestUri("/api/u")
 			.requestParams("id=1")
-			.requestBody(null)
 			.responseStatus(200)
 			.responseMessage("ok")
 			.executionTimeMs(12)
-			.oldValueJson(null)
-			.newValueJson("{\"a\":1}")
 			.ipAddress("127.0.0.1")
 			.userAgent("JUnit")
 			.className("C")
@@ -42,9 +38,8 @@ class OperationLogPayloadTest {
 		assertEquals("QUERY", p.getOperationType());
 		assertEquals("USER_ROLE", p.getModule());
 		assertEquals("User", p.getTargetType());
-		assertEquals("1", p.getTargetId());
 		assertEquals(200, p.getResponseStatus());
-		assertEquals("{\"a\":1}", p.getNewValueJson());
+		assertEquals("ok", p.getResponseMessage());
 		assertNotNull(p.getTimestamp());
 	}
 

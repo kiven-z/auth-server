@@ -32,12 +32,8 @@ public interface LogOperationPayloadConvert {
 	@Mapping(target = "createUser", source = "effectiveUserId")
 	@Mapping(target = "updateUser", source = "effectiveUserId")
 	@Mapping(target = "isDeleted", constant = "false")
-	@Mapping(target = "oldValue", source = "payload.oldValueJson", qualifiedByName = "blankToNull")
-	@Mapping(target = "newValue", source = "payload.newValueJson", qualifiedByName = "blankToNull")
 	@Mapping(target = "targetType", source = "payload.targetType", qualifiedByName = "blankToNull")
-	@Mapping(target = "targetId", source = "payload.targetId", qualifiedByName = "blankToNull")
 	@Mapping(target = "requestParams", source = "payload.requestParams", qualifiedByName = "blankToNull")
-	@Mapping(target = "requestBody", source = "payload.requestBody", qualifiedByName = "blankToNull")
 	@Mapping(target = "responseMessage", source = "payload.responseMessage", qualifiedByName = "blankToNull")
 	@Mapping(target = "userAgent", source = "payload.userAgent", qualifiedByName = "blankToNull")
 	LogOperationEntity toInsertEntity(OperationLogPayload payload, Long effectiveUserId);

@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.mock.web.MockHttpServletRequest;
 
 import java.util.Map;
 
@@ -63,13 +62,6 @@ class OperationLogServletSupportTest {
 		when(request.getParameterMap()).thenReturn(Map.of("k", new String[] { "v" }));
 		String s = OperationLogServletSupport.buildRequestParams(request, true, new ObjectMapper());
 		assertEquals("{\"k\":[\"v\"]}", s);
-	}
-
-	@Test
-	@DisplayName("readRequestBody 在普通请求上应返回 null")
-	void readRequestBody_plainRequest_shouldReturnNull() {
-		MockHttpServletRequest plain = new MockHttpServletRequest();
-		assertNull(OperationLogServletSupport.readRequestBody(plain, true));
 	}
 
 }

@@ -35,11 +35,6 @@ public class OperationLogPayload {
 	String targetType;
 
 	/**
-	 * 目标 ID 文本
-	 */
-	String targetId;
-
-	/**
 	 * HTTP 方法
 	 */
 	String requestMethod;
@@ -55,11 +50,6 @@ public class OperationLogPayload {
 	String requestParams;
 
 	/**
-	 * 请求体摘要
-	 */
-	String requestBody;
-
-	/**
 	 * HTTP 或业务层感知的响应状态码
 	 */
 	Integer responseStatus;
@@ -73,16 +63,6 @@ public class OperationLogPayload {
 	 * 执行耗时毫秒
 	 */
 	Integer executionTimeMs;
-
-	/**
-	 * 变更前 JSON
-	 */
-	String oldValueJson;
-
-	/**
-	 * 变更后 JSON
-	 */
-	String newValueJson;
 
 	/**
 	 * 客户端 IP

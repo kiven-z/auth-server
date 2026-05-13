@@ -10,7 +10,7 @@ import lombok.experimental.Accessors;
 import java.io.Serial;
 
 /**
- * 操作日志，对应 {@code log_operation}
+ * 操作日志，对应 {@code log_operation}。
  *
  * @author Bunny
  */
@@ -35,9 +35,6 @@ public class LogOperationEntity extends BaseEntity {
 	@Schema(title = "目标类型")
 	private String targetType;
 
-	@Schema(title = "目标 ID")
-	private String targetId;
-
 	@Schema(title = "HTTP 方法")
 	private String requestMethod;
 
@@ -47,9 +44,6 @@ public class LogOperationEntity extends BaseEntity {
 	@Schema(title = "请求参数摘要")
 	private String requestParams;
 
-	@Schema(title = "请求体摘要")
-	private String requestBody;
-
 	@Schema(title = "HTTP 状态码")
 	private Integer responseStatus;
 
@@ -58,12 +52,6 @@ public class LogOperationEntity extends BaseEntity {
 
 	@Schema(title = "执行耗时毫秒")
 	private Integer executionTimeMs;
-
-	@Schema(title = "变更前 JSON")
-	private String oldValue;
-
-	@Schema(title = "变更后 JSON")
-	private String newValue;
 
 	@Schema(title = "客户端 IP")
 	private String ipAddress;

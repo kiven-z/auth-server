@@ -5,13 +5,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.experimental.UtilityClass;
-import org.springframework.web.util.ContentCachingRequestWrapper;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 /**
- * 从 Servlet 请求中抽取操作日志所需的 HTTP 侧信息（纯工具，便于单测）
+ * 从 Servlet 请求中抽取操作日志所需的 HTTP 侧信息（纯工具，便于单测）。
  *
  * @author Bunny
  */
@@ -19,12 +17,12 @@ import java.util.Map;
 public class OperationLogServletSupport {
 
 	/**
-	 * 请求文本最大长度（与表字段设计对齐，约 4KB）
+	 * 请求文本最大长度（与表字段设计对齐，约 4KB）。
 	 */
 	public static final int MAX_REQUEST_TEXT = 4096;
 
 	/**
-	 * 截取文本
+	 * 截取文本。
 	 * @param value 原文
 	 * @param maxLen 最大长度
 	 * @return 截断后文本
@@ -42,6 +40,7 @@ public class OperationLogServletSupport {
 	 * @return IP 文本，非空
 	 */
 	public static String resolveClientIp(HttpServletRequest request) {
+		// FIXME IP地址问题
 		String xff = request.getHeader("X-Forwarded-For");
 		if (CharSequenceUtil.isNotBlank(xff)) {
 			int comma = xff.indexOf(',');
@@ -51,7 +50,7 @@ public class OperationLogServletSupport {
 	}
 
 	/**
-	 * 组装请求参数摘要：GET 使用 query string；其它方法序列化 parameterMap
+	 * 组装请求参数摘要：GET 使用 query string；其它方法序列化 parameterMap。
 	 * @param request 请求
 	 * @param record 是否记录
 	 * @param objectMapper JSON 序列化
@@ -74,26 +73,6 @@ public class OperationLogServletSupport {
 		catch (JsonProcessingException ex) {
 			return null;
 		}
-	}
-
-	/**
-	 * 读取可缓存的请求体（需上游包装 {@link ContentCachingRequestWrapper}）
-	 * @param request 请求
-	 * @param want 是否尝试读取
-	 * @return 正文或 {@code null}
-	 */
-	public static String readRequestBody(HttpServletRequest request, boolean want) {
-		if (!want) {
-			return null;
-		}
-		if (request instanceof ContentCachingRequestWrapper wrapper) {
-			byte[] buf = wrapper.getContentAsByteArray();
-			if (buf == null || buf.length == 0) {
-				return null;
-			}
-			return truncate(new String(buf, StandardCharsets.UTF_8), MAX_REQUEST_TEXT);
-		}
-		return null;
 	}
 
 }

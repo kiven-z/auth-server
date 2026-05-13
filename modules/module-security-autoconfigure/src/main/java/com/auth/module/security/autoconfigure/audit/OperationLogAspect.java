@@ -6,7 +6,6 @@ import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.event.OperationLogPayload;
 import com.auth.module.security.contract.spi.OperationLogHandler;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -15,22 +14,15 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.core.DefaultParameterNameDiscoverer;
-import org.springframework.core.ParameterNameDiscoverer;
-import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.StringJoiner;
 import java.util.concurrent.TimeUnit;
 
 /**
  * 在带 {@link OperationLog} 的 Web 控制器方法周围组装 {@link OperationLogPayload} 并委托
- * {@link OperationLogHandler}
+ * {@link OperationLogHandler}。
  *
  * @author Bunny
  */
@@ -39,10 +31,6 @@ import java.util.concurrent.TimeUnit;
 public class OperationLogAspect {
 
 	private static final int MAX_RESPONSE_MESSAGE = 255;
-
-	private static final ExpressionParser SPEL_PARSER = new SpelExpressionParser();
-
-	private static final ParameterNameDiscoverer PARAMETER_NAME_DISCOVERER = new DefaultParameterNameDiscoverer();
 
 	private final OperationLogHandler operationLogHandler;
 
@@ -63,6 +51,7 @@ public class OperationLogAspect {
 	}
 
 	private static Integer resolveHttpStatus(HttpServletResponse response, Throwable failure) {
+		// FIXME 解析问题
 		if (response == null) {
 			return failure != null ? 500 : null;
 		}
@@ -71,23 +60,6 @@ public class OperationLogAspect {
 			return 500;
 		}
 		return status;
-	}
-
-	private static String formatTargetId(Object value) {
-		if (value == null) {
-			return null;
-		}
-		if (value instanceof Collection<?> collection) {
-			StringJoiner joiner = new StringJoiner(",");
-			for (Object o : collection) {
-				if (o != null) {
-					joiner.add(String.valueOf(o));
-				}
-			}
-			String joined = joiner.toString();
-			return CharSequenceUtil.isBlank(joined) ? null : joined;
-		}
-		return String.valueOf(value);
 	}
 
 	/**
@@ -124,15 +96,10 @@ public class OperationLogAspect {
 		HttpServletResponse response = attributes.getResponse();
 		MethodSignature signature = (MethodSignature) joinPoint.getSignature();
 		Method method = signature.getMethod();
-		Object[] args = joinPoint.getArgs();
 
 		int executionMs = (int) TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNs);
 		Integer httpStatus = resolveHttpStatus(response, failure);
 		String responseMessage = buildResponseMessage(meta, result, failure);
-
-		String targetId = formatTargetId(evalSpel(meta.targetId(), method, args, result));
-		String oldJson = toJson(evalSpel(meta.oldValue(), method, args, result));
-		String newJson = toJson(evalSpel(meta.newValue(), method, args, result));
 
 		Long userId = SecurityUserUtils.getUserId();
 		String userAgent = CharSequenceUtil.nullToEmpty(request.getHeader("User-Agent"));
@@ -143,16 +110,12 @@ public class OperationLogAspect {
 			.operationType(meta.operation().name())
 			.module(meta.module())
 			.targetType(CharSequenceUtil.nullToEmpty(meta.targetType()))
-			.targetId(targetId)
 			.requestMethod(request.getMethod())
 			.requestUri(CharSequenceUtil.nullToEmpty(request.getRequestURI()))
 			.requestParams(OperationLogServletSupport.buildRequestParams(request, meta.recordParams(), objectMapper))
-			.requestBody(OperationLogServletSupport.readRequestBody(request, meta.recordBody()))
 			.responseStatus(httpStatus)
 			.responseMessage(responseMessage)
 			.executionTimeMs(executionMs)
-			.oldValueJson(oldJson)
-			.newValueJson(newJson)
 			.ipAddress(OperationLogServletSupport.resolveClientIp(request))
 			.userAgent(userAgent)
 			.className(method.getDeclaringClass().getName())
@@ -179,46 +142,6 @@ public class OperationLogAspect {
 			return OperationLogServletSupport.truncate(r.getMessage(), MAX_RESPONSE_MESSAGE);
 		}
 		return null;
-	}
-
-	private Object evalSpel(String expression, Method method, Object[] args, Object result) {
-		if (CharSequenceUtil.isBlank(expression)) {
-			return null;
-		}
-		StandardEvaluationContext ctx = new StandardEvaluationContext();
-		ctx.setVariable("result", result);
-		String[] names = PARAMETER_NAME_DISCOVERER.getParameterNames(method);
-		if (names != null) {
-			for (int i = 0; i < names.length && i < args.length; i++) {
-				ctx.setVariable(names[i], args[i]);
-			}
-		}
-		for (int i = 0; i < args.length; i++) {
-			ctx.setVariable("a" + i, args[i]);
-		}
-		try {
-			return SPEL_PARSER.parseExpression(expression).getValue(ctx);
-		}
-		catch (RuntimeException ex) {
-			log.debug("OperationLog SpEL evaluation skipped, expression={}, reason={}", expression, ex.getMessage());
-			return null;
-		}
-	}
-
-	private String toJson(Object value) {
-		if (value == null) {
-			return null;
-		}
-		if (value instanceof String s) {
-			return OperationLogServletSupport.truncate(s, OperationLogServletSupport.MAX_REQUEST_TEXT);
-		}
-		try {
-			return OperationLogServletSupport.truncate(objectMapper.writeValueAsString(value),
-					OperationLogServletSupport.MAX_REQUEST_TEXT);
-		}
-		catch (JsonProcessingException ex) {
-			return null;
-		}
 	}
 
 }
