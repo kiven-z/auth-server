@@ -1,9 +1,8 @@
 package com.auth.service.auth.service.impl;
 
-import com.auth.common.ip.IpAddressService;
-import com.auth.common.ip.IpInfo;
-import com.auth.common.web.model.entity.UserAgent;
 import com.auth.module.platform.persistence.model.LoginLogEntity;
+import com.auth.service.auth.infrastructure.login.audit.LoginAuditSnapshot;
+import com.auth.service.auth.infrastructure.login.audit.LoginAuditSnapshotFactory;
 import com.auth.service.auth.mapper.LoginLogMapper;
 import com.auth.service.auth.model.enums.AuthLoginLogResult;
 import com.auth.service.auth.model.enums.AuthLoginLogType;
@@ -25,10 +24,10 @@ import java.time.LocalDateTime;
 public class AuthLoginAuditServiceImpl extends ServiceImpl<LoginLogMapper, LoginLogEntity>
 		implements AuthLoginAuditService {
 
-	private final IpAddressService ipAddressService;
+	private final LoginAuditSnapshotFactory loginAuditSnapshotFactory;
 
-	public AuthLoginAuditServiceImpl(IpAddressService ipAddressService) {
-		this.ipAddressService = ipAddressService;
+	public AuthLoginAuditServiceImpl(LoginAuditSnapshotFactory loginAuditSnapshotFactory) {
+		this.loginAuditSnapshotFactory = loginAuditSnapshotFactory;
 	}
 
 	/**
@@ -37,18 +36,23 @@ public class AuthLoginAuditServiceImpl extends ServiceImpl<LoginLogMapper, Login
 	@Override
 	public void recordLoginLog(HttpServletRequest request, AuthLoginLogType eventType, AuthLoginLogResult result,
 			Long userId, String principal, String failureReason, String sessionId) {
-		LoginLogEntity entity = new LoginLogEntity();
+		recordLoginLog(loginAuditSnapshotFactory.build(request), eventType, result, userId, principal, failureReason,
+				sessionId);
+	}
 
-		if (request != null) {
-			IpInfo ipInfo = ipAddressService.resolveIpInfo(request);
-			UserAgent userAgent = UserAgent.getUserAgent(request);
-			entity.setLoginIp(ipInfo.getIpAddr());
-			entity.setLoginRegion(ipInfo.getIpRegion());
-			entity.setUserAgent(request.getHeader("User-Agent"));
-			entity.setDeviceType(userAgent.getDeviceType());
-			entity.setOsType(userAgent.getOs());
-			entity.setBrowserType(userAgent.getBrowser());
-		}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void recordLoginLog(LoginAuditSnapshot snapshot, AuthLoginLogType eventType, AuthLoginLogResult result,
+			Long userId, String principal, String failureReason, String sessionId) {
+		LoginLogEntity entity = new LoginLogEntity();
+		entity.setLoginIp(snapshot.loginIp());
+		entity.setLoginRegion(snapshot.loginRegion());
+		entity.setUserAgent(snapshot.userAgent());
+		entity.setDeviceType(snapshot.deviceType());
+		entity.setOsType(snapshot.osType());
+		entity.setBrowserType(snapshot.browserType());
 
 		try {
 			entity.setUserId(userId);

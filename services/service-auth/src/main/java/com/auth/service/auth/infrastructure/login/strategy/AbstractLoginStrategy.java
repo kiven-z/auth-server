@@ -13,12 +13,12 @@ import com.auth.service.auth.model.enums.AuthLoginLogType;
 import com.auth.service.auth.model.enums.AuthResultCode;
 import com.auth.service.auth.model.request.login.AbstractLoginRequest;
 import com.auth.service.auth.model.response.UserLoginResponse;
-import com.auth.service.auth.service.AuthLoginAuditService;
+import com.auth.service.auth.infrastructure.login.audit.LoginAuditEventPublisher;
 import com.auth.service.auth.service.AuthProfileQueryService;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
- * 登录策略模板：解析用户 → 锁定检查 → 子类校验凭证 → 构建画像与响应；失败路径写入审计日志。
+ * 登录策略模板：解析用户 → 锁定检查 → 子类校验凭证 → 构建画像与响应；失败路径发布审计事件。
  *
  * <p>
  * 会话容量由 {@link com.auth.service.auth.infrastructure.session.SessionLimitManager}
@@ -43,13 +43,13 @@ public abstract class AbstractLoginStrategy<T extends AbstractLoginRequest> impl
 
 	private final AuthProfileQueryService authProfileQueryService;
 
-	private final AuthLoginAuditService loginLogService;
+	private final LoginAuditEventPublisher loginAuditEventPublisher;
 
 	protected AbstractLoginStrategy(LoginFailureRateLimiter loginFailureRateLimiter,
-			AuthProfileQueryService authProfileQueryService, AuthLoginAuditService loginLogService) {
+			AuthProfileQueryService authProfileQueryService, LoginAuditEventPublisher loginAuditEventPublisher) {
 		this.loginFailureRateLimiter = loginFailureRateLimiter;
 		this.authProfileQueryService = authProfileQueryService;
-		this.loginLogService = loginLogService;
+		this.loginAuditEventPublisher = loginAuditEventPublisher;
 	}
 
 	/**
@@ -76,18 +76,18 @@ public abstract class AbstractLoginStrategy<T extends AbstractLoginRequest> impl
 		}
 		catch (AuthBadCredentialsException ex) {
 			int remaining = loginFailureRateLimiter.recordFailure(userId);
-			loginLogService.recordLoginLog(request, loginLogType(), AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR,
+			loginAuditEventPublisher.publish(request, loginLogType(), AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR,
 					userId, user.getUsername(), "remainingAttempts=" + remaining, null);
 			throw new AuthBusinessException(AuthResultCode.USERNAME_OR_PASSWORD_ERROR_WITH_REMAINING, remaining);
 		}
 		catch (AuthBusinessException ex) {
 			AuthResultCode code = ex.getResultCode();
 			if (code == AuthResultCode.AUTH_CODE_ERROR) {
-				loginLogService.recordLoginLog(request, loginLogType(), AuthLoginLogResult.CAPTCHA_ERROR, userId,
+				loginAuditEventPublisher.publish(request, loginLogType(), AuthLoginLogResult.CAPTCHA_ERROR, userId,
 						user.getUsername(), ex.getMessageKey(), null);
 			}
 			if (code == AuthResultCode.USER_DISABLED) {
-				loginLogService.recordLoginLog(request, loginLogType(), AuthLoginLogResult.ACCOUNT_DISABLED, userId,
+				loginAuditEventPublisher.publish(request, loginLogType(), AuthLoginLogResult.ACCOUNT_DISABLED, userId,
 						user.getUsername(), ex.getMessageKey(), null);
 			}
 			throw ex;
@@ -106,7 +106,7 @@ public abstract class AbstractLoginStrategy<T extends AbstractLoginRequest> impl
 		}
 		catch (AuthBusinessException ex) {
 			if (ex.getResultCode() == AuthResultCode.USERNAME_OR_PASSWORD_ERROR) {
-				loginLogService.recordLoginLog(request, loginLogType(), AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR,
+				loginAuditEventPublisher.publish(request, loginLogType(), AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR,
 						null, LoginAuditContextResolver.principal(auth), ex.getMessageKey(), null);
 			}
 			throw ex;
@@ -123,12 +123,12 @@ public abstract class AbstractLoginStrategy<T extends AbstractLoginRequest> impl
 		Integer rawStatus = user.getStatus();
 		try {
 			if (rawStatus == null || rawStatus == SYS_USER_STATUS_DISABLED) {
-				loginLogService.recordLoginLog(request, loginLogType(), AuthLoginLogResult.ACCOUNT_DISABLED, userId,
+				loginAuditEventPublisher.publish(request, loginLogType(), AuthLoginLogResult.ACCOUNT_DISABLED, userId,
 						user.getUsername(), AuthResultCode.USER_DISABLED.getMessageKey(), null);
 				throw new AuthBusinessException(AuthResultCode.USER_DISABLED);
 			}
 			if (rawStatus == SYS_USER_STATUS_LOCKED) {
-				loginLogService.recordLoginLog(request, loginLogType(), AuthLoginLogResult.ACCOUNT_LOCKED, userId,
+				loginAuditEventPublisher.publish(request, loginLogType(), AuthLoginLogResult.ACCOUNT_LOCKED, userId,
 						user.getUsername(), "account.status.locked", null);
 				throw new AuthBusinessException(AuthResultCode.USER_LOCKED);
 			}
@@ -140,7 +140,7 @@ public abstract class AbstractLoginStrategy<T extends AbstractLoginRequest> impl
 			AuthResultCode code = ex.getResultCode();
 			boolean codeFlag = code == AuthResultCode.USER_LOCKED_WITH_MINUTES || code == AuthResultCode.USER_LOCKED;
 			if (codeFlag) {
-				loginLogService.recordLoginLog(request, loginLogType(), AuthLoginLogResult.ACCOUNT_LOCKED, userId,
+				loginAuditEventPublisher.publish(request, loginLogType(), AuthLoginLogResult.ACCOUNT_LOCKED, userId,
 						user.getUsername(), ex.getMessageKey(), null);
 			}
 			throw ex;

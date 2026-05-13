@@ -2,6 +2,8 @@ package com.auth.service.auth.service.impl;
 
 import com.auth.common.ip.IpAddressService;
 import com.auth.module.platform.persistence.model.LoginLogEntity;
+import com.auth.service.auth.infrastructure.login.audit.LoginAuditSnapshot;
+import com.auth.service.auth.infrastructure.login.audit.LoginAuditSnapshotFactory;
 import com.auth.service.auth.mapper.LoginLogMapper;
 import com.auth.service.auth.model.enums.AuthLoginLogResult;
 import com.auth.service.auth.model.enums.AuthLoginLogType;
@@ -14,8 +16,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.lang.reflect.Field;
+import jakarta.servlet.http.HttpServletRequest;
 
+import java.lang.reflect.Field;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -40,7 +43,7 @@ class AuthLoginAuditServiceImplTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		loginLogService = new AuthLoginAuditServiceImpl(ipAddressService);
+		loginLogService = new AuthLoginAuditServiceImpl(new LoginAuditSnapshotFactory(ipAddressService));
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(loginLogService, loginLogMapper);
@@ -49,8 +52,8 @@ class AuthLoginAuditServiceImplTest {
 	@Test
 	@DisplayName("审计写入：无 HttpServletRequest 时仍写入 loginResult 与事件类型")
 	void record_LoginLog_shouldInsertEntity_whenRequestNull() {
-		loginLogService.recordLoginLog(null, AuthLoginLogType.LOGIN_PASSWORD, AuthLoginLogResult.SUCCESS, 1L, "user",
-				null, "jti-1");
+		loginLogService.recordLoginLog((HttpServletRequest) null, AuthLoginLogType.LOGIN_PASSWORD,
+				AuthLoginLogResult.SUCCESS, 1L, "user", null, "jti-1");
 
 		ArgumentCaptor<LoginLogEntity> captor = ArgumentCaptor.forClass(LoginLogEntity.class);
 		verify(loginLogMapper).insert(captor.capture());
@@ -66,10 +69,31 @@ class AuthLoginAuditServiceImplTest {
 	void record_LoginLog_shouldSwallowException_whenMapperFails() {
 		doThrow(new RuntimeException("db down")).when(loginLogMapper).insert(any(LoginLogEntity.class));
 
-		assertDoesNotThrow(() -> loginLogService.recordLoginLog(null, AuthLoginLogType.REFRESH_TOKEN,
-				AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR, null, null, "token.invalid", null));
+		assertDoesNotThrow(() -> loginLogService.recordLoginLog((HttpServletRequest) null,
+				AuthLoginLogType.REFRESH_TOKEN, AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR, null, null,
+				"token.invalid", null));
 
 		verify(loginLogMapper).insert(any(LoginLogEntity.class));
+	}
+
+	@Test
+	@DisplayName("审计写入：显式快照应落库 IP 与 User-Agent 等字段")
+	void recordLoginLog_shouldPersistSnapshotFields_whenSnapshotProvided() {
+		LoginAuditSnapshot snapshot = new LoginAuditSnapshot("203.0.113.1", "TestRegion", "TestUA", "Desktop", "Linux",
+				"Firefox");
+		loginLogService.recordLoginLog(snapshot, AuthLoginLogType.LOGIN_EMAIL, AuthLoginLogResult.SUCCESS, 2L, "e@x.com",
+				null, null);
+
+		ArgumentCaptor<LoginLogEntity> captor = ArgumentCaptor.forClass(LoginLogEntity.class);
+		verify(loginLogMapper).insert(captor.capture());
+		LoginLogEntity saved = captor.getValue();
+		assertEquals("203.0.113.1", saved.getLoginIp());
+		assertEquals("TestRegion", saved.getLoginRegion());
+		assertEquals("TestUA", saved.getUserAgent());
+		assertEquals("Desktop", saved.getDeviceType());
+		assertEquals("Linux", saved.getOsType());
+		assertEquals("Firefox", saved.getBrowserType());
+		assertEquals(AuthLoginLogType.LOGIN_EMAIL.name(), saved.getLoginType());
 	}
 
 }

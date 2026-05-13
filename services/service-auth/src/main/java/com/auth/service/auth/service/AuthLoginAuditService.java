@@ -1,5 +1,6 @@
 package com.auth.service.auth.service;
 
+import com.auth.service.auth.infrastructure.login.audit.LoginAuditSnapshot;
 import com.auth.service.auth.model.enums.AuthLoginLogResult;
 import com.auth.service.auth.model.enums.AuthLoginLogType;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,6 +23,19 @@ public interface AuthLoginAuditService {
 	 * @param sessionId 会话 ID（如 jti）；无可为空
 	 */
 	void recordLoginLog(HttpServletRequest request, AuthLoginLogType eventType, AuthLoginLogResult result, Long userId,
+			String principal, String failureReason, String sessionId);
+
+	/**
+	 * 使用已解析的请求快照记录审计（供事件监听器等路径调用）。
+	 * @param snapshot 请求快照，不可为 null；无请求信息时使用 {@link LoginAuditSnapshot#empty()}
+	 * @param eventType 事件类型
+	 * @param result 结果码
+	 * @param userId 用户 ID
+	 * @param principal 主体
+	 * @param failureReason 失败原因
+	 * @param sessionId 会话 ID
+	 */
+	void recordLoginLog(LoginAuditSnapshot snapshot, AuthLoginLogType eventType, AuthLoginLogResult result, Long userId,
 			String principal, String failureReason, String sessionId);
 
 }

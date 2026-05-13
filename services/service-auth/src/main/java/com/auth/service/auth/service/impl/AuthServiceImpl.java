@@ -20,7 +20,7 @@ import com.auth.service.auth.model.enums.AuthLoginLogResult;
 import com.auth.service.auth.model.enums.AuthLoginLogType;
 import com.auth.service.auth.model.request.login.AbstractLoginRequest;
 import com.auth.service.auth.model.response.UserLoginResponse;
-import com.auth.service.auth.service.AuthLoginAuditService;
+import com.auth.service.auth.infrastructure.login.audit.LoginAuditEventPublisher;
 import com.auth.service.auth.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -55,13 +55,13 @@ public class AuthServiceImpl implements AuthService {
 
 	private final LoginFailureRateLimiter loginFailureRateLimiter;
 
-	private final AuthLoginAuditService loginLogService;
+	private final LoginAuditEventPublisher loginAuditEventPublisher;
 
 	public AuthServiceImpl(List<LoginStrategy<?>> strategies, AuthProfileCache authProfileCache,
 			UserSessionIndexFactory userSessionIndexFactory,
 			RedisUserSessionIndexRepository redisUserSessionIndexRepository, SessionLimitManager sessionLimitManager,
 			TokenService tokenService, LoginFailureRateLimiter loginFailureRateLimiter,
-			AuthLoginAuditService loginLogService) {
+			LoginAuditEventPublisher loginAuditEventPublisher) {
 		this.strategyRegistry = strategies.stream()
 			.collect(Collectors.toUnmodifiableMap(LoginStrategy::supports, Function.identity()));
 		this.authProfileCache = authProfileCache;
@@ -70,7 +70,7 @@ public class AuthServiceImpl implements AuthService {
 		this.sessionLimitManager = sessionLimitManager;
 		this.tokenService = tokenService;
 		this.loginFailureRateLimiter = loginFailureRateLimiter;
-		this.loginLogService = loginLogService;
+		this.loginAuditEventPublisher = loginAuditEventPublisher;
 	}
 
 	/**
@@ -111,13 +111,13 @@ public class AuthServiceImpl implements AuthService {
 			loginFailureRateLimiter.recordSuccess(userId);
 
 			// 记录成功日志
-			loginLogService.recordLoginLog(request, loginResult.loginLogType(), AuthLoginLogResult.SUCCESS, userId,
+			loginAuditEventPublisher.publish(request, loginResult.loginLogType(), AuthLoginLogResult.SUCCESS, userId,
 					response.getUsername(), null, jti);
 			return response;
 		}
 		catch (AuthBusinessException ex) {
 			// 记录失败日志
-			loginLogService.recordLoginLog(request, loginResult.loginLogType(),
+			loginAuditEventPublisher.publish(request, loginResult.loginLogType(),
 					LoginAuditContextResolver.resultForOrchestrationFailure(ex.getResultCode()), userId,
 					response.getUsername(), ex.getMessageKey(), null);
 			throw ex;
@@ -135,7 +135,7 @@ public class AuthServiceImpl implements AuthService {
 			return lookupStrategy(auth);
 		}
 		catch (AuthBusinessException ex) {
-			loginLogService.recordLoginLog(request, LoginAuditContextResolver.eventTypeFromAuth(auth),
+			loginAuditEventPublisher.publish(request, LoginAuditContextResolver.eventTypeFromAuth(auth),
 					AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR, null, LoginAuditContextResolver.principal(auth),
 					ex.getMessageKey(), null);
 			throw ex;
@@ -185,7 +185,7 @@ public class AuthServiceImpl implements AuthService {
 		String username = SecurityUserUtils.getUsername();
 		redisUserSessionIndexRepository.deleteSession(jti);
 		redisUserSessionIndexRepository.removeActiveSession(userId, jti);
-		loginLogService.recordLoginLog(request, AuthLoginLogType.LOGOUT, AuthLoginLogResult.SUCCESS, userId, username,
+		loginAuditEventPublisher.publish(request, AuthLoginLogType.LOGOUT, AuthLoginLogResult.SUCCESS, userId, username,
 				null, jti);
 	}
 

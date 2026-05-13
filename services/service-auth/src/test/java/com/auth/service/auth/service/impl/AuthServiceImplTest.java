@@ -20,7 +20,7 @@ import com.auth.service.auth.model.enums.AuthLoginLogType;
 import com.auth.service.auth.model.request.login.AbstractLoginRequest;
 import com.auth.service.auth.model.request.login.UsernamePasswordLoginRequest;
 import com.auth.service.auth.model.response.UserLoginResponse;
-import com.auth.service.auth.service.AuthLoginAuditService;
+import com.auth.service.auth.infrastructure.login.audit.LoginAuditEventPublisher;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -64,7 +64,7 @@ class AuthServiceImplTest {
 	private LoginFailureRateLimiter loginFailureRateLimiter;
 
 	@Mock
-	private AuthLoginAuditService loginLogService;
+	private LoginAuditEventPublisher loginAuditEventPublisher;
 
 	@Mock
 	private HttpServletRequest httpServletRequest;
@@ -112,7 +112,7 @@ class AuthServiceImplTest {
 
 		AuthServiceImpl service = new AuthServiceImpl(List.of(strategy), authProfileCache, userSessionIndexFactory,
 				redisUserSessionIndexRepository, sessionLimitManager, tokenService, loginFailureRateLimiter,
-				loginLogService);
+				loginAuditEventPublisher);
 
 		// Act
 		UserLoginResponse actual = service.login(auth, httpServletRequest);
@@ -124,7 +124,7 @@ class AuthServiceImplTest {
 		assertNotNull(actual.getExpires());
 
 		InOrder inOrder = inOrder(sessionLimitManager, authProfileCache, tokenService, userSessionIndexFactory,
-				redisUserSessionIndexRepository, loginFailureRateLimiter, loginLogService);
+				redisUserSessionIndexRepository, loginFailureRateLimiter, loginAuditEventPublisher);
 		inOrder.verify(sessionLimitManager).assertSessionLimit(TestConstants.USER_ID);
 		inOrder.verify(authProfileCache).createCacheAuthProfile(profile);
 		inOrder.verify(tokenService).buildTokenPair(eq(TestConstants.USER_ID), anyString(), eq(1L));
@@ -133,8 +133,8 @@ class AuthServiceImplTest {
 					eq(TestConstants.REFRESH_TOKEN));
 		inOrder.verify(redisUserSessionIndexRepository).createUserSessionIndex(sessionIndex);
 		inOrder.verify(loginFailureRateLimiter).recordSuccess(TestConstants.USER_ID);
-		inOrder.verify(loginLogService)
-			.recordLoginLog(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_PASSWORD),
+		inOrder.verify(loginAuditEventPublisher)
+			.publish(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_PASSWORD),
 					eq(AuthLoginLogResult.SUCCESS), eq(TestConstants.USER_ID), eq("user"), isNull(), anyString());
 	}
 
@@ -176,7 +176,7 @@ class AuthServiceImplTest {
 
 		AuthServiceImpl service = new AuthServiceImpl(List.of(strategy), authProfileCache, userSessionIndexFactory,
 				redisUserSessionIndexRepository, sessionLimitManager, tokenService, loginFailureRateLimiter,
-				loginLogService);
+				loginAuditEventPublisher);
 
 		// Act
 		UserLoginResponse actual = service.login(auth, httpServletRequest);
@@ -195,7 +195,7 @@ class AuthServiceImplTest {
 
 		AuthServiceImpl service = new AuthServiceImpl(List.of(), authProfileCache, userSessionIndexFactory,
 				redisUserSessionIndexRepository, sessionLimitManager, tokenService, loginFailureRateLimiter,
-				loginLogService);
+				loginAuditEventPublisher);
 
 		// Act
 		AuthBusinessException exception = assertThrows(AuthBusinessException.class,
@@ -204,7 +204,7 @@ class AuthServiceImplTest {
 		// Assert
 		assertNotNull(exception.getResultCode());
 		assertEquals(AuthResultCode.AUTH_TYPE_UNSUPPORTED, exception.getResultCode());
-		verify(loginLogService).recordLoginLog(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_PASSWORD),
+		verify(loginAuditEventPublisher).publish(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_PASSWORD),
 				eq(AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR), isNull(), isNull(), eq(exception.getMessageKey()),
 				isNull());
 	}
@@ -215,7 +215,7 @@ class AuthServiceImplTest {
 		// Arrange（logout 不使用策略表，传空列表即可）
 		AuthServiceImpl service = new AuthServiceImpl(List.of(), authProfileCache, userSessionIndexFactory,
 				redisUserSessionIndexRepository, sessionLimitManager, tokenService, loginFailureRateLimiter,
-				loginLogService);
+				loginAuditEventPublisher);
 
 		service.logout(" ", null);
 		verify(tokenService).parseAccessTokenSafe(" ");
@@ -234,7 +234,7 @@ class AuthServiceImplTest {
 		// Arrange
 		AuthServiceImpl service = new AuthServiceImpl(List.of(), authProfileCache, userSessionIndexFactory,
 				redisUserSessionIndexRepository, sessionLimitManager, tokenService, loginFailureRateLimiter,
-				loginLogService);
+				loginAuditEventPublisher);
 
 		JwtUserToken jwtUserToken = mock(JwtUserToken.class);
 		when(jwtUserToken.getJti()).thenReturn(TestConstants.JTI);
@@ -248,7 +248,7 @@ class AuthServiceImplTest {
 		// Assert
 		verify(redisUserSessionIndexRepository).deleteSession(TestConstants.JTI);
 		verify(redisUserSessionIndexRepository).removeActiveSession(TestConstants.USER_ID, TestConstants.JTI);
-		verify(loginLogService).recordLoginLog(isNull(), eq(AuthLoginLogType.LOGOUT), eq(AuthLoginLogResult.SUCCESS),
+		verify(loginAuditEventPublisher).publish(isNull(), eq(AuthLoginLogType.LOGOUT), eq(AuthLoginLogResult.SUCCESS),
 				eq(TestConstants.USER_ID), isNull(), isNull(), eq(TestConstants.JTI));
 	}
 

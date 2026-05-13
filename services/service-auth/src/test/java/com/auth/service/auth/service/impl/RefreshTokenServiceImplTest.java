@@ -15,7 +15,7 @@ import com.auth.service.auth.infrastructure.session.redis.RedisUserSessionIndexR
 import com.auth.service.auth.model.enums.AuthLoginLogResult;
 import com.auth.service.auth.model.enums.AuthLoginLogType;
 import com.auth.service.auth.model.response.RefreshTokenResponse;
-import com.auth.service.auth.service.AuthLoginAuditService;
+import com.auth.service.auth.infrastructure.login.audit.LoginAuditEventPublisher;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,7 +47,7 @@ class RefreshTokenServiceImplTest {
 	private JwtProperties jwtProperties;
 
 	@Mock
-	private AuthLoginAuditService loginLogService;
+	private LoginAuditEventPublisher loginAuditEventPublisher;
 
 	private static JwtUserToken token() {
 		return JwtUserToken.builder().userId(TestConstants.USER_ID).jti(TestConstants.JTI).build();
@@ -55,7 +55,7 @@ class RefreshTokenServiceImplTest {
 
 	private RefreshTokenServiceImpl newService() {
 		return new RefreshTokenServiceImpl(authProfileCache, redisUserSessionIndexRepository, tokenService,
-				jwtProperties, loginLogService);
+				jwtProperties, loginAuditEventPublisher);
 	}
 
 	@Test
@@ -121,7 +121,7 @@ class RefreshTokenServiceImplTest {
 		AuthBusinessException ex = assertThrows(AuthBusinessException.class, () -> service.refreshToken(" ", null));
 
 		assertEquals(AuthResultCode.REFRESH_TOKEN_MISSING, ex.getResultCode());
-		verify(loginLogService).recordLoginLog(isNull(), eq(AuthLoginLogType.REFRESH_TOKEN),
+		verify(loginAuditEventPublisher).publish(isNull(), eq(AuthLoginLogType.REFRESH_TOKEN),
 				eq(AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR), isNull(), eq("/"), eq(ex.getMessageKey()),
 				isNull());
 	}
@@ -137,7 +137,7 @@ class RefreshTokenServiceImplTest {
 				() -> service.refreshToken(TestConstants.REFRESH_TOKEN, null));
 
 		assertEquals(AuthResultCode.REFRESH_TOKEN_MALFORMED, ex.getResultCode());
-		verify(loginLogService).recordLoginLog(isNull(), eq(AuthLoginLogType.REFRESH_TOKEN),
+		verify(loginAuditEventPublisher).publish(isNull(), eq(AuthLoginLogType.REFRESH_TOKEN),
 				eq(AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR), isNull(), eq("/"), eq(ex.getMessageKey()),
 				isNull());
 	}

@@ -12,7 +12,7 @@ import com.auth.service.auth.model.enums.AuthLoginLogResult;
 import com.auth.service.auth.model.enums.AuthLoginLogType;
 import com.auth.service.auth.model.enums.AuthResultCode;
 import com.auth.service.auth.model.request.login.AbstractLoginRequest;
-import com.auth.service.auth.service.AuthLoginAuditService;
+import com.auth.service.auth.infrastructure.login.audit.LoginAuditEventPublisher;
 import com.auth.service.auth.service.AuthProfileQueryService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.DisplayName;
@@ -47,7 +47,7 @@ class AbstractLoginRequestStrategyTest {
 	private AuthProfileQueryService authProfileQueryService;
 
 	@Mock
-	private AuthLoginAuditService loginLogService;
+	private LoginAuditEventPublisher loginAuditEventPublisher;
 
 	@Mock
 	private HttpServletRequest httpServletRequest;
@@ -69,8 +69,8 @@ class AbstractLoginRequestStrategyTest {
 			.build();
 		when(authProfileQueryService.buildByUser(user)).thenReturn(profile);
 
-		TestStrategy strategy = new TestStrategy(loginFailureRateLimiter, authProfileQueryService, loginLogService,
-				user, null);
+		TestStrategy strategy = new TestStrategy(loginFailureRateLimiter, authProfileQueryService,
+				loginAuditEventPublisher, user, null);
 
 		// Act
 		LoginResult result = strategy.authenticate(new TestAuth(), httpServletRequest);
@@ -95,8 +95,8 @@ class AbstractLoginRequestStrategyTest {
 
 		when(loginFailureRateLimiter.recordFailure(TestConstants.USER_ID)).thenReturn(3);
 
-		TestStrategy strategy = new TestStrategy(loginFailureRateLimiter, authProfileQueryService, loginLogService,
-				user, new AuthBadCredentialsException("bad"));
+		TestStrategy strategy = new TestStrategy(loginFailureRateLimiter, authProfileQueryService,
+				loginAuditEventPublisher, user, new AuthBadCredentialsException("bad"));
 
 		TestAuth testAuth = new TestAuth();
 
@@ -107,7 +107,7 @@ class AbstractLoginRequestStrategyTest {
 		// Assert
 		assertEquals(AuthResultCode.USERNAME_OR_PASSWORD_ERROR_WITH_REMAINING, exception.getResultCode());
 		verify(loginFailureRateLimiter).recordFailure(TestConstants.USER_ID);
-		verify(loginLogService).recordLoginLog(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_PASSWORD),
+		verify(loginAuditEventPublisher).publish(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_PASSWORD),
 				eq(AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR), eq(TestConstants.USER_ID), eq("u"),
 				eq("remainingAttempts=3"), isNull());
 	}
@@ -123,9 +123,9 @@ class AbstractLoginRequestStrategyTest {
 		private final RuntimeException authenticateException;
 
 		TestStrategy(LoginFailureRateLimiter loginFailureRateLimiter, AuthProfileQueryService authProfileQueryService,
-				AuthLoginAuditService loginLogService, UserEntity userToReturn,
+				LoginAuditEventPublisher loginAuditEventPublisher, UserEntity userToReturn,
 				RuntimeException authenticateException) {
-			super(loginFailureRateLimiter, authProfileQueryService, loginLogService);
+			super(loginFailureRateLimiter, authProfileQueryService, loginAuditEventPublisher);
 			this.userToReturn = userToReturn;
 			this.authenticateException = authenticateException;
 		}

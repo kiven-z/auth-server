@@ -16,7 +16,7 @@ import com.auth.service.auth.infrastructure.session.redis.RedisUserSessionIndexR
 import com.auth.service.auth.model.enums.AuthLoginLogResult;
 import com.auth.service.auth.model.enums.AuthLoginLogType;
 import com.auth.service.auth.model.response.RefreshTokenResponse;
-import com.auth.service.auth.service.AuthLoginAuditService;
+import com.auth.service.auth.infrastructure.login.audit.LoginAuditEventPublisher;
 import com.auth.service.auth.service.RefreshTokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
@@ -40,16 +40,16 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
 	private final JwtProperties jwtProperties;
 
-	private final AuthLoginAuditService loginLogService;
+	private final LoginAuditEventPublisher loginAuditEventPublisher;
 
 	public RefreshTokenServiceImpl(AuthProfileCache authProfileCache,
 			RedisUserSessionIndexRepository redisUserSessionIndexRepository, TokenService tokenService,
-			JwtProperties jwtProperties, AuthLoginAuditService loginLogService) {
+			JwtProperties jwtProperties, LoginAuditEventPublisher loginAuditEventPublisher) {
 		this.authProfileCache = authProfileCache;
 		this.redisUserSessionIndexRepository = redisUserSessionIndexRepository;
 		this.tokenService = tokenService;
 		this.jwtProperties = jwtProperties;
-		this.loginLogService = loginLogService;
+		this.loginAuditEventPublisher = loginAuditEventPublisher;
 	}
 
 	/**
@@ -62,7 +62,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 		}
 		catch (AuthBusinessException ex) {
 			Long userId = tryResolveUserIdFromRefreshToken(refreshToken);
-			loginLogService.recordLoginLog(request, AuthLoginLogType.REFRESH_TOKEN,
+			loginAuditEventPublisher.publish(request, AuthLoginLogType.REFRESH_TOKEN,
 					AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR, userId, "/", ex.getMessageKey(), null);
 			throw ex;
 		}
@@ -106,7 +106,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 		response.setRefreshToken(tokenPair.refreshToken());
 		response.setExpires(tokenPair.accessExpiresAt());
 
-		loginLogService.recordLoginLog(request, AuthLoginLogType.REFRESH_TOKEN, AuthLoginLogResult.SUCCESS,
+		loginAuditEventPublisher.publish(request, AuthLoginLogType.REFRESH_TOKEN, AuthLoginLogResult.SUCCESS,
 				refreshUserId, null, null, refreshJti);
 		return response;
 	}

@@ -9,7 +9,7 @@ import com.auth.service.auth.mapper.UserMapper;
 import com.auth.service.auth.model.enums.AuthLoginLogType;
 import com.auth.service.auth.model.enums.AuthResultCode;
 import com.auth.service.auth.model.request.login.EmailLoginRequest;
-import com.auth.service.auth.service.AuthLoginAuditService;
+import com.auth.service.auth.infrastructure.login.audit.LoginAuditEventPublisher;
 import com.auth.service.auth.service.AuthProfileQueryService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -33,8 +33,8 @@ public class EmailLoginStrategy extends AbstractLoginStrategy<EmailLoginRequest>
 
 	public EmailLoginStrategy(AuthProfileQueryService authProfileQueryService,
 			RedisTemplate<String, Object> redisTemplate, UserMapper userMapper,
-			LoginFailureRateLimiter loginFailureRateLimiter, AuthLoginAuditService loginLogService) {
-		super(loginFailureRateLimiter, authProfileQueryService, loginLogService);
+			LoginFailureRateLimiter loginFailureRateLimiter, LoginAuditEventPublisher loginAuditEventPublisher) {
+		super(loginFailureRateLimiter, authProfileQueryService, loginAuditEventPublisher);
 		this.redisTemplate = redisTemplate;
 		this.userMapper = userMapper;
 	}

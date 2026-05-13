@@ -9,7 +9,7 @@ import com.auth.service.auth.model.enums.AuthLoginLogResult;
 import com.auth.service.auth.model.enums.AuthLoginLogType;
 import com.auth.service.auth.model.enums.AuthResultCode;
 import com.auth.service.auth.model.request.login.UsernamePasswordLoginRequest;
-import com.auth.service.auth.service.AuthLoginAuditService;
+import com.auth.service.auth.infrastructure.login.audit.LoginAuditEventPublisher;
 import com.auth.service.auth.service.AuthProfileQueryService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.DisplayName;
@@ -49,7 +49,7 @@ class UsernamePasswordLoginStrategyTest {
 	private PasswordEncoder passwordEncoder;
 
 	@Mock
-	private AuthLoginAuditService loginLogService;
+	private LoginAuditEventPublisher loginAuditEventPublisher;
 
 	@Mock
 	private HttpServletRequest httpServletRequest;
@@ -60,7 +60,7 @@ class UsernamePasswordLoginStrategyTest {
 		// Arrange
 		when(userMapper.selectUserByUsername("u")).thenReturn(null);
 		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(userMapper, loginFailureRateLimiter,
-				authProfileQueryService, passwordEncoder, loginLogService);
+				authProfileQueryService, passwordEncoder, loginAuditEventPublisher);
 
 		UsernamePasswordLoginRequest auth = new UsernamePasswordLoginRequest();
 		auth.setUsername("u");
@@ -72,7 +72,7 @@ class UsernamePasswordLoginStrategyTest {
 
 		// Assert
 		assertEquals(AuthResultCode.USERNAME_OR_PASSWORD_ERROR, exception.getResultCode());
-		verify(loginLogService).recordLoginLog(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_PASSWORD),
+		verify(loginAuditEventPublisher).publish(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_PASSWORD),
 				eq(AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR), isNull(), eq("u"), eq(exception.getMessageKey()),
 				isNull());
 	}
@@ -82,7 +82,7 @@ class UsernamePasswordLoginStrategyTest {
 	void supports_shouldReturnUsernamePasswordLoginRequestClass() {
 		// Arrange
 		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(userMapper, loginFailureRateLimiter,
-				authProfileQueryService, passwordEncoder, loginLogService);
+				authProfileQueryService, passwordEncoder, loginAuditEventPublisher);
 
 		// Act & Assert
 		assertEquals(UsernamePasswordLoginRequest.class, strategy.supports());
@@ -104,7 +104,7 @@ class UsernamePasswordLoginStrategyTest {
 		when(loginFailureRateLimiter.recordFailure(1L)).thenReturn(2);
 
 		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(userMapper, loginFailureRateLimiter,
-				authProfileQueryService, passwordEncoder, loginLogService);
+				authProfileQueryService, passwordEncoder, loginAuditEventPublisher);
 
 		UsernamePasswordLoginRequest auth = new UsernamePasswordLoginRequest();
 		auth.setUsername("u");
@@ -116,7 +116,7 @@ class UsernamePasswordLoginStrategyTest {
 
 		// Assert
 		assertEquals(AuthResultCode.USERNAME_OR_PASSWORD_ERROR_WITH_REMAINING, exception.getResultCode());
-		verify(loginLogService).recordLoginLog(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_PASSWORD),
+		verify(loginAuditEventPublisher).publish(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_PASSWORD),
 				eq(AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR), eq(1L), eq("u"), eq("remainingAttempts=2"),
 				isNull());
 	}

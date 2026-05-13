@@ -8,7 +8,7 @@ import com.auth.service.auth.mapper.UserMapper;
 import com.auth.service.auth.model.enums.AuthLoginLogType;
 import com.auth.service.auth.model.enums.AuthResultCode;
 import com.auth.service.auth.model.request.login.UsernamePasswordLoginRequest;
-import com.auth.service.auth.service.AuthLoginAuditService;
+import com.auth.service.auth.infrastructure.login.audit.LoginAuditEventPublisher;
 import com.auth.service.auth.service.AuthProfileQueryService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -35,8 +35,8 @@ public class UsernamePasswordLoginStrategy extends AbstractLoginStrategy<Usernam
 
 	public UsernamePasswordLoginStrategy(UserMapper userMapper, LoginFailureRateLimiter loginFailureRateLimiter,
 			AuthProfileQueryService authProfileQueryService, PasswordEncoder passwordEncoder,
-			AuthLoginAuditService loginLogService) {
-		super(loginFailureRateLimiter, authProfileQueryService, loginLogService);
+			LoginAuditEventPublisher loginAuditEventPublisher) {
+		super(loginFailureRateLimiter, authProfileQueryService, loginAuditEventPublisher);
 		this.userMapper = userMapper;
 		this.passwordEncoder = passwordEncoder;
 	}
