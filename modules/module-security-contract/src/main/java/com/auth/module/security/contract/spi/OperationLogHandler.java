@@ -1,0 +1,39 @@
+package com.auth.module.security.contract.spi;
+
+import com.auth.module.security.contract.event.OperationLogPayload;
+
+/**
+ * 操作日志处理器（SPI）。业务服务实现本接口并注册为 Spring Bean，将负载持久化至 {@code log_operation} 等存储。
+ *
+ * <p>
+ * autoconfigure 层提供 {@code @ConditionalOnMissingBean} 空实现，未接入时不产生 NPE。
+ * </p>
+ *
+ * <p>
+ * 建议实现类对 {@link #handle(OperationLogPayload)} 使用 {@code @Async}，避免阻塞 Web 线程。
+ * </p>
+ *
+ * <pre>{@code
+ * &#64;Component
+ * public class MyOperationLogHandler implements OperationLogHandler {
+ *
+ *     &#64;Async
+ *     &#64;Override
+ *     public void handle(OperationLogPayload payload) {
+ *         // insert log_operation
+ *     }
+ * }
+ * }</pre>
+ *
+ * @author Bunny
+ */
+@FunctionalInterface
+public interface OperationLogHandler {
+
+	/**
+	 * 处理操作日志负载。
+	 * @param payload 负载
+	 */
+	void handle(OperationLogPayload payload);
+
+}

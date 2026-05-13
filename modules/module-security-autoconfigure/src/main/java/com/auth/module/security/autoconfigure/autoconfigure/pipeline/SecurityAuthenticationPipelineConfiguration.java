@@ -19,6 +19,8 @@ import org.springframework.context.annotation.Import;
 		SecurityAuthExecutorConfiguration.class,
 		// 审计兜底
 		AuthorizationAuditAutoConfiguration.class,
+		// 操作日志 SPI 与切面
+		OperationLogAutoConfiguration.class,
 		// 过滤器入口
 		TokenAuthenticationFilterConfiguration.class })
 @Configuration
