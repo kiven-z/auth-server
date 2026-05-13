@@ -5,7 +5,7 @@ import com.auth.service.system.admin.model.entity.EmailTemplateEntity;
 import com.auth.service.system.admin.model.po.emailtemplate.EmailTemplatePageRowPO;
 import com.auth.service.system.admin.model.query.EmailTemplateQuery;
 import com.auth.service.system.admin.model.vo.emailtemplate.EmailTemplateDetailVO;
-import com.auth.service.system.admin.service.impl.EmailTemplateServiceImpl;
+import com.auth.service.system.admin.service.impl.SysEmailTemplateServiceImpl;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.message.service.EmailSendService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -26,13 +26,13 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.*;
 
 /**
- * {@link EmailTemplateServiceImpl} 单元测试（分页与详情路径上的审计展示名补全）。
+ * {@link SysEmailTemplateServiceImpl} 单元测试（分页与详情路径上的审计展示名补全）。
  *
  * @author Bunny
  */
 @DisplayName("EmailTemplateServiceImpl 邮件模板")
 @ExtendWith(MockitoExtension.class)
-class EmailTemplateServiceImplTest {
+class SysEmailTemplateServiceImplTest {
 
 	@Mock
 	private EmailTemplateMapper emailTemplateMapper;
@@ -43,11 +43,11 @@ class EmailTemplateServiceImplTest {
 	@Mock
 	private EmailSendService emailSendService;
 
-	private EmailTemplateServiceImpl emailTemplateService;
+	private SysEmailTemplateServiceImpl emailTemplateService;
 
 	@BeforeEach
 	void setUp() throws Exception {
-		emailTemplateService = new EmailTemplateServiceImpl(auditUserDisplayService, emailSendService);
+		emailTemplateService = new SysEmailTemplateServiceImpl(auditUserDisplayService, emailSendService);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(emailTemplateService, emailTemplateMapper);

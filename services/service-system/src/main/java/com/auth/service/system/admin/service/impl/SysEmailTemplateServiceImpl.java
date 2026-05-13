@@ -13,7 +13,7 @@ import com.auth.service.system.admin.model.query.EmailTemplateQuery;
 import com.auth.service.system.admin.model.vo.emailtemplate.EmailTemplateDetailVO;
 import com.auth.service.system.admin.model.vo.emailtemplate.EmailTemplatePageResponse;
 import com.auth.service.system.admin.model.vo.emailtemplate.EmailTemplateRequireFieldRow;
-import com.auth.service.system.admin.service.EmailTemplateService;
+import com.auth.service.system.admin.service.SysEmailTemplateService;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.message.service.EmailSendService;
@@ -40,14 +40,14 @@ import static com.auth.service.system.common.exception.SystemResultCodeEnum.DATA
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-public class EmailTemplateServiceImpl extends ServiceImpl<EmailTemplateMapper, EmailTemplateEntity>
-		implements EmailTemplateService {
+public class SysEmailTemplateServiceImpl extends ServiceImpl<EmailTemplateMapper, EmailTemplateEntity>
+		implements SysEmailTemplateService {
 
 	private final AuditUserDisplayService auditUserDisplayService;
 
 	private final EmailSendService emailSendService;
 
-	public EmailTemplateServiceImpl(AuditUserDisplayService auditUserDisplayService,
+	public SysEmailTemplateServiceImpl(AuditUserDisplayService auditUserDisplayService,
 			EmailSendService emailSendService) {
 		this.auditUserDisplayService = auditUserDisplayService;
 		this.emailSendService = emailSendService;
