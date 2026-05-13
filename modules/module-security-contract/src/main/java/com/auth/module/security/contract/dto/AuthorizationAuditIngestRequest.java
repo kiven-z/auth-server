@@ -28,70 +28,31 @@ public class AuthorizationAuditIngestRequest implements Serializable {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
-	/**
-	 * 事件类型
-	 */
 	private SecurityEventType eventType;
 
-	/**
-	 * 用户 ID
-	 */
 	private Long userId;
 
-	/**
-	 * 用户名
-	 */
 	private String username;
 
-	/**
-	 * 请求 IP
-	 */
 	private String requestIp;
 
-	/**
-	 * 请求方法
-	 */
 	private String requestMethod;
 
-	/**
-	 * 请求 URI
-	 */
 	private String requestUri;
 
-	/**
-	 * 所需权限
-	 */
 	private String requiredAuthority;
 
-	/**
-	 * 决策原因
-	 */
 	private String decisionReason;
 
-	/**
-	 * 异常消息
-	 */
 	private String exceptionMessage;
 
-	/**
-	 * 类名
-	 */
 	private String className;
 
-	/**
-	 * 方法名
-	 */
 	private String methodName;
 
-	/**
-	 * 方法参数
-	 */
 	@Builder.Default
 	private Map<String, Object> methodParams = Collections.emptyMap();
 
-	/**
-	 * 时间戳
-	 */
 	private Instant timestamp;
 
 	/**

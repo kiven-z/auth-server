@@ -3,8 +3,9 @@ package com.auth.service.system.common.controller;
 import com.auth.common.core.model.response.Result;
 import com.auth.module.security.autoconfigure.annotation.InternalApi;
 import com.auth.module.security.contract.dto.AuthorizationAuditIngestRequest;
+import com.auth.module.security.contract.dto.OperationLogIngestRequest;
 import com.auth.module.security.contract.event.SecurityAuthorizationAuditPayloadEvent;
-import com.auth.service.system.log.service.LogAuthorizationAuditAppendService;
+import com.auth.service.system.common.service.LogAuthorizationAuditAppendService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Bunny
  */
 @Tag(name = "系统服务-内部-授权审计")
-@RequestMapping("/api/system/inner/authorization-audit")
+@RequestMapping("/api/system/inner")
 @RestController
 public class InternalAuthorizationAuditController {
 
@@ -28,17 +29,20 @@ public class InternalAuthorizationAuditController {
 		this.logAuthorizationAuditAppendService = logAuthorizationAuditAppendService;
 	}
 
-	/**
-	 * 追加一条权限决策审计记录。
-	 * @param body 传输负载
-	 * @return 统一结果
-	 */
 	@InternalApi
 	@Operation(summary = "追加授权审计记录", description = "供 service-auth 等经服务发现上报，写入 log_authorization_audit")
-	@PostMapping("/records")
+	@PostMapping("/authorization-audit/records")
 	public Result<Void> appendRecord(@RequestBody AuthorizationAuditIngestRequest body) {
 		SecurityAuthorizationAuditPayloadEvent event = body.toPayloadEvent();
 		logAuthorizationAuditAppendService.append(event);
+		return Result.success();
+	}
+
+	@InternalApi
+	@Operation(summary = "追加操作日志", description = "供 service-auth 等经服务发现上报，写入 log_operation")
+	@PostMapping("/operation-log/records")
+	public Result<Void> appendRecord(@RequestBody OperationLogIngestRequest body) {
+		logAuthorizationAuditAppendService.append(body.toPayload());
 		return Result.success();
 	}
 

@@ -2,7 +2,7 @@ package com.auth.service.system.common.listener;
 
 import com.auth.module.security.contract.event.SecurityAuthorizationAuditPayloadEvent;
 import com.auth.module.security.contract.spi.AuthorizationAuditHandler;
-import com.auth.service.system.log.service.LogAuthorizationAuditAppendService;
+import com.auth.service.system.common.service.LogAuthorizationAuditAppendService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 

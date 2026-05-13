@@ -33,6 +33,7 @@ public class LoggingAuthorizationAuditHandler implements AuthorizationAuditHandl
 		AuthorizationAuditIngestRequest body = AuthorizationAuditIngestRequest.fromEvent(event);
 		try {
 			Result<Void> result = systemAuthorizationAuditFeignClient.appendRecord(body);
+			// FIXME 使用 isOk(result); FeignUtil.isOk()
 			if (result == null || !Integer.valueOf(Result.SUCCESS_CODE).equals(result.getCode())) {
 				log.error(
 						"Authorization audit Feign returned non-success: code={}, message={}, requestUri={}, userId={}",

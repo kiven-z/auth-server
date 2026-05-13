@@ -1,9 +1,10 @@
-package com.auth.service.system.log.service;
+package com.auth.service.system.common.service;
 
+import com.auth.module.security.contract.event.OperationLogPayload;
 import com.auth.module.security.contract.event.SecurityAuthorizationAuditPayloadEvent;
 
 /**
- * 将授权审计事件追加写入 {@code log_authorization_audit}（供本地 SPI 与对内 HTTP 共用）
+ * 将授权审计事件追加写入
  *
  * @author Bunny
  */
@@ -14,5 +15,11 @@ public interface LogAuthorizationAuditAppendService {
 	 * @param event 授权审计负载
 	 */
 	void append(SecurityAuthorizationAuditPayloadEvent event);
+
+	/**
+	 * 添加一条操作日志记录
+	 * @param payload 操作日志负载
+	 */
+	void append(OperationLogPayload payload);
 
 }
