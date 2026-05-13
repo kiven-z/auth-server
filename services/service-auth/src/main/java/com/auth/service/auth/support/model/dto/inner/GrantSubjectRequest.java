@@ -8,7 +8,7 @@ import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * 授权主体（内部接口）：与 grant_table.subject 对应，用于批量反查受影响用户。
+ * 授权主体（内部接口）：与 grant_table.subject 对应，用于批量反查受影响用户
  *
  * @author Bunny
  */

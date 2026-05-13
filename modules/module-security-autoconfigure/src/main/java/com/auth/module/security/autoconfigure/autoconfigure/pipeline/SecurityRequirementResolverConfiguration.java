@@ -13,7 +13,7 @@ import org.springframework.web.servlet.HandlerMapping;
 import java.util.List;
 
 /**
- * 安全需求解析：将 HandlerMethod 解析为 SecurityRequirement。
+ * 安全需求解析：将 HandlerMethod 解析为 SecurityRequirement
  *
  * @author Bunny
  */
@@ -44,7 +44,7 @@ class SecurityRequirementResolverConfiguration {
 	}
 
 	/**
-	 * 规则集合：按优先级参与 SecurityRequirement 推导。
+	 * 规则集合：按优先级参与 SecurityRequirement 推导
 	 */
 	@Bean
 	List<SecurityRequirementRule> securityRequirementRules(PublicApiRule publicApiRule, InternalApiRule internalApiRule,

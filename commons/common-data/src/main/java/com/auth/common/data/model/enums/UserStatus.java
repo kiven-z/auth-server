@@ -4,10 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * 用户账号状态枚举。
+ * 用户账号状态枚举
  *
  * <p>
- * 与 sys_user 表的 status 字段一一对应。
+ * 与 sys_user 表的 status 字段一一对应
  * </p>
  *
  * @author Bunny
@@ -36,7 +36,7 @@ public enum UserStatus {
 	private final String desc;
 
 	/**
-	 * 根据 code 解析枚举。
+	 * 根据 code 解析枚举
 	 * @return 匹配的枚举，不存在则返回 null
 	 */
 	public static UserStatus of(int code) {

@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import java.util.List;
 
 /**
- * 认证执行：协调认证器并写入 SecurityContext。
+ * 认证执行：协调认证器并写入 SecurityContext
  *
  * @author Bunny
  */
@@ -23,7 +23,7 @@ class SecurityAuthExecutorConfiguration {
 	}
 
 	/**
-	 * 认证执行器：统一编排认证与上下文写入。
+	 * 认证执行器：统一编排认证与上下文写入
 	 */
 	@Bean
 	SecurityAuthExecutor securityAuthExecutor(InternalRequestAuthenticator internalRequestAuthenticator,

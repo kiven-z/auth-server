@@ -9,7 +9,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * 部门列表行（扁平；供前端表格 / 建树）。
+ * 部门列表行（扁平；供前端表格 / 建树）
  *
  * @author Bunny
  */

@@ -7,7 +7,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 /**
- * {@link LoginAuditEventPublisher} 默认实现：构建快照后发布 Spring 应用事件。
+ * {@link LoginAuditEventPublisher} 默认实现：构建快照后发布 Spring 应用事件
  *
  * @author Bunny
  */

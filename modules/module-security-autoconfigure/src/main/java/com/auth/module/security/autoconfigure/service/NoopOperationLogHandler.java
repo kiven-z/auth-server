@@ -6,7 +6,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 空操作日志处理器 — 当业务服务未提供 {@link OperationLogHandler} 实例时生效。
+ * 空操作日志处理器 — 当业务服务未提供 {@link OperationLogHandler} 实例时生效
  *
  * @author Bunny
  */
@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 public class NoopOperationLogHandler implements OperationLogHandler {
 
 	/**
-	 * 启动提示：未接入操作日志持久化。
+	 * 启动提示：未接入操作日志持久化
 	 */
 	@PostConstruct
 	void logHint() {

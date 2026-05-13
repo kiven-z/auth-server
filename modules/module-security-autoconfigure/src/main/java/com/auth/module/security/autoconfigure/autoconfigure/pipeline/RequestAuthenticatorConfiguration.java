@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 import java.util.List;
 
 /**
- * 请求认证器装配：内部/外部请求的认证入口。
+ * 请求认证器装配：内部/外部请求的认证入口
  *
  * @author Bunny
  */
@@ -32,7 +32,7 @@ class RequestAuthenticatorConfiguration {
 	}
 
 	/**
-	 * 认证器集合：按顺序尝试匹配请求来源并完成认证。
+	 * 认证器集合：按顺序尝试匹配请求来源并完成认证
 	 */
 	@Bean
 	List<RequestAuthenticator> requestAuthenticators(InternalRequestAuthenticator internalRequestAuthenticator,

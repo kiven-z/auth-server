@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 /**
- * 调用 system 服务，将授权审计写入 {@code log_authorization_audit}。
+ * 调用 system 服务，将授权审计写入 {@code log_authorization_audit}
  *
  * @author Bunny
  */
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface SystemAuthorizationAuditFeignClient {
 
 	/**
-	 * 上报一条授权审计记录。
+	 * 上报一条授权审计记录
 	 * @param body 传输负载
 	 * @return 统一结果
 	 */

@@ -22,7 +22,7 @@ import java.util.Map;
 public class Result<T> implements Serializable {
 
 	/**
-	 * 全项目统一的业务成功码（与 HTTP 2xx 配合使用；失败码由各模块枚举定义，非 0）。
+	 * 全项目统一的业务成功码（与 HTTP 2xx 配合使用；失败码由各模块枚举定义，非 0）
 	 */
 	public static final int SUCCESS_CODE = 0;
 

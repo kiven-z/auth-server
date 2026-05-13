@@ -4,7 +4,7 @@ import com.auth.service.auth.support.model.enums.AuthLoginLogResult;
 import com.auth.service.auth.support.model.enums.AuthLoginLogType;
 
 /**
- * 登录与安全审计领域事件（进程内），载荷已包含请求快照。
+ * 登录与安全审计领域事件（进程内），载荷已包含请求快照
  *
  * @param snapshot 请求上下文快照
  * @param eventType 事件类型

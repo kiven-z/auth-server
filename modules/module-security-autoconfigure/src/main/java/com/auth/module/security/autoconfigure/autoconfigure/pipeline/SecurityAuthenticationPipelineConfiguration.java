@@ -4,7 +4,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 /**
- * 「注解优先」安全认证流水线的 Bean 装配（聚合入口）。
+ * 「注解优先」安全认证流水线的 Bean 装配（聚合入口）
  *
  * @author Bunny
  */

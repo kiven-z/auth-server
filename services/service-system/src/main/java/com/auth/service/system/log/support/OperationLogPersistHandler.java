@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 /**
- * 将操作日志负载异步写入 {@code log_operation}。
+ * 将操作日志负载异步写入 {@code log_operation}
  *
  * @author Bunny
  */

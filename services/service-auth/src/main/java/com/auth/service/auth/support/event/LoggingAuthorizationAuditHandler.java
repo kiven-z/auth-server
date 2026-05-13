@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 /**
- * 认证审计处理器：经 Feign 调用 system 将授权决策事件持久化。
+ * 认证审计处理器：经 Feign 调用 system 将授权决策事件持久化
  *
  * @author Bunny
  */

@@ -1,12 +1,12 @@
 package com.auth.common.core.desensitize;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 /**
- * {@link DesensitizedStrings} 纯函数行为测试。
+ * {@link DesensitizedStrings} 纯函数行为测试
  */
 class DesensitizedStringsTest {
 

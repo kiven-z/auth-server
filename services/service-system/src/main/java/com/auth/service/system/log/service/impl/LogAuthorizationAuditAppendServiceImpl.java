@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 
 /**
- * 授权审计追加写入实现。
+ * 授权审计追加写入实现
  *
  * @author Bunny
  */

@@ -13,7 +13,7 @@ import java.util.Objects;
 
 /**
  * 将 {@link AuthBusinessException} 转为统一 {@link Result}（稳定子码 + MessageSource 文案 + ext i18n
- * 元数据）。
+ * 元数据）
  *
  * @author Bunny
  */
@@ -45,7 +45,7 @@ public class AuthBusinessExceptionResultBuilder {
 	}
 
 	/**
-	 * 由 {@link AuthResultCode#getHttpStatus()} 解析 {@link HttpStatus}；无法解析时回退 400。
+	 * 由 {@link AuthResultCode#getHttpStatus()} 解析 {@link HttpStatus}；无法解析时回退 400
 	 * @param resultCode 结果码
 	 * @return HTTP 状态
 	 */

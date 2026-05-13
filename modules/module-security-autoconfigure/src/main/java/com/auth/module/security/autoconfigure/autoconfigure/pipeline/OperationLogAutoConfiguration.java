@@ -13,30 +13,30 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
 /**
- * 操作日志 SPI 兜底与 AOP 装配。
+ * 操作日志 SPI 兜底与 AOP 装配
  *
  * @author Bunny
  */
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+@ConditionalOnBooleanProperty(prefix = "auth.common.operation-log", name = "enabled", matchIfMissing = true)
 @Configuration(proxyBeanMethods = false)
 @EnableAspectJAutoProxy
-@ConditionalOnBooleanProperty(prefix = "auth.common.operation-log", name = "enabled", matchIfMissing = true)
-@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 public class OperationLogAutoConfiguration {
 
 	/**
-	 * 空操作日志处理器。
+	 * 空操作日志处理器
 	 */
-	@Bean
 	@ConditionalOnMissingBean(OperationLogHandler.class)
+	@Bean
 	NoopOperationLogHandler noopOperationLogHandler() {
 		return new NoopOperationLogHandler();
 	}
 
 	/**
-	 * 操作日志切面（依赖 Jackson {@link ObjectMapper}）。
+	 * 操作日志切面（依赖 Jackson {@link ObjectMapper}）
 	 */
-	@Bean
 	@ConditionalOnBean(ObjectMapper.class)
+	@Bean
 	OperationLogAspect operationLogAspect(OperationLogHandler operationLogHandler, ObjectMapper objectMapper) {
 		return new OperationLogAspect(operationLogHandler, objectMapper);
 	}

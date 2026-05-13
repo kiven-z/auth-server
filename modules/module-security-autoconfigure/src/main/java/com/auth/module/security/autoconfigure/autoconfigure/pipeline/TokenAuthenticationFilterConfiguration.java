@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import java.util.Map;
 
 /**
- * 过滤器入口：注解需求分派并委托 SecurityAuthExecutor 认证。
+ * 过滤器入口：注解需求分派并委托 SecurityAuthExecutor 认证
  *
  * @author Bunny
  */
@@ -20,7 +20,7 @@ import java.util.Map;
 class TokenAuthenticationFilterConfiguration {
 
 	/**
-	 * 需求 -> 动作分派表（默认映射，可被业务侧覆盖）。
+	 * 需求 -> 动作分派表（默认映射，可被业务侧覆盖）
 	 */
 	@ConditionalOnMissingBean(name = "authActionDispatch")
 	@Bean
@@ -29,7 +29,7 @@ class TokenAuthenticationFilterConfiguration {
 	}
 
 	/**
-	 * 资源服务器认证过滤器：注解优先分派 + 委托认证执行器。
+	 * 资源服务器认证过滤器：注解优先分派 + 委托认证执行器
 	 */
 	@Bean
 	TokenAuthenticationFilter tokenAuthenticationFilter(SecurityRequirementResolver securityRequirementResolver,

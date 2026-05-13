@@ -10,7 +10,7 @@ import com.auth.service.auth.support.model.request.login.UsernamePasswordLoginRe
 import lombok.experimental.UtilityClass;
 
 /**
- * 登录审计辅助：从认证请求/用户实体解析 principal，以及编排失败时的结果码映射。
+ * 登录审计辅助：从认证请求/用户实体解析 principal，以及编排失败时的结果码映射
  *
  * @author Bunny
  */
@@ -18,7 +18,7 @@ import lombok.experimental.UtilityClass;
 public class LoginAuditContextResolver {
 
 	/**
-	 * 从认证请求体解析登录主体（用户名或邮箱），用于尚未解析到 UserEntity 时的审计。
+	 * 从认证请求体解析登录主体（用户名或邮箱），用于尚未解析到 UserEntity 时的审计
 	 * @param auth 认证请求
 	 * @return 主体字符串，无法解析时返回 null
 	 */

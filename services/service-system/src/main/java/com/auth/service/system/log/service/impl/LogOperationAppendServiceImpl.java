@@ -22,45 +22,32 @@ public class LogOperationAppendServiceImpl implements LogOperationAppendService 
 	}
 
 	/**
-	 * 将负载映射为实体（异步线程无安全上下文，审计字段在此显式赋值）。
-	 * @param payload 负载
-	 * @return 实体
-	 */
-	private static LogOperationEntity toEntity(OperationLogPayload payload) {
-		Long uid = payload.getUserId() != null ? payload.getUserId() : 0L;
-		LogOperationEntity e = new LogOperationEntity();
-		e.setUserId(uid);
-		e.setOperationType(payload.getOperationType());
-		e.setModule(payload.getModule());
-		e.setTargetType(blankToNull(payload.getTargetType()));
-		e.setTargetId(blankToNull(payload.getTargetId()));
-		e.setRequestMethod(payload.getRequestMethod());
-		e.setRequestUri(payload.getRequestUri());
-		e.setRequestParams(blankToNull(payload.getRequestParams()));
-		e.setRequestBody(blankToNull(payload.getRequestBody()));
-		e.setResponseStatus(payload.getResponseStatus());
-		e.setResponseMessage(blankToNull(payload.getResponseMessage()));
-		e.setExecutionTimeMs(payload.getExecutionTimeMs());
-		e.setOldValue(blankToNull(payload.getOldValueJson()));
-		e.setNewValue(blankToNull(payload.getNewValueJson()));
-		e.setIpAddress(payload.getIpAddress());
-		e.setUserAgent(blankToNull(payload.getUserAgent()));
-		e.setCreateUser(uid);
-		e.setUpdateUser(uid);
-		e.setIsDeleted(Boolean.FALSE);
-		return e;
-	}
-
-	private static String blankToNull(String s) {
-		return CharSequenceUtil.isBlank(s) ? null : s;
-	}
-
-	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public void append(OperationLogPayload payload) {
-		LogOperationEntity entity = toEntity(payload);
+		Long uid = payload.getUserId() != null ? payload.getUserId() : 0L;
+		LogOperationEntity entity = new LogOperationEntity();
+		entity.setUserId(uid);
+		entity.setOperationType(payload.getOperationType());
+		entity.setModule(payload.getModule());
+		entity.setTargetType(CharSequenceUtil.blankToDefault(payload.getTargetType(), null));
+		entity.setTargetId(CharSequenceUtil.blankToDefault(payload.getTargetId(), null));
+		entity.setRequestMethod(payload.getRequestMethod());
+		entity.setRequestUri(payload.getRequestUri());
+		entity.setRequestParams(CharSequenceUtil.blankToDefault(payload.getRequestParams(), null));
+		entity.setRequestBody(CharSequenceUtil.blankToDefault(payload.getRequestBody(), null));
+		entity.setResponseStatus(payload.getResponseStatus());
+		entity.setResponseMessage(CharSequenceUtil.blankToDefault(payload.getResponseMessage(), null));
+		entity.setExecutionTimeMs(payload.getExecutionTimeMs());
+		entity.setOldValue(CharSequenceUtil.blankToDefault(payload.getOldValueJson(), null));
+		entity.setNewValue(CharSequenceUtil.blankToDefault(payload.getNewValueJson(), null));
+		entity.setIpAddress(payload.getIpAddress());
+		entity.setUserAgent(CharSequenceUtil.blankToDefault(payload.getUserAgent(), null));
+		entity.setCreateUser(uid);
+		entity.setUpdateUser(uid);
+		entity.setIsDeleted(Boolean.FALSE);
+
 		logOperationMapper.insert(entity);
 	}
 

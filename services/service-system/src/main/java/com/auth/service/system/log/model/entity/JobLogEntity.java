@@ -10,7 +10,7 @@ import lombok.experimental.Accessors;
 import java.io.Serial;
 
 /**
- * 定时任务执行日志，对应 {@code log_job}；删除走逻辑删除（{@code is_deleted}）。
+ * 定时任务执行日志，对应 {@code log_job}；删除走逻辑删除（{@code is_deleted}）
  *
  * @author Bunny
  */

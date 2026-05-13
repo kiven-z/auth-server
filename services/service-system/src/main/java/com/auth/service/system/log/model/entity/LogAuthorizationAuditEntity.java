@@ -10,7 +10,7 @@ import lombok.experimental.Accessors;
 import java.io.Serial;
 
 /**
- * 权限决策审计日志，对应 {@code log_authorization_audit}；主体用户见 {@code create_user}。
+ * 权限决策审计日志，对应 {@code log_authorization_audit}；主体用户见 {@code create_user}
  *
  * @author Bunny
  */

@@ -1,12 +1,12 @@
 package com.auth.common.core.desensitize;
 
-import java.util.Collections;
-
 import cn.hutool.core.text.CharSequenceUtil;
 import lombok.experimental.UtilityClass;
 
+import java.util.Collections;
+
 /**
- * 字符串脱敏工具，供 JSON 序列化与单测复用。
+ * 字符串脱敏工具，供 JSON 序列化与单测复用
  *
  * @author Bunny
  */
@@ -14,7 +14,7 @@ import lombok.experimental.UtilityClass;
 public class DesensitizedStrings {
 
 	/**
-	 * 按前后保留长度与掩码字符进行自定义脱敏。
+	 * 按前后保留长度与掩码字符进行自定义脱敏
 	 * @param value 原始值
 	 * @param prefixLen 前缀保留长度
 	 * @param suffixLen 后缀保留长度
@@ -37,9 +37,9 @@ public class DesensitizedStrings {
 	}
 
 	/**
-	 * 金额类展示字符串：以最后一个 {@code .} 为小数点，左侧原样保留，右侧将十进制数字替换为 {@code *}。
+	 * 金额类展示字符串：以最后一个 {@code .} 为小数点，左侧原样保留，右侧将十进制数字替换为 {@code *}
 	 * <p>
-	 * 适用于 {@code 1,234.56} → {@code 1,234.**}；无小数点时返回原文。
+	 * 适用于 {@code 1,234.56} → {@code 1,234.**}；无小数点时返回原文
 	 * </p>
 	 * @param value 已格式化的金额字符串（如含千分位逗号）
 	 * @return 脱敏后的字符串

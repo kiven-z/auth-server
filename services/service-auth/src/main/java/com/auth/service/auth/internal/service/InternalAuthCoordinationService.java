@@ -24,7 +24,7 @@ public interface InternalAuthCoordinationService {
 	void kickAllSessions(List<Long> userIds);
 
 	/**
-	 * 解析用户生效角色码与权限码（与登录画像构建逻辑一致，含管理员展开）。
+	 * 解析用户生效角色码与权限码（与登录画像构建逻辑一致，含管理员展开）
 	 * @param userId 用户 ID
 	 * @return 角色码与权限码
 	 */

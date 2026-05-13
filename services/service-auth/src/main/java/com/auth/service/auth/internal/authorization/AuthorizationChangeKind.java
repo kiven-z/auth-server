@@ -1,7 +1,7 @@
 package com.auth.service.auth.internal.authorization;
 
 /**
- * 授权变更维度（文档/后续统一失效接口用）：与影响面反查入口对应关系大致如下。
+ * 授权变更维度（文档/后续统一失效接口用）：与影响面反查入口对应关系大致如下
  * <ul>
  * <li>{@link #ROLE} — sys_role、role_scope、批量 roleCode</li>
  * <li>{@link #PERMISSION} — sys_permission、sys_role_permission、permissionCodes</li>

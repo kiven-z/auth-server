@@ -14,7 +14,7 @@ import static com.auth.module.security.contract.redis.SecurityRedisKey.USER_PERM
  *
  * <p>
  * 注意：RedisTemplate 的 JSON 序列化在没有类型信息时可能反序列化为 Map，这里使用 ObjectMapper 进行二次转换；若运行时仍为
- * {@link AuthProfile} 实例则直接返回。
+ * {@link AuthProfile} 实例则直接返回
  * </p>
  *
  * @author Bunny

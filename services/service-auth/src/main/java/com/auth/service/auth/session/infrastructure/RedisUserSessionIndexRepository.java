@@ -225,7 +225,7 @@ public class RedisUserSessionIndexRepository {
 		String userSessionKey = USER_SESSION.key(jti);
 		long ttl = redisTemplate.getExpire(userSessionKey, TimeUnit.SECONDS);
 
-		// -2: key 不存在；-1: 无过期。都视为较新，避免误淘汰有效长会话
+		// -2: key 不存在；-1: 无过期都视为较新，避免误淘汰有效长会话
 		if (ttl < 0) {
 			return Long.MAX_VALUE;
 		}

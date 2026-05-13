@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * {@link DesensitizedJsonSerializer} 与 {@link Desensitized} 组合行为测试。
+ * {@link DesensitizedJsonSerializer} 与 {@link Desensitized} 组合行为测试
  */
 @SuppressWarnings("java:S5976")
 class DesensitizedJsonSerializerTest {

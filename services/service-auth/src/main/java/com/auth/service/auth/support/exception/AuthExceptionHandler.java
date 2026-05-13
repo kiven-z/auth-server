@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 /**
  * 认证服务业务异常处理：统一使用 {@link AuthBusinessExceptionResultBuilder} 与 {@link MessageSource} 拼装
- * {@link Result}。
+ * {@link Result}
  *
  * @author Bunny
  */
@@ -33,7 +33,7 @@ public class AuthExceptionHandler {
 	}
 
 	/**
-	 * 凭证错误：映射为与用户名密码错误一致的业务码与响应结构。
+	 * 凭证错误：映射为与用户名密码错误一致的业务码与响应结构
 	 * @param exception 原始异常
 	 * @return 响应实体
 	 */
@@ -45,7 +45,7 @@ public class AuthExceptionHandler {
 
 	/**
 	 * 将 {@link AuthBusinessException} 转为 HTTP 响应；{@code resultCode} 为空时降级为
-	 * {@link AuthResultCode#SERVER_ERROR}。
+	 * {@link AuthResultCode#SERVER_ERROR}
 	 * @param exception 业务异常
 	 * @return 响应实体
 	 */

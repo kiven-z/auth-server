@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Component;
 
 /**
- * 从当前 HTTP 请求构建 {@link LoginAuditSnapshot}。
+ * 从当前 HTTP 请求构建 {@link LoginAuditSnapshot}
  *
  * @author Bunny
  */
@@ -21,7 +21,7 @@ public class LoginAuditSnapshotFactory {
 	}
 
 	/**
-	 * 解析请求为审计快照；{@code request == null} 时返回 {@link LoginAuditSnapshot#empty()}。
+	 * 解析请求为审计快照；{@code request == null} 时返回 {@link LoginAuditSnapshot#empty()}
 	 * @param request HTTP 请求，可为 null
 	 * @return 不可变快照
 	 */

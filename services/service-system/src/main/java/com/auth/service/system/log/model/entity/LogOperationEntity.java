@@ -10,7 +10,7 @@ import lombok.experimental.Accessors;
 import java.io.Serial;
 
 /**
- * 操作日志，对应 {@code log_operation}。
+ * 操作日志，对应 {@code log_operation}
  *
  * @author Bunny
  */

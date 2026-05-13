@@ -1,7 +1,7 @@
 package com.auth.common.core.desensitize;
 
 /**
- * 脱敏类型，与 Hutool {@link cn.hutool.core.util.DesensitizedUtil} 能力对齐，可按项目需要扩展。
+ * 脱敏类型，与 Hutool {@link cn.hutool.core.util.DesensitizedUtil} 能力对齐，可按项目需要扩展
  *
  * @author Bunny
  */

@@ -3,7 +3,7 @@ package com.auth.service.auth.support.model.enums;
 import lombok.Getter;
 
 /**
- * 登录审计结果码，与表 {@code log_login.login_result} 一致。
+ * 登录审计结果码，与表 {@code log_login.login_result} 一致
  *
  * @author Bunny
  */

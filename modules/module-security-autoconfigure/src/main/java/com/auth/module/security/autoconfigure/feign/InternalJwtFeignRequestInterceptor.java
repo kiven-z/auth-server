@@ -13,7 +13,7 @@ import static com.auth.module.security.contract.constants.SecurityInternalTokenC
  * Feign 拦截器：出站为服务间调用签发短生命周期内部 JWT，并清除外部 {@code Authorization}，避免误传播
  *
  * <p>
- * 固定签发服务身份内部令牌（sub 占位 + service_id claim）。 不要将内部令牌传播回客户端
+ * 固定签发服务身份内部令牌（sub 占位 + service_id claim） 不要将内部令牌传播回客户端
  *
  * @author Bunny
  */

@@ -2,10 +2,10 @@ package com.auth.module.security.autoconfigure.audit;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.core.model.response.Result;
+import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.event.OperationLogPayload;
 import com.auth.module.security.contract.spi.OperationLogHandler;
-import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 在带 {@link OperationLog} 的 Web 控制器方法周围组装 {@link OperationLogPayload} 并委托
- * {@link OperationLogHandler}。
+ * {@link OperationLogHandler}
  *
  * @author Bunny
  */
@@ -53,8 +53,45 @@ public class OperationLogAspect {
 		this.objectMapper = objectMapper;
 	}
 
+	private static ServletRequestAttributes currentRequestAttributes() {
+		try {
+			return (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+		}
+		catch (IllegalStateException ex) {
+			return null;
+		}
+	}
+
+	private static Integer resolveHttpStatus(HttpServletResponse response, Throwable failure) {
+		if (response == null) {
+			return failure != null ? 500 : null;
+		}
+		int status = response.getStatus();
+		if (failure != null && status < 400) {
+			return 500;
+		}
+		return status;
+	}
+
+	private static String formatTargetId(Object value) {
+		if (value == null) {
+			return null;
+		}
+		if (value instanceof Collection<?> collection) {
+			StringJoiner joiner = new StringJoiner(",");
+			for (Object o : collection) {
+				if (o != null) {
+					joiner.add(String.valueOf(o));
+				}
+			}
+			String joined = joiner.toString();
+			return CharSequenceUtil.isBlank(joined) ? null : joined;
+		}
+		return String.valueOf(value);
+	}
+
 	/**
-	 * 环绕通知：采集 HTTP 与返回值上下文后写入操作日志。
+	 * 环绕通知：采集 HTTP 与返回值上下文后写入操作日志
 	 * @param joinPoint 连接点
 	 * @return 原方法返回值
 	 * @throws Throwable 原方法异常
@@ -131,26 +168,6 @@ public class OperationLogAspect {
 		}
 	}
 
-	private static ServletRequestAttributes currentRequestAttributes() {
-		try {
-			return (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
-		}
-		catch (IllegalStateException ex) {
-			return null;
-		}
-	}
-
-	private static Integer resolveHttpStatus(HttpServletResponse response, Throwable failure) {
-		if (response == null) {
-			return failure != null ? 500 : null;
-		}
-		int status = response.getStatus();
-		if (failure != null && status < 400) {
-			return 500;
-		}
-		return status;
-	}
-
 	private String buildResponseMessage(OperationLog meta, Object result, Throwable failure) {
 		if (failure != null) {
 			return OperationLogServletSupport.truncate(failure.getMessage(), MAX_RESPONSE_MESSAGE);
@@ -202,23 +219,6 @@ public class OperationLogAspect {
 		catch (JsonProcessingException ex) {
 			return null;
 		}
-	}
-
-	private static String formatTargetId(Object value) {
-		if (value == null) {
-			return null;
-		}
-		if (value instanceof Collection<?> collection) {
-			StringJoiner joiner = new StringJoiner(",");
-			for (Object o : collection) {
-				if (o != null) {
-					joiner.add(String.valueOf(o));
-				}
-			}
-			String joined = joiner.toString();
-			return CharSequenceUtil.isBlank(joined) ? null : joined;
-		}
-		return String.valueOf(value);
 	}
 
 }

@@ -11,7 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 /**
- * 从 Servlet 请求中抽取操作日志所需的 HTTP 侧信息（纯工具，便于单测）。
+ * 从 Servlet 请求中抽取操作日志所需的 HTTP 侧信息（纯工具，便于单测）
  *
  * @author Bunny
  */
@@ -19,7 +19,7 @@ import java.util.Map;
 public class OperationLogServletSupport {
 
 	/**
-	 * 请求文本最大长度（与表字段设计对齐，约 4KB）。
+	 * 请求文本最大长度（与表字段设计对齐，约 4KB）
 	 */
 	public static final int MAX_REQUEST_TEXT = 4096;
 
@@ -37,7 +37,7 @@ public class OperationLogServletSupport {
 	}
 
 	/**
-	 * 解析客户端 IP（优先 {@code X-Forwarded-For} 首段）。
+	 * 解析客户端 IP（优先 {@code X-Forwarded-For} 首段）
 	 * @param request 请求
 	 * @return IP 文本，非空
 	 */
@@ -51,7 +51,7 @@ public class OperationLogServletSupport {
 	}
 
 	/**
-	 * 组装请求参数摘要：GET 使用 query string；其它方法序列化 parameterMap。
+	 * 组装请求参数摘要：GET 使用 query string；其它方法序列化 parameterMap
 	 * @param request 请求
 	 * @param record 是否记录
 	 * @param objectMapper JSON 序列化
@@ -77,7 +77,7 @@ public class OperationLogServletSupport {
 	}
 
 	/**
-	 * 读取可缓存的请求体（需上游包装 {@link ContentCachingRequestWrapper}）。
+	 * 读取可缓存的请求体（需上游包装 {@link ContentCachingRequestWrapper}）
 	 * @param request 请求
 	 * @param want 是否尝试读取
 	 * @return 正文或 {@code null}

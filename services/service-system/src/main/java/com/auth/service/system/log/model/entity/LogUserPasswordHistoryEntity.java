@@ -9,9 +9,9 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 /**
- * 用户密码历史日志，对应 {@code log_user_password_history}。
+ * 用户密码历史日志，对应 {@code log_user_password_history}
  * <p>
- * 每次用户修改密码时记录。password_hash 使用 BCrypt 加密存储，仅用于后续新旧密码比对， 严禁通过任何接口返回给前端。
+ * 每次用户修改密码时记录password_hash 使用 BCrypt 加密存储，仅用于后续新旧密码比对， 严禁通过任何接口返回给前端
  * </p>
  *
  * @author Bunny

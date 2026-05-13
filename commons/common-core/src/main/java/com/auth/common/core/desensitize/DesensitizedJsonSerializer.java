@@ -14,7 +14,7 @@ import com.fasterxml.jackson.databind.ser.ContextualSerializer;
 import java.io.IOException;
 
 /**
- * 将 {@link String} 按 {@link Desensitized} 策略在 JSON 输出时脱敏。
+ * 将 {@link String} 按 {@link Desensitized} 策略在 JSON 输出时脱敏
  *
  * @author Bunny
  */

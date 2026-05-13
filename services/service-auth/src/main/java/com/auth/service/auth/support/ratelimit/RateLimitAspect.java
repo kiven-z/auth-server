@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 import static com.auth.module.security.contract.redis.SecurityRedisKey.LOGIN_CODE_LIMIT;
 
 /**
- * 基于 Redis 的限流切面。
+ * 基于 Redis 的限流切面
  *
  * <p>
  * 处理逻辑：
@@ -25,7 +25,7 @@ import static com.auth.module.security.contract.redis.SecurityRedisKey.LOGIN_COD
  * <li>从方法参数中解析出用户标识符（例如 {@code "#email"}），将其值作为 Redis 的 Key；</li>
  * <li>若该 Key 不存在，则默认从 0 开始，调用 {@code redisTemplate} 自增 1；</li>
  * <li>为该 Key 设置过期时间</li>
- * <li>在过期时间窗口内，若计数超过上限（{@link #MAX_LIMIT_COUNT}），则拒绝当前请求。</li>
+ * <li>在过期时间窗口内，若计数超过上限（{@link #MAX_LIMIT_COUNT}），则拒绝当前请求</li>
  * </ol>
  *
  * @author Bunny

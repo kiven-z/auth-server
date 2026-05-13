@@ -108,7 +108,7 @@ public abstract class AbstractSecurityTokenProvider implements SecurityTokenProv
 	}
 
 	/**
-	 * 归一化令牌：仅在 Bearer 前缀存在时裁剪前缀。
+	 * 归一化令牌：仅在 Bearer 前缀存在时裁剪前缀
 	 * @param token 令牌
 	 * @return 归一化后的令牌
 	 */

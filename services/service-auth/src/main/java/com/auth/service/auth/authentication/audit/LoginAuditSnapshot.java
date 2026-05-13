@@ -2,7 +2,7 @@ package com.auth.service.auth.authentication.audit;
 
 /**
  * 登录审计请求侧快照：在发布线程从 {@link jakarta.servlet.http.HttpServletRequest} 解析后固化，
- * 供事件监听器持久化，避免异步或请求结束后丢失上下文。
+ * 供事件监听器持久化，避免异步或请求结束后丢失上下文
  *
  * @param loginIp 客户端 IP
  * @param loginRegion 地域描述
@@ -16,7 +16,7 @@ public record LoginAuditSnapshot(String loginIp, String loginRegion, String user
 		String browserType) {
 
 	/**
-	 * 无 HTTP 请求时的空快照（字段均为 null）。
+	 * 无 HTTP 请求时的空快照（字段均为 null）
 	 * @return 空快照
 	 */
 	public static LoginAuditSnapshot empty() {

@@ -12,7 +12,7 @@ import org.springframework.util.Assert;
  * 会话上限管理器
  *
  * <p>
- * 认证成功后检查活跃会话数是否达上限，按配置策略拒绝登录或淘汰最旧会话。 从 {@link LoginFailureRateLimiter} 拆分而来，专注会话容量控制。
+ * 认证成功后检查活跃会话数是否达上限，按配置策略拒绝登录或淘汰最旧会话 从 {@link LoginFailureRateLimiter} 拆分而来，专注会话容量控制
  * </p>
  *
  * @author Bunny
@@ -36,7 +36,7 @@ public class SessionLimitManager {
 	}
 
 	/**
-	 * 认证成功后检查：活跃会话数达上限时抛会话超限异常。
+	 * 认证成功后检查：活跃会话数达上限时抛会话超限异常
 	 * @param userId 用户 ID
 	 * @throws AuthBusinessException 会话达上限且策略为拒绝时抛出
 	 */

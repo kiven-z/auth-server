@@ -8,7 +8,7 @@ import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * data_scope_grant_table 查询投影（与 Mapper 列别名一致）。
+ * data_scope_grant_table 查询投影（与 Mapper 列别名一致）
  *
  * @author Bunny
  */
