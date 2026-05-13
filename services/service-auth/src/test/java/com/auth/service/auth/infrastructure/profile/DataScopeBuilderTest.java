@@ -3,9 +3,9 @@ package com.auth.service.auth.infrastructure.profile;
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
 import com.auth.module.security.contract.api.granttable.DataScopeKeyUtil;
 import com.auth.module.security.contract.api.granttable.ScopeGrantType;
-import com.auth.service.auth.infrastructure.profile.datascope.DataScopeBuildResult;
-import com.auth.service.auth.infrastructure.profile.datascope.DataScopeBuilder;
-import com.auth.service.auth.model.projection.DataScopeProjection;
+import com.auth.service.auth.authentication.profile.datascope.DataScopeBuildResult;
+import com.auth.service.auth.authentication.profile.datascope.DataScopeBuilder;
+import com.auth.service.auth.support.model.projection.DataScopeProjection;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

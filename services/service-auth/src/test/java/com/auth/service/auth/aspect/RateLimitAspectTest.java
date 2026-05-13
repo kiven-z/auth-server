@@ -1,8 +1,9 @@
 package com.auth.service.auth.aspect;
 
-import com.auth.service.auth.annotation.RateLimit;
-import com.auth.service.auth.exception.AuthBusinessException;
-import com.auth.service.auth.model.enums.AuthResultCode;
+import com.auth.service.auth.support.exception.AuthBusinessException;
+import com.auth.service.auth.support.model.enums.AuthResultCode;
+import com.auth.service.auth.support.ratelimit.RateLimit;
+import com.auth.service.auth.support.ratelimit.RateLimitAspect;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

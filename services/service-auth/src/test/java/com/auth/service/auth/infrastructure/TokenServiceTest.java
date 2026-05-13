@@ -1,26 +1,25 @@
 package com.auth.service.auth.infrastructure;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-import java.time.LocalDateTime;
-
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
 import com.auth.common.jwt.autoconfigure.JwtProperties;
 import com.auth.common.jwt.model.JwtUserToken;
 import com.auth.module.security.core.token.model.SecurityTokenResult;
 import com.auth.module.security.core.token.provider.AccessTokenProvider;
 import com.auth.module.security.core.token.provider.RefreshTokenProvider;
 import com.auth.service.auth.TestConstants;
-import com.auth.service.auth.exception.AuthBusinessException;
-import com.auth.service.auth.model.enums.AuthResultCode;
-import com.auth.service.auth.infrastructure.login.TokenPair;
-import com.auth.service.auth.infrastructure.login.TokenService;
+import com.auth.service.auth.authentication.token.TokenPair;
+import com.auth.service.auth.authentication.token.TokenService;
+import com.auth.service.auth.support.exception.AuthBusinessException;
+import com.auth.service.auth.support.model.enums.AuthResultCode;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.LocalDateTime;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 /**
  * TokenService 单元测试

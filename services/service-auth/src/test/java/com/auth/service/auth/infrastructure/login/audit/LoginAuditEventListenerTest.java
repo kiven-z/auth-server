@@ -1,17 +1,18 @@
 package com.auth.service.auth.infrastructure.login.audit;
 
-import com.auth.service.auth.model.enums.AuthLoginLogResult;
-import com.auth.service.auth.model.enums.AuthLoginLogType;
-import com.auth.service.auth.service.AuthLoginAuditService;
+import com.auth.service.auth.authentication.audit.LoginAuditEvent;
+import com.auth.service.auth.authentication.audit.LoginAuditEventListener;
+import com.auth.service.auth.authentication.audit.LoginAuditSnapshot;
+import com.auth.service.auth.authentication.service.AuthLoginAuditService;
+import com.auth.service.auth.support.model.enums.AuthLoginLogResult;
+import com.auth.service.auth.support.model.enums.AuthLoginLogType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 
 /**

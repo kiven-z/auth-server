@@ -1,16 +1,16 @@
 package com.auth.service.auth.infrastructure.strategy;
 
 import com.auth.module.platform.persistence.model.UserEntity;
-import com.auth.service.auth.exception.AuthBusinessException;
-import com.auth.service.auth.infrastructure.login.LoginFailureRateLimiter;
-import com.auth.service.auth.infrastructure.login.strategy.UsernamePasswordLoginStrategy;
-import com.auth.service.auth.mapper.UserMapper;
-import com.auth.service.auth.model.enums.AuthLoginLogResult;
-import com.auth.service.auth.model.enums.AuthLoginLogType;
-import com.auth.service.auth.model.enums.AuthResultCode;
-import com.auth.service.auth.model.request.login.UsernamePasswordLoginRequest;
-import com.auth.service.auth.infrastructure.login.audit.LoginAuditEventPublisher;
-import com.auth.service.auth.service.AuthProfileQueryService;
+import com.auth.service.auth.authentication.audit.LoginAuditEventPublisher;
+import com.auth.service.auth.authentication.mapper.UserMapper;
+import com.auth.service.auth.authentication.service.AuthProfileQueryService;
+import com.auth.service.auth.authentication.strategy.UsernamePasswordLoginStrategy;
+import com.auth.service.auth.authentication.token.LoginFailureRateLimiter;
+import com.auth.service.auth.support.exception.AuthBusinessException;
+import com.auth.service.auth.support.model.enums.AuthLoginLogResult;
+import com.auth.service.auth.support.model.enums.AuthLoginLogType;
+import com.auth.service.auth.support.model.enums.AuthResultCode;
+import com.auth.service.auth.support.model.request.login.UsernamePasswordLoginRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,12 +21,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.ArgumentMatchers.same;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link UsernamePasswordLoginStrategy} ????

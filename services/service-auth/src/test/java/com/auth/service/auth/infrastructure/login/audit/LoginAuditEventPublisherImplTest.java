@@ -1,7 +1,11 @@
 package com.auth.service.auth.infrastructure.login.audit;
 
-import com.auth.service.auth.model.enums.AuthLoginLogResult;
-import com.auth.service.auth.model.enums.AuthLoginLogType;
+import com.auth.service.auth.authentication.audit.LoginAuditEvent;
+import com.auth.service.auth.authentication.audit.LoginAuditEventPublisherImpl;
+import com.auth.service.auth.authentication.audit.LoginAuditSnapshot;
+import com.auth.service.auth.authentication.audit.LoginAuditSnapshotFactory;
+import com.auth.service.auth.support.model.enums.AuthLoginLogResult;
+import com.auth.service.auth.support.model.enums.AuthLoginLogType;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

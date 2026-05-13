@@ -2,10 +2,11 @@ package com.auth.service.auth.service.impl;
 
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.TestConstants;
-import com.auth.service.auth.infrastructure.profile.AuthProfileCache;
-import com.auth.service.auth.infrastructure.session.redis.RedisUserSessionIndexRepository;
-import com.auth.service.auth.model.vo.inner.EffectiveCodesVO;
-import com.auth.service.auth.service.AuthProfileQueryService;
+import com.auth.service.auth.authentication.profile.AuthProfileCache;
+import com.auth.service.auth.authentication.service.AuthProfileQueryService;
+import com.auth.service.auth.internal.service.impl.InternalAuthCoordinationServiceImpl;
+import com.auth.service.auth.session.infrastructure.RedisUserSessionIndexRepository;
+import com.auth.service.auth.support.model.vo.inner.EffectiveCodesVO;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,11 +18,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link InternalAuthCoordinationServiceImpl} 单元测试

@@ -1,9 +1,9 @@
 package com.auth.service.auth.support;
 
 import com.auth.common.core.model.response.Result;
-import com.auth.service.auth.exception.AuthBusinessException;
-import com.auth.service.auth.exception.AuthBusinessExceptionResultBuilder;
-import com.auth.service.auth.model.enums.AuthResultCode;
+import com.auth.service.auth.support.exception.AuthBusinessException;
+import com.auth.service.auth.support.exception.AuthBusinessExceptionResultBuilder;
+import com.auth.service.auth.support.model.enums.AuthResultCode;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

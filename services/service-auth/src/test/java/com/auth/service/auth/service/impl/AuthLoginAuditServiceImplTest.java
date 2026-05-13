@@ -2,12 +2,14 @@ package com.auth.service.auth.service.impl;
 
 import com.auth.common.ip.IpAddressService;
 import com.auth.module.platform.persistence.model.LoginLogEntity;
-import com.auth.service.auth.infrastructure.login.audit.LoginAuditSnapshot;
-import com.auth.service.auth.infrastructure.login.audit.LoginAuditSnapshotFactory;
-import com.auth.service.auth.mapper.LoginLogMapper;
-import com.auth.service.auth.model.enums.AuthLoginLogResult;
-import com.auth.service.auth.model.enums.AuthLoginLogType;
+import com.auth.service.auth.authentication.audit.LoginAuditSnapshot;
+import com.auth.service.auth.authentication.audit.LoginAuditSnapshotFactory;
+import com.auth.service.auth.authentication.mapper.LoginLogMapper;
+import com.auth.service.auth.authentication.service.impl.AuthLoginAuditServiceImpl;
+import com.auth.service.auth.support.model.enums.AuthLoginLogResult;
+import com.auth.service.auth.support.model.enums.AuthLoginLogType;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,9 +18,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import jakarta.servlet.http.HttpServletRequest;
-
 import java.lang.reflect.Field;
+
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;

@@ -2,9 +2,10 @@ package com.auth.service.auth.service.impl;
 
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
-import com.auth.service.auth.infrastructure.profile.datascope.DataScopeEffectiveResolver;
-import com.auth.service.auth.mapper.UserAuthorizationGrantMapper;
-import com.auth.service.auth.mapper.UserMapper;
+import com.auth.service.auth.authentication.mapper.UserMapper;
+import com.auth.service.auth.authentication.profile.datascope.DataScopeEffectiveResolver;
+import com.auth.service.auth.authentication.service.impl.AuthProfileQueryServiceImpl;
+import com.auth.service.auth.internal.mapper.UserAuthorizationGrantMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

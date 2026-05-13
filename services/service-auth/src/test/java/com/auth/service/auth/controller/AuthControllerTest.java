@@ -1,12 +1,13 @@
 package com.auth.service.auth.controller;
 
 import com.auth.common.jwt.autoconfigure.JwtProperties;
-import com.auth.service.auth.model.request.login.EmailLoginRequest;
-import com.auth.service.auth.model.request.login.UsernamePasswordLoginRequest;
-import com.auth.service.auth.model.response.RefreshTokenResponse;
-import com.auth.service.auth.model.response.UserLoginResponse;
-import com.auth.service.auth.service.AuthService;
-import com.auth.service.auth.service.RefreshTokenService;
+import com.auth.service.auth.authentication.controller.AuthController;
+import com.auth.service.auth.authentication.service.AuthService;
+import com.auth.service.auth.authentication.service.RefreshTokenService;
+import com.auth.service.auth.support.model.request.login.EmailLoginRequest;
+import com.auth.service.auth.support.model.request.login.UsernamePasswordLoginRequest;
+import com.auth.service.auth.support.model.response.RefreshTokenResponse;
+import com.auth.service.auth.support.model.response.UserLoginResponse;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
