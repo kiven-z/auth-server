@@ -6,7 +6,7 @@ import com.alibaba.fastjson2.JSON;
 import com.auth.module.security.contract.event.OperationLogPayload;
 import com.auth.module.security.contract.event.SecurityAuthorizationAuditPayloadEvent;
 import com.auth.module.security.contract.event.SecurityEventType;
-import com.auth.service.system.common.service.LogAuthorizationAuditAppendService;
+import com.auth.service.system.common.service.SecurityIngestService;
 import com.auth.service.system.log.convert.LogOperationPayloadConvert;
 import com.auth.service.system.log.mapper.LogAuthorizationAuditMapper;
 import com.auth.service.system.log.mapper.LogOperationMapper;
@@ -17,12 +17,12 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 
 /**
- * 授权审计追加写入实现
+ * 安全类内部上报数据落库实现（授权审计、操作日志）。
  *
  * @author Bunny
  */
 @Service
-public class LogAuthorizationAuditAppendServiceImpl implements LogAuthorizationAuditAppendService {
+public class SecurityIngestServiceImpl implements SecurityIngestService {
 
 	/**
 	 * 方法参数 JSON 最大长度
@@ -38,7 +38,7 @@ public class LogAuthorizationAuditAppendServiceImpl implements LogAuthorizationA
 
 	private final LogOperationMapper logOperationMapper;
 
-	public LogAuthorizationAuditAppendServiceImpl(LogAuthorizationAuditMapper logAuthorizationAuditMapper,
+	public SecurityIngestServiceImpl(LogAuthorizationAuditMapper logAuthorizationAuditMapper,
 			LogOperationMapper logOperationMapper) {
 		this.logAuthorizationAuditMapper = logAuthorizationAuditMapper;
 		this.logOperationMapper = logOperationMapper;

@@ -4,10 +4,12 @@ import com.auth.common.core.model.response.Result;
 import com.auth.module.security.contract.dto.AuthorizationAuditIngestRequest;
 import com.auth.module.security.contract.event.SecurityAuthorizationAuditPayloadEvent;
 import com.auth.module.security.contract.spi.AuthorizationAuditHandler;
-import com.auth.service.auth.support.integration.SystemAuthorizationAuditFeignClient;
+import com.auth.service.auth.support.integration.SystemSecurityIngestFeignClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+
+import static com.auth.common.web.resttemplate.FeignUtil.isSuccess;
 
 /**
  * 认证审计处理器：经 Feign 调用 system 将授权决策事件持久化
@@ -18,10 +20,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class LoggingAuthorizationAuditHandler implements AuthorizationAuditHandler {
 
-	private final SystemAuthorizationAuditFeignClient systemAuthorizationAuditFeignClient;
+	private final SystemSecurityIngestFeignClient systemSecurityIngestFeignClient;
 
-	public LoggingAuthorizationAuditHandler(SystemAuthorizationAuditFeignClient systemAuthorizationAuditFeignClient) {
-		this.systemAuthorizationAuditFeignClient = systemAuthorizationAuditFeignClient;
+	public LoggingAuthorizationAuditHandler(SystemSecurityIngestFeignClient systemSecurityIngestFeignClient) {
+		this.systemSecurityIngestFeignClient = systemSecurityIngestFeignClient;
 	}
 
 	/**
@@ -32,9 +34,8 @@ public class LoggingAuthorizationAuditHandler implements AuthorizationAuditHandl
 	public void handle(SecurityAuthorizationAuditPayloadEvent event) {
 		AuthorizationAuditIngestRequest body = AuthorizationAuditIngestRequest.fromEvent(event);
 		try {
-			Result<Void> result = systemAuthorizationAuditFeignClient.appendRecord(body);
-			// FIXME 使用 isOk(result); FeignUtil.isOk()
-			if (result == null || !Integer.valueOf(Result.SUCCESS_CODE).equals(result.getCode())) {
+			Result<Void> result = systemSecurityIngestFeignClient.appendAuthorizationAudit(body);
+			if (!isSuccess(result)) {
 				log.error(
 						"Authorization audit Feign returned non-success: code={}, message={}, requestUri={}, userId={}",
 						result != null ? result.getCode() : null, result != null ? result.getMessage() : null,

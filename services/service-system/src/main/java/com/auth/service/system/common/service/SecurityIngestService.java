@@ -4,11 +4,11 @@ import com.auth.module.security.contract.event.OperationLogPayload;
 import com.auth.module.security.contract.event.SecurityAuthorizationAuditPayloadEvent;
 
 /**
- * 将授权审计事件追加写入
+ * 接收内部上报的安全相关负载并落库（授权审计、操作日志等）。
  *
  * @author Bunny
  */
-public interface LogAuthorizationAuditAppendService {
+public interface SecurityIngestService {
 
 	/**
 	 * 持久化一条授权审计记录
@@ -17,7 +17,7 @@ public interface LogAuthorizationAuditAppendService {
 	void append(SecurityAuthorizationAuditPayloadEvent event);
 
 	/**
-	 * 添加一条操作日志记录
+	 * 持久化一条操作日志记录
 	 * @param payload 操作日志负载
 	 */
 	void append(OperationLogPayload payload);

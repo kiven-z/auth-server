@@ -1,5 +1,6 @@
 package com.auth.service.system.admin.service.impl;
 
+import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
@@ -30,7 +31,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import static com.auth.common.web.resttemplate.FeignUtil.isOk;
+import static com.auth.common.web.resttemplate.FeignUtil.isSuccess;
 
 /**
  * 菜单服务实现
@@ -68,7 +69,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuEntity
 
 		// 查询当前用户角色
 		Result<EffectiveCodesInnerDTO> result = authenticationInnerFeignClient.getEffectiveCodes(userId);
-		if (!isOk(result)) {
+		if (BooleanUtil.isFalse(isSuccess(result))) {
 			log.warn("Menu web route: effective codes unavailable userId={}", userId);
 			return Collections.emptyList();
 		}

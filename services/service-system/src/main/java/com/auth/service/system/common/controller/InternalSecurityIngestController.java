@@ -5,7 +5,7 @@ import com.auth.module.security.autoconfigure.annotation.InternalApi;
 import com.auth.module.security.contract.dto.AuthorizationAuditIngestRequest;
 import com.auth.module.security.contract.dto.OperationLogIngestRequest;
 import com.auth.module.security.contract.event.SecurityAuthorizationAuditPayloadEvent;
-import com.auth.service.system.common.service.LogAuthorizationAuditAppendService;
+import com.auth.service.system.common.service.SecurityIngestService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,35 +14,35 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 对内接口：接收其他微服务上报的授权审计事件并落库。
+ * 对内接口：接收其他微服务上报的安全审计类数据（授权决策审计、操作日志）并落库。
  *
  * @author Bunny
  */
-@Tag(name = "系统服务-内部-授权审计")
+@Tag(name = "系统服务-内部-安全审计上报")
 @RequestMapping("/api/system/inner")
 @RestController
-public class InternalAuthorizationAuditController {
+public class InternalSecurityIngestController {
 
-	private final LogAuthorizationAuditAppendService logAuthorizationAuditAppendService;
+	private final SecurityIngestService securityIngestService;
 
-	public InternalAuthorizationAuditController(LogAuthorizationAuditAppendService logAuthorizationAuditAppendService) {
-		this.logAuthorizationAuditAppendService = logAuthorizationAuditAppendService;
+	public InternalSecurityIngestController(SecurityIngestService securityIngestService) {
+		this.securityIngestService = securityIngestService;
 	}
 
 	@InternalApi
 	@Operation(summary = "追加授权审计记录", description = "供 service-auth 等经服务发现上报，写入 log_authorization_audit")
 	@PostMapping("/authorization-audit/records")
-	public Result<Void> appendRecord(@RequestBody AuthorizationAuditIngestRequest body) {
+	public Result<Void> appendAuthorizationAudit(@RequestBody AuthorizationAuditIngestRequest body) {
 		SecurityAuthorizationAuditPayloadEvent event = body.toPayloadEvent();
-		logAuthorizationAuditAppendService.append(event);
+		securityIngestService.append(event);
 		return Result.success();
 	}
 
 	@InternalApi
 	@Operation(summary = "追加操作日志", description = "供 service-auth 等经服务发现上报，写入 log_operation")
 	@PostMapping("/operation-log/records")
-	public Result<Void> appendRecord(@RequestBody OperationLogIngestRequest body) {
-		logAuthorizationAuditAppendService.append(body.toPayload());
+	public Result<Void> appendOperationLog(@RequestBody OperationLogIngestRequest body) {
+		securityIngestService.append(body.toPayload());
 		return Result.success();
 	}
 

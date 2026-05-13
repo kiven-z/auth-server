@@ -2,14 +2,13 @@ package com.auth.service.system.common.listener;
 
 import com.auth.module.security.contract.event.OperationLogPayload;
 import com.auth.module.security.contract.spi.OperationLogHandler;
-import com.auth.service.system.common.service.LogAuthorizationAuditAppendService;
-import com.auth.service.system.log.service.LogOperationService;
+import com.auth.service.system.common.service.SecurityIngestService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 /**
- * 将操作日志负载异步委托给 {@link LogOperationService#appendForAudit} 写入 {@code log_operation}。
+ * 将操作日志负载异步委托给 {@link SecurityIngestService} 写入 {@code log_operation}。
  *
  * @author Bunny
  */
@@ -17,10 +16,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class OperationLogPersistHandler implements OperationLogHandler {
 
-	private final LogAuthorizationAuditAppendService logAuthorizationAuditAppendService;
+	private final SecurityIngestService securityIngestService;
 
-	public OperationLogPersistHandler(LogAuthorizationAuditAppendService logAuthorizationAuditAppendService) {
-		this.logAuthorizationAuditAppendService = logAuthorizationAuditAppendService;
+	public OperationLogPersistHandler(SecurityIngestService securityIngestService) {
+		this.securityIngestService = securityIngestService;
 	}
 
 	/**
@@ -30,7 +29,7 @@ public class OperationLogPersistHandler implements OperationLogHandler {
 	@Async
 	public void handle(OperationLogPayload payload) {
 		try {
-			logAuthorizationAuditAppendService.append(payload);
+			securityIngestService.append(payload);
 		}
 		catch (RuntimeException ex) {
 			log.error("Failed to persist operation log, uri={}, module={}", payload.getRequestUri(),

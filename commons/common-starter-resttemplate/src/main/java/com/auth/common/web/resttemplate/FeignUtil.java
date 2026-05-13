@@ -16,11 +16,11 @@ public class FeignUtil {
 	 * @param result 远程调用结果
 	 * @return 是否成功
 	 */
-	public static boolean isOk(Result<?> result) {
+	public static boolean isSuccess(Result<?> result) {
 		if (result == null) {
 			return false;
 		}
-		return Integer.valueOf(Result.SUCCESS_CODE).equals(result.getCode()) && result.getData() != null;
+		return Integer.valueOf(Result.SUCCESS_CODE).equals(result.getCode());
 	}
 
 }
