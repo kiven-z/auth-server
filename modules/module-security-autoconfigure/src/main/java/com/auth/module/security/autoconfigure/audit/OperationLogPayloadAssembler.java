@@ -23,7 +23,7 @@ import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 将 Web 请求上下文与 {@link OperationLog} 元数据组装为 {@link OperationLogPayload} 并委托
+ * 将 Web 请求上下文、控制器方法实参与 {@link OperationLog} 元数据组装为 {@link OperationLogPayload} 并委托
  * {@link OperationLogHandler}。
  *
  * @author Bunny
@@ -106,7 +106,8 @@ public class OperationLogPayloadAssembler {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
 
-        OperationLogPayload payload = buildPayload(meta, result, failure, startNs, request, response, method);
+        OperationLogPayload payload = buildPayload(meta, result, failure, startNs, request, response, method,
+                joinPoint.getArgs());
         dispatch(payload);
     }
 
@@ -120,10 +121,12 @@ public class OperationLogPayloadAssembler {
      * @param request  请求
      * @param response 响应
      * @param method   方法
+     * @param methodArgs 控制器方法实参（用于记录 {@code @RequestBody} 等绑定结果）
      * @return 操作日志负载
      */
     private OperationLogPayload buildPayload(OperationLog meta, Object result, Throwable failure, long startNs,
-                                             HttpServletRequest request, HttpServletResponse response, Method method) {
+                                             HttpServletRequest request, HttpServletResponse response, Method method,
+                                             Object[] methodArgs) {
         int executionMs = (int) TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNs);
         Integer httpStatus = resolveHttpStatus(response, failure);
         String responseMessage = OperationLogResponseMessageComposer.compose(meta, result, failure);
@@ -139,7 +142,8 @@ public class OperationLogPayloadAssembler {
                 .targetId(OperationLogContext.getTargetId())
                 .requestMethod(request.getMethod())
                 .requestUri(CharSequenceUtil.nullToEmpty(request.getRequestURI()))
-                .requestParams(OperationLogRequestParamsBuilder.build(request, meta.recordParams(), objectMapper))
+                .requestParams(OperationLogRequestParamsBuilder.build(request, meta.recordParams(), objectMapper,
+                        methodArgs))
                 .responseStatus(httpStatus)
                 .responseMessage(responseMessage)
                 .executionTimeMs(executionMs)

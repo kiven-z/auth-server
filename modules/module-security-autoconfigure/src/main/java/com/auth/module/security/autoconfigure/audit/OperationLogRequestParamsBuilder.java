@@ -3,14 +3,29 @@ package com.auth.module.security.autoconfigure.audit;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 import lombok.experimental.UtilityClass;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.Map;
+import java.security.Principal;
+import java.util.*;
 
 /**
  * 操作日志请求参数摘要构建（长度与表字段对齐）。
+ * <p>
+ * Servlet 侧：GET 使用 query string；其它方法使用 {@link HttpServletRequest#getParameterMap()}。
+ * Spring MVC 侧：对控制器方法实参做摘要（含 {@code @RequestBody} 解析后的对象），上传文件仅记元数据。
+ * </p>
  *
  * @author Bunny
  */
@@ -22,8 +37,18 @@ public class OperationLogRequestParamsBuilder {
      */
     public static final int MAX_REQUEST_TEXT = 4096;
 
+    private static final String KEY_QUERY_STRING = "queryString";
+
+    private static final String KEY_PARAMETER_MAP = "parameterMap";
+
+    private static final String KEY_METHOD_ARGS = "methodArgs";
+
+    private static final String KEY_TYPE = "_type";
+
+    private static final String KEY_NOTE = "_note";
+
     /**
-     * 组装请求参数摘要：GET 使用 query string；其它方法序列化 parameterMap。
+     * 组装请求参数摘要：不携带方法实参（与历史行为一致）。
      *
      * @param request      HTTP 请求
      * @param record       是否记录
@@ -31,14 +56,43 @@ public class OperationLogRequestParamsBuilder {
      * @return 摘要或 {@code null}
      */
     public static String build(HttpServletRequest request, boolean record, ObjectMapper objectMapper) {
+        return build(request, record, objectMapper, null);
+    }
+
+    /**
+     * 组装请求参数摘要：GET 使用 query string；其它方法序列化 parameterMap；并合并可记录的
+     * 控制器方法实参（与 {@link org.aspectj.lang.JoinPoint#getArgs()} 一致，如 {@code @RequestBody} 绑定结果）。
+     *
+     * @param request      HTTP 请求
+     * @param record       是否记录
+     * @param objectMapper JSON 序列化
+     * @param methodArgs   控制器方法实参，可为 {@code null}
+     * @return 摘要或 {@code null}
+     */
+    public static String build(HttpServletRequest request, boolean record, ObjectMapper objectMapper,
+                               Object[] methodArgs) {
         if (!record) {
             return null;
         }
+        List<Object> methodSummaries = summarizeMethodArguments(methodArgs, objectMapper);
+        if (methodSummaries.isEmpty()) {
+            return buildServletDerivedOnly(request, objectMapper);
+        }
+        return buildCombinedWithMethodArgs(request, objectMapper, methodSummaries);
+    }
+
+    /**
+     * 与历史实现一致：仅 Servlet 层 query / parameterMap
+     *
+     * @param request      请求
+     * @param objectMapper JSON 序列化
+     * @return 摘要或 {@code null}
+     */
+    private static String buildServletDerivedOnly(HttpServletRequest request, ObjectMapper objectMapper) {
         if ("GET".equalsIgnoreCase(request.getMethod())) {
             String toEmpty = CharSequenceUtil.nullToEmpty(request.getQueryString());
             return CharSequenceUtil.subPre(toEmpty, MAX_REQUEST_TEXT);
         }
-
         Map<String, String[]> map = request.getParameterMap();
         if (MapUtil.isEmpty(map)) {
             return null;
@@ -48,6 +102,173 @@ public class OperationLogRequestParamsBuilder {
         } catch (JsonProcessingException ex) {
             return null;
         }
+    }
+
+    /**
+     * 合并 Servlet 摘要与 Spring 绑定的方法实参。
+     *
+     * @param request         请求
+     * @param objectMapper    JSON 序列化
+     * @param methodSummaries 方法实参摘要
+     * @return 摘要或 {@code null}
+     */
+    private static String buildCombinedWithMethodArgs(HttpServletRequest request, ObjectMapper objectMapper,
+                                                      List<Object> methodSummaries) {
+        Map<String, Object> root = new LinkedHashMap<>();
+        if ("GET".equalsIgnoreCase(request.getMethod())) {
+            String qs = CharSequenceUtil.nullToEmpty(request.getQueryString());
+            if (CharSequenceUtil.isNotBlank(qs)) {
+                root.put(KEY_QUERY_STRING, CharSequenceUtil.subPre(qs, MAX_REQUEST_TEXT));
+            }
+        } else {
+            Map<String, String[]> map = request.getParameterMap();
+            if (MapUtil.isNotEmpty(map)) {
+                root.put(KEY_PARAMETER_MAP, map);
+            }
+        }
+        root.put(KEY_METHOD_ARGS, methodSummaries);
+        try {
+            return CharSequenceUtil.subPre(objectMapper.writeValueAsString(root), MAX_REQUEST_TEXT);
+        } catch (JsonProcessingException ex) {
+            return null;
+        }
+    }
+
+    /**
+     * 将方法实参转为可 JSON 化的摘要列表（跳过 Web 框架占位参数）。
+     *
+     * @param methodArgs   方法实参
+     * @param objectMapper JSON 序列化
+     * @return 摘要列表
+     */
+    private static List<Object> summarizeMethodArguments(Object[] methodArgs, ObjectMapper objectMapper) {
+        if (methodArgs == null || methodArgs.length == 0) {
+            return Collections.emptyList();
+        }
+        List<Object> out = new ArrayList<>();
+        for (Object arg : methodArgs) {
+            if (arg == null) {
+                continue;
+            }
+            if (isSkippedFrameworkArgument(arg)) {
+                continue;
+            }
+            Object summary = toLoggableArgumentSummary(arg, objectMapper);
+            if (summary != null) {
+                out.add(summary);
+            }
+        }
+        return out;
+    }
+
+    /**
+     * 判断是否属于 Web 层框架注入参数（不参与业务入参摘要）。
+     *
+     * @param arg 方法实参
+     * @return 是否跳过
+     */
+    private static boolean isSkippedFrameworkArgument(Object arg) {
+        return arg instanceof ServletRequest
+                || arg instanceof ServletResponse
+                || arg instanceof BindingResult
+                || arg instanceof Model
+                || arg instanceof NativeWebRequest
+                || arg instanceof HttpSession
+                || arg instanceof RedirectAttributes
+                || arg instanceof Principal;
+    }
+
+    /**
+     * 单个实参的日志摘要：上传文件仅元数据；字节数组只记长度；其余尽量转为 {@link JsonNode}。
+     *
+     * @param arg          方法实参
+     * @param objectMapper JSON 序列化
+     * @return 摘要或 {@code null}
+     */
+    private static Object toLoggableArgumentSummary(Object arg, ObjectMapper objectMapper) {
+        if (arg instanceof MultipartFile file) {
+            return summarizeMultipartFile(file);
+        }
+        if (arg instanceof MultipartFile[] files) {
+            return summarizeMultipartFileArray(files);
+        }
+        if (arg instanceof Part part) {
+            return summarizePart(part);
+        }
+        if (arg instanceof Part[] parts) {
+            return summarizePartArray(parts);
+        }
+        if (arg instanceof byte[] bytes) {
+            return Map.of(KEY_TYPE, "byte[]", "length", bytes.length);
+        }
+        try {
+            return objectMapper.valueToTree(arg);
+        } catch (Exception ex) {
+            return Map.of(KEY_TYPE, arg.getClass().getName(), KEY_NOTE, "not serializable for operation log");
+        }
+    }
+
+    /**
+     * 将 {@link MultipartFile} 转为元数据映射（不落库文件字节）。
+     *
+     * @param file 文件
+     * @return 元数据映射
+     */
+    private static Map<String, Object> summarizeMultipartFile(MultipartFile file) {
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put(KEY_TYPE, "MultipartFile");
+        m.put("originalFilename", file.getOriginalFilename());
+        m.put("size", file.getSize());
+        m.put("contentType", file.getContentType());
+        return m;
+    }
+
+    /**
+     * 批量摘要 {@link MultipartFile} 数组。
+     *
+     * @param files 文件数组
+     * @return 摘要列表
+     */
+    private static List<Object> summarizeMultipartFileArray(MultipartFile[] files) {
+        List<Object> list = new ArrayList<>();
+        for (MultipartFile f : files) {
+            if (f != null) {
+                list.add(summarizeMultipartFile(f));
+            }
+        }
+        return list;
+    }
+
+    /**
+     * 将 {@link Part} 转为元数据映射。
+     *
+     * @param part 部分
+     * @return 元数据映射
+     */
+    private static Map<String, Object> summarizePart(Part part) {
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put(KEY_TYPE, "Part");
+        m.put("name", part.getName());
+        m.put("submittedFileName", part.getSubmittedFileName());
+        m.put("size", part.getSize());
+        m.put("contentType", part.getContentType());
+        return m;
+    }
+
+    /**
+     * 批量摘要 {@link Part} 数组。
+     *
+     * @param parts 部分数组
+     * @return 摘要列表
+     */
+    private static List<Object> summarizePartArray(Part[] parts) {
+        List<Object> list = new ArrayList<>();
+        for (Part p : parts) {
+            if (p != null) {
+                list.add(summarizePart(p));
+            }
+        }
+        return list;
     }
 
 }
