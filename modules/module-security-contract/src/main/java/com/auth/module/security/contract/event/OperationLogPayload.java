@@ -36,6 +36,11 @@ public class OperationLogPayload {
 	String targetType;
 
 	/**
+	 * 业务目标主键；未通过 {@link com.auth.module.security.contract.context.OperationLogContext} 设置时为 {@code null}
+	 */
+	Long targetId;
+
+	/**
 	 * HTTP 方法
 	 */
 	String requestMethod;

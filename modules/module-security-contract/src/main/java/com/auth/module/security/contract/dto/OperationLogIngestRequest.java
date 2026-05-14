@@ -32,6 +32,8 @@ public class OperationLogIngestRequest implements Serializable {
 
 	private String targetType;
 
+	private Long targetId;
+
 	private String requestMethod;
 
 	private String requestUri;
@@ -65,6 +67,7 @@ public class OperationLogIngestRequest implements Serializable {
 			.operationType(payload.getOperationType())
 			.module(payload.getModule())
 			.targetType(payload.getTargetType())
+			.targetId(payload.getTargetId())
 			.requestMethod(payload.getRequestMethod())
 			.requestUri(payload.getRequestUri())
 			.requestParams(payload.getRequestParams())
@@ -90,6 +93,7 @@ public class OperationLogIngestRequest implements Serializable {
 			.operationType(this.operationType)
 			.module(this.module)
 			.targetType(this.targetType)
+			.targetId(this.targetId)
 			.requestMethod(this.requestMethod)
 			.requestUri(this.requestUri)
 			.requestParams(this.requestParams)

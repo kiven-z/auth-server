@@ -22,6 +22,7 @@ class OperationLogPayloadTest {
 			.operationType("QUERY")
 			.module("USER_ROLE")
 			.targetType("User")
+			.targetId(1001L)
 			.requestMethod("GET")
 			.requestUri("/api/u")
 			.requestParams("id=1")
@@ -38,6 +39,7 @@ class OperationLogPayloadTest {
 		assertEquals("QUERY", p.getOperationType());
 		assertEquals("USER_ROLE", p.getModule());
 		assertEquals("User", p.getTargetType());
+		assertEquals(1001L, p.getTargetId());
 		assertEquals(200, p.getResponseStatus());
 		assertEquals("ok", p.getResponseMessage());
 		assertNotNull(p.getTimestamp());

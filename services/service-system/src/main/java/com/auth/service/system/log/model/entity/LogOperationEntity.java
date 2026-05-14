@@ -35,6 +35,9 @@ public class LogOperationEntity extends BaseEntity {
 	@Schema(title = "目标类型")
 	private String targetType;
 
+	@Schema(title = "业务目标主键 ID")
+	private Long targetId;
+
 	@Schema(title = "HTTP 方法")
 	private String requestMethod;
 

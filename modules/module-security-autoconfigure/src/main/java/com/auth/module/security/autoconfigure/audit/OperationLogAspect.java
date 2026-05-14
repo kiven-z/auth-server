@@ -8,6 +8,7 @@ import com.auth.common.ip.IpAddressService;
 import com.auth.common.ip.IpInfo;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.module.security.contract.annotation.OperationLog;
+import com.auth.module.security.contract.context.OperationLogContext;
 import com.auth.module.security.contract.api.audit.AuditOperationModuleKeys;
 import com.auth.module.security.contract.event.OperationLogPayload;
 import com.auth.module.security.contract.spi.OperationLogHandler;
@@ -136,7 +137,12 @@ public class OperationLogAspect {
 		}
 		finally {
 			OperationLog meta = resolveDeclaredOperationLog(joinPoint);
-			publishPayload(joinPoint, meta, result, failure, startNs);
+			try {
+				publishPayload(joinPoint, meta, result, failure, startNs);
+			}
+			finally {
+				OperationLogContext.clear();
+			}
 		}
 	}
 
@@ -210,6 +216,7 @@ public class OperationLogAspect {
 			.operationType(meta.operation().name())
 			.module(AuditOperationModuleKeys.toPersistedModuleKey(meta.serviceDomain(), meta.bizModule()))
 			.targetType(CharSequenceUtil.nullToEmpty(meta.targetType()))
+			.targetId(OperationLogContext.getTargetId())
 			.requestMethod(request.getMethod())
 			.requestUri(CharSequenceUtil.nullToEmpty(request.getRequestURI()))
 			.requestParams(buildRequestParams(request, meta.recordParams(), objectMapper))
