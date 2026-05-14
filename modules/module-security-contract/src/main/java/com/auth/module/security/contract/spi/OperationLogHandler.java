@@ -1,6 +1,6 @@
 package com.auth.module.security.contract.spi;
 
-import com.auth.module.security.contract.event.OperationLogPayload;
+import com.auth.module.security.contract.event.OperationLogPayloadEvent;
 
 /**
  * 操作日志处理器（SPI）。业务服务实现本接口并注册为 Spring Bean，将负载持久化至 {@code log_operation} 等存储。
@@ -10,7 +10,7 @@ import com.auth.module.security.contract.event.OperationLogPayload;
  * </p>
  *
  * <p>
- * 建议实现类对 {@link #handle(OperationLogPayload)} 使用 {@code @Async}，避免阻塞 Web 线程。
+ * 建议实现类对 {@link #handle(OperationLogPayloadEvent)} 使用 {@code @Async}，避免阻塞 Web 线程。
  * </p>
  *
  * <pre>{@code
@@ -30,10 +30,11 @@ import com.auth.module.security.contract.event.OperationLogPayload;
 @FunctionalInterface
 public interface OperationLogHandler {
 
-	/**
-	 * 处理操作日志负载。
-	 * @param payload 负载
-	 */
-	void handle(OperationLogPayload payload);
+    /**
+     * 处理操作日志负载。
+     *
+     * @param payload 负载
+     */
+    void handle(OperationLogPayloadEvent payload);
 
 }

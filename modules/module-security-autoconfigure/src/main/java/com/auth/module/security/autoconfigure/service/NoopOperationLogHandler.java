@@ -1,6 +1,6 @@
 package com.auth.module.security.autoconfigure.service;
 
-import com.auth.module.security.contract.event.OperationLogPayload;
+import com.auth.module.security.contract.event.OperationLogPayloadEvent;
 import com.auth.module.security.contract.spi.OperationLogHandler;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
@@ -13,19 +13,19 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class NoopOperationLogHandler implements OperationLogHandler {
 
-	/**
-	 * 启动提示：未接入操作日志持久化
-	 */
-	@PostConstruct
-	void logHint() {
-		log.info(
-				"OperationLogHandler: no implementation found. Operation log payloads will be assembled by AOP but not persisted. "
-						+ "Register a bean implementing OperationLogHandler to write log_operation.");
-	}
+    /**
+     * 启动提示：未接入操作日志持久化
+     */
+    @PostConstruct
+    void logHint() {
+        log.info(
+                "OperationLogHandler: no implementation found. Operation log payloads will be assembled by AOP but not persisted. "
+                        + "Register a bean implementing OperationLogHandler to write log_operation.");
+    }
 
-	@Override
-	public void handle(OperationLogPayload payload) {
-		// intentionally empty
-	}
+    @Override
+    public void handle(OperationLogPayloadEvent payload) {
+        // intentionally empty
+    }
 
 }

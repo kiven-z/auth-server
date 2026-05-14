@@ -1,12 +1,13 @@
 package com.auth.module.security.contract.context;
 
+import com.auth.module.security.contract.event.OperationLogPayloadEvent;
 import lombok.experimental.UtilityClass;
 
 /**
  * 操作日志「业务目标主键」请求线程上下文。
  * <p>
  * 在业务代码中按需调用 {@link #setTargetId(Long)}，由 {@code OperationLogAspect} 在组装
- * {@link com.auth.module.security.contract.event.OperationLogPayload} 时读取；未设置则落库为 {@code NULL}。
+ * {@link OperationLogPayloadEvent} 时读取；未设置则落库为 {@code NULL}。
  * 切面在请求结束后会 {@link #clear()}，避免线程池复用导致串数据。
  * </p>
  *

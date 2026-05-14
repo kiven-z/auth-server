@@ -1,6 +1,6 @@
 package com.auth.service.system.common.listener;
 
-import com.auth.module.security.contract.event.OperationLogPayload;
+import com.auth.module.security.contract.event.OperationLogPayloadEvent;
 import com.auth.module.security.contract.spi.OperationLogHandler;
 import com.auth.service.system.common.service.SecurityIngestService;
 import lombok.extern.slf4j.Slf4j;
@@ -16,25 +16,24 @@ import org.springframework.stereotype.Component;
 @Component
 public class OperationLogPersistHandler implements OperationLogHandler {
 
-	private final SecurityIngestService securityIngestService;
+    private final SecurityIngestService securityIngestService;
 
-	public OperationLogPersistHandler(SecurityIngestService securityIngestService) {
-		this.securityIngestService = securityIngestService;
-	}
+    public OperationLogPersistHandler(SecurityIngestService securityIngestService) {
+        this.securityIngestService = securityIngestService;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	@Async
-	public void handle(OperationLogPayload payload) {
-		try {
-			securityIngestService.append(payload);
-		}
-		catch (RuntimeException ex) {
-			log.error("Failed to persist operation log, uri={}, module={}", payload.getRequestUri(),
-					payload.getModule(), ex);
-		}
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Async
+    public void handle(OperationLogPayloadEvent payload) {
+        try {
+            securityIngestService.append(payload);
+        } catch (RuntimeException ex) {
+            log.error("Failed to persist operation log, uri={}, module={}", payload.getRequestUri(),
+                    payload.getModule(), ex);
+        }
+    }
 
 }
