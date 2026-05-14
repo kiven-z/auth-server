@@ -1,6 +1,8 @@
 package com.auth.module.security.autoconfigure.audit;
 
 import com.auth.module.security.contract.annotation.OperationLog;
+import com.auth.module.security.contract.api.audit.AuditBizModule;
+import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
@@ -44,7 +46,8 @@ class OperationLogAspectResolveTest {
 		OperationLog meta = OperationLogAspect.resolveDeclaredOperationLog(joinPoint);
 
 		assertNotNull(meta);
-		assertEquals("DEPT", meta.module());
+		assertEquals(AuditServiceDomain.SYSTEM, meta.serviceDomain());
+		assertEquals(AuditBizModule.SYS_DEPT, meta.bizModule());
 		assertEquals(OperationLogKind.QUERY, meta.operation());
 		assertEquals("DEPT", meta.targetType());
 	}
@@ -61,7 +64,8 @@ class OperationLogAspectResolveTest {
 		OperationLog meta = OperationLogAspect.resolveDeclaredOperationLog(joinPoint);
 
 		assertNotNull(meta);
-		assertEquals("SYS", meta.module());
+		assertEquals(AuditServiceDomain.SYSTEM, meta.serviceDomain());
+		assertEquals(AuditBizModule.SYS_USER, meta.bizModule());
 		assertEquals(OperationLogKind.UPDATE, meta.operation());
 	}
 
@@ -77,7 +81,8 @@ class OperationLogAspectResolveTest {
 		OperationLog meta = OperationLogAspect.resolveDeclaredOperationLog(joinPoint);
 
 		assertNotNull(meta);
-		assertEquals("METHOD", meta.module());
+		assertEquals(AuditServiceDomain.SYSTEM, meta.serviceDomain());
+		assertEquals(AuditBizModule.SYS_ROLE, meta.bizModule());
 		assertEquals(OperationLogKind.DELETE, meta.operation());
 	}
 
@@ -92,7 +97,7 @@ class OperationLogAspectResolveTest {
 		OperationLog meta = OperationLogAspect.resolveDeclaredOperationLog(joinPoint);
 
 		assertNotNull(meta);
-		assertEquals("DEPT", meta.module());
+		assertEquals(AuditBizModule.SYS_DEPT, meta.bizModule());
 	}
 
 	@Test
@@ -118,13 +123,15 @@ class OperationLogAspectResolveTest {
 
 	static class MethodAnnotatedController {
 
-		@OperationLog(module = "DEPT", targetType = "DEPT", operation = OperationLogKind.QUERY)
+		@OperationLog(serviceDomain = AuditServiceDomain.SYSTEM, bizModule = AuditBizModule.SYS_DEPT,
+				targetType = "DEPT", operation = OperationLogKind.QUERY)
 		public void query() {
 		}
 
 	}
 
-	@OperationLog(module = "SYS", targetType = "", operation = OperationLogKind.UPDATE)
+	@OperationLog(serviceDomain = AuditServiceDomain.SYSTEM, bizModule = AuditBizModule.SYS_USER, targetType = "",
+			operation = OperationLogKind.UPDATE)
 	static class ClassAnnotatedController {
 
 		public void plain() {
@@ -132,10 +139,12 @@ class OperationLogAspectResolveTest {
 
 	}
 
-	@OperationLog(module = "CLASS", targetType = "", operation = OperationLogKind.QUERY)
+	@OperationLog(serviceDomain = AuditServiceDomain.SYSTEM, bizModule = AuditBizModule.SYS_MENU, targetType = "",
+			operation = OperationLogKind.QUERY)
 	static class OverridingController {
 
-		@OperationLog(module = "METHOD", targetType = "", operation = OperationLogKind.DELETE)
+		@OperationLog(serviceDomain = AuditServiceDomain.SYSTEM, bizModule = AuditBizModule.SYS_ROLE, targetType = "",
+				operation = OperationLogKind.DELETE)
 		public void write() {
 		}
 

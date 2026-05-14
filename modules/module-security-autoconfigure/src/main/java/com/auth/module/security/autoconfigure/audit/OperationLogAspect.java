@@ -8,6 +8,7 @@ import com.auth.common.ip.IpAddressService;
 import com.auth.common.ip.IpInfo;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.module.security.contract.annotation.OperationLog;
+import com.auth.module.security.contract.api.audit.AuditOperationModuleKeys;
 import com.auth.module.security.contract.event.OperationLogPayload;
 import com.auth.module.security.contract.spi.OperationLogHandler;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -207,7 +208,7 @@ public class OperationLogAspect {
 		OperationLogPayload payload = OperationLogPayload.builder()
 			.userId(userId)
 			.operationType(meta.operation().name())
-			.module(meta.module())
+			.module(AuditOperationModuleKeys.toPersistedModuleKey(meta.serviceDomain(), meta.bizModule()))
 			.targetType(CharSequenceUtil.nullToEmpty(meta.targetType()))
 			.requestMethod(request.getMethod())
 			.requestUri(CharSequenceUtil.nullToEmpty(request.getRequestURI()))

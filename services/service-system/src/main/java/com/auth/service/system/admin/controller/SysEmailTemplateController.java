@@ -5,6 +5,8 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.common.web.valid.group.CreateGroup;
 import com.auth.common.web.valid.group.UpdateGroup;
 import com.auth.module.security.contract.annotation.OperationLog;
+import com.auth.module.security.contract.api.audit.AuditBizModule;
+import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.admin.model.entity.EmailTemplateEntity;
 import com.auth.service.system.admin.model.form.emailtemplate.*;
@@ -120,8 +122,8 @@ public class SysEmailTemplateController {
 		return Result.success(null, UPDATE_SUCCESS.getMessage());
 	}
 
-	@OperationLog(targetType = "EMAIL_TEMPLATE_DELETE", module = "SYS_EMAIL_TEMPLATE",
-			operation = OperationLogKind.DELETE)
+	@OperationLog(targetType = "EMAIL_TEMPLATE_DELETE", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = AuditBizModule.SYS_EMAIL_TEMPLATE, operation = OperationLogKind.DELETE)
 	@Operation(summary = "删除邮件模板", description = "删除邮件模板")
 	@PreAuthorize("@auth.decide('emailTemplate:delete')")
 	@DeleteMapping()

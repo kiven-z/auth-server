@@ -3,6 +3,8 @@ package com.auth.service.system.admin.controller;
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.annotation.OperationLog;
+import com.auth.module.security.contract.api.audit.AuditBizModule;
+import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.query.SysDeptQuery;
@@ -34,7 +36,8 @@ public class SysDeptController {
 		this.sysDeptService = sysDeptService;
 	}
 
-	@OperationLog(targetType = "DEPT_LIST", module = "SYS_DEPT", operation = OperationLogKind.QUERY)
+	@OperationLog(targetType = "DEPT_LIST", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = AuditBizModule.SYS_DEPT, operation = OperationLogKind.QUERY)
 	@Operation(summary = "部门扁平列表（全量，前端建树）")
 	@PreAuthorize("@auth.decide('sysDept:query')")
 	@GetMapping("/list")

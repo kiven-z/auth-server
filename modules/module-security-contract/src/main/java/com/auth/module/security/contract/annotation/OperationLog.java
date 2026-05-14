@@ -1,5 +1,7 @@
 package com.auth.module.security.contract.annotation;
 
+import com.auth.module.security.contract.api.audit.AuditBizModule;
+import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 
 import java.lang.annotation.*;
@@ -15,10 +17,16 @@ import java.lang.annotation.*;
 public @interface OperationLog {
 
 	/**
-	 * 业务模块编码，写入 {@code log_operation.module}
-	 * @return 模块编码，如 USER_ROLE
+	 * 大模块：与微服务（如 system、auth、example）对齐。
+	 * @return 审计服务域
 	 */
-	String module();
+	AuditServiceDomain serviceDomain();
+
+	/**
+	 * 小模块：本服务内业务域（如 {@code SYS_DEPT}、{@code SYS_MENU}），枚举名与落库小模块段一致。
+	 * @return 业务模块枚举
+	 */
+	AuditBizModule bizModule();
 
 	/**
 	 * 操作类型

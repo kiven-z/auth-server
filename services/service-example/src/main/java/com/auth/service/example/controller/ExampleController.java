@@ -5,6 +5,8 @@ import com.auth.common.core.model.response.Result;
 import com.auth.module.security.autoconfigure.annotation.AuthenticatedApi;
 import com.auth.module.security.autoconfigure.annotation.PublicApi;
 import com.auth.module.security.contract.annotation.OperationLog;
+import com.auth.module.security.contract.api.audit.AuditBizModule;
+import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.example.feign.ExampleAuthInnerFeignClient;
@@ -39,7 +41,8 @@ public class ExampleController {
 		this.securityProperties = securityProperties;
 	}
 
-	@OperationLog(targetType = "Example", module = "Example", operation = OperationLogKind.QUERY)
+	@OperationLog(targetType = "Example", serviceDomain = AuditServiceDomain.EXAMPLE,
+			bizModule = AuditBizModule.EXAMPLE_DEMO, operation = OperationLogKind.QUERY)
 	@Operation(summary = "1-公开路径接口")
 	@GetMapping("/public")
 	public Result<String> publicEndpoint() {

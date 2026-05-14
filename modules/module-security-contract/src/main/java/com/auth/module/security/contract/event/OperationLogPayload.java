@@ -25,7 +25,8 @@ public class OperationLogPayload {
 	String operationType;
 
 	/**
-	 * 模块编码
+	 * 模块键：由 {@link com.auth.module.security.contract.api.audit.AuditOperationModuleKeys}
+	 * 将大模块与小模块组合， 形如 {@code SYSTEM:SYS_DEPT}，写入 {@code log_operation.module}。
 	 */
 	String module;
 
