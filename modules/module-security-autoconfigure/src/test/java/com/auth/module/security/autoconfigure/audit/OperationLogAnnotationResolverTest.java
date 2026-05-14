@@ -19,13 +19,13 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 
 /**
- * {@link OperationLogAspect} 注解解析单元测试
+ * {@link OperationLogAnnotationResolver} 单元测试
  *
  * @author Bunny
  */
 @ExtendWith(MockitoExtension.class)
-@DisplayName("OperationLogAspect 注解解析")
-class OperationLogAspectResolveTest {
+@DisplayName("OperationLogAnnotationResolver")
+class OperationLogAnnotationResolverTest {
 
 	private static final String BIZ_DEPT = "SYS_DEPT";
 
@@ -43,14 +43,14 @@ class OperationLogAspectResolveTest {
 
 	@Test
 	@DisplayName("应解析方法上的 OperationLog")
-	void resolveDeclaredOperationLog_shouldReadMethodAnnotation() throws Exception {
+	void resolve_shouldReadMethodAnnotation() throws Exception {
 		MethodAnnotatedController target = new MethodAnnotatedController();
 		Method method = MethodAnnotatedController.class.getMethod("query");
 		when(joinPoint.getSignature()).thenReturn(methodSignature);
 		when(methodSignature.getMethod()).thenReturn(method);
 		when(joinPoint.getTarget()).thenReturn(target);
 
-		OperationLog meta = OperationLogAspect.resolveDeclaredOperationLog(joinPoint);
+		OperationLog meta = OperationLogAnnotationResolver.resolve(joinPoint);
 
 		assertNotNull(meta);
 		assertEquals(AuditServiceDomain.SYSTEM, meta.serviceDomain());
@@ -61,14 +61,14 @@ class OperationLogAspectResolveTest {
 
 	@Test
 	@DisplayName("方法无注解时应回退到类上的 OperationLog")
-	void resolveDeclaredOperationLog_shouldReadClassAnnotationWhenMethodBare() throws Exception {
+	void resolve_shouldReadClassAnnotationWhenMethodBare() throws Exception {
 		ClassAnnotatedController target = new ClassAnnotatedController();
 		Method method = ClassAnnotatedController.class.getMethod("plain");
 		when(joinPoint.getSignature()).thenReturn(methodSignature);
 		when(methodSignature.getMethod()).thenReturn(method);
 		when(joinPoint.getTarget()).thenReturn(target);
 
-		OperationLog meta = OperationLogAspect.resolveDeclaredOperationLog(joinPoint);
+		OperationLog meta = OperationLogAnnotationResolver.resolve(joinPoint);
 
 		assertNotNull(meta);
 		assertEquals(AuditServiceDomain.SYSTEM, meta.serviceDomain());
@@ -78,14 +78,14 @@ class OperationLogAspectResolveTest {
 
 	@Test
 	@DisplayName("方法与类均有注解时以方法为准")
-	void resolveDeclaredOperationLog_shouldPreferMethodOverClass() throws Exception {
+	void resolve_shouldPreferMethodOverClass() throws Exception {
 		OverridingController target = new OverridingController();
 		Method method = OverridingController.class.getMethod("write");
 		when(joinPoint.getSignature()).thenReturn(methodSignature);
 		when(methodSignature.getMethod()).thenReturn(method);
 		when(joinPoint.getTarget()).thenReturn(target);
 
-		OperationLog meta = OperationLogAspect.resolveDeclaredOperationLog(joinPoint);
+		OperationLog meta = OperationLogAnnotationResolver.resolve(joinPoint);
 
 		assertNotNull(meta);
 		assertEquals(AuditServiceDomain.SYSTEM, meta.serviceDomain());
@@ -95,13 +95,13 @@ class OperationLogAspectResolveTest {
 
 	@Test
 	@DisplayName("目标为 null 时应仍能解析声明类上的方法注解")
-	void resolveDeclaredOperationLog_shouldWorkWhenTargetNull() throws Exception {
+	void resolve_shouldWorkWhenTargetNull() throws Exception {
 		Method method = MethodAnnotatedController.class.getMethod("query");
 		when(joinPoint.getSignature()).thenReturn(methodSignature);
 		when(methodSignature.getMethod()).thenReturn(method);
 		when(joinPoint.getTarget()).thenReturn(null);
 
-		OperationLog meta = OperationLogAspect.resolveDeclaredOperationLog(joinPoint);
+		OperationLog meta = OperationLogAnnotationResolver.resolve(joinPoint);
 
 		assertNotNull(meta);
 		assertEquals(BIZ_DEPT, meta.bizModule());
@@ -109,7 +109,7 @@ class OperationLogAspectResolveTest {
 
 	@Test
 	@DisplayName("无任何 OperationLog 时应返回 null")
-	void resolveDeclaredOperationLog_shouldReturnNullWhenAbsent() throws Exception {
+	void resolve_shouldReturnNullWhenAbsent() throws Exception {
 		class NoLog {
 
 			@SuppressWarnings("unused")
@@ -123,7 +123,7 @@ class OperationLogAspectResolveTest {
 		when(methodSignature.getMethod()).thenReturn(method);
 		when(joinPoint.getTarget()).thenReturn(target);
 
-		OperationLog meta = OperationLogAspect.resolveDeclaredOperationLog(joinPoint);
+		OperationLog meta = OperationLogAnnotationResolver.resolve(joinPoint);
 
 		assertNull(meta);
 	}

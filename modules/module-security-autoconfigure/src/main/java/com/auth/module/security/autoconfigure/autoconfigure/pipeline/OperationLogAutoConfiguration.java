@@ -2,6 +2,7 @@ package com.auth.module.security.autoconfigure.autoconfigure.pipeline;
 
 import com.auth.common.ip.IpAddressService;
 import com.auth.module.security.autoconfigure.audit.OperationLogAspect;
+import com.auth.module.security.autoconfigure.audit.OperationLogPayloadAssembler;
 import com.auth.module.security.autoconfigure.service.NoopOperationLogHandler;
 import com.auth.module.security.contract.spi.OperationLogHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,14 +36,24 @@ public class OperationLogAutoConfiguration {
 	}
 
 	/**
-	 * 操作日志切面
+	 * 操作日志负载组装器
 	 */
 	@ConditionalOnBean(ObjectMapper.class)
 	@Bean
-	OperationLogAspect operationLogAspect(ObjectProvider<OperationLogHandler> operationLogHandlerProvider,
-			ObjectMapper objectMapper, IpAddressService ipAddressService) {
+	OperationLogPayloadAssembler operationLogPayloadAssembler(
+			ObjectProvider<OperationLogHandler> operationLogHandlerProvider, ObjectMapper objectMapper,
+			IpAddressService ipAddressService) {
 		OperationLogHandler handler = operationLogHandlerProvider.getIfUnique();
-		return new OperationLogAspect(handler, objectMapper, ipAddressService);
+		return new OperationLogPayloadAssembler(handler, objectMapper, ipAddressService);
+	}
+
+	/**
+	 * 操作日志切面
+	 */
+	@ConditionalOnBean(OperationLogPayloadAssembler.class)
+	@Bean
+	OperationLogAspect operationLogAspect(OperationLogPayloadAssembler operationLogPayloadAssembler) {
+		return new OperationLogAspect(operationLogPayloadAssembler);
 	}
 
 }
