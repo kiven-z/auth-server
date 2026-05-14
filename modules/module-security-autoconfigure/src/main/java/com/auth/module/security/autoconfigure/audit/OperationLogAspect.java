@@ -19,6 +19,8 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.aop.support.AopUtils;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -113,8 +115,13 @@ public class OperationLogAspect {
 		}
 	}
 
-	@Around("@annotation(operationLog) || @within(operationLog)")
-	public Object aroundControllerMethod(ProceedingJoinPoint joinPoint, OperationLog operationLog) throws Throwable {
+	/**
+	 * 使用全限定名绑定，避免 {@code @annotation(x)||@within(x)} 对同一形参绑定在 Spring AOP 下出现
+	 * {@code null}。
+	 */
+	@Around("@annotation(com.auth.module.security.contract.annotation.OperationLog) "
+			+ "|| @within(com.auth.module.security.contract.annotation.OperationLog)")
+	public Object aroundControllerMethod(ProceedingJoinPoint joinPoint) throws Throwable {
 		long startNs = System.nanoTime();
 		Object result = null;
 		Throwable failure = null;
@@ -127,8 +134,27 @@ public class OperationLogAspect {
 			throw ex;
 		}
 		finally {
-			publishPayload(joinPoint, operationLog, result, failure, startNs);
+			OperationLog meta = resolveDeclaredOperationLog(joinPoint);
+			publishPayload(joinPoint, meta, result, failure, startNs);
 		}
+	}
+
+	/**
+	 * 从连接点解析 {@link OperationLog}：先取目标方法（含 CGLIB 场景），再回退到目标类上的类级别注解。
+	 * @param joinPoint 当前连接点
+	 * @return 注解实例；无法解析时 {@code null}
+	 */
+	static OperationLog resolveDeclaredOperationLog(ProceedingJoinPoint joinPoint) {
+		MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+		Method method = signature.getMethod();
+		Object target = joinPoint.getTarget();
+		Class<?> targetClass = target != null ? target.getClass() : method.getDeclaringClass();
+		Method specificMethod = AopUtils.getMostSpecificMethod(method, targetClass);
+		OperationLog fromMethod = AnnotationUtils.findAnnotation(specificMethod, OperationLog.class);
+		if (fromMethod != null) {
+			return fromMethod;
+		}
+		return AnnotationUtils.findAnnotation(targetClass, OperationLog.class);
 	}
 
 	/**
@@ -143,6 +169,11 @@ public class OperationLogAspect {
 			long startNs) {
 		// 无处理器时跳过
 		if (operationLogHandler == null) {
+			return;
+		}
+		if (meta == null) {
+			log.warn("OperationLog metadata unresolved, skip publishing. target={}",
+					joinPoint.getTarget() != null ? joinPoint.getTarget().getClass().getName() : "null");
 			return;
 		}
 		// 当前请求属性
@@ -211,6 +242,9 @@ public class OperationLogAspect {
 		// 如果异常存在记录失败消息
 		if (failure != null) {
 			return StrUtil.subPre(failure.getMessage(), MAX_RESPONSE_MESSAGE);
+		}
+		if (meta == null) {
+			return null;
 		}
 		// 如果不需要记录结果消息
 		if (!meta.recordResultMessage()) {

@@ -4,6 +4,8 @@ import com.alibaba.fastjson2.JSON;
 import com.auth.common.core.model.response.Result;
 import com.auth.module.security.autoconfigure.annotation.AuthenticatedApi;
 import com.auth.module.security.autoconfigure.annotation.PublicApi;
+import com.auth.module.security.contract.annotation.OperationLog;
+import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.example.feign.ExampleAuthInnerFeignClient;
 import io.swagger.v3.oas.annotations.Operation;
@@ -37,6 +39,7 @@ public class ExampleController {
 		this.securityProperties = securityProperties;
 	}
 
+	@OperationLog(targetType = "Example", module = "Example", operation = OperationLogKind.QUERY)
 	@Operation(summary = "1-公开路径接口")
 	@GetMapping("/public")
 	public Result<String> publicEndpoint() {
