@@ -18,7 +18,12 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 /**
  * 操作日志请求参数摘要构建（长度与表字段对齐）。
@@ -82,7 +87,7 @@ public class OperationLogRequestParamsBuilder {
     }
 
     /**
-     * 与历史实现一致：仅 Servlet 层 query / parameterMap
+     * 与历史实现一致：仅 Servlet 层 query / parameterMap。
      *
      * @param request      请求
      * @param objectMapper JSON 序列化
@@ -90,18 +95,9 @@ public class OperationLogRequestParamsBuilder {
      */
     private static String buildServletDerivedOnly(HttpServletRequest request, ObjectMapper objectMapper) {
         if ("GET".equalsIgnoreCase(request.getMethod())) {
-            String toEmpty = CharSequenceUtil.nullToEmpty(request.getQueryString());
-            return CharSequenceUtil.subPre(toEmpty, MAX_REQUEST_TEXT);
+            return legacyGetQuerySummary(request);
         }
-        Map<String, String[]> map = request.getParameterMap();
-        if (MapUtil.isEmpty(map)) {
-            return null;
-        }
-        try {
-            return CharSequenceUtil.subPre(objectMapper.writeValueAsString(map), MAX_REQUEST_TEXT);
-        } catch (JsonProcessingException ex) {
-            return null;
-        }
+        return serializeParameterMapOrNull(request.getParameterMap(), objectMapper);
     }
 
     /**
@@ -116,10 +112,7 @@ public class OperationLogRequestParamsBuilder {
                                                       List<Object> methodSummaries) {
         Map<String, Object> root = new LinkedHashMap<>();
         if ("GET".equalsIgnoreCase(request.getMethod())) {
-            String qs = CharSequenceUtil.nullToEmpty(request.getQueryString());
-            if (CharSequenceUtil.isNotBlank(qs)) {
-                root.put(KEY_QUERY_STRING, CharSequenceUtil.subPre(qs, MAX_REQUEST_TEXT));
-            }
+            putQueryStringIfNotBlankForCombined(root, request);
         } else {
             Map<String, String[]> map = request.getParameterMap();
             if (MapUtil.isNotEmpty(map)) {
@@ -127,8 +120,56 @@ public class OperationLogRequestParamsBuilder {
             }
         }
         root.put(KEY_METHOD_ARGS, methodSummaries);
+        return writeJsonTruncated(objectMapper, root);
+    }
+
+    /**
+     * GET 历史行为：始终返回截断后的 query 字符串（含空白 query 场景）
+     * 
+     * @param request 请求
+     * @return 截断后的 query 字符串
+     */
+    private static String legacyGetQuerySummary(HttpServletRequest request) {
+        return CharSequenceUtil.subPre(CharSequenceUtil.nullToEmpty(request.getQueryString()), MAX_REQUEST_TEXT);
+    }
+
+    /**
+     * 合并形态下仅在 query 非空白时写入 {@link #KEY_QUERY_STRING}。
+     * 
+     * @param root 根
+     * @param request 请求
+     */
+    private static void putQueryStringIfNotBlankForCombined(Map<String, Object> root, HttpServletRequest request) {
+        String qs = CharSequenceUtil.nullToEmpty(request.getQueryString());
+        if (CharSequenceUtil.isNotBlank(qs)) {
+            root.put(KEY_QUERY_STRING, CharSequenceUtil.subPre(qs, MAX_REQUEST_TEXT));
+        }
+    }
+
+    /**
+     * 将非空 parameterMap 序列化为 JSON 并截断；否则 {@code null}。
+     * 
+     * @param map 参数映射
+     * @param objectMapper JSON 序列化
+     * @return 摘要或 {@code null}
+     */
+    private static String serializeParameterMapOrNull(Map<String, String[]> map, ObjectMapper objectMapper) {
+        if (MapUtil.isEmpty(map)) {
+            return null;
+        }
+        return writeJsonTruncated(objectMapper, map);
+    }
+
+    /**
+     * JSON 序列化后按 {@link #MAX_REQUEST_TEXT} 截断；失败返回 {@code null}
+     * 
+     * @param objectMapper JSON 序列化
+     * @param value 值
+     * @return 摘要或 {@code null}
+     */
+    private static String writeJsonTruncated(ObjectMapper objectMapper, Object value) {
         try {
-            return CharSequenceUtil.subPre(objectMapper.writeValueAsString(root), MAX_REQUEST_TEXT);
+            return CharSequenceUtil.subPre(objectMapper.writeValueAsString(value), MAX_REQUEST_TEXT);
         } catch (JsonProcessingException ex) {
             return null;
         }
@@ -190,13 +231,13 @@ public class OperationLogRequestParamsBuilder {
             return summarizeMultipartFile(file);
         }
         if (arg instanceof MultipartFile[] files) {
-            return summarizeMultipartFileArray(files);
+            return mapNonNullElements(files, OperationLogRequestParamsBuilder::summarizeMultipartFile);
         }
         if (arg instanceof Part part) {
             return summarizePart(part);
         }
         if (arg instanceof Part[] parts) {
-            return summarizePartArray(parts);
+            return mapNonNullElements(parts, OperationLogRequestParamsBuilder::summarizePart);
         }
         if (arg instanceof byte[] bytes) {
             return Map.of(KEY_TYPE, "byte[]", "length", bytes.length);
@@ -206,6 +247,23 @@ public class OperationLogRequestParamsBuilder {
         } catch (Exception ex) {
             return Map.of(KEY_TYPE, arg.getClass().getName(), KEY_NOTE, "not serializable for operation log");
         }
+    }
+
+    /**
+     * 将数组中非 null 元素映射为摘要列表
+     * 
+     * @param items 数组
+     * @param toSummary 映射函数
+     * @return 摘要列表
+     */
+    private static <T> List<Object> mapNonNullElements(T[] items, Function<T, Object> toSummary) {
+        List<Object> list = new ArrayList<>();
+        for (T item : items) {
+            if (item != null) {
+                list.add(toSummary.apply(item));
+            }
+        }
+        return list;
     }
 
     /**
@@ -224,22 +282,6 @@ public class OperationLogRequestParamsBuilder {
     }
 
     /**
-     * 批量摘要 {@link MultipartFile} 数组。
-     *
-     * @param files 文件数组
-     * @return 摘要列表
-     */
-    private static List<Object> summarizeMultipartFileArray(MultipartFile[] files) {
-        List<Object> list = new ArrayList<>();
-        for (MultipartFile f : files) {
-            if (f != null) {
-                list.add(summarizeMultipartFile(f));
-            }
-        }
-        return list;
-    }
-
-    /**
      * 将 {@link Part} 转为元数据映射。
      *
      * @param part 部分
@@ -253,22 +295,6 @@ public class OperationLogRequestParamsBuilder {
         m.put("size", part.getSize());
         m.put("contentType", part.getContentType());
         return m;
-    }
-
-    /**
-     * 批量摘要 {@link Part} 数组。
-     *
-     * @param parts 部分数组
-     * @return 摘要列表
-     */
-    private static List<Object> summarizePartArray(Part[] parts) {
-        List<Object> list = new ArrayList<>();
-        for (Part p : parts) {
-            if (p != null) {
-                list.add(summarizePart(p));
-            }
-        }
-        return list;
     }
 
 }
