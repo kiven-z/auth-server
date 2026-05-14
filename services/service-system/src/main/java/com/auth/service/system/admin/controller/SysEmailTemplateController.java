@@ -5,7 +5,6 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.common.web.valid.group.CreateGroup;
 import com.auth.common.web.valid.group.UpdateGroup;
 import com.auth.module.security.contract.annotation.OperationLog;
-import com.auth.module.security.contract.api.audit.AuditBizModule;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.admin.model.entity.EmailTemplateEntity;
@@ -14,6 +13,7 @@ import com.auth.service.system.admin.model.query.EmailTemplateQuery;
 import com.auth.service.system.admin.model.vo.emailtemplate.EmailTemplateDetailVO;
 import com.auth.service.system.admin.model.vo.emailtemplate.EmailTemplatePageResponse;
 import com.auth.service.system.admin.service.SysEmailTemplateService;
+import com.auth.service.system.common.model.audit.SystemAuditBizModule;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -123,7 +123,7 @@ public class SysEmailTemplateController {
 	}
 
 	@OperationLog(targetType = "EMAIL_TEMPLATE_DELETE", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = AuditBizModule.SYS_EMAIL_TEMPLATE, operation = OperationLogKind.DELETE)
+			bizModule = SystemAuditBizModule.SYS_EMAIL_TEMPLATE, operation = OperationLogKind.DELETE)
 	@Operation(summary = "删除邮件模板", description = "删除邮件模板")
 	@PreAuthorize("@auth.decide('emailTemplate:delete')")
 	@DeleteMapping()

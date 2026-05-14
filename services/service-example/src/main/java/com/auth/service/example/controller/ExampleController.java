@@ -5,9 +5,9 @@ import com.auth.common.core.model.response.Result;
 import com.auth.module.security.autoconfigure.annotation.AuthenticatedApi;
 import com.auth.module.security.autoconfigure.annotation.PublicApi;
 import com.auth.module.security.contract.annotation.OperationLog;
-import com.auth.module.security.contract.api.audit.AuditBizModule;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
+import com.auth.service.example.audit.ExampleAuditBizModule;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.example.feign.ExampleAuthInnerFeignClient;
 import io.swagger.v3.oas.annotations.Operation;
@@ -42,7 +42,7 @@ public class ExampleController {
 	}
 
 	@OperationLog(targetType = "Example", serviceDomain = AuditServiceDomain.EXAMPLE,
-			bizModule = AuditBizModule.EXAMPLE_DEMO, operation = OperationLogKind.QUERY)
+			bizModule = ExampleAuditBizModule.EXAMPLE_DEMO, operation = OperationLogKind.QUERY)
 	@Operation(summary = "1-公开路径接口")
 	@GetMapping("/public")
 	public Result<String> publicEndpoint() {

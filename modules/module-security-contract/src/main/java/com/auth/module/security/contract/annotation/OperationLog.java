@@ -1,6 +1,5 @@
 package com.auth.module.security.contract.annotation;
 
-import com.auth.module.security.contract.api.audit.AuditBizModule;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 
@@ -23,10 +22,15 @@ public @interface OperationLog {
 	AuditServiceDomain serviceDomain();
 
 	/**
-	 * 小模块：本服务内业务域（如 {@code SYS_DEPT}、{@code SYS_MENU}），枚举名与落库小模块段一致。
-	 * @return 业务模块枚举
+	 * 小模块编码：由各微服务在本服务内定义常量（如 {@code public static final String}），平台不维护业务清单。
+	 * <p>
+	 * 建议使用 {@code UPPER_SNAKE}，与
+	 * {@link com.auth.module.security.contract.api.audit.AuditOperationModuleKeys}
+	 * 落库后缀一致。
+	 * </p>
+	 * @return 业务模块码，如 {@code "SYS_DEPT"}
 	 */
-	AuditBizModule bizModule();
+	String bizModule();
 
 	/**
 	 * 操作类型
