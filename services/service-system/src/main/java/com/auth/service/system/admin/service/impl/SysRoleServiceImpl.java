@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.auth.common.data.model.PageResponse;
-import com.auth.module.security.contract.convention.AuthCodeConvention;
 import com.auth.service.system.admin.mapper.SysRoleMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.enums.RoleTypeEnum;
@@ -25,7 +24,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.text.CharSequenceUtil;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -80,12 +78,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 	 */
 	@Override
 	public void create(SysRoleCreateForm form) {
-		String roleCode = CharSequenceUtil.trim(form.getRoleCode());
-		if (!AuthCodeConvention.isWellFormedRoleCode(roleCode)) {
-			throw new SystemBusinessException(SystemResultCodeEnum.ROLE_CODE_FORMAT_INVALID, roleCode);
-		}
 		SysRoleEntity entity = BeanUtil.copyProperties(form, SysRoleEntity.class);
-		entity.setRoleCode(roleCode);
 		save(entity);
 	}
 

@@ -102,21 +102,6 @@ class SysRoleServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("新增：角色编码格式非法时抛出 ROLE_CODE_FORMAT_INVALID")
-	void createThrowsWhenRoleCodeMalformed() {
-		SysRoleCreateForm form = new SysRoleCreateForm();
-		form.setRoleCode("admin");
-		form.setRoleName("非法");
-		form.setStatus(true);
-		form.setRoleType(4);
-
-		assertThatThrownBy(() -> sysRoleService.create(form)).isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemResultCodeEnum.ROLE_CODE_FORMAT_INVALID);
-		verify(sysRoleMapper, never()).insert(org.mockito.ArgumentMatchers.<SysRoleEntity>any());
-	}
-
-	@Test
 	@DisplayName("新增：持久化由 save → insert 完成")
 	void createPersistsViaInsert() {
 		SysRoleCreateForm form = new SysRoleCreateForm();

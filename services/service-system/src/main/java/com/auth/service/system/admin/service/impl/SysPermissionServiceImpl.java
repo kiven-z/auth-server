@@ -9,8 +9,11 @@ import com.auth.service.system.admin.model.query.SysPermissionQuery;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionPageResponse;
 import com.auth.service.system.admin.service.SysPermissionService;
 import com.auth.service.system.admin.support.SysPermissionPageOrderSqlBuilder;
+import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.common.exception.SystemResultCodeEnum;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -53,7 +56,20 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
      */
     @Override
     public void create(SysPermissionCreateForm form) {
+        String permissionCode = form.getPermissionCode();
+        long exists = count(Wrappers.<SysPermissionEntity>lambdaQuery()
+                .eq(SysPermissionEntity::getPermissionCode, permissionCode));
+        if (exists > 0) {
+            throw new SystemBusinessException(SystemResultCodeEnum.PERMISSION_CODE_DUPLICATE, permissionCode);
+        }
+
         SysPermissionEntity entity = SysPermissionConverter.INSTANCE.toEntity(form);
+        if (entity.getOrderNum() == null) {
+            entity.setOrderNum(0);
+        }
+        if (entity.getStatus() == null) {
+            entity.setStatus(Boolean.TRUE);
+        }
         save(entity);
     }
 

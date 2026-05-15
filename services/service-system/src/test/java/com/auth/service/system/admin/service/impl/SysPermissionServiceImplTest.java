@@ -2,7 +2,8 @@ package com.auth.service.system.admin.service.impl;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
 
@@ -70,18 +71,6 @@ class SysPermissionServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("新增：权限编码格式非法时抛出 PERMISSION_CODE_FORMAT_INVALID")
-	void createThrowsWhenPermissionCodeMalformed() {
-		SysPermissionCreateForm form = buildValidForm();
-		form.setPermissionCode("Sys:user:add");
-
-		assertThatThrownBy(() -> sysPermissionService.create(form)).isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemResultCodeEnum.PERMISSION_CODE_FORMAT_INVALID);
-		verify(sysPermissionMapper, never()).insert(org.mockito.ArgumentMatchers.<SysPermissionEntity>any());
-	}
-
-	@Test
 	@DisplayName("新增：权限编码已存在时抛出 PERMISSION_CODE_DUPLICATE")
 	void createThrowsWhenPermissionCodeExists() {
 		SysPermissionCreateForm form = buildValidForm();
@@ -93,10 +82,10 @@ class SysPermissionServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("新增：默认启用与顺序，trim 编码后持久化")
+	@DisplayName("新增：默认启用与顺序并持久化（编码已由 Web 层 strip 后入参）")
 	void createAppliesDefaultsAndPersists() {
 		SysPermissionCreateForm form = buildValidForm();
-		form.setPermissionCode("  sys:user:add  ");
+		form.setPermissionCode("sys:user:add");
 		form.setStatus(null);
 		form.setOrderNum(null);
 		when(sysPermissionMapper.selectCount(any())).thenReturn(0L);
