@@ -419,6 +419,14 @@ public enum SystemResultCodeEnum {
 	 * 权限编码已存在
 	 */
 	PERMISSION_CODE_DUPLICATE(409, 274, "PERMISSION_CODE_DUPLICATE", "system.permission.code_duplicate"),
+	/**
+	 * 权限编码格式不符合约定（全小写，1～3 段，段为 * 或 [a-z][a-z0-9]*）
+	 */
+	PERMISSION_CODE_FORMAT_INVALID(422, 277, "PERMISSION_CODE_FORMAT_INVALID", "system.permission.code_format_invalid"),
+	/**
+	 * 角色编码格式不符合约定（全大写，字母与下划线，首字符为字母）
+	 */
+	ROLE_CODE_FORMAT_INVALID(422, 278, "ROLE_CODE_FORMAT_INVALID", "system.role.code_format_invalid"),
 
 	// --- Post Management (275+)
 	/**

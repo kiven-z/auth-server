@@ -70,6 +70,18 @@ class SysPermissionServiceImplTest {
 	}
 
 	@Test
+	@DisplayName("新增：权限编码格式非法时抛出 PERMISSION_CODE_FORMAT_INVALID")
+	void createThrowsWhenPermissionCodeMalformed() {
+		SysPermissionCreateForm form = buildValidForm();
+		form.setPermissionCode("Sys:user:add");
+
+		assertThatThrownBy(() -> sysPermissionService.create(form)).isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemResultCodeEnum.PERMISSION_CODE_FORMAT_INVALID);
+		verify(sysPermissionMapper, never()).insert(org.mockito.ArgumentMatchers.<SysPermissionEntity>any());
+	}
+
+	@Test
 	@DisplayName("新增：权限编码已存在时抛出 PERMISSION_CODE_DUPLICATE")
 	void createThrowsWhenPermissionCodeExists() {
 		SysPermissionCreateForm form = buildValidForm();
