@@ -30,37 +30,37 @@ import static com.auth.service.system.common.exception.SystemResultCodeEnum.DATA
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class LogOperationServiceImpl extends ServiceImpl<LogOperationMapper, LogOperationEntity>
-        implements LogOperationService {
+		implements LogOperationService {
 
-    private final AuditUserDisplayService auditUserDisplayService;
+	private final AuditUserDisplayService auditUserDisplayService;
 
-    public LogOperationServiceImpl(AuditUserDisplayService auditUserDisplayService) {
-        this.auditUserDisplayService = auditUserDisplayService;
-    }
+	public LogOperationServiceImpl(AuditUserDisplayService auditUserDisplayService) {
+		this.auditUserDisplayService = auditUserDisplayService;
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public PageResponse<LogOperationPageVO> getPage(Page<LogOperationEntity> pageParams, LogOperationQuery query) {
-        IPage<LogOperationPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
-        IPage<LogOperationPageVO> voPage = page.convert(LogOperationConvert.INSTANCE::toPageVO);
-        auditUserDisplayService.enrichAuditUsernames(voPage);
-        return PageResponse.of(voPage);
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public PageResponse<LogOperationPageVO> getPage(Page<LogOperationEntity> pageParams, LogOperationQuery query) {
+		IPage<LogOperationPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
+		IPage<LogOperationPageVO> voPage = page.convert(LogOperationConvert.INSTANCE::toPageVO);
+		auditUserDisplayService.enrichAuditUsernames(voPage);
+		return PageResponse.of(voPage);
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public LogOperationDetailVO getDetail(Long id) {
-        LogOperationEntity entity = getById(id);
-        if (entity == null || Boolean.TRUE.equals(entity.getIsDeleted())) {
-            throw new SystemBusinessException(DATA_NOT_EXIST);
-        }
-        LogOperationDetailVO vo = BeanUtil.copyProperties(entity, LogOperationDetailVO.class);
-        auditUserDisplayService.enrichAuditUsernames(List.of(vo));
-        return vo;
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public LogOperationDetailVO getDetail(Long id) {
+		LogOperationEntity entity = getById(id);
+		if (entity == null || Boolean.TRUE.equals(entity.getIsDeleted())) {
+			throw new SystemBusinessException(DATA_NOT_EXIST);
+		}
+		LogOperationDetailVO vo = BeanUtil.copyProperties(entity, LogOperationDetailVO.class);
+		auditUserDisplayService.enrichAuditUsernames(List.of(vo));
+		return vo;
+	}
 
 }

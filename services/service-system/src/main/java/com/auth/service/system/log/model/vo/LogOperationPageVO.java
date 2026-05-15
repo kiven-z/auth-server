@@ -24,40 +24,40 @@ import java.io.Serial;
 @EqualsAndHashCode(callSuper = true)
 public class LogOperationPageVO extends BaseResponse {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+	@Serial
+	private static final long serialVersionUID = 1L;
 
-    @JsonStringFormat
-    @Schema(title = "操作用户 ID")
-    private Long userId;
+	@JsonStringFormat
+	@Schema(title = "操作用户 ID")
+	private Long userId;
 
-    @Schema(title = "操作用户名")
-    private String username;
+	@Schema(title = "操作用户名")
+	private String username;
 
-    @Schema(title = "操作模块")
-    private String module;
+	@Schema(title = "操作模块")
+	private String module;
 
-    @Schema(title = "操作类型")
-    private String operationType;
+	@Schema(title = "操作类型")
+	private String operationType;
 
-    @Schema(title = "目标类型")
-    private String targetType;
+	@Schema(title = "目标类型")
+	private String targetType;
 
-    @JsonStringFormat
-    @Schema(title = "目标主键 ID")
-    private Long targetId;
+	@JsonStringFormat
+	@Schema(title = "目标主键 ID")
+	private Long targetId;
 
-    @Schema(title = "HTTP 方法")
-    private String requestMethod;
+	@Schema(title = "HTTP 方法")
+	private String requestMethod;
 
-    @Schema(title = "HTTP 状态码")
-    private Integer responseStatus;
+	@Schema(title = "HTTP 状态码")
+	private Integer responseStatus;
 
-    @Schema(title = "执行耗时毫秒")
-    private Integer executionTimeMs;
+	@Schema(title = "执行耗时毫秒")
+	private Integer executionTimeMs;
 
-    @Schema(title = "请求 IP（脱敏）")
-    @Desensitized(DesensitizedType.IP_ADDRESS)
-    private String ipAddress;
+	@Schema(title = "请求 IP（脱敏）")
+	@Desensitized(DesensitizedType.IP_ADDRESS)
+	private String ipAddress;
 
 }

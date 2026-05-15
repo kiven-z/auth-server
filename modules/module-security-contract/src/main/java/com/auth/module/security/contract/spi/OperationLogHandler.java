@@ -30,11 +30,10 @@ import com.auth.module.security.contract.event.OperationLogPayloadEvent;
 @FunctionalInterface
 public interface OperationLogHandler {
 
-    /**
-     * 处理操作日志负载。
-     *
-     * @param payload 负载
-     */
-    void handle(OperationLogPayloadEvent payload);
+	/**
+	 * 处理操作日志负载。
+	 * @param payload 负载
+	 */
+	void handle(OperationLogPayloadEvent payload);
 
 }

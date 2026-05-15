@@ -14,57 +14,57 @@ import static org.junit.jupiter.api.Assertions.assertNull;
  */
 class OperationLogIngestRequestTest {
 
-    @Test
-    @DisplayName("fromPayload 与 toPayload 应保留 targetId")
-    void roundTrip_shouldPreserveTargetId() {
-        OperationLogPayloadEvent original = OperationLogPayloadEvent.builder()
-                .userId(1L)
-                .operationType("QUERY")
-                .module("SYSTEM:X")
-                .targetType("Dept")
-                .targetId(55L)
-                .requestMethod("GET")
-                .requestUri("/d/55")
-                .requestParams(null)
-                .responseStatus(200)
-                .responseMessage(null)
-                .executionTimeMs(3)
-                .ipAddress("127.0.0.1")
-                .userAgent(null)
-                .className("C")
-                .methodName("get")
-                .build();
+	@Test
+	@DisplayName("fromPayload 与 toPayload 应保留 targetId")
+	void roundTrip_shouldPreserveTargetId() {
+		OperationLogPayloadEvent original = OperationLogPayloadEvent.builder()
+			.userId(1L)
+			.operationType("QUERY")
+			.module("SYSTEM:X")
+			.targetType("Dept")
+			.targetId(55L)
+			.requestMethod("GET")
+			.requestUri("/d/55")
+			.requestParams(null)
+			.responseStatus(200)
+			.responseMessage(null)
+			.executionTimeMs(3)
+			.ipAddress("127.0.0.1")
+			.userAgent(null)
+			.className("C")
+			.methodName("get")
+			.build();
 
-        OperationLogIngestRequest req = OperationLogIngestRequest.fromPayload(original);
-        assertEquals(55L, req.getTargetId());
+		OperationLogIngestRequest req = OperationLogIngestRequest.fromPayload(original);
+		assertEquals(55L, req.getTargetId());
 
-        OperationLogPayloadEvent back = req.toPayload();
-        assertEquals(55L, back.getTargetId());
-    }
+		OperationLogPayloadEvent back = req.toPayload();
+		assertEquals(55L, back.getTargetId());
+	}
 
-    @Test
-    @DisplayName("targetId 为空时应保持 null")
-    void roundTrip_shouldAllowNullTargetId() {
-        OperationLogPayloadEvent original = OperationLogPayloadEvent.builder()
-                .userId(1L)
-                .operationType("QUERY")
-                .module("SYSTEM:X")
-                .targetType("Dept")
-                .requestMethod("GET")
-                .requestUri("/d")
-                .requestParams(null)
-                .responseStatus(200)
-                .responseMessage(null)
-                .executionTimeMs(3)
-                .ipAddress("127.0.0.1")
-                .userAgent(null)
-                .className("C")
-                .methodName("list")
-                .build();
+	@Test
+	@DisplayName("targetId 为空时应保持 null")
+	void roundTrip_shouldAllowNullTargetId() {
+		OperationLogPayloadEvent original = OperationLogPayloadEvent.builder()
+			.userId(1L)
+			.operationType("QUERY")
+			.module("SYSTEM:X")
+			.targetType("Dept")
+			.requestMethod("GET")
+			.requestUri("/d")
+			.requestParams(null)
+			.responseStatus(200)
+			.responseMessage(null)
+			.executionTimeMs(3)
+			.ipAddress("127.0.0.1")
+			.userAgent(null)
+			.className("C")
+			.methodName("list")
+			.build();
 
-        OperationLogIngestRequest req = OperationLogIngestRequest.fromPayload(original);
-        assertNull(req.getTargetId());
-        assertNull(req.toPayload().getTargetId());
-    }
+		OperationLogIngestRequest req = OperationLogIngestRequest.fromPayload(original);
+		assertNull(req.getTargetId());
+		assertNull(req.toPayload().getTargetId());
+	}
 
 }

@@ -89,8 +89,7 @@ class OperationLogRequestParamsBuilderTest {
 		MockHttpServletRequest req = new MockHttpServletRequest("POST", "/a");
 		Map<String, Object> body = Map.of("k", "v");
 		// 第一个参数为请求对象时应忽略，避免与外层 request 重复
-		String out = OperationLogRequestParamsBuilder.build(req, true, objectMapper,
-				new Object[] { req, body });
+		String out = OperationLogRequestParamsBuilder.build(req, true, objectMapper, new Object[] { req, body });
 		JsonNode root = objectMapper.readTree(out);
 		assertEquals(1, root.get("methodArgs").size());
 		assertEquals("v", root.get("methodArgs").get(0).get("k").asText());

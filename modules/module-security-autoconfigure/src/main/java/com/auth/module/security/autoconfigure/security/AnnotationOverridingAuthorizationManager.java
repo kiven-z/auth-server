@@ -72,7 +72,7 @@ public class AnnotationOverridingAuthorizationManager implements AuthorizationMa
 		if (matchesAny(permitMatchers, request)) {
 			return new AuthorizationDecision(true);
 		}
-		// 与历史 anyRequest().authenticated() 一致：默认需认证
+		// 默认需认证
 		return new AuthorizationDecision(isNonAnonymousAuthenticated(authentication.get()));
 	}
 

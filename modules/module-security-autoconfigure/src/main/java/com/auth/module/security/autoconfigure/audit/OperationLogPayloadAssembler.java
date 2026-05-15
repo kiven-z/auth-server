@@ -31,140 +31,137 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class OperationLogPayloadAssembler {
 
-    private final OperationLogHandler operationLogHandler;
+	private final OperationLogHandler operationLogHandler;
 
-    private final ObjectMapper objectMapper;
+	private final ObjectMapper objectMapper;
 
-    private final IpAddressService ipAddressService;
+	private final IpAddressService ipAddressService;
 
-    /**
-     * @param operationLogHandler 可为 {@code null}（与切面原行为一致：跳过发布）
-     * @param objectMapper        JSON 序列化
-     * @param ipAddressService    IP 解析
-     */
-    public OperationLogPayloadAssembler(OperationLogHandler operationLogHandler, ObjectMapper objectMapper,
-                                        IpAddressService ipAddressService) {
-        this.operationLogHandler = operationLogHandler;
-        this.objectMapper = objectMapper;
-        this.ipAddressService = ipAddressService;
-    }
+	/**
+	 * @param operationLogHandler 可为 {@code null}（与切面原行为一致：跳过发布）
+	 * @param objectMapper JSON 序列化
+	 * @param ipAddressService IP 解析
+	 */
+	public OperationLogPayloadAssembler(OperationLogHandler operationLogHandler, ObjectMapper objectMapper,
+			IpAddressService ipAddressService) {
+		this.operationLogHandler = operationLogHandler;
+		this.objectMapper = objectMapper;
+		this.ipAddressService = ipAddressService;
+	}
 
-    /**
-     * 获取当前请求属性
-     *
-     * @return 当前请求属性
-     */
-    private static ServletRequestAttributes currentRequestAttributes() {
-        try {
-            return (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
-        } catch (IllegalStateException ex) {
-            return null;
-        }
-    }
+	/**
+	 * 获取当前请求属性
+	 * @return 当前请求属性
+	 */
+	private static ServletRequestAttributes currentRequestAttributes() {
+		try {
+			return (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+		}
+		catch (IllegalStateException ex) {
+			return null;
+		}
+	}
 
-    /**
-     * 解析HTTP状态码
-     *
-     * @param response 响应
-     * @param failure  方法抛出的异常
-     * @return HTTP状态码
-     */
-    private static Integer resolveHttpStatus(HttpServletResponse response, Throwable failure) {
-        if (response == null) {
-            return failure != null ? 500 : null;
-        }
-        int status = response.getStatus();
-        return (failure != null && status < 400) ? 500 : status;
-    }
+	/**
+	 * 解析HTTP状态码
+	 * @param response 响应
+	 * @param failure 方法抛出的异常
+	 * @return HTTP状态码
+	 */
+	private static Integer resolveHttpStatus(HttpServletResponse response, Throwable failure) {
+		if (response == null) {
+			return failure != null ? 500 : null;
+		}
+		int status = response.getStatus();
+		return (failure != null && status < 400) ? 500 : status;
+	}
 
-    /**
-     * 组装并发布操作日志负载。
-     *
-     * @param joinPoint 连接点
-     * @param meta      注解元数据
-     * @param result    方法返回值
-     * @param failure   方法抛出的异常
-     * @param startNs   方法开始时间（纳秒）
-     */
-    public void assembleAndPublish(ProceedingJoinPoint joinPoint, OperationLog meta, Object result, Throwable failure,
-                                   long startNs) {
-        if (operationLogHandler == null) {
-            return;
-        }
-        if (meta == null) {
-            log.warn("OperationLog metadata unresolved, skip publishing. target={}",
-                    joinPoint.getTarget() != null ? joinPoint.getTarget().getClass().getName() : "null");
-            return;
-        }
-        ServletRequestAttributes attributes = currentRequestAttributes();
-        if (attributes == null) {
-            return;
-        }
+	/**
+	 * 组装并发布操作日志负载。
+	 * @param joinPoint 连接点
+	 * @param meta 注解元数据
+	 * @param result 方法返回值
+	 * @param failure 方法抛出的异常
+	 * @param startNs 方法开始时间（纳秒）
+	 */
+	public void assembleAndPublish(ProceedingJoinPoint joinPoint, OperationLog meta, Object result, Throwable failure,
+			long startNs) {
+		if (operationLogHandler == null) {
+			return;
+		}
+		if (meta == null) {
+			log.warn("OperationLog metadata unresolved, skip publishing. target={}",
+					joinPoint.getTarget() != null ? joinPoint.getTarget().getClass().getName() : "null");
+			return;
+		}
+		ServletRequestAttributes attributes = currentRequestAttributes();
+		if (attributes == null) {
+			return;
+		}
 
-        HttpServletRequest request = attributes.getRequest();
-        HttpServletResponse response = attributes.getResponse();
-        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
-        Method method = signature.getMethod();
+		HttpServletRequest request = attributes.getRequest();
+		HttpServletResponse response = attributes.getResponse();
+		MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+		Method method = signature.getMethod();
 
-        OperationLogPayloadEvent payload = buildPayload(meta, result, failure, startNs, request, response, method,
-                joinPoint.getArgs());
-        dispatch(payload);
-    }
+		OperationLogPayloadEvent payload = buildPayload(meta, result, failure, startNs, request, response, method,
+				joinPoint.getArgs());
+		dispatch(payload);
+	}
 
-    /**
-     * 构建操作日志负载
-     *
-     * @param meta       注解元数据
-     * @param result     方法返回值
-     * @param failure    方法抛出的异常
-     * @param startNs    方法开始时间（纳秒）
-     * @param request    请求
-     * @param response   响应
-     * @param method     方法
-     * @param methodArgs 控制器方法实参（用于记录 {@code @RequestBody} 等绑定结果）
-     * @return 操作日志负载
-     */
-    private OperationLogPayloadEvent buildPayload(OperationLog meta, Object result, Throwable failure, long startNs,
-                                                  HttpServletRequest request, HttpServletResponse response, Method method,
-                                                  Object[] methodArgs) {
-        int executionMs = (int) TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNs);
-        Integer httpStatus = resolveHttpStatus(response, failure);
-        String responseMessage = OperationLogResponseMessageComposer.compose(meta, result, failure);
-        Long userId = SecurityUserUtils.getUserId();
-        String userAgent = StrUtil.subPre(CharSequenceUtil.nullToEmpty(request.getHeader("User-Agent")), 255);
-        IpInfo ipInfo = ipAddressService.resolveIpInfo(request);
+	/**
+	 * 构建操作日志负载
+	 * @param meta 注解元数据
+	 * @param result 方法返回值
+	 * @param failure 方法抛出的异常
+	 * @param startNs 方法开始时间（纳秒）
+	 * @param request 请求
+	 * @param response 响应
+	 * @param method 方法
+	 * @param methodArgs 控制器方法实参（用于记录 {@code @RequestBody} 等绑定结果）
+	 * @return 操作日志负载
+	 */
+	private OperationLogPayloadEvent buildPayload(OperationLog meta, Object result, Throwable failure, long startNs,
+			HttpServletRequest request, HttpServletResponse response, Method method, Object[] methodArgs) {
+		int executionMs = (int) TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNs);
+		Integer httpStatus = resolveHttpStatus(response, failure);
+		String responseMessage = OperationLogResponseMessageComposer.compose(meta, result, failure);
+		Long userId = SecurityUserUtils.getUserId();
+		String userAgent = StrUtil.subPre(CharSequenceUtil.nullToEmpty(request.getHeader("User-Agent")), 255);
+		IpInfo ipInfo = ipAddressService.resolveIpInfo(request);
 
-        return OperationLogPayloadEvent.builder()
-                .userId(userId)
-                .operationType(meta.operation().name())
-                .module(AuditOperationModuleKeys.toPersistedModuleKey(meta.serviceDomain(), meta.bizModule()))
-                .targetType(CharSequenceUtil.nullToEmpty(meta.targetType()))
-                .targetId(OperationLogContext.getTargetId())
-                .requestMethod(request.getMethod())
-                .requestUri(CharSequenceUtil.nullToEmpty(request.getRequestURI()))
-                .requestParams(OperationLogRequestParamsBuilder.build(request, meta.recordParams(), objectMapper,
-                        methodArgs))
-                .responseStatus(httpStatus)
-                .responseMessage(responseMessage)
-                .executionTimeMs(executionMs)
-                .ipAddress(ipInfo.getIpAddr())
-                .userAgent(userAgent)
-                .className(method.getDeclaringClass().getName())
-                .methodName(method.getName())
-                .build();
-    }
+		return OperationLogPayloadEvent.builder()
+			.userId(userId)
+			.operationType(meta.operation().name())
+			.module(AuditOperationModuleKeys.toPersistedModuleKey(meta.serviceDomain(), meta.bizModule()))
+			.targetType(CharSequenceUtil.nullToEmpty(meta.targetType()))
+			.targetId(OperationLogContext.getTargetId())
+			.requestMethod(request.getMethod())
+			.requestUri(CharSequenceUtil.nullToEmpty(request.getRequestURI()))
+			.requestParams(
+					OperationLogRequestParamsBuilder.build(request, meta.recordParams(), objectMapper, methodArgs))
+			.responseStatus(httpStatus)
+			.responseMessage(responseMessage)
+			.executionTimeMs(executionMs)
+			.ipAddress(ipInfo.getIpAddr())
+			.userAgent(userAgent)
+			.className(method.getDeclaringClass().getName())
+			.methodName(method.getName())
+			.build();
+	}
 
-    /**
-     * 分发操作日志负载
-     *
-     * @param payload 操作日志负载
-     */
-    private void dispatch(OperationLogPayloadEvent payload) {
-        try {
-            operationLogHandler.handle(payload);
-        } catch (RuntimeException ex) {
-            log.error("OperationLogHandler failed, uri={}, module={}", payload.getRequestUri(), payload.getModule(), ex);
-        }
-    }
+	/**
+	 * 分发操作日志负载
+	 * @param payload 操作日志负载
+	 */
+	private void dispatch(OperationLogPayloadEvent payload) {
+		try {
+			operationLogHandler.handle(payload);
+		}
+		catch (RuntimeException ex) {
+			log.error("OperationLogHandler failed, uri={}, module={}", payload.getRequestUri(), payload.getModule(),
+					ex);
+		}
+	}
 
 }

@@ -14,86 +14,87 @@ import java.time.Instant;
 @Builder
 public class OperationLogPayloadEvent {
 
-    /**
-     * 操作用户 ID，未登录可为 {@code null}，持久化层应规范为 0。
-     */
-    Long userId;
+	/**
+	 * 操作用户 ID，未登录可为 {@code null}，持久化层应规范为 0。
+	 */
+	Long userId;
 
-    /**
-     * 操作类型枚举名
-     */
-    String operationType;
+	/**
+	 * 操作类型枚举名
+	 */
+	String operationType;
 
-    /**
-     * 模块键：由 {@link com.auth.module.security.contract.api.audit.AuditOperationModuleKeys}
-     * 将大模块与小模块组合， 形如 {@code SYSTEM:SYS_DEPT}，写入 {@code log_operation.module}。
-     */
-    String module;
+	/**
+	 * 模块键：由 {@link com.auth.module.security.contract.api.audit.AuditOperationModuleKeys}
+	 * 将大模块与小模块组合， 形如 {@code SYSTEM:SYS_DEPT}，写入 {@code log_operation.module}。
+	 */
+	String module;
 
-    /**
-     * 目标类型
-     */
-    String targetType;
+	/**
+	 * 目标类型
+	 */
+	String targetType;
 
-    /**
-     * 业务目标主键；未通过 {@link com.auth.module.security.contract.context.OperationLogContext} 设置时为 {@code null}
-     */
-    Long targetId;
+	/**
+	 * 业务目标主键；未通过 {@link com.auth.module.security.contract.context.OperationLogContext}
+	 * 设置时为 {@code null}
+	 */
+	Long targetId;
 
-    /**
-     * HTTP 方法
-     */
-    String requestMethod;
+	/**
+	 * HTTP 方法
+	 */
+	String requestMethod;
 
-    /**
-     * 请求 URI
-     */
-    String requestUri;
+	/**
+	 * 请求 URI
+	 */
+	String requestUri;
 
-    /**
-     * 请求参数摘要
-     */
-    String requestParams;
+	/**
+	 * 请求参数摘要
+	 */
+	String requestParams;
 
-    /**
-     * HTTP 或业务层感知的响应状态码
-     */
-    Integer responseStatus;
+	/**
+	 * HTTP 或业务层感知的响应状态码
+	 */
+	Integer responseStatus;
 
-    /**
-     * 响应消息摘要
-     */
-    String responseMessage;
+	/**
+	 * 响应消息摘要
+	 */
+	String responseMessage;
 
-    /**
-     * 执行耗时毫秒
-     */
-    Integer executionTimeMs;
+	/**
+	 * 执行耗时毫秒
+	 */
+	Integer executionTimeMs;
 
-    /**
-     * 客户端 IP
-     */
-    String ipAddress;
+	/**
+	 * 客户端 IP
+	 */
+	String ipAddress;
 
-    /**
-     * User-Agent
-     */
-    String userAgent;
+	/**
+	 * User-Agent
+	 */
+	String userAgent;
 
-    /**
-     * 控制器类名
-     */
-    String className;
+	/**
+	 * 控制器类名
+	 */
+	String className;
 
-    /**
-     * 控制器方法名
-     */
-    String methodName;
+	/**
+	 * 控制器方法名
+	 */
+	String methodName;
 
-    /**
-     * 记录时间
-     */
-    @Builder.Default
-    Instant timestamp = Instant.now();
+	/**
+	 * 记录时间
+	 */
+	@Builder.Default
+	Instant timestamp = Instant.now();
 
 }

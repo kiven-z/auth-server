@@ -15,21 +15,19 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface LogOperationService extends IService<LogOperationEntity> {
 
-    /**
-     * 分页查询操作日志
-     *
-     * @param pageParams 分页参数
-     * @param query      筛选条件
-     * @return 分页数据
-     */
-    PageResponse<LogOperationPageVO> getPage(Page<LogOperationEntity> pageParams, LogOperationQuery query);
+	/**
+	 * 分页查询操作日志
+	 * @param pageParams 分页参数
+	 * @param query 筛选条件
+	 * @return 分页数据
+	 */
+	PageResponse<LogOperationPageVO> getPage(Page<LogOperationEntity> pageParams, LogOperationQuery query);
 
-    /**
-     * 操作日志详情
-     *
-     * @param id 主键
-     * @return 详情
-     */
-    LogOperationDetailVO getDetail(Long id);
+	/**
+	 * 操作日志详情
+	 * @param id 主键
+	 * @return 详情
+	 */
+	LogOperationDetailVO getDetail(Long id);
 
 }

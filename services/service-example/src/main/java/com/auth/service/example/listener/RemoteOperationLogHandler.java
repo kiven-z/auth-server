@@ -21,30 +21,31 @@ import static com.auth.common.web.resttemplate.FeignUtil.isSuccess;
 @Component
 public class RemoteOperationLogHandler implements OperationLogHandler {
 
-    private final SystemSecurityIngestFeignClient systemSecurityIngestFeignClient;
+	private final SystemSecurityIngestFeignClient systemSecurityIngestFeignClient;
 
-    public RemoteOperationLogHandler(SystemSecurityIngestFeignClient systemSecurityIngestFeignClient) {
-        this.systemSecurityIngestFeignClient = systemSecurityIngestFeignClient;
-    }
+	public RemoteOperationLogHandler(SystemSecurityIngestFeignClient systemSecurityIngestFeignClient) {
+		this.systemSecurityIngestFeignClient = systemSecurityIngestFeignClient;
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @Async
-    public void handle(OperationLogPayloadEvent payload) {
-        OperationLogIngestRequest body = OperationLogIngestRequest.fromPayload(payload);
-        try {
-            Result<Void> result = systemSecurityIngestFeignClient.appendOperationLog(body);
-            if (BooleanUtil.isFalse(isSuccess(result))) {
-                log.error("Operation log Feign returned non-success: code={}, message={}, requestUri={}, module={}",
-                        result != null ? result.getCode() : null, result != null ? result.getMessage() : null,
-                        payload.getRequestUri(), payload.getModule());
-            }
-        } catch (RuntimeException ex) {
-            log.error("Failed to submit operation log via Feign, requestUri={}, module={}", payload.getRequestUri(),
-                    payload.getModule(), ex);
-        }
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	@Async
+	public void handle(OperationLogPayloadEvent payload) {
+		OperationLogIngestRequest body = OperationLogIngestRequest.fromPayload(payload);
+		try {
+			Result<Void> result = systemSecurityIngestFeignClient.appendOperationLog(body);
+			if (BooleanUtil.isFalse(isSuccess(result))) {
+				log.error("Operation log Feign returned non-success: code={}, message={}, requestUri={}, module={}",
+						result != null ? result.getCode() : null, result != null ? result.getMessage() : null,
+						payload.getRequestUri(), payload.getModule());
+			}
+		}
+		catch (RuntimeException ex) {
+			log.error("Failed to submit operation log via Feign, requestUri={}, module={}", payload.getRequestUri(),
+					payload.getModule(), ex);
+		}
+	}
 
 }

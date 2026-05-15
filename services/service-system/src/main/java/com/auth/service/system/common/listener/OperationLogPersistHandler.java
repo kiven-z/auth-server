@@ -16,24 +16,25 @@ import org.springframework.stereotype.Component;
 @Component
 public class OperationLogPersistHandler implements OperationLogHandler {
 
-    private final SecurityIngestService securityIngestService;
+	private final SecurityIngestService securityIngestService;
 
-    public OperationLogPersistHandler(SecurityIngestService securityIngestService) {
-        this.securityIngestService = securityIngestService;
-    }
+	public OperationLogPersistHandler(SecurityIngestService securityIngestService) {
+		this.securityIngestService = securityIngestService;
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    @Async
-    public void handle(OperationLogPayloadEvent payload) {
-        try {
-            securityIngestService.append(payload);
-        } catch (RuntimeException ex) {
-            log.error("Failed to persist operation log, uri={}, module={}", payload.getRequestUri(),
-                    payload.getModule(), ex);
-        }
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	@Async
+	public void handle(OperationLogPayloadEvent payload) {
+		try {
+			securityIngestService.append(payload);
+		}
+		catch (RuntimeException ex) {
+			log.error("Failed to persist operation log, uri={}, module={}", payload.getRequestUri(),
+					payload.getModule(), ex);
+		}
+	}
 
 }

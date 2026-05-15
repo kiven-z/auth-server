@@ -16,23 +16,23 @@ import java.lang.reflect.Method;
  */
 @UtilityClass
 public final class OperationLogAnnotationResolver {
-    /**
-     * 解析 {@link OperationLog}：先取目标方法（含 CGLIB 场景），再回退到目标类上的类级别注解。
-     *
-     * @param joinPoint 当前连接点
-     * @return 注解实例；无法解析时 {@code null}
-     */
-    public static OperationLog resolve(ProceedingJoinPoint joinPoint) {
-        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
-        Method method = signature.getMethod();
-        Object target = joinPoint.getTarget();
-        Class<?> targetClass = target != null ? target.getClass() : method.getDeclaringClass();
-        Method specificMethod = AopUtils.getMostSpecificMethod(method, targetClass);
-        OperationLog fromMethod = AnnotationUtils.findAnnotation(specificMethod, OperationLog.class);
-        if (fromMethod != null) {
-            return fromMethod;
-        }
-        return AnnotationUtils.findAnnotation(targetClass, OperationLog.class);
-    }
+
+	/**
+	 * 解析 {@link OperationLog}：先取目标方法（含 CGLIB 场景），再回退到目标类上的类级别注解。
+	 * @param joinPoint 当前连接点
+	 * @return 注解实例；无法解析时 {@code null}
+	 */
+	public static OperationLog resolve(ProceedingJoinPoint joinPoint) {
+		MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+		Method method = signature.getMethod();
+		Object target = joinPoint.getTarget();
+		Class<?> targetClass = target != null ? target.getClass() : method.getDeclaringClass();
+		Method specificMethod = AopUtils.getMostSpecificMethod(method, targetClass);
+		OperationLog fromMethod = AnnotationUtils.findAnnotation(specificMethod, OperationLog.class);
+		if (fromMethod != null) {
+			return fromMethod;
+		}
+		return AnnotationUtils.findAnnotation(targetClass, OperationLog.class);
+	}
 
 }

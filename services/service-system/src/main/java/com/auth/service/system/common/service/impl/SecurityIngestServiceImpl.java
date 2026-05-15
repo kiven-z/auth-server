@@ -24,79 +24,78 @@ import java.util.Map;
 @Service
 public class SecurityIngestServiceImpl implements SecurityIngestService {
 
-    /**
-     * 方法参数 JSON 最大长度
-     */
-    private static final int MAX_PARAM_JSON_LENGTH = 2048;
+	/**
+	 * 方法参数 JSON 最大长度
+	 */
+	private static final int MAX_PARAM_JSON_LENGTH = 2048;
 
-    /**
-     * 异常信息最大长度
-     */
-    private static final int MAX_EXCEPTION_LENGTH = 2048;
+	/**
+	 * 异常信息最大长度
+	 */
+	private static final int MAX_EXCEPTION_LENGTH = 2048;
 
-    private final LogAuthorizationAuditMapper logAuthorizationAuditMapper;
+	private final LogAuthorizationAuditMapper logAuthorizationAuditMapper;
 
-    private final LogOperationMapper logOperationMapper;
+	private final LogOperationMapper logOperationMapper;
 
-    public SecurityIngestServiceImpl(LogAuthorizationAuditMapper logAuthorizationAuditMapper,
-                                     LogOperationMapper logOperationMapper) {
-        this.logAuthorizationAuditMapper = logAuthorizationAuditMapper;
-        this.logOperationMapper = logOperationMapper;
-    }
+	public SecurityIngestServiceImpl(LogAuthorizationAuditMapper logAuthorizationAuditMapper,
+			LogOperationMapper logOperationMapper) {
+		this.logAuthorizationAuditMapper = logAuthorizationAuditMapper;
+		this.logOperationMapper = logOperationMapper;
+	}
 
-    /**
-     * 截取字符串
-     *
-     * @param value  字符串
-     * @param maxLen 最大长度
-     * @return 截取后的字符串
-     */
-    private static String truncate(String value, int maxLen) {
-        if (CharSequenceUtil.isEmpty(value)) {
-            return value;
-        }
-        return value.length() <= maxLen ? value : value.substring(0, maxLen);
-    }
+	/**
+	 * 截取字符串
+	 * @param value 字符串
+	 * @param maxLen 最大长度
+	 * @return 截取后的字符串
+	 */
+	private static String truncate(String value, int maxLen) {
+		if (CharSequenceUtil.isEmpty(value)) {
+			return value;
+		}
+		return value.length() <= maxLen ? value : value.substring(0, maxLen);
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void append(SecurityAuthorizationAuditPayloadEvent event) {
-        LogAuthorizationAuditEntity entity = new LogAuthorizationAuditEntity();
-        entity
-                .setEventType(event.getEventType() != null ? event.getEventType().name() : SecurityEventType.DENIED.name());
-        entity.setRequiredPermission(event.getRequiredAuthority());
-        entity.setRequestMethod(event.getRequestMethod());
-        entity.setRequestUri(event.getRequestUri());
-        entity.setRequestIp(event.getRequestIp());
-        entity.setDecisionReason(event.getDecisionReason());
-        entity.setExceptionMessage(truncate(event.getExceptionMessage(), MAX_EXCEPTION_LENGTH));
-        entity.setClassName(event.getClassName());
-        entity.setMethodName(event.getMethodName());
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void append(SecurityAuthorizationAuditPayloadEvent event) {
+		LogAuthorizationAuditEntity entity = new LogAuthorizationAuditEntity();
+		entity
+			.setEventType(event.getEventType() != null ? event.getEventType().name() : SecurityEventType.DENIED.name());
+		entity.setRequiredPermission(event.getRequiredAuthority());
+		entity.setRequestMethod(event.getRequestMethod());
+		entity.setRequestUri(event.getRequestUri());
+		entity.setRequestIp(event.getRequestIp());
+		entity.setDecisionReason(event.getDecisionReason());
+		entity.setExceptionMessage(truncate(event.getExceptionMessage(), MAX_EXCEPTION_LENGTH));
+		entity.setClassName(event.getClassName());
+		entity.setMethodName(event.getMethodName());
 
-        // 记录方法传参
-        Map<String, Object> params = event.getMethodParams();
-        if (MapUtil.isNotEmpty(params)) {
-            String json = JSON.toJSONString(params);
-            String truncate = truncate(json, MAX_PARAM_JSON_LENGTH);
-            entity.setMethodParams(truncate);
-        }
+		// 记录方法传参
+		Map<String, Object> params = event.getMethodParams();
+		if (MapUtil.isNotEmpty(params)) {
+			String json = JSON.toJSONString(params);
+			String truncate = truncate(json, MAX_PARAM_JSON_LENGTH);
+			entity.setMethodParams(truncate);
+		}
 
-        Long principalId = event.getUserId();
-        entity.setCreateUser(principalId != null ? principalId : 0L);
+		Long principalId = event.getUserId();
+		entity.setCreateUser(principalId != null ? principalId : 0L);
 
-        logAuthorizationAuditMapper.insert(entity);
-    }
+		logAuthorizationAuditMapper.insert(entity);
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void append(OperationLogPayloadEvent payload) {
-        Long uid = payload.getUserId() != null ? payload.getUserId() : 0L;
-        LogOperationEntity entity = LogOperationPayloadConvert.INSTANCE.toInsertEntity(payload, uid);
-        logOperationMapper.insert(entity);
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void append(OperationLogPayloadEvent payload) {
+		Long uid = payload.getUserId() != null ? payload.getUserId() : 0L;
+		LogOperationEntity entity = LogOperationPayloadConvert.INSTANCE.toInsertEntity(payload, uid);
+		logOperationMapper.insert(entity);
+	}
 
 }

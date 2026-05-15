@@ -10,18 +10,16 @@ import com.auth.module.security.contract.event.SecurityAuthorizationAuditPayload
  */
 public interface SecurityIngestService {
 
-    /**
-     * 持久化一条授权审计记录
-     *
-     * @param event 授权审计负载
-     */
-    void append(SecurityAuthorizationAuditPayloadEvent event);
+	/**
+	 * 持久化一条授权审计记录
+	 * @param event 授权审计负载
+	 */
+	void append(SecurityAuthorizationAuditPayloadEvent event);
 
-    /**
-     * 持久化一条操作日志记录
-     *
-     * @param payload 操作日志负载
-     */
-    void append(OperationLogPayloadEvent payload);
+	/**
+	 * 持久化一条操作日志记录
+	 * @param payload 操作日志负载
+	 */
+	void append(OperationLogPayloadEvent payload);
 
 }

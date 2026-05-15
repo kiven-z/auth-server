@@ -19,8 +19,7 @@ public interface LogOperationMapper extends BaseMapper<LogOperationEntity> {
 
 	/**
 	 * 分页查询操作日志
-	 *
-	 * @param page  分页参数
+	 * @param page 分页参数
 	 * @param query 筛选条件
 	 * @return 分页结果
 	 */

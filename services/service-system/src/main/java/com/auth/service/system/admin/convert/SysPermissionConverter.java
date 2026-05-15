@@ -5,6 +5,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
+import com.auth.service.system.admin.model.form.permission.SysPermissionCreateForm;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionPageResponse;
 
 /**
@@ -16,6 +17,20 @@ import com.auth.service.system.admin.model.vo.permission.SysPermissionPageRespon
 public interface SysPermissionConverter {
 
 	SysPermissionConverter INSTANCE = Mappers.getMapper(SysPermissionConverter.class);
+
+	/**
+	 * 新增表单 → 实体
+	 * @param form 表单
+	 * @return 实体
+	 */
+	@Mapping(target = "id", ignore = true)
+	@Mapping(target = "createTime", ignore = true)
+	@Mapping(target = "updateTime", ignore = true)
+	@Mapping(target = "createUser", ignore = true)
+	@Mapping(target = "updateUser", ignore = true)
+	@Mapping(target = "version", ignore = true)
+	@Mapping(target = "isDeleted", ignore = true)
+	SysPermissionEntity toEntity(SysPermissionCreateForm form);
 
 	/**
 	 * Entity → 分页行 VO
