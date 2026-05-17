@@ -18,13 +18,18 @@ spring:
           timeout: 5000
           writeTimeout: 5000
 
-# 短信：auth.message.sms.* → SmsProperties；enabled=true 时注册 aliyunSmsAsyncClient
+# 短信：切换厂商只改 provider 与对应子节点（aliyun / tencent）
 auth:
   message:
     sms:
-      enabled: true
+      enabled: false
+      provider: aliyun
       aliyun:
         access-key-id: ${AUTH_SMS_ACCESS_KEY_ID:}
         access-key-secret: ${AUTH_SMS_ACCESS_KEY_SECRET:}
         region: cn-hangzhou
         endpoint: dypnsapi.aliyuncs.com
+      tencent:
+        secret-id: ${AUTH_SMS_TENCENT_SECRET_ID:}
+        secret-key: ${AUTH_SMS_TENCENT_SECRET_KEY:}
+        region: ap-guangzhou
