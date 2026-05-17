@@ -12,41 +12,37 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * 短信发送配置
+ * 短信渠道自动配置（Properties 绑定 + 按 {@code provider} 装配客户端）
  *
  * @author Bunny
  */
-@EnableConfigurationProperties({SmsProperties.class})
 @Configuration
+@EnableConfigurationProperties(SmsProperties.class)
 public class SmsAutoConfiguration {
-    /**
-     * 阿里云短信客户端（{@code auth.message.sms.provider=aliyun}）
-     */
-    @Slf4j
-    @ConditionalOnClass(AsyncClient.class)
-    @ConditionalOnProperty(prefix = "auth.message.sms", name = "enabled", havingValue = "true")
-    @ConditionalOnProperty(prefix = "auth.message.sms", name = "provider", havingValue = "aliyun")
-    @Configuration(proxyBeanMethods = false)
-    static class AliyunSmsClientConfiguration {
 
-        /**
-         * 阿里云 Dypnsapi 异步客户端
-         *
-         * @param smsProperties 短信配置
-         * @return 可关闭的 AsyncClient
-         */
-        @ConditionalOnMissingBean(name = "aliyunSmsAsyncClient")
-        @Bean(destroyMethod = "close")
-        AsyncClient aliyunSmsAsyncClient(SmsProperties smsProperties) {
-            AsyncClient client = AliyunSmsClientFactory.create(smsProperties);
-            log.info("Aliyun SMS AsyncClient initialized, region={}, endpoint={}", smsProperties.getAliyun().getRegion(),
-                    smsProperties.getAliyun().getEndpoint());
-            return client;
-        }
+	/**
+	 * 阿里云短信客户端（{@code auth.message.sms.provider=aliyun}）
+	 */
+	@Slf4j
+	@ConditionalOnClass(AsyncClient.class)
+	@ConditionalOnProperty(prefix = "auth.message.sms", name = "enabled", havingValue = "true")
+	@ConditionalOnProperty(prefix = "auth.message.sms", name = "provider", havingValue = "aliyun")
+	@Configuration(proxyBeanMethods = false)
+	static class AliyunSmsClientConfiguration {
 
-    }
+		@Bean(destroyMethod = "close")
+		@ConditionalOnMissingBean(name = "aliyunSmsAsyncClient")
+		AsyncClient aliyunSmsAsyncClient(SmsProperties smsProperties) {
+			AsyncClient client = AliyunSmsClientFactory.create(smsProperties);
+			log.info("Aliyun SMS AsyncClient initialized, region={}, endpoint={}", smsProperties.getAliyun().getRegion(),
+					smsProperties.getAliyun().getEndpoint());
+			return client;
+		}
 
-    // 接入腾讯云时在此增加：
-    // @ConditionalOnProperty(..., name = "provider", havingValue = "tencent")
-    // static class TencentSmsClientConfiguration { ... }
+	}
+
+	// 接入腾讯云时在此新增静态内部类：
+	// @ConditionalOnProperty(..., name = "provider", havingValue = "tencent")
+	// static class TencentSmsClientConfiguration { ... }
+
 }
