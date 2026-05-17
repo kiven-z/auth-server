@@ -2,7 +2,9 @@ package com.auth.module.message.config;
 
 import com.aliyun.sdk.service.dypnsapi20170525.AsyncClient;
 import com.auth.module.message.config.properties.SmsProperties;
-import com.auth.module.message.sms.AliyunSmsClientFactory;
+import com.auth.module.message.sms.aliyun.AliyunSmsClientFactory;
+import com.auth.module.message.sms.aliyun.AliyunSmsVerifyCodeSender;
+import com.auth.module.message.sms.aliyun.SmsVerifyCodeSender;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -16,8 +18,8 @@ import org.springframework.context.annotation.Configuration;
  *
  * @author Bunny
  */
-@Configuration
 @EnableConfigurationProperties(SmsProperties.class)
+@Configuration
 public class SmsAutoConfiguration {
 
 	/**
@@ -30,13 +32,19 @@ public class SmsAutoConfiguration {
 	@Configuration(proxyBeanMethods = false)
 	static class AliyunSmsClientConfiguration {
 
-		@Bean(destroyMethod = "close")
 		@ConditionalOnMissingBean(name = "aliyunSmsAsyncClient")
+		@Bean(destroyMethod = "close")
 		AsyncClient aliyunSmsAsyncClient(SmsProperties smsProperties) {
 			AsyncClient client = AliyunSmsClientFactory.create(smsProperties);
-			log.info("Aliyun SMS AsyncClient initialized, region={}, endpoint={}", smsProperties.getAliyun().getRegion(),
-					smsProperties.getAliyun().getEndpoint());
+			log.info("Aliyun SMS AsyncClient initialized, region={}, endpoint={}",
+					smsProperties.getAliyun().getRegion(), smsProperties.getAliyun().getEndpoint());
 			return client;
+		}
+
+		@ConditionalOnMissingBean(SmsVerifyCodeSender.class)
+		@Bean
+		SmsVerifyCodeSender smsVerifyCodeSender(AsyncClient aliyunSmsAsyncClient) {
+			return new AliyunSmsVerifyCodeSender(aliyunSmsAsyncClient);
 		}
 
 	}

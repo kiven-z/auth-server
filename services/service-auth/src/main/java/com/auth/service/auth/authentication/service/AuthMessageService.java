@@ -16,4 +16,11 @@ public interface AuthMessageService {
 	 */
 	void sendEmailCode(String email, HttpServletRequest request);
 
+	/**
+	 * 发送登录手机短信验证码
+	 * @param phone 手机号
+	 * @param request 当前 HTTP 请求
+	 */
+	void sendSmsCode(String phone, HttpServletRequest request);
+
 }

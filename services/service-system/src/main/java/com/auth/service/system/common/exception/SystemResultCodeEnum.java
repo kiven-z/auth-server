@@ -346,6 +346,26 @@ public enum SystemResultCodeEnum {
 	 * 消息渠道未实现或不支持
 	 */
 	MESSAGE_CHANNEL_UNSUPPORTED(400, 280, "MESSAGE_CHANNEL_UNSUPPORTED", "system.message.channel.unsupported"),
+	/**
+	 * 短信模板不存在或已禁用
+	 */
+	SMS_TEMPLATE_NOT_FOUND(404, 281, "SMS_TEMPLATE_NOT_FOUND", "system.sms.template.not_found"),
+	/**
+	 * 缺少必填短信模板变量
+	 */
+	SMS_TEMPLATE_VARS_MISSING(422, 282, "SMS_TEMPLATE_VARS_MISSING", "system.sms.template.vars_missing"),
+	/**
+	 * 短信发送失败
+	 */
+	SMS_SEND_FAILED(502, 283, "SMS_SEND_FAILED", "system.sms.send.failed"),
+	/**
+	 * 短信接收人为空
+	 */
+	SMS_TARGET_EMPTY(400, 284, "SMS_TARGET_EMPTY", "system.sms.send.target_empty"),
+	/**
+	 * 短信签名未配置
+	 */
+	SMS_SIGN_NAME_NOT_CONFIGURED(500, 285, "SMS_SIGN_NAME_NOT_CONFIGURED", "system.sms.sign_name.not_configured"),
 
 	// 429: 重置密码过于频繁
 	RESET_PASSWORD_TOO_FREQUENTLY(429, 302, "RESET_PASSWORD_TOO_FREQUENTLY", "reset.password.too.frequent"),

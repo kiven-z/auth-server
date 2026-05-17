@@ -43,7 +43,12 @@ public enum SecurityRedisKey {
 	/**
 	 * 邮箱验证码（Value） 默认 TTL: 10 分钟 key 后缀: email
 	 */
-	EMAIL_CODE("auth:security:login:email:code:", Duration.ofMinutes(10));
+	EMAIL_CODE("auth:security:login:email:code:", Duration.ofMinutes(10)),
+
+	/**
+	 * 手机短信验证码（Value） 默认 TTL: 10 分钟 key 后缀: 手机号
+	 */
+	SMS_CODE("auth:security:login:sms:code:", Duration.ofMinutes(10));
 
 	private final String prefix;
 

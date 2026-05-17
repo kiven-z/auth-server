@@ -2,6 +2,7 @@ package com.auth.module.message.command;
 
 import com.auth.module.message.channel.MessageChannel;
 import com.auth.module.message.email.EmailChannelOptions;
+import com.auth.module.message.sms.aliyun.SmsChannelOptions;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -58,5 +59,11 @@ public class TemplateMessageCommand implements Serializable {
 	 */
 	@Valid
 	private EmailChannelOptions emailOptions;
+
+	/**
+	 * 短信渠道扩展参数
+	 */
+	@Valid
+	private SmsChannelOptions smsOptions;
 
 }

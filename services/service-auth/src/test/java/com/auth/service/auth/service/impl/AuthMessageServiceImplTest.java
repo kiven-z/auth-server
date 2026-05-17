@@ -12,6 +12,7 @@ import com.auth.service.auth.authentication.mapper.UserMapper;
 import com.auth.service.auth.authentication.service.impl.AuthMessageServiceImpl;
 import com.auth.service.auth.support.integration.SystemMessageSendFeignClient;
 import com.auth.service.auth.support.message.AuthEmailTemplateCode;
+import com.auth.service.auth.support.message.AuthSmsTemplateCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -25,6 +26,7 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import static com.auth.module.security.contract.redis.SecurityRedisKey.EMAIL_CODE;
+import static com.auth.module.security.contract.redis.SecurityRedisKey.SMS_CODE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -135,6 +137,59 @@ class AuthMessageServiceImplTest {
 			verify(valueOperations).set(eq(EMAIL_CODE.key(email)), any(), eq(EMAIL_CODE.getDefaultTtl()));
 
 			// 不调用 Feign，不发邮件
+			verify(systemMessageSendFeignClient, never()).sendByTemplate(any());
+		}
+
+	}
+
+	@Nested
+	@DisplayName("登录手机短信验证码")
+	class SmsCode {
+
+		@Test
+		@DisplayName("用户存在：写入 Redis 并调用 SMS 模板发送")
+		void sendSmsCode_shouldStoreMd5AndInvokeSmsSend() {
+			String phone = "13800138000";
+			UserEntity user = new UserEntity();
+			user.setUsername("Bunny");
+
+			when(userMapper.selectUserByPhone(phone)).thenReturn(user);
+			when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+			when(systemMessageSendFeignClient.sendByTemplate(any(TemplateMessageCommand.class)))
+				.thenReturn(Result.success());
+
+			authMessageService.sendSmsCode(phone, new MockHttpServletRequest());
+
+			ArgumentCaptor<String> redisValueCaptor = ArgumentCaptor.forClass(String.class);
+			verify(valueOperations).set(eq(SMS_CODE.key(phone)), redisValueCaptor.capture(),
+					eq(SMS_CODE.getDefaultTtl()));
+
+			ArgumentCaptor<TemplateMessageCommand> commandCaptor = ArgumentCaptor
+				.forClass(TemplateMessageCommand.class);
+			verify(systemMessageSendFeignClient).sendByTemplate(commandCaptor.capture());
+
+			TemplateMessageCommand command = commandCaptor.getValue();
+			assertEquals(MessageChannel.SMS, command.getChannel());
+			assertEquals(AuthSmsTemplateCode.LOGIN_SMS_CODE.getTemplateCode(), command.getTemplateCode());
+			assertEquals(phone, command.getTargets().get(0));
+			Object codeVar = command.getVariables().get("code");
+			assertNotNull(codeVar);
+			String code = codeVar.toString();
+			assertEquals(6, code.length());
+			assertEquals(MD5.create().digestHex16(code), redisValueCaptor.getValue());
+			assertEquals(SMS_CODE.getDefaultTtl().toMinutes(), command.getVariables().get("min"));
+		}
+
+		@Test
+		@DisplayName("用户不存在：不调用 Feign")
+		void sendSmsCode_shouldSkipWhenUserNotFound() {
+			String phone = "13800138001";
+			when(userMapper.selectUserByPhone(phone)).thenReturn(null);
+			when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+
+			authMessageService.sendSmsCode(phone, new MockHttpServletRequest());
+
+			verify(valueOperations).set(eq(SMS_CODE.key(phone)), any(), eq(SMS_CODE.getDefaultTtl()));
 			verify(systemMessageSendFeignClient, never()).sendByTemplate(any());
 		}
 

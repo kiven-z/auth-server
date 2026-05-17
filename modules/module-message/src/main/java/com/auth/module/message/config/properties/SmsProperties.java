@@ -109,6 +109,16 @@ public class SmsProperties {
 
 		private String endpoint = "dypnsapi.aliyuncs.com";
 
+		/**
+		 * 默认短信签名（模板未配置 sign_name 时使用）
+		 */
+		private String defaultSignName;
+
+		/**
+		 * 默认 Dypnsapi 方案名称
+		 */
+		private String defaultSchemeName;
+
 	}
 
 	/**

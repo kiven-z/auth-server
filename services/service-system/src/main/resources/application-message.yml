@@ -29,6 +29,8 @@ auth:
         access-key-secret: ${AUTH_SMS_ACCESS_KEY_SECRET:}
         region: cn-hangzhou
         endpoint: dypnsapi.aliyuncs.com
+        default-sign-name: ${AUTH_SMS_SIGN_NAME:}
+        default-scheme-name: ${AUTH_SMS_SCHEME_NAME:}
       tencent:
         secret-id: ${AUTH_SMS_TENCENT_SECRET_ID:}
         secret-key: ${AUTH_SMS_TENCENT_SECRET_KEY:}

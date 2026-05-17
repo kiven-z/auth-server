@@ -27,4 +27,11 @@ public interface UserMapper extends BaseMapper<UserEntity> {
 	 */
 	UserEntity selectUserByEmail(@Param("email") String email);
 
+	/**
+	 * 根据手机号查询用户
+	 * @param phone 手机号
+	 * @return 用户信息
+	 */
+	UserEntity selectUserByPhone(@Param("phone") String phone);
+
 }

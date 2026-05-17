@@ -1,4 +1,4 @@
-package com.auth.module.message.sms;
+package com.auth.module.message.sms.aliyun;
 
 import com.aliyun.auth.credentials.Credential;
 import com.aliyun.auth.credentials.provider.StaticCredentialProvider;

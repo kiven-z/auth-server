@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Import;
  * @author Bunny
  */
 @AutoConfiguration
-@Import({SmsAutoConfiguration.class})
+@Import({ SmsAutoConfiguration.class })
 public class MessageAutoConfiguration {
 
 }

@@ -35,4 +35,13 @@ public class AuthMessageController {
 		return Result.success();
 	}
 
+	@PublicApi
+	@RateLimit(principal = "#phone")
+	@Operation(summary = "发送手机短信验证码", description = "验证码需要用MD5加密")
+	@PostMapping("login/sms/send-code")
+	public Result<String> sendSmsCode(@RequestParam("phone") String phone, HttpServletRequest request) {
+		messageService.sendSmsCode(phone, request);
+		return Result.success();
+	}
+
 }

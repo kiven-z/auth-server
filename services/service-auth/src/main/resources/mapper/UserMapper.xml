@@ -45,4 +45,12 @@
         WHERE is_deleted = 0 AND status = 1 AND email = #{email}
     </select>
 
+    <!-- 根据手机号查询用户信息 -->
+    <select id="selectUserByPhone" resultType="com.auth.module.platform.persistence.model.UserEntity">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM sys_user
+        WHERE is_deleted = 0 AND status = 1 AND phone = #{phone}
+    </select>
+
 </mapper>

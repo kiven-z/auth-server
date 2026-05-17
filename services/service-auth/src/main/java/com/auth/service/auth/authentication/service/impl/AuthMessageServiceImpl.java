@@ -12,7 +12,9 @@ import com.auth.service.auth.authentication.mapper.UserMapper;
 import com.auth.service.auth.authentication.service.AuthMessageService;
 import com.auth.service.auth.support.integration.SystemMessageSendFeignClient;
 import com.auth.service.auth.support.message.AuthEmailTemplateCode;
+import com.auth.service.auth.support.message.AuthSmsTemplateCode;
 import com.auth.service.auth.support.message.LoginEmailVariables;
+import com.auth.service.auth.support.message.LoginSmsVariables;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -23,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.auth.module.security.contract.redis.SecurityRedisKey.EMAIL_CODE;
+import static com.auth.module.security.contract.redis.SecurityRedisKey.SMS_CODE;
 
 /**
  * 认证消息服务实现
@@ -84,6 +87,35 @@ public class AuthMessageServiceImpl implements AuthMessageService {
 			.targets(List.of(email))
 			.variables(variables)
 			.emailOptions(EmailChannelOptions.builder().hasHtml(Boolean.TRUE).build())
+			.build();
+
+		systemMessageSendFeignClient.sendByTemplate(command);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void sendSmsCode(String phone, HttpServletRequest request) {
+		String redisKey = SMS_CODE.key(phone);
+		String code = RandomUtil.randomNumbers(6);
+
+		redisTemplate.opsForValue().set(redisKey, MD5.create().digestHex16(code), SMS_CODE.getDefaultTtl());
+
+		long expireMinutes = SMS_CODE.getDefaultTtl().toMinutes();
+
+		UserEntity user = userMapper.selectUserByPhone(phone);
+		if (user == null) {
+			log.warn("Send SMS code skipped: no active user found for phone={}", phone);
+			return;
+		}
+
+		Map<String, Object> variables = LoginSmsVariables.build(code, expireMinutes);
+		TemplateMessageCommand command = TemplateMessageCommand.builder()
+			.channel(MessageChannel.SMS)
+			.templateCode(AuthSmsTemplateCode.LOGIN_SMS_CODE.getTemplateCode())
+			.targets(List.of(phone))
+			.variables(variables)
 			.build();
 
 		systemMessageSendFeignClient.sendByTemplate(command);
