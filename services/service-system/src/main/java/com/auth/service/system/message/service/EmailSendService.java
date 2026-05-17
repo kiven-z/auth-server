@@ -1,6 +1,6 @@
 package com.auth.service.system.message.service;
 
-import com.auth.module.email.model.EmailSendDTO;
+import com.auth.module.message.email.EmailSendDTO;
 
 /**
  * 通用邮件发送服务

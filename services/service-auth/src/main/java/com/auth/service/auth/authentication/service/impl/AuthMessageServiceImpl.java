@@ -2,11 +2,23 @@ package com.auth.service.auth.authentication.service.impl;
 
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.crypto.digest.MD5;
+import com.auth.module.message.email.EmailSendDTO;
+import com.auth.module.platform.persistence.model.UserEntity;
+import com.auth.service.auth.authentication.audit.LoginAuditSnapshot;
+import com.auth.service.auth.authentication.audit.LoginAuditSnapshotFactory;
+import com.auth.service.auth.authentication.mapper.UserMapper;
 import com.auth.service.auth.authentication.service.AuthMessageService;
+import com.auth.service.auth.support.integration.SystemMessageSendFeignClient;
+import com.auth.service.auth.support.message.AuthEmailTemplateCode;
+import com.auth.service.auth.support.message.LoginEmailVariables;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 import static com.auth.module.security.contract.redis.SecurityRedisKey.EMAIL_CODE;
 
@@ -17,27 +29,57 @@ import static com.auth.module.security.contract.redis.SecurityRedisKey.EMAIL_COD
  */
 @Slf4j
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class AuthMessageServiceImpl implements AuthMessageService {
 
-	private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
 
-	public AuthMessageServiceImpl(RedisTemplate<String, Object> redisTemplate) {
-		this.redisTemplate = redisTemplate;
-	}
+    private final UserMapper userMapper;
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void sendEmailCode(String email) {
-		String redisKey = EMAIL_CODE.key(email);
+    private final LoginAuditSnapshotFactory loginAuditSnapshotFactory;
 
-		// TODO 后面接入邮件发送，并删除 log.debug
-		// 存入Redis时需要使用MD5加密，取出时需要对比MD5值是否正确
-		String code = RandomUtil.randomNumbers(6);
-		log.debug("send email code to redis:{},code:{}", redisKey, code);
-		redisTemplate.opsForValue().set(redisKey, MD5.create().digestHex16(code), EMAIL_CODE.getDefaultTtl());
-	}
+    private final SystemMessageSendFeignClient systemMessageSendFeignClient;
+
+    public AuthMessageServiceImpl(RedisTemplate<String, Object> redisTemplate, UserMapper userMapper,
+                                  LoginAuditSnapshotFactory loginAuditSnapshotFactory,
+                                  SystemMessageSendFeignClient systemMessageSendFeignClient) {
+        this.redisTemplate = redisTemplate;
+        this.userMapper = userMapper;
+        this.loginAuditSnapshotFactory = loginAuditSnapshotFactory;
+        this.systemMessageSendFeignClient = systemMessageSendFeignClient;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void sendEmailCode(String email, HttpServletRequest request) {
+        String redisKey = EMAIL_CODE.key(email);
+        String code = RandomUtil.randomNumbers(6);
+
+        // 存入 Redis 时使用 MD5，登录校验侧对比 digestHex16
+        redisTemplate.opsForValue().set(redisKey, MD5.create().digestHex16(code), EMAIL_CODE.getDefaultTtl());
+
+        // 过期时间转成分钟
+        long expireMinutes = EMAIL_CODE.getDefaultTtl().toMinutes();
+
+        // IP地址等信息
+        LoginAuditSnapshot snapshot = loginAuditSnapshotFactory.build(request);
+
+        // 查询用户名
+        UserEntity user = userMapper.selectUserByEmail(email);
+        String username = user.getUsername();
+
+        // 拼装发送对象
+        Map<String, Object> variables = LoginEmailVariables.build(username, code, expireMinutes, LocalDateTime.now(),
+                snapshot.loginIp(), snapshot.loginRegion());
+        EmailSendDTO dto = EmailSendDTO.builder()
+                .templateCode(AuthEmailTemplateCode.LOGIN_EMAIL_CODE.getTemplateCode())
+                .to(List.of(email))
+                .variables(variables)
+                .hasHtml(Boolean.TRUE)
+                .build();
+
+        systemMessageSendFeignClient.sendEmail(dto);
+    }
 
 }

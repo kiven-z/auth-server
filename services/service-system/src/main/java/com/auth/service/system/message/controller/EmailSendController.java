@@ -1,7 +1,7 @@
 package com.auth.service.system.message.controller;
 
 import com.auth.common.core.model.response.Result;
-import com.auth.module.email.model.EmailSendDTO;
+import com.auth.module.message.email.EmailSendDTO;
 import com.auth.service.system.message.service.EmailSendService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

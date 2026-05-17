@@ -4,7 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.RandomUtil;
 import com.auth.common.data.model.PageResponse;
-import com.auth.module.email.model.EmailSendDTO;
+import com.auth.module.message.email.EmailSendDTO;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.service.system.common.exception.SystemBusinessException;
@@ -30,7 +30,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.auth.module.email.model.TemplateType.CLEAR_DATABASE_CONFIRM;
+import static com.auth.service.system.admin.model.enums.TemplateType.CLEAR_DATABASE_CONFIRM;
 import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
 
 /**
