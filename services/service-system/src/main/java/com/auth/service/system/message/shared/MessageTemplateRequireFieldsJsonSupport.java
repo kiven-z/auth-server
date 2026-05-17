@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.admin.model.vo.emailtemplate.EmailTemplateRequireFieldRow;
 import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.common.exception.SystemResultCodeEnum;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,12 +16,12 @@ import java.util.*;
 import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
 
 /**
- * require_fields JSON 校验与转换
+ * 消息模板 require_fields JSON 校验、转换与发送前变量完整性校验（邮件/短信共用）
  *
  * @author Bunny
  */
 @UtilityClass
-public class EmailTemplateRequireFieldsJsonSupport {
+public class MessageTemplateRequireFieldsJsonSupport {
 
 	private static final ObjectMapper MAPPER = new ObjectMapper()
 		.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
@@ -53,14 +54,12 @@ public class EmailTemplateRequireFieldsJsonSupport {
 			return Collections.emptyList();
 		}
 		try {
-			// 直接反序列化，FAILL_ON_UNKNOWN_PROPERTIES 会自动拒绝未知字段
 			List<EmailTemplateRequireFieldRow> rows = MAPPER.readValue(json,
 					MAPPER.getTypeFactory().constructCollectionType(List.class, EmailTemplateRequireFieldRow.class));
 			validate(rows);
 			return rows;
 		}
 		catch (UnrecognizedPropertyException e) {
-			// 保留原有的非法属性名错误信息
 			throw new SystemBusinessException(REQUIRE_FIELDS_ILLEGAL_PROPERTY, e.getPropertyName());
 		}
 		catch (Exception e) {
@@ -89,6 +88,49 @@ public class EmailTemplateRequireFieldsJsonSupport {
 				throw new SystemBusinessException(REQUIRE_FIELD_KEY_DUPLICATE, row.getKey());
 			}
 		}
+	}
+
+	/**
+	 * 找出 variables 中缺失的必填 key（仅校验 key 是否存在，不校验值是否为空）
+	 * @param requireFields 必填变量声明
+	 * @param variables 实际变量
+	 * @return 缺失的 key 列表
+	 */
+	public static List<String> findMissingKeys(List<EmailTemplateRequireFieldRow> requireFields,
+			Map<String, Object> variables) {
+		if (CollUtil.isEmpty(requireFields)) {
+			return List.of();
+		}
+		Map<String, Object> safeVariables = variables != null ? variables : Map.of();
+		return requireFields.stream()
+			.map(EmailTemplateRequireFieldRow::getKey)
+			.filter(key -> !safeVariables.containsKey(key))
+			.toList();
+	}
+
+	/**
+	 * 校验发送变量是否齐全
+	 * @param requireFields 已解析的必填变量声明
+	 * @param variables 发送变量
+	 * @param missingCode 变量缺失时的业务码（邮件/短信各自传入）
+	 */
+	public static void assertVariablesPresent(List<EmailTemplateRequireFieldRow> requireFields,
+			Map<String, Object> variables, SystemResultCodeEnum missingCode) {
+		List<String> missingKeys = findMissingKeys(requireFields, variables);
+		if (CollUtil.isNotEmpty(missingKeys)) {
+			throw new SystemBusinessException(missingCode, String.join(", ", missingKeys));
+		}
+	}
+
+	/**
+	 * 解析 require_fields 并校验发送变量是否齐全
+	 * @param requireFieldsJson 数据库中的 require_fields JSON
+	 * @param variables 发送变量
+	 * @param missingCode 变量缺失时的业务码（邮件/短信各自传入）
+	 */
+	public static void assertVariablesPresent(String requireFieldsJson, Map<String, Object> variables,
+			SystemResultCodeEnum missingCode) {
+		assertVariablesPresent(parse(requireFieldsJson), variables, missingCode);
 	}
 
 	/**

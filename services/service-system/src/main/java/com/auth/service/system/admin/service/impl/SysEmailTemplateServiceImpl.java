@@ -17,7 +17,7 @@ import com.auth.service.system.admin.service.SysEmailTemplateService;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.message.api.EmailSendService;
-import com.auth.service.system.message.shared.EmailTemplateRequireFieldsJsonSupport;
+import com.auth.service.system.message.shared.MessageTemplateRequireFieldsJsonSupport;
 import com.auth.service.system.message.shared.FreeMarkTemplateRenderer;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -80,7 +80,7 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<EmailTemplateMapper
 		BeanUtil.copyProperties(entity, vo, "requireFields");
 
 		// 设置变量声明列表
-		List<EmailTemplateRequireFieldRow> requireFields = EmailTemplateRequireFieldsJsonSupport
+		List<EmailTemplateRequireFieldRow> requireFields = MessageTemplateRequireFieldsJsonSupport
 			.parse(entity.getRequireFields());
 		vo.setRequireFields(requireFields);
 
@@ -97,7 +97,7 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<EmailTemplateMapper
 		entity.setContent(CharSequenceUtil.nullToDefault(form.getContent(), "Template content is empty"));
 		List<EmailTemplateRequireFieldRow> rows = form.getRequireFields() != null ? form.getRequireFields()
 				: Collections.emptyList();
-		entity.setRequireFields(EmailTemplateRequireFieldsJsonSupport.toJson(rows));
+		entity.setRequireFields(MessageTemplateRequireFieldsJsonSupport.toJson(rows));
 		save(entity);
 	}
 
@@ -145,7 +145,7 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<EmailTemplateMapper
 			throw new SystemBusinessException(DATA_NOT_EXIST);
 		}
 
-		String json = EmailTemplateRequireFieldsJsonSupport.toJson(form.getRequireFields());
+		String json = MessageTemplateRequireFieldsJsonSupport.toJson(form.getRequireFields());
 		entity.setRequireFields(json);
 		updateById(entity);
 	}
@@ -170,9 +170,9 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<EmailTemplateMapper
 			return null;
 		}
 
-		List<EmailTemplateRequireFieldRow> rows = EmailTemplateRequireFieldsJsonSupport
+		List<EmailTemplateRequireFieldRow> rows = MessageTemplateRequireFieldsJsonSupport
 			.parse(entity.getRequireFields());
-		Map<String, Object> model = EmailTemplateRequireFieldsJsonSupport.toExampleModel(rows);
+		Map<String, Object> model = MessageTemplateRequireFieldsJsonSupport.toExampleModel(rows);
 		return FreeMarkTemplateRenderer.processTemplate(entity.getTemplateName(), entity.getContent(), model);
 	}
 
@@ -182,7 +182,7 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<EmailTemplateMapper
 	@Override
 	public String render(EmailTemplateRenderForm form) {
 		try {
-			Map<String, Object> model = EmailTemplateRequireFieldsJsonSupport.toExampleModel(form.getRequireFields());
+			Map<String, Object> model = MessageTemplateRequireFieldsJsonSupport.toExampleModel(form.getRequireFields());
 			return FreeMarkTemplateRenderer.processTemplate("inline-preview", form.getContent(), model);
 		}
 		catch (Exception e) {
@@ -216,9 +216,9 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<EmailTemplateMapper
 		emailSendDTO.setTo(List.of(email));
 
 		// 解析必填字段并生成示例数据模型
-		List<EmailTemplateRequireFieldRow> rows = EmailTemplateRequireFieldsJsonSupport
+		List<EmailTemplateRequireFieldRow> rows = MessageTemplateRequireFieldsJsonSupport
 			.parse(entity.getRequireFields());
-		Map<String, Object> model = EmailTemplateRequireFieldsJsonSupport.toExampleModel(rows);
+		Map<String, Object> model = MessageTemplateRequireFieldsJsonSupport.toExampleModel(rows);
 		emailSendDTO.setVariables(model);
 
 		// 调用邮件服务同步发送邮件

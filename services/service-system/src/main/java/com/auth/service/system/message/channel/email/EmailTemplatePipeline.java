@@ -1,17 +1,14 @@
 package com.auth.service.system.message.channel.email;
 
-import cn.hutool.core.collection.CollUtil;
 import com.auth.service.system.admin.mapper.EmailTemplateMapper;
 import com.auth.service.system.admin.model.entity.EmailTemplateEntity;
-import com.auth.service.system.admin.model.vo.emailtemplate.EmailTemplateRequireFieldRow;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.message.channel.email.model.RenderedEmail;
-import com.auth.service.system.message.shared.EmailTemplateRequireFieldsJsonSupport;
+import com.auth.service.system.message.shared.MessageTemplateRequireFieldsJsonSupport;
 import com.auth.service.system.message.shared.FreeMarkTemplateRenderer;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -43,32 +40,11 @@ public class EmailTemplatePipeline {
 			throw new SystemBusinessException(EMAIL_TEMPLATE_NOT_FOUND, templateCode);
 		}
 		Map<String, Object> safeVariables = Optional.ofNullable(variables).orElseGet(HashMap::new);
-		validateRequiredVariables(template, safeVariables);
+		MessageTemplateRequireFieldsJsonSupport.assertVariablesPresent(template.getRequireFields(), safeVariables,
+				EMAIL_TEMPLATE_VARS_MISSING);
 		String subject = renderSubject(template, safeVariables);
 		String body = renderContent(template, safeVariables);
 		return new RenderedEmail(subject, body);
-	}
-
-	/**
-	 * 校验必填变量
-	 * @param template 邮件模板
-	 * @param variables 模板变量
-	 */
-	private void validateRequiredVariables(EmailTemplateEntity template, Map<String, Object> variables) {
-		// 校验必填（在页面中配置）
-		List<EmailTemplateRequireFieldRow> requireFields = EmailTemplateRequireFieldsJsonSupport
-			.parse(template.getRequireFields());
-		if (CollUtil.isEmpty(requireFields)) {
-			return;
-		}
-
-		List<String> missingKeys = requireFields.stream()
-			.map(EmailTemplateRequireFieldRow::getKey)
-			.filter(key -> !variables.containsKey(key))
-			.toList();
-		if (CollUtil.isNotEmpty(missingKeys)) {
-			throw new SystemBusinessException(EMAIL_TEMPLATE_VARS_MISSING, String.join(", ", missingKeys));
-		}
 	}
 
 	/**
