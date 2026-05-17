@@ -337,6 +337,16 @@ public enum SystemResultCodeEnum {
 	 */
 	FREEMARKER_MODEL_BUILD_FAILED(500, 262, "FREEMARKER_MODEL_BUILD_FAILED", "system.email.freemarker.model_failed"),
 
+	// --- 统一消息发送
+	/**
+	 * 消息发送命令为空
+	 */
+	MESSAGE_SEND_COMMAND_NULL(400, 279, "MESSAGE_SEND_COMMAND_NULL", "system.message.send.command_null"),
+	/**
+	 * 消息渠道未实现或不支持
+	 */
+	MESSAGE_CHANNEL_UNSUPPORTED(400, 280, "MESSAGE_CHANNEL_UNSUPPORTED", "system.message.channel.unsupported"),
+
 	// 429: 重置密码过于频繁
 	RESET_PASSWORD_TOO_FREQUENTLY(429, 302, "RESET_PASSWORD_TOO_FREQUENTLY", "reset.password.too.frequent"),
 

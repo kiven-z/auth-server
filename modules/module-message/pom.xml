@@ -11,7 +11,7 @@
     <artifactId>module-message</artifactId>
     <packaging>jar</packaging>
     <name>module-message</name>
-    <description>Message contracts (email DTOs, channel); transport stays in services</description>
+    <description>Message contracts (channel SPI, template command, email DTOs); transport stays in services</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

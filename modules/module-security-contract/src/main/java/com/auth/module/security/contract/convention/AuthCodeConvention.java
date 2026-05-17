@@ -30,8 +30,8 @@ public class AuthCodeConvention {
 	/**
 	 * 权限码整体：1～3 段，段间 {@code :}，与 {@link #PERMISSION_CODE_SEGMENT_REGEX} 一致
 	 */
-	public static final String PERMISSION_CODE_REGEX = "^" + PERMISSION_CODE_SEGMENT_REGEX
-			+ "(?::" + PERMISSION_CODE_SEGMENT_REGEX + "){0,2}$";
+	public static final String PERMISSION_CODE_REGEX = "^" + PERMISSION_CODE_SEGMENT_REGEX + "(?::"
+			+ PERMISSION_CODE_SEGMENT_REGEX + "){0,2}$";
 
 	/**
 	 * 角色码：大写字母与下划线，且首字符为大写字母
@@ -48,8 +48,8 @@ public class AuthCodeConvention {
 	 * @return 是否符合
 	 */
 	public static boolean isWellFormedPermissionCode(String permissionCode) {
-		return permissionCode != null && !permissionCode.isEmpty() && PERMISSION_CODE_PATTERN.matcher(permissionCode)
-			.matches();
+		return permissionCode != null && !permissionCode.isEmpty()
+				&& PERMISSION_CODE_PATTERN.matcher(permissionCode).matches();
 	}
 
 	/**

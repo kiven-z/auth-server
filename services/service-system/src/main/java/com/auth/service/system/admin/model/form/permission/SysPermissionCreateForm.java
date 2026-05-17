@@ -19,35 +19,35 @@ import java.io.Serializable;
 @Setter
 public class SysPermissionCreateForm implements Serializable {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+	@Serial
+	private static final long serialVersionUID = 1L;
 
-    @Schema(title = "权限编码（唯一标识）", requiredMode = Schema.RequiredMode.REQUIRED)
-    @Size(max = 128, message = "权限编码长度不能超过128个字符")
-    @Pattern(regexp = AuthCodeConvention.PERMISSION_CODE_REGEX,
-            message = "权限编码格式不符合约定（全小写，1～3 段以冒号分隔，每段为 * 或小写 [a-z][a-z0-9]*）")
-    @NotBlank(message = "权限编码不能为空")
-    private String permissionCode;
+	@Schema(title = "权限编码（唯一标识）", requiredMode = Schema.RequiredMode.REQUIRED)
+	@Size(max = 128, message = "权限编码长度不能超过128个字符")
+	@Pattern(regexp = AuthCodeConvention.PERMISSION_CODE_REGEX,
+			message = "权限编码格式不符合约定（全小写，1～3 段以冒号分隔，每段为 * 或小写 [a-z][a-z0-9]*）")
+	@NotBlank(message = "权限编码不能为空")
+	private String permissionCode;
 
-    @Schema(title = "权限名称", requiredMode = Schema.RequiredMode.REQUIRED)
-    @Size(max = 128, message = "权限名称长度不能超过128个字符")
-    @NotBlank(message = "权限名称不能为空")
-    private String permissionName;
+	@Schema(title = "权限名称", requiredMode = Schema.RequiredMode.REQUIRED)
+	@Size(max = 128, message = "权限名称长度不能超过128个字符")
+	@NotBlank(message = "权限名称不能为空")
+	private String permissionName;
 
-    @Schema(title = "权限类型(0=按钮, 1=API)", requiredMode = Schema.RequiredMode.REQUIRED)
-    @Max(value = 1, message = "权限类型值无效")
-    @Min(value = 0, message = "权限类型值无效")
-    @NotNull(message = "权限类型不能为空")
-    private Integer permissionType;
+	@Schema(title = "权限类型(0=按钮, 1=API)", requiredMode = Schema.RequiredMode.REQUIRED)
+	@Max(value = 1, message = "权限类型值无效")
+	@Min(value = 0, message = "权限类型值无效")
+	@NotNull(message = "权限类型不能为空")
+	private Integer permissionType;
 
-    @Schema(title = "显示顺序")
-    private Integer orderNum;
+	@Schema(title = "显示顺序")
+	private Integer orderNum;
 
-    @Schema(title = "启用状态(true=启用，false=停用)；不传时默认启用")
-    private Boolean status;
+	@Schema(title = "启用状态(true=启用，false=停用)；不传时默认启用")
+	private Boolean status;
 
-    @Schema(title = "备注")
-    @Size(max = 500, message = "备注长度不能超过500个字符")
-    private String remark;
+	@Schema(title = "备注")
+	@Size(max = 500, message = "备注长度不能超过500个字符")
+	private String remark;
 
 }

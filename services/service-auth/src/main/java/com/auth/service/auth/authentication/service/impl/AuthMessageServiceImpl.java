@@ -2,7 +2,9 @@ package com.auth.service.auth.authentication.service.impl;
 
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.crypto.digest.MD5;
-import com.auth.module.message.email.EmailSendDTO;
+import com.auth.module.message.channel.MessageChannel;
+import com.auth.module.message.command.TemplateMessageCommand;
+import com.auth.module.message.email.EmailChannelOptions;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.auth.authentication.audit.LoginAuditSnapshot;
 import com.auth.service.auth.authentication.audit.LoginAuditSnapshotFactory;
@@ -31,55 +33,57 @@ import static com.auth.module.security.contract.redis.SecurityRedisKey.EMAIL_COD
 @Service
 public class AuthMessageServiceImpl implements AuthMessageService {
 
-    private final RedisTemplate<String, Object> redisTemplate;
+	private final RedisTemplate<String, Object> redisTemplate;
 
-    private final UserMapper userMapper;
+	private final UserMapper userMapper;
 
-    private final LoginAuditSnapshotFactory loginAuditSnapshotFactory;
+	private final LoginAuditSnapshotFactory loginAuditSnapshotFactory;
 
-    private final SystemMessageSendFeignClient systemMessageSendFeignClient;
+	private final SystemMessageSendFeignClient systemMessageSendFeignClient;
 
-    public AuthMessageServiceImpl(RedisTemplate<String, Object> redisTemplate, UserMapper userMapper,
-                                  LoginAuditSnapshotFactory loginAuditSnapshotFactory,
-                                  SystemMessageSendFeignClient systemMessageSendFeignClient) {
-        this.redisTemplate = redisTemplate;
-        this.userMapper = userMapper;
-        this.loginAuditSnapshotFactory = loginAuditSnapshotFactory;
-        this.systemMessageSendFeignClient = systemMessageSendFeignClient;
-    }
+	public AuthMessageServiceImpl(RedisTemplate<String, Object> redisTemplate, UserMapper userMapper,
+			LoginAuditSnapshotFactory loginAuditSnapshotFactory,
+			SystemMessageSendFeignClient systemMessageSendFeignClient) {
+		this.redisTemplate = redisTemplate;
+		this.userMapper = userMapper;
+		this.loginAuditSnapshotFactory = loginAuditSnapshotFactory;
+		this.systemMessageSendFeignClient = systemMessageSendFeignClient;
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void sendEmailCode(String email, HttpServletRequest request) {
-        String redisKey = EMAIL_CODE.key(email);
-        String code = RandomUtil.randomNumbers(6);
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void sendEmailCode(String email, HttpServletRequest request) {
+		String redisKey = EMAIL_CODE.key(email);
+		String code = RandomUtil.randomNumbers(6);
 
-        // 存入 Redis 时使用 MD5，登录校验侧对比 digestHex16
-        redisTemplate.opsForValue().set(redisKey, MD5.create().digestHex16(code), EMAIL_CODE.getDefaultTtl());
+		// 存入 Redis 时使用 MD5，登录校验侧对比 digestHex16
+		redisTemplate.opsForValue().set(redisKey, MD5.create().digestHex16(code), EMAIL_CODE.getDefaultTtl());
 
-        // 过期时间转成分钟
-        long expireMinutes = EMAIL_CODE.getDefaultTtl().toMinutes();
+		// 过期时间转成分钟
+		long expireMinutes = EMAIL_CODE.getDefaultTtl().toMinutes();
 
-        // IP地址等信息
-        LoginAuditSnapshot snapshot = loginAuditSnapshotFactory.build(request);
+		// IP地址等信息
+		LoginAuditSnapshot snapshot = loginAuditSnapshotFactory.build(request);
 
-        // 查询用户名
-        UserEntity user = userMapper.selectUserByEmail(email);
-        String username = user.getUsername();
+		// 查询用户名
+		// FIXME 会为空
+		UserEntity user = userMapper.selectUserByEmail(email);
+		String username = user.getUsername();
 
-        // 拼装发送对象
-        Map<String, Object> variables = LoginEmailVariables.build(username, code, expireMinutes, LocalDateTime.now(),
-                snapshot.loginIp(), snapshot.loginRegion());
-        EmailSendDTO dto = EmailSendDTO.builder()
-                .templateCode(AuthEmailTemplateCode.LOGIN_EMAIL_CODE.getTemplateCode())
-                .to(List.of(email))
-                .variables(variables)
-                .hasHtml(Boolean.TRUE)
-                .build();
+		// 拼装发送对象
+		Map<String, Object> variables = LoginEmailVariables.build(username, code, expireMinutes, LocalDateTime.now(),
+				snapshot.loginIp(), snapshot.loginRegion());
+		TemplateMessageCommand command = TemplateMessageCommand.builder()
+			.channel(MessageChannel.EMAIL)
+			.templateCode(AuthEmailTemplateCode.LOGIN_EMAIL_CODE.getTemplateCode())
+			.targets(List.of(email))
+			.variables(variables)
+			.emailOptions(EmailChannelOptions.builder().hasHtml(Boolean.TRUE).build())
+			.build();
 
-        systemMessageSendFeignClient.sendEmail(dto);
-    }
+		systemMessageSendFeignClient.sendByTemplate(command);
+	}
 
 }

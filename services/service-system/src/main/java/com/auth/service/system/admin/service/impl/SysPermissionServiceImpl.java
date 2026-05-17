@@ -29,48 +29,48 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, SysPermissionEntity>
-        implements SysPermissionService {
+		implements SysPermissionService {
 
-    private final AuditUserDisplayService auditUserDisplayService;
+	private final AuditUserDisplayService auditUserDisplayService;
 
-    public SysPermissionServiceImpl(AuditUserDisplayService auditUserDisplayService) {
-        this.auditUserDisplayService = auditUserDisplayService;
-    }
+	public SysPermissionServiceImpl(AuditUserDisplayService auditUserDisplayService) {
+		this.auditUserDisplayService = auditUserDisplayService;
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public PageResponse<SysPermissionPageResponse> getPage(Page<SysPermissionEntity> pageParams,
-                                                           SysPermissionQuery query) {
-        String orderBySql = SysPermissionPageOrderSqlBuilder.buildOrderBySql(query.getSort());
-        IPage<SysPermissionEntity> entityPage = baseMapper.selectListByPage(pageParams, query, orderBySql);
-        IPage<SysPermissionPageResponse> page = entityPage.convert(SysPermissionConverter.INSTANCE::toPageResponse);
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public PageResponse<SysPermissionPageResponse> getPage(Page<SysPermissionEntity> pageParams,
+			SysPermissionQuery query) {
+		String orderBySql = SysPermissionPageOrderSqlBuilder.buildOrderBySql(query.getSort());
+		IPage<SysPermissionEntity> entityPage = baseMapper.selectListByPage(pageParams, query, orderBySql);
+		IPage<SysPermissionPageResponse> page = entityPage.convert(SysPermissionConverter.INSTANCE::toPageResponse);
 
-        auditUserDisplayService.enrichAuditUsernames(page);
-        return PageResponse.of(page);
-    }
+		auditUserDisplayService.enrichAuditUsernames(page);
+		return PageResponse.of(page);
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void create(SysPermissionCreateForm form) {
-        String permissionCode = form.getPermissionCode();
-        long exists = count(Wrappers.<SysPermissionEntity>lambdaQuery()
-                .eq(SysPermissionEntity::getPermissionCode, permissionCode));
-        if (exists > 0) {
-            throw new SystemBusinessException(SystemResultCodeEnum.PERMISSION_CODE_DUPLICATE, permissionCode);
-        }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void create(SysPermissionCreateForm form) {
+		String permissionCode = form.getPermissionCode();
+		long exists = count(
+				Wrappers.<SysPermissionEntity>lambdaQuery().eq(SysPermissionEntity::getPermissionCode, permissionCode));
+		if (exists > 0) {
+			throw new SystemBusinessException(SystemResultCodeEnum.PERMISSION_CODE_DUPLICATE, permissionCode);
+		}
 
-        SysPermissionEntity entity = SysPermissionConverter.INSTANCE.toEntity(form);
-        if (entity.getOrderNum() == null) {
-            entity.setOrderNum(0);
-        }
-        if (entity.getStatus() == null) {
-            entity.setStatus(Boolean.TRUE);
-        }
-        save(entity);
-    }
+		SysPermissionEntity entity = SysPermissionConverter.INSTANCE.toEntity(form);
+		if (entity.getOrderNum() == null) {
+			entity.setOrderNum(0);
+		}
+		if (entity.getStatus() == null) {
+			entity.setStatus(Boolean.TRUE);
+		}
+		save(entity);
+	}
 
 }

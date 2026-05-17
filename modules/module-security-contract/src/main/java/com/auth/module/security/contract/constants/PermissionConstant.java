@@ -10,7 +10,8 @@ import java.util.Set;
  * 权限相关常量（契约层） 敏感操作 bypass 语义必须由代码定义（不得远程配置）
  *
  * <p>
- * 业务权限码、通配符的字符级语法见 {@link com.auth.module.security.contract.convention.AuthCodeConvention}。
+ * 业务权限码、通配符的字符级语法见
+ * {@link com.auth.module.security.contract.convention.AuthCodeConvention}。
  * </p>
  *
  * @author Bunny
