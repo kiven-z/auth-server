@@ -1,4 +1,4 @@
-package com.auth.service.system.message.support;
+package com.auth.service.system.message.channel.email;
 
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;

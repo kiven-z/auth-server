@@ -1,4 +1,4 @@
-package com.auth.service.system.message.dispatch;
+package com.auth.service.system.message.api;
 
 import com.auth.module.message.command.TemplateMessageCommand;
 

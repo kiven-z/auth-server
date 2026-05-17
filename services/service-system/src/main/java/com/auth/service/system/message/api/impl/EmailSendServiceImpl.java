@@ -1,9 +1,9 @@
-package com.auth.service.system.message.service.impl;
+package com.auth.service.system.message.api.impl;
 
 import com.auth.module.message.email.EmailSendDTO;
+import com.auth.service.system.message.api.EmailSendService;
+import com.auth.service.system.message.api.MessageDispatchService;
 import com.auth.service.system.message.convert.TemplateMessageCommandConverter;
-import com.auth.service.system.message.dispatch.MessageDispatchService;
-import com.auth.service.system.message.service.EmailSendService;
 import org.springframework.stereotype.Service;
 
 /**

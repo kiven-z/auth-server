@@ -2,7 +2,7 @@ package com.auth.service.system.message.controller;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.module.message.command.TemplateMessageCommand;
-import com.auth.service.system.message.dispatch.MessageDispatchService;
+import com.auth.service.system.message.api.MessageDispatchService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

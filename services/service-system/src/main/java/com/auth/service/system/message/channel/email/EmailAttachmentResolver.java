@@ -1,4 +1,4 @@
-package com.auth.service.system.message.email;
+package com.auth.service.system.message.channel.email;
 
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.collection.CollUtil;
@@ -6,7 +6,6 @@ import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.PrimitiveArrayUtil;
 import com.auth.module.message.email.AttachmentDTO;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.message.support.InMemoryMultipartFile;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;

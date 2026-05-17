@@ -1,4 +1,4 @@
-package com.auth.service.system.message.email.model;
+package com.auth.service.system.message.channel.email.model;
 
 /**
  * 邮件模板渲染结果

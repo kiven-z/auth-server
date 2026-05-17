@@ -7,7 +7,7 @@ import com.auth.service.system.admin.model.query.EmailTemplateQuery;
 import com.auth.service.system.admin.model.vo.emailtemplate.EmailTemplateDetailVO;
 import com.auth.service.system.admin.service.impl.SysEmailTemplateServiceImpl;
 import com.auth.service.system.common.service.AuditUserDisplayService;
-import com.auth.service.system.message.service.EmailSendService;
+import com.auth.service.system.message.api.EmailSendService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;

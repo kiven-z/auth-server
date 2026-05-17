@@ -16,9 +16,9 @@ import com.auth.service.system.admin.model.vo.emailtemplate.EmailTemplateRequire
 import com.auth.service.system.admin.service.SysEmailTemplateService;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
-import com.auth.service.system.message.service.EmailSendService;
-import com.auth.service.system.message.support.EmailTemplateRequireFieldsJsonSupport;
-import com.auth.service.system.message.utils.MailFreeMarkUtil;
+import com.auth.service.system.message.api.EmailSendService;
+import com.auth.service.system.message.shared.EmailTemplateRequireFieldsJsonSupport;
+import com.auth.service.system.message.shared.FreeMarkTemplateRenderer;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -173,7 +173,7 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<EmailTemplateMapper
 		List<EmailTemplateRequireFieldRow> rows = EmailTemplateRequireFieldsJsonSupport
 			.parse(entity.getRequireFields());
 		Map<String, Object> model = EmailTemplateRequireFieldsJsonSupport.toExampleModel(rows);
-		return MailFreeMarkUtil.processTemplate(entity.getTemplateName(), entity.getContent(), model);
+		return FreeMarkTemplateRenderer.processTemplate(entity.getTemplateName(), entity.getContent(), model);
 	}
 
 	/**
@@ -183,7 +183,7 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<EmailTemplateMapper
 	public String render(EmailTemplateRenderForm form) {
 		try {
 			Map<String, Object> model = EmailTemplateRequireFieldsJsonSupport.toExampleModel(form.getRequireFields());
-			return MailFreeMarkUtil.processTemplate("inline-preview", form.getContent(), model);
+			return FreeMarkTemplateRenderer.processTemplate("inline-preview", form.getContent(), model);
 		}
 		catch (Exception e) {
 			return "部分内容渲染失败，请检查模板中的变量是否均已填写";

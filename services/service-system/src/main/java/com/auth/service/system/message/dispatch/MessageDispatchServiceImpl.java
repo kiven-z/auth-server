@@ -4,6 +4,7 @@ import com.auth.module.message.channel.MessageChannel;
 import com.auth.module.message.command.TemplateMessageCommand;
 import com.auth.module.message.spi.MessageSender;
 import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.message.api.MessageDispatchService;
 import org.springframework.stereotype.Service;
 
 import java.util.EnumMap;

@@ -18,7 +18,7 @@ import com.auth.service.system.log.model.query.LogJobQuery;
 import com.auth.service.system.log.model.vo.LogJobDetailVO;
 import com.auth.service.system.log.model.vo.LogJobPageResponse;
 import com.auth.service.system.log.service.LogJobService;
-import com.auth.service.system.message.service.EmailSendService;
+import com.auth.service.system.message.api.EmailSendService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;

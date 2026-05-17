@@ -67,9 +67,12 @@ public class AuthMessageServiceImpl implements AuthMessageService {
 		// IP地址等信息
 		LoginAuditSnapshot snapshot = loginAuditSnapshotFactory.build(request);
 
-		// 查询用户名
-		// FIXME 会为空
+		// 未找到活跃用户时静默返回，不暴露账号不存在（与 EmailLoginStrategy 策略一致）
 		UserEntity user = userMapper.selectUserByEmail(email);
+		if (user == null) {
+			log.warn("Send email code skipped: no active user found for email={}", email);
+			return;
+		}
 		String username = user.getUsername();
 
 		// 拼装发送对象

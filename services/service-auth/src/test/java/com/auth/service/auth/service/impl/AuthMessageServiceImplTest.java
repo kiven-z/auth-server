@@ -12,7 +12,9 @@ import com.auth.service.auth.authentication.mapper.UserMapper;
 import com.auth.service.auth.authentication.service.impl.AuthMessageServiceImpl;
 import com.auth.service.auth.support.integration.SystemMessageSendFeignClient;
 import com.auth.service.auth.support.message.AuthEmailTemplateCode;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -27,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -54,51 +57,87 @@ class AuthMessageServiceImplTest {
 
 	private AuthMessageServiceImpl authMessageService;
 
-	@Test
-	@DisplayName("发送登录验证码：写入 Redis MD5 并调用 system 邮件接口")
-	void sendEmailCode_shouldStoreMd5AndInvokeEmailSend() {
+	@BeforeEach
+	void setUp() {
 		LoginAuditSnapshotFactory snapshotFactory = new LoginAuditSnapshotFactory(ipAddressService);
 		authMessageService = new AuthMessageServiceImpl(redisTemplate, userMapper, snapshotFactory,
 				systemMessageSendFeignClient);
+	}
 
-		String email = "bunny@example.com";
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		UserEntity user = new UserEntity();
-		user.setUsername("Bunny");
+	@Nested
+	@DisplayName("正常流程：用户存在")
+	class UserFound {
 
-		when(userMapper.selectUserByEmail(email)).thenReturn(user);
-		when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-		when(ipAddressService.resolveIpInfo(request))
-			.thenReturn(IpInfo.builder().ipAddr("192.168.1.1").ipRegion("内网IP").build());
-		when(systemMessageSendFeignClient.sendByTemplate(any(TemplateMessageCommand.class)))
-			.thenReturn(Result.success());
+		@Test
+		@DisplayName("写入 Redis MD5 并调用 system 邮件接口")
+		void sendEmailCode_shouldStoreMd5AndInvokeEmailSend() {
+			String email = "bunny@example.com";
+			MockHttpServletRequest request = new MockHttpServletRequest();
+			UserEntity user = new UserEntity();
+			user.setUsername("Bunny");
 
-		authMessageService.sendEmailCode(email, request);
+			when(userMapper.selectUserByEmail(email)).thenReturn(user);
+			when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+			when(ipAddressService.resolveIpInfo(request))
+				.thenReturn(IpInfo.builder().ipAddr("192.168.1.1").ipRegion("内网IP").build());
+			when(systemMessageSendFeignClient.sendByTemplate(any(TemplateMessageCommand.class)))
+				.thenReturn(Result.success());
 
-		ArgumentCaptor<String> redisValueCaptor = ArgumentCaptor.forClass(String.class);
-		verify(valueOperations).set(eq(EMAIL_CODE.key(email)), redisValueCaptor.capture(),
-				eq(EMAIL_CODE.getDefaultTtl()));
+			authMessageService.sendEmailCode(email, request);
 
-		ArgumentCaptor<TemplateMessageCommand> commandCaptor = ArgumentCaptor.forClass(TemplateMessageCommand.class);
-		verify(systemMessageSendFeignClient).sendByTemplate(commandCaptor.capture());
+			ArgumentCaptor<String> redisValueCaptor = ArgumentCaptor.forClass(String.class);
+			verify(valueOperations).set(eq(EMAIL_CODE.key(email)), redisValueCaptor.capture(),
+					eq(EMAIL_CODE.getDefaultTtl()));
 
-		TemplateMessageCommand command = commandCaptor.getValue();
-		assertEquals(MessageChannel.EMAIL, command.getChannel());
-		assertEquals(AuthEmailTemplateCode.LOGIN_EMAIL_CODE.getTemplateCode(), command.getTemplateCode());
-		assertEquals(1, command.getTargets().size());
-		assertEquals(email, command.getTargets().get(0));
-		assertEquals(Boolean.TRUE, command.getEmailOptions().getHasHtml());
+			ArgumentCaptor<TemplateMessageCommand> commandCaptor = ArgumentCaptor
+				.forClass(TemplateMessageCommand.class);
+			verify(systemMessageSendFeignClient).sendByTemplate(commandCaptor.capture());
 
-		Object codeVar = command.getVariables().get("verificationCode");
-		assertNotNull(codeVar);
-		String code = codeVar.toString();
-		assertEquals(6, code.length());
-		assertEquals(MD5.create().digestHex16(code), redisValueCaptor.getValue());
+			TemplateMessageCommand command = commandCaptor.getValue();
+			assertEquals(MessageChannel.EMAIL, command.getChannel());
+			assertEquals(AuthEmailTemplateCode.LOGIN_EMAIL_CODE.getTemplateCode(), command.getTemplateCode());
+			assertEquals(1, command.getTargets().size());
+			assertEquals(email, command.getTargets().get(0));
+			assertEquals(Boolean.TRUE, command.getEmailOptions().getHasHtml());
 
-		assertEquals("Bunny", command.getVariables().get("username"));
-		assertEquals(EMAIL_CODE.getDefaultTtl().toMinutes(), command.getVariables().get("expireTime"));
-		assertEquals("192.168.1.1", command.getVariables().get("ipAddr"));
-		assertEquals("内网IP", command.getVariables().get("ipRegion"));
+			Object codeVar = command.getVariables().get("verificationCode");
+			assertNotNull(codeVar);
+			String code = codeVar.toString();
+			assertEquals(6, code.length());
+			assertEquals(MD5.create().digestHex16(code), redisValueCaptor.getValue());
+
+			assertEquals("Bunny", command.getVariables().get("username"));
+			assertEquals(EMAIL_CODE.getDefaultTtl().toMinutes(), command.getVariables().get("expireTime"));
+			assertEquals("192.168.1.1", command.getVariables().get("ipAddr"));
+			assertEquals("内网IP", command.getVariables().get("ipRegion"));
+		}
+
+	}
+
+	@Nested
+	@DisplayName("用户不存在：静默返回，不暴露账号状态")
+	class UserNotFound {
+
+		@Test
+		@DisplayName("用户不存在时不发送邮件，不调用 Feign")
+		void sendEmailCode_shouldSkipWhenUserNotFound() {
+			String email = "unknown@example.com";
+			MockHttpServletRequest request = new MockHttpServletRequest();
+
+			when(userMapper.selectUserByEmail(email)).thenReturn(null);
+			when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+			when(ipAddressService.resolveIpInfo(request))
+				.thenReturn(IpInfo.builder().ipAddr("192.168.1.1").ipRegion("内网IP").build());
+
+			authMessageService.sendEmailCode(email, request);
+
+			// 验证码仍正常写入 Redis（攻击者无法通过 NPE 或 4xx 判断邮箱是否存在）
+			verify(valueOperations).set(eq(EMAIL_CODE.key(email)), any(), eq(EMAIL_CODE.getDefaultTtl()));
+
+			// 不调用 Feign，不发邮件
+			verify(systemMessageSendFeignClient, never()).sendByTemplate(any());
+		}
+
 	}
 
 }

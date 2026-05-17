@@ -1,13 +1,11 @@
-package com.auth.service.system.message.channel;
+package com.auth.service.system.message.channel.email;
 
 import com.auth.module.message.channel.MessageChannel;
 import com.auth.module.message.command.TemplateMessageCommand;
 import com.auth.module.message.email.EmailSendDTO;
 import com.auth.module.message.spi.MessageSender;
+import com.auth.service.system.message.channel.email.model.RenderedEmail;
 import com.auth.service.system.message.convert.TemplateMessageCommandConverter;
-import com.auth.service.system.message.email.EmailTemplatePipeline;
-import com.auth.service.system.message.email.MimeMailTransport;
-import com.auth.service.system.message.email.model.RenderedEmail;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
