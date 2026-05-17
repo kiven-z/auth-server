@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.DATA_NOT_EXIST;
+import static com.auth.service.system.common.exception.code.common.SystemCommonResultCode.DATA_NOT_EXIST;
 
 /**
  * 权限决策审计日志 Service 实现

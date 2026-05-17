@@ -36,7 +36,7 @@ public class SystemBusinessExceptionHandler extends ValidationExceptionHandler {
 	public ResponseEntity<Result<Object>> handleSystemBusiness(SystemBusinessException exception) {
 		log.warn("System business exception: {}", exception.toString(), exception);
 
-		SystemResultCodeEnum rc = exception.getResultCode();
+		var rc = exception.getResultCode();
 		Result<Object> body = SystemResultResponseFactory.build(messageSource, exception);
 		HttpStatus status = SystemResultResponseFactory.resolveHttpStatus(rc);
 		return ResponseEntity.status(status).body(body);

@@ -10,7 +10,7 @@ import com.auth.service.system.admin.model.vo.permission.SysPermissionPageRespon
 import com.auth.service.system.admin.service.SysPermissionService;
 import com.auth.service.system.admin.support.SysPermissionPageOrderSqlBuilder;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.common.exception.SystemResultCodeEnum;
+import com.auth.service.system.common.exception.code.admin.SystemAdminResultCode;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -60,7 +60,7 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 		long exists = count(
 				Wrappers.<SysPermissionEntity>lambdaQuery().eq(SysPermissionEntity::getPermissionCode, permissionCode));
 		if (exists > 0) {
-			throw new SystemBusinessException(SystemResultCodeEnum.PERMISSION_CODE_DUPLICATE, permissionCode);
+			throw new SystemBusinessException(SystemAdminResultCode.PERMISSION_CODE_DUPLICATE, permissionCode);
 		}
 
 		SysPermissionEntity entity = SysPermissionConverter.INSTANCE.toEntity(form);

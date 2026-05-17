@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
+import static com.auth.service.system.common.exception.code.message.SystemEmailResultCode.*;
 
 /**
  * 邮件附件解析：Base64 / bytes / URL → {@link MultipartFile}

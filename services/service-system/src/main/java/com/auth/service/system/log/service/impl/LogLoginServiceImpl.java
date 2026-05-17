@@ -19,10 +19,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.DATA_NOT_EXIST;
+import static com.auth.service.system.common.exception.code.common.SystemCommonResultCode.DATA_NOT_EXIST;
 
 /**
- * 登录日志 Service 实现
+ * ???? Service ??
  *
  * @author Bunny
  */
@@ -43,7 +43,7 @@ public class LogLoginServiceImpl extends ServiceImpl<LogLoginLogMapper, LoginLog
 	@Override
 	public PageResponse<LogLoginLogPageVO> getPage(Page<LoginLogEntity> pageParams, LogLoginLogQuery query) {
 		IPage<LogLoginLogPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
-		// PO 转 VO（PageResponse.of 复用 records）
+		// PO ? VO?PageResponse.of ?? records?
 		IPage<LogLoginLogPageVO> voPage = page.convert(LogLoginLogConvert.INSTANCE::toPageVO);
 		auditUserDisplayService.enrichAuditUsernames(voPage);
 		return PageResponse.of(voPage);

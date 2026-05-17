@@ -4,7 +4,7 @@ import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.admin.convert.SysUserProfileConverter;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.common.exception.SystemResultCodeEnum;
+import com.auth.service.system.common.exception.code.common.SystemCommonResultCode;
 import com.auth.service.system.common.mapper.SysUserQueryMapper;
 import com.auth.service.system.common.model.SysUserSearchItemResponse;
 import com.auth.service.system.common.model.vo.SysUserProfileResponse;
@@ -37,11 +37,11 @@ public class SysUserQueryServiceImpl extends ServiceImpl<SysUserQueryMapper, Use
 	@Override
 	public SysUserProfileResponse getProfile(Long userId) {
 		if (userId == null) {
-			throw new SystemBusinessException(SystemResultCodeEnum.ILLEGAL_USER_ID_NOT_NULL);
+			throw new SystemBusinessException(SystemCommonResultCode.ILLEGAL_USER_ID_NOT_NULL);
 		}
 		UserEntity user = baseMapper.selectById(userId);
 		if (user == null) {
-			throw new SystemBusinessException(SystemResultCodeEnum.USER_NOT_FOUND, userId);
+			throw new SystemBusinessException(SystemCommonResultCode.USER_NOT_FOUND, userId);
 		}
 
 		SysUserProfileResponse response = SysUserProfileConverter.INSTANCE.toProfileResponse(user);

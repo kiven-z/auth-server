@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
+import static com.auth.service.system.common.exception.code.message.SystemMessageResultCode.*;
 
 /**
  * 短信模板加载、变量校验与 templateParam JSON 组装（不渲染正文）

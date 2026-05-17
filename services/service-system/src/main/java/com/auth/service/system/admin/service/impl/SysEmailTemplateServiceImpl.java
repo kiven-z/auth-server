@@ -31,10 +31,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.DATA_NOT_EXIST;
+import static com.auth.service.system.common.exception.code.common.SystemCommonResultCode.DATA_NOT_EXIST;
 
 /**
- * 邮件模板业务实现：分页查询、详情、增删改、必填变量维护、FreeMarker 预览/渲染及测试发送
+ * ????????????????????????????FreeMarker ??/???????
  *
  * @author Bunny
  */
@@ -60,7 +60,7 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<EmailTemplateMapper
 	public PageResponse<EmailTemplatePageResponse> getEmailTemplatePage(Page<EmailTemplateEntity> pageParams,
 			EmailTemplateQuery query) {
 		IPage<EmailTemplatePageRowPO> page = baseMapper.selectListByPage(pageParams, query);
-		// PO 转 VO
+		// PO ? VO
 		IPage<EmailTemplatePageResponse> voPage = page.convert(EmailTemplateConvert.INSTANCE::toPageResponse);
 		auditUserDisplayService.enrichAuditUsernames(voPage);
 		return PageResponse.of(voPage);
@@ -79,7 +79,7 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<EmailTemplateMapper
 		EmailTemplateDetailVO vo = new EmailTemplateDetailVO();
 		BeanUtil.copyProperties(entity, vo, "requireFields");
 
-		// 设置变量声明列表
+		// ????????
 		List<EmailTemplateRequireFieldRow> requireFields = MessageTemplateRequireFieldsJsonSupport
 			.parse(entity.getRequireFields());
 		vo.setRequireFields(requireFields);
@@ -186,7 +186,7 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<EmailTemplateMapper
 			return FreeMarkTemplateRenderer.processTemplate("inline-preview", form.getContent(), model);
 		}
 		catch (Exception e) {
-			return "部分内容渲染失败，请检查模板中的变量是否均已填写";
+			return "????????????????????????";
 		}
 	}
 
@@ -196,32 +196,32 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<EmailTemplateMapper
 	@Override
 	@Async
 	public void testSend(EmailTemplateTestSendForm form) {
-		// 获取并验证模板实体是否存在
+		// ?????????????
 		Long id = form.getId();
 		EmailTemplateEntity entity = getById(id);
 		if (entity == null) {
 			throw new SystemBusinessException(DATA_NOT_EXIST);
 		}
 
-		// 创建邮件发送实体
+		// ????????
 		EmailSendDTO emailSendDTO = new EmailSendDTO();
 		emailSendDTO.setHasHtml(Boolean.TRUE);
 
-		// 设置模板
+		// ????
 		String templateCode = entity.getTemplateCode();
 		emailSendDTO.setTemplateCode(templateCode);
 
-		// 设置邮箱
+		// ????
 		String email = form.getEmail();
 		emailSendDTO.setTo(List.of(email));
 
-		// 解析必填字段并生成示例数据模型
+		// ???????????????
 		List<EmailTemplateRequireFieldRow> rows = MessageTemplateRequireFieldsJsonSupport
 			.parse(entity.getRequireFields());
 		Map<String, Object> model = MessageTemplateRequireFieldsJsonSupport.toExampleModel(rows);
 		emailSendDTO.setVariables(model);
 
-		// 调用邮件服务同步发送邮件
+		// ????????????
 		emailSendService.sendByTemplate(emailSendDTO);
 	}
 

@@ -20,6 +20,9 @@ public class EmailSendServiceImpl implements EmailSendService {
 		this.messageDispatchService = messageDispatchService;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void sendByTemplate(EmailSendDTO dto) {
 		messageDispatchService.sendByTemplate(TemplateMessageCommandConverter.fromEmailDto(dto));

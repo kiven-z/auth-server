@@ -43,7 +43,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
+import static com.auth.service.system.common.exception.code.common.SystemCommonResultCode.DATA_NOT_EXIST;
+import static com.auth.service.system.common.exception.code.schedule.SystemScheduleResultCode.*;
 import static com.auth.service.system.schedule.model.constans.SysJobQuartzDataKeys.JOB_ZONE;
 
 /**

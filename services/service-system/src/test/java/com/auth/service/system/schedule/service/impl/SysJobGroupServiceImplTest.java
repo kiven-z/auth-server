@@ -22,7 +22,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.lang.reflect.Field;
 import java.util.List;
 
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
+import static com.auth.service.system.common.exception.code.common.SystemCommonResultCode.DATA_NOT_EXIST;
+import static com.auth.service.system.common.exception.code.schedule.SystemScheduleResultCode.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;

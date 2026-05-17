@@ -21,18 +21,18 @@ import com.auth.service.system.admin.model.form.permission.SysPermissionCreateFo
 import com.auth.service.system.admin.model.query.SysPermissionQuery;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionPageResponse;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.common.exception.SystemResultCodeEnum;
+import com.auth.service.system.common.exception.code.admin.SystemAdminResultCode;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 /**
- * {@link SysPermissionServiceImpl} 单元测试
+ * {@link SysPermissionServiceImpl} ????
  *
  * @author Bunny
  */
-@DisplayName("SysPermissionServiceImpl 权限管理")
+@DisplayName("SysPermissionServiceImpl ????")
 @ExtendWith(MockitoExtension.class)
 class SysPermissionServiceImplTest {
 
@@ -53,7 +53,7 @@ class SysPermissionServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("分页查询：Mapper 分页后调用审计用户展示名补全")
+	@DisplayName("?????Mapper ??????????????")
 	void getPageDelegatesEnrichToAuditUserDisplayService() {
 		Page<SysPermissionEntity> pageParams = new Page<>(1, 10);
 		SysPermissionQuery query = new SysPermissionQuery();
@@ -71,18 +71,18 @@ class SysPermissionServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("新增：权限编码已存在时抛出 PERMISSION_CODE_DUPLICATE")
+	@DisplayName("????????????? PERMISSION_CODE_DUPLICATE")
 	void createThrowsWhenPermissionCodeExists() {
 		SysPermissionCreateForm form = buildValidForm();
 		when(sysPermissionMapper.selectCount(any())).thenReturn(1L);
 
 		assertThatThrownBy(() -> sysPermissionService.create(form)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemResultCodeEnum.PERMISSION_CODE_DUPLICATE);
+			.isEqualTo(SystemAdminResultCode.PERMISSION_CODE_DUPLICATE);
 	}
 
 	@Test
-	@DisplayName("新增：默认启用与顺序并持久化（编码已由 Web 层 strip 后入参）")
+	@DisplayName("??????????????????? Web ? strip ????")
 	void createAppliesDefaultsAndPersists() {
 		SysPermissionCreateForm form = buildValidForm();
 		form.setPermissionCode("sys:user:add");
@@ -101,7 +101,7 @@ class SysPermissionServiceImplTest {
 	private static SysPermissionCreateForm buildValidForm() {
 		SysPermissionCreateForm form = new SysPermissionCreateForm();
 		form.setPermissionCode("sys:user:add");
-		form.setPermissionName("新增用户");
+		form.setPermissionName("????");
 		form.setPermissionType(1);
 		form.setRemark("r");
 		return form;

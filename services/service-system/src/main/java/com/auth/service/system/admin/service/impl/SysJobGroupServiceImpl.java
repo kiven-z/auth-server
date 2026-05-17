@@ -25,7 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
+import static com.auth.service.system.common.exception.code.common.SystemCommonResultCode.DATA_NOT_EXIST;
+import static com.auth.service.system.common.exception.code.schedule.SystemScheduleResultCode.*;
 
 /**
  * 任务分组实现

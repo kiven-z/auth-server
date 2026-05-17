@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.ASSIGN_SUCCESS;
+import static com.auth.service.system.common.exception.code.common.SystemCommonResultCode.ASSIGN_SUCCESS;
 
 /**
  * 系统菜单管理

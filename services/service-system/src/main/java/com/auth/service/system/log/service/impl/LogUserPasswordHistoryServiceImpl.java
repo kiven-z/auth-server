@@ -22,10 +22,10 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import cn.hutool.core.bean.BeanUtil;
 import lombok.extern.slf4j.Slf4j;
 
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.DATA_NOT_EXIST;
+import static com.auth.service.system.common.exception.code.common.SystemCommonResultCode.DATA_NOT_EXIST;
 
 /**
- * 密码历史日志 Service 实现
+ * ?????? Service ??
  *
  * @author Bunny
  */
@@ -49,7 +49,7 @@ public class LogUserPasswordHistoryServiceImpl
 	public PageResponse<LogUserPasswordHistoryPageVO> getPage(Page<LogUserPasswordHistoryEntity> pageParams,
 			LogUserPasswordHistoryQuery query) {
 		IPage<LogUserPasswordHistoryPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
-		// PO 转 VO
+		// PO ? VO
 		IPage<LogUserPasswordHistoryPageVO> voPage = page.convert(LogUserPasswordHistoryConvert.INSTANCE::toPageVO);
 		auditUserDisplayService.enrichAuditUsernames(voPage);
 		return PageResponse.of(voPage);

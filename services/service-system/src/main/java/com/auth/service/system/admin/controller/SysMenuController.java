@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
+import static com.auth.service.system.common.exception.code.common.SystemCommonResultCode.*;
 
 /**
  * 菜单 Web 端接口（动态路由等）

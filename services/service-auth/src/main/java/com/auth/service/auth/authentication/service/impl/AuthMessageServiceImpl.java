@@ -10,7 +10,7 @@ import com.auth.service.auth.authentication.audit.LoginAuditSnapshot;
 import com.auth.service.auth.authentication.audit.LoginAuditSnapshotFactory;
 import com.auth.service.auth.authentication.mapper.UserMapper;
 import com.auth.service.auth.authentication.service.AuthMessageService;
-import com.auth.service.auth.support.integration.SystemMessageSendFeignClient;
+import com.auth.service.auth.support.integration.SystemSecurityIngestFeignClient;
 import com.auth.service.auth.support.message.AuthEmailTemplateCode;
 import com.auth.service.auth.support.message.AuthSmsTemplateCode;
 import com.auth.service.auth.support.message.LoginEmailVariables;
@@ -42,15 +42,15 @@ public class AuthMessageServiceImpl implements AuthMessageService {
 
 	private final LoginAuditSnapshotFactory loginAuditSnapshotFactory;
 
-	private final SystemMessageSendFeignClient systemMessageSendFeignClient;
+	private final SystemSecurityIngestFeignClient systemSecurityIngestFeignClient;
 
 	public AuthMessageServiceImpl(RedisTemplate<String, Object> redisTemplate, UserMapper userMapper,
 			LoginAuditSnapshotFactory loginAuditSnapshotFactory,
-			SystemMessageSendFeignClient systemMessageSendFeignClient) {
+			SystemSecurityIngestFeignClient systemSecurityIngestFeignClient) {
 		this.redisTemplate = redisTemplate;
 		this.userMapper = userMapper;
 		this.loginAuditSnapshotFactory = loginAuditSnapshotFactory;
-		this.systemMessageSendFeignClient = systemMessageSendFeignClient;
+		this.systemSecurityIngestFeignClient = systemSecurityIngestFeignClient;
 	}
 
 	/**
@@ -89,7 +89,7 @@ public class AuthMessageServiceImpl implements AuthMessageService {
 			.emailOptions(EmailChannelOptions.builder().hasHtml(Boolean.TRUE).build())
 			.build();
 
-		systemMessageSendFeignClient.sendByTemplate(command);
+		systemSecurityIngestFeignClient.sendByTemplate(command);
 	}
 
 	/**
@@ -100,8 +100,10 @@ public class AuthMessageServiceImpl implements AuthMessageService {
 		String redisKey = SMS_CODE.key(phone);
 		String code = RandomUtil.randomNumbers(6);
 
+		// 存入Redis
 		redisTemplate.opsForValue().set(redisKey, MD5.create().digestHex16(code), SMS_CODE.getDefaultTtl());
 
+		// 获取过期时间
 		long expireMinutes = SMS_CODE.getDefaultTtl().toMinutes();
 
 		UserEntity user = userMapper.selectUserByPhone(phone);
@@ -110,6 +112,7 @@ public class AuthMessageServiceImpl implements AuthMessageService {
 			return;
 		}
 
+		// 构建发送内容
 		Map<String, Object> variables = LoginSmsVariables.build(code, expireMinutes);
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
 			.channel(MessageChannel.SMS)
@@ -118,7 +121,7 @@ public class AuthMessageServiceImpl implements AuthMessageService {
 			.variables(variables)
 			.build();
 
-		systemMessageSendFeignClient.sendByTemplate(command);
+		systemSecurityIngestFeignClient.sendByTemplate(command);
 	}
 
 }

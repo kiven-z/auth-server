@@ -10,7 +10,7 @@ import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.auth.authentication.audit.LoginAuditSnapshotFactory;
 import com.auth.service.auth.authentication.mapper.UserMapper;
 import com.auth.service.auth.authentication.service.impl.AuthMessageServiceImpl;
-import com.auth.service.auth.support.integration.SystemMessageSendFeignClient;
+import com.auth.service.auth.support.integration.SystemSecurityIngestFeignClient;
 import com.auth.service.auth.support.message.AuthEmailTemplateCode;
 import com.auth.service.auth.support.message.AuthSmsTemplateCode;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,9 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link AuthMessageServiceImpl} 单元测试
@@ -55,7 +53,7 @@ class AuthMessageServiceImplTest {
 	private IpAddressService ipAddressService;
 
 	@Mock
-	private SystemMessageSendFeignClient systemMessageSendFeignClient;
+	private SystemSecurityIngestFeignClient systemSecurityIngestFeignClient;
 
 	private AuthMessageServiceImpl authMessageService;
 
@@ -63,7 +61,7 @@ class AuthMessageServiceImplTest {
 	void setUp() {
 		LoginAuditSnapshotFactory snapshotFactory = new LoginAuditSnapshotFactory(ipAddressService);
 		authMessageService = new AuthMessageServiceImpl(redisTemplate, userMapper, snapshotFactory,
-				systemMessageSendFeignClient);
+				systemSecurityIngestFeignClient);
 	}
 
 	@Nested
@@ -82,7 +80,7 @@ class AuthMessageServiceImplTest {
 			when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 			when(ipAddressService.resolveIpInfo(request))
 				.thenReturn(IpInfo.builder().ipAddr("192.168.1.1").ipRegion("内网IP").build());
-			when(systemMessageSendFeignClient.sendByTemplate(any(TemplateMessageCommand.class)))
+			when(systemSecurityIngestFeignClient.sendByTemplate(any(TemplateMessageCommand.class)))
 				.thenReturn(Result.success());
 
 			authMessageService.sendEmailCode(email, request);
@@ -93,7 +91,7 @@ class AuthMessageServiceImplTest {
 
 			ArgumentCaptor<TemplateMessageCommand> commandCaptor = ArgumentCaptor
 				.forClass(TemplateMessageCommand.class);
-			verify(systemMessageSendFeignClient).sendByTemplate(commandCaptor.capture());
+			verify(systemSecurityIngestFeignClient).sendByTemplate(commandCaptor.capture());
 
 			TemplateMessageCommand command = commandCaptor.getValue();
 			assertEquals(MessageChannel.EMAIL, command.getChannel());
@@ -137,7 +135,7 @@ class AuthMessageServiceImplTest {
 			verify(valueOperations).set(eq(EMAIL_CODE.key(email)), any(), eq(EMAIL_CODE.getDefaultTtl()));
 
 			// 不调用 Feign，不发邮件
-			verify(systemMessageSendFeignClient, never()).sendByTemplate(any());
+			verify(systemSecurityIngestFeignClient, never()).sendByTemplate(any());
 		}
 
 	}
@@ -155,7 +153,7 @@ class AuthMessageServiceImplTest {
 
 			when(userMapper.selectUserByPhone(phone)).thenReturn(user);
 			when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-			when(systemMessageSendFeignClient.sendByTemplate(any(TemplateMessageCommand.class)))
+			when(systemSecurityIngestFeignClient.sendByTemplate(any(TemplateMessageCommand.class)))
 				.thenReturn(Result.success());
 
 			authMessageService.sendSmsCode(phone, new MockHttpServletRequest());
@@ -166,7 +164,7 @@ class AuthMessageServiceImplTest {
 
 			ArgumentCaptor<TemplateMessageCommand> commandCaptor = ArgumentCaptor
 				.forClass(TemplateMessageCommand.class);
-			verify(systemMessageSendFeignClient).sendByTemplate(commandCaptor.capture());
+			verify(systemSecurityIngestFeignClient).sendByTemplate(commandCaptor.capture());
 
 			TemplateMessageCommand command = commandCaptor.getValue();
 			assertEquals(MessageChannel.SMS, command.getChannel());
@@ -190,7 +188,7 @@ class AuthMessageServiceImplTest {
 			authMessageService.sendSmsCode(phone, new MockHttpServletRequest());
 
 			verify(valueOperations).set(eq(SMS_CODE.key(phone)), any(), eq(SMS_CODE.getDefaultTtl()));
-			verify(systemMessageSendFeignClient, never()).sendByTemplate(any());
+			verify(systemSecurityIngestFeignClient, never()).sendByTemplate(any());
 		}
 
 	}

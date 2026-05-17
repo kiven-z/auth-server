@@ -11,8 +11,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.SMS_SEND_FAILED;
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.SMS_TARGET_EMPTY;
+import static com.auth.service.system.common.exception.code.message.SystemMessageResultCode.SMS_SEND_FAILED;
+import static com.auth.service.system.common.exception.code.message.SystemMessageResultCode.SMS_TARGET_EMPTY;
 
 /**
  * 短信渠道发送实现

@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
+import static com.auth.service.system.common.exception.code.message.SystemEmailResultCode.*;
 
 /**
  * 邮件模板加载、变量校验与 FreeMarker 渲染

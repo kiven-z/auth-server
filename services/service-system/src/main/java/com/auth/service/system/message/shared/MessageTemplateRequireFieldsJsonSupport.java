@@ -4,7 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.admin.model.vo.emailtemplate.EmailTemplateRequireFieldRow;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.common.exception.SystemResultCodeEnum;
+import com.auth.service.system.common.exception.code.SystemResultCode;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,7 +13,7 @@ import lombok.experimental.UtilityClass;
 
 import java.util.*;
 
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
+import static com.auth.service.system.common.exception.code.message.SystemEmailResultCode.*;
 
 /**
  * 消息模板 require_fields JSON 校验、转换与发送前变量完整性校验（邮件/短信共用）
@@ -115,7 +115,7 @@ public class MessageTemplateRequireFieldsJsonSupport {
 	 * @param missingCode 变量缺失时的业务码（邮件/短信各自传入）
 	 */
 	public static void assertVariablesPresent(List<EmailTemplateRequireFieldRow> requireFields,
-			Map<String, Object> variables, SystemResultCodeEnum missingCode) {
+			Map<String, Object> variables, SystemResultCode missingCode) {
 		List<String> missingKeys = findMissingKeys(requireFields, variables);
 		if (CollUtil.isNotEmpty(missingKeys)) {
 			throw new SystemBusinessException(missingCode, String.join(", ", missingKeys));
@@ -129,7 +129,7 @@ public class MessageTemplateRequireFieldsJsonSupport {
 	 * @param missingCode 变量缺失时的业务码（邮件/短信各自传入）
 	 */
 	public static void assertVariablesPresent(String requireFieldsJson, Map<String, Object> variables,
-			SystemResultCodeEnum missingCode) {
+			SystemResultCode missingCode) {
 		assertVariablesPresent(parse(requireFieldsJson), variables, missingCode);
 	}
 

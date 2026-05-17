@@ -31,7 +31,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.auth.service.system.admin.model.enums.TemplateType.CLEAR_DATABASE_CONFIRM;
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
+import static com.auth.service.system.common.exception.code.common.SystemCommonResultCode.*;
 
 /**
  * 定时任务日志服务实现

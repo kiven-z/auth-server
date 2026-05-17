@@ -1,6 +1,8 @@
 package com.auth.service.system.common.exception;
 
 import com.auth.common.core.model.response.Result;
+import com.auth.service.system.common.exception.code.SystemResultCode;
+
 import lombok.experimental.UtilityClass;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -11,8 +13,9 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * 将 {@link SystemBusinessException} / {@link SystemResultCodeEnum} 转为统一 {@link Result}（与
- * {@code AuthResultResponseFactory} 轮廓一致：MessageSource 文案 + ext i18n）
+ * 将 {@link SystemBusinessException} /
+ * {@link com.auth.service.system.common.exception.code.SystemResultCode} 转为统一
+ * {@link Result}（与 {@code AuthResultResponseFactory} 轮廓一致：MessageSource 文案 + ext i18n）
  *
  * @author Bunny
  */
@@ -28,7 +31,7 @@ public class SystemResultResponseFactory {
 	public static Result<Object> build(MessageSource messageSource, SystemBusinessException exception) {
 		Objects.requireNonNull(messageSource, "messageSource");
 		Objects.requireNonNull(exception, "exception");
-		SystemResultCodeEnum resultCode = Objects.requireNonNull(exception.getResultCode(), "resultCode");
+		SystemResultCode resultCode = Objects.requireNonNull(exception.getResultCode(), "resultCode");
 		Object[] args = exception.getMessageArgs() != null ? exception.getMessageArgs() : new Object[0];
 		return buildBody(messageSource, resultCode, args);
 	}
@@ -40,7 +43,7 @@ public class SystemResultResponseFactory {
 	 * @param args i18n 参数
 	 * @return Result
 	 */
-	public static Result<Object> build(MessageSource messageSource, SystemResultCodeEnum rc, Object... args) {
+	public static Result<Object> build(MessageSource messageSource, SystemResultCode rc, Object... args) {
 		Objects.requireNonNull(messageSource, "messageSource");
 		Objects.requireNonNull(rc, "rc");
 		Object[] safeArgs = args != null ? args : new Object[0];
@@ -54,8 +57,7 @@ public class SystemResultResponseFactory {
 	 * @param args i18n 参数（已非 null）
 	 * @return Result
 	 */
-	private static Result<Object> buildBody(MessageSource messageSource, SystemResultCodeEnum resultCode,
-			Object[] args) {
+	private static Result<Object> buildBody(MessageSource messageSource, SystemResultCode resultCode, Object[] args) {
 		Locale locale = LocaleContextHolder.getLocale();
 		String messageKey = Objects.requireNonNull(resultCode.getMessageKey(), "messageKey");
 		String defaultEnglish = messageSource.getMessage(messageKey, args, messageKey, Locale.ENGLISH);
@@ -71,7 +73,7 @@ public class SystemResultResponseFactory {
 	 * @param resultCode 结果码
 	 * @return HTTP 状态
 	 */
-	public static HttpStatus resolveHttpStatus(SystemResultCodeEnum resultCode) {
+	public static HttpStatus resolveHttpStatus(SystemResultCode resultCode) {
 		Objects.requireNonNull(resultCode, "resultCode");
 		HttpStatus resolved = HttpStatus.resolve(resultCode.getHttpStatus());
 		if (resolved != null) {

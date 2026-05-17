@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.DELETE_SUCCESS;
+import static com.auth.service.system.common.exception.code.common.SystemCommonResultCode.DELETE_SUCCESS;
 
 /**
  * 操作日志接口

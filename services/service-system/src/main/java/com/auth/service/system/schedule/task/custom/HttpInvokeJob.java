@@ -5,9 +5,9 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.auth.service.system.common.exception.SystemBusinessException;
 
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.HTTP_JOB_INVALID_HTTP_METHOD;
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.HTTP_JOB_MISSING_URL;
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.HTTP_JOB_NON_2XX_RESPONSE;
+import static com.auth.service.system.common.exception.code.schedule.SystemScheduleResultCode.HTTP_JOB_INVALID_HTTP_METHOD;
+import static com.auth.service.system.common.exception.code.schedule.SystemScheduleResultCode.HTTP_JOB_MISSING_URL;
+import static com.auth.service.system.common.exception.code.schedule.SystemScheduleResultCode.HTTP_JOB_NON_2XX_RESPONSE;
 import com.auth.service.system.schedule.annotation.QuartzTask;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.Job;

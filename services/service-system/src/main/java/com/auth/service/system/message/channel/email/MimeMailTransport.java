@@ -18,7 +18,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.*;
+import static com.auth.service.system.common.exception.code.common.SystemCommonResultCode.SERVICE_UNAVAILABLE;
+import static com.auth.service.system.common.exception.code.message.SystemEmailResultCode.*;
 
 /**
  * JavaMail MIME 邮件发送

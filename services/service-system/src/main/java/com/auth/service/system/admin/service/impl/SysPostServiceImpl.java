@@ -12,7 +12,7 @@ import com.auth.service.system.admin.model.vo.post.SysPostPageResponse;
 import com.auth.service.system.admin.service.SysPostService;
 import com.auth.service.system.admin.support.SysPostPageOrderSqlBuilder;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.common.exception.SystemResultCodeEnum;
+import com.auth.service.system.common.exception.code.admin.SystemAdminResultCode;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -54,7 +54,7 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity
 	@Override
 	public void create(SysPostCreateForm form) {
 		if (baseMapper.countAssignableDept(form.getDeptId()) == 0) {
-			throw new SystemBusinessException(SystemResultCodeEnum.POST_DEPT_NOT_FOUND, form.getDeptId());
+			throw new SystemBusinessException(SystemAdminResultCode.POST_DEPT_NOT_FOUND, form.getDeptId());
 		}
 
 		String postCode = CharSequenceUtil.trim(form.getPostCode());
@@ -62,7 +62,7 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity
 			.eq(SysPostEntity::getDeptId, form.getDeptId())
 			.eq(SysPostEntity::getPostCode, postCode));
 		if (exists > 0) {
-			throw new SystemBusinessException(SystemResultCodeEnum.POST_CODE_DUPLICATE_IN_DEPT, form.getDeptId(),
+			throw new SystemBusinessException(SystemAdminResultCode.POST_CODE_DUPLICATE_IN_DEPT, form.getDeptId(),
 					postCode);
 		}
 

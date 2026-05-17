@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Map;
 
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.EMAIL_TEMPLATE_VARS_MISSING;
-import static com.auth.service.system.common.exception.SystemResultCodeEnum.SMS_TEMPLATE_VARS_MISSING;
+import static com.auth.service.system.common.exception.code.message.SystemEmailResultCode.EMAIL_TEMPLATE_VARS_MISSING;
+import static com.auth.service.system.common.exception.code.message.SystemMessageResultCode.SMS_TEMPLATE_VARS_MISSING;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -23,15 +23,14 @@ class MessageTemplateRequireFieldsJsonSupportTest {
 	@Test
 	@DisplayName("findMissingKeys 在无声明时返回空列表")
 	void findMissingKeys_returnsEmptyWhenNoRequireFields() {
-		assertThat(MessageTemplateRequireFieldsJsonSupport.findMissingKeys(List.of(), Map.of("code", "1")))
-			.isEmpty();
+		assertThat(MessageTemplateRequireFieldsJsonSupport.findMissingKeys(List.of(), Map.of("code", "1"))).isEmpty();
 	}
 
 	@Test
 	@DisplayName("findMissingKeys 在变量齐全时返回空列表")
 	void findMissingKeys_returnsEmptyWhenAllPresent() {
-		List<EmailTemplateRequireFieldRow> rows = MessageTemplateRequireFieldsJsonSupport.parse(
-				"[{\"key\":\"code\",\"exampleValue\":\"123456\"},{\"key\":\"min\",\"exampleValue\":5}]");
+		List<EmailTemplateRequireFieldRow> rows = MessageTemplateRequireFieldsJsonSupport
+			.parse("[{\"key\":\"code\",\"exampleValue\":\"123456\"},{\"key\":\"min\",\"exampleValue\":5}]");
 		assertThat(MessageTemplateRequireFieldsJsonSupport.findMissingKeys(rows, Map.of("code", "1", "min", 5)))
 			.isEmpty();
 	}

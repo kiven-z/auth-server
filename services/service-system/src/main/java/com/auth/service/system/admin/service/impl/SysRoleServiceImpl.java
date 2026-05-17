@@ -17,7 +17,7 @@ import com.auth.service.system.admin.model.vo.role.SysRolePageResponse;
 import com.auth.service.system.admin.service.SysRoleService;
 import com.auth.service.system.admin.support.SysRolePageOrderSqlBuilder;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.common.exception.SystemResultCodeEnum;
+import com.auth.service.system.common.exception.code.admin.SystemAdminResultCode;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -65,7 +65,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 	public SysRoleDetailVO getDetail(Long id) {
 		SysRoleEntity entity = baseMapper.selectById(id);
 		if (entity == null) {
-			throw new SystemBusinessException(SystemResultCodeEnum.ROLE_NOT_FOUND, id);
+			throw new SystemBusinessException(SystemAdminResultCode.ROLE_NOT_FOUND, id);
 		}
 
 		SysRoleDetailVO vo = BeanUtil.copyProperties(entity, SysRoleDetailVO.class);
