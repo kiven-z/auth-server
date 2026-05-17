@@ -11,10 +11,11 @@
     <artifactId>module-message</artifactId>
     <packaging>jar</packaging>
     <name>module-message</name>
-    <description>Message contracts (channel SPI, template command, email DTOs); transport stays in services</description>
+    <description>Message contracts (channel SPI, template command) and channel infrastructure (SMS client, properties)</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <alibabacloud-dypnsapi.version>2.0.0</alibabacloud-dypnsapi.version>
     </properties>
 
     <dependencies>
@@ -28,12 +29,26 @@
             <artifactId>jakarta.validation-api</artifactId>
         </dependency>
 
-        <!-- @ConfigurationProperties 元数据支持 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-autoconfigure</artifactId>
-            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
         </dependency>
 
+        <!-- 阿里云号码认证 / 短信相关 SDK（渠道基础设施） -->
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>alibabacloud-dypnsapi20170525</artifactId>
+            <version>${alibabacloud-dypnsapi.version}</version>
+        </dependency>
     </dependencies>
 </project>

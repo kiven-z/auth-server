@@ -1,1 +1,2 @@
 com.auth.module.message.config.MessageAutoConfiguration
+com.auth.module.message.config.sms.SmsChannelAutoConfiguration

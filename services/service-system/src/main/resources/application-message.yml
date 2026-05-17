@@ -18,9 +18,13 @@ spring:
           timeout: 5000
           writeTimeout: 5000
 
-# 短信配置：通过 auth.message.sms 前缀读取，SmsProperties 绑定
+# 短信：auth.message.sms.* → SmsProperties；enabled=true 时注册 aliyunSmsAsyncClient
 auth:
   message:
     sms:
-      access-key-id: ${AUTH_SMS_ACCESS_KEY_ID}
-      access-key-secret: ${AUTH_SMS_ACCESS_KEY_SECRET}
+      enabled: true
+      aliyun:
+        access-key-id: ${AUTH_SMS_ACCESS_KEY_ID:}
+        access-key-secret: ${AUTH_SMS_ACCESS_KEY_SECRET:}
+        region: cn-hangzhou
+        endpoint: dypnsapi.aliyuncs.com
