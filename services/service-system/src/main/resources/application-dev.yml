@@ -1,20 +1,4 @@
 spring:
-  # 设置邮箱配置
-  mail:
-    host: smtp.qq.com
-    port: 465
-    username: ${AUTH_EMAIL_CONFIG_USERNAME}
-    password: ${AUTH_EMAIL_CONFIG_PASSWORD}
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-          connectionTimeout: 5000
-          timeout: 5000
-          writeTimeout: 5000
-
   cloud:
     nacos:
       server-addr: 192.168.3.19:8848

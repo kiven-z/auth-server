@@ -21,11 +21,8 @@ spring:
       - nacos:common-config.yaml?group=AUTH_COMMON
   profiles:
     active: dev
-
-  mail:
-    default-encoding: UTF-8
-    ssl:
-      enabled: true
+    include:
+      - message
 
   cloud:
     nacos:
