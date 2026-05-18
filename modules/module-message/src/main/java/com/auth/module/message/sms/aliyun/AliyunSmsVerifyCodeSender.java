@@ -20,9 +20,13 @@ public class AliyunSmsVerifyCodeSender implements SmsVerifyCodeSender {
 		this.aliyunSmsAsyncClient = aliyunSmsAsyncClient;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void sendVerifyCode(String phone, String providerTemplateCode, String signName, String templateParam,
 			String countryCode, String schemeName) {
+		// 构建发送消息
 		try {
 			SendSmsVerifyCodeRequest.Builder builder = SendSmsVerifyCodeRequest.builder()
 				.templateCode(providerTemplateCode)
@@ -33,6 +37,8 @@ public class AliyunSmsVerifyCodeSender implements SmsVerifyCodeSender {
 			if (CharSequenceUtil.isNotBlank(schemeName)) {
 				builder.schemeName(schemeName);
 			}
+
+			// 发送消息
 			SendSmsVerifyCodeResponse response = aliyunSmsAsyncClient.sendSmsVerifyCode(builder.build()).get();
 			log.debug("Aliyun SMS sent, phone={}, templateCode={}, response={}", phone, providerTemplateCode, response);
 		}

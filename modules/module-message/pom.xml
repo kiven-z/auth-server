@@ -44,6 +44,11 @@
             <optional>true</optional>
         </dependency>
 
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+        </dependency>
+
         <!-- 阿里云号码认证 / 短信相关 SDK（渠道基础设施） -->
         <dependency>
             <groupId>com.aliyun</groupId>

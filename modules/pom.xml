@@ -15,6 +15,7 @@
     <modules>
         <module>module-file</module>
         <module>module-message</module>
+        <module>module-message-sms4j</module>
         <module>module-platform-persistence</module>
         <module>module-security-contract</module>
         <module>module-security-core</module>

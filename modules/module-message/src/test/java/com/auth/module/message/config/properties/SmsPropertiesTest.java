@@ -3,57 +3,53 @@ package com.auth.module.message.config.properties;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import java.util.LinkedHashMap;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * {@link SmsProperties} 校验测试
+ * {@link SmsProperties} 配置校验
  */
-@DisplayName("SmsProperties 配置校验")
+@DisplayName("SmsProperties 配置绑定")
 class SmsPropertiesTest {
 
 	@Test
-	@DisplayName("未启用：允许密钥为空")
-	void validate_whenDisabled_allowsBlankCredentials() {
+	@DisplayName("默认值验证")
+	void defaultValues() {
 		SmsProperties properties = new SmsProperties();
-		properties.setEnabled(false);
 
-		assertThatCode(properties::validate).doesNotThrowAnyException();
+		assertThat(properties.isEnabled()).isFalse();
+		assertThat(properties.isVerifyEnabled()).isTrue();
+		assertThat(properties.getProvider()).isEqualTo(SmsProperties.Provider.ALIYUN);
+		assertThat(properties.getNotification()).isNotNull();
+		assertThat(properties.getNotification().isEnabled()).isFalse();
 	}
 
 	@Test
-	@DisplayName("provider=aliyun 且密钥为空：抛出 IllegalStateException")
-	void validate_whenAliyunEnabledWithoutCredentials_throws() {
+	@DisplayName("通知类配置可以设置 blends")
+	void notificationWithBlends() {
 		SmsProperties properties = new SmsProperties();
-		properties.setEnabled(true);
-		properties.setProvider(SmsProperties.Provider.ALIYUN);
+		properties.getNotification().setEnabled(true);
+		properties.getNotification().setDefaultConfigId("aliyun-main");
 
-		assertThatThrownBy(properties::validate).isInstanceOf(IllegalStateException.class)
-			.hasMessageContaining("access-key-id");
+		SmsNotificationBlendProperties blend = new SmsNotificationBlendProperties();
+		blend.setSupplier("alibaba");
+		blend.setAccessKeyId("id");
+		blend.setAccessKeySecret("secret");
+		blend.setSignature("sign");
+		properties.getNotification().getBlends().put("aliyun-main", blend);
+
+		assertThat(properties.getNotification().isEnabled()).isTrue();
+		assertThat(properties.getNotification().getDefaultConfigId()).isEqualTo("aliyun-main");
+		assertThat(properties.getNotification().getBlends()).hasSize(1);
 	}
 
 	@Test
-	@DisplayName("provider=aliyun 且密钥齐全：校验通过")
-	void validate_whenAliyunEnabledWithCredentials_passes() {
+	@DisplayName("notification 为空 blends 时返回空 map")
+	void notificationWithoutBlends_returnsEmptyMap() {
 		SmsProperties properties = new SmsProperties();
-		properties.setEnabled(true);
-		properties.setProvider(SmsProperties.Provider.ALIYUN);
-		SmsProperties.Aliyun aliyun = properties.getAliyun();
-		aliyun.setAccessKeyId("test-id");
-		aliyun.setAccessKeySecret("test-secret");
-
-		assertThatCode(properties::validate).doesNotThrowAnyException();
-	}
-
-	@Test
-	@DisplayName("provider=tencent：暂未实现，启动校验失败")
-	void validate_whenTencentEnabled_throwsNotImplemented() {
-		SmsProperties properties = new SmsProperties();
-		properties.setEnabled(true);
-		properties.setProvider(SmsProperties.Provider.TENCENT);
-
-		assertThatThrownBy(properties::validate).isInstanceOf(IllegalStateException.class)
-			.hasMessageContaining("tencent");
+		assertThat(properties.getNotification().getBlends()).isInstanceOf(LinkedHashMap.class);
+		assertThat(properties.getNotification().getBlends()).isEmpty();
 	}
 
 }

@@ -1,16 +1,18 @@
 package com.auth.module.message.config.properties;
 
-import cn.hutool.core.text.CharSequenceUtil;
-import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 /**
  * 短信渠道配置（{@code auth.message.sms.*}）
  * <p>
- * 切换厂商：仅改 {@code provider} 与对应子节点（{@code aliyun} / {@code tencent}），并启用对应客户端配置类。
+ * 验证码：{@code provider} 路由到对应厂商的独立 Properties（如 {@code AliyunSmsProperties}）。<br>
+ * 通知类：{@code notification.*}（sms4j 多厂商，见 {@code module-message-sms4j}）。
  * </p>
  *
  * @author Bunny
@@ -22,63 +24,27 @@ import org.springframework.validation.annotation.Validated;
 public class SmsProperties {
 
 	/**
-	 * 是否启用短信渠道
+	 * 是否启用短信渠道（统一派发入口）
 	 */
 	private boolean enabled = false;
 
 	/**
-	 * 短信服务商（与 {@code auth.message.sms.provider} 对应）
+	 * 是否启用验证码短信（Dypnsapi）；为 false 时不校验/不装配 verify 客户端
+	 */
+	private boolean verifyEnabled = true;
+
+	/**
+	 * 验证码短信服务商
 	 */
 	private Provider provider = Provider.ALIYUN;
 
 	/**
-	 * 阿里云配置（{@code provider=aliyun} 时生效）
+	 * 通知类标准短信（sms4j）
 	 */
-	private Aliyun aliyun = new Aliyun();
+	private Notification notification = new Notification();
 
 	/**
-	 * 腾讯云配置（{@code provider=tencent} 时生效）
-	 */
-	private Tencent tencent = new Tencent();
-
-	/**
-	 * 启用时按 {@link #provider} 校验对应厂商必填项
-	 */
-	@PostConstruct
-	public void validate() {
-		if (!enabled) {
-			return;
-		}
-		switch (provider) {
-			// 阿里云
-			case ALIYUN -> validateAliyun();
-			// 腾讯云
-			case TENCENT -> validateTencent();
-			// 默认
-			default -> validateAliyun();
-		}
-	}
-
-	/**
-	 * 校验阿里云配置
-	 */
-	private void validateAliyun() {
-		if (CharSequenceUtil.isBlank(aliyun.getAccessKeyId())
-				|| CharSequenceUtil.isBlank(aliyun.getAccessKeySecret())) {
-			throw new IllegalStateException(
-					"auth.message.sms.aliyun.access-key-id and access-key-secret are required when provider=aliyun.");
-		}
-	}
-
-	/**
-	 * 校验腾讯云配置
-	 */
-	private void validateTencent() {
-		throw new IllegalStateException("auth.message.sms.provider=tencent is not implemented yet.");
-	}
-
-	/**
-	 * 短信服务商
+	 * 短信服务商（验证码通道）
 	 */
 	public enum Provider {
 
@@ -95,44 +61,26 @@ public class SmsProperties {
 	}
 
 	/**
-	 * 阿里云 SMS / Dypnsapi 连接参数
+	 * 通知类短信（sms4j）配置
 	 */
 	@Getter
 	@Setter
-	public static class Aliyun {
-
-		private String accessKeyId;
-
-		private String accessKeySecret;
-
-		private String region = "cn-hangzhou";
-
-		private String endpoint = "dypnsapi.aliyuncs.com";
+	public static class Notification {
 
 		/**
-		 * 默认短信签名（模板未配置 sign_name 时使用）
+		 * 是否启用 sms4j 通知短信
 		 */
-		private String defaultSignName;
+		private boolean enabled = false;
 
 		/**
-		 * 默认 Dypnsapi 方案名称
+		 * 模板未指定 sms_config_id 时使用的默认 blend
 		 */
-		private String defaultSchemeName;
+		private String defaultConfigId;
 
-	}
-
-	/**
-	 * 腾讯云短信连接参数（预留）
-	 */
-	@Getter
-	@Setter
-	public static class Tencent {
-
-		private String secretId;
-
-		private String secretKey;
-
-		private String region = "ap-guangzhou";
+		/**
+		 * sms4j 多厂商配置（key 即 configId）
+		 */
+		private Map<String, SmsNotificationBlendProperties> blends = new LinkedHashMap<>();
 
 	}
 
