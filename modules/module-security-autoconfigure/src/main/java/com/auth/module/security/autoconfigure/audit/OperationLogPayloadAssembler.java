@@ -103,49 +103,42 @@ public class OperationLogPayloadAssembler {
 		MethodSignature signature = (MethodSignature) joinPoint.getSignature();
 		Method method = signature.getMethod();
 
-		OperationLogPayloadEvent payload = buildPayload(meta, result, failure, startNs, request, response, method,
-				joinPoint.getArgs());
+		OperationLogPayloadEvent payload = buildPayload(new BuildPayloadContext(meta, result, failure, startNs, request,
+				response, method, joinPoint.getArgs()));
 		dispatch(payload);
 	}
 
 	/**
 	 * 构建操作日志负载
-	 * @param meta 注解元数据
-	 * @param result 方法返回值
-	 * @param failure 方法抛出的异常
-	 * @param startNs 方法开始时间（纳秒）
-	 * @param request 请求
-	 * @param response 响应
-	 * @param method 方法
-	 * @param methodArgs 控制器方法实参（用于记录 {@code @RequestBody} 等绑定结果）
+	 * @param ctx 构建上下文
 	 * @return 操作日志负载
 	 */
-	private OperationLogPayloadEvent buildPayload(OperationLog meta, Object result, Throwable failure, long startNs,
-			HttpServletRequest request, HttpServletResponse response, Method method, Object[] methodArgs) {
-		int executionMs = (int) TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNs);
-		Integer httpStatus = resolveHttpStatus(response, failure);
-		String responseMessage = OperationLogResponseMessageComposer.compose(meta, result, failure);
+	private OperationLogPayloadEvent buildPayload(BuildPayloadContext ctx) {
+		int executionMs = (int) TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - ctx.startNs());
+		Integer httpStatus = resolveHttpStatus(ctx.response(), ctx.failure());
+		String responseMessage = OperationLogResponseMessageComposer.compose(ctx.meta(), ctx.result(), ctx.failure());
 		Long userId = SecurityUserUtils.getUserId();
-		String userAgent = CharSequenceUtil.subPre(CharSequenceUtil.nullToEmpty(request.getHeader("User-Agent")), 255);
-		IpInfo ipInfo = ipAddressService.resolveIpInfo(request);
+		String userAgent = CharSequenceUtil.subPre(CharSequenceUtil.nullToEmpty(ctx.request().getHeader("User-Agent")),
+				255);
+		IpInfo ipInfo = ipAddressService.resolveIpInfo(ctx.request());
 
 		return OperationLogPayloadEvent.builder()
 			.userId(userId)
-			.operationType(meta.operation().name())
-			.module(AuditOperationModuleKeys.toPersistedModuleKey(meta.serviceDomain(), meta.bizModule()))
-			.targetType(CharSequenceUtil.nullToEmpty(meta.targetType()))
+			.operationType(ctx.meta().operation().name())
+			.module(AuditOperationModuleKeys.toPersistedModuleKey(ctx.meta().serviceDomain(), ctx.meta().bizModule()))
+			.targetType(CharSequenceUtil.nullToEmpty(ctx.meta().targetType()))
 			.targetId(OperationLogContext.getTargetId())
-			.requestMethod(request.getMethod())
-			.requestUri(CharSequenceUtil.nullToEmpty(request.getRequestURI()))
-			.requestParams(
-					OperationLogRequestParamsBuilder.build(request, meta.recordParams(), objectMapper, methodArgs))
+			.requestMethod(ctx.request().getMethod())
+			.requestUri(CharSequenceUtil.nullToEmpty(ctx.request().getRequestURI()))
+			.requestParams(OperationLogRequestParamsBuilder.build(ctx.request(), ctx.meta().recordParams(),
+					objectMapper, ctx.methodArgs()))
 			.responseStatus(httpStatus)
 			.responseMessage(responseMessage)
 			.executionTimeMs(executionMs)
 			.ipAddress(ipInfo.getIpAddr())
 			.userAgent(userAgent)
-			.className(method.getDeclaringClass().getName())
-			.methodName(method.getName())
+			.className(ctx.method().getDeclaringClass().getName())
+			.methodName(ctx.method().getName())
 			.build();
 	}
 
