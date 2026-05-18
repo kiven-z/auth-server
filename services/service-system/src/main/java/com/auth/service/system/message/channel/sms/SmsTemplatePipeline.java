@@ -3,12 +3,13 @@ package com.auth.service.system.message.channel.sms;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONUtil;
+import com.auth.module.message.channel.MessageChannel;
 import com.auth.module.message.command.ChannelOptionsSupport;
 import com.auth.module.message.command.TemplateMessageCommand;
 import com.auth.module.message.config.properties.SmsProperties;
 import com.auth.module.message.sms.SmsChannelOptions;
-import com.auth.service.system.admin.mapper.SmsTemplateMapper;
-import com.auth.service.system.admin.model.entity.SmsTemplateEntity;
+import com.auth.service.system.admin.mapper.MessageTemplateMapper;
+import com.auth.service.system.admin.model.entity.MessageTemplateEntity;
 import com.auth.service.system.admin.model.vo.emailtemplate.EmailTemplateRequireFieldRow;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.message.channel.sms.model.SmsPreparedMessage;
@@ -30,12 +31,12 @@ import static com.auth.service.system.common.exception.code.message.SystemMessag
 @Component
 public class SmsTemplatePipeline {
 
-	private final SmsTemplateMapper smsTemplateMapper;
+	private final MessageTemplateMapper messageTemplateMapper;
 
 	private final SmsProperties smsProperties;
 
-	public SmsTemplatePipeline(SmsTemplateMapper smsTemplateMapper, SmsProperties smsProperties) {
-		this.smsTemplateMapper = smsTemplateMapper;
+	public SmsTemplatePipeline(MessageTemplateMapper messageTemplateMapper, SmsProperties smsProperties) {
+		this.messageTemplateMapper = messageTemplateMapper;
 		this.smsProperties = smsProperties;
 	}
 
@@ -68,7 +69,8 @@ public class SmsTemplatePipeline {
 	public SmsPreparedMessage prepare(TemplateMessageCommand command) {
 		// 获取模板代码
 		String templateCode = command.getTemplateCode();
-		SmsTemplateEntity template = smsTemplateMapper.selectByTemplateCode(templateCode);
+		MessageTemplateEntity template = messageTemplateMapper.selectEnabledBySceneCodeAndChannel(templateCode,
+				MessageChannel.SMS.name());
 		if (template == null) {
 			throw new SystemBusinessException(SMS_TEMPLATE_NOT_FOUND, templateCode);
 		}
@@ -94,7 +96,7 @@ public class SmsTemplatePipeline {
 	 * @param command 模板发送命令
 	 * @return 短信配置ID
 	 */
-	private String resolveSmsConfigId(SmsTemplateEntity template, TemplateMessageCommand command) {
+	private String resolveSmsConfigId(MessageTemplateEntity template, TemplateMessageCommand command) {
 		SmsChannelOptions options = ChannelOptionsSupport.asSms(command.getOptions());
 		if (options != null && CharSequenceUtil.isNotBlank(options.getSmsConfigId())) {
 			return options.getSmsConfigId();

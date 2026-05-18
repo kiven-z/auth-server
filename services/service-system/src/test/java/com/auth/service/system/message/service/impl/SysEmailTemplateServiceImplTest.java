@@ -1,7 +1,8 @@
 package com.auth.service.system.message.service.impl;
 
-import com.auth.service.system.admin.mapper.EmailTemplateMapper;
-import com.auth.service.system.admin.model.entity.EmailTemplateEntity;
+import com.auth.module.message.channel.MessageChannel;
+import com.auth.service.system.admin.mapper.MessageTemplateMapper;
+import com.auth.service.system.admin.model.entity.MessageTemplateEntity;
 import com.auth.service.system.admin.model.po.emailtemplate.EmailTemplatePageRowPO;
 import com.auth.service.system.admin.model.query.EmailTemplateQuery;
 import com.auth.service.system.admin.model.vo.emailtemplate.EmailTemplateDetailVO;
@@ -35,7 +36,7 @@ import static org.mockito.Mockito.*;
 class SysEmailTemplateServiceImplTest {
 
 	@Mock
-	private EmailTemplateMapper emailTemplateMapper;
+	private MessageTemplateMapper messageTemplateMapper;
 
 	@Mock
 	private AuditUserDisplayService auditUserDisplayService;
@@ -50,16 +51,16 @@ class SysEmailTemplateServiceImplTest {
 		emailTemplateService = new SysEmailTemplateServiceImpl(auditUserDisplayService, emailSendService);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
-		baseMapperField.set(emailTemplateService, emailTemplateMapper);
+		baseMapperField.set(emailTemplateService, messageTemplateMapper);
 	}
 
 	@Test
 	@DisplayName("分页查询：Mapper 分页后委托审计用户展示名补全")
 	void getEmailTemplatePageEnrichesAuditUsernames() {
-		Page<EmailTemplateEntity> pageParams = new Page<>(1, 20);
+		Page<MessageTemplateEntity> pageParams = new Page<>(1, 20);
 		EmailTemplateQuery query = new EmailTemplateQuery();
 		Page<EmailTemplatePageRowPO> poPage = new Page<>(1, 20);
-		when(emailTemplateMapper.selectListByPage(pageParams, query)).thenReturn(poPage);
+		when(messageTemplateMapper.selectEmailTemplatePage(pageParams, query)).thenReturn(poPage);
 
 		emailTemplateService.getEmailTemplatePage(pageParams, query);
 
@@ -69,7 +70,7 @@ class SysEmailTemplateServiceImplTest {
 	@Test
 	@DisplayName("按 id 查询：无记录时返回 null，不调用补全")
 	void getEmailTemplateByIdReturnsNullWhenMissing() {
-		when(emailTemplateMapper.selectById(100L)).thenReturn(null);
+		when(messageTemplateMapper.selectById(100L)).thenReturn(null);
 
 		assertThat(emailTemplateService.getEmailTemplateById(100L)).isNull();
 		verifyNoInteractions(auditUserDisplayService);
@@ -78,13 +79,14 @@ class SysEmailTemplateServiceImplTest {
 	@Test
 	@DisplayName("按 id 查询：组装详情后补全创建人/更新人用户名")
 	void getEmailTemplateByIdEnrichesSingletonList() {
-		EmailTemplateEntity entity = new EmailTemplateEntity();
+		MessageTemplateEntity entity = new MessageTemplateEntity();
 		entity.setId(1L);
-		entity.setTemplateCode("T1");
+		entity.setSceneCode("T1");
+		entity.setChannel(MessageChannel.EMAIL.name());
 		entity.setCreateUser(7L);
 		entity.setUpdateUser(8L);
 		entity.setRequireFields(null);
-		when(emailTemplateMapper.selectById(1L)).thenReturn(entity);
+		when(messageTemplateMapper.selectById(1L)).thenReturn(entity);
 
 		EmailTemplateDetailVO vo = emailTemplateService.getEmailTemplateById(1L);
 

@@ -1,7 +1,7 @@
 package com.auth.service.system.admin.service;
 
 import com.auth.common.data.model.PageResponse;
-import com.auth.service.system.admin.model.entity.EmailTemplateEntity;
+import com.auth.service.system.admin.model.entity.MessageTemplateEntity;
 import com.auth.service.system.admin.model.form.emailtemplate.*;
 import com.auth.service.system.admin.model.query.EmailTemplateQuery;
 import com.auth.service.system.admin.model.vo.emailtemplate.EmailTemplateDetailVO;
@@ -14,7 +14,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  *
  * @author Bunny
  */
-public interface SysEmailTemplateService extends IService<EmailTemplateEntity> {
+public interface SysEmailTemplateService extends IService<MessageTemplateEntity> {
 
 	/**
 	 * 分页查询邮件模板
@@ -22,7 +22,7 @@ public interface SysEmailTemplateService extends IService<EmailTemplateEntity> {
 	 * @param query 查询参数
 	 * @return 邮件模板分页数据
 	 */
-	PageResponse<EmailTemplatePageResponse> getEmailTemplatePage(Page<EmailTemplateEntity> pageParams,
+	PageResponse<EmailTemplatePageResponse> getEmailTemplatePage(Page<MessageTemplateEntity> pageParams,
 			EmailTemplateQuery query);
 
 	/**

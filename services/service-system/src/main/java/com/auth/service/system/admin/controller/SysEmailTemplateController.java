@@ -7,7 +7,7 @@ import com.auth.common.web.valid.group.UpdateGroup;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
-import com.auth.service.system.admin.model.entity.EmailTemplateEntity;
+import com.auth.service.system.admin.model.entity.MessageTemplateEntity;
 import com.auth.service.system.admin.model.form.emailtemplate.*;
 import com.auth.service.system.admin.model.query.EmailTemplateQuery;
 import com.auth.service.system.admin.model.vo.emailtemplate.EmailTemplateDetailVO;
@@ -45,7 +45,7 @@ public class SysEmailTemplateController {
 	@PreAuthorize("@auth.decide('emailTemplate:query')")
 	@GetMapping()
 	public Result<PageResponse<EmailTemplatePageResponse>> getEmailTemplatePage(EmailTemplateQuery query) {
-		Page<EmailTemplateEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
+		Page<MessageTemplateEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
 		PageResponse<EmailTemplatePageResponse> pageResponse = sysEmailTemplateService.getEmailTemplatePage(pageParams,
 				query);
 		return Result.success(pageResponse);

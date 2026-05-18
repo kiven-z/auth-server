@@ -1,7 +1,8 @@
 package com.auth.service.system.message.channel.email;
 
-import com.auth.service.system.admin.mapper.EmailTemplateMapper;
-import com.auth.service.system.admin.model.entity.EmailTemplateEntity;
+import com.auth.module.message.channel.MessageChannel;
+import com.auth.service.system.admin.mapper.MessageTemplateMapper;
+import com.auth.service.system.admin.model.entity.MessageTemplateEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.message.channel.email.model.RenderedEmail;
 import com.auth.service.system.message.shared.MessageTemplateRequireFieldsJsonSupport;
@@ -22,10 +23,10 @@ import static com.auth.service.system.common.exception.code.message.SystemEmailR
 @Component
 public class EmailTemplatePipeline {
 
-	private final EmailTemplateMapper emailTemplateMapper;
+	private final MessageTemplateMapper messageTemplateMapper;
 
-	public EmailTemplatePipeline(EmailTemplateMapper emailTemplateMapper) {
-		this.emailTemplateMapper = emailTemplateMapper;
+	public EmailTemplatePipeline(MessageTemplateMapper messageTemplateMapper) {
+		this.messageTemplateMapper = messageTemplateMapper;
 	}
 
 	/**
@@ -35,7 +36,8 @@ public class EmailTemplatePipeline {
 	 * @return 渲染结果
 	 */
 	public RenderedEmail render(String templateCode, Map<String, Object> variables) {
-		EmailTemplateEntity template = emailTemplateMapper.selectTemplateByTemplateCode(templateCode);
+		MessageTemplateEntity template = messageTemplateMapper.selectEnabledBySceneCodeAndChannel(templateCode,
+				MessageChannel.EMAIL.name());
 		if (template == null) {
 			throw new SystemBusinessException(EMAIL_TEMPLATE_NOT_FOUND, templateCode);
 		}
@@ -53,7 +55,7 @@ public class EmailTemplatePipeline {
 	 * @param variables 模板变量
 	 * @return 渲染后的主题
 	 */
-	private String renderSubject(EmailTemplateEntity template, Map<String, Object> variables) {
+	private String renderSubject(MessageTemplateEntity template, Map<String, Object> variables) {
 		try {
 			return FreeMarkTemplateRenderer.processTemplate(template.getTemplateName() + "_subject",
 					template.getSubject(), variables);
@@ -69,9 +71,9 @@ public class EmailTemplatePipeline {
 	 * @param variables 模板变量
 	 * @return 渲染后的正文
 	 */
-	private String renderContent(EmailTemplateEntity template, Map<String, Object> variables) {
+	private String renderContent(MessageTemplateEntity template, Map<String, Object> variables) {
 		try {
-			return FreeMarkTemplateRenderer.processTemplate(template.getTemplateName(), template.getContent(),
+			return FreeMarkTemplateRenderer.processTemplate(template.getTemplateName(), template.getBodyContent(),
 					variables);
 		}
 		catch (Exception e) {

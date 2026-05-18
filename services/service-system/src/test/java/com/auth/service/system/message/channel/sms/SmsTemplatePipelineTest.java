@@ -1,10 +1,11 @@
 package com.auth.service.system.message.channel.sms;
 
+import com.auth.module.message.channel.MessageChannel;
 import com.auth.module.message.command.TemplateMessageCommand;
 import com.auth.module.message.config.properties.SmsProperties;
 import com.auth.module.message.sms.SmsChannelOptions;
-import com.auth.service.system.admin.mapper.SmsTemplateMapper;
-import com.auth.service.system.admin.model.entity.SmsTemplateEntity;
+import com.auth.service.system.admin.mapper.MessageTemplateMapper;
+import com.auth.service.system.admin.model.entity.MessageTemplateEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.message.channel.sms.model.SmsPreparedMessage;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,7 +32,7 @@ import static org.mockito.Mockito.when;
 class SmsTemplatePipelineTest {
 
 	@Mock
-	private SmsTemplateMapper smsTemplateMapper;
+	private MessageTemplateMapper messageTemplateMapper;
 
 	private SmsTemplatePipeline pipeline;
 
@@ -40,18 +41,20 @@ class SmsTemplatePipelineTest {
 		SmsProperties smsProperties = new SmsProperties();
 		smsProperties.setDefaultConfigId("aliyun-main");
 		smsProperties.setDefaultSignName("默认签名");
-		pipeline = new SmsTemplatePipeline(smsTemplateMapper, smsProperties);
+		pipeline = new SmsTemplatePipeline(messageTemplateMapper, smsProperties);
 	}
 
 	@Test
 	@DisplayName("登录验证码：组装 templateParam 并使用默认签名与 configId")
 	void prepare_loginCode_buildsTemplateParam() {
-		SmsTemplateEntity template = new SmsTemplateEntity();
-		template.setTemplateCode("login-sms-code");
+		MessageTemplateEntity template = new MessageTemplateEntity();
+		template.setSceneCode("login-sms-code");
+		template.setChannel(MessageChannel.SMS.name());
 		template.setProviderTemplateCode("100001");
 		template
 			.setRequireFields("[{\"key\":\"code\",\"exampleValue\":\"123456\"},{\"key\":\"min\",\"exampleValue\":5}]");
-		when(smsTemplateMapper.selectByTemplateCode("login-sms-code")).thenReturn(template);
+		when(messageTemplateMapper.selectEnabledBySceneCodeAndChannel("login-sms-code", MessageChannel.SMS.name()))
+			.thenReturn(template);
 
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
 			.templateCode("login-sms-code")
@@ -70,11 +73,13 @@ class SmsTemplatePipelineTest {
 	@Test
 	@DisplayName("模板指定 smsConfigId 时优先使用模板值")
 	void prepare_usesTemplateSmsConfigId() {
-		SmsTemplateEntity template = new SmsTemplateEntity();
-		template.setTemplateCode("job-alert");
+		MessageTemplateEntity template = new MessageTemplateEntity();
+		template.setSceneCode("job-alert");
+		template.setChannel(MessageChannel.SMS.name());
 		template.setSmsConfigId("aliyun-main");
 		template.setProviderTemplateCode("SMS_999");
-		when(smsTemplateMapper.selectByTemplateCode("job-alert")).thenReturn(template);
+		when(messageTemplateMapper.selectEnabledBySceneCodeAndChannel("job-alert", MessageChannel.SMS.name()))
+			.thenReturn(template);
 
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
 			.templateCode("job-alert")
@@ -90,10 +95,12 @@ class SmsTemplatePipelineTest {
 	@Test
 	@DisplayName("命令 options 可覆盖 smsConfigId")
 	void prepare_optionsOverrideConfigId() {
-		SmsTemplateEntity template = new SmsTemplateEntity();
-		template.setTemplateCode("job-alert");
+		MessageTemplateEntity template = new MessageTemplateEntity();
+		template.setSceneCode("job-alert");
+		template.setChannel(MessageChannel.SMS.name());
 		template.setProviderTemplateCode("SMS_999");
-		when(smsTemplateMapper.selectByTemplateCode("job-alert")).thenReturn(template);
+		when(messageTemplateMapper.selectEnabledBySceneCodeAndChannel("job-alert", MessageChannel.SMS.name()))
+			.thenReturn(template);
 
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
 			.templateCode("job-alert")
@@ -111,11 +118,13 @@ class SmsTemplatePipelineTest {
 	void prepare_withoutDefaultSignName_throws() {
 		SmsProperties smsProperties = new SmsProperties();
 		smsProperties.setDefaultConfigId("aliyun-main");
-		SmsTemplatePipeline pipelineWithoutSign = new SmsTemplatePipeline(smsTemplateMapper, smsProperties);
+		SmsTemplatePipeline pipelineWithoutSign = new SmsTemplatePipeline(messageTemplateMapper, smsProperties);
 
-		SmsTemplateEntity template = new SmsTemplateEntity();
+		MessageTemplateEntity template = new MessageTemplateEntity();
 		template.setProviderTemplateCode("100001");
-		when(smsTemplateMapper.selectByTemplateCode("login-sms-code")).thenReturn(template);
+		template.setChannel(MessageChannel.SMS.name());
+		when(messageTemplateMapper.selectEnabledBySceneCodeAndChannel("login-sms-code", MessageChannel.SMS.name()))
+			.thenReturn(template);
 
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
 			.templateCode("login-sms-code")
@@ -131,11 +140,13 @@ class SmsTemplatePipelineTest {
 	@Test
 	@DisplayName("必填变量缺失时抛出 SMS_TEMPLATE_VARS_MISSING")
 	void prepare_throwsWhenRequiredVariableMissing() {
-		SmsTemplateEntity template = new SmsTemplateEntity();
-		template.setTemplateCode("login-sms-code");
+		MessageTemplateEntity template = new MessageTemplateEntity();
+		template.setSceneCode("login-sms-code");
+		template.setChannel(MessageChannel.SMS.name());
 		template.setProviderTemplateCode("100001");
 		template.setRequireFields("[{\"key\":\"code\",\"exampleValue\":\"123456\"}]");
-		when(smsTemplateMapper.selectByTemplateCode("login-sms-code")).thenReturn(template);
+		when(messageTemplateMapper.selectEnabledBySceneCodeAndChannel("login-sms-code", MessageChannel.SMS.name()))
+			.thenReturn(template);
 
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
 			.templateCode("login-sms-code")

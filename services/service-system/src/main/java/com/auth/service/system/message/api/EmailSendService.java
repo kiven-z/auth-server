@@ -5,7 +5,7 @@ import com.auth.module.message.email.EmailSendDTO;
 /**
  * 通用邮件发送服务
  * <p>
- * 基于 sys_email_template + FreeMarker 实现
+ * 基于 sys_message_template（EMAIL）+ FreeMarker 实现
  * </p>
  *
  * @author Bunny

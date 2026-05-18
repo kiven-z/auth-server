@@ -27,7 +27,7 @@ public class EmailSendDTO implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * 模板编码，对应 sys_email_template.template_code
+	 * 模板编码，对应 sys_message_template.scene_code（channel=EMAIL）
 	 */
 	@NotBlank
 	private String templateCode;

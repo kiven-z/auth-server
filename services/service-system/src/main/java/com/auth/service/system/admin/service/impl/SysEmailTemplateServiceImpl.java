@@ -3,10 +3,11 @@ package com.auth.service.system.admin.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.data.model.PageResponse;
+import com.auth.module.message.channel.MessageChannel;
 import com.auth.module.message.email.EmailSendDTO;
 import com.auth.service.system.admin.convert.EmailTemplateConvert;
-import com.auth.service.system.admin.mapper.EmailTemplateMapper;
-import com.auth.service.system.admin.model.entity.EmailTemplateEntity;
+import com.auth.service.system.admin.mapper.MessageTemplateMapper;
+import com.auth.service.system.admin.model.entity.MessageTemplateEntity;
 import com.auth.service.system.admin.model.form.emailtemplate.*;
 import com.auth.service.system.admin.model.po.emailtemplate.EmailTemplatePageRowPO;
 import com.auth.service.system.admin.model.query.EmailTemplateQuery;
@@ -34,13 +35,13 @@ import java.util.Map;
 import static com.auth.service.system.common.exception.code.common.SystemCommonResultCode.DATA_NOT_EXIST;
 
 /**
- * 邮件模板服务
+ * 邮件模板服务（数据落库于 sys_message_template，channel=EMAIL）
  *
  * @author Bunny
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-public class SysEmailTemplateServiceImpl extends ServiceImpl<EmailTemplateMapper, EmailTemplateEntity>
+public class SysEmailTemplateServiceImpl extends ServiceImpl<MessageTemplateMapper, MessageTemplateEntity>
 		implements SysEmailTemplateService {
 
 	private final AuditUserDisplayService auditUserDisplayService;
@@ -57,10 +58,9 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<EmailTemplateMapper
 	 * {@inheritDoc}
 	 */
 	@Override
-	public PageResponse<EmailTemplatePageResponse> getEmailTemplatePage(Page<EmailTemplateEntity> pageParams,
+	public PageResponse<EmailTemplatePageResponse> getEmailTemplatePage(Page<MessageTemplateEntity> pageParams,
 			EmailTemplateQuery query) {
-		IPage<EmailTemplatePageRowPO> page = baseMapper.selectListByPage(pageParams, query);
-		// PO ? VO
+		IPage<EmailTemplatePageRowPO> page = baseMapper.selectEmailTemplatePage(pageParams, query);
 		IPage<EmailTemplatePageResponse> voPage = page.convert(EmailTemplateConvert.INSTANCE::toPageResponse);
 		auditUserDisplayService.enrichAuditUsernames(voPage);
 		return PageResponse.of(voPage);
@@ -71,15 +71,20 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<EmailTemplateMapper
 	 */
 	@Override
 	public EmailTemplateDetailVO getEmailTemplateById(Long id) {
-		EmailTemplateEntity entity = getById(id);
-		if (entity == null) {
+		MessageTemplateEntity entity = getById(id);
+		if (entity == null || !MessageChannel.EMAIL.name().equals(entity.getChannel())) {
 			return null;
 		}
 
 		EmailTemplateDetailVO vo = new EmailTemplateDetailVO();
-		BeanUtil.copyProperties(entity, vo, "requireFields");
+		vo.setTemplateCode(entity.getSceneCode());
+		vo.setTemplateName(entity.getTemplateName());
+		vo.setDescription(entity.getDescription());
+		vo.setSubject(entity.getSubject());
+		vo.setContent(entity.getBodyContent());
+		vo.setPriority(entity.getPriority());
+		vo.setStatus(entity.getStatus());
 
-		// ????????
 		List<EmailTemplateRequireFieldRow> requireFields = MessageTemplateRequireFieldsJsonSupport
 			.parse(entity.getRequireFields());
 		vo.setRequireFields(requireFields);
@@ -93,8 +98,11 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<EmailTemplateMapper
 	 */
 	@Override
 	public void create(EmailTemplateForm form) {
-		EmailTemplateEntity entity = BeanUtil.copyProperties(form, EmailTemplateEntity.class);
-		entity.setContent(CharSequenceUtil.nullToDefault(form.getContent(), "Template content is empty"));
+		MessageTemplateEntity entity = BeanUtil.copyProperties(form, MessageTemplateEntity.class, "id", "templateCode",
+				"content", "requireFields");
+		entity.setSceneCode(form.getTemplateCode());
+		entity.setChannel(MessageChannel.EMAIL.name());
+		entity.setBodyContent(CharSequenceUtil.nullToDefault(form.getContent(), "Template content is empty"));
 		List<EmailTemplateRequireFieldRow> rows = form.getRequireFields() != null ? form.getRequireFields()
 				: Collections.emptyList();
 		entity.setRequireFields(MessageTemplateRequireFieldsJsonSupport.toJson(rows));
@@ -106,12 +114,12 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<EmailTemplateMapper
 	 */
 	@Override
 	public void updateMetadata(EmailTemplateMetadataForm form) {
-		EmailTemplateEntity exists = getById(form.getId());
-		if (exists == null) {
+		MessageTemplateEntity exists = getById(form.getId());
+		if (exists == null || !MessageChannel.EMAIL.name().equals(exists.getChannel())) {
 			throw new SystemBusinessException(DATA_NOT_EXIST);
 		}
 
-		exists.setTemplateCode(form.getTemplateCode());
+		exists.setSceneCode(form.getTemplateCode());
 		exists.setTemplateName(form.getTemplateName());
 		exists.setDescription(form.getDescription());
 		exists.setSubject(form.getSubject());
@@ -126,12 +134,12 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<EmailTemplateMapper
 	 */
 	@Override
 	public void updateContent(Long id, EmailTemplateContentForm form) {
-		EmailTemplateEntity exists = getById(id);
-		if (exists == null) {
+		MessageTemplateEntity exists = getById(id);
+		if (exists == null || !MessageChannel.EMAIL.name().equals(exists.getChannel())) {
 			throw new SystemBusinessException(DATA_NOT_EXIST);
 		}
 
-		exists.setContent(form.getContent());
+		exists.setBodyContent(form.getContent());
 		updateById(exists);
 	}
 
@@ -140,8 +148,8 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<EmailTemplateMapper
 	 */
 	@Override
 	public void updateRequireFields(Long id, EmailTemplateRequireFieldsForm form) {
-		EmailTemplateEntity entity = getById(id);
-		if (entity == null) {
+		MessageTemplateEntity entity = getById(id);
+		if (entity == null || !MessageChannel.EMAIL.name().equals(entity.getChannel())) {
 			throw new SystemBusinessException(DATA_NOT_EXIST);
 		}
 
@@ -155,9 +163,10 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<EmailTemplateMapper
 	 */
 	@Override
 	public void batchUpdateStatus(EmailTemplateStatusForm form) {
-		update(Wrappers.<EmailTemplateEntity>lambdaUpdate()
-			.in(EmailTemplateEntity::getId, form.getIds())
-			.set(EmailTemplateEntity::getStatus, form.getStatus()));
+		update(Wrappers.<MessageTemplateEntity>lambdaUpdate()
+			.in(MessageTemplateEntity::getId, form.getIds())
+			.eq(MessageTemplateEntity::getChannel, MessageChannel.EMAIL.name())
+			.set(MessageTemplateEntity::getStatus, form.getStatus()));
 	}
 
 	/**
@@ -165,15 +174,15 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<EmailTemplateMapper
 	 */
 	@Override
 	public String previewRenderedHtml(Long id) {
-		EmailTemplateEntity entity = getById(id);
-		if (entity == null) {
+		MessageTemplateEntity entity = getById(id);
+		if (entity == null || !MessageChannel.EMAIL.name().equals(entity.getChannel())) {
 			return null;
 		}
 
 		List<EmailTemplateRequireFieldRow> rows = MessageTemplateRequireFieldsJsonSupport
 			.parse(entity.getRequireFields());
 		Map<String, Object> model = MessageTemplateRequireFieldsJsonSupport.toExampleModel(rows);
-		return FreeMarkTemplateRenderer.processTemplate(entity.getTemplateName(), entity.getContent(), model);
+		return FreeMarkTemplateRenderer.processTemplate(entity.getTemplateName(), entity.getBodyContent(), model);
 	}
 
 	/**
@@ -186,7 +195,7 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<EmailTemplateMapper
 			return FreeMarkTemplateRenderer.processTemplate("inline-preview", form.getContent(), model);
 		}
 		catch (Exception e) {
-			return "????????????????????????";
+			return "预览渲染失败，请检查变量声明与正文语法";
 		}
 	}
 
@@ -196,32 +205,26 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<EmailTemplateMapper
 	@Override
 	@Async
 	public void testSend(EmailTemplateTestSendForm form) {
-		// ?????????????
 		Long id = form.getId();
-		EmailTemplateEntity entity = getById(id);
-		if (entity == null) {
+		MessageTemplateEntity entity = getById(id);
+		if (entity == null || !MessageChannel.EMAIL.name().equals(entity.getChannel())) {
 			throw new SystemBusinessException(DATA_NOT_EXIST);
 		}
 
-		// ????????
 		EmailSendDTO emailSendDTO = new EmailSendDTO();
 		emailSendDTO.setHasHtml(Boolean.TRUE);
 
-		// ????
-		String templateCode = entity.getTemplateCode();
+		String templateCode = entity.getSceneCode();
 		emailSendDTO.setTemplateCode(templateCode);
 
-		// ????
 		String email = form.getEmail();
 		emailSendDTO.setTo(List.of(email));
 
-		// ???????????????
 		List<EmailTemplateRequireFieldRow> rows = MessageTemplateRequireFieldsJsonSupport
 			.parse(entity.getRequireFields());
 		Map<String, Object> model = MessageTemplateRequireFieldsJsonSupport.toExampleModel(rows);
 		emailSendDTO.setVariables(model);
 
-		// ????????????
 		emailSendService.sendByTemplate(emailSendDTO);
 	}
 

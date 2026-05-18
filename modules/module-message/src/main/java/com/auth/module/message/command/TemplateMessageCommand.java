@@ -37,7 +37,7 @@ public class TemplateMessageCommand implements Serializable {
 	private MessageChannel channel;
 
 	/**
-	 * 模板编码（各渠道模板表中的 template_code）
+	 * 模板编码（与 sys_message_template.scene_code 一致，按发送 channel 命中对应行）
 	 */
 	@NotBlank
 	private String templateCode;

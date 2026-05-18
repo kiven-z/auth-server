@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 /**
- * 认证服务使用的邮件模板编码（与 sys_email_template.template_code 约定一致）
+ * 认证服务使用的邮件模板编码（与 sys_message_template.scene_code、channel=EMAIL 约定一致）
  *
  * @author Bunny
  */
