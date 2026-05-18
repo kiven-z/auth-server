@@ -32,6 +32,9 @@ public class LogJobQuery extends PageQueryRequest implements Serializable {
 	@Schema(title = "调用目标")
 	private String invokeTarget;
 
+	@Schema(title = "触发类型(SCHEDULE/MANUAL)")
+	private String triggerType;
+
 	@Schema(title = "耗时(ms)")
 	private Long elapsedTime;
 

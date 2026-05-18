@@ -43,6 +43,21 @@ public class SysJobQuartzDataKeys {
 	public static final String PAYLOAD_JSON = "payloadJson";
 
 	/**
+	 * 触发类型
+	 */
+	public static final String TRIGGER_TYPE = "triggerType";
+
+	/**
+	 * 定时触发
+	 */
+	public static final String TRIGGER_TYPE_SCHEDULE = "SCHEDULE";
+
+	/**
+	 * 手动触发
+	 */
+	public static final String TRIGGER_TYPE_MANUAL = "MANUAL";
+
+	/**
 	 * Trigger 名称规则：{@code jobName + "_TRIGGER"}
 	 */
 	public static final String TRIGGER_SUFFIX = "_TRIGGER";

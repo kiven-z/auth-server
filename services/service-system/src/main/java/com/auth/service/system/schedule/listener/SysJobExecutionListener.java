@@ -82,6 +82,10 @@ public class SysJobExecutionListener implements JobListener {
 			JobDataMap jobDataMap = context.getMergedJobDataMap();
 			String invokeTarget = jobDataMap.getString(SysJobQuartzDataKeys.INVOKE_TARGET);
 			String sysJobIdStr = jobDataMap.getString(SysJobQuartzDataKeys.SYS_JOB_ID);
+			String triggerType = jobDataMap.getString(SysJobQuartzDataKeys.TRIGGER_TYPE);
+			if (triggerType == null || triggerType.isBlank()) {
+				triggerType = SysJobQuartzDataKeys.TRIGGER_TYPE_SCHEDULE;
+			}
 
 			// 转换任务ID
 			Long jobId = null;
@@ -92,12 +96,12 @@ public class SysJobExecutionListener implements JobListener {
 			// 是否记录成功的日志
 			boolean hasRecordSuccessLogEnable = scheduleJobProperties.isSuccessEnabled();
 			if (jobException == null && hasRecordSuccessLogEnable) {
-				sysJobLogService.recordSuccess(jobId, jobName, jobGroup, invokeTarget, elapsed, "OK");
+				sysJobLogService.recordSuccess(jobId, jobName, jobGroup, invokeTarget, triggerType, elapsed, "OK");
 			}
 
 			// 记录失败日志
 			if (jobException != null) {
-				sysJobLogService.recordFailure(jobId, jobName, jobGroup, invokeTarget, elapsed, jobException);
+				sysJobLogService.recordFailure(jobId, jobName, jobGroup, invokeTarget, triggerType, elapsed, jobException);
 				// 触发熔断判断
 				sysJobCircuitBreaker.evaluateAfterFailure(jobId, jobName, jobGroup);
 			}

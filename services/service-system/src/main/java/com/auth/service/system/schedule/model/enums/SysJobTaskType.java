@@ -1,6 +1,8 @@
 package com.auth.service.system.schedule.model.enums;
 
-import cn.hutool.core.text.CharSequenceUtil;
+import com.auth.service.system.common.exception.SystemBusinessException;
+
+import static com.auth.service.system.common.exception.code.schedule.SystemScheduleResultCode.JOB_TASK_TYPE_UNSUPPORTED;
 
 /**
  * 定时任务类型（仅表达调度执行入口，不承载业务语义）
@@ -25,16 +27,17 @@ public enum SysJobTaskType {
 	MESSAGE_DISPATCH;
 
 	/**
-	 * 兼容历史数据：未配置 taskType 时按 invokeTarget 是否为空推断
+	 * 解析任务类型
 	 * @param taskTypeRaw taskType 原始值
-	 * @param invokeTarget 调用目标
 	 * @return 任务类型
 	 */
-	public static SysJobTaskType resolve(String taskTypeRaw, String invokeTarget) {
-		if (CharSequenceUtil.isNotBlank(taskTypeRaw)) {
+	public static SysJobTaskType resolve(String taskTypeRaw) {
+		try {
 			return SysJobTaskType.valueOf(taskTypeRaw);
 		}
-		return CharSequenceUtil.isBlank(invokeTarget) ? CUSTOM_CLASS : BEAN_INVOKE;
+		catch (Exception exception) {
+			throw new SystemBusinessException(JOB_TASK_TYPE_UNSUPPORTED, taskTypeRaw);
+		}
 	}
 
 }

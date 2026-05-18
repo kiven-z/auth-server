@@ -34,6 +34,7 @@ class SysJobDefinitionValidationManagerTest {
 				List.of(beanValidator, customValidator), registry);
 
 		SysJobEntity job = new SysJobEntity();
+		job.setTaskType(SysJobTaskType.BEAN_INVOKE.name());
 		job.setInvokeTarget("demoQuartzTask.run()");
 
 		manager.normalizeAndValidate(job);

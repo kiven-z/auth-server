@@ -2,7 +2,6 @@ package com.auth.service.system.schedule.model.payload;
 
 import com.auth.module.message.command.TemplateMessageCommand;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -33,7 +32,6 @@ public class MessageDispatchPayload implements Serializable {
 	private Integer version = VERSION_1;
 
 	@Schema(title = "消息命令")
-	@Valid
 	@NotNull
 	private TemplateMessageCommand command;
 

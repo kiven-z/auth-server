@@ -215,6 +215,16 @@ public class SysJobSchedulerManager {
 	 * @param jobGroup 分组
 	 */
 	public void triggerJob(String jobName, String jobGroup) throws SchedulerException {
+		triggerJob(jobName, jobGroup, SysJobQuartzDataKeys.TRIGGER_TYPE_MANUAL);
+	}
+
+	/**
+	 * 立即触发一次（不影响 Cron）
+	 * @param jobName 任务名
+	 * @param jobGroup 分组
+	 * @param triggerType 触发类型
+	 */
+	public void triggerJob(String jobName, String jobGroup, String triggerType) throws SchedulerException {
 		// 构建 JobKey
 		JobKey jk = JobKey.jobKey(jobName, jobGroup);
 
@@ -223,8 +233,9 @@ public class SysJobSchedulerManager {
 			throw new SchedulerException("Job 不存在: " + jk);
 		}
 
-		// 触发 Job
-		scheduler.triggerJob(jk);
+		JobDataMap onceMap = new JobDataMap();
+		onceMap.put(SysJobQuartzDataKeys.TRIGGER_TYPE, triggerType);
+		scheduler.triggerJob(jk, onceMap);
 	}
 
 	/**
@@ -260,7 +271,7 @@ public class SysJobSchedulerManager {
 		String jobGroup = job.getJobGroup();
 		Boolean jobConcurrent = job.getConcurrent();
 		SysJobTaskHandler handler = taskHandlerRegistry.resolve(job);
-		SysJobTaskType resolvedTaskType = SysJobTaskType.resolve(job.getTaskType(), invokeTarget);
+		SysJobTaskType resolvedTaskType = SysJobTaskType.resolve(job.getTaskType());
 
 		// 判断是否并发
 		boolean concurrent = BooleanUtil.isTrue(jobConcurrent);
@@ -277,6 +288,7 @@ public class SysJobSchedulerManager {
 		map.put(SysJobQuartzDataKeys.TASK_TYPE, resolvedTaskType.name());
 		map.put(SysJobQuartzDataKeys.HANDLER_CODE, handler.handlerCode());
 		map.put(SysJobQuartzDataKeys.PAYLOAD_JSON, job.getPayloadJson());
+		map.put(SysJobQuartzDataKeys.TRIGGER_TYPE, SysJobQuartzDataKeys.TRIGGER_TYPE_SCHEDULE);
 
 		// 合并 JSON 参数
 		mergeJsonParams(map, jobParams);
@@ -324,6 +336,41 @@ public class SysJobSchedulerManager {
 
 		// 构建 CronTrigger
 		return tb.build();
+	}
+
+	/**
+	 * 查询任务触发时间
+	 * @param jobName 任务名
+	 * @param jobGroup 分组
+	 * @return 触发时间
+	 */
+	public FireTimes getFireTimes(String jobName, String jobGroup) {
+		try {
+			JobKey jobKey = JobKey.jobKey(jobName, jobGroup);
+			if (!scheduler.checkExists(jobKey)) {
+				return FireTimes.empty();
+			}
+			java.util.List<? extends Trigger> triggers = scheduler.getTriggersOfJob(jobKey);
+			if (triggers == null || triggers.isEmpty()) {
+				return FireTimes.empty();
+			}
+			Trigger trigger = triggers.get(0);
+			return new FireTimes(trigger.getPreviousFireTime(), trigger.getNextFireTime());
+		}
+		catch (Exception exception) {
+			log.warn("查询触发时间失败: {} / {}", jobGroup, jobName, exception);
+			return FireTimes.empty();
+		}
+	}
+
+	/**
+	 * 触发时间值对象
+	 */
+	public record FireTimes(Date previousFireTime, Date nextFireTime) {
+
+		public static FireTimes empty() {
+			return new FireTimes(null, null);
+		}
 	}
 
 }

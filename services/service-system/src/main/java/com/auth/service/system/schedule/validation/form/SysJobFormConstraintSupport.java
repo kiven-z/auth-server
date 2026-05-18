@@ -14,13 +14,12 @@ import lombok.experimental.UtilityClass;
 public class SysJobFormConstraintSupport {
 
 	/**
-	 * 解析任务类型（taskType 为空时按 invokeTarget 推断）
+	 * 解析任务类型（重构后要求显式传入 taskType）
 	 * @param taskTypeRaw 表单 taskType
-	 * @param invokeTarget 调用目标
 	 * @return 任务类型
 	 */
-	public static SysJobTaskType resolveTaskType(String taskTypeRaw, String invokeTarget) {
-		return SysJobTaskType.resolve(taskTypeRaw, invokeTarget);
+	public static SysJobTaskType resolveTaskType(String taskTypeRaw) {
+		return SysJobTaskType.resolve(taskTypeRaw);
 	}
 
 	/**

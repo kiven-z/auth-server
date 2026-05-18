@@ -64,12 +64,12 @@ public class MessageDispatchCommandParser {
 	private TemplateMessageCommand parseCommand(String payloadJson) {
 		try {
 			JsonNode root = objectMapper.readTree(payloadJson);
-			if (root != null && root.has("command")) {
-				MessageDispatchPayload payload = objectMapper.treeToValue(root, MessageDispatchPayload.class);
-				validatePayload(payload);
-				return payload.getCommand();
+			if (root == null || !root.has("command")) {
+				throw new SystemBusinessException(JOB_PAYLOAD_JSON_INVALID, "payload must contain version and command");
 			}
-			return objectMapper.treeToValue(root, TemplateMessageCommand.class);
+			MessageDispatchPayload payload = objectMapper.treeToValue(root, MessageDispatchPayload.class);
+			validatePayload(payload);
+			return payload.getCommand();
 		}
 		catch (SystemBusinessException exception) {
 			throw exception;

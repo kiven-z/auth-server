@@ -6,9 +6,11 @@
     <select id="selectListByPage"
             resultType="com.auth.service.system.log.model.po.SysJobLogPageRowPO">
         SELECT id,
+               job_id,
                job_name,
                job_group,
                invoke_target,
+               trigger_type,
                job_message,
                status,
                elapsed_time,
@@ -24,6 +26,9 @@
             </if>
             <if test="query.jobGroup != null and query.jobGroup != ''">
                 AND job_group LIKE CONCAT('%',#{query.jobGroup},'%')
+            </if>
+            <if test="query.triggerType != null and query.triggerType != ''">
+                AND trigger_type = #{query.triggerType}
             </if>
             <if test="query.invokeTarget != null and query.invokeTarget != ''">
                 AND invoke_target LIKE CONCAT('%', #{query.invokeTarget}, '%')

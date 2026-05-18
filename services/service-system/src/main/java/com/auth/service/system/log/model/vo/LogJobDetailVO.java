@@ -27,11 +27,17 @@ public class LogJobDetailVO extends BaseResponse {
 	@Schema(title = "任务名称")
 	private String jobName;
 
+	@Schema(title = "任务ID")
+	private Long jobId;
+
 	@Schema(title = "任务分组")
 	private String jobGroup;
 
 	@Schema(title = "调用目标")
 	private String invokeTarget;
+
+	@Schema(title = "触发类型(SCHEDULE/MANUAL)")
+	private String triggerType;
 
 	@Schema(title = "执行报告")
 	private String jobMessage;

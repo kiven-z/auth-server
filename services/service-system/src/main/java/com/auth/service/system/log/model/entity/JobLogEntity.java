@@ -26,6 +26,9 @@ public class JobLogEntity extends BaseEntity {
 	@Schema(title = "任务名")
 	private String jobName;
 
+	@Schema(title = "任务ID")
+	private Long jobId;
+
 	@Schema(title = "任务分组")
 	private String jobGroup;
 
@@ -34,6 +37,9 @@ public class JobLogEntity extends BaseEntity {
 
 	@Schema(title = "执行报告")
 	private String jobMessage;
+
+	@Schema(title = "触发类型(SCHEDULE/MANUAL)")
+	private String triggerType;
 
 	@Schema(title = "状态(0成功 1失败)")
 	private Boolean status;

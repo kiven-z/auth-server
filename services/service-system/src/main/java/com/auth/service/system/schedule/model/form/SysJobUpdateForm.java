@@ -57,8 +57,9 @@ public class SysJobUpdateForm implements Serializable {
 	@Schema(title = "执行参数 JSON")
 	private String jobParams;
 
-	@Schema(title = "任务类型(BEAN_INVOKE/CUSTOM_CLASS)")
+	@Schema(title = "任务类型(BEAN_INVOKE/CUSTOM_CLASS/MESSAGE_DISPATCH)")
 	@Size(max = 32)
+	@NotBlank(groups = UpdateGroup.class)
 	private String taskType;
 
 	@Schema(title = "执行处理器编码")

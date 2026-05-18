@@ -26,12 +26,14 @@ public class SysJobLogServiceImpl extends ServiceImpl<JobLogMapper, JobLogEntity
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void recordSuccess(Long jobId, String jobName, String jobGroup, String invokeTarget, long elapsedMs,
-			String message) {
+	public void recordSuccess(Long jobId, String jobName, String jobGroup, String invokeTarget, String triggerType,
+			long elapsedMs, String message) {
 		JobLogEntity sysJobLog = new JobLogEntity();
 		sysJobLog.setJobName(jobName);
+		sysJobLog.setJobId(jobId);
 		sysJobLog.setJobGroup(jobGroup);
 		sysJobLog.setInvokeTarget(invokeTarget);
+		sysJobLog.setTriggerType(triggerType);
 		sysJobLog.setJobMessage(message);
 		sysJobLog.setStatus(false);
 		sysJobLog.setElapsedTime(elapsedMs);
@@ -43,12 +45,14 @@ public class SysJobLogServiceImpl extends ServiceImpl<JobLogMapper, JobLogEntity
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void recordFailure(Long jobId, String jobName, String jobGroup, String invokeTarget, long elapsedMs,
-			JobExecutionException ex) {
+	public void recordFailure(Long jobId, String jobName, String jobGroup, String invokeTarget, String triggerType,
+			long elapsedMs, JobExecutionException ex) {
 		JobLogEntity jobLog = new JobLogEntity();
 		jobLog.setJobName(jobName);
+		jobLog.setJobId(jobId);
 		jobLog.setJobGroup(jobGroup);
 		jobLog.setInvokeTarget(invokeTarget);
+		jobLog.setTriggerType(triggerType);
 		jobLog.setJobMessage("FAILED");
 		jobLog.setStatus(true);
 		jobLog.setElapsedTime(elapsedMs);

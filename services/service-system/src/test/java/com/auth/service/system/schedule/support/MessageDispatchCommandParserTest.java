@@ -32,22 +32,18 @@ class MessageDispatchCommandParserTest {
 	private final MessageDispatchCommandParser parser = new MessageDispatchCommandParser(objectMapper, validator);
 
 	@Test
-	@DisplayName("兼容历史直传命令格式：合法 payload_json 解析成功")
+	@DisplayName("标准载荷缺少 command 时抛出 JOB_PAYLOAD_JSON_INVALID")
 	void parseAndValidateReturnsCommandWhenPayloadValid() {
-		// 构造最小可用 payload，校验可正常转为命令对象。
+		// 重构后必须使用 version + command 结构。
 		String payload = """
 				{
-				  "channel":"EMAIL",
-				  "templateCode":"LOGIN_NOTICE",
-				  "targets":["dev@example.com"]
+				  "version": 1
 				}
 				""";
 
-		TemplateMessageCommand command = parser.parseAndValidate(payload);
-
-		assertThat(command.getChannel()).isEqualTo(MessageChannel.EMAIL);
-		assertThat(command.getTemplateCode()).isEqualTo("LOGIN_NOTICE");
-		assertThat(command.getTargets()).isEqualTo(List.of("dev@example.com"));
+		assertThatThrownBy(() -> parser.parseAndValidate(payload)).isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(JOB_PAYLOAD_JSON_INVALID);
 	}
 
 	@Test
@@ -96,8 +92,11 @@ class MessageDispatchCommandParserTest {
 		// 缺少 targets 字段会触发 jakarta 校验失败。
 		String payload = """
 				{
-				  "channel":"EMAIL",
-				  "templateCode":"LOGIN_NOTICE"
+				  "version": 1,
+				  "command": {
+				    "channel":"EMAIL",
+				    "templateCode":"LOGIN_NOTICE"
+				  }
 				}
 				""";
 

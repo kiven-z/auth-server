@@ -66,8 +66,8 @@ class SysJobFormConsistencyValidationTest {
 	}
 
 	@Test
-	@DisplayName("UpdateForm：未显式指定 taskType 时仅做基础字段校验")
-	void updateFormAllowsNoTaskTypeForCompatibility() {
+	@DisplayName("UpdateForm：未指定 taskType 时触发字段必填校验")
+	void updateFormRejectsWhenTaskTypeMissing() {
 		SysJobUpdateForm form = validUpdateForm();
 		form.setTaskType(null);
 		form.setInvokeTarget(null);
@@ -75,7 +75,7 @@ class SysJobFormConsistencyValidationTest {
 
 		Set<ConstraintViolation<SysJobUpdateForm>> violations = validator.validate(form, UpdateGroup.class);
 
-		assertThat(violations).isEmpty();
+		assertThat(violations).anyMatch(v -> "taskType".equals(v.getPropertyPath().toString()));
 	}
 
 	private static SysJobCreateForm validCreateForm() {
@@ -88,6 +88,7 @@ class SysJobFormConsistencyValidationTest {
 		form.setMisfirePolicy(2);
 		form.setConcurrent(false);
 		form.setStatus(true);
+		form.setTaskType("BEAN_INVOKE");
 		return form;
 	}
 

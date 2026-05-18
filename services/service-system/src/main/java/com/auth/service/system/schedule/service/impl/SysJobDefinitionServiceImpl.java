@@ -30,8 +30,13 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.Date;
+
 import static com.auth.service.system.common.exception.code.common.SystemCommonResultCode.DATA_NOT_EXIST;
 import static com.auth.service.system.common.exception.code.schedule.SystemScheduleResultCode.*;
+import static com.auth.service.system.schedule.model.constans.SysJobQuartzDataKeys.JOB_ZONE;
 
 /**
  * 定时任务定义服务实现（职责：定义态 CRUD + Quartz 同步）
@@ -90,6 +95,9 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		}
 		SysJobDetailVO vo = new SysJobDetailVO();
 		BeanUtils.copyProperties(sysJob, vo);
+		SysJobSchedulerManager.FireTimes fireTimes = quartzAdmin.getFireTimes(sysJob.getJobName(), sysJob.getJobGroup());
+		vo.setPreviousFireTime(toLocalDateTime(fireTimes.previousFireTime()));
+		vo.setNextFireTime(toLocalDateTime(fireTimes.nextFireTime()));
 		return vo;
 	}
 
@@ -130,10 +138,8 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		dbJob.setJobParams(form.getJobParams());
 		dbJob.setPayloadJson(form.getPayloadJson());
 		dbJob.setHandlerCode(form.getHandlerCode());
+		dbJob.setTaskType(form.getTaskType());
 		dbJob.setRemark(form.getRemark());
-		if (form.getTaskType() != null) {
-			dbJob.setTaskType(form.getTaskType());
-		}
 		if (form.getInvokeTarget() != null) {
 			dbJob.setInvokeTarget(form.getInvokeTarget());
 		}
@@ -183,6 +189,13 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 	 */
 	private void normalizeTaskDefinition(SysJobEntity job) {
 		validationManager.normalizeAndValidate(job);
+	}
+
+	private LocalDateTime toLocalDateTime(Date date) {
+		if (date == null) {
+			return null;
+		}
+		return LocalDateTime.ofInstant(Instant.ofEpochMilli(date.getTime()), JOB_ZONE);
 	}
 
 	/**

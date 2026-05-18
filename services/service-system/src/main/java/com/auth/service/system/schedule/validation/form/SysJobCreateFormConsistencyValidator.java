@@ -17,8 +17,11 @@ public class SysJobCreateFormConsistencyValidator implements ConstraintValidator
 		if (form == null) {
 			return true;
 		}
+		if (SysJobFormConstraintSupport.isBlank(form.getTaskType())) {
+			return true;
+		}
 
-		SysJobTaskType taskType = SysJobFormConstraintSupport.resolveTaskType(form.getTaskType(), form.getInvokeTarget());
+		SysJobTaskType taskType = SysJobFormConstraintSupport.resolveTaskType(form.getTaskType());
 		return switch (taskType) {
 			case BEAN_INVOKE -> validateBeanInvoke(form, context);
 			case CUSTOM_CLASS -> validateCustomClass(form, context);

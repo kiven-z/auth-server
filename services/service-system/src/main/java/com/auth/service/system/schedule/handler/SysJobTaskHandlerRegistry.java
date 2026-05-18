@@ -29,12 +29,12 @@ public class SysJobTaskHandlerRegistry {
 	}
 
 	/**
-	 * 解析任务处理器（兼容 taskType 缺失的历史数据）
+	 * 解析任务处理器
 	 * @param job 任务定义
 	 * @return 处理器
 	 */
 	public SysJobTaskHandler resolve(SysJobEntity job) {
-		SysJobTaskType taskType = SysJobTaskType.resolve(job.getTaskType(), job.getInvokeTarget());
+		SysJobTaskType taskType = SysJobTaskType.resolve(job.getTaskType());
 		SysJobTaskHandler handler = handlers.get(taskType);
 		if (handler == null) {
 			throw new SystemBusinessException(JOB_TASK_TYPE_UNSUPPORTED, taskType.name());

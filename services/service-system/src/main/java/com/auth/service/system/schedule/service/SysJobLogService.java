@@ -20,8 +20,8 @@ public interface SysJobLogService extends IService<JobLogEntity> {
 	 * @param elapsedMs 执行时间
 	 * @param message 消息
 	 */
-	void recordSuccess(Long jobId, String jobName, String jobGroup, String invokeTarget, long elapsedMs,
-			String message);
+	void recordSuccess(Long jobId, String jobName, String jobGroup, String invokeTarget, String triggerType,
+			long elapsedMs, String message);
 
 	/**
 	 * 记录失败日志（由 Quartz 监听调用）
@@ -32,7 +32,7 @@ public interface SysJobLogService extends IService<JobLogEntity> {
 	 * @param elapsedMs 执行时间
 	 * @param ex 异常
 	 */
-	void recordFailure(Long jobId, String jobName, String jobGroup, String invokeTarget, long elapsedMs,
-			JobExecutionException ex);
+	void recordFailure(Long jobId, String jobName, String jobGroup, String invokeTarget, String triggerType,
+			long elapsedMs, JobExecutionException ex);
 
 }

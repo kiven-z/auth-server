@@ -17,7 +17,7 @@ import static com.auth.service.system.common.exception.code.schedule.SystemSched
  * 任务定义校验管理器
  *
  * <p>职责分解：
- * 1) 归一化 taskType（兼容历史数据）；
+ * 1) 归一化 taskType；
  * 2) 绑定 handlerCode（默认取执行处理器编码）；
  * 3) 委派给对应任务类型校验器。</p>
  *
@@ -44,7 +44,7 @@ public class SysJobDefinitionValidationManager {
 	 * @param job 任务定义
 	 */
 	public void normalizeAndValidate(SysJobEntity job) {
-		SysJobTaskType resolvedTaskType = SysJobTaskType.resolve(job.getTaskType(), job.getInvokeTarget());
+		SysJobTaskType resolvedTaskType = SysJobTaskType.resolve(job.getTaskType());
 		job.setTaskType(resolvedTaskType.name());
 
 		SysJobTaskHandler taskHandler = taskHandlerRegistry.resolve(job);

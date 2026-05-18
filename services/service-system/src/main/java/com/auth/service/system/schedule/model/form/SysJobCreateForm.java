@@ -41,8 +41,9 @@ public class SysJobCreateForm implements Serializable {
 	@Size(max = 255)
 	private String jobClass;
 
-	@Schema(title = "任务类型(BEAN_INVOKE/CUSTOM_CLASS)")
+	@Schema(title = "任务类型(BEAN_INVOKE/CUSTOM_CLASS/MESSAGE_DISPATCH)")
 	@Size(max = 32)
+	@NotBlank(groups = CreateGroup.class)
 	private String taskType;
 
 	@Schema(title = "执行处理器编码")
