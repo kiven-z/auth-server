@@ -2,7 +2,7 @@ package com.auth.service.system.message.channel.email;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
-import com.auth.module.message.email.EmailSendDTO;
+import com.auth.module.message.modules.email.EmailSendDTO;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.message.channel.email.model.RenderedEmail;
 import jakarta.mail.MessagingException;

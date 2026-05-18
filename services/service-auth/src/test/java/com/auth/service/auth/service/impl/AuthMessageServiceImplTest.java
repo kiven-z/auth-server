@@ -7,7 +7,7 @@ import com.auth.common.ip.IpInfo;
 import com.auth.module.message.channel.MessageChannel;
 import com.auth.module.message.command.ChannelOptionsSupport;
 import com.auth.module.message.command.TemplateMessageCommand;
-import com.auth.module.message.email.EmailChannelOptions;
+import com.auth.module.message.modules.email.EmailChannelOptions;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.auth.authentication.audit.LoginAuditSnapshotFactory;
 import com.auth.service.auth.authentication.mapper.UserMapper;

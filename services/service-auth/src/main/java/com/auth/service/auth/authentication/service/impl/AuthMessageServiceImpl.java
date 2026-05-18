@@ -4,7 +4,7 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.crypto.digest.MD5;
 import com.auth.module.message.channel.MessageChannel;
 import com.auth.module.message.command.TemplateMessageCommand;
-import com.auth.module.message.email.EmailChannelOptions;
+import com.auth.module.message.modules.email.EmailChannelOptions;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.auth.authentication.audit.LoginAuditSnapshot;
 import com.auth.service.auth.authentication.audit.LoginAuditSnapshotFactory;

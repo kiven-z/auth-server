@@ -14,7 +14,6 @@
                body_content,
                require_fields,
                provider_template_code,
-               sms_config_id,
                im_message_type,
                channel_defaults_json,
                priority,

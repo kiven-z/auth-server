@@ -27,7 +27,8 @@ public class MessageTemplateEntity extends BaseEntity {
 	private String sceneCode;
 
 	/**
-	 * 渠道：EMAIL、SMS、DING_TALK 等，与 {@link com.auth.module.message.channel.MessageChannel} 名称一致
+	 * 渠道：EMAIL、SMS、DING_TALK 等，与 {@link com.auth.module.message.channel.MessageChannel}
+	 * 名称一致
 	 */
 	@Schema(title = "渠道")
 	private String channel;
@@ -62,12 +63,6 @@ public class MessageTemplateEntity extends BaseEntity {
 	 */
 	@Schema(title = "厂商模板编码")
 	private String providerTemplateCode;
-
-	/**
-	 * sms4j blend configId 等路由键（仅 SMS，可空走默认）
-	 */
-	@Schema(title = "短信配置 ID")
-	private String smsConfigId;
 
 	/**
 	 * 钉钉等 IM 消息类型：TEXT、MARKDOWN 等

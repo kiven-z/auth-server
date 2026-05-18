@@ -1,6 +1,6 @@
 package com.auth.service.system.message.channel.dingtalk.model;
 
-import com.auth.module.message.dingtalk.DingTalkMessageType;
+import com.auth.module.message.modules.dingtalk.DingTalkMessageType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;

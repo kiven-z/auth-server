@@ -95,7 +95,8 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		}
 		SysJobDetailVO vo = new SysJobDetailVO();
 		BeanUtils.copyProperties(sysJob, vo);
-		SysJobSchedulerManager.FireTimes fireTimes = quartzAdmin.getFireTimes(sysJob.getJobName(), sysJob.getJobGroup());
+		SysJobSchedulerManager.FireTimes fireTimes = quartzAdmin.getFireTimes(sysJob.getJobName(),
+				sysJob.getJobGroup());
 		vo.setPreviousFireTime(toLocalDateTime(fireTimes.previousFireTime()));
 		vo.setNextFireTime(toLocalDateTime(fireTimes.nextFireTime()));
 		return vo;

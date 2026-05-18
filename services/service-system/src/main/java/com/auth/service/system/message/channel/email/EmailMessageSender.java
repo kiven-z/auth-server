@@ -2,7 +2,7 @@ package com.auth.service.system.message.channel.email;
 
 import com.auth.module.message.channel.MessageChannel;
 import com.auth.module.message.command.TemplateMessageCommand;
-import com.auth.module.message.email.EmailSendDTO;
+import com.auth.module.message.modules.email.EmailSendDTO;
 import com.auth.module.message.spi.MessageSender;
 import com.auth.service.system.message.channel.email.model.RenderedEmail;
 import com.auth.service.system.message.convert.TemplateMessageCommandConverter;

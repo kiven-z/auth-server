@@ -1,4 +1,4 @@
-package com.auth.module.message.email;
+package com.auth.module.message.modules.email;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;

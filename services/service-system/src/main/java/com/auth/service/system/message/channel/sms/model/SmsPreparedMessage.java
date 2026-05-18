@@ -5,7 +5,6 @@ package com.auth.service.system.message.channel.sms.model;
  *
  * @author Bunny
  */
-public record SmsPreparedMessage(String providerTemplateCode, String signName, String templateParam,
-		String smsConfigId) {
+public record SmsPreparedMessage(String providerTemplateCode, String signName, String templateParam) {
 
 }

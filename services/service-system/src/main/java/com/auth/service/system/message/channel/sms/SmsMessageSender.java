@@ -3,7 +3,7 @@ package com.auth.service.system.message.channel.sms;
 import cn.hutool.core.collection.CollUtil;
 import com.auth.module.message.channel.MessageChannel;
 import com.auth.module.message.command.TemplateMessageCommand;
-import com.auth.module.message.sms.SmsSender;
+import com.auth.module.message.modules.sms.SmsSender;
 import com.auth.module.message.spi.MessageSender;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.message.channel.sms.model.SmsPreparedMessage;
@@ -16,7 +16,7 @@ import java.util.List;
 import static com.auth.service.system.common.exception.code.message.SystemMessageResultCode.*;
 
 /**
- * 短信渠道发送实现（统一经 sms4j 标准模板短信）
+ * 短信渠道发送实现（阿里云 Dypns 验证码短信）
  *
  * @author Bunny
  */
@@ -46,22 +46,17 @@ public class SmsMessageSender implements MessageSender {
 	 */
 	@Override
 	public void sendByTemplate(TemplateMessageCommand command) {
-		// 获取手机号列表
 		List<String> targets = command.getTargets();
 		if (CollUtil.isEmpty(targets)) {
 			throw new SystemBusinessException(SMS_TARGET_EMPTY);
 		}
 
-		// 准备短信发送参数
 		SmsPreparedMessage prepared = smsTemplatePipeline.prepare(command);
-		// 获取短信发送器
 		SmsSender sender = smsSender.getIfAvailable();
-		// 如果短信发送器不存在，则抛出异常
 		if (sender == null) {
-			throw new SystemBusinessException(SMS_SMS4J_NOT_ENABLED);
+			throw new SystemBusinessException(SMS_SENDER_NOT_ENABLED);
 		}
 
-		// 发送短信
 		for (String phone : targets) {
 			sendOne(sender, phone, prepared);
 		}
@@ -75,9 +70,8 @@ public class SmsMessageSender implements MessageSender {
 	 */
 	private void sendOne(SmsSender sender, String phone, SmsPreparedMessage prepared) {
 		try {
-			// 发送短信
-			sender.sendTemplateSms(phone, prepared.providerTemplateCode(), prepared.signName(),
-					prepared.templateParam(), prepared.smsConfigId());
+			sender.sendVerifyCode(phone, prepared.signName(), prepared.providerTemplateCode(),
+					prepared.templateParam());
 		}
 		catch (IllegalStateException e) {
 			throw new SystemBusinessException(SMS_SEND_FAILED, e.getMessage());

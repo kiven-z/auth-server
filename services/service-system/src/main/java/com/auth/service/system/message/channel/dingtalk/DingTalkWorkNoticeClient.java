@@ -5,7 +5,7 @@ import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.auth.module.message.config.properties.DingTalkProperties;
-import com.auth.module.message.dingtalk.DingTalkMessageType;
+import com.auth.module.message.modules.dingtalk.DingTalkMessageType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpEntity;

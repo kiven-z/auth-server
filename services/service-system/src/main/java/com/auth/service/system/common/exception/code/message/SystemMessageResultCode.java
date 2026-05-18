@@ -44,9 +44,9 @@ public enum SystemMessageResultCode implements SystemResultCode {
 	 */
 	SMS_SIGN_NAME_NOT_CONFIGURED(500, 285, "SMS_SIGN_NAME_NOT_CONFIGURED", "system.sms.sign_name.not_configured"),
 	/**
-	 * 短信发送未启用（需开启 auth.message.sms.enabled 并引入 module-message-sms4j）
+	 * 短信发送未启用（需开启 auth.message.sms.enabled 并配置阿里云 Dypns）
 	 */
-	SMS_SMS4J_NOT_ENABLED(503, 286, "SMS_SMS4J_NOT_ENABLED", "system.sms.sms4j.not_enabled"),
+	SMS_SENDER_NOT_ENABLED(503, 286, "SMS_SENDER_NOT_ENABLED", "system.sms.sender.not_enabled"),
 	/**
 	 * 钉钉工作通知发送失败
 	 */

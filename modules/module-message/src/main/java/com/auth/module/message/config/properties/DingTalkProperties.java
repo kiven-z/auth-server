@@ -1,6 +1,6 @@
 package com.auth.module.message.config.properties;
 
-import com.auth.module.message.dingtalk.DingTalkMessageType;
+import com.auth.module.message.modules.dingtalk.DingTalkMessageType;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;

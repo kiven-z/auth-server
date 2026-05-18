@@ -4,7 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.message.channel.MessageChannel;
-import com.auth.module.message.email.EmailSendDTO;
+import com.auth.module.message.modules.email.EmailSendDTO;
 import com.auth.service.system.admin.convert.EmailTemplateConvert;
 import com.auth.service.system.admin.mapper.MessageTemplateMapper;
 import com.auth.service.system.admin.model.entity.MessageTemplateEntity;

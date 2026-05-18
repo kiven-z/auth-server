@@ -1,7 +1,6 @@
 package com.auth.module.message.command;
 
-import com.auth.module.message.email.EmailChannelOptions;
-import com.auth.module.message.sms.SmsChannelOptions;
+import com.auth.module.message.modules.email.EmailChannelOptions;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
@@ -26,7 +25,7 @@ public class ChannelOptionsMatchValidator implements ConstraintValidator<Channel
 		}
 		return switch (command.getChannel()) {
 			case EMAIL -> options instanceof EmailChannelOptions;
-			case SMS -> options instanceof SmsChannelOptions;
+			case SMS -> false;
 			case DING_TALK -> true;
 			case IN_APP -> false;
 		};

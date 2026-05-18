@@ -2,7 +2,7 @@ package com.auth.service.system.message.channel.sms;
 
 import com.auth.module.message.channel.MessageChannel;
 import com.auth.module.message.command.TemplateMessageCommand;
-import com.auth.module.message.sms.SmsSender;
+import com.auth.module.message.modules.sms.SmsSender;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.message.channel.sms.model.SmsPreparedMessage;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,12 +15,10 @@ import org.springframework.beans.factory.ObjectProvider;
 
 import java.util.List;
 
-import static com.auth.service.system.common.exception.code.message.SystemMessageResultCode.SMS_SMS4J_NOT_ENABLED;
+import static com.auth.service.system.common.exception.code.message.SystemMessageResultCode.SMS_SENDER_NOT_ENABLED;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link SmsMessageSender} 单元测试
@@ -47,7 +45,7 @@ class SmsMessageSenderTest {
 	void sendByTemplate_invokesSenderPerTarget() {
 		SmsSender sender = mock(SmsSender.class);
 		when(smsSender.getIfAvailable()).thenReturn(sender);
-		SmsPreparedMessage prepared = new SmsPreparedMessage("SMS_123", "签名", "{\"code\":\"1\"}", "aliyun-main");
+		SmsPreparedMessage prepared = new SmsPreparedMessage("100001", "签名", "{\"code\":\"1\"}");
 		when(smsTemplatePipeline.prepare(org.mockito.ArgumentMatchers.any())).thenReturn(prepared);
 
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
@@ -58,16 +56,14 @@ class SmsMessageSenderTest {
 
 		smsMessageSender.sendByTemplate(command);
 
-		verify(sender).sendTemplateSms(eq("13800000001"), eq("SMS_123"), eq("签名"), eq("{\"code\":\"1\"}"),
-				eq("aliyun-main"));
-		verify(sender).sendTemplateSms(eq("13800000002"), eq("SMS_123"), eq("签名"), eq("{\"code\":\"1\"}"),
-				eq("aliyun-main"));
+		verify(sender).sendVerifyCode(eq("13800000001"), eq("签名"), eq("100001"), eq("{\"code\":\"1\"}"));
+		verify(sender).sendVerifyCode(eq("13800000002"), eq("签名"), eq("100001"), eq("{\"code\":\"1\"}"));
 	}
 
 	@Test
-	@DisplayName("未装配 SmsSender：抛出 SMS_SMS4J_NOT_ENABLED")
+	@DisplayName("未装配 SmsSender：抛出 SMS_SENDER_NOT_ENABLED")
 	void sendByTemplate_withoutSender_throws() {
-		SmsPreparedMessage prepared = new SmsPreparedMessage("SMS_123", "签名", "{}", null);
+		SmsPreparedMessage prepared = new SmsPreparedMessage("100001", "签名", "{}");
 		when(smsTemplatePipeline.prepare(org.mockito.ArgumentMatchers.any())).thenReturn(prepared);
 
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
@@ -77,7 +73,7 @@ class SmsMessageSenderTest {
 
 		assertThatThrownBy(() -> smsMessageSender.sendByTemplate(command)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SMS_SMS4J_NOT_ENABLED);
+			.isEqualTo(SMS_SENDER_NOT_ENABLED);
 	}
 
 }

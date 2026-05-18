@@ -4,10 +4,8 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONUtil;
 import com.auth.module.message.channel.MessageChannel;
-import com.auth.module.message.command.ChannelOptionsSupport;
 import com.auth.module.message.command.TemplateMessageCommand;
 import com.auth.module.message.config.properties.SmsProperties;
-import com.auth.module.message.sms.SmsChannelOptions;
 import com.auth.service.system.admin.mapper.MessageTemplateMapper;
 import com.auth.service.system.admin.model.entity.MessageTemplateEntity;
 import com.auth.service.system.admin.model.vo.emailtemplate.EmailTemplateRequireFieldRow;
@@ -44,7 +42,7 @@ public class SmsTemplatePipeline {
 	 * 构建模板参数
 	 * @param requireFields 必填字段
 	 * @param variables 变量
-	 * @return 模板参数
+	 * @return 模板参数 JSON
 	 */
 	private static String buildTemplateParam(List<EmailTemplateRequireFieldRow> requireFields,
 			Map<String, Object> variables) {
@@ -67,7 +65,6 @@ public class SmsTemplatePipeline {
 	 * @return 厂商 API 就绪参数
 	 */
 	public SmsPreparedMessage prepare(TemplateMessageCommand command) {
-		// 获取模板代码
 		String templateCode = command.getTemplateCode();
 		MessageTemplateEntity template = messageTemplateMapper.selectEnabledBySceneCodeAndChannel(templateCode,
 				MessageChannel.SMS.name());
@@ -75,48 +72,25 @@ public class SmsTemplatePipeline {
 			throw new SystemBusinessException(SMS_TEMPLATE_NOT_FOUND, templateCode);
 		}
 
-		// 获取变量
 		Map<String, Object> variables = Optional.ofNullable(command.getVariables()).orElseGet(LinkedHashMap::new);
-		// 获取必填字段
 		List<EmailTemplateRequireFieldRow> requireFields = MessageTemplateRequireFieldsJsonSupport
 			.parse(template.getRequireFields());
 		MessageTemplateRequireFieldsJsonSupport.assertVariablesPresent(requireFields, variables,
 				SMS_TEMPLATE_VARS_MISSING);
 
-		String smsConfigId = resolveSmsConfigId(template, command);
 		String signName = resolveSignName();
 		String templateParam = buildTemplateParam(requireFields, variables);
 
-		return new SmsPreparedMessage(template.getProviderTemplateCode(), signName, templateParam, smsConfigId);
+		return new SmsPreparedMessage(template.getProviderTemplateCode(), signName, templateParam);
 	}
 
 	/**
-	 * 解析短信配置ID
-	 * @param template 短信模板
-	 * @param command 模板发送命令
-	 * @return 短信配置ID
-	 */
-	private String resolveSmsConfigId(MessageTemplateEntity template, TemplateMessageCommand command) {
-		SmsChannelOptions options = ChannelOptionsSupport.asSms(command.getOptions());
-		if (options != null && CharSequenceUtil.isNotBlank(options.getSmsConfigId())) {
-			return options.getSmsConfigId();
-		}
-
-		String smsConfigId = template.getSmsConfigId();
-		if (CharSequenceUtil.isNotBlank(smsConfigId)) {
-			return smsConfigId;
-		}
-
-		return smsProperties.getDefaultConfigId();
-	}
-
-	/**
-	 * 解析签名
+	 * 解析短信签名
 	 * @return 签名
 	 */
 	private String resolveSignName() {
-		if (CharSequenceUtil.isNotBlank(smsProperties.getDefaultSignName())) {
-			return smsProperties.getDefaultSignName();
+		if (CharSequenceUtil.isNotBlank(smsProperties.getSignName())) {
+			return smsProperties.getSignName();
 		}
 		throw new SystemBusinessException(SMS_SIGN_NAME_NOT_CONFIGURED);
 	}

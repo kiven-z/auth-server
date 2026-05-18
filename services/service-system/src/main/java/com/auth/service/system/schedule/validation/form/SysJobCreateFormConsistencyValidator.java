@@ -10,7 +10,8 @@ import jakarta.validation.ConstraintValidatorContext;
  *
  * @author Bunny
  */
-public class SysJobCreateFormConsistencyValidator implements ConstraintValidator<ValidSysJobCreateForm, SysJobCreateForm> {
+public class SysJobCreateFormConsistencyValidator
+		implements ConstraintValidator<ValidSysJobCreateForm, SysJobCreateForm> {
 
 	@Override
 	public boolean isValid(SysJobCreateForm form, ConstraintValidatorContext context) {

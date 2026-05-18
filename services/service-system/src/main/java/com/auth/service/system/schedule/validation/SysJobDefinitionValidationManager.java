@@ -16,10 +16,9 @@ import static com.auth.service.system.common.exception.code.schedule.SystemSched
 /**
  * 任务定义校验管理器
  *
- * <p>职责分解：
- * 1) 归一化 taskType；
- * 2) 绑定 handlerCode（默认取执行处理器编码）；
- * 3) 委派给对应任务类型校验器。</p>
+ * <p>
+ * 职责分解： 1) 归一化 taskType； 2) 绑定 handlerCode（默认取执行处理器编码）； 3) 委派给对应任务类型校验器。
+ * </p>
  *
  * @author Bunny
  */

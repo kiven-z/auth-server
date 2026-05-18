@@ -8,7 +8,7 @@ import org.springframework.validation.annotation.Validated;
 /**
  * 短信渠道业务配置（{@code auth.message.sms.*}）
  * <p>
- * 厂商 AK、签名、blend 由 sms4j 原生 {@code sms.blends} 配置；此处仅保留开关与默认路由。
+ * 阿里云 Dypns 验证码短信：AK、签名、区域与 Endpoint 均在此配置。
  * </p>
  *
  * @author Bunny
@@ -25,13 +25,28 @@ public class SmsProperties {
 	private boolean enabled = false;
 
 	/**
-	 * 模板未指定 sms_config_id 时使用的默认 blend（对应 sms.blends 下的 configId）
+	 * 阿里云区域 ID
 	 */
-	private String defaultConfigId;
+	private String region = "cn-hangzhou";
 
 	/**
-	 * 默认短信签名（须与 {@code sms.blends.*.signature} 一致，用于日志与校验提示）
+	 * Dypns API Endpoint
 	 */
-	private String defaultSignName;
+	private String endpoint = "dypnsapi.aliyuncs.com";
+
+	/**
+	 * 短信签名（须与阿里云控制台一致）
+	 */
+	private String signName;
+
+	/**
+	 * 阿里云 AccessKey ID
+	 */
+	private String accessKeyId;
+
+	/**
+	 * 阿里云 AccessKey Secret
+	 */
+	private String accessKeySecret;
 
 }

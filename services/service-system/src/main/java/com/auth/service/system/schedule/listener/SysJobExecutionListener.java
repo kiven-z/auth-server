@@ -101,7 +101,8 @@ public class SysJobExecutionListener implements JobListener {
 
 			// 记录失败日志
 			if (jobException != null) {
-				sysJobLogService.recordFailure(jobId, jobName, jobGroup, invokeTarget, triggerType, elapsed, jobException);
+				sysJobLogService.recordFailure(jobId, jobName, jobGroup, invokeTarget, triggerType, elapsed,
+						jobException);
 				// 触发熔断判断
 				sysJobCircuitBreaker.evaluateAfterFailure(jobId, jobName, jobGroup);
 			}

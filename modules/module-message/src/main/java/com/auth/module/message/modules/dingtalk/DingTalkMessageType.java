@@ -1,4 +1,4 @@
-package com.auth.module.message.dingtalk;
+package com.auth.module.message.modules.dingtalk;
 
 /**
  * 钉钉工作通知消息类型

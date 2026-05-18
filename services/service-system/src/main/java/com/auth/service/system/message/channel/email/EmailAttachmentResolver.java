@@ -4,7 +4,7 @@ import cn.hutool.core.codec.Base64;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.PrimitiveArrayUtil;
-import com.auth.module.message.email.AttachmentDTO;
+import com.auth.module.message.modules.email.AttachmentDTO;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

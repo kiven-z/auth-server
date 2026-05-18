@@ -1,7 +1,7 @@
 package com.auth.service.system.message.dingtalk.client;
 
 import com.auth.module.message.config.properties.DingTalkProperties;
-import com.auth.module.message.dingtalk.DingTalkMessageType;
+import com.auth.module.message.modules.dingtalk.DingTalkMessageType;
 import com.auth.service.system.message.channel.dingtalk.DingTalkAccessTokenClient;
 import com.auth.service.system.message.channel.dingtalk.DingTalkWorkNoticeClient;
 import org.junit.jupiter.api.BeforeEach;

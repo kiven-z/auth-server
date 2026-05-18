@@ -155,7 +155,8 @@ public enum SystemScheduleResultCode implements SystemResultCode {
 	/**
 	 * payload_json 版本不支持
 	 */
-	JOB_PAYLOAD_VERSION_UNSUPPORTED(422, 245, "JOB_PAYLOAD_VERSION_UNSUPPORTED", "system.job.payload.version.unsupported");
+	JOB_PAYLOAD_VERSION_UNSUPPORTED(422, 245, "JOB_PAYLOAD_VERSION_UNSUPPORTED",
+			"system.job.payload.version.unsupported");
 
 	private final int httpStatus;
 

@@ -19,9 +19,8 @@ public interface MessageTemplateMapper extends BaseMapper<MessageTemplateEntity>
 
 	/**
 	 * 按场景编码与渠道查询当前启用的最高优先级模板行。
-	 *
 	 * @param sceneCode 场景编码（发送命令 templateCode）
-	 * @param channel   渠道名，如 EMAIL、SMS
+	 * @param channel 渠道名，如 EMAIL、SMS
 	 * @return 模板行，未找到时为 null
 	 */
 	MessageTemplateEntity selectEnabledBySceneCodeAndChannel(@Param("sceneCode") String sceneCode,
@@ -29,9 +28,8 @@ public interface MessageTemplateMapper extends BaseMapper<MessageTemplateEntity>
 
 	/**
 	 * 邮件模板分页列表（channel 固定为 EMAIL）
-	 *
 	 * @param pageParams 分页参数
-	 * @param query      查询条件
+	 * @param query 查询条件
 	 * @return 分页结果
 	 */
 	IPage<EmailTemplatePageRowPO> selectEmailTemplatePage(@Param("page") Page<MessageTemplateEntity> pageParams,
