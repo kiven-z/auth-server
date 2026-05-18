@@ -1,1 +1,1 @@
-com.auth.module.message.sms4j.config.Sms4jNotificationAutoConfiguration
+com.auth.module.message.sms4j.config.Sms4jAutoConfiguration

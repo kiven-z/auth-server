@@ -1,7 +1,7 @@
 package com.auth.module.message.command;
 
 import com.auth.module.message.email.EmailChannelOptions;
-import com.auth.module.message.sms.aliyun.SmsChannelOptions;
+import com.auth.module.message.sms.SmsChannelOptions;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 

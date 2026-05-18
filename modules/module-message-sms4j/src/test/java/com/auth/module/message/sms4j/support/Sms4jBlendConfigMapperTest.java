@@ -1,6 +1,6 @@
 package com.auth.module.message.sms4j.support;
 
-import com.auth.module.message.config.properties.SmsNotificationBlendProperties;
+import com.auth.module.message.config.properties.SmsBlendProperties;
 import org.dromara.sms4j.aliyun.config.AlibabaConfig;
 import org.dromara.sms4j.tencent.config.TencentConfig;
 import org.junit.jupiter.api.DisplayName;
@@ -18,7 +18,7 @@ class Sms4jBlendConfigMapperTest {
 	@Test
 	@DisplayName("alibaba 厂商映射为 AlibabaConfig")
 	void toSmsConfig_alibaba_mapsFields() {
-		SmsNotificationBlendProperties blend = new SmsNotificationBlendProperties();
+		SmsBlendProperties blend = new SmsBlendProperties();
 		blend.setEnabled(true);
 		blend.setSupplier("alibaba");
 		blend.setAccessKeyId("ak");
@@ -35,7 +35,7 @@ class Sms4jBlendConfigMapperTest {
 	@Test
 	@DisplayName("tencent 厂商映射为 TencentConfig")
 	void toSmsConfig_tencent_mapsFields() {
-		SmsNotificationBlendProperties blend = new SmsNotificationBlendProperties();
+		SmsBlendProperties blend = new SmsBlendProperties();
 		blend.setEnabled(true);
 		blend.setSupplier("tencent");
 		blend.setAccessKeyId("ak");
@@ -52,7 +52,7 @@ class Sms4jBlendConfigMapperTest {
 	@Test
 	@DisplayName("不支持的厂商：抛出 IllegalStateException")
 	void toSmsConfig_unsupportedSupplier_throws() {
-		SmsNotificationBlendProperties blend = new SmsNotificationBlendProperties();
+		SmsBlendProperties blend = new SmsBlendProperties();
 		blend.setEnabled(true);
 		blend.setSupplier("unknown");
 

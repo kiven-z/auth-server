@@ -23,24 +23,24 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * {@link Sms4jSmsNotificationSender} 单元测试
+ * {@link Sms4jSmsSender} 单元测试
  */
 @ExtendWith(MockitoExtension.class)
-@DisplayName("Sms4jSmsNotificationSender 通知短信发送")
-class Sms4jSmsNotificationSenderTest {
+@DisplayName("Sms4jSmsSender 短信发送")
+class Sms4jSmsSenderTest {
 
 	@Mock
 	private SmsBlend smsBlend;
 
 	private SmsProperties smsProperties;
 
-	private Sms4jSmsNotificationSender sender;
+	private Sms4jSmsSender sender;
 
 	@BeforeEach
 	void setUp() {
 		smsProperties = new SmsProperties();
-		smsProperties.getNotification().setDefaultConfigId("aliyun-main");
-		sender = new Sms4jSmsNotificationSender(smsProperties);
+		smsProperties.setDefaultConfigId("aliyun-main");
+		sender = new Sms4jSmsSender(smsProperties);
 	}
 
 	@Test
@@ -86,20 +86,6 @@ class Sms4jSmsNotificationSenderTest {
 				.isInstanceOf(IllegalStateException.class)
 				.hasMessageContaining("SMS4J send failed")
 				.hasMessageContaining("quota exceeded");
-		}
-	}
-
-	@Test
-	@DisplayName("底层调用异常：包装为 IllegalStateException")
-	void sendTemplateSms_sdkThrows_wrapsException() {
-		try (MockedStatic<SmsFactory> factory = mockStatic(SmsFactory.class)) {
-			factory.when(() -> SmsFactory.getSmsBlend("aliyun-main")).thenReturn(smsBlend);
-			when(smsBlend.sendMessage(any(), any(), any())).thenThrow(new RuntimeException("network down"));
-
-			assertThatThrownBy(() -> sender.sendTemplateSms("13800000001", "SMS_123", "签名", "{}", null))
-				.isInstanceOf(IllegalStateException.class)
-				.hasMessageContaining("SMS4J send error")
-				.hasCauseInstanceOf(RuntimeException.class);
 		}
 	}
 

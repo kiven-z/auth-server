@@ -19,37 +19,27 @@ class SmsPropertiesTest {
 		SmsProperties properties = new SmsProperties();
 
 		assertThat(properties.isEnabled()).isFalse();
-		assertThat(properties.isVerifyEnabled()).isTrue();
-		assertThat(properties.getProvider()).isEqualTo(SmsProperties.Provider.ALIYUN);
-		assertThat(properties.getNotification()).isNotNull();
-		assertThat(properties.getNotification().isEnabled()).isFalse();
+		assertThat(properties.getBlends()).isInstanceOf(LinkedHashMap.class);
+		assertThat(properties.getBlends()).isEmpty();
 	}
 
 	@Test
-	@DisplayName("通知类配置可以设置 blends")
-	void notificationWithBlends() {
+	@DisplayName("可设置 blends 与 defaultConfigId")
+	void blendsConfiguration() {
 		SmsProperties properties = new SmsProperties();
-		properties.getNotification().setEnabled(true);
-		properties.getNotification().setDefaultConfigId("aliyun-main");
+		properties.setEnabled(true);
+		properties.setDefaultConfigId("aliyun-main");
 
-		SmsNotificationBlendProperties blend = new SmsNotificationBlendProperties();
+		SmsBlendProperties blend = new SmsBlendProperties();
 		blend.setSupplier("alibaba");
 		blend.setAccessKeyId("id");
 		blend.setAccessKeySecret("secret");
 		blend.setSignature("sign");
-		properties.getNotification().getBlends().put("aliyun-main", blend);
+		properties.getBlends().put("aliyun-main", blend);
 
-		assertThat(properties.getNotification().isEnabled()).isTrue();
-		assertThat(properties.getNotification().getDefaultConfigId()).isEqualTo("aliyun-main");
-		assertThat(properties.getNotification().getBlends()).hasSize(1);
-	}
-
-	@Test
-	@DisplayName("notification 为空 blends 时返回空 map")
-	void notificationWithoutBlends_returnsEmptyMap() {
-		SmsProperties properties = new SmsProperties();
-		assertThat(properties.getNotification().getBlends()).isInstanceOf(LinkedHashMap.class);
-		assertThat(properties.getNotification().getBlends()).isEmpty();
+		assertThat(properties.isEnabled()).isTrue();
+		assertThat(properties.getDefaultConfigId()).isEqualTo("aliyun-main");
+		assertThat(properties.getBlends()).hasSize(1);
 	}
 
 }

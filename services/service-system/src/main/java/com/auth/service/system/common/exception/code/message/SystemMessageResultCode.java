@@ -44,17 +44,9 @@ public enum SystemMessageResultCode implements SystemResultCode {
 	 */
 	SMS_SIGN_NAME_NOT_CONFIGURED(500, 285, "SMS_SIGN_NAME_NOT_CONFIGURED", "system.sms.sign_name.not_configured"),
 	/**
-	 * 通知类短信未启用（需开启 auth.message.sms.notification 并引入 module-message-sms4j）
+	 * 短信发送未启用（需开启 auth.message.sms.enabled 并引入 module-message-sms4j）
 	 */
-	SMS_NOTIFICATION_NOT_ENABLED(503, 286, "SMS_NOTIFICATION_NOT_ENABLED", "system.sms.notification.not_enabled"),
-	/**
-	 * 验证码短信未启用（需开启 auth.message.sms.verify-enabled 并配置 Dypnsapi）
-	 */
-	SMS_VERIFY_NOT_ENABLED(503, 287, "SMS_VERIFY_NOT_ENABLED", "system.sms.verify.not_enabled"),
-	/**
-	 * 短信模板发送模式无效
-	 */
-	SMS_TEMPLATE_TYPE_INVALID(400, 288, "SMS_TEMPLATE_TYPE_INVALID", "system.sms.template.type_invalid");
+	SMS_SMS4J_NOT_ENABLED(503, 286, "SMS_SMS4J_NOT_ENABLED", "system.sms.sms4j.not_enabled");
 
 	private final int httpStatus;
 

@@ -4,13 +4,13 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * sms4j 单厂商 blend 配置（映射 {@code auth.message.sms.notification.blends.*}）
+ * sms4j 单厂商 blend 配置（映射 {@code auth.message.sms.blends.*}）
  *
  * @author Bunny
  */
 @Getter
 @Setter
-public class SmsNotificationBlendProperties {
+public class SmsBlendProperties {
 
 	/**
 	 * 是否启用该 blend

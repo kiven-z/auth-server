@@ -15,7 +15,6 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <alibabacloud-dypnsapi.version>2.0.0</alibabacloud-dypnsapi.version>
     </properties>
 
     <dependencies>
@@ -53,11 +52,5 @@
             <artifactId>hutool-all</artifactId>
         </dependency>
 
-        <!-- 阿里云号码认证 / 短信相关 SDK（渠道基础设施） -->
-        <dependency>
-            <groupId>com.aliyun</groupId>
-            <artifactId>alibabacloud-dypnsapi20170525</artifactId>
-            <version>${alibabacloud-dypnsapi.version}</version>
-        </dependency>
     </dependencies>
 </project>

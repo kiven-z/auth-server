@@ -2,7 +2,7 @@ package com.auth.module.message.command;
 
 import com.auth.module.message.channel.MessageChannel;
 import com.auth.module.message.email.EmailChannelOptions;
-import com.auth.module.message.sms.aliyun.SmsChannelOptions;
+import com.auth.module.message.sms.SmsChannelOptions;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -58,7 +58,7 @@ class ChannelOptionsMatchValidatorTest {
 			.channel(MessageChannel.SMS)
 			.templateCode("T1")
 			.targets(List.of("13800000000"))
-			.options(SmsChannelOptions.builder().countryCode("86").build())
+			.options(SmsChannelOptions.builder().smsConfigId("aliyun-main").build())
 			.build();
 
 		Set<ConstraintViolation<TemplateMessageCommand>> violations = validator.validate(command);
