@@ -114,30 +114,48 @@ public class OperationLogPayloadAssembler {
 	 * @return 操作日志负载
 	 */
 	private OperationLogPayloadEvent buildPayload(BuildPayloadContext ctx) {
+		// 解析执行时间
 		int executionMs = (int) TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - ctx.startNs());
+		// 解析HTTP状态码
 		Integer httpStatus = resolveHttpStatus(ctx.response(), ctx.failure());
+		// 解析响应消息
 		String responseMessage = OperationLogResponseMessageComposer.compose(ctx.meta(), ctx.result(), ctx.failure());
+		// 解析用户ID
 		Long userId = SecurityUserUtils.getUserId();
+		// 解析用户代理
 		String userAgent = CharSequenceUtil.subPre(CharSequenceUtil.nullToEmpty(ctx.request().getHeader("User-Agent")),
 				255);
+		// 解析IP信息
 		IpInfo ipInfo = ipAddressService.resolveIpInfo(ctx.request());
 
+		// 构建操作日志负载
 		return OperationLogPayloadEvent.builder()
 			.userId(userId)
 			.operationType(ctx.meta().operation().name())
+			// 解析模块
 			.module(AuditOperationModuleKeys.toPersistedModuleKey(ctx.meta().serviceDomain(), ctx.meta().bizModule()))
+			// 解析目标类型
 			.targetType(CharSequenceUtil.nullToEmpty(ctx.meta().targetType()))
+			// 解析目标ID
 			.targetId(OperationLogContext.getTargetId())
 			.requestMethod(ctx.request().getMethod())
+			// 解析请求URI
 			.requestUri(CharSequenceUtil.nullToEmpty(ctx.request().getRequestURI()))
+			// 解析请求参数
 			.requestParams(OperationLogRequestParamsBuilder.build(ctx.request(), ctx.meta().recordParams(),
 					objectMapper, ctx.methodArgs()))
+			// 解析响应状态码
 			.responseStatus(httpStatus)
+			// 解析响应消息
 			.responseMessage(responseMessage)
 			.executionTimeMs(executionMs)
+			// 解析IP地址
 			.ipAddress(ipInfo.getIpAddr())
+			// 解析用户代理
 			.userAgent(userAgent)
+			// 解析类名
 			.className(ctx.method().getDeclaringClass().getName())
+			// 解析方法名
 			.methodName(ctx.method().getName())
 			.build();
 	}

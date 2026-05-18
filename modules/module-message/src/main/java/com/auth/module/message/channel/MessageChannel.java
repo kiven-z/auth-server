@@ -20,12 +20,7 @@ public enum MessageChannel {
 	/**
 	 * 钉钉
 	 */
-	DINGTALK,
-
-	/**
-	 * 企业微信
-	 */
-	WECHAT_WORK,
+	DING_TALK,
 
 	/**
 	 * 站内信

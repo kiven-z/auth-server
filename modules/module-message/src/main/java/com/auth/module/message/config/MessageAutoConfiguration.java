@@ -1,5 +1,6 @@
 package com.auth.module.message.config;
 
+import com.auth.module.message.config.properties.DingTalkProperties;
 import com.auth.module.message.config.properties.SmsProperties;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -10,7 +11,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
  * @author Bunny
  */
 @AutoConfiguration
-@EnableConfigurationProperties(SmsProperties.class)
+@EnableConfigurationProperties({ SmsProperties.class, DingTalkProperties.class })
 public class MessageAutoConfiguration {
 
 }

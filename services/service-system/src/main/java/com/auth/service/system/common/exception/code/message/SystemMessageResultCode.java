@@ -7,7 +7,7 @@ import lombok.Getter;
  * 统一消息发送与短信渠道结果码
  *
  * <p>
- * 号段：279–288（下一可用 289）
+ * 号段：279–291（下一可用 292）
  * </p>
  *
  * @author Bunny
@@ -46,7 +46,19 @@ public enum SystemMessageResultCode implements SystemResultCode {
 	/**
 	 * 短信发送未启用（需开启 auth.message.sms.enabled 并引入 module-message-sms4j）
 	 */
-	SMS_SMS4J_NOT_ENABLED(503, 286, "SMS_SMS4J_NOT_ENABLED", "system.sms.sms4j.not_enabled");
+	SMS_SMS4J_NOT_ENABLED(503, 286, "SMS_SMS4J_NOT_ENABLED", "system.sms.sms4j.not_enabled"),
+	/**
+	 * 钉钉工作通知发送失败
+	 */
+	DING_TALK_SEND_FAILED(502, 289, "DING_TALK_SEND_FAILED", "system.dingtalk.send.failed"),
+	/**
+	 * 钉钉接收人为空
+	 */
+	DING_TALK_TARGET_EMPTY(400, 290, "DING_TALK_TARGET_EMPTY", "system.dingtalk.send.target_empty"),
+	/**
+	 * 钉钉工作通知未启用（需设置 auth.message.ding-talk.enabled=true）
+	 */
+	DING_TALK_NOT_ENABLED(503, 291, "DING_TALK_NOT_ENABLED", "system.dingtalk.not_enabled");
 
 	private final int httpStatus;
 

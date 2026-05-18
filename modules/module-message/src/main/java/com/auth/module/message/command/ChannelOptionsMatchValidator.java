@@ -27,7 +27,8 @@ public class ChannelOptionsMatchValidator implements ConstraintValidator<Channel
 		return switch (command.getChannel()) {
 			case EMAIL -> options instanceof EmailChannelOptions;
 			case SMS -> options instanceof SmsChannelOptions;
-			default -> false;
+			case DING_TALK -> true;
+			case IN_APP -> false;
 		};
 	}
 
