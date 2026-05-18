@@ -33,10 +33,14 @@ public class Sms4jSmsSender implements SmsSender {
 	@Override
 	public void sendTemplateSms(String phone, String providerTemplateCode, String signName, String templateParamJson,
 			String smsConfigId) {
+		// 解析配置ID
 		String configId = resolveConfigId(smsConfigId);
+		// 获取短信混合实例
 		SmsBlend smsBlend = requireSmsBlend(configId);
+		// 解析模板参数
 		LinkedHashMap<String, String> messages = parseTemplateParam(templateParamJson);
 
+		// 发送消息
 		SmsResponse response = invokeSend(smsBlend, phone, providerTemplateCode, messages, configId);
 		assertSendSuccess(response, configId, phone, providerTemplateCode);
 		log.debug("SMS4J send ok, configId={}, phone={}, templateId={}, signName={}", configId, phone,
@@ -88,6 +92,8 @@ public class Sms4jSmsSender implements SmsSender {
 		if (response != null && response.isSuccess()) {
 			return;
 		}
+
+		// 解析失败详情
 		String detail = resolveFailureDetail(response);
 		log.error("SMS4J send failed, configId={}, phone={}, templateId={}, detail={}", configId, phone,
 				providerTemplateCode, detail);

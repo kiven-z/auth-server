@@ -7,6 +7,7 @@ import com.auth.service.auth.authentication.cookie.RefreshTokenCookieUtil;
 import com.auth.service.auth.authentication.service.AuthService;
 import com.auth.service.auth.authentication.service.RefreshTokenService;
 import com.auth.service.auth.support.model.request.login.EmailLoginRequest;
+import com.auth.service.auth.support.model.request.login.SmsLoginRequest;
 import com.auth.service.auth.support.model.request.login.UsernamePasswordLoginRequest;
 import com.auth.service.auth.support.model.response.RefreshTokenResponse;
 import com.auth.service.auth.support.model.response.UserLoginResponse;
@@ -63,6 +64,19 @@ public class AuthController {
 	@PostMapping("login/email")
 	public Result<UserLoginResponse> loginByEmail(@Valid @RequestBody EmailLoginRequest auth,
 			HttpServletRequest request, HttpServletResponse response) {
+		UserLoginResponse login = authService.login(auth, request);
+
+		RefreshTokenCookieUtil.writeToken(response, request, login.getRefreshToken(),
+				jwtProperties.getRefreshExpired());
+
+		return Result.success(login);
+	}
+
+	@PublicApi
+	@Operation(summary = "短信登录")
+	@PostMapping("login/sms")
+	public Result<UserLoginResponse> loginBySms(@Valid @RequestBody SmsLoginRequest auth, HttpServletRequest request,
+			HttpServletResponse response) {
 		UserLoginResponse login = authService.login(auth, request);
 
 		RefreshTokenCookieUtil.writeToken(response, request, login.getRefreshToken(),

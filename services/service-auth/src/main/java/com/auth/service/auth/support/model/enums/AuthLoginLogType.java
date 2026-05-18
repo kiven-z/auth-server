@@ -26,6 +26,11 @@ public enum AuthLoginLogType {
 	REFRESH_TOKEN,
 
 	/**
+	 * 短信登录
+	 */
+	LOGIN_SMS,
+
+	/**
 	 * 登出
 	 */
 	LOGOUT,

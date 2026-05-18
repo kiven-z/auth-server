@@ -6,6 +6,7 @@ import com.auth.service.auth.support.model.enums.AuthLoginLogType;
 import com.auth.service.auth.support.model.enums.AuthResultCode;
 import com.auth.service.auth.support.model.request.login.AbstractLoginRequest;
 import com.auth.service.auth.support.model.request.login.EmailLoginRequest;
+import com.auth.service.auth.support.model.request.login.SmsLoginRequest;
 import com.auth.service.auth.support.model.request.login.UsernamePasswordLoginRequest;
 import lombok.experimental.UtilityClass;
 
@@ -29,6 +30,9 @@ public class LoginAuditContextResolver {
 		if (auth instanceof EmailLoginRequest emailLoginRequest) {
 			return blankToNull(emailLoginRequest.getEmail());
 		}
+		if (auth instanceof SmsLoginRequest smsLoginRequest) {
+			return blankToNull(smsLoginRequest.getPhone());
+		}
 		return null;
 	}
 
@@ -40,6 +44,9 @@ public class LoginAuditContextResolver {
 	public static AuthLoginLogType eventTypeFromAuth(AbstractLoginRequest auth) {
 		if (auth instanceof EmailLoginRequest) {
 			return AuthLoginLogType.LOGIN_EMAIL;
+		}
+		if (auth instanceof SmsLoginRequest) {
+			return AuthLoginLogType.LOGIN_SMS;
 		}
 		return AuthLoginLogType.LOGIN_PASSWORD;
 	}
