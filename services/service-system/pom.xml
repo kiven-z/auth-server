@@ -25,6 +25,11 @@
         </dependency>
         <dependency>
             <groupId>com.auth</groupId>
+            <artifactId>module-message-sms4j</artifactId>
+            <version>0.0.2-beta</version>
+        </dependency>
+        <dependency>
+            <groupId>com.auth</groupId>
             <artifactId>module-file</artifactId>
             <version>0.0.2-beta</version>
         </dependency>

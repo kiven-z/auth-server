@@ -1,7 +1,6 @@
 package com.auth.module.message.sms.aliyun;
 
 import com.aliyun.sdk.service.dypnsapi20170525.AsyncClient;
-import com.auth.module.message.config.properties.SmsProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;

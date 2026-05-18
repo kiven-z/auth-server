@@ -3,7 +3,6 @@ package com.auth.module.message.sms.aliyun;
 import com.aliyun.auth.credentials.Credential;
 import com.aliyun.auth.credentials.provider.StaticCredentialProvider;
 import com.aliyun.sdk.service.dypnsapi20170525.AsyncClient;
-import com.auth.module.message.sms.aliyun.AliyunSmsProperties;
 import darabonba.core.client.ClientOverrideConfiguration;
 import lombok.experimental.UtilityClass;
 

@@ -7,7 +7,7 @@ import lombok.Getter;
  * 统一消息发送与短信渠道结果码
  *
  * <p>
- * 号段：279–285（下一可用 286）
+ * 号段：279–288（下一可用 289）
  * </p>
  *
  * @author Bunny
@@ -42,7 +42,19 @@ public enum SystemMessageResultCode implements SystemResultCode {
 	/**
 	 * 短信签名未配置
 	 */
-	SMS_SIGN_NAME_NOT_CONFIGURED(500, 285, "SMS_SIGN_NAME_NOT_CONFIGURED", "system.sms.sign_name.not_configured");
+	SMS_SIGN_NAME_NOT_CONFIGURED(500, 285, "SMS_SIGN_NAME_NOT_CONFIGURED", "system.sms.sign_name.not_configured"),
+	/**
+	 * 通知类短信未启用（需开启 auth.message.sms.notification 并引入 module-message-sms4j）
+	 */
+	SMS_NOTIFICATION_NOT_ENABLED(503, 286, "SMS_NOTIFICATION_NOT_ENABLED", "system.sms.notification.not_enabled"),
+	/**
+	 * 验证码短信未启用（需开启 auth.message.sms.verify-enabled 并配置 Dypnsapi）
+	 */
+	SMS_VERIFY_NOT_ENABLED(503, 287, "SMS_VERIFY_NOT_ENABLED", "system.sms.verify.not_enabled"),
+	/**
+	 * 短信模板发送模式无效
+	 */
+	SMS_TEMPLATE_TYPE_INVALID(400, 288, "SMS_TEMPLATE_TYPE_INVALID", "system.sms.template.type_invalid");
 
 	private final int httpStatus;
 

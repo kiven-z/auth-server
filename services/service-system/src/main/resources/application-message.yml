@@ -1,4 +1,9 @@
 spring:
+  autoconfigure:
+    # 通知短信走 auth.message.sms.notification + AuthSms4jReadConfig，不使用 sms4j 默认 sms.* 配置
+    exclude:
+      - org.dromara.sms4j.starter.config.SmsMainConfig
+      - org.dromara.sms4j.starter.config.SupplierConfig
   # 设置邮箱配置
   mail:
     default-encoding: UTF-8
@@ -18,11 +23,12 @@ spring:
           timeout: 5000
           writeTimeout: 5000
 
-# 短信：切换厂商只改 provider 与对应子节点（aliyun / tencent）
+# 短信：VERIFY=验证码(Dypnsapi 自研)；NOTIFY=通知类(sms4j 多厂商，见 notification)
 auth:
   message:
     sms:
       enabled: false
+      verify-enabled: true
       provider: aliyun
       aliyun:
         access-key-id: ${AUTH_SMS_ACCESS_KEY_ID:}
@@ -35,3 +41,20 @@ auth:
         secret-id: ${AUTH_SMS_TENCENT_SECRET_ID:}
         secret-key: ${AUTH_SMS_TENCENT_SECRET_KEY:}
         region: ap-guangzhou
+      notification:
+        enabled: false
+        default-config-id: aliyun-main
+        blends:
+          aliyun-main:
+            enabled: true
+            supplier: alibaba
+            access-key-id: ${AUTH_SMS_NOTIFY_ACCESS_KEY_ID:}
+            access-key-secret: ${AUTH_SMS_NOTIFY_ACCESS_KEY_SECRET:}
+            signature: ${AUTH_SMS_NOTIFY_SIGN_NAME:}
+          tencent-backup:
+            enabled: false
+            supplier: tencent
+            access-key-id: ${AUTH_SMS_TENCENT_SECRET_ID:}
+            access-key-secret: ${AUTH_SMS_TENCENT_SECRET_KEY:}
+            signature: ${AUTH_SMS_NOTIFY_SIGN_NAME:}
+            sdk-app-id: ${AUTH_SMS_TENCENT_SDK_APP_ID:}

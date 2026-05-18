@@ -1,8 +1,6 @@
 package com.auth.module.message.command;
 
 import com.auth.module.message.channel.MessageChannel;
-import com.auth.module.message.email.EmailChannelOptions;
-import com.auth.module.message.sms.aliyun.SmsChannelOptions;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -22,6 +20,7 @@ import java.util.Map;
  *
  * @author Bunny
  */
+@ChannelOptionsMatch
 @Data
 @Builder
 @NoArgsConstructor
@@ -55,15 +54,9 @@ public class TemplateMessageCommand implements Serializable {
 	private Map<String, Object> variables;
 
 	/**
-	 * 邮件渠道扩展参数
+	 * 渠道扩展参数（类型须与 {@link #channel} 一致，见 {@link ChannelOptions}）
 	 */
 	@Valid
-	private EmailChannelOptions emailOptions;
-
-	/**
-	 * 短信渠道扩展参数
-	 */
-	@Valid
-	private SmsChannelOptions smsOptions;
+	private ChannelOptions options;
 
 }

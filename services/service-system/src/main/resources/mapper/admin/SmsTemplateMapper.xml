@@ -9,6 +9,8 @@
                template_name,
                description,
                provider,
+               template_type,
+               sms_config_id,
                provider_template_code,
                sign_name,
                default_country_code,

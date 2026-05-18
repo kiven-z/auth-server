@@ -1,6 +1,7 @@
 package com.auth.service.system.message.convert;
 
 import com.auth.module.message.channel.MessageChannel;
+import com.auth.module.message.command.ChannelOptionsSupport;
 import com.auth.module.message.command.TemplateMessageCommand;
 import com.auth.module.message.email.EmailChannelOptions;
 import com.auth.module.message.email.EmailSendDTO;
@@ -20,7 +21,7 @@ public class TemplateMessageCommandConverter {
 	 * @return 模板化发送命令
 	 */
 	public static TemplateMessageCommand fromEmailDto(EmailSendDTO dto) {
-		EmailChannelOptions emailOptions = EmailChannelOptions.builder()
+		EmailChannelOptions options = EmailChannelOptions.builder()
 			.cc(dto.getCc())
 			.bcc(dto.getBcc())
 			.replyTo(dto.getReplyTo())
@@ -32,7 +33,7 @@ public class TemplateMessageCommandConverter {
 			.templateCode(dto.getTemplateCode())
 			.targets(dto.getTo())
 			.variables(dto.getVariables())
-			.emailOptions(emailOptions)
+			.options(options)
 			.build();
 	}
 
@@ -42,7 +43,7 @@ public class TemplateMessageCommandConverter {
 	 * @return 邮件发送请求
 	 */
 	public static EmailSendDTO toEmailDto(TemplateMessageCommand command) {
-		EmailChannelOptions options = command.getEmailOptions();
+		EmailChannelOptions options = ChannelOptionsSupport.asEmail(command.getOptions());
 
 		// 创建邮件发送请求构建器
 		EmailSendDTO.EmailSendDTOBuilder builder = EmailSendDTO.builder()

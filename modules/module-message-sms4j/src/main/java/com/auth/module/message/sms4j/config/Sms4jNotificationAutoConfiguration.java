@@ -45,16 +45,16 @@ public class Sms4jNotificationAutoConfiguration {
 		return new Sms4jSmsNotificationSender(smsProperties);
 	}
 
-    /**
-     * 应用就绪后注册 sms4j blend
-     */
-    @EventListener(ApplicationReadyEvent.class)
-    public void onReady(AuthSms4jReadConfig readConfig) {
-        readConfig.forEachEnabledBlend((configId, blend) -> {
-            SmsFactory.createSmsBlend(readConfig, configId);
-            log.info("SMS4J blend registered, configId={}, supplier={}", configId, blend.getSupplier());
-        });
-        log.info("SMS4J notification blends registered from auth.message.sms.notification");
-    }
+	/**
+	 * 应用就绪后注册 sms4j blend
+	 */
+	@EventListener(ApplicationReadyEvent.class)
+	public void onReady(AuthSms4jReadConfig readConfig) {
+		readConfig.forEachEnabledBlend((configId, blend) -> {
+			SmsFactory.createSmsBlend(readConfig, configId);
+			log.info("SMS4J blend registered, configId={}, supplier={}", configId, blend.getSupplier());
+		});
+		log.info("SMS4J notification blends registered from auth.message.sms.notification");
+	}
 
 }

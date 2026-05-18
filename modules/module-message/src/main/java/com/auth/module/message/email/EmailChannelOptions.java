@@ -1,12 +1,12 @@
 package com.auth.module.message.email;
 
+import com.auth.module.message.command.ChannelOptions;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serial;
-import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -18,7 +18,12 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class EmailChannelOptions implements Serializable {
+public class EmailChannelOptions implements ChannelOptions {
+
+	/**
+	 * Jackson 多态类型标识（{@link com.auth.module.message.command.ChannelOptions}）
+	 */
+	public static final String TYPE = "email";
 
 	@Serial
 	private static final long serialVersionUID = 1L;

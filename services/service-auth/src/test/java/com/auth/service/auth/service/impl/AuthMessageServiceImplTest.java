@@ -5,7 +5,9 @@ import com.auth.common.core.model.response.Result;
 import com.auth.common.ip.IpAddressService;
 import com.auth.common.ip.IpInfo;
 import com.auth.module.message.channel.MessageChannel;
+import com.auth.module.message.command.ChannelOptionsSupport;
 import com.auth.module.message.command.TemplateMessageCommand;
+import com.auth.module.message.email.EmailChannelOptions;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.auth.authentication.audit.LoginAuditSnapshotFactory;
 import com.auth.service.auth.authentication.mapper.UserMapper;
@@ -98,7 +100,8 @@ class AuthMessageServiceImplTest {
 			assertEquals(AuthEmailTemplateCode.LOGIN_EMAIL_CODE.getTemplateCode(), command.getTemplateCode());
 			assertEquals(1, command.getTargets().size());
 			assertEquals(email, command.getTargets().get(0));
-			assertEquals(Boolean.TRUE, command.getEmailOptions().getHasHtml());
+			EmailChannelOptions emailOptions = ChannelOptionsSupport.asEmail(command.getOptions());
+			assertEquals(Boolean.TRUE, emailOptions.getHasHtml());
 
 			Object codeVar = command.getVariables().get("verificationCode");
 			assertNotNull(codeVar);

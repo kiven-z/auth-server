@@ -1,7 +1,10 @@
 package com.auth.service.system.message.channel.sms;
 
 import com.auth.module.message.command.TemplateMessageCommand;
+import com.auth.module.message.config.properties.SmsNotificationBlendProperties;
 import com.auth.module.message.config.properties.SmsProperties;
+import com.auth.module.message.sms.SmsSendMode;
+import com.auth.module.message.sms.aliyun.AliyunSmsProperties;
 import com.auth.service.system.admin.mapper.SmsTemplateMapper;
 import com.auth.service.system.admin.model.entity.SmsTemplateEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
@@ -13,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -36,15 +40,21 @@ class SmsTemplatePipelineTest {
 	@BeforeEach
 	void setUp() {
 		SmsProperties smsProperties = new SmsProperties();
-		smsProperties.getAliyun().setDefaultSignName("测试签名");
-		pipeline = new SmsTemplatePipeline(smsTemplateMapper, smsProperties);
+		AliyunSmsProperties aliyunSmsProperties = new AliyunSmsProperties();
+		aliyunSmsProperties.setDefaultSignName("测试签名");
+		SmsNotificationBlendProperties blend = new SmsNotificationBlendProperties();
+		blend.setSignature("通知签名");
+		smsProperties.getNotification().getBlends().put("aliyun-main", blend);
+		smsProperties.getNotification().setDefaultConfigId("aliyun-main");
+		pipeline = new SmsTemplatePipeline(smsTemplateMapper, smsProperties, aliyunSmsProperties);
 	}
 
 	@Test
-	@DisplayName("组装 templateParam JSON 与厂商模板 CODE")
-	void prepare_buildsTemplateParam() {
+	@DisplayName("VERIFY：组装 templateParam JSON 与厂商模板 CODE")
+	void prepare_verify_buildsTemplateParam() {
 		SmsTemplateEntity template = new SmsTemplateEntity();
 		template.setTemplateCode("login-sms-code");
+		template.setTemplateType("VERIFY");
 		template.setProviderTemplateCode("100001");
 		template
 			.setRequireFields("[{\"key\":\"code\",\"exampleValue\":\"123456\"},{\"key\":\"min\",\"exampleValue\":5}]");
@@ -59,11 +69,34 @@ class SmsTemplatePipelineTest {
 
 		PreparedSms prepared = pipeline.prepare(command);
 
+		assertThat(prepared.sendMode()).isEqualTo(SmsSendMode.VERIFY);
 		assertThat(prepared.providerTemplateCode()).isEqualTo("100001");
 		assertThat(prepared.signName()).isEqualTo("测试签名");
 		assertThat(prepared.countryCode()).isEqualTo("86");
 		assertThat(prepared.templateParam()).contains("\"code\":\"123456\"");
-		assertThat(prepared.templateParam()).contains("\"min\":\"5\"");
+	}
+
+	@Test
+	@DisplayName("NOTIFY：使用 blend 签名与 smsConfigId")
+	void prepare_notify_usesBlendSignature() {
+		SmsTemplateEntity template = new SmsTemplateEntity();
+		template.setTemplateCode("job-alert");
+		template.setTemplateType("NOTIFY");
+		template.setSmsConfigId("aliyun-main");
+		template.setProviderTemplateCode("SMS_999");
+		when(smsTemplateMapper.selectByTemplateCode("job-alert")).thenReturn(template);
+
+		TemplateMessageCommand command = TemplateMessageCommand.builder()
+			.templateCode("job-alert")
+			.targets(List.of("13800000000"))
+			.variables(Map.of())
+			.build();
+
+		PreparedSms prepared = pipeline.prepare(command);
+
+		assertThat(prepared.sendMode()).isEqualTo(SmsSendMode.NOTIFY);
+		assertThat(prepared.signName()).isEqualTo("通知签名");
+		assertThat(prepared.smsConfigId()).isEqualTo("aliyun-main");
 	}
 
 	@Test

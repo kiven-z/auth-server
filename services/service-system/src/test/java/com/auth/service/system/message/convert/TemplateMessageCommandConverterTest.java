@@ -1,7 +1,9 @@
 package com.auth.service.system.message.convert;
 
 import com.auth.module.message.channel.MessageChannel;
+import com.auth.module.message.command.ChannelOptionsSupport;
 import com.auth.module.message.command.TemplateMessageCommand;
+import com.auth.module.message.email.EmailChannelOptions;
 import com.auth.module.message.email.EmailSendDTO;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,8 +37,9 @@ class TemplateMessageCommandConverterTest {
 		assertThat(command.getTemplateCode()).isEqualTo("T1");
 		assertThat(command.getTargets()).containsExactly("u@example.com");
 		assertThat(command.getVariables()).containsEntry("k", "v");
-		assertThat(command.getEmailOptions().getCc()).containsExactly("cc@example.com");
-		assertThat(command.getEmailOptions().getHasHtml()).isTrue();
+		EmailChannelOptions options = ChannelOptionsSupport.asEmail(command.getOptions());
+		assertThat(options.getCc()).containsExactly("cc@example.com");
+		assertThat(options.getHasHtml()).isTrue();
 
 		EmailSendDTO restored = TemplateMessageCommandConverter.toEmailDto(command);
 		assertThat(restored.getTemplateCode()).isEqualTo(dto.getTemplateCode());

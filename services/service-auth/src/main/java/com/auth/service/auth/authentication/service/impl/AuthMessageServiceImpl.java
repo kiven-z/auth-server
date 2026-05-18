@@ -86,7 +86,7 @@ public class AuthMessageServiceImpl implements AuthMessageService {
 			.templateCode(AuthEmailTemplateCode.LOGIN_EMAIL_CODE.getTemplateCode())
 			.targets(List.of(email))
 			.variables(variables)
-			.emailOptions(EmailChannelOptions.builder().hasHtml(Boolean.TRUE).build())
+			.options(EmailChannelOptions.builder().hasHtml(Boolean.TRUE).build())
 			.build();
 
 		systemSecurityIngestFeignClient.sendByTemplate(command);

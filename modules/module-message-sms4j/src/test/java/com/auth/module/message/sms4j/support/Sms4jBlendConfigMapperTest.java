@@ -2,7 +2,6 @@ package com.auth.module.message.sms4j.support;
 
 import com.auth.module.message.config.properties.SmsNotificationBlendProperties;
 import org.dromara.sms4j.aliyun.config.AlibabaConfig;
-import org.dromara.sms4j.provider.config.BaseConfig;
 import org.dromara.sms4j.tencent.config.TencentConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

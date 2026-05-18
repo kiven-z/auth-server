@@ -1,5 +1,6 @@
 package com.auth.service.system.message.api.impl;
 
+import com.auth.module.message.command.TemplateMessageCommand;
 import com.auth.module.message.email.EmailSendDTO;
 import com.auth.service.system.message.api.EmailSendService;
 import com.auth.service.system.message.api.MessageDispatchService;
@@ -25,7 +26,8 @@ public class EmailSendServiceImpl implements EmailSendService {
 	 */
 	@Override
 	public void sendByTemplate(EmailSendDTO dto) {
-		messageDispatchService.sendByTemplate(TemplateMessageCommandConverter.fromEmailDto(dto));
+		TemplateMessageCommand command = TemplateMessageCommandConverter.fromEmailDto(dto);
+		messageDispatchService.sendByTemplate(command);
 	}
 
 }
