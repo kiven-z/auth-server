@@ -1,6 +1,6 @@
 package com.auth.service.system.schedule.runner;
 
-import com.auth.service.system.schedule.service.SysJobService;
+import com.auth.service.system.schedule.service.SysJobOperationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
@@ -20,7 +20,7 @@ public class SysJobBootstrapRunner implements ApplicationRunner {
 	/**
 	 * 系统任务服务
 	 */
-	private final SysJobService sysJobService;
+	private final SysJobOperationService sysJobOperationService;
 
 	/**
 	 * 应用启动后将 {@code sys_job} 全量同步到 Quartz（JDBC 集群以库为准）
@@ -29,7 +29,7 @@ public class SysJobBootstrapRunner implements ApplicationRunner {
 	@Override
 	public void run(ApplicationArguments args) {
 		try {
-			sysJobService.syncAllFromDatabase();
+			sysJobOperationService.syncAllFromDatabase();
 			log.info("定时任务已从数据库同步至 Quartz");
 		}
 		catch (Exception e) {

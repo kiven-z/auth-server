@@ -40,6 +40,15 @@ public class SysJobCreateForm implements Serializable {
 	@NotBlank(groups = CreateGroup.class)
 	private String jobClass;
 
+	@Schema(title = "任务类型(BEAN_INVOKE/CUSTOM_CLASS)")
+	@Size(max = 32)
+	@NotBlank(groups = CreateGroup.class)
+	private String taskType;
+
+	@Schema(title = "执行处理器编码")
+	@Size(max = 64)
+	private String handlerCode;
+
 	@Schema(title = "调用目标")
 	@Size(max = 500)
 	private String invokeTarget;
@@ -69,6 +78,9 @@ public class SysJobCreateForm implements Serializable {
 
 	@Schema(title = "执行参数 JSON")
 	private String jobParams;
+
+	@Schema(title = "扩展载荷 JSON")
+	private String payloadJson;
 
 	@Schema(title = "备注")
 	@Size(max = 500)

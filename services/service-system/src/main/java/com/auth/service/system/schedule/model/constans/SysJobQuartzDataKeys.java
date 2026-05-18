@@ -28,6 +28,21 @@ public class SysJobQuartzDataKeys {
 	public static final String JOB_CLASS = "jobClass";
 
 	/**
+	 * 任务类型（BEAN_INVOKE/CUSTOM_CLASS）
+	 */
+	public static final String TASK_TYPE = "taskType";
+
+	/**
+	 * 处理器编码
+	 */
+	public static final String HANDLER_CODE = "handlerCode";
+
+	/**
+	 * 扩展载荷 JSON
+	 */
+	public static final String PAYLOAD_JSON = "payloadJson";
+
+	/**
 	 * Trigger 名称规则：{@code jobName + "_TRIGGER"}
 	 */
 	public static final String TRIGGER_SUFFIX = "_TRIGGER";

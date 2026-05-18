@@ -34,6 +34,12 @@ public class SysJobDetailVO extends BaseResponse {
 	@Schema(title = "白名单任务类")
 	private String jobClass;
 
+	@Schema(title = "任务类型(BEAN_INVOKE/CUSTOM_CLASS)")
+	private String taskType;
+
+	@Schema(title = "执行处理器编码")
+	private String handlerCode;
+
 	@Schema(title = "调用目标")
 	private String invokeTarget;
 
@@ -57,6 +63,9 @@ public class SysJobDetailVO extends BaseResponse {
 
 	@Schema(title = "执行参数 JSON")
 	private String jobParams;
+
+	@Schema(title = "扩展载荷 JSON")
+	private String payloadJson;
 
 	@Schema(title = "备注")
 	private String remark;

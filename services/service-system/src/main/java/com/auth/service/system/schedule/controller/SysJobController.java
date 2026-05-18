@@ -6,13 +6,12 @@ import com.auth.common.web.valid.group.CreateGroup;
 import com.auth.common.web.valid.group.UpdateGroup;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.form.SysJobCreateForm;
-import com.auth.service.system.schedule.model.form.SysJobStatusForm;
 import com.auth.service.system.schedule.model.form.SysJobUpdateForm;
 import com.auth.service.system.schedule.model.query.SysJobQuery;
 import com.auth.service.system.schedule.model.vo.QuartzTaskClassVO;
 import com.auth.service.system.schedule.model.vo.SysJobDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobPageResponse;
-import com.auth.service.system.schedule.service.SysJobService;
+import com.auth.service.system.schedule.service.SysJobDefinitionService;
 import com.auth.service.system.schedule.support.QuartzTaskRegistry;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,12 +34,12 @@ import static com.auth.service.system.common.exception.code.common.SystemCommonR
 @RestController
 public class SysJobController {
 
-	private final SysJobService sysJobService;
+	private final SysJobDefinitionService sysJobDefinitionService;
 
 	private final QuartzTaskRegistry quartzTaskRegistry;
 
-	public SysJobController(SysJobService sysJobService, QuartzTaskRegistry quartzTaskRegistry) {
-		this.sysJobService = sysJobService;
+	public SysJobController(SysJobDefinitionService sysJobDefinitionService, QuartzTaskRegistry quartzTaskRegistry) {
+		this.sysJobDefinitionService = sysJobDefinitionService;
 		this.quartzTaskRegistry = quartzTaskRegistry;
 	}
 
@@ -58,7 +57,7 @@ public class SysJobController {
 	@GetMapping
 	public Result<PageResponse<SysJobPageResponse>> page(SysJobQuery query) {
 		Page<SysJobEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
-		PageResponse<SysJobPageResponse> response = sysJobService.getPage(pageParams, query);
+		PageResponse<SysJobPageResponse> response = sysJobDefinitionService.getPage(pageParams, query);
 
 		return Result.success(response);
 	}
@@ -67,7 +66,7 @@ public class SysJobController {
 	@PreAuthorize("@auth.decide('sysJob:detail')")
 	@GetMapping("{id}")
 	public Result<SysJobDetailVO> detail(@PathVariable("id") Long id) {
-		SysJobDetailVO detail = sysJobService.getDetail(id);
+		SysJobDetailVO detail = sysJobDefinitionService.getDetail(id);
 
 		return Result.success(detail);
 	}
@@ -76,7 +75,7 @@ public class SysJobController {
 	@PreAuthorize("@auth.decide('sysJob:create')")
 	@PostMapping
 	public Result<String> create(@Validated(CreateGroup.class) @RequestBody SysJobCreateForm form) {
-		sysJobService.create(form);
+		sysJobDefinitionService.create(form);
 
 		return Result.success(null, ADD_SUCCESS.getMessage());
 	}
@@ -85,7 +84,7 @@ public class SysJobController {
 	@PreAuthorize("@auth.decide('sysJob:update')")
 	@PutMapping
 	public Result<String> update(@Validated(UpdateGroup.class) @RequestBody SysJobUpdateForm form) {
-		sysJobService.update(form);
+		sysJobDefinitionService.update(form);
 
 		return Result.success(null, UPDATE_SUCCESS.getMessage());
 	}
@@ -94,45 +93,9 @@ public class SysJobController {
 	@PreAuthorize("@auth.decide('sysJob:delete')")
 	@DeleteMapping("{id}")
 	public Result<String> delete(@PathVariable("id") Long id) {
-		sysJobService.deleteById(id);
+		sysJobDefinitionService.deleteById(id);
 
 		return Result.success(null, DELETE_SUCCESS.getMessage());
-	}
-
-	@Operation(summary = "批量启停任务")
-	@PreAuthorize("@auth.decide('sysJob:update')")
-	@PutMapping("status")
-	public Result<String> batchStatus(@Validated @RequestBody SysJobStatusForm form) {
-		sysJobService.batchUpdateStatus(form);
-
-		return Result.success(null, UPDATE_SUCCESS.getMessage());
-	}
-
-	@Operation(summary = "立即执行一次")
-	@PreAuthorize("@auth.decide('sysJob:update')")
-	@PostMapping("{id}/run")
-	public Result<String> runOnce(@PathVariable("id") Long id) {
-		sysJobService.runOnce(id);
-
-		return Result.success(null, UPDATE_SUCCESS.getMessage());
-	}
-
-	@Operation(summary = "按分组一键暂停")
-	@PreAuthorize("@auth.decide('sysJob:update')")
-	@PutMapping("group/{groupCode}/pause")
-	public Result<String> pauseGroup(@PathVariable("groupCode") String groupCode) {
-		sysJobService.pauseAllInGroup(groupCode);
-
-		return Result.success(null, UPDATE_SUCCESS.getMessage());
-	}
-
-	@Operation(summary = "按分组一键恢复")
-	@PreAuthorize("@auth.decide('sysJob:update')")
-	@PutMapping("group/{groupCode}/resume")
-	public Result<String> resumeGroup(@PathVariable("groupCode") String groupCode) {
-		sysJobService.resumeAllInGroup(groupCode);
-
-		return Result.success(null, UPDATE_SUCCESS.getMessage());
 	}
 
 }

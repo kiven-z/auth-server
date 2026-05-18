@@ -4,10 +4,11 @@ import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.auth.service.system.schedule.handler.SysJobTaskHandler;
+import com.auth.service.system.schedule.handler.SysJobTaskHandlerRegistry;
 import com.auth.service.system.schedule.model.constans.SysJobQuartzDataKeys;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
-import com.auth.service.system.schedule.task.mode.bean.BeanInvokeEntryJob;
-import com.auth.service.system.schedule.task.mode.custom.DelegatingCustomEntryJob;
+import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
 import org.quartz.impl.matchers.GroupMatcher;
@@ -31,8 +32,11 @@ public class SysJobSchedulerManager {
 
 	private final Scheduler scheduler;
 
-	public SysJobSchedulerManager(Scheduler scheduler) {
+	private final SysJobTaskHandlerRegistry taskHandlerRegistry;
+
+	public SysJobSchedulerManager(Scheduler scheduler, SysJobTaskHandlerRegistry taskHandlerRegistry) {
 		this.scheduler = scheduler;
+		this.taskHandlerRegistry = taskHandlerRegistry;
 	}
 
 	// =============== 静态工具方法 ===============
@@ -255,15 +259,12 @@ public class SysJobSchedulerManager {
 		String jobName = job.getJobName();
 		String jobGroup = job.getJobGroup();
 		Boolean jobConcurrent = job.getConcurrent();
+		SysJobTaskHandler handler = taskHandlerRegistry.resolve(job);
+		SysJobTaskType resolvedTaskType = SysJobTaskType.resolve(job.getTaskType(), invokeTarget);
 
-		// 判断是否为自定义模式
-		boolean customMode = CharSequenceUtil.isBlank(invokeTarget);
 		// 判断是否并发
 		boolean concurrent = BooleanUtil.isTrue(jobConcurrent);
-		// 根据模式和并发状态返回不同的 Job 类
-		Class<? extends Job> jobClass = customMode
-				? (concurrent ? DelegatingCustomEntryJob.class : DelegatingCustomEntryJob.Disallow.class)
-				: (concurrent ? BeanInvokeEntryJob.class : BeanInvokeEntryJob.Disallow.class);
+		Class<? extends Job> jobClass = handler.resolveEntryJobClass(concurrent);
 
 		// 构建 JobDataMap
 		JobDataMap map = new JobDataMap();
@@ -273,6 +274,9 @@ public class SysJobSchedulerManager {
 		map.put(SysJobQuartzDataKeys.INVOKE_TARGET, invokeTarget);
 		// 添加任务类
 		map.put(SysJobQuartzDataKeys.JOB_CLASS, job.getJobClass());
+		map.put(SysJobQuartzDataKeys.TASK_TYPE, resolvedTaskType.name());
+		map.put(SysJobQuartzDataKeys.HANDLER_CODE, handler.handlerCode());
+		map.put(SysJobQuartzDataKeys.PAYLOAD_JSON, job.getPayloadJson());
 
 		// 合并 JSON 参数
 		mergeJsonParams(map, jobParams);

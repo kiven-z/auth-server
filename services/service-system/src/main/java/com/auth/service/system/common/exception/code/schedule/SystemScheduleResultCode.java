@@ -135,7 +135,11 @@ public enum SystemScheduleResultCode implements SystemResultCode {
 	/**
 	 * 分组下仍有任务
 	 */
-	JOB_GROUP_HAS_ACTIVE_JOBS(422, 240, "JOB_GROUP_HAS_ACTIVE_JOBS", "system.job.group.has_active_jobs");
+	JOB_GROUP_HAS_ACTIVE_JOBS(422, 240, "JOB_GROUP_HAS_ACTIVE_JOBS", "system.job.group.has_active_jobs"),
+	/**
+	 * 任务类型不支持
+	 */
+	JOB_TASK_TYPE_UNSUPPORTED(422, 241, "JOB_TASK_TYPE_UNSUPPORTED", "system.job.task_type.unsupported");
 
 	private final int httpStatus;
 

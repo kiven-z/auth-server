@@ -2,7 +2,6 @@ package com.auth.service.system.schedule.task.custom;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.schedule.annotation.QuartzTask;
-import com.auth.service.system.schedule.task.mode.custom.DelegatingCustomEntryJob;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.Job;
@@ -14,27 +13,6 @@ import org.springframework.web.client.RestTemplate;
 
 /**
  * 带 Spring 注入的自定义 Job 示例
- *
- * <p>
- * 用途：验证 {@link DelegatingCustomEntryJob} 通过 Spring
- * {@code AutowireCapableBeanFactory#createBean} 创建 Job 时，依赖注入可用
- * </p>
- *
- * <p>
- * 参数约定（写入 {@code sys_job.job_params} JSON 后会被合并进 JobDataMap）：
- * </p>
- * <ul>
- * <li>url: string（可选，默认 https ://httpbin.org/get）</li>
- * </ul>
- *
- * <p>
- * 配置示例：
- * </p>
- * <ul>
- * <li>invoke_target：留空（自定义 Job 模式）</li>
- * <li>job_class：{@code com.auth.service.system.schedule.task.custom.SpringInjectDemoJob}</li>
- * <li>job_params：{@code {"url":"https://httpbin.org/get"}}</li>
- * </ul>
  *
  * @author Bunny
  */
