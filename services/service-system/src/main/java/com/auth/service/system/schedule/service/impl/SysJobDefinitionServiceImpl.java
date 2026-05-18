@@ -8,12 +8,9 @@ import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.log.model.entity.SysJobGroupEntity;
 import com.auth.service.system.log.model.po.SysJobPageRowPO;
-import com.auth.service.system.schedule.handler.SysJobTaskHandler;
-import com.auth.service.system.schedule.handler.SysJobTaskHandlerRegistry;
 import com.auth.service.system.schedule.mapper.JobLogMapper;
 import com.auth.service.system.schedule.mapper.SysJobMapper;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
-import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import com.auth.service.system.schedule.model.form.SysJobCreateForm;
 import com.auth.service.system.schedule.model.form.SysJobUpdateForm;
 import com.auth.service.system.schedule.model.query.SysJobQuery;
@@ -21,6 +18,7 @@ import com.auth.service.system.schedule.model.vo.SysJobDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobPageResponse;
 import com.auth.service.system.schedule.service.SysJobDefinitionService;
 import com.auth.service.system.schedule.support.SysJobSchedulerManager;
+import com.auth.service.system.schedule.validation.SysJobDefinitionValidationManager;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -54,16 +52,16 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 
 	private final JobLogMapper jobLogMapper;
 
-	private final SysJobTaskHandlerRegistry taskHandlerRegistry;
+	private final SysJobDefinitionValidationManager validationManager;
 
 	public SysJobDefinitionServiceImpl(SysJobSchedulerManager quartzAdmin,
 			AuditUserDisplayService auditUserDisplayService, SysJobGroupMapper sysJobGroupMapper,
-			JobLogMapper jobLogMapper, SysJobTaskHandlerRegistry taskHandlerRegistry) {
+			JobLogMapper jobLogMapper, SysJobDefinitionValidationManager validationManager) {
 		this.quartzAdmin = quartzAdmin;
 		this.auditUserDisplayService = auditUserDisplayService;
 		this.sysJobGroupMapper = sysJobGroupMapper;
 		this.jobLogMapper = jobLogMapper;
-		this.taskHandlerRegistry = taskHandlerRegistry;
+		this.validationManager = validationManager;
 	}
 
 	/**
@@ -122,9 +120,6 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		if (dbJob == null) {
 			throw new SystemBusinessException(DATA_NOT_EXIST);
 		}
-		SysJobTaskType resolvedTaskType = form.getTaskType() == null
-				? SysJobTaskType.resolve(dbJob.getTaskType(), dbJob.getInvokeTarget())
-				: SysJobTaskType.resolve(form.getTaskType(), form.getInvokeTarget());
 
 		dbJob.setCronExpression(form.getCronExpression());
 		dbJob.setMisfirePolicy(form.getMisfirePolicy());
@@ -135,8 +130,10 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		dbJob.setJobParams(form.getJobParams());
 		dbJob.setPayloadJson(form.getPayloadJson());
 		dbJob.setHandlerCode(form.getHandlerCode());
-		dbJob.setTaskType(resolvedTaskType.name());
 		dbJob.setRemark(form.getRemark());
+		if (form.getTaskType() != null) {
+			dbJob.setTaskType(form.getTaskType());
+		}
 		if (form.getInvokeTarget() != null) {
 			dbJob.setInvokeTarget(form.getInvokeTarget());
 		}
@@ -185,13 +182,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 	 * @param job 任务定义
 	 */
 	private void normalizeTaskDefinition(SysJobEntity job) {
-		SysJobTaskType resolvedTaskType = SysJobTaskType.resolve(job.getTaskType(), job.getInvokeTarget());
-		job.setTaskType(resolvedTaskType.name());
-		SysJobTaskHandler taskHandler = taskHandlerRegistry.resolve(job);
-		if (job.getHandlerCode() == null || job.getHandlerCode().isBlank()) {
-			job.setHandlerCode(taskHandler.handlerCode());
-		}
-		taskHandler.validate(job);
+		validationManager.normalizeAndValidate(job);
 	}
 
 	/**

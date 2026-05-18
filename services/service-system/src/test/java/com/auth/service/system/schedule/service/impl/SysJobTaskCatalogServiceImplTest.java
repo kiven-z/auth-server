@@ -1,8 +1,10 @@
 package com.auth.service.system.schedule.service.impl;
 
 import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.schedule.model.payload.MessageDispatchPayload;
 import com.auth.service.system.schedule.model.vo.QuartzTaskClassVO;
 import com.auth.service.system.schedule.model.vo.QuartzTaskMethodVO;
+import com.auth.service.system.schedule.support.MessageDispatchCommandParser;
 import com.auth.service.system.schedule.support.QuartzTaskRegistry;
 import com.auth.service.system.schedule.task.custom.DemoQuartzTask;
 import org.junit.jupiter.api.DisplayName;
@@ -34,13 +36,17 @@ class SysJobTaskCatalogServiceImplTest {
 	@Mock
 	private ApplicationContext applicationContext;
 
+	@Mock
+	private MessageDispatchCommandParser messageDispatchCommandParser;
+
 	@Test
 	@DisplayName("listQuartzClasses 返回白名单类列表")
 	void listQuartzClassesReturnsRegistryItems() {
 		QuartzTaskClassVO classVO = new QuartzTaskClassVO();
 		classVO.setClassName(DemoQuartzTask.class.getName());
 		when(quartzTaskRegistry.listAll()).thenReturn(List.of(classVO));
-		SysJobTaskCatalogServiceImpl service = new SysJobTaskCatalogServiceImpl(quartzTaskRegistry, applicationContext);
+		SysJobTaskCatalogServiceImpl service = new SysJobTaskCatalogServiceImpl(quartzTaskRegistry, applicationContext,
+				messageDispatchCommandParser);
 
 		List<QuartzTaskClassVO> result = service.listQuartzClasses();
 
@@ -54,7 +60,8 @@ class SysJobTaskCatalogServiceImplTest {
 		when(quartzTaskRegistry.isAllowed(DemoQuartzTask.class.getName())).thenReturn(true);
 		when(applicationContext.getBeanNamesForType(DemoQuartzTask.class))
 			.thenReturn(new String[] { "demoQuartzTask" });
-		SysJobTaskCatalogServiceImpl service = new SysJobTaskCatalogServiceImpl(quartzTaskRegistry, applicationContext);
+		SysJobTaskCatalogServiceImpl service = new SysJobTaskCatalogServiceImpl(quartzTaskRegistry, applicationContext,
+				messageDispatchCommandParser);
 
 		List<QuartzTaskMethodVO> methods = service.listCallableMethods(DemoQuartzTask.class.getName());
 
@@ -67,12 +74,26 @@ class SysJobTaskCatalogServiceImplTest {
 	@DisplayName("listCallableMethods 非白名单类时抛出 JOB_CLASS_NOT_WHITELISTED")
 	void listCallableMethodsThrowsWhenClassNotWhitelisted() {
 		when(quartzTaskRegistry.isAllowed(DemoQuartzTask.class.getName())).thenReturn(false);
-		SysJobTaskCatalogServiceImpl service = new SysJobTaskCatalogServiceImpl(quartzTaskRegistry, applicationContext);
+		SysJobTaskCatalogServiceImpl service = new SysJobTaskCatalogServiceImpl(quartzTaskRegistry, applicationContext,
+				messageDispatchCommandParser);
 
 		assertThatThrownBy(() -> service.listCallableMethods(DemoQuartzTask.class.getName()))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(JOB_CLASS_NOT_WHITELISTED);
+	}
+
+	@Test
+	@DisplayName("messageDispatchPayloadTemplate 返回标准模板")
+	void messageDispatchPayloadTemplateReturnsTemplate() {
+		MessageDispatchPayload payload = new MessageDispatchPayload();
+		when(messageDispatchCommandParser.buildTemplatePayload()).thenReturn(payload);
+		SysJobTaskCatalogServiceImpl service = new SysJobTaskCatalogServiceImpl(quartzTaskRegistry, applicationContext,
+				messageDispatchCommandParser);
+
+		MessageDispatchPayload result = service.messageDispatchPayloadTemplate();
+
+		assertThat(result).isSameAs(payload);
 	}
 
 }

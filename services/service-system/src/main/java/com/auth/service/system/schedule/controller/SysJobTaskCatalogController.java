@@ -1,6 +1,7 @@
 package com.auth.service.system.schedule.controller;
 
 import com.auth.common.core.model.response.Result;
+import com.auth.service.system.schedule.model.payload.MessageDispatchPayload;
 import com.auth.service.system.schedule.model.vo.QuartzTaskClassVO;
 import com.auth.service.system.schedule.model.vo.QuartzTaskMethodVO;
 import com.auth.service.system.schedule.service.SysJobTaskCatalogService;
@@ -42,6 +43,13 @@ public class SysJobTaskCatalogController {
 	@GetMapping("methods")
 	public Result<List<QuartzTaskMethodVO>> methods(@RequestParam("className") String className) {
 		return Result.success(sysJobTaskCatalogService.listCallableMethods(className));
+	}
+
+	@Operation(summary = "消息调度 payload 模板")
+	@PreAuthorize("@auth.decide('sysJob:query')")
+	@GetMapping("message-payload-template")
+	public Result<MessageDispatchPayload> messagePayloadTemplate() {
+		return Result.success(sysJobTaskCatalogService.messageDispatchPayloadTemplate());
 	}
 
 }

@@ -3,6 +3,8 @@ package com.auth.service.system.schedule.support;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.message.command.TemplateMessageCommand;
 import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.schedule.model.payload.MessageDispatchPayload;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
@@ -38,21 +40,70 @@ public class MessageDispatchCommandParser {
 		if (CharSequenceUtil.isBlank(payloadJson)) {
 			throw new SystemBusinessException(JOB_PAYLOAD_JSON_EMPTY);
 		}
+		TemplateMessageCommand command = parseCommand(payloadJson);
+		validateCommand(command);
+		return command;
+	}
 
-		TemplateMessageCommand command;
+	/**
+	 * 构建标准消息调度载荷模板
+	 * @return 标准载荷模板
+	 */
+	public MessageDispatchPayload buildTemplatePayload() {
+		MessageDispatchPayload payload = new MessageDispatchPayload();
+		payload.setVersion(MessageDispatchPayload.VERSION_1);
+		payload.setCommand(new TemplateMessageCommand());
+		return payload;
+	}
+
+	/**
+	 * 解析载荷并提取消息命令
+	 * @param payloadJson 载荷 JSON
+	 * @return 消息命令
+	 */
+	private TemplateMessageCommand parseCommand(String payloadJson) {
 		try {
-			command = objectMapper.readValue(payloadJson, TemplateMessageCommand.class);
+			JsonNode root = objectMapper.readTree(payloadJson);
+			if (root != null && root.has("command")) {
+				MessageDispatchPayload payload = objectMapper.treeToValue(root, MessageDispatchPayload.class);
+				validatePayload(payload);
+				return payload.getCommand();
+			}
+			return objectMapper.treeToValue(root, TemplateMessageCommand.class);
+		}
+		catch (SystemBusinessException exception) {
+			throw exception;
 		}
 		catch (Exception exception) {
 			throw new SystemBusinessException(JOB_PAYLOAD_JSON_INVALID, exception.getMessage());
 		}
+	}
 
+	/**
+	 * 校验标准载荷
+	 * @param payload 标准载荷
+	 */
+	private void validatePayload(MessageDispatchPayload payload) {
+		Set<ConstraintViolation<MessageDispatchPayload>> payloadViolations = validator.validate(payload);
+		if (!payloadViolations.isEmpty()) {
+			String message = payloadViolations.iterator().next().getMessage();
+			throw new SystemBusinessException(JOB_PAYLOAD_JSON_INVALID, message);
+		}
+		if (payload.getVersion() != MessageDispatchPayload.VERSION_1) {
+			throw new SystemBusinessException(JOB_PAYLOAD_VERSION_UNSUPPORTED, String.valueOf(payload.getVersion()));
+		}
+	}
+
+	/**
+	 * 校验消息命令
+	 * @param command 消息命令
+	 */
+	private void validateCommand(TemplateMessageCommand command) {
 		Set<ConstraintViolation<TemplateMessageCommand>> violations = validator.validate(command);
 		if (!violations.isEmpty()) {
 			String message = violations.iterator().next().getMessage();
 			throw new SystemBusinessException(JOB_MESSAGE_COMMAND_INVALID, message);
 		}
-		return command;
 	}
 
 }

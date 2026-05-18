@@ -2,9 +2,11 @@ package com.auth.service.system.schedule.service.impl;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.schedule.model.payload.MessageDispatchPayload;
 import com.auth.service.system.schedule.model.vo.QuartzTaskClassVO;
 import com.auth.service.system.schedule.model.vo.QuartzTaskMethodVO;
 import com.auth.service.system.schedule.service.SysJobTaskCatalogService;
+import com.auth.service.system.schedule.support.MessageDispatchCommandParser;
 import com.auth.service.system.schedule.support.QuartzTaskRegistry;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -30,9 +32,13 @@ public class SysJobTaskCatalogServiceImpl implements SysJobTaskCatalogService {
 
 	private final ApplicationContext applicationContext;
 
-	public SysJobTaskCatalogServiceImpl(QuartzTaskRegistry quartzTaskRegistry, ApplicationContext applicationContext) {
+	private final MessageDispatchCommandParser messageDispatchCommandParser;
+
+	public SysJobTaskCatalogServiceImpl(QuartzTaskRegistry quartzTaskRegistry, ApplicationContext applicationContext,
+			MessageDispatchCommandParser messageDispatchCommandParser) {
 		this.quartzTaskRegistry = quartzTaskRegistry;
 		this.applicationContext = applicationContext;
+		this.messageDispatchCommandParser = messageDispatchCommandParser;
 	}
 
 	@Override
@@ -70,6 +76,11 @@ public class SysJobTaskCatalogServiceImpl implements SysJobTaskCatalogService {
 			methodList.add(methodVO);
 		}
 		return methodList;
+	}
+
+	@Override
+	public MessageDispatchPayload messageDispatchPayloadTemplate() {
+		return messageDispatchCommandParser.buildTemplatePayload();
 	}
 
 	/**

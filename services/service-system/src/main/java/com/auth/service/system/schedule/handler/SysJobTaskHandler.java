@@ -1,6 +1,5 @@
 package com.auth.service.system.schedule.handler;
 
-import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import org.quartz.Job;
 
@@ -22,12 +21,6 @@ public interface SysJobTaskHandler {
 	 * @return 任务类型
 	 */
 	SysJobTaskType taskType();
-
-	/**
-	 * 校验任务定义合法性
-	 * @param job 任务定义
-	 */
-	void validate(SysJobEntity job);
 
 	/**
 	 * 根据并发策略返回 Quartz 入口 Job 类型

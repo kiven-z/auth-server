@@ -3,6 +3,7 @@ package com.auth.service.system.schedule.support;
 import com.auth.module.message.channel.MessageChannel;
 import com.auth.module.message.command.TemplateMessageCommand;
 import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.schedule.model.payload.MessageDispatchPayload;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,7 +32,7 @@ class MessageDispatchCommandParserTest {
 	private final MessageDispatchCommandParser parser = new MessageDispatchCommandParser(objectMapper, validator);
 
 	@Test
-	@DisplayName("合法 payload_json 解析成功")
+	@DisplayName("兼容历史直传命令格式：合法 payload_json 解析成功")
 	void parseAndValidateReturnsCommandWhenPayloadValid() {
 		// 构造最小可用 payload，校验可正常转为命令对象。
 		String payload = """
@@ -39,6 +40,28 @@ class MessageDispatchCommandParserTest {
 				  "channel":"EMAIL",
 				  "templateCode":"LOGIN_NOTICE",
 				  "targets":["dev@example.com"]
+				}
+				""";
+
+		TemplateMessageCommand command = parser.parseAndValidate(payload);
+
+		assertThat(command.getChannel()).isEqualTo(MessageChannel.EMAIL);
+		assertThat(command.getTemplateCode()).isEqualTo("LOGIN_NOTICE");
+		assertThat(command.getTargets()).isEqualTo(List.of("dev@example.com"));
+	}
+
+	@Test
+	@DisplayName("标准载荷格式(version + command)解析成功")
+	void parseAndValidateReturnsCommandWhenEnvelopePayloadValid() {
+		// 新协议格式应正确提取 command 字段。
+		String payload = """
+				{
+				  "version": 1,
+				  "command": {
+				    "channel":"EMAIL",
+				    "templateCode":"LOGIN_NOTICE",
+				    "targets":["dev@example.com"]
+				  }
 				}
 				""";
 
@@ -81,6 +104,36 @@ class MessageDispatchCommandParserTest {
 		assertThatThrownBy(() -> parser.parseAndValidate(payload)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(JOB_MESSAGE_COMMAND_INVALID);
+	}
+
+	@Test
+	@DisplayName("标准载荷版本不支持时抛出 JOB_PAYLOAD_VERSION_UNSUPPORTED")
+	void parseAndValidateThrowsWhenPayloadVersionUnsupported() {
+		// 版本升级时可在此处扩展兼容逻辑。
+		String payload = """
+				{
+				  "version": 2,
+				  "command": {
+				    "channel":"EMAIL",
+				    "templateCode":"LOGIN_NOTICE",
+				    "targets":["dev@example.com"]
+				  }
+				}
+				""";
+
+		assertThatThrownBy(() -> parser.parseAndValidate(payload)).isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(JOB_PAYLOAD_VERSION_UNSUPPORTED);
+	}
+
+	@Test
+	@DisplayName("buildTemplatePayload 返回版本化标准模板")
+	void buildTemplatePayloadReturnsVersionedTemplate() {
+		// 前端可以直接使用该模板构造 MESSAGE_DISPATCH 的 payload_json。
+		MessageDispatchPayload payload = parser.buildTemplatePayload();
+
+		assertThat(payload.getVersion()).isEqualTo(MessageDispatchPayload.VERSION_1);
+		assertThat(payload.getCommand()).isNotNull();
 	}
 
 }

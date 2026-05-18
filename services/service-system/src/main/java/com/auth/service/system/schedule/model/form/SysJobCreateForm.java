@@ -2,6 +2,7 @@ package com.auth.service.system.schedule.model.form;
 
 import com.auth.common.web.valid.group.CreateGroup;
 import io.swagger.v3.oas.annotations.media.Schema;
+import com.auth.service.system.schedule.validation.form.ValidSysJobCreateForm;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -18,6 +19,7 @@ import java.time.LocalDateTime;
  * @author Bunny
  */
 @Schema(name = "SysJobCreateForm", title = "新增定时任务")
+@ValidSysJobCreateForm(groups = CreateGroup.class)
 @Getter
 @Setter
 public class SysJobCreateForm implements Serializable {

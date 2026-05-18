@@ -151,7 +151,11 @@ public enum SystemScheduleResultCode implements SystemResultCode {
 	/**
 	 * 消息命令参数校验失败
 	 */
-	JOB_MESSAGE_COMMAND_INVALID(422, 244, "JOB_MESSAGE_COMMAND_INVALID", "system.job.message.command.invalid");
+	JOB_MESSAGE_COMMAND_INVALID(422, 244, "JOB_MESSAGE_COMMAND_INVALID", "system.job.message.command.invalid"),
+	/**
+	 * payload_json 版本不支持
+	 */
+	JOB_PAYLOAD_VERSION_UNSUPPORTED(422, 245, "JOB_PAYLOAD_VERSION_UNSUPPORTED", "system.job.payload.version.unsupported");
 
 	private final int httpStatus;
 
