@@ -6,7 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 登录短信验证码模板变量（template_code = login-sms-code，对应阿里云 ${code}、${min}）
+ * 登录 Dypns 验证码短信模板变量（scene_code=login-sms-code，channel=SMS_DYPNS_VERIFY_CODE，变量
+ * ${code}、${min}）
  *
  * @author Bunny
  */

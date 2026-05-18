@@ -1,4 +1,4 @@
-package com.auth.service.system.message.channel.sms;
+package com.auth.service.system.message.channel.dypns;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
@@ -10,7 +10,7 @@ import com.auth.service.system.admin.mapper.MessageTemplateMapper;
 import com.auth.service.system.admin.model.entity.MessageTemplateEntity;
 import com.auth.service.system.admin.model.vo.emailtemplate.EmailTemplateRequireFieldRow;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.message.channel.sms.model.SmsPreparedMessage;
+import com.auth.service.system.message.channel.dypns.model.DypnsVerifyCodePreparedMessage;
 import com.auth.service.system.message.shared.MessageTemplateRequireFieldsJsonSupport;
 import org.springframework.stereotype.Component;
 
@@ -22,18 +22,18 @@ import java.util.Optional;
 import static com.auth.service.system.common.exception.code.message.SystemMessageResultCode.*;
 
 /**
- * 短信模板加载、变量校验与 templateParam 组装
+ * Dypns 验证码短信：模板加载、变量校验与 templateParam 组装（channel=SMS_DYPNS_VERIFY_CODE）
  *
  * @author Bunny
  */
 @Component
-public class SmsTemplatePipeline {
+public class DypnsVerifyCodeTemplatePipeline {
 
 	private final MessageTemplateMapper messageTemplateMapper;
 
 	private final SmsProperties smsProperties;
 
-	public SmsTemplatePipeline(MessageTemplateMapper messageTemplateMapper, SmsProperties smsProperties) {
+	public DypnsVerifyCodeTemplatePipeline(MessageTemplateMapper messageTemplateMapper, SmsProperties smsProperties) {
 		this.messageTemplateMapper = messageTemplateMapper;
 		this.smsProperties = smsProperties;
 	}
@@ -60,16 +60,16 @@ public class SmsTemplatePipeline {
 	}
 
 	/**
-	 * 准备短信发送参数
+	 * 准备 Dypns 验证码短信发送参数
 	 * @param command 模板发送命令
 	 * @return 厂商 API 就绪参数
 	 */
-	public SmsPreparedMessage prepare(TemplateMessageCommand command) {
-		String templateCode = command.getTemplateCode();
-		MessageTemplateEntity template = messageTemplateMapper.selectEnabledBySceneCodeAndChannel(templateCode,
-				MessageChannel.SMS.name());
+	public DypnsVerifyCodePreparedMessage prepare(TemplateMessageCommand command) {
+		String sceneCode = command.getTemplateCode();
+		MessageTemplateEntity template = messageTemplateMapper.selectEnabledBySceneCodeAndChannel(sceneCode,
+				MessageChannel.SMS_DYPNS_VERIFY_CODE.name());
 		if (template == null) {
-			throw new SystemBusinessException(SMS_TEMPLATE_NOT_FOUND, templateCode);
+			throw new SystemBusinessException(SMS_TEMPLATE_NOT_FOUND, sceneCode);
 		}
 
 		Map<String, Object> variables = Optional.ofNullable(command.getVariables()).orElseGet(LinkedHashMap::new);
@@ -81,11 +81,11 @@ public class SmsTemplatePipeline {
 		String signName = resolveSignName();
 		String templateParam = buildTemplateParam(requireFields, variables);
 
-		return new SmsPreparedMessage(template.getProviderTemplateCode(), signName, templateParam);
+		return new DypnsVerifyCodePreparedMessage(template.getProviderTemplateCode(), signName, templateParam);
 	}
 
 	/**
-	 * 解析短信签名
+	 * 解析 Dypns 短信签名
 	 * @return 签名
 	 */
 	private String resolveSignName() {

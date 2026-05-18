@@ -20,7 +20,7 @@ public interface MessageTemplateMapper extends BaseMapper<MessageTemplateEntity>
 	/**
 	 * 按场景编码与渠道查询当前启用的最高优先级模板行。
 	 * @param sceneCode 场景编码（发送命令 templateCode）
-	 * @param channel 渠道名，如 EMAIL、SMS
+	 * @param channel 渠道名，如 EMAIL、SMS_DYPNS_VERIFY_CODE、DING_TALK
 	 * @return 模板行，未找到时为 null
 	 */
 	MessageTemplateEntity selectEnabledBySceneCodeAndChannel(@Param("sceneCode") String sceneCode,

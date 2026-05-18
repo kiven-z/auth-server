@@ -1,5 +1,6 @@
 package com.auth.module.message.command;
 
+import com.auth.module.message.modules.dingtalk.DingTalkChannelOptions;
 import com.auth.module.message.modules.email.EmailChannelOptions;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
@@ -25,8 +26,9 @@ public class ChannelOptionsMatchValidator implements ConstraintValidator<Channel
 		}
 		return switch (command.getChannel()) {
 			case EMAIL -> options instanceof EmailChannelOptions;
-			case SMS -> false;
-			case DING_TALK -> true;
+			case DING_TALK -> options instanceof DingTalkChannelOptions;
+			// Dypns 验证码短信（无 ChannelOptions）
+			case SMS_DYPNS_VERIFY_CODE -> false;
 			case IN_APP -> false;
 		};
 	}

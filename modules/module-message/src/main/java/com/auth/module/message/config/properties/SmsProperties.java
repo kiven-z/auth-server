@@ -20,19 +20,19 @@ import org.springframework.validation.annotation.Validated;
 public class SmsProperties {
 
 	/**
-	 * 是否启用短信渠道
+	 * 是否启用 Dypns 验证码短信渠道（SMS_DYPNS_VERIFY_CODE）
 	 */
 	private boolean enabled = false;
 
 	/**
 	 * 阿里云区域 ID
 	 */
-	private String region = "cn-hangzhou";
+	private String region;
 
 	/**
 	 * Dypns API Endpoint
 	 */
-	private String endpoint = "dypnsapi.aliyuncs.com";
+	private String endpoint;
 
 	/**
 	 * 短信签名（须与阿里云控制台一致）

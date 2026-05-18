@@ -2,7 +2,6 @@ package com.auth.module.message.command;
 
 import com.auth.module.message.channel.MessageChannel;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -20,6 +19,7 @@ import java.util.Map;
  *
  * @author Bunny
  */
+@TemplateMessageCommandValid
 @ChannelOptionsMatch
 @Data
 @Builder
@@ -37,9 +37,8 @@ public class TemplateMessageCommand implements Serializable {
 	private MessageChannel channel;
 
 	/**
-	 * 模板编码（与 sys_message_template.scene_code 一致，按发送 channel 命中对应行）
+	 * 场景/模板编码（与 sys_message_template.scene_code 一致；customBody=true 时可省略）
 	 */
-	@NotBlank
 	private String templateCode;
 
 	/**
@@ -52,6 +51,16 @@ public class TemplateMessageCommand implements Serializable {
 	 * 模板变量（FreeMarker 等渲染引擎使用）
 	 */
 	private transient Map<String, Object> variables;
+
+	/**
+	 * 是否使用自定义正文（true 时使用 {@link #body}，不查库渲染；SMS_DYPNS_VERIFY_CODE 渠道不支持）
+	 */
+	private Boolean customBody;
+
+	/**
+	 * 自定义正文（customBody=true 时必填）
+	 */
+	private String body;
 
 	/**
 	 * 渠道扩展参数（类型须与 {@link #channel} 一致，见 {@link ChannelOptions}）

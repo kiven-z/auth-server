@@ -8,7 +8,7 @@ import com.aliyun.sdk.service.dypnsapi20170525.models.SendSmsVerifyCodeResponse;
  *
  * @author Bunny
  */
-public interface DypnsVerifyCodeClient {
+public interface DypnsVerifyCodeClient extends AutoCloseable {
 
 	/**
 	 * 调用 SendSmsVerifyCode

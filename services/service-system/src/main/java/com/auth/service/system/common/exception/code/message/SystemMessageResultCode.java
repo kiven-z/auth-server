@@ -4,10 +4,10 @@ import com.auth.service.system.common.exception.code.SystemResultCode;
 import lombok.Getter;
 
 /**
- * 统一消息发送与短信渠道结果码
+ * 统一消息发送与 Dypns 验证码短信（SMS_DYPNS_VERIFY_CODE）结果码
  *
  * <p>
- * 号段：279–291（下一可用 292）
+ * 号段：279–296（下一可用 297）
  * </p>
  *
  * @author Bunny
@@ -24,27 +24,27 @@ public enum SystemMessageResultCode implements SystemResultCode {
 	 */
 	MESSAGE_CHANNEL_UNSUPPORTED(400, 280, "MESSAGE_CHANNEL_UNSUPPORTED", "system.message.channel.unsupported"),
 	/**
-	 * 短信模板不存在或已禁用
+	 * Dypns 验证码短信模板不存在或已禁用（channel=SMS_DYPNS_VERIFY_CODE）
 	 */
 	SMS_TEMPLATE_NOT_FOUND(404, 281, "SMS_TEMPLATE_NOT_FOUND", "system.sms.template.not_found"),
 	/**
-	 * 缺少必填短信模板变量
+	 * 缺少必填 Dypns 验证码短信模板变量
 	 */
 	SMS_TEMPLATE_VARS_MISSING(422, 282, "SMS_TEMPLATE_VARS_MISSING", "system.sms.template.vars_missing"),
 	/**
-	 * 短信发送失败
+	 * Dypns 验证码短信发送失败
 	 */
 	SMS_SEND_FAILED(502, 283, "SMS_SEND_FAILED", "system.sms.send.failed"),
 	/**
-	 * 短信接收人为空
+	 * Dypns 验证码短信接收人为空
 	 */
 	SMS_TARGET_EMPTY(400, 284, "SMS_TARGET_EMPTY", "system.sms.send.target_empty"),
 	/**
-	 * 短信签名未配置
+	 * Dypns 短信签名未配置
 	 */
 	SMS_SIGN_NAME_NOT_CONFIGURED(500, 285, "SMS_SIGN_NAME_NOT_CONFIGURED", "system.sms.sign_name.not_configured"),
 	/**
-	 * 短信发送未启用（需开启 auth.message.sms.enabled 并配置阿里云 Dypns）
+	 * Dypns 验证码短信未启用（需开启 auth.message.sms.enabled 并配置阿里云 Dypns）
 	 */
 	SMS_SENDER_NOT_ENABLED(503, 286, "SMS_SENDER_NOT_ENABLED", "system.sms.sender.not_enabled"),
 	/**
@@ -58,7 +58,28 @@ public enum SystemMessageResultCode implements SystemResultCode {
 	/**
 	 * 钉钉工作通知未启用（需设置 auth.message.ding-talk.enabled=true）
 	 */
-	DING_TALK_NOT_ENABLED(503, 291, "DING_TALK_NOT_ENABLED", "system.dingtalk.not_enabled");
+	DING_TALK_NOT_ENABLED(503, 291, "DING_TALK_NOT_ENABLED", "system.dingtalk.not_enabled"),
+	/**
+	 * 钉钉模板不存在或已禁用
+	 */
+	DING_TALK_TEMPLATE_NOT_FOUND(404, 292, "DING_TALK_TEMPLATE_NOT_FOUND", "system.dingtalk.template.not_found"),
+	/**
+	 * 缺少必填钉钉模板变量
+	 */
+	DING_TALK_TEMPLATE_VARS_MISSING(422, 293, "DING_TALK_TEMPLATE_VARS_MISSING",
+			"system.dingtalk.template.vars_missing"),
+	/**
+	 * 钉钉正文为空
+	 */
+	DING_TALK_BODY_EMPTY(400, 294, "DING_TALK_BODY_EMPTY", "system.dingtalk.body.empty"),
+	/**
+	 * 钉钉模板渲染失败
+	 */
+	DING_TALK_RENDER_FAILED(500, 295, "DING_TALK_RENDER_FAILED", "system.dingtalk.render.failed"),
+	/**
+	 * SMS_DYPNS_VERIFY_CODE 不支持自定义正文（须使用 templateCode 与 variables）
+	 */
+	SMS_CUSTOM_BODY_NOT_SUPPORTED(400, 296, "SMS_CUSTOM_BODY_NOT_SUPPORTED", "system.sms.custom_body.not_supported");
 
 	private final int httpStatus;
 

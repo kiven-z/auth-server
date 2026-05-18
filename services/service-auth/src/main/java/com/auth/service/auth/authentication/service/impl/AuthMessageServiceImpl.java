@@ -12,7 +12,7 @@ import com.auth.service.auth.authentication.mapper.UserMapper;
 import com.auth.service.auth.authentication.service.AuthMessageService;
 import com.auth.service.auth.support.integration.SystemSecurityIngestFeignClient;
 import com.auth.service.auth.support.message.AuthEmailTemplateCode;
-import com.auth.service.auth.support.message.AuthSmsTemplateCode;
+import com.auth.service.auth.support.message.AuthDypnsVerifyCodeSceneCode;
 import com.auth.service.auth.support.message.LoginEmailVariables;
 import com.auth.service.auth.support.message.LoginSmsVariables;
 import jakarta.servlet.http.HttpServletRequest;
@@ -115,8 +115,8 @@ public class AuthMessageServiceImpl implements AuthMessageService {
 		// 构建发送内容
 		Map<String, Object> variables = LoginSmsVariables.build(code, expireMinutes);
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
-			.channel(MessageChannel.SMS)
-			.templateCode(AuthSmsTemplateCode.LOGIN_SMS_CODE.getTemplateCode())
+			.channel(MessageChannel.SMS_DYPNS_VERIFY_CODE)
+			.templateCode(AuthDypnsVerifyCodeSceneCode.LOGIN_VERIFY_CODE.getSceneCode())
 			.targets(List.of(phone))
 			.variables(variables)
 			.build();

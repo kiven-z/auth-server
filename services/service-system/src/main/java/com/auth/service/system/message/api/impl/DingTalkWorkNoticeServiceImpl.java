@@ -1,18 +1,20 @@
 package com.auth.service.system.message.api.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import com.auth.module.message.channel.MessageChannel;
+import com.auth.module.message.command.TemplateMessageCommand;
+import com.auth.module.message.modules.dingtalk.DingTalkChannelOptions;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.message.api.DingTalkWorkNoticeService;
-import com.auth.service.system.message.channel.dingtalk.DingTalkWorkNoticeClient;
+import com.auth.service.system.message.api.MessageDispatchService;
 import com.auth.service.system.message.channel.dingtalk.model.DingTalkWorkNoticeSendForm;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
-import static com.auth.service.system.common.exception.code.message.SystemMessageResultCode.*;
+import static com.auth.service.system.common.exception.code.message.SystemMessageResultCode.DING_TALK_TARGET_EMPTY;
 
 /**
- * 钉钉工作通知发送实现
+ * 钉钉工作通知发送实现（委托统一消息编排，保留原表单 API 兼容）
  *
  * @author Bunny
  */
@@ -20,10 +22,10 @@ import static com.auth.service.system.common.exception.code.message.SystemMessag
 @Service
 public class DingTalkWorkNoticeServiceImpl implements DingTalkWorkNoticeService {
 
-	private final ObjectProvider<DingTalkWorkNoticeClient> workNoticeClient;
+	private final MessageDispatchService messageDispatchService;
 
-	public DingTalkWorkNoticeServiceImpl(ObjectProvider<DingTalkWorkNoticeClient> workNoticeClient) {
-		this.workNoticeClient = workNoticeClient;
+	public DingTalkWorkNoticeServiceImpl(MessageDispatchService messageDispatchService) {
+		this.messageDispatchService = messageDispatchService;
 	}
 
 	/**
@@ -35,17 +37,20 @@ public class DingTalkWorkNoticeServiceImpl implements DingTalkWorkNoticeService 
 			throw new SystemBusinessException(DING_TALK_TARGET_EMPTY);
 		}
 
-		DingTalkWorkNoticeClient client = workNoticeClient.getIfAvailable();
-		if (client == null) {
-			throw new SystemBusinessException(DING_TALK_NOT_ENABLED);
-		}
+		DingTalkChannelOptions options = DingTalkChannelOptions.builder()
+			.title(form.getTitle())
+			.messageType(form.getMessageType())
+			.build();
 
-		try {
-			client.sendWorkNotice(form.getUserIds(), form.getMessageType(), form.getTitle(), form.getContent());
-		}
-		catch (IllegalStateException | IllegalArgumentException ex) {
-			throw new SystemBusinessException(DING_TALK_SEND_FAILED, ex.getMessage());
-		}
+		TemplateMessageCommand command = TemplateMessageCommand.builder()
+			.channel(MessageChannel.DING_TALK)
+			.targets(form.getUserIds())
+			.customBody(Boolean.TRUE)
+			.body(form.getContent())
+			.options(options)
+			.build();
+
+		messageDispatchService.sendByTemplate(command);
 	}
 
 }

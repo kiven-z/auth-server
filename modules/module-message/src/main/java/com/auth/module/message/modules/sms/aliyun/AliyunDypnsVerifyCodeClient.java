@@ -18,7 +18,7 @@ import java.util.concurrent.CompletableFuture;
  * @author Bunny
  */
 @Slf4j
-public class AliyunDypnsVerifyCodeClient implements DypnsVerifyCodeClient, AutoCloseable {
+public class AliyunDypnsVerifyCodeClient implements DypnsVerifyCodeClient {
 
 	private final AsyncClient asyncClient;
 
@@ -27,28 +27,22 @@ public class AliyunDypnsVerifyCodeClient implements DypnsVerifyCodeClient, AutoC
 	 * @param smsProperties 短信配置
 	 */
 	public AliyunDypnsVerifyCodeClient(SmsProperties smsProperties) {
-		validateCredentials(smsProperties);
+		// 校验 AK 配置
+		if (CharSequenceUtil.isBlank(smsProperties.getAccessKeySecret())) {
+			throw new IllegalStateException("SMS access key is not configured (auth.message.sms.access-key-id/secret)");
+		}
+
 		StaticCredentialProvider credentialProvider = StaticCredentialProvider.create(Credential.builder()
 			.accessKeyId(smsProperties.getAccessKeyId())
 			.accessKeySecret(smsProperties.getAccessKeySecret())
 			.build());
+
 		this.asyncClient = AsyncClient.builder()
 			.region(smsProperties.getRegion())
 			.credentialsProvider(credentialProvider)
 			.overrideConfiguration(
 					ClientOverrideConfiguration.create().setEndpointOverride(smsProperties.getEndpoint()))
 			.build();
-	}
-
-	/**
-	 * 校验 AK 配置
-	 * @param smsProperties 短信配置
-	 */
-	private static void validateCredentials(SmsProperties smsProperties) {
-		if (CharSequenceUtil.isBlank(smsProperties.getAccessKeyId())
-				|| CharSequenceUtil.isBlank(smsProperties.getAccessKeySecret())) {
-			throw new IllegalStateException("SMS access key is not configured (auth.message.sms.access-key-id/secret)");
-		}
 	}
 
 	/**

@@ -3,7 +3,7 @@ package com.auth.module.message.modules.sms.aliyun;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.aliyun.sdk.service.dypnsapi20170525.models.SendSmsVerifyCodeRequest;
 import com.aliyun.sdk.service.dypnsapi20170525.models.SendSmsVerifyCodeResponse;
-import com.auth.module.message.modules.sms.SmsSender;
+import com.auth.module.message.modules.sms.DypnsVerifyCodeSender;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -12,7 +12,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author Bunny
  */
 @Slf4j
-public class AliyunDypnsSmsSender implements SmsSender, AutoCloseable {
+public class AliyunDypnsSmsSender implements DypnsVerifyCodeSender {
 
 	private final DypnsVerifyCodeClient dypnsClient;
 
@@ -64,13 +64,11 @@ public class AliyunDypnsSmsSender implements SmsSender, AutoCloseable {
 	 */
 	@Override
 	public void close() {
-		if (dypnsClient instanceof AutoCloseable closeable) {
-			try {
-				closeable.close();
-			}
-			catch (Exception e) {
-				log.warn("Failed to close Dypns client", e);
-			}
+		try {
+			dypnsClient.close();
+		}
+		catch (Exception e) {
+			log.warn("Failed to close Dypns client", e);
 		}
 	}
 
@@ -89,10 +87,12 @@ public class AliyunDypnsSmsSender implements SmsSender, AutoCloseable {
 					signName);
 			return;
 		}
+
 		String detail = response == null ? "null response"
 				: (response.getBody() == null ? "null body" : String.valueOf(response.getBody()));
 		log.error("Aliyun Dypns send failed, phone={}, templateCode={}, detail={}", phone, providerTemplateCode,
 				detail);
+
 		throw new IllegalStateException("Aliyun Dypns send failed: " + detail);
 	}
 

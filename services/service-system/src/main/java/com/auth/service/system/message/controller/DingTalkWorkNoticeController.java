@@ -14,11 +14,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 钉钉工作通知发送接口（手动直发，无模板）
+ * 钉钉工作通知发送接口（兼容入口，内部委托 {@code POST /api/system/message/send}）
  *
  * @author Bunny
  */
-@Tag(name = "钉钉工作通知", description = "企业应用工作通知手动发送")
+@Tag(name = "钉钉工作通知", description = "兼容旧版手动直发；推荐使用统一消息发送 /api/system/message/send")
 @ConditionalOnProperty(prefix = "auth.message.ding-talk", name = "enabled", havingValue = "true")
 @Validated
 @RequestMapping("/api/system/message/ding-talk")

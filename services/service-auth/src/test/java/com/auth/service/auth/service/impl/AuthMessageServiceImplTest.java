@@ -14,7 +14,7 @@ import com.auth.service.auth.authentication.mapper.UserMapper;
 import com.auth.service.auth.authentication.service.impl.AuthMessageServiceImpl;
 import com.auth.service.auth.support.integration.SystemSecurityIngestFeignClient;
 import com.auth.service.auth.support.message.AuthEmailTemplateCode;
-import com.auth.service.auth.support.message.AuthSmsTemplateCode;
+import com.auth.service.auth.support.message.AuthDypnsVerifyCodeSceneCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -148,7 +148,7 @@ class AuthMessageServiceImplTest {
 	class SmsCode {
 
 		@Test
-		@DisplayName("用户存在：写入 Redis 并调用 SMS 模板发送")
+		@DisplayName("用户存在：写入 Redis 并调用 Dypns 验证码短信模板发送")
 		void sendSmsCode_shouldStoreMd5AndInvokeSmsSend() {
 			String phone = "13800138000";
 			UserEntity user = new UserEntity();
@@ -170,8 +170,8 @@ class AuthMessageServiceImplTest {
 			verify(systemSecurityIngestFeignClient).sendByTemplate(commandCaptor.capture());
 
 			TemplateMessageCommand command = commandCaptor.getValue();
-			assertEquals(MessageChannel.SMS, command.getChannel());
-			assertEquals(AuthSmsTemplateCode.LOGIN_SMS_CODE.getTemplateCode(), command.getTemplateCode());
+			assertEquals(MessageChannel.SMS_DYPNS_VERIFY_CODE, command.getChannel());
+			assertEquals(AuthDypnsVerifyCodeSceneCode.LOGIN_VERIFY_CODE.getSceneCode(), command.getTemplateCode());
 			assertEquals(phone, command.getTargets().get(0));
 			Object codeVar = command.getVariables().get("code");
 			assertNotNull(codeVar);

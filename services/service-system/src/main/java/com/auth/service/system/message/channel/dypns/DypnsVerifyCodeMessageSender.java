@@ -1,12 +1,12 @@
-package com.auth.service.system.message.channel.sms;
+package com.auth.service.system.message.channel.dypns;
 
 import cn.hutool.core.collection.CollUtil;
 import com.auth.module.message.channel.MessageChannel;
 import com.auth.module.message.command.TemplateMessageCommand;
-import com.auth.module.message.modules.sms.SmsSender;
+import com.auth.module.message.modules.sms.DypnsVerifyCodeSender;
 import com.auth.module.message.spi.MessageSender;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.message.channel.sms.model.SmsPreparedMessage;
+import com.auth.service.system.message.channel.dypns.model.DypnsVerifyCodePreparedMessage;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
@@ -16,21 +16,22 @@ import java.util.List;
 import static com.auth.service.system.common.exception.code.message.SystemMessageResultCode.*;
 
 /**
- * 短信渠道发送实现（阿里云 Dypns 验证码短信）
+ * 阿里云 Dypns 验证码短信渠道发送实现（{@link MessageChannel#SMS_DYPNS_VERIFY_CODE}）
  *
  * @author Bunny
  */
 @ConditionalOnProperty(prefix = "auth.message.sms", name = "enabled", havingValue = "true")
 @Component
-public class SmsMessageSender implements MessageSender {
+public class DypnsVerifyCodeMessageSender implements MessageSender {
 
-	private final SmsTemplatePipeline smsTemplatePipeline;
+	private final DypnsVerifyCodeTemplatePipeline dypnsVerifyCodeTemplatePipeline;
 
-	private final ObjectProvider<SmsSender> smsSender;
+	private final ObjectProvider<DypnsVerifyCodeSender> dypnsVerifyCodeSender;
 
-	public SmsMessageSender(SmsTemplatePipeline smsTemplatePipeline, ObjectProvider<SmsSender> smsSender) {
-		this.smsTemplatePipeline = smsTemplatePipeline;
-		this.smsSender = smsSender;
+	public DypnsVerifyCodeMessageSender(DypnsVerifyCodeTemplatePipeline dypnsVerifyCodeTemplatePipeline,
+			ObjectProvider<DypnsVerifyCodeSender> dypnsVerifyCodeSender) {
+		this.dypnsVerifyCodeTemplatePipeline = dypnsVerifyCodeTemplatePipeline;
+		this.dypnsVerifyCodeSender = dypnsVerifyCodeSender;
 	}
 
 	/**
@@ -38,7 +39,7 @@ public class SmsMessageSender implements MessageSender {
 	 */
 	@Override
 	public MessageChannel channel() {
-		return MessageChannel.SMS;
+		return MessageChannel.SMS_DYPNS_VERIFY_CODE;
 	}
 
 	/**
@@ -46,13 +47,16 @@ public class SmsMessageSender implements MessageSender {
 	 */
 	@Override
 	public void sendByTemplate(TemplateMessageCommand command) {
+		if (Boolean.TRUE.equals(command.getCustomBody())) {
+			throw new SystemBusinessException(SMS_CUSTOM_BODY_NOT_SUPPORTED);
+		}
 		List<String> targets = command.getTargets();
 		if (CollUtil.isEmpty(targets)) {
 			throw new SystemBusinessException(SMS_TARGET_EMPTY);
 		}
 
-		SmsPreparedMessage prepared = smsTemplatePipeline.prepare(command);
-		SmsSender sender = smsSender.getIfAvailable();
+		DypnsVerifyCodePreparedMessage prepared = dypnsVerifyCodeTemplatePipeline.prepare(command);
+		DypnsVerifyCodeSender sender = dypnsVerifyCodeSender.getIfAvailable();
 		if (sender == null) {
 			throw new SystemBusinessException(SMS_SENDER_NOT_ENABLED);
 		}
@@ -63,12 +67,12 @@ public class SmsMessageSender implements MessageSender {
 	}
 
 	/**
-	 * 发送单条短信
-	 * @param sender 短信发送器
+	 * 发送单条 Dypns 验证码短信
+	 * @param sender Dypns 发送器
 	 * @param phone 手机号
-	 * @param prepared 准备好的短信发送参数
+	 * @param prepared 准备好的发送参数
 	 */
-	private void sendOne(SmsSender sender, String phone, SmsPreparedMessage prepared) {
+	private void sendOne(DypnsVerifyCodeSender sender, String phone, DypnsVerifyCodePreparedMessage prepared) {
 		try {
 			sender.sendVerifyCode(phone, prepared.signName(), prepared.providerTemplateCode(),
 					prepared.templateParam());

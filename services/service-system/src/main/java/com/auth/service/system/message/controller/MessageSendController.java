@@ -29,7 +29,8 @@ public class MessageSendController {
 		this.messageDispatchService = messageDispatchService;
 	}
 
-	@Operation(summary = "按模板发送消息", description = "根据 channel 路由至对应渠道发送实现")
+	@Operation(summary = "发送消息",
+			description = "按 channel 路由（EMAIL、SMS_DYPNS_VERIFY_CODE、DING_TALK 等）；模板发送用 templateCode+variables；钉钉等支持 customBody 直发")
 	@PostMapping("/send")
 	public Result<String> sendByTemplate(@Valid @RequestBody TemplateMessageCommand command) {
 		messageDispatchService.sendByTemplate(command);

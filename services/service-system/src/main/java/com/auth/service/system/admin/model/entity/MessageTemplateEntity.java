@@ -9,7 +9,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 /**
- * 统一消息模板（sys_message_template），按 scene_code + channel 区分邮件、短信等。
+ * 统一消息模板（sys_message_template），按 scene_code + channel 区分邮件、Dypns 验证码短信、钉钉等。
  *
  * @author Bunny
  */
@@ -27,8 +27,8 @@ public class MessageTemplateEntity extends BaseEntity {
 	private String sceneCode;
 
 	/**
-	 * 渠道：EMAIL、SMS、DING_TALK 等，与 {@link com.auth.module.message.channel.MessageChannel}
-	 * 名称一致
+	 * 渠道：EMAIL、SMS_DYPNS_VERIFY_CODE、DING_TALK 等，与
+	 * {@link com.auth.module.message.channel.MessageChannel} 名称一致（非通用 dysmsapi 短信 SMS）
 	 */
 	@Schema(title = "渠道")
 	private String channel;
@@ -40,13 +40,13 @@ public class MessageTemplateEntity extends BaseEntity {
 	private String description;
 
 	/**
-	 * 邮件主题模板（FreeMarker）；短信等非邮件渠道可为空
+	 * 邮件主题模板（FreeMarker）；Dypns 验证码短信等非邮件渠道可为空
 	 */
 	@Schema(title = "邮件主题")
 	private String subject;
 
 	/**
-	 * 正文模板：邮件 HTML / 其它渠道富文本；短信国内一般不在库中拼全文
+	 * 正文模板：邮件 HTML / 钉钉 Markdown 等；Dypns 验证码短信不在库中拼全文
 	 */
 	@Schema(title = "正文模板")
 	@TableField("body_content")
@@ -59,7 +59,7 @@ public class MessageTemplateEntity extends BaseEntity {
 	private String requireFields;
 
 	/**
-	 * 短信厂商侧已审模板编码（仅 SMS）
+	 * Dypns / 短信厂商侧已审模板编码（channel=SMS_DYPNS_VERIFY_CODE 时使用）
 	 */
 	@Schema(title = "厂商模板编码")
 	private String providerTemplateCode;

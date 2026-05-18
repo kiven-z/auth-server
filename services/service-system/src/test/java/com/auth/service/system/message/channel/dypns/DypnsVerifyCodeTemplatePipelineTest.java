@@ -1,4 +1,4 @@
-package com.auth.service.system.message.channel.sms;
+package com.auth.service.system.message.channel.dypns;
 
 import com.auth.module.message.channel.MessageChannel;
 import com.auth.module.message.command.TemplateMessageCommand;
@@ -6,7 +6,7 @@ import com.auth.module.message.config.properties.SmsProperties;
 import com.auth.service.system.admin.mapper.MessageTemplateMapper;
 import com.auth.service.system.admin.model.entity.MessageTemplateEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.message.channel.sms.model.SmsPreparedMessage;
+import com.auth.service.system.message.channel.dypns.model.DypnsVerifyCodePreparedMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,22 +24,22 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 /**
- * {@link SmsTemplatePipeline} 单元测试
+ * {@link DypnsVerifyCodeTemplatePipeline} 单元测试
  */
-@DisplayName("SmsTemplatePipeline 短信模板管道")
+@DisplayName("DypnsVerifyCodeTemplatePipeline Dypns 验证码模板管道")
 @ExtendWith(MockitoExtension.class)
-class SmsTemplatePipelineTest {
+class DypnsVerifyCodeTemplatePipelineTest {
 
 	@Mock
 	private MessageTemplateMapper messageTemplateMapper;
 
-	private SmsTemplatePipeline pipeline;
+	private DypnsVerifyCodeTemplatePipeline pipeline;
 
 	@BeforeEach
 	void setUp() {
 		SmsProperties smsProperties = new SmsProperties();
 		smsProperties.setSignName("默认签名");
-		pipeline = new SmsTemplatePipeline(messageTemplateMapper, smsProperties);
+		pipeline = new DypnsVerifyCodeTemplatePipeline(messageTemplateMapper, smsProperties);
 	}
 
 	@Test
@@ -47,11 +47,12 @@ class SmsTemplatePipelineTest {
 	void prepare_loginCode_buildsTemplateParam() {
 		MessageTemplateEntity template = new MessageTemplateEntity();
 		template.setSceneCode("login-sms-code");
-		template.setChannel(MessageChannel.SMS.name());
+		template.setChannel(MessageChannel.SMS_DYPNS_VERIFY_CODE.name());
 		template.setProviderTemplateCode("100001");
 		template
 			.setRequireFields("[{\"key\":\"code\",\"exampleValue\":\"123456\"},{\"key\":\"min\",\"exampleValue\":5}]");
-		when(messageTemplateMapper.selectEnabledBySceneCodeAndChannel("login-sms-code", MessageChannel.SMS.name()))
+		when(messageTemplateMapper.selectEnabledBySceneCodeAndChannel("login-sms-code",
+				MessageChannel.SMS_DYPNS_VERIFY_CODE.name()))
 			.thenReturn(template);
 
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
@@ -60,7 +61,7 @@ class SmsTemplatePipelineTest {
 			.variables(Map.of("code", "123456", "min", 5))
 			.build();
 
-		SmsPreparedMessage prepared = pipeline.prepare(command);
+		DypnsVerifyCodePreparedMessage prepared = pipeline.prepare(command);
 
 		assertThat(prepared.providerTemplateCode()).isEqualTo("100001");
 		assertThat(prepared.signName()).isEqualTo("默认签名");
@@ -71,12 +72,14 @@ class SmsTemplatePipelineTest {
 	@DisplayName("未配置 signName 时抛出 SMS_SIGN_NAME_NOT_CONFIGURED")
 	void prepare_withoutSignName_throws() {
 		SmsProperties smsProperties = new SmsProperties();
-		SmsTemplatePipeline pipelineWithoutSign = new SmsTemplatePipeline(messageTemplateMapper, smsProperties);
+		DypnsVerifyCodeTemplatePipeline pipelineWithoutSign = new DypnsVerifyCodeTemplatePipeline(messageTemplateMapper,
+				smsProperties);
 
 		MessageTemplateEntity template = new MessageTemplateEntity();
 		template.setProviderTemplateCode("100001");
-		template.setChannel(MessageChannel.SMS.name());
-		when(messageTemplateMapper.selectEnabledBySceneCodeAndChannel("login-sms-code", MessageChannel.SMS.name()))
+		template.setChannel(MessageChannel.SMS_DYPNS_VERIFY_CODE.name());
+		when(messageTemplateMapper.selectEnabledBySceneCodeAndChannel("login-sms-code",
+				MessageChannel.SMS_DYPNS_VERIFY_CODE.name()))
 			.thenReturn(template);
 
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
@@ -95,10 +98,11 @@ class SmsTemplatePipelineTest {
 	void prepare_throwsWhenRequiredVariableMissing() {
 		MessageTemplateEntity template = new MessageTemplateEntity();
 		template.setSceneCode("login-sms-code");
-		template.setChannel(MessageChannel.SMS.name());
+		template.setChannel(MessageChannel.SMS_DYPNS_VERIFY_CODE.name());
 		template.setProviderTemplateCode("100001");
 		template.setRequireFields("[{\"key\":\"code\",\"exampleValue\":\"123456\"}]");
-		when(messageTemplateMapper.selectEnabledBySceneCodeAndChannel("login-sms-code", MessageChannel.SMS.name()))
+		when(messageTemplateMapper.selectEnabledBySceneCodeAndChannel("login-sms-code",
+				MessageChannel.SMS_DYPNS_VERIFY_CODE.name()))
 			.thenReturn(template);
 
 		TemplateMessageCommand command = TemplateMessageCommand.builder()

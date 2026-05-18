@@ -1,7 +1,7 @@
 package com.auth.module.message.modules.sms.aliyun;
 
 import com.auth.module.message.config.properties.SmsProperties;
-import com.auth.module.message.modules.sms.SmsSender;
+import com.auth.module.message.modules.sms.DypnsVerifyCodeSender;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -30,13 +30,13 @@ public class AliyunDypnsAutoConfiguration {
 	}
 
 	/**
-	 * 短信发送 SPI 实现
+	 * Dypns 验证码短信发送 SPI 实现
 	 * @param dypnsClient Dypns 客户端
-	 * @return {@link SmsSender}
+	 * @return {@link DypnsVerifyCodeSender}
 	 */
-	@ConditionalOnMissingBean(SmsSender.class)
+	@ConditionalOnMissingBean(DypnsVerifyCodeSender.class)
 	@Bean(destroyMethod = "close")
-	SmsSender aliyunDypnsSmsSender(DypnsVerifyCodeClient dypnsClient) {
+	DypnsVerifyCodeSender aliyunDypnsVerifyCodeSender(DypnsVerifyCodeClient dypnsClient) {
 		return new AliyunDypnsSmsSender(dypnsClient);
 	}
 

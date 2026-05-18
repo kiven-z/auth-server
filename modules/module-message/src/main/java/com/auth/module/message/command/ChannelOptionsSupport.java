@@ -1,5 +1,6 @@
 package com.auth.module.message.command;
 
+import com.auth.module.message.modules.dingtalk.DingTalkChannelOptions;
 import com.auth.module.message.modules.email.EmailChannelOptions;
 import lombok.experimental.UtilityClass;
 
@@ -19,6 +20,18 @@ public class ChannelOptionsSupport {
 	public static EmailChannelOptions asEmail(ChannelOptions options) {
 		if (options instanceof EmailChannelOptions email) {
 			return email;
+		}
+		return null;
+	}
+
+	/**
+	 * 转为钉钉扩展参数
+	 * @param options 渠道扩展参数
+	 * @return 钉钉参数，类型不匹配时返回 {@code null}
+	 */
+	public static DingTalkChannelOptions asDingTalk(ChannelOptions options) {
+		if (options instanceof DingTalkChannelOptions dingTalk) {
+			return dingTalk;
 		}
 		return null;
 	}

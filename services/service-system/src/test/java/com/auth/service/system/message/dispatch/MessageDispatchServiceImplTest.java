@@ -28,12 +28,16 @@ class MessageDispatchServiceImplTest {
 	@Mock
 	private MessageSender emailSender;
 
+	@Mock
+	private MessageSender dingTalkSender;
+
 	private MessageDispatchServiceImpl dispatchService;
 
 	@BeforeEach
 	void setUp() {
 		org.mockito.Mockito.when(emailSender.channel()).thenReturn(MessageChannel.EMAIL);
-		dispatchService = new MessageDispatchServiceImpl(List.of(emailSender));
+		org.mockito.Mockito.when(dingTalkSender.channel()).thenReturn(MessageChannel.DING_TALK);
+		dispatchService = new MessageDispatchServiceImpl(List.of(emailSender, dingTalkSender));
 	}
 
 	@Test
@@ -51,16 +55,32 @@ class MessageDispatchServiceImplTest {
 	}
 
 	@Test
+	@DisplayName("DING_TALK 渠道：委托对应 MessageSender")
+	void sendByTemplate_routesToDingTalkSender() {
+		TemplateMessageCommand command = TemplateMessageCommand.builder()
+			.channel(MessageChannel.DING_TALK)
+			.templateCode("alert-job")
+			.targets(List.of("user001"))
+			.build();
+
+		dispatchService.sendByTemplate(command);
+
+		verify(dingTalkSender).sendByTemplate(command);
+		verify(emailSender, never()).sendByTemplate(any());
+	}
+
+	@Test
 	@DisplayName("未实现渠道：抛出 MESSAGE_CHANNEL_UNSUPPORTED")
 	void sendByTemplate_unsupportedChannelThrows() {
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
-			.channel(MessageChannel.SMS)
+			.channel(MessageChannel.SMS_DYPNS_VERIFY_CODE)
 			.templateCode("SMS_CODE")
 			.targets(List.of("13800000000"))
 			.build();
 
 		assertThatThrownBy(() -> dispatchService.sendByTemplate(command)).isInstanceOf(SystemBusinessException.class);
 		verify(emailSender, never()).sendByTemplate(any());
+		verify(dingTalkSender, never()).sendByTemplate(any());
 	}
 
 	@Test
