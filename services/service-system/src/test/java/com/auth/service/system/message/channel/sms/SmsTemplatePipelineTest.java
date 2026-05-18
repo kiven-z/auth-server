@@ -1,7 +1,6 @@
 package com.auth.service.system.message.channel.sms;
 
 import com.auth.module.message.command.TemplateMessageCommand;
-import com.auth.module.message.config.properties.SmsBlendProperties;
 import com.auth.module.message.config.properties.SmsProperties;
 import com.auth.module.message.sms.SmsChannelOptions;
 import com.auth.service.system.admin.mapper.SmsTemplateMapper;
@@ -18,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.Map;
 
+import static com.auth.service.system.common.exception.code.message.SystemMessageResultCode.SMS_SIGN_NAME_NOT_CONFIGURED;
 import static com.auth.service.system.common.exception.code.message.SystemMessageResultCode.SMS_TEMPLATE_VARS_MISSING;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -38,15 +38,13 @@ class SmsTemplatePipelineTest {
 	@BeforeEach
 	void setUp() {
 		SmsProperties smsProperties = new SmsProperties();
-		SmsBlendProperties blend = new SmsBlendProperties();
-		blend.setSignature("blend签名");
-		smsProperties.getBlends().put("aliyun-main", blend);
 		smsProperties.setDefaultConfigId("aliyun-main");
+		smsProperties.setDefaultSignName("默认签名");
 		pipeline = new SmsTemplatePipeline(smsTemplateMapper, smsProperties);
 	}
 
 	@Test
-	@DisplayName("登录验证码：组装 templateParam 并使用 blend 签名")
+	@DisplayName("登录验证码：组装 templateParam 并使用默认签名与 configId")
 	void prepare_loginCode_buildsTemplateParam() {
 		SmsTemplateEntity template = new SmsTemplateEntity();
 		template.setTemplateCode("login-sms-code");
@@ -64,18 +62,17 @@ class SmsTemplatePipelineTest {
 		SmsPreparedMessage prepared = pipeline.prepare(command);
 
 		assertThat(prepared.providerTemplateCode()).isEqualTo("100001");
-		assertThat(prepared.signName()).isEqualTo("blend签名");
+		assertThat(prepared.signName()).isEqualTo("默认签名");
 		assertThat(prepared.smsConfigId()).isEqualTo("aliyun-main");
 		assertThat(prepared.templateParam()).contains("\"code\":\"123456\"");
 	}
 
 	@Test
-	@DisplayName("模板指定 signName 与 smsConfigId 时优先使用模板值")
-	void prepare_usesTemplateOverrides() {
+	@DisplayName("模板指定 smsConfigId 时优先使用模板值")
+	void prepare_usesTemplateSmsConfigId() {
 		SmsTemplateEntity template = new SmsTemplateEntity();
 		template.setTemplateCode("job-alert");
-		template.setSmsConfigId("tencent-backup");
-		template.setSignName("模板签名");
+		template.setSmsConfigId("aliyun-main");
 		template.setProviderTemplateCode("SMS_999");
 		when(smsTemplateMapper.selectByTemplateCode("job-alert")).thenReturn(template);
 
@@ -87,8 +84,7 @@ class SmsTemplatePipelineTest {
 
 		SmsPreparedMessage prepared = pipeline.prepare(command);
 
-		assertThat(prepared.signName()).isEqualTo("模板签名");
-		assertThat(prepared.smsConfigId()).isEqualTo("tencent-backup");
+		assertThat(prepared.smsConfigId()).isEqualTo("aliyun-main");
 	}
 
 	@Test
@@ -108,6 +104,28 @@ class SmsTemplatePipelineTest {
 		SmsPreparedMessage prepared = pipeline.prepare(command);
 
 		assertThat(prepared.smsConfigId()).isEqualTo("aliyun-main");
+	}
+
+	@Test
+	@DisplayName("未配置 defaultSignName 时抛出 SMS_SIGN_NAME_NOT_CONFIGURED")
+	void prepare_withoutDefaultSignName_throws() {
+		SmsProperties smsProperties = new SmsProperties();
+		smsProperties.setDefaultConfigId("aliyun-main");
+		SmsTemplatePipeline pipelineWithoutSign = new SmsTemplatePipeline(smsTemplateMapper, smsProperties);
+
+		SmsTemplateEntity template = new SmsTemplateEntity();
+		template.setProviderTemplateCode("100001");
+		when(smsTemplateMapper.selectByTemplateCode("login-sms-code")).thenReturn(template);
+
+		TemplateMessageCommand command = TemplateMessageCommand.builder()
+			.templateCode("login-sms-code")
+			.targets(List.of("13800000000"))
+			.variables(Map.of("code", "1", "min", 5))
+			.build();
+
+		assertThatThrownBy(() -> pipelineWithoutSign.prepare(command)).isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SMS_SIGN_NAME_NOT_CONFIGURED);
 	}
 
 	@Test

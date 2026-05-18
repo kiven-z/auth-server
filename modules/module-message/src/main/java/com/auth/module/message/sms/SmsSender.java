@@ -13,7 +13,7 @@ public interface SmsSender {
 	 * @param providerTemplateCode 厂商模板 ID
 	 * @param signName 短信签名（须与 blend 配置一致）
 	 * @param templateParamJson 模板变量 JSON 对象字符串
-	 * @param smsConfigId sms4j blend 配置 ID（{@code auth.message.sms.blends} 的 key），为空则使用默认
+	 * @param smsConfigId sms4j blend 配置 ID（{@code sms.blends} 的 key），为空则使用默认
 	 */
 	void sendTemplateSms(String phone, String providerTemplateCode, String signName, String templateParamJson,
 			String smsConfigId);

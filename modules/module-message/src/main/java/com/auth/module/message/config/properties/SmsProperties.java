@@ -5,11 +5,11 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 /**
- * 短信渠道配置（{@code auth.message.sms.*}，厂商发送由 sms4j 适配）
+ * 短信渠道业务配置（{@code auth.message.sms.*}）
+ * <p>
+ * 厂商 AK、签名、blend 由 sms4j 原生 {@code sms.blends} 配置；此处仅保留开关与默认路由。
+ * </p>
  *
  * @author Bunny
  */
@@ -25,13 +25,13 @@ public class SmsProperties {
 	private boolean enabled = false;
 
 	/**
-	 * 模板未指定 sms_config_id 时使用的默认 blend
+	 * 模板未指定 sms_config_id 时使用的默认 blend（对应 sms.blends 下的 configId）
 	 */
 	private String defaultConfigId;
 
 	/**
-	 * sms4j 多厂商配置（key 即 configId）
+	 * 默认短信签名（须与 {@code sms.blends.*.signature} 一致，用于日志与校验提示）
 	 */
-	private Map<String, SmsBlendProperties> blends = new LinkedHashMap<>();
+	private String defaultSignName;
 
 }

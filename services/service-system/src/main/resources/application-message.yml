@@ -1,9 +1,4 @@
 spring:
-  autoconfigure:
-    # 短信走 auth.message.sms + AuthSms4jReadConfig，不使用 sms4j 默认 sms.* 配置
-    exclude:
-      - org.dromara.sms4j.starter.config.SmsMainConfig
-      - org.dromara.sms4j.starter.config.SupplierConfig
   mail:
     default-encoding: UTF-8
     ssl:
@@ -22,23 +17,20 @@ spring:
           timeout: 5000
           writeTimeout: 5000
 
-# 短信：验证码与通知类均经 sms4j 标准模板短信（多厂商 blends）
+# sms4j 原生厂商配置（签名、AK 以阿里云控制台为准）
+sms:
+  config-type: yaml
+  blends:
+    aliyun-main:
+      supplier: alibaba
+      access-key-id: ${AUTH_SMS_ACCESS_KEY_ID:}
+      access-key-secret: ${AUTH_SMS_ACCESS_KEY_SECRET:}
+      signature: ${AUTH_SMS_SIGN_NAME:}
+
+# 业务侧：开关、默认 blend、签名提示（须与 sms.blends.aliyun-main.signature 一致）
 auth:
   message:
     sms:
       enabled: true
       default-config-id: aliyun-main
-      blends:
-        aliyun-main:
-          enabled: true
-          supplier: alibaba
-          access-key-id: ${AUTH_SMS_ACCESS_KEY_ID:}
-          access-key-secret: ${AUTH_SMS_ACCESS_KEY_SECRET:}
-          signature: ${AUTH_SMS_SIGN_NAME:}
-        tencent-backup:
-          enabled: false
-          supplier: tencent
-          access-key-id: ${AUTH_SMS_TENCENT_SECRET_ID:}
-          access-key-secret: ${AUTH_SMS_TENCENT_SECRET_KEY:}
-          signature: ${AUTH_SMS_SIGN_NAME:}
-          sdk-app-id: ${AUTH_SMS_TENCENT_SDK_APP_ID:}
+      default-sign-name: ${AUTH_SMS_SIGN_NAME:}
