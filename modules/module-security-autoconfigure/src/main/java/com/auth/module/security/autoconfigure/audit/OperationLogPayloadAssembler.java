@@ -1,7 +1,6 @@
 package com.auth.module.security.autoconfigure.audit;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.util.StrUtil;
 import com.auth.common.ip.IpAddressService;
 import com.auth.common.ip.IpInfo;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
@@ -127,7 +126,7 @@ public class OperationLogPayloadAssembler {
 		Integer httpStatus = resolveHttpStatus(response, failure);
 		String responseMessage = OperationLogResponseMessageComposer.compose(meta, result, failure);
 		Long userId = SecurityUserUtils.getUserId();
-		String userAgent = StrUtil.subPre(CharSequenceUtil.nullToEmpty(request.getHeader("User-Agent")), 255);
+		String userAgent = CharSequenceUtil.subPre(CharSequenceUtil.nullToEmpty(request.getHeader("User-Agent")), 255);
 		IpInfo ipInfo = ipAddressService.resolveIpInfo(request);
 
 		return OperationLogPayloadEvent.builder()

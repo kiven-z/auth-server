@@ -51,7 +51,7 @@ public class AuthorizationAuditIngestRequest implements Serializable {
 	private String methodName;
 
 	@Builder.Default
-	private Map<String, Object> methodParams = Collections.emptyMap();
+	private transient Map<String, Object> methodParams = Collections.emptyMap();
 
 	private Instant timestamp;
 

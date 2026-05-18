@@ -18,11 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 /**
@@ -55,26 +51,26 @@ public class OperationLogRequestParamsBuilder {
 	/**
 	 * 组装请求参数摘要：不携带方法实参（与历史行为一致）。
 	 * @param request HTTP 请求
-	 * @param record 是否记录
+	 * @param hasRecord 是否记录
 	 * @param objectMapper JSON 序列化
 	 * @return 摘要或 {@code null}
 	 */
-	public static String build(HttpServletRequest request, boolean record, ObjectMapper objectMapper) {
-		return build(request, record, objectMapper, null);
+	public static String build(HttpServletRequest request, boolean hasRecord, ObjectMapper objectMapper) {
+		return build(request, hasRecord, objectMapper, null);
 	}
 
 	/**
 	 * 组装请求参数摘要：GET 使用 query string；其它方法序列化 parameterMap；并合并可记录的 控制器方法实参（与
 	 * {@link org.aspectj.lang.JoinPoint#getArgs()} 一致，如 {@code @RequestBody} 绑定结果）。
 	 * @param request HTTP 请求
-	 * @param record 是否记录
+	 * @param hasRecord 是否记录
 	 * @param objectMapper JSON 序列化
 	 * @param methodArgs 控制器方法实参，可为 {@code null}
 	 * @return 摘要或 {@code null}
 	 */
-	public static String build(HttpServletRequest request, boolean record, ObjectMapper objectMapper,
+	public static String build(HttpServletRequest request, boolean hasRecord, ObjectMapper objectMapper,
 			Object[] methodArgs) {
-		if (!record) {
+		if (!hasRecord) {
 			return null;
 		}
 		List<Object> methodSummaries = summarizeMethodArguments(methodArgs, objectMapper);

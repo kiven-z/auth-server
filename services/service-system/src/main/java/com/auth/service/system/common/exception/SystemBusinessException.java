@@ -2,7 +2,6 @@ package com.auth.service.system.common.exception;
 
 import com.auth.common.core.i18n.I18nMessageProvider;
 import com.auth.service.system.common.exception.code.SystemResultCode;
-
 import lombok.Getter;
 
 import java.util.Arrays;
@@ -21,7 +20,7 @@ import java.util.Objects;
 public class SystemBusinessException extends RuntimeException implements I18nMessageProvider {
 
 	@Getter
-	private final SystemResultCode resultCode;
+	private transient final SystemResultCode resultCode;
 
 	private final transient Object[] args;
 

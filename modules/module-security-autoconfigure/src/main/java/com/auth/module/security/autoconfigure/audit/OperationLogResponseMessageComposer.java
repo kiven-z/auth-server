@@ -1,7 +1,6 @@
 package com.auth.module.security.autoconfigure.audit;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.util.StrUtil;
 import com.auth.common.core.model.response.Result;
 import com.auth.module.security.contract.annotation.OperationLog;
 import lombok.experimental.UtilityClass;
@@ -24,13 +23,13 @@ public class OperationLogResponseMessageComposer {
 	 */
 	public static String compose(OperationLog meta, Object result, Throwable failure) {
 		if (failure != null) {
-			return StrUtil.subPre(failure.getMessage(), MAX_RESPONSE_MESSAGE);
+			return CharSequenceUtil.subPre(failure.getMessage(), MAX_RESPONSE_MESSAGE);
 		}
 		if (meta == null || !meta.recordResultMessage()) {
 			return null;
 		}
 		if (result instanceof Result<?> message && CharSequenceUtil.isNotBlank(message.getMessage())) {
-			return StrUtil.subPre(message.getMessage(), MAX_RESPONSE_MESSAGE);
+			return CharSequenceUtil.subPre(message.getMessage(), MAX_RESPONSE_MESSAGE);
 		}
 		return null;
 	}

@@ -56,7 +56,7 @@ public class EmailSendDTO implements Serializable {
 	/**
 	 * FreeMarker 模板变量
 	 */
-	private Map<String, Object> variables;
+	private transient Map<String, Object> variables;
 
 	/**
 	 * 正文是否为 HTML

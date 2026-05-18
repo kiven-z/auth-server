@@ -51,7 +51,7 @@ public class TemplateMessageCommand implements Serializable {
 	/**
 	 * 模板变量（FreeMarker 等渲染引擎使用）
 	 */
-	private Map<String, Object> variables;
+	private transient Map<String, Object> variables;
 
 	/**
 	 * 渠道扩展参数（类型须与 {@link #channel} 一致，见 {@link ChannelOptions}）
