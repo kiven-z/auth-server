@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 统一模板消息发送接口（按渠道路由）
+ * 统一消息发送 HTTP 入口（邮件、短信、钉钉等均经此接口按 channel 路由）
  *
  * @author Bunny
  */
-@Tag(name = "统一消息发送", description = "基于模板的多渠道消息发送")
+@Tag(name = "统一消息发送", description = "多渠道消息发送唯一入口；钉钉直发示例：channel=DING_TALK、customBody=true、body、options")
 @Validated
 @RequestMapping("/api/system/message")
 @RestController

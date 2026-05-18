@@ -8,7 +8,7 @@ import org.springframework.validation.annotation.Validated;
 /**
  * 短信渠道业务配置（{@code auth.message.sms.*}）
  * <p>
- * 阿里云 Dypns 验证码短信：AK、签名、区域与 Endpoint 均在此配置。
+ * 阿里云 Dypns 验证码短信：AK、区域、Endpoint 与短信签名均在此配置。
  * </p>
  *
  * @author Bunny
@@ -35,11 +35,6 @@ public class SmsProperties {
 	private String endpoint;
 
 	/**
-	 * 短信签名（须与阿里云控制台一致）
-	 */
-	private String signName;
-
-	/**
 	 * 阿里云 AccessKey ID
 	 */
 	private String accessKeyId;
@@ -48,5 +43,10 @@ public class SmsProperties {
 	 * 阿里云 AccessKey Secret
 	 */
 	private String accessKeySecret;
+
+	/**
+	 * 短信签名（SendSmsVerifyCode 必填，须与号码认证控制台已审核签名一致）
+	 */
+	private String signName;
 
 }

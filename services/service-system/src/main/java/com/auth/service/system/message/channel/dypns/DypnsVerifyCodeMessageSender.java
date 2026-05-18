@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import com.auth.module.message.channel.MessageChannel;
 import com.auth.module.message.command.TemplateMessageCommand;
 import com.auth.module.message.modules.sms.DypnsVerifyCodeSender;
+import com.auth.module.message.modules.sms.aliyun.AliyunDypnsSmsSender;
 import com.auth.module.message.spi.MessageSender;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.message.channel.dypns.model.DypnsVerifyCodePreparedMessage;
@@ -74,10 +75,13 @@ public class DypnsVerifyCodeMessageSender implements MessageSender {
 	 */
 	private void sendOne(DypnsVerifyCodeSender sender, String phone, DypnsVerifyCodePreparedMessage prepared) {
 		try {
-			sender.sendVerifyCode(phone, prepared.signName(), prepared.providerTemplateCode(),
-					prepared.templateParam());
+			sender.sendVerifyCode(phone, prepared.providerTemplateCode(), prepared.templateParam());
 		}
 		catch (IllegalStateException e) {
+			if (e.getMessage() != null
+					&& e.getMessage().startsWith(AliyunDypnsSmsSender.SIGN_NAME_NOT_CONFIGURED_MESSAGE)) {
+				throw new SystemBusinessException(SMS_SIGN_NAME_NOT_CONFIGURED);
+			}
 			throw new SystemBusinessException(SMS_SEND_FAILED, e.getMessage());
 		}
 	}

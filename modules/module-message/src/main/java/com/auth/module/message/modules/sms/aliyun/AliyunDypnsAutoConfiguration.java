@@ -36,8 +36,8 @@ public class AliyunDypnsAutoConfiguration {
 	 */
 	@ConditionalOnMissingBean(DypnsVerifyCodeSender.class)
 	@Bean(destroyMethod = "close")
-	DypnsVerifyCodeSender aliyunDypnsVerifyCodeSender(DypnsVerifyCodeClient dypnsClient) {
-		return new AliyunDypnsSmsSender(dypnsClient);
+	DypnsVerifyCodeSender aliyunDypnsVerifyCodeSender(DypnsVerifyCodeClient dypnsClient, SmsProperties smsProperties) {
+		return new AliyunDypnsSmsSender(dypnsClient, smsProperties);
 	}
 
 }

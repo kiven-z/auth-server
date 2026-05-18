@@ -1,11 +1,9 @@
 package com.auth.service.system.message.channel.dypns;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONUtil;
 import com.auth.module.message.channel.MessageChannel;
 import com.auth.module.message.command.TemplateMessageCommand;
-import com.auth.module.message.config.properties.SmsProperties;
 import com.auth.service.system.admin.mapper.MessageTemplateMapper;
 import com.auth.service.system.admin.model.entity.MessageTemplateEntity;
 import com.auth.service.system.admin.model.vo.emailtemplate.EmailTemplateRequireFieldRow;
@@ -19,10 +17,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.auth.service.system.common.exception.code.message.SystemMessageResultCode.*;
+import static com.auth.service.system.common.exception.code.message.SystemMessageResultCode.SMS_TEMPLATE_NOT_FOUND;
+import static com.auth.service.system.common.exception.code.message.SystemMessageResultCode.SMS_TEMPLATE_VARS_MISSING;
 
 /**
  * Dypns 验证码短信：模板加载、变量校验与 templateParam 组装（channel=SMS_DYPNS_VERIFY_CODE）
+ * <p>
+ * 短信签名由 {@code auth.message.sms.sign-name} 统一配置（SendSmsVerifyCode 必填）。
+ * </p>
  *
  * @author Bunny
  */
@@ -31,11 +33,8 @@ public class DypnsVerifyCodeTemplatePipeline {
 
 	private final MessageTemplateMapper messageTemplateMapper;
 
-	private final SmsProperties smsProperties;
-
-	public DypnsVerifyCodeTemplatePipeline(MessageTemplateMapper messageTemplateMapper, SmsProperties smsProperties) {
+	public DypnsVerifyCodeTemplatePipeline(MessageTemplateMapper messageTemplateMapper) {
 		this.messageTemplateMapper = messageTemplateMapper;
-		this.smsProperties = smsProperties;
 	}
 
 	/**
@@ -78,21 +77,8 @@ public class DypnsVerifyCodeTemplatePipeline {
 		MessageTemplateRequireFieldsJsonSupport.assertVariablesPresent(requireFields, variables,
 				SMS_TEMPLATE_VARS_MISSING);
 
-		String signName = resolveSignName();
 		String templateParam = buildTemplateParam(requireFields, variables);
-
-		return new DypnsVerifyCodePreparedMessage(template.getProviderTemplateCode(), signName, templateParam);
-	}
-
-	/**
-	 * 解析 Dypns 短信签名
-	 * @return 签名
-	 */
-	private String resolveSignName() {
-		if (CharSequenceUtil.isNotBlank(smsProperties.getSignName())) {
-			return smsProperties.getSignName();
-		}
-		throw new SystemBusinessException(SMS_SIGN_NAME_NOT_CONFIGURED);
+		return new DypnsVerifyCodePreparedMessage(template.getProviderTemplateCode(), templateParam);
 	}
 
 }

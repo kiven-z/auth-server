@@ -8,12 +8,11 @@ package com.auth.module.message.modules.sms;
 public interface DypnsVerifyCodeSender extends AutoCloseable {
 
 	/**
-	 * 发送验证码短信（阿里云 Dypns SendSmsVerifyCode）
+	 * 发送验证码短信（阿里云 Dypns SendSmsVerifyCode，签名见 auth.message.sms.sign-name）
 	 * @param phone 手机号
-	 * @param signName 短信签名（须与 Dypns 控制台一致）
 	 * @param providerTemplateCode 厂商已审模板编码
 	 * @param templateParamJson 模板变量 JSON 对象字符串
 	 */
-	void sendVerifyCode(String phone, String signName, String providerTemplateCode, String templateParamJson);
+	void sendVerifyCode(String phone, String providerTemplateCode, String templateParamJson);
 
 }

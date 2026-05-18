@@ -46,8 +46,7 @@ class DypnsVerifyCodeMessageSenderTest {
 	void sendByTemplate_invokesSenderPerTarget() {
 		DypnsVerifyCodeSender sender = mock(DypnsVerifyCodeSender.class);
 		when(dypnsVerifyCodeSender.getIfAvailable()).thenReturn(sender);
-		DypnsVerifyCodePreparedMessage prepared = new DypnsVerifyCodePreparedMessage("100001", "签名",
-				"{\"code\":\"1\"}");
+		DypnsVerifyCodePreparedMessage prepared = new DypnsVerifyCodePreparedMessage("100001", "{\"code\":\"1\"}");
 		when(dypnsVerifyCodeTemplatePipeline.prepare(org.mockito.ArgumentMatchers.any())).thenReturn(prepared);
 
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
@@ -58,14 +57,14 @@ class DypnsVerifyCodeMessageSenderTest {
 
 		messageSender.sendByTemplate(command);
 
-		verify(sender).sendVerifyCode(eq("13800000001"), eq("签名"), eq("100001"), eq("{\"code\":\"1\"}"));
-		verify(sender).sendVerifyCode(eq("13800000002"), eq("签名"), eq("100001"), eq("{\"code\":\"1\"}"));
+		verify(sender).sendVerifyCode(eq("13800000001"), eq("100001"), eq("{\"code\":\"1\"}"));
+		verify(sender).sendVerifyCode(eq("13800000002"), eq("100001"), eq("{\"code\":\"1\"}"));
 	}
 
 	@Test
 	@DisplayName("未装配 DypnsVerifyCodeSender：抛出 SMS_SENDER_NOT_ENABLED")
 	void sendByTemplate_withoutSender_throws() {
-		DypnsVerifyCodePreparedMessage prepared = new DypnsVerifyCodePreparedMessage("100001", "签名", "{}");
+		DypnsVerifyCodePreparedMessage prepared = new DypnsVerifyCodePreparedMessage("100001", "{}");
 		when(dypnsVerifyCodeTemplatePipeline.prepare(org.mockito.ArgumentMatchers.any())).thenReturn(prepared);
 
 		TemplateMessageCommand command = TemplateMessageCommand.builder()

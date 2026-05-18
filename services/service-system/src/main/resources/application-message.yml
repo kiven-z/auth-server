@@ -23,7 +23,7 @@ auth:
       enabled: true
       region: cn-hangzhou
       endpoint: dypnsapi.aliyuncs.com
-      sign-name: ${AUTH_SMS_SIGN_NAME:}
+      sign-name: ${AUTH_SMS_SIGN_NAME:速通互联验证码}
       access-key-id: ${AUTH_SMS_ACCESS_KEY_ID:}
       access-key-secret: ${AUTH_SMS_ACCESS_KEY_SECRET:}
     ding-talk:
