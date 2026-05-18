@@ -1,4 +1,4 @@
-package com.auth.service.system.admin.support;
+package com.auth.service.system.admin.support.sqlbuild;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
@@ -11,12 +11,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * 权限分页 ORDER BY 片段构建：仅允许白名单字段，防止 SQL 注入。
+ * 岗位分页 ORDER BY 片段构建：仅允许白名单字段，防止 SQL 注入。
  *
  * @author Bunny
  */
 @UtilityClass
-public class SysPermissionPageOrderSqlBuilder extends AbstractOrderSqlBuilder {
+public class SysPostPageOrderSqlBuilder extends AbstractOrderSqlBuilder {
 
 	/**
 	 * 默认排序：显示顺序升序，创建时间降序。
@@ -25,8 +25,8 @@ public class SysPermissionPageOrderSqlBuilder extends AbstractOrderSqlBuilder {
 
 	private static final Map<String, String> FIELD_TO_COLUMN = Map.ofEntries(Map.entry("orderNum", "p.order_num"),
 			Map.entry("createTime", "p.create_time"), Map.entry("updateTime", "p.update_time"),
-			Map.entry("permissionCode", "p.permission_code"), Map.entry("permissionName", "p.permission_name"),
-			Map.entry("permissionType", "p.permission_type"), Map.entry("status", "p.status"));
+			Map.entry("postCode", "p.post_code"), Map.entry("postName", "p.post_name"), Map.entry("status", "p.status"),
+			Map.entry("deptName", "d.dept_name"));
 
 	/**
 	 * 根据前端传入的排序规则生成 ORDER BY 子句（不含 ORDER BY 关键字）。

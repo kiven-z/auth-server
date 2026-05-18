@@ -17,8 +17,8 @@ import com.auth.service.system.admin.service.SysEmailTemplateService;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.message.api.EmailSendService;
-import com.auth.service.system.message.shared.MessageTemplateRequireFieldsJsonSupport;
 import com.auth.service.system.message.shared.FreeMarkTemplateRenderer;
+import com.auth.service.system.message.shared.MessageTemplateRequireFieldsJsonSupport;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -34,7 +34,7 @@ import java.util.Map;
 import static com.auth.service.system.common.exception.code.common.SystemCommonResultCode.DATA_NOT_EXIST;
 
 /**
- * ????????????????????????????FreeMarker ??/???????
+ * 邮件模板服务
  *
  * @author Bunny
  */

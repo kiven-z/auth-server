@@ -10,7 +10,7 @@ import com.auth.service.system.admin.model.po.post.SysPostPageRowPO;
 import com.auth.service.system.admin.model.query.SysPostQuery;
 import com.auth.service.system.admin.model.vo.post.SysPostPageResponse;
 import com.auth.service.system.admin.service.SysPostService;
-import com.auth.service.system.admin.support.SysPostPageOrderSqlBuilder;
+import com.auth.service.system.admin.support.sqlbuild.SysPostPageOrderSqlBuilder;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.admin.SystemAdminResultCode;
 import com.auth.service.system.common.service.AuditUserDisplayService;

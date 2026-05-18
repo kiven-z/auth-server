@@ -31,6 +31,12 @@ public class SmsTemplateEntity extends BaseEntity {
 	@Schema(title = "厂商：aliyun/tencent")
 	private String provider;
 
+	@Schema(title = "发送模式：VERIFY/NOTIFY")
+	private String templateType;
+
+	@Schema(title = "NOTIFY 时 sms4j configId")
+	private String smsConfigId;
+
 	@Schema(title = "厂商模板 CODE")
 	private String providerTemplateCode;
 

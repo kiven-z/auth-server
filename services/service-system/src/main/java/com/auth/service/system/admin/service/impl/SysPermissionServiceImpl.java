@@ -8,7 +8,7 @@ import com.auth.service.system.admin.model.form.permission.SysPermissionCreateFo
 import com.auth.service.system.admin.model.query.SysPermissionQuery;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionPageResponse;
 import com.auth.service.system.admin.service.SysPermissionService;
-import com.auth.service.system.admin.support.SysPermissionPageOrderSqlBuilder;
+import com.auth.service.system.admin.support.sqlbuild.SysPermissionPageOrderSqlBuilder;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.admin.SystemAdminResultCode;
 import com.auth.service.system.common.service.AuditUserDisplayService;

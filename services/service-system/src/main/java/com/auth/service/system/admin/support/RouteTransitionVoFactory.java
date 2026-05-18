@@ -31,6 +31,11 @@ public class RouteTransitionVoFactory {
 		return blank ? null : vo;
 	}
 
+	/**
+	 * 处理过渡名称
+	 * @param name 过渡名称
+	 * @return 处理后的过渡名称
+	 */
 	private static String processTransitionName(String name) {
 		if (CharSequenceUtil.isBlank(name)) {
 			return name;
@@ -38,6 +43,11 @@ public class RouteTransitionVoFactory {
 		return "animate__animated animate__" + name + " ";
 	}
 
+	/**
+	 * 处理过渡值
+	 * @param value 过渡值
+	 * @return 处理后的过渡值
+	 */
 	private static String processAnimateValue(String value) {
 		if (CharSequenceUtil.isBlank(value)) {
 			return value;

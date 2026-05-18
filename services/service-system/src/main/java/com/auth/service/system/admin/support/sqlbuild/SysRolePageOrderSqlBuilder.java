@@ -1,4 +1,4 @@
-package com.auth.service.system.admin.support;
+package com.auth.service.system.admin.support.sqlbuild;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
