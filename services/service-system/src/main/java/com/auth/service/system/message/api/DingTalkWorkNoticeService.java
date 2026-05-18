@@ -9,11 +9,10 @@ import com.auth.service.system.message.channel.dingtalk.model.DingTalkWorkNotice
  */
 public interface DingTalkWorkNoticeService {
 
-    /**
-     * 发送工作通知
-     *
-     * @param form 发送参数
-     */
-    void send(DingTalkWorkNoticeSendForm form);
+	/**
+	 * 发送工作通知
+	 * @param form 发送参数
+	 */
+	void send(DingTalkWorkNoticeSendForm form);
 
 }

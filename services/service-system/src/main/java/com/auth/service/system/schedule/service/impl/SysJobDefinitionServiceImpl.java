@@ -66,6 +66,9 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		this.taskHandlerRegistry = taskHandlerRegistry;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public PageResponse<SysJobPageResponse> getPage(Page<SysJobEntity> pageParams, SysJobQuery query) {
 		IPage<SysJobPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
@@ -78,6 +81,9 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		return PageResponse.of(voPage);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public SysJobDetailVO getDetail(Long id) {
 		SysJobEntity sysJob = getById(id);
@@ -89,6 +95,9 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		return vo;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void create(SysJobCreateForm form) {
 		validateGroupEnabled(form.getJobGroup());
@@ -104,19 +113,18 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void update(SysJobUpdateForm form) {
 		SysJobEntity dbJob = getById(Long.parseLong(form.getId()));
 		if (dbJob == null) {
 			throw new SystemBusinessException(DATA_NOT_EXIST);
 		}
-
-		SysJobTaskType oldTaskType = SysJobTaskType.resolve(dbJob.getTaskType(), dbJob.getInvokeTarget());
-		SysJobTaskType newTaskType = form.getTaskType() == null ? oldTaskType
+		SysJobTaskType resolvedTaskType = form.getTaskType() == null
+				? SysJobTaskType.resolve(dbJob.getTaskType(), dbJob.getInvokeTarget())
 				: SysJobTaskType.resolve(form.getTaskType(), form.getInvokeTarget());
-		if (oldTaskType != newTaskType) {
-			throw new SystemBusinessException(JOB_MODE_CUSTOM_FORBIDS_INVOKE_TARGET);
-		}
 
 		dbJob.setCronExpression(form.getCronExpression());
 		dbJob.setMisfirePolicy(form.getMisfirePolicy());
@@ -127,7 +135,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		dbJob.setJobParams(form.getJobParams());
 		dbJob.setPayloadJson(form.getPayloadJson());
 		dbJob.setHandlerCode(form.getHandlerCode());
-		dbJob.setTaskType(newTaskType.name());
+		dbJob.setTaskType(resolvedTaskType.name());
 		dbJob.setRemark(form.getRemark());
 		if (form.getInvokeTarget() != null) {
 			dbJob.setInvokeTarget(form.getInvokeTarget());
@@ -144,6 +152,9 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void deleteById(Long id) {
 		SysJobEntity dbJob = getById(id);

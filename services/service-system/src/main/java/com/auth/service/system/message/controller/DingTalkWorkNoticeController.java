@@ -25,17 +25,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class DingTalkWorkNoticeController {
 
-    private final DingTalkWorkNoticeService dingTalkWorkNoticeService;
+	private final DingTalkWorkNoticeService dingTalkWorkNoticeService;
 
-    public DingTalkWorkNoticeController(DingTalkWorkNoticeService dingTalkWorkNoticeService) {
-        this.dingTalkWorkNoticeService = dingTalkWorkNoticeService;
-    }
+	public DingTalkWorkNoticeController(DingTalkWorkNoticeService dingTalkWorkNoticeService) {
+		this.dingTalkWorkNoticeService = dingTalkWorkNoticeService;
+	}
 
-    @Operation(summary = "发送工作通知", description = "向指定 userid 列表发送文本或 Markdown 工作通知")
-    @PostMapping("/send")
-    public Result<String> send(@Valid @RequestBody DingTalkWorkNoticeSendForm form) {
-        dingTalkWorkNoticeService.send(form);
-        return Result.success("DingTalk work notice sent");
-    }
+	@Operation(summary = "发送工作通知", description = "向指定 userid 列表发送文本或 Markdown 工作通知")
+	@PostMapping("/send")
+	public Result<String> send(@Valid @RequestBody DingTalkWorkNoticeSendForm form) {
+		dingTalkWorkNoticeService.send(form);
+		return Result.success("DingTalk work notice sent");
+	}
 
 }

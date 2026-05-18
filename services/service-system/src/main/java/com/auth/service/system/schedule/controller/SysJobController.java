@@ -8,19 +8,15 @@ import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.form.SysJobCreateForm;
 import com.auth.service.system.schedule.model.form.SysJobUpdateForm;
 import com.auth.service.system.schedule.model.query.SysJobQuery;
-import com.auth.service.system.schedule.model.vo.QuartzTaskClassVO;
 import com.auth.service.system.schedule.model.vo.SysJobDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobPageResponse;
 import com.auth.service.system.schedule.service.SysJobDefinitionService;
-import com.auth.service.system.schedule.support.QuartzTaskRegistry;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 import static com.auth.service.system.common.exception.code.common.SystemCommonResultCode.*;
 
@@ -36,20 +32,8 @@ public class SysJobController {
 
 	private final SysJobDefinitionService sysJobDefinitionService;
 
-	private final QuartzTaskRegistry quartzTaskRegistry;
-
-	public SysJobController(SysJobDefinitionService sysJobDefinitionService, QuartzTaskRegistry quartzTaskRegistry) {
+	public SysJobController(SysJobDefinitionService sysJobDefinitionService) {
 		this.sysJobDefinitionService = sysJobDefinitionService;
-		this.quartzTaskRegistry = quartzTaskRegistry;
-	}
-
-	@Operation(summary = "@QuartzTask 白名单类列表")
-	@PreAuthorize("@auth.decide('sysJob:query')")
-	@GetMapping("quartz-classes")
-	public Result<List<QuartzTaskClassVO>> quartzClasses() {
-		List<QuartzTaskClassVO> list = quartzTaskRegistry.listAll();
-
-		return Result.success(list);
 	}
 
 	@Operation(summary = "分页查询定时任务")

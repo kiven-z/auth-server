@@ -31,51 +31,81 @@ public class SysJobServiceImpl implements SysJobService {
 		this.operationService = operationService;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void syncAllFromDatabase() {
 		operationService.syncAllFromDatabase();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public PageResponse<SysJobPageResponse> getPage(Page<SysJobEntity> pageParams, SysJobQuery query) {
 		return definitionService.getPage(pageParams, query);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public SysJobDetailVO getDetail(Long id) {
 		return definitionService.getDetail(id);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void create(SysJobCreateForm form) {
 		definitionService.create(form);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void update(SysJobUpdateForm form) {
 		definitionService.update(form);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void deleteById(Long id) {
 		definitionService.deleteById(id);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void batchUpdateStatus(SysJobStatusForm form) {
 		operationService.batchUpdateStatus(form);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void runOnce(Long id) {
 		operationService.runOnce(id);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void pauseAllInGroup(String groupCode) {
 		operationService.pauseAllInGroup(groupCode);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void resumeAllInGroup(String groupCode) {
 		operationService.resumeAllInGroup(groupCode);

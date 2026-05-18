@@ -18,18 +18,18 @@ import java.util.List;
 @Setter
 public class DingTalkWorkNoticeSendForm {
 
-    @Schema(title = "接收人钉钉 userid 列表")
-    @NotEmpty
-    private List<String> userIds;
+	@Schema(title = "接收人钉钉 userid 列表")
+	@NotEmpty
+	private List<String> userIds;
 
-    @Schema(title = "消息正文")
-    @NotBlank
-    private String content;
+	@Schema(title = "消息正文")
+	@NotBlank
+	private String content;
 
-    @Schema(title = "Markdown 标题（messageType=MARKDOWN 时有效）")
-    private String title;
+	@Schema(title = "Markdown 标题（messageType=MARKDOWN 时有效）")
+	private String title;
 
-    @Schema(title = "消息类型，默认 TEXT")
-    private DingTalkMessageType messageType;
+	@Schema(title = "消息类型，默认 TEXT")
+	private DingTalkMessageType messageType;
 
 }

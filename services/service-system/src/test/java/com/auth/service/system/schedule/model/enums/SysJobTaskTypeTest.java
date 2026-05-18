@@ -23,6 +23,15 @@ class SysJobTaskTypeTest {
 	}
 
 	@Test
+	@DisplayName("显式传入 MESSAGE_DISPATCH 时直接返回消息任务类型")
+	void resolveReturnsMessageDispatchTaskType() {
+		// 消息派发类型必须可直接解析，避免被 invokeTarget 推断覆盖。
+		SysJobTaskType result = SysJobTaskType.resolve("MESSAGE_DISPATCH", null);
+
+		assertThat(result).isEqualTo(SysJobTaskType.MESSAGE_DISPATCH);
+	}
+
+	@Test
 	@DisplayName("taskType 为空时按 invokeTarget 推断为 BEAN_INVOKE")
 	void resolveInfersBeanInvokeWhenInvokeTargetPresent() {
 		// 历史数据兼容：invokeTarget 非空视为 Bean 调用模式。

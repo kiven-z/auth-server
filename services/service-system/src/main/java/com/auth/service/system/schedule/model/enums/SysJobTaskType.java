@@ -17,7 +17,12 @@ public enum SysJobTaskType {
 	/**
 	 * 自定义类模式：执行 job_class（需实现 Quartz Job）
 	 */
-	CUSTOM_CLASS;
+	CUSTOM_CLASS,
+
+	/**
+	 * 统一消息派发模式：执行 payload_json 中的 TemplateMessageCommand
+	 */
+	MESSAGE_DISPATCH;
 
 	/**
 	 * 兼容历史数据：未配置 taskType 时按 invokeTarget 是否为空推断

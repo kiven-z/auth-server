@@ -139,7 +139,19 @@ public enum SystemScheduleResultCode implements SystemResultCode {
 	/**
 	 * 任务类型不支持
 	 */
-	JOB_TASK_TYPE_UNSUPPORTED(422, 241, "JOB_TASK_TYPE_UNSUPPORTED", "system.job.task_type.unsupported");
+	JOB_TASK_TYPE_UNSUPPORTED(422, 241, "JOB_TASK_TYPE_UNSUPPORTED", "system.job.task_type.unsupported"),
+	/**
+	 * payload_json 为空
+	 */
+	JOB_PAYLOAD_JSON_EMPTY(422, 242, "JOB_PAYLOAD_JSON_EMPTY", "system.job.payload.empty"),
+	/**
+	 * payload_json 非法
+	 */
+	JOB_PAYLOAD_JSON_INVALID(422, 243, "JOB_PAYLOAD_JSON_INVALID", "system.job.payload.invalid"),
+	/**
+	 * 消息命令参数校验失败
+	 */
+	JOB_MESSAGE_COMMAND_INVALID(422, 244, "JOB_MESSAGE_COMMAND_INVALID", "system.job.message.command.invalid");
 
 	private final int httpStatus;
 

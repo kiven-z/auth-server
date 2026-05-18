@@ -37,12 +37,10 @@ public class SysJobCreateForm implements Serializable {
 
 	@Schema(title = "白名单任务类全限定名")
 	@Size(max = 255)
-	@NotBlank(groups = CreateGroup.class)
 	private String jobClass;
 
 	@Schema(title = "任务类型(BEAN_INVOKE/CUSTOM_CLASS)")
 	@Size(max = 32)
-	@NotBlank(groups = CreateGroup.class)
 	private String taskType;
 
 	@Schema(title = "执行处理器编码")

@@ -20,31 +20,32 @@ import static com.auth.service.system.common.exception.code.message.SystemMessag
 @Service
 public class DingTalkWorkNoticeServiceImpl implements DingTalkWorkNoticeService {
 
-    private final ObjectProvider<DingTalkWorkNoticeClient> workNoticeClient;
+	private final ObjectProvider<DingTalkWorkNoticeClient> workNoticeClient;
 
-    public DingTalkWorkNoticeServiceImpl(ObjectProvider<DingTalkWorkNoticeClient> workNoticeClient) {
-        this.workNoticeClient = workNoticeClient;
-    }
+	public DingTalkWorkNoticeServiceImpl(ObjectProvider<DingTalkWorkNoticeClient> workNoticeClient) {
+		this.workNoticeClient = workNoticeClient;
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void send(DingTalkWorkNoticeSendForm form) {
-        if (form == null || CollUtil.isEmpty(form.getUserIds())) {
-            throw new SystemBusinessException(DING_TALK_TARGET_EMPTY);
-        }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void send(DingTalkWorkNoticeSendForm form) {
+		if (form == null || CollUtil.isEmpty(form.getUserIds())) {
+			throw new SystemBusinessException(DING_TALK_TARGET_EMPTY);
+		}
 
-        DingTalkWorkNoticeClient client = workNoticeClient.getIfAvailable();
-        if (client == null) {
-            throw new SystemBusinessException(DING_TALK_NOT_ENABLED);
-        }
+		DingTalkWorkNoticeClient client = workNoticeClient.getIfAvailable();
+		if (client == null) {
+			throw new SystemBusinessException(DING_TALK_NOT_ENABLED);
+		}
 
-        try {
-            client.sendWorkNotice(form.getUserIds(), form.getMessageType(), form.getTitle(), form.getContent());
-        } catch (IllegalStateException | IllegalArgumentException ex) {
-            throw new SystemBusinessException(DING_TALK_SEND_FAILED, ex.getMessage());
-        }
-    }
+		try {
+			client.sendWorkNotice(form.getUserIds(), form.getMessageType(), form.getTitle(), form.getContent());
+		}
+		catch (IllegalStateException | IllegalArgumentException ex) {
+			throw new SystemBusinessException(DING_TALK_SEND_FAILED, ex.getMessage());
+		}
+	}
 
 }

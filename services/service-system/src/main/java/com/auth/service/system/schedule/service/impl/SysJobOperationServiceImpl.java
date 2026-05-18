@@ -35,6 +35,9 @@ public class SysJobOperationServiceImpl extends ServiceImpl<SysJobMapper, SysJob
 		this.quartzAdmin = quartzAdmin;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void syncAllFromDatabase() {
 		List<SysJobEntity> allJobs = list();
@@ -48,6 +51,9 @@ public class SysJobOperationServiceImpl extends ServiceImpl<SysJobMapper, SysJob
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void batchUpdateStatus(SysJobStatusForm form) {
 		for (Long id : form.getIds()) {
@@ -71,6 +77,9 @@ public class SysJobOperationServiceImpl extends ServiceImpl<SysJobMapper, SysJob
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void runOnce(Long id) {
 		SysJobEntity dbJob = getById(id);
@@ -87,6 +96,9 @@ public class SysJobOperationServiceImpl extends ServiceImpl<SysJobMapper, SysJob
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void pauseAllInGroup(String groupCode) {
 		List<SysJobEntity> jobs = list(
@@ -103,6 +115,9 @@ public class SysJobOperationServiceImpl extends ServiceImpl<SysJobMapper, SysJob
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void resumeAllInGroup(String groupCode) {
 		List<SysJobEntity> jobs = list(
