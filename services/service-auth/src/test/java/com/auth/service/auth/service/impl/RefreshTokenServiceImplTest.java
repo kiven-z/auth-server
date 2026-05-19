@@ -6,7 +6,7 @@ import com.auth.common.jwt.model.JwtUserToken;
 import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.TestConstants;
-import com.auth.service.auth.authentication.audit.LoginAuditEventPublisher;
+import com.auth.service.auth.authentication.audit.event.LoginAuditEventPublisher;
 import com.auth.service.auth.authentication.profile.AuthProfileCache;
 import com.auth.service.auth.authentication.service.impl.RefreshTokenServiceImpl;
 import com.auth.service.auth.authentication.support.AuthTokenResponseEnricher;
@@ -29,8 +29,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -176,7 +175,7 @@ class RefreshTokenServiceImplTest {
 		assertEquals("new-access", response.getAccessToken());
 		assertEquals("new-refresh", response.getRefreshToken());
 		assertEquals(expires, response.getExpires());
-		assertEquals(false, result.rememberMe());
+		assertFalse(result.rememberMe());
 		verify(redisUserSessionIndexRepository).updateRefreshInfo(eq(TestConstants.JTI),
 				eq(MD5.create().digestHex16("new-refresh")), anyLong(), eq(Duration.ofSeconds(120L)));
 		verify(authTokenResponseEnricher).enrichReadMeDay(response);
@@ -203,7 +202,7 @@ class RefreshTokenServiceImplTest {
 
 		RefreshSessionResult result = newService().refreshToken(TestConstants.REFRESH_TOKEN, null);
 
-		assertEquals(true, result.rememberMe());
+		assertTrue(result.rememberMe());
 	}
 
 }

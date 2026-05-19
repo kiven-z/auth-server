@@ -1,7 +1,7 @@
 package com.auth.service.auth.infrastructure.strategy;
 
 import com.auth.module.platform.persistence.model.UserEntity;
-import com.auth.service.auth.authentication.audit.LoginAuditEventPublisher;
+import com.auth.service.auth.authentication.audit.event.LoginAuditEventPublisher;
 import com.auth.service.auth.authentication.mapper.UserMapper;
 import com.auth.service.auth.authentication.service.AuthProfileQueryService;
 import com.auth.service.auth.authentication.strategy.UsernamePasswordLoginStrategy;

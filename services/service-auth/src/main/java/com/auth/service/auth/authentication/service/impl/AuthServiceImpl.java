@@ -5,7 +5,7 @@ import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.authentication.audit.LoginAuditContextResolver;
-import com.auth.service.auth.authentication.audit.LoginAuditEventPublisher;
+import com.auth.service.auth.authentication.audit.event.LoginAuditEventPublisher;
 import com.auth.service.auth.authentication.profile.AuthProfileCache;
 import com.auth.service.auth.authentication.service.AuthService;
 import com.auth.service.auth.authentication.strategy.LoginStrategy;

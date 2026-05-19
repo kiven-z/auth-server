@@ -3,7 +3,7 @@ package com.auth.service.auth.infrastructure.strategy;
 import cn.hutool.crypto.digest.MD5;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
-import com.auth.service.auth.authentication.audit.LoginAuditEventPublisher;
+import com.auth.service.auth.authentication.audit.event.LoginAuditEventPublisher;
 import com.auth.service.auth.authentication.mapper.UserMapper;
 import com.auth.service.auth.authentication.service.AuthProfileQueryService;
 import com.auth.service.auth.authentication.strategy.SmsLoginStrategy;

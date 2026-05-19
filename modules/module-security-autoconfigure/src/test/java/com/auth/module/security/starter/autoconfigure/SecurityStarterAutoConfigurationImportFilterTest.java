@@ -1,6 +1,6 @@
 package com.auth.module.security.starter.autoconfigure;
 
-import com.auth.module.security.autoconfigure.autoconfigure.filter.SecurityStarterAutoConfigurationImportFilter;
+import com.auth.module.security.autoconfigure.boot.filter.SecurityStarterAutoConfigurationImportFilter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

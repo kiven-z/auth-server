@@ -4,7 +4,7 @@ import com.auth.common.jwt.model.JwtUserToken;
 import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.TestConstants;
-import com.auth.service.auth.authentication.audit.LoginAuditEventPublisher;
+import com.auth.service.auth.authentication.audit.event.LoginAuditEventPublisher;
 import com.auth.service.auth.authentication.profile.AuthProfileCache;
 import com.auth.service.auth.authentication.service.impl.AuthServiceImpl;
 import com.auth.service.auth.authentication.strategy.LoginStrategy;

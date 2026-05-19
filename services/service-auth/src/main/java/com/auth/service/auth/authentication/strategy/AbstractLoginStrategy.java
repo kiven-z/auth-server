@@ -4,7 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.authentication.audit.LoginAuditContextResolver;
-import com.auth.service.auth.authentication.audit.LoginAuditEventPublisher;
+import com.auth.service.auth.authentication.audit.event.LoginAuditEventPublisher;
 import com.auth.service.auth.authentication.service.AuthProfileQueryService;
 import com.auth.service.auth.authentication.token.LoginFailureRateLimiter;
 import com.auth.service.auth.authentication.token.LoginResult;

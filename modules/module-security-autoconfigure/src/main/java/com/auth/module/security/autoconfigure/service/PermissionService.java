@@ -64,6 +64,22 @@ public class PermissionService {
 	}
 
 	/**
+	 * 解析客户端 IP（优先 X-Forwarded-For 首段）
+	 * @param request 请求
+	 * @return IP 或 null
+	 */
+	private static String resolveClientIp(HttpServletRequest request) {
+		String forwarded = request.getHeader("X-Forwarded-For");
+		if (forwarded != null && !forwarded.isBlank()) {
+			String first = forwarded.split(",")[0].trim();
+			if (!first.isEmpty() && !"unknown".equalsIgnoreCase(first)) {
+				return first;
+			}
+		}
+		return request.getRemoteAddr();
+	}
+
+	/**
 	 * 决定权限
 	 * @param required 需要的权限
 	 * @return 是否决定权限
@@ -143,22 +159,6 @@ public class PermissionService {
 			.flatMap(resolver -> resolver.resolve(request))
 			.ifPresent(handlerMethod -> builder.className(handlerMethod.getBeanType().getName())
 				.methodName(handlerMethod.getMethod().getName()));
-	}
-
-	/**
-	 * 解析客户端 IP（优先 X-Forwarded-For 首段）
-	 * @param request 请求
-	 * @return IP 或 null
-	 */
-	private static String resolveClientIp(HttpServletRequest request) {
-		String forwarded = request.getHeader("X-Forwarded-For");
-		if (forwarded != null && !forwarded.isBlank()) {
-			String first = forwarded.split(",")[0].trim();
-			if (!first.isEmpty() && !"unknown".equalsIgnoreCase(first)) {
-				return first;
-			}
-		}
-		return request.getRemoteAddr();
 	}
 
 	/**

@@ -1,9 +1,9 @@
 package com.auth.service.auth.infrastructure.login.audit;
 
-import com.auth.service.auth.authentication.audit.LoginAuditEvent;
-import com.auth.service.auth.authentication.audit.LoginAuditEventPublisherImpl;
 import com.auth.service.auth.authentication.audit.LoginAuditSnapshot;
 import com.auth.service.auth.authentication.audit.LoginAuditSnapshotFactory;
+import com.auth.service.auth.authentication.audit.event.LoginAuditEvent;
+import com.auth.service.auth.authentication.audit.event.LoginAuditEventPublisherImpl;
 import com.auth.service.auth.support.model.enums.AuthLoginLogResult;
 import com.auth.service.auth.support.model.enums.AuthLoginLogType;
 import jakarta.servlet.http.HttpServletRequest;
