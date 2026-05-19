@@ -32,4 +32,4 @@ auth:
       agent-id: ${AUTH_DING_TALK_AGENT_ID:}
       client-id: ${AUTH_DING_TALK_CLIENT_ID:}
       client-secret: ${AUTH_DING_TALK_CLIENT_SECRET:}
-      default-message-type: TEXT
+      default-message-type: text
