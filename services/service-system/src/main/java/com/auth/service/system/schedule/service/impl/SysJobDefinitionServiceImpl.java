@@ -34,9 +34,9 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Date;
 
-import static com.auth.service.system.common.exception.SystemCommonResultCode.DATA_NOT_EXIST;
-import static com.auth.service.system.schedule.exception.SystemScheduleResultCode.JOB_GROUP_NOT_AVAILABLE;
-import static com.auth.service.system.schedule.exception.SystemScheduleResultCode.JOB_QUARTZ_OPERATION_FAILED;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
+import static com.auth.service.system.common.exception.code.SystemScheduleResultCode.JOB_GROUP_NOT_AVAILABLE;
+import static com.auth.service.system.common.exception.code.SystemScheduleResultCode.JOB_QUARTZ_OPERATION_FAILED;
 import static com.auth.service.system.schedule.model.constans.SysJobQuartzDataKeys.JOB_ZONE;
 
 /**

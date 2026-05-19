@@ -3,7 +3,7 @@ package com.auth.service.system.message.api.impl;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.message.infrastructure.spi.MessageSender;
+import com.auth.service.system.message.spi.MessageSender;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,8 +13,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static com.auth.service.system.message.infrastructure.exception.SystemMessageResultCode.MESSAGE_CHANNEL_UNSUPPORTED;
-import static com.auth.service.system.message.infrastructure.exception.SystemMessageResultCode.MESSAGE_SEND_COMMAND_NULL;
+import static com.auth.service.system.common.exception.code.SystemMessageResultCode.MESSAGE_CHANNEL_UNSUPPORTED;
+import static com.auth.service.system.common.exception.code.SystemMessageResultCode.MESSAGE_SEND_COMMAND_NULL;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;

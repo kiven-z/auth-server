@@ -13,8 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import static com.auth.service.system.common.exception.SystemCommonResultCode.JWT_INVALID;
-import static com.auth.service.system.common.exception.SystemCommonResultCode.REDIS_SYSTEM_ERROR;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.JWT_INVALID;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.REDIS_SYSTEM_ERROR;
 
 /**
  * 系统技术异常处理器

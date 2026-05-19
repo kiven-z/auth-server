@@ -7,8 +7,8 @@ import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import com.auth.service.system.schedule.validation.SysJobTaskTypeDefinitionValidator;
 import org.springframework.stereotype.Component;
 
-import static com.auth.service.system.schedule.exception.SystemScheduleResultCode.JOB_CLASS_EMPTY;
-import static com.auth.service.system.schedule.exception.SystemScheduleResultCode.JOB_MODE_CUSTOM_FORBIDS_INVOKE_TARGET;
+import static com.auth.service.system.common.exception.code.SystemScheduleResultCode.JOB_CLASS_EMPTY;
+import static com.auth.service.system.common.exception.code.SystemScheduleResultCode.JOB_MODE_CUSTOM_FORBIDS_INVOKE_TARGET;
 
 /**
  * 自定义类任务定义校验器

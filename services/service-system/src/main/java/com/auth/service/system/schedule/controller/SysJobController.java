@@ -18,7 +18,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import static com.auth.service.system.common.exception.SystemCommonResultCode.*;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.*;
 
 /**
  * 定时任务与 Quartz 操作接口

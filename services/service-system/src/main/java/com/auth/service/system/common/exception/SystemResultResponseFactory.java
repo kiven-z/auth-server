@@ -2,7 +2,7 @@ package com.auth.service.system.common.exception;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.core.model.response.Result;
-import com.auth.service.system.message.infrastructure.exception.SystemMessageException;
+import com.auth.service.system.common.exception.code.SystemResultCode;
 import lombok.experimental.UtilityClass;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;

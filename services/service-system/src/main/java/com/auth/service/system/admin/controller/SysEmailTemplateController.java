@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static com.auth.service.system.common.exception.SystemCommonResultCode.*;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.*;
 
 /**
  * 邮件模板 前端控制器

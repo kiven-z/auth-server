@@ -19,7 +19,7 @@ import com.auth.service.system.admin.service.SysEmailTemplateService;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.message.api.MessageDispatchService;
-import com.auth.service.system.message.infrastructure.template.FreemarkerTemplateRenderer;
+import com.auth.service.system.message.template.FreemarkerTemplateRenderer;
 import com.auth.service.system.message.shared.MessageTemplateRequireFieldsJsonSupport;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -33,7 +33,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static com.auth.service.system.common.exception.SystemCommonResultCode.DATA_NOT_EXIST;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 
 /**
  * 邮件模板服务（数据落库于 sys_message_template，channel=EMAIL）

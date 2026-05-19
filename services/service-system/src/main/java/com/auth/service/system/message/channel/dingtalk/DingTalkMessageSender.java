@@ -7,9 +7,8 @@ import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.message.api.model.dingtalk.DingTalkChannelOptions;
 import com.auth.module.message.api.model.dingtalk.DingTalkMessageType;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.message.infrastructure.modules.dingtalk.RenderedDingTalkNotice;
-import com.auth.service.system.message.infrastructure.modules.dingtalk.client.DingTalkWorkNoticeClient;
-import com.auth.service.system.message.infrastructure.spi.MessageSender;
+import com.auth.service.system.message.channel.dingtalk.client.DingTalkWorkNoticeClient;
+import com.auth.service.system.message.spi.MessageSender;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
@@ -18,8 +17,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.auth.service.system.message.infrastructure.exception.SystemMessageResultCode.DING_TALK_BODY_EMPTY;
-import static com.auth.service.system.message.infrastructure.exception.SystemMessageResultCode.DING_TALK_NOT_ENABLED;
+import static com.auth.service.system.common.exception.code.SystemMessageResultCode.DING_TALK_BODY_EMPTY;
+import static com.auth.service.system.common.exception.code.SystemMessageResultCode.DING_TALK_NOT_ENABLED;
 
 /**
  * 钉钉工作通知渠道发送实现（统一消息编排）

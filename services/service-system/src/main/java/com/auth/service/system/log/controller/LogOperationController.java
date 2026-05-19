@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static com.auth.service.system.common.exception.SystemCommonResultCode.DELETE_SUCCESS;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DELETE_SUCCESS;
 
 /**
  * 操作日志接口

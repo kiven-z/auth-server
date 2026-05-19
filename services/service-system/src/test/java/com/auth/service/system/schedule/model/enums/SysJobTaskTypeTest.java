@@ -4,7 +4,7 @@ import com.auth.service.system.common.exception.SystemBusinessException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static com.auth.service.system.schedule.exception.SystemScheduleResultCode.JOB_TASK_TYPE_UNSUPPORTED;
+import static com.auth.service.system.common.exception.code.SystemScheduleResultCode.JOB_TASK_TYPE_UNSUPPORTED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 

@@ -1,6 +1,6 @@
 package com.auth.service.system.admin.exception;
 
-import com.auth.service.system.common.exception.SystemResultCode;
+import com.auth.service.system.common.exception.code.SystemResultCode;
 import lombok.Getter;
 
 /**

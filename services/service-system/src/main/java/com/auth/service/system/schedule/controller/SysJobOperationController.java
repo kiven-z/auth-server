@@ -9,7 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import static com.auth.service.system.common.exception.SystemCommonResultCode.MODIFY_SUCCESS;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.MODIFY_SUCCESS;
 
 /**
  * 定时任务运行态操作接口

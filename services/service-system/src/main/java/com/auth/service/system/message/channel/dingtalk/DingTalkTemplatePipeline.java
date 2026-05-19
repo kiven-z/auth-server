@@ -6,10 +6,9 @@ import com.auth.module.message.api.model.dingtalk.DingTalkMessageType;
 import com.auth.service.system.admin.mapper.MessageTemplateMapper;
 import com.auth.service.system.admin.model.entity.MessageTemplateEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.message.infrastructure.config.properties.DingTalkProperties;
-import com.auth.service.system.message.infrastructure.modules.dingtalk.RenderedDingTalkNotice;
-import com.auth.service.system.message.infrastructure.template.FreemarkerTemplateRenderer;
-import com.auth.service.system.message.infrastructure.template.TemplateRenderException;
+import com.auth.service.system.message.config.properties.DingTalkProperties;
+import com.auth.service.system.message.template.FreemarkerTemplateRenderer;
+import com.auth.service.system.common.exception.TemplateRenderException;
 import com.auth.service.system.message.shared.MessageTemplateRequireFieldsJsonSupport;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
@@ -18,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.auth.service.system.message.infrastructure.exception.SystemMessageResultCode.*;
+import static com.auth.service.system.common.exception.code.SystemMessageResultCode.*;
 
 /**
  * 钉钉模板加载、变量校验与 FreeMarker 渲染

@@ -1,9 +1,8 @@
 package com.auth.service.system.common.exception;
 
 import com.auth.common.core.model.response.Result;
-import com.auth.service.system.message.infrastructure.exception.SystemEmailResultCode;
-import com.auth.service.system.message.infrastructure.exception.SystemMessageException;
-import com.auth.service.system.message.infrastructure.exception.SystemMessageResultCode;
+import com.auth.service.system.common.exception.code.SystemEmailResultCode;
+import com.auth.service.system.common.exception.code.SystemMessageResultCode;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

@@ -12,7 +12,7 @@ import org.springframework.util.ReflectionUtils;
 import java.lang.reflect.Method;
 import java.util.Objects;
 
-import static com.auth.service.system.schedule.exception.SystemScheduleResultCode.*;
+import static com.auth.service.system.common.exception.code.SystemScheduleResultCode.*;
 import static com.auth.service.system.schedule.model.constans.SysJobQuartzDataKeys.BEAN_NAME;
 import static com.auth.service.system.schedule.model.constans.SysJobQuartzDataKeys.METHOD_NAME;
 

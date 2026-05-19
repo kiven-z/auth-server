@@ -15,8 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.auth.service.system.common.exception.SystemCommonResultCode.DATA_NOT_EXIST;
-import static com.auth.service.system.schedule.exception.SystemScheduleResultCode.JOB_QUARTZ_OPERATION_FAILED;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
+import static com.auth.service.system.common.exception.code.SystemScheduleResultCode.JOB_QUARTZ_OPERATION_FAILED;
 
 /**
  * 定时任务运行态操作服务实现

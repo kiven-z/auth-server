@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static com.auth.service.system.schedule.exception.SystemScheduleResultCode.*;
+import static com.auth.service.system.common.exception.code.SystemScheduleResultCode.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 

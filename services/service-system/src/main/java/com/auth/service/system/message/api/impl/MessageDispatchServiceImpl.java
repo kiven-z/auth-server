@@ -4,15 +4,15 @@ import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.message.api.MessageDispatchService;
-import com.auth.service.system.message.infrastructure.spi.MessageSender;
+import com.auth.service.system.message.spi.MessageSender;
 import org.springframework.stereotype.Service;
 
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.auth.service.system.message.infrastructure.exception.SystemMessageResultCode.MESSAGE_CHANNEL_UNSUPPORTED;
-import static com.auth.service.system.message.infrastructure.exception.SystemMessageResultCode.MESSAGE_SEND_COMMAND_NULL;
+import static com.auth.service.system.common.exception.code.SystemMessageResultCode.MESSAGE_CHANNEL_UNSUPPORTED;
+import static com.auth.service.system.common.exception.code.SystemMessageResultCode.MESSAGE_SEND_COMMAND_NULL;
 
 /**
  * 消息发送编排实现
