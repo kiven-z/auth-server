@@ -16,37 +16,36 @@ import static com.auth.service.system.common.exception.code.SystemMessageResultC
 @Component
 public class DypnsVerifyCodeMessageSender implements MessageSender {
 
-	private final DypnsVerifyCodeTemplatePipeline dypnsVerifyCodeTemplatePipeline;
+    private final DypnsVerifyCodeTemplatePipeline dypnsVerifyCodeTemplatePipeline;
+    private final AliyunDypnsVerifyCodeSender aliyunDypnsVerifyCodeSender;
 
-	private final DypnsVerifyCodeSender dypnsVerifyCodeSender;
+    public DypnsVerifyCodeMessageSender(DypnsVerifyCodeTemplatePipeline dypnsVerifyCodeTemplatePipeline,
+                                        AliyunDypnsVerifyCodeSender aliyunDypnsVerifyCodeSender) {
+        this.dypnsVerifyCodeTemplatePipeline = dypnsVerifyCodeTemplatePipeline;
+        this.aliyunDypnsVerifyCodeSender = aliyunDypnsVerifyCodeSender;
+    }
 
-	public DypnsVerifyCodeMessageSender(DypnsVerifyCodeTemplatePipeline dypnsVerifyCodeTemplatePipeline,
-			DypnsVerifyCodeSender dypnsVerifyCodeSender) {
-		this.dypnsVerifyCodeTemplatePipeline = dypnsVerifyCodeTemplatePipeline;
-		this.dypnsVerifyCodeSender = dypnsVerifyCodeSender;
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public MessageChannel channel() {
+        return MessageChannel.SMS_ALIYUN_DYPNS;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public MessageChannel channel() {
-		return MessageChannel.SMS_ALIYUN_DYPNS;
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void sendByTemplate(TemplateMessageCommand command) {
+        if (Boolean.TRUE.equals(command.getCustomBody())) {
+            throw new SystemBusinessException(SMS_CUSTOM_BODY_NOT_SUPPORTED);
+        }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void sendByTemplate(TemplateMessageCommand command) {
-		if (Boolean.TRUE.equals(command.getCustomBody())) {
-			throw new SystemBusinessException(SMS_CUSTOM_BODY_NOT_SUPPORTED);
-		}
-
-		DypnsVerifyCodeSendPayload prepared = dypnsVerifyCodeTemplatePipeline.prepare(command);
-		for (String phone : command.getTargets()) {
-			dypnsVerifyCodeSender.sendVerifyCode(phone, prepared.providerTemplateCode(), prepared.templateParam());
-		}
-	}
+        DypnsVerifyCodeSendPayload prepared = dypnsVerifyCodeTemplatePipeline.prepare(command);
+        for (String phone : command.getTargets()) {
+            aliyunDypnsVerifyCodeSender.sendVerifyCode(phone, prepared.providerTemplateCode(), prepared.templateParam());
+        }
+    }
 
 }
