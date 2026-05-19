@@ -73,8 +73,15 @@ public class AliyunDypnsSmsSender implements DypnsVerifyCodeSender {
 			SendSmsVerifyCodeResponse response = dypnsClient.send(request);
 			assertSendSuccess(response, phone, providerTemplateCode);
 		}
-		catch (Exception e) {
+		catch (IllegalStateException | IllegalArgumentException e) {
+			throw e;
+		}
+		catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
 			throw new IllegalStateException("Aliyun Dypns send interrupted", e);
+		}
+		catch (Exception e) {
+			throw new IllegalStateException("Aliyun Dypns send error: " + e.getMessage(), e);
 		}
 	}
 

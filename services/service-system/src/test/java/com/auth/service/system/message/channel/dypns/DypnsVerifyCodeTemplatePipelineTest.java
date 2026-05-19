@@ -5,7 +5,7 @@ import com.auth.module.message.command.TemplateMessageCommand;
 import com.auth.service.system.admin.mapper.MessageTemplateMapper;
 import com.auth.service.system.admin.model.entity.MessageTemplateEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.message.channel.dypns.model.DypnsVerifyCodePreparedMessage;
+import com.auth.module.message.modules.sms.model.DypnsVerifyCodeSendPayload;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -57,7 +57,7 @@ class DypnsVerifyCodeTemplatePipelineTest {
 			.variables(Map.of("code", "123456", "min", 5))
 			.build();
 
-		DypnsVerifyCodePreparedMessage prepared = pipeline.prepare(command);
+		DypnsVerifyCodeSendPayload prepared = pipeline.prepare(command);
 
 		assertThat(prepared.providerTemplateCode()).isEqualTo("100001");
 		assertThat(prepared.templateParam()).contains("\"code\":\"123456\"");

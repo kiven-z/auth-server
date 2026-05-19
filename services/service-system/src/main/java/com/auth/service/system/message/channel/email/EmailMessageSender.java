@@ -2,10 +2,13 @@ package com.auth.service.system.message.channel.email;
 
 import com.auth.module.message.channel.MessageChannel;
 import com.auth.module.message.command.TemplateMessageCommand;
-import com.auth.module.message.modules.email.EmailSendDTO;
+import com.auth.module.message.modules.email.model.EmailSendDTO;
+import com.auth.module.message.modules.email.model.RenderedEmail;
+import com.auth.module.message.modules.email.transport.EmailTransportException;
+import com.auth.module.message.modules.email.transport.MimeMailTransport;
 import com.auth.module.message.spi.MessageSender;
-import com.auth.service.system.message.channel.email.model.RenderedEmail;
 import com.auth.service.system.message.convert.TemplateMessageCommandConverter;
+import com.auth.service.system.message.support.EmailTransportExceptionMapper;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -48,7 +51,12 @@ public class EmailMessageSender implements MessageSender {
 		Map<String, Object> variables = Optional.ofNullable(command.getVariables()).orElseGet(HashMap::new);
 		// 渲染邮件模板
 		RenderedEmail rendered = emailTemplatePipeline.render(command.getTemplateCode(), variables);
-		mimeMailTransport.send(emailSendDTO, rendered);
+		try {
+			mimeMailTransport.send(emailSendDTO, rendered);
+		}
+		catch (EmailTransportException e) {
+			throw EmailTransportExceptionMapper.toBusinessException(e);
+		}
 	}
 
 }

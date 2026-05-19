@@ -1,16 +1,14 @@
-package com.auth.service.system.message.channel.dingtalk;
+package com.auth.module.message.modules.dingtalk.client;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.auth.module.message.config.properties.DingTalkProperties;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -24,8 +22,6 @@ import java.util.concurrent.atomic.AtomicReference;
  * @author Bunny
  */
 @Slf4j
-@ConditionalOnProperty(prefix = "auth.message.ding-talk", name = "enabled", havingValue = "true")
-@Component
 public class DingTalkAccessTokenClient {
 
 	private static final String OAUTH_TOKEN_URL = "https://api.dingtalk.com/v1.0/oauth2/accessToken";

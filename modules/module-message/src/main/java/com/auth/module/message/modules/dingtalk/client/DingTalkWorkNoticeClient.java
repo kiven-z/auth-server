@@ -1,4 +1,4 @@
-package com.auth.service.system.message.channel.dingtalk;
+package com.auth.module.message.modules.dingtalk.client;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
@@ -7,12 +7,10 @@ import cn.hutool.json.JSONUtil;
 import com.auth.module.message.config.properties.DingTalkProperties;
 import com.auth.module.message.modules.dingtalk.DingTalkMessageType;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -27,8 +25,6 @@ import java.util.stream.Collectors;
  * @author Bunny
  */
 @Slf4j
-@ConditionalOnProperty(prefix = "auth.message.ding-talk", name = "enabled", havingValue = "true")
-@Component
 public class DingTalkWorkNoticeClient {
 
 	private static final String WORK_NOTICE_URL = "https://oapi.dingtalk.com/topapi/message/corpconversation/asyncsend_v2";

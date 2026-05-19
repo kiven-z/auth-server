@@ -1,4 +1,4 @@
-package com.auth.module.message.modules.email;
+package com.auth.module.message.modules.email.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -7,7 +7,7 @@ import com.auth.module.message.modules.sms.DypnsVerifyCodeSender;
 import com.auth.module.message.modules.sms.aliyun.AliyunDypnsSmsSender;
 import com.auth.module.message.spi.MessageSender;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.message.channel.dypns.model.DypnsVerifyCodePreparedMessage;
+import com.auth.module.message.modules.sms.model.DypnsVerifyCodeSendPayload;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
@@ -56,7 +56,7 @@ public class DypnsVerifyCodeMessageSender implements MessageSender {
 			throw new SystemBusinessException(SMS_TARGET_EMPTY);
 		}
 
-		DypnsVerifyCodePreparedMessage prepared = dypnsVerifyCodeTemplatePipeline.prepare(command);
+		DypnsVerifyCodeSendPayload prepared = dypnsVerifyCodeTemplatePipeline.prepare(command);
 		DypnsVerifyCodeSender sender = dypnsVerifyCodeSender.getIfAvailable();
 		if (sender == null) {
 			throw new SystemBusinessException(SMS_SENDER_NOT_ENABLED);
@@ -73,7 +73,7 @@ public class DypnsVerifyCodeMessageSender implements MessageSender {
 	 * @param phone 手机号
 	 * @param prepared 准备好的发送参数
 	 */
-	private void sendOne(DypnsVerifyCodeSender sender, String phone, DypnsVerifyCodePreparedMessage prepared) {
+	private void sendOne(DypnsVerifyCodeSender sender, String phone, DypnsVerifyCodeSendPayload prepared) {
 		try {
 			sender.sendVerifyCode(phone, prepared.providerTemplateCode(), prepared.templateParam());
 		}

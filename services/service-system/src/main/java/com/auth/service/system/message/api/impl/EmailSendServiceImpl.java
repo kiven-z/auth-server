@@ -1,7 +1,7 @@
 package com.auth.service.system.message.api.impl;
 
 import com.auth.module.message.command.TemplateMessageCommand;
-import com.auth.module.message.modules.email.EmailSendDTO;
+import com.auth.module.message.modules.email.model.EmailSendDTO;
 import com.auth.service.system.message.api.EmailSendService;
 import com.auth.service.system.message.api.MessageDispatchService;
 import com.auth.service.system.message.convert.TemplateMessageCommandConverter;

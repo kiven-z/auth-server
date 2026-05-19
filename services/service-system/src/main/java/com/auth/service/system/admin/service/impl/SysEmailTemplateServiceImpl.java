@@ -4,7 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.message.channel.MessageChannel;
-import com.auth.module.message.modules.email.EmailSendDTO;
+import com.auth.module.message.modules.email.model.EmailSendDTO;
 import com.auth.service.system.admin.convert.EmailTemplateConvert;
 import com.auth.service.system.admin.mapper.MessageTemplateMapper;
 import com.auth.service.system.admin.model.entity.MessageTemplateEntity;
@@ -18,7 +18,7 @@ import com.auth.service.system.admin.service.SysEmailTemplateService;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.message.api.EmailSendService;
-import com.auth.service.system.message.shared.FreeMarkTemplateRenderer;
+import com.auth.module.message.template.FreemarkerTemplateRenderer;
 import com.auth.service.system.message.shared.MessageTemplateRequireFieldsJsonSupport;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -182,7 +182,7 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<MessageTemplateMapp
 		List<EmailTemplateRequireFieldRow> rows = MessageTemplateRequireFieldsJsonSupport
 			.parse(entity.getRequireFields());
 		Map<String, Object> model = MessageTemplateRequireFieldsJsonSupport.toExampleModel(rows);
-		return FreeMarkTemplateRenderer.processTemplate(entity.getTemplateName(), entity.getBodyContent(), model);
+		return FreemarkerTemplateRenderer.processTemplate(entity.getTemplateName(), entity.getBodyContent(), model);
 	}
 
 	/**
@@ -192,7 +192,7 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<MessageTemplateMapp
 	public String render(EmailTemplateRenderForm form) {
 		try {
 			Map<String, Object> model = MessageTemplateRequireFieldsJsonSupport.toExampleModel(form.getRequireFields());
-			return FreeMarkTemplateRenderer.processTemplate("inline-preview", form.getContent(), model);
+			return FreemarkerTemplateRenderer.processTemplate("inline-preview", form.getContent(), model);
 		}
 		catch (Exception e) {
 			return "预览渲染失败，请检查变量声明与正文语法";

@@ -4,8 +4,9 @@ import com.auth.module.message.channel.MessageChannel;
 import com.auth.module.message.command.TemplateMessageCommand;
 import com.auth.module.message.modules.dingtalk.DingTalkChannelOptions;
 import com.auth.module.message.modules.dingtalk.DingTalkMessageType;
+import com.auth.module.message.modules.dingtalk.client.DingTalkWorkNoticeClient;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.message.channel.dingtalk.model.RenderedDingTalkNotice;
+import com.auth.module.message.modules.dingtalk.model.RenderedDingTalkNotice;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,14 +19,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link DingTalkMessageSender} 单元测试

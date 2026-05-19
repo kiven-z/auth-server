@@ -1,7 +1,7 @@
 package com.auth.module.message.command;
 
 import com.auth.module.message.modules.dingtalk.DingTalkChannelOptions;
-import com.auth.module.message.modules.email.EmailChannelOptions;
+import com.auth.module.message.modules.email.model.EmailChannelOptions;
 import lombok.experimental.UtilityClass;
 
 /**

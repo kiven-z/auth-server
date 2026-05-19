@@ -1,12 +1,13 @@
 package com.auth.service.system.message.channel.email;
 
 import com.auth.module.message.channel.MessageChannel;
+import com.auth.module.message.modules.email.model.RenderedEmail;
 import com.auth.service.system.admin.mapper.MessageTemplateMapper;
 import com.auth.service.system.admin.model.entity.MessageTemplateEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.message.channel.email.model.RenderedEmail;
+import com.auth.module.message.template.FreemarkerTemplateRenderer;
+import com.auth.module.message.template.TemplateRenderException;
 import com.auth.service.system.message.shared.MessageTemplateRequireFieldsJsonSupport;
-import com.auth.service.system.message.shared.FreeMarkTemplateRenderer;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -57,10 +58,10 @@ public class EmailTemplatePipeline {
 	 */
 	private String renderSubject(MessageTemplateEntity template, Map<String, Object> variables) {
 		try {
-			return FreeMarkTemplateRenderer.processTemplate(template.getTemplateName() + "_subject",
+			return FreemarkerTemplateRenderer.processTemplate(template.getTemplateName() + "_subject",
 					template.getSubject(), variables);
 		}
-		catch (Exception e) {
+		catch (TemplateRenderException e) {
 			throw new SystemBusinessException(EMAIL_SUBJECT_RENDER_FAILED, e.getMessage());
 		}
 	}
@@ -73,10 +74,10 @@ public class EmailTemplatePipeline {
 	 */
 	private String renderContent(MessageTemplateEntity template, Map<String, Object> variables) {
 		try {
-			return FreeMarkTemplateRenderer.processTemplate(template.getTemplateName(), template.getBodyContent(),
+			return FreemarkerTemplateRenderer.processTemplate(template.getTemplateName(), template.getBodyContent(),
 					variables);
 		}
-		catch (Exception e) {
+		catch (TemplateRenderException e) {
 			throw new SystemBusinessException(EMAIL_BODY_RENDER_FAILED, e.getMessage());
 		}
 	}

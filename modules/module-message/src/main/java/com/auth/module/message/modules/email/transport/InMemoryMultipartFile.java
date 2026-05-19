@@ -1,4 +1,4 @@
-package com.auth.service.system.message.channel.email;
+package com.auth.module.message.modules.email.transport;
 
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * 内存中的 MultipartFile 实现，用于邮件附件组装
+ * In-memory {@link MultipartFile} for email attachment assembly.
  *
  * @author Bunny
  */
@@ -26,10 +26,10 @@ public class InMemoryMultipartFile implements MultipartFile {
 	private final byte[] content;
 
 	/**
-	 * @param name 表单字段名
-	 * @param originalFilename 原始文件名
-	 * @param contentType MIME 类型
-	 * @param content 文件内容
+	 * @param name form field name
+	 * @param originalFilename original filename
+	 * @param contentType MIME type
+	 * @param content file bytes
 	 */
 	public InMemoryMultipartFile(String name, String originalFilename, String contentType, byte[] content) {
 		this.name = name;

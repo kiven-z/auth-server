@@ -7,9 +7,10 @@ import com.auth.module.message.command.ChannelOptionsSupport;
 import com.auth.module.message.command.TemplateMessageCommand;
 import com.auth.module.message.modules.dingtalk.DingTalkChannelOptions;
 import com.auth.module.message.modules.dingtalk.DingTalkMessageType;
+import com.auth.module.message.modules.dingtalk.client.DingTalkWorkNoticeClient;
 import com.auth.module.message.spi.MessageSender;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.message.channel.dingtalk.model.RenderedDingTalkNotice;
+import com.auth.module.message.modules.dingtalk.model.RenderedDingTalkNotice;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
@@ -38,6 +39,33 @@ public class DingTalkMessageSender implements MessageSender {
 			ObjectProvider<DingTalkWorkNoticeClient> workNoticeClient) {
 		this.dingTalkTemplatePipeline = dingTalkTemplatePipeline;
 		this.workNoticeClient = workNoticeClient;
+	}
+
+	/**
+	 * 解析消息类型：options 覆盖模板结果
+	 * @param rendered 模板渲染结果
+	 * @param options 渠道扩展参数
+	 * @return 消息类型
+	 */
+	private static DingTalkMessageType resolveMessageType(RenderedDingTalkNotice rendered,
+			DingTalkChannelOptions options) {
+		if (options != null && options.getMessageType() != null) {
+			return options.getMessageType();
+		}
+		return rendered.messageType() != null ? rendered.messageType() : DingTalkMessageType.TEXT;
+	}
+
+	/**
+	 * 解析 Markdown 标题：options 覆盖模板结果
+	 * @param rendered 模板渲染结果
+	 * @param options 渠道扩展参数
+	 * @return 标题
+	 */
+	private static String resolveTitle(RenderedDingTalkNotice rendered, DingTalkChannelOptions options) {
+		if (options != null && CharSequenceUtil.isNotBlank(options.getTitle())) {
+			return options.getTitle();
+		}
+		return rendered.title();
 	}
 
 	/**
@@ -95,33 +123,6 @@ public class DingTalkMessageSender implements MessageSender {
 
 		Map<String, Object> variables = Optional.ofNullable(command.getVariables()).orElseGet(HashMap::new);
 		return dingTalkTemplatePipeline.render(command.getTemplateCode(), variables);
-	}
-
-	/**
-	 * 解析消息类型：options 覆盖模板结果
-	 * @param rendered 模板渲染结果
-	 * @param options 渠道扩展参数
-	 * @return 消息类型
-	 */
-	private static DingTalkMessageType resolveMessageType(RenderedDingTalkNotice rendered,
-			DingTalkChannelOptions options) {
-		if (options != null && options.getMessageType() != null) {
-			return options.getMessageType();
-		}
-		return rendered.messageType() != null ? rendered.messageType() : DingTalkMessageType.TEXT;
-	}
-
-	/**
-	 * 解析 Markdown 标题：options 覆盖模板结果
-	 * @param rendered 模板渲染结果
-	 * @param options 渠道扩展参数
-	 * @return 标题
-	 */
-	private static String resolveTitle(RenderedDingTalkNotice rendered, DingTalkChannelOptions options) {
-		if (options != null && CharSequenceUtil.isNotBlank(options.getTitle())) {
-			return options.getTitle();
-		}
-		return rendered.title();
 	}
 
 }

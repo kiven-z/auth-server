@@ -8,7 +8,7 @@ import com.auth.service.system.admin.mapper.MessageTemplateMapper;
 import com.auth.service.system.admin.model.entity.MessageTemplateEntity;
 import com.auth.service.system.admin.model.vo.emailtemplate.EmailTemplateRequireFieldRow;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.message.channel.dypns.model.DypnsVerifyCodePreparedMessage;
+import com.auth.module.message.modules.sms.model.DypnsVerifyCodeSendPayload;
 import com.auth.service.system.message.shared.MessageTemplateRequireFieldsJsonSupport;
 import org.springframework.stereotype.Component;
 
@@ -63,7 +63,7 @@ public class DypnsVerifyCodeTemplatePipeline {
 	 * @param command 模板发送命令
 	 * @return 厂商 API 就绪参数
 	 */
-	public DypnsVerifyCodePreparedMessage prepare(TemplateMessageCommand command) {
+	public DypnsVerifyCodeSendPayload prepare(TemplateMessageCommand command) {
 		String sceneCode = command.getTemplateCode();
 		MessageTemplateEntity template = messageTemplateMapper.selectEnabledBySceneCodeAndChannel(sceneCode,
 				MessageChannel.SMS_DYPNS_VERIFY_CODE.name());
@@ -78,7 +78,7 @@ public class DypnsVerifyCodeTemplatePipeline {
 				SMS_TEMPLATE_VARS_MISSING);
 
 		String templateParam = buildTemplateParam(requireFields, variables);
-		return new DypnsVerifyCodePreparedMessage(template.getProviderTemplateCode(), templateParam);
+		return new DypnsVerifyCodeSendPayload(template.getProviderTemplateCode(), templateParam);
 	}
 
 }

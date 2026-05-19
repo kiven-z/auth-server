@@ -3,8 +3,8 @@ package com.auth.service.system.message.convert;
 import com.auth.module.message.channel.MessageChannel;
 import com.auth.module.message.command.ChannelOptionsSupport;
 import com.auth.module.message.command.TemplateMessageCommand;
-import com.auth.module.message.modules.email.EmailChannelOptions;
-import com.auth.module.message.modules.email.EmailSendDTO;
+import com.auth.module.message.modules.email.model.EmailChannelOptions;
+import com.auth.module.message.modules.email.model.EmailSendDTO;
 import lombok.experimental.UtilityClass;
 
 /**

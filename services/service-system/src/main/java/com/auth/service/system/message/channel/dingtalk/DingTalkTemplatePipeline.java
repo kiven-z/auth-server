@@ -7,8 +7,9 @@ import com.auth.module.message.modules.dingtalk.DingTalkMessageType;
 import com.auth.service.system.admin.mapper.MessageTemplateMapper;
 import com.auth.service.system.admin.model.entity.MessageTemplateEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.message.channel.dingtalk.model.RenderedDingTalkNotice;
-import com.auth.service.system.message.shared.FreeMarkTemplateRenderer;
+import com.auth.module.message.modules.dingtalk.model.RenderedDingTalkNotice;
+import com.auth.module.message.template.FreemarkerTemplateRenderer;
+import com.auth.module.message.template.TemplateRenderException;
 import com.auth.service.system.message.shared.MessageTemplateRequireFieldsJsonSupport;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
@@ -90,9 +91,9 @@ public class DingTalkTemplatePipeline {
 			return null;
 		}
 		try {
-			return FreeMarkTemplateRenderer.processTemplate(templateKey, templateContent, variables);
+			return FreemarkerTemplateRenderer.processTemplate(templateKey, templateContent, variables);
 		}
-		catch (Exception e) {
+		catch (TemplateRenderException e) {
 			throw new SystemBusinessException(DING_TALK_RENDER_FAILED, e.getMessage());
 		}
 	}
@@ -108,10 +109,10 @@ public class DingTalkTemplatePipeline {
 			throw new SystemBusinessException(DING_TALK_BODY_EMPTY);
 		}
 		try {
-			return FreeMarkTemplateRenderer.processTemplate(template.getTemplateName(), template.getBodyContent(),
+			return FreemarkerTemplateRenderer.processTemplate(template.getTemplateName(), template.getBodyContent(),
 					variables);
 		}
-		catch (Exception e) {
+		catch (TemplateRenderException e) {
 			throw new SystemBusinessException(DING_TALK_RENDER_FAILED, e.getMessage());
 		}
 	}
