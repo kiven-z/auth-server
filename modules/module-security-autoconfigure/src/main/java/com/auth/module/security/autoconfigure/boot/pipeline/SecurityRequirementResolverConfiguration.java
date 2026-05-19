@@ -8,7 +8,7 @@ import com.auth.module.security.autoconfigure.pipeline.rule.InternalApiRule;
 import com.auth.module.security.autoconfigure.pipeline.rule.PublicApiRule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 import java.util.List;
 
@@ -21,8 +21,8 @@ import java.util.List;
 class SecurityRequirementResolverConfiguration {
 
 	@Bean
-	HandlerMethodResolver handlerMethodResolver(List<HandlerMapping> handlerMappings) {
-		return new HandlerMethodResolver(handlerMappings);
+	HandlerMethodResolver handlerMethodResolver(RequestMappingHandlerMapping requestMappingHandlerMapping) {
+		return new HandlerMethodResolver(requestMappingHandlerMapping);
 	}
 
 	/**

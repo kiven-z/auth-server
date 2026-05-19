@@ -1,6 +1,5 @@
 package com.auth.service.system.message.convert;
 
-import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.ChannelOptionsSupport;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.message.api.model.email.EmailChannelOptions;
@@ -14,28 +13,6 @@ import lombok.experimental.UtilityClass;
  */
 @UtilityClass
 public class TemplateMessageCommandConverter {
-
-	/**
-	 * 将邮件 DTO 转为统一模板发送命令
-	 * @param dto 邮件发送请求
-	 * @return 模板化发送命令
-	 */
-	public static TemplateMessageCommand fromEmailDto(EmailSendDTO dto) {
-		EmailChannelOptions options = EmailChannelOptions.builder()
-			.cc(dto.getCc())
-			.bcc(dto.getBcc())
-			.replyTo(dto.getReplyTo())
-			.hasHtml(dto.getHasHtml())
-			.attachments(dto.getAttachments())
-			.build();
-		return TemplateMessageCommand.builder()
-			.channel(MessageChannel.EMAIL)
-			.templateCode(dto.getTemplateCode())
-			.targets(dto.getTo())
-			.variables(dto.getVariables())
-			.options(options)
-			.build();
-	}
 
 	/**
 	 * 将统一命令转为邮件 DTO（仅 EMAIL 渠道有效）

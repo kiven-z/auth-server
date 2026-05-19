@@ -4,11 +4,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerExecutionChain;
-import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.util.ServletRequestPathUtils;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -26,10 +24,10 @@ import java.util.Optional;
 @Slf4j
 public final class HandlerMethodResolver {
 
-	private final List<HandlerMapping> handlerMappings;
+	private final RequestMappingHandlerMapping requestMappingHandlerMapping;
 
-	public HandlerMethodResolver(List<HandlerMapping> handlerMappings) {
-		this.handlerMappings = handlerMappings;
+	public HandlerMethodResolver(RequestMappingHandlerMapping requestMappingHandlerMapping) {
+		this.requestMappingHandlerMapping = requestMappingHandlerMapping;
 	}
 
 	/**
@@ -44,21 +42,17 @@ public final class HandlerMethodResolver {
 				ServletRequestPathUtils.parseAndCache(request);
 				cleanupRequired = true;
 			}
-			for (HandlerMapping mapping : handlerMappings) {
-				try {
-					HandlerExecutionChain chain = mapping.getHandler(request);
-					if (chain == null) {
-						continue;
-					}
+			try {
+				HandlerExecutionChain chain = requestMappingHandlerMapping.getHandler(request);
+				if (chain != null) {
 					Object handler = chain.getHandler();
 					if (handler instanceof HandlerMethod hm) {
 						return Optional.of(hm);
 					}
 				}
-				catch (Exception exception) {
-					// 解析失败时继续尝试下一个 HandlerMapping
-					log.debug("Resolve handler method failed: {}", exception.getMessage());
-				}
+			}
+			catch (Exception exception) {
+				log.debug("Resolve handler method failed: {}", exception.getMessage());
 			}
 			return Optional.empty();
 		}

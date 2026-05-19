@@ -8,10 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.util.ServletRequestPathUtils;
-
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -21,12 +19,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class HandlerMethodResolverTest {
 
 	@Autowired
-	private List<HandlerMapping> handlerMappings;
+	private RequestMappingHandlerMapping requestMappingHandlerMapping;
 
 	@Test
 	@DisplayName("测试没有预缓存请求路径时应找到处理方法")
 	void resolve_withoutPrecachedRequestPath_findsHandlerMethod() {
-		HandlerMethodResolver resolver = new HandlerMethodResolver(handlerMappings);
+		HandlerMethodResolver resolver = new HandlerMethodResolver(requestMappingHandlerMapping);
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/probe/public");
 		request.setRequestURI("/probe/public");
 
@@ -39,7 +37,7 @@ class HandlerMethodResolverTest {
 	@Test
 	@DisplayName("测试未知路径时应返回空并清除缓存")
 	void resolve_unknownPath_returnsEmptyAndClearsCache() {
-		HandlerMethodResolver resolver = new HandlerMethodResolver(handlerMappings);
+		HandlerMethodResolver resolver = new HandlerMethodResolver(requestMappingHandlerMapping);
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/probe/does-not-exist");
 		request.setRequestURI("/probe/does-not-exist");
 
