@@ -1,6 +1,6 @@
 package com.auth.service.system.schedule.model.payload;
 
-import com.auth.module.message.command.TemplateMessageCommand;
+import com.auth.module.message.api.command.TemplateMessageCommand;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -19,20 +19,18 @@ import java.io.Serializable;
 @Setter
 public class MessageDispatchPayload implements Serializable {
 
-	@Serial
-	private static final long serialVersionUID = 1L;
+    /**
+     * 当前支持的载荷版本
+     */
+    public static final int VERSION_1 = 1;
+    @Serial
+    private static final long serialVersionUID = 1L;
+    @Schema(title = "载荷协议版本")
+    @NotNull
+    private Integer version = VERSION_1;
 
-	/**
-	 * 当前支持的载荷版本
-	 */
-	public static final int VERSION_1 = 1;
-
-	@Schema(title = "载荷协议版本")
-	@NotNull
-	private Integer version = VERSION_1;
-
-	@Schema(title = "消息命令")
-	@NotNull
-	private TemplateMessageCommand command;
+    @Schema(title = "消息命令")
+    @NotNull
+    private TemplateMessageCommand command;
 
 }

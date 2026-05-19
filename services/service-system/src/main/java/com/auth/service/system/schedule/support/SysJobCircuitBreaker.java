@@ -9,6 +9,7 @@ import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.SchedulerException;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,7 +44,7 @@ public class SysJobCircuitBreaker {
 	 */
 	private final ScheduleJobProperties scheduleJobProperties;
 
-	public SysJobCircuitBreaker(SysJobSchedulerManager sysJobSchedulerManager, SysJobMapper sysJobMapper,
+	public SysJobCircuitBreaker(@Lazy SysJobSchedulerManager sysJobSchedulerManager, SysJobMapper sysJobMapper,
 			JobLogMapper jobLogMapper, ScheduleJobProperties scheduleJobProperties) {
 		this.sysJobSchedulerManager = sysJobSchedulerManager;
 		this.sysJobMapper = sysJobMapper;

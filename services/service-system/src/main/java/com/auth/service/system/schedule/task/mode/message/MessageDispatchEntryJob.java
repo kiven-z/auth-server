@@ -1,15 +1,11 @@
 package com.auth.service.system.schedule.task.mode.message;
 
-import com.auth.module.message.command.TemplateMessageCommand;
+import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.service.system.message.api.MessageDispatchService;
 import com.auth.service.system.schedule.model.constans.SysJobQuartzDataKeys;
 import com.auth.service.system.schedule.support.MessageDispatchCommandParser;
 import com.auth.service.system.schedule.task.mode.QuartzJobSupport;
-import org.quartz.DisallowConcurrentExecution;
-import org.quartz.Job;
-import org.quartz.JobDataMap;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
+import org.quartz.*;
 import org.springframework.context.ApplicationContext;
 
 /**
@@ -19,32 +15,30 @@ import org.springframework.context.ApplicationContext;
  */
 public class MessageDispatchEntryJob implements Job {
 
-	@Override
-	public void execute(JobExecutionContext context) throws JobExecutionException {
-		try {
-			ApplicationContext app = QuartzJobSupport.getApplicationContext(context);
-			JobDataMap jobDataMap = context.getMergedJobDataMap();
-			String payloadJson = jobDataMap.getString(SysJobQuartzDataKeys.PAYLOAD_JSON);
+    @Override
+    public void execute(JobExecutionContext context) throws JobExecutionException {
+        try {
+            ApplicationContext app = QuartzJobSupport.getApplicationContext(context);
+            JobDataMap jobDataMap = context.getMergedJobDataMap();
+            String payloadJson = jobDataMap.getString(SysJobQuartzDataKeys.PAYLOAD_JSON);
 
-			MessageDispatchCommandParser parser = app.getBean(MessageDispatchCommandParser.class);
-			TemplateMessageCommand command = parser.parseAndValidate(payloadJson);
-			MessageDispatchService dispatchService = app.getBean(MessageDispatchService.class);
-			dispatchService.sendByTemplate(command);
-		}
-		catch (JobExecutionException exception) {
-			throw exception;
-		}
-		catch (Exception exception) {
-			throw new JobExecutionException(exception);
-		}
-	}
+            MessageDispatchCommandParser parser = app.getBean(MessageDispatchCommandParser.class);
+            TemplateMessageCommand command = parser.parseAndValidate(payloadJson);
+            MessageDispatchService dispatchService = app.getBean(MessageDispatchService.class);
+            dispatchService.sendByTemplate(command);
+        } catch (JobExecutionException exception) {
+            throw exception;
+        } catch (Exception exception) {
+            throw new JobExecutionException(exception);
+        }
+    }
 
-	/**
-	 * 禁止并发版本
-	 */
-	@DisallowConcurrentExecution
-	public static class Disallow extends MessageDispatchEntryJob {
+    /**
+     * 禁止并发版本
+     */
+    @DisallowConcurrentExecution
+    public static class Disallow extends MessageDispatchEntryJob {
 
-	}
+    }
 
 }

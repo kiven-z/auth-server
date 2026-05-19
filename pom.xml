@@ -21,6 +21,7 @@
         <module>services</module>
         <module>auth-gateway</module>
         <module>commons</module>
+        <module>modules/module-message-sender</module>
     </modules>
 
     <properties>
