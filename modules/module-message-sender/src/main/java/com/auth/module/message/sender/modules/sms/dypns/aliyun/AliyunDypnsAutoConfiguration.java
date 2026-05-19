@@ -1,7 +1,7 @@
-package com.auth.module.message.sender.modules.sms.aliyun;
+package com.auth.module.message.sender.modules.sms.dypns.aliyun;
 
 import com.auth.module.message.sender.config.properties.SmsProperties;
-import com.auth.module.message.sender.modules.sms.DypnsVerifyCodeSender;
+import com.auth.module.message.sender.modules.sms.dypns.DypnsVerifyCodeSender;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

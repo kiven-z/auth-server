@@ -4,7 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.json.JSONUtil;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
-import com.auth.module.message.sender.modules.sms.DypnsVerifyCodeSendPayload;
+import com.auth.module.message.sender.modules.sms.dypns.DypnsVerifyCodeSendPayload;
 import com.auth.service.system.admin.mapper.MessageTemplateMapper;
 import com.auth.service.system.admin.model.entity.MessageTemplateEntity;
 import com.auth.service.system.admin.model.vo.emailtemplate.EmailTemplateRequireFieldRow;

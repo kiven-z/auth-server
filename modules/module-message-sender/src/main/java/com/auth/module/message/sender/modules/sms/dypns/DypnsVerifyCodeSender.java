@@ -1,4 +1,4 @@
-package com.auth.module.message.sender.modules.sms;
+package com.auth.module.message.sender.modules.sms.dypns;
 
 /**
  * 阿里云 Dypns 验证码短信发送 SPI（渠道 SMS_ALIYUN_DYPNS，非 dysmsapi 通用模板短信）

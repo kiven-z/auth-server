@@ -2,7 +2,7 @@ package com.auth.module.message.sender.config;
 
 import com.auth.module.message.sender.modules.dingtalk.autoconfigure.DingTalkAutoConfiguration;
 import com.auth.module.message.sender.modules.email.autoconfigure.EmailAutoConfiguration;
-import com.auth.module.message.sender.modules.sms.aliyun.AliyunDypnsAutoConfiguration;
+import com.auth.module.message.sender.modules.sms.dypns.aliyun.AliyunDypnsAutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -22,8 +22,8 @@ public class MessageAutoConfiguration {
 	 * HTTP client for message channel adapters (DingTalk, email URL attachments).
 	 * @return RestTemplate bean
 	 */
-	@Bean
 	@ConditionalOnMissingBean
+	@Bean
 	RestTemplate messageRestTemplate() {
 		return new RestTemplate();
 	}

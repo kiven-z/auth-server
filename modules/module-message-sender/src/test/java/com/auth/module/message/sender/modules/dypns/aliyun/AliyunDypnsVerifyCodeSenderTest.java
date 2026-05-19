@@ -1,10 +1,11 @@
-package com.auth.module.message.sender.modules.sms.aliyun;
+package com.auth.module.message.sender.modules.dypns.aliyun;
 
 import com.aliyun.sdk.service.dypnsapi20170525.AsyncClient;
 import com.aliyun.sdk.service.dypnsapi20170525.models.SendSmsVerifyCodeRequest;
 import com.aliyun.sdk.service.dypnsapi20170525.models.SendSmsVerifyCodeResponse;
 import com.aliyun.sdk.service.dypnsapi20170525.models.SendSmsVerifyCodeResponseBody;
 import com.auth.module.message.sender.config.properties.SmsProperties;
+import com.auth.module.message.sender.modules.sms.dypns.aliyun.AliyunDypnsVerifyCodeSender;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,19 +16,27 @@ import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link AliyunDypnsVerifyCodeSender} 单元测试
  */
-@ExtendWith(MockitoExtension.class)
 @DisplayName("AliyunDypnsVerifyCodeSender 阿里云 Dypns 短信")
+@ExtendWith(MockitoExtension.class)
 class AliyunDypnsVerifyCodeSenderTest {
 
 	@Mock
 	private AsyncClient asyncClient;
+
+	private static SmsProperties validSmsProperties() {
+		SmsProperties properties = new SmsProperties();
+		properties.setRegion("cn-hangzhou");
+		properties.setEndpoint("dypnsapi.aliyuncs.com");
+		properties.setAccessKeyId("test-ak");
+		properties.setAccessKeySecret("test-sk");
+		properties.setSignName("TestSign");
+		return properties;
+	}
 
 	@Test
 	@DisplayName("厂商返回 OK 时发送成功")
@@ -63,16 +72,6 @@ class AliyunDypnsVerifyCodeSenderTest {
 		assertThatThrownBy(() -> sender.sendVerifyCode("13800000000", "100001", "{}"))
 			.isInstanceOf(IllegalStateException.class)
 			.hasMessageContaining("Aliyun Dypns send failed");
-	}
-
-	private static SmsProperties validSmsProperties() {
-		SmsProperties properties = new SmsProperties();
-		properties.setRegion("cn-hangzhou");
-		properties.setEndpoint("dypnsapi.aliyuncs.com");
-		properties.setAccessKeyId("test-ak");
-		properties.setAccessKeySecret("test-sk");
-		properties.setSignName("TestSign");
-		return properties;
 	}
 
 }

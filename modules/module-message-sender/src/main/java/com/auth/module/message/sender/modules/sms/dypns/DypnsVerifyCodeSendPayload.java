@@ -1,4 +1,4 @@
-package com.auth.module.message.sender.modules.sms;
+package com.auth.module.message.sender.modules.sms.dypns;
 
 /**
  * Prepared parameters for Aliyun Dypns {@code SendSmsVerifyCode}.
