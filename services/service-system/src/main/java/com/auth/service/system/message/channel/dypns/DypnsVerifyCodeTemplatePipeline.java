@@ -43,6 +43,8 @@ public class DypnsVerifyCodeTemplatePipeline {
 	private static String buildTemplateParam(List<EmailTemplateRequireFieldRow> requireFields,
 			Map<String, Object> variables) {
 		Map<String, String> paramMap = new LinkedHashMap<>();
+
+		// 添加必填字段
 		if (CollUtil.isNotEmpty(requireFields)) {
 			for (EmailTemplateRequireFieldRow field : requireFields) {
 				Object value = variables.get(field.getKey());
@@ -50,8 +52,10 @@ public class DypnsVerifyCodeTemplatePipeline {
 			}
 		}
 		else {
+			// 添加可选字段
 			variables.forEach((key, value) -> paramMap.put(key, value == null ? "" : String.valueOf(value)));
 		}
+
 		return JSONUtil.toJsonStr(paramMap);
 	}
 
@@ -62,18 +66,25 @@ public class DypnsVerifyCodeTemplatePipeline {
 	 */
 	public DypnsVerifyCodeSendPayload prepare(TemplateMessageCommand command) {
 		String sceneCode = command.getTemplateCode();
+
+		// 查询模板
 		MessageTemplateEntity template = messageTemplateMapper.selectEnabledBySceneCodeAndChannel(sceneCode,
 				MessageChannel.SMS_ALIYUN_DYPNS.name());
 		if (template == null) {
-			throw new SystemBusinessException(SMS_TEMPLATE_NOT_FOUND, sceneCode);
+			throw new SystemBusinessException(SMS_TEMPLATE_NOT_FOUND, MessageChannel.SMS_ALIYUN_DYPNS.name(),
+					sceneCode);
 		}
 
+		// 获取变量
 		Map<String, Object> variables = Optional.ofNullable(command.getVariables()).orElseGet(LinkedHashMap::new);
+		// 解析必填字段
 		List<EmailTemplateRequireFieldRow> requireFields = MessageTemplateRequireFieldsJsonSupport
 			.parse(template.getRequireFields());
+		// 验证变量
 		MessageTemplateRequireFieldsJsonSupport.assertVariablesPresent(requireFields, variables,
-				SMS_TEMPLATE_VARS_MISSING);
+				SMS_TEMPLATE_VARS_MISSING, MessageChannel.SMS_ALIYUN_DYPNS.name());
 
+		// 构建模板参数
 		String templateParam = buildTemplateParam(requireFields, variables);
 		return new DypnsVerifyCodeSendPayload(template.getProviderTemplateCode(), templateParam);
 	}

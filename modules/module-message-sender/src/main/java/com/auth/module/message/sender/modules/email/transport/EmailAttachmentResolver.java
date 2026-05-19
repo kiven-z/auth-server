@@ -59,7 +59,8 @@ public class EmailAttachmentResolver {
 			}
 			catch (IllegalArgumentException e) {
 				throw new EmailTransportException(EmailTransportException.Reason.ATTACHMENT_BASE64_FAILED,
-						e.getMessage(), e);
+						EmailTransportException.Reason.ATTACHMENT_BASE64_FAILED.formatEnglishMessage(e.getMessage()),
+						e);
 			}
 		}
 		if (attachment.getBytes() != null && attachment.getBytes().length > 0) {
@@ -72,7 +73,8 @@ public class EmailAttachmentResolver {
 					return response.getBody();
 				}
 				throw new EmailTransportException(EmailTransportException.Reason.ATTACHMENT_HTTP_STATUS,
-						"HTTP status: " + response.getStatusCode().value());
+						EmailTransportException.Reason.ATTACHMENT_HTTP_STATUS
+							.formatEnglishMessage(response.getStatusCode().value()));
 			}
 			catch (EmailTransportException e) {
 				throw e;
@@ -80,7 +82,8 @@ public class EmailAttachmentResolver {
 			catch (Exception e) {
 				log.error("Failed to download attachment from URL", e);
 				throw new EmailTransportException(EmailTransportException.Reason.ATTACHMENT_DOWNLOAD_FAILED,
-						e.getMessage(), e);
+						EmailTransportException.Reason.ATTACHMENT_DOWNLOAD_FAILED.formatEnglishMessage(e.getMessage()),
+						e);
 			}
 		}
 		return new byte[0];

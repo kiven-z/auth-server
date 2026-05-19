@@ -97,7 +97,7 @@ public class LogJobServiceImpl extends ServiceImpl<LogJobMapper, JobLogEntity> i
 		// 获取当前用户ID
 		Long userId = SecurityUserUtils.getUserId();
 		if (userId == null) {
-			throw new SystemBusinessException(USER_NOT_EXIST);
+			throw new SystemBusinessException(ILLEGAL_USER_ID_NOT_NULL);
 		}
 
 		// 查询并验证用户是否存在

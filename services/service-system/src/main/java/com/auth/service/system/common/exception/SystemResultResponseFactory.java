@@ -1,8 +1,8 @@
 package com.auth.service.system.common.exception;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.core.model.response.Result;
 import com.auth.service.system.common.exception.code.SystemResultCode;
-
 import lombok.experimental.UtilityClass;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -51,6 +51,20 @@ public class SystemResultResponseFactory {
 	}
 
 	/**
+	 * 构建传输层英文错误响应（无 i18n key，message 为英文字面量）
+	 * @param resultCode 返回 Result
+	 * @param englishMessage 英文消息
+	 * @param detailError 稳定子错误标识
+	 * @return Result
+	 */
+	public static Result<Object> buildEnglish(SystemResultCode resultCode, String englishMessage, String detailError) {
+		Objects.requireNonNull(resultCode, "resultCode");
+		String message = CharSequenceUtil.blankToDefault(englishMessage, resultCode.getError());
+		String error = CharSequenceUtil.blankToDefault(detailError, resultCode.getError());
+		return Result.error(resultCode.getBizCode(), error, message);
+	}
+
+	/**
 	 * 公共拼装：当前线程 Locale + 两段式 MessageSource + Result.error + ext
 	 * @param messageSource 消息源
 	 * @param resultCode 结果码
@@ -58,8 +72,12 @@ public class SystemResultResponseFactory {
 	 * @return Result
 	 */
 	private static Result<Object> buildBody(MessageSource messageSource, SystemResultCode resultCode, Object[] args) {
+		String messageKey = resultCode.getMessageKey();
+		if (CharSequenceUtil.isBlank(messageKey)) {
+			throw new IllegalArgumentException("messageKey is required for i18n result code: " + resultCode.getError());
+		}
+
 		Locale locale = LocaleContextHolder.getLocale();
-		String messageKey = Objects.requireNonNull(resultCode.getMessageKey(), "messageKey");
 		String defaultEnglish = messageSource.getMessage(messageKey, args, messageKey, Locale.ENGLISH);
 		String message = messageSource.getMessage(messageKey, args, defaultEnglish, locale);
 

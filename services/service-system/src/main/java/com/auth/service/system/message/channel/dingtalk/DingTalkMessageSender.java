@@ -1,6 +1,5 @@
 package com.auth.service.system.message.channel.dingtalk;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.ChannelOptionsSupport;
@@ -16,11 +15,11 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.auth.service.system.common.exception.code.message.SystemMessageResultCode.*;
+import static com.auth.service.system.common.exception.code.message.SystemMessageResultCode.DING_TALK_BODY_EMPTY;
+import static com.auth.service.system.common.exception.code.message.SystemMessageResultCode.DING_TALK_NOT_ENABLED;
 
 /**
  * 钉钉工作通知渠道发送实现（统一消息编排）
@@ -81,11 +80,6 @@ public class DingTalkMessageSender implements MessageSender {
 	 */
 	@Override
 	public void sendByTemplate(TemplateMessageCommand command) {
-		List<String> targets = command.getTargets();
-		if (CollUtil.isEmpty(targets)) {
-			throw new SystemBusinessException(DING_TALK_TARGET_EMPTY);
-		}
-
 		DingTalkWorkNoticeClient client = workNoticeClient.getIfAvailable();
 		if (client == null) {
 			throw new SystemBusinessException(DING_TALK_NOT_ENABLED);
@@ -96,12 +90,7 @@ public class DingTalkMessageSender implements MessageSender {
 		DingTalkMessageType messageType = resolveMessageType(rendered, options);
 		String title = resolveTitle(rendered, options);
 
-		try {
-			client.sendWorkNotice(targets, messageType, title, rendered.content());
-		}
-		catch (IllegalStateException | IllegalArgumentException ex) {
-			throw new SystemBusinessException(DING_TALK_SEND_FAILED, ex.getMessage());
-		}
+		client.sendWorkNotice(command.getTargets(), messageType, title, rendered.content());
 	}
 
 	/**

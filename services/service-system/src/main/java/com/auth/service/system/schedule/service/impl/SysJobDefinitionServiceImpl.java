@@ -116,7 +116,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		}
 		catch (SchedulerException ex) {
 			log.error("注册 Quartz 失败", ex);
-			throw new SystemBusinessException(JOB_QUARTZ_REGISTER_FAILED, ex.getMessage());
+			throw new SystemBusinessException(JOB_QUARTZ_OPERATION_FAILED, "register", ex.getMessage());
 		}
 	}
 
@@ -152,7 +152,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		}
 		catch (SchedulerException ex) {
 			log.error("更新 Quartz 失败", ex);
-			throw new SystemBusinessException(JOB_QUARTZ_UPDATE_FAILED, ex.getMessage());
+			throw new SystemBusinessException(JOB_QUARTZ_OPERATION_FAILED, "update", ex.getMessage());
 		}
 	}
 
@@ -173,7 +173,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		}
 		catch (SchedulerException ex) {
 			log.error("删除 Quartz Job 失败", ex);
-			throw new SystemBusinessException(JOB_QUARTZ_DELETE_FAILED, ex.getMessage());
+			throw new SystemBusinessException(JOB_QUARTZ_OPERATION_FAILED, "delete", ex.getMessage());
 		}
 		try {
 			jobLogMapper.deleteByJobNameAndGroup(jobName, jobGroup);

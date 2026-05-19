@@ -73,7 +73,7 @@ public class SysJobGroupController {
 	@PutMapping
 	public Result<String> update(@Validated(UpdateGroup.class) @RequestBody SysJobGroupUpdateForm form) {
 		sysJobGroupService.update(form);
-		return Result.success(null, UPDATE_SUCCESS.getMessage());
+		return Result.success(null, MODIFY_SUCCESS.getMessage());
 	}
 
 	@Operation(summary = "删除任务分组")

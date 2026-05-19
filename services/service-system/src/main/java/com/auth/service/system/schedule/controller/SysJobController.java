@@ -61,7 +61,7 @@ public class SysJobController {
 	public Result<String> create(@Validated(CreateGroup.class) @RequestBody SysJobCreateForm form) {
 		sysJobDefinitionService.create(form);
 
-		return Result.success(null, ADD_SUCCESS.getMessage());
+		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
 	@Operation(summary = "修改定时任务")
@@ -70,7 +70,7 @@ public class SysJobController {
 	public Result<String> update(@Validated(UpdateGroup.class) @RequestBody SysJobUpdateForm form) {
 		sysJobDefinitionService.update(form);
 
-		return Result.success(null, UPDATE_SUCCESS.getMessage());
+		return Result.success(null, MODIFY_SUCCESS.getMessage());
 	}
 
 	@Operation(summary = "删除定时任务")

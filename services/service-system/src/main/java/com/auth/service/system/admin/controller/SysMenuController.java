@@ -87,7 +87,7 @@ public class SysMenuController {
 	@PutMapping
 	public Result<String> update(@Validated(UpdateGroup.class) @RequestBody SysMenuSaveForm form) {
 		sysMenuService.update(form);
-		return Result.success(null, UPDATE_SUCCESS.getMessage());
+		return Result.success(null, MODIFY_SUCCESS.getMessage());
 	}
 
 	@Operation(summary = "批量删除菜单（逻辑删除）")
@@ -103,7 +103,7 @@ public class SysMenuController {
 	@PutMapping("/status")
 	public Result<String> batchUpdateStatus(@Valid @RequestBody SysMenuBatchStatusForm form) {
 		sysMenuService.batchUpdateStatus(form);
-		return Result.success(null, UPDATE_SUCCESS.getMessage());
+		return Result.success(null, MODIFY_SUCCESS.getMessage());
 	}
 
 }

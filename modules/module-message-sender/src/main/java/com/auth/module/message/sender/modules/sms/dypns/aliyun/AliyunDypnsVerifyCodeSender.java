@@ -7,6 +7,7 @@ import com.aliyun.sdk.service.dypnsapi20170525.AsyncClient;
 import com.aliyun.sdk.service.dypnsapi20170525.models.SendSmsVerifyCodeRequest;
 import com.aliyun.sdk.service.dypnsapi20170525.models.SendSmsVerifyCodeResponse;
 import com.auth.module.message.sender.config.properties.SmsProperties;
+import com.auth.module.message.sender.exception.MessageSenderException;
 import com.auth.module.message.sender.modules.sms.dypns.DypnsVerifyCodeSender;
 import darabonba.core.client.ClientOverrideConfiguration;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +41,7 @@ public class AliyunDypnsVerifyCodeSender implements DypnsVerifyCodeSender {
 	 * @param smsProperties 短信配置
 	 * @param asyncClient 阿里云 Dypns 客户端
 	 */
-	AliyunDypnsVerifyCodeSender(SmsProperties smsProperties, AsyncClient asyncClient) {
+	public AliyunDypnsVerifyCodeSender(SmsProperties smsProperties, AsyncClient asyncClient) {
 		this.smsProperties = smsProperties;
 		this.asyncClient = asyncClient;
 	}
@@ -85,10 +86,11 @@ public class AliyunDypnsVerifyCodeSender implements DypnsVerifyCodeSender {
 	@Override
 	public void sendVerifyCode(String phone, String providerTemplateCode, String templateParamJson) {
 		if (CharSequenceUtil.isBlank(phone)) {
-			throw new IllegalArgumentException("phone must not be blank");
+			throw new MessageSenderException("ALIYUN_DYPNS_PHONE_BLANK", "phone must not be blank");
 		}
 		if (CharSequenceUtil.isBlank(providerTemplateCode)) {
-			throw new IllegalArgumentException("providerTemplateCode must not be blank");
+			throw new MessageSenderException("ALIYUN_DYPNS_TEMPLATE_CODE_BLANK",
+					"providerTemplateCode must not be blank");
 		}
 
 		SendSmsVerifyCodeRequest request = SendSmsVerifyCodeRequest.builder()
@@ -102,15 +104,15 @@ public class AliyunDypnsVerifyCodeSender implements DypnsVerifyCodeSender {
 			SendSmsVerifyCodeResponse response = send(request);
 			assertSendSuccess(response, phone, providerTemplateCode);
 		}
-		catch (IllegalStateException | IllegalArgumentException e) {
+		catch (MessageSenderException e) {
 			throw e;
 		}
 		catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-			throw new IllegalStateException("Aliyun Dypns send interrupted", e);
+			throw new MessageSenderException("ALIYUN_DYPNS_SEND_INTERRUPTED", "Aliyun Dypns send interrupted", e);
 		}
 		catch (ExecutionException e) {
-			throw new IllegalStateException("Aliyun Dypns send failed", e);
+			throw new MessageSenderException("ALIYUN_DYPNS_SEND_FAILED", "Aliyun Dypns send failed", e);
 		}
 	}
 
@@ -157,7 +159,7 @@ public class AliyunDypnsVerifyCodeSender implements DypnsVerifyCodeSender {
 		log.error("Aliyun Dypns send failed, phone={}, templateCode={}, detail={}", phone, providerTemplateCode,
 				detail);
 
-		throw new IllegalStateException("Aliyun Dypns send failed: " + detail);
+		throw new MessageSenderException("ALIYUN_DYPNS_SEND_FAILED", "Aliyun Dypns send failed: " + detail);
 	}
 
 }

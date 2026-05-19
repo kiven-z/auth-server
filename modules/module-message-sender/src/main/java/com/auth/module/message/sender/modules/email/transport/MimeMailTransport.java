@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * JavaMail MIME email transport.
+ * JavaMail MIME 邮件传输
  *
  * @author Bunny
  */
@@ -29,7 +29,7 @@ public class MimeMailTransport {
 	private final EmailAttachmentResolver attachmentResolver;
 
 	/**
-	 * Default from address ({@code spring.mail.username}).
+	 * 默认发件人地址 ({@code spring.mail.username})
 	 */
 	@Value("${spring.mail.username}")
 	private String defaultFrom;
@@ -40,9 +40,9 @@ public class MimeMailTransport {
 	}
 
 	/**
-	 * Sends email synchronously.
-	 * @param emailSendDTO send request
-	 * @param rendered rendered subject and body
+	 * 同步发送邮件
+	 * @param emailSendDTO 发送请求
+	 * @param rendered 渲染后的主题和内容
 	 */
 	public void send(EmailSendDTO emailSendDTO, RenderedEmail rendered) {
 		try {
@@ -55,60 +55,99 @@ public class MimeMailTransport {
 		}
 	}
 
+	/**
+	 * 发送MIME邮件
+	 * @param emailSendDTO 发送请求
+	 * @param subject 主题
+	 * @param body 内容
+	 * @throws MessagingException 邮件发送异常
+	 */
 	private void sendMime(EmailSendDTO emailSendDTO, String subject, String body) throws MessagingException {
+		// 验证发送请求
 		validate(emailSendDTO, subject, body);
 
+		// 创建MIME消息
 		MimeMessage message = mailSender.createMimeMessage();
+		// 创建MIME消息助手
 		MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+		// 设置发件人
 		helper.setFrom(defaultFrom);
+		// 设置收件人
 		helper.setTo(emailSendDTO.getTo().toArray(String[]::new));
+		// 设置主题
 		helper.setSubject(subject);
+		// 设置内容
 		helper.setText(body, Boolean.TRUE.equals(emailSendDTO.getHasHtml()));
 
 		if (CharSequenceUtil.isNotBlank(emailSendDTO.getReplyTo())) {
+			// 设置回复地址
 			helper.setReplyTo(emailSendDTO.getReplyTo());
 		}
 		if (CollUtil.isNotEmpty(emailSendDTO.getCc())) {
+			// 设置抄送地址
 			helper.setCc(emailSendDTO.getCc().toArray(String[]::new));
 		}
 		if (CollUtil.isNotEmpty(emailSendDTO.getBcc())) {
+			// 设置密送地址
 			helper.setBcc(emailSendDTO.getBcc().toArray(String[]::new));
 		}
+		// 设置发送日期
 		helper.setSentDate(new Date());
 
+		// 解析附件
 		List<MultipartFile> attachmentFiles = attachmentResolver.resolve(emailSendDTO.getAttachments());
+		// 添加附件
 		addAttachments(helper, attachmentFiles);
 
 		mailSender.send(message);
 	}
 
+	/**
+	 * 验证发送请求
+	 * @param emailSendDTO 发送请求
+	 * @param subject 主题
+	 * @param body 内容
+	 */
 	private void validate(EmailSendDTO emailSendDTO, String subject, String body) {
+		// 验证发送请求
 		if (emailSendDTO == null) {
-			throw new EmailTransportException(EmailTransportException.Reason.SEND_DTO_NULL, "EmailSendDTO is null");
+			throw new EmailTransportException(EmailTransportException.Reason.SEND_DTO_NULL);
 		}
+		// 验证接收者列表
 		if (CollUtil.isEmpty(emailSendDTO.getTo())) {
-			throw new EmailTransportException(EmailTransportException.Reason.TO_EMPTY, "Recipient list is empty");
+			throw new EmailTransportException(EmailTransportException.Reason.TO_EMPTY);
 		}
+		// 验证主题
 		if (CharSequenceUtil.isBlank(subject)) {
-			throw new EmailTransportException(EmailTransportException.Reason.SUBJECT_EMPTY, "Subject is blank");
+			throw new EmailTransportException(EmailTransportException.Reason.SUBJECT_EMPTY);
 		}
+		// 验证内容
 		if (CharSequenceUtil.isBlank(body)) {
-			throw new EmailTransportException(EmailTransportException.Reason.BODY_EMPTY, "Body is blank");
+			throw new EmailTransportException(EmailTransportException.Reason.BODY_EMPTY);
 		}
 	}
 
+	/**
+	 * 添加附件
+	 * @param helper MIME消息助手
+	 * @param attachments 附件列表
+	 * @throws MessagingException 邮件发送异常
+	 */
 	private void addAttachments(MimeMessageHelper helper, List<MultipartFile> attachments) throws MessagingException {
+		// 验证附件列表
 		if (CollUtil.isEmpty(attachments)) {
 			return;
 		}
+		// 添加附件
 		for (MultipartFile file : attachments) {
 			if (file == null || file.isEmpty()) {
 				continue;
 			}
+
+			// 验证附件文件名
 			String filename = file.getOriginalFilename();
 			if (CharSequenceUtil.isBlank(filename)) {
-				throw new EmailTransportException(EmailTransportException.Reason.ATTACHMENT_FILENAME_EMPTY,
-						"Attachment filename is blank");
+				throw new EmailTransportException(EmailTransportException.Reason.ATTACHMENT_FILENAME_EMPTY);
 			}
 			helper.addAttachment(Objects.requireNonNull(filename), Objects.requireNonNull(file));
 		}

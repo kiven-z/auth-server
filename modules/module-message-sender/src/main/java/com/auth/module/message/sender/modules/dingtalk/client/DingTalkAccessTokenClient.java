@@ -4,6 +4,7 @@ import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.auth.module.message.sender.config.properties.DingTalkProperties;
+import com.auth.module.message.sender.exception.MessageSenderException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -82,14 +83,16 @@ public class DingTalkAccessTokenClient {
 			// 解析响应体
 			String responseBody = response.getBody();
 			if (CharSequenceUtil.isBlank(responseBody)) {
-				throw new IllegalStateException("DingTalk OAuth response body is empty");
+				throw new MessageSenderException("DINGTALK_OAUTH_EMPTY_RESPONSE",
+						"DingTalk OAuth response body is empty");
 			}
 
 			// 解析响应体
 			JSONObject json = JSONUtil.parseObj(responseBody);
 			String accessToken = json.getStr("accessToken");
 			if (CharSequenceUtil.isBlank(accessToken)) {
-				throw new IllegalStateException("DingTalk OAuth accessToken is blank");
+				throw new MessageSenderException("DINGTALK_OAUTH_ACCESS_TOKEN_BLANK",
+						"DingTalk OAuth accessToken is blank");
 			}
 
 			// 解析过期时间
@@ -104,7 +107,8 @@ public class DingTalkAccessTokenClient {
 		}
 		catch (RestClientException ex) {
 			log.error("DingTalk OAuth token request failed", ex);
-			throw new IllegalStateException("DingTalk OAuth token request failed: " + ex.getMessage(), ex);
+			throw new MessageSenderException("DINGTALK_OAUTH_TOKEN_REQUEST_FAILED",
+					"DingTalk OAuth token request failed: " + ex.getMessage(), ex);
 		}
 	}
 

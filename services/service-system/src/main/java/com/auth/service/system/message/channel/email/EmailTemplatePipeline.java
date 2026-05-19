@@ -40,11 +40,11 @@ public class EmailTemplatePipeline {
 		MessageTemplateEntity template = messageTemplateMapper.selectEnabledBySceneCodeAndChannel(templateCode,
 				MessageChannel.EMAIL.name());
 		if (template == null) {
-			throw new SystemBusinessException(EMAIL_TEMPLATE_NOT_FOUND, templateCode);
+			throw new SystemBusinessException(EMAIL_TEMPLATE_NOT_FOUND, MessageChannel.EMAIL.name(), templateCode);
 		}
 		Map<String, Object> safeVariables = Optional.ofNullable(variables).orElseGet(HashMap::new);
 		MessageTemplateRequireFieldsJsonSupport.assertVariablesPresent(template.getRequireFields(), safeVariables,
-				EMAIL_TEMPLATE_VARS_MISSING);
+				EMAIL_TEMPLATE_VARS_MISSING, MessageChannel.EMAIL.name());
 		String subject = renderSubject(template, safeVariables);
 		String body = renderContent(template, safeVariables);
 		return new RenderedEmail(subject, body);
@@ -62,7 +62,7 @@ public class EmailTemplatePipeline {
 					template.getSubject(), variables);
 		}
 		catch (TemplateRenderException e) {
-			throw new SystemBusinessException(EMAIL_SUBJECT_RENDER_FAILED, e.getMessage());
+			throw new SystemBusinessException(EMAIL_RENDER_FAILED, "subject", e.getMessage());
 		}
 	}
 
@@ -78,7 +78,7 @@ public class EmailTemplatePipeline {
 					variables);
 		}
 		catch (TemplateRenderException e) {
-			throw new SystemBusinessException(EMAIL_BODY_RENDER_FAILED, e.getMessage());
+			throw new SystemBusinessException(EMAIL_RENDER_FAILED, "body", e.getMessage());
 		}
 	}
 

@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static com.auth.service.system.common.exception.code.common.SystemCommonResultCode.DATA_NOT_EXIST;
-import static com.auth.service.system.common.exception.code.schedule.SystemScheduleResultCode.JOB_QUARTZ_RUN_ONCE_FAILED;
+import static com.auth.service.system.common.exception.code.schedule.SystemScheduleResultCode.JOB_QUARTZ_OPERATION_FAILED;
 
 /**
  * 定时任务运行态操作服务实现
@@ -92,7 +92,7 @@ public class SysJobOperationServiceImpl extends ServiceImpl<SysJobMapper, SysJob
 		}
 		catch (SchedulerException ex) {
 			log.error("立即执行失败", ex);
-			throw new SystemBusinessException(JOB_QUARTZ_RUN_ONCE_FAILED, ex.getMessage());
+			throw new SystemBusinessException(JOB_QUARTZ_OPERATION_FAILED, "runOnce", ex.getMessage());
 		}
 	}
 

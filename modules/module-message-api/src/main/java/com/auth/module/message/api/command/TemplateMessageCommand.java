@@ -44,7 +44,7 @@ public class TemplateMessageCommand implements Serializable {
 	/**
 	 * 接收目标列表（语义由渠道解释：邮箱 / 手机号 / 用户 ID 等）
 	 */
-	@NotEmpty
+	@NotEmpty(message = "targets must not be empty")
 	private List<String> targets;
 
 	/**

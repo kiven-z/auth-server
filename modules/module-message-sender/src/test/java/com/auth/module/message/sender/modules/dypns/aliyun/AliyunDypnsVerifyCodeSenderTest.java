@@ -5,6 +5,7 @@ import com.aliyun.sdk.service.dypnsapi20170525.models.SendSmsVerifyCodeRequest;
 import com.aliyun.sdk.service.dypnsapi20170525.models.SendSmsVerifyCodeResponse;
 import com.aliyun.sdk.service.dypnsapi20170525.models.SendSmsVerifyCodeResponseBody;
 import com.auth.module.message.sender.config.properties.SmsProperties;
+import com.auth.module.message.sender.exception.MessageSenderException;
 import com.auth.module.message.sender.modules.sms.dypns.aliyun.AliyunDypnsVerifyCodeSender;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -57,7 +58,7 @@ class AliyunDypnsVerifyCodeSenderTest {
 	}
 
 	@Test
-	@DisplayName("厂商返回非 OK 时抛出 IllegalStateException")
+	@DisplayName("厂商返回非 OK 时抛出 MessageSenderException")
 	void sendVerifyCode_shouldThrowWhenVendorReturnsError() throws Exception {
 		SmsProperties properties = validSmsProperties();
 		AliyunDypnsVerifyCodeSender sender = new AliyunDypnsVerifyCodeSender(properties, asyncClient);
@@ -70,7 +71,7 @@ class AliyunDypnsVerifyCodeSenderTest {
 			.thenReturn(CompletableFuture.completedFuture(response));
 
 		assertThatThrownBy(() -> sender.sendVerifyCode("13800000000", "100001", "{}"))
-			.isInstanceOf(IllegalStateException.class)
+			.isInstanceOf(MessageSenderException.class)
 			.hasMessageContaining("Aliyun Dypns send failed");
 	}
 

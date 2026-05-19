@@ -99,7 +99,7 @@ public class SysEmailTemplateController {
 	public Result<String> updateMetadata(@Validated(UpdateGroup.class) @RequestBody EmailTemplateMetadataForm dto) {
 		sysEmailTemplateService.updateMetadata(dto);
 
-		return Result.success(null, UPDATE_SUCCESS.getMessage());
+		return Result.success(null, MODIFY_SUCCESS.getMessage());
 	}
 
 	@Operation(summary = "仅更新邮件模板正文", description = "仅更新 content 字段")
@@ -109,7 +109,7 @@ public class SysEmailTemplateController {
 			@Validated @RequestBody EmailTemplateContentForm dto) {
 		sysEmailTemplateService.updateContent(id, dto);
 
-		return Result.success(null, UPDATE_SUCCESS.getMessage());
+		return Result.success(null, MODIFY_SUCCESS.getMessage());
 	}
 
 	@Operation(summary = "仅更新变量列表 require_fields", description = "仅更新变量列表 require_fields")
@@ -119,7 +119,7 @@ public class SysEmailTemplateController {
 			@Validated @RequestBody EmailTemplateRequireFieldsForm form) {
 		sysEmailTemplateService.updateRequireFields(id, form);
 
-		return Result.success(null, UPDATE_SUCCESS.getMessage());
+		return Result.success(null, MODIFY_SUCCESS.getMessage());
 	}
 
 	@OperationLog(targetType = "EMAIL_TEMPLATE_DELETE", serviceDomain = AuditServiceDomain.SYSTEM,
@@ -139,7 +139,7 @@ public class SysEmailTemplateController {
 	public Result<String> batchUpdateStatus(@Validated @RequestBody EmailTemplateStatusForm form) {
 		sysEmailTemplateService.batchUpdateStatus(form);
 
-		return Result.success(null, UPDATE_SUCCESS.getMessage());
+		return Result.success(null, MODIFY_SUCCESS.getMessage());
 	}
 
 }

@@ -9,7 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import static com.auth.service.system.common.exception.code.common.SystemCommonResultCode.UPDATE_SUCCESS;
+import static com.auth.service.system.common.exception.code.common.SystemCommonResultCode.MODIFY_SUCCESS;
 
 /**
  * 定时任务运行态操作接口
@@ -32,7 +32,7 @@ public class SysJobOperationController {
 	@PutMapping("status")
 	public Result<String> batchStatus(@Validated @RequestBody SysJobStatusForm form) {
 		sysJobOperationService.batchUpdateStatus(form);
-		return Result.success(null, UPDATE_SUCCESS.getMessage());
+		return Result.success(null, MODIFY_SUCCESS.getMessage());
 	}
 
 	@Operation(summary = "立即执行一次")
@@ -40,7 +40,7 @@ public class SysJobOperationController {
 	@PostMapping("{id}/run")
 	public Result<String> runOnce(@PathVariable("id") Long id) {
 		sysJobOperationService.runOnce(id);
-		return Result.success(null, UPDATE_SUCCESS.getMessage());
+		return Result.success(null, MODIFY_SUCCESS.getMessage());
 	}
 
 	@Operation(summary = "按分组一键暂停")
@@ -48,7 +48,7 @@ public class SysJobOperationController {
 	@PutMapping("group/{groupCode}/pause")
 	public Result<String> pauseGroup(@PathVariable("groupCode") String groupCode) {
 		sysJobOperationService.pauseAllInGroup(groupCode);
-		return Result.success(null, UPDATE_SUCCESS.getMessage());
+		return Result.success(null, MODIFY_SUCCESS.getMessage());
 	}
 
 	@Operation(summary = "按分组一键恢复")
@@ -56,7 +56,7 @@ public class SysJobOperationController {
 	@PutMapping("group/{groupCode}/resume")
 	public Result<String> resumeGroup(@PathVariable("groupCode") String groupCode) {
 		sysJobOperationService.resumeAllInGroup(groupCode);
-		return Result.success(null, UPDATE_SUCCESS.getMessage());
+		return Result.success(null, MODIFY_SUCCESS.getMessage());
 	}
 
 }
