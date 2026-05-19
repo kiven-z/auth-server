@@ -12,18 +12,19 @@ import jakarta.validation.ConstraintValidatorContext;
  */
 public class ChannelOptionsMatchValidator implements ConstraintValidator<ChannelOptionsMatch, TemplateMessageCommand> {
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public boolean isValid(TemplateMessageCommand command, ConstraintValidatorContext context) {
+		// 渠道必须存在
 		if (command == null || command.getChannel() == null) {
 			return true;
 		}
+
+		// 针对短信等可以为空
 		ChannelOptions options = command.getOptions();
 		if (options == null) {
 			return true;
 		}
+
 		return switch (command.getChannel()) {
 			case EMAIL -> options instanceof EmailChannelOptions;
 			case DING_TALK -> options instanceof DingTalkChannelOptions;

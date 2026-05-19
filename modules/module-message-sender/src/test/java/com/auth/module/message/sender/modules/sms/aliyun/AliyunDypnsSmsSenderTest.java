@@ -27,22 +27,9 @@ class AliyunDypnsSmsSenderTest {
 	private DypnsVerifyCodeClient dypnsClient;
 
 	@Test
-	@DisplayName("签名为空时抛出 IllegalStateException")
-	void sendVerifyCode_shouldThrowWhenSignNameBlank() {
-		SmsProperties properties = new SmsProperties();
-		properties.setSignName("  ");
-		AliyunDypnsSmsSender sender = new AliyunDypnsSmsSender(dypnsClient, properties);
-
-		assertThatThrownBy(() -> sender.sendVerifyCode("13800000000", "100001", "{}"))
-			.isInstanceOf(IllegalStateException.class)
-			.hasMessageContaining(AliyunDypnsSmsSender.SIGN_NAME_NOT_CONFIGURED_MESSAGE);
-	}
-
-	@Test
 	@DisplayName("厂商返回 OK 时发送成功")
 	void sendVerifyCode_shouldSucceedWhenVendorReturnsOk() throws Exception {
-		SmsProperties properties = new SmsProperties();
-		properties.setSignName("TestSign");
+		SmsProperties properties = validSmsProperties();
 		AliyunDypnsSmsSender sender = new AliyunDypnsSmsSender(dypnsClient, properties);
 
 		SendSmsVerifyCodeResponseBody body = mock(SendSmsVerifyCodeResponseBody.class);
@@ -59,8 +46,7 @@ class AliyunDypnsSmsSenderTest {
 	@Test
 	@DisplayName("厂商返回非 OK 时抛出 IllegalStateException")
 	void sendVerifyCode_shouldThrowWhenVendorReturnsError() throws Exception {
-		SmsProperties properties = new SmsProperties();
-		properties.setSignName("TestSign");
+		SmsProperties properties = validSmsProperties();
 		AliyunDypnsSmsSender sender = new AliyunDypnsSmsSender(dypnsClient, properties);
 
 		SendSmsVerifyCodeResponseBody body = mock(SendSmsVerifyCodeResponseBody.class);
@@ -72,6 +58,16 @@ class AliyunDypnsSmsSenderTest {
 		assertThatThrownBy(() -> sender.sendVerifyCode("13800000000", "100001", "{}"))
 			.isInstanceOf(IllegalStateException.class)
 			.hasMessageContaining("Aliyun Dypns send failed");
+	}
+
+	private static SmsProperties validSmsProperties() {
+		SmsProperties properties = new SmsProperties();
+		properties.setRegion("cn-hangzhou");
+		properties.setEndpoint("dypnsapi.aliyuncs.com");
+		properties.setAccessKeyId("test-ak");
+		properties.setAccessKeySecret("test-sk");
+		properties.setSignName("TestSign");
+		return properties;
 	}
 
 }

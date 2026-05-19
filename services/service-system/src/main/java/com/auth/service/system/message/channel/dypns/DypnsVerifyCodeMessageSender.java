@@ -5,7 +5,6 @@ import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.message.sender.modules.sms.DypnsVerifyCodeSendPayload;
 import com.auth.module.message.sender.modules.sms.DypnsVerifyCodeSender;
-import com.auth.module.message.sender.modules.sms.aliyun.AliyunDypnsSmsSender;
 import com.auth.module.message.sender.spi.MessageSender;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import org.springframework.beans.factory.ObjectProvider;
@@ -78,10 +77,6 @@ public class DypnsVerifyCodeMessageSender implements MessageSender {
 			sender.sendVerifyCode(phone, prepared.providerTemplateCode(), prepared.templateParam());
 		}
 		catch (IllegalStateException e) {
-			if (e.getMessage() != null
-					&& e.getMessage().startsWith(AliyunDypnsSmsSender.SIGN_NAME_NOT_CONFIGURED_MESSAGE)) {
-				throw new SystemBusinessException(SMS_SIGN_NAME_NOT_CONFIGURED);
-			}
 			throw new SystemBusinessException(SMS_SEND_FAILED, e.getMessage());
 		}
 	}

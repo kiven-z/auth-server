@@ -1,6 +1,5 @@
 package com.auth.module.message.sender.modules.sms.aliyun;
 
-import cn.hutool.core.text.CharSequenceUtil;
 import com.aliyun.auth.credentials.Credential;
 import com.aliyun.auth.credentials.provider.StaticCredentialProvider;
 import com.aliyun.sdk.service.dypnsapi20170525.AsyncClient;
@@ -28,11 +27,6 @@ public class AliyunDypnsVerifyCodeClient implements DypnsVerifyCodeClient {
 	 * @param smsProperties 短信配置
 	 */
 	public AliyunDypnsVerifyCodeClient(SmsProperties smsProperties) {
-		// 校验 AK 配置
-		if (CharSequenceUtil.isBlank(smsProperties.getAccessKeySecret())) {
-			throw new IllegalStateException("SMS access key is not configured (auth.message.sms.access-key-id/secret)");
-		}
-
 		StaticCredentialProvider credentialProvider = StaticCredentialProvider.create(Credential.builder()
 			.accessKeyId(smsProperties.getAccessKeyId())
 			.accessKeySecret(smsProperties.getAccessKeySecret())

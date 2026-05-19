@@ -15,11 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class AliyunDypnsSmsSender implements DypnsVerifyCodeSender {
 
-	/**
-	 * 未配置短信签名时的异常消息前缀（供上层映射业务码）
-	 */
-	public static final String SIGN_NAME_NOT_CONFIGURED_MESSAGE = "SMS sign name is not configured";
-
 	private final DypnsVerifyCodeClient dypnsClient;
 
 	private final SmsProperties smsProperties;
@@ -60,11 +55,9 @@ public class AliyunDypnsSmsSender implements DypnsVerifyCodeSender {
 			throw new IllegalArgumentException("providerTemplateCode must not be blank");
 		}
 
-		String signName = resolveSignName();
-
 		SendSmsVerifyCodeRequest request = SendSmsVerifyCodeRequest.builder()
 			.phoneNumber(phone)
-			.signName(signName)
+			.signName(smsProperties.getSignName())
 			.templateCode(providerTemplateCode)
 			.templateParam(CharSequenceUtil.blankToDefault(templateParamJson, "{}"))
 			.build();
@@ -116,18 +109,6 @@ public class AliyunDypnsSmsSender implements DypnsVerifyCodeSender {
 				detail);
 
 		throw new IllegalStateException("Aliyun Dypns send failed: " + detail);
-	}
-
-	/**
-	 * 解析短信签名
-	 * @return 签名
-	 */
-	private String resolveSignName() {
-		String signName = smsProperties.getSignName();
-		if (CharSequenceUtil.isBlank(signName)) {
-			throw new IllegalStateException(SIGN_NAME_NOT_CONFIGURED_MESSAGE + "(auth.message.sms.sign-name)");
-		}
-		return signName;
 	}
 
 }

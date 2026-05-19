@@ -20,11 +20,6 @@ import org.springframework.web.client.RestTemplate;
 @EnableConfigurationProperties(DingTalkProperties.class)
 public class DingTalkAutoConfiguration {
 
-	/**
-	 * @param dingTalkProperties DingTalk config
-	 * @param restTemplate HTTP client
-	 * @return access-token client
-	 */
 	@ConditionalOnMissingBean
 	@Bean
 	DingTalkAccessTokenClient dingTalkAccessTokenClient(DingTalkProperties dingTalkProperties,
@@ -32,12 +27,6 @@ public class DingTalkAutoConfiguration {
 		return new DingTalkAccessTokenClient(dingTalkProperties, restTemplate);
 	}
 
-	/**
-	 * @param dingTalkProperties DingTalk config
-	 * @param accessTokenClient access-token client
-	 * @param restTemplate HTTP client
-	 * @return work-notice client
-	 */
 	@ConditionalOnMissingBean
 	@Bean
 	DingTalkWorkNoticeClient dingTalkWorkNoticeClient(DingTalkProperties dingTalkProperties,

@@ -4,8 +4,8 @@ import com.auth.module.message.sender.modules.email.transport.EmailAttachmentRes
 import com.auth.module.message.sender.modules.email.transport.MimeMailTransport;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.mail.MailSenderAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -13,17 +13,12 @@ import org.springframework.web.client.RestTemplate;
 
 /**
  * Email transport auto-configuration (JavaMail MIME send).
- * <p>
- * 仅在存在 {@link JavaMailSender} Bean 时生效（需引入 {@code spring-boot-starter-mail} 并配置
- * {@code spring.mail.host}）。避免仅因 {@code spring-context-support} 携带 {@link JavaMailSender}
- * 接口类而误装配（例如 auth 服务通过 Feign 委托 system 发信）。
- * </p>
  *
  * @author Bunny
  */
 @AutoConfiguration
 @AutoConfigureAfter(MailSenderAutoConfiguration.class)
-@ConditionalOnBean(JavaMailSender.class)
+@ConditionalOnProperty(name = "spring.mail.host")
 public class EmailAutoConfiguration {
 
 	/**

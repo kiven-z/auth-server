@@ -65,13 +65,8 @@ public class DingTalkAccessTokenClient {
 			return current.token();
 		}
 
-		// 解析客户端ID和客户端密钥
 		String clientId = dingTalkProperties.getClientId();
 		String clientSecret = dingTalkProperties.getClientSecret();
-		// 如果客户端ID或客户端密钥为空，则抛出异常
-		if (CharSequenceUtil.isBlank(clientId) || CharSequenceUtil.isBlank(clientSecret)) {
-			throw new IllegalStateException("DingTalk clientId or clientSecret is not configured");
-		}
 
 		// 构建请求头
 		HttpHeaders headers = new HttpHeaders();

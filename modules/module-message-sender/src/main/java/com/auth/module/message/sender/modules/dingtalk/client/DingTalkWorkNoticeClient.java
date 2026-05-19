@@ -59,12 +59,7 @@ public class DingTalkWorkNoticeClient {
 			throw new IllegalArgumentException("DingTalk work notice content cannot be blank");
 		}
 
-		// 解析代理ID
 		Long agentId = dingTalkProperties.getAgentId();
-		// 如果代理ID为空，则抛出异常
-		if (agentId == null) {
-			throw new IllegalStateException("DingTalk agentId is not configured");
-		}
 
 		// 解析消息类型
 		DingTalkMessageType resolvedType = messageType != null ? messageType

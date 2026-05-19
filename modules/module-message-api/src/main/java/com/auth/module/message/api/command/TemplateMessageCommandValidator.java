@@ -13,15 +13,13 @@ import jakarta.validation.ConstraintValidatorContext;
 public class TemplateMessageCommandValidator
 		implements ConstraintValidator<TemplateMessageCommandValid, TemplateMessageCommand> {
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public boolean isValid(TemplateMessageCommand command, ConstraintValidatorContext context) {
 		if (command == null) {
 			return true;
 		}
 
+		// customBody 为 TURE 必须有非空的 body
 		if (BooleanUtil.isTrue(command.getCustomBody())) {
 			return CharSequenceUtil.isNotBlank(command.getBody());
 		}

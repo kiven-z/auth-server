@@ -35,9 +35,6 @@ public class SysJobSchedulerManager {
 
 	private final SysJobTaskHandlerRegistry taskHandlerRegistry;
 
-	/**
-	 * @param scheduler Quartz 调度器（延迟注入，避免与 {@code SchedulerFactoryBeanCustomizer} 监听器链形成循环依赖）
-	 */
 	public SysJobSchedulerManager(@Lazy Scheduler scheduler, SysJobTaskHandlerRegistry taskHandlerRegistry) {
 		this.scheduler = scheduler;
 		this.taskHandlerRegistry = taskHandlerRegistry;
