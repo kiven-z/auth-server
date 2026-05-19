@@ -1,5 +1,6 @@
 package com.auth.service.auth.support.model.request.login;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,5 +19,8 @@ public abstract class AbstractLoginRequest implements Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
+
+	@Schema(description = "是否记住登录（持久 Refresh Cookie；天数由服务端 Nacos refreshExpired 配置）")
+	private Boolean rememberMe;
 
 }

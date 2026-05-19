@@ -9,6 +9,8 @@ import com.auth.service.auth.TestConstants;
 import com.auth.service.auth.authentication.audit.LoginAuditEventPublisher;
 import com.auth.service.auth.authentication.profile.AuthProfileCache;
 import com.auth.service.auth.authentication.service.impl.RefreshTokenServiceImpl;
+import com.auth.service.auth.authentication.support.AuthTokenResponseEnricher;
+import com.auth.service.auth.authentication.token.RefreshSessionResult;
 import com.auth.service.auth.authentication.token.TokenPair;
 import com.auth.service.auth.authentication.token.TokenService;
 import com.auth.service.auth.session.infrastructure.RedisUserSessionIndexRepository;
@@ -50,13 +52,16 @@ class RefreshTokenServiceImplTest {
 	@Mock
 	private LoginAuditEventPublisher loginAuditEventPublisher;
 
+	@Mock
+	private AuthTokenResponseEnricher authTokenResponseEnricher;
+
 	private static JwtUserToken token() {
 		return JwtUserToken.builder().userId(TestConstants.USER_ID).jti(TestConstants.JTI).build();
 	}
 
 	private RefreshTokenServiceImpl newService() {
 		return new RefreshTokenServiceImpl(authProfileCache, redisUserSessionIndexRepository, tokenService,
-				jwtProperties, loginAuditEventPublisher);
+				jwtProperties, loginAuditEventPublisher, authTokenResponseEnricher);
 	}
 
 	@Test
@@ -165,13 +170,40 @@ class RefreshTokenServiceImplTest {
 
 		RefreshTokenServiceImpl service = newService();
 
-		RefreshTokenResponse response = service.refreshToken(TestConstants.REFRESH_TOKEN, null);
+		RefreshSessionResult result = service.refreshToken(TestConstants.REFRESH_TOKEN, null);
+		RefreshTokenResponse response = result.response();
 
 		assertEquals("new-access", response.getAccessToken());
 		assertEquals("new-refresh", response.getRefreshToken());
 		assertEquals(expires, response.getExpires());
+		assertEquals(false, result.rememberMe());
 		verify(redisUserSessionIndexRepository).updateRefreshInfo(eq(TestConstants.JTI),
 				eq(MD5.create().digestHex16("new-refresh")), anyLong(), eq(Duration.ofSeconds(120L)));
+		verify(authTokenResponseEnricher).enrichReadMeDay(response);
+	}
+
+	@Test
+	@DisplayName("刷新：会话 rememberMe=true 时结果携带 rememberMe")
+	void refresh_shouldReturnRememberMeFromSession() {
+		when(jwtProperties.getRefreshExpired()).thenReturn(120L);
+		when(tokenService.parseRefreshToken(TestConstants.REFRESH_TOKEN)).thenReturn(token());
+
+		UserSessionIndex session = new UserSessionIndex();
+		session.setUserId(TestConstants.USER_ID);
+		session.setRememberMe(true);
+		session.setRefreshTokenExpiresAt(System.currentTimeMillis() + 60_000);
+		session.setRefreshTokenHash(MD5.create().digestHex16(TestConstants.REFRESH_TOKEN));
+		when(redisUserSessionIndexRepository.loadUserSessionIndex(TestConstants.JTI)).thenReturn(Optional.of(session));
+
+		AuthProfile profile = mock(AuthProfile.class);
+		when(profile.getPermVersion()).thenReturn(9L);
+		when(authProfileCache.loadCacheAuthProfile(TestConstants.USER_ID)).thenReturn(Optional.of(profile));
+		when(tokenService.buildTokenPair(TestConstants.USER_ID, TestConstants.JTI, 9L))
+			.thenReturn(new TokenPair("new-access", "new-refresh", LocalDateTime.now().plusMinutes(5)));
+
+		RefreshSessionResult result = newService().refreshToken(TestConstants.REFRESH_TOKEN, null);
+
+		assertEquals(true, result.rememberMe());
 	}
 
 }

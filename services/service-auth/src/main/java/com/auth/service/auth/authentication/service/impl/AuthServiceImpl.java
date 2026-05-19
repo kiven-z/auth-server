@@ -9,6 +9,7 @@ import com.auth.service.auth.authentication.audit.LoginAuditEventPublisher;
 import com.auth.service.auth.authentication.profile.AuthProfileCache;
 import com.auth.service.auth.authentication.service.AuthService;
 import com.auth.service.auth.authentication.strategy.LoginStrategy;
+import com.auth.service.auth.authentication.support.AuthTokenResponseEnricher;
 import com.auth.service.auth.authentication.token.LoginFailureRateLimiter;
 import com.auth.service.auth.authentication.token.LoginResult;
 import com.auth.service.auth.authentication.token.TokenPair;
@@ -57,11 +58,13 @@ public class AuthServiceImpl implements AuthService {
 
 	private final LoginAuditEventPublisher loginAuditEventPublisher;
 
+	private final AuthTokenResponseEnricher authTokenResponseEnricher;
+
 	public AuthServiceImpl(List<LoginStrategy<?>> strategies, AuthProfileCache authProfileCache,
 			UserSessionIndexFactory userSessionIndexFactory,
 			RedisUserSessionIndexRepository redisUserSessionIndexRepository, SessionLimitManager sessionLimitManager,
 			TokenService tokenService, LoginFailureRateLimiter loginFailureRateLimiter,
-			LoginAuditEventPublisher loginAuditEventPublisher) {
+			LoginAuditEventPublisher loginAuditEventPublisher, AuthTokenResponseEnricher authTokenResponseEnricher) {
 		this.strategyRegistry = strategies.stream()
 			.collect(Collectors.toUnmodifiableMap(LoginStrategy::supports, Function.identity()));
 		this.authProfileCache = authProfileCache;
@@ -71,6 +74,7 @@ public class AuthServiceImpl implements AuthService {
 		this.tokenService = tokenService;
 		this.loginFailureRateLimiter = loginFailureRateLimiter;
 		this.loginAuditEventPublisher = loginAuditEventPublisher;
+		this.authTokenResponseEnricher = authTokenResponseEnricher;
 	}
 
 	/**
@@ -85,6 +89,7 @@ public class AuthServiceImpl implements AuthService {
 		AuthProfile profile = loginResult.authProfile();
 		UserLoginResponse response = loginResult.response();
 		Long userId = profile.getUserId();
+		boolean rememberMe = Boolean.TRUE.equals(auth.getRememberMe());
 
 		try {
 			// 检查会话上限
@@ -104,8 +109,9 @@ public class AuthServiceImpl implements AuthService {
 
 			// 构建会话索引
 			UserSessionIndex sessionIndex = userSessionIndexFactory.buildUserSessionIndex(request, userId, jti,
-					response.getRefreshToken());
+					response.getRefreshToken(), rememberMe);
 			redisUserSessionIndexRepository.createUserSessionIndex(sessionIndex);
+			authTokenResponseEnricher.enrichReadMeDay(response);
 
 			// 记录成功
 			loginFailureRateLimiter.recordSuccess(userId);

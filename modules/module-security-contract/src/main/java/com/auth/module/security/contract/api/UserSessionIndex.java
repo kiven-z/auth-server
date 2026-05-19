@@ -54,4 +54,9 @@ public class UserSessionIndex {
 	 */
 	private Long refreshTokenExpiresAt;
 
+	/**
+	 * 登录时是否勾选「记住我」（刷新时用于决定 Refresh Cookie 为持久或会话级）
+	 */
+	private Boolean rememberMe;
+
 }

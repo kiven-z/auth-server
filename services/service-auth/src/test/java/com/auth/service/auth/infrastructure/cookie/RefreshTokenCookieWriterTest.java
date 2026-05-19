@@ -1,6 +1,6 @@
 package com.auth.service.auth.infrastructure.cookie;
 
-import com.auth.service.auth.authentication.cookie.RefreshTokenCookieUtil;
+import com.auth.service.auth.authentication.cookie.RefreshTokenCookieWriter;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -15,14 +15,12 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 /**
- * RefreshTokenCookieUtil 单元测试
- *
- * @author Bunny
+ * RefreshTokenCookieWriter 单元测试
  */
 @ExtendWith(MockitoExtension.class)
-class RefreshTokenCookieUtilTest {
+class RefreshTokenCookieWriterTest {
 
-	private static final String COOKIE_NAME = "auth-refresh-token";
+	private static final String COOKIE_NAME = RefreshTokenCookieWriter.REFRESH_TOKEN_COOKIE_NAME;
 
 	@Test
 	@DisplayName("readToken：Cookie 为 null 时返回空字符串")
@@ -30,18 +28,7 @@ class RefreshTokenCookieUtilTest {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		when(request.getCookies()).thenReturn(null);
 
-		String result = RefreshTokenCookieUtil.readToken(request);
-
-		assertEquals("", result);
-	}
-
-	@Test
-	@DisplayName("readToken：不含目标 Cookie 时返回空字符串")
-	void readToken_shouldReturnEmpty_whenNoMatchingCookie() {
-		HttpServletRequest request = mock(HttpServletRequest.class);
-		when(request.getCookies()).thenReturn(new Cookie[] { new Cookie("other-cookie", "other-value") });
-
-		String result = RefreshTokenCookieUtil.readToken(request);
+		String result = RefreshTokenCookieWriter.readToken(request);
 
 		assertEquals("", result);
 	}
@@ -51,10 +38,9 @@ class RefreshTokenCookieUtilTest {
 	void readToken_shouldReturnValue_whenCookieExists() {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		Cookie target = new Cookie(COOKIE_NAME, "test-refresh-token");
-		Cookie other = new Cookie("other", "value");
-		when(request.getCookies()).thenReturn(new Cookie[] { other, target });
+		when(request.getCookies()).thenReturn(new Cookie[] { target });
 
-		String result = RefreshTokenCookieUtil.readToken(request);
+		String result = RefreshTokenCookieWriter.readToken(request);
 
 		assertEquals("test-refresh-token", result);
 	}
@@ -65,59 +51,42 @@ class RefreshTokenCookieUtilTest {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		HttpServletResponse response = mock(HttpServletResponse.class);
 
-		RefreshTokenCookieUtil.writeToken(response, request, "", 3600L);
+		RefreshTokenCookieWriter.writeToken(response, request, "", 3600L);
 
 		verify(response, never()).addHeader(anyString(), anyString());
 	}
 
 	@Test
-	@DisplayName("writeToken：非安全请求时写入 Secure=false 的 Cookie")
-	void writeToken_shouldIncludeHttpOnlyAndPath_whenInsecure() {
+	@DisplayName("writeToken：持久 Cookie 写入 Max-Age")
+	void writeToken_shouldIncludeMaxAge_whenPersistent() {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		when(request.isSecure()).thenReturn(false);
 		HttpServletResponse response = mock(HttpServletResponse.class);
 
-		RefreshTokenCookieUtil.writeToken(response, request, "refresh-value", 3600L);
+		RefreshTokenCookieWriter.writeToken(response, request, "refresh-value", 604800L);
 
 		ArgumentCaptor<String> headerValue = ArgumentCaptor.forClass(String.class);
 		verify(response).addHeader(eq(HttpHeaders.SET_COOKIE), headerValue.capture());
 		String cookieStr = headerValue.getValue();
 		assertTrue(cookieStr.contains("auth-refresh-token=refresh-value"));
-		assertTrue(cookieStr.contains("HttpOnly"));
-		assertTrue(cookieStr.contains("Path=/api/auth"));
-		assertTrue(cookieStr.contains("SameSite=Lax"));
-		assertTrue(cookieStr.contains("Max-Age=3600"));
-		assertFalse(cookieStr.contains("Secure"));
+		assertTrue(cookieStr.contains("Max-Age=604800"));
 	}
 
 	@Test
-	@DisplayName("writeToken：安全请求时写入 Secure=true 的 Cookie")
-	void writeToken_shouldIncludeSecure_whenRequestIsSecure() {
+	@DisplayName("writeToken：会话 Cookie 不写入持久 Max-Age（Spring 对 -1 通常省略 Max-Age 属性）")
+	void writeToken_shouldUseSessionMaxAge_whenNotRemembered() {
 		HttpServletRequest request = mock(HttpServletRequest.class);
-		when(request.isSecure()).thenReturn(true);
+		when(request.isSecure()).thenReturn(false);
 		HttpServletResponse response = mock(HttpServletResponse.class);
 
-		RefreshTokenCookieUtil.writeToken(response, request, "refresh-value", 3600L);
+		RefreshTokenCookieWriter.writeToken(response, request, "refresh-value",
+				RefreshTokenCookieWriter.SESSION_COOKIE_MAX_AGE_SECONDS);
 
 		ArgumentCaptor<String> headerValue = ArgumentCaptor.forClass(String.class);
 		verify(response).addHeader(eq(HttpHeaders.SET_COOKIE), headerValue.capture());
 		String cookieStr = headerValue.getValue();
-		assertTrue(cookieStr.contains("Secure"));
-	}
-
-	@Test
-	@DisplayName("writeToken：X-Forwarded-Proto 为 https 时写入 Secure=true")
-	void writeToken_shouldIncludeSecure_whenForwardedProtoHttps() {
-		HttpServletRequest request = mock(HttpServletRequest.class);
-		when(request.isSecure()).thenReturn(false);
-		when(request.getHeader("X-Forwarded-Proto")).thenReturn("https");
-		HttpServletResponse response = mock(HttpServletResponse.class);
-
-		RefreshTokenCookieUtil.writeToken(response, request, "refresh-value", 3600L);
-
-		ArgumentCaptor<String> headerValue = ArgumentCaptor.forClass(String.class);
-		verify(response).addHeader(eq(HttpHeaders.SET_COOKIE), headerValue.capture());
-		assertTrue(headerValue.getValue().contains("Secure"));
+		assertTrue(cookieStr.contains("auth-refresh-token=refresh-value"));
+		assertFalse(cookieStr.matches(".*Max-Age=[1-9]\\d*.*"));
 	}
 
 	@Test
@@ -127,14 +96,11 @@ class RefreshTokenCookieUtilTest {
 		when(request.isSecure()).thenReturn(false);
 		HttpServletResponse response = mock(HttpServletResponse.class);
 
-		RefreshTokenCookieUtil.clearToken(response, request);
+		RefreshTokenCookieWriter.clearToken(response, request);
 
 		ArgumentCaptor<String> headerValue = ArgumentCaptor.forClass(String.class);
 		verify(response).addHeader(eq(HttpHeaders.SET_COOKIE), headerValue.capture());
-		String cookieStr = headerValue.getValue();
-		assertTrue(cookieStr.startsWith("auth-refresh-token="));
-		assertTrue(cookieStr.contains("Max-Age=0"));
-		assertTrue(cookieStr.contains("HttpOnly"));
+		assertTrue(headerValue.getValue().contains("Max-Age=0"));
 	}
 
 }

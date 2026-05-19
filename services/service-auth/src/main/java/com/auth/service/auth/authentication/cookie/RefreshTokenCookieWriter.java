@@ -13,14 +13,22 @@ import java.util.Arrays;
 import java.util.Optional;
 
 /**
- * 刷新令牌 Cookie 支持类
+ * 刷新令牌 Cookie 底层读写（纯 HTTP，不含「记住我」策略）。
  *
  * @author Bunny
  */
 @UtilityClass
-public class RefreshTokenCookieUtil {
+public class RefreshTokenCookieWriter {
 
-	private static final String REFRESH_TOKEN_COOKIE_NAME = "auth-refresh-token";
+	/**
+	 * Refresh Cookie 名称
+	 */
+	public static final String REFRESH_TOKEN_COOKIE_NAME = "auth-refresh-token";
+
+	/**
+	 * Spring {@link ResponseCookie} 会话级 Max-Age（浏览器关闭后失效）
+	 */
+	public static final long SESSION_COOKIE_MAX_AGE_SECONDS = -1L;
 
 	/**
 	 * 从 Cookie 中读取刷新令牌，不存在时返回空字符串交由业务层统一抛错。
@@ -43,7 +51,7 @@ public class RefreshTokenCookieUtil {
 	 * @param response HTTP 响应
 	 * @param request HTTP 请求
 	 * @param refreshToken 刷新令牌
-	 * @param maxAgeSeconds 刷新令牌过期时间
+	 * @param maxAgeSeconds Max-Age（秒）；{@link #SESSION_COOKIE_MAX_AGE_SECONDS} 表示会话 Cookie
 	 */
 	public void writeToken(HttpServletResponse response, HttpServletRequest request, String refreshToken,
 			long maxAgeSeconds) {

@@ -10,6 +10,8 @@ import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.authentication.audit.LoginAuditEventPublisher;
 import com.auth.service.auth.authentication.profile.AuthProfileCache;
 import com.auth.service.auth.authentication.service.RefreshTokenService;
+import com.auth.service.auth.authentication.support.AuthTokenResponseEnricher;
+import com.auth.service.auth.authentication.token.RefreshSessionResult;
 import com.auth.service.auth.authentication.token.TokenPair;
 import com.auth.service.auth.authentication.token.TokenService;
 import com.auth.service.auth.session.infrastructure.RedisUserSessionIndexRepository;
@@ -42,21 +44,25 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
 	private final LoginAuditEventPublisher loginAuditEventPublisher;
 
+	private final AuthTokenResponseEnricher authTokenResponseEnricher;
+
 	public RefreshTokenServiceImpl(AuthProfileCache authProfileCache,
 			RedisUserSessionIndexRepository redisUserSessionIndexRepository, TokenService tokenService,
-			JwtProperties jwtProperties, LoginAuditEventPublisher loginAuditEventPublisher) {
+			JwtProperties jwtProperties, LoginAuditEventPublisher loginAuditEventPublisher,
+			AuthTokenResponseEnricher authTokenResponseEnricher) {
 		this.authProfileCache = authProfileCache;
 		this.redisUserSessionIndexRepository = redisUserSessionIndexRepository;
 		this.tokenService = tokenService;
 		this.jwtProperties = jwtProperties;
 		this.loginAuditEventPublisher = loginAuditEventPublisher;
+		this.authTokenResponseEnricher = authTokenResponseEnricher;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public RefreshTokenResponse refreshToken(String refreshToken, HttpServletRequest request) {
+	public RefreshSessionResult refreshToken(String refreshToken, HttpServletRequest request) {
 		try {
 			return refreshTokenInternal(refreshToken, request);
 		}
@@ -74,7 +80,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 	 * @param request HTTP 请求
 	 * @return 刷新令牌响应
 	 */
-	private RefreshTokenResponse refreshTokenInternal(String refreshToken, HttpServletRequest request) {
+	private RefreshSessionResult refreshTokenInternal(String refreshToken, HttpServletRequest request) {
 		// 刷新Token必须存在
 		if (CharSequenceUtil.isBlank(refreshToken)) {
 			throw new AuthBusinessException(AuthResultCode.REFRESH_TOKEN_MISSING);
@@ -105,10 +111,13 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 		response.setAccessToken(tokenPair.accessToken());
 		response.setRefreshToken(tokenPair.refreshToken());
 		response.setExpires(tokenPair.accessExpiresAt());
+		authTokenResponseEnricher.enrichReadMeDay(response);
+
+		boolean rememberMe = Boolean.TRUE.equals(sessionIndex.getRememberMe());
 
 		loginAuditEventPublisher.publish(request, AuthLoginLogType.REFRESH_TOKEN, AuthLoginLogResult.SUCCESS,
 				refreshUserId, null, null, refreshJti);
-		return response;
+		return new RefreshSessionResult(response, rememberMe);
 	}
 
 	/**

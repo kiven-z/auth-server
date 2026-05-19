@@ -8,6 +8,7 @@ import com.auth.service.auth.authentication.audit.LoginAuditEventPublisher;
 import com.auth.service.auth.authentication.profile.AuthProfileCache;
 import com.auth.service.auth.authentication.service.impl.AuthServiceImpl;
 import com.auth.service.auth.authentication.strategy.LoginStrategy;
+import com.auth.service.auth.authentication.support.AuthTokenResponseEnricher;
 import com.auth.service.auth.authentication.token.LoginFailureRateLimiter;
 import com.auth.service.auth.authentication.token.LoginResult;
 import com.auth.service.auth.authentication.token.TokenPair;
@@ -68,7 +69,16 @@ class AuthServiceImplTest {
 	private LoginAuditEventPublisher loginAuditEventPublisher;
 
 	@Mock
+	private AuthTokenResponseEnricher authTokenResponseEnricher;
+
+	@Mock
 	private HttpServletRequest httpServletRequest;
+
+	private AuthServiceImpl newService(LoginStrategy<?>... strategies) {
+		return new AuthServiceImpl(List.of(strategies), authProfileCache, userSessionIndexFactory,
+				redisUserSessionIndexRepository, sessionLimitManager, tokenService, loginFailureRateLimiter,
+				loginAuditEventPublisher, authTokenResponseEnricher);
+	}
 
 	@Test
 	@DisplayName("登录：策略精确匹配时，按编排顺序执行并返回响应")
@@ -105,15 +115,13 @@ class AuthServiceImplTest {
 		sessionIndex.setSessionId(TestConstants.JTI);
 		sessionIndex.setRefreshTokenExpiresAt(System.currentTimeMillis() + 60_000);
 
-		when(userSessionIndexFactory.buildUserSessionIndex(any(), anyLong(), anyString(), anyString()))
+		when(userSessionIndexFactory.buildUserSessionIndex(any(), anyLong(), anyString(), anyString(), anyBoolean()))
 			.thenReturn(sessionIndex);
 
 		when(tokenService.buildTokenPair(anyLong(), anyString(), anyLong())).thenReturn(new TokenPair(
 				TestConstants.ACCESS_TOKEN, TestConstants.REFRESH_TOKEN, LocalDateTime.now().plusMinutes(5)));
 
-		AuthServiceImpl service = new AuthServiceImpl(List.of(strategy), authProfileCache, userSessionIndexFactory,
-				redisUserSessionIndexRepository, sessionLimitManager, tokenService, loginFailureRateLimiter,
-				loginAuditEventPublisher);
+		AuthServiceImpl service = newService(strategy);
 
 		// Act
 		UserLoginResponse actual = service.login(auth, httpServletRequest);
@@ -125,14 +133,16 @@ class AuthServiceImplTest {
 		assertNotNull(actual.getExpires());
 
 		InOrder inOrder = inOrder(sessionLimitManager, authProfileCache, tokenService, userSessionIndexFactory,
-				redisUserSessionIndexRepository, loginFailureRateLimiter, loginAuditEventPublisher);
+				redisUserSessionIndexRepository, authTokenResponseEnricher, loginFailureRateLimiter,
+				loginAuditEventPublisher);
 		inOrder.verify(sessionLimitManager).assertSessionLimit(TestConstants.USER_ID);
 		inOrder.verify(authProfileCache).createCacheAuthProfile(profile);
 		inOrder.verify(tokenService).buildTokenPair(eq(TestConstants.USER_ID), anyString(), eq(1L));
 		inOrder.verify(userSessionIndexFactory)
 			.buildUserSessionIndex(same(httpServletRequest), eq(TestConstants.USER_ID), anyString(),
-					eq(TestConstants.REFRESH_TOKEN));
+					eq(TestConstants.REFRESH_TOKEN), eq(false));
 		inOrder.verify(redisUserSessionIndexRepository).createUserSessionIndex(sessionIndex);
+		inOrder.verify(authTokenResponseEnricher).enrichReadMeDay(response);
 		inOrder.verify(loginFailureRateLimiter).recordSuccess(TestConstants.USER_ID);
 		inOrder.verify(loginAuditEventPublisher)
 			.publish(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_PASSWORD), eq(AuthLoginLogResult.SUCCESS),
@@ -170,14 +180,12 @@ class AuthServiceImplTest {
 			}
 		};
 
-		when(userSessionIndexFactory.buildUserSessionIndex(any(), anyLong(), anyString(), anyString()))
+		when(userSessionIndexFactory.buildUserSessionIndex(any(), anyLong(), anyString(), anyString(), anyBoolean()))
 			.thenReturn(new UserSessionIndex());
 		when(tokenService.buildTokenPair(anyLong(), anyString(), anyLong())).thenReturn(new TokenPair(
 				TestConstants.ACCESS_TOKEN, TestConstants.REFRESH_TOKEN, LocalDateTime.now().plusMinutes(1)));
 
-		AuthServiceImpl service = new AuthServiceImpl(List.of(strategy), authProfileCache, userSessionIndexFactory,
-				redisUserSessionIndexRepository, sessionLimitManager, tokenService, loginFailureRateLimiter,
-				loginAuditEventPublisher);
+		AuthServiceImpl service = newService(strategy);
 
 		// Act
 		UserLoginResponse actual = service.login(auth, httpServletRequest);
@@ -188,15 +196,49 @@ class AuthServiceImplTest {
 	}
 
 	@Test
+	@DisplayName("登录：rememberMe=true 时写入会话索引")
+	void login_shouldPassRememberMe_whenRequestRememberMeTrue() {
+		UsernamePasswordLoginRequest auth = new UsernamePasswordLoginRequest();
+		auth.setUsername("user");
+		auth.setPassword("pass");
+		auth.setRememberMe(true);
+
+		AuthProfile profile = mock(AuthProfile.class);
+		when(profile.getUserId()).thenReturn(TestConstants.USER_ID);
+		when(profile.getPermVersion()).thenReturn(1L);
+
+		UserLoginResponse response = new UserLoginResponse();
+		LoginStrategy<UsernamePasswordLoginRequest> strategy = new LoginStrategy<>() {
+			@Override
+			public Class<UsernamePasswordLoginRequest> supports() {
+				return UsernamePasswordLoginRequest.class;
+			}
+
+			@Override
+			public LoginResult authenticate(UsernamePasswordLoginRequest requestAuth, HttpServletRequest request) {
+				return new LoginResult(response, profile, AuthLoginLogType.LOGIN_PASSWORD);
+			}
+		};
+
+		when(userSessionIndexFactory.buildUserSessionIndex(any(), anyLong(), anyString(), anyString(), eq(true)))
+			.thenReturn(new UserSessionIndex());
+		when(tokenService.buildTokenPair(anyLong(), anyString(), anyLong())).thenReturn(new TokenPair(
+				TestConstants.ACCESS_TOKEN, TestConstants.REFRESH_TOKEN, LocalDateTime.now().plusMinutes(1)));
+
+		newService(strategy).login(auth, httpServletRequest);
+
+		verify(userSessionIndexFactory).buildUserSessionIndex(same(httpServletRequest), eq(TestConstants.USER_ID),
+				anyString(), anyString(), eq(true));
+	}
+
+	@Test
 	@DisplayName("登录：无任何策略时，抛出 AUTH_TYPE_UNSUPPORTED 并写审计")
 	void login_shouldThrowAuthTypeUnsupported_whenNoStrategy() {
 		// Arrange
 		AbstractLoginRequest auth = new AbstractLoginRequest() {
 		};
 
-		AuthServiceImpl service = new AuthServiceImpl(List.of(), authProfileCache, userSessionIndexFactory,
-				redisUserSessionIndexRepository, sessionLimitManager, tokenService, loginFailureRateLimiter,
-				loginAuditEventPublisher);
+		AuthServiceImpl service = newService();
 
 		// Act
 		AuthBusinessException exception = assertThrows(AuthBusinessException.class,
@@ -214,9 +256,7 @@ class AuthServiceImplTest {
 	@DisplayName("登出：token 为空/解析异常/kind 不匹配时，静默返回不做任何删除")
 	void logout_shouldReturnSilently_whenTokenBlankOrParseThrowsOrKindNotExternalAccess() {
 		// Arrange（logout 不使用策略表，传空列表即可）
-		AuthServiceImpl service = new AuthServiceImpl(List.of(), authProfileCache, userSessionIndexFactory,
-				redisUserSessionIndexRepository, sessionLimitManager, tokenService, loginFailureRateLimiter,
-				loginAuditEventPublisher);
+		AuthServiceImpl service = newService();
 
 		service.logout(" ", null);
 		verify(tokenService).parseAccessTokenSafe(" ");
@@ -233,9 +273,7 @@ class AuthServiceImplTest {
 	@DisplayName("登出：token 有效时，删除会话并从活跃集合移除")
 	void logout_shouldDeleteSessionAndRemoveActiveSession_whenTokenValid() {
 		// Arrange
-		AuthServiceImpl service = new AuthServiceImpl(List.of(), authProfileCache, userSessionIndexFactory,
-				redisUserSessionIndexRepository, sessionLimitManager, tokenService, loginFailureRateLimiter,
-				loginAuditEventPublisher);
+		AuthServiceImpl service = newService();
 
 		JwtUserToken jwtUserToken = mock(JwtUserToken.class);
 		when(jwtUserToken.getJti()).thenReturn(TestConstants.JTI);

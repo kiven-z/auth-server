@@ -30,7 +30,7 @@ public class UserSessionIndexFactory {
 	 * 构建用户会话索引
 	 */
 	public UserSessionIndex buildUserSessionIndex(HttpServletRequest request, Long userId, String jti,
-			String refreshToken) {
+			String refreshToken, boolean rememberMe) {
 		IpInfo ipInfo = ipAddressService.resolveIpInfo(request);
 		UserAgent userAgent = UserAgent.getUserAgent(request);
 
@@ -51,6 +51,7 @@ public class UserSessionIndexFactory {
 		long refreshExpiredSeconds = properties.getRefreshExpired();
 		long refreshTokenExpiresAtMillis = System.currentTimeMillis() + refreshExpiredSeconds * 1000L;
 		userSessionIndex.setRefreshTokenExpiresAt(refreshTokenExpiresAtMillis);
+		userSessionIndex.setRememberMe(rememberMe);
 		return userSessionIndex;
 	}
 
