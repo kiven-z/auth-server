@@ -4,8 +4,8 @@ import com.auth.service.system.schedule.config.ScheduleJobProperties;
 import com.auth.service.system.schedule.model.constans.SysJobQuartzDataKeys;
 import com.auth.service.system.schedule.service.SysJobLogService;
 import com.auth.service.system.schedule.support.SysJobCircuitBreaker;
-import lombok.RequiredArgsConstructor;
 import org.quartz.*;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 /**
@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
  *
  * @author Bunny
  */
-@RequiredArgsConstructor
 @Component
 public class SysJobExecutionListener implements JobListener {
 
@@ -33,6 +32,18 @@ public class SysJobExecutionListener implements JobListener {
 	private final SysJobCircuitBreaker sysJobCircuitBreaker;
 
 	private final ScheduleJobProperties scheduleJobProperties;
+
+	/**
+	 * @param sysJobLogService 任务日志服务
+	 * @param sysJobCircuitBreaker 熔断器（延迟注入，避免参与 Quartz Scheduler 创建期的循环依赖）
+	 * @param scheduleJobProperties 任务配置
+	 */
+	public SysJobExecutionListener(SysJobLogService sysJobLogService, @Lazy SysJobCircuitBreaker sysJobCircuitBreaker,
+			ScheduleJobProperties scheduleJobProperties) {
+		this.sysJobLogService = sysJobLogService;
+		this.sysJobCircuitBreaker = sysJobCircuitBreaker;
+		this.scheduleJobProperties = scheduleJobProperties;
+	}
 
 	/**
 	 * 获取监听器名称
