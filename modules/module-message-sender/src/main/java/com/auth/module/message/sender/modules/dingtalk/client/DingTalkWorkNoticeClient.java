@@ -101,20 +101,25 @@ public class DingTalkWorkNoticeClient {
 	 * @return 消息JSON
 	 */
 	private JSONObject buildMsgJson(DingTalkMessageType messageType, String title, String content) {
-		JSONObject msg = new JSONObject();
+		JSONObject payload = new JSONObject();
+		String msgType;
+		String payloadKey;
+
 		if (messageType == DingTalkMessageType.MARKDOWN) {
-			msg.set("msgtype", "markdown");
-			JSONObject markdown = new JSONObject();
-			markdown.set("title", CharSequenceUtil.blankToDefault(title, "通知"));
-			markdown.set("text", content);
-			msg.set("markdown", markdown);
-			return msg;
+			msgType = "markdown";
+			payloadKey = "markdown";
+			payload.set("title", CharSequenceUtil.blankToDefault(title, "通知"));
+			payload.set("text", content);
+		}
+		else {
+			msgType = "text";
+			payloadKey = "text";
+			payload.set("content", content);
 		}
 
-		msg.set("msgtype", "text");
-		JSONObject text = new JSONObject();
-		text.set("content", content);
-		msg.set("text", text);
+		JSONObject msg = new JSONObject();
+		msg.set("msgtype", msgType);
+		msg.set(payloadKey, payload);
 		return msg;
 	}
 

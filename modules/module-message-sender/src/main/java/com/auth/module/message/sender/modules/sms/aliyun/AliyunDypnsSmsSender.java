@@ -7,6 +7,8 @@ import com.auth.module.message.sender.config.properties.SmsProperties;
 import com.auth.module.message.sender.modules.sms.DypnsVerifyCodeSender;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.concurrent.ExecutionException;
+
 /**
  * 阿里云 Dypns 验证码短信发送实现
  *
@@ -69,12 +71,9 @@ public class AliyunDypnsSmsSender implements DypnsVerifyCodeSender {
 		catch (IllegalStateException | IllegalArgumentException e) {
 			throw e;
 		}
-		catch (InterruptedException e) {
+		catch (InterruptedException | ExecutionException e) {
 			Thread.currentThread().interrupt();
 			throw new IllegalStateException("Aliyun Dypns send interrupted", e);
-		}
-		catch (Exception e) {
-			throw new IllegalStateException("Aliyun Dypns send error: " + e.getMessage(), e);
 		}
 	}
 
