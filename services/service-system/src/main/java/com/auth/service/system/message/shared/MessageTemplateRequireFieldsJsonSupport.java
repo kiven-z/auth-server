@@ -112,13 +112,14 @@ public class MessageTemplateRequireFieldsJsonSupport {
 	 * 校验发送变量是否齐全
 	 * @param requireFields 已解析的必填变量声明
 	 * @param variables 发送变量
-	 * @param missingCode 变量缺失时的业务码（邮件/短信各自传入）
+	 * @param missingCode 变量缺失时的业务码（邮件/短信/钉钉各自传入）
+	 * @param channel 渠道名（写入 i18n 占位 {0}）
 	 */
 	public static void assertVariablesPresent(List<EmailTemplateRequireFieldRow> requireFields,
-			Map<String, Object> variables, SystemResultCode missingCode) {
+			Map<String, Object> variables, SystemResultCode missingCode, String channel) {
 		List<String> missingKeys = findMissingKeys(requireFields, variables);
 		if (CollUtil.isNotEmpty(missingKeys)) {
-			throw new SystemBusinessException(missingCode, String.join(", ", missingKeys));
+			throw new SystemBusinessException(missingCode, channel, String.join(", ", missingKeys));
 		}
 	}
 
@@ -126,11 +127,12 @@ public class MessageTemplateRequireFieldsJsonSupport {
 	 * 解析 require_fields 并校验发送变量是否齐全
 	 * @param requireFieldsJson 数据库中的 require_fields JSON
 	 * @param variables 发送变量
-	 * @param missingCode 变量缺失时的业务码（邮件/短信各自传入）
+	 * @param missingCode 变量缺失时的业务码（邮件/短信/钉钉各自传入）
+	 * @param channel 渠道名（写入 i18n 占位 {0}）
 	 */
 	public static void assertVariablesPresent(String requireFieldsJson, Map<String, Object> variables,
-			SystemResultCode missingCode) {
-		assertVariablesPresent(parse(requireFieldsJson), variables, missingCode);
+			SystemResultCode missingCode, String channel) {
+		assertVariablesPresent(parse(requireFieldsJson), variables, missingCode, channel);
 	}
 
 	/**

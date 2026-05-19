@@ -2,10 +2,10 @@ package com.auth.service.system.message.channel.dypns;
 
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
-import com.auth.module.message.sender.modules.sms.dypns.DypnsVerifyCodeSendPayload;
-import com.auth.module.message.sender.modules.sms.dypns.DypnsVerifyCodeSender;
-import com.auth.module.message.sender.spi.MessageSender;
 import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.message.infrastructure.modules.sms.dypns.DypnsVerifyCodeSendPayload;
+import com.auth.service.system.message.infrastructure.modules.sms.dypns.DypnsVerifyCodeSender;
+import com.auth.service.system.message.infrastructure.spi.MessageSender;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;

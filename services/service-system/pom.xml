@@ -20,7 +20,7 @@
     <dependencies>
         <dependency>
             <groupId>com.auth</groupId>
-            <artifactId>module-message-sender</artifactId>
+            <artifactId>module-message-api</artifactId>
             <version>0.0.2-beta</version>
         </dependency>
         <dependency>
@@ -34,7 +34,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-freemarker</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>alibabacloud-dypnsapi20170525</artifactId>
+        </dependency>
         <!-- mail -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

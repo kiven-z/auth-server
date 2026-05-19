@@ -21,7 +21,6 @@
         <module>module-security-web-starter</module>
         <module>module-security-autoconfigure</module>
         <module>module-message-api</module>
-        <module>module-message-sender</module>
     </modules>
 
     <properties>
