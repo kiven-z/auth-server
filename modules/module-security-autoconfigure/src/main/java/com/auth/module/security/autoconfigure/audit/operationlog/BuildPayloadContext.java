@@ -1,4 +1,4 @@
-package com.auth.module.security.autoconfigure.audit;
+package com.auth.module.security.autoconfigure.audit.operationlog;
 
 import com.auth.module.security.contract.annotation.OperationLog;
 import jakarta.servlet.http.HttpServletRequest;

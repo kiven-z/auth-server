@@ -42,9 +42,12 @@ public class AccessTokenProvider extends AbstractSecurityTokenProvider {
 		Objects.requireNonNull(userId, "userId is Null");
 		Objects.requireNonNull(permVersion, "permVersion is Null");
 
+		// 获取发行者
 		String issuer = properties.getIssuer();
+		// 获取访问过期时间
 		long accessExpired = properties.getAccessExpired();
 
+		// 构建 JWT 构建器
 		JwtBuilder jwtBuilder = Jwts.builder()
 			.id(jti)
 			.issuer(issuer)
@@ -70,13 +73,18 @@ public class AccessTokenProvider extends AbstractSecurityTokenProvider {
 	@SuppressWarnings("java:S1854")
 	protected void enrichTokenResult(SecurityTokenResult.SecurityTokenResultBuilder builder, String token,
 			JwtUserToken jwtUserToken, SecurityTokenKind kind) {
+		// 访问令牌类型不匹配，返回
 		if (kind != SecurityTokenKind.EXTERNAL_ACCESS) {
 			return;
 		}
 
+		// 获取令牌声明
 		Claims claims = jwtTokenProvider.getClaims(token);
+		// 获取版本号
 		Object raw = claims.get(PERM_VERSION);
+		// 解析版本号
 		Long permVersion = parsePermVersionClaim(raw);
+		// 设置版本号
 		builder.permVersion(permVersion);
 	}
 

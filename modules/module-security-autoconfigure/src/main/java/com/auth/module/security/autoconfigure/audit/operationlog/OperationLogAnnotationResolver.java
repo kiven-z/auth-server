@@ -1,4 +1,4 @@
-package com.auth.module.security.autoconfigure.audit;
+package com.auth.module.security.autoconfigure.audit.operationlog;
 
 import com.auth.module.security.contract.annotation.OperationLog;
 import lombok.experimental.UtilityClass;
@@ -15,7 +15,7 @@ import java.lang.reflect.Method;
  * @author Bunny
  */
 @UtilityClass
-public final class OperationLogAnnotationResolver {
+public class OperationLogAnnotationResolver {
 
 	/**
 	 * 解析 {@link OperationLog}：先取目标方法（含 CGLIB 场景），再回退到目标类上的类级别注解。

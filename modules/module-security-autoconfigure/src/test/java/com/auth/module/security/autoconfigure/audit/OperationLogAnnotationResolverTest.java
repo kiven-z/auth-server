@@ -1,5 +1,6 @@
 package com.auth.module.security.autoconfigure.audit;
 
+import com.auth.module.security.autoconfigure.audit.operationlog.OperationLogAnnotationResolver;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
@@ -13,9 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Method;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 /**
@@ -23,8 +22,8 @@ import static org.mockito.Mockito.when;
  *
  * @author Bunny
  */
-@ExtendWith(MockitoExtension.class)
 @DisplayName("OperationLogAnnotationResolver")
+@ExtendWith(MockitoExtension.class)
 class OperationLogAnnotationResolverTest {
 
 	private static final String BIZ_DEPT = "SYS_DEPT";

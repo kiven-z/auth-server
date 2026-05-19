@@ -67,28 +67,37 @@ public abstract class AbstractSecurityTokenProvider implements SecurityTokenProv
 	 */
 	@Override
 	public SecurityTokenResult parseToken(String token) {
-
+		// 格式化令牌，仅在开头为 Bearer 且不能为空
 		String normalizedToken = normalizeToken(token);
 		if (CharSequenceUtil.isBlank(normalizedToken)) {
 			throw new SecurityTokenException(SecurityResultCodeEnum.TOKEN_MISSING, "Token is missing.");
 		}
 
 		try {
+			// 获取令牌声明
 			Claims claims = jwtTokenProvider.getClaims(normalizedToken);
+			// 获取令牌类型
 			Object raw = claims.get(TOKEN_TYPE);
+			// 获取令牌类型
 			String tokenKind = getTokenKind();
 
+			// 如果令牌类型不匹配
 			if (raw == null || !CharSequenceUtil.equals(raw.toString(), tokenKind, true)) {
 				throw new SecurityTokenException(SecurityResultCodeEnum.TOKEN_KIND_MISMATCH, "Token kind mismatch.");
 			}
 
+			// 解析令牌
 			JwtUserToken jwtUserToken = jwtTokenProvider.parseToken(normalizedToken);
 
+			// 获取令牌类型
 			SecurityTokenKind kind = SecurityTokenKind.of(tokenKind);
+			// 如果令牌类型不存在
 			if (kind == null) {
 				throw new SecurityTokenException(SecurityResultCodeEnum.TOKEN_KIND_MISMATCH,
 						"Token kind is not supported: " + tokenKind);
 			}
+
+			// 构建令牌结果
 			SecurityTokenResult.SecurityTokenResultBuilder builder = SecurityTokenResult.builder()
 				.kind(kind)
 				.rawToken(normalizedToken)
@@ -108,15 +117,16 @@ public abstract class AbstractSecurityTokenProvider implements SecurityTokenProv
 	}
 
 	/**
-	 * 归一化令牌：仅在 Bearer 前缀存在时裁剪前缀
+	 * 格式化令牌：仅在 Bearer 前缀存在时裁剪前缀
 	 * @param token 令牌
-	 * @return 归一化后的令牌
+	 * @return 格式化后的令牌
 	 */
 	private String normalizeToken(String token) {
 		String trimmedToken = CharSequenceUtil.trim(token);
 		if (CharSequenceUtil.isBlank(trimmedToken)) {
 			return trimmedToken;
 		}
+
 		return CharSequenceUtil.startWithIgnoreCase(trimmedToken, BEARER_PREFIX)
 				? CharSequenceUtil.trim(CharSequenceUtil.removePrefixIgnoreCase(trimmedToken, BEARER_PREFIX))
 				: trimmedToken;

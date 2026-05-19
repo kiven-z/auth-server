@@ -1,5 +1,6 @@
 package com.auth.module.security.autoconfigure.audit;
 
+import com.auth.module.security.autoconfigure.audit.operationlog.OperationLogRequestParamsBuilder;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;

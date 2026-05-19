@@ -1,6 +1,7 @@
 package com.auth.module.security.autoconfigure.audit;
 
 import com.auth.common.core.model.response.Result;
+import com.auth.module.security.autoconfigure.audit.operationlog.OperationLogResponseMessageComposer;
 import com.auth.module.security.contract.annotation.OperationLog;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,8 +18,8 @@ import static org.mockito.Mockito.when;
  *
  * @author Bunny
  */
-@ExtendWith(MockitoExtension.class)
 @DisplayName("OperationLogResponseMessageComposer")
+@ExtendWith(MockitoExtension.class)
 class OperationLogResponseMessageComposerTest {
 
 	@Mock

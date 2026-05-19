@@ -1,8 +1,8 @@
 package com.auth.module.security.autoconfigure.autoconfigure.pipeline;
 
 import com.auth.common.ip.IpAddressService;
-import com.auth.module.security.autoconfigure.audit.OperationLogAspect;
-import com.auth.module.security.autoconfigure.audit.OperationLogPayloadAssembler;
+import com.auth.module.security.autoconfigure.audit.operationlog.OperationLogAspect;
+import com.auth.module.security.autoconfigure.audit.operationlog.OperationLogPayloadAssembler;
 import com.auth.module.security.autoconfigure.service.NoopOperationLogHandler;
 import com.auth.module.security.contract.spi.OperationLogHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;

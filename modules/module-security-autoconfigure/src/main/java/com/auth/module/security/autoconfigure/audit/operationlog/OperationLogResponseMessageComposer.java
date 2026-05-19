@@ -1,4 +1,4 @@
-package com.auth.module.security.autoconfigure.audit;
+package com.auth.module.security.autoconfigure.audit.operationlog;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.core.model.response.Result;

@@ -1,4 +1,4 @@
-package com.auth.module.security.autoconfigure.audit;
+package com.auth.module.security.autoconfigure.audit.operationlog;
 
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.text.CharSequenceUtil;
@@ -15,7 +15,6 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 import java.util.*;
@@ -47,6 +46,8 @@ public class OperationLogRequestParamsBuilder {
 	private static final String KEY_TYPE = "_type";
 
 	private static final String KEY_NOTE = "_note";
+
+	private static final String GET = "GET";
 
 	/**
 	 * 组装请求参数摘要：不携带方法实参（与历史行为一致）。
@@ -87,7 +88,7 @@ public class OperationLogRequestParamsBuilder {
 	 * @return 摘要或 {@code null}
 	 */
 	private static String buildServletDerivedOnly(HttpServletRequest request, ObjectMapper objectMapper) {
-		if ("GET".equalsIgnoreCase(request.getMethod())) {
+		if (GET.equalsIgnoreCase(request.getMethod())) {
 			return legacyGetQuerySummary(request);
 		}
 		return serializeParameterMapOrNull(request.getParameterMap(), objectMapper);
@@ -103,7 +104,7 @@ public class OperationLogRequestParamsBuilder {
 	private static String buildCombinedWithMethodArgs(HttpServletRequest request, ObjectMapper objectMapper,
 			List<Object> methodSummaries) {
 		Map<String, Object> root = new LinkedHashMap<>();
-		if ("GET".equalsIgnoreCase(request.getMethod())) {
+		if (GET.equalsIgnoreCase(request.getMethod())) {
 			putQueryStringIfNotBlankForCombined(root, request);
 		}
 		else {
@@ -195,9 +196,10 @@ public class OperationLogRequestParamsBuilder {
 	 * @return 是否跳过
 	 */
 	private static boolean isSkippedFrameworkArgument(Object arg) {
+		// RedirectAttributes 为 Model 子类型，由 instanceof Model 一并跳过
 		return arg instanceof ServletRequest || arg instanceof ServletResponse || arg instanceof BindingResult
 				|| arg instanceof Model || arg instanceof NativeWebRequest || arg instanceof HttpSession
-				|| arg instanceof RedirectAttributes || arg instanceof Principal;
+				|| arg instanceof Principal;
 	}
 
 	/**

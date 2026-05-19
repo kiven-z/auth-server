@@ -1,6 +1,7 @@
-package com.auth.module.security.autoconfigure.audit;
+package com.auth.module.security.autoconfigure.audit.operationlog;
 
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.ArrayUtil;
 import com.auth.common.ip.IpAddressService;
 import com.auth.common.ip.IpInfo;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
@@ -106,7 +107,7 @@ public class OperationLogPayloadAssembler {
 		Method method = signature.getMethod();
 
 		Object[] args = joinPoint.getArgs();
-		List<Object> methodArgs = args == null || args.length == 0 ? List.of() : List.copyOf(Arrays.asList(args));
+		List<Object> methodArgs = ArrayUtil.isEmpty(args) ? List.of() : List.copyOf(Arrays.asList(args));
 		OperationLogPayloadEvent payload = buildPayload(
 				new BuildPayloadContext(meta, result, failure, startNs, request, response, method, methodArgs));
 		dispatch(payload);

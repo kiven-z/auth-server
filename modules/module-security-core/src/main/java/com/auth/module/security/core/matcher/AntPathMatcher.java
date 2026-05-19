@@ -22,9 +22,12 @@ public class AntPathMatcher {
 	 * @return 是否匹配
 	 */
 	public static boolean matchesAnyAnt(String uri, List<String> patterns) {
+		// 请求路径为空、匹配路径为空，返回 false
 		if (CharSequenceUtil.isBlank(uri) || ArrayUtil.isEmpty(patterns)) {
 			return false;
 		}
+
+		// 开始寻找匹配的 Ant 路径
 		org.springframework.util.AntPathMatcher matcher = new org.springframework.util.AntPathMatcher();
 		for (String pattern : patterns) {
 			if (StringUtils.hasText(pattern) && matcher.match(pattern, uri)) {

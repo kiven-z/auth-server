@@ -40,7 +40,9 @@ public class InternalTokenProvider extends AbstractSecurityTokenProvider {
 	public String buildToken(Long userId, String jti, Long permVersion) {
 		Objects.requireNonNull(userId, "userId is Null");
 
+		// 构建 JWT 构建器
 		JwtBuilder builder = baseBuilder(userId, jti).claims(Map.of(PRINCIPAL_TYPE, PRINCIPAL_TYPE_USER));
+		// 生成 JWT 令牌
 		return super.jwtTokenProvider.generatorJwtToken(builder);
 	}
 
@@ -55,8 +57,10 @@ public class InternalTokenProvider extends AbstractSecurityTokenProvider {
 	 * @return 内部令牌
 	 */
 	public String buildServiceToken(String serviceId, String jti) {
+		// 构建 JWT 构建器
 		JwtBuilder builder = baseBuilder(SERVICE_SUB_PLACEHOLDER, jti)
 			.claims(Map.of(PRINCIPAL_TYPE, PRINCIPAL_TYPE_SERVICE, SERVICE_ID, serviceId));
+		// 生成 JWT 令牌
 		return super.jwtTokenProvider.generatorJwtToken(builder);
 	}
 
@@ -68,15 +72,20 @@ public class InternalTokenProvider extends AbstractSecurityTokenProvider {
 	@SuppressWarnings("java:S1854")
 	protected void enrichTokenResult(SecurityTokenResult.SecurityTokenResultBuilder builder, String token,
 			JwtUserToken jwtUserToken, SecurityTokenKind kind) {
+		// 内部令牌类型不匹配，返回
 		if (kind != SecurityTokenKind.INTERNAL) {
 			return;
 		}
 
+		// 获取令牌声明
 		Claims claims = super.jwtTokenProvider.getClaims(token);
+		// 获取主体类型
 		Object principalType = claims.get(PRINCIPAL_TYPE);
 		if (principalType != null) {
 			builder.principalType(principalType.toString());
 		}
+
+		// 获取服务ID
 		Object serviceId = claims.get(SERVICE_ID);
 		if (serviceId != null) {
 			builder.serviceId(serviceId.toString());

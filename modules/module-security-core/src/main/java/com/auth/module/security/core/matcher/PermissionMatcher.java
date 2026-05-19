@@ -30,22 +30,22 @@ public class PermissionMatcher {
 		}
 
 		// 修剪并转换为小写
-		String g = CharSequenceUtil.trim(granted).toLowerCase();
-		String r = CharSequenceUtil.trim(required).toLowerCase();
+		granted = CharSequenceUtil.trim(granted).toLowerCase();
+		required = CharSequenceUtil.trim(required).toLowerCase();
 
 		// 检查是否为管理员通配权限
-		if (isAdminPermission(List.of(g))) {
+		if (isAdminPermission(List.of(granted))) {
 			return true;
 		}
 
 		// 如果授予的权限和需要的权限相等，则返回 true
-		if (g.equals(r)) {
+		if (granted.equals(required)) {
 			return true;
 		}
 
 		// 分割授予的权限和需要的权限
-		String[] gParts = g.split(":");
-		String[] rParts = r.split(":");
+		String[] gParts = granted.split(":");
+		String[] rParts = required.split(":");
 
 		// 获取授予的权限和需要的权限的最大长度
 		int max = Math.max(gParts.length, rParts.length);
