@@ -16,31 +16,28 @@ import org.springframework.web.bind.annotation.RequestBody;
 @FeignClient(name = "service-system", contextId = "systemSecurityIngest", path = "/api/system")
 public interface SystemSecurityIngestFeignClient {
 
-    /**
-     * 上报一条授权审计记录
-     *
-     * @param body 传输负载
-     * @return 统一结果
-     */
-    @PostMapping("inner/authorization-audit/records")
-    Result<Void> appendAuthorizationAudit(@RequestBody AuthorizationAuditIngestRequest body);
+	/**
+	 * 上报一条授权审计记录
+	 * @param body 传输负载
+	 * @return 统一结果
+	 */
+	@PostMapping("inner/authorization-audit/records")
+	Result<Void> appendAuthorizationAudit(@RequestBody AuthorizationAuditIngestRequest body);
 
-    /**
-     * 上报一条操作日志记录
-     *
-     * @param body 传输负载
-     * @return 统一结果
-     */
-    @PostMapping("inner/operation-log/records")
-    Result<Void> appendOperationLog(@RequestBody OperationLogIngestRequest body);
+	/**
+	 * 上报一条操作日志记录
+	 * @param body 传输负载
+	 * @return 统一结果
+	 */
+	@PostMapping("inner/operation-log/records")
+	Result<Void> appendOperationLog(@RequestBody OperationLogIngestRequest body);
 
-    /**
-     * 按模板发送消息（多渠道统一入口）
-     *
-     * @param command 模板化发送命令
-     * @return 统一结果
-     */
-    @PostMapping("/message/send")
-    Result<String> sendByTemplate(@RequestBody TemplateMessageCommand command);
+	/**
+	 * 按模板发送消息（多渠道统一入口）
+	 * @param command 模板化发送命令
+	 * @return 统一结果
+	 */
+	@PostMapping("message/send")
+	Result<String> sendByTemplate(@RequestBody TemplateMessageCommand command);
 
 }

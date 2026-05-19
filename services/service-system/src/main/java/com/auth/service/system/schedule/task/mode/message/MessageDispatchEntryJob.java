@@ -15,30 +15,32 @@ import org.springframework.context.ApplicationContext;
  */
 public class MessageDispatchEntryJob implements Job {
 
-    @Override
-    public void execute(JobExecutionContext context) throws JobExecutionException {
-        try {
-            ApplicationContext app = QuartzJobSupport.getApplicationContext(context);
-            JobDataMap jobDataMap = context.getMergedJobDataMap();
-            String payloadJson = jobDataMap.getString(SysJobQuartzDataKeys.PAYLOAD_JSON);
+	@Override
+	public void execute(JobExecutionContext context) throws JobExecutionException {
+		try {
+			ApplicationContext app = QuartzJobSupport.getApplicationContext(context);
+			JobDataMap jobDataMap = context.getMergedJobDataMap();
+			String payloadJson = jobDataMap.getString(SysJobQuartzDataKeys.PAYLOAD_JSON);
 
-            MessageDispatchCommandParser parser = app.getBean(MessageDispatchCommandParser.class);
-            TemplateMessageCommand command = parser.parseAndValidate(payloadJson);
-            MessageDispatchService dispatchService = app.getBean(MessageDispatchService.class);
-            dispatchService.sendByTemplate(command);
-        } catch (JobExecutionException exception) {
-            throw exception;
-        } catch (Exception exception) {
-            throw new JobExecutionException(exception);
-        }
-    }
+			MessageDispatchCommandParser parser = app.getBean(MessageDispatchCommandParser.class);
+			TemplateMessageCommand command = parser.parseAndValidate(payloadJson);
+			MessageDispatchService dispatchService = app.getBean(MessageDispatchService.class);
+			dispatchService.sendByTemplate(command);
+		}
+		catch (JobExecutionException exception) {
+			throw exception;
+		}
+		catch (Exception exception) {
+			throw new JobExecutionException(exception);
+		}
+	}
 
-    /**
-     * 禁止并发版本
-     */
-    @DisallowConcurrentExecution
-    public static class Disallow extends MessageDispatchEntryJob {
+	/**
+	 * 禁止并发版本
+	 */
+	@DisallowConcurrentExecution
+	public static class Disallow extends MessageDispatchEntryJob {
 
-    }
+	}
 
 }

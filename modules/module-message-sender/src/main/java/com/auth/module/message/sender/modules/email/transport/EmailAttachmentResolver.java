@@ -22,66 +22,68 @@ import java.util.List;
 @Slf4j
 public class EmailAttachmentResolver {
 
-    private final RestTemplate restTemplate;
+	private final RestTemplate restTemplate;
 
-    public EmailAttachmentResolver(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
-    }
+	public EmailAttachmentResolver(RestTemplate restTemplate) {
+		this.restTemplate = restTemplate;
+	}
 
-    /**
-     * Converts attachment DTOs to in-memory multipart files.
-     *
-     * @param attachments attachment DTO list
-     * @return multipart files
-     */
-    public List<MultipartFile> resolve(List<AttachmentDTO> attachments) {
-        if (CollUtil.isEmpty(attachments)) {
-            return Collections.emptyList();
-        }
+	/**
+	 * Converts attachment DTOs to in-memory multipart files.
+	 * @param attachments attachment DTO list
+	 * @return multipart files
+	 */
+	public List<MultipartFile> resolve(List<AttachmentDTO> attachments) {
+		if (CollUtil.isEmpty(attachments)) {
+			return Collections.emptyList();
+		}
 
-        List<MultipartFile> files = new ArrayList<>(attachments.size());
-        for (AttachmentDTO attachment : attachments) {
-            if (attachment != null && CharSequenceUtil.isNotBlank(attachment.getFilename())) {
-                String filename = attachment.getFilename();
-                String contentType = attachment.getContentType();
-                byte[] content = resolveBytes(attachment);
-                if (PrimitiveArrayUtil.isNotEmpty(content)) {
-                    files.add(new InMemoryMultipartFile(filename, filename, contentType, content));
-                }
-            }
-        }
-        return files;
-    }
+		List<MultipartFile> files = new ArrayList<>(attachments.size());
+		for (AttachmentDTO attachment : attachments) {
+			if (attachment != null && CharSequenceUtil.isNotBlank(attachment.getFilename())) {
+				String filename = attachment.getFilename();
+				String contentType = attachment.getContentType();
+				byte[] content = resolveBytes(attachment);
+				if (PrimitiveArrayUtil.isNotEmpty(content)) {
+					files.add(new InMemoryMultipartFile(filename, filename, contentType, content));
+				}
+			}
+		}
+		return files;
+	}
 
-    private byte[] resolveBytes(AttachmentDTO attachment) {
-        if (CharSequenceUtil.isNotBlank(attachment.getBase64())) {
-            try {
-                return Base64.decode(attachment.getBase64());
-            } catch (IllegalArgumentException e) {
-                throw new EmailTransportException(EmailTransportException.Reason.ATTACHMENT_BASE64_FAILED,
-                        e.getMessage(), e);
-            }
-        }
-        if (attachment.getBytes() != null && attachment.getBytes().length > 0) {
-            return attachment.getBytes();
-        }
-        if (CharSequenceUtil.isNotBlank(attachment.getUrl())) {
-            try {
-                ResponseEntity<byte[]> response = restTemplate.getForEntity(attachment.getUrl(), byte[].class);
-                if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                    return response.getBody();
-                }
-                throw new EmailTransportException(EmailTransportException.Reason.ATTACHMENT_HTTP_STATUS,
-                        "HTTP status: " + response.getStatusCode().value());
-            } catch (EmailTransportException e) {
-                throw e;
-            } catch (Exception e) {
-                log.error("Failed to download attachment from URL", e);
-                throw new EmailTransportException(EmailTransportException.Reason.ATTACHMENT_DOWNLOAD_FAILED,
-                        e.getMessage(), e);
-            }
-        }
-        return new byte[0];
-    }
+	private byte[] resolveBytes(AttachmentDTO attachment) {
+		if (CharSequenceUtil.isNotBlank(attachment.getBase64())) {
+			try {
+				return Base64.decode(attachment.getBase64());
+			}
+			catch (IllegalArgumentException e) {
+				throw new EmailTransportException(EmailTransportException.Reason.ATTACHMENT_BASE64_FAILED,
+						e.getMessage(), e);
+			}
+		}
+		if (attachment.getBytes() != null && attachment.getBytes().length > 0) {
+			return attachment.getBytes();
+		}
+		if (CharSequenceUtil.isNotBlank(attachment.getUrl())) {
+			try {
+				ResponseEntity<byte[]> response = restTemplate.getForEntity(attachment.getUrl(), byte[].class);
+				if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+					return response.getBody();
+				}
+				throw new EmailTransportException(EmailTransportException.Reason.ATTACHMENT_HTTP_STATUS,
+						"HTTP status: " + response.getStatusCode().value());
+			}
+			catch (EmailTransportException e) {
+				throw e;
+			}
+			catch (Exception e) {
+				log.error("Failed to download attachment from URL", e);
+				throw new EmailTransportException(EmailTransportException.Reason.ATTACHMENT_DOWNLOAD_FAILED,
+						e.getMessage(), e);
+			}
+		}
+		return new byte[0];
+	}
 
 }

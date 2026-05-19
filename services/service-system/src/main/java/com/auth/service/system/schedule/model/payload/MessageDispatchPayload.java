@@ -19,18 +19,20 @@ import java.io.Serializable;
 @Setter
 public class MessageDispatchPayload implements Serializable {
 
-    /**
-     * 当前支持的载荷版本
-     */
-    public static final int VERSION_1 = 1;
-    @Serial
-    private static final long serialVersionUID = 1L;
-    @Schema(title = "载荷协议版本")
-    @NotNull
-    private Integer version = VERSION_1;
+	/**
+	 * 当前支持的载荷版本
+	 */
+	public static final int VERSION_1 = 1;
 
-    @Schema(title = "消息命令")
-    @NotNull
-    private TemplateMessageCommand command;
+	@Serial
+	private static final long serialVersionUID = 1L;
+
+	@Schema(title = "载荷协议版本")
+	@NotNull
+	private Integer version = VERSION_1;
+
+	@Schema(title = "消息命令")
+	@NotNull
+	private TemplateMessageCommand command;
 
 }

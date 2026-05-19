@@ -1,7 +1,7 @@
 package com.auth.service.system.schedule.support;
 
-import com.auth.module.message.channel.MessageChannel;
-import com.auth.module.message.command.TemplateMessageCommand;
+import com.auth.module.message.api.channel.MessageChannel;
+import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.schedule.model.payload.MessageDispatchPayload;
 import com.fasterxml.jackson.databind.ObjectMapper;

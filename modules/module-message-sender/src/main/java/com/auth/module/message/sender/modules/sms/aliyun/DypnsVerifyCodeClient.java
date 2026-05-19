@@ -12,14 +12,13 @@ import java.util.concurrent.ExecutionException;
  */
 public interface DypnsVerifyCodeClient extends AutoCloseable {
 
-    /**
-     * 调用 SendSmsVerifyCode
-     *
-     * @param request 请求参数
-     * @return 响应
-     * @throws ExecutionException   执行异常
-     * @throws InterruptedException 中断异常
-     */
-    SendSmsVerifyCodeResponse send(SendSmsVerifyCodeRequest request) throws ExecutionException, InterruptedException;
+	/**
+	 * 调用 SendSmsVerifyCode
+	 * @param request 请求参数
+	 * @return 响应
+	 * @throws ExecutionException 执行异常
+	 * @throws InterruptedException 中断异常
+	 */
+	SendSmsVerifyCodeResponse send(SendSmsVerifyCodeRequest request) throws ExecutionException, InterruptedException;
 
 }

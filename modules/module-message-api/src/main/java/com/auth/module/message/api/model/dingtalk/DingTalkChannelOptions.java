@@ -19,22 +19,22 @@ import java.io.Serial;
 @AllArgsConstructor
 public class DingTalkChannelOptions implements ChannelOptions {
 
-    /**
-     * Jackson 多态类型标识
-     */
-    public static final String TYPE = "ding_talk";
+	/**
+	 * Jackson 多态类型标识
+	 */
+	public static final String TYPE = "ding_talk";
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+	@Serial
+	private static final long serialVersionUID = 1L;
 
-    /**
-     * Markdown 标题（TEXT 类型可空）
-     */
-    private String title;
+	/**
+	 * Markdown 标题（TEXT 类型可空）
+	 */
+	private String title;
 
-    /**
-     * 覆盖模板或默认的消息类型
-     */
-    private DingTalkMessageType messageType;
+	/**
+	 * 覆盖模板或默认的消息类型
+	 */
+	private DingTalkMessageType messageType;
 
 }

@@ -21,50 +21,49 @@ import java.util.concurrent.ExecutionException;
 @Slf4j
 public class AliyunDypnsVerifyCodeClient implements DypnsVerifyCodeClient {
 
-    private final AsyncClient asyncClient;
+	private final AsyncClient asyncClient;
 
-    /**
-     * 根据配置创建 Dypns 客户端
-     *
-     * @param smsProperties 短信配置
-     */
-    public AliyunDypnsVerifyCodeClient(SmsProperties smsProperties) {
-        // 校验 AK 配置
-        if (CharSequenceUtil.isBlank(smsProperties.getAccessKeySecret())) {
-            throw new IllegalStateException("SMS access key is not configured (auth.message.sms.access-key-id/secret)");
-        }
+	/**
+	 * 根据配置创建 Dypns 客户端
+	 * @param smsProperties 短信配置
+	 */
+	public AliyunDypnsVerifyCodeClient(SmsProperties smsProperties) {
+		// 校验 AK 配置
+		if (CharSequenceUtil.isBlank(smsProperties.getAccessKeySecret())) {
+			throw new IllegalStateException("SMS access key is not configured (auth.message.sms.access-key-id/secret)");
+		}
 
-        StaticCredentialProvider credentialProvider = StaticCredentialProvider.create(Credential.builder()
-                .accessKeyId(smsProperties.getAccessKeyId())
-                .accessKeySecret(smsProperties.getAccessKeySecret())
-                .build());
+		StaticCredentialProvider credentialProvider = StaticCredentialProvider.create(Credential.builder()
+			.accessKeyId(smsProperties.getAccessKeyId())
+			.accessKeySecret(smsProperties.getAccessKeySecret())
+			.build());
 
-        this.asyncClient = AsyncClient.builder()
-                .region(smsProperties.getRegion())
-                .credentialsProvider(credentialProvider)
-                .overrideConfiguration(
-                        ClientOverrideConfiguration.create().setEndpointOverride(smsProperties.getEndpoint()))
-                .build();
-    }
+		this.asyncClient = AsyncClient.builder()
+			.region(smsProperties.getRegion())
+			.credentialsProvider(credentialProvider)
+			.overrideConfiguration(
+					ClientOverrideConfiguration.create().setEndpointOverride(smsProperties.getEndpoint()))
+			.build();
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public SendSmsVerifyCodeResponse send(SendSmsVerifyCodeRequest request)
-            throws ExecutionException, InterruptedException {
-        CompletableFuture<SendSmsVerifyCodeResponse> future = asyncClient.sendSmsVerifyCode(request);
-        return future.get();
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public SendSmsVerifyCodeResponse send(SendSmsVerifyCodeRequest request)
+			throws ExecutionException, InterruptedException {
+		CompletableFuture<SendSmsVerifyCodeResponse> future = asyncClient.sendSmsVerifyCode(request);
+		return future.get();
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void close() {
-        if (asyncClient != null) {
-            asyncClient.close();
-        }
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void close() {
+		if (asyncClient != null) {
+			asyncClient.close();
+		}
+	}
 
 }

@@ -11,22 +11,22 @@ import jakarta.validation.ConstraintValidatorContext;
  * @author Bunny
  */
 public class TemplateMessageCommandValidator
-        implements ConstraintValidator<TemplateMessageCommandValid, TemplateMessageCommand> {
+		implements ConstraintValidator<TemplateMessageCommandValid, TemplateMessageCommand> {
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isValid(TemplateMessageCommand command, ConstraintValidatorContext context) {
-        if (command == null) {
-            return true;
-        }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean isValid(TemplateMessageCommand command, ConstraintValidatorContext context) {
+		if (command == null) {
+			return true;
+		}
 
-        if (BooleanUtil.isTrue(command.getCustomBody())) {
-            return CharSequenceUtil.isNotBlank(command.getBody());
-        }
+		if (BooleanUtil.isTrue(command.getCustomBody())) {
+			return CharSequenceUtil.isNotBlank(command.getBody());
+		}
 
-        return CharSequenceUtil.isNotBlank(command.getTemplateCode());
-    }
+		return CharSequenceUtil.isNotBlank(command.getTemplateCode());
+	}
 
 }

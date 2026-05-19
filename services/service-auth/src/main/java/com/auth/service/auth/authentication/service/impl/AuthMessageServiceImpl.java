@@ -36,92 +36,92 @@ import static com.auth.module.security.contract.redis.SecurityRedisKey.SMS_CODE;
 @Service
 public class AuthMessageServiceImpl implements AuthMessageService {
 
-    private final RedisTemplate<String, Object> redisTemplate;
+	private final RedisTemplate<String, Object> redisTemplate;
 
-    private final UserMapper userMapper;
+	private final UserMapper userMapper;
 
-    private final LoginAuditSnapshotFactory loginAuditSnapshotFactory;
+	private final LoginAuditSnapshotFactory loginAuditSnapshotFactory;
 
-    private final SystemSecurityIngestFeignClient systemSecurityIngestFeignClient;
+	private final SystemSecurityIngestFeignClient systemSecurityIngestFeignClient;
 
-    public AuthMessageServiceImpl(RedisTemplate<String, Object> redisTemplate, UserMapper userMapper,
-                                  LoginAuditSnapshotFactory loginAuditSnapshotFactory,
-                                  SystemSecurityIngestFeignClient systemSecurityIngestFeignClient) {
-        this.redisTemplate = redisTemplate;
-        this.userMapper = userMapper;
-        this.loginAuditSnapshotFactory = loginAuditSnapshotFactory;
-        this.systemSecurityIngestFeignClient = systemSecurityIngestFeignClient;
-    }
+	public AuthMessageServiceImpl(RedisTemplate<String, Object> redisTemplate, UserMapper userMapper,
+			LoginAuditSnapshotFactory loginAuditSnapshotFactory,
+			SystemSecurityIngestFeignClient systemSecurityIngestFeignClient) {
+		this.redisTemplate = redisTemplate;
+		this.userMapper = userMapper;
+		this.loginAuditSnapshotFactory = loginAuditSnapshotFactory;
+		this.systemSecurityIngestFeignClient = systemSecurityIngestFeignClient;
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void sendEmailCode(String email, HttpServletRequest request) {
-        String redisKey = EMAIL_CODE.key(email);
-        String code = RandomUtil.randomNumbers(6);
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void sendEmailCode(String email, HttpServletRequest request) {
+		String redisKey = EMAIL_CODE.key(email);
+		String code = RandomUtil.randomNumbers(6);
 
-        // 存入 Redis 时使用 MD5，登录校验侧对比 digestHex16
-        redisTemplate.opsForValue().set(redisKey, MD5.create().digestHex16(code), EMAIL_CODE.getDefaultTtl());
+		// 存入 Redis 时使用 MD5，登录校验侧对比 digestHex16
+		redisTemplate.opsForValue().set(redisKey, MD5.create().digestHex16(code), EMAIL_CODE.getDefaultTtl());
 
-        // 过期时间转成分钟
-        long expireMinutes = EMAIL_CODE.getDefaultTtl().toMinutes();
+		// 过期时间转成分钟
+		long expireMinutes = EMAIL_CODE.getDefaultTtl().toMinutes();
 
-        // IP地址等信息
-        LoginAuditSnapshot snapshot = loginAuditSnapshotFactory.build(request);
+		// IP地址等信息
+		LoginAuditSnapshot snapshot = loginAuditSnapshotFactory.build(request);
 
-        // 未找到活跃用户时静默返回，不暴露账号不存在（与 EmailLoginStrategy 策略一致）
-        UserEntity user = userMapper.selectUserByEmail(email);
-        if (user == null) {
-            log.warn("Send email code skipped: no active user found for email={}", email);
-            return;
-        }
-        String username = user.getUsername();
+		// 未找到活跃用户时静默返回，不暴露账号不存在（与 EmailLoginStrategy 策略一致）
+		UserEntity user = userMapper.selectUserByEmail(email);
+		if (user == null) {
+			log.warn("Send email code skipped: no active user found for email={}", email);
+			return;
+		}
+		String username = user.getUsername();
 
-        // 拼装发送对象
-        Map<String, Object> variables = LoginEmailVariables.build(username, code, expireMinutes, LocalDateTime.now(),
-                snapshot.loginIp(), snapshot.loginRegion());
-        TemplateMessageCommand command = TemplateMessageCommand.builder()
-                .channel(MessageChannel.EMAIL)
-                .templateCode(AuthEmailTemplateCode.LOGIN_EMAIL_CODE.getTemplateCode())
-                .targets(List.of(email))
-                .variables(variables)
-                .options(EmailChannelOptions.builder().hasHtml(Boolean.TRUE).build())
-                .build();
+		// 拼装发送对象
+		Map<String, Object> variables = LoginEmailVariables.build(username, code, expireMinutes, LocalDateTime.now(),
+				snapshot.loginIp(), snapshot.loginRegion());
+		TemplateMessageCommand command = TemplateMessageCommand.builder()
+			.channel(MessageChannel.EMAIL)
+			.templateCode(AuthEmailTemplateCode.LOGIN_EMAIL_CODE.getTemplateCode())
+			.targets(List.of(email))
+			.variables(variables)
+			.options(EmailChannelOptions.builder().hasHtml(Boolean.TRUE).build())
+			.build();
 
-        systemSecurityIngestFeignClient.sendByTemplate(command);
-    }
+		systemSecurityIngestFeignClient.sendByTemplate(command);
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void sendSmsCode(String phone, HttpServletRequest request) {
-        String redisKey = SMS_CODE.key(phone);
-        String code = RandomUtil.randomNumbers(6);
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void sendSmsCode(String phone, HttpServletRequest request) {
+		String redisKey = SMS_CODE.key(phone);
+		String code = RandomUtil.randomNumbers(6);
 
-        // 存入Redis
-        redisTemplate.opsForValue().set(redisKey, MD5.create().digestHex16(code), SMS_CODE.getDefaultTtl());
+		// 存入Redis
+		redisTemplate.opsForValue().set(redisKey, MD5.create().digestHex16(code), SMS_CODE.getDefaultTtl());
 
-        // 获取过期时间
-        long expireMinutes = SMS_CODE.getDefaultTtl().toMinutes();
+		// 获取过期时间
+		long expireMinutes = SMS_CODE.getDefaultTtl().toMinutes();
 
-        UserEntity user = userMapper.selectUserByPhone(phone);
-        if (user == null) {
-            log.warn("Send SMS code skipped: no active user found for phone={}", phone);
-            return;
-        }
+		UserEntity user = userMapper.selectUserByPhone(phone);
+		if (user == null) {
+			log.warn("Send SMS code skipped: no active user found for phone={}", phone);
+			return;
+		}
 
-        // 构建发送内容
-        Map<String, Object> variables = LoginSmsVariables.build(code, expireMinutes);
-        TemplateMessageCommand command = TemplateMessageCommand.builder()
-                .channel(MessageChannel.SMS_DYPNS_VERIFY_CODE)
-                .templateCode(AuthDypnsVerifyCodeSceneCode.LOGIN_VERIFY_CODE.getSceneCode())
-                .targets(List.of(phone))
-                .variables(variables)
-                .build();
+		// 构建发送内容
+		Map<String, Object> variables = LoginSmsVariables.build(code, expireMinutes);
+		TemplateMessageCommand command = TemplateMessageCommand.builder()
+			.channel(MessageChannel.SMS_DYPNS_VERIFY_CODE)
+			.templateCode(AuthDypnsVerifyCodeSceneCode.LOGIN_VERIFY_CODE.getSceneCode())
+			.targets(List.of(phone))
+			.variables(variables)
+			.build();
 
-        systemSecurityIngestFeignClient.sendByTemplate(command);
-    }
+		systemSecurityIngestFeignClient.sendByTemplate(command);
+	}
 
 }

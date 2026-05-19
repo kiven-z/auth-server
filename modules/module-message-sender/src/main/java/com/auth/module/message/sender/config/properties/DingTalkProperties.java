@@ -17,34 +17,34 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class DingTalkProperties {
 
-    /**
-     * 是否启用钉钉工作通知
-     */
-    private boolean enabled = false;
+	/**
+	 * 是否启用钉钉工作通知
+	 */
+	private boolean enabled = false;
 
-    /**
-     * 应用 App ID
-     */
-    private String appId;
+	/**
+	 * 应用 App ID
+	 */
+	private String appId;
 
-    /**
-     * 工作通知 AgentId
-     */
-    private Long agentId;
+	/**
+	 * 工作通知 AgentId
+	 */
+	private Long agentId;
 
-    /**
-     * Client ID（原 AppKey）
-     */
-    private String clientId;
+	/**
+	 * Client ID（原 AppKey）
+	 */
+	private String clientId;
 
-    /**
-     * Client Secret（原 AppSecret）
-     */
-    private String clientSecret;
+	/**
+	 * Client Secret（原 AppSecret）
+	 */
+	private String clientSecret;
 
-    /**
-     * 未指定消息类型时的默认值
-     */
-    private DingTalkMessageType defaultMessageType = DingTalkMessageType.TEXT;
+	/**
+	 * 未指定消息类型时的默认值
+	 */
+	private DingTalkMessageType defaultMessageType = DingTalkMessageType.TEXT;
 
 }

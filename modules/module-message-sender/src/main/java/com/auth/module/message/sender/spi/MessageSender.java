@@ -1,6 +1,5 @@
 package com.auth.module.message.sender.spi;
 
-
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 
@@ -11,18 +10,16 @@ import com.auth.module.message.api.command.TemplateMessageCommand;
  */
 public interface MessageSender {
 
-    /**
-     * 本实现支持的渠道
-     *
-     * @return 渠道枚举
-     */
-    MessageChannel channel();
+	/**
+	 * 本实现支持的渠道
+	 * @return 渠道枚举
+	 */
+	MessageChannel channel();
 
-    /**
-     * 按模板发送消息
-     *
-     * @param command 模板化发送命令
-     */
-    void sendByTemplate(TemplateMessageCommand command);
+	/**
+	 * 按模板发送消息
+	 * @param command 模板化发送命令
+	 */
+	void sendByTemplate(TemplateMessageCommand command);
 
 }

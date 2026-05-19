@@ -7,14 +7,14 @@ package com.auth.module.message.api.model.dingtalk;
  */
 public enum DingTalkMessageType {
 
-    /**
-     * 文本
-     */
-    TEXT,
+	/**
+	 * 文本
+	 */
+	TEXT,
 
-    /**
-     * Markdown
-     */
-    MARKDOWN
+	/**
+	 * Markdown
+	 */
+	MARKDOWN
 
 }

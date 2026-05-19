@@ -18,19 +18,18 @@ import org.springframework.web.client.RestTemplate;
  * @author Bunny
  */
 @AutoConfiguration
-@EnableConfigurationProperties({SmsProperties.class, DingTalkProperties.class})
-@Import({AliyunDypnsAutoConfiguration.class, DingTalkAutoConfiguration.class, EmailAutoConfiguration.class})
+@EnableConfigurationProperties({ SmsProperties.class, DingTalkProperties.class })
+@Import({ AliyunDypnsAutoConfiguration.class, DingTalkAutoConfiguration.class, EmailAutoConfiguration.class })
 public class MessageAutoConfiguration {
 
-    /**
-     * HTTP client for message channel adapters (DingTalk, email URL attachments).
-     *
-     * @return RestTemplate bean
-     */
-    @ConditionalOnMissingBean
-    @Bean
-    RestTemplate messageRestTemplate() {
-        return new RestTemplate();
-    }
+	/**
+	 * HTTP client for message channel adapters (DingTalk, email URL attachments).
+	 * @return RestTemplate bean
+	 */
+	@ConditionalOnMissingBean
+	@Bean
+	RestTemplate messageRestTemplate() {
+		return new RestTemplate();
+	}
 
 }

@@ -31,55 +31,54 @@ import static com.auth.service.system.common.exception.code.message.SystemMessag
 @Component
 public class DypnsVerifyCodeTemplatePipeline {
 
-    private final MessageTemplateMapper messageTemplateMapper;
+	private final MessageTemplateMapper messageTemplateMapper;
 
-    public DypnsVerifyCodeTemplatePipeline(MessageTemplateMapper messageTemplateMapper) {
-        this.messageTemplateMapper = messageTemplateMapper;
-    }
+	public DypnsVerifyCodeTemplatePipeline(MessageTemplateMapper messageTemplateMapper) {
+		this.messageTemplateMapper = messageTemplateMapper;
+	}
 
-    /**
-     * 构建模板参数
-     *
-     * @param requireFields 必填字段
-     * @param variables     变量
-     * @return 模板参数 JSON
-     */
-    private static String buildTemplateParam(List<EmailTemplateRequireFieldRow> requireFields,
-                                             Map<String, Object> variables) {
-        Map<String, String> paramMap = new LinkedHashMap<>();
-        if (CollUtil.isNotEmpty(requireFields)) {
-            for (EmailTemplateRequireFieldRow field : requireFields) {
-                Object value = variables.get(field.getKey());
-                paramMap.put(field.getKey(), value == null ? "" : String.valueOf(value));
-            }
-        } else {
-            variables.forEach((key, value) -> paramMap.put(key, value == null ? "" : String.valueOf(value)));
-        }
-        return JSONUtil.toJsonStr(paramMap);
-    }
+	/**
+	 * 构建模板参数
+	 * @param requireFields 必填字段
+	 * @param variables 变量
+	 * @return 模板参数 JSON
+	 */
+	private static String buildTemplateParam(List<EmailTemplateRequireFieldRow> requireFields,
+			Map<String, Object> variables) {
+		Map<String, String> paramMap = new LinkedHashMap<>();
+		if (CollUtil.isNotEmpty(requireFields)) {
+			for (EmailTemplateRequireFieldRow field : requireFields) {
+				Object value = variables.get(field.getKey());
+				paramMap.put(field.getKey(), value == null ? "" : String.valueOf(value));
+			}
+		}
+		else {
+			variables.forEach((key, value) -> paramMap.put(key, value == null ? "" : String.valueOf(value)));
+		}
+		return JSONUtil.toJsonStr(paramMap);
+	}
 
-    /**
-     * 准备 Dypns 验证码短信发送参数
-     *
-     * @param command 模板发送命令
-     * @return 厂商 API 就绪参数
-     */
-    public DypnsVerifyCodeSendPayload prepare(TemplateMessageCommand command) {
-        String sceneCode = command.getTemplateCode();
-        MessageTemplateEntity template = messageTemplateMapper.selectEnabledBySceneCodeAndChannel(sceneCode,
-                MessageChannel.SMS_DYPNS_VERIFY_CODE.name());
-        if (template == null) {
-            throw new SystemBusinessException(SMS_TEMPLATE_NOT_FOUND, sceneCode);
-        }
+	/**
+	 * 准备 Dypns 验证码短信发送参数
+	 * @param command 模板发送命令
+	 * @return 厂商 API 就绪参数
+	 */
+	public DypnsVerifyCodeSendPayload prepare(TemplateMessageCommand command) {
+		String sceneCode = command.getTemplateCode();
+		MessageTemplateEntity template = messageTemplateMapper.selectEnabledBySceneCodeAndChannel(sceneCode,
+				MessageChannel.SMS_DYPNS_VERIFY_CODE.name());
+		if (template == null) {
+			throw new SystemBusinessException(SMS_TEMPLATE_NOT_FOUND, sceneCode);
+		}
 
-        Map<String, Object> variables = Optional.ofNullable(command.getVariables()).orElseGet(LinkedHashMap::new);
-        List<EmailTemplateRequireFieldRow> requireFields = MessageTemplateRequireFieldsJsonSupport
-                .parse(template.getRequireFields());
-        MessageTemplateRequireFieldsJsonSupport.assertVariablesPresent(requireFields, variables,
-                SMS_TEMPLATE_VARS_MISSING);
+		Map<String, Object> variables = Optional.ofNullable(command.getVariables()).orElseGet(LinkedHashMap::new);
+		List<EmailTemplateRequireFieldRow> requireFields = MessageTemplateRequireFieldsJsonSupport
+			.parse(template.getRequireFields());
+		MessageTemplateRequireFieldsJsonSupport.assertVariablesPresent(requireFields, variables,
+				SMS_TEMPLATE_VARS_MISSING);
 
-        String templateParam = buildTemplateParam(requireFields, variables);
-        return new DypnsVerifyCodeSendPayload(template.getProviderTemplateCode(), templateParam);
-    }
+		String templateParam = buildTemplateParam(requireFields, variables);
+		return new DypnsVerifyCodeSendPayload(template.getProviderTemplateCode(), templateParam);
+	}
 
 }

@@ -17,13 +17,13 @@ import java.lang.annotation.*;
 @Documented
 public @interface ChannelOptionsMatch {
 
-    /**
-     * 校验失败消息
-     */
-    String message() default "channel and options type mismatch";
+	/**
+	 * 校验失败消息
+	 */
+	String message() default "channel and options type mismatch";
 
-    Class<?>[] groups() default {};
+	Class<?>[] groups() default {};
 
-    Class<? extends Payload>[] payload() default {};
+	Class<? extends Payload>[] payload() default {};
 
 }

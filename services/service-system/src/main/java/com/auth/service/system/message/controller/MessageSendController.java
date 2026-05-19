@@ -19,22 +19,21 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @Tag(name = "统一消息发送", description = "多渠道消息发送唯一入口；钉钉直发示例：channel=DING_TALK、customBody=true、body、options")
 @Validated
-@RequestMapping("/api/system/message")
+@RequestMapping("/api/system/message/")
 @RestController
 public class MessageSendController {
 
-    private final MessageDispatchService messageDispatchService;
+	private final MessageDispatchService messageDispatchService;
 
-    public MessageSendController(MessageDispatchService messageDispatchService) {
-        this.messageDispatchService = messageDispatchService;
-    }
+	public MessageSendController(MessageDispatchService messageDispatchService) {
+		this.messageDispatchService = messageDispatchService;
+	}
 
-    @Operation(summary = "发送消息",
-            description = "按 channel 路由（EMAIL、SMS_DYPNS_VERIFY_CODE、DING_TALK 等）；模板发送用 templateCode+variables；钉钉等支持 customBody 直发")
-    @PostMapping("/send")
-    public Result<String> sendByTemplate(@Valid @RequestBody TemplateMessageCommand command) {
-        messageDispatchService.sendByTemplate(command);
-        return Result.success("Message send request accepted");
-    }
+	@Operation(summary = "发送消息", description = "按 channel 路由")
+	@PostMapping("send")
+	public Result<String> sendByTemplate(@Valid @RequestBody TemplateMessageCommand command) {
+		messageDispatchService.sendByTemplate(command);
+		return Result.success("Message send request accepted");
+	}
 
 }

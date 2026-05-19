@@ -16,25 +16,22 @@ import java.lang.annotation.*;
 @Documented
 public @interface TemplateMessageCommandValid {
 
-    /**
-     * 校验失败提示
-     *
-     * @return 消息
-     */
-    String message() default "Invalid template message command";
+	/**
+	 * 校验失败提示
+	 * @return 消息
+	 */
+	String message() default "Invalid template message command";
 
-    /**
-     * 分组
-     *
-     * @return 分组
-     */
-    Class<?>[] groups() default {};
+	/**
+	 * 分组
+	 * @return 分组
+	 */
+	Class<?>[] groups() default {};
 
-    /**
-     * 负载
-     *
-     * @return 负载
-     */
-    Class<? extends Payload>[] payload() default {};
+	/**
+	 * 负载
+	 * @return 负载
+	 */
+	Class<? extends Payload>[] payload() default {};
 
 }

@@ -17,70 +17,70 @@ import java.io.InputStream;
  */
 public class InMemoryMultipartFile implements MultipartFile {
 
-    private final String name;
+	private final String name;
 
-    private final String originalFilename;
+	private final String originalFilename;
 
-    private final String contentType;
+	private final String contentType;
 
-    private final byte[] content;
+	private final byte[] content;
 
-    /**
-     * @param name             form field name
-     * @param originalFilename original filename
-     * @param contentType      MIME type
-     * @param content          file bytes
-     */
-    public InMemoryMultipartFile(String name, String originalFilename, String contentType, byte[] content) {
-        this.name = name;
-        this.originalFilename = originalFilename;
-        this.contentType = contentType;
-        this.content = content != null ? content : new byte[0];
-    }
+	/**
+	 * @param name form field name
+	 * @param originalFilename original filename
+	 * @param contentType MIME type
+	 * @param content file bytes
+	 */
+	public InMemoryMultipartFile(String name, String originalFilename, String contentType, byte[] content) {
+		this.name = name;
+		this.originalFilename = originalFilename;
+		this.contentType = contentType;
+		this.content = content != null ? content : new byte[0];
+	}
 
-    @Override
-    @NonNull
-    public String getName() {
-        return name;
-    }
+	@Override
+	@NonNull
+	public String getName() {
+		return name;
+	}
 
-    @Override
-    @Nullable
-    public String getOriginalFilename() {
-        return originalFilename;
-    }
+	@Override
+	@Nullable
+	public String getOriginalFilename() {
+		return originalFilename;
+	}
 
-    @Override
-    @Nullable
-    public String getContentType() {
-        return contentType;
-    }
+	@Override
+	@Nullable
+	public String getContentType() {
+		return contentType;
+	}
 
-    @Override
-    public boolean isEmpty() {
-        return content.length == 0;
-    }
+	@Override
+	public boolean isEmpty() {
+		return content.length == 0;
+	}
 
-    @Override
-    public long getSize() {
-        return content.length;
-    }
+	@Override
+	public long getSize() {
+		return content.length;
+	}
 
-    @Override
-    @NonNull
-    public byte[] getBytes() {
-        return content;
-    }
+	@Override
+	@NonNull
+	public byte[] getBytes() {
+		return content;
+	}
 
-    @Override
-    @NonNull
-    public InputStream getInputStream() {
-        return new ByteArrayInputStream(content);
-    }
+	@Override
+	@NonNull
+	public InputStream getInputStream() {
+		return new ByteArrayInputStream(content);
+	}
 
-    @Override
-    public void transferTo(@NonNull File dest) throws IOException {
-        FileCopyUtils.copy(content, dest);
-    }
+	@Override
+	public void transferTo(@NonNull File dest) throws IOException {
+		FileCopyUtils.copy(content, dest);
+	}
 
 }

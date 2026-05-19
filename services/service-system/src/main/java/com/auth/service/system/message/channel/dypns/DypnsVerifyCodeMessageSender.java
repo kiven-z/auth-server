@@ -25,65 +25,65 @@ import static com.auth.service.system.common.exception.code.message.SystemMessag
 @Component
 public class DypnsVerifyCodeMessageSender implements MessageSender {
 
-    private final DypnsVerifyCodeTemplatePipeline dypnsVerifyCodeTemplatePipeline;
+	private final DypnsVerifyCodeTemplatePipeline dypnsVerifyCodeTemplatePipeline;
 
-    private final ObjectProvider<DypnsVerifyCodeSender> dypnsVerifyCodeSender;
+	private final ObjectProvider<DypnsVerifyCodeSender> dypnsVerifyCodeSender;
 
-    public DypnsVerifyCodeMessageSender(DypnsVerifyCodeTemplatePipeline dypnsVerifyCodeTemplatePipeline,
-                                        ObjectProvider<DypnsVerifyCodeSender> dypnsVerifyCodeSender) {
-        this.dypnsVerifyCodeTemplatePipeline = dypnsVerifyCodeTemplatePipeline;
-        this.dypnsVerifyCodeSender = dypnsVerifyCodeSender;
-    }
+	public DypnsVerifyCodeMessageSender(DypnsVerifyCodeTemplatePipeline dypnsVerifyCodeTemplatePipeline,
+			ObjectProvider<DypnsVerifyCodeSender> dypnsVerifyCodeSender) {
+		this.dypnsVerifyCodeTemplatePipeline = dypnsVerifyCodeTemplatePipeline;
+		this.dypnsVerifyCodeSender = dypnsVerifyCodeSender;
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public MessageChannel channel() {
-        return MessageChannel.SMS_DYPNS_VERIFY_CODE;
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public MessageChannel channel() {
+		return MessageChannel.SMS_DYPNS_VERIFY_CODE;
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void sendByTemplate(TemplateMessageCommand command) {
-        if (Boolean.TRUE.equals(command.getCustomBody())) {
-            throw new SystemBusinessException(SMS_CUSTOM_BODY_NOT_SUPPORTED);
-        }
-        List<String> targets = command.getTargets();
-        if (CollUtil.isEmpty(targets)) {
-            throw new SystemBusinessException(SMS_TARGET_EMPTY);
-        }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void sendByTemplate(TemplateMessageCommand command) {
+		if (Boolean.TRUE.equals(command.getCustomBody())) {
+			throw new SystemBusinessException(SMS_CUSTOM_BODY_NOT_SUPPORTED);
+		}
+		List<String> targets = command.getTargets();
+		if (CollUtil.isEmpty(targets)) {
+			throw new SystemBusinessException(SMS_TARGET_EMPTY);
+		}
 
-        DypnsVerifyCodeSendPayload prepared = dypnsVerifyCodeTemplatePipeline.prepare(command);
-        DypnsVerifyCodeSender sender = dypnsVerifyCodeSender.getIfAvailable();
-        if (sender == null) {
-            throw new SystemBusinessException(SMS_SENDER_NOT_ENABLED);
-        }
+		DypnsVerifyCodeSendPayload prepared = dypnsVerifyCodeTemplatePipeline.prepare(command);
+		DypnsVerifyCodeSender sender = dypnsVerifyCodeSender.getIfAvailable();
+		if (sender == null) {
+			throw new SystemBusinessException(SMS_SENDER_NOT_ENABLED);
+		}
 
-        for (String phone : targets) {
-            sendOne(sender, phone, prepared);
-        }
-    }
+		for (String phone : targets) {
+			sendOne(sender, phone, prepared);
+		}
+	}
 
-    /**
-     * 发送单条 Dypns 验证码短信
-     *
-     * @param sender   Dypns 发送器
-     * @param phone    手机号
-     * @param prepared 准备好的发送参数
-     */
-    private void sendOne(DypnsVerifyCodeSender sender, String phone, DypnsVerifyCodeSendPayload prepared) {
-        try {
-            sender.sendVerifyCode(phone, prepared.providerTemplateCode(), prepared.templateParam());
-        } catch (IllegalStateException e) {
-            if (e.getMessage() != null
-                    && e.getMessage().startsWith(AliyunDypnsSmsSender.SIGN_NAME_NOT_CONFIGURED_MESSAGE)) {
-                throw new SystemBusinessException(SMS_SIGN_NAME_NOT_CONFIGURED);
-            }
-            throw new SystemBusinessException(SMS_SEND_FAILED, e.getMessage());
-        }
-    }
+	/**
+	 * 发送单条 Dypns 验证码短信
+	 * @param sender Dypns 发送器
+	 * @param phone 手机号
+	 * @param prepared 准备好的发送参数
+	 */
+	private void sendOne(DypnsVerifyCodeSender sender, String phone, DypnsVerifyCodeSendPayload prepared) {
+		try {
+			sender.sendVerifyCode(phone, prepared.providerTemplateCode(), prepared.templateParam());
+		}
+		catch (IllegalStateException e) {
+			if (e.getMessage() != null
+					&& e.getMessage().startsWith(AliyunDypnsSmsSender.SIGN_NAME_NOT_CONFIGURED_MESSAGE)) {
+				throw new SystemBusinessException(SMS_SIGN_NAME_NOT_CONFIGURED);
+			}
+			throw new SystemBusinessException(SMS_SEND_FAILED, e.getMessage());
+		}
+	}
 
 }

@@ -24,94 +24,94 @@ import java.util.Objects;
 @Slf4j
 public class MimeMailTransport {
 
-    private final JavaMailSender mailSender;
+	private final JavaMailSender mailSender;
 
-    private final EmailAttachmentResolver attachmentResolver;
+	private final EmailAttachmentResolver attachmentResolver;
 
-    /**
-     * Default from address ({@code spring.mail.username}).
-     */
-    @Value("${spring.mail.username}")
-    private String defaultFrom;
+	/**
+	 * Default from address ({@code spring.mail.username}).
+	 */
+	@Value("${spring.mail.username}")
+	private String defaultFrom;
 
-    public MimeMailTransport(JavaMailSender mailSender, EmailAttachmentResolver attachmentResolver) {
-        this.mailSender = mailSender;
-        this.attachmentResolver = attachmentResolver;
-    }
+	public MimeMailTransport(JavaMailSender mailSender, EmailAttachmentResolver attachmentResolver) {
+		this.mailSender = mailSender;
+		this.attachmentResolver = attachmentResolver;
+	}
 
-    /**
-     * Sends email synchronously.
-     *
-     * @param emailSendDTO send request
-     * @param rendered     rendered subject and body
-     */
-    public void send(EmailSendDTO emailSendDTO, RenderedEmail rendered) {
-        try {
-            sendMime(emailSendDTO, rendered.subject(), rendered.body());
-        } catch (MessagingException e) {
-            log.error("Failed to send email, templateCode={}, reason={}", emailSendDTO.getTemplateCode(),
-                    e.getMessage(), e);
-            throw new EmailTransportException(EmailTransportException.Reason.SEND_FAILED, e.getMessage(), e);
-        }
-    }
+	/**
+	 * Sends email synchronously.
+	 * @param emailSendDTO send request
+	 * @param rendered rendered subject and body
+	 */
+	public void send(EmailSendDTO emailSendDTO, RenderedEmail rendered) {
+		try {
+			sendMime(emailSendDTO, rendered.subject(), rendered.body());
+		}
+		catch (MessagingException e) {
+			log.error("Failed to send email, templateCode={}, reason={}", emailSendDTO.getTemplateCode(),
+					e.getMessage(), e);
+			throw new EmailTransportException(EmailTransportException.Reason.SEND_FAILED, e.getMessage(), e);
+		}
+	}
 
-    private void sendMime(EmailSendDTO emailSendDTO, String subject, String body) throws MessagingException {
-        validate(emailSendDTO, subject, body);
+	private void sendMime(EmailSendDTO emailSendDTO, String subject, String body) throws MessagingException {
+		validate(emailSendDTO, subject, body);
 
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-        helper.setFrom(defaultFrom);
-        helper.setTo(emailSendDTO.getTo().toArray(String[]::new));
-        helper.setSubject(subject);
-        helper.setText(body, Boolean.TRUE.equals(emailSendDTO.getHasHtml()));
+		MimeMessage message = mailSender.createMimeMessage();
+		MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+		helper.setFrom(defaultFrom);
+		helper.setTo(emailSendDTO.getTo().toArray(String[]::new));
+		helper.setSubject(subject);
+		helper.setText(body, Boolean.TRUE.equals(emailSendDTO.getHasHtml()));
 
-        if (CharSequenceUtil.isNotBlank(emailSendDTO.getReplyTo())) {
-            helper.setReplyTo(emailSendDTO.getReplyTo());
-        }
-        if (CollUtil.isNotEmpty(emailSendDTO.getCc())) {
-            helper.setCc(emailSendDTO.getCc().toArray(String[]::new));
-        }
-        if (CollUtil.isNotEmpty(emailSendDTO.getBcc())) {
-            helper.setBcc(emailSendDTO.getBcc().toArray(String[]::new));
-        }
-        helper.setSentDate(new Date());
+		if (CharSequenceUtil.isNotBlank(emailSendDTO.getReplyTo())) {
+			helper.setReplyTo(emailSendDTO.getReplyTo());
+		}
+		if (CollUtil.isNotEmpty(emailSendDTO.getCc())) {
+			helper.setCc(emailSendDTO.getCc().toArray(String[]::new));
+		}
+		if (CollUtil.isNotEmpty(emailSendDTO.getBcc())) {
+			helper.setBcc(emailSendDTO.getBcc().toArray(String[]::new));
+		}
+		helper.setSentDate(new Date());
 
-        List<MultipartFile> attachmentFiles = attachmentResolver.resolve(emailSendDTO.getAttachments());
-        addAttachments(helper, attachmentFiles);
+		List<MultipartFile> attachmentFiles = attachmentResolver.resolve(emailSendDTO.getAttachments());
+		addAttachments(helper, attachmentFiles);
 
-        mailSender.send(message);
-    }
+		mailSender.send(message);
+	}
 
-    private void validate(EmailSendDTO emailSendDTO, String subject, String body) {
-        if (emailSendDTO == null) {
-            throw new EmailTransportException(EmailTransportException.Reason.SEND_DTO_NULL, "EmailSendDTO is null");
-        }
-        if (CollUtil.isEmpty(emailSendDTO.getTo())) {
-            throw new EmailTransportException(EmailTransportException.Reason.TO_EMPTY, "Recipient list is empty");
-        }
-        if (CharSequenceUtil.isBlank(subject)) {
-            throw new EmailTransportException(EmailTransportException.Reason.SUBJECT_EMPTY, "Subject is blank");
-        }
-        if (CharSequenceUtil.isBlank(body)) {
-            throw new EmailTransportException(EmailTransportException.Reason.BODY_EMPTY, "Body is blank");
-        }
-    }
+	private void validate(EmailSendDTO emailSendDTO, String subject, String body) {
+		if (emailSendDTO == null) {
+			throw new EmailTransportException(EmailTransportException.Reason.SEND_DTO_NULL, "EmailSendDTO is null");
+		}
+		if (CollUtil.isEmpty(emailSendDTO.getTo())) {
+			throw new EmailTransportException(EmailTransportException.Reason.TO_EMPTY, "Recipient list is empty");
+		}
+		if (CharSequenceUtil.isBlank(subject)) {
+			throw new EmailTransportException(EmailTransportException.Reason.SUBJECT_EMPTY, "Subject is blank");
+		}
+		if (CharSequenceUtil.isBlank(body)) {
+			throw new EmailTransportException(EmailTransportException.Reason.BODY_EMPTY, "Body is blank");
+		}
+	}
 
-    private void addAttachments(MimeMessageHelper helper, List<MultipartFile> attachments) throws MessagingException {
-        if (CollUtil.isEmpty(attachments)) {
-            return;
-        }
-        for (MultipartFile file : attachments) {
-            if (file == null || file.isEmpty()) {
-                continue;
-            }
-            String filename = file.getOriginalFilename();
-            if (CharSequenceUtil.isBlank(filename)) {
-                throw new EmailTransportException(EmailTransportException.Reason.ATTACHMENT_FILENAME_EMPTY,
-                        "Attachment filename is blank");
-            }
-            helper.addAttachment(Objects.requireNonNull(filename), Objects.requireNonNull(file));
-        }
-    }
+	private void addAttachments(MimeMessageHelper helper, List<MultipartFile> attachments) throws MessagingException {
+		if (CollUtil.isEmpty(attachments)) {
+			return;
+		}
+		for (MultipartFile file : attachments) {
+			if (file == null || file.isEmpty()) {
+				continue;
+			}
+			String filename = file.getOriginalFilename();
+			if (CharSequenceUtil.isBlank(filename)) {
+				throw new EmailTransportException(EmailTransportException.Reason.ATTACHMENT_FILENAME_EMPTY,
+						"Attachment filename is blank");
+			}
+			helper.addAttachment(Objects.requireNonNull(filename), Objects.requireNonNull(file));
+		}
+	}
 
 }

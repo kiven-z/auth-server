@@ -19,34 +19,34 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class SmsProperties {
 
-    /**
-     * 是否启用 Dypns 验证码短信渠道（SMS_DYPNS_VERIFY_CODE）
-     */
-    private boolean enabled = false;
+	/**
+	 * 是否启用 Dypns 验证码短信渠道（SMS_DYPNS_VERIFY_CODE）
+	 */
+	private boolean enabled = false;
 
-    /**
-     * 阿里云区域 ID
-     */
-    private String region;
+	/**
+	 * 阿里云区域 ID
+	 */
+	private String region;
 
-    /**
-     * Dypns API Endpoint
-     */
-    private String endpoint;
+	/**
+	 * Dypns API Endpoint
+	 */
+	private String endpoint;
 
-    /**
-     * 阿里云 AccessKey ID
-     */
-    private String accessKeyId;
+	/**
+	 * 阿里云 AccessKey ID
+	 */
+	private String accessKeyId;
 
-    /**
-     * 阿里云 AccessKey Secret
-     */
-    private String accessKeySecret;
+	/**
+	 * 阿里云 AccessKey Secret
+	 */
+	private String accessKeySecret;
 
-    /**
-     * 短信签名（SendSmsVerifyCode 必填，须与号码认证控制台已审核签名一致）
-     */
-    private String signName;
+	/**
+	 * 短信签名（SendSmsVerifyCode 必填，须与号码认证控制台已审核签名一致）
+	 */
+	private String signName;
 
 }

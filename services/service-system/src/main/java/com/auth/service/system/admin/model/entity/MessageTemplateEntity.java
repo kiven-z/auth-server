@@ -28,7 +28,8 @@ public class MessageTemplateEntity extends BaseEntity {
 
 	/**
 	 * 渠道：EMAIL、SMS_DYPNS_VERIFY_CODE、DING_TALK 等，与
-	 * {@link com.auth.module.message.channel.MessageChannel} 名称一致（非通用 dysmsapi 短信 SMS）
+	 * {@link com.auth.module.message.api.channel.MessageChannel} 名称一致（非通用 dysmsapi 短信
+	 * SMS）
 	 */
 	@Schema(title = "渠道")
 	private String channel;
