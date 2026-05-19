@@ -1,10 +1,10 @@
-package com.auth.service.system.message.api.impl;
+package com.auth.service.system.message.service.impl;
 
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.message.api.MessageDispatchService;
-import com.auth.service.system.message.spi.MessageSender;
+import com.auth.service.system.message.channel.MessageSender;
+import com.auth.service.system.message.service.MessageDispatchService;
 import org.springframework.stereotype.Service;
 
 import java.util.EnumMap;

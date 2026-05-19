@@ -6,11 +6,10 @@ import com.auth.module.message.api.model.dingtalk.DingTalkMessageType;
 import com.auth.service.system.admin.mapper.MessageTemplateMapper;
 import com.auth.service.system.admin.model.entity.MessageTemplateEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.message.config.properties.DingTalkProperties;
-import com.auth.service.system.message.template.FreemarkerTemplateRenderer;
 import com.auth.service.system.common.exception.TemplateRenderException;
+import com.auth.service.system.message.config.DingTalkProperties;
 import com.auth.service.system.message.shared.MessageTemplateRequireFieldsJsonSupport;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import com.auth.service.system.message.template.FreemarkerTemplateRenderer;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -24,7 +23,6 @@ import static com.auth.service.system.common.exception.code.SystemMessageResultC
  *
  * @author Bunny
  */
-@ConditionalOnProperty(prefix = "auth.message.ding-talk", name = "enabled", havingValue = "true")
 @Component
 public class DingTalkTemplatePipeline {
 

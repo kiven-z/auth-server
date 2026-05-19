@@ -1,31 +1,28 @@
-package com.auth.service.system.message.config.properties;
+package com.auth.service.system.message.config;
 
-import com.auth.service.system.message.config.MessageAutoConfiguration;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
 
 /**
- * 短信渠道业务配置（{@code auth.message.sms.*}）
- * <p>
- * 阿里云 Dypns 验证码短信：AK、区域、Endpoint 与短信签名均在此配置。 由 {@link MessageAutoConfiguration} 注册； Dypns
- * Sender Bean 仅在 {@code auth.message.sms.enabled=true} 时装配。
- * </p>
+ * 短信渠道业务配置
  *
  * @author Bunny
  */
 @Getter
 @Setter
 @ConfigurationProperties(prefix = "auth.message.sms")
+@Configuration
 @Validated
 public class SmsProperties {
 
 	/**
-	 * 是否启用 Dypns 验证码短信渠道（SMS_ALIYUN_DYPNS）
+	 * 是否启用 Dypns 验证码短信渠道（SMS_ALIYUN_DYPNS，业务开关，配置项保留）
 	 */
-	private boolean enabled = false;
+	private boolean enabled = true;
 
 	/**
 	 * 阿里云区域 ID

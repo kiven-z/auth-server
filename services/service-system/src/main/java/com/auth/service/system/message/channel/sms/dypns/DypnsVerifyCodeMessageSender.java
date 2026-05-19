@@ -3,29 +3,25 @@ package com.auth.service.system.message.channel.sms.dypns;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.message.spi.MessageSender;
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import com.auth.service.system.message.channel.MessageSender;
 import org.springframework.stereotype.Component;
 
 import static com.auth.service.system.common.exception.code.SystemMessageResultCode.SMS_CUSTOM_BODY_NOT_SUPPORTED;
-import static com.auth.service.system.common.exception.code.SystemMessageResultCode.SMS_SENDER_NOT_ENABLED;
 
 /**
  * 阿里云 Dypns 验证码短信渠道发送实现（{@link MessageChannel#SMS_ALIYUN_DYPNS}）
  *
  * @author Bunny
  */
-@ConditionalOnProperty(prefix = "auth.message.sms", name = "enabled", havingValue = "true")
 @Component
 public class DypnsVerifyCodeMessageSender implements MessageSender {
 
 	private final DypnsVerifyCodeTemplatePipeline dypnsVerifyCodeTemplatePipeline;
 
-	private final ObjectProvider<DypnsVerifyCodeSender> dypnsVerifyCodeSender;
+	private final DypnsVerifyCodeSender dypnsVerifyCodeSender;
 
 	public DypnsVerifyCodeMessageSender(DypnsVerifyCodeTemplatePipeline dypnsVerifyCodeTemplatePipeline,
-			ObjectProvider<DypnsVerifyCodeSender> dypnsVerifyCodeSender) {
+			DypnsVerifyCodeSender dypnsVerifyCodeSender) {
 		this.dypnsVerifyCodeTemplatePipeline = dypnsVerifyCodeTemplatePipeline;
 		this.dypnsVerifyCodeSender = dypnsVerifyCodeSender;
 	}
@@ -48,13 +44,8 @@ public class DypnsVerifyCodeMessageSender implements MessageSender {
 		}
 
 		DypnsVerifyCodeSendPayload prepared = dypnsVerifyCodeTemplatePipeline.prepare(command);
-		DypnsVerifyCodeSender sender = dypnsVerifyCodeSender.getIfAvailable();
-		if (sender == null) {
-			throw new SystemBusinessException(SMS_SENDER_NOT_ENABLED);
-		}
-
 		for (String phone : command.getTargets()) {
-			sender.sendVerifyCode(phone, prepared.providerTemplateCode(), prepared.templateParam());
+			dypnsVerifyCodeSender.sendVerifyCode(phone, prepared.providerTemplateCode(), prepared.templateParam());
 		}
 	}
 

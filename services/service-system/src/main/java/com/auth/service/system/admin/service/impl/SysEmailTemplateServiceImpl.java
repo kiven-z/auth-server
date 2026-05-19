@@ -18,9 +18,9 @@ import com.auth.service.system.admin.model.vo.emailtemplate.EmailTemplateRequire
 import com.auth.service.system.admin.service.SysEmailTemplateService;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
-import com.auth.service.system.message.api.MessageDispatchService;
-import com.auth.service.system.message.template.FreemarkerTemplateRenderer;
+import com.auth.service.system.message.service.MessageDispatchService;
 import com.auth.service.system.message.shared.MessageTemplateRequireFieldsJsonSupport;
+import com.auth.service.system.message.template.FreemarkerTemplateRenderer;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;

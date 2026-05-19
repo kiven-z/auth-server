@@ -7,10 +7,8 @@ import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.message.api.model.dingtalk.DingTalkChannelOptions;
 import com.auth.module.message.api.model.dingtalk.DingTalkMessageType;
 import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.message.channel.MessageSender;
 import com.auth.service.system.message.channel.dingtalk.client.DingTalkWorkNoticeClient;
-import com.auth.service.system.message.spi.MessageSender;
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -18,23 +16,21 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.auth.service.system.common.exception.code.SystemMessageResultCode.DING_TALK_BODY_EMPTY;
-import static com.auth.service.system.common.exception.code.SystemMessageResultCode.DING_TALK_NOT_ENABLED;
 
 /**
  * 钉钉工作通知渠道发送实现（统一消息编排）
  *
  * @author Bunny
  */
-@ConditionalOnProperty(prefix = "auth.message.ding-talk", name = "enabled", havingValue = "true")
 @Component
 public class DingTalkMessageSender implements MessageSender {
 
 	private final DingTalkTemplatePipeline dingTalkTemplatePipeline;
 
-	private final ObjectProvider<DingTalkWorkNoticeClient> workNoticeClient;
+	private final DingTalkWorkNoticeClient workNoticeClient;
 
 	public DingTalkMessageSender(DingTalkTemplatePipeline dingTalkTemplatePipeline,
-			ObjectProvider<DingTalkWorkNoticeClient> workNoticeClient) {
+			DingTalkWorkNoticeClient workNoticeClient) {
 		this.dingTalkTemplatePipeline = dingTalkTemplatePipeline;
 		this.workNoticeClient = workNoticeClient;
 	}
@@ -79,17 +75,12 @@ public class DingTalkMessageSender implements MessageSender {
 	 */
 	@Override
 	public void sendByTemplate(TemplateMessageCommand command) {
-		DingTalkWorkNoticeClient client = workNoticeClient.getIfAvailable();
-		if (client == null) {
-			throw new SystemBusinessException(DING_TALK_NOT_ENABLED);
-		}
-
 		RenderedDingTalkNotice rendered = resolveContent(command);
 		DingTalkChannelOptions options = ChannelOptionsSupport.asDingTalk(command.getOptions());
 		DingTalkMessageType messageType = resolveMessageType(rendered, options);
 		String title = resolveTitle(rendered, options);
 
-		client.sendWorkNotice(command.getTargets(), messageType, title, rendered.content());
+		workNoticeClient.sendWorkNotice(command.getTargets(), messageType, title, rendered.content());
 	}
 
 	/**

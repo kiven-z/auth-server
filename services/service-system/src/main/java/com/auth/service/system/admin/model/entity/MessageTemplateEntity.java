@@ -27,7 +27,7 @@ public class MessageTemplateEntity extends BaseEntity {
 	private String sceneCode;
 
 	/**
-	 * 渠道{@link com.auth.module.message.api.channel.MessageChannel} SMS）
+	 * 渠道（{@link com.auth.module.message.api.channel.MessageChannel} 名称）
 	 */
 	@Schema(title = "渠道")
 	private String channel;

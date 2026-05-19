@@ -3,13 +3,14 @@ package com.auth.service.system.message.channel.dingtalk.client;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.auth.service.system.message.config.properties.DingTalkProperties;
 import com.auth.service.system.common.exception.SystemMessageException;
+import com.auth.service.system.message.config.DingTalkProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -25,6 +26,7 @@ import static com.auth.service.system.common.exception.code.SystemMessageResultC
  * @author Bunny
  */
 @Slf4j
+@Component
 public class DingTalkAccessTokenClient {
 
 	private static final String OAUTH_TOKEN_URL = "https://api.dingtalk.com/v1.0/oauth2/accessToken";

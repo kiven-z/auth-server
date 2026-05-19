@@ -6,11 +6,12 @@ import com.aliyun.auth.credentials.provider.StaticCredentialProvider;
 import com.aliyun.sdk.service.dypnsapi20170525.AsyncClient;
 import com.aliyun.sdk.service.dypnsapi20170525.models.SendSmsVerifyCodeRequest;
 import com.aliyun.sdk.service.dypnsapi20170525.models.SendSmsVerifyCodeResponse;
-import com.auth.service.system.message.config.properties.SmsProperties;
 import com.auth.service.system.common.exception.SystemMessageException;
 import com.auth.service.system.message.channel.sms.dypns.DypnsVerifyCodeSender;
+import com.auth.service.system.message.config.SmsProperties;
 import darabonba.core.client.ClientOverrideConfiguration;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -23,6 +24,7 @@ import static com.auth.service.system.common.exception.code.SystemMessageResultC
  * @author Bunny
  */
 @Slf4j
+@Component
 public class AliyunDypnsVerifyCodeSender implements DypnsVerifyCodeSender {
 
 	private final AsyncClient asyncClient;
@@ -36,16 +38,6 @@ public class AliyunDypnsVerifyCodeSender implements DypnsVerifyCodeSender {
 	public AliyunDypnsVerifyCodeSender(SmsProperties smsProperties) {
 		this.smsProperties = smsProperties;
 		this.asyncClient = createAsyncClient(smsProperties);
-	}
-
-	/**
-	 * 供单测注入 mock AsyncClient
-	 * @param smsProperties 短信配置
-	 * @param asyncClient 阿里云 Dypns 客户端
-	 */
-	public AliyunDypnsVerifyCodeSender(SmsProperties smsProperties, AsyncClient asyncClient) {
-		this.smsProperties = smsProperties;
-		this.asyncClient = asyncClient;
 	}
 
 	/**
@@ -105,9 +97,6 @@ public class AliyunDypnsVerifyCodeSender implements DypnsVerifyCodeSender {
 			SendSmsVerifyCodeResponse response = send(request);
 			assertSendSuccess(response, phone, providerTemplateCode);
 		}
-		catch (SystemMessageException e) {
-			throw e;
-		}
 		catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			throw new SystemMessageException(SMS_DYPNS_SEND_INTERRUPTED);
@@ -117,9 +106,6 @@ public class AliyunDypnsVerifyCodeSender implements DypnsVerifyCodeSender {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void close() {
 		if (asyncClient != null) {

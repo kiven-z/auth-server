@@ -5,13 +5,14 @@ import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.auth.module.message.api.model.dingtalk.DingTalkMessageType;
-import com.auth.service.system.message.config.properties.DingTalkProperties;
 import com.auth.service.system.common.exception.SystemMessageException;
+import com.auth.service.system.message.config.DingTalkProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -28,6 +29,7 @@ import static com.auth.service.system.common.exception.code.SystemMessageResultC
  * @author Bunny
  */
 @Slf4j
+@Component
 public class DingTalkWorkNoticeClient {
 
 	private static final String WORK_NOTICE_URL = "https://oapi.dingtalk.com/topapi/message/corpconversation/asyncsend_v2";

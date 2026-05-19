@@ -1,33 +1,30 @@
-package com.auth.service.system.message.config.properties;
+package com.auth.service.system.message.config;
 
 import com.auth.module.message.api.model.dingtalk.DingTalkMessageType;
-import com.auth.service.system.message.config.MessageAutoConfiguration;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
 
 /**
- * 钉钉工作通知配置（{@code auth.message.ding-talk.*}）
- * <p>
- * 由 {@link MessageAutoConfiguration} 注册； 钉钉 Client Bean 仅在
- * {@code auth.message.ding-talk.enabled=true} 时装配。
- * </p>
+ * 钉钉工作通知配置
  *
  * @author Bunny
  */
 @Getter
 @Setter
 @ConfigurationProperties(prefix = "auth.message.ding-talk")
+@Configuration
 @Validated
 public class DingTalkProperties {
 
 	/**
-	 * 是否启用钉钉工作通知
+	 * 是否启用钉钉工作通知（业务开关，配置项保留）
 	 */
-	private boolean enabled = false;
+	private boolean enabled = true;
 
 	/**
 	 * 应用 App ID（预留，当前 Open API 未使用）

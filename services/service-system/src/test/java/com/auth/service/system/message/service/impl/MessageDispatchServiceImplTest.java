@@ -1,9 +1,9 @@
-package com.auth.service.system.message.api.impl;
+package com.auth.service.system.message.service.impl;
 
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.message.spi.MessageSender;
+import com.auth.service.system.message.channel.MessageSender;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

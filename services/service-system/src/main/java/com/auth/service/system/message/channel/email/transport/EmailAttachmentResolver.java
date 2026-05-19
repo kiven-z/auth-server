@@ -8,6 +8,7 @@ import com.auth.module.message.api.model.email.AttachmentDTO;
 import com.auth.service.system.common.exception.SystemMessageException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,6 +24,7 @@ import static com.auth.service.system.common.exception.code.SystemEmailResultCod
  * @author Bunny
  */
 @Slf4j
+@Component
 public class EmailAttachmentResolver {
 
 	private final RestTemplate restTemplate;

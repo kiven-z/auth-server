@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
@@ -25,6 +26,7 @@ import static com.auth.service.system.common.exception.code.SystemEmailResultCod
  * @author Bunny
  */
 @Slf4j
+@Component
 public class MimeMailTransport {
 
 	private final JavaMailSender mailSender;
@@ -32,7 +34,7 @@ public class MimeMailTransport {
 	private final EmailAttachmentResolver attachmentResolver;
 
 	/**
-	 * 默认发件人地址 ({@code spring.mail.username})
+	 * 默认发件人地址
 	 */
 	@Value("${spring.mail.username}")
 	private String defaultFrom;
