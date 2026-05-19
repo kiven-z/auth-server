@@ -1,11 +1,9 @@
 package com.auth.service.system.common.exception;
 
 import com.auth.common.core.model.response.Result;
-import com.auth.service.system.common.exception.code.common.SystemCommonResultCode;
-import com.auth.service.system.common.exception.code.message.SystemEmailResultCode;
-import com.auth.service.system.common.exception.code.message.SystemMessageTransportResultCode;
-import com.auth.service.system.common.exception.code.schedule.SystemScheduleResultCode;
-
+import com.auth.service.system.message.infrastructure.exception.SystemEmailResultCode;
+import com.auth.service.system.message.infrastructure.exception.SystemMessageException;
+import com.auth.service.system.schedule.exception.SystemScheduleResultCode;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,9 +17,7 @@ import org.springframework.http.HttpStatus;
 import java.util.Locale;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -120,17 +116,21 @@ class SystemResultResponseFactoryTest {
 	}
 
 	@Test
-	@DisplayName("buildEnglish：返回英文 message 且无 i18n ext")
-	void buildEnglish_noI18nExt() {
-		Result<Object> result = SystemResultResponseFactory.buildEnglish(
-				SystemMessageTransportResultCode.MESSAGE_TRANSPORT_VALIDATION_FAILED, "Recipient list is empty",
-				"TO_EMPTY");
+	@DisplayName("build(消息异常)：应填充 code、message 与 ext.i18nKey")
+	void build_fromMessageException_setsCodeMessageAndExt() {
+		LocaleContextHolder.setLocale(Locale.ENGLISH);
+		String key = SystemEmailResultCode.EMAIL_SEND_TO_EMPTY.getMessageKey();
+		when(messageSource.getMessage(eq(key), any(), eq(key), eq(Locale.ENGLISH))).thenReturn("no-recipients");
+		when(messageSource.getMessage(eq(key), any(), eq("no-recipients"), eq(Locale.ENGLISH)))
+			.thenReturn("no-recipients");
 
-		assertEquals(SystemMessageTransportResultCode.MESSAGE_TRANSPORT_VALIDATION_FAILED.getBizCode(),
-				result.getCode());
-		assertEquals("TO_EMPTY", result.getError());
-		assertEquals("Recipient list is empty", result.getMessage());
-		assertEquals(null, result.getExt());
+		SystemMessageException ex = new SystemMessageException(SystemEmailResultCode.EMAIL_SEND_TO_EMPTY);
+		Result<Object> result = SystemResultResponseFactory.build(messageSource, ex);
+
+		assertEquals(SystemEmailResultCode.EMAIL_SEND_TO_EMPTY.getBizCode(), result.getCode());
+		assertEquals(SystemEmailResultCode.EMAIL_SEND_TO_EMPTY.getError(), result.getError());
+		assertEquals("no-recipients", result.getMessage());
+		assertEquals(key, result.getExt().get("i18nKey"));
 	}
 
 }

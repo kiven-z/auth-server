@@ -5,6 +5,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.PrimitiveArrayUtil;
 import com.auth.module.message.api.model.email.AttachmentDTO;
+import com.auth.service.system.message.infrastructure.exception.SystemMessageException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
@@ -13,6 +14,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static com.auth.service.system.message.infrastructure.exception.SystemEmailResultCode.*;
 
 /**
  * 附件解析器，将附件DTO转换为MultipartFile（Base64 / bytes / URL）
@@ -63,9 +66,7 @@ public class EmailAttachmentResolver {
 				return Base64.decode(attachment.getBase64());
 			}
 			catch (IllegalArgumentException e) {
-				throw new EmailTransportException(EmailTransportException.Reason.ATTACHMENT_BASE64_FAILED,
-						EmailTransportException.Reason.ATTACHMENT_BASE64_FAILED.formatEnglishMessage(e.getMessage()),
-						e);
+				throw new SystemMessageException(EMAIL_ATTACHMENT_BASE64_FAILED, e.getMessage());
 			}
 		}
 		if (attachment.getBytes() != null && attachment.getBytes().length > 0) {
@@ -77,18 +78,14 @@ public class EmailAttachmentResolver {
 				if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
 					return response.getBody();
 				}
-				throw new EmailTransportException(EmailTransportException.Reason.ATTACHMENT_HTTP_STATUS,
-						EmailTransportException.Reason.ATTACHMENT_HTTP_STATUS
-							.formatEnglishMessage(response.getStatusCode().value()));
+				throw new SystemMessageException(EMAIL_ATTACHMENT_HTTP_STATUS, response.getStatusCode().value());
 			}
-			catch (EmailTransportException e) {
+			catch (SystemMessageException e) {
 				throw e;
 			}
 			catch (Exception e) {
 				log.error("Failed to download attachment from URL", e);
-				throw new EmailTransportException(EmailTransportException.Reason.ATTACHMENT_DOWNLOAD_FAILED,
-						EmailTransportException.Reason.ATTACHMENT_DOWNLOAD_FAILED.formatEnglishMessage(e.getMessage()),
-						e);
+				throw new SystemMessageException(EMAIL_ATTACHMENT_DOWNLOAD_FAILED, e.getMessage());
 			}
 		}
 		return new byte[0];

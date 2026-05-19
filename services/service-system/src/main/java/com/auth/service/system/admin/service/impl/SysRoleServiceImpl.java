@@ -2,6 +2,7 @@ package com.auth.service.system.admin.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.auth.common.data.model.PageResponse;
+import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.SysRoleMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.enums.RoleTypeEnum;
@@ -13,7 +14,6 @@ import com.auth.service.system.admin.model.vo.role.SysRolePageResponse;
 import com.auth.service.system.admin.service.SysRoleService;
 import com.auth.service.system.admin.support.sqlbuild.SysRolePageOrderSqlBuilder;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.common.exception.code.admin.SystemAdminResultCode;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;

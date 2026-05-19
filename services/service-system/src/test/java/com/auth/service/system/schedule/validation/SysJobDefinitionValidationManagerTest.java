@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static com.auth.service.system.common.exception.code.schedule.SystemScheduleResultCode.JOB_TASK_TYPE_UNSUPPORTED;
+import static com.auth.service.system.schedule.exception.SystemScheduleResultCode.JOB_TASK_TYPE_UNSUPPORTED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 

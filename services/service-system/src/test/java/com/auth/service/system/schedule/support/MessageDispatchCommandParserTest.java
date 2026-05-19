@@ -5,15 +5,14 @@ import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.schedule.model.payload.MessageDispatchPayload;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-
 import java.util.List;
 
-import static com.auth.service.system.common.exception.code.schedule.SystemScheduleResultCode.*;
+import static com.auth.service.system.schedule.exception.SystemScheduleResultCode.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 

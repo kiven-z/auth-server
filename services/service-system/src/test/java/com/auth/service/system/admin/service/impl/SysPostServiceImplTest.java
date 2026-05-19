@@ -1,25 +1,7 @@
 package com.auth.service.system.admin.service.impl;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.lang.reflect.Field;
-import java.util.List;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
 import com.auth.common.data.model.PageResponse;
+import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.SysPostMapper;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.form.post.SysPostCreateForm;
@@ -27,11 +9,25 @@ import com.auth.service.system.admin.model.po.post.SysPostPageRowPO;
 import com.auth.service.system.admin.model.query.SysPostQuery;
 import com.auth.service.system.admin.model.vo.post.SysPostPageResponse;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.common.exception.code.admin.SystemAdminResultCode;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.lang.reflect.Field;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link SysPostServiceImpl} ?????
@@ -49,6 +45,16 @@ class SysPostServiceImplTest {
 	private AuditUserDisplayService auditUserDisplayService;
 
 	private SysPostServiceImpl sysPostService;
+
+	private static SysPostCreateForm minimalForm(Long deptId, String postCode, String postName) {
+		SysPostCreateForm form = new SysPostCreateForm();
+		form.setDeptId(deptId);
+		form.setPostCode(postCode);
+		form.setPostName(postName);
+		form.setStatus(true);
+		form.setOrderNum(0);
+		return form;
+	}
 
 	@BeforeEach
 	void setUp() throws Exception {
@@ -110,16 +116,6 @@ class SysPostServiceImplTest {
 		verify(sysPostMapper).insert(argThat(
 				(SysPostEntity e) -> Long.valueOf(2L).equals(e.getDeptId()) && "NEW_CODE".equals(e.getPostCode())
 						&& Boolean.TRUE.equals(e.getStatus()) && Integer.valueOf(0).equals(e.getOrderNum())));
-	}
-
-	private static SysPostCreateForm minimalForm(Long deptId, String postCode, String postName) {
-		SysPostCreateForm form = new SysPostCreateForm();
-		form.setDeptId(deptId);
-		form.setPostCode(postCode);
-		form.setPostName(postName);
-		form.setStatus(true);
-		form.setOrderNum(0);
-		return form;
 	}
 
 }

@@ -2,6 +2,7 @@ package com.auth.service.system.admin.service.impl;
 
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.convert.SysPermissionConverter;
+import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.SysPermissionMapper;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.form.permission.SysPermissionCreateForm;
@@ -10,7 +11,6 @@ import com.auth.service.system.admin.model.vo.permission.SysPermissionPageRespon
 import com.auth.service.system.admin.service.SysPermissionService;
 import com.auth.service.system.admin.support.sqlbuild.SysPermissionPageOrderSqlBuilder;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.common.exception.code.admin.SystemAdminResultCode;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;

@@ -18,8 +18,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.auth.service.system.common.exception.code.message.SystemMessageResultCode.DING_TALK_BODY_EMPTY;
-import static com.auth.service.system.common.exception.code.message.SystemMessageResultCode.DING_TALK_NOT_ENABLED;
+import static com.auth.service.system.message.infrastructure.exception.SystemMessageResultCode.DING_TALK_BODY_EMPTY;
+import static com.auth.service.system.message.infrastructure.exception.SystemMessageResultCode.DING_TALK_NOT_ENABLED;
 
 /**
  * 钉钉工作通知渠道发送实现（统一消息编排）

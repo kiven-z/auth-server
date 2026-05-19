@@ -4,7 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.admin.model.vo.emailtemplate.EmailTemplateRequireFieldRow;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.common.exception.code.SystemResultCode;
+import com.auth.service.system.common.exception.SystemResultCode;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,7 +13,7 @@ import lombok.experimental.UtilityClass;
 
 import java.util.*;
 
-import static com.auth.service.system.common.exception.code.message.SystemEmailResultCode.*;
+import static com.auth.service.system.message.infrastructure.exception.SystemEmailResultCode.*;
 
 /**
  * 消息模板 require_fields JSON 校验、转换与发送前变量完整性校验（邮件/短信共用）

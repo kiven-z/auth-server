@@ -6,7 +6,7 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.auth.module.message.api.model.dingtalk.DingTalkMessageType;
 import com.auth.service.system.message.infrastructure.config.properties.DingTalkProperties;
-import com.auth.service.system.message.infrastructure.exception.MessageSenderException;
+import com.auth.service.system.message.infrastructure.exception.SystemMessageException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -19,6 +19,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static com.auth.service.system.message.infrastructure.exception.SystemMessageResultCode.*;
 
 /**
  * 钉钉工作通知 Open API 客户端（asyncsend_v2）
@@ -53,12 +55,10 @@ public class DingTalkWorkNoticeClient {
 	public void sendWorkNotice(List<String> userIds, DingTalkMessageType messageType, String title, String content) {
 		// 如果接收人列表为空，则抛出异常
 		if (CollUtil.isEmpty(userIds)) {
-			throw new MessageSenderException("DINGTALK_WORK_NOTICE_USER_IDS_EMPTY",
-					"DingTalk work notice userIds cannot be empty");
+			throw new SystemMessageException(DING_TALK_WORK_NOTICE_USER_IDS_EMPTY);
 		}
 		if (CharSequenceUtil.isBlank(content)) {
-			throw new MessageSenderException("DINGTALK_WORK_NOTICE_CONTENT_BLANK",
-					"DingTalk work notice content cannot be blank");
+			throw new SystemMessageException(DING_TALK_WORK_NOTICE_CONTENT_BLANK);
 		}
 
 		Long agentId = dingTalkProperties.getAgentId();
@@ -91,8 +91,7 @@ public class DingTalkWorkNoticeClient {
 		}
 		catch (RestClientException ex) {
 			log.error("DingTalk work notice HTTP error, agentId={}, userIds={}", agentId, useridList, ex);
-			throw new MessageSenderException("DINGTALK_WORK_NOTICE_HTTP_ERROR",
-					"DingTalk work notice HTTP error: " + ex.getMessage(), ex);
+			throw new SystemMessageException(DING_TALK_WORK_NOTICE_HTTP_ERROR, ex.getMessage());
 		}
 	}
 
@@ -134,8 +133,7 @@ public class DingTalkWorkNoticeClient {
 	 */
 	private void assertSendSuccess(String responseBody, Long agentId, String useridList) {
 		if (CharSequenceUtil.isBlank(responseBody)) {
-			throw new MessageSenderException("DINGTALK_WORK_NOTICE_EMPTY_RESPONSE",
-					"DingTalk work notice empty response");
+			throw new SystemMessageException(DING_TALK_WORK_NOTICE_EMPTY_RESPONSE);
 		}
 
 		JSONObject json = JSONUtil.parseObj(responseBody);
@@ -146,7 +144,7 @@ public class DingTalkWorkNoticeClient {
 
 		String detail = json.getStr("errmsg", responseBody);
 		log.error("DingTalk work notice failed, agentId={}, userIds={}, detail={}", agentId, useridList, detail);
-		throw new MessageSenderException("DINGTALK_WORK_NOTICE_FAILED", "DingTalk work notice failed: " + detail);
+		throw new SystemMessageException(DING_TALK_WORK_NOTICE_FAILED, detail);
 	}
 
 }

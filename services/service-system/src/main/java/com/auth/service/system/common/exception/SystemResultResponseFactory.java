@@ -2,7 +2,7 @@ package com.auth.service.system.common.exception;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.core.model.response.Result;
-import com.auth.service.system.common.exception.code.SystemResultCode;
+import com.auth.service.system.message.infrastructure.exception.SystemMessageException;
 import lombok.experimental.UtilityClass;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -13,9 +13,9 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * 将 {@link SystemBusinessException} /
- * {@link com.auth.service.system.common.exception.code.SystemResultCode} 转为统一
- * {@link Result}（与 {@code AuthResultResponseFactory} 轮廓一致：MessageSource 文案 + ext i18n）
+ * 将 {@link SystemBusinessException}、{@link SystemMessageException} /
+ * {@link SystemResultCode} 转为统一 {@link Result}（与 {@code AuthResultResponseFactory}
+ * 轮廓一致：MessageSource 文案 + ext i18n）
  *
  * @author Bunny
  */
@@ -29,11 +29,19 @@ public class SystemResultResponseFactory {
 	 * @return Result
 	 */
 	public static Result<Object> build(MessageSource messageSource, SystemBusinessException exception) {
-		Objects.requireNonNull(messageSource, "messageSource");
-		Objects.requireNonNull(exception, "exception");
-		SystemResultCode resultCode = Objects.requireNonNull(exception.getResultCode(), "resultCode");
-		Object[] args = exception.getMessageArgs() != null ? exception.getMessageArgs() : new Object[0];
-		return buildBody(messageSource, resultCode, args);
+		return build(messageSource, Objects.requireNonNull(exception, "exception").getResultCode(),
+				exception.getMessageArgs());
+	}
+
+	/**
+	 * 构建消息域错误响应体
+	 * @param messageSource 消息源
+	 * @param exception 消息异常
+	 * @return Result
+	 */
+	public static Result<Object> build(MessageSource messageSource, SystemMessageException exception) {
+		return build(messageSource, Objects.requireNonNull(exception, "exception").getResultCode(),
+				exception.getMessageArgs());
 	}
 
 	/**
@@ -48,20 +56,6 @@ public class SystemResultResponseFactory {
 		Objects.requireNonNull(rc, "rc");
 		Object[] safeArgs = args != null ? args : new Object[0];
 		return buildBody(messageSource, rc, safeArgs);
-	}
-
-	/**
-	 * 构建传输层英文错误响应（无 i18n key，message 为英文字面量）
-	 * @param resultCode 返回 Result
-	 * @param englishMessage 英文消息
-	 * @param detailError 稳定子错误标识
-	 * @return Result
-	 */
-	public static Result<Object> buildEnglish(SystemResultCode resultCode, String englishMessage, String detailError) {
-		Objects.requireNonNull(resultCode, "resultCode");
-		String message = CharSequenceUtil.blankToDefault(englishMessage, resultCode.getError());
-		String error = CharSequenceUtil.blankToDefault(detailError, resultCode.getError());
-		return Result.error(resultCode.getBizCode(), error, message);
 	}
 
 	/**

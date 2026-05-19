@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static com.auth.service.system.common.exception.code.admin.SystemAdminResultCode.ASSIGN_COMPLETED;
+import static com.auth.service.system.admin.exception.SystemAdminResultCode.ASSIGN_COMPLETED;
 
 /**
  * 系统菜单管理

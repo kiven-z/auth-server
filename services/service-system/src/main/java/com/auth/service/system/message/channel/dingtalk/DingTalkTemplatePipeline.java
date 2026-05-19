@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.auth.service.system.common.exception.code.message.SystemMessageResultCode.*;
+import static com.auth.service.system.message.infrastructure.exception.SystemMessageResultCode.*;
 
 /**
  * 钉钉模板加载、变量校验与 FreeMarker 渲染

@@ -2,7 +2,7 @@ package com.auth.service.system.admin.user.service.impl;
 
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.common.exception.code.common.SystemCommonResultCode;
+import com.auth.service.system.common.exception.SystemCommonResultCode;
 import com.auth.service.system.common.mapper.SysUserQueryMapper;
 import com.auth.service.system.common.model.SysUserSearchItemResponse;
 import com.auth.service.system.common.model.po.UserDeptProfilePO;

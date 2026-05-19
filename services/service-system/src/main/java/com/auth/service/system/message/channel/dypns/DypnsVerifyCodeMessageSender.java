@@ -10,8 +10,8 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-import static com.auth.service.system.common.exception.code.message.SystemMessageResultCode.SMS_CUSTOM_BODY_NOT_SUPPORTED;
-import static com.auth.service.system.common.exception.code.message.SystemMessageResultCode.SMS_SENDER_NOT_ENABLED;
+import static com.auth.service.system.message.infrastructure.exception.SystemMessageResultCode.SMS_CUSTOM_BODY_NOT_SUPPORTED;
+import static com.auth.service.system.message.infrastructure.exception.SystemMessageResultCode.SMS_SENDER_NOT_ENABLED;
 
 /**
  * 阿里云 Dypns 验证码短信渠道发送实现（{@link MessageChannel#SMS_ALIYUN_DYPNS}）

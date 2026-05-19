@@ -13,8 +13,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static com.auth.service.system.common.exception.code.message.SystemMessageResultCode.MESSAGE_CHANNEL_UNSUPPORTED;
-import static com.auth.service.system.common.exception.code.message.SystemMessageResultCode.MESSAGE_SEND_COMMAND_NULL;
+import static com.auth.service.system.message.infrastructure.exception.SystemMessageResultCode.MESSAGE_CHANNEL_UNSUPPORTED;
+import static com.auth.service.system.message.infrastructure.exception.SystemMessageResultCode.MESSAGE_SEND_COMMAND_NULL;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;

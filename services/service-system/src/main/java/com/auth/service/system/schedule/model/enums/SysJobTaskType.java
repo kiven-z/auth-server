@@ -2,7 +2,7 @@ package com.auth.service.system.schedule.model.enums;
 
 import com.auth.service.system.common.exception.SystemBusinessException;
 
-import static com.auth.service.system.common.exception.code.schedule.SystemScheduleResultCode.JOB_TASK_TYPE_UNSUPPORTED;
+import static com.auth.service.system.schedule.exception.SystemScheduleResultCode.JOB_TASK_TYPE_UNSUPPORTED;
 
 /**
  * 定时任务类型（仅表达调度执行入口，不承载业务语义）

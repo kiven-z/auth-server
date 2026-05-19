@@ -1,6 +1,5 @@
-package com.auth.service.system.common.exception.code.common;
+package com.auth.service.system.common.exception;
 
-import com.auth.service.system.common.exception.code.SystemResultCode;
 import lombok.Getter;
 
 /**

@@ -1,6 +1,6 @@
-package com.auth.service.system.common.exception.code.schedule;
+package com.auth.service.system.schedule.exception;
 
-import com.auth.service.system.common.exception.code.SystemResultCode;
+import com.auth.service.system.common.exception.SystemResultCode;
 import lombok.Getter;
 
 /**

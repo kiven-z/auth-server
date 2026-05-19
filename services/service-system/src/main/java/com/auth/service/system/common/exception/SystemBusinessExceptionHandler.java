@@ -2,6 +2,7 @@ package com.auth.service.system.common.exception;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.common.web.exception.ValidationExceptionHandler;
+import com.auth.service.system.message.infrastructure.exception.SystemMessageException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.core.annotation.Order;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 /**
- * 系统业务异常处理器（与 {@code AuthExceptionHandler} 一致：{@link MessageSource} +
+ * 系统业务与消息发送异常处理器（与 {@code AuthExceptionHandler} 一致：{@link MessageSource} +
  * {@link SystemResultResponseFactory}）
  *
  * @author Bunny
@@ -35,6 +36,21 @@ public class SystemBusinessExceptionHandler extends ValidationExceptionHandler {
 	@ExceptionHandler(SystemBusinessException.class)
 	public ResponseEntity<Result<Object>> handleSystemBusiness(SystemBusinessException exception) {
 		log.warn("System business exception: {}", exception.toString(), exception);
+
+		var rc = exception.getResultCode();
+		Result<Object> body = SystemResultResponseFactory.build(messageSource, exception);
+		HttpStatus status = SystemResultResponseFactory.resolveHttpStatus(rc);
+		return ResponseEntity.status(status).body(body);
+	}
+
+	/**
+	 * 处理消息发送域异常（传输层 / 渠道基础设施）
+	 * @param exception 消息异常
+	 * @return 响应实体
+	 */
+	@ExceptionHandler(SystemMessageException.class)
+	public ResponseEntity<Result<Object>> handleSystemMessage(SystemMessageException exception) {
+		log.warn("System message exception: {}", exception.toString(), exception);
 
 		var rc = exception.getResultCode();
 		Result<Object> body = SystemResultResponseFactory.build(messageSource, exception);

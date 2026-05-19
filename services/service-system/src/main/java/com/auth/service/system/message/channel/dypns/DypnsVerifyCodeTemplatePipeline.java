@@ -17,8 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.auth.service.system.common.exception.code.message.SystemMessageResultCode.SMS_TEMPLATE_NOT_FOUND;
-import static com.auth.service.system.common.exception.code.message.SystemMessageResultCode.SMS_TEMPLATE_VARS_MISSING;
+import static com.auth.service.system.message.infrastructure.exception.SystemMessageResultCode.SMS_TEMPLATE_NOT_FOUND;
+import static com.auth.service.system.message.infrastructure.exception.SystemMessageResultCode.SMS_TEMPLATE_VARS_MISSING;
 
 /**
  * Dypns 验证码短信：模板加载、变量校验与 templateParam 组装（channel=SMS_ALIYUN_DYPNS）

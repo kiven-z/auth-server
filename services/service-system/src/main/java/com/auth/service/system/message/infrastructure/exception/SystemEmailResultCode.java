@@ -1,13 +1,13 @@
-package com.auth.service.system.common.exception.code.message;
+package com.auth.service.system.message.infrastructure.exception;
 
-import com.auth.service.system.common.exception.code.SystemResultCode;
+import com.auth.service.system.common.exception.SystemResultCode;
 import lombok.Getter;
 
 /**
- * 邮件模板、发送与 require_fields 结果码
+ * 邮件模板、require_fields 与 MIME 传输结果码
  *
  * <p>
- * 号段：241、247–261（248–249 合并为 248；255–256、262 已释放）
+ * 号段：241、247–248、253–261、262–270（255–256 已释放，见 {@code package-info.java}）
  * </p>
  *
  * @author Bunny
@@ -65,7 +65,54 @@ public enum SystemEmailResultCode implements SystemResultCode {
 	/**
 	 * 变量 key 重复
 	 */
-	REQUIRE_FIELD_KEY_DUPLICATE(422, 261, "REQUIRE_FIELD_KEY_DUPLICATE", "system.email.require_field.key_duplicate");
+	REQUIRE_FIELD_KEY_DUPLICATE(422, 261, "REQUIRE_FIELD_KEY_DUPLICATE", "system.email.require_field.key_duplicate"),
+
+	/**
+	 * 邮件发送参数为空
+	 */
+	EMAIL_SEND_DTO_NULL(400, 262, "EMAIL_SEND_DTO_NULL", "system.email.send.dto_null"),
+
+	/**
+	 * 收件人不能为空
+	 */
+	EMAIL_SEND_TO_EMPTY(400, 263, "EMAIL_SEND_TO_EMPTY", "system.email.send.to_empty"),
+
+	/**
+	 * 邮件主题不能为空
+	 */
+	EMAIL_SEND_SUBJECT_EMPTY(400, 264, "EMAIL_SEND_SUBJECT_EMPTY", "system.email.send.subject_empty"),
+
+	/**
+	 * 邮件正文不能为空
+	 */
+	EMAIL_SEND_BODY_EMPTY(400, 265, "EMAIL_SEND_BODY_EMPTY", "system.email.send.body_empty"),
+
+	/**
+	 * 附件文件名不能为空
+	 */
+	EMAIL_ATTACHMENT_FILENAME_EMPTY(400, 266, "EMAIL_ATTACHMENT_FILENAME_EMPTY",
+			"system.email.attachment.filename_empty"),
+
+	/**
+	 * 附件 Base64 解码失败（{0}=详情）
+	 */
+	EMAIL_ATTACHMENT_BASE64_FAILED(400, 267, "EMAIL_ATTACHMENT_BASE64_FAILED", "system.email.attachment.base64_failed"),
+
+	/**
+	 * 从 URL 下载附件失败，HTTP 状态非 2xx（{0}=状态码）
+	 */
+	EMAIL_ATTACHMENT_HTTP_STATUS(502, 268, "EMAIL_ATTACHMENT_HTTP_STATUS", "system.email.attachment.http_status"),
+
+	/**
+	 * 从 URL 下载附件失败（{0}=详情）
+	 */
+	EMAIL_ATTACHMENT_DOWNLOAD_FAILED(502, 269, "EMAIL_ATTACHMENT_DOWNLOAD_FAILED",
+			"system.email.attachment.download_failed"),
+
+	/**
+	 * MIME 邮件发送失败（{0}=详情）
+	 */
+	EMAIL_SEND_FAILED(502, 270, "EMAIL_SEND_FAILED", "system.email.send.failed");
 
 	private final int httpStatus;
 

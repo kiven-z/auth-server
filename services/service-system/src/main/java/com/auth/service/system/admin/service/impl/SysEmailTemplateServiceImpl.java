@@ -33,7 +33,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static com.auth.service.system.common.exception.code.common.SystemCommonResultCode.DATA_NOT_EXIST;
+import static com.auth.service.system.common.exception.SystemCommonResultCode.DATA_NOT_EXIST;
 
 /**
  * 邮件模板服务（数据落库于 sys_message_template，channel=EMAIL）

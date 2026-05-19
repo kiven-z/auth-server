@@ -9,7 +9,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.auth.service.system.common.exception.code.schedule.SystemScheduleResultCode.JOB_TASK_TYPE_UNSUPPORTED;
+import static com.auth.service.system.schedule.exception.SystemScheduleResultCode.JOB_TASK_TYPE_UNSUPPORTED;
 
 /**
  * 任务处理器注册中心

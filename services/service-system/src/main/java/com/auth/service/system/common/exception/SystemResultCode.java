@@ -1,18 +1,12 @@
-package com.auth.service.system.common.exception.code;
+package com.auth.service.system.common.exception;
+
+import com.auth.common.web.context.SpringContextHolder;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 import java.util.Locale;
 
-import org.springframework.context.i18n.LocaleContextHolder;
-
-import com.auth.common.web.context.SpringContextHolder;
-
 /**
  * 系统服务结果码契约（模块 {@code 10}）
- *
- * <p>
- * 业务代码格式: {@code 10CATSEQ}，{@code getBizCode()} = {@code 100_000 + getCode()}。 各域枚举见
- * {@code code.*} 子包；号段登记见 {@code package-info.java}。
- * </p>
  *
  * @author Bunny
  */

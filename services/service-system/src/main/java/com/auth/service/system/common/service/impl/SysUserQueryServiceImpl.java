@@ -4,7 +4,7 @@ import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.admin.convert.SysUserProfileConverter;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.common.exception.code.common.SystemCommonResultCode;
+import com.auth.service.system.common.exception.SystemCommonResultCode;
 import com.auth.service.system.common.mapper.SysUserQueryMapper;
 import com.auth.service.system.common.model.SysUserSearchItemResponse;
 import com.auth.service.system.common.model.vo.SysUserProfileResponse;
