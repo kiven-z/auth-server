@@ -8,6 +8,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -57,7 +58,7 @@ class OperationLogRequestParamsBuilderTest {
 		body.put("person", "(,,´•ω•)ノ(´っω•｀。)");
 		body.put("kind", "😄");
 		// 模拟 @RequestBody 绑定完成后的 Map，与 Servlet parameterMap 无关
-		String out = OperationLogRequestParamsBuilder.build(req, true, objectMapper, new Object[] { body });
+		String out = OperationLogRequestParamsBuilder.build(req, true, objectMapper, List.of(body));
 		assertNotNull(out);
 		JsonNode root = objectMapper.readTree(out);
 		assertTrue(root.has("methodArgs"));
@@ -70,7 +71,7 @@ class OperationLogRequestParamsBuilderTest {
 		MockHttpServletRequest req = new MockHttpServletRequest("GET", "/a");
 		req.setQueryString("page=1");
 		// 存在可记录实参时 GET 也改为结构化 JSON，便于同时携带 query 与 body 类参数
-		String out = OperationLogRequestParamsBuilder.build(req, true, objectMapper, new Object[] { 99L });
+		String out = OperationLogRequestParamsBuilder.build(req, true, objectMapper, List.of(99L));
 		JsonNode root = objectMapper.readTree(out);
 		assertEquals("page=1", root.get("queryString").asText());
 		assertEquals(99L, root.get("methodArgs").get(0).asLong());
@@ -82,7 +83,7 @@ class OperationLogRequestParamsBuilderTest {
 		MockHttpServletRequest req = new MockHttpServletRequest("POST", "/a");
 		Map<String, Object> body = Map.of("k", "v");
 		// 第一个参数为请求对象时应忽略，避免与外层 request 重复
-		String out = OperationLogRequestParamsBuilder.build(req, true, objectMapper, new Object[] { req, body });
+		String out = OperationLogRequestParamsBuilder.build(req, true, objectMapper, List.of(req, body));
 		JsonNode root = objectMapper.readTree(out);
 		assertEquals(1, root.get("methodArgs").size());
 		assertEquals("v", root.get("methodArgs").get(0).get("k").asText());
@@ -94,7 +95,7 @@ class OperationLogRequestParamsBuilderTest {
 		MockHttpServletRequest req = new MockHttpServletRequest("POST", "/a");
 		MockMultipartFile file = new MockMultipartFile("f", "a.txt", "text/plain", "x".getBytes());
 		// 上传场景不落库二进制，仅文件名/大小/类型
-		String out = OperationLogRequestParamsBuilder.build(req, true, objectMapper, new Object[] { file });
+		String out = OperationLogRequestParamsBuilder.build(req, true, objectMapper, List.of(file));
 		JsonNode root = objectMapper.readTree(out);
 		JsonNode meta = root.get("methodArgs").get(0);
 		assertEquals("MultipartFile", meta.get("_type").asText());

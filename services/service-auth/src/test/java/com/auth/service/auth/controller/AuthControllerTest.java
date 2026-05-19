@@ -26,72 +26,72 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class AuthControllerTest {
 
-    @Mock
-    private AuthSessionFacade authSessionFacade;
+	@Mock
+	private AuthSessionFacade authSessionFacade;
 
-    private AuthController controller;
+	private AuthController controller;
 
-    @BeforeEach
-    void setUp() {
-        controller = new AuthController(authSessionFacade);
-    }
+	@BeforeEach
+	void setUp() {
+		controller = new AuthController(authSessionFacade);
+	}
 
-    @Test
-    @DisplayName("用户名密码登录：委托 completeLogin")
-    void loginByUsername_shouldDelegateToFacade() {
-        UsernamePasswordLoginRequest auth = new UsernamePasswordLoginRequest();
-        UserLoginResponse loginResponse = new UserLoginResponse();
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        HttpServletResponse response = mock(HttpServletResponse.class);
+	@Test
+	@DisplayName("用户名密码登录：委托 completeLogin")
+	void loginByUsername_shouldDelegateToFacade() {
+		UsernamePasswordLoginRequest auth = new UsernamePasswordLoginRequest();
+		UserLoginResponse loginResponse = new UserLoginResponse();
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
 
-        when(authSessionFacade.completeLogin(same(auth), same(request), same(response))).thenReturn(loginResponse);
+		when(authSessionFacade.completeLogin(same(auth), same(request), same(response))).thenReturn(loginResponse);
 
-        var result = controller.loginByUsername(auth, request, response);
+		var result = controller.loginByUsername(auth, request, response);
 
-        assertSame(loginResponse, result.getData());
-        verify(authSessionFacade).completeLogin(auth, request, response);
-    }
+		assertSame(loginResponse, result.getData());
+		verify(authSessionFacade).completeLogin(auth, request, response);
+	}
 
-    @Test
-    @DisplayName("邮箱登录：委托 completeLogin")
-    void loginByEmail_shouldDelegateToFacade() {
-        EmailLoginRequest auth = new EmailLoginRequest();
-        UserLoginResponse loginResponse = new UserLoginResponse();
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        HttpServletResponse response = mock(HttpServletResponse.class);
+	@Test
+	@DisplayName("邮箱登录：委托 completeLogin")
+	void loginByEmail_shouldDelegateToFacade() {
+		EmailLoginRequest auth = new EmailLoginRequest();
+		UserLoginResponse loginResponse = new UserLoginResponse();
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
 
-        when(authSessionFacade.completeLogin(same(auth), same(request), same(response))).thenReturn(loginResponse);
+		when(authSessionFacade.completeLogin(same(auth), same(request), same(response))).thenReturn(loginResponse);
 
-        var result = controller.loginByEmail(auth, request, response);
+		var result = controller.loginByEmail(auth, request, response);
 
-        assertSame(loginResponse, result.getData());
-    }
+		assertSame(loginResponse, result.getData());
+	}
 
-    @Test
-    @DisplayName("刷新令牌：委托 completeRefresh")
-    void refreshToken_shouldDelegateToFacade() {
-        RefreshTokenResponse data = new RefreshTokenResponse();
-        data.setAccessToken("new-access-token");
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        HttpServletResponse response = mock(HttpServletResponse.class);
+	@Test
+	@DisplayName("刷新令牌：委托 completeRefresh")
+	void refreshToken_shouldDelegateToFacade() {
+		RefreshTokenResponse data = new RefreshTokenResponse();
+		data.setAccessToken("new-access-token");
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
 
-        when(authSessionFacade.completeRefresh(same(request), same(response))).thenReturn(data);
+		when(authSessionFacade.completeRefresh(same(request), same(response))).thenReturn(data);
 
-        var result = controller.refreshToken(request, response);
+		var result = controller.refreshToken(request, response);
 
-        assertSame(data, result.getData());
-    }
+		assertSame(data, result.getData());
+	}
 
-    @Test
-    @DisplayName("退出登录：委托 completeLogout")
-    void logout_shouldDelegateToFacade() {
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        HttpServletResponse response = mock(HttpServletResponse.class);
+	@Test
+	@DisplayName("退出登录：委托 completeLogout")
+	void logout_shouldDelegateToFacade() {
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
 
-        var result = controller.logout(request, response);
+		var result = controller.logout(request, response);
 
-        assertNotNull(result);
-        verify(authSessionFacade).completeLogout(request, response);
-    }
+		assertNotNull(result);
+		verify(authSessionFacade).completeLogout(request, response);
+	}
 
 }

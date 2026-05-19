@@ -34,6 +34,21 @@ public class AliyunDypnsSmsSender implements DypnsVerifyCodeSender {
 	}
 
 	/**
+	 * 解析失败回执说明（用于日志与异常消息）
+	 * @param response 厂商响应
+	 * @return 可读说明
+	 */
+	private static String resolveFailureDetail(SendSmsVerifyCodeResponse response) {
+		if (response == null) {
+			return "null response";
+		}
+		if (response.getBody() == null) {
+			return "null body";
+		}
+		return String.valueOf(response.getBody());
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	@Override
@@ -58,12 +73,8 @@ public class AliyunDypnsSmsSender implements DypnsVerifyCodeSender {
 			SendSmsVerifyCodeResponse response = dypnsClient.send(request);
 			assertSendSuccess(response, phone, providerTemplateCode);
 		}
-		catch (IllegalStateException e) {
-			throw e;
-		}
 		catch (Exception e) {
-			log.error("Aliyun Dypns send error, phone={}, templateCode={}", phone, providerTemplateCode, e);
-			throw new IllegalStateException("Aliyun Dypns send error: " + e.getMessage(), e);
+			throw new IllegalStateException("Aliyun Dypns send interrupted", e);
 		}
 	}
 
@@ -93,8 +104,7 @@ public class AliyunDypnsSmsSender implements DypnsVerifyCodeSender {
 			return;
 		}
 
-		String detail = response == null ? "null response"
-				: (response.getBody() == null ? "null body" : String.valueOf(response.getBody()));
+		String detail = resolveFailureDetail(response);
 		log.error("Aliyun Dypns send failed, phone={}, templateCode={}, detail={}", phone, providerTemplateCode,
 				detail);
 

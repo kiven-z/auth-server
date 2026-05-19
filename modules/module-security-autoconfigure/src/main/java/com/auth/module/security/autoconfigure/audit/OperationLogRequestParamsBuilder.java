@@ -65,11 +65,11 @@ public class OperationLogRequestParamsBuilder {
 	 * @param request HTTP 请求
 	 * @param hasRecord 是否记录
 	 * @param objectMapper JSON 序列化
-	 * @param methodArgs 控制器方法实参，可为 {@code null}
+	 * @param methodArgs 控制器方法实参，可为 {@code null} 或空列表
 	 * @return 摘要或 {@code null}
 	 */
 	public static String build(HttpServletRequest request, boolean hasRecord, ObjectMapper objectMapper,
-			Object[] methodArgs) {
+			List<Object> methodArgs) {
 		if (!hasRecord) {
 			return null;
 		}
@@ -171,18 +171,16 @@ public class OperationLogRequestParamsBuilder {
 	 * @param objectMapper JSON 序列化
 	 * @return 摘要列表
 	 */
-	private static List<Object> summarizeMethodArguments(Object[] methodArgs, ObjectMapper objectMapper) {
-		if (methodArgs == null || methodArgs.length == 0) {
+	private static List<Object> summarizeMethodArguments(List<Object> methodArgs, ObjectMapper objectMapper) {
+		if (methodArgs == null || methodArgs.isEmpty()) {
 			return Collections.emptyList();
 		}
 		List<Object> out = new ArrayList<>();
 		for (Object arg : methodArgs) {
-			if (arg == null) {
+			if (arg == null || isSkippedFrameworkArgument(arg)) {
 				continue;
 			}
-			if (isSkippedFrameworkArgument(arg)) {
-				continue;
-			}
+
 			Object summary = toLoggableArgumentSummary(arg, objectMapper);
 			if (summary != null) {
 				out.add(summary);

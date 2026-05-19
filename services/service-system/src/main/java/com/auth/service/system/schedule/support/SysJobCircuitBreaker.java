@@ -8,9 +8,7 @@ import com.auth.service.system.schedule.mapper.SysJobMapper;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.extern.slf4j.Slf4j;
-import org.quartz.JobKey;
-import org.quartz.Scheduler;
-import org.springframework.context.annotation.Lazy;
+import org.quartz.SchedulerException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,9 +24,9 @@ import java.util.List;
 public class SysJobCircuitBreaker {
 
 	/**
-	 * 调度器
+	 * Quartz 调度管理
 	 */
-	private final Scheduler scheduler;
+	private final SysJobSchedulerManager sysJobSchedulerManager;
 
 	/**
 	 * 系统任务Mapper
@@ -45,9 +43,9 @@ public class SysJobCircuitBreaker {
 	 */
 	private final ScheduleJobProperties scheduleJobProperties;
 
-	public SysJobCircuitBreaker(@Lazy Scheduler scheduler, SysJobMapper sysJobMapper, JobLogMapper jobLogMapper,
-			ScheduleJobProperties scheduleJobProperties) {
-		this.scheduler = scheduler;
+	public SysJobCircuitBreaker(SysJobSchedulerManager sysJobSchedulerManager, SysJobMapper sysJobMapper,
+			JobLogMapper jobLogMapper, ScheduleJobProperties scheduleJobProperties) {
+		this.sysJobSchedulerManager = sysJobSchedulerManager;
 		this.sysJobMapper = sysJobMapper;
 		this.jobLogMapper = jobLogMapper;
 		this.scheduleJobProperties = scheduleJobProperties;
@@ -90,11 +88,11 @@ public class SysJobCircuitBreaker {
 
 		// 4. 暂停 Quartz 任务（失败则回滚事务）
 		try {
-			scheduler.pauseJob(JobKey.jobKey(jobName, jobGroup));
+			sysJobSchedulerManager.pauseJob(jobName, jobGroup);
 		}
-		catch (Exception e) {
-			log.error("熔断后暂停 Quartz 任务失败: {}.{}", jobGroup, jobName, e);
-			throw new RuntimeException("熔断暂停任务失败", e);
+		catch (SchedulerException ex) {
+			log.error("熔断后暂停 Quartz 任务失败: {}.{}", jobGroup, jobName, ex);
+			throw new SysJobCircuitBreakerException("熔断暂停任务失败", ex);
 		}
 
 		log.warn("任务已连续失败 {} 次，已暂停: {} / {}", threshold, jobGroup, jobName);

@@ -19,6 +19,8 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -103,8 +105,10 @@ public class OperationLogPayloadAssembler {
 		MethodSignature signature = (MethodSignature) joinPoint.getSignature();
 		Method method = signature.getMethod();
 
-		OperationLogPayloadEvent payload = buildPayload(new BuildPayloadContext(meta, result, failure, startNs, request,
-				response, method, joinPoint.getArgs()));
+		Object[] args = joinPoint.getArgs();
+		List<Object> methodArgs = args == null || args.length == 0 ? List.of() : List.copyOf(Arrays.asList(args));
+		OperationLogPayloadEvent payload = buildPayload(
+				new BuildPayloadContext(meta, result, failure, startNs, request, response, method, methodArgs));
 		dispatch(payload);
 	}
 

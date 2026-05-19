@@ -90,6 +90,24 @@ class AliyunDypnsSmsSenderTest {
 	}
 
 	@Test
+	@DisplayName("线程中断时恢复中断标志并包装为 IllegalStateException")
+	void sendVerifyCode_interrupted() throws Exception {
+		when(dypnsClient.send(any(SendSmsVerifyCodeRequest.class))).thenThrow(new InterruptedException("interrupted"));
+
+		AliyunDypnsSmsSender sender = new AliyunDypnsSmsSender(dypnsClient, smsProperties);
+		try {
+			assertThatThrownBy(() -> sender.sendVerifyCode("13800000000", "100001", "{}"))
+				.isInstanceOf(IllegalStateException.class)
+				.hasMessageContaining("interrupted");
+			assertThat(Thread.currentThread().isInterrupted()).isTrue();
+		}
+		finally {
+			// 清除本用例设置的中断标志，避免影响后续测试
+			Thread.interrupted();
+		}
+	}
+
+	@Test
 	@DisplayName("调用异常时包装为 IllegalStateException")
 	void sendVerifyCode_clientThrows() throws Exception {
 		when(dypnsClient.send(any(SendSmsVerifyCodeRequest.class))).thenThrow(new RuntimeException("network"));

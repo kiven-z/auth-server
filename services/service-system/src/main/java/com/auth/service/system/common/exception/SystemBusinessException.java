@@ -20,7 +20,7 @@ import java.util.Objects;
 public class SystemBusinessException extends RuntimeException implements I18nMessageProvider {
 
 	@Getter
-	private transient final SystemResultCode resultCode;
+	private final transient SystemResultCode resultCode;
 
 	private final transient Object[] args;
 

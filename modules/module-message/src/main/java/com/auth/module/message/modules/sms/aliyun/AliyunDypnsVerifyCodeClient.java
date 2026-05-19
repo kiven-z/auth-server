@@ -11,6 +11,7 @@ import darabonba.core.client.ClientOverrideConfiguration;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 /**
  * 基于阿里云 Dypns AsyncClient 的验证码发送客户端
@@ -49,7 +50,8 @@ public class AliyunDypnsVerifyCodeClient implements DypnsVerifyCodeClient {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public SendSmsVerifyCodeResponse send(SendSmsVerifyCodeRequest request) throws Exception {
+	public SendSmsVerifyCodeResponse send(SendSmsVerifyCodeRequest request)
+			throws ExecutionException, InterruptedException {
 		CompletableFuture<SendSmsVerifyCodeResponse> future = asyncClient.sendSmsVerifyCode(request);
 		return future.get();
 	}

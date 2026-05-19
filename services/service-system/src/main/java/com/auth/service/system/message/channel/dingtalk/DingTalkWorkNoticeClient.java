@@ -81,7 +81,7 @@ public class DingTalkWorkNoticeClient {
 				buildMsgJson(resolvedType, title, content));
 
 		// 构建请求URL
-		String url = UriComponentsBuilder.fromHttpUrl(WORK_NOTICE_URL)
+		String url = UriComponentsBuilder.fromUriString(WORK_NOTICE_URL)
 			.queryParam("access_token", accessToken)
 			.toUriString();
 
