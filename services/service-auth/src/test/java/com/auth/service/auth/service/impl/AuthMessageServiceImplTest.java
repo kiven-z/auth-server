@@ -133,7 +133,7 @@ class AuthMessageServiceImplTest {
 				.forClass(TemplateMessageCommand.class);
 			verify(systemSecurityIngestFeignClient).sendByTemplate(commandCaptor.capture());
 			TemplateMessageCommand command = commandCaptor.getValue();
-			assertEquals(MessageChannel.SMS_DYPNS_VERIFY_CODE, command.getChannel());
+			assertEquals(MessageChannel.SMS_ALIYUN_DYPNS, command.getChannel());
 			assertEquals(AuthDypnsVerifyCodeSceneCode.LOGIN_VERIFY_CODE.getSceneCode(), command.getTemplateCode());
 			assertEquals(phone, command.getTargets().get(0));
 		}

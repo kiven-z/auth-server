@@ -51,10 +51,10 @@ class ChannelOptionsMatchValidatorTest {
 	}
 
 	@Test
-	@DisplayName("SMS_DYPNS_VERIFY_CODE 渠道：带 options 时校验失败")
+	@DisplayName("SMS_ALIYUN_DYPNS 渠道：带 options 时校验失败")
 	void isValid_shouldFailForDypnsWithAnyOptions() {
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
-			.channel(MessageChannel.SMS_DYPNS_VERIFY_CODE)
+			.channel(MessageChannel.SMS_ALIYUN_DYPNS)
 			.templateCode("100001")
 			.targets(List.of("13800000000"))
 			.options(EmailChannelOptions.builder().build())
@@ -67,7 +67,7 @@ class ChannelOptionsMatchValidatorTest {
 	@DisplayName("options 为空时校验通过")
 	void isValid_shouldPassWhenOptionsNull() {
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
-			.channel(MessageChannel.SMS_DYPNS_VERIFY_CODE)
+			.channel(MessageChannel.SMS_ALIYUN_DYPNS)
 			.templateCode("100001")
 			.targets(List.of("13800000000"))
 			.build();

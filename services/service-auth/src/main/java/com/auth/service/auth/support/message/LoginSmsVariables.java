@@ -6,8 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 登录 Dypns 验证码短信模板变量（scene_code=login-sms-code，channel=SMS_DYPNS_VERIFY_CODE，变量
- * ${code}、${min}）
+ * 登录验证码短信模板
  *
  * @author Bunny
  */

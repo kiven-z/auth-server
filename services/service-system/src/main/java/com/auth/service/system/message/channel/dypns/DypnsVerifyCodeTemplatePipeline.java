@@ -21,10 +21,7 @@ import static com.auth.service.system.common.exception.code.message.SystemMessag
 import static com.auth.service.system.common.exception.code.message.SystemMessageResultCode.SMS_TEMPLATE_VARS_MISSING;
 
 /**
- * Dypns 验证码短信：模板加载、变量校验与 templateParam 组装（channel=SMS_DYPNS_VERIFY_CODE）
- * <p>
- * 短信签名由 {@code auth.message.sms.sign-name} 统一配置（SendSmsVerifyCode 必填）。
- * </p>
+ * Dypns 验证码短信：模板加载、变量校验与 templateParam 组装（channel=SMS_ALIYUN_DYPNS）
  *
  * @author Bunny
  */
@@ -66,7 +63,7 @@ public class DypnsVerifyCodeTemplatePipeline {
 	public DypnsVerifyCodeSendPayload prepare(TemplateMessageCommand command) {
 		String sceneCode = command.getTemplateCode();
 		MessageTemplateEntity template = messageTemplateMapper.selectEnabledBySceneCodeAndChannel(sceneCode,
-				MessageChannel.SMS_DYPNS_VERIFY_CODE.name());
+				MessageChannel.SMS_ALIYUN_DYPNS.name());
 		if (template == null) {
 			throw new SystemBusinessException(SMS_TEMPLATE_NOT_FOUND, sceneCode);
 		}

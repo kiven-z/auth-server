@@ -13,9 +13,14 @@ public enum MessageChannel {
 	EMAIL,
 
 	/**
-	 * 阿里云 Dypns 验证码短信（SendSmsVerifyCode；与通用 dysmsapi 模板短信 SMS 不同）
+	 * 阿里云号码认证 Dypns 验证码短信（SendSmsVerifyCode；套餐/控制台模板）
 	 */
-	SMS_DYPNS_VERIFY_CODE,
+	SMS_ALIYUN_DYPNS,
+
+	// /**
+	// * 阿里云 dysmsapi 自配模板短信（SendSms）；未来启用时再放开并实现对应 MessageSender
+	// */
+	// SMS_ALIYUN_DYSMSAPI,
 
 	/**
 	 * 钉钉

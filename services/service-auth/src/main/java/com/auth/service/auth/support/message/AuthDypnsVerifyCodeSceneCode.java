@@ -4,8 +4,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 /**
- * 认证场景下 Dypns 验证码短信的 scene_code（与 sys_message_template.channel=SMS_DYPNS_VERIFY_CODE
- * 约定一致）
+ * 认证场景下验证码短信
  *
  * @author Bunny
  */

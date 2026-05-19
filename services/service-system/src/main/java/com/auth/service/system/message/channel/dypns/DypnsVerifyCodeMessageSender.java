@@ -16,7 +16,7 @@ import java.util.List;
 import static com.auth.service.system.common.exception.code.message.SystemMessageResultCode.*;
 
 /**
- * 阿里云 Dypns 验证码短信渠道发送实现（{@link MessageChannel#SMS_DYPNS_VERIFY_CODE}）
+ * 阿里云 Dypns 验证码短信渠道发送实现（{@link MessageChannel#SMS_ALIYUN_DYPNS}）
  *
  * @author Bunny
  */
@@ -39,7 +39,7 @@ public class DypnsVerifyCodeMessageSender implements MessageSender {
 	 */
 	@Override
 	public MessageChannel channel() {
-		return MessageChannel.SMS_DYPNS_VERIFY_CODE;
+		return MessageChannel.SMS_ALIYUN_DYPNS;
 	}
 
 	/**

@@ -19,25 +19,14 @@ import org.springframework.context.annotation.Bean;
 public class AliyunDypnsAutoConfiguration {
 
 	/**
-	 * Dypns 验证码客户端
+	 * Dypns 验证码短信发送实现
 	 * @param smsProperties 短信配置
-	 * @return 客户端 Bean
-	 */
-	@ConditionalOnMissingBean(DypnsVerifyCodeClient.class)
-	@Bean(destroyMethod = "close")
-	DypnsVerifyCodeClient aliyunDypnsVerifyCodeClient(SmsProperties smsProperties) {
-		return new AliyunDypnsVerifyCodeClient(smsProperties);
-	}
-
-	/**
-	 * Dypns 验证码短信发送 SPI 实现
-	 * @param dypnsClient Dypns 客户端
 	 * @return {@link DypnsVerifyCodeSender}
 	 */
 	@ConditionalOnMissingBean(DypnsVerifyCodeSender.class)
 	@Bean(destroyMethod = "close")
-	DypnsVerifyCodeSender aliyunDypnsVerifyCodeSender(DypnsVerifyCodeClient dypnsClient, SmsProperties smsProperties) {
-		return new AliyunDypnsSmsSender(dypnsClient, smsProperties);
+	DypnsVerifyCodeSender aliyunDypnsVerifyCodeSender(SmsProperties smsProperties) {
+		return new AliyunDypnsVerifyCodeSender(smsProperties);
 	}
 
 }

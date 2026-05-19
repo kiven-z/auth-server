@@ -53,7 +53,7 @@ public class TemplateMessageCommand implements Serializable {
 	private transient Map<String, Object> variables;
 
 	/**
-	 * 是否使用自定义正文（true 时使用 {@link #body}，不查库渲染；SMS_DYPNS_VERIFY_CODE 渠道不支持）
+	 * 是否使用自定义正文（true 时使用 {@link #body}，不查库渲染；SMS_ALIYUN_DYPNS 渠道不支持）
 	 */
 	private Boolean customBody;
 

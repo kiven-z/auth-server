@@ -77,7 +77,7 @@ class MessageDispatchServiceImplTest {
 	@DisplayName("不支持的渠道：抛出 SystemBusinessException")
 	void sendByTemplate_shouldThrowWhenChannelUnsupported() {
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
-			.channel(MessageChannel.SMS_DYPNS_VERIFY_CODE)
+			.channel(MessageChannel.SMS_ALIYUN_DYPNS)
 			.templateCode("100001")
 			.targets(List.of("13800000000"))
 			.build();

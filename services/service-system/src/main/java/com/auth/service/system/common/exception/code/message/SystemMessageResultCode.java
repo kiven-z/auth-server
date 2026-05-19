@@ -4,7 +4,7 @@ import com.auth.service.system.common.exception.code.SystemResultCode;
 import lombok.Getter;
 
 /**
- * 统一消息发送与 Dypns 验证码短信（SMS_DYPNS_VERIFY_CODE）结果码
+ * 统一消息发送与 Dypns 验证码短信（SMS_ALIYUN_DYPNS）结果码
  *
  * <p>
  * 号段：279–296（下一可用 297）
@@ -24,7 +24,7 @@ public enum SystemMessageResultCode implements SystemResultCode {
 	 */
 	MESSAGE_CHANNEL_UNSUPPORTED(400, 280, "MESSAGE_CHANNEL_UNSUPPORTED", "system.message.channel.unsupported"),
 	/**
-	 * Dypns 验证码短信模板不存在或已禁用（channel=SMS_DYPNS_VERIFY_CODE）
+	 * Dypns 验证码短信模板不存在或已禁用（channel=SMS_ALIYUN_DYPNS）
 	 */
 	SMS_TEMPLATE_NOT_FOUND(404, 281, "SMS_TEMPLATE_NOT_FOUND", "system.sms.template.not_found"),
 	/**
@@ -77,7 +77,7 @@ public enum SystemMessageResultCode implements SystemResultCode {
 	 */
 	DING_TALK_RENDER_FAILED(500, 295, "DING_TALK_RENDER_FAILED", "system.dingtalk.render.failed"),
 	/**
-	 * SMS_DYPNS_VERIFY_CODE 不支持自定义正文（须使用 templateCode 与 variables）
+	 * SMS_ALIYUN_DYPNS 不支持自定义正文（须使用 templateCode 与 variables）
 	 */
 	SMS_CUSTOM_BODY_NOT_SUPPORTED(400, 296, "SMS_CUSTOM_BODY_NOT_SUPPORTED", "system.sms.custom_body.not_supported");
 

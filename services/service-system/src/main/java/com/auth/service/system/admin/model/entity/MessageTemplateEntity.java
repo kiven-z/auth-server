@@ -27,9 +27,7 @@ public class MessageTemplateEntity extends BaseEntity {
 	private String sceneCode;
 
 	/**
-	 * 渠道：EMAIL、SMS_DYPNS_VERIFY_CODE、DING_TALK 等，与
-	 * {@link com.auth.module.message.api.channel.MessageChannel} 名称一致（非通用 dysmsapi 短信
-	 * SMS）
+	 * 渠道{@link com.auth.module.message.api.channel.MessageChannel} SMS）
 	 */
 	@Schema(title = "渠道")
 	private String channel;
@@ -49,8 +47,8 @@ public class MessageTemplateEntity extends BaseEntity {
 	/**
 	 * 正文模板：邮件 HTML / 钉钉 Markdown 等；Dypns 验证码短信不在库中拼全文
 	 */
-	@Schema(title = "正文模板")
 	@TableField("body_content")
+	@Schema(title = "正文模板")
 	private String bodyContent;
 
 	/**
@@ -60,7 +58,7 @@ public class MessageTemplateEntity extends BaseEntity {
 	private String requireFields;
 
 	/**
-	 * Dypns / 短信厂商侧已审模板编码（channel=SMS_DYPNS_VERIFY_CODE 时使用）
+	 * Dypns / 短信厂商侧已审模板编码（channel=SMS_ALIYUN_DYPNS 时使用）
 	 */
 	@Schema(title = "厂商模板编码")
 	private String providerTemplateCode;
@@ -74,8 +72,8 @@ public class MessageTemplateEntity extends BaseEntity {
 	/**
 	 * 渠道默认扩展（JSON），与会话级 options 合并
 	 */
-	@Schema(title = "渠道默认选项 JSON")
 	@TableField("channel_defaults_json")
+	@Schema(title = "渠道默认选项 JSON")
 	private String channelDefaultsJson;
 
 	@Schema(title = "优先级（同 scene+channel 启用行取最大 priority）")

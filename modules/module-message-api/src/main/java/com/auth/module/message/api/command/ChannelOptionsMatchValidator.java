@@ -29,7 +29,7 @@ public class ChannelOptionsMatchValidator implements ConstraintValidator<Channel
 			case EMAIL -> options instanceof EmailChannelOptions;
 			case DING_TALK -> options instanceof DingTalkChannelOptions;
 			// Dypns 验证码短信（无 ChannelOptions）
-			case SMS_DYPNS_VERIFY_CODE -> false;
+			case SMS_ALIYUN_DYPNS -> false;
 			case IN_APP -> false;
 		};
 	}

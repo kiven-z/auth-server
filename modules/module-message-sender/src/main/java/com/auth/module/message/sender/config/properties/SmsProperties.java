@@ -22,7 +22,7 @@ import org.springframework.validation.annotation.Validated;
 public class SmsProperties {
 
 	/**
-	 * 是否启用 Dypns 验证码短信渠道（SMS_DYPNS_VERIFY_CODE）
+	 * 是否启用 Dypns 验证码短信渠道（SMS_ALIYUN_DYPNS）
 	 */
 	private boolean enabled = false;
 

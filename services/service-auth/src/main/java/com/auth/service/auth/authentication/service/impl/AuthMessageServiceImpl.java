@@ -115,7 +115,7 @@ public class AuthMessageServiceImpl implements AuthMessageService {
 		// 构建发送内容
 		Map<String, Object> variables = LoginSmsVariables.build(code, expireMinutes);
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
-			.channel(MessageChannel.SMS_DYPNS_VERIFY_CODE)
+			.channel(MessageChannel.SMS_ALIYUN_DYPNS)
 			.templateCode(AuthDypnsVerifyCodeSceneCode.LOGIN_VERIFY_CODE.getSceneCode())
 			.targets(List.of(phone))
 			.variables(variables)
