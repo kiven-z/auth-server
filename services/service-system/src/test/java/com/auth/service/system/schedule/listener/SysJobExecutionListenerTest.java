@@ -65,7 +65,7 @@ class SysJobExecutionListenerTest {
 
 	@Test
 	@DisplayName("jobWasExecuted：执行成功且未开启成功日志时不写库")
-	void jobWasExecuted_onSuccess_withoutSuccessLog_skipsPersistence() throws JobExecutionException {
+	void jobWasExecuted_onSuccess_withoutSuccessLog_skipsPersistence() {
 		when(scheduleJobProperties.isSuccessEnabled()).thenReturn(false);
 
 		JobExecutionContext context = mock(JobExecutionContext.class);

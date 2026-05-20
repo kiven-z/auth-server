@@ -1,19 +1,18 @@
-package com.auth.service.auth.service.impl;
+package com.auth.service.auth.authentication.application.impl;
 
 import com.auth.common.jwt.model.JwtUserToken;
 import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.TestConstants;
-import com.auth.service.auth.authentication.api.dto.request.AbstractLoginRequest;
-import com.auth.service.auth.authentication.api.dto.request.UsernamePasswordLoginRequest;
 import com.auth.service.auth.authentication.api.dto.response.UserLoginResponse;
-import com.auth.service.auth.authentication.application.impl.AuthServiceImpl;
+import com.auth.service.auth.authentication.application.command.AbstractLoginCommand;
+import com.auth.service.auth.authentication.application.command.UsernamePasswordLoginCommand;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogResult;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.event.LoginAuditEventPublisher;
 import com.auth.service.auth.authentication.domain.model.LoginResult;
 import com.auth.service.auth.authentication.domain.model.TokenPair;
-import com.auth.service.auth.authentication.domain.strategy.LoginStrategy;
+import com.auth.service.auth.authentication.domain.port.LoginStrategy;
 import com.auth.service.auth.authentication.infrastructure.support.AuthTokenResponseEnricher;
 import com.auth.service.auth.authentication.infrastructure.token.LoginFailureRateLimiter;
 import com.auth.service.auth.authentication.infrastructure.token.TokenService;
@@ -83,10 +82,7 @@ class AuthServiceImplTest {
 	@Test
 	@DisplayName("登录：策略精确匹配时，按编排顺序执行并返回响应")
 	void login_shouldOrchestrateInOrder_whenStrategyMatchesExactly() {
-		// Arrange
-		UsernamePasswordLoginRequest auth = new UsernamePasswordLoginRequest();
-		auth.setUsername("user");
-		auth.setPassword("pass");
+		UsernamePasswordLoginCommand command = new UsernamePasswordLoginCommand("user", "pass");
 
 		AuthProfile profile = mock(AuthProfile.class);
 		when(profile.getUserId()).thenReturn(TestConstants.USER_ID);
@@ -98,14 +94,14 @@ class AuthServiceImplTest {
 
 		LoginResult loginResult = new LoginResult(response, profile, AuthLoginLogType.LOGIN_PASSWORD);
 
-		LoginStrategy<UsernamePasswordLoginRequest> strategy = new LoginStrategy<>() {
+		LoginStrategy<UsernamePasswordLoginCommand> strategy = new LoginStrategy<>() {
 			@Override
-			public Class<UsernamePasswordLoginRequest> supports() {
-				return UsernamePasswordLoginRequest.class;
+			public Class<UsernamePasswordLoginCommand> supports() {
+				return UsernamePasswordLoginCommand.class;
 			}
 
 			@Override
-			public LoginResult authenticate(UsernamePasswordLoginRequest requestAuth, HttpServletRequest request) {
+			public LoginResult authenticate(UsernamePasswordLoginCommand cmd, HttpServletRequest request) {
 				return loginResult;
 			}
 		};
@@ -119,14 +115,12 @@ class AuthServiceImplTest {
 			.thenReturn(sessionIndex);
 
 		when(tokenService.buildTokenPair(anyLong(), anyString(), anyLong())).thenReturn(new TokenPair(
-				TestConstants.ACCESS_TOKEN, TestConstants.REFRESH_TOKEN, LocalDateTime.now().plusMinutes(5)));
+				TestConstants.ACCESS_TOKEN, TestConstants.REFRESH_TOKEN, LocalDateTime.now().plusMinutes(1)));
 
 		AuthServiceImpl service = newService(strategy);
 
-		// Act
-		UserLoginResponse actual = service.login(auth, httpServletRequest);
+		UserLoginResponse actual = service.login(command, httpServletRequest);
 
-		// Assert
 		assertSame(response, actual);
 		assertEquals(TestConstants.ACCESS_TOKEN, actual.getAccessToken());
 		assertEquals(TestConstants.REFRESH_TOKEN, actual.getRefreshToken());
@@ -150,16 +144,17 @@ class AuthServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("登录：无精确匹配时，允许父类/接口匹配兜底")
+	@DisplayName("登录：无精确匹配时，允许父类命令类型匹配兜底")
 	void login_shouldFallbackToAssignableStrategy_whenExactClassNotFound() {
-		// Arrange
-		class MyLoginRequest extends UsernamePasswordLoginRequest {
+		class SubLoginCommand extends UsernamePasswordLoginCommand {
+
+			SubLoginCommand() {
+				super("user", "pass");
+			}
 
 		}
 
-		MyLoginRequest auth = new MyLoginRequest();
-		auth.setUsername("user");
-		auth.setPassword("pass");
+		SubLoginCommand command = new SubLoginCommand();
 
 		AuthProfile profile = mock(AuthProfile.class);
 		when(profile.getUserId()).thenReturn(TestConstants.USER_ID);
@@ -168,14 +163,14 @@ class AuthServiceImplTest {
 		UserLoginResponse response = new UserLoginResponse();
 		response.setId(TestConstants.USER_ID);
 
-		LoginStrategy<UsernamePasswordLoginRequest> strategy = new LoginStrategy<>() {
+		LoginStrategy<UsernamePasswordLoginCommand> strategy = new LoginStrategy<>() {
 			@Override
-			public Class<UsernamePasswordLoginRequest> supports() {
-				return UsernamePasswordLoginRequest.class;
+			public Class<UsernamePasswordLoginCommand> supports() {
+				return UsernamePasswordLoginCommand.class;
 			}
 
 			@Override
-			public LoginResult authenticate(UsernamePasswordLoginRequest requestAuth, HttpServletRequest request) {
+			public LoginResult authenticate(UsernamePasswordLoginCommand cmd, HttpServletRequest request) {
 				return new LoginResult(response, profile, AuthLoginLogType.LOGIN_PASSWORD);
 			}
 		};
@@ -187,10 +182,8 @@ class AuthServiceImplTest {
 
 		AuthServiceImpl service = newService(strategy);
 
-		// Act
-		UserLoginResponse actual = service.login(auth, httpServletRequest);
+		UserLoginResponse actual = service.login(command, httpServletRequest);
 
-		// Assert
 		assertSame(response, actual);
 		verify(sessionLimitManager).assertSessionLimit(TestConstants.USER_ID);
 	}
@@ -198,24 +191,22 @@ class AuthServiceImplTest {
 	@Test
 	@DisplayName("登录：rememberMe=true 时写入会话索引")
 	void login_shouldPassRememberMe_whenRequestRememberMeTrue() {
-		UsernamePasswordLoginRequest auth = new UsernamePasswordLoginRequest();
-		auth.setUsername("user");
-		auth.setPassword("pass");
-		auth.setRememberMe(true);
+		UsernamePasswordLoginCommand command = new UsernamePasswordLoginCommand("user", "pass");
+		command.setRememberMe(true);
 
 		AuthProfile profile = mock(AuthProfile.class);
 		when(profile.getUserId()).thenReturn(TestConstants.USER_ID);
 		when(profile.getPermVersion()).thenReturn(1L);
 
 		UserLoginResponse response = new UserLoginResponse();
-		LoginStrategy<UsernamePasswordLoginRequest> strategy = new LoginStrategy<>() {
+		LoginStrategy<UsernamePasswordLoginCommand> strategy = new LoginStrategy<>() {
 			@Override
-			public Class<UsernamePasswordLoginRequest> supports() {
-				return UsernamePasswordLoginRequest.class;
+			public Class<UsernamePasswordLoginCommand> supports() {
+				return UsernamePasswordLoginCommand.class;
 			}
 
 			@Override
-			public LoginResult authenticate(UsernamePasswordLoginRequest requestAuth, HttpServletRequest request) {
+			public LoginResult authenticate(UsernamePasswordLoginCommand cmd, HttpServletRequest request) {
 				return new LoginResult(response, profile, AuthLoginLogType.LOGIN_PASSWORD);
 			}
 		};
@@ -225,7 +216,7 @@ class AuthServiceImplTest {
 		when(tokenService.buildTokenPair(anyLong(), anyString(), anyLong())).thenReturn(new TokenPair(
 				TestConstants.ACCESS_TOKEN, TestConstants.REFRESH_TOKEN, LocalDateTime.now().plusMinutes(1)));
 
-		newService(strategy).login(auth, httpServletRequest);
+		newService(strategy).login(command, httpServletRequest);
 
 		verify(userSessionIndexFactory).buildUserSessionIndex(same(httpServletRequest), eq(TestConstants.USER_ID),
 				anyString(), anyString(), eq(true));
@@ -234,18 +225,23 @@ class AuthServiceImplTest {
 	@Test
 	@DisplayName("登录：无任何策略时，抛出 AUTH_TYPE_UNSUPPORTED 并写审计")
 	void login_shouldThrowAuthTypeUnsupported_whenNoStrategy() {
-		// Arrange
-		AbstractLoginRequest auth = new AbstractLoginRequest() {
+		AbstractLoginCommand unknown = new AbstractLoginCommand() {
+			@Override
+			public AuthLoginLogType loginLogType() {
+				return AuthLoginLogType.LOGIN_PASSWORD;
+			}
+
+			@Override
+			public String principalForAudit() {
+				return null;
+			}
 		};
 
 		AuthServiceImpl service = newService();
 
-		// Act
 		AuthBusinessException exception = assertThrows(AuthBusinessException.class,
-				() -> service.login(auth, httpServletRequest));
+				() -> service.login(unknown, httpServletRequest));
 
-		// Assert
-		assertNotNull(exception.getResultCode());
 		assertEquals(AuthResultCode.AUTH_TYPE_UNSUPPORTED, exception.getResultCode());
 		verify(loginAuditEventPublisher).publish(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_PASSWORD),
 				eq(AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR), isNull(), isNull(), eq(exception.getMessageKey()),
@@ -255,9 +251,7 @@ class AuthServiceImplTest {
 	@Test
 	@DisplayName("登录：编排失败时回滚已写入的画像与会话")
 	void login_shouldRollbackArtifacts_whenOrchestrationFailsAfterProfileCached() {
-		UsernamePasswordLoginRequest auth = new UsernamePasswordLoginRequest();
-		auth.setUsername("user");
-		auth.setPassword("pass");
+		UsernamePasswordLoginCommand command = new UsernamePasswordLoginCommand("user", "pass");
 
 		AuthProfile profile = mock(AuthProfile.class);
 		when(profile.getUserId()).thenReturn(TestConstants.USER_ID);
@@ -269,14 +263,14 @@ class AuthServiceImplTest {
 
 		LoginResult loginResult = new LoginResult(response, profile, AuthLoginLogType.LOGIN_PASSWORD);
 
-		LoginStrategy<UsernamePasswordLoginRequest> strategy = new LoginStrategy<>() {
+		LoginStrategy<UsernamePasswordLoginCommand> strategy = new LoginStrategy<>() {
 			@Override
-			public Class<UsernamePasswordLoginRequest> supports() {
-				return UsernamePasswordLoginRequest.class;
+			public Class<UsernamePasswordLoginCommand> supports() {
+				return UsernamePasswordLoginCommand.class;
 			}
 
 			@Override
-			public LoginResult authenticate(UsernamePasswordLoginRequest requestAuth, HttpServletRequest request) {
+			public LoginResult authenticate(UsernamePasswordLoginCommand cmd, HttpServletRequest request) {
 				return loginResult;
 			}
 		};
@@ -286,7 +280,7 @@ class AuthServiceImplTest {
 
 		AuthServiceImpl service = newService(strategy);
 
-		assertThrows(AuthBusinessException.class, () -> service.login(auth, httpServletRequest));
+		assertThrows(AuthBusinessException.class, () -> service.login(command, httpServletRequest));
 
 		verify(authProfileCache).createCacheAuthProfile(profile);
 		verify(authProfileCache).evictCacheAuthProfile(TestConstants.USER_ID);
@@ -296,7 +290,6 @@ class AuthServiceImplTest {
 	@Test
 	@DisplayName("登出：token 为空或无法解析时不删除会话")
 	void logout_shouldSkipRevoke_whenTokenBlankOrUnparsed() {
-		// Arrange（logout 不使用策略表，传空列表即可）
 		AuthServiceImpl service = newService();
 
 		service.logout(" ", null);
@@ -313,7 +306,6 @@ class AuthServiceImplTest {
 	@Test
 	@DisplayName("登出：token 有效时，删除会话并从活跃集合移除")
 	void logout_shouldDeleteSessionAndRemoveActiveSession_whenTokenValid() {
-		// Arrange
 		AuthServiceImpl service = newService();
 
 		JwtUserToken jwtUserToken = mock(JwtUserToken.class);
@@ -322,10 +314,8 @@ class AuthServiceImplTest {
 
 		when(tokenService.parseAccessTokenSafe(TestConstants.ACCESS_TOKEN)).thenReturn(Optional.of(jwtUserToken));
 
-		// Act
 		service.logout(TestConstants.ACCESS_TOKEN, null);
 
-		// Assert
 		verify(redisUserSessionIndexRepository).deleteSession(TestConstants.JTI);
 		verify(redisUserSessionIndexRepository).removeActiveSession(TestConstants.USER_ID, TestConstants.JTI);
 		verify(loginAuditEventPublisher).publish(isNull(), eq(AuthLoginLogType.LOGOUT), eq(AuthLoginLogResult.SUCCESS),

@@ -1,12 +1,12 @@
 package com.auth.service.auth.authentication.infrastructure.audit;
 
 import cn.hutool.core.text.CharSequenceUtil;
+import com.auth.service.auth.authentication.api.assembler.LoginCommandAssembler;
 import com.auth.service.auth.authentication.api.dto.request.AbstractLoginRequest;
-import com.auth.service.auth.authentication.api.dto.request.EmailLoginRequest;
-import com.auth.service.auth.authentication.api.dto.request.SmsLoginRequest;
-import com.auth.service.auth.authentication.api.dto.request.UsernamePasswordLoginRequest;
+import com.auth.service.auth.authentication.application.command.AbstractLoginCommand;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogResult;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
+import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.enums.AuthResultCode;
 import lombok.experimental.UtilityClass;
 
@@ -24,16 +24,21 @@ public class LoginAuditContextResolver {
 	 * @return 主体字符串，无法解析时返回 null
 	 */
 	public static String principal(AbstractLoginRequest auth) {
-		if (auth instanceof UsernamePasswordLoginRequest usernamePasswordLoginRequest) {
-			return blankToNull(usernamePasswordLoginRequest.getUsername());
+		try {
+			return principal(LoginCommandAssembler.toCommand(auth));
 		}
-		if (auth instanceof EmailLoginRequest emailLoginRequest) {
-			return blankToNull(emailLoginRequest.getEmail());
+		catch (AuthBusinessException ex) {
+			return null;
 		}
-		if (auth instanceof SmsLoginRequest smsLoginRequest) {
-			return blankToNull(smsLoginRequest.getPhone());
-		}
-		return null;
+	}
+
+	/**
+	 * 从登录命令解析审计主体。
+	 * @param command 登录命令
+	 * @return 主体字符串，无法解析时返回 null
+	 */
+	public static String principal(AbstractLoginCommand command) {
+		return blankToNull(command.principalForAudit());
 	}
 
 	/**
@@ -42,13 +47,12 @@ public class LoginAuditContextResolver {
 	 * @return 事件类型；未知类型时回退为密码登录类型
 	 */
 	public static AuthLoginLogType eventTypeFromAuth(AbstractLoginRequest auth) {
-		if (auth instanceof EmailLoginRequest) {
-			return AuthLoginLogType.LOGIN_EMAIL;
+		try {
+			return LoginCommandAssembler.toCommand(auth).loginLogType();
 		}
-		if (auth instanceof SmsLoginRequest) {
-			return AuthLoginLogType.LOGIN_SMS;
+		catch (AuthBusinessException ex) {
+			return AuthLoginLogType.LOGIN_PASSWORD;
 		}
-		return AuthLoginLogType.LOGIN_PASSWORD;
 	}
 
 	/**

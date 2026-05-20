@@ -1,11 +1,10 @@
-package com.auth.service.auth.service.impl;
+package com.auth.service.auth.integration.application.impl;
 
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.TestConstants;
 import com.auth.service.auth.authorization.api.dto.EffectiveCodesVO;
 import com.auth.service.auth.authorization.application.AuthProfileQueryService;
 import com.auth.service.auth.authorization.infrastructure.cache.AuthProfileCache;
-import com.auth.service.auth.integration.application.impl.InternalAuthCoordinationServiceImpl;
 import com.auth.service.auth.session.infrastructure.redis.RedisUserSessionIndexRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

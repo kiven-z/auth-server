@@ -1,4 +1,4 @@
-package com.auth.service.auth.service.impl;
+package com.auth.service.auth.authentication.application.impl;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.module.message.api.channel.MessageChannel;
@@ -6,7 +6,6 @@ import com.auth.module.message.api.command.ChannelOptionsSupport;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.message.api.model.email.EmailChannelOptions;
 import com.auth.module.platform.persistence.model.UserEntity;
-import com.auth.service.auth.authentication.application.impl.AuthMessageServiceImpl;
 import com.auth.service.auth.authentication.infrastructure.audit.LoginAuditSnapshot;
 import com.auth.service.auth.authentication.infrastructure.audit.LoginAuditSnapshotFactory;
 import com.auth.service.auth.authentication.infrastructure.message.AuthDypnsVerifyCodeSceneCode;

@@ -3,10 +3,10 @@ package com.auth.service.auth.authentication.infrastructure.strategy;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.crypto.digest.MD5;
 import com.auth.module.platform.persistence.model.UserEntity;
-import com.auth.service.auth.authentication.api.dto.request.SmsLoginRequest;
+import com.auth.service.auth.authentication.application.command.SmsLoginCommand;
+import com.auth.service.auth.authentication.application.support.AbstractLoginStrategyTemplate;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.event.LoginAuditEventPublisher;
-import com.auth.service.auth.authentication.domain.strategy.AbstractLoginStrategy;
 import com.auth.service.auth.authentication.infrastructure.persistence.UserMapper;
 import com.auth.service.auth.authentication.infrastructure.token.LoginFailureRateLimiter;
 import com.auth.service.auth.authorization.application.AuthProfileQueryService;
@@ -26,7 +26,7 @@ import static com.auth.module.security.contract.redis.SecurityRedisKey.SMS_CODE;
  * @author Bunny
  */
 @Component
-public class SmsLoginStrategy extends AbstractLoginStrategy<SmsLoginRequest> {
+public class SmsLoginStrategy extends AbstractLoginStrategyTemplate<SmsLoginCommand> {
 
 	private final RedisTemplate<String, Object> redisTemplate;
 
@@ -46,8 +46,8 @@ public class SmsLoginStrategy extends AbstractLoginStrategy<SmsLoginRequest> {
 	}
 
 	@Override
-	protected UserEntity resolveUser(SmsLoginRequest auth) {
-		String phone = auth.getPhone();
+	protected UserEntity resolveUser(SmsLoginCommand command) {
+		String phone = command.getPhone();
 		UserEntity user = userMapper.selectUserForLoginByPhone(phone);
 		if (user == null) {
 			throw new AuthBusinessException(AuthResultCode.USERNAME_OR_PASSWORD_ERROR);
@@ -56,9 +56,9 @@ public class SmsLoginStrategy extends AbstractLoginStrategy<SmsLoginRequest> {
 	}
 
 	@Override
-	protected AuthLoginLogType doAuthenticate(SmsLoginRequest auth, UserEntity user) {
-		String phone = Objects.requireNonNull(auth.getPhone());
-		String code = Objects.requireNonNull(auth.getCode());
+	protected AuthLoginLogType doAuthenticate(SmsLoginCommand command, UserEntity user) {
+		String phone = Objects.requireNonNull(command.getPhone());
+		String code = Objects.requireNonNull(command.getCode());
 
 		code = MD5.create().digestHex16(code);
 		@NotNull
@@ -69,7 +69,7 @@ public class SmsLoginStrategy extends AbstractLoginStrategy<SmsLoginRequest> {
 			throw new AuthBusinessException(AuthResultCode.AUTH_CODE_ERROR);
 		}
 
-		deleteSmsCode(auth.getPhone());
+		deleteSmsCode(command.getPhone());
 
 		return AuthLoginLogType.LOGIN_SMS;
 	}
@@ -83,8 +83,8 @@ public class SmsLoginStrategy extends AbstractLoginStrategy<SmsLoginRequest> {
 	}
 
 	@Override
-	public Class<SmsLoginRequest> supports() {
-		return SmsLoginRequest.class;
+	public Class<SmsLoginCommand> supports() {
+		return SmsLoginCommand.class;
 	}
 
 }

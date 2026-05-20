@@ -1,18 +1,18 @@
-package com.auth.service.auth.authentication.domain.strategy;
+package com.auth.service.auth.authentication.application.support;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
-import com.auth.service.auth.authentication.api.dto.request.AbstractLoginRequest;
 import com.auth.service.auth.authentication.api.dto.response.UserLoginResponse;
+import com.auth.service.auth.authentication.application.command.AbstractLoginCommand;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogResult;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.event.LoginAuditEventPublisher;
 import com.auth.service.auth.authentication.domain.model.LoginResult;
-import com.auth.service.auth.authentication.infrastructure.audit.LoginAuditContextResolver;
+import com.auth.service.auth.authentication.domain.port.LoginStrategy;
 import com.auth.service.auth.authentication.infrastructure.token.LoginFailureRateLimiter;
 import com.auth.service.auth.authorization.application.AuthProfileQueryService;
-import com.auth.service.auth.session.infrastructure.redis.support.SessionLimitManager;
 import com.auth.service.auth.shared.audit.AuthLoginAuditMapping;
 import com.auth.service.auth.shared.exception.AuthBadCredentialsException;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
@@ -23,12 +23,15 @@ import jakarta.servlet.http.HttpServletRequest;
  * 登录策略模板：解析用户 → 锁定检查 → 子类校验凭证 → 构建画像与响应；失败路径发布审计事件。
  *
  * <p>
- * 会话容量由 {@link SessionLimitManager} 在编排层统一处理。
+ * 会话容量由
+ * {@link com.auth.service.auth.session.infrastructure.redis.support.SessionLimitManager}
+ * 在 {@link com.auth.service.auth.authentication.application.impl.AuthServiceImpl}
+ * 编排层统一处理。
  * </p>
  *
  * @author Bunny
  */
-public abstract class AbstractLoginStrategy<T extends AbstractLoginRequest> implements LoginStrategy<T> {
+public abstract class AbstractLoginStrategyTemplate<T extends AbstractLoginCommand> implements LoginStrategy<T> {
 
 	/**
 	 * 与 {@link UserEntity#getStatus()} 对齐：0=禁用
@@ -46,11 +49,16 @@ public abstract class AbstractLoginStrategy<T extends AbstractLoginRequest> impl
 
 	private final LoginAuditEventPublisher loginAuditEventPublisher;
 
-	protected AbstractLoginStrategy(LoginFailureRateLimiter loginFailureRateLimiter,
+	protected AbstractLoginStrategyTemplate(LoginFailureRateLimiter loginFailureRateLimiter,
 			AuthProfileQueryService authProfileQueryService, LoginAuditEventPublisher loginAuditEventPublisher) {
 		this.loginFailureRateLimiter = loginFailureRateLimiter;
 		this.authProfileQueryService = authProfileQueryService;
 		this.loginAuditEventPublisher = loginAuditEventPublisher;
+	}
+
+	private static String principalForAudit(AbstractLoginCommand command) {
+		String principal = command.principalForAudit();
+		return CharSequenceUtil.isBlank(principal) ? null : principal;
 	}
 
 	/**
@@ -60,13 +68,13 @@ public abstract class AbstractLoginStrategy<T extends AbstractLoginRequest> impl
 	protected abstract AuthLoginLogType loginLogType();
 
 	@Override
-	public LoginResult authenticate(T auth, HttpServletRequest request) {
-		UserEntity user = resolveUserOrAuditAndRethrow(auth, request);
+	public LoginResult authenticate(T command, HttpServletRequest request) {
+		UserEntity user = resolveUserOrAuditAndRethrow(command, request);
 		Long userId = user.getId();
 		assertNotLockedOrAuditAndRethrow(request, user);
 
 		try {
-			AuthLoginLogType resolvedLoginLogType = doAuthenticate(auth, user);
+			AuthLoginLogType resolvedLoginLogType = doAuthenticate(command, user);
 			AuthProfile profile = authProfileQueryService.buildByUser(user);
 
 			UserLoginResponse response = BeanUtil.copyProperties(user, UserLoginResponse.class);
@@ -89,19 +97,19 @@ public abstract class AbstractLoginStrategy<T extends AbstractLoginRequest> impl
 
 	/**
 	 * 解析用户实体并记录审计日志。
-	 * @param auth 登录请求
+	 * @param command 登录命令
 	 * @param request HTTP 请求
 	 * @return 用户实体
 	 */
-	private UserEntity resolveUserOrAuditAndRethrow(T auth, HttpServletRequest request) {
+	private UserEntity resolveUserOrAuditAndRethrow(T command, HttpServletRequest request) {
 		try {
-			return resolveUser(auth);
+			return resolveUser(command);
 		}
 		catch (AuthBusinessException ex) {
 			if (ex.getResultCode() == AuthResultCode.USERNAME_OR_PASSWORD_ERROR) {
 				loginAuditEventPublisher.publish(request, loginLogType(),
-						AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR, null,
-						LoginAuditContextResolver.principal(auth), ex.getMessageKey(), null);
+						AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR, null, principalForAudit(command),
+						ex.getMessageKey(), null);
 			}
 			throw ex;
 		}
@@ -156,18 +164,18 @@ public abstract class AbstractLoginStrategy<T extends AbstractLoginRequest> impl
 	}
 
 	/**
-	 * 解析认证请求对应的用户实体。
-	 * @param auth 登录请求
+	 * 解析认证命令对应的用户实体。
+	 * @param command 登录命令
 	 * @return 用户实体
 	 */
-	protected abstract UserEntity resolveUser(T auth);
+	protected abstract UserEntity resolveUser(T command);
 
 	/**
 	 * 校验凭证；密码不匹配时抛出 {@link AuthBadCredentialsException}。
-	 * @param auth 登录请求
+	 * @param command 登录命令
 	 * @param user 已解析用户
 	 * @return 登录类型（与审计类型一致）
 	 */
-	protected abstract AuthLoginLogType doAuthenticate(T auth, UserEntity user);
+	protected abstract AuthLoginLogType doAuthenticate(T command, UserEntity user);
 
 }

@@ -3,6 +3,7 @@ package com.auth.service.auth.authentication.application;
 import com.auth.service.auth.authentication.api.dto.request.UsernamePasswordLoginRequest;
 import com.auth.service.auth.authentication.api.dto.response.RefreshTokenResponse;
 import com.auth.service.auth.authentication.api.dto.response.UserLoginResponse;
+import com.auth.service.auth.authentication.application.command.AbstractLoginCommand;
 import com.auth.service.auth.authentication.domain.model.RefreshSessionResult;
 import com.auth.service.auth.authentication.infrastructure.cookie.AuthRefreshCookieService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -51,7 +52,7 @@ class AuthSessionApplicationServiceTest {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		HttpServletResponse response = mock(HttpServletResponse.class);
 
-		when(authService.login(same(auth), same(request))).thenReturn(login);
+		when(authService.login(any(AbstractLoginCommand.class), same(request))).thenReturn(login);
 
 		UserLoginResponse actual = authSessionApplicationService.completeLogin(auth, request, response);
 

@@ -1,13 +1,13 @@
-package com.auth.service.auth.authentication.api.dto.request;
+package com.auth.service.auth.authentication.application.support;
 
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.TestConstants;
+import com.auth.service.auth.authentication.application.command.AbstractLoginCommand;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogResult;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.event.LoginAuditEventPublisher;
 import com.auth.service.auth.authentication.domain.model.LoginResult;
-import com.auth.service.auth.authentication.domain.strategy.AbstractLoginStrategy;
 import com.auth.service.auth.authentication.infrastructure.token.LoginFailureRateLimiter;
 import com.auth.service.auth.authorization.application.AuthProfileQueryService;
 import com.auth.service.auth.shared.exception.AuthBadCredentialsException;
@@ -28,12 +28,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * {@link AbstractLoginStrategy} 单元测试
+ * {@link AbstractLoginStrategyTemplate} 单元测试
  *
  * @author Bunny
  */
 @ExtendWith(MockitoExtension.class)
-class AbstractLoginRequestStrategyTest {
+class AbstractLoginStrategyTemplateTest {
 
 	@Mock
 	private LoginFailureRateLimiter loginFailureRateLimiter;
@@ -50,7 +50,6 @@ class AbstractLoginRequestStrategyTest {
 	@Test
 	@DisplayName("模板策略：成功路径会前置检查锁定并构建 profile + response")
 	void authenticate_shouldBuildProfileAndResponse_whenSuccess() {
-		// Arrange
 		UserEntity user = new UserEntity();
 		user.setId(TestConstants.USER_ID);
 		user.setUsername("u");
@@ -67,10 +66,8 @@ class AbstractLoginRequestStrategyTest {
 		TestStrategy strategy = new TestStrategy(loginFailureRateLimiter, authProfileQueryService,
 				loginAuditEventPublisher, user, null);
 
-		// Act
-		LoginResult result = strategy.authenticate(new TestAuth(), httpServletRequest);
+		LoginResult result = strategy.authenticate(new TestLoginCommand(), httpServletRequest);
 
-		// Assert
 		verify(loginFailureRateLimiter).assertNotLocked(TestConstants.USER_ID);
 		verify(authProfileQueryService).buildByUser(user);
 		assertNotNull(result);
@@ -82,7 +79,6 @@ class AbstractLoginRequestStrategyTest {
 	@Test
 	@DisplayName("模板策略：凭证错误时记录失败次数、写审计并抛 USERNAME_OR_PASSWORD_ERROR_WITH_REMAINING")
 	void authenticate_shouldRecordFailureAndThrowBizException_whenBadCredentials() {
-		// Arrange
 		UserEntity user = new UserEntity();
 		user.setId(TestConstants.USER_ID);
 		user.setUsername("u");
@@ -93,13 +89,9 @@ class AbstractLoginRequestStrategyTest {
 		TestStrategy strategy = new TestStrategy(loginFailureRateLimiter, authProfileQueryService,
 				loginAuditEventPublisher, user, new AuthBadCredentialsException("bad"));
 
-		TestAuth testAuth = new TestAuth();
-
-		// Act
 		AuthBusinessException exception = assertThrows(AuthBusinessException.class,
-				() -> strategy.authenticate(testAuth, httpServletRequest));
+				() -> strategy.authenticate(new TestLoginCommand(), httpServletRequest));
 
-		// Assert
 		assertEquals(AuthResultCode.USERNAME_OR_PASSWORD_ERROR_WITH_REMAINING, exception.getResultCode());
 		verify(loginFailureRateLimiter).recordFailure(TestConstants.USER_ID);
 		verify(loginAuditEventPublisher).publish(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_PASSWORD),
@@ -107,11 +99,21 @@ class AbstractLoginRequestStrategyTest {
 				eq("remainingAttempts=3"), isNull());
 	}
 
-	static class TestAuth extends AbstractLoginRequest {
+	static class TestLoginCommand extends AbstractLoginCommand {
+
+		@Override
+		public AuthLoginLogType loginLogType() {
+			return AuthLoginLogType.LOGIN_PASSWORD;
+		}
+
+		@Override
+		public String principalForAudit() {
+			return "test";
+		}
 
 	}
 
-	static class TestStrategy extends AbstractLoginStrategy<TestAuth> {
+	static class TestStrategy extends AbstractLoginStrategyTemplate<TestLoginCommand> {
 
 		private final UserEntity userToReturn;
 
@@ -131,12 +133,12 @@ class AbstractLoginRequestStrategyTest {
 		}
 
 		@Override
-		protected UserEntity resolveUser(TestAuth auth) {
+		protected UserEntity resolveUser(TestLoginCommand command) {
 			return userToReturn;
 		}
 
 		@Override
-		protected AuthLoginLogType doAuthenticate(TestAuth auth, UserEntity user) {
+		protected AuthLoginLogType doAuthenticate(TestLoginCommand command, UserEntity user) {
 			if (authenticateException != null) {
 				throw authenticateException;
 			}
@@ -144,8 +146,8 @@ class AbstractLoginRequestStrategyTest {
 		}
 
 		@Override
-		public Class<TestAuth> supports() {
-			return TestAuth.class;
+		public Class<TestLoginCommand> supports() {
+			return TestLoginCommand.class;
 		}
 
 	}

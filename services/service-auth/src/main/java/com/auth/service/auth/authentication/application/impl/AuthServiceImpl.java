@@ -1,18 +1,18 @@
 package com.auth.service.auth.authentication.application.impl;
 
-import com.auth.common.jwt.model.JwtUserToken;
+import cn.hutool.core.util.BooleanUtil;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
-import com.auth.service.auth.authentication.api.dto.request.AbstractLoginRequest;
 import com.auth.service.auth.authentication.api.dto.response.UserLoginResponse;
 import com.auth.service.auth.authentication.application.AuthService;
+import com.auth.service.auth.authentication.application.command.AbstractLoginCommand;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogResult;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.event.LoginAuditEventPublisher;
 import com.auth.service.auth.authentication.domain.model.LoginResult;
 import com.auth.service.auth.authentication.domain.model.TokenPair;
-import com.auth.service.auth.authentication.domain.strategy.LoginStrategy;
+import com.auth.service.auth.authentication.domain.port.LoginStrategy;
 import com.auth.service.auth.authentication.infrastructure.audit.LoginAuditContextResolver;
 import com.auth.service.auth.authentication.infrastructure.support.AuthTokenResponseEnricher;
 import com.auth.service.auth.authentication.infrastructure.token.LoginFailureRateLimiter;
@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
 @Service
 public class AuthServiceImpl implements AuthService {
 
-	private final Map<Class<? extends AbstractLoginRequest>, LoginStrategy<?>> strategyRegistry;
+	private final Map<Class<? extends AbstractLoginCommand>, LoginStrategy<?>> strategyRegistry;
 
 	private final AuthProfileCache authProfileCache;
 
@@ -82,14 +82,14 @@ public class AuthServiceImpl implements AuthService {
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	public UserLoginResponse login(AbstractLoginRequest auth, HttpServletRequest request) {
-		LoginStrategy<?> raw = lookupStrategyWithAudit(auth, request);
+	public UserLoginResponse login(AbstractLoginCommand command, HttpServletRequest request) {
+		LoginStrategy<?> strategy = lookupStrategyWithAudit(command, request);
 
-		LoginResult loginResult = ((LoginStrategy<AbstractLoginRequest>) raw).authenticate(auth, request);
+		LoginResult loginResult = ((LoginStrategy<AbstractLoginCommand>) strategy).authenticate(command, request);
 		AuthProfile profile = loginResult.authProfile();
 		UserLoginResponse response = loginResult.response();
 		Long userId = profile.getUserId();
-		boolean rememberMe = Boolean.TRUE.equals(auth.getRememberMe());
+		boolean rememberMe = BooleanUtil.isTrue(command.getRememberMe());
 
 		String jti = null;
 		boolean profileCached = false;
@@ -141,38 +141,30 @@ public class AuthServiceImpl implements AuthService {
 
 	/**
 	 * 查找登录策略并记录审计日志。
-	 * @param auth 认证请求
+	 * @param command 认证请求
 	 * @param request HTTP 请求
 	 * @return 登录策略
 	 */
-	private LoginStrategy<?> lookupStrategyWithAudit(AbstractLoginRequest auth, HttpServletRequest request) {
+	private LoginStrategy<?> lookupStrategyWithAudit(AbstractLoginCommand command, HttpServletRequest request) {
 		try {
-			return lookupStrategy(auth);
+			// 从注册表中查找匹配的策略（精确匹配 → 父类/接口匹配兜底）
+			LoginStrategy<?> raw = strategyRegistry.get(command.getClass());
+			if (raw == null) {
+				raw = strategyRegistry.entrySet()
+					.stream()
+					.filter(entry -> entry.getKey().isInstance(command))
+					.map(Map.Entry::getValue)
+					.findFirst()
+					.orElseThrow(() -> new AuthBusinessException(AuthResultCode.AUTH_TYPE_UNSUPPORTED));
+			}
+			return raw;
 		}
 		catch (AuthBusinessException ex) {
-			loginAuditEventPublisher.publish(request, LoginAuditContextResolver.eventTypeFromAuth(auth),
-					AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR, null, LoginAuditContextResolver.principal(auth),
+			loginAuditEventPublisher.publish(request, command.loginLogType(),
+					AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR, null, command.principalForAudit(),
 					ex.getMessageKey(), null);
 			throw ex;
 		}
-	}
-
-	/**
-	 * 从注册表中查找匹配的策略（精确匹配 → 父类/接口匹配兜底）
-	 * @param auth 认证请求
-	 * @return 匹配的登录策略
-	 */
-	private LoginStrategy<?> lookupStrategy(AbstractLoginRequest auth) {
-		LoginStrategy<?> raw = strategyRegistry.get(auth.getClass());
-		if (raw == null) {
-			raw = strategyRegistry.entrySet()
-				.stream()
-				.filter(entry -> entry.getKey().isInstance(auth))
-				.map(Map.Entry::getValue)
-				.findFirst()
-				.orElseThrow(() -> new AuthBusinessException(AuthResultCode.AUTH_TYPE_UNSUPPORTED));
-		}
-		return raw;
 	}
 
 	/**
@@ -180,8 +172,16 @@ public class AuthServiceImpl implements AuthService {
 	 */
 	@Override
 	public void logout(String accessToken, HttpServletRequest request) {
-		tokenService.parseAccessTokenSafe(accessToken)
-			.ifPresent(userToken -> revokeExternalAccessSession(request, userToken));
+		// 撤销外部访问令牌对应的服务端会话并记录登出审计
+		tokenService.parseAccessTokenSafe(accessToken).ifPresent(userToken -> {
+			String jti = userToken.getJti();
+			Long userId = userToken.getUserId();
+			String username = SecurityUserUtils.getUsername();
+			redisUserSessionIndexRepository.deleteSession(jti);
+			redisUserSessionIndexRepository.removeActiveSession(userId, jti);
+			loginAuditEventPublisher.publish(request, AuthLoginLogType.LOGOUT, AuthLoginLogResult.SUCCESS, userId,
+					username, null, jti);
+		});
 	}
 
 	/**
@@ -195,21 +195,6 @@ public class AuthServiceImpl implements AuthService {
 		if (profileCached) {
 			authProfileCache.evictCacheAuthProfile(userId);
 		}
-	}
-
-	/**
-	 * 撤销外部访问令牌对应的服务端会话并记录登出审计。
-	 * @param request HTTP 请求
-	 * @param userToken 已校验含非空 userId 与 jti 的用户令牌载荷
-	 */
-	private void revokeExternalAccessSession(HttpServletRequest request, JwtUserToken userToken) {
-		String jti = userToken.getJti();
-		Long userId = userToken.getUserId();
-		String username = SecurityUserUtils.getUsername();
-		redisUserSessionIndexRepository.deleteSession(jti);
-		redisUserSessionIndexRepository.removeActiveSession(userId, jti);
-		loginAuditEventPublisher.publish(request, AuthLoginLogType.LOGOUT, AuthLoginLogResult.SUCCESS, userId, username,
-				null, jti);
 	}
 
 }

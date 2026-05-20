@@ -1,4 +1,4 @@
-package com.auth.service.auth.service.impl;
+package com.auth.service.auth.authentication.application.impl;
 
 import cn.hutool.crypto.digest.MD5;
 import com.auth.common.jwt.autoconfigure.JwtProperties;
@@ -7,7 +7,6 @@ import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.TestConstants;
 import com.auth.service.auth.authentication.api.dto.response.RefreshTokenResponse;
-import com.auth.service.auth.authentication.application.impl.RefreshTokenServiceImpl;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogResult;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.event.LoginAuditEventPublisher;

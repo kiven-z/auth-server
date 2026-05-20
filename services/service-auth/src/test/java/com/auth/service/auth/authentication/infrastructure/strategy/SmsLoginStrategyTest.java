@@ -3,7 +3,7 @@ package com.auth.service.auth.authentication.infrastructure.strategy;
 import cn.hutool.crypto.digest.MD5;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
-import com.auth.service.auth.authentication.api.dto.request.SmsLoginRequest;
+import com.auth.service.auth.authentication.application.command.SmsLoginCommand;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogResult;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.event.LoginAuditEventPublisher;
@@ -70,19 +70,14 @@ class SmsLoginStrategyTest {
 	@Test
 	@DisplayName("手机号未注册时抛出 USERNAME_OR_PASSWORD_ERROR 并发布审计事件")
 	void authenticate_shouldThrow_whenPhoneNotRegistered() {
-		// Arrange
 		when(userMapper.selectUserForLoginByPhone("13800138000")).thenReturn(null);
 		SmsLoginStrategy strategy = createStrategy();
 
-		SmsLoginRequest auth = new SmsLoginRequest();
-		auth.setPhone("13800138000");
-		auth.setCode("123456");
+		SmsLoginCommand command = new SmsLoginCommand("13800138000", "123456");
 
-		// Act
 		AuthBusinessException exception = assertThrows(AuthBusinessException.class,
-				() -> strategy.authenticate(auth, httpServletRequest));
+				() -> strategy.authenticate(command, httpServletRequest));
 
-		// Assert
 		assertEquals(AuthResultCode.USERNAME_OR_PASSWORD_ERROR, exception.getResultCode());
 		verify(loginAuditEventPublisher).publish(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_SMS),
 				eq(AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR), isNull(), eq("13800138000"),
@@ -92,7 +87,6 @@ class SmsLoginStrategyTest {
 	@Test
 	@DisplayName("验证码错误时抛出 AUTH_CODE_ERROR")
 	void doAuthenticate_shouldThrow_whenCodeMismatch() {
-		// Arrange
 		UserEntity user = new UserEntity();
 		user.setId(1L);
 		user.setUsername("testUser");
@@ -106,15 +100,11 @@ class SmsLoginStrategyTest {
 		String redisKey = "auth:security:login:sms:code:" + phone;
 		when(valueOperations.get(redisKey)).thenReturn(MD5.create().digestHex16("wrong"));
 
-		SmsLoginRequest auth = new SmsLoginRequest();
-		auth.setPhone("13800138000");
-		auth.setCode("000000");
+		SmsLoginCommand command = new SmsLoginCommand("13800138000", "000000");
 
-		// Act
 		AuthBusinessException exception = assertThrows(AuthBusinessException.class,
-				() -> strategy.authenticate(auth, httpServletRequest));
+				() -> strategy.authenticate(command, httpServletRequest));
 
-		// Assert
 		assertEquals(AuthResultCode.AUTH_CODE_ERROR, exception.getResultCode());
 		verify(loginAuditEventPublisher).publish(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_SMS),
 				eq(AuthLoginLogResult.CAPTCHA_ERROR), eq(1L), eq("testUser"), eq(exception.getMessageKey()), isNull());
@@ -123,7 +113,6 @@ class SmsLoginStrategyTest {
 	@Test
 	@DisplayName("验证码正确时登录成功并删除 Redis 中的验证码")
 	void doAuthenticate_shouldSucceed_whenCodeMatches() {
-		// Arrange
 		UserEntity user = new UserEntity();
 		user.setId(1L);
 		user.setUsername("testUser");
@@ -144,22 +133,18 @@ class SmsLoginStrategyTest {
 		String redisKey = "auth:security:login:sms:code:" + phone;
 		when(valueOperations.get(redisKey)).thenReturn(MD5.create().digestHex16(code));
 
-		SmsLoginRequest auth = new SmsLoginRequest();
-		auth.setPhone(phone);
-		auth.setCode(code);
+		SmsLoginCommand command = new SmsLoginCommand(phone, code);
 
-		// Act
-		strategy.authenticate(auth, httpServletRequest);
+		strategy.authenticate(command, httpServletRequest);
 
-		// Assert
 		verify(redisTemplate).delete(redisKey);
 	}
 
 	@Test
-	@DisplayName("supports 返回 SmsLoginRequest.class")
-	void supports_shouldReturnSmsLoginRequestClass() {
+	@DisplayName("supports 返回 SmsLoginCommand.class")
+	void supports_shouldReturnSmsLoginCommandClass() {
 		SmsLoginStrategy strategy = createStrategy();
-		assertEquals(SmsLoginRequest.class, strategy.supports());
+		assertEquals(SmsLoginCommand.class, strategy.supports());
 	}
 
 }

@@ -1,8 +1,7 @@
-package com.auth.service.auth.service.impl;
+package com.auth.service.auth.authentication.application.impl;
 
 import com.auth.common.ip.IpAddressService;
 import com.auth.module.platform.persistence.model.LoginLogEntity;
-import com.auth.service.auth.authentication.application.impl.AuthLoginAuditServiceImpl;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogResult;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.infrastructure.audit.LoginAuditSnapshot;

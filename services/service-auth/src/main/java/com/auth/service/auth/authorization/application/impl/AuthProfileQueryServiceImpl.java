@@ -5,9 +5,9 @@ import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.module.security.contract.api.authorization.PolicyBundle;
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
 import com.auth.module.security.contract.constants.PermissionConstant;
+import com.auth.service.auth.authentication.infrastructure.persistence.UserMapper;
 import com.auth.service.auth.authorization.application.AuthProfileQueryService;
 import com.auth.service.auth.authorization.application.DataScopeEffectiveResolver;
-import com.auth.service.auth.identity.application.UserReadGateway;
 import com.auth.service.auth.authorization.infrastructure.persistence.UserAuthorizationGrantMapper;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.enums.AuthResultCode;
@@ -26,14 +26,14 @@ public class AuthProfileQueryServiceImpl implements AuthProfileQueryService {
 
 	private final UserAuthorizationGrantMapper userAuthorizationGrantMapper;
 
-	private final UserReadGateway userReadGateway;
+	private final UserMapper userMapper;
 
 	private final DataScopeEffectiveResolver dataScopeEffectiveResolver;
 
-	public AuthProfileQueryServiceImpl(UserAuthorizationGrantMapper userAuthorizationGrantMapper,
-			UserReadGateway userReadGateway, DataScopeEffectiveResolver dataScopeEffectiveResolver) {
+	public AuthProfileQueryServiceImpl(UserAuthorizationGrantMapper userAuthorizationGrantMapper, UserMapper userMapper,
+			DataScopeEffectiveResolver dataScopeEffectiveResolver) {
 		this.userAuthorizationGrantMapper = userAuthorizationGrantMapper;
-		this.userReadGateway = userReadGateway;
+		this.userMapper = userMapper;
 		this.dataScopeEffectiveResolver = dataScopeEffectiveResolver;
 	}
 
@@ -44,7 +44,7 @@ public class AuthProfileQueryServiceImpl implements AuthProfileQueryService {
 	 */
 	@Override
 	public AuthProfile buildByUserId(Long userId) {
-		UserEntity user = userReadGateway.findById(userId);
+		UserEntity user = userMapper.selectById(userId);
 		if (user == null) {
 			throw new AuthBusinessException(AuthResultCode.USER_NOT_FOUND);
 		}

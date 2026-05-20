@@ -1,7 +1,7 @@
 package com.auth.service.auth.authentication.infrastructure.strategy;
 
 import com.auth.module.platform.persistence.model.UserEntity;
-import com.auth.service.auth.authentication.api.dto.request.UsernamePasswordLoginRequest;
+import com.auth.service.auth.authentication.application.command.UsernamePasswordLoginCommand;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogResult;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.event.LoginAuditEventPublisher;
@@ -49,22 +49,17 @@ class UsernamePasswordLoginStrategyTest {
 	private HttpServletRequest httpServletRequest;
 
 	@Test
-	@DisplayName("????????????? USERNAME_OR_PASSWORD_ERROR?????????????")
+	@DisplayName("用户不存在时抛出 USERNAME_OR_PASSWORD_ERROR 并记录审计")
 	void resolveUser_shouldThrow_whenUserNotFound() {
-		// Arrange
 		when(userMapper.selectUserForLoginByUsername("u")).thenReturn(null);
 		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(userMapper, loginFailureRateLimiter,
 				authProfileQueryService, passwordEncoder, loginAuditEventPublisher);
 
-		UsernamePasswordLoginRequest auth = new UsernamePasswordLoginRequest();
-		auth.setUsername("u");
-		auth.setPassword("p");
+		UsernamePasswordLoginCommand command = new UsernamePasswordLoginCommand("u", "p");
 
-		// Act
 		AuthBusinessException exception = assertThrows(AuthBusinessException.class,
-				() -> strategy.authenticate(auth, httpServletRequest));
+				() -> strategy.authenticate(command, httpServletRequest));
 
-		// Assert
 		assertEquals(AuthResultCode.USERNAME_OR_PASSWORD_ERROR, exception.getResultCode());
 		verify(loginAuditEventPublisher).publish(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_PASSWORD),
 				eq(AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR), isNull(), eq("u"), eq(exception.getMessageKey()),
@@ -84,12 +79,10 @@ class UsernamePasswordLoginStrategyTest {
 		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(userMapper, loginFailureRateLimiter,
 				authProfileQueryService, passwordEncoder, loginAuditEventPublisher);
 
-		UsernamePasswordLoginRequest auth = new UsernamePasswordLoginRequest();
-		auth.setUsername("u");
-		auth.setPassword("p");
+		UsernamePasswordLoginCommand command = new UsernamePasswordLoginCommand("u", "p");
 
 		AuthBusinessException exception = assertThrows(AuthBusinessException.class,
-				() -> strategy.authenticate(auth, httpServletRequest));
+				() -> strategy.authenticate(command, httpServletRequest));
 
 		assertEquals(AuthResultCode.USER_DISABLED, exception.getResultCode());
 		verify(loginAuditEventPublisher).publish(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_PASSWORD),
@@ -99,20 +92,17 @@ class UsernamePasswordLoginStrategyTest {
 	}
 
 	@Test
-	@DisplayName("supports 返回 UsernamePasswordLoginRequest.class")
-	void supports_shouldReturnUsernamePasswordLoginRequestClass() {
-		// Arrange
+	@DisplayName("supports 返回 UsernamePasswordLoginCommand.class")
+	void supports_shouldReturnUsernamePasswordLoginCommandClass() {
 		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(userMapper, loginFailureRateLimiter,
 				authProfileQueryService, passwordEncoder, loginAuditEventPublisher);
 
-		// Act & Assert
-		assertEquals(UsernamePasswordLoginRequest.class, strategy.supports());
+		assertEquals(UsernamePasswordLoginCommand.class, strategy.supports());
 	}
 
 	@Test
-	@DisplayName("????????????? USERNAME_OR_PASSWORD_ERROR_WITH_REMAINING")
+	@DisplayName("密码错误时抛出 USERNAME_OR_PASSWORD_ERROR_WITH_REMAINING")
 	void authenticate_shouldThrowRemaining_whenPasswordMismatch() {
-		// Arrange
 		UserEntity user = new UserEntity();
 		user.setId(1L);
 		user.setUsername("u");
@@ -127,15 +117,11 @@ class UsernamePasswordLoginStrategyTest {
 		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(userMapper, loginFailureRateLimiter,
 				authProfileQueryService, passwordEncoder, loginAuditEventPublisher);
 
-		UsernamePasswordLoginRequest auth = new UsernamePasswordLoginRequest();
-		auth.setUsername("u");
-		auth.setPassword("p");
+		UsernamePasswordLoginCommand command = new UsernamePasswordLoginCommand("u", "p");
 
-		// Act
 		AuthBusinessException exception = assertThrows(AuthBusinessException.class,
-				() -> strategy.authenticate(auth, httpServletRequest));
+				() -> strategy.authenticate(command, httpServletRequest));
 
-		// Assert
 		assertEquals(AuthResultCode.USERNAME_OR_PASSWORD_ERROR_WITH_REMAINING, exception.getResultCode());
 		verify(loginAuditEventPublisher).publish(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_PASSWORD),
 				eq(AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR), eq(1L), eq("u"), eq("remainingAttempts=2"),
