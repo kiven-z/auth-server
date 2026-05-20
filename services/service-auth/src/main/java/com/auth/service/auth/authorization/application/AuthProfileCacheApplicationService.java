@@ -23,8 +23,7 @@ public class AuthProfileCacheApplicationService {
 
 	private final ObjectMapper objectMapper;
 
-	public AuthProfileCacheApplicationService(RedisTemplate<String, Object> redisTemplate,
-			ObjectMapper objectMapper) {
+	public AuthProfileCacheApplicationService(RedisTemplate<String, Object> redisTemplate, ObjectMapper objectMapper) {
 		this.redisTemplate = redisTemplate;
 		this.objectMapper = objectMapper;
 	}

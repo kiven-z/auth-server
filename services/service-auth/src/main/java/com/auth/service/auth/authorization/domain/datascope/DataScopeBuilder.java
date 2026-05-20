@@ -7,7 +7,6 @@ import com.auth.module.security.contract.api.authorization.ScopeGrant;
 import com.auth.module.security.contract.api.granttable.DataScopeKeyUtil;
 import com.auth.module.security.contract.api.granttable.ScopeGrantEffectiveMerger;
 import com.auth.module.security.contract.api.granttable.ScopeGrantType;
-import com.auth.service.auth.authorization.infrastructure.persistence.projection.DataScopeProjection;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,31 +27,35 @@ public class DataScopeBuilder {
 
 	/**
 	 * 构建生效数据权限
-	 * @param projections 原始授权片段
+	 * @param grantPieces 原始授权片段（领域读模型）
 	 * @return 生效授权 Map
 	 */
-	public static Map<String, ScopeGrant> buildDataScopes(List<DataScopeProjection> projections) {
-		return buildDataScopesWithTrace(projections).getDataScopes();
+	public static Map<String, ScopeGrant> buildDataScopes(List<DataScopeGrantPiece> grantPieces) {
+		return buildDataScopesWithTrace(grantPieces).getDataScopes();
 	}
 
 	/**
 	 * 构建生效数据权限与轨迹
-	 * @param projections 原始授权片段
+	 * @param grantPieces 原始授权片段（领域读模型）
 	 * @return 构建结果
 	 */
-	public static DataScopeBuildResult buildDataScopesWithTrace(List<DataScopeProjection> projections) {
-		if (CollUtil.isEmpty(projections)) {
+	public static DataScopeBuildResult buildDataScopesWithTrace(List<DataScopeGrantPiece> grantPieces) {
+		if (CollUtil.isEmpty(grantPieces)) {
 			return DataScopeBuildResult.builder().dataScopes(Map.of()).traces(List.of()).build();
 		}
 
-		Map<String, List<DataScopeProjection>> grouped = groupByDimensionAndResource(projections);
+		// 按维度+资源键分组
+		Map<String, List<DataScopeGrantPiece>> grouped = groupByDimensionAndResource(grantPieces);
+
+		// 创建数据权限Map和轨迹列表
 		Map<String, ScopeGrant> dataScopes = new LinkedHashMap<>(grouped.size());
 		List<DataScopeResolveTrace> traces = new ArrayList<>(grouped.size());
 
-		for (Map.Entry<String, List<DataScopeProjection>> entry : grouped.entrySet()) {
+		// 遍历分组结果
+		for (Map.Entry<String, List<DataScopeGrantPiece>> entry : grouped.entrySet()) {
 			String key = entry.getKey();
-			List<DataScopeProjection> group = entry.getValue();
-			List<DataScopeProjection> candidates = selectCandidates(group);
+			List<DataScopeGrantPiece> group = entry.getValue();
+			List<DataScopeGrantPiece> candidates = selectCandidates(group);
 			ScopeGrant merged = ScopeGrantEffectiveMerger.mergeLoose(toGrants(candidates));
 
 			ScopeGrant effective = merged != null ? merged
@@ -71,10 +74,10 @@ public class DataScopeBuilder {
 	 * @param effective 生效范围
 	 * @return 轨迹
 	 */
-	private static DataScopeResolveTrace buildTrace(String key, List<DataScopeProjection> all,
-			List<DataScopeProjection> candidates, ScopeGrant effective) {
+	private static DataScopeResolveTrace buildTrace(String key, List<DataScopeGrantPiece> all,
+			List<DataScopeGrantPiece> candidates, ScopeGrant effective) {
 		String source;
-		if (all.stream().anyMatch(p -> "USER".equalsIgnoreCase(p.getSubjectType()))) {
+		if (all.stream().anyMatch(p -> "USER".equalsIgnoreCase(p.subjectType()))) {
 			source = "USER_OVERRIDE";
 		}
 		else {
@@ -95,26 +98,26 @@ public class DataScopeBuilder {
 
 	/**
 	 * 转换为授权列表
-	 * @param projections 原始授权片段
+	 * @param grantPieces 原始授权片段
 	 * @return 授权列表
 	 */
-	private static List<ScopeGrant> toGrants(List<DataScopeProjection> projections) {
-		return projections.stream().map(DataScopeBuilder::toGrant).filter(Objects::nonNull).toList();
+	private static List<ScopeGrant> toGrants(List<DataScopeGrantPiece> grantPieces) {
+		return grantPieces.stream().map(DataScopeBuilder::toGrant).filter(Objects::nonNull).toList();
 	}
 
 	/**
 	 * 转换为授权
-	 * @param projection 原始授权片段
+	 * @param piece 原始授权片段
 	 * @return 授权
 	 */
-	private static ScopeGrant toGrant(DataScopeProjection projection) {
-		if (projection == null) {
+	private static ScopeGrant toGrant(DataScopeGrantPiece piece) {
+		if (piece == null) {
 			return null;
 		}
-		ScopeGrantType type = parseScopeType(projection.getScopeType());
+		ScopeGrantType type = parseScopeType(piece.scopeType());
 		return ScopeGrant.builder()
 			.scopeType(type)
-			.values(parseValuesByScopeType(type, projection.getScopeSubjectIds()))
+			.values(parseValuesByScopeType(type, piece.scopeSubjectIds()))
 			.build();
 	}
 
@@ -186,9 +189,9 @@ public class DataScopeBuilder {
 	 * @param group 范围组
 	 * @return 候选范围
 	 */
-	private static List<DataScopeProjection> selectCandidates(List<DataScopeProjection> group) {
-		List<DataScopeProjection> users = group.stream()
-			.filter(p -> p != null && "USER".equalsIgnoreCase(p.getSubjectType()))
+	private static List<DataScopeGrantPiece> selectCandidates(List<DataScopeGrantPiece> group) {
+		List<DataScopeGrantPiece> users = group.stream()
+			.filter(p -> p != null && "USER".equalsIgnoreCase(p.subjectType()))
 			.toList();
 		if (CollUtil.isNotEmpty(users)) {
 			return users;
@@ -198,18 +201,18 @@ public class DataScopeBuilder {
 
 	/**
 	 * 按维度分组
-	 * @param projections 原始授权片段
+	 * @param grantPieces 原始授权片段
 	 * @return 分组结果
 	 */
-	private static Map<String, List<DataScopeProjection>> groupByDimensionAndResource(
-			List<DataScopeProjection> projections) {
-		Map<String, List<DataScopeProjection>> grouped = new LinkedHashMap<>();
-		for (DataScopeProjection projection : projections) {
-			if (projection == null) {
+	private static Map<String, List<DataScopeGrantPiece>> groupByDimensionAndResource(
+			List<DataScopeGrantPiece> grantPieces) {
+		Map<String, List<DataScopeGrantPiece>> grouped = new LinkedHashMap<>();
+		for (DataScopeGrantPiece piece : grantPieces) {
+			if (piece == null) {
 				continue;
 			}
-			String key = DataScopeKeyUtil.compose(projection.getDimensionType(), projection.getScopeResourceCode());
-			grouped.computeIfAbsent(key, ignored -> new ArrayList<>()).add(projection);
+			String key = DataScopeKeyUtil.compose(piece.dimensionType(), piece.scopeResourceCode());
+			grouped.computeIfAbsent(key, ignored -> new ArrayList<>()).add(piece);
 		}
 		return grouped;
 	}

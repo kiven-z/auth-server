@@ -20,6 +20,8 @@ public class LoginResponseAssembler {
 	 */
 	public static UserLoginResponse toUserLoginResponse(LoginResult loginResult) {
 		AuthenticatedUser user = loginResult.authenticatedUser();
+
+		// 创建用户登录响应
 		UserLoginResponse response = new UserLoginResponse();
 		response.setId(user.id());
 		response.setUsername(user.username());

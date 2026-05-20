@@ -13,7 +13,7 @@ import com.auth.service.auth.authentication.domain.event.LoginAuditEventPublishe
 import com.auth.service.auth.authentication.domain.model.AuthenticatedUser;
 import com.auth.service.auth.authentication.domain.model.LoginResult;
 import com.auth.service.auth.authentication.domain.model.TokenPair;
-import com.auth.service.auth.authentication.domain.port.LoginStrategy;
+import com.auth.service.auth.authentication.application.port.LoginStrategy;
 import com.auth.service.auth.authentication.infrastructure.cookie.RememberMeCookiePolicy;
 import com.auth.service.auth.authentication.infrastructure.token.LoginFailureRateLimiter;
 import com.auth.service.auth.authentication.infrastructure.token.TokenService;
