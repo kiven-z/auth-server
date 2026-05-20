@@ -85,9 +85,10 @@ class AbstractLoginStrategyTemplateTest {
 
 		TestStrategy strategy = new TestStrategy(loginFailureRateLimitPort, authProfileQueryService,
 				loginAuditCoordinator, account, new AuthBadCredentialsException("bad"));
+		TestLoginCommand command = new TestLoginCommand();
 
 		AuthBusinessException exception = assertThrows(AuthBusinessException.class,
-				() -> strategy.authenticate(new TestLoginCommand(), httpServletRequest));
+				() -> strategy.authenticate(command, httpServletRequest));
 
 		assertEquals(AuthResultCode.USERNAME_OR_PASSWORD_ERROR_WITH_REMAINING, exception.getResultCode());
 		verify(loginFailureRateLimitPort).recordFailure(TestConstants.USER_ID);

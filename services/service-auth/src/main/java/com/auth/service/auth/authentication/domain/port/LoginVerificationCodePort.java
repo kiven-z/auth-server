@@ -24,4 +24,12 @@ public interface LoginVerificationCodePort {
 	 */
 	void deleteCode(CredentialDimension dimension, String target);
 
+	/**
+	 * 存储验证码摘要（发送侧写入，与登录校验 MD5 摘要比对）。
+	 * @param dimension 邮箱或手机号维度
+	 * @param target 邮箱地址或手机号
+	 * @param digestHex16 摘要（如 MD5 hex16）
+	 */
+	void storeDigest(CredentialDimension dimension, String target, String digestHex16);
+
 }

@@ -47,6 +47,7 @@ public class AuthProfileCacheApplicationService implements AuthProfileCachePort 
 	 * @param userId 用户 ID
 	 * @return 缓存中的画像，不存在时为空
 	 */
+	@Override
 	public Optional<AuthProfile> loadCachedProfile(long userId) {
 		String userPermKey = USER_PERM.key(userId);
 		Object value = redisTemplate.opsForValue().get(userPermKey);

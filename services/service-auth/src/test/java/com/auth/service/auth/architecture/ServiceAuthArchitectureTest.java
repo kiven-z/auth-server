@@ -1,15 +1,18 @@
 package com.auth.service.auth.architecture;
 
+import com.auth.common.core.model.response.Result;
 import com.auth.common.web.exception.ValidationExceptionHandler;
+import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
-import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.lang.ArchRule;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.RestTemplate;
 
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noMethods;
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods;
 
 /**
  * service-auth 模块架构约束（ArchUnit）。
@@ -20,6 +23,12 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noMethods;
 class ServiceAuthArchitectureTest {
 
 	private static final String AUTH_ROOT = "..service.auth..";
+
+	private static final String AUTH_APPLICATION = "..authentication.application..";
+
+	private static final String AUTH_INFRA = "..authentication.infrastructure..";
+
+	private static final String SESSION_INFRA = "..session.infrastructure..";
 
 	@ArchTest
 	static final ArchRule controllers_must_not_depend_on_mappers = noClasses().that()
@@ -57,5 +66,34 @@ class ServiceAuthArchitectureTest {
 		.resideInAPackage(AUTH_ROOT)
 		.should()
 		.haveName("printStackTrace");
+
+	@ArchTest
+	static final ArchRule authentication_application_must_not_depend_on_infrastructure = noClasses().that()
+		.resideInAPackage(AUTH_APPLICATION)
+		.should()
+		.dependOnClassesThat()
+		.resideInAnyPackage(AUTH_INFRA, SESSION_INFRA);
+
+	@ArchTest
+	static final ArchRule must_not_declare_rest_template = noClasses().that()
+		.resideInAPackage(AUTH_ROOT)
+		.should()
+		.dependOnClassesThat()
+		.areAssignableTo(RestTemplate.class);
+
+	@ArchTest
+	static final ArchRule controller_public_api_methods_return_result = methods().that()
+		.areDeclaredInClassesThat()
+		.resideInAPackage("..api.controller..")
+		.and()
+		.arePublic()
+		.and()
+		.doNotHaveName("equals")
+		.and()
+		.doNotHaveName("hashCode")
+		.and()
+		.doNotHaveName("toString")
+		.should()
+		.haveRawReturnType(Result.class);
 
 }

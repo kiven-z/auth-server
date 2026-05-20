@@ -12,8 +12,6 @@ import com.auth.service.auth.authentication.application.port.*;
 import com.auth.service.auth.authentication.domain.model.LoginResult;
 import com.auth.service.auth.authentication.domain.model.TokenPair;
 import com.auth.service.auth.authentication.domain.port.LoginFailureRateLimitPort;
-import com.auth.service.auth.authentication.infrastructure.cookie.RememberMeCookiePolicy;
-import com.auth.service.auth.session.infrastructure.redis.support.UserSessionIndexFactory;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.enums.AuthResultCode;
 import jakarta.servlet.http.HttpServletRequest;
@@ -39,7 +37,7 @@ public class LoginApplicationService {
 
 	private final AuthProfileCachePort authProfileCachePort;
 
-	private final UserSessionIndexFactory userSessionIndexFactory;
+	private final UserSessionIndexBuildPort userSessionIndexBuildPort;
 
 	private final UserSessionIndexPort userSessionIndexPort;
 
@@ -51,23 +49,23 @@ public class LoginApplicationService {
 
 	private final LoginAuditCoordinator loginAuditCoordinator;
 
-	private final RememberMeCookiePolicy rememberMeCookiePolicy;
+	private final RememberMePolicyPort rememberMePolicyPort;
 
 	public LoginApplicationService(List<LoginStrategy<?>> strategies, AuthProfileCachePort authProfileCachePort,
-			UserSessionIndexFactory userSessionIndexFactory, UserSessionIndexPort userSessionIndexPort,
+			UserSessionIndexBuildPort userSessionIndexBuildPort, UserSessionIndexPort userSessionIndexPort,
 			SessionLimitPort sessionLimitPort, TokenIssuerPort tokenIssuerPort,
 			LoginFailureRateLimitPort loginFailureRateLimitPort, LoginAuditCoordinator loginAuditCoordinator,
-			RememberMeCookiePolicy rememberMeCookiePolicy) {
+			RememberMePolicyPort rememberMePolicyPort) {
 		this.strategyRegistry = strategies.stream()
 			.collect(Collectors.toUnmodifiableMap(LoginStrategy::supports, Function.identity()));
 		this.authProfileCachePort = authProfileCachePort;
-		this.userSessionIndexFactory = userSessionIndexFactory;
+		this.userSessionIndexBuildPort = userSessionIndexBuildPort;
 		this.userSessionIndexPort = userSessionIndexPort;
 		this.sessionLimitPort = sessionLimitPort;
 		this.tokenIssuerPort = tokenIssuerPort;
 		this.loginFailureRateLimitPort = loginFailureRateLimitPort;
 		this.loginAuditCoordinator = loginAuditCoordinator;
-		this.rememberMeCookiePolicy = rememberMeCookiePolicy;
+		this.rememberMePolicyPort = rememberMePolicyPort;
 	}
 
 	/**
@@ -120,16 +118,15 @@ public class LoginApplicationService {
 			response.setExpires(tokenPair.accessExpiresAt());
 
 			// 构建用户会话索引
-			UserSessionIndex sessionIndex = userSessionIndexFactory.buildUserSessionIndex(request, userId, jti,
+			UserSessionIndex sessionIndex = userSessionIndexBuildPort.build(request, userId, jti,
 					response.getRefreshToken(), rememberMe);
 			userSessionIndexPort.createUserSessionIndex(sessionIndex);
 
 			// 设置会话创建标志
 			sessionCreated = true;
-			response.setReadMeDay(rememberMeCookiePolicy.resolveReadMeDay());
+			response.setReadMeDay(rememberMePolicyPort.resolveReadMeDay());
 
 			loginFailureRateLimitPort.recordSuccess(userId);
-
 			loginAuditCoordinator.auditLoginSuccess(request, loginResult.loginLogType(), userId, username, jti);
 			return response;
 		}

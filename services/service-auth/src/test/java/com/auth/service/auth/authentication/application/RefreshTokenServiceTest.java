@@ -7,11 +7,11 @@ import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.TestConstants;
 import com.auth.service.auth.authentication.application.login.audit.LoginAuditCoordinator;
+import com.auth.service.auth.authentication.application.port.AuthProfileCachePort;
+import com.auth.service.auth.authentication.application.port.TokenIssuerPort;
+import com.auth.service.auth.authentication.application.port.UserSessionIndexPort;
 import com.auth.service.auth.authentication.domain.model.RefreshSessionResult;
 import com.auth.service.auth.authentication.domain.model.TokenPair;
-import com.auth.service.auth.authentication.infrastructure.token.TokenService;
-import com.auth.service.auth.authorization.application.AuthProfileCacheApplicationService;
-import com.auth.service.auth.session.infrastructure.redis.RedisUserSessionIndexRepository;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.enums.AuthResultCode;
 import org.junit.jupiter.api.DisplayName;
@@ -37,13 +37,13 @@ import static org.mockito.Mockito.*;
 class RefreshTokenServiceTest {
 
 	@Mock
-	private AuthProfileCacheApplicationService authProfileCacheApplicationService;
+	private AuthProfileCachePort authProfileCachePort;
 
 	@Mock
-	private RedisUserSessionIndexRepository redisUserSessionIndexRepository;
+	private UserSessionIndexPort userSessionIndexPort;
 
 	@Mock
-	private TokenService tokenService;
+	private TokenIssuerPort tokenIssuerPort;
 
 	@Mock
 	private JwtProperties jwtProperties;
@@ -56,15 +56,15 @@ class RefreshTokenServiceTest {
 	}
 
 	private RefreshTokenService newService() {
-		return new RefreshTokenService(authProfileCacheApplicationService, redisUserSessionIndexRepository,
-				tokenService, jwtProperties, loginAuditCoordinator);
+		return new RefreshTokenService(authProfileCachePort, userSessionIndexPort, tokenIssuerPort, jwtProperties,
+				loginAuditCoordinator);
 	}
 
 	@Test
 	@DisplayName("刷新：会话不存在时抛 REFRESH_TOKEN_EXPIRED")
 	void refresh_shouldThrowExpired_whenSessionMissing() {
-		when(tokenService.parseRefreshToken(TestConstants.REFRESH_TOKEN)).thenReturn(token());
-		when(redisUserSessionIndexRepository.loadUserSessionIndex(TestConstants.JTI)).thenReturn(Optional.empty());
+		when(tokenIssuerPort.parseRefreshToken(TestConstants.REFRESH_TOKEN)).thenReturn(token());
+		when(userSessionIndexPort.loadUserSessionIndex(TestConstants.JTI)).thenReturn(Optional.empty());
 		RefreshTokenService service = newService();
 
 		AuthBusinessException ex = assertThrows(AuthBusinessException.class,
@@ -76,13 +76,13 @@ class RefreshTokenServiceTest {
 	@Test
 	@DisplayName("刷新：refresh 哈希不匹配时撤销会话并抛 REFRESH_TOKEN_EXPIRED")
 	void refresh_shouldRevokeSession_whenRefreshHashMismatch() {
-		when(tokenService.parseRefreshToken(TestConstants.REFRESH_TOKEN)).thenReturn(token());
+		when(tokenIssuerPort.parseRefreshToken(TestConstants.REFRESH_TOKEN)).thenReturn(token());
 
 		UserSessionIndex session = new UserSessionIndex();
 		session.setUserId(TestConstants.USER_ID);
 		session.setRefreshTokenExpiresAt(System.currentTimeMillis() + 60_000);
 		session.setRefreshTokenHash("deadbeef");
-		when(redisUserSessionIndexRepository.loadUserSessionIndex(TestConstants.JTI)).thenReturn(Optional.of(session));
+		when(userSessionIndexPort.loadUserSessionIndex(TestConstants.JTI)).thenReturn(Optional.of(session));
 
 		RefreshTokenService service = newService();
 
@@ -90,20 +90,20 @@ class RefreshTokenServiceTest {
 				() -> service.refreshToken(TestConstants.REFRESH_TOKEN, null));
 
 		assertEquals(AuthResultCode.REFRESH_TOKEN_EXPIRED, ex.getResultCode());
-		verify(redisUserSessionIndexRepository).deleteSession(TestConstants.JTI);
-		verify(redisUserSessionIndexRepository).removeActiveSession(TestConstants.USER_ID, TestConstants.JTI);
+		verify(userSessionIndexPort).deleteSession(TestConstants.JTI);
+		verify(userSessionIndexPort).removeActiveSession(TestConstants.USER_ID, TestConstants.JTI);
 	}
 
 	@Test
 	@DisplayName("刷新：会话归属用户不一致时撤销会话并抛 REFRESH_TOKEN_EXPIRED")
 	void refresh_shouldRevokeSession_whenSessionOwnershipMismatch() {
-		when(tokenService.parseRefreshToken(TestConstants.REFRESH_TOKEN)).thenReturn(token());
+		when(tokenIssuerPort.parseRefreshToken(TestConstants.REFRESH_TOKEN)).thenReturn(token());
 
 		UserSessionIndex session = new UserSessionIndex();
 		session.setUserId(TestConstants.USER_ID + 1L);
 		session.setRefreshTokenExpiresAt(System.currentTimeMillis() + 60_000);
 		session.setRefreshTokenHash(MD5.create().digestHex16(TestConstants.REFRESH_TOKEN));
-		when(redisUserSessionIndexRepository.loadUserSessionIndex(TestConstants.JTI)).thenReturn(Optional.of(session));
+		when(userSessionIndexPort.loadUserSessionIndex(TestConstants.JTI)).thenReturn(Optional.of(session));
 
 		RefreshTokenService service = newService();
 
@@ -111,8 +111,8 @@ class RefreshTokenServiceTest {
 				() -> service.refreshToken(TestConstants.REFRESH_TOKEN, null));
 
 		assertEquals(AuthResultCode.REFRESH_TOKEN_EXPIRED, ex.getResultCode());
-		verify(redisUserSessionIndexRepository).deleteSession(TestConstants.JTI);
-		verify(redisUserSessionIndexRepository).removeActiveSession(TestConstants.USER_ID, TestConstants.JTI);
+		verify(userSessionIndexPort).deleteSession(TestConstants.JTI);
+		verify(userSessionIndexPort).removeActiveSession(TestConstants.USER_ID, TestConstants.JTI);
 	}
 
 	@Test
@@ -127,9 +127,9 @@ class RefreshTokenServiceTest {
 	}
 
 	@Test
-	@DisplayName("刷新：tokenService 解析 refreshToken 异常时抛 REFRESH_TOKEN_MALFORMED 并记录审计")
+	@DisplayName("刷新：token 解析 refreshToken 异常时抛 REFRESH_TOKEN_MALFORMED 并记录审计")
 	void refresh_shouldThrowMalformed_whenParseFails() {
-		when(tokenService.parseRefreshToken(TestConstants.REFRESH_TOKEN))
+		when(tokenIssuerPort.parseRefreshToken(TestConstants.REFRESH_TOKEN))
 			.thenThrow(new AuthBusinessException(AuthResultCode.REFRESH_TOKEN_MALFORMED));
 		RefreshTokenService service = newService();
 
@@ -144,22 +144,21 @@ class RefreshTokenServiceTest {
 	@DisplayName("刷新：校验通过时返回新令牌并旋转 refresh")
 	void refresh_shouldReturnNewTokenPair_whenAllChecksPass() {
 		when(jwtProperties.getRefreshExpired()).thenReturn(120L);
-		when(tokenService.parseRefreshToken(TestConstants.REFRESH_TOKEN)).thenReturn(token());
+		when(tokenIssuerPort.parseRefreshToken(TestConstants.REFRESH_TOKEN)).thenReturn(token());
 
 		UserSessionIndex session = new UserSessionIndex();
 		session.setUserId(TestConstants.USER_ID);
 		session.setRefreshTokenExpiresAt(System.currentTimeMillis() + 60_000);
 		session.setRefreshTokenHash(MD5.create().digestHex16(TestConstants.REFRESH_TOKEN));
-		when(redisUserSessionIndexRepository.loadUserSessionIndex(TestConstants.JTI)).thenReturn(Optional.of(session));
+		when(userSessionIndexPort.loadUserSessionIndex(TestConstants.JTI)).thenReturn(Optional.of(session));
 
 		AuthProfile profile = mock(AuthProfile.class);
 		when(profile.getPermVersion()).thenReturn(9L);
-		when(authProfileCacheApplicationService.loadCachedProfile(TestConstants.USER_ID))
-			.thenReturn(Optional.of(profile));
+		when(authProfileCachePort.loadCachedProfile(TestConstants.USER_ID)).thenReturn(Optional.of(profile));
 
 		LocalDateTime expires = LocalDateTime.now().plusMinutes(5);
 		TokenPair tokenPair = new TokenPair("new-access", "new-refresh", expires);
-		when(tokenService.buildTokenPair(TestConstants.USER_ID, TestConstants.JTI, 9L)).thenReturn(tokenPair);
+		when(tokenIssuerPort.buildTokenPair(TestConstants.USER_ID, TestConstants.JTI, 9L)).thenReturn(tokenPair);
 
 		RefreshTokenService service = newService();
 
@@ -169,7 +168,7 @@ class RefreshTokenServiceTest {
 		assertEquals("new-refresh", result.tokenPair().refreshToken());
 		assertEquals(expires, result.tokenPair().accessExpiresAt());
 		assertFalse(result.rememberMe());
-		verify(redisUserSessionIndexRepository).updateRefreshInfo(eq(TestConstants.JTI),
+		verify(userSessionIndexPort).updateRefreshInfo(eq(TestConstants.JTI),
 				eq(MD5.create().digestHex16("new-refresh")), anyLong(), eq(Duration.ofSeconds(120L)));
 	}
 
@@ -177,20 +176,19 @@ class RefreshTokenServiceTest {
 	@DisplayName("刷新：会话 rememberMe=true 时结果携带 rememberMe")
 	void refresh_shouldReturnRememberMeFromSession() {
 		when(jwtProperties.getRefreshExpired()).thenReturn(120L);
-		when(tokenService.parseRefreshToken(TestConstants.REFRESH_TOKEN)).thenReturn(token());
+		when(tokenIssuerPort.parseRefreshToken(TestConstants.REFRESH_TOKEN)).thenReturn(token());
 
 		UserSessionIndex session = new UserSessionIndex();
 		session.setUserId(TestConstants.USER_ID);
 		session.setRememberMe(true);
 		session.setRefreshTokenExpiresAt(System.currentTimeMillis() + 60_000);
 		session.setRefreshTokenHash(MD5.create().digestHex16(TestConstants.REFRESH_TOKEN));
-		when(redisUserSessionIndexRepository.loadUserSessionIndex(TestConstants.JTI)).thenReturn(Optional.of(session));
+		when(userSessionIndexPort.loadUserSessionIndex(TestConstants.JTI)).thenReturn(Optional.of(session));
 
 		AuthProfile profile = mock(AuthProfile.class);
 		when(profile.getPermVersion()).thenReturn(9L);
-		when(authProfileCacheApplicationService.loadCachedProfile(TestConstants.USER_ID))
-			.thenReturn(Optional.of(profile));
-		when(tokenService.buildTokenPair(TestConstants.USER_ID, TestConstants.JTI, 9L))
+		when(authProfileCachePort.loadCachedProfile(TestConstants.USER_ID)).thenReturn(Optional.of(profile));
+		when(tokenIssuerPort.buildTokenPair(TestConstants.USER_ID, TestConstants.JTI, 9L))
 			.thenReturn(new TokenPair("new-access", "new-refresh", LocalDateTime.now().plusMinutes(5)));
 
 		RefreshSessionResult result = newService().refreshToken(TestConstants.REFRESH_TOKEN, null);

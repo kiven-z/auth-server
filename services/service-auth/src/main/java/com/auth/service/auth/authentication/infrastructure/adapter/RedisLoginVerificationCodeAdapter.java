@@ -25,26 +25,6 @@ public class RedisLoginVerificationCodeAdapter implements LoginVerificationCodeP
 		this.redisTemplate = redisTemplate;
 	}
 
-	@Override
-	public String getStoredDigest(CredentialDimension dimension, String target) {
-		String redisKey = resolveKey(dimension, target);
-		if (redisKey == null) {
-			return null;
-		}
-		return (String) redisTemplate.opsForValue().get(redisKey);
-	}
-
-	@Override
-	public void deleteCode(CredentialDimension dimension, String target) {
-		if (CharSequenceUtil.isBlank(target)) {
-			return;
-		}
-		String redisKey = resolveKey(dimension, target);
-		if (redisKey != null) {
-			redisTemplate.delete(redisKey);
-		}
-	}
-
 	private static String resolveKey(CredentialDimension dimension, String target) {
 		if (CharSequenceUtil.isBlank(target)) {
 			return null;
@@ -55,6 +35,51 @@ public class RedisLoginVerificationCodeAdapter implements LoginVerificationCodeP
 			case PHONE -> SMS_CODE.key(normalized);
 			default -> null;
 		};
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getStoredDigest(CredentialDimension dimension, String target) {
+		String redisKey = resolveKey(dimension, target);
+		if (redisKey == null) {
+			return null;
+		}
+		return (String) redisTemplate.opsForValue().get(redisKey);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void storeDigest(CredentialDimension dimension, String target, String digestHex16) {
+		String redisKey = resolveKey(dimension, target);
+		if (redisKey == null) {
+			return;
+		}
+		var ttl = switch (dimension) {
+			case EMAIL -> EMAIL_CODE.getDefaultTtl();
+			case PHONE -> SMS_CODE.getDefaultTtl();
+			default -> null;
+		};
+		if (ttl != null) {
+			redisTemplate.opsForValue().set(redisKey, digestHex16, ttl);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void deleteCode(CredentialDimension dimension, String target) {
+		if (CharSequenceUtil.isBlank(target)) {
+			return;
+		}
+		String redisKey = resolveKey(dimension, target);
+		if (redisKey != null) {
+			redisTemplate.delete(redisKey);
+		}
 	}
 
 }

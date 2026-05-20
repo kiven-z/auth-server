@@ -5,13 +5,14 @@ import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.ChannelOptionsSupport;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.message.api.model.email.EmailChannelOptions;
+import com.auth.service.auth.authentication.application.message.AuthDypnsVerifyCodeSceneCode;
+import com.auth.service.auth.authentication.application.message.AuthEmailTemplateCode;
 import com.auth.service.auth.authentication.domain.enums.CredentialDimension;
 import com.auth.service.auth.authentication.domain.model.LoginAccount;
 import com.auth.service.auth.authentication.domain.model.LoginAuditSnapshot;
 import com.auth.service.auth.authentication.domain.port.LoginAccountLookupPort;
-import com.auth.service.auth.authentication.infrastructure.audit.LoginAuditSnapshotFactory;
-import com.auth.service.auth.authentication.infrastructure.message.AuthDypnsVerifyCodeSceneCode;
-import com.auth.service.auth.authentication.infrastructure.message.AuthEmailTemplateCode;
+import com.auth.service.auth.authentication.domain.port.LoginAuditSnapshotPort;
+import com.auth.service.auth.authentication.domain.port.LoginVerificationCodePort;
 import com.auth.service.auth.shared.integration.SystemSecurityIngestFeignClient;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,13 +23,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 
 import java.util.Optional;
 
-import static com.auth.module.security.contract.redis.SecurityRedisKey.EMAIL_CODE;
-import static com.auth.module.security.contract.redis.SecurityRedisKey.SMS_CODE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -44,16 +41,13 @@ import static org.mockito.Mockito.when;
 class AuthMessageServiceTest {
 
 	@Mock
-	private RedisTemplate<String, Object> redisTemplate;
-
-	@Mock
-	private ValueOperations<String, Object> valueOperations;
-
-	@Mock
 	private LoginAccountLookupPort loginAccountLookupPort;
 
 	@Mock
-	private LoginAuditSnapshotFactory loginAuditSnapshotFactory;
+	private LoginAuditSnapshotPort loginAuditSnapshotPort;
+
+	@Mock
+	private LoginVerificationCodePort loginVerificationCodePort;
 
 	@Mock
 	private SystemSecurityIngestFeignClient systemSecurityIngestFeignClient;
@@ -65,9 +59,8 @@ class AuthMessageServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-		authMessageService = new AuthMessageService(redisTemplate, loginAccountLookupPort, loginAuditSnapshotFactory,
-				systemSecurityIngestFeignClient);
+		authMessageService = new AuthMessageService(loginAccountLookupPort, loginAuditSnapshotPort,
+				loginVerificationCodePort, systemSecurityIngestFeignClient);
 	}
 
 	@Nested
@@ -75,20 +68,20 @@ class AuthMessageServiceTest {
 	class SendEmailCode {
 
 		@Test
-		@DisplayName("用户存在时写入 Redis 并 Feign 委托 system 发信")
+		@DisplayName("用户存在时写入验证码并 Feign 委托 system 发信")
 		void sendEmailCode_shouldStoreMd5AndInvokeEmailSend() {
 			String email = "bunny@example.com";
 			LoginAccount account = new LoginAccount(1L, "bunny", 1, null, null, null, 1L);
 			when(loginAccountLookupPort.findActiveOnly(CredentialDimension.EMAIL, email))
 				.thenReturn(Optional.of(account));
-			when(loginAuditSnapshotFactory.build(request))
+			when(loginAuditSnapshotPort.build(request))
 				.thenReturn(new LoginAuditSnapshot("127.0.0.1", "本地", "ua", "pc", "win", "chrome"));
 			when(systemSecurityIngestFeignClient.sendByTemplate(any(TemplateMessageCommand.class)))
 				.thenReturn(Result.success("ok"));
 
 			authMessageService.sendEmailCode(email, request);
 
-			verify(valueOperations).set(eq(EMAIL_CODE.key(email)), any(), eq(EMAIL_CODE.getDefaultTtl()));
+			verify(loginVerificationCodePort).storeDigest(eq(CredentialDimension.EMAIL), eq(email), any());
 			ArgumentCaptor<TemplateMessageCommand> commandCaptor = ArgumentCaptor
 				.forClass(TemplateMessageCommand.class);
 			verify(systemSecurityIngestFeignClient).sendByTemplate(commandCaptor.capture());
@@ -108,7 +101,7 @@ class AuthMessageServiceTest {
 
 			authMessageService.sendEmailCode(email, request);
 
-			verify(valueOperations).set(eq(EMAIL_CODE.key(email)), any(), eq(EMAIL_CODE.getDefaultTtl()));
+			verify(loginVerificationCodePort).storeDigest(eq(CredentialDimension.EMAIL), eq(email), any());
 			verify(systemSecurityIngestFeignClient, never()).sendByTemplate(any());
 		}
 
@@ -119,7 +112,7 @@ class AuthMessageServiceTest {
 	class SendSmsCode {
 
 		@Test
-		@DisplayName("用户存在时写入 Redis 并 Feign 委托 system 发短信")
+		@DisplayName("用户存在时写入验证码并 Feign 委托 system 发短信")
 		void sendSmsCode_shouldStoreMd5AndInvokeSmsSend() {
 			String phone = "13800000000";
 			LoginAccount account = new LoginAccount(1L, "bunny", 1, null, null, null, 1L);
@@ -130,7 +123,7 @@ class AuthMessageServiceTest {
 
 			authMessageService.sendSmsCode(phone);
 
-			verify(valueOperations).set(eq(SMS_CODE.key(phone)), any(), eq(SMS_CODE.getDefaultTtl()));
+			verify(loginVerificationCodePort).storeDigest(eq(CredentialDimension.PHONE), eq(phone), any());
 			ArgumentCaptor<TemplateMessageCommand> commandCaptor = ArgumentCaptor
 				.forClass(TemplateMessageCommand.class);
 			verify(systemSecurityIngestFeignClient).sendByTemplate(commandCaptor.capture());
@@ -148,7 +141,7 @@ class AuthMessageServiceTest {
 
 			authMessageService.sendSmsCode(phone);
 
-			verify(valueOperations).set(eq(SMS_CODE.key(phone)), any(), eq(SMS_CODE.getDefaultTtl()));
+			verify(loginVerificationCodePort).storeDigest(eq(CredentialDimension.PHONE), eq(phone), any());
 			verify(systemSecurityIngestFeignClient, never()).sendByTemplate(any());
 		}
 

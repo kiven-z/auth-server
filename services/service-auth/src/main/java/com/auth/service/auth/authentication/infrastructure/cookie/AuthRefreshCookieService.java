@@ -1,5 +1,7 @@
 package com.auth.service.auth.authentication.infrastructure.cookie;
 
+import com.auth.service.auth.authentication.application.port.RefreshCookiePort;
+import com.auth.service.auth.authentication.application.port.RememberMePolicyPort;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
@@ -10,12 +12,12 @@ import org.springframework.stereotype.Service;
  * @author Bunny
  */
 @Service
-public class AuthRefreshCookieService {
+public class AuthRefreshCookieService implements RefreshCookiePort {
 
-	private final RememberMeCookiePolicy rememberMeCookiePolicy;
+	private final RememberMePolicyPort rememberMePolicyPort;
 
-	public AuthRefreshCookieService(RememberMeCookiePolicy rememberMeCookiePolicy) {
-		this.rememberMeCookiePolicy = rememberMeCookiePolicy;
+	public AuthRefreshCookieService(RememberMePolicyPort rememberMePolicyPort) {
+		this.rememberMePolicyPort = rememberMePolicyPort;
 	}
 
 	/**
@@ -23,6 +25,7 @@ public class AuthRefreshCookieService {
 	 * @param request HTTP 请求
 	 * @return 刷新令牌，缺失时为空串
 	 */
+	@Override
 	public String readRefreshToken(HttpServletRequest request) {
 		return RefreshTokenCookieWriter.readToken(request);
 	}
@@ -34,9 +37,10 @@ public class AuthRefreshCookieService {
 	 * @param refreshToken 刷新令牌
 	 * @param rememberMe 是否记住登录
 	 */
+	@Override
 	public void writeRefreshToken(HttpServletResponse response, HttpServletRequest request, String refreshToken,
 			boolean rememberMe) {
-		long maxAgeSeconds = rememberMeCookiePolicy.resolveMaxAgeSeconds(rememberMe);
+		long maxAgeSeconds = rememberMePolicyPort.resolveMaxAgeSeconds(rememberMe);
 		RefreshTokenCookieWriter.writeToken(response, request, refreshToken, maxAgeSeconds);
 	}
 
@@ -45,6 +49,7 @@ public class AuthRefreshCookieService {
 	 * @param response HTTP 响应
 	 * @param request HTTP 请求
 	 */
+	@Override
 	public void clearRefreshToken(HttpServletResponse response, HttpServletRequest request) {
 		RefreshTokenCookieWriter.clearToken(response, request);
 	}

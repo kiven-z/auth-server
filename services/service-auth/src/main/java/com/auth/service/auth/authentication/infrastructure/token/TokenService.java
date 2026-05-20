@@ -98,6 +98,7 @@ public class TokenService implements TokenIssuerPort {
 	 * @param token 刷新令牌原始字符串
 	 * @return 用户载荷
 	 */
+	@Override
 	public JwtUserToken parseRefreshToken(String token) {
 		try {
 			JwtUserToken userToken = refreshTokenProvider.parseToken(token).getUserToken();

@@ -5,19 +5,20 @@ import cn.hutool.crypto.digest.MD5;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.message.api.model.email.EmailChannelOptions;
+import com.auth.service.auth.authentication.application.message.AuthDypnsVerifyCodeSceneCode;
+import com.auth.service.auth.authentication.application.message.AuthEmailTemplateCode;
+import com.auth.service.auth.authentication.application.message.LoginEmailVariables;
+import com.auth.service.auth.authentication.application.message.LoginSmsVariables;
 import com.auth.service.auth.authentication.domain.enums.CredentialDimension;
 import com.auth.service.auth.authentication.domain.model.LoginAccount;
 import com.auth.service.auth.authentication.domain.model.LoginAuditSnapshot;
 import com.auth.service.auth.authentication.domain.port.LoginAccountLookupPort;
-import com.auth.service.auth.authentication.infrastructure.audit.LoginAuditSnapshotFactory;
-import com.auth.service.auth.authentication.infrastructure.message.AuthDypnsVerifyCodeSceneCode;
-import com.auth.service.auth.authentication.infrastructure.message.AuthEmailTemplateCode;
-import com.auth.service.auth.authentication.infrastructure.message.LoginEmailVariables;
-import com.auth.service.auth.authentication.infrastructure.message.LoginSmsVariables;
+import com.auth.service.auth.authentication.domain.port.LoginAuditSnapshotPort;
+import com.auth.service.auth.authentication.domain.port.LoginVerificationCodePort;
 import com.auth.service.auth.shared.integration.SystemSecurityIngestFeignClient;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -32,44 +33,37 @@ import static com.auth.module.security.contract.redis.SecurityRedisKey.SMS_CODE;
  *
  * @author Bunny
  */
+@RequiredArgsConstructor
 @Slf4j
 @Service
 public class AuthMessageService {
 
-	private final RedisTemplate<String, Object> redisTemplate;
-
 	private final LoginAccountLookupPort loginAccountLookupPort;
 
-	private final LoginAuditSnapshotFactory loginAuditSnapshotFactory;
+	private final LoginAuditSnapshotPort loginAuditSnapshotPort;
+
+	private final LoginVerificationCodePort loginVerificationCodePort;
 
 	private final SystemSecurityIngestFeignClient systemSecurityIngestFeignClient;
-
-	public AuthMessageService(RedisTemplate<String, Object> redisTemplate,
-			LoginAccountLookupPort loginAccountLookupPort, LoginAuditSnapshotFactory loginAuditSnapshotFactory,
-			SystemSecurityIngestFeignClient systemSecurityIngestFeignClient) {
-		this.redisTemplate = redisTemplate;
-		this.loginAccountLookupPort = loginAccountLookupPort;
-		this.loginAuditSnapshotFactory = loginAuditSnapshotFactory;
-		this.systemSecurityIngestFeignClient = systemSecurityIngestFeignClient;
-	}
 
 	/**
 	 * 发送登录邮箱验证码
 	 * @param email 邮箱
 	 * @param request 当前 HTTP 请求（用于解析登录 IP 等信息）
 	 */
+
 	public void sendEmailCode(String email, HttpServletRequest request) {
-		String redisKey = EMAIL_CODE.key(email);
 		String code = RandomUtil.randomNumbers(6);
+		String digest = MD5.create().digestHex16(code);
 
 		// 存入 Redis 时使用 MD5，登录校验侧对比 digestHex16
-		redisTemplate.opsForValue().set(redisKey, MD5.create().digestHex16(code), EMAIL_CODE.getDefaultTtl());
+		loginVerificationCodePort.storeDigest(CredentialDimension.EMAIL, email, digest);
 
 		// 过期时间转成分钟
 		long expireMinutes = EMAIL_CODE.getDefaultTtl().toMinutes();
 
 		// IP地址等信息
-		LoginAuditSnapshot snapshot = loginAuditSnapshotFactory.build(request);
+		LoginAuditSnapshot snapshot = loginAuditSnapshotPort.build(request);
 
 		// 未找到活跃用户时静默返回，不暴露账号不存在（与 EmailLoginStrategy 策略一致）
 		LoginAccount account = loginAccountLookupPort.findActiveOnly(CredentialDimension.EMAIL, email).orElse(null);
@@ -98,13 +92,13 @@ public class AuthMessageService {
 	 * @param phone 手机号
 	 */
 	public void sendSmsCode(String phone) {
-		String redisKey = SMS_CODE.key(phone);
 		String code = RandomUtil.randomNumbers(6);
+		String digest = MD5.create().digestHex16(code);
 
 		// 存入Redis
-		redisTemplate.opsForValue().set(redisKey, MD5.create().digestHex16(code), SMS_CODE.getDefaultTtl());
+		loginVerificationCodePort.storeDigest(CredentialDimension.PHONE, phone, digest);
 
-		// 获取过期时间
+		// 存入Redis
 		long expireMinutes = SMS_CODE.getDefaultTtl().toMinutes();
 
 		if (loginAccountLookupPort.findActiveOnly(CredentialDimension.PHONE, phone).isEmpty()) {
@@ -112,7 +106,6 @@ public class AuthMessageService {
 			return;
 		}
 
-		// 构建发送内容
 		Map<String, Object> variables = LoginSmsVariables.build(code, expireMinutes);
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
 			.channel(MessageChannel.SMS_ALIYUN_DYPNS)
@@ -120,7 +113,6 @@ public class AuthMessageService {
 			.targets(List.of(phone))
 			.variables(variables)
 			.build();
-
 		systemSecurityIngestFeignClient.sendByTemplate(command);
 	}
 

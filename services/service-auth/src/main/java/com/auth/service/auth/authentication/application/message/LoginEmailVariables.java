@@ -1,4 +1,4 @@
-package com.auth.service.auth.authentication.infrastructure.message;
+package com.auth.service.auth.authentication.application.message;
 
 import lombok.experimental.UtilityClass;
 

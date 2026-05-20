@@ -28,4 +28,11 @@ public interface TokenIssuerPort {
 	 */
 	Optional<JwtUserToken> parseAccessTokenSafe(String token);
 
+	/**
+	 * 解析刷新令牌。
+	 * @param token 刷新令牌原始字符串
+	 * @return 用户载荷
+	 */
+	JwtUserToken parseRefreshToken(String token);
+
 }

@@ -7,8 +7,8 @@ import com.auth.service.auth.authentication.api.dto.response.RefreshTokenRespons
 import com.auth.service.auth.authentication.api.dto.response.UserLoginResponse;
 import com.auth.service.auth.authentication.application.assembler.RefreshResponseAssembler;
 import com.auth.service.auth.authentication.domain.model.RefreshSessionResult;
-import com.auth.service.auth.authentication.infrastructure.cookie.AuthRefreshCookieService;
-import com.auth.service.auth.authentication.infrastructure.cookie.RememberMeCookiePolicy;
+import com.auth.service.auth.authentication.application.port.RefreshCookiePort;
+import com.auth.service.auth.authentication.application.port.RememberMePolicyPort;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
@@ -27,17 +27,17 @@ public class AuthSessionApplicationService {
 
 	private final RefreshTokenService refreshTokenService;
 
-	private final AuthRefreshCookieService authRefreshCookieService;
+	private final RefreshCookiePort refreshCookiePort;
 
-	private final RememberMeCookiePolicy rememberMeCookiePolicy;
+	private final RememberMePolicyPort rememberMePolicyPort;
 
 	public AuthSessionApplicationService(LoginApplicationService loginApplicationService,
-			RefreshTokenService refreshTokenService, AuthRefreshCookieService authRefreshCookieService,
-			RememberMeCookiePolicy rememberMeCookiePolicy) {
+			RefreshTokenService refreshTokenService, RefreshCookiePort refreshCookiePort,
+			RememberMePolicyPort rememberMePolicyPort) {
 		this.loginApplicationService = loginApplicationService;
 		this.refreshTokenService = refreshTokenService;
-		this.authRefreshCookieService = authRefreshCookieService;
-		this.rememberMeCookiePolicy = rememberMeCookiePolicy;
+		this.refreshCookiePort = refreshCookiePort;
+		this.rememberMePolicyPort = rememberMePolicyPort;
 	}
 
 	/**
@@ -51,7 +51,7 @@ public class AuthSessionApplicationService {
 			HttpServletResponse response) {
 		UserLoginResponse login = loginApplicationService.login(LoginCommandAssembler.toCommand(auth), request);
 
-		authRefreshCookieService.writeRefreshToken(response, request, login.getRefreshToken(),
+		refreshCookiePort.writeRefreshToken(response, request, login.getRefreshToken(),
 				BooleanUtil.isTrue(auth.getRememberMe()));
 		return login;
 	}
@@ -63,13 +63,12 @@ public class AuthSessionApplicationService {
 	 * @return 刷新响应（含 readMeDay）
 	 */
 	public RefreshTokenResponse completeRefresh(HttpServletRequest request, HttpServletResponse response) {
-		String refreshToken = authRefreshCookieService.readRefreshToken(request);
+		String refreshToken = refreshCookiePort.readRefreshToken(request);
 		RefreshSessionResult result = refreshTokenService.refreshToken(refreshToken, request);
 		RefreshTokenResponse refreshResponse = RefreshResponseAssembler.toRefreshTokenResponse(result);
 
-		refreshResponse.setReadMeDay(rememberMeCookiePolicy.resolveReadMeDay());
-		authRefreshCookieService.writeRefreshToken(response, request, result.tokenPair().refreshToken(),
-				result.rememberMe());
+		refreshResponse.setReadMeDay(rememberMePolicyPort.resolveReadMeDay());
+		refreshCookiePort.writeRefreshToken(response, request, result.tokenPair().refreshToken(), result.rememberMe());
 		return refreshResponse;
 	}
 
@@ -85,11 +84,11 @@ public class AuthSessionApplicationService {
 				String token = authHeader.substring(BEARER_PREFIX.length());
 				loginApplicationService.logout(token, request);
 			}
-			String refreshToken = authRefreshCookieService.readRefreshToken(request);
+			String refreshToken = refreshCookiePort.readRefreshToken(request);
 			refreshTokenService.revokeByRefreshToken(refreshToken, request);
 		}
 		finally {
-			authRefreshCookieService.clearRefreshToken(response, request);
+			refreshCookiePort.clearRefreshToken(response, request);
 		}
 	}
 

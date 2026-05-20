@@ -6,8 +6,8 @@ import com.auth.service.auth.authentication.api.dto.response.UserLoginResponse;
 import com.auth.service.auth.authentication.application.command.AbstractLoginCommand;
 import com.auth.service.auth.authentication.domain.model.RefreshSessionResult;
 import com.auth.service.auth.authentication.domain.model.TokenPair;
-import com.auth.service.auth.authentication.infrastructure.cookie.AuthRefreshCookieService;
-import com.auth.service.auth.authentication.infrastructure.cookie.RememberMeCookiePolicy;
+import com.auth.service.auth.authentication.application.port.RefreshCookiePort;
+import com.auth.service.auth.authentication.application.port.RememberMePolicyPort;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.DisplayName;
@@ -39,10 +39,10 @@ class AuthSessionApplicationServiceTest {
 	private RefreshTokenService refreshTokenService;
 
 	@Mock
-	private AuthRefreshCookieService authRefreshCookieService;
+	private RefreshCookiePort refreshCookiePort;
 
 	@Mock
-	private RememberMeCookiePolicy rememberMeCookiePolicy;
+	private RememberMePolicyPort rememberMePolicyPort;
 
 	@InjectMocks
 	private AuthSessionApplicationService authSessionApplicationService;
@@ -65,7 +65,7 @@ class AuthSessionApplicationServiceTest {
 		UserLoginResponse actual = authSessionApplicationService.completeLogin(auth, request, response);
 
 		assertSame(login, actual);
-		verify(authRefreshCookieService).writeRefreshToken(response, request, "refresh-token", true);
+		verify(refreshCookiePort).writeRefreshToken(response, request, "refresh-token", true);
 	}
 
 	@Test
@@ -77,10 +77,10 @@ class AuthSessionApplicationServiceTest {
 		LocalDateTime expires = LocalDateTime.now().plusHours(1);
 		TokenPair tokenPair = new TokenPair("new-access", "new-refresh", expires);
 
-		when(authRefreshCookieService.readRefreshToken(request)).thenReturn("old-refresh");
+		when(refreshCookiePort.readRefreshToken(request)).thenReturn("old-refresh");
 		when(refreshTokenService.refreshToken("old-refresh", request))
 			.thenReturn(new RefreshSessionResult(tokenPair, false));
-		when(rememberMeCookiePolicy.resolveReadMeDay()).thenReturn(5L);
+		when(rememberMePolicyPort.resolveReadMeDay()).thenReturn(5L);
 
 		RefreshTokenResponse actual = authSessionApplicationService.completeRefresh(request, response);
 
@@ -88,8 +88,8 @@ class AuthSessionApplicationServiceTest {
 		assertEquals("new-refresh", actual.getRefreshToken());
 		assertEquals(expires, actual.getExpires());
 		assertEquals(5L, actual.getReadMeDay());
-		verify(rememberMeCookiePolicy).resolveReadMeDay();
-		verify(authRefreshCookieService).writeRefreshToken(response, request, "new-refresh", false);
+		verify(rememberMePolicyPort).resolveReadMeDay();
+		verify(refreshCookiePort).writeRefreshToken(response, request, "new-refresh", false);
 	}
 
 	@Test
@@ -98,13 +98,13 @@ class AuthSessionApplicationServiceTest {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		HttpServletResponse response = mock(HttpServletResponse.class);
 		when(request.getHeader("Authorization")).thenReturn("Bearer access-token");
-		when(authRefreshCookieService.readRefreshToken(request)).thenReturn("refresh-token");
+		when(refreshCookiePort.readRefreshToken(request)).thenReturn("refresh-token");
 
 		authSessionApplicationService.completeLogout(request, response);
 
 		verify(loginApplicationService).logout("access-token", request);
 		verify(refreshTokenService).revokeByRefreshToken("refresh-token", request);
-		verify(authRefreshCookieService).clearRefreshToken(response, request);
+		verify(refreshCookiePort).clearRefreshToken(response, request);
 	}
 
 	@Test
@@ -113,13 +113,13 @@ class AuthSessionApplicationServiceTest {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		HttpServletResponse response = mock(HttpServletResponse.class);
 		when(request.getHeader("Authorization")).thenReturn(null);
-		when(authRefreshCookieService.readRefreshToken(request)).thenReturn("refresh-only");
+		when(refreshCookiePort.readRefreshToken(request)).thenReturn("refresh-only");
 
 		authSessionApplicationService.completeLogout(request, response);
 
 		verify(loginApplicationService, never()).logout(anyString(), any());
 		verify(refreshTokenService).revokeByRefreshToken("refresh-only", request);
-		verify(authRefreshCookieService).clearRefreshToken(response, request);
+		verify(refreshCookiePort).clearRefreshToken(response, request);
 	}
 
 }

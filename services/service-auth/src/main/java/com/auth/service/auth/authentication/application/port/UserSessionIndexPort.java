@@ -3,6 +3,9 @@ package com.auth.service.auth.authentication.application.port;
 import com.auth.module.security.contract.api.UserSessionIndex;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.Duration;
+import java.util.Optional;
+
 /**
  * 用户会话索引读写端口（Redis 实现）。
  *
@@ -28,5 +31,21 @@ public interface UserSessionIndexPort {
 	 * @param sessionId 会话 ID（jti）
 	 */
 	void removeActiveSession(long userId, String sessionId);
+
+	/**
+	 * 按 jti 加载会话索引。
+	 * @param sessionId 会话 ID（jti）
+	 * @return 会话索引，不存在时为空
+	 */
+	Optional<UserSessionIndex> loadUserSessionIndex(String sessionId);
+
+	/**
+	 * 更新刷新令牌校验信息并刷新会话 TTL。
+	 * @param sessionId 会话 ID（jti）
+	 * @param refreshTokenHash refreshToken 摘要
+	 * @param refreshTokenExpiresAt refreshToken 过期时间戳（毫秒）
+	 * @param ttl 会话 TTL
+	 */
+	void updateRefreshInfo(String sessionId, String refreshTokenHash, long refreshTokenExpiresAt, Duration ttl);
 
 }

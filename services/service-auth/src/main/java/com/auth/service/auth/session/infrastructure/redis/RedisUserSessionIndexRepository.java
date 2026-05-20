@@ -83,6 +83,7 @@ public class RedisUserSessionIndexRepository implements UserSessionIndexPort {
 	 * @param jti 会话唯一标识
 	 * @return 会话索引
 	 */
+	@Override
 	public Optional<UserSessionIndex> loadUserSessionIndex(@NotNull String jti) {
 		if (CharSequenceUtil.isBlank(jti)) {
 			return Optional.empty();
@@ -104,6 +105,7 @@ public class RedisUserSessionIndexRepository implements UserSessionIndexPort {
 	 * @param refreshTokenExpiresAt refreshToken 过期时间戳（毫秒）
 	 * @param ttl 会话 TTL（通常与 refreshToken 有效期一致）
 	 */
+	@Override
 	public void updateRefreshInfo(@NotNull String jti, @NotNull String refreshTokenHash, long refreshTokenExpiresAt,
 			@NotNull Duration ttl) {
 		String sessionKey = USER_SESSION.key(jti);

@@ -12,14 +12,14 @@ import com.auth.service.auth.authentication.application.port.AuthProfileCachePor
 import com.auth.service.auth.authentication.application.port.LoginStrategy;
 import com.auth.service.auth.authentication.application.port.SessionLimitPort;
 import com.auth.service.auth.authentication.application.port.TokenIssuerPort;
+import com.auth.service.auth.authentication.application.port.RememberMePolicyPort;
+import com.auth.service.auth.authentication.application.port.UserSessionIndexBuildPort;
 import com.auth.service.auth.authentication.application.port.UserSessionIndexPort;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.model.AuthenticatedUser;
 import com.auth.service.auth.authentication.domain.model.LoginResult;
 import com.auth.service.auth.authentication.domain.model.TokenPair;
 import com.auth.service.auth.authentication.domain.port.LoginFailureRateLimitPort;
-import com.auth.service.auth.authentication.infrastructure.cookie.RememberMeCookiePolicy;
-import com.auth.service.auth.session.infrastructure.redis.support.UserSessionIndexFactory;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.enums.AuthResultCode;
 import jakarta.servlet.http.HttpServletRequest;
@@ -64,7 +64,7 @@ class LoginApplicationServiceTest {
 	private AuthProfileCachePort authProfileCachePort;
 
 	@Mock
-	private UserSessionIndexFactory userSessionIndexFactory;
+	private UserSessionIndexBuildPort userSessionIndexBuildPort;
 
 	@Mock
 	private UserSessionIndexPort userSessionIndexPort;
@@ -82,7 +82,7 @@ class LoginApplicationServiceTest {
 	private LoginAuditCoordinator loginAuditCoordinator;
 
 	@Mock
-	private RememberMeCookiePolicy rememberMeCookiePolicy;
+	private RememberMePolicyPort rememberMePolicyPort;
 
 	@Mock
 	private HttpServletRequest httpServletRequest;
@@ -94,9 +94,9 @@ class LoginApplicationServiceTest {
 	}
 
 	private LoginApplicationService newService(LoginStrategy<?>... strategies) {
-		return new LoginApplicationService(List.of(strategies), authProfileCachePort, userSessionIndexFactory,
+		return new LoginApplicationService(List.of(strategies), authProfileCachePort, userSessionIndexBuildPort,
 				userSessionIndexPort, sessionLimitPort, tokenIssuerPort, loginFailureRateLimitPort,
-				loginAuditCoordinator, rememberMeCookiePolicy);
+				loginAuditCoordinator, rememberMePolicyPort);
 	}
 
 	@Test
@@ -131,12 +131,12 @@ class LoginApplicationServiceTest {
 		sessionIndex.setSessionId(TestConstants.JTI);
 		sessionIndex.setRefreshTokenExpiresAt(System.currentTimeMillis() + 60_000);
 
-		when(userSessionIndexFactory.buildUserSessionIndex(any(), anyLong(), anyString(), anyString(), anyBoolean()))
+		when(userSessionIndexBuildPort.build(any(), anyLong(), anyString(), anyString(), anyBoolean()))
 			.thenReturn(sessionIndex);
 
 		when(tokenIssuerPort.buildTokenPair(anyLong(), anyString(), anyLong())).thenReturn(new TokenPair(
 				TestConstants.ACCESS_TOKEN, TestConstants.REFRESH_TOKEN, LocalDateTime.now().plusMinutes(1)));
-		when(rememberMeCookiePolicy.resolveReadMeDay()).thenReturn(7L);
+		when(rememberMePolicyPort.resolveReadMeDay()).thenReturn(7L);
 
 		LoginApplicationService service = newService(strategy);
 
@@ -149,16 +149,16 @@ class LoginApplicationServiceTest {
 		assertNotNull(actual.getExpires());
 		assertEquals(7L, actual.getReadMeDay());
 
-		InOrder inOrder = inOrder(sessionLimitPort, authProfileCachePort, tokenIssuerPort, userSessionIndexFactory,
-				userSessionIndexPort, rememberMeCookiePolicy, loginFailureRateLimitPort, loginAuditCoordinator);
+		InOrder inOrder = inOrder(sessionLimitPort, authProfileCachePort, tokenIssuerPort, userSessionIndexBuildPort,
+				userSessionIndexPort, rememberMePolicyPort, loginFailureRateLimitPort, loginAuditCoordinator);
 		inOrder.verify(sessionLimitPort).assertSessionLimit(TestConstants.USER_ID);
 		inOrder.verify(authProfileCachePort).cacheProfile(profile);
 		inOrder.verify(tokenIssuerPort).buildTokenPair(eq(TestConstants.USER_ID), anyString(), eq(1L));
-		inOrder.verify(userSessionIndexFactory)
-			.buildUserSessionIndex(same(httpServletRequest), eq(TestConstants.USER_ID), anyString(),
-					eq(TestConstants.REFRESH_TOKEN), eq(false));
+		inOrder.verify(userSessionIndexBuildPort)
+			.build(same(httpServletRequest), eq(TestConstants.USER_ID), anyString(), eq(TestConstants.REFRESH_TOKEN),
+					eq(false));
 		inOrder.verify(userSessionIndexPort).createUserSessionIndex(sessionIndex);
-		inOrder.verify(rememberMeCookiePolicy).resolveReadMeDay();
+		inOrder.verify(rememberMePolicyPort).resolveReadMeDay();
 		inOrder.verify(loginFailureRateLimitPort).recordSuccess(TestConstants.USER_ID);
 		inOrder.verify(loginAuditCoordinator)
 			.auditLoginSuccess(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_PASSWORD), eq(TestConstants.USER_ID),
@@ -197,7 +197,7 @@ class LoginApplicationServiceTest {
 			}
 		};
 
-		when(userSessionIndexFactory.buildUserSessionIndex(any(), anyLong(), anyString(), anyString(), anyBoolean()))
+		when(userSessionIndexBuildPort.build(any(), anyLong(), anyString(), anyString(), anyBoolean()))
 			.thenReturn(new UserSessionIndex());
 		when(tokenIssuerPort.buildTokenPair(anyLong(), anyString(), anyLong())).thenReturn(new TokenPair(
 				TestConstants.ACCESS_TOKEN, TestConstants.REFRESH_TOKEN, LocalDateTime.now().plusMinutes(1)));
@@ -233,15 +233,15 @@ class LoginApplicationServiceTest {
 			}
 		};
 
-		when(userSessionIndexFactory.buildUserSessionIndex(any(), anyLong(), anyString(), anyString(), eq(true)))
+		when(userSessionIndexBuildPort.build(any(), anyLong(), anyString(), anyString(), eq(true)))
 			.thenReturn(new UserSessionIndex());
 		when(tokenIssuerPort.buildTokenPair(anyLong(), anyString(), anyLong())).thenReturn(new TokenPair(
 				TestConstants.ACCESS_TOKEN, TestConstants.REFRESH_TOKEN, LocalDateTime.now().plusMinutes(1)));
 
 		newService(strategy).login(command, httpServletRequest);
 
-		verify(userSessionIndexFactory).buildUserSessionIndex(same(httpServletRequest), eq(TestConstants.USER_ID),
-				anyString(), anyString(), eq(true));
+		verify(userSessionIndexBuildPort).build(same(httpServletRequest), eq(TestConstants.USER_ID), anyString(),
+				anyString(), eq(true));
 	}
 
 	@Test
