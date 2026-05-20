@@ -3,8 +3,8 @@ package com.auth.service.auth.integration.application;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.authorization.api.dto.EffectiveCodesVO;
 import com.auth.service.auth.authorization.application.AuthProfileQueryService;
-import com.auth.service.auth.authorization.infrastructure.cache.AuthProfileCache;
-import com.auth.service.auth.session.infrastructure.redis.RedisUserSessionIndexRepository;
+import com.auth.service.auth.authorization.application.AuthProfileCacheApplicationService;
+import com.auth.service.auth.session.application.SessionAdminApplicationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,11 +22,11 @@ import java.util.Objects;
 @Service
 public class InternalAuthCoordinationService {
 
-	private final RedisUserSessionIndexRepository redisUserSessionIndexRepository;
+	private final SessionAdminApplicationService sessionAdminApplicationService;
 
 	private final AuthProfileQueryService authProfileQueryService;
 
-	private final AuthProfileCache authProfileCache;
+	private final AuthProfileCacheApplicationService authProfileCacheApplicationService;
 
 	/**
 	 * 刷新用户缓存
@@ -36,7 +36,7 @@ public class InternalAuthCoordinationService {
 		userIds.stream().filter(Objects::nonNull).forEach(userId -> {
 			try {
 				AuthProfile profile = authProfileQueryService.buildByUserId(userId);
-				authProfileCache.createCacheAuthProfile(profile);
+				authProfileCacheApplicationService.cacheProfile(profile);
 			}
 			catch (RuntimeException ex) {
 				log.warn("Failed to refresh auth profile cache for userId={}: {}", userId, ex.getMessage());
@@ -51,7 +51,7 @@ public class InternalAuthCoordinationService {
 	public void kickAllSessions(List<Long> userIds) {
 		userIds.stream().filter(Objects::nonNull).forEach(userId -> {
 			try {
-				redisUserSessionIndexRepository.deleteAllSessions(userId);
+				sessionAdminApplicationService.kickAllSessions(userId);
 			}
 			catch (RuntimeException ex) {
 				log.warn("Failed to kick all sessions for userId={}: {}", userId, ex.getMessage());

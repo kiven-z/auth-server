@@ -1,11 +1,10 @@
-package com.auth.service.auth.authentication.application;
+package com.auth.service.auth.authentication.infrastructure.audit;
 
 import com.auth.common.ip.IpAddressService;
 import com.auth.module.platform.persistence.model.LoginLogEntity;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogResult;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.model.LoginAuditSnapshot;
-import com.auth.service.auth.authentication.infrastructure.audit.LoginAuditSnapshotFactory;
 import com.auth.service.auth.authentication.infrastructure.persistence.LoginLogMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,12 +25,12 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
 /**
- * {@link AuthLoginAuditService} 单元测试
+ * {@link AuthLoginAuditRecorder} 单元测试
  *
  * @author Bunny
  */
 @ExtendWith(MockitoExtension.class)
-class AuthLoginAuditServiceTest {
+class AuthLoginAuditRecorderTest {
 
 	@Mock
 	private IpAddressService ipAddressService;
@@ -39,20 +38,20 @@ class AuthLoginAuditServiceTest {
 	@Mock
 	private LoginLogMapper loginLogMapper;
 
-	private AuthLoginAuditService loginLogService;
+	private AuthLoginAuditRecorder loginAuditRecorder;
 
 	@BeforeEach
 	void setUp() throws Exception {
-		loginLogService = new AuthLoginAuditService(new LoginAuditSnapshotFactory(ipAddressService));
+		loginAuditRecorder = new AuthLoginAuditRecorder(new LoginAuditSnapshotFactory(ipAddressService));
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
-		baseMapperField.set(loginLogService, loginLogMapper);
+		baseMapperField.set(loginAuditRecorder, loginLogMapper);
 	}
 
 	@Test
 	@DisplayName("审计写入：无 HttpServletRequest 时仍写入 loginResult 与事件类型")
 	void record_LoginLog_shouldInsertEntity_whenRequestNull() {
-		loginLogService.recordLoginLog((HttpServletRequest) null, AuthLoginLogType.LOGIN_PASSWORD,
+		loginAuditRecorder.recordLoginLog((HttpServletRequest) null, AuthLoginLogType.LOGIN_PASSWORD,
 				AuthLoginLogResult.SUCCESS, 1L, "user", null, "jti-1");
 
 		ArgumentCaptor<LoginLogEntity> captor = ArgumentCaptor.forClass(LoginLogEntity.class);
@@ -70,7 +69,7 @@ class AuthLoginAuditServiceTest {
 		doThrow(new RuntimeException("db down")).when(loginLogMapper).insert(any(LoginLogEntity.class));
 
 		assertDoesNotThrow(
-				() -> loginLogService.recordLoginLog((HttpServletRequest) null, AuthLoginLogType.REFRESH_TOKEN,
+				() -> loginAuditRecorder.recordLoginLog((HttpServletRequest) null, AuthLoginLogType.REFRESH_TOKEN,
 						AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR, null, null, "token.invalid", null));
 
 		verify(loginLogMapper).insert(any(LoginLogEntity.class));
@@ -81,7 +80,7 @@ class AuthLoginAuditServiceTest {
 	void recordLoginLog_shouldPersistSnapshotFields_whenSnapshotProvided() {
 		LoginAuditSnapshot snapshot = new LoginAuditSnapshot("203.0.113.1", "TestRegion", "TestUA", "Desktop", "Linux",
 				"Firefox");
-		loginLogService.recordLoginLog(snapshot, AuthLoginLogType.LOGIN_EMAIL, AuthLoginLogResult.SUCCESS, 2L,
+		loginAuditRecorder.recordLoginLog(snapshot, AuthLoginLogType.LOGIN_EMAIL, AuthLoginLogResult.SUCCESS, 2L,
 				"e@x.com", null, null);
 
 		ArgumentCaptor<LoginLogEntity> captor = ArgumentCaptor.forClass(LoginLogEntity.class);

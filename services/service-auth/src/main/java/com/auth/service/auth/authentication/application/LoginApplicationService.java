@@ -13,11 +13,11 @@ import com.auth.service.auth.authentication.domain.event.LoginAuditEventPublishe
 import com.auth.service.auth.authentication.domain.model.LoginResult;
 import com.auth.service.auth.authentication.domain.model.TokenPair;
 import com.auth.service.auth.authentication.domain.port.LoginStrategy;
-import com.auth.service.auth.authentication.infrastructure.audit.LoginAuditContextResolver;
+import com.auth.service.auth.authentication.application.support.LoginAuditContextResolver;
 import com.auth.service.auth.authentication.infrastructure.support.AuthTokenResponseEnricher;
 import com.auth.service.auth.authentication.infrastructure.token.LoginFailureRateLimiter;
 import com.auth.service.auth.authentication.infrastructure.token.TokenService;
-import com.auth.service.auth.authorization.infrastructure.cache.AuthProfileCache;
+import com.auth.service.auth.authorization.application.AuthProfileCacheApplicationService;
 import com.auth.service.auth.session.infrastructure.redis.RedisUserSessionIndexRepository;
 import com.auth.service.auth.session.infrastructure.redis.support.SessionLimitManager;
 import com.auth.service.auth.session.infrastructure.redis.support.UserSessionIndexFactory;
@@ -44,7 +44,7 @@ public class LoginApplicationService {
 
 	private final Map<Class<? extends AbstractLoginCommand>, LoginStrategy<?>> strategyRegistry;
 
-	private final AuthProfileCache authProfileCache;
+	private final AuthProfileCacheApplicationService authProfileCacheApplicationService;
 
 	private final UserSessionIndexFactory userSessionIndexFactory;
 
@@ -60,14 +60,15 @@ public class LoginApplicationService {
 
 	private final AuthTokenResponseEnricher authTokenResponseEnricher;
 
-	public LoginApplicationService(List<LoginStrategy<?>> strategies, AuthProfileCache authProfileCache,
+	public LoginApplicationService(List<LoginStrategy<?>> strategies,
+			AuthProfileCacheApplicationService authProfileCacheApplicationService,
 			UserSessionIndexFactory userSessionIndexFactory,
 			RedisUserSessionIndexRepository redisUserSessionIndexRepository, SessionLimitManager sessionLimitManager,
 			TokenService tokenService, LoginFailureRateLimiter loginFailureRateLimiter,
 			LoginAuditEventPublisher loginAuditEventPublisher, AuthTokenResponseEnricher authTokenResponseEnricher) {
 		this.strategyRegistry = strategies.stream()
 			.collect(Collectors.toUnmodifiableMap(LoginStrategy::supports, Function.identity()));
-		this.authProfileCache = authProfileCache;
+		this.authProfileCacheApplicationService = authProfileCacheApplicationService;
 		this.userSessionIndexFactory = userSessionIndexFactory;
 		this.redisUserSessionIndexRepository = redisUserSessionIndexRepository;
 		this.sessionLimitManager = sessionLimitManager;
@@ -103,7 +104,7 @@ public class LoginApplicationService {
 			jti = UUID.randomUUID().toString();
 			long permVersion = profile.getPermVersion();
 
-			authProfileCache.createCacheAuthProfile(profile);
+			authProfileCacheApplicationService.cacheProfile(profile);
 			profileCached = true;
 
 			TokenPair tokenPair = tokenService.buildTokenPair(userId, jti, permVersion);
@@ -190,7 +191,7 @@ public class LoginApplicationService {
 			redisUserSessionIndexRepository.removeActiveSession(userId, jti);
 		}
 		if (profileCached) {
-			authProfileCache.evictCacheAuthProfile(userId);
+			authProfileCacheApplicationService.evictProfile(userId);
 		}
 	}
 

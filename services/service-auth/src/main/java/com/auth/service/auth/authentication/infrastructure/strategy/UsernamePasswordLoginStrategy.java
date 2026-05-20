@@ -5,6 +5,8 @@ import com.auth.service.auth.authentication.application.command.UsernamePassword
 import com.auth.service.auth.authentication.application.support.AbstractLoginStrategyTemplate;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.event.LoginAuditEventPublisher;
+import com.auth.service.auth.authentication.infrastructure.persistence.UserCredentialField;
+import com.auth.service.auth.authentication.infrastructure.persistence.UserCredentialQueries;
 import com.auth.service.auth.authentication.infrastructure.persistence.UserMapper;
 import com.auth.service.auth.authentication.infrastructure.token.LoginFailureRateLimiter;
 import com.auth.service.auth.authorization.application.AuthProfileQueryService;
@@ -42,7 +44,7 @@ public class UsernamePasswordLoginStrategy extends AbstractLoginStrategyTemplate
 	@Override
 	protected UserEntity resolveUser(UsernamePasswordLoginCommand command) {
 		String username = command.getUsername();
-		UserEntity user = userMapper.selectUserForLoginByUsername(username);
+		UserEntity user = UserCredentialQueries.forLogin(userMapper, UserCredentialField.USERNAME, username);
 		if (user == null) {
 			throw new AuthBusinessException(AuthResultCode.USERNAME_OR_PASSWORD_ERROR);
 		}

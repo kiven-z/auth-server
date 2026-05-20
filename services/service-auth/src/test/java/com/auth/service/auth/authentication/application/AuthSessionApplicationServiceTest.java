@@ -5,7 +5,9 @@ import com.auth.service.auth.authentication.api.dto.response.RefreshTokenRespons
 import com.auth.service.auth.authentication.api.dto.response.UserLoginResponse;
 import com.auth.service.auth.authentication.application.command.AbstractLoginCommand;
 import com.auth.service.auth.authentication.domain.model.RefreshSessionResult;
+import com.auth.service.auth.authentication.domain.model.TokenPair;
 import com.auth.service.auth.authentication.infrastructure.cookie.AuthRefreshCookieService;
+import com.auth.service.auth.authentication.infrastructure.support.AuthTokenResponseEnricher;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.DisplayName;
@@ -17,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -37,6 +40,9 @@ class AuthSessionApplicationServiceTest {
 
 	@Mock
 	private AuthRefreshCookieService authRefreshCookieService;
+
+	@Mock
+	private AuthTokenResponseEnricher authTokenResponseEnricher;
 
 	@InjectMocks
 	private AuthSessionApplicationService authSessionApplicationService;
@@ -68,18 +74,19 @@ class AuthSessionApplicationServiceTest {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		HttpServletResponse response = mock(HttpServletResponse.class);
 
-		RefreshTokenResponse body = new RefreshTokenResponse();
-		body.setAccessToken("new-access");
-		body.setRefreshToken("new-refresh");
-		body.setExpires(LocalDateTime.now().plusHours(1));
+		LocalDateTime expires = LocalDateTime.now().plusHours(1);
+		TokenPair tokenPair = new TokenPair("new-access", "new-refresh", expires);
 
 		when(authRefreshCookieService.readRefreshToken(request)).thenReturn("old-refresh");
 		when(refreshTokenService.refreshToken("old-refresh", request))
-			.thenReturn(new RefreshSessionResult(body, false));
+			.thenReturn(new RefreshSessionResult(tokenPair, false));
 
 		RefreshTokenResponse actual = authSessionApplicationService.completeRefresh(request, response);
 
-		assertSame(body, actual);
+		assertEquals("new-access", actual.getAccessToken());
+		assertEquals("new-refresh", actual.getRefreshToken());
+		assertEquals(expires, actual.getExpires());
+		verify(authTokenResponseEnricher).enrichReadMeDay(actual);
 		verify(authRefreshCookieService).writeRefreshToken(response, request, "new-refresh", false);
 	}
 

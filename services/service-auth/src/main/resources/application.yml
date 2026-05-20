@@ -67,8 +67,3 @@ springdoc:
     enabled: false
   swagger-ui:
     enabled: false
-
-auth:
-  common:
-    jwt:
-      algorithm: HS256

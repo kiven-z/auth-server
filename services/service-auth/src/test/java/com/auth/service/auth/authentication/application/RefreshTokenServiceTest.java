@@ -6,15 +6,13 @@ import com.auth.common.jwt.model.JwtUserToken;
 import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.TestConstants;
-import com.auth.service.auth.authentication.api.dto.response.RefreshTokenResponse;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogResult;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.event.LoginAuditEventPublisher;
 import com.auth.service.auth.authentication.domain.model.RefreshSessionResult;
 import com.auth.service.auth.authentication.domain.model.TokenPair;
-import com.auth.service.auth.authentication.infrastructure.support.AuthTokenResponseEnricher;
 import com.auth.service.auth.authentication.infrastructure.token.TokenService;
-import com.auth.service.auth.authorization.infrastructure.cache.AuthProfileCache;
+import com.auth.service.auth.authorization.application.AuthProfileCacheApplicationService;
 import com.auth.service.auth.session.infrastructure.redis.RedisUserSessionIndexRepository;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.enums.AuthResultCode;
@@ -41,7 +39,7 @@ import static org.mockito.Mockito.*;
 class RefreshTokenServiceTest {
 
 	@Mock
-	private AuthProfileCache authProfileCache;
+	private AuthProfileCacheApplicationService authProfileCacheApplicationService;
 
 	@Mock
 	private RedisUserSessionIndexRepository redisUserSessionIndexRepository;
@@ -55,16 +53,13 @@ class RefreshTokenServiceTest {
 	@Mock
 	private LoginAuditEventPublisher loginAuditEventPublisher;
 
-	@Mock
-	private AuthTokenResponseEnricher authTokenResponseEnricher;
-
 	private static JwtUserToken token() {
 		return JwtUserToken.builder().userId(TestConstants.USER_ID).jti(TestConstants.JTI).build();
 	}
 
 	private RefreshTokenService newService() {
-		return new RefreshTokenService(authProfileCache, redisUserSessionIndexRepository, tokenService, jwtProperties,
-				loginAuditEventPublisher, authTokenResponseEnricher);
+		return new RefreshTokenService(authProfileCacheApplicationService, redisUserSessionIndexRepository,
+				tokenService, jwtProperties, loginAuditEventPublisher);
 	}
 
 	@Test
@@ -165,24 +160,23 @@ class RefreshTokenServiceTest {
 
 		AuthProfile profile = mock(AuthProfile.class);
 		when(profile.getPermVersion()).thenReturn(9L);
-		when(authProfileCache.loadCacheAuthProfile(TestConstants.USER_ID)).thenReturn(Optional.of(profile));
+		when(authProfileCacheApplicationService.loadCachedProfile(TestConstants.USER_ID))
+			.thenReturn(Optional.of(profile));
 
 		LocalDateTime expires = LocalDateTime.now().plusMinutes(5);
-		when(tokenService.buildTokenPair(TestConstants.USER_ID, TestConstants.JTI, 9L))
-			.thenReturn(new TokenPair("new-access", "new-refresh", expires));
+		TokenPair tokenPair = new TokenPair("new-access", "new-refresh", expires);
+		when(tokenService.buildTokenPair(TestConstants.USER_ID, TestConstants.JTI, 9L)).thenReturn(tokenPair);
 
 		RefreshTokenService service = newService();
 
 		RefreshSessionResult result = service.refreshToken(TestConstants.REFRESH_TOKEN, null);
-		RefreshTokenResponse response = result.response();
 
-		assertEquals("new-access", response.getAccessToken());
-		assertEquals("new-refresh", response.getRefreshToken());
-		assertEquals(expires, response.getExpires());
+		assertEquals("new-access", result.tokenPair().accessToken());
+		assertEquals("new-refresh", result.tokenPair().refreshToken());
+		assertEquals(expires, result.tokenPair().accessExpiresAt());
 		assertFalse(result.rememberMe());
 		verify(redisUserSessionIndexRepository).updateRefreshInfo(eq(TestConstants.JTI),
 				eq(MD5.create().digestHex16("new-refresh")), anyLong(), eq(Duration.ofSeconds(120L)));
-		verify(authTokenResponseEnricher).enrichReadMeDay(response);
 	}
 
 	@Test
@@ -200,7 +194,8 @@ class RefreshTokenServiceTest {
 
 		AuthProfile profile = mock(AuthProfile.class);
 		when(profile.getPermVersion()).thenReturn(9L);
-		when(authProfileCache.loadCacheAuthProfile(TestConstants.USER_ID)).thenReturn(Optional.of(profile));
+		when(authProfileCacheApplicationService.loadCachedProfile(TestConstants.USER_ID))
+			.thenReturn(Optional.of(profile));
 		when(tokenService.buildTokenPair(TestConstants.USER_ID, TestConstants.JTI, 9L))
 			.thenReturn(new TokenPair("new-access", "new-refresh", LocalDateTime.now().plusMinutes(5)));
 

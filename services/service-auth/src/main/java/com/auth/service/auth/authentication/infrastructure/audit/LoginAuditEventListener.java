@@ -1,22 +1,22 @@
 package com.auth.service.auth.authentication.infrastructure.audit;
 
-import com.auth.service.auth.authentication.application.AuthLoginAuditService;
 import com.auth.service.auth.authentication.domain.event.LoginAuditEvent;
+import com.auth.service.auth.authentication.domain.port.LoginAuditRecorder;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 /**
- * 将 {@link LoginAuditEvent} 转为 {@link AuthLoginAuditService} 持久化调用
+ * 将 {@link LoginAuditEvent} 委托给 {@link LoginAuditRecorder} 落库。
  *
  * @author Bunny
  */
 @Component
 public class LoginAuditEventListener {
 
-	private final AuthLoginAuditService authLoginAuditService;
+	private final LoginAuditRecorder loginAuditRecorder;
 
-	public LoginAuditEventListener(AuthLoginAuditService authLoginAuditService) {
-		this.authLoginAuditService = authLoginAuditService;
+	public LoginAuditEventListener(LoginAuditRecorder loginAuditRecorder) {
+		this.loginAuditRecorder = loginAuditRecorder;
 	}
 
 	/**
@@ -25,7 +25,7 @@ public class LoginAuditEventListener {
 	 */
 	@EventListener
 	public void onLoginAudit(LoginAuditEvent event) {
-		authLoginAuditService.recordLoginLog(event.snapshot(), event.eventType(), event.result(), event.userId(),
+		loginAuditRecorder.recordLoginLog(event.snapshot(), event.eventType(), event.result(), event.userId(),
 				event.principal(), event.failureReason(), event.sessionId());
 	}
 

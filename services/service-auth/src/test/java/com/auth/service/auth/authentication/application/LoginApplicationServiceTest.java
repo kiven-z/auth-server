@@ -17,7 +17,7 @@ import com.auth.service.auth.authentication.domain.port.LoginStrategy;
 import com.auth.service.auth.authentication.infrastructure.support.AuthTokenResponseEnricher;
 import com.auth.service.auth.authentication.infrastructure.token.LoginFailureRateLimiter;
 import com.auth.service.auth.authentication.infrastructure.token.TokenService;
-import com.auth.service.auth.authorization.infrastructure.cache.AuthProfileCache;
+import com.auth.service.auth.authorization.application.AuthProfileCacheApplicationService;
 import com.auth.service.auth.session.infrastructure.redis.RedisUserSessionIndexRepository;
 import com.auth.service.auth.session.infrastructure.redis.support.SessionLimitManager;
 import com.auth.service.auth.session.infrastructure.redis.support.UserSessionIndexFactory;
@@ -48,7 +48,7 @@ import static org.mockito.Mockito.*;
 class LoginApplicationServiceTest {
 
 	@Mock
-	private AuthProfileCache authProfileCache;
+	private AuthProfileCacheApplicationService authProfileCacheApplicationService;
 
 	@Mock
 	private UserSessionIndexFactory userSessionIndexFactory;
@@ -81,9 +81,9 @@ class LoginApplicationServiceTest {
 	}
 
 	private LoginApplicationService newService(LoginStrategy<?>... strategies) {
-		return new LoginApplicationService(List.of(strategies), authProfileCache, userSessionIndexFactory,
-				redisUserSessionIndexRepository, sessionLimitManager, tokenService, loginFailureRateLimiter,
-				loginAuditEventPublisher, authTokenResponseEnricher);
+		return new LoginApplicationService(List.of(strategies), authProfileCacheApplicationService,
+				userSessionIndexFactory, redisUserSessionIndexRepository, sessionLimitManager, tokenService,
+				loginFailureRateLimiter, loginAuditEventPublisher, authTokenResponseEnricher);
 	}
 
 	@Test
@@ -134,11 +134,11 @@ class LoginApplicationServiceTest {
 		assertEquals(TestConstants.REFRESH_TOKEN, actual.getRefreshToken());
 		assertNotNull(actual.getExpires());
 
-		InOrder inOrder = inOrder(sessionLimitManager, authProfileCache, tokenService, userSessionIndexFactory,
-				redisUserSessionIndexRepository, authTokenResponseEnricher, loginFailureRateLimiter,
-				loginAuditEventPublisher);
+		InOrder inOrder = inOrder(sessionLimitManager, authProfileCacheApplicationService, tokenService,
+				userSessionIndexFactory, redisUserSessionIndexRepository, authTokenResponseEnricher,
+				loginFailureRateLimiter, loginAuditEventPublisher);
 		inOrder.verify(sessionLimitManager).assertSessionLimit(TestConstants.USER_ID);
-		inOrder.verify(authProfileCache).createCacheAuthProfile(profile);
+		inOrder.verify(authProfileCacheApplicationService).cacheProfile(profile);
 		inOrder.verify(tokenService).buildTokenPair(eq(TestConstants.USER_ID), anyString(), eq(1L));
 		inOrder.verify(userSessionIndexFactory)
 			.buildUserSessionIndex(same(httpServletRequest), eq(TestConstants.USER_ID), anyString(),
@@ -290,8 +290,8 @@ class LoginApplicationServiceTest {
 
 		assertThrows(AuthBusinessException.class, () -> service.login(command, httpServletRequest));
 
-		verify(authProfileCache).createCacheAuthProfile(profile);
-		verify(authProfileCache).evictCacheAuthProfile(TestConstants.USER_ID);
+		verify(authProfileCacheApplicationService).cacheProfile(profile);
+		verify(authProfileCacheApplicationService).evictProfile(TestConstants.USER_ID);
 		verify(redisUserSessionIndexRepository, never()).createUserSessionIndex(any());
 	}
 

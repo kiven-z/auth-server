@@ -7,6 +7,7 @@ import com.auth.service.auth.authentication.application.command.SmsLoginCommand;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogResult;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.event.LoginAuditEventPublisher;
+import com.auth.service.auth.authentication.infrastructure.persistence.UserCredentialField;
 import com.auth.service.auth.authentication.infrastructure.persistence.UserMapper;
 import com.auth.service.auth.authentication.infrastructure.token.LoginFailureRateLimiter;
 import com.auth.service.auth.authorization.application.AuthProfileQueryService;
@@ -20,8 +21,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
-
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -70,7 +69,7 @@ class SmsLoginStrategyTest {
 	@Test
 	@DisplayName("手机号未注册时抛出 USERNAME_OR_PASSWORD_ERROR 并发布审计事件")
 	void authenticate_shouldThrow_whenPhoneNotRegistered() {
-		when(userMapper.selectUserForLoginByPhone("13800138000")).thenReturn(null);
+		when(userMapper.selectByCredential(UserCredentialField.PHONE, "13800138000", false)).thenReturn(null);
 		SmsLoginStrategy strategy = createStrategy();
 
 		SmsLoginCommand command = new SmsLoginCommand("13800138000", "123456");
@@ -92,7 +91,7 @@ class SmsLoginStrategyTest {
 		user.setUsername("testUser");
 		user.setPhone("13800138000");
 		user.setStatus(1);
-		when(userMapper.selectUserForLoginByPhone("13800138000")).thenReturn(user);
+		when(userMapper.selectByCredential(UserCredentialField.PHONE, "13800138000", false)).thenReturn(user);
 		doNothing().when(loginFailureRateLimiter).assertNotLocked(1L);
 		SmsLoginStrategy strategy = createStrategyWithRedis();
 
@@ -119,12 +118,10 @@ class SmsLoginStrategyTest {
 		user.setPhone("13800138000");
 		user.setNickname("Test");
 		user.setStatus(1);
-		when(userMapper.selectUserForLoginByPhone("13800138000")).thenReturn(user);
+		when(userMapper.selectByCredential(UserCredentialField.PHONE, "13800138000", false)).thenReturn(user);
 		doNothing().when(loginFailureRateLimiter).assertNotLocked(1L);
 
 		AuthProfile profile = mock(AuthProfile.class);
-		when(profile.getRoles()).thenReturn(List.of());
-		when(profile.getPermissions()).thenReturn(List.of());
 		when(authProfileQueryService.buildByUser(user)).thenReturn(profile);
 		SmsLoginStrategy strategy = createStrategyWithRedis();
 

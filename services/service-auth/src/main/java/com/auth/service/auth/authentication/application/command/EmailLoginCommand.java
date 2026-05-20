@@ -1,6 +1,5 @@
 package com.auth.service.auth.authentication.application.command;
 
-import com.auth.service.auth.authentication.api.dto.request.EmailLoginRequest;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import lombok.Getter;
 
@@ -19,17 +18,6 @@ public class EmailLoginCommand extends AbstractLoginCommand {
 	public EmailLoginCommand(String email, String code) {
 		this.email = email;
 		this.code = code;
-	}
-
-	/**
-	 * 从 HTTP 请求 DTO 构建命令。
-	 * @param request 邮箱登录请求
-	 * @return 登录命令
-	 */
-	public static EmailLoginCommand from(EmailLoginRequest request) {
-		EmailLoginCommand command = new EmailLoginCommand(request.getEmail(), request.getCode());
-		command.setRememberMe(request.getRememberMe());
-		return command;
 	}
 
 	@Override

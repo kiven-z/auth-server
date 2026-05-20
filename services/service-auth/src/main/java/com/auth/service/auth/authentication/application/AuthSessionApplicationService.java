@@ -1,11 +1,14 @@
 package com.auth.service.auth.authentication.application;
 
+import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.auth.authentication.api.assembler.LoginCommandAssembler;
 import com.auth.service.auth.authentication.api.dto.request.AbstractLoginRequest;
 import com.auth.service.auth.authentication.api.dto.response.RefreshTokenResponse;
 import com.auth.service.auth.authentication.api.dto.response.UserLoginResponse;
+import com.auth.service.auth.authentication.application.assembler.RefreshResponseAssembler;
 import com.auth.service.auth.authentication.domain.model.RefreshSessionResult;
 import com.auth.service.auth.authentication.infrastructure.cookie.AuthRefreshCookieService;
+import com.auth.service.auth.authentication.infrastructure.support.AuthTokenResponseEnricher;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
@@ -26,11 +29,15 @@ public class AuthSessionApplicationService {
 
 	private final AuthRefreshCookieService authRefreshCookieService;
 
+	private final AuthTokenResponseEnricher authTokenResponseEnricher;
+
 	public AuthSessionApplicationService(LoginApplicationService loginApplicationService,
-			RefreshTokenService refreshTokenService, AuthRefreshCookieService authRefreshCookieService) {
+			RefreshTokenService refreshTokenService, AuthRefreshCookieService authRefreshCookieService,
+			AuthTokenResponseEnricher authTokenResponseEnricher) {
 		this.loginApplicationService = loginApplicationService;
 		this.refreshTokenService = refreshTokenService;
 		this.authRefreshCookieService = authRefreshCookieService;
+		this.authTokenResponseEnricher = authTokenResponseEnricher;
 	}
 
 	/**
@@ -43,8 +50,9 @@ public class AuthSessionApplicationService {
 	public UserLoginResponse completeLogin(AbstractLoginRequest auth, HttpServletRequest request,
 			HttpServletResponse response) {
 		UserLoginResponse login = loginApplicationService.login(LoginCommandAssembler.toCommand(auth), request);
-		boolean rememberMe = Boolean.TRUE.equals(auth.getRememberMe());
-		authRefreshCookieService.writeRefreshToken(response, request, login.getRefreshToken(), rememberMe);
+
+		authRefreshCookieService.writeRefreshToken(response, request, login.getRefreshToken(),
+				BooleanUtil.isTrue(auth.getRememberMe()));
 		return login;
 	}
 
@@ -57,9 +65,12 @@ public class AuthSessionApplicationService {
 	public RefreshTokenResponse completeRefresh(HttpServletRequest request, HttpServletResponse response) {
 		String refreshToken = authRefreshCookieService.readRefreshToken(request);
 		RefreshSessionResult result = refreshTokenService.refreshToken(refreshToken, request);
-		authRefreshCookieService.writeRefreshToken(response, request, result.response().getRefreshToken(),
+		RefreshTokenResponse refreshResponse = RefreshResponseAssembler.toRefreshTokenResponse(result);
+
+		authTokenResponseEnricher.enrichReadMeDay(refreshResponse);
+		authRefreshCookieService.writeRefreshToken(response, request, result.tokenPair().refreshToken(),
 				result.rememberMe());
-		return result.response();
+		return refreshResponse;
 	}
 
 	/**

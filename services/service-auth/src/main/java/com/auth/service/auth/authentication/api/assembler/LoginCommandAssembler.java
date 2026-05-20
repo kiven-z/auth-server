@@ -30,13 +30,21 @@ public class LoginCommandAssembler {
 			throw new AuthBusinessException(AuthResultCode.AUTH_TYPE_UNSUPPORTED);
 		}
 		if (request instanceof UsernamePasswordLoginRequest usernamePasswordLoginRequest) {
-			return UsernamePasswordLoginCommand.from(usernamePasswordLoginRequest);
+			UsernamePasswordLoginCommand command = new UsernamePasswordLoginCommand(
+					usernamePasswordLoginRequest.getUsername(), usernamePasswordLoginRequest.getPassword());
+			command.setRememberMe(usernamePasswordLoginRequest.getRememberMe());
+			return command;
 		}
 		if (request instanceof EmailLoginRequest emailLoginRequest) {
-			return EmailLoginCommand.from(emailLoginRequest);
+			EmailLoginCommand command = new EmailLoginCommand(emailLoginRequest.getEmail(),
+					emailLoginRequest.getCode());
+			command.setRememberMe(emailLoginRequest.getRememberMe());
+			return command;
 		}
 		if (request instanceof SmsLoginRequest smsLoginRequest) {
-			return SmsLoginCommand.from(smsLoginRequest);
+			SmsLoginCommand command = new SmsLoginCommand(smsLoginRequest.getPhone(), smsLoginRequest.getCode());
+			command.setRememberMe(smsLoginRequest.getRememberMe());
+			return command;
 		}
 		throw new AuthBusinessException(AuthResultCode.AUTH_TYPE_UNSUPPORTED);
 	}

@@ -7,15 +7,13 @@ import com.auth.common.jwt.autoconfigure.JwtProperties;
 import com.auth.common.jwt.model.JwtUserToken;
 import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
-import com.auth.service.auth.authentication.api.dto.response.RefreshTokenResponse;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogResult;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.event.LoginAuditEventPublisher;
 import com.auth.service.auth.authentication.domain.model.RefreshSessionResult;
 import com.auth.service.auth.authentication.domain.model.TokenPair;
-import com.auth.service.auth.authentication.infrastructure.support.AuthTokenResponseEnricher;
 import com.auth.service.auth.authentication.infrastructure.token.TokenService;
-import com.auth.service.auth.authorization.infrastructure.cache.AuthProfileCache;
+import com.auth.service.auth.authorization.application.AuthProfileCacheApplicationService;
 import com.auth.service.auth.session.infrastructure.redis.RedisUserSessionIndexRepository;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.enums.AuthResultCode;
@@ -35,7 +33,7 @@ import java.util.Objects;
 @Service
 public class RefreshTokenService {
 
-	private final AuthProfileCache authProfileCache;
+	private final AuthProfileCacheApplicationService authProfileCacheApplicationService;
 
 	private final RedisUserSessionIndexRepository redisUserSessionIndexRepository;
 
@@ -45,18 +43,14 @@ public class RefreshTokenService {
 
 	private final LoginAuditEventPublisher loginAuditEventPublisher;
 
-	private final AuthTokenResponseEnricher authTokenResponseEnricher;
-
-	public RefreshTokenService(AuthProfileCache authProfileCache,
+	public RefreshTokenService(AuthProfileCacheApplicationService authProfileCacheApplicationService,
 			RedisUserSessionIndexRepository redisUserSessionIndexRepository, TokenService tokenService,
-			JwtProperties jwtProperties, LoginAuditEventPublisher loginAuditEventPublisher,
-			AuthTokenResponseEnricher authTokenResponseEnricher) {
-		this.authProfileCache = authProfileCache;
+			JwtProperties jwtProperties, LoginAuditEventPublisher loginAuditEventPublisher) {
+		this.authProfileCacheApplicationService = authProfileCacheApplicationService;
 		this.redisUserSessionIndexRepository = redisUserSessionIndexRepository;
 		this.tokenService = tokenService;
 		this.jwtProperties = jwtProperties;
 		this.loginAuditEventPublisher = loginAuditEventPublisher;
-		this.authTokenResponseEnricher = authTokenResponseEnricher;
 	}
 
 	/**
@@ -100,7 +94,7 @@ public class RefreshTokenService {
 		assertRefreshTokenMatches(refreshUserId, refreshJti, sessionIndex, refreshToken);
 
 		// 加载缓存画像
-		AuthProfile profile = authProfileCache.loadCacheAuthProfile(refreshUserId)
+		AuthProfile profile = authProfileCacheApplicationService.loadCachedProfile(refreshUserId)
 			.orElseThrow(() -> new AuthBusinessException(AuthResultCode.REFRESH_TOKEN_EXPIRED));
 		Long permVersion = Objects.requireNonNull(profile.getPermVersion(), "permVersion must not be null");
 
@@ -109,18 +103,11 @@ public class RefreshTokenService {
 		// 旋转刷新令牌
 		rotateRefreshInSession(refreshJti, tokenPair.refreshToken());
 
-		// 构建刷新令牌响应
-		RefreshTokenResponse response = new RefreshTokenResponse();
-		response.setAccessToken(tokenPair.accessToken());
-		response.setRefreshToken(tokenPair.refreshToken());
-		response.setExpires(tokenPair.accessExpiresAt());
-		authTokenResponseEnricher.enrichReadMeDay(response);
-
 		boolean rememberMe = Boolean.TRUE.equals(sessionIndex.getRememberMe());
 
 		loginAuditEventPublisher.publish(request, AuthLoginLogType.REFRESH_TOKEN, AuthLoginLogResult.SUCCESS,
 				refreshUserId, null, null, refreshJti);
-		return new RefreshSessionResult(response, rememberMe);
+		return new RefreshSessionResult(tokenPair, rememberMe);
 	}
 
 	/**

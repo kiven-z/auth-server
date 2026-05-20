@@ -14,45 +14,17 @@ import org.apache.ibatis.annotations.Param;
 public interface UserMapper extends BaseMapper<UserEntity> {
 
 	/**
-	 * 根据用户名查询可登录用户（仅未删除；含禁用/锁定，由登录策略做状态校验）
-	 * @param username 用户名
-	 * @return 用户信息
+	 * 按凭证维度查询用户。
+	 * <p>
+	 * {@code activeOnly=false}：登录场景，仅
+	 * {@code is_deleted=0}；{@code activeOnly=true}：发码等，额外要求 {@code status=1}。
+	 * </p>
+	 * @param field 凭证维度（列白名单）
+	 * @param value 凭证值
+	 * @param activeOnly 是否仅查询正常状态用户
+	 * @return 用户信息，不存在时为 null
 	 */
-	UserEntity selectUserForLoginByUsername(@Param("username") String username);
-
-	/**
-	 * 根据邮箱查询可登录用户（仅未删除；含禁用/锁定，由登录策略做状态校验）
-	 * @param email 邮箱
-	 * @return 用户信息
-	 */
-	UserEntity selectUserForLoginByEmail(@Param("email") String email);
-
-	/**
-	 * 根据手机号查询可登录用户（仅未删除；含禁用/锁定，由登录策略做状态校验）
-	 * @param phone 手机号
-	 * @return 用户信息
-	 */
-	UserEntity selectUserForLoginByPhone(@Param("phone") String phone);
-
-	/**
-	 * 根据用户名查询正常状态用户（发码等场景）
-	 * @param username 用户名
-	 * @return 用户信息
-	 */
-	UserEntity selectUserByUsername(@Param("username") String username);
-
-	/**
-	 * 根据邮箱查询正常状态用户（发码等场景）
-	 * @param email 邮箱
-	 * @return 用户信息
-	 */
-	UserEntity selectUserByEmail(@Param("email") String email);
-
-	/**
-	 * 根据手机号查询正常状态用户（发码等场景）
-	 * @param phone 手机号
-	 * @return 用户信息
-	 */
-	UserEntity selectUserByPhone(@Param("phone") String phone);
+	UserEntity selectByCredential(@Param("field") UserCredentialField field, @Param("value") String value,
+			@Param("activeOnly") boolean activeOnly);
 
 }

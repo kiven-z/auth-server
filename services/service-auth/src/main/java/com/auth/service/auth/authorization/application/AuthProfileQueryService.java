@@ -61,10 +61,13 @@ public class AuthProfileQueryService {
 		List<String> roles = userAuthorizationGrantMapper.selectRolesByUserId(userId);
 		List<String> permissions = userAuthorizationGrantMapper.selectPermissionsByUserId(userId);
 
+		// 若是管理员设置管理员角色和权限
 		if (PermissionConstant.isAdmin(userId, roles)) {
 			roles = PermissionConstant.ADMIN_ROLES;
 			permissions = PermissionConstant.ADMIN_WILDCARD_PERMISSIONS;
 		}
+
+		// 查询数据权限
 		Map<String, ScopeGrant> dataScopes = dataScopeEffectiveResolver.resolveByUserId(userId);
 
 		return AuthProfile.builder()

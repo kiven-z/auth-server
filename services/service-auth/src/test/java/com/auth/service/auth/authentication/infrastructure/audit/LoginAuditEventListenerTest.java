@@ -1,10 +1,10 @@
 package com.auth.service.auth.authentication.infrastructure.audit;
 
-import com.auth.service.auth.authentication.application.AuthLoginAuditService;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogResult;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.event.LoginAuditEvent;
 import com.auth.service.auth.authentication.domain.model.LoginAuditSnapshot;
+import com.auth.service.auth.authentication.domain.port.LoginAuditRecorder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,19 +23,19 @@ import static org.mockito.Mockito.verify;
 class LoginAuditEventListenerTest {
 
 	@Mock
-	private AuthLoginAuditService authLoginAuditService;
+	private LoginAuditRecorder loginAuditRecorder;
 
 	@Test
 	@DisplayName("监听器应将事件委托给审计服务快照写入")
 	void onLoginAudit_shouldDelegateToAuditService() {
-		LoginAuditEventListener listener = new LoginAuditEventListener(authLoginAuditService);
+		LoginAuditEventListener listener = new LoginAuditEventListener(loginAuditRecorder);
 		LoginAuditSnapshot snapshot = LoginAuditSnapshot.empty();
 		LoginAuditEvent event = new LoginAuditEvent(snapshot, AuthLoginLogType.LOGOUT, AuthLoginLogResult.SUCCESS, 3L,
 				"name", null, "sid");
 
 		listener.onLoginAudit(event);
 
-		verify(authLoginAuditService).recordLoginLog(same(snapshot), eq(AuthLoginLogType.LOGOUT),
+		verify(loginAuditRecorder).recordLoginLog(same(snapshot), eq(AuthLoginLogType.LOGOUT),
 				eq(AuthLoginLogResult.SUCCESS), eq(3L), eq("name"), isNull(), eq("sid"));
 	}
 

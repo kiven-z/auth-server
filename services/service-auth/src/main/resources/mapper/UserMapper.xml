@@ -29,52 +29,26 @@
        is_deleted
     </sql>
 
-    <!-- 登录：按用户名查询（不过滤 status，禁用/锁定由策略层校验） -->
-    <select id="selectUserForLoginByUsername" resultType="com.auth.module.platform.persistence.model.UserEntity">
+    <!-- 按凭证维度查询用户：activeOnly 控制是否过滤 status=1 -->
+    <select id="selectByCredential" resultType="com.auth.module.platform.persistence.model.UserEntity">
         SELECT
         <include refid="Base_Column_List"/>
         FROM sys_user
-        WHERE is_deleted = 0 AND username = #{username}
-    </select>
-
-    <!-- 登录：按邮箱查询（不过滤 status，禁用/锁定由策略层校验） -->
-    <select id="selectUserForLoginByEmail" resultType="com.auth.module.platform.persistence.model.UserEntity">
-        SELECT
-        <include refid="Base_Column_List"/>
-        FROM sys_user
-        WHERE is_deleted = 0 AND email = #{email}
-    </select>
-
-    <!-- 登录：按手机号查询（不过滤 status，禁用/锁定由策略层校验） -->
-    <select id="selectUserForLoginByPhone" resultType="com.auth.module.platform.persistence.model.UserEntity">
-        SELECT
-        <include refid="Base_Column_List"/>
-        FROM sys_user
-        WHERE is_deleted = 0 AND phone = #{phone}
-    </select>
-
-    <!-- 发码等：按用户名查询正常状态用户 -->
-    <select id="selectUserByUsername" resultType="com.auth.module.platform.persistence.model.UserEntity">
-        SELECT
-        <include refid="Base_Column_List"/>
-        FROM sys_user
-        WHERE is_deleted = 0 AND status = 1 AND username = #{username}
-    </select>
-
-    <!-- 发码等：按邮箱查询正常状态用户 -->
-    <select id="selectUserByEmail" resultType="com.auth.module.platform.persistence.model.UserEntity">
-        SELECT
-        <include refid="Base_Column_List"/>
-        FROM sys_user
-        WHERE is_deleted = 0 AND status = 1 AND email = #{email}
-    </select>
-
-    <!-- 发码等：按手机号查询正常状态用户 -->
-    <select id="selectUserByPhone" resultType="com.auth.module.platform.persistence.model.UserEntity">
-        SELECT
-        <include refid="Base_Column_List"/>
-        FROM sys_user
-        WHERE is_deleted = 0 AND status = 1 AND phone = #{phone}
+        WHERE is_deleted = 0
+        <if test="activeOnly">
+            AND status = 1
+        </if>
+        <choose>
+            <when test="field.name() == 'USERNAME'">
+                AND username = #{value}
+            </when>
+            <when test="field.name() == 'EMAIL'">
+                AND email = #{value}
+            </when>
+            <when test="field.name() == 'PHONE'">
+                AND phone = #{value}
+            </when>
+        </choose>
     </select>
 
 </mapper>

@@ -7,6 +7,8 @@ import com.auth.service.auth.authentication.application.command.SmsLoginCommand;
 import com.auth.service.auth.authentication.application.support.AbstractLoginStrategyTemplate;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.event.LoginAuditEventPublisher;
+import com.auth.service.auth.authentication.infrastructure.persistence.UserCredentialField;
+import com.auth.service.auth.authentication.infrastructure.persistence.UserCredentialQueries;
 import com.auth.service.auth.authentication.infrastructure.persistence.UserMapper;
 import com.auth.service.auth.authentication.infrastructure.token.LoginFailureRateLimiter;
 import com.auth.service.auth.authorization.application.AuthProfileQueryService;
@@ -48,7 +50,7 @@ public class SmsLoginStrategy extends AbstractLoginStrategyTemplate<SmsLoginComm
 	@Override
 	protected UserEntity resolveUser(SmsLoginCommand command) {
 		String phone = command.getPhone();
-		UserEntity user = userMapper.selectUserForLoginByPhone(phone);
+		UserEntity user = UserCredentialQueries.forLogin(userMapper, UserCredentialField.PHONE, phone);
 		if (user == null) {
 			throw new AuthBusinessException(AuthResultCode.USERNAME_OR_PASSWORD_ERROR);
 		}

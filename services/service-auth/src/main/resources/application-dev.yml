@@ -45,20 +45,20 @@ spring:
 
 knife4j:
   basic:
-    enable: true
+    enable: false
 springdoc:
   # 显示 actuator 端点
-  show-actuator: true
+  show-actuator: false
   # OpenAPI JSON文档端点配置
   api-docs:
     # 是否启用OpenAPI JSON端点
-    enabled: true
+    enabled: false
     # OpenAPI JSON文档的访问路径，默认值: /v3/api-docs，可以自定义为其他路径，如: /api-docs, /openapi等
     path: /v3/api-docs
   # Swagger UI界面配置
   swagger-ui:
     # 是否启用Swagger UI可视化界面
-    enabled: true
+    enabled: false
     # Swagger UI界面的访问路径，默认值: /swagger-ui.html，可以自定义为其他路径，如: /docs, /api-docs/ui等
     path: /swagger-ui.html
     # API操作（接口）的排序方式，alpha: 按字母顺序排序（默认），method: 按HTTP请求方法排序（GET → POST → PUT → DELETE等）
@@ -86,7 +86,7 @@ springdoc:
 logging:
   level:
     root: warn
-    com.auth: info
+    com.auth: debug
 
 # auth:
 #   common:
