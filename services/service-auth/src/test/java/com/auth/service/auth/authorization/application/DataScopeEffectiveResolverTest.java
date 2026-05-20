@@ -1,4 +1,4 @@
-package com.auth.service.auth.authorization.application.impl;
+package com.auth.service.auth.authorization.application;
 
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
 import com.auth.module.security.contract.api.granttable.DataScopeKeyUtil;
@@ -19,8 +19,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
+/**
+ * {@link DataScopeEffectiveResolver} 单元测试
+ *
+ * @author Bunny
+ */
 @ExtendWith(MockitoExtension.class)
-class DataScopeEffectiveResolverImplTest {
+class DataScopeEffectiveResolverTest {
 
 	@Mock
 	private UserAuthorizationGrantMapper mapper;
@@ -28,8 +33,7 @@ class DataScopeEffectiveResolverImplTest {
 	@Test
 	@DisplayName("用户ID为空时返回空结果")
 	void nullUserId_shouldReturnEmptyResult() {
-		// userId 为空时不查询数据库，直接返回空范围
-		DataScopeEffectiveResolverImpl resolver = new DataScopeEffectiveResolverImpl(mapper);
+		DataScopeEffectiveResolver resolver = new DataScopeEffectiveResolver(mapper);
 		DataScopeBuildResult result = resolver.resolveWithTrace(null);
 		assertTrue(result.getDataScopes().isEmpty());
 		assertTrue(result.getTraces().isEmpty());
@@ -38,7 +42,6 @@ class DataScopeEffectiveResolverImplTest {
 	@Test
 	@DisplayName("可返回生效范围与轨迹")
 	void shouldResolveScopesAndTrace() {
-		// 模拟角色范围片段，验证 resolver 能产出生效 map 与轨迹
 		DataScopeProjection projection = new DataScopeProjection();
 		projection.setSubjectType("ROLE");
 		projection.setScopeResourceCode("order");
@@ -47,7 +50,7 @@ class DataScopeEffectiveResolverImplTest {
 		projection.setScopeSubjectIds("[\"7\"]");
 		when(mapper.selectEffectiveDataScopesByUserId(10L)).thenReturn(List.of(projection));
 
-		DataScopeEffectiveResolverImpl resolver = new DataScopeEffectiveResolverImpl(mapper);
+		DataScopeEffectiveResolver resolver = new DataScopeEffectiveResolver(mapper);
 		DataScopeBuildResult result = resolver.resolveWithTrace(10L);
 		Map<String, ScopeGrant> scopes = result.getDataScopes();
 

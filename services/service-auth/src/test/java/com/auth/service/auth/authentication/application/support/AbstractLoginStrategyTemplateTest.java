@@ -72,8 +72,9 @@ class AbstractLoginStrategyTemplateTest {
 		verify(authProfileQueryService).buildByUser(user);
 		assertNotNull(result);
 		assertEquals(TestConstants.USER_ID, result.authProfile().getUserId());
-		assertEquals(List.of("R1"), result.response().getRoles());
-		assertEquals(List.of("P1"), result.response().getPermissions());
+		assertEquals(TestConstants.USER_ID, result.authenticatedUser().id());
+		assertEquals(List.of("R1"), result.authProfile().getRoles());
+		assertEquals(List.of("P1"), result.authProfile().getPermissions());
 	}
 
 	@Test

@@ -4,6 +4,7 @@ import com.auth.service.auth.authentication.application.AuthLoginAuditService;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogResult;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.event.LoginAuditEvent;
+import com.auth.service.auth.authentication.domain.model.LoginAuditSnapshot;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

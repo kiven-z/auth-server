@@ -1,4 +1,4 @@
-package com.auth.service.auth.integration.application.impl;
+package com.auth.service.auth.integration.application;
 
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.TestConstants;
@@ -20,12 +20,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 /**
- * {@link InternalAuthCoordinationServiceImpl} 单元测试
+ * {@link InternalAuthCoordinationService} 单元测试
  *
  * @author Bunny
  */
 @ExtendWith(MockitoExtension.class)
-class InternalAuthCoordinationServiceImplTest {
+class InternalAuthCoordinationServiceTest {
 
 	@Mock
 	private RedisUserSessionIndexRepository redisUserSessionIndexRepository;
@@ -39,7 +39,7 @@ class InternalAuthCoordinationServiceImplTest {
 	@Test
 	@DisplayName("刷新缓存：入参为空/含 null 时不抛异常且跳过 null")
 	void refreshUserCache_shouldIgnoreEmptyAndNullAndSwallowExceptions() {
-		InternalAuthCoordinationServiceImpl service = new InternalAuthCoordinationServiceImpl(
+		InternalAuthCoordinationService service = new InternalAuthCoordinationService(
 				redisUserSessionIndexRepository, authProfileQueryService, authProfileCache);
 
 		assertDoesNotThrow(() -> service.refreshUserCache(List.of()));
@@ -57,7 +57,7 @@ class InternalAuthCoordinationServiceImplTest {
 	@Test
 	@DisplayName("踢会话：入参为空/含 null 时不抛异常且跳过 null；下游异常会被吞掉")
 	void kickAllSessions_shouldIgnoreEmptyAndNullAndSwallowExceptions() {
-		InternalAuthCoordinationServiceImpl service = new InternalAuthCoordinationServiceImpl(
+		InternalAuthCoordinationService service = new InternalAuthCoordinationService(
 				redisUserSessionIndexRepository, authProfileQueryService, authProfileCache);
 
 		assertDoesNotThrow(() -> service.kickAllSessions(List.of()));
@@ -72,7 +72,7 @@ class InternalAuthCoordinationServiceImplTest {
 	@Test
 	@DisplayName("resolveEffectiveCodes：委托 AuthProfileQueryService 并拷贝角色与权限列表")
 	void resolveEffectiveCodes_mapsProfileRolesAndPermissions() {
-		InternalAuthCoordinationServiceImpl service = new InternalAuthCoordinationServiceImpl(
+		InternalAuthCoordinationService service = new InternalAuthCoordinationService(
 				redisUserSessionIndexRepository, authProfileQueryService, authProfileCache);
 		AuthProfile profile = AuthProfile.builder()
 			.userId(TestConstants.USER_ID)

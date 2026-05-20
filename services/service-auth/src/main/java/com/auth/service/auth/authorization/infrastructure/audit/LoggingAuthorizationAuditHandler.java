@@ -1,4 +1,4 @@
-package com.auth.service.auth.authorization.infrastructure;
+package com.auth.service.auth.authorization.infrastructure.audit;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.module.security.contract.dto.AuthorizationAuditIngestRequest;

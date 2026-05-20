@@ -1,4 +1,4 @@
-package com.auth.service.auth.authorization.infrastructure;
+package com.auth.service.auth.authorization.infrastructure.persistence.query;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

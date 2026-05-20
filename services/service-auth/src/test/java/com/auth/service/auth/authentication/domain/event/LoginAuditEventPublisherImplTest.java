@@ -3,7 +3,7 @@ package com.auth.service.auth.authentication.domain.event;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogResult;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.infrastructure.audit.LoginAuditEventPublisherImpl;
-import com.auth.service.auth.authentication.infrastructure.audit.LoginAuditSnapshot;
+import com.auth.service.auth.authentication.domain.model.LoginAuditSnapshot;
 import com.auth.service.auth.authentication.infrastructure.audit.LoginAuditSnapshotFactory;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.DisplayName;

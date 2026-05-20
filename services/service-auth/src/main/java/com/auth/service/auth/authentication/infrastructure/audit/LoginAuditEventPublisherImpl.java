@@ -4,6 +4,7 @@ import com.auth.service.auth.authentication.domain.enums.AuthLoginLogResult;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.event.LoginAuditEvent;
 import com.auth.service.auth.authentication.domain.event.LoginAuditEventPublisher;
+import com.auth.service.auth.authentication.domain.model.LoginAuditSnapshot;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;

@@ -1,4 +1,4 @@
-package com.auth.service.auth.authentication.application.impl;
+package com.auth.service.auth.authentication.application;
 
 import cn.hutool.crypto.digest.MD5;
 import com.auth.common.jwt.autoconfigure.JwtProperties;
@@ -32,8 +32,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * {@link RefreshTokenService} 单元测试
+ *
+ * @author Bunny
+ */
 @ExtendWith(MockitoExtension.class)
-class RefreshTokenServiceImplTest {
+class RefreshTokenServiceTest {
 
 	@Mock
 	private AuthProfileCache authProfileCache;
@@ -57,9 +62,9 @@ class RefreshTokenServiceImplTest {
 		return JwtUserToken.builder().userId(TestConstants.USER_ID).jti(TestConstants.JTI).build();
 	}
 
-	private RefreshTokenServiceImpl newService() {
-		return new RefreshTokenServiceImpl(authProfileCache, redisUserSessionIndexRepository, tokenService,
-				jwtProperties, loginAuditEventPublisher, authTokenResponseEnricher);
+	private RefreshTokenService newService() {
+		return new RefreshTokenService(authProfileCache, redisUserSessionIndexRepository, tokenService, jwtProperties,
+				loginAuditEventPublisher, authTokenResponseEnricher);
 	}
 
 	@Test
@@ -67,7 +72,7 @@ class RefreshTokenServiceImplTest {
 	void refresh_shouldThrowExpired_whenSessionMissing() {
 		when(tokenService.parseRefreshToken(TestConstants.REFRESH_TOKEN)).thenReturn(token());
 		when(redisUserSessionIndexRepository.loadUserSessionIndex(TestConstants.JTI)).thenReturn(Optional.empty());
-		RefreshTokenServiceImpl service = newService();
+		RefreshTokenService service = newService();
 
 		AuthBusinessException ex = assertThrows(AuthBusinessException.class,
 				() -> service.refreshToken(TestConstants.REFRESH_TOKEN, null));
@@ -86,7 +91,7 @@ class RefreshTokenServiceImplTest {
 		session.setRefreshTokenHash("deadbeef");
 		when(redisUserSessionIndexRepository.loadUserSessionIndex(TestConstants.JTI)).thenReturn(Optional.of(session));
 
-		RefreshTokenServiceImpl service = newService();
+		RefreshTokenService service = newService();
 
 		AuthBusinessException ex = assertThrows(AuthBusinessException.class,
 				() -> service.refreshToken(TestConstants.REFRESH_TOKEN, null));
@@ -107,7 +112,7 @@ class RefreshTokenServiceImplTest {
 		session.setRefreshTokenHash(MD5.create().digestHex16(TestConstants.REFRESH_TOKEN));
 		when(redisUserSessionIndexRepository.loadUserSessionIndex(TestConstants.JTI)).thenReturn(Optional.of(session));
 
-		RefreshTokenServiceImpl service = newService();
+		RefreshTokenService service = newService();
 
 		AuthBusinessException ex = assertThrows(AuthBusinessException.class,
 				() -> service.refreshToken(TestConstants.REFRESH_TOKEN, null));
@@ -120,7 +125,7 @@ class RefreshTokenServiceImplTest {
 	@Test
 	@DisplayName("刷新：空白刷新令牌时抛 REFRESH_TOKEN_MISSING 并记录审计")
 	void refresh_shouldThrowMissing_whenTokenBlank() {
-		RefreshTokenServiceImpl service = newService();
+		RefreshTokenService service = newService();
 
 		AuthBusinessException ex = assertThrows(AuthBusinessException.class, () -> service.refreshToken(" ", null));
 
@@ -135,7 +140,7 @@ class RefreshTokenServiceImplTest {
 	void refresh_shouldThrowMalformed_whenParseFails() {
 		when(tokenService.parseRefreshToken(TestConstants.REFRESH_TOKEN))
 			.thenThrow(new AuthBusinessException(AuthResultCode.REFRESH_TOKEN_MALFORMED));
-		RefreshTokenServiceImpl service = newService();
+		RefreshTokenService service = newService();
 
 		AuthBusinessException ex = assertThrows(AuthBusinessException.class,
 				() -> service.refreshToken(TestConstants.REFRESH_TOKEN, null));
@@ -166,7 +171,7 @@ class RefreshTokenServiceImplTest {
 		when(tokenService.buildTokenPair(TestConstants.USER_ID, TestConstants.JTI, 9L))
 			.thenReturn(new TokenPair("new-access", "new-refresh", expires));
 
-		RefreshTokenServiceImpl service = newService();
+		RefreshTokenService service = newService();
 
 		RefreshSessionResult result = service.refreshToken(TestConstants.REFRESH_TOKEN, null);
 		RefreshTokenResponse response = result.response();

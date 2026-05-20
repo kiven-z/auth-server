@@ -1,11 +1,11 @@
-package com.auth.service.auth.authentication.application.impl;
+package com.auth.service.auth.authentication.application;
 
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.authentication.api.dto.response.UserLoginResponse;
-import com.auth.service.auth.authentication.application.AuthService;
+import com.auth.service.auth.authentication.application.assembler.LoginResponseAssembler;
 import com.auth.service.auth.authentication.application.command.AbstractLoginCommand;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogResult;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
@@ -34,13 +34,13 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * 认证服务实现
+ * 登录应用服务：凭证校验后的令牌签发、会话与画像缓存编排。
  *
  * @author Bunny
  */
 @Slf4j
 @Service
-public class AuthServiceImpl implements AuthService {
+public class LoginApplicationService {
 
 	private final Map<Class<? extends AbstractLoginCommand>, LoginStrategy<?>> strategyRegistry;
 
@@ -60,7 +60,7 @@ public class AuthServiceImpl implements AuthService {
 
 	private final AuthTokenResponseEnricher authTokenResponseEnricher;
 
-	public AuthServiceImpl(List<LoginStrategy<?>> strategies, AuthProfileCache authProfileCache,
+	public LoginApplicationService(List<LoginStrategy<?>> strategies, AuthProfileCache authProfileCache,
 			UserSessionIndexFactory userSessionIndexFactory,
 			RedisUserSessionIndexRepository redisUserSessionIndexRepository, SessionLimitManager sessionLimitManager,
 			TokenService tokenService, LoginFailureRateLimiter loginFailureRateLimiter,
@@ -78,24 +78,26 @@ public class AuthServiceImpl implements AuthService {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * 执行登录并返回已填充访问/刷新令牌的响应。
+	 * @param command 登录命令
+	 * @param request HTTP 请求
+	 * @return 登录响应
 	 */
-	@Override
 	@SuppressWarnings("unchecked")
 	public UserLoginResponse login(AbstractLoginCommand command, HttpServletRequest request) {
 		LoginStrategy<?> strategy = lookupStrategyWithAudit(command, request);
 
 		LoginResult loginResult = ((LoginStrategy<AbstractLoginCommand>) strategy).authenticate(command, request);
 		AuthProfile profile = loginResult.authProfile();
-		UserLoginResponse response = loginResult.response();
+		UserLoginResponse response = LoginResponseAssembler.toUserLoginResponse(loginResult);
 		Long userId = profile.getUserId();
+		String username = loginResult.authenticatedUser().username();
 		boolean rememberMe = BooleanUtil.isTrue(command.getRememberMe());
 
 		String jti = null;
 		boolean profileCached = false;
 		boolean sessionCreated = false;
 		try {
-			// 检查会话上限
 			sessionLimitManager.assertSessionLimit(userId);
 
 			jti = UUID.randomUUID().toString();
@@ -104,32 +106,28 @@ public class AuthServiceImpl implements AuthService {
 			authProfileCache.createCacheAuthProfile(profile);
 			profileCached = true;
 
-			// 构建令牌
 			TokenPair tokenPair = tokenService.buildTokenPair(userId, jti, permVersion);
 			response.setAccessToken(tokenPair.accessToken());
 			response.setRefreshToken(tokenPair.refreshToken());
 			response.setExpires(tokenPair.accessExpiresAt());
 
-			// 构建会话索引
 			UserSessionIndex sessionIndex = userSessionIndexFactory.buildUserSessionIndex(request, userId, jti,
 					response.getRefreshToken(), rememberMe);
 			redisUserSessionIndexRepository.createUserSessionIndex(sessionIndex);
 			sessionCreated = true;
 			authTokenResponseEnricher.enrichReadMeDay(response);
 
-			// 记录成功
 			loginFailureRateLimiter.recordSuccess(userId);
 
-			// 记录成功日志
 			loginAuditEventPublisher.publish(request, loginResult.loginLogType(), AuthLoginLogResult.SUCCESS, userId,
-					response.getUsername(), null, jti);
+					username, null, jti);
 			return response;
 		}
 		catch (AuthBusinessException ex) {
 			rollbackLoginArtifacts(userId, jti, profileCached, sessionCreated);
 			loginAuditEventPublisher.publish(request, loginResult.loginLogType(),
-					LoginAuditContextResolver.resultForOrchestrationFailure(ex.getResultCode()), userId,
-					response.getUsername(), ex.getMessageKey(), null);
+					LoginAuditContextResolver.resultForOrchestrationFailure(ex.getResultCode()), userId, username,
+					ex.getMessageKey(), null);
 			throw ex;
 		}
 		catch (RuntimeException ex) {
@@ -147,7 +145,6 @@ public class AuthServiceImpl implements AuthService {
 	 */
 	private LoginStrategy<?> lookupStrategyWithAudit(AbstractLoginCommand command, HttpServletRequest request) {
 		try {
-			// 从注册表中查找匹配的策略（精确匹配 → 父类/接口匹配兜底）
 			LoginStrategy<?> raw = strategyRegistry.get(command.getClass());
 			if (raw == null) {
 				raw = strategyRegistry.entrySet()
@@ -168,11 +165,11 @@ public class AuthServiceImpl implements AuthService {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * 登出当前会话（永远不抛出异常）。幂等：会话不存在/索引不存在都视为成功。
+	 * @param accessToken Access Token（不含 Bearer 前缀）
+	 * @param request HTTP 请求
 	 */
-	@Override
 	public void logout(String accessToken, HttpServletRequest request) {
-		// 撤销外部访问令牌对应的服务端会话并记录登出审计
 		tokenService.parseAccessTokenSafe(accessToken).ifPresent(userToken -> {
 			String jti = userToken.getJti();
 			Long userId = userToken.getUserId();

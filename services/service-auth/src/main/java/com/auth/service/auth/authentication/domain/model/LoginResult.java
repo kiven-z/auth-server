@@ -1,17 +1,17 @@
 package com.auth.service.auth.authentication.domain.model;
 
 import com.auth.module.security.contract.api.authorization.AuthProfile;
-import com.auth.service.auth.authentication.api.dto.response.UserLoginResponse;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * 登录结果（用于在登录链路中复用授权画像，避免重复查询）
+ * 登录结果（领域层）：认证用户快照 + 授权画像，供应用层组装 API 响应与签发令牌。
  *
- * @param response 用户登录响应
+ * @param authenticatedUser 已认证用户展示信息
  * @param authProfile 授权画像
+ * @param loginLogType 登录审计类型
  * @author Bunny
  */
-public record LoginResult(@NotNull UserLoginResponse response, @NotNull AuthProfile authProfile,
+public record LoginResult(@NotNull AuthenticatedUser authenticatedUser, @NotNull AuthProfile authProfile,
 		@NotNull AuthLoginLogType loginLogType) {
 }

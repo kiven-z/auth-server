@@ -1,10 +1,10 @@
-package com.auth.service.auth.authentication.application.impl;
+package com.auth.service.auth.authentication.application;
 
 import com.auth.common.ip.IpAddressService;
 import com.auth.module.platform.persistence.model.LoginLogEntity;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogResult;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
-import com.auth.service.auth.authentication.infrastructure.audit.LoginAuditSnapshot;
+import com.auth.service.auth.authentication.domain.model.LoginAuditSnapshot;
 import com.auth.service.auth.authentication.infrastructure.audit.LoginAuditSnapshotFactory;
 import com.auth.service.auth.authentication.infrastructure.persistence.LoginLogMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -26,12 +26,12 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
 /**
- * {@link AuthLoginAuditServiceImpl} 单元测试
+ * {@link AuthLoginAuditService} 单元测试
  *
  * @author Bunny
  */
 @ExtendWith(MockitoExtension.class)
-class AuthLoginAuditServiceImplTest {
+class AuthLoginAuditServiceTest {
 
 	@Mock
 	private IpAddressService ipAddressService;
@@ -39,11 +39,11 @@ class AuthLoginAuditServiceImplTest {
 	@Mock
 	private LoginLogMapper loginLogMapper;
 
-	private AuthLoginAuditServiceImpl loginLogService;
+	private AuthLoginAuditService loginLogService;
 
 	@BeforeEach
 	void setUp() throws Exception {
-		loginLogService = new AuthLoginAuditServiceImpl(new LoginAuditSnapshotFactory(ipAddressService));
+		loginLogService = new AuthLoginAuditService(new LoginAuditSnapshotFactory(ipAddressService));
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(loginLogService, loginLogMapper);

@@ -1,4 +1,4 @@
-package com.auth.service.auth.authentication.application.impl;
+package com.auth.service.auth.authentication.application;
 
 import com.auth.common.jwt.model.JwtUserToken;
 import com.auth.module.security.contract.api.UserSessionIndex;
@@ -10,6 +10,7 @@ import com.auth.service.auth.authentication.application.command.UsernamePassword
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogResult;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.event.LoginAuditEventPublisher;
+import com.auth.service.auth.authentication.domain.model.AuthenticatedUser;
 import com.auth.service.auth.authentication.domain.model.LoginResult;
 import com.auth.service.auth.authentication.domain.model.TokenPair;
 import com.auth.service.auth.authentication.domain.port.LoginStrategy;
@@ -39,12 +40,12 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**
- * AuthServiceImpl 单元测试
+ * LoginApplicationService 单元测试
  *
  * @author Bunny
  */
 @ExtendWith(MockitoExtension.class)
-class AuthServiceImplTest {
+class LoginApplicationServiceTest {
 
 	@Mock
 	private AuthProfileCache authProfileCache;
@@ -73,8 +74,14 @@ class AuthServiceImplTest {
 	@Mock
 	private HttpServletRequest httpServletRequest;
 
-	private AuthServiceImpl newService(LoginStrategy<?>... strategies) {
-		return new AuthServiceImpl(List.of(strategies), authProfileCache, userSessionIndexFactory,
+	private static LoginResult toLoginResult(UserLoginResponse response, AuthProfile profile) {
+		AuthenticatedUser user = new AuthenticatedUser(response.getId(), response.getUsername(), response.getNickname(),
+				response.getAvatar());
+		return new LoginResult(user, profile, AuthLoginLogType.LOGIN_PASSWORD);
+	}
+
+	private LoginApplicationService newService(LoginStrategy<?>... strategies) {
+		return new LoginApplicationService(List.of(strategies), authProfileCache, userSessionIndexFactory,
 				redisUserSessionIndexRepository, sessionLimitManager, tokenService, loginFailureRateLimiter,
 				loginAuditEventPublisher, authTokenResponseEnricher);
 	}
@@ -92,7 +99,7 @@ class AuthServiceImplTest {
 		response.setId(TestConstants.USER_ID);
 		response.setUsername("user");
 
-		LoginResult loginResult = new LoginResult(response, profile, AuthLoginLogType.LOGIN_PASSWORD);
+		LoginResult loginResult = toLoginResult(response, profile);
 
 		LoginStrategy<UsernamePasswordLoginCommand> strategy = new LoginStrategy<>() {
 			@Override
@@ -117,11 +124,12 @@ class AuthServiceImplTest {
 		when(tokenService.buildTokenPair(anyLong(), anyString(), anyLong())).thenReturn(new TokenPair(
 				TestConstants.ACCESS_TOKEN, TestConstants.REFRESH_TOKEN, LocalDateTime.now().plusMinutes(1)));
 
-		AuthServiceImpl service = newService(strategy);
+		LoginApplicationService service = newService(strategy);
 
 		UserLoginResponse actual = service.login(command, httpServletRequest);
 
-		assertSame(response, actual);
+		assertEquals(TestConstants.USER_ID, actual.getId());
+		assertEquals("user", actual.getUsername());
 		assertEquals(TestConstants.ACCESS_TOKEN, actual.getAccessToken());
 		assertEquals(TestConstants.REFRESH_TOKEN, actual.getRefreshToken());
 		assertNotNull(actual.getExpires());
@@ -136,7 +144,7 @@ class AuthServiceImplTest {
 			.buildUserSessionIndex(same(httpServletRequest), eq(TestConstants.USER_ID), anyString(),
 					eq(TestConstants.REFRESH_TOKEN), eq(false));
 		inOrder.verify(redisUserSessionIndexRepository).createUserSessionIndex(sessionIndex);
-		inOrder.verify(authTokenResponseEnricher).enrichReadMeDay(response);
+		inOrder.verify(authTokenResponseEnricher).enrichReadMeDay(actual);
 		inOrder.verify(loginFailureRateLimiter).recordSuccess(TestConstants.USER_ID);
 		inOrder.verify(loginAuditEventPublisher)
 			.publish(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_PASSWORD), eq(AuthLoginLogResult.SUCCESS),
@@ -171,7 +179,7 @@ class AuthServiceImplTest {
 
 			@Override
 			public LoginResult authenticate(UsernamePasswordLoginCommand cmd, HttpServletRequest request) {
-				return new LoginResult(response, profile, AuthLoginLogType.LOGIN_PASSWORD);
+				return toLoginResult(response, profile);
 			}
 		};
 
@@ -180,11 +188,11 @@ class AuthServiceImplTest {
 		when(tokenService.buildTokenPair(anyLong(), anyString(), anyLong())).thenReturn(new TokenPair(
 				TestConstants.ACCESS_TOKEN, TestConstants.REFRESH_TOKEN, LocalDateTime.now().plusMinutes(1)));
 
-		AuthServiceImpl service = newService(strategy);
+		LoginApplicationService service = newService(strategy);
 
 		UserLoginResponse actual = service.login(command, httpServletRequest);
 
-		assertSame(response, actual);
+		assertEquals(TestConstants.USER_ID, actual.getId());
 		verify(sessionLimitManager).assertSessionLimit(TestConstants.USER_ID);
 	}
 
@@ -207,7 +215,7 @@ class AuthServiceImplTest {
 
 			@Override
 			public LoginResult authenticate(UsernamePasswordLoginCommand cmd, HttpServletRequest request) {
-				return new LoginResult(response, profile, AuthLoginLogType.LOGIN_PASSWORD);
+				return toLoginResult(response, profile);
 			}
 		};
 
@@ -237,7 +245,7 @@ class AuthServiceImplTest {
 			}
 		};
 
-		AuthServiceImpl service = newService();
+		LoginApplicationService service = newService();
 
 		AuthBusinessException exception = assertThrows(AuthBusinessException.class,
 				() -> service.login(unknown, httpServletRequest));
@@ -261,7 +269,7 @@ class AuthServiceImplTest {
 		response.setId(TestConstants.USER_ID);
 		response.setUsername("user");
 
-		LoginResult loginResult = new LoginResult(response, profile, AuthLoginLogType.LOGIN_PASSWORD);
+		LoginResult loginResult = toLoginResult(response, profile);
 
 		LoginStrategy<UsernamePasswordLoginCommand> strategy = new LoginStrategy<>() {
 			@Override
@@ -278,7 +286,7 @@ class AuthServiceImplTest {
 		when(tokenService.buildTokenPair(anyLong(), anyString(), anyLong()))
 			.thenThrow(new AuthBusinessException(AuthResultCode.SERVER_ERROR));
 
-		AuthServiceImpl service = newService(strategy);
+		LoginApplicationService service = newService(strategy);
 
 		assertThrows(AuthBusinessException.class, () -> service.login(command, httpServletRequest));
 
@@ -290,7 +298,7 @@ class AuthServiceImplTest {
 	@Test
 	@DisplayName("登出：token 为空或无法解析时不删除会话")
 	void logout_shouldSkipRevoke_whenTokenBlankOrUnparsed() {
-		AuthServiceImpl service = newService();
+		LoginApplicationService service = newService();
 
 		service.logout(" ", null);
 		verify(tokenService).parseAccessTokenSafe(" ");
@@ -306,7 +314,7 @@ class AuthServiceImplTest {
 	@Test
 	@DisplayName("登出：token 有效时，删除会话并从活跃集合移除")
 	void logout_shouldDeleteSessionAndRemoveActiveSession_whenTokenValid() {
-		AuthServiceImpl service = newService();
+		LoginApplicationService service = newService();
 
 		JwtUserToken jwtUserToken = mock(JwtUserToken.class);
 		when(jwtUserToken.getJti()).thenReturn(TestConstants.JTI);

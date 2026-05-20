@@ -22,13 +22,15 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**
- * AuthSessionFacade 单元测试
+ * {@link AuthSessionApplicationService} 单元测试
+ *
+ * @author Bunny
  */
 @ExtendWith(MockitoExtension.class)
 class AuthSessionApplicationServiceTest {
 
 	@Mock
-	private AuthService authService;
+	private LoginApplicationService loginApplicationService;
 
 	@Mock
 	private RefreshTokenService refreshTokenService;
@@ -52,7 +54,7 @@ class AuthSessionApplicationServiceTest {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		HttpServletResponse response = mock(HttpServletResponse.class);
 
-		when(authService.login(any(AbstractLoginCommand.class), same(request))).thenReturn(login);
+		when(loginApplicationService.login(any(AbstractLoginCommand.class), same(request))).thenReturn(login);
 
 		UserLoginResponse actual = authSessionApplicationService.completeLogin(auth, request, response);
 
@@ -91,7 +93,7 @@ class AuthSessionApplicationServiceTest {
 
 		authSessionApplicationService.completeLogout(request, response);
 
-		verify(authService).logout("access-token", request);
+		verify(loginApplicationService).logout("access-token", request);
 		verify(refreshTokenService).revokeByRefreshToken("refresh-token", request);
 		verify(authRefreshCookieService).clearRefreshToken(response, request);
 	}
@@ -106,7 +108,7 @@ class AuthSessionApplicationServiceTest {
 
 		authSessionApplicationService.completeLogout(request, response);
 
-		verify(authService, never()).logout(anyString(), any());
+		verify(loginApplicationService, never()).logout(anyString(), any());
 		verify(refreshTokenService).revokeByRefreshToken("refresh-only", request);
 		verify(authRefreshCookieService).clearRefreshToken(response, request);
 	}

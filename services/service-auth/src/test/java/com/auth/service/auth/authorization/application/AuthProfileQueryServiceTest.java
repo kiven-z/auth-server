@@ -1,9 +1,8 @@
-package com.auth.service.auth.authorization.application.impl;
+package com.auth.service.auth.authorization.application;
 
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
-import com.auth.service.auth.authentication.infrastructure.persistence.UserMapper;
-import com.auth.service.auth.authorization.application.DataScopeEffectiveResolver;
+import com.auth.service.auth.authorization.domain.port.UserReadPort;
 import com.auth.service.auth.authorization.infrastructure.persistence.UserAuthorizationGrantMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,14 +17,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+/**
+ * {@link AuthProfileQueryService} 单元测试
+ *
+ * @author Bunny
+ */
 @ExtendWith(MockitoExtension.class)
-class AuthProfileQueryServiceImplTest {
+class AuthProfileQueryServiceTest {
 
 	@Mock
 	private UserAuthorizationGrantMapper userAuthorizationGrantMapper;
 
 	@Mock
-	private UserMapper userMapper;
+	private UserReadPort userReadPort;
 
 	@Mock
 	private DataScopeEffectiveResolver dataScopeEffectiveResolver;
@@ -33,7 +37,6 @@ class AuthProfileQueryServiceImplTest {
 	@Test
 	@DisplayName("构建画像时注入生效数据权限")
 	void buildByUser_shouldContainResolvedDataScopes() {
-		// 构造用户、角色和权限，验证 dataScopes 来自 resolver
 		UserEntity user = new UserEntity();
 		user.setId(10L);
 		user.setUsername("u10");
@@ -42,7 +45,7 @@ class AuthProfileQueryServiceImplTest {
 		ScopeGrant grant = ScopeGrant.builder().build();
 		when(dataScopeEffectiveResolver.resolveByUserId(10L)).thenReturn(Map.of("DEPT::default", grant));
 
-		AuthProfileQueryServiceImpl service = new AuthProfileQueryServiceImpl(userAuthorizationGrantMapper, userMapper,
+		AuthProfileQueryService service = new AuthProfileQueryService(userAuthorizationGrantMapper, userReadPort,
 				dataScopeEffectiveResolver);
 		Map<String, ScopeGrant> dataScopes = service.buildByUser(user).getDataScopes();
 
