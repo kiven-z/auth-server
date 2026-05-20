@@ -14,7 +14,7 @@ import com.auth.service.auth.authentication.domain.model.AuthenticatedUser;
 import com.auth.service.auth.authentication.domain.model.LoginResult;
 import com.auth.service.auth.authentication.domain.model.TokenPair;
 import com.auth.service.auth.authentication.domain.port.LoginStrategy;
-import com.auth.service.auth.authentication.infrastructure.support.AuthTokenResponseEnricher;
+import com.auth.service.auth.authentication.infrastructure.cookie.RememberMeCookiePolicy;
 import com.auth.service.auth.authentication.infrastructure.token.LoginFailureRateLimiter;
 import com.auth.service.auth.authentication.infrastructure.token.TokenService;
 import com.auth.service.auth.authorization.application.AuthProfileCacheApplicationService;
@@ -69,7 +69,7 @@ class LoginApplicationServiceTest {
 	private LoginAuditEventPublisher loginAuditEventPublisher;
 
 	@Mock
-	private AuthTokenResponseEnricher authTokenResponseEnricher;
+	private RememberMeCookiePolicy rememberMeCookiePolicy;
 
 	@Mock
 	private HttpServletRequest httpServletRequest;
@@ -83,7 +83,7 @@ class LoginApplicationServiceTest {
 	private LoginApplicationService newService(LoginStrategy<?>... strategies) {
 		return new LoginApplicationService(List.of(strategies), authProfileCacheApplicationService,
 				userSessionIndexFactory, redisUserSessionIndexRepository, sessionLimitManager, tokenService,
-				loginFailureRateLimiter, loginAuditEventPublisher, authTokenResponseEnricher);
+				loginFailureRateLimiter, loginAuditEventPublisher, rememberMeCookiePolicy);
 	}
 
 	@Test
@@ -123,6 +123,7 @@ class LoginApplicationServiceTest {
 
 		when(tokenService.buildTokenPair(anyLong(), anyString(), anyLong())).thenReturn(new TokenPair(
 				TestConstants.ACCESS_TOKEN, TestConstants.REFRESH_TOKEN, LocalDateTime.now().plusMinutes(1)));
+		when(rememberMeCookiePolicy.resolveReadMeDay()).thenReturn(7L);
 
 		LoginApplicationService service = newService(strategy);
 
@@ -133,9 +134,10 @@ class LoginApplicationServiceTest {
 		assertEquals(TestConstants.ACCESS_TOKEN, actual.getAccessToken());
 		assertEquals(TestConstants.REFRESH_TOKEN, actual.getRefreshToken());
 		assertNotNull(actual.getExpires());
+		assertEquals(7L, actual.getReadMeDay());
 
 		InOrder inOrder = inOrder(sessionLimitManager, authProfileCacheApplicationService, tokenService,
-				userSessionIndexFactory, redisUserSessionIndexRepository, authTokenResponseEnricher,
+				userSessionIndexFactory, redisUserSessionIndexRepository, rememberMeCookiePolicy,
 				loginFailureRateLimiter, loginAuditEventPublisher);
 		inOrder.verify(sessionLimitManager).assertSessionLimit(TestConstants.USER_ID);
 		inOrder.verify(authProfileCacheApplicationService).cacheProfile(profile);
@@ -144,7 +146,7 @@ class LoginApplicationServiceTest {
 			.buildUserSessionIndex(same(httpServletRequest), eq(TestConstants.USER_ID), anyString(),
 					eq(TestConstants.REFRESH_TOKEN), eq(false));
 		inOrder.verify(redisUserSessionIndexRepository).createUserSessionIndex(sessionIndex);
-		inOrder.verify(authTokenResponseEnricher).enrichReadMeDay(actual);
+		inOrder.verify(rememberMeCookiePolicy).resolveReadMeDay();
 		inOrder.verify(loginFailureRateLimiter).recordSuccess(TestConstants.USER_ID);
 		inOrder.verify(loginAuditEventPublisher)
 			.publish(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_PASSWORD), eq(AuthLoginLogResult.SUCCESS),

@@ -8,7 +8,7 @@ import com.auth.service.auth.authentication.api.dto.response.UserLoginResponse;
 import com.auth.service.auth.authentication.application.assembler.RefreshResponseAssembler;
 import com.auth.service.auth.authentication.domain.model.RefreshSessionResult;
 import com.auth.service.auth.authentication.infrastructure.cookie.AuthRefreshCookieService;
-import com.auth.service.auth.authentication.infrastructure.support.AuthTokenResponseEnricher;
+import com.auth.service.auth.authentication.infrastructure.cookie.RememberMeCookiePolicy;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
@@ -29,15 +29,15 @@ public class AuthSessionApplicationService {
 
 	private final AuthRefreshCookieService authRefreshCookieService;
 
-	private final AuthTokenResponseEnricher authTokenResponseEnricher;
+	private final RememberMeCookiePolicy rememberMeCookiePolicy;
 
 	public AuthSessionApplicationService(LoginApplicationService loginApplicationService,
 			RefreshTokenService refreshTokenService, AuthRefreshCookieService authRefreshCookieService,
-			AuthTokenResponseEnricher authTokenResponseEnricher) {
+			RememberMeCookiePolicy rememberMeCookiePolicy) {
 		this.loginApplicationService = loginApplicationService;
 		this.refreshTokenService = refreshTokenService;
 		this.authRefreshCookieService = authRefreshCookieService;
-		this.authTokenResponseEnricher = authTokenResponseEnricher;
+		this.rememberMeCookiePolicy = rememberMeCookiePolicy;
 	}
 
 	/**
@@ -67,7 +67,7 @@ public class AuthSessionApplicationService {
 		RefreshSessionResult result = refreshTokenService.refreshToken(refreshToken, request);
 		RefreshTokenResponse refreshResponse = RefreshResponseAssembler.toRefreshTokenResponse(result);
 
-		authTokenResponseEnricher.enrichReadMeDay(refreshResponse);
+		refreshResponse.setReadMeDay(rememberMeCookiePolicy.resolveReadMeDay());
 		authRefreshCookieService.writeRefreshToken(response, request, result.tokenPair().refreshToken(),
 				result.rememberMe());
 		return refreshResponse;

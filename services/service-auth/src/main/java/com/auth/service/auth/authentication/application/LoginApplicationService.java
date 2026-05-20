@@ -14,7 +14,7 @@ import com.auth.service.auth.authentication.domain.model.LoginResult;
 import com.auth.service.auth.authentication.domain.model.TokenPair;
 import com.auth.service.auth.authentication.domain.port.LoginStrategy;
 import com.auth.service.auth.authentication.application.support.LoginAuditContextResolver;
-import com.auth.service.auth.authentication.infrastructure.support.AuthTokenResponseEnricher;
+import com.auth.service.auth.authentication.infrastructure.cookie.RememberMeCookiePolicy;
 import com.auth.service.auth.authentication.infrastructure.token.LoginFailureRateLimiter;
 import com.auth.service.auth.authentication.infrastructure.token.TokenService;
 import com.auth.service.auth.authorization.application.AuthProfileCacheApplicationService;
@@ -58,14 +58,14 @@ public class LoginApplicationService {
 
 	private final LoginAuditEventPublisher loginAuditEventPublisher;
 
-	private final AuthTokenResponseEnricher authTokenResponseEnricher;
+	private final RememberMeCookiePolicy rememberMeCookiePolicy;
 
 	public LoginApplicationService(List<LoginStrategy<?>> strategies,
 			AuthProfileCacheApplicationService authProfileCacheApplicationService,
 			UserSessionIndexFactory userSessionIndexFactory,
 			RedisUserSessionIndexRepository redisUserSessionIndexRepository, SessionLimitManager sessionLimitManager,
 			TokenService tokenService, LoginFailureRateLimiter loginFailureRateLimiter,
-			LoginAuditEventPublisher loginAuditEventPublisher, AuthTokenResponseEnricher authTokenResponseEnricher) {
+			LoginAuditEventPublisher loginAuditEventPublisher, RememberMeCookiePolicy rememberMeCookiePolicy) {
 		this.strategyRegistry = strategies.stream()
 			.collect(Collectors.toUnmodifiableMap(LoginStrategy::supports, Function.identity()));
 		this.authProfileCacheApplicationService = authProfileCacheApplicationService;
@@ -75,7 +75,7 @@ public class LoginApplicationService {
 		this.tokenService = tokenService;
 		this.loginFailureRateLimiter = loginFailureRateLimiter;
 		this.loginAuditEventPublisher = loginAuditEventPublisher;
-		this.authTokenResponseEnricher = authTokenResponseEnricher;
+		this.rememberMeCookiePolicy = rememberMeCookiePolicy;
 	}
 
 	/**
@@ -116,7 +116,7 @@ public class LoginApplicationService {
 					response.getRefreshToken(), rememberMe);
 			redisUserSessionIndexRepository.createUserSessionIndex(sessionIndex);
 			sessionCreated = true;
-			authTokenResponseEnricher.enrichReadMeDay(response);
+			response.setReadMeDay(rememberMeCookiePolicy.resolveReadMeDay());
 
 			loginFailureRateLimiter.recordSuccess(userId);
 

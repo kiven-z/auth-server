@@ -7,7 +7,7 @@ import com.auth.service.auth.authentication.application.command.AbstractLoginCom
 import com.auth.service.auth.authentication.domain.model.RefreshSessionResult;
 import com.auth.service.auth.authentication.domain.model.TokenPair;
 import com.auth.service.auth.authentication.infrastructure.cookie.AuthRefreshCookieService;
-import com.auth.service.auth.authentication.infrastructure.support.AuthTokenResponseEnricher;
+import com.auth.service.auth.authentication.infrastructure.cookie.RememberMeCookiePolicy;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.DisplayName;
@@ -42,7 +42,7 @@ class AuthSessionApplicationServiceTest {
 	private AuthRefreshCookieService authRefreshCookieService;
 
 	@Mock
-	private AuthTokenResponseEnricher authTokenResponseEnricher;
+	private RememberMeCookiePolicy rememberMeCookiePolicy;
 
 	@InjectMocks
 	private AuthSessionApplicationService authSessionApplicationService;
@@ -80,13 +80,15 @@ class AuthSessionApplicationServiceTest {
 		when(authRefreshCookieService.readRefreshToken(request)).thenReturn("old-refresh");
 		when(refreshTokenService.refreshToken("old-refresh", request))
 			.thenReturn(new RefreshSessionResult(tokenPair, false));
+		when(rememberMeCookiePolicy.resolveReadMeDay()).thenReturn(5L);
 
 		RefreshTokenResponse actual = authSessionApplicationService.completeRefresh(request, response);
 
 		assertEquals("new-access", actual.getAccessToken());
 		assertEquals("new-refresh", actual.getRefreshToken());
 		assertEquals(expires, actual.getExpires());
-		verify(authTokenResponseEnricher).enrichReadMeDay(actual);
+		assertEquals(5L, actual.getReadMeDay());
+		verify(rememberMeCookiePolicy).resolveReadMeDay();
 		verify(authRefreshCookieService).writeRefreshToken(response, request, "new-refresh", false);
 	}
 
