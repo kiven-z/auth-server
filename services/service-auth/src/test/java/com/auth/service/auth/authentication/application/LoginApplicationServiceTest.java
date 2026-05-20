@@ -7,9 +7,8 @@ import com.auth.service.auth.TestConstants;
 import com.auth.service.auth.authentication.api.dto.response.UserLoginResponse;
 import com.auth.service.auth.authentication.application.command.AbstractLoginCommand;
 import com.auth.service.auth.authentication.application.command.UsernamePasswordLoginCommand;
-import com.auth.service.auth.authentication.domain.enums.AuthLoginLogResult;
+import com.auth.service.auth.authentication.application.login.audit.LoginAuditCoordinator;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
-import com.auth.service.auth.authentication.domain.event.LoginAuditEventPublisher;
 import com.auth.service.auth.authentication.domain.model.AuthenticatedUser;
 import com.auth.service.auth.authentication.domain.model.LoginResult;
 import com.auth.service.auth.authentication.domain.model.TokenPair;
@@ -66,7 +65,7 @@ class LoginApplicationServiceTest {
 	private LoginFailureRateLimiter loginFailureRateLimiter;
 
 	@Mock
-	private LoginAuditEventPublisher loginAuditEventPublisher;
+	private LoginAuditCoordinator loginAuditCoordinator;
 
 	@Mock
 	private RememberMeCookiePolicy rememberMeCookiePolicy;
@@ -83,7 +82,7 @@ class LoginApplicationServiceTest {
 	private LoginApplicationService newService(LoginStrategy<?>... strategies) {
 		return new LoginApplicationService(List.of(strategies), authProfileCacheApplicationService,
 				userSessionIndexFactory, redisUserSessionIndexRepository, sessionLimitManager, tokenService,
-				loginFailureRateLimiter, loginAuditEventPublisher, rememberMeCookiePolicy);
+				loginFailureRateLimiter, loginAuditCoordinator, rememberMeCookiePolicy);
 	}
 
 	@Test
@@ -138,7 +137,7 @@ class LoginApplicationServiceTest {
 
 		InOrder inOrder = inOrder(sessionLimitManager, authProfileCacheApplicationService, tokenService,
 				userSessionIndexFactory, redisUserSessionIndexRepository, rememberMeCookiePolicy,
-				loginFailureRateLimiter, loginAuditEventPublisher);
+				loginFailureRateLimiter, loginAuditCoordinator);
 		inOrder.verify(sessionLimitManager).assertSessionLimit(TestConstants.USER_ID);
 		inOrder.verify(authProfileCacheApplicationService).cacheProfile(profile);
 		inOrder.verify(tokenService).buildTokenPair(eq(TestConstants.USER_ID), anyString(), eq(1L));
@@ -148,9 +147,9 @@ class LoginApplicationServiceTest {
 		inOrder.verify(redisUserSessionIndexRepository).createUserSessionIndex(sessionIndex);
 		inOrder.verify(rememberMeCookiePolicy).resolveReadMeDay();
 		inOrder.verify(loginFailureRateLimiter).recordSuccess(TestConstants.USER_ID);
-		inOrder.verify(loginAuditEventPublisher)
-			.publish(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_PASSWORD), eq(AuthLoginLogResult.SUCCESS),
-					eq(TestConstants.USER_ID), eq("user"), isNull(), anyString());
+		inOrder.verify(loginAuditCoordinator)
+			.auditLoginSuccess(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_PASSWORD), eq(TestConstants.USER_ID),
+					eq("user"), anyString());
 	}
 
 	@Test
@@ -253,9 +252,8 @@ class LoginApplicationServiceTest {
 				() -> service.login(unknown, httpServletRequest));
 
 		assertEquals(AuthResultCode.AUTH_TYPE_UNSUPPORTED, exception.getResultCode());
-		verify(loginAuditEventPublisher).publish(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_PASSWORD),
-				eq(AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR), isNull(), isNull(), eq(exception.getMessageKey()),
-				isNull());
+		verify(loginAuditCoordinator).auditUnsupportedLoginCommand(same(httpServletRequest), eq(unknown),
+				eq(exception.getMessageKey()));
 	}
 
 	@Test
@@ -328,8 +326,8 @@ class LoginApplicationServiceTest {
 
 		verify(redisUserSessionIndexRepository).deleteSession(TestConstants.JTI);
 		verify(redisUserSessionIndexRepository).removeActiveSession(TestConstants.USER_ID, TestConstants.JTI);
-		verify(loginAuditEventPublisher).publish(isNull(), eq(AuthLoginLogType.LOGOUT), eq(AuthLoginLogResult.SUCCESS),
-				eq(TestConstants.USER_ID), isNull(), isNull(), eq(TestConstants.JTI));
+		verify(loginAuditCoordinator).auditLogoutSuccess(isNull(), eq(TestConstants.USER_ID), isNull(),
+				eq(TestConstants.JTI));
 	}
 
 }

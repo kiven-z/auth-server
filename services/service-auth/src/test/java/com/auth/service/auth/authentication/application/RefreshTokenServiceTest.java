@@ -6,9 +6,7 @@ import com.auth.common.jwt.model.JwtUserToken;
 import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.TestConstants;
-import com.auth.service.auth.authentication.domain.enums.AuthLoginLogResult;
-import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
-import com.auth.service.auth.authentication.domain.event.LoginAuditEventPublisher;
+import com.auth.service.auth.authentication.application.login.audit.LoginAuditCoordinator;
 import com.auth.service.auth.authentication.domain.model.RefreshSessionResult;
 import com.auth.service.auth.authentication.domain.model.TokenPair;
 import com.auth.service.auth.authentication.infrastructure.token.TokenService;
@@ -51,7 +49,7 @@ class RefreshTokenServiceTest {
 	private JwtProperties jwtProperties;
 
 	@Mock
-	private LoginAuditEventPublisher loginAuditEventPublisher;
+	private LoginAuditCoordinator loginAuditCoordinator;
 
 	private static JwtUserToken token() {
 		return JwtUserToken.builder().userId(TestConstants.USER_ID).jti(TestConstants.JTI).build();
@@ -59,7 +57,7 @@ class RefreshTokenServiceTest {
 
 	private RefreshTokenService newService() {
 		return new RefreshTokenService(authProfileCacheApplicationService, redisUserSessionIndexRepository,
-				tokenService, jwtProperties, loginAuditEventPublisher);
+				tokenService, jwtProperties, loginAuditCoordinator);
 	}
 
 	@Test
@@ -125,9 +123,7 @@ class RefreshTokenServiceTest {
 		AuthBusinessException ex = assertThrows(AuthBusinessException.class, () -> service.refreshToken(" ", null));
 
 		assertEquals(AuthResultCode.REFRESH_TOKEN_MISSING, ex.getResultCode());
-		verify(loginAuditEventPublisher).publish(isNull(), eq(AuthLoginLogType.REFRESH_TOKEN),
-				eq(AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR), isNull(), eq("/"), eq(ex.getMessageKey()),
-				isNull());
+		verify(loginAuditCoordinator).auditRefreshTokenFailure(isNull(), isNull(), eq(ex));
 	}
 
 	@Test
@@ -141,9 +137,7 @@ class RefreshTokenServiceTest {
 				() -> service.refreshToken(TestConstants.REFRESH_TOKEN, null));
 
 		assertEquals(AuthResultCode.REFRESH_TOKEN_MALFORMED, ex.getResultCode());
-		verify(loginAuditEventPublisher).publish(isNull(), eq(AuthLoginLogType.REFRESH_TOKEN),
-				eq(AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR), isNull(), eq("/"), eq(ex.getMessageKey()),
-				isNull());
+		verify(loginAuditCoordinator).auditRefreshTokenFailure(isNull(), isNull(), eq(ex));
 	}
 
 	@Test

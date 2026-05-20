@@ -2,7 +2,6 @@ package com.auth.service.auth.session.infrastructure.redis.support;
 
 import com.auth.module.security.autoconfigure.config.user.SessionLimitStrategy;
 import com.auth.module.security.autoconfigure.config.user.UserConfigProperties;
-import com.auth.service.auth.authentication.infrastructure.token.LoginFailureRateLimiter;
 import com.auth.service.auth.session.infrastructure.redis.RedisUserSessionIndexRepository;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.enums.AuthResultCode;
@@ -13,7 +12,7 @@ import org.springframework.util.Assert;
  * 会话上限管理器
  *
  * <p>
- * 认证成功后检查活跃会话数是否达上限，按配置策略拒绝登录或淘汰最旧会话 从 {@link LoginFailureRateLimiter} 拆分而来，专注会话容量控制
+ * 认证成功后检查活跃会话数是否达上限，按配置策略拒绝登录或淘汰最旧会话（从登录失败限流逻辑中拆分，专注会话容量控制）。
  * </p>
  *
  * @author Bunny

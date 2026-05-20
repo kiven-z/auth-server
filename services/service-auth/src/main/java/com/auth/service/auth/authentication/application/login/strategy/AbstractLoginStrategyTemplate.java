@@ -1,25 +1,24 @@
-package com.auth.service.auth.authentication.application.support;
+package com.auth.service.auth.authentication.application.login.strategy;
 
-import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.authentication.application.command.AbstractLoginCommand;
-import com.auth.service.auth.authentication.domain.enums.AuthLoginLogResult;
+import com.auth.service.auth.authentication.application.login.audit.LoginAuditContextResolver;
+import com.auth.service.auth.authentication.application.login.audit.LoginAuditCoordinator;
+import com.auth.service.auth.authentication.application.port.LoginStrategy;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
-import com.auth.service.auth.authentication.domain.event.LoginAuditEventPublisher;
 import com.auth.service.auth.authentication.domain.model.AuthenticatedUser;
 import com.auth.service.auth.authentication.domain.model.LoginResult;
-import com.auth.service.auth.authentication.application.port.LoginStrategy;
+import com.auth.service.auth.authentication.domain.service.UserAccountLoginEligibility;
 import com.auth.service.auth.authentication.infrastructure.token.LoginFailureRateLimiter;
 import com.auth.service.auth.authorization.application.AuthProfileQueryService;
-import com.auth.service.auth.shared.audit.AuthLoginAuditMapping;
 import com.auth.service.auth.shared.exception.AuthBadCredentialsException;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.enums.AuthResultCode;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
- * 登录策略模板：解析用户 → 锁定检查 → 子类校验凭证 → 构建画像与响应；失败路径发布审计事件。
+ * 登录策略模板：解析用户 → 锁定检查 → 子类校验凭证 → 构建画像与返回；失败路径经 {@link LoginAuditCoordinator} 发布审计。
  *
  * <p>
  * 会话容量由
@@ -32,32 +31,17 @@ import jakarta.servlet.http.HttpServletRequest;
  */
 public abstract class AbstractLoginStrategyTemplate<T extends AbstractLoginCommand> implements LoginStrategy<T> {
 
-	/**
-	 * 与 {@link UserEntity#getStatus()} 对齐：0=禁用
-	 */
-	private static final int SYS_USER_STATUS_DISABLED = 0;
-
-	/**
-	 * 与 {@link UserEntity#getStatus()} 对齐：2=锁定
-	 */
-	private static final int SYS_USER_STATUS_LOCKED = 2;
-
 	protected final LoginFailureRateLimiter loginFailureRateLimiter;
 
 	private final AuthProfileQueryService authProfileQueryService;
 
-	private final LoginAuditEventPublisher loginAuditEventPublisher;
+	private final LoginAuditCoordinator loginAuditCoordinator;
 
 	protected AbstractLoginStrategyTemplate(LoginFailureRateLimiter loginFailureRateLimiter,
-			AuthProfileQueryService authProfileQueryService, LoginAuditEventPublisher loginAuditEventPublisher) {
+			AuthProfileQueryService authProfileQueryService, LoginAuditCoordinator loginAuditCoordinator) {
 		this.loginFailureRateLimiter = loginFailureRateLimiter;
 		this.authProfileQueryService = authProfileQueryService;
-		this.loginAuditEventPublisher = loginAuditEventPublisher;
-	}
-
-	private static String principalForAudit(AbstractLoginCommand command) {
-		String principal = command.principalForAudit();
-		return CharSequenceUtil.isBlank(principal) ? null : principal;
+		this.loginAuditCoordinator = loginAuditCoordinator;
 	}
 
 	/**
@@ -82,16 +66,13 @@ public abstract class AbstractLoginStrategyTemplate<T extends AbstractLoginComma
 		}
 		catch (AuthBadCredentialsException ex) {
 			int remaining = loginFailureRateLimiter.recordFailure(userId);
-			loginAuditEventPublisher.publish(request, loginLogType(), AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR,
-					userId, user.getUsername(), "remainingAttempts=" + remaining, null);
+			loginAuditCoordinator.auditBadCredentialsWithRemaining(request, loginLogType(), userId, user.getUsername(),
+					remaining);
 			throw new AuthBusinessException(AuthResultCode.USERNAME_OR_PASSWORD_ERROR_WITH_REMAINING, remaining);
 		}
 		catch (AuthBusinessException ex) {
-			// 按业务码映射发布凭证校验失败审计
-			AuthResultCode code = ex.getResultCode();
-			AuthLoginAuditMapping.credentialFailureAudit(code)
-				.ifPresent(auditResult -> loginAuditEventPublisher.publish(request, loginLogType(), auditResult,
-						user.getId(), user.getUsername(), ex.getMessageKey(), null));
+			loginAuditCoordinator.auditMappedCredentialFailure(request, loginLogType(), user.getId(),
+					user.getUsername(), ex);
 			throw ex;
 		}
 	}
@@ -108,9 +89,8 @@ public abstract class AbstractLoginStrategyTemplate<T extends AbstractLoginComma
 		}
 		catch (AuthBusinessException ex) {
 			if (ex.getResultCode() == AuthResultCode.USERNAME_OR_PASSWORD_ERROR) {
-				loginAuditEventPublisher.publish(request, loginLogType(),
-						AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR, null, principalForAudit(command),
-						ex.getMessageKey(), null);
+				loginAuditCoordinator.auditUserUnknownAfterResolve(request, loginLogType(),
+						LoginAuditContextResolver.principal(command), ex.getMessageKey());
 			}
 			throw ex;
 		}
@@ -125,26 +105,27 @@ public abstract class AbstractLoginStrategyTemplate<T extends AbstractLoginComma
 		Long userId = user.getId();
 		Integer rawStatus = user.getStatus();
 		try {
-			// 用户状态需要是正常状态
-			if (rawStatus == null || rawStatus == SYS_USER_STATUS_DISABLED) {
-				loginAuditEventPublisher.publish(request, loginLogType(), AuthLoginLogResult.ACCOUNT_DISABLED, userId,
-						user.getUsername(), AuthResultCode.USER_DISABLED.getMessageKey(), null);
-				throw new AuthBusinessException(AuthResultCode.USER_DISABLED);
-			}
-			if (rawStatus == SYS_USER_STATUS_LOCKED) {
-				loginAuditEventPublisher.publish(request, loginLogType(), AuthLoginLogResult.ACCOUNT_LOCKED, userId,
-						user.getUsername(), "account.status.locked", null);
-				throw new AuthBusinessException(AuthResultCode.USER_LOCKED);
+			UserAccountLoginEligibility eligibility = UserAccountLoginEligibility.fromStatus(rawStatus);
+			switch (eligibility) {
+				case DISABLED -> {
+					loginAuditCoordinator.auditAccountDisabled(request, loginLogType(), userId, user.getUsername(),
+							AuthResultCode.USER_DISABLED.getMessageKey());
+					throw new AuthBusinessException(AuthResultCode.USER_DISABLED);
+				}
+				case STATUS_LOCKED -> {
+					loginAuditCoordinator.auditAccountLockedByStatus(request, loginLogType(), userId,
+							user.getUsername());
+					throw new AuthBusinessException(AuthResultCode.USER_LOCKED);
+				}
+				case ALLOWED -> {
+					// 继续检查登录失败锁定计数
+				}
 			}
 
 			loginFailureRateLimiter.assertNotLocked(userId);
 		}
 		catch (AuthBusinessException ex) {
-			// 按业务码映射发布账号锁定类审计
-			AuthResultCode code = ex.getResultCode();
-			AuthLoginAuditMapping.lockFailureAudit(code)
-				.ifPresent(auditResult -> loginAuditEventPublisher.publish(request, loginLogType(), auditResult,
-						user.getId(), user.getUsername(), ex.getMessageKey(), null));
+			loginAuditCoordinator.auditMappedLockFailure(request, loginLogType(), user.getId(), user.getUsername(), ex);
 			throw ex;
 		}
 	}

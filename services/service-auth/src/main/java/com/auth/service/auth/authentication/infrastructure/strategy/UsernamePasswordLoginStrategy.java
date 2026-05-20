@@ -2,9 +2,9 @@ package com.auth.service.auth.authentication.infrastructure.strategy;
 
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.auth.authentication.application.command.UsernamePasswordLoginCommand;
-import com.auth.service.auth.authentication.application.support.AbstractLoginStrategyTemplate;
+import com.auth.service.auth.authentication.application.login.audit.LoginAuditCoordinator;
+import com.auth.service.auth.authentication.application.login.strategy.AbstractLoginStrategyTemplate;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
-import com.auth.service.auth.authentication.domain.event.LoginAuditEventPublisher;
 import com.auth.service.auth.authentication.infrastructure.persistence.UserCredentialField;
 import com.auth.service.auth.authentication.infrastructure.persistence.UserCredentialQueries;
 import com.auth.service.auth.authentication.infrastructure.persistence.UserMapper;
@@ -30,8 +30,8 @@ public class UsernamePasswordLoginStrategy extends AbstractLoginStrategyTemplate
 
 	public UsernamePasswordLoginStrategy(UserMapper userMapper, LoginFailureRateLimiter loginFailureRateLimiter,
 			AuthProfileQueryService authProfileQueryService, PasswordEncoder passwordEncoder,
-			LoginAuditEventPublisher loginAuditEventPublisher) {
-		super(loginFailureRateLimiter, authProfileQueryService, loginAuditEventPublisher);
+			LoginAuditCoordinator loginAuditCoordinator) {
+		super(loginFailureRateLimiter, authProfileQueryService, loginAuditCoordinator);
 		this.userMapper = userMapper;
 		this.passwordEncoder = passwordEncoder;
 	}

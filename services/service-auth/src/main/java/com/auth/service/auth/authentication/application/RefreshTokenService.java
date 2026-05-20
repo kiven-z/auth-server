@@ -7,9 +7,7 @@ import com.auth.common.jwt.autoconfigure.JwtProperties;
 import com.auth.common.jwt.model.JwtUserToken;
 import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
-import com.auth.service.auth.authentication.domain.enums.AuthLoginLogResult;
-import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
-import com.auth.service.auth.authentication.domain.event.LoginAuditEventPublisher;
+import com.auth.service.auth.authentication.application.login.audit.LoginAuditCoordinator;
 import com.auth.service.auth.authentication.domain.model.RefreshSessionResult;
 import com.auth.service.auth.authentication.domain.model.TokenPair;
 import com.auth.service.auth.authentication.infrastructure.token.TokenService;
@@ -41,16 +39,16 @@ public class RefreshTokenService {
 
 	private final JwtProperties jwtProperties;
 
-	private final LoginAuditEventPublisher loginAuditEventPublisher;
+	private final LoginAuditCoordinator loginAuditCoordinator;
 
 	public RefreshTokenService(AuthProfileCacheApplicationService authProfileCacheApplicationService,
 			RedisUserSessionIndexRepository redisUserSessionIndexRepository, TokenService tokenService,
-			JwtProperties jwtProperties, LoginAuditEventPublisher loginAuditEventPublisher) {
+			JwtProperties jwtProperties, LoginAuditCoordinator loginAuditCoordinator) {
 		this.authProfileCacheApplicationService = authProfileCacheApplicationService;
 		this.redisUserSessionIndexRepository = redisUserSessionIndexRepository;
 		this.tokenService = tokenService;
 		this.jwtProperties = jwtProperties;
-		this.loginAuditEventPublisher = loginAuditEventPublisher;
+		this.loginAuditCoordinator = loginAuditCoordinator;
 	}
 
 	/**
@@ -65,8 +63,7 @@ public class RefreshTokenService {
 		}
 		catch (AuthBusinessException ex) {
 			Long userId = tryResolveUserIdFromRefreshToken(refreshToken);
-			loginAuditEventPublisher.publish(request, AuthLoginLogType.REFRESH_TOKEN,
-					AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR, userId, "/", ex.getMessageKey(), null);
+			loginAuditCoordinator.auditRefreshTokenFailure(request, userId, ex);
 			throw ex;
 		}
 	}
@@ -105,8 +102,7 @@ public class RefreshTokenService {
 
 		boolean rememberMe = Boolean.TRUE.equals(sessionIndex.getRememberMe());
 
-		loginAuditEventPublisher.publish(request, AuthLoginLogType.REFRESH_TOKEN, AuthLoginLogResult.SUCCESS,
-				refreshUserId, null, null, refreshJti);
+		loginAuditCoordinator.auditRefreshTokenSuccess(request, refreshUserId, refreshJti);
 		return new RefreshSessionResult(tokenPair, rememberMe);
 	}
 
@@ -205,8 +201,7 @@ public class RefreshTokenService {
 		Long userId = userToken.getUserId();
 		redisUserSessionIndexRepository.deleteSession(jti);
 		redisUserSessionIndexRepository.removeActiveSession(userId, jti);
-		loginAuditEventPublisher.publish(request, AuthLoginLogType.LOGOUT, AuthLoginLogResult.SUCCESS, userId, "/",
-				null, jti);
+		loginAuditCoordinator.auditLogoutOnRefreshTokenRevoke(request, userId, jti);
 	}
 
 }

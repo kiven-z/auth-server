@@ -1,7 +1,7 @@
 package com.auth.service.auth.authentication.application;
 
 import cn.hutool.core.util.BooleanUtil;
-import com.auth.service.auth.authentication.api.assembler.LoginCommandAssembler;
+import com.auth.service.auth.authentication.application.assembler.LoginCommandAssembler;
 import com.auth.service.auth.authentication.api.dto.request.AbstractLoginRequest;
 import com.auth.service.auth.authentication.api.dto.response.RefreshTokenResponse;
 import com.auth.service.auth.authentication.api.dto.response.UserLoginResponse;

@@ -2,9 +2,8 @@ package com.auth.service.auth.authentication.infrastructure.strategy;
 
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.auth.authentication.application.command.UsernamePasswordLoginCommand;
-import com.auth.service.auth.authentication.domain.enums.AuthLoginLogResult;
+import com.auth.service.auth.authentication.application.login.audit.LoginAuditCoordinator;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
-import com.auth.service.auth.authentication.domain.event.LoginAuditEventPublisher;
 import com.auth.service.auth.authentication.infrastructure.persistence.UserCredentialField;
 import com.auth.service.auth.authentication.infrastructure.persistence.UserMapper;
 import com.auth.service.auth.authentication.infrastructure.token.LoginFailureRateLimiter;
@@ -44,7 +43,7 @@ class UsernamePasswordLoginStrategyTest {
 	private PasswordEncoder passwordEncoder;
 
 	@Mock
-	private LoginAuditEventPublisher loginAuditEventPublisher;
+	private LoginAuditCoordinator loginAuditCoordinator;
 
 	@Mock
 	private HttpServletRequest httpServletRequest;
@@ -54,7 +53,7 @@ class UsernamePasswordLoginStrategyTest {
 	void resolveUser_shouldThrow_whenUserNotFound() {
 		when(userMapper.selectByCredential(UserCredentialField.USERNAME, "u", false)).thenReturn(null);
 		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(userMapper, loginFailureRateLimiter,
-				authProfileQueryService, passwordEncoder, loginAuditEventPublisher);
+				authProfileQueryService, passwordEncoder, loginAuditCoordinator);
 
 		UsernamePasswordLoginCommand command = new UsernamePasswordLoginCommand("u", "p");
 
@@ -62,9 +61,8 @@ class UsernamePasswordLoginStrategyTest {
 				() -> strategy.authenticate(command, httpServletRequest));
 
 		assertEquals(AuthResultCode.USERNAME_OR_PASSWORD_ERROR, exception.getResultCode());
-		verify(loginAuditEventPublisher).publish(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_PASSWORD),
-				eq(AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR), isNull(), eq("u"), eq(exception.getMessageKey()),
-				isNull());
+		verify(loginAuditCoordinator).auditUserUnknownAfterResolve(same(httpServletRequest),
+				eq(AuthLoginLogType.LOGIN_PASSWORD), eq("u"), eq(exception.getMessageKey()));
 	}
 
 	@Test
@@ -78,7 +76,7 @@ class UsernamePasswordLoginStrategyTest {
 		when(userMapper.selectByCredential(UserCredentialField.USERNAME, "u", false)).thenReturn(user);
 
 		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(userMapper, loginFailureRateLimiter,
-				authProfileQueryService, passwordEncoder, loginAuditEventPublisher);
+				authProfileQueryService, passwordEncoder, loginAuditCoordinator);
 
 		UsernamePasswordLoginCommand command = new UsernamePasswordLoginCommand("u", "p");
 
@@ -86,9 +84,8 @@ class UsernamePasswordLoginStrategyTest {
 				() -> strategy.authenticate(command, httpServletRequest));
 
 		assertEquals(AuthResultCode.USER_DISABLED, exception.getResultCode());
-		verify(loginAuditEventPublisher).publish(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_PASSWORD),
-				eq(AuthLoginLogResult.ACCOUNT_DISABLED), eq(1L), eq("u"),
-				eq(AuthResultCode.USER_DISABLED.getMessageKey()), isNull());
+		verify(loginAuditCoordinator).auditAccountDisabled(same(httpServletRequest),
+				eq(AuthLoginLogType.LOGIN_PASSWORD), eq(1L), eq("u"), eq(AuthResultCode.USER_DISABLED.getMessageKey()));
 		verifyNoInteractions(passwordEncoder);
 	}
 
@@ -96,7 +93,7 @@ class UsernamePasswordLoginStrategyTest {
 	@DisplayName("supports 返回 UsernamePasswordLoginCommand.class")
 	void supports_shouldReturnUsernamePasswordLoginCommandClass() {
 		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(userMapper, loginFailureRateLimiter,
-				authProfileQueryService, passwordEncoder, loginAuditEventPublisher);
+				authProfileQueryService, passwordEncoder, loginAuditCoordinator);
 
 		assertEquals(UsernamePasswordLoginCommand.class, strategy.supports());
 	}
@@ -116,7 +113,7 @@ class UsernamePasswordLoginStrategyTest {
 		when(loginFailureRateLimiter.recordFailure(1L)).thenReturn(2);
 
 		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(userMapper, loginFailureRateLimiter,
-				authProfileQueryService, passwordEncoder, loginAuditEventPublisher);
+				authProfileQueryService, passwordEncoder, loginAuditCoordinator);
 
 		UsernamePasswordLoginCommand command = new UsernamePasswordLoginCommand("u", "p");
 
@@ -124,9 +121,8 @@ class UsernamePasswordLoginStrategyTest {
 				() -> strategy.authenticate(command, httpServletRequest));
 
 		assertEquals(AuthResultCode.USERNAME_OR_PASSWORD_ERROR_WITH_REMAINING, exception.getResultCode());
-		verify(loginAuditEventPublisher).publish(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_PASSWORD),
-				eq(AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR), eq(1L), eq("u"), eq("remainingAttempts=2"),
-				isNull());
+		verify(loginAuditCoordinator).auditBadCredentialsWithRemaining(same(httpServletRequest),
+				eq(AuthLoginLogType.LOGIN_PASSWORD), eq(1L), eq("u"), eq(2));
 	}
 
 }

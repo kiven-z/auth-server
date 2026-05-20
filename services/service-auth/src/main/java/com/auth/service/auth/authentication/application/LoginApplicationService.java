@@ -7,11 +7,8 @@ import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.authentication.api.dto.response.UserLoginResponse;
 import com.auth.service.auth.authentication.application.assembler.LoginResponseAssembler;
 import com.auth.service.auth.authentication.application.command.AbstractLoginCommand;
+import com.auth.service.auth.authentication.application.login.audit.LoginAuditCoordinator;
 import com.auth.service.auth.authentication.application.port.LoginStrategy;
-import com.auth.service.auth.authentication.application.support.LoginAuditContextResolver;
-import com.auth.service.auth.authentication.domain.enums.AuthLoginLogResult;
-import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
-import com.auth.service.auth.authentication.domain.event.LoginAuditEventPublisher;
 import com.auth.service.auth.authentication.domain.model.LoginResult;
 import com.auth.service.auth.authentication.domain.model.TokenPair;
 import com.auth.service.auth.authentication.infrastructure.cookie.RememberMeCookiePolicy;
@@ -56,7 +53,7 @@ public class LoginApplicationService {
 
 	private final LoginFailureRateLimiter loginFailureRateLimiter;
 
-	private final LoginAuditEventPublisher loginAuditEventPublisher;
+	private final LoginAuditCoordinator loginAuditCoordinator;
 
 	private final RememberMeCookiePolicy rememberMeCookiePolicy;
 
@@ -65,7 +62,7 @@ public class LoginApplicationService {
 			UserSessionIndexFactory userSessionIndexFactory,
 			RedisUserSessionIndexRepository redisUserSessionIndexRepository, SessionLimitManager sessionLimitManager,
 			TokenService tokenService, LoginFailureRateLimiter loginFailureRateLimiter,
-			LoginAuditEventPublisher loginAuditEventPublisher, RememberMeCookiePolicy rememberMeCookiePolicy) {
+			LoginAuditCoordinator loginAuditCoordinator, RememberMeCookiePolicy rememberMeCookiePolicy) {
 		this.strategyRegistry = strategies.stream()
 			.collect(Collectors.toUnmodifiableMap(LoginStrategy::supports, Function.identity()));
 		this.authProfileCacheApplicationService = authProfileCacheApplicationService;
@@ -74,7 +71,7 @@ public class LoginApplicationService {
 		this.sessionLimitManager = sessionLimitManager;
 		this.tokenService = tokenService;
 		this.loginFailureRateLimiter = loginFailureRateLimiter;
-		this.loginAuditEventPublisher = loginAuditEventPublisher;
+		this.loginAuditCoordinator = loginAuditCoordinator;
 		this.rememberMeCookiePolicy = rememberMeCookiePolicy;
 	}
 
@@ -139,16 +136,13 @@ public class LoginApplicationService {
 			// 记录成功登录
 			loginFailureRateLimiter.recordSuccess(userId);
 
-			loginAuditEventPublisher.publish(request, loginResult.loginLogType(), AuthLoginLogResult.SUCCESS, userId,
-					username, null, jti);
+			loginAuditCoordinator.auditLoginSuccess(request, loginResult.loginLogType(), userId, username, jti);
 			return response;
 		}
 		catch (AuthBusinessException ex) {
 			// 回滚登录痕迹
 			rollbackLoginArtifacts(userId, jti, profileCached, sessionCreated);
-			loginAuditEventPublisher.publish(request, loginResult.loginLogType(),
-					LoginAuditContextResolver.resultForOrchestrationFailure(ex.getResultCode()), userId, username,
-					ex.getMessageKey(), null);
+			loginAuditCoordinator.auditOrchestrationFailure(request, loginResult.loginLogType(), userId, username, ex);
 			throw ex;
 		}
 		catch (RuntimeException ex) {
@@ -180,9 +174,7 @@ public class LoginApplicationService {
 			return raw;
 		}
 		catch (AuthBusinessException ex) {
-			loginAuditEventPublisher.publish(request, command.loginLogType(),
-					AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR, null, command.principalForAudit(),
-					ex.getMessageKey(), null);
+			loginAuditCoordinator.auditUnsupportedLoginCommand(request, command, ex.getMessageKey());
 			throw ex;
 		}
 	}
@@ -207,8 +199,7 @@ public class LoginApplicationService {
 			redisUserSessionIndexRepository.removeActiveSession(userId, jti);
 
 			// 记录成功登出
-			loginAuditEventPublisher.publish(request, AuthLoginLogType.LOGOUT, AuthLoginLogResult.SUCCESS, userId,
-					username, null, jti);
+			loginAuditCoordinator.auditLogoutSuccess(request, userId, username, jti);
 		});
 	}
 

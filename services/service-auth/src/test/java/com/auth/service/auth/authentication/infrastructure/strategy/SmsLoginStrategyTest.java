@@ -4,9 +4,8 @@ import cn.hutool.crypto.digest.MD5;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.authentication.application.command.SmsLoginCommand;
-import com.auth.service.auth.authentication.domain.enums.AuthLoginLogResult;
+import com.auth.service.auth.authentication.application.login.audit.LoginAuditCoordinator;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
-import com.auth.service.auth.authentication.domain.event.LoginAuditEventPublisher;
 import com.auth.service.auth.authentication.infrastructure.persistence.UserCredentialField;
 import com.auth.service.auth.authentication.infrastructure.persistence.UserMapper;
 import com.auth.service.auth.authentication.infrastructure.token.LoginFailureRateLimiter;
@@ -51,14 +50,14 @@ class SmsLoginStrategyTest {
 	private AuthProfileQueryService authProfileQueryService;
 
 	@Mock
-	private LoginAuditEventPublisher loginAuditEventPublisher;
+	private LoginAuditCoordinator loginAuditCoordinator;
 
 	@Mock
 	private HttpServletRequest httpServletRequest;
 
 	private SmsLoginStrategy createStrategy() {
 		return new SmsLoginStrategy(authProfileQueryService, redisTemplate, userMapper, loginFailureRateLimiter,
-				loginAuditEventPublisher);
+				loginAuditCoordinator);
 	}
 
 	private SmsLoginStrategy createStrategyWithRedis() {
@@ -78,9 +77,8 @@ class SmsLoginStrategyTest {
 				() -> strategy.authenticate(command, httpServletRequest));
 
 		assertEquals(AuthResultCode.USERNAME_OR_PASSWORD_ERROR, exception.getResultCode());
-		verify(loginAuditEventPublisher).publish(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_SMS),
-				eq(AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR), isNull(), eq("13800138000"),
-				eq(exception.getMessageKey()), isNull());
+		verify(loginAuditCoordinator).auditUserUnknownAfterResolve(same(httpServletRequest),
+				eq(AuthLoginLogType.LOGIN_SMS), eq("13800138000"), eq(exception.getMessageKey()));
 	}
 
 	@Test
@@ -105,8 +103,8 @@ class SmsLoginStrategyTest {
 				() -> strategy.authenticate(command, httpServletRequest));
 
 		assertEquals(AuthResultCode.AUTH_CODE_ERROR, exception.getResultCode());
-		verify(loginAuditEventPublisher).publish(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_SMS),
-				eq(AuthLoginLogResult.CAPTCHA_ERROR), eq(1L), eq("testUser"), eq(exception.getMessageKey()), isNull());
+		verify(loginAuditCoordinator).auditMappedCredentialFailure(same(httpServletRequest),
+				eq(AuthLoginLogType.LOGIN_SMS), eq(1L), eq("testUser"), eq(exception));
 	}
 
 	@Test

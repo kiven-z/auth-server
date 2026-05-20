@@ -4,9 +4,9 @@ import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.crypto.digest.MD5;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.auth.authentication.application.command.EmailLoginCommand;
-import com.auth.service.auth.authentication.application.support.AbstractLoginStrategyTemplate;
+import com.auth.service.auth.authentication.application.login.audit.LoginAuditCoordinator;
+import com.auth.service.auth.authentication.application.login.strategy.AbstractLoginStrategyTemplate;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
-import com.auth.service.auth.authentication.domain.event.LoginAuditEventPublisher;
 import com.auth.service.auth.authentication.infrastructure.persistence.UserCredentialField;
 import com.auth.service.auth.authentication.infrastructure.persistence.UserCredentialQueries;
 import com.auth.service.auth.authentication.infrastructure.persistence.UserMapper;
@@ -36,8 +36,8 @@ public class EmailLoginStrategy extends AbstractLoginStrategyTemplate<EmailLogin
 
 	public EmailLoginStrategy(AuthProfileQueryService authProfileQueryService,
 			RedisTemplate<String, Object> redisTemplate, UserMapper userMapper,
-			LoginFailureRateLimiter loginFailureRateLimiter, LoginAuditEventPublisher loginAuditEventPublisher) {
-		super(loginFailureRateLimiter, authProfileQueryService, loginAuditEventPublisher);
+			LoginFailureRateLimiter loginFailureRateLimiter, LoginAuditCoordinator loginAuditCoordinator) {
+		super(loginFailureRateLimiter, authProfileQueryService, loginAuditCoordinator);
 		this.redisTemplate = redisTemplate;
 		this.userMapper = userMapper;
 	}

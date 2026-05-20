@@ -1,4 +1,4 @@
-package com.auth.service.auth.authentication.application.support;
+package com.auth.service.auth.authentication.application.login.audit;
 
 import com.auth.service.auth.authentication.application.command.AbstractLoginCommand;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogResult;
