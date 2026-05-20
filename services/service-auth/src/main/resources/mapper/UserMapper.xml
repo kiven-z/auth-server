@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.auth.service.auth.authentication.mapper.UserMapper">
+<mapper namespace="com.auth.service.auth.authentication.infrastructure.persistence.UserMapper">
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
         id,
@@ -29,7 +29,31 @@
        is_deleted
     </sql>
 
-    <!-- 根据用户名查询用户信息 -->
+    <!-- 登录：按用户名查询（不过滤 status，禁用/锁定由策略层校验） -->
+    <select id="selectUserForLoginByUsername" resultType="com.auth.module.platform.persistence.model.UserEntity">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM sys_user
+        WHERE is_deleted = 0 AND username = #{username}
+    </select>
+
+    <!-- 登录：按邮箱查询（不过滤 status，禁用/锁定由策略层校验） -->
+    <select id="selectUserForLoginByEmail" resultType="com.auth.module.platform.persistence.model.UserEntity">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM sys_user
+        WHERE is_deleted = 0 AND email = #{email}
+    </select>
+
+    <!-- 登录：按手机号查询（不过滤 status，禁用/锁定由策略层校验） -->
+    <select id="selectUserForLoginByPhone" resultType="com.auth.module.platform.persistence.model.UserEntity">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM sys_user
+        WHERE is_deleted = 0 AND phone = #{phone}
+    </select>
+
+    <!-- 发码等：按用户名查询正常状态用户 -->
     <select id="selectUserByUsername" resultType="com.auth.module.platform.persistence.model.UserEntity">
         SELECT
         <include refid="Base_Column_List"/>
@@ -37,7 +61,7 @@
         WHERE is_deleted = 0 AND status = 1 AND username = #{username}
     </select>
 
-    <!-- 根据邮箱查询用户信息 -->
+    <!-- 发码等：按邮箱查询正常状态用户 -->
     <select id="selectUserByEmail" resultType="com.auth.module.platform.persistence.model.UserEntity">
         SELECT
         <include refid="Base_Column_List"/>
@@ -45,7 +69,7 @@
         WHERE is_deleted = 0 AND status = 1 AND email = #{email}
     </select>
 
-    <!-- 根据手机号查询用户信息 -->
+    <!-- 发码等：按手机号查询正常状态用户 -->
     <select id="selectUserByPhone" resultType="com.auth.module.platform.persistence.model.UserEntity">
         SELECT
         <include refid="Base_Column_List"/>

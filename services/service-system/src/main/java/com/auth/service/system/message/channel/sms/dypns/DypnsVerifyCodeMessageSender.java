@@ -16,36 +16,38 @@ import static com.auth.service.system.common.exception.code.SystemMessageResultC
 @Component
 public class DypnsVerifyCodeMessageSender implements MessageSender {
 
-    private final DypnsVerifyCodeTemplatePipeline dypnsVerifyCodeTemplatePipeline;
-    private final AliyunDypnsVerifyCodeSender aliyunDypnsVerifyCodeSender;
+	private final DypnsVerifyCodeTemplatePipeline dypnsVerifyCodeTemplatePipeline;
 
-    public DypnsVerifyCodeMessageSender(DypnsVerifyCodeTemplatePipeline dypnsVerifyCodeTemplatePipeline,
-                                        AliyunDypnsVerifyCodeSender aliyunDypnsVerifyCodeSender) {
-        this.dypnsVerifyCodeTemplatePipeline = dypnsVerifyCodeTemplatePipeline;
-        this.aliyunDypnsVerifyCodeSender = aliyunDypnsVerifyCodeSender;
-    }
+	private final AliyunDypnsVerifyCodeSender aliyunDypnsVerifyCodeSender;
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public MessageChannel channel() {
-        return MessageChannel.SMS_ALIYUN_DYPNS;
-    }
+	public DypnsVerifyCodeMessageSender(DypnsVerifyCodeTemplatePipeline dypnsVerifyCodeTemplatePipeline,
+			AliyunDypnsVerifyCodeSender aliyunDypnsVerifyCodeSender) {
+		this.dypnsVerifyCodeTemplatePipeline = dypnsVerifyCodeTemplatePipeline;
+		this.aliyunDypnsVerifyCodeSender = aliyunDypnsVerifyCodeSender;
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void sendByTemplate(TemplateMessageCommand command) {
-        if (Boolean.TRUE.equals(command.getCustomBody())) {
-            throw new SystemBusinessException(SMS_CUSTOM_BODY_NOT_SUPPORTED);
-        }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public MessageChannel channel() {
+		return MessageChannel.SMS_ALIYUN_DYPNS;
+	}
 
-        DypnsVerifyCodeSendPayload prepared = dypnsVerifyCodeTemplatePipeline.prepare(command);
-        for (String phone : command.getTargets()) {
-            aliyunDypnsVerifyCodeSender.sendVerifyCode(phone, prepared.providerTemplateCode(), prepared.templateParam());
-        }
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void sendByTemplate(TemplateMessageCommand command) {
+		if (Boolean.TRUE.equals(command.getCustomBody())) {
+			throw new SystemBusinessException(SMS_CUSTOM_BODY_NOT_SUPPORTED);
+		}
+
+		DypnsVerifyCodeSendPayload prepared = dypnsVerifyCodeTemplatePipeline.prepare(command);
+		for (String phone : command.getTargets()) {
+			aliyunDypnsVerifyCodeSender.sendVerifyCode(phone, prepared.providerTemplateCode(),
+					prepared.templateParam());
+		}
+	}
 
 }

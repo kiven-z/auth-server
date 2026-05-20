@@ -24,64 +24,64 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class SysJobExecutionListenerTest {
 
-    @Mock
-    private SysJobLogService sysJobLogService;
+	@Mock
+	private SysJobLogService sysJobLogService;
 
-    @Mock
-    private SysJobCircuitBreaker sysJobCircuitBreaker;
+	@Mock
+	private SysJobCircuitBreaker sysJobCircuitBreaker;
 
-    @Mock
-    private ScheduleJobProperties scheduleJobProperties;
+	@Mock
+	private ScheduleJobProperties scheduleJobProperties;
 
-    @InjectMocks
-    private SysJobExecutionListener sysJobExecutionListener;
+	@InjectMocks
+	private SysJobExecutionListener sysJobExecutionListener;
 
-    @Test
-    @DisplayName("jobWasExecuted：执行失败时应记录日志并触发熔断评估")
-    void jobWasExecuted_onFailure_recordsLogAndEvaluatesCircuitBreaker() {
-        when(scheduleJobProperties.isSuccessEnabled()).thenReturn(false);
+	@Test
+	@DisplayName("jobWasExecuted：执行失败时应记录日志并触发熔断评估")
+	void jobWasExecuted_onFailure_recordsLogAndEvaluatesCircuitBreaker() {
+		when(scheduleJobProperties.isSuccessEnabled()).thenReturn(false);
 
-        JobExecutionContext context = mock(JobExecutionContext.class);
-        JobDetail jobDetail = mock(JobDetail.class);
-        JobKey jobKey = JobKey.jobKey("demoJob", "DEFAULT");
-        JobDataMap jobDataMap = new JobDataMap();
-        jobDataMap.put(SysJobQuartzDataKeys.SYS_JOB_ID, "1");
-        jobDataMap.put(SysJobQuartzDataKeys.INVOKE_TARGET, "demoBean.run()");
-        jobDataMap.put(SysJobQuartzDataKeys.TRIGGER_TYPE, SysJobQuartzDataKeys.TRIGGER_TYPE_SCHEDULE);
+		JobExecutionContext context = mock(JobExecutionContext.class);
+		JobDetail jobDetail = mock(JobDetail.class);
+		JobKey jobKey = JobKey.jobKey("demoJob", "DEFAULT");
+		JobDataMap jobDataMap = new JobDataMap();
+		jobDataMap.put(SysJobQuartzDataKeys.SYS_JOB_ID, "1");
+		jobDataMap.put(SysJobQuartzDataKeys.INVOKE_TARGET, "demoBean.run()");
+		jobDataMap.put(SysJobQuartzDataKeys.TRIGGER_TYPE, SysJobQuartzDataKeys.TRIGGER_TYPE_SCHEDULE);
 
-        when(context.getJobDetail()).thenReturn(jobDetail);
-        when(jobDetail.getKey()).thenReturn(jobKey);
-        when(context.getMergedJobDataMap()).thenReturn(jobDataMap);
+		when(context.getJobDetail()).thenReturn(jobDetail);
+		when(jobDetail.getKey()).thenReturn(jobKey);
+		when(context.getMergedJobDataMap()).thenReturn(jobDataMap);
 
-        JobExecutionException jobException = new JobExecutionException("boom");
-        sysJobExecutionListener.jobToBeExecuted(context);
-        sysJobExecutionListener.jobWasExecuted(context, jobException);
+		JobExecutionException jobException = new JobExecutionException("boom");
+		sysJobExecutionListener.jobToBeExecuted(context);
+		sysJobExecutionListener.jobWasExecuted(context, jobException);
 
-        verify(sysJobLogService).recordFailure(eq(1L), eq("demoJob"), eq("DEFAULT"), eq("demoBean.run()"),
-                eq(SysJobQuartzDataKeys.TRIGGER_TYPE_SCHEDULE), org.mockito.ArgumentMatchers.anyLong(),
-                eq(jobException));
-        verify(sysJobCircuitBreaker).evaluateAfterFailure(1L, "demoJob", "DEFAULT");
-    }
+		verify(sysJobLogService).recordFailure(eq(1L), eq("demoJob"), eq("DEFAULT"), eq("demoBean.run()"),
+				eq(SysJobQuartzDataKeys.TRIGGER_TYPE_SCHEDULE), org.mockito.ArgumentMatchers.anyLong(),
+				eq(jobException));
+		verify(sysJobCircuitBreaker).evaluateAfterFailure(1L, "demoJob", "DEFAULT");
+	}
 
-    @Test
-    @DisplayName("jobWasExecuted：执行成功且未开启成功日志时不写库")
-    void jobWasExecuted_onSuccess_withoutSuccessLog_skipsPersistence() throws JobExecutionException {
-        when(scheduleJobProperties.isSuccessEnabled()).thenReturn(false);
+	@Test
+	@DisplayName("jobWasExecuted：执行成功且未开启成功日志时不写库")
+	void jobWasExecuted_onSuccess_withoutSuccessLog_skipsPersistence() throws JobExecutionException {
+		when(scheduleJobProperties.isSuccessEnabled()).thenReturn(false);
 
-        JobExecutionContext context = mock(JobExecutionContext.class);
-        JobDetail jobDetail = mock(JobDetail.class);
-        JobKey jobKey = JobKey.jobKey("demoJob", "DEFAULT");
-        JobDataMap jobDataMap = new JobDataMap();
+		JobExecutionContext context = mock(JobExecutionContext.class);
+		JobDetail jobDetail = mock(JobDetail.class);
+		JobKey jobKey = JobKey.jobKey("demoJob", "DEFAULT");
+		JobDataMap jobDataMap = new JobDataMap();
 
-        when(context.getJobDetail()).thenReturn(jobDetail);
-        when(jobDetail.getKey()).thenReturn(jobKey);
-        when(context.getMergedJobDataMap()).thenReturn(jobDataMap);
+		when(context.getJobDetail()).thenReturn(jobDetail);
+		when(jobDetail.getKey()).thenReturn(jobKey);
+		when(context.getMergedJobDataMap()).thenReturn(jobDataMap);
 
-        sysJobExecutionListener.jobToBeExecuted(context);
-        sysJobExecutionListener.jobWasExecuted(context, null);
+		sysJobExecutionListener.jobToBeExecuted(context);
+		sysJobExecutionListener.jobWasExecuted(context, null);
 
-        verifyNoInteractions(sysJobLogService);
-        verifyNoInteractions(sysJobCircuitBreaker);
-    }
+		verifyNoInteractions(sysJobLogService);
+		verifyNoInteractions(sysJobCircuitBreaker);
+	}
 
 }

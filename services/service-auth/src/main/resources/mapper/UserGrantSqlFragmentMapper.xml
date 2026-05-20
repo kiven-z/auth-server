@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.auth.service.auth.internal.mapper.UserGrantSqlFragmentMapper">
+<mapper namespace="com.auth.service.auth.authorization.infrastructure.persistence.UserGrantSqlFragmentMapper">
     <!--
         公共片段：画像查询与影响面反查共用 grant_table + USER/DEPT/POST 语义。
         部门主体由 user_dept 与 dept_closure 解析祖先部门；修改授权展开规则时只维护本文件。

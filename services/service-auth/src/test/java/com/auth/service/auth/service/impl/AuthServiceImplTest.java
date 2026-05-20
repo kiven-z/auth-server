@@ -4,25 +4,25 @@ import com.auth.common.jwt.model.JwtUserToken;
 import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.TestConstants;
-import com.auth.service.auth.authentication.audit.event.LoginAuditEventPublisher;
-import com.auth.service.auth.authentication.profile.AuthProfileCache;
-import com.auth.service.auth.authentication.service.impl.AuthServiceImpl;
-import com.auth.service.auth.authentication.strategy.LoginStrategy;
-import com.auth.service.auth.authentication.support.AuthTokenResponseEnricher;
-import com.auth.service.auth.authentication.token.LoginFailureRateLimiter;
-import com.auth.service.auth.authentication.token.LoginResult;
-import com.auth.service.auth.authentication.token.TokenPair;
-import com.auth.service.auth.authentication.token.TokenService;
-import com.auth.service.auth.session.infrastructure.RedisUserSessionIndexRepository;
-import com.auth.service.auth.session.infrastructure.SessionLimitManager;
-import com.auth.service.auth.session.infrastructure.UserSessionIndexFactory;
-import com.auth.service.auth.support.exception.AuthBusinessException;
-import com.auth.service.auth.support.model.enums.AuthLoginLogResult;
-import com.auth.service.auth.support.model.enums.AuthLoginLogType;
-import com.auth.service.auth.support.model.enums.AuthResultCode;
-import com.auth.service.auth.support.model.request.login.AbstractLoginRequest;
-import com.auth.service.auth.support.model.request.login.UsernamePasswordLoginRequest;
-import com.auth.service.auth.support.model.response.UserLoginResponse;
+import com.auth.service.auth.authentication.api.dto.request.AbstractLoginRequest;
+import com.auth.service.auth.authentication.api.dto.request.UsernamePasswordLoginRequest;
+import com.auth.service.auth.authentication.api.dto.response.UserLoginResponse;
+import com.auth.service.auth.authentication.application.impl.AuthServiceImpl;
+import com.auth.service.auth.authentication.domain.enums.AuthLoginLogResult;
+import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
+import com.auth.service.auth.authentication.domain.event.LoginAuditEventPublisher;
+import com.auth.service.auth.authentication.domain.model.LoginResult;
+import com.auth.service.auth.authentication.domain.model.TokenPair;
+import com.auth.service.auth.authentication.domain.strategy.LoginStrategy;
+import com.auth.service.auth.authentication.infrastructure.support.AuthTokenResponseEnricher;
+import com.auth.service.auth.authentication.infrastructure.token.LoginFailureRateLimiter;
+import com.auth.service.auth.authentication.infrastructure.token.TokenService;
+import com.auth.service.auth.authorization.infrastructure.cache.AuthProfileCache;
+import com.auth.service.auth.session.infrastructure.redis.RedisUserSessionIndexRepository;
+import com.auth.service.auth.session.infrastructure.redis.support.SessionLimitManager;
+import com.auth.service.auth.session.infrastructure.redis.support.UserSessionIndexFactory;
+import com.auth.service.auth.shared.exception.AuthBusinessException;
+import com.auth.service.auth.shared.exception.enums.AuthResultCode;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -253,8 +253,49 @@ class AuthServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("登出：token 为空/解析异常/kind 不匹配时，静默返回不做任何删除")
-	void logout_shouldReturnSilently_whenTokenBlankOrParseThrowsOrKindNotExternalAccess() {
+	@DisplayName("登录：编排失败时回滚已写入的画像与会话")
+	void login_shouldRollbackArtifacts_whenOrchestrationFailsAfterProfileCached() {
+		UsernamePasswordLoginRequest auth = new UsernamePasswordLoginRequest();
+		auth.setUsername("user");
+		auth.setPassword("pass");
+
+		AuthProfile profile = mock(AuthProfile.class);
+		when(profile.getUserId()).thenReturn(TestConstants.USER_ID);
+		when(profile.getPermVersion()).thenReturn(1L);
+
+		UserLoginResponse response = new UserLoginResponse();
+		response.setId(TestConstants.USER_ID);
+		response.setUsername("user");
+
+		LoginResult loginResult = new LoginResult(response, profile, AuthLoginLogType.LOGIN_PASSWORD);
+
+		LoginStrategy<UsernamePasswordLoginRequest> strategy = new LoginStrategy<>() {
+			@Override
+			public Class<UsernamePasswordLoginRequest> supports() {
+				return UsernamePasswordLoginRequest.class;
+			}
+
+			@Override
+			public LoginResult authenticate(UsernamePasswordLoginRequest requestAuth, HttpServletRequest request) {
+				return loginResult;
+			}
+		};
+
+		when(tokenService.buildTokenPair(anyLong(), anyString(), anyLong()))
+			.thenThrow(new AuthBusinessException(AuthResultCode.SERVER_ERROR));
+
+		AuthServiceImpl service = newService(strategy);
+
+		assertThrows(AuthBusinessException.class, () -> service.login(auth, httpServletRequest));
+
+		verify(authProfileCache).createCacheAuthProfile(profile);
+		verify(authProfileCache).evictCacheAuthProfile(TestConstants.USER_ID);
+		verify(redisUserSessionIndexRepository, never()).createUserSessionIndex(any());
+	}
+
+	@Test
+	@DisplayName("登出：token 为空或无法解析时不删除会话")
+	void logout_shouldSkipRevoke_whenTokenBlankOrUnparsed() {
 		// Arrange（logout 不使用策略表，传空列表即可）
 		AuthServiceImpl service = newService();
 

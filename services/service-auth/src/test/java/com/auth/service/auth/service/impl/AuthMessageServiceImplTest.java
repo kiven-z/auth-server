@@ -6,13 +6,13 @@ import com.auth.module.message.api.command.ChannelOptionsSupport;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.message.api.model.email.EmailChannelOptions;
 import com.auth.module.platform.persistence.model.UserEntity;
-import com.auth.service.auth.authentication.audit.LoginAuditSnapshot;
-import com.auth.service.auth.authentication.audit.LoginAuditSnapshotFactory;
-import com.auth.service.auth.authentication.mapper.UserMapper;
-import com.auth.service.auth.authentication.service.impl.AuthMessageServiceImpl;
-import com.auth.service.auth.support.integration.SystemSecurityIngestFeignClient;
-import com.auth.service.auth.support.message.AuthDypnsVerifyCodeSceneCode;
-import com.auth.service.auth.support.message.AuthEmailTemplateCode;
+import com.auth.service.auth.authentication.application.impl.AuthMessageServiceImpl;
+import com.auth.service.auth.authentication.infrastructure.audit.LoginAuditSnapshot;
+import com.auth.service.auth.authentication.infrastructure.audit.LoginAuditSnapshotFactory;
+import com.auth.service.auth.authentication.infrastructure.message.AuthDypnsVerifyCodeSceneCode;
+import com.auth.service.auth.authentication.infrastructure.message.AuthEmailTemplateCode;
+import com.auth.service.auth.authentication.infrastructure.persistence.UserMapper;
+import com.auth.service.auth.shared.integration.SystemSecurityIngestFeignClient;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -30,15 +30,13 @@ import static com.auth.module.security.contract.redis.SecurityRedisKey.SMS_CODE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link AuthMessageServiceImpl} 单元测试
  */
-@ExtendWith(MockitoExtension.class)
 @DisplayName("AuthMessageServiceImpl 认证消息服务")
+@ExtendWith(MockitoExtension.class)
 class AuthMessageServiceImplTest {
 
 	@Mock
