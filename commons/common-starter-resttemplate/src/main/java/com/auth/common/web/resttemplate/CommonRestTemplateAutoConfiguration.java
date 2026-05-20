@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * RestTemplate auto configuration (optionally LoadBalanced).
+ * RestTemplate配置
  *
  * @author Bunny
  */

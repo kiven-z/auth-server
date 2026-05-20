@@ -4,9 +4,9 @@ import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.service.system.admin.mapper.MessageTemplateMapper;
 import com.auth.service.system.admin.model.entity.MessageTemplateEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.message.template.FreemarkerTemplateRenderer;
 import com.auth.service.system.common.exception.TemplateRenderException;
-import com.auth.service.system.message.shared.MessageTemplateRequireFieldsJsonSupport;
+import com.auth.service.system.message.template.FreemarkerTemplateRenderer;
+import com.auth.service.system.message.template.MessageTemplateRequireFieldsJsonSupport;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;

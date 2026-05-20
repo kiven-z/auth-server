@@ -1,4 +1,4 @@
-package com.auth.service.system.message.shared;
+package com.auth.service.system.message.template;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;

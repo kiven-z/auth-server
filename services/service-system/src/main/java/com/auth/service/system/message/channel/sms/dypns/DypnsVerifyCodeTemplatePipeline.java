@@ -8,7 +8,7 @@ import com.auth.service.system.admin.mapper.MessageTemplateMapper;
 import com.auth.service.system.admin.model.entity.MessageTemplateEntity;
 import com.auth.service.system.admin.model.vo.emailtemplate.EmailTemplateRequireFieldRow;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.message.shared.MessageTemplateRequireFieldsJsonSupport;
+import com.auth.service.system.message.template.MessageTemplateRequireFieldsJsonSupport;
 import org.springframework.stereotype.Component;
 
 import java.util.LinkedHashMap;
