@@ -68,6 +68,13 @@ class ServiceAuthArchitectureTest {
 		.haveName("printStackTrace");
 
 	@ArchTest
+	static final ArchRule authentication_application_must_not_depend_on_authorization_application = noClasses().that()
+		.resideInAPackage(AUTH_APPLICATION)
+		.should()
+		.dependOnClassesThat()
+		.resideInAPackage("..authorization.application..");
+
+	@ArchTest
 	static final ArchRule authentication_application_must_not_depend_on_infrastructure = noClasses().that()
 		.resideInAPackage(AUTH_APPLICATION)
 		.should()
@@ -80,6 +87,20 @@ class ServiceAuthArchitectureTest {
 		.should()
 		.dependOnClassesThat()
 		.areAssignableTo(RestTemplate.class);
+
+	@ArchTest
+	static final ArchRule authorization_must_not_depend_on_authentication_domain = noClasses().that()
+		.resideInAPackage("..authorization..")
+		.should()
+		.dependOnClassesThat()
+		.resideInAPackage("..authentication.domain..");
+
+	@ArchTest
+	static final ArchRule authorization_application_must_not_use_user_entity = noClasses().that()
+		.resideInAPackage("..authorization.application..")
+		.should()
+		.dependOnClassesThat()
+		.haveFullyQualifiedName("com.auth.module.platform.persistence.model.UserEntity");
 
 	@ArchTest
 	static final ArchRule controller_public_api_methods_return_result = methods().that()

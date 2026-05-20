@@ -1,6 +1,6 @@
 package com.auth.service.auth.authorization.domain.port;
 
-import com.auth.module.platform.persistence.model.UserEntity;
+import com.auth.service.auth.authorization.domain.model.UserAccountSnapshot;
 
 import java.util.Optional;
 
@@ -12,10 +12,10 @@ import java.util.Optional;
 public interface UserReadPort {
 
 	/**
-	 * 按用户 ID 查询用户实体。
+	 * 按用户 ID 查询授权用用户快照。
 	 * @param userId 用户 ID
-	 * @return 用户实体；不存在时为空
+	 * @return 用户快照；不存在时为空
 	 */
-	Optional<UserEntity> findById(Long userId);
+	Optional<UserAccountSnapshot> findById(Long userId);
 
 }

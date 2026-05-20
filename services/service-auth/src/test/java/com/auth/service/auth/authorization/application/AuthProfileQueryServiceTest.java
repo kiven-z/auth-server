@@ -1,7 +1,7 @@
 package com.auth.service.auth.authorization.application;
 
-import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
+import com.auth.service.auth.authorization.domain.model.UserAccountSnapshot;
 import com.auth.service.auth.authorization.domain.port.UserReadPort;
 import com.auth.service.auth.authorization.infrastructure.persistence.UserAuthorizationGrantMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -36,10 +36,8 @@ class AuthProfileQueryServiceTest {
 
 	@Test
 	@DisplayName("构建画像时注入生效数据权限")
-	void buildByUser_shouldContainResolvedDataScopes() {
-		UserEntity user = new UserEntity();
-		user.setId(10L);
-		user.setUsername("u10");
+	void buildByAccount_shouldContainResolvedDataScopes() {
+		UserAccountSnapshot account = new UserAccountSnapshot(10L, "u10", 1L);
 		when(userAuthorizationGrantMapper.selectRolesByUserId(10L)).thenReturn(List.of("COMMON"));
 		when(userAuthorizationGrantMapper.selectPermissionsByUserId(10L)).thenReturn(List.of("system:user:list"));
 		ScopeGrant grant = ScopeGrant.builder().build();
@@ -47,7 +45,7 @@ class AuthProfileQueryServiceTest {
 
 		AuthProfileQueryService service = new AuthProfileQueryService(userAuthorizationGrantMapper, userReadPort,
 				dataScopeEffectiveResolver);
-		Map<String, ScopeGrant> dataScopes = service.buildByUser(user).getDataScopes();
+		Map<String, ScopeGrant> dataScopes = service.buildByAccount(account).getDataScopes();
 
 		assertEquals(1, dataScopes.size());
 		assertEquals(grant, dataScopes.get("DEPT::default"));

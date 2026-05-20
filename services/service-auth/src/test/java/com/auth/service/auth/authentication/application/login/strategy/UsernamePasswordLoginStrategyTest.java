@@ -7,7 +7,7 @@ import com.auth.service.auth.authentication.domain.enums.CredentialDimension;
 import com.auth.service.auth.authentication.domain.model.LoginAccount;
 import com.auth.service.auth.authentication.domain.port.LoginAccountLookupPort;
 import com.auth.service.auth.authentication.domain.port.LoginFailureRateLimitPort;
-import com.auth.service.auth.authorization.application.AuthProfileQueryService;
+import com.auth.service.auth.authorization.domain.port.AuthProfileQueryPort;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.enums.AuthResultCode;
 import jakarta.servlet.http.HttpServletRequest;
@@ -44,7 +44,7 @@ class UsernamePasswordLoginStrategyTest {
 	private LoginFailureRateLimitPort loginFailureRateLimitPort;
 
 	@Mock
-	private AuthProfileQueryService authProfileQueryService;
+	private AuthProfileQueryPort authProfileQueryPort;
 
 	@Mock
 	private PasswordEncoder passwordEncoder;
@@ -60,7 +60,7 @@ class UsernamePasswordLoginStrategyTest {
 	void resolveUser_shouldThrow_whenUserNotFound() {
 		when(loginAccountLookupPort.findForLogin(CredentialDimension.USERNAME, "u")).thenReturn(Optional.empty());
 		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(loginAccountLookupPort,
-				loginFailureRateLimitPort, authProfileQueryService, passwordEncoder, loginAuditCoordinator);
+				loginFailureRateLimitPort, authProfileQueryPort, passwordEncoder, loginAuditCoordinator);
 
 		UsernamePasswordLoginCommand command = new UsernamePasswordLoginCommand("u", "p");
 
@@ -79,7 +79,7 @@ class UsernamePasswordLoginStrategyTest {
 		when(loginAccountLookupPort.findForLogin(CredentialDimension.USERNAME, "u")).thenReturn(Optional.of(account));
 
 		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(loginAccountLookupPort,
-				loginFailureRateLimitPort, authProfileQueryService, passwordEncoder, loginAuditCoordinator);
+				loginFailureRateLimitPort, authProfileQueryPort, passwordEncoder, loginAuditCoordinator);
 
 		UsernamePasswordLoginCommand command = new UsernamePasswordLoginCommand("u", "p");
 
@@ -96,7 +96,7 @@ class UsernamePasswordLoginStrategyTest {
 	@DisplayName("supports 返回 UsernamePasswordLoginCommand.class")
 	void supports_shouldReturnUsernamePasswordLoginCommandClass() {
 		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(loginAccountLookupPort,
-				loginFailureRateLimitPort, authProfileQueryService, passwordEncoder, loginAuditCoordinator);
+				loginFailureRateLimitPort, authProfileQueryPort, passwordEncoder, loginAuditCoordinator);
 
 		assertEquals(UsernamePasswordLoginCommand.class, strategy.supports());
 	}
@@ -112,7 +112,7 @@ class UsernamePasswordLoginStrategyTest {
 		when(loginFailureRateLimitPort.recordFailure(1L)).thenReturn(2);
 
 		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(loginAccountLookupPort,
-				loginFailureRateLimitPort, authProfileQueryService, passwordEncoder, loginAuditCoordinator);
+				loginFailureRateLimitPort, authProfileQueryPort, passwordEncoder, loginAuditCoordinator);
 
 		UsernamePasswordLoginCommand command = new UsernamePasswordLoginCommand("u", "p");
 

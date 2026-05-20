@@ -1,7 +1,6 @@
 package com.auth.service.system.common.exception;
 
 import com.auth.common.core.model.response.Result;
-import com.auth.common.web.exception.ValidationExceptionHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.core.annotation.Order;
@@ -19,7 +18,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 @Order(10)
 @RestControllerAdvice
-public class SystemBusinessExceptionHandler extends ValidationExceptionHandler {
+public class SystemBusinessExceptionHandler {
 
 	private final MessageSource messageSource;
 

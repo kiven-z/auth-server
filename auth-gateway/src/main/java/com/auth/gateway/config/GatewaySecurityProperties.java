@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
 
 import com.auth.module.security.core.matcher.AntPathMatcher;
 
@@ -19,6 +20,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Component
+@Validated
 @ConfigurationProperties(prefix = "auth.gateway.security")
 public class GatewaySecurityProperties {
 

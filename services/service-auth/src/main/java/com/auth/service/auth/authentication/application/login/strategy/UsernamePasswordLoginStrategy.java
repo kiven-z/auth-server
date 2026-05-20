@@ -7,7 +7,7 @@ import com.auth.service.auth.authentication.domain.enums.CredentialDimension;
 import com.auth.service.auth.authentication.domain.model.LoginAccount;
 import com.auth.service.auth.authentication.domain.port.LoginAccountLookupPort;
 import com.auth.service.auth.authentication.domain.port.LoginFailureRateLimitPort;
-import com.auth.service.auth.authorization.application.AuthProfileQueryService;
+import com.auth.service.auth.authorization.domain.port.AuthProfileQueryPort;
 import com.auth.service.auth.shared.exception.AuthBadCredentialsException;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.enums.AuthResultCode;
@@ -27,9 +27,9 @@ public class UsernamePasswordLoginStrategy extends AbstractLoginStrategyTemplate
 	private final PasswordEncoder passwordEncoder;
 
 	public UsernamePasswordLoginStrategy(LoginAccountLookupPort loginAccountLookupPort,
-			LoginFailureRateLimitPort loginFailureRateLimitPort, AuthProfileQueryService authProfileQueryService,
+			LoginFailureRateLimitPort loginFailureRateLimitPort, AuthProfileQueryPort authProfileQueryPort,
 			PasswordEncoder passwordEncoder, LoginAuditCoordinator loginAuditCoordinator) {
-		super(loginFailureRateLimitPort, authProfileQueryService, loginAuditCoordinator);
+		super(loginFailureRateLimitPort, authProfileQueryPort, loginAuditCoordinator);
 		this.loginAccountLookupPort = loginAccountLookupPort;
 		this.passwordEncoder = passwordEncoder;
 	}

@@ -1,7 +1,6 @@
 package com.auth.gateway.exception;
 
 import com.auth.common.core.model.response.Result;
-import com.auth.common.web.exception.ValidationExceptionHandler;
 import com.auth.gateway.support.GatewayResultFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
@@ -19,7 +18,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 @Order(10)
 @RestControllerAdvice
-public class GatewayBusinessExceptionHandler extends ValidationExceptionHandler {
+public class GatewayBusinessExceptionHandler {
 
 	private final MessageSource messageSource;
 

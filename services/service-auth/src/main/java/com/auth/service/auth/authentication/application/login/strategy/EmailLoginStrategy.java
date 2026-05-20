@@ -9,7 +9,7 @@ import com.auth.service.auth.authentication.domain.model.LoginAccount;
 import com.auth.service.auth.authentication.domain.port.LoginAccountLookupPort;
 import com.auth.service.auth.authentication.domain.port.LoginFailureRateLimitPort;
 import com.auth.service.auth.authentication.domain.port.LoginVerificationCodePort;
-import com.auth.service.auth.authorization.application.AuthProfileQueryService;
+import com.auth.service.auth.authorization.domain.port.AuthProfileQueryPort;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.enums.AuthResultCode;
 import org.springframework.stereotype.Component;
@@ -29,9 +29,9 @@ public class EmailLoginStrategy extends AbstractLoginStrategyTemplate<EmailLogin
 	private final LoginVerificationCodePort loginVerificationCodePort;
 
 	public EmailLoginStrategy(LoginAccountLookupPort loginAccountLookupPort,
-			LoginFailureRateLimitPort loginFailureRateLimitPort, AuthProfileQueryService authProfileQueryService,
+			LoginFailureRateLimitPort loginFailureRateLimitPort, AuthProfileQueryPort authProfileQueryPort,
 			LoginVerificationCodePort loginVerificationCodePort, LoginAuditCoordinator loginAuditCoordinator) {
-		super(loginFailureRateLimitPort, authProfileQueryService, loginAuditCoordinator);
+		super(loginFailureRateLimitPort, authProfileQueryPort, loginAuditCoordinator);
 		this.loginAccountLookupPort = loginAccountLookupPort;
 		this.loginVerificationCodePort = loginVerificationCodePort;
 	}

@@ -10,7 +10,7 @@ import com.auth.service.auth.authentication.domain.model.LoginAccount;
 import com.auth.service.auth.authentication.domain.port.LoginAccountLookupPort;
 import com.auth.service.auth.authentication.domain.port.LoginFailureRateLimitPort;
 import com.auth.service.auth.authentication.domain.port.LoginVerificationCodePort;
-import com.auth.service.auth.authorization.application.AuthProfileQueryService;
+import com.auth.service.auth.authorization.domain.port.AuthProfileQueryPort;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.enums.AuthResultCode;
 import jakarta.servlet.http.HttpServletRequest;
@@ -49,7 +49,7 @@ class SmsLoginStrategyTest {
 	private LoginFailureRateLimitPort loginFailureRateLimitPort;
 
 	@Mock
-	private AuthProfileQueryService authProfileQueryService;
+	private AuthProfileQueryPort authProfileQueryPort;
 
 	@Mock
 	private LoginAuditCoordinator loginAuditCoordinator;
@@ -58,7 +58,7 @@ class SmsLoginStrategyTest {
 	private HttpServletRequest httpServletRequest;
 
 	private SmsLoginStrategy createStrategy() {
-		return new SmsLoginStrategy(loginAccountLookupPort, loginFailureRateLimitPort, authProfileQueryService,
+		return new SmsLoginStrategy(loginAccountLookupPort, loginFailureRateLimitPort, authProfileQueryPort,
 				loginVerificationCodePort, loginAuditCoordinator);
 	}
 
@@ -111,7 +111,7 @@ class SmsLoginStrategyTest {
 		doNothing().when(loginFailureRateLimitPort).assertNotLocked(1L);
 
 		AuthProfile profile = mock(AuthProfile.class);
-		when(authProfileQueryService.buildByUserId(1L)).thenReturn(profile);
+		when(authProfileQueryPort.buildByUserId(1L)).thenReturn(profile);
 
 		String phone = "13800138000";
 		String code = "123456";

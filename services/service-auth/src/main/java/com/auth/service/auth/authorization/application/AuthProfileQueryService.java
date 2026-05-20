@@ -1,10 +1,11 @@
 package com.auth.service.auth.authorization.application;
 
-import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.module.security.contract.api.authorization.PolicyBundle;
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
 import com.auth.module.security.contract.constants.PermissionConstant;
+import com.auth.service.auth.authorization.domain.model.UserAccountSnapshot;
+import com.auth.service.auth.authorization.domain.port.AuthProfileQueryPort;
 import com.auth.service.auth.authorization.domain.port.UserReadPort;
 import com.auth.service.auth.authorization.infrastructure.persistence.UserAuthorizationGrantMapper;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
@@ -20,7 +21,7 @@ import java.util.Map;
  * @author Bunny
  */
 @Service
-public class AuthProfileQueryService {
+public class AuthProfileQueryService implements AuthProfileQueryPort {
 
 	private final UserAuthorizationGrantMapper userAuthorizationGrantMapper;
 
@@ -40,22 +41,23 @@ public class AuthProfileQueryService {
 	 * @param userId 用户ID
 	 * @return 授权画像
 	 */
+	@Override
 	public AuthProfile buildByUserId(Long userId) {
-		UserEntity user = userReadPort.findById(userId)
+		UserAccountSnapshot account = userReadPort.findById(userId)
 			.orElseThrow(() -> new AuthBusinessException(AuthResultCode.USER_NOT_FOUND));
-		return buildByUser(user);
+		return buildByAccount(account);
 	}
 
 	/**
-	 * 根据用户信息构建授权画像（避免重复查询用户）
-	 * @param user 用户信息
+	 * 根据用户快照构建授权画像（避免重复查询用户）
+	 * @param account 用户快照
 	 * @return 授权画像
 	 */
-	public AuthProfile buildByUser(UserEntity user) {
-		if (user == null || user.getId() == null) {
+	public AuthProfile buildByAccount(UserAccountSnapshot account) {
+		if (account == null || account.id() == null) {
 			throw new AuthBusinessException(AuthResultCode.USER_NOT_FOUND);
 		}
-		long userId = user.getId();
+		long userId = account.id();
 
 		// 获取功能权限
 		List<String> roles = userAuthorizationGrantMapper.selectRolesByUserId(userId);
@@ -71,14 +73,14 @@ public class AuthProfileQueryService {
 		Map<String, ScopeGrant> dataScopes = dataScopeEffectiveResolver.resolveByUserId(userId);
 
 		return AuthProfile.builder()
-			.userId(user.getId())
-			.username(user.getUsername())
+			.userId(account.id())
+			.username(account.username())
 			.roles(roles)
 			.permissions(permissions)
 			.dataScopes(dataScopes)
 			// TODO 后面完成
 			.policies(PolicyBundle.empty())
-			.permVersion(user.getPermVersion())
+			.permVersion(account.permVersion())
 			.build();
 	}
 

@@ -1,6 +1,7 @@
 package com.auth.service.system.message.config;
 
 import com.auth.module.message.api.model.dingtalk.DingTalkMessageType;
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -29,6 +30,7 @@ public class DingTalkProperties {
 	/**
 	 * 应用 App ID（预留，当前 Open API 未使用）
 	 */
+	@Nullable
 	private String appId;
 
 	/**

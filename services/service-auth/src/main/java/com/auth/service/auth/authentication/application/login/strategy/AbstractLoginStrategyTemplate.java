@@ -11,7 +11,7 @@ import com.auth.service.auth.authentication.domain.model.LoginAccount;
 import com.auth.service.auth.authentication.domain.model.LoginResult;
 import com.auth.service.auth.authentication.domain.port.LoginFailureRateLimitPort;
 import com.auth.service.auth.authentication.domain.service.UserAccountLoginEligibility;
-import com.auth.service.auth.authorization.application.AuthProfileQueryService;
+import com.auth.service.auth.authorization.domain.port.AuthProfileQueryPort;
 import com.auth.service.auth.shared.exception.AuthBadCredentialsException;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.enums.AuthResultCode;
@@ -32,14 +32,14 @@ public abstract class AbstractLoginStrategyTemplate<T extends AbstractLoginComma
 
 	protected final LoginFailureRateLimitPort loginFailureRateLimitPort;
 
-	private final AuthProfileQueryService authProfileQueryService;
+	private final AuthProfileQueryPort authProfileQueryPort;
 
 	private final LoginAuditCoordinator loginAuditCoordinator;
 
 	protected AbstractLoginStrategyTemplate(LoginFailureRateLimitPort loginFailureRateLimitPort,
-			AuthProfileQueryService authProfileQueryService, LoginAuditCoordinator loginAuditCoordinator) {
+			AuthProfileQueryPort authProfileQueryPort, LoginAuditCoordinator loginAuditCoordinator) {
 		this.loginFailureRateLimitPort = loginFailureRateLimitPort;
-		this.authProfileQueryService = authProfileQueryService;
+		this.authProfileQueryPort = authProfileQueryPort;
 		this.loginAuditCoordinator = loginAuditCoordinator;
 	}
 
@@ -57,7 +57,7 @@ public abstract class AbstractLoginStrategyTemplate<T extends AbstractLoginComma
 
 		try {
 			AuthLoginLogType resolvedLoginLogType = doAuthenticate(command, account);
-			AuthProfile profile = authProfileQueryService.buildByUserId(userId);
+			AuthProfile profile = authProfileQueryPort.buildByUserId(userId);
 
 			return new LoginResult(AuthenticatedUser.from(account), profile, resolvedLoginLogType);
 		}
