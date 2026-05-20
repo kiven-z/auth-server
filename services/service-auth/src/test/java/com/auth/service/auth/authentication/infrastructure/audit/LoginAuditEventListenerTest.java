@@ -21,21 +21,21 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class LoginAuditEventListenerTest {
 
-    @Mock
-    private AuthLoginAuditService authLoginAuditService;
+	@Mock
+	private AuthLoginAuditService authLoginAuditService;
 
-    @Test
-    @DisplayName("监听器应将事件委托给审计服务快照写入")
-    void onLoginAudit_shouldDelegateToAuditService() {
-        LoginAuditEventListener listener = new LoginAuditEventListener(authLoginAuditService);
-        LoginAuditSnapshot snapshot = LoginAuditSnapshot.empty();
-        LoginAuditEvent event = new LoginAuditEvent(snapshot, AuthLoginLogType.LOGOUT, AuthLoginLogResult.SUCCESS, 3L,
-                "name", null, "sid");
+	@Test
+	@DisplayName("监听器应将事件委托给审计服务快照写入")
+	void onLoginAudit_shouldDelegateToAuditService() {
+		LoginAuditEventListener listener = new LoginAuditEventListener(authLoginAuditService);
+		LoginAuditSnapshot snapshot = LoginAuditSnapshot.empty();
+		LoginAuditEvent event = new LoginAuditEvent(snapshot, AuthLoginLogType.LOGOUT, AuthLoginLogResult.SUCCESS, 3L,
+				"name", null, "sid");
 
-        listener.onLoginAudit(event);
+		listener.onLoginAudit(event);
 
-        verify(authLoginAuditService).recordLoginLog(same(snapshot), eq(AuthLoginLogType.LOGOUT),
-                eq(AuthLoginLogResult.SUCCESS), eq(3L), eq("name"), isNull(), eq("sid"));
-    }
+		verify(authLoginAuditService).recordLoginLog(same(snapshot), eq(AuthLoginLogType.LOGOUT),
+				eq(AuthLoginLogResult.SUCCESS), eq(3L), eq("name"), isNull(), eq("sid"));
+	}
 
 }

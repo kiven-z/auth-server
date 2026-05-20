@@ -36,130 +36,130 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class SmsLoginStrategyTest {
 
-    @Mock
-    private UserMapper userMapper;
+	@Mock
+	private UserMapper userMapper;
 
-    @Mock
-    private RedisTemplate<String, Object> redisTemplate;
+	@Mock
+	private RedisTemplate<String, Object> redisTemplate;
 
-    @Mock
-    private ValueOperations<String, Object> valueOperations;
+	@Mock
+	private ValueOperations<String, Object> valueOperations;
 
-    @Mock
-    private LoginFailureRateLimiter loginFailureRateLimiter;
+	@Mock
+	private LoginFailureRateLimiter loginFailureRateLimiter;
 
-    @Mock
-    private AuthProfileQueryService authProfileQueryService;
+	@Mock
+	private AuthProfileQueryService authProfileQueryService;
 
-    @Mock
-    private LoginAuditEventPublisher loginAuditEventPublisher;
+	@Mock
+	private LoginAuditEventPublisher loginAuditEventPublisher;
 
-    @Mock
-    private HttpServletRequest httpServletRequest;
+	@Mock
+	private HttpServletRequest httpServletRequest;
 
-    private SmsLoginStrategy createStrategy() {
-        return new SmsLoginStrategy(authProfileQueryService, redisTemplate, userMapper, loginFailureRateLimiter,
-                loginAuditEventPublisher);
-    }
+	private SmsLoginStrategy createStrategy() {
+		return new SmsLoginStrategy(authProfileQueryService, redisTemplate, userMapper, loginFailureRateLimiter,
+				loginAuditEventPublisher);
+	}
 
-    private SmsLoginStrategy createStrategyWithRedis() {
-        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-        return createStrategy();
-    }
+	private SmsLoginStrategy createStrategyWithRedis() {
+		when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+		return createStrategy();
+	}
 
-    @Test
-    @DisplayName("手机号未注册时抛出 USERNAME_OR_PASSWORD_ERROR 并发布审计事件")
-    void authenticate_shouldThrow_whenPhoneNotRegistered() {
-        // Arrange
-        when(userMapper.selectUserForLoginByPhone("13800138000")).thenReturn(null);
-        SmsLoginStrategy strategy = createStrategy();
+	@Test
+	@DisplayName("手机号未注册时抛出 USERNAME_OR_PASSWORD_ERROR 并发布审计事件")
+	void authenticate_shouldThrow_whenPhoneNotRegistered() {
+		// Arrange
+		when(userMapper.selectUserForLoginByPhone("13800138000")).thenReturn(null);
+		SmsLoginStrategy strategy = createStrategy();
 
-        SmsLoginRequest auth = new SmsLoginRequest();
-        auth.setPhone("13800138000");
-        auth.setCode("123456");
+		SmsLoginRequest auth = new SmsLoginRequest();
+		auth.setPhone("13800138000");
+		auth.setCode("123456");
 
-        // Act
-        AuthBusinessException exception = assertThrows(AuthBusinessException.class,
-                () -> strategy.authenticate(auth, httpServletRequest));
+		// Act
+		AuthBusinessException exception = assertThrows(AuthBusinessException.class,
+				() -> strategy.authenticate(auth, httpServletRequest));
 
-        // Assert
-        assertEquals(AuthResultCode.USERNAME_OR_PASSWORD_ERROR, exception.getResultCode());
-        verify(loginAuditEventPublisher).publish(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_SMS),
-                eq(AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR), isNull(), eq("13800138000"),
-                eq(exception.getMessageKey()), isNull());
-    }
+		// Assert
+		assertEquals(AuthResultCode.USERNAME_OR_PASSWORD_ERROR, exception.getResultCode());
+		verify(loginAuditEventPublisher).publish(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_SMS),
+				eq(AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR), isNull(), eq("13800138000"),
+				eq(exception.getMessageKey()), isNull());
+	}
 
-    @Test
-    @DisplayName("验证码错误时抛出 AUTH_CODE_ERROR")
-    void doAuthenticate_shouldThrow_whenCodeMismatch() {
-        // Arrange
-        UserEntity user = new UserEntity();
-        user.setId(1L);
-        user.setUsername("testUser");
-        user.setPhone("13800138000");
-        user.setStatus(1);
-        when(userMapper.selectUserForLoginByPhone("13800138000")).thenReturn(user);
-        doNothing().when(loginFailureRateLimiter).assertNotLocked(1L);
-        SmsLoginStrategy strategy = createStrategyWithRedis();
+	@Test
+	@DisplayName("验证码错误时抛出 AUTH_CODE_ERROR")
+	void doAuthenticate_shouldThrow_whenCodeMismatch() {
+		// Arrange
+		UserEntity user = new UserEntity();
+		user.setId(1L);
+		user.setUsername("testUser");
+		user.setPhone("13800138000");
+		user.setStatus(1);
+		when(userMapper.selectUserForLoginByPhone("13800138000")).thenReturn(user);
+		doNothing().when(loginFailureRateLimiter).assertNotLocked(1L);
+		SmsLoginStrategy strategy = createStrategyWithRedis();
 
-        String phone = "13800138000";
-        String redisKey = "auth:security:login:sms:code:" + phone;
-        when(valueOperations.get(redisKey)).thenReturn(MD5.create().digestHex16("wrong"));
+		String phone = "13800138000";
+		String redisKey = "auth:security:login:sms:code:" + phone;
+		when(valueOperations.get(redisKey)).thenReturn(MD5.create().digestHex16("wrong"));
 
-        SmsLoginRequest auth = new SmsLoginRequest();
-        auth.setPhone("13800138000");
-        auth.setCode("000000");
+		SmsLoginRequest auth = new SmsLoginRequest();
+		auth.setPhone("13800138000");
+		auth.setCode("000000");
 
-        // Act
-        AuthBusinessException exception = assertThrows(AuthBusinessException.class,
-                () -> strategy.authenticate(auth, httpServletRequest));
+		// Act
+		AuthBusinessException exception = assertThrows(AuthBusinessException.class,
+				() -> strategy.authenticate(auth, httpServletRequest));
 
-        // Assert
-        assertEquals(AuthResultCode.AUTH_CODE_ERROR, exception.getResultCode());
-        verify(loginAuditEventPublisher).publish(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_SMS),
-                eq(AuthLoginLogResult.CAPTCHA_ERROR), eq(1L), eq("testUser"), eq(exception.getMessageKey()), isNull());
-    }
+		// Assert
+		assertEquals(AuthResultCode.AUTH_CODE_ERROR, exception.getResultCode());
+		verify(loginAuditEventPublisher).publish(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_SMS),
+				eq(AuthLoginLogResult.CAPTCHA_ERROR), eq(1L), eq("testUser"), eq(exception.getMessageKey()), isNull());
+	}
 
-    @Test
-    @DisplayName("验证码正确时登录成功并删除 Redis 中的验证码")
-    void doAuthenticate_shouldSucceed_whenCodeMatches() {
-        // Arrange
-        UserEntity user = new UserEntity();
-        user.setId(1L);
-        user.setUsername("testUser");
-        user.setPhone("13800138000");
-        user.setNickname("Test");
-        user.setStatus(1);
-        when(userMapper.selectUserForLoginByPhone("13800138000")).thenReturn(user);
-        doNothing().when(loginFailureRateLimiter).assertNotLocked(1L);
+	@Test
+	@DisplayName("验证码正确时登录成功并删除 Redis 中的验证码")
+	void doAuthenticate_shouldSucceed_whenCodeMatches() {
+		// Arrange
+		UserEntity user = new UserEntity();
+		user.setId(1L);
+		user.setUsername("testUser");
+		user.setPhone("13800138000");
+		user.setNickname("Test");
+		user.setStatus(1);
+		when(userMapper.selectUserForLoginByPhone("13800138000")).thenReturn(user);
+		doNothing().when(loginFailureRateLimiter).assertNotLocked(1L);
 
-        AuthProfile profile = mock(AuthProfile.class);
-        when(profile.getRoles()).thenReturn(List.of());
-        when(profile.getPermissions()).thenReturn(List.of());
-        when(authProfileQueryService.buildByUser(user)).thenReturn(profile);
-        SmsLoginStrategy strategy = createStrategyWithRedis();
+		AuthProfile profile = mock(AuthProfile.class);
+		when(profile.getRoles()).thenReturn(List.of());
+		when(profile.getPermissions()).thenReturn(List.of());
+		when(authProfileQueryService.buildByUser(user)).thenReturn(profile);
+		SmsLoginStrategy strategy = createStrategyWithRedis();
 
-        String phone = "13800138000";
-        String code = "123456";
-        String redisKey = "auth:security:login:sms:code:" + phone;
-        when(valueOperations.get(redisKey)).thenReturn(MD5.create().digestHex16(code));
+		String phone = "13800138000";
+		String code = "123456";
+		String redisKey = "auth:security:login:sms:code:" + phone;
+		when(valueOperations.get(redisKey)).thenReturn(MD5.create().digestHex16(code));
 
-        SmsLoginRequest auth = new SmsLoginRequest();
-        auth.setPhone(phone);
-        auth.setCode(code);
+		SmsLoginRequest auth = new SmsLoginRequest();
+		auth.setPhone(phone);
+		auth.setCode(code);
 
-        // Act
-        strategy.authenticate(auth, httpServletRequest);
+		// Act
+		strategy.authenticate(auth, httpServletRequest);
 
-        // Assert
-        verify(redisTemplate).delete(redisKey);
-    }
+		// Assert
+		verify(redisTemplate).delete(redisKey);
+	}
 
-    @Test
-    @DisplayName("supports 返回 SmsLoginRequest.class")
-    void supports_shouldReturnSmsLoginRequestClass() {
-        SmsLoginStrategy strategy = createStrategy();
-        assertEquals(SmsLoginRequest.class, strategy.supports());
-    }
+	@Test
+	@DisplayName("supports 返回 SmsLoginRequest.class")
+	void supports_shouldReturnSmsLoginRequestClass() {
+		SmsLoginStrategy strategy = createStrategy();
+		assertEquals(SmsLoginRequest.class, strategy.supports());
+	}
 
 }

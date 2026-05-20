@@ -25,73 +25,73 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class RateLimitAspectTest {
 
-    @Mock
-    private RedisTemplate<String, Object> redisTemplate;
+	@Mock
+	private RedisTemplate<String, Object> redisTemplate;
 
-    @Mock
-    private ValueOperations<String, Object> valueOperations;
+	@Mock
+	private ValueOperations<String, Object> valueOperations;
 
-    private DummyService proxyWithAspect() {
-        RateLimitAspect aspect = new RateLimitAspect(redisTemplate);
-        AspectJProxyFactory factory = new AspectJProxyFactory(new DummyService());
-        factory.addAspect(aspect);
-        return factory.getProxy();
-    }
+	private DummyService proxyWithAspect() {
+		RateLimitAspect aspect = new RateLimitAspect(redisTemplate);
+		AspectJProxyFactory factory = new AspectJProxyFactory(new DummyService());
+		factory.addAspect(aspect);
+		return factory.getProxy();
+	}
 
-    @Test
-    @DisplayName("限流：principal 为空时抛 BAD_REQUEST_MISSING_EMAIL_EXCEPTION")
-    void checkRateLimit_shouldThrowMissingEmail_whenPrincipalBlank() {
-        // Arrange
-        DummyService proxy = proxyWithAspect();
+	@Test
+	@DisplayName("限流：principal 为空时抛 BAD_REQUEST_MISSING_EMAIL_EXCEPTION")
+	void checkRateLimit_shouldThrowMissingEmail_whenPrincipalBlank() {
+		// Arrange
+		DummyService proxy = proxyWithAspect();
 
-        // Act
-        AuthBusinessException exception = assertThrows(AuthBusinessException.class, proxy::missingPrincipal);
+		// Act
+		AuthBusinessException exception = assertThrows(AuthBusinessException.class, proxy::missingPrincipal);
 
-        // Assert
-        assertEquals(AuthResultCode.BAD_REQUEST_MISSING_EMAIL_EXCEPTION, exception.getResultCode());
-    }
+		// Assert
+		assertEquals(AuthResultCode.BAD_REQUEST_MISSING_EMAIL_EXCEPTION, exception.getResultCode());
+	}
 
-    @Test
-    @DisplayName("限流：计数超过上限时抛 TOO_MANY_REQUESTS")
-    void checkRateLimit_shouldThrowTooManyRequests_whenCountExceeded() {
-        // Arrange
-        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-        when(valueOperations.increment(anyString())).thenReturn(6L);
-        DummyService proxy = proxyWithAspect();
+	@Test
+	@DisplayName("限流：计数超过上限时抛 TOO_MANY_REQUESTS")
+	void checkRateLimit_shouldThrowTooManyRequests_whenCountExceeded() {
+		// Arrange
+		when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+		when(valueOperations.increment(anyString())).thenReturn(6L);
+		DummyService proxy = proxyWithAspect();
 
-        // Act
-        AuthBusinessException exception = assertThrows(AuthBusinessException.class, proxy::sendCode);
+		// Act
+		AuthBusinessException exception = assertThrows(AuthBusinessException.class, proxy::sendCode);
 
-        // Assert
-        assertEquals(AuthResultCode.TOO_MANY_REQUESTS, exception.getResultCode());
-    }
+		// Assert
+		assertEquals(AuthResultCode.TOO_MANY_REQUESTS, exception.getResultCode());
+	}
 
-    @Test
-    @DisplayName("限流：首次计数时 expire 返回 false，抛 TOO_MANY_REQUESTS")
-    void checkRateLimit_shouldThrowTooManyRequests_whenExpireFailedOnFirstCount() {
-        // Arrange
-        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-        when(valueOperations.increment(anyString())).thenReturn(1L);
-        when(redisTemplate.expire(anyString(), any())).thenReturn(false);
-        DummyService proxy = proxyWithAspect();
+	@Test
+	@DisplayName("限流：首次计数时 expire 返回 false，抛 TOO_MANY_REQUESTS")
+	void checkRateLimit_shouldThrowTooManyRequests_whenExpireFailedOnFirstCount() {
+		// Arrange
+		when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+		when(valueOperations.increment(anyString())).thenReturn(1L);
+		when(redisTemplate.expire(anyString(), any())).thenReturn(false);
+		DummyService proxy = proxyWithAspect();
 
-        // Act
-        AuthBusinessException exception = assertThrows(AuthBusinessException.class, proxy::sendCode);
+		// Act
+		AuthBusinessException exception = assertThrows(AuthBusinessException.class, proxy::sendCode);
 
-        // Assert
-        assertEquals(AuthResultCode.TOO_MANY_REQUESTS, exception.getResultCode());
-    }
+		// Assert
+		assertEquals(AuthResultCode.TOO_MANY_REQUESTS, exception.getResultCode());
+	}
 
-    static class DummyService {
+	static class DummyService {
 
-        @RateLimit()
-        void missingPrincipal() {
-        }
+		@RateLimit()
+		void missingPrincipal() {
+		}
 
-        @RateLimit(principal = "user@example.com")
-        void sendCode() {
-        }
+		@RateLimit(principal = "user@example.com")
+		void sendCode() {
+		}
 
-    }
+	}
 
 }

@@ -2,7 +2,7 @@ package com.auth.service.auth.session.api.controller;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.module.security.contract.api.UserSessionIndex;
-import com.auth.service.auth.session.infrastructure.redis.RedisUserSessionIndexRepository;
+import com.auth.service.auth.session.application.SessionAdminApplicationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,18 +20,17 @@ import java.util.List;
 @RestController
 public class AdminSessionController {
 
-	private final RedisUserSessionIndexRepository redisUserSessionIndexRepository;
+	private final SessionAdminApplicationService sessionAdminApplicationService;
 
-	public AdminSessionController(RedisUserSessionIndexRepository redisUserSessionIndexRepository) {
-		this.redisUserSessionIndexRepository = redisUserSessionIndexRepository;
+	public AdminSessionController(SessionAdminApplicationService sessionAdminApplicationService) {
+		this.sessionAdminApplicationService = sessionAdminApplicationService;
 	}
 
 	@Operation(summary = "管理员踢下线（按 sessionId/jti）")
 	@PreAuthorize("@auth.decide('ADMIN')")
 	@PostMapping("{userId}/sessions/{sessionId}/kick")
 	public Result<Void> kick(@PathVariable("userId") long userId, @PathVariable("sessionId") String sessionId) {
-		redisUserSessionIndexRepository.deleteSession(sessionId);
-		redisUserSessionIndexRepository.removeActiveSession(userId, sessionId);
+		sessionAdminApplicationService.kickSession(userId, sessionId);
 		return Result.success();
 	}
 
@@ -39,7 +38,7 @@ public class AdminSessionController {
 	@PreAuthorize("@auth.decide('ADMIN')")
 	@PostMapping("{userId}/sessions/kick-all")
 	public Result<Void> kickAll(@PathVariable("userId") long userId) {
-		redisUserSessionIndexRepository.deleteAllSessions(userId);
+		sessionAdminApplicationService.kickAllSessions(userId);
 		return Result.success();
 	}
 
@@ -47,7 +46,7 @@ public class AdminSessionController {
 	@PreAuthorize("@auth.decide('ADMIN')")
 	@GetMapping("{userId}/sessions")
 	public Result<List<UserSessionIndex>> getListSessions(@PathVariable("userId") long userId) {
-		return Result.success(redisUserSessionIndexRepository.listUserSessions(userId));
+		return Result.success(sessionAdminApplicationService.listActiveSessions(userId));
 	}
 
 }

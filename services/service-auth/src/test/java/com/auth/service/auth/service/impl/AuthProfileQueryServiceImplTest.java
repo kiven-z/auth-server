@@ -2,9 +2,9 @@ package com.auth.service.auth.service.impl;
 
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
-import com.auth.service.auth.authentication.infrastructure.persistence.UserMapper;
+import com.auth.service.auth.authorization.application.DataScopeEffectiveResolver;
 import com.auth.service.auth.authorization.application.impl.AuthProfileQueryServiceImpl;
-import com.auth.service.auth.authorization.domain.datascope.DataScopeEffectiveResolver;
+import com.auth.service.auth.identity.application.UserReadGateway;
 import com.auth.service.auth.authorization.infrastructure.persistence.UserAuthorizationGrantMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,7 +26,7 @@ class AuthProfileQueryServiceImplTest {
 	private UserAuthorizationGrantMapper userAuthorizationGrantMapper;
 
 	@Mock
-	private UserMapper userMapper;
+	private UserReadGateway userReadGateway;
 
 	@Mock
 	private DataScopeEffectiveResolver dataScopeEffectiveResolver;
@@ -43,8 +43,8 @@ class AuthProfileQueryServiceImplTest {
 		ScopeGrant grant = ScopeGrant.builder().build();
 		when(dataScopeEffectiveResolver.resolveByUserId(10L)).thenReturn(Map.of("DEPT::default", grant));
 
-		AuthProfileQueryServiceImpl service = new AuthProfileQueryServiceImpl(userAuthorizationGrantMapper, userMapper,
-				dataScopeEffectiveResolver);
+		AuthProfileQueryServiceImpl service = new AuthProfileQueryServiceImpl(userAuthorizationGrantMapper,
+				userReadGateway, dataScopeEffectiveResolver);
 		Map<String, ScopeGrant> dataScopes = service.buildByUser(user).getDataScopes();
 
 		assertEquals(1, dataScopes.size());
