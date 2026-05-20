@@ -1,1 +1,1 @@
-mvn -T 1C spring-javaformat:apply
+mvn spring-javaformat:apply

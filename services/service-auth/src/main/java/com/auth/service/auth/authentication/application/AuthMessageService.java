@@ -5,16 +5,15 @@ import cn.hutool.crypto.digest.MD5;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.message.api.model.email.EmailChannelOptions;
-import com.auth.module.platform.persistence.model.UserEntity;
+import com.auth.service.auth.authentication.domain.enums.CredentialDimension;
+import com.auth.service.auth.authentication.domain.model.LoginAccount;
 import com.auth.service.auth.authentication.domain.model.LoginAuditSnapshot;
+import com.auth.service.auth.authentication.domain.port.LoginAccountLookupPort;
 import com.auth.service.auth.authentication.infrastructure.audit.LoginAuditSnapshotFactory;
 import com.auth.service.auth.authentication.infrastructure.message.AuthDypnsVerifyCodeSceneCode;
 import com.auth.service.auth.authentication.infrastructure.message.AuthEmailTemplateCode;
 import com.auth.service.auth.authentication.infrastructure.message.LoginEmailVariables;
 import com.auth.service.auth.authentication.infrastructure.message.LoginSmsVariables;
-import com.auth.service.auth.authentication.infrastructure.persistence.UserCredentialField;
-import com.auth.service.auth.authentication.infrastructure.persistence.UserCredentialQueries;
-import com.auth.service.auth.authentication.infrastructure.persistence.UserMapper;
 import com.auth.service.auth.shared.integration.SystemSecurityIngestFeignClient;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -39,17 +38,17 @@ public class AuthMessageService {
 
 	private final RedisTemplate<String, Object> redisTemplate;
 
-	private final UserMapper userMapper;
+	private final LoginAccountLookupPort loginAccountLookupPort;
 
 	private final LoginAuditSnapshotFactory loginAuditSnapshotFactory;
 
 	private final SystemSecurityIngestFeignClient systemSecurityIngestFeignClient;
 
-	public AuthMessageService(RedisTemplate<String, Object> redisTemplate, UserMapper userMapper,
-			LoginAuditSnapshotFactory loginAuditSnapshotFactory,
+	public AuthMessageService(RedisTemplate<String, Object> redisTemplate,
+			LoginAccountLookupPort loginAccountLookupPort, LoginAuditSnapshotFactory loginAuditSnapshotFactory,
 			SystemSecurityIngestFeignClient systemSecurityIngestFeignClient) {
 		this.redisTemplate = redisTemplate;
-		this.userMapper = userMapper;
+		this.loginAccountLookupPort = loginAccountLookupPort;
 		this.loginAuditSnapshotFactory = loginAuditSnapshotFactory;
 		this.systemSecurityIngestFeignClient = systemSecurityIngestFeignClient;
 	}
@@ -73,12 +72,12 @@ public class AuthMessageService {
 		LoginAuditSnapshot snapshot = loginAuditSnapshotFactory.build(request);
 
 		// 未找到活跃用户时静默返回，不暴露账号不存在（与 EmailLoginStrategy 策略一致）
-		UserEntity user = UserCredentialQueries.activeOnly(userMapper, UserCredentialField.EMAIL, email);
-		if (user == null) {
+		LoginAccount account = loginAccountLookupPort.findActiveOnly(CredentialDimension.EMAIL, email).orElse(null);
+		if (account == null) {
 			log.warn("Send email code skipped: no active user found for email={}", email);
 			return;
 		}
-		String username = user.getUsername();
+		String username = account.username();
 
 		// 拼装发送对象
 		Map<String, Object> variables = LoginEmailVariables.build(username, code, expireMinutes, LocalDateTime.now(),
@@ -108,8 +107,7 @@ public class AuthMessageService {
 		// 获取过期时间
 		long expireMinutes = SMS_CODE.getDefaultTtl().toMinutes();
 
-		UserEntity user = UserCredentialQueries.activeOnly(userMapper, UserCredentialField.PHONE, phone);
-		if (user == null) {
+		if (loginAccountLookupPort.findActiveOnly(CredentialDimension.PHONE, phone).isEmpty()) {
 			log.warn("Send SMS code skipped: no active user found for phone={}", phone);
 			return;
 		}

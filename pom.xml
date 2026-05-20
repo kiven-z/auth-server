@@ -79,26 +79,16 @@
         <easyexcel.version>4.0.3</easyexcel.version>
         <quartz.version>2.5.1</quartz.version>
         <ip2region.version>3.3.2</ip2region.version>
-        <useragent-utils.version>1.21</useragent-utils.version>
         <yauaa.version>7.32.0</yauaa.version>
         <joda-time.version>2.10.1</joda-time.version>
         <commons-pool2.version>2.12.1</commons-pool2.version>
         <aliyun-dypnsapi.version>2.0.0</aliyun-dypnsapi.version>
 
-        <!-- WebJars -->
-        <bootstrap.version>5.1.3</bootstrap.version>
-        <jquery.version>3.6.0</jquery.version>
-        <font-awesome.version>5.15.4</font-awesome.version>
-
         <!-- Code format -->
         <spring-javaformat.version>0.0.47</spring-javaformat.version>
 
-        <!-- Test parallelism (defaults: safe/serial; enable via -Pparallel-tests) -->
-        <surefire.forkCount>1</surefire.forkCount>
-        <surefire.reuseForks>true</surefire.reuseForks>
-        <junit.jupiter.parallel.enabled>false</junit.jupiter.parallel.enabled>
-        <junit.jupiter.parallel.mode.default>same_thread</junit.jupiter.parallel.mode.default>
-        <junit.jupiter.parallel.mode.classes.default>same_thread</junit.jupiter.parallel.mode.classes.default>
+        <!-- Architecture tests -->
+        <archunit.version>1.4.0</archunit.version>
     </properties>
 
     <dependencyManagement>
@@ -230,11 +220,6 @@
                 <version>${ip2region.version}</version>
             </dependency>
             <dependency>
-                <groupId>eu.bitwalker</groupId>
-                <artifactId>UserAgentUtils</artifactId>
-                <version>${useragent-utils.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>nl.basjes.parse.useragent</groupId>
                 <artifactId>yauaa</artifactId>
                 <version>${yauaa.version}</version>
@@ -245,23 +230,6 @@
                 <groupId>org.quartz-scheduler</groupId>
                 <artifactId>quartz</artifactId>
                 <version>${quartz.version}</version>
-            </dependency>
-
-            <!-- Web前端资源 -->
-            <dependency>
-                <groupId>org.webjars</groupId>
-                <artifactId>bootstrap</artifactId>
-                <version>${bootstrap.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.webjars</groupId>
-                <artifactId>jquery</artifactId>
-                <version>${jquery.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.webjars</groupId>
-                <artifactId>font-awesome</artifactId>
-                <version>${font-awesome.version}</version>
             </dependency>
 
             <!-- 工具/补充 -->
@@ -291,29 +259,17 @@
                 <artifactId>alibabacloud-dypnsapi20170525</artifactId>
                 <version>${aliyun-dypnsapi.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>com.tngtech.archunit</groupId>
+                <artifactId>archunit-junit5</artifactId>
+                <version>${archunit.version}</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
     <profiles>
-        <profile>
-            <id>parallel-tests</id>
-            <activation>
-                <property>
-                    <name>parallelTests</name>
-                    <value>true</value>
-                </property>
-            </activation>
-            <properties>
-                <!-- Use one fork per CPU core (logical cores) -->
-                <surefire.forkCount>1C</surefire.forkCount>
-                <surefire.reuseForks>true</surefire.reuseForks>
-                <!-- JUnit Jupiter (JUnit5) parallel execution inside each fork -->
-                <junit.jupiter.parallel.enabled>true</junit.jupiter.parallel.enabled>
-                <junit.jupiter.parallel.mode.default>concurrent</junit.jupiter.parallel.mode.default>
-                <junit.jupiter.parallel.mode.classes.default>concurrent</junit.jupiter.parallel.mode.classes.default>
-            </properties>
-        </profile>
-
         <!--dev环境-->
         <profile>
             <id>dev</id>
@@ -425,18 +381,6 @@
                     <!-- 取消跳过测试 -->
                     <skip>false</skip>
                     <encoding>UTF-8</encoding>
-                    <!-- Parallel execution (controlled by properties / profile) -->
-                    <forkCount>${surefire.forkCount}</forkCount>
-                    <reuseForks>${surefire.reuseForks}</reuseForks>
-                    <systemPropertyVariables>
-                        <junit.jupiter.execution.parallel.enabled>${junit.jupiter.parallel.enabled}
-                        </junit.jupiter.execution.parallel.enabled>
-                        <junit.jupiter.execution.parallel.mode.default>${junit.jupiter.parallel.mode.default}
-                        </junit.jupiter.execution.parallel.mode.default>
-                        <junit.jupiter.execution.parallel.mode.classes.default>
-                            ${junit.jupiter.parallel.mode.classes.default}
-                        </junit.jupiter.execution.parallel.mode.classes.default>
-                    </systemPropertyVariables>
                 </configuration>
             </plugin>
             <plugin>

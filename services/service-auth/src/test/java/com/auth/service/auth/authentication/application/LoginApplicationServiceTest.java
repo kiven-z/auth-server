@@ -8,17 +8,17 @@ import com.auth.service.auth.authentication.api.dto.response.UserLoginResponse;
 import com.auth.service.auth.authentication.application.command.AbstractLoginCommand;
 import com.auth.service.auth.authentication.application.command.UsernamePasswordLoginCommand;
 import com.auth.service.auth.authentication.application.login.audit.LoginAuditCoordinator;
+import com.auth.service.auth.authentication.application.port.AuthProfileCachePort;
+import com.auth.service.auth.authentication.application.port.LoginStrategy;
+import com.auth.service.auth.authentication.application.port.SessionLimitPort;
+import com.auth.service.auth.authentication.application.port.TokenIssuerPort;
+import com.auth.service.auth.authentication.application.port.UserSessionIndexPort;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.model.AuthenticatedUser;
 import com.auth.service.auth.authentication.domain.model.LoginResult;
 import com.auth.service.auth.authentication.domain.model.TokenPair;
-import com.auth.service.auth.authentication.application.port.LoginStrategy;
+import com.auth.service.auth.authentication.domain.port.LoginFailureRateLimitPort;
 import com.auth.service.auth.authentication.infrastructure.cookie.RememberMeCookiePolicy;
-import com.auth.service.auth.authentication.infrastructure.token.LoginFailureRateLimiter;
-import com.auth.service.auth.authentication.infrastructure.token.TokenService;
-import com.auth.service.auth.authorization.application.AuthProfileCacheApplicationService;
-import com.auth.service.auth.session.infrastructure.redis.RedisUserSessionIndexRepository;
-import com.auth.service.auth.session.infrastructure.redis.support.SessionLimitManager;
 import com.auth.service.auth.session.infrastructure.redis.support.UserSessionIndexFactory;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.enums.AuthResultCode;
@@ -34,9 +34,23 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 /**
  * LoginApplicationService 单元测试
@@ -47,22 +61,22 @@ import static org.mockito.Mockito.*;
 class LoginApplicationServiceTest {
 
 	@Mock
-	private AuthProfileCacheApplicationService authProfileCacheApplicationService;
+	private AuthProfileCachePort authProfileCachePort;
 
 	@Mock
 	private UserSessionIndexFactory userSessionIndexFactory;
 
 	@Mock
-	private RedisUserSessionIndexRepository redisUserSessionIndexRepository;
+	private UserSessionIndexPort userSessionIndexPort;
 
 	@Mock
-	private SessionLimitManager sessionLimitManager;
+	private SessionLimitPort sessionLimitPort;
 
 	@Mock
-	private TokenService tokenService;
+	private TokenIssuerPort tokenIssuerPort;
 
 	@Mock
-	private LoginFailureRateLimiter loginFailureRateLimiter;
+	private LoginFailureRateLimitPort loginFailureRateLimitPort;
 
 	@Mock
 	private LoginAuditCoordinator loginAuditCoordinator;
@@ -80,9 +94,9 @@ class LoginApplicationServiceTest {
 	}
 
 	private LoginApplicationService newService(LoginStrategy<?>... strategies) {
-		return new LoginApplicationService(List.of(strategies), authProfileCacheApplicationService,
-				userSessionIndexFactory, redisUserSessionIndexRepository, sessionLimitManager, tokenService,
-				loginFailureRateLimiter, loginAuditCoordinator, rememberMeCookiePolicy);
+		return new LoginApplicationService(List.of(strategies), authProfileCachePort, userSessionIndexFactory,
+				userSessionIndexPort, sessionLimitPort, tokenIssuerPort, loginFailureRateLimitPort,
+				loginAuditCoordinator, rememberMeCookiePolicy);
 	}
 
 	@Test
@@ -120,7 +134,7 @@ class LoginApplicationServiceTest {
 		when(userSessionIndexFactory.buildUserSessionIndex(any(), anyLong(), anyString(), anyString(), anyBoolean()))
 			.thenReturn(sessionIndex);
 
-		when(tokenService.buildTokenPair(anyLong(), anyString(), anyLong())).thenReturn(new TokenPair(
+		when(tokenIssuerPort.buildTokenPair(anyLong(), anyString(), anyLong())).thenReturn(new TokenPair(
 				TestConstants.ACCESS_TOKEN, TestConstants.REFRESH_TOKEN, LocalDateTime.now().plusMinutes(1)));
 		when(rememberMeCookiePolicy.resolveReadMeDay()).thenReturn(7L);
 
@@ -135,18 +149,17 @@ class LoginApplicationServiceTest {
 		assertNotNull(actual.getExpires());
 		assertEquals(7L, actual.getReadMeDay());
 
-		InOrder inOrder = inOrder(sessionLimitManager, authProfileCacheApplicationService, tokenService,
-				userSessionIndexFactory, redisUserSessionIndexRepository, rememberMeCookiePolicy,
-				loginFailureRateLimiter, loginAuditCoordinator);
-		inOrder.verify(sessionLimitManager).assertSessionLimit(TestConstants.USER_ID);
-		inOrder.verify(authProfileCacheApplicationService).cacheProfile(profile);
-		inOrder.verify(tokenService).buildTokenPair(eq(TestConstants.USER_ID), anyString(), eq(1L));
+		InOrder inOrder = inOrder(sessionLimitPort, authProfileCachePort, tokenIssuerPort, userSessionIndexFactory,
+				userSessionIndexPort, rememberMeCookiePolicy, loginFailureRateLimitPort, loginAuditCoordinator);
+		inOrder.verify(sessionLimitPort).assertSessionLimit(TestConstants.USER_ID);
+		inOrder.verify(authProfileCachePort).cacheProfile(profile);
+		inOrder.verify(tokenIssuerPort).buildTokenPair(eq(TestConstants.USER_ID), anyString(), eq(1L));
 		inOrder.verify(userSessionIndexFactory)
 			.buildUserSessionIndex(same(httpServletRequest), eq(TestConstants.USER_ID), anyString(),
 					eq(TestConstants.REFRESH_TOKEN), eq(false));
-		inOrder.verify(redisUserSessionIndexRepository).createUserSessionIndex(sessionIndex);
+		inOrder.verify(userSessionIndexPort).createUserSessionIndex(sessionIndex);
 		inOrder.verify(rememberMeCookiePolicy).resolveReadMeDay();
-		inOrder.verify(loginFailureRateLimiter).recordSuccess(TestConstants.USER_ID);
+		inOrder.verify(loginFailureRateLimitPort).recordSuccess(TestConstants.USER_ID);
 		inOrder.verify(loginAuditCoordinator)
 			.auditLoginSuccess(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_PASSWORD), eq(TestConstants.USER_ID),
 					eq("user"), anyString());
@@ -186,7 +199,7 @@ class LoginApplicationServiceTest {
 
 		when(userSessionIndexFactory.buildUserSessionIndex(any(), anyLong(), anyString(), anyString(), anyBoolean()))
 			.thenReturn(new UserSessionIndex());
-		when(tokenService.buildTokenPair(anyLong(), anyString(), anyLong())).thenReturn(new TokenPair(
+		when(tokenIssuerPort.buildTokenPair(anyLong(), anyString(), anyLong())).thenReturn(new TokenPair(
 				TestConstants.ACCESS_TOKEN, TestConstants.REFRESH_TOKEN, LocalDateTime.now().plusMinutes(1)));
 
 		LoginApplicationService service = newService(strategy);
@@ -194,7 +207,7 @@ class LoginApplicationServiceTest {
 		UserLoginResponse actual = service.login(command, httpServletRequest);
 
 		assertEquals(TestConstants.USER_ID, actual.getId());
-		verify(sessionLimitManager).assertSessionLimit(TestConstants.USER_ID);
+		verify(sessionLimitPort).assertSessionLimit(TestConstants.USER_ID);
 	}
 
 	@Test
@@ -222,7 +235,7 @@ class LoginApplicationServiceTest {
 
 		when(userSessionIndexFactory.buildUserSessionIndex(any(), anyLong(), anyString(), anyString(), eq(true)))
 			.thenReturn(new UserSessionIndex());
-		when(tokenService.buildTokenPair(anyLong(), anyString(), anyLong())).thenReturn(new TokenPair(
+		when(tokenIssuerPort.buildTokenPair(anyLong(), anyString(), anyLong())).thenReturn(new TokenPair(
 				TestConstants.ACCESS_TOKEN, TestConstants.REFRESH_TOKEN, LocalDateTime.now().plusMinutes(1)));
 
 		newService(strategy).login(command, httpServletRequest);
@@ -283,16 +296,16 @@ class LoginApplicationServiceTest {
 			}
 		};
 
-		when(tokenService.buildTokenPair(anyLong(), anyString(), anyLong()))
+		when(tokenIssuerPort.buildTokenPair(anyLong(), anyString(), anyLong()))
 			.thenThrow(new AuthBusinessException(AuthResultCode.SERVER_ERROR));
 
 		LoginApplicationService service = newService(strategy);
 
 		assertThrows(AuthBusinessException.class, () -> service.login(command, httpServletRequest));
 
-		verify(authProfileCacheApplicationService).cacheProfile(profile);
-		verify(authProfileCacheApplicationService).evictProfile(TestConstants.USER_ID);
-		verify(redisUserSessionIndexRepository, never()).createUserSessionIndex(any());
+		verify(authProfileCachePort).cacheProfile(profile);
+		verify(authProfileCachePort).evictProfile(TestConstants.USER_ID);
+		verify(userSessionIndexPort, never()).createUserSessionIndex(any());
 	}
 
 	@Test
@@ -301,14 +314,14 @@ class LoginApplicationServiceTest {
 		LoginApplicationService service = newService();
 
 		service.logout(" ", null);
-		verify(tokenService).parseAccessTokenSafe(" ");
-		verifyNoInteractions(redisUserSessionIndexRepository);
+		verify(tokenIssuerPort).parseAccessTokenSafe(" ");
+		verifyNoInteractions(userSessionIndexPort);
 
-		reset(tokenService, redisUserSessionIndexRepository);
-		when(tokenService.parseAccessTokenSafe("x")).thenReturn(Optional.empty());
+		reset(tokenIssuerPort, userSessionIndexPort);
+		when(tokenIssuerPort.parseAccessTokenSafe("x")).thenReturn(Optional.empty());
 		service.logout("x", null);
-		verify(tokenService).parseAccessTokenSafe("x");
-		verifyNoInteractions(redisUserSessionIndexRepository);
+		verify(tokenIssuerPort).parseAccessTokenSafe("x");
+		verifyNoInteractions(userSessionIndexPort);
 	}
 
 	@Test
@@ -320,12 +333,12 @@ class LoginApplicationServiceTest {
 		when(jwtUserToken.getJti()).thenReturn(TestConstants.JTI);
 		when(jwtUserToken.getUserId()).thenReturn(TestConstants.USER_ID);
 
-		when(tokenService.parseAccessTokenSafe(TestConstants.ACCESS_TOKEN)).thenReturn(Optional.of(jwtUserToken));
+		when(tokenIssuerPort.parseAccessTokenSafe(TestConstants.ACCESS_TOKEN)).thenReturn(Optional.of(jwtUserToken));
 
 		service.logout(TestConstants.ACCESS_TOKEN, null);
 
-		verify(redisUserSessionIndexRepository).deleteSession(TestConstants.JTI);
-		verify(redisUserSessionIndexRepository).removeActiveSession(TestConstants.USER_ID, TestConstants.JTI);
+		verify(userSessionIndexPort).deleteSession(TestConstants.JTI);
+		verify(userSessionIndexPort).removeActiveSession(TestConstants.USER_ID, TestConstants.JTI);
 		verify(loginAuditCoordinator).auditLogoutSuccess(isNull(), eq(TestConstants.USER_ID), isNull(),
 				eq(TestConstants.JTI));
 	}

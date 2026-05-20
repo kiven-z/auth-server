@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.security.contract.api.UserSessionIndex;
+import com.auth.service.auth.authentication.application.port.UserSessionIndexPort;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,7 @@ import static com.auth.module.security.contract.redis.SecurityRedisKey.USER_SESS
  * @author Bunny
  */
 @Service
-public class RedisUserSessionIndexRepository {
+public class RedisUserSessionIndexRepository implements UserSessionIndexPort {
 
 	private final RedisTemplate<String, Object> redisTemplate;
 
@@ -44,6 +45,7 @@ public class RedisUserSessionIndexRepository {
 	 * 添加会话，使用 jti 向Redis中添加会话
 	 * @param userSessionIndex 用户会话索引
 	 */
+	@Override
 	public void createUserSessionIndex(@NotNull UserSessionIndex userSessionIndex) {
 		// jti
 		String sessionId = userSessionIndex.getSessionId();
@@ -139,6 +141,7 @@ public class RedisUserSessionIndexRepository {
 	 * 删除会话详情 key（不存在也视为成功）
 	 * @param jti 会话唯一标识
 	 */
+	@Override
 	public void deleteSession(@NotNull String jti) {
 		String userSessionKey = USER_SESSION.key(jti);
 		redisTemplate.delete(userSessionKey);
@@ -149,6 +152,7 @@ public class RedisUserSessionIndexRepository {
 	 * @param userId 用户ID
 	 * @param jti 会话唯一标识
 	 */
+	@Override
 	public void removeActiveSession(long userId, @NotNull String jti) {
 		String userSessionsKey = USER_SESSIONS.key(userId);
 		redisTemplate.opsForSet().remove(userSessionsKey, jti);

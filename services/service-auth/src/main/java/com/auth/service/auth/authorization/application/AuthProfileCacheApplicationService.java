@@ -1,6 +1,7 @@
 package com.auth.service.auth.authorization.application;
 
 import com.auth.module.security.contract.api.authorization.AuthProfile;
+import com.auth.service.auth.authentication.application.port.AuthProfileCachePort;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -17,7 +18,7 @@ import static com.auth.module.security.contract.redis.SecurityRedisKey.USER_PERM
  * @author Bunny
  */
 @Service
-public class AuthProfileCacheApplicationService {
+public class AuthProfileCacheApplicationService implements AuthProfileCachePort {
 
 	private final RedisTemplate<String, Object> redisTemplate;
 
@@ -32,6 +33,7 @@ public class AuthProfileCacheApplicationService {
 	 * 写入用户授权画像缓存。
 	 * @param authProfile 授权画像
 	 */
+	@Override
 	public void cacheProfile(@NotNull AuthProfile authProfile) {
 		Long userId = authProfile.getUserId();
 		Assert.notNull(userId, "userId cannot be null");
@@ -61,6 +63,7 @@ public class AuthProfileCacheApplicationService {
 	 * 移除用户授权画像缓存（登录失败回滚等场景）。
 	 * @param userId 用户 ID
 	 */
+	@Override
 	public void evictProfile(long userId) {
 		redisTemplate.delete(USER_PERM.key(userId));
 	}

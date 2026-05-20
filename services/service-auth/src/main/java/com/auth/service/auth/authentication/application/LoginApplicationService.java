@@ -8,15 +8,11 @@ import com.auth.service.auth.authentication.api.dto.response.UserLoginResponse;
 import com.auth.service.auth.authentication.application.assembler.LoginResponseAssembler;
 import com.auth.service.auth.authentication.application.command.AbstractLoginCommand;
 import com.auth.service.auth.authentication.application.login.audit.LoginAuditCoordinator;
-import com.auth.service.auth.authentication.application.port.LoginStrategy;
+import com.auth.service.auth.authentication.application.port.*;
 import com.auth.service.auth.authentication.domain.model.LoginResult;
 import com.auth.service.auth.authentication.domain.model.TokenPair;
+import com.auth.service.auth.authentication.domain.port.LoginFailureRateLimitPort;
 import com.auth.service.auth.authentication.infrastructure.cookie.RememberMeCookiePolicy;
-import com.auth.service.auth.authentication.infrastructure.token.LoginFailureRateLimiter;
-import com.auth.service.auth.authentication.infrastructure.token.TokenService;
-import com.auth.service.auth.authorization.application.AuthProfileCacheApplicationService;
-import com.auth.service.auth.session.infrastructure.redis.RedisUserSessionIndexRepository;
-import com.auth.service.auth.session.infrastructure.redis.support.SessionLimitManager;
 import com.auth.service.auth.session.infrastructure.redis.support.UserSessionIndexFactory;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.enums.AuthResultCode;
@@ -41,36 +37,35 @@ public class LoginApplicationService {
 
 	private final Map<Class<? extends AbstractLoginCommand>, LoginStrategy<?>> strategyRegistry;
 
-	private final AuthProfileCacheApplicationService authProfileCacheApplicationService;
+	private final AuthProfileCachePort authProfileCachePort;
 
 	private final UserSessionIndexFactory userSessionIndexFactory;
 
-	private final RedisUserSessionIndexRepository redisUserSessionIndexRepository;
+	private final UserSessionIndexPort userSessionIndexPort;
 
-	private final SessionLimitManager sessionLimitManager;
+	private final SessionLimitPort sessionLimitPort;
 
-	private final TokenService tokenService;
+	private final TokenIssuerPort tokenIssuerPort;
 
-	private final LoginFailureRateLimiter loginFailureRateLimiter;
+	private final LoginFailureRateLimitPort loginFailureRateLimitPort;
 
 	private final LoginAuditCoordinator loginAuditCoordinator;
 
 	private final RememberMeCookiePolicy rememberMeCookiePolicy;
 
-	public LoginApplicationService(List<LoginStrategy<?>> strategies,
-			AuthProfileCacheApplicationService authProfileCacheApplicationService,
-			UserSessionIndexFactory userSessionIndexFactory,
-			RedisUserSessionIndexRepository redisUserSessionIndexRepository, SessionLimitManager sessionLimitManager,
-			TokenService tokenService, LoginFailureRateLimiter loginFailureRateLimiter,
-			LoginAuditCoordinator loginAuditCoordinator, RememberMeCookiePolicy rememberMeCookiePolicy) {
+	public LoginApplicationService(List<LoginStrategy<?>> strategies, AuthProfileCachePort authProfileCachePort,
+			UserSessionIndexFactory userSessionIndexFactory, UserSessionIndexPort userSessionIndexPort,
+			SessionLimitPort sessionLimitPort, TokenIssuerPort tokenIssuerPort,
+			LoginFailureRateLimitPort loginFailureRateLimitPort, LoginAuditCoordinator loginAuditCoordinator,
+			RememberMeCookiePolicy rememberMeCookiePolicy) {
 		this.strategyRegistry = strategies.stream()
 			.collect(Collectors.toUnmodifiableMap(LoginStrategy::supports, Function.identity()));
-		this.authProfileCacheApplicationService = authProfileCacheApplicationService;
+		this.authProfileCachePort = authProfileCachePort;
 		this.userSessionIndexFactory = userSessionIndexFactory;
-		this.redisUserSessionIndexRepository = redisUserSessionIndexRepository;
-		this.sessionLimitManager = sessionLimitManager;
-		this.tokenService = tokenService;
-		this.loginFailureRateLimiter = loginFailureRateLimiter;
+		this.userSessionIndexPort = userSessionIndexPort;
+		this.sessionLimitPort = sessionLimitPort;
+		this.tokenIssuerPort = tokenIssuerPort;
+		this.loginFailureRateLimitPort = loginFailureRateLimitPort;
 		this.loginAuditCoordinator = loginAuditCoordinator;
 		this.rememberMeCookiePolicy = rememberMeCookiePolicy;
 	}
@@ -106,7 +101,7 @@ public class LoginApplicationService {
 		boolean sessionCreated = false;
 		try {
 			// 校验会话限制
-			sessionLimitManager.assertSessionLimit(userId);
+			sessionLimitPort.assertSessionLimit(userId);
 
 			// 生成JTI
 			jti = UUID.randomUUID().toString();
@@ -115,11 +110,11 @@ public class LoginApplicationService {
 			long permVersion = profile.getPermVersion();
 
 			// 缓存用户画像
-			authProfileCacheApplicationService.cacheProfile(profile);
+			authProfileCachePort.cacheProfile(profile);
 			profileCached = true;
 
 			// 构建令牌对
-			TokenPair tokenPair = tokenService.buildTokenPair(userId, jti, permVersion);
+			TokenPair tokenPair = tokenIssuerPort.buildTokenPair(userId, jti, permVersion);
 			response.setAccessToken(tokenPair.accessToken());
 			response.setRefreshToken(tokenPair.refreshToken());
 			response.setExpires(tokenPair.accessExpiresAt());
@@ -127,14 +122,13 @@ public class LoginApplicationService {
 			// 构建用户会话索引
 			UserSessionIndex sessionIndex = userSessionIndexFactory.buildUserSessionIndex(request, userId, jti,
 					response.getRefreshToken(), rememberMe);
-			redisUserSessionIndexRepository.createUserSessionIndex(sessionIndex);
+			userSessionIndexPort.createUserSessionIndex(sessionIndex);
 
 			// 设置会话创建标志
 			sessionCreated = true;
 			response.setReadMeDay(rememberMeCookiePolicy.resolveReadMeDay());
 
-			// 记录成功登录
-			loginFailureRateLimiter.recordSuccess(userId);
+			loginFailureRateLimitPort.recordSuccess(userId);
 
 			loginAuditCoordinator.auditLoginSuccess(request, loginResult.loginLogType(), userId, username, jti);
 			return response;
@@ -186,17 +180,14 @@ public class LoginApplicationService {
 	 */
 	public void logout(String accessToken, HttpServletRequest request) {
 		// 解析访问令牌
-		tokenService.parseAccessTokenSafe(accessToken).ifPresent(userToken -> {
-			// 获取JTI和用户ID
+		tokenIssuerPort.parseAccessTokenSafe(accessToken).ifPresent(userToken -> {
 			String jti = userToken.getJti();
 			Long userId = userToken.getUserId();
 			String username = SecurityUserUtils.getUsername();
 
-			// 删除会话索引
-			redisUserSessionIndexRepository.deleteSession(jti);
-
-			// 移除活跃会话
-			redisUserSessionIndexRepository.removeActiveSession(userId, jti);
+			// 获取JTI和用户ID
+			userSessionIndexPort.deleteSession(jti);
+			userSessionIndexPort.removeActiveSession(userId, jti);
 
 			// 记录成功登出
 			loginAuditCoordinator.auditLogoutSuccess(request, userId, username, jti);
@@ -209,13 +200,13 @@ public class LoginApplicationService {
 	private void rollbackLoginArtifacts(Long userId, String jti, boolean profileCached, boolean sessionCreated) {
 		// 如果会话已创建且JTI不为空，则删除会话索引
 		if (sessionCreated && jti != null) {
-			redisUserSessionIndexRepository.deleteSession(jti);
-			redisUserSessionIndexRepository.removeActiveSession(userId, jti);
+			userSessionIndexPort.deleteSession(jti);
+			userSessionIndexPort.removeActiveSession(userId, jti);
 		}
 
 		// 如果用户画像已缓存，则移除用户画像
 		if (profileCached) {
-			authProfileCacheApplicationService.evictProfile(userId);
+			authProfileCachePort.evictProfile(userId);
 		}
 	}
 

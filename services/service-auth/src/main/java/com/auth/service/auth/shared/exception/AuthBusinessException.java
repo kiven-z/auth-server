@@ -9,7 +9,8 @@ import java.util.Arrays;
 /**
  * 认证服务业务异常：语义以 {@link AuthResultCode} 为唯一来源，可选携带 i18n 占位参数
  * <p>
- * {@link #getMessage()} 可用于日志/调试；对外 API 文案由 {@link AuthBusinessExceptionResultBuilder} 结合
+ * {@link #getMessage()} 返回 messageKey 供日志/调试；对外 API 文案由
+ * {@link AuthBusinessExceptionResultBuilder} 结合
  * {@link org.springframework.context.MessageSource} 解析
  * </p>
  *
@@ -33,13 +34,11 @@ public class AuthBusinessException extends RuntimeException implements I18nMessa
 		if (resultCode == null) {
 			return super.getMessage();
 		}
-		try {
-			return resultCode.getMessage(args);
+		String key = resultCode.getMessageKey();
+		if (args.length == 0) {
+			return key;
 		}
-		catch (Exception ignored) {
-			// If i18n resolution fails, fall back to key + args to keep it debuggable.
-			return resultCode.getMessageKey() + (args.length > 0 ? (" " + Arrays.toString(args)) : "");
-		}
+		return key + " " + Arrays.toString(args);
 	}
 
 	@Override

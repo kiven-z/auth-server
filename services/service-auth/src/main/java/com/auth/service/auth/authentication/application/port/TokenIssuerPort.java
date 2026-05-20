@@ -1,0 +1,31 @@
+package com.auth.service.auth.authentication.application.port;
+
+import com.auth.common.jwt.model.JwtUserToken;
+import com.auth.service.auth.authentication.domain.model.TokenPair;
+
+import java.util.Optional;
+
+/**
+ * 访问令牌与刷新令牌签发、解析端口。
+ *
+ * @author Bunny
+ */
+public interface TokenIssuerPort {
+
+	/**
+	 * 签发访问令牌与刷新令牌。
+	 * @param userId 用户 ID
+	 * @param jti 会话唯一标识
+	 * @param permVersion 权限版本快照
+	 * @return 令牌对
+	 */
+	TokenPair buildTokenPair(Long userId, String jti, Long permVersion);
+
+	/**
+	 * 容错解析访问令牌（永不抛出异常）。
+	 * @param token 访问令牌原始字符串
+	 * @return 用户载荷
+	 */
+	Optional<JwtUserToken> parseAccessTokenSafe(String token);
+
+}

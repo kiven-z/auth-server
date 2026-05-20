@@ -22,4 +22,13 @@ public record AuthenticatedUser(Long id, String username, String nickname, Strin
 		return new AuthenticatedUser(user.getId(), user.getUsername(), user.getNickname(), user.getAvatar());
 	}
 
+	/**
+	 * 从登录账户快照构建。
+	 * @param account 登录账户
+	 * @return 认证用户快照
+	 */
+	public static AuthenticatedUser from(LoginAccount account) {
+		return new AuthenticatedUser(account.id(), account.username(), account.nickname(), account.avatar());
+	}
+
 }

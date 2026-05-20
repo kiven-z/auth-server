@@ -1,12 +1,12 @@
-package com.auth.service.auth.authentication.infrastructure.strategy;
+package com.auth.service.auth.authentication.application.login.strategy;
 
-import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.auth.authentication.application.command.UsernamePasswordLoginCommand;
 import com.auth.service.auth.authentication.application.login.audit.LoginAuditCoordinator;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
-import com.auth.service.auth.authentication.infrastructure.persistence.UserCredentialField;
-import com.auth.service.auth.authentication.infrastructure.persistence.UserMapper;
-import com.auth.service.auth.authentication.infrastructure.token.LoginFailureRateLimiter;
+import com.auth.service.auth.authentication.domain.enums.CredentialDimension;
+import com.auth.service.auth.authentication.domain.model.LoginAccount;
+import com.auth.service.auth.authentication.domain.port.LoginAccountLookupPort;
+import com.auth.service.auth.authentication.domain.port.LoginFailureRateLimitPort;
 import com.auth.service.auth.authorization.application.AuthProfileQueryService;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.enums.AuthResultCode;
@@ -18,23 +18,30 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 /**
- * {@link UsernamePasswordLoginStrategy}
+ * {@link UsernamePasswordLoginStrategy} 单元测试
+ *
  * @author Bunny
  */
 @ExtendWith(MockitoExtension.class)
 class UsernamePasswordLoginStrategyTest {
 
 	@Mock
-	private UserMapper userMapper;
+	private LoginAccountLookupPort loginAccountLookupPort;
 
 	@Mock
-	private LoginFailureRateLimiter loginFailureRateLimiter;
+	private LoginFailureRateLimitPort loginFailureRateLimitPort;
 
 	@Mock
 	private AuthProfileQueryService authProfileQueryService;
@@ -51,9 +58,9 @@ class UsernamePasswordLoginStrategyTest {
 	@Test
 	@DisplayName("用户不存在时抛出 USERNAME_OR_PASSWORD_ERROR 并记录审计")
 	void resolveUser_shouldThrow_whenUserNotFound() {
-		when(userMapper.selectByCredential(UserCredentialField.USERNAME, "u", false)).thenReturn(null);
-		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(userMapper, loginFailureRateLimiter,
-				authProfileQueryService, passwordEncoder, loginAuditCoordinator);
+		when(loginAccountLookupPort.findForLogin(CredentialDimension.USERNAME, "u")).thenReturn(Optional.empty());
+		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(loginAccountLookupPort,
+				loginFailureRateLimitPort, authProfileQueryService, passwordEncoder, loginAuditCoordinator);
 
 		UsernamePasswordLoginCommand command = new UsernamePasswordLoginCommand("u", "p");
 
@@ -68,15 +75,11 @@ class UsernamePasswordLoginStrategyTest {
 	@Test
 	@DisplayName("账号禁用时抛出 USER_DISABLED 并记录审计")
 	void authenticate_shouldThrowUserDisabled_whenAccountDisabled() {
-		UserEntity user = new UserEntity();
-		user.setId(1L);
-		user.setUsername("u");
-		user.setPassword("encoded");
-		user.setStatus(0);
-		when(userMapper.selectByCredential(UserCredentialField.USERNAME, "u", false)).thenReturn(user);
+		LoginAccount account = new LoginAccount(1L, "u", 0, "encoded", null, null, 1L);
+		when(loginAccountLookupPort.findForLogin(CredentialDimension.USERNAME, "u")).thenReturn(Optional.of(account));
 
-		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(userMapper, loginFailureRateLimiter,
-				authProfileQueryService, passwordEncoder, loginAuditCoordinator);
+		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(loginAccountLookupPort,
+				loginFailureRateLimitPort, authProfileQueryService, passwordEncoder, loginAuditCoordinator);
 
 		UsernamePasswordLoginCommand command = new UsernamePasswordLoginCommand("u", "p");
 
@@ -92,8 +95,8 @@ class UsernamePasswordLoginStrategyTest {
 	@Test
 	@DisplayName("supports 返回 UsernamePasswordLoginCommand.class")
 	void supports_shouldReturnUsernamePasswordLoginCommandClass() {
-		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(userMapper, loginFailureRateLimiter,
-				authProfileQueryService, passwordEncoder, loginAuditCoordinator);
+		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(loginAccountLookupPort,
+				loginFailureRateLimitPort, authProfileQueryService, passwordEncoder, loginAuditCoordinator);
 
 		assertEquals(UsernamePasswordLoginCommand.class, strategy.supports());
 	}
@@ -101,19 +104,15 @@ class UsernamePasswordLoginStrategyTest {
 	@Test
 	@DisplayName("密码错误时抛出 USERNAME_OR_PASSWORD_ERROR_WITH_REMAINING")
 	void authenticate_shouldThrowRemaining_whenPasswordMismatch() {
-		UserEntity user = new UserEntity();
-		user.setId(1L);
-		user.setUsername("u");
-		user.setPassword("encoded");
-		user.setStatus(1);
-		when(userMapper.selectByCredential(UserCredentialField.USERNAME, "u", false)).thenReturn(user);
+		LoginAccount account = new LoginAccount(1L, "u", 1, "encoded", null, null, 1L);
+		when(loginAccountLookupPort.findForLogin(CredentialDimension.USERNAME, "u")).thenReturn(Optional.of(account));
 
 		when(passwordEncoder.matches("p", "encoded")).thenReturn(false);
-		doNothing().when(loginFailureRateLimiter).assertNotLocked(1L);
-		when(loginFailureRateLimiter.recordFailure(1L)).thenReturn(2);
+		doNothing().when(loginFailureRateLimitPort).assertNotLocked(1L);
+		when(loginFailureRateLimitPort.recordFailure(1L)).thenReturn(2);
 
-		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(userMapper, loginFailureRateLimiter,
-				authProfileQueryService, passwordEncoder, loginAuditCoordinator);
+		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(loginAccountLookupPort,
+				loginFailureRateLimitPort, authProfileQueryService, passwordEncoder, loginAuditCoordinator);
 
 		UsernamePasswordLoginCommand command = new UsernamePasswordLoginCommand("u", "p");
 

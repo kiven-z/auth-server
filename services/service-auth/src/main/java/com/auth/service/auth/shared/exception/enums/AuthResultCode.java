@@ -1,12 +1,7 @@
 package com.auth.service.auth.shared.exception.enums;
 
-import com.auth.common.web.context.SpringContextHolder;
 import com.auth.service.auth.shared.exception.AuthBusinessExceptionResultBuilder;
 import lombok.Getter;
-import org.springframework.context.i18n.LocaleContextHolder;
-
-import java.util.Locale;
-import java.util.Objects;
 
 /**
  * 统一返回结果状态信息类HTTP 语义以本枚举 {@link #httpStatus} 为唯一事实来源；构造参数顺序为
@@ -164,27 +159,6 @@ public enum AuthResultCode {
 		this.code = code;
 		this.error = error;
 		this.messageKey = messageKey;
-	}
-
-	/**
-	 * 获取国际化消息
-	 * @param locale 语言环境
-	 * @param args 消息参数
-	 * @return 国际化后的消息
-	 */
-	public String getMessage(Locale locale, Object... args) {
-		Locale finalLocale = Objects.requireNonNullElse(locale, LocaleContextHolder.getLocale());
-		return SpringContextHolder.getMessage(messageKey, args, finalLocale);
-	}
-
-	/**
-	 * 获取默认语言环境的国际化消息
-	 * @param args 消息参数
-	 * @return 国际化后的消息
-	 */
-	public String getMessage(Object... args) {
-		Locale locale = LocaleContextHolder.getLocale();
-		return getMessage(locale, args);
 	}
 
 }

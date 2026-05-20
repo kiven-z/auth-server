@@ -5,13 +5,13 @@ import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.ChannelOptionsSupport;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.message.api.model.email.EmailChannelOptions;
-import com.auth.module.platform.persistence.model.UserEntity;
+import com.auth.service.auth.authentication.domain.enums.CredentialDimension;
+import com.auth.service.auth.authentication.domain.model.LoginAccount;
 import com.auth.service.auth.authentication.domain.model.LoginAuditSnapshot;
+import com.auth.service.auth.authentication.domain.port.LoginAccountLookupPort;
 import com.auth.service.auth.authentication.infrastructure.audit.LoginAuditSnapshotFactory;
 import com.auth.service.auth.authentication.infrastructure.message.AuthDypnsVerifyCodeSceneCode;
 import com.auth.service.auth.authentication.infrastructure.message.AuthEmailTemplateCode;
-import com.auth.service.auth.authentication.infrastructure.persistence.UserCredentialField;
-import com.auth.service.auth.authentication.infrastructure.persistence.UserMapper;
 import com.auth.service.auth.shared.integration.SystemSecurityIngestFeignClient;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +24,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+
+import java.util.Optional;
 
 import static com.auth.module.security.contract.redis.SecurityRedisKey.EMAIL_CODE;
 import static com.auth.module.security.contract.redis.SecurityRedisKey.SMS_CODE;
@@ -48,7 +50,7 @@ class AuthMessageServiceTest {
 	private ValueOperations<String, Object> valueOperations;
 
 	@Mock
-	private UserMapper userMapper;
+	private LoginAccountLookupPort loginAccountLookupPort;
 
 	@Mock
 	private LoginAuditSnapshotFactory loginAuditSnapshotFactory;
@@ -64,7 +66,7 @@ class AuthMessageServiceTest {
 	@BeforeEach
 	void setUp() {
 		when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-		authMessageService = new AuthMessageService(redisTemplate, userMapper, loginAuditSnapshotFactory,
+		authMessageService = new AuthMessageService(redisTemplate, loginAccountLookupPort, loginAuditSnapshotFactory,
 				systemSecurityIngestFeignClient);
 	}
 
@@ -76,9 +78,9 @@ class AuthMessageServiceTest {
 		@DisplayName("用户存在时写入 Redis 并 Feign 委托 system 发信")
 		void sendEmailCode_shouldStoreMd5AndInvokeEmailSend() {
 			String email = "bunny@example.com";
-			UserEntity user = new UserEntity();
-			user.setUsername("bunny");
-			when(userMapper.selectByCredential(UserCredentialField.EMAIL, email, true)).thenReturn(user);
+			LoginAccount account = new LoginAccount(1L, "bunny", 1, null, null, null, 1L);
+			when(loginAccountLookupPort.findActiveOnly(CredentialDimension.EMAIL, email))
+				.thenReturn(Optional.of(account));
 			when(loginAuditSnapshotFactory.build(request))
 				.thenReturn(new LoginAuditSnapshot("127.0.0.1", "本地", "ua", "pc", "win", "chrome"));
 			when(systemSecurityIngestFeignClient.sendByTemplate(any(TemplateMessageCommand.class)))
@@ -102,7 +104,7 @@ class AuthMessageServiceTest {
 		@DisplayName("用户不存在时静默返回且不调用 Feign")
 		void sendEmailCode_shouldSkipWhenUserNotFound() {
 			String email = "unknown@example.com";
-			when(userMapper.selectByCredential(UserCredentialField.EMAIL, email, true)).thenReturn(null);
+			when(loginAccountLookupPort.findActiveOnly(CredentialDimension.EMAIL, email)).thenReturn(Optional.empty());
 
 			authMessageService.sendEmailCode(email, request);
 
@@ -120,9 +122,9 @@ class AuthMessageServiceTest {
 		@DisplayName("用户存在时写入 Redis 并 Feign 委托 system 发短信")
 		void sendSmsCode_shouldStoreMd5AndInvokeSmsSend() {
 			String phone = "13800000000";
-			UserEntity user = new UserEntity();
-			user.setUsername("bunny");
-			when(userMapper.selectByCredential(UserCredentialField.PHONE, phone, true)).thenReturn(user);
+			LoginAccount account = new LoginAccount(1L, "bunny", 1, null, null, null, 1L);
+			when(loginAccountLookupPort.findActiveOnly(CredentialDimension.PHONE, phone))
+				.thenReturn(Optional.of(account));
 			when(systemSecurityIngestFeignClient.sendByTemplate(any(TemplateMessageCommand.class)))
 				.thenReturn(Result.success("ok"));
 
@@ -142,7 +144,7 @@ class AuthMessageServiceTest {
 		@DisplayName("用户不存在时静默返回且不调用 Feign")
 		void sendSmsCode_shouldSkipWhenUserNotFound() {
 			String phone = "13800000001";
-			when(userMapper.selectByCredential(UserCredentialField.PHONE, phone, true)).thenReturn(null);
+			when(loginAccountLookupPort.findActiveOnly(CredentialDimension.PHONE, phone)).thenReturn(Optional.empty());
 
 			authMessageService.sendSmsCode(phone);
 
