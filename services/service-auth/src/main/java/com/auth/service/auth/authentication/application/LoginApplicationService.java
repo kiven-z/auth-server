@@ -1,7 +1,7 @@
 package com.auth.service.auth.authentication.application;
 
 import cn.hutool.core.util.BooleanUtil;
-import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
+import com.auth.service.auth.authentication.domain.model.LogoutSessionHint;
 import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.authentication.api.dto.response.UserLoginResponse;
@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -175,19 +176,13 @@ public class LoginApplicationService {
 	 * @param accessToken Access Token（不含 Bearer 前缀）
 	 * @param request HTTP 请求
 	 */
-	public void logout(String accessToken, HttpServletRequest request) {
-		// 解析访问令牌
-		tokenIssuerPort.parseAccessTokenSafe(accessToken).ifPresent(userToken -> {
+	public Optional<LogoutSessionHint> logout(String accessToken, HttpServletRequest request) {
+		return tokenIssuerPort.parseAccessTokenSafe(accessToken).map(userToken -> {
 			String jti = userToken.getJti();
 			Long userId = userToken.getUserId();
-			String username = SecurityUserUtils.getUsername();
-
-			// 获取JTI和用户ID
 			userSessionIndexPort.deleteSession(jti);
 			userSessionIndexPort.removeActiveSession(userId, jti);
-
-			// 记录成功登出
-			loginAuditCoordinator.auditLogoutSuccess(request, userId, username, jti);
+			return new LogoutSessionHint(userId, jti);
 		});
 	}
 

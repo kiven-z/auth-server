@@ -170,6 +170,8 @@ class RefreshTokenServiceTest {
 		assertFalse(result.rememberMe());
 		verify(userSessionIndexPort).updateRefreshInfo(eq(TestConstants.JTI),
 				eq(MD5.create().digestHex16("new-refresh")), anyLong(), eq(Duration.ofSeconds(120L)));
+		verify(loginAuditCoordinator).auditRefreshTokenSuccess(isNull(), eq(TestConstants.USER_ID),
+				eq(TestConstants.JTI));
 	}
 
 	@Test

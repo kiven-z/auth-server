@@ -6,12 +6,16 @@ import com.auth.service.auth.authentication.api.dto.request.AbstractLoginRequest
 import com.auth.service.auth.authentication.api.dto.response.RefreshTokenResponse;
 import com.auth.service.auth.authentication.api.dto.response.UserLoginResponse;
 import com.auth.service.auth.authentication.application.assembler.RefreshResponseAssembler;
+import com.auth.service.auth.authentication.application.login.audit.LoginAuditCoordinator;
+import com.auth.service.auth.authentication.domain.model.LogoutSessionHint;
 import com.auth.service.auth.authentication.domain.model.RefreshSessionResult;
 import com.auth.service.auth.authentication.application.port.RefreshCookiePort;
 import com.auth.service.auth.authentication.application.port.RememberMePolicyPort;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 import static com.auth.common.jwt.provider.AbstractJwtTokenProvider.BEARER_PREFIX;
 
@@ -31,13 +35,16 @@ public class AuthSessionApplicationService {
 
 	private final RememberMePolicyPort rememberMePolicyPort;
 
+	private final LoginAuditCoordinator loginAuditCoordinator;
+
 	public AuthSessionApplicationService(LoginApplicationService loginApplicationService,
 			RefreshTokenService refreshTokenService, RefreshCookiePort refreshCookiePort,
-			RememberMePolicyPort rememberMePolicyPort) {
+			RememberMePolicyPort rememberMePolicyPort, LoginAuditCoordinator loginAuditCoordinator) {
 		this.loginApplicationService = loginApplicationService;
 		this.refreshTokenService = refreshTokenService;
 		this.refreshCookiePort = refreshCookiePort;
 		this.rememberMePolicyPort = rememberMePolicyPort;
+		this.loginAuditCoordinator = loginAuditCoordinator;
 	}
 
 	/**
@@ -73,19 +80,24 @@ public class AuthSessionApplicationService {
 	}
 
 	/**
-	 * 完成登出：撤销服务端会话并清除 Refresh Cookie。
+	 * 完成登出：撤销服务端会话、写入单条登出审计并清除 Refresh Cookie。
 	 * @param request HTTP 请求
 	 * @param response HTTP 响应
 	 */
 	public void completeLogout(HttpServletRequest request, HttpServletResponse response) {
 		try {
+			Optional<LogoutSessionHint> auditHint = Optional.empty();
+
 			String authHeader = request.getHeader("Authorization");
 			if (authHeader != null && authHeader.startsWith(BEARER_PREFIX)) {
 				String token = authHeader.substring(BEARER_PREFIX.length());
-				loginApplicationService.logout(token, request);
+				auditHint = loginApplicationService.logout(token, request);
 			}
 			String refreshToken = refreshCookiePort.readRefreshToken(request);
-			refreshTokenService.revokeByRefreshToken(refreshToken, request);
+			Optional<LogoutSessionHint> refreshHint = refreshTokenService.revokeByRefreshToken(refreshToken, request);
+			auditHint = auditHint.or(() -> refreshHint);
+
+			auditHint.ifPresent(hint -> loginAuditCoordinator.auditLogoutSuccess(request, hint.userId(), hint.jti()));
 		}
 		finally {
 			refreshCookiePort.clearRefreshToken(response, request);

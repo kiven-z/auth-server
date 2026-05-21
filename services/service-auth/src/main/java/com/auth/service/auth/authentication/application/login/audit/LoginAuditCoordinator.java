@@ -7,187 +7,199 @@ import com.auth.service.auth.authentication.domain.event.LoginAuditEventPublishe
 import com.auth.service.auth.shared.audit.AuthLoginAuditMapping;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 /**
+ *
  * 登录相关审计发布协调器：集中策略与编排阶段的 {@link LoginAuditEventPublisher} 调用，降低模板与应用服务中的散落调用。
  *
  * @author Bunny
+ *
  */
 @Component
-@RequiredArgsConstructor
 public class LoginAuditCoordinator {
 
-	private final LoginAuditEventPublisher loginAuditEventPublisher;
+    private final LoginAuditEventPublisher loginAuditEventPublisher;
 
-	/**
-	 * 不支持的登录命令类型（策略表未命中）。
-	 * @param request HTTP 请求
-	 * @param command 登录命令
-	 * @param messageKey 失败原因 messageKey
-	 */
-	public void auditUnsupportedLoginCommand(HttpServletRequest request, AbstractLoginCommand command,
-			String messageKey) {
-		loginAuditEventPublisher.publish(request, command.loginLogType(),
-				AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR, null, LoginAuditContextResolver.principal(command),
-				messageKey, null);
-	}
+    private final LoginAuditPrincipalNormalizer loginAuditPrincipalNormalizer;
 
-	/**
-	 * 解析用户失败且为「用户名或密码错误」类（不暴露用户是否存在）。
-	 * @param request HTTP 请求
-	 * @param logType 登录日志类型
-	 * @param principal 审计主体
-	 * @param messageKey 失败原因 messageKey
-	 */
-	public void auditUserUnknownAfterResolve(HttpServletRequest request, AuthLoginLogType logType, String principal,
-			String messageKey) {
-		loginAuditEventPublisher.publish(request, logType, AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR, null,
-				principal, messageKey, null);
-	}
+    public LoginAuditCoordinator(LoginAuditEventPublisher loginAuditEventPublisher,
+                                 LoginAuditPrincipalNormalizer loginAuditPrincipalNormalizer) {
+        this.loginAuditEventPublisher = loginAuditEventPublisher;
+        this.loginAuditPrincipalNormalizer = loginAuditPrincipalNormalizer;
+    }
 
-	/**
-	 * 账户禁用（状态位）。
-	 * @param request HTTP 请求
-	 * @param logType 登录日志类型
-	 * @param userId 用户 ID
-	 * @param username 用户名
-	 * @param messageKey 失败原因 messageKey
-	 */
-	public void auditAccountDisabled(HttpServletRequest request, AuthLoginLogType logType, Long userId, String username,
-			String messageKey) {
-		loginAuditEventPublisher.publish(request, logType, AuthLoginLogResult.ACCOUNT_DISABLED, userId, username,
-				messageKey, null);
-	}
+    /**
+     * 不支持的登录命令类型（策略表未命中）。
+     *
+     * @param request    HTTP 请求
+     * @param command    登录命令
+     * @param messageKey 失败原因 messageKey
+     */
+    public void auditUnsupportedLoginCommand(HttpServletRequest request, AbstractLoginCommand command,
+                                             String messageKey) {
+        publishNormalized(request, command.loginLogType(), AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR, null,
+                LoginAuditContextResolver.principal(command), messageKey, null);
+    }
 
-	/**
-	 * 账户状态为锁定（状态位）。
-	 * @param request HTTP 请求
-	 * @param logType 登录日志类型
-	 * @param userId 用户 ID
-	 * @param username 用户名
-	 */
-	public void auditAccountLockedByStatus(HttpServletRequest request, AuthLoginLogType logType, Long userId,
-			String username) {
-		loginAuditEventPublisher.publish(request, logType, AuthLoginLogResult.ACCOUNT_LOCKED, userId, username,
-				"account.status.locked", null);
-	}
+    /**
+     * 解析用户失败且为「用户名或密码错误」类（不暴露用户是否存在）。
+     *
+     * @param request    HTTP 请求
+     * @param logType    登录日志类型
+     * @param principal  审计主体
+     * @param messageKey 失败原因 messageKey
+     */
+    public void auditUserUnknownAfterResolve(HttpServletRequest request, AuthLoginLogType logType, String principal,
+                                             String messageKey) {
+        publishNormalized(request, logType, AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR, null, principal,
+                messageKey, null);
+    }
 
-	/**
-	 * 凭证错误且带剩余尝试次数说明。
-	 * @param request HTTP 请求
-	 * @param logType 登录日志类型
-	 * @param userId 用户 ID
-	 * @param username 用户名
-	 * @param remainingAttempts 剩余尝试次数
-	 */
-	public void auditBadCredentialsWithRemaining(HttpServletRequest request, AuthLoginLogType logType, Long userId,
-			String username, int remainingAttempts) {
-		loginAuditEventPublisher.publish(request, logType, AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR, userId,
-				username, "remainingAttempts=" + remainingAttempts, null);
-	}
+    /**
+     * 账户禁用（状态位）。
+     *
+     * @param request    HTTP 请求
+     * @param logType    登录日志类型
+     * @param userId     用户 ID
+     * @param username   用户名
+     * @param messageKey 失败原因 messageKey
+     */
+    public void auditAccountDisabled(HttpServletRequest request, AuthLoginLogType logType, Long userId, String username,
+                                     String messageKey) {
+        publishNormalized(request, logType, AuthLoginLogResult.ACCOUNT_DISABLED, userId, username, messageKey, null);
+    }
 
-	/**
-	 * 按业务码映射发布「凭证类」失败审计（可选映射）。
-	 * @param request HTTP 请求
-	 * @param logType 登录日志类型
-	 * @param userId 用户 ID
-	 * @param username 用户名
-	 * @param ex 业务异常
-	 */
-	public void auditMappedCredentialFailure(HttpServletRequest request, AuthLoginLogType logType, Long userId,
-			String username, AuthBusinessException ex) {
-		AuthLoginAuditMapping.credentialFailureAudit(ex.getResultCode())
-			.ifPresent(result -> loginAuditEventPublisher.publish(request, logType, result, userId, username,
-					ex.getMessageKey(), null));
-	}
+    /**
+     * 账户状态为锁定（状态位）。
+     *
+     * @param request  HTTP 请求
+     * @param logType  登录日志类型
+     * @param userId   用户 ID
+     * @param username 用户名
+     */
+    public void auditAccountLockedByStatus(HttpServletRequest request, AuthLoginLogType logType, Long userId,
+                                           String username) {
+        publishNormalized(request, logType, AuthLoginLogResult.ACCOUNT_LOCKED, userId, username,
+                "account.status.locked", null);
+    }
 
-	/**
-	 * 按业务码映射发布「锁定类」失败审计（可选映射）。
-	 * @param request HTTP 请求
-	 * @param logType 登录日志类型
-	 * @param userId 用户 ID
-	 * @param username 用户名
-	 * @param ex 业务异常
-	 */
-	public void auditMappedLockFailure(HttpServletRequest request, AuthLoginLogType logType, Long userId,
-			String username, AuthBusinessException ex) {
-		AuthLoginAuditMapping.lockFailureAudit(ex.getResultCode())
-			.ifPresent(result -> loginAuditEventPublisher.publish(request, logType, result, userId, username,
-					ex.getMessageKey(), null));
-	}
+    /**
+     * 凭证错误且带剩余尝试次数说明。
+     *
+     * @param request           HTTP 请求
+     * @param logType           登录日志类型
+     * @param userId            用户 ID
+     * @param username          用户名
+     * @param remainingAttempts 剩余尝试次数
+     */
+    public void auditBadCredentialsWithRemaining(HttpServletRequest request, AuthLoginLogType logType, Long userId,
+                                                 String username, int remainingAttempts) {
+        publishNormalized(request, logType, AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR, userId, username,
+                "remainingAttempts=" + remainingAttempts, null);
+    }
 
-	/**
-	 * 登录编排成功（已签发令牌并建立会话后）。
-	 * @param request HTTP 请求
-	 * @param logType 登录日志类型
-	 * @param userId 用户 ID
-	 * @param username 用户名
-	 * @param jti 会话 ID
-	 */
-	public void auditLoginSuccess(HttpServletRequest request, AuthLoginLogType logType, Long userId, String username,
-			String jti) {
-		loginAuditEventPublisher.publish(request, logType, AuthLoginLogResult.SUCCESS, userId, username, null, jti);
-	}
+    /**
+     * 按业务码映射发布「凭证类」失败审计（可选映射）。
+     *
+     * @param request  HTTP 请求
+     * @param logType  登录日志类型
+     * @param userId   用户 ID
+     * @param username 用户名
+     * @param ex       业务异常
+     */
+    public void auditMappedCredentialFailure(HttpServletRequest request, AuthLoginLogType logType, Long userId,
+                                             String username, AuthBusinessException ex) {
+        AuthLoginAuditMapping.credentialFailureAudit(ex.getResultCode())
+                .ifPresent(
+                        result -> publishNormalized(request, logType, result, userId, username, ex.getMessageKey(), null));
+    }
 
-	/**
-	 * 登录编排阶段失败（令牌/会话写入失败等）。
-	 * @param request HTTP 请求
-	 * @param logType 登录日志类型
-	 * @param userId 用户 ID
-	 * @param username 用户名
-	 * @param ex 业务异常
-	 */
-	public void auditOrchestrationFailure(HttpServletRequest request, AuthLoginLogType logType, Long userId,
-			String username, AuthBusinessException ex) {
-		AuthLoginLogResult result = LoginAuditContextResolver.resultForOrchestrationFailure(ex.getResultCode());
-		loginAuditEventPublisher.publish(request, logType, result, userId, username, ex.getMessageKey(), null);
-	}
+    /**
+     * 按业务码映射发布「锁定类」失败审计（可选映射）。
+     *
+     * @param request  HTTP 请求
+     * @param logType  登录日志类型
+     * @param userId   用户 ID
+     * @param username 用户名
+     * @param ex       业务异常
+     */
+    public void auditMappedLockFailure(HttpServletRequest request, AuthLoginLogType logType, Long userId,
+                                       String username, AuthBusinessException ex) {
+        AuthLoginAuditMapping.lockFailureAudit(ex.getResultCode())
+                .ifPresent(
+                        result -> publishNormalized(request, logType, result, userId, username, ex.getMessageKey(), null));
+    }
 
-	/**
-	 * Access Token 登出成功审计。
-	 * @param request HTTP 请求
-	 * @param userId 用户 ID
-	 * @param username 用户名
-	 * @param jti 会话 ID
-	 */
-	public void auditLogoutSuccess(HttpServletRequest request, Long userId, String username, String jti) {
-		loginAuditEventPublisher.publish(request, AuthLoginLogType.LOGOUT, AuthLoginLogResult.SUCCESS, userId, username,
-				null, jti);
-	}
+    /**
+     * 登录编排成功（已签发令牌并建立会话后）。
+     *
+     * @param request  HTTP 请求
+     * @param logType  登录日志类型
+     * @param userId   用户 ID
+     * @param username 用户名
+     * @param jti      会话 ID
+     */
+    public void auditLoginSuccess(HttpServletRequest request, AuthLoginLogType logType, Long userId, String username,
+                                  String jti) {
+        publishNormalized(request, logType, AuthLoginLogResult.SUCCESS, userId, username, null, jti);
+    }
 
-	/**
-	 * 刷新令牌失败审计。
-	 * @param request HTTP 请求
-	 * @param userId 用户 ID（可能为 null）
-	 * @param ex 业务异常
-	 */
-	public void auditRefreshTokenFailure(HttpServletRequest request, Long userId, AuthBusinessException ex) {
-		loginAuditEventPublisher.publish(request, AuthLoginLogType.REFRESH_TOKEN,
-				AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR, userId, "/", ex.getMessageKey(), null);
-	}
+    /**
+     * 登录编排阶段失败（令牌/会话写入失败等）。
+     *
+     * @param request  HTTP 请求
+     * @param logType  登录日志类型
+     * @param userId   用户 ID
+     * @param username 用户名
+     * @param ex       业务异常
+     */
+    public void auditOrchestrationFailure(HttpServletRequest request, AuthLoginLogType logType, Long userId,
+                                          String username, AuthBusinessException ex) {
+        AuthLoginLogResult result = LoginAuditContextResolver.resultForOrchestrationFailure(ex.getResultCode());
+        publishNormalized(request, logType, result, userId, username, ex.getMessageKey(), null);
+    }
 
-	/**
-	 * 刷新令牌成功审计。
-	 * @param request HTTP 请求
-	 * @param userId 用户 ID
-	 * @param jti 会话 ID
-	 */
-	public void auditRefreshTokenSuccess(HttpServletRequest request, Long userId, String jti) {
-		loginAuditEventPublisher.publish(request, AuthLoginLogType.REFRESH_TOKEN, AuthLoginLogResult.SUCCESS, userId,
-				null, null, jti);
-	}
+    /**
+     * 登出成功审计（编排层在撤销会话后单点调用）。
+     *
+     * @param request HTTP 请求
+     * @param userId  用户 ID
+     * @param jti     会话 ID
+     */
+    public void auditLogoutSuccess(HttpServletRequest request, Long userId, String jti) {
+        publishNormalized(request, AuthLoginLogType.LOGOUT, AuthLoginLogResult.SUCCESS, userId, null, null, jti);
+    }
 
-	/**
-	 * 按 Refresh 撤销会话时的登出审计（主体固定为 {@code /} 与历史行为一致）。
-	 * @param request HTTP 请求
-	 * @param userId 用户 ID
-	 * @param jti 会话 ID
-	 */
-	public void auditLogoutOnRefreshTokenRevoke(HttpServletRequest request, Long userId, String jti) {
-		loginAuditEventPublisher.publish(request, AuthLoginLogType.LOGOUT, AuthLoginLogResult.SUCCESS, userId, "/",
-				null, jti);
-	}
+    /**
+     * 刷新令牌失败审计。
+     *
+     * @param request HTTP 请求
+     * @param userId  用户 ID（可能为 null）
+     * @param ex      业务异常
+     */
+    public void auditRefreshTokenFailure(HttpServletRequest request, Long userId, AuthBusinessException ex) {
+        publishNormalized(request, AuthLoginLogType.REFRESH_TOKEN, AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR,
+                userId, null, ex.getMessageKey(), null);
+    }
+
+    /**
+     * 刷新令牌成功审计。
+     *
+     * @param request HTTP 请求
+     * @param userId  用户 ID
+     * @param jti     会话 ID
+     */
+    public void auditRefreshTokenSuccess(HttpServletRequest request, Long userId, String jti) {
+        publishNormalized(request, AuthLoginLogType.REFRESH_TOKEN, AuthLoginLogResult.SUCCESS, userId, null, null, jti);
+    }
+
+    private void publishNormalized(HttpServletRequest request, AuthLoginLogType eventType, AuthLoginLogResult result,
+                                   Long userId, String principal, String failureReason, String sessionId) {
+
+        String normalizedPrincipal = loginAuditPrincipalNormalizer.normalize(userId, principal);
+        loginAuditEventPublisher.publish(request, eventType, result, userId, normalizedPrincipal, failureReason,
+                sessionId);
+    }
 
 }

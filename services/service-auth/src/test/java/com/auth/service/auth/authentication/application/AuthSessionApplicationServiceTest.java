@@ -6,8 +6,11 @@ import com.auth.service.auth.authentication.api.dto.response.UserLoginResponse;
 import com.auth.service.auth.authentication.application.command.AbstractLoginCommand;
 import com.auth.service.auth.authentication.domain.model.RefreshSessionResult;
 import com.auth.service.auth.authentication.domain.model.TokenPair;
+import com.auth.service.auth.TestConstants;
+import com.auth.service.auth.authentication.application.login.audit.LoginAuditCoordinator;
 import com.auth.service.auth.authentication.application.port.RefreshCookiePort;
 import com.auth.service.auth.authentication.application.port.RememberMePolicyPort;
+import com.auth.service.auth.authentication.domain.model.LogoutSessionHint;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.DisplayName;
@@ -18,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -43,6 +47,9 @@ class AuthSessionApplicationServiceTest {
 
 	@Mock
 	private RememberMePolicyPort rememberMePolicyPort;
+
+	@Mock
+	private LoginAuditCoordinator loginAuditCoordinator;
 
 	@InjectMocks
 	private AuthSessionApplicationService authSessionApplicationService;
@@ -99,11 +106,16 @@ class AuthSessionApplicationServiceTest {
 		HttpServletResponse response = mock(HttpServletResponse.class);
 		when(request.getHeader("Authorization")).thenReturn("Bearer access-token");
 		when(refreshCookiePort.readRefreshToken(request)).thenReturn("refresh-token");
+		when(loginApplicationService.logout("access-token", request))
+			.thenReturn(Optional.of(new LogoutSessionHint(TestConstants.USER_ID, TestConstants.JTI)));
+		when(refreshTokenService.revokeByRefreshToken("refresh-token", request)).thenReturn(Optional.empty());
 
 		authSessionApplicationService.completeLogout(request, response);
 
 		verify(loginApplicationService).logout("access-token", request);
 		verify(refreshTokenService).revokeByRefreshToken("refresh-token", request);
+		verify(loginAuditCoordinator).auditLogoutSuccess(same(request), eq(TestConstants.USER_ID),
+				eq(TestConstants.JTI));
 		verify(refreshCookiePort).clearRefreshToken(response, request);
 	}
 
@@ -114,11 +126,15 @@ class AuthSessionApplicationServiceTest {
 		HttpServletResponse response = mock(HttpServletResponse.class);
 		when(request.getHeader("Authorization")).thenReturn(null);
 		when(refreshCookiePort.readRefreshToken(request)).thenReturn("refresh-only");
+		when(refreshTokenService.revokeByRefreshToken("refresh-only", request))
+			.thenReturn(Optional.of(new LogoutSessionHint(TestConstants.USER_ID, TestConstants.JTI)));
 
 		authSessionApplicationService.completeLogout(request, response);
 
 		verify(loginApplicationService, never()).logout(anyString(), any());
 		verify(refreshTokenService).revokeByRefreshToken("refresh-only", request);
+		verify(loginAuditCoordinator).auditLogoutSuccess(same(request), eq(TestConstants.USER_ID),
+				eq(TestConstants.JTI));
 		verify(refreshCookiePort).clearRefreshToken(response, request);
 	}
 

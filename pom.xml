@@ -32,25 +32,10 @@
         <!-- SonarQube 配置 -->
         <sonar.projectKey>${project.artifactId}</sonar.projectKey>
         <sonar.projectName>${project.name}</sonar.projectName>
-        <!-- Coverage should focus on business logic, not pure data/config classes -->
-        <sonar.coverage.exclusions>
-            **/config/**
-            **/*Config.*
-            **/*Configuration.*
-            **/*Properties.*
-            **/model/**
-            **/constants/**
-        </sonar.coverage.exclusions>
+        <!-- Coverage should focus on business logic, not pure data/config classes (comma-separated for Sonar scanner) -->
+        <sonar.coverage.exclusions>**/config/**,**/*Config.*,**/*Configuration.*,**/*Properties.*,**/model/**,**/model/*,**/constants/**</sonar.coverage.exclusions>
         <!-- CPD (duplications): exclude same boilerplate paths; coverage.exclusions does NOT apply here -->
-        <sonar.cpd.exclusions>
-            **/config/**
-            **/*Config.*
-            **/*Configuration.*
-            **/*Properties.*
-            **/model/**
-            **/constants/**
-            **/common/exception/**
-        </sonar.cpd.exclusions>
+        <sonar.cpd.exclusions>**/config/**,**/*Config.*,**/*Configuration.*,**/*Properties.*,**/model/**,**/model/*,**/constants/**,**/common/exception/**,**/exception/**</sonar.cpd.exclusions>
 
         <!-- JaCoCo 版本 -->
         <jacoco.version>0.8.12</jacoco.version>
@@ -264,12 +249,14 @@
                 <version>${commons-lang3.version}</version>
             </dependency>
 
+            <!-- 阿里云短信 -->
             <dependency>
                 <groupId>com.aliyun</groupId>
                 <artifactId>alibabacloud-dypnsapi20170525</artifactId>
                 <version>${aliyun-dypnsapi.version}</version>
             </dependency>
 
+            <!-- 架构测试 -->
             <dependency>
                 <groupId>com.tngtech.archunit</groupId>
                 <artifactId>archunit-junit5</artifactId>

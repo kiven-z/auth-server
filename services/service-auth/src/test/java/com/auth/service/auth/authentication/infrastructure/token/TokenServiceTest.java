@@ -1,8 +1,6 @@
 package com.auth.service.auth.authentication.infrastructure.token;
 
 import com.auth.common.jwt.autoconfigure.JwtProperties;
-import com.auth.common.jwt.model.JwtUserToken;
-import com.auth.module.security.core.token.model.SecurityTokenResult;
 import com.auth.module.security.core.token.provider.AccessTokenProvider;
 import com.auth.module.security.core.token.provider.RefreshTokenProvider;
 import com.auth.service.auth.TestConstants;
@@ -54,30 +52,6 @@ class TokenServiceTest {
 		assertEquals("acc", tokenPair.accessToken());
 		assertEquals("ref", tokenPair.refreshToken());
 		assertNotNull(tokenPair.accessExpiresAt());
-	}
-
-	@Test
-	@DisplayName("parseAccessToken：解析成功时返回用户载荷")
-	void parseAccessToken_shouldReturnUserToken_whenSuccess() {
-		JwtUserToken userToken = JwtUserToken.builder().userId(TestConstants.USER_ID).jti(TestConstants.JTI).build();
-		SecurityTokenResult result = SecurityTokenResult.builder().userToken(userToken).build();
-		when(accessTokenProvider.parseToken("ok")).thenReturn(result);
-		TokenService service = new TokenService(accessTokenProvider, refreshTokenProvider, jwtProperties);
-
-		JwtUserToken parsed = service.parseAccessToken("ok");
-
-		assertEquals(TestConstants.USER_ID, parsed.getUserId());
-		assertEquals(TestConstants.JTI, parsed.getJti());
-	}
-
-	@Test
-	@DisplayName("parseAccessToken：provider 异常时抛 TOKEN_PARSING_FAILED")
-	void parseAccessToken_shouldThrowBusinessException_whenProviderThrows() {
-		when(accessTokenProvider.parseToken("bad")).thenThrow(new RuntimeException("invalid jwt"));
-		TokenService service = new TokenService(accessTokenProvider, refreshTokenProvider, jwtProperties);
-
-		AuthBusinessException ex = assertThrows(AuthBusinessException.class, () -> service.parseAccessToken("bad"));
-		assertEquals(AuthResultCode.TOKEN_PARSING_FAILED, ex.getResultCode());
 	}
 
 	@Test

@@ -11,6 +11,7 @@ import com.auth.service.auth.authentication.application.login.audit.LoginAuditCo
 import com.auth.service.auth.authentication.application.port.AuthProfileCachePort;
 import com.auth.service.auth.authentication.application.port.TokenIssuerPort;
 import com.auth.service.auth.authentication.application.port.UserSessionIndexPort;
+import com.auth.service.auth.authentication.domain.model.LogoutSessionHint;
 import com.auth.service.auth.authentication.domain.model.RefreshSessionResult;
 import com.auth.service.auth.authentication.domain.model.TokenPair;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * 刷新令牌应用服务：校验会话、旋转 Refresh Token、撤销会话。
@@ -58,58 +60,48 @@ public class RefreshTokenService {
 	 */
 	public RefreshSessionResult refreshToken(String refreshToken, HttpServletRequest request) {
 		try {
-			return refreshTokenInternal(refreshToken, request);
+			// 如果刷新令牌为空，则抛出异常
+			if (CharSequenceUtil.isBlank(refreshToken)) {
+				throw new AuthBusinessException(AuthResultCode.REFRESH_TOKEN_MISSING);
+			}
+
+			// 解析刷新令牌
+			JwtUserToken refreshUserToken = tokenIssuerPort.parseRefreshToken(refreshToken);
+			// 获取用户ID
+			Long refreshUserId = refreshUserToken.getUserId();
+			// 获取会话ID
+			String refreshJti = refreshUserToken.getJti();
+
+			// 加载用户会话索引
+			UserSessionIndex sessionIndex = userSessionIndexPort.loadUserSessionIndex(refreshJti)
+				.orElseThrow(() -> new AuthBusinessException(AuthResultCode.REFRESH_TOKEN_EXPIRED));
+			// 断言刷新令牌与会话中存储的哈希及过期时间一致
+			assertRefreshTokenMatches(refreshUserId, refreshJti, sessionIndex, refreshToken);
+
+			// 加载用户画像
+			AuthProfile profile = authProfileCachePort.loadCachedProfile(refreshUserId)
+				.orElseThrow(() -> new AuthBusinessException(AuthResultCode.REFRESH_TOKEN_EXPIRED));
+			// 获取权限版本
+			Long permVersion = Objects.requireNonNull(profile.getPermVersion(), "permVersion must not be null");
+
+			// 旋转刷新令牌
+			TokenPair tokenPair = tokenIssuerPort.buildTokenPair(refreshUserId, refreshJti, permVersion);
+			// 旋转刷新令牌
+			rotateRefreshInSession(refreshJti, tokenPair.refreshToken());
+
+			// 获取是否记住我
+			boolean rememberMe = Boolean.TRUE.equals(sessionIndex.getRememberMe());
+			// 记录成功刷新令牌
+
+			loginAuditCoordinator.auditRefreshTokenSuccess(request, refreshUserId, refreshJti);
+			// 返回刷新令牌结果
+			return new RefreshSessionResult(tokenPair, rememberMe);
 		}
 		catch (AuthBusinessException ex) {
 			Long userId = tryResolveUserIdFromRefreshToken(refreshToken);
 			loginAuditCoordinator.auditRefreshTokenFailure(request, userId, ex);
 			throw ex;
 		}
-	}
-
-	/**
-	 * 刷新令牌内部实现
-	 * @param refreshToken 刷新令牌
-	 * @param request HTTP 请求
-	 * @return 刷新令牌响应
-	 */
-	private RefreshSessionResult refreshTokenInternal(String refreshToken, HttpServletRequest request) {
-		// 如果刷新令牌为空，则抛出异常
-		if (CharSequenceUtil.isBlank(refreshToken)) {
-			throw new AuthBusinessException(AuthResultCode.REFRESH_TOKEN_MISSING);
-		}
-
-		// 解析刷新令牌
-		JwtUserToken refreshUserToken = tokenIssuerPort.parseRefreshToken(refreshToken);
-		// 获取用户ID
-		Long refreshUserId = refreshUserToken.getUserId();
-		// 获取会话ID
-		String refreshJti = refreshUserToken.getJti();
-
-		// 加载用户会话索引
-		UserSessionIndex sessionIndex = userSessionIndexPort.loadUserSessionIndex(refreshJti)
-			.orElseThrow(() -> new AuthBusinessException(AuthResultCode.REFRESH_TOKEN_EXPIRED));
-		// 断言刷新令牌与会话中存储的哈希及过期时间一致
-		assertRefreshTokenMatches(refreshUserId, refreshJti, sessionIndex, refreshToken);
-
-		// 加载用户画像
-		AuthProfile profile = authProfileCachePort.loadCachedProfile(refreshUserId)
-			.orElseThrow(() -> new AuthBusinessException(AuthResultCode.REFRESH_TOKEN_EXPIRED));
-		// 获取权限版本
-		Long permVersion = Objects.requireNonNull(profile.getPermVersion(), "permVersion must not be null");
-
-		// 旋转刷新令牌
-		TokenPair tokenPair = tokenIssuerPort.buildTokenPair(refreshUserId, refreshJti, permVersion);
-		// 旋转刷新令牌
-		rotateRefreshInSession(refreshJti, tokenPair.refreshToken());
-
-		// 获取是否记住我
-		boolean rememberMe = Boolean.TRUE.equals(sessionIndex.getRememberMe());
-		// 记录成功刷新令牌
-
-		loginAuditCoordinator.auditRefreshTokenSuccess(request, refreshUserId, refreshJti);
-		// 返回刷新令牌结果
-		return new RefreshSessionResult(tokenPair, rememberMe);
 	}
 
 	/**
@@ -184,13 +176,13 @@ public class RefreshTokenService {
 	 * @param refreshToken 刷新令牌
 	 * @param request 当前 HTTP 请求（审计）；允许为 null
 	 */
-	public void revokeByRefreshToken(String refreshToken, HttpServletRequest request) {
+	public Optional<LogoutSessionHint> revokeByRefreshToken(String refreshToken, HttpServletRequest request) {
 		if (CharSequenceUtil.isBlank(refreshToken)) {
-			return;
+			return Optional.empty();
 		}
 		try {
 			JwtUserToken userToken = tokenIssuerPort.parseRefreshToken(refreshToken);
-			revokeServerSession(request, userToken);
+			return Optional.of(revokeServerSession(userToken));
 		}
 		catch (RuntimeException ex) {
 			log.error("Failed to revoke session by refresh token", ex);
@@ -199,14 +191,16 @@ public class RefreshTokenService {
 	}
 
 	/**
-	 * 删除刷新令牌对应的服务端会话并记录登出审计。
+	 * 删除刷新令牌对应的服务端会话。
+	 * @param userToken 刷新令牌解析结果
+	 * @return 登出审计上下文
 	 */
-	private void revokeServerSession(HttpServletRequest request, JwtUserToken userToken) {
+	private LogoutSessionHint revokeServerSession(JwtUserToken userToken) {
 		String jti = userToken.getJti();
 		Long userId = userToken.getUserId();
 		userSessionIndexPort.deleteSession(jti);
 		userSessionIndexPort.removeActiveSession(userId, jti);
-		loginAuditCoordinator.auditLogoutOnRefreshTokenRevoke(request, userId, jti);
+		return new LogoutSessionHint(userId, jti);
 	}
 
 }

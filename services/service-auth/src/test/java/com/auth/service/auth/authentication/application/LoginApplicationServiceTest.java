@@ -37,6 +37,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -335,12 +336,14 @@ class LoginApplicationServiceTest {
 
 		when(tokenIssuerPort.parseAccessTokenSafe(TestConstants.ACCESS_TOKEN)).thenReturn(Optional.of(jwtUserToken));
 
-		service.logout(TestConstants.ACCESS_TOKEN, null);
+		var hint = service.logout(TestConstants.ACCESS_TOKEN, null);
 
 		verify(userSessionIndexPort).deleteSession(TestConstants.JTI);
 		verify(userSessionIndexPort).removeActiveSession(TestConstants.USER_ID, TestConstants.JTI);
-		verify(loginAuditCoordinator).auditLogoutSuccess(isNull(), eq(TestConstants.USER_ID), isNull(),
-				eq(TestConstants.JTI));
+		verifyNoInteractions(loginAuditCoordinator);
+		assertTrue(hint.isPresent());
+		assertEquals(TestConstants.USER_ID, hint.get().userId());
+		assertEquals(TestConstants.JTI, hint.get().jti());
 	}
 
 }

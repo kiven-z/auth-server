@@ -57,24 +57,6 @@ public class TokenService implements TokenIssuerPort {
 	}
 
 	/**
-	 * 解析访问令牌
-	 * @param token 访问令牌原始字符串
-	 * @return 用户载荷
-	 */
-	public JwtUserToken parseAccessToken(String token) {
-		try {
-			return requireUserToken(accessTokenProvider.parseToken(token).getUserToken(),
-					AuthResultCode.TOKEN_PARSING_FAILED);
-		}
-		catch (AuthBusinessException ex) {
-			throw ex;
-		}
-		catch (Exception ex) {
-			throw new AuthBusinessException(AuthResultCode.TOKEN_PARSING_FAILED);
-		}
-	}
-
-	/**
 	 * 容错解析访问令牌（永不抛出异常）
 	 * @param token 访问令牌原始字符串
 	 * @return 用户载荷
@@ -85,7 +67,11 @@ public class TokenService implements TokenIssuerPort {
 			return Optional.empty();
 		}
 		try {
-			return Optional.of(parseAccessToken(token));
+			// 解析访问令牌
+			JwtUserToken jwtUserToken = requireUserToken(accessTokenProvider.parseToken(token).getUserToken(),
+					AuthResultCode.TOKEN_PARSING_FAILED);
+
+			return Optional.of(jwtUserToken);
 		}
 		catch (Exception exception) {
 			log.error(exception.getMessage(), exception);

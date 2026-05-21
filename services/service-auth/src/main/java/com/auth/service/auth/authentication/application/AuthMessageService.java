@@ -65,15 +65,15 @@ public class AuthMessageService {
 		// IP地址等信息
 		LoginAuditSnapshot snapshot = loginAuditSnapshotPort.build(request);
 
-		// 未找到活跃用户时静默返回，不暴露账号不存在（与 EmailLoginStrategy 策略一致）
+		// 未找到活跃用户时静默返回，不暴露账号不存在
 		LoginAccount account = loginAccountLookupPort.findActiveOnly(CredentialDimension.EMAIL, email).orElse(null);
 		if (account == null) {
 			log.warn("Send email code skipped: no active user found for email={}", email);
 			return;
 		}
-		String username = account.username();
 
 		// 拼装发送对象
+		String username = account.username();
 		Map<String, Object> variables = LoginEmailVariables.build(username, code, expireMinutes, LocalDateTime.now(),
 				snapshot.loginIp(), snapshot.loginRegion());
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
@@ -106,6 +106,7 @@ public class AuthMessageService {
 			return;
 		}
 
+		// 拼装发送对象
 		Map<String, Object> variables = LoginSmsVariables.build(code, expireMinutes);
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
 			.channel(MessageChannel.SMS_ALIYUN_DYPNS)
