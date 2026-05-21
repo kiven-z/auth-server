@@ -1,7 +1,7 @@
 package com.auth.service.auth.authentication.application.login.strategy;
 
 import com.auth.module.security.contract.api.authorization.AuthProfile;
-import com.auth.service.auth.authentication.application.command.AbstractLoginCommand;
+import com.auth.service.auth.authentication.application.input.credential.AbstractCredentialLogin;
 import com.auth.service.auth.authentication.application.login.audit.LoginAuditService;
 import com.auth.service.auth.authentication.application.port.LoginStrategy;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
@@ -21,7 +21,7 @@ import jakarta.servlet.http.HttpServletRequest;
  *
  * @author Bunny
  */
-public abstract class AbstractLoginStrategyTemplate<T extends AbstractLoginCommand> implements LoginStrategy<T> {
+public abstract class AbstractLoginStrategyTemplate<T extends AbstractCredentialLogin> implements LoginStrategy<T> {
 
 	protected final LoginFailureRateLimitPort loginFailureRateLimitPort;
 

@@ -1,6 +1,6 @@
 package com.auth.service.auth.authentication.application.port;
 
-import com.auth.service.auth.authentication.application.command.AbstractLoginCommand;
+import com.auth.service.auth.authentication.application.input.credential.AbstractCredentialLogin;
 import com.auth.service.auth.authentication.domain.model.LoginResult;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -9,7 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
  *
  * @author Bunny
  */
-public interface LoginStrategy<T extends AbstractLoginCommand> {
+public interface LoginStrategy<T extends AbstractCredentialLogin> {
 
 	/**
 	 * 当前策略支持的命令类型（作为注册表 key）。
@@ -19,7 +19,7 @@ public interface LoginStrategy<T extends AbstractLoginCommand> {
 
 	/**
 	 * 执行登录认证。
-	 * @param command 登录命令
+	 * @param command 凭证登录入站模型
 	 * @param request 当前 HTTP 请求（用于审计 IP/UA）；允许为 null
 	 * @return 登录结果（响应、画像、日志类型）
 	 */

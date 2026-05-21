@@ -1,20 +1,26 @@
-package com.auth.service.auth.authentication.application.command;
+package com.auth.service.auth.authentication.application.input.credential;
 
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 /**
- * 登录用例命令基类：与 HTTP DTO 解耦，供应用层与认证策略使用。
+ * 凭证类登录入站模型基类：用户名密码、邮箱、短信等；供 Controller 与认证策略共用。
  *
  * @author Bunny
  */
 @Getter
 @Setter
-public abstract class AbstractLoginCommand {
+public abstract class AbstractCredentialLogin implements Serializable {
+
+	@Serial
+	private static final long serialVersionUID = 1L;
 
 	/**
-	 * 是否记住登录（持久 Refresh Cookie）
+	 * 是否记住登录（持久 Refresh Cookie；天数由服务端 Nacos refreshExpired 配置）
 	 */
 	private Boolean rememberMe;
 

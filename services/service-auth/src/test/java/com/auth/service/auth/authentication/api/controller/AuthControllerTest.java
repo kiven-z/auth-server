@@ -1,10 +1,10 @@
 package com.auth.service.auth.authentication.api.controller;
 
-import com.auth.service.auth.authentication.api.dto.request.EmailLoginRequest;
-import com.auth.service.auth.authentication.api.dto.request.UsernamePasswordLoginRequest;
 import com.auth.service.auth.authentication.api.dto.response.RefreshTokenResponse;
 import com.auth.service.auth.authentication.api.dto.response.UserLoginResponse;
 import com.auth.service.auth.authentication.application.AuthSessionApplicationService;
+import com.auth.service.auth.authentication.application.input.credential.EmailLogin;
+import com.auth.service.auth.authentication.application.input.credential.UsernamePasswordLogin;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,32 +38,32 @@ class AuthControllerTest {
 	@Test
 	@DisplayName("用户名密码登录：委托 completeLogin")
 	void loginByUsername_shouldDelegateToFacade() {
-		UsernamePasswordLoginRequest auth = new UsernamePasswordLoginRequest();
+		UsernamePasswordLogin credential = new UsernamePasswordLogin();
 		UserLoginResponse loginResponse = new UserLoginResponse();
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		HttpServletResponse response = mock(HttpServletResponse.class);
 
-		when(authSessionApplicationService.completeLogin(same(auth), same(request), same(response)))
+		when(authSessionApplicationService.completeLogin(same(credential), same(request), same(response)))
 			.thenReturn(loginResponse);
 
-		var result = controller.loginByUsername(auth, request, response);
+		var result = controller.loginByUsername(credential, request, response);
 
 		assertSame(loginResponse, result.getData());
-		verify(authSessionApplicationService).completeLogin(auth, request, response);
+		verify(authSessionApplicationService).completeLogin(credential, request, response);
 	}
 
 	@Test
 	@DisplayName("邮箱登录：委托 completeLogin")
 	void loginByEmail_shouldDelegateToFacade() {
-		EmailLoginRequest auth = new EmailLoginRequest();
+		EmailLogin credential = new EmailLogin();
 		UserLoginResponse loginResponse = new UserLoginResponse();
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		HttpServletResponse response = mock(HttpServletResponse.class);
 
-		when(authSessionApplicationService.completeLogin(same(auth), same(request), same(response)))
+		when(authSessionApplicationService.completeLogin(same(credential), same(request), same(response)))
 			.thenReturn(loginResponse);
 
-		var result = controller.loginByEmail(auth, request, response);
+		var result = controller.loginByEmail(credential, request, response);
 
 		assertSame(loginResponse, result.getData());
 	}

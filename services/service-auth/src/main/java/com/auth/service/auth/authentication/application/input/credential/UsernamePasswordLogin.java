@@ -1,5 +1,6 @@
-package com.auth.service.auth.authentication.api.dto.request;
+package com.auth.service.auth.authentication.application.input.credential;
 
+import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -8,13 +9,13 @@ import lombok.Setter;
 import java.io.Serial;
 
 /**
- * 用户名密码登录认证请求
+ * 用户名密码登录入站模型。
  *
  * @author Bunny
  */
 @Getter
 @Setter
-public class UsernamePasswordLoginRequest extends AbstractLoginRequest {
+public class UsernamePasswordLogin extends AbstractCredentialLogin {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
@@ -26,5 +27,15 @@ public class UsernamePasswordLoginRequest extends AbstractLoginRequest {
 	@Schema(name = "password", title = "密码", requiredMode = Schema.RequiredMode.REQUIRED)
 	@NotBlank(message = "密码不能为空")
 	private String password;
+
+	@Override
+	public AuthLoginLogType loginLogType() {
+		return AuthLoginLogType.LOGIN_PASSWORD;
+	}
+
+	@Override
+	public String principalForAudit() {
+		return username;
+	}
 
 }

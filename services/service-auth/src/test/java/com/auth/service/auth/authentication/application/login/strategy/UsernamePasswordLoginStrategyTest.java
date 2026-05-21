@@ -1,6 +1,6 @@
 package com.auth.service.auth.authentication.application.login.strategy;
 
-import com.auth.service.auth.authentication.application.command.UsernamePasswordLoginCommand;
+import com.auth.service.auth.authentication.application.input.credential.UsernamePasswordLogin;
 import com.auth.service.auth.authentication.application.login.audit.LoginAuditService;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.enums.CredentialDimension;
@@ -59,14 +59,16 @@ class UsernamePasswordLoginStrategyTest {
 		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(loginAccountLookupPort,
 				loginFailureRateLimitPort, authProfileQueryPort, passwordEncoder, loginAuditService);
 
-		UsernamePasswordLoginCommand command = new UsernamePasswordLoginCommand("u", "p");
-		when(loginAuditService.resolvePrincipal(command)).thenReturn("u");
+		UsernamePasswordLogin credential = new UsernamePasswordLogin();
+		credential.setUsername("u");
+		credential.setPassword("p");
+		when(loginAuditService.resolvePrincipal(credential)).thenReturn("u");
 
 		AuthBusinessException exception = assertThrows(AuthBusinessException.class,
-				() -> strategy.authenticate(command, httpServletRequest));
+				() -> strategy.authenticate(credential, httpServletRequest));
 
 		assertEquals(AuthResultCode.USERNAME_OR_PASSWORD_ERROR, exception.getResultCode());
-		verify(loginAuditService).resolvePrincipal(command);
+		verify(loginAuditService).resolvePrincipal(credential);
 		verify(loginAuditService).auditUserUnknownAfterResolve(same(httpServletRequest),
 				eq(AuthLoginLogType.LOGIN_PASSWORD), eq("u"), eq(exception.getMessageKey()));
 	}
@@ -80,10 +82,12 @@ class UsernamePasswordLoginStrategyTest {
 		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(loginAccountLookupPort,
 				loginFailureRateLimitPort, authProfileQueryPort, passwordEncoder, loginAuditService);
 
-		UsernamePasswordLoginCommand command = new UsernamePasswordLoginCommand("u", "p");
+		UsernamePasswordLogin credential = new UsernamePasswordLogin();
+		credential.setUsername("u");
+		credential.setPassword("p");
 
 		AuthBusinessException exception = assertThrows(AuthBusinessException.class,
-				() -> strategy.authenticate(command, httpServletRequest));
+				() -> strategy.authenticate(credential, httpServletRequest));
 
 		assertEquals(AuthResultCode.USER_DISABLED, exception.getResultCode());
 		verify(loginAuditService).auditAccountDisabled(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_PASSWORD),
@@ -92,12 +96,12 @@ class UsernamePasswordLoginStrategyTest {
 	}
 
 	@Test
-	@DisplayName("supports 返回 UsernamePasswordLoginCommand.class")
-	void supports_shouldReturnUsernamePasswordLoginCommandClass() {
+	@DisplayName("supports 返回 UsernamePasswordLogin.class")
+	void supports_shouldReturnUsernamePasswordLoginClass() {
 		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(loginAccountLookupPort,
 				loginFailureRateLimitPort, authProfileQueryPort, passwordEncoder, loginAuditService);
 
-		assertEquals(UsernamePasswordLoginCommand.class, strategy.supports());
+		assertEquals(UsernamePasswordLogin.class, strategy.supports());
 	}
 
 	@Test
@@ -113,10 +117,12 @@ class UsernamePasswordLoginStrategyTest {
 		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(loginAccountLookupPort,
 				loginFailureRateLimitPort, authProfileQueryPort, passwordEncoder, loginAuditService);
 
-		UsernamePasswordLoginCommand command = new UsernamePasswordLoginCommand("u", "p");
+		UsernamePasswordLogin credential = new UsernamePasswordLogin();
+		credential.setUsername("u");
+		credential.setPassword("p");
 
 		AuthBusinessException exception = assertThrows(AuthBusinessException.class,
-				() -> strategy.authenticate(command, httpServletRequest));
+				() -> strategy.authenticate(credential, httpServletRequest));
 
 		assertEquals(AuthResultCode.USERNAME_OR_PASSWORD_ERROR_WITH_REMAINING, exception.getResultCode());
 		verify(loginAuditService).auditBadCredentialsWithRemaining(same(httpServletRequest),

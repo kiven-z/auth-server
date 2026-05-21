@@ -2,7 +2,7 @@ package com.auth.service.auth.authentication.application.login.audit;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
-import com.auth.service.auth.authentication.application.command.AbstractLoginCommand;
+import com.auth.service.auth.authentication.application.input.credential.AbstractCredentialLogin;
 import com.auth.service.auth.authentication.application.port.AuthProfileCachePort;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogResult;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
@@ -46,29 +46,50 @@ public class LoginAuditService {
 		this.userReadPort = userReadPort;
 	}
 
+	private static String blankToNull(String value) {
+		return CharSequenceUtil.isBlank(value) ? null : value.trim();
+	}
+
+	/**
+	 * 将业务结果码映射为审计结果枚举（编排阶段失败等）。
+	 * @param code 业务结果码
+	 * @return 审计结果
+	 */
+	private static AuthLoginLogResult resultForOrchestrationFailure(AuthResultCode code) {
+		if (code == null) {
+			return AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR;
+		}
+		return switch (code) {
+			case USER_LOCKED, USER_LOCKED_WITH_MINUTES -> AuthLoginLogResult.ACCOUNT_LOCKED;
+			case AUTH_CODE_ERROR -> AuthLoginLogResult.CAPTCHA_ERROR;
+			case USER_DISABLED -> AuthLoginLogResult.ACCOUNT_DISABLED;
+			default -> AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR;
+		};
+	}
+
 	/**
 	 * 从登录命令解析审计主体（手机号/邮箱/输入用户名等）。
-	 * @param command 登录命令
+	 * @param credential 登录命令
 	 * @return 主体字符串，无法解析时返回 null
 	 */
-	public String resolvePrincipal(AbstractLoginCommand command) {
-		if (command == null) {
+	public String resolvePrincipal(AbstractCredentialLogin credential) {
+		if (credential == null) {
 			return null;
 		}
-		String auditPrincipal = command.principalForAudit();
+		String auditPrincipal = credential.principalForAudit();
 		return auditPrincipal == null || auditPrincipal.isBlank() ? null : auditPrincipal;
 	}
 
 	/**
 	 * 不支持的登录命令类型（策略表未命中）。
 	 * @param request HTTP 请求
-	 * @param command 登录命令
+	 * @param credential 登录命令
 	 * @param messageKey 失败原因 messageKey
 	 */
-	public void auditUnsupportedLoginCommand(HttpServletRequest request, AbstractLoginCommand command,
+	public void auditUnsupportedLoginCommand(HttpServletRequest request, AbstractCredentialLogin credential,
 			String messageKey) {
-		publishNormalized(request, command.loginLogType(), AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR, null,
-				resolvePrincipal(command), messageKey, null);
+		publishNormalized(request, credential.loginLogType(), AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR, null,
+				resolvePrincipal(credential), messageKey, null);
 	}
 
 	/**
@@ -242,27 +263,6 @@ public class LoginAuditService {
 			.filter(CharSequenceUtil::isNotBlank)
 			.or(() -> userReadPort.findById(userId).map(UserAccountSnapshot::username))
 			.orElse(null);
-	}
-
-	private static String blankToNull(String value) {
-		return CharSequenceUtil.isBlank(value) ? null : value.trim();
-	}
-
-	/**
-	 * 将业务结果码映射为审计结果枚举（编排阶段失败等）。
-	 * @param code 业务结果码
-	 * @return 审计结果
-	 */
-	private static AuthLoginLogResult resultForOrchestrationFailure(AuthResultCode code) {
-		if (code == null) {
-			return AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR;
-		}
-		return switch (code) {
-			case USER_LOCKED, USER_LOCKED_WITH_MINUTES -> AuthLoginLogResult.ACCOUNT_LOCKED;
-			case AUTH_CODE_ERROR -> AuthLoginLogResult.CAPTCHA_ERROR;
-			case USER_DISABLED -> AuthLoginLogResult.ACCOUNT_DISABLED;
-			default -> AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR;
-		};
 	}
 
 }

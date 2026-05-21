@@ -4,8 +4,8 @@ import com.auth.common.jwt.model.JwtUserToken;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.TestConstants;
 import com.auth.service.auth.authentication.api.dto.response.UserLoginResponse;
-import com.auth.service.auth.authentication.application.command.AbstractLoginCommand;
-import com.auth.service.auth.authentication.application.command.UsernamePasswordLoginCommand;
+import com.auth.service.auth.authentication.application.input.credential.AbstractCredentialLogin;
+import com.auth.service.auth.authentication.application.input.credential.UsernamePasswordLogin;
 import com.auth.service.auth.authentication.application.login.audit.LoginAuditService;
 import com.auth.service.auth.authentication.application.port.LoginStrategy;
 import com.auth.service.auth.authentication.application.port.TokenIssuerPort;
@@ -67,8 +67,10 @@ class LoginApplicationServiceTest {
 	@Test
 	@DisplayName("登录：策略认证成功后委托 LoginSessionOrchestrator 签发会话")
 	void login_shouldDelegateToSessionOrchestrator_whenStrategyAuthenticates() {
-		UsernamePasswordLoginCommand command = new UsernamePasswordLoginCommand("user", "pass");
-		command.setRememberMe(true);
+		UsernamePasswordLogin credential = new UsernamePasswordLogin();
+		credential.setUsername("user");
+		credential.setPassword("pass");
+		credential.setRememberMe(true);
 
 		AuthProfile profile = mock(AuthProfile.class);
 		UserLoginResponse response = new UserLoginResponse();
@@ -76,14 +78,14 @@ class LoginApplicationServiceTest {
 		response.setUsername("user");
 		LoginResult loginResult = toLoginResult(response, profile);
 
-		LoginStrategy<UsernamePasswordLoginCommand> strategy = new LoginStrategy<>() {
+		LoginStrategy<UsernamePasswordLogin> strategy = new LoginStrategy<>() {
 			@Override
-			public Class<UsernamePasswordLoginCommand> supports() {
-				return UsernamePasswordLoginCommand.class;
+			public Class<UsernamePasswordLogin> supports() {
+				return UsernamePasswordLogin.class;
 			}
 
 			@Override
-			public LoginResult authenticate(UsernamePasswordLoginCommand cmd, HttpServletRequest request) {
+			public LoginResult authenticate(UsernamePasswordLogin cmd, HttpServletRequest request) {
 				return loginResult;
 			}
 		};
@@ -94,7 +96,7 @@ class LoginApplicationServiceTest {
 				same(httpServletRequest)))
 			.thenReturn(issued);
 
-		UserLoginResponse actual = newService(strategy).login(command, httpServletRequest);
+		UserLoginResponse actual = newService(strategy).login(credential, httpServletRequest);
 
 		assertSame(issued, actual);
 		verify(loginSessionOrchestrator).issueSession(eq(loginResult), any(UserLoginResponse.class), eq(true),
@@ -104,28 +106,29 @@ class LoginApplicationServiceTest {
 	@Test
 	@DisplayName("登录：无精确匹配时，允许父类命令类型匹配兜底")
 	void login_shouldFallbackToAssignableStrategy_whenExactClassNotFound() {
-		class SubLoginCommand extends UsernamePasswordLoginCommand {
+		class SubUsernamePasswordLogin extends UsernamePasswordLogin {
 
-			SubLoginCommand() {
-				super("user", "pass");
+			SubUsernamePasswordLogin() {
+				setUsername("user");
+				setPassword("pass");
 			}
 
 		}
 
-		SubLoginCommand command = new SubLoginCommand();
+		SubUsernamePasswordLogin credential = new SubUsernamePasswordLogin();
 		AuthProfile profile = mock(AuthProfile.class);
 		UserLoginResponse response = new UserLoginResponse();
 		response.setId(TestConstants.USER_ID);
 		LoginResult loginResult = toLoginResult(response, profile);
 
-		LoginStrategy<UsernamePasswordLoginCommand> strategy = new LoginStrategy<>() {
+		LoginStrategy<UsernamePasswordLogin> strategy = new LoginStrategy<>() {
 			@Override
-			public Class<UsernamePasswordLoginCommand> supports() {
-				return UsernamePasswordLoginCommand.class;
+			public Class<UsernamePasswordLogin> supports() {
+				return UsernamePasswordLogin.class;
 			}
 
 			@Override
-			public LoginResult authenticate(UsernamePasswordLoginCommand cmd, HttpServletRequest request) {
+			public LoginResult authenticate(UsernamePasswordLogin cmd, HttpServletRequest request) {
 				return loginResult;
 			}
 		};
@@ -134,7 +137,7 @@ class LoginApplicationServiceTest {
 				same(httpServletRequest)))
 			.thenReturn(response);
 
-		UserLoginResponse actual = newService(strategy).login(command, httpServletRequest);
+		UserLoginResponse actual = newService(strategy).login(credential, httpServletRequest);
 
 		assertEquals(TestConstants.USER_ID, actual.getId());
 		verify(loginSessionOrchestrator).issueSession(eq(loginResult), any(UserLoginResponse.class), eq(false),
@@ -144,7 +147,7 @@ class LoginApplicationServiceTest {
 	@Test
 	@DisplayName("登录：无任何策略时，抛出 AUTH_TYPE_UNSUPPORTED 并写审计")
 	void login_shouldThrowAuthTypeUnsupported_whenNoStrategy() {
-		AbstractLoginCommand unknown = new AbstractLoginCommand() {
+		AbstractCredentialLogin unknown = new AbstractCredentialLogin() {
 			@Override
 			public AuthLoginLogType loginLogType() {
 				return AuthLoginLogType.LOGIN_PASSWORD;
@@ -156,8 +159,9 @@ class LoginApplicationServiceTest {
 			}
 		};
 
+		LoginApplicationService service = newService();
 		AuthBusinessException exception = assertThrows(AuthBusinessException.class,
-				() -> newService().login(unknown, httpServletRequest));
+				() -> service.login(unknown, httpServletRequest));
 
 		assertEquals(AuthResultCode.AUTH_TYPE_UNSUPPORTED, exception.getResultCode());
 		verify(loginAuditService).auditUnsupportedLoginCommand(same(httpServletRequest), eq(unknown),

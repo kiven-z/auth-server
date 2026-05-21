@@ -156,8 +156,9 @@ class LoginSessionOrchestratorTest {
 		when(tokenIssuerPort.buildTokenPair(anyLong(), anyString(), anyLong()))
 			.thenThrow(new AuthBusinessException(AuthResultCode.SERVER_ERROR));
 
+		LoginSessionOrchestrator orchestrator = newOrchestrator();
 		assertThrows(AuthBusinessException.class,
-				() -> newOrchestrator().issueSession(loginResult, response, false, httpServletRequest));
+				() -> orchestrator.issueSession(loginResult, response, false, httpServletRequest));
 
 		verify(authProfileCachePort).cacheProfile(profile);
 		verify(authProfileCachePort).evictProfile(TestConstants.USER_ID);

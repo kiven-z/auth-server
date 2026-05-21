@@ -1,6 +1,6 @@
 package com.auth.service.auth.authentication.application.login.strategy;
 
-import com.auth.service.auth.authentication.application.command.UsernamePasswordLoginCommand;
+import com.auth.service.auth.authentication.application.input.credential.UsernamePasswordLogin;
 import com.auth.service.auth.authentication.application.login.audit.LoginAuditService;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.enums.CredentialDimension;
@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
  * @author Bunny
  */
 @Component
-public class UsernamePasswordLoginStrategy extends AbstractLoginStrategyTemplate<UsernamePasswordLoginCommand> {
+public class UsernamePasswordLoginStrategy extends AbstractLoginStrategyTemplate<UsernamePasswordLogin> {
 
 	private final LoginAccountLookupPort loginAccountLookupPort;
 
@@ -40,22 +40,22 @@ public class UsernamePasswordLoginStrategy extends AbstractLoginStrategyTemplate
 	}
 
 	@Override
-	protected LoginAccount resolveAccount(UsernamePasswordLoginCommand command) {
-		return loginAccountLookupPort.findForLogin(CredentialDimension.USERNAME, command.getUsername())
+	protected LoginAccount resolveAccount(UsernamePasswordLogin credential) {
+		return loginAccountLookupPort.findForLogin(CredentialDimension.USERNAME, credential.getUsername())
 			.orElseThrow(() -> new AuthBusinessException(AuthResultCode.USERNAME_OR_PASSWORD_ERROR));
 	}
 
 	@Override
-	protected AuthLoginLogType doAuthenticate(UsernamePasswordLoginCommand command, LoginAccount account) {
-		if (!passwordEncoder.matches(command.getPassword(), account.encodedPassword())) {
+	protected AuthLoginLogType doAuthenticate(UsernamePasswordLogin credential, LoginAccount account) {
+		if (!passwordEncoder.matches(credential.getPassword(), account.encodedPassword())) {
 			throw new AuthBadCredentialsException("Password mismatch");
 		}
 		return AuthLoginLogType.LOGIN_PASSWORD;
 	}
 
 	@Override
-	public Class<UsernamePasswordLoginCommand> supports() {
-		return UsernamePasswordLoginCommand.class;
+	public Class<UsernamePasswordLogin> supports() {
+		return UsernamePasswordLogin.class;
 	}
 
 }

@@ -1,7 +1,7 @@
 package com.auth.service.auth.authentication.application.login.strategy;
 
 import cn.hutool.crypto.digest.MD5;
-import com.auth.service.auth.authentication.application.command.EmailLoginCommand;
+import com.auth.service.auth.authentication.application.input.credential.EmailLogin;
 import com.auth.service.auth.authentication.application.login.audit.LoginAuditService;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.enums.CredentialDimension;
@@ -22,7 +22,7 @@ import java.util.Objects;
  * @author Bunny
  */
 @Component
-public class EmailLoginStrategy extends AbstractLoginStrategyTemplate<EmailLoginCommand> {
+public class EmailLoginStrategy extends AbstractLoginStrategyTemplate<EmailLogin> {
 
 	private final LoginAccountLookupPort loginAccountLookupPort;
 
@@ -42,15 +42,15 @@ public class EmailLoginStrategy extends AbstractLoginStrategyTemplate<EmailLogin
 	}
 
 	@Override
-	protected LoginAccount resolveAccount(EmailLoginCommand command) {
-		return loginAccountLookupPort.findForLogin(CredentialDimension.EMAIL, command.getEmail())
+	protected LoginAccount resolveAccount(EmailLogin credential) {
+		return loginAccountLookupPort.findForLogin(CredentialDimension.EMAIL, credential.getEmail())
 			.orElseThrow(() -> new AuthBusinessException(AuthResultCode.USERNAME_OR_PASSWORD_ERROR));
 	}
 
 	@Override
-	protected AuthLoginLogType doAuthenticate(EmailLoginCommand command, LoginAccount account) {
-		String email = Objects.requireNonNull(command.getEmail());
-		String codeDigest = MD5.create().digestHex16(Objects.requireNonNull(command.getCode()));
+	protected AuthLoginLogType doAuthenticate(EmailLogin credential, LoginAccount account) {
+		String email = Objects.requireNonNull(credential.getEmail());
+		String codeDigest = MD5.create().digestHex16(Objects.requireNonNull(credential.getCode()));
 		String stored = loginVerificationCodePort.getStoredDigest(CredentialDimension.EMAIL, email);
 
 		if (!Objects.equals(codeDigest, stored)) {
@@ -62,8 +62,8 @@ public class EmailLoginStrategy extends AbstractLoginStrategyTemplate<EmailLogin
 	}
 
 	@Override
-	public Class<EmailLoginCommand> supports() {
-		return EmailLoginCommand.class;
+	public Class<EmailLogin> supports() {
+		return EmailLogin.class;
 	}
 
 }

@@ -2,7 +2,7 @@ package com.auth.service.auth.authentication.application.login.strategy;
 
 import cn.hutool.crypto.digest.MD5;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
-import com.auth.service.auth.authentication.application.command.SmsLoginCommand;
+import com.auth.service.auth.authentication.application.input.credential.SmsLogin;
 import com.auth.service.auth.authentication.application.login.audit.LoginAuditService;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.enums.CredentialDimension;
@@ -66,14 +66,16 @@ class SmsLoginStrategyTest {
 			.thenReturn(Optional.empty());
 		SmsLoginStrategy strategy = createStrategy();
 
-		SmsLoginCommand command = new SmsLoginCommand("13800138000", "123456");
-		when(loginAuditService.resolvePrincipal(command)).thenReturn("13800138000");
+		SmsLogin credential = new SmsLogin();
+		credential.setPhone("13800138000");
+		credential.setCode("123456");
+		when(loginAuditService.resolvePrincipal(credential)).thenReturn("13800138000");
 
 		AuthBusinessException exception = assertThrows(AuthBusinessException.class,
-				() -> strategy.authenticate(command, httpServletRequest));
+				() -> strategy.authenticate(credential, httpServletRequest));
 
 		assertEquals(AuthResultCode.USERNAME_OR_PASSWORD_ERROR, exception.getResultCode());
-		verify(loginAuditService).resolvePrincipal(command);
+		verify(loginAuditService).resolvePrincipal(credential);
 		verify(loginAuditService).auditUserUnknownAfterResolve(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_SMS),
 				eq("13800138000"), eq(exception.getMessageKey()));
 	}
@@ -91,10 +93,12 @@ class SmsLoginStrategyTest {
 
 		SmsLoginStrategy strategy = createStrategy();
 
-		SmsLoginCommand command = new SmsLoginCommand("13800138000", "000000");
+		SmsLogin credential = new SmsLogin();
+		credential.setPhone("13800138000");
+		credential.setCode("000000");
 
 		AuthBusinessException exception = assertThrows(AuthBusinessException.class,
-				() -> strategy.authenticate(command, httpServletRequest));
+				() -> strategy.authenticate(credential, httpServletRequest));
 
 		assertEquals(AuthResultCode.AUTH_CODE_ERROR, exception.getResultCode());
 		verify(loginAuditService).auditMappedCredentialFailure(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_SMS),
@@ -118,18 +122,20 @@ class SmsLoginStrategyTest {
 			.thenReturn(MD5.create().digestHex16(code));
 
 		SmsLoginStrategy strategy = createStrategy();
-		SmsLoginCommand command = new SmsLoginCommand(phone, code);
+		SmsLogin credential = new SmsLogin();
+		credential.setPhone(phone);
+		credential.setCode(code);
 
-		strategy.authenticate(command, httpServletRequest);
+		strategy.authenticate(credential, httpServletRequest);
 
 		verify(loginVerificationCodePort).deleteCode(CredentialDimension.PHONE, phone);
 	}
 
 	@Test
-	@DisplayName("supports 返回 SmsLoginCommand.class")
-	void supports_shouldReturnSmsLoginCommandClass() {
+	@DisplayName("supports 返回 SmsLogin.class")
+	void supports_shouldReturnSmsLoginClass() {
 		SmsLoginStrategy strategy = createStrategy();
-		assertEquals(SmsLoginCommand.class, strategy.supports());
+		assertEquals(SmsLogin.class, strategy.supports());
 	}
 
 }

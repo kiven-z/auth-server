@@ -2,7 +2,7 @@ package com.auth.service.auth.authentication.application.login.strategy;
 
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.TestConstants;
-import com.auth.service.auth.authentication.application.command.AbstractLoginCommand;
+import com.auth.service.auth.authentication.application.input.credential.AbstractCredentialLogin;
 import com.auth.service.auth.authentication.application.login.audit.LoginAuditService;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.model.LoginAccount;
@@ -63,7 +63,7 @@ class AbstractLoginStrategyTemplateTest {
 		TestStrategy strategy = new TestStrategy(loginFailureRateLimitPort, authProfileQueryPort, loginAuditService,
 				account, null);
 
-		LoginResult result = strategy.authenticate(new TestLoginCommand(), httpServletRequest);
+		LoginResult result = strategy.authenticate(new TestCredentialLogin(), httpServletRequest);
 
 		verify(loginFailureRateLimitPort).assertNotLocked(TestConstants.USER_ID);
 		verify(authProfileQueryPort).buildByUserId(TestConstants.USER_ID);
@@ -83,10 +83,10 @@ class AbstractLoginStrategyTemplateTest {
 
 		TestStrategy strategy = new TestStrategy(loginFailureRateLimitPort, authProfileQueryPort, loginAuditService,
 				account, new AuthBadCredentialsException("bad"));
-		TestLoginCommand command = new TestLoginCommand();
+		TestCredentialLogin credential = new TestCredentialLogin();
 
 		AuthBusinessException exception = assertThrows(AuthBusinessException.class,
-				() -> strategy.authenticate(command, httpServletRequest));
+				() -> strategy.authenticate(credential, httpServletRequest));
 
 		assertEquals(AuthResultCode.USERNAME_OR_PASSWORD_ERROR_WITH_REMAINING, exception.getResultCode());
 		verify(loginFailureRateLimitPort).recordFailure(TestConstants.USER_ID);
@@ -94,7 +94,7 @@ class AbstractLoginStrategyTemplateTest {
 				eq(AuthLoginLogType.LOGIN_PASSWORD), eq(TestConstants.USER_ID), eq("u"), eq(3));
 	}
 
-	static class TestLoginCommand extends AbstractLoginCommand {
+	static class TestCredentialLogin extends AbstractCredentialLogin {
 
 		@Override
 		public AuthLoginLogType loginLogType() {
@@ -108,7 +108,7 @@ class AbstractLoginStrategyTemplateTest {
 
 	}
 
-	static class TestStrategy extends AbstractLoginStrategyTemplate<TestLoginCommand> {
+	static class TestStrategy extends AbstractLoginStrategyTemplate<TestCredentialLogin> {
 
 		private final LoginAccount accountToReturn;
 
@@ -128,12 +128,12 @@ class AbstractLoginStrategyTemplateTest {
 		}
 
 		@Override
-		protected LoginAccount resolveAccount(TestLoginCommand command) {
+		protected LoginAccount resolveAccount(TestCredentialLogin credential) {
 			return accountToReturn;
 		}
 
 		@Override
-		protected AuthLoginLogType doAuthenticate(TestLoginCommand command, LoginAccount account) {
+		protected AuthLoginLogType doAuthenticate(TestCredentialLogin credential, LoginAccount account) {
 			if (authenticateException != null) {
 				throw authenticateException;
 			}
@@ -141,8 +141,8 @@ class AbstractLoginStrategyTemplateTest {
 		}
 
 		@Override
-		public Class<TestLoginCommand> supports() {
-			return TestLoginCommand.class;
+		public Class<TestCredentialLogin> supports() {
+			return TestCredentialLogin.class;
 		}
 
 	}

@@ -1,11 +1,10 @@
 package com.auth.service.auth.authentication.application;
 
 import cn.hutool.core.util.BooleanUtil;
-import com.auth.service.auth.authentication.api.dto.request.AbstractLoginRequest;
 import com.auth.service.auth.authentication.api.dto.response.RefreshTokenResponse;
 import com.auth.service.auth.authentication.api.dto.response.UserLoginResponse;
-import com.auth.service.auth.authentication.application.assembler.LoginCommandAssembler;
 import com.auth.service.auth.authentication.application.assembler.RefreshResponseAssembler;
+import com.auth.service.auth.authentication.application.input.credential.AbstractCredentialLogin;
 import com.auth.service.auth.authentication.application.login.audit.LoginAuditService;
 import com.auth.service.auth.authentication.application.port.RefreshCookiePort;
 import com.auth.service.auth.authentication.application.port.RememberMePolicyPort;
@@ -49,17 +48,17 @@ public class AuthSessionApplicationService {
 
 	/**
 	 * 完成登录：签发令牌、写入 Redis 会话、下发 Refresh Cookie。
-	 * @param auth 登录请求（含 rememberMe）
+	 * @param credential 凭证登录入站模型（含 rememberMe）
 	 * @param request HTTP 请求
 	 * @param response HTTP 响应
 	 * @return 登录响应（含 readMeDay）
 	 */
-	public UserLoginResponse completeLogin(AbstractLoginRequest auth, HttpServletRequest request,
+	public UserLoginResponse completeLogin(AbstractCredentialLogin credential, HttpServletRequest request,
 			HttpServletResponse response) {
-		UserLoginResponse login = loginApplicationService.login(LoginCommandAssembler.toCommand(auth), request);
+		UserLoginResponse login = loginApplicationService.login(credential, request);
 
 		refreshCookiePort.writeRefreshToken(response, request, login.getRefreshToken(),
-				BooleanUtil.isTrue(auth.getRememberMe()));
+				BooleanUtil.isTrue(credential.getRememberMe()));
 		return login;
 	}
 

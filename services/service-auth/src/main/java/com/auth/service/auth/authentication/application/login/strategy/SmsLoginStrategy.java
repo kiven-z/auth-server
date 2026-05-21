@@ -1,7 +1,7 @@
 package com.auth.service.auth.authentication.application.login.strategy;
 
 import cn.hutool.crypto.digest.MD5;
-import com.auth.service.auth.authentication.application.command.SmsLoginCommand;
+import com.auth.service.auth.authentication.application.input.credential.SmsLogin;
 import com.auth.service.auth.authentication.application.login.audit.LoginAuditService;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.enums.CredentialDimension;
@@ -22,7 +22,7 @@ import java.util.Objects;
  * @author Bunny
  */
 @Component
-public class SmsLoginStrategy extends AbstractLoginStrategyTemplate<SmsLoginCommand> {
+public class SmsLoginStrategy extends AbstractLoginStrategyTemplate<SmsLogin> {
 
 	private final LoginAccountLookupPort loginAccountLookupPort;
 
@@ -42,15 +42,15 @@ public class SmsLoginStrategy extends AbstractLoginStrategyTemplate<SmsLoginComm
 	}
 
 	@Override
-	protected LoginAccount resolveAccount(SmsLoginCommand command) {
-		return loginAccountLookupPort.findForLogin(CredentialDimension.PHONE, command.getPhone())
+	protected LoginAccount resolveAccount(SmsLogin credential) {
+		return loginAccountLookupPort.findForLogin(CredentialDimension.PHONE, credential.getPhone())
 			.orElseThrow(() -> new AuthBusinessException(AuthResultCode.USERNAME_OR_PASSWORD_ERROR));
 	}
 
 	@Override
-	protected AuthLoginLogType doAuthenticate(SmsLoginCommand command, LoginAccount account) {
-		String phone = Objects.requireNonNull(command.getPhone());
-		String codeDigest = MD5.create().digestHex16(Objects.requireNonNull(command.getCode()));
+	protected AuthLoginLogType doAuthenticate(SmsLogin credential, LoginAccount account) {
+		String phone = Objects.requireNonNull(credential.getPhone());
+		String codeDigest = MD5.create().digestHex16(Objects.requireNonNull(credential.getCode()));
 		String stored = loginVerificationCodePort.getStoredDigest(CredentialDimension.PHONE, phone);
 
 		if (!Objects.equals(codeDigest, stored)) {
@@ -62,8 +62,8 @@ public class SmsLoginStrategy extends AbstractLoginStrategyTemplate<SmsLoginComm
 	}
 
 	@Override
-	public Class<SmsLoginCommand> supports() {
-		return SmsLoginCommand.class;
+	public Class<SmsLogin> supports() {
+		return SmsLogin.class;
 	}
 
 }

@@ -1,5 +1,6 @@
-package com.auth.service.auth.authentication.api.dto.request;
+package com.auth.service.auth.authentication.application.input.credential;
 
+import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -9,13 +10,13 @@ import lombok.Setter;
 import java.io.Serial;
 
 /**
- * 邮箱登录认证请求
+ * 邮箱验证码登录入站模型。
  *
  * @author Bunny
  */
 @Getter
 @Setter
-public class EmailLoginRequest extends AbstractLoginRequest {
+public class EmailLogin extends AbstractCredentialLogin {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
@@ -28,5 +29,15 @@ public class EmailLoginRequest extends AbstractLoginRequest {
 	@Schema(name = "code", title = "验证码或密码", requiredMode = Schema.RequiredMode.REQUIRED)
 	@NotBlank(message = "验证码或密码不能为空")
 	private String code;
+
+	@Override
+	public AuthLoginLogType loginLogType() {
+		return AuthLoginLogType.LOGIN_EMAIL;
+	}
+
+	@Override
+	public String principalForAudit() {
+		return email;
+	}
 
 }

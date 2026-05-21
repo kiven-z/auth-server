@@ -1,10 +1,10 @@
 package com.auth.service.auth.authentication.application;
 
 import com.auth.service.auth.TestConstants;
-import com.auth.service.auth.authentication.api.dto.request.UsernamePasswordLoginRequest;
 import com.auth.service.auth.authentication.api.dto.response.RefreshTokenResponse;
 import com.auth.service.auth.authentication.api.dto.response.UserLoginResponse;
-import com.auth.service.auth.authentication.application.command.AbstractLoginCommand;
+import com.auth.service.auth.authentication.application.input.credential.AbstractCredentialLogin;
+import com.auth.service.auth.authentication.application.input.credential.UsernamePasswordLogin;
 import com.auth.service.auth.authentication.application.login.audit.LoginAuditService;
 import com.auth.service.auth.authentication.application.port.RefreshCookiePort;
 import com.auth.service.auth.authentication.application.port.RememberMePolicyPort;
@@ -36,104 +36,104 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class AuthSessionApplicationServiceTest {
 
-    @Mock
-    private LoginApplicationService loginApplicationService;
+	@Mock
+	private LoginApplicationService loginApplicationService;
 
-    @Mock
-    private RefreshTokenService refreshTokenService;
+	@Mock
+	private RefreshTokenService refreshTokenService;
 
-    @Mock
-    private RefreshCookiePort refreshCookiePort;
+	@Mock
+	private RefreshCookiePort refreshCookiePort;
 
-    @Mock
-    private RememberMePolicyPort rememberMePolicyPort;
+	@Mock
+	private RememberMePolicyPort rememberMePolicyPort;
 
-    @Mock
-    private LoginAuditService loginAuditService;
+	@Mock
+	private LoginAuditService loginAuditService;
 
-    @InjectMocks
-    private AuthSessionApplicationService authSessionApplicationService;
+	@InjectMocks
+	private AuthSessionApplicationService authSessionApplicationService;
 
-    @Test
-    @DisplayName("completeLogin：登录后按 rememberMe 写入 Refresh Cookie")
-    void completeLogin_shouldWriteCookieWithRememberMe() {
-        UsernamePasswordLoginRequest auth = new UsernamePasswordLoginRequest();
-        auth.setUsername("user");
-        auth.setPassword("pass");
-        auth.setRememberMe(true);
+	@Test
+	@DisplayName("completeLogin：登录后按 rememberMe 写入 Refresh Cookie")
+	void completeLogin_shouldWriteCookieWithRememberMe() {
+		UsernamePasswordLogin credential = new UsernamePasswordLogin();
+		credential.setUsername("user");
+		credential.setPassword("pass");
+		credential.setRememberMe(true);
 
-        UserLoginResponse login = new UserLoginResponse();
-        login.setRefreshToken("refresh-token");
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        HttpServletResponse response = mock(HttpServletResponse.class);
+		UserLoginResponse login = new UserLoginResponse();
+		login.setRefreshToken("refresh-token");
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
 
-        when(loginApplicationService.login(any(AbstractLoginCommand.class), same(request))).thenReturn(login);
+		when(loginApplicationService.login(any(AbstractCredentialLogin.class), same(request))).thenReturn(login);
 
-        UserLoginResponse actual = authSessionApplicationService.completeLogin(auth, request, response);
+		UserLoginResponse actual = authSessionApplicationService.completeLogin(credential, request, response);
 
-        assertSame(login, actual);
-        verify(refreshCookiePort).writeRefreshToken(response, request, "refresh-token", true);
-    }
+		assertSame(login, actual);
+		verify(refreshCookiePort).writeRefreshToken(response, request, "refresh-token", true);
+	}
 
-    @Test
-    @DisplayName("completeRefresh：刷新后按会话 rememberMe 重写 Cookie")
-    void completeRefresh_shouldWriteCookieFromSessionRememberMe() {
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        HttpServletResponse response = mock(HttpServletResponse.class);
+	@Test
+	@DisplayName("completeRefresh：刷新后按会话 rememberMe 重写 Cookie")
+	void completeRefresh_shouldWriteCookieFromSessionRememberMe() {
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
 
-        LocalDateTime expires = LocalDateTime.now().plusHours(1);
-        TokenPair tokenPair = new TokenPair("new-access", "new-refresh", expires);
+		LocalDateTime expires = LocalDateTime.now().plusHours(1);
+		TokenPair tokenPair = new TokenPair("new-access", "new-refresh", expires);
 
-        when(refreshCookiePort.readRefreshToken(request)).thenReturn("old-refresh");
-        when(refreshTokenService.refreshToken("old-refresh", request))
-                .thenReturn(new RefreshSessionResult(tokenPair, false));
-        when(rememberMePolicyPort.resolveReadMeDay()).thenReturn(5L);
+		when(refreshCookiePort.readRefreshToken(request)).thenReturn("old-refresh");
+		when(refreshTokenService.refreshToken("old-refresh", request))
+			.thenReturn(new RefreshSessionResult(tokenPair, false));
+		when(rememberMePolicyPort.resolveReadMeDay()).thenReturn(5L);
 
-        RefreshTokenResponse actual = authSessionApplicationService.completeRefresh(request, response);
+		RefreshTokenResponse actual = authSessionApplicationService.completeRefresh(request, response);
 
-        assertEquals("new-access", actual.getAccessToken());
-        assertEquals("new-refresh", actual.getRefreshToken());
-        assertEquals(expires, actual.getExpires());
-        assertEquals(5L, actual.getReadMeDay());
-        verify(rememberMePolicyPort).resolveReadMeDay();
-        verify(refreshCookiePort).writeRefreshToken(response, request, "new-refresh", false);
-    }
+		assertEquals("new-access", actual.getAccessToken());
+		assertEquals("new-refresh", actual.getRefreshToken());
+		assertEquals(expires, actual.getExpires());
+		assertEquals(5L, actual.getReadMeDay());
+		verify(rememberMePolicyPort).resolveReadMeDay();
+		verify(refreshCookiePort).writeRefreshToken(response, request, "new-refresh", false);
+	}
 
-    @Test
-    @DisplayName("completeLogout：撤销 Access/Refresh 会话并始终清除 Cookie")
-    void completeLogout_shouldRevokeSessionsAndClearCookie() {
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        HttpServletResponse response = mock(HttpServletResponse.class);
-        when(request.getHeader("Authorization")).thenReturn("Bearer access-token");
-        when(refreshCookiePort.readRefreshToken(request)).thenReturn("refresh-token");
-        when(loginApplicationService.logout("access-token"))
-                .thenReturn(Optional.of(new LogoutSessionHint(TestConstants.USER_ID, TestConstants.JTI)));
-        when(refreshTokenService.revokeByRefreshToken("refresh-token")).thenReturn(Optional.empty());
+	@Test
+	@DisplayName("completeLogout：撤销 Access/Refresh 会话并始终清除 Cookie")
+	void completeLogout_shouldRevokeSessionsAndClearCookie() {
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		when(request.getHeader("Authorization")).thenReturn("Bearer access-token");
+		when(refreshCookiePort.readRefreshToken(request)).thenReturn("refresh-token");
+		when(loginApplicationService.logout("access-token"))
+			.thenReturn(Optional.of(new LogoutSessionHint(TestConstants.USER_ID, TestConstants.JTI)));
+		when(refreshTokenService.revokeByRefreshToken("refresh-token")).thenReturn(Optional.empty());
 
-        authSessionApplicationService.completeLogout(request, response);
+		authSessionApplicationService.completeLogout(request, response);
 
-        verify(loginApplicationService).logout("access-token");
-        verify(refreshTokenService).revokeByRefreshToken("refresh-token");
-        verify(loginAuditService).auditLogoutSuccess(same(request), eq(TestConstants.USER_ID), eq(TestConstants.JTI));
-        verify(refreshCookiePort).clearRefreshToken(response, request);
-    }
+		verify(loginApplicationService).logout("access-token");
+		verify(refreshTokenService).revokeByRefreshToken("refresh-token");
+		verify(loginAuditService).auditLogoutSuccess(same(request), eq(TestConstants.USER_ID), eq(TestConstants.JTI));
+		verify(refreshCookiePort).clearRefreshToken(response, request);
+	}
 
-    @Test
-    @DisplayName("completeLogout：无 Authorization 时仍按 Refresh Cookie 撤销会话")
-    void completeLogout_shouldRevokeByRefresh_whenNoAuthorizationHeader() {
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        HttpServletResponse response = mock(HttpServletResponse.class);
-        when(request.getHeader("Authorization")).thenReturn(null);
-        when(refreshCookiePort.readRefreshToken(request)).thenReturn("refresh-only");
-        when(refreshTokenService.revokeByRefreshToken("refresh-only"))
-                .thenReturn(Optional.of(new LogoutSessionHint(TestConstants.USER_ID, TestConstants.JTI)));
+	@Test
+	@DisplayName("completeLogout：无 Authorization 时仍按 Refresh Cookie 撤销会话")
+	void completeLogout_shouldRevokeByRefresh_whenNoAuthorizationHeader() {
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
+		when(request.getHeader("Authorization")).thenReturn(null);
+		when(refreshCookiePort.readRefreshToken(request)).thenReturn("refresh-only");
+		when(refreshTokenService.revokeByRefreshToken("refresh-only"))
+			.thenReturn(Optional.of(new LogoutSessionHint(TestConstants.USER_ID, TestConstants.JTI)));
 
-        authSessionApplicationService.completeLogout(request, response);
+		authSessionApplicationService.completeLogout(request, response);
 
-        verify(loginApplicationService, never()).logout(anyString());
-        verify(refreshTokenService).revokeByRefreshToken("refresh-only");
-        verify(loginAuditService).auditLogoutSuccess(same(request), eq(TestConstants.USER_ID), eq(TestConstants.JTI));
-        verify(refreshCookiePort).clearRefreshToken(response, request);
-    }
+		verify(loginApplicationService, never()).logout(anyString());
+		verify(refreshTokenService).revokeByRefreshToken("refresh-only");
+		verify(loginAuditService).auditLogoutSuccess(same(request), eq(TestConstants.USER_ID), eq(TestConstants.JTI));
+		verify(refreshCookiePort).clearRefreshToken(response, request);
+	}
 
 }

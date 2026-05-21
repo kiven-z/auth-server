@@ -2,12 +2,12 @@ package com.auth.service.auth.authentication.api.controller;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.module.security.autoconfigure.annotation.PublicApi;
-import com.auth.service.auth.authentication.api.dto.request.EmailLoginRequest;
-import com.auth.service.auth.authentication.api.dto.request.SmsLoginRequest;
-import com.auth.service.auth.authentication.api.dto.request.UsernamePasswordLoginRequest;
 import com.auth.service.auth.authentication.api.dto.response.RefreshTokenResponse;
 import com.auth.service.auth.authentication.api.dto.response.UserLoginResponse;
 import com.auth.service.auth.authentication.application.AuthSessionApplicationService;
+import com.auth.service.auth.authentication.application.input.credential.EmailLogin;
+import com.auth.service.auth.authentication.application.input.credential.SmsLogin;
+import com.auth.service.auth.authentication.application.input.credential.UsernamePasswordLogin;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,27 +37,27 @@ public class AuthController {
 	@PublicApi
 	@Operation(summary = "用户名密码登录")
 	@PostMapping("login/username")
-	public Result<UserLoginResponse> loginByUsername(@Valid @RequestBody UsernamePasswordLoginRequest auth,
+	public Result<UserLoginResponse> loginByUsername(@Valid @RequestBody UsernamePasswordLogin credential,
 			HttpServletRequest request, HttpServletResponse response) {
-		UserLoginResponse data = authSessionApplicationService.completeLogin(auth, request, response);
+		UserLoginResponse data = authSessionApplicationService.completeLogin(credential, request, response);
 		return Result.success(data);
 	}
 
 	@PublicApi
 	@Operation(summary = "邮箱登录")
 	@PostMapping("login/email")
-	public Result<UserLoginResponse> loginByEmail(@Valid @RequestBody EmailLoginRequest auth,
-			HttpServletRequest request, HttpServletResponse response) {
-		UserLoginResponse data = authSessionApplicationService.completeLogin(auth, request, response);
+	public Result<UserLoginResponse> loginByEmail(@Valid @RequestBody EmailLogin credential, HttpServletRequest request,
+			HttpServletResponse response) {
+		UserLoginResponse data = authSessionApplicationService.completeLogin(credential, request, response);
 		return Result.success(data);
 	}
 
 	@PublicApi
 	@Operation(summary = "短信登录")
 	@PostMapping("login/sms")
-	public Result<UserLoginResponse> loginBySms(@Valid @RequestBody SmsLoginRequest auth, HttpServletRequest request,
+	public Result<UserLoginResponse> loginBySms(@Valid @RequestBody SmsLogin credential, HttpServletRequest request,
 			HttpServletResponse response) {
-		UserLoginResponse data = authSessionApplicationService.completeLogin(auth, request, response);
+		UserLoginResponse data = authSessionApplicationService.completeLogin(credential, request, response);
 		return Result.success(data);
 	}
 
