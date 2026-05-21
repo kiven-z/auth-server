@@ -1,11 +1,11 @@
 package com.auth.service.system.admin.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.data.model.PageResponse;
+import com.auth.service.system.admin.convert.SysRoleConverter;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.SysRoleMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
-import com.auth.service.system.admin.model.enums.RoleTypeEnum;
 import com.auth.service.system.admin.model.form.role.SysRoleCreateForm;
 import com.auth.service.system.admin.model.query.SysRoleQuery;
 import com.auth.service.system.admin.model.vo.role.SysRoleDetailVO;
@@ -16,6 +16,7 @@ import com.auth.service.system.admin.support.sqlbuild.SysRolePageOrderSqlBuilder
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -47,11 +48,9 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 	public PageResponse<SysRolePageResponse> getPage(Page<SysRoleEntity> pageParams, SysRoleQuery query) {
 		String orderBySql = SysRolePageOrderSqlBuilder.buildOrderBySql(query.getSort());
 		IPage<SysRoleEntity> entityPage = baseMapper.selectListByPage(pageParams, query, orderBySql);
-		IPage<SysRolePageResponse> page = entityPage.convert(entity -> {
-			SysRolePageResponse row = new SysRolePageResponse();
-			BeanUtil.copyProperties(entity, row);
-			return row;
-		});
+		IPage<SysRolePageResponse> page = entityPage.convert(SysRoleConverter.INSTANCE::toPageResponse);
+
+		// 审计用户名
 		auditUserDisplayService.enrichAuditUsernames(page);
 		return PageResponse.of(page);
 	}
@@ -66,9 +65,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 			throw new SystemBusinessException(SystemAdminResultCode.ROLE_NOT_FOUND, id);
 		}
 
-		SysRoleDetailVO vo = BeanUtil.copyProperties(entity, SysRoleDetailVO.class);
-		vo.setRoleTypeDesc(RoleTypeEnum.getDesc(entity.getRoleType()));
-		return vo;
+		return SysRoleConverter.INSTANCE.toDetailVo(entity);
 	}
 
 	/**
@@ -76,7 +73,20 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 	 */
 	@Override
 	public void create(SysRoleCreateForm form) {
-		SysRoleEntity entity = BeanUtil.copyProperties(form, SysRoleEntity.class);
+		String roleCode = CharSequenceUtil.trim(form.getRoleCode());
+
+		// 检查角色编码是否重复
+		long exists = count(Wrappers.<SysRoleEntity>lambdaQuery().eq(SysRoleEntity::getRoleCode, roleCode));
+		if (exists > 0) {
+			throw new SystemBusinessException(SystemAdminResultCode.ROLE_CODE_DUPLICATE, roleCode);
+		}
+
+		// 转换为实体并保存
+		SysRoleEntity entity = SysRoleConverter.INSTANCE.toEntity(form);
+		entity.setRoleCode(roleCode);
+		if (entity.getOrderNum() == null) {
+			entity.setOrderNum(0);
+		}
 		save(entity);
 	}
 

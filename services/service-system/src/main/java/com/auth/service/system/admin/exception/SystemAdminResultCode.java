@@ -7,7 +7,7 @@ import lombok.Getter;
  * 系统管理域结果码（角色、权限、岗位）
  *
  * <p>
- * 号段：263、274–276（265–273、277–278 已释放）
+ * 号段：263、274–277（265–273、278 已释放）
  * </p>
  *
  * @author Bunny
@@ -24,6 +24,11 @@ public enum SystemAdminResultCode implements SystemResultCode {
 	 * 角色不存在
 	 */
 	ROLE_NOT_FOUND(404, 263, "ROLE_NOT_FOUND", "system.role.not_found"),
+
+	/**
+	 * 角色编码已存在
+	 */
+	ROLE_CODE_DUPLICATE(409, 277, "ROLE_CODE_DUPLICATE", "system.role.code_duplicate"),
 
 	/**
 	 * 权限编码已存在

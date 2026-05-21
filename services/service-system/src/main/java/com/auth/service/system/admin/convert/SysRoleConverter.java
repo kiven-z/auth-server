@@ -1,0 +1,55 @@
+package com.auth.service.system.admin.convert;
+
+import com.auth.service.system.admin.model.entity.SysRoleEntity;
+import com.auth.service.system.admin.model.form.role.SysRoleCreateForm;
+import com.auth.service.system.admin.model.vo.role.SysRoleDetailVO;
+import com.auth.service.system.admin.model.vo.role.SysRolePageResponse;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.factory.Mappers;
+
+/**
+ * 系统角色实体、表单与 VO 转换。
+ *
+ * @author Bunny
+ */
+@Mapper
+public interface SysRoleConverter {
+
+	SysRoleConverter INSTANCE = Mappers.getMapper(SysRoleConverter.class);
+
+	/**
+	 * 新增表单 → 实体
+	 * @param form 角色新增表单
+	 * @return 待持久化实体
+	 */
+	@Mapping(target = "id", ignore = true)
+	@Mapping(target = "createTime", ignore = true)
+	@Mapping(target = "updateTime", ignore = true)
+	@Mapping(target = "createUser", ignore = true)
+	@Mapping(target = "updateUser", ignore = true)
+	@Mapping(target = "version", ignore = true)
+	@Mapping(target = "isDeleted", ignore = true)
+	SysRoleEntity toEntity(SysRoleCreateForm form);
+
+	/**
+	 * 实体 → 详情 VO
+	 * @param entity 角色实体
+	 * @return 详情 VO
+	 */
+	@Mapping(target = "roleTypeDesc",
+			expression = "java(com.auth.service.system.admin.model.enums.RoleTypeEnum.getDesc(entity.getRoleType()))")
+	@Mapping(target = "createUsername", ignore = true)
+	@Mapping(target = "updateUsername", ignore = true)
+	SysRoleDetailVO toDetailVo(SysRoleEntity entity);
+
+	/**
+	 * 实体 → 分页行 VO
+	 * @param entity 角色实体
+	 * @return 分页行
+	 */
+	@Mapping(target = "createUsername", ignore = true)
+	@Mapping(target = "updateUsername", ignore = true)
+	SysRolePageResponse toPageResponse(SysRoleEntity entity);
+
+}
