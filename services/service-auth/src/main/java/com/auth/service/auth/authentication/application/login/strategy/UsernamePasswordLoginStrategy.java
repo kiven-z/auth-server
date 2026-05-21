@@ -1,7 +1,7 @@
 package com.auth.service.auth.authentication.application.login.strategy;
 
 import com.auth.service.auth.authentication.application.command.UsernamePasswordLoginCommand;
-import com.auth.service.auth.authentication.application.login.audit.LoginAuditCoordinator;
+import com.auth.service.auth.authentication.application.login.audit.LoginAuditService;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.enums.CredentialDimension;
 import com.auth.service.auth.authentication.domain.model.LoginAccount;
@@ -28,8 +28,8 @@ public class UsernamePasswordLoginStrategy extends AbstractLoginStrategyTemplate
 
 	public UsernamePasswordLoginStrategy(LoginAccountLookupPort loginAccountLookupPort,
 			LoginFailureRateLimitPort loginFailureRateLimitPort, AuthProfileQueryPort authProfileQueryPort,
-			PasswordEncoder passwordEncoder, LoginAuditCoordinator loginAuditCoordinator) {
-		super(loginFailureRateLimitPort, authProfileQueryPort, loginAuditCoordinator);
+			PasswordEncoder passwordEncoder, LoginAuditService loginAuditService) {
+		super(loginFailureRateLimitPort, authProfileQueryPort, loginAuditService);
 		this.loginAccountLookupPort = loginAccountLookupPort;
 		this.passwordEncoder = passwordEncoder;
 	}

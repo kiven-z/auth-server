@@ -7,7 +7,7 @@ import com.auth.common.jwt.autoconfigure.JwtProperties;
 import com.auth.common.jwt.model.JwtUserToken;
 import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
-import com.auth.service.auth.authentication.application.login.audit.LoginAuditCoordinator;
+import com.auth.service.auth.authentication.application.login.audit.LoginAuditService;
 import com.auth.service.auth.authentication.application.port.AuthProfileCachePort;
 import com.auth.service.auth.authentication.application.port.TokenIssuerPort;
 import com.auth.service.auth.authentication.application.port.UserSessionIndexPort;
@@ -41,15 +41,15 @@ public class RefreshTokenService {
 
 	private final JwtProperties jwtProperties;
 
-	private final LoginAuditCoordinator loginAuditCoordinator;
+	private final LoginAuditService loginAuditService;
 
 	public RefreshTokenService(AuthProfileCachePort authProfileCachePort, UserSessionIndexPort userSessionIndexPort,
-			TokenIssuerPort tokenIssuerPort, JwtProperties jwtProperties, LoginAuditCoordinator loginAuditCoordinator) {
+			TokenIssuerPort tokenIssuerPort, JwtProperties jwtProperties, LoginAuditService loginAuditService) {
 		this.authProfileCachePort = authProfileCachePort;
 		this.userSessionIndexPort = userSessionIndexPort;
 		this.tokenIssuerPort = tokenIssuerPort;
 		this.jwtProperties = jwtProperties;
-		this.loginAuditCoordinator = loginAuditCoordinator;
+		this.loginAuditService = loginAuditService;
 	}
 
 	/**
@@ -93,13 +93,13 @@ public class RefreshTokenService {
 			boolean rememberMe = Boolean.TRUE.equals(sessionIndex.getRememberMe());
 			// 记录成功刷新令牌
 
-			loginAuditCoordinator.auditRefreshTokenSuccess(request, refreshUserId, refreshJti);
+			loginAuditService.auditRefreshTokenSuccess(request, refreshUserId, refreshJti);
 			// 返回刷新令牌结果
 			return new RefreshSessionResult(tokenPair, rememberMe);
 		}
 		catch (AuthBusinessException ex) {
 			Long userId = tryResolveUserIdFromRefreshToken(refreshToken);
-			loginAuditCoordinator.auditRefreshTokenFailure(request, userId, ex);
+			loginAuditService.auditRefreshTokenFailure(request, userId, ex);
 			throw ex;
 		}
 	}
@@ -174,9 +174,8 @@ public class RefreshTokenService {
 	/**
 	 * 按刷新令牌撤销服务端会话（登出等场景；令牌无效时静默跳过）。
 	 * @param refreshToken 刷新令牌
-	 * @param request 当前 HTTP 请求（审计）；允许为 null
 	 */
-	public Optional<LogoutSessionHint> revokeByRefreshToken(String refreshToken, HttpServletRequest request) {
+	public Optional<LogoutSessionHint> revokeByRefreshToken(String refreshToken) {
 		if (CharSequenceUtil.isBlank(refreshToken)) {
 			return Optional.empty();
 		}

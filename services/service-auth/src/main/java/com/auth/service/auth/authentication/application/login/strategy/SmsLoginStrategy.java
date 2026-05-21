@@ -2,7 +2,7 @@ package com.auth.service.auth.authentication.application.login.strategy;
 
 import cn.hutool.crypto.digest.MD5;
 import com.auth.service.auth.authentication.application.command.SmsLoginCommand;
-import com.auth.service.auth.authentication.application.login.audit.LoginAuditCoordinator;
+import com.auth.service.auth.authentication.application.login.audit.LoginAuditService;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.enums.CredentialDimension;
 import com.auth.service.auth.authentication.domain.model.LoginAccount;
@@ -30,8 +30,8 @@ public class SmsLoginStrategy extends AbstractLoginStrategyTemplate<SmsLoginComm
 
 	public SmsLoginStrategy(LoginAccountLookupPort loginAccountLookupPort,
 			LoginFailureRateLimitPort loginFailureRateLimitPort, AuthProfileQueryPort authProfileQueryPort,
-			LoginVerificationCodePort loginVerificationCodePort, LoginAuditCoordinator loginAuditCoordinator) {
-		super(loginFailureRateLimitPort, authProfileQueryPort, loginAuditCoordinator);
+			LoginVerificationCodePort loginVerificationCodePort, LoginAuditService loginAuditService) {
+		super(loginFailureRateLimitPort, authProfileQueryPort, loginAuditService);
 		this.loginAccountLookupPort = loginAccountLookupPort;
 		this.loginVerificationCodePort = loginVerificationCodePort;
 	}

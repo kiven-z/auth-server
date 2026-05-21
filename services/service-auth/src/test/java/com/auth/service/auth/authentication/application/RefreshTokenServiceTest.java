@@ -6,7 +6,7 @@ import com.auth.common.jwt.model.JwtUserToken;
 import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.TestConstants;
-import com.auth.service.auth.authentication.application.login.audit.LoginAuditCoordinator;
+import com.auth.service.auth.authentication.application.login.audit.LoginAuditService;
 import com.auth.service.auth.authentication.application.port.AuthProfileCachePort;
 import com.auth.service.auth.authentication.application.port.TokenIssuerPort;
 import com.auth.service.auth.authentication.application.port.UserSessionIndexPort;
@@ -49,7 +49,7 @@ class RefreshTokenServiceTest {
 	private JwtProperties jwtProperties;
 
 	@Mock
-	private LoginAuditCoordinator loginAuditCoordinator;
+	private LoginAuditService loginAuditService;
 
 	private static JwtUserToken token() {
 		return JwtUserToken.builder().userId(TestConstants.USER_ID).jti(TestConstants.JTI).build();
@@ -57,7 +57,7 @@ class RefreshTokenServiceTest {
 
 	private RefreshTokenService newService() {
 		return new RefreshTokenService(authProfileCachePort, userSessionIndexPort, tokenIssuerPort, jwtProperties,
-				loginAuditCoordinator);
+				loginAuditService);
 	}
 
 	@Test
@@ -123,7 +123,7 @@ class RefreshTokenServiceTest {
 		AuthBusinessException ex = assertThrows(AuthBusinessException.class, () -> service.refreshToken(" ", null));
 
 		assertEquals(AuthResultCode.REFRESH_TOKEN_MISSING, ex.getResultCode());
-		verify(loginAuditCoordinator).auditRefreshTokenFailure(isNull(), isNull(), eq(ex));
+		verify(loginAuditService).auditRefreshTokenFailure(isNull(), isNull(), eq(ex));
 	}
 
 	@Test
@@ -137,7 +137,7 @@ class RefreshTokenServiceTest {
 				() -> service.refreshToken(TestConstants.REFRESH_TOKEN, null));
 
 		assertEquals(AuthResultCode.REFRESH_TOKEN_MALFORMED, ex.getResultCode());
-		verify(loginAuditCoordinator).auditRefreshTokenFailure(isNull(), isNull(), eq(ex));
+		verify(loginAuditService).auditRefreshTokenFailure(isNull(), isNull(), eq(ex));
 	}
 
 	@Test
@@ -170,8 +170,7 @@ class RefreshTokenServiceTest {
 		assertFalse(result.rememberMe());
 		verify(userSessionIndexPort).updateRefreshInfo(eq(TestConstants.JTI),
 				eq(MD5.create().digestHex16("new-refresh")), anyLong(), eq(Duration.ofSeconds(120L)));
-		verify(loginAuditCoordinator).auditRefreshTokenSuccess(isNull(), eq(TestConstants.USER_ID),
-				eq(TestConstants.JTI));
+		verify(loginAuditService).auditRefreshTokenSuccess(isNull(), eq(TestConstants.USER_ID), eq(TestConstants.JTI));
 	}
 
 	@Test

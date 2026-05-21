@@ -5,8 +5,7 @@ import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.ChannelOptionsSupport;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.message.api.model.email.EmailChannelOptions;
-import com.auth.service.auth.authentication.application.message.AuthDypnsVerifyCodeSceneCode;
-import com.auth.service.auth.authentication.application.message.AuthEmailTemplateCode;
+import com.auth.service.auth.authentication.application.message.AuthMessageScene;
 import com.auth.service.auth.authentication.domain.enums.CredentialDimension;
 import com.auth.service.auth.authentication.domain.model.LoginAccount;
 import com.auth.service.auth.authentication.domain.model.LoginAuditSnapshot;
@@ -87,7 +86,7 @@ class AuthMessageServiceTest {
 			verify(systemSecurityIngestFeignClient).sendByTemplate(commandCaptor.capture());
 			TemplateMessageCommand command = commandCaptor.getValue();
 			assertEquals(MessageChannel.EMAIL, command.getChannel());
-			assertEquals(AuthEmailTemplateCode.LOGIN_EMAIL_CODE.getTemplateCode(), command.getTemplateCode());
+			assertEquals(AuthMessageScene.LOGIN_EMAIL.getTemplateCode(), command.getTemplateCode());
 			assertEquals(email, command.getTargets().get(0));
 			EmailChannelOptions emailOptions = ChannelOptionsSupport.asEmail(command.getOptions());
 			assertEquals(Boolean.TRUE, emailOptions.getHasHtml());
@@ -129,7 +128,7 @@ class AuthMessageServiceTest {
 			verify(systemSecurityIngestFeignClient).sendByTemplate(commandCaptor.capture());
 			TemplateMessageCommand command = commandCaptor.getValue();
 			assertEquals(MessageChannel.SMS_ALIYUN_DYPNS, command.getChannel());
-			assertEquals(AuthDypnsVerifyCodeSceneCode.LOGIN_VERIFY_CODE.getSceneCode(), command.getTemplateCode());
+			assertEquals(AuthMessageScene.LOGIN_SMS.getTemplateCode(), command.getTemplateCode());
 			assertEquals(phone, command.getTargets().get(0));
 		}
 

@@ -1,7 +1,7 @@
 package com.auth.service.auth.authentication.application.login.strategy;
 
 import com.auth.service.auth.authentication.application.command.UsernamePasswordLoginCommand;
-import com.auth.service.auth.authentication.application.login.audit.LoginAuditCoordinator;
+import com.auth.service.auth.authentication.application.login.audit.LoginAuditService;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.enums.CredentialDimension;
 import com.auth.service.auth.authentication.domain.model.LoginAccount;
@@ -24,10 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.same;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link UsernamePasswordLoginStrategy} 单元测试
@@ -50,7 +47,7 @@ class UsernamePasswordLoginStrategyTest {
 	private PasswordEncoder passwordEncoder;
 
 	@Mock
-	private LoginAuditCoordinator loginAuditCoordinator;
+	private LoginAuditService loginAuditService;
 
 	@Mock
 	private HttpServletRequest httpServletRequest;
@@ -60,15 +57,17 @@ class UsernamePasswordLoginStrategyTest {
 	void resolveUser_shouldThrow_whenUserNotFound() {
 		when(loginAccountLookupPort.findForLogin(CredentialDimension.USERNAME, "u")).thenReturn(Optional.empty());
 		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(loginAccountLookupPort,
-				loginFailureRateLimitPort, authProfileQueryPort, passwordEncoder, loginAuditCoordinator);
+				loginFailureRateLimitPort, authProfileQueryPort, passwordEncoder, loginAuditService);
 
 		UsernamePasswordLoginCommand command = new UsernamePasswordLoginCommand("u", "p");
+		when(loginAuditService.resolvePrincipal(command)).thenReturn("u");
 
 		AuthBusinessException exception = assertThrows(AuthBusinessException.class,
 				() -> strategy.authenticate(command, httpServletRequest));
 
 		assertEquals(AuthResultCode.USERNAME_OR_PASSWORD_ERROR, exception.getResultCode());
-		verify(loginAuditCoordinator).auditUserUnknownAfterResolve(same(httpServletRequest),
+		verify(loginAuditService).resolvePrincipal(command);
+		verify(loginAuditService).auditUserUnknownAfterResolve(same(httpServletRequest),
 				eq(AuthLoginLogType.LOGIN_PASSWORD), eq("u"), eq(exception.getMessageKey()));
 	}
 
@@ -79,7 +78,7 @@ class UsernamePasswordLoginStrategyTest {
 		when(loginAccountLookupPort.findForLogin(CredentialDimension.USERNAME, "u")).thenReturn(Optional.of(account));
 
 		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(loginAccountLookupPort,
-				loginFailureRateLimitPort, authProfileQueryPort, passwordEncoder, loginAuditCoordinator);
+				loginFailureRateLimitPort, authProfileQueryPort, passwordEncoder, loginAuditService);
 
 		UsernamePasswordLoginCommand command = new UsernamePasswordLoginCommand("u", "p");
 
@@ -87,8 +86,8 @@ class UsernamePasswordLoginStrategyTest {
 				() -> strategy.authenticate(command, httpServletRequest));
 
 		assertEquals(AuthResultCode.USER_DISABLED, exception.getResultCode());
-		verify(loginAuditCoordinator).auditAccountDisabled(same(httpServletRequest),
-				eq(AuthLoginLogType.LOGIN_PASSWORD), eq(1L), eq("u"), eq(AuthResultCode.USER_DISABLED.getMessageKey()));
+		verify(loginAuditService).auditAccountDisabled(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_PASSWORD),
+				eq(1L), eq("u"), eq(AuthResultCode.USER_DISABLED.getMessageKey()));
 		verifyNoInteractions(passwordEncoder);
 	}
 
@@ -96,7 +95,7 @@ class UsernamePasswordLoginStrategyTest {
 	@DisplayName("supports 返回 UsernamePasswordLoginCommand.class")
 	void supports_shouldReturnUsernamePasswordLoginCommandClass() {
 		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(loginAccountLookupPort,
-				loginFailureRateLimitPort, authProfileQueryPort, passwordEncoder, loginAuditCoordinator);
+				loginFailureRateLimitPort, authProfileQueryPort, passwordEncoder, loginAuditService);
 
 		assertEquals(UsernamePasswordLoginCommand.class, strategy.supports());
 	}
@@ -112,7 +111,7 @@ class UsernamePasswordLoginStrategyTest {
 		when(loginFailureRateLimitPort.recordFailure(1L)).thenReturn(2);
 
 		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(loginAccountLookupPort,
-				loginFailureRateLimitPort, authProfileQueryPort, passwordEncoder, loginAuditCoordinator);
+				loginFailureRateLimitPort, authProfileQueryPort, passwordEncoder, loginAuditService);
 
 		UsernamePasswordLoginCommand command = new UsernamePasswordLoginCommand("u", "p");
 
@@ -120,7 +119,7 @@ class UsernamePasswordLoginStrategyTest {
 				() -> strategy.authenticate(command, httpServletRequest));
 
 		assertEquals(AuthResultCode.USERNAME_OR_PASSWORD_ERROR_WITH_REMAINING, exception.getResultCode());
-		verify(loginAuditCoordinator).auditBadCredentialsWithRemaining(same(httpServletRequest),
+		verify(loginAuditService).auditBadCredentialsWithRemaining(same(httpServletRequest),
 				eq(AuthLoginLogType.LOGIN_PASSWORD), eq(1L), eq("u"), eq(2));
 	}
 

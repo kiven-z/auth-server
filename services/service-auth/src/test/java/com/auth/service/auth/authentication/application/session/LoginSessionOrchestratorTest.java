@@ -4,12 +4,8 @@ import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.TestConstants;
 import com.auth.service.auth.authentication.api.dto.response.UserLoginResponse;
-import com.auth.service.auth.authentication.application.login.audit.LoginAuditCoordinator;
-import com.auth.service.auth.authentication.application.port.AuthProfileCachePort;
-import com.auth.service.auth.authentication.application.port.RememberMePolicyPort;
-import com.auth.service.auth.authentication.application.port.TokenIssuerPort;
-import com.auth.service.auth.authentication.application.port.UserSessionIndexBuildPort;
-import com.auth.service.auth.authentication.application.port.UserSessionIndexPort;
+import com.auth.service.auth.authentication.application.login.audit.LoginAuditService;
+import com.auth.service.auth.authentication.application.port.*;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.model.AuthenticatedUser;
 import com.auth.service.auth.authentication.domain.model.LoginResult;
@@ -28,20 +24,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.same;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link LoginSessionOrchestrator} 单元测试
@@ -70,7 +55,7 @@ class LoginSessionOrchestratorTest {
 	private LoginFailureRateLimitPort loginFailureRateLimitPort;
 
 	@Mock
-	private LoginAuditCoordinator loginAuditCoordinator;
+	private LoginAuditService loginAuditService;
 
 	@Mock
 	private RememberMePolicyPort rememberMePolicyPort;
@@ -78,16 +63,16 @@ class LoginSessionOrchestratorTest {
 	@Mock
 	private HttpServletRequest httpServletRequest;
 
-	private LoginSessionOrchestrator newOrchestrator() {
-		return new LoginSessionOrchestrator(sessionLimitPort, authProfileCachePort, tokenIssuerPort,
-				userSessionIndexBuildPort, userSessionIndexPort, loginFailureRateLimitPort, loginAuditCoordinator,
-				rememberMePolicyPort);
-	}
-
 	private static LoginResult toLoginResult(UserLoginResponse response, AuthProfile profile) {
 		AuthenticatedUser user = new AuthenticatedUser(response.getId(), response.getUsername(), response.getNickname(),
 				response.getAvatar());
 		return new LoginResult(user, profile, AuthLoginLogType.LOGIN_PASSWORD);
+	}
+
+	private LoginSessionOrchestrator newOrchestrator() {
+		return new LoginSessionOrchestrator(sessionLimitPort, authProfileCachePort, tokenIssuerPort,
+				userSessionIndexBuildPort, userSessionIndexPort, loginFailureRateLimitPort, loginAuditService,
+				rememberMePolicyPort);
 	}
 
 	@Test
@@ -120,7 +105,7 @@ class LoginSessionOrchestratorTest {
 		assertEquals(7L, actual.getReadMeDay());
 
 		InOrder inOrder = inOrder(sessionLimitPort, authProfileCachePort, tokenIssuerPort, userSessionIndexBuildPort,
-				userSessionIndexPort, rememberMePolicyPort, loginFailureRateLimitPort, loginAuditCoordinator);
+				userSessionIndexPort, rememberMePolicyPort, loginFailureRateLimitPort, loginAuditService);
 		inOrder.verify(sessionLimitPort).assertSessionLimit(TestConstants.USER_ID);
 		inOrder.verify(authProfileCachePort).cacheProfile(profile);
 		inOrder.verify(tokenIssuerPort).buildTokenPair(eq(TestConstants.USER_ID), anyString(), eq(1L));
@@ -130,7 +115,7 @@ class LoginSessionOrchestratorTest {
 		inOrder.verify(userSessionIndexPort).createUserSessionIndex(sessionIndex);
 		inOrder.verify(rememberMePolicyPort).resolveReadMeDay();
 		inOrder.verify(loginFailureRateLimitPort).recordSuccess(TestConstants.USER_ID);
-		inOrder.verify(loginAuditCoordinator)
+		inOrder.verify(loginAuditService)
 			.auditLoginSuccess(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_PASSWORD), eq(TestConstants.USER_ID),
 					eq("user"), anyString());
 	}
@@ -177,7 +162,7 @@ class LoginSessionOrchestratorTest {
 		verify(authProfileCachePort).cacheProfile(profile);
 		verify(authProfileCachePort).evictProfile(TestConstants.USER_ID);
 		verify(userSessionIndexPort, never()).createUserSessionIndex(any());
-		verify(loginAuditCoordinator).auditOrchestrationFailure(same(httpServletRequest),
+		verify(loginAuditService).auditOrchestrationFailure(same(httpServletRequest),
 				eq(AuthLoginLogType.LOGIN_PASSWORD), eq(TestConstants.USER_ID), eq("user"),
 				any(AuthBusinessException.class));
 	}

@@ -2,13 +2,10 @@ package com.auth.service.auth.authentication.application;
 
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.crypto.digest.MD5;
-import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.message.api.model.email.EmailChannelOptions;
-import com.auth.service.auth.authentication.application.message.AuthDypnsVerifyCodeSceneCode;
-import com.auth.service.auth.authentication.application.message.AuthEmailTemplateCode;
-import com.auth.service.auth.authentication.application.message.LoginEmailVariables;
-import com.auth.service.auth.authentication.application.message.LoginSmsVariables;
+import com.auth.service.auth.authentication.application.message.AuthMessageScene;
+import com.auth.service.auth.authentication.application.message.AuthMessageVariables;
 import com.auth.service.auth.authentication.domain.enums.CredentialDimension;
 import com.auth.service.auth.authentication.domain.model.LoginAccount;
 import com.auth.service.auth.authentication.domain.model.LoginAuditSnapshot;
@@ -73,11 +70,11 @@ public class AuthMessageService {
 
 		// 拼装发送对象
 		String username = account.username();
-		Map<String, Object> variables = LoginEmailVariables.build(username, code, expireMinutes, LocalDateTime.now(),
-				snapshot.loginIp(), snapshot.loginRegion());
+		Map<String, Object> variables = AuthMessageVariables.buildLoginEmail(username, code, expireMinutes,
+				LocalDateTime.now(), snapshot.loginIp(), snapshot.loginRegion());
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
-			.channel(MessageChannel.EMAIL)
-			.templateCode(AuthEmailTemplateCode.LOGIN_EMAIL_CODE.getTemplateCode())
+			.channel(AuthMessageScene.LOGIN_EMAIL.getChannel())
+			.templateCode(AuthMessageScene.LOGIN_EMAIL.getTemplateCode())
 			.targets(List.of(email))
 			.variables(variables)
 			.options(EmailChannelOptions.builder().hasHtml(Boolean.TRUE).build())
@@ -106,10 +103,10 @@ public class AuthMessageService {
 		}
 
 		// 拼装发送对象
-		Map<String, Object> variables = LoginSmsVariables.build(code, expireMinutes);
+		Map<String, Object> variables = AuthMessageVariables.buildLoginSms(code, expireMinutes);
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
-			.channel(MessageChannel.SMS_ALIYUN_DYPNS)
-			.templateCode(AuthDypnsVerifyCodeSceneCode.LOGIN_VERIFY_CODE.getSceneCode())
+			.channel(AuthMessageScene.LOGIN_SMS.getChannel())
+			.templateCode(AuthMessageScene.LOGIN_SMS.getTemplateCode())
 			.targets(List.of(phone))
 			.variables(variables)
 			.build();

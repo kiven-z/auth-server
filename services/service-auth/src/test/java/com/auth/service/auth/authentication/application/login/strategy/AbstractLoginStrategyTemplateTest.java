@@ -3,7 +3,7 @@ package com.auth.service.auth.authentication.application.login.strategy;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.TestConstants;
 import com.auth.service.auth.authentication.application.command.AbstractLoginCommand;
-import com.auth.service.auth.authentication.application.login.audit.LoginAuditCoordinator;
+import com.auth.service.auth.authentication.application.login.audit.LoginAuditService;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.model.LoginAccount;
 import com.auth.service.auth.authentication.domain.model.LoginResult;
@@ -21,9 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.verify;
@@ -44,7 +42,7 @@ class AbstractLoginStrategyTemplateTest {
 	private AuthProfileQueryPort authProfileQueryPort;
 
 	@Mock
-	private LoginAuditCoordinator loginAuditCoordinator;
+	private LoginAuditService loginAuditService;
 
 	@Mock
 	private HttpServletRequest httpServletRequest;
@@ -62,7 +60,7 @@ class AbstractLoginStrategyTemplateTest {
 			.build();
 		when(authProfileQueryPort.buildByUserId(TestConstants.USER_ID)).thenReturn(profile);
 
-		TestStrategy strategy = new TestStrategy(loginFailureRateLimitPort, authProfileQueryPort, loginAuditCoordinator,
+		TestStrategy strategy = new TestStrategy(loginFailureRateLimitPort, authProfileQueryPort, loginAuditService,
 				account, null);
 
 		LoginResult result = strategy.authenticate(new TestLoginCommand(), httpServletRequest);
@@ -83,7 +81,7 @@ class AbstractLoginStrategyTemplateTest {
 
 		when(loginFailureRateLimitPort.recordFailure(TestConstants.USER_ID)).thenReturn(3);
 
-		TestStrategy strategy = new TestStrategy(loginFailureRateLimitPort, authProfileQueryPort, loginAuditCoordinator,
+		TestStrategy strategy = new TestStrategy(loginFailureRateLimitPort, authProfileQueryPort, loginAuditService,
 				account, new AuthBadCredentialsException("bad"));
 		TestLoginCommand command = new TestLoginCommand();
 
@@ -92,7 +90,7 @@ class AbstractLoginStrategyTemplateTest {
 
 		assertEquals(AuthResultCode.USERNAME_OR_PASSWORD_ERROR_WITH_REMAINING, exception.getResultCode());
 		verify(loginFailureRateLimitPort).recordFailure(TestConstants.USER_ID);
-		verify(loginAuditCoordinator).auditBadCredentialsWithRemaining(same(httpServletRequest),
+		verify(loginAuditService).auditBadCredentialsWithRemaining(same(httpServletRequest),
 				eq(AuthLoginLogType.LOGIN_PASSWORD), eq(TestConstants.USER_ID), eq("u"), eq(3));
 	}
 
@@ -117,9 +115,9 @@ class AbstractLoginStrategyTemplateTest {
 		private final RuntimeException authenticateException;
 
 		TestStrategy(LoginFailureRateLimitPort loginFailureRateLimitPort, AuthProfileQueryPort authProfileQueryPort,
-				LoginAuditCoordinator loginAuditCoordinator, LoginAccount accountToReturn,
+				LoginAuditService loginAuditService, LoginAccount accountToReturn,
 				RuntimeException authenticateException) {
-			super(loginFailureRateLimitPort, authProfileQueryPort, loginAuditCoordinator);
+			super(loginFailureRateLimitPort, authProfileQueryPort, loginAuditService);
 			this.accountToReturn = accountToReturn;
 			this.authenticateException = authenticateException;
 		}

@@ -1,16 +1,16 @@
 package com.auth.service.auth.authentication.application;
 
 import cn.hutool.core.util.BooleanUtil;
-import com.auth.service.auth.authentication.application.assembler.LoginCommandAssembler;
 import com.auth.service.auth.authentication.api.dto.request.AbstractLoginRequest;
 import com.auth.service.auth.authentication.api.dto.response.RefreshTokenResponse;
 import com.auth.service.auth.authentication.api.dto.response.UserLoginResponse;
+import com.auth.service.auth.authentication.application.assembler.LoginCommandAssembler;
 import com.auth.service.auth.authentication.application.assembler.RefreshResponseAssembler;
-import com.auth.service.auth.authentication.application.login.audit.LoginAuditCoordinator;
-import com.auth.service.auth.authentication.domain.model.LogoutSessionHint;
-import com.auth.service.auth.authentication.domain.model.RefreshSessionResult;
+import com.auth.service.auth.authentication.application.login.audit.LoginAuditService;
 import com.auth.service.auth.authentication.application.port.RefreshCookiePort;
 import com.auth.service.auth.authentication.application.port.RememberMePolicyPort;
+import com.auth.service.auth.authentication.domain.model.LogoutSessionHint;
+import com.auth.service.auth.authentication.domain.model.RefreshSessionResult;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
@@ -35,16 +35,16 @@ public class AuthSessionApplicationService {
 
 	private final RememberMePolicyPort rememberMePolicyPort;
 
-	private final LoginAuditCoordinator loginAuditCoordinator;
+	private final LoginAuditService loginAuditService;
 
 	public AuthSessionApplicationService(LoginApplicationService loginApplicationService,
 			RefreshTokenService refreshTokenService, RefreshCookiePort refreshCookiePort,
-			RememberMePolicyPort rememberMePolicyPort, LoginAuditCoordinator loginAuditCoordinator) {
+			RememberMePolicyPort rememberMePolicyPort, LoginAuditService loginAuditService) {
 		this.loginApplicationService = loginApplicationService;
 		this.refreshTokenService = refreshTokenService;
 		this.refreshCookiePort = refreshCookiePort;
 		this.rememberMePolicyPort = rememberMePolicyPort;
-		this.loginAuditCoordinator = loginAuditCoordinator;
+		this.loginAuditService = loginAuditService;
 	}
 
 	/**
@@ -91,13 +91,13 @@ public class AuthSessionApplicationService {
 			String authHeader = request.getHeader("Authorization");
 			if (authHeader != null && authHeader.startsWith(BEARER_PREFIX)) {
 				String token = authHeader.substring(BEARER_PREFIX.length());
-				auditHint = loginApplicationService.logout(token, request);
+				auditHint = loginApplicationService.logout(token);
 			}
 			String refreshToken = refreshCookiePort.readRefreshToken(request);
-			Optional<LogoutSessionHint> refreshHint = refreshTokenService.revokeByRefreshToken(refreshToken, request);
+			Optional<LogoutSessionHint> refreshHint = refreshTokenService.revokeByRefreshToken(refreshToken);
 			auditHint = auditHint.or(() -> refreshHint);
 
-			auditHint.ifPresent(hint -> loginAuditCoordinator.auditLogoutSuccess(request, hint.userId(), hint.jti()));
+			auditHint.ifPresent(hint -> loginAuditService.auditLogoutSuccess(request, hint.userId(), hint.jti()));
 		}
 		finally {
 			refreshCookiePort.clearRefreshToken(response, request);

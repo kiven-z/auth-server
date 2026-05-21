@@ -1,16 +1,16 @@
 package com.auth.service.auth.authentication.application;
 
 import cn.hutool.core.util.BooleanUtil;
-import com.auth.service.auth.authentication.domain.model.LogoutSessionHint;
 import com.auth.service.auth.authentication.api.dto.response.UserLoginResponse;
 import com.auth.service.auth.authentication.application.assembler.LoginResponseAssembler;
 import com.auth.service.auth.authentication.application.command.AbstractLoginCommand;
-import com.auth.service.auth.authentication.application.login.audit.LoginAuditCoordinator;
+import com.auth.service.auth.authentication.application.login.audit.LoginAuditService;
 import com.auth.service.auth.authentication.application.port.LoginStrategy;
 import com.auth.service.auth.authentication.application.port.TokenIssuerPort;
 import com.auth.service.auth.authentication.application.port.UserSessionIndexPort;
 import com.auth.service.auth.authentication.application.session.LoginSessionOrchestrator;
 import com.auth.service.auth.authentication.domain.model.LoginResult;
+import com.auth.service.auth.authentication.domain.model.LogoutSessionHint;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.enums.AuthResultCode;
 import jakarta.servlet.http.HttpServletRequest;
@@ -38,17 +38,17 @@ public class LoginApplicationService {
 
 	private final TokenIssuerPort tokenIssuerPort;
 
-	private final LoginAuditCoordinator loginAuditCoordinator;
+	private final LoginAuditService loginAuditService;
 
 	public LoginApplicationService(List<LoginStrategy<?>> strategies, LoginSessionOrchestrator loginSessionOrchestrator,
 			UserSessionIndexPort userSessionIndexPort, TokenIssuerPort tokenIssuerPort,
-			LoginAuditCoordinator loginAuditCoordinator) {
+			LoginAuditService loginAuditService) {
 		this.strategyRegistry = strategies.stream()
 			.collect(Collectors.toUnmodifiableMap(LoginStrategy::supports, Function.identity()));
 		this.loginSessionOrchestrator = loginSessionOrchestrator;
 		this.userSessionIndexPort = userSessionIndexPort;
 		this.tokenIssuerPort = tokenIssuerPort;
-		this.loginAuditCoordinator = loginAuditCoordinator;
+		this.loginAuditService = loginAuditService;
 	}
 
 	/**
@@ -91,7 +91,7 @@ public class LoginApplicationService {
 			return raw;
 		}
 		catch (AuthBusinessException ex) {
-			loginAuditCoordinator.auditUnsupportedLoginCommand(request, command, ex.getMessageKey());
+			loginAuditService.auditUnsupportedLoginCommand(request, command, ex.getMessageKey());
 			throw ex;
 		}
 	}
@@ -99,9 +99,8 @@ public class LoginApplicationService {
 	/**
 	 * 登出当前会话（永远不抛出异常）。幂等：会话不存在/索引不存在都视为成功。
 	 * @param accessToken Access Token（不含 Bearer 前缀）
-	 * @param request HTTP 请求
 	 */
-	public Optional<LogoutSessionHint> logout(String accessToken, HttpServletRequest request) {
+	public Optional<LogoutSessionHint> logout(String accessToken) {
 		return tokenIssuerPort.parseAccessTokenSafe(accessToken).map(userToken -> {
 			String jti = userToken.getJti();
 			Long userId = userToken.getUserId();

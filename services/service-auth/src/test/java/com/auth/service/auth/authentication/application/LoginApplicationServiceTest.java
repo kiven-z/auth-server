@@ -6,7 +6,7 @@ import com.auth.service.auth.TestConstants;
 import com.auth.service.auth.authentication.api.dto.response.UserLoginResponse;
 import com.auth.service.auth.authentication.application.command.AbstractLoginCommand;
 import com.auth.service.auth.authentication.application.command.UsernamePasswordLoginCommand;
-import com.auth.service.auth.authentication.application.login.audit.LoginAuditCoordinator;
+import com.auth.service.auth.authentication.application.login.audit.LoginAuditService;
 import com.auth.service.auth.authentication.application.port.LoginStrategy;
 import com.auth.service.auth.authentication.application.port.TokenIssuerPort;
 import com.auth.service.auth.authentication.application.port.UserSessionIndexPort;
@@ -26,18 +26,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.same;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link LoginApplicationService} 单元测试：策略路由、会话签发委托与登出。
@@ -57,7 +48,7 @@ class LoginApplicationServiceTest {
 	private TokenIssuerPort tokenIssuerPort;
 
 	@Mock
-	private LoginAuditCoordinator loginAuditCoordinator;
+	private LoginAuditService loginAuditService;
 
 	@Mock
 	private HttpServletRequest httpServletRequest;
@@ -70,7 +61,7 @@ class LoginApplicationServiceTest {
 
 	private LoginApplicationService newService(LoginStrategy<?>... strategies) {
 		return new LoginApplicationService(List.of(strategies), loginSessionOrchestrator, userSessionIndexPort,
-				tokenIssuerPort, loginAuditCoordinator);
+				tokenIssuerPort, loginAuditService);
 	}
 
 	@Test
@@ -169,7 +160,7 @@ class LoginApplicationServiceTest {
 				() -> newService().login(unknown, httpServletRequest));
 
 		assertEquals(AuthResultCode.AUTH_TYPE_UNSUPPORTED, exception.getResultCode());
-		verify(loginAuditCoordinator).auditUnsupportedLoginCommand(same(httpServletRequest), eq(unknown),
+		verify(loginAuditService).auditUnsupportedLoginCommand(same(httpServletRequest), eq(unknown),
 				eq(exception.getMessageKey()));
 		verifyNoInteractions(loginSessionOrchestrator);
 	}
@@ -179,13 +170,13 @@ class LoginApplicationServiceTest {
 	void logout_shouldSkipRevoke_whenTokenBlankOrUnparsed() {
 		LoginApplicationService service = newService();
 
-		service.logout(" ", null);
+		service.logout(" ");
 		verify(tokenIssuerPort).parseAccessTokenSafe(" ");
 		verifyNoInteractions(userSessionIndexPort);
 
 		reset(tokenIssuerPort, userSessionIndexPort);
 		when(tokenIssuerPort.parseAccessTokenSafe("x")).thenReturn(Optional.empty());
-		service.logout("x", null);
+		service.logout("x");
 		verify(tokenIssuerPort).parseAccessTokenSafe("x");
 		verifyNoInteractions(userSessionIndexPort);
 	}
@@ -201,11 +192,11 @@ class LoginApplicationServiceTest {
 
 		when(tokenIssuerPort.parseAccessTokenSafe(TestConstants.ACCESS_TOKEN)).thenReturn(Optional.of(jwtUserToken));
 
-		var hint = service.logout(TestConstants.ACCESS_TOKEN, null);
+		var hint = service.logout(TestConstants.ACCESS_TOKEN);
 
 		verify(userSessionIndexPort).deleteSession(TestConstants.JTI);
 		verify(userSessionIndexPort).removeActiveSession(TestConstants.USER_ID, TestConstants.JTI);
-		verifyNoInteractions(loginAuditCoordinator);
+		verifyNoInteractions(loginAuditService);
 		assertTrue(hint.isPresent());
 		assertEquals(TestConstants.USER_ID, hint.get().userId());
 		assertEquals(TestConstants.JTI, hint.get().jti());

@@ -2,8 +2,7 @@ package com.auth.service.auth.authentication.application.login.strategy;
 
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.authentication.application.command.AbstractLoginCommand;
-import com.auth.service.auth.authentication.application.login.audit.LoginAuditContextResolver;
-import com.auth.service.auth.authentication.application.login.audit.LoginAuditCoordinator;
+import com.auth.service.auth.authentication.application.login.audit.LoginAuditService;
 import com.auth.service.auth.authentication.application.port.LoginStrategy;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.model.AuthenticatedUser;
@@ -18,7 +17,7 @@ import com.auth.service.auth.shared.exception.enums.AuthResultCode;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
- * 登录策略模板：解析用户 → 锁定检查 → 子类校验凭证 → 构建画像与返回；失败路径经 {@link LoginAuditCoordinator} 发布审计。
+ * 登录策略模板：解析用户 → 锁定检查 → 子类校验凭证 → 构建画像与返回；失败路径经 {@link LoginAuditService} 发布审计。
  *
  * @author Bunny
  */
@@ -28,13 +27,13 @@ public abstract class AbstractLoginStrategyTemplate<T extends AbstractLoginComma
 
 	private final AuthProfileQueryPort authProfileQueryPort;
 
-	private final LoginAuditCoordinator loginAuditCoordinator;
+	private final LoginAuditService loginAuditService;
 
 	protected AbstractLoginStrategyTemplate(LoginFailureRateLimitPort loginFailureRateLimitPort,
-			AuthProfileQueryPort authProfileQueryPort, LoginAuditCoordinator loginAuditCoordinator) {
+			AuthProfileQueryPort authProfileQueryPort, LoginAuditService loginAuditService) {
 		this.loginFailureRateLimitPort = loginFailureRateLimitPort;
 		this.authProfileQueryPort = authProfileQueryPort;
-		this.loginAuditCoordinator = loginAuditCoordinator;
+		this.loginAuditService = loginAuditService;
 	}
 
 	/**
@@ -45,25 +44,30 @@ public abstract class AbstractLoginStrategyTemplate<T extends AbstractLoginComma
 
 	@Override
 	public LoginResult authenticate(T command, HttpServletRequest request) {
+		// 解析登录账户并记录审计日志
 		LoginAccount account = resolveAccountOrAuditAndRethrow(command, request);
 		Long userId = account.id();
+
+		// 校验用户是否锁定并记录审计日志
 		assertNotLockedOrAuditAndRethrow(request, account);
 
 		try {
+			// 校验凭证并记录审计日志
 			AuthLoginLogType resolvedLoginLogType = doAuthenticate(command, account);
+			// 构建认证用户画像
 			AuthProfile profile = authProfileQueryPort.buildByUserId(userId);
-
 			return new LoginResult(AuthenticatedUser.from(account), profile, resolvedLoginLogType);
 		}
+		// 凭证不匹配时记录审计日志
 		catch (AuthBadCredentialsException ex) {
 			int remaining = loginFailureRateLimitPort.recordFailure(userId);
-			loginAuditCoordinator.auditBadCredentialsWithRemaining(request, loginLogType(), userId, account.username(),
+			loginAuditService.auditBadCredentialsWithRemaining(request, loginLogType(), userId, account.username(),
 					remaining);
 			throw new AuthBusinessException(AuthResultCode.USERNAME_OR_PASSWORD_ERROR_WITH_REMAINING, remaining);
 		}
 		catch (AuthBusinessException ex) {
-			loginAuditCoordinator.auditMappedCredentialFailure(request, loginLogType(), account.id(),
-					account.username(), ex);
+			loginAuditService.auditMappedCredentialFailure(request, loginLogType(), account.id(), account.username(),
+					ex);
 			throw ex;
 		}
 	}
@@ -80,8 +84,8 @@ public abstract class AbstractLoginStrategyTemplate<T extends AbstractLoginComma
 		}
 		catch (AuthBusinessException ex) {
 			if (ex.getResultCode() == AuthResultCode.USERNAME_OR_PASSWORD_ERROR) {
-				loginAuditCoordinator.auditUserUnknownAfterResolve(request, loginLogType(),
-						LoginAuditContextResolver.principal(command), ex.getMessageKey());
+				loginAuditService.auditUserUnknownAfterResolve(request, loginLogType(),
+						loginAuditService.resolvePrincipal(command), ex.getMessageKey());
 			}
 			throw ex;
 		}
@@ -98,13 +102,12 @@ public abstract class AbstractLoginStrategyTemplate<T extends AbstractLoginComma
 			UserAccountLoginEligibility eligibility = UserAccountLoginEligibility.fromStatus(account.status());
 			switch (eligibility) {
 				case DISABLED -> {
-					loginAuditCoordinator.auditAccountDisabled(request, loginLogType(), userId, account.username(),
+					loginAuditService.auditAccountDisabled(request, loginLogType(), userId, account.username(),
 							AuthResultCode.USER_DISABLED.getMessageKey());
 					throw new AuthBusinessException(AuthResultCode.USER_DISABLED);
 				}
 				case STATUS_LOCKED -> {
-					loginAuditCoordinator.auditAccountLockedByStatus(request, loginLogType(), userId,
-							account.username());
+					loginAuditService.auditAccountLockedByStatus(request, loginLogType(), userId, account.username());
 					throw new AuthBusinessException(AuthResultCode.USER_LOCKED);
 				}
 				case ALLOWED -> {
@@ -116,7 +119,7 @@ public abstract class AbstractLoginStrategyTemplate<T extends AbstractLoginComma
 			loginFailureRateLimitPort.assertNotLocked(userId);
 		}
 		catch (AuthBusinessException ex) {
-			loginAuditCoordinator.auditMappedLockFailure(request, loginLogType(), account.id(), account.username(), ex);
+			loginAuditService.auditMappedLockFailure(request, loginLogType(), account.id(), account.username(), ex);
 			throw ex;
 		}
 	}

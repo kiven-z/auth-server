@@ -6,35 +6,37 @@ import com.auth.common.ip.IpInfo;
 import com.auth.common.jwt.autoconfigure.JwtProperties;
 import com.auth.common.web.model.entity.UserAgent;
 import com.auth.module.security.contract.api.UserSessionIndex;
+import com.auth.service.auth.authentication.application.port.UserSessionIndexBuildPort;
 import jakarta.servlet.http.HttpServletRequest;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 /**
- * 负责创建 UserSessionIndex
+ * 从 HTTP 请求与令牌参数构建 {@link UserSessionIndex}，实现 {@link UserSessionIndexBuildPort}。
  *
  * @author Bunny
  */
 @Service
-public class UserSessionIndexFactory {
+public class UserSessionIndexBuilder implements UserSessionIndexBuildPort {
 
 	private final IpAddressService ipAddressService;
 
 	private final JwtProperties properties;
 
-	public UserSessionIndexFactory(IpAddressService ipAddressService, JwtProperties properties) {
+	public UserSessionIndexBuilder(IpAddressService ipAddressService, JwtProperties properties) {
 		this.ipAddressService = ipAddressService;
 		this.properties = properties;
 	}
 
 	/**
-	 * 构建用户会话索引
+	 * {@inheritDoc}
 	 */
-	public UserSessionIndex buildUserSessionIndex(HttpServletRequest request, Long userId, String jti,
-			String refreshToken, boolean rememberMe) {
+	@Override
+	public UserSessionIndex build(@NotNull HttpServletRequest request, Long userId, String jti, String refreshToken,
+			boolean rememberMe) {
 		IpInfo ipInfo = ipAddressService.resolveIpInfo(request);
 		UserAgent userAgent = UserAgent.getUserAgent(request);
 
-		// 构建会话索引
 		UserSessionIndex userSessionIndex = new UserSessionIndex();
 		userSessionIndex.setUserId(userId);
 		userSessionIndex.setSessionId(jti);
@@ -44,9 +46,7 @@ public class UserSessionIndexFactory {
 		userSessionIndex.setBrowserType(userAgent.getBrowser());
 		userSessionIndex.setOsType(userAgent.getOs());
 
-		// 设置刷新TokenHash等
 		String refreshTokenHash = MD5.create().digestHex16(refreshToken);
-
 		userSessionIndex.setRefreshTokenHash(refreshTokenHash);
 		long refreshExpiredSeconds = properties.getRefreshExpired();
 		long refreshTokenExpiresAtMillis = System.currentTimeMillis() + refreshExpiredSeconds * 1000L;

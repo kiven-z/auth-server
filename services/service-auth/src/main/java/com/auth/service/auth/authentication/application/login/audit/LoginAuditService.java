@@ -1,37 +1,62 @@
 package com.auth.service.auth.authentication.application.login.audit;
 
+import cn.hutool.core.text.CharSequenceUtil;
+import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.authentication.application.command.AbstractLoginCommand;
+import com.auth.service.auth.authentication.application.port.AuthProfileCachePort;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogResult;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.model.LoginAuditSnapshot;
 import com.auth.service.auth.authentication.domain.port.LoginAuditRecorder;
 import com.auth.service.auth.authentication.domain.port.LoginAuditSnapshotPort;
+import com.auth.service.auth.authorization.domain.model.UserAccountSnapshot;
+import com.auth.service.auth.authorization.domain.port.UserReadPort;
 import com.auth.service.auth.shared.audit.AuthLoginAuditMapping;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
+import com.auth.service.auth.shared.exception.enums.AuthResultCode;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 /**
- *
- * 登录相关审计协调器：在请求线程解析快照并规范化主体，经 {@link LoginAuditRecorder} 异步落库。
+ * 登录审计应用服务：解析请求快照、规范化主体并委托 {@link LoginAuditRecorder} 落库。
  *
  * @author Bunny
- *
  */
-@Component
-public class LoginAuditCoordinator {
+@Service
+public class LoginAuditService {
+
+	/**
+	 * 历史占位主体，写入前需替换为真实登录名。
+	 */
+	private static final String LEGACY_PLACEHOLDER = "/";
 
 	private final LoginAuditSnapshotPort loginAuditSnapshotPort;
 
 	private final LoginAuditRecorder loginAuditRecorder;
 
-	private final LoginAuditPrincipalNormalizer loginAuditPrincipalNormalizer;
+	private final AuthProfileCachePort authProfileCachePort;
 
-	public LoginAuditCoordinator(LoginAuditSnapshotPort loginAuditSnapshotPort, LoginAuditRecorder loginAuditRecorder,
-			LoginAuditPrincipalNormalizer loginAuditPrincipalNormalizer) {
+	private final UserReadPort userReadPort;
+
+	public LoginAuditService(LoginAuditSnapshotPort loginAuditSnapshotPort, LoginAuditRecorder loginAuditRecorder,
+			AuthProfileCachePort authProfileCachePort, UserReadPort userReadPort) {
 		this.loginAuditSnapshotPort = loginAuditSnapshotPort;
 		this.loginAuditRecorder = loginAuditRecorder;
-		this.loginAuditPrincipalNormalizer = loginAuditPrincipalNormalizer;
+		this.authProfileCachePort = authProfileCachePort;
+		this.userReadPort = userReadPort;
+	}
+
+	/**
+	 * 从登录命令解析审计主体（手机号/邮箱/输入用户名等）。
+	 * @param command 登录命令
+	 * @return 主体字符串，无法解析时返回 null
+	 */
+	public String resolvePrincipal(AbstractLoginCommand command) {
+		if (command == null) {
+			return null;
+		}
+		String auditPrincipal = command.principalForAudit();
+		return auditPrincipal == null || auditPrincipal.isBlank() ? null : auditPrincipal;
 	}
 
 	/**
@@ -43,7 +68,7 @@ public class LoginAuditCoordinator {
 	public void auditUnsupportedLoginCommand(HttpServletRequest request, AbstractLoginCommand command,
 			String messageKey) {
 		publishNormalized(request, command.loginLogType(), AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR, null,
-				LoginAuditContextResolver.principal(command), messageKey, null);
+				resolvePrincipal(command), messageKey, null);
 	}
 
 	/**
@@ -152,7 +177,7 @@ public class LoginAuditCoordinator {
 	 */
 	public void auditOrchestrationFailure(HttpServletRequest request, AuthLoginLogType logType, Long userId,
 			String username, AuthBusinessException ex) {
-		AuthLoginLogResult result = LoginAuditContextResolver.resultForOrchestrationFailure(ex.getResultCode());
+		AuthLoginLogResult result = resultForOrchestrationFailure(ex.getResultCode());
 		publishNormalized(request, logType, result, userId, username, ex.getMessageKey(), null);
 	}
 
@@ -190,9 +215,54 @@ public class LoginAuditCoordinator {
 	private void publishNormalized(HttpServletRequest request, AuthLoginLogType eventType, AuthLoginLogResult result,
 			Long userId, String principal, String failureReason, String sessionId) {
 		LoginAuditSnapshot snapshot = loginAuditSnapshotPort.build(request);
-		String normalizedPrincipal = loginAuditPrincipalNormalizer.normalize(userId, principal);
+		String normalizedPrincipal = normalizePrincipal(userId, principal);
 		loginAuditRecorder.recordLoginLog(snapshot, eventType, result, userId, normalizedPrincipal, failureReason,
 				sessionId);
+	}
+
+	/**
+	 * 规范化审计主体：有 userId 时优先落库系统登录名，无 userId 时保留登录尝试主体。
+	 * @param userId 用户 ID
+	 * @param incomingPrincipal 调用方传入的主体
+	 * @return 规范化后的主体
+	 */
+	private String normalizePrincipal(Long userId, String incomingPrincipal) {
+		if (userId == null) {
+			return blankToNull(incomingPrincipal);
+		}
+
+		String trimmed = blankToNull(incomingPrincipal);
+		boolean isUsableAccountPrincipal = CharSequenceUtil.isNotBlank(trimmed) && !LEGACY_PLACEHOLDER.equals(trimmed);
+		if (isUsableAccountPrincipal) {
+			return trimmed;
+		}
+
+		return authProfileCachePort.loadCachedProfile(userId)
+			.map(AuthProfile::getUsername)
+			.filter(CharSequenceUtil::isNotBlank)
+			.or(() -> userReadPort.findById(userId).map(UserAccountSnapshot::username))
+			.orElse(null);
+	}
+
+	private static String blankToNull(String value) {
+		return CharSequenceUtil.isBlank(value) ? null : value.trim();
+	}
+
+	/**
+	 * 将业务结果码映射为审计结果枚举（编排阶段失败等）。
+	 * @param code 业务结果码
+	 * @return 审计结果
+	 */
+	private static AuthLoginLogResult resultForOrchestrationFailure(AuthResultCode code) {
+		if (code == null) {
+			return AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR;
+		}
+		return switch (code) {
+			case USER_LOCKED, USER_LOCKED_WITH_MINUTES -> AuthLoginLogResult.ACCOUNT_LOCKED;
+			case AUTH_CODE_ERROR -> AuthLoginLogResult.CAPTCHA_ERROR;
+			case USER_DISABLED -> AuthLoginLogResult.ACCOUNT_DISABLED;
+			default -> AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR;
+		};
 	}
 
 }

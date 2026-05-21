@@ -3,7 +3,7 @@ package com.auth.service.auth.authentication.application.login.strategy;
 import cn.hutool.crypto.digest.MD5;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.authentication.application.command.SmsLoginCommand;
-import com.auth.service.auth.authentication.application.login.audit.LoginAuditCoordinator;
+import com.auth.service.auth.authentication.application.login.audit.LoginAuditService;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.enums.CredentialDimension;
 import com.auth.service.auth.authentication.domain.model.LoginAccount;
@@ -26,10 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.same;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link SmsLoginStrategy} 单元测试
@@ -52,14 +49,14 @@ class SmsLoginStrategyTest {
 	private AuthProfileQueryPort authProfileQueryPort;
 
 	@Mock
-	private LoginAuditCoordinator loginAuditCoordinator;
+	private LoginAuditService loginAuditService;
 
 	@Mock
 	private HttpServletRequest httpServletRequest;
 
 	private SmsLoginStrategy createStrategy() {
 		return new SmsLoginStrategy(loginAccountLookupPort, loginFailureRateLimitPort, authProfileQueryPort,
-				loginVerificationCodePort, loginAuditCoordinator);
+				loginVerificationCodePort, loginAuditService);
 	}
 
 	@Test
@@ -70,13 +67,15 @@ class SmsLoginStrategyTest {
 		SmsLoginStrategy strategy = createStrategy();
 
 		SmsLoginCommand command = new SmsLoginCommand("13800138000", "123456");
+		when(loginAuditService.resolvePrincipal(command)).thenReturn("13800138000");
 
 		AuthBusinessException exception = assertThrows(AuthBusinessException.class,
 				() -> strategy.authenticate(command, httpServletRequest));
 
 		assertEquals(AuthResultCode.USERNAME_OR_PASSWORD_ERROR, exception.getResultCode());
-		verify(loginAuditCoordinator).auditUserUnknownAfterResolve(same(httpServletRequest),
-				eq(AuthLoginLogType.LOGIN_SMS), eq("13800138000"), eq(exception.getMessageKey()));
+		verify(loginAuditService).resolvePrincipal(command);
+		verify(loginAuditService).auditUserUnknownAfterResolve(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_SMS),
+				eq("13800138000"), eq(exception.getMessageKey()));
 	}
 
 	@Test
@@ -98,8 +97,8 @@ class SmsLoginStrategyTest {
 				() -> strategy.authenticate(command, httpServletRequest));
 
 		assertEquals(AuthResultCode.AUTH_CODE_ERROR, exception.getResultCode());
-		verify(loginAuditCoordinator).auditMappedCredentialFailure(same(httpServletRequest),
-				eq(AuthLoginLogType.LOGIN_SMS), eq(1L), eq("testUser"), eq(exception));
+		verify(loginAuditService).auditMappedCredentialFailure(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_SMS),
+				eq(1L), eq("testUser"), eq(exception));
 	}
 
 	@Test
