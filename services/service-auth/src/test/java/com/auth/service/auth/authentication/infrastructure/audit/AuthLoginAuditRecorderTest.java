@@ -1,13 +1,11 @@
 package com.auth.service.auth.authentication.infrastructure.audit;
 
-import com.auth.common.ip.IpAddressService;
 import com.auth.module.platform.persistence.model.LoginLogEntity;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogResult;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.model.LoginAuditSnapshot;
 import com.auth.service.auth.authentication.infrastructure.persistence.LoginLogMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,25 +31,22 @@ import static org.mockito.Mockito.verify;
 class AuthLoginAuditRecorderTest {
 
 	@Mock
-	private IpAddressService ipAddressService;
-
-	@Mock
 	private LoginLogMapper loginLogMapper;
 
 	private AuthLoginAuditRecorder loginAuditRecorder;
 
 	@BeforeEach
 	void setUp() throws Exception {
-		loginAuditRecorder = new AuthLoginAuditRecorder(new LoginAuditSnapshotFactory(ipAddressService));
+		loginAuditRecorder = new AuthLoginAuditRecorder();
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(loginAuditRecorder, loginLogMapper);
 	}
 
 	@Test
-	@DisplayName("审计写入：无 HttpServletRequest 时仍写入 loginResult 与事件类型")
-	void record_LoginLog_shouldInsertEntity_whenRequestNull() {
-		loginAuditRecorder.recordLoginLog((HttpServletRequest) null, AuthLoginLogType.LOGIN_PASSWORD,
+	@DisplayName("审计写入：空快照仍写入 loginResult 与事件类型")
+	void recordLoginLog_shouldInsertEntity_whenSnapshotEmpty() {
+		loginAuditRecorder.recordLoginLog(LoginAuditSnapshot.empty(), AuthLoginLogType.LOGIN_PASSWORD,
 				AuthLoginLogResult.SUCCESS, 1L, "user", null, "jti-1");
 
 		ArgumentCaptor<LoginLogEntity> captor = ArgumentCaptor.forClass(LoginLogEntity.class);
@@ -65,11 +60,11 @@ class AuthLoginAuditRecorderTest {
 
 	@Test
 	@DisplayName("审计写入：插入抛异常时不向外抛出")
-	void record_LoginLog_shouldSwallowException_whenMapperFails() {
+	void recordLoginLog_shouldSwallowException_whenMapperFails() {
 		doThrow(new RuntimeException("db down")).when(loginLogMapper).insert(any(LoginLogEntity.class));
 
 		assertDoesNotThrow(
-				() -> loginAuditRecorder.recordLoginLog((HttpServletRequest) null, AuthLoginLogType.REFRESH_TOKEN,
+				() -> loginAuditRecorder.recordLoginLog(LoginAuditSnapshot.empty(), AuthLoginLogType.REFRESH_TOKEN,
 						AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR, null, null, "token.invalid", null));
 
 		verify(loginLogMapper).insert(any(LoginLogEntity.class));

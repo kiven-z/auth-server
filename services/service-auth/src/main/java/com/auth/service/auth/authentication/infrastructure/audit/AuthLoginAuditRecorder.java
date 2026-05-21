@@ -5,17 +5,16 @@ import com.auth.service.auth.authentication.domain.enums.AuthLoginLogResult;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.model.LoginAuditSnapshot;
 import com.auth.service.auth.authentication.domain.port.LoginAuditRecorder;
-import com.auth.service.auth.authentication.domain.port.LoginAuditSnapshotPort;
 import com.auth.service.auth.authentication.infrastructure.persistence.LoginLogMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
 /**
- * {@link LoginAuditRecorder} 实现：将认证审计写入 {@code log_login}。
+ * {@link LoginAuditRecorder} 实现：异步将认证审计写入 {@code log_login}。
  *
  * @author Bunny
  */
@@ -23,26 +22,11 @@ import java.time.LocalDateTime;
 @Service
 public class AuthLoginAuditRecorder extends ServiceImpl<LoginLogMapper, LoginLogEntity> implements LoginAuditRecorder {
 
-	private final LoginAuditSnapshotPort loginAuditSnapshotPort;
-
-	public AuthLoginAuditRecorder(LoginAuditSnapshotPort loginAuditSnapshotPort) {
-		this.loginAuditSnapshotPort = loginAuditSnapshotPort;
-	}
-
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void recordLoginLog(HttpServletRequest request, AuthLoginLogType eventType, AuthLoginLogResult result,
-			Long userId, String principal, String failureReason, String sessionId) {
-		recordLoginLog(loginAuditSnapshotPort.build(request), eventType, result, userId, principal, failureReason,
-				sessionId);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
+	@Async
 	public void recordLoginLog(LoginAuditSnapshot snapshot, AuthLoginLogType eventType, AuthLoginLogResult result,
 			Long userId, String principal, String failureReason, String sessionId) {
 		LoginLogEntity entity = new LoginLogEntity();

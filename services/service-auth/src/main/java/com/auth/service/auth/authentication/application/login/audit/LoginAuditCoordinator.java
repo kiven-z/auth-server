@@ -3,7 +3,9 @@ package com.auth.service.auth.authentication.application.login.audit;
 import com.auth.service.auth.authentication.application.command.AbstractLoginCommand;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogResult;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
-import com.auth.service.auth.authentication.domain.event.LoginAuditEventPublisher;
+import com.auth.service.auth.authentication.domain.model.LoginAuditSnapshot;
+import com.auth.service.auth.authentication.domain.port.LoginAuditRecorder;
+import com.auth.service.auth.authentication.domain.port.LoginAuditSnapshotPort;
 import com.auth.service.auth.shared.audit.AuthLoginAuditMapping;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 /**
  *
- * 登录相关审计发布协调器：集中策略与编排阶段的 {@link LoginAuditEventPublisher} 调用，降低模板与应用服务中的散落调用。
+ * 登录相关审计协调器：在请求线程解析快照并规范化主体，经 {@link LoginAuditRecorder} 异步落库。
  *
  * @author Bunny
  *
@@ -19,13 +21,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class LoginAuditCoordinator {
 
-	private final LoginAuditEventPublisher loginAuditEventPublisher;
+	private final LoginAuditSnapshotPort loginAuditSnapshotPort;
+
+	private final LoginAuditRecorder loginAuditRecorder;
 
 	private final LoginAuditPrincipalNormalizer loginAuditPrincipalNormalizer;
 
-	public LoginAuditCoordinator(LoginAuditEventPublisher loginAuditEventPublisher,
+	public LoginAuditCoordinator(LoginAuditSnapshotPort loginAuditSnapshotPort, LoginAuditRecorder loginAuditRecorder,
 			LoginAuditPrincipalNormalizer loginAuditPrincipalNormalizer) {
-		this.loginAuditEventPublisher = loginAuditEventPublisher;
+		this.loginAuditSnapshotPort = loginAuditSnapshotPort;
+		this.loginAuditRecorder = loginAuditRecorder;
 		this.loginAuditPrincipalNormalizer = loginAuditPrincipalNormalizer;
 	}
 
@@ -184,9 +189,9 @@ public class LoginAuditCoordinator {
 
 	private void publishNormalized(HttpServletRequest request, AuthLoginLogType eventType, AuthLoginLogResult result,
 			Long userId, String principal, String failureReason, String sessionId) {
-
+		LoginAuditSnapshot snapshot = loginAuditSnapshotPort.build(request);
 		String normalizedPrincipal = loginAuditPrincipalNormalizer.normalize(userId, principal);
-		loginAuditEventPublisher.publish(request, eventType, result, userId, normalizedPrincipal, failureReason,
+		loginAuditRecorder.recordLoginLog(snapshot, eventType, result, userId, normalizedPrincipal, failureReason,
 				sessionId);
 	}
 
