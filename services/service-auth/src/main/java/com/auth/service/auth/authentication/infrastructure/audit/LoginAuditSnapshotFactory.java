@@ -3,17 +3,18 @@ package com.auth.service.auth.authentication.infrastructure.audit;
 import com.auth.common.ip.IpAddressService;
 import com.auth.common.ip.IpInfo;
 import com.auth.service.auth.authentication.domain.model.LoginAuditSnapshot;
+import com.auth.service.auth.authentication.domain.port.LoginAuditSnapshotPort;
 import com.auth.common.web.model.entity.UserAgent;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Component;
 
 /**
- * 从当前 HTTP 请求构建 {@link LoginAuditSnapshot}
+ * 从当前 HTTP 请求构建 {@link LoginAuditSnapshot}，作为 {@link LoginAuditSnapshotPort} 的唯一实现。
  *
  * @author Bunny
  */
 @Component
-public class LoginAuditSnapshotFactory {
+public class LoginAuditSnapshotFactory implements LoginAuditSnapshotPort {
 
 	private final IpAddressService ipAddressService;
 
@@ -22,10 +23,9 @@ public class LoginAuditSnapshotFactory {
 	}
 
 	/**
-	 * 解析请求为审计快照；{@code request == null} 时返回 {@link LoginAuditSnapshot#empty()}
-	 * @param request HTTP 请求，可为 null
-	 * @return 不可变快照
+	 * {@inheritDoc}
 	 */
+	@Override
 	public LoginAuditSnapshot build(HttpServletRequest request) {
 		if (request == null) {
 			return LoginAuditSnapshot.empty();

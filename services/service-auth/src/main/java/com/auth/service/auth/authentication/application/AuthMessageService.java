@@ -51,7 +51,6 @@ public class AuthMessageService {
 	 * @param email 邮箱
 	 * @param request 当前 HTTP 请求（用于解析登录 IP 等信息）
 	 */
-
 	public void sendEmailCode(String email, HttpServletRequest request) {
 		String code = RandomUtil.randomNumbers(6);
 		String digest = MD5.create().digestHex16(code);

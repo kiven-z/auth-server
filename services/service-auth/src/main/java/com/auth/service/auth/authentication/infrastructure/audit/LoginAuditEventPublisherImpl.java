@@ -5,12 +5,14 @@ import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.event.LoginAuditEvent;
 import com.auth.service.auth.authentication.domain.event.LoginAuditEventPublisher;
 import com.auth.service.auth.authentication.domain.model.LoginAuditSnapshot;
+import com.auth.service.auth.authentication.domain.port.LoginAuditSnapshotPort;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 /**
- * {@link LoginAuditEventPublisher} 默认实现：构建快照后发布 Spring 应用事件
+ * {@link LoginAuditEventPublisher} 默认实现：经 {@link LoginAuditSnapshotPort} 构建快照后发布 Spring
+ * 应用事件
  *
  * @author Bunny
  */
@@ -19,12 +21,12 @@ public class LoginAuditEventPublisherImpl implements LoginAuditEventPublisher {
 
 	private final ApplicationEventPublisher applicationEventPublisher;
 
-	private final LoginAuditSnapshotFactory loginAuditSnapshotFactory;
+	private final LoginAuditSnapshotPort loginAuditSnapshotPort;
 
 	public LoginAuditEventPublisherImpl(ApplicationEventPublisher applicationEventPublisher,
-			LoginAuditSnapshotFactory loginAuditSnapshotFactory) {
+			LoginAuditSnapshotPort loginAuditSnapshotPort) {
 		this.applicationEventPublisher = applicationEventPublisher;
-		this.loginAuditSnapshotFactory = loginAuditSnapshotFactory;
+		this.loginAuditSnapshotPort = loginAuditSnapshotPort;
 	}
 
 	/**
@@ -33,7 +35,7 @@ public class LoginAuditEventPublisherImpl implements LoginAuditEventPublisher {
 	@Override
 	public void publish(HttpServletRequest request, AuthLoginLogType eventType, AuthLoginLogResult result, Long userId,
 			String principal, String failureReason, String sessionId) {
-		LoginAuditSnapshot snapshot = loginAuditSnapshotFactory.build(request);
+		LoginAuditSnapshot snapshot = loginAuditSnapshotPort.build(request);
 		applicationEventPublisher.publishEvent(
 				new LoginAuditEvent(snapshot, eventType, result, userId, principal, failureReason, sessionId));
 	}

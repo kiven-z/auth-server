@@ -5,6 +5,7 @@ import com.auth.service.auth.authentication.domain.enums.AuthLoginLogResult;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.model.LoginAuditSnapshot;
 import com.auth.service.auth.authentication.domain.port.LoginAuditRecorder;
+import com.auth.service.auth.authentication.domain.port.LoginAuditSnapshotPort;
 import com.auth.service.auth.authentication.infrastructure.persistence.LoginLogMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,10 +23,10 @@ import java.time.LocalDateTime;
 @Service
 public class AuthLoginAuditRecorder extends ServiceImpl<LoginLogMapper, LoginLogEntity> implements LoginAuditRecorder {
 
-	private final LoginAuditSnapshotFactory loginAuditSnapshotFactory;
+	private final LoginAuditSnapshotPort loginAuditSnapshotPort;
 
-	public AuthLoginAuditRecorder(LoginAuditSnapshotFactory loginAuditSnapshotFactory) {
-		this.loginAuditSnapshotFactory = loginAuditSnapshotFactory;
+	public AuthLoginAuditRecorder(LoginAuditSnapshotPort loginAuditSnapshotPort) {
+		this.loginAuditSnapshotPort = loginAuditSnapshotPort;
 	}
 
 	/**
@@ -34,7 +35,7 @@ public class AuthLoginAuditRecorder extends ServiceImpl<LoginLogMapper, LoginLog
 	@Override
 	public void recordLoginLog(HttpServletRequest request, AuthLoginLogType eventType, AuthLoginLogResult result,
 			Long userId, String principal, String failureReason, String sessionId) {
-		recordLoginLog(loginAuditSnapshotFactory.build(request), eventType, result, userId, principal, failureReason,
+		recordLoginLog(loginAuditSnapshotPort.build(request), eventType, result, userId, principal, failureReason,
 				sessionId);
 	}
 

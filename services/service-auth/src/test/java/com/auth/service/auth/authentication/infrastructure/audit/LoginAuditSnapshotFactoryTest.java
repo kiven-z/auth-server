@@ -18,7 +18,7 @@ import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
 
 /**
- * {@link LoginAuditSnapshotFactory} 单元测试
+ * {@link LoginAuditSnapshotFactory}（{@link com.auth.service.auth.authentication.domain.port.LoginAuditSnapshotPort}）单元测试
  *
  * @author Bunny
  */
@@ -37,7 +37,7 @@ class LoginAuditSnapshotFactoryTest {
 	}
 
 	@Test
-	@DisplayName("有效请求时应解析 IP 与 UA 相关字段")
+	@DisplayName("作为 Port 实现：有效请求时应解析 IP 与 UA 相关字段")
 	void build_shouldPopulateFields_whenRequestPresent() {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		when(request.getHeader("User-Agent")).thenReturn("Mozilla/5.0");

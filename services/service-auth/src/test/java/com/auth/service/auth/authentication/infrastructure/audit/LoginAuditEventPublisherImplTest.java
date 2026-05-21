@@ -4,6 +4,7 @@ import com.auth.service.auth.authentication.domain.enums.AuthLoginLogResult;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.event.LoginAuditEvent;
 import com.auth.service.auth.authentication.domain.model.LoginAuditSnapshot;
+import com.auth.service.auth.authentication.domain.port.LoginAuditSnapshotPort;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,19 +31,19 @@ class LoginAuditEventPublisherImplTest {
 	private ApplicationEventPublisher applicationEventPublisher;
 
 	@Mock
-	private LoginAuditSnapshotFactory loginAuditSnapshotFactory;
+	private LoginAuditSnapshotPort loginAuditSnapshotPort;
 
 	@Mock
 	private HttpServletRequest httpServletRequest;
 
 	@Test
-	@DisplayName("发布时应附带工厂构建的快照")
-	void publish_shouldEmitEventWithSnapshotFromFactory() {
+	@DisplayName("发布时应附带 Port 解析的快照")
+	void publish_shouldEmitEventWithSnapshotFromPort() {
 		LoginAuditSnapshot snapshot = LoginAuditSnapshot.empty();
-		when(loginAuditSnapshotFactory.build(httpServletRequest)).thenReturn(snapshot);
+		when(loginAuditSnapshotPort.build(httpServletRequest)).thenReturn(snapshot);
 
 		LoginAuditEventPublisherImpl publisher = new LoginAuditEventPublisherImpl(applicationEventPublisher,
-				loginAuditSnapshotFactory);
+				loginAuditSnapshotPort);
 		publisher.publish(httpServletRequest, AuthLoginLogType.LOGIN_PASSWORD, AuthLoginLogResult.SUCCESS, 9L, "user",
 				null, "jti-x");
 
