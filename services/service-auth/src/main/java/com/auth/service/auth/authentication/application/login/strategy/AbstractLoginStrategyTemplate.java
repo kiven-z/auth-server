@@ -20,12 +20,6 @@ import jakarta.servlet.http.HttpServletRequest;
 /**
  * 登录策略模板：解析用户 → 锁定检查 → 子类校验凭证 → 构建画像与返回；失败路径经 {@link LoginAuditCoordinator} 发布审计。
  *
- * <p>
- * 会话容量由 {@link com.auth.service.auth.authentication.application.port.SessionLimitPort} 在
- * {@link com.auth.service.auth.authentication.application.LoginApplicationService}
- * 编排层统一处理。
- * </p>
- *
  * @author Bunny
  */
 public abstract class AbstractLoginStrategyTemplate<T extends AbstractLoginCommand> implements LoginStrategy<T> {
@@ -116,6 +110,7 @@ public abstract class AbstractLoginStrategyTemplate<T extends AbstractLoginComma
 				case ALLOWED -> {
 					// 继续检查登录失败锁定计数
 				}
+				default -> throw new AuthBusinessException(AuthResultCode.AUTH_REQUEST_TYPE_UNSUPPORTED);
 			}
 
 			loginFailureRateLimitPort.assertNotLocked(userId);

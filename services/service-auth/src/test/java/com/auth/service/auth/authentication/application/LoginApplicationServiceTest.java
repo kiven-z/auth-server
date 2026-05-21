@@ -1,60 +1,46 @@
 package com.auth.service.auth.authentication.application;
 
 import com.auth.common.jwt.model.JwtUserToken;
-import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.TestConstants;
 import com.auth.service.auth.authentication.api.dto.response.UserLoginResponse;
 import com.auth.service.auth.authentication.application.command.AbstractLoginCommand;
 import com.auth.service.auth.authentication.application.command.UsernamePasswordLoginCommand;
 import com.auth.service.auth.authentication.application.login.audit.LoginAuditCoordinator;
-import com.auth.service.auth.authentication.application.port.AuthProfileCachePort;
 import com.auth.service.auth.authentication.application.port.LoginStrategy;
-import com.auth.service.auth.authentication.application.port.SessionLimitPort;
 import com.auth.service.auth.authentication.application.port.TokenIssuerPort;
-import com.auth.service.auth.authentication.application.port.RememberMePolicyPort;
-import com.auth.service.auth.authentication.application.port.UserSessionIndexBuildPort;
 import com.auth.service.auth.authentication.application.port.UserSessionIndexPort;
+import com.auth.service.auth.authentication.application.session.LoginSessionOrchestrator;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.model.AuthenticatedUser;
 import com.auth.service.auth.authentication.domain.model.LoginResult;
-import com.auth.service.auth.authentication.domain.model.TokenPair;
-import com.auth.service.auth.authentication.domain.port.LoginFailureRateLimitPort;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.enums.AuthResultCode;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.same;
-import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 /**
- * LoginApplicationService 单元测试
+ * {@link LoginApplicationService} 单元测试：策略路由、会话签发委托与登出。
  *
  * @author Bunny
  */
@@ -62,28 +48,16 @@ import static org.mockito.Mockito.when;
 class LoginApplicationServiceTest {
 
 	@Mock
-	private AuthProfileCachePort authProfileCachePort;
-
-	@Mock
-	private UserSessionIndexBuildPort userSessionIndexBuildPort;
+	private LoginSessionOrchestrator loginSessionOrchestrator;
 
 	@Mock
 	private UserSessionIndexPort userSessionIndexPort;
 
 	@Mock
-	private SessionLimitPort sessionLimitPort;
-
-	@Mock
 	private TokenIssuerPort tokenIssuerPort;
 
 	@Mock
-	private LoginFailureRateLimitPort loginFailureRateLimitPort;
-
-	@Mock
 	private LoginAuditCoordinator loginAuditCoordinator;
-
-	@Mock
-	private RememberMePolicyPort rememberMePolicyPort;
 
 	@Mock
 	private HttpServletRequest httpServletRequest;
@@ -95,24 +69,20 @@ class LoginApplicationServiceTest {
 	}
 
 	private LoginApplicationService newService(LoginStrategy<?>... strategies) {
-		return new LoginApplicationService(List.of(strategies), authProfileCachePort, userSessionIndexBuildPort,
-				userSessionIndexPort, sessionLimitPort, tokenIssuerPort, loginFailureRateLimitPort,
-				loginAuditCoordinator, rememberMePolicyPort);
+		return new LoginApplicationService(List.of(strategies), loginSessionOrchestrator, userSessionIndexPort,
+				tokenIssuerPort, loginAuditCoordinator);
 	}
 
 	@Test
-	@DisplayName("登录：策略精确匹配时，按编排顺序执行并返回响应")
-	void login_shouldOrchestrateInOrder_whenStrategyMatchesExactly() {
+	@DisplayName("登录：策略认证成功后委托 LoginSessionOrchestrator 签发会话")
+	void login_shouldDelegateToSessionOrchestrator_whenStrategyAuthenticates() {
 		UsernamePasswordLoginCommand command = new UsernamePasswordLoginCommand("user", "pass");
+		command.setRememberMe(true);
 
 		AuthProfile profile = mock(AuthProfile.class);
-		when(profile.getUserId()).thenReturn(TestConstants.USER_ID);
-		when(profile.getPermVersion()).thenReturn(1L);
-
 		UserLoginResponse response = new UserLoginResponse();
 		response.setId(TestConstants.USER_ID);
 		response.setUsername("user");
-
 		LoginResult loginResult = toLoginResult(response, profile);
 
 		LoginStrategy<UsernamePasswordLoginCommand> strategy = new LoginStrategy<>() {
@@ -127,43 +97,17 @@ class LoginApplicationServiceTest {
 			}
 		};
 
-		UserSessionIndex sessionIndex = new UserSessionIndex();
-		sessionIndex.setUserId(TestConstants.USER_ID);
-		sessionIndex.setSessionId(TestConstants.JTI);
-		sessionIndex.setRefreshTokenExpiresAt(System.currentTimeMillis() + 60_000);
+		UserLoginResponse issued = new UserLoginResponse();
+		issued.setAccessToken(TestConstants.ACCESS_TOKEN);
+		when(loginSessionOrchestrator.issueSession(eq(loginResult), any(UserLoginResponse.class), eq(true),
+				same(httpServletRequest)))
+			.thenReturn(issued);
 
-		when(userSessionIndexBuildPort.build(any(), anyLong(), anyString(), anyString(), anyBoolean()))
-			.thenReturn(sessionIndex);
+		UserLoginResponse actual = newService(strategy).login(command, httpServletRequest);
 
-		when(tokenIssuerPort.buildTokenPair(anyLong(), anyString(), anyLong())).thenReturn(new TokenPair(
-				TestConstants.ACCESS_TOKEN, TestConstants.REFRESH_TOKEN, LocalDateTime.now().plusMinutes(1)));
-		when(rememberMePolicyPort.resolveReadMeDay()).thenReturn(7L);
-
-		LoginApplicationService service = newService(strategy);
-
-		UserLoginResponse actual = service.login(command, httpServletRequest);
-
-		assertEquals(TestConstants.USER_ID, actual.getId());
-		assertEquals("user", actual.getUsername());
-		assertEquals(TestConstants.ACCESS_TOKEN, actual.getAccessToken());
-		assertEquals(TestConstants.REFRESH_TOKEN, actual.getRefreshToken());
-		assertNotNull(actual.getExpires());
-		assertEquals(7L, actual.getReadMeDay());
-
-		InOrder inOrder = inOrder(sessionLimitPort, authProfileCachePort, tokenIssuerPort, userSessionIndexBuildPort,
-				userSessionIndexPort, rememberMePolicyPort, loginFailureRateLimitPort, loginAuditCoordinator);
-		inOrder.verify(sessionLimitPort).assertSessionLimit(TestConstants.USER_ID);
-		inOrder.verify(authProfileCachePort).cacheProfile(profile);
-		inOrder.verify(tokenIssuerPort).buildTokenPair(eq(TestConstants.USER_ID), anyString(), eq(1L));
-		inOrder.verify(userSessionIndexBuildPort)
-			.build(same(httpServletRequest), eq(TestConstants.USER_ID), anyString(), eq(TestConstants.REFRESH_TOKEN),
-					eq(false));
-		inOrder.verify(userSessionIndexPort).createUserSessionIndex(sessionIndex);
-		inOrder.verify(rememberMePolicyPort).resolveReadMeDay();
-		inOrder.verify(loginFailureRateLimitPort).recordSuccess(TestConstants.USER_ID);
-		inOrder.verify(loginAuditCoordinator)
-			.auditLoginSuccess(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_PASSWORD), eq(TestConstants.USER_ID),
-					eq("user"), anyString());
+		assertSame(issued, actual);
+		verify(loginSessionOrchestrator).issueSession(eq(loginResult), any(UserLoginResponse.class), eq(true),
+				same(httpServletRequest));
 	}
 
 	@Test
@@ -178,13 +122,10 @@ class LoginApplicationServiceTest {
 		}
 
 		SubLoginCommand command = new SubLoginCommand();
-
 		AuthProfile profile = mock(AuthProfile.class);
-		when(profile.getUserId()).thenReturn(TestConstants.USER_ID);
-		when(profile.getPermVersion()).thenReturn(1L);
-
 		UserLoginResponse response = new UserLoginResponse();
 		response.setId(TestConstants.USER_ID);
+		LoginResult loginResult = toLoginResult(response, profile);
 
 		LoginStrategy<UsernamePasswordLoginCommand> strategy = new LoginStrategy<>() {
 			@Override
@@ -194,55 +135,19 @@ class LoginApplicationServiceTest {
 
 			@Override
 			public LoginResult authenticate(UsernamePasswordLoginCommand cmd, HttpServletRequest request) {
-				return toLoginResult(response, profile);
+				return loginResult;
 			}
 		};
 
-		when(userSessionIndexBuildPort.build(any(), anyLong(), anyString(), anyString(), anyBoolean()))
-			.thenReturn(new UserSessionIndex());
-		when(tokenIssuerPort.buildTokenPair(anyLong(), anyString(), anyLong())).thenReturn(new TokenPair(
-				TestConstants.ACCESS_TOKEN, TestConstants.REFRESH_TOKEN, LocalDateTime.now().plusMinutes(1)));
+		when(loginSessionOrchestrator.issueSession(eq(loginResult), any(UserLoginResponse.class), eq(false),
+				same(httpServletRequest)))
+			.thenReturn(response);
 
-		LoginApplicationService service = newService(strategy);
-
-		UserLoginResponse actual = service.login(command, httpServletRequest);
+		UserLoginResponse actual = newService(strategy).login(command, httpServletRequest);
 
 		assertEquals(TestConstants.USER_ID, actual.getId());
-		verify(sessionLimitPort).assertSessionLimit(TestConstants.USER_ID);
-	}
-
-	@Test
-	@DisplayName("登录：rememberMe=true 时写入会话索引")
-	void login_shouldPassRememberMe_whenRequestRememberMeTrue() {
-		UsernamePasswordLoginCommand command = new UsernamePasswordLoginCommand("user", "pass");
-		command.setRememberMe(true);
-
-		AuthProfile profile = mock(AuthProfile.class);
-		when(profile.getUserId()).thenReturn(TestConstants.USER_ID);
-		when(profile.getPermVersion()).thenReturn(1L);
-
-		UserLoginResponse response = new UserLoginResponse();
-		LoginStrategy<UsernamePasswordLoginCommand> strategy = new LoginStrategy<>() {
-			@Override
-			public Class<UsernamePasswordLoginCommand> supports() {
-				return UsernamePasswordLoginCommand.class;
-			}
-
-			@Override
-			public LoginResult authenticate(UsernamePasswordLoginCommand cmd, HttpServletRequest request) {
-				return toLoginResult(response, profile);
-			}
-		};
-
-		when(userSessionIndexBuildPort.build(any(), anyLong(), anyString(), anyString(), eq(true)))
-			.thenReturn(new UserSessionIndex());
-		when(tokenIssuerPort.buildTokenPair(anyLong(), anyString(), anyLong())).thenReturn(new TokenPair(
-				TestConstants.ACCESS_TOKEN, TestConstants.REFRESH_TOKEN, LocalDateTime.now().plusMinutes(1)));
-
-		newService(strategy).login(command, httpServletRequest);
-
-		verify(userSessionIndexBuildPort).build(same(httpServletRequest), eq(TestConstants.USER_ID), anyString(),
-				anyString(), eq(true));
+		verify(loginSessionOrchestrator).issueSession(eq(loginResult), any(UserLoginResponse.class), eq(false),
+				same(httpServletRequest));
 	}
 
 	@Test
@@ -260,53 +165,13 @@ class LoginApplicationServiceTest {
 			}
 		};
 
-		LoginApplicationService service = newService();
-
 		AuthBusinessException exception = assertThrows(AuthBusinessException.class,
-				() -> service.login(unknown, httpServletRequest));
+				() -> newService().login(unknown, httpServletRequest));
 
 		assertEquals(AuthResultCode.AUTH_TYPE_UNSUPPORTED, exception.getResultCode());
 		verify(loginAuditCoordinator).auditUnsupportedLoginCommand(same(httpServletRequest), eq(unknown),
 				eq(exception.getMessageKey()));
-	}
-
-	@Test
-	@DisplayName("登录：编排失败时回滚已写入的画像与会话")
-	void login_shouldRollbackArtifacts_whenOrchestrationFailsAfterProfileCached() {
-		UsernamePasswordLoginCommand command = new UsernamePasswordLoginCommand("user", "pass");
-
-		AuthProfile profile = mock(AuthProfile.class);
-		when(profile.getUserId()).thenReturn(TestConstants.USER_ID);
-		when(profile.getPermVersion()).thenReturn(1L);
-
-		UserLoginResponse response = new UserLoginResponse();
-		response.setId(TestConstants.USER_ID);
-		response.setUsername("user");
-
-		LoginResult loginResult = toLoginResult(response, profile);
-
-		LoginStrategy<UsernamePasswordLoginCommand> strategy = new LoginStrategy<>() {
-			@Override
-			public Class<UsernamePasswordLoginCommand> supports() {
-				return UsernamePasswordLoginCommand.class;
-			}
-
-			@Override
-			public LoginResult authenticate(UsernamePasswordLoginCommand cmd, HttpServletRequest request) {
-				return loginResult;
-			}
-		};
-
-		when(tokenIssuerPort.buildTokenPair(anyLong(), anyString(), anyLong()))
-			.thenThrow(new AuthBusinessException(AuthResultCode.SERVER_ERROR));
-
-		LoginApplicationService service = newService(strategy);
-
-		assertThrows(AuthBusinessException.class, () -> service.login(command, httpServletRequest));
-
-		verify(authProfileCachePort).cacheProfile(profile);
-		verify(authProfileCachePort).evictProfile(TestConstants.USER_ID);
-		verify(userSessionIndexPort, never()).createUserSessionIndex(any());
+		verifyNoInteractions(loginSessionOrchestrator);
 	}
 
 	@Test

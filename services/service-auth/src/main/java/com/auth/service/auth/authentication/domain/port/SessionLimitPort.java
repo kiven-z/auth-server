@@ -1,7 +1,7 @@
-package com.auth.service.auth.authentication.application.port;
+package com.auth.service.auth.authentication.domain.port;
 
 /**
- * 登录前会话数量上限检查端口。
+ * 登录前会话数量上限检查端口（领域策略：活跃会话达上限时的拒绝或淘汰规则）。
  *
  * @author Bunny
  */

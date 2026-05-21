@@ -2,7 +2,7 @@ package com.auth.service.auth.session.infrastructure.redis.support;
 
 import com.auth.module.security.autoconfigure.config.user.SessionLimitStrategy;
 import com.auth.module.security.autoconfigure.config.user.UserConfigProperties;
-import com.auth.service.auth.authentication.application.port.SessionLimitPort;
+import com.auth.service.auth.authentication.domain.port.SessionLimitPort;
 import com.auth.service.auth.session.infrastructure.redis.RedisUserSessionIndexRepository;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.enums.AuthResultCode;
