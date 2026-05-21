@@ -2,7 +2,6 @@ package com.auth.service.auth.session.infrastructure.redis.support;
 
 import com.auth.module.security.autoconfigure.config.user.SessionLimitStrategy;
 import com.auth.module.security.autoconfigure.config.user.UserConfigProperties;
-import com.auth.service.auth.authentication.domain.port.SessionLimitPort;
 import com.auth.service.auth.session.infrastructure.redis.RedisUserSessionIndexRepository;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.enums.AuthResultCode;
@@ -19,7 +18,7 @@ import org.springframework.util.Assert;
  * @author Bunny
  */
 @Component
-public class SessionLimitManager implements SessionLimitPort {
+public class SessionLimitManager {
 
 	/**
 	 * userId 非空断言文案
@@ -41,7 +40,6 @@ public class SessionLimitManager implements SessionLimitPort {
 	 * @param userId 用户 ID
 	 * @throws AuthBusinessException 会话达上限且策略为拒绝时抛出
 	 */
-	@Override
 	public void assertSessionLimit(Long userId) {
 		Assert.notNull(userId, USER_ID_NOT_NULL);
 		redisUserSessionIndexRepository.cleanupStaleActiveSessions(userId);

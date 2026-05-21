@@ -1,14 +1,12 @@
 package com.auth.service.auth.authentication.application.login.strategy;
 
 import cn.hutool.crypto.digest.MD5;
+import com.auth.service.auth.authentication.application.gateway.CredentialGateway;
 import com.auth.service.auth.authentication.application.input.credential.EmailLogin;
 import com.auth.service.auth.authentication.application.login.audit.LoginAuditService;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.enums.CredentialDimension;
 import com.auth.service.auth.authentication.domain.model.LoginAccount;
-import com.auth.service.auth.authentication.domain.port.LoginAccountLookupPort;
-import com.auth.service.auth.authentication.domain.port.LoginFailureRateLimitPort;
-import com.auth.service.auth.authentication.domain.port.LoginVerificationCodePort;
 import com.auth.service.auth.authorization.domain.port.AuthProfileQueryPort;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.enums.AuthResultCode;
@@ -24,16 +22,9 @@ import java.util.Objects;
 @Component
 public class EmailLoginStrategy extends AbstractLoginStrategyTemplate<EmailLogin> {
 
-	private final LoginAccountLookupPort loginAccountLookupPort;
-
-	private final LoginVerificationCodePort loginVerificationCodePort;
-
-	public EmailLoginStrategy(LoginAccountLookupPort loginAccountLookupPort,
-			LoginFailureRateLimitPort loginFailureRateLimitPort, AuthProfileQueryPort authProfileQueryPort,
-			LoginVerificationCodePort loginVerificationCodePort, LoginAuditService loginAuditService) {
-		super(loginFailureRateLimitPort, authProfileQueryPort, loginAuditService);
-		this.loginAccountLookupPort = loginAccountLookupPort;
-		this.loginVerificationCodePort = loginVerificationCodePort;
+	public EmailLoginStrategy(CredentialGateway credentialGateway, AuthProfileQueryPort authProfileQueryPort,
+			LoginAuditService loginAuditService) {
+		super(credentialGateway, authProfileQueryPort, loginAuditService);
 	}
 
 	@Override
@@ -43,7 +34,7 @@ public class EmailLoginStrategy extends AbstractLoginStrategyTemplate<EmailLogin
 
 	@Override
 	protected LoginAccount resolveAccount(EmailLogin credential) {
-		return loginAccountLookupPort.findForLogin(CredentialDimension.EMAIL, credential.getEmail())
+		return credentialGateway.findForLogin(CredentialDimension.EMAIL, credential.getEmail())
 			.orElseThrow(() -> new AuthBusinessException(AuthResultCode.USERNAME_OR_PASSWORD_ERROR));
 	}
 
@@ -51,13 +42,13 @@ public class EmailLoginStrategy extends AbstractLoginStrategyTemplate<EmailLogin
 	protected AuthLoginLogType doAuthenticate(EmailLogin credential, LoginAccount account) {
 		String email = Objects.requireNonNull(credential.getEmail());
 		String codeDigest = MD5.create().digestHex16(Objects.requireNonNull(credential.getCode()));
-		String stored = loginVerificationCodePort.getStoredDigest(CredentialDimension.EMAIL, email);
+		String stored = credentialGateway.getStoredDigest(CredentialDimension.EMAIL, email);
 
 		if (!Objects.equals(codeDigest, stored)) {
 			throw new AuthBusinessException(AuthResultCode.AUTH_CODE_ERROR);
 		}
 
-		loginVerificationCodePort.deleteCode(CredentialDimension.EMAIL, email);
+		credentialGateway.deleteCode(CredentialDimension.EMAIL, email);
 		return AuthLoginLogType.LOGIN_EMAIL;
 	}
 

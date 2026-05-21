@@ -9,9 +9,8 @@ import com.auth.service.auth.authentication.application.message.AuthMessageVaria
 import com.auth.service.auth.authentication.domain.enums.CredentialDimension;
 import com.auth.service.auth.authentication.domain.model.LoginAccount;
 import com.auth.service.auth.authentication.domain.model.LoginAuditSnapshot;
-import com.auth.service.auth.authentication.domain.port.LoginAccountLookupPort;
+import com.auth.service.auth.authentication.application.gateway.CredentialGateway;
 import com.auth.service.auth.authentication.domain.port.LoginAuditSnapshotPort;
-import com.auth.service.auth.authentication.domain.port.LoginVerificationCodePort;
 import com.auth.service.auth.shared.integration.SystemSecurityIngestFeignClient;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -35,11 +34,9 @@ import static com.auth.module.security.contract.redis.SecurityRedisKey.SMS_CODE;
 @Service
 public class AuthMessageService {
 
-	private final LoginAccountLookupPort loginAccountLookupPort;
+	private final CredentialGateway credentialGateway;
 
 	private final LoginAuditSnapshotPort loginAuditSnapshotPort;
-
-	private final LoginVerificationCodePort loginVerificationCodePort;
 
 	private final SystemSecurityIngestFeignClient systemSecurityIngestFeignClient;
 
@@ -53,7 +50,7 @@ public class AuthMessageService {
 		String digest = MD5.create().digestHex16(code);
 
 		// 存入 Redis 时使用 MD5，登录校验侧对比 digestHex16
-		loginVerificationCodePort.storeDigest(CredentialDimension.EMAIL, email, digest);
+		credentialGateway.storeDigest(CredentialDimension.EMAIL, email, digest);
 
 		// 过期时间转成分钟
 		long expireMinutes = EMAIL_CODE.getDefaultTtl().toMinutes();
@@ -62,7 +59,7 @@ public class AuthMessageService {
 		LoginAuditSnapshot snapshot = loginAuditSnapshotPort.build(request);
 
 		// 未找到活跃用户时静默返回，不暴露账号不存在
-		LoginAccount account = loginAccountLookupPort.findActiveOnly(CredentialDimension.EMAIL, email).orElse(null);
+		LoginAccount account = credentialGateway.findActiveOnly(CredentialDimension.EMAIL, email).orElse(null);
 		if (account == null) {
 			log.warn("Send email code skipped: no active user found for email={}", email);
 			return;
@@ -92,12 +89,12 @@ public class AuthMessageService {
 		String digest = MD5.create().digestHex16(code);
 
 		// 存入Redis
-		loginVerificationCodePort.storeDigest(CredentialDimension.PHONE, phone, digest);
+		credentialGateway.storeDigest(CredentialDimension.PHONE, phone, digest);
 
 		// 存入Redis
 		long expireMinutes = SMS_CODE.getDefaultTtl().toMinutes();
 
-		if (loginAccountLookupPort.findActiveOnly(CredentialDimension.PHONE, phone).isEmpty()) {
+		if (credentialGateway.findActiveOnly(CredentialDimension.PHONE, phone).isEmpty()) {
 			log.warn("Send SMS code skipped: no active user found for phone={}", phone);
 			return;
 		}

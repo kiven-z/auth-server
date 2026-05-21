@@ -9,9 +9,8 @@ import com.auth.service.auth.authentication.application.message.AuthMessageScene
 import com.auth.service.auth.authentication.domain.enums.CredentialDimension;
 import com.auth.service.auth.authentication.domain.model.LoginAccount;
 import com.auth.service.auth.authentication.domain.model.LoginAuditSnapshot;
-import com.auth.service.auth.authentication.domain.port.LoginAccountLookupPort;
+import com.auth.service.auth.authentication.application.gateway.CredentialGateway;
 import com.auth.service.auth.authentication.domain.port.LoginAuditSnapshotPort;
-import com.auth.service.auth.authentication.domain.port.LoginVerificationCodePort;
 import com.auth.service.auth.shared.integration.SystemSecurityIngestFeignClient;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,13 +39,10 @@ import static org.mockito.Mockito.when;
 class AuthMessageServiceTest {
 
 	@Mock
-	private LoginAccountLookupPort loginAccountLookupPort;
+	private CredentialGateway credentialGateway;
 
 	@Mock
 	private LoginAuditSnapshotPort loginAuditSnapshotPort;
-
-	@Mock
-	private LoginVerificationCodePort loginVerificationCodePort;
 
 	@Mock
 	private SystemSecurityIngestFeignClient systemSecurityIngestFeignClient;
@@ -58,8 +54,8 @@ class AuthMessageServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		authMessageService = new AuthMessageService(loginAccountLookupPort, loginAuditSnapshotPort,
-				loginVerificationCodePort, systemSecurityIngestFeignClient);
+		authMessageService = new AuthMessageService(credentialGateway, loginAuditSnapshotPort,
+				systemSecurityIngestFeignClient);
 	}
 
 	@Nested
@@ -71,8 +67,7 @@ class AuthMessageServiceTest {
 		void sendEmailCode_shouldStoreMd5AndInvokeEmailSend() {
 			String email = "bunny@example.com";
 			LoginAccount account = new LoginAccount(1L, "bunny", 1, null, null, null, 1L);
-			when(loginAccountLookupPort.findActiveOnly(CredentialDimension.EMAIL, email))
-				.thenReturn(Optional.of(account));
+			when(credentialGateway.findActiveOnly(CredentialDimension.EMAIL, email)).thenReturn(Optional.of(account));
 			when(loginAuditSnapshotPort.build(request))
 				.thenReturn(new LoginAuditSnapshot("127.0.0.1", "本地", "ua", "pc", "win", "chrome"));
 			when(systemSecurityIngestFeignClient.sendByTemplate(any(TemplateMessageCommand.class)))
@@ -80,7 +75,7 @@ class AuthMessageServiceTest {
 
 			authMessageService.sendEmailCode(email, request);
 
-			verify(loginVerificationCodePort).storeDigest(eq(CredentialDimension.EMAIL), eq(email), any());
+			verify(credentialGateway).storeDigest(eq(CredentialDimension.EMAIL), eq(email), any());
 			ArgumentCaptor<TemplateMessageCommand> commandCaptor = ArgumentCaptor
 				.forClass(TemplateMessageCommand.class);
 			verify(systemSecurityIngestFeignClient).sendByTemplate(commandCaptor.capture());
@@ -96,11 +91,11 @@ class AuthMessageServiceTest {
 		@DisplayName("用户不存在时静默返回且不调用 Feign")
 		void sendEmailCode_shouldSkipWhenUserNotFound() {
 			String email = "unknown@example.com";
-			when(loginAccountLookupPort.findActiveOnly(CredentialDimension.EMAIL, email)).thenReturn(Optional.empty());
+			when(credentialGateway.findActiveOnly(CredentialDimension.EMAIL, email)).thenReturn(Optional.empty());
 
 			authMessageService.sendEmailCode(email, request);
 
-			verify(loginVerificationCodePort).storeDigest(eq(CredentialDimension.EMAIL), eq(email), any());
+			verify(credentialGateway).storeDigest(eq(CredentialDimension.EMAIL), eq(email), any());
 			verify(systemSecurityIngestFeignClient, never()).sendByTemplate(any());
 		}
 
@@ -115,14 +110,13 @@ class AuthMessageServiceTest {
 		void sendSmsCode_shouldStoreMd5AndInvokeSmsSend() {
 			String phone = "13800000000";
 			LoginAccount account = new LoginAccount(1L, "bunny", 1, null, null, null, 1L);
-			when(loginAccountLookupPort.findActiveOnly(CredentialDimension.PHONE, phone))
-				.thenReturn(Optional.of(account));
+			when(credentialGateway.findActiveOnly(CredentialDimension.PHONE, phone)).thenReturn(Optional.of(account));
 			when(systemSecurityIngestFeignClient.sendByTemplate(any(TemplateMessageCommand.class)))
 				.thenReturn(Result.success("ok"));
 
 			authMessageService.sendSmsCode(phone);
 
-			verify(loginVerificationCodePort).storeDigest(eq(CredentialDimension.PHONE), eq(phone), any());
+			verify(credentialGateway).storeDigest(eq(CredentialDimension.PHONE), eq(phone), any());
 			ArgumentCaptor<TemplateMessageCommand> commandCaptor = ArgumentCaptor
 				.forClass(TemplateMessageCommand.class);
 			verify(systemSecurityIngestFeignClient).sendByTemplate(commandCaptor.capture());
@@ -136,11 +130,11 @@ class AuthMessageServiceTest {
 		@DisplayName("用户不存在时静默返回且不调用 Feign")
 		void sendSmsCode_shouldSkipWhenUserNotFound() {
 			String phone = "13800000001";
-			when(loginAccountLookupPort.findActiveOnly(CredentialDimension.PHONE, phone)).thenReturn(Optional.empty());
+			when(credentialGateway.findActiveOnly(CredentialDimension.PHONE, phone)).thenReturn(Optional.empty());
 
 			authMessageService.sendSmsCode(phone);
 
-			verify(loginVerificationCodePort).storeDigest(eq(CredentialDimension.PHONE), eq(phone), any());
+			verify(credentialGateway).storeDigest(eq(CredentialDimension.PHONE), eq(phone), any());
 			verify(systemSecurityIngestFeignClient, never()).sendByTemplate(any());
 		}
 

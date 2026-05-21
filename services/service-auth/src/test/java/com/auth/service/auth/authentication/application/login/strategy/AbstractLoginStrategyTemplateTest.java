@@ -7,7 +7,7 @@ import com.auth.service.auth.authentication.application.login.audit.LoginAuditSe
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.model.LoginAccount;
 import com.auth.service.auth.authentication.domain.model.LoginResult;
-import com.auth.service.auth.authentication.domain.port.LoginFailureRateLimitPort;
+import com.auth.service.auth.authentication.application.gateway.CredentialGateway;
 import com.auth.service.auth.authorization.domain.port.AuthProfileQueryPort;
 import com.auth.service.auth.shared.exception.AuthBadCredentialsException;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
@@ -36,7 +36,7 @@ import static org.mockito.Mockito.when;
 class AbstractLoginStrategyTemplateTest {
 
 	@Mock
-	private LoginFailureRateLimitPort loginFailureRateLimitPort;
+	private CredentialGateway credentialGateway;
 
 	@Mock
 	private AuthProfileQueryPort authProfileQueryPort;
@@ -60,12 +60,12 @@ class AbstractLoginStrategyTemplateTest {
 			.build();
 		when(authProfileQueryPort.buildByUserId(TestConstants.USER_ID)).thenReturn(profile);
 
-		TestStrategy strategy = new TestStrategy(loginFailureRateLimitPort, authProfileQueryPort, loginAuditService,
-				account, null);
+		TestStrategy strategy = new TestStrategy(credentialGateway, authProfileQueryPort, loginAuditService, account,
+				null);
 
 		LoginResult result = strategy.authenticate(new TestCredentialLogin(), httpServletRequest);
 
-		verify(loginFailureRateLimitPort).assertNotLocked(TestConstants.USER_ID);
+		verify(credentialGateway).assertNotLocked(TestConstants.USER_ID);
 		verify(authProfileQueryPort).buildByUserId(TestConstants.USER_ID);
 		assertNotNull(result);
 		assertEquals(TestConstants.USER_ID, result.authProfile().getUserId());
@@ -79,17 +79,17 @@ class AbstractLoginStrategyTemplateTest {
 	void authenticate_shouldRecordFailureAndThrowBizException_whenBadCredentials() {
 		LoginAccount account = new LoginAccount(TestConstants.USER_ID, "u", 1, "encoded", null, null, 1L);
 
-		when(loginFailureRateLimitPort.recordFailure(TestConstants.USER_ID)).thenReturn(3);
+		when(credentialGateway.recordFailure(TestConstants.USER_ID)).thenReturn(3);
 
-		TestStrategy strategy = new TestStrategy(loginFailureRateLimitPort, authProfileQueryPort, loginAuditService,
-				account, new AuthBadCredentialsException("bad"));
+		TestStrategy strategy = new TestStrategy(credentialGateway, authProfileQueryPort, loginAuditService, account,
+				new AuthBadCredentialsException("bad"));
 		TestCredentialLogin credential = new TestCredentialLogin();
 
 		AuthBusinessException exception = assertThrows(AuthBusinessException.class,
 				() -> strategy.authenticate(credential, httpServletRequest));
 
 		assertEquals(AuthResultCode.USERNAME_OR_PASSWORD_ERROR_WITH_REMAINING, exception.getResultCode());
-		verify(loginFailureRateLimitPort).recordFailure(TestConstants.USER_ID);
+		verify(credentialGateway).recordFailure(TestConstants.USER_ID);
 		verify(loginAuditService).auditBadCredentialsWithRemaining(same(httpServletRequest),
 				eq(AuthLoginLogType.LOGIN_PASSWORD), eq(TestConstants.USER_ID), eq("u"), eq(3));
 	}
@@ -114,10 +114,10 @@ class AbstractLoginStrategyTemplateTest {
 
 		private final RuntimeException authenticateException;
 
-		TestStrategy(LoginFailureRateLimitPort loginFailureRateLimitPort, AuthProfileQueryPort authProfileQueryPort,
+		TestStrategy(CredentialGateway credentialGateway, AuthProfileQueryPort authProfileQueryPort,
 				LoginAuditService loginAuditService, LoginAccount accountToReturn,
 				RuntimeException authenticateException) {
-			super(loginFailureRateLimitPort, authProfileQueryPort, loginAuditService);
+			super(credentialGateway, authProfileQueryPort, loginAuditService);
 			this.accountToReturn = accountToReturn;
 			this.authenticateException = authenticateException;
 		}

@@ -4,14 +4,16 @@ import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.TestConstants;
 import com.auth.service.auth.authentication.api.dto.response.UserLoginResponse;
+import com.auth.service.auth.authentication.application.gateway.CredentialGateway;
+import com.auth.service.auth.authentication.application.gateway.SessionGateway;
+import com.auth.service.auth.authentication.application.gateway.TokenGateway;
 import com.auth.service.auth.authentication.application.login.audit.LoginAuditService;
-import com.auth.service.auth.authentication.application.port.*;
+import com.auth.service.auth.authentication.application.port.AuthProfileCachePort;
+import com.auth.service.auth.authentication.application.port.RememberMePolicyPort;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.model.AuthenticatedUser;
 import com.auth.service.auth.authentication.domain.model.LoginResult;
 import com.auth.service.auth.authentication.domain.model.TokenPair;
-import com.auth.service.auth.authentication.domain.port.LoginFailureRateLimitPort;
-import com.auth.service.auth.authentication.domain.port.SessionLimitPort;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.enums.AuthResultCode;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,22 +39,16 @@ import static org.mockito.Mockito.*;
 class LoginSessionOrchestratorTest {
 
 	@Mock
-	private SessionLimitPort sessionLimitPort;
+	private SessionGateway sessionGateway;
 
 	@Mock
 	private AuthProfileCachePort authProfileCachePort;
 
 	@Mock
-	private TokenIssuerPort tokenIssuerPort;
+	private TokenGateway tokenGateway;
 
 	@Mock
-	private UserSessionIndexBuildPort userSessionIndexBuildPort;
-
-	@Mock
-	private UserSessionIndexPort userSessionIndexPort;
-
-	@Mock
-	private LoginFailureRateLimitPort loginFailureRateLimitPort;
+	private CredentialGateway credentialGateway;
 
 	@Mock
 	private LoginAuditService loginAuditService;
@@ -70,9 +66,8 @@ class LoginSessionOrchestratorTest {
 	}
 
 	private LoginSessionOrchestrator newOrchestrator() {
-		return new LoginSessionOrchestrator(sessionLimitPort, authProfileCachePort, tokenIssuerPort,
-				userSessionIndexBuildPort, userSessionIndexPort, loginFailureRateLimitPort, loginAuditService,
-				rememberMePolicyPort);
+		return new LoginSessionOrchestrator(sessionGateway, authProfileCachePort, tokenGateway, credentialGateway,
+				loginAuditService, rememberMePolicyPort);
 	}
 
 	@Test
@@ -91,9 +86,9 @@ class LoginSessionOrchestratorTest {
 		sessionIndex.setUserId(TestConstants.USER_ID);
 		sessionIndex.setSessionId(TestConstants.JTI);
 
-		when(userSessionIndexBuildPort.build(any(), anyLong(), anyString(), anyString(), anyBoolean()))
+		when(sessionGateway.buildSessionIndex(any(), anyLong(), anyString(), anyString(), anyBoolean()))
 			.thenReturn(sessionIndex);
-		when(tokenIssuerPort.buildTokenPair(anyLong(), anyString(), anyLong())).thenReturn(new TokenPair(
+		when(tokenGateway.buildTokenPair(anyLong(), anyString(), anyLong())).thenReturn(new TokenPair(
 				TestConstants.ACCESS_TOKEN, TestConstants.REFRESH_TOKEN, LocalDateTime.now().plusMinutes(1)));
 		when(rememberMePolicyPort.resolveReadMeDay()).thenReturn(7L);
 
@@ -104,17 +99,17 @@ class LoginSessionOrchestratorTest {
 		assertNotNull(actual.getExpires());
 		assertEquals(7L, actual.getReadMeDay());
 
-		InOrder inOrder = inOrder(sessionLimitPort, authProfileCachePort, tokenIssuerPort, userSessionIndexBuildPort,
-				userSessionIndexPort, rememberMePolicyPort, loginFailureRateLimitPort, loginAuditService);
-		inOrder.verify(sessionLimitPort).assertSessionLimit(TestConstants.USER_ID);
+		InOrder inOrder = inOrder(sessionGateway, authProfileCachePort, tokenGateway, rememberMePolicyPort,
+				credentialGateway, loginAuditService);
+		inOrder.verify(sessionGateway).assertSessionLimit(TestConstants.USER_ID);
 		inOrder.verify(authProfileCachePort).cacheProfile(profile);
-		inOrder.verify(tokenIssuerPort).buildTokenPair(eq(TestConstants.USER_ID), anyString(), eq(1L));
-		inOrder.verify(userSessionIndexBuildPort)
-			.build(same(httpServletRequest), eq(TestConstants.USER_ID), anyString(), eq(TestConstants.REFRESH_TOKEN),
-					eq(false));
-		inOrder.verify(userSessionIndexPort).createUserSessionIndex(sessionIndex);
+		inOrder.verify(tokenGateway).buildTokenPair(eq(TestConstants.USER_ID), anyString(), eq(1L));
+		inOrder.verify(sessionGateway)
+			.buildSessionIndex(same(httpServletRequest), eq(TestConstants.USER_ID), anyString(),
+					eq(TestConstants.REFRESH_TOKEN), eq(false));
+		inOrder.verify(sessionGateway).createUserSessionIndex(sessionIndex);
 		inOrder.verify(rememberMePolicyPort).resolveReadMeDay();
-		inOrder.verify(loginFailureRateLimitPort).recordSuccess(TestConstants.USER_ID);
+		inOrder.verify(credentialGateway).recordSuccess(TestConstants.USER_ID);
 		inOrder.verify(loginAuditService)
 			.auditLoginSuccess(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_PASSWORD), eq(TestConstants.USER_ID),
 					eq("user"), anyString());
@@ -130,14 +125,14 @@ class LoginSessionOrchestratorTest {
 		UserLoginResponse response = new UserLoginResponse();
 		LoginResult loginResult = toLoginResult(response, profile);
 
-		when(userSessionIndexBuildPort.build(any(), anyLong(), anyString(), anyString(), eq(true)))
+		when(sessionGateway.buildSessionIndex(any(), anyLong(), anyString(), anyString(), eq(true)))
 			.thenReturn(new UserSessionIndex());
-		when(tokenIssuerPort.buildTokenPair(anyLong(), anyString(), anyLong())).thenReturn(new TokenPair(
+		when(tokenGateway.buildTokenPair(anyLong(), anyString(), anyLong())).thenReturn(new TokenPair(
 				TestConstants.ACCESS_TOKEN, TestConstants.REFRESH_TOKEN, LocalDateTime.now().plusMinutes(1)));
 
 		newOrchestrator().issueSession(loginResult, response, true, httpServletRequest);
 
-		verify(userSessionIndexBuildPort).build(same(httpServletRequest), eq(TestConstants.USER_ID), anyString(),
+		verify(sessionGateway).buildSessionIndex(same(httpServletRequest), eq(TestConstants.USER_ID), anyString(),
 				anyString(), eq(true));
 	}
 
@@ -153,7 +148,7 @@ class LoginSessionOrchestratorTest {
 		response.setUsername("user");
 		LoginResult loginResult = toLoginResult(response, profile);
 
-		when(tokenIssuerPort.buildTokenPair(anyLong(), anyString(), anyLong()))
+		when(tokenGateway.buildTokenPair(anyLong(), anyString(), anyLong()))
 			.thenThrow(new AuthBusinessException(AuthResultCode.SERVER_ERROR));
 
 		LoginSessionOrchestrator orchestrator = newOrchestrator();
@@ -162,7 +157,7 @@ class LoginSessionOrchestratorTest {
 
 		verify(authProfileCachePort).cacheProfile(profile);
 		verify(authProfileCachePort).evictProfile(TestConstants.USER_ID);
-		verify(userSessionIndexPort, never()).createUserSessionIndex(any());
+		verify(sessionGateway, never()).createUserSessionIndex(any());
 		verify(loginAuditService).auditOrchestrationFailure(same(httpServletRequest),
 				eq(AuthLoginLogType.LOGIN_PASSWORD), eq(TestConstants.USER_ID), eq("user"),
 				any(AuthBusinessException.class));

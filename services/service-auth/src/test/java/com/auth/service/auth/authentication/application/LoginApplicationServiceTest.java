@@ -8,8 +8,8 @@ import com.auth.service.auth.authentication.application.input.credential.Abstrac
 import com.auth.service.auth.authentication.application.input.credential.UsernamePasswordLogin;
 import com.auth.service.auth.authentication.application.login.audit.LoginAuditService;
 import com.auth.service.auth.authentication.application.port.LoginStrategy;
-import com.auth.service.auth.authentication.application.port.TokenIssuerPort;
-import com.auth.service.auth.authentication.application.port.UserSessionIndexPort;
+import com.auth.service.auth.authentication.application.gateway.SessionGateway;
+import com.auth.service.auth.authentication.application.gateway.TokenGateway;
 import com.auth.service.auth.authentication.application.session.LoginSessionOrchestrator;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.model.AuthenticatedUser;
@@ -42,10 +42,10 @@ class LoginApplicationServiceTest {
 	private LoginSessionOrchestrator loginSessionOrchestrator;
 
 	@Mock
-	private UserSessionIndexPort userSessionIndexPort;
+	private SessionGateway sessionGateway;
 
 	@Mock
-	private TokenIssuerPort tokenIssuerPort;
+	private TokenGateway tokenGateway;
 
 	@Mock
 	private LoginAuditService loginAuditService;
@@ -60,8 +60,8 @@ class LoginApplicationServiceTest {
 	}
 
 	private LoginApplicationService newService(LoginStrategy<?>... strategies) {
-		return new LoginApplicationService(List.of(strategies), loginSessionOrchestrator, userSessionIndexPort,
-				tokenIssuerPort, loginAuditService);
+		return new LoginApplicationService(List.of(strategies), loginSessionOrchestrator, sessionGateway, tokenGateway,
+				loginAuditService);
 	}
 
 	@Test
@@ -175,14 +175,14 @@ class LoginApplicationServiceTest {
 		LoginApplicationService service = newService();
 
 		service.logout(" ");
-		verify(tokenIssuerPort).parseAccessTokenSafe(" ");
-		verifyNoInteractions(userSessionIndexPort);
+		verify(tokenGateway).parseAccessTokenSafe(" ");
+		verifyNoInteractions(sessionGateway);
 
-		reset(tokenIssuerPort, userSessionIndexPort);
-		when(tokenIssuerPort.parseAccessTokenSafe("x")).thenReturn(Optional.empty());
+		reset(tokenGateway, sessionGateway);
+		when(tokenGateway.parseAccessTokenSafe("x")).thenReturn(Optional.empty());
 		service.logout("x");
-		verify(tokenIssuerPort).parseAccessTokenSafe("x");
-		verifyNoInteractions(userSessionIndexPort);
+		verify(tokenGateway).parseAccessTokenSafe("x");
+		verifyNoInteractions(sessionGateway);
 	}
 
 	@Test
@@ -194,12 +194,12 @@ class LoginApplicationServiceTest {
 		when(jwtUserToken.getJti()).thenReturn(TestConstants.JTI);
 		when(jwtUserToken.getUserId()).thenReturn(TestConstants.USER_ID);
 
-		when(tokenIssuerPort.parseAccessTokenSafe(TestConstants.ACCESS_TOKEN)).thenReturn(Optional.of(jwtUserToken));
+		when(tokenGateway.parseAccessTokenSafe(TestConstants.ACCESS_TOKEN)).thenReturn(Optional.of(jwtUserToken));
 
 		var hint = service.logout(TestConstants.ACCESS_TOKEN);
 
-		verify(userSessionIndexPort).deleteSession(TestConstants.JTI);
-		verify(userSessionIndexPort).removeActiveSession(TestConstants.USER_ID, TestConstants.JTI);
+		verify(sessionGateway).deleteSession(TestConstants.JTI);
+		verify(sessionGateway).removeActiveSession(TestConstants.USER_ID, TestConstants.JTI);
 		verifyNoInteractions(loginAuditService);
 		assertTrue(hint.isPresent());
 		assertEquals(TestConstants.USER_ID, hint.get().userId());

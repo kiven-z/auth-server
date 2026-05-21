@@ -5,9 +5,9 @@ import com.auth.service.auth.authentication.api.dto.response.UserLoginResponse;
 import com.auth.service.auth.authentication.application.assembler.LoginResponseAssembler;
 import com.auth.service.auth.authentication.application.input.credential.AbstractCredentialLogin;
 import com.auth.service.auth.authentication.application.login.audit.LoginAuditService;
+import com.auth.service.auth.authentication.application.gateway.SessionGateway;
+import com.auth.service.auth.authentication.application.gateway.TokenGateway;
 import com.auth.service.auth.authentication.application.port.LoginStrategy;
-import com.auth.service.auth.authentication.application.port.TokenIssuerPort;
-import com.auth.service.auth.authentication.application.port.UserSessionIndexPort;
 import com.auth.service.auth.authentication.application.session.LoginSessionOrchestrator;
 import com.auth.service.auth.authentication.domain.model.LoginResult;
 import com.auth.service.auth.authentication.domain.model.LogoutSessionHint;
@@ -34,20 +34,19 @@ public class LoginApplicationService {
 
 	private final LoginSessionOrchestrator loginSessionOrchestrator;
 
-	private final UserSessionIndexPort userSessionIndexPort;
+	private final SessionGateway sessionGateway;
 
-	private final TokenIssuerPort tokenIssuerPort;
+	private final TokenGateway tokenGateway;
 
 	private final LoginAuditService loginAuditService;
 
 	public LoginApplicationService(List<LoginStrategy<?>> strategies, LoginSessionOrchestrator loginSessionOrchestrator,
-			UserSessionIndexPort userSessionIndexPort, TokenIssuerPort tokenIssuerPort,
-			LoginAuditService loginAuditService) {
+			SessionGateway sessionGateway, TokenGateway tokenGateway, LoginAuditService loginAuditService) {
 		this.strategyRegistry = strategies.stream()
 			.collect(Collectors.toUnmodifiableMap(LoginStrategy::supports, Function.identity()));
 		this.loginSessionOrchestrator = loginSessionOrchestrator;
-		this.userSessionIndexPort = userSessionIndexPort;
-		this.tokenIssuerPort = tokenIssuerPort;
+		this.sessionGateway = sessionGateway;
+		this.tokenGateway = tokenGateway;
 		this.loginAuditService = loginAuditService;
 	}
 
@@ -101,11 +100,11 @@ public class LoginApplicationService {
 	 * @param accessToken Access Token（不含 Bearer 前缀）
 	 */
 	public Optional<LogoutSessionHint> logout(String accessToken) {
-		return tokenIssuerPort.parseAccessTokenSafe(accessToken).map(userToken -> {
+		return tokenGateway.parseAccessTokenSafe(accessToken).map(userToken -> {
 			String jti = userToken.getJti();
 			Long userId = userToken.getUserId();
-			userSessionIndexPort.deleteSession(jti);
-			userSessionIndexPort.removeActiveSession(userId, jti);
+			sessionGateway.deleteSession(jti);
+			sessionGateway.removeActiveSession(userId, jti);
 			return new LogoutSessionHint(userId, jti);
 		});
 	}

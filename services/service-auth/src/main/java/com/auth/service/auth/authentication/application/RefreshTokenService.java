@@ -8,9 +8,9 @@ import com.auth.common.jwt.model.JwtUserToken;
 import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.authentication.application.login.audit.LoginAuditService;
+import com.auth.service.auth.authentication.application.gateway.SessionGateway;
+import com.auth.service.auth.authentication.application.gateway.TokenGateway;
 import com.auth.service.auth.authentication.application.port.AuthProfileCachePort;
-import com.auth.service.auth.authentication.application.port.TokenIssuerPort;
-import com.auth.service.auth.authentication.application.port.UserSessionIndexPort;
 import com.auth.service.auth.authentication.domain.model.LogoutSessionHint;
 import com.auth.service.auth.authentication.domain.model.RefreshSessionResult;
 import com.auth.service.auth.authentication.domain.model.TokenPair;
@@ -35,19 +35,19 @@ public class RefreshTokenService {
 
 	private final AuthProfileCachePort authProfileCachePort;
 
-	private final UserSessionIndexPort userSessionIndexPort;
+	private final SessionGateway sessionGateway;
 
-	private final TokenIssuerPort tokenIssuerPort;
+	private final TokenGateway tokenGateway;
 
 	private final JwtProperties jwtProperties;
 
 	private final LoginAuditService loginAuditService;
 
-	public RefreshTokenService(AuthProfileCachePort authProfileCachePort, UserSessionIndexPort userSessionIndexPort,
-			TokenIssuerPort tokenIssuerPort, JwtProperties jwtProperties, LoginAuditService loginAuditService) {
+	public RefreshTokenService(AuthProfileCachePort authProfileCachePort, SessionGateway sessionGateway,
+			TokenGateway tokenGateway, JwtProperties jwtProperties, LoginAuditService loginAuditService) {
 		this.authProfileCachePort = authProfileCachePort;
-		this.userSessionIndexPort = userSessionIndexPort;
-		this.tokenIssuerPort = tokenIssuerPort;
+		this.sessionGateway = sessionGateway;
+		this.tokenGateway = tokenGateway;
 		this.jwtProperties = jwtProperties;
 		this.loginAuditService = loginAuditService;
 	}
@@ -66,14 +66,14 @@ public class RefreshTokenService {
 			}
 
 			// 解析刷新令牌
-			JwtUserToken refreshUserToken = tokenIssuerPort.parseRefreshToken(refreshToken);
+			JwtUserToken refreshUserToken = tokenGateway.parseRefreshToken(refreshToken);
 			// 获取用户ID
 			Long refreshUserId = refreshUserToken.getUserId();
 			// 获取会话ID
 			String refreshJti = refreshUserToken.getJti();
 
 			// 加载用户会话索引
-			UserSessionIndex sessionIndex = userSessionIndexPort.loadUserSessionIndex(refreshJti)
+			UserSessionIndex sessionIndex = sessionGateway.loadUserSessionIndex(refreshJti)
 				.orElseThrow(() -> new AuthBusinessException(AuthResultCode.REFRESH_TOKEN_EXPIRED));
 			// 断言刷新令牌与会话中存储的哈希及过期时间一致
 			assertRefreshTokenMatches(refreshUserId, refreshJti, sessionIndex, refreshToken);
@@ -85,7 +85,7 @@ public class RefreshTokenService {
 			Long permVersion = Objects.requireNonNull(profile.getPermVersion(), "permVersion must not be null");
 
 			// 旋转刷新令牌
-			TokenPair tokenPair = tokenIssuerPort.buildTokenPair(refreshUserId, refreshJti, permVersion);
+			TokenPair tokenPair = tokenGateway.buildTokenPair(refreshUserId, refreshJti, permVersion);
 			// 旋转刷新令牌
 			rotateRefreshInSession(refreshJti, tokenPair.refreshToken());
 
@@ -114,7 +114,7 @@ public class RefreshTokenService {
 			return null;
 		}
 		try {
-			JwtUserToken tokenResult = tokenIssuerPort.parseRefreshToken(refreshToken);
+			JwtUserToken tokenResult = tokenGateway.parseRefreshToken(refreshToken);
 			return tokenResult.getUserId();
 		}
 		catch (Exception ignored) {
@@ -144,15 +144,15 @@ public class RefreshTokenService {
 			throw new AuthBusinessException(AuthResultCode.REFRESH_TOKEN_EXPIRED);
 		}
 		if (BooleanUtil.isFalse(Objects.equals(userId, sessionUserId))) {
-			userSessionIndexPort.deleteSession(jti);
-			userSessionIndexPort.removeActiveSession(userId, jti);
+			sessionGateway.deleteSession(jti);
+			sessionGateway.removeActiveSession(userId, jti);
 			throw new AuthBusinessException(AuthResultCode.REFRESH_TOKEN_EXPIRED);
 		}
 
 		boolean hashMatches = CharSequenceUtil.isNotBlank(redisHash) && Objects.equals(redisHash, requestHash);
 		if (BooleanUtil.isFalse(hashMatches)) {
-			userSessionIndexPort.deleteSession(jti);
-			userSessionIndexPort.removeActiveSession(userId, jti);
+			sessionGateway.deleteSession(jti);
+			sessionGateway.removeActiveSession(userId, jti);
 			throw new AuthBusinessException(AuthResultCode.REFRESH_TOKEN_EXPIRED);
 		}
 	}
@@ -168,7 +168,7 @@ public class RefreshTokenService {
 		long refreshTokenExpiresAt = System.currentTimeMillis() + refreshExpiredSeconds * 1000L;
 		Duration ttl = Duration.ofSeconds(refreshExpiredSeconds);
 
-		userSessionIndexPort.updateRefreshInfo(jti, refreshTokenHash, refreshTokenExpiresAt, ttl);
+		sessionGateway.updateRefreshInfo(jti, refreshTokenHash, refreshTokenExpiresAt, ttl);
 	}
 
 	/**
@@ -180,7 +180,7 @@ public class RefreshTokenService {
 			return Optional.empty();
 		}
 		try {
-			JwtUserToken userToken = tokenIssuerPort.parseRefreshToken(refreshToken);
+			JwtUserToken userToken = tokenGateway.parseRefreshToken(refreshToken);
 			return Optional.of(revokeServerSession(userToken));
 		}
 		catch (RuntimeException ex) {
@@ -197,8 +197,8 @@ public class RefreshTokenService {
 	private LogoutSessionHint revokeServerSession(JwtUserToken userToken) {
 		String jti = userToken.getJti();
 		Long userId = userToken.getUserId();
-		userSessionIndexPort.deleteSession(jti);
-		userSessionIndexPort.removeActiveSession(userId, jti);
+		sessionGateway.deleteSession(jti);
+		sessionGateway.removeActiveSession(userId, jti);
 		return new LogoutSessionHint(userId, jti);
 	}
 

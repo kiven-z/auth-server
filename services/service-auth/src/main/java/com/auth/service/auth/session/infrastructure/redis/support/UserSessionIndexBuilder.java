@@ -6,18 +6,17 @@ import com.auth.common.ip.IpInfo;
 import com.auth.common.jwt.autoconfigure.JwtProperties;
 import com.auth.common.web.model.entity.UserAgent;
 import com.auth.module.security.contract.api.UserSessionIndex;
-import com.auth.service.auth.authentication.application.port.UserSessionIndexBuildPort;
 import jakarta.servlet.http.HttpServletRequest;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 /**
- * 从 HTTP 请求与令牌参数构建 {@link UserSessionIndex}，实现 {@link UserSessionIndexBuildPort}。
+ * 从 HTTP 请求与令牌参数构建 {@link UserSessionIndex}。
  *
  * @author Bunny
  */
 @Service
-public class UserSessionIndexBuilder implements UserSessionIndexBuildPort {
+public class UserSessionIndexBuilder {
 
 	private final IpAddressService ipAddressService;
 
@@ -31,7 +30,6 @@ public class UserSessionIndexBuilder implements UserSessionIndexBuildPort {
 	/**
 	 * {@inheritDoc}
 	 */
-	@Override
 	public UserSessionIndex build(@NotNull HttpServletRequest request, Long userId, String jti, String refreshToken,
 			boolean rememberMe) {
 		IpInfo ipInfo = ipAddressService.resolveIpInfo(request);

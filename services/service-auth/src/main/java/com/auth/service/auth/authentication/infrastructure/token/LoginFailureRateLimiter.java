@@ -1,7 +1,6 @@
 package com.auth.service.auth.authentication.infrastructure.token;
 
 import com.auth.module.security.autoconfigure.config.user.UserConfigProperties;
-import com.auth.service.auth.authentication.domain.port.LoginFailureRateLimitPort;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.enums.AuthResultCode;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -28,7 +27,7 @@ import static com.auth.module.security.contract.redis.SecurityRedisKey.LOGIN_FAI
  * @author Bunny
  */
 @Component
-public class LoginFailureRateLimiter implements LoginFailureRateLimitPort {
+public class LoginFailureRateLimiter {
 
 	/**
 	 * userId 非空断言文案
@@ -59,7 +58,6 @@ public class LoginFailureRateLimiter implements LoginFailureRateLimitPort {
 	 * 登录前置检查（只读）：密码失败达阈值时抛锁定异常。
 	 * @param userId 用户 ID
 	 */
-	@Override
 	public void assertNotLocked(Long userId) {
 		Assert.notNull(userId, USER_ID_NOT_NULL);
 
@@ -84,7 +82,6 @@ public class LoginFailureRateLimiter implements LoginFailureRateLimitPort {
 	 * @param userId 用户 ID
 	 * @return 剩余可尝试次数（已锁定返回 0）
 	 */
-	@Override
 	public int recordFailure(Long userId) {
 		Assert.notNull(userId, USER_ID_NOT_NULL);
 
@@ -109,7 +106,6 @@ public class LoginFailureRateLimiter implements LoginFailureRateLimitPort {
 	 * 认证成功时调用：清除失败计数
 	 * @param userId 用户 ID
 	 */
-	@Override
 	public void recordSuccess(Long userId) {
 		Assert.notNull(userId, USER_ID_NOT_NULL);
 

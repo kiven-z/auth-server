@@ -1,4 +1,4 @@
-package com.auth.service.auth.authentication.application.port;
+package com.auth.service.auth.authentication.application.gateway;
 
 import com.auth.common.jwt.model.JwtUserToken;
 import com.auth.service.auth.authentication.domain.model.TokenPair;
@@ -6,11 +6,11 @@ import com.auth.service.auth.authentication.domain.model.TokenPair;
 import java.util.Optional;
 
 /**
- * 访问令牌与刷新令牌签发、解析端口。
+ * JWT 令牌网关：签发访问/刷新令牌及解析。
  *
  * @author Bunny
  */
-public interface TokenIssuerPort {
+public interface TokenGateway {
 
 	/**
 	 * 签发访问令牌与刷新令牌。

@@ -2,7 +2,6 @@ package com.auth.service.auth.authentication.infrastructure.adapter;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.auth.authentication.domain.enums.CredentialDimension;
-import com.auth.service.auth.authentication.domain.port.LoginVerificationCodePort;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +16,7 @@ import static com.auth.module.security.contract.redis.SecurityRedisKey.SMS_CODE;
  * @author Bunny
  */
 @Component
-public class RedisLoginVerificationCodeAdapter implements LoginVerificationCodePort {
+public class RedisLoginVerificationCodeAdapter {
 
 	private final RedisTemplate<String, Object> redisTemplate;
 
@@ -40,7 +39,6 @@ public class RedisLoginVerificationCodeAdapter implements LoginVerificationCodeP
 	/**
 	 * {@inheritDoc}
 	 */
-	@Override
 	public String getStoredDigest(CredentialDimension dimension, String target) {
 		String redisKey = resolveKey(dimension, target);
 		if (redisKey == null) {
@@ -52,7 +50,6 @@ public class RedisLoginVerificationCodeAdapter implements LoginVerificationCodeP
 	/**
 	 * {@inheritDoc}
 	 */
-	@Override
 	public void storeDigest(CredentialDimension dimension, String target, String digestHex16) {
 		String redisKey = resolveKey(dimension, target);
 		if (redisKey == null) {
@@ -71,7 +68,6 @@ public class RedisLoginVerificationCodeAdapter implements LoginVerificationCodeP
 	/**
 	 * {@inheritDoc}
 	 */
-	@Override
 	public void deleteCode(CredentialDimension dimension, String target) {
 		if (CharSequenceUtil.isBlank(target)) {
 			return;

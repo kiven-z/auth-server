@@ -3,13 +3,15 @@ package com.auth.service.auth.authentication.application.session;
 import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.authentication.api.dto.response.UserLoginResponse;
+import com.auth.service.auth.authentication.application.gateway.CredentialGateway;
+import com.auth.service.auth.authentication.application.gateway.SessionGateway;
+import com.auth.service.auth.authentication.application.gateway.TokenGateway;
 import com.auth.service.auth.authentication.application.login.audit.LoginAuditService;
-import com.auth.service.auth.authentication.application.port.*;
+import com.auth.service.auth.authentication.application.port.AuthProfileCachePort;
+import com.auth.service.auth.authentication.application.port.RememberMePolicyPort;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.model.LoginResult;
 import com.auth.service.auth.authentication.domain.model.TokenPair;
-import com.auth.service.auth.authentication.domain.port.LoginFailureRateLimitPort;
-import com.auth.service.auth.authentication.domain.port.SessionLimitPort;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -31,17 +33,13 @@ import java.util.UUID;
 @Service
 public class LoginSessionOrchestrator {
 
-	private final SessionLimitPort sessionLimitPort;
+	private final SessionGateway sessionGateway;
 
 	private final AuthProfileCachePort authProfileCachePort;
 
-	private final TokenIssuerPort tokenIssuerPort;
+	private final TokenGateway tokenGateway;
 
-	private final UserSessionIndexBuildPort userSessionIndexBuildPort;
-
-	private final UserSessionIndexPort userSessionIndexPort;
-
-	private final LoginFailureRateLimitPort loginFailureRateLimitPort;
+	private final CredentialGateway credentialGateway;
 
 	private final LoginAuditService loginAuditService;
 
@@ -71,7 +69,7 @@ public class LoginSessionOrchestrator {
 		boolean sessionCreated = false;
 		try {
 			// 校验用户会话上限
-			sessionLimitPort.assertSessionLimit(userId);
+			sessionGateway.assertSessionLimit(userId);
 
 			// 生成会话 ID
 			jti = UUID.randomUUID().toString();
@@ -84,15 +82,15 @@ public class LoginSessionOrchestrator {
 			profileCached = true;
 
 			// 构建令牌对
-			TokenPair tokenPair = tokenIssuerPort.buildTokenPair(userId, jti, permVersion);
+			TokenPair tokenPair = tokenGateway.buildTokenPair(userId, jti, permVersion);
 			response.setAccessToken(tokenPair.accessToken());
 			response.setRefreshToken(tokenPair.refreshToken());
 			response.setExpires(tokenPair.accessExpiresAt());
 
 			// 构建用户会话索引
-			UserSessionIndex sessionIndex = userSessionIndexBuildPort.build(request, userId, jti,
+			UserSessionIndex sessionIndex = sessionGateway.buildSessionIndex(request, userId, jti,
 					response.getRefreshToken(), rememberMe);
-			userSessionIndexPort.createUserSessionIndex(sessionIndex);
+			sessionGateway.createUserSessionIndex(sessionIndex);
 			// 标记会话已创建
 			sessionCreated = true;
 
@@ -100,7 +98,7 @@ public class LoginSessionOrchestrator {
 			response.setReadMeDay(rememberMePolicyPort.resolveReadMeDay());
 
 			// 记录登录成功
-			loginFailureRateLimitPort.recordSuccess(userId);
+			credentialGateway.recordSuccess(userId);
 			loginAuditService.auditLoginSuccess(request, loginLogType, userId, username, jti);
 			return response;
 		}
@@ -121,8 +119,8 @@ public class LoginSessionOrchestrator {
 	 */
 	private void rollbackLoginArtifacts(Long userId, String jti, boolean profileCached, boolean sessionCreated) {
 		if (sessionCreated && jti != null) {
-			userSessionIndexPort.deleteSession(jti);
-			userSessionIndexPort.removeActiveSession(userId, jti);
+			sessionGateway.deleteSession(jti);
+			sessionGateway.removeActiveSession(userId, jti);
 		}
 		if (profileCached) {
 			authProfileCachePort.evictProfile(userId);

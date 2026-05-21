@@ -1,12 +1,11 @@
 package com.auth.service.auth.authentication.application.login.strategy;
 
+import com.auth.service.auth.authentication.application.gateway.CredentialGateway;
 import com.auth.service.auth.authentication.application.input.credential.UsernamePasswordLogin;
 import com.auth.service.auth.authentication.application.login.audit.LoginAuditService;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.enums.CredentialDimension;
 import com.auth.service.auth.authentication.domain.model.LoginAccount;
-import com.auth.service.auth.authentication.domain.port.LoginAccountLookupPort;
-import com.auth.service.auth.authentication.domain.port.LoginFailureRateLimitPort;
 import com.auth.service.auth.authorization.domain.port.AuthProfileQueryPort;
 import com.auth.service.auth.shared.exception.AuthBadCredentialsException;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
@@ -22,15 +21,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class UsernamePasswordLoginStrategy extends AbstractLoginStrategyTemplate<UsernamePasswordLogin> {
 
-	private final LoginAccountLookupPort loginAccountLookupPort;
-
 	private final PasswordEncoder passwordEncoder;
 
-	public UsernamePasswordLoginStrategy(LoginAccountLookupPort loginAccountLookupPort,
-			LoginFailureRateLimitPort loginFailureRateLimitPort, AuthProfileQueryPort authProfileQueryPort,
+	public UsernamePasswordLoginStrategy(CredentialGateway credentialGateway, AuthProfileQueryPort authProfileQueryPort,
 			PasswordEncoder passwordEncoder, LoginAuditService loginAuditService) {
-		super(loginFailureRateLimitPort, authProfileQueryPort, loginAuditService);
-		this.loginAccountLookupPort = loginAccountLookupPort;
+		super(credentialGateway, authProfileQueryPort, loginAuditService);
 		this.passwordEncoder = passwordEncoder;
 	}
 
@@ -41,7 +36,7 @@ public class UsernamePasswordLoginStrategy extends AbstractLoginStrategyTemplate
 
 	@Override
 	protected LoginAccount resolveAccount(UsernamePasswordLogin credential) {
-		return loginAccountLookupPort.findForLogin(CredentialDimension.USERNAME, credential.getUsername())
+		return credentialGateway.findForLogin(CredentialDimension.USERNAME, credential.getUsername())
 			.orElseThrow(() -> new AuthBusinessException(AuthResultCode.USERNAME_OR_PASSWORD_ERROR));
 	}
 

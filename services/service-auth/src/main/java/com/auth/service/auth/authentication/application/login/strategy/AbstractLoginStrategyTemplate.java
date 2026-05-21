@@ -8,7 +8,7 @@ import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.model.AuthenticatedUser;
 import com.auth.service.auth.authentication.domain.model.LoginAccount;
 import com.auth.service.auth.authentication.domain.model.LoginResult;
-import com.auth.service.auth.authentication.domain.port.LoginFailureRateLimitPort;
+import com.auth.service.auth.authentication.application.gateway.CredentialGateway;
 import com.auth.service.auth.authentication.domain.service.UserAccountLoginEligibility;
 import com.auth.service.auth.authorization.domain.port.AuthProfileQueryPort;
 import com.auth.service.auth.shared.exception.AuthBadCredentialsException;
@@ -23,15 +23,15 @@ import jakarta.servlet.http.HttpServletRequest;
  */
 public abstract class AbstractLoginStrategyTemplate<T extends AbstractCredentialLogin> implements LoginStrategy<T> {
 
-	protected final LoginFailureRateLimitPort loginFailureRateLimitPort;
+	protected final CredentialGateway credentialGateway;
 
 	private final AuthProfileQueryPort authProfileQueryPort;
 
 	private final LoginAuditService loginAuditService;
 
-	protected AbstractLoginStrategyTemplate(LoginFailureRateLimitPort loginFailureRateLimitPort,
+	protected AbstractLoginStrategyTemplate(CredentialGateway credentialGateway,
 			AuthProfileQueryPort authProfileQueryPort, LoginAuditService loginAuditService) {
-		this.loginFailureRateLimitPort = loginFailureRateLimitPort;
+		this.credentialGateway = credentialGateway;
 		this.authProfileQueryPort = authProfileQueryPort;
 		this.loginAuditService = loginAuditService;
 	}
@@ -60,7 +60,7 @@ public abstract class AbstractLoginStrategyTemplate<T extends AbstractCredential
 		}
 		// 凭证不匹配时记录审计日志
 		catch (AuthBadCredentialsException ex) {
-			int remaining = loginFailureRateLimitPort.recordFailure(userId);
+			int remaining = credentialGateway.recordFailure(userId);
 			loginAuditService.auditBadCredentialsWithRemaining(request, loginLogType(), userId, account.username(),
 					remaining);
 			throw new AuthBusinessException(AuthResultCode.USERNAME_OR_PASSWORD_ERROR_WITH_REMAINING, remaining);
@@ -116,7 +116,7 @@ public abstract class AbstractLoginStrategyTemplate<T extends AbstractCredential
 				default -> throw new AuthBusinessException(AuthResultCode.AUTH_REQUEST_TYPE_UNSUPPORTED);
 			}
 
-			loginFailureRateLimitPort.assertNotLocked(userId);
+			credentialGateway.assertNotLocked(userId);
 		}
 		catch (AuthBusinessException ex) {
 			loginAuditService.auditMappedLockFailure(request, loginLogType(), account.id(), account.username(), ex);
