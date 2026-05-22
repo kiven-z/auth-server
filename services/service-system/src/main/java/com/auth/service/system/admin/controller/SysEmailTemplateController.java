@@ -93,11 +93,11 @@ public class SysEmailTemplateController {
 		return Result.success(null, ADD_SUCCESS.getMessage());
 	}
 
-	@Operation(summary = "更新邮件模板元数据", description = "仅更新编码、名称、描述、主题、优先级、状态，不修改正文与变量")
+	@Operation(summary = "更新邮件模板", description = "更新邮件模板")
 	@PreAuthorize("@auth.decide('emailTemplate:update')")
 	@PutMapping()
-	public Result<String> updateMetadata(@Validated(UpdateGroup.class) @RequestBody EmailTemplateMetadataForm dto) {
-		sysEmailTemplateService.updateMetadata(dto);
+	public Result<String> update(@Validated(UpdateGroup.class) @RequestBody EmailTemplateForm dto) {
+		sysEmailTemplateService.update(dto);
 
 		return Result.success(null, MODIFY_SUCCESS.getMessage());
 	}

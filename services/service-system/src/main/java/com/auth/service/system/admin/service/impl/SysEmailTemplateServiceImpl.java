@@ -114,7 +114,7 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<MessageTemplateMapp
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void updateMetadata(EmailTemplateMetadataForm form) {
+	public void update(EmailTemplateForm form) {
 		MessageTemplateEntity exists = getById(form.getId());
 		if (exists == null || !MessageChannel.EMAIL.name().equals(exists.getChannel())) {
 			throw new SystemBusinessException(DATA_NOT_EXIST);
@@ -126,7 +126,10 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<MessageTemplateMapp
 		exists.setSubject(form.getSubject());
 		exists.setPriority(form.getPriority());
 		exists.setStatus(form.getStatus());
-
+		exists.setBodyContent(CharSequenceUtil.nullToDefault(form.getContent(), exists.getBodyContent()));
+		if (form.getRequireFields() != null) {
+			exists.setRequireFields(MessageTemplateRequireFieldsJsonSupport.toJson(form.getRequireFields()));
+		}
 		updateById(exists);
 	}
 

@@ -39,10 +39,10 @@ public interface SysEmailTemplateService extends IService<MessageTemplateEntity>
 	void create(EmailTemplateForm form);
 
 	/**
-	 * 仅更新元数据（编码、名称、描述、主题、优先级、状态），不修改 content 与 require_fields
-	 * @param form 元数据表单
+	 * 更新邮件模板
+	 * @param form 邮件模板表单
 	 */
-	void updateMetadata(EmailTemplateMetadataForm form);
+	void update(EmailTemplateForm form);
 
 	/**
 	 * 仅更新邮件正文 content
