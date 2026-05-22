@@ -1,6 +1,5 @@
 package com.auth.service.system.admin.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.message.api.channel.MessageChannel;
@@ -77,19 +76,7 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<MessageTemplateMapp
 			return null;
 		}
 
-		EmailTemplateDetailVO vo = new EmailTemplateDetailVO();
-		vo.setTemplateCode(entity.getSceneCode());
-		vo.setTemplateName(entity.getTemplateName());
-		vo.setDescription(entity.getDescription());
-		vo.setSubject(entity.getSubject());
-		vo.setContent(entity.getBodyContent());
-		vo.setPriority(entity.getPriority());
-		vo.setStatus(entity.getStatus());
-
-		List<EmailTemplateRequireFieldRow> requireFields = MessageTemplateRequireFieldsJsonSupport
-			.parse(entity.getRequireFields());
-		vo.setRequireFields(requireFields);
-
+		EmailTemplateDetailVO vo = EmailTemplateConvert.INSTANCE.toDetailVo(entity);
 		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(vo));
 		return vo;
 	}
@@ -99,14 +86,10 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<MessageTemplateMapp
 	 */
 	@Override
 	public void create(EmailTemplateForm form) {
-		MessageTemplateEntity entity = BeanUtil.copyProperties(form, MessageTemplateEntity.class, "id", "templateCode",
-				"content", "requireFields");
-		entity.setSceneCode(form.getTemplateCode());
+		MessageTemplateEntity entity = EmailTemplateConvert.INSTANCE.toEntity(form);
 		entity.setChannel(MessageChannel.EMAIL.name());
-		entity.setBodyContent(CharSequenceUtil.nullToDefault(form.getContent(), "Template content is empty"));
-		List<EmailTemplateRequireFieldRow> rows = form.getRequireFields() != null ? form.getRequireFields()
-				: Collections.emptyList();
-		entity.setRequireFields(MessageTemplateRequireFieldsJsonSupport.toJson(rows));
+		entity.setBodyContent(CharSequenceUtil.nullToDefault(entity.getBodyContent(), "Template content is empty"));
+		entity.setRequireFields(MessageTemplateRequireFieldsJsonSupport.toJson(Collections.emptyList()));
 		save(entity);
 	}
 
@@ -120,16 +103,8 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<MessageTemplateMapp
 			throw new SystemBusinessException(DATA_NOT_EXIST);
 		}
 
-		exists.setSceneCode(form.getTemplateCode());
-		exists.setTemplateName(form.getTemplateName());
-		exists.setDescription(form.getDescription());
-		exists.setSubject(form.getSubject());
-		exists.setPriority(form.getPriority());
-		exists.setStatus(form.getStatus());
+		EmailTemplateConvert.INSTANCE.updateEntity(form, exists);
 		exists.setBodyContent(CharSequenceUtil.nullToDefault(form.getContent(), exists.getBodyContent()));
-		if (form.getRequireFields() != null) {
-			exists.setRequireFields(MessageTemplateRequireFieldsJsonSupport.toJson(form.getRequireFields()));
-		}
 		updateById(exists);
 	}
 

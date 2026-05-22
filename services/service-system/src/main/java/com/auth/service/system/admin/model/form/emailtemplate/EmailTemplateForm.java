@@ -2,9 +2,7 @@ package com.auth.service.system.admin.model.form.emailtemplate;
 
 import com.auth.common.web.valid.group.CreateGroup;
 import com.auth.common.web.valid.group.UpdateGroup;
-import com.auth.service.system.admin.model.vo.emailtemplate.EmailTemplateRequireFieldRow;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -13,12 +11,11 @@ import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.List;
 
 import static com.auth.common.web.validation.ValidationPatterns.LETTER_UNDERSCORE_HYPHEN_REQUIRE_LETTER;
 
 /**
- * 邮件模板表单
+ * 邮件模板表单（创建与更新共用；变量列表在独立接口维护）
  *
  * @author Bunny
  */
@@ -61,10 +58,5 @@ public class EmailTemplateForm implements Serializable {
 
 	@Schema(name = "content", title = "邮件内容(支持HTML)，可空串")
 	private String content;
-
-	@Schema(name = "requireFields", title = "模板依赖变量列表（可为空数组）")
-	@Valid
-	@NotNull(message = "require_fields 不能为 null", groups = CreateGroup.class)
-	private List<EmailTemplateRequireFieldRow> requireFields;
 
 }

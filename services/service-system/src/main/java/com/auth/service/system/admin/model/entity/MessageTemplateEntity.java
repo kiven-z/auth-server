@@ -20,15 +20,9 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class MessageTemplateEntity extends BaseEntity {
 
-	/**
-	 * 业务场景编码（与发送命令中的 templateCode 一致：如 login-email-code、login-sms-code）
-	 */
 	@Schema(title = "场景编码")
 	private String sceneCode;
 
-	/**
-	 * 渠道（{@link com.auth.module.message.api.channel.MessageChannel} 名称）
-	 */
 	@Schema(title = "渠道")
 	private String channel;
 
@@ -38,40 +32,22 @@ public class MessageTemplateEntity extends BaseEntity {
 	@Schema(title = "模板描述")
 	private String description;
 
-	/**
-	 * 邮件主题模板（FreeMarker）；Dypns 验证码短信等非邮件渠道可为空
-	 */
 	@Schema(title = "邮件主题")
 	private String subject;
 
-	/**
-	 * 正文模板：邮件 HTML / 钉钉 Markdown 等；Dypns 验证码短信不在库中拼全文
-	 */
 	@TableField("body_content")
 	@Schema(title = "正文模板")
 	private String bodyContent;
 
-	/**
-	 * 模板依赖变量（JSON 数组）
-	 */
 	@Schema(title = "必填变量声明 JSON")
 	private String requireFields;
 
-	/**
-	 * Dypns / 短信厂商侧已审模板编码（channel=SMS_ALIYUN_DYPNS 时使用）
-	 */
 	@Schema(title = "厂商模板编码")
 	private String providerTemplateCode;
 
-	/**
-	 * 钉钉等 IM 消息类型：TEXT、MARKDOWN 等
-	 */
 	@Schema(title = "IM 消息类型")
 	private String imMessageType;
 
-	/**
-	 * 渠道默认扩展（JSON），与会话级 options 合并
-	 */
 	@TableField("channel_defaults_json")
 	@Schema(title = "渠道默认选项 JSON")
 	private String channelDefaultsJson;
