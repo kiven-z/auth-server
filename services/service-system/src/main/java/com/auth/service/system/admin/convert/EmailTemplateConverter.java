@@ -18,9 +18,9 @@ import java.util.List;
  * @author Bunny
  */
 @Mapper(unmappedTargetPolicy = ReportingPolicy.ERROR)
-public interface EmailTemplateConvert {
+public interface EmailTemplateConverter {
 
-	EmailTemplateConvert INSTANCE = Mappers.getMapper(EmailTemplateConvert.class);
+	EmailTemplateConverter INSTANCE = Mappers.getMapper(EmailTemplateConverter.class);
 
 	/**
 	 * 数据库 require_fields JSON → 变量声明列表

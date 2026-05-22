@@ -12,9 +12,9 @@ import org.mapstruct.factory.Mappers;
  * @author Bunny
  */
 @Mapper
-public interface LogUserPasswordHistoryConvert {
+public interface LogUserPasswordHistoryConverter {
 
-	LogUserPasswordHistoryConvert INSTANCE = Mappers.getMapper(LogUserPasswordHistoryConvert.class);
+	LogUserPasswordHistoryConverter INSTANCE = Mappers.getMapper(LogUserPasswordHistoryConverter.class);
 
 	/**
 	 * 密码历史日志分页行 PO → 分页返回 VO

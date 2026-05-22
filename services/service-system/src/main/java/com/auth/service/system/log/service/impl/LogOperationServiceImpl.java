@@ -4,7 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
-import com.auth.service.system.log.convert.LogOperationConvert;
+import com.auth.service.system.log.convert.LogOperationConverter;
 import com.auth.service.system.log.mapper.LogOperationMapper;
 import com.auth.service.system.log.model.entity.LogOperationEntity;
 import com.auth.service.system.log.model.po.LogOperationPageRowPO;
@@ -44,7 +44,7 @@ public class LogOperationServiceImpl extends ServiceImpl<LogOperationMapper, Log
 	@Override
 	public PageResponse<LogOperationPageVO> getPage(Page<LogOperationEntity> pageParams, LogOperationQuery query) {
 		IPage<LogOperationPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
-		IPage<LogOperationPageVO> voPage = page.convert(LogOperationConvert.INSTANCE::toPageVO);
+		IPage<LogOperationPageVO> voPage = page.convert(LogOperationConverter.INSTANCE::toPageVO);
 		auditUserDisplayService.enrichAuditUsernames(voPage);
 		return PageResponse.of(voPage);
 	}

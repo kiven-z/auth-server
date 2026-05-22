@@ -5,7 +5,7 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.message.api.model.email.EmailChannelOptions;
-import com.auth.service.system.admin.convert.EmailTemplateConvert;
+import com.auth.service.system.admin.convert.EmailTemplateConverter;
 import com.auth.service.system.admin.mapper.MessageTemplateMapper;
 import com.auth.service.system.admin.model.entity.MessageTemplateEntity;
 import com.auth.service.system.admin.model.form.emailtemplate.*;
@@ -61,7 +61,7 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<MessageTemplateMapp
 	public PageResponse<EmailTemplatePageResponse> getEmailTemplatePage(Page<MessageTemplateEntity> pageParams,
 			EmailTemplateQuery query) {
 		IPage<EmailTemplatePageRowPO> page = baseMapper.selectEmailTemplatePage(pageParams, query);
-		IPage<EmailTemplatePageResponse> voPage = page.convert(EmailTemplateConvert.INSTANCE::toPageResponse);
+		IPage<EmailTemplatePageResponse> voPage = page.convert(EmailTemplateConverter.INSTANCE::toPageResponse);
 		auditUserDisplayService.enrichAuditUsernames(voPage);
 		return PageResponse.of(voPage);
 	}
@@ -76,7 +76,7 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<MessageTemplateMapp
 			return null;
 		}
 
-		EmailTemplateDetailVO vo = EmailTemplateConvert.INSTANCE.toDetailVo(entity);
+		EmailTemplateDetailVO vo = EmailTemplateConverter.INSTANCE.toDetailVo(entity);
 		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(vo));
 		return vo;
 	}
@@ -86,7 +86,7 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<MessageTemplateMapp
 	 */
 	@Override
 	public void create(EmailTemplateForm form) {
-		MessageTemplateEntity entity = EmailTemplateConvert.INSTANCE.toEntity(form);
+		MessageTemplateEntity entity = EmailTemplateConverter.INSTANCE.toEntity(form);
 		entity.setChannel(MessageChannel.EMAIL.name());
 		entity.setBodyContent(CharSequenceUtil.nullToDefault(entity.getBodyContent(), "Template content is empty"));
 		entity.setRequireFields(MessageTemplateRequireFieldsJsonSupport.toJson(Collections.emptyList()));
@@ -103,7 +103,7 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<MessageTemplateMapp
 			throw new SystemBusinessException(DATA_NOT_EXIST);
 		}
 
-		EmailTemplateConvert.INSTANCE.updateEntity(form, exists);
+		EmailTemplateConverter.INSTANCE.updateEntity(form, exists);
 		exists.setBodyContent(CharSequenceUtil.nullToDefault(form.getContent(), exists.getBodyContent()));
 		updateById(exists);
 	}

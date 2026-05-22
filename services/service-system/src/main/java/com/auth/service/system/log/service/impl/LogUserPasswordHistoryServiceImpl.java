@@ -4,7 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
-import com.auth.service.system.log.convert.LogUserPasswordHistoryConvert;
+import com.auth.service.system.log.convert.LogUserPasswordHistoryConverter;
 import com.auth.service.system.log.mapper.LogUserPasswordHistoryMapper;
 import com.auth.service.system.log.model.entity.LogUserPasswordHistoryEntity;
 import com.auth.service.system.log.model.po.LogUserPasswordHistoryDetailRowPO;
@@ -48,7 +48,7 @@ public class LogUserPasswordHistoryServiceImpl
 			LogUserPasswordHistoryQuery query) {
 		IPage<LogUserPasswordHistoryPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
 		// PO ? VO
-		IPage<LogUserPasswordHistoryPageVO> voPage = page.convert(LogUserPasswordHistoryConvert.INSTANCE::toPageVO);
+		IPage<LogUserPasswordHistoryPageVO> voPage = page.convert(LogUserPasswordHistoryConverter.INSTANCE::toPageVO);
 		auditUserDisplayService.enrichAuditUsernames(voPage);
 		return PageResponse.of(voPage);
 	}

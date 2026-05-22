@@ -12,9 +12,9 @@ import org.mapstruct.factory.Mappers;
  * @author Bunny
  */
 @Mapper
-public interface LogAuthorizationAuditConvert {
+public interface LogAuthorizationAuditConverter {
 
-	LogAuthorizationAuditConvert INSTANCE = Mappers.getMapper(LogAuthorizationAuditConvert.class);
+	LogAuthorizationAuditConverter INSTANCE = Mappers.getMapper(LogAuthorizationAuditConverter.class);
 
 	/**
 	 * 分页行 PO → VO

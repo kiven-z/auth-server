@@ -7,7 +7,7 @@ import com.auth.module.security.contract.event.OperationLogPayloadEvent;
 import com.auth.module.security.contract.event.SecurityAuthorizationAuditPayloadEvent;
 import com.auth.module.security.contract.event.SecurityEventType;
 import com.auth.service.system.common.service.SecurityIngestService;
-import com.auth.service.system.log.convert.LogOperationPayloadConvert;
+import com.auth.service.system.log.convert.LogOperationPayloadConverter;
 import com.auth.service.system.log.mapper.LogAuthorizationAuditMapper;
 import com.auth.service.system.log.mapper.LogOperationMapper;
 import com.auth.service.system.log.model.entity.LogAuthorizationAuditEntity;
@@ -94,7 +94,7 @@ public class SecurityIngestServiceImpl implements SecurityIngestService {
 	@Override
 	public void append(OperationLogPayloadEvent payload) {
 		Long uid = payload.getUserId() != null ? payload.getUserId() : 0L;
-		LogOperationEntity entity = LogOperationPayloadConvert.INSTANCE.toInsertEntity(payload, uid);
+		LogOperationEntity entity = LogOperationPayloadConverter.INSTANCE.toInsertEntity(payload, uid);
 		logOperationMapper.insert(entity);
 	}
 

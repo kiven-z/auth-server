@@ -4,7 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
-import com.auth.service.system.log.convert.LogAuthorizationAuditConvert;
+import com.auth.service.system.log.convert.LogAuthorizationAuditConverter;
 import com.auth.service.system.log.mapper.LogAuthorizationAuditMapper;
 import com.auth.service.system.log.model.entity.LogAuthorizationAuditEntity;
 import com.auth.service.system.log.model.po.LogAuthorizationAuditDetailRowPO;
@@ -46,7 +46,7 @@ public class LogAuthorizationAuditServiceImpl extends
 	public PageResponse<LogAuthorizationAuditPageVO> getPage(Page<LogAuthorizationAuditEntity> pageParams,
 			LogAuthorizationAuditQuery query) {
 		IPage<LogAuthorizationAuditPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
-		IPage<LogAuthorizationAuditPageVO> voPage = page.convert(LogAuthorizationAuditConvert.INSTANCE::toPageVO);
+		IPage<LogAuthorizationAuditPageVO> voPage = page.convert(LogAuthorizationAuditConverter.INSTANCE::toPageVO);
 
 		auditUserDisplayService.enrichAuditUsernames(voPage);
 		return PageResponse.of(voPage);

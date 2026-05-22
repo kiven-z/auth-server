@@ -12,9 +12,9 @@ import org.mapstruct.factory.Mappers;
  * @author Bunny
  */
 @Mapper
-public interface SysJobLogConvert {
+public interface SysJobLogConverter {
 
-	SysJobLogConvert INSTANCE = Mappers.getMapper(SysJobLogConvert.class);
+	SysJobLogConverter INSTANCE = Mappers.getMapper(SysJobLogConverter.class);
 
 	/**
 	 * 任务日志分页行 PO → 分页返回 VO

@@ -16,9 +16,9 @@ import org.mapstruct.factory.Mappers;
  */
 @Mapper(uses = MapStructStringQualifiers.class, unmappedTargetPolicy = ReportingPolicy.ERROR,
 		unmappedSourcePolicy = ReportingPolicy.ERROR)
-public interface LogOperationPayloadConvert {
+public interface LogOperationPayloadConverter {
 
-	LogOperationPayloadConvert INSTANCE = Mappers.getMapper(LogOperationPayloadConvert.class);
+	LogOperationPayloadConverter INSTANCE = Mappers.getMapper(LogOperationPayloadConverter.class);
 
 	/**
 	 * 将负载映射为待插入实体；审计用户与操作用户均使用 {@code effectiveUserId}（通常为已规范化的用户主键）。

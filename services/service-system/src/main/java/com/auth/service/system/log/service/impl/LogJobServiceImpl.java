@@ -12,7 +12,7 @@ import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.mapper.SysUserQueryMapper;
 import com.auth.service.system.common.service.AuditUserDisplayService;
-import com.auth.service.system.log.convert.SysJobLogConvert;
+import com.auth.service.system.log.convert.SysJobLogConverter;
 import com.auth.service.system.log.mapper.LogJobMapper;
 import com.auth.service.system.log.model.entity.JobLogEntity;
 import com.auth.service.system.log.model.po.SysJobLogPageRowPO;
@@ -69,7 +69,7 @@ public class LogJobServiceImpl extends ServiceImpl<LogJobMapper, JobLogEntity> i
 	public PageResponse<LogJobPageResponse> getPage(Page<JobLogEntity> pageParams, LogJobQuery query) {
 		IPage<SysJobLogPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
 		// PO 转 VO
-		IPage<LogJobPageResponse> voPage = page.convert(SysJobLogConvert.INSTANCE::toPageResponse);
+		IPage<LogJobPageResponse> voPage = page.convert(SysJobLogConverter.INSTANCE::toPageResponse);
 		auditUserDisplayService.enrichAuditUsernames(voPage);
 		return PageResponse.of(voPage);
 	}

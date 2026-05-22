@@ -5,7 +5,7 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.module.platform.persistence.model.LoginLogEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
-import com.auth.service.system.log.convert.LogLoginLogConvert;
+import com.auth.service.system.log.convert.LogLoginLogConverter;
 import com.auth.service.system.log.mapper.LogLoginLogMapper;
 import com.auth.service.system.log.model.po.LogLoginLogPageRowPO;
 import com.auth.service.system.log.model.query.LogLoginLogQuery;
@@ -44,7 +44,7 @@ public class LogLoginServiceImpl extends ServiceImpl<LogLoginLogMapper, LoginLog
 	public PageResponse<LogLoginLogPageVO> getPage(Page<LoginLogEntity> pageParams, LogLoginLogQuery query) {
 		IPage<LogLoginLogPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
 		// PO ? VO?PageResponse.of ?? records?
-		IPage<LogLoginLogPageVO> voPage = page.convert(LogLoginLogConvert.INSTANCE::toPageVO);
+		IPage<LogLoginLogPageVO> voPage = page.convert(LogLoginLogConverter.INSTANCE::toPageVO);
 		auditUserDisplayService.enrichAuditUsernames(voPage);
 		return PageResponse.of(voPage);
 	}

@@ -10,9 +10,9 @@ import java.time.LocalDateTime;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * {@link SysJobLogConvert} 映射校验
+ * {@link SysJobLogConverter} 映射校验
  */
-class SysJobLogConvertTest {
+class SysJobLogConverterTest {
 
 	@Test
 	@DisplayName("任务日志分页 PO 转 VO 时应映射审计字段且用户名由后续 enrich 填充")
@@ -31,7 +31,7 @@ class SysJobLogConvertTest {
 		po.setCreateUser(1L);
 		po.setUpdateUser(2L);
 
-		LogJobPageResponse vo = SysJobLogConvert.INSTANCE.toPageResponse(po);
+		LogJobPageResponse vo = SysJobLogConverter.INSTANCE.toPageResponse(po);
 
 		// 方法内：校验业务字段与 BaseResponse 审计字段
 		assertThat(vo.getId()).isEqualTo(10L);
