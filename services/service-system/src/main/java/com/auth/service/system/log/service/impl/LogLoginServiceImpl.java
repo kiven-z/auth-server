@@ -1,6 +1,5 @@
 package com.auth.service.system.log.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.platform.persistence.model.LoginLogEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
@@ -58,7 +57,7 @@ public class LogLoginServiceImpl extends ServiceImpl<LogLoginLogMapper, LoginLog
 		if (entity == null) {
 			throw new SystemBusinessException(DATA_NOT_EXIST);
 		}
-		return BeanUtil.copyProperties(entity, LogLoginLogDetailVO.class);
+		return LogLoginLogConverter.INSTANCE.toDetailVo(entity);
 	}
 
 }

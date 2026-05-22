@@ -95,13 +95,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 	 */
 	@Override
 	public List<SysRoleOptionVO> listOptions(String roleName, String roleCode) {
-		return baseMapper.selectRoleOptions(roleName, roleCode).stream().map(entity -> {
-			SysRoleOptionVO vo = new SysRoleOptionVO();
-			vo.setId(entity.getId());
-			vo.setRoleCode(entity.getRoleCode());
-			vo.setRoleName(entity.getRoleName());
-			return vo;
-		}).toList();
+		return SysRoleConverter.INSTANCE.toOptionVoList(baseMapper.selectRoleOptions(roleName, roleCode));
 	}
 
 }

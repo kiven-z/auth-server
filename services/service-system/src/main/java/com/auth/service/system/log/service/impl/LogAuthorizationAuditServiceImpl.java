@@ -1,6 +1,5 @@
 package com.auth.service.system.log.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
@@ -61,7 +60,7 @@ public class LogAuthorizationAuditServiceImpl extends
 		if (po == null) {
 			throw new SystemBusinessException(DATA_NOT_EXIST);
 		}
-		return BeanUtil.copyProperties(po, LogAuthorizationAuditDetailVO.class);
+		return LogAuthorizationAuditConverter.INSTANCE.toDetailVo(po);
 	}
 
 }

@@ -1,6 +1,8 @@
 package com.auth.service.system.log.convert;
 
+import com.auth.module.platform.persistence.model.LoginLogEntity;
 import com.auth.service.system.log.model.po.LogLoginLogPageRowPO;
+import com.auth.service.system.log.model.vo.LogLoginLogDetailVO;
 import com.auth.service.system.log.model.vo.LogLoginLogPageVO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -24,5 +26,14 @@ public interface LogLoginLogConverter {
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
 	LogLoginLogPageVO toPageVO(LogLoginLogPageRowPO po);
+
+	/**
+	 * 实体 → 详情 VO
+	 * @param entity 登录日志实体
+	 * @return 详情 VO
+	 */
+	@Mapping(target = "createUsername", ignore = true)
+	@Mapping(target = "updateUsername", ignore = true)
+	LogLoginLogDetailVO toDetailVo(LoginLogEntity entity);
 
 }

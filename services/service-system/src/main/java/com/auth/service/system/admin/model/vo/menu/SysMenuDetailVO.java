@@ -32,13 +32,13 @@ public class SysMenuDetailVO extends SysMenuListVO {
 	@Schema(title = "额外图标")
 	private String extraIcon;
 
-	@Schema(title = "是否显示父级菜单：0 否 1 是")
+	@Schema(title = "是否显示父级菜单")
 	private Boolean showParent;
 
 	@Schema(title = "iframe 地址")
 	private String frameSrc;
 
-	@Schema(title = "iframe 首次加载动画：0 否 1 是")
+	@Schema(title = "iframe 首次加载动画")
 	private Boolean frameLoading;
 
 	@Schema(title = "Vue Transition 名称")
@@ -50,7 +50,7 @@ public class SysMenuDetailVO extends SysMenuListVO {
 	@Schema(title = "离场 animate.css")
 	private String leaveTransition;
 
-	@Schema(title = "禁止加入标签页：0 否 1 是")
+	@Schema(title = "禁止加入标签页")
 	private Boolean hiddenTag;
 
 	@Schema(title = "动态标签层级")

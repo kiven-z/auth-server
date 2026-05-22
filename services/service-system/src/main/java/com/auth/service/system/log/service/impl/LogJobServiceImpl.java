@@ -1,6 +1,5 @@
 package com.auth.service.system.log.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.RandomUtil;
 import com.auth.common.data.model.PageResponse;
@@ -85,8 +84,7 @@ public class LogJobServiceImpl extends ServiceImpl<LogJobMapper, JobLogEntity> i
 			throw new SystemBusinessException(DATA_NOT_EXIST);
 		}
 
-		// 复制数据到VO
-		return BeanUtil.copyProperties(sysJobLog, LogJobDetailVO.class);
+		return SysJobLogConverter.INSTANCE.toDetailVo(sysJobLog);
 	}
 
 	/**

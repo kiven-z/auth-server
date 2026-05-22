@@ -43,7 +43,7 @@ public class LogJobDetailVO extends BaseResponse {
 	private String jobMessage;
 
 	@Schema(title = "状态(0成功 1失败)")
-	private Integer status;
+	private Boolean status;
 
 	@Schema(title = "异常信息")
 	private String exceptionInfo;

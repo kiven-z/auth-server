@@ -1,6 +1,5 @@
 package com.auth.service.system.log.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
@@ -58,7 +57,7 @@ public class LogOperationServiceImpl extends ServiceImpl<LogOperationMapper, Log
 		if (entity == null || Boolean.TRUE.equals(entity.getIsDeleted())) {
 			throw new SystemBusinessException(DATA_NOT_EXIST);
 		}
-		LogOperationDetailVO vo = BeanUtil.copyProperties(entity, LogOperationDetailVO.class);
+		LogOperationDetailVO vo = LogOperationConverter.INSTANCE.toDetailVo(entity);
 		auditUserDisplayService.enrichAuditUsernames(List.of(vo));
 		return vo;
 	}

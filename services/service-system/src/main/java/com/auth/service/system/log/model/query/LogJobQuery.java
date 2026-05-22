@@ -38,7 +38,7 @@ public class LogJobQuery extends PageQueryRequest implements Serializable {
 	@Schema(title = "耗时(ms)")
 	private Long elapsedTime;
 
-	@Schema(title = "状态(0成功 1失败)")
-	private Integer status;
+	@Schema(title = "执行是否成功(true=仅成功，false=仅失败)")
+	private Boolean status;
 
 }

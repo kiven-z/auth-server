@@ -48,16 +48,16 @@ public class SysMenuListVO extends BaseResponse {
 	@Schema(title = "状态：0 启用 1 禁用")
 	private Boolean status;
 
-	@Schema(title = "是否在菜单中显示：0 否 1 是")
+	@Schema(title = "是否在菜单中显示")
 	private Boolean showLink;
 
 	@Schema(title = "排序，越大越靠后")
 	private Integer menuRank;
 
-	@Schema(title = "是否缓存：0 否 1 是")
+	@Schema(title = "是否缓存")
 	private Boolean keepAlive;
 
-	@Schema(title = "是否固定标签：0 否 1 是")
+	@Schema(title = "是否固定标签")
 	private Boolean fixedTag;
 
 	@Schema(title = "备注")

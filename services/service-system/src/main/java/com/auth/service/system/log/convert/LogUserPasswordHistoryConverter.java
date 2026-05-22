@@ -1,6 +1,8 @@
 package com.auth.service.system.log.convert;
 
+import com.auth.service.system.log.model.po.LogUserPasswordHistoryDetailRowPO;
 import com.auth.service.system.log.model.po.LogUserPasswordHistoryPageRowPO;
+import com.auth.service.system.log.model.vo.LogUserPasswordHistoryDetailVO;
 import com.auth.service.system.log.model.vo.LogUserPasswordHistoryPageVO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -25,5 +27,14 @@ public interface LogUserPasswordHistoryConverter {
 	@Mapping(target = "updateUsername", ignore = true)
 	@Mapping(target = "changeTime", source = "createTime")
 	LogUserPasswordHistoryPageVO toPageVO(LogUserPasswordHistoryPageRowPO po);
+
+	/**
+	 * 详情 PO → 详情 VO
+	 * @param po 持久层详情投影
+	 * @return 详情 VO
+	 */
+	@Mapping(target = "createUsername", ignore = true)
+	@Mapping(target = "updateUsername", ignore = true)
+	LogUserPasswordHistoryDetailVO toDetailVo(LogUserPasswordHistoryDetailRowPO po);
 
 }

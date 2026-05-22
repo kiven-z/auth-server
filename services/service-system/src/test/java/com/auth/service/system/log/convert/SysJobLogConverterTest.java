@@ -1,6 +1,8 @@
 package com.auth.service.system.log.convert;
 
+import com.auth.service.system.log.model.entity.JobLogEntity;
 import com.auth.service.system.log.model.po.SysJobLogPageRowPO;
+import com.auth.service.system.log.model.vo.LogJobDetailVO;
 import com.auth.service.system.log.model.vo.LogJobPageResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,13 +38,48 @@ class SysJobLogConverterTest {
 		// 方法内：校验业务字段与 BaseResponse 审计字段
 		assertThat(vo.getId()).isEqualTo(10L);
 		assertThat(vo.getJobName()).isEqualTo("demoJob");
-		assertThat(vo.getStatus()).isZero();
+		assertThat(vo.getStatus()).isTrue();
 		assertThat(vo.getCreateTime()).isEqualTo(now);
 		assertThat(vo.getUpdateTime()).isEqualTo(now);
 		assertThat(vo.getCreateUser()).isEqualTo(1L);
 		assertThat(vo.getUpdateUser()).isEqualTo(2L);
 		assertThat(vo.getCreateUsername()).isNull();
 		assertThat(vo.getUpdateUsername()).isNull();
+	}
+
+	@Test
+	@DisplayName("分页 PO status=1 映射为 false（失败）")
+	void toPageResponse_mapsFailureStatus() {
+		SysJobLogPageRowPO po = new SysJobLogPageRowPO();
+		po.setStatus(1);
+
+		LogJobPageResponse vo = SysJobLogConverter.INSTANCE.toPageResponse(po);
+
+		assertThat(vo.getStatus()).isFalse();
+	}
+
+	@Test
+	@DisplayName("任务日志实体转详情 VO 时 status 映射为 true=成功")
+	void toDetailVo_mapsStatusAsBooleanSuccess() {
+		JobLogEntity entity = new JobLogEntity();
+		entity.setId(1L);
+		entity.setJobName("demo");
+		entity.setStatus(Boolean.FALSE);
+
+		LogJobDetailVO vo = SysJobLogConverter.INSTANCE.toDetailVo(entity);
+
+		assertThat(vo.getStatus()).isTrue();
+	}
+
+	@Test
+	@DisplayName("任务日志实体 status=true(失败) 映射为 API false")
+	void toDetailVo_mapsStatusAsBooleanFailure() {
+		JobLogEntity entity = new JobLogEntity();
+		entity.setStatus(Boolean.TRUE);
+
+		LogJobDetailVO vo = SysJobLogConverter.INSTANCE.toDetailVo(entity);
+
+		assertThat(vo.getStatus()).isFalse();
 	}
 
 }

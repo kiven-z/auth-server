@@ -3,10 +3,13 @@ package com.auth.service.system.admin.convert;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.form.role.SysRoleCreateForm;
 import com.auth.service.system.admin.model.vo.role.SysRoleDetailVO;
+import com.auth.service.system.admin.model.vo.role.SysRoleOptionVO;
 import com.auth.service.system.admin.model.vo.role.SysRolePageResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+
+import java.util.List;
 
 /**
  * 系统角色实体、表单与 VO 转换。
@@ -51,5 +54,19 @@ public interface SysRoleConverter {
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
 	SysRolePageResponse toPageResponse(SysRoleEntity entity);
+
+	/**
+	 * 实体 → 下拉选项 VO
+	 * @param entity 角色实体
+	 * @return 下拉选项
+	 */
+	SysRoleOptionVO toOptionVo(SysRoleEntity entity);
+
+	/**
+	 * 实体列表 → 下拉选项列表
+	 * @param entities 角色实体列表
+	 * @return 下拉选项列表
+	 */
+	List<SysRoleOptionVO> toOptionVoList(List<SysRoleEntity> entities);
 
 }

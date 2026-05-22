@@ -1,6 +1,8 @@
 package com.auth.service.system.log.convert;
 
+import com.auth.service.system.log.model.entity.LogOperationEntity;
 import com.auth.service.system.log.model.po.LogOperationPageRowPO;
+import com.auth.service.system.log.model.vo.LogOperationDetailVO;
 import com.auth.service.system.log.model.vo.LogOperationPageVO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -25,5 +27,14 @@ public interface LogOperationConverter {
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
 	LogOperationPageVO toPageVO(LogOperationPageRowPO po);
+
+	/**
+	 * 实体 → 详情 VO（操作用户展示名由 Service enrich）
+	 * @param entity 操作日志实体
+	 * @return 详情 VO
+	 */
+	@Mapping(target = "createUsername", ignore = true)
+	@Mapping(target = "updateUsername", ignore = true)
+	LogOperationDetailVO toDetailVo(LogOperationEntity entity);
 
 }

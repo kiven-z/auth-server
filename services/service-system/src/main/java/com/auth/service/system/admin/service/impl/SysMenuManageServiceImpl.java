@@ -1,5 +1,6 @@
 package com.auth.service.system.admin.service.impl;
 
+import com.auth.service.system.admin.convert.SysMenuManageConverter;
 import com.auth.service.system.admin.mapper.SysMenuMapper;
 import com.auth.service.system.admin.mapper.SysMenuPermissionMapper;
 import com.auth.service.system.admin.mapper.SysMenuRoleMapper;
@@ -46,13 +47,7 @@ public class SysMenuManageServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu
 	public List<SysMenuAssignedRoleRow> listAssignedRoles(Long menuId) {
 		List<SysMenuAssignedRolePO> dtoList = sysMenuRoleMapper.selectAssignedRolesByMenuId(menuId);
 
-		return dtoList.stream().map(dto -> {
-			SysMenuAssignedRoleRow row = new SysMenuAssignedRoleRow();
-			row.setRoleCode(dto.getRoleCode());
-			row.setRoleName(dto.getRoleName());
-			row.setAssigned(true);
-			return row;
-		}).toList();
+		return SysMenuManageConverter.INSTANCE.toAssignedRoleRowList(dtoList);
 	}
 
 	/**
@@ -73,13 +68,7 @@ public class SysMenuManageServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu
 	public List<SysMenuAssignedPermissionRow> listPermissionsWithAssignFlags(Long menuId) {
 		List<SysMenuAssignedPermissionPO> dtoList = sysMenuPermissionMapper.selectAssignedPermissionByMenuId(menuId);
 
-		return dtoList.stream().map(dto -> {
-			SysMenuAssignedPermissionRow row = new SysMenuAssignedPermissionRow();
-			row.setPermissionCode(dto.getPermissionCode());
-			row.setPermissionName(dto.getPermissionName());
-			row.setAssigned(true);
-			return row;
-		}).toList();
+		return SysMenuManageConverter.INSTANCE.toAssignedPermissionRowList(dtoList);
 	}
 
 	/**

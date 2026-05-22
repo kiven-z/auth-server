@@ -4,6 +4,7 @@ import com.auth.service.system.admin.model.form.role.SysRoleCreateForm;
 import com.auth.service.system.admin.model.query.EmailTemplateQuery;
 import com.auth.service.system.admin.model.query.SysJobGroupQuery;
 import com.auth.service.system.admin.model.query.SysRoleQuery;
+import com.auth.service.system.log.model.query.LogJobQuery;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -57,6 +58,13 @@ class BooleanStatusJsonDeserializationTest {
 	void emailTemplateQueryAcceptsBooleanStatus() throws Exception {
 		EmailTemplateQuery query = objectMapper.readValue("{\"status\":false}", EmailTemplateQuery.class);
 		assertThat(query.getStatus()).isFalse();
+	}
+
+	@Test
+	@DisplayName("LogJobQuery 支持 status 布尔反序列化")
+	void logJobQueryAcceptsBooleanStatus() throws Exception {
+		LogJobQuery query = objectMapper.readValue("{\"status\":true}", LogJobQuery.class);
+		assertThat(query.getStatus()).isTrue();
 	}
 
 }
