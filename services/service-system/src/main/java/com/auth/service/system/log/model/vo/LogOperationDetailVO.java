@@ -29,6 +29,9 @@ public class LogOperationDetailVO extends BaseResponse {
 	@Schema(title = "操作用户 ID")
 	private Long userId;
 
+	@Schema(title = "操作用户名")
+	private String username;
+
 	@Schema(title = "操作模块")
 	private String module;
 

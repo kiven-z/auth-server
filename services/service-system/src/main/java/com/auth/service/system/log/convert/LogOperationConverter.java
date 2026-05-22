@@ -33,6 +33,7 @@ public interface LogOperationConverter {
 	 * @param entity 操作日志实体
 	 * @return 详情 VO
 	 */
+	@Mapping(target = "username", ignore = true)
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
 	LogOperationDetailVO toDetailVo(LogOperationEntity entity);
