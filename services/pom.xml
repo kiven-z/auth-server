@@ -51,6 +51,11 @@
         </dependency>
         <dependency>
             <groupId>com.auth</groupId>
+            <artifactId>common-mapstruct</artifactId>
+            <version>0.0.2-beta</version>
+        </dependency>
+        <dependency>
+            <groupId>com.auth</groupId>
             <artifactId>module-security-web-starter</artifactId>
             <version>0.0.2-beta</version>
         </dependency>

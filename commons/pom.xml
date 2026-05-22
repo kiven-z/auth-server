@@ -21,6 +21,7 @@
         <module>common-starter-cache</module>
         <module>common-starter-jwt</module>
         <module>common-data</module>
+        <module>common-mapstruct</module>
     </modules>
 
     <name>commons</name>
