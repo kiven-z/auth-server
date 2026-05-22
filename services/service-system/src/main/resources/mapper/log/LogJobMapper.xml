@@ -42,9 +42,4 @@
         </where>
         ORDER BY create_time DESC
     </select>
-
-    <!-- 物理清空日志表 -->
-    <delete id="deleteAll">
-        TRUNCATE TABLE log_job;
-    </delete>
 </mapper>

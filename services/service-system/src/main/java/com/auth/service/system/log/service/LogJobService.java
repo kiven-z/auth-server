@@ -30,15 +30,4 @@ public interface LogJobService extends IService<JobLogEntity> {
 	 */
 	LogJobDetailVO getDetail(Long id);
 
-	/**
-	 * 发送清空日志验证码
-	 */
-	void sendClearLogVerificationCode();
-
-	/**
-	 * 清空全部日志
-	 * @param verificationCode 验证码
-	 */
-	void clearAll(String verificationCode);
-
 }

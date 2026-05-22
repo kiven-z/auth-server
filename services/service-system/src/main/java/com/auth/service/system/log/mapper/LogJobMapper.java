@@ -26,9 +26,4 @@ public interface LogJobMapper extends BaseMapper<JobLogEntity> {
 	IPage<SysJobLogPageRowPO> selectListByPage(@Param("page") Page<JobLogEntity> page,
 			@Param("query") LogJobQuery query);
 
-	/**
-	 * 物理清空日志表（一键清空）
-	 */
-	void deleteAll();
-
 }

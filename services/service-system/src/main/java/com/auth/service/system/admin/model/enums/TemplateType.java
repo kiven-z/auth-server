@@ -33,12 +33,7 @@ public enum TemplateType {
 	/**
 	 * 通用通知邮件模板
 	 */
-	NOTIFICATION("notification", "通知"),
-
-	/**
-	 * 清空数据库确认
-	 */
-	CLEAR_DATABASE_CONFIRM("clear-database-confirm", "清空数据库确认");
+	NOTIFICATION("notification", "通知");
 
 	/**
 	 * 模板编码

@@ -61,22 +61,4 @@ public class LogJobController {
 		return Result.success(null, DELETE_SUCCESS.getMessage());
 	}
 
-	@Operation(summary = "发送清空日志验证码")
-	@PreAuthorize("@auth.decide('sysJobLog:clearAll')")
-	@PostMapping("send-code")
-	public Result<String> sendCode() {
-		logJobService.sendClearLogVerificationCode();
-
-		return Result.success();
-	}
-
-	@Operation(summary = "清空全部日志")
-	@PreAuthorize("@auth.decide('sysJobLog:clearAll')")
-	@DeleteMapping("clear")
-	public Result<String> clearAll(@RequestParam("code") String code) {
-		logJobService.clearAll(code);
-
-		return Result.success(null, DELETE_SUCCESS.getMessage());
-	}
-
 }

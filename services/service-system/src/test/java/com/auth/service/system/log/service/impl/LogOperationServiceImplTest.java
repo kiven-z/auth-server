@@ -98,8 +98,7 @@ class LogOperationServiceImplTest {
 	void getDetailThrowsWhenNotFound() {
 		when(logOperationMapper.selectById(99L)).thenReturn(null);
 
-		assertThatThrownBy(() -> logOperationService.getDetail(99L))
-			.isInstanceOf(SystemBusinessException.class)
+		assertThatThrownBy(() -> logOperationService.getDetail(99L)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(DATA_NOT_EXIST);
 	}
