@@ -75,8 +75,8 @@ public class SysJobCircuitBreaker {
 		if (recent.size() < threshold) {
 			return;
 		}
-		// 失败日志约定：status=true 表示失败（log_job.status=1）
-		boolean allFailed = recent.stream().allMatch(log -> BooleanUtil.isTrue(log.getStatus()));
+		// 失败日志约定：status=false 表示失败（log_job.status=0）
+		boolean allFailed = recent.stream().allMatch(log -> BooleanUtil.isFalse(log.getStatus()));
 		if (!allFailed) {
 			return;
 		}

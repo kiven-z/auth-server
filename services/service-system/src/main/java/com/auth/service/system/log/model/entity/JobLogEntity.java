@@ -41,7 +41,7 @@ public class JobLogEntity extends BaseEntity {
 	@Schema(title = "触发类型(SCHEDULE/MANUAL)")
 	private String triggerType;
 
-	@Schema(title = "状态(0成功 1失败)")
+	@Schema(title = "执行是否成功(1=成功，0=失败)")
 	private Boolean status;
 
 	@Schema(title = "异常信息")

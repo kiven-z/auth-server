@@ -22,4 +22,14 @@ public class MapStructStringQualifiers {
 		return CharSequenceUtil.blankToDefault(value, null);
 	}
 
+	/**
+	 * JDBC 整型状态 → API 布尔（1=成功 → true，0=失败 → false）
+	 * @param dbStatus 库表 0/1
+	 * @return API 语义
+	 */
+	@Named("dbIntToSuccessBoolean")
+	public Boolean dbIntToSuccessBoolean(Integer dbStatus) {
+		return dbStatus != null && dbStatus == 1;
+	}
+
 }

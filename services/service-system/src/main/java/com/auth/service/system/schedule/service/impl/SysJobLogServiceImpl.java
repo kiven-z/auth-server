@@ -35,7 +35,7 @@ public class SysJobLogServiceImpl extends ServiceImpl<JobLogMapper, JobLogEntity
 		sysJobLog.setInvokeTarget(invokeTarget);
 		sysJobLog.setTriggerType(triggerType);
 		sysJobLog.setJobMessage(message);
-		sysJobLog.setStatus(false);
+		sysJobLog.setStatus(true);
 		sysJobLog.setElapsedTime(elapsedMs);
 		sysJobLog.setCreateTime(LocalDateTime.now());
 		save(sysJobLog);
@@ -54,7 +54,7 @@ public class SysJobLogServiceImpl extends ServiceImpl<JobLogMapper, JobLogEntity
 		jobLog.setInvokeTarget(invokeTarget);
 		jobLog.setTriggerType(triggerType);
 		jobLog.setJobMessage("FAILED");
-		jobLog.setStatus(true);
+		jobLog.setStatus(false);
 		jobLog.setElapsedTime(elapsedMs);
 		jobLog.setCreateTime(LocalDateTime.now());
 
