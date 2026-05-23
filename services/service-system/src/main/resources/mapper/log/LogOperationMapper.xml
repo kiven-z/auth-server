@@ -22,7 +22,6 @@
             lo.update_user
         FROM log_operation lo
         <where>
-            lo.is_deleted = 0
             <if test="query.userId != null">
                 AND lo.user_id = #{query.userId}
             </if>

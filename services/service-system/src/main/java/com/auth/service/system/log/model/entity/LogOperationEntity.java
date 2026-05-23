@@ -10,7 +10,7 @@ import lombok.experimental.Accessors;
 import java.io.Serial;
 
 /**
- * 操作日志，对应 {@code log_operation}。
+ * 操作日志
  *
  * @author Bunny
  */
@@ -61,8 +61,5 @@ public class LogOperationEntity extends BaseEntity {
 
 	@Schema(title = "User-Agent")
 	private String userAgent;
-
-	@Schema(title = "逻辑删除")
-	private Boolean isDeleted;
 
 }

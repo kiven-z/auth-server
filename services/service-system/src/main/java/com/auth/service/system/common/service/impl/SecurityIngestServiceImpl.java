@@ -93,8 +93,8 @@ public class SecurityIngestServiceImpl implements SecurityIngestService {
 	 */
 	@Override
 	public void append(OperationLogPayloadEvent payload) {
-		Long uid = payload.getUserId() != null ? payload.getUserId() : 0L;
-		LogOperationEntity entity = LogOperationPayloadConverter.INSTANCE.toInsertEntity(payload, uid);
+		Long principalUserId = payload.getUserId();
+		LogOperationEntity entity = LogOperationPayloadConverter.INSTANCE.toInsertEntity(payload, principalUserId);
 		logOperationMapper.insert(entity);
 	}
 

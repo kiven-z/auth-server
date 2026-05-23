@@ -58,7 +58,7 @@ public class LogOperationServiceImpl extends ServiceImpl<LogOperationMapper, Log
 	@Override
 	public LogOperationDetailVO getDetail(Long id) {
 		LogOperationEntity entity = getById(id);
-		if (entity == null || Boolean.TRUE.equals(entity.getIsDeleted())) {
+		if (entity == null) {
 			throw new SystemBusinessException(DATA_NOT_EXIST);
 		}
 		LogOperationDetailVO vo = LogOperationConverter.INSTANCE.toDetailVo(entity);

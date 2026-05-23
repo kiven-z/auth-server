@@ -83,7 +83,6 @@ class LogOperationServiceImplTest {
 		LogOperationEntity entity = new LogOperationEntity();
 		entity.setId(10L);
 		entity.setUserId(2L);
-		entity.setIsDeleted(false);
 		when(logOperationMapper.selectById(10L)).thenReturn(entity);
 		when(auditUserDisplayService.mapUsernamesByIds(List.of(2L))).thenReturn(Map.of(2L, "operator"));
 
@@ -91,6 +90,24 @@ class LogOperationServiceImplTest {
 
 		assertThat(detail.getUsername()).isEqualTo("operator");
 		verify(auditUserDisplayService).enrichAuditUsernames(any(List.class));
+	}
+
+	@Test
+	@DisplayName("分页查询：匿名用户不解析用户名")
+	void getPageSkipsUsernameWhenUserIdNull() {
+		Page<LogOperationEntity> pageParams = new Page<>(1, 10);
+		LogOperationQuery query = new LogOperationQuery();
+		LogOperationPageRowPO po = new LogOperationPageRowPO();
+		po.setUserId(null);
+		Page<LogOperationPageRowPO> poPage = new Page<>(1, 10);
+		poPage.setRecords(List.of(po));
+		when(logOperationMapper.selectListByPage(pageParams, query)).thenReturn(poPage);
+
+		PageResponse<LogOperationPageVO> result = logOperationService.getPage(pageParams, query);
+
+		assertThat(result.getList()).hasSize(1);
+		assertThat(result.getList().get(0).getUserId()).isNull();
+		assertThat(result.getList().get(0).getUsername()).isNull();
 	}
 
 	@Test

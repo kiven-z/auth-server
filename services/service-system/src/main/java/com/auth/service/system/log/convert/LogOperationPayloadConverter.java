@@ -21,9 +21,9 @@ public interface LogOperationPayloadConverter {
 	LogOperationPayloadConverter INSTANCE = Mappers.getMapper(LogOperationPayloadConverter.class);
 
 	/**
-	 * 将负载映射为待插入实体；审计用户与操作用户均使用 {@code effectiveUserId}（通常为已规范化的用户主键）。
+	 * 将负载映射为待插入实体
 	 * @param payload 操作日志负载
-	 * @param effectiveUserId 操作用户 ID（未登录场景调用方应传入 0）
+	 * @param principalUserId 操作用户 ID；匿名或未认证时为null
 	 * @return 持久化实体
 	 */
 	@Mapping(target = "id", ignore = true)
@@ -31,15 +31,14 @@ public interface LogOperationPayloadConverter {
 	@Mapping(target = "updateTime", ignore = true)
 	@Mapping(target = "version", ignore = true)
 	@Mapping(target = "remark", ignore = true)
-	@Mapping(target = "userId", source = "effectiveUserId")
-	@Mapping(target = "createUser", source = "effectiveUserId")
-	@Mapping(target = "updateUser", source = "effectiveUserId")
-	@Mapping(target = "isDeleted", constant = "false")
+	@Mapping(target = "userId", source = "principalUserId")
+	@Mapping(target = "createUser", source = "principalUserId")
+	@Mapping(target = "updateUser", source = "principalUserId")
 	@Mapping(target = "targetType", source = "payload.targetType", qualifiedByName = "blankToNull")
 	@Mapping(target = "requestParams", source = "payload.requestParams", qualifiedByName = "blankToNull")
 	@Mapping(target = "responseMessage", source = "payload.responseMessage", qualifiedByName = "blankToNull")
 	@Mapping(target = "userAgent", source = "payload.userAgent", qualifiedByName = "blankToNull")
 	@BeanMapping(ignoreUnmappedSourceProperties = { "userId", "className", "methodName", "timestamp" })
-	LogOperationEntity toInsertEntity(OperationLogPayloadEvent payload, Long effectiveUserId);
+	LogOperationEntity toInsertEntity(OperationLogPayloadEvent payload, Long principalUserId);
 
 }
