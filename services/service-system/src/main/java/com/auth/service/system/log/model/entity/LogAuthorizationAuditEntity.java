@@ -10,7 +10,7 @@ import lombok.experimental.Accessors;
 import java.io.Serial;
 
 /**
- * 权限决策审计日志，对应 {@code log_authorization_audit}；主体用户见 {@code create_user}
+ * 权限决策审计日志
  *
  * @author Bunny
  */
@@ -67,8 +67,5 @@ public class LogAuthorizationAuditEntity extends BaseEntity {
 
 	@Schema(title = "异常消息")
 	private String exceptionMessage;
-
-	@Schema(title = "逻辑删除标记", description = "物理删除")
-	private Boolean isDeleted;
 
 }

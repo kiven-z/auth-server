@@ -33,7 +33,9 @@ public class AuditUserDisplayServiceImpl implements AuditUserDisplayService {
 	 */
 	private static List<Long> collectAuditUserIds(List<? extends BaseResponse> records) {
 		return records.stream()
-			.flatMap(vo -> Stream.of(vo.getCreateUser(), vo.getUpdateUser()).filter(Objects::nonNull))
+			.flatMap(vo -> Stream.of(vo.getCreateUser(), vo.getUpdateUser()))
+			.filter(Objects::nonNull)
+			.filter(userId -> userId > 0)
 			.distinct()
 			.toList();
 	}
@@ -46,7 +48,11 @@ public class AuditUserDisplayServiceImpl implements AuditUserDisplayService {
 		if (CollUtil.isEmpty(userIds)) {
 			return Collections.emptyMap();
 		}
-		List<Long> distinctIds = userIds.stream().filter(Objects::nonNull).distinct().toList();
+		List<Long> distinctIds = userIds.stream()
+			.filter(Objects::nonNull)
+			.filter(userId -> userId > 0)
+			.distinct()
+			.toList();
 		if (CollUtil.isEmpty(distinctIds)) {
 			return Collections.emptyMap();
 		}

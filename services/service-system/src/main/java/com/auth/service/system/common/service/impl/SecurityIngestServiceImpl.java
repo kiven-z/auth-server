@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 
 /**
- * 安全类内部上报数据落库实现（授权审计、操作日志）。
+ * 安全类内部上报数据落库实现。
  *
  * @author Bunny
  */

@@ -19,6 +19,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 
 /**
@@ -60,7 +62,9 @@ public class LogAuthorizationAuditServiceImpl extends
 		if (po == null) {
 			throw new SystemBusinessException(DATA_NOT_EXIST);
 		}
-		return LogAuthorizationAuditConverter.INSTANCE.toDetailVo(po);
+		LogAuthorizationAuditDetailVO vo = LogAuthorizationAuditConverter.INSTANCE.toDetailVo(po);
+		auditUserDisplayService.enrichAuditUsernames(List.of(vo));
+		return vo;
 	}
 
 }

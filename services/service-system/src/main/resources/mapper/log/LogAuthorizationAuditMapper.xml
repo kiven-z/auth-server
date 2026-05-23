@@ -16,9 +16,7 @@
         laa.create_user,
         laa.update_user
         FROM log_authorization_audit laa
-        LEFT JOIN sys_user u ON laa.create_user = u.id AND u.is_deleted = 0
         <where>
-            laa.is_deleted = 0
             <if test="query.eventType != null and query.eventType != ''">
                 AND laa.event_type = #{query.eventType}
             </if>
@@ -61,7 +59,6 @@
                laa.update_user
         FROM log_authorization_audit laa
         WHERE laa.id = #{id}
-          AND laa.is_deleted = 0
     </select>
 
 </mapper>

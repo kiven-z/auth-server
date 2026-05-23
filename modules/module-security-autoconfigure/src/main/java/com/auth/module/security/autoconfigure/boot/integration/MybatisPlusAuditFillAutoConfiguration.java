@@ -40,8 +40,8 @@ public class MybatisPlusAuditFillAutoConfiguration implements BaseMybatisPlusCon
 
 		Long userId = SecurityUserUtils.getUserId();
 		if (userId != null) {
-			this.setFieldValByName(CREATE_USER, SecurityUserUtils.getUserId(), metaObject);
-			this.setFieldValByName(UPDATE_USER, SecurityUserUtils.getUserId(), metaObject);
+			this.strictInsertFill(metaObject, CREATE_USER, Long.class, userId);
+			this.strictInsertFill(metaObject, UPDATE_USER, Long.class, userId);
 		}
 	}
 
