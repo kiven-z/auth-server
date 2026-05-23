@@ -9,7 +9,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 /**
- * 统一消息模板（sys_message_template），按 scene_code + channel 区分邮件、Dypns 验证码短信、钉钉等。
+ * 统一消息模板（sys_message_template）
  *
  * @author Bunny
  */

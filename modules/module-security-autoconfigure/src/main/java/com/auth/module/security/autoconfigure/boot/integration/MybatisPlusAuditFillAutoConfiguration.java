@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import java.time.LocalDateTime;
 
 /**
- * MyBatisPlus 配置自动填充字段 使用 auth.common.mybatis-plus.auto-fill = false 禁用
+ * MyBatisPlus 配置自动填充字段
  *
  * @author Bunny
  */
@@ -35,6 +35,7 @@ public class MybatisPlusAuditFillAutoConfiguration implements BaseMybatisPlusCon
 	public void insertFill(MetaObject metaObject) {
 		// 设置属性值
 		this.strictInsertFill(metaObject, "isDeleted", Integer.class, 0);
+		this.strictInsertFill(metaObject, "version", Long.class, 0L);
 		this.setFieldValByName(CREATE_TIME, LocalDateTime.now(), metaObject);
 		this.setFieldValByName(UPDATE_TIME, LocalDateTime.now(), metaObject);
 
