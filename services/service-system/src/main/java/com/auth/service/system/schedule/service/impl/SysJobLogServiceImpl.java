@@ -10,10 +10,8 @@ import org.quartz.JobExecutionException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-
 /**
- * 任务执行日志实现
+ * 任务执行日志实现（追加写入 {@code log_job}，删除由管理端物理删除）。
  *
  * @author Bunny
  */
@@ -23,22 +21,30 @@ import java.time.LocalDateTime;
 public class SysJobLogServiceImpl extends ServiceImpl<JobLogMapper, JobLogEntity> implements SysJobLogService {
 
 	/**
+	 * 组装公共字段；审计列由 MyBatis 填充（无登录用户时为 NULL）。
+	 */
+	private static JobLogEntity buildBaseLog(Long jobId, String jobName, String jobGroup, String invokeTarget,
+			String triggerType, long elapsedMs) {
+		JobLogEntity entity = new JobLogEntity();
+		entity.setJobId(jobId);
+		entity.setJobName(jobName);
+		entity.setJobGroup(jobGroup);
+		entity.setInvokeTarget(invokeTarget);
+		entity.setTriggerType(triggerType);
+		entity.setElapsedTime(elapsedMs);
+		return entity;
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public void recordSuccess(Long jobId, String jobName, String jobGroup, String invokeTarget, String triggerType,
 			long elapsedMs, String message) {
-		JobLogEntity sysJobLog = new JobLogEntity();
-		sysJobLog.setJobName(jobName);
-		sysJobLog.setJobId(jobId);
-		sysJobLog.setJobGroup(jobGroup);
-		sysJobLog.setInvokeTarget(invokeTarget);
-		sysJobLog.setTriggerType(triggerType);
-		sysJobLog.setJobMessage(message);
-		sysJobLog.setStatus(true);
-		sysJobLog.setElapsedTime(elapsedMs);
-		sysJobLog.setCreateTime(LocalDateTime.now());
-		save(sysJobLog);
+		JobLogEntity entity = buildBaseLog(jobId, jobName, jobGroup, invokeTarget, triggerType, elapsedMs);
+		entity.setJobMessage(message);
+		entity.setStatus(true);
+		save(entity);
 	}
 
 	/**
@@ -47,23 +53,13 @@ public class SysJobLogServiceImpl extends ServiceImpl<JobLogMapper, JobLogEntity
 	@Override
 	public void recordFailure(Long jobId, String jobName, String jobGroup, String invokeTarget, String triggerType,
 			long elapsedMs, JobExecutionException ex) {
-		JobLogEntity jobLog = new JobLogEntity();
-		jobLog.setJobName(jobName);
-		jobLog.setJobId(jobId);
-		jobLog.setJobGroup(jobGroup);
-		jobLog.setInvokeTarget(invokeTarget);
-		jobLog.setTriggerType(triggerType);
-		jobLog.setJobMessage("FAILED");
-		jobLog.setStatus(false);
-		jobLog.setElapsedTime(elapsedMs);
-		jobLog.setCreateTime(LocalDateTime.now());
-
-		// 如果异常不为空，则设置异常信息
+		JobLogEntity entity = buildBaseLog(jobId, jobName, jobGroup, invokeTarget, triggerType, elapsedMs);
+		entity.setJobMessage("FAILED");
+		entity.setStatus(false);
 		if (ex != null) {
-			jobLog.setExceptionInfo(ExceptionUtil.stacktraceToString(ex, 8000));
+			entity.setExceptionInfo(ExceptionUtil.stacktraceToString(ex, 8000));
 		}
-
-		save(jobLog);
+		save(entity);
 	}
 
 }

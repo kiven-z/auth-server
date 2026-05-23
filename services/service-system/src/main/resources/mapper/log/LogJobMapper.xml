@@ -20,7 +20,9 @@
                update_user
         FROM log_job
         <where>
-            AND is_deleted = 0
+            <if test="query.jobId != null">
+                AND job_id = #{query.jobId}
+            </if>
             <if test="query.jobName != null and query.jobName != ''">
                 AND job_name LIKE CONCAT('%',#{query.jobName}, '%')
             </if>

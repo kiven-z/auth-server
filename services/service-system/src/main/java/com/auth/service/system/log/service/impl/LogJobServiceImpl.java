@@ -16,6 +16,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 
 /**
@@ -55,7 +57,9 @@ public class LogJobServiceImpl extends ServiceImpl<LogJobMapper, JobLogEntity> i
 			throw new SystemBusinessException(DATA_NOT_EXIST);
 		}
 
-		return SysJobLogConverter.INSTANCE.toDetailVo(sysJobLog);
+		LogJobDetailVO vo = SysJobLogConverter.INSTANCE.toDetailVo(sysJobLog);
+		auditUserDisplayService.enrichAuditUsernames(List.of(vo));
+		return vo;
 	}
 
 }

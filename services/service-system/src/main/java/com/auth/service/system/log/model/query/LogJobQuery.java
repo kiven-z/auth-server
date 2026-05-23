@@ -23,6 +23,9 @@ public class LogJobQuery extends PageQueryRequest implements Serializable {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
+	@Schema(title = "任务 ID")
+	private Long jobId;
+
 	@Schema(title = "任务名称")
 	private String jobName;
 

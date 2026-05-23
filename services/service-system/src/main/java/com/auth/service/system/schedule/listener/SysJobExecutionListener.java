@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 /**
- * 统一记录 {@code log_job}，并在失败时触发熔断判断
+ * 统一记录
  *
  * @author Bunny
  */

@@ -1,6 +1,6 @@
 ---
 description: Git 提交信息格式规范
-globs: **/*.java
+globs: **/*.java,**/*.xml
 ---
 
 ## Git提交规范

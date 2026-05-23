@@ -10,7 +10,7 @@ import lombok.experimental.Accessors;
 import java.io.Serial;
 
 /**
- * 定时任务执行日志，对应 {@code log_job}；删除走逻辑删除（{@code is_deleted}）
+ * 定时任务执行日志
  *
  * @author Bunny
  */
@@ -41,7 +41,7 @@ public class JobLogEntity extends BaseEntity {
 	@Schema(title = "触发类型(SCHEDULE/MANUAL)")
 	private String triggerType;
 
-	@Schema(title = "执行是否成功(1=成功，0=失败)")
+	@Schema(title = "执行是否成功")
 	private Boolean status;
 
 	@Schema(title = "异常信息")
@@ -49,8 +49,5 @@ public class JobLogEntity extends BaseEntity {
 
 	@Schema(title = "耗时毫秒")
 	private Long elapsedTime;
-
-	@Schema(title = "逻辑删除：0 否 1 是", description = "物理删除")
-	private Boolean isDeleted;
 
 }

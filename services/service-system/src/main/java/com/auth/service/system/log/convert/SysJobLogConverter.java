@@ -10,7 +10,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 /**
- * 任务日志转换器（库表/API：1=成功，0=失败，与项目 Boolean 约定一致）
+ * 任务日志转换器
  *
  * @author Bunny
  */

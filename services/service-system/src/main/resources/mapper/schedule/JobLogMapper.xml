@@ -18,7 +18,6 @@
         create_time
         FROM log_job
         <where>
-            AND is_deleted = 0
             <if test="jobName != null and jobName != ''">
                 AND job_name = #{jobName}
             </if>
