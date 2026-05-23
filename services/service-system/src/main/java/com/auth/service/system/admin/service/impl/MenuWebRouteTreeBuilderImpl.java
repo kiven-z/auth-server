@@ -4,8 +4,8 @@ import cn.hutool.core.collection.CollUtil;
 import com.auth.common.core.utils.TreeNodeProcessorUtil;
 import com.auth.module.security.contract.constants.PermissionConstant;
 import com.auth.service.system.admin.convert.MenuConvertContext;
-import com.auth.service.system.admin.convert.MenuRouteMetaConverter;
 import com.auth.service.system.admin.convert.MenuRouteNodeConverter;
+import com.auth.service.system.admin.support.MenuRouteMetaVoFactory;
 import com.auth.service.system.admin.mapper.SysMenuMapper;
 import com.auth.service.system.admin.mapper.SysMenuPermissionMapper;
 import com.auth.service.system.admin.mapper.SysMenuRoleMapper;
@@ -136,8 +136,8 @@ public class MenuWebRouteTreeBuilderImpl extends ServiceImpl<SysMenuMapper, SysM
 	 */
 	private List<RouteNodeVO> convertTreeToVO(List<MenuRouteTreeNode> nodes, MenuConvertContext context) {
 		return nodes.stream().map(node -> {
-			RouteMetaVO routeMetaVO = MenuRouteMetaConverter.INSTANCE.toRouteMetaVO(node.getMenu(), context);
-			RouteNodeVO vo = MenuRouteNodeConverter.INSTANCE.toRouteNodeVO(node, context);
+			RouteMetaVO routeMetaVO = MenuRouteMetaVoFactory.fromMenuEntity(node.getMenu(), context);
+			RouteNodeVO vo = MenuRouteNodeConverter.INSTANCE.toRouteNodeVO(node);
 			vo.setMeta(routeMetaVO);
 
 			if (CollUtil.isNotEmpty(node.getChildren())) {

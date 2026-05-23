@@ -40,8 +40,7 @@ public interface SysRoleConverter {
 	 * @param entity 角色实体
 	 * @return 详情 VO
 	 */
-	@Mapping(target = "roleTypeDesc",
-			expression = "java(com.auth.service.system.admin.model.enums.RoleTypeEnum.getDesc(entity.getRoleType()))")
+	@Mapping(target = "roleTypeDesc", ignore = true)
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
 	SysRoleDetailVO toDetailVo(SysRoleEntity entity);

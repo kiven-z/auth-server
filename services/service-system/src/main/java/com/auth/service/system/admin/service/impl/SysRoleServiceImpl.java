@@ -3,6 +3,7 @@ package com.auth.service.system.admin.service.impl;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.convert.SysRoleConverter;
+import com.auth.service.system.admin.convert.SysRoleDetailVoConverter;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.SysRoleMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
@@ -65,7 +66,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 			throw new SystemBusinessException(SystemAdminResultCode.ROLE_NOT_FOUND, id);
 		}
 
-		return SysRoleConverter.INSTANCE.toDetailVo(entity);
+		return SysRoleDetailVoConverter.toDetailVo(entity);
 	}
 
 	/**
