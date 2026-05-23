@@ -9,10 +9,11 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.Comparator;
 import java.util.stream.Collectors;
@@ -28,21 +29,43 @@ import java.util.stream.Collectors;
 public class ValidationExceptionHandler extends BaseExceptionResponseBuilder {
 
 	/**
-	 * 处理方法参数验证异常
+	 * 参数类型不匹配时的统一英文提示
+	 */
+	private static final String INVALID_VALUE_FORMAT = "invalid value format";
+
+	/**
+	 * 处理模型绑定与 {@code @Valid} 校验异常（含 GET 查询对象、请求体）
 	 * @param exception 异常
 	 * @return 响应实体
 	 */
-	@ExceptionHandler(MethodArgumentNotValidException.class)
-	public ResponseEntity<Result<Object>> handleMethodArgumentNotValid(MethodArgumentNotValidException exception) {
-		// 获取绑定结果
-		String details = exception.getBindingResult()
+	@ExceptionHandler(BindException.class)
+	public ResponseEntity<Result<Object>> handleBindException(BindException exception) {
+		// Spring 绑定阶段类型转换失败时的错误码
+		String typeMismatch = "typeMismatch";
+
+		String collect = exception.getBindingResult()
 			.getFieldErrors()
 			.stream()
 			.sorted(Comparator.comparing(FieldError::getField))
-			.map(fe -> fe.getField() + ": " + (fe.getDefaultMessage() != null ? fe.getDefaultMessage() : "invalid"))
+			.map(fieldError -> {
+				String message = typeMismatch.equals(fieldError.getCode()) ? INVALID_VALUE_FORMAT
+						: (fieldError.getDefaultMessage() != null ? fieldError.getDefaultMessage() : "invalid");
+				return fieldError.getField() + ": " + message;
+			})
 			.collect(Collectors.joining(", "));
 
-		return warn(HttpStatus.BAD_REQUEST, 400, "Validation failed: " + details, exception, "Validation error");
+		return validationFailed((collect), exception);
+	}
+
+	/**
+	 * 处理单个请求参数类型不匹配（如 {@code @RequestParam Long id}）
+	 * @param exception 异常
+	 * @return 响应实体
+	 */
+	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
+	public ResponseEntity<Result<Object>> handleMethodArgumentTypeMismatch(
+			MethodArgumentTypeMismatchException exception) {
+		return validationFailed(exception.getName() + ": " + INVALID_VALUE_FORMAT, exception);
 	}
 
 	/**
@@ -57,7 +80,7 @@ public class ValidationExceptionHandler extends BaseExceptionResponseBuilder {
 			.map(v -> v.getPropertyPath() + ": " + v.getMessage())
 			.collect(Collectors.joining(", "));
 
-		return warn(HttpStatus.BAD_REQUEST, 400, "Validation failed: " + details, exception, "Constraint violation");
+		return validationFailed(details, exception);
 	}
 
 	/**
@@ -71,7 +94,6 @@ public class ValidationExceptionHandler extends BaseExceptionResponseBuilder {
 		String rootName = root != null ? root.getClass().getSimpleName() : "Unknown";
 
 		String message;
-		// 根据根类型设置消息
 		switch (rootName) {
 			case "JsonParseException" -> message = "Malformed JSON: please check syntax.";
 			case "InvalidFormatException" -> message = "Invalid JSON value format: please check field types.";
@@ -80,6 +102,16 @@ public class ValidationExceptionHandler extends BaseExceptionResponseBuilder {
 		}
 
 		return warn(HttpStatus.BAD_REQUEST, 400, message, exception, "Unreadable HTTP message");
+	}
+
+	/**
+	 * 构建 400 校验失败响应
+	 */
+	private ResponseEntity<Result<Object>> validationFailed(String details, Throwable exception) {
+		// 校验失败响应前缀
+		String validationFailedPrefix = "Validation failed: ";
+
+		return warn(HttpStatus.BAD_REQUEST, 400, validationFailedPrefix + details, exception, "Validation error");
 	}
 
 }
