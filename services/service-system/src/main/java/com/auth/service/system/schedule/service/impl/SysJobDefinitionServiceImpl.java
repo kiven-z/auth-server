@@ -1,7 +1,7 @@
 package com.auth.service.system.schedule.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.BooleanUtil;
+import com.auth.service.system.schedule.convert.SysJobConverter;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.mapper.SysJobGroupMapper;
 import com.auth.service.system.common.exception.SystemBusinessException;
@@ -26,7 +26,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobKey;
 import org.quartz.SchedulerException;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -76,11 +75,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 	@Override
 	public PageResponse<SysJobPageResponse> getPage(Page<SysJobEntity> pageParams, SysJobQuery query) {
 		IPage<SysJobPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
-		IPage<SysJobPageResponse> voPage = page.convert(po -> {
-			SysJobPageResponse vo = new SysJobPageResponse();
-			BeanUtils.copyProperties(po, vo);
-			return vo;
-		});
+		IPage<SysJobPageResponse> voPage = page.convert(SysJobConverter.INSTANCE::toPageResponse);
 		auditUserDisplayService.enrichAuditUsernames(voPage);
 		return PageResponse.of(voPage);
 	}
@@ -94,8 +89,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		if (sysJob == null) {
 			throw new SystemBusinessException(DATA_NOT_EXIST);
 		}
-		SysJobDetailVO vo = new SysJobDetailVO();
-		BeanUtils.copyProperties(sysJob, vo);
+		SysJobDetailVO vo = SysJobConverter.INSTANCE.toDetailVo(sysJob);
 		SysJobSchedulerManager.FireTimes fireTimes = quartzAdmin.getFireTimes(sysJob.getJobName(),
 				sysJob.getJobGroup());
 		vo.setPreviousFireTime(toLocalDateTime(fireTimes.previousFireTime()));
@@ -109,7 +103,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 	@Override
 	public void create(SysJobCreateForm form) {
 		validateGroupEnabled(form.getJobGroup());
-		SysJobEntity sysJob = BeanUtil.copyProperties(form, SysJobEntity.class);
+		SysJobEntity sysJob = SysJobConverter.INSTANCE.toEntity(form);
 		normalizeTaskDefinition(sysJob);
 		save(sysJob);
 		try {
@@ -131,21 +125,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 			throw new SystemBusinessException(DATA_NOT_EXIST);
 		}
 
-		dbJob.setCronExpression(form.getCronExpression());
-		dbJob.setMisfirePolicy(form.getMisfirePolicy());
-		dbJob.setConcurrent(form.getConcurrent());
-		dbJob.setStartTime(form.getStartTime());
-		dbJob.setEndTime(form.getEndTime());
-		dbJob.setStatus(form.getStatus());
-		dbJob.setJobParams(form.getJobParams());
-		dbJob.setPayloadJson(form.getPayloadJson());
-		dbJob.setHandlerCode(form.getHandlerCode());
-		dbJob.setTaskType(form.getTaskType());
-		dbJob.setRemark(form.getRemark());
-		if (form.getInvokeTarget() != null) {
-			dbJob.setInvokeTarget(form.getInvokeTarget());
-		}
-
+		SysJobConverter.INSTANCE.updateEntity(form, dbJob);
 		normalizeTaskDefinition(dbJob);
 		updateById(dbJob);
 		try {

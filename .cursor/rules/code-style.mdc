@@ -24,12 +24,55 @@ alwaysApply: true
 5. 如果要做分页查询必须返回以下字段（除非明确说明不要这些字段）：`create_time`、`update_time`、`create_user`、`update_user`。
 6. 生成的代码必需要有注释，函数方法中也要有相应的文档注释。如果是类中的常量，必须使用 `static final` 修饰符，且要有文档注释。即使是简单的
    `private static final`也要有注释。生成的实现类要有注释。
-7. 如果使用工具类，优先考虑使用 hutool 工具类。
-8. 如果要在service模块中使用stream时转换对象，优先在目录convert使用mapstruct。如果只是简单的三个字段以下的不用。
+7. 如果使用工具类，优先考虑使用 hutool 工具类；与「对象映射」冲突时以 **§对象映射** 为准（基础设施层 `Map↔Bean` 等例外见该节）。
+8. Service 层对象转换遵循 **§对象映射**：默认在 `{module}/convert` 使用 MapStruct，但不强制；**KISS 优先于技术栈统一**。
 9. 如果涉及表单校验使用`jakarta.validation.constraints`相关包下的注解。
 10. 如果数据库中没有这个字段或者有需要改的，将SQL生成在后端db目录下，并用注释表明作用，修改了什么。
 11. **数据库层（Mapper）与展现层（VO/Response）之间不能直接耦合**。Mapper 层应面向 Entity 或 PO（Persistent Object），VO 应只在
-    Service/Controller 层组装。%% %%
+    Service/Controller 层组装。
+
+### 对象映射（MapStruct / convert）
+
+**目标**：减少 Service 中散落的 setter 与 Bean 拷贝，集中维护类型映射；**不是**「凡转换必 MapStruct」。与 **KISS 原则** 冲突时，选更简单、更可读的方案。
+
+#### 默认策略
+
+- 业务层 **稳定 Java 类型** 之间的映射（Entity / PO / Form / VO / Response / 领域 record），放在 `{module}/convert`，命名 `XxxConverter`，使用 `INSTANCE = Mappers.getMapper(...)`。
+- 主要收益：**类型安全**、字段集中维护、减少 Service 噪音；勿以「性能一定更好」作为唯一理由。
+
+#### 适用 MapStruct（应优先）
+
+同时满足以下条件时，使用 MapStruct：
+
+1. 源、目标均为 **编译期已知** 的 Java 类型。
+2. 映射以 **字段同名或少量 `@Mapping`** 为主，不依赖 `Map` / `Object` 动态键。
+3. 无或仅有少量 `@Named`、`@AfterMapping`（如枚举→码、审计列填充）。
+4. **生成代码占主导**：预计 MapStruct 生成逻辑 **≥ 50%**；否则重新评估（见「可不使用」）。
+
+#### 可不使用 MapStruct（允许，须在类或方法 Javadoc 用一行说明原因）
+
+| 场景 | 推荐做法 |
+|------|----------|
+| ≤3 个简单同名字段 | 内联赋值或 record 构造（**可不建** Converter） |
+| `Map` / `Map<Object,Object>` / Redis Hash | `infrastructure` 下 `*RedisCodec`，或 Repository 内私有方法；基础设施层可用 **hutool `BeanUtil`** 做 `Map↔Bean`，类上注释 `infrastructure: Map↔Bean` |
+| 含 MD5、TTL、签名、多步编排 | Builder / 领域工厂；MapStruct 只映射 **已算好的值** |
+| 映射规则频繁变化、强 if/else | 显式 Java，避免大量 `expression` |
+| 同一 `@Mapper` 内大量手写 `default` | **拆分**：仅将纯映射留在 Converter；其余归 Codec / Builder |
+
+#### 复杂度否决（强制）
+
+引入或保留 MapStruct 前必须自问：
+
+- 是否比手写 setter、record 构造或基础设施层 `BeanUtil` **更短、更清晰**？
+- 新人能否 **一眼看出** 字段来源与去向？（避免「假 `@Mapper`」：挂 MapStruct 注解却主要靠手写）
+
+若答案为否 → **不用 MapStruct**，并在 Javadoc 或 PR 说明中标注 **复杂度否决**。
+
+#### 目录与职责边界
+
+- `convert` **仅** 放：应用/领域 ↔ 展现或持久模型 的映射。
+- **禁止** 在 `convert` 中放置：Redis/MQ/HTTP 编解码、动态 `Map` 互转、以手写为主的混合巨型类。
+- Stream 中 `map` 转换对象时，优先调用 `XxxConverter.INSTANCE`，而非在 lambda 内手写 setter。
 
 ### 设计要求
 
