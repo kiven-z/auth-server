@@ -61,7 +61,6 @@ alwaysApply: true
 
 **Schema 优先**：
 
-- 生成任何后端功能前，必须先检索 `db/auth_admin_base_structure.sql`或者 `ab/auth_admin_xxx.sql`。
 - 若当前表结构不满足需求，必须先输出对应的 `ALTER TABLE` 或 `CREATE TABLE` SQL 语句，经确认后再编写 Java 代码。
 
 **MyBatis-Plus 规范**：

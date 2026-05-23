@@ -19,7 +19,6 @@
             ll.update_user
         FROM log_login ll
         <where>
-            ll.is_deleted = 0
             <if test="query.userId != null">
                 AND ll.user_id = #{query.userId}
             </if>

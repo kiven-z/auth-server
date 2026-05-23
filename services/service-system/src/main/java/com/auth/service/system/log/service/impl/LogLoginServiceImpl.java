@@ -21,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 
 /**
- * ???? Service ??
+ * 登录日志 Service 实现
  *
  * @author Bunny
  */

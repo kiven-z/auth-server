@@ -18,6 +18,7 @@ import java.lang.reflect.Field;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -56,6 +57,23 @@ class AuthLoginAuditRecorderTest {
 		assertEquals(AuthLoginLogType.LOGIN_PASSWORD.name(), saved.getLoginType());
 		assertEquals("user", saved.getUsername());
 		assertEquals("jti-1", saved.getSessionId());
+		assertEquals(1L, saved.getCreateUser());
+		assertEquals(1L, saved.getUpdateUser());
+	}
+
+	@Test
+	@DisplayName("审计写入：未识别用户时 user_id 与审计字段均为 null")
+	void recordLoginLog_shouldLeaveAuditFieldsNull_whenUserIdNull() {
+		loginAuditRecorder.recordLoginLog(LoginAuditSnapshot.empty(), AuthLoginLogType.LOGIN_PASSWORD,
+				AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR, null, "13800138000", "user.not.found", null);
+
+		ArgumentCaptor<LoginLogEntity> captor = ArgumentCaptor.forClass(LoginLogEntity.class);
+		verify(loginLogMapper).insert(captor.capture());
+		LoginLogEntity saved = captor.getValue();
+		assertNull(saved.getUserId());
+		assertNull(saved.getCreateUser());
+		assertNull(saved.getUpdateUser());
+		assertEquals("13800138000", saved.getUsername());
 	}
 
 	@Test

@@ -46,11 +46,11 @@ public class AuthLoginAuditRecorder extends ServiceImpl<LoginLogMapper, LoginLog
 			entity.setLoginTime(LocalDateTime.now());
 			entity.setSessionId(sessionId);
 
-			// 设置更新用户和创建用户，因为部分登录不存在用户信息
-			entity.setCreateUser(userId);
-			entity.setUpdateUser(userId);
-			entity.setCreateTime(LocalDateTime.now());
-			entity.setUpdateTime(LocalDateTime.now());
+			if (userId != null) {
+				entity.setCreateUser(userId);
+				entity.setUpdateUser(userId);
+			}
+
 			baseMapper.insert(entity);
 		}
 		catch (Exception ex) {
