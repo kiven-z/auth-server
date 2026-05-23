@@ -2,4 +2,12 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.auth.service.auth.authorization.infrastructure.persistence.AuthorizationImpactMapper">
 
+    <!-- 按角色码反查受影响用户 ID（grant_table USER/DEPT/POST，与 UserGrantSqlFragmentMapper 正向语义同源） -->
+    <select id="selectUserIdsByRoleCodes" resultType="java.lang.Long">
+        SELECT DISTINCT impacted.user_id
+        FROM (
+        <include refid="com.auth.service.auth.authorization.infrastructure.persistence.UserGrantSqlFragmentMapper.selectUserIdsByRoleCodesUnion"/>
+        ) impacted
+    </select>
+
 </mapper>

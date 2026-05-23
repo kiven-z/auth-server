@@ -23,16 +23,33 @@ public class LoginAccountLookupAdapter {
 		this.userMapper = userMapper;
 	}
 
+	/**
+	 * 根据凭证维度查询登录账户
+	 * @param dimension 凭证维度
+	 * @param value 凭证值
+	 * @return 登录账户
+	 */
 	public Optional<LoginAccount> findForLogin(CredentialDimension dimension, String value) {
 		return Optional.ofNullable(UserCredentialQueries.forLogin(userMapper, toField(dimension), value))
 			.map(LoginAccount::from);
 	}
 
+	/**
+	 * 根据凭证维度查询当前有效的登录账户
+	 * @param dimension 凭证维度
+	 * @param value 凭证值
+	 * @return 登录账户
+	 */
 	public Optional<LoginAccount> findActiveOnly(CredentialDimension dimension, String value) {
 		return Optional.ofNullable(UserCredentialQueries.activeOnly(userMapper, toField(dimension), value))
 			.map(LoginAccount::from);
 	}
 
+	/**
+	 * 将凭证维度转换为用户凭证字段
+	 * @param dimension 凭证维度
+	 * @return 用户凭证字段
+	 */
 	private static UserCredentialField toField(CredentialDimension dimension) {
 		return UserCredentialField.valueOf(dimension.name());
 	}
