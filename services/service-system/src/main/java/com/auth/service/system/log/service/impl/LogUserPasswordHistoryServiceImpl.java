@@ -19,10 +19,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 
 /**
- * ?????? Service ??
+ * 密码历史日志查询与物理删除
  *
  * @author Bunny
  */
@@ -46,7 +48,6 @@ public class LogUserPasswordHistoryServiceImpl
 	public PageResponse<LogUserPasswordHistoryPageVO> getPage(Page<LogUserPasswordHistoryEntity> pageParams,
 			LogUserPasswordHistoryQuery query) {
 		IPage<LogUserPasswordHistoryPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
-		// PO ? VO
 		IPage<LogUserPasswordHistoryPageVO> voPage = page.convert(LogUserPasswordHistoryConverter.INSTANCE::toPageVO);
 		auditUserDisplayService.enrichAuditUsernames(voPage);
 		return PageResponse.of(voPage);
@@ -61,7 +62,9 @@ public class LogUserPasswordHistoryServiceImpl
 		if (po == null) {
 			throw new SystemBusinessException(DATA_NOT_EXIST);
 		}
-		return LogUserPasswordHistoryConverter.INSTANCE.toDetailVo(po);
+		LogUserPasswordHistoryDetailVO vo = LogUserPasswordHistoryConverter.INSTANCE.toDetailVo(po);
+		auditUserDisplayService.enrichAuditUsernames(List.of(vo));
+		return vo;
 	}
 
 }

@@ -9,9 +9,9 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 /**
- * 用户密码历史日志，对应 {@code log_user_password_history}
+ * 用户密码历史日志，对应表 {@code log_user_password_history}。
  * <p>
- * 每次用户修改密码时记录password_hash 使用 BCrypt 加密存储，仅用于后续新旧密码比对， 严禁通过任何接口返回给前端
+ * 记录用户修改密码时的 Hash（BCrypt），仅用于历史密码比对，禁止通过 API 返回 {@code passwordHash}。 删除接口为物理删除。
  * </p>
  *
  * @author Bunny
@@ -23,20 +23,14 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class LogUserPasswordHistoryEntity extends BaseEntity {
 
-	@Schema(title = "用户ID")
+	@Schema(title = "用户 ID；未关联用户时为 null")
 	private Long userId;
 
 	@JsonIgnore
-	@Schema(title = "密码Hash值")
+	@Schema(title = "密码 Hash（BCrypt）")
 	private String passwordHash;
 
-	@Schema(title = "修改IP地址")
+	@Schema(title = "修改密码时的客户端 IP")
 	private String changeIp;
-
-	/**
-	 * 逻辑删除标记（查询 SQL 显式带 {@code is_deleted = 0}；未使用 {@code @TableLogic}，便于后续一键启用）
-	 */
-	@Schema(title = "逻辑删除")
-	private Boolean isDeleted;
 
 }

@@ -51,4 +51,12 @@ public class LogUserPasswordHistoryDetailRowPO implements Serializable {
 	@Schema(title = "更新时间")
 	private LocalDateTime updateTime;
 
+	@JsonStringFormat
+	@Schema(title = "创建用户")
+	private Long createUser;
+
+	@JsonStringFormat
+	@Schema(title = "更新用户")
+	private Long updateUser;
+
 }
