@@ -35,9 +35,11 @@ public class TemplateMessageCommandChecker {
 		if (command == null) {
 			return Optional.empty();
 		}
+		// 校验模板或正文是否有效
 		if (!isTemplateOrBodyValid(command)) {
 			return Optional.of(INVALID_TEMPLATE_MESSAGE_COMMAND);
 		}
+		// 校验渠道选项是否匹配
 		if (!isChannelOptionsMatch(command)) {
 			return Optional.of(CHANNEL_OPTIONS_MISMATCH);
 		}
@@ -50,10 +52,13 @@ public class TemplateMessageCommandChecker {
 	 * @return 是否有效
 	 */
 	private static boolean isTemplateOrBodyValid(TemplateMessageCommand command) {
+		// 校验自定义正文是否有效
 		if (Boolean.TRUE.equals(command.getCustomBody())) {
 			String body = command.getBody();
 			return body != null && !body.isBlank();
 		}
+
+		// 校验模板代码是否有效
 		String templateCode = command.getTemplateCode();
 		return templateCode != null && !templateCode.isBlank();
 	}

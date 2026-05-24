@@ -3,8 +3,8 @@ package com.auth.service.system.message.service.impl;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.channel.MessageSender;
 import com.auth.module.message.api.command.TemplateMessageCommand;
-import com.auth.module.message.api.dispatch.MessageDispatchService;
 import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.message.service.MessageDispatchService;
 import com.auth.service.system.message.validation.TemplateMessageCommandValidation;
 import org.springframework.stereotype.Service;
 
