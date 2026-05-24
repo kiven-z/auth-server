@@ -3,6 +3,7 @@ package com.auth.service.system.schedule.support;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.message.validation.TemplateMessageCommandChecker;
 import com.auth.service.system.schedule.model.payload.MessageDispatchPayload;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -104,6 +105,9 @@ public class MessageDispatchCommandParser {
 			String message = violations.iterator().next().getMessage();
 			throw new SystemBusinessException(JOB_MESSAGE_COMMAND_INVALID, message);
 		}
+		TemplateMessageCommandChecker.findViolation(command).ifPresent(message -> {
+			throw new SystemBusinessException(JOB_MESSAGE_COMMAND_INVALID, message);
+		});
 	}
 
 }

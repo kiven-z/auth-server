@@ -20,6 +20,11 @@ public enum SystemMessageResultCode implements SystemResultCode {
 	MESSAGE_SEND_COMMAND_NULL(400, 279, "MESSAGE_SEND_COMMAND_NULL", "system.message.send.command_null"),
 
 	/**
+	 * 消息发送命令业务规则不合法
+	 */
+	MESSAGE_COMMAND_INVALID(400, 283, "MESSAGE_COMMAND_INVALID", "system.message.send.command_invalid"),
+
+	/**
 	 * 消息渠道未实现或不支持
 	 */
 	MESSAGE_CHANNEL_UNSUPPORTED(400, 280, "MESSAGE_CHANNEL_UNSUPPORTED", "system.message.channel.unsupported"),

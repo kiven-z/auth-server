@@ -2,7 +2,6 @@ package com.auth.service.auth.authentication.application;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.module.message.api.channel.MessageChannel;
-import com.auth.module.message.api.command.ChannelOptionsSupport;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.message.api.model.email.EmailChannelOptions;
 import com.auth.service.auth.authentication.application.message.AuthMessageScene;
@@ -83,7 +82,7 @@ class AuthMessageServiceTest {
 			assertEquals(MessageChannel.EMAIL, command.getChannel());
 			assertEquals(AuthMessageScene.LOGIN_EMAIL.getTemplateCode(), command.getTemplateCode());
 			assertEquals(email, command.getTargets().get(0));
-			EmailChannelOptions emailOptions = ChannelOptionsSupport.asEmail(command.getOptions());
+			EmailChannelOptions emailOptions = (EmailChannelOptions) command.getOptions();
 			assertEquals(Boolean.TRUE, emailOptions.getHasHtml());
 		}
 

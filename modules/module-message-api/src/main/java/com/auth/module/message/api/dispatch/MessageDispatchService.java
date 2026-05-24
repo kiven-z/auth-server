@@ -1,9 +1,9 @@
-package com.auth.service.system.message.service;
+package com.auth.module.message.api.dispatch;
 
 import com.auth.module.message.api.command.TemplateMessageCommand;
 
 /**
- * 消息发送编排
+ * 消息发送编排 SPI
  *
  * @author Bunny
  */

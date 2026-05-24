@@ -2,7 +2,8 @@ package com.auth.service.system.message.controller;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.module.message.api.command.TemplateMessageCommand;
-import com.auth.service.system.message.service.MessageDispatchService;
+import com.auth.module.message.api.dispatch.MessageDispatchService;
+import com.auth.module.security.autoconfigure.annotation.InternalApi;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -29,6 +30,7 @@ public class MessageSendController {
 		this.messageDispatchService = messageDispatchService;
 	}
 
+	@InternalApi
 	@Operation(summary = "发送消息", description = "按 channel 路由")
 	@PostMapping("send")
 	public Result<String> sendByTemplate(@Valid @RequestBody TemplateMessageCommand command) {

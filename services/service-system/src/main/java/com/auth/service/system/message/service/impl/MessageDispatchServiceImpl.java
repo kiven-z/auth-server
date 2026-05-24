@@ -1,10 +1,11 @@
 package com.auth.service.system.message.service.impl;
 
 import com.auth.module.message.api.channel.MessageChannel;
+import com.auth.module.message.api.channel.MessageSender;
 import com.auth.module.message.api.command.TemplateMessageCommand;
+import com.auth.module.message.api.dispatch.MessageDispatchService;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.message.channel.MessageSender;
-import com.auth.service.system.message.service.MessageDispatchService;
+import com.auth.service.system.message.validation.TemplateMessageCommandChecker;
 import org.springframework.stereotype.Service;
 
 import java.util.EnumMap;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.auth.service.system.common.exception.code.SystemMessageResultCode.MESSAGE_CHANNEL_UNSUPPORTED;
+import static com.auth.service.system.common.exception.code.SystemMessageResultCode.MESSAGE_COMMAND_INVALID;
 import static com.auth.service.system.common.exception.code.SystemMessageResultCode.MESSAGE_SEND_COMMAND_NULL;
 
 /**
@@ -43,6 +45,9 @@ public class MessageDispatchServiceImpl implements MessageDispatchService {
 		if (command.getChannel() == null) {
 			throw new SystemBusinessException(MESSAGE_CHANNEL_UNSUPPORTED, "null");
 		}
+		TemplateMessageCommandChecker.findViolation(command).ifPresent(message -> {
+			throw new SystemBusinessException(MESSAGE_COMMAND_INVALID, message);
+		});
 
 		// 获取发送器
 		MessageSender sender = senderByChannel.get(command.getChannel());

@@ -2,7 +2,7 @@ package com.auth.service.system.message.channel.email;
 
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
-import com.auth.service.system.message.channel.MessageSender;
+import com.auth.module.message.api.channel.MessageSender;
 import com.auth.service.system.message.channel.email.transport.MimeMailTransport;
 import org.springframework.stereotype.Component;
 

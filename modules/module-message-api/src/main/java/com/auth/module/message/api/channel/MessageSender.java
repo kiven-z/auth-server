@@ -1,6 +1,5 @@
-package com.auth.service.system.message.channel;
+package com.auth.module.message.api.channel;
 
-import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 
 /**

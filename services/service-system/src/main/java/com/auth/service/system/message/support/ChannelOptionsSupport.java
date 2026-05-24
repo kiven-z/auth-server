@@ -1,5 +1,6 @@
-package com.auth.module.message.api.command;
+package com.auth.service.system.message.support;
 
+import com.auth.module.message.api.command.ChannelOptions;
 import com.auth.module.message.api.model.dingtalk.DingTalkChannelOptions;
 import com.auth.module.message.api.model.email.EmailChannelOptions;
 import lombok.experimental.UtilityClass;

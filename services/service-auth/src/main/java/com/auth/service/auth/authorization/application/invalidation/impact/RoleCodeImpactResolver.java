@@ -15,34 +15,34 @@ import java.util.Set;
 @Component
 public class RoleCodeImpactResolver implements ImpactResolver<RoleCodes> {
 
-    private final AuthorizationImpactQueryPort authorizationImpactQueryPort;
+	private final AuthorizationImpactQueryPort authorizationImpactQueryPort;
 
-    public RoleCodeImpactResolver(AuthorizationImpactQueryPort authorizationImpactQueryPort) {
-        this.authorizationImpactQueryPort = authorizationImpactQueryPort;
-    }
+	public RoleCodeImpactResolver(AuthorizationImpactQueryPort authorizationImpactQueryPort) {
+		this.authorizationImpactQueryPort = authorizationImpactQueryPort;
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public AuthorizationChangeKind kind() {
-        return AuthorizationChangeKind.ROLE;
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public AuthorizationChangeKind kind() {
+		return AuthorizationChangeKind.ROLE;
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Class<RoleCodes> targetType() {
-        return RoleCodes.class;
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Class<RoleCodes> targetType() {
+		return RoleCodes.class;
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Set<Long> resolve(RoleCodes target) {
-        return authorizationImpactQueryPort.findUserIdsByRoleCodes(target.codes());
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Set<Long> resolve(RoleCodes target) {
+		return authorizationImpactQueryPort.findUserIdsByRoleCodes(target.codes());
+	}
 
 }

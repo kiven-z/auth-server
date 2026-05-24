@@ -19,8 +19,6 @@ import java.util.Map;
  *
  * @author Bunny
  */
-@ChannelOptionsMatch
-@TemplateMessageCommandValid
 @Data
 @Builder
 @NoArgsConstructor

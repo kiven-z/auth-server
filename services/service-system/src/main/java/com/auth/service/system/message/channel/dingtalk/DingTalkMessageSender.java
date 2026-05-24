@@ -2,12 +2,12 @@ package com.auth.service.system.message.channel.dingtalk;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.message.api.channel.MessageChannel;
-import com.auth.module.message.api.command.ChannelOptionsSupport;
+import com.auth.service.system.message.support.ChannelOptionsSupport;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.message.api.model.dingtalk.DingTalkChannelOptions;
 import com.auth.module.message.api.model.dingtalk.DingTalkMessageType;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.message.channel.MessageSender;
+import com.auth.module.message.api.channel.MessageSender;
 import com.auth.service.system.message.channel.dingtalk.client.DingTalkWorkNoticeClient;
 import org.springframework.stereotype.Component;
 

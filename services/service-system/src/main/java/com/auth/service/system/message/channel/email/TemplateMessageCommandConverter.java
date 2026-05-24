@@ -1,6 +1,6 @@
 package com.auth.service.system.message.channel.email;
 
-import com.auth.module.message.api.command.ChannelOptionsSupport;
+import com.auth.service.system.message.support.ChannelOptionsSupport;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.message.api.model.email.EmailChannelOptions;
 import lombok.experimental.UtilityClass;

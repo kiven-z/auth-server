@@ -3,7 +3,7 @@ package com.auth.service.system.message.channel.sms.dypns;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.message.channel.MessageSender;
+import com.auth.module.message.api.channel.MessageSender;
 import org.springframework.stereotype.Component;
 
 import static com.auth.service.system.common.exception.code.SystemMessageResultCode.SMS_CUSTOM_BODY_NOT_SUPPORTED;
