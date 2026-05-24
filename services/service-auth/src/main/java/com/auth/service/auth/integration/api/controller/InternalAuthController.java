@@ -29,6 +29,7 @@ public class InternalAuthController {
 	@Operation(summary = "刷新用户授权画像缓存（AuthProfile）")
 	@PostMapping("/cache/refresh")
 	public Result<Void> refreshUserCache(@RequestBody(required = false) List<Long> userIds) {
+		// FIXME 放在登录认证中——authentication
 		if (CollUtil.isEmpty(userIds)) {
 			return Result.success();
 		}
@@ -41,6 +42,7 @@ public class InternalAuthController {
 	@Operation(summary = "批量踢出用户全部会话")
 	@PostMapping("/sessions/kick-all")
 	public Result<Void> kickAllSessions(@RequestBody(required = false) List<Long> userIds) {
+		// FIXME 放在session会话中
 		if (CollUtil.isEmpty(userIds)) {
 			return Result.success();
 		}
@@ -53,6 +55,7 @@ public class InternalAuthController {
 	@Operation(summary = "查询用户生效角色码与权限码（供 system 动态菜单等内部调用）")
 	@GetMapping("/principal/{userId}/effective-codes")
 	public Result<EffectiveCodesVO> effectiveCodes(@PathVariable("userId") Long userId) {
+		// FIXME 放在登录认证中——authentication
 		EffectiveCodesVO body = internalAuthCoordinationService.resolveEffectiveCodes(userId);
 		return Result.success(body);
 	}

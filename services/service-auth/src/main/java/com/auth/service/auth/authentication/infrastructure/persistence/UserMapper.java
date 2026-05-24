@@ -1,9 +1,12 @@
 package com.auth.service.auth.authentication.infrastructure.persistence;
 
 import com.auth.module.platform.persistence.model.UserEntity;
+import com.auth.service.auth.authorization.infrastructure.persistence.projection.UserInvalidationStateProjection;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * 用户 Mapper（认证专用）
@@ -26,5 +29,12 @@ public interface UserMapper extends BaseMapper<UserEntity> {
 	 */
 	UserEntity selectByCredential(@Param("field") UserCredentialField field, @Param("value") String value,
 			@Param("activeOnly") boolean activeOnly);
+
+	/**
+	 * 批量查询用户失效分桶所需状态。
+	 * @param userIds 用户 ID 列表，非空
+	 * @return 状态投影
+	 */
+	List<UserInvalidationStateProjection> selectInvalidationStatesByUserIds(@Param("userIds") List<Long> userIds);
 
 }
