@@ -1,0 +1,81 @@
+package com.auth.service.system.authorization.outbox.mapper;
+
+import com.auth.service.system.authorization.outbox.model.SysAuthorizationInvalidationOutboxEntity;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+/**
+ * 授权失效 Outbox Mapper。
+ *
+ * @author Bunny
+ */
+@Mapper
+public interface SysAuthorizationInvalidationOutboxMapper {
+
+	/**
+	 * 插入待投递记录（status=PENDING）。
+	 * @param record Outbox 行
+	 * @return 影响行数
+	 */
+	int insertPending(SysAuthorizationInvalidationOutboxEntity record);
+
+	/**
+	 * 按主键查询。
+	 * @param id 主键
+	 * @return 记录，不存在为 null
+	 */
+	SysAuthorizationInvalidationOutboxEntity selectById(@Param("id") Long id);
+
+	/**
+	 * 查询可抢占的待重试记录。
+	 * @param statuses 状态列表
+	 * @param now 当前时间
+	 * @param limit 批次上限
+	 * @return 记录列表
+	 */
+	List<SysAuthorizationInvalidationOutboxEntity> selectClaimable(@Param("statuses") List<String> statuses,
+			@Param("now") LocalDateTime now, @Param("limit") int limit);
+
+	/**
+	 * 抢占记录（乐观锁 version）。
+	 * @param id 主键
+	 * @param lockedBy 实例标识
+	 * @param lockedAt 抢占时间
+	 * @param expectedVersion 期望版本
+	 * @return 更新行数
+	 */
+	int claimForProcessing(@Param("id") Long id, @Param("lockedBy") String lockedBy,
+			@Param("lockedAt") LocalDateTime lockedAt, @Param("expectedVersion") Long expectedVersion);
+
+	/**
+	 * 标记投递成功。
+	 * @param id 主键
+	 * @param processedAt 处理完成时间
+	 * @return 影响行数
+	 */
+	int markSuccess(@Param("id") Long id, @Param("processedAt") LocalDateTime processedAt);
+
+	/**
+	 * 标记投递失败并安排下次重试。
+	 * @param id 主键
+	 * @param status FAILED 或 DEAD
+	 * @param retryCount 已重试次数
+	 * @param nextRetryAt 下次重试时间（DEAD 可为 null）
+	 * @param lastError 失败原因
+	 * @return 影响行数
+	 */
+	int markFailure(@Param("id") Long id, @Param("status") String status, @Param("retryCount") int retryCount,
+			@Param("nextRetryAt") LocalDateTime nextRetryAt, @Param("lastError") String lastError);
+
+	/**
+	 * 同步投递失败时记录错误（保持 PENDING，供 Job 重试）。
+	 * @param id 主键
+	 * @param lastError 失败原因
+	 * @return 影响行数
+	 */
+	int recordSyncFailure(@Param("id") Long id, @Param("lastError") String lastError);
+
+}

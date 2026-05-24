@@ -1,6 +1,8 @@
 package com.auth.service.system.common.feign;
 
 import com.auth.common.core.model.response.Result;
+import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest;
+import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateResponse;
 import com.auth.service.system.common.feign.dto.EffectiveCodesInnerDTO;
 import com.auth.service.system.common.feign.fallback.AuthInnerFeignClientFallback;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -35,5 +37,13 @@ public interface AuthInnerFeignClient {
 	 */
 	@GetMapping("/authorization/principal/{userId}/effective-codes")
 	Result<EffectiveCodesInnerDTO> getEffectiveCodes(@PathVariable("userId") Long userId);
+
+	/**
+	 * 授权失效（反查用户 → 递增 perm_version → 刷新/驱逐画像）。
+	 * @param request 统一失效请求
+	 * @return 执行结果摘要
+	 */
+	@PostMapping("/authorization/invalidate")
+	Result<AuthorizationInvalidateResponse> invalidate(@RequestBody AuthorizationInvalidateRequest request);
 
 }

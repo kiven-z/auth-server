@@ -1,6 +1,8 @@
 package com.auth.service.system.common.feign.fallback;
 
 import com.auth.common.core.model.response.Result;
+import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest;
+import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateResponse;
 import com.auth.service.system.common.feign.AuthInnerFeignClient;
 import com.auth.service.system.common.feign.dto.EffectiveCodesInnerDTO;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +36,13 @@ public class AuthInnerFeignClientFallback implements AuthInnerFeignClient {
 	public Result<EffectiveCodesInnerDTO> getEffectiveCodes(Long userId) {
 		log.error("AuthInnerPrincipalFeignClientFallback: getEffectiveCodes failed, userId={}", userId);
 		return Result.success(new EffectiveCodesInnerDTO());
+	}
+
+	@Override
+	public Result<AuthorizationInvalidateResponse> invalidate(AuthorizationInvalidateRequest request) {
+		String eventId = request != null ? request.eventId() : null;
+		log.error("AuthInnerFeignClientFallback: invalidate failed, eventId={}", eventId);
+		return Result.error("Authorization invalidation service is unavailable");
 	}
 
 }
