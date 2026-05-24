@@ -15,7 +15,7 @@ import java.util.Set;
 import static com.auth.service.system.common.exception.code.SystemScheduleResultCode.*;
 
 /**
- * 解析消息调度载荷（仅校验 payload 信封；命令合法性由 {@link com.auth.service.system.message.service.MessageDispatchService} 统一校验）
+ * 解析消息调度载荷
  *
  * @author Bunny
  */

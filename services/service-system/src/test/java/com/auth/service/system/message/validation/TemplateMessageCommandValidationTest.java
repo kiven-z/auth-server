@@ -36,8 +36,7 @@ class TemplateMessageCommandValidationTest {
 	@Test
 	@DisplayName("command 为 null 时抛出 MESSAGE_SEND_COMMAND_NULL")
 	void validate_shouldThrowWhenCommandNull() {
-		assertThatThrownBy(() -> commandValidation.validate(null))
-			.isInstanceOf(SystemBusinessException.class)
+		assertThatThrownBy(() -> commandValidation.validate(null)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(MESSAGE_SEND_COMMAND_NULL);
 	}
@@ -51,8 +50,7 @@ class TemplateMessageCommandValidationTest {
 			.targets(Collections.emptyList())
 			.build();
 
-		assertThatThrownBy(() -> commandValidation.validate(command))
-			.isInstanceOf(SystemBusinessException.class)
+		assertThatThrownBy(() -> commandValidation.validate(command)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(MESSAGE_COMMAND_INVALID);
 	}
@@ -65,8 +63,7 @@ class TemplateMessageCommandValidationTest {
 			.templateCode("LOGIN_NOTICE")
 			.build();
 
-		assertThatThrownBy(() -> commandValidation.validate(command))
-			.isInstanceOf(SystemBusinessException.class)
+		assertThatThrownBy(() -> commandValidation.validate(command)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(MESSAGE_COMMAND_INVALID);
 	}
@@ -80,8 +77,7 @@ class TemplateMessageCommandValidationTest {
 			.customBody(Boolean.FALSE)
 			.build();
 
-		assertThatThrownBy(() -> commandValidation.validate(command))
-			.isInstanceOf(SystemBusinessException.class)
+		assertThatThrownBy(() -> commandValidation.validate(command)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(MESSAGE_COMMAND_INVALID);
 	}
@@ -95,8 +91,7 @@ class TemplateMessageCommandValidationTest {
 			.customBody(Boolean.TRUE)
 			.build();
 
-		assertThatThrownBy(() -> commandValidation.validate(command))
-			.isInstanceOf(SystemBusinessException.class)
+		assertThatThrownBy(() -> commandValidation.validate(command)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(MESSAGE_COMMAND_INVALID);
 	}
@@ -124,8 +119,7 @@ class TemplateMessageCommandValidationTest {
 			.options(DingTalkChannelOptions.builder().build())
 			.build();
 
-		assertThatThrownBy(() -> commandValidation.validate(command))
-			.isInstanceOf(SystemBusinessException.class)
+		assertThatThrownBy(() -> commandValidation.validate(command)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(MESSAGE_COMMAND_INVALID);
 	}
@@ -140,8 +134,7 @@ class TemplateMessageCommandValidationTest {
 			.options(EmailChannelOptions.builder().build())
 			.build();
 
-		assertThatThrownBy(() -> commandValidation.validate(command))
-			.isInstanceOf(SystemBusinessException.class)
+		assertThatThrownBy(() -> commandValidation.validate(command)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(MESSAGE_COMMAND_INVALID);
 	}
