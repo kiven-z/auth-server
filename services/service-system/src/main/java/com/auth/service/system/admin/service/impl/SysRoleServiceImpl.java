@@ -123,7 +123,8 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 		Boolean oldStatus = existing.getStatus();
 		Boolean newStatus = form.getStatus();
 
-		if (!CharSequenceUtil.equals(oldRoleCode, newRoleCode)) {
+		boolean roleCodeChanged = !CharSequenceUtil.equals(oldRoleCode, newRoleCode);
+		if (roleCodeChanged) {
 			long duplicate = count(Wrappers.<SysRoleEntity>lambdaQuery().eq(SysRoleEntity::getRoleCode, newRoleCode)
 				.ne(SysRoleEntity::getId, existing.getId()));
 			if (duplicate > 0) {
@@ -137,6 +138,10 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 			existing.setOrderNum(0);
 		}
 		updateById(existing);
+
+		if (roleCodeChanged) {
+			cascadeRoleCodeRename(oldRoleCode, newRoleCode);
+		}
 
 		if (shouldInvalidateAfterUpdate(oldRoleCode, newRoleCode, oldStatus, newStatus)) {
 			List<String> invalidateCodes = new ArrayList<>();
@@ -189,6 +194,18 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 			return true;
 		}
 		return !Objects.equals(oldStatus, newStatus);
+	}
+
+	/**
+	 * {@code role_code} 变更时级联更新关联表（与文档列出的 grant / 权限 / 菜单角色一致）。
+	 * @param oldRoleCode 原编码
+	 * @param newRoleCode 新编码
+	 */
+	private void cascadeRoleCodeRename(String oldRoleCode, String newRoleCode) {
+		sysRoleCascadeMapper.updateGrantTableRoleCode(oldRoleCode, newRoleCode);
+		sysRoleCascadeMapper.updateRolePermissionRoleCode(oldRoleCode, newRoleCode);
+		sysRoleCascadeMapper.updateMenuRoleRoleCode(oldRoleCode, newRoleCode);
+		log.info("Role code cascaded: {} -> {}", oldRoleCode, newRoleCode);
 	}
 
 }

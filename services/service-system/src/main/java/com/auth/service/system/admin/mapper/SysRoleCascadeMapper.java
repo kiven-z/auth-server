@@ -18,4 +18,29 @@ public interface SysRoleCascadeMapper {
 	 */
 	int deleteMenuRolesByRoleCode(@Param("roleCode") String roleCode);
 
+	/**
+	 * 角色编码变更时级联更新 grant_table。
+	 * @param oldRoleCode 原角色编码
+	 * @param newRoleCode 新角色编码
+	 * @return 更新行数
+	 */
+	int updateGrantTableRoleCode(@Param("oldRoleCode") String oldRoleCode, @Param("newRoleCode") String newRoleCode);
+
+	/**
+	 * 角色编码变更时级联更新 sys_role_permission。
+	 * @param oldRoleCode 原角色编码
+	 * @param newRoleCode 新角色编码
+	 * @return 更新行数
+	 */
+	int updateRolePermissionRoleCode(@Param("oldRoleCode") String oldRoleCode,
+			@Param("newRoleCode") String newRoleCode);
+
+	/**
+	 * 角色编码变更时级联更新 sys_menu_role。
+	 * @param oldRoleCode 原角色编码
+	 * @param newRoleCode 新角色编码
+	 * @return 更新行数
+	 */
+	int updateMenuRoleRoleCode(@Param("oldRoleCode") String oldRoleCode, @Param("newRoleCode") String newRoleCode);
+
 }

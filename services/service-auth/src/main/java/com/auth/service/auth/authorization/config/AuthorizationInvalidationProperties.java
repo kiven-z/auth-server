@@ -25,4 +25,9 @@ public class AuthorizationInvalidationProperties {
 	@NotNull
 	private Integer batchSize = 500;
 
+	/**
+	 * 是否启用策略码 → 角色码桥接（依赖 {@code role_policy} 表；表未落地前保持 {@code false}）。
+	 */
+	private boolean policyRoleBridgeEnabled = false;
+
 }

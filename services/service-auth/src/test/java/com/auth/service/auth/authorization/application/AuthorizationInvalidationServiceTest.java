@@ -7,11 +7,13 @@ import com.auth.module.security.contract.dto.invalidation.RoleInvalidatePayload;
 import com.auth.service.auth.authorization.application.invalidation.impact.ImpactResolverRegistry;
 import com.auth.service.auth.authorization.application.invalidation.policy.UserInvalidationPolicy;
 import com.auth.service.auth.authorization.config.AuthorizationInvalidationProperties;
+import com.auth.service.auth.authorization.domain.invalidation.model.IdempotencyClaimStatus;
 import com.auth.service.auth.authorization.domain.invalidation.model.UserInvalidationBuckets;
 import com.auth.service.auth.authorization.domain.invalidation.model.UserInvalidationState;
 import com.auth.service.auth.authorization.domain.invalidation.port.InvalidationIdempotencyPort;
 import com.auth.service.auth.authorization.domain.invalidation.port.UserInvalidationStateQueryPort;
 import com.auth.service.auth.authorization.domain.invalidation.port.UserPermVersionPort;
+import com.auth.service.auth.session.application.SessionAdminApplicationService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -54,6 +56,9 @@ class AuthorizationInvalidationServiceTest {
 	private AuthProfileMaterializationService authProfileMaterializationService;
 
 	@Mock
+	private SessionAdminApplicationService sessionAdminApplicationService;
+
+	@Mock
 	private AuthorizationInvalidationProperties authorizationInvalidationProperties;
 
 	@InjectMocks
@@ -70,13 +75,16 @@ class AuthorizationInvalidationServiceTest {
 		AuthorizationInvalidateResponse response = authorizationInvalidationService.invalidate(request);
 
 		assertEquals(cached, response);
+		verify(invalidationIdempotencyPort, never()).tryClaim(any(), any());
 		verify(impactResolverRegistry, never()).resolve(any());
 	}
 
 	@Test
-	@DisplayName("无影响用户时返回全零并记录幂等")
+	@DisplayName("无影响用户时返回全零并完成幂等记录")
 	void invalidate_emptyImpact_shouldReturnEmpty() {
 		when(invalidationIdempotencyPort.findProcessedOutcome("evt-2")).thenReturn(Optional.empty());
+		when(invalidationIdempotencyPort.tryClaim("evt-2", AuthorizationChangeKind.ROLE))
+			.thenReturn(IdempotencyClaimStatus.CLAIMED);
 		when(impactResolverRegistry.resolve(any())).thenReturn(Set.of());
 
 		AuthorizationInvalidateRequest request = new AuthorizationInvalidateRequest("evt-2",
@@ -84,7 +92,7 @@ class AuthorizationInvalidationServiceTest {
 		AuthorizationInvalidateResponse response = authorizationInvalidationService.invalidate(request);
 
 		assertEquals(AuthorizationInvalidateResponse.empty(), response);
-		verify(invalidationIdempotencyPort).saveProcessedOutcome(eq("evt-2"), eq(AuthorizationChangeKind.ROLE),
+		verify(invalidationIdempotencyPort).completeProcessedOutcome(eq("evt-2"), eq(AuthorizationChangeKind.ROLE),
 				eq(AuthorizationInvalidateResponse.empty()));
 	}
 
@@ -92,6 +100,8 @@ class AuthorizationInvalidationServiceTest {
 	@DisplayName("先递增 perm_version 再刷新画像")
 	void invalidate_shouldIncrementBeforeRefresh() {
 		when(invalidationIdempotencyPort.findProcessedOutcome("evt-3")).thenReturn(Optional.empty());
+		when(invalidationIdempotencyPort.tryClaim("evt-3", AuthorizationChangeKind.ROLE))
+			.thenReturn(IdempotencyClaimStatus.CLAIMED);
 		when(impactResolverRegistry.resolve(any())).thenReturn(Set.of(1L));
 		when(userInvalidationStateQueryPort.loadByUserIds(Set.of(1L)))
 			.thenReturn(List.of(new UserInvalidationState(1L, 1, false)));
@@ -111,8 +121,53 @@ class AuthorizationInvalidationServiceTest {
 		InOrder order = inOrder(userPermVersionPort, authProfileMaterializationService);
 		order.verify(userPermVersionPort).incrementInBatches(Set.of(1L), 500);
 		order.verify(authProfileMaterializationService).refreshInBatches(Set.of(1L), 500);
-		verify(invalidationIdempotencyPort).saveProcessedOutcome(eq("evt-3"), eq(AuthorizationChangeKind.ROLE),
+		verify(invalidationIdempotencyPort).completeProcessedOutcome(eq("evt-3"), eq(AuthorizationChangeKind.ROLE),
 				eq(new AuthorizationInvalidateResponse(1, 1, 1, 0)));
+	}
+
+	@Test
+	@DisplayName("逻辑删除用户驱逐后踢掉全部会话")
+	void invalidate_deletedUser_shouldKickSessions() {
+		when(invalidationIdempotencyPort.findProcessedOutcome("evt-4")).thenReturn(Optional.empty());
+		when(invalidationIdempotencyPort.tryClaim("evt-4", AuthorizationChangeKind.ROLE))
+			.thenReturn(IdempotencyClaimStatus.CLAIMED);
+		when(impactResolverRegistry.resolve(any())).thenReturn(Set.of(9L));
+		when(userInvalidationStateQueryPort.loadByUserIds(Set.of(9L)))
+			.thenReturn(List.of(new UserInvalidationState(9L, 1, true)));
+		when(userInvalidationPolicy.partition(anyCollection()))
+			.thenReturn(new UserInvalidationBuckets(Set.of(), Set.of(9L)));
+		when(authorizationInvalidationProperties.getBatchSize()).thenReturn(500);
+		when(userPermVersionPort.incrementInBatches(Set.of(), 500)).thenReturn(0);
+		when(authProfileMaterializationService.refreshInBatches(Set.of(), 500)).thenReturn(0);
+		when(authProfileMaterializationService.evictInBatches(Set.of(9L), 500)).thenReturn(1);
+
+		AuthorizationInvalidateRequest request = new AuthorizationInvalidateRequest("evt-4",
+				AuthorizationChangeKind.ROLE, new RoleInvalidatePayload(List.of("ADMIN")));
+		authorizationInvalidationService.invalidate(request);
+
+		verify(sessionAdminApplicationService).kickAllSessions(Set.of(9L));
+	}
+
+	@Test
+	@DisplayName("流水线失败时释放幂等占位")
+	void invalidate_pipelineFailure_shouldReleaseClaim() {
+		when(invalidationIdempotencyPort.findProcessedOutcome("evt-5")).thenReturn(Optional.empty());
+		when(invalidationIdempotencyPort.tryClaim("evt-5", AuthorizationChangeKind.ROLE))
+			.thenReturn(IdempotencyClaimStatus.CLAIMED);
+		when(impactResolverRegistry.resolve(any())).thenThrow(new IllegalStateException("resolver error"));
+
+		AuthorizationInvalidateRequest request = new AuthorizationInvalidateRequest("evt-5",
+				AuthorizationChangeKind.ROLE, new RoleInvalidatePayload(List.of("ADMIN")));
+
+		try {
+			authorizationInvalidationService.invalidate(request);
+		}
+		catch (IllegalStateException ignored) {
+			// expected
+		}
+
+		verify(invalidationIdempotencyPort).releaseClaim("evt-5");
+		verify(invalidationIdempotencyPort, never()).completeProcessedOutcome(any(), any(), any());
 	}
 
 }

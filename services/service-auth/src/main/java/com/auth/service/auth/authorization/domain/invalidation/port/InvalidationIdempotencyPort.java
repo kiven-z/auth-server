@@ -2,6 +2,7 @@ package com.auth.service.auth.authorization.domain.invalidation.port;
 
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateResponse;
+import com.auth.service.auth.authorization.domain.invalidation.model.IdempotencyClaimStatus;
 
 import java.util.Optional;
 
@@ -13,18 +14,33 @@ import java.util.Optional;
 public interface InvalidationIdempotencyPort {
 
 	/**
-	 * 查询已处理事件的结果摘要。
+	 * 查询已处理事件的结果摘要（不含处理中占位行）。
 	 * @param eventId 业务事件 ID
 	 * @return 已存在时返回结果，否则为空
 	 */
 	Optional<AuthorizationInvalidateResponse> findProcessedOutcome(String eventId);
 
 	/**
-	 * 记录已成功处理的事件及结果摘要。
+	 * 抢占 {@code eventId} 处理权（INSERT 占位行，依赖 {@code uk_event_id}）。
+	 * @param eventId 业务事件 ID
+	 * @param kind 变更维度
+	 * @return 抢占结果
+	 */
+	IdempotencyClaimStatus tryClaim(String eventId, AuthorizationChangeKind kind);
+
+	/**
+	 * 将占位行更新为最终处理结果。
 	 * @param eventId 业务事件 ID
 	 * @param kind 变更维度
 	 * @param response 执行结果
 	 */
-	void saveProcessedOutcome(String eventId, AuthorizationChangeKind kind, AuthorizationInvalidateResponse response);
+	void completeProcessedOutcome(String eventId, AuthorizationChangeKind kind,
+			AuthorizationInvalidateResponse response);
+
+	/**
+	 * 处理失败时释放占位，便于 Outbox 重试。
+	 * @param eventId 业务事件 ID
+	 */
+	void releaseClaim(String eventId);
 
 }

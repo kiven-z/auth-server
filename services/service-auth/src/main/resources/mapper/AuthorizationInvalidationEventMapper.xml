@@ -18,8 +18,8 @@
         LIMIT 1 
     </select>
 
-    <!-- 插入已处理失效事件（event_id 唯一约束） -->
-    <insert id="insertProcessedEvent">
+    <!-- 插入处理中占位（event_id 唯一约束，并发时仅一行成功） -->
+    <insert id="insertProcessingClaim">
         INSERT INTO auth_authorization_invalidation_event (id,
                                                            event_id,
                                                            change_kind,
@@ -43,5 +43,26 @@
                 #{processedAt},
                 0)
     </insert>
+
+    <!-- 占位行更新为最终处理结果 -->
+    <update id="updateProcessedOutcome">
+        UPDATE auth_authorization_invalidation_event
+        SET impacted_user_count = #{impactedUserCount},
+            version_bumped_count = #{versionBumpedCount},
+            profile_refreshed_count = #{profileRefreshedCount},
+            profile_evicted_count = #{profileEvictedCount},
+            processed_at = #{processedAt},
+            update_time = #{processedAt}
+        WHERE event_id = #{eventId}
+          AND impacted_user_count = -1
+    </update>
+
+    <!-- 失败时释放占位，允许 Outbox 重试 -->
+    <delete id="deleteProcessingClaim">
+        DELETE
+        FROM auth_authorization_invalidation_event
+        WHERE event_id = #{eventId}
+          AND impacted_user_count = -1
+    </delete>
 
 </mapper>

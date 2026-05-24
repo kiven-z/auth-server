@@ -9,4 +9,25 @@
         WHERE role_code = #{roleCode}
     </delete>
 
+    <!-- 角色码变更：级联 grant_table -->
+    <update id="updateGrantTableRoleCode">
+        UPDATE grant_table
+        SET role_code = #{newRoleCode}
+        WHERE role_code = #{oldRoleCode}
+    </update>
+
+    <!-- 角色码变更：级联 sys_role_permission -->
+    <update id="updateRolePermissionRoleCode">
+        UPDATE sys_role_permission
+        SET role_code = #{newRoleCode}
+        WHERE role_code = #{oldRoleCode}
+    </update>
+
+    <!-- 角色码变更：级联 sys_menu_role -->
+    <update id="updateMenuRoleRoleCode">
+        UPDATE sys_menu_role
+        SET role_code = #{newRoleCode}
+        WHERE role_code = #{oldRoleCode}
+    </update>
+
 </mapper>

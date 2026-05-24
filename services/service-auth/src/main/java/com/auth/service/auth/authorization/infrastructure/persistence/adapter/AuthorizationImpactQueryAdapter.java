@@ -2,6 +2,7 @@ package com.auth.service.auth.authorization.infrastructure.persistence.adapter;
 
 import cn.hutool.core.collection.CollUtil;
 import com.auth.module.security.contract.dto.invalidation.GrantSubjectKey;
+import com.auth.service.auth.authorization.config.AuthorizationInvalidationProperties;
 import com.auth.service.auth.authorization.domain.invalidation.port.AuthorizationImpactQueryPort;
 import com.auth.service.auth.authorization.infrastructure.persistence.AuthorizationImpactMapper;
 import org.springframework.stereotype.Repository;
@@ -19,8 +20,12 @@ public class AuthorizationImpactQueryAdapter implements AuthorizationImpactQuery
 
 	private final AuthorizationImpactMapper authorizationImpactMapper;
 
-	public AuthorizationImpactQueryAdapter(AuthorizationImpactMapper authorizationImpactMapper) {
+	private final AuthorizationInvalidationProperties authorizationInvalidationProperties;
+
+	public AuthorizationImpactQueryAdapter(AuthorizationImpactMapper authorizationImpactMapper,
+			AuthorizationInvalidationProperties authorizationInvalidationProperties) {
 		this.authorizationImpactMapper = authorizationImpactMapper;
+		this.authorizationInvalidationProperties = authorizationInvalidationProperties;
 	}
 
 	/**
@@ -140,14 +145,18 @@ public class AuthorizationImpactQueryAdapter implements AuthorizationImpactQuery
 	public Set<Long> findUserIdsByPolicyCodes(Collection<String> policyCodes) {
 		Set<Long> userIds = new HashSet<>();
 		List<String> codes = policyCodes.stream().distinct().toList();
-
-		// 查询角色代码
-		List<String> roleCodes = authorizationImpactMapper.selectRoleCodesByPolicyCodes(codes);
-		if (CollUtil.isNotEmpty(roleCodes)) {
-			userIds.addAll(findUserIdsByRoleCodes(roleCodes));
+		if (codes.isEmpty()) {
+			return Set.of();
 		}
 
-		// 查询用户ID
+		// role_policy 未落地时仅走 user_access_policy_binding，避免 SQL 报错
+		if (authorizationInvalidationProperties.isPolicyRoleBridgeEnabled()) {
+			List<String> roleCodes = authorizationImpactMapper.selectRoleCodesByPolicyCodes(codes);
+			if (CollUtil.isNotEmpty(roleCodes)) {
+				userIds.addAll(findUserIdsByRoleCodes(roleCodes));
+			}
+		}
+
 		List<Long> list = authorizationImpactMapper.selectUserIdsByPolicyBinding(codes);
 		userIds.addAll(list);
 		return Set.copyOf(userIds);

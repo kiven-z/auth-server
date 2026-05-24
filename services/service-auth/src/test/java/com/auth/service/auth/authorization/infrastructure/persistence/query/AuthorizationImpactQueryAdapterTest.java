@@ -2,8 +2,10 @@ package com.auth.service.auth.authorization.infrastructure.persistence.query;
 
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.module.security.contract.dto.invalidation.GrantSubjectKey;
+import com.auth.service.auth.authorization.config.AuthorizationInvalidationProperties;
 import com.auth.service.auth.authorization.infrastructure.persistence.AuthorizationImpactMapper;
 import com.auth.service.auth.authorization.infrastructure.persistence.adapter.AuthorizationImpactQueryAdapter;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,10 +29,19 @@ class AuthorizationImpactQueryAdapterTest {
 	@Mock
 	private AuthorizationImpactMapper authorizationImpactMapper;
 
+	private AuthorizationInvalidationProperties invalidationProperties;
+
+	private AuthorizationImpactQueryAdapter adapter;
+
+	@BeforeEach
+	void setUp() {
+		invalidationProperties = new AuthorizationInvalidationProperties();
+		adapter = new AuthorizationImpactQueryAdapter(authorizationImpactMapper, invalidationProperties);
+	}
+
 	@Test
 	@DisplayName("空角色码列表不访问数据库")
 	void findUserIdsByRoleCodes_emptyInput_shouldNotCallMapper() {
-		AuthorizationImpactQueryAdapter adapter = new AuthorizationImpactQueryAdapter(authorizationImpactMapper);
 
 		assertTrue(adapter.findUserIdsByRoleCodes(List.of()).isEmpty());
 		verifyNoInteractions(authorizationImpactMapper);
@@ -41,7 +52,6 @@ class AuthorizationImpactQueryAdapterTest {
 	void findUserIdsByRoleCodes_shouldDistinctBeforeQuery() {
 		when(authorizationImpactMapper.selectUserIdsByRoleCodes(List.of("R_A"))).thenReturn(List.of(1L, 2L));
 
-		AuthorizationImpactQueryAdapter adapter = new AuthorizationImpactQueryAdapter(authorizationImpactMapper);
 		Set<Long> userIds = adapter.findUserIdsByRoleCodes(List.of("R_A", "R_A"));
 
 		assertEquals(Set.of(1L, 2L), userIds);
@@ -55,7 +65,6 @@ class AuthorizationImpactQueryAdapterTest {
 		when(authorizationImpactMapper.selectUserIdsByGrantDeptSubjectIds(List.of(20L))).thenReturn(List.of(21L));
 		when(authorizationImpactMapper.selectUserIdsByGrantPostSubjectIds(List.of(30L))).thenReturn(List.of(31L));
 
-		AuthorizationImpactQueryAdapter adapter = new AuthorizationImpactQueryAdapter(authorizationImpactMapper);
 		Set<Long> userIds = adapter
 			.findUserIdsByGrantSubjects(List.of(new GrantSubjectKey(GrantTableSubjectType.USER, 10L),
 					new GrantSubjectKey(GrantTableSubjectType.DEPT, 20L),
@@ -73,7 +82,6 @@ class AuthorizationImpactQueryAdapterTest {
 		when(authorizationImpactMapper.selectRoleCodesByPermissionCodes(List.of("P_A"))).thenReturn(List.of("R_A"));
 		when(authorizationImpactMapper.selectUserIdsByRoleCodes(List.of("R_A"))).thenReturn(List.of(5L));
 
-		AuthorizationImpactQueryAdapter adapter = new AuthorizationImpactQueryAdapter(authorizationImpactMapper);
 		Set<Long> userIds = adapter.findUserIdsByPermissionCodes(List.of("P_A"));
 
 		assertEquals(Set.of(5L), userIds);
@@ -82,13 +90,25 @@ class AuthorizationImpactQueryAdapterTest {
 	}
 
 	@Test
-	@DisplayName("策略码合并角色桥接与直连用户")
-	void findUserIdsByPolicyCodes_shouldUnionRoleAndDirectUsers() {
+	@DisplayName("策略码：桥接关闭时仅查询直连绑定")
+	void findUserIdsByPolicyCodes_bridgeDisabled_shouldOnlyQueryBinding() {
+		invalidationProperties.setPolicyRoleBridgeEnabled(false);
+		when(authorizationImpactMapper.selectUserIdsByPolicyBinding(List.of("POL_A"))).thenReturn(List.of(2L));
+
+		Set<Long> userIds = adapter.findUserIdsByPolicyCodes(List.of("POL_A"));
+
+		assertEquals(Set.of(2L), userIds);
+		verify(authorizationImpactMapper, never()).selectRoleCodesByPolicyCodes(any());
+	}
+
+	@Test
+	@DisplayName("策略码：桥接开启时合并角色与直连用户")
+	void findUserIdsByPolicyCodes_bridgeEnabled_shouldUnionRoleAndDirectUsers() {
+		invalidationProperties.setPolicyRoleBridgeEnabled(true);
 		when(authorizationImpactMapper.selectRoleCodesByPolicyCodes(List.of("POL_A"))).thenReturn(List.of("R_A"));
 		when(authorizationImpactMapper.selectUserIdsByRoleCodes(List.of("R_A"))).thenReturn(List.of(1L));
 		when(authorizationImpactMapper.selectUserIdsByPolicyBinding(List.of("POL_A"))).thenReturn(List.of(2L));
 
-		AuthorizationImpactQueryAdapter adapter = new AuthorizationImpactQueryAdapter(authorizationImpactMapper);
 		Set<Long> userIds = adapter.findUserIdsByPolicyCodes(List.of("POL_A"));
 
 		assertEquals(Set.of(1L, 2L), userIds);

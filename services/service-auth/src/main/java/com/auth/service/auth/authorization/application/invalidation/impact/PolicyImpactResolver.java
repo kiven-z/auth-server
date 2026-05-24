@@ -9,7 +9,12 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * 按策略码反查受影响用户 ID（P4 桥接 + 用户直连绑定）。
+ * 按策略码反查受影响用户 ID（用户直连绑定 + 可选角色桥接）。
+ *
+ * <p>
+ * 角色桥接依赖 {@code role_policy} 表，由 {@code auth.auth.invalidation.policy-role-bridge-enabled} 控制，
+ * 表未落地前保持默认 {@code false}。
+ * </p>
  *
  * @author Bunny
  */
