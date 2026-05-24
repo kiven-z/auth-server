@@ -3,6 +3,7 @@ package com.auth.service.system.admin.service;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.form.role.SysRoleCreateForm;
+import com.auth.service.system.admin.model.form.role.SysRoleUpdateForm;
 import com.auth.service.system.admin.model.query.SysRoleQuery;
 import com.auth.service.system.admin.model.vo.role.SysRoleDetailVO;
 import com.auth.service.system.admin.model.vo.role.SysRoleOptionVO;
@@ -38,6 +39,18 @@ public interface SysRoleService {
 	 * @param form 新增表单
 	 */
 	void create(SysRoleCreateForm form);
+
+	/**
+	 * 更新角色；仅当 {@code role_code} 或 {@code status} 变化时触发授权失效。
+	 * @param form 更新表单
+	 */
+	void update(SysRoleUpdateForm form);
+
+	/**
+	 * 删除角色（逻辑删除）；删除前检查 grant_table 引用。
+	 * @param id 角色主键
+	 */
+	void deleteById(Long id);
 
 	/**
 	 * 查询角色下拉选项

@@ -2,6 +2,7 @@ package com.auth.service.system.admin.convert;
 
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.form.role.SysRoleCreateForm;
+import com.auth.service.system.admin.model.form.role.SysRoleUpdateForm;
 import com.auth.service.system.admin.model.vo.role.SysRoleDetailVO;
 import com.auth.service.system.admin.model.vo.role.SysRoleOptionVO;
 import com.auth.service.system.admin.model.vo.role.SysRolePageResponse;
@@ -34,6 +35,20 @@ public interface SysRoleConverter {
 	@Mapping(target = "version", ignore = true)
 	@Mapping(target = "isDeleted", ignore = true)
 	SysRoleEntity toEntity(SysRoleCreateForm form);
+
+	/**
+	 * 更新表单字段合并到已有实体（不覆盖主键与审计字段）。
+	 * @param form 更新表单
+	 * @param entity 已有实体
+	 */
+	@Mapping(target = "id", ignore = true)
+	@Mapping(target = "createTime", ignore = true)
+	@Mapping(target = "updateTime", ignore = true)
+	@Mapping(target = "createUser", ignore = true)
+	@Mapping(target = "updateUser", ignore = true)
+	@Mapping(target = "version", ignore = true)
+	@Mapping(target = "isDeleted", ignore = true)
+	void applyUpdateForm(SysRoleUpdateForm form, @org.mapstruct.MappingTarget SysRoleEntity entity);
 
 	/**
 	 * 实体 → 详情 VO

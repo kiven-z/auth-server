@@ -3,7 +3,9 @@ package com.auth.service.system.admin.controller;
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
+import com.auth.common.web.valid.group.UpdateGroup;
 import com.auth.service.system.admin.model.form.role.SysRoleCreateForm;
+import com.auth.service.system.admin.model.form.role.SysRoleUpdateForm;
 import com.auth.service.system.admin.model.query.SysRoleQuery;
 import com.auth.service.system.admin.model.vo.role.SysRoleDetailVO;
 import com.auth.service.system.admin.model.vo.role.SysRoleOptionVO;
@@ -13,6 +15,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.validation.annotation.Validated;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -58,6 +61,24 @@ public class SysRoleController {
 	@PostMapping
 	public Result<Void> create(@Valid @RequestBody SysRoleCreateForm form) {
 		sysRoleService.create(form);
+		return Result.success();
+	}
+
+	@Operation(summary = "更新角色")
+	@PreAuthorize("@auth.decide('sysRole:update')")
+	@PutMapping("/{id}")
+	public Result<Void> update(@PathVariable("id") Long id,
+			@Validated(UpdateGroup.class) @RequestBody SysRoleUpdateForm form) {
+		form.setId(id);
+		sysRoleService.update(form);
+		return Result.success();
+	}
+
+	@Operation(summary = "删除角色")
+	@PreAuthorize("@auth.decide('sysRole:delete')")
+	@DeleteMapping("/{id}")
+	public Result<Void> delete(@PathVariable("id") Long id) {
+		sysRoleService.deleteById(id);
 		return Result.success();
 	}
 

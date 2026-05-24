@@ -7,7 +7,7 @@ import lombok.Getter;
  * 系统管理域结果码（角色、权限、岗位）
  *
  * <p>
- * 号段：263、274–277（265–273、278 已释放）
+ * 号段：263、274–277、278–279（265–273 已释放）
  * </p>
  *
  * @author Bunny
@@ -43,7 +43,17 @@ public enum SystemAdminResultCode implements SystemResultCode {
 	/**
 	 * 同一部门下岗位编码已存在
 	 */
-	POST_CODE_DUPLICATE_IN_DEPT(409, 276, "POST_CODE_DUPLICATE_IN_DEPT", "system.post.code_duplicate_in_dept"),;
+	POST_CODE_DUPLICATE_IN_DEPT(409, 276, "POST_CODE_DUPLICATE_IN_DEPT", "system.post.code_duplicate_in_dept"),
+
+	/**
+	 * 角色仍被 grant_table 引用，不可删除
+	 */
+	ROLE_IN_USE(409, 278, "ROLE_IN_USE", "system.role.in_use"),
+
+	/**
+	 * 存在无效或未启用的权限码
+	 */
+	ROLE_PERMISSION_INVALID(400, 279, "ROLE_PERMISSION_INVALID", "system.role.permission_invalid"),;
 
 	private final int httpStatus;
 

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.auth.service.system.admin.mapper.SysRolePermissionMapper">
+
+    <!-- 按角色编码删除全部权限关联 -->
+    <delete id="deleteByRoleCode">
+        DELETE
+        FROM sys_role_permission
+        WHERE role_code = #{roleCode}
+    </delete>
+
+    <!-- 查询角色已分配的权限码 -->
+    <select id="selectPermissionCodesByRoleCode" resultType="java.lang.String">
+        SELECT permission_code
+        FROM sys_role_permission
+        WHERE role_code = #{roleCode}
+        ORDER BY permission_code
+    </select>
+
+    <!-- 批量插入角色权限关联 -->
+    <insert id="batchInsertRolePermissions">
+        INSERT INTO sys_role_permission (role_code,
+                                         permission_code,
+                                         grant_time,
+                                         grantor_id,
+                                         create_user,
+                                         update_user,
+                                         version)
+        VALUES
+        <foreach collection="permissionCodes" item="permissionCode" separator=",">
+            (#{roleCode},
+             #{permissionCode},
+             NOW(3),
+             #{grantorId},
+             #{createUser},
+             #{createUser},
+             0)
+        </foreach>
+    </insert>
+
+</mapper>
