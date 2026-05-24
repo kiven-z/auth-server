@@ -2,12 +2,61 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.auth.service.auth.authorization.infrastructure.persistence.AuthorizationImpactMapper">
 
-    <!-- 按角色码反查受影响用户 ID（grant_table USER/DEPT/POST，与 UserGrantSqlFragmentMapper 正向语义同源） -->
+    <!-- 按角色码反查受影响用户 ID -->
     <select id="selectUserIdsByRoleCodes" resultType="java.lang.Long">
         SELECT DISTINCT impacted.user_id
         FROM (
-        <include refid="com.auth.service.auth.authorization.infrastructure.persistence.UserGrantSqlFragmentMapper.selectUserIdsByRoleCodesUnion"/>
+        <include refid="com.auth.service.auth.authorization.infrastructure.persistence.AuthorizationGrantImpactFragments.impactUserIdsByRoleCodesFromGrant"/>
         ) impacted
+    </select>
+
+    <!-- 按 grant_table USER 主体反查用户 ID -->
+    <select id="selectUserIdsByGrantUserSubjectIds" resultType="java.lang.Long">
+        SELECT DISTINCT impacted.user_id
+        FROM (
+        <include refid="com.auth.service.auth.authorization.infrastructure.persistence.AuthorizationGrantImpactFragments.impactUserIdsByGrantUserSubjects"/>
+        ) impacted
+    </select>
+
+    <!-- 按 grant_table DEPT 主体反查用户 ID -->
+    <select id="selectUserIdsByGrantDeptSubjectIds" resultType="java.lang.Long">
+        SELECT DISTINCT impacted.user_id
+        FROM (
+        <include refid="com.auth.service.auth.authorization.infrastructure.persistence.AuthorizationGrantImpactFragments.impactUserIdsByGrantDeptSubjects"/>
+        ) impacted
+    </select>
+
+    <!-- 按 grant_table POST 主体反查用户 ID -->
+    <select id="selectUserIdsByGrantPostSubjectIds" resultType="java.lang.Long">
+        SELECT DISTINCT impacted.user_id
+        FROM (
+        <include refid="com.auth.service.auth.authorization.infrastructure.persistence.AuthorizationGrantImpactFragments.impactUserIdsByGrantPostSubjects"/>
+        ) impacted
+    </select>
+
+    <!-- 按部门 ID 反查部门成员（含子部门） -->
+    <select id="selectUserIdsByDeptIds" resultType="java.lang.Long">
+        <include refid="com.auth.service.auth.authorization.infrastructure.persistence.AuthorizationGrantImpactFragments.impactUserIdsByDeptIds"/>
+    </select>
+
+    <!-- 按岗位 ID 反查岗位成员 -->
+    <select id="selectUserIdsByPostIds" resultType="java.lang.Long">
+        <include refid="com.auth.service.auth.authorization.infrastructure.persistence.AuthorizationGrantImpactFragments.impactUserIdsByPostIds"/>
+    </select>
+
+    <!-- 权限码桥接：查询关联角色码 -->
+    <select id="selectRoleCodesByPermissionCodes" resultType="java.lang.String">
+        <include refid="com.auth.service.auth.authorization.infrastructure.persistence.AuthorizationGrantImpactFragments.impactRoleCodesByPermissionCodes"/>
+    </select>
+
+    <!-- 策略码桥接：查询关联角色码 -->
+    <select id="selectRoleCodesByPolicyCodes" resultType="java.lang.String">
+        <include refid="com.auth.service.auth.authorization.infrastructure.persistence.AuthorizationGrantImpactFragments.impactRoleCodesByPolicyCodes"/>
+    </select>
+
+    <!-- 策略码桥接：查询直连绑定的用户 ID -->
+    <select id="selectUserIdsByPolicyBinding" resultType="java.lang.Long">
+        <include refid="com.auth.service.auth.authorization.infrastructure.persistence.AuthorizationGrantImpactFragments.impactUserIdsByPolicyBinding"/>
     </select>
 
 </mapper>

@@ -4,32 +4,29 @@
 
     <!-- 查询用户角色码 -->
     <select id="selectRolesByUserId" resultType="java.lang.String">
-        <include refid="com.auth.service.auth.authorization.infrastructure.persistence.UserGrantSqlFragmentMapper.selectRolesAndPermissionsByUserIdCte"/>
-        -- 根据主体映射获取所有角色编码
+        <include refid="com.auth.service.auth.authorization.infrastructure.persistence.AuthorizationGrantForwardFragments.fwdUserSubjectsForFunctionalGrant"/>
         SELECT DISTINCT gt.role_code
         FROM grant_table gt
-        JOIN user_subjects us ON gt.subject_type = us.sub_type AND gt.subject_id = us.sub_id
-        JOIN sys_role r ON r.role_code = gt.role_code
+                 JOIN user_subjects us ON gt.subject_type = us.sub_type AND gt.subject_id = us.sub_id
+                 JOIN sys_role r ON r.role_code = gt.role_code
         WHERE r.status = 1
-        AND r.is_deleted = 0
+          AND r.is_deleted = 0
     </select>
 
     <!-- 根据用户ID查询所有有效权限 -->
     <select id="selectPermissionsByUserId" resultType="java.lang.String">
-        <include refid="com.auth.service.auth.authorization.infrastructure.persistence.UserGrantSqlFragmentMapper.selectRolesAndPermissionsByUserIdCte"/>,
+        <include refid="com.auth.service.auth.authorization.infrastructure.persistence.AuthorizationGrantForwardFragments.fwdUserSubjectsForFunctionalGrant"/>,
         all_role_codes AS (
-        -- 根据主体映射获取所有角色编码
-        SELECT DISTINCT gt.role_code
-        FROM grant_table gt
-        JOIN user_subjects us ON gt.subject_type = us.sub_type AND gt.subject_id = us.sub_id
-        JOIN sys_role r ON r.role_code = gt.role_code
-        WHERE r.status = 1
-        AND r.is_deleted = 0)
-        -- 最终关联权限表（不区分 permission_type，含按钮与 API）
+            SELECT DISTINCT gt.role_code
+            FROM grant_table gt
+                     JOIN user_subjects us ON gt.subject_type = us.sub_type AND gt.subject_id = us.sub_id
+                     JOIN sys_role r ON r.role_code = gt.role_code
+            WHERE r.status = 1
+              AND r.is_deleted = 0)
         SELECT DISTINCT p.permission_code
         FROM sys_role_permission rp
-        JOIN all_role_codes arc ON rp.role_code = arc.role_code
-        JOIN sys_permission p ON p.permission_code = rp.permission_code
+                 JOIN all_role_codes arc ON rp.role_code = arc.role_code
+                 JOIN sys_permission p ON p.permission_code = rp.permission_code
         WHERE p.status = 1
           AND p.is_deleted = 0
     </select>
@@ -37,23 +34,21 @@
     <!-- 查询用户生效数据权限片段 -->
     <select id="selectEffectiveDataScopesByUserId"
             resultType="com.auth.service.auth.authorization.infrastructure.persistence.projection.DataScopeProjection">
-        <include refid="com.auth.service.auth.authorization.infrastructure.persistence.UserGrantSqlFragmentMapper.selectDataScopeSubjectsByUserIdCte"/>
+        <include refid="com.auth.service.auth.authorization.infrastructure.persistence.AuthorizationGrantForwardFragments.fwdUserSubjectsForDataScope"/>
         SELECT ds.policy_holder_type,
-        ds.scope_resource_code,
-        ds.scope_dimension_type,
-        ds.scope_type,
-        ds.scope_subject_ids
+               ds.scope_resource_code,
+               ds.scope_dimension_type,
+               ds.scope_type,
+               ds.scope_subject_ids
         FROM data_scope_grant_table ds
-        JOIN all_subjects s ON ds.policy_holder_type = s.sub_type AND ds.policy_holder_id = s.sub_id
+                 JOIN all_subjects s ON ds.policy_holder_type = s.sub_type AND ds.policy_holder_id = s.sub_id
         WHERE ds.is_deleted = 0
         ORDER BY ds.scope_resource_code,
-        CASE ds.policy_holder_type
-        WHEN 'USER' THEN 1
-        WHEN 'ROLE' THEN 2
-        # WHEN 'DEPT' THEN 3
-        # WHEN 'POST' THEN 4
-        ELSE 9
-        END
+                 CASE ds.policy_holder_type
+                     WHEN 'USER' THEN 1
+                     WHEN 'ROLE' THEN 2
+                     ELSE 9
+                     END
     </select>
 
 </mapper>

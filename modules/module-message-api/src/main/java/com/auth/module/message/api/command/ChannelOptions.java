@@ -12,9 +12,11 @@ import java.io.Serializable;
  *
  * @author Bunny
  */
-@JsonSubTypes({ @JsonSubTypes.Type(value = EmailChannelOptions.class, name = EmailChannelOptions.TYPE),
-		@JsonSubTypes.Type(value = DingTalkChannelOptions.class, name = DingTalkChannelOptions.TYPE) })
+@JsonSubTypes({
+        // 邮件多态标识
+        @JsonSubTypes.Type(value = EmailChannelOptions.class, name = EmailChannelOptions.TYPE),
+        // 钉钉多态标识
+        @JsonSubTypes.Type(value = DingTalkChannelOptions.class, name = DingTalkChannelOptions.TYPE)})
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 public interface ChannelOptions extends Serializable {
-
 }
