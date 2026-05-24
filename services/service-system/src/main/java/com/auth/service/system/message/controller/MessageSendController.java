@@ -6,8 +6,6 @@ import com.auth.module.security.autoconfigure.annotation.InternalApi;
 import com.auth.service.system.message.service.MessageDispatchService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Bunny
  */
 @Tag(name = "统一消息发送", description = "多渠道消息发送唯一入口；钉钉直发示例：channel=DING_TALK、customBody=true、body、options")
-@Validated
 @RequestMapping("/api/system/message/")
 @RestController
 public class MessageSendController {
@@ -33,7 +30,7 @@ public class MessageSendController {
 	@InternalApi
 	@Operation(summary = "发送消息", description = "按 channel 路由")
 	@PostMapping("send")
-	public Result<String> sendByTemplate(@Valid @RequestBody TemplateMessageCommand command) {
+	public Result<String> sendByTemplate(@RequestBody TemplateMessageCommand command) {
 		messageDispatchService.sendByTemplate(command);
 		return Result.success("Message send request accepted");
 	}

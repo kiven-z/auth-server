@@ -3,7 +3,6 @@ package com.auth.service.system.schedule.support;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.message.validation.TemplateMessageCommandValidation;
 import com.auth.service.system.schedule.model.payload.MessageDispatchPayload;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,7 +15,7 @@ import java.util.Set;
 import static com.auth.service.system.common.exception.code.SystemScheduleResultCode.*;
 
 /**
- * 解析并校验消息调度命令
+ * 解析消息调度载荷（仅校验 payload 信封；命令合法性由 {@link com.auth.service.system.message.service.MessageDispatchService} 统一校验）
  *
  * @author Bunny
  */
@@ -27,17 +26,13 @@ public class MessageDispatchCommandParser {
 
 	private final Validator validator;
 
-	private final TemplateMessageCommandValidation commandValidation;
-
-	public MessageDispatchCommandParser(ObjectMapper objectMapper, Validator validator,
-			TemplateMessageCommandValidation commandValidation) {
+	public MessageDispatchCommandParser(ObjectMapper objectMapper, Validator validator) {
 		this.objectMapper = objectMapper;
 		this.validator = validator;
-		this.commandValidation = commandValidation;
 	}
 
 	/**
-	 * 将 payload_json 解析为 TemplateMessageCommand 并做 jakarta 校验
+	 * 将 payload_json 解析为 TemplateMessageCommand（不校验命令业务规则）
 	 * @param payloadJson 载荷 JSON
 	 * @return 消息命令
 	 */
@@ -45,9 +40,7 @@ public class MessageDispatchCommandParser {
 		if (CharSequenceUtil.isBlank(payloadJson)) {
 			throw new SystemBusinessException(JOB_PAYLOAD_JSON_EMPTY);
 		}
-		TemplateMessageCommand command = parseCommand(payloadJson);
-		validateCommand(command);
-		return command;
+		return parseCommand(payloadJson);
 	}
 
 	/**
@@ -85,7 +78,7 @@ public class MessageDispatchCommandParser {
 	}
 
 	/**
-	 * 校验标准载荷
+	 * 校验标准载荷信封
 	 * @param payload 标准载荷
 	 */
 	private void validatePayload(MessageDispatchPayload payload) {
@@ -97,14 +90,6 @@ public class MessageDispatchCommandParser {
 		if (payload.getVersion() != MessageDispatchPayload.VERSION_1) {
 			throw new SystemBusinessException(JOB_PAYLOAD_VERSION_UNSUPPORTED, String.valueOf(payload.getVersion()));
 		}
-	}
-
-	/**
-	 * 校验消息命令
-	 * @param command 消息命令
-	 */
-	private void validateCommand(TemplateMessageCommand command) {
-		commandValidation.validateForJob(command, JOB_MESSAGE_COMMAND_INVALID);
 	}
 
 }

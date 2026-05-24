@@ -16,7 +16,6 @@ import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemMessageResultCode.MESSAGE_COMMAND_INVALID;
 import static com.auth.service.system.common.exception.code.SystemMessageResultCode.MESSAGE_SEND_COMMAND_NULL;
-import static com.auth.service.system.common.exception.code.SystemScheduleResultCode.JOB_MESSAGE_COMMAND_INVALID;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -35,46 +34,89 @@ class TemplateMessageCommandValidationTest {
 	}
 
 	@Test
-	@DisplayName("dispatch：command 为 null 时抛出 MESSAGE_SEND_COMMAND_NULL")
-	void validateForDispatch_shouldThrowWhenCommandNull() {
-		assertThatThrownBy(() -> commandValidation.validateForDispatch(null))
+	@DisplayName("command 为 null 时抛出 MESSAGE_SEND_COMMAND_NULL")
+	void validate_shouldThrowWhenCommandNull() {
+		assertThatThrownBy(() -> commandValidation.validate(null))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(MESSAGE_SEND_COMMAND_NULL);
 	}
 
 	@Test
-	@DisplayName("dispatch：targets 为空时抛出 MESSAGE_COMMAND_INVALID")
-	void validateForDispatch_shouldThrowWhenTargetsEmpty() {
+	@DisplayName("targets 为空时抛出 MESSAGE_COMMAND_INVALID")
+	void validate_shouldThrowWhenTargetsEmpty() {
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
 			.channel(MessageChannel.EMAIL)
 			.templateCode("login-email-code")
 			.targets(Collections.emptyList())
 			.build();
 
-		assertThatThrownBy(() -> commandValidation.validateForDispatch(command))
+		assertThatThrownBy(() -> commandValidation.validate(command))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(MESSAGE_COMMAND_INVALID);
 	}
 
 	@Test
-	@DisplayName("dispatch：缺少 templateCode 时抛出 MESSAGE_COMMAND_INVALID")
-	void validateForDispatch_shouldThrowWhenTemplateCodeMissing() {
+	@DisplayName("缺少 targets 时抛出 MESSAGE_COMMAND_INVALID")
+	void validate_shouldThrowWhenTargetsMissing() {
+		TemplateMessageCommand command = TemplateMessageCommand.builder()
+			.channel(MessageChannel.EMAIL)
+			.templateCode("LOGIN_NOTICE")
+			.build();
+
+		assertThatThrownBy(() -> commandValidation.validate(command))
+			.isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(MESSAGE_COMMAND_INVALID);
+	}
+
+	@Test
+	@DisplayName("模板模式：缺少 templateCode 时抛出 MESSAGE_COMMAND_INVALID")
+	void validate_shouldThrowWhenTemplateCodeMissing() {
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
 			.channel(MessageChannel.EMAIL)
 			.targets(List.of("a@example.com"))
+			.customBody(Boolean.FALSE)
 			.build();
 
-		assertThatThrownBy(() -> commandValidation.validateForDispatch(command))
+		assertThatThrownBy(() -> commandValidation.validate(command))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(MESSAGE_COMMAND_INVALID);
 	}
 
 	@Test
-	@DisplayName("dispatch：channel 与 options 不匹配时抛出 MESSAGE_COMMAND_INVALID")
-	void validateForDispatch_shouldThrowWhenChannelOptionsMismatch() {
+	@DisplayName("自定义正文模式：缺少 body 时抛出 MESSAGE_COMMAND_INVALID")
+	void validate_shouldThrowWhenCustomBodyWithoutBody() {
+		TemplateMessageCommand command = TemplateMessageCommand.builder()
+			.channel(MessageChannel.DING_TALK)
+			.targets(List.of("user-1"))
+			.customBody(Boolean.TRUE)
+			.build();
+
+		assertThatThrownBy(() -> commandValidation.validate(command))
+			.isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(MESSAGE_COMMAND_INVALID);
+	}
+
+	@Test
+	@DisplayName("自定义正文模式：存在 body 时校验通过")
+	void validate_shouldPassWhenCustomBodyWithBody() {
+		TemplateMessageCommand command = TemplateMessageCommand.builder()
+			.channel(MessageChannel.DING_TALK)
+			.targets(List.of("user-1"))
+			.customBody(Boolean.TRUE)
+			.body("hello")
+			.build();
+
+		assertThatCode(() -> commandValidation.validate(command)).doesNotThrowAnyException();
+	}
+
+	@Test
+	@DisplayName("channel 与 options 不匹配时抛出 MESSAGE_COMMAND_INVALID")
+	void validate_shouldThrowWhenChannelOptionsMismatch() {
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
 			.channel(MessageChannel.EMAIL)
 			.templateCode("login-email-code")
@@ -82,15 +124,43 @@ class TemplateMessageCommandValidationTest {
 			.options(DingTalkChannelOptions.builder().build())
 			.build();
 
-		assertThatThrownBy(() -> commandValidation.validateForDispatch(command))
+		assertThatThrownBy(() -> commandValidation.validate(command))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(MESSAGE_COMMAND_INVALID);
 	}
 
 	@Test
-	@DisplayName("dispatch：合法命令校验通过")
-	void validateForDispatch_shouldPassWhenCommandValid() {
+	@DisplayName("SMS_ALIYUN_DYPNS 渠道：带 options 时抛出 MESSAGE_COMMAND_INVALID")
+	void validate_shouldThrowForDypnsWithAnyOptions() {
+		TemplateMessageCommand command = TemplateMessageCommand.builder()
+			.channel(MessageChannel.SMS_ALIYUN_DYPNS)
+			.templateCode("100001")
+			.targets(List.of("13800000000"))
+			.options(EmailChannelOptions.builder().build())
+			.build();
+
+		assertThatThrownBy(() -> commandValidation.validate(command))
+			.isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(MESSAGE_COMMAND_INVALID);
+	}
+
+	@Test
+	@DisplayName("options 为空时校验通过")
+	void validate_shouldPassWhenOptionsNull() {
+		TemplateMessageCommand command = TemplateMessageCommand.builder()
+			.channel(MessageChannel.SMS_ALIYUN_DYPNS)
+			.templateCode("100001")
+			.targets(List.of("13800000000"))
+			.build();
+
+		assertThatCode(() -> commandValidation.validate(command)).doesNotThrowAnyException();
+	}
+
+	@Test
+	@DisplayName("合法命令校验通过")
+	void validate_shouldPassWhenCommandValid() {
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
 			.channel(MessageChannel.EMAIL)
 			.templateCode("login-email-code")
@@ -98,21 +168,7 @@ class TemplateMessageCommandValidationTest {
 			.options(EmailChannelOptions.builder().hasHtml(Boolean.TRUE).build())
 			.build();
 
-		assertThatCode(() -> commandValidation.validateForDispatch(command)).doesNotThrowAnyException();
-	}
-
-	@Test
-	@DisplayName("job：缺少 targets 时抛出 JOB_MESSAGE_COMMAND_INVALID")
-	void validateForJob_shouldThrowWhenTargetsMissing() {
-		TemplateMessageCommand command = TemplateMessageCommand.builder()
-			.channel(MessageChannel.EMAIL)
-			.templateCode("LOGIN_NOTICE")
-			.build();
-
-		assertThatThrownBy(() -> commandValidation.validateForJob(command, JOB_MESSAGE_COMMAND_INVALID))
-			.isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(JOB_MESSAGE_COMMAND_INVALID);
+		assertThatCode(() -> commandValidation.validate(command)).doesNotThrowAnyException();
 	}
 
 }

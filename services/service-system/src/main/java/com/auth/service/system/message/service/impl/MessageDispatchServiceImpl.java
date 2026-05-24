@@ -39,7 +39,7 @@ public class MessageDispatchServiceImpl implements MessageDispatchService {
 	 */
 	@Override
 	public void sendByTemplate(TemplateMessageCommand command) {
-		commandValidation.validateForDispatch(command);
+		commandValidation.validate(command);
 
 		// 获取发送器
 		MessageSender sender = senderByChannel.get(command.getChannel());
