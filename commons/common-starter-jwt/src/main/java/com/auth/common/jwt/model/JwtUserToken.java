@@ -5,8 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Access Token 载荷映射 / 签发入参；Refresh 解析后仅部分字段有值 用户身份信息的载体（userId, username, roles,
- * permissions, audience, uaFp），用于构建和解析 JWT 中的自定义 Claims
+ * Access Token 载荷映射 / 签发入参
  *
  * @author Bunny
  */

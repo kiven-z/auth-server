@@ -1,7 +1,7 @@
-package com.auth.service.auth.authorization.domain.enums;
+package com.auth.module.security.contract.api.authorization;
 
 /**
- * 授权变更维度（文档/后续统一失效接口用）：与影响面反查入口对应关系大致如下
+ * 授权变更维度（跨服务失效契约）：与影响面反查入口对应关系大致如下
  * <ul>
  * <li>{@link #ROLE} — sys_role、role_scope、批量 roleCode</li>
  * <li>{@link #PERMISSION} — sys_permission、sys_role_permission、permissionCodes</li>
@@ -9,7 +9,7 @@ package com.auth.service.auth.authorization.domain.enums;
  * <li>{@link #GRANT} — grant_table、GrantSubject 列表</li>
  * <li>{@link #USER_DEPT} — user_dept、部门成员 deptIds</li>
  * <li>{@link #USER_POST} — user_post、岗位人员 postIds</li>
- * <li>{@link #USER_SCOPE} — user_scope（通常直指 userId，可单独扩展）</li>
+ * <li>{@link #USER_SCOPE} — user_scope（通常直指 userId）</li>
  * </ul>
  *
  * @author Bunny

@@ -1,6 +1,6 @@
 package com.auth.service.auth.authorization.domain.invalidation.model;
 
-import com.auth.service.auth.authorization.domain.enums.AuthorizationChangeKind;
+import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

@@ -1,6 +1,6 @@
 package com.auth.service.auth.authorization.application.invalidation.impact;
 
-import com.auth.service.auth.authorization.domain.enums.AuthorizationChangeKind;
+import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 import com.auth.service.auth.authorization.domain.invalidation.model.RoleCodes;
 import com.auth.service.auth.authorization.domain.invalidation.port.AuthorizationImpactQueryPort;
 import org.junit.jupiter.api.DisplayName;

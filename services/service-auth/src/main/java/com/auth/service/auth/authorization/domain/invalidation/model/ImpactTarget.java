@@ -1,6 +1,6 @@
 package com.auth.service.auth.authorization.domain.invalidation.model;
 
-import com.auth.service.auth.authorization.domain.enums.AuthorizationChangeKind;
+import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 
 /**
  * 授权失效的业务键（密封类型）：不同 {@link AuthorizationChangeKind} 使用不同子类型，避免万能 ID 列表。

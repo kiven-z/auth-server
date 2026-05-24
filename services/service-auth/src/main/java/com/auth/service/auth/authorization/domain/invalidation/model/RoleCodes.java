@@ -1,7 +1,7 @@
 package com.auth.service.auth.authorization.domain.invalidation.model;
 
 import cn.hutool.core.collection.CollUtil;
-import com.auth.service.auth.authorization.domain.enums.AuthorizationChangeKind;
+import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 
 import java.util.List;
 
