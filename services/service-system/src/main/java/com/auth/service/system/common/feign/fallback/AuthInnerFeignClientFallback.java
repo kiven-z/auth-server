@@ -1,7 +1,7 @@
 package com.auth.service.system.common.feign.fallback;
 
 import com.auth.common.core.model.response.Result;
-import com.auth.service.system.common.feign.AuthenticationInnerFeignClient;
+import com.auth.service.system.common.feign.AuthInnerFeignClient;
 import com.auth.service.system.common.feign.dto.EffectiveCodesInnerDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -9,11 +9,13 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
+ * Fallback
+ *
  * @author Bunny
  */
 @Slf4j
 @Component
-public class AuthenticationInnerFeignClientFallback implements AuthenticationInnerFeignClient {
+public class AuthInnerFeignClientFallback implements AuthInnerFeignClient {
 
 	/**
 	 * 刷新用户缓存

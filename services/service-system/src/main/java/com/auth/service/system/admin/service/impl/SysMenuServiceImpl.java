@@ -16,7 +16,7 @@ import com.auth.service.system.admin.model.vo.menu.SysMenuDetailVO;
 import com.auth.service.system.admin.model.vo.menu.SysMenuListVO;
 import com.auth.service.system.admin.service.MenuWebRouteTreeBuilder;
 import com.auth.service.system.admin.service.SysMenuService;
-import com.auth.service.system.common.feign.AuthenticationInnerFeignClient;
+import com.auth.service.system.common.feign.AuthInnerFeignClient;
 import com.auth.service.system.common.feign.dto.EffectiveCodesInnerDTO;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -45,15 +45,14 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuEntity
 
 	private final AuditUserDisplayService auditUserDisplayService;
 
-	private final AuthenticationInnerFeignClient authenticationInnerFeignClient;
+	private final AuthInnerFeignClient authInnerFeignClient;
 
 	private final MenuWebRouteTreeBuilder menuWebRouteTreeBuilder;
 
 	public SysMenuServiceImpl(AuditUserDisplayService auditUserDisplayService,
-			AuthenticationInnerFeignClient authenticationInnerFeignClient,
-			MenuWebRouteTreeBuilder menuWebRouteTreeBuilder) {
+			AuthInnerFeignClient authInnerFeignClient, MenuWebRouteTreeBuilder menuWebRouteTreeBuilder) {
 		this.auditUserDisplayService = auditUserDisplayService;
-		this.authenticationInnerFeignClient = authenticationInnerFeignClient;
+		this.authInnerFeignClient = authInnerFeignClient;
 		this.menuWebRouteTreeBuilder = menuWebRouteTreeBuilder;
 	}
 
@@ -68,7 +67,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuEntity
 		}
 
 		// 查询当前用户角色
-		Result<EffectiveCodesInnerDTO> result = authenticationInnerFeignClient.getEffectiveCodes(userId);
+		Result<EffectiveCodesInnerDTO> result = authInnerFeignClient.getEffectiveCodes(userId);
 		if (BooleanUtil.isFalse(isSuccessWithData(result))) {
 			log.warn("Menu web route: effective codes unavailable userId={}", userId);
 			return Collections.emptyList();

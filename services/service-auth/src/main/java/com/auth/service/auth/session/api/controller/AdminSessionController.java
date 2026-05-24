@@ -42,6 +42,13 @@ public class AdminSessionController {
 		return Result.success();
 	}
 
+	@Operation(summary = "批量踢出用户全部会话")
+	@PostMapping("/kick-all")
+	public Result<Void> kickAllSessions(@RequestBody(required = false) List<Long> userIds) {
+		sessionAdminApplicationService.kickAllSessions(userIds);
+		return Result.success();
+	}
+
 	@Operation(summary = "查询用户活跃会话列表")
 	@PreAuthorize("@auth.decide('ADMIN')")
 	@GetMapping("{userId}/sessions")

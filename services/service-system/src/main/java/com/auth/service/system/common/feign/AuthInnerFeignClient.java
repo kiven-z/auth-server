@@ -1,32 +1,31 @@
 package com.auth.service.system.common.feign;
 
-import java.util.List;
-
+import com.auth.common.core.model.response.Result;
+import com.auth.service.system.common.feign.dto.EffectiveCodesInnerDTO;
+import com.auth.service.system.common.feign.fallback.AuthInnerFeignClientFallback;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import com.auth.common.core.model.response.Result;
-import com.auth.service.system.common.feign.dto.EffectiveCodesInnerDTO;
-import com.auth.service.system.common.feign.fallback.AuthenticationInnerFeignClientFallback;
+import java.util.List;
 
 /**
  * 鉴权服务内部服务,鉴权服务内部服务接口
  *
  * @author Bunny
  */
-@FeignClient(name = "service-auth", contextId = "authenticationInnerCache", path = "/api/auth/inner",
-		fallback = AuthenticationInnerFeignClientFallback.class)
-public interface AuthenticationInnerFeignClient {
+@FeignClient(name = "service-auth", contextId = "authInnerFeignClient", path = "/api/auth/inner",
+		fallback = AuthInnerFeignClientFallback.class)
+public interface AuthInnerFeignClient {
 
 	/**
 	 * 刷新用户缓存
 	 * @param userIds 用户ID列表
 	 * @return 刷新结果
 	 */
-	@PostMapping("/cache/refresh")
+	@PostMapping("/authorization/cache/refresh")
 	Result<String> refreshUserCache(@RequestBody List<Long> userIds);
 
 	/**
@@ -34,7 +33,7 @@ public interface AuthenticationInnerFeignClient {
 	 * @param userId 用户 ID
 	 * @return 统一响应体
 	 */
-	@GetMapping("/principal/{userId}/effective-codes")
+	@GetMapping("/authorization/principal/{userId}/effective-codes")
 	Result<EffectiveCodesInnerDTO> getEffectiveCodes(@PathVariable("userId") Long userId);
 
 }
