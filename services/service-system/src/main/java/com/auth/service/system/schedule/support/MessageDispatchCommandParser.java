@@ -3,7 +3,7 @@ package com.auth.service.system.schedule.support;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.message.validation.TemplateMessageCommandChecker;
+import com.auth.service.system.message.validation.TemplateMessageCommandValidation;
 import com.auth.service.system.schedule.model.payload.MessageDispatchPayload;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,9 +27,13 @@ public class MessageDispatchCommandParser {
 
 	private final Validator validator;
 
-	public MessageDispatchCommandParser(ObjectMapper objectMapper, Validator validator) {
+	private final TemplateMessageCommandValidation commandValidation;
+
+	public MessageDispatchCommandParser(ObjectMapper objectMapper, Validator validator,
+			TemplateMessageCommandValidation commandValidation) {
 		this.objectMapper = objectMapper;
 		this.validator = validator;
+		this.commandValidation = commandValidation;
 	}
 
 	/**
@@ -100,14 +104,7 @@ public class MessageDispatchCommandParser {
 	 * @param command 消息命令
 	 */
 	private void validateCommand(TemplateMessageCommand command) {
-		Set<ConstraintViolation<TemplateMessageCommand>> violations = validator.validate(command);
-		if (!violations.isEmpty()) {
-			String message = violations.iterator().next().getMessage();
-			throw new SystemBusinessException(JOB_MESSAGE_COMMAND_INVALID, message);
-		}
-		TemplateMessageCommandChecker.findViolation(command).ifPresent(message -> {
-			throw new SystemBusinessException(JOB_MESSAGE_COMMAND_INVALID, message);
-		});
+		commandValidation.validateForJob(command, JOB_MESSAGE_COMMAND_INVALID);
 	}
 
 }

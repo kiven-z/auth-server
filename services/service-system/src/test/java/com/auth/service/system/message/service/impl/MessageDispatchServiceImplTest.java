@@ -1,9 +1,12 @@
 package com.auth.service.system.message.service.impl;
 
 import com.auth.module.message.api.channel.MessageChannel;
+import com.auth.module.message.api.channel.MessageSender;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.module.message.api.channel.MessageSender;
+import com.auth.service.system.message.validation.TemplateMessageCommandValidation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,13 +14,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
 import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemMessageResultCode.MESSAGE_CHANNEL_UNSUPPORTED;
+import static com.auth.service.system.common.exception.code.SystemMessageResultCode.MESSAGE_COMMAND_INVALID;
 import static com.auth.service.system.common.exception.code.SystemMessageResultCode.MESSAGE_SEND_COMMAND_NULL;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link MessageDispatchServiceImpl} 单元测试
@@ -38,7 +45,9 @@ class MessageDispatchServiceImplTest {
 	void setUp() {
 		when(emailSender.channel()).thenReturn(MessageChannel.EMAIL);
 		when(dingTalkSender.channel()).thenReturn(MessageChannel.DING_TALK);
-		dispatchService = new MessageDispatchServiceImpl(List.of(emailSender, dingTalkSender));
+		Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+		TemplateMessageCommandValidation commandValidation = new TemplateMessageCommandValidation(validator);
+		dispatchService = new MessageDispatchServiceImpl(List.of(emailSender, dingTalkSender), commandValidation);
 	}
 
 	@Test
@@ -94,6 +103,22 @@ class MessageDispatchServiceImplTest {
 		assertThatThrownBy(() -> dispatchService.sendByTemplate(null)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(MESSAGE_SEND_COMMAND_NULL);
+	}
+
+	@Test
+	@DisplayName("targets 为空：抛出 MESSAGE_COMMAND_INVALID")
+	void sendByTemplate_shouldThrowWhenTargetsEmpty() {
+		TemplateMessageCommand command = TemplateMessageCommand.builder()
+			.channel(MessageChannel.EMAIL)
+			.templateCode("login-email-code")
+			.targets(Collections.emptyList())
+			.build();
+
+		assertThatThrownBy(() -> dispatchService.sendByTemplate(command)).isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(MESSAGE_COMMAND_INVALID);
+
+		verify(emailSender, never()).sendByTemplate(any());
 	}
 
 }

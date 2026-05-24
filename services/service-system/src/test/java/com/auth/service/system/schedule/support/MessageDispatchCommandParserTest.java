@@ -4,9 +4,11 @@ import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.schedule.model.payload.MessageDispatchPayload;
+import com.auth.service.system.message.validation.TemplateMessageCommandValidation;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -28,7 +30,14 @@ class MessageDispatchCommandParserTest {
 
 	private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
-	private final MessageDispatchCommandParser parser = new MessageDispatchCommandParser(objectMapper, validator);
+	private final TemplateMessageCommandValidation commandValidation = new TemplateMessageCommandValidation(validator);
+
+	private MessageDispatchCommandParser parser;
+
+	@BeforeEach
+	void setUp() {
+		parser = new MessageDispatchCommandParser(objectMapper, validator, commandValidation);
+	}
 
 	@Test
 	@DisplayName("标准载荷缺少 command 时抛出 JOB_PAYLOAD_JSON_INVALID")
