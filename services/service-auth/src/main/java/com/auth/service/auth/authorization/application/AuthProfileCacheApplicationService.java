@@ -36,7 +36,7 @@ public class AuthProfileCacheApplicationService implements AuthProfileCachePort 
 	@Override
 	public void cacheProfile(@NotNull AuthProfile authProfile) {
 		Long userId = authProfile.getUserId();
-		Assert.notNull(userId, "userId cannot be null");
+		Assert.notNull(userId, "用户ID不能为空");
 
 		String userPerm = USER_PERM.key(userId);
 		redisTemplate.opsForValue().set(userPerm, authProfile, USER_PERM.getDefaultTtl());
@@ -49,14 +49,20 @@ public class AuthProfileCacheApplicationService implements AuthProfileCachePort 
 	 */
 	@Override
 	public Optional<AuthProfile> loadCachedProfile(long userId) {
+		// 获取用户授权画像缓存键
 		String userPermKey = USER_PERM.key(userId);
+
+		// 获取用户授权画像缓存值
 		Object value = redisTemplate.opsForValue().get(userPermKey);
 		if (value == null) {
 			return Optional.empty();
 		}
+
+		// 如果用户授权画像缓存值为空，则返回空
 		if (value instanceof AuthProfile profile) {
 			return Optional.of(profile);
 		}
+
 		return Optional.ofNullable(objectMapper.convertValue(value, AuthProfile.class));
 	}
 

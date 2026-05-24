@@ -51,7 +51,7 @@
             resultType="com.auth.service.auth.authorization.infrastructure.persistence.projection.UserInvalidationStateProjection">
         SELECT id AS userId,
                status,
-               is_deleted AS isDeleted
+               is_deleted
         FROM sys_user
         WHERE id IN
         <foreach collection="userIds" item="userId" open="(" separator="," close=")">

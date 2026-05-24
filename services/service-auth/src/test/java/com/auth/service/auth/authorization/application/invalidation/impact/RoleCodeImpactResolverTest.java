@@ -1,7 +1,7 @@
 package com.auth.service.auth.authorization.application.invalidation.impact;
 
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
-import com.auth.service.auth.authorization.domain.invalidation.model.RoleCodes;
+import com.auth.module.security.contract.dto.invalidation.RoleInvalidatePayload;
 import com.auth.service.auth.authorization.domain.invalidation.port.AuthorizationImpactQueryPort;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,19 +32,19 @@ class RoleCodeImpactResolverTest {
 		when(authorizationImpactQueryPort.findUserIdsByRoleCodes(List.of("R_A", "R_B"))).thenReturn(Set.of(10L, 20L));
 
 		RoleCodeImpactResolver resolver = new RoleCodeImpactResolver(authorizationImpactQueryPort);
-		Set<Long> userIds = resolver.resolve(new RoleCodes(List.of("R_A", "R_B")));
+		Set<Long> userIds = resolver.resolve(new RoleInvalidatePayload(List.of("R_A", "R_B")));
 
 		assertEquals(Set.of(10L, 20L), userIds);
 		verify(authorizationImpactQueryPort).findUserIdsByRoleCodes(List.of("R_A", "R_B"));
 	}
 
 	@Test
-	@DisplayName("元数据：ROLE 维度与 RoleCodes 类型")
+	@DisplayName("元数据：ROLE 维度与 RoleInvalidatePayload 类型")
 	void metadata_shouldMatchRoleKind() {
 		RoleCodeImpactResolver resolver = new RoleCodeImpactResolver(authorizationImpactQueryPort);
 
 		assertEquals(AuthorizationChangeKind.ROLE, resolver.kind());
-		assertEquals(RoleCodes.class, resolver.targetType());
+		assertEquals(RoleInvalidatePayload.class, resolver.payloadType());
 	}
 
 }

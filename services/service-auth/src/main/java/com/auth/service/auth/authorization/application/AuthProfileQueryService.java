@@ -43,8 +43,10 @@ public class AuthProfileQueryService implements AuthProfileQueryPort {
 	 */
 	@Override
 	public AuthProfile buildByUserId(Long userId) {
+		// 查询用户快照
 		UserAccountSnapshot account = userReadPort.findById(userId)
 			.orElseThrow(() -> new AuthBusinessException(AuthResultCode.USER_NOT_FOUND));
+		// 构建授权画像
 		return buildByAccount(account);
 	}
 
@@ -54,9 +56,11 @@ public class AuthProfileQueryService implements AuthProfileQueryPort {
 	 * @return 授权画像
 	 */
 	public AuthProfile buildByAccount(UserAccountSnapshot account) {
+		// 如果用户快照为空或用户ID为空，则抛出用户不存在异常
 		if (account == null || account.id() == null) {
 			throw new AuthBusinessException(AuthResultCode.USER_NOT_FOUND);
 		}
+		// 获取用户ID
 		long userId = account.id();
 
 		// 获取功能权限

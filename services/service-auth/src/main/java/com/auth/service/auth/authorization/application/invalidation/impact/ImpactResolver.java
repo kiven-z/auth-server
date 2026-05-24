@@ -1,17 +1,17 @@
 package com.auth.service.auth.authorization.application.invalidation.impact;
 
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
-import com.auth.service.auth.authorization.domain.invalidation.model.ImpactTarget;
+import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidatePayload;
 
 import java.util.Set;
 
 /**
  * 影响面解析策略：仅负责将类型化业务键解析为受影响用户 ID。
  *
- * @param <T> 支持的 {@link ImpactTarget} 子类型
+ * @param <T> 支持的 {@link AuthorizationInvalidatePayload} 子类型
  * @author Bunny
  */
-public interface ImpactResolver<T extends ImpactTarget> {
+public interface ImpactResolver<T extends AuthorizationInvalidatePayload> {
 
 	/**
 	 * 本解析器处理的变更维度。
@@ -20,16 +20,16 @@ public interface ImpactResolver<T extends ImpactTarget> {
 	AuthorizationChangeKind kind();
 
 	/**
-	 * 支持的目标类型（用于注册表分发时的类型检查）。
-	 * @return 目标 Class
+	 * 支持的 Payload 类型（用于注册表分发时的类型检查）。
+	 * @return Payload Class
 	 */
-	Class<T> targetType();
+	Class<T> payloadType();
 
 	/**
 	 * 解析受影响用户 ID。
-	 * @param target 类型化失效目标
+	 * @param payload 类型化失效业务键
 	 * @return 去重用户 ID
 	 */
-	Set<Long> resolve(T target);
+	Set<Long> resolve(T payload);
 
 }

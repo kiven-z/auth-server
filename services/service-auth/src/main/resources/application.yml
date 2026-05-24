@@ -51,6 +51,11 @@ spring:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
 
+auth:
+  auth:
+    invalidation:
+      batch-size: 500
+
 mybatis-plus:
   mapper-locations:
     - "classpath*:/mapper/**/*.xml"

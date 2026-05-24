@@ -6,6 +6,7 @@ import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidat
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateResponse;
 import com.auth.service.auth.authorization.api.dto.EffectiveCodesVO;
 import com.auth.service.auth.authorization.application.AuthorizationInnerService;
+import com.auth.service.auth.authorization.application.AuthorizationInvalidationService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,8 @@ import java.util.List;
 public class AuthorizationInnerController {
 
 	private final AuthorizationInnerService authorizationInnerService;
+
+	private final AuthorizationInvalidationService authorizationInvalidationService;
 
 	@InternalApi
 	@Operation(summary = "刷新用户授权画像缓存（AuthProfile）")
@@ -48,9 +51,8 @@ public class AuthorizationInnerController {
 	@PostMapping("/invalidate")
 	public Result<AuthorizationInvalidateResponse> invalidate(
 			@Valid @RequestBody AuthorizationInvalidateRequest request) {
-		// TODO 待实现：request → InvalidationCommand → AuthorizationInvalidationService
-		log.debug("Authorization invalidate requested: eventId={}, kind={}", request.eventId(), request.kind());
-		return Result.success(AuthorizationInvalidateResponse.empty());
+		AuthorizationInvalidateResponse response = authorizationInvalidationService.invalidate(request);
+		return Result.success(response);
 	}
 
 }

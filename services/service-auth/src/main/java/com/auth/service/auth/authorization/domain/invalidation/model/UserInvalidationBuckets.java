@@ -38,11 +38,16 @@ public record UserInvalidationBuckets(Set<Long> versionBumpUserIds, Set<Long> ev
 		if (isEmpty()) {
 			return Set.of();
 		}
+		// 合并用户ID集合
 		Set<Long> all = new HashSet<>(versionBumpUserIds);
 		all.addAll(evictOnlyUserIds);
 		return Set.copyOf(all);
 	}
 
+	/**
+	 * 是否为空。
+	 * @return 是否为空
+	 */
 	public boolean isEmpty() {
 		return versionBumpUserIds.isEmpty() && evictOnlyUserIds.isEmpty();
 	}

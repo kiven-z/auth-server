@@ -51,7 +51,10 @@ public class AuthorizationInnerService {
 	 * @return 角色码与权限码
 	 */
 	public EffectiveCodesVO resolveEffectiveCodes(Long userId) {
+		// 构建用户授权画像
 		AuthProfile profile = authProfileQueryService.buildByUserId(userId);
+
+		// 如果用户授权画像为空，则返回空角色码和权限码
 		EffectiveCodesVO vo = new EffectiveCodesVO();
 		if (profile == null) {
 			vo.setRoleCodes(List.of());
@@ -59,6 +62,7 @@ public class AuthorizationInnerService {
 			return vo;
 		}
 
+		// 设置角色码和权限码
 		vo.setRoleCodes(Objects.requireNonNullElse(profile.getRoles(), List.of()));
 		vo.setPermissionCodes(Objects.requireNonNullElse(profile.getPermissions(), List.of()));
 		return vo;

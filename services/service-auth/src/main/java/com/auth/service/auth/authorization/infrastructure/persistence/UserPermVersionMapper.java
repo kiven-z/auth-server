@@ -6,7 +6,7 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 /**
- * 用户权限版本号批量更新 Mapper。
+ * 用户权限版本号批量更新 Mapper
  *
  * @author Bunny
  */

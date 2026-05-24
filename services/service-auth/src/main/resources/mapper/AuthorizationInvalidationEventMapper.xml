@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.auth.service.auth.authorization.infrastructure.persistence.AuthorizationInvalidationEventMapper">
+
+    <!-- 按 eventId 查询已处理失效事件 -->
+    <select id="selectByEventId"
+            resultType="com.auth.service.auth.authorization.infrastructure.persistence.projection.AuthorizationInvalidationEventProjection">
+        SELECT id,
+               event_id,
+               change_kind,
+               impacted_user_count,
+               version_bumped_count,
+               profile_refreshed_count,
+               profile_evicted_count,
+               processed_at           
+        FROM auth_authorization_invalidation_event
+        WHERE event_id = #{eventId}
+        LIMIT 1 
+    </select>
+
+    <!-- 插入已处理失效事件（event_id 唯一约束） -->
+    <insert id="insertProcessedEvent">
+        INSERT INTO auth_authorization_invalidation_event (id,
+                                                           event_id,
+                                                           change_kind,
+                                                           impacted_user_count,
+                                                           version_bumped_count,
+                                                           profile_refreshed_count,
+                                                           profile_evicted_count,
+                                                           processed_at,
+                                                           create_time,
+                                                           update_time,
+                                                           version)
+        VALUES (#{id},
+                #{eventId},
+                #{changeKind},
+                #{impactedUserCount},
+                #{versionBumpedCount},
+                #{profileRefreshedCount},
+                #{profileEvictedCount},
+                #{processedAt},
+                #{processedAt},
+                #{processedAt},
+                0)
+    </insert>
+
+</mapper>

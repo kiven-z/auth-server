@@ -1,10 +1,11 @@
 package com.auth.service.auth.authorization.application.invalidation.impact;
 
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
-import com.auth.service.auth.authorization.domain.invalidation.model.RoleCodes;
+import com.auth.module.security.contract.dto.invalidation.RoleInvalidatePayload;
 import com.auth.service.auth.authorization.domain.invalidation.port.AuthorizationImpactQueryPort;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -13,7 +14,7 @@ import java.util.Set;
  * @author Bunny
  */
 @Component
-public class RoleCodeImpactResolver implements ImpactResolver<RoleCodes> {
+public class RoleCodeImpactResolver implements ImpactResolver<RoleInvalidatePayload> {
 
 	private final AuthorizationImpactQueryPort authorizationImpactQueryPort;
 
@@ -33,16 +34,18 @@ public class RoleCodeImpactResolver implements ImpactResolver<RoleCodes> {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Class<RoleCodes> targetType() {
-		return RoleCodes.class;
+	public Class<RoleInvalidatePayload> payloadType() {
+		return RoleInvalidatePayload.class;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Set<Long> resolve(RoleCodes target) {
-		return authorizationImpactQueryPort.findUserIdsByRoleCodes(target.codes());
+	public Set<Long> resolve(RoleInvalidatePayload payload) {
+		List<String> roleCodes = payload.roleCodes();
+
+		return authorizationImpactQueryPort.findUserIdsByRoleCodes(roleCodes);
 	}
 
 }
