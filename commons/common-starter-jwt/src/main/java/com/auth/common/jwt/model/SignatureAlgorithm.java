@@ -15,6 +15,6 @@ public enum SignatureAlgorithm {
 	/**
 	 * RS256
 	 */
-	RS256,;
+	RS256,
 
 }

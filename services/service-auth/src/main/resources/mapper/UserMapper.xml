@@ -57,7 +57,6 @@
         <foreach collection="userIds" item="userId" open="(" separator="," close=")">
             #{userId}
         </foreach>
-        AND status = 1
     </select>
 
 </mapper>
