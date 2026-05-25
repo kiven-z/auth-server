@@ -5,8 +5,8 @@ spring:
       enabled: true
     host: smtp.qq.com
     port: 465
-    username: ${AUTH_EMAIL_CONFIG_USERNAME}
-    password: ${AUTH_EMAIL_CONFIG_PASSWORD}
+    username: ${AUTH_EMAIL_CONFIG_USERNAME:}
+    password: ${AUTH_EMAIL_CONFIG_PASSWORD:}
     properties:
       mail:
         smtp:

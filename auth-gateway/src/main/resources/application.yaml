@@ -1,5 +1,5 @@
 server:
-  port: 18090
+  port: 8080
   tomcat:
     threads:
       max: 300
@@ -22,13 +22,12 @@ spring:
       - nacos:common-config.yaml?group=AUTH_COMMON
       - nacos:auth-gateway.yaml
   profiles:
-    active: dev
+    active: test
     include:
       - route
 
   cloud:
     nacos:
-      server-addr: 192.168.3.19:8848
       discovery:
         namespace: ${spring.profiles.active:dev}
         group: DEFAULT_GROUP

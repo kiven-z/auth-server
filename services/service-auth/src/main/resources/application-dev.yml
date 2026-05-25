@@ -6,7 +6,7 @@ spring:
 
   cloud:
     nacos:
-      server-addr: 192.168.3.19:8848
+      server-addr: 192.168.3.4:8848
       username: nacos
       password: Dev1234!
       config:
@@ -15,7 +15,7 @@ spring:
 
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:mysql://192.168.3.19:3306/auth_admin_base?serverTimezone=GMT%2B8&useSSL=false&characterEncoding=utf-8&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://192.168.3.4:3306/auth_admin_base?serverTimezone=GMT%2B8&useSSL=false&characterEncoding=utf-8&allowPublicKeyRetrieval=true
     username: dev_user
     password: Dev1234!
     hikari:
@@ -42,46 +42,6 @@ spring:
           max-idle: 50
           # 最小空闲
           min-idle: 10
-
-knife4j:
-  basic:
-    enable: false
-springdoc:
-  # 显示 actuator 端点
-  show-actuator: false
-  # OpenAPI JSON文档端点配置
-  api-docs:
-    # 是否启用OpenAPI JSON端点
-    enabled: false
-    # OpenAPI JSON文档的访问路径，默认值: /v3/api-docs，可以自定义为其他路径，如: /api-docs, /openapi等
-    path: /v3/api-docs
-  # Swagger UI界面配置
-  swagger-ui:
-    # 是否启用Swagger UI可视化界面
-    enabled: false
-    # Swagger UI界面的访问路径，默认值: /swagger-ui.html，可以自定义为其他路径，如: /docs, /api-docs/ui等
-    path: /swagger-ui.html
-    # API操作（接口）的排序方式，alpha: 按字母顺序排序（默认），method: 按HTTP请求方法排序（GET → POST → PUT → DELETE等）
-    operations-sorter: method
-    # 标签（分组）的排序方式，alpha: 按字母顺序排序标签，也可设置为自定义函数进行特殊排序
-    tags-sorter: alpha
-    # 文档内容的展开方式，none: 完全不展开，所有接口都是折叠状态，list: 只展开标签列表，接口保持折叠，full: 完全展开，显示所有接口的详细信息
-    doc-expansion: none
-    # 是否显示请求的响应时间（在"Try it out"测试时显示）true: 显示接口调用的耗时，false: 不显示耗时信息
-    display-request-duration: true
-    # 是否启用深度链接
-    # true: 允许直接链接到特定的接口或模型
-    #       URL会包含锚点，可以直接分享特定接口的链接
-    # false: 不启用深度链接
-    deep-linking: true
-    # 是否持久化授权信息
-    # true: 页面刷新后保留已输入的授权信息（如Token）
-    # false: 页面刷新后需要重新输入授权信息
-    persist-authorization: true
-    # 是否显示操作ID（operationId），true: 显示每个接口的operationId（可用于代码生成），false: 隐藏operationId，界面更简洁
-    display-operation-id: false
-    # 模型（Model）的默认渲染方式，example: 显示示例值（更易读，推荐），model: 显示完整的模型结构，控制右侧模型示例的显示格式
-    default-model-rendering: example
 
 logging:
   level:
