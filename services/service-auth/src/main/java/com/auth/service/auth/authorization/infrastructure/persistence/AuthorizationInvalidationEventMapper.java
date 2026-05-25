@@ -21,7 +21,8 @@ public interface AuthorizationInvalidationEventMapper {
 
 	/**
 	 * 插入处理中占位记录（{@code event_id} 唯一约束保证幂等）。
-	 * @param record 事件投影（计数为 {@link com.auth.service.auth.authorization.domain.invalidation.model.InvalidationProcessingMarker#PROCESSING_COUNT}）
+	 * @param record 事件投影（计数为
+	 * {@link com.auth.service.auth.authorization.domain.invalidation.model.InvalidationProcessingMarker#PROCESSING_COUNT}）
 	 * @return 插入行数
 	 */
 	int insertProcessingClaim(AuthorizationInvalidationEventProjection record);

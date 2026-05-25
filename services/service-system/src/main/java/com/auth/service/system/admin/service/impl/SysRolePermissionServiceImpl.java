@@ -74,9 +74,8 @@ public class SysRolePermissionServiceImpl implements SysRolePermissionService {
 			throw new SystemBusinessException(SystemAdminResultCode.ROLE_NOT_FOUND, roleCode);
 		}
 
-		SysRoleEntity role = sysRoleMapper.selectOne(Wrappers.<SysRoleEntity>lambdaQuery()
-			.eq(SysRoleEntity::getRoleCode, normalized)
-			.last("LIMIT 1"));
+		SysRoleEntity role = sysRoleMapper.selectOne(
+				Wrappers.<SysRoleEntity>lambdaQuery().eq(SysRoleEntity::getRoleCode, normalized).last("LIMIT 1"));
 		if (role == null) {
 			throw new SystemBusinessException(SystemAdminResultCode.ROLE_NOT_FOUND, normalized);
 		}

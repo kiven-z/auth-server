@@ -44,8 +44,7 @@ class AuthorizationInvalidationCoordinatorTest {
 	@DisplayName("submit 写入 Outbox 并发布 AFTER_COMMIT 投递事件")
 	void submit_shouldEnqueueAndPublishDispatchEvent() {
 		when(properties.getSyncDispatchEnabled()).thenReturn(true);
-		when(publisher.enqueue(org.mockito.ArgumentMatchers.any(), eq("SYS_ROLE"), eq("SUPER_ADMIN")))
-			.thenReturn(100L);
+		when(publisher.enqueue(org.mockito.ArgumentMatchers.any(), eq("SYS_ROLE"), eq("SUPER_ADMIN"))).thenReturn(100L);
 
 		AuthorizationInvalidateRequest request = new AuthorizationInvalidateRequest("evt-1",
 				AuthorizationChangeKind.ROLE, new RoleInvalidatePayload(List.of("SUPER_ADMIN")));

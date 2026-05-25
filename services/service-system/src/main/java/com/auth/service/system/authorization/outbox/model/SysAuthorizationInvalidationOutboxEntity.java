@@ -22,17 +22,21 @@ public class SysAuthorizationInvalidationOutboxEntity extends BaseEntity {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * 业务幂等键，与 {@link com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest#eventId()} 一致。
+	 * 业务幂等键，与
+	 * {@link com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest#eventId()}
+	 * 一致。
 	 */
 	private String eventId;
 
 	/**
-	 * {@link com.auth.module.security.contract.api.authorization.AuthorizationChangeKind} 枚举名。
+	 * {@link com.auth.module.security.contract.api.authorization.AuthorizationChangeKind}
+	 * 枚举名。
 	 */
 	private String changeKind;
 
 	/**
-	 * {@link com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidatePayload} 的 JSON。
+	 * {@link com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidatePayload}
+	 * 的 JSON。
 	 */
 	private String payload;
 

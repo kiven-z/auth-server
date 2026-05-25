@@ -24,41 +24,44 @@ import java.util.List;
 @Component
 public class AuthorizationInvalidationOutboxJob {
 
-    private static final List<String> CLAIMABLE_STATUSES = List.of(
-            AuthorizationInvalidationOutboxStatus.PENDING.name(),
-            AuthorizationInvalidationOutboxStatus.FAILED.name());
+	private static final List<String> CLAIMABLE_STATUSES = List.of(AuthorizationInvalidationOutboxStatus.PENDING.name(),
+			AuthorizationInvalidationOutboxStatus.FAILED.name());
 
-    private final SysAuthorizationInvalidationOutboxMapper outboxMapper;
+	private final SysAuthorizationInvalidationOutboxMapper outboxMapper;
 
-    private final AuthorizationInvalidationOutboxProcessor outboxProcessor;
+	private final AuthorizationInvalidationOutboxProcessor outboxProcessor;
 
-    private final AuthorizationInvalidationProperties properties;
-    private final String instanceSuffix = Long.toHexString(System.nanoTime());
-    @Value("${spring.application.name:service-system}")
-    private String applicationName;
+	private final AuthorizationInvalidationProperties properties;
 
-    /**
-     * 定时扫描并补偿投递失败的 Outbox 记录。
-     */
-    @Scheduled(fixedDelayString = "${auth.system.authorization-invalidation.poll-interval-ms:30000}")
-    public void pollAndDispatch() {
-        LocalDateTime now = LocalDateTime.now();
-        Integer pollBatchSize = properties.getPollBatchSize();
+	private final String instanceSuffix = Long.toHexString(System.nanoTime());
 
-        List<SysAuthorizationInvalidationOutboxEntity> rows = outboxMapper.selectClaimable(CLAIMABLE_STATUSES, now, pollBatchSize);
-        if (rows.isEmpty()) {
-            return;
-        }
+	@Value("${spring.application.name:service-system}")
+	private String applicationName;
 
-        String lockedBy = applicationName + "-" + instanceSuffix;
-        for (SysAuthorizationInvalidationOutboxEntity row : rows) {
-            try {
-                outboxProcessor.processClaimedRow(row, lockedBy);
-            } catch (RuntimeException ex) {
-                log.warn("Outbox compensation failed: outboxId={}, eventId={}, cause={}", row.getId(),
-                        row.getEventId(), ex.getMessage());
-            }
-        }
-    }
+	/**
+	 * 定时扫描并补偿投递失败的 Outbox 记录。
+	 */
+	@Scheduled(fixedDelayString = "${auth.system.authorization-invalidation.poll-interval-ms:30000}")
+	public void pollAndDispatch() {
+		LocalDateTime now = LocalDateTime.now();
+		Integer pollBatchSize = properties.getPollBatchSize();
+
+		List<SysAuthorizationInvalidationOutboxEntity> rows = outboxMapper.selectClaimable(CLAIMABLE_STATUSES, now,
+				pollBatchSize);
+		if (rows.isEmpty()) {
+			return;
+		}
+
+		String lockedBy = applicationName + "-" + instanceSuffix;
+		for (SysAuthorizationInvalidationOutboxEntity row : rows) {
+			try {
+				outboxProcessor.processClaimedRow(row, lockedBy);
+			}
+			catch (RuntimeException ex) {
+				log.warn("Outbox compensation failed: outboxId={}, eventId={}, cause={}", row.getId(), row.getEventId(),
+						ex.getMessage());
+			}
+		}
+	}
 
 }

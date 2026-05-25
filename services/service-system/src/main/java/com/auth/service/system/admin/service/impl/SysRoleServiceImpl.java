@@ -125,7 +125,8 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 
 		boolean roleCodeChanged = !CharSequenceUtil.equals(oldRoleCode, newRoleCode);
 		if (roleCodeChanged) {
-			long duplicate = count(Wrappers.<SysRoleEntity>lambdaQuery().eq(SysRoleEntity::getRoleCode, newRoleCode)
+			long duplicate = count(Wrappers.<SysRoleEntity>lambdaQuery()
+				.eq(SysRoleEntity::getRoleCode, newRoleCode)
 				.ne(SysRoleEntity::getId, existing.getId()));
 			if (duplicate > 0) {
 				throw new SystemBusinessException(SystemAdminResultCode.ROLE_CODE_DUPLICATE, newRoleCode);
