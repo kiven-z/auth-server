@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 /**
- * 授权失效幂等 Port 适配器。
+ * 授权失效幂等 Port 适配器
  *
  * @author Bunny
  */
@@ -30,7 +30,7 @@ public class InvalidationIdempotencyAdapter implements InvalidationIdempotencyPo
 	}
 
 	/**
-	 * 转换为授权失效响应（跳过处理中占位行）。
+	 * 转换为授权失效响应
 	 * @param projection 授权失效事件投影
 	 * @return 授权失效响应；处理中占位时为空
 	 */
@@ -46,6 +46,21 @@ public class InvalidationIdempotencyAdapter implements InvalidationIdempotencyPo
 				ObjectUtil.defaultIfNull(projection.getProfileRefreshedCount(), 0),
 				ObjectUtil.defaultIfNull(projection.getProfileEvictedCount(), 0));
 		return Optional.of(response);
+	}
+
+	private static AuthorizationInvalidationEventProjection buildProcessingClaim(String eventId,
+			AuthorizationChangeKind kind) {
+		LocalDateTime now = LocalDateTime.now();
+		AuthorizationInvalidationEventProjection projection = new AuthorizationInvalidationEventProjection();
+		projection.setId(IdWorker.getId());
+		projection.setEventId(eventId);
+		projection.setChangeKind(kind.name());
+		projection.setImpactedUserCount(InvalidationProcessingMarker.PROCESSING_COUNT);
+		projection.setVersionBumpedCount(InvalidationProcessingMarker.PROCESSING_COUNT);
+		projection.setProfileRefreshedCount(InvalidationProcessingMarker.PROCESSING_COUNT);
+		projection.setProfileEvictedCount(InvalidationProcessingMarker.PROCESSING_COUNT);
+		projection.setProcessedAt(now);
+		return projection;
 	}
 
 	@Override
@@ -83,16 +98,16 @@ public class InvalidationIdempotencyAdapter implements InvalidationIdempotencyPo
 	@Override
 	public void completeProcessedOutcome(String eventId, AuthorizationChangeKind kind,
 			AuthorizationInvalidateResponse response) {
-		AuthorizationInvalidationEventProjection record = new AuthorizationInvalidationEventProjection();
-		record.setEventId(eventId);
-		record.setChangeKind(kind.name());
-		record.setImpactedUserCount(response.impactedUserCount());
-		record.setVersionBumpedCount(response.versionBumpedCount());
-		record.setProfileRefreshedCount(response.profileRefreshedCount());
-		record.setProfileEvictedCount(response.profileEvictedCount());
-		record.setProcessedAt(LocalDateTime.now());
+		AuthorizationInvalidationEventProjection projection = new AuthorizationInvalidationEventProjection();
+		projection.setEventId(eventId);
+		projection.setChangeKind(kind.name());
+		projection.setImpactedUserCount(response.impactedUserCount());
+		projection.setVersionBumpedCount(response.versionBumpedCount());
+		projection.setProfileRefreshedCount(response.profileRefreshedCount());
+		projection.setProfileEvictedCount(response.profileEvictedCount());
+		projection.setProcessedAt(LocalDateTime.now());
 
-		int updated = authorizationInvalidationEventMapper.updateProcessedOutcome(record);
+		int updated = authorizationInvalidationEventMapper.updateProcessedOutcome(projection);
 		if (updated == 0) {
 			throw new IllegalStateException(
 					"Failed to complete invalidation idempotency record, eventId=" + eventId + " (claim missing?)");
@@ -102,21 +117,6 @@ public class InvalidationIdempotencyAdapter implements InvalidationIdempotencyPo
 	@Override
 	public void releaseClaim(String eventId) {
 		authorizationInvalidationEventMapper.deleteProcessingClaim(eventId);
-	}
-
-	private static AuthorizationInvalidationEventProjection buildProcessingClaim(String eventId,
-			AuthorizationChangeKind kind) {
-		LocalDateTime now = LocalDateTime.now();
-		AuthorizationInvalidationEventProjection record = new AuthorizationInvalidationEventProjection();
-		record.setId(IdWorker.getId());
-		record.setEventId(eventId);
-		record.setChangeKind(kind.name());
-		record.setImpactedUserCount(InvalidationProcessingMarker.PROCESSING_COUNT);
-		record.setVersionBumpedCount(InvalidationProcessingMarker.PROCESSING_COUNT);
-		record.setProfileRefreshedCount(InvalidationProcessingMarker.PROCESSING_COUNT);
-		record.setProfileEvictedCount(InvalidationProcessingMarker.PROCESSING_COUNT);
-		record.setProcessedAt(now);
-		return record;
 	}
 
 }

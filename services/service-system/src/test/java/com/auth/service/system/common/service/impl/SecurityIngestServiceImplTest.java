@@ -53,7 +53,7 @@ class SecurityIngestServiceImplTest {
 
 		ArgumentCaptor<LogAuthorizationAuditEntity> captor = ArgumentCaptor.forClass(LogAuthorizationAuditEntity.class);
 		verify(logAuthorizationAuditMapper).insert(captor.capture());
-		assertThat(captor.getValue().getCreateUser()).isEqualTo(0L);
+		assertThat(captor.getValue().getCreateUser()).isZero();
 	}
 
 	@Test

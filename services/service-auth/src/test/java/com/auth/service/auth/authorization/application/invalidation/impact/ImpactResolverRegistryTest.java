@@ -1,5 +1,6 @@
 package com.auth.service.auth.authorization.application.invalidation.impact;
 
+import com.auth.module.security.contract.dto.invalidation.PermissionInvalidatePayload;
 import com.auth.module.security.contract.dto.invalidation.RoleInvalidatePayload;
 import com.auth.service.auth.authorization.domain.invalidation.port.AuthorizationImpactQueryPort;
 import org.junit.jupiter.api.DisplayName;
@@ -44,10 +45,8 @@ class ImpactResolverRegistryTest {
 		ImpactResolverRegistry registry = new ImpactResolverRegistry(
 				List.of(new RoleCodeImpactResolver(authorizationImpactQueryPort)));
 
-		assertThrows(IllegalStateException.class,
-				() -> registry
-					.resolve(new com.auth.module.security.contract.dto.invalidation.PermissionInvalidatePayload(
-							List.of("sys:user:list"))));
+		PermissionInvalidatePayload unregisteredPayload = new PermissionInvalidatePayload(List.of("sys:user:list"));
+		assertThrows(IllegalStateException.class, () -> registry.resolve(unregisteredPayload));
 	}
 
 }

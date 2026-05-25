@@ -86,15 +86,17 @@ class AuthorizationInvalidateRequestTest {
 	@Test
 	@DisplayName("kind 与 payload 类型不一致时应拒绝构造")
 	void constructor_kindPayloadMismatch_shouldThrow() {
-		assertThrows(IllegalArgumentException.class, () -> new AuthorizationInvalidateRequest("evt-bad",
-				AuthorizationChangeKind.ROLE, new PermissionInvalidatePayload(List.of("sys:user:list"))));
+		PermissionInvalidatePayload mismatchedPayload = new PermissionInvalidatePayload(List.of("sys:user:list"));
+		assertThrows(IllegalArgumentException.class,
+				() -> new AuthorizationInvalidateRequest("evt-bad", AuthorizationChangeKind.ROLE, mismatchedPayload));
 	}
 
 	@Test
 	@DisplayName("eventId 为空时应拒绝构造")
 	void constructor_blankEventId_shouldThrow() {
-		assertThrows(IllegalArgumentException.class, () -> new AuthorizationInvalidateRequest("  ",
-				AuthorizationChangeKind.ROLE, new RoleInvalidatePayload(List.of("ADMIN"))));
+		RoleInvalidatePayload payload = new RoleInvalidatePayload(List.of("ADMIN"));
+		assertThrows(IllegalArgumentException.class,
+				() -> new AuthorizationInvalidateRequest("  ", AuthorizationChangeKind.ROLE, payload));
 	}
 
 }

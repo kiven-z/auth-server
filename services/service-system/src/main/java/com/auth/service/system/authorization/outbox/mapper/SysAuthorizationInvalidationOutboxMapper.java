@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * 授权失效 Outbox Mapper。
+ * 授权失效 Outbox Mapper
  *
  * @author Bunny
  */
@@ -16,11 +16,11 @@ import java.util.List;
 public interface SysAuthorizationInvalidationOutboxMapper {
 
 	/**
-	 * 插入待投递记录（status=PENDING）。
-	 * @param record Outbox 行
+	 * 插入待投递记录（status=PENDING）
+	 * @param outboxEntity Outbox 行
 	 * @return 影响行数
 	 */
-	int insertPending(SysAuthorizationInvalidationOutboxEntity record);
+	int insertPending(SysAuthorizationInvalidationOutboxEntity outboxEntity);
 
 	/**
 	 * 按主键查询。
@@ -40,7 +40,7 @@ public interface SysAuthorizationInvalidationOutboxMapper {
 			@Param("now") LocalDateTime now, @Param("limit") int limit);
 
 	/**
-	 * 抢占记录（乐观锁 version）。
+	 * 抢占记录（乐观锁 version）
 	 * @param id 主键
 	 * @param lockedBy 实例标识
 	 * @param lockedAt 抢占时间
@@ -71,7 +71,7 @@ public interface SysAuthorizationInvalidationOutboxMapper {
 			@Param("nextRetryAt") LocalDateTime nextRetryAt, @Param("lastError") String lastError);
 
 	/**
-	 * 同步投递失败时记录错误（保持 PENDING，供 Job 重试）。
+	 * 同步投递失败时记录错误（保持 PENDING，供 Job 重试）
 	 * @param id 主键
 	 * @param lastError 失败原因
 	 * @return 影响行数

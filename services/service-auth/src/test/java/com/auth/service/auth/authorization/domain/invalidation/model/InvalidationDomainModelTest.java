@@ -19,8 +19,8 @@ class InvalidationDomainModelTest {
 	@Test
 	@DisplayName("InvalidationCommand 拒绝空白 eventId")
 	void invalidationCommand_blankEventId_shouldThrow() {
-		assertThrows(IllegalArgumentException.class,
-				() -> new InvalidationCommand("  ", new RoleInvalidatePayload(List.of("ADMIN"))));
+		RoleInvalidatePayload payload = new RoleInvalidatePayload(List.of("ADMIN"));
+		assertThrows(IllegalArgumentException.class, () -> new InvalidationCommand("  ", payload));
 	}
 
 	@Test

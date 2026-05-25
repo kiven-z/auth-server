@@ -48,8 +48,16 @@ public class ValidationExceptionHandler extends BaseExceptionResponseBuilder {
 			.stream()
 			.sorted(Comparator.comparing(FieldError::getField))
 			.map(fieldError -> {
-				String message = typeMismatch.equals(fieldError.getCode()) ? INVALID_VALUE_FORMAT
-						: (fieldError.getDefaultMessage() != null ? fieldError.getDefaultMessage() : "invalid");
+				String message;
+				if (typeMismatch.equals(fieldError.getCode())) {
+					message = INVALID_VALUE_FORMAT;
+				}
+				else if (fieldError.getDefaultMessage() != null) {
+					message = fieldError.getDefaultMessage();
+				}
+				else {
+					message = "invalid";
+				}
 				return fieldError.getField() + ": " + message;
 			})
 			.collect(Collectors.joining(", "));

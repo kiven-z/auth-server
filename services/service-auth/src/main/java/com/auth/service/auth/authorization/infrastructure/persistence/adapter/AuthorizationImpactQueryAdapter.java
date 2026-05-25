@@ -8,10 +8,10 @@ import com.auth.service.auth.authorization.infrastructure.persistence.Authorizat
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 /**
- * 授权影响面查询 Port 适配器（MyBatis 实现）。
+ * 授权影响面查询 Port 适配器
  *
  * @author Bunny
  */
@@ -75,13 +75,12 @@ public class AuthorizationImpactQueryAdapter implements AuthorizationImpactQuery
 	}
 
 	/**
-	 * 分段查询并累加用户 ID，SQL 层已做 SELECT DISTINCT，返回值无需再次去重。
+	 * 分段查询并累加用户
 	 * @param subjectIds 授权主体ID集合
 	 * @param queryFn 查询函数
 	 * @param accumulator 累加器
 	 */
-	private void queryAndAccumulate(List<Long> subjectIds, Function<List<Long>, List<Long>> queryFn,
-			Set<Long> accumulator) {
+	private void queryAndAccumulate(List<Long> subjectIds, UnaryOperator<List<Long>> queryFn, Set<Long> accumulator) {
 		if (CollUtil.isEmpty(subjectIds)) {
 			return;
 		}

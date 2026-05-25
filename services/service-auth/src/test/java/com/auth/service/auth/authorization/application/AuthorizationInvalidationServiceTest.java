@@ -92,8 +92,8 @@ class AuthorizationInvalidationServiceTest {
 		AuthorizationInvalidateResponse response = authorizationInvalidationService.invalidate(request);
 
 		assertEquals(AuthorizationInvalidateResponse.empty(), response);
-		verify(invalidationIdempotencyPort).completeProcessedOutcome(eq("evt-2"), eq(AuthorizationChangeKind.ROLE),
-				eq(AuthorizationInvalidateResponse.empty()));
+		verify(invalidationIdempotencyPort).completeProcessedOutcome("evt-2", AuthorizationChangeKind.ROLE,
+				AuthorizationInvalidateResponse.empty());
 	}
 
 	@Test
@@ -121,8 +121,8 @@ class AuthorizationInvalidationServiceTest {
 		InOrder order = inOrder(userPermVersionPort, authProfileMaterializationService);
 		order.verify(userPermVersionPort).incrementInBatches(Set.of(1L), 500);
 		order.verify(authProfileMaterializationService).refreshInBatches(Set.of(1L), 500);
-		verify(invalidationIdempotencyPort).completeProcessedOutcome(eq("evt-3"), eq(AuthorizationChangeKind.ROLE),
-				eq(new AuthorizationInvalidateResponse(1, 1, 1, 0)));
+		verify(invalidationIdempotencyPort).completeProcessedOutcome("evt-3", AuthorizationChangeKind.ROLE,
+				new AuthorizationInvalidateResponse(1, 1, 1, 0));
 	}
 
 	@Test

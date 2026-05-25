@@ -5,7 +5,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 /**
- * 授权失效幂等事件 Mapper。
+ * 授权失效幂等事件 Mapper
  *
  * @author Bunny
  */
@@ -20,19 +20,18 @@ public interface AuthorizationInvalidationEventMapper {
 	AuthorizationInvalidationEventProjection selectByEventId(@Param("eventId") String eventId);
 
 	/**
-	 * 插入处理中占位记录（{@code event_id} 唯一约束保证幂等）。
-	 * @param record 事件投影（计数为
-	 * {@link com.auth.service.auth.authorization.domain.invalidation.model.InvalidationProcessingMarker#PROCESSING_COUNT}）
+	 * 插入处理中占位记录
+	 * @param projection 事件投影（计数为
 	 * @return 插入行数
 	 */
-	int insertProcessingClaim(AuthorizationInvalidationEventProjection record);
+	int insertProcessingClaim(AuthorizationInvalidationEventProjection projection);
 
 	/**
 	 * 将占位行更新为最终处理结果。
-	 * @param record 事件投影
+	 * @param projection 事件投影
 	 * @return 更新行数
 	 */
-	int updateProcessedOutcome(AuthorizationInvalidationEventProjection record);
+	int updateProcessedOutcome(AuthorizationInvalidationEventProjection projection);
 
 	/**
 	 * 删除处理中占位行（失败回滚时释放 eventId）。

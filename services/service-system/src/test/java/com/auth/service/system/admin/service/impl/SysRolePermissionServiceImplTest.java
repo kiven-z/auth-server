@@ -18,7 +18,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -49,7 +48,8 @@ class SysRolePermissionServiceImplTest {
 	void assignWhenRoleMissingShouldThrow() {
 		when(sysRoleMapper.selectOne(any())).thenReturn(null);
 
-		assertThatThrownBy(() -> sysRolePermissionService.assignPermissions("MISSING", List.of("sys:user:list")))
+		List<String> permissionCodes = List.of("sys:user:list");
+		assertThatThrownBy(() -> sysRolePermissionService.assignPermissions("MISSING", permissionCodes))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemAdminResultCode.ROLE_NOT_FOUND);
@@ -66,9 +66,8 @@ class SysRolePermissionServiceImplTest {
 		sysRolePermissionService.assignPermissions("ADMIN", List.of("sys:user:list"));
 
 		verify(sysRolePermissionMapper).deleteByRoleCode("ADMIN");
-		verify(sysRolePermissionMapper).batchInsertRolePermissions(eq("ADMIN"), eq(List.of("sys:user:list")), any(),
-				any());
-		verify(roleInvalidationTrigger).submitByRoleCodes(eq(List.of("ADMIN")), eq("assign-permissions:ADMIN"));
+		verify(sysRolePermissionMapper).batchInsertRolePermissions("ADMIN", List.of("sys:user:list"), 0L, 0L);
+		verify(roleInvalidationTrigger).submitByRoleCodes(List.of("ADMIN"), "assign-permissions:ADMIN");
 	}
 
 }

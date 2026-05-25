@@ -16,7 +16,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -24,10 +23,8 @@ import java.lang.reflect.Field;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -128,7 +125,7 @@ class SysRoleServiceImplTest {
 		SysRoleUpdateForm form = updateForm(1L, "ADMIN", "管理员", false);
 		sysRoleService.update(form);
 
-		verify(roleInvalidationTrigger).submitByRoleCodes(eq(List.of("ADMIN")), eq("update:ADMIN"));
+		verify(roleInvalidationTrigger).submitByRoleCodes(List.of("ADMIN"), "update:ADMIN");
 	}
 
 	@Test
@@ -156,10 +153,7 @@ class SysRoleServiceImplTest {
 		verify(sysRoleCascadeMapper).deleteMenuRolesByRoleCode("EMPTY_ROLE");
 		verify(sysRoleMapper).deleteById(3L);
 
-		@SuppressWarnings("unchecked")
-		ArgumentCaptor<List<String>> codesCaptor = ArgumentCaptor.forClass(List.class);
-		verify(roleInvalidationTrigger).submitByRoleCodes(codesCaptor.capture(), eq("delete:EMPTY_ROLE"));
-		assertEquals(List.of("EMPTY_ROLE"), codesCaptor.getValue());
+		verify(roleInvalidationTrigger).submitByRoleCodes(List.of("EMPTY_ROLE"), "delete:EMPTY_ROLE");
 	}
 
 	private static SysRoleEntity roleEntity(Long id, String roleCode, String roleName, boolean status) {

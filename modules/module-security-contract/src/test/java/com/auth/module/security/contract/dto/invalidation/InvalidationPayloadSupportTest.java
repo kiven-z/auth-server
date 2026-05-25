@@ -31,16 +31,21 @@ class InvalidationPayloadSupportTest {
 	@Test
 	@DisplayName("copyNonEmpty 在 null 或空列表时应拒绝")
 	void copyNonEmpty_whenNullOrEmpty_shouldThrow() {
-		assertThrows(IllegalArgumentException.class, () -> InvalidationPayloadSupport.copyNonEmpty(null, "roleCodes"));
+		List<String> nullSource = null;
 		assertThrows(IllegalArgumentException.class,
-				() -> InvalidationPayloadSupport.copyNonEmpty(Collections.emptyList(), "roleCodes"));
+				() -> InvalidationPayloadSupport.copyNonEmpty(nullSource, "roleCodes"));
+
+		List<String> emptySource = Collections.emptyList();
+		assertThrows(IllegalArgumentException.class,
+				() -> InvalidationPayloadSupport.copyNonEmpty(emptySource, "roleCodes"));
 	}
 
 	@Test
 	@DisplayName("requireNonNull 在 null 时应拒绝")
 	void requireNonNull_whenNull_shouldThrow() {
+		Object nullValue = null;
 		assertThrows(IllegalArgumentException.class,
-				() -> InvalidationPayloadSupport.requireNonNull(null, "subjectId"));
+				() -> InvalidationPayloadSupport.requireNonNull(nullValue, "subjectId"));
 	}
 
 }

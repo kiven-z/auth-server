@@ -18,8 +18,7 @@ import java.util.function.Supplier;
 import static com.auth.module.security.autoconfigure.security.AnnotationOverridingAuthorizationSupport.*;
 
 /**
- * 在 HTTP 授权阶段优先尊重 {@link SecurityRequirement}（由 {@link TokenAuthenticationFilter} 写入
- * {@link SecurityRequirement#REQUEST_ATTRIBUTE}），再回落到 {@code permitPaths} 路径规则
+ * 在 HTTP 授权阶段
  *
  * @author Bunny
  * @see TokenAuthenticationFilter
@@ -80,10 +79,8 @@ public class AnnotationOverridingAuthorizationManager implements AuthorizationMa
 	 * 委托 {@link #authorize(Supplier, RequestAuthorizationContext)}；保留以满足当前
 	 * {@link AuthorizationManager} 对抽象 {@code check} 的编译要求 NOSONAR S1133 — Spring
 	 * Security 6.5 仍声明抽象 check，需保留桥接
-	 * @deprecated 请改用 {@link #authorize(Supplier, RequestAuthorizationContext)}
 	 */
 	@Override
-	@Deprecated
 	public AuthorizationDecision check(Supplier<Authentication> authentication, RequestAuthorizationContext context) {
 		AuthorizationResult r = authorize(authentication, context);
 		if (r instanceof AuthorizationDecision ad) {
