@@ -79,7 +79,7 @@ class AuthorizationInvalidationServiceTest {
 	}
 
 	@Test
-	@DisplayName("无影响用户时返回全零")
+	@DisplayName("无影响用户时返回全零并完成幂等占位")
 	void invalidate_emptyImpact_shouldReturnEmpty() {
 		when(invalidationIdempotencyPort.acquireGate("evt-2", AuthorizationChangeKind.ROLE))
 			.thenReturn(new InvalidationIdempotencyGate.Claimed());
@@ -90,7 +90,8 @@ class AuthorizationInvalidationServiceTest {
 		AuthorizationInvalidateResponse response = authorizationInvalidationService.invalidate(request);
 
 		assertEquals(AuthorizationInvalidateResponse.empty(), response);
-		verify(invalidationIdempotencyPort, never()).completeProcessedOutcome(any(), any(), any());
+		verify(invalidationIdempotencyPort).completeProcessedOutcome("evt-2", AuthorizationChangeKind.ROLE,
+				AuthorizationInvalidateResponse.empty());
 	}
 
 	@Test

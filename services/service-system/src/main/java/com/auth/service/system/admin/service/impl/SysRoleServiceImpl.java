@@ -5,9 +5,7 @@ import com.auth.service.system.admin.convert.SysRoleConverter;
 import com.auth.service.system.admin.convert.SysRoleDetailVoConverter;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.GrantTableMapper;
-import com.auth.service.system.admin.mapper.SysMenuRoleMapper;
 import com.auth.service.system.admin.mapper.SysRoleMapper;
-import com.auth.service.system.admin.mapper.SysRolePermissionMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.form.role.SysRoleCreateForm;
 import com.auth.service.system.admin.model.form.role.SysRoleUpdateForm;
@@ -48,18 +46,11 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 
 	private final GrantTableMapper grantTableMapper;
 
-	private final SysRolePermissionMapper sysRolePermissionMapper;
-
-	private final SysMenuRoleMapper sysMenuRoleMapper;
-
 	public SysRoleServiceImpl(AuditUserDisplayService auditUserDisplayService,
-			RoleAuthorizationInvalidationTrigger roleInvalidationTrigger, GrantTableMapper grantTableMapper,
-			SysRolePermissionMapper sysRolePermissionMapper, SysMenuRoleMapper sysMenuRoleMapper) {
+			RoleAuthorizationInvalidationTrigger roleInvalidationTrigger, GrantTableMapper grantTableMapper) {
 		this.auditUserDisplayService = auditUserDisplayService;
 		this.roleInvalidationTrigger = roleInvalidationTrigger;
 		this.grantTableMapper = grantTableMapper;
-		this.sysRolePermissionMapper = sysRolePermissionMapper;
-		this.sysMenuRoleMapper = sysMenuRoleMapper;
 	}
 
 	/**
@@ -169,8 +160,6 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 			throw new SystemBusinessException(SystemAdminResultCode.ROLE_IN_USE, roleCode);
 		}
 
-		sysRolePermissionMapper.deleteByRoleCode(roleCode);
-		sysMenuRoleMapper.deleteByRoleCode(roleCode);
 		removeById(id);
 
 		roleInvalidationTrigger.submitByRoleCodes(List.of(roleCode), "delete:" + roleCode);

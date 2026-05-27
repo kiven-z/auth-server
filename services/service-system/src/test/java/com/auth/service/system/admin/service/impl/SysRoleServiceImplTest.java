@@ -2,9 +2,7 @@ package com.auth.service.system.admin.service.impl;
 
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.GrantTableMapper;
-import com.auth.service.system.admin.mapper.SysMenuRoleMapper;
 import com.auth.service.system.admin.mapper.SysRoleMapper;
-import com.auth.service.system.admin.mapper.SysRolePermissionMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.authorization.dispatch.trigger.RoleAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
@@ -48,12 +46,6 @@ class SysRoleServiceImplTest {
 	@Mock
 	private GrantTableMapper grantTableMapper;
 
-	@Mock
-	private SysRolePermissionMapper sysRolePermissionMapper;
-
-	@Mock
-	private SysMenuRoleMapper sysMenuRoleMapper;
-
 	private SysRoleServiceImpl sysRoleService;
 
 	private static SysRoleEntity roleEntity(Long id, String roleCode) {
@@ -68,8 +60,7 @@ class SysRoleServiceImplTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		sysRoleService = new SysRoleServiceImpl(auditUserDisplayService, roleInvalidationTrigger, grantTableMapper,
-				sysRolePermissionMapper, sysMenuRoleMapper);
+		sysRoleService = new SysRoleServiceImpl(auditUserDisplayService, roleInvalidationTrigger, grantTableMapper);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysRoleService, sysRoleMapper);
@@ -103,7 +94,7 @@ class SysRoleServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("删除角色：物理删除子表关联、主表并触发授权失效")
+	@DisplayName("删除角色：物理删除主表并触发授权失效（子表由数据库 CASCADE 维护）")
 	void deleteShouldPhysicallyDeleteAndInvalidate() {
 		when(sysRoleMapper.selectById(3L)).thenReturn(roleEntity(3L, "EMPTY_ROLE"));
 		when(grantTableMapper.countByRoleCode("EMPTY_ROLE")).thenReturn(0L);
@@ -111,8 +102,6 @@ class SysRoleServiceImplTest {
 
 		sysRoleService.deleteById(3L);
 
-		verify(sysRolePermissionMapper).deleteByRoleCode("EMPTY_ROLE");
-		verify(sysMenuRoleMapper).deleteByRoleCode("EMPTY_ROLE");
 		verify(sysRoleMapper).deleteById(3L);
 		verify(roleInvalidationTrigger).submitByRoleCodes(List.of("EMPTY_ROLE"), "delete:EMPTY_ROLE");
 	}
