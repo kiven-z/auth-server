@@ -1,6 +1,10 @@
 package com.auth.service.system.admin.service.impl;
 
-import cn.hutool.core.text.CharSequenceUtil;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.convert.SysRoleConverter;
 import com.auth.service.system.admin.convert.SysRoleDetailVoConverter;
@@ -21,17 +25,14 @@ import com.auth.service.system.admin.support.sqlbuild.SysRolePageOrderSqlBuilder
 import com.auth.service.system.authorization.dispatch.RoleAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
+import com.auth.service.system.common.support.FieldChangeSupport;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import cn.hutool.core.text.CharSequenceUtil;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 系统角色服务实现
@@ -61,17 +62,6 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 		this.sysRolePermissionMapper = sysRolePermissionMapper;
 		this.sysRoleCascadeMapper = sysRoleCascadeMapper;
 		this.roleInvalidationTrigger = roleInvalidationTrigger;
-	}
-
-	/**
-	 * 判断是否需在更新后触发授权失效：role_code 或 status 变化时触发；仅改名称/排序/备注不触发。
-	 */
-	private static boolean shouldInvalidateAfterUpdate(String oldRoleCode, String newRoleCode, Boolean oldStatus,
-			Boolean newStatus) {
-		if (!CharSequenceUtil.equals(oldRoleCode, newRoleCode)) {
-			return true;
-		}
-		return !Objects.equals(oldStatus, newStatus);
 	}
 
 	/**
@@ -107,16 +97,16 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 	public void create(SysRoleCreateForm form) {
 		String roleCode = CharSequenceUtil.trim(form.getRoleCode());
 
+		// 检查角色编码是否重复
 		long exists = count(Wrappers.<SysRoleEntity>lambdaQuery().eq(SysRoleEntity::getRoleCode, roleCode));
 		if (exists > 0) {
 			throw new SystemBusinessException(SystemAdminResultCode.ROLE_CODE_DUPLICATE, roleCode);
 		}
 
+		// 创建角色
 		SysRoleEntity entity = SysRoleConverter.INSTANCE.toEntity(form);
 		entity.setRoleCode(roleCode);
-		if (entity.getOrderNum() == null) {
-			entity.setOrderNum(0);
-		}
+
 		save(entity);
 	}
 
@@ -125,44 +115,44 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 	 */
 	@Override
 	public void update(SysRoleUpdateForm form) {
-		SysRoleEntity existing = baseMapper.selectById(form.getId());
+		// 检查角色是否存在
+		Long id = form.getId();
+		SysRoleEntity existing = baseMapper.selectById(id);
 		if (existing == null) {
-			throw new SystemBusinessException(SystemAdminResultCode.ROLE_NOT_FOUND, form.getId());
+			throw new SystemBusinessException(SystemAdminResultCode.ROLE_NOT_FOUND, id);
 		}
 
+		// 检查角色编码是否重复
 		String oldRoleCode = existing.getRoleCode();
 		String newRoleCode = CharSequenceUtil.trim(form.getRoleCode());
 		Boolean oldStatus = existing.getStatus();
 		Boolean newStatus = form.getStatus();
-
-		boolean roleCodeChanged = !CharSequenceUtil.equals(oldRoleCode, newRoleCode);
-		if (roleCodeChanged) {
-			long duplicate = count(Wrappers.<SysRoleEntity>lambdaQuery()
-				.eq(SysRoleEntity::getRoleCode, newRoleCode)
-				.ne(SysRoleEntity::getId, existing.getId()));
-			if (duplicate > 0) {
-				throw new SystemBusinessException(SystemAdminResultCode.ROLE_CODE_DUPLICATE, newRoleCode);
-			}
+		// 检查角色编码是否重复
+		long duplicate = count(Wrappers.<SysRoleEntity>lambdaQuery()
+			.eq(SysRoleEntity::getRoleCode, newRoleCode)
+			.ne(SysRoleEntity::getId, existing.getId()));
+		if (duplicate > 0) {
+			throw new SystemBusinessException(SystemAdminResultCode.ROLE_CODE_DUPLICATE, newRoleCode);
 		}
 
+		// 检查角色编码是否变更
+		boolean roleCodeChanged = FieldChangeSupport.codeChanged(oldRoleCode, newRoleCode);
+		boolean statusChanged = FieldChangeSupport.valueChanged(oldStatus, newStatus);
+
+		// 更新角色
 		SysRoleConverter.INSTANCE.applyUpdateForm(form, existing);
 		existing.setRoleCode(newRoleCode);
-		if (existing.getOrderNum() == null) {
-			existing.setOrderNum(0);
-		}
 		updateById(existing);
 
+		// 检查角色编码是否变更
 		if (roleCodeChanged) {
 			cascadeRoleCodeRename(oldRoleCode, newRoleCode);
 		}
 
-		if (shouldInvalidateAfterUpdate(oldRoleCode, newRoleCode, oldStatus, newStatus)) {
-			List<String> invalidateCodes = new ArrayList<>();
-			invalidateCodes.add(oldRoleCode);
-			if (!CharSequenceUtil.equals(oldRoleCode, newRoleCode)) {
-				invalidateCodes.add(newRoleCode);
-			}
-			roleInvalidationTrigger.submitByRoleCodes(invalidateCodes, "update:" + newRoleCode);
+		// 检查角色状态是否变更
+		if (FieldChangeSupport.anyChanged(roleCodeChanged, statusChanged)) {
+			roleInvalidationTrigger.submitByRoleCodes(FieldChangeSupport.renameCodes(oldRoleCode, newRoleCode),
+					"update:" + newRoleCode);
 		}
 	}
 
@@ -176,16 +166,19 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 			throw new SystemBusinessException(SystemAdminResultCode.ROLE_NOT_FOUND, id);
 		}
 
+		// 检查角色是否被 grant_table 引用
 		String roleCode = existing.getRoleCode();
 		long grantRefs = grantTableMapper.countByRoleCode(roleCode);
 		if (grantRefs > 0) {
 			throw new SystemBusinessException(SystemAdminResultCode.ROLE_IN_USE, roleCode);
 		}
 
+		// 删除角色权限
 		sysRolePermissionMapper.deleteByRoleCode(roleCode);
 		sysRoleCascadeMapper.deleteMenuRolesByRoleCode(roleCode);
 		removeById(id);
 
+		// 触发授权失效
 		roleInvalidationTrigger.submitByRoleCodes(List.of(roleCode), "delete:" + roleCode);
 		log.info("Role deleted: id={}, roleCode={}", id, roleCode);
 	}
