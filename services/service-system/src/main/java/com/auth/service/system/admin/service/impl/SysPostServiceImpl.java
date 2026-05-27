@@ -1,6 +1,5 @@
 package com.auth.service.system.admin.service.impl;
 
-import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.convert.SysPostConverter;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
@@ -57,7 +56,7 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity
 			throw new SystemBusinessException(SystemAdminResultCode.POST_DEPT_NOT_FOUND, form.getDeptId());
 		}
 
-		String postCode = CharSequenceUtil.trim(form.getPostCode());
+		String postCode = form.getPostCode();
 		long exists = count(Wrappers.<SysPostEntity>lambdaQuery()
 			.eq(SysPostEntity::getDeptId, form.getDeptId())
 			.eq(SysPostEntity::getPostCode, postCode));

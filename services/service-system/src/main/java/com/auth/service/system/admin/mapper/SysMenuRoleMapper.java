@@ -40,6 +40,13 @@ public interface SysMenuRoleMapper extends BaseMapper<SysMenuRoleEntity> {
 	void deleteByMenuId(@Param("menuId") Long menuId);
 
 	/**
+	 * 按角色编码删除菜单-角色关联（删除角色前清理）。
+	 * @param roleCode 角色编码
+	 */
+	@Delete("DELETE FROM sys_menu_role WHERE role_code = #{roleCode}")
+	void deleteByRoleCode(@Param("roleCode") String roleCode);
+
+	/**
 	 * 批量插入菜单-角色关联
 	 * @param menuId 菜单ID
 	 * @param roleCodes 角色编码列表

@@ -58,7 +58,6 @@ public class SysUserQueryServiceImpl extends ServiceImpl<SysUserQueryMapper, Use
 	 */
 	@Override
 	public List<SysUserSearchItemResponse> searchByKeyword(String keyword, Integer limit) {
-		keyword = CharSequenceUtil.trim(keyword);
 		if (CharSequenceUtil.isEmpty(keyword)) {
 			return Collections.emptyList();
 		}

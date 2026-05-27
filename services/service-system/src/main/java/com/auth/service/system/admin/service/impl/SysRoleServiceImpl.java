@@ -1,11 +1,13 @@
 package com.auth.service.system.admin.service.impl;
 
-import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.convert.SysRoleConverter;
 import com.auth.service.system.admin.convert.SysRoleDetailVoConverter;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
+import com.auth.service.system.admin.mapper.GrantTableMapper;
+import com.auth.service.system.admin.mapper.SysMenuRoleMapper;
 import com.auth.service.system.admin.mapper.SysRoleMapper;
+import com.auth.service.system.admin.mapper.SysRolePermissionMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.form.role.SysRoleCreateForm;
 import com.auth.service.system.admin.model.form.role.SysRoleUpdateForm;
@@ -44,10 +46,20 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 
 	private final RoleAuthorizationInvalidationTrigger roleInvalidationTrigger;
 
+	private final GrantTableMapper grantTableMapper;
+
+	private final SysRolePermissionMapper sysRolePermissionMapper;
+
+	private final SysMenuRoleMapper sysMenuRoleMapper;
+
 	public SysRoleServiceImpl(AuditUserDisplayService auditUserDisplayService,
-			RoleAuthorizationInvalidationTrigger roleInvalidationTrigger) {
+			RoleAuthorizationInvalidationTrigger roleInvalidationTrigger, GrantTableMapper grantTableMapper,
+			SysRolePermissionMapper sysRolePermissionMapper, SysMenuRoleMapper sysMenuRoleMapper) {
 		this.auditUserDisplayService = auditUserDisplayService;
 		this.roleInvalidationTrigger = roleInvalidationTrigger;
+		this.grantTableMapper = grantTableMapper;
+		this.sysRolePermissionMapper = sysRolePermissionMapper;
+		this.sysMenuRoleMapper = sysMenuRoleMapper;
 	}
 
 	/**
@@ -81,7 +93,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 	 */
 	@Override
 	public void create(SysRoleCreateForm form) {
-		String roleCode = CharSequenceUtil.trim(form.getRoleCode());
+		String roleCode = form.getRoleCode();
 
 		BusinessKeyAssert.requireAbsent(this,
 				Wrappers.<SysRoleEntity>lambdaQuery().eq(SysRoleEntity::getRoleCode, roleCode),
@@ -107,7 +119,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 
 		// 检查角色编码是否变更
 		String oldRoleCode = existing.getRoleCode();
-		String newRoleCode = CharSequenceUtil.trim(form.getRoleCode());
+		String newRoleCode = form.getRoleCode();
 		Boolean oldStatus = existing.getStatus();
 		Boolean newStatus = form.getStatus();
 
@@ -140,6 +152,29 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 	public List<SysRoleOptionVO> listOptions(String roleName, String roleCode) {
 		List<SysRoleEntity> entities = baseMapper.selectRoleOptions(roleName, roleCode);
 		return SysRoleConverter.INSTANCE.toOptionVoList(entities);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void deleteById(Long id) {
+		SysRoleEntity existing = baseMapper.selectById(id);
+		if (existing == null) {
+			throw new SystemBusinessException(SystemAdminResultCode.ROLE_NOT_FOUND, id);
+		}
+
+		String roleCode = existing.getRoleCode();
+		if (grantTableMapper.countByRoleCode(roleCode) > 0) {
+			throw new SystemBusinessException(SystemAdminResultCode.ROLE_IN_USE, roleCode);
+		}
+
+		sysRolePermissionMapper.deleteByRoleCode(roleCode);
+		sysMenuRoleMapper.deleteByRoleCode(roleCode);
+		removeById(id);
+
+		roleInvalidationTrigger.submitByRoleCodes(List.of(roleCode), "delete:" + roleCode);
+		log.info("Role deleted: id={}, roleCode={}", id, roleCode);
 	}
 
 }

@@ -84,11 +84,11 @@ public class SysRoleController {
 		return Result.success();
 	}
 
-	@Operation(summary = "批量删除角色")
+	@Operation(summary = "删除角色")
 	@PreAuthorize("@auth.decide('sysRole:delete')")
-	@DeleteMapping
-	public Result<Void> deleteBatch(@RequestBody List<Long> ids) {
-		sysRoleService.removeBatchByIds(ids);
+	@DeleteMapping("/{id}")
+	public Result<Void> delete(@PathVariable("id") Long id) {
+		sysRoleService.deleteById(id);
 		return Result.success();
 	}
 

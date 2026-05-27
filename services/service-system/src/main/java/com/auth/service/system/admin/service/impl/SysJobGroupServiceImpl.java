@@ -1,6 +1,5 @@
 package com.auth.service.system.admin.service.impl;
 
-import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.convert.SysJobGroupConverter;
@@ -65,8 +64,7 @@ public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJo
 	 */
 	@Override
 	public List<SysJobGroupPageResponse> listEnabledOptions(String keyword, int limit) {
-		String searchKeyword = CharSequenceUtil.trim(keyword);
-		List<SysJobGroupPageRowPO> list = baseMapper.selectEnabledOptions(searchKeyword, limit);
+		List<SysJobGroupPageRowPO> list = baseMapper.selectEnabledOptions(keyword, limit);
 		List<SysJobGroupPageResponse> voList = list.stream()
 			.map(SysJobGroupConverter.INSTANCE::toPageResponse)
 			.toList();

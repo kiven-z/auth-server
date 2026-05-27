@@ -66,17 +66,16 @@ public class SysRolePermissionServiceImpl implements SysRolePermissionService {
 	}
 
 	private String requireExistingRoleCode(String roleCode) {
-		String normalized = CharSequenceUtil.trim(roleCode);
-		if (CharSequenceUtil.isBlank(normalized)) {
+		if (CharSequenceUtil.isBlank(roleCode)) {
 			throw new SystemBusinessException(SystemAdminResultCode.ROLE_NOT_FOUND, roleCode);
 		}
 
-		SysRoleEntity role = sysRoleMapper.selectOne(
-				Wrappers.<SysRoleEntity>lambdaQuery().eq(SysRoleEntity::getRoleCode, normalized).last("LIMIT 1"));
+		SysRoleEntity role = sysRoleMapper
+			.selectOne(Wrappers.<SysRoleEntity>lambdaQuery().eq(SysRoleEntity::getRoleCode, roleCode).last("LIMIT 1"));
 		if (role == null) {
-			throw new SystemBusinessException(SystemAdminResultCode.ROLE_NOT_FOUND, normalized);
+			throw new SystemBusinessException(SystemAdminResultCode.ROLE_NOT_FOUND, roleCode);
 		}
-		return normalized;
+		return roleCode;
 	}
 
 	private void validatePermissionCodesExist(List<String> permissionCodes) {

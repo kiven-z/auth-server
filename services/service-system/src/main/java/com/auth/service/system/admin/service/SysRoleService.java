@@ -55,4 +55,10 @@ public interface SysRoleService extends IService<SysRoleEntity> {
 	 */
 	List<SysRoleOptionVO> listOptions(String roleName, String roleCode);
 
+	/**
+	 * 按主键删除角色；grant_table 仍有引用时拒绝删除，成功后触发授权失效。
+	 * @param id 角色主键
+	 */
+	void deleteById(Long id);
+
 }
