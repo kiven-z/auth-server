@@ -17,7 +17,6 @@
         p.update_user
         FROM sys_permission p
         <where>
-            p.is_deleted = 0
             <if test="query.permissionCode != null and query.permissionCode != ''">
                 AND p.permission_code LIKE CONCAT('%', #{query.permissionCode}, '%')
             </if>

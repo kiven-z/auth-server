@@ -1,12 +1,5 @@
 package com.auth.service.system.admin.controller;
 
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
@@ -15,11 +8,14 @@ import com.auth.service.system.admin.model.query.SysPermissionQuery;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionPageResponse;
 import com.auth.service.system.admin.service.SysPermissionService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * 系统权限管理 Controller
@@ -52,6 +48,14 @@ public class SysPermissionController {
 	@PostMapping
 	public Result<Void> create(@Valid @RequestBody SysPermissionCreateForm form) {
 		sysPermissionService.create(form);
+		return Result.success();
+	}
+
+	@Operation(summary = "批量删除权限")
+	@PreAuthorize("@auth.decide('sysPermission:delete')")
+	@DeleteMapping
+	public Result<Void> deleteBatch(@RequestBody List<Long> ids) {
+		sysPermissionService.deleteByIds(ids);
 		return Result.success();
 	}
 

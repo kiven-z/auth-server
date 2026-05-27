@@ -40,7 +40,8 @@ public class SysRolePermissionController {
 	public Result<List<String>> assign(@PathVariable("roleCode") String roleCode,
 			@Valid @RequestBody SysRolePermissionAssignForm form) {
 		sysRolePermissionService.assignPermissions(roleCode, form.getPermissionCodes());
-		return Result.success(sysRolePermissionService.listPermissionCodes(roleCode));
+		List<String> data = sysRolePermissionService.listPermissionCodes(roleCode);
+		return Result.success(data);
 	}
 
 }

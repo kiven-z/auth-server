@@ -33,7 +33,6 @@ public interface SysRoleConverter {
 	@Mapping(target = "createUser", ignore = true)
 	@Mapping(target = "updateUser", ignore = true)
 	@Mapping(target = "version", ignore = true)
-	@Mapping(target = "isDeleted", ignore = true)
 	SysRoleEntity toEntity(SysRoleCreateForm form);
 
 	/**
@@ -47,7 +46,6 @@ public interface SysRoleConverter {
 	@Mapping(target = "createUser", ignore = true)
 	@Mapping(target = "updateUser", ignore = true)
 	@Mapping(target = "version", ignore = true)
-	@Mapping(target = "isDeleted", ignore = true)
 	void applyUpdateForm(SysRoleUpdateForm form, @org.mapstruct.MappingTarget SysRoleEntity entity);
 
 	/**

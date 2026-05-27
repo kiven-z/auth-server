@@ -10,7 +10,7 @@ import com.auth.service.system.admin.mapper.SysRolePermissionMapper;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.service.SysRolePermissionService;
-import com.auth.service.system.authorization.dispatch.RoleAuthorizationInvalidationTrigger;
+import com.auth.service.system.authorization.dispatch.trigger.RoleAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
@@ -18,10 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * 角色权限分配服务实现。
@@ -51,7 +48,7 @@ public class SysRolePermissionServiceImpl implements SysRolePermissionService {
 	@Override
 	public void assignPermissions(String roleCode, List<String> permissionCodes) {
 		String normalized = requireExistingRoleCode(roleCode);
-		List<String> codes = normalizePermissionCodes(permissionCodes);
+		List<String> codes = permissionCodes.stream().distinct().toList();
 		validatePermissionCodesExist(codes);
 
 		Long operatorId = SecurityUserUtils.getUserId();
@@ -82,20 +79,6 @@ public class SysRolePermissionServiceImpl implements SysRolePermissionService {
 		return normalized;
 	}
 
-	private static List<String> normalizePermissionCodes(List<String> permissionCodes) {
-		if (permissionCodes == null) {
-			return List.of();
-		}
-		Set<String> unique = new LinkedHashSet<>();
-		for (String code : permissionCodes) {
-			String trimmed = CharSequenceUtil.trim(code);
-			if (CharSequenceUtil.isNotBlank(trimmed)) {
-				unique.add(trimmed);
-			}
-		}
-		return new ArrayList<>(unique);
-	}
-
 	private void validatePermissionCodesExist(List<String> permissionCodes) {
 		if (CollUtil.isEmpty(permissionCodes)) {
 			return;
@@ -103,8 +86,7 @@ public class SysRolePermissionServiceImpl implements SysRolePermissionService {
 
 		Long validCount = sysPermissionMapper.selectCount(Wrappers.<SysPermissionEntity>lambdaQuery()
 			.in(SysPermissionEntity::getPermissionCode, permissionCodes)
-			.eq(SysPermissionEntity::getStatus, true)
-			.eq(SysPermissionEntity::getIsDeleted, false));
+			.eq(SysPermissionEntity::getStatus, true));
 		if (validCount == null || validCount != permissionCodes.size()) {
 			throw new SystemBusinessException(SystemAdminResultCode.ROLE_PERMISSION_INVALID);
 		}

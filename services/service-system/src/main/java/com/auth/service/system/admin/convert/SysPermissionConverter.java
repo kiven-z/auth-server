@@ -29,7 +29,6 @@ public interface SysPermissionConverter {
 	@Mapping(target = "createUser", ignore = true)
 	@Mapping(target = "updateUser", ignore = true)
 	@Mapping(target = "version", ignore = true)
-	@Mapping(target = "isDeleted", ignore = true)
 	SysPermissionEntity toEntity(SysPermissionCreateForm form);
 
 	/**

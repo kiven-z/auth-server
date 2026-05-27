@@ -46,8 +46,7 @@
                  FROM grant_table gt
                           JOIN base_subjects bs ON gt.subject_type = bs.sub_type AND gt.subject_id = bs.sub_id
                           JOIN sys_role sr ON sr.role_code = gt.role_code
-                 WHERE sr.status = 1
-                   AND sr.is_deleted = 0),
+                 WHERE sr.status = 1),
              all_subjects AS (SELECT bs.sub_type, bs.sub_id
                               FROM base_subjects bs
                               UNION ALL

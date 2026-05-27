@@ -8,7 +8,7 @@ import java.time.Duration;
 import java.util.Optional;
 
 /**
- * 会话基础设施网关：活跃会话上限、Redis 会话索引生命周期与 Refresh 哈希轮换。
+ * 会话基础设施网关：活跃会话上限、Redis 会话索引生命周期与 Refresh 哈希轮换
  *
  * @author Bunny
  */
@@ -17,7 +17,7 @@ public interface SessionGateway {
 	// --- 会话上限 ---
 
 	/**
-	 * 认证成功后检查：活跃会话数达上限时抛会话超限异常。
+	 * 认证成功后检查：活跃会话数达上限时抛会话超限异常
 	 * @param userId 用户 ID
 	 */
 	void assertSessionLimit(Long userId);

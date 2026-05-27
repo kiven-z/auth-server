@@ -5,7 +5,7 @@ import com.auth.service.system.admin.mapper.SysPermissionMapper;
 import com.auth.service.system.admin.mapper.SysRoleMapper;
 import com.auth.service.system.admin.mapper.SysRolePermissionMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
-import com.auth.service.system.authorization.dispatch.RoleAuthorizationInvalidationTrigger;
+import com.auth.service.system.authorization.dispatch.trigger.RoleAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

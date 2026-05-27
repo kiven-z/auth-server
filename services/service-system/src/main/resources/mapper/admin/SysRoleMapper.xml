@@ -17,7 +17,6 @@
         r.update_user
         FROM sys_role r
         <where>
-            r.is_deleted = 0
             <if test="query.roleCode != null and query.roleCode != ''">
                 AND r.role_code LIKE CONCAT('%', #{query.roleCode}, '%')
             </if>
@@ -38,7 +37,7 @@
     <select id="selectRoleOptions" resultType="com.auth.service.system.admin.model.entity.SysRoleEntity">
         SELECT id, role_code, role_name FROM sys_role
         <where>
-            status = 1 AND is_deleted = 0
+            status = 1
             <if test="roleName != null and roleName != ''">AND role_name LIKE CONCAT('%', #{roleName}, '%')</if>
             <if test="roleCode != null and roleCode != ''">AND role_code LIKE CONCAT('%', #{roleCode}, '%')</if>
         </where>

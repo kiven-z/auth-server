@@ -90,7 +90,7 @@ public class SysMenuController {
 		return Result.success(null, MODIFY_SUCCESS.getMessage());
 	}
 
-	@Operation(summary = "批量删除菜单（逻辑删除）")
+	@Operation(summary = "批量删除菜单")
 	@PreAuthorize("@auth.decide('sysMenu:delete')")
 	@DeleteMapping
 	public Result<String> remove(@RequestBody List<Long> ids) {
@@ -98,7 +98,7 @@ public class SysMenuController {
 		return Result.success(null, DELETE_SUCCESS.getMessage());
 	}
 
-	@Operation(summary = "批量更新菜单状态（0=启用 1=禁用）")
+	@Operation(summary = "批量更新菜单状态")
 	@PreAuthorize("@auth.decide('sysMenu:update')")
 	@PutMapping("/status")
 	public Result<String> batchUpdateStatus(@Valid @RequestBody SysMenuBatchStatusForm form) {

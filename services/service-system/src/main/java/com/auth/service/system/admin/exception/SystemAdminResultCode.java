@@ -31,6 +31,11 @@ public enum SystemAdminResultCode implements SystemResultCode {
 	ROLE_CODE_DUPLICATE(409, 277, "ROLE_CODE_DUPLICATE", "system.role.code_duplicate"),
 
 	/**
+	 * 权限不存在
+	 */
+	PERMISSION_NOT_FOUND(404, 280, "PERMISSION_NOT_FOUND", "system.permission.not_found"),
+
+	/**
 	 * 权限编码已存在
 	 */
 	PERMISSION_CODE_DUPLICATE(409, 274, "PERMISSION_CODE_DUPLICATE", "system.permission.code_duplicate"),

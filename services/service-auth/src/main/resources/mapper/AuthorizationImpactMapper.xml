@@ -129,7 +129,6 @@
             #{permissionCode}
         </foreach>
           AND p.status = 1
-          AND p.is_deleted = 0
     </select>
 
     <!-- 策略码桥接：查询关联角色码（role_policy 表落地后生效） -->

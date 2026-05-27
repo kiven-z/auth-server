@@ -1,5 +1,6 @@
 package com.auth.service.system.admin.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.convert.SysPermissionConverter;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
@@ -10,6 +11,7 @@ import com.auth.service.system.admin.model.query.SysPermissionQuery;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionPageResponse;
 import com.auth.service.system.admin.service.SysPermissionService;
 import com.auth.service.system.admin.support.sqlbuild.SysPermissionPageOrderSqlBuilder;
+import com.auth.service.system.authorization.dispatch.trigger.PermissionAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -19,6 +21,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * 系统权限服务实现
@@ -33,8 +37,12 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 
 	private final AuditUserDisplayService auditUserDisplayService;
 
-	public SysPermissionServiceImpl(AuditUserDisplayService auditUserDisplayService) {
+	private final PermissionAuthorizationInvalidationTrigger permissionInvalidationTrigger;
+
+	public SysPermissionServiceImpl(AuditUserDisplayService auditUserDisplayService,
+			PermissionAuthorizationInvalidationTrigger permissionInvalidationTrigger) {
 		this.auditUserDisplayService = auditUserDisplayService;
+		this.permissionInvalidationTrigger = permissionInvalidationTrigger;
 	}
 
 	/**
@@ -71,6 +79,36 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 			entity.setStatus(Boolean.TRUE);
 		}
 		save(entity);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void deleteById(Long id) {
+		SysPermissionEntity existing = baseMapper.selectById(id);
+		if (existing == null) {
+			throw new SystemBusinessException(SystemAdminResultCode.PERMISSION_NOT_FOUND, id);
+		}
+
+		String permissionCode = existing.getPermissionCode();
+		removeById(id);
+
+		permissionInvalidationTrigger.submitByPermissionCodes(List.of(permissionCode), "delete:" + permissionCode);
+		log.info("Permission deleted: id={}, permissionCode={}", id, permissionCode);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void deleteByIds(List<Long> ids) {
+		if (CollUtil.isEmpty(ids)) {
+			return;
+		}
+		for (Long id : ids) {
+			deleteById(id);
+		}
 	}
 
 }

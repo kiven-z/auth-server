@@ -9,6 +9,7 @@ import com.auth.service.system.admin.model.vo.role.SysRoleDetailVO;
 import com.auth.service.system.admin.model.vo.role.SysRoleOptionVO;
 import com.auth.service.system.admin.model.vo.role.SysRolePageResponse;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
 
@@ -17,7 +18,7 @@ import java.util.List;
  *
  * @author Bunny
  */
-public interface SysRoleService {
+public interface SysRoleService extends IService<SysRoleEntity> {
 
 	/**
 	 * 分页查询角色列表
@@ -45,12 +46,6 @@ public interface SysRoleService {
 	 * @param form 更新表单
 	 */
 	void update(SysRoleUpdateForm form);
-
-	/**
-	 * 删除角色（逻辑删除）；删除前检查 grant_table 引用。
-	 * @param id 角色主键
-	 */
-	void deleteById(Long id);
 
 	/**
 	 * 查询角色下拉选项

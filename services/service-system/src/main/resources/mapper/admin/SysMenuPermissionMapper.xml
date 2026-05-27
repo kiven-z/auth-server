@@ -12,7 +12,6 @@
                       ON p.permission_code = mp.permission_code
                           AND p.permission_type = 0
                           AND p.status = 1
-                          AND p.is_deleted = 0
         WHERE mp.menu_id = #{menuId}
         ORDER BY p.permission_code
     </select>
@@ -26,7 +25,6 @@
                  INNER JOIN sys_permission p ON p.permission_code = mp.permission_code
             AND p.permission_type = 0
             AND p.status = 1
-            AND p.is_deleted = 0
         WHERE mp.menu_id IN
         <foreach collection="menuIds" item="id" open="(" separator="," close=")">
             #{id}

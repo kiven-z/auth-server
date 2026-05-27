@@ -1,15 +1,17 @@
 package com.auth.service.system.authorization.dispatch;
 
-import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest;
-import com.auth.service.system.authorization.config.AuthorizationInvalidationProperties;
-import com.auth.service.system.authorization.outbox.AuthorizationInvalidationPublisher;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest;
+import com.auth.service.system.authorization.config.AuthorizationInvalidationProperties;
+import com.auth.service.system.authorization.outbox.AuthorizationInvalidationPublisher;
+
+import lombok.RequiredArgsConstructor;
+
 /**
- * 授权失效协调入口：同事务写 Outbox，提交后（可选）同步 Feign 投递。
+ * 授权失效协调入口：同事务写 Outbox，提交后（可选）同步 Feign 投递
  *
  * @author Bunny
  */

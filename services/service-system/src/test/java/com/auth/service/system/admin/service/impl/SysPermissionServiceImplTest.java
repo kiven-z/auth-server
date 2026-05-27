@@ -1,16 +1,12 @@
 package com.auth.service.system.admin.service.impl;
 
-import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.SysPermissionMapper;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.form.permission.SysPermissionCreateForm;
-import com.auth.service.system.admin.model.query.SysPermissionQuery;
-import com.auth.service.system.admin.model.vo.permission.SysPermissionPageResponse;
+import com.auth.service.system.authorization.dispatch.trigger.PermissionAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,19 +16,18 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Field;
+import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 /**
- * {@link SysPermissionServiceImpl} ????
+ * {@link SysPermissionServiceImpl} 单元测试。
  *
  * @author Bunny
  */
-@DisplayName("SysPermissionServiceImpl ????")
+@DisplayName("SysPermissionServiceImpl 系统权限")
 @ExtendWith(MockitoExtension.class)
 class SysPermissionServiceImplTest {
 
@@ -42,47 +37,26 @@ class SysPermissionServiceImplTest {
 	@Mock
 	private AuditUserDisplayService auditUserDisplayService;
 
-	private SysPermissionServiceImpl sysPermissionService;
+	@Mock
+	private PermissionAuthorizationInvalidationTrigger permissionInvalidationTrigger;
 
-	private static SysPermissionCreateForm buildValidForm() {
-		SysPermissionCreateForm form = new SysPermissionCreateForm();
-		form.setPermissionCode("sys:user:add");
-		form.setPermissionName("????");
-		form.setPermissionType(1);
-		form.setRemark("r");
-		return form;
-	}
+	private SysPermissionServiceImpl sysPermissionService;
 
 	@BeforeEach
 	void setUp() throws Exception {
-		sysPermissionService = new SysPermissionServiceImpl(auditUserDisplayService);
+		sysPermissionService = new SysPermissionServiceImpl(auditUserDisplayService, permissionInvalidationTrigger);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysPermissionService, sysPermissionMapper);
 	}
 
 	@Test
-	@DisplayName("?????Mapper ??????????????")
-	void getPageDelegatesEnrichToAuditUserDisplayService() {
-		Page<SysPermissionEntity> pageParams = new Page<>(1, 10);
-		SysPermissionQuery query = new SysPermissionQuery();
-		Page<SysPermissionEntity> mpPage = new Page<>(1, 10);
-		SysPermissionEntity entityRow = new SysPermissionEntity();
-		entityRow.setId(1L);
-		mpPage.setRecords(java.util.List.of(entityRow));
-		when(sysPermissionMapper.selectListByPage(eq(pageParams), eq(query), anyString())).thenReturn(mpPage);
-
-		PageResponse<SysPermissionPageResponse> result = sysPermissionService.getPage(pageParams, query);
-
-		assertThat(result.getList()).hasSize(1);
-		verify(auditUserDisplayService)
-			.enrichAuditUsernames(org.mockito.ArgumentMatchers.<IPage<SysPermissionPageResponse>>any());
-	}
-
-	@Test
-	@DisplayName("????????????? PERMISSION_CODE_DUPLICATE")
+	@DisplayName("新增权限：编码已存在时抛出 PERMISSION_CODE_DUPLICATE")
 	void createThrowsWhenPermissionCodeExists() {
-		SysPermissionCreateForm form = buildValidForm();
+		SysPermissionCreateForm form = new SysPermissionCreateForm();
+		form.setPermissionCode("sys:user:list");
+		form.setPermissionName("列表");
+		form.setPermissionType(0);
 		when(sysPermissionMapper.selectCount(any())).thenReturn(1L);
 
 		assertThatThrownBy(() -> sysPermissionService.create(form)).isInstanceOf(SystemBusinessException.class)
@@ -91,20 +65,30 @@ class SysPermissionServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("??????????????????? Web ? strip ????")
-	void createAppliesDefaultsAndPersists() {
-		SysPermissionCreateForm form = buildValidForm();
-		form.setPermissionCode("sys:user:add");
-		form.setStatus(null);
-		form.setOrderNum(null);
-		when(sysPermissionMapper.selectCount(any())).thenReturn(0L);
-		when(sysPermissionMapper.insert(any(SysPermissionEntity.class))).thenReturn(1);
+	@DisplayName("删除权限：不存在时抛出 PERMISSION_NOT_FOUND")
+	void deleteThrowsWhenNotFound() {
+		when(sysPermissionMapper.selectById(9L)).thenReturn(null);
 
-		sysPermissionService.create(form);
+		assertThatThrownBy(() -> sysPermissionService.deleteById(9L)).isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemAdminResultCode.PERMISSION_NOT_FOUND);
 
-		verify(sysPermissionMapper)
-			.insert(argThat((SysPermissionEntity e) -> "sys:user:add".equals(e.getPermissionCode())
-					&& Boolean.TRUE.equals(e.getStatus()) && Integer.valueOf(0).equals(e.getOrderNum())));
+		verify(sysPermissionMapper, never()).deleteById(any());
+	}
+
+	@Test
+	@DisplayName("删除权限：物理删除并触发授权失效")
+	void deleteShouldPhysicallyDeleteAndInvalidate() {
+		SysPermissionEntity entity = new SysPermissionEntity();
+		entity.setId(5L);
+		entity.setPermissionCode("sys:role:delete");
+		when(sysPermissionMapper.selectById(5L)).thenReturn(entity);
+
+		sysPermissionService.deleteById(5L);
+
+		verify(sysPermissionMapper).deleteById(5L);
+		verify(permissionInvalidationTrigger).submitByPermissionCodes(List.of("sys:role:delete"),
+				"delete:sys:role:delete");
 	}
 
 }

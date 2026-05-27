@@ -1,19 +1,17 @@
-package com.auth.service.system.authorization.dispatch;
+package com.auth.service.system.authorization.dispatch.trigger;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest;
 import com.auth.module.security.contract.dto.invalidation.RoleInvalidatePayload;
+import com.auth.service.system.authorization.dispatch.AuthorizationInvalidationCoordinator;
 import com.auth.service.system.common.model.audit.SystemAuditBizModule;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -33,7 +31,7 @@ public class RoleAuthorizationInvalidationTrigger {
 	 * @param operation 操作标识，用于 eventId 与 sourceBizId
 	 */
 	public void submitByRoleCodes(Collection<String> roleCodes, String operation) {
-		List<String> codes = normalizeRoleCodes(roleCodes);
+		List<String> codes = roleCodes.stream().distinct().toList();
 		if (CollUtil.isEmpty(codes)) {
 			return;
 		}
@@ -44,20 +42,6 @@ public class RoleAuthorizationInvalidationTrigger {
 		AuthorizationInvalidateRequest request = new AuthorizationInvalidateRequest(eventId,
 				AuthorizationChangeKind.ROLE, new RoleInvalidatePayload(codes));
 		invalidationCoordinator.submit(request, SystemAuditBizModule.SYS_ROLE, bizKey);
-	}
-
-	private static List<String> normalizeRoleCodes(Collection<String> roleCodes) {
-		if (CollUtil.isEmpty(roleCodes)) {
-			return List.of();
-		}
-		Set<String> unique = new LinkedHashSet<>();
-		for (String code : roleCodes) {
-			String trimmed = CharSequenceUtil.trim(code);
-			if (CharSequenceUtil.isNotBlank(trimmed)) {
-				unique.add(trimmed);
-			}
-		}
-		return new ArrayList<>(unique);
 	}
 
 }

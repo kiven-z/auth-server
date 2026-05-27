@@ -7,6 +7,8 @@ import com.auth.service.system.admin.model.query.SysPermissionQuery;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionPageResponse;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
+import java.util.List;
+
 /**
  * 系统权限服务
  *
@@ -27,5 +29,17 @@ public interface SysPermissionService {
 	 * @param form 新增表单
 	 */
 	void create(SysPermissionCreateForm form);
+
+	/**
+	 * 物理删除权限；关联表由数据库 ON DELETE CASCADE 维护。
+	 * @param id 权限主键
+	 */
+	void deleteById(Long id);
+
+	/**
+	 * 批量物理删除权限。
+	 * @param ids 权限主键列表
+	 */
+	void deleteByIds(List<Long> ids);
 
 }

@@ -41,14 +41,14 @@ public interface AuthorizationImpactQueryPort {
 	Set<Long> findUserIdsByPostIds(Collection<Long> postIds);
 
 	/**
-	 * 按权限码反查受影响用户 ID（桥接角色码后走 grant 反向）。
+	 * 按权限码反查受影响用户 ID
 	 * @param permissionCodes 权限码，非空
 	 * @return 去重后的用户 ID 集合
 	 */
 	Set<Long> findUserIdsByPermissionCodes(Collection<String> permissionCodes);
 
 	/**
-	 * 按策略码反查受影响用户 ID（角色桥接 + 用户直连绑定）。
+	 * 按策略码反查受影响用户 ID
 	 * @param policyCodes 策略码，非空
 	 * @return 去重后的用户 ID 集合
 	 */
