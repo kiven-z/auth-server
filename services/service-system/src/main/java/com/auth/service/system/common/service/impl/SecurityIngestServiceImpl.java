@@ -44,12 +44,6 @@ public class SecurityIngestServiceImpl implements SecurityIngestService {
 		this.logOperationMapper = logOperationMapper;
 	}
 
-	/**
-	 * 截取字符串
-	 * @param value 字符串
-	 * @param maxLen 最大长度
-	 * @return 截取后的字符串
-	 */
 	private static String truncate(String value, int maxLen) {
 		if (CharSequenceUtil.isEmpty(value)) {
 			return value;
@@ -57,9 +51,6 @@ public class SecurityIngestServiceImpl implements SecurityIngestService {
 		return value.length() <= maxLen ? value : value.substring(0, maxLen);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void append(SecurityAuthorizationAuditPayloadEvent event) {
 		LogAuthorizationAuditEntity entity = new LogAuthorizationAuditEntity();
@@ -74,7 +65,6 @@ public class SecurityIngestServiceImpl implements SecurityIngestService {
 		entity.setClassName(event.getClassName());
 		entity.setMethodName(event.getMethodName());
 
-		// 记录方法传参
 		Map<String, Object> params = event.getMethodParams();
 		if (MapUtil.isNotEmpty(params)) {
 			String json = JSON.toJSONString(params);
@@ -88,9 +78,6 @@ public class SecurityIngestServiceImpl implements SecurityIngestService {
 		logAuthorizationAuditMapper.insert(entity);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void append(OperationLogPayloadEvent payload) {
 		Long principalUserId = payload.getUserId();

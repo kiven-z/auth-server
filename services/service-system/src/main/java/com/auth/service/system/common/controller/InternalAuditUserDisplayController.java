@@ -14,10 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 对内接口：按用户 ID 批量解析用户名，供其他微服务经网关 / 服务发现调用。
- * <p>
- * 安全与路由由网关白名单及服务间认证策略控制，本控制器仅编排应用服务。
- * </p>
+ * 对内接口：按用户 ID 批量解析用户名（id → username）
  *
  * @author Bunny
  */

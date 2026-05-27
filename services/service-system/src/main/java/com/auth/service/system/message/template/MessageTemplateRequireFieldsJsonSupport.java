@@ -16,7 +16,7 @@ import java.util.*;
 import static com.auth.service.system.common.exception.code.SystemEmailResultCode.*;
 
 /**
- * 消息模板 require_fields JSON 校验、转换与发送前变量完整性校验（邮件/短信共用）
+ * 消息模板必填变量声明：序列化、解析与发送前完整性校验（多渠道共用）
  *
  * @author Bunny
  */
@@ -45,9 +45,7 @@ public class MessageTemplateRequireFieldsJsonSupport {
 	}
 
 	/**
-	 * 解析数据库中的 JSON，校验结构与 key 唯一性
-	 * @param json JSON 字符串
-	 * @return 变量列表
+	 * 解析必填变量声明 JSON，校验结构与 key 唯一性
 	 */
 	public static List<EmailTemplateRequireFieldRow> parse(String json) {
 		if (CharSequenceUtil.isBlank(json)) {
@@ -124,22 +122,16 @@ public class MessageTemplateRequireFieldsJsonSupport {
 	}
 
 	/**
-	 * 解析 require_fields 并校验发送变量是否齐全
-	 * @param requireFieldsJson 数据库中的 require_fields JSON
-	 * @param variables 发送变量
-	 * @param missingCode 变量缺失时的业务码（邮件/短信/钉钉各自传入）
-	 * @param channel 渠道名（写入 i18n 占位 {0}）
+	 * 解析声明并校验发送变量是否齐全
+	 * @param missingCode 变量缺失时的业务码（各渠道传入）
+	 * @param channel 渠道名（i18n 占位 {0}）
 	 */
 	public static void assertVariablesPresent(String requireFieldsJson, Map<String, Object> variables,
 			SystemResultCode missingCode, String channel) {
 		assertVariablesPresent(parse(requireFieldsJson), variables, missingCode, channel);
 	}
 
-	/**
-	 * 将变量列表转为 FreeMarker 数据模型（使用每条记录的 exampleValue）
-	 * @param rows 变量列表
-	 * @return 数据模型
-	 */
+	/** 用各字段的 exampleValue 组装预览/示例数据模型 */
 	public static Map<String, Object> toExampleModel(List<EmailTemplateRequireFieldRow> rows) {
 		if (rows == null) {
 			throw new SystemBusinessException(REQUIRE_FIELDS_NULL);

@@ -26,17 +26,11 @@ public class DypnsVerifyCodeMessageSender implements MessageSender {
 		this.aliyunDypnsVerifyCodeSender = aliyunDypnsVerifyCodeSender;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public MessageChannel channel() {
 		return MessageChannel.SMS_ALIYUN_DYPNS;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void sendByTemplate(TemplateMessageCommand command) {
 		if (Boolean.TRUE.equals(command.getCustomBody())) {

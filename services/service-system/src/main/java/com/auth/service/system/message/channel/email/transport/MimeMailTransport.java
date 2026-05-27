@@ -33,9 +33,6 @@ public class MimeMailTransport {
 
 	private final EmailAttachmentResolver attachmentResolver;
 
-	/**
-	 * 默认发件人地址
-	 */
 	@Value("${spring.mail.username}")
 	private String defaultFrom;
 
@@ -60,13 +57,6 @@ public class MimeMailTransport {
 		}
 	}
 
-	/**
-	 * 发送MIME邮件
-	 * @param emailSendDTO 发送请求
-	 * @param subject 主题
-	 * @param body 内容
-	 * @throws MessagingException 邮件发送异常
-	 */
 	private void sendMime(EmailSendDTO emailSendDTO, String subject, String body) throws MessagingException {
 		validate(emailSendDTO, subject, body);
 
@@ -94,12 +84,6 @@ public class MimeMailTransport {
 		mailSender.send(message);
 	}
 
-	/**
-	 * 验证发送请求
-	 * @param emailSendDTO 发送请求
-	 * @param subject 主题
-	 * @param body 内容
-	 */
 	private void validate(EmailSendDTO emailSendDTO, String subject, String body) {
 		if (emailSendDTO == null) {
 			throw new SystemMessageException(EMAIL_SEND_DTO_NULL);
@@ -115,12 +99,6 @@ public class MimeMailTransport {
 		}
 	}
 
-	/**
-	 * 添加附件
-	 * @param helper MIME消息助手
-	 * @param attachments 附件列表
-	 * @throws MessagingException 邮件发送异常
-	 */
 	private void addAttachments(MimeMessageHelper helper, List<MultipartFile> attachments) throws MessagingException {
 		if (CollUtil.isEmpty(attachments)) {
 			return;

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * @author Bunny
  */
-@Tag(name = "统一消息发送", description = "多渠道消息发送唯一入口；钉钉直发示例：channel=DING_TALK、customBody=true、body、options")
+@Tag(name = "统一消息发送", description = "按 channel 路由至邮件、短信、钉钉等渠道")
 @RequestMapping("/api/system/message/")
 @RestController
 public class MessageSendController {

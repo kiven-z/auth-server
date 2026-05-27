@@ -62,17 +62,11 @@ public class DingTalkMessageSender implements MessageSender {
 		return rendered.title();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public MessageChannel channel() {
 		return MessageChannel.DING_TALK;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void sendByTemplate(TemplateMessageCommand command) {
 		RenderedDingTalkNotice rendered = resolveContent(command);
@@ -89,16 +83,13 @@ public class DingTalkMessageSender implements MessageSender {
 	 * @return 渲染结果
 	 */
 	private RenderedDingTalkNotice resolveContent(TemplateMessageCommand command) {
-		// 自定义消息
 		Boolean customBody = command.getCustomBody();
 		if (Boolean.TRUE.equals(customBody)) {
-			// 自定义消息体不能为空
 			String body = command.getBody();
 			if (CharSequenceUtil.isBlank(body)) {
 				throw new SystemBusinessException(DING_TALK_BODY_EMPTY);
 			}
 
-			// 转换成自定义消息发送
 			DingTalkChannelOptions options = ChannelOptionsSupport.asDingTalk(command.getOptions());
 			DingTalkMessageType type = options != null && options.getMessageType() != null ? options.getMessageType()
 					: DingTalkMessageType.TEXT;
@@ -106,7 +97,6 @@ public class DingTalkMessageSender implements MessageSender {
 			return new RenderedDingTalkNotice(type, title, command.getBody());
 		}
 
-		// 使用模板发送
 		Map<String, Object> variables = Optional.ofNullable(command.getVariables()).orElseGet(HashMap::new);
 		return dingTalkTemplatePipeline.render(command.getTemplateCode(), variables);
 	}

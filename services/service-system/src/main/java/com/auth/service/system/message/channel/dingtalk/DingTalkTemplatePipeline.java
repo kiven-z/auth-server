@@ -19,7 +19,7 @@ import java.util.Optional;
 import static com.auth.service.system.common.exception.code.SystemMessageResultCode.*;
 
 /**
- * 钉钉模板加载、变量校验与 FreeMarker 渲染
+ * 钉钉模板加载、变量校验与渲染
  *
  * @author Bunny
  */
@@ -59,30 +59,18 @@ public class DingTalkTemplatePipeline {
 		return new RenderedDingTalkNotice(messageType, title, content);
 	}
 
-	/**
-	 * 解析消息类型：模板 im_message_type 优先，否则配置默认
-	 * @param template 模板实体
-	 * @return 消息类型
-	 */
+	/** 模板上的消息类型优先，无效或缺失时用渠道默认 */
 	private DingTalkMessageType resolveMessageType(MessageTemplateEntity template) {
 		if (CharSequenceUtil.isNotBlank(template.getImMessageType())) {
 			try {
 				return DingTalkMessageType.valueOf(template.getImMessageType().trim().toUpperCase());
 			}
 			catch (IllegalArgumentException ignored) {
-				// 非法值回退默认
 			}
 		}
 		return dingTalkProperties.getDefaultMessageType();
 	}
 
-	/**
-	 * 渲染可选字段（主题/标题等）
-	 * @param templateKey FreeMarker 模板名
-	 * @param templateContent 模板内容
-	 * @param variables 变量
-	 * @return 渲染结果，模板为空时返回 null
-	 */
 	private String renderOptionalField(String templateKey, String templateContent, Map<String, Object> variables) {
 		if (CharSequenceUtil.isBlank(templateContent)) {
 			return null;
@@ -95,12 +83,6 @@ public class DingTalkTemplatePipeline {
 		}
 	}
 
-	/**
-	 * 渲染正文
-	 * @param template 模板实体
-	 * @param variables 变量
-	 * @return 渲染后的正文
-	 */
 	private String renderBody(MessageTemplateEntity template, Map<String, Object> variables) {
 		if (CharSequenceUtil.isBlank(template.getBodyContent())) {
 			throw new SystemBusinessException(DING_TALK_BODY_EMPTY);

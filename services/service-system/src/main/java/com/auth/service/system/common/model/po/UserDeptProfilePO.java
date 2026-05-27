@@ -9,7 +9,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 用户档案-部门关联查询行（Mapper 投影，非 API 出参）
+ * 用户档案-部门关联查询行
  *
  * @author Bunny
  */

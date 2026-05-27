@@ -28,7 +28,6 @@ public class AuthInnerFeignClientFallback implements AuthInnerFeignClient {
 	public Result<String> refreshUserCache(List<Long> userIds) {
 		log.error("AuthenticationInnerFeignClientFallback-刷新用户缓存 失败，用户IDs：{}", userIds);
 
-		// 方案A：返回失败结果，让调用方处理
 		return Result.error("刷新缓存服务暂不可用");
 	}
 

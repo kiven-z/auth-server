@@ -64,7 +64,6 @@ public class DingTalkAccessTokenClient {
 	 * @return accessToken
 	 */
 	private synchronized String refreshAccessToken() {
-		// 获取缓存中的 accessToken
 		CachedToken current = cachedToken.get();
 		if (current != null && current.isValid()) {
 			return current.token();
@@ -73,35 +72,27 @@ public class DingTalkAccessTokenClient {
 		String clientId = dingTalkProperties.getClientId();
 		String clientSecret = dingTalkProperties.getClientSecret();
 
-		// 构建请求头
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
-		// 构建请求体
 		Map<String, String> body = Map.of("appKey", clientId, "appSecret", clientSecret);
-		// 构建请求实体
 		HttpEntity<Map<String, String>> entity = new HttpEntity<>(body, headers);
 
 		try {
-			// 发送请求
 			ResponseEntity<String> response = restTemplate.postForEntity(OAUTH_TOKEN_URL, entity, String.class);
-			// 解析响应体
 			String responseBody = response.getBody();
 			if (CharSequenceUtil.isBlank(responseBody)) {
 				throw new SystemMessageException(DING_TALK_OAUTH_EMPTY_RESPONSE);
 			}
 
-			// 解析响应体
 			JSONObject json = JSONUtil.parseObj(responseBody);
 			String accessToken = json.getStr("accessToken");
 			if (CharSequenceUtil.isBlank(accessToken)) {
 				throw new SystemMessageException(DING_TALK_OAUTH_ACCESS_TOKEN_BLANK);
 			}
 
-			// 解析过期时间
 			Long expireIn = json.getLong("expireIn");
 			long expireSeconds = expireIn != null && expireIn > 0 ? expireIn : 7200L;
 
-			// 构建过期时间
 			Instant expiresAt = Instant.now().plusSeconds(expireSeconds);
 			cachedToken.set(new CachedToken(accessToken, expiresAt));
 			log.debug("DingTalk accessToken refreshed, expiresIn={}s", expireSeconds);

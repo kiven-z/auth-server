@@ -19,7 +19,7 @@ import java.util.concurrent.ExecutionException;
 import static com.auth.service.system.common.exception.code.SystemMessageResultCode.*;
 
 /**
- * 阿里云 Dypns 验证码短信发送实现（SendSmsVerifyCode）
+ * 阿里云 Dypns 验证码短信发送
  *
  * @author Bunny
  */
@@ -31,20 +31,11 @@ public class AliyunDypnsVerifyCodeSender implements AutoCloseable {
 
 	private final SmsProperties smsProperties;
 
-	/**
-	 * 根据配置创建 Dypns 客户端并发送
-	 * @param smsProperties 短信配置
-	 */
 	public AliyunDypnsVerifyCodeSender(SmsProperties smsProperties) {
 		this.smsProperties = smsProperties;
 		this.asyncClient = createAsyncClient(smsProperties);
 	}
 
-	/**
-	 * 创建 Dypns AsyncClient
-	 * @param smsProperties 短信配置
-	 * @return 客户端
-	 */
 	private static AsyncClient createAsyncClient(SmsProperties smsProperties) {
 		StaticCredentialProvider credentialProvider = StaticCredentialProvider.create(Credential.builder()
 			.accessKeyId(smsProperties.getAccessKeyId())
@@ -59,11 +50,6 @@ public class AliyunDypnsVerifyCodeSender implements AutoCloseable {
 			.build();
 	}
 
-	/**
-	 * 解析失败回执说明（用于日志与异常消息）
-	 * @param response 厂商响应
-	 * @return 可读说明
-	 */
 	private static String resolveFailureDetail(SendSmsVerifyCodeResponse response) {
 		if (response == null) {
 			return "null response";
@@ -75,10 +61,10 @@ public class AliyunDypnsVerifyCodeSender implements AutoCloseable {
 	}
 
 	/**
-	 * 发送验证码短信（阿里云 Dypns SendSmsVerifyCode，签名见 auth.message.sms.sign-name）
+	 * 向指定手机号发送验证码短信
 	 * @param phone 手机号
-	 * @param providerTemplateCode 厂商已审模板编码
-	 * @param templateParamJson 模板变量 JSON 对象字符串
+	 * @param providerTemplateCode 厂商侧模板编码
+	 * @param templateParamJson 模板变量 JSON
 	 */
 	public void sendVerifyCode(String phone, String providerTemplateCode, String templateParamJson) {
 		if (CharSequenceUtil.isBlank(phone)) {
@@ -121,23 +107,12 @@ public class AliyunDypnsVerifyCodeSender implements AutoCloseable {
 		}
 	}
 
-	/**
-	 * 调用 SendSmsVerifyCode
-	 * @param request 请求参数
-	 * @return 响应
-	 */
 	private SendSmsVerifyCodeResponse send(SendSmsVerifyCodeRequest request)
 			throws ExecutionException, InterruptedException {
 		CompletableFuture<SendSmsVerifyCodeResponse> future = asyncClient.sendSmsVerifyCode(request);
 		return future.get();
 	}
 
-	/**
-	 * 校验厂商回执
-	 * @param response 响应
-	 * @param phone 手机号
-	 * @param providerTemplateCode 模板编码
-	 */
 	private void assertSendSuccess(SendSmsVerifyCodeResponse response, String phone, String providerTemplateCode) {
 		if (response != null && response.getBody() != null
 				&& "OK".equalsIgnoreCase(String.valueOf(response.getBody().getCode()))) {

@@ -22,33 +22,19 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class DingTalkProperties {
 
-	/**
-	 * 应用 App ID（预留，当前 Open API 未使用）
-	 */
 	@Nullable
 	private String appId;
 
-	/**
-	 * 工作通知 AgentId
-	 */
 	@NotNull
 	private Long agentId;
 
-	/**
-	 * Client ID（原 AppKey）
-	 */
 	@NotBlank
 	private String clientId;
 
-	/**
-	 * Client Secret（原 AppSecret）
-	 */
 	@NotBlank
 	private String clientSecret;
 
-	/**
-	 * 未指定消息类型时的默认值
-	 */
+	/** 未指定消息类型时的默认值 */
 	private DingTalkMessageType defaultMessageType = DingTalkMessageType.TEXT;
 
 }

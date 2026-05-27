@@ -3,11 +3,7 @@ package com.auth.service.system.common.exception.code;
 import lombok.Getter;
 
 /**
- * 统一消息编排、模板与渠道传输（Dypns / 钉钉）结果码
- *
- * <p>
- * 号段：279–282、292–296、297–308（285、286、291 已释放；原 297–299 粗粒度传输码已释放，见 {@code package-info.java}）
- * </p>
+ * 消息发送、模板渲染与渠道（Dypns、钉钉）相关结果码
  *
  * @author Bunny
  */
@@ -61,7 +57,7 @@ public enum SystemMessageResultCode implements SystemResultCode {
 	DING_TALK_RENDER_FAILED(500, 295, "DING_TALK_RENDER_FAILED", "system.dingtalk.render.failed"),
 
 	/**
-	 * SMS_ALIYUN_DYPNS 不支持自定义正文（须使用 templateCode 与 variables）
+	 * SMS_ALIYUN_DYPNS 只走模板（templateCode + variables），不支持自定义正文
 	 */
 	SMS_CUSTOM_BODY_NOT_SUPPORTED(400, 296, "SMS_CUSTOM_BODY_NOT_SUPPORTED", "system.sms.custom_body.not_supported"),
 

@@ -34,14 +34,10 @@ public class MessageDispatchServiceImpl implements MessageDispatchService {
 		this.commandValidation = commandValidation;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void sendByTemplate(TemplateMessageCommand command) {
 		commandValidation.validate(command);
 
-		// 获取发送器
 		MessageSender sender = senderByChannel.get(command.getChannel());
 		if (sender == null) {
 			throw new SystemBusinessException(MESSAGE_CHANNEL_UNSUPPORTED, command.getChannel().name());

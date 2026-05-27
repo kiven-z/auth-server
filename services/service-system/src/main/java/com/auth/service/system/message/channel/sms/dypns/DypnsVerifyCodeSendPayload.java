@@ -1,10 +1,10 @@
 package com.auth.service.system.message.channel.sms.dypns;
 
 /**
- * Prepared parameters for Aliyun Dypns {@code SendSmsVerifyCode}.
+ * Dypns 验证码短信发送就绪参数
  *
- * @param providerTemplateCode vendor-approved template code
- * @param templateParam template variables JSON object string
+ * @param providerTemplateCode 厂商侧模板编码
+ * @param templateParam 模板变量 JSON
  * @author Bunny
  */
 public record DypnsVerifyCodeSendPayload(String providerTemplateCode, String templateParam) {

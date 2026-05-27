@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.util.List;
 
 /**
- * 鉴权服务内部服务,鉴权服务内部服务接口
+ * 鉴权服务内部 Feign 客户端
  *
  * @author Bunny
  */
@@ -39,9 +39,7 @@ public interface AuthInnerFeignClient {
 	Result<EffectiveCodesInnerDTO> getEffectiveCodes(@PathVariable("userId") Long userId);
 
 	/**
-	 * 授权失效（反查用户 → 递增 perm_version → 刷新/驱逐画像）。
-	 * @param request 统一失效请求
-	 * @return 执行结果摘要
+	 * 触发授权失效与主体画像更新
 	 */
 	@PostMapping("/authorization/invalidate")
 	Result<AuthorizationInvalidateResponse> invalidate(@RequestBody AuthorizationInvalidateRequest request);

@@ -13,9 +13,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * 将 {@link SystemBusinessException}、{@link SystemMessageException} /
- * {@link SystemResultCode} 转为统一 {@link Result}（与 {@code AuthResultResponseFactory}
- * 轮廓一致：MessageSource 文案 + ext i18n）
+ * 将系统异常与结果码组装为统一 {@link Result}（含 i18n 扩展字段）
  *
  * @author Bunny
  */
@@ -58,13 +56,6 @@ public class SystemResultResponseFactory {
 		return buildBody(messageSource, rc, safeArgs);
 	}
 
-	/**
-	 * 公共拼装：当前线程 Locale + 两段式 MessageSource + Result.error + ext
-	 * @param messageSource 消息源
-	 * @param resultCode 结果码
-	 * @param args i18n 参数（已非 null）
-	 * @return Result
-	 */
 	private static Result<Object> buildBody(MessageSource messageSource, SystemResultCode resultCode, Object[] args) {
 		String messageKey = resultCode.getMessageKey();
 		if (CharSequenceUtil.isBlank(messageKey)) {

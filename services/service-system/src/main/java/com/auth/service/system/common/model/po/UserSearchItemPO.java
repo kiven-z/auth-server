@@ -8,7 +8,7 @@ import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * 用户关键词搜索查询行（Mapper 投影，非 API 出参）
+ * 用户关键词搜索查询行
  *
  * @author Bunny
  */

@@ -19,7 +19,7 @@ import java.util.List;
 import static com.auth.service.system.common.exception.code.SystemEmailResultCode.*;
 
 /**
- * 附件解析器，将附件DTO转换为MultipartFile（Base64 / bytes / URL）
+ * 将附件声明解析为可随信发送的二进制内容
  *
  * @author Bunny
  */
@@ -33,11 +33,6 @@ public class EmailAttachmentResolver {
 		this.restTemplate = restTemplate;
 	}
 
-	/**
-	 * 解析附件DTO列表为MultipartFile列表
-	 * @param attachments 附件DTO列表
-	 * @return MultipartFile列表
-	 */
 	public List<MultipartFile> resolve(List<AttachmentDTO> attachments) {
 		if (CollUtil.isEmpty(attachments)) {
 			return Collections.emptyList();
@@ -57,11 +52,6 @@ public class EmailAttachmentResolver {
 		return files;
 	}
 
-	/**
-	 * 解析附件字节数组
-	 * @param attachment 附件DTO
-	 * @return 字节数组
-	 */
 	private byte[] resolveBytes(AttachmentDTO attachment) {
 		if (CharSequenceUtil.isNotBlank(attachment.getBase64())) {
 			try {

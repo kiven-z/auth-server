@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * 认证审计处理器：将授权决策事件持久化至 {@code log_authorization_audit}。
+ * 将授权决策审计事件落库
  *
  * @author Bunny
  */
@@ -21,9 +21,6 @@ public class AuthAuditHandler implements AuthorizationAuditHandler {
 		this.securityIngestService = securityIngestService;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void handle(SecurityAuthorizationAuditPayloadEvent event) {
 		try {

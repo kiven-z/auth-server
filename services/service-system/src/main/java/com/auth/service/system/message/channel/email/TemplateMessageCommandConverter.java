@@ -21,13 +21,11 @@ public class TemplateMessageCommandConverter {
 	public static EmailSendDTO toEmailDto(TemplateMessageCommand command) {
 		EmailChannelOptions options = ChannelOptionsSupport.asEmail(command.getOptions());
 
-		// 创建邮件发送请求构建器
 		EmailSendDTO.EmailSendDTOBuilder builder = EmailSendDTO.builder()
 			.templateCode(command.getTemplateCode())
 			.to(command.getTargets())
 			.variables(command.getVariables());
 
-		// 设置邮件发送请求的配置
 		if (options != null) {
 			builder.cc(options.getCc())
 				.bcc(options.getBcc())

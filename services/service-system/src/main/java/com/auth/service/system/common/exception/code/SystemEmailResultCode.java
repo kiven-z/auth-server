@@ -3,11 +3,7 @@ package com.auth.service.system.common.exception.code;
 import lombok.Getter;
 
 /**
- * 邮件模板、require_fields 与 MIME 传输结果码
- *
- * <p>
- * 号段：241、247–248、253–261、262–270（255–256 已释放，见 {@code package-info.java}）
- * </p>
+ * 邮件模板、必填变量与 MIME 发送相关结果码
  *
  * @author Bunny
  */
@@ -30,12 +26,12 @@ public enum SystemEmailResultCode implements SystemResultCode {
 	EMAIL_RENDER_FAILED(500, 248, "EMAIL_RENDER_FAILED", "system.email.render.failed"),
 
 	/**
-	 * require_fields 不能为 null
+	 * 必填变量声明不能为 null
 	 */
 	REQUIRE_FIELDS_NULL(422, 253, "REQUIRE_FIELDS_NULL", "system.email.require_fields.null"),
 
 	/**
-	 * require_fields 序列化失败
+	 * 必填变量声明序列化失败
 	 */
 	REQUIRE_FIELDS_SERIALIZE_FAILED(400, 254, "REQUIRE_FIELDS_SERIALIZE_FAILED",
 			"system.email.require_fields.serialize_failed"),
@@ -47,7 +43,7 @@ public enum SystemEmailResultCode implements SystemResultCode {
 			"system.email.require_fields.illegal_property"),
 
 	/**
-	 * require_fields 解析失败
+	 * 必填变量声明解析失败
 	 */
 	REQUIRE_FIELDS_PARSE_FAILED(422, 258, "REQUIRE_FIELDS_PARSE_FAILED", "system.email.require_fields.parse_failed"),
 

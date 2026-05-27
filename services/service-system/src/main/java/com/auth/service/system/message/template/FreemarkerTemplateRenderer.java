@@ -10,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.StringWriter;
 
 /**
- * FreeMarker string-template renderer (shared across message channels).
+ * 字符串模板渲染（多渠道共用）
  *
  * @author Bunny
  */
@@ -18,17 +18,10 @@ import java.io.StringWriter;
 @Slf4j
 public class FreemarkerTemplateRenderer {
 
-	/**
-	 * Singleton {@link Configuration} instance.
-	 */
 	public static final Configuration CONFIGURATION = createConfiguration();
 
 	/**
-	 * Renders a template from in-memory content (no file loader).
-	 * @param templateName logical template name (for error messages)
-	 * @param templateContent template source
-	 * @param dataModel data model
-	 * @return rendered text
+	 * @param templateName 逻辑名，仅用于错误定位
 	 */
 	public static String processTemplate(String templateName, String templateContent, Object dataModel) {
 		try {

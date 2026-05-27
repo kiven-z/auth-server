@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 import static com.auth.service.system.common.exception.code.SystemMessageResultCode.*;
 
 /**
- * 钉钉工作通知 Open API 客户端（asyncsend_v2）
+ * 钉钉工作通知客户端
  *
  * @author Bunny
  */
@@ -55,7 +55,6 @@ public class DingTalkWorkNoticeClient {
 	 * @param content 正文
 	 */
 	public void sendWorkNotice(List<String> userIds, DingTalkMessageType messageType, String title, String content) {
-		// 如果接收人列表为空，则抛出异常
 		if (CollUtil.isEmpty(userIds)) {
 			throw new SystemMessageException(DING_TALK_WORK_NOTICE_USER_IDS_EMPTY);
 		}
@@ -65,17 +64,14 @@ public class DingTalkWorkNoticeClient {
 
 		Long agentId = dingTalkProperties.getAgentId();
 
-		// 解析消息类型
 		DingTalkMessageType resolvedType = messageType != null ? messageType
 				: dingTalkProperties.getDefaultMessageType();
 		String accessToken = accessTokenClient.getAccessToken();
 		String useridList = userIds.stream().filter(CharSequenceUtil::isNotBlank).collect(Collectors.joining(","));
 
-		// 构建请求体
 		Map<String, Object> requestBody = Map.of("agent_id", agentId, "userid_list", useridList, "msg",
 				buildMsgJson(resolvedType, title, content));
 
-		// 构建请求URL
 		String url = UriComponentsBuilder.fromUriString(WORK_NOTICE_URL)
 			.queryParam("access_token", accessToken)
 			.toUriString();
@@ -85,9 +81,7 @@ public class DingTalkWorkNoticeClient {
 		HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
 
 		try {
-			// 发送请求
 			ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
-			// 解析响应体
 			assertSendSuccess(response.getBody(), agentId, useridList);
 			log.debug("DingTalk work notice sent, agentId={}, userIds={}", agentId, useridList);
 		}
@@ -97,13 +91,6 @@ public class DingTalkWorkNoticeClient {
 		}
 	}
 
-	/**
-	 * 构建消息JSON
-	 * @param messageType 消息类型
-	 * @param title Markdown 标题（TEXT 可空）
-	 * @param content 正文
-	 * @return 消息JSON
-	 */
 	private JSONObject buildMsgJson(DingTalkMessageType messageType, String title, String content) {
 		JSONObject payload = new JSONObject();
 		String msgType;
@@ -127,12 +114,6 @@ public class DingTalkWorkNoticeClient {
 		return msg;
 	}
 
-	/**
-	 * 断言发送成功
-	 * @param responseBody 响应体
-	 * @param agentId 代理ID
-	 * @param useridList 接收人列表
-	 */
 	private void assertSendSuccess(String responseBody, Long agentId, String useridList) {
 		if (CharSequenceUtil.isBlank(responseBody)) {
 			throw new SystemMessageException(DING_TALK_WORK_NOTICE_EMPTY_RESPONSE);

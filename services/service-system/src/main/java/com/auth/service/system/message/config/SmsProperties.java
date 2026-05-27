@@ -19,33 +19,19 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class SmsProperties {
 
-	/**
-	 * 阿里云区域 ID
-	 */
 	@NotBlank
 	private String region;
 
-	/**
-	 * Dypns API Endpoint
-	 */
 	@NotBlank
 	private String endpoint;
 
-	/**
-	 * 阿里云 AccessKey ID
-	 */
 	@NotBlank
 	private String accessKeyId;
 
-	/**
-	 * 阿里云 AccessKey Secret
-	 */
 	@NotBlank
 	private String accessKeySecret;
 
-	/**
-	 * 短信签名（SendSmsVerifyCode 必填，须与号码认证控制台已审核签名一致）
-	 */
+	/** 短信签名 */
 	@NotBlank
 	private String signName;
 

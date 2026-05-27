@@ -16,7 +16,7 @@ import java.util.Optional;
 import static com.auth.service.system.common.exception.code.SystemEmailResultCode.*;
 
 /**
- * 邮件模板加载、变量校验与 FreeMarker 渲染
+ * 邮件模板加载、变量校验与渲染
  *
  * @author Bunny
  */
@@ -49,12 +49,6 @@ public class EmailTemplatePipeline {
 		return new RenderedEmail(subject, body);
 	}
 
-	/**
-	 * 渲染邮件主题
-	 * @param template 邮件模板
-	 * @param variables 模板变量
-	 * @return 渲染后的主题
-	 */
 	private String renderSubject(MessageTemplateEntity template, Map<String, Object> variables) {
 		try {
 			return FreemarkerTemplateRenderer.processTemplate(template.getTemplateName() + "_subject",
@@ -65,12 +59,6 @@ public class EmailTemplatePipeline {
 		}
 	}
 
-	/**
-	 * 渲染邮件正文
-	 * @param template 邮件模板
-	 * @param variables 模板变量
-	 * @return 渲染后的正文
-	 */
 	private String renderContent(MessageTemplateEntity template, Map<String, Object> variables) {
 		try {
 			return FreemarkerTemplateRenderer.processTemplate(template.getTemplateName(), template.getBodyContent(),

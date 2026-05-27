@@ -1,7 +1,7 @@
 package com.auth.service.system.common.exception;
 
 /**
- * FreeMarker template render failure.
+ * 模板渲染失败
  *
  * @author Bunny
  */

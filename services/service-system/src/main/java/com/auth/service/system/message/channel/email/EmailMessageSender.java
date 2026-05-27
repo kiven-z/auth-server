@@ -27,26 +27,16 @@ public class EmailMessageSender implements MessageSender {
 		this.mimeMailTransport = mimeMailTransport;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public MessageChannel channel() {
 		return MessageChannel.EMAIL;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void sendByTemplate(TemplateMessageCommand command) {
-		// 将命令转换为邮件发送请求
 		EmailSendDTO emailSendDTO = TemplateMessageCommandConverter.toEmailDto(command);
-		// 渲染邮件模板
 		Map<String, Object> variables = Optional.ofNullable(command.getVariables()).orElseGet(HashMap::new);
-		// 渲染邮件模板
 		RenderedEmail rendered = emailTemplatePipeline.render(command.getTemplateCode(), variables);
-
 		mimeMailTransport.send(emailSendDTO, rendered);
 	}
 

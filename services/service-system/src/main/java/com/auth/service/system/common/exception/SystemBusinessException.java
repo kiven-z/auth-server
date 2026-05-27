@@ -8,12 +8,7 @@ import java.util.Arrays;
 import java.util.Objects;
 
 /**
- * 系统业务异常：语义以 {@link SystemResultCode} 为唯一来源，可选携带 i18n 占位参数（与
- * {@code AuthBusinessException} 同构）
- * <p>
- * 对外 API 的 {@code message} 由 {@link SystemResultResponseFactory} 结合
- * {@link org.springframework.context.MessageSource} 解析；{@link #getMessage()} 用于日志/调试
- * </p>
+ * 系统业务异常，语义以 {@link SystemResultCode} 为来源，可携带 i18n 占位参数
  *
  * @author Bunny
  */
@@ -48,10 +43,6 @@ public class SystemBusinessException extends RuntimeException implements I18nMes
 		return resultCode != null ? resultCode.getMessageKey() : null;
 	}
 
-	/**
-	 * i18n 占位参数
-	 * @return 参数数组
-	 */
 	@Override
 	public Object[] getMessageArgs() {
 		return args;

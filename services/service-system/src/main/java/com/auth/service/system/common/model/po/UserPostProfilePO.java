@@ -8,7 +8,7 @@ import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * 用户档案-岗位关联查询行（Mapper 投影，非 API 出参）
+ * 用户档案-岗位关联查询行
  *
  * @author Bunny
  */

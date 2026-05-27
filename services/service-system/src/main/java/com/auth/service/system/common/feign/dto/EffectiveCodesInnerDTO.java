@@ -11,10 +11,7 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * Feign 反序列化用：与 auth 服务 {@code EffectiveCodesVO} JSON 字段一致（roleCodes / permissionCodes）
- * <p>
- * 注意：命名后缀为 InnerDTO 表示是内部 Feign 传输对象，非 API 出参。
- * </p>
+ * 用户生效角色码与权限码（内部 Feign 传输）
  *
  * @author Bunny
  */

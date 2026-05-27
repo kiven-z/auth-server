@@ -15,9 +15,7 @@ import java.util.List;
 public interface SysUserQueryService extends IService<UserEntity> {
 
 	/**
-	 * 查询用户档案（基本信息、部门、岗位） 包含当前用户禁用
-	 * @param userId 用户ID
-	 * @return 聚合结果
+	 * 查询用户档案（基本信息、部门、岗位），含已禁用用户
 	 */
 	SysUserProfileResponse getProfile(Long userId);
 
