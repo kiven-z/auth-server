@@ -51,7 +51,7 @@ public class UserInvalidationPolicy {
 		// 遍历用户状态快照
 		for (UserInvalidationState state : states) {
 			// 如果用户状态为空或用户ID为空，则跳过
-			if (state == null || state.userId() == null) {
+			if (state.userId() == null) {
 				continue;
 			}
 

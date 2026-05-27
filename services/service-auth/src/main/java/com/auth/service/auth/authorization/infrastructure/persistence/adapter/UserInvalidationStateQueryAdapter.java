@@ -27,10 +27,6 @@ public class UserInvalidationStateQueryAdapter implements UserInvalidationStateQ
 
 	@Override
 	public List<UserInvalidationState> loadByUserIds(Collection<Long> userIds) {
-		// 如果用户ID集合为空，则返回空列表
-		if (CollUtil.isEmpty(userIds)) {
-			return List.of();
-		}
 		List<Long> ids = userIds.stream().filter(Objects::nonNull).distinct().toList();
 		if (CollUtil.isEmpty(ids)) {
 			return List.of();

@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * 用户失效分桶：正常用户递增版本并刷新画像；其余仅驱逐缓存。
+ * 用户失效分桶：正常用户递增版本并刷新画像；其余仅驱逐缓存
  *
  * @param versionBumpUserIds 需要 {@code perm_version + 1} 并刷新画像的用户 ID
  * @param evictOnlyUserIds 仅需驱逐 Redis 画像的用户 ID
@@ -12,11 +12,6 @@ import java.util.Set;
  */
 public record UserInvalidationBuckets(Set<Long> versionBumpUserIds, Set<Long> evictOnlyUserIds) {
 
-	/**
-	 * 紧凑构造：防御性不可变副本。
-	 * @param versionBumpUserIds 递增版本用户
-	 * @param evictOnlyUserIds 仅驱逐用户
-	 */
 	public UserInvalidationBuckets {
 		versionBumpUserIds = versionBumpUserIds == null ? Set.of() : Set.copyOf(versionBumpUserIds);
 		evictOnlyUserIds = evictOnlyUserIds == null ? Set.of() : Set.copyOf(evictOnlyUserIds);
@@ -31,25 +26,13 @@ public record UserInvalidationBuckets(Set<Long> versionBumpUserIds, Set<Long> ev
 	}
 
 	/**
-	 * 合并后的全部用户 ID（去重）。
+	 * 合并后的全部用户 ID（去重）
 	 * @return 所有涉及的用户 ID
 	 */
 	public Set<Long> allUserIds() {
-		if (isEmpty()) {
-			return Set.of();
-		}
-		// 合并用户ID集合
 		Set<Long> all = new HashSet<>(versionBumpUserIds);
 		all.addAll(evictOnlyUserIds);
 		return Set.copyOf(all);
-	}
-
-	/**
-	 * 是否为空。
-	 * @return 是否为空
-	 */
-	public boolean isEmpty() {
-		return versionBumpUserIds.isEmpty() && evictOnlyUserIds.isEmpty();
 	}
 
 }

@@ -60,7 +60,7 @@ class UserInvalidationPolicyTest {
 	void partition_empty_shouldReturnEmptyBuckets() {
 		UserInvalidationBuckets buckets = policy.partition(List.of());
 
-		assertTrue(buckets.isEmpty());
+		assertEquals(Set.of(), buckets.allUserIds());
 	}
 
 }

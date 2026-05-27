@@ -1,12 +1,6 @@
 package com.auth.service.auth.authorization.application;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
-import org.springframework.stereotype.Service;
-
+import cn.hutool.core.collection.CollUtil;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateResponse;
 import com.auth.service.auth.authorization.application.invalidation.impact.ImpactResolverRegistry;
@@ -20,10 +14,14 @@ import com.auth.service.auth.authorization.domain.invalidation.port.Invalidation
 import com.auth.service.auth.authorization.domain.invalidation.port.UserInvalidationStateQueryPort;
 import com.auth.service.auth.authorization.domain.invalidation.port.UserPermVersionPort;
 import com.auth.service.auth.session.application.SessionAdminApplicationService;
-
-import cn.hutool.core.collection.CollUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * 授权失效编排唯一入口
@@ -57,11 +55,11 @@ public class AuthorizationInvalidationService {
 	 * @return 执行结果摘要
 	 */
 	public AuthorizationInvalidateResponse invalidate(AuthorizationInvalidateRequest request) {
-		// 构建失效命令
+		// 构建命令
 		InvalidationCommand command = new InvalidationCommand(request.eventId(), request.payload());
-		String eventId = command.eventId();
 
-		// 查询幂等结果
+		// 使用 EventId 查询幂等结果
+		String eventId = command.eventId();
 		Optional<AuthorizationInvalidateResponse> cached = invalidationIdempotencyPort.findProcessedOutcome(eventId);
 		if (cached.isPresent()) {
 			log.debug("Authorization invalidate skipped (idempotent): eventId={}", eventId);
@@ -74,6 +72,8 @@ public class AuthorizationInvalidationService {
 			return invalidationIdempotencyPort.findProcessedOutcome(eventId)
 				.orElse(AuthorizationInvalidateResponse.empty());
 		}
+
+		// 抢占幂等锁
 		if (claimStatus == IdempotencyClaimStatus.IN_PROGRESS) {
 			log.warn("Authorization invalidate in progress by another worker: eventId={}", eventId);
 			return invalidationIdempotencyPort.findProcessedOutcome(eventId)
@@ -81,8 +81,38 @@ public class AuthorizationInvalidationService {
 		}
 
 		try {
-			// 执行失效流水线
-			AuthorizationInvalidateResponse response = executePipeline(command);
+			// 解析影响用户ID
+			Set<Long> impactedUserIds = impactResolverRegistry.resolve(command.payload());
+			if (CollUtil.isEmpty(impactedUserIds)) {
+				return AuthorizationInvalidateResponse.empty();
+			}
+
+			// 查询用户状态快照
+			List<UserInvalidationState> invalidationStateList = userInvalidationStateQueryPort
+				.loadByUserIds(impactedUserIds);
+			// 分区用户状态快照
+			UserInvalidationBuckets buckets = userInvalidationPolicy.partition(invalidationStateList);
+			Set<Long> evictOnlyUserIds = buckets.evictOnlyUserIds();
+			Set<Long> versionBumpUserIds = buckets.versionBumpUserIds();
+
+			// 获取批量大小
+			int batchSize = authorizationInvalidationProperties.getBatchSize();
+
+			// 分批递增版本
+			int versionBumpedCount = userPermVersionPort.incrementInBatches(versionBumpUserIds, batchSize);
+			int profileRefreshedCount = authProfileMaterializationService.refreshInBatches(versionBumpUserIds,
+					batchSize);
+
+			// 分批驱逐画像
+			int profileEvictedCount = authProfileMaterializationService.evictInBatches(evictOnlyUserIds, batchSize);
+
+			// 逻辑删除用户：驱逐画像后踢掉全部会话
+			kickSessionsForDeletedUsers(invalidationStateList);
+
+			// 构建执行结果摘要
+			int impactedUserCount = impactedUserIds.size();
+			AuthorizationInvalidateResponse response = new AuthorizationInvalidateResponse(impactedUserCount,
+					versionBumpedCount, profileRefreshedCount, profileEvictedCount);
 			invalidationIdempotencyPort.completeProcessedOutcome(eventId, request.kind(), response);
 			log.info(
 					"Authorization invalidate completed: eventId={}, kind={}, impacted={}, bumped={}, refreshed={}, evicted={}",
@@ -95,45 +125,6 @@ public class AuthorizationInvalidationService {
 			invalidationIdempotencyPort.releaseClaim(eventId);
 			throw ex;
 		}
-	}
-
-	/**
-	 * 执行失效流水线
-	 * @param command 失效命令
-	 * @return 执行结果摘要
-	 */
-	private AuthorizationInvalidateResponse executePipeline(InvalidationCommand command) {
-		// 解析影响用户ID
-		Set<Long> impactedUserIds = impactResolverRegistry.resolve(command.payload());
-		int impactedUserCount = impactedUserIds.size();
-		if (CollUtil.isEmpty(impactedUserIds)) {
-			return AuthorizationInvalidateResponse.empty();
-		}
-
-		// 查询用户状态快照
-		List<UserInvalidationState> invalidationStateList = userInvalidationStateQueryPort
-			.loadByUserIds(impactedUserIds);
-		// 分区用户状态快照
-		UserInvalidationBuckets buckets = userInvalidationPolicy.partition(invalidationStateList);
-
-		// 获取批量大小
-		int batchSize = authorizationInvalidationProperties.getBatchSize();
-		Set<Long> versionBumpUserIds = buckets.versionBumpUserIds();
-
-		// 分批递增版本
-		int versionBumpedCount = userPermVersionPort.incrementInBatches(versionBumpUserIds, batchSize);
-		int profileRefreshedCount = authProfileMaterializationService.refreshInBatches(versionBumpUserIds, batchSize);
-
-		// 分批驱逐画像
-		Set<Long> evictOnlyUserIds = buckets.evictOnlyUserIds();
-		int profileEvictedCount = authProfileMaterializationService.evictInBatches(evictOnlyUserIds, batchSize);
-
-		// 逻辑删除用户：驱逐画像后踢掉全部会话
-		kickSessionsForDeletedUsers(invalidationStateList);
-
-		// 构建执行结果摘要
-		return new AuthorizationInvalidateResponse(impactedUserCount, versionBumpedCount, profileRefreshedCount,
-				profileEvictedCount);
 	}
 
 	/**

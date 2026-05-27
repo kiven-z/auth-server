@@ -30,24 +30,11 @@ public class InvalidationIdempotencyAdapter implements InvalidationIdempotencyPo
 	}
 
 	/**
-	 * 转换为授权失效响应
-	 * @param projection 授权失效事件投影
-	 * @return 授权失效响应；处理中占位时为空
+	 * 构建处理中占位记录
+	 * @param eventId 业务事件 ID
+	 * @param kind 变更维度
+	 * @return 处理中占位记录
 	 */
-	private static Optional<AuthorizationInvalidateResponse> toResponseIfCompleted(
-			AuthorizationInvalidationEventProjection projection) {
-		if (projection == null || InvalidationProcessingMarker.isProcessing(projection.getImpactedUserCount())) {
-			return Optional.empty();
-		}
-
-		AuthorizationInvalidateResponse response = new AuthorizationInvalidateResponse(
-				ObjectUtil.defaultIfNull(projection.getImpactedUserCount(), 0),
-				ObjectUtil.defaultIfNull(projection.getVersionBumpedCount(), 0),
-				ObjectUtil.defaultIfNull(projection.getProfileRefreshedCount(), 0),
-				ObjectUtil.defaultIfNull(projection.getProfileEvictedCount(), 0));
-		return Optional.of(response);
-	}
-
 	private static AuthorizationInvalidationEventProjection buildProcessingClaim(String eventId,
 			AuthorizationChangeKind kind) {
 		LocalDateTime now = LocalDateTime.now();
@@ -63,38 +50,66 @@ public class InvalidationIdempotencyAdapter implements InvalidationIdempotencyPo
 		return projection;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Optional<AuthorizationInvalidateResponse> findProcessedOutcome(String eventId) {
+		// 查询幂等结果
 		AuthorizationInvalidationEventProjection projection = authorizationInvalidationEventMapper
 			.selectByEventId(eventId);
-		return toResponseIfCompleted(projection);
+
+		if (projection == null || InvalidationProcessingMarker.isProcessing(projection.getImpactedUserCount())) {
+			return Optional.empty();
+		}
+
+		// 转换为授权失效响应，为Null时返回0
+		AuthorizationInvalidateResponse response = new AuthorizationInvalidateResponse(
+				ObjectUtil.defaultIfNull(projection.getImpactedUserCount(), 0),
+				ObjectUtil.defaultIfNull(projection.getVersionBumpedCount(), 0),
+				ObjectUtil.defaultIfNull(projection.getProfileRefreshedCount(), 0),
+				ObjectUtil.defaultIfNull(projection.getProfileEvictedCount(), 0));
+		return Optional.of(response);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public IdempotencyClaimStatus tryClaim(String eventId, AuthorizationChangeKind kind) {
+		// 查询幂等结果
 		Optional<AuthorizationInvalidateResponse> completed = findProcessedOutcome(eventId);
 		if (completed.isPresent()) {
 			return IdempotencyClaimStatus.ALREADY_COMPLETED;
 		}
 
+		// 构建处理中占位记录
 		AuthorizationInvalidationEventProjection claim = buildProcessingClaim(eventId, kind);
 		try {
+			// 插入处理中占位记录
 			authorizationInvalidationEventMapper.insertProcessingClaim(claim);
 			return IdempotencyClaimStatus.CLAIMED;
 		}
 		catch (DuplicateKeyException ex) {
+			// 查询处理中占位记录
 			AuthorizationInvalidationEventProjection existing = authorizationInvalidationEventMapper
 				.selectByEventId(eventId);
 			if (existing == null) {
+				// 如果处理中占位记录不存在，则返回处理中
 				return IdempotencyClaimStatus.IN_PROGRESS;
 			}
 			if (InvalidationProcessingMarker.isProcessing(existing.getImpactedUserCount())) {
+				// 如果处理中占位记录存在，则返回处理中
 				return IdempotencyClaimStatus.IN_PROGRESS;
 			}
+			// 如果处理中占位记录存在，则返回已完成
 			return IdempotencyClaimStatus.ALREADY_COMPLETED;
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void completeProcessedOutcome(String eventId, AuthorizationChangeKind kind,
 			AuthorizationInvalidateResponse response) {
@@ -114,6 +129,9 @@ public class InvalidationIdempotencyAdapter implements InvalidationIdempotencyPo
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void releaseClaim(String eventId) {
 		authorizationInvalidationEventMapper.deleteProcessingClaim(eventId);
