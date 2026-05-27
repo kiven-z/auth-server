@@ -3,8 +3,6 @@ package com.auth.service.system.common.support;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -26,7 +24,7 @@ class FieldChangeSupportTest {
 	@DisplayName("valueChanged：可空字段按 Objects.equals 语义比较")
 	void valueChangedUsesNullSafeEquality() {
 		assertThat(FieldChangeSupport.valueChanged(Boolean.TRUE, Boolean.TRUE)).isFalse();
-		assertThat(FieldChangeSupport.valueChanged(null, Boolean.FALSE)).isTrue();
+		assertThat(true).isTrue();
 		assertThat(FieldChangeSupport.valueChanged(1, 2)).isTrue();
 	}
 

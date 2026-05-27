@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 /**
@@ -88,18 +89,17 @@ class SysRoleServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("新增角色：编码去空格、排序号默认 0 并持久化")
-	void createTrimsRoleCodeAppliesDefaultsAndPersists() {
+	@DisplayName("新增角色：编码去空格后持久化")
+	void createTrimsRoleCodeAndPersists() {
 		SysRoleCreateForm form = minimalForm();
 		form.setRoleCode("  CUSTOM_R_ONE  ");
-		form.setOrderNum(null);
 		when(sysRoleMapper.selectCount(any())).thenReturn(0L);
 		when(sysRoleMapper.insert(any(SysRoleEntity.class))).thenReturn(1);
 
 		sysRoleService.create(form);
 
-		verify(sysRoleMapper).insert(argThat((SysRoleEntity e) -> "CUSTOM_R_ONE".equals(e.getRoleCode())
-				&& Integer.valueOf(0).equals(e.getOrderNum()) && Boolean.TRUE.equals(e.getStatus())));
+		verify(sysRoleMapper).insert(argThat(
+				(SysRoleEntity e) -> "CUSTOM_R_ONE".equals(e.getRoleCode()) && Boolean.TRUE.equals(e.getStatus())));
 	}
 
 	@Test
@@ -112,7 +112,25 @@ class SysRoleServiceImplTest {
 		SysRoleUpdateForm form = updateForm(1L, "ADMIN", "新名", true);
 		sysRoleService.update(form);
 
+		verify(sysRoleMapper, never()).selectCount(any());
 		verify(roleInvalidationTrigger, never()).submitByRoleCodes(any(), any());
+	}
+
+	@Test
+	@DisplayName("更新角色：改为已存在的编码时抛出 ROLE_CODE_DUPLICATE")
+	void updateThrowsWhenNewRoleCodeDuplicate() {
+		SysRoleEntity existing = roleEntity(1L, "ADMIN", "管理员", true);
+		when(sysRoleMapper.selectById(1L)).thenReturn(existing);
+		when(sysRoleMapper.selectCount(any())).thenReturn(1L);
+
+		SysRoleUpdateForm form = updateForm(1L, "DUPLICATE", "管理员", true);
+
+		assertThatThrownBy(() -> sysRoleService.update(form)).isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemAdminResultCode.ROLE_CODE_DUPLICATE);
+
+		verify(sysRoleMapper, never()).updateById(any(SysRoleEntity.class));
+		verifyNoInteractions(roleInvalidationTrigger);
 	}
 
 	@Test

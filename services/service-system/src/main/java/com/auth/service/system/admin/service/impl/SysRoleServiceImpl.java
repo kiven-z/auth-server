@@ -25,6 +25,7 @@ import com.auth.service.system.admin.support.sqlbuild.SysRolePageOrderSqlBuilder
 import com.auth.service.system.authorization.dispatch.RoleAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
+import com.auth.service.system.common.support.BusinessKeyAssert;
 import com.auth.service.system.common.support.FieldChangeSupport;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -97,11 +98,9 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 	public void create(SysRoleCreateForm form) {
 		String roleCode = CharSequenceUtil.trim(form.getRoleCode());
 
-		// 检查角色编码是否重复
-		long exists = count(Wrappers.<SysRoleEntity>lambdaQuery().eq(SysRoleEntity::getRoleCode, roleCode));
-		if (exists > 0) {
-			throw new SystemBusinessException(SystemAdminResultCode.ROLE_CODE_DUPLICATE, roleCode);
-		}
+		BusinessKeyAssert.requireAbsent(this,
+				Wrappers.<SysRoleEntity>lambdaQuery().eq(SysRoleEntity::getRoleCode, roleCode),
+				SystemAdminResultCode.ROLE_CODE_DUPLICATE, roleCode);
 
 		// 创建角色
 		SysRoleEntity entity = SysRoleConverter.INSTANCE.toEntity(form);
@@ -122,22 +121,20 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 			throw new SystemBusinessException(SystemAdminResultCode.ROLE_NOT_FOUND, id);
 		}
 
-		// 检查角色编码是否重复
 		String oldRoleCode = existing.getRoleCode();
 		String newRoleCode = CharSequenceUtil.trim(form.getRoleCode());
 		Boolean oldStatus = existing.getStatus();
 		Boolean newStatus = form.getStatus();
-		// 检查角色编码是否重复
-		long duplicate = count(Wrappers.<SysRoleEntity>lambdaQuery()
-			.eq(SysRoleEntity::getRoleCode, newRoleCode)
-			.ne(SysRoleEntity::getId, existing.getId()));
-		if (duplicate > 0) {
-			throw new SystemBusinessException(SystemAdminResultCode.ROLE_CODE_DUPLICATE, newRoleCode);
-		}
-
-		// 检查角色编码是否变更
 		boolean roleCodeChanged = FieldChangeSupport.codeChanged(oldRoleCode, newRoleCode);
 		boolean statusChanged = FieldChangeSupport.valueChanged(oldStatus, newStatus);
+
+		if (roleCodeChanged) {
+			BusinessKeyAssert.requireAbsent(this,
+					Wrappers.<SysRoleEntity>lambdaQuery()
+						.eq(SysRoleEntity::getRoleCode, newRoleCode)
+						.ne(SysRoleEntity::getId, existing.getId()),
+					SystemAdminResultCode.ROLE_CODE_DUPLICATE, newRoleCode);
+		}
 
 		// 更新角色
 		SysRoleConverter.INSTANCE.applyUpdateForm(form, existing);
