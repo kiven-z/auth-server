@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
 
 /**
- * system 侧授权失效投递配置（{@code auth.system.authorization-invalidation.*}）。
+ * system 侧授权失效投递配置
  *
  * @author Bunny
  */
@@ -29,22 +29,22 @@ public class AuthorizationInvalidationProperties {
 	/**
 	 * 补偿 Job 扫描间隔（毫秒）。
 	 */
-	@NotNull
 	@Min(5000)
+	@NotNull
 	private Long pollIntervalMs = 30_000L;
 
 	/**
 	 * 每批抢占 Outbox 条数上限。
 	 */
-	@NotNull
 	@Min(1)
+	@NotNull
 	private Integer pollBatchSize = 50;
 
 	/**
 	 * 失败后重试间隔基数（秒），实际为 base * 2^retryCount。
 	 */
-	@NotNull
 	@Min(1)
+	@NotNull
 	private Integer retryBackoffSeconds = 30;
 
 }

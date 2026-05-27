@@ -1,14 +1,13 @@
 package com.auth.service.system.authorization.dispatch;
 
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
+import cn.hutool.core.util.BooleanUtil;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest;
 import com.auth.service.system.authorization.config.AuthorizationInvalidationProperties;
 import com.auth.service.system.authorization.outbox.AuthorizationInvalidationPublisher;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 授权失效协调入口：同事务写 Outbox，提交后（可选）同步 Feign 投递
@@ -34,7 +33,9 @@ public class AuthorizationInvalidationCoordinator {
 	@Transactional(rollbackFor = Exception.class)
 	public void submit(AuthorizationInvalidateRequest request, String sourceModule, String sourceBizId) {
 		Long outboxId = publisher.enqueue(request, sourceModule, sourceBizId);
-		if (Boolean.TRUE.equals(properties.getSyncDispatchEnabled())) {
+
+		Boolean enabled = properties.getSyncDispatchEnabled();
+		if (BooleanUtil.isTrue(enabled)) {
 			applicationEventPublisher.publishEvent(new AuthorizationInvalidationDispatchEvent(outboxId));
 		}
 	}

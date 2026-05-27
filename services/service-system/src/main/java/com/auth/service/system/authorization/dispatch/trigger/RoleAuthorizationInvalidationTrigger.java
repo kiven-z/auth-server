@@ -37,8 +37,10 @@ public class RoleAuthorizationInvalidationTrigger {
 		}
 
 		String bizKey = CharSequenceUtil.blankToDefault(operation, "invalidate") + ":" + String.join(",", codes);
+
 		String eventId = "sys-role-" + CharSequenceUtil.blankToDefault(operation, "op") + "-"
 				+ UUID.randomUUID().toString().replace("-", "");
+
 		AuthorizationInvalidateRequest request = new AuthorizationInvalidateRequest(eventId,
 				AuthorizationChangeKind.ROLE, new RoleInvalidatePayload(codes));
 		invalidationCoordinator.submit(request, SystemAuditBizModule.SYS_ROLE, bizKey);

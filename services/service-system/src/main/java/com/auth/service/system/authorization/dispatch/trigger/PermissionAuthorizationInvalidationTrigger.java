@@ -37,8 +37,10 @@ public class PermissionAuthorizationInvalidationTrigger {
 		}
 
 		String bizKey = CharSequenceUtil.blankToDefault(operation, "invalidate") + ":" + String.join(",", codes);
+
 		String eventId = "sys-perm-" + CharSequenceUtil.blankToDefault(operation, "op") + "-"
 				+ UUID.randomUUID().toString().replace("-", "");
+
 		AuthorizationInvalidateRequest request = new AuthorizationInvalidateRequest(eventId,
 				AuthorizationChangeKind.PERMISSION, new PermissionInvalidatePayload(codes));
 		invalidationCoordinator.submit(request, SystemAuditBizModule.SYS_PERMISSION, bizKey);

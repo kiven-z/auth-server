@@ -24,10 +24,12 @@ public class AuthorizationInvalidationDispatchListener {
 	 */
 	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
 	public void onAfterCommit(AuthorizationInvalidationDispatchEvent event) {
-		if (event == null || event.outboxId() == null) {
+		Long outboxId = event.outboxId();
+		if (outboxId == null) {
 			return;
 		}
-		outboxProcessor.processById(event.outboxId());
+
+		outboxProcessor.processById(outboxId);
 	}
 
 }
