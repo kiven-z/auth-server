@@ -3,7 +3,7 @@ package com.auth.service.auth.authorization.infrastructure.persistence.adapter;
 import cn.hutool.core.util.ObjectUtil;
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateResponse;
-import com.auth.service.auth.authorization.domain.invalidation.model.IdempotencyClaimStatus;
+import com.auth.service.auth.authorization.domain.invalidation.model.InvalidationIdempotencyGate;
 import com.auth.service.auth.authorization.domain.invalidation.model.InvalidationProcessingMarker;
 import com.auth.service.auth.authorization.domain.invalidation.port.InvalidationIdempotencyPort;
 import com.auth.service.auth.authorization.infrastructure.persistence.AuthorizationInvalidationEventMapper;
@@ -13,7 +13,6 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 /**
  * 授权失效幂等 Port 适配器
@@ -42,6 +41,7 @@ public class InvalidationIdempotencyAdapter implements InvalidationIdempotencyPo
 		projection.setId(IdWorker.getId());
 		projection.setEventId(eventId);
 		projection.setChangeKind(kind.name());
+		// 全部设置为-1
 		projection.setImpactedUserCount(InvalidationProcessingMarker.PROCESSING_COUNT);
 		projection.setVersionBumpedCount(InvalidationProcessingMarker.PROCESSING_COUNT);
 		projection.setProfileRefreshedCount(InvalidationProcessingMarker.PROCESSING_COUNT);
@@ -51,59 +51,48 @@ public class InvalidationIdempotencyAdapter implements InvalidationIdempotencyPo
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * 将持久化投影转换为授权失效响应。
+	 * @param projection 事件投影
+	 * @return 执行结果摘要
 	 */
-	@Override
-	public Optional<AuthorizationInvalidateResponse> findProcessedOutcome(String eventId) {
-		// 查询幂等结果
-		AuthorizationInvalidationEventProjection projection = authorizationInvalidationEventMapper
-			.selectByEventId(eventId);
-
-		if (projection == null || InvalidationProcessingMarker.isProcessing(projection.getImpactedUserCount())) {
-			return Optional.empty();
-		}
-
-		// 转换为授权失效响应，为Null时返回0
-		AuthorizationInvalidateResponse response = new AuthorizationInvalidateResponse(
-				ObjectUtil.defaultIfNull(projection.getImpactedUserCount(), 0),
+	private static AuthorizationInvalidateResponse toResponse(AuthorizationInvalidationEventProjection projection) {
+		return new AuthorizationInvalidateResponse(ObjectUtil.defaultIfNull(projection.getImpactedUserCount(), 0),
 				ObjectUtil.defaultIfNull(projection.getVersionBumpedCount(), 0),
 				ObjectUtil.defaultIfNull(projection.getProfileRefreshedCount(), 0),
 				ObjectUtil.defaultIfNull(projection.getProfileEvictedCount(), 0));
-		return Optional.of(response);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public IdempotencyClaimStatus tryClaim(String eventId, AuthorizationChangeKind kind) {
-		// 查询幂等结果
-		Optional<AuthorizationInvalidateResponse> completed = findProcessedOutcome(eventId);
-		if (completed.isPresent()) {
-			return IdempotencyClaimStatus.ALREADY_COMPLETED;
+	public InvalidationIdempotencyGate acquireGate(String eventId, AuthorizationChangeKind kind) {
+		// 查询已处理记录
+		AuthorizationInvalidationEventProjection projection = authorizationInvalidationEventMapper
+			.selectByEventId(eventId);
+
+		// 已处理完成，直接返回历史结果
+		if (projection != null && !InvalidationProcessingMarker.isProcessing(projection.getImpactedUserCount())) {
+			AuthorizationInvalidateResponse response = toResponse(projection);
+			return new InvalidationIdempotencyGate.Completed(response);
 		}
 
-		// 构建处理中占位记录
-		AuthorizationInvalidationEventProjection claim = buildProcessingClaim(eventId, kind);
 		try {
-			// 插入处理中占位记录
+			// 处理中，插入占位记录
+			AuthorizationInvalidationEventProjection claim = buildProcessingClaim(eventId, kind);
 			authorizationInvalidationEventMapper.insertProcessingClaim(claim);
-			return IdempotencyClaimStatus.CLAIMED;
+			return new InvalidationIdempotencyGate.Claimed();
 		}
 		catch (DuplicateKeyException ex) {
-			// 查询处理中占位记录
 			AuthorizationInvalidationEventProjection existing = authorizationInvalidationEventMapper
 				.selectByEventId(eventId);
-			if (existing == null) {
-				// 如果处理中占位记录不存在，则返回处理中
-				return IdempotencyClaimStatus.IN_PROGRESS;
+			// 占位记录仍为处理中，返回处理中结果
+			if (existing == null || InvalidationProcessingMarker.isProcessing(existing.getImpactedUserCount())) {
+				return new InvalidationIdempotencyGate.InProgress();
 			}
-			if (InvalidationProcessingMarker.isProcessing(existing.getImpactedUserCount())) {
-				// 如果处理中占位记录存在，则返回处理中
-				return IdempotencyClaimStatus.IN_PROGRESS;
-			}
-			// 如果处理中占位记录存在，则返回已完成
-			return IdempotencyClaimStatus.ALREADY_COMPLETED;
+
+			AuthorizationInvalidateResponse response = toResponse(existing);
+			return new InvalidationIdempotencyGate.Completed(response);
 		}
 	}
 

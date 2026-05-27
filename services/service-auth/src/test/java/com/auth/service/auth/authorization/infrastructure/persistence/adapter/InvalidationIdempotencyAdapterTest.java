@@ -2,7 +2,7 @@ package com.auth.service.auth.authorization.infrastructure.persistence.adapter;
 
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateResponse;
-import com.auth.service.auth.authorization.domain.invalidation.model.IdempotencyClaimStatus;
+import com.auth.service.auth.authorization.domain.invalidation.model.InvalidationIdempotencyGate;
 import com.auth.service.auth.authorization.domain.invalidation.model.InvalidationProcessingMarker;
 import com.auth.service.auth.authorization.infrastructure.persistence.AuthorizationInvalidationEventMapper;
 import com.auth.service.auth.authorization.infrastructure.persistence.projection.AuthorizationInvalidationEventProjection;
@@ -16,7 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DuplicateKeyException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -35,24 +35,31 @@ class InvalidationIdempotencyAdapterTest {
 	private InvalidationIdempotencyAdapter adapter;
 
 	@Test
-	@DisplayName("已完成事件不返回处理中占位")
-	void findProcessedOutcome_processingRow_shouldBeEmpty() {
-		AuthorizationInvalidationEventProjection processing = new AuthorizationInvalidationEventProjection();
-		processing.setImpactedUserCount(InvalidationProcessingMarker.PROCESSING_COUNT);
-		when(authorizationInvalidationEventMapper.selectByEventId("evt-p")).thenReturn(processing);
+	@DisplayName("已完成事件直接返回 Completed")
+	void acquireGate_completedRow_shouldReturnCompleted() {
+		AuthorizationInvalidationEventProjection completed = new AuthorizationInvalidationEventProjection();
+		completed.setImpactedUserCount(10);
+		completed.setVersionBumpedCount(8);
+		completed.setProfileRefreshedCount(8);
+		completed.setProfileEvictedCount(2);
+		when(authorizationInvalidationEventMapper.selectByEventId("evt-done")).thenReturn(completed);
 
-		assertTrue(adapter.findProcessedOutcome("evt-p").isEmpty());
+		InvalidationIdempotencyGate gate = adapter.acquireGate("evt-done", AuthorizationChangeKind.ROLE);
+
+		assertInstanceOf(InvalidationIdempotencyGate.Completed.class, gate);
+		assertEquals(new AuthorizationInvalidateResponse(10, 8, 8, 2),
+				((InvalidationIdempotencyGate.Completed) gate).response());
 	}
 
 	@Test
-	@DisplayName("tryClaim 成功插入占位行")
-	void tryClaim_insertSuccess_shouldReturnClaimed() {
+	@DisplayName("acquireGate 成功插入占位行")
+	void acquireGate_insertSuccess_shouldReturnClaimed() {
 		when(authorizationInvalidationEventMapper.selectByEventId("evt-1")).thenReturn(null);
 		when(authorizationInvalidationEventMapper.insertProcessingClaim(any())).thenReturn(1);
 
-		IdempotencyClaimStatus status = adapter.tryClaim("evt-1", AuthorizationChangeKind.ROLE);
+		InvalidationIdempotencyGate gate = adapter.acquireGate("evt-1", AuthorizationChangeKind.ROLE);
 
-		assertEquals(IdempotencyClaimStatus.CLAIMED, status);
+		assertInstanceOf(InvalidationIdempotencyGate.Claimed.class, gate);
 		ArgumentCaptor<AuthorizationInvalidationEventProjection> captor = ArgumentCaptor
 			.forClass(AuthorizationInvalidationEventProjection.class);
 		verify(authorizationInvalidationEventMapper).insertProcessingClaim(captor.capture());
@@ -60,8 +67,8 @@ class InvalidationIdempotencyAdapterTest {
 	}
 
 	@Test
-	@DisplayName("tryClaim 唯一键冲突且仍为处理中")
-	void tryClaim_duplicateProcessing_shouldReturnInProgress() {
+	@DisplayName("acquireGate 唯一键冲突且仍为处理中")
+	void acquireGate_duplicateProcessing_shouldReturnInProgress() {
 		when(authorizationInvalidationEventMapper.selectByEventId("evt-2")).thenReturn(null);
 		when(authorizationInvalidationEventMapper.insertProcessingClaim(any()))
 			.thenThrow(new DuplicateKeyException("dup"));
@@ -70,9 +77,32 @@ class InvalidationIdempotencyAdapterTest {
 		processing.setImpactedUserCount(InvalidationProcessingMarker.PROCESSING_COUNT);
 		when(authorizationInvalidationEventMapper.selectByEventId("evt-2")).thenReturn(null, processing);
 
-		IdempotencyClaimStatus status = adapter.tryClaim("evt-2", AuthorizationChangeKind.ROLE);
+		InvalidationIdempotencyGate gate = adapter.acquireGate("evt-2", AuthorizationChangeKind.ROLE);
 
-		assertEquals(IdempotencyClaimStatus.IN_PROGRESS, status);
+		assertInstanceOf(InvalidationIdempotencyGate.InProgress.class, gate);
+	}
+
+	@Test
+	@DisplayName("acquireGate 唯一键冲突且对方已完成")
+	void acquireGate_duplicateCompleted_shouldReturnCompleted() {
+		AuthorizationInvalidationEventProjection processing = new AuthorizationInvalidationEventProjection();
+		processing.setImpactedUserCount(InvalidationProcessingMarker.PROCESSING_COUNT);
+		when(authorizationInvalidationEventMapper.selectByEventId("evt-3")).thenReturn(processing);
+		when(authorizationInvalidationEventMapper.insertProcessingClaim(any()))
+			.thenThrow(new DuplicateKeyException("dup"));
+
+		AuthorizationInvalidationEventProjection completed = new AuthorizationInvalidationEventProjection();
+		completed.setImpactedUserCount(3);
+		completed.setVersionBumpedCount(2);
+		completed.setProfileRefreshedCount(2);
+		completed.setProfileEvictedCount(1);
+		when(authorizationInvalidationEventMapper.selectByEventId("evt-3")).thenReturn(processing, completed);
+
+		InvalidationIdempotencyGate gate = adapter.acquireGate("evt-3", AuthorizationChangeKind.ROLE);
+
+		assertInstanceOf(InvalidationIdempotencyGate.Completed.class, gate);
+		assertEquals(new AuthorizationInvalidateResponse(3, 2, 2, 1),
+				((InvalidationIdempotencyGate.Completed) gate).response());
 	}
 
 	@Test
@@ -81,7 +111,7 @@ class InvalidationIdempotencyAdapterTest {
 		AuthorizationInvalidateResponse response = new AuthorizationInvalidateResponse(1, 1, 1, 0);
 		when(authorizationInvalidationEventMapper.updateProcessedOutcome(any())).thenReturn(1);
 
-		adapter.completeProcessedOutcome("evt-3", AuthorizationChangeKind.ROLE, response);
+		adapter.completeProcessedOutcome("evt-4", AuthorizationChangeKind.ROLE, response);
 
 		verify(authorizationInvalidationEventMapper).updateProcessedOutcome(any());
 	}

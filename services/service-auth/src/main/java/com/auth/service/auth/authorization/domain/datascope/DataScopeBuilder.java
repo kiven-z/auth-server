@@ -16,7 +16,7 @@ import java.util.*;
  * 数据权限生效构建器
  *
  * <p>
- * 按文档规则执行：先按维度+资源键分组，再做 USER 优先；若无 USER 则做 ROLE/DEPT/POST 宽松合并，最终兜底 SELF。
+ * 先按维度+资源键分组，再做 USER 优先；若无 USER 则做 ROLE/DEPT/POST 宽松合并，最终兜底 SELF。
  * </p>
  *
  * @author Bunny

@@ -40,12 +40,12 @@ public class Result<T> implements Serializable {
 	private String message;
 
 	/**
-	 * 稳定错误标识符，例如 {@code TOKEN_EXPIRED}, {@code REDIS_UNAVAILABLE}
+	 * 稳定错误标识符
 	 */
 	private String error;
 
 	/**
-	 * 稳定错误子代码，别名 {@link #error} 保持与使用 {@code subCode} 命名的文档的兼容性
+	 * 稳定错误子代码，别名 {@link #error}
 	 */
 	private String subCode;
 

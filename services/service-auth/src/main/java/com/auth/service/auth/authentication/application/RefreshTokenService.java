@@ -7,9 +7,9 @@ import com.auth.common.jwt.autoconfigure.JwtProperties;
 import com.auth.common.jwt.model.JwtUserToken;
 import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
-import com.auth.service.auth.authentication.application.login.audit.LoginAuditService;
 import com.auth.service.auth.authentication.application.gateway.SessionGateway;
 import com.auth.service.auth.authentication.application.gateway.TokenGateway;
+import com.auth.service.auth.authentication.application.login.audit.LoginAuditService;
 import com.auth.service.auth.authentication.application.port.AuthProfileCachePort;
 import com.auth.service.auth.authentication.domain.model.LogoutSessionHint;
 import com.auth.service.auth.authentication.domain.model.RefreshSessionResult;
@@ -125,7 +125,7 @@ public class RefreshTokenService {
 	/**
 	 * 断言刷新令牌与会话中存储的哈希及过期时间一致。
 	 * <p>
-	 * 过期仅抛错；哈希为空或与请求令牌摘要不一致时视为脏会话，先撤销服务端会话再抛错（与文档强会话绑定一致）。
+	 * 过期仅抛错；哈希为空或与请求令牌摘要不一致时视为脏会话，先撤销服务端会话再抛错
 	 * </p>
 	 * @param userId 令牌声明的用户 ID（用于活跃集合移除）
 	 * @param jti 会话 ID

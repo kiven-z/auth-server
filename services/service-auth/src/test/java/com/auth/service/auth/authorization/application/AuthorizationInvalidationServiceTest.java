@@ -7,7 +7,7 @@ import com.auth.module.security.contract.dto.invalidation.RoleInvalidatePayload;
 import com.auth.service.auth.authorization.application.invalidation.impact.ImpactResolverRegistry;
 import com.auth.service.auth.authorization.application.invalidation.policy.UserInvalidationPolicy;
 import com.auth.service.auth.authorization.config.AuthorizationInvalidationProperties;
-import com.auth.service.auth.authorization.domain.invalidation.model.IdempotencyClaimStatus;
+import com.auth.service.auth.authorization.domain.invalidation.model.InvalidationIdempotencyGate;
 import com.auth.service.auth.authorization.domain.invalidation.model.UserInvalidationBuckets;
 import com.auth.service.auth.authorization.domain.invalidation.model.UserInvalidationState;
 import com.auth.service.auth.authorization.domain.invalidation.port.InvalidationIdempotencyPort;
@@ -23,7 +23,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -68,23 +67,22 @@ class AuthorizationInvalidationServiceTest {
 	@DisplayName("幂等命中时直接返回缓存结果")
 	void invalidate_idempotentHit_shouldReturnCached() {
 		AuthorizationInvalidateResponse cached = new AuthorizationInvalidateResponse(10, 8, 8, 2);
-		when(invalidationIdempotencyPort.findProcessedOutcome("evt-1")).thenReturn(Optional.of(cached));
+		when(invalidationIdempotencyPort.acquireGate("evt-1", AuthorizationChangeKind.ROLE))
+			.thenReturn(new InvalidationIdempotencyGate.Completed(cached));
 
 		AuthorizationInvalidateRequest request = new AuthorizationInvalidateRequest("evt-1",
 				AuthorizationChangeKind.ROLE, new RoleInvalidatePayload(List.of("ADMIN")));
 		AuthorizationInvalidateResponse response = authorizationInvalidationService.invalidate(request);
 
 		assertEquals(cached, response);
-		verify(invalidationIdempotencyPort, never()).tryClaim(any(), any());
 		verify(impactResolverRegistry, never()).resolve(any());
 	}
 
 	@Test
-	@DisplayName("无影响用户时返回全零并完成幂等记录")
+	@DisplayName("无影响用户时返回全零")
 	void invalidate_emptyImpact_shouldReturnEmpty() {
-		when(invalidationIdempotencyPort.findProcessedOutcome("evt-2")).thenReturn(Optional.empty());
-		when(invalidationIdempotencyPort.tryClaim("evt-2", AuthorizationChangeKind.ROLE))
-			.thenReturn(IdempotencyClaimStatus.CLAIMED);
+		when(invalidationIdempotencyPort.acquireGate("evt-2", AuthorizationChangeKind.ROLE))
+			.thenReturn(new InvalidationIdempotencyGate.Claimed());
 		when(impactResolverRegistry.resolve(any())).thenReturn(Set.of());
 
 		AuthorizationInvalidateRequest request = new AuthorizationInvalidateRequest("evt-2",
@@ -92,16 +90,14 @@ class AuthorizationInvalidationServiceTest {
 		AuthorizationInvalidateResponse response = authorizationInvalidationService.invalidate(request);
 
 		assertEquals(AuthorizationInvalidateResponse.empty(), response);
-		verify(invalidationIdempotencyPort).completeProcessedOutcome("evt-2", AuthorizationChangeKind.ROLE,
-				AuthorizationInvalidateResponse.empty());
+		verify(invalidationIdempotencyPort, never()).completeProcessedOutcome(any(), any(), any());
 	}
 
 	@Test
 	@DisplayName("先递增 perm_version 再刷新画像")
 	void invalidate_shouldIncrementBeforeRefresh() {
-		when(invalidationIdempotencyPort.findProcessedOutcome("evt-3")).thenReturn(Optional.empty());
-		when(invalidationIdempotencyPort.tryClaim("evt-3", AuthorizationChangeKind.ROLE))
-			.thenReturn(IdempotencyClaimStatus.CLAIMED);
+		when(invalidationIdempotencyPort.acquireGate("evt-3", AuthorizationChangeKind.ROLE))
+			.thenReturn(new InvalidationIdempotencyGate.Claimed());
 		when(impactResolverRegistry.resolve(any())).thenReturn(Set.of(1L));
 		when(userInvalidationStateQueryPort.loadByUserIds(Set.of(1L)))
 			.thenReturn(List.of(new UserInvalidationState(1L, 1, false)));
@@ -128,9 +124,8 @@ class AuthorizationInvalidationServiceTest {
 	@Test
 	@DisplayName("逻辑删除用户驱逐后踢掉全部会话")
 	void invalidate_deletedUser_shouldKickSessions() {
-		when(invalidationIdempotencyPort.findProcessedOutcome("evt-4")).thenReturn(Optional.empty());
-		when(invalidationIdempotencyPort.tryClaim("evt-4", AuthorizationChangeKind.ROLE))
-			.thenReturn(IdempotencyClaimStatus.CLAIMED);
+		when(invalidationIdempotencyPort.acquireGate("evt-4", AuthorizationChangeKind.ROLE))
+			.thenReturn(new InvalidationIdempotencyGate.Claimed());
 		when(impactResolverRegistry.resolve(any())).thenReturn(Set.of(9L));
 		when(userInvalidationStateQueryPort.loadByUserIds(Set.of(9L)))
 			.thenReturn(List.of(new UserInvalidationState(9L, 1, true)));
@@ -151,9 +146,8 @@ class AuthorizationInvalidationServiceTest {
 	@Test
 	@DisplayName("流水线失败时释放幂等占位")
 	void invalidate_pipelineFailure_shouldReleaseClaim() {
-		when(invalidationIdempotencyPort.findProcessedOutcome("evt-5")).thenReturn(Optional.empty());
-		when(invalidationIdempotencyPort.tryClaim("evt-5", AuthorizationChangeKind.ROLE))
-			.thenReturn(IdempotencyClaimStatus.CLAIMED);
+		when(invalidationIdempotencyPort.acquireGate("evt-5", AuthorizationChangeKind.ROLE))
+			.thenReturn(new InvalidationIdempotencyGate.Claimed());
 		when(impactResolverRegistry.resolve(any())).thenThrow(new IllegalStateException("resolver error"));
 
 		AuthorizationInvalidateRequest request = new AuthorizationInvalidateRequest("evt-5",
@@ -168,6 +162,20 @@ class AuthorizationInvalidationServiceTest {
 
 		verify(invalidationIdempotencyPort).releaseClaim("evt-5");
 		verify(invalidationIdempotencyPort, never()).completeProcessedOutcome(any(), any(), any());
+	}
+
+	@Test
+	@DisplayName("他人处理中时返回空结果")
+	void invalidate_inProgress_shouldReturnEmpty() {
+		when(invalidationIdempotencyPort.acquireGate("evt-6", AuthorizationChangeKind.ROLE))
+			.thenReturn(new InvalidationIdempotencyGate.InProgress());
+
+		AuthorizationInvalidateRequest request = new AuthorizationInvalidateRequest("evt-6",
+				AuthorizationChangeKind.ROLE, new RoleInvalidatePayload(List.of("ADMIN")));
+		AuthorizationInvalidateResponse response = authorizationInvalidationService.invalidate(request);
+
+		assertEquals(AuthorizationInvalidateResponse.empty(), response);
+		verify(impactResolverRegistry, never()).resolve(any());
 	}
 
 }

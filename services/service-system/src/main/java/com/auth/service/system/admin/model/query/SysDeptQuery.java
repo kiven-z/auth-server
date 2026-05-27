@@ -10,7 +10,7 @@ import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * 部门扁平列表 / 分页查询条件（与文档「部门管理」查询条件对齐）。
+ * 部门扁平列表 / 分页查询条件
  *
  * @author Bunny
  */

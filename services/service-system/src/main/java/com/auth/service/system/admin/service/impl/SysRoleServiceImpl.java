@@ -28,6 +28,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -60,6 +61,17 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 		this.sysRolePermissionMapper = sysRolePermissionMapper;
 		this.sysRoleCascadeMapper = sysRoleCascadeMapper;
 		this.roleInvalidationTrigger = roleInvalidationTrigger;
+	}
+
+	/**
+	 * 判断是否需在更新后触发授权失效：role_code 或 status 变化时触发；仅改名称/排序/备注不触发。
+	 */
+	private static boolean shouldInvalidateAfterUpdate(String oldRoleCode, String newRoleCode, Boolean oldStatus,
+			Boolean newStatus) {
+		if (!CharSequenceUtil.equals(oldRoleCode, newRoleCode)) {
+			return true;
+		}
+		return !Objects.equals(oldStatus, newStatus);
 	}
 
 	/**
@@ -187,18 +199,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 	}
 
 	/**
-	 * 判断是否需在更新后触发授权失效：role_code 或 status 变化时触发；仅改名称/排序/备注不触发。
-	 */
-	private static boolean shouldInvalidateAfterUpdate(String oldRoleCode, String newRoleCode, Boolean oldStatus,
-			Boolean newStatus) {
-		if (!CharSequenceUtil.equals(oldRoleCode, newRoleCode)) {
-			return true;
-		}
-		return !Objects.equals(oldStatus, newStatus);
-	}
-
-	/**
-	 * {@code role_code} 变更时级联更新关联表（与文档列出的 grant / 权限 / 菜单角色一致）。
+	 * {@code role_code} 变更时级联更新关联表
 	 * @param oldRoleCode 原编码
 	 * @param newRoleCode 新编码
 	 */

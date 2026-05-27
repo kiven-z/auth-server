@@ -20,7 +20,7 @@ import java.util.Set;
 public class PermissionConstant {
 
 	/**
-	 * 内置超级用户 ID（命中则功能/数据权限短路语义由 starter 实现与文档契约对齐）变更需发版与评审，不得远程注入
+	 * 内置超级用户 ID,不得远程注入
 	 */
 	public static final Set<Long> SUPER_ADMIN_USER_IDS = Set.of(1L);
 

@@ -6,8 +6,8 @@ import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidat
 import com.auth.service.auth.authorization.application.invalidation.impact.ImpactResolverRegistry;
 import com.auth.service.auth.authorization.application.invalidation.policy.UserInvalidationPolicy;
 import com.auth.service.auth.authorization.config.AuthorizationInvalidationProperties;
-import com.auth.service.auth.authorization.domain.invalidation.model.IdempotencyClaimStatus;
 import com.auth.service.auth.authorization.domain.invalidation.model.InvalidationCommand;
+import com.auth.service.auth.authorization.domain.invalidation.model.InvalidationIdempotencyGate;
 import com.auth.service.auth.authorization.domain.invalidation.model.UserInvalidationBuckets;
 import com.auth.service.auth.authorization.domain.invalidation.model.UserInvalidationState;
 import com.auth.service.auth.authorization.domain.invalidation.port.InvalidationIdempotencyPort;
@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -57,27 +56,21 @@ public class AuthorizationInvalidationService {
 	public AuthorizationInvalidateResponse invalidate(AuthorizationInvalidateRequest request) {
 		// 构建命令
 		InvalidationCommand command = new InvalidationCommand(request.eventId(), request.payload());
-
-		// 使用 EventId 查询幂等结果
 		String eventId = command.eventId();
-		Optional<AuthorizationInvalidateResponse> cached = invalidationIdempotencyPort.findProcessedOutcome(eventId);
-		if (cached.isPresent()) {
+
+		// 查询幂等门禁结果
+		InvalidationIdempotencyGate gate = invalidationIdempotencyPort.acquireGate(eventId, request.kind());
+
+		// 已处理完成，直接返回历史结果
+		if (gate instanceof InvalidationIdempotencyGate.Completed completed) {
 			log.debug("Authorization invalidate skipped (idempotent): eventId={}", eventId);
-			return cached.get();
+			return completed.response();
 		}
 
-		// 抢占幂等锁
-		IdempotencyClaimStatus claimStatus = invalidationIdempotencyPort.tryClaim(eventId, request.kind());
-		if (claimStatus == IdempotencyClaimStatus.ALREADY_COMPLETED) {
-			return invalidationIdempotencyPort.findProcessedOutcome(eventId)
-				.orElse(AuthorizationInvalidateResponse.empty());
-		}
-
-		// 抢占幂等锁
-		if (claimStatus == IdempotencyClaimStatus.IN_PROGRESS) {
+		// 处理中，返回空结果
+		if (gate instanceof InvalidationIdempotencyGate.InProgress) {
 			log.warn("Authorization invalidate in progress by another worker: eventId={}", eventId);
-			return invalidationIdempotencyPort.findProcessedOutcome(eventId)
-				.orElse(AuthorizationInvalidateResponse.empty());
+			return AuthorizationInvalidateResponse.empty();
 		}
 
 		try {
@@ -109,7 +102,7 @@ public class AuthorizationInvalidationService {
 			// 逻辑删除用户：驱逐画像后踢掉全部会话
 			kickSessionsForDeletedUsers(invalidationStateList);
 
-			// 构建执行结果摘要
+			// 构建执行结果
 			int impactedUserCount = impactedUserIds.size();
 			AuthorizationInvalidateResponse response = new AuthorizationInvalidateResponse(impactedUserCount,
 					versionBumpedCount, profileRefreshedCount, profileEvictedCount);
@@ -128,7 +121,7 @@ public class AuthorizationInvalidationService {
 	}
 
 	/**
-	 * 逻辑删除用户：驱逐画像后踢掉全部会话（文档 §6 用户状态分桶）。
+	 * 逻辑删除用户
 	 * @param states 用户状态快照
 	 */
 	private void kickSessionsForDeletedUsers(List<UserInvalidationState> states) {

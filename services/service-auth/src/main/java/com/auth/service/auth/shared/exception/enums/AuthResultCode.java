@@ -134,7 +134,7 @@ public enum AuthResultCode {
 	private final int httpStatus;
 
 	/**
-	 * 业务码（5位规则在文档中，存 int 以便传输/比较）
+	 * 业务码
 	 */
 	private final Integer code;
 

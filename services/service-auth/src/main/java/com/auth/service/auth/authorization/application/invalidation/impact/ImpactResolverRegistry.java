@@ -1,13 +1,14 @@
 package com.auth.service.auth.authorization.application.invalidation.impact;
 
-import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
-import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidatePayload;
-import org.springframework.stereotype.Component;
-
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.springframework.stereotype.Component;
+
+import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
+import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidatePayload;
 
 /**
  * 影响面解析器注册表：按 {@link AuthorizationChangeKind} 分发到对应 {@link ImpactResolver}。
@@ -56,6 +57,12 @@ public class ImpactResolverRegistry {
 		return dispatch(resolver, payload);
 	}
 
+	/**
+	 * 分发解析器
+	 * @param resolver 解析器
+	 * @param payload 失效业务键
+	 * @return 受影响用户 ID 集合
+	 */
 	private <T extends AuthorizationInvalidatePayload> Set<Long> dispatch(ImpactResolver<T> resolver,
 			AuthorizationInvalidatePayload payload) {
 		Class<T> payloadType = resolver.payloadType();
