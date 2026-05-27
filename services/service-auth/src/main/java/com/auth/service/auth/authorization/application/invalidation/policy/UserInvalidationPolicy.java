@@ -11,7 +11,7 @@ import java.util.Set;
 
 /**
  * 用户失效分桶策略：与 {@link com.auth.module.platform.persistence.model.UserEntity#getStatus()}
- * 约定一致。
+ * 约定一致
  *
  * @author Bunny
  */
@@ -19,7 +19,7 @@ import java.util.Set;
 public class UserInvalidationPolicy {
 
 	/**
-	 * 正常启用。
+	 * 正常启用
 	 */
 	private static final int STATUS_NORMAL = 1;
 
@@ -33,7 +33,7 @@ public class UserInvalidationPolicy {
 	}
 
 	/**
-	 * 将反查得到的用户按状态分为「递增版本+刷画像」与「仅驱逐缓存」。
+	 * 将反查得到的用户按状态分为「递增版本+刷画像」与「仅驱逐缓存」
 	 * @param states 用户状态快照（须含反查得到的每个 userId）
 	 * @return 分桶结果
 	 */

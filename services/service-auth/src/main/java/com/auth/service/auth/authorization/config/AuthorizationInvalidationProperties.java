@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
 
 /**
- * 授权失效编排可调参数。
+ * 授权失效编排可调参数
  *
  * @author Bunny
  */
@@ -20,13 +20,13 @@ import org.springframework.validation.annotation.Validated;
 public class AuthorizationInvalidationProperties {
 
 	/**
-	 * 递增与画像刷新/驱逐的每批大小。
+	 * 递增与画像刷新/驱逐的每批大小
 	 */
 	@NotNull
 	private Integer batchSize = 500;
 
 	/**
-	 * 是否启用策略码 → 角色码桥接（依赖 {@code role_policy} 表；表未落地前保持 {@code false}）。
+	 * 是否启用策略码
 	 */
 	private boolean policyRoleBridgeEnabled = false;
 

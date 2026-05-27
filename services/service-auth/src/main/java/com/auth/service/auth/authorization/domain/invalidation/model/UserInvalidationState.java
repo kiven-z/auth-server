@@ -1,7 +1,7 @@
 package com.auth.service.auth.authorization.domain.invalidation.model;
 
 /**
- * 用户失效策略输入：仅含权限同步所需的状态位。
+ * 用户失效策略输入：仅含权限同步所需的状态位
  *
  * @param userId 用户 ID
  * @param status 用户状态（0=禁用,1=正常,2=锁定）

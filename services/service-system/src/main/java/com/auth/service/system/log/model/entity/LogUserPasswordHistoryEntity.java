@@ -9,9 +9,9 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 /**
- * 用户密码历史日志，对应表 {@code log_user_password_history}。
+ * 用户密码历史日志，对应表 {@code log_user_password_history}
  * <p>
- * 记录用户修改密码时的 Hash（BCrypt），仅用于历史密码比对，禁止通过 API 返回 {@code passwordHash}。 删除接口为物理删除。
+ * 记录用户修改密码时的 Hash（BCrypt），仅用于历史密码比对，禁止通过 API 返回 {@code passwordHash} 删除接口为物理删除
  * </p>
  *
  * @author Bunny

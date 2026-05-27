@@ -16,7 +16,7 @@ import java.util.*;
  * 数据权限生效构建器
  *
  * <p>
- * 先按维度+资源键分组，再做 USER 优先；若无 USER 则做 ROLE/DEPT/POST 宽松合并，最终兜底 SELF。
+ * 先按维度+资源键分组，再做 USER 优先；若无 USER 则做 ROLE/DEPT/POST 宽松合并，最终兜底 SELF
  * </p>
  *
  * @author Bunny
@@ -139,12 +139,12 @@ public class DataScopeBuilder {
 	}
 
 	/**
-	 * 按范围类型解析值列表。
+	 * 按范围类型解析值列表
 	 *
 	 * <p>
 	 * 约束约定： 1. CUSTOM / NODE_* 允许携带 scope_subject_ids； 2. ALL / SELF 忽略
 	 * scope_subject_ids； 3. 非 CUSTOM 且 values 为空时，后续合并器会走 restrictiveWithoutIds 分支，最终由
-	 * Handler fail-close。
+	 * Handler fail-close
 	 * </p>
 	 */
 	private static List<String> parseValuesByScopeType(ScopeGrantType scopeType, String rawValues) {

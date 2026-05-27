@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * 按权限码反查受影响用户 ID（P4→P1 桥接委托 Port）。
+ * 按权限码反查受影响用户 ID（P4→P1 桥接委托 Port）
  *
  * @author Bunny
  */

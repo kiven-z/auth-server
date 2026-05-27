@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * 按 grant_table 授权主体反查受影响用户 ID（P2）。
+ * 按 grant_table 授权主体反查受影响用户 ID（P2）
  *
  * @author Bunny
  */

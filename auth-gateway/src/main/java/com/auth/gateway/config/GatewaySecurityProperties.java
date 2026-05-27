@@ -1,16 +1,14 @@
 package com.auth.gateway.config;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.auth.module.security.core.matcher.AntPathMatcher;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
-import com.auth.module.security.core.matcher.AntPathMatcher;
-
-import lombok.Getter;
-import lombok.Setter;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 网关安全策略配置
@@ -19,18 +17,18 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@ConfigurationProperties(prefix = "auth.gateway.security")
 @Component
 @Validated
-@ConfigurationProperties(prefix = "auth.gateway.security")
 public class GatewaySecurityProperties {
 
 	/**
-	 * 是否开启严格校验模式。
+	 * 是否开启严格校验模式
 	 */
 	private boolean strictEnabled = false;
 
 	/**
-	 * 严格校验路径（Ant 风格）。
+	 * 严格校验路径（Ant 风格）
 	 */
 	private List<String> strictPatterns = new ArrayList<>();
 

@@ -23,10 +23,10 @@ import org.springframework.web.bind.annotation.InitBinder;
  * <p>
  * <strong>Not a substitute for defensive coding
  * everywhere</strong>：不会处理请求头、消息队列、定时任务入参、手写 JDBC、其它进程内非 HTTP JSON
- * 反序列化路径等；业务上若存在「必须保留首尾空白」的字段，应单独约定（例如专用 DTO 或不用 {@code String} 承载）。
+ * 反序列化路径等；业务上若存在「必须保留首尾空白」的字段，应单独约定（例如专用 DTO 或不用 {@code String} 承载）
  * </p>
  * <p>
- * 因此服务层对<strong>不可信外部边界</strong>仍可按需校验；本配置只是减少重复的前后端空格噪音。
+ * 因此服务层对<strong>不可信外部边界</strong>仍可按需校验；本配置只是减少重复的前后端空格噪音
  * </p>
  *
  * @author Bunny
@@ -36,7 +36,7 @@ import org.springframework.web.bind.annotation.InitBinder;
 public class ControllerStringParamTrimConfig {
 
 	/**
-	 * 注册字符串编辑器：去除前后空白；{@code emptyAsNull=false} 表示仅空白时得到空串而非 {@code null}。
+	 * 注册字符串编辑器：去除前后空白；{@code emptyAsNull=false} 表示仅空白时得到空串而非 {@code null}
 	 */
 	@InitBinder
 	public void initBinder(WebDataBinder binder) {
@@ -47,7 +47,7 @@ public class ControllerStringParamTrimConfig {
 	/**
 	 * 为应用主 {@code ObjectMapper} 注册 JSON 字符串反序列化修剪；若需完全自定义 ObjectMapper，可提供同名能力的
 	 * {@link Jackson2ObjectMapperBuilderCustomizer} 或自行注册
-	 * {@link TrimmingStringDeserializer}。
+	 * {@link TrimmingStringDeserializer}
 	 */
 	@Bean
 	public Jackson2ObjectMapperBuilderCustomizer stringTrimJacksonCustomizer() {

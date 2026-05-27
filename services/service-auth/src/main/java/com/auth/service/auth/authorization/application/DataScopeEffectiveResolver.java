@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * 用户数据权限生效范围解析：聚合授权片段并生成最终生效范围。
+ * 用户数据权限生效范围解析：聚合授权片段并生成最终生效范围
  *
  * @author Bunny
  */
@@ -30,7 +30,20 @@ public class DataScopeEffectiveResolver {
 	}
 
 	/**
-	 * 查询并构建用户生效数据权限。
+	 * 将持久层投影转为领域读模型，避免领域构建器依赖基础设施类型。
+	 * @param projections Mapper 查询结果
+	 * @return 授权片段列表
+	 */
+	private static List<DataScopeGrantPiece> toGrantPieces(List<DataScopeProjection> projections) {
+		return projections.stream()
+			.filter(Objects::nonNull)
+			.map(p -> new DataScopeGrantPiece(p.getSubjectType(), p.getScopeResourceCode(), p.getDimensionType(),
+					p.getScopeType(), p.getScopeSubjectIds()))
+			.toList();
+	}
+
+	/**
+	 * 查询并构建用户生效数据权限
 	 * @param userId 用户 ID
 	 * @return 生效数据权限
 	 */
@@ -39,7 +52,7 @@ public class DataScopeEffectiveResolver {
 	}
 
 	/**
-	 * 查询并构建用户生效数据权限（含轨迹）。
+	 * 查询并构建用户生效数据权限（含轨迹）
 	 * @param userId 用户 ID
 	 * @return 生效数据权限构建结果
 	 */
@@ -65,19 +78,6 @@ public class DataScopeEffectiveResolver {
 		log.debug("Resolved data scopes for userId={}, scopeSize={}, traceSize={}", userId,
 				result.getDataScopes().size(), result.getTraces().size());
 		return result;
-	}
-
-	/**
-	 * 将持久层投影转为领域读模型，避免领域构建器依赖基础设施类型。
-	 * @param projections Mapper 查询结果
-	 * @return 授权片段列表
-	 */
-	private static List<DataScopeGrantPiece> toGrantPieces(List<DataScopeProjection> projections) {
-		return projections.stream()
-			.filter(Objects::nonNull)
-			.map(p -> new DataScopeGrantPiece(p.getSubjectType(), p.getScopeResourceCode(), p.getDimensionType(),
-					p.getScopeType(), p.getScopeSubjectIds()))
-			.toList();
 	}
 
 }

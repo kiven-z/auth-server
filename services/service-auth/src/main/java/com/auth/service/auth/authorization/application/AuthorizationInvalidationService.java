@@ -49,7 +49,7 @@ public class AuthorizationInvalidationService {
 	private final AuthorizationInvalidationProperties authorizationInvalidationProperties;
 
 	/**
-	 * 执行授权失效流水线。
+	 * 执行授权失效流水线
 	 * @param request 统一失效请求
 	 * @return 执行结果摘要
 	 */

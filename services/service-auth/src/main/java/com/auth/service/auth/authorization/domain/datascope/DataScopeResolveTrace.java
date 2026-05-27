@@ -4,7 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 /**
- * 数据权限解析轨迹（合并规则命中过程）。
+ * 数据权限解析轨迹（合并规则命中过程）
  *
  * @author Bunny
  */

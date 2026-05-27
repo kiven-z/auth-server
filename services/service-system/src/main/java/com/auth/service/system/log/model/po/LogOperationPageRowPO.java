@@ -11,7 +11,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 操作日志分页行（持久层投影）。
+ * 操作日志分页行（持久层投影）
  *
  * @author Bunny
  */

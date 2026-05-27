@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * 按岗位 ID 反查成员用户 ID（P3）。
+ * 按岗位 ID 反查成员用户 ID（P3）
  *
  * @author Bunny
  */

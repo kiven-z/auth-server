@@ -18,7 +18,7 @@ public record UserInvalidationBuckets(Set<Long> versionBumpUserIds, Set<Long> ev
 	}
 
 	/**
-	 * 空分桶。
+	 * 空分桶
 	 * @return 无任何用户
 	 */
 	public static UserInvalidationBuckets empty() {

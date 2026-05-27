@@ -1,5 +1,6 @@
 package com.auth.service.system.log.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
@@ -14,7 +15,6 @@ import com.auth.service.system.log.service.LogOperationService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import cn.hutool.core.collection.CollUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -68,7 +68,7 @@ public class LogOperationServiceImpl extends ServiceImpl<LogOperationMapper, Log
 	}
 
 	/**
-	 * 为分页行填充操作用户名（{@code userId} → {@code username}）。
+	 * 为分页行填充操作用户名（{@code userId} → {@code username}）
 	 * @param records 分页 VO 列表
 	 */
 	private void enrichOperatorUsernames(List<LogOperationPageVO> records) {
@@ -89,7 +89,7 @@ public class LogOperationServiceImpl extends ServiceImpl<LogOperationMapper, Log
 	}
 
 	/**
-	 * 为详情填充操作用户名。
+	 * 为详情填充操作用户名
 	 * @param vo 详情 VO
 	 */
 	private void enrichOperatorUsername(LogOperationDetailVO vo) {

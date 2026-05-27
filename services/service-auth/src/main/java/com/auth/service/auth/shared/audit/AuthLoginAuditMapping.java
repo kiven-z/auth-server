@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * 认证业务结果码与登录审计结果映射。
+ * 认证业务结果码与登录审计结果映射
  *
  * @author Bunny
  */
@@ -30,7 +30,7 @@ public class AuthLoginAuditMapping {
 			AuthLoginLogResult.ACCOUNT_LOCKED);
 
 	/**
-	 * 解析凭证校验阶段业务码对应的审计结果。
+	 * 解析凭证校验阶段业务码对应的审计结果
 	 * @param resultCode 业务结果码
 	 * @return 审计结果，无映射时为空
 	 */
@@ -39,7 +39,7 @@ public class AuthLoginAuditMapping {
 	}
 
 	/**
-	 * 解析账号锁定类业务码对应的审计结果。
+	 * 解析账号锁定类业务码对应的审计结果
 	 * @param resultCode 业务结果码
 	 * @return 审计结果，无映射时为空
 	 */

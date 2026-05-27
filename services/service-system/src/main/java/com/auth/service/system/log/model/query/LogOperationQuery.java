@@ -10,7 +10,7 @@ import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * 操作日志分页查询条件。
+ * 操作日志分页查询条件
  *
  * @author Bunny
  */

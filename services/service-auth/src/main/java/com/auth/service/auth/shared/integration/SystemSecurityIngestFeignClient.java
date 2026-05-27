@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 /**
- * 调用 system 服务内部接口，将授权审计与操作日志上报落库。
+ * 调用 system 服务内部接口，将授权审计与操作日志上报落库
  *
  * @author Bunny
  */

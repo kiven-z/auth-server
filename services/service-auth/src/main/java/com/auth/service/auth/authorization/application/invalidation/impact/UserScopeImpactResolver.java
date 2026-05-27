@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import java.util.Set;
 
 /**
- * 按用户 ID 直连失效（P6，无需 SQL 反查）。
+ * 按用户 ID 直连失效（P6，无需 SQL 反查）
  *
  * @author Bunny
  */

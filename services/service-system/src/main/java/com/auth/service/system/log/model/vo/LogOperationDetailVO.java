@@ -11,7 +11,7 @@ import lombok.ToString;
 import java.io.Serial;
 
 /**
- * 操作日志详情（API 出参）。
+ * 操作日志详情（API 出参）
  *
  * @author Bunny
  */

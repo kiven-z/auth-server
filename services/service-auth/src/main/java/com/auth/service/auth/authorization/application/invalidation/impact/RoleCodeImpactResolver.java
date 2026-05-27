@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * 按角色码反查受影响用户 ID。
+ * 按角色码反查受影响用户 ID
  *
  * @author Bunny
  */

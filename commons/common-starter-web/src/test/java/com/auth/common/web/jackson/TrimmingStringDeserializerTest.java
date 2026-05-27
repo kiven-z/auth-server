@@ -1,16 +1,15 @@
 package com.auth.common.web.jackson;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
- * 翻译成中文： 测试 {@link TrimmingStringDeserializer} 的 JSON 字符串值的修剪功能。
+ * 翻译成中文： 测试 {@link TrimmingStringDeserializer} 的 JSON 字符串值的修剪功能
  */
 class TrimmingStringDeserializerTest {
 
@@ -20,7 +19,7 @@ class TrimmingStringDeserializerTest {
 	@Test
 	@DisplayName("JSON string values are stripped of leading and trailing whitespace (strip semantics)")
 	void stripsWhitespace() throws Exception {
-		// 测试 U+2003 EM SPACE 是空白字符，NBSP (U+00A0) 不是空白字符。
+		// 测试 U+2003 EM SPACE 是空白字符，NBSP (U+00A0) 不是空白字符
 		assertEquals("ab", mapper.readValue("\"\\u2003 ab \\u2003\"", String.class));
 	}
 

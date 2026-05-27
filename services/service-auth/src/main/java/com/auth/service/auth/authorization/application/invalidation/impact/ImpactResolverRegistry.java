@@ -11,7 +11,7 @@ import com.auth.module.security.contract.api.authorization.AuthorizationChangeKi
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidatePayload;
 
 /**
- * 影响面解析器注册表：按 {@link AuthorizationChangeKind} 分发到对应 {@link ImpactResolver}。
+ * 影响面解析器注册表：按 {@link AuthorizationChangeKind} 分发到对应 {@link ImpactResolver}
  *
  * @author Bunny
  */
@@ -21,7 +21,7 @@ public class ImpactResolverRegistry {
 	private final Map<AuthorizationChangeKind, ImpactResolver<?>> resolversByKind;
 
 	/**
-	 * 注入全部解析器并建立 kind → resolver 映射。
+	 * 注入全部解析器并建立 kind → resolver 映射
 	 * @param resolvers Spring 容器中的解析器列表
 	 */
 	public ImpactResolverRegistry(List<ImpactResolver<?>> resolvers) {
@@ -40,7 +40,7 @@ public class ImpactResolverRegistry {
 	}
 
 	/**
-	 * 将类型化失效 Payload 解析为受影响用户 ID 集合。
+	 * 将类型化失效 Payload 解析为受影响用户 ID 集合
 	 * @param payload 失效业务键
 	 * @return 去重用户 ID
 	 */

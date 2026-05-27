@@ -13,7 +13,7 @@ import org.mapstruct.Named;
 public class MapStructStringQualifiers {
 
 	/**
-	 * 空白（含 null、空串、仅空白）时返回 {@code null}，否则返回原字符串。
+	 * 空白（含 null、空串、仅空白）时返回 {@code null}，否则返回原字符串
 	 * @param value 原始值
 	 * @return 归一后的值
 	 */

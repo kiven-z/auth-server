@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 数据权限构建结果（生效范围与解析轨迹）。
+ * 数据权限构建结果（生效范围与解析轨迹）
  *
  * @author Bunny
  */

@@ -12,14 +12,12 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noMethods;
 
 /**
- * auth-gateway 模块架构约束（ArchUnit）。
+ * auth-gateway 模块架构约束（ArchUnit）
  *
  * @author Bunny
  */
 @AnalyzeClasses(packages = "com.auth.gateway", importOptions = ImportOption.DoNotIncludeTests.class)
 class GatewayArchitectureTest {
-
-	private static final String GATEWAY_ROOT = "..gateway..";
 
 	@ArchTest
 	static final ArchRule business_exception_handlers_must_not_extend_validation_handler = noClasses().that()
@@ -28,6 +26,8 @@ class GatewayArchitectureTest {
 		.areAnnotatedWith(RestControllerAdvice.class)
 		.should()
 		.beAssignableTo(ValidationExceptionHandler.class);
+
+	private static final String GATEWAY_ROOT = "..gateway..";
 
 	@ArchTest
 	static final ArchRule must_not_declare_rest_template = noClasses().that()

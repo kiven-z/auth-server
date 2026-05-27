@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * 授权画像物化：分批重建缓存或驱逐 Redis 画像。
+ * 授权画像物化：分批重建缓存或驱逐 Redis 画像
  *
  * @author Bunny
  */
@@ -26,7 +26,7 @@ public class AuthProfileMaterializationService {
 	private final AuthProfileCacheApplicationService authProfileCacheApplicationService;
 
 	/**
-	 * 分批处理用户ID集合。
+	 * 分批处理用户ID集合
 	 * @param userIds 用户ID集合
 	 * @param batchSize 每批大小
 	 * @return 分批后的用户ID集合

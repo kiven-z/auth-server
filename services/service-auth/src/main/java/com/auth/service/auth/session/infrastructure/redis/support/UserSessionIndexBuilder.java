@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 /**
- * 从 HTTP 请求与令牌参数构建 {@link UserSessionIndex}。
+ * 从 HTTP 请求与令牌参数构建 {@link UserSessionIndex}
  *
  * @author Bunny
  */

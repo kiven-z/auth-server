@@ -13,7 +13,7 @@ import lombok.ToString;
 import java.io.Serial;
 
 /**
- * 操作日志分页行（API 出参）。
+ * 操作日志分页行（API 出参）
  *
  * @author Bunny
  */
@@ -56,8 +56,8 @@ public class LogOperationPageVO extends BaseResponse {
 	@Schema(title = "执行耗时毫秒")
 	private Integer executionTimeMs;
 
-	@Schema(title = "请求 IP（脱敏）")
 	@Desensitized(DesensitizedType.IP_ADDRESS)
+	@Schema(title = "请求 IP（脱敏）")
 	private String ipAddress;
 
 }

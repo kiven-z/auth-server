@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import static com.auth.common.web.resttemplate.FeignUtil.isSuccess;
 
 /**
- * 将操作日志负载异步委托给 service-system 通过 Feign 上报（没有本地 {@code log_operation} 访问权限）。
+ * 将操作日志负载异步委托给 service-system 通过 Feign 上报（没有本地 {@code log_operation} 访问权限）
  *
  * @author Bunny
  */

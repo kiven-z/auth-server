@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * 授权画像缓存刷新：按用户重建并写入 Redis。
+ * 授权画像缓存刷新：按用户重建并写入 Redis
  *
  * @author Bunny
  */
@@ -26,7 +26,7 @@ public class AuthorizationInnerService {
 	private final AuthProfileCacheApplicationService authProfileCacheApplicationService;
 
 	/**
-	 * 刷新用户授权画像缓存。
+	 * 刷新用户授权画像缓存
 	 * @param userIds 用户 ID 列表
 	 */
 	public void refreshUserCache(Collection<Long> userIds) {

@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * 管理端会话用例：踢人、查询活跃会话。
+ * 管理端会话用例：踢人、查询活跃会话
  *
  * @author Bunny
  */
@@ -25,7 +25,7 @@ public class SessionAdminApplicationService {
 	}
 
 	/**
-	 * 踢出指定会话。
+	 * 踢出指定会话
 	 * @param userId 用户 ID
 	 * @param sessionId 会话 ID（jti）
 	 */
@@ -35,7 +35,7 @@ public class SessionAdminApplicationService {
 	}
 
 	/**
-	 * 踢出用户全部会话。
+	 * 踢出用户全部会话
 	 * @param userId 用户 ID
 	 */
 	public void kickAllSessions(long userId) {
@@ -43,7 +43,7 @@ public class SessionAdminApplicationService {
 	}
 
 	/**
-	 * 批量踢出用户全部会话（跳过 null，单用户失败不影响其余用户）。
+	 * 批量踢出用户全部会话（跳过 null，单用户失败不影响其余用户）
 	 * @param userIds 用户 ID 列表
 	 */
 	public void kickAllSessions(Collection<Long> userIds) {
@@ -58,7 +58,7 @@ public class SessionAdminApplicationService {
 	}
 
 	/**
-	 * 查询用户活跃会话列表。
+	 * 查询用户活跃会话列表
 	 * @param userId 用户 ID
 	 * @return 活跃会话列表
 	 */
