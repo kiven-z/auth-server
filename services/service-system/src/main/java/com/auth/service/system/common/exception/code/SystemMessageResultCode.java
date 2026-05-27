@@ -6,7 +6,7 @@ import lombok.Getter;
  * 统一消息编排、模板与渠道传输（Dypns / 钉钉）结果码
  *
  * <p>
- * 号段：279–282、286、291–296、297–308（285、原 297–299 粗粒度传输码已释放，见 {@code package-info.java}）
+ * 号段：279–282、292–296、297–308（285、286、291 已释放；原 297–299 粗粒度传输码已释放，见 {@code package-info.java}）
  * </p>
  *
  * @author Bunny
@@ -38,16 +38,6 @@ public enum SystemMessageResultCode implements SystemResultCode {
 	 * 缺少必填 Dypns 验证码短信模板变量
 	 */
 	SMS_TEMPLATE_VARS_MISSING(422, 282, "SMS_TEMPLATE_VARS_MISSING", "system.message.template.vars_missing"),
-
-	/**
-	 * Dypns 验证码短信未启用（需开启 auth.message.sms.enabled 并配置阿里云 Dypns）
-	 */
-	SMS_SENDER_NOT_ENABLED(503, 286, "SMS_SENDER_NOT_ENABLED", "system.sms.sender.not_enabled"),
-
-	/**
-	 * 钉钉工作通知未启用（需设置 auth.message.ding-talk.enabled=true）
-	 */
-	DING_TALK_NOT_ENABLED(503, 291, "DING_TALK_NOT_ENABLED", "system.dingtalk.not_enabled"),
 
 	/**
 	 * 钉钉模板不存在或已禁用

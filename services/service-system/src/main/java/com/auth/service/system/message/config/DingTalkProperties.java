@@ -23,11 +23,6 @@ import org.springframework.validation.annotation.Validated;
 public class DingTalkProperties {
 
 	/**
-	 * 是否启用钉钉工作通知（业务开关，配置项保留）
-	 */
-	private boolean enabled = true;
-
-	/**
 	 * 应用 App ID（预留，当前 Open API 未使用）
 	 */
 	@Nullable

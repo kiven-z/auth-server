@@ -20,11 +20,6 @@ import org.springframework.validation.annotation.Validated;
 public class SmsProperties {
 
 	/**
-	 * 是否启用 Dypns 验证码短信渠道（SMS_ALIYUN_DYPNS，业务开关，配置项保留）
-	 */
-	private boolean enabled = true;
-
-	/**
 	 * 阿里云区域 ID
 	 */
 	@NotBlank

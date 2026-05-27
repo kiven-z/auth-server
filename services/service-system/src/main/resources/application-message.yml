@@ -20,14 +20,12 @@ spring:
 auth:
   message:
     sms:
-      enabled: true
       region: cn-hangzhou
       endpoint: dypnsapi.aliyuncs.com
       sign-name: ${AUTH_SMS_SIGN_NAME:速通互联验证码}
       access-key-id: ${AUTH_SMS_ACCESS_KEY_ID:}
       access-key-secret: ${AUTH_SMS_ACCESS_KEY_SECRET:}
     ding-talk:
-      enabled: true
       app-id: ${AUTH_DING_TALK_APP_ID:}
       agent-id: ${AUTH_DING_TALK_AGENT_ID:}
       client-id: ${AUTH_DING_TALK_CLIENT_ID:}
