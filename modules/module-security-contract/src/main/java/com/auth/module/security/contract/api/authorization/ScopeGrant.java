@@ -1,18 +1,17 @@
 package com.auth.module.security.contract.api.authorization;
 
+import com.auth.module.security.contract.api.granttable.ScopeGrantType;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import lombok.Builder;
+import lombok.Getter;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 
-import com.auth.module.security.contract.api.granttable.ScopeGrantType;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-
-import lombok.Builder;
-import lombok.Getter;
-
 /**
- * 单个授权主体的数据范围（与 data_scope_grant_table 的 scope_type、scope_subject_ids 对应）。
+ * 运行时数据范围
  *
  * @author Bunny
  */

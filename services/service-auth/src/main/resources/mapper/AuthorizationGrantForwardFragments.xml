@@ -2,8 +2,8 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.auth.service.auth.authorization.infrastructure.persistence.AuthorizationGrantForwardFragments">
     <!--
-        正向片段：userId → USER/DEPT/POST 主体（及数据权限下的 ROLE 主体）。
-        用于登录画像、缓存重建、生效码查询；修改 grant 展开规则时只维护本文件。
+        正向片段：userId → USER/DEPT/POST 主体。
+        用于功能权限 grant 展开；修改 grant 展开规则时只维护本文件。
     -->
     <!-- 功能权限：单用户主体 CTE（user_subjects）。步骤 4 的 PROJECT 扩展注释为使用说明，请勿删除。 -->
     <sql id="fwdUserSubjectsForFunctionalGrant">
@@ -23,34 +23,5 @@
             -- 未来扩展：在此处 UNION ALL 增加 PROJECT 或其他主体即可
             -- UNION ALL SELECT 'PROJECT', project_id FROM user_project ...
         )
-    </sql>
-
-    <!-- 数据权限：在 base_subjects 上额外展开 ROLE 主体（all_subjects） -->
-    <sql id="fwdUserSubjectsForDataScope">
-        WITH base_subjects AS (
-            SELECT 'USER' AS sub_type, #{userId} AS sub_id
-            UNION ALL
-            SELECT 'DEPT' AS sub_type, dc.ancestor_id AS sub_id
-            FROM user_dept ud
-                     JOIN dept_closure dc ON ud.dept_id = dc.descendant_id
-            WHERE ud.user_id = #{userId}
-              AND ud.status IN (1, 2)
-            UNION ALL
-            SELECT 'POST' AS sub_type, up.post_id AS sub_id
-            FROM user_post up
-            WHERE up.user_id = #{userId}
-              AND up.status IN (1, 2)
-        ),
-             role_subjects AS (
-                 SELECT DISTINCT 'ROLE' AS sub_type, sr.id AS sub_id
-                 FROM grant_table gt
-                          JOIN base_subjects bs ON gt.subject_type = bs.sub_type AND gt.subject_id = bs.sub_id
-                          JOIN sys_role sr ON sr.role_code = gt.role_code
-                 WHERE sr.status = 1),
-             all_subjects AS (SELECT bs.sub_type, bs.sub_id
-                              FROM base_subjects bs
-                              UNION ALL
-                              SELECT rs.sub_type, rs.sub_id
-                              FROM role_subjects rs)
     </sql>
 </mapper>

@@ -3,6 +3,8 @@ package com.auth.service.auth.authorization.application;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.module.security.contract.api.authorization.PolicyBundle;
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
+import com.auth.module.security.contract.api.datascope.DataScopeKeys;
+import com.auth.module.security.contract.api.granttable.ScopeGrantType;
 import com.auth.module.security.contract.constants.PermissionConstant;
 import com.auth.service.auth.authorization.domain.model.UserAccountSnapshot;
 import com.auth.service.auth.authorization.domain.port.AuthProfileQueryPort;
@@ -43,10 +45,8 @@ public class AuthProfileQueryService implements AuthProfileQueryPort {
 	 */
 	@Override
 	public AuthProfile buildByUserId(Long userId) {
-		// 查询用户快照
 		UserAccountSnapshot account = userReadPort.findById(userId)
 			.orElseThrow(() -> new AuthBusinessException(AuthResultCode.USER_NOT_FOUND));
-		// 构建授权画像
 		return buildByAccount(account);
 	}
 
@@ -66,15 +66,17 @@ public class AuthProfileQueryService implements AuthProfileQueryPort {
 		// 获取功能权限
 		List<String> roles = userAuthorizationGrantMapper.selectRolesByUserId(userId);
 		List<String> permissions = userAuthorizationGrantMapper.selectPermissionsByUserId(userId);
+		Map<String, ScopeGrant> dataScopes;
 
-		// 若是管理员设置管理员角色和权限
-		if (PermissionConstant.isAdmin(userId, roles)) {
+		boolean admin = PermissionConstant.isAdmin(userId, roles);
+		if (admin) {
 			roles = PermissionConstant.ADMIN_ROLES;
 			permissions = PermissionConstant.ADMIN_WILDCARD_PERMISSIONS;
+			dataScopes = Map.of(DataScopeKeys.DEPT_DEFAULT, ScopeGrant.builder().scopeType(ScopeGrantType.ALL).build());
 		}
-
-		// 查询数据权限
-		Map<String, ScopeGrant> dataScopes = dataScopeEffectiveResolver.resolveByUserId(userId);
+		else {
+			dataScopes = dataScopeEffectiveResolver.resolveByUserIdAndRoles(userId, roles);
+		}
 
 		return AuthProfile.builder()
 			.userId(account.id())

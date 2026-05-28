@@ -1,11 +1,9 @@
 package com.auth.service.auth.authorization.application;
 
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
-import com.auth.module.security.contract.api.granttable.DataScopeKeyUtil;
+import com.auth.module.security.contract.api.datascope.DataScopeKeys;
 import com.auth.module.security.contract.api.granttable.ScopeGrantType;
-import com.auth.service.auth.authorization.domain.datascope.DataScopeBuildResult;
-import com.auth.service.auth.authorization.infrastructure.persistence.UserAuthorizationGrantMapper;
-import com.auth.service.auth.authorization.infrastructure.persistence.projection.DataScopeProjection;
+import com.auth.service.auth.authorization.application.datascope.DeptDataScopeResolver;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,46 +15,35 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link DataScopeEffectiveResolver} 单元测试
- *
- * @author Bunny
  */
 @ExtendWith(MockitoExtension.class)
 class DataScopeEffectiveResolverTest {
 
 	@Mock
-	private UserAuthorizationGrantMapper mapper;
+	private DeptDataScopeResolver deptDataScopeResolver;
 
 	@Test
-	@DisplayName("用户ID为空时返回空结果")
-	void nullUserId_shouldReturnEmptyResult() {
-		DataScopeEffectiveResolver resolver = new DataScopeEffectiveResolver(mapper);
-		DataScopeBuildResult result = resolver.resolveWithTrace(null);
-		assertTrue(result.getDataScopes().isEmpty());
-		assertTrue(result.getTraces().isEmpty());
+	@DisplayName("用户ID为空时返回空 Map")
+	void nullUserId_shouldReturnEmptyMap() {
+		DataScopeEffectiveResolver resolver = new DataScopeEffectiveResolver(deptDataScopeResolver);
+		assertTrue(resolver.resolveByUserIdAndRoles(null, List.of("R1")).isEmpty());
 	}
 
 	@Test
-	@DisplayName("可返回生效范围与轨迹")
-	void shouldResolveScopesAndTrace() {
-		DataScopeProjection projection = new DataScopeProjection();
-		projection.setSubjectType("ROLE");
-		projection.setScopeResourceCode("order");
-		projection.setDimensionType("DEPT");
-		projection.setScopeType("NODE_ONLY");
-		projection.setScopeSubjectIds("[\"7\"]");
-		when(mapper.selectEffectiveDataScopesByUserId(10L)).thenReturn(List.of(projection));
+	@DisplayName("返回单键 DEPT::default 的生效范围")
+	void shouldReturnSingleKeyMap() {
+		ScopeGrant selfGrant = ScopeGrant.builder().scopeType(ScopeGrantType.SELF).build();
+		when(deptDataScopeResolver.resolveEffectiveGrant(10L, List.of("R1"))).thenReturn(selfGrant);
 
-		DataScopeEffectiveResolver resolver = new DataScopeEffectiveResolver(mapper);
-		DataScopeBuildResult result = resolver.resolveWithTrace(10L);
-		Map<String, ScopeGrant> scopes = result.getDataScopes();
+		DataScopeEffectiveResolver resolver = new DataScopeEffectiveResolver(deptDataScopeResolver);
+		Map<String, ScopeGrant> scopes = resolver.resolveByUserIdAndRoles(10L, List.of("R1"));
 
-		assertEquals(ScopeGrantType.CUSTOM, scopes.get(DataScopeKeyUtil.compose("DEPT", "order")).getScopeType());
-		assertEquals(1, result.getTraces().size());
-		verify(mapper, times(1)).selectEffectiveDataScopesByUserId(10L);
+		assertEquals(1, scopes.size());
+		assertEquals(selfGrant, scopes.get(DataScopeKeys.DEPT_DEFAULT));
 	}
 
 }

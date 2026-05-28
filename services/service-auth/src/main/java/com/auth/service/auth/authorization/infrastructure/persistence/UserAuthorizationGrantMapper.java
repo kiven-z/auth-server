@@ -1,6 +1,5 @@
 package com.auth.service.auth.authorization.infrastructure.persistence;
 
-import com.auth.service.auth.authorization.infrastructure.persistence.projection.DataScopeProjection;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -27,12 +26,5 @@ public interface UserAuthorizationGrantMapper {
 	 * @return 权限列表
 	 */
 	List<String> selectPermissionsByUserId(@Param("userId") Long userId);
-
-	/**
-	 * 查询用户生效数据权限片段（按主体展开后）
-	 * @param userId 用户 ID
-	 * @return 原始数据权限片段
-	 */
-	List<DataScopeProjection> selectEffectiveDataScopesByUserId(@Param("userId") Long userId);
 
 }
