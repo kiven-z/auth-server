@@ -1,5 +1,7 @@
 package com.auth.module.security.contract.api.audit;
 
+import lombok.experimental.UtilityClass;
+
 import java.util.Objects;
 
 /**
@@ -10,15 +12,13 @@ import java.util.Objects;
  *
  * @author Bunny
  */
-public final class AuditOperationModuleKeys {
+@UtilityClass
+public class AuditOperationModuleKeys {
 
 	/**
 	 * 复合键分隔符（大模块:小模块）
 	 */
 	public static final char SEPARATOR = ':';
-
-	private AuditOperationModuleKeys() {
-	}
 
 	/**
 	 * 生成持久化用模块键，形如 {@code SYSTEM:SYS_DEPT}。
