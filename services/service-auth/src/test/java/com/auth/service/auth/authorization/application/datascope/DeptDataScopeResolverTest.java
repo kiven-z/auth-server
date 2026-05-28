@@ -105,4 +105,21 @@ class DeptDataScopeResolverTest {
 		assertEquals(List.of("10", "11", "12"), grant.getValues());
 	}
 
+	@Test
+	@DisplayName("scope_dept_ids 为空时 DEPT 范围 fail-close 为空列表")
+	void blankScopeDeptIds_shouldMaterializeEmptyValues() {
+		when(userScopeMapper.selectByUserId(10L)).thenReturn(null);
+
+		RoleScopeProjection roleScope = new RoleScopeProjection();
+		roleScope.setRoleCode("R1");
+		roleScope.setScopeType("DEPT");
+		roleScope.setScopeDeptIds(null);
+		when(roleScopeMapper.selectByRoleCodes(List.of("R1"))).thenReturn(List.of(roleScope));
+
+		ScopeGrant grant = resolver.resolveEffectiveGrant(10L, List.of("R1"));
+
+		assertEquals(ScopeGrantType.CUSTOM, grant.getScopeType());
+		assertEquals(List.of(), grant.getValues());
+	}
+
 }

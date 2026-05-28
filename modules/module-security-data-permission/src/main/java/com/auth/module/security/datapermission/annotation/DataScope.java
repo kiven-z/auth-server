@@ -1,5 +1,6 @@
 package com.auth.module.security.datapermission.annotation;
 
+import com.auth.module.security.contract.api.datascope.DataScopeResource;
 import com.auth.module.security.datapermission.handler.DataScopeHandler;
 import com.auth.module.security.datapermission.handler.DefaultDataScopeHandler;
 
@@ -38,7 +39,7 @@ public @interface DataScope {
 	/**
 	 * 要匹配的数据资源键
 	 */
-	String resourceCode() default "default";
+	String resourceCode() default DataScopeResource.DEFAULT;
 
 	/**
 	 * 数据维度类型，如 DEPT、POST

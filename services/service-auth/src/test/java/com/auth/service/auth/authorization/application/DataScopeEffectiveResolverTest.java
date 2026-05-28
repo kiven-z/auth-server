@@ -1,7 +1,7 @@
 package com.auth.service.auth.authorization.application;
 
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
-import com.auth.module.security.contract.api.datascope.DataScopeKeys;
+import com.auth.module.security.contract.api.datascope.DataScopeDimension;
 import com.auth.module.security.contract.api.granttable.ScopeGrantType;
 import com.auth.service.auth.authorization.application.datascope.DeptDataScopeResolver;
 import org.junit.jupiter.api.DisplayName;
@@ -43,7 +43,7 @@ class DataScopeEffectiveResolverTest {
 		Map<String, ScopeGrant> scopes = resolver.resolveByUserIdAndRoles(10L, List.of("R1"));
 
 		assertEquals(1, scopes.size());
-		assertEquals(selfGrant, scopes.get(DataScopeKeys.DEPT_DEFAULT));
+		assertEquals(selfGrant, scopes.get(DataScopeDimension.DEPT.defaultProfileKey()));
 	}
 
 }

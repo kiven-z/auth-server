@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
-import com.auth.module.security.contract.api.granttable.DataScopeKeyUtil;
+import com.auth.module.security.contract.api.datascope.DataScopeDimension;
 import com.auth.module.security.contract.api.granttable.ScopeGrantType;
 import com.auth.module.security.datapermission.annotation.DataScope;
 
@@ -45,7 +45,7 @@ class DefaultDataScopeHandlerTest {
 		// 构造默认资源键命中 SELF 的画像
 		AuthProfile user = AuthProfile.builder()
 			.userId(10L)
-			.dataScopes(Map.of(DataScopeKeyUtil.compose("DEPT", "default"),
+			.dataScopes(Map.of(DataScopeDimension.DEPT.defaultProfileKey(),
 					ScopeGrant.builder().scopeType(ScopeGrantType.SELF).values(List.of()).build()))
 			.build();
 		String cond = new DefaultDataScopeHandler().buildCondition(user, defaultAnn());
@@ -58,7 +58,7 @@ class DefaultDataScopeHandlerTest {
 		// 构造部门节点范围，验证生成维度 IN 条件
 		AuthProfile profile = AuthProfile.builder()
 			.userId(10L)
-			.dataScopes(Map.of(DataScopeKeyUtil.compose("DEPT", "default"),
+			.dataScopes(Map.of(DataScopeDimension.DEPT.defaultProfileKey(),
 					ScopeGrant.builder().scopeType(ScopeGrantType.NODE_ONLY).values(List.of("1", "2")).build()))
 			.build();
 		String cond = new DefaultDataScopeHandler().buildCondition(profile, defaultAnn());
@@ -71,7 +71,7 @@ class DefaultDataScopeHandlerTest {
 		// 构造受限但无值场景，应该拒绝放开查询
 		AuthProfile profile = AuthProfile.builder()
 			.userId(10L)
-			.dataScopes(Map.of(DataScopeKeyUtil.compose("DEPT", "default"),
+			.dataScopes(Map.of(DataScopeDimension.DEPT.defaultProfileKey(),
 					ScopeGrant.builder().scopeType(ScopeGrantType.NODE_ONLY).values(List.of()).build()))
 			.build();
 		String cond = new DefaultDataScopeHandler().buildCondition(profile, defaultAnn());
@@ -84,7 +84,7 @@ class DefaultDataScopeHandlerTest {
 		// 构造 ALL 场景，SQL 不应附加过滤
 		AuthProfile profile = AuthProfile.builder()
 			.userId(10L)
-			.dataScopes(Map.of(DataScopeKeyUtil.compose("DEPT", "default"),
+			.dataScopes(Map.of(DataScopeDimension.DEPT.defaultProfileKey(),
 					ScopeGrant.builder().scopeType(ScopeGrantType.ALL).values(List.of()).build()))
 			.build();
 		String cond = new DefaultDataScopeHandler().buildCondition(profile, defaultAnn());
@@ -97,7 +97,7 @@ class DefaultDataScopeHandlerTest {
 		// 超级管理员且 ignoreSuperAdmin=false 时应直接跳过过滤
 		AuthProfile profile = AuthProfile.builder()
 			.userId(1L)
-			.dataScopes(Map.of(DataScopeKeyUtil.compose("DEPT", "default"),
+			.dataScopes(Map.of(DataScopeDimension.DEPT.defaultProfileKey(),
 					ScopeGrant.builder().scopeType(ScopeGrantType.SELF).values(List.of()).build()))
 			.build();
 		String cond = new DefaultDataScopeHandler().buildCondition(profile, defaultAnn());
@@ -112,7 +112,7 @@ class DefaultDataScopeHandlerTest {
 		DataScope ann = method.getAnnotation(DataScope.class);
 		AuthProfile profile = AuthProfile.builder()
 			.userId(1L)
-			.dataScopes(Map.of(DataScopeKeyUtil.compose("DEPT", "default"),
+			.dataScopes(Map.of(DataScopeDimension.DEPT.defaultProfileKey(),
 					ScopeGrant.builder().scopeType(ScopeGrantType.SELF).values(List.of()).build()))
 			.build();
 		String cond = new DefaultDataScopeHandler().buildCondition(profile, ann);
@@ -125,7 +125,7 @@ class DefaultDataScopeHandlerTest {
 		// 注解声明 resourceCode=order 时应命中 DEPT::order
 		AuthProfile profile = AuthProfile.builder()
 			.userId(10L)
-			.dataScopes(Map.of(DataScopeKeyUtil.compose("DEPT", "order"),
+			.dataScopes(Map.of(DataScopeDimension.DEPT.profileKey("order"),
 					ScopeGrant.builder().scopeType(ScopeGrantType.CUSTOM).values(List.of("8", "9")).build()))
 			.build();
 		String cond = new DefaultDataScopeHandler().buildCondition(profile, orderAnn());
