@@ -1,6 +1,5 @@
 package com.auth.module.security.datapermission.annotation;
 
-import com.auth.module.security.contract.api.datascope.DataScopeProfileKeys;
 import com.auth.module.security.datapermission.handler.DataScopeHandler;
 import com.auth.module.security.datapermission.handler.DefaultDataScopeHandler;
 
@@ -35,11 +34,6 @@ public @interface DataScope {
 	 * SQL 处理器
 	 */
 	Class<? extends DataScopeHandler> handler() default DefaultDataScopeHandler.class;
-
-	/**
-	 * 要匹配的数据资源键
-	 */
-	String resourceCode() default "default";
 
 	/**
 	 * 是否忽略管理员

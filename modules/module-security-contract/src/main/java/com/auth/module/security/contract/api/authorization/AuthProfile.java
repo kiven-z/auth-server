@@ -8,7 +8,6 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 用户授权画像（契约层，缓存/JWT 下游可消费的稳定模型）
@@ -38,10 +37,9 @@ public class AuthProfile implements Serializable {
 	private final List<String> permissions = Collections.emptyList();
 
 	/**
-	 * 数据权限
+	 * 部门维数据范围
 	 */
-	@Builder.Default
-	private final Map<String, ScopeGrant> dataScopes = Collections.emptyMap();
+	private final ScopeGrant deptScope;
 
 	/**
 	 * 轻量策略

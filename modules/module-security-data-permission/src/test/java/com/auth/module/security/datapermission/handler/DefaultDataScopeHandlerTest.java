@@ -4,14 +4,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
-import com.auth.module.security.contract.api.datascope.DataScopeProfileKeys;
 import com.auth.module.security.contract.api.granttable.ScopeGrantType;
 import com.auth.module.security.datapermission.annotation.DataScope;
 
@@ -22,17 +20,8 @@ class DefaultDataScopeHandlerTest {
 		return method.getAnnotation(DataScope.class);
 	}
 
-	private static DataScope orderAnn() throws Exception {
-		Method method = DefaultDataScopeHandlerTest.class.getDeclaredMethod("annotatedOrder");
-		return method.getAnnotation(DataScope.class);
-	}
-
 	@DataScope
 	void annotatedDefault() {
-	}
-
-	@DataScope(resourceCode = "order")
-	void annotatedOrder() {
 	}
 
 	@DataScope(ignoreSuperAdmin = true)
@@ -44,8 +33,7 @@ class DefaultDataScopeHandlerTest {
 	void self_shouldUseUserColumn() throws Exception {
 		AuthProfile user = AuthProfile.builder()
 			.userId(10L)
-			.dataScopes(Map.of(DataScopeProfileKeys.DEFAULT,
-					ScopeGrant.builder().scopeType(ScopeGrantType.SELF).values(List.of()).build()))
+			.deptScope(ScopeGrant.builder().scopeType(ScopeGrantType.SELF).values(List.of()).build())
 			.build();
 		String cond = new DefaultDataScopeHandler().buildCondition(user, defaultAnn());
 		assertEquals("d.create_user = 10", cond);
@@ -56,8 +44,7 @@ class DefaultDataScopeHandlerTest {
 	void dept_shouldInDeptIds() throws Exception {
 		AuthProfile profile = AuthProfile.builder()
 			.userId(10L)
-			.dataScopes(Map.of(DataScopeProfileKeys.DEFAULT,
-					ScopeGrant.builder().scopeType(ScopeGrantType.NODE_ONLY).values(List.of(1L, 2L)).build()))
+			.deptScope(ScopeGrant.builder().scopeType(ScopeGrantType.NODE_ONLY).values(List.of(1L, 2L)).build())
 			.build();
 		String cond = new DefaultDataScopeHandler().buildCondition(profile, defaultAnn());
 		assertEquals("d.dept_id IN (1,2)", cond);
@@ -68,8 +55,7 @@ class DefaultDataScopeHandlerTest {
 	void emptyDeptIds_shouldFailClosed() throws Exception {
 		AuthProfile profile = AuthProfile.builder()
 			.userId(10L)
-			.dataScopes(Map.of(DataScopeProfileKeys.DEFAULT,
-					ScopeGrant.builder().scopeType(ScopeGrantType.NODE_ONLY).values(List.of()).build()))
+			.deptScope(ScopeGrant.builder().scopeType(ScopeGrantType.NODE_ONLY).values(List.of()).build())
 			.build();
 		String cond = new DefaultDataScopeHandler().buildCondition(profile, defaultAnn());
 		assertEquals("1 = 0", cond);
@@ -80,8 +66,7 @@ class DefaultDataScopeHandlerTest {
 	void all_shouldReturnNull() throws Exception {
 		AuthProfile profile = AuthProfile.builder()
 			.userId(10L)
-			.dataScopes(Map.of(DataScopeProfileKeys.DEFAULT,
-					ScopeGrant.builder().scopeType(ScopeGrantType.ALL).values(List.of()).build()))
+			.deptScope(ScopeGrant.builder().scopeType(ScopeGrantType.ALL).values(List.of()).build())
 			.build();
 		String cond = new DefaultDataScopeHandler().buildCondition(profile, defaultAnn());
 		assertNull(cond);
@@ -92,8 +77,7 @@ class DefaultDataScopeHandlerTest {
 	void superAdmin_shouldBypassWhenIgnoreFlagIsFalse() throws Exception {
 		AuthProfile profile = AuthProfile.builder()
 			.userId(1L)
-			.dataScopes(Map.of(DataScopeProfileKeys.DEFAULT,
-					ScopeGrant.builder().scopeType(ScopeGrantType.SELF).values(List.of()).build()))
+			.deptScope(ScopeGrant.builder().scopeType(ScopeGrantType.SELF).values(List.of()).build())
 			.build();
 		String cond = new DefaultDataScopeHandler().buildCondition(profile, defaultAnn());
 		assertNull(cond);
@@ -106,23 +90,18 @@ class DefaultDataScopeHandlerTest {
 		DataScope ann = method.getAnnotation(DataScope.class);
 		AuthProfile profile = AuthProfile.builder()
 			.userId(1L)
-			.dataScopes(Map.of(DataScopeProfileKeys.DEFAULT,
-					ScopeGrant.builder().scopeType(ScopeGrantType.SELF).values(List.of()).build()))
+			.deptScope(ScopeGrant.builder().scopeType(ScopeGrantType.SELF).values(List.of()).build())
 			.build();
 		String cond = new DefaultDataScopeHandler().buildCondition(profile, ann);
 		assertEquals("d.create_user = 1", cond);
 	}
 
 	@Test
-	@DisplayName("按 resourceCode 命中非默认范围键")
-	void orderResource_shouldUseSpecificScopeKey() throws Exception {
-		AuthProfile profile = AuthProfile.builder()
-			.userId(10L)
-			.dataScopes(Map.of(DataScopeProfileKeys.forResource("order"),
-					ScopeGrant.builder().scopeType(ScopeGrantType.CUSTOM).values(List.of(8L, 9L)).build()))
-			.build();
-		String cond = new DefaultDataScopeHandler().buildCondition(profile, orderAnn());
-		assertEquals("d.dept_id IN (8,9)", cond);
+	@DisplayName("deptScope 为空时默认 SELF")
+	void nullDeptScope_shouldDefaultToSelf() throws Exception {
+		AuthProfile profile = AuthProfile.builder().userId(10L).build();
+		String cond = new DefaultDataScopeHandler().buildCondition(profile, defaultAnn());
+		assertEquals("d.create_user = 10", cond);
 	}
 
 }

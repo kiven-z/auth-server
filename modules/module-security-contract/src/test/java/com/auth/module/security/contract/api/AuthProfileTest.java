@@ -20,10 +20,9 @@ class AuthProfileTest {
 		assertNotNull(p.getPermissions());
 		assertTrue(p.getPermissions().isEmpty());
 
-		assertNotNull(p.getDataScopes());
-		assertTrue(p.getDataScopes().isEmpty());
-
 		assertNotNull(p.getPolicies());
+
+		assertNull(p.getDeptScope());
 	}
 
 }

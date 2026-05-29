@@ -1,7 +1,6 @@
 package com.auth.service.auth.authorization.application;
 
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
-import com.auth.module.security.contract.api.datascope.DataScopeProfileKeys;
 import com.auth.module.security.contract.api.granttable.ScopeGrantType;
 import com.auth.service.auth.authorization.application.datascope.DeptDataScopeResolver;
 import com.auth.service.auth.authorization.domain.model.UserAccountSnapshot;
@@ -14,7 +13,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
@@ -37,7 +35,7 @@ class AuthProfileQueryServiceTest {
 
 	@Test
 	@DisplayName("构建画像时注入生效数据权限")
-	void buildByAccount_shouldContainResolvedDataScopes() {
+	void buildByAccount_shouldContainResolvedDeptScope() {
 		UserAccountSnapshot account = new UserAccountSnapshot(10L, "u10", 1L);
 		when(userAuthorizationGrantMapper.selectRolesByUserId(10L)).thenReturn(List.of("COMMON"));
 		when(userAuthorizationGrantMapper.selectPermissionsByUserId(10L)).thenReturn(List.of("system:user:list"));
@@ -46,25 +44,22 @@ class AuthProfileQueryServiceTest {
 
 		AuthProfileQueryService service = new AuthProfileQueryService(userAuthorizationGrantMapper, userReadPort,
 				deptDataScopeResolver);
-		Map<String, ScopeGrant> dataScopes = service.buildByAccount(account).getDataScopes();
 
-		assertEquals(1, dataScopes.size());
-		assertEquals(grant, dataScopes.get(DataScopeProfileKeys.DEFAULT));
+		assertEquals(grant, service.buildByAccount(account).getDeptScope());
 		verify(deptDataScopeResolver).resolveEffectiveGrant(10L, List.of("COMMON"));
 	}
 
 	@Test
 	@DisplayName("管理员写入 ALL 数据范围且不调用 resolver")
-	void admin_shouldReceiveAllDataScope() {
+	void admin_shouldReceiveAllDeptScope() {
 		UserAccountSnapshot account = new UserAccountSnapshot(2L, "admin", 1L);
 		when(userAuthorizationGrantMapper.selectRolesByUserId(2L)).thenReturn(List.of("ADMIN"));
 		when(userAuthorizationGrantMapper.selectPermissionsByUserId(2L)).thenReturn(List.of("*"));
 
 		AuthProfileQueryService service = new AuthProfileQueryService(userAuthorizationGrantMapper, userReadPort,
 				deptDataScopeResolver);
-		Map<String, ScopeGrant> dataScopes = service.buildByAccount(account).getDataScopes();
 
-		assertEquals(ScopeGrantType.ALL, dataScopes.get(DataScopeProfileKeys.DEFAULT).getScopeType());
+		assertEquals(ScopeGrantType.ALL, service.buildByAccount(account).getDeptScope().getScopeType());
 	}
 
 }

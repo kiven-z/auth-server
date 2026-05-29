@@ -3,7 +3,6 @@ package com.auth.module.security.datapermission.handler;
 import cn.hutool.core.collection.CollUtil;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
-import com.auth.module.security.contract.api.datascope.DataScopeProfileKeys;
 import com.auth.module.security.contract.api.granttable.ScopeGrantType;
 import com.auth.module.security.contract.constants.PermissionConstant;
 import com.auth.module.security.datapermission.annotation.DataScope;
@@ -53,7 +52,7 @@ public class DefaultDataScopeHandler implements DataScopeHandler {
 		if (safeUserColumn == null || safeDimensionColumn == null) {
 			return FAIL_CLOSE_CONDITION;
 		}
-		ScopeGrant grant = resolveGrant(profile, dataScope);
+		ScopeGrant grant = resolveGrant(profile);
 		ScopeGrantType scopeType = resolveScopeType(grant);
 		ScopeSqlStrategy strategy = strategyRegistry.getOrDefault(scopeType, strategyRegistry.get(ScopeGrantType.SELF));
 		ScopeSqlBuildContext context = ScopeSqlBuildContext.builder()
@@ -73,17 +72,12 @@ public class DefaultDataScopeHandler implements DataScopeHandler {
 		return grant.getScopeType();
 	}
 
-	private ScopeGrant resolveGrant(AuthProfile profile, DataScope dataScope) {
-		Map<String, ScopeGrant> dataScopes = profile.getDataScopes();
-		if (dataScopes == null || dataScopes.isEmpty()) {
+	private ScopeGrant resolveGrant(AuthProfile profile) {
+		ScopeGrant grant = profile.getDeptScope();
+		if (grant == null) {
 			return ScopeGrant.builder().scopeType(ScopeGrantType.SELF).build();
 		}
-		String resourceKey = DataScopeProfileKeys.forResource(dataScope.resourceCode());
-		ScopeGrant grant = dataScopes.get(resourceKey);
-		if (grant == null && !DataScopeProfileKeys.DEFAULT.equals(resourceKey)) {
-			grant = dataScopes.get(DataScopeProfileKeys.DEFAULT);
-		}
-		return grant != null ? grant : ScopeGrant.builder().scopeType(ScopeGrantType.SELF).build();
+		return grant;
 	}
 
 	private List<Long> normalizeValues(List<Long> values) {
