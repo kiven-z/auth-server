@@ -1,25 +1,22 @@
 package com.auth.service.auth.authorization.application.datascope;
 
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import org.springframework.stereotype.Service;
-
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.json.JSONUtil;
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
 import com.auth.module.security.contract.api.datascope.DataScopeStorageType;
 import com.auth.module.security.contract.api.granttable.ScopeGrantEffectiveMerger;
-import com.auth.module.security.contract.api.granttable.ScopeGrantType;
 import com.auth.service.auth.authorization.infrastructure.persistence.DeptClosureMapper;
 import com.auth.service.auth.authorization.infrastructure.persistence.RoleScopeMapper;
 import com.auth.service.auth.authorization.infrastructure.persistence.UserScopeMapper;
 import com.auth.service.auth.authorization.infrastructure.persistence.projection.RoleScopeProjection;
 import com.auth.service.auth.authorization.infrastructure.persistence.projection.UserScopeProjection;
-
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 部门维数据权限生效解析：user_scope 覆盖 role_scope，多角色宽松合并
@@ -44,53 +41,35 @@ public class DeptDataScopeResolver {
 	}
 
 	/**
-	 * 仅本人范围
-	 * @return 仅本人范围
+	 * 默认数据权限
+	 * @return 数据权限
 	 */
 	private static ScopeGrant selfGrant() {
-		return ScopeGrant.builder().scopeType(ScopeGrantType.SELF).build();
+		return ScopeGrant.builder().scopeType(DataScopeStorageType.SELF).build();
 	}
 
 	/**
-	 * 存储层 scope_type + 部门 ID 列表 → 运行时 {@link ScopeGrant}
-	 * @param storageType 存储枚举
-	 * @param deptIds 部门 ID 列表（DEPT_AND_CHILD 须已展开）
-	 * @return 运行时范围
-	 */
-	private static ScopeGrant toScopeGrant(DataScopeStorageType storageType, List<Long> deptIds) {
-		if (storageType == null) {
-			return selfGrant();
-		}
-		return switch (storageType) {
-			case ALL -> ScopeGrant.builder().scopeType(ScopeGrantType.ALL).build();
-			case SELF -> selfGrant();
-			case DEPT -> ScopeGrant.builder().scopeType(ScopeGrantType.NODE_ONLY).values(deptIds).build();
-			case DEPT_AND_CHILD -> ScopeGrant.builder().scopeType(ScopeGrantType.CUSTOM).values(deptIds).build();
-		};
-	}
-
-	/**
-	 * 解析用户生效数据范围（单条 ScopeGrant，不含管理员短路）
-	 * @param userId 用户 ID
-	 * @param roleCodes 用户角色码（来自 grant_table 展开）
-	 * @return 生效范围；无配置时显式 {@link ScopeGrantType#SELF}
+	 * 解析用户的数据权限
+	 * @param userId 用户ID
+	 * @param roleCodes 角色码列表
+	 * @return 数据权限
 	 */
 	public ScopeGrant resolveEffectiveGrant(Long userId, List<String> roleCodes) {
 		if (userId == null) {
 			return selfGrant();
 		}
 
+		// 有 user_scope 则不再读 role_scope
 		UserScopeProjection userScope = userScopeMapper.selectByUserId(userId);
 		if (userScope != null) {
 			ScopeGrant grant = materializeRow(userScope.getScopeType(), userScope.getScopeDeptIds());
-			log.debug("转换 user_scope 为 ScopeGrant: userId={}, scopeType={}", userId, grant.getScopeType());
+			log.debug("user_scope 生效: userId={}, scopeType={}", userId, grant.getScopeType());
 			return grant;
 		}
 
-		List<String> safeRoleCodes = roleCodes != null ? roleCodes : List.of();
-		List<RoleScopeProjection> roleScopes = roleScopeMapper.selectByRoleCodes(safeRoleCodes);
+		List<RoleScopeProjection> roleScopes = roleScopeMapper.selectByRoleCodes(roleCodes);
 		if (CollUtil.isEmpty(roleScopes)) {
-			log.debug("没有 role_scope 配置: userId={}, 默认 SELF", userId);
+			log.debug("无 role_scope: userId={}, 默认 SELF", userId);
 			return selfGrant();
 		}
 
@@ -99,18 +78,18 @@ public class DeptDataScopeResolver {
 			.toList();
 		ScopeGrant merged = ScopeGrantEffectiveMerger.mergeLoose(grants);
 		if (merged == null) {
-			log.debug("role_scope 合并返回 null: userId={}, 默认 SELF", userId);
+			log.debug("role_scope 合并为空: userId={}, 默认 SELF", userId);
 			return selfGrant();
 		}
-		log.debug("转换 role_scope 为 ScopeGrant: userId={}, scopeType={}", userId, merged.getScopeType());
+		log.debug("role_scope 合并生效: userId={}, scopeType={}", userId, merged.getScopeType());
 		return merged;
 	}
 
 	/**
-	 * 物化行范围
-	 * @param scopeTypeRaw 范围类型原始值
-	 * @param scopeDeptIdsRaw 范围部门 ID 原始值
-	 * @return 物化范围
+	 * 将数据库中的数据权限转换为ScopeGrant对象
+	 * @param scopeTypeRaw 数据权限类型
+	 * @param scopeDeptIdsRaw 数据权限部门ID列表
+	 * @return ScopeGrant对象
 	 */
 	private ScopeGrant materializeRow(String scopeTypeRaw, String scopeDeptIdsRaw) {
 		DataScopeStorageType storageType = DataScopeStorageType.parse(scopeTypeRaw);
@@ -118,17 +97,24 @@ public class DeptDataScopeResolver {
 			return selfGrant();
 		}
 		List<Long> anchorDeptIds = JSONUtil.toList(scopeDeptIdsRaw, Long.class);
-		List<Long> effectiveDeptIds = resolveDeptIdsForStorageType(storageType, anchorDeptIds);
-		return toScopeGrant(storageType, effectiveDeptIds);
+		List<Long> valuesForRedis = resolveValuesForRedis(storageType, anchorDeptIds);
+		return switch (storageType) {
+			case ALL -> ScopeGrant.builder().scopeType(DataScopeStorageType.ALL).build();
+			case SELF -> selfGrant();
+			case DEPT -> ScopeGrant.builder().scopeType(DataScopeStorageType.DEPT).values(valuesForRedis).build();
+			case DEPT_AND_CHILD ->
+				ScopeGrant.builder().scopeType(DataScopeStorageType.DEPT_AND_CHILD).values(valuesForRedis).build();
+			default -> selfGrant();
+		};
 	}
 
 	/**
-	 * 解析部门 ID 列表
-	 * @param storageType 存储类型
-	 * @param anchorDeptIds 锚点部门 ID 列表
-	 * @return 解析后的部门 ID 列表
+	 * DEPT 存锚点；DEPT_AND_CHILD 登录时经 dept_closure 展开后写入 values
+	 * @param storageType 数据权限类型
+	 * @param anchorDeptIds 锚点部门ID列表
+	 * @return 部门ID列表
 	 */
-	private List<Long> resolveDeptIdsForStorageType(DataScopeStorageType storageType, List<Long> anchorDeptIds) {
+	private List<Long> resolveValuesForRedis(DataScopeStorageType storageType, List<Long> anchorDeptIds) {
 		if (storageType != DataScopeStorageType.DEPT_AND_CHILD) {
 			return anchorDeptIds;
 		}
@@ -136,6 +122,7 @@ public class DeptDataScopeResolver {
 			return List.of();
 		}
 
+		// 按照部门展开
 		List<Long> expanded = deptClosureMapper.selectDescendantDeptIdsByAncestorIds(anchorDeptIds);
 		if (CollUtil.isEmpty(expanded)) {
 			return anchorDeptIds;

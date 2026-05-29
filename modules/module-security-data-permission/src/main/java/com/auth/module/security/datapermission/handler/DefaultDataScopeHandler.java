@@ -1,22 +1,18 @@
 package com.auth.module.security.datapermission.handler;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
+import com.auth.module.security.contract.api.datascope.DataScopeStorageType;
 import com.auth.module.security.contract.api.granttable.ScopeGrantType;
 import com.auth.module.security.contract.constants.PermissionConstant;
 import com.auth.module.security.datapermission.annotation.DataScope;
 import com.auth.module.security.datapermission.strategy.*;
 
-import java.util.EnumMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import cn.hutool.core.text.CharSequenceUtil;
 
 /**
  * 默认处理器用于部门/自身过滤
@@ -35,9 +31,6 @@ public class DefaultDataScopeHandler implements DataScopeHandler {
 		this.strategyRegistry = buildStrategyRegistry();
 	}
 
-	/**
-	 * 构建当前用户的 SQL 条件
-	 */
 	@Override
 	public String buildCondition(AuthProfile profile, DataScope dataScope) {
 		if (profile == null || profile.getUserId() == null || dataScope == null) {
@@ -53,29 +46,29 @@ public class DefaultDataScopeHandler implements DataScopeHandler {
 			return FAIL_CLOSE_CONDITION;
 		}
 		ScopeGrant grant = resolveGrant(profile);
-		ScopeGrantType scopeType = resolveScopeType(grant);
-		ScopeSqlStrategy strategy = strategyRegistry.getOrDefault(scopeType, strategyRegistry.get(ScopeGrantType.SELF));
+		ScopeGrantType executionType = switch (grant.getScopeType()) {
+			case ALL -> ScopeGrantType.ALL;
+			case SELF -> ScopeGrantType.SELF;
+			case DEPT -> ScopeGrantType.NODE_ONLY;
+			case DEPT_AND_CHILD -> ScopeGrantType.CUSTOM;
+			default -> ScopeGrantType.SELF;
+		};
+		ScopeSqlStrategy strategy = strategyRegistry.getOrDefault(executionType,
+				strategyRegistry.get(ScopeGrantType.SELF));
 		ScopeSqlBuildContext context = ScopeSqlBuildContext.builder()
 			.userId(profile.getUserId())
 			.alias(safeAlias)
 			.userColumn(safeUserColumn)
 			.dimensionColumn(safeDimensionColumn)
-			.values(normalizeValues(grant != null ? grant.getValues() : List.of()))
+			.values(normalizeValues(grant.getValues()))
 			.build();
 		return strategy.buildCondition(context);
 	}
 
-	private ScopeGrantType resolveScopeType(ScopeGrant grant) {
-		if (grant == null || grant.getScopeType() == null) {
-			return ScopeGrantType.SELF;
-		}
-		return grant.getScopeType();
-	}
-
 	private ScopeGrant resolveGrant(AuthProfile profile) {
 		ScopeGrant grant = profile.getDeptScope();
-		if (grant == null) {
-			return ScopeGrant.builder().scopeType(ScopeGrantType.SELF).build();
+		if (grant == null || grant.getScopeType() == null) {
+			return ScopeGrant.builder().scopeType(DataScopeStorageType.SELF).build();
 		}
 		return grant;
 	}

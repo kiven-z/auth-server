@@ -3,7 +3,7 @@ package com.auth.service.auth.authorization.application;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.module.security.contract.api.authorization.PolicyBundle;
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
-import com.auth.module.security.contract.api.granttable.ScopeGrantType;
+import com.auth.module.security.contract.api.datascope.DataScopeStorageType;
 import com.auth.module.security.contract.constants.PermissionConstant;
 import com.auth.service.auth.authorization.application.datascope.DeptDataScopeResolver;
 import com.auth.service.auth.authorization.domain.model.UserAccountSnapshot;
@@ -61,19 +61,14 @@ public class AuthProfileQueryService implements AuthProfileQueryPort {
 		}
 		long userId = account.id();
 
-		// 获取用户ID
 		List<String> roles = userAuthorizationGrantMapper.selectRolesByUserId(userId);
 		List<String> permissions = userAuthorizationGrantMapper.selectPermissionsByUserId(userId);
-		// 获取功能权限
 		boolean admin = PermissionConstant.isAdmin(userId, roles);
-		ScopeGrant deptScope;
+		ScopeGrant deptScope = deptDataScopeResolver.resolveEffectiveGrant(userId, roles);
 		if (admin) {
 			roles = PermissionConstant.ADMIN_ROLES;
 			permissions = PermissionConstant.ADMIN_WILDCARD_PERMISSIONS;
-			deptScope = ScopeGrant.builder().scopeType(ScopeGrantType.ALL).build();
-		}
-		else {
-			deptScope = deptDataScopeResolver.resolveEffectiveGrant(userId, roles);
+			deptScope = ScopeGrant.builder().scopeType(DataScopeStorageType.ALL).values(deptScope.getValues()).build();
 		}
 
 		return AuthProfile.builder()

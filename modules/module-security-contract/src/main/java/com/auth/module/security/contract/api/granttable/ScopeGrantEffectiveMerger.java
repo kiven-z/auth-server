@@ -2,6 +2,7 @@ package com.auth.module.security.contract.api.granttable;
 
 import cn.hutool.core.collection.CollUtil;
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
+import com.auth.module.security.contract.api.datascope.DataScopeStorageType;
 import lombok.experimental.UtilityClass;
 
 import java.util.*;
@@ -15,7 +16,7 @@ import java.util.*;
 public class ScopeGrantEffectiveMerger {
 
 	/**
-	 * 宽松合并：ALL 优先；再合并 NODE_ONLY/NODE_AND_DESC/CUSTOM 的取值列表为 CUSTOM；否则若存在 SELF 则返回 SELF。
+	 * 宽松合并：ALL 优先；存在部门 ID 时取并集，若含任一条 DEPT_AND_CHILD 则结果为 DEPT_AND_CHILD，否则为 DEPT；否则 SELF。
 	 * @param grants 授权片段集合
 	 * @return 合并结果；无可合并项时返回 {@code null}
 	 */
@@ -25,42 +26,54 @@ public class ScopeGrantEffectiveMerger {
 		}
 		boolean anyAll = false;
 		boolean anySelf = false;
+		boolean anyDeptAndChild = false;
 		boolean restrictiveWithoutIds = false;
 		LinkedHashSet<Long> unionIds = new LinkedHashSet<>();
 		for (ScopeGrant grant : grants) {
 			if (grant == null || grant.getScopeType() == null) {
 				continue;
 			}
-
-			// 授权范围
 			switch (grant.getScopeType()) {
 				case ALL -> anyAll = true;
-				// 只能看自己
 				case SELF -> anySelf = true;
-				case NODE_ONLY, NODE_AND_DESC, CUSTOM -> {
-					List<Long> vals = grant.getValues();
-					if (CollUtil.isEmpty(vals)) {
-						restrictiveWithoutIds = true;
-					}
-					unionIds.addAll(vals);
+				case DEPT -> restrictiveWithoutIds |= mergeDeptValues(grant, unionIds);
+				case DEPT_AND_CHILD -> {
+					anyDeptAndChild = true;
+					restrictiveWithoutIds |= mergeDeptValues(grant, unionIds);
 				}
 				default -> anySelf = true;
 			}
 		}
 
 		if (anyAll) {
-			return ScopeGrant.builder().scopeType(ScopeGrantType.ALL).build();
+			return ScopeGrant.builder().scopeType(DataScopeStorageType.ALL).build();
 		}
 		if (CollUtil.isNotEmpty(unionIds)) {
-			return ScopeGrant.builder().scopeType(ScopeGrantType.CUSTOM).values(List.copyOf(unionIds)).build();
+			DataScopeStorageType mergedType = anyDeptAndChild ? DataScopeStorageType.DEPT_AND_CHILD
+					: DataScopeStorageType.DEPT;
+			return ScopeGrant.builder().scopeType(mergedType).values(List.copyOf(unionIds)).build();
 		}
 		if (restrictiveWithoutIds) {
-			return ScopeGrant.builder().scopeType(ScopeGrantType.CUSTOM).values(List.of()).build();
+			DataScopeStorageType mergedType = anyDeptAndChild ? DataScopeStorageType.DEPT_AND_CHILD
+					: DataScopeStorageType.DEPT;
+			return ScopeGrant.builder().scopeType(mergedType).values(List.of()).build();
 		}
 		if (anySelf) {
-			return ScopeGrant.builder().scopeType(ScopeGrantType.SELF).build();
+			return ScopeGrant.builder().scopeType(DataScopeStorageType.SELF).build();
 		}
 		return null;
+	}
+
+	/**
+	 * @return 是否合并了非空部门 ID
+	 */
+	private static boolean mergeDeptValues(ScopeGrant grant, LinkedHashSet<Long> unionIds) {
+		List<Long> vals = grant.getValues();
+		if (CollUtil.isEmpty(vals)) {
+			return true;
+		}
+		unionIds.addAll(vals);
+		return false;
 	}
 
 	/**

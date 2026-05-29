@@ -1,7 +1,7 @@
 package com.auth.service.auth.authorization.application.datascope;
 
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
-import com.auth.module.security.contract.api.granttable.ScopeGrantType;
+import com.auth.module.security.contract.api.datascope.DataScopeStorageType;
 import com.auth.service.auth.authorization.infrastructure.persistence.DeptClosureMapper;
 import com.auth.service.auth.authorization.infrastructure.persistence.RoleScopeMapper;
 import com.auth.service.auth.authorization.infrastructure.persistence.UserScopeMapper;
@@ -49,13 +49,13 @@ class DeptDataScopeResolverTest {
 
 		ScopeGrant grant = resolver.resolveEffectiveGrant(10L, List.of("ADMIN"));
 
-		assertEquals(ScopeGrantType.SELF, grant.getScopeType());
+		assertEquals(DataScopeStorageType.SELF, grant.getScopeType());
 		verify(roleScopeMapper, never()).selectByRoleCodes(anyList());
 	}
 
 	@Test
-	@DisplayName("无 user_scope 时多角色 mergeLoose 取最宽")
-	void roleScopes_shouldMergeLoosely() {
+	@DisplayName("无 user_scope 时多角色 DEPT merge 仍为 DEPT")
+	void roleScopes_shouldMergeAsDept() {
 		when(userScopeMapper.selectByUserId(10L)).thenReturn(null);
 
 		RoleScopeProjection roleA = new RoleScopeProjection();
@@ -72,7 +72,7 @@ class DeptDataScopeResolverTest {
 
 		ScopeGrant grant = resolver.resolveEffectiveGrant(10L, List.of("R1", "R2"));
 
-		assertEquals(ScopeGrantType.CUSTOM, grant.getScopeType());
+		assertEquals(DataScopeStorageType.DEPT, grant.getScopeType());
 		assertEquals(List.of(1L, 2L, 3L), grant.getValues());
 	}
 
@@ -84,11 +84,11 @@ class DeptDataScopeResolverTest {
 
 		ScopeGrant grant = resolver.resolveEffectiveGrant(10L, List.of("R1"));
 
-		assertEquals(ScopeGrantType.SELF, grant.getScopeType());
+		assertEquals(DataScopeStorageType.SELF, grant.getScopeType());
 	}
 
 	@Test
-	@DisplayName("DEPT_AND_CHILD 展开闭包后写入 CUSTOM")
+	@DisplayName("DEPT_AND_CHILD 展开闭包后仍为 DEPT_AND_CHILD")
 	void deptAndChild_shouldExpandClosure() {
 		when(userScopeMapper.selectByUserId(10L)).thenReturn(null);
 
@@ -101,12 +101,12 @@ class DeptDataScopeResolverTest {
 
 		ScopeGrant grant = resolver.resolveEffectiveGrant(10L, List.of("R1"));
 
-		assertEquals(ScopeGrantType.CUSTOM, grant.getScopeType());
+		assertEquals(DataScopeStorageType.DEPT_AND_CHILD, grant.getScopeType());
 		assertEquals(List.of(10L, 11L, 12L), grant.getValues());
 	}
 
 	@Test
-	@DisplayName("scope_dept_ids 为空时 DEPT 范围 fail-close 为空列表")
+	@DisplayName("scope_dept_ids 为空时 DEPT fail-close 为空列表")
 	void blankScopeDeptIds_shouldMaterializeEmptyValues() {
 		when(userScopeMapper.selectByUserId(10L)).thenReturn(null);
 
@@ -118,7 +118,7 @@ class DeptDataScopeResolverTest {
 
 		ScopeGrant grant = resolver.resolveEffectiveGrant(10L, List.of("R1"));
 
-		assertEquals(ScopeGrantType.CUSTOM, grant.getScopeType());
+		assertEquals(DataScopeStorageType.DEPT, grant.getScopeType());
 		assertEquals(List.of(), grant.getValues());
 	}
 

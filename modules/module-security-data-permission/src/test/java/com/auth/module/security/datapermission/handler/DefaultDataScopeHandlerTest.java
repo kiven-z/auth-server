@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
-import com.auth.module.security.contract.api.granttable.ScopeGrantType;
+import com.auth.module.security.contract.api.datascope.DataScopeStorageType;
 import com.auth.module.security.datapermission.annotation.DataScope;
 
 class DefaultDataScopeHandlerTest {
@@ -33,21 +33,35 @@ class DefaultDataScopeHandlerTest {
 	void self_shouldUseUserColumn() throws Exception {
 		AuthProfile user = AuthProfile.builder()
 			.userId(10L)
-			.deptScope(ScopeGrant.builder().scopeType(ScopeGrantType.SELF).values(List.of()).build())
+			.deptScope(ScopeGrant.builder().scopeType(DataScopeStorageType.SELF).values(List.of()).build())
 			.build();
 		String cond = new DefaultDataScopeHandler().buildCondition(user, defaultAnn());
 		assertEquals("d.create_user = 10", cond);
 	}
 
 	@Test
-	@DisplayName("NODE 范围使用 dimensionColumn 生成 IN 条件")
+	@DisplayName("DEPT 范围使用 dimensionColumn 生成 IN 条件")
 	void dept_shouldInDeptIds() throws Exception {
 		AuthProfile profile = AuthProfile.builder()
 			.userId(10L)
-			.deptScope(ScopeGrant.builder().scopeType(ScopeGrantType.NODE_ONLY).values(List.of(1L, 2L)).build())
+			.deptScope(ScopeGrant.builder().scopeType(DataScopeStorageType.DEPT).values(List.of(1L, 2L)).build())
 			.build();
 		String cond = new DefaultDataScopeHandler().buildCondition(profile, defaultAnn());
 		assertEquals("d.dept_id IN (1,2)", cond);
+	}
+
+	@Test
+	@DisplayName("DEPT_AND_CHILD 范围使用已展开 ID 列表")
+	void deptAndChild_shouldInDeptIds() throws Exception {
+		AuthProfile profile = AuthProfile.builder()
+			.userId(10L)
+			.deptScope(ScopeGrant.builder()
+				.scopeType(DataScopeStorageType.DEPT_AND_CHILD)
+				.values(List.of(1L, 2L, 3L))
+				.build())
+			.build();
+		String cond = new DefaultDataScopeHandler().buildCondition(profile, defaultAnn());
+		assertEquals("d.dept_id IN (1,2,3)", cond);
 	}
 
 	@Test
@@ -55,7 +69,7 @@ class DefaultDataScopeHandlerTest {
 	void emptyDeptIds_shouldFailClosed() throws Exception {
 		AuthProfile profile = AuthProfile.builder()
 			.userId(10L)
-			.deptScope(ScopeGrant.builder().scopeType(ScopeGrantType.NODE_ONLY).values(List.of()).build())
+			.deptScope(ScopeGrant.builder().scopeType(DataScopeStorageType.DEPT).values(List.of()).build())
 			.build();
 		String cond = new DefaultDataScopeHandler().buildCondition(profile, defaultAnn());
 		assertEquals("1 = 0", cond);
@@ -66,7 +80,7 @@ class DefaultDataScopeHandlerTest {
 	void all_shouldReturnNull() throws Exception {
 		AuthProfile profile = AuthProfile.builder()
 			.userId(10L)
-			.deptScope(ScopeGrant.builder().scopeType(ScopeGrantType.ALL).values(List.of()).build())
+			.deptScope(ScopeGrant.builder().scopeType(DataScopeStorageType.ALL).values(List.of()).build())
 			.build();
 		String cond = new DefaultDataScopeHandler().buildCondition(profile, defaultAnn());
 		assertNull(cond);
@@ -77,7 +91,7 @@ class DefaultDataScopeHandlerTest {
 	void superAdmin_shouldBypassWhenIgnoreFlagIsFalse() throws Exception {
 		AuthProfile profile = AuthProfile.builder()
 			.userId(1L)
-			.deptScope(ScopeGrant.builder().scopeType(ScopeGrantType.SELF).values(List.of()).build())
+			.deptScope(ScopeGrant.builder().scopeType(DataScopeStorageType.SELF).values(List.of()).build())
 			.build();
 		String cond = new DefaultDataScopeHandler().buildCondition(profile, defaultAnn());
 		assertNull(cond);
@@ -90,7 +104,7 @@ class DefaultDataScopeHandlerTest {
 		DataScope ann = method.getAnnotation(DataScope.class);
 		AuthProfile profile = AuthProfile.builder()
 			.userId(1L)
-			.deptScope(ScopeGrant.builder().scopeType(ScopeGrantType.SELF).values(List.of()).build())
+			.deptScope(ScopeGrant.builder().scopeType(DataScopeStorageType.SELF).values(List.of()).build())
 			.build();
 		String cond = new DefaultDataScopeHandler().buildCondition(profile, ann);
 		assertEquals("d.create_user = 1", cond);

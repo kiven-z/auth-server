@@ -3,7 +3,7 @@ package com.auth.module.security.contract.api.datascope;
 import java.util.Locale;
 
 /**
- * 数据范围存储层枚举（role_scope / user_scope.scope_type）
+ * 数据范围存储层枚举（role_scope / user_scope.scope_type，与 Redis deptScope.scopeType 一致）
  *
  * @author Bunny
  */
@@ -30,9 +30,9 @@ public enum DataScopeStorageType {
 	DEPT_AND_CHILD;
 
 	/**
-	 * 解析库表 scope_type 字符串
+	 * 解析库表 scope_type 或 JSON 字符串
 	 * @param raw 原始值
-	 * @return 枚举
+	 * @return 枚举；无法识别时为 {@code null}
 	 */
 	public static DataScopeStorageType parse(String raw) {
 		try {

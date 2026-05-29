@@ -1,7 +1,7 @@
 package com.auth.service.auth.authorization.application;
 
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
-import com.auth.module.security.contract.api.granttable.ScopeGrantType;
+import com.auth.module.security.contract.api.datascope.DataScopeStorageType;
 import com.auth.service.auth.authorization.application.datascope.DeptDataScopeResolver;
 import com.auth.service.auth.authorization.domain.model.UserAccountSnapshot;
 import com.auth.service.auth.authorization.domain.port.UserReadPort;
@@ -16,6 +16,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 /**
@@ -39,7 +40,7 @@ class AuthProfileQueryServiceTest {
 		UserAccountSnapshot account = new UserAccountSnapshot(10L, "u10", 1L);
 		when(userAuthorizationGrantMapper.selectRolesByUserId(10L)).thenReturn(List.of("COMMON"));
 		when(userAuthorizationGrantMapper.selectPermissionsByUserId(10L)).thenReturn(List.of("system:user:list"));
-		ScopeGrant grant = ScopeGrant.builder().scopeType(ScopeGrantType.SELF).build();
+		ScopeGrant grant = ScopeGrant.builder().scopeType(DataScopeStorageType.DEPT).values(List.of(2L)).build();
 		when(deptDataScopeResolver.resolveEffectiveGrant(10L, List.of("COMMON"))).thenReturn(grant);
 
 		AuthProfileQueryService service = new AuthProfileQueryService(userAuthorizationGrantMapper, userReadPort,
@@ -59,7 +60,8 @@ class AuthProfileQueryServiceTest {
 		AuthProfileQueryService service = new AuthProfileQueryService(userAuthorizationGrantMapper, userReadPort,
 				deptDataScopeResolver);
 
-		assertEquals(ScopeGrantType.ALL, service.buildByAccount(account).getDeptScope().getScopeType());
+		assertEquals(DataScopeStorageType.ALL, service.buildByAccount(account).getDeptScope().getScopeType());
+		verifyNoInteractions(deptDataScopeResolver);
 	}
 
 }

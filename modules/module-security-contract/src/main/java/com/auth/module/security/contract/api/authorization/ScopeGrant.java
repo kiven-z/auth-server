@@ -1,6 +1,6 @@
 package com.auth.module.security.contract.api.authorization;
 
-import com.auth.module.security.contract.api.granttable.ScopeGrantType;
+import com.auth.module.security.contract.api.datascope.DataScopeStorageType;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,7 +11,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * 运行时数据范围
+ * 部门维数据范围（与 role_scope / user_scope、Redis AuthProfile.deptScope 一致）
  *
  * @author Bunny
  */
@@ -26,10 +26,10 @@ public class ScopeGrant implements Serializable {
 	/**
 	 * 授权范围类型
 	 */
-	private final ScopeGrantType scopeType;
+	private final DataScopeStorageType scopeType;
 
 	/**
-	 * 范围取值列表（JSON 数组解析结果），如部门 ID / 岗位 ID 等
+	 * 范围取值列表
 	 */
 	@Builder.Default
 	private final List<Long> values = Collections.emptyList();
