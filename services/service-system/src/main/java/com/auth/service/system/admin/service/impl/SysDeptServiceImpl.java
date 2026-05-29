@@ -2,11 +2,14 @@ package com.auth.service.system.admin.service.impl;
 
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.convert.SysDeptConverter;
+import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.SysDeptMapper;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.query.SysDeptQuery;
+import com.auth.service.system.admin.model.vo.dept.SysDeptDetailVO;
 import com.auth.service.system.admin.model.vo.dept.SysDeptListVO;
 import com.auth.service.system.admin.service.SysDeptService;
+import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -51,6 +54,20 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 		IPage<SysDeptListVO> result = entityPage.convert(SysDeptConverter.INSTANCE::toListVo);
 		auditUserDisplayService.enrichAuditUsernames(result);
 		return PageResponse.of(result);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public SysDeptDetailVO getDetail(Long id) {
+		SysDeptEntity entity = baseMapper.selectById(id);
+		if (entity == null || Integer.valueOf(1).equals(entity.getIsDeleted())) {
+			throw new SystemBusinessException(SystemAdminResultCode.DEPT_NOT_FOUND, id);
+		}
+		SysDeptDetailVO detail = SysDeptConverter.INSTANCE.toDetailVo(entity);
+		auditUserDisplayService.enrichAuditUsernames(List.of(detail));
+		return detail;
 	}
 
 }

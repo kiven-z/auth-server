@@ -58,7 +58,42 @@ public enum SystemAdminResultCode implements SystemResultCode {
 	/**
 	 * 存在无效或未启用的权限码
 	 */
-	ROLE_PERMISSION_INVALID(400, 279, "ROLE_PERMISSION_INVALID", "system.role.permission_invalid"),;
+	ROLE_PERMISSION_INVALID(400, 279, "ROLE_PERMISSION_INVALID", "system.role.permission_invalid"),
+
+	/**
+	 * 部门不存在或已删除
+	 */
+	DEPT_NOT_FOUND(404, 281, "DEPT_NOT_FOUND", "system.dept.not_found"),
+
+	/**
+	 * 部门编码已存在
+	 */
+	DEPT_CODE_DUPLICATE(409, 282, "DEPT_CODE_DUPLICATE", "system.dept.code_duplicate"),
+
+	/**
+	 * 父部门不存在或不可用
+	 */
+	DEPT_PARENT_NOT_FOUND(404, 283, "DEPT_PARENT_NOT_FOUND", "system.dept.parent_not_found"),
+
+	/**
+	 * 不能将部门移动到自身下
+	 */
+	DEPT_MOVE_TO_SELF(400, 284, "DEPT_MOVE_TO_SELF", "system.dept.move_to_self"),
+
+	/**
+	 * 不能将部门移动到其子部门下
+	 */
+	DEPT_MOVE_TO_DESCENDANT(400, 285, "DEPT_MOVE_TO_DESCENDANT", "system.dept.move_to_descendant"),
+
+	/**
+	 * 存在未删除的子部门
+	 */
+	DEPT_HAS_CHILDREN(409, 286, "DEPT_HAS_CHILDREN", "system.dept.has_children"),
+
+	/**
+	 * 部门或子树仍被用户/授权/岗位引用
+	 */
+	DEPT_IN_USE(409, 287, "DEPT_IN_USE", "system.dept.in_use"),;
 
 	private final int httpStatus;
 

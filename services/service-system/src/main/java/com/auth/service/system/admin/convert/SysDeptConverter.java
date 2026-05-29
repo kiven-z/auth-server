@@ -1,6 +1,9 @@
 package com.auth.service.system.admin.convert;
 
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
+import com.auth.service.system.admin.model.form.dept.SysDeptCreateForm;
+import com.auth.service.system.admin.model.form.dept.SysDeptUpdateForm;
+import com.auth.service.system.admin.model.vo.dept.SysDeptDetailVO;
 import com.auth.service.system.admin.model.vo.dept.SysDeptListVO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -33,5 +36,43 @@ public interface SysDeptConverter {
 	 * @return 列表 VO
 	 */
 	List<SysDeptListVO> toListVoList(List<SysDeptEntity> entities);
+
+	/**
+	 * 新增表单 → 实体
+	 * @param form 新增表单
+	 * @return 待持久化实体
+	 */
+	@Mapping(target = "id", ignore = true)
+	@Mapping(target = "createTime", ignore = true)
+	@Mapping(target = "updateTime", ignore = true)
+	@Mapping(target = "createUser", ignore = true)
+	@Mapping(target = "updateUser", ignore = true)
+	@Mapping(target = "version", ignore = true)
+	@Mapping(target = "isDeleted", ignore = true)
+	SysDeptEntity toEntity(SysDeptCreateForm form);
+
+	/**
+	 * 更新表单合并到已有实体（不修改 parentId）。
+	 * @param form 更新表单
+	 * @param entity 已有实体
+	 */
+	@Mapping(target = "id", ignore = true)
+	@Mapping(target = "parentId", ignore = true)
+	@Mapping(target = "createTime", ignore = true)
+	@Mapping(target = "updateTime", ignore = true)
+	@Mapping(target = "createUser", ignore = true)
+	@Mapping(target = "updateUser", ignore = true)
+	@Mapping(target = "version", ignore = true)
+	@Mapping(target = "isDeleted", ignore = true)
+	void applyUpdateForm(SysDeptUpdateForm form, @org.mapstruct.MappingTarget SysDeptEntity entity);
+
+	/**
+	 * 实体 → 详情 VO
+	 * @param entity 部门实体
+	 * @return 详情 VO
+	 */
+	@Mapping(target = "createUsername", ignore = true)
+	@Mapping(target = "updateUsername", ignore = true)
+	SysDeptDetailVO toDetailVo(SysDeptEntity entity);
 
 }

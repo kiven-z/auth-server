@@ -19,13 +19,20 @@
         <where>
             d.is_deleted = 0
             <if test="query.deptName != null and query.deptName != ''">
-                AND d.dept_name LIKE CONCAT('%', #{query.deptName}, '%')
+                AND d.dept_name LIKE CONCAT('%',
+                #{query.deptName},
+                '%'
+                )
             </if>
             <if test="query.deptCode != null and query.deptCode != ''">
-                AND d.dept_code LIKE CONCAT('%', #{query.deptCode}, '%')
+                AND d.dept_code LIKE CONCAT('%',
+                #{query.deptCode},
+                '%'
+                )
             </if>
             <if test="query.status != null">
-                AND d.status = #{query.status}
+                AND d.status =
+                #{query.status}
             </if>
         </where>
         ORDER BY d.order_num, d.id

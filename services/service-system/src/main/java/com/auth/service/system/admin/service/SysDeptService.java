@@ -3,6 +3,7 @@ package com.auth.service.system.admin.service;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.query.SysDeptQuery;
+import com.auth.service.system.admin.model.vo.dept.SysDeptDetailVO;
 import com.auth.service.system.admin.model.vo.dept.SysDeptListVO;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -30,5 +31,12 @@ public interface SysDeptService extends IService<SysDeptEntity> {
 	 * @return 分页结果
 	 */
 	PageResponse<SysDeptListVO> pageFlat(Page<SysDeptEntity> pageParams, SysDeptQuery query);
+
+	/**
+	 * 部门详情。
+	 * @param id 部门主键
+	 * @return 详情 VO
+	 */
+	SysDeptDetailVO getDetail(Long id);
 
 }
