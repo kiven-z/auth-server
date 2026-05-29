@@ -32,6 +32,6 @@ public class ScopeGrant implements Serializable {
 	 * 范围取值列表（JSON 数组解析结果），如部门 ID / 岗位 ID 等
 	 */
 	@Builder.Default
-	private final List<String> values = Collections.emptyList();
+	private final List<Long> values = Collections.emptyList();
 
 }

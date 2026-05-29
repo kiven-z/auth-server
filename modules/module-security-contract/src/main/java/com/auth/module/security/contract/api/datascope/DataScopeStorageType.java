@@ -1,7 +1,5 @@
 package com.auth.module.security.contract.api.datascope;
 
-import cn.hutool.core.text.CharSequenceUtil;
-
 import java.util.Locale;
 
 /**
@@ -37,12 +35,8 @@ public enum DataScopeStorageType {
 	 * @return 枚举
 	 */
 	public static DataScopeStorageType parse(String raw) {
-		if (CharSequenceUtil.isBlank(raw)) {
-			return null;
-		}
 		try {
-			String upperCase = raw.trim().toUpperCase(Locale.ROOT);
-			return valueOf(upperCase);
+			return valueOf(raw.strip().toUpperCase(Locale.ROOT));
 		}
 		catch (IllegalArgumentException ex) {
 			return null;

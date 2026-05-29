@@ -1,9 +1,9 @@
 package com.auth.service.auth.authorization.application;
 
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
-import com.auth.module.security.contract.api.datascope.DataScopeDimension;
-import com.auth.module.security.contract.api.datascope.DataScopeResource;
+import com.auth.module.security.contract.api.datascope.DataScopeProfileKeys;
 import com.auth.module.security.contract.api.granttable.ScopeGrantType;
+import com.auth.service.auth.authorization.application.datascope.DeptDataScopeResolver;
 import com.auth.service.auth.authorization.domain.model.UserAccountSnapshot;
 import com.auth.service.auth.authorization.domain.port.UserReadPort;
 import com.auth.service.auth.authorization.infrastructure.persistence.UserAuthorizationGrantMapper;
@@ -33,7 +33,7 @@ class AuthProfileQueryServiceTest {
 	private UserReadPort userReadPort;
 
 	@Mock
-	private DataScopeEffectiveResolver dataScopeEffectiveResolver;
+	private DeptDataScopeResolver deptDataScopeResolver;
 
 	@Test
 	@DisplayName("构建画像时注入生效数据权限")
@@ -42,16 +42,15 @@ class AuthProfileQueryServiceTest {
 		when(userAuthorizationGrantMapper.selectRolesByUserId(10L)).thenReturn(List.of("COMMON"));
 		when(userAuthorizationGrantMapper.selectPermissionsByUserId(10L)).thenReturn(List.of("system:user:list"));
 		ScopeGrant grant = ScopeGrant.builder().scopeType(ScopeGrantType.SELF).build();
-		when(dataScopeEffectiveResolver.resolveByUserIdAndRoles(10L, List.of("COMMON")))
-			.thenReturn(Map.of(DataScopeDimension.DEPT.defaultProfileKey(), grant));
+		when(deptDataScopeResolver.resolveEffectiveGrant(10L, List.of("COMMON"))).thenReturn(grant);
 
 		AuthProfileQueryService service = new AuthProfileQueryService(userAuthorizationGrantMapper, userReadPort,
-				dataScopeEffectiveResolver);
+				deptDataScopeResolver);
 		Map<String, ScopeGrant> dataScopes = service.buildByAccount(account).getDataScopes();
 
 		assertEquals(1, dataScopes.size());
-		assertEquals(grant, dataScopes.get(DataScopeDimension.DEPT.defaultProfileKey()));
-		verify(dataScopeEffectiveResolver).resolveByUserIdAndRoles(10L, List.of("COMMON"));
+		assertEquals(grant, dataScopes.get(DataScopeProfileKeys.DEFAULT));
+		verify(deptDataScopeResolver).resolveEffectiveGrant(10L, List.of("COMMON"));
 	}
 
 	@Test
@@ -62,10 +61,10 @@ class AuthProfileQueryServiceTest {
 		when(userAuthorizationGrantMapper.selectPermissionsByUserId(2L)).thenReturn(List.of("*"));
 
 		AuthProfileQueryService service = new AuthProfileQueryService(userAuthorizationGrantMapper, userReadPort,
-				dataScopeEffectiveResolver);
+				deptDataScopeResolver);
 		Map<String, ScopeGrant> dataScopes = service.buildByAccount(account).getDataScopes();
 
-		assertEquals(ScopeGrantType.ALL, dataScopes.get(DataScopeDimension.DEPT.defaultProfileKey()).getScopeType());
+		assertEquals(ScopeGrantType.ALL, dataScopes.get(DataScopeProfileKeys.DEFAULT).getScopeType());
 	}
 
 }

@@ -35,8 +35,8 @@ public class ScopeSqlBuildContext {
 	private final String dimensionColumn;
 
 	/**
-	 * 范围值列表
+	 * 范围值列表（维度 ID，如部门 ID）
 	 */
-	private final List<String> values;
+	private final List<Long> values;
 
 }

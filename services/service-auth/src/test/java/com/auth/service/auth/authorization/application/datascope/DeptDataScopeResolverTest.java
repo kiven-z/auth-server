@@ -73,7 +73,7 @@ class DeptDataScopeResolverTest {
 		ScopeGrant grant = resolver.resolveEffectiveGrant(10L, List.of("R1", "R2"));
 
 		assertEquals(ScopeGrantType.CUSTOM, grant.getScopeType());
-		assertEquals(List.of("1", "2", "3"), grant.getValues());
+		assertEquals(List.of(1L, 2L, 3L), grant.getValues());
 	}
 
 	@Test
@@ -102,7 +102,7 @@ class DeptDataScopeResolverTest {
 		ScopeGrant grant = resolver.resolveEffectiveGrant(10L, List.of("R1"));
 
 		assertEquals(ScopeGrantType.CUSTOM, grant.getScopeType());
-		assertEquals(List.of("10", "11", "12"), grant.getValues());
+		assertEquals(List.of(10L, 11L, 12L), grant.getValues());
 	}
 
 	@Test

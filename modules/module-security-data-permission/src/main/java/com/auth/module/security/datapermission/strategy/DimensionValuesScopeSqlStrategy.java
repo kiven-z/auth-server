@@ -5,6 +5,7 @@ import com.auth.module.security.contract.api.granttable.ScopeGrantType;
 
 import java.util.EnumSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 维度值集合范围策略
@@ -23,7 +24,7 @@ public class DimensionValuesScopeSqlStrategy implements ScopeSqlStrategy {
 		if (CollUtil.isEmpty(context.getValues())) {
 			return "1 = 0";
 		}
-		String ids = String.join(",", context.getValues());
+		String ids = context.getValues().stream().map(String::valueOf).collect(Collectors.joining(","));
 		return context.getDimensionColumn() + " IN (" + ids + ")";
 	}
 

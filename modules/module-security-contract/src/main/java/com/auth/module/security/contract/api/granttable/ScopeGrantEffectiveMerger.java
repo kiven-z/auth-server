@@ -26,7 +26,7 @@ public class ScopeGrantEffectiveMerger {
 		boolean anyAll = false;
 		boolean anySelf = false;
 		boolean restrictiveWithoutIds = false;
-		LinkedHashSet<String> unionIds = new LinkedHashSet<>();
+		LinkedHashSet<Long> unionIds = new LinkedHashSet<>();
 		for (ScopeGrant grant : grants) {
 			if (grant == null || grant.getScopeType() == null) {
 				continue;
@@ -38,7 +38,7 @@ public class ScopeGrantEffectiveMerger {
 				// 只能看自己
 				case SELF -> anySelf = true;
 				case NODE_ONLY, NODE_AND_DESC, CUSTOM -> {
-					List<String> vals = Optional.ofNullable(grant.getValues()).orElse(List.of());
+					List<Long> vals = grant.getValues();
 					if (CollUtil.isEmpty(vals)) {
 						restrictiveWithoutIds = true;
 					}
