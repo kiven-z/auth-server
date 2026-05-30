@@ -39,23 +39,32 @@ public class SysRolePermissionServiceImpl implements SysRolePermissionService {
 
 	private final RoleAuthorizationInvalidationTrigger roleInvalidationTrigger;
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public List<String> listPermissionCodes(String roleCode) {
 		String normalized = requireExistingRoleCode(roleCode);
 		return sysRolePermissionMapper.selectPermissionCodesByRoleCode(normalized);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void assignPermissions(String roleCode, List<String> permissionCodes) {
 		String normalized = requireExistingRoleCode(roleCode);
 		List<String> codes = permissionCodes.stream().distinct().toList();
-		validatePermissionCodesExist(codes);
 
-		Long operatorId = SecurityUserUtils.getUserId();
-		if (operatorId == null) {
-			operatorId = 0L;
+		// 验证权限是否存在
+		Long validCount = sysPermissionMapper.selectCount(Wrappers.<SysPermissionEntity>lambdaQuery()
+			.in(SysPermissionEntity::getPermissionCode, permissionCodes)
+			.eq(SysPermissionEntity::getStatus, true));
+		if (validCount == null || validCount != permissionCodes.size()) {
+			throw new SystemBusinessException(SystemAdminResultCode.ROLE_PERMISSION_INVALID);
 		}
 
+		Long operatorId = SecurityUserUtils.getUserId();
 		sysRolePermissionMapper.deleteByRoleCode(normalized);
 		if (CollUtil.isNotEmpty(codes)) {
 			sysRolePermissionMapper.batchInsertRolePermissions(normalized, codes, operatorId, operatorId);
@@ -65,6 +74,12 @@ public class SysRolePermissionServiceImpl implements SysRolePermissionService {
 		log.info("Role permissions replaced: roleCode={}, count={}", normalized, codes.size());
 	}
 
+	/**
+	 * 确保角色代码存在
+	 * @param roleCode 角色代码
+	 * @return 角色代码
+	 * @throws SystemBusinessException 如果角色代码不存在
+	 */
 	private String requireExistingRoleCode(String roleCode) {
 		if (CharSequenceUtil.isBlank(roleCode)) {
 			throw new SystemBusinessException(SystemAdminResultCode.ROLE_NOT_FOUND, roleCode);
@@ -76,19 +91,6 @@ public class SysRolePermissionServiceImpl implements SysRolePermissionService {
 			throw new SystemBusinessException(SystemAdminResultCode.ROLE_NOT_FOUND, roleCode);
 		}
 		return roleCode;
-	}
-
-	private void validatePermissionCodesExist(List<String> permissionCodes) {
-		if (CollUtil.isEmpty(permissionCodes)) {
-			return;
-		}
-
-		Long validCount = sysPermissionMapper.selectCount(Wrappers.<SysPermissionEntity>lambdaQuery()
-			.in(SysPermissionEntity::getPermissionCode, permissionCodes)
-			.eq(SysPermissionEntity::getStatus, true));
-		if (validCount == null || validCount != permissionCodes.size()) {
-			throw new SystemBusinessException(SystemAdminResultCode.ROLE_PERMISSION_INVALID);
-		}
 	}
 
 }

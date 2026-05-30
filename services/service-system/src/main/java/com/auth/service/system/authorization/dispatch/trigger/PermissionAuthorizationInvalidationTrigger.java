@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * 权限码维度授权失效触发：写 Outbox 并在提交后同步投递 auth。
+ * 权限码维度授权失效触发：写 Outbox 并在提交后同步投递 auth
  *
  * @author Bunny
  */
@@ -26,7 +26,7 @@ public class PermissionAuthorizationInvalidationTrigger {
 	private final AuthorizationInvalidationCoordinator invalidationCoordinator;
 
 	/**
-	 * 按权限码提交失效事件（去重、忽略空白）。
+	 * 按权限码提交失效事件（去重、忽略空白）
 	 * @param permissionCodes 权限码列表
 	 * @param operation 操作标识，用于 eventId 与 sourceBizId
 	 */

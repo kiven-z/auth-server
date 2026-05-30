@@ -15,6 +15,8 @@ import java.util.UUID;
 
 /**
  * 部门树结构变更后触发授权失效（成员与 DEPT 主体展开依赖闭包）。
+ *
+ * @author Bunny
  */
 @RequiredArgsConstructor
 @Component

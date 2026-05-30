@@ -2,8 +2,6 @@ spring:
   cloud:
     nacos:
       server-addr: 192.168.3.19:8848
-      username: nacos
-      password: Dev1234!
 
   datasource:
     type: com.zaxxer.hikari.HikariDataSource

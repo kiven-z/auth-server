@@ -4,30 +4,34 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 /**
- * 部门闭包表写操作：委托数据库存储过程维护路径。
+ * 部门闭包表写操作
+ *
+ * @author Bunny
  */
 @Mapper
 public interface DeptClosureMapper {
 
-	/**
-	 * 新增节点后写入闭包（须与 {@code sys_dept} 同事务）。
-	 * @param deptId 新部门主键
-	 * @param parentId 父部门 ID，顶级传
-	 * {@link com.auth.service.system.admin.support.dept.DeptTreeConstants#ROOT_PARENT_ID}
-	 */
-	void callInsert(@Param("deptId") Long deptId, @Param("parentId") Long parentId);
+    /**
+     * 新增节点后写入闭包
+     *
+     * @param deptId   新部门主键
+     * @param parentId 父部门 ID，顶级传
+     */
+    void callInsert(@Param("deptId") Long deptId, @Param("parentId") Long parentId);
 
-	/**
-	 * 物理删除子树在闭包表中的全部路径。
-	 * @param deptId 子树根节点 ID
-	 */
-	void callDeleteSubtree(@Param("deptId") Long deptId);
+    /**
+     * 物理删除子树在闭包表中的全部路径
+     *
+     * @param deptId 子树根节点 ID
+     */
+    void callDeleteSubtree(@Param("deptId") Long deptId);
 
-	/**
-	 * 变更父部门后重算闭包路径（须已更新 {@code sys_dept.parent_id}）。
-	 * @param deptId 被移动部门 ID
-	 * @param newParentId 新父部门 ID，顶级传 {@code 0}
-	 */
-	void callMove(@Param("deptId") Long deptId, @Param("newParentId") Long newParentId);
+    /**
+     * 变更父部门后重算闭包路径（须已更新 sys_dept.parent_id）
+     *
+     * @param deptId      被移动部门 ID
+     * @param newParentId 新父部门 ID，顶级传 0
+     */
+    void callMove(@Param("deptId") Long deptId, @Param("newParentId") Long newParentId);
 
 }

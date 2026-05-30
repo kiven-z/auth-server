@@ -1,5 +1,6 @@
 package com.auth.service.system.admin.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import com.auth.service.system.admin.convert.SysMenuManageConverter;
 import com.auth.service.system.admin.mapper.SysMenuMapper;
 import com.auth.service.system.admin.mapper.SysMenuPermissionMapper;
@@ -28,57 +29,62 @@ import java.util.List;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class SysMenuManageServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuEntity>
-		implements SysMenuManageService {
+        implements SysMenuManageService {
 
-	private final SysMenuRoleMapper sysMenuRoleMapper;
+    private final SysMenuRoleMapper sysMenuRoleMapper;
 
-	private final SysMenuPermissionMapper sysMenuPermissionMapper;
+    private final SysMenuPermissionMapper sysMenuPermissionMapper;
 
-	public SysMenuManageServiceImpl(SysMenuRoleMapper sysMenuRoleMapper,
-			SysMenuPermissionMapper sysMenuPermissionMapper) {
-		this.sysMenuRoleMapper = sysMenuRoleMapper;
-		this.sysMenuPermissionMapper = sysMenuPermissionMapper;
-	}
+    public SysMenuManageServiceImpl(SysMenuRoleMapper sysMenuRoleMapper,
+                                    SysMenuPermissionMapper sysMenuPermissionMapper) {
+        this.sysMenuRoleMapper = sysMenuRoleMapper;
+        this.sysMenuPermissionMapper = sysMenuPermissionMapper;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public List<SysMenuAssignedRoleRow> listAssignedRoles(Long menuId) {
-		List<SysMenuAssignedRolePO> dtoList = sysMenuRoleMapper.selectAssignedRolesByMenuId(menuId);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<SysMenuAssignedRoleRow> listAssignedRoles(Long menuId) {
+        List<SysMenuAssignedRolePO> dtoList = sysMenuRoleMapper.selectAssignedRolesByMenuId(menuId);
 
-		return SysMenuManageConverter.INSTANCE.toAssignedRoleRowList(dtoList);
-	}
+        return SysMenuManageConverter.INSTANCE.toAssignedRoleRowList(dtoList);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void replaceMenuRoles(Long menuId, SysMenuAssignRoleForm form) {
-		List<String> roleCodes = form.getRoleCodes();
-		sysMenuRoleMapper.deleteByMenuId(menuId);
-		sysMenuRoleMapper.batchInsertMenuRoles(menuId, roleCodes);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void replaceMenuRoles(Long menuId, SysMenuAssignRoleForm form) {
+        List<String> roleCodes = form.getRoleCodes();
+        sysMenuRoleMapper.deleteByMenuId(menuId);
 
-	}
+        if (CollUtil.isEmpty(roleCodes)) {
+            return;
+        }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public List<SysMenuAssignedPermissionRow> listPermissionsWithAssignFlags(Long menuId) {
-		List<SysMenuAssignedPermissionPO> dtoList = sysMenuPermissionMapper.selectAssignedPermissionByMenuId(menuId);
+        sysMenuRoleMapper.batchInsertMenuRoles(menuId, roleCodes);
 
-		return SysMenuManageConverter.INSTANCE.toAssignedPermissionRowList(dtoList);
-	}
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void replaceMenuPermissions(Long menuId, SysMenuAssignPermissionForm form) {
-		List<String> permissionCodes = form.getPermissionCodes();
-		sysMenuPermissionMapper.deleteByMenuId(menuId);
-		sysMenuPermissionMapper.batchInsertMenuPermissions(menuId, permissionCodes);
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<SysMenuAssignedPermissionRow> listPermissionsWithAssignFlags(Long menuId) {
+        List<SysMenuAssignedPermissionPO> dtoList = sysMenuPermissionMapper.selectAssignedPermissionByMenuId(menuId);
+
+        return SysMenuManageConverter.INSTANCE.toAssignedPermissionRowList(dtoList);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void replaceMenuPermissions(Long menuId, SysMenuAssignPermissionForm form) {
+        List<String> permissionCodes = form.getPermissionCodes();
+        sysMenuPermissionMapper.deleteByMenuId(menuId);
+        sysMenuPermissionMapper.batchInsertMenuPermissions(menuId, permissionCodes);
+    }
 
 }

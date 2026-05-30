@@ -34,6 +34,7 @@ public class AuthorizationInvalidationCoordinator {
 	public void submit(AuthorizationInvalidateRequest request, String sourceModule, String sourceBizId) {
 		Long outboxId = publisher.enqueue(request, sourceModule, sourceBizId);
 
+		// 事务提交后是否同步
 		Boolean enabled = properties.getSyncDispatchEnabled();
 		if (BooleanUtil.isTrue(enabled)) {
 			applicationEventPublisher.publishEvent(new AuthorizationInvalidationDispatchEvent(outboxId));

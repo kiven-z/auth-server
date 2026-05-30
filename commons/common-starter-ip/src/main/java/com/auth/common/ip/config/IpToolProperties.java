@@ -1,6 +1,5 @@
 package com.auth.common.ip.config;
 
-import cn.hutool.core.text.CharSequenceUtil;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -16,16 +15,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class IpToolProperties {
 
 	/**
-	 * 默认的IPv4数据库文件路径
-	 */
-	private static final String DEFAULT_IPV4_DB_PATH = "classpath:ipdb/ip2region_v4.xdb";
-
-	/**
-	 * 默认的IPv6数据库文件路径
-	 */
-	private static final String DEFAULT_IPV6_DB_PATH = "classpath:ipdb/ip2region_v6.xdb";
-
-	/**
 	 * 是否解析外部/公共IP地址的区域 内部/私有IP地址永远不会从数据库中解析
 	 */
 	private boolean resolveExternalEnabled = true;
@@ -36,29 +25,13 @@ public class IpToolProperties {
 	private boolean resolveIpv6Enabled = false;
 
 	/**
-	 * IPv4 数据库文件路径
+	 * IPv4 数据库文件路径（本地文件系统）
 	 */
-	private String ipv4DbPath;
+	private String ipv4DbPath = "/ipdb/ip2region_v4.xdb";
 
 	/**
-	 * IPv6 数据库文件路径
+	 * IPv6 数据库文件路径（本地文件系统）
 	 */
-	private String ipv6DbPath;
-
-	/**
-	 * 获取默认的IPv4数据库文件路径
-	 * @return 默认的IPv4数据库文件路径
-	 */
-	public String getDefaultIpv4DbPath() {
-		return CharSequenceUtil.isNotBlank(ipv4DbPath) ? ipv4DbPath : DEFAULT_IPV4_DB_PATH;
-	}
-
-	/**
-	 * 获取默认的IPv6数据库文件路径
-	 * @return 默认的IPv6数据库文件路径
-	 */
-	public String getDefaultIpv6DbPath() {
-		return CharSequenceUtil.isNotBlank(ipv6DbPath) ? ipv6DbPath : DEFAULT_IPV6_DB_PATH;
-	}
+	private String ipv6DbPath = "/ipdb/ip2region_v6.xdb";
 
 }
