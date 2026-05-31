@@ -28,4 +28,11 @@ class DataScopeStorageTypeTest {
 		assertNull(DataScopeStorageType.parse(null));
 	}
 
+	@Test
+	@DisplayName("parse 未知枚举名返回 null")
+	void parse_unknownReturnsNull() {
+		assertNull(DataScopeStorageType.parse("NODE_ONLY"));
+		assertNull(DataScopeStorageType.parse("CUSTOM"));
+	}
+
 }

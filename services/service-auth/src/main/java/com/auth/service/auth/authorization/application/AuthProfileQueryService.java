@@ -64,11 +64,14 @@ public class AuthProfileQueryService implements AuthProfileQueryPort {
 		List<String> roles = userAuthorizationGrantMapper.selectRolesByUserId(userId);
 		List<String> permissions = userAuthorizationGrantMapper.selectPermissionsByUserId(userId);
 		boolean admin = PermissionConstant.isAdmin(userId, roles);
-		ScopeGrant deptScope = deptDataScopeResolver.resolveEffectiveGrant(userId, roles);
+		ScopeGrant deptScope;
 		if (admin) {
 			roles = PermissionConstant.ADMIN_ROLES;
 			permissions = PermissionConstant.ADMIN_WILDCARD_PERMISSIONS;
-			deptScope = ScopeGrant.builder().scopeType(DataScopeStorageType.ALL).values(deptScope.getValues()).build();
+			deptScope = ScopeGrant.builder().scopeType(DataScopeStorageType.ALL).values(List.of()).build();
+		}
+		else {
+			deptScope = deptDataScopeResolver.resolveEffectiveGrant(userId, roles);
 		}
 
 		return AuthProfile.builder()
