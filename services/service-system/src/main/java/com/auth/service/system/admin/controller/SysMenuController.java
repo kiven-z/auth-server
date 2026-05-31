@@ -5,6 +5,9 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.common.web.valid.group.UpdateGroup;
 import com.auth.module.security.autoconfigure.annotation.AuthenticatedApi;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
+import com.auth.module.security.contract.annotation.OperationLog;
+import com.auth.module.security.contract.api.audit.AuditServiceDomain;
+import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.admin.model.form.menu.SysMenuBatchStatusForm;
 import com.auth.service.system.admin.model.form.menu.SysMenuSaveForm;
@@ -13,6 +16,7 @@ import com.auth.service.system.admin.model.vo.menu.RouteNodeVO;
 import com.auth.service.system.admin.model.vo.menu.SysMenuDetailVO;
 import com.auth.service.system.admin.model.vo.menu.SysMenuListVO;
 import com.auth.service.system.admin.service.SysMenuService;
+import com.auth.service.system.common.model.audit.SystemAuditBizModule;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -42,7 +46,7 @@ public class SysMenuController {
 	}
 
 	@AuthenticatedApi
-	@Operation(summary = "动态路由列表（占位返回空）")
+	@Operation(summary = "动态路由列表")
 	@GetMapping("/web-routes")
 	public Result<List<RouteNodeVO>> getWebRoutes() {
 		Long userId = SecurityUserUtils.getUserId();
@@ -74,6 +78,8 @@ public class SysMenuController {
 		return Result.success(detail);
 	}
 
+	@OperationLog(targetType = "MENU", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_MENU, operation = OperationLogKind.CREATE)
 	@Operation(summary = "新增菜单")
 	@PreAuthorize("@auth.decide('sysMenu:create')")
 	@PostMapping
@@ -82,6 +88,8 @@ public class SysMenuController {
 		return Result.success(id, ADD_SUCCESS.getMessage());
 	}
 
+	@OperationLog(targetType = "MENU", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_MENU, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "更新菜单")
 	@PreAuthorize("@auth.decide('sysMenu:update')")
 	@PutMapping
@@ -90,14 +98,18 @@ public class SysMenuController {
 		return Result.success(null, MODIFY_SUCCESS.getMessage());
 	}
 
+	@OperationLog(targetType = "MENU", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_MENU, operation = OperationLogKind.DELETE)
 	@Operation(summary = "批量删除菜单")
 	@PreAuthorize("@auth.decide('sysMenu:delete')")
 	@DeleteMapping
 	public Result<String> remove(@RequestBody List<Long> ids) {
-		sysMenuService.removeBatchByIds(ids);
+		sysMenuService.deleteByIds(ids);
 		return Result.success(null, DELETE_SUCCESS.getMessage());
 	}
 
+	@OperationLog(targetType = "MENU", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_MENU, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "批量更新菜单状态")
 	@PreAuthorize("@auth.decide('sysMenu:update')")
 	@PutMapping("/status")

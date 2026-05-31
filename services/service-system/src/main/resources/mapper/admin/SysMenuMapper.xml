@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.auth.service.system.admin.mapper.SysMenuMapper">
 
-    <!-- 菜单列表查询条件（不含逻辑删除） -->
+    <!-- 菜单列表查询条件 -->
     <sql id="listWhere">
         SELECT   m.id,
         m.parent_id,
@@ -23,7 +23,6 @@
         m.create_user,
         m.update_user   FROM sys_menu m
         <where>
-            m.is_deleted = 0
             <if test="query.name != null and query.name != ''">
                 AND m.name LIKE CONCAT('%', #{query.name}, '%')
             </if>

@@ -1,9 +1,7 @@
 package com.auth.service.system.admin.model.entity;
 
 import com.auth.common.data.model.BaseEntity;
-import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -90,9 +88,5 @@ public class SysMenuEntity extends BaseEntity {
 
 	@Schema(title = "扩展 meta JSON")
 	private String extraMeta;
-
-	@TableLogic(value = "0", delval = "1")
-	@Schema(title = "逻辑删除：0 否 1 是")
-	private Boolean isDeleted;
 
 }

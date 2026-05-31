@@ -71,4 +71,10 @@ public interface SysMenuService extends IService<SysMenuEntity> {
 	 */
 	void batchUpdateStatus(SysMenuBatchStatusForm form);
 
+	/**
+	 * 批量物理删除菜单（先清理关联表，再删主表；存在子菜单时拒绝）。
+	 * @param ids 菜单主键列表
+	 */
+	void deleteByIds(List<Long> ids);
+
 }

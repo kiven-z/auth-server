@@ -57,7 +57,6 @@ public interface SysMenuConverter {
 	@Mapping(target = "updateUser", ignore = true)
 	@Mapping(target = "version", ignore = true)
 	@Mapping(target = "extraMeta", ignore = true)
-	@Mapping(target = "isDeleted", ignore = true)
 	SysMenuEntity toMenuEntity(SysMenuSaveForm form);
 
 }
