@@ -11,7 +11,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * 部门维数据范围（与 role_scope / user_scope、Redis AuthProfile.deptScope 一致）
+ * 部门维数据范围
  *
  * @author Bunny
  */

@@ -37,7 +37,7 @@ public class AuthProfile implements Serializable {
 	private final List<String> permissions = Collections.emptyList();
 
 	/**
-	 * 部门维数据范围
+	 * 部门维数据范围（登录解析：user_scope 优先，否则 role_scope 合并）
 	 */
 	private final ScopeGrant deptScope;
 

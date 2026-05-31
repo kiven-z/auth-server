@@ -3,7 +3,7 @@ package com.auth.module.security.contract.api.datascope;
 import java.util.Locale;
 
 /**
- * 数据范围存储层枚举（role_scope / user_scope.scope_type，与 Redis deptScope.scopeType 一致）
+ * 数据范围存储层枚举
  *
  * @author Bunny
  */
