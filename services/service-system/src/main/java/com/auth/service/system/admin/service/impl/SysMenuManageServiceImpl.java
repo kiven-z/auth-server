@@ -56,15 +56,12 @@ public class SysMenuManageServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu
 	 */
 	@Override
 	public void replaceMenuRoles(Long menuId, SysMenuAssignRoleForm form) {
-		List<String> roleCodes = form.getRoleCodes();
+		List<String> roleCodes = CollUtil.emptyIfNull(form.getRoleCodes());
+
 		sysMenuRoleMapper.deleteByMenuId(menuId);
-
-		if (CollUtil.isEmpty(roleCodes)) {
-			return;
+		if (CollUtil.isNotEmpty(roleCodes)) {
+			sysMenuRoleMapper.batchInsertMenuRoles(menuId, roleCodes);
 		}
-
-		sysMenuRoleMapper.batchInsertMenuRoles(menuId, roleCodes);
-
 	}
 
 	/**
@@ -82,13 +79,12 @@ public class SysMenuManageServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu
 	 */
 	@Override
 	public void replaceMenuPermissions(Long menuId, SysMenuAssignPermissionForm form) {
-		List<String> permissionCodes = form.getPermissionCodes();
-		sysMenuPermissionMapper.deleteByMenuId(menuId);
+		List<String> permissionCodes = CollUtil.emptyIfNull(form.getPermissionCodes());
 
-		if (CollUtil.isEmpty(permissionCodes)) {
-			return;
+		sysMenuPermissionMapper.deleteByMenuId(menuId);
+		if (CollUtil.isNotEmpty(permissionCodes)) {
+			sysMenuPermissionMapper.batchInsertMenuPermissions(menuId, permissionCodes);
 		}
-		sysMenuPermissionMapper.batchInsertMenuPermissions(menuId, permissionCodes);
 	}
 
 }

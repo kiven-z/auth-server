@@ -7,7 +7,7 @@ import lombok.Getter;
  * 系统管理域结果码（角色、权限、岗位）
  *
  * <p>
- * 号段：263、274–277、278–279（265–273 已释放）
+ * 号段：263、274–277、278–279、288–28
  * </p>
  *
  * @author Bunny
@@ -93,7 +93,17 @@ public enum SystemAdminResultCode implements SystemResultCode {
 	/**
 	 * 部门或子树仍被用户/授权/岗位引用
 	 */
-	DEPT_IN_USE(409, 287, "DEPT_IN_USE", "system.dept.in_use"),;
+	DEPT_IN_USE(409, 287, "DEPT_IN_USE", "system.dept.in_use"),
+
+	/**
+	 * 菜单不存在
+	 */
+	MENU_NOT_FOUND(404, 288, "MENU_NOT_FOUND", "system.menu.not_found"),
+
+	/**
+	 * 存在未删除的子菜单
+	 */
+	MENU_HAS_CHILDREN(409, 289, "MENU_HAS_CHILDREN", "system.menu.has_children"),;
 
 	private final int httpStatus;
 

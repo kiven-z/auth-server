@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
 
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.admin.model.query.SysMenuQuery;
@@ -33,13 +32,5 @@ public interface SysMenuMapper extends BaseMapper<SysMenuEntity> {
 	 * @return 分页菜单列表
 	 */
 	IPage<SysMenuEntity> selectPageByQuery(IPage<SysMenuEntity> page, @Param("query") SysMenuQuery query);
-
-	/**
-	 * 统计指定父节点下的直接子菜单数量。
-	 * @param parentId 父菜单 ID
-	 * @return 子菜单数量
-	 */
-	@Select("SELECT COUNT(1) FROM sys_menu WHERE parent_id = #{parentId}")
-	long countByParentId(@Param("parentId") Long parentId);
 
 }
