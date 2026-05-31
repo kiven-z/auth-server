@@ -2,7 +2,7 @@ package com.auth.module.security.datapermission.strategy;
 
 import java.util.Set;
 
-import com.auth.module.security.contract.api.granttable.ScopeGrantType;
+import com.auth.module.security.contract.api.datascope.DataScopeStorageType;
 
 /**
  * 数据范围 SQL 生成策略
@@ -15,7 +15,7 @@ public interface ScopeSqlStrategy {
 	 * 支持的范围类型
 	 * @return 范围类型集合
 	 */
-	Set<ScopeGrantType> supportedTypes();
+	Set<DataScopeStorageType> supportedTypes();
 
 	/**
 	 * 构建 SQL 条件

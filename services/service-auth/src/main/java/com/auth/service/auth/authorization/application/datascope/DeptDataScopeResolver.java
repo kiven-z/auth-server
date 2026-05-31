@@ -4,7 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.json.JSONUtil;
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
 import com.auth.module.security.contract.api.datascope.DataScopeStorageType;
-import com.auth.module.security.contract.api.granttable.ScopeGrantEffectiveMerger;
+import com.auth.module.security.contract.api.datascope.DeptScopeMerger;
 import com.auth.service.auth.authorization.infrastructure.persistence.DeptClosureMapper;
 import com.auth.service.auth.authorization.infrastructure.persistence.RoleScopeMapper;
 import com.auth.service.auth.authorization.infrastructure.persistence.UserScopeMapper;
@@ -76,7 +76,7 @@ public class DeptDataScopeResolver {
 		List<ScopeGrant> grants = roleScopes.stream()
 			.map(projection -> materializeRow(projection.getScopeType(), projection.getScopeDeptIds()))
 			.toList();
-		ScopeGrant merged = ScopeGrantEffectiveMerger.mergeLoose(grants);
+		ScopeGrant merged = DeptScopeMerger.mergeLoose(grants);
 		if (merged == null) {
 			log.debug("role_scope 合并为空: userId={}, 默认 SELF", userId);
 			return selfGrant();

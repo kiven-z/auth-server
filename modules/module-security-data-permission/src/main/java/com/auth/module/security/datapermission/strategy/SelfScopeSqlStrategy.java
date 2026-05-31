@@ -3,7 +3,7 @@ package com.auth.module.security.datapermission.strategy;
 import java.util.EnumSet;
 import java.util.Set;
 
-import com.auth.module.security.contract.api.granttable.ScopeGrantType;
+import com.auth.module.security.contract.api.datascope.DataScopeStorageType;
 
 /**
  * 仅本人范围策略
@@ -13,8 +13,8 @@ import com.auth.module.security.contract.api.granttable.ScopeGrantType;
 public class SelfScopeSqlStrategy implements ScopeSqlStrategy {
 
 	@Override
-	public Set<ScopeGrantType> supportedTypes() {
-		return EnumSet.of(ScopeGrantType.SELF);
+	public Set<DataScopeStorageType> supportedTypes() {
+		return EnumSet.of(DataScopeStorageType.SELF);
 	}
 
 	@Override

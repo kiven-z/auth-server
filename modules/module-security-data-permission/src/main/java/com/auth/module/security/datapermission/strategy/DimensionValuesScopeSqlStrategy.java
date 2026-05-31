@@ -1,22 +1,23 @@
 package com.auth.module.security.datapermission.strategy;
 
 import cn.hutool.core.collection.CollUtil;
-import com.auth.module.security.contract.api.granttable.ScopeGrantType;
+import com.auth.module.security.contract.api.datascope.DataScopeStorageType;
 
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * 维度值集合范围策略
+ * 部门 ID 集合范围策略
  *
  * @author Bunny
  */
 public class DimensionValuesScopeSqlStrategy implements ScopeSqlStrategy {
 
 	@Override
-	public Set<ScopeGrantType> supportedTypes() {
-		return EnumSet.of(ScopeGrantType.CUSTOM, ScopeGrantType.NODE_ONLY, ScopeGrantType.NODE_AND_DESC);
+	public Set<DataScopeStorageType> supportedTypes() {
+		return EnumSet.of(DataScopeStorageType.DEPT, DataScopeStorageType.DEPT_AND_CHILD,
+				DataScopeStorageType.CUSTOMER);
 	}
 
 	@Override

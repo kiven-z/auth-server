@@ -5,7 +5,6 @@ import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
 import com.auth.module.security.contract.api.datascope.DataScopeStorageType;
-import com.auth.module.security.contract.api.granttable.ScopeGrantType;
 import com.auth.module.security.contract.constants.PermissionConstant;
 import com.auth.module.security.datapermission.annotation.DataScope;
 import com.auth.module.security.datapermission.strategy.*;
@@ -25,7 +24,7 @@ public class DefaultDataScopeHandler implements DataScopeHandler {
 
 	private static final Pattern SAFE_IDENTIFIER = Pattern.compile("^[A-Za-z_]\\w*$");
 
-	private final Map<ScopeGrantType, ScopeSqlStrategy> strategyRegistry;
+	private final Map<DataScopeStorageType, ScopeSqlStrategy> strategyRegistry;
 
 	public DefaultDataScopeHandler() {
 		this.strategyRegistry = buildStrategyRegistry();
@@ -46,15 +45,10 @@ public class DefaultDataScopeHandler implements DataScopeHandler {
 			return FAIL_CLOSE_CONDITION;
 		}
 		ScopeGrant grant = resolveGrant(profile);
-		ScopeGrantType executionType = switch (grant.getScopeType()) {
-			case ALL -> ScopeGrantType.ALL;
-			case SELF -> ScopeGrantType.SELF;
-			case DEPT -> ScopeGrantType.NODE_ONLY;
-			case DEPT_AND_CHILD -> ScopeGrantType.CUSTOM;
-			default -> ScopeGrantType.SELF;
-		};
-		ScopeSqlStrategy strategy = strategyRegistry.getOrDefault(executionType,
-				strategyRegistry.get(ScopeGrantType.SELF));
+		DataScopeStorageType scopeType = grant.getScopeType() != null ? grant.getScopeType()
+				: DataScopeStorageType.SELF;
+		ScopeSqlStrategy strategy = strategyRegistry.getOrDefault(scopeType,
+				strategyRegistry.get(DataScopeStorageType.SELF));
 		ScopeSqlBuildContext context = ScopeSqlBuildContext.builder()
 			.userId(profile.getUserId())
 			.alias(safeAlias)
@@ -82,12 +76,12 @@ public class DefaultDataScopeHandler implements DataScopeHandler {
 			.collect(Collectors.collectingAndThen(Collectors.toCollection(LinkedHashSet::new), List::copyOf));
 	}
 
-	private Map<ScopeGrantType, ScopeSqlStrategy> buildStrategyRegistry() {
-		Map<ScopeGrantType, ScopeSqlStrategy> registry = new EnumMap<>(ScopeGrantType.class);
+	private Map<DataScopeStorageType, ScopeSqlStrategy> buildStrategyRegistry() {
+		Map<DataScopeStorageType, ScopeSqlStrategy> registry = new EnumMap<>(DataScopeStorageType.class);
 		List<ScopeSqlStrategy> strategies = List.of(new AllScopeSqlStrategy(), new SelfScopeSqlStrategy(),
 				new DimensionValuesScopeSqlStrategy());
 		for (ScopeSqlStrategy strategy : strategies) {
-			for (ScopeGrantType type : strategy.supportedTypes()) {
+			for (DataScopeStorageType type : strategy.supportedTypes()) {
 				registry.put(type, strategy);
 			}
 		}
