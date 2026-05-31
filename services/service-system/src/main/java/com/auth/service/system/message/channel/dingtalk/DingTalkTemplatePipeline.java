@@ -10,6 +10,7 @@ import com.auth.service.system.common.exception.TemplateRenderException;
 import com.auth.service.system.message.config.DingTalkProperties;
 import com.auth.service.system.message.template.FreemarkerTemplateRenderer;
 import com.auth.service.system.message.template.MessageTemplateRequireFieldsJsonSupport;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -23,6 +24,7 @@ import static com.auth.service.system.common.exception.code.SystemMessageResultC
  *
  * @author Bunny
  */
+@Slf4j
 @Component
 public class DingTalkTemplatePipeline {
 
@@ -65,7 +67,9 @@ public class DingTalkTemplatePipeline {
 			try {
 				return DingTalkMessageType.valueOf(template.getImMessageType().trim().toUpperCase());
 			}
-			catch (IllegalArgumentException ignored) {
+			catch (IllegalArgumentException ex) {
+				log.warn("Invalid DingTalk message type [{}] on template [{}], using channel default.",
+						template.getImMessageType(), template.getTemplateName(), ex);
 			}
 		}
 		return dingTalkProperties.getDefaultMessageType();

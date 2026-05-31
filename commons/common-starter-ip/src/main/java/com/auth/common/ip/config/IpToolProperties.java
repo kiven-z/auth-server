@@ -1,8 +1,9 @@
 package com.auth.common.ip.config;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * IP工具配置属性 配置前缀使用 kebab-case 遵循项目约定 配置前缀：{@code auth.common.ip-tool}
@@ -27,11 +28,11 @@ public class IpToolProperties {
 	/**
 	 * IPv4 数据库文件路径（本地文件系统）
 	 */
-	private String ipv4DbPath = "/ipdb/ip2region_v4.xdb";
+	private String ipv4DbPath;
 
 	/**
 	 * IPv6 数据库文件路径（本地文件系统）
 	 */
-	private String ipv6DbPath = "/ipdb/ip2region_v6.xdb";
+	private String ipv6DbPath;
 
 }

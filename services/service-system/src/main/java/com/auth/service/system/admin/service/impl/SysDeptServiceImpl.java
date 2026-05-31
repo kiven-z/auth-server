@@ -90,9 +90,7 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 		if (entity == null || Integer.valueOf(1).equals(entity.getIsDeleted())) {
 			throw new SystemBusinessException(SystemAdminResultCode.DEPT_NOT_FOUND, id);
 		}
-		SysDeptDetailVO detail = SysDeptConverter.INSTANCE.toDetailVo(entity);
-		auditUserDisplayService.enrichAuditUsernames(List.of(detail));
-		return detail;
+		return SysDeptConverter.INSTANCE.toDetailVo(entity);
 	}
 
 	/**
