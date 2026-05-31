@@ -83,7 +83,7 @@ class UserInvalidationBucketsTest {
 	void allUserIds_shouldReturnUnmodifiableSet() {
 		UserInvalidationBuckets buckets = new UserInvalidationBuckets(Set.of(1L), Set.of());
 
-		Set<Long> allUserIds = new HashSet<>(buckets.allUserIds());
+		Set<Long> allUserIds = buckets.allUserIds();
 		assertThrows(UnsupportedOperationException.class, () -> allUserIds.add(2L));
 	}
 

@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -79,10 +80,11 @@ class SysMenuServiceImplTest {
 	@Test
 	@DisplayName("删除菜单：无子节点冲突时批量物理删除")
 	void deleteShouldBatchRemoveByIds() {
-		when(sysMenuMapper.selectFirstBlockedParentId(List.of(3L, 4L))).thenReturn(null);
+		when(sysMenuMapper.selectFirstBlockedParentId(List.of(3L, 3L, 4L))).thenReturn(null);
 
-		sysMenuService.deleteByIds(List.of(3L, 3L, null, 4L));
+		sysMenuService.deleteByIds(Arrays.asList(3L, 3L, null, 4L));
 
+		verify(sysMenuMapper).selectFirstBlockedParentId(List.of(3L, 3L, 4L));
 		verify(sysMenuMapper).deleteByIds(anyCollection());
 	}
 

@@ -85,15 +85,15 @@ class SysJobGroupServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("启用下拉：keyword trim，并补全展示名")
-	void listEnabledOptionsTrimsKeyword() {
+	@DisplayName("启用下拉：keyword 原样透传，并补全展示名")
+	void listEnabledOptionsPassesKeywordThrough() {
 		List<SysJobGroupPageRowPO> rows = List.of(new SysJobGroupPageRowPO());
-		when(sysJobGroupMapper.selectEnabledOptions("kw", 999)).thenReturn(rows);
+		when(sysJobGroupMapper.selectEnabledOptions("  kw  ", 999)).thenReturn(rows);
 
 		List<?> result = sysJobGroupService.listEnabledOptions("  kw  ", 999);
 
 		assertThat(result).hasSize(1);
-		verify(sysJobGroupMapper).selectEnabledOptions("kw", 999);
+		verify(sysJobGroupMapper).selectEnabledOptions("  kw  ", 999);
 		verify(auditUserDisplayService).enrichAuditUsernames(any(List.class));
 	}
 

@@ -166,12 +166,17 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuEntity
 			return;
 		}
 
-		Long blockedParentId = baseMapper.selectFirstBlockedParentId(ids);
+		List<Long> idsToDelete = ids.stream().filter(Objects::nonNull).toList();
+		if (CollUtil.isEmpty(idsToDelete)) {
+			return;
+		}
+
+		Long blockedParentId = baseMapper.selectFirstBlockedParentId(idsToDelete);
 		if (blockedParentId != null) {
 			throw new SystemBusinessException(SystemAdminResultCode.MENU_HAS_CHILDREN, blockedParentId);
 		}
 
-		removeByIds(ids);
+		removeByIds(idsToDelete);
 	}
 
 }

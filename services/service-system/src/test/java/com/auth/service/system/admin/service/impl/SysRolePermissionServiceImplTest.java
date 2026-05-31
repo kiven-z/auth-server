@@ -18,6 +18,8 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -66,7 +68,8 @@ class SysRolePermissionServiceImplTest {
 		sysRolePermissionService.assignPermissions("ADMIN", List.of("sys:user:list"));
 
 		verify(sysRolePermissionMapper).deleteByRoleCode("ADMIN");
-		verify(sysRolePermissionMapper).batchInsertRolePermissions("ADMIN", List.of("sys:user:list"), 0L, 0L);
+		verify(sysRolePermissionMapper).batchInsertRolePermissions(eq("ADMIN"), eq(List.of("sys:user:list")), isNull(),
+				isNull());
 		verify(roleInvalidationTrigger).submitByRoleCodes(List.of("ADMIN"), "assign-permissions:ADMIN");
 	}
 

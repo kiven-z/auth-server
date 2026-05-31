@@ -35,6 +35,9 @@ public enum DataScopeStorageType {
 	 * @return 枚举；无法识别时为 {@code null}
 	 */
 	public static DataScopeStorageType parse(String raw) {
+		if (raw == null || raw.isBlank()) {
+			return null;
+		}
 		try {
 			return valueOf(raw.strip().toUpperCase(Locale.ROOT));
 		}
