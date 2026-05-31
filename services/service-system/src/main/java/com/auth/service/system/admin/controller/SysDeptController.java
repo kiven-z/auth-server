@@ -35,77 +35,77 @@ import java.util.List;
 @RestController
 public class SysDeptController {
 
-    private final SysDeptService sysDeptService;
+	private final SysDeptService sysDeptService;
 
-    public SysDeptController(SysDeptService sysDeptService) {
-        this.sysDeptService = sysDeptService;
-    }
+	public SysDeptController(SysDeptService sysDeptService) {
+		this.sysDeptService = sysDeptService;
+	}
 
-    @OperationLog(targetType = "DEPT_LIST", serviceDomain = AuditServiceDomain.SYSTEM,
-            bizModule = SystemAuditBizModule.SYS_DEPT, operation = OperationLogKind.QUERY)
-    @Operation(summary = "部门扁平列表（全量，前端建树）")
-    @PreAuthorize("@auth.decide('sysDept:query')")
-    @GetMapping("/list")
-    public Result<List<SysDeptListVO>> list(SysDeptQuery query) {
-        return Result.success(sysDeptService.listFlat(query));
-    }
+	@OperationLog(targetType = "DEPT_LIST", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_DEPT, operation = OperationLogKind.QUERY)
+	@Operation(summary = "部门扁平列表（全量，前端建树）")
+	@PreAuthorize("@auth.decide('sysDept:query')")
+	@GetMapping("/list")
+	public Result<List<SysDeptListVO>> list(SysDeptQuery query) {
+		return Result.success(sysDeptService.listFlat(query));
+	}
 
-    @Operation(summary = "部门分页查询（表格视图）")
-    @PreAuthorize("@auth.decide('sysDept:query')")
-    @GetMapping("/page")
-    public Result<PageResponse<SysDeptListVO>> page(SysDeptQuery query) {
-        Page<SysDeptEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
-        PageResponse<SysDeptListVO> result = sysDeptService.pageFlat(pageParams, query);
-        return Result.success(result);
-    }
+	@Operation(summary = "部门分页查询（表格视图）")
+	@PreAuthorize("@auth.decide('sysDept:query')")
+	@GetMapping("/page")
+	public Result<PageResponse<SysDeptListVO>> page(SysDeptQuery query) {
+		Page<SysDeptEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
+		PageResponse<SysDeptListVO> result = sysDeptService.pageFlat(pageParams, query);
+		return Result.success(result);
+	}
 
-    @Operation(summary = "部门详情")
-    @PreAuthorize("@auth.decide('sysDept:query')")
-    @GetMapping("/{id}")
-    public Result<SysDeptDetailVO> detail(@PathVariable("id") Long id) {
-        return Result.success(sysDeptService.getDetail(id));
-    }
+	@Operation(summary = "部门详情")
+	@PreAuthorize("@auth.decide('sysDept:query')")
+	@GetMapping("/{id}")
+	public Result<SysDeptDetailVO> detail(@PathVariable("id") Long id) {
+		return Result.success(sysDeptService.getDetail(id));
+	}
 
-    @OperationLog(targetType = "DEPT", serviceDomain = AuditServiceDomain.SYSTEM,
-            bizModule = SystemAuditBizModule.SYS_DEPT, operation = OperationLogKind.CREATE)
-    @Operation(summary = "新增部门")
-    @PreAuthorize("@auth.decide('sysDept:create')")
-    @PostMapping
-    public Result<Void> create(@Valid @RequestBody SysDeptCreateForm form) {
-        sysDeptService.create(form);
-        return Result.success();
-    }
+	@OperationLog(targetType = "DEPT", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_DEPT, operation = OperationLogKind.CREATE)
+	@Operation(summary = "新增部门")
+	@PreAuthorize("@auth.decide('sysDept:create')")
+	@PostMapping
+	public Result<Void> create(@Valid @RequestBody SysDeptCreateForm form) {
+		sysDeptService.create(form);
+		return Result.success();
+	}
 
-    @OperationLog(targetType = "DEPT", serviceDomain = AuditServiceDomain.SYSTEM,
-            bizModule = SystemAuditBizModule.SYS_DEPT, operation = OperationLogKind.UPDATE)
-    @Operation(summary = "更新部门（不含父部门）")
-    @PreAuthorize("@auth.decide('sysDept:update')")
-    @PutMapping("/{id}")
-    public Result<Void> update(@PathVariable("id") Long id,
-                               @Validated(UpdateGroup.class) @RequestBody SysDeptUpdateForm form) {
-        form.setId(id);
-        sysDeptService.updateMeta(form);
-        return Result.success();
-    }
+	@OperationLog(targetType = "DEPT", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_DEPT, operation = OperationLogKind.UPDATE)
+	@Operation(summary = "更新部门（不含父部门）")
+	@PreAuthorize("@auth.decide('sysDept:update')")
+	@PutMapping("/{id}")
+	public Result<Void> update(@PathVariable("id") Long id,
+			@Validated(UpdateGroup.class) @RequestBody SysDeptUpdateForm form) {
+		form.setId(id);
+		sysDeptService.updateMeta(form);
+		return Result.success();
+	}
 
-    @OperationLog(targetType = "DEPT", serviceDomain = AuditServiceDomain.SYSTEM,
-            bizModule = SystemAuditBizModule.SYS_DEPT, operation = OperationLogKind.UPDATE)
-    @Operation(summary = "移动部门（变更父部门）")
-    @PreAuthorize("@auth.decide('sysDept:update')")
-    @PutMapping("/{id}/move")
-    public Result<Void> move(@PathVariable("id") Long id, @Valid @RequestBody SysDeptMoveForm form) {
-        sysDeptService.move(id, form);
-        return Result.success();
-    }
+	@OperationLog(targetType = "DEPT", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_DEPT, operation = OperationLogKind.UPDATE)
+	@Operation(summary = "移动部门（变更父部门）")
+	@PreAuthorize("@auth.decide('sysDept:update')")
+	@PutMapping("/{id}/move")
+	public Result<Void> move(@PathVariable("id") Long id, @Valid @RequestBody SysDeptMoveForm form) {
+		sysDeptService.move(id, form);
+		return Result.success();
+	}
 
-    @OperationLog(targetType = "DEPT", serviceDomain = AuditServiceDomain.SYSTEM,
-            bizModule = SystemAuditBizModule.SYS_DEPT, operation = OperationLogKind.DELETE)
-    @Operation(summary = "删除部门（逻辑删除）")
-    @PreAuthorize("@auth.decide('sysDept:delete')")
-    @DeleteMapping("/{id}")
-    public Result<Void> delete(@PathVariable("id") Long id) {
-        sysDeptService.deleteById(id);
-        return Result.success();
-    }
+	@OperationLog(targetType = "DEPT", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_DEPT, operation = OperationLogKind.DELETE)
+	@Operation(summary = "删除部门（逻辑删除）")
+	@PreAuthorize("@auth.decide('sysDept:delete')")
+	@DeleteMapping("/{id}")
+	public Result<Void> delete(@PathVariable("id") Long id) {
+		sysDeptService.deleteById(id);
+		return Result.success();
+	}
 
 }

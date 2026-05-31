@@ -17,11 +17,11 @@ spring:
     import:
       - nacos:common-config.yaml?group=AUTH_COMMON
   profiles:
-    active: dev
+    active: test
 
   cloud:
     nacos:
-      server-addr: 192.168.3.19:8848
+      server-addr: 192.168.3.4:8848
       discovery:
         namespace: ${spring.profiles.active:dev}
         group: DEFAULT_GROUP
