@@ -56,17 +56,15 @@ public class SysRolePermissionServiceImpl implements SysRolePermissionService {
 		String normalized = requireExistingRoleCode(roleCode);
 		List<String> codes = permissionCodes.stream().distinct().toList();
 
-		// 验证权限是否存在
-		Long validCount = sysPermissionMapper.selectCount(Wrappers.<SysPermissionEntity>lambdaQuery()
-			.in(SysPermissionEntity::getPermissionCode, permissionCodes)
-			.eq(SysPermissionEntity::getStatus, true));
-		if (validCount == null || validCount != permissionCodes.size()) {
-			throw new SystemBusinessException(SystemAdminResultCode.ROLE_PERMISSION_INVALID);
-		}
-
 		Long operatorId = SecurityUserUtils.getUserId();
 		sysRolePermissionMapper.deleteByRoleCode(normalized);
 		if (CollUtil.isNotEmpty(codes)) {
+			Long validCount = sysPermissionMapper.selectCount(Wrappers.<SysPermissionEntity>lambdaQuery()
+				.in(SysPermissionEntity::getPermissionCode, codes)
+				.eq(SysPermissionEntity::getStatus, true));
+			if (validCount == null || validCount != codes.size()) {
+				throw new SystemBusinessException(SystemAdminResultCode.ROLE_PERMISSION_INVALID);
+			}
 			sysRolePermissionMapper.batchInsertRolePermissions(normalized, codes, operatorId, operatorId);
 		}
 

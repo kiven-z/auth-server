@@ -28,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -76,7 +77,9 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 			throw new SystemBusinessException(SystemAdminResultCode.ROLE_NOT_FOUND, id);
 		}
 
-		return SysRoleDetailVoConverter.toDetailVo(entity);
+		SysRoleDetailVO detail = SysRoleDetailVoConverter.toDetailVo(entity);
+		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail));
+		return detail;
 	}
 
 	/**
