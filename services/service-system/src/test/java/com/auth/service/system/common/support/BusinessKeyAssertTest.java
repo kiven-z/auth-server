@@ -44,9 +44,9 @@ class BusinessKeyAssertTest {
 	@DisplayName("requireAbsent：存在冲突记录时抛出 DUPLICATE 业务异常")
 	void requireAbsentThrowsWhenCountPositive() {
 		when(roleService.count(any())).thenReturn(1L);
+		var duplicateQuery = Wrappers.<SysRoleEntity>lambdaQuery().eq(SysRoleEntity::getRoleCode, "ADMIN");
 
-		assertThatThrownBy(() -> BusinessKeyAssert.requireAbsent(roleService,
-				Wrappers.<SysRoleEntity>lambdaQuery().eq(SysRoleEntity::getRoleCode, "ADMIN"),
+		assertThatThrownBy(() -> BusinessKeyAssert.requireAbsent(roleService, duplicateQuery,
 				SystemAdminResultCode.ROLE_CODE_DUPLICATE, "ADMIN"))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())

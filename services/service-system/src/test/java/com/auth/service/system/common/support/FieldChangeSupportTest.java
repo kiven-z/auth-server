@@ -24,7 +24,7 @@ class FieldChangeSupportTest {
 	@DisplayName("valueChanged：可空字段按 Objects.equals 语义比较")
 	void valueChangedUsesNullSafeEquality() {
 		assertThat(FieldChangeSupport.valueChanged(Boolean.TRUE, Boolean.TRUE)).isFalse();
-		assertThat(true).isTrue();
+		assertThat(FieldChangeSupport.valueChanged(null, null)).isFalse();
 		assertThat(FieldChangeSupport.valueChanged(1, 2)).isTrue();
 	}
 

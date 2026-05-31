@@ -69,8 +69,9 @@ class SysMenuServiceImplTest {
 	@DisplayName("删除菜单：存在未一并删除的子菜单时抛出 MENU_HAS_CHILDREN")
 	void deleteThrowsWhenHasUndeletedChildren() {
 		when(sysMenuMapper.selectFirstBlockedParentId(List.of(2L))).thenReturn(2L);
+		List<Long> menuIds = List.of(2L);
 
-		assertThatThrownBy(() -> sysMenuService.deleteByIds(List.of(2L))).isInstanceOf(SystemBusinessException.class)
+		assertThatThrownBy(() -> sysMenuService.deleteByIds(menuIds)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemAdminResultCode.MENU_HAS_CHILDREN);
 
