@@ -7,6 +7,7 @@ import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.constants.PermissionConstant;
 import com.auth.service.system.admin.convert.SysMenuConverter;
+import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.SysMenuMapper;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.admin.model.form.menu.SysMenuBatchStatusForm;
@@ -17,6 +18,7 @@ import com.auth.service.system.admin.model.vo.menu.SysMenuDetailVO;
 import com.auth.service.system.admin.model.vo.menu.SysMenuListVO;
 import com.auth.service.system.admin.service.MenuWebRouteTreeBuilder;
 import com.auth.service.system.admin.service.SysMenuService;
+import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.feign.AuthInnerFeignClient;
 import com.auth.service.system.common.feign.dto.EffectiveCodesInnerDTO;
 import com.auth.service.system.common.service.AuditUserDisplayService;
@@ -44,127 +46,132 @@ import static com.auth.common.web.resttemplate.FeignUtil.isSuccessWithData;
 @Transactional(rollbackFor = Exception.class)
 public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuEntity> implements SysMenuService {
 
-    private final AuditUserDisplayService auditUserDisplayService;
+	private final AuditUserDisplayService auditUserDisplayService;
 
-    private final AuthInnerFeignClient authInnerFeignClient;
+	private final AuthInnerFeignClient authInnerFeignClient;
 
-    private final MenuWebRouteTreeBuilder menuWebRouteTreeBuilder;
+	private final MenuWebRouteTreeBuilder menuWebRouteTreeBuilder;
 
-    public SysMenuServiceImpl(AuditUserDisplayService auditUserDisplayService,
-                              AuthInnerFeignClient authInnerFeignClient, MenuWebRouteTreeBuilder menuWebRouteTreeBuilder) {
-        this.auditUserDisplayService = auditUserDisplayService;
-        this.authInnerFeignClient = authInnerFeignClient;
-        this.menuWebRouteTreeBuilder = menuWebRouteTreeBuilder;
-    }
+	public SysMenuServiceImpl(AuditUserDisplayService auditUserDisplayService,
+			AuthInnerFeignClient authInnerFeignClient, MenuWebRouteTreeBuilder menuWebRouteTreeBuilder) {
+		this.auditUserDisplayService = auditUserDisplayService;
+		this.authInnerFeignClient = authInnerFeignClient;
+		this.menuWebRouteTreeBuilder = menuWebRouteTreeBuilder;
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<RouteNodeVO> listWebRoutes(Long userId) {
-        if (userId == null) {
-            return Collections.emptyList();
-        }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public List<RouteNodeVO> listWebRoutes(Long userId) {
+		if (userId == null) {
+			return Collections.emptyList();
+		}
 
-        Result<EffectiveCodesInnerDTO> result = authInnerFeignClient.getEffectiveCodes(userId);
-        if (BooleanUtil.isFalse(isSuccessWithData(result))) {
-            log.warn("Menu web route: effective codes unavailable userId={}", userId);
-            return Collections.emptyList();
-        }
+		Result<EffectiveCodesInnerDTO> result = authInnerFeignClient.getEffectiveCodes(userId);
+		if (BooleanUtil.isFalse(isSuccessWithData(result))) {
+			log.warn("Menu web route: effective codes unavailable userId={}", userId);
+			return Collections.emptyList();
+		}
 
-        EffectiveCodesInnerDTO data = result.getData();
-        List<String> roleCodes = data.getRoleCodes();
-        List<String> permissionCodes = data.getPermissionCodes();
-        boolean isAdmin = PermissionConstant.isAdmin(userId, roleCodes);
-        log.debug("Menu web route: userId={} admin={} roleCount={} permissionCount={}", userId, isAdmin,
-                roleCodes.size(), permissionCodes.size());
+		EffectiveCodesInnerDTO data = result.getData();
+		List<String> roleCodes = data.getRoleCodes();
+		List<String> permissionCodes = data.getPermissionCodes();
+		boolean isAdmin = PermissionConstant.isAdmin(userId, roleCodes);
+		log.debug("Menu web route: userId={} admin={} roleCount={} permissionCount={}", userId, isAdmin,
+				roleCodes.size(), permissionCodes.size());
 
-        List<SysMenuEntity> menuList = list(
-                Wrappers.<SysMenuEntity>lambdaQuery().eq(SysMenuEntity::getStatus, Boolean.TRUE));
+		List<SysMenuEntity> menuList = list(
+				Wrappers.<SysMenuEntity>lambdaQuery().eq(SysMenuEntity::getStatus, Boolean.TRUE));
 
-        return isAdmin ? menuWebRouteTreeBuilder.buildAdminRoutes(menuList)
-                : menuWebRouteTreeBuilder.buildRoutes(menuList);
-    }
+		return isAdmin ? menuWebRouteTreeBuilder.buildAdminRoutes(menuList)
+				: menuWebRouteTreeBuilder.buildRoutes(menuList);
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<SysMenuListVO> listFlat(SysMenuQuery query) {
-        List<SysMenuEntity> entities = baseMapper.selectListByQuery(query);
-        List<SysMenuListVO> list = SysMenuConverter.INSTANCE.toListVoList(entities);
-        auditUserDisplayService.enrichAuditUsernames(list);
-        return list;
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public List<SysMenuListVO> listFlat(SysMenuQuery query) {
+		List<SysMenuEntity> entities = baseMapper.selectListByQuery(query);
+		List<SysMenuListVO> list = SysMenuConverter.INSTANCE.toListVoList(entities);
+		auditUserDisplayService.enrichAuditUsernames(list);
+		return list;
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public PageResponse<SysMenuListVO> pageFlat(Page<SysMenuEntity> pageParams, SysMenuQuery query) {
-        IPage<SysMenuEntity> entityPage = baseMapper.selectPageByQuery(pageParams, query);
-        IPage<SysMenuListVO> result = entityPage.convert(SysMenuConverter.INSTANCE::toListVo);
-        auditUserDisplayService.enrichAuditUsernames(result);
-        return PageResponse.of(result);
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public PageResponse<SysMenuListVO> pageFlat(Page<SysMenuEntity> pageParams, SysMenuQuery query) {
+		IPage<SysMenuEntity> entityPage = baseMapper.selectPageByQuery(pageParams, query);
+		IPage<SysMenuListVO> result = entityPage.convert(SysMenuConverter.INSTANCE::toListVo);
+		auditUserDisplayService.enrichAuditUsernames(result);
+		return PageResponse.of(result);
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public SysMenuDetailVO getDetail(Long id) {
-        SysMenuEntity entity = getById(id);
-        return SysMenuConverter.INSTANCE.toDetailVo(entity);
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public SysMenuDetailVO getDetail(Long id) {
+		SysMenuEntity entity = getById(id);
+		return SysMenuConverter.INSTANCE.toDetailVo(entity);
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String create(SysMenuSaveForm form) {
-        SysMenuEntity entity = SysMenuConverter.INSTANCE.toMenuEntity(form);
-        entity.setParentId(ObjectUtil.defaultIfNull(entity.getParentId(), 0L));
-        save(entity);
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String create(SysMenuSaveForm form) {
+		SysMenuEntity entity = SysMenuConverter.INSTANCE.toMenuEntity(form);
+		entity.setParentId(ObjectUtil.defaultIfNull(entity.getParentId(), 0L));
+		save(entity);
 
-        Long menuId = entity.getId();
-        return String.valueOf(menuId);
-    }
+		Long menuId = entity.getId();
+		return String.valueOf(menuId);
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void update(SysMenuSaveForm form) {
-        SysMenuEntity entity = SysMenuConverter.INSTANCE.toMenuEntity(form);
-        entity.setParentId(ObjectUtil.defaultIfNull(entity.getParentId(), 0L));
-        updateById(entity);
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void update(SysMenuSaveForm form) {
+		SysMenuEntity entity = SysMenuConverter.INSTANCE.toMenuEntity(form);
+		entity.setParentId(ObjectUtil.defaultIfNull(entity.getParentId(), 0L));
+		updateById(entity);
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void batchUpdateStatus(SysMenuBatchStatusForm form) {
-        Boolean status = form.getStatus();
-        List<SysMenuEntity> list = form.getIds().stream().filter(Objects::nonNull).map(id -> {
-            SysMenuEntity sysMenuEntity = new SysMenuEntity();
-            sysMenuEntity.setId(id);
-            sysMenuEntity.setStatus(status);
-            return sysMenuEntity;
-        }).toList();
-        updateBatchById(list);
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void batchUpdateStatus(SysMenuBatchStatusForm form) {
+		Boolean status = form.getStatus();
+		List<SysMenuEntity> list = form.getIds().stream().filter(Objects::nonNull).map(id -> {
+			SysMenuEntity sysMenuEntity = new SysMenuEntity();
+			sysMenuEntity.setId(id);
+			sysMenuEntity.setStatus(status);
+			return sysMenuEntity;
+		}).toList();
+		updateBatchById(list);
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void deleteByIds(List<Long> ids) {
-        if (CollUtil.isEmpty(ids)) {
-            return;
-        }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void deleteByIds(List<Long> ids) {
+		if (CollUtil.isEmpty(ids)) {
+			return;
+		}
 
-        removeByIds(ids);
-    }
+		Long blockedParentId = baseMapper.selectFirstBlockedParentId(ids);
+		if (blockedParentId != null) {
+			throw new SystemBusinessException(SystemAdminResultCode.MENU_HAS_CHILDREN, blockedParentId);
+		}
+
+		removeByIds(ids);
+	}
 
 }

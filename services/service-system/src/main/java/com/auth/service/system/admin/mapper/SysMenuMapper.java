@@ -33,4 +33,11 @@ public interface SysMenuMapper extends BaseMapper<SysMenuEntity> {
 	 */
 	IPage<SysMenuEntity> selectPageByQuery(IPage<SysMenuEntity> page, @Param("query") SysMenuQuery query);
 
+	/**
+	 * 查找待删节点中，仍存在「未纳入本次删除」子菜单的父节点 ID（至多一条）。
+	 * @param ids 待删除菜单 ID 列表
+	 * @return 阻塞删除的父菜单 ID；无冲突时 {@code null}
+	 */
+	Long selectFirstBlockedParentId(@Param("ids") List<Long> ids);
+
 }

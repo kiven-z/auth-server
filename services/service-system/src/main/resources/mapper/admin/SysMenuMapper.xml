@@ -54,4 +54,19 @@
         <include refid="listWhere"/>
     </select>
 
+    <!-- 删除前校验：待删父节点下是否仍有未纳入本次删除的子菜单 -->
+    <select id="selectFirstBlockedParentId" resultType="java.lang.Long">
+        SELECT parent_id
+        FROM sys_menu
+        WHERE parent_id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+          AND id NOT IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        LIMIT 1
+    </select>
+
 </mapper>
