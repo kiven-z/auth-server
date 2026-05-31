@@ -16,7 +16,7 @@ class DataScopeStorageTypeTest {
 	@DisplayName("parse 识别业务枚举")
 	void parse_businessEnum() {
 		assertEquals(DataScopeStorageType.DEPT, DataScopeStorageType.parse("DEPT"));
-		assertEquals(DataScopeStorageType.CUSTOMER, DataScopeStorageType.parse("CUSTOMER"));
+		assertEquals(DataScopeStorageType.DEPT_AND_CHILD, DataScopeStorageType.parse("DEPT_AND_CHILD"));
 	}
 
 	@Test

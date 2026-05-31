@@ -42,7 +42,6 @@ public class DeptScopeMerger {
 					anyDeptAndChild = true;
 					restrictiveWithoutIds |= mergeDeptValues(grant, unionIds);
 				}
-				case CUSTOMER -> restrictiveWithoutIds |= mergeDeptValues(grant, unionIds);
 				default -> anySelf = true;
 			}
 		}

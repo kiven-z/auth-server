@@ -16,8 +16,7 @@ public class DimensionValuesScopeSqlStrategy implements ScopeSqlStrategy {
 
 	@Override
 	public Set<DataScopeStorageType> supportedTypes() {
-		return EnumSet.of(DataScopeStorageType.DEPT, DataScopeStorageType.DEPT_AND_CHILD,
-				DataScopeStorageType.CUSTOMER);
+		return EnumSet.of(DataScopeStorageType.DEPT, DataScopeStorageType.DEPT_AND_CHILD);
 	}
 
 	@Override

@@ -27,12 +27,7 @@ public enum DataScopeStorageType {
 	/**
 	 * 指定部门及全部后代（登录解析时需展开为部门 ID 列表）
 	 */
-	DEPT_AND_CHILD,
-
-	/**
-	 * 用户级自定义范围（仅 user_scope 生效路径使用）
-	 */
-	CUSTOMER;
+	DEPT_AND_CHILD;
 
 	/**
 	 * 解析库表 scope_type 或 JSON 字符串

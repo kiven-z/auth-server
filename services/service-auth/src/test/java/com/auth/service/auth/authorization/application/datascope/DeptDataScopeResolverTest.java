@@ -41,8 +41,23 @@ class DeptDataScopeResolverTest {
 	private DeptDataScopeResolver resolver;
 
 	@Test
-	@DisplayName("user_scope 存在时覆盖 role_scope")
+	@DisplayName("user_scope 存在时覆盖 role_scope 且类型与库表一致")
 	void userScope_shouldOverrideRoleScope() {
+		UserScopeProjection userScope = new UserScopeProjection();
+		userScope.setScopeType("DEPT");
+		userScope.setScopeDeptIds("[1,2]");
+		when(userScopeMapper.selectByUserId(10L)).thenReturn(userScope);
+
+		ScopeGrant grant = resolver.resolveEffectiveGrant(10L, List.of("ADMIN"));
+
+		assertEquals(DataScopeStorageType.DEPT, grant.getScopeType());
+		assertEquals(List.of(1L, 2L), grant.getValues());
+		verify(roleScopeMapper, never()).selectByRoleCodes(anyList());
+	}
+
+	@Test
+	@DisplayName("user_scope 为 SELF 时仍走 SELF")
+	void userScope_self_shouldStaySelf() {
 		UserScopeProjection userScope = new UserScopeProjection();
 		userScope.setScopeType("SELF");
 		when(userScopeMapper.selectByUserId(10L)).thenReturn(userScope);
@@ -50,7 +65,21 @@ class DeptDataScopeResolverTest {
 		ScopeGrant grant = resolver.resolveEffectiveGrant(10L, List.of("ADMIN"));
 
 		assertEquals(DataScopeStorageType.SELF, grant.getScopeType());
-		verify(roleScopeMapper, never()).selectByRoleCodes(anyList());
+	}
+
+	@Test
+	@DisplayName("user_scope 为 DEPT_AND_CHILD 时展开闭包后仍为 DEPT_AND_CHILD")
+	void userScope_deptAndChild_shouldExpandClosure() {
+		UserScopeProjection userScope = new UserScopeProjection();
+		userScope.setScopeType("DEPT_AND_CHILD");
+		userScope.setScopeDeptIds("[10]");
+		when(userScopeMapper.selectByUserId(10L)).thenReturn(userScope);
+		when(deptClosureMapper.selectDescendantDeptIdsByAncestorIds(List.of(10L))).thenReturn(List.of(10L, 11L, 12L));
+
+		ScopeGrant grant = resolver.resolveEffectiveGrant(10L, List.of("R1"));
+
+		assertEquals(DataScopeStorageType.DEPT_AND_CHILD, grant.getScopeType());
+		assertEquals(List.of(10L, 11L, 12L), grant.getValues());
 	}
 
 	@Test
