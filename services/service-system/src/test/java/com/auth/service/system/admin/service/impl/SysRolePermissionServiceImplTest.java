@@ -97,7 +97,8 @@ class SysRolePermissionServiceImplTest {
 		when(sysRoleMapper.selectOne(any())).thenReturn(role);
 		when(sysPermissionMapper.selectCount(any())).thenReturn(0L);
 
-		assertThatThrownBy(() -> sysRolePermissionService.assignPermissions("ADMIN", List.of("missing:perm")))
+		List<String> permissionCodes = List.of("missing:perm");
+		assertThatThrownBy(() -> sysRolePermissionService.assignPermissions("ADMIN", permissionCodes))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemAdminResultCode.ROLE_PERMISSION_INVALID);

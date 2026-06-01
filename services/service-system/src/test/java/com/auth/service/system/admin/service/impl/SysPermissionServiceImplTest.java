@@ -6,6 +6,7 @@ import com.auth.service.system.admin.mapper.SysPermissionMapper;
 import com.auth.service.system.admin.mapper.SysRolePermissionMapper;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.form.permission.SysPermissionCreateForm;
+import com.auth.service.system.admin.model.form.permission.SysPermissionUpdateForm;
 import com.auth.service.system.admin.model.po.permission.SysPermissionBoundMenuPO;
 import com.auth.service.system.admin.model.po.permission.SysPermissionBoundRolePO;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionDetailVO;
@@ -26,7 +27,10 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link SysPermissionServiceImpl} 单元测试。
@@ -54,6 +58,28 @@ class SysPermissionServiceImplTest {
 
 	private SysPermissionServiceImpl sysPermissionService;
 
+	private static SysPermissionEntity permissionEntity(Long id, String permissionCode) {
+		SysPermissionEntity entity = new SysPermissionEntity();
+		entity.setId(id);
+		entity.setPermissionCode(permissionCode);
+		entity.setPermissionName("测试权限");
+		entity.setPermissionType(1);
+		entity.setStatus(true);
+		entity.setOrderNum(0);
+		return entity;
+	}
+
+	private static SysPermissionUpdateForm updateForm(Long id, String permissionCode, Boolean status) {
+		SysPermissionUpdateForm form = new SysPermissionUpdateForm();
+		form.setId(id);
+		form.setPermissionCode(permissionCode);
+		form.setPermissionName("测试权限");
+		form.setPermissionType(1);
+		form.setStatus(status);
+		form.setOrderNum(0);
+		return form;
+	}
+
 	@BeforeEach
 	void setUp() throws Exception {
 		sysPermissionService = new SysPermissionServiceImpl(auditUserDisplayService, permissionInvalidationTrigger,
@@ -75,6 +101,70 @@ class SysPermissionServiceImplTest {
 		assertThatThrownBy(() -> sysPermissionService.create(form)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemAdminResultCode.PERMISSION_CODE_DUPLICATE);
+	}
+
+	@Test
+	@DisplayName("更新权限：不存在时抛出 PERMISSION_NOT_FOUND")
+	void updateThrowsWhenNotFound() {
+		SysPermissionUpdateForm form = updateForm(9L, "sys:user:query", true);
+		when(sysPermissionMapper.selectById(9L)).thenReturn(null);
+
+		assertThatThrownBy(() -> sysPermissionService.update(form)).isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemAdminResultCode.PERMISSION_NOT_FOUND);
+
+		verifyNoInteractions(permissionInvalidationTrigger);
+	}
+
+	@Test
+	@DisplayName("更新权限：编码冲突时抛出 PERMISSION_CODE_DUPLICATE")
+	void updateThrowsWhenPermissionCodeDuplicate() {
+		SysPermissionUpdateForm form = updateForm(1L, "sys:user:update", true);
+		when(sysPermissionMapper.selectById(1L)).thenReturn(permissionEntity(1L, "sys:user:query"));
+		when(sysPermissionMapper.selectCount(any())).thenReturn(1L);
+
+		assertThatThrownBy(() -> sysPermissionService.update(form)).isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemAdminResultCode.PERMISSION_CODE_DUPLICATE);
+
+		verifyNoInteractions(permissionInvalidationTrigger);
+	}
+
+	@Test
+	@DisplayName("更新权限：仅名称变更时不触发授权失效")
+	void updateShouldNotInvalidateWhenOnlyNameChanged() {
+		SysPermissionUpdateForm form = updateForm(2L, "sys:user:query", true);
+		form.setPermissionName("用户查询");
+		when(sysPermissionMapper.selectById(2L)).thenReturn(permissionEntity(2L, "sys:user:query"));
+
+		sysPermissionService.update(form);
+
+		verify(permissionInvalidationTrigger, never()).submitByPermissionCodes(any(), any());
+	}
+
+	@Test
+	@DisplayName("更新权限：状态变更时触发授权失效")
+	void updateShouldInvalidateWhenStatusChanged() {
+		SysPermissionUpdateForm form = updateForm(3L, "sys:user:query", false);
+		when(sysPermissionMapper.selectById(3L)).thenReturn(permissionEntity(3L, "sys:user:query"));
+
+		sysPermissionService.update(form);
+
+		verify(permissionInvalidationTrigger).submitByPermissionCodes(List.of("sys:user:query"),
+				"update:sys:user:query");
+	}
+
+	@Test
+	@DisplayName("更新权限：编码重命名时触发授权失效并携带旧新码")
+	void updateShouldInvalidateWhenPermissionCodeRenamed() {
+		SysPermissionUpdateForm form = updateForm(4L, "sys:user:list", true);
+		when(sysPermissionMapper.selectById(4L)).thenReturn(permissionEntity(4L, "sys:user:query"));
+		when(sysPermissionMapper.selectCount(any())).thenReturn(0L);
+
+		sysPermissionService.update(form);
+
+		verify(permissionInvalidationTrigger).submitByPermissionCodes(List.of("sys:user:query", "sys:user:list"),
+				"update:sys:user:list");
 	}
 
 	@Test

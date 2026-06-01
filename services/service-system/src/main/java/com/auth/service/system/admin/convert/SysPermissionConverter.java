@@ -1,17 +1,17 @@
 package com.auth.service.system.admin.convert;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
-
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.form.permission.SysPermissionCreateForm;
+import com.auth.service.system.admin.model.form.permission.SysPermissionUpdateForm;
 import com.auth.service.system.admin.model.po.permission.SysPermissionBoundMenuPO;
 import com.auth.service.system.admin.model.po.permission.SysPermissionBoundRolePO;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionBoundMenuItemVO;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionBoundRoleItemVO;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionDetailVO;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionPageResponse;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 
@@ -37,6 +37,19 @@ public interface SysPermissionConverter {
 	@Mapping(target = "updateUser", ignore = true)
 	@Mapping(target = "version", ignore = true)
 	SysPermissionEntity toEntity(SysPermissionCreateForm form);
+
+	/**
+	 * 更新表单字段合并到已有实体
+	 * @param form 更新表单
+	 * @param entity 已有实体
+	 */
+	@Mapping(target = "id", ignore = true)
+	@Mapping(target = "createTime", ignore = true)
+	@Mapping(target = "updateTime", ignore = true)
+	@Mapping(target = "createUser", ignore = true)
+	@Mapping(target = "updateUser", ignore = true)
+	@Mapping(target = "version", ignore = true)
+	void applyUpdateForm(SysPermissionUpdateForm form, @org.mapstruct.MappingTarget SysPermissionEntity entity);
 
 	/**
 	 * 实体 → 详情 VO

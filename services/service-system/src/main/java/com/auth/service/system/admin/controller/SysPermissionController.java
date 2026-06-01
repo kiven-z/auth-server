@@ -2,8 +2,10 @@ package com.auth.service.system.admin.controller;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
+import com.auth.common.web.valid.group.UpdateGroup;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.form.permission.SysPermissionCreateForm;
+import com.auth.service.system.admin.model.form.permission.SysPermissionUpdateForm;
 import com.auth.service.system.admin.model.query.SysPermissionQuery;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionDetailVO;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionPageResponse;
@@ -14,6 +16,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -55,6 +58,16 @@ public class SysPermissionController {
 	@PostMapping
 	public Result<Void> create(@Valid @RequestBody SysPermissionCreateForm form) {
 		sysPermissionService.create(form);
+		return Result.success();
+	}
+
+	@Operation(summary = "更新权限")
+	@PreAuthorize("@auth.decide('sysPermission:update')")
+	@PutMapping("/{id}")
+	public Result<Void> update(@PathVariable("id") Long id,
+			@Validated(UpdateGroup.class) @RequestBody SysPermissionUpdateForm form) {
+		form.setId(id);
+		sysPermissionService.update(form);
 		return Result.success();
 	}
 

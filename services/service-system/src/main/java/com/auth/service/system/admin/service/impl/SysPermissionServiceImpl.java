@@ -9,6 +9,7 @@ import com.auth.service.system.admin.mapper.SysRolePermissionMapper;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.enums.PermissionTypeEnum;
 import com.auth.service.system.admin.model.form.permission.SysPermissionCreateForm;
+import com.auth.service.system.admin.model.form.permission.SysPermissionUpdateForm;
 import com.auth.service.system.admin.model.query.SysPermissionQuery;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionDetailVO;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionPageResponse;
@@ -17,6 +18,8 @@ import com.auth.service.system.admin.support.sqlbuild.SysPermissionPageOrderSqlB
 import com.auth.service.system.authorization.dispatch.trigger.PermissionAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
+import com.auth.service.system.common.support.BusinessKeyAssert;
+import com.auth.service.system.common.support.FieldChangeSupport;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -113,6 +116,44 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 
 		SysPermissionEntity entity = SysPermissionConverter.INSTANCE.toEntity(form);
 		save(entity);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void update(SysPermissionUpdateForm form) {
+		Long id = form.getId();
+		SysPermissionEntity existing = baseMapper.selectById(id);
+		if (existing == null) {
+			throw new SystemBusinessException(SystemAdminResultCode.PERMISSION_NOT_FOUND, id);
+		}
+
+		// 新旧权限和状态
+		String oldPermissionCode = existing.getPermissionCode();
+		String newPermissionCode = form.getPermissionCode();
+		Boolean oldStatus = existing.getStatus();
+		Boolean newStatus = form.getStatus();
+
+		// 只要权限码或状态更新
+		boolean permissionCodeChanged = FieldChangeSupport.codeChanged(oldPermissionCode, newPermissionCode);
+		boolean statusChanged = FieldChangeSupport.valueChanged(oldStatus, newStatus);
+		if (permissionCodeChanged) {
+			BusinessKeyAssert.requireAbsent(this,
+					Wrappers.<SysPermissionEntity>lambdaQuery()
+						.eq(SysPermissionEntity::getPermissionCode, newPermissionCode)
+						.ne(SysPermissionEntity::getId, existing.getId()),
+					SystemAdminResultCode.PERMISSION_CODE_DUPLICATE, newPermissionCode);
+		}
+
+		SysPermissionConverter.INSTANCE.applyUpdateForm(form, existing);
+		existing.setPermissionCode(newPermissionCode);
+		updateById(existing);
+
+		if (FieldChangeSupport.anyChanged(permissionCodeChanged, statusChanged)) {
+			List<String> permissionCodes = FieldChangeSupport.renameCodes(oldPermissionCode, newPermissionCode);
+			permissionInvalidationTrigger.submitByPermissionCodes(permissionCodes, "update:" + newPermissionCode);
+		}
 	}
 
 	/**
