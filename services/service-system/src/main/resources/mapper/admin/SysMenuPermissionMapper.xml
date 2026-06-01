@@ -19,8 +19,8 @@
     <!-- 批量查询菜单关联的操作权限编码（permission_type=0 按钮，且启用、未删除；供动态路由 meta） -->
     <select id="selectActiveButtonPermissionLinksByMenuIds"
             resultType="com.auth.service.system.admin.model.po.menu.SysMenuPermissionLinkRowPO">
-        SELECT mp.menu_id AS menuId,
-               mp.permission_code AS permissionCode
+        SELECT mp.menu_id,
+               mp.permission_code
         FROM sys_menu_permission mp
                  INNER JOIN sys_permission p ON p.permission_code = mp.permission_code
             AND p.permission_type = 0
@@ -34,12 +34,12 @@
     <!-- 按权限码反查已绑定菜单 -->
     <select id="selectBoundMenusByPermissionCode"
             resultType="com.auth.service.system.admin.model.po.permission.SysPermissionBoundMenuPO">
-        SELECT m.id        AS id,
-               m.title     AS title,
-               m.name      AS name,
-               m.path      AS path,
-               m.menu_type AS menuType,
-               m.status    AS status
+        SELECT m.id,
+               m.title,
+               m.name,
+               m.path,
+               m.menu_type,
+               m.status
         FROM sys_menu_permission mp
                  INNER JOIN sys_menu m ON m.id = mp.menu_id
         WHERE mp.permission_code = #{permissionCode}

@@ -17,8 +17,8 @@
     <!-- 批量查询菜单关联角色编码（仅启用且未删除的角色；供动态路由 meta） -->
     <select id="selectActiveRoleLinksByMenuIds"
             resultType="com.auth.service.system.admin.model.po.menu.SysMenuRoleLinkRowPO">
-        SELECT mr.menu_id AS menuId,
-               mr.role_code AS roleCode
+        SELECT mr.menu_id,
+               mr.role_code
         FROM sys_menu_role mr
                  INNER JOIN sys_role r ON r.role_code = mr.role_code
             AND r.status = 1

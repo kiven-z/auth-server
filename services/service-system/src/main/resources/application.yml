@@ -73,6 +73,8 @@ spring:
       org.quartz.threadPool.threadPriority: 5
 
 mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
   mapper-locations:
     - "classpath*:/mapper/**/*.xml"
   global-config:

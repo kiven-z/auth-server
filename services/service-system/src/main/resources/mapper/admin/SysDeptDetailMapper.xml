@@ -5,15 +5,15 @@
     <!-- 部门详情：直接挂靠用户（user_dept.status IN 1,2；与删除前引用检查口径一致） -->
     <select id="selectBoundUsersByDeptId"
             resultType="com.auth.service.system.admin.model.po.dept.SysDeptBoundUserPO">
-        SELECT ud.user_id    AS userId,
-               u.username    AS username,
-               u.nickname    AS nickname,
-               u.employee_no AS employeeNo,
-               u.status      AS userStatus,
-               ud.is_primary AS isPrimary,
-               ud.status     AS relationStatus,
-               ud.position   AS position,
-               ud.join_time  AS joinTime
+        SELECT ud.user_id,
+               u.username,
+               u.nickname,
+               u.employee_no,
+               u.status      AS user_status,
+               ud.is_primary,
+               ud.status     AS relation_status,
+               ud.position,
+               ud.join_time
         FROM user_dept ud
                  INNER JOIN sys_user u ON u.id = ud.user_id AND u.is_deleted = 0
         WHERE ud.dept_id = #{deptId}
@@ -24,10 +24,10 @@
     <!-- 部门详情：本部门岗位 -->
     <select id="selectBoundPostsByDeptId"
             resultType="com.auth.service.system.admin.model.po.dept.SysDeptBoundPostPO">
-        SELECT p.id        AS id,
-               p.post_code AS postCode,
-               p.post_name AS postName,
-               p.status    AS status
+        SELECT p.id,
+               p.post_code,
+               p.post_name,
+               p.status
         FROM sys_post p
         WHERE p.dept_id = #{deptId}
           AND p.is_deleted = 0
@@ -37,11 +37,11 @@
     <!-- 部门详情：grant_table DEPT 主体已授权角色 -->
     <select id="selectBoundRolesByDeptId"
             resultType="com.auth.service.system.admin.model.po.dept.SysDeptBoundRolePO">
-        SELECT r.role_code   AS roleCode,
-               r.role_name   AS roleName,
-               r.status      AS status,
-               r.role_type   AS roleType,
-               gt.grant_time AS grantTime
+        SELECT r.role_code,
+               r.role_name,
+               r.status,
+               r.role_type,
+               gt.grant_time
         FROM grant_table gt
                  INNER JOIN sys_role r ON r.role_code = gt.role_code
         WHERE gt.subject_type = 'DEPT'

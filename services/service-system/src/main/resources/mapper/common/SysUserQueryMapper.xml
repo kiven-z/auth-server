@@ -5,13 +5,13 @@
     <!-- 用户档案：部门列表（user_dept JOIN sys_dept） -->
     <select id="selectDeptProfileByUserId"
             resultType="com.auth.service.system.common.model.po.UserDeptProfilePO">
-        SELECT d.id          AS dept_id,
-               d.dept_name   AS dept_name,
-               d.dept_code   AS dept_code,
-               ud.is_primary AS is_primary,
-               ud.status     AS status,
-               ud.position   AS position,
-               ud.join_time  AS join_time
+        SELECT d.id AS dept_id,
+               d.dept_name,
+               d.dept_code,
+               ud.is_primary,
+               ud.status,
+               ud.position,
+               ud.join_time
         FROM user_dept ud
                  INNER JOIN sys_dept d ON ud.dept_id = d.id  AND d.status = 1 AND d.is_deleted = 0
         WHERE ud.user_id = #{userId}
@@ -21,12 +21,12 @@
     <!-- 用户档案：岗位列表（user_post JOIN sys_post） -->
     <select id="selectPostProfileByUserId"
             resultType="com.auth.service.system.common.model.po.UserPostProfilePO">
-        SELECT up.id         AS id,
-               up.post_id    AS post_id,
-               sp.post_name  AS post_name,
-               sp.post_code  AS post_code,
-               up.is_primary AS is_primary,
-               up.status     AS status
+        SELECT up.id,
+               up.post_id,
+               sp.post_name,
+               sp.post_code,
+               up.is_primary,
+               up.status
         FROM user_post up
                  INNER JOIN sys_post sp ON up.post_id = sp.id AND sp.status = 1 AND sp.is_deleted = 0
         WHERE up.user_id = #{userId}
