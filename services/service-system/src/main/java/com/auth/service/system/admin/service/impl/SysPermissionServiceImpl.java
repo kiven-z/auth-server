@@ -1,11 +1,5 @@
 package com.auth.service.system.admin.service.impl;
 
-import java.util.Collections;
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.convert.SysPermissionConverter;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
@@ -27,8 +21,12 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * 系统权限服务实现
@@ -83,25 +81,22 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 		}
 
 		SysPermissionDetailVO detail = SysPermissionConverter.INSTANCE.toDetailVo(entity);
-		enrichBoundReferences(detail);
-		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail));
-		return detail;
-	}
 
-	/**
-	 * 填充权限详情中的角色/菜单引用关系。
-	 * @param detail 权限详情
-	 */
-	private void enrichBoundReferences(SysPermissionDetailVO detail) {
-		String permissionCode = detail.getPermissionCode();
+		// 查询绑定的角色和菜单
+		String permissionCode = entity.getPermissionCode();
 		detail.setBoundRoles(SysPermissionConverter.INSTANCE
 			.toBoundRoleItemList(sysRolePermissionMapper.selectBoundRolesByPermissionCode(permissionCode)));
-		if (PermissionTypeEnum.BUTTON.getCode().equals(detail.getPermissionType())) {
+		if (PermissionTypeEnum.BUTTON.getCode().equals(entity.getPermissionType())) {
 			detail.setBoundMenus(SysPermissionConverter.INSTANCE
 				.toBoundMenuItemList(sysMenuPermissionMapper.selectBoundMenusByPermissionCode(permissionCode)));
-			return;
 		}
-		detail.setBoundMenus(List.of());
+		else {
+			detail.setBoundMenus(List.of());
+		}
+
+		// 关联用户
+		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail));
+		return detail;
 	}
 
 	/**
