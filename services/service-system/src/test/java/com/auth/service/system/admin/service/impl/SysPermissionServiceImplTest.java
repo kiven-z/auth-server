@@ -1,9 +1,13 @@
 package com.auth.service.system.admin.service.impl;
 
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
+import com.auth.service.system.admin.mapper.SysMenuPermissionMapper;
 import com.auth.service.system.admin.mapper.SysPermissionMapper;
+import com.auth.service.system.admin.mapper.SysRolePermissionMapper;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.form.permission.SysPermissionCreateForm;
+import com.auth.service.system.admin.model.po.permission.SysPermissionBoundMenuPO;
+import com.auth.service.system.admin.model.po.permission.SysPermissionBoundRolePO;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionDetailVO;
 import com.auth.service.system.authorization.dispatch.trigger.PermissionAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
@@ -42,11 +46,18 @@ class SysPermissionServiceImplTest {
 	@Mock
 	private PermissionAuthorizationInvalidationTrigger permissionInvalidationTrigger;
 
+	@Mock
+	private SysRolePermissionMapper sysRolePermissionMapper;
+
+	@Mock
+	private SysMenuPermissionMapper sysMenuPermissionMapper;
+
 	private SysPermissionServiceImpl sysPermissionService;
 
 	@BeforeEach
 	void setUp() throws Exception {
-		sysPermissionService = new SysPermissionServiceImpl(auditUserDisplayService, permissionInvalidationTrigger);
+		sysPermissionService = new SysPermissionServiceImpl(auditUserDisplayService, permissionInvalidationTrigger,
+				sysRolePermissionMapper, sysMenuPermissionMapper);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysPermissionService, sysPermissionMapper);
@@ -86,12 +97,55 @@ class SysPermissionServiceImplTest {
 		entity.setPermissionType(1);
 		entity.setStatus(true);
 		when(sysPermissionMapper.selectById(3L)).thenReturn(entity);
+		when(sysRolePermissionMapper.selectBoundRolesByPermissionCode("sys:dept:query")).thenReturn(List.of());
 
 		SysPermissionDetailVO detail = sysPermissionService.getDetail(3L);
 
 		assertThat(detail.getPermissionCode()).isEqualTo("sys:dept:query");
 		assertThat(detail.getPermissionType()).isEqualTo(1);
+		assertThat(detail.getBoundRoles()).isEmpty();
+		assertThat(detail.getBoundMenus()).isEmpty();
+		verify(sysRolePermissionMapper).selectBoundRolesByPermissionCode("sys:dept:query");
+		verify(sysMenuPermissionMapper, never()).selectBoundMenusByPermissionCode(any());
 		verify(auditUserDisplayService).enrichAuditUsernames(any(List.class));
+	}
+
+	@Test
+	@DisplayName("权限详情：按钮权限填充角色与菜单引用")
+	void getDetailShouldIncludeBoundRolesAndMenusForButtonPermission() {
+		SysPermissionEntity entity = new SysPermissionEntity();
+		entity.setId(7L);
+		entity.setPermissionCode("sys:user:create");
+		entity.setPermissionName("新增用户");
+		entity.setPermissionType(0);
+		entity.setStatus(true);
+		when(sysPermissionMapper.selectById(7L)).thenReturn(entity);
+
+		SysPermissionBoundRolePO boundRole = new SysPermissionBoundRolePO();
+		boundRole.setRoleCode("ADMIN");
+		boundRole.setRoleName("管理员");
+		boundRole.setStatus(true);
+		boundRole.setRoleType(1);
+		when(sysRolePermissionMapper.selectBoundRolesByPermissionCode("sys:user:create"))
+			.thenReturn(List.of(boundRole));
+
+		SysPermissionBoundMenuPO boundMenu = new SysPermissionBoundMenuPO();
+		boundMenu.setId(100L);
+		boundMenu.setTitle("用户管理");
+		boundMenu.setName("SystemUser");
+		boundMenu.setPath("/system/user");
+		boundMenu.setMenuType(0);
+		boundMenu.setStatus(true);
+		when(sysMenuPermissionMapper.selectBoundMenusByPermissionCode("sys:user:create"))
+			.thenReturn(List.of(boundMenu));
+
+		SysPermissionDetailVO detail = sysPermissionService.getDetail(7L);
+
+		assertThat(detail.getBoundRoles()).hasSize(1);
+		assertThat(detail.getBoundRoles().get(0).getRoleCode()).isEqualTo("ADMIN");
+		assertThat(detail.getBoundMenus()).hasSize(1);
+		assertThat(detail.getBoundMenus().get(0).getTitle()).isEqualTo("用户管理");
+		verify(sysMenuPermissionMapper).selectBoundMenusByPermissionCode("sys:user:create");
 	}
 
 	@Test

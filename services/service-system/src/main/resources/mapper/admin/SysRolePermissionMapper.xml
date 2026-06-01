@@ -17,6 +17,19 @@
         ORDER BY permission_code
     </select>
 
+    <!-- 按权限码反查已绑定角色 -->
+    <select id="selectBoundRolesByPermissionCode"
+            resultType="com.auth.service.system.admin.model.po.permission.SysPermissionBoundRolePO">
+        SELECT r.role_code  AS roleCode,
+               r.role_name  AS roleName,
+               r.status     AS status,
+               r.role_type  AS roleType
+        FROM sys_role_permission rp
+                 INNER JOIN sys_role r ON r.role_code = rp.role_code
+        WHERE rp.permission_code = #{permissionCode}
+        ORDER BY r.role_code
+    </select>
+
     <!-- 批量插入角色权限关联 -->
     <insert id="batchInsertRolePermissions">
         INSERT INTO sys_role_permission (role_code,

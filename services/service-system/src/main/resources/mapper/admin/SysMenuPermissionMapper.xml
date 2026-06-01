@@ -31,6 +31,21 @@
         </foreach>
     </select>
 
+    <!-- 按权限码反查已绑定菜单 -->
+    <select id="selectBoundMenusByPermissionCode"
+            resultType="com.auth.service.system.admin.model.po.permission.SysPermissionBoundMenuPO">
+        SELECT m.id        AS id,
+               m.title     AS title,
+               m.name      AS name,
+               m.path      AS path,
+               m.menu_type AS menuType,
+               m.status    AS status
+        FROM sys_menu_permission mp
+                 INNER JOIN sys_menu m ON m.id = mp.menu_id
+        WHERE mp.permission_code = #{permissionCode}
+        ORDER BY m.menu_rank, m.id
+    </select>
+
     <!-- 批量插入菜单-权限关联 -->
     <insert id="batchInsertMenuPermissions">
         INSERT INTO sys_menu_permission (menu_id, permission_code) VALUES

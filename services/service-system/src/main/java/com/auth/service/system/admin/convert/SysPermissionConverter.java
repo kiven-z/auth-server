@@ -6,8 +6,14 @@ import org.mapstruct.factory.Mappers;
 
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.form.permission.SysPermissionCreateForm;
+import com.auth.service.system.admin.model.po.permission.SysPermissionBoundMenuPO;
+import com.auth.service.system.admin.model.po.permission.SysPermissionBoundRolePO;
+import com.auth.service.system.admin.model.vo.permission.SysPermissionBoundMenuItemVO;
+import com.auth.service.system.admin.model.vo.permission.SysPermissionBoundRoleItemVO;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionDetailVO;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionPageResponse;
+
+import java.util.List;
 
 /**
  * 权限转换器
@@ -39,7 +45,37 @@ public interface SysPermissionConverter {
 	 */
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "boundRoles", ignore = true)
+	@Mapping(target = "boundMenus", ignore = true)
 	SysPermissionDetailVO toDetailVo(SysPermissionEntity entity);
+
+	/**
+	 * 已绑定角色 PO → 详情项 VO
+	 * @param po 持久层投影
+	 * @return 详情项 VO
+	 */
+	SysPermissionBoundRoleItemVO toBoundRoleItem(SysPermissionBoundRolePO po);
+
+	/**
+	 * 已绑定角色 PO 列表 → 详情项 VO 列表
+	 * @param poList 持久层投影列表
+	 * @return 详情项 VO 列表
+	 */
+	List<SysPermissionBoundRoleItemVO> toBoundRoleItemList(List<SysPermissionBoundRolePO> poList);
+
+	/**
+	 * 已绑定菜单 PO → 详情项 VO
+	 * @param po 持久层投影
+	 * @return 详情项 VO
+	 */
+	SysPermissionBoundMenuItemVO toBoundMenuItem(SysPermissionBoundMenuPO po);
+
+	/**
+	 * 已绑定菜单 PO 列表 → 详情项 VO 列表
+	 * @param poList 持久层投影列表
+	 * @return 详情项 VO 列表
+	 */
+	List<SysPermissionBoundMenuItemVO> toBoundMenuItemList(List<SysPermissionBoundMenuPO> poList);
 
 	/**
 	 * Entity → 分页行 VO

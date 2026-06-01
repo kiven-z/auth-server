@@ -9,8 +9,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.convert.SysPermissionConverter;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
+import com.auth.service.system.admin.mapper.SysMenuPermissionMapper;
 import com.auth.service.system.admin.mapper.SysPermissionMapper;
+import com.auth.service.system.admin.mapper.SysRolePermissionMapper;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
+import com.auth.service.system.admin.model.enums.PermissionTypeEnum;
 import com.auth.service.system.admin.model.form.permission.SysPermissionCreateForm;
 import com.auth.service.system.admin.model.query.SysPermissionQuery;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionDetailVO;
@@ -42,10 +45,17 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 
 	private final PermissionAuthorizationInvalidationTrigger permissionInvalidationTrigger;
 
+	private final SysRolePermissionMapper sysRolePermissionMapper;
+
+	private final SysMenuPermissionMapper sysMenuPermissionMapper;
+
 	public SysPermissionServiceImpl(AuditUserDisplayService auditUserDisplayService,
-			PermissionAuthorizationInvalidationTrigger permissionInvalidationTrigger) {
+			PermissionAuthorizationInvalidationTrigger permissionInvalidationTrigger,
+			SysRolePermissionMapper sysRolePermissionMapper, SysMenuPermissionMapper sysMenuPermissionMapper) {
 		this.auditUserDisplayService = auditUserDisplayService;
 		this.permissionInvalidationTrigger = permissionInvalidationTrigger;
+		this.sysRolePermissionMapper = sysRolePermissionMapper;
+		this.sysMenuPermissionMapper = sysMenuPermissionMapper;
 	}
 
 	/**
@@ -73,8 +83,25 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 		}
 
 		SysPermissionDetailVO detail = SysPermissionConverter.INSTANCE.toDetailVo(entity);
+		enrichBoundReferences(detail);
 		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail));
 		return detail;
+	}
+
+	/**
+	 * 填充权限详情中的角色/菜单引用关系。
+	 * @param detail 权限详情
+	 */
+	private void enrichBoundReferences(SysPermissionDetailVO detail) {
+		String permissionCode = detail.getPermissionCode();
+		detail.setBoundRoles(SysPermissionConverter.INSTANCE
+			.toBoundRoleItemList(sysRolePermissionMapper.selectBoundRolesByPermissionCode(permissionCode)));
+		if (PermissionTypeEnum.BUTTON.getCode().equals(detail.getPermissionType())) {
+			detail.setBoundMenus(SysPermissionConverter.INSTANCE
+				.toBoundMenuItemList(sysMenuPermissionMapper.selectBoundMenusByPermissionCode(permissionCode)));
+			return;
+		}
+		detail.setBoundMenus(List.of());
 	}
 
 	/**
