@@ -144,7 +144,7 @@ class SysPermissionServiceImplTest {
 
 		sysPermissionService.update(form);
 
-		assertThat(entity.getPermissionType()).isEqualTo(0);
+		assertThat(entity.getPermissionType()).isZero();
 	}
 
 	@Test

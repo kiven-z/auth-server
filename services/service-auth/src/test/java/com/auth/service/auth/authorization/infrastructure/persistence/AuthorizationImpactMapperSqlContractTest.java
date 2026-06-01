@@ -28,15 +28,14 @@ class AuthorizationImpactMapperSqlContractTest {
 	void permissionCodeBridgeShouldNotFilterByPermissionStatus() throws IOException {
 		String xml = readClasspathText();
 
-		assertThat(xml).contains("selectRoleCodesByPermissionCodes");
-
 		// 反查桥接只需要 sys_role_permission；不应依赖 sys_permission.status=1
-		assertThat(xml).doesNotContain("JOIN sys_permission");
-		assertThat(xml).doesNotContain("INNER JOIN sys_permission");
-		// 注意：XML 中存在 ud.status / up.status；这里只禁止 sys_permission 的别名 p.status
-		assertThat(xml).doesNotContain(" p.status");
-		assertThat(xml).doesNotContain(" p.status ");
-		assertThat(xml).doesNotContain("p.status =");
+		assertThat(xml).contains("selectRoleCodesByPermissionCodes")
+			.doesNotContain("JOIN sys_permission")
+			.doesNotContain("INNER JOIN sys_permission")
+			// 注意：XML 中存在 ud.status / up.status；这里只禁止 sys_permission 的别名 p.status
+			.doesNotContain(" p.status")
+			.doesNotContain(" p.status ")
+			.doesNotContain("p.status =");
 	}
 
 }
