@@ -71,4 +71,12 @@ public class SysPermissionController {
 		return Result.success();
 	}
 
+	@Operation(summary = "删除权限")
+	@PreAuthorize("@auth.decide('sysPermission:delete')")
+	@DeleteMapping("/{id}")
+	public Result<Void> delete(@PathVariable("id") Long id) {
+		sysPermissionService.deleteById(id);
+		return Result.success();
+	}
+
 }

@@ -34,5 +34,5 @@ class AuthorizationImpactMapperSqlRegressionTest {
 		assertFalse(xml.contains("AND p.status = 1"),
 				"Permission bridge should not filter by sys_permission.status (breaks on disable)");
 	}
-}
 
+}
