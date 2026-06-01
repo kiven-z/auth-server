@@ -9,6 +9,7 @@ import com.auth.service.system.admin.model.form.permission.SysPermissionCreateFo
 import com.auth.service.system.admin.model.form.permission.SysPermissionUpdateForm;
 import com.auth.service.system.admin.model.po.permission.SysPermissionBoundMenuPO;
 import com.auth.service.system.admin.model.po.permission.SysPermissionBoundRolePO;
+import com.auth.service.system.authorization.dispatch.trigger.RoleAuthorizationInvalidationTrigger;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionDetailVO;
 import com.auth.service.system.authorization.dispatch.trigger.PermissionAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
@@ -18,7 +19,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Field;
@@ -47,6 +50,9 @@ class SysPermissionServiceImplTest {
 
 	@Mock
 	private PermissionAuthorizationInvalidationTrigger permissionInvalidationTrigger;
+
+	@Mock
+	private RoleAuthorizationInvalidationTrigger roleInvalidationTrigger;
 
 	@Mock
 	private SysRolePermissionMapper sysRolePermissionMapper;
@@ -81,7 +87,7 @@ class SysPermissionServiceImplTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		sysPermissionService = new SysPermissionServiceImpl(auditUserDisplayService, permissionInvalidationTrigger,
-				sysRolePermissionMapper, sysMenuPermissionMapper);
+				roleInvalidationTrigger, sysRolePermissionMapper, sysMenuPermissionMapper);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysPermissionService, sysPermissionMapper);
@@ -249,18 +255,41 @@ class SysPermissionServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("删除权限：物理删除并触发授权失效")
-	void deleteShouldPhysicallyDeleteAndInvalidate() {
+	@DisplayName("删除权限：删除前快照角色并提交 ROLE 失效，再物理删除")
+	void deleteShouldInvalidateBoundRolesBeforePhysicalDelete() {
 		SysPermissionEntity entity = new SysPermissionEntity();
 		entity.setId(5L);
 		entity.setPermissionCode("sys:role:delete");
 		when(sysPermissionMapper.selectById(5L)).thenReturn(entity);
+		SysPermissionBoundRolePO boundRole = new SysPermissionBoundRolePO();
+		boundRole.setRoleCode("TEST");
+		when(sysRolePermissionMapper.selectBoundRolesByPermissionCode("sys:role:delete"))
+			.thenReturn(List.of(boundRole));
 
 		sysPermissionService.deleteById(5L);
 
-		verify(permissionInvalidationTrigger).submitByPermissionCodes(List.of("sys:role:delete"),
-				"delete:sys:role:delete");
-		verify(sysPermissionMapper).deleteById(5L);
+		InOrder order = Mockito.inOrder(permissionInvalidationTrigger, roleInvalidationTrigger, sysPermissionMapper);
+		order.verify(permissionInvalidationTrigger)
+			.submitByPermissionCodes(List.of("sys:role:delete"), "delete:sys:role:delete");
+		order.verify(roleInvalidationTrigger).submitByRoleCodes(List.of("TEST"), "delete-permission:sys:role:delete");
+		order.verify(sysPermissionMapper).deleteById(5L);
+	}
+
+	@Test
+	@DisplayName("删除权限：无绑定角色时不提交 ROLE 失效")
+	void deleteShouldSkipRoleInvalidationWhenNoBoundRoles() {
+		SysPermissionEntity entity = new SysPermissionEntity();
+		entity.setId(6L);
+		entity.setPermissionCode("sys:orphan:perm");
+		when(sysPermissionMapper.selectById(6L)).thenReturn(entity);
+		when(sysRolePermissionMapper.selectBoundRolesByPermissionCode("sys:orphan:perm")).thenReturn(List.of());
+
+		sysPermissionService.deleteById(6L);
+
+		verify(permissionInvalidationTrigger).submitByPermissionCodes(List.of("sys:orphan:perm"),
+				"delete:sys:orphan:perm");
+		verify(roleInvalidationTrigger, never()).submitByRoleCodes(any(), any());
+		verify(sysPermissionMapper).deleteById(6L);
 	}
 
 }
