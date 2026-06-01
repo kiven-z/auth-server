@@ -93,6 +93,8 @@ public class SysEmailTemplateController {
 		return Result.success(null, ADD_SUCCESS.getMessage());
 	}
 
+	@OperationLog(targetType = "EMAIL_TEMPLATE", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_EMAIL_TEMPLATE, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "更新邮件模板", description = "更新邮件模板")
 	@PreAuthorize("@auth.decide('emailTemplate:update')")
 	@PutMapping()
@@ -102,6 +104,8 @@ public class SysEmailTemplateController {
 		return Result.success(null, MODIFY_SUCCESS.getMessage());
 	}
 
+	@OperationLog(targetType = "EMAIL_TEMPLATE", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_EMAIL_TEMPLATE, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "仅更新邮件模板正文", description = "仅更新 content 字段")
 	@PreAuthorize("@auth.decide('emailTemplate:update')")
 	@PutMapping("{id}/content")
@@ -112,6 +116,8 @@ public class SysEmailTemplateController {
 		return Result.success(null, MODIFY_SUCCESS.getMessage());
 	}
 
+	@OperationLog(targetType = "EMAIL_TEMPLATE", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_EMAIL_TEMPLATE, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "仅更新变量列表 require_fields", description = "仅更新变量列表 require_fields")
 	@PreAuthorize("@auth.decide('emailTemplate:update')")
 	@PutMapping("{id}/require-fields")
@@ -133,6 +139,8 @@ public class SysEmailTemplateController {
 		return Result.success(null, DELETE_SUCCESS.getMessage());
 	}
 
+	@OperationLog(targetType = "EMAIL_TEMPLATE", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_EMAIL_TEMPLATE, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "批量启用/禁用邮件模板", description = "批量启用/禁用邮件模板")
 	@PreAuthorize("@auth.decide('emailTemplate:update')")
 	@PutMapping("status")

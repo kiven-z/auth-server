@@ -1,8 +1,12 @@
 package com.auth.service.system.admin.controller;
 
 import com.auth.common.core.model.response.Result;
+import com.auth.module.security.contract.annotation.OperationLog;
+import com.auth.module.security.contract.api.audit.AuditServiceDomain;
+import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.admin.model.form.role.SysRolePermissionAssignForm;
 import com.auth.service.system.admin.service.SysRolePermissionService;
+import com.auth.service.system.common.model.audit.SystemAuditBizModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -34,6 +38,8 @@ public class SysRolePermissionController {
 		return Result.success(sysRolePermissionService.listPermissionCodes(roleCode));
 	}
 
+	@OperationLog(targetType = "ROLE_PERMISSION", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_ROLE_PERMISSION, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "全量分配角色权限码（触发 perm_version 失效）")
 	@PreAuthorize("@auth.decide('sysRole:update')")
 	@PostMapping

@@ -4,11 +4,15 @@ import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.common.web.valid.group.CreateGroup;
 import com.auth.common.web.valid.group.UpdateGroup;
+import com.auth.module.security.contract.annotation.OperationLog;
+import com.auth.module.security.contract.api.audit.AuditServiceDomain;
+import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.admin.model.form.jobgroup.SysJobGroupForm;
 import com.auth.service.system.admin.model.form.jobgroup.SysJobGroupUpdateForm;
 import com.auth.service.system.admin.model.query.SysJobGroupQuery;
 import com.auth.service.system.admin.model.vo.jobgroup.SysJobGroupPageResponse;
 import com.auth.service.system.admin.service.SysJobGroupService;
+import com.auth.service.system.common.model.audit.SystemAuditBizModule;
 import com.auth.service.system.log.model.entity.SysJobGroupEntity;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
@@ -68,6 +72,8 @@ public class SysJobGroupController {
 		return Result.success(null, ADD_SUCCESS.getMessage());
 	}
 
+	@OperationLog(targetType = "JOB_GROUP", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_JOB_GROUP, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "修改任务分组")
 	@PreAuthorize("@auth.decide('sysJobGroup:update')")
 	@PutMapping
@@ -76,6 +82,8 @@ public class SysJobGroupController {
 		return Result.success(null, MODIFY_SUCCESS.getMessage());
 	}
 
+	@OperationLog(targetType = "JOB_GROUP", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_JOB_GROUP, operation = OperationLogKind.DELETE)
 	@Operation(summary = "删除任务分组")
 	@PreAuthorize("@auth.decide('sysJobGroup:delete')")
 	@DeleteMapping("{id}")

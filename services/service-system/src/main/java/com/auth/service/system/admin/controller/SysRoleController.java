@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.common.web.valid.group.UpdateGroup;
+import com.auth.module.security.contract.annotation.OperationLog;
+import com.auth.module.security.contract.api.audit.AuditServiceDomain;
+import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.form.role.SysRoleCreateForm;
 import com.auth.service.system.admin.model.form.role.SysRoleUpdateForm;
@@ -25,6 +28,7 @@ import com.auth.service.system.admin.model.vo.role.SysRoleDetailVO;
 import com.auth.service.system.admin.model.vo.role.SysRoleOptionVO;
 import com.auth.service.system.admin.model.vo.role.SysRolePageResponse;
 import com.auth.service.system.admin.service.SysRoleService;
+import com.auth.service.system.common.model.audit.SystemAuditBizModule;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -74,6 +78,8 @@ public class SysRoleController {
 		return Result.success();
 	}
 
+	@OperationLog(targetType = "ROLE", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_ROLE, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "更新角色")
 	@PreAuthorize("@auth.decide('sysRole:update')")
 	@PutMapping("/{id}")
@@ -84,6 +90,8 @@ public class SysRoleController {
 		return Result.success();
 	}
 
+	@OperationLog(targetType = "ROLE", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_ROLE, operation = OperationLogKind.DELETE)
 	@Operation(summary = "删除角色")
 	@PreAuthorize("@auth.decide('sysRole:delete')")
 	@DeleteMapping("/{id}")
