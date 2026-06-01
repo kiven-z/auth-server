@@ -5,15 +5,15 @@
     <!-- 部门详情：直接挂靠用户（user_dept.status IN 1,2；与删除前引用检查口径一致） -->
     <select id="selectBoundUsersByDeptId"
             resultType="com.auth.service.system.admin.model.po.dept.SysDeptBoundUserPO">
-        SELECT ud.user_id        AS userId,
-               u.username        AS username,
-               u.nickname        AS nickname,
-               u.employee_no     AS employeeNo,
-               u.status          AS userStatus,
-               ud.is_primary     AS isPrimary,
-               ud.status         AS relationStatus,
-               ud.position       AS position,
-               ud.join_time      AS joinTime
+        SELECT ud.user_id    AS userId,
+               u.username    AS username,
+               u.nickname    AS nickname,
+               u.employee_no AS employeeNo,
+               u.status      AS userStatus,
+               ud.is_primary AS isPrimary,
+               ud.status     AS relationStatus,
+               ud.position   AS position,
+               ud.join_time  AS joinTime
         FROM user_dept ud
                  INNER JOIN sys_user u ON u.id = ud.user_id AND u.is_deleted = 0
         WHERE ud.dept_id = #{deptId}
@@ -24,11 +24,10 @@
     <!-- 部门详情：本部门岗位 -->
     <select id="selectBoundPostsByDeptId"
             resultType="com.auth.service.system.admin.model.po.dept.SysDeptBoundPostPO">
-        SELECT p.id          AS id,
-               p.post_code   AS postCode,
-               p.post_name   AS postName,
-               p.status      AS status,
-               p.order_num   AS orderNum
+        SELECT p.id        AS id,
+               p.post_code AS postCode,
+               p.post_name AS postName,
+               p.status    AS status
         FROM sys_post p
         WHERE p.dept_id = #{deptId}
           AND p.is_deleted = 0
