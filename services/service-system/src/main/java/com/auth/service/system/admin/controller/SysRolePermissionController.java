@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static com.auth.service.system.admin.exception.SystemAdminResultCode.ASSIGN_COMPLETED;
+
 /**
  * 角色权限分配 Controller。
  *
@@ -44,11 +46,10 @@ public class SysRolePermissionController {
 	@Operation(summary = "全量分配角色权限码（触发 perm_version 失效）")
 	@PreAuthorize("@auth.decide('sysRole:update')")
 	@PostMapping
-	public Result<List<String>> assign(@PathVariable("roleCode") String roleCode,
+	public Result<Void> assign(@PathVariable("roleCode") String roleCode,
 			@Valid @RequestBody SysRolePermissionAssignForm form) {
 		sysRolePermissionService.assignPermissions(roleCode, form.getPermissionCodes());
-		List<String> data = sysRolePermissionService.listPermissionCodes(roleCode);
-		return Result.success(data);
+		return Result.success(null, ASSIGN_COMPLETED.getMessage());
 	}
 
 }

@@ -45,15 +45,6 @@ public class SysRolePermissionServiceImpl implements SysRolePermissionService {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public List<String> listPermissionCodes(String roleCode) {
-		String normalized = requireExistingRoleCode(roleCode);
-		return sysRolePermissionMapper.selectPermissionCodesByRoleCode(normalized);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
 	public List<SysRoleAssignedPermissionRow> listAssignedPermissions(String roleCode) {
 		String normalized = requireExistingRoleCode(roleCode);
 		return SysRolePermissionConverter.INSTANCE

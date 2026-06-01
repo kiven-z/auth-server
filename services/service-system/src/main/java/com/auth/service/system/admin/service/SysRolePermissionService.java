@@ -12,13 +12,6 @@ import java.util.List;
 public interface SysRolePermissionService {
 
 	/**
-	 * 查询角色已分配的权限码列表。
-	 * @param roleCode 角色编码
-	 * @return 权限码列表
-	 */
-	List<String> listPermissionCodes(String roleCode);
-
-	/**
 	 * 查询角色已分配权限
 	 * @param roleCode 角色编码
 	 * @return 已分配权限行列表

@@ -25,13 +25,6 @@ public interface SysRolePermissionMapper extends BaseMapper<SysRolePermissionEnt
 	int deleteByRoleCode(@Param("roleCode") String roleCode);
 
 	/**
-	 * 查询角色已分配的权限码列表
-	 * @param roleCode 角色编码
-	 * @return 权限码列表
-	 */
-	List<String> selectPermissionCodesByRoleCode(@Param("roleCode") String roleCode);
-
-	/**
 	 * 查询角色已分配权限
 	 * @param roleCode 角色编码
 	 * @return 已分配权限列表

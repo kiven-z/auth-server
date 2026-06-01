@@ -9,14 +9,6 @@
         WHERE role_code = #{roleCode}
     </delete>
 
-    <!-- 查询角色已分配的权限码 -->
-    <select id="selectPermissionCodesByRoleCode" resultType="java.lang.String">
-        SELECT permission_code
-        FROM sys_role_permission
-        WHERE role_code = #{roleCode}
-        ORDER BY permission_code
-    </select>
-
     <!-- 查询角色已分配权限 -->
     <select id="selectAssignedPermissionsByRoleCode"
             resultType="com.auth.service.system.admin.model.po.role.SysRoleAssignedPermissionPO">
