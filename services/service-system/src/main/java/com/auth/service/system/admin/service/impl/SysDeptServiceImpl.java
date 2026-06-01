@@ -3,6 +3,7 @@ package com.auth.service.system.admin.service.impl;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.convert.SysDeptConverter;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
+import com.auth.service.system.admin.mapper.SysDeptDetailMapper;
 import com.auth.service.system.admin.mapper.SysDeptMapper;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.form.dept.SysDeptCreateForm;
@@ -28,13 +29,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 import static com.auth.service.system.admin.support.dept.DeptReferenceChecker.ROOT_PARENT_ID;
 
 /**
- * 部门服务实现（查询）。
+ * 部门服务实现。
  *
  * @author Bunny
  */
@@ -51,6 +53,8 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 	private final DeptClosureMaintainer deptClosureMaintainer;
 
 	private final DeptAuthorizationInvalidationTrigger deptInvalidationTrigger;
+
+	private final SysDeptDetailMapper sysDeptDetailMapper;
 
 	private static long normalizeParentId(Long parentId) {
 		if (parentId == null || parentId < ROOT_PARENT_ID) {
@@ -91,7 +95,13 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 			throw new SystemBusinessException(SystemAdminResultCode.DEPT_NOT_FOUND, id);
 		}
 		SysDeptDetailVO detail = SysDeptConverter.INSTANCE.toDetailVo(entity);
-		auditUserDisplayService.enrichAuditUsernames(List.of(detail));
+		detail.setBoundUsers(
+				SysDeptConverter.INSTANCE.toBoundUserItemList(sysDeptDetailMapper.selectBoundUsersByDeptId(id)));
+		detail.setBoundPosts(
+				SysDeptConverter.INSTANCE.toBoundPostItemList(sysDeptDetailMapper.selectBoundPostsByDeptId(id)));
+		detail.setBoundRoles(
+				SysDeptConverter.INSTANCE.toBoundRoleItemList(sysDeptDetailMapper.selectBoundRolesByDeptId(id)));
+		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail));
 		return detail;
 	}
 

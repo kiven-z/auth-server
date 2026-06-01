@@ -9,6 +9,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.io.Serial;
+import java.util.List;
 
 /**
  * 部门详情 VO。
@@ -41,5 +42,14 @@ public class SysDeptDetailVO extends BaseResponse {
 
 	@Schema(title = "备注")
 	private String remark;
+
+	@Schema(title = "关联用户列表（user_dept 反查，仅本部门）")
+	private List<SysDeptBoundUserItemVO> boundUsers;
+
+	@Schema(title = "下属岗位列表（sys_post 反查，仅本部门）")
+	private List<SysDeptBoundPostItemVO> boundPosts;
+
+	@Schema(title = "已授权角色列表（grant_table DEPT 主体反查）")
+	private List<SysDeptBoundRoleItemVO> boundRoles;
 
 }

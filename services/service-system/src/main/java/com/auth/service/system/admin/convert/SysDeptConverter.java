@@ -3,6 +3,12 @@ package com.auth.service.system.admin.convert;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.form.dept.SysDeptCreateForm;
 import com.auth.service.system.admin.model.form.dept.SysDeptUpdateForm;
+import com.auth.service.system.admin.model.po.dept.SysDeptBoundPostPO;
+import com.auth.service.system.admin.model.po.dept.SysDeptBoundRolePO;
+import com.auth.service.system.admin.model.po.dept.SysDeptBoundUserPO;
+import com.auth.service.system.admin.model.vo.dept.SysDeptBoundPostItemVO;
+import com.auth.service.system.admin.model.vo.dept.SysDeptBoundRoleItemVO;
+import com.auth.service.system.admin.model.vo.dept.SysDeptBoundUserItemVO;
 import com.auth.service.system.admin.model.vo.dept.SysDeptDetailVO;
 import com.auth.service.system.admin.model.vo.dept.SysDeptListVO;
 import org.mapstruct.Mapper;
@@ -73,6 +79,51 @@ public interface SysDeptConverter {
 	 */
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "boundUsers", ignore = true)
+	@Mapping(target = "boundPosts", ignore = true)
+	@Mapping(target = "boundRoles", ignore = true)
 	SysDeptDetailVO toDetailVo(SysDeptEntity entity);
+
+	/**
+	 * 关联用户 PO → 详情项 VO
+	 * @param po 持久层投影
+	 * @return 详情项 VO
+	 */
+	SysDeptBoundUserItemVO toBoundUserItem(SysDeptBoundUserPO po);
+
+	/**
+	 * 关联用户 PO 列表 → 详情项 VO 列表
+	 * @param poList 持久层投影列表
+	 * @return 详情项 VO 列表
+	 */
+	List<SysDeptBoundUserItemVO> toBoundUserItemList(List<SysDeptBoundUserPO> poList);
+
+	/**
+	 * 下属岗位 PO → 详情项 VO
+	 * @param po 持久层投影
+	 * @return 详情项 VO
+	 */
+	SysDeptBoundPostItemVO toBoundPostItem(SysDeptBoundPostPO po);
+
+	/**
+	 * 下属岗位 PO 列表 → 详情项 VO 列表
+	 * @param poList 持久层投影列表
+	 * @return 详情项 VO 列表
+	 */
+	List<SysDeptBoundPostItemVO> toBoundPostItemList(List<SysDeptBoundPostPO> poList);
+
+	/**
+	 * 已授权角色 PO → 详情项 VO
+	 * @param po 持久层投影
+	 * @return 详情项 VO
+	 */
+	SysDeptBoundRoleItemVO toBoundRoleItem(SysDeptBoundRolePO po);
+
+	/**
+	 * 已授权角色 PO 列表 → 详情项 VO 列表
+	 * @param poList 持久层投影列表
+	 * @return 详情项 VO 列表
+	 */
+	List<SysDeptBoundRoleItemVO> toBoundRoleItemList(List<SysDeptBoundRolePO> poList);
 
 }
