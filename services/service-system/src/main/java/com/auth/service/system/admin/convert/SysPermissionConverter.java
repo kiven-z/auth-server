@@ -6,6 +6,7 @@ import org.mapstruct.factory.Mappers;
 
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.form.permission.SysPermissionCreateForm;
+import com.auth.service.system.admin.model.vo.permission.SysPermissionDetailVO;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionPageResponse;
 
 /**
@@ -30,6 +31,15 @@ public interface SysPermissionConverter {
 	@Mapping(target = "updateUser", ignore = true)
 	@Mapping(target = "version", ignore = true)
 	SysPermissionEntity toEntity(SysPermissionCreateForm form);
+
+	/**
+	 * 实体 → 详情 VO
+	 * @param entity 权限实体
+	 * @return 详情 VO
+	 */
+	@Mapping(target = "createUsername", ignore = true)
+	@Mapping(target = "updateUsername", ignore = true)
+	SysPermissionDetailVO toDetailVo(SysPermissionEntity entity);
 
 	/**
 	 * Entity → 分页行 VO

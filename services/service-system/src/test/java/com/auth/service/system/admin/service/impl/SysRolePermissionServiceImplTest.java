@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -71,6 +72,38 @@ class SysRolePermissionServiceImplTest {
 		verify(sysRolePermissionMapper).batchInsertRolePermissions(eq("ADMIN"), eq(List.of("sys:user:list")), isNull(),
 				isNull());
 		verify(roleInvalidationTrigger).submitByRoleCodes(List.of("ADMIN"), "assign-permissions:ADMIN");
+	}
+
+	@Test
+	@DisplayName("分配权限：空列表仅清空关联且不校验权限表")
+	void assignEmptyListShouldClearOnly() {
+		SysRoleEntity role = new SysRoleEntity();
+		role.setRoleCode("ADMIN");
+		when(sysRoleMapper.selectOne(any())).thenReturn(role);
+
+		sysRolePermissionService.assignPermissions("ADMIN", List.of());
+
+		verify(sysRolePermissionMapper).deleteByRoleCode("ADMIN");
+		verify(sysPermissionMapper, never()).selectCount(any());
+		verify(sysRolePermissionMapper, never()).batchInsertRolePermissions(any(), any(), any(), any());
+		verify(roleInvalidationTrigger).submitByRoleCodes(List.of("ADMIN"), "assign-permissions:ADMIN");
+	}
+
+	@Test
+	@DisplayName("分配权限：权限码无效时抛出 ROLE_PERMISSION_INVALID")
+	void assignWhenPermissionInvalidShouldThrow() {
+		SysRoleEntity role = new SysRoleEntity();
+		role.setRoleCode("ADMIN");
+		when(sysRoleMapper.selectOne(any())).thenReturn(role);
+		when(sysPermissionMapper.selectCount(any())).thenReturn(0L);
+
+		assertThatThrownBy(() -> sysRolePermissionService.assignPermissions("ADMIN", List.of("missing:perm")))
+			.isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemAdminResultCode.ROLE_PERMISSION_INVALID);
+
+		verify(sysRolePermissionMapper).deleteByRoleCode("ADMIN");
+		verify(sysRolePermissionMapper, never()).batchInsertRolePermissions(any(), any(), any(), any());
 	}
 
 }

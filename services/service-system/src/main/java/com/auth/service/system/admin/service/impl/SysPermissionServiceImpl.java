@@ -1,6 +1,11 @@
 package com.auth.service.system.admin.service.impl;
 
-import cn.hutool.core.collection.CollUtil;
+import java.util.Collections;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.convert.SysPermissionConverter;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
@@ -8,6 +13,7 @@ import com.auth.service.system.admin.mapper.SysPermissionMapper;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.form.permission.SysPermissionCreateForm;
 import com.auth.service.system.admin.model.query.SysPermissionQuery;
+import com.auth.service.system.admin.model.vo.permission.SysPermissionDetailVO;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionPageResponse;
 import com.auth.service.system.admin.service.SysPermissionService;
 import com.auth.service.system.admin.support.sqlbuild.SysPermissionPageOrderSqlBuilder;
@@ -18,11 +24,8 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 系统权限服务实现
@@ -63,6 +66,21 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 	 * {@inheritDoc}
 	 */
 	@Override
+	public SysPermissionDetailVO getDetail(Long id) {
+		SysPermissionEntity entity = baseMapper.selectById(id);
+		if (entity == null) {
+			throw new SystemBusinessException(SystemAdminResultCode.PERMISSION_NOT_FOUND, id);
+		}
+
+		SysPermissionDetailVO detail = SysPermissionConverter.INSTANCE.toDetailVo(entity);
+		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail));
+		return detail;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public void create(SysPermissionCreateForm form) {
 		String permissionCode = form.getPermissionCode();
 		long exists = count(
@@ -72,12 +90,6 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 		}
 
 		SysPermissionEntity entity = SysPermissionConverter.INSTANCE.toEntity(form);
-		if (entity.getOrderNum() == null) {
-			entity.setOrderNum(0);
-		}
-		if (entity.getStatus() == null) {
-			entity.setStatus(Boolean.TRUE);
-		}
 		save(entity);
 	}
 
@@ -96,19 +108,6 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 
 		permissionInvalidationTrigger.submitByPermissionCodes(List.of(permissionCode), "delete:" + permissionCode);
 		log.info("Permission deleted: id={}, permissionCode={}", id, permissionCode);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void deleteByIds(List<Long> ids) {
-		if (CollUtil.isEmpty(ids)) {
-			return;
-		}
-		for (Long id : ids) {
-			deleteById(id);
-		}
 	}
 
 }
