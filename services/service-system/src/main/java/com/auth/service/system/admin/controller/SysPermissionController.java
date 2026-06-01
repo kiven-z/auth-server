@@ -5,6 +5,7 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.form.permission.SysPermissionCreateForm;
 import com.auth.service.system.admin.model.query.SysPermissionQuery;
+import com.auth.service.system.admin.model.vo.permission.SysPermissionDetailVO;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionPageResponse;
 import com.auth.service.system.admin.service.SysPermissionService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -14,8 +15,6 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * 系统权限管理 Controller
@@ -43,19 +42,19 @@ public class SysPermissionController {
 		return Result.success(result);
 	}
 
+	@Operation(summary = "权限详情")
+	@PreAuthorize("@auth.decide('sysPermission:detail')")
+	@GetMapping("/{id}")
+	public Result<SysPermissionDetailVO> detail(@PathVariable("id") Long id) {
+		SysPermissionDetailVO vo = sysPermissionService.getDetail(id);
+		return Result.success(vo);
+	}
+
 	@Operation(summary = "新增权限")
 	@PreAuthorize("@auth.decide('sysPermission:create')")
 	@PostMapping
 	public Result<Void> create(@Valid @RequestBody SysPermissionCreateForm form) {
 		sysPermissionService.create(form);
-		return Result.success();
-	}
-
-	@Operation(summary = "批量删除权限")
-	@PreAuthorize("@auth.decide('sysPermission:delete')")
-	@DeleteMapping
-	public Result<Void> deleteBatch(@RequestBody List<Long> ids) {
-		sysPermissionService.deleteByIds(ids);
 		return Result.success();
 	}
 

@@ -4,6 +4,7 @@ import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.SysPermissionMapper;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.form.permission.SysPermissionCreateForm;
+import com.auth.service.system.admin.model.vo.permission.SysPermissionDetailVO;
 import com.auth.service.system.authorization.dispatch.trigger.PermissionAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
@@ -18,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.lang.reflect.Field;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -62,6 +64,34 @@ class SysPermissionServiceImplTest {
 		assertThatThrownBy(() -> sysPermissionService.create(form)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemAdminResultCode.PERMISSION_CODE_DUPLICATE);
+	}
+
+	@Test
+	@DisplayName("权限详情：不存在时抛出 PERMISSION_NOT_FOUND")
+	void getDetailThrowsWhenNotFound() {
+		when(sysPermissionMapper.selectById(9L)).thenReturn(null);
+
+		assertThatThrownBy(() -> sysPermissionService.getDetail(9L)).isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemAdminResultCode.PERMISSION_NOT_FOUND);
+	}
+
+	@Test
+	@DisplayName("权限详情：返回 VO 并填充审计用户名")
+	void getDetailReturnsVoAndEnrichesAuditUsernames() {
+		SysPermissionEntity entity = new SysPermissionEntity();
+		entity.setId(3L);
+		entity.setPermissionCode("sys:dept:query");
+		entity.setPermissionName("部门查询");
+		entity.setPermissionType(1);
+		entity.setStatus(true);
+		when(sysPermissionMapper.selectById(3L)).thenReturn(entity);
+
+		SysPermissionDetailVO detail = sysPermissionService.getDetail(3L);
+
+		assertThat(detail.getPermissionCode()).isEqualTo("sys:dept:query");
+		assertThat(detail.getPermissionType()).isEqualTo(1);
+		verify(auditUserDisplayService).enrichAuditUsernames(any(List.class));
 	}
 
 	@Test

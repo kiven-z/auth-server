@@ -4,10 +4,9 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.form.permission.SysPermissionCreateForm;
 import com.auth.service.system.admin.model.query.SysPermissionQuery;
+import com.auth.service.system.admin.model.vo.permission.SysPermissionDetailVO;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionPageResponse;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-
-import java.util.List;
 
 /**
  * 系统权限服务
@@ -25,6 +24,13 @@ public interface SysPermissionService {
 	PageResponse<SysPermissionPageResponse> getPage(Page<SysPermissionEntity> pageParams, SysPermissionQuery query);
 
 	/**
+	 * 权限详情
+	 * @param id 权限主键
+	 * @return 详情 VO
+	 */
+	SysPermissionDetailVO getDetail(Long id);
+
+	/**
 	 * 新增权限
 	 * @param form 新增表单
 	 */
@@ -35,11 +41,5 @@ public interface SysPermissionService {
 	 * @param id 权限主键
 	 */
 	void deleteById(Long id);
-
-	/**
-	 * 批量物理删除权限。
-	 * @param ids 权限主键列表
-	 */
-	void deleteByIds(List<Long> ids);
 
 }
