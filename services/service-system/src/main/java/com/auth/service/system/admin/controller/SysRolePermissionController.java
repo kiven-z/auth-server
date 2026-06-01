@@ -5,6 +5,7 @@ import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.admin.model.form.role.SysRolePermissionAssignForm;
+import com.auth.service.system.admin.model.vo.role.SysRoleAssignedPermissionRow;
 import com.auth.service.system.admin.service.SysRolePermissionService;
 import com.auth.service.system.common.model.audit.SystemAuditBizModule;
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,8 +35,8 @@ public class SysRolePermissionController {
 	@Operation(summary = "查询角色已分配权限码")
 	@PreAuthorize("@auth.decide('sysRole:query')")
 	@GetMapping
-	public Result<List<String>> list(@PathVariable("roleCode") String roleCode) {
-		return Result.success(sysRolePermissionService.listPermissionCodes(roleCode));
+	public Result<List<SysRoleAssignedPermissionRow>> list(@PathVariable("roleCode") String roleCode) {
+		return Result.success(sysRolePermissionService.listAssignedPermissions(roleCode));
 	}
 
 	@OperationLog(targetType = "ROLE_PERMISSION", serviceDomain = AuditServiceDomain.SYSTEM,

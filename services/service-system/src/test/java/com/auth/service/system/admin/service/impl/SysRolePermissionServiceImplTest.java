@@ -5,6 +5,8 @@ import com.auth.service.system.admin.mapper.SysPermissionMapper;
 import com.auth.service.system.admin.mapper.SysRoleMapper;
 import com.auth.service.system.admin.mapper.SysRolePermissionMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
+import com.auth.service.system.admin.model.po.role.SysRoleAssignedPermissionPO;
+import com.auth.service.system.admin.model.vo.role.SysRoleAssignedPermissionRow;
 import com.auth.service.system.authorization.dispatch.trigger.RoleAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import org.junit.jupiter.api.DisplayName;
@@ -16,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -45,6 +48,25 @@ class SysRolePermissionServiceImplTest {
 
 	@InjectMocks
 	private SysRolePermissionServiceImpl sysRolePermissionService;
+
+	@Test
+	@DisplayName("查询已分配权限：返回权限码与名称")
+	void listAssignedPermissionsShouldReturnCodeAndName() {
+		SysRoleEntity role = new SysRoleEntity();
+		role.setRoleCode("ADMIN");
+		when(sysRoleMapper.selectOne(any())).thenReturn(role);
+
+		SysRoleAssignedPermissionPO po = new SysRoleAssignedPermissionPO();
+		po.setPermissionCode("sys:user:list");
+		po.setPermissionName("用户查询");
+		when(sysRolePermissionMapper.selectAssignedPermissionsByRoleCode("ADMIN")).thenReturn(List.of(po));
+
+		List<SysRoleAssignedPermissionRow> rows = sysRolePermissionService.listAssignedPermissions("ADMIN");
+
+		assertThat(rows).hasSize(1);
+		assertThat(rows.get(0).getPermissionCode()).isEqualTo("sys:user:list");
+		assertThat(rows.get(0).getPermissionName()).isEqualTo("用户查询");
+	}
 
 	@Test
 	@DisplayName("分配权限：角色不存在时抛出 ROLE_NOT_FOUND")

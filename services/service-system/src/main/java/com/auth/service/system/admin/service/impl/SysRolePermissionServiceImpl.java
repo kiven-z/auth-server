@@ -4,11 +4,13 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
+import com.auth.service.system.admin.convert.SysRolePermissionConverter;
 import com.auth.service.system.admin.mapper.SysPermissionMapper;
 import com.auth.service.system.admin.mapper.SysRoleMapper;
 import com.auth.service.system.admin.mapper.SysRolePermissionMapper;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
+import com.auth.service.system.admin.model.vo.role.SysRoleAssignedPermissionRow;
 import com.auth.service.system.admin.service.SysRolePermissionService;
 import com.auth.service.system.authorization.dispatch.trigger.RoleAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
@@ -46,6 +48,16 @@ public class SysRolePermissionServiceImpl implements SysRolePermissionService {
 	public List<String> listPermissionCodes(String roleCode) {
 		String normalized = requireExistingRoleCode(roleCode);
 		return sysRolePermissionMapper.selectPermissionCodesByRoleCode(normalized);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public List<SysRoleAssignedPermissionRow> listAssignedPermissions(String roleCode) {
+		String normalized = requireExistingRoleCode(roleCode);
+		return SysRolePermissionConverter.INSTANCE
+			.toAssignedPermissionRowList(sysRolePermissionMapper.selectAssignedPermissionsByRoleCode(normalized));
 	}
 
 	/**

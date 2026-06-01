@@ -2,6 +2,7 @@ package com.auth.service.system.admin.mapper;
 
 import com.auth.service.system.admin.model.entity.SysRolePermissionEntity;
 import com.auth.service.system.admin.model.po.permission.SysPermissionBoundRolePO;
+import com.auth.service.system.admin.model.po.role.SysRoleAssignedPermissionPO;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -29,6 +30,13 @@ public interface SysRolePermissionMapper extends BaseMapper<SysRolePermissionEnt
 	 * @return 权限码列表
 	 */
 	List<String> selectPermissionCodesByRoleCode(@Param("roleCode") String roleCode);
+
+	/**
+	 * 查询角色已分配权限
+	 * @param roleCode 角色编码
+	 * @return 已分配权限列表
+	 */
+	List<SysRoleAssignedPermissionPO> selectAssignedPermissionsByRoleCode(@Param("roleCode") String roleCode);
 
 	/**
 	 * 按权限码反查已绑定角色

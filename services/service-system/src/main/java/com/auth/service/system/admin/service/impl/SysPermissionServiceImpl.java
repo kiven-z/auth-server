@@ -1,11 +1,7 @@
 package com.auth.service.system.admin.service.impl;
 
-import java.util.Collections;
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.convert.SysPermissionConverter;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
@@ -32,10 +28,13 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-
-import cn.hutool.core.collection.CollUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * 系统权限服务实现
@@ -174,6 +173,8 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 		List<String> boundRoleCodes = sysRolePermissionMapper.selectBoundRolesByPermissionCode(permissionCode)
 			.stream()
 			.map(SysPermissionBoundRolePO::getRoleCode)
+			.filter(CharSequenceUtil::isNotBlank)
+			.distinct()
 			.toList();
 		if (CollUtil.isNotEmpty(boundRoleCodes)) {
 			roleInvalidationTrigger.submitByRoleCodes(boundRoleCodes, "delete-permission:" + permissionCode);
