@@ -8,6 +8,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.io.Serial;
+import java.util.List;
 
 /**
  * 角色详情 VO
@@ -44,5 +45,8 @@ public class SysRoleDetailVO extends BaseResponse {
 
 	@Schema(title = "备注")
 	private String remark;
+
+	@Schema(title = "已分配权限列表（sys_role_permission 正查）")
+	private List<SysRoleBoundPermissionItemVO> boundPermissions;
 
 }

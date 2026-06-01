@@ -3,7 +3,10 @@ package com.auth.service.system.admin.service.impl;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.GrantTableMapper;
 import com.auth.service.system.admin.mapper.SysRoleMapper;
+import com.auth.service.system.admin.mapper.SysRolePermissionMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
+import com.auth.service.system.admin.model.po.role.SysRoleAssignedPermissionPO;
+import com.auth.service.system.admin.model.vo.role.SysRoleDetailVO;
 import com.auth.service.system.authorization.dispatch.trigger.RoleAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
@@ -18,8 +21,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.lang.reflect.Field;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -46,6 +51,9 @@ class SysRoleServiceImplTest {
 	@Mock
 	private GrantTableMapper grantTableMapper;
 
+	@Mock
+	private SysRolePermissionMapper sysRolePermissionMapper;
+
 	private SysRoleServiceImpl sysRoleService;
 
 	private static SysRoleEntity roleEntity(Long id, String roleCode) {
@@ -60,10 +68,45 @@ class SysRoleServiceImplTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		sysRoleService = new SysRoleServiceImpl(auditUserDisplayService, roleInvalidationTrigger, grantTableMapper);
+		sysRoleService = new SysRoleServiceImpl(auditUserDisplayService, roleInvalidationTrigger, grantTableMapper,
+				sysRolePermissionMapper);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysRoleService, sysRoleMapper);
+	}
+
+	@Test
+	@DisplayName("角色详情：不存在时抛出 ROLE_NOT_FOUND")
+	void getDetailThrowsWhenNotFound() {
+		when(sysRoleMapper.selectById(9L)).thenReturn(null);
+
+		assertThatThrownBy(() -> sysRoleService.getDetail(9L)).isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemAdminResultCode.ROLE_NOT_FOUND);
+
+		verifyNoInteractions(sysRolePermissionMapper);
+	}
+
+	@Test
+	@DisplayName("角色详情：返回已分配权限列表")
+	void getDetailShouldIncludeBoundPermissions() {
+		when(sysRoleMapper.selectById(1L)).thenReturn(roleEntity(1L, "ADMIN"));
+
+		SysRoleAssignedPermissionPO permission = new SysRoleAssignedPermissionPO();
+		permission.setPermissionCode("sys:user:query");
+		permission.setPermissionName("用户查询");
+		permission.setPermissionType(1);
+		permission.setStatus(true);
+		when(sysRolePermissionMapper.selectAssignedPermissionsByRoleCode("ADMIN")).thenReturn(List.of(permission));
+
+		SysRoleDetailVO detail = sysRoleService.getDetail(1L);
+
+		assertThat(detail.getRoleCode()).isEqualTo("ADMIN");
+		assertThat(detail.getBoundPermissions()).hasSize(1);
+		assertThat(detail.getBoundPermissions().get(0).getPermissionCode()).isEqualTo("sys:user:query");
+		assertThat(detail.getBoundPermissions().get(0).getPermissionType()).isEqualTo(1);
+		verify(sysRolePermissionMapper).selectAssignedPermissionsByRoleCode("ADMIN");
+		verify(auditUserDisplayService).enrichAuditUsernames(anyList());
 	}
 
 	@Test

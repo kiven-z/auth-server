@@ -3,9 +3,11 @@ package com.auth.service.system.admin.service.impl;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.convert.SysRoleConverter;
 import com.auth.service.system.admin.convert.SysRoleDetailVoConverter;
+import com.auth.service.system.admin.convert.SysRolePermissionConverter;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.GrantTableMapper;
 import com.auth.service.system.admin.mapper.SysRoleMapper;
+import com.auth.service.system.admin.mapper.SysRolePermissionMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.form.role.SysRoleCreateForm;
 import com.auth.service.system.admin.model.form.role.SysRoleUpdateForm;
@@ -24,6 +26,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +39,7 @@ import java.util.List;
  *
  * @author Bunny
  */
+@RequiredArgsConstructor
 @Slf4j
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -47,12 +51,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 
 	private final GrantTableMapper grantTableMapper;
 
-	public SysRoleServiceImpl(AuditUserDisplayService auditUserDisplayService,
-			RoleAuthorizationInvalidationTrigger roleInvalidationTrigger, GrantTableMapper grantTableMapper) {
-		this.auditUserDisplayService = auditUserDisplayService;
-		this.roleInvalidationTrigger = roleInvalidationTrigger;
-		this.grantTableMapper = grantTableMapper;
-	}
+	private final SysRolePermissionMapper sysRolePermissionMapper;
 
 	/**
 	 * {@inheritDoc}
@@ -78,6 +77,8 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 		}
 
 		SysRoleDetailVO detail = SysRoleDetailVoConverter.toDetailVo(entity);
+		detail.setBoundPermissions(SysRolePermissionConverter.INSTANCE.toBoundPermissionItemList(
+				sysRolePermissionMapper.selectAssignedPermissionsByRoleCode(entity.getRoleCode())));
 		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail));
 		return detail;
 	}

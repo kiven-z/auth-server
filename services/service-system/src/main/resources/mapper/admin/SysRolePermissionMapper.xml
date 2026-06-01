@@ -13,7 +13,9 @@
     <select id="selectAssignedPermissionsByRoleCode"
             resultType="com.auth.service.system.admin.model.po.role.SysRoleAssignedPermissionPO">
         SELECT rp.permission_code                              AS permissionCode,
-               COALESCE(p.permission_name, rp.permission_code) AS permissionName
+               COALESCE(p.permission_name, rp.permission_code) AS permissionName,
+               p.permission_type                               AS permissionType,
+               p.status                                        AS status
         FROM sys_role_permission rp
                  LEFT JOIN sys_permission p ON p.permission_code = rp.permission_code
         WHERE rp.role_code = #{roleCode}
