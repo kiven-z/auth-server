@@ -123,12 +123,10 @@
     <select id="selectRoleCodesByPermissionCodes" resultType="java.lang.String">
         SELECT DISTINCT rp.role_code
         FROM sys_role_permission rp
-                 INNER JOIN sys_permission p ON p.permission_code = rp.permission_code
         WHERE rp.permission_code IN
         <foreach collection="permissionCodes" item="permissionCode" open="(" separator="," close=")">
             #{permissionCode}
         </foreach>
-          AND p.status = 1
     </select>
 
     <!-- 策略码桥接：查询关联角色码（role_policy 表落地后生效） -->
