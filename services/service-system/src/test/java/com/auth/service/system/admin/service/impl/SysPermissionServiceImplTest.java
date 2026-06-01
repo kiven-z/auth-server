@@ -78,7 +78,6 @@ class SysPermissionServiceImplTest {
 		form.setId(id);
 		form.setPermissionCode(permissionCode);
 		form.setPermissionName("测试权限");
-		form.setPermissionType(1);
 		form.setStatus(status);
 		form.setOrderNum(0);
 		return form;
@@ -132,6 +131,20 @@ class SysPermissionServiceImplTest {
 			.isEqualTo(SystemAdminResultCode.PERMISSION_CODE_DUPLICATE);
 
 		verifyNoInteractions(permissionInvalidationTrigger);
+	}
+
+	@Test
+	@DisplayName("更新权限：不修改 permission_type")
+	void updateShouldNotChangePermissionType() {
+		SysPermissionEntity entity = permissionEntity(1L);
+		entity.setPermissionType(0);
+		SysPermissionUpdateForm form = updateForm(1L, "sys:user:query", true);
+		form.setPermissionName("重命名");
+		when(sysPermissionMapper.selectById(1L)).thenReturn(entity);
+
+		sysPermissionService.update(form);
+
+		assertThat(entity.getPermissionType()).isEqualTo(0);
 	}
 
 	@Test

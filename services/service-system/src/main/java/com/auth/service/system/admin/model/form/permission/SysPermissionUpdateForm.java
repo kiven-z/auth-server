@@ -3,8 +3,6 @@ package com.auth.service.system.admin.model.form.permission;
 import com.auth.common.web.valid.group.UpdateGroup;
 import com.auth.module.security.contract.convention.AuthCodeConvention;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -43,12 +41,6 @@ public class SysPermissionUpdateForm implements Serializable {
 	@Size(max = 128, message = "权限名称长度不能超过128个字符")
 	@NotBlank(message = "权限名称不能为空")
 	private String permissionName;
-
-	@Schema(title = "权限类型(0=按钮, 1=API)", requiredMode = Schema.RequiredMode.REQUIRED)
-	@Max(value = 1, message = "权限类型值无效")
-	@Min(value = 0, message = "权限类型值无效")
-	@NotNull(message = "权限类型不能为空")
-	private Integer permissionType;
 
 	@Schema(title = "显示顺序")
 	private Integer orderNum;

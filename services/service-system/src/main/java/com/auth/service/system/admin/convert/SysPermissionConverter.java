@@ -44,6 +44,7 @@ public interface SysPermissionConverter {
 	 * @param entity 已有实体
 	 */
 	@Mapping(target = "id", ignore = true)
+	@Mapping(target = "permissionType", ignore = true)
 	@Mapping(target = "createTime", ignore = true)
 	@Mapping(target = "updateTime", ignore = true)
 	@Mapping(target = "createUser", ignore = true)
