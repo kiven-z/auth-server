@@ -3,6 +3,7 @@ package com.auth.service.system.admin.support.dept;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.DeptReferenceMapper;
 import com.auth.service.system.admin.mapper.SysDeptMapper;
+import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -22,6 +23,10 @@ public class DeptReferenceChecker {
 	 */
 	public static final long ROOT_PARENT_ID = 0L;
 
+	private final SysDeptMapper sysDeptMapper;
+
+	private final DeptReferenceMapper deptReferenceMapper;
+
 	/**
 	 * 将表单 parentId 规范为可落库的父部门 ID（null 或负数视为顶级）。
 	 * @param parentId 原始父部门 ID
@@ -34,10 +39,6 @@ public class DeptReferenceChecker {
 		return parentId;
 	}
 
-	private final SysDeptMapper sysDeptMapper;
-
-	private final DeptReferenceMapper deptReferenceMapper;
-
 	/**
 	 * 加载未删除部门，不存在则抛业务异常。
 	 * @param deptId 部门 ID
@@ -46,6 +47,19 @@ public class DeptReferenceChecker {
 		if (sysDeptMapper.countActiveById(deptId) == 0) {
 			throw new SystemBusinessException(SystemAdminResultCode.DEPT_NOT_FOUND, deptId);
 		}
+	}
+
+	/**
+	 * 加载未删除部门，不存在则抛业务异常。
+	 * @param deptId 部门 ID
+	 * @return 部门实体
+	 */
+	public SysDeptEntity getExistingActive(Long deptId) {
+		SysDeptEntity existing = sysDeptMapper.selectById(deptId);
+		if (existing == null) {
+			throw new SystemBusinessException(SystemAdminResultCode.DEPT_NOT_FOUND, deptId);
+		}
+		return existing;
 	}
 
 	/**

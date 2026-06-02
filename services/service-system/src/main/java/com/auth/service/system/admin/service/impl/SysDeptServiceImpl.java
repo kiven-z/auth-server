@@ -9,6 +9,9 @@ import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.form.dept.SysDeptCreateForm;
 import com.auth.service.system.admin.model.form.dept.SysDeptMoveForm;
 import com.auth.service.system.admin.model.form.dept.SysDeptUpdateForm;
+import com.auth.service.system.admin.model.po.dept.SysDeptBoundPostPO;
+import com.auth.service.system.admin.model.po.dept.SysDeptBoundRolePO;
+import com.auth.service.system.admin.model.po.dept.SysDeptBoundUserPO;
 import com.auth.service.system.admin.model.query.SysDeptQuery;
 import com.auth.service.system.admin.model.vo.dept.SysDeptDetailVO;
 import com.auth.service.system.admin.model.vo.dept.SysDeptListVO;
@@ -16,7 +19,6 @@ import com.auth.service.system.admin.service.SysDeptService;
 import com.auth.service.system.admin.support.dept.DeptClosureMaintainer;
 import com.auth.service.system.admin.support.dept.DeptReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.DeptAuthorizationInvalidationTrigger;
-import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.common.support.BusinessKeyAssert;
 import com.auth.service.system.common.support.FieldChangeSupport;
@@ -35,7 +37,7 @@ import java.util.List;
 import static com.auth.service.system.admin.support.dept.DeptReferenceChecker.ROOT_PARENT_ID;
 
 /**
- * 部门服务实现。
+ * 部门服务实现
  *
  * @author Bunny
  */
@@ -63,7 +65,7 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 		List<SysDeptEntity> entities = baseMapper.selectListByQuery(query);
 		List<SysDeptListVO> list = SysDeptConverter.INSTANCE.toListVoList(entities);
 
-		// 补充审计用户名。
+		// 补充审计用户名
 		auditUserDisplayService.enrichAuditUsernames(list);
 		return list;
 	}
@@ -76,7 +78,7 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 		IPage<SysDeptEntity> entityPage = baseMapper.selectPageByQuery(pageParams, query);
 		IPage<SysDeptListVO> result = entityPage.convert(SysDeptConverter.INSTANCE::toListVo);
 
-		// 补充审计用户名。
+		// 补充审计用户名
 		auditUserDisplayService.enrichAuditUsernames(result);
 		return PageResponse.of(result);
 	}
@@ -86,18 +88,19 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 	 */
 	@Override
 	public SysDeptDetailVO getDetail(Long id) {
-		SysDeptEntity entity = getExistingActive(id);
+		SysDeptEntity entity = deptReferenceChecker.getExistingActive(id);
 
-		// 转换为详情 VO。
 		SysDeptDetailVO detail = SysDeptConverter.INSTANCE.toDetailVo(entity);
-		detail.setBoundUsers(
-				SysDeptConverter.INSTANCE.toBoundUserItemList(sysDeptDetailMapper.selectBoundUsersByDeptId(id)));
-		detail.setBoundPosts(
-				SysDeptConverter.INSTANCE.toBoundPostItemList(sysDeptDetailMapper.selectBoundPostsByDeptId(id)));
-		detail.setBoundRoles(
-				SysDeptConverter.INSTANCE.toBoundRoleItemList(sysDeptDetailMapper.selectBoundRolesByDeptId(id)));
+		List<SysDeptBoundUserPO> boundUsers = sysDeptDetailMapper.selectBoundUsersByDeptId(id);
+		detail.setBoundUsers(SysDeptConverter.INSTANCE.toBoundUserItemList(boundUsers));
 
-		// 补充审计用户名。
+		List<SysDeptBoundPostPO> boundPosts = sysDeptDetailMapper.selectBoundPostsByDeptId(id);
+		detail.setBoundPosts(SysDeptConverter.INSTANCE.toBoundPostItemList(boundPosts));
+
+		List<SysDeptBoundRolePO> boundRoles = sysDeptDetailMapper.selectBoundRolesByDeptId(id);
+		detail.setBoundRoles(SysDeptConverter.INSTANCE.toBoundRoleItemList(boundRoles));
+
+		// 补充审计用户名
 		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail));
 		return detail;
 	}
@@ -107,23 +110,22 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 	 */
 	@Override
 	public void create(SysDeptCreateForm form) {
-		// 规范化父部门 ID 并校验父部门存在（顶级跳过校验）。
+		// 规范化父部门 ID 并校验父部门存在（顶级跳过校验）
 		long parentId = deptReferenceChecker.normalizeAndRequireActiveParent(form.getParentId());
 
-		// 校验部门编码唯一性。
+		// 校验部门编码唯一性
 		String deptCode = form.getDeptCode();
 		BusinessKeyAssert.requireAbsent(this,
 				Wrappers.<SysDeptEntity>lambdaQuery().eq(SysDeptEntity::getDeptCode, deptCode),
 				SystemAdminResultCode.DEPT_CODE_DUPLICATE, deptCode);
 
-		// 转换为实体对象。
 		SysDeptEntity entity = SysDeptConverter.INSTANCE.toEntity(form);
 		entity.setDeptCode(deptCode);
 		entity.setParentId(parentId);
 
-		// 保存部门。
 		save(entity);
-		// 维护部门闭包。
+
+		// 维护部门闭包
 		deptClosureMaintainer.insertNode(entity.getId(), parentId);
 	}
 
@@ -133,7 +135,7 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 	@Override
 	public void updateMeta(SysDeptUpdateForm form) {
 		Long id = form.getId();
-		SysDeptEntity existing = getExistingActive(id);
+		SysDeptEntity existing = deptReferenceChecker.getExistingActive(id);
 
 		String newDeptCode = form.getDeptCode();
 		boolean codeChanged = FieldChangeSupport.codeChanged(existing.getDeptCode(), newDeptCode);
@@ -147,6 +149,10 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 
 		SysDeptConverter.INSTANCE.applyUpdateForm(form, existing);
 		existing.setDeptCode(newDeptCode);
+
+		// 触发部门授权失效
+		deptInvalidationTrigger.submitByDeptIds(List.of(id), "update:" + id);
+
 		updateById(existing);
 	}
 
@@ -155,7 +161,8 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 	 */
 	@Override
 	public void move(Long deptId, SysDeptMoveForm form) {
-		SysDeptEntity existing = getExistingActive(deptId);
+		// 校验部门是否存在
+		SysDeptEntity existing = deptReferenceChecker.getExistingActive(deptId);
 		long newParentId = deptReferenceChecker.normalizeAndRequireActiveParent(form.getParentId());
 		long oldParentId = existing.getParentId() != null ? existing.getParentId() : ROOT_PARENT_ID;
 
@@ -163,11 +170,14 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 			return;
 		}
 
+		// 校验移动目标是否有效。
 		deptReferenceChecker.requireMoveTargetValid(deptId, newParentId);
-
 		existing.setParentId(newParentId);
 		updateById(existing);
+
+		// 维护部门闭包
 		deptClosureMaintainer.moveNode(deptId, newParentId);
+		// 触发部门授权失效
 		deptInvalidationTrigger.submitByDeptIds(List.of(deptId), "move:" + deptId);
 	}
 
@@ -176,27 +186,19 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 	 */
 	@Override
 	public void deleteById(Long deptId) {
-		getExistingActive(deptId);
+		// 校验部门是否存在
+		deptReferenceChecker.getExistingActive(deptId);
+		// 校验部门是否有子部门
 		deptReferenceChecker.requireNoActiveChildren(deptId);
+		// 校验部门是否有子部门
 		deptReferenceChecker.requireSubtreeUnused(deptId);
 
+		// 维护部门闭包
 		deptClosureMaintainer.removeClosurePaths(deptId);
-		removeById(deptId);
+		// 触发部门授权失效
 		deptInvalidationTrigger.submitByDeptIds(List.of(deptId), "delete:" + deptId);
-		log.info("Department deleted (sys_dept logical, dept_closure physical): id={}", deptId);
-	}
 
-	/**
-	 * 加载未删除部门，不存在则抛业务异常。
-	 * @param deptId 部门 ID
-	 * @return 部门实体
-	 */
-	private SysDeptEntity getExistingActive(Long deptId) {
-		SysDeptEntity existing = getById(deptId);
-		if (existing == null) {
-			throw new SystemBusinessException(SystemAdminResultCode.DEPT_NOT_FOUND, deptId);
-		}
-		return existing;
+		removeById(deptId);
 	}
 
 }
