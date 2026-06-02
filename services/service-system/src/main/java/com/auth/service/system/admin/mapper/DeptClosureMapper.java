@@ -31,4 +31,10 @@ public interface DeptClosureMapper {
 	 */
 	void callMove(@Param("deptId") Long deptId, @Param("newParentId") Long newParentId);
 
+	/**
+	 * 逻辑删除部门后移除闭包路径（仅叶子节点场景）
+	 * @param deptId 被逻辑删除的部门 ID
+	 */
+	void callRemoveLogical(@Param("deptId") Long deptId);
+
 }

@@ -6,6 +6,7 @@
     <select id="selectDescendantDeptIdsByAncestorIds" resultType="long">
         SELECT DISTINCT dc.descendant_id
         FROM dept_closure dc
+        INNER JOIN sys_dept d ON d.id = dc.descendant_id AND d.is_deleted = 0
         <where>
             <choose>
                 <when test="ancestorDeptIds != null and ancestorDeptIds.size() > 0">

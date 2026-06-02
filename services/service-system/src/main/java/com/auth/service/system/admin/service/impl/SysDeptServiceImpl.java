@@ -183,6 +183,8 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 		deptReferenceChecker.requireSubtreeUnused(deptId);
 
 		removeById(deptId);
+		deptClosureMaintainer.removeLogicalNode(deptId);
+		deptInvalidationTrigger.submitByDeptIds(List.of(deptId), "delete:" + deptId);
 		log.info("Department logically deleted: id={}", deptId);
 	}
 

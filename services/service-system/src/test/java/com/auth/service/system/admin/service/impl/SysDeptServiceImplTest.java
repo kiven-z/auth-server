@@ -29,7 +29,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -157,6 +159,22 @@ class SysDeptServiceImplTest {
 		verify(sysDeptDetailMapper).selectBoundPostsByDeptId(deptId);
 		verify(sysDeptDetailMapper).selectBoundRolesByDeptId(deptId);
 		verify(auditUserDisplayService).enrichAuditUsernames(anyList());
+	}
+
+	@Test
+	@DisplayName("逻辑删除部门：删除主表并清理闭包、触发授权失效")
+	void deleteByIdRemovesEntityAndClosure() {
+		Long deptId = 20L;
+		when(sysDeptMapper.selectById(deptId)).thenReturn(activeDept(deptId));
+		doReturn(true).when(sysDeptService).removeById(deptId);
+
+		sysDeptService.deleteById(deptId);
+
+		verify(deptReferenceChecker).requireNoActiveChildren(deptId);
+		verify(deptReferenceChecker).requireSubtreeUnused(deptId);
+		verify(sysDeptService).removeById(deptId);
+		verify(deptClosureMaintainer).removeLogicalNode(deptId);
+		verify(deptInvalidationTrigger).submitByDeptIds(eq(List.of(deptId)), eq("delete:" + deptId));
 	}
 
 }

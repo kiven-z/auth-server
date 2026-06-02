@@ -19,4 +19,9 @@
                            #{newParentId, mode=IN, jdbcType=BIGINT})}
     </update>
 
+    <!-- 逻辑删除部门：移除闭包路径 -->
+    <update id="callRemoveLogical" statementType="CALLABLE">
+        {CALL sp_dept_remove_logical(#{deptId, mode=IN, jdbcType=BIGINT})}
+    </update>
+
 </mapper>
