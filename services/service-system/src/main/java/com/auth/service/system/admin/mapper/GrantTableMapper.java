@@ -4,7 +4,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 /**
- * grant_table 只读查询（角色删除前引用检查）。
+ * grant_table 读写
  *
  * @author Bunny
  */

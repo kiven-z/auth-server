@@ -18,8 +18,7 @@ class AuthorizationGrantForwardFragmentsSqlContractTest {
 	private static String readClasspathText() throws IOException {
 		try (InputStream in = AuthorizationGrantForwardFragmentsSqlContractTest.class
 			.getResourceAsStream("/mapper/AuthorizationGrantForwardFragments.xml")) {
-			assertThat(in).as("resource %s must exist", "/mapper/AuthorizationGrantForwardFragments.xml")
-				.isNotNull();
+			assertThat(in).as("resource %s must exist", "/mapper/AuthorizationGrantForwardFragments.xml").isNotNull();
 			return new String(in.readAllBytes(), StandardCharsets.UTF_8);
 		}
 	}

@@ -1,8 +1,44 @@
 package com.auth.service.system.admin.controller;
 
-import org.springframework.web.bind.annotation.RestController;
+import com.auth.common.core.model.response.Result;
+import com.auth.module.security.contract.annotation.OperationLog;
+import com.auth.module.security.contract.api.audit.AuditServiceDomain;
+import com.auth.module.security.contract.api.audit.OperationLogKind;
+import com.auth.service.system.common.model.audit.SystemAuditBizModule;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
+import static com.auth.service.system.admin.exception.SystemAdminResultCode.ASSIGN_COMPLETED;
+
+/**
+ * 部门扩展管理
+ *
+ * @author Bunny
+ */
+@Tag(name = "部门扩展管理")
+@RequestMapping("/api/system/dept")
 @RestController
 public class SysDeptManageController {
+
+	@Operation(summary = "查询部门已分配角色")
+	@PreAuthorize("@auth.decide('sysDept:query')")
+	@GetMapping("/{deptId}/roles")
+	public Result<List<Object>> listRoles(@PathVariable("deptId") Long deptId) {
+		return Result.success();
+	}
+
+	@OperationLog(targetType = "DEPT_ROLE", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.GRANT_TABLE, operation = OperationLogKind.UPDATE)
+	@Operation(summary = "全量覆盖部门角色授权（grant_table DEPT 主体，触发用户授权画像失效）")
+	@PreAuthorize("@auth.decide('sysDept:update')")
+	@PutMapping("/{deptId}/roles")
+	public Result<Void> replaceRoles(@PathVariable("deptId") Long deptId) {
+
+		return Result.success(null, ASSIGN_COMPLETED.getMessage());
+	}
 
 }

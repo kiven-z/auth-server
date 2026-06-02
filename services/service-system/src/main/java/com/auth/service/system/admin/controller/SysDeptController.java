@@ -63,7 +63,8 @@ public class SysDeptController {
 	@PreAuthorize("@auth.decide('sysDept:query')")
 	@GetMapping("/{id}")
 	public Result<SysDeptDetailVO> detail(@PathVariable("id") Long id) {
-		return Result.success(sysDeptService.getDetail(id));
+		SysDeptDetailVO detail = sysDeptService.getDetail(id);
+		return Result.success(detail);
 	}
 
 	@OperationLog(targetType = "DEPT", serviceDomain = AuditServiceDomain.SYSTEM,
