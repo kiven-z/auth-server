@@ -215,10 +215,11 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
         // 校验部门是否有子部门
         deptReferenceChecker.requireSubtreeUnused(deptId);
 
+        // 先提交失效（反查依赖 dept_closure）；再清理闭包与主表
+        deptInvalidationTrigger.submitByDeptIds(List.of(deptId), "delete:" + deptId);
+
         // 维护部门闭包
         deptClosureMaintainer.removeClosurePaths(deptId);
-        // 触发部门授权失效
-        deptInvalidationTrigger.submitByDeptIds(List.of(deptId), "delete:" + deptId);
 
         removeById(deptId);
     }

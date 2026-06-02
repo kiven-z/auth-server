@@ -13,7 +13,8 @@
                                SELECT 'DEPT' AS sub_type, dc.ancestor_id AS sub_id
                                FROM user_dept ud
                                         JOIN dept_closure dc ON ud.dept_id = dc.descendant_id
-                                        JOIN sys_dept d ON d.id = ud.dept_id AND d.is_deleted = 0
+                                        JOIN sys_dept d ON d.id = ud.dept_id AND d.is_deleted = 0 AND d.status = 1
+                                        JOIN sys_dept da ON da.id = dc.ancestor_id AND da.is_deleted = 0 AND da.status = 1
                                WHERE ud.user_id = #{userId}
                                  AND ud.status IN (1, 2)
                                UNION ALL

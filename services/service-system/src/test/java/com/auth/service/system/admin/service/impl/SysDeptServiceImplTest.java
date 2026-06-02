@@ -234,8 +234,8 @@ class SysDeptServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("删除部门：先物理清理闭包再逻辑删主表并触发授权失效")
-	void deleteByIdRemovesClosureThenEntity() {
+	@DisplayName("删除部门：先触发授权失效再清理闭包并逻辑删主表")
+	void deleteByIdInvalidatesBeforeRemovingClosure() {
 		Long deptId = 20L;
 		when(deptReferenceChecker.getExistingActive(deptId)).thenReturn(activeDept(deptId));
 		doReturn(true).when(sysDeptService).removeById(deptId);
@@ -244,10 +244,10 @@ class SysDeptServiceImplTest {
 
 		verify(deptReferenceChecker).requireNoActiveChildren(deptId);
 		verify(deptReferenceChecker).requireSubtreeUnused(deptId);
-		var inOrder = inOrder(deptClosureMaintainer, sysDeptService);
+		var inOrder = inOrder(deptInvalidationTrigger, deptClosureMaintainer, sysDeptService);
+		inOrder.verify(deptInvalidationTrigger).submitByDeptIds(eq(List.of(deptId)), eq("delete:" + deptId));
 		inOrder.verify(deptClosureMaintainer).removeClosurePaths(deptId);
 		inOrder.verify(sysDeptService).removeById(deptId);
-		verify(deptInvalidationTrigger).submitByDeptIds(eq(List.of(deptId)), eq("delete:" + deptId));
 	}
 
 }
