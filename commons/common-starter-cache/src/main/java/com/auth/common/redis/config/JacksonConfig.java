@@ -12,8 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -44,10 +42,9 @@ public class JacksonConfig {
 	 * 配置 ObjectMapper 实例
 	 * @return 配置好的 ObjectMapper 实例
 	 */
-	@Bean
-	@Primary
-	public ObjectMapper objectMapper() {
-		log.info("Registering ObjectMapper");
+	@Bean("redisObjectMapper")
+	public ObjectMapper redisObjectMapper() {
+		log.info("Registering redisObjectMapper");
 		ObjectMapper objectMapper = new ObjectMapper();
 
 		// 添加 JavaTimeModule 模块
@@ -70,24 +67,6 @@ public class JacksonConfig {
 		objectMapper.setTimeZone(TimeZone.getTimeZone(ZoneId.systemDefault()));
 
 		return objectMapper;
-	}
-
-	/**
-	 * 配置 Jackson2ObjectMapperBuilder 实例
-	 * @param objectMapper 已配置的 ObjectMapper 实例
-	 * @return Jackson2ObjectMapperBuilder 实例
-	 */
-	@Bean
-	public Jackson2ObjectMapperBuilder jackson2ObjectMapperBuilder(ObjectMapper objectMapper) {
-		log.info("Registering Jackson2ObjectMapperBuilder");
-
-		Jackson2ObjectMapperBuilder jackson2ObjectMapperBuilder = new Jackson2ObjectMapperBuilder()
-			.timeZone(TimeZone.getTimeZone(ZoneId.systemDefault()))
-			.simpleDateFormat(DATE_TIME_FORMAT);
-
-		jackson2ObjectMapperBuilder.configure(objectMapper);
-
-		return jackson2ObjectMapperBuilder;
 	}
 
 }

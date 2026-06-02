@@ -4,19 +4,19 @@
 
     <!-- 新增部门：维护 dept_closure -->
     <update id="callInsert" statementType="CALLABLE">
-        {CALL sp_dept_insert(#{deptId, mode=IN, jdbcType=BIGINT},
-                             #{parentId, mode=IN, jdbcType=BIGINT})}
+        CALL sp_dept_insert(#{deptId, mode=IN, jdbcType=BIGINT},
+                            #{parentId, mode=IN, jdbcType=BIGINT})
     </update>
 
     <!-- 物理删除子树：移除闭包路径 -->
     <update id="callDelete" statementType="CALLABLE">
-        {CALL sp_dept_delete(#{deptId, mode=IN, jdbcType=BIGINT})}
+        CALL sp_dept_delete(#{deptId, mode=IN, jdbcType=BIGINT})
     </update>
 
     <!-- 移动部门：重算闭包路径 -->
     <update id="callMove" statementType="CALLABLE">
-        {CALL sp_dept_move(#{deptId, mode=IN, jdbcType=BIGINT},
-                           #{newParentId, mode=IN, jdbcType=BIGINT})}
+        CALL sp_dept_move(#{deptId, mode=IN, jdbcType=BIGINT},
+                          #{newParentId, mode=IN, jdbcType=BIGINT})
     </update>
 
 </mapper>

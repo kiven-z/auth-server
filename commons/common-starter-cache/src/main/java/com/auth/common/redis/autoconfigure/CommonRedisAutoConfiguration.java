@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Import;
  * @author Bunny
  */
 @Slf4j
-@AutoConfiguration(before = { JacksonAutoConfiguration.class })
+@AutoConfiguration(after = { JacksonAutoConfiguration.class })
 @Import({ JacksonConfig.class, RedisConfig.class })
 public class CommonRedisAutoConfiguration implements ApplicationRunner {
 
