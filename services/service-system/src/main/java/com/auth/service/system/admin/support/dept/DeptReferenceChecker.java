@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
  *
  * @author Bunny
  */
+
 @RequiredArgsConstructor
 @Component
 public class DeptReferenceChecker {
@@ -20,6 +21,18 @@ public class DeptReferenceChecker {
 	 * 顶级部门的 parent_id
 	 */
 	public static final long ROOT_PARENT_ID = 0L;
+
+	/**
+	 * 将表单 parentId 规范为可落库的父部门 ID（null 或负数视为顶级）。
+	 * @param parentId 原始父部门 ID
+	 * @return 规范化后的父部门 ID
+	 */
+	public static long normalizeParentId(Long parentId) {
+		if (parentId == null || parentId < ROOT_PARENT_ID) {
+			return ROOT_PARENT_ID;
+		}
+		return parentId;
+	}
 
 	private final SysDeptMapper sysDeptMapper;
 
@@ -46,6 +59,17 @@ public class DeptReferenceChecker {
 		if (sysDeptMapper.countActiveById(parentId) == 0) {
 			throw new SystemBusinessException(SystemAdminResultCode.DEPT_PARENT_NOT_FOUND, parentId);
 		}
+	}
+
+	/**
+	 * 规范化父部门 ID 并校验父部门存在（顶级跳过校验）。
+	 * @param rawParentId 原始父部门 ID
+	 * @return 规范化后的父部门 ID
+	 */
+	public long normalizeAndRequireActiveParent(Long rawParentId) {
+		long parentId = normalizeParentId(rawParentId);
+		requireActiveParent(parentId > ROOT_PARENT_ID ? parentId : null);
+		return parentId;
 	}
 
 	/**

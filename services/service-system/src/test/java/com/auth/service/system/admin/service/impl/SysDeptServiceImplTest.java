@@ -4,6 +4,7 @@ import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.SysDeptDetailMapper;
 import com.auth.service.system.admin.mapper.SysDeptMapper;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
+import com.auth.service.system.admin.model.form.dept.SysDeptCreateForm;
 import com.auth.service.system.admin.model.po.dept.SysDeptBoundPostPO;
 import com.auth.service.system.admin.model.po.dept.SysDeptBoundRolePO;
 import com.auth.service.system.admin.model.po.dept.SysDeptBoundUserPO;
@@ -26,7 +27,10 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -71,11 +75,34 @@ class SysDeptServiceImplTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		sysDeptService = new SysDeptServiceImpl(auditUserDisplayService, deptReferenceChecker, deptClosureMaintainer,
-				deptInvalidationTrigger, sysDeptDetailMapper);
+		sysDeptService = spy(new SysDeptServiceImpl(auditUserDisplayService, deptReferenceChecker,
+				deptClosureMaintainer, deptInvalidationTrigger, sysDeptDetailMapper));
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysDeptService, sysDeptMapper);
+	}
+
+	@Test
+	@DisplayName("新增部门：保存后维护闭包表")
+	void createPersistsEntityAndMaintainsClosure() {
+		SysDeptCreateForm form = new SysDeptCreateForm();
+		form.setParentId(1L);
+		form.setDeptName("测试部");
+		form.setDeptCode("D_TEST");
+		form.setStatus(true);
+		form.setOrderNum(1);
+
+		when(deptReferenceChecker.normalizeAndRequireActiveParent(1L)).thenReturn(1L);
+		when(sysDeptMapper.selectCount(any())).thenReturn(0L);
+		doAnswer(invocation -> {
+			SysDeptEntity entity = invocation.getArgument(0);
+			entity.setId(100L);
+			return true;
+		}).when(sysDeptService).save(any(SysDeptEntity.class));
+
+		sysDeptService.create(form);
+
+		verify(deptClosureMaintainer).insertNode(100L, 1L);
 	}
 
 	@Test

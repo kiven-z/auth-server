@@ -1,5 +1,13 @@
 package com.auth.service.system.admin.service.impl;
 
+import static com.auth.service.system.admin.support.dept.DeptReferenceChecker.ROOT_PARENT_ID;
+
+import java.util.Collections;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.convert.SysDeptConverter;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
@@ -24,16 +32,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-
-import static com.auth.service.system.admin.support.dept.DeptReferenceChecker.ROOT_PARENT_ID;
 
 /**
  * 部门服务实现。
@@ -56,13 +57,6 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 
 	private final SysDeptDetailMapper sysDeptDetailMapper;
 
-	private static long normalizeParentId(Long parentId) {
-		if (parentId == null || parentId < ROOT_PARENT_ID) {
-			return ROOT_PARENT_ID;
-		}
-		return parentId;
-	}
-
 	/**
 	 * {@inheritDoc}
 	 */
@@ -70,6 +64,8 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 	public List<SysDeptListVO> listFlat(SysDeptQuery query) {
 		List<SysDeptEntity> entities = baseMapper.selectListByQuery(query);
 		List<SysDeptListVO> list = SysDeptConverter.INSTANCE.toListVoList(entities);
+
+		// 补充审计用户名。
 		auditUserDisplayService.enrichAuditUsernames(list);
 		return list;
 	}
@@ -81,6 +77,8 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 	public PageResponse<SysDeptListVO> pageFlat(Page<SysDeptEntity> pageParams, SysDeptQuery query) {
 		IPage<SysDeptEntity> entityPage = baseMapper.selectPageByQuery(pageParams, query);
 		IPage<SysDeptListVO> result = entityPage.convert(SysDeptConverter.INSTANCE::toListVo);
+
+		// 补充审计用户名。
 		auditUserDisplayService.enrichAuditUsernames(result);
 		return PageResponse.of(result);
 	}
@@ -90,10 +88,9 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 	 */
 	@Override
 	public SysDeptDetailVO getDetail(Long id) {
-		SysDeptEntity entity = baseMapper.selectById(id);
-		if (entity == null || Integer.valueOf(1).equals(entity.getIsDeleted())) {
-			throw new SystemBusinessException(SystemAdminResultCode.DEPT_NOT_FOUND, id);
-		}
+		SysDeptEntity entity = getExistingActive(id);
+
+		// 转换为详情 VO。
 		SysDeptDetailVO detail = SysDeptConverter.INSTANCE.toDetailVo(entity);
 		detail.setBoundUsers(
 				SysDeptConverter.INSTANCE.toBoundUserItemList(sysDeptDetailMapper.selectBoundUsersByDeptId(id)));
@@ -101,6 +98,8 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 				SysDeptConverter.INSTANCE.toBoundPostItemList(sysDeptDetailMapper.selectBoundPostsByDeptId(id)));
 		detail.setBoundRoles(
 				SysDeptConverter.INSTANCE.toBoundRoleItemList(sysDeptDetailMapper.selectBoundRolesByDeptId(id)));
+
+		// 补充审计用户名。
 		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail));
 		return detail;
 	}
@@ -110,24 +109,24 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 	 */
 	@Override
 	public void create(SysDeptCreateForm form) {
-		long parentId = normalizeParentId(form.getParentId());
-		deptReferenceChecker.requireActiveParent(parentId > ROOT_PARENT_ID ? parentId : null);
+		// 规范化父部门 ID 并校验父部门存在（顶级跳过校验）。
+		long parentId = deptReferenceChecker.normalizeAndRequireActiveParent(form.getParentId());
 
+		// 校验部门编码唯一性。
 		String deptCode = form.getDeptCode();
 		BusinessKeyAssert.requireAbsent(this,
 				Wrappers.<SysDeptEntity>lambdaQuery().eq(SysDeptEntity::getDeptCode, deptCode),
 				SystemAdminResultCode.DEPT_CODE_DUPLICATE, deptCode);
 
+		// 转换为实体对象。
 		SysDeptEntity entity = SysDeptConverter.INSTANCE.toEntity(form);
 		entity.setDeptCode(deptCode);
 		entity.setParentId(parentId);
-		if (entity.getOrderNum() == null) {
-			entity.setOrderNum(0);
-		}
 
+		// 保存部门。
 		save(entity);
+		// 维护部门闭包。
 		deptClosureMaintainer.insertNode(entity.getId(), parentId);
-		log.info("Department created: id={}, parentId={}, deptCode={}", entity.getId(), parentId, deptCode);
 	}
 
 	/**
@@ -151,7 +150,6 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 		SysDeptConverter.INSTANCE.applyUpdateForm(form, existing);
 		existing.setDeptCode(newDeptCode);
 		updateById(existing);
-		log.info("Department meta updated: id={}, deptCode={}", id, newDeptCode);
 	}
 
 	/**
@@ -160,7 +158,7 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 	@Override
 	public void move(Long deptId, SysDeptMoveForm form) {
 		SysDeptEntity existing = getExistingActive(deptId);
-		long newParentId = normalizeParentId(form.getParentId());
+		long newParentId = deptReferenceChecker.normalizeAndRequireActiveParent(form.getParentId());
 		long oldParentId = existing.getParentId() != null ? existing.getParentId() : ROOT_PARENT_ID;
 
 		if (oldParentId == newParentId) {
@@ -168,13 +166,11 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 		}
 
 		deptReferenceChecker.requireMoveTargetValid(deptId, newParentId);
-		deptReferenceChecker.requireActiveParent(newParentId > ROOT_PARENT_ID ? newParentId : null);
 
 		existing.setParentId(newParentId);
 		updateById(existing);
 		deptClosureMaintainer.moveNode(deptId, newParentId);
 		deptInvalidationTrigger.submitByDeptIds(List.of(deptId), "move:" + deptId);
-		log.info("Department moved: id={}, oldParentId={}, newParentId={}", deptId, oldParentId, newParentId);
 	}
 
 	/**
@@ -190,9 +186,14 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 		log.info("Department logically deleted: id={}", deptId);
 	}
 
+	/**
+	 * 加载未删除部门，不存在则抛业务异常。
+	 * @param deptId 部门 ID
+	 * @return 部门实体
+	 */
 	private SysDeptEntity getExistingActive(Long deptId) {
 		SysDeptEntity existing = getById(deptId);
-		if (existing == null || Objects.equals(existing.getIsDeleted(), 1)) {
+		if (existing == null) {
 			throw new SystemBusinessException(SystemAdminResultCode.DEPT_NOT_FOUND, deptId);
 		}
 		return existing;
