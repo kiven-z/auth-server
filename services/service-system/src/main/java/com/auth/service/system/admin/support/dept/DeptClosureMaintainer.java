@@ -5,12 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 /**
- * 闭包表维护入口：仅树结构变更时调用存储过程。
- *
- * <p>
- * 改部门名称/编码/排序/状态勿调用本类；逻辑删除调用 {@link #removeLogicalNode}；
- * 物理删除子树才调用 {@link #deleteSubtree}。
- * </p>
+ * 闭包表维护入口：部门树结构变更时调用存储过程
  *
  * @author Bunny
  */
@@ -18,44 +13,32 @@ import org.springframework.stereotype.Component;
 @Component
 public class DeptClosureMaintainer {
 
-    private final DeptClosureMapper deptClosureMapper;
+	private final DeptClosureMapper deptClosureMapper;
 
-    /**
-     * 新增部门后写入闭包路径。
-     *
-     * @param deptId   部门 ID
-     * @param parentId 父部门 ID
-     */
-    public void insertNode(long deptId, long parentId) {
-        deptClosureMapper.callInsert(deptId, parentId);
-    }
+	/**
+	 * 新增部门后写入闭包路径
+	 * @param deptId 部门 ID
+	 * @param parentId 父部门 ID
+	 */
+	public void insertNode(long deptId, long parentId) {
+		deptClosureMapper.callInsert(deptId, parentId);
+	}
 
-    /**
-     * 物理删除子树时移除闭包路径。
-     *
-     * @param deptId 子树根 ID
-     */
-    public void deleteSubtree(long deptId) {
-        deptClosureMapper.callDeleteSubtree(deptId);
-    }
+	/**
+	 * 物理删除该部门在 {@code dept_closure} 中的全部路径（{@code sp_dept_delete}）
+	 * @param deptId 部门 ID
+	 */
+	public void removeClosurePaths(long deptId) {
+		deptClosureMapper.callDelete(deptId);
+	}
 
-    /**
-     * 变更父部门后重算闭包（调用前须已更新 {@code sys_dept.parent_id}）。
-     *
-     * @param deptId      被移动部门 ID
-     * @param newParentId 新父部门 ID
-     */
-    public void moveNode(long deptId, long newParentId) {
-        deptClosureMapper.callMove(deptId, newParentId);
-    }
-
-    /**
-     * 逻辑删除部门后移除闭包路径。
-     *
-     * @param deptId 部门 ID
-     */
-    public void removeLogicalNode(long deptId) {
-        deptClosureMapper.callRemoveLogical(deptId);
-    }
+	/**
+	 * 变更父部门后重算闭包（调用前须已更新 {@code sys_dept.parent_id}）
+	 * @param deptId 被移动部门 ID
+	 * @param newParentId 新父部门 ID
+	 */
+	public void moveNode(long deptId, long newParentId) {
+		deptClosureMapper.callMove(deptId, newParentId);
+	}
 
 }

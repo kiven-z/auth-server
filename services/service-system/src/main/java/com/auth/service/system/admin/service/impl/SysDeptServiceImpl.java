@@ -1,13 +1,5 @@
 package com.auth.service.system.admin.service.impl;
 
-import static com.auth.service.system.admin.support.dept.DeptReferenceChecker.ROOT_PARENT_ID;
-
-import java.util.Collections;
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.convert.SysDeptConverter;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
@@ -32,9 +24,15 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
+import java.util.List;
+
+import static com.auth.service.system.admin.support.dept.DeptReferenceChecker.ROOT_PARENT_ID;
 
 /**
  * 部门服务实现。
@@ -182,10 +180,10 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 		deptReferenceChecker.requireNoActiveChildren(deptId);
 		deptReferenceChecker.requireSubtreeUnused(deptId);
 
+		deptClosureMaintainer.removeClosurePaths(deptId);
 		removeById(deptId);
-		deptClosureMaintainer.removeLogicalNode(deptId);
 		deptInvalidationTrigger.submitByDeptIds(List.of(deptId), "delete:" + deptId);
-		log.info("Department logically deleted: id={}", deptId);
+		log.info("Department deleted (sys_dept logical, dept_closure physical): id={}", deptId);
 	}
 
 	/**

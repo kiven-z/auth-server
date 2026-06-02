@@ -22,7 +22,7 @@ public interface DeptClosureMapper {
 	 * 物理删除子树在闭包表中的全部路径
 	 * @param deptId 子树根节点 ID
 	 */
-	void callDeleteSubtree(@Param("deptId") Long deptId);
+	void callDelete(@Param("deptId") Long deptId);
 
 	/**
 	 * 变更父部门后重算闭包路径（须已更新 sys_dept.parent_id）
@@ -30,11 +30,5 @@ public interface DeptClosureMapper {
 	 * @param newParentId 新父部门 ID，顶级传 0
 	 */
 	void callMove(@Param("deptId") Long deptId, @Param("newParentId") Long newParentId);
-
-	/**
-	 * 逻辑删除部门后移除闭包路径（仅叶子节点场景）
-	 * @param deptId 被逻辑删除的部门 ID
-	 */
-	void callRemoveLogical(@Param("deptId") Long deptId);
 
 }

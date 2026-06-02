@@ -32,6 +32,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -162,8 +163,8 @@ class SysDeptServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("逻辑删除部门：删除主表并清理闭包、触发授权失效")
-	void deleteByIdRemovesEntityAndClosure() {
+	@DisplayName("删除部门：先物理清理闭包再逻辑删主表并触发授权失效")
+	void deleteByIdRemovesClosureThenEntity() {
 		Long deptId = 20L;
 		when(sysDeptMapper.selectById(deptId)).thenReturn(activeDept(deptId));
 		doReturn(true).when(sysDeptService).removeById(deptId);
@@ -172,8 +173,9 @@ class SysDeptServiceImplTest {
 
 		verify(deptReferenceChecker).requireNoActiveChildren(deptId);
 		verify(deptReferenceChecker).requireSubtreeUnused(deptId);
-		verify(sysDeptService).removeById(deptId);
-		verify(deptClosureMaintainer).removeLogicalNode(deptId);
+		var inOrder = inOrder(deptClosureMaintainer, sysDeptService);
+		inOrder.verify(deptClosureMaintainer).removeClosurePaths(deptId);
+		inOrder.verify(sysDeptService).removeById(deptId);
 		verify(deptInvalidationTrigger).submitByDeptIds(eq(List.of(deptId)), eq("delete:" + deptId));
 	}
 

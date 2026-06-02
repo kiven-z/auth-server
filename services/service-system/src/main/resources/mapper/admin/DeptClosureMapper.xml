@@ -9,7 +9,7 @@
     </update>
 
     <!-- 物理删除子树：移除闭包路径 -->
-    <update id="callDeleteSubtree" statementType="CALLABLE">
+    <update id="callDelete" statementType="CALLABLE">
         {CALL sp_dept_delete(#{deptId, mode=IN, jdbcType=BIGINT})}
     </update>
 
@@ -17,11 +17,6 @@
     <update id="callMove" statementType="CALLABLE">
         {CALL sp_dept_move(#{deptId, mode=IN, jdbcType=BIGINT},
                            #{newParentId, mode=IN, jdbcType=BIGINT})}
-    </update>
-
-    <!-- 逻辑删除部门：移除闭包路径 -->
-    <update id="callRemoveLogical" statementType="CALLABLE">
-        {CALL sp_dept_remove_logical(#{deptId, mode=IN, jdbcType=BIGINT})}
     </update>
 
 </mapper>
