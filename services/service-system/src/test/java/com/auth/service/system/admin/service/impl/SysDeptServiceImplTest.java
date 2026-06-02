@@ -5,6 +5,8 @@ import com.auth.service.system.admin.mapper.SysDeptDetailMapper;
 import com.auth.service.system.admin.mapper.SysDeptMapper;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.form.dept.SysDeptCreateForm;
+import com.auth.service.system.admin.model.form.dept.SysDeptMoveForm;
+import com.auth.service.system.admin.model.form.dept.SysDeptUpdateForm;
 import com.auth.service.system.admin.model.po.dept.SysDeptBoundPostPO;
 import com.auth.service.system.admin.model.po.dept.SysDeptBoundRolePO;
 import com.auth.service.system.admin.model.po.dept.SysDeptBoundUserPO;
@@ -33,6 +35,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -111,7 +114,8 @@ class SysDeptServiceImplTest {
 	@Test
 	@DisplayName("部门详情：不存在或已删除时抛出 DEPT_NOT_FOUND")
 	void getDetailThrowsWhenNotFound() {
-		when(sysDeptMapper.selectById(99L)).thenReturn(null);
+		when(deptReferenceChecker.getExistingActive(99L))
+			.thenThrow(new SystemBusinessException(SystemAdminResultCode.DEPT_NOT_FOUND, 99L));
 
 		assertThatThrownBy(() -> sysDeptService.getDetail(99L)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
@@ -122,7 +126,7 @@ class SysDeptServiceImplTest {
 	@DisplayName("部门详情：填充基础字段与三类关联列表")
 	void getDetailReturnsVoWithBoundLists() {
 		Long deptId = 10L;
-		when(sysDeptMapper.selectById(deptId)).thenReturn(activeDept(deptId));
+		when(deptReferenceChecker.getExistingActive(deptId)).thenReturn(activeDept(deptId));
 
 		SysDeptBoundUserPO boundUser = new SysDeptBoundUserPO();
 		boundUser.setUserId(100L);
@@ -163,10 +167,77 @@ class SysDeptServiceImplTest {
 	}
 
 	@Test
+	@DisplayName("更新部门：父部门未变时不维护闭包")
+	void updateMetaWithoutParentChangeSkipsClosure() {
+		Long deptId = 30L;
+		SysDeptEntity entity = activeDept(deptId);
+		when(deptReferenceChecker.getExistingActive(deptId)).thenReturn(entity);
+		when(deptReferenceChecker.normalizeAndRequireActiveParent(0L)).thenReturn(0L);
+		doReturn(true).when(sysDeptService).updateById(any(SysDeptEntity.class));
+
+		SysDeptUpdateForm form = new SysDeptUpdateForm();
+		form.setId(deptId);
+		form.setParentId(0L);
+		form.setDeptName("研发部");
+		form.setDeptCode("RD");
+		form.setStatus(true);
+
+		sysDeptService.updateMeta(form);
+
+		verify(deptClosureMaintainer, never()).moveNode(deptId, 0L);
+		verify(deptInvalidationTrigger).submitByDeptIds(eq(List.of(deptId)), eq("update:" + deptId));
+		verify(deptInvalidationTrigger, never()).submitByDeptIds(eq(List.of(deptId)), eq("move:" + deptId));
+	}
+
+	@Test
+	@DisplayName("更新部门：父部门变更时维护闭包并触发移动类授权失效")
+	void updateMetaWithParentChangeMaintainsClosureAndMoveInvalidation() {
+		Long deptId = 31L;
+		SysDeptEntity entity = activeDept(deptId);
+		when(deptReferenceChecker.getExistingActive(deptId)).thenReturn(entity);
+		when(deptReferenceChecker.normalizeAndRequireActiveParent(5L)).thenReturn(5L);
+		doReturn(true).when(sysDeptService).updateById(any(SysDeptEntity.class));
+
+		SysDeptUpdateForm form = new SysDeptUpdateForm();
+		form.setId(deptId);
+		form.setParentId(5L);
+		form.setDeptName("研发部");
+		form.setDeptCode("RD");
+		form.setStatus(true);
+
+		sysDeptService.updateMeta(form);
+
+		verify(deptReferenceChecker).requireMoveTargetValid(deptId, 5L);
+		verify(deptClosureMaintainer).moveNode(deptId, 5L);
+		verify(deptInvalidationTrigger).submitByDeptIds(eq(List.of(deptId)), eq("move:" + deptId));
+		verify(deptInvalidationTrigger).submitByDeptIds(eq(List.of(deptId)), eq("update:" + deptId));
+	}
+
+	@Test
+	@DisplayName("移动部门：父部门变更时复用 doMove 维护闭包")
+	void moveWithNewParentMaintainsClosure() {
+		Long deptId = 32L;
+		SysDeptEntity entity = activeDept(deptId);
+		when(deptReferenceChecker.getExistingActive(deptId)).thenReturn(entity);
+		when(deptReferenceChecker.normalizeAndRequireActiveParent(8L)).thenReturn(8L);
+		doReturn(true).when(sysDeptService).updateById(any(SysDeptEntity.class));
+
+		SysDeptMoveForm form = new SysDeptMoveForm();
+		form.setParentId(8L);
+
+		sysDeptService.move(deptId, form);
+
+		verify(deptReferenceChecker).requireMoveTargetValid(deptId, 8L);
+		verify(deptClosureMaintainer).moveNode(deptId, 8L);
+		verify(deptInvalidationTrigger).submitByDeptIds(eq(List.of(deptId)), eq("move:" + deptId));
+		verify(deptInvalidationTrigger, never()).submitByDeptIds(eq(List.of(deptId)), eq("update:" + deptId));
+	}
+
+	@Test
 	@DisplayName("删除部门：先物理清理闭包再逻辑删主表并触发授权失效")
 	void deleteByIdRemovesClosureThenEntity() {
 		Long deptId = 20L;
-		when(sysDeptMapper.selectById(deptId)).thenReturn(activeDept(deptId));
+		when(deptReferenceChecker.getExistingActive(deptId)).thenReturn(activeDept(deptId));
 		doReturn(true).when(sysDeptService).removeById(deptId);
 
 		sysDeptService.deleteById(deptId);

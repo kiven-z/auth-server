@@ -78,7 +78,7 @@ public class SysDeptController {
 
 	@OperationLog(targetType = "DEPT", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_DEPT, operation = OperationLogKind.UPDATE)
-	@Operation(summary = "更新部门（不含父部门）")
+	@Operation(summary = "更新部门")
 	@PreAuthorize("@auth.decide('sysDept:update')")
 	@PutMapping("/{id}")
 	public Result<Void> update(@PathVariable("id") Long id,

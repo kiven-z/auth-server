@@ -12,7 +12,7 @@ import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * 部门元数据更新表单（不含父部门变更）。
+ * 部门更新表单
  */
 @Schema(name = "SysDeptUpdateForm", title = "部门更新表单")
 @Getter
@@ -25,6 +25,10 @@ public class SysDeptUpdateForm implements Serializable {
 	@Schema(title = "部门主键", requiredMode = Schema.RequiredMode.REQUIRED)
 	@NotNull(groups = UpdateGroup.class, message = "部门ID不能为空")
 	private Long id;
+
+	@Schema(title = "父部门ID，0 表示顶级", requiredMode = Schema.RequiredMode.REQUIRED)
+	@NotNull(message = "父部门不能为空")
+	private Long parentId;
 
 	@Schema(title = "部门名称", requiredMode = Schema.RequiredMode.REQUIRED)
 	@Size(max = 100, message = "部门名称长度不能超过100个字符")
