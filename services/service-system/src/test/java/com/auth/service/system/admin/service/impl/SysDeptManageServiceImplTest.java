@@ -5,11 +5,11 @@ import com.auth.module.security.contract.dto.invalidation.GrantSubjectKey;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.GrantTableMapper;
 import com.auth.service.system.admin.mapper.SysDeptDetailMapper;
-import com.auth.service.system.admin.mapper.SysRoleMapper;
 import com.auth.service.system.admin.model.form.dept.SysDeptAssignRoleForm;
 import com.auth.service.system.admin.model.po.dept.SysDeptBoundRolePO;
 import com.auth.service.system.admin.model.vo.dept.SysDeptAssignedRoleRow;
 import com.auth.service.system.admin.support.dept.DeptReferenceChecker;
+import com.auth.service.system.admin.support.role.RoleGrantReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.GrantAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import org.junit.jupiter.api.DisplayName;
@@ -25,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -46,7 +47,7 @@ class SysDeptManageServiceImplTest {
 	private GrantTableMapper grantTableMapper;
 
 	@Mock
-	private SysRoleMapper sysRoleMapper;
+	private RoleGrantReferenceChecker roleGrantReferenceChecker;
 
 	@Mock
 	private GrantAuthorizationInvalidationTrigger grantInvalidationTrigger;
@@ -79,10 +80,9 @@ class SysDeptManageServiceImplTest {
 		SysDeptAssignRoleForm form = new SysDeptAssignRoleForm();
 		form.setRoleCodes(List.of("BIZ_ADMIN", "CUSTOM_A"));
 
-		when(sysRoleMapper.selectCount(any())).thenReturn(2L);
-
 		sysDeptManageService.replaceDeptRoles(deptId, form);
 
+		verify(roleGrantReferenceChecker).requireDeptGrantEligibleRoles(List.of("BIZ_ADMIN", "CUSTOM_A"));
 		verify(grantTableMapper).deleteBySubject(GrantTableSubjectType.DEPT.name(), deptId);
 		verify(grantTableMapper).batchInsertSubjectRoleGrants(eq(GrantTableSubjectType.DEPT.name()), eq(deptId),
 				eq(List.of("BIZ_ADMIN", "CUSTOM_A")), any());
@@ -99,20 +99,21 @@ class SysDeptManageServiceImplTest {
 
 		sysDeptManageService.replaceDeptRoles(deptId, form);
 
+		verify(roleGrantReferenceChecker).requireDeptGrantEligibleRoles(List.of());
 		verify(grantTableMapper).deleteBySubject(GrantTableSubjectType.DEPT.name(), deptId);
 		verify(grantTableMapper, never()).batchInsertSubjectRoleGrants(any(), any(), any(), any());
 		verify(grantInvalidationTrigger).submitByGrantSubjects(any(), eq("replace-dept-roles:10"));
-		verify(sysRoleMapper, never()).selectCount(any());
 	}
 
 	@Test
-	@DisplayName("覆盖分配：角色不存在、未启用或 roleType 不允许时抛出 DEPT_ROLE_INVALID")
+	@DisplayName("覆盖分配：角色校验失败时不写 grant")
 	void replaceDeptRolesThrowsWhenRoleInvalid() {
 		Long deptId = 10L;
 		SysDeptAssignRoleForm form = new SysDeptAssignRoleForm();
 		form.setRoleCodes(List.of("SYS_ADMIN"));
 
-		when(sysRoleMapper.selectCount(any())).thenReturn(0L);
+		doThrow(new SystemBusinessException(SystemAdminResultCode.DEPT_ROLE_INVALID)).when(roleGrantReferenceChecker)
+			.requireDeptGrantEligibleRoles(List.of("SYS_ADMIN"));
 
 		assertThatThrownBy(() -> sysDeptManageService.replaceDeptRoles(deptId, form))
 			.isInstanceOf(SystemBusinessException.class)

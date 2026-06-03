@@ -11,7 +11,6 @@ import com.auth.service.system.common.model.audit.SystemAuditBizModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,12 +24,15 @@ import static com.auth.service.system.admin.exception.SystemAdminResultCode.ASSI
  * @author Bunny
  */
 @Tag(name = "部门扩展管理")
-@RequiredArgsConstructor
 @RequestMapping("/api/system/dept")
 @RestController
 public class SysDeptManageController {
 
 	private final SysDeptManageService sysDeptManageService;
+
+	public SysDeptManageController(SysDeptManageService sysDeptManageService) {
+		this.sysDeptManageService = sysDeptManageService;
+	}
 
 	@Operation(summary = "查询部门已分配角色")
 	@PreAuthorize("@auth.decide('sysDept:query')")
