@@ -1,7 +1,8 @@
 package com.auth.service.system.admin.convert;
 
 import com.auth.service.system.admin.model.vo.menu.RouteNodeVO;
-import com.auth.service.system.admin.support.MenuRouteTreeNode;
+import com.auth.service.system.admin.support.menu.MenuRouteMetaVoFactory;
+import com.auth.service.system.admin.support.menu.MenuRouteTreeNode;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
@@ -22,8 +23,7 @@ public interface MenuRouteNodeConverter {
 	/**
 	 * 将树节点转为路由 VO（单层，不含 children 递归）
 	 * @param node 建树中间节点
-	 * @return 路由 VO（meta 由
-	 * {@link com.auth.service.system.admin.support.MenuRouteMetaVoFactory} 填充）
+	 * @return 路由 VO（meta 由 {@link MenuRouteMetaVoFactory} 填充）
 	 */
 	@Mapping(target = "path", source = "node.menu.path")
 	@Mapping(target = "name", source = "node.menu.name")
