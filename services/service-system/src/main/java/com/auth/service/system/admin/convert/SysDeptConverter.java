@@ -53,7 +53,7 @@ public interface SysDeptConverter {
 	SysDeptEntity toEntity(SysDeptForm form);
 
 	/**
-	 * 更新表单合并到已有实体（不修改 parentId）。
+	 * 更新表单合并到已有实体
 	 * @param form 更新表单
 	 * @param entity 已有实体
 	 */

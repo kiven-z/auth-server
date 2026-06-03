@@ -158,7 +158,7 @@ class SysDeptServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("更新部门：父部门未变时不维护闭包")
+	@DisplayName("更新部门：父部门未变时不维护闭包且仅一次落库")
 	void updateMetaWithoutParentChangeSkipsClosure() {
 		Long deptId = 30L;
 		SysDeptEntity entity = activeDept(deptId);
@@ -175,13 +175,14 @@ class SysDeptServiceImplTest {
 
 		sysDeptService.updateMeta(form);
 
-		verify(deptClosureMaintainer, never()).moveNode(deptId, 0L);
+		verify(sysDeptService, times(1)).updateById(any(SysDeptEntity.class));
+		verify(deptClosureMaintainer, never()).moveNode(anyLong(), anyLong());
 		verify(deptInvalidationTrigger).submitByDeptIds(eq(List.of(deptId)), eq("update:" + deptId));
 		verify(deptInvalidationTrigger, never()).submitByDeptIds(eq(List.of(deptId)), eq("move:" + deptId));
 	}
 
 	@Test
-	@DisplayName("更新部门：父部门变更时维护闭包并触发移动类授权失效")
+	@DisplayName("更新部门：父部门变更时先落库再维护闭包且仅触发移动类授权失效")
 	void updateMetaWithParentChangeMaintainsClosureAndMoveInvalidation() {
 		Long deptId = 31L;
 		SysDeptEntity entity = activeDept(deptId);
@@ -199,9 +200,12 @@ class SysDeptServiceImplTest {
 		sysDeptService.updateMeta(form);
 
 		verify(deptReferenceChecker).requireMoveTargetValid(deptId, 5L);
-		verify(deptClosureMaintainer).moveNode(deptId, 5L);
+		verify(sysDeptService, times(1)).updateById(any(SysDeptEntity.class));
+		var persistOrder = inOrder(sysDeptService, deptClosureMaintainer);
+		persistOrder.verify(sysDeptService).updateById(any(SysDeptEntity.class));
+		persistOrder.verify(deptClosureMaintainer).moveNode(deptId, 5L);
 		verify(deptInvalidationTrigger).submitByDeptIds(eq(List.of(deptId)), eq("move:" + deptId));
-		verify(deptInvalidationTrigger).submitByDeptIds(eq(List.of(deptId)), eq("update:" + deptId));
+		verify(deptInvalidationTrigger, never()).submitByDeptIds(eq(List.of(deptId)), eq("update:" + deptId));
 	}
 
 	@Test
@@ -219,7 +223,10 @@ class SysDeptServiceImplTest {
 		sysDeptService.move(deptId, form);
 
 		verify(deptReferenceChecker).requireMoveTargetValid(deptId, 8L);
-		verify(deptClosureMaintainer).moveNode(deptId, 8L);
+		verify(sysDeptService, times(1)).updateById(any(SysDeptEntity.class));
+		var persistOrder = inOrder(sysDeptService, deptClosureMaintainer);
+		persistOrder.verify(sysDeptService).updateById(any(SysDeptEntity.class));
+		persistOrder.verify(deptClosureMaintainer).moveNode(deptId, 8L);
 		verify(deptInvalidationTrigger).submitByDeptIds(eq(List.of(deptId)), eq("move:" + deptId));
 		verify(deptInvalidationTrigger, never()).submitByDeptIds(eq(List.of(deptId)), eq("update:" + deptId));
 	}

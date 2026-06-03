@@ -48,7 +48,7 @@ public interface SysDeptService extends IService<SysDeptEntity> {
 	void create(SysDeptForm form);
 
 	/**
-	 * 更新部门元数据（名称、编码、状态等），不修改父部门
+	 * 更新部门元数据
 	 * @param form 保存表单
 	 */
 	void updateMeta(SysDeptForm form);

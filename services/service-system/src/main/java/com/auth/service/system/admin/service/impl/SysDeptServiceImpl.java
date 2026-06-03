@@ -1,5 +1,13 @@
 package com.auth.service.system.admin.service.impl;
 
+import static com.auth.service.system.admin.support.dept.DeptReferenceChecker.ROOT_PARENT_ID;
+
+import java.util.Collections;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.convert.SysDeptConverter;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
@@ -25,15 +33,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Collections;
-import java.util.List;
-
-import static com.auth.service.system.admin.support.dept.DeptReferenceChecker.ROOT_PARENT_ID;
 
 /**
  * 部门服务实现
@@ -145,6 +147,7 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 		Long id = form.getId();
 		SysDeptEntity existing = deptReferenceChecker.getExistingActive(id);
 
+		// 校验部门编码唯一性
 		String newDeptCode = form.getDeptCode();
 		boolean codeChanged = FieldChangeSupport.codeChanged(existing.getDeptCode(), newDeptCode);
 		if (codeChanged) {
@@ -155,18 +158,27 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 					SystemAdminResultCode.DEPT_CODE_DUPLICATE, newDeptCode);
 		}
 
+		// 规范化父部门 ID 并校验父部门存在（顶级跳过校验）
 		long newParentId = deptReferenceChecker.normalizeAndRequireActiveParent(form.getParentId());
-		if (resolveParentId(existing) != newParentId) {
-			doMove(existing, newParentId);
+		boolean parentChanged = resolveParentId(existing) != newParentId;
+		if (parentChanged) {
+			deptReferenceChecker.requireMoveTargetValid(id, newParentId);
+			existing.setParentId(newParentId);
 		}
 
 		SysDeptConverter.INSTANCE.applyUpdateForm(form, existing);
 		existing.setDeptCode(newDeptCode);
 
-		// 触发部门授权失效
-		deptInvalidationTrigger.submitByDeptIds(List.of(id), "update:" + id);
-
 		updateById(existing);
+
+		// 维护部门闭包
+		if (parentChanged) {
+			deptClosureMaintainer.moveNode(id, newParentId);
+		}
+
+		// 触发授权失效
+		String invalidationOp = parentChanged ? "move:" + id : "update:" + id;
+		deptInvalidationTrigger.submitByDeptIds(List.of(id), invalidationOp);
 	}
 
 	/**
@@ -174,7 +186,6 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 	 */
 	@Override
 	public void move(Long deptId, SysDeptMoveForm form) {
-		// 校验部门是否存在
 		SysDeptEntity existing = deptReferenceChecker.getExistingActive(deptId);
 		long newParentId = deptReferenceChecker.normalizeAndRequireActiveParent(form.getParentId());
 
@@ -182,20 +193,12 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 			return;
 		}
 
-		doMove(existing, newParentId);
-	}
-
-	/**
-	 * 变更父部门：落库 parent_id、维护闭包并触发移动类授权失效。
-	 * @param existing 已加载的部门实体（将被写入新 parentId）
-	 * @param newParentId 规范化后的新父部门 ID
-	 */
-	private void doMove(SysDeptEntity existing, long newParentId) {
-		Long deptId = existing.getId();
+		// 校验移动目标是否有效
 		deptReferenceChecker.requireMoveTargetValid(deptId, newParentId);
 		existing.setParentId(newParentId);
 		updateById(existing);
 
+		// 维护部门闭包
 		deptClosureMaintainer.moveNode(deptId, newParentId);
 		deptInvalidationTrigger.submitByDeptIds(List.of(deptId), "move:" + deptId);
 	}
