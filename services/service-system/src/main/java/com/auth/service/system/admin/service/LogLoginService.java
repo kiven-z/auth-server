@@ -1,0 +1,33 @@
+package com.auth.service.system.admin.service;
+
+import com.auth.common.data.model.PageResponse;
+import com.auth.module.platform.persistence.model.LoginLogEntity;
+import com.auth.service.system.admin.model.query.LogLoginLogQuery;
+import com.auth.service.system.admin.model.vo.loglogin.LogLoginLogDetailVO;
+import com.auth.service.system.admin.model.vo.loglogin.LogLoginLogPageVO;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.IService;
+
+/**
+ * 登录日志 Service
+ *
+ * @author Bunny
+ */
+public interface LogLoginService extends IService<LoginLogEntity> {
+
+	/**
+	 * 分页查询登录日志
+	 * @param pageParams 分页参数
+	 * @param query 查询条件
+	 * @return 分页数据
+	 */
+	PageResponse<LogLoginLogPageVO> getPage(Page<LoginLogEntity> pageParams, LogLoginLogQuery query);
+
+	/**
+	 * 登录日志详情
+	 * @param id 主键
+	 * @return 详情
+	 */
+	LogLoginLogDetailVO getDetail(Long id);
+
+}

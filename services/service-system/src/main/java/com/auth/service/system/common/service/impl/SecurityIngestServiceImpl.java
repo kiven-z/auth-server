@@ -6,12 +6,12 @@ import com.alibaba.fastjson2.JSON;
 import com.auth.module.security.contract.event.OperationLogPayloadEvent;
 import com.auth.module.security.contract.event.SecurityAuthorizationAuditPayloadEvent;
 import com.auth.module.security.contract.event.SecurityEventType;
+import com.auth.service.system.admin.convert.LogOperationPayloadConverter;
+import com.auth.service.system.admin.mapper.LogAuthorizationAuditMapper;
+import com.auth.service.system.admin.mapper.LogOperationMapper;
+import com.auth.service.system.admin.model.entity.LogAuthorizationAuditEntity;
+import com.auth.service.system.admin.model.entity.LogOperationEntity;
 import com.auth.service.system.common.service.SecurityIngestService;
-import com.auth.service.system.log.convert.LogOperationPayloadConverter;
-import com.auth.service.system.log.mapper.LogAuthorizationAuditMapper;
-import com.auth.service.system.log.mapper.LogOperationMapper;
-import com.auth.service.system.log.model.entity.LogAuthorizationAuditEntity;
-import com.auth.service.system.log.model.entity.LogOperationEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
