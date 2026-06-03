@@ -1,6 +1,6 @@
 package com.auth.service.system.admin.service.impl;
 
-import static com.auth.service.system.admin.support.dept.DeptReferenceChecker.ROOT_PARENT_ID;
+import static com.auth.service.system.admin.support.dept.DeptReferenceChecker.resolveParentId;
 
 import java.util.Collections;
 import java.util.List;
@@ -57,15 +57,6 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 	private final DeptAuthorizationInvalidationTrigger deptInvalidationTrigger;
 
 	private final SysDeptDetailMapper sysDeptDetailMapper;
-
-	/**
-	 * 解析可比较的父部门 ID（null 视为顶级）。
-	 * @param entity 部门实体
-	 * @return 父部门 ID，顶级为 {@link DeptReferenceChecker#ROOT_PARENT_ID}
-	 */
-	private static long resolveParentId(SysDeptEntity entity) {
-		return entity.getParentId() != null ? entity.getParentId() : ROOT_PARENT_ID;
-	}
 
 	/**
 	 * {@inheritDoc}
@@ -212,7 +203,7 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 		deptReferenceChecker.getExistingActive(deptId);
 		// 校验部门是否有子部门
 		deptReferenceChecker.requireNoActiveChildren(deptId);
-		// 校验部门是否有子部门
+		// 校验子树是否仍被用户、授权或岗位引用
 		deptReferenceChecker.requireSubtreeUnused(deptId);
 
 		// 先提交失效（反查依赖 dept_closure）；再清理闭包与主表

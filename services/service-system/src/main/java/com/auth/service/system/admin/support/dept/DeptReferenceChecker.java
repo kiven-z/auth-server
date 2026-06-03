@@ -28,7 +28,7 @@ public class DeptReferenceChecker {
 	private final DeptReferenceMapper deptReferenceMapper;
 
 	/**
-	 * 将表单 parentId 规范为可落库的父部门 ID
+	 * 将 parentId 规范为可比较的父部门 ID（null 或负数视为顶级）。
 	 * @param parentId 原始父部门 ID
 	 * @return 规范化后的父部门 ID
 	 */
@@ -37,6 +37,15 @@ public class DeptReferenceChecker {
 			return ROOT_PARENT_ID;
 		}
 		return parentId;
+	}
+
+	/**
+	 * 从已落库实体解析可比较的父部门 ID。
+	 * @param entity 部门实体
+	 * @return 规范化后的父部门 ID
+	 */
+	public static long resolveParentId(SysDeptEntity entity) {
+		return normalizeParentId(entity.getParentId());
 	}
 
 	/**
@@ -53,26 +62,15 @@ public class DeptReferenceChecker {
 	}
 
 	/**
-	 * 父部门须存在且未删除；顶级父 ID 为 0 时跳过。
-	 * @param parentId 父部门 ID
-	 */
-	public void requireActiveParent(Long parentId) {
-		if (parentId == null || parentId <= ROOT_PARENT_ID) {
-			return;
-		}
-		if (sysDeptMapper.countActiveById(parentId) == 0) {
-			throw new SystemBusinessException(SystemAdminResultCode.DEPT_PARENT_NOT_FOUND, parentId);
-		}
-	}
-
-	/**
 	 * 规范化父部门 ID 并校验父部门存在（顶级跳过校验）。
 	 * @param rawParentId 原始父部门 ID
 	 * @return 规范化后的父部门 ID
 	 */
 	public long normalizeAndRequireActiveParent(Long rawParentId) {
 		long parentId = normalizeParentId(rawParentId);
-		requireActiveParent(parentId > ROOT_PARENT_ID ? parentId : null);
+		if (parentId > ROOT_PARENT_ID && sysDeptMapper.countActiveById(parentId) == 0) {
+			throw new SystemBusinessException(SystemAdminResultCode.DEPT_PARENT_NOT_FOUND, parentId);
+		}
 		return parentId;
 	}
 
