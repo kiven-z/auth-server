@@ -8,6 +8,7 @@ import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * 角色分页查询条件
@@ -32,7 +33,7 @@ public class SysRoleQuery extends PageQueryRequest implements Serializable {
 	@Schema(title = "启用状态(true=正常启用，false=停用)")
 	private Boolean status;
 
-	@Schema(title = "角色类型(1-4)")
-	private Integer roleType;
+	@Schema(title = "角色类型列表(1-4)")
+	private List<Integer> roleTypes;
 
 }

@@ -167,7 +167,6 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 		removeById(id);
 
 		roleInvalidationTrigger.submitByRoleCodes(List.of(roleCode), "delete:" + roleCode);
-		log.info("Role deleted: id={}, roleCode={}", id, roleCode);
 	}
 
 }
