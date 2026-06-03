@@ -1,0 +1,119 @@
+package com.auth.service.system.admin.support.dept;
+
+import com.auth.service.system.admin.mapper.DeptClosureDiagnosticsMapper;
+import com.auth.service.system.admin.model.po.dept.DeptClosureDepthChainRowPO;
+import com.auth.service.system.admin.model.po.dept.DeptClosureHealthStatsPO;
+import com.auth.service.system.admin.model.po.dept.DeptClosureParentLinkRowPO;
+import com.auth.service.system.admin.model.vo.dept.DeptClosureHealthVO;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+/**
+ * {@link DeptClosureHealthService} 单元测试。
+ */
+@DisplayName("DeptClosureHealthService 闭包表健康检查")
+@ExtendWith(MockitoExtension.class)
+class DeptClosureHealthServiceTest {
+
+	@Mock
+	private DeptClosureDiagnosticsMapper deptClosureDiagnosticsMapper;
+
+	@InjectMocks
+	private DeptClosureHealthService deptClosureHealthService;
+
+	@Test
+	@DisplayName("inspect：无异常时 passed 为 true")
+	void inspect_whenNoAnomalies_passedTrue() {
+		DeptClosureHealthStatsPO stats = new DeptClosureHealthStatsPO();
+		stats.setOnlySelf(1L);
+		stats.setHasAncestors(2L);
+		stats.setZeroClosure(0L);
+		stats.setTotal(3L);
+		when(deptClosureDiagnosticsMapper.countParentLinkAnomalies()).thenReturn(0L);
+		when(deptClosureDiagnosticsMapper.selectParentLinkAnomalies(200)).thenReturn(List.of());
+		when(deptClosureDiagnosticsMapper.countDepthChainAnomalies()).thenReturn(0L);
+		when(deptClosureDiagnosticsMapper.selectDepthChainAnomalies(200)).thenReturn(List.of());
+		when(deptClosureDiagnosticsMapper.selectHealthStats()).thenReturn(stats);
+
+		DeptClosureHealthVO result = deptClosureHealthService.inspect();
+
+		assertThat(result.getPassed()).isTrue();
+		assertThat(result.getMissingParentLinkCount()).isZero();
+		assertThat(result.getDepthChainAnomalyCount()).isZero();
+		assertThat(result.getParentLinkSampleTruncated()).isFalse();
+		assertThat(result.getDepthChainSampleTruncated()).isFalse();
+		assertThat(result.getHealthStats().getTotal()).isEqualTo(3L);
+		assertThat(result.getCheckedAt()).isNotNull();
+		verify(deptClosureDiagnosticsMapper).selectParentLinkAnomalies(eq(200));
+	}
+
+	@Test
+	@DisplayName("inspect：存在父子直连缺失时 passed 为 false")
+	void inspect_whenParentLinkMissing_passedFalse() {
+		DeptClosureParentLinkRowPO row = new DeptClosureParentLinkRowPO();
+		row.setId(10L);
+		row.setDeptName("研发一部");
+		row.setParentId(1L);
+		when(deptClosureDiagnosticsMapper.countParentLinkAnomalies()).thenReturn(1L);
+		when(deptClosureDiagnosticsMapper.selectParentLinkAnomalies(200)).thenReturn(List.of(row));
+		when(deptClosureDiagnosticsMapper.countDepthChainAnomalies()).thenReturn(0L);
+		when(deptClosureDiagnosticsMapper.selectDepthChainAnomalies(200)).thenReturn(List.of());
+		when(deptClosureDiagnosticsMapper.selectHealthStats()).thenReturn(new DeptClosureHealthStatsPO());
+
+		DeptClosureHealthVO result = deptClosureHealthService.inspect();
+
+		assertThat(result.getPassed()).isFalse();
+		assertThat(result.getParentLinkAnomalies()).hasSize(1);
+		assertThat(result.getParentLinkAnomalies().get(0).getParentLinkStatus()).isEqualTo("MISSING_PARENT_LINK");
+	}
+
+	@Test
+	@DisplayName("inspect：异常数超过样本上限时标记截断")
+	void inspect_whenCountExceedsSample_truncatedTrue() {
+		when(deptClosureDiagnosticsMapper.countParentLinkAnomalies()).thenReturn(250L);
+		when(deptClosureDiagnosticsMapper.selectParentLinkAnomalies(200)).thenReturn(List.of());
+		when(deptClosureDiagnosticsMapper.countDepthChainAnomalies()).thenReturn(0L);
+		when(deptClosureDiagnosticsMapper.selectDepthChainAnomalies(200)).thenReturn(List.of());
+		when(deptClosureDiagnosticsMapper.selectHealthStats()).thenReturn(new DeptClosureHealthStatsPO());
+
+		DeptClosureHealthVO result = deptClosureHealthService.inspect();
+
+		assertThat(result.getParentLinkSampleTruncated()).isTrue();
+		assertThat(result.getMissingParentLinkCount()).isEqualTo(250L);
+	}
+
+	@Test
+	@DisplayName("inspect：存在深度链条异常时 passed 为 false")
+	void inspect_whenDepthChainBroken_passedFalse() {
+		DeptClosureDepthChainRowPO row = new DeptClosureDepthChainRowPO();
+		row.setId(20L);
+		row.setDeptName("子部门");
+		row.setParentId(1L);
+		row.setChildClosureCnt(1L);
+		row.setParentClosureCnt(3L);
+		row.setExpectedChildCnt(4L);
+		when(deptClosureDiagnosticsMapper.countParentLinkAnomalies()).thenReturn(0L);
+		when(deptClosureDiagnosticsMapper.selectParentLinkAnomalies(200)).thenReturn(List.of());
+		when(deptClosureDiagnosticsMapper.countDepthChainAnomalies()).thenReturn(1L);
+		when(deptClosureDiagnosticsMapper.selectDepthChainAnomalies(200)).thenReturn(List.of(row));
+		when(deptClosureDiagnosticsMapper.selectHealthStats()).thenReturn(new DeptClosureHealthStatsPO());
+
+		DeptClosureHealthVO result = deptClosureHealthService.inspect();
+
+		assertThat(result.getPassed()).isFalse();
+		assertThat(result.getDepthChainAnomalies()).hasSize(1);
+		assertThat(result.getDepthChainAnomalies().get(0).getExpectedChildCnt()).isEqualTo(4L);
+	}
+
+}

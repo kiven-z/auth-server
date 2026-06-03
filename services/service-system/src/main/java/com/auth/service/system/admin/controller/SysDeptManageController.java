@@ -5,8 +5,10 @@ import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.admin.model.form.dept.SysDeptAssignRoleForm;
+import com.auth.service.system.admin.model.vo.dept.DeptClosureHealthVO;
 import com.auth.service.system.admin.model.vo.dept.SysDeptAssignedRoleRow;
 import com.auth.service.system.admin.service.SysDeptManageService;
+import com.auth.service.system.admin.support.dept.DeptClosureHealthService;
 import com.auth.service.system.common.model.audit.SystemAuditBizModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -30,8 +32,22 @@ public class SysDeptManageController {
 
 	private final SysDeptManageService sysDeptManageService;
 
-	public SysDeptManageController(SysDeptManageService sysDeptManageService) {
+	private final DeptClosureHealthService deptClosureHealthService;
+
+	public SysDeptManageController(SysDeptManageService sysDeptManageService,
+			DeptClosureHealthService deptClosureHealthService) {
 		this.sysDeptManageService = sysDeptManageService;
+		this.deptClosureHealthService = deptClosureHealthService;
+	}
+
+	@OperationLog(targetType = "DEPT_CLOSURE_HEALTH", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.DEPT_CLOSURE, operation = OperationLogKind.QUERY)
+	@Operation(summary = "部门闭包表健康检查（只读运维）")
+	@PreAuthorize("@auth.decide('sysDept:diagnose')")
+	@GetMapping("/closure/health")
+	public Result<DeptClosureHealthVO> closureHealth() {
+		DeptClosureHealthVO healthVO = deptClosureHealthService.inspect();
+		return Result.success(healthVO);
 	}
 
 	@Operation(summary = "查询部门已分配角色")
