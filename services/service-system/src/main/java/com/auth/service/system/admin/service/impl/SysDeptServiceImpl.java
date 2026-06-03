@@ -6,9 +6,8 @@ import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.SysDeptDetailMapper;
 import com.auth.service.system.admin.mapper.SysDeptMapper;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
-import com.auth.service.system.admin.model.form.dept.SysDeptCreateForm;
+import com.auth.service.system.admin.model.form.dept.SysDeptForm;
 import com.auth.service.system.admin.model.form.dept.SysDeptMoveForm;
-import com.auth.service.system.admin.model.form.dept.SysDeptUpdateForm;
 import com.auth.service.system.admin.model.po.dept.SysDeptBoundPostPO;
 import com.auth.service.system.admin.model.po.dept.SysDeptBoundRolePO;
 import com.auth.service.system.admin.model.po.dept.SysDeptBoundUserPO;
@@ -118,7 +117,7 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void create(SysDeptCreateForm form) {
+	public void create(SysDeptForm form) {
 		// 规范化父部门 ID 并校验父部门存在（顶级跳过校验）
 		long parentId = deptReferenceChecker.normalizeAndRequireActiveParent(form.getParentId());
 
@@ -142,7 +141,7 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void updateMeta(SysDeptUpdateForm form) {
+	public void updateMeta(SysDeptForm form) {
 		Long id = form.getId();
 		SysDeptEntity existing = deptReferenceChecker.getExistingActive(id);
 

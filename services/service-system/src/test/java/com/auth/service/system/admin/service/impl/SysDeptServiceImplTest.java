@@ -4,9 +4,8 @@ import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.SysDeptDetailMapper;
 import com.auth.service.system.admin.mapper.SysDeptMapper;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
-import com.auth.service.system.admin.model.form.dept.SysDeptCreateForm;
+import com.auth.service.system.admin.model.form.dept.SysDeptForm;
 import com.auth.service.system.admin.model.form.dept.SysDeptMoveForm;
-import com.auth.service.system.admin.model.form.dept.SysDeptUpdateForm;
 import com.auth.service.system.admin.model.po.dept.SysDeptBoundPostPO;
 import com.auth.service.system.admin.model.po.dept.SysDeptBoundRolePO;
 import com.auth.service.system.admin.model.po.dept.SysDeptBoundUserPO;
@@ -29,16 +28,8 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link SysDeptServiceImpl} 单元测试。
@@ -91,7 +82,7 @@ class SysDeptServiceImplTest {
 	@Test
 	@DisplayName("新增部门：保存后维护闭包表")
 	void createPersistsEntityAndMaintainsClosure() {
-		SysDeptCreateForm form = new SysDeptCreateForm();
+		SysDeptForm form = new SysDeptForm();
 		form.setParentId(1L);
 		form.setDeptName("测试部");
 		form.setDeptCode("D_TEST");
@@ -175,7 +166,7 @@ class SysDeptServiceImplTest {
 		when(deptReferenceChecker.normalizeAndRequireActiveParent(0L)).thenReturn(0L);
 		doReturn(true).when(sysDeptService).updateById(any(SysDeptEntity.class));
 
-		SysDeptUpdateForm form = new SysDeptUpdateForm();
+		SysDeptForm form = new SysDeptForm();
 		form.setId(deptId);
 		form.setParentId(0L);
 		form.setDeptName("研发部");
@@ -198,7 +189,7 @@ class SysDeptServiceImplTest {
 		when(deptReferenceChecker.normalizeAndRequireActiveParent(5L)).thenReturn(5L);
 		doReturn(true).when(sysDeptService).updateById(any(SysDeptEntity.class));
 
-		SysDeptUpdateForm form = new SysDeptUpdateForm();
+		SysDeptForm form = new SysDeptForm();
 		form.setId(deptId);
 		form.setParentId(5L);
 		form.setDeptName("研发部");

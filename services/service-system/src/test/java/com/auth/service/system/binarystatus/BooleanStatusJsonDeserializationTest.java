@@ -1,6 +1,6 @@
 package com.auth.service.system.binarystatus;
 
-import com.auth.service.system.admin.model.form.role.SysRoleCreateForm;
+import com.auth.service.system.admin.model.form.role.SysRoleForm;
 import com.auth.service.system.admin.model.query.EmailTemplateQuery;
 import com.auth.service.system.admin.model.query.SysJobGroupQuery;
 import com.auth.service.system.admin.model.query.SysRoleQuery;
@@ -44,11 +44,10 @@ class BooleanStatusJsonDeserializationTest {
 	}
 
 	@Test
-	@DisplayName("SysRoleCreateForm 必填 status 布尔")
-	void sysRoleCreateFormAcceptsBooleanStatus() throws Exception {
-		SysRoleCreateForm form = objectMapper.readValue(
-				"{\"roleCode\":\"R_DEMO\",\"roleName\":\"演示\",\"roleType\":4,\"status\":true}",
-				SysRoleCreateForm.class);
+	@DisplayName("SysRoleSaveForm 必填 status 布尔")
+	void sysRoleSaveFormAcceptsBooleanStatus() throws Exception {
+		SysRoleForm form = objectMapper.readValue(
+				"{\"roleCode\":\"R_DEMO\",\"roleName\":\"演示\",\"roleType\":4,\"status\":true}", SysRoleForm.class);
 		assertThat(form.getStatus()).isTrue();
 	}
 

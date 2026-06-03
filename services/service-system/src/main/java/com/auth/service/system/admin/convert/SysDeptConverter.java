@@ -1,16 +1,11 @@
 package com.auth.service.system.admin.convert;
 
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
-import com.auth.service.system.admin.model.form.dept.SysDeptCreateForm;
-import com.auth.service.system.admin.model.form.dept.SysDeptUpdateForm;
+import com.auth.service.system.admin.model.form.dept.SysDeptForm;
 import com.auth.service.system.admin.model.po.dept.SysDeptBoundPostPO;
 import com.auth.service.system.admin.model.po.dept.SysDeptBoundRolePO;
 import com.auth.service.system.admin.model.po.dept.SysDeptBoundUserPO;
-import com.auth.service.system.admin.model.vo.dept.SysDeptBoundPostItemVO;
-import com.auth.service.system.admin.model.vo.dept.SysDeptBoundRoleItemVO;
-import com.auth.service.system.admin.model.vo.dept.SysDeptBoundUserItemVO;
-import com.auth.service.system.admin.model.vo.dept.SysDeptDetailVO;
-import com.auth.service.system.admin.model.vo.dept.SysDeptListVO;
+import com.auth.service.system.admin.model.vo.dept.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
@@ -55,7 +50,7 @@ public interface SysDeptConverter {
 	@Mapping(target = "updateUser", ignore = true)
 	@Mapping(target = "version", ignore = true)
 	@Mapping(target = "isDeleted", ignore = true)
-	SysDeptEntity toEntity(SysDeptCreateForm form);
+	SysDeptEntity toEntity(SysDeptForm form);
 
 	/**
 	 * 更新表单合并到已有实体（不修改 parentId）。
@@ -70,7 +65,7 @@ public interface SysDeptConverter {
 	@Mapping(target = "updateUser", ignore = true)
 	@Mapping(target = "version", ignore = true)
 	@Mapping(target = "isDeleted", ignore = true)
-	void applyUpdateForm(SysDeptUpdateForm form, @org.mapstruct.MappingTarget SysDeptEntity entity);
+	void applyUpdateForm(SysDeptForm form, @org.mapstruct.MappingTarget SysDeptEntity entity);
 
 	/**
 	 * 实体 → 详情 VO

@@ -9,8 +9,7 @@ import com.auth.service.system.admin.mapper.GrantTableMapper;
 import com.auth.service.system.admin.mapper.SysRoleMapper;
 import com.auth.service.system.admin.mapper.SysRolePermissionMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
-import com.auth.service.system.admin.model.form.role.SysRoleCreateForm;
-import com.auth.service.system.admin.model.form.role.SysRoleUpdateForm;
+import com.auth.service.system.admin.model.form.role.SysRoleForm;
 import com.auth.service.system.admin.model.query.SysRoleQuery;
 import com.auth.service.system.admin.model.vo.role.SysRoleDetailVO;
 import com.auth.service.system.admin.model.vo.role.SysRoleOptionVO;
@@ -87,7 +86,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void create(SysRoleCreateForm form) {
+	public void create(SysRoleForm form) {
 		String roleCode = form.getRoleCode();
 
 		BusinessKeyAssert.requireAbsent(this,
@@ -104,7 +103,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void update(SysRoleUpdateForm form) {
+	public void update(SysRoleForm form) {
 		// 检查角色是否存在
 		Long id = form.getId();
 		SysRoleEntity existing = baseMapper.selectById(id);

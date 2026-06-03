@@ -2,9 +2,8 @@ package com.auth.service.system.admin.service;
 
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
-import com.auth.service.system.admin.model.form.dept.SysDeptCreateForm;
+import com.auth.service.system.admin.model.form.dept.SysDeptForm;
 import com.auth.service.system.admin.model.form.dept.SysDeptMoveForm;
-import com.auth.service.system.admin.model.form.dept.SysDeptUpdateForm;
 import com.auth.service.system.admin.model.query.SysDeptQuery;
 import com.auth.service.system.admin.model.vo.dept.SysDeptDetailVO;
 import com.auth.service.system.admin.model.vo.dept.SysDeptListVO;
@@ -46,13 +45,13 @@ public interface SysDeptService extends IService<SysDeptEntity> {
 	 * 新增部门并写入闭包表
 	 * @param form 新增表单
 	 */
-	void create(SysDeptCreateForm form);
+	void create(SysDeptForm form);
 
 	/**
 	 * 更新部门元数据（名称、编码、状态等），不修改父部门
-	 * @param form 更新表单
+	 * @param form 保存表单
 	 */
-	void updateMeta(SysDeptUpdateForm form);
+	void updateMeta(SysDeptForm form);
 
 	/**
 	 * 变更父部门并重算闭包

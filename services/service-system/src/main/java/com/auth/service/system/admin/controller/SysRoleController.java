@@ -16,13 +16,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
+import com.auth.common.web.valid.group.CreateGroup;
 import com.auth.common.web.valid.group.UpdateGroup;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
-import com.auth.service.system.admin.model.form.role.SysRoleCreateForm;
-import com.auth.service.system.admin.model.form.role.SysRoleUpdateForm;
+import com.auth.service.system.admin.model.form.role.SysRoleForm;
 import com.auth.service.system.admin.model.query.SysRoleQuery;
 import com.auth.service.system.admin.model.vo.role.SysRoleDetailVO;
 import com.auth.service.system.admin.model.vo.role.SysRoleOptionVO;
@@ -33,7 +33,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -73,7 +72,7 @@ public class SysRoleController {
 	@Operation(summary = "新增角色")
 	@PreAuthorize("@auth.decide('sysRole:create')")
 	@PostMapping
-	public Result<Void> create(@Valid @RequestBody SysRoleCreateForm form) {
+	public Result<Void> create(@Validated(CreateGroup.class) @RequestBody SysRoleForm form) {
 		sysRoleService.create(form);
 		return Result.success();
 	}
@@ -84,7 +83,7 @@ public class SysRoleController {
 	@PreAuthorize("@auth.decide('sysRole:update')")
 	@PutMapping("/{id}")
 	public Result<Void> update(@PathVariable("id") Long id,
-			@Validated(UpdateGroup.class) @RequestBody SysRoleUpdateForm form) {
+			@Validated(UpdateGroup.class) @RequestBody SysRoleForm form) {
 		form.setId(id);
 		sysRoleService.update(form);
 		return Result.success();

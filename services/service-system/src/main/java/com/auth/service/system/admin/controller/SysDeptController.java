@@ -2,14 +2,14 @@ package com.auth.service.system.admin.controller;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
+import com.auth.common.web.valid.group.CreateGroup;
 import com.auth.common.web.valid.group.UpdateGroup;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
-import com.auth.service.system.admin.model.form.dept.SysDeptCreateForm;
+import com.auth.service.system.admin.model.form.dept.SysDeptForm;
 import com.auth.service.system.admin.model.form.dept.SysDeptMoveForm;
-import com.auth.service.system.admin.model.form.dept.SysDeptUpdateForm;
 import com.auth.service.system.admin.model.query.SysDeptQuery;
 import com.auth.service.system.admin.model.vo.dept.SysDeptDetailVO;
 import com.auth.service.system.admin.model.vo.dept.SysDeptListVO;
@@ -72,7 +72,7 @@ public class SysDeptController {
 	@Operation(summary = "新增部门")
 	@PreAuthorize("@auth.decide('sysDept:create')")
 	@PostMapping
-	public Result<Void> create(@Valid @RequestBody SysDeptCreateForm form) {
+	public Result<Void> create(@Validated(CreateGroup.class) @RequestBody SysDeptForm form) {
 		sysDeptService.create(form);
 		return Result.success();
 	}
@@ -83,7 +83,7 @@ public class SysDeptController {
 	@PreAuthorize("@auth.decide('sysDept:update')")
 	@PutMapping("/{id}")
 	public Result<Void> update(@PathVariable("id") Long id,
-			@Validated(UpdateGroup.class) @RequestBody SysDeptUpdateForm form) {
+			@Validated(UpdateGroup.class) @RequestBody SysDeptForm form) {
 		form.setId(id);
 		sysDeptService.updateMeta(form);
 		return Result.success();
