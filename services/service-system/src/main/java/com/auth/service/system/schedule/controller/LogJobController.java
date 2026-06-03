@@ -1,12 +1,12 @@
-package com.auth.service.system.log.controller;
+package com.auth.service.system.schedule.controller;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
-import com.auth.service.system.log.model.entity.JobLogEntity;
-import com.auth.service.system.log.model.query.LogJobQuery;
-import com.auth.service.system.log.model.vo.LogJobDetailVO;
-import com.auth.service.system.log.model.vo.LogJobPageResponse;
-import com.auth.service.system.log.service.LogJobService;
+import com.auth.service.system.schedule.model.entity.JobLogEntity;
+import com.auth.service.system.schedule.model.query.LogJobQuery;
+import com.auth.service.system.schedule.model.vo.LogJobDetailVO;
+import com.auth.service.system.schedule.model.vo.LogJobPageResponse;
+import com.auth.service.system.schedule.service.LogJobService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

@@ -1,14 +1,13 @@
 package com.auth.service.system.schedule.service.impl;
 
-import com.auth.service.system.admin.mapper.SysJobGroupMapper;
-import com.auth.service.system.admin.model.form.jobgroup.SysJobGroupForm;
-import com.auth.service.system.admin.model.po.jobgroup.SysJobGroupPageRowPO;
-import com.auth.service.system.admin.model.query.SysJobGroupQuery;
-import com.auth.service.system.admin.service.impl.SysJobGroupServiceImpl;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
-import com.auth.service.system.log.model.entity.SysJobGroupEntity;
+import com.auth.service.system.schedule.mapper.SysJobGroupMapper;
 import com.auth.service.system.schedule.mapper.SysJobMapper;
+import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
+import com.auth.service.system.schedule.model.form.SysJobGroupForm;
+import com.auth.service.system.schedule.model.po.SysJobGroupPageRowPO;
+import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;

@@ -1,7 +1,7 @@
 package com.auth.service.system.schedule.mapper;
 
-import com.auth.service.system.log.model.po.SysJobPageRowPO;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
+import com.auth.service.system.schedule.model.po.SysJobPageRowPO;
 import com.auth.service.system.schedule.model.query.SysJobQuery;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;

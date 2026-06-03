@@ -1,4 +1,4 @@
-package com.auth.service.system.log.model.query;
+package com.auth.service.system.schedule.model.query;
 
 import com.auth.common.core.model.query.PageQueryRequest;
 import io.swagger.v3.oas.annotations.media.Schema;

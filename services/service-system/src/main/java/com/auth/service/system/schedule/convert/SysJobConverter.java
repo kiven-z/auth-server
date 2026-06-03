@@ -1,9 +1,9 @@
 package com.auth.service.system.schedule.convert;
 
-import com.auth.service.system.log.model.po.SysJobPageRowPO;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.form.SysJobCreateForm;
 import com.auth.service.system.schedule.model.form.SysJobUpdateForm;
+import com.auth.service.system.schedule.model.po.SysJobPageRowPO;
 import com.auth.service.system.schedule.model.vo.SysJobDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobPageResponse;
 import org.mapstruct.Mapper;
@@ -13,7 +13,7 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.factory.Mappers;
 
 /**
- * 定时任务定义（Entity / Form / PO / VO）转换。
+ * 定时任务
  *
  * @author Bunny
  */

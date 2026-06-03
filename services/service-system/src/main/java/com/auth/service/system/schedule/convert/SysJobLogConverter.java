@@ -1,10 +1,10 @@
-package com.auth.service.system.log.convert;
+package com.auth.service.system.schedule.convert;
 
 import com.auth.common.mapstruct.qualifier.MapStructStringQualifiers;
-import com.auth.service.system.log.model.entity.JobLogEntity;
-import com.auth.service.system.log.model.po.SysJobLogPageRowPO;
-import com.auth.service.system.log.model.vo.LogJobDetailVO;
-import com.auth.service.system.log.model.vo.LogJobPageResponse;
+import com.auth.service.system.schedule.model.entity.JobLogEntity;
+import com.auth.service.system.schedule.model.po.SysJobLogPageRowPO;
+import com.auth.service.system.schedule.model.vo.LogJobDetailVO;
+import com.auth.service.system.schedule.model.vo.LogJobPageResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;

@@ -1,18 +1,18 @@
 package com.auth.service.system.schedule.service.impl;
 
 import cn.hutool.core.util.BooleanUtil;
-import com.auth.service.system.schedule.convert.SysJobConverter;
 import com.auth.common.data.model.PageResponse;
-import com.auth.service.system.admin.mapper.SysJobGroupMapper;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
-import com.auth.service.system.log.model.entity.SysJobGroupEntity;
-import com.auth.service.system.log.model.po.SysJobPageRowPO;
+import com.auth.service.system.schedule.convert.SysJobConverter;
 import com.auth.service.system.schedule.mapper.JobLogMapper;
+import com.auth.service.system.schedule.mapper.SysJobGroupMapper;
 import com.auth.service.system.schedule.mapper.SysJobMapper;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
+import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
 import com.auth.service.system.schedule.model.form.SysJobCreateForm;
 import com.auth.service.system.schedule.model.form.SysJobUpdateForm;
+import com.auth.service.system.schedule.model.po.SysJobPageRowPO;
 import com.auth.service.system.schedule.model.query.SysJobQuery;
 import com.auth.service.system.schedule.model.vo.SysJobDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobPageResponse;
@@ -39,7 +39,7 @@ import static com.auth.service.system.common.exception.code.SystemScheduleResult
 import static com.auth.service.system.schedule.model.constans.SysJobQuartzDataKeys.JOB_ZONE;
 
 /**
- * 定时任务定义服务实现（职责：定义态 CRUD + Quartz 同步）
+ * 定时任务定义服务实现
  *
  * @author Bunny
  */

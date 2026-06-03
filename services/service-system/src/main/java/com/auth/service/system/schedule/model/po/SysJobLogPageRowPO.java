@@ -1,4 +1,4 @@
-package com.auth.service.system.log.model.po;
+package com.auth.service.system.schedule.model.po;
 
 import com.auth.common.core.annotation.JsonStringFormat;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -12,7 +12,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 任务日志分页行（持久层查询投影，非 API 出参）
+ * 任务日志分页行
  *
  * @author Bunny
  */

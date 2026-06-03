@@ -1,10 +1,10 @@
 package com.auth.service.system.admin.convert;
 
-import com.auth.service.system.log.convert.SysJobLogConverter;
-import com.auth.service.system.log.model.entity.JobLogEntity;
-import com.auth.service.system.log.model.po.SysJobLogPageRowPO;
-import com.auth.service.system.log.model.vo.LogJobDetailVO;
-import com.auth.service.system.log.model.vo.LogJobPageResponse;
+import com.auth.service.system.schedule.convert.SysJobLogConverter;
+import com.auth.service.system.schedule.model.entity.JobLogEntity;
+import com.auth.service.system.schedule.model.po.SysJobLogPageRowPO;
+import com.auth.service.system.schedule.model.vo.LogJobDetailVO;
+import com.auth.service.system.schedule.model.vo.LogJobPageResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

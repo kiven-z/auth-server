@@ -1,8 +1,8 @@
 package com.auth.service.system.schedule.service.impl;
 
 import cn.hutool.core.exceptions.ExceptionUtil;
-import com.auth.service.system.log.model.entity.JobLogEntity;
 import com.auth.service.system.schedule.mapper.JobLogMapper;
+import com.auth.service.system.schedule.model.entity.JobLogEntity;
 import com.auth.service.system.schedule.service.SysJobLogService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * 任务执行日志实现（追加写入 {@code log_job}，删除由管理端物理删除）。
+ * 任务执行日志实现
  *
  * @author Bunny
  */

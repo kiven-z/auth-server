@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.auth.service.system.schedule.mapper.SysJobMapper">
 
-    <select id="selectListByPage" resultType="com.auth.service.system.log.model.po.SysJobPageRowPO">
+    <select id="selectListByPage" resultType="com.auth.service.system.schedule.model.po.SysJobPageRowPO">
         SELECT
         id,
         job_name,
@@ -26,13 +26,20 @@
         update_user FROM sys_job
         <where>
             <if test="query.jobName != null and query.jobName != ''">
-                AND job_name LIKE CONCAT('%', #{query.jobName}, '%')
+                AND job_name LIKE CONCAT('%',
+                #{query.jobName},
+                '%'
+                )
             </if>
             <if test="query.jobGroup != null and query.jobGroup != ''">
-                AND job_group LIKE CONCAT('%', #{query.jobGroup}, '%')
+                AND job_group LIKE CONCAT('%',
+                #{query.jobGroup},
+                '%'
+                )
             </if>
             <if test="query.status != null">
-                AND status = #{query.status}
+                AND status =
+                #{query.status}
             </if>
         </where>
         ORDER BY create_time DESC

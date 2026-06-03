@@ -1,4 +1,4 @@
-package com.auth.service.system.log.model.entity;
+package com.auth.service.system.schedule.model.entity;
 
 import com.auth.common.data.model.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;

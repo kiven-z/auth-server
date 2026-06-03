@@ -1,4 +1,4 @@
-package com.auth.service.system.log.model.vo;
+package com.auth.service.system.schedule.model.vo;
 
 import com.auth.common.core.model.response.BaseResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -10,7 +10,7 @@ import lombok.ToString;
 import java.io.Serial;
 
 /**
- * 任务日志详情（含异常堆栈）
+ * 任务日志详情
  *
  * @author Bunny
  */

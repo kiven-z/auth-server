@@ -1,10 +1,10 @@
 package com.auth.service.system.schedule.support;
 
 import cn.hutool.core.util.BooleanUtil;
-import com.auth.service.system.log.model.entity.JobLogEntity;
 import com.auth.service.system.schedule.config.ScheduleJobProperties;
 import com.auth.service.system.schedule.mapper.JobLogMapper;
 import com.auth.service.system.schedule.mapper.SysJobMapper;
+import com.auth.service.system.schedule.model.entity.JobLogEntity;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * 根据最近执行日志连续失败次数触发熔断：更新 {@code sys_job.status=0} 并 {@code pauseJob}
+ * 根据最近执行日志连续失败次数触发熔断
  *
  * @author Bunny
  */
