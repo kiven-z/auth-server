@@ -3,8 +3,10 @@ package com.auth.service.system.admin.model.enums;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.List;
+
 /**
- * 角色类型枚举，与表 {@code sys_role.role_type} 注释一致。
+ * 角色类型枚举，与表 {@code sys_role.role_type} 注释一致
  *
  * @author Bunny
  */
@@ -31,6 +33,11 @@ public enum RoleTypeEnum {
 	 * 自定义角色
 	 */
 	CUSTOM(4, "自定义角色");
+
+	/**
+	 * 部门 grant_table 授权允许的角色类型（业务、自定义）
+	 */
+	public static final List<Integer> DEPT_GRANT_TYPES = List.of(BUSINESS.code, CUSTOM.code);
 
 	private final Integer code;
 

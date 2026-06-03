@@ -1,10 +1,13 @@
 package com.auth.service.system.admin.service.impl;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.text.CharSequenceUtil;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
-import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.convert.SysRolePermissionConverter;
+import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.SysPermissionMapper;
 import com.auth.service.system.admin.mapper.SysRoleMapper;
 import com.auth.service.system.admin.mapper.SysRolePermissionMapper;
@@ -15,12 +18,11 @@ import com.auth.service.system.admin.service.SysRolePermissionService;
 import com.auth.service.system.authorization.dispatch.trigger.RoleAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 /**
  * 角色权限分配服务实现。
@@ -62,6 +64,7 @@ public class SysRolePermissionServiceImpl implements SysRolePermissionService {
 		Long operatorId = SecurityUserUtils.getUserId();
 		sysRolePermissionMapper.deleteByRoleCode(normalized);
 		if (CollUtil.isNotEmpty(codes)) {
+			// FIXME 抽取当前逻辑进行复用
 			Long validCount = sysPermissionMapper.selectCount(Wrappers.<SysPermissionEntity>lambdaQuery()
 				.in(SysPermissionEntity::getPermissionCode, codes)
 				.eq(SysPermissionEntity::getStatus, true));

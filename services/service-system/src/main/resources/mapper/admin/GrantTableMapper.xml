@@ -9,4 +9,33 @@
         WHERE role_code = #{roleCode}
     </select>
 
+    <!-- 按授权主体删除全部 grant 行 -->
+    <delete id="deleteBySubject">
+        DELETE
+        FROM grant_table
+        WHERE subject_type = #{subjectType}
+          AND subject_id = #{subjectId}
+    </delete>
+
+    <!-- 批量插入主体-角色授权边 -->
+    <insert id="batchInsertSubjectRoleGrants">
+        INSERT INTO grant_table (subject_type,
+        subject_id,
+        role_code,
+        grant_time,
+        create_user,
+        update_user,
+        version)
+        VALUES
+        <foreach collection="roleCodes" item="roleCode" separator=",">
+            (#{subjectType},
+            #{subjectId},
+            #{roleCode},
+            NOW(3),
+            #{operatorId},
+            #{operatorId},
+            0)
+        </foreach>
+    </insert>
+
 </mapper>

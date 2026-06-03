@@ -61,6 +61,11 @@ public enum SystemAdminResultCode implements SystemResultCode {
 	ROLE_PERMISSION_INVALID(400, 279, "ROLE_PERMISSION_INVALID", "system.role.permission_invalid"),
 
 	/**
+	 * 部门授权角色无效（不存在、未启用或类型不允许）
+	 */
+	DEPT_ROLE_INVALID(400, 290, "DEPT_ROLE_INVALID", "system.dept.role_invalid"),
+
+	/**
 	 * 部门不存在或已删除
 	 */
 	DEPT_NOT_FOUND(404, 281, "DEPT_NOT_FOUND", "system.dept.not_found"),

@@ -9,9 +9,9 @@
                u.username,
                u.nickname,
                u.employee_no,
-               u.status      AS user_status,
+               u.status  AS user_status,
                ud.is_primary,
-               ud.status     AS relation_status,
+               ud.status AS relation_status,
                ud.position,
                ud.join_time
         FROM user_dept ud
@@ -46,6 +46,7 @@
                  INNER JOIN sys_role r ON r.role_code = gt.role_code
         WHERE gt.subject_type = 'DEPT'
           AND gt.subject_id = #{deptId}
+          AND r.role_type IN (3, 4)
         ORDER BY r.role_code
     </select>
 

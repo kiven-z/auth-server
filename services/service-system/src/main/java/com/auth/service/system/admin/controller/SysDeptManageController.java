@@ -4,9 +4,14 @@ import com.auth.common.core.model.response.Result;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
+import com.auth.service.system.admin.model.form.dept.SysDeptAssignRoleForm;
+import com.auth.service.system.admin.model.vo.dept.SysDeptAssignedRoleRow;
+import com.auth.service.system.admin.service.SysDeptManageService;
 import com.auth.service.system.common.model.audit.SystemAuditBizModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,24 +25,28 @@ import static com.auth.service.system.admin.exception.SystemAdminResultCode.ASSI
  * @author Bunny
  */
 @Tag(name = "部门扩展管理")
+@RequiredArgsConstructor
 @RequestMapping("/api/system/dept")
 @RestController
 public class SysDeptManageController {
 
+	private final SysDeptManageService sysDeptManageService;
+
 	@Operation(summary = "查询部门已分配角色")
 	@PreAuthorize("@auth.decide('sysDept:query')")
 	@GetMapping("/{deptId}/roles")
-	public Result<List<Object>> listRoles(@PathVariable("deptId") Long deptId) {
-		return Result.success();
+	public Result<List<SysDeptAssignedRoleRow>> listRoles(@PathVariable("deptId") Long deptId) {
+		return Result.success(sysDeptManageService.listAssignedRoles(deptId));
 	}
 
 	@OperationLog(targetType = "DEPT_ROLE", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.GRANT_TABLE, operation = OperationLogKind.UPDATE)
-	@Operation(summary = "全量覆盖部门角色授权（grant_table DEPT 主体，触发用户授权画像失效）")
+	@Operation(summary = "全量覆盖部门角色授权")
 	@PreAuthorize("@auth.decide('sysDept:update')")
 	@PutMapping("/{deptId}/roles")
-	public Result<Void> replaceRoles(@PathVariable("deptId") Long deptId) {
-
+	public Result<Void> replaceRoles(@PathVariable("deptId") Long deptId,
+			@Valid @RequestBody SysDeptAssignRoleForm form) {
+		sysDeptManageService.replaceDeptRoles(deptId, form);
 		return Result.success(null, ASSIGN_COMPLETED.getMessage());
 	}
 
