@@ -1,4 +1,4 @@
-package com.auth.service.system.admin.model.form.emailtemplate;
+package com.auth.service.system.message.model.form;
 
 import com.auth.common.web.valid.group.CreateGroup;
 import com.auth.common.web.valid.group.UpdateGroup;

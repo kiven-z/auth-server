@@ -1,4 +1,4 @@
-package com.auth.service.system.admin.model.entity;
+package com.auth.service.system.message.model.entity;
 
 import com.auth.common.data.model.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableField;

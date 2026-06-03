@@ -2,9 +2,9 @@ package com.auth.service.system.message.template;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
-import com.auth.service.system.admin.model.vo.emailtemplate.EmailTemplateRequireFieldRow;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemResultCode;
+import com.auth.service.system.message.model.vo.EmailTemplateRequireFieldRow;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -131,7 +131,9 @@ public class MessageTemplateRequireFieldsJsonSupport {
 		assertVariablesPresent(parse(requireFieldsJson), variables, missingCode, channel);
 	}
 
-	/** 用各字段的 exampleValue 组装预览/示例数据模型 */
+	/**
+	 * 用各字段的 exampleValue 组装预览/示例数据模型
+	 */
 	public static Map<String, Object> toExampleModel(List<EmailTemplateRequireFieldRow> rows) {
 		if (rows == null) {
 			throw new SystemBusinessException(REQUIRE_FIELDS_NULL);

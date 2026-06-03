@@ -1,10 +1,10 @@
 package com.auth.service.system.message.channel.email;
 
 import com.auth.module.message.api.channel.MessageChannel;
-import com.auth.service.system.admin.mapper.MessageTemplateMapper;
-import com.auth.service.system.admin.model.entity.MessageTemplateEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.TemplateRenderException;
+import com.auth.service.system.message.mapper.MessageTemplateMapper;
+import com.auth.service.system.message.model.entity.MessageTemplateEntity;
 import com.auth.service.system.message.template.FreemarkerTemplateRenderer;
 import com.auth.service.system.message.template.MessageTemplateRequireFieldsJsonSupport;
 import org.springframework.stereotype.Component;

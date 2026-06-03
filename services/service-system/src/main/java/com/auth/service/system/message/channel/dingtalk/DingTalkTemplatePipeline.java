@@ -3,11 +3,11 @@ package com.auth.service.system.message.channel.dingtalk;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.model.dingtalk.DingTalkMessageType;
-import com.auth.service.system.admin.mapper.MessageTemplateMapper;
-import com.auth.service.system.admin.model.entity.MessageTemplateEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.TemplateRenderException;
 import com.auth.service.system.message.config.DingTalkProperties;
+import com.auth.service.system.message.mapper.MessageTemplateMapper;
+import com.auth.service.system.message.model.entity.MessageTemplateEntity;
 import com.auth.service.system.message.template.FreemarkerTemplateRenderer;
 import com.auth.service.system.message.template.MessageTemplateRequireFieldsJsonSupport;
 import lombok.extern.slf4j.Slf4j;
@@ -61,7 +61,9 @@ public class DingTalkTemplatePipeline {
 		return new RenderedDingTalkNotice(messageType, title, content);
 	}
 
-	/** 模板上的消息类型优先，无效或缺失时用渠道默认 */
+	/**
+	 * 模板上的消息类型优先，无效或缺失时用渠道默认
+	 */
 	private DingTalkMessageType resolveMessageType(MessageTemplateEntity template) {
 		if (CharSequenceUtil.isNotBlank(template.getImMessageType())) {
 			try {

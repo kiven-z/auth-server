@@ -4,10 +4,10 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.json.JSONUtil;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
-import com.auth.service.system.admin.mapper.MessageTemplateMapper;
-import com.auth.service.system.admin.model.entity.MessageTemplateEntity;
-import com.auth.service.system.admin.model.vo.emailtemplate.EmailTemplateRequireFieldRow;
 import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.message.mapper.MessageTemplateMapper;
+import com.auth.service.system.message.model.entity.MessageTemplateEntity;
+import com.auth.service.system.message.model.vo.EmailTemplateRequireFieldRow;
 import com.auth.service.system.message.template.MessageTemplateRequireFieldsJsonSupport;
 import org.springframework.stereotype.Component;
 

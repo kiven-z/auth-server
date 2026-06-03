@@ -1,9 +1,9 @@
 package com.auth.service.system.binarystatus;
 
 import com.auth.service.system.admin.model.form.role.SysRoleForm;
-import com.auth.service.system.admin.model.query.EmailTemplateQuery;
 import com.auth.service.system.admin.model.query.SysJobGroupQuery;
 import com.auth.service.system.admin.model.query.SysRoleQuery;
+import com.auth.service.system.message.model.query.EmailTemplateQuery;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
