@@ -1,10 +1,6 @@
 package com.auth.service.system.admin.service.impl;
 
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
+import cn.hutool.core.collection.CollUtil;
 import com.auth.service.system.admin.convert.SysMenuManageConverter;
 import com.auth.service.system.admin.mapper.SysMenuMapper;
 import com.auth.service.system.admin.mapper.SysMenuPermissionMapper;
@@ -17,10 +13,13 @@ import com.auth.service.system.admin.model.po.menu.SysMenuAssignedRolePO;
 import com.auth.service.system.admin.model.vo.menu.SysMenuAssignedPermissionRow;
 import com.auth.service.system.admin.model.vo.menu.SysMenuAssignedRoleRow;
 import com.auth.service.system.admin.service.SysMenuManageService;
+import com.auth.service.system.admin.support.role.RoleGrantReferenceChecker;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-
-import cn.hutool.core.collection.CollUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * 菜单管理实现
@@ -37,10 +36,13 @@ public class SysMenuManageServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu
 
 	private final SysMenuPermissionMapper sysMenuPermissionMapper;
 
+	private final RoleGrantReferenceChecker roleGrantReferenceChecker;
+
 	public SysMenuManageServiceImpl(SysMenuRoleMapper sysMenuRoleMapper,
-			SysMenuPermissionMapper sysMenuPermissionMapper) {
+			SysMenuPermissionMapper sysMenuPermissionMapper, RoleGrantReferenceChecker roleGrantReferenceChecker) {
 		this.sysMenuRoleMapper = sysMenuRoleMapper;
 		this.sysMenuPermissionMapper = sysMenuPermissionMapper;
+		this.roleGrantReferenceChecker = roleGrantReferenceChecker;
 	}
 
 	/**
@@ -58,8 +60,8 @@ public class SysMenuManageServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu
 	 */
 	@Override
 	public void replaceMenuRoles(Long menuId, SysMenuAssignRoleForm form) {
-		// FIXME 校验角色类型只能是菜单类型 roleType = 2
-		List<String> roleCodes = CollUtil.emptyIfNull(form.getRoleCodes());
+		List<String> roleCodes = CollUtil.emptyIfNull(form.getRoleCodes()).stream().distinct().toList();
+		roleGrantReferenceChecker.requireMenuAssignEligibleRoles(roleCodes);
 
 		// 删除当前菜单已分配角色
 		sysMenuRoleMapper.deleteByMenuId(menuId);

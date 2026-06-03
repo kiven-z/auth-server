@@ -108,7 +108,12 @@ public enum SystemAdminResultCode implements SystemResultCode {
 	/**
 	 * 存在未删除的子菜单
 	 */
-	MENU_HAS_CHILDREN(409, 289, "MENU_HAS_CHILDREN", "system.menu.has_children"),;
+	MENU_HAS_CHILDREN(409, 289, "MENU_HAS_CHILDREN", "system.menu.has_children"),
+
+	/**
+	 * 菜单分配角色无效（不存在、未启用或类型非菜单角色）
+	 */
+	MENU_ROLE_INVALID(400, 291, "MENU_ROLE_INVALID", "system.menu.role_invalid"),;
 
 	private final int httpStatus;
 

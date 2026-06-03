@@ -39,6 +39,11 @@ public enum RoleTypeEnum {
 	 */
 	public static final List<Integer> DEPT_GRANT_TYPES = List.of(BUSINESS.code, CUSTOM.code);
 
+	/**
+	 * 菜单-角色关联允许的角色类型（菜单角色）
+	 */
+	public static final List<Integer> MENU_ASSIGN_TYPES = List.of(MENU.code);
+
 	private final Integer code;
 
 	private final String desc;
