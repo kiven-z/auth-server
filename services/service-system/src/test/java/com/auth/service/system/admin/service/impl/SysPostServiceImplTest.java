@@ -4,10 +4,11 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.SysPostMapper;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
-import com.auth.service.system.admin.model.form.post.SysPostCreateForm;
+import com.auth.service.system.admin.model.form.post.SysPostForm;
 import com.auth.service.system.admin.model.po.post.SysPostPageRowPO;
 import com.auth.service.system.admin.model.query.SysPostQuery;
 import com.auth.service.system.admin.model.vo.post.SysPostPageResponse;
+import com.auth.service.system.authorization.dispatch.trigger.PostAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -26,15 +27,14 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
- * {@link SysPostServiceImpl} ?????
+ * {@link SysPostServiceImpl} 单元测试
  *
  * @author Bunny
  */
-@DisplayName("SysPostServiceImpl ????")
+@DisplayName("SysPostServiceImpl 岗位管理")
 @ExtendWith(MockitoExtension.class)
 class SysPostServiceImplTest {
 
@@ -44,10 +44,13 @@ class SysPostServiceImplTest {
 	@Mock
 	private AuditUserDisplayService auditUserDisplayService;
 
+	@Mock
+	private PostAuthorizationInvalidationTrigger postInvalidationTrigger;
+
 	private SysPostServiceImpl sysPostService;
 
-	private static SysPostCreateForm minimalForm(Long deptId, String postCode, String postName) {
-		SysPostCreateForm form = new SysPostCreateForm();
+	private static SysPostForm minimalForm(Long deptId, String postCode, String postName) {
+		SysPostForm form = new SysPostForm();
 		form.setDeptId(deptId);
 		form.setPostCode(postCode);
 		form.setPostName(postName);
@@ -58,14 +61,14 @@ class SysPostServiceImplTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		sysPostService = new SysPostServiceImpl(auditUserDisplayService);
+		sysPostService = new SysPostServiceImpl(auditUserDisplayService, postInvalidationTrigger);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysPostService, sysPostMapper);
 	}
 
 	@Test
-	@DisplayName("?????Mapper ??????????????")
+	@DisplayName("分页查询：委托审计用户名补全")
 	void getPageDelegatesEnrichToAuditUserDisplayService() {
 		Page<SysPostEntity> pageParams = new Page<>(1, 10);
 		SysPostQuery query = new SysPostQuery();
@@ -76,15 +79,14 @@ class SysPostServiceImplTest {
 		PageResponse<SysPostPageResponse> result = sysPostService.getPage(pageParams, query);
 
 		assertThat(result.getList()).hasSize(1);
-		verify(auditUserDisplayService)
-			.enrichAuditUsernames(org.mockito.ArgumentMatchers.<IPage<SysPostPageResponse>>any());
+		verify(auditUserDisplayService).enrichAuditUsernames(any(IPage.class));
 	}
 
 	@Test
-	@DisplayName("??????????? POST_DEPT_NOT_FOUND")
+	@DisplayName("新增：部门不可挂载时 POST_DEPT_NOT_FOUND")
 	void createThrowsWhenDeptNotAssignable() {
 		when(sysPostMapper.countAssignableDept(99L)).thenReturn(0);
-		SysPostCreateForm form = minimalForm(99L, "P1", "???");
+		SysPostForm form = minimalForm(99L, "P1", "开发");
 
 		assertThatThrownBy(() -> sysPostService.create(form)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
@@ -92,11 +94,11 @@ class SysPostServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("??????????????? POST_CODE_DUPLICATE_IN_DEPT")
+	@DisplayName("新增：部门内编码重复时 POST_CODE_DUPLICATE_IN_DEPT")
 	void createThrowsWhenPostCodeDuplicateInDept() {
 		when(sysPostMapper.countAssignableDept(1L)).thenReturn(1);
 		when(sysPostMapper.selectCount(any())).thenReturn(1L);
-		SysPostCreateForm form = minimalForm(1L, "DUP", "??");
+		SysPostForm form = minimalForm(1L, "DUP", "重复岗");
 
 		assertThatThrownBy(() -> sysPostService.create(form)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
@@ -104,18 +106,78 @@ class SysPostServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("?????????????")
+	@DisplayName("新增：校验通过时落库")
 	void createPersistsWhenValid() {
 		when(sysPostMapper.countAssignableDept(2L)).thenReturn(1);
 		when(sysPostMapper.selectCount(any())).thenReturn(0L);
 		when(sysPostMapper.insert(any(SysPostEntity.class))).thenReturn(1);
-		SysPostCreateForm form = minimalForm(2L, "NEW_CODE", "???");
+		SysPostForm form = minimalForm(2L, "NEW_CODE", "新岗位");
 
 		sysPostService.create(form);
 
 		verify(sysPostMapper).insert(argThat(
 				(SysPostEntity e) -> Long.valueOf(2L).equals(e.getDeptId()) && "NEW_CODE".equals(e.getPostCode())
 						&& Boolean.TRUE.equals(e.getStatus()) && Integer.valueOf(0).equals(e.getOrderNum())));
+	}
+
+	@Test
+	@DisplayName("更新：岗位不存在时 POST_NOT_FOUND")
+	void updateThrowsWhenPostNotFound() {
+		when(sysPostMapper.selectById(9L)).thenReturn(null);
+		SysPostForm form = minimalForm(1L, "C1", "岗位");
+
+		assertThatThrownBy(() -> sysPostService.update(9L, form)).isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemAdminResultCode.POST_NOT_FOUND);
+	}
+
+	@Test
+	@DisplayName("更新：仅改名称时不提交授权失效")
+	void updateWithoutStatusChangeSkipsInvalidation() {
+		Long postId = 10L;
+		SysPostEntity existing = activePost(postId, 1L, "DEV", true);
+		when(sysPostMapper.selectById(postId)).thenReturn(existing);
+		when(sysPostMapper.countAssignableDept(1L)).thenReturn(1);
+		when(sysPostMapper.selectCount(any())).thenReturn(0L);
+		when(sysPostMapper.updateById(any(SysPostEntity.class))).thenReturn(1);
+
+		SysPostForm form = minimalForm(1L, "DEV", "研发岗");
+		form.setStatus(true);
+
+		sysPostService.update(postId, form);
+
+		verify(sysPostMapper).updateById(argThat((SysPostEntity e) -> "研发岗".equals(e.getPostName())));
+		verify(postInvalidationTrigger, never()).submitByPostIds(any(), any());
+	}
+
+	@Test
+	@DisplayName("更新：状态变更时提交 USER_POST 授权失效")
+	void updateWithStatusChangeSubmitsInvalidation() {
+		Long postId = 11L;
+		SysPostEntity existing = activePost(postId, 2L, "OPS", true);
+		when(sysPostMapper.selectById(postId)).thenReturn(existing);
+		when(sysPostMapper.countAssignableDept(3L)).thenReturn(1);
+		when(sysPostMapper.selectCount(any())).thenReturn(0L);
+		when(sysPostMapper.updateById(any(SysPostEntity.class))).thenReturn(1);
+
+		SysPostForm form = minimalForm(3L, "OPS", "运维");
+		form.setStatus(false);
+
+		sysPostService.update(postId, form);
+
+		verify(sysPostMapper).updateById(argThat(
+				(SysPostEntity e) -> Long.valueOf(3L).equals(e.getDeptId()) && Boolean.FALSE.equals(e.getStatus())));
+		verify(postInvalidationTrigger).submitByPostIds(eq(List.of(postId)), eq("update:" + postId));
+	}
+
+	private static SysPostEntity activePost(Long id, Long deptId, String postCode, boolean status) {
+		SysPostEntity entity = new SysPostEntity();
+		entity.setId(id);
+		entity.setDeptId(deptId);
+		entity.setPostCode(postCode);
+		entity.setPostName("原名");
+		entity.setStatus(status);
+		return entity;
 	}
 
 }

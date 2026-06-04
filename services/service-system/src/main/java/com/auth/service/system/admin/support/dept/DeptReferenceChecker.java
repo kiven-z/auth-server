@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
  *
  * @author Bunny
  */
-
 @RequiredArgsConstructor
 @Component
 public class DeptReferenceChecker {

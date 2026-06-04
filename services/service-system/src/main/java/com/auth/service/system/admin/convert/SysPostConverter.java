@@ -33,12 +33,11 @@ public interface SysPostConverter {
 	SysPostEntity toEntity(SysPostForm form);
 
 	/**
-	 * 表单字段合并到已有实体（更新；不覆盖部门与审计字段）
+	 * 表单字段合并到已有实体（更新；不覆盖主键与审计字段）
 	 * @param form 表单
 	 * @param entity 已有实体
 	 */
 	@Mapping(target = "id", ignore = true)
-	@Mapping(target = "deptId", ignore = true)
 	@Mapping(target = "createTime", ignore = true)
 	@Mapping(target = "updateTime", ignore = true)
 	@Mapping(target = "createUser", ignore = true)

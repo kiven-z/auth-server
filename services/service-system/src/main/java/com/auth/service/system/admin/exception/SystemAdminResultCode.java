@@ -51,6 +51,11 @@ public enum SystemAdminResultCode implements SystemResultCode {
 	POST_CODE_DUPLICATE_IN_DEPT(409, 276, "POST_CODE_DUPLICATE_IN_DEPT", "system.post.code_duplicate_in_dept"),
 
 	/**
+	 * 岗位不存在或已删除
+	 */
+	POST_NOT_FOUND(404, 292, "POST_NOT_FOUND", "system.post.not_found"),
+
+	/**
 	 * 角色仍被 grant_table 引用，不可删除
 	 */
 	ROLE_IN_USE(409, 278, "ROLE_IN_USE", "system.role.in_use"),

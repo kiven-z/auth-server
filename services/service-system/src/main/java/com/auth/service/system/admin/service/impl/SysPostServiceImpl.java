@@ -1,8 +1,12 @@
 package com.auth.service.system.admin.service.impl;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.convert.SysPostConverter;
-import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.SysPostMapper;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.form.post.SysPostForm;
@@ -10,17 +14,16 @@ import com.auth.service.system.admin.model.po.post.SysPostPageRowPO;
 import com.auth.service.system.admin.model.query.SysPostQuery;
 import com.auth.service.system.admin.model.vo.post.SysPostPageResponse;
 import com.auth.service.system.admin.service.SysPostService;
+import com.auth.service.system.admin.support.post.PostReferenceChecker;
 import com.auth.service.system.admin.support.sqlbuild.SysPostPageOrderSqlBuilder;
-import com.auth.service.system.authorization.dispatch.trigger.GrantAuthorizationInvalidationTrigger;
-import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.authorization.dispatch.trigger.PostAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.service.AuditUserDisplayService;
+import com.auth.service.system.common.support.FieldChangeSupport;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 系统岗位服务实现
@@ -34,7 +37,9 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity
 
 	private final AuditUserDisplayService auditUserDisplayService;
 
-	private final GrantAuthorizationInvalidationTrigger grantInvalidationTrigger;
+	private final PostAuthorizationInvalidationTrigger postInvalidationTrigger;
+
+	private final PostReferenceChecker postReferenceChecker;
 
 	/**
 	 * {@inheritDoc}
@@ -45,6 +50,7 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity
 		IPage<SysPostPageRowPO> page = baseMapper.selectListByPage(pageParams, query, orderBySql);
 		IPage<SysPostPageResponse> voPage = page.convert(SysPostConverter.INSTANCE::toPageResponse);
 
+		// 补充审计用户名
 		auditUserDisplayService.enrichAuditUsernames(voPage);
 		return PageResponse.of(voPage);
 	}
@@ -54,22 +60,17 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity
 	 */
 	@Override
 	public void create(SysPostForm form) {
-		if (baseMapper.countAssignableDept(form.getDeptId()) == 0) {
-			throw new SystemBusinessException(SystemAdminResultCode.POST_DEPT_NOT_FOUND, form.getDeptId());
-		}
+		// 校验部门可挂载岗位
+		Long deptId = form.getDeptId();
+		postReferenceChecker.requireAssignableDept(deptId);
 
+		// 同一部门内岗位编码唯一
 		String postCode = form.getPostCode();
-		long exists = count(Wrappers.<SysPostEntity>lambdaQuery()
-			.eq(SysPostEntity::getDeptId, form.getDeptId())
-			.eq(SysPostEntity::getPostCode, postCode));
-		if (exists > 0) {
-			throw new SystemBusinessException(SystemAdminResultCode.POST_CODE_DUPLICATE_IN_DEPT, form.getDeptId(),
-					postCode);
-		}
+		postReferenceChecker.requirePostCodeUniqueInDept(deptId, postCode, null);
 
 		SysPostEntity entity = SysPostConverter.INSTANCE.toEntity(form);
 		entity.setPostCode(postCode);
-
+		entity.setDeptId(deptId);
 		save(entity);
 	}
 
@@ -78,7 +79,27 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity
 	 */
 	@Override
 	public void update(Long id, SysPostForm form) {
+		SysPostEntity existing = postReferenceChecker.getExistingActive(id);
 
+		// 校验部门可挂载岗位
+		Long deptId = form.getDeptId();
+		postReferenceChecker.requireAssignableDept(deptId);
+
+		// 同一部门内岗位编码唯一
+		String postCode = form.getPostCode();
+		postReferenceChecker.requirePostCodeUniqueInDept(deptId, postCode, id);
+
+		// 校验状态是否发生变化
+		boolean statusChanged = FieldChangeSupport.valueChanged(existing.getStatus(), form.getStatus());
+		SysPostConverter.INSTANCE.applyUpdateForm(form, existing);
+		existing.setDeptId(deptId);
+		existing.setPostCode(postCode);
+		updateById(existing);
+
+		// 如果状态发生变化，则提交授权失效
+		if (statusChanged) {
+			postInvalidationTrigger.submitByPostIds(List.of(id), "update:" + id);
+		}
 	}
 
 }
