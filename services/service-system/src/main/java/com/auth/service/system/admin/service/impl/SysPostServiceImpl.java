@@ -5,18 +5,20 @@ import com.auth.service.system.admin.convert.SysPostConverter;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.SysPostMapper;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
-import com.auth.service.system.admin.model.form.post.SysPostCreateForm;
+import com.auth.service.system.admin.model.form.post.SysPostForm;
 import com.auth.service.system.admin.model.po.post.SysPostPageRowPO;
 import com.auth.service.system.admin.model.query.SysPostQuery;
 import com.auth.service.system.admin.model.vo.post.SysPostPageResponse;
 import com.auth.service.system.admin.service.SysPostService;
 import com.auth.service.system.admin.support.sqlbuild.SysPostPageOrderSqlBuilder;
+import com.auth.service.system.authorization.dispatch.trigger.GrantAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,15 +27,14 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * @author Bunny
  */
+@RequiredArgsConstructor
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity> implements SysPostService {
 
 	private final AuditUserDisplayService auditUserDisplayService;
 
-	public SysPostServiceImpl(AuditUserDisplayService auditUserDisplayService) {
-		this.auditUserDisplayService = auditUserDisplayService;
-	}
+	private final GrantAuthorizationInvalidationTrigger grantInvalidationTrigger;
 
 	/**
 	 * {@inheritDoc}
@@ -43,6 +44,7 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity
 		String orderBySql = SysPostPageOrderSqlBuilder.buildOrderBySql(query.getSort());
 		IPage<SysPostPageRowPO> page = baseMapper.selectListByPage(pageParams, query, orderBySql);
 		IPage<SysPostPageResponse> voPage = page.convert(SysPostConverter.INSTANCE::toPageResponse);
+
 		auditUserDisplayService.enrichAuditUsernames(voPage);
 		return PageResponse.of(voPage);
 	}
@@ -51,7 +53,7 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void create(SysPostCreateForm form) {
+	public void create(SysPostForm form) {
 		if (baseMapper.countAssignableDept(form.getDeptId()) == 0) {
 			throw new SystemBusinessException(SystemAdminResultCode.POST_DEPT_NOT_FOUND, form.getDeptId());
 		}
@@ -67,11 +69,16 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity
 
 		SysPostEntity entity = SysPostConverter.INSTANCE.toEntity(form);
 		entity.setPostCode(postCode);
-		if (entity.getOrderNum() == null) {
-			entity.setOrderNum(0);
-		}
 
 		save(entity);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void update(Long id, SysPostForm form) {
+
 	}
 
 }
