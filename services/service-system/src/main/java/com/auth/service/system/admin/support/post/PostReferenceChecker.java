@@ -1,6 +1,8 @@
 package com.auth.service.system.admin.support.post;
 
+import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
+import com.auth.service.system.admin.mapper.GrantTableMapper;
 import com.auth.service.system.admin.mapper.SysPostMapper;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
@@ -18,6 +20,8 @@ import org.springframework.stereotype.Component;
 public class PostReferenceChecker {
 
 	private final SysPostMapper sysPostMapper;
+
+	private final GrantTableMapper grantTableMapper;
 
 	/**
 	 * 加载未逻辑删除的岗位，不存在则抛业务异常
@@ -54,6 +58,17 @@ public class PostReferenceChecker {
 
 		if (sysPostMapper.selectCount(wrapper) > 0) {
 			throw new SystemBusinessException(SystemAdminResultCode.POST_CODE_DUPLICATE_IN_DEPT, deptId, postCode);
+		}
+	}
+
+	/**
+	 * 逻辑删除前：无有效 user_post 关联，且 grant_table 无 POST 主体引用。
+	 * @param postId 岗位 ID
+	 */
+	public void requireDeletable(Long postId) {
+		if (sysPostMapper.countActiveUserPostByPostId(postId) > 0
+				|| grantTableMapper.countBySubject(GrantTableSubjectType.POST.name(), postId) > 0) {
+			throw new SystemBusinessException(SystemAdminResultCode.POST_IN_USE, postId);
 		}
 	}
 

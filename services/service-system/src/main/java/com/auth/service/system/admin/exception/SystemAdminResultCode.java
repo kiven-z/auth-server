@@ -56,6 +56,11 @@ public enum SystemAdminResultCode implements SystemResultCode {
 	POST_NOT_FOUND(404, 292, "POST_NOT_FOUND", "system.post.not_found"),
 
 	/**
+	 * 岗位仍被 user_post 或 grant_table 引用，不可删除
+	 */
+	POST_IN_USE(409, 293, "POST_IN_USE", "system.post.in_use"),
+
+	/**
 	 * 角色仍被 grant_table 引用，不可删除
 	 */
 	ROLE_IN_USE(409, 278, "ROLE_IN_USE", "system.role.in_use"),

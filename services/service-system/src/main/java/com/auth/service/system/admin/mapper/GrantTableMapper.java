@@ -21,6 +21,14 @@ public interface GrantTableMapper {
 	long countByRoleCode(@Param("roleCode") String roleCode);
 
 	/**
+	 * 统计指定授权主体在 grant_table 中的引用行数。
+	 * @param subjectType 主体类型
+	 * @param subjectId 主体 ID
+	 * @return 引用行数
+	 */
+	long countBySubject(@Param("subjectType") String subjectType, @Param("subjectId") Long subjectId);
+
+	/**
 	 * 按授权主体删除全部 grant 行。
 	 * @param subjectType 主体类型
 	 * @param subjectId 主体 ID

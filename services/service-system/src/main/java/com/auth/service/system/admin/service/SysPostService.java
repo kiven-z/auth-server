@@ -35,4 +35,10 @@ public interface SysPostService {
 	 */
 	void update(Long id, SysPostForm form);
 
+	/**
+	 * 按主键逻辑删除岗位；user_post 或 grant_table 仍有引用时拒绝删除，成功后触发授权失效。
+	 * @param id 岗位主键
+	 */
+	void deleteById(Long id);
+
 }

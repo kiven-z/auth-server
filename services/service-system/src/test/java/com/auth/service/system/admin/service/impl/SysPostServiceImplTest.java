@@ -1,7 +1,10 @@
 package com.auth.service.system.admin.service.impl;
 
 import com.auth.common.data.model.PageResponse;
+import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
+import com.auth.module.security.contract.dto.invalidation.GrantSubjectKey;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
+import com.auth.service.system.admin.mapper.GrantTableMapper;
 import com.auth.service.system.admin.mapper.SysPostMapper;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.form.post.SysPostForm;
@@ -9,6 +12,7 @@ import com.auth.service.system.admin.model.po.post.SysPostPageRowPO;
 import com.auth.service.system.admin.model.query.SysPostQuery;
 import com.auth.service.system.admin.model.vo.post.SysPostPageResponse;
 import com.auth.service.system.admin.support.post.PostReferenceChecker;
+import com.auth.service.system.authorization.dispatch.trigger.GrantAuthorizationInvalidationTrigger;
 import com.auth.service.system.authorization.dispatch.trigger.PostAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
@@ -48,6 +52,12 @@ class SysPostServiceImplTest {
 	@Mock
 	private PostAuthorizationInvalidationTrigger postInvalidationTrigger;
 
+	@Mock
+	private GrantAuthorizationInvalidationTrigger grantInvalidationTrigger;
+
+	@Mock
+	private GrantTableMapper grantTableMapper;
+
 	private SysPostServiceImpl sysPostService;
 
 	private static SysPostForm minimalForm(Long deptId, String postCode, String postName) {
@@ -72,8 +82,9 @@ class SysPostServiceImplTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		PostReferenceChecker postReferenceChecker = new PostReferenceChecker(sysPostMapper);
-		sysPostService = new SysPostServiceImpl(auditUserDisplayService, postInvalidationTrigger, postReferenceChecker);
+		PostReferenceChecker postReferenceChecker = new PostReferenceChecker(sysPostMapper, grantTableMapper);
+		sysPostService = new SysPostServiceImpl(auditUserDisplayService, postInvalidationTrigger,
+				grantInvalidationTrigger, postReferenceChecker);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysPostService, sysPostMapper);
@@ -180,6 +191,66 @@ class SysPostServiceImplTest {
 		verify(sysPostMapper).updateById(argThat(
 				(SysPostEntity e) -> Long.valueOf(3L).equals(e.getDeptId()) && Boolean.FALSE.equals(e.getStatus())));
 		verify(postInvalidationTrigger).submitByPostIds(List.of(postId), "update:" + postId);
+	}
+
+	@Test
+	@DisplayName("删除：岗位不存在时 POST_NOT_FOUND")
+	void deleteThrowsWhenPostNotFound() {
+		when(sysPostMapper.selectById(9L)).thenReturn(null);
+
+		assertThatThrownBy(() -> sysPostService.deleteById(9L)).isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemAdminResultCode.POST_NOT_FOUND);
+
+		verifyNoInteractions(postInvalidationTrigger, grantInvalidationTrigger);
+	}
+
+	@Test
+	@DisplayName("删除：user_post 仍有关联时 POST_IN_USE")
+	void deleteThrowsWhenUserPostInUse() {
+		Long postId = 20L;
+		when(sysPostMapper.selectById(postId)).thenReturn(activePost(postId, 1L, "U1"));
+		when(sysPostMapper.countActiveUserPostByPostId(postId)).thenReturn(1L);
+
+		assertThatThrownBy(() -> sysPostService.deleteById(postId)).isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemAdminResultCode.POST_IN_USE);
+
+		verify(sysPostMapper, never()).deleteById(any());
+		verifyNoInteractions(postInvalidationTrigger, grantInvalidationTrigger);
+	}
+
+	@Test
+	@DisplayName("删除：grant_table POST 主体仍引用时 POST_IN_USE")
+	void deleteThrowsWhenGrantPostSubjectInUse() {
+		Long postId = 21L;
+		when(sysPostMapper.selectById(postId)).thenReturn(activePost(postId, 1L, "G1"));
+		when(sysPostMapper.countActiveUserPostByPostId(postId)).thenReturn(0L);
+		when(grantTableMapper.countBySubject(GrantTableSubjectType.POST.name(), postId)).thenReturn(1L);
+
+		assertThatThrownBy(() -> sysPostService.deleteById(postId)).isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemAdminResultCode.POST_IN_USE);
+
+		verify(sysPostMapper, never()).deleteById(any());
+		verifyNoInteractions(postInvalidationTrigger, grantInvalidationTrigger);
+	}
+
+	@Test
+	@DisplayName("删除：无引用时逻辑删除并提交 USER_POST 与 GRANT 授权失效")
+	void deleteShouldInvalidateAndRemoveWhenDeletable() {
+		Long postId = 22L;
+		when(sysPostMapper.selectById(postId)).thenReturn(activePost(postId, 1L, "OK"));
+		when(sysPostMapper.countActiveUserPostByPostId(postId)).thenReturn(0L);
+		when(grantTableMapper.countBySubject(GrantTableSubjectType.POST.name(), postId)).thenReturn(0L);
+		when(sysPostMapper.deleteById(postId)).thenReturn(1);
+
+		sysPostService.deleteById(postId);
+
+		verify(postInvalidationTrigger).submitByPostIds(List.of(postId), "delete:" + postId);
+		verify(grantInvalidationTrigger).submitByGrantSubjects(
+				List.of(new GrantSubjectKey(GrantTableSubjectType.POST, postId)), "delete:" + postId);
+		verify(sysPostMapper).deleteById(postId);
 	}
 
 }

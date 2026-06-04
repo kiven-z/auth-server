@@ -198,12 +198,13 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 	public void deleteById(Long deptId) {
 		// 校验部门是否存在
 		deptReferenceChecker.getExistingActive(deptId);
+
 		// 校验部门是否有子部门
 		deptReferenceChecker.requireNoActiveChildren(deptId);
 		// 校验子树是否仍被用户、授权或岗位引用
 		deptReferenceChecker.requireSubtreeUnused(deptId);
 
-		// 先提交失效（反查依赖 dept_closure）；再清理闭包与主表
+		// 先提交失效（反查依赖 dept_closure）再清理闭包与主表
 		deptInvalidationTrigger.submitByDeptIds(List.of(deptId), "delete:" + deptId);
 
 		// 维护部门闭包

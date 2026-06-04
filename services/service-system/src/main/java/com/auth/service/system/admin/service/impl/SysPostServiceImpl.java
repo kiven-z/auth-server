@@ -1,6 +1,13 @@
 package com.auth.service.system.admin.service.impl;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.auth.common.data.model.PageResponse;
+import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
+import com.auth.module.security.contract.dto.invalidation.GrantSubjectKey;
 import com.auth.service.system.admin.convert.SysPostConverter;
 import com.auth.service.system.admin.mapper.SysPostMapper;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
@@ -11,17 +18,15 @@ import com.auth.service.system.admin.model.vo.post.SysPostPageResponse;
 import com.auth.service.system.admin.service.SysPostService;
 import com.auth.service.system.admin.support.post.PostReferenceChecker;
 import com.auth.service.system.admin.support.sqlbuild.SysPostPageOrderSqlBuilder;
+import com.auth.service.system.authorization.dispatch.trigger.GrantAuthorizationInvalidationTrigger;
 import com.auth.service.system.authorization.dispatch.trigger.PostAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.common.support.FieldChangeSupport;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 /**
  * 系统岗位服务实现
@@ -36,6 +41,8 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity
 	private final AuditUserDisplayService auditUserDisplayService;
 
 	private final PostAuthorizationInvalidationTrigger postInvalidationTrigger;
+
+	private final GrantAuthorizationInvalidationTrigger grantInvalidationTrigger;
 
 	private final PostReferenceChecker postReferenceChecker;
 
@@ -94,6 +101,25 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity
 		if (statusChanged) {
 			postInvalidationTrigger.submitByPostIds(List.of(id), "update:" + id);
 		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void deleteById(Long id) {
+		// 校验岗位是否存在
+		postReferenceChecker.getExistingActive(id);
+		// 校验岗位是否有被引用
+		postReferenceChecker.requireDeletable(id);
+
+		// 删除岗位后，提交授权失效
+		postInvalidationTrigger.submitByPostIds(List.of(id), "delete:" + id);
+		// 删除岗位后，提交授权失效
+		grantInvalidationTrigger.submitByGrantSubjects(List.of(new GrantSubjectKey(GrantTableSubjectType.POST, id)),
+				"delete:" + id);
+
+		removeById(id);
 	}
 
 }
