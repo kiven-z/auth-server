@@ -33,7 +33,7 @@ public interface SysPostMapper extends BaseMapper<SysPostEntity> {
 	 * @param deptId 部门主键
 	 * @return 命中条数
 	 */
-	@Select("SELECT COUNT(1) FROM sys_dept WHERE id = #{deptId} AND is_deleted = 0")
+	@Select("SELECT COUNT(1) FROM sys_dept WHERE id = #{deptId} AND status = 1 AND is_deleted = 0")
 	int countAssignableDept(@Param("deptId") Long deptId);
 
 }

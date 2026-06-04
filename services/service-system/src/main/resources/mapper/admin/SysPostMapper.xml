@@ -21,27 +21,28 @@
         <where>
             p.is_deleted = 0
             <if test="query.postCode != null and query.postCode != ''">
-                AND p.post_code LIKE CONCAT('%', #{query.postCode}, '%')
+                AND p.post_code LIKE CONCAT('%',
+                #{query.postCode},
+                '%'
+                )
             </if>
             <if test="query.postName != null and query.postName != ''">
-                AND p.post_name LIKE CONCAT('%', #{query.postName}, '%')
+                AND p.post_name LIKE CONCAT('%',
+                #{query.postName},
+                '%'
+                )
             </if>
             <if test="query.deptName != null and query.deptName != ''">
-                AND d.dept_name LIKE CONCAT('%', #{query.deptName}, '%')
+                AND d.dept_name LIKE CONCAT('%',
+                #{query.deptName},
+                '%'
+                )
             </if>
             <if test="query.status != null">
-                AND p.status = #{query.status}
+                AND p.status =
+                #{query.status}
             </if>
         </where>
         ORDER BY ${orderBySql}
-    </select>
-
-    <!-- 校验部门是否可用于挂载岗位 -->
-    <select id="countAssignableDept" resultType="int">
-        SELECT COUNT(1)
-        FROM sys_dept
-        WHERE id = #{deptId}
-          AND status = 1
-          AND is_deleted = 0
     </select>
 </mapper>
