@@ -1,17 +1,19 @@
 package com.auth.service.system.admin.service.impl;
 
 import com.auth.common.data.model.PageResponse;
+import com.auth.service.system.admin.convert.SysDeptConverter;
 import com.auth.service.system.admin.convert.SysPostConverter;
+import com.auth.service.system.admin.mapper.SysPostDetailMapper;
 import com.auth.service.system.admin.mapper.SysPostMapper;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.form.post.SysPostForm;
 import com.auth.service.system.admin.model.po.post.SysPostPageRowPO;
 import com.auth.service.system.admin.model.query.SysPostQuery;
+import com.auth.service.system.admin.model.vo.post.SysPostDetailVO;
 import com.auth.service.system.admin.model.vo.post.SysPostPageResponse;
 import com.auth.service.system.admin.service.SysPostService;
 import com.auth.service.system.admin.support.post.PostReferenceChecker;
 import com.auth.service.system.admin.support.sqlbuild.SysPostPageOrderSqlBuilder;
-import com.auth.service.system.authorization.dispatch.trigger.GrantAuthorizationInvalidationTrigger;
 import com.auth.service.system.authorization.dispatch.trigger.PostAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.common.support.FieldChangeSupport;
@@ -22,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -38,9 +41,9 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity
 
 	private final PostAuthorizationInvalidationTrigger postInvalidationTrigger;
 
-	private final GrantAuthorizationInvalidationTrigger grantInvalidationTrigger;
-
 	private final PostReferenceChecker postReferenceChecker;
+
+	private final SysPostDetailMapper sysPostDetailMapper;
 
 	/**
 	 * {@inheritDoc}
@@ -54,6 +57,24 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity
 		// 补充审计用户名
 		auditUserDisplayService.enrichAuditUsernames(voPage);
 		return PageResponse.of(voPage);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public SysPostDetailVO getDetail(Long id) {
+		SysPostEntity entity = postReferenceChecker.getExistingActive(id);
+
+		SysPostDetailVO detail = SysPostConverter.INSTANCE.toDetailVo(entity);
+		detail.setBoundDept(SysPostConverter.INSTANCE.toBoundDeptItem(sysPostDetailMapper.selectBoundDeptByPostId(id)));
+		detail.setBoundUsers(
+				SysPostConverter.INSTANCE.toBoundUserItemList(sysPostDetailMapper.selectBoundUsersByPostId(id)));
+		detail.setBoundRoles(
+				SysDeptConverter.INSTANCE.toBoundRoleItemList(sysPostDetailMapper.selectBoundRolesByPostId(id)));
+
+		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail));
+		return detail;
 	}
 
 	/**

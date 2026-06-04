@@ -4,6 +4,7 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.form.post.SysPostForm;
 import com.auth.service.system.admin.model.query.SysPostQuery;
+import com.auth.service.system.admin.model.vo.post.SysPostDetailVO;
 import com.auth.service.system.admin.model.vo.post.SysPostPageResponse;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
@@ -21,6 +22,13 @@ public interface SysPostService {
 	 * @return 分页数据
 	 */
 	PageResponse<SysPostPageResponse> getPage(Page<SysPostEntity> pageParams, SysPostQuery query);
+
+	/**
+	 * 岗位详情（含所属部门、关联用户、已授权角色）
+	 * @param id 岗位主键
+	 * @return 详情
+	 */
+	SysPostDetailVO getDetail(Long id);
 
 	/**
 	 * 新增岗位

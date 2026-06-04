@@ -2,11 +2,18 @@ package com.auth.service.system.admin.convert;
 
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.form.post.SysPostForm;
+import com.auth.service.system.admin.model.po.post.SysPostBoundDeptPO;
+import com.auth.service.system.admin.model.po.post.SysPostBoundUserPO;
 import com.auth.service.system.admin.model.po.post.SysPostPageRowPO;
+import com.auth.service.system.admin.model.vo.post.SysPostBoundDeptItemVO;
+import com.auth.service.system.admin.model.vo.post.SysPostBoundUserItemVO;
+import com.auth.service.system.admin.model.vo.post.SysPostDetailVO;
 import com.auth.service.system.admin.model.vo.post.SysPostPageResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+
+import java.util.List;
 
 /**
  * 岗位转换器
@@ -54,5 +61,31 @@ public interface SysPostConverter {
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
 	SysPostPageResponse toPageResponse(SysPostPageRowPO po);
+
+	/**
+	 * 实体 → 详情 VO
+	 * @param entity 岗位实体
+	 * @return 详情 VO
+	 */
+	@Mapping(target = "createUsername", ignore = true)
+	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "boundDept", ignore = true)
+	@Mapping(target = "boundUsers", ignore = true)
+	@Mapping(target = "boundRoles", ignore = true)
+	SysPostDetailVO toDetailVo(SysPostEntity entity);
+
+	/**
+	 * 所属部门 PO → 详情项 VO
+	 * @param po 持久层投影
+	 * @return 部门项，po 为 null 时返回 null
+	 */
+	SysPostBoundDeptItemVO toBoundDeptItem(SysPostBoundDeptPO po);
+
+	/**
+	 * 关联用户 PO 列表 → 详情项 VO 列表
+	 * @param poList 持久层投影列表
+	 * @return 详情项 VO 列表
+	 */
+	List<SysPostBoundUserItemVO> toBoundUserItemList(List<SysPostBoundUserPO> poList);
 
 }

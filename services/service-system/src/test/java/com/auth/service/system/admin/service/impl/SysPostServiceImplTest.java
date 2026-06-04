@@ -3,11 +3,16 @@ package com.auth.service.system.admin.service.impl;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.PostReferenceMapper;
+import com.auth.service.system.admin.mapper.SysPostDetailMapper;
 import com.auth.service.system.admin.mapper.SysPostMapper;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.form.post.SysPostForm;
+import com.auth.service.system.admin.model.po.dept.SysDeptBoundRolePO;
+import com.auth.service.system.admin.model.po.post.SysPostBoundDeptPO;
+import com.auth.service.system.admin.model.po.post.SysPostBoundUserPO;
 import com.auth.service.system.admin.model.po.post.SysPostPageRowPO;
 import com.auth.service.system.admin.model.query.SysPostQuery;
+import com.auth.service.system.admin.model.vo.post.SysPostDetailVO;
 import com.auth.service.system.admin.model.vo.post.SysPostPageResponse;
 import com.auth.service.system.admin.support.post.PostReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.GrantAuthorizationInvalidationTrigger;
@@ -56,6 +61,9 @@ class SysPostServiceImplTest {
 	@Mock
 	private PostReferenceMapper postReferenceMapper;
 
+	@Mock
+	private SysPostDetailMapper sysPostDetailMapper;
+
 	private SysPostServiceImpl sysPostService;
 
 	private static SysPostForm minimalForm(Long deptId, String postCode, String postName) {
@@ -82,7 +90,7 @@ class SysPostServiceImplTest {
 	void setUp() throws Exception {
 		PostReferenceChecker postReferenceChecker = new PostReferenceChecker(sysPostMapper, postReferenceMapper);
 		sysPostService = new SysPostServiceImpl(auditUserDisplayService, postInvalidationTrigger,
-				grantInvalidationTrigger, postReferenceChecker);
+				grantInvalidationTrigger, postReferenceChecker, sysPostDetailMapper);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysPostService, sysPostMapper);
@@ -101,6 +109,65 @@ class SysPostServiceImplTest {
 
 		assertThat(result.getList()).hasSize(1);
 		verify(auditUserDisplayService).enrichAuditUsernames(any(IPage.class));
+	}
+
+	@Test
+	@DisplayName("详情：岗位不存在时 POST_NOT_FOUND")
+	void getDetailThrowsWhenPostNotFound() {
+		when(sysPostMapper.selectById(9L)).thenReturn(null);
+
+		assertThatThrownBy(() -> sysPostService.getDetail(9L)).isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemAdminResultCode.POST_NOT_FOUND);
+
+		verifyNoInteractions(sysPostDetailMapper);
+		verify(auditUserDisplayService, never()).enrichAuditUsernames(anyList());
+	}
+
+	@Test
+	@DisplayName("详情：组装主表、部门快照、用户与角色并补全审计用户名")
+	void getDetailAssemblesBoundDataAndEnrichesAudit() {
+		Long postId = 30L;
+		SysPostEntity entity = activePost(postId, 2L, "DEV");
+		entity.setPostName("研发");
+		entity.setOrderNum(1);
+		entity.setRemark("备注");
+
+		SysPostBoundDeptPO boundDept = new SysPostBoundDeptPO();
+		boundDept.setDeptId(2L);
+		boundDept.setDeptCode("RD");
+		boundDept.setDeptName("研发部");
+		boundDept.setStatus(true);
+		boundDept.setParentId(0L);
+
+		SysPostBoundUserPO boundUser = new SysPostBoundUserPO();
+		boundUser.setUserId(100L);
+		boundUser.setUsername("alice");
+
+		SysDeptBoundRolePO boundRole = new SysDeptBoundRolePO();
+		boundRole.setRoleCode("CUSTOM_A");
+		boundRole.setRoleName("业务角色A");
+
+		when(sysPostMapper.selectById(postId)).thenReturn(entity);
+		when(sysPostDetailMapper.selectBoundDeptByPostId(postId)).thenReturn(boundDept);
+		when(sysPostDetailMapper.selectBoundUsersByPostId(postId)).thenReturn(List.of(boundUser));
+		when(sysPostDetailMapper.selectBoundRolesByPostId(postId)).thenReturn(List.of(boundRole));
+
+		SysPostDetailVO detail = sysPostService.getDetail(postId);
+
+		assertThat(detail.getPostCode()).isEqualTo("DEV");
+		assertThat(detail.getPostName()).isEqualTo("研发");
+		assertThat(detail.getDeptId()).isEqualTo(2L);
+		assertThat(detail.getBoundDept()).isNotNull();
+		assertThat(detail.getBoundDept().getDeptName()).isEqualTo("研发部");
+		assertThat(detail.getBoundUsers()).hasSize(1);
+		assertThat(detail.getBoundUsers().get(0).getUsername()).isEqualTo("alice");
+		assertThat(detail.getBoundRoles()).hasSize(1);
+		assertThat(detail.getBoundRoles().get(0).getRoleCode()).isEqualTo("CUSTOM_A");
+		verify(sysPostDetailMapper).selectBoundDeptByPostId(postId);
+		verify(sysPostDetailMapper).selectBoundUsersByPostId(postId);
+		verify(sysPostDetailMapper).selectBoundRolesByPostId(postId);
+		verify(auditUserDisplayService).enrichAuditUsernames(anyList());
 	}
 
 	@Test

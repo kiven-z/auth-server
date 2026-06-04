@@ -8,6 +8,7 @@ import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.form.post.SysPostForm;
 import com.auth.service.system.admin.model.query.SysPostQuery;
+import com.auth.service.system.admin.model.vo.post.SysPostDetailVO;
 import com.auth.service.system.admin.model.vo.post.SysPostPageResponse;
 import com.auth.service.system.admin.service.SysPostService;
 import com.auth.service.system.common.model.audit.SystemAuditBizModule;
@@ -43,6 +44,13 @@ public class SysPostController {
 		Page<SysPostEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
 		PageResponse<SysPostPageResponse> result = sysPostService.getPage(pageParams, query);
 		return Result.success(result);
+	}
+
+	@Operation(summary = "岗位详情")
+	@PreAuthorize("@auth.decide('sysPost:query')")
+	@GetMapping("/{id}")
+	public Result<SysPostDetailVO> detail(@PathVariable("id") Long id) {
+		return Result.success(sysPostService.getDetail(id));
 	}
 
 	@Operation(summary = "新增岗位")
