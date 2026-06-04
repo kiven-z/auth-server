@@ -9,14 +9,6 @@
         WHERE role_code = #{roleCode}
     </select>
 
-    <!-- 主体删除前：grant_table 是否仍引用该 subject -->
-    <select id="countBySubject" resultType="long">
-        SELECT COUNT(1)
-        FROM grant_table
-        WHERE subject_type = #{subjectType}
-          AND subject_id = #{subjectId}
-    </select>
-
     <!-- 按授权主体删除全部 grant 行 -->
     <delete id="deleteBySubject">
         DELETE

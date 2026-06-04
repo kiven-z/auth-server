@@ -4,7 +4,7 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.module.security.contract.dto.invalidation.GrantSubjectKey;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
-import com.auth.service.system.admin.mapper.GrantTableMapper;
+import com.auth.service.system.admin.mapper.PostReferenceMapper;
 import com.auth.service.system.admin.mapper.SysPostMapper;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.form.post.SysPostForm;
@@ -56,7 +56,7 @@ class SysPostServiceImplTest {
 	private GrantAuthorizationInvalidationTrigger grantInvalidationTrigger;
 
 	@Mock
-	private GrantTableMapper grantTableMapper;
+	private PostReferenceMapper postReferenceMapper;
 
 	private SysPostServiceImpl sysPostService;
 
@@ -82,7 +82,7 @@ class SysPostServiceImplTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		PostReferenceChecker postReferenceChecker = new PostReferenceChecker(sysPostMapper, grantTableMapper);
+		PostReferenceChecker postReferenceChecker = new PostReferenceChecker(sysPostMapper, postReferenceMapper);
 		sysPostService = new SysPostServiceImpl(auditUserDisplayService, postInvalidationTrigger,
 				grantInvalidationTrigger, postReferenceChecker);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
@@ -210,7 +210,7 @@ class SysPostServiceImplTest {
 	void deleteThrowsWhenUserPostInUse() {
 		Long postId = 20L;
 		when(sysPostMapper.selectById(postId)).thenReturn(activePost(postId, 1L, "U1"));
-		when(sysPostMapper.countActiveUserPostByPostId(postId)).thenReturn(1L);
+		when(postReferenceMapper.countUserPostByPostId(postId)).thenReturn(1L);
 
 		assertThatThrownBy(() -> sysPostService.deleteById(postId)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
@@ -225,8 +225,8 @@ class SysPostServiceImplTest {
 	void deleteThrowsWhenGrantPostSubjectInUse() {
 		Long postId = 21L;
 		when(sysPostMapper.selectById(postId)).thenReturn(activePost(postId, 1L, "G1"));
-		when(sysPostMapper.countActiveUserPostByPostId(postId)).thenReturn(0L);
-		when(grantTableMapper.countBySubject(GrantTableSubjectType.POST.name(), postId)).thenReturn(1L);
+		when(postReferenceMapper.countUserPostByPostId(postId)).thenReturn(0L);
+		when(postReferenceMapper.countGrantPostSubjectByPostId(postId)).thenReturn(1L);
 
 		assertThatThrownBy(() -> sysPostService.deleteById(postId)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
@@ -241,8 +241,8 @@ class SysPostServiceImplTest {
 	void deleteShouldInvalidateAndRemoveWhenDeletable() {
 		Long postId = 22L;
 		when(sysPostMapper.selectById(postId)).thenReturn(activePost(postId, 1L, "OK"));
-		when(sysPostMapper.countActiveUserPostByPostId(postId)).thenReturn(0L);
-		when(grantTableMapper.countBySubject(GrantTableSubjectType.POST.name(), postId)).thenReturn(0L);
+		when(postReferenceMapper.countUserPostByPostId(postId)).thenReturn(0L);
+		when(postReferenceMapper.countGrantPostSubjectByPostId(postId)).thenReturn(0L);
 		when(sysPostMapper.deleteById(postId)).thenReturn(1);
 
 		sysPostService.deleteById(postId);

@@ -36,12 +36,4 @@ public interface SysPostMapper extends BaseMapper<SysPostEntity> {
 	@Select("SELECT COUNT(1) FROM sys_dept WHERE id = #{deptId} AND status = 1 AND is_deleted = 0")
 	int countAssignableDept(@Param("deptId") Long deptId);
 
-	/**
-	 * 统计岗位下仍有效的用户-岗位关联（与授权影响面反查一致）
-	 * @param postId 岗位主键
-	 * @return 关联行数
-	 */
-	@Select("SELECT COUNT(1) FROM user_post WHERE post_id = #{postId} AND status IN (1, 2)")
-	long countActiveUserPostByPostId(@Param("postId") Long postId);
-
 }

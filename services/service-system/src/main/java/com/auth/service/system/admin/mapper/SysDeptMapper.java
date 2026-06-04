@@ -11,7 +11,7 @@ import org.apache.ibatis.annotations.Select;
 import java.util.List;
 
 /**
- * 系统部门 Mapper。
+ * 系统部门 Mapper
  *
  * @author Bunny
  */
@@ -19,14 +19,14 @@ import java.util.List;
 public interface SysDeptMapper extends BaseMapper<SysDeptEntity> {
 
 	/**
-	 * 条件查询全部部门（扁平，供前端建树）。
+	 * 条件查询全部部门（扁平，供前端建树）
 	 * @param query 查询条件
 	 * @return 部门列表
 	 */
 	List<SysDeptEntity> selectListByQuery(@Param("query") SysDeptQuery query);
 
 	/**
-	 * 分页查询部门（表格视图）。
+	 * 分页查询部门（表格视图）
 	 * @param page 分页参数
 	 * @param query 查询条件
 	 * @return 分页部门列表
@@ -34,7 +34,7 @@ public interface SysDeptMapper extends BaseMapper<SysDeptEntity> {
 	IPage<SysDeptEntity> selectPageByQuery(IPage<SysDeptEntity> page, @Param("query") SysDeptQuery query);
 
 	/**
-	 * 未逻辑删除的部门数量。
+	 * 未逻辑删除的部门数量
 	 * @param deptId 部门 ID
 	 * @return 匹配行数
 	 */
@@ -42,7 +42,7 @@ public interface SysDeptMapper extends BaseMapper<SysDeptEntity> {
 	int countActiveById(@Param("deptId") Long deptId);
 
 	/**
-	 * 未删除的直接子部门数量。
+	 * 未删除的直接子部门数量
 	 * @param parentId 父部门 ID
 	 * @return 子部门行数
 	 */
