@@ -10,6 +10,8 @@ import java.time.LocalDateTime;
 
 /**
  * 部门详情-已授权角色行
+ *
+ * @author bunny
  */
 @Schema(name = "SysDeptBoundRolePO", title = "部门已授权角色 PO")
 @Getter

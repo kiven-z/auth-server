@@ -54,6 +54,15 @@ public class RoleGrantReferenceChecker {
 	}
 
 	/**
+	 * 岗位 grant 专用：仅允许业务/自定义角色（roleType 3/4）
+	 * @param roleCodes 待写入角色编码
+	 */
+	public void requirePostGrantEligibleRoles(List<String> roleCodes) {
+		// FIXME 和 requireGrantEligibleRoles 可以重命名
+		requireGrantEligibleRoles(roleCodes, RoleTypeEnum.POST_GRANT_TYPES, SystemAdminResultCode.POST_ROLE_INVALID);
+	}
+
+	/**
 	 * 菜单-角色关联专用：仅允许菜单角色（roleType 2）
 	 * @param roleCodes 待写入角色编码
 	 */

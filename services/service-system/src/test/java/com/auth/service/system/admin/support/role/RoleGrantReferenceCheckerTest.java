@@ -83,6 +83,27 @@ class RoleGrantReferenceCheckerTest {
 	}
 
 	@Test
+	@DisplayName("岗位 grant：全部 eligible 时不抛异常")
+	void requirePostGrantEligibleRolesPassesWhenAllEligible() {
+		when(sysRoleMapper.selectCount(any())).thenReturn(1L);
+
+		assertThatCode(() -> roleGrantReferenceChecker.requirePostGrantEligibleRoles(List.of("CUSTOM_A")))
+			.doesNotThrowAnyException();
+	}
+
+	@Test
+	@DisplayName("岗位 grant：存在无效角色时抛出 POST_ROLE_INVALID")
+	void requirePostGrantEligibleRolesThrowsWhenNotAllEligible() {
+		when(sysRoleMapper.selectCount(any())).thenReturn(0L);
+
+		List<String> roleCodes = List.of("SYS_ADMIN");
+		assertThatThrownBy(() -> roleGrantReferenceChecker.requirePostGrantEligibleRoles(roleCodes))
+			.isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemAdminResultCode.POST_ROLE_INVALID);
+	}
+
+	@Test
 	@DisplayName("菜单关联：存在无效角色时抛出 MENU_ROLE_INVALID")
 	void requireMenuAssignEligibleRolesThrowsWhenNotAllEligible() {
 		when(sysRoleMapper.selectCount(any())).thenReturn(0L);

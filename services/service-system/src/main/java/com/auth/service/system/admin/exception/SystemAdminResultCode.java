@@ -61,6 +61,11 @@ public enum SystemAdminResultCode implements SystemResultCode {
 	POST_IN_USE(409, 293, "POST_IN_USE", "system.post.in_use"),
 
 	/**
+	 * 岗位授权角色无效（不存在、未启用或类型不允许）
+	 */
+	POST_ROLE_INVALID(400, 294, "POST_ROLE_INVALID", "system.post.role_invalid"),
+
+	/**
 	 * 角色仍被 grant_table 引用，不可删除
 	 */
 	ROLE_IN_USE(409, 278, "ROLE_IN_USE", "system.role.in_use"),
