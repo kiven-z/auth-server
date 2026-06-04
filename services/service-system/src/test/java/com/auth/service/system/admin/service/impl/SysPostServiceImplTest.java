@@ -1,8 +1,6 @@
 package com.auth.service.system.admin.service.impl;
 
 import com.auth.common.data.model.PageResponse;
-import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
-import com.auth.module.security.contract.dto.invalidation.GrantSubjectKey;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.PostReferenceMapper;
 import com.auth.service.system.admin.mapper.SysPostMapper;
@@ -12,7 +10,6 @@ import com.auth.service.system.admin.model.po.post.SysPostPageRowPO;
 import com.auth.service.system.admin.model.query.SysPostQuery;
 import com.auth.service.system.admin.model.vo.post.SysPostPageResponse;
 import com.auth.service.system.admin.support.post.PostReferenceChecker;
-import com.auth.service.system.authorization.dispatch.trigger.GrantAuthorizationInvalidationTrigger;
 import com.auth.service.system.authorization.dispatch.trigger.PostAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
@@ -53,9 +50,6 @@ class SysPostServiceImplTest {
 	private PostAuthorizationInvalidationTrigger postInvalidationTrigger;
 
 	@Mock
-	private GrantAuthorizationInvalidationTrigger grantInvalidationTrigger;
-
-	@Mock
 	private PostReferenceMapper postReferenceMapper;
 
 	private SysPostServiceImpl sysPostService;
@@ -83,8 +77,7 @@ class SysPostServiceImplTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		PostReferenceChecker postReferenceChecker = new PostReferenceChecker(sysPostMapper, postReferenceMapper);
-		sysPostService = new SysPostServiceImpl(auditUserDisplayService, postInvalidationTrigger,
-				grantInvalidationTrigger, postReferenceChecker);
+		sysPostService = new SysPostServiceImpl(auditUserDisplayService, postInvalidationTrigger, postReferenceChecker);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysPostService, sysPostMapper);
@@ -174,6 +167,25 @@ class SysPostServiceImplTest {
 	}
 
 	@Test
+	@DisplayName("更新：仅换挂载部门时提交 USER_POST 授权失效")
+	void updateWithDeptChangeSubmitsInvalidation() {
+		Long postId = 12L;
+		SysPostEntity existing = activePost(postId, 1L, "DEV");
+		when(sysPostMapper.selectById(postId)).thenReturn(existing);
+		when(sysPostMapper.countAssignableDept(5L)).thenReturn(1);
+		when(sysPostMapper.selectCount(any())).thenReturn(0L);
+		when(sysPostMapper.updateById(any(SysPostEntity.class))).thenReturn(1);
+
+		SysPostForm form = minimalForm(5L, "DEV", "原名");
+		form.setStatus(true);
+
+		sysPostService.update(postId, form);
+
+		verify(sysPostMapper).updateById(argThat((SysPostEntity e) -> Long.valueOf(5L).equals(e.getDeptId())));
+		verify(postInvalidationTrigger).submitByPostIds(List.of(postId), "update:" + postId);
+	}
+
+	@Test
 	@DisplayName("更新：状态变更时提交 USER_POST 授权失效")
 	void updateWithStatusChangeSubmitsInvalidation() {
 		Long postId = 11L;
@@ -202,7 +214,7 @@ class SysPostServiceImplTest {
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemAdminResultCode.POST_NOT_FOUND);
 
-		verifyNoInteractions(postInvalidationTrigger, grantInvalidationTrigger);
+		verifyNoInteractions(postInvalidationTrigger);
 	}
 
 	@Test
@@ -217,7 +229,7 @@ class SysPostServiceImplTest {
 			.isEqualTo(SystemAdminResultCode.POST_IN_USE);
 
 		verify(sysPostMapper, never()).deleteById(any());
-		verifyNoInteractions(postInvalidationTrigger, grantInvalidationTrigger);
+		verifyNoInteractions(postInvalidationTrigger);
 	}
 
 	@Test
@@ -233,11 +245,11 @@ class SysPostServiceImplTest {
 			.isEqualTo(SystemAdminResultCode.POST_IN_USE);
 
 		verify(sysPostMapper, never()).deleteById(any());
-		verifyNoInteractions(postInvalidationTrigger, grantInvalidationTrigger);
+		verifyNoInteractions(postInvalidationTrigger);
 	}
 
 	@Test
-	@DisplayName("删除：无引用时逻辑删除并提交 USER_POST 与 GRANT 授权失效")
+	@DisplayName("删除：无引用时逻辑删除并仅提交 USER_POST 授权失效")
 	void deleteShouldInvalidateAndRemoveWhenDeletable() {
 		Long postId = 22L;
 		when(sysPostMapper.selectById(postId)).thenReturn(activePost(postId, 1L, "OK"));
@@ -248,8 +260,6 @@ class SysPostServiceImplTest {
 		sysPostService.deleteById(postId);
 
 		verify(postInvalidationTrigger).submitByPostIds(List.of(postId), "delete:" + postId);
-		verify(grantInvalidationTrigger).submitByGrantSubjects(
-				List.of(new GrantSubjectKey(GrantTableSubjectType.POST, postId)), "delete:" + postId);
 		verify(sysPostMapper).deleteById(postId);
 	}
 

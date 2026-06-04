@@ -1,13 +1,6 @@
 package com.auth.service.system.admin.service.impl;
 
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.auth.common.data.model.PageResponse;
-import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
-import com.auth.module.security.contract.dto.invalidation.GrantSubjectKey;
 import com.auth.service.system.admin.convert.SysPostConverter;
 import com.auth.service.system.admin.mapper.SysPostMapper;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
@@ -25,8 +18,11 @@ import com.auth.service.system.common.support.FieldChangeSupport;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * 系统岗位服务实现
@@ -115,9 +111,6 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity
 
 		// 删除岗位后，提交授权失效
 		postInvalidationTrigger.submitByPostIds(List.of(id), "delete:" + id);
-		// 删除岗位后，提交授权失效
-		grantInvalidationTrigger.submitByGrantSubjects(List.of(new GrantSubjectKey(GrantTableSubjectType.POST, id)),
-				"delete:" + id);
 
 		removeById(id);
 	}
