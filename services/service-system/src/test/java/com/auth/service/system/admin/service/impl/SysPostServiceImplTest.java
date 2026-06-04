@@ -2,12 +2,15 @@ package com.auth.service.system.admin.service.impl;
 
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
+import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
+import com.auth.service.system.admin.mapper.GrantTableMapper;
 import com.auth.service.system.admin.mapper.PostReferenceMapper;
 import com.auth.service.system.admin.mapper.SysPostDetailMapper;
 import com.auth.service.system.admin.mapper.SysPostMapper;
+import com.auth.service.system.admin.model.enums.RoleTypeEnum;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.form.post.SysPostForm;
-import com.auth.service.system.admin.model.po.dept.SysDeptBoundRolePO;
+import com.auth.service.system.admin.model.po.granttable.GrantTableBoundRolePO;
 import com.auth.service.system.admin.model.po.post.SysPostBoundDeptPO;
 import com.auth.service.system.admin.model.po.post.SysPostBoundUserPO;
 import com.auth.service.system.admin.model.po.post.SysPostPageRowPO;
@@ -60,6 +63,9 @@ class SysPostServiceImplTest {
 	@Mock
 	private SysPostDetailMapper sysPostDetailMapper;
 
+	@Mock
+	private GrantTableMapper grantTableMapper;
+
 	private SysPostServiceImpl sysPostService;
 
 	private static SysPostForm minimalForm(Long deptId, String postCode, String postName) {
@@ -86,7 +92,7 @@ class SysPostServiceImplTest {
 	void setUp() throws Exception {
 		PostReferenceChecker postReferenceChecker = new PostReferenceChecker(sysPostMapper, postReferenceMapper);
 		sysPostService = new SysPostServiceImpl(auditUserDisplayService, postInvalidationTrigger, postReferenceChecker,
-				sysPostDetailMapper);
+				sysPostDetailMapper, grantTableMapper);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysPostService, sysPostMapper);
@@ -140,14 +146,16 @@ class SysPostServiceImplTest {
 		boundUser.setUserId(100L);
 		boundUser.setUsername("alice");
 
-		SysDeptBoundRolePO boundRole = new SysDeptBoundRolePO();
+		GrantTableBoundRolePO boundRole = new GrantTableBoundRolePO();
 		boundRole.setRoleCode("CUSTOM_A");
 		boundRole.setRoleName("业务角色A");
 
 		when(sysPostMapper.selectById(postId)).thenReturn(entity);
 		when(sysPostDetailMapper.selectBoundDeptByPostId(postId)).thenReturn(boundDept);
 		when(sysPostDetailMapper.selectBoundUsersByPostId(postId)).thenReturn(List.of(boundUser));
-		when(sysPostDetailMapper.selectBoundRolesByPostId(postId)).thenReturn(List.of(boundRole));
+		when(grantTableMapper.selectBoundRolesBySubject(GrantTableSubjectType.POST.name(), postId,
+				RoleTypeEnum.ORG_GRANT_TYPES))
+			.thenReturn(List.of(boundRole));
 
 		SysPostDetailVO detail = sysPostService.getDetail(postId);
 
@@ -162,7 +170,8 @@ class SysPostServiceImplTest {
 		assertThat(detail.getBoundRoles().get(0).getRoleCode()).isEqualTo("CUSTOM_A");
 		verify(sysPostDetailMapper).selectBoundDeptByPostId(postId);
 		verify(sysPostDetailMapper).selectBoundUsersByPostId(postId);
-		verify(sysPostDetailMapper).selectBoundRolesByPostId(postId);
+		verify(grantTableMapper).selectBoundRolesBySubject(GrantTableSubjectType.POST.name(), postId,
+				RoleTypeEnum.ORG_GRANT_TYPES);
 		verify(auditUserDisplayService).enrichAuditUsernames(anyList());
 	}
 

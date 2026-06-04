@@ -1,7 +1,6 @@
 package com.auth.service.system.admin.mapper;
 
 import com.auth.service.system.admin.model.po.dept.SysDeptBoundPostPO;
-import com.auth.service.system.admin.model.po.dept.SysDeptBoundRolePO;
 import com.auth.service.system.admin.model.po.dept.SysDeptBoundUserPO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -27,12 +26,5 @@ public interface SysDeptDetailMapper {
 	 * @return 岗位列表
 	 */
 	List<SysDeptBoundPostPO> selectBoundPostsByDeptId(@Param("deptId") Long deptId);
-
-	/**
-	 * 查询以本部门为授权主体（DEPT）的角色授权边
-	 * @param deptId 部门 ID
-	 * @return 已授权角色列表
-	 */
-	List<SysDeptBoundRolePO> selectBoundRolesByDeptId(@Param("deptId") Long deptId);
 
 }

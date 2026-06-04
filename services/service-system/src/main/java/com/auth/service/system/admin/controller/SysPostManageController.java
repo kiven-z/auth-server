@@ -4,8 +4,8 @@ import com.auth.common.core.model.response.Result;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
-import com.auth.service.system.admin.model.form.post.SysPostAssignRoleForm;
-import com.auth.service.system.admin.model.vo.post.SysPostAssignedRoleRow;
+import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
+import com.auth.service.system.admin.model.vo.granttable.GrantTableAssignedRoleRow;
 import com.auth.service.system.admin.service.SysPostManageService;
 import com.auth.service.system.common.model.audit.SystemAuditBizModule;
 import io.swagger.v3.oas.annotations.Operation;
@@ -42,7 +42,7 @@ public class SysPostManageController {
 	@Operation(summary = "查询岗位已分配角色")
 	@PreAuthorize("@auth.decide('sysPost:query')")
 	@GetMapping("/{postId}/roles")
-	public Result<List<SysPostAssignedRoleRow>> listRoles(@PathVariable("postId") Long postId) {
+	public Result<List<GrantTableAssignedRoleRow>> listRoles(@PathVariable("postId") Long postId) {
 		return Result.success(sysPostManageService.listAssignedRoles(postId));
 	}
 
@@ -52,7 +52,7 @@ public class SysPostManageController {
 	@PreAuthorize("@auth.decide('sysPost:update')")
 	@PutMapping("/{postId}/roles")
 	public Result<Void> replaceRoles(@PathVariable("postId") Long postId,
-			@Valid @RequestBody SysPostAssignRoleForm form) {
+			@Valid @RequestBody GrantTableAssignRoleForm form) {
 		sysPostManageService.replacePostRoles(postId, form);
 		return Result.success(null, ASSIGN_COMPLETED.getMessage());
 	}

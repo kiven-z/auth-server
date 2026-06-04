@@ -1,16 +1,20 @@
 package com.auth.service.system.admin.service.impl;
 
 import com.auth.common.data.model.PageResponse;
+import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
+import com.auth.service.system.admin.convert.GrantTableSubjectRoleConverter;
 import com.auth.service.system.admin.convert.SysDeptConverter;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
+import com.auth.service.system.admin.mapper.GrantTableMapper;
 import com.auth.service.system.admin.mapper.SysDeptDetailMapper;
 import com.auth.service.system.admin.mapper.SysDeptMapper;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
+import com.auth.service.system.admin.model.enums.RoleTypeEnum;
 import com.auth.service.system.admin.model.form.dept.SysDeptForm;
 import com.auth.service.system.admin.model.form.dept.SysDeptMoveForm;
 import com.auth.service.system.admin.model.po.dept.SysDeptBoundPostPO;
-import com.auth.service.system.admin.model.po.dept.SysDeptBoundRolePO;
 import com.auth.service.system.admin.model.po.dept.SysDeptBoundUserPO;
+import com.auth.service.system.admin.model.po.granttable.GrantTableBoundRolePO;
 import com.auth.service.system.admin.model.query.SysDeptQuery;
 import com.auth.service.system.admin.model.vo.dept.SysDeptDetailVO;
 import com.auth.service.system.admin.model.vo.dept.SysDeptListVO;
@@ -56,6 +60,8 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 
 	private final SysDeptDetailMapper sysDeptDetailMapper;
 
+	private final GrantTableMapper grantTableMapper;
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -96,8 +102,9 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 		List<SysDeptBoundPostPO> boundPosts = sysDeptDetailMapper.selectBoundPostsByDeptId(id);
 		detail.setBoundPosts(SysDeptConverter.INSTANCE.toBoundPostItemList(boundPosts));
 
-		List<SysDeptBoundRolePO> boundRoles = sysDeptDetailMapper.selectBoundRolesByDeptId(id);
-		detail.setBoundRoles(SysDeptConverter.INSTANCE.toBoundRoleItemList(boundRoles));
+		List<GrantTableBoundRolePO> poList = grantTableMapper
+			.selectBoundRolesBySubject(GrantTableSubjectType.DEPT.name(), id, RoleTypeEnum.ORG_GRANT_TYPES);
+		detail.setBoundRoles(GrantTableSubjectRoleConverter.INSTANCE.toBoundRoleItemList(poList));
 
 		// 补充审计用户名
 		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail));

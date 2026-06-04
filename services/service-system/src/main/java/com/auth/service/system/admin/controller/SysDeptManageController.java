@@ -4,9 +4,9 @@ import com.auth.common.core.model.response.Result;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
-import com.auth.service.system.admin.model.form.dept.SysDeptAssignRoleForm;
+import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
 import com.auth.service.system.admin.model.vo.dept.DeptClosureHealthVO;
-import com.auth.service.system.admin.model.vo.dept.SysDeptAssignedRoleRow;
+import com.auth.service.system.admin.model.vo.granttable.GrantTableAssignedRoleRow;
 import com.auth.service.system.admin.service.SysDeptManageService;
 import com.auth.service.system.admin.support.dept.DeptClosureHealthService;
 import com.auth.service.system.common.model.audit.SystemAuditBizModule;
@@ -53,7 +53,7 @@ public class SysDeptManageController {
 	@Operation(summary = "查询部门已分配角色")
 	@PreAuthorize("@auth.decide('sysDept:query')")
 	@GetMapping("/{deptId}/roles")
-	public Result<List<SysDeptAssignedRoleRow>> listRoles(@PathVariable("deptId") Long deptId) {
+	public Result<List<GrantTableAssignedRoleRow>> listRoles(@PathVariable("deptId") Long deptId) {
 		return Result.success(sysDeptManageService.listAssignedRoles(deptId));
 	}
 
@@ -63,7 +63,7 @@ public class SysDeptManageController {
 	@PreAuthorize("@auth.decide('sysDept:update')")
 	@PutMapping("/{deptId}/roles")
 	public Result<Void> replaceRoles(@PathVariable("deptId") Long deptId,
-			@Valid @RequestBody SysDeptAssignRoleForm form) {
+			@Valid @RequestBody GrantTableAssignRoleForm form) {
 		sysDeptManageService.replaceDeptRoles(deptId, form);
 		return Result.success(null, ASSIGN_COMPLETED.getMessage());
 	}

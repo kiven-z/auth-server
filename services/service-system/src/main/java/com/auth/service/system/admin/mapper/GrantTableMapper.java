@@ -1,5 +1,6 @@
 package com.auth.service.system.admin.mapper;
 
+import com.auth.service.system.admin.model.po.granttable.GrantTableBoundRolePO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -38,5 +39,15 @@ public interface GrantTableMapper {
 	 */
 	int batchInsertSubjectRoleGrants(@Param("subjectType") String subjectType, @Param("subjectId") Long subjectId,
 			@Param("roleCodes") List<String> roleCodes, @Param("operatorId") Long operatorId);
+
+	/**
+	 * 按授权主体查询已绑定角色（联表 sys_role）。
+	 * @param subjectType 主体类型
+	 * @param subjectId 主体 ID
+	 * @param roleTypes 允许展示的 role_type 集合
+	 * @return 已授权角色投影列表
+	 */
+	List<GrantTableBoundRolePO> selectBoundRolesBySubject(@Param("subjectType") String subjectType,
+			@Param("subjectId") Long subjectId, @Param("roleTypes") List<Integer> roleTypes);
 
 }

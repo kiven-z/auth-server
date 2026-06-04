@@ -1,9 +1,12 @@
 package com.auth.service.system.admin.service.impl;
 
 import com.auth.common.data.model.PageResponse;
-import com.auth.service.system.admin.convert.SysDeptConverter;
+import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
+import com.auth.service.system.admin.convert.GrantTableSubjectRoleConverter;
 import com.auth.service.system.admin.convert.SysPostConverter;
+import com.auth.service.system.admin.mapper.GrantTableMapper;
 import com.auth.service.system.admin.mapper.SysPostDetailMapper;
+import com.auth.service.system.admin.model.enums.RoleTypeEnum;
 import com.auth.service.system.admin.mapper.SysPostMapper;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.form.post.SysPostForm;
@@ -45,6 +48,8 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity
 
 	private final SysPostDetailMapper sysPostDetailMapper;
 
+	private final GrantTableMapper grantTableMapper;
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -70,8 +75,8 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity
 		detail.setBoundDept(SysPostConverter.INSTANCE.toBoundDeptItem(sysPostDetailMapper.selectBoundDeptByPostId(id)));
 		detail.setBoundUsers(
 				SysPostConverter.INSTANCE.toBoundUserItemList(sysPostDetailMapper.selectBoundUsersByPostId(id)));
-		detail.setBoundRoles(
-				SysDeptConverter.INSTANCE.toBoundRoleItemList(sysPostDetailMapper.selectBoundRolesByPostId(id)));
+		detail.setBoundRoles(GrantTableSubjectRoleConverter.INSTANCE.toBoundRoleItemList(grantTableMapper
+			.selectBoundRolesBySubject(GrantTableSubjectType.POST.name(), id, RoleTypeEnum.ORG_GRANT_TYPES)));
 
 		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail));
 		return detail;

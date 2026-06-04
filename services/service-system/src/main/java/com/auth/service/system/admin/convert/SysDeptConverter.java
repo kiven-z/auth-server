@@ -3,7 +3,6 @@ package com.auth.service.system.admin.convert;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.form.dept.SysDeptForm;
 import com.auth.service.system.admin.model.po.dept.SysDeptBoundPostPO;
-import com.auth.service.system.admin.model.po.dept.SysDeptBoundRolePO;
 import com.auth.service.system.admin.model.po.dept.SysDeptBoundUserPO;
 import com.auth.service.system.admin.model.vo.dept.*;
 import org.mapstruct.Mapper;
@@ -92,12 +91,5 @@ public interface SysDeptConverter {
 	 * @return 详情项 VO 列表
 	 */
 	List<SysDeptBoundPostItemVO> toBoundPostItemList(List<SysDeptBoundPostPO> poList);
-
-	/**
-	 * 已授权角色 PO 列表 → 详情项 VO 列表
-	 * @param poList 持久层投影列表
-	 * @return 详情项 VO 列表
-	 */
-	List<SysDeptBoundRoleItemVO> toBoundRoleItemList(List<SysDeptBoundRolePO> poList);
 
 }

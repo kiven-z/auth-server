@@ -1,4 +1,4 @@
-package com.auth.service.system.admin.model.po.dept;
+package com.auth.service.system.admin.model.po.granttable;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
@@ -9,14 +9,14 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 部门详情-已授权角色行
+ * grant_table 主体已授权角色查询投影
  *
- * @author bunny
+ * @author Bunny
  */
-@Schema(name = "SysDeptBoundRolePO", title = "部门已授权角色 PO")
+@Schema(name = "GrantTableBoundRolePO", title = "grant_table 已授权角色 PO")
 @Getter
 @Setter
-public class SysDeptBoundRolePO implements Serializable {
+public class GrantTableBoundRolePO implements Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 1L;

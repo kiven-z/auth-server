@@ -1,4 +1,4 @@
-package com.auth.service.system.admin.model.form.post;
+package com.auth.service.system.admin.model.form.granttable;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
@@ -10,19 +10,19 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * 岗位分配角色表单 FIXME 我记得这个也是有相同的
+ * grant_table 主体全量覆盖角色表单
  *
  * @author Bunny
  */
-@Schema(name = "SysPostAssignRoleForm", title = "岗位分配角色表单")
+@Schema(name = "GrantTableAssignRoleForm", title = "grant_table 分配角色表单")
 @Getter
 @Setter
-public class SysPostAssignRoleForm implements Serializable {
+public class GrantTableAssignRoleForm implements Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
 
-	@Schema(title = "角色编码列表（仅允许 roleType=3/4）", requiredMode = Schema.RequiredMode.REQUIRED)
+	@Schema(title = "角色编码列表（组织类主体仅允许 roleType=3/4）", requiredMode = Schema.RequiredMode.REQUIRED)
 	@NotNull(message = "roleCodes is required")
 	private List<String> roleCodes;
 

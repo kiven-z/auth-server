@@ -1,6 +1,7 @@
 package com.auth.service.system.admin.support.role;
 
 import cn.hutool.core.collection.CollUtil;
+import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.SysRoleMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
@@ -46,20 +47,20 @@ public class RoleGrantReferenceChecker {
 	}
 
 	/**
-	 * 部门 grant 专用：仅允许业务/自定义角色（roleType 3/4）
+	 * 组织类 grant_table 主体：仅允许业务/自定义角色（roleType 3/4）
+	 * @param subjectType 授权主体类型（部门、岗位等）
 	 * @param roleCodes 待写入角色编码
 	 */
-	public void requireDeptGrantEligibleRoles(List<String> roleCodes) {
-		requireGrantEligibleRoles(roleCodes, RoleTypeEnum.DEPT_GRANT_TYPES, SystemAdminResultCode.DEPT_ROLE_INVALID);
+	public void requireGrantTableOrgRoles(GrantTableSubjectType subjectType, List<String> roleCodes) {
+		requireGrantEligibleRoles(roleCodes, RoleTypeEnum.ORG_GRANT_TYPES, orgGrantInvalidCode(subjectType));
 	}
 
-	/**
-	 * 岗位 grant 专用：仅允许业务/自定义角色（roleType 3/4）
-	 * @param roleCodes 待写入角色编码
-	 */
-	public void requirePostGrantEligibleRoles(List<String> roleCodes) {
-		// FIXME 和 requireGrantEligibleRoles 可以重命名
-		requireGrantEligibleRoles(roleCodes, RoleTypeEnum.POST_GRANT_TYPES, SystemAdminResultCode.POST_ROLE_INVALID);
+	private static SystemResultCode orgGrantInvalidCode(GrantTableSubjectType subjectType) {
+		return switch (subjectType) {
+			case DEPT -> SystemAdminResultCode.DEPT_ROLE_INVALID;
+			case POST -> SystemAdminResultCode.POST_ROLE_INVALID;
+			default -> throw new IllegalArgumentException("Unsupported org grant subject type: " + subjectType);
+		};
 	}
 
 	/**

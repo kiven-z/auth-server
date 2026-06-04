@@ -34,20 +34,4 @@
         ORDER BY p.order_num, p.post_code
     </select>
 
-    <!-- 部门详情：grant_table DEPT 主体已授权角色 -->
-    <select id="selectBoundRolesByDeptId"
-            resultType="com.auth.service.system.admin.model.po.dept.SysDeptBoundRolePO">
-        SELECT r.role_code,
-               r.role_name,
-               r.status,
-               r.role_type,
-               gt.grant_time
-        FROM grant_table gt
-                 INNER JOIN sys_role r ON r.role_code = gt.role_code
-        WHERE gt.subject_type = 'DEPT'
-          AND gt.subject_id = #{deptId}
-          AND r.role_type IN (3, 4)
-        ORDER BY r.role_code
-    </select>
-
 </mapper>

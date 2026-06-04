@@ -1,5 +1,7 @@
 package com.auth.service.system.admin.service.impl;
 
+import com.auth.service.system.admin.mapper.GrantTableMapper;
+import com.auth.service.system.admin.mapper.SysDeptDetailMapper;
 import com.auth.service.system.admin.mapper.SysDeptMapper;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.form.dept.SysDeptForm;
@@ -46,6 +48,12 @@ class SysDeptServiceImplTest {
 	@Mock
 	private DeptAuthorizationInvalidationTrigger deptInvalidationTrigger;
 
+	@Mock
+	private SysDeptDetailMapper sysDeptDetailMapper;
+
+	@Mock
+	private GrantTableMapper grantTableMapper;
+
 	private SysDeptServiceImpl sysDeptService;
 
 	private static SysDeptForm minimalForm(Long id, long parentId, String deptCode, String deptName, boolean status) {
@@ -72,7 +80,7 @@ class SysDeptServiceImplTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		sysDeptService = new SysDeptServiceImpl(auditUserDisplayService, deptReferenceChecker, deptClosureMaintainer,
-				deptInvalidationTrigger, null);
+				deptInvalidationTrigger, sysDeptDetailMapper, grantTableMapper);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysDeptService, sysDeptMapper);

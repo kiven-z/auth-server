@@ -1,5 +1,6 @@
 package com.auth.service.system.admin.support.role;
 
+import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.SysRoleMapper;
 import com.auth.service.system.admin.model.enums.RoleTypeEnum;
@@ -35,29 +36,31 @@ class RoleGrantReferenceCheckerTest {
 
 	@Test
 	@DisplayName("空列表跳过校验")
-	void requireDeptGrantEligibleRolesSkipsWhenEmpty() {
-		assertThatCode(() -> roleGrantReferenceChecker.requireDeptGrantEligibleRoles(List.of()))
+	void requireGrantTableOrgRolesSkipsWhenEmpty() {
+		assertThatCode(() -> roleGrantReferenceChecker.requireGrantTableOrgRoles(GrantTableSubjectType.DEPT, List.of()))
 			.doesNotThrowAnyException();
 
 		verify(sysRoleMapper, never()).selectCount(any());
 	}
 
 	@Test
-	@DisplayName("全部 eligible 时不抛异常")
-	void requireDeptGrantEligibleRolesPassesWhenAllEligible() {
+	@DisplayName("部门主体：全部 eligible 时不抛异常")
+	void requireGrantTableOrgRolesPassesForDeptWhenAllEligible() {
 		when(sysRoleMapper.selectCount(any())).thenReturn(2L);
 
-		assertThatCode(() -> roleGrantReferenceChecker.requireDeptGrantEligibleRoles(List.of("BIZ_ADMIN", "CUSTOM_A")))
+		assertThatCode(() -> roleGrantReferenceChecker.requireGrantTableOrgRoles(GrantTableSubjectType.DEPT,
+				List.of("BIZ_ADMIN", "CUSTOM_A")))
 			.doesNotThrowAnyException();
 	}
 
 	@Test
-	@DisplayName("存在无效角色时抛出 DEPT_ROLE_INVALID")
-	void requireDeptGrantEligibleRolesThrowsWhenNotAllEligible() {
+	@DisplayName("部门主体：存在无效角色时抛出 DEPT_ROLE_INVALID")
+	void requireGrantTableOrgRolesThrowsDeptInvalidWhenNotAllEligible() {
 		when(sysRoleMapper.selectCount(any())).thenReturn(0L);
 
 		List<String> roleCodes = List.of("SYS_ADMIN");
-		assertThatThrownBy(() -> roleGrantReferenceChecker.requireDeptGrantEligibleRoles(roleCodes))
+		assertThatThrownBy(
+				() -> roleGrantReferenceChecker.requireGrantTableOrgRoles(GrantTableSubjectType.DEPT, roleCodes))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemAdminResultCode.DEPT_ROLE_INVALID);
@@ -83,21 +86,23 @@ class RoleGrantReferenceCheckerTest {
 	}
 
 	@Test
-	@DisplayName("岗位 grant：全部 eligible 时不抛异常")
-	void requirePostGrantEligibleRolesPassesWhenAllEligible() {
+	@DisplayName("岗位主体：全部 eligible 时不抛异常")
+	void requireGrantTableOrgRolesPassesForPostWhenAllEligible() {
 		when(sysRoleMapper.selectCount(any())).thenReturn(1L);
 
-		assertThatCode(() -> roleGrantReferenceChecker.requirePostGrantEligibleRoles(List.of("CUSTOM_A")))
+		assertThatCode(() -> roleGrantReferenceChecker.requireGrantTableOrgRoles(GrantTableSubjectType.POST,
+				List.of("CUSTOM_A")))
 			.doesNotThrowAnyException();
 	}
 
 	@Test
-	@DisplayName("岗位 grant：存在无效角色时抛出 POST_ROLE_INVALID")
-	void requirePostGrantEligibleRolesThrowsWhenNotAllEligible() {
+	@DisplayName("岗位主体：存在无效角色时抛出 POST_ROLE_INVALID")
+	void requireGrantTableOrgRolesThrowsPostInvalidWhenNotAllEligible() {
 		when(sysRoleMapper.selectCount(any())).thenReturn(0L);
 
 		List<String> roleCodes = List.of("SYS_ADMIN");
-		assertThatThrownBy(() -> roleGrantReferenceChecker.requirePostGrantEligibleRoles(roleCodes))
+		assertThatThrownBy(
+				() -> roleGrantReferenceChecker.requireGrantTableOrgRoles(GrantTableSubjectType.POST, roleCodes))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemAdminResultCode.POST_ROLE_INVALID);
