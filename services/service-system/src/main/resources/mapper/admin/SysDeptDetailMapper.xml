@@ -13,12 +13,12 @@
                ud.is_primary,
                ud.status AS relation_status,
                ud.position,
-               ud.join_time
+               ud.grant_time
         FROM user_dept ud
                  INNER JOIN sys_user u ON u.id = ud.user_id AND u.is_deleted = 0
         WHERE ud.dept_id = #{deptId}
           AND ud.status IN (1, 2)
-        ORDER BY ud.is_primary DESC, ud.join_time DESC, u.username
+        ORDER BY ud.is_primary DESC, ud.grant_time DESC, u.username
     </select>
 
     <!-- 部门详情：本部门岗位 -->

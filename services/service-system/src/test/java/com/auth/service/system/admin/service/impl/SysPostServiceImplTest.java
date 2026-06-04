@@ -15,7 +15,6 @@ import com.auth.service.system.admin.model.query.SysPostQuery;
 import com.auth.service.system.admin.model.vo.post.SysPostDetailVO;
 import com.auth.service.system.admin.model.vo.post.SysPostPageResponse;
 import com.auth.service.system.admin.support.post.PostReferenceChecker;
-import com.auth.service.system.authorization.dispatch.trigger.GrantAuthorizationInvalidationTrigger;
 import com.auth.service.system.authorization.dispatch.trigger.PostAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
@@ -56,9 +55,6 @@ class SysPostServiceImplTest {
 	private PostAuthorizationInvalidationTrigger postInvalidationTrigger;
 
 	@Mock
-	private GrantAuthorizationInvalidationTrigger grantInvalidationTrigger;
-
-	@Mock
 	private PostReferenceMapper postReferenceMapper;
 
 	@Mock
@@ -89,8 +85,8 @@ class SysPostServiceImplTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		PostReferenceChecker postReferenceChecker = new PostReferenceChecker(sysPostMapper, postReferenceMapper);
-		sysPostService = new SysPostServiceImpl(auditUserDisplayService, postInvalidationTrigger,
-				grantInvalidationTrigger, postReferenceChecker, sysPostDetailMapper);
+		sysPostService = new SysPostServiceImpl(auditUserDisplayService, postInvalidationTrigger, postReferenceChecker,
+				sysPostDetailMapper);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysPostService, sysPostMapper);

@@ -1,6 +1,7 @@
 package com.auth.service.system.admin.model.vo.post;
 
 import com.auth.common.core.annotation.JsonStringFormat;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -46,7 +47,8 @@ public class SysPostBoundUserItemVO implements Serializable {
 	@Schema(title = "用户-岗位关联状态(0=已调离,1=正常,2=兼职)")
 	private Integer relationStatus;
 
-	@Schema(title = "任职时间")
-	private LocalDateTime assignmentDate;
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@Schema(title = "授权时间")
+	private LocalDateTime grantTime;
 
 }

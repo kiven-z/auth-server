@@ -43,7 +43,7 @@ public class SysUserDeptProfileItemResponse implements Serializable {
 	private String position;
 
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	@Schema(title = "加入部门时间")
-	private LocalDateTime joinTime;
+	@Schema(title = "授权时间")
+	private LocalDateTime grantTime;
 
 }

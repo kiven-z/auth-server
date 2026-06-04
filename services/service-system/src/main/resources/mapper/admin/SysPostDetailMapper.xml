@@ -26,12 +26,12 @@
                u.status  AS user_status,
                up.is_primary,
                up.status AS relation_status,
-               up.assignment_date
+               up.grant_time
         FROM user_post up
                  INNER JOIN sys_user u ON u.id = up.user_id AND u.is_deleted = 0
         WHERE up.post_id = #{postId}
           AND up.status IN (1, 2)
-        ORDER BY up.is_primary DESC, up.assignment_date DESC, u.username
+        ORDER BY up.is_primary DESC, up.grant_time DESC, u.username
     </select>
 
     <!-- 岗位详情：grant_table POST 主体已授权角色 -->

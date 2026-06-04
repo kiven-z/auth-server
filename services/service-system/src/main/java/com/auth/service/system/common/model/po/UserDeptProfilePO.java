@@ -38,7 +38,7 @@ public class UserDeptProfilePO implements Serializable {
 	@Schema(title = "岗位")
 	private String position;
 
-	@Schema(title = "加入时间")
-	private LocalDateTime joinTime;
+	@Schema(title = "授权时间")
+	private LocalDateTime grantTime;
 
 }

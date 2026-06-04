@@ -10,6 +10,8 @@ import java.time.LocalDateTime;
 
 /**
  * 部门详情-关联用户行
+ *
+ * @author bunny
  */
 @Schema(name = "SysDeptBoundUserPO", title = "部门已关联用户 PO")
 @Getter
@@ -43,7 +45,7 @@ public class SysDeptBoundUserPO implements Serializable {
 	@Schema(title = "部门内职位")
 	private String position;
 
-	@Schema(title = "加入部门时间")
-	private LocalDateTime joinTime;
+	@Schema(title = "授权时间")
+	private LocalDateTime grantTime;
 
 }
