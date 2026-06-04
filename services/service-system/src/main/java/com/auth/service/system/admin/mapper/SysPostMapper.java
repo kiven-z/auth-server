@@ -18,24 +18,22 @@ import org.apache.ibatis.annotations.Select;
 @Mapper
 public interface SysPostMapper extends BaseMapper<SysPostEntity> {
 
-    /**
-     * 分页查询岗位
-     *
-     * @param page       分页参数
-     * @param query      筛选条件
-     * @param orderBySql 已由白名单校验的 ORDER BY 片段
-     * @return 分页结果
-     */
-    IPage<SysPostPageRowPO> selectListByPage(@Param("page") Page<SysPostEntity> page,
-                                             @Param("query") SysPostQuery query, @Param("orderBySql") String orderBySql);
+	/**
+	 * 分页查询岗位
+	 * @param page 分页参数
+	 * @param query 筛选条件
+	 * @param orderBySql 已由白名单校验的 ORDER BY 片段
+	 * @return 分页结果
+	 */
+	IPage<SysPostPageRowPO> selectListByPage(@Param("page") Page<SysPostEntity> page,
+			@Param("query") SysPostQuery query, @Param("orderBySql") String orderBySql);
 
-    /**
-     * 统计可用于挂载岗位的部门
-     *
-     * @param deptId 部门主键
-     * @return 命中条数
-     */
-    @Select("SELECT COUNT(1) FROM sys_dept WHERE id = #{deptId} AND is_deleted = 0")
-    int countAssignableDept(@Param("deptId") Long deptId);
+	/**
+	 * 统计可用于挂载岗位的部门
+	 * @param deptId 部门主键
+	 * @return 命中条数
+	 */
+	@Select("SELECT COUNT(1) FROM sys_dept WHERE id = #{deptId} AND is_deleted = 0")
+	int countAssignableDept(@Param("deptId") Long deptId);
 
 }

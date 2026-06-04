@@ -1,10 +1,5 @@
 package com.auth.service.system.admin.service.impl;
 
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.convert.SysPostConverter;
 import com.auth.service.system.admin.mapper.SysPostMapper;
@@ -22,8 +17,11 @@ import com.auth.service.system.common.support.FieldChangeSupport;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * 系统岗位服务实现
@@ -69,8 +67,6 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity
 		postReferenceChecker.requirePostCodeUniqueInDept(deptId, postCode, null);
 
 		SysPostEntity entity = SysPostConverter.INSTANCE.toEntity(form);
-		entity.setPostCode(postCode);
-		entity.setDeptId(deptId);
 		save(entity);
 	}
 
@@ -92,8 +88,6 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity
 		// 校验状态是否发生变化
 		boolean statusChanged = FieldChangeSupport.valueChanged(existing.getStatus(), form.getStatus());
 		SysPostConverter.INSTANCE.applyUpdateForm(form, existing);
-		existing.setDeptId(deptId);
-		existing.setPostCode(postCode);
 		updateById(existing);
 
 		// 如果状态发生变化，则提交授权失效

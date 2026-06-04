@@ -8,6 +8,7 @@ import com.auth.service.system.admin.model.form.post.SysPostForm;
 import com.auth.service.system.admin.model.po.post.SysPostPageRowPO;
 import com.auth.service.system.admin.model.query.SysPostQuery;
 import com.auth.service.system.admin.model.vo.post.SysPostPageResponse;
+import com.auth.service.system.admin.support.post.PostReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.PostAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
@@ -59,9 +60,20 @@ class SysPostServiceImplTest {
 		return form;
 	}
 
+	private static SysPostEntity activePost(Long id, Long deptId, String postCode) {
+		SysPostEntity entity = new SysPostEntity();
+		entity.setId(id);
+		entity.setDeptId(deptId);
+		entity.setPostCode(postCode);
+		entity.setPostName("原名");
+		entity.setStatus(true);
+		return entity;
+	}
+
 	@BeforeEach
 	void setUp() throws Exception {
-		sysPostService = new SysPostServiceImpl(auditUserDisplayService, postInvalidationTrigger);
+		PostReferenceChecker postReferenceChecker = new PostReferenceChecker(sysPostMapper);
+		sysPostService = new SysPostServiceImpl(auditUserDisplayService, postInvalidationTrigger, postReferenceChecker);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysPostService, sysPostMapper);
@@ -135,7 +147,7 @@ class SysPostServiceImplTest {
 	@DisplayName("更新：仅改名称时不提交授权失效")
 	void updateWithoutStatusChangeSkipsInvalidation() {
 		Long postId = 10L;
-		SysPostEntity existing = activePost(postId, 1L, "DEV", true);
+		SysPostEntity existing = activePost(postId, 1L, "DEV");
 		when(sysPostMapper.selectById(postId)).thenReturn(existing);
 		when(sysPostMapper.countAssignableDept(1L)).thenReturn(1);
 		when(sysPostMapper.selectCount(any())).thenReturn(0L);
@@ -154,7 +166,7 @@ class SysPostServiceImplTest {
 	@DisplayName("更新：状态变更时提交 USER_POST 授权失效")
 	void updateWithStatusChangeSubmitsInvalidation() {
 		Long postId = 11L;
-		SysPostEntity existing = activePost(postId, 2L, "OPS", true);
+		SysPostEntity existing = activePost(postId, 2L, "OPS");
 		when(sysPostMapper.selectById(postId)).thenReturn(existing);
 		when(sysPostMapper.countAssignableDept(3L)).thenReturn(1);
 		when(sysPostMapper.selectCount(any())).thenReturn(0L);
@@ -168,16 +180,6 @@ class SysPostServiceImplTest {
 		verify(sysPostMapper).updateById(argThat(
 				(SysPostEntity e) -> Long.valueOf(3L).equals(e.getDeptId()) && Boolean.FALSE.equals(e.getStatus())));
 		verify(postInvalidationTrigger).submitByPostIds(eq(List.of(postId)), eq("update:" + postId));
-	}
-
-	private static SysPostEntity activePost(Long id, Long deptId, String postCode, boolean status) {
-		SysPostEntity entity = new SysPostEntity();
-		entity.setId(id);
-		entity.setDeptId(deptId);
-		entity.setPostCode(postCode);
-		entity.setPostName("原名");
-		entity.setStatus(status);
-		return entity;
 	}
 
 }
