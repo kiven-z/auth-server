@@ -64,25 +64,11 @@ public interface SysPermissionConverter {
 	SysPermissionDetailVO toDetailVo(SysPermissionEntity entity);
 
 	/**
-	 * 已绑定角色 PO → 详情项 VO
-	 * @param po 持久层投影
-	 * @return 详情项 VO
-	 */
-	SysPermissionBoundRoleItemVO toBoundRoleItem(SysPermissionBoundRolePO po);
-
-	/**
 	 * 已绑定角色 PO 列表 → 详情项 VO 列表
 	 * @param poList 持久层投影列表
 	 * @return 详情项 VO 列表
 	 */
 	List<SysPermissionBoundRoleItemVO> toBoundRoleItemList(List<SysPermissionBoundRolePO> poList);
-
-	/**
-	 * 已绑定菜单 PO → 详情项 VO
-	 * @param po 持久层投影
-	 * @return 详情项 VO
-	 */
-	SysPermissionBoundMenuItemVO toBoundMenuItem(SysPermissionBoundMenuPO po);
 
 	/**
 	 * 已绑定菜单 PO 列表 → 详情项 VO 列表

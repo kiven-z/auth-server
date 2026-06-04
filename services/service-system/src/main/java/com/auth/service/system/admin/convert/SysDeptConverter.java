@@ -80,13 +80,6 @@ public interface SysDeptConverter {
 	SysDeptDetailVO toDetailVo(SysDeptEntity entity);
 
 	/**
-	 * 关联用户 PO → 详情项 VO
-	 * @param po 持久层投影
-	 * @return 详情项 VO
-	 */
-	SysDeptBoundUserItemVO toBoundUserItem(SysDeptBoundUserPO po);
-
-	/**
 	 * 关联用户 PO 列表 → 详情项 VO 列表
 	 * @param poList 持久层投影列表
 	 * @return 详情项 VO 列表
@@ -94,25 +87,11 @@ public interface SysDeptConverter {
 	List<SysDeptBoundUserItemVO> toBoundUserItemList(List<SysDeptBoundUserPO> poList);
 
 	/**
-	 * 下属岗位 PO → 详情项 VO
-	 * @param po 持久层投影
-	 * @return 详情项 VO
-	 */
-	SysDeptBoundPostItemVO toBoundPostItem(SysDeptBoundPostPO po);
-
-	/**
 	 * 下属岗位 PO 列表 → 详情项 VO 列表
 	 * @param poList 持久层投影列表
 	 * @return 详情项 VO 列表
 	 */
 	List<SysDeptBoundPostItemVO> toBoundPostItemList(List<SysDeptBoundPostPO> poList);
-
-	/**
-	 * 已授权角色 PO → 详情项 VO
-	 * @param po 持久层投影
-	 * @return 详情项 VO
-	 */
-	SysDeptBoundRoleItemVO toBoundRoleItem(SysDeptBoundRolePO po);
 
 	/**
 	 * 已授权角色 PO 列表 → 详情项 VO 列表

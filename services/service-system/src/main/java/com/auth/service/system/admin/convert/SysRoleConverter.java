@@ -68,13 +68,6 @@ public interface SysRoleConverter {
 	SysRolePageResponse toPageResponse(SysRoleEntity entity);
 
 	/**
-	 * 实体 → 下拉选项 VO
-	 * @param entity 角色实体
-	 * @return 下拉选项
-	 */
-	SysRoleOptionVO toOptionVo(SysRoleEntity entity);
-
-	/**
 	 * 实体列表 → 下拉选项列表
 	 * @param entities 角色实体列表
 	 * @return 下拉选项列表

@@ -19,25 +19,11 @@ public interface SysRolePermissionConverter {
 	SysRolePermissionConverter INSTANCE = Mappers.getMapper(SysRolePermissionConverter.class);
 
 	/**
-	 * 已分配权限 PO → 列表行
-	 * @param po 持久层投影
-	 * @return 列表行
-	 */
-	SysRoleAssignedPermissionRow toAssignedPermissionRow(SysRoleAssignedPermissionPO po);
-
-	/**
 	 * 已分配权限 PO 列表 → 列表行
 	 * @param poList 持久层投影列表
 	 * @return 列表行
 	 */
 	List<SysRoleAssignedPermissionRow> toAssignedPermissionRowList(List<SysRoleAssignedPermissionPO> poList);
-
-	/**
-	 * 已分配权限 PO → 角色详情项 VO
-	 * @param po 持久层投影
-	 * @return 详情项 VO
-	 */
-	SysRoleBoundPermissionItemVO toBoundPermissionItem(SysRoleAssignedPermissionPO po);
 
 	/**
 	 * 已分配权限 PO 列表 → 角色详情项 VO 列表
