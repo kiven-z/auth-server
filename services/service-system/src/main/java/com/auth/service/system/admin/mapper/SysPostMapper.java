@@ -8,7 +8,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
 
 /**
  * 系统岗位 Mapper
@@ -33,7 +32,6 @@ public interface SysPostMapper extends BaseMapper<SysPostEntity> {
 	 * @param deptId 部门主键
 	 * @return 命中条数
 	 */
-	@Select("SELECT COUNT(1) FROM sys_dept WHERE id = #{deptId} AND status = 1 AND is_deleted = 0")
 	int countAssignableDept(@Param("deptId") Long deptId);
 
 }

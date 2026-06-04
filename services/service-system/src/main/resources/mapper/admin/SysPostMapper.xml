@@ -45,4 +45,19 @@
         </where>
         ORDER BY ${orderBySql}
     </select>
+
+    <!-- 可挂载岗位：本部门启用，且 dept_closure 路径上无停用/已删祖先 -->
+    <select id="countAssignableDept" resultType="int">
+        SELECT COUNT(1)
+        FROM sys_dept d
+        WHERE d.id = #{deptId}
+          AND d.status = 1
+          AND d.is_deleted = 0
+          AND NOT EXISTS (SELECT 1
+                          FROM dept_closure dc
+                                   INNER JOIN sys_dept a ON a.id = dc.ancestor_id
+                          WHERE dc.descendant_id = #{deptId}
+                            AND dc.depth &gt; 0
+                            AND (a.is_deleted = 1 OR a.status = 0))
+    </select>
 </mapper>

@@ -10,6 +10,7 @@ import com.auth.service.system.admin.model.po.post.SysPostPageRowPO;
 import com.auth.service.system.admin.model.query.SysPostQuery;
 import com.auth.service.system.admin.model.vo.post.SysPostPageResponse;
 import com.auth.service.system.admin.support.post.PostReferenceChecker;
+import com.auth.service.system.authorization.dispatch.trigger.GrantAuthorizationInvalidationTrigger;
 import com.auth.service.system.authorization.dispatch.trigger.PostAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
@@ -50,6 +51,9 @@ class SysPostServiceImplTest {
 	private PostAuthorizationInvalidationTrigger postInvalidationTrigger;
 
 	@Mock
+	private GrantAuthorizationInvalidationTrigger grantInvalidationTrigger;
+
+	@Mock
 	private PostReferenceMapper postReferenceMapper;
 
 	private SysPostServiceImpl sysPostService;
@@ -77,7 +81,8 @@ class SysPostServiceImplTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		PostReferenceChecker postReferenceChecker = new PostReferenceChecker(sysPostMapper, postReferenceMapper);
-		sysPostService = new SysPostServiceImpl(auditUserDisplayService, postInvalidationTrigger, postReferenceChecker);
+		sysPostService = new SysPostServiceImpl(auditUserDisplayService, postInvalidationTrigger,
+				grantInvalidationTrigger, postReferenceChecker);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysPostService, sysPostMapper);
@@ -107,6 +112,21 @@ class SysPostServiceImplTest {
 		assertThatThrownBy(() -> sysPostService.create(form)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemAdminResultCode.POST_DEPT_NOT_FOUND);
+	}
+
+	@Test
+	@DisplayName("新增：父级停用导致子级不可挂载时 POST_DEPT_NOT_FOUND")
+	void createThrowsWhenAncestorDeptDisabled() {
+		// 子部门自身可启用，但祖先停用后 countAssignableDept 为 0
+		when(sysPostMapper.countAssignableDept(100L)).thenReturn(0);
+		SysPostForm form = minimalForm(100L, "P2", "子岗");
+
+		assertThatThrownBy(() -> sysPostService.create(form)).isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemAdminResultCode.POST_DEPT_NOT_FOUND);
+
+		verify(sysPostMapper).countAssignableDept(100L);
+		verify(sysPostMapper, never()).insert(any(SysPostEntity.class));
 	}
 
 	@Test
@@ -167,8 +187,8 @@ class SysPostServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("更新：仅换挂载部门时提交 USER_POST 授权失效")
-	void updateWithDeptChangeSubmitsInvalidation() {
+	@DisplayName("更新：仅改所属部门时不提交授权失效")
+	void updateDeptChangeWithoutStatusSkipsInvalidation() {
 		Long postId = 12L;
 		SysPostEntity existing = activePost(postId, 1L, "DEV");
 		when(sysPostMapper.selectById(postId)).thenReturn(existing);
@@ -181,8 +201,9 @@ class SysPostServiceImplTest {
 
 		sysPostService.update(postId, form);
 
+		verify(sysPostMapper).countAssignableDept(5L);
 		verify(sysPostMapper).updateById(argThat((SysPostEntity e) -> Long.valueOf(5L).equals(e.getDeptId())));
-		verify(postInvalidationTrigger).submitByPostIds(List.of(postId), "update:" + postId);
+		verify(postInvalidationTrigger, never()).submitByPostIds(any(), any());
 	}
 
 	@Test
@@ -191,17 +212,17 @@ class SysPostServiceImplTest {
 		Long postId = 11L;
 		SysPostEntity existing = activePost(postId, 2L, "OPS");
 		when(sysPostMapper.selectById(postId)).thenReturn(existing);
-		when(sysPostMapper.countAssignableDept(3L)).thenReturn(1);
+		when(sysPostMapper.countAssignableDept(2L)).thenReturn(1);
 		when(sysPostMapper.selectCount(any())).thenReturn(0L);
 		when(sysPostMapper.updateById(any(SysPostEntity.class))).thenReturn(1);
 
-		SysPostForm form = minimalForm(3L, "OPS", "运维");
+		SysPostForm form = minimalForm(2L, "OPS", "运维");
 		form.setStatus(false);
 
 		sysPostService.update(postId, form);
 
 		verify(sysPostMapper).updateById(argThat(
-				(SysPostEntity e) -> Long.valueOf(3L).equals(e.getDeptId()) && Boolean.FALSE.equals(e.getStatus())));
+				(SysPostEntity e) -> Long.valueOf(2L).equals(e.getDeptId()) && Boolean.FALSE.equals(e.getStatus())));
 		verify(postInvalidationTrigger).submitByPostIds(List.of(postId), "update:" + postId);
 	}
 
