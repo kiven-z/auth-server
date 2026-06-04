@@ -11,6 +11,7 @@ import com.auth.service.system.admin.model.enums.RoleTypeEnum;
 import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
 import com.auth.service.system.admin.model.po.granttable.GrantTableBoundRolePO;
 import com.auth.service.system.admin.model.vo.granttable.GrantTableAssignedRoleRow;
+import com.auth.service.system.admin.support.granttable.GrantTableSubjectExistenceVerifier;
 import com.auth.service.system.admin.support.post.PostReferenceChecker;
 import com.auth.service.system.admin.support.role.RoleGrantReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.GrantAuthorizationInvalidationTrigger;
@@ -62,8 +63,10 @@ class GrantTableSubjectRoleServiceImplTest {
 	@BeforeEach
 	void setUp() {
 		PostReferenceChecker postReferenceChecker = new PostReferenceChecker(sysPostMapper, postReferenceMapper);
-		grantTableSubjectRoleService = new GrantTableSubjectRoleServiceImpl(null, postReferenceChecker,
-				grantTableMapper, roleGrantReferenceChecker, grantInvalidationTrigger);
+		GrantTableSubjectExistenceVerifier subjectExistenceVerifier = new GrantTableSubjectExistenceVerifier(null,
+				postReferenceChecker);
+		grantTableSubjectRoleService = new GrantTableSubjectRoleServiceImpl(subjectExistenceVerifier, grantTableMapper,
+				roleGrantReferenceChecker, grantInvalidationTrigger);
 	}
 
 	@Test

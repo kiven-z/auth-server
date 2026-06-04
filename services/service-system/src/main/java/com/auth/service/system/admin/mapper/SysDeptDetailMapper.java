@@ -9,6 +9,8 @@ import java.util.List;
 
 /**
  * 部门详情关联数据只读查询
+ *
+ * @author bunny
  */
 @Mapper
 public interface SysDeptDetailMapper {

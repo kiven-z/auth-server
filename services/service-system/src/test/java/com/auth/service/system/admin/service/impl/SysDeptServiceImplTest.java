@@ -67,10 +67,10 @@ class SysDeptServiceImplTest {
 		return form;
 	}
 
-	private static SysDeptEntity activeDept(Long id, long parentId, String deptCode) {
+	private static SysDeptEntity activeDept(Long id, String deptCode) {
 		SysDeptEntity entity = new SysDeptEntity();
 		entity.setId(id);
-		entity.setParentId(parentId);
+		entity.setParentId(0L);
 		entity.setDeptCode(deptCode);
 		entity.setDeptName("原部门");
 		entity.setStatus(true);
@@ -90,7 +90,7 @@ class SysDeptServiceImplTest {
 	@DisplayName("更新元数据：仅改名称时不提交授权失效")
 	void updateMetaWithoutAuthImpactSkipsInvalidation() {
 		Long deptId = 1L;
-		SysDeptEntity existing = activeDept(deptId, 0L, "D001");
+		SysDeptEntity existing = activeDept(deptId, "D001");
 		when(deptReferenceChecker.getExistingActive(deptId)).thenReturn(existing);
 		when(deptReferenceChecker.normalizeAndRequireActiveParent(0L)).thenReturn(0L);
 		when(sysDeptMapper.updateById(any(SysDeptEntity.class))).thenReturn(1);
@@ -107,7 +107,7 @@ class SysDeptServiceImplTest {
 	@DisplayName("更新元数据：状态变更时提交 USER_DEPT 授权失效")
 	void updateMetaWithStatusChangeSubmitsInvalidation() {
 		Long deptId = 2L;
-		SysDeptEntity existing = activeDept(deptId, 0L, "D002");
+		SysDeptEntity existing = activeDept(deptId, "D002");
 		when(deptReferenceChecker.getExistingActive(deptId)).thenReturn(existing);
 		when(deptReferenceChecker.normalizeAndRequireActiveParent(0L)).thenReturn(0L);
 		when(sysDeptMapper.updateById(any(SysDeptEntity.class))).thenReturn(1);
@@ -124,7 +124,7 @@ class SysDeptServiceImplTest {
 	@DisplayName("更新元数据：父级变更时维护闭包并提交 move 失效")
 	void updateMetaWithParentChangeSubmitsMoveInvalidation() {
 		Long deptId = 3L;
-		SysDeptEntity existing = activeDept(deptId, 0L, "D003");
+		SysDeptEntity existing = activeDept(deptId, "D003");
 		when(deptReferenceChecker.getExistingActive(deptId)).thenReturn(existing);
 		when(deptReferenceChecker.normalizeAndRequireActiveParent(10L)).thenReturn(10L);
 		when(sysDeptMapper.updateById(any(SysDeptEntity.class))).thenReturn(1);
