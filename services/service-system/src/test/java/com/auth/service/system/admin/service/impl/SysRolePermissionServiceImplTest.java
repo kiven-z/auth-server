@@ -7,12 +7,13 @@ import com.auth.service.system.admin.mapper.SysRolePermissionMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.po.role.SysRoleAssignedPermissionPO;
 import com.auth.service.system.admin.model.vo.role.SysRoleAssignedPermissionRow;
+import com.auth.service.system.admin.support.permission.PermissionReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.RoleAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -46,8 +47,14 @@ class SysRolePermissionServiceImplTest {
 	@Mock
 	private RoleAuthorizationInvalidationTrigger roleInvalidationTrigger;
 
-	@InjectMocks
 	private SysRolePermissionServiceImpl sysRolePermissionService;
+
+	@BeforeEach
+	void setUp() {
+		PermissionReferenceChecker permissionReferenceChecker = new PermissionReferenceChecker(sysPermissionMapper);
+		sysRolePermissionService = new SysRolePermissionServiceImpl(sysRoleMapper, sysRolePermissionMapper,
+				permissionReferenceChecker, roleInvalidationTrigger);
+	}
 
 	@Test
 	@DisplayName("查询已分配权限：返回权限码与名称")

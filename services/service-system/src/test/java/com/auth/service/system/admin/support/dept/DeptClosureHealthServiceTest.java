@@ -12,11 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -41,9 +37,7 @@ class DeptClosureHealthServiceTest {
 		stats.setZeroClosure(0L);
 		stats.setTotal(3L);
 		when(deptClosureDiagnosticsMapper.countParentLinkAnomalies()).thenReturn(0L);
-		when(deptClosureDiagnosticsMapper.selectParentLinkAnomalies(200)).thenReturn(List.of());
 		when(deptClosureDiagnosticsMapper.countDepthChainAnomalies()).thenReturn(0L);
-		when(deptClosureDiagnosticsMapper.selectDepthChainAnomalies(200)).thenReturn(List.of());
 		when(deptClosureDiagnosticsMapper.selectHealthStats()).thenReturn(stats);
 
 		DeptClosureHealthVO result = deptClosureHealthService.inspect();
@@ -55,7 +49,6 @@ class DeptClosureHealthServiceTest {
 		assertThat(result.getDepthChainSampleTruncated()).isFalse();
 		assertThat(result.getHealthStats().getTotal()).isEqualTo(3L);
 		assertThat(result.getCheckedAt()).isNotNull();
-		verify(deptClosureDiagnosticsMapper).selectParentLinkAnomalies(eq(200));
 	}
 
 	@Test
@@ -66,9 +59,7 @@ class DeptClosureHealthServiceTest {
 		row.setDeptName("研发一部");
 		row.setParentId(1L);
 		when(deptClosureDiagnosticsMapper.countParentLinkAnomalies()).thenReturn(1L);
-		when(deptClosureDiagnosticsMapper.selectParentLinkAnomalies(200)).thenReturn(List.of(row));
 		when(deptClosureDiagnosticsMapper.countDepthChainAnomalies()).thenReturn(0L);
-		when(deptClosureDiagnosticsMapper.selectDepthChainAnomalies(200)).thenReturn(List.of());
 		when(deptClosureDiagnosticsMapper.selectHealthStats()).thenReturn(new DeptClosureHealthStatsPO());
 
 		DeptClosureHealthVO result = deptClosureHealthService.inspect();
@@ -82,9 +73,7 @@ class DeptClosureHealthServiceTest {
 	@DisplayName("inspect：异常数超过样本上限时标记截断")
 	void inspect_whenCountExceedsSample_truncatedTrue() {
 		when(deptClosureDiagnosticsMapper.countParentLinkAnomalies()).thenReturn(250L);
-		when(deptClosureDiagnosticsMapper.selectParentLinkAnomalies(200)).thenReturn(List.of());
 		when(deptClosureDiagnosticsMapper.countDepthChainAnomalies()).thenReturn(0L);
-		when(deptClosureDiagnosticsMapper.selectDepthChainAnomalies(200)).thenReturn(List.of());
 		when(deptClosureDiagnosticsMapper.selectHealthStats()).thenReturn(new DeptClosureHealthStatsPO());
 
 		DeptClosureHealthVO result = deptClosureHealthService.inspect();
@@ -104,9 +93,7 @@ class DeptClosureHealthServiceTest {
 		row.setParentClosureCnt(3L);
 		row.setExpectedChildCnt(4L);
 		when(deptClosureDiagnosticsMapper.countParentLinkAnomalies()).thenReturn(0L);
-		when(deptClosureDiagnosticsMapper.selectParentLinkAnomalies(200)).thenReturn(List.of());
 		when(deptClosureDiagnosticsMapper.countDepthChainAnomalies()).thenReturn(1L);
-		when(deptClosureDiagnosticsMapper.selectDepthChainAnomalies(200)).thenReturn(List.of(row));
 		when(deptClosureDiagnosticsMapper.selectHealthStats()).thenReturn(new DeptClosureHealthStatsPO());
 
 		DeptClosureHealthVO result = deptClosureHealthService.inspect();

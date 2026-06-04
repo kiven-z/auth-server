@@ -8,13 +8,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.service.system.admin.convert.SysRolePermissionConverter;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
-import com.auth.service.system.admin.mapper.SysPermissionMapper;
 import com.auth.service.system.admin.mapper.SysRoleMapper;
 import com.auth.service.system.admin.mapper.SysRolePermissionMapper;
-import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.vo.role.SysRoleAssignedPermissionRow;
 import com.auth.service.system.admin.service.SysRolePermissionService;
+import com.auth.service.system.admin.support.permission.PermissionReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.RoleAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -39,7 +38,7 @@ public class SysRolePermissionServiceImpl implements SysRolePermissionService {
 
 	private final SysRolePermissionMapper sysRolePermissionMapper;
 
-	private final SysPermissionMapper sysPermissionMapper;
+	private final PermissionReferenceChecker permissionReferenceChecker;
 
 	private final RoleAuthorizationInvalidationTrigger roleInvalidationTrigger;
 
@@ -64,13 +63,7 @@ public class SysRolePermissionServiceImpl implements SysRolePermissionService {
 		Long operatorId = SecurityUserUtils.getUserId();
 		sysRolePermissionMapper.deleteByRoleCode(normalized);
 		if (CollUtil.isNotEmpty(codes)) {
-			// FIXME 抽取当前逻辑进行复用
-			Long validCount = sysPermissionMapper.selectCount(Wrappers.<SysPermissionEntity>lambdaQuery()
-				.in(SysPermissionEntity::getPermissionCode, codes)
-				.eq(SysPermissionEntity::getStatus, true));
-			if (validCount == null || validCount != codes.size()) {
-				throw new SystemBusinessException(SystemAdminResultCode.ROLE_PERMISSION_INVALID);
-			}
+			permissionReferenceChecker.requireActivePermissionCodes(codes);
 			sysRolePermissionMapper.batchInsertRolePermissions(normalized, codes, operatorId, operatorId);
 		}
 
