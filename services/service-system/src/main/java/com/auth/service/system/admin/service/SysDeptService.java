@@ -1,5 +1,7 @@
 package com.auth.service.system.admin.service;
 
+import java.util.List;
+
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.form.dept.SysDeptForm;
@@ -9,8 +11,6 @@ import com.auth.service.system.admin.model.vo.dept.SysDeptDetailVO;
 import com.auth.service.system.admin.model.vo.dept.SysDeptListVO;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-
-import java.util.List;
 
 /**
  * 部门服务（查询能力）
@@ -61,7 +61,7 @@ public interface SysDeptService extends IService<SysDeptEntity> {
 	void move(Long deptId, SysDeptMoveForm form);
 
 	/**
-	 * 逻辑删除部门（不调用闭包删除存储过程）
+	 * 逻辑删除部门
 	 * @param deptId 部门 ID
 	 */
 	void deleteById(Long deptId);

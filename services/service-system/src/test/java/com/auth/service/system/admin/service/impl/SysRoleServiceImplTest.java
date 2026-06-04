@@ -5,6 +5,7 @@ import com.auth.service.system.admin.mapper.GrantTableMapper;
 import com.auth.service.system.admin.mapper.SysRoleMapper;
 import com.auth.service.system.admin.mapper.SysRolePermissionMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
+import com.auth.service.system.admin.model.form.role.SysRoleForm;
 import com.auth.service.system.admin.model.po.role.SysRoleAssignedPermissionPO;
 import com.auth.service.system.admin.model.vo.role.SysRoleDetailVO;
 import com.auth.service.system.authorization.dispatch.trigger.RoleAuthorizationInvalidationTrigger;
@@ -25,6 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -55,6 +57,17 @@ class SysRoleServiceImplTest {
 	private SysRolePermissionMapper sysRolePermissionMapper;
 
 	private SysRoleServiceImpl sysRoleService;
+
+	private static SysRoleForm updateForm(Long id, String roleCode, boolean status) {
+		SysRoleForm form = new SysRoleForm();
+		form.setId(id);
+		form.setRoleCode(roleCode);
+		form.setRoleName("测试角色");
+		form.setStatus(status);
+		form.setRoleType(4);
+		form.setOrderNum(0);
+		return form;
+	}
 
 	private static SysRoleEntity roleEntity(Long id, String roleCode) {
 		SysRoleEntity entity = new SysRoleEntity();
@@ -108,6 +121,44 @@ class SysRoleServiceImplTest {
 		assertThat(detail.getBoundPermissions().get(0).getPermissionType()).isEqualTo(1);
 		verify(sysRolePermissionMapper).selectAssignedPermissionsByRoleCode("ADMIN");
 		verify(auditUserDisplayService).enrichAuditUsernames(anyList());
+	}
+
+	@Test
+	@DisplayName("更新角色：仅改名称时不提交授权失效")
+	void updateWithoutAuthImpactSkipsInvalidation() {
+		when(sysRoleMapper.selectById(4L)).thenReturn(roleEntity(4L, "EDITOR"));
+		when(sysRoleMapper.updateById(any(SysRoleEntity.class))).thenReturn(1);
+
+		SysRoleForm form = updateForm(4L, "EDITOR", true);
+		form.setRoleName("编辑者");
+
+		sysRoleService.update(form);
+
+		verify(sysRoleMapper).updateById(argThat((SysRoleEntity e) -> "编辑者".equals(e.getRoleName())));
+		verifyNoInteractions(roleInvalidationTrigger);
+	}
+
+	@Test
+	@DisplayName("更新角色：状态变更时提交 ROLE 授权失效")
+	void updateWithStatusChangeSubmitsInvalidation() {
+		when(sysRoleMapper.selectById(5L)).thenReturn(roleEntity(5L, "VIEWER"));
+		when(sysRoleMapper.updateById(any(SysRoleEntity.class))).thenReturn(1);
+
+		sysRoleService.update(updateForm(5L, "VIEWER", false));
+
+		verify(roleInvalidationTrigger).submitByRoleCodes(List.of("VIEWER"), "update:VIEWER");
+	}
+
+	@Test
+	@DisplayName("更新角色：编码重命名时提交失效并携带旧新码")
+	void updateWithRoleCodeRenameSubmitsInvalidation() {
+		when(sysRoleMapper.selectById(6L)).thenReturn(roleEntity(6L, "OLD_CODE"));
+		when(sysRoleMapper.selectCount(any())).thenReturn(0L);
+		when(sysRoleMapper.updateById(any(SysRoleEntity.class))).thenReturn(1);
+
+		sysRoleService.update(updateForm(6L, "NEW_CODE", true));
+
+		verify(roleInvalidationTrigger).submitByRoleCodes(List.of("OLD_CODE", "NEW_CODE"), "update:NEW_CODE");
 	}
 
 	@Test

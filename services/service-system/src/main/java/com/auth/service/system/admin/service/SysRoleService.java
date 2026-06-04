@@ -1,5 +1,7 @@
 package com.auth.service.system.admin.service;
 
+import java.util.List;
+
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.form.role.SysRoleForm;
@@ -9,8 +11,6 @@ import com.auth.service.system.admin.model.vo.role.SysRoleOptionVO;
 import com.auth.service.system.admin.model.vo.role.SysRolePageResponse;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-
-import java.util.List;
 
 /**
  * 系统角色服务
@@ -41,7 +41,7 @@ public interface SysRoleService extends IService<SysRoleEntity> {
 	void create(SysRoleForm form);
 
 	/**
-	 * 更新角色；仅当 {@code role_code} 或 {@code status} 变化时触发授权失效。
+	 * 更新角色
 	 * @param form 保存表单
 	 */
 	void update(SysRoleForm form);
@@ -55,7 +55,7 @@ public interface SysRoleService extends IService<SysRoleEntity> {
 	List<SysRoleOptionVO> listOptions(String roleName, String roleCode);
 
 	/**
-	 * 按主键删除角色；grant_table 仍有引用时拒绝删除，成功后触发授权失效。
+	 * 按主键删除角色
 	 * @param id 角色主键
 	 */
 	void deleteById(Long id);

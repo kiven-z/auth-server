@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * 岗位主表变更后触发授权失效（成员经 user_post 绑定，展开依赖 sys_post 启用状态）。
+ * 岗位启用状态变更后触发授权失效
  *
  * @author Bunny
  */
@@ -25,7 +25,7 @@ public class PostAuthorizationInvalidationTrigger {
 	private final AuthorizationInvalidationCoordinator invalidationCoordinator;
 
 	/**
-	 * 按岗位 ID 提交失效（去重、忽略空）。
+	 * 按岗位 ID 提交失效（去重、忽略空）
 	 * @param postIds 岗位主键
 	 * @param operation 操作标识
 	 */

@@ -148,6 +148,7 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 		// 规范化父部门 ID 并校验父部门存在（顶级跳过校验）
 		long newParentId = deptReferenceChecker.normalizeAndRequireActiveParent(form.getParentId());
 		boolean parentChanged = resolveParentId(existing) != newParentId;
+		boolean statusChanged = FieldChangeSupport.valueChanged(existing.getStatus(), form.getStatus());
 		if (parentChanged) {
 			deptReferenceChecker.requireMoveTargetValid(id, newParentId);
 			existing.setParentId(newParentId);
@@ -161,9 +162,11 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 			deptClosureMaintainer.moveNode(id, newParentId);
 		}
 
-		// 触发授权失效
-		String invalidationOp = parentChanged ? "move:" + id : "update:" + id;
-		deptInvalidationTrigger.submitByDeptIds(List.of(id), invalidationOp);
+		// 父级或启用状态影响授权展开与数据范围，其余元数据变更不刷新画像
+		if (FieldChangeSupport.anyChanged(parentChanged, statusChanged)) {
+			String invalidationOp = parentChanged ? "move:" + id : "update:" + id;
+			deptInvalidationTrigger.submitByDeptIds(List.of(id), invalidationOp);
+		}
 	}
 
 	/**

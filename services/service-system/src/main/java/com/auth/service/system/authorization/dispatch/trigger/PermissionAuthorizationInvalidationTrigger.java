@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * 权限码维度授权失效触发：写 Outbox 并在提交后同步投递 auth
+ * 权限码或启用状态变更、删除后触发授权失效
  *
  * @author Bunny
  */

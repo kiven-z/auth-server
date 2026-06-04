@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * 角色维度授权失效触发：写 Outbox 并在提交后同步投递 auth。
+ * 角色码或启用状态变更、删除及权限分配后触发授权失效
  *
  * @author Bunny
  */
@@ -26,7 +26,7 @@ public class RoleAuthorizationInvalidationTrigger {
 	private final AuthorizationInvalidationCoordinator invalidationCoordinator;
 
 	/**
-	 * 按角色码提交失效事件（去重、忽略空白）。
+	 * 按角色码提交失效事件（去重、忽略空白）
 	 * @param roleCodes 角色编码，可含 old+new
 	 * @param operation 操作标识，用于 eventId 与 sourceBizId
 	 */

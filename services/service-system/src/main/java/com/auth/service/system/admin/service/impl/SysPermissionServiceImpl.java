@@ -149,6 +149,7 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 		existing.setPermissionCode(newPermissionCode);
 		updateById(existing);
 
+		// 权限码或启用状态影响角色权限展开，其余元数据变更不刷新画像
 		if (FieldChangeSupport.anyChanged(permissionCodeChanged, statusChanged)) {
 			List<String> permissionCodes = FieldChangeSupport.renameCodes(oldPermissionCode, newPermissionCode);
 			permissionInvalidationTrigger.submitByPermissionCodes(permissionCodes, "update:" + newPermissionCode);
