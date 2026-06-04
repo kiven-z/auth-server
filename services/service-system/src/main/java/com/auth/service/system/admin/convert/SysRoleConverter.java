@@ -53,6 +53,7 @@ public interface SysRoleConverter {
 	 * @return 详情 VO
 	 */
 	@Mapping(target = "roleTypeDesc", ignore = true)
+	@Mapping(target = "boundPermissions", ignore = true)
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
 	SysRoleDetailVO toDetailVo(SysRoleEntity entity);

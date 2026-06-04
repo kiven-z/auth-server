@@ -2,8 +2,8 @@ package com.auth.service.system.admin.service.impl;
 
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.convert.SysRoleConverter;
-import com.auth.service.system.admin.convert.SysRoleDetailVoConverter;
 import com.auth.service.system.admin.convert.SysRolePermissionConverter;
+import com.auth.service.system.admin.model.enums.RoleTypeEnum;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.GrantTableMapper;
 import com.auth.service.system.admin.mapper.SysRoleMapper;
@@ -75,7 +75,8 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 			throw new SystemBusinessException(SystemAdminResultCode.ROLE_NOT_FOUND, id);
 		}
 
-		SysRoleDetailVO detail = SysRoleDetailVoConverter.toDetailVo(entity);
+		SysRoleDetailVO detail = SysRoleConverter.INSTANCE.toDetailVo(entity);
+		detail.setRoleTypeDesc(RoleTypeEnum.getDesc(entity.getRoleType()));
 		detail.setBoundPermissions(SysRolePermissionConverter.INSTANCE.toBoundPermissionItemList(
 				sysRolePermissionMapper.selectAssignedPermissionsByRoleCode(entity.getRoleCode())));
 		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail));

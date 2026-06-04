@@ -56,7 +56,8 @@ class PermissionReferenceCheckerTest {
 	void requireActivePermissionCodesThrowsWhenNotAllActive() {
 		when(sysPermissionMapper.selectCount(any())).thenReturn(0L);
 
-		assertThatThrownBy(() -> permissionReferenceChecker.requireActivePermissionCodes(List.of("missing:perm")))
+		List<String> permissionCodes = List.of("missing:perm");
+		assertThatThrownBy(() -> permissionReferenceChecker.requireActivePermissionCodes(permissionCodes))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemAdminResultCode.ROLE_PERMISSION_INVALID);

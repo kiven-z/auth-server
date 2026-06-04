@@ -12,7 +12,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 /**
@@ -59,6 +62,7 @@ class DeptClosureHealthServiceTest {
 		row.setDeptName("研发一部");
 		row.setParentId(1L);
 		when(deptClosureDiagnosticsMapper.countParentLinkAnomalies()).thenReturn(1L);
+		when(deptClosureDiagnosticsMapper.selectParentLinkAnomalies(anyInt())).thenReturn(List.of(row));
 		when(deptClosureDiagnosticsMapper.countDepthChainAnomalies()).thenReturn(0L);
 		when(deptClosureDiagnosticsMapper.selectHealthStats()).thenReturn(new DeptClosureHealthStatsPO());
 
@@ -94,6 +98,7 @@ class DeptClosureHealthServiceTest {
 		row.setExpectedChildCnt(4L);
 		when(deptClosureDiagnosticsMapper.countParentLinkAnomalies()).thenReturn(0L);
 		when(deptClosureDiagnosticsMapper.countDepthChainAnomalies()).thenReturn(1L);
+		when(deptClosureDiagnosticsMapper.selectDepthChainAnomalies(anyInt())).thenReturn(List.of(row));
 		when(deptClosureDiagnosticsMapper.selectHealthStats()).thenReturn(new DeptClosureHealthStatsPO());
 
 		DeptClosureHealthVO result = deptClosureHealthService.inspect();

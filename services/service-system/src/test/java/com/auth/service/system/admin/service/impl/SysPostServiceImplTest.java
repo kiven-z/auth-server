@@ -179,7 +179,7 @@ class SysPostServiceImplTest {
 
 		verify(sysPostMapper).updateById(argThat(
 				(SysPostEntity e) -> Long.valueOf(3L).equals(e.getDeptId()) && Boolean.FALSE.equals(e.getStatus())));
-		verify(postInvalidationTrigger).submitByPostIds(eq(List.of(postId)), eq("update:" + postId));
+		verify(postInvalidationTrigger).submitByPostIds(List.of(postId), "update:" + postId);
 	}
 
 }

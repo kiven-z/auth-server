@@ -102,6 +102,7 @@ class SysRoleServiceImplTest {
 		SysRoleDetailVO detail = sysRoleService.getDetail(1L);
 
 		assertThat(detail.getRoleCode()).isEqualTo("ADMIN");
+		assertThat(detail.getRoleTypeDesc()).isEqualTo("自定义角色");
 		assertThat(detail.getBoundPermissions()).hasSize(1);
 		assertThat(detail.getBoundPermissions().get(0).getPermissionCode()).isEqualTo("sys:user:query");
 		assertThat(detail.getBoundPermissions().get(0).getPermissionType()).isEqualTo(1);

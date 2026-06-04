@@ -56,7 +56,8 @@ class RoleGrantReferenceCheckerTest {
 	void requireDeptGrantEligibleRolesThrowsWhenNotAllEligible() {
 		when(sysRoleMapper.selectCount(any())).thenReturn(0L);
 
-		assertThatThrownBy(() -> roleGrantReferenceChecker.requireDeptGrantEligibleRoles(List.of("SYS_ADMIN")))
+		List<String> roleCodes = List.of("SYS_ADMIN");
+		assertThatThrownBy(() -> roleGrantReferenceChecker.requireDeptGrantEligibleRoles(roleCodes))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemAdminResultCode.DEPT_ROLE_INVALID);
@@ -86,7 +87,8 @@ class RoleGrantReferenceCheckerTest {
 	void requireMenuAssignEligibleRolesThrowsWhenNotAllEligible() {
 		when(sysRoleMapper.selectCount(any())).thenReturn(0L);
 
-		assertThatThrownBy(() -> roleGrantReferenceChecker.requireMenuAssignEligibleRoles(List.of("BIZ_ADMIN")))
+		List<String> roleCodes = List.of("BIZ_ADMIN");
+		assertThatThrownBy(() -> roleGrantReferenceChecker.requireMenuAssignEligibleRoles(roleCodes))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemAdminResultCode.MENU_ROLE_INVALID);

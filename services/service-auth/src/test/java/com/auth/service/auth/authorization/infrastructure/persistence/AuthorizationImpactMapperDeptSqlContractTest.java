@@ -29,7 +29,7 @@ class AuthorizationImpactMapperDeptSqlContractTest {
 		String xml = readClasspathText();
 
 		int selectStart = xml.indexOf("<select id=\"selectUserIdsByDeptIds\"");
-		assertThat(selectStart).isGreaterThanOrEqualTo(0);
+		assertThat(selectStart).isNotNegative();
 		int selectEnd = xml.indexOf("</select>", selectStart);
 		String selectBlock = xml.substring(selectStart, selectEnd);
 
