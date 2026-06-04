@@ -17,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -66,6 +67,7 @@ class SysRolePermissionServiceImplTest {
 		SysRoleAssignedPermissionPO po = new SysRoleAssignedPermissionPO();
 		po.setPermissionCode("sys:user:list");
 		po.setPermissionName("用户查询");
+		po.setGrantTime(LocalDateTime.of(2026, 6, 4, 9, 15, 0));
 		when(sysRolePermissionMapper.selectAssignedPermissionsByRoleCode("ADMIN")).thenReturn(List.of(po));
 
 		List<SysRoleAssignedPermissionRow> rows = sysRolePermissionService.listAssignedPermissions("ADMIN");
@@ -73,6 +75,7 @@ class SysRolePermissionServiceImplTest {
 		assertThat(rows).hasSize(1);
 		assertThat(rows.get(0).getPermissionCode()).isEqualTo("sys:user:list");
 		assertThat(rows.get(0).getPermissionName()).isEqualTo("用户查询");
+		assertThat(rows.get(0).getGrantTime()).isEqualTo(LocalDateTime.of(2026, 6, 4, 9, 15, 0));
 	}
 
 	@Test

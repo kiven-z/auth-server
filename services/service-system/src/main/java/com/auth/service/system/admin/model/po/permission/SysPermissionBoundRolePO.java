@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * 权限已绑定角色行
@@ -31,5 +32,8 @@ public class SysPermissionBoundRolePO implements Serializable {
 
 	@Schema(title = "角色类型(1=系统,2=菜单,3=业务,4=自定义)")
 	private Integer roleType;
+
+	@Schema(title = "授权时间")
+	private LocalDateTime grantTime;
 
 }

@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * 角色已分配权限 PO
@@ -31,5 +32,8 @@ public class SysRoleAssignedPermissionPO implements Serializable {
 
 	@Schema(title = "启用状态(true=启用，false=停用)")
 	private Boolean status;
+
+	@Schema(title = "授权时间")
+	private LocalDateTime grantTime;
 
 }
