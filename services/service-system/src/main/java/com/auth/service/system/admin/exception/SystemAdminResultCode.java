@@ -143,7 +143,12 @@ public enum SystemAdminResultCode implements SystemResultCode {
 	/**
 	 * Excel 导出单页条数非法
 	 */
-	EXPORT_PAGE_SIZE_INVALID(400, 297, "EXPORT_PAGE_SIZE_INVALID", "system.export.page_size_invalid"),;
+	EXPORT_PAGE_SIZE_INVALID(400, 297, "EXPORT_PAGE_SIZE_INVALID", "system.export.page_size_invalid"),
+
+	/**
+	 * 导出范围不支持或参数不完整（含 FULL_ASYNC 预留）
+	 */
+	EXPORT_SCOPE_NOT_SUPPORTED(400, 298, "EXPORT_SCOPE_NOT_SUPPORTED", "system.export.scope_not_supported"),;
 
 	private final int httpStatus;
 

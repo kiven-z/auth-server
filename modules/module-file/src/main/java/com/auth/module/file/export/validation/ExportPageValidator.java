@@ -1,11 +1,10 @@
-package com.auth.service.system.admin.excel.export;
+package com.auth.module.file.export.validation;
 
-import com.auth.service.system.admin.exception.SystemAdminResultCode;
-import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.module.file.export.model.ExportLimits;
 import lombok.experimental.UtilityClass;
 
 /**
- * 管理端 Excel 导出分页参数校验
+ * 同步导出分页参数校验
  *
  * @author Bunny
  */
@@ -18,16 +17,14 @@ public class ExportPageValidator {
 	public static final int DEFAULT_PAGE_SIZE = 30;
 
 	/**
-	 * 标准化每页条数并在越界时抛出业务异常
+	 * 标准化每页条数并在越界时抛出校验异常
 	 * @param pageSize 请求中的每页条数，可为 null
 	 * @return 合法 pageSize
 	 */
 	public static int normalizePageSize(Integer pageSize) {
 		int resolved = pageSize == null ? DEFAULT_PAGE_SIZE : pageSize;
-
-		// 检查跨页行数是否超过上限
 		if (resolved < ExportLimits.MIN_PAGE_SIZE || resolved > ExportLimits.MAX_PAGE_SIZE) {
-			throw new SystemBusinessException(SystemAdminResultCode.EXPORT_PAGE_SIZE_INVALID, resolved);
+			throw new ExportValidationException(ExportValidationCode.PAGE_SIZE_INVALID, resolved);
 		}
 		return resolved;
 	}
@@ -40,14 +37,13 @@ public class ExportPageValidator {
 	 */
 	public static void validatePageRange(int fromPage, int toPage, int pageSize) {
 		if (toPage < fromPage) {
-			throw new SystemBusinessException(SystemAdminResultCode.EXPORT_PAGE_RANGE_INVALID, fromPage, toPage);
+			throw new ExportValidationException(ExportValidationCode.PAGE_RANGE_INVALID, fromPage, toPage);
 		}
 
-		// 检查跨页行数是否超过上限
 		long spanRows = (long) (toPage - fromPage + 1) * pageSize;
 		if (spanRows > ExportLimits.MAX_EXPORT_ROWS) {
-			throw new SystemBusinessException(SystemAdminResultCode.EXPORT_ROW_LIMIT_EXCEEDED,
-					ExportLimits.MAX_EXPORT_ROWS, spanRows);
+			throw new ExportValidationException(ExportValidationCode.ROW_LIMIT_EXCEEDED, ExportLimits.MAX_EXPORT_ROWS,
+					spanRows);
 		}
 	}
 

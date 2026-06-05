@@ -1,5 +1,6 @@
 package com.auth.service.system.admin.service.impl;
 
+import com.auth.module.file.export.model.enums.ExportScope;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.SysRoleMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
@@ -95,6 +96,17 @@ class SysRoleExportServiceImplTest {
 		assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
 		assertThat(response.getBody()).isNotNull().isNotEmpty();
 		verify(sysRoleMapper).selectListByPage(any(Page.class), eq(query), anyString());
+	}
+
+	@Test
+	@DisplayName("FULL_ASYNC 导出抛出范围不支持异常")
+	void export_whenFullAsync_throwsScopeNotSupported() {
+		SysRoleExportQuery query = baseQuery(1, 1);
+		query.setExportScope(ExportScope.FULL_ASYNC);
+
+		assertThatThrownBy(() -> exportService.export(query)).isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemAdminResultCode.EXPORT_SCOPE_NOT_SUPPORTED);
 	}
 
 }

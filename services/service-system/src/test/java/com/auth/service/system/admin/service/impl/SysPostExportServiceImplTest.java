@@ -1,5 +1,6 @@
 package com.auth.service.system.admin.service.impl;
 
+import com.auth.module.file.export.model.enums.ExportScope;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.SysPostMapper;
 import com.auth.service.system.admin.model.po.post.SysPostPageRowPO;
@@ -96,6 +97,44 @@ class SysPostExportServiceImplTest {
 		assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
 		assertThat(response.getBody()).isNotNull().isNotEmpty();
 		verify(sysPostMapper).selectListByPage(any(Page.class), eq(query), anyString());
+	}
+
+	@Test
+	@DisplayName("FULL_ASYNC 导出抛出范围不支持异常")
+	void export_whenFullAsync_throwsScopeNotSupported() {
+		SysPostExportQuery query = baseQuery(1, 1);
+		query.setExportScope(ExportScope.FULL_ASYNC);
+
+		assertThatThrownBy(() -> exportService.export(query)).isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemAdminResultCode.EXPORT_SCOPE_NOT_SUPPORTED);
+	}
+
+	@Test
+	@DisplayName("CURRENT_PAGE 使用 pageIndex 导出单页")
+	void export_whenCurrentPage_usesPageIndex() throws IOException {
+		SysPostExportQuery query = baseQuery(1, 99);
+		query.setExportScope(ExportScope.CURRENT_PAGE);
+		query.setPageIndex(3);
+		query.setPageSize(10);
+
+		SysPostPageRowPO row = new SysPostPageRowPO();
+		row.setId(1L);
+		row.setDeptCode("D01");
+		row.setDeptName("研发部");
+		row.setPostCode("P01");
+		row.setPostName("工程师");
+		row.setStatus(true);
+		row.setOrderNum(1);
+
+		IPage<SysPostPageRowPO> page = new Page<>(3, 10, 1);
+		page.setRecords(List.of(row));
+		when(sysPostMapper.selectListByPage(any(Page.class), eq(query), anyString())).thenReturn(page);
+
+		ResponseEntity<byte[]> response = exportService.export(query);
+
+		assertThat(response.getBody()).isNotNull().isNotEmpty();
+		verify(sysPostMapper).selectListByPage(argThat(p -> p.getCurrent() == 3), eq(query), anyString());
 	}
 
 }
