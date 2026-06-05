@@ -30,7 +30,7 @@ import com.auth.service.system.admin.model.query.role.SysRoleExportQuery;
 import com.auth.service.system.admin.model.vo.role.SysRoleDetailVO;
 import com.auth.service.system.admin.model.vo.role.SysRoleOptionVO;
 import com.auth.service.system.admin.model.vo.role.SysRolePageResponse;
-import com.auth.service.system.admin.service.SysRoleExportService;
+import com.auth.service.system.admin.excel.role.SysRoleSpreadsheetService;
 import com.auth.service.system.admin.service.SysRoleService;
 import com.auth.service.system.common.model.audit.SystemAuditBizModule;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -52,18 +52,18 @@ public class SysRoleController {
 
 	private final SysRoleService sysRoleService;
 
-	private final SysRoleExportService sysRoleExportService;
+	private final SysRoleSpreadsheetService sysRoleSpreadsheetService;
 
-	public SysRoleController(SysRoleService sysRoleService, SysRoleExportService sysRoleExportService) {
+	public SysRoleController(SysRoleService sysRoleService, SysRoleSpreadsheetService sysRoleSpreadsheetService) {
 		this.sysRoleService = sysRoleService;
-		this.sysRoleExportService = sysRoleExportService;
+		this.sysRoleSpreadsheetService = sysRoleSpreadsheetService;
 	}
 
 	@Operation(summary = "角色 Excel 导出")
 	@PreAuthorize("@auth.decide('sysRole:export')")
 	@GetMapping("/export")
 	public ResponseEntity<byte[]> export(@Validated SysRoleExportQuery query) throws IOException {
-		return sysRoleExportService.export(query);
+		return sysRoleSpreadsheetService.export(query);
 	}
 
 	@Operation(summary = "角色分页查询")

@@ -11,7 +11,7 @@ import com.auth.service.system.admin.model.query.post.SysPostExportQuery;
 import com.auth.service.system.admin.model.query.post.SysPostQuery;
 import com.auth.service.system.admin.model.vo.post.SysPostDetailVO;
 import com.auth.service.system.admin.model.vo.post.SysPostPageResponse;
-import com.auth.service.system.admin.service.SysPostExportService;
+import com.auth.service.system.admin.excel.post.SysPostSpreadsheetService;
 import com.auth.service.system.admin.service.SysPostService;
 import com.auth.service.system.common.model.audit.SystemAuditBizModule;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -39,18 +39,18 @@ public class SysPostController {
 
 	private final SysPostService sysPostService;
 
-	private final SysPostExportService sysPostExportService;
+	private final SysPostSpreadsheetService sysPostSpreadsheetService;
 
-	public SysPostController(SysPostService sysPostService, SysPostExportService sysPostExportService) {
+	public SysPostController(SysPostService sysPostService, SysPostSpreadsheetService sysPostSpreadsheetService) {
 		this.sysPostService = sysPostService;
-		this.sysPostExportService = sysPostExportService;
+		this.sysPostSpreadsheetService = sysPostSpreadsheetService;
 	}
 
 	@Operation(summary = "岗位 Excel 导出")
 	@PreAuthorize("@auth.decide('sysPost:export')")
 	@GetMapping("/export")
 	public ResponseEntity<byte[]> export(@Validated SysPostExportQuery query) throws IOException {
-		return sysPostExportService.export(query);
+		return sysPostSpreadsheetService.export(query);
 	}
 
 	@Operation(summary = "岗位分页查询")
