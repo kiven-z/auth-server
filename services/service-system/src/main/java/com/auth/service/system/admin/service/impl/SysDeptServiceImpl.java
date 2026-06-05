@@ -14,6 +14,7 @@ import com.auth.service.system.admin.model.form.dept.SysDeptForm;
 import com.auth.service.system.admin.model.form.dept.SysDeptMoveForm;
 import com.auth.service.system.admin.model.po.dept.SysDeptBoundPostPO;
 import com.auth.service.system.admin.model.po.dept.SysDeptBoundUserPO;
+import com.auth.service.system.admin.model.po.dept.SysDeptPageRowPO;
 import com.auth.service.system.admin.model.po.granttable.GrantTableBoundRolePO;
 import com.auth.service.system.admin.model.query.SysDeptQuery;
 import com.auth.service.system.admin.model.vo.dept.SysDeptDetailVO;
@@ -80,8 +81,8 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 	 */
 	@Override
 	public PageResponse<SysDeptListVO> pageFlat(Page<SysDeptEntity> pageParams, SysDeptQuery query) {
-		IPage<SysDeptEntity> entityPage = baseMapper.selectPageByQuery(pageParams, query);
-		IPage<SysDeptListVO> result = entityPage.convert(SysDeptConverter.INSTANCE::toListVo);
+		IPage<SysDeptPageRowPO> poPage = baseMapper.selectListByPage(pageParams, query);
+		IPage<SysDeptListVO> result = poPage.convert(SysDeptConverter.INSTANCE::toListVoFromPageRow);
 
 		// 补充审计用户名
 		auditUserDisplayService.enrichAuditUsernames(result);

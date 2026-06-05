@@ -28,15 +28,7 @@ public interface SysDeptMapper extends BaseMapper<SysDeptEntity> {
 	List<SysDeptEntity> selectListByQuery(@Param("query") SysDeptQuery query);
 
 	/**
-	 * 分页查询部门（表格视图）
-	 * @param page 分页参数
-	 * @param query 查询条件
-	 * @return 分页部门列表
-	 */
-	IPage<SysDeptEntity> selectPageByQuery(IPage<SysDeptEntity> page, @Param("query") SysDeptQuery query);
-
-	/**
-	 * 分页查询部门
+	 * 分页查询部门（含父部门信息；表格视图与 Excel 导出共用）
 	 * @param page 分页参数
 	 * @param query 查询条件
 	 * @return 分页部门列表
