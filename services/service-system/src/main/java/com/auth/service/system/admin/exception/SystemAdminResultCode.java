@@ -131,19 +131,19 @@ public enum SystemAdminResultCode implements SystemResultCode {
 	MENU_ROLE_INVALID(400, 291, "MENU_ROLE_INVALID", "system.menu.role_invalid"),
 
 	/**
-	 * 岗位导出页码区间无效（结束页小于起始页） FIXME 修改为通用的，后面还会用到导出功能
+	 * Excel 导出页码区间无效（结束页小于起始页）
 	 */
-	POST_EXPORT_PAGE_RANGE_INVALID(400, 295, "POST_EXPORT_PAGE_RANGE_INVALID", "system.post.export_page_range_invalid"),
+	EXPORT_PAGE_RANGE_INVALID(400, 295, "EXPORT_PAGE_RANGE_INVALID", "system.export.page_range_invalid"),
 
 	/**
-	 * 岗位导出超过最大行数 FIXME 修改为通用的，后面还会用到导出功能
+	 * Excel 导出超过最大行数
 	 */
-	POST_EXPORT_ROW_LIMIT_EXCEEDED(400, 296, "POST_EXPORT_ROW_LIMIT_EXCEEDED", "system.post.export_row_limit_exceeded"),
+	EXPORT_ROW_LIMIT_EXCEEDED(400, 296, "EXPORT_ROW_LIMIT_EXCEEDED", "system.export.row_limit_exceeded"),
 
 	/**
-	 * 岗位导出单页条数非法 FIXME 修改为通用的，后面还会用到导出功能
+	 * Excel 导出单页条数非法
 	 */
-	POST_EXPORT_PAGE_SIZE_INVALID(400, 297, "POST_EXPORT_PAGE_SIZE_INVALID", "system.post.export_page_size_invalid"),;
+	EXPORT_PAGE_SIZE_INVALID(400, 297, "EXPORT_PAGE_SIZE_INVALID", "system.export.page_size_invalid"),;
 
 	private final int httpStatus;
 

@@ -57,7 +57,7 @@ class SysPostExportServiceImplTest {
 
 		assertThatThrownBy(() -> exportService.export(query)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemAdminResultCode.POST_EXPORT_PAGE_RANGE_INVALID);
+			.isEqualTo(SystemAdminResultCode.EXPORT_PAGE_RANGE_INVALID);
 	}
 
 	@Test
@@ -68,7 +68,7 @@ class SysPostExportServiceImplTest {
 
 		assertThatThrownBy(() -> exportService.export(query)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemAdminResultCode.POST_EXPORT_ROW_LIMIT_EXCEEDED);
+			.isEqualTo(SystemAdminResultCode.EXPORT_ROW_LIMIT_EXCEEDED);
 	}
 
 	@Test

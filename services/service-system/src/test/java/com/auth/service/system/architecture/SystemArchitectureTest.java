@@ -6,6 +6,7 @@ import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.RestTemplate;
 
@@ -54,6 +55,9 @@ class SystemArchitectureTest {
 		.should()
 		.haveName("printStackTrace");
 
+	/**
+	 * 常规 JSON API 返回 {@link Result}；二进制文件下载（如 Excel 导出）允许 {@link ResponseEntity}。
+	 */
 	@ArchTest
 	static final ArchRule controller_public_api_methods_return_result = methods().that()
 		.areDeclaredInClassesThat()
@@ -66,6 +70,8 @@ class SystemArchitectureTest {
 		.doNotHaveName("hashCode")
 		.and()
 		.doNotHaveName("toString")
+		.and()
+		.doNotHaveRawReturnType(ResponseEntity.class)
 		.should()
 		.haveRawReturnType(Result.class);
 
