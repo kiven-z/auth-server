@@ -1,6 +1,7 @@
 package com.auth.service.system.admin.excel.post;
 
 import com.alibaba.excel.annotation.ExcelProperty;
+import com.auth.module.file.export.converter.LongIdExcelConverter;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -40,7 +41,7 @@ public class SysPostSpreadsheetRow {
 	@ExcelProperty(value = "更新时间", index = 8)
 	private String updateTimeText;
 
-	@ExcelProperty(value = "主键ID", index = 9)
+	@ExcelProperty(value = "主键ID", index = 9, converter = LongIdExcelConverter.class)
 	private Long id;
 
 }

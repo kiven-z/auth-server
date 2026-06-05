@@ -1,6 +1,7 @@
 package com.auth.service.system.admin.excel.dept;
 
 import com.alibaba.excel.annotation.ExcelProperty;
+import com.auth.module.file.export.converter.LongIdExcelConverter;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,7 +20,7 @@ public class SysDeptSpreadsheetRow {
 	@ExcelProperty(value = "父部门名称", index = 1)
 	private String parentDeptName;
 
-	@ExcelProperty(value = "父部门ID", index = 2)
+	@ExcelProperty(value = "父部门ID", index = 2, converter = LongIdExcelConverter.class)
 	private Long parentId;
 
 	@ExcelProperty(value = "部门编码", index = 3)
@@ -43,7 +44,7 @@ public class SysDeptSpreadsheetRow {
 	@ExcelProperty(value = "更新时间", index = 9)
 	private String updateTimeText;
 
-	@ExcelProperty(value = "主键ID", index = 10)
+	@ExcelProperty(value = "主键ID", index = 10, converter = LongIdExcelConverter.class)
 	private Long id;
 
 }
