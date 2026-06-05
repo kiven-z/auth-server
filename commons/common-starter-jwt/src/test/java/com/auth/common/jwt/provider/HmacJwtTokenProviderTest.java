@@ -15,16 +15,16 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class HmacJwtTokenProviderTest {
 
-	private static final String issuer = "test-issuer";
+	private static final String ISSUER = "test-issuer";
 
-	private static final long userId = 1L;
+	private static final long USER_ID = 1L;
 
 	@Test
 	@DisplayName("生成访问令牌、刷新令牌并验证")
 	void mintAccessRefreshValidateAndRemaining() {
 		JwtProperties props = new JwtProperties();
 		props.setAlgorithm(HS256);
-		props.setIssuer(issuer);
+		props.setIssuer(ISSUER);
 		props.setSecret("0123456789abcdef0123456789abcdef0123456789abcdef0123456789ab");
 		props.setAccessExpired(3600);
 		props.setRefreshExpired(7200);
@@ -35,21 +35,21 @@ class HmacJwtTokenProviderTest {
 		// 访问令牌
 		JwtBuilder accessTokenJwtBuilder = Jwts.builder()
 			.id(IdUtil.fastSimpleUUID())
-			.issuer(issuer)
-			.subject(String.valueOf(userId))
+			.issuer(ISSUER)
+			.subject(String.valueOf(USER_ID))
 			.issuedAt(new Date())
 			.expiration(new Date(System.currentTimeMillis() + 3600 * 1000));
 		String access = provider.generatorJwtToken(accessTokenJwtBuilder);
 		assertTrue(provider.validateToken(access));
-		assertEquals(userId, provider.parseToken(access).getUserId());
+		assertEquals(USER_ID, provider.parseToken(access).getUserId());
 		long remaining = provider.getRemainingSeconds(access);
 		assertTrue(remaining > 0);
 
 		// 刷新令牌
 		JwtBuilder refreshTokenJwtBuilder = Jwts.builder()
 			.id(IdUtil.fastSimpleUUID())
-			.issuer(issuer)
-			.subject(String.valueOf(userId))
+			.issuer(ISSUER)
+			.subject(String.valueOf(USER_ID))
 			.issuedAt(new Date())
 			.expiration(new Date(System.currentTimeMillis() + 3600 * 7000));
 		String refresh = provider.generatorJwtToken(refreshTokenJwtBuilder);

@@ -1,10 +1,6 @@
 package com.auth.common.web.exception;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
-import java.lang.reflect.Method;
-
+import com.auth.common.core.model.response.Result;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,7 +13,10 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import com.auth.common.core.model.response.Result;
+import java.lang.reflect.Method;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * {@link ValidationExceptionHandler} 单元测试
@@ -31,8 +30,8 @@ class ValidationExceptionHandlerTest {
 		handler = new ValidationExceptionHandler();
 	}
 
-	@DisplayName("BindException：类型转换失败应返回 invalid value format")
 	@Test
+	@DisplayName("BindException：类型转换失败应返回 invalid value format")
 	void handleBindException_typeMismatchLong_returnsInvalidValueFormatMessage() {
 		BindException exception = bindExceptionWithTypeMismatch("abc");
 
@@ -44,8 +43,8 @@ class ValidationExceptionHandlerTest {
 		assertEquals("Validation failed: jobId: invalid value format", response.getBody().getMessage());
 	}
 
-	@DisplayName("MethodArgumentNotValidException：由 BindException 统一处理")
 	@Test
+	@DisplayName("MethodArgumentNotValidException：由 BindException 统一处理")
 	void handleBindException_methodArgumentNotValid_returnsInvalidValueFormatMessage() throws NoSuchMethodException {
 		DummyQuery target = new DummyQuery();
 		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(target, "logJobQuery");
@@ -61,8 +60,8 @@ class ValidationExceptionHandlerTest {
 		assertEquals("Validation failed: jobId: invalid value format", response.getBody().getMessage());
 	}
 
-	@DisplayName("MethodArgumentTypeMismatchException：单个参数类型错误应返回 invalid value format")
 	@Test
+	@DisplayName("MethodArgumentTypeMismatchException：单个参数类型错误应返回 invalid value format")
 	void handleMethodArgumentTypeMismatch_longParam_returnsInvalidValueFormatMessage() {
 		MethodArgumentTypeMismatchException exception = new MethodArgumentTypeMismatchException("abc", Long.class,
 				"jobId", null, null);
@@ -74,8 +73,8 @@ class ValidationExceptionHandlerTest {
 		assertEquals("Validation failed: jobId: invalid value format", response.getBody().getMessage());
 	}
 
-	@DisplayName("BindException：普通校验消息应原样输出英文字段提示")
 	@Test
+	@DisplayName("BindException：普通校验消息应原样输出英文字段提示")
 	void handleBindException_constraintMessage_preservesDefaultMessage() {
 		DummyQuery target = new DummyQuery();
 		BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(target, "form");
@@ -107,18 +106,6 @@ class ValidationExceptionHandlerTest {
 	 * 测试用查询对象
 	 */
 	private static class DummyQuery {
-
-		private Long jobId;
-
-		private String name;
-
-		void setJobId(Long jobId) {
-			this.jobId = jobId;
-		}
-
-		void setName(String name) {
-			this.name = name;
-		}
 
 	}
 

@@ -71,7 +71,7 @@ public class LoginFailureRateLimiter {
 
 		// 超过最大配置尝试次数
 		if (failures >= maxPasswordAttempts) {
-			long expireMinute = redisTemplate.getExpire(failureCountKey, TimeUnit.MINUTES);
+			Long expireMinute = redisTemplate.getExpire(failureCountKey, TimeUnit.MINUTES);
 			long minutes = Math.max(1L, expireMinute);
 			throw new AuthBusinessException(AuthResultCode.USER_LOCKED_WITH_MINUTES, minutes);
 		}

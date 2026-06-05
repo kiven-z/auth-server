@@ -17,15 +17,15 @@ import com.auth.module.file.export.writer.ExcelExportWriter;
  * 同步分页导出模板：解析范围 → 分页拉取 → 转换行 → 写 Excel → 交付下载
  *
  * @param <Q> 导出查询类型
- * @param <PO> 持久层行类型
- * @param <ROW> Excel 导出行类型
+ * @param <P> 持久层行类型
+ * @param <R> Excel 导出行类型
  * @author Bunny
  */
-public abstract class AbstractSyncPagedExportService<Q extends ExportScopeQuery, PO, ROW> {
+public abstract class AbstractSyncPagedExportService<Q extends ExportScopeQuery, P, R> {
 
 	private static final DateTimeFormatter FILE_NAME_TIME = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
-	private final ExcelExportWriter<ROW> excelWriter;
+	private final ExcelExportWriter<R> excelWriter;
 
 	private final String filenamePrefix;
 
@@ -33,7 +33,7 @@ public abstract class AbstractSyncPagedExportService<Q extends ExportScopeQuery,
 	 * @param excelWriter Excel 写入器
 	 * @param filenamePrefix 文件名前缀（不含扩展名）
 	 */
-	protected AbstractSyncPagedExportService(ExcelExportWriter<ROW> excelWriter, String filenamePrefix) {
+	protected AbstractSyncPagedExportService(ExcelExportWriter<R> excelWriter, String filenamePrefix) {
 		this.excelWriter = excelWriter;
 		this.filenamePrefix = filenamePrefix;
 	}
@@ -48,8 +48,8 @@ public abstract class AbstractSyncPagedExportService<Q extends ExportScopeQuery,
 		ExportPageRange range = ExportScopeResolver.resolve(query);
 		ExportPageValidator.validatePageRange(range.fromPage(), range.toPage(), range.pageSize());
 
-		List<PO> rows = fetchByPageRange(query, range);
-		List<ROW> exportRows = toExportRows(rows);
+		List<P> rows = fetchByPageRange(query, range);
+		List<R> exportRows = toExportRows(rows);
 		String filename = filenamePrefix + "_" + LocalDateTime.now().format(FILE_NAME_TIME) + ".xlsx";
 		byte[] bytes = excelWriter.write(exportRows);
 		return SyncFileDelivery.deliver(bytes, filename);
@@ -61,8 +61,8 @@ public abstract class AbstractSyncPagedExportService<Q extends ExportScopeQuery,
 	 * @param range 页码区间
 	 * @return 数据列表
 	 */
-	private List<PO> fetchByPageRange(Q query, ExportPageRange range) {
-		List<PO> rows = new ArrayList<>();
+	private List<P> fetchByPageRange(Q query, ExportPageRange range) {
+		List<P> rows = new ArrayList<>();
 		for (int pageIndex = range.fromPage(); pageIndex <= range.toPage(); pageIndex++) {
 			rows.addAll(fetchPage(query, pageIndex, range.pageSize()));
 		}
@@ -76,13 +76,13 @@ public abstract class AbstractSyncPagedExportService<Q extends ExportScopeQuery,
 	 * @param pageSize 每页条数
 	 * @return 当前页记录
 	 */
-	protected abstract List<PO> fetchPage(Q query, int pageIndex, int pageSize);
+	protected abstract List<P> fetchPage(Q query, int pageIndex, int pageSize);
 
 	/**
 	 * 将持久层行转为导出行
 	 * @param rows 持久层行列表
 	 * @return Excel 行列表
 	 */
-	protected abstract List<ROW> toExportRows(List<PO> rows);
+	protected abstract List<R> toExportRows(List<P> rows);
 
 }

@@ -26,56 +26,54 @@ import java.util.List;
  */
 @Service
 public class SysPostSpreadsheetService
-        extends AbstractSyncPagedExportService<SysPostExportQuery, SysPostPageRowPO, SysPostSpreadsheetRow> {
+		extends AbstractSyncPagedExportService<SysPostExportQuery, SysPostPageRowPO, SysPostSpreadsheetRow> {
 
-    private static final String SHEET_NAME = "岗位";
+	private static final String SHEET_NAME = "岗位";
 
-    private static final String FILENAME_PREFIX = "岗位";
+	private static final String FILENAME_PREFIX = "岗位";
 
-    private static final int STATUS_COLUMN_INDEX = 4;
+	private static final int STATUS_COLUMN_INDEX = 4;
 
-    private final SysPostMapper sysPostMapper;
+	private final SysPostMapper sysPostMapper;
 
-    public SysPostSpreadsheetService(SysPostMapper sysPostMapper) {
-        super(buildExcelWriter(), FILENAME_PREFIX);
-        this.sysPostMapper = sysPostMapper;
-    }
+	public SysPostSpreadsheetService(SysPostMapper sysPostMapper) {
+		super(buildExcelWriter(), FILENAME_PREFIX);
+		this.sysPostMapper = sysPostMapper;
+	}
 
-    /**
-     * 构建 Excel 导出 writer
-     *
-     * @return Excel 导出 writer
-     */
-    private static ExcelExportWriter<SysPostSpreadsheetRow> buildExcelWriter() {
-        return new ExcelExportWriter<>(SysPostSpreadsheetRow.class, SHEET_NAME)
-                .registerWriteHandler(ZebraStripeStyleType.getHandler(ZebraStripeStyleType.BLUE_GREY_TECH))
-                .registerWriteHandler(new StatusColorCellWriteHandler(STATUS_COLUMN_INDEX));
-    }
+	/**
+	 * 构建 Excel 导出 writer
+	 * @return Excel 导出 writer
+	 */
+	private static ExcelExportWriter<SysPostSpreadsheetRow> buildExcelWriter() {
+		return new ExcelExportWriter<>(SysPostSpreadsheetRow.class, SHEET_NAME)
+			.registerWriteHandler(ZebraStripeStyleType.getHandler(ZebraStripeStyleType.BLUE_GREY_TECH))
+			.registerWriteHandler(new StatusColorCellWriteHandler(STATUS_COLUMN_INDEX));
+	}
 
-    /**
-     * 按筛选条件与页码区间导出岗位 Excel
-     *
-     * @param query 导出查询
-     * @return 文件字节响应
-     * @throws IOException 写入失败
-     */
-    @Override
-    @Transactional(readOnly = true)
-    public ResponseEntity<byte[]> export(SysPostExportQuery query) throws IOException {
-        return super.export(query);
-    }
+	/**
+	 * 按筛选条件与页码区间导出岗位 Excel
+	 * @param query 导出查询
+	 * @return 文件字节响应
+	 * @throws IOException 写入失败
+	 */
+	@Override
+	@Transactional(readOnly = true)
+	public ResponseEntity<byte[]> export(SysPostExportQuery query) throws IOException {
+		return super.export(query);
+	}
 
-    @Override
-    protected List<SysPostPageRowPO> fetchPage(SysPostExportQuery query, int pageIndex, int pageSize) {
-        String orderBySql = SysPostPageOrderSqlBuilder.buildOrderBySql(query.getSort());
-        Page<SysPostEntity> pageParams = new Page<>(pageIndex, pageSize);
-        IPage<SysPostPageRowPO> page = sysPostMapper.selectListByPage(pageParams, query, orderBySql);
-        return page.getRecords();
-    }
+	@Override
+	protected List<SysPostPageRowPO> fetchPage(SysPostExportQuery query, int pageIndex, int pageSize) {
+		String orderBySql = SysPostPageOrderSqlBuilder.buildOrderBySql(query.getSort());
+		Page<SysPostEntity> pageParams = new Page<>(pageIndex, pageSize);
+		IPage<SysPostPageRowPO> page = sysPostMapper.selectListByPage(pageParams, query, orderBySql);
+		return page.getRecords();
+	}
 
-    @Override
-    protected List<SysPostSpreadsheetRow> toExportRows(List<SysPostPageRowPO> rows) {
-        return SysPostSpreadsheetConverter.INSTANCE.toSpreadsheetRows(rows);
-    }
+	@Override
+	protected List<SysPostSpreadsheetRow> toExportRows(List<SysPostPageRowPO> rows) {
+		return SysPostSpreadsheetConverter.INSTANCE.toSpreadsheetRows(rows);
+	}
 
 }

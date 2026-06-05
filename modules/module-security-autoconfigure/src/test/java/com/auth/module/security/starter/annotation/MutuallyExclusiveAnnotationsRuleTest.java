@@ -49,6 +49,7 @@ class MutuallyExclusiveAnnotationsRuleTest {
 
 		@PublicApi
 		public void onlyPublic() {
+			// fixture: annotation carrier only; never invoked
 		}
 
 	}
@@ -60,6 +61,7 @@ class MutuallyExclusiveAnnotationsRuleTest {
 		@AuthenticatedApi
 		@PreAuthorize("true")
 		public void triple() {
+			// fixture: annotation carrier only; never invoked
 		}
 
 	}

@@ -22,10 +22,12 @@ class DefaultDataScopeHandlerTest {
 
 	@DataScope
 	void annotatedDefault() {
+		// fixture: annotation carrier only; never invoked
 	}
 
 	@DataScope(ignoreSuperAdmin = true)
 	void annotatedIgnoreAdmin() {
+		// fixture: annotation carrier only; never invoked
 	}
 
 	@Test

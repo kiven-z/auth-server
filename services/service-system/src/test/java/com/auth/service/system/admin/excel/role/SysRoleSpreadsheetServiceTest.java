@@ -30,48 +30,48 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class SysRoleSpreadsheetServiceTest {
 
-    @Mock
-    private SysRoleMapper sysRoleMapper;
+	@Mock
+	private SysRoleMapper sysRoleMapper;
 
-    private SysRoleSpreadsheetService spreadsheetService;
+	private SysRoleSpreadsheetService spreadsheetService;
 
-    private static SysRoleExportQuery baseQuery() {
-        SysRoleExportQuery query = new SysRoleExportQuery();
-        query.setFromPage(1);
-        query.setToPage(1);
-        return query;
-    }
+	private static SysRoleExportQuery baseQuery() {
+		SysRoleExportQuery query = new SysRoleExportQuery();
+		query.setFromPage(1);
+		query.setToPage(1);
+		return query;
+	}
 
-    @BeforeEach
-    void setUp() {
-        spreadsheetService = new SysRoleSpreadsheetService(sysRoleMapper);
-    }
+	@BeforeEach
+	void setUp() {
+		spreadsheetService = new SysRoleSpreadsheetService(sysRoleMapper);
+	}
 
-    @Test
-    @DisplayName("单页导出成功返回非空 Excel 字节")
-    void export_whenSinglePage_returnsExcelBytes() throws IOException {
-        // 构造单页导出查询
-        SysRoleExportQuery query = baseQuery();
-        query.setPageSize(10);
+	@Test
+	@DisplayName("单页导出成功返回非空 Excel 字节")
+	void export_whenSinglePage_returnsExcelBytes() throws IOException {
+		// 构造单页导出查询
+		SysRoleExportQuery query = baseQuery();
+		query.setPageSize(10);
 
-        SysRoleEntity row = new SysRoleEntity();
-        row.setId(1L);
-        row.setRoleCode("ADMIN");
-        row.setRoleName("管理员");
-        row.setRoleType(1);
-        row.setStatus(true);
-        row.setOrderNum(1);
-        row.setRemark("备注样例");
+		SysRoleEntity row = new SysRoleEntity();
+		row.setId(1L);
+		row.setRoleCode("ADMIN");
+		row.setRoleName("管理员");
+		row.setRoleType(1);
+		row.setStatus(true);
+		row.setOrderNum(1);
+		row.setRemark("备注样例");
 
-        IPage<SysRoleEntity> page = new Page<>(1, 10, 1);
-        page.setRecords(List.of(row));
-        when(sysRoleMapper.selectListByPage(any(Page.class), eq(query), anyString())).thenReturn(page);
+		IPage<SysRoleEntity> page = new Page<>(1, 10, 1);
+		page.setRecords(List.of(row));
+		when(sysRoleMapper.selectListByPage(any(Page.class), eq(query), anyString())).thenReturn(page);
 
-        ResponseEntity<byte[]> response = spreadsheetService.export(query);
+		ResponseEntity<byte[]> response = spreadsheetService.export(query);
 
-        assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
-        assertThat(response.getBody()).isNotNull().isNotEmpty();
-        verify(sysRoleMapper).selectListByPage(any(Page.class), eq(query), anyString());
-    }
+		assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
+		assertThat(response.getBody()).isNotNull().isNotEmpty();
+		verify(sysRoleMapper).selectListByPage(any(Page.class), eq(query), anyString());
+	}
 
 }

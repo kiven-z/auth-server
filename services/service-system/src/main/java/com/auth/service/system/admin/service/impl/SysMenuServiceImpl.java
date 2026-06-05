@@ -154,7 +154,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuEntity
 			sysMenuEntity.setStatus(status);
 			return sysMenuEntity;
 		}).toList();
-		updateBatchById(list);
+		this.updateBatchById(list);
 	}
 
 	/**

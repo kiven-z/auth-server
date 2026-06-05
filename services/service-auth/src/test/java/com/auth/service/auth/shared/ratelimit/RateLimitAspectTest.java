@@ -86,10 +86,12 @@ class RateLimitAspectTest {
 
 		@RateLimit()
 		void missingPrincipal() {
+			// fixture: body intentionally empty; aspect intercepts before invocation
 		}
 
 		@RateLimit(principal = "user@example.com")
 		void sendCode() {
+			// fixture: body intentionally empty; aspect intercepts before invocation
 		}
 
 	}

@@ -107,7 +107,7 @@ public class DataScopeInnerInterceptor implements InnerInterceptor {
 		// 追加 WHERE 条件
 		String originalSql = boundSql.getSql();
 		String patched = appendWhereCondition(originalSql, condition);
-		if (!patched.equals(originalSql)) {
+		if (patched != null && !patched.equals(originalSql)) {
 			trySetSql(boundSql, patched);
 		}
 	}

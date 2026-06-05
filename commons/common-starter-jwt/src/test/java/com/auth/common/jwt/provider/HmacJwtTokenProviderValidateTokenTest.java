@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class HmacJwtTokenProviderValidateTokenTest {
 
-	private static final String issuer = "validate-issuer";
+	private static final String ISSUER = "validate-issuer";
 
 	private HmacJwtTokenProvider provider;
 
@@ -19,8 +19,8 @@ class HmacJwtTokenProviderValidateTokenTest {
 
 	@BeforeEach
 	void setUp() {
-		this.provider = JwtTestFixtures.hmacProvider(issuer);
-		this.validToken = this.provider.generatorJwtToken(Jwts.builder().issuer(issuer).subject("3"));
+		this.provider = JwtTestFixtures.hmacProvider(ISSUER);
+		this.validToken = this.provider.generatorJwtToken(Jwts.builder().issuer(ISSUER).subject("3"));
 	}
 
 	@Test

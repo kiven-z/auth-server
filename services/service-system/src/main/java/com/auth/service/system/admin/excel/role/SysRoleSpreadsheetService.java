@@ -25,56 +25,54 @@ import java.util.List;
  */
 @Service
 public class SysRoleSpreadsheetService
-        extends AbstractSyncPagedExportService<SysRoleExportQuery, SysRoleEntity, SysRoleSpreadsheetRow> {
+		extends AbstractSyncPagedExportService<SysRoleExportQuery, SysRoleEntity, SysRoleSpreadsheetRow> {
 
-    private static final String SHEET_NAME = "角色";
+	private static final String SHEET_NAME = "角色";
 
-    private static final String FILENAME_PREFIX = "角色";
+	private static final String FILENAME_PREFIX = "角色";
 
-    private static final int STATUS_COLUMN_INDEX = 3;
+	private static final int STATUS_COLUMN_INDEX = 3;
 
-    private final SysRoleMapper sysRoleMapper;
+	private final SysRoleMapper sysRoleMapper;
 
-    public SysRoleSpreadsheetService(SysRoleMapper sysRoleMapper) {
-        super(buildExcelWriter(), FILENAME_PREFIX);
-        this.sysRoleMapper = sysRoleMapper;
-    }
+	public SysRoleSpreadsheetService(SysRoleMapper sysRoleMapper) {
+		super(buildExcelWriter(), FILENAME_PREFIX);
+		this.sysRoleMapper = sysRoleMapper;
+	}
 
-    /**
-     * 构建 Excel 导出 writer
-     *
-     * @return Excel 导出 writer
-     */
-    private static ExcelExportWriter<SysRoleSpreadsheetRow> buildExcelWriter() {
-        return new ExcelExportWriter<>(SysRoleSpreadsheetRow.class, SHEET_NAME)
-                .registerWriteHandler(ZebraStripeStyleType.getHandler(ZebraStripeStyleType.BLUE_GREY_TECH))
-                .registerWriteHandler(new StatusColorCellWriteHandler(STATUS_COLUMN_INDEX));
-    }
+	/**
+	 * 构建 Excel 导出 writer
+	 * @return Excel 导出 writer
+	 */
+	private static ExcelExportWriter<SysRoleSpreadsheetRow> buildExcelWriter() {
+		return new ExcelExportWriter<>(SysRoleSpreadsheetRow.class, SHEET_NAME)
+			.registerWriteHandler(ZebraStripeStyleType.getHandler(ZebraStripeStyleType.BLUE_GREY_TECH))
+			.registerWriteHandler(new StatusColorCellWriteHandler(STATUS_COLUMN_INDEX));
+	}
 
-    /**
-     * 按筛选条件与页码区间导出角色 Excel
-     *
-     * @param query 导出查询
-     * @return 文件字节响应
-     * @throws IOException 写入失败
-     */
-    @Override
-    @Transactional(readOnly = true)
-    public ResponseEntity<byte[]> export(SysRoleExportQuery query) throws IOException {
-        return super.export(query);
-    }
+	/**
+	 * 按筛选条件与页码区间导出角色 Excel
+	 * @param query 导出查询
+	 * @return 文件字节响应
+	 * @throws IOException 写入失败
+	 */
+	@Override
+	@Transactional(readOnly = true)
+	public ResponseEntity<byte[]> export(SysRoleExportQuery query) throws IOException {
+		return super.export(query);
+	}
 
-    @Override
-    protected List<SysRoleEntity> fetchPage(SysRoleExportQuery query, int pageIndex, int pageSize) {
-        String orderBySql = SysRolePageOrderSqlBuilder.buildOrderBySql(query.getSort());
-        Page<SysRoleEntity> pageParams = new Page<>(pageIndex, pageSize);
-        IPage<SysRoleEntity> page = sysRoleMapper.selectListByPage(pageParams, query, orderBySql);
-        return page.getRecords();
-    }
+	@Override
+	protected List<SysRoleEntity> fetchPage(SysRoleExportQuery query, int pageIndex, int pageSize) {
+		String orderBySql = SysRolePageOrderSqlBuilder.buildOrderBySql(query.getSort());
+		Page<SysRoleEntity> pageParams = new Page<>(pageIndex, pageSize);
+		IPage<SysRoleEntity> page = sysRoleMapper.selectListByPage(pageParams, query, orderBySql);
+		return page.getRecords();
+	}
 
-    @Override
-    protected List<SysRoleSpreadsheetRow> toExportRows(List<SysRoleEntity> rows) {
-        return SysRoleSpreadsheetConverter.INSTANCE.toSpreadsheetRows(rows);
-    }
+	@Override
+	protected List<SysRoleSpreadsheetRow> toExportRows(List<SysRoleEntity> rows) {
+		return SysRoleSpreadsheetConverter.INSTANCE.toSpreadsheetRows(rows);
+	}
 
 }

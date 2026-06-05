@@ -221,15 +221,15 @@ public class RedisUserSessionIndexRepository {
 	 * @param jti 会话唯一标识
 	 * @return 剩余TTL
 	 */
-	private long ttlRank(String jti) {
-		String userSessionKey = USER_SESSION.key(jti);
-		long ttl = redisTemplate.getExpire(userSessionKey, TimeUnit.SECONDS);
+    private Long ttlRank(String jti) {
+        String userSessionKey = USER_SESSION.key(jti);
+        Long ttl = redisTemplate.getExpire(userSessionKey, TimeUnit.SECONDS);
 
-		// -2: key 不存在；-1: 无过期都视为较新，避免误淘汰有效长会话
-		if (ttl < 0) {
-			return Long.MAX_VALUE;
-		}
-		return ttl;
-	}
+        // null: Redis 未返回 TTL；-2: key 不存在；-1: 无过期都视为较新，避免误淘汰有效长会话
+        if (ttl == null || ttl < 0) {
+            return Long.MAX_VALUE;
+        }
+        return ttl;
+    }
 
 }
