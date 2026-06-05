@@ -4,9 +4,11 @@ import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.common.web.valid.group.CreateGroup;
 import com.auth.common.web.valid.group.UpdateGroup;
+import com.auth.module.file.export.ExportScopeQueryFields;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
+import com.auth.service.system.admin.excel.dept.SysDeptSpreadsheetService;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.form.dept.SysDeptForm;
 import com.auth.service.system.admin.model.form.dept.SysDeptMoveForm;
@@ -19,14 +21,16 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
- * 系统部门管理 Controller（查询）。
+ * 系统部门管理 Controller
  *
  * @author Bunny
  */
@@ -37,8 +41,19 @@ public class SysDeptController {
 
 	private final SysDeptService sysDeptService;
 
-	public SysDeptController(SysDeptService sysDeptService) {
+	private final SysDeptSpreadsheetService sysDeptSpreadsheetService;
+
+	public SysDeptController(SysDeptService sysDeptService, SysDeptSpreadsheetService sysDeptSpreadsheetService) {
 		this.sysDeptService = sysDeptService;
+		this.sysDeptSpreadsheetService = sysDeptSpreadsheetService;
+	}
+
+	@Operation(summary = "部门 Excel 导出")
+	@PreAuthorize("@auth.decide('sysDept:export')")
+	@GetMapping("/export")
+	public ResponseEntity<byte[]> export(@Validated SysDeptQuery filter, @Validated ExportScopeQueryFields scope)
+			throws IOException {
+		return sysDeptSpreadsheetService.export(filter, scope);
 	}
 
 	@OperationLog(targetType = "DEPT_LIST", serviceDomain = AuditServiceDomain.SYSTEM,

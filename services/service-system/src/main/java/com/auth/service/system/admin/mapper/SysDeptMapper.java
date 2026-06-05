@@ -1,9 +1,11 @@
 package com.auth.service.system.admin.mapper;
 
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
+import com.auth.service.system.admin.model.po.dept.SysDeptPageRowPO;
 import com.auth.service.system.admin.model.query.SysDeptQuery;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -32,6 +34,15 @@ public interface SysDeptMapper extends BaseMapper<SysDeptEntity> {
 	 * @return 分页部门列表
 	 */
 	IPage<SysDeptEntity> selectPageByQuery(IPage<SysDeptEntity> page, @Param("query") SysDeptQuery query);
+
+	/**
+	 * 分页查询部门
+	 * @param page 分页参数
+	 * @param query 查询条件
+	 * @return 分页部门列表
+	 */
+	IPage<SysDeptPageRowPO> selectListByPage(@Param("page") Page<SysDeptEntity> page,
+			@Param("query") SysDeptQuery query);
 
 	/**
 	 * 未逻辑删除的部门数量

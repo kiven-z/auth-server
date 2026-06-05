@@ -50,4 +50,44 @@
         <include refid="listWhere"/>
     </select>
 
+    <!-- 分页查询部门 -->
+    <select id="selectListByPage"
+            resultType="com.auth.service.system.admin.model.po.dept.SysDeptPageRowPO">
+        SELECT d.id,
+        d.parent_id,
+        p.dept_code AS parent_dept_code,
+        p.dept_name AS parent_dept_name,
+        d.dept_name,
+        d.dept_code,
+        d.status,
+        d.order_num,
+        d.remark,
+        d.create_time,
+        d.update_time,
+        d.create_user,
+        d.update_user
+        FROM sys_dept d
+        LEFT JOIN sys_dept p ON d.parent_id = p.id AND p.is_deleted = 0
+        <where>
+            d.is_deleted = 0
+            <if test="query.deptName != null and query.deptName != ''">
+                AND d.dept_name LIKE CONCAT('%',
+                #{query.deptName},
+                '%'
+                )
+            </if>
+            <if test="query.deptCode != null and query.deptCode != ''">
+                AND d.dept_code LIKE CONCAT('%',
+                #{query.deptCode},
+                '%'
+                )
+            </if>
+            <if test="query.status != null">
+                AND d.status =
+                #{query.status}
+            </if>
+        </where>
+        ORDER BY d.order_num, d.id
+    </select>
+
 </mapper>
