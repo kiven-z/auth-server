@@ -85,6 +85,7 @@ class SysPostExportServiceImplTest {
 		row.setPostName("工程师");
 		row.setStatus(true);
 		row.setOrderNum(1);
+		row.setRemark("备注样例");
 
 		IPage<SysPostPageRowPO> page = new Page<>(1, 10, 1);
 		page.setRecords(List.of(row));

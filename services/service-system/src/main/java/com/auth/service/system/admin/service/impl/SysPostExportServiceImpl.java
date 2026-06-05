@@ -1,16 +1,5 @@
 package com.auth.service.system.admin.service.impl;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.auth.module.file.export.impl.ExcelExportStrategy;
 import com.auth.service.system.admin.convert.SysPostExportConverter;
 import com.auth.service.system.admin.excel.StatusColorCellWriteHandler;
@@ -24,8 +13,17 @@ import com.auth.service.system.admin.service.SysPostExportService;
 import com.auth.service.system.admin.support.sqlbuild.SysPostPageOrderSqlBuilder;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 岗位 Excel 导出实现
@@ -50,12 +48,9 @@ public class SysPostExportServiceImpl implements SysPostExportService {
 	@Override
 	@Transactional(readOnly = true)
 	public ResponseEntity<byte[]> export(SysPostExportQuery query) throws IOException {
-		// 验证页码范围
 		int fromPage = query.getFromPage();
 		int toPage = query.getToPage();
 		int pageSize = ExportPageValidator.normalizePageSize(query.getPageSize());
-
-		// 验证页码范围
 		ExportPageValidator.validatePageRange(fromPage, toPage, pageSize);
 
 		// 构建排序语句

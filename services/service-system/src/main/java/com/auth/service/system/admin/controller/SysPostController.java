@@ -47,7 +47,7 @@ public class SysPostController {
 	}
 
 	@Operation(summary = "岗位 Excel 导出")
-	@PreAuthorize("@auth.decide('sysPost:query')")
+	@PreAuthorize("@auth.decide('sysPost:export')")
 	@GetMapping("/export")
 	public ResponseEntity<byte[]> export(@Validated SysPostExportQuery query) throws IOException {
 		return sysPostExportService.export(query);

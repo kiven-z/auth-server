@@ -7,11 +7,13 @@
         SELECT
         p.id,
         p.dept_id,
+        d.dept_code,
         d.dept_name,
         p.post_code,
         p.post_name,
         p.status,
         p.order_num,
+        p.remark,
         p.create_time,
         p.update_time,
         p.create_user,
