@@ -1,6 +1,14 @@
 package com.auth.service.system.admin.service.impl;
 
+import java.io.IOException;
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.auth.module.file.export.AbstractSyncPagedExportService;
+import com.auth.module.file.export.model.enums.ZebraStripeStyleType;
 import com.auth.module.file.export.writer.ExcelExportWriter;
 import com.auth.service.system.admin.convert.SysPostExportConverter;
 import com.auth.service.system.admin.excel.StatusColorCellWriteHandler;
@@ -13,12 +21,6 @@ import com.auth.service.system.admin.service.SysPostExportService;
 import com.auth.service.system.admin.support.sqlbuild.SysPostPageOrderSqlBuilder;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.io.IOException;
-import java.util.List;
 
 /**
  * 岗位 Excel 导出实现
@@ -43,8 +45,13 @@ public class SysPostExportServiceImpl
 		this.sysPostMapper = sysPostMapper;
 	}
 
+	/**
+	 * 构建 Excel 导出 writer
+	 * @return Excel 导出 writer
+	 */
 	private static ExcelExportWriter<SysPostExportRow> buildExcelWriter() {
 		return new ExcelExportWriter<>(SysPostExportRow.class, SHEET_NAME)
+			.registerWriteHandler(ZebraStripeStyleType.getHandler(ZebraStripeStyleType.BLUE_GREY_TECH))
 			.registerWriteHandler(new StatusColorCellWriteHandler(STATUS_COLUMN_INDEX));
 	}
 

@@ -1,6 +1,7 @@
 package com.auth.module.file.export;
 
 import com.auth.module.file.exception.ExportException;
+import com.auth.module.file.export.model.ExportPageRange;
 import com.auth.module.file.export.model.enums.ExportScope;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,8 +21,8 @@ class ExportScopeResolverTest {
 	@DisplayName("未传 exportScope 时按页码区间解析")
 	void resolve_whenScopeNull_usesPageRange() {
 		StubExportQuery query = new StubExportQuery();
-		query.setFromPage(2);
-		query.setToPage(4);
+		query.setFromPage();
+		query.setToPage();
 		query.setPageSize(20);
 
 		ExportPageRange range = ExportScopeResolver.resolve(query);
@@ -36,7 +37,7 @@ class ExportScopeResolverTest {
 	void resolve_whenCurrentPage_usesPageIndex() {
 		StubExportQuery query = new StubExportQuery();
 		query.setExportScope(ExportScope.CURRENT_PAGE);
-		query.setPageIndex(5);
+		query.setPageIndex();
 		query.setPageSize(15);
 
 		ExportPageRange range = ExportScopeResolver.resolve(query);
@@ -76,6 +77,10 @@ class ExportScopeResolverTest {
 			return exportScope;
 		}
 
+		void setExportScope(ExportScope exportScope) {
+			this.exportScope = exportScope;
+		}
+
 		@Override
 		public Integer getPageIndex() {
 			return pageIndex;
@@ -96,24 +101,20 @@ class ExportScopeResolverTest {
 			return pageSize;
 		}
 
-		void setExportScope(ExportScope exportScope) {
-			this.exportScope = exportScope;
-		}
-
-		void setPageIndex(Integer pageIndex) {
-			this.pageIndex = pageIndex;
-		}
-
-		void setFromPage(Integer fromPage) {
-			this.fromPage = fromPage;
-		}
-
-		void setToPage(Integer toPage) {
-			this.toPage = toPage;
-		}
-
 		void setPageSize(Integer pageSize) {
 			this.pageSize = pageSize;
+		}
+
+		void setPageIndex() {
+			this.pageIndex = 5;
+		}
+
+		void setFromPage() {
+			this.fromPage = 2;
+		}
+
+		void setToPage() {
+			this.toPage = 4;
 		}
 
 	}

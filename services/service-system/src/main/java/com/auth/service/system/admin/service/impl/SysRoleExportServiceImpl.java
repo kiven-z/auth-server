@@ -1,9 +1,16 @@
 package com.auth.service.system.admin.service.impl;
 
+import java.io.IOException;
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.auth.module.file.export.AbstractSyncPagedExportService;
+import com.auth.module.file.export.model.enums.ZebraStripeStyleType;
 import com.auth.module.file.export.writer.ExcelExportWriter;
 import com.auth.service.system.admin.convert.SysRoleExportConverter;
-import com.auth.service.system.admin.excel.RoleTypeColorCellWriteHandler;
 import com.auth.service.system.admin.excel.StatusColorCellWriteHandler;
 import com.auth.service.system.admin.excel.role.SysRoleExportRow;
 import com.auth.service.system.admin.mapper.SysRoleMapper;
@@ -13,12 +20,6 @@ import com.auth.service.system.admin.service.SysRoleExportService;
 import com.auth.service.system.admin.support.sqlbuild.SysRolePageOrderSqlBuilder;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.io.IOException;
-import java.util.List;
 
 /**
  * 角色 Excel 导出实现
@@ -34,8 +35,6 @@ public class SysRoleExportServiceImpl
 
 	private static final String FILENAME_PREFIX = "角色";
 
-	private static final int ROLE_TYPE_COLUMN_INDEX = 2;
-
 	private static final int STATUS_COLUMN_INDEX = 3;
 
 	private final SysRoleMapper sysRoleMapper;
@@ -45,9 +44,13 @@ public class SysRoleExportServiceImpl
 		this.sysRoleMapper = sysRoleMapper;
 	}
 
+	/**
+	 * 构建 Excel 导出 writer
+	 * @return Excel 导出 writer
+	 */
 	private static ExcelExportWriter<SysRoleExportRow> buildExcelWriter() {
 		return new ExcelExportWriter<>(SysRoleExportRow.class, SHEET_NAME)
-			.registerWriteHandler(new RoleTypeColorCellWriteHandler(ROLE_TYPE_COLUMN_INDEX))
+			.registerWriteHandler(ZebraStripeStyleType.getHandler(ZebraStripeStyleType.BLUE_GREY_TECH))
 			.registerWriteHandler(new StatusColorCellWriteHandler(STATUS_COLUMN_INDEX));
 	}
 
