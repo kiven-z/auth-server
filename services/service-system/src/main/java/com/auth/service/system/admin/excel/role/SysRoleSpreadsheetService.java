@@ -1,13 +1,14 @@
 package com.auth.service.system.admin.excel.role;
 
 import com.auth.module.file.export.AbstractSyncPagedExportService;
+import com.auth.module.file.export.ExportScopeQueryFields;
 import com.auth.module.file.export.model.enums.ZebraStripeStyleType;
 import com.auth.module.file.export.writer.ExcelExportWriter;
 import com.auth.service.system.admin.convert.SysRoleSpreadsheetConverter;
 import com.auth.service.system.admin.excel.StatusColorCellWriteHandler;
 import com.auth.service.system.admin.mapper.SysRoleMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
-import com.auth.service.system.admin.model.query.role.SysRoleExportQuery;
+import com.auth.service.system.admin.model.query.SysRoleQuery;
 import com.auth.service.system.admin.support.sqlbuild.SysRolePageOrderSqlBuilder;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -25,7 +26,7 @@ import java.util.List;
  */
 @Service
 public class SysRoleSpreadsheetService
-		extends AbstractSyncPagedExportService<SysRoleExportQuery, SysRoleEntity, SysRoleSpreadsheetRow> {
+		extends AbstractSyncPagedExportService<SysRoleQuery, SysRoleEntity, SysRoleSpreadsheetRow> {
 
 	private static final String SHEET_NAME = "角色";
 
@@ -52,21 +53,22 @@ public class SysRoleSpreadsheetService
 
 	/**
 	 * 按筛选条件与页码区间导出角色 Excel
-	 * @param query 导出查询
+	 * @param filter 列表筛选
+	 * @param scope 导出范围
 	 * @return 文件字节响应
 	 * @throws IOException 写入失败
 	 */
 	@Override
 	@Transactional(readOnly = true)
-	public ResponseEntity<byte[]> export(SysRoleExportQuery query) throws IOException {
-		return super.export(query);
+	public ResponseEntity<byte[]> export(SysRoleQuery filter, ExportScopeQueryFields scope) throws IOException {
+		return super.export(filter, scope);
 	}
 
 	@Override
-	protected List<SysRoleEntity> fetchPage(SysRoleExportQuery query, int pageIndex, int pageSize) {
-		String orderBySql = SysRolePageOrderSqlBuilder.buildOrderBySql(query.getSort());
+	protected List<SysRoleEntity> fetchPage(SysRoleQuery filter, int pageIndex, int pageSize) {
+		String orderBySql = SysRolePageOrderSqlBuilder.buildOrderBySql(filter.getSort());
 		Page<SysRoleEntity> pageParams = new Page<>(pageIndex, pageSize);
-		IPage<SysRoleEntity> page = sysRoleMapper.selectListByPage(pageParams, query, orderBySql);
+		IPage<SysRoleEntity> page = sysRoleMapper.selectListByPage(pageParams, filter, orderBySql);
 		return page.getRecords();
 	}
 

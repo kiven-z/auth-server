@@ -25,8 +25,8 @@ import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.form.role.SysRoleForm;
+import com.auth.module.file.export.ExportScopeQueryFields;
 import com.auth.service.system.admin.model.query.SysRoleQuery;
-import com.auth.service.system.admin.model.query.role.SysRoleExportQuery;
 import com.auth.service.system.admin.model.vo.role.SysRoleDetailVO;
 import com.auth.service.system.admin.model.vo.role.SysRoleOptionVO;
 import com.auth.service.system.admin.model.vo.role.SysRolePageResponse;
@@ -62,8 +62,9 @@ public class SysRoleController {
 	@Operation(summary = "角色 Excel 导出")
 	@PreAuthorize("@auth.decide('sysRole:export')")
 	@GetMapping("/export")
-	public ResponseEntity<byte[]> export(@Validated SysRoleExportQuery query) throws IOException {
-		return sysRoleSpreadsheetService.export(query);
+	public ResponseEntity<byte[]> export(@Validated SysRoleQuery filter, @Validated ExportScopeQueryFields scope)
+			throws IOException {
+		return sysRoleSpreadsheetService.export(filter, scope);
 	}
 
 	@Operation(summary = "角色分页查询")

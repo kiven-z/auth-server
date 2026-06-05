@@ -24,8 +24,8 @@ import com.auth.service.system.admin.excel.permission.SysPermissionSpreadsheetSe
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.form.permission.SysPermissionCreateForm;
 import com.auth.service.system.admin.model.form.permission.SysPermissionUpdateForm;
+import com.auth.module.file.export.ExportScopeQueryFields;
 import com.auth.service.system.admin.model.query.SysPermissionQuery;
-import com.auth.service.system.admin.model.query.permission.SysPermissionExportQuery;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionDetailVO;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionPageResponse;
 import com.auth.service.system.admin.service.SysPermissionService;
@@ -61,8 +61,9 @@ public class SysPermissionController {
 	@Operation(summary = "权限 Excel 导出")
 	@PreAuthorize("@auth.decide('sysPermission:export')")
 	@GetMapping("/export")
-	public ResponseEntity<byte[]> export(@Validated SysPermissionExportQuery query) throws IOException {
-		return sysPermissionSpreadsheetService.export(query);
+	public ResponseEntity<byte[]> export(@Validated SysPermissionQuery filter, @Validated ExportScopeQueryFields scope)
+			throws IOException {
+		return sysPermissionSpreadsheetService.export(filter, scope);
 	}
 
 	@Operation(summary = "权限分页查询")

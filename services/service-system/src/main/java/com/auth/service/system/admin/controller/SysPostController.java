@@ -7,7 +7,7 @@ import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.form.post.SysPostForm;
-import com.auth.service.system.admin.model.query.post.SysPostExportQuery;
+import com.auth.module.file.export.ExportScopeQueryFields;
 import com.auth.service.system.admin.model.query.post.SysPostQuery;
 import com.auth.service.system.admin.model.vo.post.SysPostDetailVO;
 import com.auth.service.system.admin.model.vo.post.SysPostPageResponse;
@@ -49,8 +49,9 @@ public class SysPostController {
 	@Operation(summary = "岗位 Excel 导出")
 	@PreAuthorize("@auth.decide('sysPost:export')")
 	@GetMapping("/export")
-	public ResponseEntity<byte[]> export(@Validated SysPostExportQuery query) throws IOException {
-		return sysPostSpreadsheetService.export(query);
+	public ResponseEntity<byte[]> export(@Validated SysPostQuery filter, @Validated ExportScopeQueryFields scope)
+			throws IOException {
+		return sysPostSpreadsheetService.export(filter, scope);
 	}
 
 	@Operation(summary = "岗位分页查询")

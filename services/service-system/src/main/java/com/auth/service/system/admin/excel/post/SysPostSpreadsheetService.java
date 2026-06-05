@@ -1,6 +1,7 @@
 package com.auth.service.system.admin.excel.post;
 
 import com.auth.module.file.export.AbstractSyncPagedExportService;
+import com.auth.module.file.export.ExportScopeQueryFields;
 import com.auth.module.file.export.model.enums.ZebraStripeStyleType;
 import com.auth.module.file.export.writer.ExcelExportWriter;
 import com.auth.service.system.admin.convert.SysPostSpreadsheetConverter;
@@ -8,7 +9,7 @@ import com.auth.service.system.admin.excel.StatusColorCellWriteHandler;
 import com.auth.service.system.admin.mapper.SysPostMapper;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.po.post.SysPostPageRowPO;
-import com.auth.service.system.admin.model.query.post.SysPostExportQuery;
+import com.auth.service.system.admin.model.query.post.SysPostQuery;
 import com.auth.service.system.admin.support.sqlbuild.SysPostPageOrderSqlBuilder;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -26,7 +27,7 @@ import java.util.List;
  */
 @Service
 public class SysPostSpreadsheetService
-		extends AbstractSyncPagedExportService<SysPostExportQuery, SysPostPageRowPO, SysPostSpreadsheetRow> {
+		extends AbstractSyncPagedExportService<SysPostQuery, SysPostPageRowPO, SysPostSpreadsheetRow> {
 
 	private static final String SHEET_NAME = "岗位";
 
@@ -53,21 +54,22 @@ public class SysPostSpreadsheetService
 
 	/**
 	 * 按筛选条件与页码区间导出岗位 Excel
-	 * @param query 导出查询
+	 * @param filter 列表筛选
+	 * @param scope 导出范围
 	 * @return 文件字节响应
 	 * @throws IOException 写入失败
 	 */
 	@Override
 	@Transactional(readOnly = true)
-	public ResponseEntity<byte[]> export(SysPostExportQuery query) throws IOException {
-		return super.export(query);
+	public ResponseEntity<byte[]> export(SysPostQuery filter, ExportScopeQueryFields scope) throws IOException {
+		return super.export(filter, scope);
 	}
 
 	@Override
-	protected List<SysPostPageRowPO> fetchPage(SysPostExportQuery query, int pageIndex, int pageSize) {
-		String orderBySql = SysPostPageOrderSqlBuilder.buildOrderBySql(query.getSort());
+	protected List<SysPostPageRowPO> fetchPage(SysPostQuery filter, int pageIndex, int pageSize) {
+		String orderBySql = SysPostPageOrderSqlBuilder.buildOrderBySql(filter.getSort());
 		Page<SysPostEntity> pageParams = new Page<>(pageIndex, pageSize);
-		IPage<SysPostPageRowPO> page = sysPostMapper.selectListByPage(pageParams, query, orderBySql);
+		IPage<SysPostPageRowPO> page = sysPostMapper.selectListByPage(pageParams, filter, orderBySql);
 		return page.getRecords();
 	}
 

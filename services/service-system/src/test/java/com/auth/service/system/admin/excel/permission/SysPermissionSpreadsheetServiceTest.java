@@ -1,8 +1,9 @@
 package com.auth.service.system.admin.excel.permission;
 
+import com.auth.module.file.export.ExportScopeQueryFields;
 import com.auth.service.system.admin.mapper.SysPermissionMapper;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
-import com.auth.service.system.admin.model.query.permission.SysPermissionExportQuery;
+import com.auth.service.system.admin.model.query.SysPermissionQuery;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,11 +36,11 @@ class SysPermissionSpreadsheetServiceTest {
 
 	private SysPermissionSpreadsheetService spreadsheetService;
 
-	private static SysPermissionExportQuery baseQuery() {
-		SysPermissionExportQuery query = new SysPermissionExportQuery();
-		query.setFromPage(1);
-		query.setToPage(1);
-		return query;
+	private static ExportScopeQueryFields baseScope() {
+		ExportScopeQueryFields scope = new ExportScopeQueryFields();
+		scope.setFromPage(1);
+		scope.setToPage(1);
+		return scope;
 	}
 
 	@BeforeEach
@@ -50,9 +51,10 @@ class SysPermissionSpreadsheetServiceTest {
 	@Test
 	@DisplayName("单页导出成功返回非空 Excel 字节")
 	void export_whenSinglePage_returnsExcelBytes() throws IOException {
-		// 构造单页导出查询
-		SysPermissionExportQuery query = baseQuery();
-		query.setPageSize(10);
+		// 构造单页导出筛选与范围
+		SysPermissionQuery filter = new SysPermissionQuery();
+		filter.setPageSize(10);
+		ExportScopeQueryFields scope = baseScope();
 
 		SysPermissionEntity row = new SysPermissionEntity();
 		row.setId(1L);
@@ -64,13 +66,13 @@ class SysPermissionSpreadsheetServiceTest {
 
 		IPage<SysPermissionEntity> page = new Page<>(1, 10, 1);
 		page.setRecords(List.of(row));
-		when(sysPermissionMapper.selectListByPage(any(Page.class), eq(query), anyString())).thenReturn(page);
+		when(sysPermissionMapper.selectListByPage(any(Page.class), eq(filter), anyString())).thenReturn(page);
 
-		ResponseEntity<byte[]> response = spreadsheetService.export(query);
+		ResponseEntity<byte[]> response = spreadsheetService.export(filter, scope);
 
 		assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
 		assertThat(response.getBody()).isNotNull().isNotEmpty();
-		verify(sysPermissionMapper).selectListByPage(any(Page.class), eq(query), anyString());
+		verify(sysPermissionMapper).selectListByPage(any(Page.class), eq(filter), anyString());
 	}
 
 }

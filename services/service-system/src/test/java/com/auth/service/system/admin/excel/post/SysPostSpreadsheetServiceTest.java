@@ -1,9 +1,10 @@
 package com.auth.service.system.admin.excel.post;
 
+import com.auth.module.file.export.ExportScopeQueryFields;
 import com.auth.module.file.export.model.enums.ExportScope;
 import com.auth.service.system.admin.mapper.SysPostMapper;
 import com.auth.service.system.admin.model.po.post.SysPostPageRowPO;
-import com.auth.service.system.admin.model.query.post.SysPostExportQuery;
+import com.auth.service.system.admin.model.query.post.SysPostQuery;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,11 +37,11 @@ class SysPostSpreadsheetServiceTest {
 
 	private SysPostSpreadsheetService spreadsheetService;
 
-	private static SysPostExportQuery baseQuery(int toPage) {
-		SysPostExportQuery query = new SysPostExportQuery();
-		query.setFromPage(1);
-		query.setToPage(toPage);
-		return query;
+	private static ExportScopeQueryFields baseScope(int toPage) {
+		ExportScopeQueryFields scope = new ExportScopeQueryFields();
+		scope.setFromPage(1);
+		scope.setToPage(toPage);
+		return scope;
 	}
 
 	@BeforeEach
@@ -51,9 +52,10 @@ class SysPostSpreadsheetServiceTest {
 	@Test
 	@DisplayName("单页导出成功返回非空 Excel 字节")
 	void export_whenSinglePage_returnsExcelBytes() throws IOException {
-		// 构造单页导出查询
-		SysPostExportQuery query = baseQuery(1);
-		query.setPageSize(10);
+		// 构造单页导出筛选与范围
+		SysPostQuery filter = new SysPostQuery();
+		filter.setPageSize(10);
+		ExportScopeQueryFields scope = baseScope(1);
 
 		SysPostPageRowPO row = new SysPostPageRowPO();
 		row.setId(1L);
@@ -67,23 +69,23 @@ class SysPostSpreadsheetServiceTest {
 
 		IPage<SysPostPageRowPO> page = new Page<>(1, 10, 1);
 		page.setRecords(List.of(row));
-		when(sysPostMapper.selectListByPage(any(Page.class), eq(query), anyString())).thenReturn(page);
+		when(sysPostMapper.selectListByPage(any(Page.class), eq(filter), anyString())).thenReturn(page);
 
-		ResponseEntity<byte[]> response = spreadsheetService.export(query);
+		ResponseEntity<byte[]> response = spreadsheetService.export(filter, scope);
 
 		assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
 		assertThat(response.getBody()).isNotNull().isNotEmpty();
-		verify(sysPostMapper).selectListByPage(any(Page.class), eq(query), anyString());
+		verify(sysPostMapper).selectListByPage(any(Page.class), eq(filter), anyString());
 	}
 
 	@Test
-	@DisplayName("CURRENT_PAGE 使用 pageIndex 导出单页")
-	void export_whenCurrentPage_usesPageIndex() throws IOException {
-		// CURRENT_PAGE 应忽略 fromPage/toPage，改用 pageIndex
-		SysPostExportQuery query = baseQuery(99);
-		query.setExportScope(ExportScope.CURRENT_PAGE);
-		query.setPageIndex(3);
-		query.setPageSize(10);
+	@DisplayName("CURRENT_PAGE 使用 filter 的 pageIndex 导出单页")
+	void export_whenCurrentPage_usesFilterPageIndex() throws IOException {
+		SysPostQuery filter = new SysPostQuery();
+		filter.setPageIndex(3);
+		filter.setPageSize(10);
+		ExportScopeQueryFields scope = baseScope(99);
+		scope.setExportScope(ExportScope.CURRENT_PAGE);
 
 		SysPostPageRowPO row = new SysPostPageRowPO();
 		row.setId(1L);
@@ -96,12 +98,12 @@ class SysPostSpreadsheetServiceTest {
 
 		IPage<SysPostPageRowPO> page = new Page<>(3, 10, 1);
 		page.setRecords(List.of(row));
-		when(sysPostMapper.selectListByPage(any(Page.class), eq(query), anyString())).thenReturn(page);
+		when(sysPostMapper.selectListByPage(any(Page.class), eq(filter), anyString())).thenReturn(page);
 
-		ResponseEntity<byte[]> response = spreadsheetService.export(query);
+		ResponseEntity<byte[]> response = spreadsheetService.export(filter, scope);
 
 		assertThat(response.getBody()).isNotNull().isNotEmpty();
-		verify(sysPostMapper).selectListByPage(argThat(p -> p.getCurrent() == 3), eq(query), anyString());
+		verify(sysPostMapper).selectListByPage(argThat(p -> p.getCurrent() == 3), eq(filter), anyString());
 	}
 
 }

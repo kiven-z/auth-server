@@ -1,8 +1,6 @@
-package com.auth.service.system.admin.model.query.permission;
+package com.auth.module.file.export;
 
-import com.auth.module.file.export.ExportScopeQuery;
 import com.auth.module.file.export.model.enums.ExportScope;
-import com.auth.service.system.admin.model.query.SysPermissionQuery;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -11,17 +9,18 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serial;
+import java.io.Serializable;
 
 /**
- * 权限 Excel 导出查询（筛选与分页列表一致，并指定导出范围）
+ * 同步导出共用的范围字段
  *
  * @author Bunny
  */
-@Schema(name = "SysPermissionExportQuery", title = "权限导出查询")
+@Schema(title = "导出范围参数")
 @Getter
 @Setter
-@EqualsAndHashCode(callSuper = true)
-public class SysPermissionExportQuery extends SysPermissionQuery implements ExportScopeQuery {
+@EqualsAndHashCode
+public class ExportScopeQueryFields implements Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 1L;

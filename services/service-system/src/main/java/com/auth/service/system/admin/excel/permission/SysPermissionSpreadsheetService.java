@@ -1,13 +1,14 @@
 package com.auth.service.system.admin.excel.permission;
 
 import com.auth.module.file.export.AbstractSyncPagedExportService;
+import com.auth.module.file.export.ExportScopeQueryFields;
 import com.auth.module.file.export.model.enums.ZebraStripeStyleType;
 import com.auth.module.file.export.writer.ExcelExportWriter;
 import com.auth.service.system.admin.convert.SysPermissionSpreadsheetConverter;
 import com.auth.service.system.admin.excel.StatusColorCellWriteHandler;
 import com.auth.service.system.admin.mapper.SysPermissionMapper;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
-import com.auth.service.system.admin.model.query.permission.SysPermissionExportQuery;
+import com.auth.service.system.admin.model.query.SysPermissionQuery;
 import com.auth.service.system.admin.support.sqlbuild.SysPermissionPageOrderSqlBuilder;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -24,8 +25,8 @@ import java.util.List;
  * @author Bunny
  */
 @Service
-public class SysPermissionSpreadsheetService extends
-		AbstractSyncPagedExportService<SysPermissionExportQuery, SysPermissionEntity, SysPermissionSpreadsheetRow> {
+public class SysPermissionSpreadsheetService
+		extends AbstractSyncPagedExportService<SysPermissionQuery, SysPermissionEntity, SysPermissionSpreadsheetRow> {
 
 	private static final String SHEET_NAME = "权限";
 
@@ -52,21 +53,22 @@ public class SysPermissionSpreadsheetService extends
 
 	/**
 	 * 按筛选条件与页码区间导出权限 Excel
-	 * @param query 导出查询
+	 * @param filter 列表筛选
+	 * @param scope 导出范围
 	 * @return 文件字节响应
 	 * @throws IOException 写入失败
 	 */
 	@Override
 	@Transactional(readOnly = true)
-	public ResponseEntity<byte[]> export(SysPermissionExportQuery query) throws IOException {
-		return super.export(query);
+	public ResponseEntity<byte[]> export(SysPermissionQuery filter, ExportScopeQueryFields scope) throws IOException {
+		return super.export(filter, scope);
 	}
 
 	@Override
-	protected List<SysPermissionEntity> fetchPage(SysPermissionExportQuery query, int pageIndex, int pageSize) {
-		String orderBySql = SysPermissionPageOrderSqlBuilder.buildOrderBySql(query.getSort());
+	protected List<SysPermissionEntity> fetchPage(SysPermissionQuery filter, int pageIndex, int pageSize) {
+		String orderBySql = SysPermissionPageOrderSqlBuilder.buildOrderBySql(filter.getSort());
 		Page<SysPermissionEntity> pageParams = new Page<>(pageIndex, pageSize);
-		IPage<SysPermissionEntity> page = sysPermissionMapper.selectListByPage(pageParams, query, orderBySql);
+		IPage<SysPermissionEntity> page = sysPermissionMapper.selectListByPage(pageParams, filter, orderBySql);
 		return page.getRecords();
 	}
 
