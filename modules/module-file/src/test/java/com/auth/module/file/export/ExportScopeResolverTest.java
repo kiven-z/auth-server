@@ -1,9 +1,7 @@
 package com.auth.module.file.export;
 
-import com.auth.module.file.export.model.ExportPageRange;
+import com.auth.module.file.exception.ExportException;
 import com.auth.module.file.export.model.enums.ExportScope;
-import com.auth.module.file.export.validation.ExportValidationCode;
-import com.auth.module.file.export.validation.ExportValidationException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -49,14 +47,13 @@ class ExportScopeResolverTest {
 	}
 
 	@Test
-	@DisplayName("FULL_ASYNC 抛出尚未支持异常")
+	@DisplayName("FULL_ASYNC 抛出英文尚未支持异常")
 	void resolve_whenFullAsync_throwsNotSupported() {
 		StubExportQuery query = new StubExportQuery();
 		query.setExportScope(ExportScope.FULL_ASYNC);
 
-		assertThatThrownBy(() -> ExportScopeResolver.resolve(query)).isInstanceOf(ExportValidationException.class)
-			.extracting(ex -> ((ExportValidationException) ex).getCode())
-			.isEqualTo(ExportValidationCode.FULL_ASYNC_NOT_SUPPORTED);
+		assertThatThrownBy(() -> ExportScopeResolver.resolve(query)).isInstanceOf(ExportException.class)
+			.hasMessage("Full async export is not supported yet");
 	}
 
 	/**
@@ -79,17 +76,9 @@ class ExportScopeResolverTest {
 			return exportScope;
 		}
 
-		void setExportScope(ExportScope exportScope) {
-			this.exportScope = exportScope;
-		}
-
 		@Override
 		public Integer getPageIndex() {
 			return pageIndex;
-		}
-
-		void setPageIndex(Integer pageIndex) {
-			this.pageIndex = pageIndex;
 		}
 
 		@Override
@@ -97,22 +86,30 @@ class ExportScopeResolverTest {
 			return fromPage;
 		}
 
-		void setFromPage(Integer fromPage) {
-			this.fromPage = fromPage;
-		}
-
 		@Override
 		public Integer getToPage() {
 			return toPage;
 		}
 
-		void setToPage(Integer toPage) {
-			this.toPage = toPage;
-		}
-
 		@Override
 		public Integer getPageSize() {
 			return pageSize;
+		}
+
+		void setExportScope(ExportScope exportScope) {
+			this.exportScope = exportScope;
+		}
+
+		void setPageIndex(Integer pageIndex) {
+			this.pageIndex = pageIndex;
+		}
+
+		void setFromPage(Integer fromPage) {
+			this.fromPage = fromPage;
+		}
+
+		void setToPage(Integer toPage) {
+			this.toPage = toPage;
 		}
 
 		void setPageSize(Integer pageSize) {

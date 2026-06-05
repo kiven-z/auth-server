@@ -1,10 +1,10 @@
 package com.auth.service.system.admin.service.impl;
 
+import com.auth.module.file.export.AbstractSyncPagedExportService;
 import com.auth.module.file.export.writer.ExcelExportWriter;
 import com.auth.service.system.admin.convert.SysRoleExportConverter;
 import com.auth.service.system.admin.excel.RoleTypeColorCellWriteHandler;
 import com.auth.service.system.admin.excel.StatusColorCellWriteHandler;
-import com.auth.service.system.admin.excel.export.AbstractSystemAdminExportService;
 import com.auth.service.system.admin.excel.role.SysRoleExportRow;
 import com.auth.service.system.admin.mapper.SysRoleMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
@@ -27,7 +27,7 @@ import java.util.List;
  */
 @Service
 public class SysRoleExportServiceImpl
-		extends AbstractSystemAdminExportService<SysRoleExportQuery, SysRoleEntity, SysRoleExportRow>
+		extends AbstractSyncPagedExportService<SysRoleExportQuery, SysRoleEntity, SysRoleExportRow>
 		implements SysRoleExportService {
 
 	private static final String SHEET_NAME = "角色";

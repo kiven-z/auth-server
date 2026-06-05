@@ -1,15 +1,13 @@
 package com.auth.module.file.export;
 
+import com.auth.module.file.exception.ExportException;
 import com.auth.module.file.export.model.ExportPageRange;
 import com.auth.module.file.export.model.enums.ExportScope;
 import com.auth.module.file.export.validation.ExportPageValidator;
-import com.auth.module.file.export.validation.ExportValidationCode;
-import com.auth.module.file.export.validation.ExportValidationException;
-
 import lombok.experimental.UtilityClass;
 
 /**
- * 按 {@link ExportScope} 解析实际导出的页码区间
+ * 解析实际导出的页码区间
  *
  * @author Bunny
  */
@@ -26,7 +24,7 @@ public class ExportScopeResolver {
 		return switch (scope) {
 			case CURRENT_PAGE -> resolveCurrentPage(query);
 			case PAGE_RANGE -> resolvePageRange(query);
-			case FULL_ASYNC -> throw new ExportValidationException(ExportValidationCode.FULL_ASYNC_NOT_SUPPORTED);
+			case FULL_ASYNC -> throw ExportException.fullAsyncNotSupported();
 		};
 	}
 
@@ -38,7 +36,7 @@ public class ExportScopeResolver {
 	private static ExportPageRange resolveCurrentPage(ExportScopeQuery query) {
 		Integer pageIndex = query.getPageIndex();
 		if (pageIndex == null || pageIndex < 1) {
-			throw new ExportValidationException(ExportValidationCode.CURRENT_PAGE_INDEX_REQUIRED);
+			throw ExportException.currentPageIndexRequired();
 		}
 		int pageSize = ExportPageValidator.normalizePageSize(query.getPageSize());
 		return new ExportPageRange(pageIndex, pageIndex, pageSize);
@@ -53,7 +51,7 @@ public class ExportScopeResolver {
 		Integer fromPage = query.getFromPage();
 		Integer toPage = query.getToPage();
 		if (fromPage == null || toPage == null) {
-			throw new ExportValidationException(ExportValidationCode.PAGE_RANGE_REQUIRED);
+			throw ExportException.pageRangeRequired();
 		}
 		int pageSize = ExportPageValidator.normalizePageSize(query.getPageSize());
 		return new ExportPageRange(fromPage, toPage, pageSize);

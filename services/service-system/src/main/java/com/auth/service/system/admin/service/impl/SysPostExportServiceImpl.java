@@ -1,9 +1,9 @@
 package com.auth.service.system.admin.service.impl;
 
+import com.auth.module.file.export.AbstractSyncPagedExportService;
 import com.auth.module.file.export.writer.ExcelExportWriter;
 import com.auth.service.system.admin.convert.SysPostExportConverter;
 import com.auth.service.system.admin.excel.StatusColorCellWriteHandler;
-import com.auth.service.system.admin.excel.export.AbstractSystemAdminExportService;
 import com.auth.service.system.admin.excel.post.SysPostExportRow;
 import com.auth.service.system.admin.mapper.SysPostMapper;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
@@ -27,7 +27,7 @@ import java.util.List;
  */
 @Service
 public class SysPostExportServiceImpl
-		extends AbstractSystemAdminExportService<SysPostExportQuery, SysPostPageRowPO, SysPostExportRow>
+		extends AbstractSyncPagedExportService<SysPostExportQuery, SysPostPageRowPO, SysPostExportRow>
 		implements SysPostExportService {
 
 	private static final String SHEET_NAME = "岗位";
