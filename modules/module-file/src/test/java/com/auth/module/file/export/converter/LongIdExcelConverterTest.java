@@ -3,7 +3,6 @@ package com.auth.module.file.export.converter;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.metadata.GlobalConfiguration;
 import com.alibaba.excel.metadata.data.WriteCellData;
-import com.alibaba.excel.metadata.property.ExcelContentProperty;
 import com.auth.module.file.export.writer.ExcelExportWriter;
 import lombok.Getter;
 import lombok.Setter;
@@ -29,14 +28,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("LongIdExcelConverter 长整型 ID 文本导出")
 class LongIdExcelConverterTest {
 
-	/** Snowflake 样例 ID（超过 Excel 数值 15 位精度） */
+	/**
+	 * Snowflake 样例 ID（超过 Excel 数值 15 位精度）
+	 */
 	private static final long SNOWFLAKE_ID = 2_061_699_478_481_860_001L;
 
 	private final LongIdExcelConverter converter = new LongIdExcelConverter();
 
 	@Test
 	@DisplayName("convertToExcelData 将 Long 转为完整字符串")
-	void convertToExcelData_whenSnowflakeId_returnsFullString() throws Exception {
+	void convertToExcelData_whenSnowflakeId_returnsFullString() {
 		WriteCellData<?> cellData = converter.convertToExcelData(SNOWFLAKE_ID, null, new GlobalConfiguration());
 
 		assertThat(cellData.getStringValue()).isEqualTo("2061699478481860001");
@@ -44,7 +45,7 @@ class LongIdExcelConverterTest {
 
 	@Test
 	@DisplayName("convertToExcelData 在 null 时返回空串")
-	void convertToExcelData_whenNull_returnsEmptyString() throws Exception {
+	void convertToExcelData_whenNull_returnsEmptyString() {
 		WriteCellData<?> cellData = converter.convertToExcelData(null, null, new GlobalConfiguration());
 
 		assertThat(cellData.getStringValue()).isEmpty();

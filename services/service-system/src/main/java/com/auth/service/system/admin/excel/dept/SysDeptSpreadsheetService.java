@@ -80,19 +80,12 @@ public class SysDeptSpreadsheetService
 	protected List<SysDeptSpreadsheetRow> toExportRows(List<SysDeptPageRowPO> rows) {
 		List<Long> deptIds = rows.stream().map(SysDeptPageRowPO::getId).toList();
 		Map<Long, String> deptPathById = deptPathResolver.resolve(deptIds);
-		return rows.stream().map(row -> toExportRow(row, deptPathById)).toList();
-	}
 
-	/**
-	 * 单条分页行转导出行，并填充全路径。
-	 * @param row 分页行
-	 * @param deptPathById 部门全路径映射
-	 * @return Excel 行
-	 */
-	private SysDeptSpreadsheetRow toExportRow(SysDeptPageRowPO row, Map<Long, String> deptPathById) {
-		SysDeptSpreadsheetRow exportRow = SysDeptSpreadsheetConverter.INSTANCE.toSpreadsheetRow(row);
-		exportRow.setDeptPath(deptPathById.getOrDefault(row.getId(), row.getDeptName()));
-		return exportRow;
+		return rows.stream().map(row -> {
+			SysDeptSpreadsheetRow exportRow = SysDeptSpreadsheetConverter.INSTANCE.toSpreadsheetRow(row);
+			exportRow.setDeptPath(deptPathById.getOrDefault(row.getId(), row.getDeptName()));
+			return exportRow;
+		}).toList();
 	}
 
 }
