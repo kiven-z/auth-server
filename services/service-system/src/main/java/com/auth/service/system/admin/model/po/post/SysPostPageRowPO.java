@@ -32,6 +32,9 @@ public class SysPostPageRowPO implements Serializable {
 	@Schema(title = "部门名称")
 	private String deptName;
 
+	@Schema(title = "部门编码")
+	private String deptCode;
+
 	@Schema(title = "岗位编码")
 	private String postCode;
 
@@ -43,6 +46,9 @@ public class SysPostPageRowPO implements Serializable {
 
 	@Schema(title = "排序号")
 	private Integer orderNum;
+
+	@Schema(title = "备注")
+	private String remark;
 
 	@Schema(title = "创建时间")
 	private LocalDateTime createTime;

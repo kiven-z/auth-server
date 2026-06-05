@@ -128,7 +128,22 @@ public enum SystemAdminResultCode implements SystemResultCode {
 	/**
 	 * 菜单分配角色无效（不存在、未启用或类型非菜单角色）
 	 */
-	MENU_ROLE_INVALID(400, 291, "MENU_ROLE_INVALID", "system.menu.role_invalid"),;
+	MENU_ROLE_INVALID(400, 291, "MENU_ROLE_INVALID", "system.menu.role_invalid"),
+
+	/**
+	 * 岗位导出页码区间无效（结束页小于起始页） FIXME 修改为通用的，后面还会用到导出功能
+	 */
+	POST_EXPORT_PAGE_RANGE_INVALID(400, 295, "POST_EXPORT_PAGE_RANGE_INVALID", "system.post.export_page_range_invalid"),
+
+	/**
+	 * 岗位导出超过最大行数 FIXME 修改为通用的，后面还会用到导出功能
+	 */
+	POST_EXPORT_ROW_LIMIT_EXCEEDED(400, 296, "POST_EXPORT_ROW_LIMIT_EXCEEDED", "system.post.export_row_limit_exceeded"),
+
+	/**
+	 * 岗位导出单页条数非法 FIXME 修改为通用的，后面还会用到导出功能
+	 */
+	POST_EXPORT_PAGE_SIZE_INVALID(400, 297, "POST_EXPORT_PAGE_SIZE_INVALID", "system.post.export_page_size_invalid"),;
 
 	private final int httpStatus;
 

@@ -1,20 +1,20 @@
 package com.auth.service.system.admin.service.impl;
 
 import com.auth.common.data.model.PageResponse;
-import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
+import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.GrantTableMapper;
 import com.auth.service.system.admin.mapper.PostReferenceMapper;
 import com.auth.service.system.admin.mapper.SysPostDetailMapper;
 import com.auth.service.system.admin.mapper.SysPostMapper;
-import com.auth.service.system.admin.model.enums.RoleTypeEnum;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
+import com.auth.service.system.admin.model.enums.RoleTypeEnum;
 import com.auth.service.system.admin.model.form.post.SysPostForm;
 import com.auth.service.system.admin.model.po.granttable.GrantTableBoundRolePO;
 import com.auth.service.system.admin.model.po.post.SysPostBoundDeptPO;
 import com.auth.service.system.admin.model.po.post.SysPostBoundUserPO;
 import com.auth.service.system.admin.model.po.post.SysPostPageRowPO;
-import com.auth.service.system.admin.model.query.SysPostQuery;
+import com.auth.service.system.admin.model.query.post.SysPostQuery;
 import com.auth.service.system.admin.model.vo.post.SysPostDetailVO;
 import com.auth.service.system.admin.model.vo.post.SysPostPageResponse;
 import com.auth.service.system.admin.support.post.PostReferenceChecker;

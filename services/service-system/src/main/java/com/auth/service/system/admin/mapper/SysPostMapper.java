@@ -2,7 +2,7 @@ package com.auth.service.system.admin.mapper;
 
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.po.post.SysPostPageRowPO;
-import com.auth.service.system.admin.model.query.SysPostQuery;
+import com.auth.service.system.admin.model.query.post.SysPostQuery;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;

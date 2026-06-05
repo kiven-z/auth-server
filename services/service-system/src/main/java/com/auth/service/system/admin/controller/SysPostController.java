@@ -7,9 +7,11 @@ import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.form.post.SysPostForm;
-import com.auth.service.system.admin.model.query.SysPostQuery;
+import com.auth.service.system.admin.model.query.post.SysPostExportQuery;
+import com.auth.service.system.admin.model.query.post.SysPostQuery;
 import com.auth.service.system.admin.model.vo.post.SysPostDetailVO;
 import com.auth.service.system.admin.model.vo.post.SysPostPageResponse;
+import com.auth.service.system.admin.service.SysPostExportService;
 import com.auth.service.system.admin.service.SysPostService;
 import com.auth.service.system.common.model.audit.SystemAuditBizModule;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -17,8 +19,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 /**
  * 系统岗位管理 Controller
@@ -33,8 +39,18 @@ public class SysPostController {
 
 	private final SysPostService sysPostService;
 
-	public SysPostController(SysPostService sysPostService) {
+	private final SysPostExportService sysPostExportService;
+
+	public SysPostController(SysPostService sysPostService, SysPostExportService sysPostExportService) {
 		this.sysPostService = sysPostService;
+		this.sysPostExportService = sysPostExportService;
+	}
+
+	@Operation(summary = "岗位 Excel 导出")
+	@PreAuthorize("@auth.decide('sysPost:query')")
+	@GetMapping("/export")
+	public ResponseEntity<byte[]> export(@Validated SysPostExportQuery query) throws IOException {
+		return sysPostExportService.export(query);
 	}
 
 	@Operation(summary = "岗位分页查询")
