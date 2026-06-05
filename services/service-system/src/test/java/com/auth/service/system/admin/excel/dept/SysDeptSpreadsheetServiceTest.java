@@ -5,8 +5,12 @@ import com.auth.module.file.export.model.enums.ExportScope;
 import com.auth.service.system.admin.mapper.SysDeptMapper;
 import com.auth.service.system.admin.model.po.dept.SysDeptPageRowPO;
 import com.auth.service.system.admin.model.query.SysDeptQuery;
+import com.auth.service.system.admin.support.dept.DeptPathResolver;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,8 +19,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
@@ -35,6 +41,9 @@ class SysDeptSpreadsheetServiceTest {
 	@Mock
 	private SysDeptMapper sysDeptMapper;
 
+	@Mock
+	private DeptPathResolver deptPathResolver;
+
 	private SysDeptSpreadsheetService spreadsheetService;
 
 	private static ExportScopeQueryFields baseScope(int toPage) {
@@ -46,7 +55,7 @@ class SysDeptSpreadsheetServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		spreadsheetService = new SysDeptSpreadsheetService(sysDeptMapper);
+		spreadsheetService = new SysDeptSpreadsheetService(sysDeptMapper, deptPathResolver);
 	}
 
 	@Test
@@ -71,12 +80,44 @@ class SysDeptSpreadsheetServiceTest {
 		IPage<SysDeptPageRowPO> page = new Page<>(1, 10, 1);
 		page.setRecords(List.of(row));
 		when(sysDeptMapper.selectListByPage(any(Page.class), eq(filter))).thenReturn(page);
+		when(deptPathResolver.resolve(List.of(2L))).thenReturn(Map.of(2L, "总部/研发部"));
 
 		ResponseEntity<byte[]> response = spreadsheetService.export(filter, scope);
 
 		assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
 		assertThat(response.getBody()).isNotNull().isNotEmpty();
 		verify(sysDeptMapper).selectListByPage(any(Page.class), eq(filter));
+	}
+
+	@Test
+	@DisplayName("导出行写入部门全路径列")
+	void export_whenPathResolved_writesDeptPathColumn() throws IOException {
+		SysDeptQuery filter = new SysDeptQuery();
+		filter.setPageSize(10);
+		ExportScopeQueryFields scope = baseScope(1);
+
+		SysDeptPageRowPO row = new SysDeptPageRowPO();
+		row.setId(2L);
+		row.setParentId(1L);
+		row.setDeptCode("RD");
+		row.setDeptName("研发部");
+		row.setStatus(true);
+		row.setOrderNum(1);
+
+		IPage<SysDeptPageRowPO> page = new Page<>(1, 10, 1);
+		page.setRecords(List.of(row));
+		when(sysDeptMapper.selectListByPage(any(Page.class), eq(filter))).thenReturn(page);
+		when(deptPathResolver.resolve(List.of(2L))).thenReturn(Map.of(2L, "总部/研发部"));
+
+		ResponseEntity<byte[]> response = spreadsheetService.export(filter, scope);
+
+		try (XSSFWorkbook workbook = new XSSFWorkbook(new ByteArrayInputStream(response.getBody()))) {
+			Sheet sheet = workbook.getSheetAt(0);
+			Row header = sheet.getRow(0);
+			Row data = sheet.getRow(1);
+			assertThat(header.getCell(5).getStringCellValue()).isEqualTo("部门路径");
+			assertThat(data.getCell(5).getStringCellValue()).isEqualTo("总部/研发部");
+		}
 	}
 
 	@Test
@@ -99,6 +140,7 @@ class SysDeptSpreadsheetServiceTest {
 		IPage<SysDeptPageRowPO> page = new Page<>(3, 10, 1);
 		page.setRecords(List.of(row));
 		when(sysDeptMapper.selectListByPage(any(Page.class), eq(filter))).thenReturn(page);
+		when(deptPathResolver.resolve(List.of(1L))).thenReturn(Map.of(1L, "总部"));
 
 		ResponseEntity<byte[]> response = spreadsheetService.export(filter, scope);
 

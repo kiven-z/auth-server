@@ -10,6 +10,7 @@ import com.auth.service.system.admin.mapper.SysDeptMapper;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.po.dept.SysDeptPageRowPO;
 import com.auth.service.system.admin.model.query.SysDeptQuery;
+import com.auth.service.system.admin.support.dept.DeptPathResolver;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 部门 Excel 导出
@@ -32,13 +34,16 @@ public class SysDeptSpreadsheetService
 
 	private static final String FILENAME_PREFIX = "部门";
 
-	private static final int STATUS_COLUMN_INDEX = 5;
+	private static final int STATUS_COLUMN_INDEX = 6;
 
 	private final SysDeptMapper sysDeptMapper;
 
-	public SysDeptSpreadsheetService(SysDeptMapper sysDeptMapper) {
+	private final DeptPathResolver deptPathResolver;
+
+	public SysDeptSpreadsheetService(SysDeptMapper sysDeptMapper, DeptPathResolver deptPathResolver) {
 		super(buildExcelWriter(), FILENAME_PREFIX);
 		this.sysDeptMapper = sysDeptMapper;
+		this.deptPathResolver = deptPathResolver;
 	}
 
 	/**
@@ -73,7 +78,21 @@ public class SysDeptSpreadsheetService
 
 	@Override
 	protected List<SysDeptSpreadsheetRow> toExportRows(List<SysDeptPageRowPO> rows) {
-		return SysDeptSpreadsheetConverter.INSTANCE.toSpreadsheetRows(rows);
+		List<Long> deptIds = rows.stream().map(SysDeptPageRowPO::getId).toList();
+		Map<Long, String> deptPathById = deptPathResolver.resolve(deptIds);
+		return rows.stream().map(row -> toExportRow(row, deptPathById)).toList();
+	}
+
+	/**
+	 * 单条分页行转导出行，并填充全路径。
+	 * @param row 分页行
+	 * @param deptPathById 部门全路径映射
+	 * @return Excel 行
+	 */
+	private SysDeptSpreadsheetRow toExportRow(SysDeptPageRowPO row, Map<Long, String> deptPathById) {
+		SysDeptSpreadsheetRow exportRow = SysDeptSpreadsheetConverter.INSTANCE.toSpreadsheetRow(row);
+		exportRow.setDeptPath(deptPathById.getOrDefault(row.getId(), row.getDeptName()));
+		return exportRow;
 	}
 
 }

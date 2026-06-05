@@ -2,6 +2,7 @@ package com.auth.service.system.admin.mapper;
 
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.po.dept.SysDeptPageRowPO;
+import com.auth.service.system.admin.model.po.dept.SysDeptPathRowPO;
 import com.auth.service.system.admin.model.query.SysDeptQuery;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -51,5 +52,12 @@ public interface SysDeptMapper extends BaseMapper<SysDeptEntity> {
 	 */
 	@Select("SELECT COUNT(1) FROM sys_dept WHERE parent_id = #{parentId} AND is_deleted = 0")
 	int countActiveDirectChildren(@Param("parentId") Long parentId);
+
+	/**
+	 * 批量查询部门从根到自身的名称路径
+	 * @param ids 部门主键列表
+	 * @return 路径投影列表
+	 */
+	List<SysDeptPathRowPO> selectDeptPathByIds(@Param("ids") List<Long> ids);
 
 }

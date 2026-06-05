@@ -29,22 +29,25 @@ public class SysDeptSpreadsheetRow {
 	@ExcelProperty(value = "部门名称", index = 4)
 	private String deptName;
 
-	@ExcelProperty(value = "状态", index = 5)
+	@ExcelProperty(value = "部门路径", index = 5)
+	private String deptPath;
+
+	@ExcelProperty(value = "状态", index = 6)
 	private String statusLabel;
 
-	@ExcelProperty(value = "显示顺序", index = 6)
+	@ExcelProperty(value = "显示顺序", index = 7)
 	private Integer orderNum;
 
-	@ExcelProperty(value = "备注", index = 7)
+	@ExcelProperty(value = "备注", index = 8)
 	private String remark;
 
-	@ExcelProperty(value = "创建时间", index = 8)
+	@ExcelProperty(value = "创建时间", index = 9)
 	private String createTimeText;
 
-	@ExcelProperty(value = "更新时间", index = 9)
+	@ExcelProperty(value = "更新时间", index = 10)
 	private String updateTimeText;
 
-	@ExcelProperty(value = "主键ID", index = 10, converter = LongIdExcelConverter.class)
+	@ExcelProperty(value = "主键ID", index = 11, converter = LongIdExcelConverter.class)
 	private Long id;
 
 }

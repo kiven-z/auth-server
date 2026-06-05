@@ -68,4 +68,18 @@
         ORDER BY d.order_num, d.id
     </select>
 
+    <!-- 批量查询部门全路径（根到叶，基于 dept_closure） -->
+    <select id="selectDeptPathByIds"
+            resultType="com.auth.service.system.admin.model.po.dept.SysDeptPathRowPO">
+        SELECT dc.descendant_id AS id,
+               GROUP_CONCAT(a.dept_name ORDER BY dc.depth DESC SEPARATOR '/') AS dept_path
+        FROM dept_closure dc
+                 INNER JOIN sys_dept a ON a.id = dc.ancestor_id AND a.is_deleted = 0
+        WHERE dc.descendant_id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        GROUP BY dc.descendant_id
+    </select>
+
 </mapper>

@@ -31,6 +31,7 @@ public interface SysDeptSpreadsheetConverter {
 	 * @param po 持久层投影
 	 * @return 表格行
 	 */
+	@Mapping(target = "deptPath", ignore = true)
 	@Mapping(target = "statusLabel", source = "status", qualifiedByName = "statusLabel")
 	@Mapping(target = "createTimeText", source = "createTime", qualifiedByName = "dateTimeText")
 	@Mapping(target = "updateTimeText", source = "updateTime", qualifiedByName = "dateTimeText")
