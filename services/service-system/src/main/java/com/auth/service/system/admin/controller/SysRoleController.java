@@ -1,7 +1,9 @@
 package com.auth.service.system.admin.controller;
 
+import java.io.IOException;
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,9 +26,11 @@ import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.form.role.SysRoleForm;
 import com.auth.service.system.admin.model.query.SysRoleQuery;
+import com.auth.service.system.admin.model.query.role.SysRoleExportQuery;
 import com.auth.service.system.admin.model.vo.role.SysRoleDetailVO;
 import com.auth.service.system.admin.model.vo.role.SysRoleOptionVO;
 import com.auth.service.system.admin.model.vo.role.SysRolePageResponse;
+import com.auth.service.system.admin.service.SysRoleExportService;
 import com.auth.service.system.admin.service.SysRoleService;
 import com.auth.service.system.common.model.audit.SystemAuditBizModule;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -48,8 +52,18 @@ public class SysRoleController {
 
 	private final SysRoleService sysRoleService;
 
-	public SysRoleController(SysRoleService sysRoleService) {
+	private final SysRoleExportService sysRoleExportService;
+
+	public SysRoleController(SysRoleService sysRoleService, SysRoleExportService sysRoleExportService) {
 		this.sysRoleService = sysRoleService;
+		this.sysRoleExportService = sysRoleExportService;
+	}
+
+	@Operation(summary = "角色 Excel 导出")
+	@PreAuthorize("@auth.decide('sysRole:export')")
+	@GetMapping("/export")
+	public ResponseEntity<byte[]> export(@Validated SysRoleExportQuery query) throws IOException {
+		return sysRoleExportService.export(query);
 	}
 
 	@Operation(summary = "角色分页查询")
