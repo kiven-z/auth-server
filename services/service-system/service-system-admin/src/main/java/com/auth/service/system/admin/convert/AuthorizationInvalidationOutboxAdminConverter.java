@@ -1,9 +1,11 @@
 package com.auth.service.system.admin.convert;
 
-import com.auth.service.system.admin.model.po.authorizationinvalidation.AuthorizationInvalidationOutboxDetailRowPO;
-import com.auth.service.system.admin.model.po.authorizationinvalidation.AuthorizationInvalidationOutboxPageRowPO;
+import com.auth.service.system.admin.model.query.AuthorizationInvalidationOutboxQuery;
 import com.auth.service.system.admin.model.vo.authorizationinvalidation.AuthorizationInvalidationOutboxDetailVO;
 import com.auth.service.system.admin.model.vo.authorizationinvalidation.AuthorizationInvalidationOutboxPageVO;
+import com.auth.service.system.authorization.ops.model.po.AuthorizationInvalidationOutboxDetailRowPO;
+import com.auth.service.system.authorization.ops.model.po.AuthorizationInvalidationOutboxPageRowPO;
+import com.auth.service.system.authorization.ops.model.query.AuthorizationInvalidationOutboxOpsQuery;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
@@ -18,6 +20,13 @@ public interface AuthorizationInvalidationOutboxAdminConverter {
 
 	AuthorizationInvalidationOutboxAdminConverter INSTANCE = Mappers
 		.getMapper(AuthorizationInvalidationOutboxAdminConverter.class);
+
+	/**
+	 * 管理端查询条件 → Outbox 运维查询条件
+	 * @param query 管理端分页查询
+	 * @return 运维查询条件
+	 */
+	AuthorizationInvalidationOutboxOpsQuery toOpsQuery(AuthorizationInvalidationOutboxQuery query);
 
 	/**
 	 * 分页行 PO → VO

@@ -8,10 +8,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.auth.common.core.model.response.Result;
 import com.auth.common.web.resttemplate.FeignUtil;
 import com.auth.service.system.admin.convert.AuthorizationInvalidationStatsAdminConverter;
-import com.auth.service.system.admin.mapper.AuthorizationInvalidationOutboxAdminMapper;
 import com.auth.service.system.admin.model.vo.authorizationinvalidation.AuthorizationInvalidationEventStatsVO;
 import com.auth.service.system.admin.model.vo.authorizationinvalidation.AuthorizationInvalidationSummaryVO;
 import com.auth.service.system.admin.service.AuthorizationInvalidationStatsAdminService;
+import com.auth.service.system.authorization.ops.service.AuthorizationInvalidationOutboxOpsService;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.feign.AuthInnerFeignClient;
 import com.auth.service.system.common.feign.dto.AuthorizationInvalidationEventStatsInnerDTO;
@@ -28,14 +28,14 @@ import lombok.extern.slf4j.Slf4j;
 @Transactional(readOnly = true)
 public class AuthorizationInvalidationStatsAdminServiceImpl implements AuthorizationInvalidationStatsAdminService {
 
-	private final AuthorizationInvalidationOutboxAdminMapper authorizationInvalidationOutboxAdminMapper;
+	private final AuthorizationInvalidationOutboxOpsService authorizationInvalidationOutboxOpsService;
 
 	private final AuthInnerFeignClient authInnerFeignClient;
 
 	public AuthorizationInvalidationStatsAdminServiceImpl(
-			AuthorizationInvalidationOutboxAdminMapper authorizationInvalidationOutboxAdminMapper,
+			AuthorizationInvalidationOutboxOpsService authorizationInvalidationOutboxOpsService,
 			AuthInnerFeignClient authInnerFeignClient) {
-		this.authorizationInvalidationOutboxAdminMapper = authorizationInvalidationOutboxAdminMapper;
+		this.authorizationInvalidationOutboxOpsService = authorizationInvalidationOutboxOpsService;
 		this.authInnerFeignClient = authInnerFeignClient;
 	}
 
@@ -46,7 +46,7 @@ public class AuthorizationInvalidationStatsAdminServiceImpl implements Authoriza
 	public AuthorizationInvalidationSummaryVO getSummary() {
 		AuthorizationInvalidationSummaryVO summaryVO = new AuthorizationInvalidationSummaryVO();
 		summaryVO.setOutbox(AuthorizationInvalidationStatsAdminConverter
-			.toOutboxStatsVo(authorizationInvalidationOutboxAdminMapper.selectOutboxStats()));
+			.toOutboxStatsVo(authorizationInvalidationOutboxOpsService.getOutboxStats()));
 		summaryVO.setEvent(loadEventStats());
 		return summaryVO;
 	}

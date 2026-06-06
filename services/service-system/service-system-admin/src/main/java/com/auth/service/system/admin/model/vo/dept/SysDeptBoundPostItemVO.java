@@ -4,23 +4,27 @@ import com.auth.common.core.annotation.JsonStringFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.io.Serial;
 import java.io.Serializable;
 
 /**
  * 部门详情-下属岗位项
+ *
+ * @author bunny
  */
 @Schema(name = "SysDeptBoundPostItemVO", title = "部门下属岗位项")
 @Getter
 @Setter
+@ToString
 public class SysDeptBoundPostItemVO implements Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
 
-	@Schema(title = "岗位ID")
 	@JsonStringFormat
+	@Schema(title = "岗位ID")
 	private Long id;
 
 	@Schema(title = "岗位编码")

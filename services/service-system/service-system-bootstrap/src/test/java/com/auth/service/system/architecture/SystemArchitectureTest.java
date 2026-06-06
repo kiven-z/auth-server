@@ -2,6 +2,8 @@ package com.auth.service.system.architecture;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.common.web.exception.ValidationExceptionHandler;
+import com.tngtech.archunit.base.DescribedPredicate;
+import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
@@ -33,7 +35,25 @@ class SystemArchitectureTest {
 
 	private static final String MESSAGE = "com.auth.service.system.message..";
 
-	private static final String AUTHORIZATION = "com.auth.service.system.authorization..";
+	private static final String AUTHORIZATION_ROOT = "com.auth.service.system.authorization";
+
+	private static final DescribedPredicate<JavaClass> AUTHORIZATION_INTERNALS_FOR_ADMIN = new DescribedPredicate<>(
+			"authorization internals except trigger and ops") {
+		@Override
+		public boolean test(JavaClass javaClass) {
+			String pkg = javaClass.getPackageName();
+			if (!pkg.startsWith(AUTHORIZATION_ROOT)) {
+				return false;
+			}
+			if (pkg.startsWith(AUTHORIZATION_ROOT + ".dispatch.trigger")) {
+				return false;
+			}
+			if (pkg.startsWith(AUTHORIZATION_ROOT + ".ops")) {
+				return false;
+			}
+			return true;
+		}
+	};
 
 	@ArchTest
 	static final ArchRule controllers_must_not_depend_on_mappers = noClasses().that()
@@ -98,14 +118,23 @@ class SystemArchitectureTest {
 		.resideInAPackage(MESSAGE)
 		.should()
 		.dependOnClassesThat()
-		.resideInAnyPackage(ADMIN, SCHEDULE, AUTHORIZATION);
+		.resideInAnyPackage(ADMIN, SCHEDULE, AUTHORIZATION_ROOT + "..");
 
 	@ArchTest
 	static final ArchRule authorization_must_not_depend_on_admin = noClasses().that()
-		.resideInAPackage(AUTHORIZATION)
+		.resideInAPackage(AUTHORIZATION_ROOT + "..")
 		.should()
 		.dependOnClassesThat()
 		.resideInAPackage(ADMIN);
+
+	/**
+	 * admin 触发授权失效仅允许依赖 trigger；运维读写仅允许依赖 ops 门面。
+	 */
+	@ArchTest
+	static final ArchRule admin_authorization_coupling_only_via_trigger_and_ops = noClasses().that()
+		.resideInAPackage(ADMIN)
+		.should()
+		.dependOnClassesThat(AUTHORIZATION_INTERNALS_FOR_ADMIN);
 
 	/**
 	 * schedule 调用 message 时只允许依赖 {@code message.service} 包（Maven 模块依赖已约束模块级边界）。

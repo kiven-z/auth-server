@@ -9,7 +9,9 @@ import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * 部门移动（变更父部门）表单。
+ * 部门移动
+ *
+ * @author bunny
  */
 @Schema(name = "SysDeptMoveForm", title = "部门移动表单")
 @Getter

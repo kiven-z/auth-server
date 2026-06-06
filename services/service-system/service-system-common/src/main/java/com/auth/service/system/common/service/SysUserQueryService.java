@@ -16,6 +16,8 @@ public interface SysUserQueryService extends IService<UserEntity> {
 
 	/**
 	 * 查询用户档案（基本信息、部门、岗位），含已禁用用户
+	 * @param userId 用户ID
+	 * @return 用户档案
 	 */
 	SysUserProfileResponse getProfile(Long userId);
 

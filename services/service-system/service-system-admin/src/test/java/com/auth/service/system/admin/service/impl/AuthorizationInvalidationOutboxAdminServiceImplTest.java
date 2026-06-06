@@ -1,12 +1,12 @@
 package com.auth.service.system.admin.service.impl;
 
 import com.auth.common.data.model.PageResponse;
-import com.auth.service.system.admin.mapper.AuthorizationInvalidationOutboxAdminMapper;
-import com.auth.service.system.admin.model.po.authorizationinvalidation.AuthorizationInvalidationOutboxDetailRowPO;
-import com.auth.service.system.admin.model.po.authorizationinvalidation.AuthorizationInvalidationOutboxPageRowPO;
 import com.auth.service.system.admin.model.query.AuthorizationInvalidationOutboxQuery;
 import com.auth.service.system.admin.model.vo.authorizationinvalidation.AuthorizationInvalidationOutboxDetailVO;
 import com.auth.service.system.admin.model.vo.authorizationinvalidation.AuthorizationInvalidationOutboxPageVO;
+import com.auth.service.system.authorization.ops.model.po.AuthorizationInvalidationOutboxDetailRowPO;
+import com.auth.service.system.authorization.ops.model.po.AuthorizationInvalidationOutboxPageRowPO;
+import com.auth.service.system.authorization.ops.service.AuthorizationInvalidationOutboxOpsService;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -37,7 +37,7 @@ import static org.mockito.Mockito.when;
 class AuthorizationInvalidationOutboxAdminServiceImplTest {
 
 	@Mock
-	private AuthorizationInvalidationOutboxAdminMapper authorizationInvalidationOutboxAdminMapper;
+	private AuthorizationInvalidationOutboxOpsService authorizationInvalidationOutboxOpsService;
 
 	@Mock
 	private AuditUserDisplayService auditUserDisplayService;
@@ -67,7 +67,7 @@ class AuthorizationInvalidationOutboxAdminServiceImplTest {
 		AuthorizationInvalidationOutboxPageRowPO row = buildPageRow();
 		Page<AuthorizationInvalidationOutboxPageRowPO> page = new Page<>(1, 10, 1);
 		page.setRecords(List.of(row));
-		when(authorizationInvalidationOutboxAdminMapper.selectListByPage(any(), any())).thenReturn(page);
+		when(authorizationInvalidationOutboxOpsService.getPage(any())).thenReturn(page);
 
 		PageResponse<AuthorizationInvalidationOutboxPageVO> response = adminService.getPage(query);
 
@@ -80,7 +80,7 @@ class AuthorizationInvalidationOutboxAdminServiceImplTest {
 	@Test
 	@DisplayName("详情查询：记录不存在时抛出 DATA_NOT_EXIST")
 	void getDetail_shouldThrowWhenMissing() {
-		when(authorizationInvalidationOutboxAdminMapper.selectDetailById(99L)).thenReturn(null);
+		when(authorizationInvalidationOutboxOpsService.getDetail(99L)).thenReturn(null);
 
 		SystemBusinessException exception = assertThrows(SystemBusinessException.class,
 				() -> adminService.getDetail(99L));
@@ -98,7 +98,7 @@ class AuthorizationInvalidationOutboxAdminServiceImplTest {
 		detailRow.setStatus("DEAD");
 		detailRow.setPayload("{\"roleCode\":\"ADMIN\"}");
 		detailRow.setLastError("auth invalidate failed");
-		when(authorizationInvalidationOutboxAdminMapper.selectDetailById(10L)).thenReturn(detailRow);
+		when(authorizationInvalidationOutboxOpsService.getDetail(10L)).thenReturn(detailRow);
 
 		AuthorizationInvalidationOutboxDetailVO detailVO = adminService.getDetail(10L);
 

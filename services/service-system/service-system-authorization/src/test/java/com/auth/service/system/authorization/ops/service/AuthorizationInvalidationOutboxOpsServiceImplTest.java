@@ -1,10 +1,10 @@
-package com.auth.service.system.admin.service.impl;
+package com.auth.service.system.authorization.ops.service;
 
 import com.auth.common.core.model.response.Result;
-import com.auth.service.system.admin.model.form.authorizationinvalidation.AuthorizationInvalidationOutboxRetryForm;
-import com.auth.service.system.admin.model.vo.authorizationinvalidation.AuthorizationInvalidationOutboxRetryResultVO;
 import com.auth.service.system.authorization.config.AuthorizationInvalidationProperties;
 import com.auth.service.system.authorization.dispatch.AuthorizationInvalidationOutboxProcessor;
+import com.auth.service.system.authorization.ops.exception.AuthorizationInvalidationOpsResultCode;
+import com.auth.service.system.authorization.ops.mapper.AuthorizationInvalidationOutboxOpsMapper;
 import com.auth.service.system.authorization.outbox.AuthorizationInvalidationOutboxStatus;
 import com.auth.service.system.authorization.outbox.mapper.SysAuthorizationInvalidationOutboxMapper;
 import com.auth.service.system.authorization.outbox.model.SysAuthorizationInvalidationOutboxEntity;
@@ -19,8 +19,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 
-import static com.auth.service.system.admin.exception.SystemAdminResultCode.AUTH_INVALIDATION_OUTBOX_PROCESSING_LOCKED;
-import static com.auth.service.system.admin.exception.SystemAdminResultCode.AUTH_INVALIDATION_OUTBOX_RETRY_NOT_ALLOWED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -31,11 +29,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * {@link AuthorizationInvalidationOutboxManualRetryService} 单元测试
+ * {@link AuthorizationInvalidationOutboxOpsServiceImpl} 单元测试
  */
 @ExtendWith(MockitoExtension.class)
-@DisplayName("AuthorizationInvalidationOutboxManualRetryService Outbox 人工重试")
-class AuthorizationInvalidationOutboxManualRetryServiceTest {
+@DisplayName("AuthorizationInvalidationOutboxOpsServiceImpl Outbox 人工重试")
+class AuthorizationInvalidationOutboxOpsServiceImplTest {
+
+	@Mock
+	private AuthorizationInvalidationOutboxOpsMapper authorizationInvalidationOutboxOpsMapper;
 
 	@Mock
 	private SysAuthorizationInvalidationOutboxMapper outboxMapper;
@@ -48,12 +49,12 @@ class AuthorizationInvalidationOutboxManualRetryServiceTest {
 
 	private final AuthorizationInvalidationProperties properties = new AuthorizationInvalidationProperties();
 
-	private AuthorizationInvalidationOutboxManualRetryService manualRetryService;
+	private AuthorizationInvalidationOutboxOpsServiceImpl opsService;
 
 	@BeforeEach
 	void setUpService() {
-		manualRetryService = new AuthorizationInvalidationOutboxManualRetryService(outboxMapper, outboxProcessor,
-				authInnerFeignClient, properties);
+		opsService = new AuthorizationInvalidationOutboxOpsServiceImpl(authorizationInvalidationOutboxOpsMapper,
+				outboxMapper, outboxProcessor, authInnerFeignClient, properties);
 	}
 
 	private static SysAuthorizationInvalidationOutboxEntity buildRow(Long id, String status) {
@@ -67,20 +68,22 @@ class AuthorizationInvalidationOutboxManualRetryServiceTest {
 
 	@Test
 	@DisplayName("SUCCESS 状态不允许人工重试")
-	void retryById_shouldRejectSuccessStatus() {
+	void retryManual_shouldRejectSuccessStatus() {
+		// 已 SUCCESS 的 Outbox 不允许再次人工重试
 		when(outboxMapper.selectById(1L))
 			.thenReturn(buildRow(1L, AuthorizationInvalidationOutboxStatus.SUCCESS.name()));
 
 		SystemBusinessException exception = assertThrows(SystemBusinessException.class,
-				() -> manualRetryService.retryById(1L, null));
+				() -> opsService.retryManual(1L, false));
 
-		assertEquals(AUTH_INVALIDATION_OUTBOX_RETRY_NOT_ALLOWED, exception.getResultCode());
+		assertEquals(AuthorizationInvalidationOpsResultCode.RETRY_NOT_ALLOWED, exception.getResultCode());
 		verify(outboxProcessor, never()).processById(any());
 	}
 
 	@Test
 	@DisplayName("DEAD 状态应先 reset 再同步投递")
-	void retryById_shouldResetDeadAndDispatch() {
+	void retryManual_shouldResetDeadAndDispatch() {
+		// DEAD 需先 reset 再触发一次同步投递
 		SysAuthorizationInvalidationOutboxEntity deadRow = buildRow(2L,
 				AuthorizationInvalidationOutboxStatus.DEAD.name());
 		SysAuthorizationInvalidationOutboxEntity pendingRow = buildRow(2L,
@@ -90,31 +93,33 @@ class AuthorizationInvalidationOutboxManualRetryServiceTest {
 		when(authInnerFeignClient.releaseInvalidationEventClaim("role:1001")).thenReturn(Result.success(false));
 		when(outboxProcessor.processById(2L)).thenReturn(true);
 
-		AuthorizationInvalidationOutboxRetryResultVO result = manualRetryService.retryById(2L, null);
+		var outcome = opsService.retryManual(2L, false);
 
-		assertEquals("DEAD", result.getPreviousStatus());
-		assertEquals(AuthorizationInvalidationOutboxStatus.PENDING.name(), result.getCurrentStatus());
-		assertTrue(result.getDispatched());
+		assertEquals("DEAD", outcome.previousStatus());
+		assertEquals(AuthorizationInvalidationOutboxStatus.PENDING.name(), outcome.currentStatus());
+		assertTrue(outcome.dispatched());
 		verify(outboxMapper).resetForManualRetry(2L, 1L);
 	}
 
 	@Test
 	@DisplayName("PROCESSING 未超时且未 force 时应拒绝")
-	void retryById_shouldRejectFreshProcessingWithoutForce() {
+	void retryManual_shouldRejectFreshProcessingWithoutForce() {
+		// PROCESSING 占位未超时且未 force 时不允许重试
 		SysAuthorizationInvalidationOutboxEntity processingRow = buildRow(3L,
 				AuthorizationInvalidationOutboxStatus.PROCESSING.name());
 		processingRow.setLockedAt(LocalDateTime.now().plusMinutes(1));
 		when(outboxMapper.selectById(3L)).thenReturn(processingRow);
 
 		SystemBusinessException exception = assertThrows(SystemBusinessException.class,
-				() -> manualRetryService.retryById(3L, null));
+				() -> opsService.retryManual(3L, false));
 
-		assertEquals(AUTH_INVALIDATION_OUTBOX_PROCESSING_LOCKED, exception.getResultCode());
+		assertEquals(AuthorizationInvalidationOpsResultCode.PROCESSING_LOCKED, exception.getResultCode());
 	}
 
 	@Test
 	@DisplayName("PROCESSING force=true 时应 reset 并投递")
-	void retryById_shouldForceProcessingRetry() {
+	void retryManual_shouldForceProcessingRetry() {
+		// force=true 时允许重置 PROCESSING 并再次投递
 		SysAuthorizationInvalidationOutboxEntity processingRow = buildRow(4L,
 				AuthorizationInvalidationOutboxStatus.PROCESSING.name());
 		processingRow.setLockedAt(LocalDateTime.now());
@@ -125,13 +130,11 @@ class AuthorizationInvalidationOutboxManualRetryServiceTest {
 		when(authInnerFeignClient.releaseInvalidationEventClaim("role:1001")).thenReturn(Result.success(true));
 		when(outboxProcessor.processById(4L)).thenReturn(false);
 
-		AuthorizationInvalidationOutboxRetryForm form = new AuthorizationInvalidationOutboxRetryForm();
-		form.setForce(true);
-		AuthorizationInvalidationOutboxRetryResultVO result = manualRetryService.retryById(4L, form);
+		var outcome = opsService.retryManual(4L, true);
 
-		assertEquals("PROCESSING", result.getPreviousStatus());
-		assertTrue(result.getClaimReleased());
-		assertFalse(result.getDispatched());
+		assertEquals("PROCESSING", outcome.previousStatus());
+		assertTrue(outcome.claimReleased());
+		assertFalse(outcome.dispatched());
 		verify(outboxMapper).resetForManualRetry(4L, 1L);
 	}
 

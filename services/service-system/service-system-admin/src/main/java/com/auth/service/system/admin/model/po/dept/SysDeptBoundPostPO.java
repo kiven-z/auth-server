@@ -9,6 +9,8 @@ import java.io.Serializable;
 
 /**
  * 部门详情-下属岗位行
+ *
+ * @author bunny
  */
 @Schema(name = "SysDeptBoundPostPO", title = "部门下属岗位 PO")
 @Getter

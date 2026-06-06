@@ -16,9 +16,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.auth.common.core.model.response.Result;
-import com.auth.service.system.admin.mapper.AuthorizationInvalidationOutboxAdminMapper;
-import com.auth.service.system.admin.model.po.authorizationinvalidation.AuthorizationInvalidationOutboxStatsPO;
 import com.auth.service.system.admin.model.vo.authorizationinvalidation.AuthorizationInvalidationSummaryVO;
+import com.auth.service.system.authorization.ops.model.po.AuthorizationInvalidationOutboxStatsPO;
+import com.auth.service.system.authorization.ops.service.AuthorizationInvalidationOutboxOpsService;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.feign.AuthInnerFeignClient;
 import com.auth.service.system.common.feign.dto.AuthorizationInvalidationEventStatsInnerDTO;
@@ -31,7 +31,7 @@ import com.auth.service.system.common.feign.dto.AuthorizationInvalidationEventSt
 class AuthorizationInvalidationStatsAdminServiceImplTest {
 
 	@Mock
-	private AuthorizationInvalidationOutboxAdminMapper authorizationInvalidationOutboxAdminMapper;
+	private AuthorizationInvalidationOutboxOpsService authorizationInvalidationOutboxOpsService;
 
 	@Mock
 	private AuthInnerFeignClient authInnerFeignClient;
@@ -49,7 +49,7 @@ class AuthorizationInvalidationStatsAdminServiceImplTest {
 		outboxStats.setSuccessCount(5L);
 		outboxStats.setFailedCount(1L);
 		outboxStats.setDeadCount(1L);
-		when(authorizationInvalidationOutboxAdminMapper.selectOutboxStats()).thenReturn(outboxStats);
+		when(authorizationInvalidationOutboxOpsService.getOutboxStats()).thenReturn(outboxStats);
 
 		AuthorizationInvalidationEventStatsInnerDTO eventStats = new AuthorizationInvalidationEventStatsInnerDTO();
 		eventStats.setTotalCount(8L);
@@ -64,14 +64,14 @@ class AuthorizationInvalidationStatsAdminServiceImplTest {
 		assertEquals(new BigDecimal("20.00"), summary.getOutbox().getFailureRatePercent());
 		assertEquals(8L, summary.getEvent().getTotalCount());
 		assertEquals(1L, summary.getEvent().getProcessingCount());
-		verify(authorizationInvalidationOutboxAdminMapper).selectOutboxStats();
+		verify(authorizationInvalidationOutboxOpsService).getOutboxStats();
 		verify(authInnerFeignClient).getInvalidationEventSummary();
 	}
 
 	@Test
 	@DisplayName("统计摘要：auth 统计不可用时抛出 SERVICE_UNAVAILABLE")
 	void getSummary_shouldThrowWhenEventSummaryUnavailable() {
-		when(authorizationInvalidationOutboxAdminMapper.selectOutboxStats())
+		when(authorizationInvalidationOutboxOpsService.getOutboxStats())
 			.thenReturn(new AuthorizationInvalidationOutboxStatsPO());
 		when(authInnerFeignClient.getInvalidationEventSummary()).thenReturn(Result.error("unavailable"));
 

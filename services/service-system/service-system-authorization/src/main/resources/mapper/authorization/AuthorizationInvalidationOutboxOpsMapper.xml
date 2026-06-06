@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.auth.service.system.admin.mapper.AuthorizationInvalidationOutboxAdminMapper">
+<mapper namespace="com.auth.service.system.authorization.ops.mapper.AuthorizationInvalidationOutboxOpsMapper">
 
     <!-- 分页查询 Outbox（运维只读） -->
     <select id="selectListByPage"
-            resultType="com.auth.service.system.admin.model.po.authorizationinvalidation.AuthorizationInvalidationOutboxPageRowPO">
+            resultType="com.auth.service.system.authorization.ops.model.po.AuthorizationInvalidationOutboxPageRowPO">
         SELECT aio.id,
         aio.event_id,
         aio.change_kind,
@@ -64,7 +64,7 @@
 
     <!-- 按主键查询 Outbox 详情 -->
     <select id="selectDetailById"
-            resultType="com.auth.service.system.admin.model.po.authorizationinvalidation.AuthorizationInvalidationOutboxDetailRowPO">
+            resultType="com.auth.service.system.authorization.ops.model.po.AuthorizationInvalidationOutboxDetailRowPO">
         SELECT aio.id,
                aio.event_id,
                aio.change_kind,
@@ -90,7 +90,7 @@
 
     <!-- Outbox 状态统计（运维只读） -->
     <select id="selectOutboxStats"
-            resultType="com.auth.service.system.admin.model.po.authorizationinvalidation.AuthorizationInvalidationOutboxStatsPO">
+            resultType="com.auth.service.system.authorization.ops.model.po.AuthorizationInvalidationOutboxStatsPO">
         SELECT COUNT(*)                                                   AS total_count,
                SUM(CASE WHEN aio.status = 'PENDING' THEN 1 ELSE 0 END)    AS pending_count,
                SUM(CASE WHEN aio.status = 'PROCESSING' THEN 1 ELSE 0 END) AS processing_count,

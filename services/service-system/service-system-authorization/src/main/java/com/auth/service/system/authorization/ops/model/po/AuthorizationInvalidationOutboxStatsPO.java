@@ -1,4 +1,4 @@
-package com.auth.service.system.admin.model.po.authorizationinvalidation;
+package com.auth.service.system.authorization.ops.model.po;
 
 import java.io.Serial;
 import java.io.Serializable;

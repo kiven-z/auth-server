@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import com.auth.service.system.admin.model.po.authorizationinvalidation.AuthorizationInvalidationOutboxStatsPO;
+import com.auth.service.system.authorization.ops.model.po.AuthorizationInvalidationOutboxStatsPO;
 import com.auth.service.system.admin.model.vo.authorizationinvalidation.AuthorizationInvalidationEventStatsVO;
 import com.auth.service.system.admin.model.vo.authorizationinvalidation.AuthorizationInvalidationOutboxStatsVO;
 import com.auth.service.system.common.feign.dto.AuthorizationInvalidationEventStatsInnerDTO;

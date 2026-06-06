@@ -3,6 +3,7 @@ package com.auth.service.system.admin.model.vo.permission;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -15,6 +16,7 @@ import java.io.Serializable;
 @Schema(name = "SysPermissionBoundMenuItemVO", title = "权限已绑定菜单项")
 @Getter
 @Setter
+@ToString
 public class SysPermissionBoundMenuItemVO implements Serializable {
 
 	@Serial

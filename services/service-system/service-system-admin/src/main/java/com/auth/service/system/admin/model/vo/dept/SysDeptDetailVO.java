@@ -12,7 +12,9 @@ import java.io.Serial;
 import java.util.List;
 
 /**
- * 部门详情 VO。
+ * 部门详情
+ *
+ * @author bunny
  */
 @Schema(name = "SysDeptDetailVO", title = "部门详情")
 @Getter
@@ -24,8 +26,8 @@ public class SysDeptDetailVO extends BaseResponse {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
-	@Schema(title = "父部门ID，0 表示顶级")
 	@JsonStringFormat
+	@Schema(title = "父部门ID，0 表示顶级")
 	private Long parentId;
 
 	@Schema(title = "部门名称")

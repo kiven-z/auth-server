@@ -3,17 +3,21 @@ package com.auth.service.system.admin.model.vo.dept;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 部门详情-已授权角色项（grant_table DEPT 主体）
+ * 部门详情-已授权角色项
+ *
+ * @author bunny
  */
 @Schema(name = "SysDeptBoundRoleItemVO", title = "部门已授权角色项")
 @Getter
 @Setter
+@ToString
 public class SysDeptBoundRoleItemVO implements Serializable {
 
 	@Serial
