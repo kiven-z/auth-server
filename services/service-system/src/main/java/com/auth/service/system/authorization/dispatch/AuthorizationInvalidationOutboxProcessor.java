@@ -26,112 +26,109 @@ import java.time.LocalDateTime;
 @Service
 public class AuthorizationInvalidationOutboxProcessor {
 
-    private final SysAuthorizationInvalidationOutboxMapper outboxMapper;
+	private final SysAuthorizationInvalidationOutboxMapper outboxMapper;
 
-    private final InvalidationOutboxPayloadCodec payloadCodec;
+	private final InvalidationOutboxPayloadCodec payloadCodec;
 
-    private final AuthInnerFeignClient authInnerFeignClient;
+	private final AuthInnerFeignClient authInnerFeignClient;
 
-    private final AuthorizationInvalidationProperties properties;
+	private final AuthorizationInvalidationProperties properties;
 
-    private static String truncateError(String message) {
-        if (message == null) {
-            return "unknown error";
-        }
-        return message.length() > 1900 ? message.substring(0, 1900) : message;
-    }
+	private static String truncateError(String message) {
+		if (message == null) {
+			return "unknown error";
+		}
+		return message.length() > 1900 ? message.substring(0, 1900) : message;
+	}
 
-    /**
-     * 处理单条 Outbox（同步或补偿 Job 共用）。
-     *
-     * @param outboxId Outbox 主键
-     * @return 是否处理成功
-     */
-    public boolean processById(Long outboxId) {
-        SysAuthorizationInvalidationOutboxEntity row = outboxMapper.selectById(outboxId);
-        if (row == null) {
-            log.warn("Outbox row not found, id={}", outboxId);
-            return false;
-        }
-        if (AuthorizationInvalidationOutboxStatus.SUCCESS.name().equals(row.getStatus())) {
-            return true;
-        }
-        return dispatchRow(row);
-    }
+	/**
+	 * 处理单条 Outbox（同步或补偿 Job 共用）。
+	 * @param outboxId Outbox 主键
+	 * @return 是否处理成功
+	 */
+	public boolean processById(Long outboxId) {
+		SysAuthorizationInvalidationOutboxEntity row = outboxMapper.selectById(outboxId);
+		if (row == null) {
+			log.warn("Outbox row not found, id={}", outboxId);
+			return false;
+		}
+		if (AuthorizationInvalidationOutboxStatus.SUCCESS.name().equals(row.getStatus())) {
+			return true;
+		}
+		return dispatchRow(row);
+	}
 
-    /**
-     * 补偿 Job：抢占后处理。
-     *
-     * @param row      已查询的 Outbox 行
-     * @param lockedBy 抢占实例标识
-     * @return 是否处理成功
-     */
-    public boolean processClaimedRow(SysAuthorizationInvalidationOutboxEntity row, String lockedBy) {
-        LocalDateTime now = LocalDateTime.now();
-        int claimed = outboxMapper.claimForProcessing(row.getId(), lockedBy, now, row.getVersion());
-        if (claimed == 0) {
-            return false;
-        }
-        SysAuthorizationInvalidationOutboxEntity latest = outboxMapper.selectById(row.getId());
-        if (latest == null) {
-            return false;
-        }
-        return dispatchRow(latest);
-    }
+	/**
+	 * 补偿 Job：抢占后处理。
+	 * @param row 已查询的 Outbox 行
+	 * @param lockedBy 抢占实例标识
+	 * @return 是否处理成功
+	 */
+	public boolean processClaimedRow(SysAuthorizationInvalidationOutboxEntity row, String lockedBy) {
+		LocalDateTime now = LocalDateTime.now();
+		int claimed = outboxMapper.claimForProcessing(row.getId(), lockedBy, now, row.getVersion());
+		if (claimed == 0) {
+			return false;
+		}
+		SysAuthorizationInvalidationOutboxEntity latest = outboxMapper.selectById(row.getId());
+		if (latest == null) {
+			return false;
+		}
+		return dispatchRow(latest);
+	}
 
-    /**
-     * 处理 Outbox 行。
-     *
-     * @param row 已查询的 Outbox 行
-     * @return 是否处理成功
-     */
-    private boolean dispatchRow(SysAuthorizationInvalidationOutboxEntity row) {
-        AuthorizationChangeKind kind = AuthorizationChangeKind.valueOf(row.getChangeKind());
-        AuthorizationInvalidateRequest request = new AuthorizationInvalidateRequest(row.getEventId(), kind,
-                payloadCodec.deserialize(kind, row.getPayload()));
+	/**
+	 * 处理 Outbox 行。
+	 * @param row 已查询的 Outbox 行
+	 * @return 是否处理成功
+	 */
+	private boolean dispatchRow(SysAuthorizationInvalidationOutboxEntity row) {
+		AuthorizationChangeKind kind = AuthorizationChangeKind.valueOf(row.getChangeKind());
+		AuthorizationInvalidateRequest request = new AuthorizationInvalidateRequest(row.getEventId(), kind,
+				payloadCodec.deserialize(kind, row.getPayload()));
 
-        try {
-            Result<AuthorizationInvalidateResponse> result = authInnerFeignClient.invalidate(request);
-            if (result != null && Integer.valueOf(Result.SUCCESS_CODE).equals(result.getCode())) {
-                outboxMapper.markSuccess(row.getId(), LocalDateTime.now());
-                log.info("Authorization invalidation dispatched: eventId={}, outboxId={}", row.getEventId(),
-                        row.getId());
-                return true;
-            }
-            String message = result != null ? result.getMessage() : "null Result";
-            handleFailure(row, "auth invalidate failed: " + message);
-            return false;
-        } catch (RuntimeException ex) {
-            handleFailure(row, ex.getMessage());
-            log.warn("Authorization invalidation dispatch error: eventId={}, outboxId={}, cause={}", row.getEventId(),
-                    row.getId(), ex.getMessage());
-            return false;
-        }
-    }
+		try {
+			Result<AuthorizationInvalidateResponse> result = authInnerFeignClient.invalidate(request);
+			if (result != null && Integer.valueOf(Result.SUCCESS_CODE).equals(result.getCode())) {
+				outboxMapper.markSuccess(row.getId(), LocalDateTime.now());
+				log.info("Authorization invalidation dispatched: eventId={}, outboxId={}", row.getEventId(),
+						row.getId());
+				return true;
+			}
+			String message = result != null ? result.getMessage() : "null Result";
+			handleFailure(row, "auth invalidate failed: " + message);
+			return false;
+		}
+		catch (RuntimeException ex) {
+			handleFailure(row, ex.getMessage());
+			log.warn("Authorization invalidation dispatch error: eventId={}, outboxId={}, cause={}", row.getEventId(),
+					row.getId(), ex.getMessage());
+			return false;
+		}
+	}
 
-    /**
-     * 处理失败情况。
-     *
-     * @param row          已查询的 Outbox 行
-     * @param errorMessage 错误消息
-     */
-    private void handleFailure(SysAuthorizationInvalidationOutboxEntity row, String errorMessage) {
-        String truncated = truncateError(errorMessage);
-        if (AuthorizationInvalidationOutboxStatus.PENDING.name().equals(row.getStatus())) {
-            outboxMapper.recordSyncFailure(row.getId(), truncated);
-            return;
-        }
-        int nextRetry = row.getRetryCount() + 1;
-        int maxRetry = row.getMaxRetry() != null ? row.getMaxRetry() : 5;
-        if (nextRetry >= maxRetry) {
-            outboxMapper.markFailure(row.getId(), AuthorizationInvalidationOutboxStatus.DEAD.name(), nextRetry, null,
-                    truncated);
-            return;
-        }
-        long backoffSeconds = (long) properties.getRetryBackoffSeconds() * (1L << Math.min(nextRetry, 10));
-        LocalDateTime nextRetryAt = LocalDateTime.now().plusSeconds(backoffSeconds);
-        outboxMapper.markFailure(row.getId(), AuthorizationInvalidationOutboxStatus.FAILED.name(), nextRetry,
-                nextRetryAt, truncated);
-    }
+	/**
+	 * 处理失败情况。
+	 * @param row 已查询的 Outbox 行
+	 * @param errorMessage 错误消息
+	 */
+	private void handleFailure(SysAuthorizationInvalidationOutboxEntity row, String errorMessage) {
+		String truncated = truncateError(errorMessage);
+		if (AuthorizationInvalidationOutboxStatus.PENDING.name().equals(row.getStatus())) {
+			outboxMapper.recordSyncFailure(row.getId(), truncated);
+			return;
+		}
+		int nextRetry = row.getRetryCount() + 1;
+		int maxRetry = row.getMaxRetry() != null ? row.getMaxRetry() : 5;
+		if (nextRetry >= maxRetry) {
+			outboxMapper.markFailure(row.getId(), AuthorizationInvalidationOutboxStatus.DEAD.name(), nextRetry, null,
+					truncated);
+			return;
+		}
+		long backoffSeconds = (long) properties.getRetryBackoffSeconds() * (1L << Math.min(nextRetry, 10));
+		LocalDateTime nextRetryAt = LocalDateTime.now().plusSeconds(backoffSeconds);
+		outboxMapper.markFailure(row.getId(), AuthorizationInvalidationOutboxStatus.FAILED.name(), nextRetry,
+				nextRetryAt, truncated);
+	}
 
 }

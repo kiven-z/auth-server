@@ -1,30 +1,32 @@
-package com.auth.service.system.authorization.outbox.model.po;
+package com.auth.service.system.admin.model.vo.authorizationinvalidation;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.LocalDateTime;
-
+import com.auth.common.core.model.response.BaseResponse;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
+
+import java.io.Serial;
+import java.time.LocalDateTime;
 
 /**
- * 授权失效 Outbox 分页行（PO）
+ * 授权失效 Outbox 分页行
  *
  * @author Bunny
  */
-@Schema(name = "AuthorizationInvalidationOutboxPageRowPO", title = "授权失效 Outbox 分页行")
+@Schema(name = "AuthorizationInvalidationOutboxPageVO", title = "授权失效 Outbox 分页行")
 @Getter
 @Setter
-public class AuthorizationInvalidationOutboxPageRowPO implements Serializable {
+@ToString
+@EqualsAndHashCode(callSuper = true)
+public class AuthorizationInvalidationOutboxPageVO extends BaseResponse {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
 
-	@Schema(title = "主键")
-	private Long id;
-
-	@Schema(title = "业务事件 ID（幂等键）")
+	@Schema(title = "业务事件 ID")
 	private String eventId;
 
 	@Schema(title = "变更维度")
@@ -39,6 +41,7 @@ public class AuthorizationInvalidationOutboxPageRowPO implements Serializable {
 	@Schema(title = "最大重试次数")
 	private Integer maxRetry;
 
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "下次重试时间")
 	private LocalDateTime nextRetryAt;
 
@@ -48,9 +51,11 @@ public class AuthorizationInvalidationOutboxPageRowPO implements Serializable {
 	@Schema(title = "抢占实例标识")
 	private String lockedBy;
 
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "抢占时间")
 	private LocalDateTime lockedAt;
 
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "处理完成时间")
 	private LocalDateTime processedAt;
 
@@ -59,17 +64,5 @@ public class AuthorizationInvalidationOutboxPageRowPO implements Serializable {
 
 	@Schema(title = "业务主键")
 	private String sourceBizId;
-
-	@Schema(title = "创建时间")
-	private LocalDateTime createTime;
-
-	@Schema(title = "更新时间")
-	private LocalDateTime updateTime;
-
-	@Schema(title = "创建用户")
-	private Long createUser;
-
-	@Schema(title = "更新用户")
-	private Long updateUser;
 
 }

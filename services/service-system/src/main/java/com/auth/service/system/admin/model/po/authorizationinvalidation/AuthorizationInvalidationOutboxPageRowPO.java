@@ -1,22 +1,22 @@
-package com.auth.service.system.authorization.outbox.model.po;
-
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.LocalDateTime;
+package com.auth.service.system.admin.model.po.authorizationinvalidation;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
 /**
- * 授权失效 Outbox 详情行（PO）
+ * 授权失效 Outbox 分页行（PO）
  *
  * @author Bunny
  */
-@Schema(name = "AuthorizationInvalidationOutboxDetailRowPO", title = "授权失效 Outbox 详情行")
+@Schema(name = "AuthorizationInvalidationOutboxPageRowPO", title = "授权失效 Outbox 分页行")
 @Getter
 @Setter
-public class AuthorizationInvalidationOutboxDetailRowPO implements Serializable {
+public class AuthorizationInvalidationOutboxPageRowPO implements Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
@@ -29,9 +29,6 @@ public class AuthorizationInvalidationOutboxDetailRowPO implements Serializable 
 
 	@Schema(title = "变更维度")
 	private String changeKind;
-
-	@Schema(title = "失效业务键 JSON")
-	private String payload;
 
 	@Schema(title = "投递状态")
 	private String status;
@@ -74,8 +71,5 @@ public class AuthorizationInvalidationOutboxDetailRowPO implements Serializable 
 
 	@Schema(title = "更新用户")
 	private Long updateUser;
-
-	@Schema(title = "备注")
-	private String remark;
 
 }

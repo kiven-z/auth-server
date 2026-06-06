@@ -1,36 +1,37 @@
-package com.auth.service.system.authorization.outbox.model.vo;
+package com.auth.service.system.admin.model.po.authorizationinvalidation;
 
-import com.auth.common.core.model.response.BaseResponse;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 授权失效 Outbox 分页行
+ * 授权失效 Outbox 详情行（PO）
  *
  * @author Bunny
  */
-@Schema(name = "AuthorizationInvalidationOutboxPageVO", title = "授权失效 Outbox 分页行")
+@Schema(name = "AuthorizationInvalidationOutboxDetailRowPO", title = "授权失效 Outbox 详情行")
 @Getter
 @Setter
-@ToString
-@EqualsAndHashCode(callSuper = true)
-public class AuthorizationInvalidationOutboxPageVO extends BaseResponse {
+public class AuthorizationInvalidationOutboxDetailRowPO implements Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
 
-	@Schema(title = "业务事件 ID")
+	@Schema(title = "主键")
+	private Long id;
+
+	@Schema(title = "业务事件 ID（幂等键）")
 	private String eventId;
 
 	@Schema(title = "变更维度")
 	private String changeKind;
+
+	@Schema(title = "失效业务键 JSON")
+	private String payload;
 
 	@Schema(title = "投递状态")
 	private String status;
@@ -41,7 +42,6 @@ public class AuthorizationInvalidationOutboxPageVO extends BaseResponse {
 	@Schema(title = "最大重试次数")
 	private Integer maxRetry;
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "下次重试时间")
 	private LocalDateTime nextRetryAt;
 
@@ -51,11 +51,9 @@ public class AuthorizationInvalidationOutboxPageVO extends BaseResponse {
 	@Schema(title = "抢占实例标识")
 	private String lockedBy;
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "抢占时间")
 	private LocalDateTime lockedAt;
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "处理完成时间")
 	private LocalDateTime processedAt;
 
@@ -64,5 +62,20 @@ public class AuthorizationInvalidationOutboxPageVO extends BaseResponse {
 
 	@Schema(title = "业务主键")
 	private String sourceBizId;
+
+	@Schema(title = "创建时间")
+	private LocalDateTime createTime;
+
+	@Schema(title = "更新时间")
+	private LocalDateTime updateTime;
+
+	@Schema(title = "创建用户")
+	private Long createUser;
+
+	@Schema(title = "更新用户")
+	private Long updateUser;
+
+	@Schema(title = "备注")
+	private String remark;
 
 }

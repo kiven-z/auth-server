@@ -1,9 +1,9 @@
 package com.auth.service.system.admin.service;
 
 import com.auth.common.data.model.PageResponse;
-import com.auth.service.system.authorization.outbox.model.query.AuthorizationInvalidationOutboxQuery;
-import com.auth.service.system.authorization.outbox.model.vo.AuthorizationInvalidationOutboxDetailVO;
-import com.auth.service.system.authorization.outbox.model.vo.AuthorizationInvalidationOutboxPageVO;
+import com.auth.service.system.admin.model.query.AuthorizationInvalidationOutboxQuery;
+import com.auth.service.system.admin.model.vo.authorizationinvalidation.AuthorizationInvalidationOutboxDetailVO;
+import com.auth.service.system.admin.model.vo.authorizationinvalidation.AuthorizationInvalidationOutboxPageVO;
 
 /**
  * 授权失效 Outbox 管理端查询服务
