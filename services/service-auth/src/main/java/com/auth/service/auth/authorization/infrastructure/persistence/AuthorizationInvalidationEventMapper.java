@@ -2,6 +2,7 @@ package com.auth.service.auth.authorization.infrastructure.persistence;
 
 import com.auth.service.auth.authorization.domain.model.po.AuthorizationInvalidationEventDetailRowPO;
 import com.auth.service.auth.authorization.domain.model.po.AuthorizationInvalidationEventPageRowPO;
+import com.auth.service.auth.authorization.domain.model.po.AuthorizationInvalidationEventStatsPO;
 import com.auth.service.auth.authorization.domain.model.query.AuthorizationInvalidationEventQuery;
 import com.auth.service.auth.authorization.infrastructure.persistence.projection.AuthorizationInvalidationEventProjection;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -61,5 +62,11 @@ public interface AuthorizationInvalidationEventMapper {
 	 * @return 详情投影
 	 */
 	AuthorizationInvalidationEventDetailRowPO selectDetailById(@Param("id") Long id);
+
+	/**
+	 * 统计幂等事件处理状态分布
+	 * @return 统计结果
+	 */
+	AuthorizationInvalidationEventStatsPO selectEventStats();
 
 }

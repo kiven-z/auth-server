@@ -13,6 +13,7 @@ import com.auth.service.auth.authorization.application.query.AuthorizationInvali
 import com.auth.service.auth.authorization.domain.model.query.AuthorizationInvalidationEventQuery;
 import com.auth.service.auth.authorization.domain.model.vo.AuthorizationInvalidationEventDetailVO;
 import com.auth.service.auth.authorization.domain.model.vo.AuthorizationInvalidationEventPageVO;
+import com.auth.service.auth.authorization.domain.model.vo.AuthorizationInvalidationEventStatsVO;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -78,6 +79,13 @@ public class AuthorizationInnerController {
 	@GetMapping("/invalidation/event/{id}")
 	public Result<AuthorizationInvalidationEventDetailVO> invalidationEventDetail(@PathVariable("id") Long id) {
 		return Result.success(authorizationInvalidationEventQueryApplicationService.getDetail(id));
+	}
+
+	@InternalApi
+	@Operation(summary = "授权失效幂等事件统计")
+	@GetMapping("/invalidation/event/summary")
+	public Result<AuthorizationInvalidationEventStatsVO> invalidationEventSummary() {
+		return Result.success(authorizationInvalidationEventQueryApplicationService.getStats());
 	}
 
 	@InternalApi

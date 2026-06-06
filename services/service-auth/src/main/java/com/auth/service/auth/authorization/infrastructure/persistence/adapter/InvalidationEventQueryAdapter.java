@@ -3,6 +3,7 @@ package com.auth.service.auth.authorization.infrastructure.persistence.adapter;
 import com.auth.service.auth.authorization.domain.invalidation.port.InvalidationEventQueryPort;
 import com.auth.service.auth.authorization.domain.model.po.AuthorizationInvalidationEventDetailRowPO;
 import com.auth.service.auth.authorization.domain.model.po.AuthorizationInvalidationEventPageRowPO;
+import com.auth.service.auth.authorization.domain.model.po.AuthorizationInvalidationEventStatsPO;
 import com.auth.service.auth.authorization.domain.model.query.AuthorizationInvalidationEventQuery;
 import com.auth.service.auth.authorization.infrastructure.persistence.AuthorizationInvalidationEventMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -38,6 +39,14 @@ public class InvalidationEventQueryAdapter implements InvalidationEventQueryPort
 	@Override
 	public AuthorizationInvalidationEventDetailRowPO selectDetailById(Long id) {
 		return authorizationInvalidationEventMapper.selectDetailById(id);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public AuthorizationInvalidationEventStatsPO selectEventStats() {
+		return authorizationInvalidationEventMapper.selectEventStats();
 	}
 
 }

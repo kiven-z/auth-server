@@ -16,6 +16,7 @@ import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidat
 import com.auth.service.system.common.feign.dto.AuthorizationInvalidationEventDetailInnerDTO;
 import com.auth.service.system.common.feign.dto.AuthorizationInvalidationEventInnerQuery;
 import com.auth.service.system.common.feign.dto.AuthorizationInvalidationEventPageInnerDTO;
+import com.auth.service.system.common.feign.dto.AuthorizationInvalidationEventStatsInnerDTO;
 import com.auth.service.system.common.feign.dto.EffectiveCodesInnerDTO;
 import com.auth.service.system.common.feign.fallback.AuthInnerFeignClientFallback;
 
@@ -68,6 +69,13 @@ public interface AuthInnerFeignClient {
 	 */
 	@GetMapping("/authorization/invalidation/event/{id}")
 	Result<AuthorizationInvalidationEventDetailInnerDTO> getInvalidationEventDetail(@PathVariable("id") Long id);
+
+	/**
+	 * 授权失效幂等事件统计
+	 * @return 统计摘要
+	 */
+	@GetMapping("/authorization/invalidation/event/summary")
+	Result<AuthorizationInvalidationEventStatsInnerDTO> getInvalidationEventSummary();
 
 	/**
 	 * 释放授权失效幂等事件 processing 占位

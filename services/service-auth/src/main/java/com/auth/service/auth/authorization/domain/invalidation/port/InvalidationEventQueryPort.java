@@ -2,6 +2,7 @@ package com.auth.service.auth.authorization.domain.invalidation.port;
 
 import com.auth.service.auth.authorization.domain.model.po.AuthorizationInvalidationEventDetailRowPO;
 import com.auth.service.auth.authorization.domain.model.po.AuthorizationInvalidationEventPageRowPO;
+import com.auth.service.auth.authorization.domain.model.po.AuthorizationInvalidationEventStatsPO;
 import com.auth.service.auth.authorization.domain.model.query.AuthorizationInvalidationEventQuery;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -28,5 +29,11 @@ public interface InvalidationEventQueryPort {
 	 * @return 详情投影，不存在时为 null
 	 */
 	AuthorizationInvalidationEventDetailRowPO selectDetailById(Long id);
+
+	/**
+	 * 统计幂等事件处理状态分布
+	 * @return 统计结果
+	 */
+	AuthorizationInvalidationEventStatsPO selectEventStats();
 
 }

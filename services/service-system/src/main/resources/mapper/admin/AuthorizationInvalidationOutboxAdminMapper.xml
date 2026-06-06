@@ -25,8 +25,7 @@
         FROM sys_authorization_invalidation_outbox aio
         <where>
             <if test="query.eventId != null and query.eventId != ''">
-                AND aio.event_id =
-                #{query.eventId}
+                AND aio.event_id LIKE CONCAT(#{query.eventId}, '%')
             </if>
             <if test="query.changeKind != null and query.changeKind != ''">
                 AND aio.change_kind =
@@ -41,8 +40,7 @@
                 #{query.sourceModule}
             </if>
             <if test="query.sourceBizId != null and query.sourceBizId != ''">
-                AND aio.source_biz_id =
-                #{query.sourceBizId}
+                AND aio.source_biz_id LIKE CONCAT(#{query.sourceBizId}, '%')
             </if>
             <if test="query.createTimeStart != null">
                 AND aio.create_time &gt;=
@@ -88,6 +86,18 @@
                aio.remark
         FROM sys_authorization_invalidation_outbox aio
         WHERE aio.id = #{id}
+    </select>
+
+    <!-- Outbox 状态统计（运维只读） -->
+    <select id="selectOutboxStats"
+            resultType="com.auth.service.system.admin.model.po.authorizationinvalidation.AuthorizationInvalidationOutboxStatsPO">
+        SELECT COUNT(*)                                                   AS total_count,
+               SUM(CASE WHEN aio.status = 'PENDING' THEN 1 ELSE 0 END)    AS pending_count,
+               SUM(CASE WHEN aio.status = 'PROCESSING' THEN 1 ELSE 0 END) AS processing_count,
+               SUM(CASE WHEN aio.status = 'SUCCESS' THEN 1 ELSE 0 END)  AS success_count,
+               SUM(CASE WHEN aio.status = 'FAILED' THEN 1 ELSE 0 END)   AS failed_count,
+               SUM(CASE WHEN aio.status = 'DEAD' THEN 1 ELSE 0 END)     AS dead_count
+        FROM sys_authorization_invalidation_outbox aio
     </select>
 
 </mapper>

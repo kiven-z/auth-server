@@ -2,6 +2,7 @@ package com.auth.service.system.admin.mapper;
 
 import com.auth.service.system.admin.model.po.authorizationinvalidation.AuthorizationInvalidationOutboxDetailRowPO;
 import com.auth.service.system.admin.model.po.authorizationinvalidation.AuthorizationInvalidationOutboxPageRowPO;
+import com.auth.service.system.admin.model.po.authorizationinvalidation.AuthorizationInvalidationOutboxStatsPO;
 import com.auth.service.system.admin.model.query.AuthorizationInvalidationOutboxQuery;
 import com.auth.service.system.authorization.outbox.model.SysAuthorizationInvalidationOutboxEntity;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -33,5 +34,11 @@ public interface AuthorizationInvalidationOutboxAdminMapper {
 	 * @return 详情行，不存在为 null
 	 */
 	AuthorizationInvalidationOutboxDetailRowPO selectDetailById(@Param("id") Long id);
+
+	/**
+	 * 统计 Outbox 各状态记录数
+	 * @return 状态统计
+	 */
+	AuthorizationInvalidationOutboxStatsPO selectOutboxStats();
 
 }

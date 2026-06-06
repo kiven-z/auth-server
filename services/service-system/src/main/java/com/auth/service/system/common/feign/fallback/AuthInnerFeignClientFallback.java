@@ -8,6 +8,7 @@ import com.auth.service.system.common.feign.AuthInnerFeignClient;
 import com.auth.service.system.common.feign.dto.AuthorizationInvalidationEventDetailInnerDTO;
 import com.auth.service.system.common.feign.dto.AuthorizationInvalidationEventInnerQuery;
 import com.auth.service.system.common.feign.dto.AuthorizationInvalidationEventPageInnerDTO;
+import com.auth.service.system.common.feign.dto.AuthorizationInvalidationEventStatsInnerDTO;
 import com.auth.service.system.common.feign.dto.EffectiveCodesInnerDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -69,6 +70,15 @@ public class AuthInnerFeignClientFallback implements AuthInnerFeignClient {
 	public Result<AuthorizationInvalidationEventDetailInnerDTO> getInvalidationEventDetail(Long id) {
 		log.error("AuthInnerFeignClientFallback: getInvalidationEventDetail failed, id={}", id);
 		return Result.error("Authorization invalidation event query is unavailable");
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Result<AuthorizationInvalidationEventStatsInnerDTO> getInvalidationEventSummary() {
+		log.error("AuthInnerFeignClientFallback: getInvalidationEventSummary failed");
+		return Result.error("Authorization invalidation event summary is unavailable");
 	}
 
 	/**

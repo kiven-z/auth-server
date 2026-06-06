@@ -24,7 +24,7 @@ public class AuthorizationInvalidationEventQuery extends PageQueryRequest implem
 	@Serial
 	private static final long serialVersionUID = 1L;
 
-	@Schema(title = "业务事件 ID（精确匹配）")
+	@Schema(title = "业务事件 ID（前缀匹配）")
 	private String eventId;
 
 	@Schema(title = "变更维度（AuthorizationChangeKind）")

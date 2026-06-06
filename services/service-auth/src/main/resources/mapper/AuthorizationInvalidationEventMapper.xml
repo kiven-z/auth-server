@@ -83,8 +83,10 @@
         FROM auth_authorization_invalidation_event aie
         <where>
             <if test="query.eventId != null and query.eventId != ''">
-                AND aie.event_id =
-                #{query.eventId}
+                AND aie.event_id LIKE CONCAT(
+                #{query.eventId},
+                '%'
+                )
             </if>
             <if test="query.changeKind != null and query.changeKind != ''">
                 AND aie.change_kind =
@@ -126,6 +128,15 @@
                aie.remark
         FROM auth_authorization_invalidation_event aie
         WHERE aie.id = #{id}
+    </select>
+
+    <!-- 幂等事件统计（运维只读） -->
+    <select id="selectEventStats"
+            resultType="com.auth.service.auth.authorization.domain.model.po.AuthorizationInvalidationEventStatsPO">
+        SELECT COUNT(*)                                     AS total_count,
+               SUM(IF(aie.impacted_user_count = -1, 1, 0))  AS processing_count,
+               SUM(IF(aie.impacted_user_count != -1, 1, 0)) AS completed_count
+        FROM auth_authorization_invalidation_event aie
     </select>
 
 </mapper>

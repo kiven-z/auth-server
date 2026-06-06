@@ -5,9 +5,11 @@ import com.auth.service.auth.authorization.domain.invalidation.model.Invalidatio
 import com.auth.service.auth.authorization.domain.invalidation.port.InvalidationEventQueryPort;
 import com.auth.service.auth.authorization.domain.model.po.AuthorizationInvalidationEventDetailRowPO;
 import com.auth.service.auth.authorization.domain.model.po.AuthorizationInvalidationEventPageRowPO;
+import com.auth.service.auth.authorization.domain.model.po.AuthorizationInvalidationEventStatsPO;
 import com.auth.service.auth.authorization.domain.model.query.AuthorizationInvalidationEventQuery;
 import com.auth.service.auth.authorization.domain.model.vo.AuthorizationInvalidationEventDetailVO;
 import com.auth.service.auth.authorization.domain.model.vo.AuthorizationInvalidationEventPageVO;
+import com.auth.service.auth.authorization.domain.model.vo.AuthorizationInvalidationEventStatsVO;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.enums.AuthResultCode;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -101,6 +103,23 @@ class AuthorizationInvalidationEventQueryApplicationServiceTest {
 		assertEquals("evt-detail", detailVO.getEventId());
 		assertEquals("ROLE", detailVO.getChangeKind());
 		assertFalse(detailVO.getProcessing());
+	}
+
+	@Test
+	@DisplayName("统计查询：应返回幂等事件处理状态计数")
+	void getStats_shouldReturnEventStats() {
+		AuthorizationInvalidationEventStatsPO statsPo = new AuthorizationInvalidationEventStatsPO();
+		statsPo.setTotalCount(12L);
+		statsPo.setProcessingCount(1L);
+		statsPo.setCompletedCount(11L);
+		when(invalidationEventQueryPort.selectEventStats()).thenReturn(statsPo);
+
+		AuthorizationInvalidationEventStatsVO statsVo = queryApplicationService.getStats();
+
+		assertEquals(12L, statsVo.getTotalCount());
+		assertEquals(1L, statsVo.getProcessingCount());
+		assertEquals(11L, statsVo.getCompletedCount());
+		verify(invalidationEventQueryPort).selectEventStats();
 	}
 
 }

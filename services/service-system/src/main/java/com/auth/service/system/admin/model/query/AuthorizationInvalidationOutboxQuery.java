@@ -24,7 +24,7 @@ public class AuthorizationInvalidationOutboxQuery extends PageQueryRequest imple
 	@Serial
 	private static final long serialVersionUID = 1L;
 
-	@Schema(title = "业务事件 ID（精确匹配）")
+	@Schema(title = "业务事件 ID（前缀匹配）")
 	private String eventId;
 
 	@Schema(title = "变更维度（AuthorizationChangeKind）")
@@ -36,7 +36,7 @@ public class AuthorizationInvalidationOutboxQuery extends PageQueryRequest imple
 	@Schema(title = "触发模块")
 	private String sourceModule;
 
-	@Schema(title = "业务主键（精确匹配）")
+	@Schema(title = "业务主键（前缀匹配）")
 	private String sourceBizId;
 
 	@Schema(title = "创建时间（开始）")

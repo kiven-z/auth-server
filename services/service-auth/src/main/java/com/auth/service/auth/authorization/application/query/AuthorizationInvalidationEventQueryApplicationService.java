@@ -5,9 +5,11 @@ import com.auth.service.auth.authorization.convert.AuthorizationInvalidationEven
 import com.auth.service.auth.authorization.domain.invalidation.port.InvalidationEventQueryPort;
 import com.auth.service.auth.authorization.domain.model.po.AuthorizationInvalidationEventDetailRowPO;
 import com.auth.service.auth.authorization.domain.model.po.AuthorizationInvalidationEventPageRowPO;
+import com.auth.service.auth.authorization.domain.model.po.AuthorizationInvalidationEventStatsPO;
 import com.auth.service.auth.authorization.domain.model.query.AuthorizationInvalidationEventQuery;
 import com.auth.service.auth.authorization.domain.model.vo.AuthorizationInvalidationEventDetailVO;
 import com.auth.service.auth.authorization.domain.model.vo.AuthorizationInvalidationEventPageVO;
+import com.auth.service.auth.authorization.domain.model.vo.AuthorizationInvalidationEventStatsVO;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.enums.AuthResultCode;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -27,6 +29,16 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthorizationInvalidationEventQueryApplicationService {
 
 	private final InvalidationEventQueryPort invalidationEventQueryPort;
+
+	/**
+	 * 空值计数归零
+	 * @param count 原始计数
+	 * @return 非空计数
+	 */
+	private static long defaultCount(Long count) {
+		// FIXME 删除这二个使用Objects
+		return count != null ? count : 0L;
+	}
 
 	/**
 	 * 分页查询幂等事件
@@ -53,6 +65,29 @@ public class AuthorizationInvalidationEventQueryApplicationService {
 			throw new AuthBusinessException(AuthResultCode.DATA_NOT_EXIST);
 		}
 		return AuthorizationInvalidationEventConverter.INSTANCE.toDetailVo(detailRow);
+	}
+
+	/**
+	 * 查询幂等事件统计
+	 * @return 统计摘要
+	 */
+	public AuthorizationInvalidationEventStatsVO getStats() {
+		AuthorizationInvalidationEventStatsPO statsPo = invalidationEventQueryPort.selectEventStats();
+		AuthorizationInvalidationEventStatsVO statsVo = new AuthorizationInvalidationEventStatsVO();
+		if (statsPo == null) {
+			statsVo.setTotalCount(0L);
+			statsVo.setProcessingCount(0L);
+			statsVo.setCompletedCount(0L);
+			return statsVo;
+		}
+
+		// FIXME 使用Object方法
+		statsVo.setTotalCount(defaultCount(statsPo.getTotalCount()));
+		// FIXME 使用Object方法
+		statsVo.setProcessingCount(defaultCount(statsPo.getProcessingCount()));
+		// FIXME 使用Object方法
+		statsVo.setCompletedCount(defaultCount(statsPo.getCompletedCount()));
+		return statsVo;
 	}
 
 }
