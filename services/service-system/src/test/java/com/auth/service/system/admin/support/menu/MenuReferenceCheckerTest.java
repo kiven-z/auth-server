@@ -65,9 +65,8 @@ class MenuReferenceCheckerTest {
 	@DisplayName("requireMoveTargetValid：不能移动到自身")
 	void requireMoveTargetValidRejectsSelf() {
 		assertThatThrownBy(() -> menuReferenceChecker.requireMoveTargetValid(5L, 5L))
-			.isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemAdminResultCode.MENU_MOVE_TO_SELF);
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("Cannot move tree node under itself, nodeId=5");
 	}
 
 	@Test
@@ -76,9 +75,8 @@ class MenuReferenceCheckerTest {
 		when(sysMenuMapper.selectById(20L)).thenReturn(menuEntity(20L, 10L));
 
 		assertThatThrownBy(() -> menuReferenceChecker.requireMoveTargetValid(10L, 20L))
-			.isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemAdminResultCode.MENU_MOVE_TO_DESCENDANT);
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("Cannot move tree node under its descendant, nodeId=10, newParentId=20");
 	}
 
 	private static SysMenuEntity menuEntity(Long id, Long parentId) {

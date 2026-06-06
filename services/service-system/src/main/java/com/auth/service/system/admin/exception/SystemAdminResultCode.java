@@ -96,16 +96,6 @@ public enum SystemAdminResultCode implements SystemResultCode {
 	DEPT_PARENT_NOT_FOUND(404, 283, "DEPT_PARENT_NOT_FOUND", "system.dept.parent_not_found"),
 
 	/**
-	 * 不能将部门移动到自身下
-	 */
-	DEPT_MOVE_TO_SELF(400, 284, "DEPT_MOVE_TO_SELF", "system.dept.move_to_self"),
-
-	/**
-	 * 不能将部门移动到其子部门下
-	 */
-	DEPT_MOVE_TO_DESCENDANT(400, 285, "DEPT_MOVE_TO_DESCENDANT", "system.dept.move_to_descendant"),
-
-	/**
 	 * 存在未删除的子部门
 	 */
 	DEPT_HAS_CHILDREN(409, 286, "DEPT_HAS_CHILDREN", "system.dept.has_children"),
@@ -129,16 +119,6 @@ public enum SystemAdminResultCode implements SystemResultCode {
 	 * 父菜单不存在
 	 */
 	MENU_PARENT_NOT_FOUND(404, 292, "MENU_PARENT_NOT_FOUND", "system.menu.parent_not_found"),
-
-	/**
-	 * 不能将菜单移动到自身下
-	 */
-	MENU_MOVE_TO_SELF(400, 293, "MENU_MOVE_TO_SELF", "system.menu.move_to_self"),
-
-	/**
-	 * 不能将菜单移动到其子菜单下
-	 */
-	MENU_MOVE_TO_DESCENDANT(400, 294, "MENU_MOVE_TO_DESCENDANT", "system.menu.move_to_descendant"),
 
 	/**
 	 * 菜单分配角色无效（不存在、未启用或类型非菜单角色）

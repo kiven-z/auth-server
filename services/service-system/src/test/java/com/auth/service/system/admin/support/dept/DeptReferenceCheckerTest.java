@@ -2,7 +2,6 @@ package com.auth.service.system.admin.support.dept;
 
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.SysDeptMapper;
-import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,28 +26,6 @@ class DeptReferenceCheckerTest {
 
 	@InjectMocks
 	private DeptReferenceChecker deptReferenceChecker;
-
-	@Test
-	@DisplayName("normalizeParentId：null 与负数归一为顶级")
-	void normalizeParentIdMapsNullAndNegativeToRoot() {
-		assertThat(DeptReferenceChecker.normalizeParentId(null)).isZero();
-		assertThat(DeptReferenceChecker.normalizeParentId(-1L)).isZero();
-		assertThat(DeptReferenceChecker.normalizeParentId(5L)).isEqualTo(5L);
-	}
-
-	@Test
-	@DisplayName("resolveParentId：委托 normalizeParentId")
-	void resolveParentIdDelegatesToNormalize() {
-		SysDeptEntity entity = new SysDeptEntity();
-		entity.setParentId(null);
-		assertThat(DeptReferenceChecker.resolveParentId(entity)).isZero();
-
-		entity.setParentId(-2L);
-		assertThat(DeptReferenceChecker.resolveParentId(entity)).isZero();
-
-		entity.setParentId(3L);
-		assertThat(DeptReferenceChecker.resolveParentId(entity)).isEqualTo(3L);
-	}
 
 	@Test
 	@DisplayName("normalizeAndRequireActiveParent：顶级不查库")

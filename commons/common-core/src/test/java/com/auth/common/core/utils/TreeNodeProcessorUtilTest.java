@@ -118,29 +118,6 @@ class TreeNodeProcessorUtilTest {
 	}
 
 	@Test
-	void testBuildTreeRecursive() {
-		// 测试递归构建方法
-		List<TreeNodeTest> list = createSimpleTreeData();
-		List<TreeNodeTest> result = TreeNodeProcessorUtil.buildTreeRecursive(list);
-
-		assertEquals(1, result.size());
-		TreeNodeTest root = result.get(0);
-
-		assertEquals("根节点", root.getName());
-		assertTrue(root.isHasLeaf());
-		assertEquals(2, root.getChildren().size());
-	}
-
-	@Test
-	void testBuildTreeRecursiveWithEmptyList() {
-		List<TreeNodeTest> emptyList = new ArrayList<>();
-		List<TreeNodeTest> result = TreeNodeProcessorUtil.buildTreeRecursive(emptyList);
-
-		assertNotNull(result);
-		assertTrue(result.isEmpty());
-	}
-
-	@Test
 	void testHasLeafProperty() {
 		// 测试hasLeaf属性是否正确设置
 		List<TreeNodeTest> list = new ArrayList<>();

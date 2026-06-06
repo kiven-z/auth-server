@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.auth.common.core.model.response.Result;
+import com.auth.common.core.utils.TreeParentIdUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.constants.PermissionConstant;
 import com.auth.service.system.admin.convert.SysMenuConverter;
@@ -156,7 +157,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuEntity
 		SysMenuEntity existing = menuReferenceChecker.getExisting(menuId);
 		long newParentId = menuReferenceChecker.normalizeAndRequireParent(form.getParentId());
 
-		if (MenuReferenceChecker.normalizeParentId(existing.getParentId()) == newParentId) {
+		if (TreeParentIdUtil.normalize(existing.getParentId()) == newParentId) {
 			return;
 		}
 

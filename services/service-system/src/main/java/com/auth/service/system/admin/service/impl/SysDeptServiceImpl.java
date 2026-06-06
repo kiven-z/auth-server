@@ -1,5 +1,6 @@
 package com.auth.service.system.admin.service.impl;
 
+import com.auth.common.core.utils.TreeParentIdUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.convert.GrantTableSubjectRoleConverter;
@@ -37,8 +38,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
-
-import static com.auth.service.system.admin.support.dept.DeptReferenceChecker.resolveParentId;
 
 /**
  * 部门服务实现
@@ -155,7 +154,7 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 
 		// 规范化父部门 ID 并校验父部门存在（顶级跳过校验）
 		long newParentId = deptReferenceChecker.normalizeAndRequireActiveParent(form.getParentId());
-		boolean parentChanged = resolveParentId(existing) != newParentId;
+		boolean parentChanged = TreeParentIdUtil.normalize(existing.getParentId()) != newParentId;
 		boolean statusChanged = FieldChangeSupport.valueChanged(existing.getStatus(), form.getStatus());
 		if (parentChanged) {
 			deptReferenceChecker.requireMoveTargetValid(id, newParentId);
@@ -185,7 +184,7 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 		SysDeptEntity existing = deptReferenceChecker.getExistingActive(deptId);
 		long newParentId = deptReferenceChecker.normalizeAndRequireActiveParent(form.getParentId());
 
-		if (resolveParentId(existing) == newParentId) {
+		if (TreeParentIdUtil.normalize(existing.getParentId()) == newParentId) {
 			return;
 		}
 

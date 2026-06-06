@@ -4,7 +4,6 @@ import cn.hutool.core.collection.CollUtil;
 import com.auth.common.core.model.entity.TreeNode;
 import lombok.experimental.UtilityClass;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -58,49 +57,6 @@ public class TreeNodeProcessorUtil {
 		// 递归构建每个子节点的子树
 		for (T child : children) {
 			buildChildren(child, list);
-		}
-	}
-
-	/**
-	 * 构建树形结构（递归方式）- 实现相同的效果
-	 */
-	public static <T extends TreeNode<T>> List<T> buildTreeRecursive(List<T> list) {
-		if (CollUtil.isEmpty(list)) {
-			return new ArrayList<>();
-		}
-
-		// 找出所有根节点（parentId = 0）
-		List<T> rootNodes = list.stream().filter(node -> node.getParentId() == 0L).toList();
-
-		// 为每个根节点构建子树
-		for (T rootNode : rootNodes) {
-			findChildren(rootNode, list);
-		}
-
-		return rootNodes;
-	}
-
-	/**
-	 * 递归查找子节点
-	 */
-	private static <T extends TreeNode<T>> void findChildren(T parentNode, List<T> allNodes) {
-		// 找出当前节点的所有子节点
-		List<T> children = allNodes.stream().filter(node -> parentNode.getId().equals(node.getParentId())).toList();
-
-		if (CollUtil.isNotEmpty(children)) {
-			// 设置子节点
-			parentNode.setChildren(children);
-			parentNode.setHasLeaf(true);
-
-			// 递归为每个子节点查找它们的子节点
-			for (T child : children) {
-				findChildren(child, allNodes);
-			}
-		}
-		else {
-			// 如果没有子节点，设置空列表
-			parentNode.setChildren(new ArrayList<>());
-			parentNode.setHasLeaf(false);
 		}
 	}
 

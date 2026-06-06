@@ -1,12 +1,10 @@
 package com.auth.service.system.admin.support.menu;
 
+import com.auth.common.core.utils.TreeParentIdUtil;
+import com.auth.common.core.utils.TreeRelationUtil;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.SysMenuMapper;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
-import com.auth.service.system.admin.support.tree.TreeMoveTargetValidator;
-import com.auth.service.system.admin.support.tree.TreeParentChainDescendantChecker;
-import com.auth.service.system.admin.support.tree.TreeParentIdNormalizer;
-import com.auth.service.system.admin.support.tree.TreeParentIds;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import org.springframework.stereotype.Component;
 
@@ -22,15 +20,6 @@ public class MenuReferenceChecker {
 
 	public MenuReferenceChecker(SysMenuMapper sysMenuMapper) {
 		this.sysMenuMapper = sysMenuMapper;
-	}
-
-	/**
-	 * 将 parentId 规范为可比较的父菜单 ID（null 或负数视为顶级）。
-	 * @param parentId 原始父菜单 ID
-	 * @return 规范化后的父菜单 ID
-	 */
-	public static long normalizeParentId(Long parentId) {
-		return TreeParentIdNormalizer.normalize(parentId);
 	}
 
 	/**
@@ -52,8 +41,8 @@ public class MenuReferenceChecker {
 	 * @return 规范化后的父菜单 ID
 	 */
 	public long normalizeAndRequireParent(Long rawParentId) {
-		long parentId = normalizeParentId(rawParentId);
-		if (parentId > TreeParentIds.ROOT_PARENT_ID && sysMenuMapper.selectById(parentId) == null) {
+		long parentId = TreeParentIdUtil.normalize(rawParentId);
+		if (parentId > TreeParentIdUtil.ROOT_PARENT_ID && sysMenuMapper.selectById(parentId) == null) {
 			throw new SystemBusinessException(SystemAdminResultCode.MENU_PARENT_NOT_FOUND, parentId);
 		}
 		return parentId;
@@ -65,13 +54,11 @@ public class MenuReferenceChecker {
 	 * @param newParentId 新父菜单
 	 */
 	public void requireMoveTargetValid(Long menuId, Long newParentId) {
-		TreeMoveTargetValidator.requireValid(menuId, newParentId, this::isDescendantOf,
-				new SystemBusinessException(SystemAdminResultCode.MENU_MOVE_TO_SELF, menuId),
-				new SystemBusinessException(SystemAdminResultCode.MENU_MOVE_TO_DESCENDANT, menuId, newParentId));
+		TreeRelationUtil.requireValidMoveTarget(menuId, newParentId, this::isDescendantOf);
 	}
 
 	private boolean isDescendantOf(Long ancestorId, Long nodeId) {
-		return TreeParentChainDescendantChecker.isDescendantOf(ancestorId, nodeId, id -> {
+		return TreeRelationUtil.isDescendantOf(ancestorId, nodeId, id -> {
 			SysMenuEntity node = sysMenuMapper.selectById(id);
 			return node == null ? null : node.getParentId();
 		});
