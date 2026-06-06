@@ -15,13 +15,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.auth.common.core.model.response.Result;
 import com.auth.service.system.admin.model.vo.authorizationinvalidation.AuthorizationInvalidationSummaryVO;
+import com.auth.service.system.authorization.ops.model.po.AuthorizationInvalidationEventStatsPO;
 import com.auth.service.system.authorization.ops.model.po.AuthorizationInvalidationOutboxStatsPO;
+import com.auth.service.system.authorization.ops.service.AuthorizationInvalidationEventOpsService;
 import com.auth.service.system.authorization.ops.service.AuthorizationInvalidationOutboxOpsService;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.common.feign.AuthInnerFeignClient;
-import com.auth.service.system.common.feign.dto.AuthorizationInvalidationEventStatsInnerDTO;
 
 /**
  * {@link AuthorizationInvalidationStatsAdminServiceImpl} 单元测试
@@ -34,7 +33,7 @@ class AuthorizationInvalidationStatsAdminServiceImplTest {
 	private AuthorizationInvalidationOutboxOpsService authorizationInvalidationOutboxOpsService;
 
 	@Mock
-	private AuthInnerFeignClient authInnerFeignClient;
+	private AuthorizationInvalidationEventOpsService authorizationInvalidationEventOpsService;
 
 	@InjectMocks
 	private AuthorizationInvalidationStatsAdminServiceImpl statsAdminService;
@@ -51,11 +50,11 @@ class AuthorizationInvalidationStatsAdminServiceImplTest {
 		outboxStats.setDeadCount(1L);
 		when(authorizationInvalidationOutboxOpsService.getOutboxStats()).thenReturn(outboxStats);
 
-		AuthorizationInvalidationEventStatsInnerDTO eventStats = new AuthorizationInvalidationEventStatsInnerDTO();
+		AuthorizationInvalidationEventStatsPO eventStats = new AuthorizationInvalidationEventStatsPO();
 		eventStats.setTotalCount(8L);
 		eventStats.setProcessingCount(1L);
 		eventStats.setCompletedCount(7L);
-		when(authInnerFeignClient.getInvalidationEventSummary()).thenReturn(Result.success(eventStats));
+		when(authorizationInvalidationEventOpsService.getEventStats()).thenReturn(eventStats);
 
 		AuthorizationInvalidationSummaryVO summary = statsAdminService.getSummary();
 
@@ -65,15 +64,16 @@ class AuthorizationInvalidationStatsAdminServiceImplTest {
 		assertEquals(8L, summary.getEvent().getTotalCount());
 		assertEquals(1L, summary.getEvent().getProcessingCount());
 		verify(authorizationInvalidationOutboxOpsService).getOutboxStats();
-		verify(authInnerFeignClient).getInvalidationEventSummary();
+		verify(authorizationInvalidationEventOpsService).getEventStats();
 	}
 
 	@Test
-	@DisplayName("统计摘要：auth 统计不可用时抛出 SERVICE_UNAVAILABLE")
+	@DisplayName("统计摘要：事件统计不可用时抛出 SERVICE_UNAVAILABLE")
 	void getSummary_shouldThrowWhenEventSummaryUnavailable() {
 		when(authorizationInvalidationOutboxOpsService.getOutboxStats())
 			.thenReturn(new AuthorizationInvalidationOutboxStatsPO());
-		when(authInnerFeignClient.getInvalidationEventSummary()).thenReturn(Result.error("unavailable"));
+		when(authorizationInvalidationEventOpsService.getEventStats())
+			.thenThrow(new SystemBusinessException(SERVICE_UNAVAILABLE));
 
 		SystemBusinessException exception = assertThrows(SystemBusinessException.class, statsAdminService::getSummary);
 

@@ -27,7 +27,13 @@ public enum AuthorizationInvalidationOpsResultCode implements SystemResultCode {
 	 * Outbox 仍处于 PROCESSING 且未满足解锁条件
 	 */
 	PROCESSING_LOCKED(409, 301, "AUTH_INVALIDATION_OUTBOX_PROCESSING_LOCKED",
-			"system.authorization.invalidation.outbox.processing_locked"),;
+			"system.authorization.invalidation.outbox.processing_locked"),
+
+	/**
+	 * 幂等事件非 processing 占位，无需释放
+	 */
+	EVENT_RELEASE_NOT_PROCESSING(400, 304, "AUTH_INVALIDATION_EVENT_RELEASE_NOT_PROCESSING",
+			"system.authorization.invalidation.event.release_not_processing"),;
 
 	private final int httpStatus;
 

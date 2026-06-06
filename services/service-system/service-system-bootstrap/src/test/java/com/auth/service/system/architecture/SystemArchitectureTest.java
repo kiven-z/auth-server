@@ -156,4 +156,16 @@ class SystemArchitectureTest {
 		.dependOnClassesThat()
 		.resideInAPackage("com.auth.service.system.common.feign..");
 
+	/**
+	 * 授权失效运维 admin 服务不得直接依赖 Feign 客户端（经 authorization.ops 门面访问 auth）。
+	 */
+	@ArchTest
+	static final ArchRule admin_invalidation_must_not_use_feign_client = noClasses().that()
+		.resideInAPackage(ADMIN)
+		.and()
+		.haveSimpleNameStartingWith("AuthorizationInvalidation")
+		.should()
+		.dependOnClassesThat()
+		.haveSimpleName("AuthInnerFeignClient");
+
 }

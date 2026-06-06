@@ -3,8 +3,8 @@ package com.auth.service.system.admin.convert;
 import com.auth.service.system.admin.model.query.AuthorizationInvalidationEventQuery;
 import com.auth.service.system.admin.model.vo.authorizationinvalidation.AuthorizationInvalidationEventDetailVO;
 import com.auth.service.system.admin.model.vo.authorizationinvalidation.AuthorizationInvalidationEventPageVO;
+import com.auth.service.system.authorization.ops.model.query.AuthorizationInvalidationEventOpsQuery;
 import com.auth.service.system.common.feign.dto.AuthorizationInvalidationEventDetailInnerDTO;
-import com.auth.service.system.common.feign.dto.AuthorizationInvalidationEventInnerQuery;
 import com.auth.service.system.common.feign.dto.AuthorizationInvalidationEventPageInnerDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -22,11 +22,11 @@ public interface AuthorizationInvalidationEventAdminConverter {
 		.getMapper(AuthorizationInvalidationEventAdminConverter.class);
 
 	/**
-	 * 管理端查询条件 → Feign 查询
+	 * 管理端查询条件 → 运维查询
 	 * @param query 管理端查询
-	 * @return Feign 查询
+	 * @return 运维查询
 	 */
-	AuthorizationInvalidationEventInnerQuery toInnerQuery(AuthorizationInvalidationEventQuery query);
+	AuthorizationInvalidationEventOpsQuery toOpsQuery(AuthorizationInvalidationEventQuery query);
 
 	/**
 	 * Feign 分页行 → 管理端分页 VO

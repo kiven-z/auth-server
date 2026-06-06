@@ -4,10 +4,10 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
 
+import com.auth.service.system.authorization.ops.model.po.AuthorizationInvalidationEventStatsPO;
 import com.auth.service.system.authorization.ops.model.po.AuthorizationInvalidationOutboxStatsPO;
 import com.auth.service.system.admin.model.vo.authorizationinvalidation.AuthorizationInvalidationEventStatsVO;
 import com.auth.service.system.admin.model.vo.authorizationinvalidation.AuthorizationInvalidationOutboxStatsVO;
-import com.auth.service.system.common.feign.dto.AuthorizationInvalidationEventStatsInnerDTO;
 
 import lombok.experimental.UtilityClass;
 
@@ -54,22 +54,21 @@ public class AuthorizationInvalidationStatsAdminConverter {
 	}
 
 	/**
-	 * 幂等事件统计 DTO 转 VO
-	 * @param statsDto Feign DTO
+	 * 幂等事件统计 PO 转 VO
+	 * @param statsPo 统计 PO
 	 * @return 事件统计 VO
 	 */
-	public static AuthorizationInvalidationEventStatsVO toEventStatsVo(
-			AuthorizationInvalidationEventStatsInnerDTO statsDto) {
+	public static AuthorizationInvalidationEventStatsVO toEventStatsVo(AuthorizationInvalidationEventStatsPO statsPo) {
 		AuthorizationInvalidationEventStatsVO statsVo = new AuthorizationInvalidationEventStatsVO();
-		if (statsDto == null) {
+		if (statsPo == null) {
 			statsVo.setTotalCount(0L);
 			statsVo.setProcessingCount(0L);
 			statsVo.setCompletedCount(0L);
 			return statsVo;
 		}
-		statsVo.setTotalCount(Objects.requireNonNullElse(statsDto.getTotalCount(), 0L));
-		statsVo.setProcessingCount(Objects.requireNonNullElse(statsDto.getProcessingCount(), 0L));
-		statsVo.setCompletedCount(Objects.requireNonNullElse(statsDto.getCompletedCount(), 0L));
+		statsVo.setTotalCount(Objects.requireNonNullElse(statsPo.getTotalCount(), 0L));
+		statsVo.setProcessingCount(Objects.requireNonNullElse(statsPo.getProcessingCount(), 0L));
+		statsVo.setCompletedCount(Objects.requireNonNullElse(statsPo.getCompletedCount(), 0L));
 		return statsVo;
 	}
 

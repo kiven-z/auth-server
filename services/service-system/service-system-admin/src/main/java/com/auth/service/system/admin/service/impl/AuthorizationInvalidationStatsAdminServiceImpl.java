@@ -1,43 +1,29 @@
 package com.auth.service.system.admin.service.impl;
 
-import static com.auth.service.system.common.exception.code.SystemCommonResultCode.SERVICE_UNAVAILABLE;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.auth.common.core.model.response.Result;
-import com.auth.common.web.resttemplate.FeignUtil;
 import com.auth.service.system.admin.convert.AuthorizationInvalidationStatsAdminConverter;
-import com.auth.service.system.admin.model.vo.authorizationinvalidation.AuthorizationInvalidationEventStatsVO;
 import com.auth.service.system.admin.model.vo.authorizationinvalidation.AuthorizationInvalidationSummaryVO;
 import com.auth.service.system.admin.service.AuthorizationInvalidationStatsAdminService;
+import com.auth.service.system.authorization.ops.service.AuthorizationInvalidationEventOpsService;
 import com.auth.service.system.authorization.ops.service.AuthorizationInvalidationOutboxOpsService;
-import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.common.feign.AuthInnerFeignClient;
-import com.auth.service.system.common.feign.dto.AuthorizationInvalidationEventStatsInnerDTO;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
 
 /**
  * 授权失效运维统计服务实现
  *
  * @author Bunny
  */
-@Slf4j
+@RequiredArgsConstructor
 @Service
 @Transactional(readOnly = true)
 public class AuthorizationInvalidationStatsAdminServiceImpl implements AuthorizationInvalidationStatsAdminService {
 
 	private final AuthorizationInvalidationOutboxOpsService authorizationInvalidationOutboxOpsService;
 
-	private final AuthInnerFeignClient authInnerFeignClient;
-
-	public AuthorizationInvalidationStatsAdminServiceImpl(
-			AuthorizationInvalidationOutboxOpsService authorizationInvalidationOutboxOpsService,
-			AuthInnerFeignClient authInnerFeignClient) {
-		this.authorizationInvalidationOutboxOpsService = authorizationInvalidationOutboxOpsService;
-		this.authInnerFeignClient = authInnerFeignClient;
-	}
+	private final AuthorizationInvalidationEventOpsService authorizationInvalidationEventOpsService;
 
 	/**
 	 * {@inheritDoc}
@@ -47,21 +33,9 @@ public class AuthorizationInvalidationStatsAdminServiceImpl implements Authoriza
 		AuthorizationInvalidationSummaryVO summaryVO = new AuthorizationInvalidationSummaryVO();
 		summaryVO.setOutbox(AuthorizationInvalidationStatsAdminConverter
 			.toOutboxStatsVo(authorizationInvalidationOutboxOpsService.getOutboxStats()));
-		summaryVO.setEvent(loadEventStats());
+		summaryVO.setEvent(AuthorizationInvalidationStatsAdminConverter
+			.toEventStatsVo(authorizationInvalidationEventOpsService.getEventStats()));
 		return summaryVO;
-	}
-
-	/**
-	 * 经 Feign 拉取幂等事件统计
-	 * @return 事件统计 VO
-	 */
-	private AuthorizationInvalidationEventStatsVO loadEventStats() {
-		Result<AuthorizationInvalidationEventStatsInnerDTO> result = authInnerFeignClient.getInvalidationEventSummary();
-		if (!FeignUtil.isSuccessWithData(result)) {
-			log.warn("Authorization invalidation event summary unavailable");
-			throw new SystemBusinessException(SERVICE_UNAVAILABLE);
-		}
-		return AuthorizationInvalidationStatsAdminConverter.toEventStatsVo(result.getData());
 	}
 
 }

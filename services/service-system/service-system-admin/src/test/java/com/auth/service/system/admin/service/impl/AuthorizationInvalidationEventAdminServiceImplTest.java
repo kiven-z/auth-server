@@ -1,12 +1,13 @@
 package com.auth.service.system.admin.service.impl;
 
-import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.model.query.AuthorizationInvalidationEventQuery;
 import com.auth.service.system.admin.model.vo.authorizationinvalidation.AuthorizationInvalidationEventDetailVO;
 import com.auth.service.system.admin.model.vo.authorizationinvalidation.AuthorizationInvalidationEventPageVO;
+import com.auth.service.system.authorization.ops.exception.AuthorizationInvalidationOpsResultCode;
+import com.auth.service.system.authorization.ops.model.query.AuthorizationInvalidationEventOpsQuery;
+import com.auth.service.system.authorization.ops.service.AuthorizationInvalidationEventOpsService;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.common.feign.AuthInnerFeignClient;
 import com.auth.service.system.common.feign.dto.AuthorizationInvalidationEventDetailInnerDTO;
 import com.auth.service.system.common.feign.dto.AuthorizationInvalidationEventPageInnerDTO;
 import com.auth.service.system.common.service.AuditUserDisplayService;
@@ -19,14 +20,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static com.auth.service.system.admin.exception.SystemAdminResultCode.AUTH_INVALIDATION_EVENT_RELEASE_NOT_PROCESSING;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.SERVICE_UNAVAILABLE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -38,7 +38,7 @@ import static org.mockito.Mockito.when;
 class AuthorizationInvalidationEventAdminServiceImplTest {
 
 	@Mock
-	private AuthInnerFeignClient authInnerFeignClient;
+	private AuthorizationInvalidationEventOpsService authorizationInvalidationEventOpsService;
 
 	@Mock
 	private AuditUserDisplayService auditUserDisplayService;
@@ -47,10 +47,10 @@ class AuthorizationInvalidationEventAdminServiceImplTest {
 	private AuthorizationInvalidationEventAdminServiceImpl adminService;
 
 	@Test
-	@DisplayName("分页查询：Feign 失败时抛出 SERVICE_UNAVAILABLE")
-	void getPage_shouldThrowWhenFeignFailed() {
-		when(authInnerFeignClient.getInvalidationEventPage(org.mockito.ArgumentMatchers.any()))
-			.thenReturn(Result.error("unavailable"));
+	@DisplayName("分页查询：运维门面失败时抛出 SERVICE_UNAVAILABLE")
+	void getPage_shouldThrowWhenOpsFailed() {
+		when(authorizationInvalidationEventOpsService.getPage(any(AuthorizationInvalidationEventOpsQuery.class)))
+			.thenThrow(new SystemBusinessException(SERVICE_UNAVAILABLE));
 
 		AuthorizationInvalidationEventQuery query = new AuthorizationInvalidationEventQuery();
 		SystemBusinessException exception = assertThrows(SystemBusinessException.class,
@@ -60,7 +60,7 @@ class AuthorizationInvalidationEventAdminServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("分页查询：Feign 成功时应转换并 enrich 审计用户名")
+	@DisplayName("分页查询：运维门面成功时应转换并 enrich 审计用户名")
 	void getPage_shouldConvertAndEnrich() {
 		AuthorizationInvalidationEventPageInnerDTO innerDto = new AuthorizationInvalidationEventPageInnerDTO();
 		innerDto.setId(1L);
@@ -70,8 +70,8 @@ class AuthorizationInvalidationEventAdminServiceImplTest {
 
 		PageResponse<AuthorizationInvalidationEventPageInnerDTO> pageData = PageResponse.of(1L, 10L, 1L,
 				List.of(innerDto));
-		when(authInnerFeignClient.getInvalidationEventPage(org.mockito.ArgumentMatchers.any()))
-			.thenReturn(Result.success(pageData));
+		when(authorizationInvalidationEventOpsService.getPage(any(AuthorizationInvalidationEventOpsQuery.class)))
+			.thenReturn(pageData);
 
 		PageResponse<AuthorizationInvalidationEventPageVO> response = adminService
 			.getPage(new AuthorizationInvalidationEventQuery());
@@ -82,9 +82,10 @@ class AuthorizationInvalidationEventAdminServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("详情查询：Feign 无数据时抛出 DATA_NOT_EXIST")
-	void getDetail_shouldThrowWhenFeignFailed() {
-		when(authInnerFeignClient.getInvalidationEventDetail(1L)).thenReturn(Result.error("not found"));
+	@DisplayName("详情查询：运维门面无数据时抛出 DATA_NOT_EXIST")
+	void getDetail_shouldThrowWhenOpsFailed() {
+		when(authorizationInvalidationEventOpsService.getDetail(1L))
+			.thenThrow(new SystemBusinessException(DATA_NOT_EXIST));
 
 		SystemBusinessException exception = assertThrows(SystemBusinessException.class,
 				() -> adminService.getDetail(1L));
@@ -93,12 +94,12 @@ class AuthorizationInvalidationEventAdminServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("详情查询：Feign 成功时返回详情 VO")
+	@DisplayName("详情查询：运维门面成功时返回详情 VO")
 	void getDetail_shouldReturnDetailVo() {
 		AuthorizationInvalidationEventDetailInnerDTO innerDto = new AuthorizationInvalidationEventDetailInnerDTO();
 		innerDto.setId(2L);
 		innerDto.setEventId("evt-detail");
-		when(authInnerFeignClient.getInvalidationEventDetail(2L)).thenReturn(Result.success(innerDto));
+		when(authorizationInvalidationEventOpsService.getDetail(2L)).thenReturn(innerDto);
 
 		AuthorizationInvalidationEventDetailVO detailVO = adminService.getDetail(2L);
 
@@ -107,35 +108,26 @@ class AuthorizationInvalidationEventAdminServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("释放占位：非 processing 记录应拒绝")
-	void releaseProcessingClaim_shouldRejectCompletedEvent() {
-		AuthorizationInvalidationEventDetailInnerDTO innerDto = new AuthorizationInvalidationEventDetailInnerDTO();
-		innerDto.setId(3L);
-		innerDto.setEventId("evt-done");
-		innerDto.setProcessing(Boolean.FALSE);
-		when(authInnerFeignClient.getInvalidationEventDetail(3L)).thenReturn(Result.success(innerDto));
-
-		SystemBusinessException exception = assertThrows(SystemBusinessException.class,
-				() -> adminService.releaseProcessingClaim(3L));
-
-		assertEquals(AUTH_INVALIDATION_EVENT_RELEASE_NOT_PROCESSING, exception.getResultCode());
-		verify(authInnerFeignClient, never()).releaseInvalidationEventClaim("evt-done");
-	}
-
-	@Test
-	@DisplayName("释放占位：processing 记录应调用 Feign 释放")
-	void releaseProcessingClaim_shouldCallFeignRelease() {
-		AuthorizationInvalidationEventDetailInnerDTO innerDto = new AuthorizationInvalidationEventDetailInnerDTO();
-		innerDto.setId(4L);
-		innerDto.setEventId("evt-processing");
-		innerDto.setProcessing(Boolean.TRUE);
-		when(authInnerFeignClient.getInvalidationEventDetail(4L)).thenReturn(Result.success(innerDto));
-		when(authInnerFeignClient.releaseInvalidationEventClaim("evt-processing")).thenReturn(Result.success(true));
+	@DisplayName("释放占位：应委托运维门面")
+	void releaseProcessingClaim_shouldDelegateToOps() {
+		when(authorizationInvalidationEventOpsService.releaseProcessingClaim(4L)).thenReturn(true);
 
 		boolean released = adminService.releaseProcessingClaim(4L);
 
 		assertTrue(released);
-		verify(authInnerFeignClient).releaseInvalidationEventClaim("evt-processing");
+		verify(authorizationInvalidationEventOpsService).releaseProcessingClaim(4L);
+	}
+
+	@Test
+	@DisplayName("释放占位：非 processing 记录应透传运维结果码")
+	void releaseProcessingClaim_shouldPropagateOpsResultCode() {
+		when(authorizationInvalidationEventOpsService.releaseProcessingClaim(3L)).thenThrow(
+				new SystemBusinessException(AuthorizationInvalidationOpsResultCode.EVENT_RELEASE_NOT_PROCESSING));
+
+		SystemBusinessException exception = assertThrows(SystemBusinessException.class,
+				() -> adminService.releaseProcessingClaim(3L));
+
+		assertEquals(AuthorizationInvalidationOpsResultCode.EVENT_RELEASE_NOT_PROCESSING, exception.getResultCode());
 	}
 
 }
