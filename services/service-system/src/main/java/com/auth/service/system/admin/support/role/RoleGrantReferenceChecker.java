@@ -59,14 +59,4 @@ public class RoleGrantReferenceChecker {
 				SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 	}
 
-	/**
-	 * 菜单-角色关联专用：仅允许菜单角色（roleType 2）
-	 * @param roleCodes 待写入角色编码
-	 */
-	public void requireMenuAssignEligibleRoles(List<String> roleCodes) {
-		// FIXME 直接调用 requireGrantEligibleRoles
-		requireGrantEligibleRoles(roleCodes, RoleTypeEnum.MENU_ASSIGN_TYPES,
-				SystemCommonResultCode.GRANT_REFERENCE_INVALID);
-	}
-
 }

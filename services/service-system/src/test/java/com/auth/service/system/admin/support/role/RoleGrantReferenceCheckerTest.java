@@ -78,10 +78,11 @@ class RoleGrantReferenceCheckerTest {
 
 	@Test
 	@DisplayName("菜单关联：全部 eligible 时不抛异常")
-	void requireMenuAssignEligibleRolesPassesWhenAllEligible() {
+	void requireGrantEligibleRolesPassesForMenuAssignWhenAllEligible() {
 		when(sysRoleMapper.selectCount(any())).thenReturn(1L);
 
-		assertThatCode(() -> roleGrantReferenceChecker.requireMenuAssignEligibleRoles(List.of("MENU_ADMIN")))
+		assertThatCode(() -> roleGrantReferenceChecker.requireGrantEligibleRoles(List.of("MENU_ADMIN"),
+				RoleTypeEnum.MENU_ASSIGN_TYPES, SystemCommonResultCode.GRANT_REFERENCE_INVALID))
 			.doesNotThrowAnyException();
 	}
 
@@ -109,12 +110,13 @@ class RoleGrantReferenceCheckerTest {
 	}
 
 	@Test
-	@DisplayName("菜单关联：存在无效角色时抛出 MENU_ROLE_INVALID")
-	void requireMenuAssignEligibleRolesThrowsWhenNotAllEligible() {
+	@DisplayName("菜单关联：存在无效角色时抛出 GRANT_REFERENCE_INVALID")
+	void requireGrantEligibleRolesThrowsForMenuAssignWhenNotAllEligible() {
 		when(sysRoleMapper.selectCount(any())).thenReturn(0L);
 
 		List<String> roleCodes = List.of("BIZ_ADMIN");
-		assertThatThrownBy(() -> roleGrantReferenceChecker.requireMenuAssignEligibleRoles(roleCodes))
+		assertThatThrownBy(() -> roleGrantReferenceChecker.requireGrantEligibleRoles(roleCodes,
+				RoleTypeEnum.MENU_ASSIGN_TYPES, SystemCommonResultCode.GRANT_REFERENCE_INVALID))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.GRANT_REFERENCE_INVALID);

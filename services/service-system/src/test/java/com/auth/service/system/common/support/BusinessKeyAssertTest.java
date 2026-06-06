@@ -1,9 +1,8 @@
 package com.auth.service.system.common.support;
 
-import com.auth.service.system.common.exception.code.SystemCommonResultCode;
-import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.junit.jupiter.api.DisplayName;

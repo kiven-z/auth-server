@@ -1,10 +1,11 @@
 package com.auth.service.system.admin.service.impl;
 
-import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.admin.mapper.SysMenuRoleMapper;
+import com.auth.service.system.admin.model.enums.RoleTypeEnum;
 import com.auth.service.system.admin.model.form.menu.SysMenuAssignRoleForm;
 import com.auth.service.system.admin.support.role.RoleGrantReferenceChecker;
 import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,6 +17,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 /**
@@ -43,7 +45,8 @@ class SysMenuManageServiceImplTest {
 
 		sysMenuManageService.replaceMenuRoles(menuId, form);
 
-		verify(roleGrantReferenceChecker).requireMenuAssignEligibleRoles(List.of("MENU_ADMIN", "MENU_GUEST"));
+		verify(roleGrantReferenceChecker).requireGrantEligibleRoles(List.of("MENU_ADMIN", "MENU_GUEST"),
+				RoleTypeEnum.MENU_ASSIGN_TYPES, SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 		verify(sysMenuRoleMapper).deleteByMenuId(menuId);
 		verify(sysMenuRoleMapper).batchInsertMenuRoles(menuId, List.of("MENU_ADMIN", "MENU_GUEST"));
 	}
@@ -57,7 +60,8 @@ class SysMenuManageServiceImplTest {
 
 		sysMenuManageService.replaceMenuRoles(menuId, form);
 
-		verify(roleGrantReferenceChecker).requireMenuAssignEligibleRoles(List.of());
+		verify(roleGrantReferenceChecker).requireGrantEligibleRoles(List.of(), RoleTypeEnum.MENU_ASSIGN_TYPES,
+				SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 		verify(sysMenuRoleMapper).deleteByMenuId(menuId);
 		verify(sysMenuRoleMapper, never()).batchInsertMenuRoles(any(), any());
 	}
@@ -71,7 +75,8 @@ class SysMenuManageServiceImplTest {
 
 		doThrow(new SystemBusinessException(SystemCommonResultCode.GRANT_REFERENCE_INVALID))
 			.when(roleGrantReferenceChecker)
-			.requireMenuAssignEligibleRoles(List.of("BIZ_ADMIN"));
+			.requireGrantEligibleRoles(eq(List.of("BIZ_ADMIN")), eq(RoleTypeEnum.MENU_ASSIGN_TYPES),
+					eq(SystemCommonResultCode.GRANT_REFERENCE_INVALID));
 
 		assertThatThrownBy(() -> sysMenuManageService.replaceMenuRoles(menuId, form))
 			.isInstanceOf(SystemBusinessException.class)

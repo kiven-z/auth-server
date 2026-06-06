@@ -6,6 +6,7 @@ import com.auth.service.system.admin.mapper.SysMenuMapper;
 import com.auth.service.system.admin.mapper.SysMenuPermissionMapper;
 import com.auth.service.system.admin.mapper.SysMenuRoleMapper;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
+import com.auth.service.system.admin.model.enums.RoleTypeEnum;
 import com.auth.service.system.admin.model.form.menu.SysMenuAssignPermissionForm;
 import com.auth.service.system.admin.model.form.menu.SysMenuAssignRoleForm;
 import com.auth.service.system.admin.model.po.menu.SysMenuAssignedPermissionPO;
@@ -14,6 +15,7 @@ import com.auth.service.system.admin.model.vo.menu.SysMenuAssignedPermissionRow;
 import com.auth.service.system.admin.model.vo.menu.SysMenuAssignedRoleRow;
 import com.auth.service.system.admin.service.SysMenuManageService;
 import com.auth.service.system.admin.support.role.RoleGrantReferenceChecker;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -61,7 +63,8 @@ public class SysMenuManageServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu
 	@Override
 	public void replaceMenuRoles(Long menuId, SysMenuAssignRoleForm form) {
 		List<String> roleCodes = CollUtil.emptyIfNull(form.getRoleCodes()).stream().distinct().toList();
-		roleGrantReferenceChecker.requireMenuAssignEligibleRoles(roleCodes);
+		roleGrantReferenceChecker.requireGrantEligibleRoles(roleCodes, RoleTypeEnum.MENU_ASSIGN_TYPES,
+				SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 
 		// 删除当前菜单已分配角色
 		sysMenuRoleMapper.deleteByMenuId(menuId);
