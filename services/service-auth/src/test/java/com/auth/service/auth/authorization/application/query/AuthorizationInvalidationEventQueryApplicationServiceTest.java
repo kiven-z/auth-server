@@ -10,7 +10,6 @@ import com.auth.service.auth.authorization.domain.invalidation.model.Invalidatio
 import com.auth.service.auth.authorization.domain.invalidation.port.InvalidationEventQueryPort;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.enums.AuthResultCode;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,10 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -33,8 +29,8 @@ import static org.mockito.Mockito.when;
 /**
  * {@link AuthorizationInvalidationEventQueryApplicationService} 单元测试
  */
-@ExtendWith(MockitoExtension.class)
 @DisplayName("AuthorizationInvalidationEventQueryApplicationService 幂等事件只读查询")
+@ExtendWith(MockitoExtension.class)
 class AuthorizationInvalidationEventQueryApplicationServiceTest {
 
 	@Mock
@@ -42,6 +38,17 @@ class AuthorizationInvalidationEventQueryApplicationServiceTest {
 
 	@InjectMocks
 	private AuthorizationInvalidationEventQueryApplicationService queryApplicationService;
+
+	private static AuthorizationInvalidationEventPageRowPO buildPageRow(Long id, String eventId,
+			Integer impactedUserCount) {
+		AuthorizationInvalidationEventPageRowPO row = new AuthorizationInvalidationEventPageRowPO();
+		row.setId(id);
+		row.setEventId(eventId);
+		row.setChangeKind("ROLE");
+		row.setImpactedUserCount(impactedUserCount);
+		row.setProcessedAt(LocalDateTime.now());
+		return row;
+	}
 
 	@Test
 	@DisplayName("分页查询：应映射 processing 标记并返回分页结果")
@@ -94,17 +101,6 @@ class AuthorizationInvalidationEventQueryApplicationServiceTest {
 		assertEquals("evt-detail", detailVO.getEventId());
 		assertEquals("ROLE", detailVO.getChangeKind());
 		assertFalse(detailVO.getProcessing());
-	}
-
-	private static AuthorizationInvalidationEventPageRowPO buildPageRow(Long id, String eventId,
-			Integer impactedUserCount) {
-		AuthorizationInvalidationEventPageRowPO row = new AuthorizationInvalidationEventPageRowPO();
-		row.setId(id);
-		row.setEventId(eventId);
-		row.setChangeKind("ROLE");
-		row.setImpactedUserCount(impactedUserCount);
-		row.setProcessedAt(LocalDateTime.now());
-		return row;
 	}
 
 }
