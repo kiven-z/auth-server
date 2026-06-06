@@ -2,7 +2,10 @@ package com.auth.service.system.admin.service.impl;
 
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.SysMenuMapper;
+import com.auth.service.system.admin.model.entity.SysMenuEntity;
+import com.auth.service.system.admin.model.form.menu.SysMenuMoveForm;
 import com.auth.service.system.admin.service.MenuWebRouteTreeBuilder;
+import com.auth.service.system.admin.support.menu.MenuReferenceChecker;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.feign.AuthInnerFeignClient;
 import com.auth.service.system.common.service.AuditUserDisplayService;
@@ -20,6 +23,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -47,11 +51,15 @@ class SysMenuServiceImplTest {
 	@Mock
 	private MenuWebRouteTreeBuilder menuWebRouteTreeBuilder;
 
+	@Mock
+	private MenuReferenceChecker menuReferenceChecker;
+
 	private SysMenuServiceImpl sysMenuService;
 
 	@BeforeEach
 	void setUp() throws Exception {
-		sysMenuService = new SysMenuServiceImpl(auditUserDisplayService, authInnerFeignClient, menuWebRouteTreeBuilder);
+		sysMenuService = new SysMenuServiceImpl(auditUserDisplayService, authInnerFeignClient, menuWebRouteTreeBuilder,
+				menuReferenceChecker);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysMenuService, sysMenuMapper);
@@ -79,6 +87,36 @@ class SysMenuServiceImplTest {
 	}
 
 	@Test
+	@DisplayName("移动菜单：父级未变时跳过更新")
+	void moveSkipsUpdateWhenParentUnchanged() {
+		SysMenuEntity existing = menuEntity(6L, 0L);
+		when(menuReferenceChecker.getExisting(6L)).thenReturn(existing);
+		when(menuReferenceChecker.normalizeAndRequireParent(0L)).thenReturn(0L);
+
+		SysMenuMoveForm form = new SysMenuMoveForm();
+		form.setParentId(0L);
+		sysMenuService.move(6L, form);
+
+		verify(sysMenuMapper, never()).updateById(any(SysMenuEntity.class));
+	}
+
+	@Test
+	@DisplayName("移动菜单：父级变更时更新 parentId")
+	void moveUpdatesParentWhenChanged() {
+		SysMenuEntity existing = menuEntity(7L, 0L);
+		when(menuReferenceChecker.getExisting(7L)).thenReturn(existing);
+		when(menuReferenceChecker.normalizeAndRequireParent(12L)).thenReturn(12L);
+		when(sysMenuMapper.updateById(any(SysMenuEntity.class))).thenReturn(1);
+
+		SysMenuMoveForm form = new SysMenuMoveForm();
+		form.setParentId(12L);
+		sysMenuService.move(7L, form);
+
+		verify(menuReferenceChecker).requireMoveTargetValid(7L, 12L);
+		verify(sysMenuMapper).updateById(argThat((SysMenuEntity e) -> Long.valueOf(12L).equals(e.getParentId())));
+	}
+
+	@Test
 	@DisplayName("删除菜单：无子节点冲突时批量物理删除")
 	void deleteShouldBatchRemoveByIds() {
 		when(sysMenuMapper.selectFirstBlockedParentId(List.of(3L, 3L, 4L))).thenReturn(null);
@@ -87,6 +125,13 @@ class SysMenuServiceImplTest {
 
 		verify(sysMenuMapper).selectFirstBlockedParentId(List.of(3L, 3L, 4L));
 		verify(sysMenuMapper).deleteByIds(anyCollection());
+	}
+
+	private static SysMenuEntity menuEntity(Long id, Long parentId) {
+		SysMenuEntity entity = new SysMenuEntity();
+		entity.setId(id);
+		entity.setParentId(parentId);
+		return entity;
 	}
 
 }

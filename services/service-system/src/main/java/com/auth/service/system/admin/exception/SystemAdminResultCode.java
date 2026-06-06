@@ -126,6 +126,21 @@ public enum SystemAdminResultCode implements SystemResultCode {
 	MENU_HAS_CHILDREN(409, 289, "MENU_HAS_CHILDREN", "system.menu.has_children"),
 
 	/**
+	 * 父菜单不存在
+	 */
+	MENU_PARENT_NOT_FOUND(404, 292, "MENU_PARENT_NOT_FOUND", "system.menu.parent_not_found"),
+
+	/**
+	 * 不能将菜单移动到自身下
+	 */
+	MENU_MOVE_TO_SELF(400, 293, "MENU_MOVE_TO_SELF", "system.menu.move_to_self"),
+
+	/**
+	 * 不能将菜单移动到其子菜单下
+	 */
+	MENU_MOVE_TO_DESCENDANT(400, 294, "MENU_MOVE_TO_DESCENDANT", "system.menu.move_to_descendant"),
+
+	/**
 	 * 菜单分配角色无效（不存在、未启用或类型非菜单角色）
 	 */
 	MENU_ROLE_INVALID(400, 291, "MENU_ROLE_INVALID", "system.menu.role_invalid"),

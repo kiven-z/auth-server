@@ -3,6 +3,7 @@ package com.auth.service.system.admin.service;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.admin.model.form.menu.SysMenuBatchStatusForm;
+import com.auth.service.system.admin.model.form.menu.SysMenuMoveForm;
 import com.auth.service.system.admin.model.form.menu.SysMenuSaveForm;
 import com.auth.service.system.admin.model.query.SysMenuQuery;
 import com.auth.service.system.admin.model.vo.menu.RouteNodeVO;
@@ -64,6 +65,13 @@ public interface SysMenuService extends IService<SysMenuEntity> {
 	 * @param form 表单（含 id）
 	 */
 	void update(SysMenuSaveForm form);
+
+	/**
+	 * 移动菜单（变更父菜单）
+	 * @param menuId 菜单主键
+	 * @param form 新父菜单
+	 */
+	void move(Long menuId, SysMenuMoveForm form);
 
 	/**
 	 * 批量更新状态（0=启用 1=禁用）

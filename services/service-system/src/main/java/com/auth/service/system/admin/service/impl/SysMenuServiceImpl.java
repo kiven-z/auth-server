@@ -11,7 +11,9 @@ import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.SysMenuMapper;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.admin.model.form.menu.SysMenuBatchStatusForm;
+import com.auth.service.system.admin.model.form.menu.SysMenuMoveForm;
 import com.auth.service.system.admin.model.form.menu.SysMenuSaveForm;
+import com.auth.service.system.admin.support.menu.MenuReferenceChecker;
 import com.auth.service.system.admin.model.query.SysMenuQuery;
 import com.auth.service.system.admin.model.vo.menu.RouteNodeVO;
 import com.auth.service.system.admin.model.vo.menu.SysMenuDetailVO;
@@ -52,11 +54,15 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuEntity
 
 	private final MenuWebRouteTreeBuilder menuWebRouteTreeBuilder;
 
+	private final MenuReferenceChecker menuReferenceChecker;
+
 	public SysMenuServiceImpl(AuditUserDisplayService auditUserDisplayService,
-			AuthInnerFeignClient authInnerFeignClient, MenuWebRouteTreeBuilder menuWebRouteTreeBuilder) {
+			AuthInnerFeignClient authInnerFeignClient, MenuWebRouteTreeBuilder menuWebRouteTreeBuilder,
+			MenuReferenceChecker menuReferenceChecker) {
 		this.auditUserDisplayService = auditUserDisplayService;
 		this.authInnerFeignClient = authInnerFeignClient;
 		this.menuWebRouteTreeBuilder = menuWebRouteTreeBuilder;
+		this.menuReferenceChecker = menuReferenceChecker;
 	}
 
 	/**
@@ -140,6 +146,23 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuEntity
 		SysMenuEntity entity = SysMenuConverter.INSTANCE.toMenuEntity(form);
 		entity.setParentId(ObjectUtil.defaultIfNull(entity.getParentId(), 0L));
 		updateById(entity);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void move(Long menuId, SysMenuMoveForm form) {
+		SysMenuEntity existing = menuReferenceChecker.getExisting(menuId);
+		long newParentId = menuReferenceChecker.normalizeAndRequireParent(form.getParentId());
+
+		if (MenuReferenceChecker.normalizeParentId(existing.getParentId()) == newParentId) {
+			return;
+		}
+
+		menuReferenceChecker.requireMoveTargetValid(menuId, newParentId);
+		existing.setParentId(newParentId);
+		updateById(existing);
 	}
 
 	/**
