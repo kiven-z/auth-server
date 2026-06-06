@@ -1,6 +1,6 @@
 package com.auth.service.system.admin.service.impl;
 
-import com.auth.service.system.admin.exception.SystemAdminResultCode;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.admin.mapper.SysMenuPermissionMapper;
 import com.auth.service.system.admin.mapper.SysPermissionMapper;
 import com.auth.service.system.admin.mapper.SysRolePermissionMapper;
@@ -104,7 +104,7 @@ class SysPermissionServiceImplTest {
 
 		assertThatThrownBy(() -> sysPermissionService.create(form)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemAdminResultCode.PERMISSION_CODE_DUPLICATE);
+			.isEqualTo(SystemCommonResultCode.DATA_CODE_DUPLICATE);
 	}
 
 	@Test
@@ -115,7 +115,7 @@ class SysPermissionServiceImplTest {
 
 		assertThatThrownBy(() -> sysPermissionService.update(form)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemAdminResultCode.PERMISSION_NOT_FOUND);
+			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
 
 		verifyNoInteractions(permissionInvalidationTrigger);
 	}
@@ -129,7 +129,7 @@ class SysPermissionServiceImplTest {
 
 		assertThatThrownBy(() -> sysPermissionService.update(form)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemAdminResultCode.PERMISSION_CODE_DUPLICATE);
+			.isEqualTo(SystemCommonResultCode.DATA_CODE_DUPLICATE);
 
 		verifyNoInteractions(permissionInvalidationTrigger);
 	}
@@ -191,7 +191,7 @@ class SysPermissionServiceImplTest {
 
 		assertThatThrownBy(() -> sysPermissionService.getDetail(9L)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemAdminResultCode.PERMISSION_NOT_FOUND);
+			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
 	}
 
 	@Test
@@ -264,7 +264,7 @@ class SysPermissionServiceImplTest {
 
 		assertThatThrownBy(() -> sysPermissionService.deleteById(9L)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemAdminResultCode.PERMISSION_NOT_FOUND);
+			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
 
 		verify(sysPermissionMapper, never()).deleteById(any());
 	}

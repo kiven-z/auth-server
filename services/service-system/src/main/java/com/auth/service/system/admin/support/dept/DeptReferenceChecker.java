@@ -2,7 +2,7 @@ package com.auth.service.system.admin.support.dept;
 
 import com.auth.common.core.utils.TreeParentIdUtil;
 import com.auth.common.core.utils.TreeRelationUtil;
-import com.auth.service.system.admin.exception.SystemAdminResultCode;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.admin.mapper.DeptReferenceMapper;
 import com.auth.service.system.admin.mapper.SysDeptMapper;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
@@ -31,7 +31,7 @@ public class DeptReferenceChecker {
 	public SysDeptEntity getExistingActive(Long deptId) {
 		SysDeptEntity existing = sysDeptMapper.selectById(deptId);
 		if (existing == null) {
-			throw new SystemBusinessException(SystemAdminResultCode.DEPT_NOT_FOUND, deptId);
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST, deptId);
 		}
 		return existing;
 	}
@@ -44,7 +44,7 @@ public class DeptReferenceChecker {
 	public long normalizeAndRequireActiveParent(Long rawParentId) {
 		long parentId = TreeParentIdUtil.normalize(rawParentId);
 		if (parentId > TreeParentIdUtil.ROOT_PARENT_ID && sysDeptMapper.countActiveById(parentId) == 0) {
-			throw new SystemBusinessException(SystemAdminResultCode.DEPT_PARENT_NOT_FOUND, parentId);
+			throw new SystemBusinessException(SystemCommonResultCode.TREE_PARENT_UNAVAILABLE, parentId);
 		}
 		return parentId;
 	}
@@ -65,7 +65,7 @@ public class DeptReferenceChecker {
 	 */
 	public void requireNoActiveChildren(Long deptId) {
 		if (sysDeptMapper.countActiveDirectChildren(deptId) > 0) {
-			throw new SystemBusinessException(SystemAdminResultCode.DEPT_HAS_CHILDREN, deptId);
+			throw new SystemBusinessException(SystemCommonResultCode.TREE_HAS_ACTIVE_CHILDREN, deptId);
 		}
 	}
 
@@ -77,7 +77,7 @@ public class DeptReferenceChecker {
 		if (deptReferenceMapper.countUserDeptInSubtree(deptId) > 0
 				|| deptReferenceMapper.countGrantDeptSubjectInSubtree(deptId) > 0
 				|| deptReferenceMapper.countPostInSubtree(deptId) > 0) {
-			throw new SystemBusinessException(SystemAdminResultCode.DEPT_IN_USE, deptId);
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_IN_USE, deptId);
 		}
 	}
 

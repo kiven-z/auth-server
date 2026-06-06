@@ -5,7 +5,7 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.convert.GrantTableSubjectRoleConverter;
 import com.auth.service.system.admin.convert.SysDeptConverter;
-import com.auth.service.system.admin.exception.SystemAdminResultCode;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.admin.mapper.GrantTableMapper;
 import com.auth.service.system.admin.mapper.SysDeptDetailMapper;
 import com.auth.service.system.admin.mapper.SysDeptMapper;
@@ -123,7 +123,7 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 		String deptCode = form.getDeptCode();
 		BusinessKeyAssert.requireAbsent(this,
 				Wrappers.<SysDeptEntity>lambdaQuery().eq(SysDeptEntity::getDeptCode, deptCode),
-				SystemAdminResultCode.DEPT_CODE_DUPLICATE, deptCode);
+				SystemCommonResultCode.DATA_CODE_DUPLICATE, deptCode);
 
 		SysDeptEntity entity = SysDeptConverter.INSTANCE.toEntity(form);
 		entity.setParentId(parentId);
@@ -149,7 +149,7 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 					Wrappers.<SysDeptEntity>lambdaQuery()
 						.eq(SysDeptEntity::getDeptCode, newDeptCode)
 						.ne(SysDeptEntity::getId, id),
-					SystemAdminResultCode.DEPT_CODE_DUPLICATE, newDeptCode);
+					SystemCommonResultCode.DATA_CODE_DUPLICATE, newDeptCode);
 		}
 
 		// 规范化父部门 ID 并校验父部门存在（顶级跳过校验）

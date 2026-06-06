@@ -4,7 +4,7 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.convert.SysRoleConverter;
 import com.auth.service.system.admin.convert.SysRolePermissionConverter;
 import com.auth.service.system.admin.model.enums.RoleTypeEnum;
-import com.auth.service.system.admin.exception.SystemAdminResultCode;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.admin.mapper.GrantTableMapper;
 import com.auth.service.system.admin.mapper.SysRoleMapper;
 import com.auth.service.system.admin.mapper.SysRolePermissionMapper;
@@ -72,7 +72,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 	public SysRoleDetailVO getDetail(Long id) {
 		SysRoleEntity entity = baseMapper.selectById(id);
 		if (entity == null) {
-			throw new SystemBusinessException(SystemAdminResultCode.ROLE_NOT_FOUND, id);
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST, id);
 		}
 
 		SysRoleDetailVO detail = SysRoleConverter.INSTANCE.toDetailVo(entity);
@@ -92,7 +92,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 
 		BusinessKeyAssert.requireAbsent(this,
 				Wrappers.<SysRoleEntity>lambdaQuery().eq(SysRoleEntity::getRoleCode, roleCode),
-				SystemAdminResultCode.ROLE_CODE_DUPLICATE, roleCode);
+				SystemCommonResultCode.DATA_CODE_DUPLICATE, roleCode);
 
 		SysRoleEntity entity = SysRoleConverter.INSTANCE.toEntity(form);
 		entity.setRoleCode(roleCode);
@@ -109,7 +109,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 		Long id = form.getId();
 		SysRoleEntity existing = baseMapper.selectById(id);
 		if (existing == null) {
-			throw new SystemBusinessException(SystemAdminResultCode.ROLE_NOT_FOUND, id);
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST, id);
 		}
 
 		// 检查角色编码是否变更
@@ -126,7 +126,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 					Wrappers.<SysRoleEntity>lambdaQuery()
 						.eq(SysRoleEntity::getRoleCode, newRoleCode)
 						.ne(SysRoleEntity::getId, existing.getId()),
-					SystemAdminResultCode.ROLE_CODE_DUPLICATE, newRoleCode);
+					SystemCommonResultCode.DATA_CODE_DUPLICATE, newRoleCode);
 		}
 
 		// 更新角色
@@ -156,12 +156,12 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 	public void deleteById(Long id) {
 		SysRoleEntity existing = baseMapper.selectById(id);
 		if (existing == null) {
-			throw new SystemBusinessException(SystemAdminResultCode.ROLE_NOT_FOUND, id);
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST, id);
 		}
 
 		String roleCode = existing.getRoleCode();
 		if (grantTableMapper.countByRoleCode(roleCode) > 0) {
-			throw new SystemBusinessException(SystemAdminResultCode.ROLE_IN_USE, roleCode);
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_IN_USE, roleCode);
 		}
 
 		removeById(id);

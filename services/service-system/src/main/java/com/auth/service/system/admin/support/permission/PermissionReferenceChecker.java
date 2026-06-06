@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.auth.service.system.admin.exception.SystemAdminResultCode;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.admin.mapper.SysPermissionMapper;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
@@ -36,7 +36,7 @@ public class PermissionReferenceChecker {
 			.in(SysPermissionEntity::getPermissionCode, permissionCodes)
 			.eq(SysPermissionEntity::getStatus, true));
 		if (activeCount != permissionCodes.size()) {
-			throw new SystemBusinessException(SystemAdminResultCode.ROLE_PERMISSION_INVALID);
+			throw new SystemBusinessException(SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 		}
 	}
 

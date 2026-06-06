@@ -1,6 +1,6 @@
 package com.auth.service.system.admin.support.menu;
 
-import com.auth.service.system.admin.exception.SystemAdminResultCode;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.admin.mapper.SysMenuMapper;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
@@ -58,7 +58,7 @@ class MenuReferenceCheckerTest {
 		assertThatThrownBy(() -> menuReferenceChecker.normalizeAndRequireParent(9L))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemAdminResultCode.MENU_PARENT_NOT_FOUND);
+			.isEqualTo(SystemCommonResultCode.TREE_PARENT_UNAVAILABLE);
 	}
 
 	@Test

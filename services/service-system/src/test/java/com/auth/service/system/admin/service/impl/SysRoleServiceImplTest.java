@@ -1,6 +1,6 @@
 package com.auth.service.system.admin.service.impl;
 
-import com.auth.service.system.admin.exception.SystemAdminResultCode;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.admin.mapper.GrantTableMapper;
 import com.auth.service.system.admin.mapper.SysRoleMapper;
 import com.auth.service.system.admin.mapper.SysRolePermissionMapper;
@@ -96,7 +96,7 @@ class SysRoleServiceImplTest {
 
 		assertThatThrownBy(() -> sysRoleService.getDetail(9L)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemAdminResultCode.ROLE_NOT_FOUND);
+			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
 
 		verifyNoInteractions(sysRolePermissionMapper);
 	}
@@ -172,7 +172,7 @@ class SysRoleServiceImplTest {
 
 		assertThatThrownBy(() -> sysRoleService.deleteById(9L)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemAdminResultCode.ROLE_NOT_FOUND);
+			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
 
 		verify(sysRoleMapper, never()).deleteById(any());
 		verifyNoInteractions(roleInvalidationTrigger);
@@ -186,7 +186,7 @@ class SysRoleServiceImplTest {
 
 		assertThatThrownBy(() -> sysRoleService.deleteById(2L)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemAdminResultCode.ROLE_IN_USE);
+			.isEqualTo(SystemCommonResultCode.DATA_IN_USE);
 
 		verify(sysRoleMapper, never()).deleteById(any());
 		verifyNoInteractions(roleInvalidationTrigger);

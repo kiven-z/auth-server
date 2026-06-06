@@ -1,6 +1,6 @@
 package com.auth.service.system.admin.service.impl;
 
-import com.auth.service.system.admin.exception.SystemAdminResultCode;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.admin.mapper.SysMenuRoleMapper;
 import com.auth.service.system.admin.model.form.menu.SysMenuAssignRoleForm;
 import com.auth.service.system.admin.support.role.RoleGrantReferenceChecker;
@@ -69,13 +69,14 @@ class SysMenuManageServiceImplTest {
 		SysMenuAssignRoleForm form = new SysMenuAssignRoleForm();
 		form.setRoleCodes(List.of("BIZ_ADMIN"));
 
-		doThrow(new SystemBusinessException(SystemAdminResultCode.MENU_ROLE_INVALID)).when(roleGrantReferenceChecker)
+		doThrow(new SystemBusinessException(SystemCommonResultCode.GRANT_REFERENCE_INVALID))
+			.when(roleGrantReferenceChecker)
 			.requireMenuAssignEligibleRoles(List.of("BIZ_ADMIN"));
 
 		assertThatThrownBy(() -> sysMenuManageService.replaceMenuRoles(menuId, form))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemAdminResultCode.MENU_ROLE_INVALID);
+			.isEqualTo(SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 
 		verify(sysMenuRoleMapper, never()).deleteByMenuId(any());
 		verify(sysMenuRoleMapper, never()).batchInsertMenuRoles(any(), any());

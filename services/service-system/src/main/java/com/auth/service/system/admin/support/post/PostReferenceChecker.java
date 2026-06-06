@@ -1,6 +1,7 @@
 package com.auth.service.system.admin.support.post;
 
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.admin.mapper.PostReferenceMapper;
 import com.auth.service.system.admin.mapper.SysPostMapper;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
@@ -30,7 +31,7 @@ public class PostReferenceChecker {
 	public SysPostEntity getExistingActive(Long postId) {
 		SysPostEntity existing = sysPostMapper.selectById(postId);
 		if (existing == null) {
-			throw new SystemBusinessException(SystemAdminResultCode.POST_NOT_FOUND, postId);
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST, postId);
 		}
 		return existing;
 	}
@@ -41,7 +42,7 @@ public class PostReferenceChecker {
 	 */
 	public void requireAssignableDept(Long deptId) {
 		if (sysPostMapper.countAssignableDept(deptId) == 0) {
-			throw new SystemBusinessException(SystemAdminResultCode.POST_DEPT_NOT_FOUND, deptId);
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_UNAVAILABLE, deptId);
 		}
 	}
 
@@ -72,7 +73,7 @@ public class PostReferenceChecker {
 	public void requireDeletable(Long postId) {
 		if (postReferenceMapper.countUserPostByPostId(postId) > 0
 				|| postReferenceMapper.countGrantPostSubjectByPostId(postId) > 0) {
-			throw new SystemBusinessException(SystemAdminResultCode.POST_IN_USE, postId);
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_IN_USE, postId);
 		}
 	}
 

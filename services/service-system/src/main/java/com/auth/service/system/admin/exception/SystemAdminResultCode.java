@@ -4,10 +4,10 @@ import com.auth.service.system.common.exception.code.SystemResultCode;
 import lombok.Getter;
 
 /**
- * 系统管理域结果码（角色、权限、岗位）
+ * 系统管理域结果码（岗位、导出、授权失效 Outbox 等 Admin 特有场景）
  *
  * <p>
- * 号段：263、274–277、278–279、288–28
+ * 号段：268、276、295–305
  * </p>
  *
  * @author Bunny
@@ -21,109 +21,9 @@ public enum SystemAdminResultCode implements SystemResultCode {
 	ASSIGN_COMPLETED(200, 268, "ASSIGN_COMPLETED", "system.admin.assign_completed"),
 
 	/**
-	 * 角色不存在
-	 */
-	ROLE_NOT_FOUND(404, 263, "ROLE_NOT_FOUND", "data.not.exists"),
-
-	/**
-	 * 角色编码已存在
-	 */
-	ROLE_CODE_DUPLICATE(409, 277, "ROLE_CODE_DUPLICATE", "data.code.duplicate"),
-
-	/**
-	 * 权限不存在
-	 */
-	PERMISSION_NOT_FOUND(404, 280, "PERMISSION_NOT_FOUND", "data.not.exists"),
-
-	/**
-	 * 权限编码已存在
-	 */
-	PERMISSION_CODE_DUPLICATE(409, 274, "PERMISSION_CODE_DUPLICATE", "data.code.duplicate"),
-
-	/**
-	 * 部门不存在、已停用或已删除，不可挂载岗位
-	 */
-	POST_DEPT_NOT_FOUND(404, 275, "POST_DEPT_NOT_FOUND", "data.unavailable"),
-
-	/**
 	 * 同一部门下岗位编码已存在
 	 */
 	POST_CODE_DUPLICATE_IN_DEPT(409, 276, "POST_CODE_DUPLICATE_IN_DEPT", "system.post.code_duplicate_in_dept"),
-
-	/**
-	 * 岗位不存在或已删除
-	 */
-	POST_NOT_FOUND(404, 292, "POST_NOT_FOUND", "data.not.exists"),
-
-	/**
-	 * 岗位仍被 user_post 或 grant_table 引用，不可删除
-	 */
-	POST_IN_USE(409, 293, "POST_IN_USE", "data.in_use"),
-
-	/**
-	 * 岗位授权角色无效（不存在、未启用或类型不允许）
-	 */
-	POST_ROLE_INVALID(400, 294, "POST_ROLE_INVALID", "grant.reference_invalid"),
-
-	/**
-	 * 角色仍被 grant_table 引用，不可删除
-	 */
-	ROLE_IN_USE(409, 278, "ROLE_IN_USE", "data.in_use"),
-
-	/**
-	 * 存在无效或未启用的权限码
-	 */
-	ROLE_PERMISSION_INVALID(400, 279, "ROLE_PERMISSION_INVALID", "grant.reference_invalid"),
-
-	/**
-	 * 部门授权角色无效（不存在、未启用或类型不允许）
-	 */
-	DEPT_ROLE_INVALID(400, 290, "DEPT_ROLE_INVALID", "grant.reference_invalid"),
-
-	/**
-	 * 部门不存在或已删除
-	 */
-	DEPT_NOT_FOUND(404, 281, "DEPT_NOT_FOUND", "data.not.exists"),
-
-	/**
-	 * 部门编码已存在
-	 */
-	DEPT_CODE_DUPLICATE(409, 282, "DEPT_CODE_DUPLICATE", "data.code.duplicate"),
-
-	/**
-	 * 父部门不存在或不可用
-	 */
-	DEPT_PARENT_NOT_FOUND(404, 283, "DEPT_PARENT_NOT_FOUND", "tree.parent.unavailable"),
-
-	/**
-	 * 存在未删除的子部门
-	 */
-	DEPT_HAS_CHILDREN(409, 286, "DEPT_HAS_CHILDREN", "tree.has_active_children"),
-
-	/**
-	 * 部门或子树仍被用户/授权/岗位引用
-	 */
-	DEPT_IN_USE(409, 287, "DEPT_IN_USE", "data.in_use"),
-
-	/**
-	 * 菜单不存在
-	 */
-	MENU_NOT_FOUND(404, 288, "MENU_NOT_FOUND", "data.not.exists"),
-
-	/**
-	 * 存在未删除的子菜单
-	 */
-	MENU_HAS_CHILDREN(409, 289, "MENU_HAS_CHILDREN", "tree.has_active_children"),
-
-	/**
-	 * 父菜单不存在
-	 */
-	MENU_PARENT_NOT_FOUND(404, 292, "MENU_PARENT_NOT_FOUND", "tree.parent.unavailable"),
-
-	/**
-	 * 菜单分配角色无效（不存在、未启用或类型非菜单角色）
-	 */
-	MENU_ROLE_INVALID(400, 291, "MENU_ROLE_INVALID", "grant.reference_invalid"),
 
 	/**
 	 * Excel 导出页码区间无效（结束页小于起始页）

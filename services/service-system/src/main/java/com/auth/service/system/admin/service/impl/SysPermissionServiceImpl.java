@@ -4,7 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.convert.SysPermissionConverter;
-import com.auth.service.system.admin.exception.SystemAdminResultCode;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.admin.mapper.SysMenuPermissionMapper;
 import com.auth.service.system.admin.mapper.SysPermissionMapper;
 import com.auth.service.system.admin.mapper.SysRolePermissionMapper;
@@ -79,7 +79,7 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 	public SysPermissionDetailVO getDetail(Long id) {
 		SysPermissionEntity entity = baseMapper.selectById(id);
 		if (entity == null) {
-			throw new SystemBusinessException(SystemAdminResultCode.PERMISSION_NOT_FOUND, id);
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST, id);
 		}
 
 		SysPermissionDetailVO detail = SysPermissionConverter.INSTANCE.toDetailVo(entity);
@@ -110,7 +110,7 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 		long exists = count(
 				Wrappers.<SysPermissionEntity>lambdaQuery().eq(SysPermissionEntity::getPermissionCode, permissionCode));
 		if (exists > 0) {
-			throw new SystemBusinessException(SystemAdminResultCode.PERMISSION_CODE_DUPLICATE, permissionCode);
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_CODE_DUPLICATE, permissionCode);
 		}
 
 		SysPermissionEntity entity = SysPermissionConverter.INSTANCE.toEntity(form);
@@ -125,7 +125,7 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 		Long id = form.getId();
 		SysPermissionEntity existing = baseMapper.selectById(id);
 		if (existing == null) {
-			throw new SystemBusinessException(SystemAdminResultCode.PERMISSION_NOT_FOUND, id);
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST, id);
 		}
 
 		// 新旧权限和状态
@@ -142,7 +142,7 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 					Wrappers.<SysPermissionEntity>lambdaQuery()
 						.eq(SysPermissionEntity::getPermissionCode, newPermissionCode)
 						.ne(SysPermissionEntity::getId, existing.getId()),
-					SystemAdminResultCode.PERMISSION_CODE_DUPLICATE, newPermissionCode);
+					SystemCommonResultCode.DATA_CODE_DUPLICATE, newPermissionCode);
 		}
 
 		SysPermissionConverter.INSTANCE.applyUpdateForm(form, existing);
@@ -163,7 +163,7 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 	public void deleteById(Long id) {
 		SysPermissionEntity existing = baseMapper.selectById(id);
 		if (existing == null) {
-			throw new SystemBusinessException(SystemAdminResultCode.PERMISSION_NOT_FOUND, id);
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST, id);
 		}
 
 		// 失效在事务提交后投递：PERMISSION 桥接依赖 sys_role_permission，须在删除前快照角色并走 ROLE 失效

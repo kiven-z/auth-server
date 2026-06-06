@@ -1,6 +1,6 @@
 package com.auth.service.system.admin.support.dept;
 
-import com.auth.service.system.admin.exception.SystemAdminResultCode;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.admin.mapper.SysDeptMapper;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import org.junit.jupiter.api.DisplayName;
@@ -53,7 +53,7 @@ class DeptReferenceCheckerTest {
 		assertThatThrownBy(() -> deptReferenceChecker.normalizeAndRequireActiveParent(9L))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemAdminResultCode.DEPT_PARENT_NOT_FOUND);
+			.isEqualTo(SystemCommonResultCode.TREE_PARENT_UNAVAILABLE);
 	}
 
 }

@@ -1,6 +1,6 @@
 package com.auth.service.system.admin.support.permission;
 
-import com.auth.service.system.admin.exception.SystemAdminResultCode;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.admin.mapper.SysPermissionMapper;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import org.junit.jupiter.api.DisplayName;
@@ -60,7 +60,7 @@ class PermissionReferenceCheckerTest {
 		assertThatThrownBy(() -> permissionReferenceChecker.requireActivePermissionCodes(permissionCodes))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemAdminResultCode.ROLE_PERMISSION_INVALID);
+			.isEqualTo(SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 	}
 
 }

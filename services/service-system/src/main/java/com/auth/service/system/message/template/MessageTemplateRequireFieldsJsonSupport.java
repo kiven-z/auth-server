@@ -13,7 +13,7 @@ import lombok.experimental.UtilityClass;
 
 import java.util.*;
 
-import static com.auth.service.system.common.exception.code.SystemEmailResultCode.*;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.*;
 
 /**
  * 消息模板必填变量声明：序列化、解析与发送前完整性校验（多渠道共用）
@@ -33,14 +33,14 @@ public class MessageTemplateRequireFieldsJsonSupport {
 	 */
 	public static String toJson(List<EmailTemplateRequireFieldRow> rows) {
 		if (rows == null) {
-			throw new SystemBusinessException(REQUIRE_FIELDS_NULL);
+			throw new SystemBusinessException(DATA_INVALID, "require_fields");
 		}
 		validate(rows);
 		try {
 			return MAPPER.writeValueAsString(rows);
 		}
 		catch (JsonProcessingException e) {
-			throw new SystemBusinessException(REQUIRE_FIELDS_SERIALIZE_FAILED, e.getMessage());
+			throw new SystemBusinessException(DATA_INVALID, e.getMessage());
 		}
 	}
 
@@ -58,10 +58,10 @@ public class MessageTemplateRequireFieldsJsonSupport {
 			return rows;
 		}
 		catch (UnrecognizedPropertyException e) {
-			throw new SystemBusinessException(REQUIRE_FIELDS_ILLEGAL_PROPERTY, e.getPropertyName());
+			throw new SystemBusinessException(DATA_INVALID, e.getPropertyName());
 		}
 		catch (Exception e) {
-			throw new SystemBusinessException(REQUIRE_FIELDS_PARSE_FAILED, e.getMessage());
+			throw new SystemBusinessException(DATA_INVALID, e.getMessage());
 		}
 	}
 
@@ -77,13 +77,13 @@ public class MessageTemplateRequireFieldsJsonSupport {
 		Set<String> keys = new HashSet<>();
 		for (EmailTemplateRequireFieldRow row : rows) {
 			if (row == null || CharSequenceUtil.isBlank(row.getKey())) {
-				throw new SystemBusinessException(REQUIRE_FIELD_KEY_EMPTY);
+				throw new SystemBusinessException(PARAM_REQUIRED, "Variable key");
 			}
 			if (row.getExampleValue() == null || row.getExampleValue().isNull()) {
-				throw new SystemBusinessException(REQUIRE_FIELD_EXAMPLE_EMPTY, row.getKey());
+				throw new SystemBusinessException(PARAM_REQUIRED, row.getKey() + " exampleValue");
 			}
 			if (!keys.add(row.getKey())) {
-				throw new SystemBusinessException(REQUIRE_FIELD_KEY_DUPLICATE, row.getKey());
+				throw new SystemBusinessException(PARAM_DUPLICATE, "Variable key", row.getKey());
 			}
 		}
 	}
@@ -136,7 +136,7 @@ public class MessageTemplateRequireFieldsJsonSupport {
 	 */
 	public static Map<String, Object> toExampleModel(List<EmailTemplateRequireFieldRow> rows) {
 		if (rows == null) {
-			throw new SystemBusinessException(REQUIRE_FIELDS_NULL);
+			throw new SystemBusinessException(DATA_INVALID, "require_fields");
 		}
 		validate(rows);
 		Map<String, Object> model = new LinkedHashMap<>();

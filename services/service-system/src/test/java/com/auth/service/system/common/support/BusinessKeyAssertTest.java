@@ -1,6 +1,7 @@
 package com.auth.service.system.common.support;
 
-import com.auth.service.system.admin.exception.SystemAdminResultCode;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -35,7 +36,7 @@ class BusinessKeyAssertTest {
 
 		BusinessKeyAssert.requireAbsent(roleService,
 				Wrappers.<SysRoleEntity>lambdaQuery().eq(SysRoleEntity::getRoleCode, "ADMIN"),
-				SystemAdminResultCode.ROLE_CODE_DUPLICATE, "ADMIN");
+				SystemCommonResultCode.DATA_CODE_DUPLICATE, "ADMIN");
 
 		verify(roleService).count(any());
 	}
@@ -47,10 +48,10 @@ class BusinessKeyAssertTest {
 		var duplicateQuery = Wrappers.<SysRoleEntity>lambdaQuery().eq(SysRoleEntity::getRoleCode, "ADMIN");
 
 		assertThatThrownBy(() -> BusinessKeyAssert.requireAbsent(roleService, duplicateQuery,
-				SystemAdminResultCode.ROLE_CODE_DUPLICATE, "ADMIN"))
+				SystemCommonResultCode.DATA_CODE_DUPLICATE, "ADMIN"))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemAdminResultCode.ROLE_CODE_DUPLICATE);
+			.isEqualTo(SystemCommonResultCode.DATA_CODE_DUPLICATE);
 	}
 
 }

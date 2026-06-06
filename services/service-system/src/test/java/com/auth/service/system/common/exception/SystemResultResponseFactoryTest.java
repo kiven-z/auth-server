@@ -2,7 +2,6 @@ package com.auth.service.system.common.exception;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
-import com.auth.service.system.common.exception.code.SystemEmailResultCode;
 import com.auth.service.system.common.exception.code.SystemScheduleResultCode;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -63,16 +62,16 @@ class SystemResultResponseFactoryTest {
 	void build_fromException_withArgs_preservesI18nArgs() {
 		// 统一模板键需 channel + templateCode 两个参数
 		LocaleContextHolder.setLocale(Locale.ENGLISH);
-		String key = SystemEmailResultCode.EMAIL_TEMPLATE_NOT_FOUND.getMessageKey();
+		String key = SystemCommonResultCode.TEMPLATE_NOT_FOUND.getMessageKey();
 		Object[] args = new Object[] { "EMAIL", "tpl-1" };
 		when(messageSource.getMessage(eq(key), any(), eq(key), eq(Locale.ENGLISH))).thenReturn("tpl-missing");
 		when(messageSource.getMessage(eq(key), any(), eq("tpl-missing"), eq(Locale.ENGLISH))).thenReturn("tpl-missing");
 
-		SystemBusinessException ex = new SystemBusinessException(SystemEmailResultCode.EMAIL_TEMPLATE_NOT_FOUND,
-				"EMAIL", "tpl-1");
+		SystemBusinessException ex = new SystemBusinessException(SystemCommonResultCode.TEMPLATE_NOT_FOUND, "EMAIL",
+				"tpl-1");
 		Result<Object> result = SystemResultResponseFactory.build(messageSource, ex);
 
-		assertEquals(SystemEmailResultCode.EMAIL_TEMPLATE_NOT_FOUND.getBizCode(), result.getCode());
+		assertEquals(SystemCommonResultCode.TEMPLATE_NOT_FOUND.getBizCode(), result.getCode());
 		Map<String, Object> ext = result.getExt();
 		assertNotNull(ext);
 		assertArrayEquals(args, (Object[]) ext.get("i18nArgs"));
@@ -119,16 +118,16 @@ class SystemResultResponseFactoryTest {
 	@DisplayName("build(消息异常)：应填充 code、message 与 ext.i18nKey")
 	void build_fromMessageException_setsCodeMessageAndExt() {
 		LocaleContextHolder.setLocale(Locale.ENGLISH);
-		String key = SystemEmailResultCode.EMAIL_SEND_TO_EMPTY.getMessageKey();
+		String key = SystemCommonResultCode.PARAM_REQUIRED.getMessageKey();
 		when(messageSource.getMessage(eq(key), any(), eq(key), eq(Locale.ENGLISH))).thenReturn("no-recipients");
 		when(messageSource.getMessage(eq(key), any(), eq("no-recipients"), eq(Locale.ENGLISH)))
 			.thenReturn("no-recipients");
 
-		SystemMessageException ex = new SystemMessageException(SystemEmailResultCode.EMAIL_SEND_TO_EMPTY);
+		SystemMessageException ex = new SystemMessageException(SystemCommonResultCode.PARAM_REQUIRED, "Recipients");
 		Result<Object> result = SystemResultResponseFactory.build(messageSource, ex);
 
-		assertEquals(SystemEmailResultCode.EMAIL_SEND_TO_EMPTY.getBizCode(), result.getCode());
-		assertEquals(SystemEmailResultCode.EMAIL_SEND_TO_EMPTY.getError(), result.getError());
+		assertEquals(SystemCommonResultCode.PARAM_REQUIRED.getBizCode(), result.getCode());
+		assertEquals(SystemCommonResultCode.PARAM_REQUIRED.getError(), result.getError());
 		assertEquals("no-recipients", result.getMessage());
 		assertEquals(key, result.getExt().get("i18nKey"));
 	}

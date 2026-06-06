@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.auth.service.system.common.exception.code.SystemEmailResultCode.*;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.*;
 
 /**
  * 邮件模板加载、变量校验与渲染
@@ -39,11 +39,11 @@ public class EmailTemplatePipeline {
 		MessageTemplateEntity template = messageTemplateMapper.selectEnabledBySceneCodeAndChannel(templateCode,
 				MessageChannel.EMAIL.name());
 		if (template == null) {
-			throw new SystemBusinessException(EMAIL_TEMPLATE_NOT_FOUND, MessageChannel.EMAIL.name(), templateCode);
+			throw new SystemBusinessException(TEMPLATE_NOT_FOUND, MessageChannel.EMAIL.name(), templateCode);
 		}
 		Map<String, Object> safeVariables = Optional.ofNullable(variables).orElseGet(HashMap::new);
 		MessageTemplateRequireFieldsJsonSupport.assertVariablesPresent(template.getRequireFields(), safeVariables,
-				EMAIL_TEMPLATE_VARS_MISSING, MessageChannel.EMAIL.name());
+				TEMPLATE_VARS_MISSING, MessageChannel.EMAIL.name());
 		String subject = renderSubject(template, safeVariables);
 		String body = renderContent(template, safeVariables);
 		return new RenderedEmail(subject, body);
@@ -55,7 +55,7 @@ public class EmailTemplatePipeline {
 					template.getSubject(), variables);
 		}
 		catch (TemplateRenderException e) {
-			throw new SystemBusinessException(EMAIL_RENDER_FAILED, "subject", e.getMessage());
+			throw new SystemBusinessException(RENDER_FAILED, "subject", e.getMessage());
 		}
 	}
 
@@ -65,7 +65,7 @@ public class EmailTemplatePipeline {
 					variables);
 		}
 		catch (TemplateRenderException e) {
-			throw new SystemBusinessException(EMAIL_RENDER_FAILED, "body", e.getMessage());
+			throw new SystemBusinessException(RENDER_FAILED, "body", e.getMessage());
 		}
 	}
 

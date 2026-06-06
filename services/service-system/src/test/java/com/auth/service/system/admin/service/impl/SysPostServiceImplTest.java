@@ -3,6 +3,7 @@ package com.auth.service.system.admin.service.impl;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.admin.mapper.GrantTableMapper;
 import com.auth.service.system.admin.mapper.PostReferenceMapper;
 import com.auth.service.system.admin.mapper.SysPostDetailMapper;
@@ -120,7 +121,7 @@ class SysPostServiceImplTest {
 
 		assertThatThrownBy(() -> sysPostService.getDetail(9L)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemAdminResultCode.POST_NOT_FOUND);
+			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
 
 		verifyNoInteractions(sysPostDetailMapper);
 		verify(auditUserDisplayService, never()).enrichAuditUsernames(anyList());
@@ -183,7 +184,7 @@ class SysPostServiceImplTest {
 
 		assertThatThrownBy(() -> sysPostService.create(form)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemAdminResultCode.POST_DEPT_NOT_FOUND);
+			.isEqualTo(SystemCommonResultCode.DATA_UNAVAILABLE);
 	}
 
 	@Test
@@ -195,7 +196,7 @@ class SysPostServiceImplTest {
 
 		assertThatThrownBy(() -> sysPostService.create(form)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemAdminResultCode.POST_DEPT_NOT_FOUND);
+			.isEqualTo(SystemCommonResultCode.DATA_UNAVAILABLE);
 
 		verify(sysPostMapper).countAssignableDept(100L);
 		verify(sysPostMapper, never()).insert(any(SysPostEntity.class));
@@ -236,7 +237,7 @@ class SysPostServiceImplTest {
 
 		assertThatThrownBy(() -> sysPostService.update(9L, form)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemAdminResultCode.POST_NOT_FOUND);
+			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
 	}
 
 	@Test
@@ -305,7 +306,7 @@ class SysPostServiceImplTest {
 
 		assertThatThrownBy(() -> sysPostService.deleteById(9L)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemAdminResultCode.POST_NOT_FOUND);
+			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
 
 		verifyNoInteractions(postInvalidationTrigger);
 	}
@@ -319,7 +320,7 @@ class SysPostServiceImplTest {
 
 		assertThatThrownBy(() -> sysPostService.deleteById(postId)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemAdminResultCode.POST_IN_USE);
+			.isEqualTo(SystemCommonResultCode.DATA_IN_USE);
 
 		verify(sysPostMapper, never()).deleteById(any());
 		verifyNoInteractions(postInvalidationTrigger);
@@ -335,7 +336,7 @@ class SysPostServiceImplTest {
 
 		assertThatThrownBy(() -> sysPostService.deleteById(postId)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemAdminResultCode.POST_IN_USE);
+			.isEqualTo(SystemCommonResultCode.DATA_IN_USE);
 
 		verify(sysPostMapper, never()).deleteById(any());
 		verifyNoInteractions(postInvalidationTrigger);

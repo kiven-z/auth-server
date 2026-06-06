@@ -2,11 +2,11 @@ package com.auth.service.system.admin.support.role;
 
 import cn.hutool.core.collection.CollUtil;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
-import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.SysRoleMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.enums.RoleTypeEnum;
 import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.common.exception.code.SystemResultCode;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
@@ -52,15 +52,11 @@ public class RoleGrantReferenceChecker {
 	 * @param roleCodes 待写入角色编码
 	 */
 	public void requireGrantTableOrgRoles(GrantTableSubjectType subjectType, List<String> roleCodes) {
-		requireGrantEligibleRoles(roleCodes, RoleTypeEnum.ORG_GRANT_TYPES, orgGrantInvalidCode(subjectType));
-	}
-
-	private static SystemResultCode orgGrantInvalidCode(GrantTableSubjectType subjectType) {
-		return switch (subjectType) {
-			case DEPT -> SystemAdminResultCode.DEPT_ROLE_INVALID;
-			case POST -> SystemAdminResultCode.POST_ROLE_INVALID;
-			default -> throw new IllegalArgumentException("Unsupported org grant subject type: " + subjectType);
-		};
+		if (subjectType != GrantTableSubjectType.DEPT && subjectType != GrantTableSubjectType.POST) {
+			throw new IllegalArgumentException("Unsupported org grant subject type: " + subjectType);
+		}
+		requireGrantEligibleRoles(roleCodes, RoleTypeEnum.ORG_GRANT_TYPES,
+				SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 	}
 
 	/**
@@ -68,7 +64,9 @@ public class RoleGrantReferenceChecker {
 	 * @param roleCodes 待写入角色编码
 	 */
 	public void requireMenuAssignEligibleRoles(List<String> roleCodes) {
-		requireGrantEligibleRoles(roleCodes, RoleTypeEnum.MENU_ASSIGN_TYPES, SystemAdminResultCode.MENU_ROLE_INVALID);
+		// FIXME 直接调用 requireGrantEligibleRoles
+		requireGrantEligibleRoles(roleCodes, RoleTypeEnum.MENU_ASSIGN_TYPES,
+				SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 	}
 
 }

@@ -1,6 +1,6 @@
 package com.auth.service.system.admin.service.impl;
 
-import com.auth.service.system.admin.exception.SystemAdminResultCode;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.admin.mapper.SysPermissionMapper;
 import com.auth.service.system.admin.mapper.SysRoleMapper;
 import com.auth.service.system.admin.mapper.SysRolePermissionMapper;
@@ -87,7 +87,7 @@ class SysRolePermissionServiceImplTest {
 		assertThatThrownBy(() -> sysRolePermissionService.assignPermissions("MISSING", permissionCodes))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemAdminResultCode.ROLE_NOT_FOUND);
+			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
 	}
 
 	@Test
@@ -133,7 +133,7 @@ class SysRolePermissionServiceImplTest {
 		assertThatThrownBy(() -> sysRolePermissionService.assignPermissions("ADMIN", permissionCodes))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemAdminResultCode.ROLE_PERMISSION_INVALID);
+			.isEqualTo(SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 
 		verify(sysRolePermissionMapper).deleteByRoleCode("ADMIN");
 		verify(sysRolePermissionMapper, never()).batchInsertRolePermissions(any(), any(), any(), any());

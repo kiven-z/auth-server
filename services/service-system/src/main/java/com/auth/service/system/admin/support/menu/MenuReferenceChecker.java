@@ -2,7 +2,7 @@ package com.auth.service.system.admin.support.menu;
 
 import com.auth.common.core.utils.TreeParentIdUtil;
 import com.auth.common.core.utils.TreeRelationUtil;
-import com.auth.service.system.admin.exception.SystemAdminResultCode;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.admin.mapper.SysMenuMapper;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
@@ -30,7 +30,7 @@ public class MenuReferenceChecker {
 	public SysMenuEntity getExisting(Long menuId) {
 		SysMenuEntity existing = sysMenuMapper.selectById(menuId);
 		if (existing == null) {
-			throw new SystemBusinessException(SystemAdminResultCode.MENU_NOT_FOUND, menuId);
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST, menuId);
 		}
 		return existing;
 	}
@@ -43,7 +43,7 @@ public class MenuReferenceChecker {
 	public long normalizeAndRequireParent(Long rawParentId) {
 		long parentId = TreeParentIdUtil.normalize(rawParentId);
 		if (parentId > TreeParentIdUtil.ROOT_PARENT_ID && sysMenuMapper.selectById(parentId) == null) {
-			throw new SystemBusinessException(SystemAdminResultCode.MENU_PARENT_NOT_FOUND, parentId);
+			throw new SystemBusinessException(SystemCommonResultCode.TREE_PARENT_UNAVAILABLE, parentId);
 		}
 		return parentId;
 	}

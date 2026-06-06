@@ -8,7 +8,7 @@ import com.auth.common.core.utils.TreeParentIdUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.constants.PermissionConstant;
 import com.auth.service.system.admin.convert.SysMenuConverter;
-import com.auth.service.system.admin.exception.SystemAdminResultCode;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.admin.mapper.SysMenuMapper;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.admin.model.form.menu.SysMenuBatchStatusForm;
@@ -197,7 +197,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuEntity
 
 		Long blockedParentId = baseMapper.selectFirstBlockedParentId(idsToDelete);
 		if (blockedParentId != null) {
-			throw new SystemBusinessException(SystemAdminResultCode.MENU_HAS_CHILDREN, blockedParentId);
+			throw new SystemBusinessException(SystemCommonResultCode.TREE_HAS_ACTIVE_CHILDREN, blockedParentId);
 		}
 
 		removeByIds(idsToDelete);

@@ -2,7 +2,7 @@ package com.auth.service.system.admin.service.impl;
 
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.module.security.contract.dto.invalidation.GrantSubjectKey;
-import com.auth.service.system.admin.exception.SystemAdminResultCode;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.admin.mapper.GrantTableMapper;
 import com.auth.service.system.admin.mapper.PostReferenceMapper;
 import com.auth.service.system.admin.mapper.SysPostMapper;
@@ -96,7 +96,7 @@ class GrantTableSubjectRoleServiceImplTest {
 		assertThatThrownBy(() -> grantTableSubjectRoleService.listAssignedRoles(GrantTableSubjectType.POST, SUBJECT_ID))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemAdminResultCode.POST_NOT_FOUND);
+			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
 	}
 
 	@Test

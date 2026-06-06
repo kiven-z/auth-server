@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.service.system.admin.convert.SysRolePermissionConverter;
-import com.auth.service.system.admin.exception.SystemAdminResultCode;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.admin.mapper.SysRoleMapper;
 import com.auth.service.system.admin.mapper.SysRolePermissionMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
@@ -79,13 +79,13 @@ public class SysRolePermissionServiceImpl implements SysRolePermissionService {
 	 */
 	private String requireExistingRoleCode(String roleCode) {
 		if (CharSequenceUtil.isBlank(roleCode)) {
-			throw new SystemBusinessException(SystemAdminResultCode.ROLE_NOT_FOUND, roleCode);
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST, roleCode);
 		}
 
 		SysRoleEntity role = sysRoleMapper
 			.selectOne(Wrappers.<SysRoleEntity>lambdaQuery().eq(SysRoleEntity::getRoleCode, roleCode).last("LIMIT 1"));
 		if (role == null) {
-			throw new SystemBusinessException(SystemAdminResultCode.ROLE_NOT_FOUND, roleCode);
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST, roleCode);
 		}
 		return roleCode;
 	}

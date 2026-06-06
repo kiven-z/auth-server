@@ -1,7 +1,7 @@
 package com.auth.service.system.admin.support.role;
 
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
-import com.auth.service.system.admin.exception.SystemAdminResultCode;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.admin.mapper.SysRoleMapper;
 import com.auth.service.system.admin.model.enums.RoleTypeEnum;
 import com.auth.service.system.common.exception.SystemBusinessException;
@@ -63,7 +63,7 @@ class RoleGrantReferenceCheckerTest {
 				() -> roleGrantReferenceChecker.requireGrantTableOrgRoles(GrantTableSubjectType.DEPT, roleCodes))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemAdminResultCode.DEPT_ROLE_INVALID);
+			.isEqualTo(SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 	}
 
 	@Test
@@ -72,7 +72,7 @@ class RoleGrantReferenceCheckerTest {
 		when(sysRoleMapper.selectCount(any())).thenReturn(1L);
 
 		assertThatCode(() -> roleGrantReferenceChecker.requireGrantEligibleRoles(List.of("MENU_ADMIN"),
-				List.of(RoleTypeEnum.MENU.getCode()), SystemAdminResultCode.ROLE_NOT_FOUND))
+				List.of(RoleTypeEnum.MENU.getCode()), SystemCommonResultCode.DATA_NOT_EXIST))
 			.doesNotThrowAnyException();
 	}
 
@@ -105,7 +105,7 @@ class RoleGrantReferenceCheckerTest {
 				() -> roleGrantReferenceChecker.requireGrantTableOrgRoles(GrantTableSubjectType.POST, roleCodes))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemAdminResultCode.POST_ROLE_INVALID);
+			.isEqualTo(SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 	}
 
 	@Test
@@ -117,7 +117,7 @@ class RoleGrantReferenceCheckerTest {
 		assertThatThrownBy(() -> roleGrantReferenceChecker.requireMenuAssignEligibleRoles(roleCodes))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemAdminResultCode.MENU_ROLE_INVALID);
+			.isEqualTo(SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 	}
 
 }

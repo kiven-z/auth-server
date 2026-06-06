@@ -6,7 +6,7 @@ import lombok.Getter;
  * 系统服务通用结果码（成功、请求校验、用户、基础设施等）
  *
  * <p>
- * 号段：0、102–103、205–209、306–311、402、206
+ * 号段：0、102–103、205–209、306–318、402、206
  * </p>
  *
  * @author Bunny
@@ -68,6 +68,41 @@ public enum SystemCommonResultCode implements SystemResultCode {
 	 * 关联数据无效或未启用
 	 */
 	GRANT_REFERENCE_INVALID(400, 311, "GRANT_REFERENCE_INVALID", "grant.reference_invalid"),
+
+	/**
+	 * 数据异常（格式、解析或完整性错误）
+	 */
+	DATA_INVALID(422, 312, "DATA_INVALID", "data.invalid"),
+
+	/**
+	 * 必填参数为空
+	 */
+	PARAM_REQUIRED(422, 313, "PARAM_REQUIRED", "param.required"),
+
+	/**
+	 * 参数重复
+	 */
+	PARAM_DUPLICATE(409, 314, "PARAM_DUPLICATE", "param.duplicate"),
+
+	/**
+	 * 外部请求失败（邮件、附件、第三方 API 等）
+	 */
+	EXTERNAL_REQUEST_FAILED(502, 315, "EXTERNAL_REQUEST_FAILED", "external.request.failed"),
+
+	/**
+	 * 消息模板不存在或已禁用
+	 */
+	TEMPLATE_NOT_FOUND(404, 316, "TEMPLATE_NOT_FOUND", "system.message.template.not_found"),
+
+	/**
+	 * 缺少必填模板变量
+	 */
+	TEMPLATE_VARS_MISSING(422, 317, "TEMPLATE_VARS_MISSING", "system.message.template.vars_missing"),
+
+	/**
+	 * 模板渲染失败（{0}=subject|body，{1}=详情）
+	 */
+	RENDER_FAILED(500, 318, "RENDER_FAILED", "system.render.failed"),
 
 	/**
 	 * 验证码错误

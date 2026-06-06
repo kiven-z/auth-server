@@ -1,6 +1,6 @@
 package com.auth.service.system.admin.service.impl;
 
-import com.auth.service.system.admin.exception.SystemAdminResultCode;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.admin.mapper.SysMenuMapper;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.admin.model.form.menu.SysMenuMoveForm;
@@ -81,7 +81,7 @@ class SysMenuServiceImplTest {
 
 		assertThatThrownBy(() -> sysMenuService.deleteByIds(menuIds)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemAdminResultCode.MENU_HAS_CHILDREN);
+			.isEqualTo(SystemCommonResultCode.TREE_HAS_ACTIVE_CHILDREN);
 
 		verify(sysMenuMapper, never()).deleteByIds(any());
 	}
