@@ -172,7 +172,7 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 
 		// 父级或启用状态影响授权展开与数据范围，其余元数据变更不刷新画像
 		if (FieldChangeSupport.anyChanged(parentChanged, statusChanged)) {
-			String invalidationOp = parentChanged ? "move:" + id : "update:" + id;
+			String invalidationOp = parentChanged ? "move" : "update";
 			deptInvalidationTrigger.submitByDeptIds(List.of(id), invalidationOp);
 		}
 	}
@@ -196,7 +196,7 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 
 		// 维护部门闭包
 		deptClosureMaintainer.moveNode(deptId, newParentId);
-		deptInvalidationTrigger.submitByDeptIds(List.of(deptId), "move:" + deptId);
+		deptInvalidationTrigger.submitByDeptIds(List.of(deptId), "move");
 	}
 
 	/**
@@ -213,7 +213,7 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 		deptReferenceChecker.requireSubtreeUnused(deptId);
 
 		// 先提交失效（反查依赖 dept_closure）再清理闭包与主表
-		deptInvalidationTrigger.submitByDeptIds(List.of(deptId), "delete:" + deptId);
+		deptInvalidationTrigger.submitByDeptIds(List.of(deptId), "delete");
 
 		// 维护部门闭包
 		deptClosureMaintainer.removeClosurePaths(deptId);

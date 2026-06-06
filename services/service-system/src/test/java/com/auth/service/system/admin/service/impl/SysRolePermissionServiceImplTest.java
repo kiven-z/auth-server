@@ -103,7 +103,7 @@ class SysRolePermissionServiceImplTest {
 		verify(sysRolePermissionMapper).deleteByRoleCode("ADMIN");
 		verify(sysRolePermissionMapper).batchInsertRolePermissions(eq("ADMIN"), eq(List.of("sys:user:list")), isNull(),
 				isNull());
-		verify(roleInvalidationTrigger).submitByRoleCodes(List.of("ADMIN"), "assign-permissions:ADMIN");
+		verify(roleInvalidationTrigger).submitByRoleCodes(List.of("ADMIN"), "assign-permissions");
 	}
 
 	@Test
@@ -118,7 +118,7 @@ class SysRolePermissionServiceImplTest {
 		verify(sysRolePermissionMapper).deleteByRoleCode("ADMIN");
 		verify(sysPermissionMapper, never()).selectCount(any());
 		verify(sysRolePermissionMapper, never()).batchInsertRolePermissions(any(), any(), any(), any());
-		verify(roleInvalidationTrigger).submitByRoleCodes(List.of("ADMIN"), "assign-permissions:ADMIN");
+		verify(roleInvalidationTrigger).submitByRoleCodes(List.of("ADMIN"), "assign-permissions");
 	}
 
 	@Test

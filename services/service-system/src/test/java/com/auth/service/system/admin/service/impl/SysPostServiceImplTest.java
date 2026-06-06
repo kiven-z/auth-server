@@ -295,7 +295,7 @@ class SysPostServiceImplTest {
 
 		verify(sysPostMapper).updateById(argThat(
 				(SysPostEntity e) -> Long.valueOf(2L).equals(e.getDeptId()) && Boolean.FALSE.equals(e.getStatus())));
-		verify(postInvalidationTrigger).submitByPostIds(List.of(postId), "update:" + postId);
+		verify(postInvalidationTrigger).submitByPostIds(List.of(postId), "update");
 	}
 
 	@Test
@@ -352,7 +352,7 @@ class SysPostServiceImplTest {
 
 		sysPostService.deleteById(postId);
 
-		verify(postInvalidationTrigger).submitByPostIds(List.of(postId), "delete:" + postId);
+		verify(postInvalidationTrigger).submitByPostIds(List.of(postId), "delete");
 		verify(sysPostMapper).deleteById(postId);
 	}
 

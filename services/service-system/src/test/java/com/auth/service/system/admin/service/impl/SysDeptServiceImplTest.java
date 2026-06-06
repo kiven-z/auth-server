@@ -116,7 +116,7 @@ class SysDeptServiceImplTest {
 		sysDeptService.updateMeta(form);
 
 		verify(sysDeptMapper).updateById(argThat((SysDeptEntity e) -> Boolean.FALSE.equals(e.getStatus())));
-		verify(deptInvalidationTrigger).submitByDeptIds(List.of(deptId), "update:" + deptId);
+		verify(deptInvalidationTrigger).submitByDeptIds(List.of(deptId), "update");
 		verify(deptClosureMaintainer, never()).moveNode(anyLong(), anyLong());
 	}
 
@@ -133,7 +133,7 @@ class SysDeptServiceImplTest {
 		sysDeptService.updateMeta(form);
 
 		verify(deptClosureMaintainer).moveNode(deptId, 10L);
-		verify(deptInvalidationTrigger).submitByDeptIds(List.of(deptId), "move:" + deptId);
+		verify(deptInvalidationTrigger).submitByDeptIds(List.of(deptId), "move");
 	}
 
 }

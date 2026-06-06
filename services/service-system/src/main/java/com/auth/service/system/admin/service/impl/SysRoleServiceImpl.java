@@ -136,7 +136,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 
 		if (FieldChangeSupport.anyChanged(roleCodeChanged, statusChanged)) {
 			List<String> roleCodes = FieldChangeSupport.renameCodes(oldRoleCode, newRoleCode);
-			roleInvalidationTrigger.submitByRoleCodes(roleCodes, "update:" + newRoleCode);
+			roleInvalidationTrigger.submitByRoleCodes(roleCodes, "update");
 		}
 	}
 
@@ -166,7 +166,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 
 		removeById(id);
 
-		roleInvalidationTrigger.submitByRoleCodes(List.of(roleCode), "delete:" + roleCode);
+		roleInvalidationTrigger.submitByRoleCodes(List.of(roleCode), "delete");
 	}
 
 }

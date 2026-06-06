@@ -5,13 +5,14 @@ import com.auth.module.security.contract.api.authorization.AuthorizationChangeKi
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest;
 import com.auth.module.security.contract.dto.invalidation.UserPostInvalidatePayload;
 import com.auth.service.system.authorization.dispatch.AuthorizationInvalidationCoordinator;
+import com.auth.service.system.authorization.dispatch.support.InvalidationEventIds;
+import com.auth.service.system.authorization.dispatch.support.InvalidationSourceBizIds;
 import com.auth.service.system.common.model.audit.SystemAuditBizModule;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * 岗位启用状态变更后触发授权失效
@@ -22,24 +23,25 @@ import java.util.UUID;
 @Component
 public class PostAuthorizationInvalidationTrigger {
 
-	private final AuthorizationInvalidationCoordinator invalidationCoordinator;
+    private final AuthorizationInvalidationCoordinator invalidationCoordinator;
 
-	/**
-	 * 按岗位 ID 提交失效（去重、忽略空）
-	 * @param postIds 岗位主键
-	 * @param operation 操作标识
-	 */
-	public void submitByPostIds(Collection<Long> postIds, String operation) {
-		List<Long> ids = postIds.stream().distinct().toList();
-		if (CollUtil.isEmpty(ids)) {
-			return;
-		}
+    /**
+     * 按岗位 ID 提交失效（去重、忽略空）
+     *
+     * @param postIds   岗位主键
+     * @param operation 操作标识
+     */
+    public void submitByPostIds(Collection<Long> postIds, String operation) {
+        List<Long> ids = postIds.stream().distinct().toList();
+        if (CollUtil.isEmpty(ids)) {
+            return;
+        }
 
-		String bizKey = "post:" + operation + ":" + ids;
-		String eventId = "sys-post-" + operation + "-" + UUID.randomUUID().toString().replace("-", "");
-		AuthorizationInvalidateRequest request = new AuthorizationInvalidateRequest(eventId,
-				AuthorizationChangeKind.USER_POST, new UserPostInvalidatePayload(ids));
-		invalidationCoordinator.submit(request, SystemAuditBizModule.SYS_POST, bizKey);
-	}
+        String sourceBizId = InvalidationSourceBizIds.of(operation, InvalidationSourceBizIds.joinLongIds(ids));
+        String eventId = InvalidationEventIds.next(InvalidationEventIds.KIND_POST);
+        AuthorizationInvalidateRequest request = new AuthorizationInvalidateRequest(eventId,
+                AuthorizationChangeKind.USER_POST, new UserPostInvalidatePayload(ids));
+        invalidationCoordinator.submit(request, SystemAuditBizModule.SYS_POST, sourceBizId);
+    }
 
 }

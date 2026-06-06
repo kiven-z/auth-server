@@ -63,7 +63,7 @@ public class GrantTableSubjectRoleServiceImpl implements GrantTableSubjectRoleSe
 		}
 
 		grantInvalidationTrigger.submitByGrantSubjects(List.of(new GrantSubjectKey(subjectType, subjectId)),
-				"replace-" + subjectType.name().toLowerCase() + "-roles:" + subjectId);
+				"replace-roles");
 	}
 
 }

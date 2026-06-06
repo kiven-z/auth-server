@@ -121,7 +121,7 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity
 
 		// 如果状态发生变化，则提交授权失效
 		if (statusChanged) {
-			postInvalidationTrigger.submitByPostIds(List.of(id), "update:" + id);
+			postInvalidationTrigger.submitByPostIds(List.of(id), "update");
 		}
 	}
 
@@ -136,7 +136,7 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity
 		postReferenceChecker.requireDeletable(id);
 
 		// 删除岗位后，提交授权失效
-		postInvalidationTrigger.submitByPostIds(List.of(id), "delete:" + id);
+		postInvalidationTrigger.submitByPostIds(List.of(id), "delete");
 
 		removeById(id);
 	}

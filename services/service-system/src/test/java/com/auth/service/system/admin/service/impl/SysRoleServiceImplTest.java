@@ -150,7 +150,7 @@ class SysRoleServiceImplTest {
 
 		sysRoleService.update(updateForm(5L, "VIEWER", false));
 
-		verify(roleInvalidationTrigger).submitByRoleCodes(List.of("VIEWER"), "update:VIEWER");
+		verify(roleInvalidationTrigger).submitByRoleCodes(List.of("VIEWER"), "update");
 	}
 
 	@Test
@@ -162,7 +162,7 @@ class SysRoleServiceImplTest {
 
 		sysRoleService.update(updateForm(6L, "NEW_CODE", true));
 
-		verify(roleInvalidationTrigger).submitByRoleCodes(List.of("OLD_CODE", "NEW_CODE"), "update:NEW_CODE");
+		verify(roleInvalidationTrigger).submitByRoleCodes(List.of("OLD_CODE", "NEW_CODE"), "update");
 	}
 
 	@Test
@@ -202,7 +202,7 @@ class SysRoleServiceImplTest {
 		sysRoleService.deleteById(3L);
 
 		verify(sysRoleMapper).deleteById(3L);
-		verify(roleInvalidationTrigger).submitByRoleCodes(List.of("EMPTY_ROLE"), "delete:EMPTY_ROLE");
+		verify(roleInvalidationTrigger).submitByRoleCodes(List.of("EMPTY_ROLE"), "delete");
 	}
 
 }

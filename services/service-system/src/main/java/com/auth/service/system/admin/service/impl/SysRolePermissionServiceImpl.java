@@ -67,7 +67,7 @@ public class SysRolePermissionServiceImpl implements SysRolePermissionService {
 			sysRolePermissionMapper.batchInsertRolePermissions(normalized, codes, operatorId, operatorId);
 		}
 
-		roleInvalidationTrigger.submitByRoleCodes(List.of(normalized), "assign-permissions:" + normalized);
+		roleInvalidationTrigger.submitByRoleCodes(List.of(normalized), "assign-permissions");
 		log.info("Role permissions replaced: roleCode={}, count={}", normalized, codes.size());
 	}
 

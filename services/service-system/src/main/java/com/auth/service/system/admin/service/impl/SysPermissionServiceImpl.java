@@ -152,7 +152,7 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 		// 权限码或启用状态影响角色权限展开，其余元数据变更不刷新画像
 		if (FieldChangeSupport.anyChanged(permissionCodeChanged, statusChanged)) {
 			List<String> permissionCodes = FieldChangeSupport.renameCodes(oldPermissionCode, newPermissionCode);
-			permissionInvalidationTrigger.submitByPermissionCodes(permissionCodes, "update:" + newPermissionCode);
+			permissionInvalidationTrigger.submitByPermissionCodes(permissionCodes, "update");
 		}
 	}
 
@@ -168,7 +168,7 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 
 		// 失效在事务提交后投递：PERMISSION 桥接依赖 sys_role_permission，须在删除前快照角色并走 ROLE 失效
 		String permissionCode = existing.getPermissionCode();
-		permissionInvalidationTrigger.submitByPermissionCodes(List.of(permissionCode), "delete:" + permissionCode);
+		permissionInvalidationTrigger.submitByPermissionCodes(List.of(permissionCode), "delete");
 
 		// 提交 ROLE 失效
 		List<String> boundRoleCodes = sysRolePermissionMapper.selectBoundRolesByPermissionCode(permissionCode)
@@ -178,7 +178,7 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 			.distinct()
 			.toList();
 		if (CollUtil.isNotEmpty(boundRoleCodes)) {
-			roleInvalidationTrigger.submitByRoleCodes(boundRoleCodes, "delete-permission:" + permissionCode);
+			roleInvalidationTrigger.submitByRoleCodes(boundRoleCodes, "delete-permission");
 		}
 
 		// 删除权限

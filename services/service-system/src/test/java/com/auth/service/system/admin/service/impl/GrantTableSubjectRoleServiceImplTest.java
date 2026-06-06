@@ -117,7 +117,7 @@ class GrantTableSubjectRoleServiceImplTest {
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<List<GrantSubjectKey>> subjectsCaptor = ArgumentCaptor.forClass(List.class);
 		verify(grantInvalidationTrigger).submitByGrantSubjects(subjectsCaptor.capture(),
-				eq("replace-post-roles:" + SUBJECT_ID));
+				eq("replace-roles"));
 		assertThat(subjectsCaptor.getValue())
 			.containsExactly(new GrantSubjectKey(GrantTableSubjectType.POST, SUBJECT_ID));
 	}
@@ -133,7 +133,7 @@ class GrantTableSubjectRoleServiceImplTest {
 
 		verify(grantTableMapper).deleteBySubject(GrantTableSubjectType.POST.name(), SUBJECT_ID);
 		verify(grantTableMapper, never()).batchInsertSubjectRoleGrants(any(), any(), any(), any());
-		verify(grantInvalidationTrigger).submitByGrantSubjects(any(), eq("replace-post-roles:" + SUBJECT_ID));
+		verify(grantInvalidationTrigger).submitByGrantSubjects(any(), eq("replace-roles"));
 	}
 
 	private static SysPostEntity activePost(Long id) {

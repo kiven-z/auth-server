@@ -169,7 +169,7 @@ class SysPermissionServiceImplTest {
 		sysPermissionService.update(form);
 
 		verify(permissionInvalidationTrigger).submitByPermissionCodes(List.of("sys:user:query"),
-				"update:sys:user:query");
+				"update");
 	}
 
 	@Test
@@ -182,7 +182,7 @@ class SysPermissionServiceImplTest {
 		sysPermissionService.update(form);
 
 		verify(permissionInvalidationTrigger).submitByPermissionCodes(List.of("sys:user:query", "sys:user:list"),
-				"update:sys:user:list");
+				"update");
 	}
 
 	@Test
@@ -286,8 +286,8 @@ class SysPermissionServiceImplTest {
 
 		InOrder order = Mockito.inOrder(permissionInvalidationTrigger, roleInvalidationTrigger, sysPermissionMapper);
 		order.verify(permissionInvalidationTrigger)
-			.submitByPermissionCodes(List.of("sys:role:delete"), "delete:sys:role:delete");
-		order.verify(roleInvalidationTrigger).submitByRoleCodes(List.of("TEST"), "delete-permission:sys:role:delete");
+			.submitByPermissionCodes(List.of("sys:role:delete"), "delete");
+		order.verify(roleInvalidationTrigger).submitByRoleCodes(List.of("TEST"), "delete-permission");
 		order.verify(sysPermissionMapper).deleteById(5L);
 	}
 
@@ -303,7 +303,7 @@ class SysPermissionServiceImplTest {
 		sysPermissionService.deleteById(6L);
 
 		verify(permissionInvalidationTrigger).submitByPermissionCodes(List.of("sys:orphan:perm"),
-				"delete:sys:orphan:perm");
+				"delete");
 		verify(roleInvalidationTrigger, never()).submitByRoleCodes(any(), any());
 		verify(sysPermissionMapper).deleteById(6L);
 	}
