@@ -9,6 +9,7 @@ import com.auth.service.system.admin.model.query.AuthorizationInvalidationOutbox
 import com.auth.service.system.admin.model.vo.authorizationinvalidation.AuthorizationInvalidationOutboxDetailVO;
 import com.auth.service.system.admin.model.vo.authorizationinvalidation.AuthorizationInvalidationOutboxPageVO;
 import com.auth.service.system.admin.service.AuthorizationInvalidationOutboxAdminService;
+import com.auth.service.system.authorization.outbox.model.SysAuthorizationInvalidationOutboxEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -45,7 +46,7 @@ public class AuthorizationInvalidationOutboxAdminServiceImpl implements Authoriz
 	 */
 	@Override
 	public PageResponse<AuthorizationInvalidationOutboxPageVO> getPage(AuthorizationInvalidationOutboxQuery query) {
-		Page<AuthorizationInvalidationOutboxPageRowPO> pageParams = new Page<>(query.getPageIndex(),
+		Page<SysAuthorizationInvalidationOutboxEntity> pageParams = new Page<>(query.getPageIndex(),
 				query.getPageSize());
 		IPage<AuthorizationInvalidationOutboxPageRowPO> page = authorizationInvalidationOutboxAdminMapper
 			.selectListByPage(pageParams, query);

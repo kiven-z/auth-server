@@ -3,6 +3,7 @@ package com.auth.service.system.admin.mapper;
 import com.auth.service.system.admin.model.po.authorizationinvalidation.AuthorizationInvalidationOutboxDetailRowPO;
 import com.auth.service.system.admin.model.po.authorizationinvalidation.AuthorizationInvalidationOutboxPageRowPO;
 import com.auth.service.system.admin.model.query.AuthorizationInvalidationOutboxQuery;
+import com.auth.service.system.authorization.outbox.model.SysAuthorizationInvalidationOutboxEntity;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Mapper;
@@ -23,7 +24,7 @@ public interface AuthorizationInvalidationOutboxAdminMapper {
 	 * @return 分页结果
 	 */
 	IPage<AuthorizationInvalidationOutboxPageRowPO> selectListByPage(
-			@Param("page") Page<AuthorizationInvalidationOutboxPageRowPO> page,
+			@Param("page") Page<SysAuthorizationInvalidationOutboxEntity> page,
 			@Param("query") AuthorizationInvalidationOutboxQuery query);
 
 	/**
