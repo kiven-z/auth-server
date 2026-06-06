@@ -1,6 +1,11 @@
 package com.auth.service.auth.authorization.infrastructure.persistence;
 
+import com.auth.service.auth.authorization.admin.model.po.AuthorizationInvalidationEventDetailRowPO;
+import com.auth.service.auth.authorization.admin.model.po.AuthorizationInvalidationEventPageRowPO;
+import com.auth.service.auth.authorization.admin.model.query.AuthorizationInvalidationEventQuery;
 import com.auth.service.auth.authorization.infrastructure.persistence.projection.AuthorizationInvalidationEventProjection;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -39,5 +44,22 @@ public interface AuthorizationInvalidationEventMapper {
 	 * @return 删除行数
 	 */
 	int deleteProcessingClaim(@Param("eventId") String eventId);
+
+	/**
+	 * 分页查询幂等事件（运维只读）
+	 * @param page 分页参数
+	 * @param query 查询条件
+	 * @return 分页数据
+	 */
+	IPage<AuthorizationInvalidationEventPageRowPO> selectListByPage(
+			@Param("page") Page<AuthorizationInvalidationEventPageRowPO> page,
+			@Param("query") AuthorizationInvalidationEventQuery query);
+
+	/**
+	 * 按主键查询详情
+	 * @param id 主键
+	 * @return 详情投影
+	 */
+	AuthorizationInvalidationEventDetailRowPO selectDetailById(@Param("id") Long id);
 
 }

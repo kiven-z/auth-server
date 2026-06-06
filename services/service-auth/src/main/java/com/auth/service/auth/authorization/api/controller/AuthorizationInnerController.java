@@ -1,26 +1,24 @@
 package com.auth.service.auth.authorization.api.controller;
 
-import java.util.List;
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.auth.common.core.model.response.Result;
+import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.autoconfigure.annotation.InternalApi;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateResponse;
+import com.auth.service.auth.authorization.admin.model.query.AuthorizationInvalidationEventQuery;
+import com.auth.service.auth.authorization.admin.model.vo.AuthorizationInvalidationEventDetailVO;
+import com.auth.service.auth.authorization.admin.model.vo.AuthorizationInvalidationEventPageVO;
 import com.auth.service.auth.authorization.api.dto.EffectiveCodesVO;
 import com.auth.service.auth.authorization.application.AuthorizationInnerService;
 import com.auth.service.auth.authorization.application.AuthorizationInvalidationService;
-
+import com.auth.service.auth.authorization.application.query.AuthorizationInvalidationEventQueryApplicationService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * 授权域内部接口
@@ -36,6 +34,8 @@ public class AuthorizationInnerController {
 	private final AuthorizationInnerService authorizationInnerService;
 
 	private final AuthorizationInvalidationService authorizationInvalidationService;
+
+	private final AuthorizationInvalidationEventQueryApplicationService authorizationInvalidationEventQueryApplicationService;
 
 	@InternalApi
 	@Operation(summary = "刷新用户授权画像缓存（AuthProfile）")
@@ -60,6 +60,21 @@ public class AuthorizationInnerController {
 			@Valid @RequestBody AuthorizationInvalidateRequest request) {
 		AuthorizationInvalidateResponse response = authorizationInvalidationService.invalidate(request);
 		return Result.success(response);
+	}
+
+	@InternalApi
+	@Operation(summary = "分页查询授权失效幂等事件")
+	@GetMapping("/invalidation/event/page")
+	public Result<PageResponse<AuthorizationInvalidationEventPageVO>> invalidationEventPage(
+			AuthorizationInvalidationEventQuery query) {
+		return Result.success(authorizationInvalidationEventQueryApplicationService.getPage(query));
+	}
+
+	@InternalApi
+	@Operation(summary = "授权失效幂等事件详情")
+	@GetMapping("/invalidation/event/{id}")
+	public Result<AuthorizationInvalidationEventDetailVO> invalidationEventDetail(@PathVariable("id") Long id) {
+		return Result.success(authorizationInvalidationEventQueryApplicationService.getDetail(id));
 	}
 
 }

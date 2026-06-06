@@ -76,6 +76,11 @@ public enum AuthResultCode {
 	USER_NOT_FOUND(401, 1404, "USER_NOT_FOUND", "user.not.found"),
 
 	/**
+	 * 资源不存在
+	 */
+	DATA_NOT_EXIST(404, 1206, "DATA_NOT_EXIST", "data.not.exists"),
+
+	/**
 	 * 业务规则拒绝：操作频繁
 	 */
 	TOO_MANY_REQUESTS(429, 1304, "TOO_MANY_REQUESTS", "too.many.requests"),

@@ -65,4 +65,63 @@
           AND impacted_user_count = -1
     </delete>
 
+    <!-- 分页查询幂等事件（运维只读） -->
+    <select id="selectListByPage"
+            resultType="com.auth.service.auth.authorization.admin.model.po.AuthorizationInvalidationEventPageRowPO">
+        SELECT aie.id,
+               aie.event_id,
+               aie.change_kind,
+               aie.impacted_user_count,
+               aie.version_bumped_count,
+               aie.profile_refreshed_count,
+               aie.profile_evicted_count,
+               aie.processed_at,
+               aie.create_time,
+               aie.update_time,
+               aie.create_user,
+               aie.update_user
+        FROM auth_authorization_invalidation_event aie
+        <where>
+            <if test="query.eventId != null and query.eventId != ''">
+                AND aie.event_id = #{query.eventId}
+            </if>
+            <if test="query.changeKind != null and query.changeKind != ''">
+                AND aie.change_kind = #{query.changeKind}
+            </if>
+            <if test="query.processing != null and query.processing">
+                AND aie.impacted_user_count = -1
+            </if>
+            <if test="query.processing != null and !query.processing">
+                AND aie.impacted_user_count != -1
+            </if>
+            <if test="query.processedAtStart != null">
+                AND aie.processed_at &gt;= #{query.processedAtStart}
+            </if>
+            <if test="query.processedAtEnd != null">
+                AND aie.processed_at &lt;= #{query.processedAtEnd}
+            </if>
+        </where>
+        ORDER BY aie.processed_at DESC, aie.create_time DESC
+    </select>
+
+    <!-- 按主键查询幂等事件详情 -->
+    <select id="selectDetailById"
+            resultType="com.auth.service.auth.authorization.admin.model.po.AuthorizationInvalidationEventDetailRowPO">
+        SELECT aie.id,
+               aie.event_id,
+               aie.change_kind,
+               aie.impacted_user_count,
+               aie.version_bumped_count,
+               aie.profile_refreshed_count,
+               aie.profile_evicted_count,
+               aie.processed_at,
+               aie.create_time,
+               aie.update_time,
+               aie.create_user,
+               aie.update_user,
+               aie.remark
+        FROM auth_authorization_invalidation_event aie
+        WHERE aie.id = #{id}
+    </select>
+
 </mapper>
