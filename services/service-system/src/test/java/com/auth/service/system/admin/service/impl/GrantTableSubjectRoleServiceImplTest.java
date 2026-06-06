@@ -116,8 +116,7 @@ class GrantTableSubjectRoleServiceImplTest {
 
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<List<GrantSubjectKey>> subjectsCaptor = ArgumentCaptor.forClass(List.class);
-		verify(grantInvalidationTrigger).submitByGrantSubjects(subjectsCaptor.capture(),
-				eq("replace-roles"));
+		verify(grantInvalidationTrigger).submitByGrantSubjects(subjectsCaptor.capture(), eq("replace-roles"));
 		assertThat(subjectsCaptor.getValue())
 			.containsExactly(new GrantSubjectKey(GrantTableSubjectType.POST, SUBJECT_ID));
 	}

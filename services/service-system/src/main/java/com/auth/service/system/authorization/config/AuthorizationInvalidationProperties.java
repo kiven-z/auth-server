@@ -47,4 +47,11 @@ public class AuthorizationInvalidationProperties {
 	@NotNull
 	private Integer retryBackoffSeconds = 30;
 
+	/**
+	 * 人工重试允许解锁 PROCESSING 的抢占超时（分钟） 超时或 force=true 时可重试。
+	 */
+	@Min(1)
+	@NotNull
+	private Integer manualProcessingUnlockTimeoutMinutes = 5;
+
 }

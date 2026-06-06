@@ -1,13 +1,13 @@
 package com.auth.service.auth.authorization.application.query;
 
 import com.auth.common.data.model.PageResponse;
-import com.auth.service.auth.authorization.admin.convert.AuthorizationInvalidationEventConverter;
-import com.auth.service.auth.authorization.admin.model.po.AuthorizationInvalidationEventDetailRowPO;
-import com.auth.service.auth.authorization.admin.model.po.AuthorizationInvalidationEventPageRowPO;
-import com.auth.service.auth.authorization.admin.model.query.AuthorizationInvalidationEventQuery;
-import com.auth.service.auth.authorization.admin.model.vo.AuthorizationInvalidationEventDetailVO;
-import com.auth.service.auth.authorization.admin.model.vo.AuthorizationInvalidationEventPageVO;
+import com.auth.service.auth.authorization.convert.AuthorizationInvalidationEventConverter;
 import com.auth.service.auth.authorization.domain.invalidation.port.InvalidationEventQueryPort;
+import com.auth.service.auth.authorization.domain.model.po.AuthorizationInvalidationEventDetailRowPO;
+import com.auth.service.auth.authorization.domain.model.po.AuthorizationInvalidationEventPageRowPO;
+import com.auth.service.auth.authorization.domain.model.query.AuthorizationInvalidationEventQuery;
+import com.auth.service.auth.authorization.domain.model.vo.AuthorizationInvalidationEventDetailVO;
+import com.auth.service.auth.authorization.domain.model.vo.AuthorizationInvalidationEventPageVO;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.enums.AuthResultCode;
 import com.baomidou.mybatisplus.core.metadata.IPage;

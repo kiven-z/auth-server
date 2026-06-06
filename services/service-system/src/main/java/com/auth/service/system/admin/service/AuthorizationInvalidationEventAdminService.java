@@ -26,4 +26,11 @@ public interface AuthorizationInvalidationEventAdminService {
 	 */
 	AuthorizationInvalidationEventDetailVO getDetail(Long id);
 
+	/**
+	 * 释放 processing 占位，允许 Outbox 重新投递。
+	 * @param id 幂等事件主键
+	 * @return 是否实际释放
+	 */
+	boolean releaseProcessingClaim(Long id);
+
 }

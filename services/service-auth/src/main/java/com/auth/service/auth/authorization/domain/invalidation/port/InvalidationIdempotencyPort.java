@@ -31,7 +31,8 @@ public interface InvalidationIdempotencyPort {
 	/**
 	 * 处理失败时释放占位，便于 Outbox 重试
 	 * @param eventId 业务事件 ID
+	 * @return
 	 */
-	void releaseClaim(String eventId);
+	boolean releaseClaim(String eventId);
 
 }

@@ -148,7 +148,49 @@ public enum SystemAdminResultCode implements SystemResultCode {
 	/**
 	 * 导出范围不支持或参数不完整（含 FULL_ASYNC 预留）
 	 */
-	EXPORT_SCOPE_NOT_SUPPORTED(400, 298, "EXPORT_SCOPE_NOT_SUPPORTED", "system.export.scope_not_supported"),;
+	EXPORT_SCOPE_NOT_SUPPORTED(400, 298, "EXPORT_SCOPE_NOT_SUPPORTED", "system.export.scope_not_supported"),
+
+	/**
+	 * Outbox 当前状态不允许人工重试
+	 */
+	AUTH_INVALIDATION_OUTBOX_RETRY_NOT_ALLOWED(400, 299, "AUTH_INVALIDATION_OUTBOX_RETRY_NOT_ALLOWED",
+			"system.authorization.invalidation.outbox.retry_not_allowed"),
+
+	/**
+	 * Outbox 人工重试并发冲突（版本或状态已变更）
+	 */
+	AUTH_INVALIDATION_OUTBOX_RETRY_CONFLICT(409, 300, "AUTH_INVALIDATION_OUTBOX_RETRY_CONFLICT",
+			"system.authorization.invalidation.outbox.retry_conflict"),
+
+	/**
+	 * Outbox 仍处于 PROCESSING 且未满足解锁条件
+	 */
+	AUTH_INVALIDATION_OUTBOX_PROCESSING_LOCKED(409, 301, "AUTH_INVALIDATION_OUTBOX_PROCESSING_LOCKED",
+			"system.authorization.invalidation.outbox.processing_locked"),
+
+	/**
+	 * Outbox 人工重试投递成功
+	 */
+	AUTH_INVALIDATION_OUTBOX_RETRY_SUCCESS(200, 302, "AUTH_INVALIDATION_OUTBOX_RETRY_SUCCESS",
+			"system.authorization.invalidation.outbox.retry_success"),
+
+	/**
+	 * Outbox 人工重试投递失败
+	 */
+	AUTH_INVALIDATION_OUTBOX_RETRY_FAILED(200, 303, "AUTH_INVALIDATION_OUTBOX_RETRY_FAILED",
+			"system.authorization.invalidation.outbox.retry_failed"),
+
+	/**
+	 * 幂等事件非 processing 占位，无需释放
+	 */
+	AUTH_INVALIDATION_EVENT_RELEASE_NOT_PROCESSING(400, 304, "AUTH_INVALIDATION_EVENT_RELEASE_NOT_PROCESSING",
+			"system.authorization.invalidation.event.release_not_processing"),
+
+	/**
+	 * 幂等事件 processing 占位已释放
+	 */
+	AUTH_INVALIDATION_EVENT_RELEASE_SUCCESS(200, 305, "AUTH_INVALIDATION_EVENT_RELEASE_SUCCESS",
+			"system.authorization.invalidation.event.release_success"),;
 
 	private final int httpStatus;
 

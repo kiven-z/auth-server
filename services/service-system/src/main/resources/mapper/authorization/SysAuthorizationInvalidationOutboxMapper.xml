@@ -134,4 +134,20 @@
           AND status = 'PENDING'
     </update>
 
+    <!-- 人工重试：重置为待投递并清空抢占/错误 -->
+    <update id="resetForManualRetry">
+        UPDATE sys_authorization_invalidation_outbox
+        SET status        = 'PENDING',
+            retry_count   = 0,
+            next_retry_at = NULL,
+            last_error    = NULL,
+            locked_by     = NULL,
+            locked_at     = NULL,
+            update_time   = NOW(3),
+            version       = version + 1
+        WHERE id = #{id}
+          AND version = #{expectedVersion}
+          AND status IN ('DEAD', 'FAILED', 'PROCESSING')
+    </update>
+
 </mapper>

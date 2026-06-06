@@ -23,25 +23,24 @@ import java.util.List;
 @Component
 public class PostAuthorizationInvalidationTrigger {
 
-    private final AuthorizationInvalidationCoordinator invalidationCoordinator;
+	private final AuthorizationInvalidationCoordinator invalidationCoordinator;
 
-    /**
-     * 按岗位 ID 提交失效（去重、忽略空）
-     *
-     * @param postIds   岗位主键
-     * @param operation 操作标识
-     */
-    public void submitByPostIds(Collection<Long> postIds, String operation) {
-        List<Long> ids = postIds.stream().distinct().toList();
-        if (CollUtil.isEmpty(ids)) {
-            return;
-        }
+	/**
+	 * 按岗位 ID 提交失效（去重、忽略空）
+	 * @param postIds 岗位主键
+	 * @param operation 操作标识
+	 */
+	public void submitByPostIds(Collection<Long> postIds, String operation) {
+		List<Long> ids = postIds.stream().distinct().toList();
+		if (CollUtil.isEmpty(ids)) {
+			return;
+		}
 
-        String sourceBizId = InvalidationSourceBizIds.of(operation, InvalidationSourceBizIds.joinLongIds(ids));
-        String eventId = InvalidationEventIds.next(InvalidationEventIds.KIND_POST);
-        AuthorizationInvalidateRequest request = new AuthorizationInvalidateRequest(eventId,
-                AuthorizationChangeKind.USER_POST, new UserPostInvalidatePayload(ids));
-        invalidationCoordinator.submit(request, SystemAuditBizModule.SYS_POST, sourceBizId);
-    }
+		String sourceBizId = InvalidationSourceBizIds.of(operation, InvalidationSourceBizIds.joinLongIds(ids));
+		String eventId = InvalidationEventIds.next(InvalidationEventIds.KIND_POST);
+		AuthorizationInvalidateRequest request = new AuthorizationInvalidateRequest(eventId,
+				AuthorizationChangeKind.USER_POST, new UserPostInvalidatePayload(ids));
+		invalidationCoordinator.submit(request, SystemAuditBizModule.SYS_POST, sourceBizId);
+	}
 
 }

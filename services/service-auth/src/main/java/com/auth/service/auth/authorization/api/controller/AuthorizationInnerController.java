@@ -5,13 +5,14 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.autoconfigure.annotation.InternalApi;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateResponse;
-import com.auth.service.auth.authorization.admin.model.query.AuthorizationInvalidationEventQuery;
-import com.auth.service.auth.authorization.admin.model.vo.AuthorizationInvalidationEventDetailVO;
-import com.auth.service.auth.authorization.admin.model.vo.AuthorizationInvalidationEventPageVO;
 import com.auth.service.auth.authorization.api.dto.EffectiveCodesVO;
 import com.auth.service.auth.authorization.application.AuthorizationInnerService;
 import com.auth.service.auth.authorization.application.AuthorizationInvalidationService;
+import com.auth.service.auth.authorization.application.ops.AuthorizationInvalidationEventOpsApplicationService;
 import com.auth.service.auth.authorization.application.query.AuthorizationInvalidationEventQueryApplicationService;
+import com.auth.service.auth.authorization.domain.model.query.AuthorizationInvalidationEventQuery;
+import com.auth.service.auth.authorization.domain.model.vo.AuthorizationInvalidationEventDetailVO;
+import com.auth.service.auth.authorization.domain.model.vo.AuthorizationInvalidationEventPageVO;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,8 @@ public class AuthorizationInnerController {
 	private final AuthorizationInvalidationService authorizationInvalidationService;
 
 	private final AuthorizationInvalidationEventQueryApplicationService authorizationInvalidationEventQueryApplicationService;
+
+	private final AuthorizationInvalidationEventOpsApplicationService authorizationInvalidationEventOpsApplicationService;
 
 	@InternalApi
 	@Operation(summary = "刷新用户授权画像缓存（AuthProfile）")
@@ -75,6 +78,14 @@ public class AuthorizationInnerController {
 	@GetMapping("/invalidation/event/{id}")
 	public Result<AuthorizationInvalidationEventDetailVO> invalidationEventDetail(@PathVariable("id") Long id) {
 		return Result.success(authorizationInvalidationEventQueryApplicationService.getDetail(id));
+	}
+
+	@InternalApi
+	@Operation(summary = "释放授权失效幂等事件 processing 占位")
+	@PostMapping("/invalidation/event/{eventId}/release-claim")
+	public Result<Boolean> releaseInvalidationEventClaim(@PathVariable("eventId") String eventId) {
+		boolean released = authorizationInvalidationEventOpsApplicationService.releaseProcessingClaim(eventId);
+		return Result.success(released);
 	}
 
 }

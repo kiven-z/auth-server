@@ -23,14 +23,14 @@ public interface SysAuthorizationInvalidationOutboxMapper {
 	int insertPending(SysAuthorizationInvalidationOutboxEntity outboxEntity);
 
 	/**
-	 * 按主键查询。
+	 * 按主键查询
 	 * @param id 主键
 	 * @return 记录，不存在为 null
 	 */
 	SysAuthorizationInvalidationOutboxEntity selectById(@Param("id") Long id);
 
 	/**
-	 * 查询可抢占的待重试记录。
+	 * 查询可抢占的待重试记录
 	 * @param statuses 状态列表
 	 * @param now 当前时间
 	 * @param limit 批次上限
@@ -51,7 +51,7 @@ public interface SysAuthorizationInvalidationOutboxMapper {
 			@Param("lockedAt") LocalDateTime lockedAt, @Param("expectedVersion") Long expectedVersion);
 
 	/**
-	 * 标记投递成功。
+	 * 标记投递成功
 	 * @param id 主键
 	 * @param processedAt 处理完成时间
 	 * @return 影响行数
@@ -59,7 +59,7 @@ public interface SysAuthorizationInvalidationOutboxMapper {
 	int markSuccess(@Param("id") Long id, @Param("processedAt") LocalDateTime processedAt);
 
 	/**
-	 * 标记投递失败并安排下次重试。
+	 * 标记投递失败并安排下次重试
 	 * @param id 主键
 	 * @param status FAILED 或 DEAD
 	 * @param retryCount 已重试次数
@@ -77,5 +77,13 @@ public interface SysAuthorizationInvalidationOutboxMapper {
 	 * @return 影响行数
 	 */
 	int recordSyncFailure(@Param("id") Long id, @Param("lastError") String lastError);
+
+	/**
+	 * 人工重试前重置为 PENDING（DEAD / FAILED / PROCESSING）
+	 * @param id 主键
+	 * @param expectedVersion 期望版本
+	 * @return 影响行数
+	 */
+	int resetForManualRetry(@Param("id") Long id, @Param("expectedVersion") Long expectedVersion);
 
 }

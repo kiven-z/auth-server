@@ -120,10 +120,11 @@ public class InvalidationIdempotencyAdapter implements InvalidationIdempotencyPo
 
 	/**
 	 * {@inheritDoc}
+	 * @return
 	 */
 	@Override
-	public void releaseClaim(String eventId) {
-		authorizationInvalidationEventMapper.deleteProcessingClaim(eventId);
+	public boolean releaseClaim(String eventId) {
+		return authorizationInvalidationEventMapper.deleteProcessingClaim(eventId) > 0;
 	}
 
 }

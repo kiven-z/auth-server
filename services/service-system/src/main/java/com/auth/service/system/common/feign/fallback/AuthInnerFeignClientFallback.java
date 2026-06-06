@@ -71,4 +71,13 @@ public class AuthInnerFeignClientFallback implements AuthInnerFeignClient {
 		return Result.error("Authorization invalidation event query is unavailable");
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Result<Boolean> releaseInvalidationEventClaim(String eventId) {
+		log.error("AuthInnerFeignClientFallback: releaseInvalidationEventClaim failed, eventId={}", eventId);
+		return Result.error("Authorization invalidation event release claim is unavailable");
+	}
+
 }

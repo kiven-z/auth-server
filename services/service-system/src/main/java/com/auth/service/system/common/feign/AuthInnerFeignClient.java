@@ -69,4 +69,12 @@ public interface AuthInnerFeignClient {
 	@GetMapping("/authorization/invalidation/event/{id}")
 	Result<AuthorizationInvalidationEventDetailInnerDTO> getInvalidationEventDetail(@PathVariable("id") Long id);
 
+	/**
+	 * 释放授权失效幂等事件 processing 占位
+	 * @param eventId 业务事件 ID
+	 * @return 是否实际释放
+	 */
+	@PostMapping("/authorization/invalidation/event/{eventId}/release-claim")
+	Result<Boolean> releaseInvalidationEventClaim(@PathVariable("eventId") String eventId);
+
 }

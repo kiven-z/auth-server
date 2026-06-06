@@ -1,8 +1,8 @@
 package com.auth.service.auth.authorization.infrastructure.persistence;
 
-import com.auth.service.auth.authorization.admin.model.po.AuthorizationInvalidationEventDetailRowPO;
-import com.auth.service.auth.authorization.admin.model.po.AuthorizationInvalidationEventPageRowPO;
-import com.auth.service.auth.authorization.admin.model.query.AuthorizationInvalidationEventQuery;
+import com.auth.service.auth.authorization.domain.model.po.AuthorizationInvalidationEventDetailRowPO;
+import com.auth.service.auth.authorization.domain.model.po.AuthorizationInvalidationEventPageRowPO;
+import com.auth.service.auth.authorization.domain.model.query.AuthorizationInvalidationEventQuery;
 import com.auth.service.auth.authorization.infrastructure.persistence.projection.AuthorizationInvalidationEventProjection;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -26,7 +26,7 @@ public interface AuthorizationInvalidationEventMapper {
 
 	/**
 	 * 插入处理中占位记录
-	 * @param projection 事件投影（计数为
+	 * @param projection 事件投影
 	 * @return 插入行数
 	 */
 	int insertProcessingClaim(AuthorizationInvalidationEventProjection projection);
@@ -39,14 +39,14 @@ public interface AuthorizationInvalidationEventMapper {
 	int updateProcessedOutcome(AuthorizationInvalidationEventProjection projection);
 
 	/**
-	 * 删除处理中占位行（失败回滚时释放 eventId）。
+	 * 删除处理中占位行
 	 * @param eventId 业务事件 ID
 	 * @return 删除行数
 	 */
 	int deleteProcessingClaim(@Param("eventId") String eventId);
 
 	/**
-	 * 分页查询幂等事件（运维只读）
+	 * 分页查询幂等事件
 	 * @param page 分页参数
 	 * @param query 查询条件
 	 * @return 分页数据

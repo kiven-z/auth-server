@@ -1,4 +1,4 @@
-package com.auth.service.auth.authorization.admin.model.query;
+package com.auth.service.auth.authorization.domain.model.query;
 
 import com.auth.common.core.model.query.PageQueryRequest;
 import io.swagger.v3.oas.annotations.media.Schema;

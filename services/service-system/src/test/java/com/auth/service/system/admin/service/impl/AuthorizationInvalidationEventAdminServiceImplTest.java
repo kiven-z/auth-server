@@ -19,11 +19,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
+import static com.auth.service.system.admin.exception.SystemAdminResultCode.AUTH_INVALIDATION_EVENT_RELEASE_NOT_PROCESSING;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.SERVICE_UNAVAILABLE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -101,6 +104,38 @@ class AuthorizationInvalidationEventAdminServiceImplTest {
 
 		assertEquals("evt-detail", detailVO.getEventId());
 		verify(auditUserDisplayService).enrichAuditUsernames(anyList());
+	}
+
+	@Test
+	@DisplayName("释放占位：非 processing 记录应拒绝")
+	void releaseProcessingClaim_shouldRejectCompletedEvent() {
+		AuthorizationInvalidationEventDetailInnerDTO innerDto = new AuthorizationInvalidationEventDetailInnerDTO();
+		innerDto.setId(3L);
+		innerDto.setEventId("evt-done");
+		innerDto.setProcessing(Boolean.FALSE);
+		when(authInnerFeignClient.getInvalidationEventDetail(3L)).thenReturn(Result.success(innerDto));
+
+		SystemBusinessException exception = assertThrows(SystemBusinessException.class,
+				() -> adminService.releaseProcessingClaim(3L));
+
+		assertEquals(AUTH_INVALIDATION_EVENT_RELEASE_NOT_PROCESSING, exception.getResultCode());
+		verify(authInnerFeignClient, never()).releaseInvalidationEventClaim("evt-done");
+	}
+
+	@Test
+	@DisplayName("释放占位：processing 记录应调用 Feign 释放")
+	void releaseProcessingClaim_shouldCallFeignRelease() {
+		AuthorizationInvalidationEventDetailInnerDTO innerDto = new AuthorizationInvalidationEventDetailInnerDTO();
+		innerDto.setId(4L);
+		innerDto.setEventId("evt-processing");
+		innerDto.setProcessing(Boolean.TRUE);
+		when(authInnerFeignClient.getInvalidationEventDetail(4L)).thenReturn(Result.success(innerDto));
+		when(authInnerFeignClient.releaseInvalidationEventClaim("evt-processing")).thenReturn(Result.success(true));
+
+		boolean released = adminService.releaseProcessingClaim(4L);
+
+		assertTrue(released);
+		verify(authInnerFeignClient).releaseInvalidationEventClaim("evt-processing");
 	}
 
 }

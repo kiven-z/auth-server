@@ -82,15 +82,13 @@ mybatis-plus:
       id-type: assign_id
 
 auth:
-  common:
-    jwt:
-      algorithm: HS256
   system:
     authorization-invalidation:
       sync-dispatch-enabled: true
       poll-interval-ms: 30000
       poll-batch-size: 50
       retry-backoff-seconds: 30
+      manual-processing-unlock-timeout-minutes: 5
     # 定时任务熔断：连续失败次数达到阈值后自动 pauseJob 并更新 sys_job.status=0
     schedule:
       job:

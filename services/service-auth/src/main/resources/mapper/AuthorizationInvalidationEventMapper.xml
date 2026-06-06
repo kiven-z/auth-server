@@ -12,10 +12,10 @@
                version_bumped_count,
                profile_refreshed_count,
                profile_evicted_count,
-               processed_at           
+               processed_at
         FROM auth_authorization_invalidation_event
         WHERE event_id = #{eventId}
-        LIMIT 1 
+        LIMIT 1
     </select>
 
     <!-- 插入处理中占位（event_id 唯一约束，并发时仅一行成功） -->
@@ -47,12 +47,12 @@
     <!-- 占位行更新为最终处理结果 -->
     <update id="updateProcessedOutcome">
         UPDATE auth_authorization_invalidation_event
-        SET impacted_user_count = #{impactedUserCount},
-            version_bumped_count = #{versionBumpedCount},
+        SET impacted_user_count     = #{impactedUserCount},
+            version_bumped_count    = #{versionBumpedCount},
             profile_refreshed_count = #{profileRefreshedCount},
-            profile_evicted_count = #{profileEvictedCount},
-            processed_at = #{processedAt},
-            update_time = #{processedAt}
+            profile_evicted_count   = #{profileEvictedCount},
+            processed_at            = #{processedAt},
+            update_time             = #{processedAt}
         WHERE event_id = #{eventId}
           AND impacted_user_count = -1
     </update>
@@ -67,26 +67,28 @@
 
     <!-- 分页查询幂等事件（运维只读） -->
     <select id="selectListByPage"
-            resultType="com.auth.service.auth.authorization.admin.model.po.AuthorizationInvalidationEventPageRowPO">
+            resultType="com.auth.service.auth.authorization.domain.model.po.AuthorizationInvalidationEventPageRowPO">
         SELECT aie.id,
-               aie.event_id,
-               aie.change_kind,
-               aie.impacted_user_count,
-               aie.version_bumped_count,
-               aie.profile_refreshed_count,
-               aie.profile_evicted_count,
-               aie.processed_at,
-               aie.create_time,
-               aie.update_time,
-               aie.create_user,
-               aie.update_user
+        aie.event_id,
+        aie.change_kind,
+        aie.impacted_user_count,
+        aie.version_bumped_count,
+        aie.profile_refreshed_count,
+        aie.profile_evicted_count,
+        aie.processed_at,
+        aie.create_time,
+        aie.update_time,
+        aie.create_user,
+        aie.update_user
         FROM auth_authorization_invalidation_event aie
         <where>
             <if test="query.eventId != null and query.eventId != ''">
-                AND aie.event_id = #{query.eventId}
+                AND aie.event_id =
+                #{query.eventId}
             </if>
             <if test="query.changeKind != null and query.changeKind != ''">
-                AND aie.change_kind = #{query.changeKind}
+                AND aie.change_kind =
+                #{query.changeKind}
             </if>
             <if test="query.processing != null and query.processing">
                 AND aie.impacted_user_count = -1
@@ -95,10 +97,12 @@
                 AND aie.impacted_user_count != -1
             </if>
             <if test="query.processedAtStart != null">
-                AND aie.processed_at &gt;= #{query.processedAtStart}
+                AND aie.processed_at &gt;=
+                #{query.processedAtStart}
             </if>
             <if test="query.processedAtEnd != null">
-                AND aie.processed_at &lt;= #{query.processedAtEnd}
+                AND aie.processed_at &lt;=
+                #{query.processedAtEnd}
             </if>
         </where>
         ORDER BY aie.processed_at DESC, aie.create_time DESC
@@ -106,7 +110,7 @@
 
     <!-- 按主键查询幂等事件详情 -->
     <select id="selectDetailById"
-            resultType="com.auth.service.auth.authorization.admin.model.po.AuthorizationInvalidationEventDetailRowPO">
+            resultType="com.auth.service.auth.authorization.domain.model.po.AuthorizationInvalidationEventDetailRowPO">
         SELECT aie.id,
                aie.event_id,
                aie.change_kind,

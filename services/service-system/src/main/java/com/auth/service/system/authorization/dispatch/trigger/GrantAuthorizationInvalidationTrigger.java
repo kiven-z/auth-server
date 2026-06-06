@@ -24,26 +24,24 @@ import java.util.List;
 @Component
 public class GrantAuthorizationInvalidationTrigger {
 
-    private final AuthorizationInvalidationCoordinator invalidationCoordinator;
+	private final AuthorizationInvalidationCoordinator invalidationCoordinator;
 
-    /**
-     * 按授权主体提交失效事件
-     *
-     * @param subjects  授权主体键列表
-     * @param operation 操作标识
-     */
-    public void submitByGrantSubjects(Collection<GrantSubjectKey> subjects, String operation) {
-        List<GrantSubjectKey> keys = subjects.stream().distinct().toList();
-        if (CollUtil.isEmpty(keys)) {
-            return;
-        }
+	/**
+	 * 按授权主体提交失效事件
+	 * @param subjects 授权主体键列表
+	 * @param operation 操作标识
+	 */
+	public void submitByGrantSubjects(Collection<GrantSubjectKey> subjects, String operation) {
+		List<GrantSubjectKey> keys = subjects.stream().distinct().toList();
+		if (CollUtil.isEmpty(keys)) {
+			return;
+		}
 
-        String sourceBizId = InvalidationSourceBizIds.of(operation,
-                InvalidationSourceBizIds.formatGrantSubjects(keys));
-        String eventId = InvalidationEventIds.next(InvalidationEventIds.KIND_GRANT);
-        AuthorizationInvalidateRequest request = new AuthorizationInvalidateRequest(eventId,
-                AuthorizationChangeKind.GRANT, new GrantInvalidatePayload(keys));
-        invalidationCoordinator.submit(request, SystemAuditBizModule.GRANT_TABLE, sourceBizId);
-    }
+		String sourceBizId = InvalidationSourceBizIds.of(operation, InvalidationSourceBizIds.formatGrantSubjects(keys));
+		String eventId = InvalidationEventIds.next(InvalidationEventIds.KIND_GRANT);
+		AuthorizationInvalidateRequest request = new AuthorizationInvalidateRequest(eventId,
+				AuthorizationChangeKind.GRANT, new GrantInvalidatePayload(keys));
+		invalidationCoordinator.submit(request, SystemAuditBizModule.GRANT_TABLE, sourceBizId);
+	}
 
 }

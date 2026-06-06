@@ -66,34 +66,9 @@ public class SystemAuditBizModule {
 	public static final String SYS_EMAIL_TEMPLATE = "SYS_EMAIL_TEMPLATE";
 
 	/**
-	 * 定时任务
-	 */
-	public static final String SYS_JOB = "SYS_JOB";
-
-	/**
 	 * 定时任务分组
 	 */
 	public static final String SYS_JOB_GROUP = "SYS_JOB_GROUP";
-
-	/**
-	 * 文件
-	 */
-	public static final String SYS_FILES = "SYS_FILES";
-
-	/**
-	 * 文件分片详情
-	 */
-	public static final String SYS_FILES_PART_DETAIL = "SYS_FILES_PART_DETAIL";
-
-	/**
-	 * 用户部门关联
-	 */
-	public static final String USER_DEPT = "USER_DEPT";
-
-	/**
-	 * 用户岗位关联
-	 */
-	public static final String USER_POST = "USER_POST";
 
 	/**
 	 * 授权主体
@@ -101,53 +76,13 @@ public class SystemAuditBizModule {
 	public static final String GRANT_TABLE = "GRANT_TABLE";
 
 	/**
-	 * 访问策略绑定
+	 * 授权失效 Outbox 投递队列
 	 */
-	public static final String USER_ACCESS_POLICY_BINDING = "USER_ACCESS_POLICY_BINDING";
+	public static final String AUTH_INVALIDATION_OUTBOX = "AUTH_INVALIDATION_OUTBOX";
 
 	/**
-	 * 访问策略定义
+	 * 授权失效幂等事件
 	 */
-	public static final String USER_ACCESS_POLICY_DEFINITION = "USER_ACCESS_POLICY_DEFINITION";
-
-	/**
-	 * 访问策略维度
-	 */
-	public static final String USER_ACCESS_POLICY_DIMENSION = "USER_ACCESS_POLICY_DIMENSION";
-
-	/**
-	 * 授权审计日志
-	 */
-	public static final String LOG_AUTHORIZATION_AUDIT = "LOG_AUTHORIZATION_AUDIT";
-
-	/**
-	 * 数据范围审计日志
-	 */
-	public static final String LOG_DATA_SCOPE_AUDIT = "LOG_DATA_SCOPE_AUDIT";
-
-	/**
-	 * 策略执行日志
-	 */
-	public static final String LOG_POLICY_EXECUTION = "LOG_POLICY_EXECUTION";
-
-	/**
-	 * 密码历史日志
-	 */
-	public static final String LOG_USER_PASSWORD_HISTORY = "LOG_USER_PASSWORD_HISTORY";
-
-	/**
-	 * 操作日志
-	 */
-	public static final String LOG_OPERATION = "LOG_OPERATION";
-
-	/**
-	 * 登录日志
-	 */
-	public static final String LOG_LOGIN = "LOG_LOGIN";
-
-	/**
-	 * 任务调度日志
-	 */
-	public static final String LOG_JOB = "LOG_JOB";
+	public static final String AUTH_INVALIDATION_EVENT = "AUTH_INVALIDATION_EVENT";
 
 }

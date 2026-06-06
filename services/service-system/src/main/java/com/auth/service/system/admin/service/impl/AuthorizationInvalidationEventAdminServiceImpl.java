@@ -1,5 +1,6 @@
 package com.auth.service.system.admin.service.impl;
 
+import static com.auth.service.system.admin.exception.SystemAdminResultCode.AUTH_INVALIDATION_EVENT_RELEASE_NOT_PROCESSING;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.SERVICE_UNAVAILABLE;
 
@@ -23,6 +24,7 @@ import com.auth.service.system.common.feign.dto.AuthorizationInvalidationEventIn
 import com.auth.service.system.common.feign.dto.AuthorizationInvalidationEventPageInnerDTO;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 
+import cn.hutool.core.util.BooleanUtil;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -98,6 +100,26 @@ public class AuthorizationInvalidationEventAdminServiceImpl implements Authoriza
 		// 补充审计用户名
 		auditUserDisplayService.enrichAuditUsernames(List.of(detailVO));
 		return detailVO;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean releaseProcessingClaim(Long id) {
+		AuthorizationInvalidationEventDetailVO detail = getDetail(id);
+		if (BooleanUtil.isFalse(detail.getProcessing())) {
+			throw new SystemBusinessException(AUTH_INVALIDATION_EVENT_RELEASE_NOT_PROCESSING);
+		}
+
+		// 释放幂等事件 processing 占位
+		Result<Boolean> result = authInnerFeignClient.releaseInvalidationEventClaim(detail.getEventId());
+		if (!FeignUtil.isSuccessWithData(result)) {
+			log.warn("Authorization invalidation event release claim unavailable, id={}", id);
+			throw new SystemBusinessException(SERVICE_UNAVAILABLE);
+		}
+
+		return BooleanUtil.isTrue(result.getData());
 	}
 
 }

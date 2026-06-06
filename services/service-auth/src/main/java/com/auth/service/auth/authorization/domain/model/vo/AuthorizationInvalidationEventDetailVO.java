@@ -1,4 +1,4 @@
-package com.auth.service.auth.authorization.admin.model.vo;
+package com.auth.service.auth.authorization.domain.model.vo;
 
 import com.auth.common.core.model.response.BaseResponse;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -12,16 +12,16 @@ import java.io.Serial;
 import java.time.LocalDateTime;
 
 /**
- * 授权失效幂等事件分页行
+ * 授权失效幂等事件详情
  *
  * @author Bunny
  */
-@Schema(name = "AuthorizationInvalidationEventPageVO", title = "授权失效幂等事件分页行")
+@Schema(name = "AuthorizationInvalidationEventDetailVO", title = "授权失效幂等事件详情")
 @Getter
 @Setter
 @ToString
 @EqualsAndHashCode(callSuper = true)
-public class AuthorizationInvalidationEventPageVO extends BaseResponse {
+public class AuthorizationInvalidationEventDetailVO extends BaseResponse {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
@@ -50,5 +50,8 @@ public class AuthorizationInvalidationEventPageVO extends BaseResponse {
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "处理完成时间")
 	private LocalDateTime processedAt;
+
+	@Schema(title = "备注")
+	private String remark;
 
 }

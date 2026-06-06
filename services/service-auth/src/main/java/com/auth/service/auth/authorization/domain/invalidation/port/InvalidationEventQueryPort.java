@@ -1,8 +1,8 @@
 package com.auth.service.auth.authorization.domain.invalidation.port;
 
-import com.auth.service.auth.authorization.admin.model.po.AuthorizationInvalidationEventDetailRowPO;
-import com.auth.service.auth.authorization.admin.model.po.AuthorizationInvalidationEventPageRowPO;
-import com.auth.service.auth.authorization.admin.model.query.AuthorizationInvalidationEventQuery;
+import com.auth.service.auth.authorization.domain.model.po.AuthorizationInvalidationEventDetailRowPO;
+import com.auth.service.auth.authorization.domain.model.po.AuthorizationInvalidationEventPageRowPO;
+import com.auth.service.auth.authorization.domain.model.query.AuthorizationInvalidationEventQuery;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 

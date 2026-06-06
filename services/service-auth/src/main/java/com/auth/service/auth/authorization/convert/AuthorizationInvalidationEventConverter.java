@@ -1,10 +1,10 @@
-package com.auth.service.auth.authorization.admin.convert;
+package com.auth.service.auth.authorization.convert;
 
-import com.auth.service.auth.authorization.admin.model.po.AuthorizationInvalidationEventDetailRowPO;
-import com.auth.service.auth.authorization.admin.model.po.AuthorizationInvalidationEventPageRowPO;
-import com.auth.service.auth.authorization.admin.model.vo.AuthorizationInvalidationEventDetailVO;
-import com.auth.service.auth.authorization.admin.model.vo.AuthorizationInvalidationEventPageVO;
 import com.auth.service.auth.authorization.domain.invalidation.model.InvalidationProcessingMarker;
+import com.auth.service.auth.authorization.domain.model.po.AuthorizationInvalidationEventDetailRowPO;
+import com.auth.service.auth.authorization.domain.model.po.AuthorizationInvalidationEventPageRowPO;
+import com.auth.service.auth.authorization.domain.model.vo.AuthorizationInvalidationEventDetailVO;
+import com.auth.service.auth.authorization.domain.model.vo.AuthorizationInvalidationEventPageVO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;

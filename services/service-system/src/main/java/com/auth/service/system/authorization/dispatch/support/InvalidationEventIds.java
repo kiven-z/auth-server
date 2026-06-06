@@ -11,39 +11,38 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class InvalidationEventIds {
 
-    /**
-     * 部门维度短前缀
-     */
-    public static final String KIND_DEPT = "dept";
+	/**
+	 * 部门维度短前缀
+	 */
+	public static final String KIND_DEPT = "dept";
 
-    /**
-     * 角色维度短前缀
-     */
-    public static final String KIND_ROLE = "role";
+	/**
+	 * 角色维度短前缀
+	 */
+	public static final String KIND_ROLE = "role";
 
-    /**
-     * 权限维度短前缀
-     */
-    public static final String KIND_PERM = "perm";
+	/**
+	 * 权限维度短前缀
+	 */
+	public static final String KIND_PERM = "perm";
 
-    /**
-     * 岗位维度短前缀
-     */
-    public static final String KIND_POST = "post";
+	/**
+	 * 岗位维度短前缀
+	 */
+	public static final String KIND_POST = "post";
 
-    /**
-     * grant_table 维度短前缀
-     */
-    public static final String KIND_GRANT = "grant";
+	/**
+	 * grant_table 维度短前缀
+	 */
+	public static final String KIND_GRANT = "grant";
 
-    /**
-     * 生成幂等 eventId
-     *
-     * @param kind 变更维度短前缀
-     * @return eventId
-     */
-    public static String next(String kind) {
-        return kind + ":" + IdWorker.getId();
-    }
+	/**
+	 * 生成幂等 eventId
+	 * @param kind 变更维度短前缀
+	 * @return eventId
+	 */
+	public static String next(String kind) {
+		return kind + ":" + IdWorker.getId();
+	}
 
 }
