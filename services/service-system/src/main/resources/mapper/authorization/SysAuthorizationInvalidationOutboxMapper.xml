@@ -60,28 +60,28 @@
     <select id="selectClaimable"
             resultType="com.auth.service.system.authorization.outbox.model.SysAuthorizationInvalidationOutboxEntity">
         SELECT id,
-               event_id,
-               change_kind,
-               payload,
-               status,
-               retry_count,
-               max_retry,
-               next_retry_at,
-               last_error,
-               locked_by,
-               locked_at,
-               processed_at,
-               source_module,
-               source_biz_id,
-               create_time,
-               update_time,
-               version
+        event_id,
+        change_kind,
+        payload,
+        status,
+        retry_count,
+        max_retry,
+        next_retry_at,
+        last_error,
+        locked_by,
+        locked_at,
+        processed_at,
+        source_module,
+        source_biz_id,
+        create_time,
+        update_time,
+        version
         FROM sys_authorization_invalidation_outbox
         WHERE status IN
         <foreach collection="statuses" item="status" open="(" separator="," close=")">
             #{status}
         </foreach>
-          AND (next_retry_at IS NULL OR next_retry_at &lt;= #{now})
+        AND (next_retry_at IS NULL OR next_retry_at &lt;= #{now})
         ORDER BY create_time ASC
         LIMIT #{limit}
     </select>
@@ -133,5 +133,93 @@
         WHERE id = #{id}
           AND status = 'PENDING'
     </update>
+
+    <!-- 分页查询 Outbox（运维只读） -->
+    <select id="selectListByPage"
+            resultType="com.auth.service.system.authorization.outbox.model.po.AuthorizationInvalidationOutboxPageRowPO">
+        SELECT aio.id,
+        aio.event_id,
+        aio.change_kind,
+        aio.status,
+        aio.retry_count,
+        aio.max_retry,
+        aio.next_retry_at,
+        aio.last_error,
+        aio.locked_by,
+        aio.locked_at,
+        aio.processed_at,
+        aio.source_module,
+        aio.source_biz_id,
+        aio.create_time,
+        aio.update_time,
+        aio.create_user,
+        aio.update_user
+        FROM sys_authorization_invalidation_outbox aio
+        <where>
+            <if test="query.eventId != null and query.eventId != ''">
+                AND aio.event_id =
+                #{query.eventId}
+            </if>
+            <if test="query.changeKind != null and query.changeKind != ''">
+                AND aio.change_kind =
+                #{query.changeKind}
+            </if>
+            <if test="query.status != null and query.status != ''">
+                AND aio.status =
+                #{query.status}
+            </if>
+            <if test="query.sourceModule != null and query.sourceModule != ''">
+                AND aio.source_module =
+                #{query.sourceModule}
+            </if>
+            <if test="query.sourceBizId != null and query.sourceBizId != ''">
+                AND aio.source_biz_id =
+                #{query.sourceBizId}
+            </if>
+            <if test="query.createTimeStart != null">
+                AND aio.create_time &gt;=
+                #{query.createTimeStart}
+            </if>
+            <if test="query.createTimeEnd != null">
+                AND aio.create_time &lt;=
+                #{query.createTimeEnd}
+            </if>
+            <if test="query.processedAtStart != null">
+                AND aio.processed_at &gt;=
+                #{query.processedAtStart}
+            </if>
+            <if test="query.processedAtEnd != null">
+                AND aio.processed_at &lt;=
+                #{query.processedAtEnd}
+            </if>
+        </where>
+        ORDER BY aio.create_time DESC
+    </select>
+
+    <!-- 按主键查询 Outbox 详情 -->
+    <select id="selectDetailById"
+            resultType="com.auth.service.system.authorization.outbox.model.po.AuthorizationInvalidationOutboxDetailRowPO">
+        SELECT aio.id,
+               aio.event_id,
+               aio.change_kind,
+               aio.payload,
+               aio.status,
+               aio.retry_count,
+               aio.max_retry,
+               aio.next_retry_at,
+               aio.last_error,
+               aio.locked_by,
+               aio.locked_at,
+               aio.processed_at,
+               aio.source_module,
+               aio.source_biz_id,
+               aio.create_time,
+               aio.update_time,
+               aio.create_user,
+               aio.update_user,
+               aio.remark
+        FROM sys_authorization_invalidation_outbox aio
+        WHERE aio.id = #{id}
+    </select>
 
 </mapper>
