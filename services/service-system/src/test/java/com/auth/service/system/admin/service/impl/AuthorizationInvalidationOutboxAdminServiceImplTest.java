@@ -32,8 +32,8 @@ import static org.mockito.Mockito.when;
 /**
  * {@link AuthorizationInvalidationOutboxAdminServiceImpl} 单元测试
  */
-@ExtendWith(MockitoExtension.class)
 @DisplayName("AuthorizationInvalidationOutboxAdminServiceImpl Outbox 管理端查询")
+@ExtendWith(MockitoExtension.class)
 class AuthorizationInvalidationOutboxAdminServiceImplTest {
 
 	@Mock
@@ -45,12 +45,12 @@ class AuthorizationInvalidationOutboxAdminServiceImplTest {
 	@InjectMocks
 	private AuthorizationInvalidationOutboxAdminServiceImpl adminService;
 
-	private static AuthorizationInvalidationOutboxPageRowPO buildPageRow(Long id, String eventId, String status) {
+	private static AuthorizationInvalidationOutboxPageRowPO buildPageRow() {
 		AuthorizationInvalidationOutboxPageRowPO row = new AuthorizationInvalidationOutboxPageRowPO();
-		row.setId(id);
-		row.setEventId(eventId);
+		row.setId(1L);
+		row.setEventId("evt-1");
 		row.setChangeKind("ROLE");
-		row.setStatus(status);
+		row.setStatus("PENDING");
 		row.setRetryCount(0);
 		row.setMaxRetry(5);
 		row.setCreateTime(LocalDateTime.now());
@@ -64,7 +64,7 @@ class AuthorizationInvalidationOutboxAdminServiceImplTest {
 		query.setPageIndex(1);
 		query.setPageSize(10);
 
-		AuthorizationInvalidationOutboxPageRowPO row = buildPageRow(1L, "evt-1", "PENDING");
+		AuthorizationInvalidationOutboxPageRowPO row = buildPageRow();
 		Page<AuthorizationInvalidationOutboxPageRowPO> page = new Page<>(1, 10, 1);
 		page.setRecords(List.of(row));
 		when(authorizationInvalidationOutboxAdminMapper.selectListByPage(any(), any())).thenReturn(page);

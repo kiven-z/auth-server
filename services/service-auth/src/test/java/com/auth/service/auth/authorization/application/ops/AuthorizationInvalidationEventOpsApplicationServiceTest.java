@@ -54,6 +54,7 @@ class AuthorizationInvalidationEventOpsApplicationServiceTest {
 		processing.setEventId("role:2");
 		processing.setImpactedUserCount(InvalidationProcessingMarker.PROCESSING_COUNT);
 		when(authorizationInvalidationEventMapper.selectByEventId("role:2")).thenReturn(processing);
+		when(invalidationIdempotencyPort.releaseClaim("role:2")).thenReturn(true);
 
 		boolean released = opsApplicationService.releaseProcessingClaim("role:2");
 

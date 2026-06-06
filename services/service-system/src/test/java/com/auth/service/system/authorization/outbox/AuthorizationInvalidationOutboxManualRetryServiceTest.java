@@ -25,7 +25,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -132,7 +131,7 @@ class AuthorizationInvalidationOutboxManualRetryServiceTest {
 		assertEquals("PROCESSING", result.getPreviousStatus());
 		assertTrue(result.getClaimReleased());
 		assertFalse(result.getDispatched());
-		verify(outboxMapper).resetForManualRetry(eq(4L), eq(1L));
+		verify(outboxMapper).resetForManualRetry(4L, 1L);
 	}
 
 }
