@@ -6,7 +6,7 @@ import lombok.Getter;
  * 系统服务通用结果码（成功、请求校验、用户、基础设施等）
  *
  * <p>
- * 号段：0、102–103、205–209、402、206
+ * 号段：0、102–103、205–209、306–311、402、206
  * </p>
  *
  * @author Bunny
@@ -38,6 +38,36 @@ public enum SystemCommonResultCode implements SystemResultCode {
 	 * 数据不存在
 	 */
 	DATA_NOT_EXIST(404, 206, "DATA_NOT_EXIST", "data.not.exists"),
+
+	/**
+	 * 当前数据不存在或不可用（含已停用、已删除）
+	 */
+	DATA_UNAVAILABLE(404, 306, "DATA_UNAVAILABLE", "data.unavailable"),
+
+	/**
+	 * 数据仍被引用，无法删除
+	 */
+	DATA_IN_USE(409, 307, "DATA_IN_USE", "data.in_use"),
+
+	/**
+	 * 编码已存在
+	 */
+	DATA_CODE_DUPLICATE(409, 308, "DATA_CODE_DUPLICATE", "data.code.duplicate"),
+
+	/**
+	 * 树形父节点不存在或不可用
+	 */
+	TREE_PARENT_UNAVAILABLE(404, 309, "TREE_PARENT_UNAVAILABLE", "tree.parent.unavailable"),
+
+	/**
+	 * 存在未删除的子节点
+	 */
+	TREE_HAS_ACTIVE_CHILDREN(409, 310, "TREE_HAS_ACTIVE_CHILDREN", "tree.has_active_children"),
+
+	/**
+	 * 关联数据无效或未启用
+	 */
+	GRANT_REFERENCE_INVALID(400, 311, "GRANT_REFERENCE_INVALID", "grant.reference_invalid"),
 
 	/**
 	 * 验证码错误

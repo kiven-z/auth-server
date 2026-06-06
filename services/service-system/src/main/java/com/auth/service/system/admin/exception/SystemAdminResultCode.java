@@ -23,27 +23,27 @@ public enum SystemAdminResultCode implements SystemResultCode {
 	/**
 	 * 角色不存在
 	 */
-	ROLE_NOT_FOUND(404, 263, "ROLE_NOT_FOUND", "system.role.not_found"),
+	ROLE_NOT_FOUND(404, 263, "ROLE_NOT_FOUND", "data.not.exists"),
 
 	/**
 	 * 角色编码已存在
 	 */
-	ROLE_CODE_DUPLICATE(409, 277, "ROLE_CODE_DUPLICATE", "system.role.code_duplicate"),
+	ROLE_CODE_DUPLICATE(409, 277, "ROLE_CODE_DUPLICATE", "data.code.duplicate"),
 
 	/**
 	 * 权限不存在
 	 */
-	PERMISSION_NOT_FOUND(404, 280, "PERMISSION_NOT_FOUND", "system.permission.not_found"),
+	PERMISSION_NOT_FOUND(404, 280, "PERMISSION_NOT_FOUND", "data.not.exists"),
 
 	/**
 	 * 权限编码已存在
 	 */
-	PERMISSION_CODE_DUPLICATE(409, 274, "PERMISSION_CODE_DUPLICATE", "system.permission.code_duplicate"),
+	PERMISSION_CODE_DUPLICATE(409, 274, "PERMISSION_CODE_DUPLICATE", "data.code.duplicate"),
 
 	/**
 	 * 部门不存在、已停用或已删除，不可挂载岗位
 	 */
-	POST_DEPT_NOT_FOUND(404, 275, "POST_DEPT_NOT_FOUND", "system.post.dept_not_found"),
+	POST_DEPT_NOT_FOUND(404, 275, "POST_DEPT_NOT_FOUND", "data.unavailable"),
 
 	/**
 	 * 同一部门下岗位编码已存在
@@ -53,77 +53,77 @@ public enum SystemAdminResultCode implements SystemResultCode {
 	/**
 	 * 岗位不存在或已删除
 	 */
-	POST_NOT_FOUND(404, 292, "POST_NOT_FOUND", "system.post.not_found"),
+	POST_NOT_FOUND(404, 292, "POST_NOT_FOUND", "data.not.exists"),
 
 	/**
 	 * 岗位仍被 user_post 或 grant_table 引用，不可删除
 	 */
-	POST_IN_USE(409, 293, "POST_IN_USE", "system.post.in_use"),
+	POST_IN_USE(409, 293, "POST_IN_USE", "data.in_use"),
 
 	/**
 	 * 岗位授权角色无效（不存在、未启用或类型不允许）
 	 */
-	POST_ROLE_INVALID(400, 294, "POST_ROLE_INVALID", "system.post.role_invalid"),
+	POST_ROLE_INVALID(400, 294, "POST_ROLE_INVALID", "grant.reference_invalid"),
 
 	/**
 	 * 角色仍被 grant_table 引用，不可删除
 	 */
-	ROLE_IN_USE(409, 278, "ROLE_IN_USE", "system.role.in_use"),
+	ROLE_IN_USE(409, 278, "ROLE_IN_USE", "data.in_use"),
 
 	/**
 	 * 存在无效或未启用的权限码
 	 */
-	ROLE_PERMISSION_INVALID(400, 279, "ROLE_PERMISSION_INVALID", "system.role.permission_invalid"),
+	ROLE_PERMISSION_INVALID(400, 279, "ROLE_PERMISSION_INVALID", "grant.reference_invalid"),
 
 	/**
 	 * 部门授权角色无效（不存在、未启用或类型不允许）
 	 */
-	DEPT_ROLE_INVALID(400, 290, "DEPT_ROLE_INVALID", "system.dept.role_invalid"),
+	DEPT_ROLE_INVALID(400, 290, "DEPT_ROLE_INVALID", "grant.reference_invalid"),
 
 	/**
 	 * 部门不存在或已删除
 	 */
-	DEPT_NOT_FOUND(404, 281, "DEPT_NOT_FOUND", "system.dept.not_found"),
+	DEPT_NOT_FOUND(404, 281, "DEPT_NOT_FOUND", "data.not.exists"),
 
 	/**
 	 * 部门编码已存在
 	 */
-	DEPT_CODE_DUPLICATE(409, 282, "DEPT_CODE_DUPLICATE", "system.dept.code_duplicate"),
+	DEPT_CODE_DUPLICATE(409, 282, "DEPT_CODE_DUPLICATE", "data.code.duplicate"),
 
 	/**
 	 * 父部门不存在或不可用
 	 */
-	DEPT_PARENT_NOT_FOUND(404, 283, "DEPT_PARENT_NOT_FOUND", "system.dept.parent_not_found"),
+	DEPT_PARENT_NOT_FOUND(404, 283, "DEPT_PARENT_NOT_FOUND", "tree.parent.unavailable"),
 
 	/**
 	 * 存在未删除的子部门
 	 */
-	DEPT_HAS_CHILDREN(409, 286, "DEPT_HAS_CHILDREN", "system.dept.has_children"),
+	DEPT_HAS_CHILDREN(409, 286, "DEPT_HAS_CHILDREN", "tree.has_active_children"),
 
 	/**
 	 * 部门或子树仍被用户/授权/岗位引用
 	 */
-	DEPT_IN_USE(409, 287, "DEPT_IN_USE", "system.dept.in_use"),
+	DEPT_IN_USE(409, 287, "DEPT_IN_USE", "data.in_use"),
 
 	/**
 	 * 菜单不存在
 	 */
-	MENU_NOT_FOUND(404, 288, "MENU_NOT_FOUND", "system.menu.not_found"),
+	MENU_NOT_FOUND(404, 288, "MENU_NOT_FOUND", "data.not.exists"),
 
 	/**
 	 * 存在未删除的子菜单
 	 */
-	MENU_HAS_CHILDREN(409, 289, "MENU_HAS_CHILDREN", "system.menu.has_children"),
+	MENU_HAS_CHILDREN(409, 289, "MENU_HAS_CHILDREN", "tree.has_active_children"),
 
 	/**
 	 * 父菜单不存在
 	 */
-	MENU_PARENT_NOT_FOUND(404, 292, "MENU_PARENT_NOT_FOUND", "system.menu.parent_not_found"),
+	MENU_PARENT_NOT_FOUND(404, 292, "MENU_PARENT_NOT_FOUND", "tree.parent.unavailable"),
 
 	/**
 	 * 菜单分配角色无效（不存在、未启用或类型非菜单角色）
 	 */
-	MENU_ROLE_INVALID(400, 291, "MENU_ROLE_INVALID", "system.menu.role_invalid"),
+	MENU_ROLE_INVALID(400, 291, "MENU_ROLE_INVALID", "grant.reference_invalid"),
 
 	/**
 	 * Excel 导出页码区间无效（结束页小于起始页）
