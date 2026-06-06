@@ -18,11 +18,11 @@ import java.io.Serializable;
 @Setter
 public class SysMenuMoveForm implements Serializable {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+	@Serial
+	private static final long serialVersionUID = 1L;
 
-    @Schema(title = "新父菜单 ID，0 表示挂到顶级", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "新父菜单不能为空")
-    private Long parentId;
+	@Schema(title = "新父菜单 ID，0 表示挂到顶级", requiredMode = Schema.RequiredMode.REQUIRED)
+	@NotNull(message = "新父菜单不能为空")
+	private Long parentId;
 
 }
