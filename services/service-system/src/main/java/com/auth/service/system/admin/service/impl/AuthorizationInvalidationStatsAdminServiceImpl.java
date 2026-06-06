@@ -56,8 +56,7 @@ public class AuthorizationInvalidationStatsAdminServiceImpl implements Authoriza
 	 * @return 事件统计 VO
 	 */
 	private AuthorizationInvalidationEventStatsVO loadEventStats() {
-		Result<AuthorizationInvalidationEventStatsInnerDTO> result = authInnerFeignClient
-			.getInvalidationEventSummary();
+		Result<AuthorizationInvalidationEventStatsInnerDTO> result = authInnerFeignClient.getInvalidationEventSummary();
 		if (!FeignUtil.isSuccessWithData(result)) {
 			log.warn("Authorization invalidation event summary unavailable");
 			throw new SystemBusinessException(SERVICE_UNAVAILABLE);

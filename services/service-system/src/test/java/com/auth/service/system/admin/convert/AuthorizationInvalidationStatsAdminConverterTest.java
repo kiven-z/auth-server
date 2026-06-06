@@ -21,7 +21,8 @@ class AuthorizationInvalidationStatsAdminConverterTest {
 	@Test
 	@DisplayName("Outbox 统计：null PO 应归零")
 	void toOutboxStatsVo_nullPo() {
-		AuthorizationInvalidationOutboxStatsVO statsVo = AuthorizationInvalidationStatsAdminConverter.toOutboxStatsVo(null);
+		AuthorizationInvalidationOutboxStatsVO statsVo = AuthorizationInvalidationStatsAdminConverter
+			.toOutboxStatsVo(null);
 
 		assertThat(statsVo.getTotalCount()).isZero();
 		assertThat(statsVo.getPendingCount()).isZero();
@@ -68,7 +69,34 @@ class AuthorizationInvalidationStatsAdminConverterTest {
 	@Test
 	@DisplayName("幂等事件统计：null DTO 应归零")
 	void toEventStatsVo_nullDto() {
-		AuthorizationInvalidationEventStatsVO statsVo = AuthorizationInvalidationStatsAdminConverter.toEventStatsVo(null);
+		AuthorizationInvalidationEventStatsVO statsVo = AuthorizationInvalidationStatsAdminConverter
+			.toEventStatsVo(null);
+
+		assertThat(statsVo.getTotalCount()).isZero();
+		assertThat(statsVo.getProcessingCount()).isZero();
+		assertThat(statsVo.getCompletedCount()).isZero();
+	}
+
+	@Test
+	@DisplayName("Outbox 统计：计数字段为空时应归零")
+	void toOutboxStatsVo_shouldDefaultNullCountsToZero() {
+		AuthorizationInvalidationOutboxStatsVO statsVo = AuthorizationInvalidationStatsAdminConverter
+			.toOutboxStatsVo(new AuthorizationInvalidationOutboxStatsPO());
+
+		assertThat(statsVo.getTotalCount()).isZero();
+		assertThat(statsVo.getPendingCount()).isZero();
+		assertThat(statsVo.getProcessingCount()).isZero();
+		assertThat(statsVo.getSuccessCount()).isZero();
+		assertThat(statsVo.getFailedCount()).isZero();
+		assertThat(statsVo.getDeadCount()).isZero();
+		assertThat(statsVo.getFailureRatePercent()).isEqualByComparingTo(BigDecimal.ZERO);
+	}
+
+	@Test
+	@DisplayName("幂等事件统计：计数字段为空时应归零")
+	void toEventStatsVo_shouldDefaultNullCountsToZero() {
+		AuthorizationInvalidationEventStatsVO statsVo = AuthorizationInvalidationStatsAdminConverter
+			.toEventStatsVo(new AuthorizationInvalidationEventStatsInnerDTO());
 
 		assertThat(statsVo.getTotalCount()).isZero();
 		assertThat(statsVo.getProcessingCount()).isZero();

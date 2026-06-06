@@ -17,7 +17,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 /**
@@ -75,8 +74,8 @@ class SysMenuManageServiceImplTest {
 
 		doThrow(new SystemBusinessException(SystemCommonResultCode.GRANT_REFERENCE_INVALID))
 			.when(roleGrantReferenceChecker)
-			.requireGrantEligibleRoles(eq(List.of("BIZ_ADMIN")), eq(RoleTypeEnum.MENU_ASSIGN_TYPES),
-					eq(SystemCommonResultCode.GRANT_REFERENCE_INVALID));
+			.requireGrantEligibleRoles(List.of("BIZ_ADMIN"), RoleTypeEnum.MENU_ASSIGN_TYPES,
+					SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 
 		assertThatThrownBy(() -> sysMenuManageService.replaceMenuRoles(menuId, form))
 			.isInstanceOf(SystemBusinessException.class)

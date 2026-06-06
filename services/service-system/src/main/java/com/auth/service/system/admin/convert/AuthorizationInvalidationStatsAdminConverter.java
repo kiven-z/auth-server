@@ -2,6 +2,7 @@ package com.auth.service.system.admin.convert;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Objects;
 
 import com.auth.service.system.admin.model.po.authorizationinvalidation.AuthorizationInvalidationOutboxStatsPO;
 import com.auth.service.system.admin.model.vo.authorizationinvalidation.AuthorizationInvalidationEventStatsVO;
@@ -25,7 +26,8 @@ public class AuthorizationInvalidationStatsAdminConverter {
 	 * @param statsPo 统计 PO
 	 * @return Outbox 统计 VO
 	 */
-	public static AuthorizationInvalidationOutboxStatsVO toOutboxStatsVo(AuthorizationInvalidationOutboxStatsPO statsPo) {
+	public static AuthorizationInvalidationOutboxStatsVO toOutboxStatsVo(
+			AuthorizationInvalidationOutboxStatsPO statsPo) {
 		AuthorizationInvalidationOutboxStatsVO statsVo = new AuthorizationInvalidationOutboxStatsVO();
 		if (statsPo == null) {
 			statsVo.setTotalCount(0L);
@@ -38,13 +40,13 @@ public class AuthorizationInvalidationStatsAdminConverter {
 			return statsVo;
 		}
 
-		long total = defaultCount(statsPo.getTotalCount());
-		long failed = defaultCount(statsPo.getFailedCount());
-		long dead = defaultCount(statsPo.getDeadCount());
+		long total = Objects.requireNonNullElse(statsPo.getTotalCount(), 0L);
+		long failed = Objects.requireNonNullElse(statsPo.getFailedCount(), 0L);
+		long dead = Objects.requireNonNullElse(statsPo.getDeadCount(), 0L);
 		statsVo.setTotalCount(total);
-		statsVo.setPendingCount(defaultCount(statsPo.getPendingCount()));
-		statsVo.setProcessingCount(defaultCount(statsPo.getProcessingCount()));
-		statsVo.setSuccessCount(defaultCount(statsPo.getSuccessCount()));
+		statsVo.setPendingCount(Objects.requireNonNullElse(statsPo.getPendingCount(), 0L));
+		statsVo.setProcessingCount(Objects.requireNonNullElse(statsPo.getProcessingCount(), 0L));
+		statsVo.setSuccessCount(Objects.requireNonNullElse(statsPo.getSuccessCount(), 0L));
 		statsVo.setFailedCount(failed);
 		statsVo.setDeadCount(dead);
 		statsVo.setFailureRatePercent(calculateFailureRatePercent(total, failed, dead));
@@ -65,9 +67,9 @@ public class AuthorizationInvalidationStatsAdminConverter {
 			statsVo.setCompletedCount(0L);
 			return statsVo;
 		}
-		statsVo.setTotalCount(defaultCount(statsDto.getTotalCount()));
-		statsVo.setProcessingCount(defaultCount(statsDto.getProcessingCount()));
-		statsVo.setCompletedCount(defaultCount(statsDto.getCompletedCount()));
+		statsVo.setTotalCount(Objects.requireNonNullElse(statsDto.getTotalCount(), 0L));
+		statsVo.setProcessingCount(Objects.requireNonNullElse(statsDto.getProcessingCount(), 0L));
+		statsVo.setCompletedCount(Objects.requireNonNullElse(statsDto.getCompletedCount(), 0L));
 		return statsVo;
 	}
 
@@ -85,15 +87,6 @@ public class AuthorizationInvalidationStatsAdminConverter {
 		return BigDecimal.valueOf(failed + dead)
 			.multiply(BigDecimal.valueOf(100))
 			.divide(BigDecimal.valueOf(total), FAILURE_RATE_SCALE, RoundingMode.HALF_UP);
-	}
-
-	/**
-	 * 空值计数归零
-	 * @param count 原始计数
-	 * @return 非空计数
-	 */
-	private static long defaultCount(Long count) {
-		return count != null ? count : 0L;
 	}
 
 }

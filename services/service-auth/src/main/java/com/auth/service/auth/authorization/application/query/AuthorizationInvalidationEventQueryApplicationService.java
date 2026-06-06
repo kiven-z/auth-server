@@ -14,6 +14,7 @@ import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.enums.AuthResultCode;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,16 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthorizationInvalidationEventQueryApplicationService {
 
 	private final InvalidationEventQueryPort invalidationEventQueryPort;
-
-	/**
-	 * 空值计数归零
-	 * @param count 原始计数
-	 * @return 非空计数
-	 */
-	private static long defaultCount(Long count) {
-		// FIXME 删除这二个使用Objects
-		return count != null ? count : 0L;
-	}
 
 	/**
 	 * 分页查询幂等事件
@@ -81,12 +72,9 @@ public class AuthorizationInvalidationEventQueryApplicationService {
 			return statsVo;
 		}
 
-		// FIXME 使用Object方法
-		statsVo.setTotalCount(defaultCount(statsPo.getTotalCount()));
-		// FIXME 使用Object方法
-		statsVo.setProcessingCount(defaultCount(statsPo.getProcessingCount()));
-		// FIXME 使用Object方法
-		statsVo.setCompletedCount(defaultCount(statsPo.getCompletedCount()));
+		statsVo.setTotalCount(Objects.requireNonNullElse(statsPo.getTotalCount(), 0L));
+		statsVo.setProcessingCount(Objects.requireNonNullElse(statsPo.getProcessingCount(), 0L));
+		statsVo.setCompletedCount(Objects.requireNonNullElse(statsPo.getCompletedCount(), 0L));
 		return statsVo;
 	}
 

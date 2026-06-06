@@ -106,6 +106,30 @@ class AuthorizationInvalidationEventQueryApplicationServiceTest {
 	}
 
 	@Test
+	@DisplayName("统计查询：PO 为空时应归零")
+	void getStats_shouldReturnZeroWhenPoNull() {
+		when(invalidationEventQueryPort.selectEventStats()).thenReturn(null);
+
+		AuthorizationInvalidationEventStatsVO statsVo = queryApplicationService.getStats();
+
+		assertEquals(0L, statsVo.getTotalCount());
+		assertEquals(0L, statsVo.getProcessingCount());
+		assertEquals(0L, statsVo.getCompletedCount());
+	}
+
+	@Test
+	@DisplayName("统计查询：计数字段为空时应归零")
+	void getStats_shouldDefaultNullCountsToZero() {
+		when(invalidationEventQueryPort.selectEventStats()).thenReturn(new AuthorizationInvalidationEventStatsPO());
+
+		AuthorizationInvalidationEventStatsVO statsVo = queryApplicationService.getStats();
+
+		assertEquals(0L, statsVo.getTotalCount());
+		assertEquals(0L, statsVo.getProcessingCount());
+		assertEquals(0L, statsVo.getCompletedCount());
+	}
+
+	@Test
 	@DisplayName("统计查询：应返回幂等事件处理状态计数")
 	void getStats_shouldReturnEventStats() {
 		AuthorizationInvalidationEventStatsPO statsPo = new AuthorizationInvalidationEventStatsPO();
