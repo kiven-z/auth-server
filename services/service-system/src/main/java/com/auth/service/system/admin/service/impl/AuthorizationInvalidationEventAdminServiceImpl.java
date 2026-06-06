@@ -52,9 +52,9 @@ public class AuthorizationInvalidationEventAdminServiceImpl implements Authoriza
 	public PageResponse<AuthorizationInvalidationEventPageVO> getPage(AuthorizationInvalidationEventQuery query) {
 		// 转换为内部查询对象
 		AuthorizationInvalidationEventInnerQuery innerQuery = AuthorizationInvalidationEventAdminConverter.INSTANCE
-				.toInnerQuery(query);
+			.toInnerQuery(query);
 		Result<PageResponse<AuthorizationInvalidationEventPageInnerDTO>> result = authInnerFeignClient
-				.getInvalidationEventPage(innerQuery);
+			.getInvalidationEventPage(innerQuery);
 
 		// 判断是否成功
 		if (!FeignUtil.isSuccessWithData(result)) {
@@ -65,9 +65,9 @@ public class AuthorizationInvalidationEventAdminServiceImpl implements Authoriza
 		// 转换为VO对象
 		PageResponse<AuthorizationInvalidationEventPageInnerDTO> pageData = result.getData();
 		List<AuthorizationInvalidationEventPageVO> records = pageData.getList()
-				.stream()
-				.map(AuthorizationInvalidationEventAdminConverter.INSTANCE::toPageVO)
-				.toList();
+			.stream()
+			.map(AuthorizationInvalidationEventAdminConverter.INSTANCE::toPageVO)
+			.toList();
 		PageResponse<AuthorizationInvalidationEventPageVO> response = PageResponse.of(pageData.getPageNo(),
 				pageData.getPageSize(), pageData.getTotal(), records);
 
@@ -83,7 +83,7 @@ public class AuthorizationInvalidationEventAdminServiceImpl implements Authoriza
 	public AuthorizationInvalidationEventDetailVO getDetail(Long id) {
 		// 转换为内部查询对象
 		Result<AuthorizationInvalidationEventDetailInnerDTO> result = authInnerFeignClient
-				.getInvalidationEventDetail(id);
+			.getInvalidationEventDetail(id);
 
 		// 判断是否成功
 		if (!FeignUtil.isSuccessWithData(result)) {
@@ -93,7 +93,7 @@ public class AuthorizationInvalidationEventAdminServiceImpl implements Authoriza
 
 		// 转换为VO对象
 		AuthorizationInvalidationEventDetailVO detailVO = AuthorizationInvalidationEventAdminConverter.INSTANCE
-				.toDetailVO(result.getData());
+			.toDetailVO(result.getData());
 
 		// 补充审计用户名
 		auditUserDisplayService.enrichAuditUsernames(List.of(detailVO));

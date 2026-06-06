@@ -49,8 +49,9 @@ class AuthorizationInvalidationEventAdminServiceImplTest {
 		when(authInnerFeignClient.getInvalidationEventPage(org.mockito.ArgumentMatchers.any()))
 			.thenReturn(Result.error("unavailable"));
 
+		AuthorizationInvalidationEventQuery query = new AuthorizationInvalidationEventQuery();
 		SystemBusinessException exception = assertThrows(SystemBusinessException.class,
-				() -> adminService.getPage(new AuthorizationInvalidationEventQuery()));
+				() -> adminService.getPage(query));
 
 		assertEquals(SERVICE_UNAVAILABLE, exception.getResultCode());
 	}

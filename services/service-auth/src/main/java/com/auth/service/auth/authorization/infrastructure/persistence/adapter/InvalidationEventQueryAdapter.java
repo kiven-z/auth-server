@@ -17,27 +17,27 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class InvalidationEventQueryAdapter implements InvalidationEventQueryPort {
 
-    private final AuthorizationInvalidationEventMapper authorizationInvalidationEventMapper;
+	private final AuthorizationInvalidationEventMapper authorizationInvalidationEventMapper;
 
-    public InvalidationEventQueryAdapter(AuthorizationInvalidationEventMapper authorizationInvalidationEventMapper) {
-        this.authorizationInvalidationEventMapper = authorizationInvalidationEventMapper;
-    }
+	public InvalidationEventQueryAdapter(AuthorizationInvalidationEventMapper authorizationInvalidationEventMapper) {
+		this.authorizationInvalidationEventMapper = authorizationInvalidationEventMapper;
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public IPage<AuthorizationInvalidationEventPageRowPO> selectPage(Page<AuthorizationInvalidationEventPageRowPO> page,
-                                                                     AuthorizationInvalidationEventQuery query) {
-        return authorizationInvalidationEventMapper.selectListByPage(page, query);
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public IPage<AuthorizationInvalidationEventPageRowPO> selectPage(Page<AuthorizationInvalidationEventPageRowPO> page,
+			AuthorizationInvalidationEventQuery query) {
+		return authorizationInvalidationEventMapper.selectListByPage(page, query);
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public AuthorizationInvalidationEventDetailRowPO selectDetailById(Long id) {
-        return authorizationInvalidationEventMapper.selectDetailById(id);
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public AuthorizationInvalidationEventDetailRowPO selectDetailById(Long id) {
+		return authorizationInvalidationEventMapper.selectDetailById(id);
+	}
 
 }
