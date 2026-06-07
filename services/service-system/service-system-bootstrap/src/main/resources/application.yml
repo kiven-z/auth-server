@@ -89,6 +89,10 @@ auth:
       poll-batch-size: 50
       retry-backoff-seconds: 30
       manual-processing-unlock-timeout-minutes: 5
+      success-retention-days: 90
+      success-cleanup-enabled: true
+      success-cleanup-interval-ms: 86400000
+      success-cleanup-batch-size: 500
     # 定时任务熔断：连续失败次数达到阈值后自动 pauseJob 并更新 sys_job.status=0
     schedule:
       job:

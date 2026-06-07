@@ -57,6 +57,14 @@ auth:
       batch-size: 500
       # role_policy 表落地后改为 true，启用 POLICY → role_code 桥接
       policy-role-bridge-enabled: false
+      processing-claim-timeout-minutes: 30
+      processing-claim-cleanup-enabled: true
+      processing-claim-cleanup-interval-ms: 300000
+      processing-claim-cleanup-batch-size: 100
+      success-retention-days: 90
+      success-cleanup-enabled: true
+      success-cleanup-interval-ms: 86400000
+      success-cleanup-batch-size: 500
 
 mybatis-plus:
   mapper-locations:

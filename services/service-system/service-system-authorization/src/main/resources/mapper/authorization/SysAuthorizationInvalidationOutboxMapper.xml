@@ -150,4 +150,14 @@
           AND status IN ('DEAD', 'FAILED', 'PROCESSING')
     </update>
 
+    <!-- 批量删除 SUCCESS 且已过保留期的 Outbox -->
+    <delete id="deleteSuccessBefore">
+        DELETE
+        FROM sys_authorization_invalidation_outbox
+        WHERE status = 'SUCCESS'
+          AND processed_at IS NOT NULL
+          AND processed_at &lt; #{cutoffTime}
+        LIMIT #{batchSize}
+    </delete>
+
 </mapper>

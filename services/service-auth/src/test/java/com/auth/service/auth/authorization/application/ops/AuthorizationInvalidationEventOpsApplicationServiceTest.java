@@ -62,4 +62,33 @@ class AuthorizationInvalidationEventOpsApplicationServiceTest {
 		verify(invalidationIdempotencyPort).releaseClaim("role:2");
 	}
 
+	@Test
+	@DisplayName("批量释放超时 processing 占位")
+	void cleanupStaleProcessingClaims_shouldDelegateToMapper() {
+		// 调用运维清理接口
+		when(authorizationInvalidationEventMapper.deleteStaleProcessingClaims(
+				java.time.LocalDateTime.of(2026, 1, 1, 0, 0), 50)).thenReturn(3);
+
+		int deleted = opsApplicationService.cleanupStaleProcessingClaims(java.time.LocalDateTime.of(2026, 1, 1, 0, 0),
+				50);
+
+		assertTrue(deleted == 3);
+		verify(authorizationInvalidationEventMapper).deleteStaleProcessingClaims(
+				java.time.LocalDateTime.of(2026, 1, 1, 0, 0), 50);
+	}
+
+	@Test
+	@DisplayName("批量删除已完成过期幂等事件")
+	void purgeCompletedBefore_shouldDelegateToMapper() {
+		// 调用历史清理接口
+		when(authorizationInvalidationEventMapper.deleteCompletedBefore(
+				java.time.LocalDateTime.of(2025, 6, 1, 0, 0), 200)).thenReturn(10);
+
+		int deleted = opsApplicationService.purgeCompletedBefore(java.time.LocalDateTime.of(2025, 6, 1, 0, 0), 200);
+
+		assertTrue(deleted == 10);
+		verify(authorizationInvalidationEventMapper).deleteCompletedBefore(
+				java.time.LocalDateTime.of(2025, 6, 1, 0, 0), 200);
+	}
+
 }
