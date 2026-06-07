@@ -5,6 +5,8 @@ import com.auth.service.system.admin.mapper.SysDeptDetailMapper;
 import com.auth.service.system.admin.mapper.SysDeptMapper;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.form.dept.SysDeptForm;
+import com.auth.service.system.admin.model.query.SysDeptQuery;
+import com.auth.service.system.admin.model.vo.dept.SysDeptListVO;
 import com.auth.service.system.admin.support.dept.DeptClosureMaintainer;
 import com.auth.service.system.admin.support.dept.DeptReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.DeptAuthorizationInvalidationTrigger;
@@ -18,9 +20,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Field;
+import java.util.Collections;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
@@ -84,6 +89,31 @@ class SysDeptServiceImplTest {
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysDeptService, sysDeptMapper);
+	}
+
+	@Test
+	@DisplayName("扁平列表：无关键词时查询全量未删除部门")
+	void listFlatWithoutKeywordQueriesAllActiveDepts() {
+		SysDeptEntity entity = activeDept(1L, "D001");
+		when(sysDeptMapper.selectListByQuery(any(SysDeptQuery.class))).thenReturn(List.of(entity));
+
+		List<SysDeptListVO> result = sysDeptService.listFlat(new SysDeptQuery());
+
+		assertEquals(1, result.size());
+		verify(sysDeptMapper).selectListByQuery(argThat((SysDeptQuery q) -> q.getKeyword() == null));
+		verify(auditUserDisplayService).enrichAuditUsernames(anyList());
+	}
+
+	@Test
+	@DisplayName("扁平列表：关键词去空白后传给 Mapper")
+	void listFlatTrimsKeywordBeforeQuery() {
+		when(sysDeptMapper.selectListByQuery(any(SysDeptQuery.class))).thenReturn(Collections.emptyList());
+
+		SysDeptQuery query = new SysDeptQuery();
+		query.setKeyword("  研发  ");
+		sysDeptService.listFlat(query);
+
+		verify(sysDeptMapper).selectListByQuery(argThat((SysDeptQuery q) -> "研发".equals(q.getKeyword())));
 	}
 
 	@Test

@@ -32,4 +32,7 @@ public class SysDeptQuery extends PageQueryRequest implements Serializable {
 	@Schema(title = "状态(true=正常，false=禁用)")
 	private Boolean status;
 
+	@Schema(title = "关键词（部门名称或编码，模糊；扁平列表建树时含祖先节点）")
+	private String keyword;
+
 }

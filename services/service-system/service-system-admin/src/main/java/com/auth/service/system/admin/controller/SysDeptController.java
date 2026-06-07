@@ -58,7 +58,7 @@ public class SysDeptController {
 
 	@OperationLog(targetType = "DEPT_LIST", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_DEPT, operation = OperationLogKind.QUERY)
-	@Operation(summary = "部门扁平列表（全量，前端建树）")
+	@Operation(summary = "部门扁平列表（全量或关键词过滤，前端建树）")
 	@PreAuthorize("@auth.decide('sysDept:query')")
 	@GetMapping("/list")
 	public Result<List<SysDeptListVO>> list(SysDeptQuery query) {

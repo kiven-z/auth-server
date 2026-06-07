@@ -82,8 +82,11 @@ public class AuditUserDisplayServiceImpl implements AuditUserDisplayService {
 		}
 		Map<Long, String> usernameMap = mapUsernamesByIds(collectAuditUserIds(records));
 		for (BaseResponse vo : records) {
-			vo.setCreateUsername(usernameMap.get(vo.getCreateUser()));
-			vo.setUpdateUsername(usernameMap.get(vo.getUpdateUser()));
+			String createUsername = usernameMap.get(vo.getCreateUser());
+			vo.setCreateUsername(createUsername);
+
+			String updateUsername = usernameMap.get(vo.getUpdateUser());
+			vo.setUpdateUsername(updateUsername);
 		}
 	}
 

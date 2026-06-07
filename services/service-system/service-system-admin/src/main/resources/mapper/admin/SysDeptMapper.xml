@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.auth.service.system.admin.mapper.SysDeptMapper">
 
-    <!-- 部门列表筛选条件（不含 SELECT / JOIN） -->
+    <!-- 部门列表筛选条件（不含 SELECT / JOIN；分页 / 导出） -->
     <sql id="queryWhere">
         d.is_deleted = 0
         <if test="query.deptName != null and query.deptName != ''">
@@ -23,6 +23,19 @@
         </if>
     </sql>
 
+    <!-- 扁平列表关键词：命中节点及其祖先（供前端建树） -->
+    <sql id="listKeywordWhere">
+        <if test="query.keyword != null and query.keyword != ''">
+            AND d.id IN (
+                SELECT dc.ancestor_id
+                FROM dept_closure dc
+                         INNER JOIN sys_dept m ON m.id = dc.descendant_id AND m.is_deleted = 0
+                WHERE m.dept_name LIKE CONCAT('%', #{query.keyword}, '%')
+                   OR m.dept_code LIKE CONCAT('%', #{query.keyword}, '%')
+            )
+        </if>
+    </sql>
+
     <!-- 部门扁平列表查询（无分页，供树形构建） -->
     <select id="selectListByQuery"
             resultType="com.auth.service.system.admin.model.entity.SysDeptEntity">
@@ -40,6 +53,7 @@
         FROM sys_dept d
         <where>
             <include refid="queryWhere"/>
+            <include refid="listKeywordWhere"/>
         </where>
         ORDER BY d.order_num, d.id
     </select>
