@@ -22,28 +22,28 @@ import java.io.Serializable;
 @EqualsAndHashCode(callSuper = true)
 public class SysUserPageVO extends BaseResponse implements Serializable {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+	@Serial
+	private static final long serialVersionUID = 1L;
 
-    @Schema(title = "用户名")
-    private String username;
+	@Schema(title = "用户名")
+	private String username;
 
-    @Schema(title = "昵称")
-    private String nickname;
+	@Schema(title = "昵称")
+	private String nickname;
 
-    @Schema(title = "头像 URL")
-    private String avatar;
+	@Schema(title = "头像 URL")
+	private String avatar;
 
-    @Schema(title = "手机号")
-    private String phone;
+	@Schema(title = "手机号")
+	private String phone;
 
-    @Schema(title = "邮箱")
-    private String email;
+	@Schema(title = "邮箱")
+	private String email;
 
-    @Schema(title = "工号")
-    private String employeeNo;
+	@Schema(title = "工号")
+	private String employeeNo;
 
-    @Schema(title = "账号状态(0=禁用,1=正常,2=锁定)")
-    private Integer status;
+	@Schema(title = "账号状态(0=禁用,1=正常,2=锁定)")
+	private Integer status;
 
 }

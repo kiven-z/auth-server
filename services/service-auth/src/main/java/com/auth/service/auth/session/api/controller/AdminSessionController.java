@@ -16,7 +16,7 @@ import java.util.List;
  * @author Bunny
  */
 @Tag(name = "管理端会话", description = "管理员踢人/会话管理")
-@RequestMapping("/api/admin/users")
+@RequestMapping("/api/auth/admin/users")
 @RestController
 public class AdminSessionController {
 
