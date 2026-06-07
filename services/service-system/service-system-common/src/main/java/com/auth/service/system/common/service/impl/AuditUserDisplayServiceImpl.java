@@ -3,7 +3,7 @@ package com.auth.service.system.common.service.impl;
 import cn.hutool.core.collection.CollUtil;
 import com.auth.common.core.model.response.BaseResponse;
 import com.auth.module.platform.persistence.model.UserEntity;
-import com.auth.service.system.admin.mapper.SysUserMapper;
+import com.auth.service.system.common.mapper.SysUserQueryMapper;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.springframework.stereotype.Service;
@@ -13,21 +13,21 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * 审计用户展示名：基于用户表批量解析用户名。
+ * 审计用户展示名
  *
  * @author Bunny
  */
 @Service
 public class AuditUserDisplayServiceImpl implements AuditUserDisplayService {
 
-	private final SysUserMapper sysUserMapper;
+	private final SysUserQueryMapper sysUserQueryMapper;
 
-	public AuditUserDisplayServiceImpl(SysUserMapper sysUserMapper) {
-		this.sysUserMapper = sysUserMapper;
+	public AuditUserDisplayServiceImpl(SysUserQueryMapper sysUserQueryMapper) {
+		this.sysUserQueryMapper = sysUserQueryMapper;
 	}
 
 	/**
-	 * 从行列表中收集创建人、更新人用户 ID（去重、非空）。
+	 * 从行列表中收集创建人、更新人用户 ID
 	 * @param records 行列表
 	 * @return 用户主键列表
 	 */
@@ -56,7 +56,7 @@ public class AuditUserDisplayServiceImpl implements AuditUserDisplayService {
 		if (CollUtil.isEmpty(distinctIds)) {
 			return Collections.emptyMap();
 		}
-		return sysUserMapper.selectBatchIds(distinctIds)
+		return sysUserQueryMapper.selectBatchIds(distinctIds)
 			.stream()
 			.collect(Collectors.toMap(UserEntity::getId, UserEntity::getUsername));
 	}

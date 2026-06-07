@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 /**
- * 将操作日志负载异步委托给 {@link SecurityIngestService} 写入操作日志表。
+ * 将操作日志负载异步委托给 {@link SecurityIngestService} 写入操作日志表
  *
  * @author Bunny
  */

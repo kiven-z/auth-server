@@ -1,4 +1,4 @@
-package com.auth.service.system.common.service.impl;
+package com.auth.service.system.admin.ingest;
 
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.text.CharSequenceUtil;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 
 /**
- * 安全类内部上报数据落库实现。
+ * 安全类内部上报数据落库实现
  *
  * @author Bunny
  */
@@ -51,6 +51,9 @@ public class SecurityIngestServiceImpl implements SecurityIngestService {
 		return value.length() <= maxLen ? value : value.substring(0, maxLen);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void append(SecurityAuthorizationAuditPayloadEvent event) {
 		LogAuthorizationAuditEntity entity = new LogAuthorizationAuditEntity();
@@ -78,6 +81,9 @@ public class SecurityIngestServiceImpl implements SecurityIngestService {
 		logAuthorizationAuditMapper.insert(entity);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void append(OperationLogPayloadEvent payload) {
 		Long principalUserId = payload.getUserId();

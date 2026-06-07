@@ -1,4 +1,4 @@
-package com.auth.service.system.admin.user.service.impl;
+package com.auth.service.system.common.service.impl;
 
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
@@ -9,7 +9,6 @@ import com.auth.service.system.common.model.po.UserDeptProfilePO;
 import com.auth.service.system.common.model.po.UserPostProfilePO;
 import com.auth.service.system.common.model.po.UserSearchItemPO;
 import com.auth.service.system.common.model.vo.SysUserProfileResponse;
-import com.auth.service.system.common.service.impl.SysUserQueryServiceImpl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -29,11 +28,11 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**
- * {@link SysUserQueryServiceImpl} ????
+ * {@link SysUserQueryServiceImpl} 单元测试。
  *
  * @author Bunny
  */
-@DisplayName("SysUserQueryServiceImpl ????")
+@DisplayName("SysUserQueryServiceImpl 用户只读查询")
 @ExtendWith(MockitoExtension.class)
 class SysUserQueryServiceImplTest {
 
@@ -51,7 +50,7 @@ class SysUserQueryServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("userId ????? ILLEGAL_USER_ID_NOT_NULL")
+	@DisplayName("userId 为空时抛出 ILLEGAL_USER_ID_NOT_NULL")
 	void getProfileRejectsNullUserId() {
 		assertThatThrownBy(() -> sysUserQueryService.getProfile(null)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
@@ -59,7 +58,7 @@ class SysUserQueryServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("???????? USER_NOT_FOUND")
+	@DisplayName("用户不存在时抛出 USER_NOT_FOUND")
 	void getProfileRejectsMissingUser() {
 		when(sysUserQueryMapper.selectById(99L)).thenReturn(null);
 
@@ -69,7 +68,7 @@ class SysUserQueryServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("?????????????????????")
+	@DisplayName("正常查询时聚合用户、部门与岗位档案")
 	void getProfileReturnsAggregatedData() {
 		UserEntity user = new UserEntity();
 		user.setId(1L);
@@ -90,28 +89,28 @@ class SysUserQueryServiceImplTest {
 
 		UserDeptProfilePO deptRow = new UserDeptProfilePO();
 		deptRow.setDeptId(10L);
-		deptRow.setDeptName("???");
+		deptRow.setDeptName("研发部");
 		when(sysUserQueryMapper.selectDeptProfileByUserId(1L)).thenReturn(List.of(deptRow));
 
 		UserPostProfilePO postRow = new UserPostProfilePO();
 		postRow.setId(100L);
 		postRow.setPostId(20L);
-		postRow.setPostName("???");
+		postRow.setPostName("工程师");
 		when(sysUserQueryMapper.selectPostProfileByUserId(1L)).thenReturn(List.of(postRow));
 
 		SysUserProfileResponse profile = sysUserQueryService.getProfile(1L);
 
 		assertThat(profile.getUsername()).isEqualTo("alice");
 		assertThat(profile.getDeptList()).hasSize(1);
-		assertThat(profile.getDeptList().get(0).getDeptName()).isEqualTo("???");
+		assertThat(profile.getDeptList().get(0).getDeptName()).isEqualTo("研发部");
 		assertThat(profile.getPostList()).hasSize(1);
-		assertThat(profile.getPostList().get(0).getPostName()).isEqualTo("???");
+		assertThat(profile.getPostList().get(0).getPostName()).isEqualTo("工程师");
 		verify(sysUserQueryMapper).selectDeptProfileByUserId(1L);
 		verify(sysUserQueryMapper).selectPostProfileByUserId(1L);
 	}
 
 	@Test
-	@DisplayName("Mapper ?? null ????????")
+	@DisplayName("Mapper 返回 null 时部门与岗位列表为空")
 	void getProfileTreatsNullListsAsEmpty() {
 		UserEntity user = new UserEntity();
 		user.setId(2L);
@@ -127,21 +126,21 @@ class SysUserQueryServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("???? null ??????????")
+	@DisplayName("关键词为 null 时不查库并返回空列表")
 	void searchReturnsEmptyWhenKeywordNull() {
 		assertThat(sysUserQueryService.searchByKeyword(null, 10)).isEmpty();
 		verifyNoInteractions(sysUserQueryMapper);
 	}
 
 	@Test
-	@DisplayName("????????????????")
+	@DisplayName("关键词为空白时不查库并返回空列表")
 	void searchReturnsEmptyWhenKeywordBlank() {
 		assertThat(sysUserQueryService.searchByKeyword("   ", 10)).isEmpty();
 		verifyNoInteractions(sysUserQueryMapper);
 	}
 
 	@Test
-	@DisplayName("limit ? null ????? 20 ?")
+	@DisplayName("limit 为 null 时默认使用 20")
 	void searchUsesDefaultLimitWhenNull() {
 		when(sysUserQueryMapper.searchByKeyword(anyString(), anyInt())).thenReturn(List.of());
 
@@ -153,7 +152,7 @@ class SysUserQueryServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("limit ?? 50 ???? 50")
+	@DisplayName("limit 超过 50 时封顶为 50")
 	void searchCapsLimitAtFifty() {
 		when(sysUserQueryMapper.searchByKeyword(anyString(), anyInt())).thenReturn(List.of());
 
@@ -165,7 +164,7 @@ class SysUserQueryServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("limit ?? 1 ?? 1 ???")
+	@DisplayName("limit 小于 1 时提升为 1")
 	void searchRaisesTinyLimitToOne() {
 		when(sysUserQueryMapper.searchByKeyword(anyString(), anyInt())).thenReturn(List.of());
 
@@ -177,7 +176,7 @@ class SysUserQueryServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("?? Mapper ????")
+	@DisplayName("正常搜索时返回 Mapper 结果")
 	void searchReturnsMapperRows() {
 		UserSearchItemPO row = new UserSearchItemPO();
 		row.setId(1L);

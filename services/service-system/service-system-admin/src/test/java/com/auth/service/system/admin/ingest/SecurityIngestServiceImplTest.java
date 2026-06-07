@@ -1,4 +1,4 @@
-package com.auth.service.system.common.service.impl;
+package com.auth.service.system.admin.ingest;
 
 import com.auth.module.security.contract.event.OperationLogPayloadEvent;
 import com.auth.module.security.contract.event.SecurityAuthorizationAuditPayloadEvent;

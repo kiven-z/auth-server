@@ -1,4 +1,4 @@
-package com.auth.service.system.admin.convert;
+package com.auth.service.system.common.convert;
 
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.common.model.SysUserSearchItemResponse;

@@ -4,6 +4,9 @@ import com.auth.common.core.model.response.Result;
 import com.auth.common.web.exception.ValidationExceptionHandler;
 import com.tngtech.archunit.base.DescribedPredicate;
 import com.tngtech.archunit.core.domain.JavaClass;
+import com.tngtech.archunit.lang.ArchCondition;
+import com.tngtech.archunit.lang.ConditionEvents;
+import com.tngtech.archunit.lang.SimpleConditionEvent;
 import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
@@ -12,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.RestTemplate;
 
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noMethods;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods;
@@ -167,5 +171,23 @@ class SystemArchitectureTest {
 		.should()
 		.dependOnClassesThat()
 		.haveSimpleName("AuthInnerFeignClient");
+
+	/**
+	 * {@code com.auth.service.system.common} 包仅允许出现在 common 模块，admin 模块不得残留同名包。
+	 */
+	@ArchTest
+	static final ArchRule common_package_must_not_reside_in_admin_module = classes().that()
+		.resideInAPackage("com.auth.service.system.common..")
+		.should(new ArchCondition<>("not originate from service-system-admin module") {
+			@Override
+			public void check(JavaClass javaClass, ConditionEvents events) {
+				javaClass.getSource().ifPresent(source -> {
+					if (source.toString().contains("service-system-admin")) {
+						events.add(SimpleConditionEvent.violated(javaClass,
+								javaClass.getFullName() + " must live in service-system-common, not admin"));
+					}
+				});
+			}
+		});
 
 }

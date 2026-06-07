@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 对内接口：按用户 ID 批量解析用户名（id → username）
+ * 对内接口-按用户 ID 批量解析用户名
  *
  * @author Bunny
  */
