@@ -19,26 +19,26 @@ import java.time.LocalDateTime;
 @Component
 public class AuthorizationInvalidationProcessingClaimCleanupJob {
 
-    private final AuthorizationInvalidationEventOpsApplicationService authorizationInvalidationEventOpsApplicationService;
+	private final AuthorizationInvalidationEventOpsApplicationService authorizationInvalidationEventOpsApplicationService;
 
-    private final AuthorizationInvalidationProperties properties;
+	private final AuthorizationInvalidationProperties properties;
 
-    /**
-     * 定时扫描并释放超时的 processing 占位
-     */
-    @Scheduled(fixedDelayString = "${auth.auth.invalidation.processing-claim-cleanup-interval-ms:300000}")
-    public void cleanupStaleProcessingClaims() {
-        if (!properties.getProcessingClaimCleanupEnabled()) {
-            return;
-        }
+	/**
+	 * 定时扫描并释放超时的 processing 占位
+	 */
+	@Scheduled(fixedDelayString = "${auth.auth.invalidation.processing-claim-cleanup-interval-ms:300000}")
+	public void cleanupStaleProcessingClaims() {
+		if (!properties.getProcessingClaimCleanupEnabled()) {
+			return;
+		}
 
-        LocalDateTime cutoff = LocalDateTime.now().minusMinutes(properties.getProcessingClaimTimeoutMinutes());
-        int batchSize = properties.getProcessingClaimCleanupBatchSize();
-        int deleted = authorizationInvalidationEventOpsApplicationService.cleanupStaleProcessingClaims(cutoff,
-                batchSize);
-        if (deleted > 0) {
-            log.warn("Released stale invalidation processing claims: count={}, cutoff={}", deleted, cutoff);
-        }
-    }
+		LocalDateTime cutoff = LocalDateTime.now().minusMinutes(properties.getProcessingClaimTimeoutMinutes());
+		int batchSize = properties.getProcessingClaimCleanupBatchSize();
+		int deleted = authorizationInvalidationEventOpsApplicationService.cleanupStaleProcessingClaims(cutoff,
+				batchSize);
+		if (deleted > 0) {
+			log.warn("Released stale invalidation processing claims: count={}, cutoff={}", deleted, cutoff);
+		}
+	}
 
 }

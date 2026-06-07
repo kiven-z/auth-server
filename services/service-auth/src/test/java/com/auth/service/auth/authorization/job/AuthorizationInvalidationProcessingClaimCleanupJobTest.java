@@ -38,7 +38,8 @@ class AuthorizationInvalidationProcessingClaimCleanupJobTest {
 
 		cleanupJob.cleanupStaleProcessingClaims();
 
-		verify(authorizationInvalidationEventOpsApplicationService, never()).cleanupStaleProcessingClaims(any(), anyInt());
+		verify(authorizationInvalidationEventOpsApplicationService, never()).cleanupStaleProcessingClaims(any(),
+				anyInt());
 	}
 
 	@Test
