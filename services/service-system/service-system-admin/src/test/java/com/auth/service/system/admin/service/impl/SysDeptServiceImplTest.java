@@ -5,7 +5,7 @@ import com.auth.service.system.admin.mapper.SysDeptDetailMapper;
 import com.auth.service.system.admin.mapper.SysDeptMapper;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.form.dept.SysDeptForm;
-import com.auth.service.system.admin.model.query.SysDeptQuery;
+import com.auth.service.system.admin.model.query.SysDeptListQuery;
 import com.auth.service.system.admin.model.vo.dept.SysDeptListVO;
 import com.auth.service.system.admin.support.dept.DeptClosureMaintainer;
 import com.auth.service.system.admin.support.dept.DeptReferenceChecker;
@@ -95,25 +95,25 @@ class SysDeptServiceImplTest {
 	@DisplayName("扁平列表：无关键词时查询全量未删除部门")
 	void listFlatWithoutKeywordQueriesAllActiveDepts() {
 		SysDeptEntity entity = activeDept(1L, "D001");
-		when(sysDeptMapper.selectListByQuery(any(SysDeptQuery.class))).thenReturn(List.of(entity));
+		when(sysDeptMapper.selectListByQuery(any(SysDeptListQuery.class))).thenReturn(List.of(entity));
 
-		List<SysDeptListVO> result = sysDeptService.listFlat(new SysDeptQuery());
+		List<SysDeptListVO> result = sysDeptService.listFlat(new SysDeptListQuery());
 
 		assertEquals(1, result.size());
-		verify(sysDeptMapper).selectListByQuery(argThat((SysDeptQuery q) -> q.getKeyword() == null));
+		verify(sysDeptMapper).selectListByQuery(argThat((SysDeptListQuery q) -> q.getKeyword() == null));
 		verify(auditUserDisplayService).enrichAuditUsernames(anyList());
 	}
 
 	@Test
-	@DisplayName("扁平列表：关键词去空白后传给 Mapper")
-	void listFlatTrimsKeywordBeforeQuery() {
-		when(sysDeptMapper.selectListByQuery(any(SysDeptQuery.class))).thenReturn(Collections.emptyList());
+	@DisplayName("扁平列表：关键词原样传给 Mapper")
+	void listFlatPassesKeywordAsIs() {
+		when(sysDeptMapper.selectListByQuery(any(SysDeptListQuery.class))).thenReturn(Collections.emptyList());
 
-		SysDeptQuery query = new SysDeptQuery();
+		SysDeptListQuery query = new SysDeptListQuery();
 		query.setKeyword("  研发  ");
 		sysDeptService.listFlat(query);
 
-		verify(sysDeptMapper).selectListByQuery(argThat((SysDeptQuery q) -> "研发".equals(q.getKeyword())));
+		verify(sysDeptMapper).selectListByQuery(argThat((SysDeptListQuery q) -> "  研发  ".equals(q.getKeyword())));
 	}
 
 	@Test

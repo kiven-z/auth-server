@@ -12,7 +12,8 @@ import com.auth.service.system.admin.excel.dept.SysDeptSpreadsheetService;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.form.dept.SysDeptForm;
 import com.auth.service.system.admin.model.form.dept.SysDeptMoveForm;
-import com.auth.service.system.admin.model.query.SysDeptQuery;
+import com.auth.service.system.admin.model.query.SysDeptListQuery;
+import com.auth.service.system.admin.model.query.SysDeptPageQuery;
 import com.auth.service.system.admin.model.vo.dept.SysDeptDetailVO;
 import com.auth.service.system.admin.model.vo.dept.SysDeptListVO;
 import com.auth.service.system.admin.service.SysDeptService;
@@ -51,9 +52,9 @@ public class SysDeptController {
 	@Operation(summary = "部门 Excel 导出")
 	@PreAuthorize("@auth.decide('sysDept:export')")
 	@GetMapping("/export")
-	public ResponseEntity<byte[]> export(@Validated SysDeptQuery filter, @Validated ExportScopeQueryFields scope)
+	public ResponseEntity<byte[]> export(@Validated SysDeptPageQuery query, @Validated ExportScopeQueryFields scope)
 			throws IOException {
-		return sysDeptSpreadsheetService.export(filter, scope);
+		return sysDeptSpreadsheetService.export(query, scope);
 	}
 
 	@OperationLog(targetType = "DEPT_LIST", serviceDomain = AuditServiceDomain.SYSTEM,
@@ -61,14 +62,15 @@ public class SysDeptController {
 	@Operation(summary = "部门扁平列表（全量或关键词过滤，前端建树）")
 	@PreAuthorize("@auth.decide('sysDept:query')")
 	@GetMapping("/list")
-	public Result<List<SysDeptListVO>> list(SysDeptQuery query) {
-		return Result.success(sysDeptService.listFlat(query));
+	public Result<List<SysDeptListVO>> list(SysDeptListQuery query) {
+		List<SysDeptListVO> data = sysDeptService.listFlat(query);
+		return Result.success(data);
 	}
 
 	@Operation(summary = "部门分页查询（表格视图）")
 	@PreAuthorize("@auth.decide('sysDept:query')")
 	@GetMapping("/page")
-	public Result<PageResponse<SysDeptListVO>> page(SysDeptQuery query) {
+	public Result<PageResponse<SysDeptListVO>> page(SysDeptPageQuery query) {
 		Page<SysDeptEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
 		PageResponse<SysDeptListVO> result = sysDeptService.pageFlat(pageParams, query);
 		return Result.success(result);

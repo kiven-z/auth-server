@@ -3,7 +3,8 @@ package com.auth.service.system.admin.mapper;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.po.dept.SysDeptPageRowPO;
 import com.auth.service.system.admin.model.po.dept.SysDeptPathRowPO;
-import com.auth.service.system.admin.model.query.SysDeptQuery;
+import com.auth.service.system.admin.model.query.SysDeptListQuery;
+import com.auth.service.system.admin.model.query.SysDeptPageQuery;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -26,7 +27,7 @@ public interface SysDeptMapper extends BaseMapper<SysDeptEntity> {
 	 * @param query 查询条件
 	 * @return 部门列表
 	 */
-	List<SysDeptEntity> selectListByQuery(@Param("query") SysDeptQuery query);
+	List<SysDeptEntity> selectListByQuery(@Param("query") SysDeptListQuery query);
 
 	/**
 	 * 分页查询部门（含父部门信息；表格视图与 Excel 导出共用）
@@ -35,7 +36,7 @@ public interface SysDeptMapper extends BaseMapper<SysDeptEntity> {
 	 * @return 分页部门列表
 	 */
 	IPage<SysDeptPageRowPO> selectListByPage(@Param("page") Page<SysDeptEntity> page,
-			@Param("query") SysDeptQuery query);
+			@Param("query") SysDeptPageQuery query);
 
 	/**
 	 * 未逻辑删除的部门数量

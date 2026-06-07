@@ -16,7 +16,8 @@ import com.auth.service.system.admin.model.po.dept.SysDeptBoundPostPO;
 import com.auth.service.system.admin.model.po.dept.SysDeptBoundUserPO;
 import com.auth.service.system.admin.model.po.dept.SysDeptPageRowPO;
 import com.auth.service.system.admin.model.po.granttable.GrantTableBoundRolePO;
-import com.auth.service.system.admin.model.query.SysDeptQuery;
+import com.auth.service.system.admin.model.query.SysDeptListQuery;
+import com.auth.service.system.admin.model.query.SysDeptPageQuery;
 import com.auth.service.system.admin.model.vo.dept.SysDeptDetailVO;
 import com.auth.service.system.admin.model.vo.dept.SysDeptListVO;
 import com.auth.service.system.admin.service.SysDeptService;
@@ -66,7 +67,7 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 	 * {@inheritDoc}
 	 */
 	@Override
-	public List<SysDeptListVO> listFlat(SysDeptQuery query) {
+	public List<SysDeptListVO> listFlat(SysDeptListQuery query) {
 		List<SysDeptEntity> entities = baseMapper.selectListByQuery(query);
 		List<SysDeptListVO> list = SysDeptConverter.INSTANCE.toListVoList(entities);
 
@@ -79,7 +80,7 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 	 * {@inheritDoc}
 	 */
 	@Override
-	public PageResponse<SysDeptListVO> pageFlat(Page<SysDeptEntity> pageParams, SysDeptQuery query) {
+	public PageResponse<SysDeptListVO> pageFlat(Page<SysDeptEntity> pageParams, SysDeptPageQuery query) {
 		IPage<SysDeptPageRowPO> poPage = baseMapper.selectListByPage(pageParams, query);
 		IPage<SysDeptListVO> result = poPage.convert(SysDeptConverter.INSTANCE::toListVoFromPageRow);
 

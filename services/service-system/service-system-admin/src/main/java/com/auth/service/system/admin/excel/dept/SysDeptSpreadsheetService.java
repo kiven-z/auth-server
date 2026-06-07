@@ -9,7 +9,7 @@ import com.auth.service.system.admin.excel.StatusColorCellWriteHandler;
 import com.auth.service.system.admin.mapper.SysDeptMapper;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.po.dept.SysDeptPageRowPO;
-import com.auth.service.system.admin.model.query.SysDeptQuery;
+import com.auth.service.system.admin.model.query.SysDeptPageQuery;
 import com.auth.service.system.admin.support.dept.DeptPathResolver;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -28,7 +28,7 @@ import java.util.Map;
  */
 @Service
 public class SysDeptSpreadsheetService
-		extends AbstractSyncPagedExportService<SysDeptQuery, SysDeptPageRowPO, SysDeptSpreadsheetRow> {
+		extends AbstractSyncPagedExportService<SysDeptPageQuery, SysDeptPageRowPO, SysDeptSpreadsheetRow> {
 
 	private static final String SHEET_NAME = "部门";
 
@@ -58,19 +58,19 @@ public class SysDeptSpreadsheetService
 
 	/**
 	 * 按筛选条件与页码区间导出部门 Excel
-	 * @param filter 列表筛选
+	 * @param query 列表筛选
 	 * @param scope 导出范围
 	 * @return 文件字节响应
 	 * @throws IOException 写入失败
 	 */
 	@Override
 	@Transactional(readOnly = true)
-	public ResponseEntity<byte[]> export(SysDeptQuery filter, ExportScopeQueryFields scope) throws IOException {
-		return super.export(filter, scope);
+	public ResponseEntity<byte[]> export(SysDeptPageQuery query, ExportScopeQueryFields scope) throws IOException {
+		return super.export(query, scope);
 	}
 
 	@Override
-	protected List<SysDeptPageRowPO> fetchPage(SysDeptQuery filter, int pageIndex, int pageSize) {
+	protected List<SysDeptPageRowPO> fetchPage(SysDeptPageQuery filter, int pageIndex, int pageSize) {
 		Page<SysDeptEntity> pageParams = new Page<>(pageIndex, pageSize);
 		IPage<SysDeptPageRowPO> page = sysDeptMapper.selectListByPage(pageParams, filter);
 		return page.getRecords();

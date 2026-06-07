@@ -6,7 +6,8 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.form.dept.SysDeptForm;
 import com.auth.service.system.admin.model.form.dept.SysDeptMoveForm;
-import com.auth.service.system.admin.model.query.SysDeptQuery;
+import com.auth.service.system.admin.model.query.SysDeptListQuery;
+import com.auth.service.system.admin.model.query.SysDeptPageQuery;
 import com.auth.service.system.admin.model.vo.dept.SysDeptDetailVO;
 import com.auth.service.system.admin.model.vo.dept.SysDeptListVO;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -24,7 +25,7 @@ public interface SysDeptService extends IService<SysDeptEntity> {
 	 * @param query 筛选条件
 	 * @return 部门行
 	 */
-	List<SysDeptListVO> listFlat(SysDeptQuery query);
+	List<SysDeptListVO> listFlat(SysDeptListQuery query);
 
 	/**
 	 * 分页查询部门（表格视图）
@@ -32,7 +33,7 @@ public interface SysDeptService extends IService<SysDeptEntity> {
 	 * @param query 筛选与分页
 	 * @return 分页结果
 	 */
-	PageResponse<SysDeptListVO> pageFlat(Page<SysDeptEntity> pageParams, SysDeptQuery query);
+	PageResponse<SysDeptListVO> pageFlat(Page<SysDeptEntity> pageParams, SysDeptPageQuery query);
 
 	/**
 	 * 部门详情
