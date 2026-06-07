@@ -6,7 +6,7 @@ import lombok.Getter;
  * 系统服务通用结果码（成功、请求校验、用户、基础设施等）
  *
  * <p>
- * 号段：0、102–103、205–209、306–318、402、206
+ * 号段：0、102–103、205–209、306–314、402、206
  * </p>
  *
  * @author Bunny
@@ -83,26 +83,6 @@ public enum SystemCommonResultCode implements SystemResultCode {
 	 * 参数重复
 	 */
 	PARAM_DUPLICATE(409, 314, "PARAM_DUPLICATE", "param.duplicate"),
-
-	/**
-	 * 外部请求失败（邮件、附件、第三方 API 等）
-	 */
-	EXTERNAL_REQUEST_FAILED(502, 315, "EXTERNAL_REQUEST_FAILED", "external.request.failed"),
-
-	/**
-	 * 消息模板不存在或已禁用
-	 */
-	TEMPLATE_NOT_FOUND(404, 316, "TEMPLATE_NOT_FOUND", "system.message.template.not_found"),
-
-	/**
-	 * 缺少必填模板变量
-	 */
-	TEMPLATE_VARS_MISSING(422, 317, "TEMPLATE_VARS_MISSING", "system.message.template.vars_missing"),
-
-	/**
-	 * 模板渲染失败（{0}=subject|body，{1}=详情）
-	 */
-	RENDER_FAILED(500, 318, "RENDER_FAILED", "system.render.failed"),
 
 	/**
 	 * 验证码错误

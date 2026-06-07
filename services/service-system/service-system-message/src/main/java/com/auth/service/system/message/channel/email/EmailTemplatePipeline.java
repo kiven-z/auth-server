@@ -2,7 +2,7 @@ package com.auth.service.system.message.channel.email;
 
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.common.exception.TemplateRenderException;
+import com.auth.service.system.message.exception.TemplateRenderException;
 import com.auth.service.system.message.mapper.MessageTemplateMapper;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
 import com.auth.service.system.message.template.FreemarkerTemplateRenderer;
@@ -13,7 +13,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.auth.service.system.common.exception.code.SystemCommonResultCode.*;
+import static com.auth.service.system.message.exception.MessageResultCode.RENDER_FAILED;
+import static com.auth.service.system.message.exception.MessageResultCode.TEMPLATE_NOT_FOUND;
+import static com.auth.service.system.message.exception.MessageResultCode.TEMPLATE_VARS_MISSING;
 
 /**
  * 邮件模板加载、变量校验与渲染

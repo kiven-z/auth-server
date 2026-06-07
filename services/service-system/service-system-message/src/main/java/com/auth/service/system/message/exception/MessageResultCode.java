@@ -1,5 +1,6 @@
-package com.auth.service.system.common.exception.code;
+package com.auth.service.system.message.exception;
 
+import com.auth.service.system.common.exception.code.SystemResultCode;
 import lombok.Getter;
 
 /**
@@ -8,7 +9,7 @@ import lombok.Getter;
  * @author Bunny
  */
 @Getter
-public enum SystemMessageResultCode implements SystemResultCode {
+public enum MessageResultCode implements SystemResultCode {
 
 	/**
 	 * 消息发送命令为空
@@ -125,7 +126,27 @@ public enum SystemMessageResultCode implements SystemResultCode {
 	/**
 	 * 钉钉工作通知发送失败（{0}=详情）
 	 */
-	DING_TALK_WORK_NOTICE_FAILED(502, 308, "DING_TALK_WORK_NOTICE_FAILED", "system.dingtalk.work_notice.failed");
+	DING_TALK_WORK_NOTICE_FAILED(502, 308, "DING_TALK_WORK_NOTICE_FAILED", "system.dingtalk.work_notice.failed"),
+
+	/**
+	 * 外部请求失败（邮件、附件、第三方 API 等）
+	 */
+	EXTERNAL_REQUEST_FAILED(502, 315, "EXTERNAL_REQUEST_FAILED", "external.request.failed"),
+
+	/**
+	 * 消息模板不存在或已禁用
+	 */
+	TEMPLATE_NOT_FOUND(404, 316, "TEMPLATE_NOT_FOUND", "system.message.template.not_found"),
+
+	/**
+	 * 缺少必填模板变量
+	 */
+	TEMPLATE_VARS_MISSING(422, 317, "TEMPLATE_VARS_MISSING", "system.message.template.vars_missing"),
+
+	/**
+	 * 模板渲染失败（{0}=subject|body，{1}=详情）
+	 */
+	RENDER_FAILED(500, 318, "RENDER_FAILED", "system.render.failed");
 
 	private final int httpStatus;
 
@@ -135,7 +156,7 @@ public enum SystemMessageResultCode implements SystemResultCode {
 
 	private final String messageKey;
 
-	SystemMessageResultCode(int httpStatus, int code, String error, String messageKey) {
+	MessageResultCode(int httpStatus, int code, String error, String messageKey) {
 		this.httpStatus = httpStatus;
 		this.code = code;
 		this.error = error;

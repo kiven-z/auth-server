@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Set;
 
-import static com.auth.service.system.common.exception.code.SystemScheduleResultCode.*;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.*;
 
 /**
  * 解析消息调度载荷

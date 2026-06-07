@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.auth.service.system.common.exception.code.SystemScheduleResultCode.*;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.*;
 
 /**
  * 任务目录服务实现

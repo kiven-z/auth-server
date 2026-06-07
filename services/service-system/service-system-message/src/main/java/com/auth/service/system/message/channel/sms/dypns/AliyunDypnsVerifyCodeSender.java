@@ -6,7 +6,7 @@ import com.aliyun.auth.credentials.provider.StaticCredentialProvider;
 import com.aliyun.sdk.service.dypnsapi20170525.AsyncClient;
 import com.aliyun.sdk.service.dypnsapi20170525.models.SendSmsVerifyCodeRequest;
 import com.aliyun.sdk.service.dypnsapi20170525.models.SendSmsVerifyCodeResponse;
-import com.auth.service.system.common.exception.SystemMessageException;
+import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.message.config.SmsProperties;
 import darabonba.core.client.ClientOverrideConfiguration;
 import jakarta.annotation.PreDestroy;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import static com.auth.service.system.common.exception.code.SystemMessageResultCode.*;
+import static com.auth.service.system.message.exception.MessageResultCode.*;
 
 /**
  * 阿里云 Dypns 验证码短信发送
@@ -68,10 +68,10 @@ public class AliyunDypnsVerifyCodeSender implements AutoCloseable {
 	 */
 	public void sendVerifyCode(String phone, String providerTemplateCode, String templateParamJson) {
 		if (CharSequenceUtil.isBlank(phone)) {
-			throw new SystemMessageException(SMS_DYPNS_PHONE_BLANK);
+			throw new SystemBusinessException(SMS_DYPNS_PHONE_BLANK);
 		}
 		if (CharSequenceUtil.isBlank(providerTemplateCode)) {
-			throw new SystemMessageException(SMS_DYPNS_TEMPLATE_CODE_BLANK);
+			throw new SystemBusinessException(SMS_DYPNS_TEMPLATE_CODE_BLANK);
 		}
 
 		SendSmsVerifyCodeRequest request = SendSmsVerifyCodeRequest.builder()
@@ -87,10 +87,10 @@ public class AliyunDypnsVerifyCodeSender implements AutoCloseable {
 		}
 		catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-			throw new SystemMessageException(SMS_DYPNS_SEND_INTERRUPTED);
+			throw new SystemBusinessException(SMS_DYPNS_SEND_INTERRUPTED);
 		}
 		catch (ExecutionException e) {
-			throw new SystemMessageException(SMS_DYPNS_SEND_FAILED, e.getMessage());
+			throw new SystemBusinessException(SMS_DYPNS_SEND_FAILED, e.getMessage());
 		}
 	}
 
@@ -124,7 +124,7 @@ public class AliyunDypnsVerifyCodeSender implements AutoCloseable {
 		log.error("Aliyun Dypns send failed, phone={}, templateCode={}, detail={}", phone, providerTemplateCode,
 				detail);
 
-		throw new SystemMessageException(SMS_DYPNS_SEND_FAILED, detail);
+		throw new SystemBusinessException(SMS_DYPNS_SEND_FAILED, detail);
 	}
 
 }

@@ -25,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
-import static com.auth.service.system.common.exception.code.SystemScheduleResultCode.*;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.*;
 
 /**
  * 任务分组实现

@@ -2,7 +2,6 @@ package com.auth.service.system.common.exception;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
-import com.auth.service.system.common.exception.code.SystemScheduleResultCode;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -60,18 +59,16 @@ class SystemResultResponseFactoryTest {
 	@Test
 	@DisplayName("build(异常)：带参数时应保留 ext.i18nArgs")
 	void build_fromException_withArgs_preservesI18nArgs() {
-		// 统一模板键需 channel + templateCode 两个参数
 		LocaleContextHolder.setLocale(Locale.ENGLISH);
-		String key = SystemCommonResultCode.TEMPLATE_NOT_FOUND.getMessageKey();
-		Object[] args = new Object[] { "EMAIL", "tpl-1" };
-		when(messageSource.getMessage(eq(key), any(), eq(key), eq(Locale.ENGLISH))).thenReturn("tpl-missing");
-		when(messageSource.getMessage(eq(key), any(), eq("tpl-missing"), eq(Locale.ENGLISH))).thenReturn("tpl-missing");
+		String key = SystemCommonResultCode.DATA_IN_USE.getMessageKey();
+		Object[] args = new Object[] { "sys_role" };
+		when(messageSource.getMessage(eq(key), any(), eq(key), eq(Locale.ENGLISH))).thenReturn("in-use");
+		when(messageSource.getMessage(eq(key), any(), eq("in-use"), eq(Locale.ENGLISH))).thenReturn("in-use");
 
-		SystemBusinessException ex = new SystemBusinessException(SystemCommonResultCode.TEMPLATE_NOT_FOUND, "EMAIL",
-				"tpl-1");
+		SystemBusinessException ex = new SystemBusinessException(SystemCommonResultCode.DATA_IN_USE, "sys_role");
 		Result<Object> result = SystemResultResponseFactory.build(messageSource, ex);
 
-		assertEquals(SystemCommonResultCode.TEMPLATE_NOT_FOUND.getBizCode(), result.getCode());
+		assertEquals(SystemCommonResultCode.DATA_IN_USE.getBizCode(), result.getCode());
 		Map<String, Object> ext = result.getExt();
 		assertNotNull(ext);
 		assertArrayEquals(args, (Object[]) ext.get("i18nArgs"));
@@ -81,15 +78,16 @@ class SystemResultResponseFactoryTest {
 	@DisplayName("build(枚举, args)：应与工厂契约一致")
 	void build_fromEnum_matchesFactoryContract() {
 		LocaleContextHolder.setLocale(Locale.ENGLISH);
-		String key = SystemScheduleResultCode.JOB_GROUP_HAS_ACTIVE_JOBS.getMessageKey();
-		when(messageSource.getMessage(eq(key), any(), eq(key), eq(Locale.ENGLISH))).thenReturn("has-jobs");
-		when(messageSource.getMessage(eq(key), any(), eq("has-jobs"), eq(Locale.ENGLISH))).thenReturn("has-jobs");
+		String key = SystemCommonResultCode.PARAM_REQUIRED.getMessageKey();
+		when(messageSource.getMessage(eq(key), any(), eq(key), eq(Locale.ENGLISH))).thenReturn("param-required");
+		when(messageSource.getMessage(eq(key), any(), eq("param-required"), eq(Locale.ENGLISH)))
+			.thenReturn("param-required");
 
-		Result<Object> result = SystemResultResponseFactory.build(messageSource,
-				SystemScheduleResultCode.JOB_GROUP_HAS_ACTIVE_JOBS, 3);
+		Result<Object> result = SystemResultResponseFactory.build(messageSource, SystemCommonResultCode.PARAM_REQUIRED,
+				"Recipients");
 
-		assertEquals(SystemScheduleResultCode.JOB_GROUP_HAS_ACTIVE_JOBS.getBizCode(), result.getCode());
-		assertEquals("has-jobs", result.getMessage());
+		assertEquals(SystemCommonResultCode.PARAM_REQUIRED.getBizCode(), result.getCode());
+		assertEquals("param-required", result.getMessage());
 		assertEquals(key, result.getExt().get("i18nKey"));
 	}
 
@@ -112,24 +110,6 @@ class SystemResultResponseFactoryTest {
 	void resolveHttpStatus_serviceUnavailable() {
 		assertEquals(HttpStatus.SERVICE_UNAVAILABLE,
 				SystemResultResponseFactory.resolveHttpStatus(SystemCommonResultCode.SERVICE_UNAVAILABLE));
-	}
-
-	@Test
-	@DisplayName("build(消息异常)：应填充 code、message 与 ext.i18nKey")
-	void build_fromMessageException_setsCodeMessageAndExt() {
-		LocaleContextHolder.setLocale(Locale.ENGLISH);
-		String key = SystemCommonResultCode.PARAM_REQUIRED.getMessageKey();
-		when(messageSource.getMessage(eq(key), any(), eq(key), eq(Locale.ENGLISH))).thenReturn("no-recipients");
-		when(messageSource.getMessage(eq(key), any(), eq("no-recipients"), eq(Locale.ENGLISH)))
-			.thenReturn("no-recipients");
-
-		SystemMessageException ex = new SystemMessageException(SystemCommonResultCode.PARAM_REQUIRED, "Recipients");
-		Result<Object> result = SystemResultResponseFactory.build(messageSource, ex);
-
-		assertEquals(SystemCommonResultCode.PARAM_REQUIRED.getBizCode(), result.getCode());
-		assertEquals(SystemCommonResultCode.PARAM_REQUIRED.getError(), result.getError());
-		assertEquals("no-recipients", result.getMessage());
-		assertEquals(key, result.getExt().get("i18nKey"));
 	}
 
 }

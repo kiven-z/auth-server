@@ -4,7 +4,7 @@ import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.model.dingtalk.DingTalkMessageType;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.common.exception.TemplateRenderException;
+import com.auth.service.system.message.exception.TemplateRenderException;
 import com.auth.service.system.message.config.DingTalkProperties;
 import com.auth.service.system.message.mapper.MessageTemplateMapper;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.auth.service.system.common.exception.code.SystemMessageResultCode.*;
+import static com.auth.service.system.message.exception.MessageResultCode.*;
 
 /**
  * 钉钉模板加载、变量校验与渲染

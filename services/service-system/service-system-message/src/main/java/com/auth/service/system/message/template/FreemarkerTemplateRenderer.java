@@ -1,6 +1,6 @@
 package com.auth.service.system.message.template;
 
-import com.auth.service.system.common.exception.TemplateRenderException;
+import com.auth.service.system.message.exception.TemplateRenderException;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateExceptionHandler;

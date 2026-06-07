@@ -3,7 +3,7 @@ package com.auth.service.system.message.channel.dingtalk.client;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.auth.service.system.common.exception.SystemMessageException;
+import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.message.config.DingTalkProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
@@ -18,7 +18,7 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static com.auth.service.system.common.exception.code.SystemMessageResultCode.*;
+import static com.auth.service.system.message.exception.MessageResultCode.*;
 
 /**
  * 钉钉应用 accessToken 获取与内存缓存
@@ -81,13 +81,13 @@ public class DingTalkAccessTokenClient {
 			ResponseEntity<String> response = restTemplate.postForEntity(OAUTH_TOKEN_URL, entity, String.class);
 			String responseBody = response.getBody();
 			if (CharSequenceUtil.isBlank(responseBody)) {
-				throw new SystemMessageException(DING_TALK_OAUTH_EMPTY_RESPONSE);
+				throw new SystemBusinessException(DING_TALK_OAUTH_EMPTY_RESPONSE);
 			}
 
 			JSONObject json = JSONUtil.parseObj(responseBody);
 			String accessToken = json.getStr("accessToken");
 			if (CharSequenceUtil.isBlank(accessToken)) {
-				throw new SystemMessageException(DING_TALK_OAUTH_ACCESS_TOKEN_BLANK);
+				throw new SystemBusinessException(DING_TALK_OAUTH_ACCESS_TOKEN_BLANK);
 			}
 
 			Long expireIn = json.getLong("expireIn");
@@ -100,7 +100,7 @@ public class DingTalkAccessTokenClient {
 		}
 		catch (RestClientException ex) {
 			log.error("DingTalk OAuth token request failed", ex);
-			throw new SystemMessageException(DING_TALK_OAUTH_TOKEN_REQUEST_FAILED, ex.getMessage());
+			throw new SystemBusinessException(DING_TALK_OAUTH_TOKEN_REQUEST_FAILED, ex.getMessage());
 		}
 	}
 

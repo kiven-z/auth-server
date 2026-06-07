@@ -1,4 +1,4 @@
-package com.auth.service.system.common.exception;
+package com.auth.service.system.message.exception;
 
 /**
  * 模板渲染失败

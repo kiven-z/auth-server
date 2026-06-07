@@ -11,14 +11,10 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.auth.service.system.common.exception.code.SystemScheduleResultCode.JOB_TASK_TYPE_UNSUPPORTED;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_TASK_TYPE_UNSUPPORTED;
 
 /**
  * 任务定义校验管理器
- *
- * <p>
- * 职责分解： 1) 归一化 taskType； 2) 绑定 handlerCode（默认取执行处理器编码）； 3) 委派给对应任务类型校验器。
- * </p>
  *
  * @author Bunny
  */

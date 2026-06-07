@@ -1,7 +1,7 @@
 package com.auth.service.system.message.channel.email.transport;
 
-import static com.auth.service.system.common.exception.code.SystemCommonResultCode.EXTERNAL_REQUEST_FAILED;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
+import static com.auth.service.system.message.exception.MessageResultCode.EXTERNAL_REQUEST_FAILED;
 
 import java.util.Date;
 import java.util.List;
@@ -13,7 +13,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.auth.service.system.common.exception.SystemMessageException;
+import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.message.channel.email.EmailSendDTO;
 import com.auth.service.system.message.channel.email.RenderedEmail;
 
@@ -56,7 +56,7 @@ public class MimeMailTransport {
 		catch (MessagingException e) {
 			log.error("Failed to send email, templateCode={}, reason={}", emailSendDTO.getTemplateCode(),
 					e.getMessage(), e);
-			throw new SystemMessageException(EXTERNAL_REQUEST_FAILED, "Email send", e.getMessage());
+			throw new SystemBusinessException(EXTERNAL_REQUEST_FAILED, "Email send", e.getMessage());
 		}
 	}
 
@@ -102,16 +102,16 @@ public class MimeMailTransport {
 	 */
 	private void validate(EmailSendDTO emailSendDTO, String subject, String body) {
 		if (emailSendDTO == null) {
-			throw new SystemMessageException(PARAM_REQUIRED, "Email request");
+			throw new SystemBusinessException(PARAM_REQUIRED, "Email request");
 		}
 		if (CollUtil.isEmpty(emailSendDTO.getTo())) {
-			throw new SystemMessageException(PARAM_REQUIRED, "Recipients");
+			throw new SystemBusinessException(PARAM_REQUIRED, "Recipients");
 		}
 		if (CharSequenceUtil.isBlank(subject)) {
-			throw new SystemMessageException(PARAM_REQUIRED, "Email subject");
+			throw new SystemBusinessException(PARAM_REQUIRED, "Email subject");
 		}
 		if (CharSequenceUtil.isBlank(body)) {
-			throw new SystemMessageException(PARAM_REQUIRED, "Email body");
+			throw new SystemBusinessException(PARAM_REQUIRED, "Email body");
 		}
 	}
 
@@ -132,7 +132,7 @@ public class MimeMailTransport {
 
 			String filename = file.getOriginalFilename();
 			if (CharSequenceUtil.isBlank(filename)) {
-				throw new SystemMessageException(PARAM_REQUIRED, "Attachment filename");
+				throw new SystemBusinessException(PARAM_REQUIRED, "Attachment filename");
 			}
 			helper.addAttachment(Objects.requireNonNull(filename), Objects.requireNonNull(file));
 		}

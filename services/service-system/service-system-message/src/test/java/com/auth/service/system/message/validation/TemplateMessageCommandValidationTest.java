@@ -14,8 +14,8 @@ import org.junit.jupiter.api.Test;
 import java.util.Collections;
 import java.util.List;
 
-import static com.auth.service.system.common.exception.code.SystemMessageResultCode.MESSAGE_COMMAND_INVALID;
-import static com.auth.service.system.common.exception.code.SystemMessageResultCode.MESSAGE_SEND_COMMAND_NULL;
+import static com.auth.service.system.message.exception.MessageResultCode.MESSAGE_COMMAND_INVALID;
+import static com.auth.service.system.message.exception.MessageResultCode.MESSAGE_SEND_COMMAND_NULL;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 

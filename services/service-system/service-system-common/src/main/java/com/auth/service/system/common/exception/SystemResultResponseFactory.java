@@ -32,17 +32,6 @@ public class SystemResultResponseFactory {
 	}
 
 	/**
-	 * 构建消息域错误响应体
-	 * @param messageSource 消息源
-	 * @param exception 消息异常
-	 * @return Result
-	 */
-	public static Result<Object> build(MessageSource messageSource, SystemMessageException exception) {
-		return build(messageSource, Objects.requireNonNull(exception, "exception").getResultCode(),
-				exception.getMessageArgs());
-	}
-
-	/**
 	 * 由枚举与占位参数直接构建错误体（技术异常等场景）
 	 * @param messageSource 消息源
 	 * @param rc 结果码枚举

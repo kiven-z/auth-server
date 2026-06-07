@@ -1,5 +1,6 @@
-package com.auth.service.system.common.exception.code;
+package com.auth.service.system.schedule.exception;
 
+import com.auth.service.system.common.exception.code.SystemResultCode;
 import lombok.Getter;
 
 /**
@@ -12,7 +13,7 @@ import lombok.Getter;
  * @author Bunny
  */
 @Getter
-public enum SystemScheduleResultCode implements SystemResultCode {
+public enum ScheduleResultCode implements SystemResultCode {
 
 	/**
 	 * invoke_target 为空
@@ -127,7 +128,7 @@ public enum SystemScheduleResultCode implements SystemResultCode {
 
 	private final String messageKey;
 
-	SystemScheduleResultCode(int httpStatus, int code, String error, String messageKey) {
+	ScheduleResultCode(int httpStatus, int code, String error, String messageKey) {
 		this.httpStatus = httpStatus;
 		this.code = code;
 		this.error = error;

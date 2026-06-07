@@ -7,7 +7,7 @@ import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import com.auth.service.system.schedule.validation.SysJobTaskTypeDefinitionValidator;
 import org.springframework.stereotype.Component;
 
-import static com.auth.service.system.common.exception.code.SystemScheduleResultCode.JOB_MODE_BEAN_REQUIRES_INVOKE_TARGET;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_MODE_BEAN_REQUIRES_INVOKE_TARGET;
 
 /**
  * Bean 调用任务定义校验器

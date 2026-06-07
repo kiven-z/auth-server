@@ -12,8 +12,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Set;
 
-import static com.auth.service.system.common.exception.code.SystemMessageResultCode.MESSAGE_COMMAND_INVALID;
-import static com.auth.service.system.common.exception.code.SystemMessageResultCode.MESSAGE_SEND_COMMAND_NULL;
+import static com.auth.service.system.message.exception.MessageResultCode.MESSAGE_COMMAND_INVALID;
+import static com.auth.service.system.message.exception.MessageResultCode.MESSAGE_SEND_COMMAND_NULL;
 
 /**
  * 统一发送命令入参校验

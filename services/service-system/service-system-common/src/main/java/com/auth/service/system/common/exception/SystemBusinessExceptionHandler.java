@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 /**
- * 系统业务与消息发送异常 HTTP 映射
+ * 系统业务异常 HTTP 映射
  *
  * @author Bunny
  */
@@ -34,24 +34,8 @@ public class SystemBusinessExceptionHandler {
 	public ResponseEntity<Result<Object>> handleSystemBusiness(SystemBusinessException exception) {
 		log.warn("System business exception: {}", exception.toString(), exception);
 
-		var rc = exception.getResultCode();
 		Result<Object> body = SystemResultResponseFactory.build(messageSource, exception);
-		HttpStatus status = SystemResultResponseFactory.resolveHttpStatus(rc);
-		return ResponseEntity.status(status).body(body);
-	}
-
-	/**
-	 * 处理消息发送域异常（传输层 / 渠道基础设施）
-	 * @param exception 消息异常
-	 * @return 响应实体
-	 */
-	@ExceptionHandler(SystemMessageException.class)
-	public ResponseEntity<Result<Object>> handleSystemMessage(SystemMessageException exception) {
-		log.warn("System message exception: {}", exception.toString(), exception);
-
-		var rc = exception.getResultCode();
-		Result<Object> body = SystemResultResponseFactory.build(messageSource, exception);
-		HttpStatus status = SystemResultResponseFactory.resolveHttpStatus(rc);
+		HttpStatus status = SystemResultResponseFactory.resolveHttpStatus(exception.getResultCode());
 		return ResponseEntity.status(status).body(body);
 	}
 

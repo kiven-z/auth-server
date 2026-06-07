@@ -1,6 +1,6 @@
 package com.auth.service.system.message.channel.email.transport;
 
-import static com.auth.service.system.common.exception.code.SystemCommonResultCode.EXTERNAL_REQUEST_FAILED;
+import static com.auth.service.system.message.exception.MessageResultCode.EXTERNAL_REQUEST_FAILED;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,7 +12,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.auth.module.message.api.model.email.AttachmentDTO;
-import com.auth.service.system.common.exception.SystemMessageException;
+import com.auth.service.system.common.exception.SystemBusinessException;
 
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.collection.CollUtil;
@@ -70,7 +70,7 @@ public class EmailAttachmentResolver {
 				return Base64.decode(attachment.getBase64());
 			}
 			catch (IllegalArgumentException e) {
-				throw new SystemMessageException(EXTERNAL_REQUEST_FAILED, "Attachment Base64 decode", e.getMessage());
+				throw new SystemBusinessException(EXTERNAL_REQUEST_FAILED, "Attachment Base64 decode", e.getMessage());
 			}
 		}
 		if (attachment.getBytes() != null && attachment.getBytes().length > 0) {
@@ -82,15 +82,15 @@ public class EmailAttachmentResolver {
 				if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
 					return response.getBody();
 				}
-				throw new SystemMessageException(EXTERNAL_REQUEST_FAILED, "Attachment download",
+				throw new SystemBusinessException(EXTERNAL_REQUEST_FAILED, "Attachment download",
 						"HTTP " + response.getStatusCode().value());
 			}
-			catch (SystemMessageException e) {
+			catch (SystemBusinessException e) {
 				throw e;
 			}
 			catch (Exception e) {
 				log.error("Failed to download attachment from URL", e);
-				throw new SystemMessageException(EXTERNAL_REQUEST_FAILED, "Attachment download", e.getMessage());
+				throw new SystemBusinessException(EXTERNAL_REQUEST_FAILED, "Attachment download", e.getMessage());
 			}
 		}
 		return new byte[0];

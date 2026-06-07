@@ -22,7 +22,7 @@ import java.lang.reflect.Field;
 import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
-import static com.auth.service.system.common.exception.code.SystemScheduleResultCode.*;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
