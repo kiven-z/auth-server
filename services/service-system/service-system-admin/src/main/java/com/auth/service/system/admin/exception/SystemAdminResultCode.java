@@ -72,7 +72,23 @@ public enum SystemAdminResultCode implements SystemResultCode {
 	/**
 	 * 不能删除当前登录账号
 	 */
-	USER_DELETE_SELF_FORBIDDEN(409, 316, "USER_DELETE_SELF_FORBIDDEN", "system.user.delete_self_forbidden"),;
+	USER_DELETE_SELF_FORBIDDEN(409, 316, "USER_DELETE_SELF_FORBIDDEN", "system.user.delete_self_forbidden"),
+
+	/**
+	 * 内置超级管理员不可变更状态
+	 */
+	USER_STATUS_SUPER_ADMIN_FORBIDDEN(409, 317, "USER_STATUS_SUPER_ADMIN_FORBIDDEN",
+			"system.user.status_super_admin_forbidden"),
+
+	/**
+	 * 不能将当前登录账号设为禁用或锁定
+	 */
+	USER_STATUS_SELF_FORBIDDEN(409, 318, "USER_STATUS_SELF_FORBIDDEN", "system.user.status_self_forbidden"),
+
+	/**
+	 * 用户状态码非法
+	 */
+	USER_STATUS_INVALID(400, 319, "USER_STATUS_INVALID", "system.user.status_invalid"),;
 
 	private final int httpStatus;
 

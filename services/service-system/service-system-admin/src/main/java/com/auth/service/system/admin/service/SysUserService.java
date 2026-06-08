@@ -2,6 +2,7 @@ package com.auth.service.system.admin.service;
 
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.platform.persistence.model.UserEntity;
+import com.auth.service.system.admin.model.form.user.SysUserBatchStatusForm;
 import com.auth.service.system.admin.model.query.user.SysUserPageQuery;
 import com.auth.service.system.admin.model.vo.user.SysUserPageVO;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -29,5 +30,11 @@ public interface SysUserService extends IService<UserEntity> {
 	 * @param ids 用户主键列表
 	 */
 	void deleteByIds(List<Long> ids);
+
+	/**
+	 * 批量更新用户账号状态
+	 * @param form 目标状态与用户主键列表
+	 */
+	void batchUpdateStatus(SysUserBatchStatusForm form);
 
 }

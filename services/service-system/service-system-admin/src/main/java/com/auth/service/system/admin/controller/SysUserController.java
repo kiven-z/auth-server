@@ -6,6 +6,7 @@ import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
+import com.auth.service.system.admin.model.form.user.SysUserBatchStatusForm;
 import com.auth.service.system.admin.model.query.user.SysUserPageQuery;
 import com.auth.service.system.admin.model.vo.user.SysUserPageVO;
 import com.auth.service.system.admin.service.SysUserService;
@@ -15,8 +16,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DELETE_SUCCESS;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.MODIFY_SUCCESS;
 
 /**
  * 系统用户管理 Controller
@@ -47,6 +51,16 @@ public class SysUserController {
 		Page<UserEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
 		PageResponse<SysUserPageVO> result = sysUserService.getPage(pageParams, query);
 		return Result.success(result);
+	}
+
+	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
+	@Operation(summary = "批量更新用户状态")
+	@PreAuthorize("@auth.decide('sysUser:update')")
+	@PutMapping("/status")
+	public Result<String> batchUpdateStatus(@Valid @RequestBody SysUserBatchStatusForm form) {
+		sysUserService.batchUpdateStatus(form);
+		return Result.success(null, MODIFY_SUCCESS.getMessage());
 	}
 
 	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
