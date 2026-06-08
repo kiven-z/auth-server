@@ -229,8 +229,12 @@ class SysUserServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("批量改状态：禁用或锁定当前登录用户时拒绝")
-	void batchUpdateStatusThrowsWhenDisablingOrLockingSelf() {
+	@DisplayName("批量改状态：包含当前登录用户时拒绝")
+	void batchUpdateStatusThrowsWhenUpdatingSelf() {
+		SysUserBatchStatusForm normalForm = new SysUserBatchStatusForm();
+		normalForm.setIds(List.of(8L));
+		normalForm.setStatus(UserStatus.NORMAL.getCode());
+
 		SysUserBatchStatusForm disableForm = new SysUserBatchStatusForm();
 		disableForm.setIds(List.of(8L));
 		disableForm.setStatus(UserStatus.DISABLED.getCode());
@@ -241,6 +245,11 @@ class SysUserServiceImplTest {
 
 		try (MockedStatic<SecurityUserUtils> securityUserUtils = mockStatic(SecurityUserUtils.class)) {
 			securityUserUtils.when(SecurityUserUtils::getUserId).thenReturn(8L);
+
+			assertThatThrownBy(() -> sysUserService.batchUpdateStatus(normalForm))
+				.isInstanceOf(SystemBusinessException.class)
+				.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+				.isEqualTo(SystemAdminResultCode.USER_OPERATION_FORBIDDEN);
 
 			assertThatThrownBy(() -> sysUserService.batchUpdateStatus(disableForm))
 				.isInstanceOf(SystemBusinessException.class)
