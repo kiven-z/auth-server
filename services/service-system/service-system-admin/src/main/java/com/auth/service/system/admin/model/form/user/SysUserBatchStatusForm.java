@@ -26,13 +26,13 @@ public class SysUserBatchStatusForm implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Schema(title = "用户主键列表", requiredMode = Schema.RequiredMode.REQUIRED)
-	@NotEmpty(message = "ids must not be empty")
+	@NotEmpty(message = "用户主键列表不能为空")
 	private List<Long> ids;
 
-	@Schema(title = "目标状态(0=禁用,1=正常,2=锁定)", requiredMode = Schema.RequiredMode.REQUIRED)
-	@NotNull(message = "status is required")
-	@Min(value = 0, message = "status must be 0, 1 or 2")
-	@Max(value = 2, message = "status must be 0, 1 or 2")
+	@Schema(title = "目标状态（0=禁用，1=正常，2=锁定）", requiredMode = Schema.RequiredMode.REQUIRED)
+	@NotNull(message = "目标状态不能为空")
+	@Min(value = 0, message = "目标状态值无效")
+	@Max(value = 2, message = "目标状态值无效")
 	private Integer status;
 
 }

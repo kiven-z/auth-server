@@ -4,8 +4,6 @@ import cn.hutool.core.collection.CollUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.common.data.model.enums.UserStatus;
 import com.auth.module.platform.persistence.model.UserEntity;
-import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
-import com.auth.module.security.contract.constants.PermissionConstant;
 import com.auth.service.system.admin.convert.SysUserConverter;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.SysUserMapper;
@@ -15,6 +13,8 @@ import com.auth.service.system.admin.model.query.user.SysUserPageQuery;
 import com.auth.service.system.admin.model.vo.user.SysUserPageVO;
 import com.auth.service.system.admin.service.SysUserService;
 import com.auth.service.system.admin.support.sqlbuild.SysUserPageOrderSqlBuilder;
+import com.auth.service.system.admin.support.user.UserOperationChecker;
+import com.auth.service.system.admin.support.user.UserProtectedOperation;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -38,6 +38,8 @@ import java.util.Objects;
 public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> implements SysUserService {
 
 	private final AuditUserDisplayService auditUserDisplayService;
+
+	private final UserOperationChecker userOperationChecker;
 
 	/**
 	 * {@inheritDoc}
@@ -66,16 +68,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 			return;
 		}
 
-		// 不能删除管理员账号和自己账号
-		Long currentUserId = SecurityUserUtils.getUserId();
-		for (Long userId : idsToDelete) {
-			if (PermissionConstant.isSuperAdmin(userId)) {
-				throw new SystemBusinessException(SystemAdminResultCode.USER_DELETE_SUPER_ADMIN_FORBIDDEN, userId);
-			}
-			if (currentUserId != null && currentUserId.equals(userId)) {
-				throw new SystemBusinessException(SystemAdminResultCode.USER_DELETE_SELF_FORBIDDEN);
-			}
-		}
+		userOperationChecker.requireOperable(idsToDelete, UserProtectedOperation.DELETE);
 
 		removeByIds(idsToDelete);
 	}
@@ -95,16 +88,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 			return;
 		}
 
-		Long currentUserId = SecurityUserUtils.getUserId();
-		boolean restrictSelf = status == UserStatus.DISABLED.getCode() || status == UserStatus.LOCKED.getCode();
-		for (Long userId : idsToUpdate) {
-			if (PermissionConstant.isSuperAdmin(userId)) {
-				throw new SystemBusinessException(SystemAdminResultCode.USER_STATUS_SUPER_ADMIN_FORBIDDEN, userId);
-			}
-			if (restrictSelf && currentUserId != null && currentUserId.equals(userId)) {
-				throw new SystemBusinessException(SystemAdminResultCode.USER_STATUS_SELF_FORBIDDEN);
-			}
-		}
+		userOperationChecker.requireOperable(idsToUpdate, UserProtectedOperation.fromStatus(status));
 
 		List<UserEntity> updates = idsToUpdate.stream().map(userId -> {
 			UserEntity entity = new UserEntity();

@@ -5,6 +5,7 @@ import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.SysUserMapper;
+import com.auth.service.system.admin.support.user.UserOperationChecker;
 import com.auth.common.data.model.enums.UserStatus;
 import com.auth.service.system.admin.model.form.user.SysUserBatchStatusForm;
 import com.auth.service.system.admin.model.po.user.SysUserPageRowPO;
@@ -62,7 +63,7 @@ class SysUserServiceImplTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		sysUserService = new SysUserServiceImpl(auditUserDisplayService);
+		sysUserService = new SysUserServiceImpl(auditUserDisplayService, new UserOperationChecker());
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysUserService, sysUserMapper);
@@ -98,7 +99,7 @@ class SysUserServiceImplTest {
 		assertThatThrownBy(() -> sysUserService.deleteByIds(List.of(1L, 2L)))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemAdminResultCode.USER_DELETE_SUPER_ADMIN_FORBIDDEN);
+			.isEqualTo(SystemAdminResultCode.USER_OPERATION_FORBIDDEN);
 
 		verify(sysUserMapper, never()).deleteByIds(anyCollection());
 	}
@@ -112,7 +113,7 @@ class SysUserServiceImplTest {
 			assertThatThrownBy(() -> sysUserService.deleteByIds(List.of(8L)))
 				.isInstanceOf(SystemBusinessException.class)
 				.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-				.isEqualTo(SystemAdminResultCode.USER_DELETE_SELF_FORBIDDEN);
+				.isEqualTo(SystemAdminResultCode.USER_OPERATION_FORBIDDEN);
 		}
 
 		verify(sysUserMapper, never()).deleteByIds(anyCollection());
@@ -149,8 +150,7 @@ class SysUserServiceImplTest {
 		form.setIds(List.of(2L));
 		form.setStatus(9);
 
-		assertThatThrownBy(() -> sysUserService.batchUpdateStatus(form))
-			.isInstanceOf(SystemBusinessException.class)
+		assertThatThrownBy(() -> sysUserService.batchUpdateStatus(form)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemAdminResultCode.USER_STATUS_INVALID);
 
@@ -164,10 +164,9 @@ class SysUserServiceImplTest {
 		form.setIds(List.of(1L, 2L));
 		form.setStatus(UserStatus.DISABLED.getCode());
 
-		assertThatThrownBy(() -> sysUserService.batchUpdateStatus(form))
-			.isInstanceOf(SystemBusinessException.class)
+		assertThatThrownBy(() -> sysUserService.batchUpdateStatus(form)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemAdminResultCode.USER_STATUS_SUPER_ADMIN_FORBIDDEN);
+			.isEqualTo(SystemAdminResultCode.USER_OPERATION_FORBIDDEN);
 
 		verify(sysUserMapper, never()).updateById(any(UserEntity.class));
 	}
@@ -189,12 +188,12 @@ class SysUserServiceImplTest {
 			assertThatThrownBy(() -> sysUserService.batchUpdateStatus(disableForm))
 				.isInstanceOf(SystemBusinessException.class)
 				.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-				.isEqualTo(SystemAdminResultCode.USER_STATUS_SELF_FORBIDDEN);
+				.isEqualTo(SystemAdminResultCode.USER_OPERATION_FORBIDDEN);
 
 			assertThatThrownBy(() -> sysUserService.batchUpdateStatus(lockForm))
 				.isInstanceOf(SystemBusinessException.class)
 				.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-				.isEqualTo(SystemAdminResultCode.USER_STATUS_SELF_FORBIDDEN);
+				.isEqualTo(SystemAdminResultCode.USER_OPERATION_FORBIDDEN);
 		}
 
 		verify(sysUserMapper, never()).updateById(any(UserEntity.class));
@@ -215,10 +214,12 @@ class SysUserServiceImplTest {
 			spyService.batchUpdateStatus(form);
 
 			verify(spyService).updateBatchById(argThat(updates -> updates.size() == 2
-					&& updates.stream().anyMatch(entity -> Long.valueOf(2L).equals(entity.getId())
-							&& Integer.valueOf(UserStatus.LOCKED.getCode()).equals(entity.getStatus()))
-					&& updates.stream().anyMatch(entity -> Long.valueOf(3L).equals(entity.getId())
-							&& Integer.valueOf(UserStatus.LOCKED.getCode()).equals(entity.getStatus()))));
+					&& updates.stream()
+						.anyMatch(entity -> Long.valueOf(2L).equals(entity.getId())
+								&& Integer.valueOf(UserStatus.LOCKED.getCode()).equals(entity.getStatus()))
+					&& updates.stream()
+						.anyMatch(entity -> Long.valueOf(3L).equals(entity.getId())
+								&& Integer.valueOf(UserStatus.LOCKED.getCode()).equals(entity.getStatus()))));
 		}
 	}
 
