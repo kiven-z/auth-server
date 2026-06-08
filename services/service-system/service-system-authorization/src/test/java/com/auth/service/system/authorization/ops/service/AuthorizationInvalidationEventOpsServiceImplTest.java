@@ -50,9 +50,10 @@ class AuthorizationInvalidationEventOpsServiceImplTest {
 	@DisplayName("分页查询：Feign 失败时抛出 SERVICE_UNAVAILABLE")
 	void getPage_shouldThrowWhenFeignFailed() {
 		when(authInnerFeignClient.getInvalidationEventPage(any())).thenReturn(Result.error("unavailable"));
+		AuthorizationInvalidationEventOpsQuery query = new AuthorizationInvalidationEventOpsQuery();
 
 		SystemBusinessException exception = assertThrows(SystemBusinessException.class,
-				() -> opsService.getPage(new AuthorizationInvalidationEventOpsQuery()));
+				() -> opsService.getPage(query));
 
 		assertEquals(SERVICE_UNAVAILABLE, exception.getResultCode());
 	}

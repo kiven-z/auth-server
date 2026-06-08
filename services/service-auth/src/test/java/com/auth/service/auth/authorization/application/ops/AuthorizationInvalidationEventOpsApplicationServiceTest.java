@@ -11,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.never;
@@ -72,7 +73,7 @@ class AuthorizationInvalidationEventOpsApplicationServiceTest {
 		int deleted = opsApplicationService.cleanupStaleProcessingClaims(java.time.LocalDateTime.of(2026, 1, 1, 0, 0),
 				50);
 
-		assertTrue(deleted == 3);
+		assertEquals(3, deleted);
 		verify(authorizationInvalidationEventMapper)
 			.deleteStaleProcessingClaims(java.time.LocalDateTime.of(2026, 1, 1, 0, 0), 50);
 	}
@@ -87,7 +88,7 @@ class AuthorizationInvalidationEventOpsApplicationServiceTest {
 
 		int deleted = opsApplicationService.purgeCompletedBefore(java.time.LocalDateTime.of(2025, 6, 1, 0, 0), 200);
 
-		assertTrue(deleted == 10);
+		assertEquals(10, deleted);
 		verify(authorizationInvalidationEventMapper).deleteCompletedBefore(java.time.LocalDateTime.of(2025, 6, 1, 0, 0),
 				200);
 	}

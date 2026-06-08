@@ -16,8 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.auth.service.system.message.exception.MessageResultCode.SMS_TEMPLATE_NOT_FOUND;
-import static com.auth.service.system.message.exception.MessageResultCode.SMS_TEMPLATE_VARS_MISSING;
+import static com.auth.service.system.message.exception.MessageResultCode.TEMPLATE_NOT_FOUND;
+import static com.auth.service.system.message.exception.MessageResultCode.TEMPLATE_VARS_MISSING;
 
 /**
  * Dypns 验证码短信：模板加载、变量校验与发送参数组装
@@ -56,15 +56,14 @@ public class DypnsVerifyCodeTemplatePipeline {
 		MessageTemplateEntity template = messageTemplateMapper.selectEnabledBySceneCodeAndChannel(sceneCode,
 				MessageChannel.SMS_ALIYUN_DYPNS.name());
 		if (template == null) {
-			throw new SystemBusinessException(SMS_TEMPLATE_NOT_FOUND, MessageChannel.SMS_ALIYUN_DYPNS.name(),
-					sceneCode);
+			throw new SystemBusinessException(TEMPLATE_NOT_FOUND, MessageChannel.SMS_ALIYUN_DYPNS.name(), sceneCode);
 		}
 
 		Map<String, Object> variables = Optional.ofNullable(command.getVariables()).orElseGet(LinkedHashMap::new);
 		List<EmailTemplateRequireFieldRow> requireFields = MessageTemplateRequireFieldsJsonSupport
 			.parse(template.getRequireFields());
-		MessageTemplateRequireFieldsJsonSupport.assertVariablesPresent(requireFields, variables,
-				SMS_TEMPLATE_VARS_MISSING, MessageChannel.SMS_ALIYUN_DYPNS.name());
+		MessageTemplateRequireFieldsJsonSupport.assertVariablesPresent(requireFields, variables, TEMPLATE_VARS_MISSING,
+				MessageChannel.SMS_ALIYUN_DYPNS.name());
 
 		String templateParam = buildTemplateParam(requireFields, variables);
 		return new DypnsVerifyCodeSendPayload(template.getProviderTemplateCode(), templateParam);

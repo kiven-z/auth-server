@@ -48,12 +48,12 @@ public class DingTalkTemplatePipeline {
 		MessageTemplateEntity template = messageTemplateMapper.selectEnabledBySceneCodeAndChannel(sceneCode,
 				MessageChannel.DING_TALK.name());
 		if (template == null) {
-			throw new SystemBusinessException(DING_TALK_TEMPLATE_NOT_FOUND, MessageChannel.DING_TALK.name(), sceneCode);
+			throw new SystemBusinessException(TEMPLATE_NOT_FOUND, MessageChannel.DING_TALK.name(), sceneCode);
 		}
 
 		Map<String, Object> safeVariables = Optional.ofNullable(variables).orElseGet(HashMap::new);
 		MessageTemplateRequireFieldsJsonSupport.assertVariablesPresent(template.getRequireFields(), safeVariables,
-				DING_TALK_TEMPLATE_VARS_MISSING, MessageChannel.DING_TALK.name());
+				TEMPLATE_VARS_MISSING, MessageChannel.DING_TALK.name());
 
 		DingTalkMessageType messageType = resolveMessageType(template);
 		String title = renderOptionalField(template.getTemplateName() + "_title", template.getSubject(), safeVariables);

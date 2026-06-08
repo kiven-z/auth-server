@@ -27,25 +27,14 @@ public enum MessageResultCode implements SystemResultCode {
 	MESSAGE_CHANNEL_UNSUPPORTED(400, 280, "MESSAGE_CHANNEL_UNSUPPORTED", "system.message.channel.unsupported"),
 
 	/**
-	 * Dypns 验证码短信模板不存在或已禁用（channel=SMS_ALIYUN_DYPNS）
+	 * 消息模板不存在或已禁用
 	 */
-	SMS_TEMPLATE_NOT_FOUND(404, 281, "SMS_TEMPLATE_NOT_FOUND", "system.message.template.not_found"),
+	TEMPLATE_NOT_FOUND(404, 316, "TEMPLATE_NOT_FOUND", "system.message.template.not_found"),
 
 	/**
-	 * 缺少必填 Dypns 验证码短信模板变量
+	 * 缺少必填模板变量
 	 */
-	SMS_TEMPLATE_VARS_MISSING(422, 282, "SMS_TEMPLATE_VARS_MISSING", "system.message.template.vars_missing"),
-
-	/**
-	 * 钉钉模板不存在或已禁用
-	 */
-	DING_TALK_TEMPLATE_NOT_FOUND(404, 292, "DING_TALK_TEMPLATE_NOT_FOUND", "system.message.template.not_found"),
-
-	/**
-	 * 缺少必填钉钉模板变量
-	 */
-	DING_TALK_TEMPLATE_VARS_MISSING(422, 293, "DING_TALK_TEMPLATE_VARS_MISSING",
-			"system.message.template.vars_missing"),
+	TEMPLATE_VARS_MISSING(422, 317, "TEMPLATE_VARS_MISSING", "system.message.template.vars_missing"),
 
 	/**
 	 * 钉钉正文为空
@@ -132,16 +121,6 @@ public enum MessageResultCode implements SystemResultCode {
 	 * 外部请求失败（邮件、附件、第三方 API 等）
 	 */
 	EXTERNAL_REQUEST_FAILED(502, 315, "EXTERNAL_REQUEST_FAILED", "external.request.failed"),
-
-	/**
-	 * 消息模板不存在或已禁用
-	 */
-	TEMPLATE_NOT_FOUND(404, 316, "TEMPLATE_NOT_FOUND", "system.message.template.not_found"),
-
-	/**
-	 * 缺少必填模板变量
-	 */
-	TEMPLATE_VARS_MISSING(422, 317, "TEMPLATE_VARS_MISSING", "system.message.template.vars_missing"),
 
 	/**
 	 * 模板渲染失败（{0}=subject|body，{1}=详情）
