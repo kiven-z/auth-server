@@ -11,6 +11,7 @@ import com.auth.service.system.admin.model.form.user.SysUserBatchStatusForm;
 import com.auth.service.system.admin.model.form.user.SysUserForm;
 import com.auth.service.system.admin.support.user.SysUserDefaults;
 import com.auth.service.system.admin.support.user.UserOperationChecker;
+import com.auth.service.system.admin.support.user.UserSessionRevocationSupport;
 import com.auth.service.system.admin.model.po.user.SysUserPageRowPO;
 import com.auth.service.system.admin.model.query.user.SysUserPageQuery;
 import com.auth.service.system.admin.model.vo.user.SysUserPageVO;
@@ -69,11 +70,15 @@ class SysUserServiceImplTest {
 	@Mock
 	private PasswordEncoder passwordEncoder;
 
+	@Mock
+	private UserSessionRevocationSupport userSessionRevocationSupport;
+
 	private SysUserServiceImpl sysUserService;
 
 	@BeforeEach
 	void setUp() throws Exception {
-		sysUserService = new SysUserServiceImpl(auditUserDisplayService, new UserOperationChecker(), passwordEncoder);
+		sysUserService = new SysUserServiceImpl(auditUserDisplayService, new UserOperationChecker(), passwordEncoder,
+				userSessionRevocationSupport);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysUserService, sysUserMapper);
@@ -170,14 +175,16 @@ class SysUserServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("批量删除：校验通过后逻辑删除")
+	@DisplayName("批量删除：校验通过后逻辑删除并踢出会话")
 	void deleteByIdsShouldRemoveExistingUsers() {
+		SysUserServiceImpl spyService = spy(sysUserService);
 		try (MockedStatic<SecurityUserUtils> securityUserUtils = mockStatic(SecurityUserUtils.class)) {
 			securityUserUtils.when(SecurityUserUtils::getUserId).thenReturn(99L);
 
-			sysUserService.deleteByIds(Arrays.asList(2L, null, 3L, 3L));
+			spyService.deleteByIds(Arrays.asList(2L, null, 3L, 3L));
 
-			verify(sysUserMapper).deleteByIds(List.of(2L, 3L));
+			verify(spyService).removeByIds(List.of(2L, 3L));
+			verify(userSessionRevocationSupport).revokeAllSessionsAfterCommit(List.of(2L, 3L));
 		}
 	}
 
@@ -250,7 +257,7 @@ class SysUserServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("批量改状态：校验通过后批量更新")
+	@DisplayName("批量改状态：校验通过后批量更新并踢出会话")
 	void batchUpdateStatusShouldUpdateUsers() {
 		SysUserBatchStatusForm form = new SysUserBatchStatusForm();
 		form.setIds(Arrays.asList(2L, null, 3L, 3L));
@@ -270,6 +277,7 @@ class SysUserServiceImplTest {
 					&& updates.stream()
 						.anyMatch(entity -> Long.valueOf(3L).equals(entity.getId())
 								&& Integer.valueOf(UserStatus.LOCKED.getCode()).equals(entity.getStatus()))));
+			verify(userSessionRevocationSupport).revokeAllSessionsAfterCommit(List.of(2L, 3L));
 		}
 	}
 

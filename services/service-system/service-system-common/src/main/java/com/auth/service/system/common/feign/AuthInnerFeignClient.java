@@ -85,4 +85,12 @@ public interface AuthInnerFeignClient {
 	@PostMapping("/authorization/invalidation/event/{eventId}/release-claim")
 	Result<Boolean> releaseInvalidationEventClaim(@PathVariable("eventId") String eventId);
 
+	/**
+	 * 批量踢出用户全部会话（账户状态变更、删除等）
+	 * @param userIds 用户 ID 列表
+	 * @return 统一响应
+	 */
+	@PostMapping("/sessions/kick-all")
+	Result<Void> kickAllSessions(@RequestBody(required = false) List<Long> userIds);
+
 }

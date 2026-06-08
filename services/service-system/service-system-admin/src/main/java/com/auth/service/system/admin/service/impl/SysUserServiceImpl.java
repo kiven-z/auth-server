@@ -1,6 +1,14 @@
 package com.auth.service.system.admin.service.impl;
 
-import cn.hutool.core.collection.CollUtil;
+import java.time.LocalDate;
+import java.time.Period;
+import java.util.List;
+import java.util.Objects;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.auth.common.data.model.PageResponse;
 import com.auth.common.data.model.enums.UserStatus;
 import com.auth.module.platform.persistence.model.UserEntity;
@@ -17,20 +25,15 @@ import com.auth.service.system.admin.support.sqlbuild.SysUserPageOrderSqlBuilder
 import com.auth.service.system.admin.support.user.SysUserDefaults;
 import com.auth.service.system.admin.support.user.UserOperationChecker;
 import com.auth.service.system.admin.support.user.UserProtectedOperation;
+import com.auth.service.system.admin.support.user.UserSessionRevocationSupport;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.Period;
-import java.util.List;
-import java.util.Objects;
+import cn.hutool.core.collection.CollUtil;
+import lombok.RequiredArgsConstructor;
 
 /**
  * 系统用户服务实现
@@ -47,6 +50,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 	private final UserOperationChecker userOperationChecker;
 
 	private final PasswordEncoder passwordEncoder;
+
+	private final UserSessionRevocationSupport userSessionRevocationSupport;
 
 	/**
 	 * {@inheritDoc}
@@ -92,6 +97,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 		userOperationChecker.requireOperable(idsToDelete, UserProtectedOperation.DELETE);
 
 		removeByIds(idsToDelete);
+		userSessionRevocationSupport.revokeAllSessionsAfterCommit(idsToDelete);
 	}
 
 	/**
@@ -118,6 +124,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 			return entity;
 		}).toList();
 		updateBatchById(updates);
+		userSessionRevocationSupport.revokeAllSessionsAfterCommit(idsToUpdate);
 	}
 
 }

@@ -90,4 +90,13 @@ public class AuthInnerFeignClientFallback implements AuthInnerFeignClient {
 		return Result.error("Authorization invalidation event release claim is unavailable");
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Result<Void> kickAllSessions(List<Long> userIds) {
+		log.error("AuthInnerFeignClientFallback: kickAllSessions failed, userIds={}", userIds);
+		return Result.error("Session revocation service is unavailable");
+	}
+
 }
