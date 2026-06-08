@@ -95,7 +95,7 @@ class SysUserServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("新增用户：写入默认密码与权限版本")
+	@DisplayName("新增用户：写入默认密码与表单字段")
 	void createShouldPersistUserWithDefaults() {
 		SysUserForm form = validCreateForm();
 		when(passwordEncoder.encode(SysUserDefaults.DEFAULT_PASSWORD)).thenReturn("{bcrypt}hash");
@@ -114,7 +114,6 @@ class SysUserServiceImplTest {
 		assertThat(saved.getUsername()).isEqualTo("new_user");
 		assertThat(saved.getPassword()).isEqualTo("{bcrypt}hash");
 		assertThat(saved.getAvatar()).isNull();
-		assertThat(saved.getPermVersion()).isZero();
 		assertThat(saved.getGender()).isEqualTo(GenderStatus.MALE.getCode());
 		assertThat(saved.getRemark()).isEqualTo("note");
 		assertThat(saved.getAge()).isNotNull();

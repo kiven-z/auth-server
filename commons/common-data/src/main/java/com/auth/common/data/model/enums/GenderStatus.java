@@ -31,15 +31,6 @@ public enum GenderStatus {
 
 	private final String desc;
 
-	public static String getDesc(int code) {
-		for (GenderStatus value : values()) {
-			if (value.code == code) {
-				return value.desc;
-			}
-		}
-		return null;
-	}
-
 	/**
 	 * 根据 code 解析枚举
 	 * @param code 性别码
