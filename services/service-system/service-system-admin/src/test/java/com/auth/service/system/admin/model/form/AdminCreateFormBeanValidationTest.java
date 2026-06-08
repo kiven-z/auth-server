@@ -53,7 +53,9 @@ class AdminCreateFormBeanValidationTest {
 	private static SysUserForm validUserForm() {
 		SysUserForm form = new SysUserForm();
 		form.setUsername("new_user");
+		form.setNickname("New User");
 		form.setEmail("new@example.com");
+		form.setPhone("13800000000");
 		form.setEmployeeNo("E100");
 		form.setStatus(UserStatus.NORMAL.getCode());
 		form.setGender(GenderStatus.MALE.getCode());
@@ -112,14 +114,34 @@ class AdminCreateFormBeanValidationTest {
 	}
 
 	@Test
-	@DisplayName("SysUserForm：工号为空时存在 NotBlank 约束违反")
-	void userCreateFormRejectsBlankEmployeeNo() {
+	@DisplayName("SysUserForm：昵称为空时存在 NotBlank 约束违反")
+	void userCreateFormRejectsBlankNickname() {
 		SysUserForm form = validUserForm();
-		form.setEmployeeNo("");
+		form.setNickname("  ");
 
 		Set<ConstraintViolation<SysUserForm>> violations = validator.validate(form);
 
-		assertThat(violations).anyMatch(v -> "employeeNo".equals(v.getPropertyPath().toString()));
+		assertThat(violations).anyMatch(v -> "nickname".equals(v.getPropertyPath().toString()));
+	}
+
+	@Test
+	@DisplayName("SysUserForm：手机号为空时存在 NotBlank 约束违反")
+	void userCreateFormRejectsBlankPhone() {
+		SysUserForm form = validUserForm();
+		form.setPhone("");
+
+		Set<ConstraintViolation<SysUserForm>> violations = validator.validate(form);
+
+		assertThat(violations).anyMatch(v -> "phone".equals(v.getPropertyPath().toString()));
+	}
+
+	@Test
+	@DisplayName("SysUserForm：工号为空时通过校验")
+	void userCreateFormAcceptsBlankEmployeeNo() {
+		SysUserForm form = validUserForm();
+		form.setEmployeeNo(null);
+
+		assertThat(validator.validate(form)).isEmpty();
 	}
 
 	@Test

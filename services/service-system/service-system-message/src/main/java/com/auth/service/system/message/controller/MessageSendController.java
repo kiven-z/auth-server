@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 统一消息发送 HTTP 入口（邮件、短信、钉钉等均经此接口按 channel 路由）
+ * 统一消息发送 HTTP 入口
  *
  * @author Bunny
  */

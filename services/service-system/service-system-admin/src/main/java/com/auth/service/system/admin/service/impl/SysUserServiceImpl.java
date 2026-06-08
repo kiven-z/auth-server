@@ -71,6 +71,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 		if (form.getBirthday() != null) {
 			entity.setAge(Period.between(form.getBirthday(), LocalDate.now()).getYears());
 		}
+		entity.setPermVersion(SysUserDefaults.DEFAULT_PERM_VERSION);
 		save(entity);
 	}
 

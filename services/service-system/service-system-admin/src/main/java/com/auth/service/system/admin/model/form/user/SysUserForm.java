@@ -33,7 +33,8 @@ public class SysUserForm implements Serializable {
 	@NotBlank(message = "用户名不能为空")
 	private String username;
 
-	@Schema(title = "昵称")
+	@Schema(title = "昵称", requiredMode = Schema.RequiredMode.REQUIRED)
+	@NotBlank(message = "昵称不能为空")
 	@Size(max = 64, message = "昵称长度不能超过64个字符")
 	private String nickname;
 
@@ -43,12 +44,12 @@ public class SysUserForm implements Serializable {
 	@Size(max = 128, message = "邮箱长度不能超过128个字符")
 	private String email;
 
-	@Schema(title = "手机号")
+	@Schema(title = "手机号", requiredMode = Schema.RequiredMode.REQUIRED)
+	@NotBlank(message = "手机号不能为空")
 	@Size(max = 32, message = "手机号长度不能超过32个字符")
 	private String phone;
 
-	@Schema(title = "工号", requiredMode = Schema.RequiredMode.REQUIRED)
-	@NotBlank(message = "工号不能为空")
+	@Schema(title = "工号")
 	@Size(max = 64, message = "工号长度不能超过64个字符")
 	private String employeeNo;
 
