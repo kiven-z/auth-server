@@ -43,6 +43,7 @@ public class AdminSessionController {
 	}
 
 	@Operation(summary = "批量踢出用户全部会话")
+	@PreAuthorize("@auth.decide('ADMIN')")
 	@PostMapping("/kick-all")
 	public Result<Void> kickAllSessions(@RequestBody(required = false) List<Long> userIds) {
 		sessionAdminApplicationService.kickAllSessions(userIds);

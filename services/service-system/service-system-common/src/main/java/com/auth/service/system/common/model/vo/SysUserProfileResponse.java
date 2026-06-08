@@ -9,7 +9,6 @@ import lombok.Setter;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,16 +56,6 @@ public class SysUserProfileResponse implements Serializable {
 
 	@Schema(title = "个人简介")
 	private String introduction;
-
-	@Schema(title = "最后登录IP")
-	private String lastLoginIp;
-
-	@Schema(title = "最后登录地区")
-	private String lastLoginRegion;
-
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	@Schema(title = "最后登录时间")
-	private LocalDateTime lastLoginTime;
 
 	@Schema(title = "所属部门列表")
 	private List<SysUserDeptProfileItemResponse> deptList = new ArrayList<>();

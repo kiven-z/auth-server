@@ -81,9 +81,6 @@ class SysUserQueryServiceImplTest {
 		user.setGender(1);
 		user.setBirthday(LocalDate.of(1990, 1, 2));
 		user.setIntroduction("bio");
-		user.setLastLoginIp("127.0.0.1");
-		user.setLastLoginRegion("local");
-		user.setLastLoginTime(null);
 
 		when(sysUserQueryMapper.selectById(1L)).thenReturn(user);
 

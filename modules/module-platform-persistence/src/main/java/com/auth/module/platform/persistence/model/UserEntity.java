@@ -9,7 +9,6 @@ import lombok.experimental.Accessors;
 
 import java.io.Serial;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 /**
  * 系统用户 系统用户的实体类对象
@@ -84,21 +83,6 @@ public class UserEntity extends BaseEntity {
 	 * 个人简介
 	 */
 	private String introduction;
-
-	/**
-	 * 最后登录IP
-	 */
-	private String lastLoginIp;
-
-	/**
-	 * 最后登录地区
-	 */
-	private String lastLoginRegion;
-
-	/**
-	 * 最后登录时间
-	 */
-	private LocalDateTime lastLoginTime;
 
 	/**
 	 * 权限版本号
