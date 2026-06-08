@@ -7,6 +7,8 @@ import com.auth.service.system.admin.model.vo.user.SysUserPageVO;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.List;
+
 /**
  * 系统用户服务
  *
@@ -21,5 +23,11 @@ public interface SysUserService extends IService<UserEntity> {
 	 * @return 分页结果
 	 */
 	PageResponse<SysUserPageVO> getPage(Page<UserEntity> pageParams, SysUserPageQuery query);
+
+	/**
+	 * 批量逻辑删除用户
+	 * @param ids 用户主键列表
+	 */
+	void deleteByIds(List<Long> ids);
 
 }

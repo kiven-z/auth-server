@@ -15,9 +15,15 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DELETE_SUCCESS;
 
 /**
  * 系统用户管理 Controller
@@ -41,6 +47,16 @@ public class SysUserController {
 		Page<UserEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
 		PageResponse<SysUserPageVO> result = sysUserService.getPage(pageParams, query);
 		return Result.success(result);
+	}
+
+	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.DELETE)
+	@Operation(summary = "批量删除用户")
+	@PreAuthorize("@auth.decide('sysUser:delete')")
+	@DeleteMapping
+	public Result<String> batchDelete(@RequestBody List<Long> ids) {
+		sysUserService.deleteByIds(ids);
+		return Result.success(null, DELETE_SUCCESS.getMessage());
 	}
 
 }

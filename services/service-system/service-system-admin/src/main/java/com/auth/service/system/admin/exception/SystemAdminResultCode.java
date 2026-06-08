@@ -61,7 +61,18 @@ public enum SystemAdminResultCode implements SystemResultCode {
 	 * 幂等事件 processing 占位已释放
 	 */
 	AUTH_INVALIDATION_EVENT_RELEASE_SUCCESS(200, 305, "AUTH_INVALIDATION_EVENT_RELEASE_SUCCESS",
-			"system.authorization.invalidation.event.release_success"),;
+			"system.authorization.invalidation.event.release_success"),
+
+	/**
+	 * 内置超级管理员不可删除
+	 */
+	USER_DELETE_SUPER_ADMIN_FORBIDDEN(409, 315, "USER_DELETE_SUPER_ADMIN_FORBIDDEN",
+			"system.user.delete_super_admin_forbidden"),
+
+	/**
+	 * 不能删除当前登录账号
+	 */
+	USER_DELETE_SELF_FORBIDDEN(409, 316, "USER_DELETE_SELF_FORBIDDEN", "system.user.delete_self_forbidden"),;
 
 	private final int httpStatus;
 
