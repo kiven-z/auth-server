@@ -7,6 +7,7 @@ import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.admin.model.form.user.SysUserBatchStatusForm;
+import com.auth.service.system.admin.model.form.user.SysUserForm;
 import com.auth.service.system.admin.model.query.user.SysUserPageQuery;
 import com.auth.service.system.admin.model.vo.user.SysUserPageVO;
 import com.auth.service.system.admin.service.SysUserService;
@@ -19,6 +20,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -51,6 +53,16 @@ public class SysUserController {
 		Page<UserEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
 		PageResponse<SysUserPageVO> result = sysUserService.getPage(pageParams, query);
 		return Result.success(result);
+	}
+
+	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.CREATE)
+	@Operation(summary = "新增用户")
+	@PreAuthorize("@auth.decide('sysUser:create')")
+	@PostMapping
+	public Result<Void> create(@Valid @RequestBody SysUserForm form) {
+		sysUserService.create(form);
+		return Result.success();
 	}
 
 	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,

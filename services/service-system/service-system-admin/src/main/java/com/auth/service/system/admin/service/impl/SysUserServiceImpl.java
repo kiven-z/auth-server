@@ -8,11 +8,13 @@ import com.auth.service.system.admin.convert.SysUserConverter;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.SysUserMapper;
 import com.auth.service.system.admin.model.form.user.SysUserBatchStatusForm;
+import com.auth.service.system.admin.model.form.user.SysUserForm;
 import com.auth.service.system.admin.model.po.user.SysUserPageRowPO;
 import com.auth.service.system.admin.model.query.user.SysUserPageQuery;
 import com.auth.service.system.admin.model.vo.user.SysUserPageVO;
 import com.auth.service.system.admin.service.SysUserService;
 import com.auth.service.system.admin.support.sqlbuild.SysUserPageOrderSqlBuilder;
+import com.auth.service.system.admin.support.user.SysUserDefaults;
 import com.auth.service.system.admin.support.user.UserOperationChecker;
 import com.auth.service.system.admin.support.user.UserProtectedOperation;
 import com.auth.service.system.common.exception.SystemBusinessException;
@@ -21,6 +23,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +44,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 
 	private final UserOperationChecker userOperationChecker;
 
+	private final PasswordEncoder passwordEncoder;
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -52,6 +57,16 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 
 		auditUserDisplayService.enrichAuditUsernames(voPage);
 		return PageResponse.of(voPage);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void create(SysUserForm form) {
+		UserEntity entity = SysUserConverter.INSTANCE.toEntity(form);
+		entity.setPassword(passwordEncoder.encode(SysUserDefaults.DEFAULT_PASSWORD));
+		save(entity);
 	}
 
 	/**

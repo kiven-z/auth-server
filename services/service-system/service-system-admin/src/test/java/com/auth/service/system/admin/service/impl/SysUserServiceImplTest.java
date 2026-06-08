@@ -1,13 +1,16 @@
 package com.auth.service.system.admin.service.impl;
 
 import com.auth.common.data.model.PageResponse;
+import com.auth.common.data.model.enums.GenderStatus;
+import com.auth.common.data.model.enums.UserStatus;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.SysUserMapper;
-import com.auth.service.system.admin.support.user.UserOperationChecker;
-import com.auth.common.data.model.enums.UserStatus;
 import com.auth.service.system.admin.model.form.user.SysUserBatchStatusForm;
+import com.auth.service.system.admin.model.form.user.SysUserForm;
+import com.auth.service.system.admin.support.user.SysUserDefaults;
+import com.auth.service.system.admin.support.user.UserOperationChecker;
 import com.auth.service.system.admin.model.po.user.SysUserPageRowPO;
 import com.auth.service.system.admin.model.query.user.SysUserPageQuery;
 import com.auth.service.system.admin.model.vo.user.SysUserPageVO;
@@ -20,11 +23,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.lang.reflect.Field;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
@@ -43,6 +49,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doAnswer;
 
 /**
  * {@link SysUserServiceImpl} 单元测试
@@ -59,14 +66,58 @@ class SysUserServiceImplTest {
 	@Mock
 	private AuditUserDisplayService auditUserDisplayService;
 
+	@Mock
+	private PasswordEncoder passwordEncoder;
+
 	private SysUserServiceImpl sysUserService;
 
 	@BeforeEach
 	void setUp() throws Exception {
-		sysUserService = new SysUserServiceImpl(auditUserDisplayService, new UserOperationChecker());
+		sysUserService = new SysUserServiceImpl(auditUserDisplayService, new UserOperationChecker(), passwordEncoder);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysUserService, sysUserMapper);
+	}
+
+	private static SysUserForm validCreateForm() {
+		SysUserForm form = new SysUserForm();
+		form.setUsername("new_user");
+		form.setNickname("New User");
+		form.setEmail("new@example.com");
+		form.setPhone("13800000000");
+		form.setEmployeeNo("E100");
+		form.setStatus(UserStatus.NORMAL.getCode());
+		form.setGender(GenderStatus.MALE.getCode());
+		form.setBirthday(LocalDate.of(1990, 1, 1));
+		form.setIntroduction("hello");
+		form.setRemark("note");
+		return form;
+	}
+
+	@Test
+	@DisplayName("新增用户：写入默认密码与权限版本")
+	void createShouldPersistUserWithDefaults() {
+		SysUserForm form = validCreateForm();
+		when(passwordEncoder.encode(SysUserDefaults.DEFAULT_PASSWORD)).thenReturn("{bcrypt}hash");
+		SysUserServiceImpl spyService = spy(sysUserService);
+		doAnswer(invocation -> {
+			UserEntity entity = invocation.getArgument(0);
+			entity.setId(100L);
+			return true;
+		}).when(spyService).save(org.mockito.ArgumentMatchers.any(UserEntity.class));
+
+		spyService.create(form);
+
+		ArgumentCaptor<UserEntity> captor = ArgumentCaptor.forClass(UserEntity.class);
+		verify(spyService).save(captor.capture());
+		UserEntity saved = captor.getValue();
+		assertThat(saved.getUsername()).isEqualTo("new_user");
+		assertThat(saved.getPassword()).isEqualTo("{bcrypt}hash");
+		assertThat(saved.getAvatar()).isNull();
+		assertThat(saved.getPermVersion()).isZero();
+		assertThat(saved.getGender()).isEqualTo(GenderStatus.MALE.getCode());
+		assertThat(saved.getRemark()).isEqualTo("note");
+		assertThat(saved.getAge()).isNotNull();
 	}
 
 	@Test
@@ -96,8 +147,8 @@ class SysUserServiceImplTest {
 	@Test
 	@DisplayName("批量删除：包含超级管理员时拒绝")
 	void deleteByIdsThrowsWhenSuperAdminIncluded() {
-		assertThatThrownBy(() -> sysUserService.deleteByIds(List.of(1L, 2L)))
-			.isInstanceOf(SystemBusinessException.class)
+		List<Long> ids = List.of(1L, 2L);
+		assertThatThrownBy(() -> sysUserService.deleteByIds(ids)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemAdminResultCode.USER_OPERATION_FORBIDDEN);
 
@@ -110,8 +161,8 @@ class SysUserServiceImplTest {
 		try (MockedStatic<SecurityUserUtils> securityUserUtils = mockStatic(SecurityUserUtils.class)) {
 			securityUserUtils.when(SecurityUserUtils::getUserId).thenReturn(8L);
 
-			assertThatThrownBy(() -> sysUserService.deleteByIds(List.of(8L)))
-				.isInstanceOf(SystemBusinessException.class)
+			List<Long> ids = List.of(8L);
+			assertThatThrownBy(() -> sysUserService.deleteByIds(ids)).isInstanceOf(SystemBusinessException.class)
 				.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 				.isEqualTo(SystemAdminResultCode.USER_OPERATION_FORBIDDEN);
 		}

@@ -3,6 +3,7 @@ package com.auth.service.system.admin.service;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.admin.model.form.user.SysUserBatchStatusForm;
+import com.auth.service.system.admin.model.form.user.SysUserForm;
 import com.auth.service.system.admin.model.query.user.SysUserPageQuery;
 import com.auth.service.system.admin.model.vo.user.SysUserPageVO;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -24,6 +25,12 @@ public interface SysUserService extends IService<UserEntity> {
 	 * @return 分页结果
 	 */
 	PageResponse<SysUserPageVO> getPage(Page<UserEntity> pageParams, SysUserPageQuery query);
+
+	/**
+	 * 新增用户
+	 * @param form 用户资料
+	 */
+	void create(SysUserForm form);
 
 	/**
 	 * 批量逻辑删除用户
