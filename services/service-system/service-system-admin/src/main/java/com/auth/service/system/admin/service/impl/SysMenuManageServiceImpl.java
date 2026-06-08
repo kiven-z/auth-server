@@ -54,7 +54,7 @@ public class SysMenuManageServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu
 	public List<SysMenuAssignedRoleRow> listAssignedRoles(Long menuId) {
 		List<SysMenuAssignedRolePO> dtoList = sysMenuRoleMapper.selectAssignedRolesByMenuId(menuId);
 
-		return SysMenuManageConverter.INSTANCE.toAssignedRoleRowList(dtoList);
+		return dtoList.stream().map(SysMenuManageConverter.INSTANCE::toAssignedRoleRow).toList();
 	}
 
 	/**
@@ -82,7 +82,7 @@ public class SysMenuManageServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu
 	public List<SysMenuAssignedPermissionRow> listPermissionsWithAssignFlags(Long menuId) {
 		List<SysMenuAssignedPermissionPO> dtoList = sysMenuPermissionMapper.selectAssignedPermissionByMenuId(menuId);
 
-		return SysMenuManageConverter.INSTANCE.toAssignedPermissionRowList(dtoList);
+		return dtoList.stream().map(SysMenuManageConverter.INSTANCE::toAssignedPermissionRow).toList();
 	}
 
 	/**

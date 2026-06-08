@@ -1,18 +1,12 @@
 package com.auth.service.system.admin.convert;
 
-import com.auth.common.data.model.enums.GenderStatus;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.admin.model.form.user.SysUserForm;
 import com.auth.service.system.admin.model.po.user.SysUserPageRowPO;
 import com.auth.service.system.admin.model.vo.user.SysUserPageVO;
-import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
 import org.mapstruct.factory.Mappers;
-
-import java.time.LocalDate;
-import java.time.Period;
 
 /**
  * 用户转换器
@@ -34,7 +28,7 @@ public interface SysUserConverter {
 	SysUserPageVO toPageVo(SysUserPageRowPO po);
 
 	/**
-	 * 新增表单 → 实体（密码、头像、权限版本等由 Service 填充）
+	 * 新增表单 → 实体
 	 * @param form 表单
 	 * @return 实体
 	 */
@@ -50,18 +44,5 @@ public interface SysUserConverter {
 	@Mapping(target = "version", ignore = true)
 	@Mapping(target = "isDeleted", ignore = true)
 	UserEntity toEntity(SysUserForm form);
-
-	/**
-	 * 未传性别时默认为未知；有出生日期时计算年龄
-	 */
-	@AfterMapping
-	default void fillCreateDerivedFields(@MappingTarget UserEntity entity, SysUserForm form) {
-		if (entity.getGender() == null) {
-			entity.setGender(GenderStatus.UNKNOWN.getCode());
-		}
-		if (form.getBirthday() != null) {
-			entity.setAge(Period.between(form.getBirthday(), LocalDate.now()).getYears());
-		}
-	}
 
 }

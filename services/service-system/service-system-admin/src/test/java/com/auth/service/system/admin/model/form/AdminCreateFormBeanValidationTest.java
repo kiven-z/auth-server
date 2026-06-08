@@ -12,7 +12,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDate;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,6 +47,16 @@ class AdminCreateFormBeanValidationTest {
 		form.setStatus(true);
 		form.setRoleType(4);
 		form.setOrderNum(0);
+		return form;
+	}
+
+	private static SysUserForm validUserForm() {
+		SysUserForm form = new SysUserForm();
+		form.setUsername("new_user");
+		form.setEmail("new@example.com");
+		form.setEmployeeNo("E100");
+		form.setStatus(UserStatus.NORMAL.getCode());
+		form.setGender(GenderStatus.MALE.getCode());
 		return form;
 	}
 
@@ -89,16 +98,6 @@ class AdminCreateFormBeanValidationTest {
 		form.setRoleCode("CUSTOM_R_ONE");
 
 		assertThat(validator.validate(form)).isEmpty();
-	}
-
-	private static SysUserForm validUserForm() {
-		SysUserForm form = new SysUserForm();
-		form.setUsername("new_user");
-		form.setEmail("new@example.com");
-		form.setEmployeeNo("E100");
-		form.setStatus(UserStatus.NORMAL.getCode());
-		form.setGender(GenderStatus.MALE.getCode());
-		return form;
 	}
 
 	@Test

@@ -27,6 +27,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
 import java.util.Objects;
 
@@ -66,6 +68,9 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 	public void create(SysUserForm form) {
 		UserEntity entity = SysUserConverter.INSTANCE.toEntity(form);
 		entity.setPassword(passwordEncoder.encode(SysUserDefaults.DEFAULT_PASSWORD));
+		if (form.getBirthday() != null) {
+			entity.setAge(Period.between(form.getBirthday(), LocalDate.now()).getYears());
+		}
 		save(entity);
 	}
 
