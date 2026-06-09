@@ -18,8 +18,8 @@ import com.auth.service.system.admin.model.vo.menu.SysMenuListVO;
 import com.auth.service.system.admin.service.MenuWebRouteTreeBuilder;
 import com.auth.service.system.admin.service.SysMenuService;
 import com.auth.service.system.admin.support.menu.MenuReferenceChecker;
-import com.auth.service.system.authorization.dispatch.trigger.UserEffectiveCodesSnapshot;
-import com.auth.service.system.authorization.dispatch.trigger.UserEffectiveCodesTrigger;
+import com.auth.service.system.authorization.dispatch.query.UserEffectiveCodesResolver;
+import com.auth.service.system.authorization.dispatch.query.UserEffectiveCodesSnapshot;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.common.service.AuditUserDisplayService;
@@ -47,17 +47,17 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuEntity
 
 	private final AuditUserDisplayService auditUserDisplayService;
 
-	private final UserEffectiveCodesTrigger userEffectiveCodesTrigger;
+	private final UserEffectiveCodesResolver userEffectiveCodesResolver;
 
 	private final MenuWebRouteTreeBuilder menuWebRouteTreeBuilder;
 
 	private final MenuReferenceChecker menuReferenceChecker;
 
 	public SysMenuServiceImpl(AuditUserDisplayService auditUserDisplayService,
-			UserEffectiveCodesTrigger userEffectiveCodesTrigger, MenuWebRouteTreeBuilder menuWebRouteTreeBuilder,
+			UserEffectiveCodesResolver userEffectiveCodesResolver, MenuWebRouteTreeBuilder menuWebRouteTreeBuilder,
 			MenuReferenceChecker menuReferenceChecker) {
 		this.auditUserDisplayService = auditUserDisplayService;
-		this.userEffectiveCodesTrigger = userEffectiveCodesTrigger;
+		this.userEffectiveCodesResolver = userEffectiveCodesResolver;
 		this.menuWebRouteTreeBuilder = menuWebRouteTreeBuilder;
 		this.menuReferenceChecker = menuReferenceChecker;
 	}
@@ -71,7 +71,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuEntity
 			return Collections.emptyList();
 		}
 
-		UserEffectiveCodesSnapshot codes = userEffectiveCodesTrigger.resolve(userId).orElse(null);
+		UserEffectiveCodesSnapshot codes = userEffectiveCodesResolver.resolve(userId).orElse(null);
 		if (codes == null) {
 			log.warn("Menu web route: effective codes unavailable userId={}", userId);
 			return Collections.emptyList();

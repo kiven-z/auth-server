@@ -20,7 +20,7 @@ import java.util.List;
  */
 @Tag(name = "管理端授权", description = "管理员刷新用户授权画像缓存")
 @RequiredArgsConstructor
-@RequestMapping("/api/auth/admin/users")
+@RequestMapping("/api/auth/users")
 @RestController
 public class AdminAuthorizationController {
 

@@ -1,4 +1,4 @@
-package com.auth.service.system.authorization.dispatch.trigger;
+package com.auth.service.system.authorization.dispatch.query;
 
 import java.util.List;
 

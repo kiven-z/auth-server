@@ -5,7 +5,7 @@ import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.admin.model.form.menu.SysMenuMoveForm;
 import com.auth.service.system.admin.service.MenuWebRouteTreeBuilder;
 import com.auth.service.system.admin.support.menu.MenuReferenceChecker;
-import com.auth.service.system.authorization.dispatch.trigger.UserEffectiveCodesTrigger;
+import com.auth.service.system.authorization.dispatch.query.UserEffectiveCodesResolver;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.common.service.AuditUserDisplayService;
@@ -41,7 +41,7 @@ class SysMenuServiceImplTest {
 	private AuditUserDisplayService auditUserDisplayService;
 
 	@Mock
-	private UserEffectiveCodesTrigger userEffectiveCodesTrigger;
+	private UserEffectiveCodesResolver userEffectiveCodesResolver;
 
 	@Mock
 	private MenuWebRouteTreeBuilder menuWebRouteTreeBuilder;
@@ -60,7 +60,7 @@ class SysMenuServiceImplTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		sysMenuService = new SysMenuServiceImpl(auditUserDisplayService, userEffectiveCodesTrigger,
+		sysMenuService = new SysMenuServiceImpl(auditUserDisplayService, userEffectiveCodesResolver,
 				menuWebRouteTreeBuilder, menuReferenceChecker);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);

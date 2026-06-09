@@ -59,9 +59,9 @@ public class LogOperationServiceImpl extends ServiceImpl<LogOperationMapper, Log
 		}
 		List<Long> userIds = records.stream().map(LogOperationPageVO::getUserId).toList();
 		Map<Long, String> usernameMap = auditUserDisplayService.mapUsernamesByIds(userIds);
-		for (LogOperationPageVO record : records) {
-			if (record.getUserId() != null) {
-				record.setUsername(usernameMap.get(record.getUserId()));
+		for (LogOperationPageVO pageVo : records) {
+			if (pageVo.getUserId() != null) {
+				pageVo.setUsername(usernameMap.get(pageVo.getUserId()));
 			}
 		}
 		return PageResponse.of(voPage);

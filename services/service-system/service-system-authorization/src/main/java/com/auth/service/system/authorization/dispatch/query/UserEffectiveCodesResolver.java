@@ -1,4 +1,4 @@
-package com.auth.service.system.authorization.dispatch.trigger;
+package com.auth.service.system.authorization.dispatch.query;
 
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.common.core.model.response.Result;
@@ -13,14 +13,14 @@ import java.util.Optional;
 import static com.auth.common.web.resttemplate.FeignUtil.isSuccessWithData;
 
 /**
- * 查询用户生效角色码与权限码（admin 经 trigger 访问 auth 内部能力）
+ * 查询用户生效角色码与权限码（admin 经 query 门面访问 auth 内部能力）
  *
  * @author Bunny
  */
 @RequiredArgsConstructor
 @Slf4j
 @Component
-public class UserEffectiveCodesTrigger {
+public class UserEffectiveCodesResolver {
 
 	private final AuthInnerFeignClient authInnerFeignClient;
 
