@@ -37,6 +37,11 @@ public class InvalidationEventIds {
 	public static final String KIND_GRANT = "grant";
 
 	/**
+	 * 用户维度短前缀（USER_SCOPE：按 userId 直连失效）
+	 */
+	public static final String KIND_USER = "user";
+
+	/**
 	 * 生成幂等 eventId
 	 * @param kind 变更维度短前缀
 	 * @return eventId
