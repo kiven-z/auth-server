@@ -1,4 +1,4 @@
-package com.auth.service.system.authorization.ops.manualretry;
+package com.auth.service.system.authorization.ops;
 
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.common.core.model.response.Result;
@@ -7,9 +7,9 @@ import com.auth.service.system.authorization.config.AuthorizationInvalidationPro
 import com.auth.service.system.authorization.dispatch.AuthorizationInvalidationOutboxProcessor;
 import com.auth.service.system.authorization.feign.AuthInnerFeignClient;
 import com.auth.service.system.authorization.mapper.SysAuthorizationInvalidationOutboxMapper;
-import com.auth.service.system.authorization.model.record.AuthorizationInvalidationOutboxManualRetryOutcome;
 import com.auth.service.system.authorization.model.entity.SysAuthorizationInvalidationOutboxEntity;
 import com.auth.service.system.authorization.model.enums.AuthorizationInvalidationOutboxStatus;
+import com.auth.service.system.authorization.model.record.AuthorizationInvalidationOutboxManualRetryOutcome;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

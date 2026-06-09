@@ -1,8 +1,8 @@
-package com.auth.service.system.authorization.ops.manualretry;
+package com.auth.service.system.authorization.ops;
 
 import cn.hutool.core.util.BooleanUtil;
-import com.auth.service.system.authorization.model.record.AuthorizationInvalidationOutboxManualRetryOutcome;
 import com.auth.service.system.authorization.model.form.AuthorizationInvalidationOutboxRetryForm;
+import com.auth.service.system.authorization.model.record.AuthorizationInvalidationOutboxManualRetryOutcome;
 import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationOutboxRetryResultVO;
 import com.auth.service.system.authorization.service.AuthorizationInvalidationOutboxOpsService;
 import lombok.RequiredArgsConstructor;
