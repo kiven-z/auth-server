@@ -10,8 +10,7 @@ import com.auth.service.system.admin.mapper.SysPermissionMapper;
 import com.auth.service.system.admin.mapper.SysRolePermissionMapper;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.enums.PermissionTypeEnum;
-import com.auth.service.system.admin.model.form.permission.SysPermissionCreateForm;
-import com.auth.service.system.admin.model.form.permission.SysPermissionUpdateForm;
+import com.auth.service.system.admin.model.form.permission.SysPermissionForm;
 import com.auth.service.system.admin.model.po.permission.SysPermissionBoundRolePO;
 import com.auth.service.system.admin.model.query.SysPermissionQuery;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionDetailVO;
@@ -105,7 +104,7 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void create(SysPermissionCreateForm form) {
+	public void create(SysPermissionForm form) {
 		String permissionCode = form.getPermissionCode();
 		long exists = count(
 				Wrappers.<SysPermissionEntity>lambdaQuery().eq(SysPermissionEntity::getPermissionCode, permissionCode));
@@ -121,7 +120,7 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void update(SysPermissionUpdateForm form) {
+	public void update(SysPermissionForm form) {
 		Long id = form.getId();
 		SysPermissionEntity existing = baseMapper.selectById(id);
 		if (existing == null) {

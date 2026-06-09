@@ -2,8 +2,7 @@ package com.auth.service.system.admin.service;
 
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
-import com.auth.service.system.admin.model.form.permission.SysPermissionCreateForm;
-import com.auth.service.system.admin.model.form.permission.SysPermissionUpdateForm;
+import com.auth.service.system.admin.model.form.permission.SysPermissionForm;
 import com.auth.service.system.admin.model.query.SysPermissionQuery;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionDetailVO;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionPageResponse;
@@ -35,13 +34,13 @@ public interface SysPermissionService {
 	 * 新增权限
 	 * @param form 新增表单
 	 */
-	void create(SysPermissionCreateForm form);
+	void create(SysPermissionForm form);
 
 	/**
 	 * 更新权限
 	 * @param form 更新表单
 	 */
-	void update(SysPermissionUpdateForm form);
+	void update(SysPermissionForm form);
 
 	/**
 	 * 物理删除权限；关联表由数据库 ON DELETE CASCADE 维护。

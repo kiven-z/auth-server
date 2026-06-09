@@ -2,6 +2,7 @@ package com.auth.service.system.admin.controller;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
+import com.auth.common.web.valid.group.CreateGroup;
 import com.auth.common.web.valid.group.UpdateGroup;
 import com.auth.module.file.export.ExportScopeQueryFields;
 import com.auth.module.security.contract.annotation.OperationLog;
@@ -9,8 +10,7 @@ import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.admin.excel.permission.SysPermissionSpreadsheetService;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
-import com.auth.service.system.admin.model.form.permission.SysPermissionCreateForm;
-import com.auth.service.system.admin.model.form.permission.SysPermissionUpdateForm;
+import com.auth.service.system.admin.model.form.permission.SysPermissionForm;
 import com.auth.service.system.admin.model.query.SysPermissionQuery;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionDetailVO;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionPageResponse;
@@ -19,7 +19,6 @@ import com.auth.service.system.common.model.SystemAuditBizModule;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -77,7 +76,7 @@ public class SysPermissionController {
 	@Operation(summary = "新增权限")
 	@PreAuthorize("@auth.decide('sysPermission:create')")
 	@PostMapping
-	public Result<Void> create(@Valid @RequestBody SysPermissionCreateForm form) {
+	public Result<Void> create(@Validated(CreateGroup.class) @RequestBody SysPermissionForm form) {
 		sysPermissionService.create(form);
 		return Result.success();
 	}
@@ -88,7 +87,7 @@ public class SysPermissionController {
 	@PreAuthorize("@auth.decide('sysPermission:update')")
 	@PutMapping("/{id}")
 	public Result<Void> update(@PathVariable("id") Long id,
-			@Validated(UpdateGroup.class) @RequestBody SysPermissionUpdateForm form) {
+			@Validated(UpdateGroup.class) @RequestBody SysPermissionForm form) {
 		form.setId(id);
 		sysPermissionService.update(form);
 		return Result.success();

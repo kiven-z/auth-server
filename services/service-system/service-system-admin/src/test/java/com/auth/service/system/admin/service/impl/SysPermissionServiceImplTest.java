@@ -5,8 +5,7 @@ import com.auth.service.system.admin.mapper.SysMenuPermissionMapper;
 import com.auth.service.system.admin.mapper.SysPermissionMapper;
 import com.auth.service.system.admin.mapper.SysRolePermissionMapper;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
-import com.auth.service.system.admin.model.form.permission.SysPermissionCreateForm;
-import com.auth.service.system.admin.model.form.permission.SysPermissionUpdateForm;
+import com.auth.service.system.admin.model.form.permission.SysPermissionForm;
 import com.auth.service.system.admin.model.po.permission.SysPermissionBoundMenuPO;
 import com.auth.service.system.admin.model.po.permission.SysPermissionBoundRolePO;
 import com.auth.service.system.authorization.dispatch.trigger.RoleAuthorizationInvalidationTrigger;
@@ -74,8 +73,8 @@ class SysPermissionServiceImplTest {
 		return entity;
 	}
 
-	private static SysPermissionUpdateForm updateForm(Long id, String permissionCode, Boolean status) {
-		SysPermissionUpdateForm form = new SysPermissionUpdateForm();
+	private static SysPermissionForm updateForm(Long id, String permissionCode, Boolean status) {
+		SysPermissionForm form = new SysPermissionForm();
 		form.setId(id);
 		form.setPermissionCode(permissionCode);
 		form.setPermissionName("测试权限");
@@ -96,7 +95,7 @@ class SysPermissionServiceImplTest {
 	@Test
 	@DisplayName("新增权限：编码已存在时抛出 PERMISSION_CODE_DUPLICATE")
 	void createThrowsWhenPermissionCodeExists() {
-		SysPermissionCreateForm form = new SysPermissionCreateForm();
+		SysPermissionForm form = new SysPermissionForm();
 		form.setPermissionCode("sys:user:list");
 		form.setPermissionName("列表");
 		form.setPermissionType(0);
@@ -110,7 +109,7 @@ class SysPermissionServiceImplTest {
 	@Test
 	@DisplayName("更新权限：不存在时抛出 PERMISSION_NOT_FOUND")
 	void updateThrowsWhenNotFound() {
-		SysPermissionUpdateForm form = updateForm(9L, "sys:user:query", true);
+		SysPermissionForm form = updateForm(9L, "sys:user:query", true);
 		when(sysPermissionMapper.selectById(9L)).thenReturn(null);
 
 		assertThatThrownBy(() -> sysPermissionService.update(form)).isInstanceOf(SystemBusinessException.class)
@@ -123,7 +122,7 @@ class SysPermissionServiceImplTest {
 	@Test
 	@DisplayName("更新权限：编码冲突时抛出 PERMISSION_CODE_DUPLICATE")
 	void updateThrowsWhenPermissionCodeDuplicate() {
-		SysPermissionUpdateForm form = updateForm(1L, "sys:user:update", true);
+		SysPermissionForm form = updateForm(1L, "sys:user:update", true);
 		when(sysPermissionMapper.selectById(1L)).thenReturn(permissionEntity(1L));
 		when(sysPermissionMapper.selectCount(any())).thenReturn(1L);
 
@@ -139,7 +138,7 @@ class SysPermissionServiceImplTest {
 	void updateShouldNotChangePermissionType() {
 		SysPermissionEntity entity = permissionEntity(1L);
 		entity.setPermissionType(0);
-		SysPermissionUpdateForm form = updateForm(1L, "sys:user:query", true);
+		SysPermissionForm form = updateForm(1L, "sys:user:query", true);
 		form.setPermissionName("重命名");
 		when(sysPermissionMapper.selectById(1L)).thenReturn(entity);
 
@@ -151,7 +150,7 @@ class SysPermissionServiceImplTest {
 	@Test
 	@DisplayName("更新权限：仅名称变更时不触发授权失效")
 	void updateShouldNotInvalidateWhenOnlyNameChanged() {
-		SysPermissionUpdateForm form = updateForm(2L, "sys:user:query", true);
+		SysPermissionForm form = updateForm(2L, "sys:user:query", true);
 		form.setPermissionName("用户查询");
 		when(sysPermissionMapper.selectById(2L)).thenReturn(permissionEntity(2L));
 
@@ -163,7 +162,7 @@ class SysPermissionServiceImplTest {
 	@Test
 	@DisplayName("更新权限：状态变更时触发授权失效")
 	void updateShouldInvalidateWhenStatusChanged() {
-		SysPermissionUpdateForm form = updateForm(3L, "sys:user:query", false);
+		SysPermissionForm form = updateForm(3L, "sys:user:query", false);
 		when(sysPermissionMapper.selectById(3L)).thenReturn(permissionEntity(3L));
 
 		sysPermissionService.update(form);
@@ -174,7 +173,7 @@ class SysPermissionServiceImplTest {
 	@Test
 	@DisplayName("更新权限：编码重命名时触发授权失效并携带旧新码")
 	void updateShouldInvalidateWhenPermissionCodeRenamed() {
-		SysPermissionUpdateForm form = updateForm(4L, "sys:user:list", true);
+		SysPermissionForm form = updateForm(4L, "sys:user:list", true);
 		when(sysPermissionMapper.selectById(4L)).thenReturn(permissionEntity(4L));
 		when(sysPermissionMapper.selectCount(any())).thenReturn(0L);
 

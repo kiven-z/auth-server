@@ -2,7 +2,9 @@ package com.auth.service.system.admin.model.form;
 
 import com.auth.common.data.model.enums.GenderStatus;
 import com.auth.common.data.model.enums.UserStatus;
-import com.auth.service.system.admin.model.form.permission.SysPermissionCreateForm;
+import com.auth.common.web.valid.group.CreateGroup;
+import com.auth.common.web.valid.group.UpdateGroup;
+import com.auth.service.system.admin.model.form.permission.SysPermissionForm;
 import com.auth.service.system.admin.model.form.role.SysRoleForm;
 import com.auth.service.system.admin.model.form.user.SysUserForm;
 import jakarta.validation.ConstraintViolation;
@@ -31,8 +33,8 @@ class AdminCreateFormBeanValidationTest {
 		validator = Validation.buildDefaultValidatorFactory().getValidator();
 	}
 
-	private static SysPermissionCreateForm validPermissionForm() {
-		SysPermissionCreateForm form = new SysPermissionCreateForm();
+	private static SysPermissionForm validPermissionForm() {
+		SysPermissionForm form = new SysPermissionForm();
 		form.setPermissionCode("sys:user:add");
 		form.setPermissionName("新增用户");
 		form.setPermissionType(1);
@@ -63,23 +65,46 @@ class AdminCreateFormBeanValidationTest {
 	}
 
 	@Test
-	@DisplayName("SysPermissionCreateForm：权限码不符合格式时存在 Pattern 约束违反")
+	@DisplayName("SysPermissionForm：创建时权限码不符合格式时存在 Pattern 约束违反")
 	void permissionCreateFormRejectsMalformedCode() {
-		SysPermissionCreateForm form = validPermissionForm();
+		SysPermissionForm form = validPermissionForm();
 		form.setPermissionCode("Sys:user:add");
 
-		Set<ConstraintViolation<SysPermissionCreateForm>> violations = validator.validate(form);
+		Set<ConstraintViolation<SysPermissionForm>> violations = validator.validate(form, CreateGroup.class);
 
 		assertThat(violations).anyMatch(v -> "permissionCode".equals(v.getPropertyPath().toString()));
 	}
 
 	@Test
-	@DisplayName("SysPermissionCreateForm：合法权限码通过校验")
+	@DisplayName("SysPermissionForm：创建时合法权限码通过校验")
 	void permissionCreateFormAcceptsWellFormedCode() {
-		SysPermissionCreateForm form = validPermissionForm();
+		SysPermissionForm form = validPermissionForm();
 		form.setPermissionCode("sys:user:add");
 
-		assertThat(validator.validate(form)).isEmpty();
+		assertThat(validator.validate(form, CreateGroup.class)).isEmpty();
+	}
+
+	@Test
+	@DisplayName("SysPermissionForm：更新时状态为空时存在 NotNull 约束违反")
+	void permissionUpdateFormRejectsNullStatus() {
+		SysPermissionForm form = validPermissionForm();
+		form.setId(1L);
+		form.setStatus(null);
+
+		Set<ConstraintViolation<SysPermissionForm>> violations = validator.validate(form, UpdateGroup.class);
+
+		assertThat(violations).anyMatch(v -> "status".equals(v.getPropertyPath().toString()));
+	}
+
+	@Test
+	@DisplayName("SysPermissionForm：更新时 ID 为空时存在 NotNull 约束违反")
+	void permissionUpdateFormRejectsNullId() {
+		SysPermissionForm form = validPermissionForm();
+		form.setStatus(true);
+
+		Set<ConstraintViolation<SysPermissionForm>> violations = validator.validate(form, UpdateGroup.class);
+
+		assertThat(violations).anyMatch(v -> "id".equals(v.getPropertyPath().toString()));
 	}
 
 	@Test
