@@ -42,20 +42,14 @@ class SystemArchitectureTest {
 	private static final String AUTHORIZATION_ROOT = "com.auth.service.system.authorization";
 
 	private static final DescribedPredicate<JavaClass> AUTHORIZATION_INTERNALS_FOR_ADMIN = new DescribedPredicate<>(
-			"authorization internals except trigger and ops") {
+			"authorization internals except trigger") {
 		@Override
 		public boolean test(JavaClass javaClass) {
 			String pkg = javaClass.getPackageName();
 			if (!pkg.startsWith(AUTHORIZATION_ROOT)) {
 				return false;
 			}
-			if (pkg.startsWith(AUTHORIZATION_ROOT + ".dispatch.trigger")) {
-				return false;
-			}
-			if (pkg.startsWith(AUTHORIZATION_ROOT + ".ops")) {
-				return false;
-			}
-			return true;
+			return !pkg.startsWith(AUTHORIZATION_ROOT + ".dispatch.trigger");
 		}
 	};
 
@@ -132,10 +126,10 @@ class SystemArchitectureTest {
 		.resideInAPackage(ADMIN);
 
 	/**
-	 * admin 触发授权失效仅允许依赖 trigger；运维读写仅允许依赖 ops 门面。
+	 * admin 触发授权失效仅允许依赖 trigger。
 	 */
 	@ArchTest
-	static final ArchRule admin_authorization_coupling_only_via_trigger_and_ops = noClasses().that()
+	static final ArchRule admin_authorization_coupling_only_via_trigger = noClasses().that()
 		.resideInAPackage(ADMIN)
 		.should()
 		.dependOnClassesThat(AUTHORIZATION_INTERNALS_FOR_ADMIN);
@@ -159,18 +153,6 @@ class SystemArchitectureTest {
 		.should()
 		.dependOnClassesThat()
 		.resideInAPackage("com.auth.service.system.common.feign..");
-
-	/**
-	 * 授权失效运维 admin 服务不得直接依赖 Feign 客户端（经 authorization.ops 门面访问 auth）。
-	 */
-	@ArchTest
-	static final ArchRule admin_invalidation_must_not_use_feign_client = noClasses().that()
-		.resideInAPackage(ADMIN)
-		.and()
-		.haveSimpleNameStartingWith("AuthorizationInvalidation")
-		.should()
-		.dependOnClassesThat()
-		.haveSimpleName("AuthInnerFeignClient");
 
 	/**
 	 * {@code com.auth.service.system.common} 包仅允许出现在 common 模块，admin 模块不得残留同名包。

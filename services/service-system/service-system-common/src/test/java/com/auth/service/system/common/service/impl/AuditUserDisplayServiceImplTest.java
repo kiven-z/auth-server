@@ -124,20 +124,6 @@ class AuditUserDisplayServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("enrichAuditUsernames：create_user 为 0 时不查询用户表")
-	void enrichAuditUsernamesSkipsSentinelZeroUserId() {
-		BaseResponse row = new BaseResponse();
-		row.setCreateUser(0L);
-		row.setUpdateUser(null);
-		List<BaseResponse> list = List.of(row);
-
-		auditUserDisplayService.enrichAuditUsernames(list);
-
-		assertThat(row.getCreateUsername()).isNull();
-		verifyNoInteractions(sysUserQueryMapper);
-	}
-
-	@Test
 	@DisplayName("enrichAuditUsernames(IPage)：当前页无记录时不访问用户表")
 	void enrichAuditUsernamesPageEmptyRecordsSkipsDb() {
 		Page<BaseResponse> page = new Page<>();

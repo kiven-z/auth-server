@@ -24,7 +24,8 @@ public interface AuthorizationInvalidationOutboxOpsService {
 	/**
 	 * 查询 Outbox 详情
 	 * @param id 主键
-	 * @return 详情行，不存在为 null
+	 * @return 详情行，不存在时抛出
+	 * {@link com.auth.service.system.common.exception.SystemBusinessException}
 	 */
 	AuthorizationInvalidationOutboxDetailRowPO getDetail(Long id);
 

@@ -49,6 +49,7 @@ public class LogAuthorizationAuditServiceImpl extends
 		IPage<LogAuthorizationAuditPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
 		IPage<LogAuthorizationAuditPageVO> voPage = page.convert(LogAuthorizationAuditConverter.INSTANCE::toPageVO);
 
+		// 解析用户名
 		auditUserDisplayService.enrichAuditUsernames(voPage);
 		return PageResponse.of(voPage);
 	}
@@ -62,6 +63,8 @@ public class LogAuthorizationAuditServiceImpl extends
 		if (po == null) {
 			throw new SystemBusinessException(DATA_NOT_EXIST);
 		}
+
+		// 解析用户名
 		LogAuthorizationAuditDetailVO vo = LogAuthorizationAuditConverter.INSTANCE.toDetailVo(po);
 		auditUserDisplayService.enrichAuditUsernames(List.of(vo));
 		return vo;

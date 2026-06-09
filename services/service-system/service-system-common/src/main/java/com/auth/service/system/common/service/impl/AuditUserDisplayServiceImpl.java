@@ -27,20 +27,6 @@ public class AuditUserDisplayServiceImpl implements AuditUserDisplayService {
 	}
 
 	/**
-	 * 从行列表中收集创建人、更新人用户 ID
-	 * @param records 行列表
-	 * @return 用户主键列表
-	 */
-	private static List<Long> collectAuditUserIds(List<? extends BaseResponse> records) {
-		return records.stream()
-			.flatMap(vo -> Stream.of(vo.getCreateUser(), vo.getUpdateUser()))
-			.filter(Objects::nonNull)
-			.filter(userId -> userId > 0)
-			.distinct()
-			.toList();
-	}
-
-	/**
 	 * {@inheritDoc}
 	 */
 	@Override
@@ -48,11 +34,7 @@ public class AuditUserDisplayServiceImpl implements AuditUserDisplayService {
 		if (CollUtil.isEmpty(userIds)) {
 			return Collections.emptyMap();
 		}
-		List<Long> distinctIds = userIds.stream()
-			.filter(Objects::nonNull)
-			.filter(userId -> userId > 0)
-			.distinct()
-			.toList();
+		List<Long> distinctIds = userIds.stream().filter(Objects::nonNull).distinct().toList();
 		if (CollUtil.isEmpty(distinctIds)) {
 			return Collections.emptyMap();
 		}
@@ -80,7 +62,14 @@ public class AuditUserDisplayServiceImpl implements AuditUserDisplayService {
 		if (CollUtil.isEmpty(records)) {
 			return;
 		}
-		Map<Long, String> usernameMap = mapUsernamesByIds(collectAuditUserIds(records));
+
+		List<Long> list = records.stream()
+			.flatMap(vo -> Stream.of(vo.getCreateUser(), vo.getUpdateUser()))
+			.filter(Objects::nonNull)
+			.distinct()
+			.toList();
+		Map<Long, String> usernameMap = mapUsernamesByIds(list);
+
 		for (BaseResponse vo : records) {
 			String createUsername = usernameMap.get(vo.getCreateUser());
 			vo.setCreateUsername(createUsername);

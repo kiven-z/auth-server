@@ -42,8 +42,9 @@ public class LogLoginServiceImpl extends ServiceImpl<LogLoginLogMapper, LoginLog
 	@Override
 	public PageResponse<LogLoginLogPageVO> getPage(Page<LoginLogEntity> pageParams, LogLoginLogQuery query) {
 		IPage<LogLoginLogPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
-		// PO ? VO?PageResponse.of ?? records?
 		IPage<LogLoginLogPageVO> voPage = page.convert(LogLoginLogConverter.INSTANCE::toPageVO);
+
+		// 解析用户名
 		auditUserDisplayService.enrichAuditUsernames(voPage);
 		return PageResponse.of(voPage);
 	}

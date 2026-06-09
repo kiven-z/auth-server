@@ -46,7 +46,8 @@ public class LogOperationController {
 	@PreAuthorize("@auth.decide('sysLogOperation:detail')")
 	@GetMapping("{id}")
 	public Result<LogOperationDetailVO> detail(@PathVariable("id") Long id) {
-		return Result.success(logOperationService.getDetail(id));
+		LogOperationDetailVO detail = logOperationService.getDetail(id);
+		return Result.success(detail);
 	}
 
 	@Operation(summary = "批量删除操作日志")

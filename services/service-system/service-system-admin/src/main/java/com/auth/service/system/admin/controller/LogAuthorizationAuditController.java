@@ -46,7 +46,8 @@ public class LogAuthorizationAuditController {
 	@PreAuthorize("@auth.decide('sysLogAuthorizationAudit:detail')")
 	@GetMapping("{id}")
 	public Result<LogAuthorizationAuditDetailVO> detail(@PathVariable("id") Long id) {
-		return Result.success(logAuthorizationAuditService.getDetail(id));
+		LogAuthorizationAuditDetailVO detail = logAuthorizationAuditService.getDetail(id);
+		return Result.success(detail);
 	}
 
 	@Operation(summary = "批量删除权限决策审计（仅接收 ID 列表）")

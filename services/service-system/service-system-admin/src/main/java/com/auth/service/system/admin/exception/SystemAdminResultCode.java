@@ -4,7 +4,7 @@ import com.auth.service.system.common.exception.code.SystemResultCode;
 import lombok.Getter;
 
 /**
- * 系统管理域结果码（岗位、导出、授权失效 Outbox 等 Admin 特有场景）
+ * 系统管理域结果码（岗位、导出等 Admin 特有场景）
  *
  * <p>
  * 号段：268、276、295–305
@@ -44,24 +44,6 @@ public enum SystemAdminResultCode implements SystemResultCode {
 	 * 导出范围不支持或参数不完整（含 FULL_ASYNC 预留）
 	 */
 	EXPORT_SCOPE_NOT_SUPPORTED(400, 298, "EXPORT_SCOPE_NOT_SUPPORTED", "system.export.scope_not_supported"),
-
-	/**
-	 * Outbox 人工重试投递成功
-	 */
-	AUTH_INVALIDATION_OUTBOX_RETRY_SUCCESS(200, 302, "AUTH_INVALIDATION_OUTBOX_RETRY_SUCCESS",
-			"system.authorization.invalidation.outbox.retry_success"),
-
-	/**
-	 * Outbox 人工重试投递失败
-	 */
-	AUTH_INVALIDATION_OUTBOX_RETRY_FAILED(200, 303, "AUTH_INVALIDATION_OUTBOX_RETRY_FAILED",
-			"system.authorization.invalidation.outbox.retry_failed"),
-
-	/**
-	 * 幂等事件 processing 占位已释放
-	 */
-	AUTH_INVALIDATION_EVENT_RELEASE_SUCCESS(200, 305, "AUTH_INVALIDATION_EVENT_RELEASE_SUCCESS",
-			"system.authorization.invalidation.event.release_success"),
 
 	/**
 	 * 目标用户不允许执行该写操作（内置超级管理员或当前登录账号）

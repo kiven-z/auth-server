@@ -7,11 +7,14 @@ import com.auth.service.system.authorization.ops.model.po.AuthorizationInvalidat
 import com.auth.service.system.authorization.ops.model.po.AuthorizationInvalidationOutboxPageRowPO;
 import com.auth.service.system.authorization.ops.model.po.AuthorizationInvalidationOutboxStatsPO;
 import com.auth.service.system.authorization.ops.model.query.AuthorizationInvalidationOutboxOpsQuery;
+import com.auth.service.system.common.exception.SystemBusinessException;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 
 /**
  * 授权失效 Outbox 运维门面实现
@@ -42,7 +45,12 @@ public class AuthorizationInvalidationOutboxOpsServiceImpl implements Authorizat
 	 */
 	@Override
 	public AuthorizationInvalidationOutboxDetailRowPO getDetail(Long id) {
-		return authorizationInvalidationOutboxOpsMapper.selectDetailById(id);
+		AuthorizationInvalidationOutboxDetailRowPO detailRow = authorizationInvalidationOutboxOpsMapper
+			.selectDetailById(id);
+		if (detailRow == null) {
+			throw new SystemBusinessException(DATA_NOT_EXIST);
+		}
+		return detailRow;
 	}
 
 	/**

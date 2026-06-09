@@ -33,7 +33,25 @@ public enum AuthorizationInvalidationOpsResultCode implements SystemResultCode {
 	 * 幂等事件非 processing 占位，无需释放
 	 */
 	EVENT_RELEASE_NOT_PROCESSING(400, 304, "AUTH_INVALIDATION_EVENT_RELEASE_NOT_PROCESSING",
-			"system.authorization.invalidation.event.release_not_processing"),;
+			"system.authorization.invalidation.event.release_not_processing"),
+
+	/**
+	 * Outbox 人工重试投递成功
+	 */
+	RETRY_SUCCESS(200, 302, "AUTH_INVALIDATION_OUTBOX_RETRY_SUCCESS",
+			"system.authorization.invalidation.outbox.retry_success"),
+
+	/**
+	 * Outbox 人工重试投递失败
+	 */
+	RETRY_FAILED(200, 303, "AUTH_INVALIDATION_OUTBOX_RETRY_FAILED",
+			"system.authorization.invalidation.outbox.retry_failed"),
+
+	/**
+	 * 幂等事件 processing 占位已释放
+	 */
+	EVENT_RELEASE_SUCCESS(200, 305, "AUTH_INVALIDATION_EVENT_RELEASE_SUCCESS",
+			"system.authorization.invalidation.event.release_success"),;
 
 	private final int httpStatus;
 
