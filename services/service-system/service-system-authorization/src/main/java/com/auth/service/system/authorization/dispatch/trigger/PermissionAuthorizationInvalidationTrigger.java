@@ -37,9 +37,10 @@ public class PermissionAuthorizationInvalidationTrigger {
 		}
 
 		String sourceBizId = InvalidationSourceBizIds.of(operation, InvalidationSourceBizIds.joinCodes(codes));
-		String eventId = InvalidationEventIds.next(InvalidationEventIds.KIND_PERM);
+		String eventId = InvalidationEventIds.next(AuthorizationChangeKind.PERMISSION);
+		PermissionInvalidatePayload payload = new PermissionInvalidatePayload(codes);
 		AuthorizationInvalidateRequest request = new AuthorizationInvalidateRequest(eventId,
-				AuthorizationChangeKind.PERMISSION, new PermissionInvalidatePayload(codes));
+				AuthorizationChangeKind.PERMISSION, payload);
 		invalidationCoordinator.submit(request, SystemAuditBizModule.SYS_PERMISSION, sourceBizId);
 	}
 

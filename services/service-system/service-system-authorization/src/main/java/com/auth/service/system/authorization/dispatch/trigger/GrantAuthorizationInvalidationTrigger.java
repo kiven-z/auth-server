@@ -38,9 +38,10 @@ public class GrantAuthorizationInvalidationTrigger {
 		}
 
 		String sourceBizId = InvalidationSourceBizIds.of(operation, InvalidationSourceBizIds.formatGrantSubjects(keys));
-		String eventId = InvalidationEventIds.next(InvalidationEventIds.KIND_GRANT);
+		String eventId = InvalidationEventIds.next(AuthorizationChangeKind.GRANT);
+		GrantInvalidatePayload payload = new GrantInvalidatePayload(keys);
 		AuthorizationInvalidateRequest request = new AuthorizationInvalidateRequest(eventId,
-				AuthorizationChangeKind.GRANT, new GrantInvalidatePayload(keys));
+				AuthorizationChangeKind.GRANT, payload);
 		invalidationCoordinator.submit(request, SystemAuditBizModule.GRANT_TABLE, sourceBizId);
 	}
 

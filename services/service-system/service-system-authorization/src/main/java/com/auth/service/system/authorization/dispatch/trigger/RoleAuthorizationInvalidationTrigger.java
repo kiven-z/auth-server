@@ -37,9 +37,10 @@ public class RoleAuthorizationInvalidationTrigger {
 		}
 
 		String sourceBizId = InvalidationSourceBizIds.of(operation, InvalidationSourceBizIds.joinCodes(codes));
-		String eventId = InvalidationEventIds.next(InvalidationEventIds.KIND_ROLE);
+		String eventId = InvalidationEventIds.next(AuthorizationChangeKind.ROLE);
+		RoleInvalidatePayload payload = new RoleInvalidatePayload(codes);
 		AuthorizationInvalidateRequest request = new AuthorizationInvalidateRequest(eventId,
-				AuthorizationChangeKind.ROLE, new RoleInvalidatePayload(codes));
+				AuthorizationChangeKind.ROLE, payload);
 		invalidationCoordinator.submit(request, SystemAuditBizModule.SYS_ROLE, sourceBizId);
 	}
 

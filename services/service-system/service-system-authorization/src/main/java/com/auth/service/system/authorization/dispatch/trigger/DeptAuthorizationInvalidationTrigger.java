@@ -36,9 +36,10 @@ public class DeptAuthorizationInvalidationTrigger {
 			return;
 		}
 		String sourceBizId = InvalidationSourceBizIds.of(operation, InvalidationSourceBizIds.joinLongIds(ids));
-		String eventId = InvalidationEventIds.next(InvalidationEventIds.KIND_DEPT);
+		String eventId = InvalidationEventIds.next(AuthorizationChangeKind.USER_DEPT);
+		UserDeptInvalidatePayload payload = new UserDeptInvalidatePayload(ids);
 		AuthorizationInvalidateRequest request = new AuthorizationInvalidateRequest(eventId,
-				AuthorizationChangeKind.USER_DEPT, new UserDeptInvalidatePayload(ids));
+				AuthorizationChangeKind.USER_DEPT, payload);
 		invalidationCoordinator.submit(request, SystemAuditBizModule.SYS_DEPT, sourceBizId);
 	}
 

@@ -1,5 +1,6 @@
 package com.auth.service.system.authorization.dispatch.support;
 
+import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import lombok.experimental.UtilityClass;
 
@@ -12,42 +13,12 @@ import lombok.experimental.UtilityClass;
 public class InvalidationEventIds {
 
 	/**
-	 * 部门维度短前缀
-	 */
-	public static final String KIND_DEPT = "dept";
-
-	/**
-	 * 角色维度短前缀
-	 */
-	public static final String KIND_ROLE = "role";
-
-	/**
-	 * 权限维度短前缀
-	 */
-	public static final String KIND_PERM = "perm";
-
-	/**
-	 * 岗位维度短前缀
-	 */
-	public static final String KIND_POST = "post";
-
-	/**
-	 * grant_table 维度短前缀
-	 */
-	public static final String KIND_GRANT = "grant";
-
-	/**
-	 * 用户维度短前缀（USER_SCOPE：按 userId 直连失效）
-	 */
-	public static final String KIND_USER = "user";
-
-	/**
 	 * 生成幂等 eventId
-	 * @param kind 变更维度短前缀
+	 * @param kind 变更维度
 	 * @return eventId
 	 */
-	public static String next(String kind) {
-		return kind + ":" + IdWorker.getId();
+	public static String next(AuthorizationChangeKind kind) {
+		return kind.eventIdPrefix() + ":" + IdWorker.getId();
 	}
 
 }

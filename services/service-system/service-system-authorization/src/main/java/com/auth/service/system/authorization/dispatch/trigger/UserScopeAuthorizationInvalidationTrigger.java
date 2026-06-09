@@ -38,9 +38,10 @@ public class UserScopeAuthorizationInvalidationTrigger {
 		}
 
 		String sourceBizId = InvalidationSourceBizIds.of(operation, InvalidationSourceBizIds.joinLongIds(ids));
-		String eventId = InvalidationEventIds.next(InvalidationEventIds.KIND_USER);
+		String eventId = InvalidationEventIds.next(AuthorizationChangeKind.USER_SCOPE);
+		UserScopeInvalidatePayload payload = new UserScopeInvalidatePayload(ids);
 		AuthorizationInvalidateRequest request = new AuthorizationInvalidateRequest(eventId,
-				AuthorizationChangeKind.USER_SCOPE, new UserScopeInvalidatePayload(ids));
+				AuthorizationChangeKind.USER_SCOPE, payload);
 		invalidationCoordinator.submit(request, SystemAuditBizModule.SYS_USER, sourceBizId);
 	}
 
