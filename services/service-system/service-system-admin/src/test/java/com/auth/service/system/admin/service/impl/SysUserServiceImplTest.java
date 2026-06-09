@@ -11,7 +11,7 @@ import com.auth.service.system.admin.model.form.user.SysUserBatchStatusForm;
 import com.auth.service.system.admin.model.form.user.SysUserForm;
 import com.auth.service.system.admin.support.user.SysUserDefaults;
 import com.auth.service.system.admin.support.user.UserOperationChecker;
-import com.auth.service.system.admin.support.user.UserSessionRevocationSupport;
+import com.auth.service.system.authorization.dispatch.trigger.UserSessionRevocationTrigger;
 import com.auth.service.system.admin.model.po.user.SysUserPageRowPO;
 import com.auth.service.system.admin.model.query.user.SysUserPageQuery;
 import com.auth.service.system.admin.model.vo.user.SysUserPageVO;
@@ -71,14 +71,14 @@ class SysUserServiceImplTest {
 	private PasswordEncoder passwordEncoder;
 
 	@Mock
-	private UserSessionRevocationSupport userSessionRevocationSupport;
+	private UserSessionRevocationTrigger userSessionRevocationTrigger;
 
 	private SysUserServiceImpl sysUserService;
 
 	@BeforeEach
 	void setUp() throws Exception {
 		sysUserService = new SysUserServiceImpl(auditUserDisplayService, new UserOperationChecker(), passwordEncoder,
-				userSessionRevocationSupport);
+				userSessionRevocationTrigger);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysUserService, sysUserMapper);
@@ -184,7 +184,7 @@ class SysUserServiceImplTest {
 			spyService.deleteByIds(Arrays.asList(2L, null, 3L, 3L));
 
 			verify(spyService).removeByIds(List.of(2L, 3L));
-			verify(userSessionRevocationSupport).revokeAllSessionsAfterCommit(List.of(2L, 3L));
+			verify(userSessionRevocationTrigger).revokeAllSessionsAfterCommit(List.of(2L, 3L));
 		}
 	}
 
@@ -286,7 +286,7 @@ class SysUserServiceImplTest {
 					&& updates.stream()
 						.anyMatch(entity -> Long.valueOf(3L).equals(entity.getId())
 								&& Integer.valueOf(UserStatus.LOCKED.getCode()).equals(entity.getStatus()))));
-			verify(userSessionRevocationSupport).revokeAllSessionsAfterCommit(List.of(2L, 3L));
+			verify(userSessionRevocationTrigger).revokeAllSessionsAfterCommit(List.of(2L, 3L));
 		}
 	}
 

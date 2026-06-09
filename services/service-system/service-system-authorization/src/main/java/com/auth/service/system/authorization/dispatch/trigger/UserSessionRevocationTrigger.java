@@ -1,4 +1,4 @@
-package com.auth.service.system.admin.support.user;
+package com.auth.service.system.authorization.dispatch.trigger;
 
 import cn.hutool.core.collection.CollUtil;
 import com.auth.service.system.authorization.service.UserSessionRevocationService;
@@ -10,13 +10,13 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import java.util.List;
 
 /**
- * 事务提交后撤销用户会话，避免 DB 回滚与会话已踢不一致
+ * 用户会话撤销触发：事务提交后调用 auth 踢出全部会话
  *
  * @author Bunny
  */
 @RequiredArgsConstructor
 @Component
-public class UserSessionRevocationSupport {
+public class UserSessionRevocationTrigger {
 
 	private final UserSessionRevocationService userSessionRevocationService;
 

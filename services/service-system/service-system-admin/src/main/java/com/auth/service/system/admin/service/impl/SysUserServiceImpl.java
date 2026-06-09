@@ -16,7 +16,7 @@ import com.auth.service.system.admin.service.SysUserService;
 import com.auth.service.system.admin.support.sqlbuild.SysUserPageOrderSqlBuilder;
 import com.auth.service.system.admin.support.user.SysUserDefaults;
 import com.auth.service.system.admin.support.user.UserOperationChecker;
-import com.auth.service.system.admin.support.user.UserSessionRevocationSupport;
+import com.auth.service.system.authorization.dispatch.trigger.UserSessionRevocationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -48,7 +48,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 
 	private final PasswordEncoder passwordEncoder;
 
-	private final UserSessionRevocationSupport userSessionRevocationSupport;
+	private final UserSessionRevocationTrigger userSessionRevocationTrigger;
 
 	/**
 	 * {@inheritDoc}
@@ -95,7 +95,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 		userOperationChecker.requireOperable(idsToDelete);
 
 		removeByIds(idsToDelete);
-		userSessionRevocationSupport.revokeAllSessionsAfterCommit(idsToDelete);
+		userSessionRevocationTrigger.revokeAllSessionsAfterCommit(idsToDelete);
 	}
 
 	/**
@@ -122,7 +122,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 			return entity;
 		}).toList();
 		updateBatchById(updates);
-		userSessionRevocationSupport.revokeAllSessionsAfterCommit(idsToUpdate);
+		userSessionRevocationTrigger.revokeAllSessionsAfterCommit(idsToUpdate);
 	}
 
 }

@@ -1,9 +1,7 @@
 package com.auth.service.system.admin.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.core.util.ObjectUtil;
-import com.auth.common.core.model.response.Result;
 import com.auth.common.core.utils.TreeParentIdUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.constants.PermissionConstant;
@@ -20,8 +18,8 @@ import com.auth.service.system.admin.model.vo.menu.SysMenuListVO;
 import com.auth.service.system.admin.service.MenuWebRouteTreeBuilder;
 import com.auth.service.system.admin.service.SysMenuService;
 import com.auth.service.system.admin.support.menu.MenuReferenceChecker;
-import com.auth.service.system.authorization.feign.AuthInnerFeignClient;
-import com.auth.service.system.authorization.feign.dto.EffectiveCodesInnerDTO;
+import com.auth.service.system.authorization.dispatch.trigger.UserEffectiveCodesSnapshot;
+import com.auth.service.system.authorization.dispatch.trigger.UserEffectiveCodesTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.common.service.AuditUserDisplayService;
@@ -37,8 +35,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import static com.auth.common.web.resttemplate.FeignUtil.isSuccessWithData;
-
 /**
  * 菜单服务实现
  *
@@ -51,17 +47,17 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuEntity
 
 	private final AuditUserDisplayService auditUserDisplayService;
 
-	private final AuthInnerFeignClient authInnerFeignClient;
+	private final UserEffectiveCodesTrigger userEffectiveCodesTrigger;
 
 	private final MenuWebRouteTreeBuilder menuWebRouteTreeBuilder;
 
 	private final MenuReferenceChecker menuReferenceChecker;
 
 	public SysMenuServiceImpl(AuditUserDisplayService auditUserDisplayService,
-			AuthInnerFeignClient authInnerFeignClient, MenuWebRouteTreeBuilder menuWebRouteTreeBuilder,
+			UserEffectiveCodesTrigger userEffectiveCodesTrigger, MenuWebRouteTreeBuilder menuWebRouteTreeBuilder,
 			MenuReferenceChecker menuReferenceChecker) {
 		this.auditUserDisplayService = auditUserDisplayService;
-		this.authInnerFeignClient = authInnerFeignClient;
+		this.userEffectiveCodesTrigger = userEffectiveCodesTrigger;
 		this.menuWebRouteTreeBuilder = menuWebRouteTreeBuilder;
 		this.menuReferenceChecker = menuReferenceChecker;
 	}
@@ -75,15 +71,14 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuEntity
 			return Collections.emptyList();
 		}
 
-		Result<EffectiveCodesInnerDTO> result = authInnerFeignClient.getEffectiveCodes(userId);
-		if (BooleanUtil.isFalse(isSuccessWithData(result))) {
+		UserEffectiveCodesSnapshot codes = userEffectiveCodesTrigger.resolve(userId).orElse(null);
+		if (codes == null) {
 			log.warn("Menu web route: effective codes unavailable userId={}", userId);
 			return Collections.emptyList();
 		}
 
-		EffectiveCodesInnerDTO data = result.getData();
-		List<String> roleCodes = data.getRoleCodes();
-		List<String> permissionCodes = data.getPermissionCodes();
+		List<String> roleCodes = codes.roleCodes();
+		List<String> permissionCodes = codes.permissionCodes();
 		boolean isAdmin = PermissionConstant.isAdmin(userId, roleCodes);
 		log.debug("Menu web route: userId={} admin={} roleCount={} permissionCount={}", userId, isAdmin,
 				roleCodes.size(), permissionCodes.size());
