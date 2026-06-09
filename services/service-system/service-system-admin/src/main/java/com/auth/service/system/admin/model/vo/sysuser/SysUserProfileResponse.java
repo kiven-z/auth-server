@@ -41,6 +41,9 @@ public class SysUserProfileResponse implements Serializable {
 	@Schema(title = "手机号")
 	private String phone;
 
+	@Schema(title = "工号")
+	private String employeeNo;
+
 	@Schema(title = "头像URL")
 	private String avatar;
 
@@ -56,6 +59,9 @@ public class SysUserProfileResponse implements Serializable {
 
 	@Schema(title = "个人简介")
 	private String introduction;
+
+	@Schema(title = "备注")
+	private String remark;
 
 	@Schema(title = "所属部门列表")
 	private List<SysUserDeptProfileItemResponse> deptList = new ArrayList<>();

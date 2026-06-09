@@ -9,6 +9,7 @@ import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.SysUserMapper;
 import com.auth.service.system.admin.model.form.user.SysUserBatchStatusForm;
 import com.auth.service.system.admin.model.form.user.SysUserForm;
+import com.auth.service.system.admin.model.form.user.SysUserUpdateForm;
 import com.auth.service.system.admin.model.po.user.SysUserPageRowPO;
 import com.auth.service.system.admin.model.query.user.SysUserPageQuery;
 import com.auth.service.system.admin.model.vo.user.SysUserPageVO;
@@ -18,6 +19,7 @@ import com.auth.service.system.admin.support.user.SysUserDefaults;
 import com.auth.service.system.admin.support.user.UserOperationChecker;
 import com.auth.service.system.authorization.dispatch.trigger.UserSessionRevocationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -76,6 +78,28 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 		entity.setPermVersion(SysUserDefaults.DEFAULT_PERM_VERSION);
 
 		save(entity);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void update(Long id, SysUserUpdateForm form) {
+		UserEntity existing = getById(id);
+		if (existing == null) {
+			throw new SystemBusinessException(SystemCommonResultCode.USER_NOT_FOUND, id);
+		}
+
+		userOperationChecker.requireOperable(List.of(id));
+		SysUserConverter.INSTANCE.applyUpdateForm(form, existing);
+		if (form.getBirthday() != null) {
+			existing.setAge(Period.between(form.getBirthday(), LocalDate.now()).getYears());
+		}
+		else {
+			existing.setAge(null);
+		}
+
+		updateById(existing);
 	}
 
 	/**

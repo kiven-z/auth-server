@@ -9,6 +9,8 @@ import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.SysUserMapper;
 import com.auth.service.system.admin.model.form.user.SysUserBatchStatusForm;
 import com.auth.service.system.admin.model.form.user.SysUserForm;
+import com.auth.service.system.admin.model.form.user.SysUserUpdateForm;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.admin.support.user.SysUserDefaults;
 import com.auth.service.system.admin.support.user.UserOperationChecker;
 import com.auth.service.system.authorization.dispatch.trigger.UserSessionRevocationTrigger;
@@ -138,6 +140,74 @@ class SysUserServiceImplTest {
 
 		assertThat(result.getList()).hasSize(1);
 		verify(auditUserDisplayService).enrichAuditUsernames(any(IPage.class));
+	}
+
+	private static SysUserUpdateForm validUpdateForm() {
+		SysUserUpdateForm form = new SysUserUpdateForm();
+		form.setNickname("Updated User");
+		form.setEmail("updated@example.com");
+		form.setPhone("13900000001");
+		form.setEmployeeNo("E200");
+		form.setGender(GenderStatus.FEMALE.getCode());
+		form.setBirthday(LocalDate.of(1992, 6, 15));
+		form.setIntroduction("updated intro");
+		form.setRemark("updated note");
+		return form;
+	}
+
+	@Test
+	@DisplayName("更新用户：用户不存在时抛出 USER_NOT_FOUND")
+	void updateThrowsWhenUserNotFound() {
+		when(sysUserMapper.selectById(99L)).thenReturn(null);
+
+		assertThatThrownBy(() -> sysUserService.update(99L, validUpdateForm()))
+			.isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemCommonResultCode.USER_NOT_FOUND);
+	}
+
+	@Test
+	@DisplayName("更新用户：包含超级管理员时拒绝")
+	void updateThrowsWhenSuperAdmin() {
+		UserEntity existing = new UserEntity();
+		existing.setId(1L);
+		when(sysUserMapper.selectById(1L)).thenReturn(existing);
+
+		assertThatThrownBy(() -> sysUserService.update(1L, validUpdateForm()))
+			.isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemAdminResultCode.USER_OPERATION_FORBIDDEN);
+
+		verify(sysUserMapper, never()).updateById(any(UserEntity.class));
+	}
+
+	@Test
+	@DisplayName("更新用户：校验通过后合并表单并保留用户名与状态")
+	void updateShouldApplyFormWithoutChangingUsernameOrStatus() {
+		UserEntity existing = new UserEntity();
+		existing.setId(8L);
+		existing.setUsername("keep_user");
+		existing.setStatus(UserStatus.DISABLED.getCode());
+		when(sysUserMapper.selectById(8L)).thenReturn(existing);
+		SysUserServiceImpl spyService = spy(sysUserService);
+		doReturn(true).when(spyService).updateById(any(UserEntity.class));
+
+		try (MockedStatic<SecurityUserUtils> securityUserUtils = mockStatic(SecurityUserUtils.class)) {
+			securityUserUtils.when(SecurityUserUtils::getUserId).thenReturn(99L);
+
+			SysUserUpdateForm form = validUpdateForm();
+			spyService.update(8L, form);
+
+			ArgumentCaptor<UserEntity> captor = ArgumentCaptor.forClass(UserEntity.class);
+			verify(spyService).updateById(captor.capture());
+			UserEntity updated = captor.getValue();
+			assertThat(updated.getUsername()).isEqualTo("keep_user");
+			assertThat(updated.getStatus()).isEqualTo(UserStatus.DISABLED.getCode());
+			assertThat(updated.getNickname()).isEqualTo("Updated User");
+			assertThat(updated.getEmail()).isEqualTo("updated@example.com");
+			assertThat(updated.getRemark()).isEqualTo("updated note");
+			assertThat(updated.getAge()).isNotNull();
+		}
 	}
 
 	@Test

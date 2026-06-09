@@ -2,6 +2,7 @@ package com.auth.service.system.admin.convert;
 
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.admin.model.form.user.SysUserForm;
+import com.auth.service.system.admin.model.form.user.SysUserUpdateForm;
 import com.auth.service.system.admin.model.po.user.SysUserPageRowPO;
 import com.auth.service.system.admin.model.vo.user.SysUserPageVO;
 import org.mapstruct.Mapper;
@@ -44,5 +45,25 @@ public interface SysUserConverter {
 	@Mapping(target = "version", ignore = true)
 	@Mapping(target = "isDeleted", ignore = true)
 	UserEntity toEntity(SysUserForm form);
+
+	/**
+	 * 更新表单字段合并到已有实体（不覆盖用户名、状态、密码与权限版本）
+	 * @param form 更新表单
+	 * @param entity 已有实体
+	 */
+	@Mapping(target = "id", ignore = true)
+	@Mapping(target = "username", ignore = true)
+	@Mapping(target = "status", ignore = true)
+	@Mapping(target = "password", ignore = true)
+	@Mapping(target = "avatar", ignore = true)
+	@Mapping(target = "age", ignore = true)
+	@Mapping(target = "permVersion", ignore = true)
+	@Mapping(target = "createTime", ignore = true)
+	@Mapping(target = "updateTime", ignore = true)
+	@Mapping(target = "createUser", ignore = true)
+	@Mapping(target = "updateUser", ignore = true)
+	@Mapping(target = "version", ignore = true)
+	@Mapping(target = "isDeleted", ignore = true)
+	void applyUpdateForm(SysUserUpdateForm form, @org.mapstruct.MappingTarget UserEntity entity);
 
 }

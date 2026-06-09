@@ -8,6 +8,7 @@ import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.admin.model.form.user.SysUserBatchStatusForm;
 import com.auth.service.system.admin.model.form.user.SysUserForm;
+import com.auth.service.system.admin.model.form.user.SysUserUpdateForm;
 import com.auth.service.system.admin.model.query.user.SysUserPageQuery;
 import com.auth.service.system.admin.model.vo.user.SysUserPageVO;
 import com.auth.service.system.admin.service.SysUserService;
@@ -56,6 +57,16 @@ public class SysUserController {
 	@PostMapping
 	public Result<Void> create(@Valid @RequestBody SysUserForm form) {
 		sysUserService.create(form);
+		return Result.success();
+	}
+
+	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
+	@Operation(summary = "更新用户基础资料")
+	@PreAuthorize("@auth.decide('sysUser:update')")
+	@PutMapping("/{id}")
+	public Result<Void> update(@PathVariable("id") Long id, @Valid @RequestBody SysUserUpdateForm form) {
+		sysUserService.update(id, form);
 		return Result.success();
 	}
 
