@@ -1,4 +1,4 @@
-package com.auth.service.system.authorization.ops.service;
+package com.auth.service.system.authorization.service.impl;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
@@ -9,7 +9,6 @@ import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidation
 import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidationEventStatsInnerDTO;
 import com.auth.service.system.authorization.model.po.AuthorizationInvalidationEventStatsPO;
 import com.auth.service.system.authorization.model.query.AuthorizationInvalidationEventOpsQuery;
-import com.auth.service.system.authorization.service.impl.AuthorizationInvalidationEventOpsServiceImpl;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

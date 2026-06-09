@@ -1,4 +1,4 @@
-package com.auth.service.system.authorization.manualretry;
+package com.auth.service.system.authorization.outbox;
 
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 import com.auth.module.security.contract.dto.invalidation.*;

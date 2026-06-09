@@ -1,6 +1,6 @@
 package com.auth.service.system.authorization.service;
 
-import com.auth.service.system.authorization.model.AuthorizationInvalidationOutboxManualRetryOutcome;
+import com.auth.service.system.authorization.model.record.AuthorizationInvalidationOutboxManualRetryOutcome;
 import com.auth.service.system.authorization.model.po.AuthorizationInvalidationOutboxDetailRowPO;
 import com.auth.service.system.authorization.model.po.AuthorizationInvalidationOutboxPageRowPO;
 import com.auth.service.system.authorization.model.po.AuthorizationInvalidationOutboxStatsPO;

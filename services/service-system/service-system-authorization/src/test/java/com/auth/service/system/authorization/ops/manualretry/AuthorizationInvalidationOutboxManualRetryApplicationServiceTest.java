@@ -5,7 +5,6 @@ import com.auth.service.system.authorization.config.AuthorizationInvalidationPro
 import com.auth.service.system.authorization.dispatch.AuthorizationInvalidationOutboxProcessor;
 import com.auth.service.system.authorization.exception.AuthorizationInvalidationOpsResultCode;
 import com.auth.service.system.authorization.feign.AuthInnerFeignClient;
-import com.auth.service.system.authorization.manualretry.AuthorizationInvalidationOutboxManualRetryApplicationService;
 import com.auth.service.system.authorization.mapper.SysAuthorizationInvalidationOutboxMapper;
 import com.auth.service.system.authorization.model.entity.SysAuthorizationInvalidationOutboxEntity;
 import com.auth.service.system.authorization.model.enums.AuthorizationInvalidationOutboxStatus;

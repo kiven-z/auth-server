@@ -51,10 +51,10 @@ class SysMenuServiceImplTest {
 
 	private SysMenuServiceImpl sysMenuService;
 
-	private static SysMenuEntity menuEntity(Long id, Long parentId) {
+	private static SysMenuEntity menuEntity(Long id) {
 		SysMenuEntity entity = new SysMenuEntity();
 		entity.setId(id);
-		entity.setParentId(parentId);
+		entity.setParentId(0L);
 		return entity;
 	}
 
@@ -91,7 +91,7 @@ class SysMenuServiceImplTest {
 	@Test
 	@DisplayName("移动菜单：父级未变时跳过更新")
 	void moveSkipsUpdateWhenParentUnchanged() {
-		SysMenuEntity existing = menuEntity(6L, 0L);
+		SysMenuEntity existing = menuEntity(6L);
 		when(menuReferenceChecker.getExisting(6L)).thenReturn(existing);
 		when(menuReferenceChecker.normalizeAndRequireParent(0L)).thenReturn(0L);
 
@@ -105,7 +105,7 @@ class SysMenuServiceImplTest {
 	@Test
 	@DisplayName("移动菜单：父级变更时更新 parentId")
 	void moveUpdatesParentWhenChanged() {
-		SysMenuEntity existing = menuEntity(7L, 0L);
+		SysMenuEntity existing = menuEntity(7L);
 		when(menuReferenceChecker.getExisting(7L)).thenReturn(existing);
 		when(menuReferenceChecker.normalizeAndRequireParent(12L)).thenReturn(12L);
 		when(sysMenuMapper.updateById(any(SysMenuEntity.class))).thenReturn(1);

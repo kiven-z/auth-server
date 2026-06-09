@@ -4,7 +4,7 @@ import com.auth.module.security.contract.api.authorization.AuthorizationChangeKi
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest;
 import com.auth.module.security.contract.dto.invalidation.RoleInvalidatePayload;
 import com.auth.service.system.authorization.config.AuthorizationInvalidationProperties;
-import com.auth.service.system.authorization.manualretry.AuthorizationInvalidationPublisher;
+import com.auth.service.system.authorization.outbox.AuthorizationInvalidationPublisher;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

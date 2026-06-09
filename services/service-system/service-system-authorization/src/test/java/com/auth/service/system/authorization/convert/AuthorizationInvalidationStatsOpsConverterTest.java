@@ -1,6 +1,5 @@
-package com.auth.service.system.authorization.ops.convert;
+package com.auth.service.system.authorization.convert;
 
-import com.auth.service.system.authorization.convert.AuthorizationInvalidationStatsOpsConverter;
 import com.auth.service.system.authorization.model.po.AuthorizationInvalidationEventStatsPO;
 import com.auth.service.system.authorization.model.po.AuthorizationInvalidationOutboxStatsPO;
 import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationEventStatsVO;

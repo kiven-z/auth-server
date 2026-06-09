@@ -3,7 +3,7 @@ package com.auth.service.system.authorization.dispatch;
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest;
 import com.auth.service.system.authorization.config.AuthorizationInvalidationProperties;
-import com.auth.service.system.authorization.manualretry.AuthorizationInvalidationPublisher;
+import com.auth.service.system.authorization.outbox.AuthorizationInvalidationPublisher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;

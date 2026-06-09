@@ -1,11 +1,10 @@
-package com.auth.service.system.authorization.ops.query;
+package com.auth.service.system.authorization.service.impl;
 
 import com.auth.service.system.authorization.model.po.AuthorizationInvalidationEventStatsPO;
 import com.auth.service.system.authorization.model.po.AuthorizationInvalidationOutboxStatsPO;
 import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationSummaryVO;
 import com.auth.service.system.authorization.service.AuthorizationInvalidationEventOpsService;
 import com.auth.service.system.authorization.service.AuthorizationInvalidationOutboxOpsService;
-import com.auth.service.system.authorization.service.impl.AuthorizationInvalidationStatsQueryServiceImpl;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

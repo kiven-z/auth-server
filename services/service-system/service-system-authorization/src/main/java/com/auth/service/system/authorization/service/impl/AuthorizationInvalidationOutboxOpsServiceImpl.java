@@ -1,8 +1,8 @@
 package com.auth.service.system.authorization.service.impl;
 
-import com.auth.service.system.authorization.manualretry.AuthorizationInvalidationOutboxManualRetryApplicationService;
 import com.auth.service.system.authorization.mapper.AuthorizationInvalidationOutboxOpsMapper;
-import com.auth.service.system.authorization.model.AuthorizationInvalidationOutboxManualRetryOutcome;
+import com.auth.service.system.authorization.model.record.AuthorizationInvalidationOutboxManualRetryOutcome;
+import com.auth.service.system.authorization.ops.manualretry.AuthorizationInvalidationOutboxManualRetryApplicationService;
 import com.auth.service.system.authorization.model.po.AuthorizationInvalidationOutboxDetailRowPO;
 import com.auth.service.system.authorization.model.po.AuthorizationInvalidationOutboxPageRowPO;
 import com.auth.service.system.authorization.model.po.AuthorizationInvalidationOutboxStatsPO;

@@ -1,9 +1,8 @@
-package com.auth.service.system.authorization.ops.service;
+package com.auth.service.system.authorization.service.impl;
 
-import com.auth.service.system.authorization.manualretry.AuthorizationInvalidationOutboxManualRetryApplicationService;
 import com.auth.service.system.authorization.mapper.AuthorizationInvalidationOutboxOpsMapper;
-import com.auth.service.system.authorization.model.AuthorizationInvalidationOutboxManualRetryOutcome;
-import com.auth.service.system.authorization.service.impl.AuthorizationInvalidationOutboxOpsServiceImpl;
+import com.auth.service.system.authorization.model.record.AuthorizationInvalidationOutboxManualRetryOutcome;
+import com.auth.service.system.authorization.ops.manualretry.AuthorizationInvalidationOutboxManualRetryApplicationService;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

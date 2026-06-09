@@ -1,4 +1,4 @@
-package com.auth.service.system.authorization.ops.query;
+package com.auth.service.system.authorization.service.impl;
 
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.authorization.model.po.AuthorizationInvalidationOutboxDetailRowPO;
@@ -7,7 +7,6 @@ import com.auth.service.system.authorization.model.query.AuthorizationInvalidati
 import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationOutboxDetailVO;
 import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationOutboxPageVO;
 import com.auth.service.system.authorization.service.AuthorizationInvalidationOutboxOpsService;
-import com.auth.service.system.authorization.service.impl.AuthorizationInvalidationOutboxQueryServiceImpl;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;

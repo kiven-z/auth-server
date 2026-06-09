@@ -1,4 +1,4 @@
-package com.auth.service.system.authorization.ops.query;
+package com.auth.service.system.authorization.service.impl;
 
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.authorization.exception.AuthorizationInvalidationOpsResultCode;
@@ -9,7 +9,6 @@ import com.auth.service.system.authorization.model.query.AuthorizationInvalidati
 import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationEventDetailVO;
 import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationEventPageVO;
 import com.auth.service.system.authorization.service.AuthorizationInvalidationEventOpsService;
-import com.auth.service.system.authorization.service.impl.AuthorizationInvalidationEventQueryServiceImpl;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import org.junit.jupiter.api.DisplayName;

@@ -1,4 +1,4 @@
-package com.auth.service.system.authorization.model;
+package com.auth.service.system.authorization.model.record;
 
 /**
  * Outbox 人工重试执行摘要

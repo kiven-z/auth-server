@@ -3,7 +3,6 @@ package com.auth.service.system.authorization.outbox;
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidatePayload;
 import com.auth.module.security.contract.dto.invalidation.RoleInvalidatePayload;
-import com.auth.service.system.authorization.manualretry.InvalidationOutboxPayloadCodec;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

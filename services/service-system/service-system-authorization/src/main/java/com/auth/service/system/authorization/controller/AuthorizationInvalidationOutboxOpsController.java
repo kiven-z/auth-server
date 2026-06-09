@@ -13,7 +13,7 @@ import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationO
 import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationOutboxPageVO;
 import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationOutboxRetryResultVO;
 import com.auth.service.system.authorization.service.AuthorizationInvalidationOutboxQueryService;
-import com.auth.service.system.authorization.service.impl.AuthorizationInvalidationOutboxManualRetryService;
+import com.auth.service.system.authorization.ops.manualretry.AuthorizationInvalidationOutboxManualRetryService;
 import com.auth.service.system.common.model.SystemAuditBizModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
