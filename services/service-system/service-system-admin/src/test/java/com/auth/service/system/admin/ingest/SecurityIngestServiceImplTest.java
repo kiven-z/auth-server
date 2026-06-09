@@ -7,6 +7,7 @@ import com.auth.service.system.admin.mapper.LogAuthorizationAuditMapper;
 import com.auth.service.system.admin.mapper.LogOperationMapper;
 import com.auth.service.system.admin.model.entity.LogAuthorizationAuditEntity;
 import com.auth.service.system.admin.model.entity.LogOperationEntity;
+import com.auth.service.system.admin.service.impl.SecurityIngestServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

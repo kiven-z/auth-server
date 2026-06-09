@@ -1,4 +1,4 @@
-package com.auth.service.system.admin.ingest;
+package com.auth.service.system.admin.service.impl;
 
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.text.CharSequenceUtil;
@@ -11,6 +11,7 @@ import com.auth.service.system.admin.mapper.LogAuthorizationAuditMapper;
 import com.auth.service.system.admin.mapper.LogOperationMapper;
 import com.auth.service.system.admin.model.entity.LogAuthorizationAuditEntity;
 import com.auth.service.system.admin.model.entity.LogOperationEntity;
+import com.auth.service.system.admin.service.SecurityIngestService;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;

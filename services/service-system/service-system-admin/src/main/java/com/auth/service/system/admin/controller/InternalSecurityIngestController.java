@@ -5,7 +5,7 @@ import com.auth.module.security.autoconfigure.annotation.InternalApi;
 import com.auth.module.security.contract.dto.AuthorizationAuditIngestRequest;
 import com.auth.module.security.contract.dto.OperationLogIngestRequest;
 import com.auth.module.security.contract.event.SecurityAuthorizationAuditPayloadEvent;
-import com.auth.service.system.admin.ingest.SecurityIngestService;
+import com.auth.service.system.admin.service.SecurityIngestService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.PostMapping;
