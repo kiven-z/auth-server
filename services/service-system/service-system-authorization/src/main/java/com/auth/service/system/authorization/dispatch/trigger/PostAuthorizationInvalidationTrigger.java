@@ -7,7 +7,7 @@ import com.auth.module.security.contract.dto.invalidation.UserPostInvalidatePayl
 import com.auth.service.system.authorization.dispatch.AuthorizationInvalidationCoordinator;
 import com.auth.service.system.authorization.dispatch.support.InvalidationEventIds;
 import com.auth.service.system.authorization.dispatch.support.InvalidationSourceBizIds;
-import com.auth.service.system.common.model.audit.SystemAuditBizModule;
+import com.auth.service.system.common.model.SystemAuditBizModule;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

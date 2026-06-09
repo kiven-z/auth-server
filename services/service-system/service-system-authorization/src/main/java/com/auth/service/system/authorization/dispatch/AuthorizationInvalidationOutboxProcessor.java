@@ -9,7 +9,7 @@ import com.auth.service.system.authorization.outbox.AuthorizationInvalidationOut
 import com.auth.service.system.authorization.outbox.InvalidationOutboxPayloadCodec;
 import com.auth.service.system.authorization.outbox.mapper.SysAuthorizationInvalidationOutboxMapper;
 import com.auth.service.system.authorization.outbox.model.SysAuthorizationInvalidationOutboxEntity;
-import com.auth.service.system.common.feign.AuthInnerFeignClient;
+import com.auth.service.system.authorization.integration.feign.AuthInnerFeignClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

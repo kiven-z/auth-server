@@ -3,8 +3,8 @@ package com.auth.service.system.authorization.ops.service;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.authorization.ops.model.po.AuthorizationInvalidationEventStatsPO;
 import com.auth.service.system.authorization.ops.model.query.AuthorizationInvalidationEventOpsQuery;
-import com.auth.service.system.common.feign.dto.AuthorizationInvalidationEventDetailInnerDTO;
-import com.auth.service.system.common.feign.dto.AuthorizationInvalidationEventPageInnerDTO;
+import com.auth.service.system.authorization.integration.feign.dto.AuthorizationInvalidationEventDetailInnerDTO;
+import com.auth.service.system.authorization.integration.feign.dto.AuthorizationInvalidationEventPageInnerDTO;
 
 /**
  * 授权失效幂等事件运维门面

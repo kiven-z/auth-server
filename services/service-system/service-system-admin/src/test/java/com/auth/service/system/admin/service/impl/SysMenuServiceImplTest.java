@@ -7,7 +7,7 @@ import com.auth.service.system.admin.model.form.menu.SysMenuMoveForm;
 import com.auth.service.system.admin.service.MenuWebRouteTreeBuilder;
 import com.auth.service.system.admin.support.menu.MenuReferenceChecker;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.common.feign.AuthInnerFeignClient;
+import com.auth.service.system.authorization.integration.feign.AuthInnerFeignClient;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.junit.jupiter.api.BeforeEach;

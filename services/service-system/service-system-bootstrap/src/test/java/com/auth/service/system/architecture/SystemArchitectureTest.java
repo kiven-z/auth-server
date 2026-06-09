@@ -152,7 +152,7 @@ class SystemArchitectureTest {
 		.resideInAnyPackage(MESSAGE, SCHEDULE)
 		.should()
 		.dependOnClassesThat()
-		.resideInAPackage("com.auth.service.system.common.feign..");
+		.resideInAPackage("com.auth.service.system.authorization.integration.feign..");
 
 	/**
 	 * {@code com.auth.service.system.common} 包仅允许出现在 common 模块，admin 模块不得残留同名包。

@@ -49,6 +49,7 @@ public class LogUserPasswordHistoryServiceImpl
 			LogUserPasswordHistoryQuery query) {
 		IPage<LogUserPasswordHistoryPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
 		IPage<LogUserPasswordHistoryPageVO> voPage = page.convert(LogUserPasswordHistoryConverter.INSTANCE::toPageVO);
+
 		auditUserDisplayService.enrichAuditUsernames(voPage);
 		return PageResponse.of(voPage);
 	}
@@ -63,6 +64,7 @@ public class LogUserPasswordHistoryServiceImpl
 			throw new SystemBusinessException(DATA_NOT_EXIST);
 		}
 		LogUserPasswordHistoryDetailVO vo = LogUserPasswordHistoryConverter.INSTANCE.toDetailVo(po);
+
 		auditUserDisplayService.enrichAuditUsernames(List.of(vo));
 		return vo;
 	}

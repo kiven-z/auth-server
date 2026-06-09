@@ -17,7 +17,7 @@ import com.auth.service.system.admin.model.query.SysDeptPageQuery;
 import com.auth.service.system.admin.model.vo.dept.SysDeptDetailVO;
 import com.auth.service.system.admin.model.vo.dept.SysDeptListVO;
 import com.auth.service.system.admin.service.SysDeptService;
-import com.auth.service.system.common.model.audit.SystemAuditBizModule;
+import com.auth.service.system.common.model.SystemAuditBizModule;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

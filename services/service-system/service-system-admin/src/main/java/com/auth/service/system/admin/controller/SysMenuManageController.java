@@ -9,7 +9,7 @@ import com.auth.service.system.admin.model.form.menu.SysMenuAssignRoleForm;
 import com.auth.service.system.admin.model.vo.menu.SysMenuAssignedPermissionRow;
 import com.auth.service.system.admin.model.vo.menu.SysMenuAssignedRoleRow;
 import com.auth.service.system.admin.service.SysMenuManageService;
-import com.auth.service.system.common.model.audit.SystemAuditBizModule;
+import com.auth.service.system.common.model.SystemAuditBizModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

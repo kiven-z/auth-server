@@ -6,10 +6,10 @@ import com.auth.service.system.authorization.ops.exception.AuthorizationInvalida
 import com.auth.service.system.authorization.ops.model.po.AuthorizationInvalidationEventStatsPO;
 import com.auth.service.system.authorization.ops.model.query.AuthorizationInvalidationEventOpsQuery;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.common.feign.AuthInnerFeignClient;
-import com.auth.service.system.common.feign.dto.AuthorizationInvalidationEventDetailInnerDTO;
-import com.auth.service.system.common.feign.dto.AuthorizationInvalidationEventPageInnerDTO;
-import com.auth.service.system.common.feign.dto.AuthorizationInvalidationEventStatsInnerDTO;
+import com.auth.service.system.authorization.integration.feign.AuthInnerFeignClient;
+import com.auth.service.system.authorization.integration.feign.dto.AuthorizationInvalidationEventDetailInnerDTO;
+import com.auth.service.system.authorization.integration.feign.dto.AuthorizationInvalidationEventPageInnerDTO;
+import com.auth.service.system.authorization.integration.feign.dto.AuthorizationInvalidationEventStatsInnerDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -4,8 +4,8 @@ import com.auth.service.system.authorization.ops.model.query.AuthorizationInvali
 import com.auth.service.system.authorization.ops.model.vo.AuthorizationInvalidationEventDetailVO;
 import com.auth.service.system.authorization.ops.model.vo.AuthorizationInvalidationEventPageVO;
 import com.auth.service.system.authorization.ops.model.query.AuthorizationInvalidationEventOpsQuery;
-import com.auth.service.system.common.feign.dto.AuthorizationInvalidationEventDetailInnerDTO;
-import com.auth.service.system.common.feign.dto.AuthorizationInvalidationEventPageInnerDTO;
+import com.auth.service.system.authorization.integration.feign.dto.AuthorizationInvalidationEventDetailInnerDTO;
+import com.auth.service.system.authorization.integration.feign.dto.AuthorizationInvalidationEventPageInnerDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;

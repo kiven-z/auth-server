@@ -1,7 +1,7 @@
 package com.auth.service.system.admin.support.user;
 
 import cn.hutool.core.collection.CollUtil;
-import com.auth.service.system.common.service.UserSessionRevocationService;
+import com.auth.service.system.authorization.service.UserSessionRevocationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionSynchronization;

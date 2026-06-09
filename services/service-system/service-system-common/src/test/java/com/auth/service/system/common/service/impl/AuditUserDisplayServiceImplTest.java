@@ -2,7 +2,7 @@ package com.auth.service.system.common.service.impl;
 
 import com.auth.common.core.model.response.BaseResponse;
 import com.auth.module.platform.persistence.model.UserEntity;
-import com.auth.service.system.common.mapper.SysUserQueryMapper;
+import com.auth.service.system.common.mapper.AuditUserDisplayMapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,7 +30,7 @@ import static org.mockito.Mockito.when;
 class AuditUserDisplayServiceImplTest {
 
 	@Mock
-	private SysUserQueryMapper sysUserQueryMapper;
+	private AuditUserDisplayMapper auditUserDisplayMapper;
 
 	@InjectMocks
 	private AuditUserDisplayServiceImpl auditUserDisplayService;
@@ -40,11 +40,11 @@ class AuditUserDisplayServiceImplTest {
 	void mapUsernamesByIdsReturnsEmptyWithoutDbWhenNoIds() {
 		// ── null ─────────────────────────────────────────────────
 		assertThat(auditUserDisplayService.mapUsernamesByIds(null)).isEmpty();
-		verifyNoInteractions(sysUserQueryMapper);
+		verifyNoInteractions(auditUserDisplayMapper);
 
 		// ── empty collection ────────────────────────────────────
 		assertThat(auditUserDisplayService.mapUsernamesByIds(Collections.emptyList())).isEmpty();
-		verifyNoInteractions(sysUserQueryMapper);
+		verifyNoInteractions(auditUserDisplayMapper);
 	}
 
 	@Test
@@ -57,7 +57,7 @@ class AuditUserDisplayServiceImplTest {
 		u2.setId(2L);
 		u2.setUsername("bob");
 
-		when(sysUserQueryMapper.selectBatchIds(List.of(1L, 2L))).thenReturn(List.of(u1, u2));
+		when(auditUserDisplayMapper.selectBatchIds(List.of(1L, 2L))).thenReturn(List.of(u1, u2));
 
 		Map<Long, String> result = auditUserDisplayService.mapUsernamesByIds(Arrays.asList(1L, null, 1L, 2L));
 
@@ -68,7 +68,7 @@ class AuditUserDisplayServiceImplTest {
 	@DisplayName("mapUsernamesByIds：全部为 null 主键时不访问数据库")
 	void mapUsernamesByIdsAllNullIdsSkipsDb() {
 		assertThat(auditUserDisplayService.mapUsernamesByIds(Arrays.asList(null, null))).isEmpty();
-		verifyNoInteractions(sysUserQueryMapper);
+		verifyNoInteractions(auditUserDisplayMapper);
 	}
 
 	@Test
@@ -86,7 +86,7 @@ class AuditUserDisplayServiceImplTest {
 		UserEntity u2 = new UserEntity();
 		u2.setId(2L);
 		u2.setUsername("bob");
-		when(sysUserQueryMapper.selectBatchIds(List.of(1L, 2L))).thenReturn(List.of(u1, u2));
+		when(auditUserDisplayMapper.selectBatchIds(List.of(1L, 2L))).thenReturn(List.of(u1, u2));
 
 		auditUserDisplayService.enrichAuditUsernames(page);
 
@@ -108,7 +108,7 @@ class AuditUserDisplayServiceImplTest {
 		UserEntity u2 = new UserEntity();
 		u2.setId(2L);
 		u2.setUsername("bob");
-		when(sysUserQueryMapper.selectBatchIds(List.of(1L, 2L))).thenReturn(List.of(u1, u2));
+		when(auditUserDisplayMapper.selectBatchIds(List.of(1L, 2L))).thenReturn(List.of(u1, u2));
 
 		auditUserDisplayService.enrichAuditUsernames(list);
 
@@ -120,7 +120,7 @@ class AuditUserDisplayServiceImplTest {
 	@DisplayName("enrichAuditUsernames(IPage)：page 为 null 时不访问数据库")
 	void enrichAuditUsernamesPageNullSkipsDb() {
 		auditUserDisplayService.enrichAuditUsernames((Page<BaseResponse>) null);
-		verifyNoInteractions(sysUserQueryMapper);
+		verifyNoInteractions(auditUserDisplayMapper);
 	}
 
 	@Test
@@ -131,7 +131,7 @@ class AuditUserDisplayServiceImplTest {
 
 		auditUserDisplayService.enrichAuditUsernames(page);
 
-		verifyNoInteractions(sysUserQueryMapper);
+		verifyNoInteractions(auditUserDisplayMapper);
 	}
 
 }

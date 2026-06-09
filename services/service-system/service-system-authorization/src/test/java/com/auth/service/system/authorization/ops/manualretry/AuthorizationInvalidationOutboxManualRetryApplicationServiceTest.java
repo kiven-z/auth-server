@@ -8,7 +8,7 @@ import com.auth.service.system.authorization.outbox.AuthorizationInvalidationOut
 import com.auth.service.system.authorization.outbox.mapper.SysAuthorizationInvalidationOutboxMapper;
 import com.auth.service.system.authorization.outbox.model.SysAuthorizationInvalidationOutboxEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.common.feign.AuthInnerFeignClient;
+import com.auth.service.system.authorization.integration.feign.AuthInnerFeignClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

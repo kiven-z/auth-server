@@ -3,7 +3,7 @@ package com.auth.service.system.common.service.impl;
 import cn.hutool.core.collection.CollUtil;
 import com.auth.common.core.model.response.BaseResponse;
 import com.auth.module.platform.persistence.model.UserEntity;
-import com.auth.service.system.common.mapper.SysUserQueryMapper;
+import com.auth.service.system.common.mapper.AuditUserDisplayMapper;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.springframework.stereotype.Service;
@@ -20,10 +20,10 @@ import java.util.stream.Stream;
 @Service
 public class AuditUserDisplayServiceImpl implements AuditUserDisplayService {
 
-	private final SysUserQueryMapper sysUserQueryMapper;
+	private final AuditUserDisplayMapper auditUserDisplayMapper;
 
-	public AuditUserDisplayServiceImpl(SysUserQueryMapper sysUserQueryMapper) {
-		this.sysUserQueryMapper = sysUserQueryMapper;
+	public AuditUserDisplayServiceImpl(AuditUserDisplayMapper auditUserDisplayMapper) {
+		this.auditUserDisplayMapper = auditUserDisplayMapper;
 	}
 
 	/**
@@ -38,7 +38,7 @@ public class AuditUserDisplayServiceImpl implements AuditUserDisplayService {
 		if (CollUtil.isEmpty(distinctIds)) {
 			return Collections.emptyMap();
 		}
-		return sysUserQueryMapper.selectBatchIds(distinctIds)
+		return auditUserDisplayMapper.selectBatchIds(distinctIds)
 			.stream()
 			.collect(Collectors.toMap(UserEntity::getId, UserEntity::getUsername));
 	}

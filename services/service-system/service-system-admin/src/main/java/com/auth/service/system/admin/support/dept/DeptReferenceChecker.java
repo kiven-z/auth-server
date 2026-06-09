@@ -2,11 +2,11 @@ package com.auth.service.system.admin.support.dept;
 
 import com.auth.common.core.utils.TreeParentIdUtil;
 import com.auth.common.core.utils.TreeRelationUtil;
-import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.admin.mapper.DeptReferenceMapper;
 import com.auth.service.system.admin.mapper.SysDeptMapper;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -57,16 +57,6 @@ public class DeptReferenceChecker {
 	public void requireMoveTargetValid(Long deptId, Long newParentId) {
 		TreeRelationUtil.requireValidMoveTarget(deptId, newParentId,
 				(ancestorId, nodeId) -> deptReferenceMapper.countDescendantRelation(ancestorId, nodeId) > 0);
-	}
-
-	/**
-	 * 逻辑删除前：无未删除的直接子部门
-	 * @param deptId 部门 ID
-	 */
-	public void requireNoActiveChildren(Long deptId) {
-		if (sysDeptMapper.countActiveDirectChildren(deptId) > 0) {
-			throw new SystemBusinessException(SystemCommonResultCode.TREE_HAS_ACTIVE_CHILDREN, deptId);
-		}
 	}
 
 	/**

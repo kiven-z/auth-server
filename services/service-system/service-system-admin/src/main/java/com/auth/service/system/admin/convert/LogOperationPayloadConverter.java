@@ -10,7 +10,7 @@ import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
 /**
- * {@link OperationLogPayloadEvent} → {@link LogOperationEntity} 映射
+ * LogOperationPayloadConverter 映射
  *
  * @author Bunny
  */

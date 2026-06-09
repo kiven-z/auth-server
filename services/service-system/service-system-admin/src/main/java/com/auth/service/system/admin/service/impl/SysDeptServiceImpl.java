@@ -24,6 +24,7 @@ import com.auth.service.system.admin.service.SysDeptService;
 import com.auth.service.system.admin.support.dept.DeptClosureMaintainer;
 import com.auth.service.system.admin.support.dept.DeptReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.DeptAuthorizationInvalidationTrigger;
+import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.common.support.BusinessKeyAssert;
@@ -208,7 +209,9 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 		deptReferenceChecker.getExistingActive(deptId);
 
 		// 校验部门是否有子部门
-		deptReferenceChecker.requireNoActiveChildren(deptId);
+		if (baseMapper.countActiveDirectChildren(deptId) > 0) {
+			throw new SystemBusinessException(SystemCommonResultCode.TREE_HAS_ACTIVE_CHILDREN, deptId);
+		}
 		// 校验子树是否仍被用户、授权或岗位引用
 		deptReferenceChecker.requireSubtreeUnused(deptId);
 

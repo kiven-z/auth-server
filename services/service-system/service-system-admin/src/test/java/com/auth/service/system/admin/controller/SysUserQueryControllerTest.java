@@ -1,10 +1,8 @@
 package com.auth.service.system.admin.controller;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-import java.util.List;
-
+import com.auth.common.core.model.response.Result;
+import com.auth.service.system.admin.model.SysUserSearchItemResponse;
+import com.auth.service.system.admin.service.SysUserQueryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,10 +10,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.auth.common.core.model.response.Result;
-import com.auth.service.system.common.controller.SysUserQueryController;
-import com.auth.service.system.common.model.SysUserSearchItemResponse;
-import com.auth.service.system.common.service.SysUserQueryService;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link SysUserQueryController} 单元测试。

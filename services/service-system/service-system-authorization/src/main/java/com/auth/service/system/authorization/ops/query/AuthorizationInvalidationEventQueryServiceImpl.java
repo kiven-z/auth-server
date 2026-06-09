@@ -12,8 +12,8 @@ import com.auth.service.system.authorization.ops.model.vo.AuthorizationInvalidat
 import com.auth.service.system.authorization.ops.model.vo.AuthorizationInvalidationEventPageVO;
 import com.auth.service.system.authorization.ops.model.query.AuthorizationInvalidationEventOpsQuery;
 import com.auth.service.system.authorization.ops.service.AuthorizationInvalidationEventOpsService;
-import com.auth.service.system.common.feign.dto.AuthorizationInvalidationEventDetailInnerDTO;
-import com.auth.service.system.common.feign.dto.AuthorizationInvalidationEventPageInnerDTO;
+import com.auth.service.system.authorization.integration.feign.dto.AuthorizationInvalidationEventDetailInnerDTO;
+import com.auth.service.system.authorization.integration.feign.dto.AuthorizationInvalidationEventPageInnerDTO;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 
 import lombok.RequiredArgsConstructor;
