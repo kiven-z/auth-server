@@ -1,7 +1,6 @@
 package com.auth.service.system.authorization.service.impl;
 
 import com.auth.common.data.model.PageResponse;
-import com.auth.service.system.authorization.exception.AuthorizationInvalidationOpsResultCode;
 import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidationEventDetailInnerDTO;
 import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidationEventPageInnerDTO;
 import com.auth.service.system.authorization.model.query.AuthorizationInvalidationEventOpsQuery;
@@ -103,29 +102,6 @@ class AuthorizationInvalidationEventQueryServiceImplTest {
 
 		assertEquals("evt-detail", detailVO.getEventId());
 		verify(auditUserDisplayService).enrichAuditUsernames(anyList());
-	}
-
-	@Test
-	@DisplayName("释放占位：应委托运维门面")
-	void releaseProcessingClaim_shouldDelegateToOps() {
-		when(authorizationInvalidationEventOpsService.releaseProcessingClaim(4L)).thenReturn(true);
-
-		boolean released = queryService.releaseProcessingClaim(4L);
-
-		assertTrue(released);
-		verify(authorizationInvalidationEventOpsService).releaseProcessingClaim(4L);
-	}
-
-	@Test
-	@DisplayName("释放占位：非 processing 记录应透传运维结果码")
-	void releaseProcessingClaim_shouldPropagateOpsResultCode() {
-		when(authorizationInvalidationEventOpsService.releaseProcessingClaim(3L)).thenThrow(
-				new SystemBusinessException(AuthorizationInvalidationOpsResultCode.EVENT_RELEASE_NOT_PROCESSING));
-
-		SystemBusinessException exception = assertThrows(SystemBusinessException.class,
-				() -> queryService.releaseProcessingClaim(3L));
-
-		assertEquals(AuthorizationInvalidationOpsResultCode.EVENT_RELEASE_NOT_PROCESSING, exception.getResultCode());
 	}
 
 }

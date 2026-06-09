@@ -9,6 +9,7 @@ import com.auth.module.security.contract.context.OperationLogContext;
 import com.auth.service.system.authorization.model.query.AuthorizationInvalidationEventQuery;
 import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationEventDetailVO;
 import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationEventPageVO;
+import com.auth.service.system.authorization.service.AuthorizationInvalidationEventOpsService;
 import com.auth.service.system.authorization.service.AuthorizationInvalidationEventQueryService;
 import com.auth.service.system.common.model.SystemAuditBizModule;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,9 +31,13 @@ public class AuthorizationInvalidationEventOpsController {
 
 	private final AuthorizationInvalidationEventQueryService authorizationInvalidationEventQueryService;
 
+	private final AuthorizationInvalidationEventOpsService authorizationInvalidationEventOpsService;
+
 	public AuthorizationInvalidationEventOpsController(
-			AuthorizationInvalidationEventQueryService authorizationInvalidationEventQueryService) {
+			AuthorizationInvalidationEventQueryService authorizationInvalidationEventQueryService,
+			AuthorizationInvalidationEventOpsService authorizationInvalidationEventOpsService) {
 		this.authorizationInvalidationEventQueryService = authorizationInvalidationEventQueryService;
+		this.authorizationInvalidationEventOpsService = authorizationInvalidationEventOpsService;
 	}
 
 	@Operation(summary = "分页查询授权失效幂等事件")
@@ -59,7 +64,9 @@ public class AuthorizationInvalidationEventOpsController {
 	@PostMapping("{id}/release-claim")
 	public Result<Boolean> releaseClaim(@PathVariable("id") Long id) {
 		OperationLogContext.setTargetId(id);
-		boolean released = authorizationInvalidationEventQueryService.releaseProcessingClaim(id);
+
+		// 释放 processing 占位，允许 Outbox 重新投递
+		boolean released = authorizationInvalidationEventOpsService.releaseProcessingClaim(id);
 		return Result.success(released, EVENT_RELEASE_SUCCESS.getMessage());
 	}
 

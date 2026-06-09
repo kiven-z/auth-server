@@ -26,11 +26,6 @@ public class AdminAuthorizationController {
 
 	private final AdminAuthorizationService adminAuthorizationService;
 
-	/**
-	 * 批量刷新用户授权画像缓存（重建 Redis AuthProfile）
-	 * @param userIds 用户 ID 列表
-	 * @return 统一响应
-	 */
 	@Operation(summary = "批量刷新用户授权画像缓存（AuthProfile）")
 	@PreAuthorize("@auth.decide('ADMIN')")
 	@PostMapping("/authorization/refresh")

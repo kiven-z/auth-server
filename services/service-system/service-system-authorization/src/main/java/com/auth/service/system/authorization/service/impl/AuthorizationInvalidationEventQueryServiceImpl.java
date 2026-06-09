@@ -65,12 +65,4 @@ public class AuthorizationInvalidationEventQueryServiceImpl implements Authoriza
 		return detailVO;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public boolean releaseProcessingClaim(Long id) {
-		return authorizationInvalidationEventOpsService.releaseProcessingClaim(id);
-	}
-
 }
