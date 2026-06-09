@@ -3,12 +3,13 @@ package com.auth.service.system.authorization.ops.manualretry;
 import com.auth.common.core.model.response.Result;
 import com.auth.service.system.authorization.config.AuthorizationInvalidationProperties;
 import com.auth.service.system.authorization.dispatch.AuthorizationInvalidationOutboxProcessor;
-import com.auth.service.system.authorization.ops.exception.AuthorizationInvalidationOpsResultCode;
-import com.auth.service.system.authorization.outbox.AuthorizationInvalidationOutboxStatus;
-import com.auth.service.system.authorization.outbox.mapper.SysAuthorizationInvalidationOutboxMapper;
-import com.auth.service.system.authorization.outbox.model.SysAuthorizationInvalidationOutboxEntity;
+import com.auth.service.system.authorization.exception.AuthorizationInvalidationOpsResultCode;
+import com.auth.service.system.authorization.feign.AuthInnerFeignClient;
+import com.auth.service.system.authorization.manualretry.AuthorizationInvalidationOutboxManualRetryApplicationService;
+import com.auth.service.system.authorization.mapper.SysAuthorizationInvalidationOutboxMapper;
+import com.auth.service.system.authorization.model.entity.SysAuthorizationInvalidationOutboxEntity;
+import com.auth.service.system.authorization.model.enums.AuthorizationInvalidationOutboxStatus;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.authorization.integration.feign.AuthInnerFeignClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,21 +19,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link AuthorizationInvalidationOutboxManualRetryApplicationService} 单元测试
  */
-@ExtendWith(MockitoExtension.class)
 @DisplayName("AuthorizationInvalidationOutboxManualRetryApplicationService Outbox 人工重试")
+@ExtendWith(MockitoExtension.class)
 class AuthorizationInvalidationOutboxManualRetryApplicationServiceTest {
+
+	private final AuthorizationInvalidationProperties properties = new AuthorizationInvalidationProperties();
 
 	@Mock
 	private SysAuthorizationInvalidationOutboxMapper outboxMapper;
@@ -43,15 +41,7 @@ class AuthorizationInvalidationOutboxManualRetryApplicationServiceTest {
 	@Mock
 	private AuthInnerFeignClient authInnerFeignClient;
 
-	private final AuthorizationInvalidationProperties properties = new AuthorizationInvalidationProperties();
-
 	private AuthorizationInvalidationOutboxManualRetryApplicationService manualRetryService;
-
-	@BeforeEach
-	void setUpService() {
-		manualRetryService = new AuthorizationInvalidationOutboxManualRetryApplicationService(outboxMapper,
-				outboxProcessor, authInnerFeignClient, properties);
-	}
 
 	private static SysAuthorizationInvalidationOutboxEntity buildRow(Long id, String status) {
 		SysAuthorizationInvalidationOutboxEntity row = new SysAuthorizationInvalidationOutboxEntity();
@@ -60,6 +50,12 @@ class AuthorizationInvalidationOutboxManualRetryApplicationServiceTest {
 		row.setStatus(status);
 		row.setVersion(1L);
 		return row;
+	}
+
+	@BeforeEach
+	void setUpService() {
+		manualRetryService = new AuthorizationInvalidationOutboxManualRetryApplicationService(outboxMapper,
+				outboxProcessor, authInnerFeignClient, properties);
 	}
 
 	@Test

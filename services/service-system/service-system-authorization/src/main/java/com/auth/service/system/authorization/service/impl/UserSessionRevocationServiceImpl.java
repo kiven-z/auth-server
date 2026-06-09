@@ -3,7 +3,7 @@ package com.auth.service.system.authorization.service.impl;
 import cn.hutool.core.collection.CollUtil;
 import com.auth.common.core.model.response.Result;
 import com.auth.common.web.resttemplate.FeignUtil;
-import com.auth.service.system.authorization.integration.feign.AuthInnerFeignClient;
+import com.auth.service.system.authorization.feign.AuthInnerFeignClient;
 import com.auth.service.system.authorization.service.UserSessionRevocationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,8 +16,8 @@ import java.util.List;
  *
  * @author Bunny
  */
-@Slf4j
 @RequiredArgsConstructor
+@Slf4j
 @Service
 public class UserSessionRevocationServiceImpl implements UserSessionRevocationService {
 

@@ -1,16 +1,16 @@
 package com.auth.service.system.authorization.ops.convert;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.math.BigDecimal;
-
+import com.auth.service.system.authorization.convert.AuthorizationInvalidationStatsOpsConverter;
+import com.auth.service.system.authorization.model.po.AuthorizationInvalidationEventStatsPO;
+import com.auth.service.system.authorization.model.po.AuthorizationInvalidationOutboxStatsPO;
+import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationEventStatsVO;
+import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationOutboxStatsVO;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import com.auth.service.system.authorization.ops.model.po.AuthorizationInvalidationEventStatsPO;
-import com.auth.service.system.authorization.ops.model.po.AuthorizationInvalidationOutboxStatsPO;
-import com.auth.service.system.authorization.ops.model.vo.AuthorizationInvalidationEventStatsVO;
-import com.auth.service.system.authorization.ops.model.vo.AuthorizationInvalidationOutboxStatsVO;
+import java.math.BigDecimal;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * {@link AuthorizationInvalidationStatsOpsConverter} 单元测试

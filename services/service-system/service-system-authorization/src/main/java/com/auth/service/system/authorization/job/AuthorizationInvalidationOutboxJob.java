@@ -2,9 +2,9 @@ package com.auth.service.system.authorization.job;
 
 import com.auth.service.system.authorization.config.AuthorizationInvalidationProperties;
 import com.auth.service.system.authorization.dispatch.AuthorizationInvalidationOutboxProcessor;
-import com.auth.service.system.authorization.outbox.AuthorizationInvalidationOutboxStatus;
-import com.auth.service.system.authorization.outbox.mapper.SysAuthorizationInvalidationOutboxMapper;
-import com.auth.service.system.authorization.outbox.model.SysAuthorizationInvalidationOutboxEntity;
+import com.auth.service.system.authorization.mapper.SysAuthorizationInvalidationOutboxMapper;
+import com.auth.service.system.authorization.model.entity.SysAuthorizationInvalidationOutboxEntity;
+import com.auth.service.system.authorization.model.enums.AuthorizationInvalidationOutboxStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

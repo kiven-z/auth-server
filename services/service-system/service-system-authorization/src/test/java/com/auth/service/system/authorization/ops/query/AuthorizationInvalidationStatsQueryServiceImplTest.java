@@ -1,13 +1,12 @@
 package com.auth.service.system.authorization.ops.query;
 
-import static com.auth.service.system.common.exception.code.SystemCommonResultCode.SERVICE_UNAVAILABLE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.math.BigDecimal;
-
+import com.auth.service.system.authorization.model.po.AuthorizationInvalidationEventStatsPO;
+import com.auth.service.system.authorization.model.po.AuthorizationInvalidationOutboxStatsPO;
+import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationSummaryVO;
+import com.auth.service.system.authorization.service.AuthorizationInvalidationEventOpsService;
+import com.auth.service.system.authorization.service.AuthorizationInvalidationOutboxOpsService;
+import com.auth.service.system.authorization.service.impl.AuthorizationInvalidationStatsQueryServiceImpl;
+import com.auth.service.system.common.exception.SystemBusinessException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,12 +14,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.auth.service.system.authorization.ops.model.po.AuthorizationInvalidationEventStatsPO;
-import com.auth.service.system.authorization.ops.model.po.AuthorizationInvalidationOutboxStatsPO;
-import com.auth.service.system.authorization.ops.model.vo.AuthorizationInvalidationSummaryVO;
-import com.auth.service.system.authorization.ops.service.AuthorizationInvalidationEventOpsService;
-import com.auth.service.system.authorization.ops.service.AuthorizationInvalidationOutboxOpsService;
-import com.auth.service.system.common.exception.SystemBusinessException;
+import java.math.BigDecimal;
+
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.SERVICE_UNAVAILABLE;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link AuthorizationInvalidationStatsQueryServiceImpl} 单元测试

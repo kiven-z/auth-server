@@ -1,13 +1,13 @@
 package com.auth.service.system.admin.service.impl;
 
-import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.admin.mapper.SysMenuMapper;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.admin.model.form.menu.SysMenuMoveForm;
 import com.auth.service.system.admin.service.MenuWebRouteTreeBuilder;
 import com.auth.service.system.admin.support.menu.MenuReferenceChecker;
+import com.auth.service.system.authorization.feign.AuthInnerFeignClient;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.authorization.integration.feign.AuthInnerFeignClient;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,13 +22,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.anyCollection;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link SysMenuServiceImpl} 单元测试。
@@ -55,6 +50,13 @@ class SysMenuServiceImplTest {
 	private MenuReferenceChecker menuReferenceChecker;
 
 	private SysMenuServiceImpl sysMenuService;
+
+	private static SysMenuEntity menuEntity(Long id, Long parentId) {
+		SysMenuEntity entity = new SysMenuEntity();
+		entity.setId(id);
+		entity.setParentId(parentId);
+		return entity;
+	}
 
 	@BeforeEach
 	void setUp() throws Exception {
@@ -125,13 +127,6 @@ class SysMenuServiceImplTest {
 
 		verify(sysMenuMapper).selectFirstBlockedParentId(List.of(3L, 3L, 4L));
 		verify(sysMenuMapper).deleteByIds(anyCollection());
-	}
-
-	private static SysMenuEntity menuEntity(Long id, Long parentId) {
-		SysMenuEntity entity = new SysMenuEntity();
-		entity.setId(id);
-		entity.setParentId(parentId);
-		return entity;
 	}
 
 }

@@ -1,15 +1,16 @@
 package com.auth.service.system.authorization.ops.query;
 
 import com.auth.common.data.model.PageResponse;
-import com.auth.service.system.authorization.ops.model.query.AuthorizationInvalidationEventQuery;
-import com.auth.service.system.authorization.ops.model.vo.AuthorizationInvalidationEventDetailVO;
-import com.auth.service.system.authorization.ops.model.vo.AuthorizationInvalidationEventPageVO;
-import com.auth.service.system.authorization.ops.exception.AuthorizationInvalidationOpsResultCode;
-import com.auth.service.system.authorization.ops.model.query.AuthorizationInvalidationEventOpsQuery;
-import com.auth.service.system.authorization.ops.service.AuthorizationInvalidationEventOpsService;
+import com.auth.service.system.authorization.exception.AuthorizationInvalidationOpsResultCode;
+import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidationEventDetailInnerDTO;
+import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidationEventPageInnerDTO;
+import com.auth.service.system.authorization.model.query.AuthorizationInvalidationEventOpsQuery;
+import com.auth.service.system.authorization.model.query.AuthorizationInvalidationEventQuery;
+import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationEventDetailVO;
+import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationEventPageVO;
+import com.auth.service.system.authorization.service.AuthorizationInvalidationEventOpsService;
+import com.auth.service.system.authorization.service.impl.AuthorizationInvalidationEventQueryServiceImpl;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.authorization.integration.feign.dto.AuthorizationInvalidationEventDetailInnerDTO;
-import com.auth.service.system.authorization.integration.feign.dto.AuthorizationInvalidationEventPageInnerDTO;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,9 +23,7 @@ import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.SERVICE_UNAVAILABLE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
@@ -33,8 +32,8 @@ import static org.mockito.Mockito.when;
 /**
  * {@link AuthorizationInvalidationEventQueryServiceImpl} 单元测试
  */
-@ExtendWith(MockitoExtension.class)
 @DisplayName("AuthorizationInvalidationEventQueryServiceImpl 幂等事件运维查询")
+@ExtendWith(MockitoExtension.class)
 class AuthorizationInvalidationEventQueryServiceImplTest {
 
 	@Mock

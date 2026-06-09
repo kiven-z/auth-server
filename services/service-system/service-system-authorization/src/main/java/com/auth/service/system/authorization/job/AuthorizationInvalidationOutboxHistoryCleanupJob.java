@@ -1,7 +1,7 @@
 package com.auth.service.system.authorization.job;
 
 import com.auth.service.system.authorization.config.AuthorizationInvalidationProperties;
-import com.auth.service.system.authorization.outbox.mapper.SysAuthorizationInvalidationOutboxMapper;
+import com.auth.service.system.authorization.mapper.SysAuthorizationInvalidationOutboxMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;

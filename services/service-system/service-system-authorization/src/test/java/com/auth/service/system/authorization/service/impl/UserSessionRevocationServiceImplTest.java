@@ -1,7 +1,7 @@
 package com.auth.service.system.authorization.service.impl;
 
 import com.auth.common.core.model.response.Result;
-import com.auth.service.system.authorization.integration.feign.AuthInnerFeignClient;
+import com.auth.service.system.authorization.feign.AuthInnerFeignClient;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,9 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link UserSessionRevocationServiceImpl} 单元测试

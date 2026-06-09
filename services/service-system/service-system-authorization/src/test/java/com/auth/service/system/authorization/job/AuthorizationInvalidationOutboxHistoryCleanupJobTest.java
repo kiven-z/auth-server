@@ -1,7 +1,7 @@
 package com.auth.service.system.authorization.job;
 
 import com.auth.service.system.authorization.config.AuthorizationInvalidationProperties;
-import com.auth.service.system.authorization.outbox.mapper.SysAuthorizationInvalidationOutboxMapper;
+import com.auth.service.system.authorization.mapper.SysAuthorizationInvalidationOutboxMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,16 +11,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link AuthorizationInvalidationOutboxHistoryCleanupJob} 单元测试
  */
-@ExtendWith(MockitoExtension.class)
 @DisplayName("AuthorizationInvalidationOutboxHistoryCleanupJob SUCCESS 历史清理")
+@ExtendWith(MockitoExtension.class)
 class AuthorizationInvalidationOutboxHistoryCleanupJobTest {
 
 	@Mock
