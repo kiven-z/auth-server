@@ -24,16 +24,6 @@ public class AuthInnerFeignClientFallback implements AuthInnerFeignClient {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Result<String> refreshUserCache(List<Long> userIds) {
-		log.error("AuthenticationInnerFeignClientFallback-刷新用户缓存 失败，用户IDs：{}", userIds);
-
-		return Result.error("刷新缓存服务暂不可用");
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
 	public Result<EffectiveCodesInnerDTO> getEffectiveCodes(Long userId) {
 		log.error("AuthInnerPrincipalFeignClientFallback: getEffectiveCodes failed, userId={}", userId);
 		return Result.success(new EffectiveCodesInnerDTO());

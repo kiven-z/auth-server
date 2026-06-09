@@ -10,12 +10,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link AuthorizationInnerService} 单元测试
@@ -26,27 +26,8 @@ class AuthorizationInnerServiceTest {
 	@Mock
 	private AuthProfileQueryService authProfileQueryService;
 
-	@Mock
-	private AuthProfileCacheApplicationService authProfileCacheApplicationService;
-
 	@InjectMocks
 	private AuthorizationInnerService authorizationInnerService;
-
-	@Test
-	@DisplayName("刷新缓存：入参为空/含 null 时不抛异常且跳过 null")
-	void refreshUserCache_shouldIgnoreEmptyAndNullAndSwallowExceptions() {
-		assertDoesNotThrow(() -> authorizationInnerService.refreshUserCache(List.of()));
-		verifyNoInteractions(authProfileQueryService, authProfileCacheApplicationService);
-
-		AuthProfile profile = mock(AuthProfile.class);
-		when(authProfileQueryService.buildByUserId(TestConstants.USER_ID)).thenReturn(profile);
-		doThrow(new RuntimeException("boom")).when(authProfileCacheApplicationService).cacheProfile(profile);
-
-		assertDoesNotThrow(
-				() -> authorizationInnerService.refreshUserCache(Arrays.asList(null, TestConstants.USER_ID)));
-		verify(authProfileQueryService).buildByUserId(TestConstants.USER_ID);
-		verify(authProfileCacheApplicationService).cacheProfile(profile);
-	}
 
 	@Test
 	@DisplayName("resolveEffectiveCodes：委托 AuthProfileQueryService 并拷贝角色与权限列表")

@@ -30,14 +30,6 @@ import com.auth.service.system.authorization.feign.fallback.AuthInnerFeignClient
 public interface AuthInnerFeignClient {
 
 	/**
-	 * 刷新用户缓存
-	 * @param userIds 用户ID列表
-	 * @return 刷新结果
-	 */
-	@PostMapping("/authorization/cache/refresh")
-	Result<String> refreshUserCache(@RequestBody List<Long> userIds);
-
-	/**
 	 * 查询用户生效角色码与权限码
 	 * @param userId 用户 ID
 	 * @return 统一响应体

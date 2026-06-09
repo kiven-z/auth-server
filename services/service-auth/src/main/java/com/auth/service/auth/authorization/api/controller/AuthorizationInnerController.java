@@ -42,14 +42,6 @@ public class AuthorizationInnerController {
 	private final AuthorizationInvalidationEventOpsApplicationService authorizationInvalidationEventOpsApplicationService;
 
 	@InternalApi
-	@Operation(summary = "刷新用户授权画像缓存（AuthProfile）")
-	@PostMapping("/cache/refresh")
-	public Result<Void> refreshUserCache(@RequestBody(required = false) List<Long> userIds) {
-		authorizationInnerService.refreshUserCache(userIds);
-		return Result.success();
-	}
-
-	@InternalApi
 	@Operation(summary = "查询用户生效角色码与权限码（供 system 动态菜单等内部调用）")
 	@GetMapping("/principal/{userId}/effective-codes")
 	public Result<EffectiveCodesVO> effectiveCodes(@PathVariable("userId") Long userId) {
