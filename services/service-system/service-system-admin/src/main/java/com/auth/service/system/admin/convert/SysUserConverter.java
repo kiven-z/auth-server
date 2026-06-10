@@ -4,8 +4,10 @@ import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.admin.model.form.user.SysUserForm;
 import com.auth.service.system.admin.model.po.user.SysUserPageRowPO;
 import com.auth.service.system.admin.model.vo.user.SysUserPageVO;
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.factory.Mappers;
 
 /**
@@ -46,15 +48,12 @@ public interface SysUserConverter {
 	UserEntity toEntity(SysUserForm form);
 
 	/**
-	 * 更新表单字段合并到已有实体（不覆盖用户名、状态、密码与权限版本）
+	 * 更新表单字段合并到已有实体
 	 * @param form 更新表单
 	 * @param entity 已有实体
 	 */
 	@Mapping(target = "id", ignore = true)
-	@Mapping(target = "username", ignore = true)
-	@Mapping(target = "status", ignore = true)
 	@Mapping(target = "password", ignore = true)
-	@Mapping(target = "avatar", ignore = true)
 	@Mapping(target = "age", ignore = true)
 	@Mapping(target = "permVersion", ignore = true)
 	@Mapping(target = "createTime", ignore = true)
@@ -63,6 +62,7 @@ public interface SysUserConverter {
 	@Mapping(target = "updateUser", ignore = true)
 	@Mapping(target = "version", ignore = true)
 	@Mapping(target = "isDeleted", ignore = true)
+	@BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 	void applyUpdateForm(SysUserForm form, @org.mapstruct.MappingTarget UserEntity entity);
 
 }

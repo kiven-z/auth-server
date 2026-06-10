@@ -67,7 +67,8 @@ public class SysUserController {
 	@Operation(summary = "更新用户基础资料")
 	@PreAuthorize("@auth.decide('sysUser:update')")
 	@PutMapping("/{id}")
-	public Result<Void> update(@PathVariable("id") Long id, @Validated(UpdateGroup.class) @RequestBody SysUserForm form) {
+	public Result<Void> update(@PathVariable("id") Long id,
+			@Validated(UpdateGroup.class) @RequestBody SysUserForm form) {
 		sysUserService.update(id, form);
 		return Result.success();
 	}

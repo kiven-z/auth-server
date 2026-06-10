@@ -12,6 +12,10 @@ import com.auth.service.system.admin.model.form.user.SysUserForm;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.admin.support.user.SysUserDefaults;
 import com.auth.service.system.admin.support.user.UserOperationChecker;
+import com.auth.service.system.admin.support.user.UserUpdateSideEffect;
+import com.auth.service.system.admin.support.user.UserUpdateSideEffectResolver;
+import com.auth.service.system.admin.support.user.UserWriteSideEffectApplier;
+import com.auth.service.system.authorization.dispatch.trigger.UserScopeAuthorizationInvalidationTrigger;
 import com.auth.service.system.authorization.dispatch.trigger.UserSessionRevocationTrigger;
 import com.auth.service.system.admin.model.po.user.SysUserPageRowPO;
 import com.auth.service.system.admin.model.query.user.SysUserPageQuery;
@@ -72,14 +76,24 @@ class SysUserServiceImplTest {
 	private PasswordEncoder passwordEncoder;
 
 	@Mock
+	private UserScopeAuthorizationInvalidationTrigger userScopeInvalidationTrigger;
+
+	@Mock
 	private UserSessionRevocationTrigger userSessionRevocationTrigger;
+
+	private UserUpdateSideEffectResolver userUpdateSideEffectResolver;
+
+	private UserWriteSideEffectApplier userWriteSideEffectApplier;
 
 	private SysUserServiceImpl sysUserService;
 
 	@BeforeEach
 	void setUp() throws Exception {
-		sysUserService = new SysUserServiceImpl(auditUserDisplayService, new UserOperationChecker(), passwordEncoder,
+		userUpdateSideEffectResolver = new UserUpdateSideEffectResolver();
+		userWriteSideEffectApplier = new UserWriteSideEffectApplier(userScopeInvalidationTrigger,
 				userSessionRevocationTrigger);
+		sysUserService = new SysUserServiceImpl(auditUserDisplayService, new UserOperationChecker(), passwordEncoder,
+				userUpdateSideEffectResolver, userWriteSideEffectApplier);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysUserService, sysUserMapper);
@@ -181,11 +195,13 @@ class SysUserServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("更新用户：校验通过后合并表单并保留用户名与状态")
-	void updateShouldApplyFormWithoutChangingUsernameOrStatus() {
+	@DisplayName("更新用户：校验通过后合并表单并保留状态")
+	void updateShouldApplyFormWithoutChangingStatus() {
 		UserEntity existing = new UserEntity();
 		existing.setId(8L);
 		existing.setUsername("keep_user");
+		existing.setEmail("old@example.com");
+		existing.setPhone("13800000000");
 		existing.setStatus(UserStatus.DISABLED.getCode());
 		when(sysUserMapper.selectById(8L)).thenReturn(existing);
 		SysUserServiceImpl spyService = spy(sysUserService);
@@ -206,6 +222,32 @@ class SysUserServiceImplTest {
 			assertThat(updated.getEmail()).isEqualTo("updated@example.com");
 			assertThat(updated.getRemark()).isEqualTo("updated note");
 			assertThat(updated.getAge()).isNotNull();
+			verify(userScopeInvalidationTrigger).submitByUserIds(List.of(8L), "update");
+			verify(userSessionRevocationTrigger).revokeAllSessionsAfterCommit(List.of(8L));
+		}
+	}
+
+	@Test
+	@DisplayName("更新用户：仅改昵称时不触发授权失效与会话撤销")
+	void updateShouldSkipSideEffectsWhenOnlyCosmeticFieldsChanged() {
+		UserEntity existing = new UserEntity();
+		existing.setId(8L);
+		existing.setUsername("keep_user");
+		existing.setEmail("updated@example.com");
+		existing.setPhone("13900000001");
+		existing.setStatus(UserStatus.NORMAL.getCode());
+		when(sysUserMapper.selectById(8L)).thenReturn(existing);
+		SysUserServiceImpl spyService = spy(sysUserService);
+		doReturn(true).when(spyService).updateById(any(UserEntity.class));
+
+		try (MockedStatic<SecurityUserUtils> securityUserUtils = mockStatic(SecurityUserUtils.class)) {
+			securityUserUtils.when(SecurityUserUtils::getUserId).thenReturn(99L);
+
+			SysUserForm form = validUpdateForm();
+			spyService.update(8L, form);
+
+			verify(userScopeInvalidationTrigger, never()).submitByUserIds(anyList(), anyString());
+			verify(userSessionRevocationTrigger, never()).revokeAllSessionsAfterCommit(anyList());
 		}
 	}
 
@@ -253,6 +295,7 @@ class SysUserServiceImplTest {
 			spyService.deleteByIds(Arrays.asList(2L, null, 3L, 3L));
 
 			verify(spyService).removeByIds(List.of(2L, 3L));
+			verify(userScopeInvalidationTrigger).submitByUserIds(List.of(2L, 3L), "delete");
 			verify(userSessionRevocationTrigger).revokeAllSessionsAfterCommit(List.of(2L, 3L));
 		}
 	}
@@ -355,6 +398,7 @@ class SysUserServiceImplTest {
 					&& updates.stream()
 						.anyMatch(entity -> Long.valueOf(3L).equals(entity.getId())
 								&& Integer.valueOf(UserStatus.LOCKED.getCode()).equals(entity.getStatus()))));
+			verify(userScopeInvalidationTrigger).submitByUserIds(List.of(2L, 3L), "lock");
 			verify(userSessionRevocationTrigger).revokeAllSessionsAfterCommit(List.of(2L, 3L));
 		}
 	}

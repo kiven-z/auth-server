@@ -1,6 +1,14 @@
 package com.auth.service.system.admin.service.impl;
 
-import cn.hutool.core.collection.CollUtil;
+import java.time.LocalDate;
+import java.time.Period;
+import java.util.List;
+import java.util.Objects;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.auth.common.data.model.PageResponse;
 import com.auth.common.data.model.enums.UserStatus;
 import com.auth.module.platform.persistence.model.UserEntity;
@@ -16,22 +24,18 @@ import com.auth.service.system.admin.service.SysUserService;
 import com.auth.service.system.admin.support.sqlbuild.SysUserPageOrderSqlBuilder;
 import com.auth.service.system.admin.support.user.SysUserDefaults;
 import com.auth.service.system.admin.support.user.UserOperationChecker;
+import com.auth.service.system.authorization.dispatch.trigger.UserScopeAuthorizationInvalidationTrigger;
 import com.auth.service.system.authorization.dispatch.trigger.UserSessionRevocationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.common.service.AuditUserDisplayService;
+import com.auth.service.system.common.support.FieldChangeSupport;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.Period;
-import java.util.List;
-import java.util.Objects;
+import cn.hutool.core.collection.CollUtil;
+import lombok.RequiredArgsConstructor;
 
 /**
  * 系统用户服务实现
@@ -48,6 +52,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 	private final UserOperationChecker userOperationChecker;
 
 	private final PasswordEncoder passwordEncoder;
+
+	private final UserScopeAuthorizationInvalidationTrigger userScopeInvalidationTrigger;
 
 	private final UserSessionRevocationTrigger userSessionRevocationTrigger;
 
@@ -89,13 +95,27 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 			throw new SystemBusinessException(SystemCommonResultCode.USER_NOT_FOUND, id);
 		}
 
-		userOperationChecker.requireOperable(List.of(id));
+		List<Long> userIds = List.of(id);
+		userOperationChecker.requireOperable(userIds);
+
+		// 解析需要更新用户画像
+		boolean resolveUpdate = FieldChangeSupport.anyChanged(!Objects.equals(existing.getStatus(), form.getStatus()));
+		if (resolveUpdate) {
+			userScopeInvalidationTrigger.submitByUserIds(userIds, "update");
+		}
+
+		// 解析需要踢出会话
+		boolean revoke = FieldChangeSupport.anyChanged(
+				FieldChangeSupport.codeChanged(existing.getUsername(), form.getUsername()),
+				FieldChangeSupport.codeChanged(existing.getEmail(), form.getEmail()),
+				FieldChangeSupport.codeChanged(existing.getPhone(), form.getPhone()));
+		if (revoke) {
+			userSessionRevocationTrigger.revokeAllSessionsAfterCommit(userIds);
+		}
+
 		SysUserConverter.INSTANCE.applyUpdateForm(form, existing);
 		if (form.getBirthday() != null) {
 			existing.setAge(Period.between(form.getBirthday(), LocalDate.now()).getYears());
-		}
-		else {
-			existing.setAge(null);
 		}
 
 		updateById(existing);
