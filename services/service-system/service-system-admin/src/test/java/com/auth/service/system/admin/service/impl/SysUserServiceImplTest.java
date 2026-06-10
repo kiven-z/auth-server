@@ -101,8 +101,8 @@ class SysUserServiceImplTest {
 	void resetPasswordByAdminRejectsMissingUser() {
 		when(sysUserMapper.selectById(99L)).thenReturn(null);
 
-		assertThatThrownBy(
-				() -> sysUserService.resetPasswordByAdmin(99L, adminResetForm("newPass12", "newPass12"), CHANGE_IP))
+		assertThatThrownBy(67890
+				- () -> sysUserService.resetPasswordByAdmin(99L, adminResetForm("newPass12", "newPass12"), CHANGE_IP))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.USER_NOT_FOUND);

@@ -11,11 +11,11 @@ import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.admin.model.form.user.SysUserAdminResetPasswordForm;
 import com.auth.service.system.admin.model.form.user.SysUserBatchStatusForm;
-import com.auth.service.system.admin.model.form.user.SysUserChangePasswordForm;
 import com.auth.service.system.admin.model.form.user.SysUserForm;
 import com.auth.service.system.admin.model.query.user.SysUserPageQuery;
 import com.auth.service.system.admin.model.vo.user.SysUserPageVO;
 import com.auth.service.system.admin.service.SysUserService;
+import com.auth.service.system.admin.support.user.UserPasswordService;
 import com.auth.service.system.common.model.SystemAuditBizModule;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
@@ -45,18 +45,9 @@ public class SysUserController {
 
 	private final SysUserService sysUserService;
 
-	private final IpAddressService ipAddressService;
+	private final UserPasswordService userPasswordService;
 
-	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
-	@Operation(summary = "当前用户修改密码")
-	@PutMapping("/me/password")
-	public Result<String> changeOwnPassword(@Valid @RequestBody SysUserChangePasswordForm form,
-			HttpServletRequest request) {
-		String changeIp = ipAddressService.resolveIpInfo(request).getIpAddr();
-		sysUserService.changeOwnPassword(form, changeIp);
-		return Result.success(null, MODIFY_SUCCESS.getMessage());
-	}
+	private final IpAddressService ipAddressService;
 
 	@OperationLog(targetType = "USER_LIST", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.QUERY)
@@ -87,7 +78,7 @@ public class SysUserController {
 	public Result<String> resetPassword(@PathVariable("id") Long id,
 			@Valid @RequestBody SysUserAdminResetPasswordForm form, HttpServletRequest request) {
 		String changeIp = ipAddressService.resolveIpInfo(request).getIpAddr();
-		sysUserService.resetPasswordByAdmin(id, form, changeIp);
+		userPasswordService.resetPasswordByAdmin(id, form, changeIp);
 		return Result.success(null, MODIFY_SUCCESS.getMessage());
 	}
 

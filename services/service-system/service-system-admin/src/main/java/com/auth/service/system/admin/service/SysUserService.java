@@ -2,9 +2,7 @@ package com.auth.service.system.admin.service;
 
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.platform.persistence.model.UserEntity;
-import com.auth.service.system.admin.model.form.user.SysUserAdminResetPasswordForm;
 import com.auth.service.system.admin.model.form.user.SysUserBatchStatusForm;
-import com.auth.service.system.admin.model.form.user.SysUserChangePasswordForm;
 import com.auth.service.system.admin.model.form.user.SysUserForm;
 import com.auth.service.system.admin.model.query.user.SysUserPageQuery;
 import com.auth.service.system.admin.model.vo.user.SysUserPageVO;
@@ -52,20 +50,5 @@ public interface SysUserService extends IService<UserEntity> {
 	 * @param form 目标状态与用户主键列表
 	 */
 	void batchUpdateStatus(SysUserBatchStatusForm form);
-
-	/**
-	 * 管理员重置用户密码
-	 * @param userId 目标用户主键
-	 * @param form 新密码
-	 * @param changeIp 客户端 IP
-	 */
-	void resetPasswordByAdmin(Long userId, SysUserAdminResetPasswordForm form, String changeIp);
-
-	/**
-	 * 当前登录用户修改自己的密码
-	 * @param form 旧密码与新密码
-	 * @param changeIp 客户端 IP
-	 */
-	void changeOwnPassword(SysUserChangePasswordForm form, String changeIp);
 
 }

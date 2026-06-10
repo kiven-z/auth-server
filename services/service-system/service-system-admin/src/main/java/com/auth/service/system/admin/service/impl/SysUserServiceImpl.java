@@ -4,18 +4,14 @@ import cn.hutool.core.collection.CollUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.common.data.model.enums.UserStatus;
 import com.auth.module.platform.persistence.model.UserEntity;
-import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.service.system.admin.convert.SysUserConverter;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.SysUserMapper;
-import com.auth.service.system.admin.model.form.user.SysUserAdminResetPasswordForm;
 import com.auth.service.system.admin.model.form.user.SysUserBatchStatusForm;
-import com.auth.service.system.admin.model.form.user.SysUserChangePasswordForm;
 import com.auth.service.system.admin.model.form.user.SysUserForm;
 import com.auth.service.system.admin.model.po.user.SysUserPageRowPO;
 import com.auth.service.system.admin.model.query.user.SysUserPageQuery;
 import com.auth.service.system.admin.model.vo.user.SysUserPageVO;
-import com.auth.service.system.admin.service.LogUserPasswordHistoryService;
 import com.auth.service.system.admin.service.SysUserService;
 import com.auth.service.system.admin.support.sqlbuild.SysUserPageOrderSqlBuilder;
 import com.auth.service.system.admin.support.user.SysUserDefaults;
@@ -55,8 +51,6 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 	private final PasswordEncoder passwordEncoder;
 
 	private final UserSessionRevocationTrigger userSessionRevocationTrigger;
-
-	private final LogUserPasswordHistoryService logUserPasswordHistoryService;
 
 	/**
 	 * {@inheritDoc}
@@ -162,62 +156,6 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 		}).toList();
 		updateBatchById(updates);
 		userSessionRevocationTrigger.revokeAllSessionsAfterCommit(idsToUpdate);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void resetPasswordByAdmin(Long userId, SysUserAdminResetPasswordForm form, String changeIp) {
-		UserEntity existing = getById(userId);
-		if (existing == null) {
-			throw new SystemBusinessException(SystemCommonResultCode.USER_NOT_FOUND, userId);
-		}
-
-		userOperationChecker.requireOperable(List.of(userId));
-		applyPasswordChange(existing, form.getNewPassword(), form.getConfirmPassword(), changeIp);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void changeOwnPassword(SysUserChangePasswordForm form, String changeIp) {
-		Long currentUserId = SecurityUserUtils.getUserId();
-		if (currentUserId == null) {
-			throw new SystemBusinessException(SystemCommonResultCode.JWT_INVALID);
-		}
-
-		UserEntity existing = getById(currentUserId);
-		if (existing == null) {
-			throw new SystemBusinessException(SystemCommonResultCode.USER_NOT_FOUND, currentUserId);
-		}
-
-		if (!passwordEncoder.matches(form.getOldPassword(), existing.getPassword())) {
-			throw new SystemBusinessException(SystemAdminResultCode.OLD_PASSWORD_INCORRECT);
-		}
-
-		applyPasswordChange(existing, form.getNewPassword(), form.getConfirmPassword(), changeIp);
-	}
-
-	/**
-	 * 校验确认密码、更新密码、记录历史并踢出全部会话
-	 * @param user 目标用户
-	 * @param newPassword 新密码明文
-	 * @param confirmPassword 确认密码明文
-	 * @param changeIp 客户端 IP
-	 */
-	private void applyPasswordChange(UserEntity user, String newPassword, String confirmPassword, String changeIp) {
-		if (!Objects.equals(newPassword, confirmPassword)) {
-			throw new SystemBusinessException(SystemAdminResultCode.PASSWORD_CONFIRM_MISMATCH);
-		}
-
-		String encodedPassword = passwordEncoder.encode(newPassword);
-		user.setPassword(encodedPassword);
-		updateById(user);
-
-		logUserPasswordHistoryService.recordChange(user.getId(), encodedPassword, changeIp);
-		userSessionRevocationTrigger.revokeAllSessionsAfterCommit(List.of(user.getId()));
 	}
 
 }
