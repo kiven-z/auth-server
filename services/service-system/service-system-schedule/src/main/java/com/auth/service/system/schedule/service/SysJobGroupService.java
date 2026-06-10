@@ -5,6 +5,7 @@ import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
 import com.auth.service.system.schedule.model.form.SysJobGroupForm;
 import com.auth.service.system.schedule.model.form.SysJobGroupUpdateForm;
 import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
+import com.auth.service.system.schedule.model.vo.SysJobGroupDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobGroupPageResponse;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
@@ -32,6 +33,13 @@ public interface SysJobGroupService {
 	 * @return 列表
 	 */
 	List<SysJobGroupPageResponse> listEnabledOptions(String keyword, int limit);
+
+	/**
+	 * 分组详情
+	 * @param id 主键
+	 * @return 详情
+	 */
+	SysJobGroupDetailVO getDetail(Long id);
 
 	/**
 	 * 新增分组

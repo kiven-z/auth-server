@@ -4,6 +4,7 @@ import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
 import com.auth.service.system.schedule.model.form.SysJobGroupForm;
 import com.auth.service.system.schedule.model.form.SysJobGroupUpdateForm;
 import com.auth.service.system.schedule.model.po.SysJobGroupPageRowPO;
+import com.auth.service.system.schedule.model.vo.SysJobGroupDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobGroupPageResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -59,5 +60,14 @@ public interface SysJobGroupConverter {
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
 	SysJobGroupPageResponse toPageResponse(SysJobGroupPageRowPO po);
+
+	/**
+	 * 任务分组实体 → 详情 VO
+	 * @param entity 任务分组实体
+	 * @return 详情返回对象
+	 */
+	@Mapping(target = "createUsername", ignore = true)
+	@Mapping(target = "updateUsername", ignore = true)
+	SysJobGroupDetailVO toDetailVo(SysJobGroupEntity entity);
 
 }

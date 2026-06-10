@@ -13,6 +13,7 @@ import com.auth.service.system.schedule.model.form.SysJobGroupForm;
 import com.auth.service.system.schedule.model.form.SysJobGroupUpdateForm;
 import com.auth.service.system.schedule.model.po.SysJobGroupPageRowPO;
 import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
+import com.auth.service.system.schedule.model.vo.SysJobGroupDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobGroupPageResponse;
 import com.auth.service.system.schedule.service.SysJobGroupService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -71,6 +72,21 @@ public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJo
 		auditUserDisplayService.enrichAuditUsernames(voList);
 
 		return voList;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public SysJobGroupDetailVO getDetail(Long id) {
+		SysJobGroupEntity entity = getById(id);
+		if (entity == null) {
+			throw new SystemBusinessException(DATA_NOT_EXIST);
+		}
+
+		SysJobGroupDetailVO detail = SysJobGroupConverter.INSTANCE.toDetailVo(entity);
+		auditUserDisplayService.enrichAuditUsernames(List.of(detail));
+		return detail;
 	}
 
 	/**

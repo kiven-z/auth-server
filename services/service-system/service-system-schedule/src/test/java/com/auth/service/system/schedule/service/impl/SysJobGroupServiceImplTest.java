@@ -8,6 +8,7 @@ import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
 import com.auth.service.system.schedule.model.form.SysJobGroupForm;
 import com.auth.service.system.schedule.model.po.SysJobGroupPageRowPO;
 import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
+import com.auth.service.system.schedule.model.vo.SysJobGroupDetailVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -104,6 +105,35 @@ class SysJobGroupServiceImplTest {
 		sysJobGroupService.listEnabledOptions(null, 0);
 
 		verify(sysJobGroupMapper).selectEnabledOptions(null, 0);
+	}
+
+	@Test
+	@DisplayName("详情：存在时返回 VO 并补全审计展示名")
+	void getDetailReturnsVoWhenExists() {
+		SysJobGroupEntity entity = new SysJobGroupEntity();
+		entity.setId(1L);
+		entity.setGroupCode("G1");
+		entity.setGroupName("分组一");
+		entity.setStatus(true);
+		entity.setIsSystem(false);
+		entity.setOrderNum(0);
+		when(sysJobGroupMapper.selectById(1L)).thenReturn(entity);
+
+		SysJobGroupDetailVO detail = sysJobGroupService.getDetail(1L);
+
+		assertThat(detail.getGroupCode()).isEqualTo("G1");
+		assertThat(detail.getGroupName()).isEqualTo("分组一");
+		verify(auditUserDisplayService).enrichAuditUsernames(any(List.class));
+	}
+
+	@Test
+	@DisplayName("详情：分组不存在时抛出 DATA_NOT_EXIST")
+	void getDetailThrowsWhenMissing() {
+		when(sysJobGroupMapper.selectById(99L)).thenReturn(null);
+
+		assertThatThrownBy(() -> sysJobGroupService.getDetail(99L)).isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(DATA_NOT_EXIST);
 	}
 
 	@Test

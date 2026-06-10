@@ -12,6 +12,7 @@ import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
 import com.auth.service.system.schedule.model.form.SysJobGroupForm;
 import com.auth.service.system.schedule.model.form.SysJobGroupUpdateForm;
 import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
+import com.auth.service.system.schedule.model.vo.SysJobGroupDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobGroupPageResponse;
 import com.auth.service.system.schedule.service.SysJobGroupService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -62,6 +63,15 @@ public class SysJobGroupController {
 		List<SysJobGroupPageResponse> responses = sysJobGroupService.listEnabledOptions(keyword, limit);
 
 		return Result.success(responses);
+	}
+
+	@Operation(summary = "任务分组详情")
+	@PreAuthorize("@auth.decide('sysJobGroup:query')")
+	@GetMapping("{id}")
+	public Result<SysJobGroupDetailVO> detail(@PathVariable("id") Long id) {
+		SysJobGroupDetailVO detail = sysJobGroupService.getDetail(id);
+
+		return Result.success(detail);
 	}
 
 	@Operation(summary = "新增任务分组")
