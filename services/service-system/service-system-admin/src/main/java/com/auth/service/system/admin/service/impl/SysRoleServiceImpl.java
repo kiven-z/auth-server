@@ -1,14 +1,19 @@
 package com.auth.service.system.admin.service.impl;
 
+import java.util.Collections;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.convert.SysRoleConverter;
 import com.auth.service.system.admin.convert.SysRolePermissionConverter;
-import com.auth.service.system.admin.model.enums.RoleTypeEnum;
-import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.admin.mapper.GrantTableMapper;
 import com.auth.service.system.admin.mapper.SysRoleMapper;
 import com.auth.service.system.admin.mapper.SysRolePermissionMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
+import com.auth.service.system.admin.model.enums.RoleTypeEnum;
 import com.auth.service.system.admin.model.form.role.SysRoleForm;
 import com.auth.service.system.admin.model.query.SysRoleQuery;
 import com.auth.service.system.admin.model.vo.role.SysRoleDetailVO;
@@ -18,6 +23,7 @@ import com.auth.service.system.admin.service.SysRoleService;
 import com.auth.service.system.admin.support.sqlbuild.SysRolePageOrderSqlBuilder;
 import com.auth.service.system.authorization.dispatch.trigger.RoleAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.common.support.BusinessKeyAssert;
 import com.auth.service.system.common.support.FieldChangeSupport;
@@ -25,13 +31,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Collections;
-import java.util.List;
 
 /**
  * 系统角色服务实现
@@ -115,12 +117,10 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 		// 检查角色编码是否变更
 		String oldRoleCode = existing.getRoleCode();
 		String newRoleCode = form.getRoleCode();
-		Boolean oldStatus = existing.getStatus();
-		Boolean newStatus = form.getStatus();
 
 		// 检查角色编码是否变更
 		boolean roleCodeChanged = FieldChangeSupport.codeChanged(oldRoleCode, newRoleCode);
-		boolean statusChanged = FieldChangeSupport.valueChanged(oldStatus, newStatus);
+		boolean statusChanged = FieldChangeSupport.valueChanged(existing.getStatus(), form.getStatus());
 		if (roleCodeChanged) {
 			BusinessKeyAssert.requireAbsent(this,
 					Wrappers.<SysRoleEntity>lambdaQuery()
@@ -131,7 +131,6 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 
 		// 更新角色
 		SysRoleConverter.INSTANCE.applyUpdateForm(form, existing);
-		existing.setRoleCode(newRoleCode);
 		updateById(existing);
 
 		if (FieldChangeSupport.anyChanged(roleCodeChanged, statusChanged)) {

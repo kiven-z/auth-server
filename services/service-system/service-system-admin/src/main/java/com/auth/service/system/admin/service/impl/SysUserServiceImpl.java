@@ -1,14 +1,6 @@
 package com.auth.service.system.admin.service.impl;
 
-import java.time.LocalDate;
-import java.time.Period;
-import java.util.List;
-import java.util.Objects;
-
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
+import cn.hutool.core.collection.CollUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.common.data.model.enums.UserStatus;
 import com.auth.module.platform.persistence.model.UserEntity;
@@ -33,9 +25,15 @@ import com.auth.service.system.common.support.FieldChangeSupport;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-
-import cn.hutool.core.collection.CollUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.Period;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * 系统用户服务实现
@@ -99,7 +97,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 		userOperationChecker.requireOperable(userIds);
 
 		// 解析需要更新用户画像
-		boolean resolveUpdate = FieldChangeSupport.anyChanged(!Objects.equals(existing.getStatus(), form.getStatus()));
+		boolean resolveUpdate = FieldChangeSupport
+			.anyChanged(FieldChangeSupport.valueChanged(existing.getStatus(), form.getStatus()));
 		if (resolveUpdate) {
 			userScopeInvalidationTrigger.submitByUserIds(userIds, "update");
 		}

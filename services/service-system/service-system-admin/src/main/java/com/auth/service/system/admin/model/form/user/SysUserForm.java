@@ -26,7 +26,7 @@ public class SysUserForm implements Serializable {
 
 	@Schema(title = "用户名")
 	@Size(max = 64, message = "用户名长度不能超过64个字符", groups = { CreateGroup.class, UpdateGroup.class })
-	@NotBlank(groups = CreateGroup.class, message = "用户名不能为空")
+	@NotBlank(message = "用户名不能为空", groups = { CreateGroup.class, UpdateGroup.class })
 	private String username;
 
 	@Schema(title = "昵称", requiredMode = Schema.RequiredMode.REQUIRED)
@@ -50,9 +50,9 @@ public class SysUserForm implements Serializable {
 	private String employeeNo;
 
 	@Schema(title = "账号状态（0=禁用，1=正常，2=锁定）")
-	@Max(value = 2, message = "账号状态值无效", groups = CreateGroup.class)
-	@Min(value = 0, message = "账号状态值无效", groups = CreateGroup.class)
-	@NotNull(groups = CreateGroup.class, message = "账号状态不能为空")
+	@Max(value = 2, message = "账号状态值无效", groups = { CreateGroup.class, UpdateGroup.class })
+	@Min(value = 0, message = "账号状态值无效", groups = { CreateGroup.class, UpdateGroup.class })
+	@NotNull(message = "账号状态不能为空", groups = { CreateGroup.class, UpdateGroup.class })
 	private Integer status;
 
 	@Schema(title = "性别（0=未知，1=男，2=女）")

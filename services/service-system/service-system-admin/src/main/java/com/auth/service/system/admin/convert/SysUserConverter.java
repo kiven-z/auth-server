@@ -54,6 +54,7 @@ public interface SysUserConverter {
 	 */
 	@Mapping(target = "id", ignore = true)
 	@Mapping(target = "password", ignore = true)
+	@Mapping(target = "avatar", ignore = true)
 	@Mapping(target = "age", ignore = true)
 	@Mapping(target = "permVersion", ignore = true)
 	@Mapping(target = "createTime", ignore = true)

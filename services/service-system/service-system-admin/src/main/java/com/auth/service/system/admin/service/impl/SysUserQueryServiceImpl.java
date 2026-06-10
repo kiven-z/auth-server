@@ -3,12 +3,12 @@ package com.auth.service.system.admin.service.impl;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.admin.convert.SysUserProfileConverter;
-import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.admin.mapper.SysUserQueryMapper;
 import com.auth.service.system.admin.model.SysUserSearchItemResponse;
 import com.auth.service.system.admin.model.vo.sysuser.SysUserProfileResponse;
 import com.auth.service.system.admin.service.SysUserQueryService;
+import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
@@ -45,10 +45,10 @@ public class SysUserQueryServiceImpl extends ServiceImpl<SysUserQueryMapper, Use
 		}
 
 		SysUserProfileResponse response = SysUserProfileConverter.INSTANCE.toProfileResponse(user);
-		response.setDeptList(SysUserProfileConverter.INSTANCE.toDeptItemResponseList(
-				Objects.requireNonNullElse(sysUserQueryMapper.selectDeptProfileByUserId(userId), List.of())));
-		response.setPostList(SysUserProfileConverter.INSTANCE.toPostItemResponseList(
-				Objects.requireNonNullElse(sysUserQueryMapper.selectPostProfileByUserId(userId), List.of())));
+		response.setDeptList(SysUserProfileConverter.INSTANCE
+			.toDeptItemResponseList(sysUserQueryMapper.selectDeptProfileByUserId(userId)));
+		response.setPostList(SysUserProfileConverter.INSTANCE
+			.toPostItemResponseList(sysUserQueryMapper.selectPostProfileByUserId(userId)));
 
 		return response;
 	}

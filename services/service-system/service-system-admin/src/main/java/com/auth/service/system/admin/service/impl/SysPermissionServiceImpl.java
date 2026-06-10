@@ -4,13 +4,13 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.convert.SysPermissionConverter;
-import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.admin.mapper.SysMenuPermissionMapper;
 import com.auth.service.system.admin.mapper.SysPermissionMapper;
 import com.auth.service.system.admin.mapper.SysRolePermissionMapper;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.enums.PermissionTypeEnum;
 import com.auth.service.system.admin.model.form.permission.SysPermissionForm;
+import com.auth.service.system.admin.model.po.permission.SysPermissionBoundMenuPO;
 import com.auth.service.system.admin.model.po.permission.SysPermissionBoundRolePO;
 import com.auth.service.system.admin.model.query.SysPermissionQuery;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionDetailVO;
@@ -20,6 +20,7 @@ import com.auth.service.system.admin.support.sqlbuild.SysPermissionPageOrderSqlB
 import com.auth.service.system.authorization.dispatch.trigger.PermissionAuthorizationInvalidationTrigger;
 import com.auth.service.system.authorization.dispatch.trigger.RoleAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.common.support.BusinessKeyAssert;
 import com.auth.service.system.common.support.FieldChangeSupport;
@@ -85,11 +86,15 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 
 		// 查询绑定的角色和菜单
 		String permissionCode = entity.getPermissionCode();
-		detail.setBoundRoles(SysPermissionConverter.INSTANCE
-			.toBoundRoleItemList(sysRolePermissionMapper.selectBoundRolesByPermissionCode(permissionCode)));
-		if (PermissionTypeEnum.BUTTON.getCode().equals(entity.getPermissionType())) {
-			detail.setBoundMenus(SysPermissionConverter.INSTANCE
-				.toBoundMenuItemList(sysMenuPermissionMapper.selectBoundMenusByPermissionCode(permissionCode)));
+		List<SysPermissionBoundRolePO> boundRoles = sysRolePermissionMapper
+			.selectBoundRolesByPermissionCode(permissionCode);
+		detail.setBoundRoles(SysPermissionConverter.INSTANCE.toBoundRoleItemList(boundRoles));
+
+		Integer permissionType = entity.getPermissionType();
+		if (PermissionTypeEnum.BUTTON.getCode().equals(permissionType)) {
+			List<SysPermissionBoundMenuPO> permissionCodes = sysMenuPermissionMapper
+				.selectBoundMenusByPermissionCode(permissionCode);
+			detail.setBoundMenus(SysPermissionConverter.INSTANCE.toBoundMenuItemList(permissionCodes));
 		}
 		else {
 			detail.setBoundMenus(List.of());
