@@ -2,8 +2,8 @@ package com.auth.service.system.admin.service.impl;
 
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
-import com.auth.service.system.admin.mapper.UserDeptMapper;
 import com.auth.service.system.admin.mapper.SysUserMapper;
+import com.auth.service.system.admin.mapper.UserDeptMapper;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.entity.UserDeptEntity;
 import com.auth.service.system.admin.model.enums.UserOrgRelationStatusEnum;
@@ -28,10 +28,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link SysUserDeptServiceImpl} 单元测试
@@ -69,6 +66,29 @@ class SysUserDeptServiceImplTest {
 
 	private SysUserDeptServiceImpl sysUserDeptService;
 
+	private static UserEntity activeUser() {
+		UserEntity entity = new UserEntity();
+		entity.setId(SysUserDeptServiceImplTest.USER_ID);
+		entity.setUsername("tester");
+		return entity;
+	}
+
+	private static SysDeptEntity activeDept() {
+		SysDeptEntity dept = new SysDeptEntity();
+		dept.setId(SysUserDeptServiceImplTest.DEPT_ID);
+		dept.setStatus(true);
+		return dept;
+	}
+
+	private static UserDeptEntity relation(int status) {
+		UserDeptEntity entity = new UserDeptEntity();
+		entity.setId(SysUserDeptServiceImplTest.RELATION_ID);
+		entity.setUserId(USER_ID);
+		entity.setDeptId(DEPT_ID);
+		entity.setStatus(status);
+		return entity;
+	}
+
 	@BeforeEach
 	void setUp() {
 		UserReferenceChecker userReferenceChecker = new UserReferenceChecker(sysUserMapper);
@@ -80,10 +100,10 @@ class SysUserDeptServiceImplTest {
 	@Test
 	@DisplayName("新增：写入关联并触发用户授权失效")
 	void createInsertsRelationAndSubmitsInvalidation() {
-		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser(USER_ID));
+		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
 		when(userDeptMapper.countByUserIdAndDeptId(USER_ID, DEPT_ID)).thenReturn(0);
 		when(userDeptMapper.selectActiveByUserId(USER_ID)).thenReturn(List.of());
-		when(deptReferenceChecker.getExistingActive(DEPT_ID)).thenReturn(activeDept(DEPT_ID));
+		when(deptReferenceChecker.getExistingActive(DEPT_ID)).thenReturn(activeDept());
 
 		UserDeptAssignForm form = new UserDeptAssignForm();
 		form.setUserId(USER_ID);
@@ -104,9 +124,9 @@ class SysUserDeptServiceImplTest {
 	@Test
 	@DisplayName("新增：重复部门抛出 USER_DEPT_DUPLICATE")
 	void createThrowsWhenDuplicateDept() {
-		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser(USER_ID));
+		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
 		when(userDeptMapper.countByUserIdAndDeptId(USER_ID, DEPT_ID)).thenReturn(1);
-		when(deptReferenceChecker.getExistingActive(DEPT_ID)).thenReturn(activeDept(DEPT_ID));
+		when(deptReferenceChecker.getExistingActive(DEPT_ID)).thenReturn(activeDept());
 
 		UserDeptAssignForm form = new UserDeptAssignForm();
 		form.setUserId(USER_ID);
@@ -123,8 +143,8 @@ class SysUserDeptServiceImplTest {
 	@Test
 	@DisplayName("设为主部门：仅正常状态允许")
 	void setPrimaryThrowsWhenStatusNotNormal() {
-		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser(USER_ID));
-		UserDeptEntity existing = relation(RELATION_ID, UserOrgRelationStatusEnum.PART_TIME.getCode());
+		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
+		UserDeptEntity existing = relation(UserOrgRelationStatusEnum.PART_TIME.getCode());
 		when(userDeptMapper.selectByUserIdAndDeptId(USER_ID, DEPT_ID)).thenReturn(existing);
 
 		assertThatThrownBy(() -> sysUserDeptService.setPrimary(USER_ID, DEPT_ID))
@@ -136,8 +156,8 @@ class SysUserDeptServiceImplTest {
 	@Test
 	@DisplayName("调离：状态置为已调离并维护主部门")
 	void transferSetsStatusTransferred() {
-		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser(USER_ID));
-		UserDeptEntity existing = relation(RELATION_ID, UserOrgRelationStatusEnum.NORMAL.getCode());
+		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
+		UserDeptEntity existing = relation(UserOrgRelationStatusEnum.NORMAL.getCode());
 		when(userDeptMapper.selectByUserIdAndDeptId(USER_ID, DEPT_ID)).thenReturn(existing);
 
 		sysUserDeptService.transfer(USER_ID, DEPT_ID);
@@ -153,8 +173,8 @@ class SysUserDeptServiceImplTest {
 	@Test
 	@DisplayName("删除：按部门 ID 删除并仅触发当前用户授权失效")
 	void deleteByDeptIdsDeletesRelationAndSubmitsUserInvalidation() {
-		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser(USER_ID));
-		UserDeptEntity existing = relation(RELATION_ID, UserOrgRelationStatusEnum.NORMAL.getCode());
+		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
+		UserDeptEntity existing = relation(UserOrgRelationStatusEnum.NORMAL.getCode());
 		when(userDeptMapper.selectByUserIdAndDeptId(USER_ID, DEPT_ID)).thenReturn(existing);
 
 		sysUserDeptService.deleteByDeptIds(USER_ID, List.of(DEPT_ID));
@@ -167,7 +187,7 @@ class SysUserDeptServiceImplTest {
 	@Test
 	@DisplayName("更新：受保护用户不允许修改")
 	void updateThrowsWhenUserNotOperable() {
-		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser(USER_ID));
+		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
 		doThrow(new SystemBusinessException(SystemAdminResultCode.USER_OPERATION_FORBIDDEN, USER_ID))
 			.when(userOperationChecker)
 			.requireOperable(List.of(USER_ID));
@@ -180,29 +200,6 @@ class SysUserDeptServiceImplTest {
 		assertThatThrownBy(() -> sysUserDeptService.update(form)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemAdminResultCode.USER_OPERATION_FORBIDDEN);
-	}
-
-	private static UserEntity activeUser(Long id) {
-		UserEntity entity = new UserEntity();
-		entity.setId(id);
-		entity.setUsername("tester");
-		return entity;
-	}
-
-	private static SysDeptEntity activeDept(Long id) {
-		SysDeptEntity dept = new SysDeptEntity();
-		dept.setId(id);
-		dept.setStatus(true);
-		return dept;
-	}
-
-	private static UserDeptEntity relation(Long id, int status) {
-		UserDeptEntity entity = new UserDeptEntity();
-		entity.setId(id);
-		entity.setUserId(USER_ID);
-		entity.setDeptId(DEPT_ID);
-		entity.setStatus(status);
-		return entity;
 	}
 
 }

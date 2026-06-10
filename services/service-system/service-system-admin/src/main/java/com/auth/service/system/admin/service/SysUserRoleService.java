@@ -6,11 +6,11 @@ import com.auth.service.system.admin.model.vo.granttable.GrantTableAssignedRoleR
 import java.util.List;
 
 /**
- * 用户扩展管理（grant_table 直连角色等）
+ * 用户直连角色授权（grant_table）
  *
  * @author Bunny
  */
-public interface SysUserManageService {
+public interface SysUserRoleService {
 
 	/**
 	 * 查询用户已分配角色

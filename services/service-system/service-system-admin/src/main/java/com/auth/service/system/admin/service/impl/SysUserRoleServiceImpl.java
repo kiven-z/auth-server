@@ -9,7 +9,7 @@ import com.auth.service.system.admin.model.enums.RoleTypeEnum;
 import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
 import com.auth.service.system.admin.model.po.granttable.GrantTableBoundRolePO;
 import com.auth.service.system.admin.model.vo.granttable.GrantTableAssignedRoleRow;
-import com.auth.service.system.admin.service.SysUserManageService;
+import com.auth.service.system.admin.service.SysUserRoleService;
 import com.auth.service.system.admin.support.role.RoleGrantReferenceChecker;
 import com.auth.service.system.admin.support.user.UserOperationChecker;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * 用户扩展管理实现
+ * 用户直连角色授权实现
  *
  * @author Bunny
  */
@@ -31,7 +31,7 @@ import java.util.List;
 @Slf4j
 @Service
 @Transactional(rollbackFor = Exception.class)
-public class SysUserManageServiceImpl implements SysUserManageService {
+public class SysUserRoleServiceImpl implements SysUserRoleService {
 
 	private final UserReferenceChecker userReferenceChecker;
 
@@ -62,7 +62,6 @@ public class SysUserManageServiceImpl implements SysUserManageService {
 	public void replaceUserRoles(Long userId, GrantTableAssignRoleForm form) {
 		userReferenceChecker.getExistingActive(userId);
 
-		// 不能修改自己
 		userOperationChecker.requireOperable(List.of(userId));
 
 		List<String> roleCodes = CollUtil.emptyIfNull(form.getRoleCodes()).stream().distinct().toList();

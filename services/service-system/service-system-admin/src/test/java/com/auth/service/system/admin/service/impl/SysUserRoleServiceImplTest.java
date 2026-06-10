@@ -34,11 +34,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * {@link SysUserManageServiceImpl} 单元测试
+ * {@link SysUserRoleServiceImpl} 单元测试
  */
-@DisplayName("SysUserManageServiceImpl 用户直连角色授权")
+@DisplayName("SysUserRoleServiceImpl 用户直连角色授权")
 @ExtendWith(MockitoExtension.class)
-class SysUserManageServiceImplTest {
+class SysUserRoleServiceImplTest {
 
 	private static final Long USER_ID = 10L;
 
@@ -57,12 +57,12 @@ class SysUserManageServiceImplTest {
 	@Mock
 	private UserAuthorizationInvalidationTrigger userAuthorizationInvalidationTrigger;
 
-	private SysUserManageServiceImpl sysUserManageService;
+	private SysUserRoleServiceImpl sysUserRoleService;
 
 	@BeforeEach
 	void setUp() {
 		UserReferenceChecker userReferenceChecker = new UserReferenceChecker(sysUserMapper);
-		sysUserManageService = new SysUserManageServiceImpl(userReferenceChecker, userOperationChecker,
+		sysUserRoleService = new SysUserRoleServiceImpl(userReferenceChecker, userOperationChecker,
 				roleGrantReferenceChecker, grantTableMapper, userAuthorizationInvalidationTrigger);
 	}
 
@@ -77,7 +77,7 @@ class SysUserManageServiceImplTest {
 				RoleTypeEnum.SUBJECT_GRANT_TYPES))
 			.thenReturn(List.of(boundRole));
 
-		List<GrantTableAssignedRoleRow> rows = sysUserManageService.listAssignedRoles(USER_ID);
+		List<GrantTableAssignedRoleRow> rows = sysUserRoleService.listAssignedRoles(USER_ID);
 
 		assertThat(rows).hasSize(1);
 		assertThat(rows.get(0).getRoleCode()).isEqualTo("CUSTOM_A");
@@ -89,7 +89,7 @@ class SysUserManageServiceImplTest {
 	void listAssignedRolesThrowsWhenUserMissing() {
 		when(sysUserMapper.selectById(USER_ID)).thenReturn(null);
 
-		assertThatThrownBy(() -> sysUserManageService.listAssignedRoles(USER_ID))
+		assertThatThrownBy(() -> sysUserRoleService.listAssignedRoles(USER_ID))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.USER_NOT_FOUND);
@@ -102,7 +102,7 @@ class SysUserManageServiceImplTest {
 		GrantTableAssignRoleForm form = new GrantTableAssignRoleForm();
 		form.setRoleCodes(List.of("BIZ_ADMIN", "CUSTOM_A"));
 
-		sysUserManageService.replaceUserRoles(USER_ID, form);
+		sysUserRoleService.replaceUserRoles(USER_ID, form);
 
 		verify(userOperationChecker).requireOperable(List.of(USER_ID));
 		verify(roleGrantReferenceChecker).requireGrantEligibleRoles(List.of("BIZ_ADMIN", "CUSTOM_A"),
@@ -120,7 +120,7 @@ class SysUserManageServiceImplTest {
 		GrantTableAssignRoleForm form = new GrantTableAssignRoleForm();
 		form.setRoleCodes(List.of());
 
-		sysUserManageService.replaceUserRoles(USER_ID, form);
+		sysUserRoleService.replaceUserRoles(USER_ID, form);
 
 		verify(grantTableMapper).deleteBySubject(GrantTableSubjectType.USER.name(), USER_ID);
 		verify(grantTableMapper, never()).batchInsertSubjectRoleGrants(any(), any(), any(), any());
@@ -137,7 +137,7 @@ class SysUserManageServiceImplTest {
 		GrantTableAssignRoleForm form = new GrantTableAssignRoleForm();
 		form.setRoleCodes(List.of("CUSTOM_A"));
 
-		assertThatThrownBy(() -> sysUserManageService.replaceUserRoles(USER_ID, form))
+		assertThatThrownBy(() -> sysUserRoleService.replaceUserRoles(USER_ID, form))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemAdminResultCode.USER_OPERATION_FORBIDDEN);
