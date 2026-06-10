@@ -2,7 +2,6 @@ package com.auth.service.system.admin.convert;
 
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.admin.model.form.user.SysUserForm;
-import com.auth.service.system.admin.model.form.user.SysUserUpdateForm;
 import com.auth.service.system.admin.model.po.user.SysUserPageRowPO;
 import com.auth.service.system.admin.model.vo.user.SysUserPageVO;
 import org.mapstruct.Mapper;
@@ -64,6 +63,6 @@ public interface SysUserConverter {
 	@Mapping(target = "updateUser", ignore = true)
 	@Mapping(target = "version", ignore = true)
 	@Mapping(target = "isDeleted", ignore = true)
-	void applyUpdateForm(SysUserUpdateForm form, @org.mapstruct.MappingTarget UserEntity entity);
+	void applyUpdateForm(SysUserForm form, @org.mapstruct.MappingTarget UserEntity entity);
 
 }

@@ -2,13 +2,14 @@ package com.auth.service.system.admin.controller;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
+import com.auth.common.web.valid.group.CreateGroup;
+import com.auth.common.web.valid.group.UpdateGroup;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.admin.model.form.user.SysUserBatchStatusForm;
 import com.auth.service.system.admin.model.form.user.SysUserForm;
-import com.auth.service.system.admin.model.form.user.SysUserUpdateForm;
 import com.auth.service.system.admin.model.query.user.SysUserPageQuery;
 import com.auth.service.system.admin.model.vo.user.SysUserPageVO;
 import com.auth.service.system.admin.service.SysUserService;
@@ -19,6 +20,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -55,7 +57,7 @@ public class SysUserController {
 	@Operation(summary = "新增用户")
 	@PreAuthorize("@auth.decide('sysUser:create')")
 	@PostMapping
-	public Result<Void> create(@Valid @RequestBody SysUserForm form) {
+	public Result<Void> create(@Validated(CreateGroup.class) @RequestBody SysUserForm form) {
 		sysUserService.create(form);
 		return Result.success();
 	}
@@ -65,7 +67,7 @@ public class SysUserController {
 	@Operation(summary = "更新用户基础资料")
 	@PreAuthorize("@auth.decide('sysUser:update')")
 	@PutMapping("/{id}")
-	public Result<Void> update(@PathVariable("id") Long id, @Valid @RequestBody SysUserUpdateForm form) {
+	public Result<Void> update(@PathVariable("id") Long id, @Validated(UpdateGroup.class) @RequestBody SysUserForm form) {
 		sysUserService.update(id, form);
 		return Result.success();
 	}

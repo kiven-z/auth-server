@@ -9,7 +9,6 @@ import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.SysUserMapper;
 import com.auth.service.system.admin.model.form.user.SysUserBatchStatusForm;
 import com.auth.service.system.admin.model.form.user.SysUserForm;
-import com.auth.service.system.admin.model.form.user.SysUserUpdateForm;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.admin.support.user.SysUserDefaults;
 import com.auth.service.system.admin.support.user.UserOperationChecker;
@@ -142,8 +141,8 @@ class SysUserServiceImplTest {
 		verify(auditUserDisplayService).enrichAuditUsernames(any(IPage.class));
 	}
 
-	private static SysUserUpdateForm validUpdateForm() {
-		SysUserUpdateForm form = new SysUserUpdateForm();
+	private static SysUserForm validUpdateForm() {
+		SysUserForm form = new SysUserForm();
 		form.setNickname("Updated User");
 		form.setEmail("updated@example.com");
 		form.setPhone("13900000001");
@@ -195,7 +194,7 @@ class SysUserServiceImplTest {
 		try (MockedStatic<SecurityUserUtils> securityUserUtils = mockStatic(SecurityUserUtils.class)) {
 			securityUserUtils.when(SecurityUserUtils::getUserId).thenReturn(99L);
 
-			SysUserUpdateForm form = validUpdateForm();
+			SysUserForm form = validUpdateForm();
 			spyService.update(8L, form);
 
 			ArgumentCaptor<UserEntity> captor = ArgumentCaptor.forClass(UserEntity.class);

@@ -128,62 +128,107 @@ class AdminCreateFormBeanValidationTest {
 	}
 
 	@Test
-	@DisplayName("SysUserForm：邮箱为空时存在 NotBlank 约束违反")
+	@DisplayName("SysUserForm：新增时用户名为空时存在 NotBlank 约束违反")
+	void userCreateFormRejectsBlankUsername() {
+		SysUserForm form = validUserForm();
+		form.setUsername("  ");
+
+		Set<ConstraintViolation<SysUserForm>> violations = validator.validate(form, CreateGroup.class);
+
+		assertThat(violations).anyMatch(v -> "username".equals(v.getPropertyPath().toString()));
+	}
+
+	@Test
+	@DisplayName("SysUserForm：新增时账号状态为空时存在 NotNull 约束违反")
+	void userCreateFormRejectsNullStatus() {
+		SysUserForm form = validUserForm();
+		form.setStatus(null);
+
+		Set<ConstraintViolation<SysUserForm>> violations = validator.validate(form, CreateGroup.class);
+
+		assertThat(violations).anyMatch(v -> "status".equals(v.getPropertyPath().toString()));
+	}
+
+	@Test
+	@DisplayName("SysUserForm：新增时邮箱为空时存在 NotBlank 约束违反")
 	void userCreateFormRejectsBlankEmail() {
 		SysUserForm form = validUserForm();
 		form.setEmail("  ");
 
-		Set<ConstraintViolation<SysUserForm>> violations = validator.validate(form);
+		Set<ConstraintViolation<SysUserForm>> violations = validator.validate(form, CreateGroup.class);
 
 		assertThat(violations).anyMatch(v -> "email".equals(v.getPropertyPath().toString()));
 	}
 
 	@Test
-	@DisplayName("SysUserForm：昵称为空时存在 NotBlank 约束违反")
+	@DisplayName("SysUserForm：新增时昵称为空时存在 NotBlank 约束违反")
 	void userCreateFormRejectsBlankNickname() {
 		SysUserForm form = validUserForm();
 		form.setNickname("  ");
 
-		Set<ConstraintViolation<SysUserForm>> violations = validator.validate(form);
+		Set<ConstraintViolation<SysUserForm>> violations = validator.validate(form, CreateGroup.class);
 
 		assertThat(violations).anyMatch(v -> "nickname".equals(v.getPropertyPath().toString()));
 	}
 
 	@Test
-	@DisplayName("SysUserForm：手机号为空时存在 NotBlank 约束违反")
+	@DisplayName("SysUserForm：新增时手机号为空时存在 NotBlank 约束违反")
 	void userCreateFormRejectsBlankPhone() {
 		SysUserForm form = validUserForm();
 		form.setPhone("");
 
-		Set<ConstraintViolation<SysUserForm>> violations = validator.validate(form);
+		Set<ConstraintViolation<SysUserForm>> violations = validator.validate(form, CreateGroup.class);
 
 		assertThat(violations).anyMatch(v -> "phone".equals(v.getPropertyPath().toString()));
 	}
 
 	@Test
-	@DisplayName("SysUserForm：工号为空时通过校验")
+	@DisplayName("SysUserForm：新增时工号为空时通过校验")
 	void userCreateFormAcceptsBlankEmployeeNo() {
 		SysUserForm form = validUserForm();
 		form.setEmployeeNo(null);
 
-		assertThat(validator.validate(form)).isEmpty();
+		assertThat(validator.validate(form, CreateGroup.class)).isEmpty();
 	}
 
 	@Test
-	@DisplayName("SysUserForm：性别非法时存在 Max 约束违反")
+	@DisplayName("SysUserForm：新增时性别非法时存在 Max 约束违反")
 	void userCreateFormRejectsInvalidGender() {
 		SysUserForm form = validUserForm();
 		form.setGender(9);
 
-		Set<ConstraintViolation<SysUserForm>> violations = validator.validate(form);
+		Set<ConstraintViolation<SysUserForm>> violations = validator.validate(form, CreateGroup.class);
 
 		assertThat(violations).anyMatch(v -> "gender".equals(v.getPropertyPath().toString()));
 	}
 
 	@Test
-	@DisplayName("SysUserForm：合法表单通过校验")
+	@DisplayName("SysUserForm：新增时合法表单通过校验")
 	void userCreateFormAcceptsWellFormedPayload() {
-		assertThat(validator.validate(validUserForm())).isEmpty();
+		assertThat(validator.validate(validUserForm(), CreateGroup.class)).isEmpty();
+	}
+
+	@Test
+	@DisplayName("SysUserForm：更新时缺少用户名与状态仍可通过校验")
+	void userUpdateFormAcceptsPayloadWithoutUsernameOrStatus() {
+		SysUserForm form = validUserForm();
+		form.setUsername(null);
+		form.setStatus(null);
+
+		assertThat(validator.validate(form, UpdateGroup.class)).isEmpty();
+	}
+
+	@Test
+	@DisplayName("SysUserForm：更新时昵称为空时存在 NotBlank 约束违反")
+	void userUpdateFormRejectsBlankNickname() {
+		SysUserForm form = validUserForm();
+		form.setUsername(null);
+		form.setStatus(null);
+		form.setNickname("");
+
+		Set<ConstraintViolation<SysUserForm>> violations = validator.validate(form, UpdateGroup.class);
+
+		assertThat(violations).anyMatch(v -> "nickname".equals(v.getPropertyPath().toString()));
 	}
 
 }

@@ -9,7 +9,6 @@ import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.SysUserMapper;
 import com.auth.service.system.admin.model.form.user.SysUserBatchStatusForm;
 import com.auth.service.system.admin.model.form.user.SysUserForm;
-import com.auth.service.system.admin.model.form.user.SysUserUpdateForm;
 import com.auth.service.system.admin.model.po.user.SysUserPageRowPO;
 import com.auth.service.system.admin.model.query.user.SysUserPageQuery;
 import com.auth.service.system.admin.model.vo.user.SysUserPageVO;
@@ -84,7 +83,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void update(Long id, SysUserUpdateForm form) {
+	public void update(Long id, SysUserForm form) {
 		UserEntity existing = getById(id);
 		if (existing == null) {
 			throw new SystemBusinessException(SystemCommonResultCode.USER_NOT_FOUND, id);
