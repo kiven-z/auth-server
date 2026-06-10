@@ -63,7 +63,24 @@ public enum SystemAdminResultCode implements SystemResultCode {
 	/**
 	 * 旧密码不正确
 	 */
-	OLD_PASSWORD_INCORRECT(422, 321, "OLD_PASSWORD_INCORRECT", "system.user.old_password_incorrect"),;
+	OLD_PASSWORD_INCORRECT(422, 321, "OLD_PASSWORD_INCORRECT", "system.user.old_password_incorrect"),
+
+	/**
+	 * 用户部门关联已存在
+	 */
+	USER_DEPT_DUPLICATE(409, 322, "USER_DEPT_DUPLICATE", "system.user.dept_duplicate"),
+
+	/**
+	 * 用户部门关联状态非法
+	 */
+	USER_DEPT_RELATION_STATUS_INVALID(400, 323, "USER_DEPT_RELATION_STATUS_INVALID",
+			"system.user.dept_relation_status_invalid"),
+
+	/**
+	 * 仅正常状态的部门关联可设为主部门
+	 */
+	USER_DEPT_PRIMARY_NOT_ELIGIBLE(400, 324, "USER_DEPT_PRIMARY_NOT_ELIGIBLE",
+			"system.user.dept_primary_not_eligible"),;
 
 	private final int httpStatus;
 
