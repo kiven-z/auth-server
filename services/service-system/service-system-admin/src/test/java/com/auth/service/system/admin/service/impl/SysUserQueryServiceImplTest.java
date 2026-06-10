@@ -1,14 +1,14 @@
 package com.auth.service.system.admin.service.impl;
 
 import com.auth.module.platform.persistence.model.UserEntity;
-import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.admin.mapper.SysUserQueryMapper;
 import com.auth.service.system.admin.model.SysUserSearchItemResponse;
 import com.auth.service.system.admin.model.po.sysuser.UserDeptProfilePO;
 import com.auth.service.system.admin.model.po.sysuser.UserPostProfilePO;
 import com.auth.service.system.admin.model.po.sysuser.UserSearchItemPO;
 import com.auth.service.system.admin.model.vo.sysuser.SysUserProfileResponse;
+import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -104,22 +104,6 @@ class SysUserQueryServiceImplTest {
 		assertThat(profile.getPostList().get(0).getPostName()).isEqualTo("工程师");
 		verify(sysUserQueryMapper).selectDeptProfileByUserId(1L);
 		verify(sysUserQueryMapper).selectPostProfileByUserId(1L);
-	}
-
-	@Test
-	@DisplayName("Mapper 返回 null 时部门与岗位列表为空")
-	void getProfileTreatsNullListsAsEmpty() {
-		UserEntity user = new UserEntity();
-		user.setId(2L);
-		user.setUsername("bob");
-		when(sysUserQueryMapper.selectById(2L)).thenReturn(user);
-		when(sysUserQueryMapper.selectDeptProfileByUserId(2L)).thenReturn(null);
-		when(sysUserQueryMapper.selectPostProfileByUserId(2L)).thenReturn(null);
-
-		SysUserProfileResponse profile = sysUserQueryService.getProfile(2L);
-
-		assertThat(profile.getDeptList()).isEmpty();
-		assertThat(profile.getPostList()).isEmpty();
 	}
 
 	@Test

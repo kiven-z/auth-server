@@ -1,93 +1,1 @@
-package com.auth.service.system.admin.service.impl;
-
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
-import com.auth.service.system.admin.convert.SysRolePermissionConverter;
-import com.auth.service.system.common.exception.code.SystemCommonResultCode;
-import com.auth.service.system.admin.mapper.SysRoleMapper;
-import com.auth.service.system.admin.mapper.SysRolePermissionMapper;
-import com.auth.service.system.admin.model.entity.SysRoleEntity;
-import com.auth.service.system.admin.model.vo.role.SysRoleAssignedPermissionRow;
-import com.auth.service.system.admin.service.SysRolePermissionService;
-import com.auth.service.system.admin.support.permission.PermissionReferenceChecker;
-import com.auth.service.system.authorization.dispatch.trigger.RoleAuthorizationInvalidationTrigger;
-import com.auth.service.system.common.exception.SystemBusinessException;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.text.CharSequenceUtil;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
-/**
- * 角色权限分配服务实现。
- *
- * @author Bunny
- */
-@RequiredArgsConstructor
-@Slf4j
-@Service
-@Transactional(rollbackFor = Exception.class)
-public class SysRolePermissionServiceImpl implements SysRolePermissionService {
-
-	private final SysRoleMapper sysRoleMapper;
-
-	private final SysRolePermissionMapper sysRolePermissionMapper;
-
-	private final PermissionReferenceChecker permissionReferenceChecker;
-
-	private final RoleAuthorizationInvalidationTrigger roleInvalidationTrigger;
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public List<SysRoleAssignedPermissionRow> listAssignedPermissions(String roleCode) {
-		String normalized = requireExistingRoleCode(roleCode);
-		return SysRolePermissionConverter.INSTANCE
-			.toAssignedPermissionRowList(sysRolePermissionMapper.selectAssignedPermissionsByRoleCode(normalized));
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void assignPermissions(String roleCode, List<String> permissionCodes) {
-		String normalized = requireExistingRoleCode(roleCode);
-		List<String> codes = permissionCodes.stream().distinct().toList();
-
-		Long operatorId = SecurityUserUtils.getUserId();
-		sysRolePermissionMapper.deleteByRoleCode(normalized);
-		if (CollUtil.isNotEmpty(codes)) {
-			permissionReferenceChecker.requireActivePermissionCodes(codes);
-			sysRolePermissionMapper.batchInsertRolePermissions(normalized, codes, operatorId, operatorId);
-		}
-
-		roleInvalidationTrigger.submitByRoleCodes(List.of(normalized), "assign-permissions");
-		log.info("Role permissions replaced: roleCode={}, count={}", normalized, codes.size());
-	}
-
-	/**
-	 * 确保角色代码存在
-	 * @param roleCode 角色代码
-	 * @return 角色代码
-	 * @throws SystemBusinessException 如果角色代码不存在
-	 */
-	private String requireExistingRoleCode(String roleCode) {
-		if (CharSequenceUtil.isBlank(roleCode)) {
-			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST, roleCode);
-		}
-
-		SysRoleEntity role = sysRoleMapper
-			.selectOne(Wrappers.<SysRoleEntity>lambdaQuery().eq(SysRoleEntity::getRoleCode, roleCode).last("LIMIT 1"));
-		if (role == null) {
-			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST, roleCode);
-		}
-		return roleCode;
-	}
-
-}
+package com.auth.service.system.admin.service.impl;import cn.hutool.core.collection.CollUtil;import com.auth.module.security.autoconfigure.web.SecurityUserUtils;import com.auth.service.system.admin.convert.SysRolePermissionConverter;import com.auth.service.system.admin.mapper.SysRolePermissionMapper;import com.auth.service.system.admin.model.vo.role.SysRoleAssignedPermissionRow;import com.auth.service.system.admin.service.SysRolePermissionService;import com.auth.service.system.admin.support.permission.PermissionReferenceChecker;import com.auth.service.system.admin.support.role.RoleReferenceChecker;import com.auth.service.system.authorization.dispatch.trigger.RoleAuthorizationInvalidationTrigger;import lombok.RequiredArgsConstructor;import lombok.extern.slf4j.Slf4j;import org.springframework.stereotype.Service;import org.springframework.transaction.annotation.Transactional;import java.util.List;/** * 角色权限分配服务实现。 * * @author Bunny */@RequiredArgsConstructor@Slf4j@Service@Transactional(rollbackFor = Exception.class)public class SysRolePermissionServiceImpl implements SysRolePermissionService {	private final RoleReferenceChecker roleReferenceChecker;	private final SysRolePermissionMapper sysRolePermissionMapper;	private final PermissionReferenceChecker permissionReferenceChecker;	private final RoleAuthorizationInvalidationTrigger roleInvalidationTrigger;	/**	 * {@inheritDoc}	 */	@Override	public List<SysRoleAssignedPermissionRow> listAssignedPermissions(String roleCode) {		String normalized = roleReferenceChecker.getExistingByRoleCode(roleCode).getRoleCode();		return SysRolePermissionConverter.INSTANCE			.toAssignedPermissionRowList(sysRolePermissionMapper.selectAssignedPermissionsByRoleCode(normalized));	}	/**	 * {@inheritDoc}	 */	@Override	public void assignPermissions(String roleCode, List<String> permissionCodes) {		String normalized = roleReferenceChecker.getExistingByRoleCode(roleCode).getRoleCode();		List<String> codes = permissionCodes.stream().distinct().toList();		Long operatorId = SecurityUserUtils.getUserId();		sysRolePermissionMapper.deleteByRoleCode(normalized);		if (CollUtil.isNotEmpty(codes)) {			permissionReferenceChecker.requireActivePermissionCodes(codes);			sysRolePermissionMapper.batchInsertRolePermissions(normalized, codes, operatorId, operatorId);		}		roleInvalidationTrigger.submitByRoleCodes(List.of(normalized), "assign-permissions");		log.info("Role permissions replaced: roleCode={}, count={}", normalized, codes.size());	}}

@@ -2,12 +2,12 @@ package com.auth.service.system.admin.service.impl;
 
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.admin.mapper.SysPermissionMapper;
-import com.auth.service.system.admin.mapper.SysRoleMapper;
 import com.auth.service.system.admin.mapper.SysRolePermissionMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.po.role.SysRoleAssignedPermissionPO;
 import com.auth.service.system.admin.model.vo.role.SysRoleAssignedPermissionRow;
 import com.auth.service.system.admin.support.permission.PermissionReferenceChecker;
+import com.auth.service.system.admin.support.role.RoleReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.RoleAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,7 +37,7 @@ import static org.mockito.Mockito.when;
 class SysRolePermissionServiceImplTest {
 
 	@Mock
-	private SysRoleMapper sysRoleMapper;
+	private RoleReferenceChecker roleReferenceChecker;
 
 	@Mock
 	private SysRolePermissionMapper sysRolePermissionMapper;
@@ -53,7 +53,7 @@ class SysRolePermissionServiceImplTest {
 	@BeforeEach
 	void setUp() {
 		PermissionReferenceChecker permissionReferenceChecker = new PermissionReferenceChecker(sysPermissionMapper);
-		sysRolePermissionService = new SysRolePermissionServiceImpl(sysRoleMapper, sysRolePermissionMapper,
+		sysRolePermissionService = new SysRolePermissionServiceImpl(roleReferenceChecker, sysRolePermissionMapper,
 				permissionReferenceChecker, roleInvalidationTrigger);
 	}
 
@@ -62,7 +62,7 @@ class SysRolePermissionServiceImplTest {
 	void listAssignedPermissionsShouldReturnCodeAndName() {
 		SysRoleEntity role = new SysRoleEntity();
 		role.setRoleCode("ADMIN");
-		when(sysRoleMapper.selectOne(any())).thenReturn(role);
+		when(roleReferenceChecker.getExistingByRoleCode("ADMIN")).thenReturn(role);
 
 		SysRoleAssignedPermissionPO po = new SysRoleAssignedPermissionPO();
 		po.setPermissionCode("sys:user:list");
@@ -79,9 +79,10 @@ class SysRolePermissionServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("分配权限：角色不存在时抛出 ROLE_NOT_FOUND")
+	@DisplayName("分配权限：角色不存在时抛出 DATA_NOT_EXIST")
 	void assignWhenRoleMissingShouldThrow() {
-		when(sysRoleMapper.selectOne(any())).thenReturn(null);
+		when(roleReferenceChecker.getExistingByRoleCode("MISSING"))
+			.thenThrow(new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST, "MISSING"));
 
 		List<String> permissionCodes = List.of("sys:user:list");
 		assertThatThrownBy(() -> sysRolePermissionService.assignPermissions("MISSING", permissionCodes))
@@ -95,7 +96,7 @@ class SysRolePermissionServiceImplTest {
 	void assignShouldReplaceAndInvalidate() {
 		SysRoleEntity role = new SysRoleEntity();
 		role.setRoleCode("ADMIN");
-		when(sysRoleMapper.selectOne(any())).thenReturn(role);
+		when(roleReferenceChecker.getExistingByRoleCode("ADMIN")).thenReturn(role);
 		when(sysPermissionMapper.selectCount(any())).thenReturn(1L);
 
 		sysRolePermissionService.assignPermissions("ADMIN", List.of("sys:user:list"));
@@ -111,7 +112,7 @@ class SysRolePermissionServiceImplTest {
 	void assignEmptyListShouldClearOnly() {
 		SysRoleEntity role = new SysRoleEntity();
 		role.setRoleCode("ADMIN");
-		when(sysRoleMapper.selectOne(any())).thenReturn(role);
+		when(roleReferenceChecker.getExistingByRoleCode("ADMIN")).thenReturn(role);
 
 		sysRolePermissionService.assignPermissions("ADMIN", List.of());
 
@@ -122,11 +123,11 @@ class SysRolePermissionServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("分配权限：权限码无效时抛出 ROLE_PERMISSION_INVALID")
+	@DisplayName("分配权限：权限码无效时抛出 GRANT_REFERENCE_INVALID")
 	void assignWhenPermissionInvalidShouldThrow() {
 		SysRoleEntity role = new SysRoleEntity();
 		role.setRoleCode("ADMIN");
-		when(sysRoleMapper.selectOne(any())).thenReturn(role);
+		when(roleReferenceChecker.getExistingByRoleCode("ADMIN")).thenReturn(role);
 		when(sysPermissionMapper.selectCount(any())).thenReturn(0L);
 
 		List<String> permissionCodes = List.of("missing:perm");

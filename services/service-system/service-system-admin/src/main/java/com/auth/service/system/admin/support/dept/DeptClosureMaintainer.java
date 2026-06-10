@@ -25,7 +25,7 @@ public class DeptClosureMaintainer {
 	}
 
 	/**
-	 * 物理删除该部门在 {@code dept_closure} 中的全部路径（{@code sp_dept_delete}）
+	 * 物理删除该部门在
 	 * @param deptId 部门 ID
 	 */
 	public void removeClosurePaths(long deptId) {
@@ -33,7 +33,7 @@ public class DeptClosureMaintainer {
 	}
 
 	/**
-	 * 变更父部门后重算闭包（调用前须已更新 {@code sys_dept.parent_id}）
+	 * 变更父部门后重算闭包
 	 * @param deptId 被移动部门 ID
 	 * @param newParentId 新父部门 ID
 	 */
