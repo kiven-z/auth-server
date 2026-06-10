@@ -20,7 +20,7 @@ class AuthorizationChangeKindTest {
 		assertEquals("grant", AuthorizationChangeKind.GRANT.eventIdPrefix());
 		assertEquals("dept", AuthorizationChangeKind.USER_DEPT.eventIdPrefix());
 		assertEquals("post", AuthorizationChangeKind.USER_POST.eventIdPrefix());
-		assertEquals("user", AuthorizationChangeKind.USER_SCOPE.eventIdPrefix());
+		assertEquals("user", AuthorizationChangeKind.USER.eventIdPrefix());
 	}
 
 }

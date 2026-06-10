@@ -9,7 +9,7 @@ import com.auth.module.security.contract.api.authorization.AuthorizationChangeKi
  */
 public sealed interface AuthorizationInvalidatePayload
 		permits RoleInvalidatePayload, PermissionInvalidatePayload, PolicyInvalidatePayload, GrantInvalidatePayload,
-		UserDeptInvalidatePayload, UserPostInvalidatePayload, UserScopeInvalidatePayload {
+		UserDeptInvalidatePayload, UserPostInvalidatePayload, UserInvalidatePayload {
 
 	/**
 	 * 本负载对应的变更维度。

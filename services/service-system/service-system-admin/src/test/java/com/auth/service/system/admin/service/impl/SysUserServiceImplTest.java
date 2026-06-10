@@ -8,7 +8,6 @@ import com.auth.service.system.admin.model.form.user.SysUserAdminResetPasswordFo
 import com.auth.service.system.admin.model.form.user.SysUserChangePasswordForm;
 import com.auth.service.system.admin.service.LogUserPasswordHistoryService;
 import com.auth.service.system.admin.support.user.UserOperationChecker;
-import com.auth.service.system.authorization.dispatch.trigger.UserScopeAuthorizationInvalidationTrigger;
 import com.auth.service.system.authorization.dispatch.trigger.UserSessionRevocationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
@@ -59,9 +58,6 @@ class SysUserServiceImplTest {
 	private PasswordEncoder passwordEncoder;
 
 	@Mock
-	private UserScopeAuthorizationInvalidationTrigger userScopeInvalidationTrigger;
-
-	@Mock
 	private UserSessionRevocationTrigger userSessionRevocationTrigger;
 
 	@Mock
@@ -72,7 +68,7 @@ class SysUserServiceImplTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		sysUserService = new SysUserServiceImpl(auditUserDisplayService, new UserOperationChecker(), passwordEncoder,
-				userScopeInvalidationTrigger, userSessionRevocationTrigger, logUserPasswordHistoryService);
+				userSessionRevocationTrigger, logUserPasswordHistoryService);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysUserService, sysUserMapper);

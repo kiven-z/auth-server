@@ -15,6 +15,27 @@ import java.io.IOException;
  */
 public class AuthorizationInvalidateRequestDeserializer extends JsonDeserializer<AuthorizationInvalidateRequest> {
 
+	/**
+	 * 根据 kind 节点类型，转换为对应的 AuthorizationInvalidatePayload 子类
+	 * @param context 反序列化上下文
+	 * @param kind kind 节点类型
+	 * @param payloadNode payload 节点
+	 * @return 对应的 AuthorizationInvalidatePayload 子类
+	 * @throws IOException 如果转换失败
+	 */
+	private static AuthorizationInvalidatePayload resolvePayload(DeserializationContext context,
+			AuthorizationChangeKind kind, JsonNode payloadNode) throws IOException {
+		return switch (kind) {
+			case ROLE -> context.readTreeAsValue(payloadNode, RoleInvalidatePayload.class);
+			case PERMISSION -> context.readTreeAsValue(payloadNode, PermissionInvalidatePayload.class);
+			case POLICY -> context.readTreeAsValue(payloadNode, PolicyInvalidatePayload.class);
+			case GRANT -> context.readTreeAsValue(payloadNode, GrantInvalidatePayload.class);
+			case USER_DEPT -> context.readTreeAsValue(payloadNode, UserDeptInvalidatePayload.class);
+			case USER_POST -> context.readTreeAsValue(payloadNode, UserPostInvalidatePayload.class);
+			case USER -> context.readTreeAsValue(payloadNode, UserInvalidatePayload.class);
+		};
+	}
+
 	@Override
 	public AuthorizationInvalidateRequest deserialize(JsonParser parser, DeserializationContext context)
 			throws IOException {
@@ -39,27 +60,6 @@ public class AuthorizationInvalidateRequestDeserializer extends JsonDeserializer
 		// 根据 kind 节点类型，转换为对应的 AuthorizationInvalidatePayload 子类
 		AuthorizationInvalidatePayload payload = resolvePayload(context, kind, payloadNode);
 		return new AuthorizationInvalidateRequest(eventId, kind, payload);
-	}
-
-	/**
-	 * 根据 kind 节点类型，转换为对应的 AuthorizationInvalidatePayload 子类
-	 * @param context 反序列化上下文
-	 * @param kind kind 节点类型
-	 * @param payloadNode payload 节点
-	 * @return 对应的 AuthorizationInvalidatePayload 子类
-	 * @throws IOException 如果转换失败
-	 */
-	private static AuthorizationInvalidatePayload resolvePayload(DeserializationContext context,
-			AuthorizationChangeKind kind, JsonNode payloadNode) throws IOException {
-		return switch (kind) {
-			case ROLE -> context.readTreeAsValue(payloadNode, RoleInvalidatePayload.class);
-			case PERMISSION -> context.readTreeAsValue(payloadNode, PermissionInvalidatePayload.class);
-			case POLICY -> context.readTreeAsValue(payloadNode, PolicyInvalidatePayload.class);
-			case GRANT -> context.readTreeAsValue(payloadNode, GrantInvalidatePayload.class);
-			case USER_DEPT -> context.readTreeAsValue(payloadNode, UserDeptInvalidatePayload.class);
-			case USER_POST -> context.readTreeAsValue(payloadNode, UserPostInvalidatePayload.class);
-			case USER_SCOPE -> context.readTreeAsValue(payloadNode, UserScopeInvalidatePayload.class);
-		};
 	}
 
 }

@@ -84,6 +84,44 @@ class AuthorizationInvalidateRequestTest {
 	}
 
 	@Test
+	@DisplayName("USER 请求 JSON 反序列化后 kind 与 payload 一致")
+	void deserialize_userPayload_shouldMatchKind() throws Exception {
+		String json = """
+				{
+				  "eventId": "evt-user-001",
+				  "kind": "USER",
+				  "payload": {
+				    "userIds": [10, 20]
+				  }
+				}
+				""";
+
+		AuthorizationInvalidateRequest request = objectMapper.readValue(json, AuthorizationInvalidateRequest.class);
+
+		assertEquals("evt-user-001", request.eventId());
+		assertEquals(AuthorizationChangeKind.USER, request.kind());
+		assertInstanceOf(UserInvalidatePayload.class, request.payload());
+		assertEquals(List.of(10L, 20L), ((UserInvalidatePayload) request.payload()).userIds());
+	}
+
+	@Test
+	@DisplayName("已废弃的 USER_SCOPE kind 应拒绝反序列化")
+	void deserialize_legacyUserScopePayload_shouldReject() {
+		String json = """
+				{
+				  "eventId": "evt-legacy-001",
+				  "kind": "USER_SCOPE",
+				  "payload": {
+				    "userIds": [10]
+				  }
+				}
+				""";
+
+		assertThrows(IllegalArgumentException.class,
+				() -> objectMapper.readValue(json, AuthorizationInvalidateRequest.class));
+	}
+
+	@Test
 	@DisplayName("kind 与 payload 类型不一致时应拒绝构造")
 	void constructor_kindPayloadMismatch_shouldThrow() {
 		PermissionInvalidatePayload mismatchedPayload = new PermissionInvalidatePayload(List.of("sys:user:list"));

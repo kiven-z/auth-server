@@ -20,7 +20,6 @@ import com.auth.service.system.admin.service.SysUserService;
 import com.auth.service.system.admin.support.sqlbuild.SysUserPageOrderSqlBuilder;
 import com.auth.service.system.admin.support.user.SysUserDefaults;
 import com.auth.service.system.admin.support.user.UserOperationChecker;
-import com.auth.service.system.authorization.dispatch.trigger.UserScopeAuthorizationInvalidationTrigger;
 import com.auth.service.system.authorization.dispatch.trigger.UserSessionRevocationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
@@ -54,8 +53,6 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 	private final UserOperationChecker userOperationChecker;
 
 	private final PasswordEncoder passwordEncoder;
-
-	private final UserScopeAuthorizationInvalidationTrigger userScopeInvalidationTrigger;
 
 	private final UserSessionRevocationTrigger userSessionRevocationTrigger;
 
@@ -102,14 +99,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 		List<Long> userIds = List.of(id);
 		userOperationChecker.requireOperable(userIds);
 
-		// 解析需要更新用户画像
-		boolean resolveUpdate = FieldChangeSupport
-			.anyChanged(FieldChangeSupport.valueChanged(existing.getStatus(), form.getStatus()));
-		if (resolveUpdate) {
-			userScopeInvalidationTrigger.submitByUserIds(userIds, "update");
-		}
-
-		// 解析需要踢出会话
+		// 敏感字段变更时踢出全部会话
 		boolean revoke = FieldChangeSupport.anyChanged(
 				FieldChangeSupport.codeChanged(existing.getUsername(), form.getUsername()),
 				FieldChangeSupport.codeChanged(existing.getEmail(), form.getEmail()),

@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 
 /**
- * Outbox {@code payload} 列与契约 Payload 的 JSON 编解码。
+ * Outbox payload 列与契约 Payload 的 JSON 编解码。
  *
  * @author Bunny
  */
@@ -49,7 +49,7 @@ public class InvalidationOutboxPayloadCodec {
 				case GRANT -> objectMapper.readValue(json, GrantInvalidatePayload.class);
 				case USER_DEPT -> objectMapper.readValue(json, UserDeptInvalidatePayload.class);
 				case USER_POST -> objectMapper.readValue(json, UserPostInvalidatePayload.class);
-				case USER_SCOPE -> objectMapper.readValue(json, UserScopeInvalidatePayload.class);
+				case USER -> objectMapper.readValue(json, UserInvalidatePayload.class);
 			};
 		}
 		catch (JsonProcessingException ex) {
