@@ -77,7 +77,7 @@ class GrantTableSubjectRoleServiceImplTest {
 		boundRole.setRoleCode("CUSTOM_A");
 		boundRole.setRoleName("业务角色A");
 		when(grantTableMapper.selectBoundRolesBySubject(GrantTableSubjectType.POST.name(), SUBJECT_ID,
-				RoleTypeEnum.ORG_GRANT_TYPES))
+				RoleTypeEnum.SUBJECT_GRANT_TYPES))
 			.thenReturn(List.of(boundRole));
 
 		List<GrantTableAssignedRoleRow> rows = grantTableSubjectRoleService

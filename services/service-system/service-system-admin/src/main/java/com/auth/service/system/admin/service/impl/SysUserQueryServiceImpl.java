@@ -7,9 +7,11 @@ import com.auth.service.system.admin.mapper.SysUserQueryMapper;
 import com.auth.service.system.admin.model.SysUserSearchItemResponse;
 import com.auth.service.system.admin.model.vo.sysuser.SysUserProfileResponse;
 import com.auth.service.system.admin.service.SysUserQueryService;
+import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -21,15 +23,14 @@ import java.util.Objects;
  *
  * @author Bunny
  */
+@RequiredArgsConstructor
 @Service
 public class SysUserQueryServiceImpl extends ServiceImpl<SysUserQueryMapper, UserEntity>
 		implements SysUserQueryService {
 
 	private final SysUserQueryMapper sysUserQueryMapper;
 
-	public SysUserQueryServiceImpl(SysUserQueryMapper sysUserQueryMapper) {
-		this.sysUserQueryMapper = sysUserQueryMapper;
-	}
+	private final UserReferenceChecker userReferenceChecker;
 
 	/**
 	 * {@inheritDoc}
@@ -39,10 +40,7 @@ public class SysUserQueryServiceImpl extends ServiceImpl<SysUserQueryMapper, Use
 		if (userId == null) {
 			throw new SystemBusinessException(SystemCommonResultCode.ILLEGAL_USER_ID_NOT_NULL);
 		}
-		UserEntity user = baseMapper.selectById(userId);
-		if (user == null) {
-			throw new SystemBusinessException(SystemCommonResultCode.USER_NOT_FOUND, userId);
-		}
+		UserEntity user = userReferenceChecker.getExistingActive(userId);
 
 		SysUserProfileResponse response = SysUserProfileConverter.INSTANCE.toProfileResponse(user);
 		response.setDeptList(SysUserProfileConverter.INSTANCE

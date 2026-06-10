@@ -155,7 +155,7 @@ class SysPostServiceImplTest {
 		when(sysPostDetailMapper.selectBoundDeptByPostId(postId)).thenReturn(boundDept);
 		when(sysPostDetailMapper.selectBoundUsersByPostId(postId)).thenReturn(List.of(boundUser));
 		when(grantTableMapper.selectBoundRolesBySubject(GrantTableSubjectType.POST.name(), postId,
-				RoleTypeEnum.ORG_GRANT_TYPES))
+				RoleTypeEnum.SUBJECT_GRANT_TYPES))
 			.thenReturn(List.of(boundRole));
 
 		SysPostDetailVO detail = sysPostService.getDetail(postId);
@@ -172,7 +172,7 @@ class SysPostServiceImplTest {
 		verify(sysPostDetailMapper).selectBoundDeptByPostId(postId);
 		verify(sysPostDetailMapper).selectBoundUsersByPostId(postId);
 		verify(grantTableMapper).selectBoundRolesBySubject(GrantTableSubjectType.POST.name(), postId,
-				RoleTypeEnum.ORG_GRANT_TYPES);
+				RoleTypeEnum.SUBJECT_GRANT_TYPES);
 		verify(auditUserDisplayService).enrichAuditUsernames(anyList());
 	}
 

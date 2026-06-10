@@ -16,9 +16,9 @@ import com.auth.service.system.admin.service.SysUserService;
 import com.auth.service.system.admin.support.sqlbuild.SysUserPageOrderSqlBuilder;
 import com.auth.service.system.admin.support.user.SysUserDefaults;
 import com.auth.service.system.admin.support.user.UserOperationChecker;
+import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.UserSessionRevocationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.common.support.FieldChangeSupport;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -47,6 +47,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 	private final AuditUserDisplayService auditUserDisplayService;
 
 	private final UserOperationChecker userOperationChecker;
+
+	private final UserReferenceChecker userReferenceChecker;
 
 	private final PasswordEncoder passwordEncoder;
 
@@ -85,10 +87,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 	 */
 	@Override
 	public void update(Long id, SysUserForm form) {
-		UserEntity existing = getById(id);
-		if (existing == null) {
-			throw new SystemBusinessException(SystemCommonResultCode.USER_NOT_FOUND, id);
-		}
+		UserEntity existing = userReferenceChecker.getExistingActive(id);
 
 		List<Long> userIds = List.of(id);
 		userOperationChecker.requireOperable(userIds);

@@ -33,50 +33,50 @@ import java.util.List;
 @Transactional(rollbackFor = Exception.class)
 public class SysUserManageServiceImpl implements SysUserManageService {
 
-    private final UserReferenceChecker userReferenceChecker;
+	private final UserReferenceChecker userReferenceChecker;
 
-    private final UserOperationChecker userOperationChecker;
+	private final UserOperationChecker userOperationChecker;
 
-    private final RoleGrantReferenceChecker roleGrantReferenceChecker;
+	private final RoleGrantReferenceChecker roleGrantReferenceChecker;
 
-    private final GrantTableMapper grantTableMapper;
+	private final GrantTableMapper grantTableMapper;
 
-    private final UserAuthorizationInvalidationTrigger userAuthorizationInvalidationTrigger;
+	private final UserAuthorizationInvalidationTrigger userAuthorizationInvalidationTrigger;
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<GrantTableAssignedRoleRow> listAssignedRoles(Long userId) {
-        userReferenceChecker.getExistingActive(userId);
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public List<GrantTableAssignedRoleRow> listAssignedRoles(Long userId) {
+		userReferenceChecker.getExistingActive(userId);
 
-        List<GrantTableBoundRolePO> grantTableBoundRoles = grantTableMapper
-                .selectBoundRolesBySubject(GrantTableSubjectType.USER.name(), userId, RoleTypeEnum.USER_GRANT_TYPES);
-        return GrantTableSubjectRoleConverter.INSTANCE.toAssignedRoleRowList(grantTableBoundRoles);
-    }
+		List<GrantTableBoundRolePO> grantTableBoundRoles = grantTableMapper
+			.selectBoundRolesBySubject(GrantTableSubjectType.USER.name(), userId, RoleTypeEnum.SUBJECT_GRANT_TYPES);
+		return GrantTableSubjectRoleConverter.INSTANCE.toAssignedRoleRowList(grantTableBoundRoles);
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void replaceUserRoles(Long userId, GrantTableAssignRoleForm form) {
-        userReferenceChecker.getExistingActive(userId);
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void replaceUserRoles(Long userId, GrantTableAssignRoleForm form) {
+		userReferenceChecker.getExistingActive(userId);
 
-        // 不能修改自己
-        userOperationChecker.requireOperable(List.of(userId));
+		// 不能修改自己
+		userOperationChecker.requireOperable(List.of(userId));
 
-        List<String> roleCodes = CollUtil.emptyIfNull(form.getRoleCodes()).stream().distinct().toList();
-        roleGrantReferenceChecker.requireGrantEligibleRoles(roleCodes, RoleTypeEnum.USER_GRANT_TYPES,
-                SystemCommonResultCode.GRANT_REFERENCE_INVALID);
+		List<String> roleCodes = CollUtil.emptyIfNull(form.getRoleCodes()).stream().distinct().toList();
+		roleGrantReferenceChecker.requireGrantEligibleRoles(roleCodes, RoleTypeEnum.SUBJECT_GRANT_TYPES,
+				SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 
-        Long operatorId = SecurityUserUtils.getUserId();
-        grantTableMapper.deleteBySubject(GrantTableSubjectType.USER.name(), userId);
-        if (CollUtil.isNotEmpty(roleCodes)) {
-            grantTableMapper.batchInsertSubjectRoleGrants(GrantTableSubjectType.USER.name(), userId, roleCodes,
-                    operatorId);
-        }
+		Long operatorId = SecurityUserUtils.getUserId();
+		grantTableMapper.deleteBySubject(GrantTableSubjectType.USER.name(), userId);
+		if (CollUtil.isNotEmpty(roleCodes)) {
+			grantTableMapper.batchInsertSubjectRoleGrants(GrantTableSubjectType.USER.name(), userId, roleCodes,
+					operatorId);
+		}
 
-        userAuthorizationInvalidationTrigger.submitByUserIds(List.of(userId), "replace-roles");
-    }
+		userAuthorizationInvalidationTrigger.submitByUserIds(List.of(userId), "replace-roles");
+	}
 
 }

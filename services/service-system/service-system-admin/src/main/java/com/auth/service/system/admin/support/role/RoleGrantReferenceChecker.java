@@ -55,16 +55,7 @@ public class RoleGrantReferenceChecker {
 		if (subjectType != GrantTableSubjectType.DEPT && subjectType != GrantTableSubjectType.POST) {
 			throw new IllegalArgumentException("Unsupported org grant subject type: " + subjectType);
 		}
-		requireGrantEligibleRoles(roleCodes, RoleTypeEnum.ORG_GRANT_TYPES,
-				SystemCommonResultCode.GRANT_REFERENCE_INVALID);
-	}
-
-	/**
-	 * 用户直连 grant_table 主体：仅允许业务/自定义角色（roleType 3/4）
-	 * @param roleCodes 待写入角色编码
-	 */
-	public void requireGrantTableUserRoles(List<String> roleCodes) {
-		requireGrantEligibleRoles(roleCodes, RoleTypeEnum.USER_GRANT_TYPES,
+		requireGrantEligibleRoles(roleCodes, RoleTypeEnum.SUBJECT_GRANT_TYPES,
 				SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 	}
 

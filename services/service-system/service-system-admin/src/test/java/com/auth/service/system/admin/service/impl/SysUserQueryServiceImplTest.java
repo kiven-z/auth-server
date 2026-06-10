@@ -1,7 +1,9 @@
 package com.auth.service.system.admin.service.impl;
 
 import com.auth.module.platform.persistence.model.UserEntity;
+import com.auth.service.system.admin.mapper.SysUserMapper;
 import com.auth.service.system.admin.mapper.SysUserQueryMapper;
+import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import com.auth.service.system.admin.model.SysUserSearchItemResponse;
 import com.auth.service.system.admin.model.po.sysuser.UserDeptProfilePO;
 import com.auth.service.system.admin.model.po.sysuser.UserPostProfilePO;
@@ -39,11 +41,15 @@ class SysUserQueryServiceImplTest {
 	@Mock
 	private SysUserQueryMapper sysUserQueryMapper;
 
+	@Mock
+	private SysUserMapper sysUserMapper;
+
 	private SysUserQueryServiceImpl sysUserQueryService;
 
 	@BeforeEach
 	void setUp() throws Exception {
-		sysUserQueryService = new SysUserQueryServiceImpl(sysUserQueryMapper);
+		UserReferenceChecker userReferenceChecker = new UserReferenceChecker(sysUserMapper);
+		sysUserQueryService = new SysUserQueryServiceImpl(sysUserQueryMapper, userReferenceChecker);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysUserQueryService, sysUserQueryMapper);
@@ -60,7 +66,7 @@ class SysUserQueryServiceImplTest {
 	@Test
 	@DisplayName("用户不存在时抛出 USER_NOT_FOUND")
 	void getProfileRejectsMissingUser() {
-		when(sysUserQueryMapper.selectById(99L)).thenReturn(null);
+		when(sysUserMapper.selectById(99L)).thenReturn(null);
 
 		assertThatThrownBy(() -> sysUserQueryService.getProfile(99L)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
@@ -82,7 +88,7 @@ class SysUserQueryServiceImplTest {
 		user.setBirthday(LocalDate.of(1990, 1, 2));
 		user.setIntroduction("bio");
 
-		when(sysUserQueryMapper.selectById(1L)).thenReturn(user);
+		when(sysUserMapper.selectById(1L)).thenReturn(user);
 
 		UserDeptProfilePO deptRow = new UserDeptProfilePO();
 		deptRow.setDeptId(10L);

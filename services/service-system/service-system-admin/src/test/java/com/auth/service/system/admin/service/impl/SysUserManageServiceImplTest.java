@@ -74,7 +74,7 @@ class SysUserManageServiceImplTest {
 		boundRole.setRoleCode("CUSTOM_A");
 		boundRole.setRoleName("业务角色A");
 		when(grantTableMapper.selectBoundRolesBySubject(GrantTableSubjectType.USER.name(), USER_ID,
-				RoleTypeEnum.USER_GRANT_TYPES))
+				RoleTypeEnum.SUBJECT_GRANT_TYPES))
 			.thenReturn(List.of(boundRole));
 
 		List<GrantTableAssignedRoleRow> rows = sysUserManageService.listAssignedRoles(USER_ID);
@@ -105,7 +105,8 @@ class SysUserManageServiceImplTest {
 		sysUserManageService.replaceUserRoles(USER_ID, form);
 
 		verify(userOperationChecker).requireOperable(List.of(USER_ID));
-		verify(roleGrantReferenceChecker).requireGrantTableUserRoles(List.of("BIZ_ADMIN", "CUSTOM_A"));
+		verify(roleGrantReferenceChecker).requireGrantEligibleRoles(List.of("BIZ_ADMIN", "CUSTOM_A"),
+				RoleTypeEnum.SUBJECT_GRANT_TYPES, SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 		verify(grantTableMapper).deleteBySubject(GrantTableSubjectType.USER.name(), USER_ID);
 		verify(grantTableMapper).batchInsertSubjectRoleGrants(eq(GrantTableSubjectType.USER.name()), eq(USER_ID),
 				eq(List.of("BIZ_ADMIN", "CUSTOM_A")), any());

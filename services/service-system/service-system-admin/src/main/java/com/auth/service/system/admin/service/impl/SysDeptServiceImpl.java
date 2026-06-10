@@ -105,7 +105,7 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 		detail.setBoundPosts(SysDeptConverter.INSTANCE.toBoundPostItemList(boundPosts));
 
 		List<GrantTableBoundRolePO> poList = grantTableMapper
-			.selectBoundRolesBySubject(GrantTableSubjectType.DEPT.name(), id, RoleTypeEnum.ORG_GRANT_TYPES);
+			.selectBoundRolesBySubject(GrantTableSubjectType.DEPT.name(), id, RoleTypeEnum.SUBJECT_GRANT_TYPES);
 		detail.setBoundRoles(GrantTableSubjectRoleConverter.INSTANCE.toBoundRoleItemList(poList));
 
 		// 补充审计用户名

@@ -44,7 +44,7 @@ public class GrantTableSubjectRoleServiceImpl implements GrantTableSubjectRoleSe
 	public List<GrantTableAssignedRoleRow> listAssignedRoles(GrantTableSubjectType subjectType, Long subjectId) {
 		subjectExistenceVerifier.requireExistingActive(subjectType, subjectId);
 		return GrantTableSubjectRoleConverter.INSTANCE.toAssignedRoleRowList(grantTableMapper
-			.selectBoundRolesBySubject(subjectType.name(), subjectId, RoleTypeEnum.ORG_GRANT_TYPES));
+			.selectBoundRolesBySubject(subjectType.name(), subjectId, RoleTypeEnum.SUBJECT_GRANT_TYPES));
 	}
 
 	/**

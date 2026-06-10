@@ -76,7 +76,7 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity
 		detail.setBoundUsers(
 				SysPostConverter.INSTANCE.toBoundUserItemList(sysPostDetailMapper.selectBoundUsersByPostId(id)));
 		detail.setBoundRoles(GrantTableSubjectRoleConverter.INSTANCE.toBoundRoleItemList(grantTableMapper
-			.selectBoundRolesBySubject(GrantTableSubjectType.POST.name(), id, RoleTypeEnum.ORG_GRANT_TYPES)));
+			.selectBoundRolesBySubject(GrantTableSubjectType.POST.name(), id, RoleTypeEnum.SUBJECT_GRANT_TYPES)));
 
 		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail));
 		return detail;

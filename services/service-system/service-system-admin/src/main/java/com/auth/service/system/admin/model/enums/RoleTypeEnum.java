@@ -35,14 +35,9 @@ public enum RoleTypeEnum {
 	CUSTOM(4, "自定义角色");
 
 	/**
-	 * 组织类 grant_table 主体（部门、岗位等）允许绑定的角色类型（业务、自定义）
+	 * grant_table 主体（部门、岗位、用户等）允许绑定的角色类型（业务、自定义）
 	 */
-	public static final List<Integer> ORG_GRANT_TYPES = List.of(BUSINESS.code, CUSTOM.code);
-
-	/**
-	 * 用户直连 grant_table 主体允许绑定的角色类型（业务、自定义）
-	 */
-	public static final List<Integer> USER_GRANT_TYPES = List.of(BUSINESS.code, CUSTOM.code);
+	public static final List<Integer> SUBJECT_GRANT_TYPES = List.of(BUSINESS.code, CUSTOM.code);
 
 	/**
 	 * 菜单-角色关联允许的角色类型（菜单角色）
