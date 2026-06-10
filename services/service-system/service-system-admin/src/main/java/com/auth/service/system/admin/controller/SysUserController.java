@@ -2,13 +2,16 @@ package com.auth.service.system.admin.controller;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
+import com.auth.common.ip.IpAddressService;
 import com.auth.common.web.valid.group.CreateGroup;
 import com.auth.common.web.valid.group.UpdateGroup;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
+import com.auth.service.system.admin.model.form.user.SysUserAdminResetPasswordForm;
 import com.auth.service.system.admin.model.form.user.SysUserBatchStatusForm;
+import com.auth.service.system.admin.model.form.user.SysUserChangePasswordForm;
 import com.auth.service.system.admin.model.form.user.SysUserForm;
 import com.auth.service.system.admin.model.query.user.SysUserPageQuery;
 import com.auth.service.system.admin.model.vo.user.SysUserPageVO;
@@ -17,6 +20,7 @@ import com.auth.service.system.common.model.SystemAuditBizModule;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -41,6 +45,19 @@ public class SysUserController {
 
 	private final SysUserService sysUserService;
 
+	private final IpAddressService ipAddressService;
+
+	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
+	@Operation(summary = "当前用户修改密码")
+	@PutMapping("/me/password")
+	public Result<String> changeOwnPassword(@Valid @RequestBody SysUserChangePasswordForm form,
+			HttpServletRequest request) {
+		String changeIp = ipAddressService.resolveIpInfo(request).getIpAddr();
+		sysUserService.changeOwnPassword(form, changeIp);
+		return Result.success(null, MODIFY_SUCCESS.getMessage());
+	}
+
 	@OperationLog(targetType = "USER_LIST", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.QUERY)
 	@Operation(summary = "用户分页查询")
@@ -60,6 +77,18 @@ public class SysUserController {
 	public Result<Void> create(@Validated(CreateGroup.class) @RequestBody SysUserForm form) {
 		sysUserService.create(form);
 		return Result.success();
+	}
+
+	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
+	@Operation(summary = "管理员重置用户密码")
+	@PreAuthorize("@auth.decide('sysUser:update')")
+	@PutMapping("/{id}/password")
+	public Result<String> resetPassword(@PathVariable("id") Long id,
+			@Valid @RequestBody SysUserAdminResetPasswordForm form, HttpServletRequest request) {
+		String changeIp = ipAddressService.resolveIpInfo(request).getIpAddr();
+		sysUserService.resetPasswordByAdmin(id, form, changeIp);
+		return Result.success(null, MODIFY_SUCCESS.getMessage());
 	}
 
 	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,

@@ -69,4 +69,16 @@ public class LogUserPasswordHistoryServiceImpl
 		return vo;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void recordChange(Long userId, String passwordHash, String changeIp) {
+		LogUserPasswordHistoryEntity entity = new LogUserPasswordHistoryEntity();
+		entity.setUserId(userId);
+		entity.setPasswordHash(passwordHash);
+		entity.setChangeIp(changeIp);
+		save(entity);
+	}
+
 }

@@ -53,7 +53,17 @@ public enum SystemAdminResultCode implements SystemResultCode {
 	/**
 	 * 用户状态码非法
 	 */
-	USER_STATUS_INVALID(400, 319, "USER_STATUS_INVALID", "system.user.status_invalid"),;
+	USER_STATUS_INVALID(400, 319, "USER_STATUS_INVALID", "system.user.status_invalid"),
+
+	/**
+	 * 两次输入的密码不一致
+	 */
+	PASSWORD_CONFIRM_MISMATCH(422, 320, "PASSWORD_CONFIRM_MISMATCH", "system.user.password_confirm_mismatch"),
+
+	/**
+	 * 旧密码不正确
+	 */
+	OLD_PASSWORD_INCORRECT(422, 321, "OLD_PASSWORD_INCORRECT", "system.user.old_password_incorrect"),;
 
 	private final int httpStatus;
 

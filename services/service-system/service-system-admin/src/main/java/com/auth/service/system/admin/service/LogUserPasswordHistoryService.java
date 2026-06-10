@@ -31,4 +31,12 @@ public interface LogUserPasswordHistoryService extends IService<LogUserPasswordH
 	 */
 	LogUserPasswordHistoryDetailVO getDetail(Long id);
 
+	/**
+	 * 记录一次密码变更
+	 * @param userId 用户主键
+	 * @param passwordHash 加密后的密码
+	 * @param changeIp 客户端 IP
+	 */
+	void recordChange(Long userId, String passwordHash, String changeIp);
+
 }
