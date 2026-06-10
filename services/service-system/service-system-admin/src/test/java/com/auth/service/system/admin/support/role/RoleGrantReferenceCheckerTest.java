@@ -110,6 +110,26 @@ class RoleGrantReferenceCheckerTest {
 	}
 
 	@Test
+	@DisplayName("用户直连主体：全部 eligible 时不抛异常")
+	void requireGrantTableUserRolesPassesWhenAllEligible() {
+		when(sysRoleMapper.selectCount(any())).thenReturn(2L);
+
+		assertThatCode(() -> roleGrantReferenceChecker.requireGrantTableUserRoles(List.of("BIZ_ADMIN", "CUSTOM_A")))
+			.doesNotThrowAnyException();
+	}
+
+	@Test
+	@DisplayName("用户直连主体：存在无效角色时抛出 GRANT_REFERENCE_INVALID")
+	void requireGrantTableUserRolesThrowsWhenNotAllEligible() {
+		when(sysRoleMapper.selectCount(any())).thenReturn(0L);
+
+		assertThatThrownBy(() -> roleGrantReferenceChecker.requireGrantTableUserRoles(List.of("SYS_ADMIN")))
+			.isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemCommonResultCode.GRANT_REFERENCE_INVALID);
+	}
+
+	@Test
 	@DisplayName("菜单关联：存在无效角色时抛出 GRANT_REFERENCE_INVALID")
 	void requireGrantEligibleRolesThrowsForMenuAssignWhenNotAllEligible() {
 		when(sysRoleMapper.selectCount(any())).thenReturn(0L);
