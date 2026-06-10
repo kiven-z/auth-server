@@ -60,6 +60,26 @@
           AND dept_id = #{deptId}
     </select>
 
+    <select id="selectByUserIdAndDeptId" resultType="com.auth.service.system.admin.model.entity.UserDeptEntity">
+        SELECT id,
+               user_id,
+               dept_id,
+               is_primary,
+               position,
+               grant_time,
+               status,
+               create_time,
+               update_time,
+               create_user,
+               update_user,
+               version,
+               remark
+        FROM user_dept
+        WHERE user_id = #{userId}
+          AND dept_id = #{deptId}
+        LIMIT 1
+    </select>
+
     <select id="selectActiveByUserId" resultType="com.auth.service.system.admin.model.entity.UserDeptEntity">
         SELECT id,
                user_id,

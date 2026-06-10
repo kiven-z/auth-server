@@ -1,12 +1,12 @@
 package com.auth.service.system.admin.model.po.userdept;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.LocalDateTime;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * 用户部门关联分页行
@@ -58,9 +58,6 @@ public class UserDeptPageRowPO implements Serializable {
 
 	@Schema(title = "更新用户")
 	private Long updateUser;
-
-	@Schema(title = "乐观锁版本号")
-	private Long version;
 
 	@Schema(title = "备注")
 	private String remark;

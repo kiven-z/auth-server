@@ -2,10 +2,8 @@ package com.auth.service.system.admin.service;
 
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.model.form.userdept.UserDeptAssignForm;
-import com.auth.service.system.admin.model.form.userdept.UserDeptUpdateForm;
 import com.auth.service.system.admin.model.query.user.UserDeptPageQuery;
 import com.auth.service.system.admin.model.vo.userdept.UserDeptPageVO;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 import java.util.List;
 
@@ -26,38 +24,35 @@ public interface SysUserDeptService {
 
 	/**
 	 * 新增用户部门关联
-	 * @param userId 用户 ID
 	 * @param form 表单
 	 */
-	void create(Long userId, UserDeptAssignForm form);
+	void create(UserDeptAssignForm form);
 
 	/**
 	 * 更新用户部门关联
-	 * @param userId 用户 ID
-	 * @param relationId 关联主键
 	 * @param form 表单
 	 */
-	void update(Long userId, Long relationId, UserDeptUpdateForm form);
+	void update(UserDeptAssignForm form);
 
 	/**
 	 * 设为主部门
 	 * @param userId 用户 ID
-	 * @param relationId 关联主键
+	 * @param deptId 部门 ID
 	 */
-	void setPrimary(Long userId, Long relationId);
+	void setPrimary(Long userId, Long deptId);
 
 	/**
 	 * 调离（status=0）
 	 * @param userId 用户 ID
-	 * @param relationId 关联主键
+	 * @param deptId 部门 ID
 	 */
-	void transfer(Long userId, Long relationId);
+	void transfer(Long userId, Long deptId);
 
 	/**
 	 * 批量删除用户部门关联
 	 * @param userId 用户 ID
-	 * @param relationIds 关联主键列表
+	 * @param deptIds 部门 ID 列表
 	 */
-	void deleteByIds(Long userId, List<Long> relationIds);
+	void deleteByDeptIds(Long userId, List<Long> deptIds);
 
 }

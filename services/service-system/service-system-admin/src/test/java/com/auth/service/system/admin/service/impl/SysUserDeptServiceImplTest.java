@@ -8,12 +8,10 @@ import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.entity.UserDeptEntity;
 import com.auth.service.system.admin.model.enums.UserOrgRelationStatusEnum;
 import com.auth.service.system.admin.model.form.userdept.UserDeptAssignForm;
-import com.auth.service.system.admin.model.form.userdept.UserDeptUpdateForm;
 import com.auth.service.system.admin.support.dept.DeptReferenceChecker;
 import com.auth.service.system.admin.support.user.UserOperationChecker;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import com.auth.service.system.admin.support.userdept.UserDeptPrimaryCoordinator;
-import com.auth.service.system.authorization.dispatch.trigger.DeptAuthorizationInvalidationTrigger;
 import com.auth.service.system.authorization.dispatch.trigger.UserAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
@@ -30,7 +28,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -68,9 +65,6 @@ class SysUserDeptServiceImplTest {
 	private UserAuthorizationInvalidationTrigger userAuthorizationInvalidationTrigger;
 
 	@Mock
-	private DeptAuthorizationInvalidationTrigger deptAuthorizationInvalidationTrigger;
-
-	@Mock
 	private AuditUserDisplayService auditUserDisplayService;
 
 	private SysUserDeptServiceImpl sysUserDeptService;
@@ -80,22 +74,23 @@ class SysUserDeptServiceImplTest {
 		UserReferenceChecker userReferenceChecker = new UserReferenceChecker(sysUserMapper);
 		sysUserDeptService = new SysUserDeptServiceImpl(userReferenceChecker, userOperationChecker,
 				deptReferenceChecker, userDeptMapper, userDeptPrimaryCoordinator, userAuthorizationInvalidationTrigger,
-				deptAuthorizationInvalidationTrigger, auditUserDisplayService);
+				auditUserDisplayService);
 	}
 
 	@Test
-	@DisplayName("新增：写入关联并触发授权失效")
+	@DisplayName("新增：写入关联并触发用户授权失效")
 	void createInsertsRelationAndSubmitsInvalidation() {
 		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser(USER_ID));
 		when(userDeptMapper.countByUserIdAndDeptId(USER_ID, DEPT_ID)).thenReturn(0);
 		when(userDeptMapper.selectActiveByUserId(USER_ID)).thenReturn(List.of());
-		when(deptReferenceChecker.requireGrantEligible(DEPT_ID)).thenReturn(activeDept(DEPT_ID));
+		when(deptReferenceChecker.getExistingActive(DEPT_ID)).thenReturn(activeDept(DEPT_ID));
 
 		UserDeptAssignForm form = new UserDeptAssignForm();
+		form.setUserId(USER_ID);
 		form.setDeptId(DEPT_ID);
 		form.setStatus(UserOrgRelationStatusEnum.NORMAL.getCode());
 
-		sysUserDeptService.create(USER_ID, form);
+		sysUserDeptService.create(form);
 
 		verify(userOperationChecker).requireOperable(List.of(USER_ID));
 		ArgumentCaptor<UserDeptEntity> captor = ArgumentCaptor.forClass(UserDeptEntity.class);
@@ -104,7 +99,6 @@ class SysUserDeptServiceImplTest {
 		assertThat(captor.getValue().getIsPrimary()).isTrue();
 		verify(userDeptPrimaryCoordinator).ensurePrimaryInvariant(USER_ID);
 		verify(userAuthorizationInvalidationTrigger).submitByUserIds(List.of(USER_ID), "create-dept");
-		verify(deptAuthorizationInvalidationTrigger).submitByDeptIds(List.of(DEPT_ID), "create-dept");
 	}
 
 	@Test
@@ -112,13 +106,14 @@ class SysUserDeptServiceImplTest {
 	void createThrowsWhenDuplicateDept() {
 		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser(USER_ID));
 		when(userDeptMapper.countByUserIdAndDeptId(USER_ID, DEPT_ID)).thenReturn(1);
-		when(deptReferenceChecker.requireGrantEligible(DEPT_ID)).thenReturn(activeDept(DEPT_ID));
+		when(deptReferenceChecker.getExistingActive(DEPT_ID)).thenReturn(activeDept(DEPT_ID));
 
 		UserDeptAssignForm form = new UserDeptAssignForm();
+		form.setUserId(USER_ID);
 		form.setDeptId(DEPT_ID);
 		form.setStatus(UserOrgRelationStatusEnum.NORMAL.getCode());
 
-		assertThatThrownBy(() -> sysUserDeptService.create(USER_ID, form)).isInstanceOf(SystemBusinessException.class)
+		assertThatThrownBy(() -> sysUserDeptService.create(form)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemAdminResultCode.USER_DEPT_DUPLICATE);
 
@@ -130,9 +125,9 @@ class SysUserDeptServiceImplTest {
 	void setPrimaryThrowsWhenStatusNotNormal() {
 		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser(USER_ID));
 		UserDeptEntity existing = relation(RELATION_ID, UserOrgRelationStatusEnum.PART_TIME.getCode());
-		when(userDeptMapper.selectByIdAndUserId(RELATION_ID, USER_ID)).thenReturn(existing);
+		when(userDeptMapper.selectByUserIdAndDeptId(USER_ID, DEPT_ID)).thenReturn(existing);
 
-		assertThatThrownBy(() -> sysUserDeptService.setPrimary(USER_ID, RELATION_ID))
+		assertThatThrownBy(() -> sysUserDeptService.setPrimary(USER_ID, DEPT_ID))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemAdminResultCode.USER_DEPT_PRIMARY_NOT_ELIGIBLE);
@@ -143,15 +138,30 @@ class SysUserDeptServiceImplTest {
 	void transferSetsStatusTransferred() {
 		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser(USER_ID));
 		UserDeptEntity existing = relation(RELATION_ID, UserOrgRelationStatusEnum.NORMAL.getCode());
-		when(userDeptMapper.selectByIdAndUserId(RELATION_ID, USER_ID)).thenReturn(existing);
+		when(userDeptMapper.selectByUserIdAndDeptId(USER_ID, DEPT_ID)).thenReturn(existing);
 
-		sysUserDeptService.transfer(USER_ID, RELATION_ID);
+		sysUserDeptService.transfer(USER_ID, DEPT_ID);
 
 		ArgumentCaptor<UserDeptEntity> captor = ArgumentCaptor.forClass(UserDeptEntity.class);
 		verify(userDeptMapper).updateById(captor.capture());
 		assertThat(captor.getValue().getStatus()).isEqualTo(UserOrgRelationStatusEnum.TRANSFERRED.getCode());
 		assertThat(captor.getValue().getIsPrimary()).isFalse();
 		verify(userDeptPrimaryCoordinator).ensurePrimaryInvariant(USER_ID);
+		verify(userAuthorizationInvalidationTrigger).submitByUserIds(List.of(USER_ID), "transfer-dept");
+	}
+
+	@Test
+	@DisplayName("删除：按部门 ID 删除并仅触发当前用户授权失效")
+	void deleteByDeptIdsDeletesRelationAndSubmitsUserInvalidation() {
+		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser(USER_ID));
+		UserDeptEntity existing = relation(RELATION_ID, UserOrgRelationStatusEnum.NORMAL.getCode());
+		when(userDeptMapper.selectByUserIdAndDeptId(USER_ID, DEPT_ID)).thenReturn(existing);
+
+		sysUserDeptService.deleteByDeptIds(USER_ID, List.of(DEPT_ID));
+
+		verify(userDeptMapper).deleteById(RELATION_ID);
+		verify(userDeptPrimaryCoordinator).ensurePrimaryInvariant(USER_ID);
+		verify(userAuthorizationInvalidationTrigger).submitByUserIds(List.of(USER_ID), "delete-dept");
 	}
 
 	@Test
@@ -162,12 +172,12 @@ class SysUserDeptServiceImplTest {
 			.when(userOperationChecker)
 			.requireOperable(List.of(USER_ID));
 
-		UserDeptUpdateForm form = new UserDeptUpdateForm();
+		UserDeptAssignForm form = new UserDeptAssignForm();
+		form.setUserId(USER_ID);
+		form.setDeptId(DEPT_ID);
 		form.setStatus(UserOrgRelationStatusEnum.NORMAL.getCode());
-		form.setVersion(0L);
 
-		assertThatThrownBy(() -> sysUserDeptService.update(USER_ID, RELATION_ID, form))
-			.isInstanceOf(SystemBusinessException.class)
+		assertThatThrownBy(() -> sysUserDeptService.update(form)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemAdminResultCode.USER_OPERATION_FORBIDDEN);
 	}

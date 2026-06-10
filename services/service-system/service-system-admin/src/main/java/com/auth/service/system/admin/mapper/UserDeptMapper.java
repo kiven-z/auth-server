@@ -46,6 +46,14 @@ public interface UserDeptMapper extends BaseMapper<UserDeptEntity> {
 	int countByUserIdAndDeptId(@Param("userId") Long userId, @Param("deptId") Long deptId);
 
 	/**
+	 * 按用户与部门加载关联
+	 * @param userId 用户 ID
+	 * @param deptId 部门 ID
+	 * @return 实体，不存在时为 null
+	 */
+	UserDeptEntity selectByUserIdAndDeptId(@Param("userId") Long userId, @Param("deptId") Long deptId);
+
+	/**
 	 * 查询用户有效关联（status IN 1,2）
 	 * @param userId 用户 ID
 	 * @return 关联列表
