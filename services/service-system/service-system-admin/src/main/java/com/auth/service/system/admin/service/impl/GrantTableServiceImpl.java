@@ -1,11 +1,6 @@
 package com.auth.service.system.admin.service.impl;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
+import cn.hutool.core.collection.CollUtil;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.module.security.contract.dto.invalidation.GrantSubjectKey;
 import com.auth.service.system.admin.convert.GrantTableSubjectRoleConverter;
@@ -20,9 +15,12 @@ import com.auth.service.system.admin.support.granttable.GrantTableSubjectExisten
 import com.auth.service.system.admin.support.role.RoleGrantReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.GrantAuthorizationInvalidationTrigger;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-
-import cn.hutool.core.collection.CollUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * grant_table 读写与主体角色授权编排实现。
@@ -101,7 +99,7 @@ public class GrantTableServiceImpl extends ServiceImpl<GrantTableMapper, GrantTa
 			entity.setGrantTime(grantTime);
 			return entity;
 		}).toList();
-		saveBatch(entities);
+		super.saveBatch(entities);
 	}
 
 }

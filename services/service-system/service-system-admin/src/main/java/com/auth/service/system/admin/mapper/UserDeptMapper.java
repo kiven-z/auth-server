@@ -9,8 +9,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import java.util.List;
-
 /**
  * 用户部门关联 Mapper
  *
@@ -54,17 +52,17 @@ public interface UserDeptMapper extends BaseMapper<UserDeptEntity> {
 	UserDeptEntity selectByUserIdAndDeptId(@Param("userId") Long userId, @Param("deptId") Long deptId);
 
 	/**
-	 * 查询用户有效关联（status IN 1,2）
-	 * @param userId 用户 ID
-	 * @return 关联列表
-	 */
-	List<UserDeptEntity> selectActiveByUserId(@Param("userId") Long userId);
-
-	/**
 	 * 将用户全部有效关联的 is_primary 置为 false
 	 * @param userId 用户 ID
 	 * @return 影响行数
 	 */
 	int demotePrimaryByUserId(@Param("userId") Long userId);
+
+	/**
+	 * 删除用户全部部门关联
+	 * @param userId 用户 ID
+	 * @return 影响行数
+	 */
+	int deleteByUserId(@Param("userId") Long userId);
 
 }

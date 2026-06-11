@@ -40,6 +40,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -204,10 +205,9 @@ class SysUserDeptServiceImplTest {
 	void createRejectsDuplicateDeptRelation() {
 		stubCreatePrerequisites();
 		when(userDeptMapper.countByUserIdAndDeptId(USER_ID, DEPT_ID)).thenReturn(1);
+		UserDeptAssignForm form = createForm(UserOrgRelationStatusEnum.NORMAL.getCode(), false, null);
 
-		assertThatThrownBy(() -> sysUserDeptService.create(USER_ID,
-				createForm(UserOrgRelationStatusEnum.NORMAL.getCode(), false, null)))
-			.isInstanceOf(SystemBusinessException.class)
+		assertThatThrownBy(() -> sysUserDeptService.create(USER_ID, form)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemAdminResultCode.USER_DEPT_DUPLICATE);
 
@@ -220,10 +220,9 @@ class SysUserDeptServiceImplTest {
 	void createRejectsPrimaryWhenStatusNotNormal() {
 		stubCreatePrerequisites();
 		when(userDeptMapper.countByUserIdAndDeptId(USER_ID, DEPT_ID)).thenReturn(0);
+		UserDeptAssignForm form = createForm(UserOrgRelationStatusEnum.TRANSFERRED.getCode(), true, null);
 
-		assertThatThrownBy(() -> sysUserDeptService.create(USER_ID,
-				createForm(UserOrgRelationStatusEnum.TRANSFERRED.getCode(), true, null)))
-			.isInstanceOf(SystemBusinessException.class)
+		assertThatThrownBy(() -> sysUserDeptService.create(USER_ID, form)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemAdminResultCode.USER_DEPT_PRIMARY_NOT_ELIGIBLE);
 
@@ -310,9 +309,9 @@ class SysUserDeptServiceImplTest {
 	void updateRejectsPrimaryWhenStatusNotNormal() {
 		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
 		when(userDeptMapper.selectByIdAndUserId(RELATION_ID, USER_ID)).thenReturn(existingRelation());
+		UserDeptAssignForm form = createForm(UserOrgRelationStatusEnum.TRANSFERRED.getCode(), true, null);
 
-		assertThatThrownBy(() -> sysUserDeptService.update(USER_ID, RELATION_ID,
-				createForm(UserOrgRelationStatusEnum.TRANSFERRED.getCode(), true, null)))
+		assertThatThrownBy(() -> sysUserDeptService.update(USER_ID, RELATION_ID, form))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemAdminResultCode.USER_DEPT_PRIMARY_NOT_ELIGIBLE);
@@ -325,14 +324,59 @@ class SysUserDeptServiceImplTest {
 	void updateRejectsMissingRelation() {
 		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
 		when(userDeptMapper.selectByIdAndUserId(RELATION_ID, USER_ID)).thenReturn(null);
+		UserDeptAssignForm form = createForm(UserOrgRelationStatusEnum.NORMAL.getCode(), false, null);
 
-		assertThatThrownBy(() -> sysUserDeptService.update(USER_ID, RELATION_ID,
-				createForm(UserOrgRelationStatusEnum.NORMAL.getCode(), false, null)))
+		assertThatThrownBy(() -> sysUserDeptService.update(USER_ID, RELATION_ID, form))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
 
 		verify(userDeptMapper, never()).updateById(any(UserDeptEntity.class));
+	}
+
+	@Test
+	@DisplayName("批量删除：删除并触发授权失效")
+	void removeBatchDeletesOwnedRelationsAndTriggersInvalidation() {
+		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
+		when(userDeptMapper.deleteByIds(anyCollection())).thenReturn(1);
+
+		sysUserDeptService.removeBatch(USER_ID, List.of(RELATION_ID));
+
+		verify(userDeptMapper).deleteByIds(anyCollection());
+		verify(userAuthorizationInvalidationTrigger).submitByUserIds(List.of(USER_ID), "delete-dept");
+	}
+
+	@Test
+	@DisplayName("批量删除：空列表时不执行删除")
+	void removeBatchSkipsEmptyIds() {
+		sysUserDeptService.removeBatch(USER_ID, List.of());
+
+		verify(userDeptMapper, never()).deleteByIds(anyCollection());
+		verify(userAuthorizationInvalidationTrigger, never()).submitByUserIds(any(), any());
+	}
+
+	@Test
+	@DisplayName("全部清空：删除用户全部关联并触发授权失效")
+	void removeAllDeletesAllRelationsAndTriggersInvalidation() {
+		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
+		when(userDeptMapper.deleteByUserId(USER_ID)).thenReturn(2);
+
+		sysUserDeptService.removeAll(USER_ID);
+
+		verify(userDeptMapper).deleteByUserId(USER_ID);
+		verify(userAuthorizationInvalidationTrigger).submitByUserIds(List.of(USER_ID), "clear-dept");
+	}
+
+	@Test
+	@DisplayName("全部清空：无关联时不触发授权失效")
+	void removeAllSkipsInvalidationWhenNoRelations() {
+		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
+		when(userDeptMapper.deleteByUserId(USER_ID)).thenReturn(0);
+
+		sysUserDeptService.removeAll(USER_ID);
+
+		verify(userDeptMapper).deleteByUserId(USER_ID);
+		verify(userAuthorizationInvalidationTrigger, never()).submitByUserIds(any(), any());
 	}
 
 }

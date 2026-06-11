@@ -1,5 +1,6 @@
 package com.auth.service.system.admin.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.convert.UserDeptConverter;
@@ -112,6 +113,37 @@ public class SysUserDeptServiceImpl extends ServiceImpl<UserDeptMapper, UserDept
 		UserDeptConverter.INSTANCE.applyUpdateForm(form, existing);
 		updateById(existing);
 		userAuthorizationInvalidationTrigger.submitByUserIds(List.of(userId), "update-dept");
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void removeBatch(Long userId, List<Long> ids) {
+		if (ids == null || CollUtil.isEmpty(ids)) {
+			return;
+		}
+
+		userReferenceChecker.getExistingActive(userId);
+		userOperationChecker.requireOperable(List.of(userId));
+
+		List<Long> distinctIds = ids.stream().distinct().toList();
+
+		removeByIds(distinctIds);
+		userAuthorizationInvalidationTrigger.submitByUserIds(List.of(userId), "delete-dept");
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void removeAll(Long userId) {
+		userReferenceChecker.getExistingActive(userId);
+		userOperationChecker.requireOperable(List.of(userId));
+
+		if (baseMapper.deleteByUserId(userId) > 0) {
+			userAuthorizationInvalidationTrigger.submitByUserIds(List.of(userId), "clear-dept");
+		}
 	}
 
 	/**

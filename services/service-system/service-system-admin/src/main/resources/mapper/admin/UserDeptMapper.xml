@@ -5,93 +5,86 @@
     <!-- 用户部门关联分页 -->
     <select id="selectListByPage" resultType="com.auth.service.system.admin.model.po.userdept.UserDeptPageRowPO">
         SELECT ud.id,
-               ud.user_id,
-               ud.dept_id,
-               d.dept_name,
-               d.dept_code,
-               ud.is_primary,
-               ud.status,
-               ud.create_time,
-               ud.update_time,
-               ud.create_user,
-               ud.update_user,
-               ud.version,
-               ud.remark
+        ud.user_id,
+        ud.dept_id,
+        d.dept_name,
+        d.dept_code,
+        ud.is_primary,
+        ud.status,
+        ud.create_time,
+        ud.update_time,
+        ud.create_user,
+        ud.update_user,
+        ud.version,
+        ud.remark
         FROM user_dept ud
-                 INNER JOIN sys_dept d ON d.id = ud.dept_id AND d.is_deleted = 0
+        INNER JOIN sys_dept d ON d.id = ud.dept_id AND d.is_deleted = 0
         WHERE ud.user_id = #{userId}
         <if test="query.deptName != null and query.deptName != ''">
-            AND d.dept_name LIKE CONCAT('%', #{query.deptName}, '%')
+            AND d.dept_name LIKE CONCAT('%',
+            #{query.deptName},
+            '%'
+            )
         </if>
         <if test="query.deptCode != null and query.deptCode != ''">
-            AND d.dept_code LIKE CONCAT('%', #{query.deptCode}, '%')
+            AND d.dept_code LIKE CONCAT('%',
+            #{query.deptCode},
+            '%'
+            )
         </if>
         <if test="query.status != null">
-            AND ud.status = #{query.status}
+            AND ud.status =
+            #{query.status}
         </if>
         ORDER BY ud.is_primary DESC, ud.create_time DESC, ud.id DESC
     </select>
 
+    <!-- 按用户与关联主键加载 -->
     <select id="selectByIdAndUserId" resultType="com.auth.service.system.admin.model.entity.UserDeptEntity">
         SELECT id,
-               user_id,
-               dept_id,
-               is_primary,
-               status,
-               create_time,
-               update_time,
-               create_user,
-               update_user,
-               version,
-               remark
+        user_id,
+        dept_id,
+        is_primary,
+        status,
+        create_time,
+        update_time,
+        create_user,
+        update_user,
+        version,
+        remark
         FROM user_dept
         WHERE id = #{id}
-          AND user_id = #{userId}
+        AND user_id = #{userId}
     </select>
 
+    <!-- 统计用户与部门是否已有关联 -->
     <select id="countByUserIdAndDeptId" resultType="int">
         SELECT COUNT(1)
         FROM user_dept
         WHERE user_id = #{userId}
-          AND dept_id = #{deptId}
+        AND dept_id = #{deptId}
     </select>
 
+    <!-- 按用户与部门加载关联 -->
     <select id="selectByUserIdAndDeptId" resultType="com.auth.service.system.admin.model.entity.UserDeptEntity">
         SELECT id,
-               user_id,
-               dept_id,
-               is_primary,
-               status,
-               create_time,
-               update_time,
-               create_user,
-               update_user,
-               version,
-               remark
+        user_id,
+        dept_id,
+        is_primary,
+        status,
+        create_time,
+        update_time,
+        create_user,
+        update_user,
+        version,
+        remark
         FROM user_dept
         WHERE user_id = #{userId}
-          AND dept_id = #{deptId}
+        AND dept_id = #{deptId}
         LIMIT 1
     </select>
 
-    <select id="selectActiveByUserId" resultType="com.auth.service.system.admin.model.entity.UserDeptEntity">
-        SELECT id,
-               user_id,
-               dept_id,
-               is_primary,
-               status,
-               create_time,
-               update_time,
-               create_user,
-               update_user,
-               version,
-               remark
-        FROM user_dept
-        WHERE user_id = #{userId}
-          AND status IN (1, 2)
-        ORDER BY is_primary DESC, create_time ASC, id ASC
-    </select>
-
+    <!-- 将用户全部有效关联的 is_primary 置为 false -->
     <update id="demotePrimaryByUserId">
         UPDATE user_dept
         SET is_primary = 0
@@ -99,5 +92,12 @@
           AND status IN (1, 2)
           AND is_primary = 1
     </update>
+
+    <!-- 删除用户全部部门关联 -->
+    <delete id="deleteByUserId">
+        DELETE
+        FROM user_dept
+        WHERE user_id = #{userId}
+    </delete>
 
 </mapper>

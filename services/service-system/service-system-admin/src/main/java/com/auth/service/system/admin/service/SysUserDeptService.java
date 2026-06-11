@@ -7,6 +7,8 @@ import com.auth.service.system.admin.model.query.user.UserDeptPageQuery;
 import com.auth.service.system.admin.model.vo.userdept.UserDeptPageVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.List;
+
 /**
  * 用户部门关联管理
  *
@@ -36,5 +38,18 @@ public interface SysUserDeptService extends IService<UserDeptEntity> {
 	 * @param form 关联表单
 	 */
 	void update(Long userId, Long id, UserDeptAssignForm form);
+
+	/**
+	 * 批量删除用户部门关联
+	 * @param userId 用户 ID
+	 * @param ids 关联主键列表
+	 */
+	void removeBatch(Long userId, List<Long> ids);
+
+	/**
+	 * 清空用户全部部门关联
+	 * @param userId 用户 ID
+	 */
+	void removeAll(Long userId);
 
 }

@@ -153,7 +153,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 			entity.setStatus(status);
 			return entity;
 		}).toList();
-		updateBatchById(updates);
+		super.updateBatchById(updates);
 		userSessionRevocationTrigger.revokeAllSessionsAfterCommit(idsToUpdate);
 	}
 

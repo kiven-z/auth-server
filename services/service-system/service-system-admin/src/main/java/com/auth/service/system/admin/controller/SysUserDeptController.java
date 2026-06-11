@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,6 +23,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * 用户部门关联管理
@@ -63,6 +66,26 @@ public class SysUserDeptController {
 	public Result<Void> update(@PathVariable("userId") Long userId, @PathVariable("id") Long id,
 			@Valid @RequestBody UserDeptAssignForm form) {
 		sysUserDeptService.update(userId, id, form);
+		return Result.success();
+	}
+
+	@OperationLog(targetType = "USER_DEPT", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.DELETE)
+	@Operation(summary = "批量删除用户部门关联")
+	@PreAuthorize("@auth.decide('sysUserDept:delete')")
+	@DeleteMapping("/{userId}")
+	public Result<Void> removeBatch(@PathVariable("userId") Long userId, @RequestBody List<Long> ids) {
+		sysUserDeptService.removeBatch(userId, ids);
+		return Result.success();
+	}
+
+	@OperationLog(targetType = "USER_DEPT", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.DELETE)
+	@Operation(summary = "清空用户全部部门关联")
+	@PreAuthorize("@auth.decide('sysUserDept:delete')")
+	@DeleteMapping("/{userId}/all")
+	public Result<Void> removeAll(@PathVariable("userId") Long userId) {
+		sysUserDeptService.removeAll(userId);
 		return Result.success();
 	}
 
