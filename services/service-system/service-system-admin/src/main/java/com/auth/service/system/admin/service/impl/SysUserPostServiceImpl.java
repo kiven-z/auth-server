@@ -1,6 +1,5 @@
 package com.auth.service.system.admin.service.impl;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.convert.UserPostConverter;
@@ -17,6 +16,7 @@ import com.auth.service.system.admin.model.vo.userpost.UserPostPageVO;
 import com.auth.service.system.admin.service.SysUserPostService;
 import com.auth.service.system.admin.support.post.PostReferenceChecker;
 import com.auth.service.system.admin.support.user.UserOperationChecker;
+import com.auth.service.system.admin.support.user.UserOrgRelationBatchRemoveSupport;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.UserAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
@@ -50,6 +50,8 @@ public class SysUserPostServiceImpl extends ServiceImpl<UserPostMapper, UserPost
 	private final UserAuthorizationInvalidationTrigger userAuthorizationInvalidationTrigger;
 
 	private final AuditUserDisplayService auditUserDisplayService;
+
+	private final UserOrgRelationBatchRemoveSupport userOrgRelationBatchRemoveSupport;
 
 	/**
 	 * {@inheritDoc}
@@ -117,16 +119,7 @@ public class SysUserPostServiceImpl extends ServiceImpl<UserPostMapper, UserPost
 	 */
 	@Override
 	public void removeBatch(Long userId, List<Long> ids) {
-		if (ids == null || CollUtil.isEmpty(ids)) {
-			return;
-		}
-
-		userReferenceChecker.getExistingActive(userId);
-		userOperationChecker.requireOperable(List.of(userId));
-
-		List<Long> distinctIds = ids.stream().distinct().toList();
-		removeByIds(distinctIds);
-		userAuthorizationInvalidationTrigger.submitByUserIds(List.of(userId), "delete-post");
+		userOrgRelationBatchRemoveSupport.removeBatch(userId, ids, this::removeByIds, "delete-post");
 	}
 
 	/**

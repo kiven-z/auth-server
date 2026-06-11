@@ -1,6 +1,5 @@
 package com.auth.service.system.admin.service.impl;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.convert.UserDeptConverter;
@@ -15,6 +14,7 @@ import com.auth.service.system.admin.model.vo.userdept.UserDeptPageVO;
 import com.auth.service.system.admin.service.SysUserDeptService;
 import com.auth.service.system.admin.support.dept.DeptReferenceChecker;
 import com.auth.service.system.admin.support.user.UserOperationChecker;
+import com.auth.service.system.admin.support.user.UserOrgRelationBatchRemoveSupport;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.UserAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
@@ -49,6 +49,8 @@ public class SysUserDeptServiceImpl extends ServiceImpl<UserDeptMapper, UserDept
 	private final UserAuthorizationInvalidationTrigger userAuthorizationInvalidationTrigger;
 
 	private final AuditUserDisplayService auditUserDisplayService;
+
+	private final UserOrgRelationBatchRemoveSupport userOrgRelationBatchRemoveSupport;
 
 	/**
 	 * {@inheritDoc}
@@ -120,17 +122,7 @@ public class SysUserDeptServiceImpl extends ServiceImpl<UserDeptMapper, UserDept
 	 */
 	@Override
 	public void removeBatch(Long userId, List<Long> ids) {
-		if (ids == null || CollUtil.isEmpty(ids)) {
-			return;
-		}
-
-		userReferenceChecker.getExistingActive(userId);
-		userOperationChecker.requireOperable(List.of(userId));
-
-		List<Long> distinctIds = ids.stream().distinct().toList();
-
-		removeByIds(distinctIds);
-		userAuthorizationInvalidationTrigger.submitByUserIds(List.of(userId), "delete-dept");
+		userOrgRelationBatchRemoveSupport.removeBatch(userId, ids, this::removeByIds, "delete-dept");
 	}
 
 	/**

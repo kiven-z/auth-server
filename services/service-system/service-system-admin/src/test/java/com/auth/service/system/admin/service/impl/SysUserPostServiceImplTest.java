@@ -16,6 +16,7 @@ import com.auth.service.system.admin.model.query.user.UserPostPageQuery;
 import com.auth.service.system.admin.model.vo.userpost.UserPostPageVO;
 import com.auth.service.system.admin.support.post.PostReferenceChecker;
 import com.auth.service.system.admin.support.user.UserOperationChecker;
+import com.auth.service.system.admin.support.user.UserOrgRelationBatchRemoveSupport;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.UserAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
@@ -114,8 +115,11 @@ class SysUserPostServiceImplTest {
 	void setUp() throws Exception {
 		UserReferenceChecker userReferenceChecker = new UserReferenceChecker(sysUserMapper);
 		PostReferenceChecker postReferenceChecker = new PostReferenceChecker(sysPostMapper, null);
+		UserOrgRelationBatchRemoveSupport batchRemoveSupport = new UserOrgRelationBatchRemoveSupport(
+				userReferenceChecker, userOperationChecker, userAuthorizationInvalidationTrigger);
 		sysUserPostService = new SysUserPostServiceImpl(userReferenceChecker, userOperationChecker,
-				postReferenceChecker, userAuthorizationInvalidationTrigger, auditUserDisplayService);
+				postReferenceChecker, userAuthorizationInvalidationTrigger, auditUserDisplayService,
+				batchRemoveSupport);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysUserPostService, userPostMapper);

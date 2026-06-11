@@ -48,22 +48,24 @@ public enum SystemAdminResultCode implements SystemResultCode {
 	/**
 	 * 用户部门关联已存在
 	 */
-	USER_DEPT_DUPLICATE(409, 322, "USER_DEPT_DUPLICATE", "system.user.dept_duplicate"),
+	USER_DEPT_DUPLICATE(409, 322, "USER_DEPT_DUPLICATE", "system.user.org_relation_duplicate"),
 
 	/**
-	 * 仅正常状态的部门关联可设为主部门
+	 * 仅正常状态的关联可设为主要关联
 	 */
-	USER_DEPT_PRIMARY_NOT_ELIGIBLE(400, 324, "USER_DEPT_PRIMARY_NOT_ELIGIBLE", "system.user.dept_primary_not_eligible"),
+	USER_DEPT_PRIMARY_NOT_ELIGIBLE(400, 324, "USER_DEPT_PRIMARY_NOT_ELIGIBLE",
+			"system.user.org_relation_primary_not_eligible"),
 
 	/**
 	 * 用户岗位关联已存在
 	 */
-	USER_POST_DUPLICATE(409, 325, "USER_POST_DUPLICATE", "system.user.post_duplicate"),
+	USER_POST_DUPLICATE(409, 325, "USER_POST_DUPLICATE", "system.user.org_relation_duplicate"),
 
 	/**
-	 * 仅正常状态的岗位关联可设为主岗位
+	 * 仅正常状态的关联可设为主要关联
 	 */
-	USER_POST_PRIMARY_NOT_ELIGIBLE(400, 326, "USER_POST_PRIMARY_NOT_ELIGIBLE", "system.user.post_primary_not_eligible");
+	USER_POST_PRIMARY_NOT_ELIGIBLE(400, 326, "USER_POST_PRIMARY_NOT_ELIGIBLE",
+			"system.user.org_relation_primary_not_eligible");
 
 	private final int httpStatus;
 

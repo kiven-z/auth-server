@@ -16,6 +16,7 @@ import com.auth.service.system.admin.model.query.user.UserDeptPageQuery;
 import com.auth.service.system.admin.model.vo.userdept.UserDeptPageVO;
 import com.auth.service.system.admin.support.dept.DeptReferenceChecker;
 import com.auth.service.system.admin.support.user.UserOperationChecker;
+import com.auth.service.system.admin.support.user.UserOrgRelationBatchRemoveSupport;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.UserAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
@@ -115,8 +116,11 @@ class SysUserDeptServiceImplTest {
 	void setUp() throws Exception {
 		UserReferenceChecker userReferenceChecker = new UserReferenceChecker(sysUserMapper);
 		DeptReferenceChecker deptReferenceChecker = new DeptReferenceChecker(sysDeptMapper, deptReferenceMapper);
+		UserOrgRelationBatchRemoveSupport batchRemoveSupport = new UserOrgRelationBatchRemoveSupport(
+				userReferenceChecker, userOperationChecker, userAuthorizationInvalidationTrigger);
 		sysUserDeptService = new SysUserDeptServiceImpl(userReferenceChecker, userOperationChecker,
-				deptReferenceChecker, userAuthorizationInvalidationTrigger, auditUserDisplayService);
+				deptReferenceChecker, userAuthorizationInvalidationTrigger, auditUserDisplayService,
+				batchRemoveSupport);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysUserDeptService, userDeptMapper);
