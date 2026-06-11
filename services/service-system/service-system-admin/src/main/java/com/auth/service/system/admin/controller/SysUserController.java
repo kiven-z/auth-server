@@ -9,6 +9,8 @@ import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
+import com.auth.module.file.export.ExportScopeQueryFields;
+import com.auth.service.system.admin.excel.user.SysUserSpreadsheetService;
 import com.auth.service.system.admin.model.form.user.SysUserAdminResetPasswordForm;
 import com.auth.service.system.admin.model.form.user.SysUserBatchStatusForm;
 import com.auth.service.system.admin.model.form.user.SysUserForm;
@@ -23,10 +25,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DELETE_SUCCESS;
@@ -45,9 +49,19 @@ public class SysUserController {
 
 	private final SysUserService sysUserService;
 
+	private final SysUserSpreadsheetService sysUserSpreadsheetService;
+
 	private final UserPasswordService userPasswordService;
 
 	private final IpAddressService ipAddressService;
+
+	@Operation(summary = "用户 Excel 导出")
+	@PreAuthorize("@auth.decide('sysUser:export')")
+	@GetMapping("/export")
+	public ResponseEntity<byte[]> export(@Validated SysUserPageQuery filter, @Validated ExportScopeQueryFields scope)
+			throws IOException {
+		return sysUserSpreadsheetService.export(filter, scope);
+	}
 
 	@OperationLog(targetType = "USER_LIST", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.QUERY)
