@@ -37,7 +37,11 @@ public class SysRoleBoundPermissionItemVO implements Serializable {
 	private Boolean status;
 
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	@Schema(title = "授权时间")
-	private LocalDateTime grantTime;
+	@Schema(title = "创建时间")
+	private LocalDateTime createTime;
+
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@Schema(title = "更新时间")
+	private LocalDateTime updateTime;
 
 }

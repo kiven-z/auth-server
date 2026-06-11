@@ -27,7 +27,10 @@ public class SysRoleAssignedPermissionRow implements Serializable {
 	@Schema(title = "权限名称")
 	private String permissionName;
 
-	@Schema(title = "授权时间")
-	private LocalDateTime grantTime;
+	@Schema(title = "创建时间")
+	private LocalDateTime createTime;
+
+	@Schema(title = "更新时间")
+	private LocalDateTime updateTime;
 
 }

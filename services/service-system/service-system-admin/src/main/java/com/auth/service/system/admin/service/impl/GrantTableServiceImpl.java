@@ -19,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -90,13 +89,11 @@ public class GrantTableServiceImpl extends ServiceImpl<GrantTableMapper, GrantTa
 			return;
 		}
 
-		LocalDateTime grantTime = LocalDateTime.now();
 		List<GrantTableEntity> entities = roleCodes.stream().map(roleCode -> {
 			GrantTableEntity entity = new GrantTableEntity();
 			entity.setSubjectType(subjectType);
 			entity.setSubjectId(subjectId);
 			entity.setRoleCode(roleCode);
-			entity.setGrantTime(grantTime);
 			return entity;
 		}).toList();
 		super.saveBatch(entities);

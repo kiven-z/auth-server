@@ -1,5 +1,6 @@
 package com.auth.service.system.admin.model.entity;
 
+import com.auth.common.data.model.BaseEntity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -8,11 +9,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serial;
-import java.io.Serializable;
-import java.time.LocalDateTime;
 
 /**
- * 角色与权限码关联，对应 {@code sys_role_permission}。
+ * 角色与权限码关联
  *
  * @author Bunny
  */
@@ -20,7 +19,7 @@ import java.time.LocalDateTime;
 @Schema(name = "SysRolePermissionEntity", title = "角色权限关联")
 @Getter
 @Setter
-public class SysRolePermissionEntity implements Serializable {
+public class SysRolePermissionEntity extends BaseEntity {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
@@ -33,9 +32,6 @@ public class SysRolePermissionEntity implements Serializable {
 
 	@Schema(title = "权限码")
 	private String permissionCode;
-
-	@Schema(title = "授权时间")
-	private LocalDateTime grantTime;
 
 	@Schema(title = "授权人 userId")
 	private Long grantorId;

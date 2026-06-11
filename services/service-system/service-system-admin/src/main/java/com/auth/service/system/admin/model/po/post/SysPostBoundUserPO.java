@@ -42,7 +42,10 @@ public class SysPostBoundUserPO implements Serializable {
 	@Schema(title = "用户-岗位关联状态(0=已调离,1=正常,2=兼职)")
 	private Integer relationStatus;
 
-	@Schema(title = "授权时间")
-	private LocalDateTime grantTime;
+	@Schema(title = "创建时间")
+	private LocalDateTime createTime;
+
+	@Schema(title = "更新时间")
+	private LocalDateTime updateTime;
 
 }

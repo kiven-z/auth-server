@@ -232,7 +232,8 @@ class SysPermissionServiceImplTest {
 		boundRole.setRoleName("管理员");
 		boundRole.setStatus(true);
 		boundRole.setRoleType(1);
-		boundRole.setGrantTime(LocalDateTime.of(2026, 6, 4, 10, 30, 0));
+		boundRole.setCreateTime(LocalDateTime.of(2026, 6, 4, 10, 30, 0));
+		boundRole.setUpdateTime(LocalDateTime.of(2026, 6, 4, 10, 30, 0));
 		when(sysRolePermissionMapper.selectBoundRolesByPermissionCode("sys:user:create"))
 			.thenReturn(List.of(boundRole));
 
@@ -250,7 +251,8 @@ class SysPermissionServiceImplTest {
 
 		assertThat(detail.getBoundRoles()).hasSize(1);
 		assertThat(detail.getBoundRoles().get(0).getRoleCode()).isEqualTo("ADMIN");
-		assertThat(detail.getBoundRoles().get(0).getGrantTime()).isEqualTo(LocalDateTime.of(2026, 6, 4, 10, 30, 0));
+		assertThat(detail.getBoundRoles().get(0).getCreateTime()).isEqualTo(LocalDateTime.of(2026, 6, 4, 10, 30, 0));
+		assertThat(detail.getBoundRoles().get(0).getUpdateTime()).isEqualTo(LocalDateTime.of(2026, 6, 4, 10, 30, 0));
 		assertThat(detail.getBoundMenus()).hasSize(1);
 		assertThat(detail.getBoundMenus().get(0).getTitle()).isEqualTo("用户管理");
 		verify(sysMenuPermissionMapper).selectBoundMenusByPermissionCode("sys:user:create");

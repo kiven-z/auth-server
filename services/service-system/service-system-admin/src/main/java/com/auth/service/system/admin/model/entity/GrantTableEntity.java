@@ -6,8 +6,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-
 /**
  * 统一授权表行，对应 {@code grant_table}。
  *
@@ -27,8 +25,5 @@ public class GrantTableEntity extends BaseEntity {
 
 	@Schema(title = "角色编码")
 	private String roleCode;
-
-	@Schema(title = "授权时间")
-	private LocalDateTime grantTime;
 
 }

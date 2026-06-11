@@ -26,12 +26,13 @@
                u.status  AS user_status,
                up.is_primary,
                up.status AS relation_status,
-               up.grant_time
+               up.create_time,
+               up.update_time
         FROM user_post up
                  INNER JOIN sys_user u ON u.id = up.user_id AND u.is_deleted = 0
         WHERE up.post_id = #{postId}
           AND up.status IN (1, 2)
-        ORDER BY up.is_primary DESC, up.grant_time DESC, u.username
+        ORDER BY up.is_primary DESC, up.create_time DESC, u.username
     </select>
 
 </mapper>

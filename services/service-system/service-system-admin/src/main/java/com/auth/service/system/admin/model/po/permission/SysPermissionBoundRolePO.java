@@ -33,7 +33,10 @@ public class SysPermissionBoundRolePO implements Serializable {
 	@Schema(title = "角色类型(1=系统,2=菜单,3=业务,4=自定义)")
 	private Integer roleType;
 
-	@Schema(title = "授权时间")
-	private LocalDateTime grantTime;
+	@Schema(title = "创建时间")
+	private LocalDateTime createTime;
+
+	@Schema(title = "更新时间")
+	private LocalDateTime updateTime;
 
 }

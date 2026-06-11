@@ -28,7 +28,7 @@
         FROM user_post up
                  INNER JOIN sys_post sp ON up.post_id = sp.id AND sp.status = 1 AND sp.is_deleted = 0
         WHERE up.user_id = #{userId}
-        ORDER BY up.is_primary DESC, up.grant_time DESC
+        ORDER BY up.is_primary DESC, up.create_time DESC
     </select>
 
     <!-- 管理端用户远程搜索：未删除且状态正常，关键词模糊匹配多字段 -->

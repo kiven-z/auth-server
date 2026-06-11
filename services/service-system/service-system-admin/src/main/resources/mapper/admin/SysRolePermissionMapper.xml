@@ -16,7 +16,8 @@
                COALESCE(p.permission_name, rp.permission_code) AS permission_name,
                p.permission_type,
                p.status,
-               rp.grant_time
+               rp.create_time,
+               rp.update_time
         FROM sys_role_permission rp
                  LEFT JOIN sys_permission p ON p.permission_code = rp.permission_code
         WHERE rp.role_code = #{roleCode}
@@ -30,7 +31,8 @@
                r.role_name,
                r.status,
                r.role_type,
-               rp.grant_time
+               rp.create_time,
+               rp.update_time
         FROM sys_role_permission rp
                  INNER JOIN sys_role r ON r.role_code = rp.role_code
         WHERE rp.permission_code = #{permissionCode}
@@ -41,7 +43,6 @@
     <insert id="batchInsertRolePermissions">
         INSERT INTO sys_role_permission (role_code,
         permission_code,
-        grant_time,
         grantor_id,
         create_user,
         update_user,
@@ -50,7 +51,6 @@
         <foreach collection="permissionCodes" item="permissionCode" separator=",">
             (#{roleCode},
             #{permissionCode},
-            NOW(3),
             #{grantorId},
             #{createUser},
             #{createUser},

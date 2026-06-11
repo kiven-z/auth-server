@@ -158,7 +158,7 @@ class GrantTableServiceImplTest {
 		assertThat(entitiesCaptor.getValue())
 			.allSatisfy(entity -> assertThat(entity.getSubjectType()).isEqualTo("USER"))
 			.allSatisfy(entity -> assertThat(entity.getSubjectId()).isEqualTo(SUBJECT_ID))
-			.allSatisfy(entity -> assertThat(entity.getGrantTime()).isNotNull());
+			.allSatisfy(entity -> assertThat(entity.getRoleCode()).isNotBlank());
 		assertThat(entitiesCaptor.getValue().stream().map(GrantTableEntity::getRoleCode).toList())
 			.containsExactlyInAnyOrder("BIZ_ADMIN", "CUSTOM_A");
 	}

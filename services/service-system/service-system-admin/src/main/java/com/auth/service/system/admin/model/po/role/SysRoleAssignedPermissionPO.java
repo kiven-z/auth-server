@@ -33,7 +33,10 @@ public class SysRoleAssignedPermissionPO implements Serializable {
 	@Schema(title = "启用状态(true=启用，false=停用)")
 	private Boolean status;
 
-	@Schema(title = "授权时间")
-	private LocalDateTime grantTime;
+	@Schema(title = "创建时间")
+	private LocalDateTime createTime;
+
+	@Schema(title = "更新时间")
+	private LocalDateTime updateTime;
 
 }
