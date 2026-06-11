@@ -24,10 +24,6 @@ public class UserDeptAssignForm implements Serializable {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
-	@Schema(title = "用户 ID", requiredMode = Schema.RequiredMode.REQUIRED)
-	@NotNull(message = "用户 ID 必填")
-	private Long userId;
-
 	@Schema(title = "部门 ID", requiredMode = Schema.RequiredMode.REQUIRED)
 	@NotNull(message = "部门 ID 必填")
 	private Long deptId;
@@ -40,10 +36,6 @@ public class UserDeptAssignForm implements Serializable {
 
 	@Schema(title = "是否主部门；不传时由服务端按规则推断")
 	private Boolean isPrimary;
-
-	@Schema(title = "在部门内职务")
-	@Size(max = 64, message = "文字长度必须 <= 64")
-	private String position;
 
 	@Schema(title = "备注")
 	@Size(max = 255, message = "备注长度必须 <= 255")

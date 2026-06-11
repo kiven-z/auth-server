@@ -41,12 +41,6 @@ public class UserDeptPageRowPO implements Serializable {
 	@Schema(title = "关联状态")
 	private Integer status;
 
-	@Schema(title = "在部门内职务")
-	private String position;
-
-	@Schema(title = "授权/绑定时间")
-	private LocalDateTime grantTime;
-
 	@Schema(title = "创建时间")
 	private LocalDateTime createTime;
 

@@ -5,8 +5,6 @@ import com.auth.service.system.admin.model.vo.userdept.UserDeptPageVO;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
-import java.util.List;
-
 /**
  * 用户部门关联转换
  *
@@ -26,12 +24,5 @@ public interface UserDeptConverter {
 	 * @return VO
 	 */
 	UserDeptPageVO toPageVo(UserDeptPageRowPO row);
-
-	/**
-	 * 分页行列表转换
-	 * @param rows 分页行列表
-	 * @return VO 列表
-	 */
-	List<UserDeptPageVO> toPageVoList(List<UserDeptPageRowPO> rows);
 
 }

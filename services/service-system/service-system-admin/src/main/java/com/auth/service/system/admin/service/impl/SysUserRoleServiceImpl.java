@@ -61,7 +61,6 @@ public class SysUserRoleServiceImpl implements SysUserRoleService {
 	@Override
 	public void replaceUserRoles(Long userId, GrantTableAssignRoleForm form) {
 		userReferenceChecker.getExistingActive(userId);
-
 		userOperationChecker.requireOperable(List.of(userId));
 
 		List<String> roleCodes = CollUtil.emptyIfNull(form.getRoleCodes()).stream().distinct().toList();
@@ -71,6 +70,7 @@ public class SysUserRoleServiceImpl implements SysUserRoleService {
 		Long operatorId = SecurityUserUtils.getUserId();
 		grantTableMapper.deleteBySubject(GrantTableSubjectType.USER.name(), userId);
 		if (CollUtil.isNotEmpty(roleCodes)) {
+			// FIXME 需要修复为Service插入或者是 insert
 			grantTableMapper.batchInsertSubjectRoleGrants(GrantTableSubjectType.USER.name(), userId, roleCodes,
 					operatorId);
 		}

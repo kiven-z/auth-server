@@ -11,8 +11,6 @@
                d.dept_code,
                ud.is_primary,
                ud.status,
-               ud.position,
-               ud.grant_time,
                ud.create_time,
                ud.update_time,
                ud.create_user,
@@ -31,7 +29,7 @@
         <if test="query.status != null">
             AND ud.status = #{query.status}
         </if>
-        ORDER BY ud.is_primary DESC, ud.grant_time DESC, ud.id DESC
+        ORDER BY ud.is_primary DESC, ud.create_time DESC, ud.id DESC
     </select>
 
     <select id="selectByIdAndUserId" resultType="com.auth.service.system.admin.model.entity.UserDeptEntity">
