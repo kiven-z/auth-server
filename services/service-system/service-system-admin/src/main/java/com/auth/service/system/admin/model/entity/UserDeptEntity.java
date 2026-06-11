@@ -1,7 +1,5 @@
 package com.auth.service.system.admin.model.entity;
 
-import java.time.LocalDateTime;
-
 import com.auth.common.data.model.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 
@@ -27,12 +25,6 @@ public class UserDeptEntity extends BaseEntity {
 
 	@Schema(title = "是否主部门")
 	private Boolean isPrimary;
-
-	@Schema(title = "在部门内的职务")
-	private String position;
-
-	@Schema(title = "授权/绑定时间")
-	private LocalDateTime grantTime;
 
 	@Schema(title = "关联状态")
 	private Integer status;

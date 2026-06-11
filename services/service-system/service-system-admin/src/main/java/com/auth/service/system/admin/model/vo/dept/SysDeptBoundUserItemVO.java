@@ -1,7 +1,6 @@
 package com.auth.service.system.admin.model.vo.dept;
 
 import com.auth.common.core.annotation.JsonStringFormat;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,7 +8,6 @@ import lombok.ToString;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDateTime;
 
 /**
  * 部门详情-关联用户项
@@ -46,12 +44,5 @@ public class SysDeptBoundUserItemVO implements Serializable {
 
 	@Schema(title = "用户-部门关联状态(0=已调离,1=正常,2=兼职)")
 	private Integer relationStatus;
-
-	@Schema(title = "部门内职位")
-	private String position;
-
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	@Schema(title = "授权时间")
-	private LocalDateTime grantTime;
 
 }

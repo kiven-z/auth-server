@@ -9,13 +9,11 @@
                d.dept_name,
                d.dept_code,
                ud.is_primary,
-               ud.status,
-               ud.position,
-               ud.grant_time
+               ud.status
         FROM user_dept ud
                  INNER JOIN sys_dept d ON ud.dept_id = d.id  AND d.status = 1 AND d.is_deleted = 0
         WHERE ud.user_id = #{userId}
-        ORDER BY ud.is_primary DESC, ud.grant_time DESC
+        ORDER BY ud.is_primary DESC, ud.create_time DESC
     </select>
 
     <!-- 用户档案：岗位列表（user_post JOIN sys_post） -->

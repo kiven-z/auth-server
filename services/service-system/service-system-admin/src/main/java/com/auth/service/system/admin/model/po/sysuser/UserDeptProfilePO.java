@@ -6,7 +6,6 @@ import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDateTime;
 
 /**
  * 用户档案-部门关联查询行
@@ -34,11 +33,5 @@ public class UserDeptProfilePO implements Serializable {
 
 	@Schema(title = "状态")
 	private Integer status;
-
-	@Schema(title = "岗位")
-	private String position;
-
-	@Schema(title = "授权时间")
-	private LocalDateTime grantTime;
 
 }

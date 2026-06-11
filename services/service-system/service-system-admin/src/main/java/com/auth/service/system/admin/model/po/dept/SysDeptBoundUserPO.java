@@ -6,7 +6,6 @@ import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDateTime;
 
 /**
  * 部门详情-关联用户行
@@ -41,11 +40,5 @@ public class SysDeptBoundUserPO implements Serializable {
 
 	@Schema(title = "用户-部门关联状态(0=已调离,1=正常,2=兼职)")
 	private Integer relationStatus;
-
-	@Schema(title = "部门内职位")
-	private String position;
-
-	@Schema(title = "授权时间")
-	private LocalDateTime grantTime;
 
 }

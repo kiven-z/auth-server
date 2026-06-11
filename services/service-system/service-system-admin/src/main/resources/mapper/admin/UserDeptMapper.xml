@@ -37,8 +37,6 @@
                user_id,
                dept_id,
                is_primary,
-               position,
-               grant_time,
                status,
                create_time,
                update_time,
@@ -63,8 +61,6 @@
                user_id,
                dept_id,
                is_primary,
-               position,
-               grant_time,
                status,
                create_time,
                update_time,
@@ -83,8 +79,6 @@
                user_id,
                dept_id,
                is_primary,
-               position,
-               grant_time,
                status,
                create_time,
                update_time,
@@ -95,7 +89,7 @@
         FROM user_dept
         WHERE user_id = #{userId}
           AND status IN (1, 2)
-        ORDER BY is_primary DESC, grant_time ASC, id ASC
+        ORDER BY is_primary DESC, create_time ASC, id ASC
     </select>
 
     <update id="demotePrimaryByUserId">

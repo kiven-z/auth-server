@@ -35,8 +35,6 @@ public interface UserDeptConverter {
 	 */
 	@Mapping(target = "id", ignore = true)
 	@Mapping(target = "userId", ignore = true)
-	@Mapping(target = "position", ignore = true)
-	@Mapping(target = "grantTime", ignore = true)
 	@Mapping(target = "createTime", ignore = true)
 	@Mapping(target = "updateTime", ignore = true)
 	@Mapping(target = "createUser", ignore = true)
