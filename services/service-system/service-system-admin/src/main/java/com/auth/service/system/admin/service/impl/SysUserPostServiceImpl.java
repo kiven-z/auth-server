@@ -109,6 +109,7 @@ public class SysUserPostServiceImpl extends ServiceImpl<UserPostMapper, UserPost
 		}
 
 		applyPrimaryPostRules(userId, form.getStatus(), form.getIsPrimary());
+
 		UserPostConverter.INSTANCE.applyUpdateForm(form, existing);
 		updateById(existing);
 		userAuthorizationInvalidationTrigger.submitByUserIds(List.of(userId), "update-post");
@@ -143,9 +144,11 @@ public class SysUserPostServiceImpl extends ServiceImpl<UserPostMapper, UserPost
 	 */
 	private void applyPrimaryPostRules(Long userId, Integer status, Boolean isPrimary) {
 		boolean primary = BooleanUtil.isTrue(isPrimary);
+
 		if (primary && !UserOrgRelationStatusEnum.canBePrimary(status)) {
 			throw new SystemBusinessException(SystemAdminResultCode.USER_POST_PRIMARY_NOT_ELIGIBLE);
 		}
+
 		if (primary) {
 			baseMapper.demotePrimaryByUserId(userId);
 		}

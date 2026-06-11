@@ -1,5 +1,26 @@
 package com.auth.service.system.admin.service.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.lang.reflect.Field;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
@@ -25,24 +46,6 @@ import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.lang.reflect.Field;
-import java.time.LocalDateTime;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
 
 /**
  * {@link SysUserPostServiceImpl} 单元测试
@@ -197,10 +200,9 @@ class SysUserPostServiceImplTest {
 	void createRejectsDuplicatePostRelation() {
 		stubCreatePrerequisites();
 		when(userPostMapper.countByUserIdAndPostId(USER_ID, POST_ID)).thenReturn(1);
+		UserPostAssignForm form = createForm(UserOrgRelationStatusEnum.NORMAL.getCode(), false, null);
 
-		assertThatThrownBy(() -> sysUserPostService.create(USER_ID,
-				createForm(UserOrgRelationStatusEnum.NORMAL.getCode(), false, null)))
-			.isInstanceOf(SystemBusinessException.class)
+		assertThatThrownBy(() -> sysUserPostService.create(USER_ID, form)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemAdminResultCode.USER_POST_DUPLICATE);
 
@@ -212,10 +214,9 @@ class SysUserPostServiceImplTest {
 	void createRejectsPrimaryWhenStatusNotNormal() {
 		stubCreatePrerequisites();
 		when(userPostMapper.countByUserIdAndPostId(USER_ID, POST_ID)).thenReturn(0);
+		UserPostAssignForm form = createForm(UserOrgRelationStatusEnum.TRANSFERRED.getCode(), true, null);
 
-		assertThatThrownBy(() -> sysUserPostService.create(USER_ID,
-				createForm(UserOrgRelationStatusEnum.TRANSFERRED.getCode(), true, null)))
-			.isInstanceOf(SystemBusinessException.class)
+		assertThatThrownBy(() -> sysUserPostService.create(USER_ID, form)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemAdminResultCode.USER_POST_PRIMARY_NOT_ELIGIBLE);
 	}
@@ -247,9 +248,9 @@ class SysUserPostServiceImplTest {
 	void updateRejectsMissingRelation() {
 		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
 		when(userPostMapper.selectByIdAndUserId(RELATION_ID, USER_ID)).thenReturn(null);
+		UserPostRelationUpdateForm form = updateForm(UserOrgRelationStatusEnum.NORMAL.getCode(), null);
 
-		assertThatThrownBy(() -> sysUserPostService.update(USER_ID, RELATION_ID,
-				updateForm(UserOrgRelationStatusEnum.NORMAL.getCode(), null)))
+		assertThatThrownBy(() -> sysUserPostService.update(USER_ID, RELATION_ID, form))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);

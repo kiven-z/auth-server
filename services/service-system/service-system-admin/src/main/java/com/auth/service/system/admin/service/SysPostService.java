@@ -6,7 +6,10 @@ import com.auth.service.system.admin.model.form.post.SysPostForm;
 import com.auth.service.system.admin.model.query.post.SysPostQuery;
 import com.auth.service.system.admin.model.vo.post.SysPostDetailVO;
 import com.auth.service.system.admin.model.vo.post.SysPostPageResponse;
+import com.auth.service.system.admin.model.vo.post.SysPostSearchItemResponse;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+
+import java.util.List;
 
 /**
  * 系统岗位服务
@@ -22,6 +25,15 @@ public interface SysPostService {
 	 * @return 分页数据
 	 */
 	PageResponse<SysPostPageResponse> getPage(Page<SysPostEntity> pageParams, SysPostQuery query);
+
+	/**
+	 * 岗位关键词搜索（编码/名称前缀匹配）
+	 * @param keyword 搜索关键字（前缀匹配，可选）
+	 * @param status 启用状态（可选）
+	 * @param limit 返回条数上限，默认 20，最大 50
+	 * @return 搜索项列表
+	 */
+	List<SysPostSearchItemResponse> search(String keyword, Boolean status, Integer limit);
 
 	/**
 	 * 岗位详情（含所属部门、关联用户、已授权角色）

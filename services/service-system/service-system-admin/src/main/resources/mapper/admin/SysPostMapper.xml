@@ -48,6 +48,30 @@
         ORDER BY ${orderBySql}
     </select>
 
+    <!-- 岗位远程搜索：编码/名称前缀匹配（可走索引），无关键字时返回默认条数 -->
+    <select id="search" resultType="com.auth.service.system.admin.model.po.post.SysPostSearchItemPO">
+        SELECT p.id,
+               p.dept_id,
+               d.dept_name,
+               p.post_code,
+               p.post_name,
+               p.status
+        FROM sys_post p
+                 INNER JOIN sys_dept d ON p.dept_id = d.id AND d.is_deleted = 0
+        WHERE p.is_deleted = 0
+        <if test="status != null">
+            AND p.status = #{status}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (
+                p.post_code LIKE CONCAT(#{keyword}, '%')
+                OR p.post_name LIKE CONCAT(#{keyword}, '%')
+            )
+        </if>
+        ORDER BY p.order_num ASC, p.id DESC
+        LIMIT #{limit}
+    </select>
+
     <!-- 可挂载岗位：本部门启用，且 dept_closure 路径上无停用/已删祖先 -->
     <select id="countAssignableDept" resultType="int">
         SELECT COUNT(1)

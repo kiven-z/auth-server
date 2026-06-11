@@ -15,9 +15,12 @@ import com.auth.service.system.admin.model.po.granttable.GrantTableBoundRolePO;
 import com.auth.service.system.admin.model.po.post.SysPostBoundDeptPO;
 import com.auth.service.system.admin.model.po.post.SysPostBoundUserPO;
 import com.auth.service.system.admin.model.po.post.SysPostPageRowPO;
+import com.auth.service.system.admin.model.po.post.SysPostSearchItemPO;
 import com.auth.service.system.admin.model.query.post.SysPostQuery;
 import com.auth.service.system.admin.model.vo.post.SysPostDetailVO;
 import com.auth.service.system.admin.model.vo.post.SysPostPageResponse;
+import com.auth.service.system.admin.model.vo.post.SysPostSearchItemResponse;
+import org.mockito.ArgumentCaptor;
 import com.auth.service.system.admin.support.post.PostReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.PostAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
@@ -97,6 +100,69 @@ class SysPostServiceImplTest {
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysPostService, sysPostMapper);
+	}
+
+	@Test
+	@DisplayName("搜索：关键字原样传入 Mapper")
+	void searchPassesKeywordThrough() {
+		when(sysPostMapper.search("", true, 10)).thenReturn(List.of());
+
+		sysPostService.search("", true, 10);
+
+		verify(sysPostMapper).search("", true, 10);
+	}
+
+	@Test
+	@DisplayName("搜索：limit 为 null 时默认使用 20")
+	void searchUsesDefaultLimitWhenNull() {
+		when(sysPostMapper.search(any(), any(), anyInt())).thenReturn(List.of());
+
+		sysPostService.search("dev", true, null);
+
+		ArgumentCaptor<Integer> limitCap = ArgumentCaptor.forClass(Integer.class);
+		verify(sysPostMapper).search(eq("dev"), eq(true), limitCap.capture());
+		assertThat(limitCap.getValue()).isEqualTo(20);
+	}
+
+	@Test
+	@DisplayName("搜索：limit 超过 50 时封顶为 50")
+	void searchCapsLimitAtFifty() {
+		when(sysPostMapper.search(any(), any(), anyInt())).thenReturn(List.of());
+
+		sysPostService.search("研发", null, 200);
+
+		ArgumentCaptor<Integer> limitCap = ArgumentCaptor.forClass(Integer.class);
+		verify(sysPostMapper).search(eq("研发"), isNull(), limitCap.capture());
+		assertThat(limitCap.getValue()).isEqualTo(50);
+	}
+
+	@Test
+	@DisplayName("搜索：limit 小于 1 时提升为 1")
+	void searchRaisesTinyLimitToOne() {
+		when(sysPostMapper.search(any(), any(), anyInt())).thenReturn(List.of());
+
+		sysPostService.search("p1", false, 0);
+
+		ArgumentCaptor<Integer> limitCap = ArgumentCaptor.forClass(Integer.class);
+		verify(sysPostMapper).search(eq("p1"), eq(false), limitCap.capture());
+		assertThat(limitCap.getValue()).isEqualTo(1);
+	}
+
+	@Test
+	@DisplayName("搜索：正常返回 Mapper 结果")
+	void searchReturnsMapperRows() {
+		SysPostSearchItemPO row = new SysPostSearchItemPO();
+		row.setId(5L);
+		row.setPostCode("OPS");
+		row.setPostName("运维");
+		when(sysPostMapper.search("ops", true, 15)).thenReturn(List.of(row));
+
+		List<SysPostSearchItemResponse> result = sysPostService.search("ops", true, 15);
+
+		assertThat(result).hasSize(1).first().satisfies(r -> {
+			assertThat(r.getId()).isEqualTo(5L);
+			assertThat(r.getPostCode()).isEqualTo("OPS");
+		});
 	}
 
 	@Test

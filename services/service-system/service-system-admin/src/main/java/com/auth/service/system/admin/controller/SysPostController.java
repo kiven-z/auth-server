@@ -12,6 +12,8 @@ import com.auth.service.system.admin.model.form.post.SysPostForm;
 import com.auth.service.system.admin.model.query.post.SysPostQuery;
 import com.auth.service.system.admin.model.vo.post.SysPostDetailVO;
 import com.auth.service.system.admin.model.vo.post.SysPostPageResponse;
+import com.auth.service.system.admin.model.vo.post.SysPostSearchItemResponse;
+import io.swagger.v3.oas.annotations.Parameter;
 import com.auth.service.system.admin.service.SysPostService;
 import com.auth.service.system.common.model.SystemAuditBizModule;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -25,6 +27,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * 系统岗位管理 Controller
@@ -61,6 +64,17 @@ public class SysPostController {
 		Page<SysPostEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
 		PageResponse<SysPostPageResponse> result = sysPostService.getPage(pageParams, query);
 		return Result.success(result);
+	}
+
+	@Operation(summary = "岗位关键词搜索")
+	@PreAuthorize("@auth.decide('sysPost:query')")
+	@GetMapping("/search")
+	public Result<List<SysPostSearchItemResponse>> search(
+			@Parameter(description = "搜索关键字（前缀匹配岗位编码或名称）") @RequestParam(required = false) String keyword,
+			@Parameter(description = "启用状态(true=启用，false=停用)") @RequestParam(required = false) Boolean status,
+			@Parameter(description = "返回条数上限，默认 20，最大 50") @RequestParam(required = false,
+					defaultValue = "20") Integer limit) {
+		return Result.success(sysPostService.search(keyword, status, limit));
 	}
 
 	@Operation(summary = "岗位详情")

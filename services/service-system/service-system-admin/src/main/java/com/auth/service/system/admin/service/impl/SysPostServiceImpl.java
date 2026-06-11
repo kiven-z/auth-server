@@ -11,9 +11,11 @@ import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.enums.RoleTypeEnum;
 import com.auth.service.system.admin.model.form.post.SysPostForm;
 import com.auth.service.system.admin.model.po.post.SysPostPageRowPO;
+import com.auth.service.system.admin.model.po.post.SysPostSearchItemPO;
 import com.auth.service.system.admin.model.query.post.SysPostQuery;
 import com.auth.service.system.admin.model.vo.post.SysPostDetailVO;
 import com.auth.service.system.admin.model.vo.post.SysPostPageResponse;
+import com.auth.service.system.admin.model.vo.post.SysPostSearchItemResponse;
 import com.auth.service.system.admin.service.SysPostService;
 import com.auth.service.system.admin.support.post.PostReferenceChecker;
 import com.auth.service.system.admin.support.sqlbuild.SysPostPageOrderSqlBuilder;
@@ -62,6 +64,18 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity
 		// 补充审计用户名
 		auditUserDisplayService.enrichAuditUsernames(voPage);
 		return PageResponse.of(voPage);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public List<SysPostSearchItemResponse> search(String keyword, Boolean status, Integer limit) {
+		int cappedLimit = limit == null ? 20 : Math.max(1, Math.min(limit, 50));
+
+		List<SysPostSearchItemPO> poList = baseMapper.search(keyword, status, cappedLimit);
+
+		return SysPostConverter.INSTANCE.toSearchItemResponseList(poList);
 	}
 
 	/**

@@ -6,10 +6,12 @@ import com.auth.service.system.admin.model.form.post.SysPostForm;
 import com.auth.service.system.admin.model.po.post.SysPostBoundDeptPO;
 import com.auth.service.system.admin.model.po.post.SysPostBoundUserPO;
 import com.auth.service.system.admin.model.po.post.SysPostPageRowPO;
+import com.auth.service.system.admin.model.po.post.SysPostSearchItemPO;
 import com.auth.service.system.admin.model.vo.post.SysPostBoundDeptItemVO;
 import com.auth.service.system.admin.model.vo.post.SysPostBoundUserItemVO;
 import com.auth.service.system.admin.model.vo.post.SysPostDetailVO;
 import com.auth.service.system.admin.model.vo.post.SysPostPageResponse;
+import com.auth.service.system.admin.model.vo.post.SysPostSearchItemResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
@@ -88,5 +90,12 @@ public interface SysPostConverter {
 	 * @return 详情项 VO 列表
 	 */
 	List<SysPostBoundUserItemVO> toBoundUserItemList(List<SysPostBoundUserPO> poList);
+
+	/**
+	 * 搜索行 PO 列表 → 搜索项 VO 列表
+	 * @param poList 持久层投影列表
+	 * @return 搜索项 VO 列表
+	 */
+	List<SysPostSearchItemResponse> toSearchItemResponseList(List<SysPostSearchItemPO> poList);
 
 }
