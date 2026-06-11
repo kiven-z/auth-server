@@ -8,7 +8,7 @@ import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
 import com.auth.service.system.admin.model.vo.dept.DeptClosureHealthVO;
 import com.auth.service.system.admin.model.vo.granttable.GrantTableAssignedRoleRow;
-import com.auth.service.system.admin.service.GrantTableSubjectRoleService;
+import com.auth.service.system.admin.service.GrantTableService;
 import com.auth.service.system.admin.support.dept.DeptClosureHealthService;
 import com.auth.service.system.common.model.SystemAuditBizModule;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,13 +31,13 @@ import static com.auth.service.system.admin.exception.SystemAdminResultCode.ASSI
 @RestController
 public class SysDeptManageController {
 
-	private final GrantTableSubjectRoleService grantTableSubjectRoleService;
+	private final GrantTableService grantTableService;
 
 	private final DeptClosureHealthService deptClosureHealthService;
 
-	public SysDeptManageController(GrantTableSubjectRoleService grantTableSubjectRoleService,
+	public SysDeptManageController(GrantTableService grantTableService,
 			DeptClosureHealthService deptClosureHealthService) {
-		this.grantTableSubjectRoleService = grantTableSubjectRoleService;
+		this.grantTableService = grantTableService;
 		this.deptClosureHealthService = deptClosureHealthService;
 	}
 
@@ -55,7 +55,7 @@ public class SysDeptManageController {
 	@PreAuthorize("@auth.decide('sysDept:query')")
 	@GetMapping("/{deptId}/roles")
 	public Result<List<GrantTableAssignedRoleRow>> listRoles(@PathVariable("deptId") Long deptId) {
-		return Result.success(grantTableSubjectRoleService.listAssignedRoles(GrantTableSubjectType.DEPT, deptId));
+		return Result.success(grantTableService.listAssignedRoles(GrantTableSubjectType.DEPT, deptId));
 	}
 
 	@OperationLog(targetType = "DEPT_ROLE", serviceDomain = AuditServiceDomain.SYSTEM,
@@ -65,7 +65,7 @@ public class SysDeptManageController {
 	@PutMapping("/{deptId}/roles")
 	public Result<Void> replaceRoles(@PathVariable("deptId") Long deptId,
 			@Valid @RequestBody GrantTableAssignRoleForm form) {
-		grantTableSubjectRoleService.replaceSubjectRoles(GrantTableSubjectType.DEPT, deptId, form);
+		grantTableService.replaceOrgSubjectRoles(GrantTableSubjectType.DEPT, deptId, form);
 		return Result.success(null, ASSIGN_COMPLETED.getMessage());
 	}
 

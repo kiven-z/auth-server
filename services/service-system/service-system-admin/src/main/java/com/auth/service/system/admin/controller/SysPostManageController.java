@@ -7,7 +7,7 @@ import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
 import com.auth.service.system.admin.model.vo.granttable.GrantTableAssignedRoleRow;
-import com.auth.service.system.admin.service.GrantTableSubjectRoleService;
+import com.auth.service.system.admin.service.GrantTableService;
 import com.auth.service.system.common.model.SystemAuditBizModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,17 +29,17 @@ import static com.auth.service.system.admin.exception.SystemAdminResultCode.ASSI
 @RestController
 public class SysPostManageController {
 
-	private final GrantTableSubjectRoleService grantTableSubjectRoleService;
+	private final GrantTableService grantTableService;
 
-	public SysPostManageController(GrantTableSubjectRoleService grantTableSubjectRoleService) {
-		this.grantTableSubjectRoleService = grantTableSubjectRoleService;
+	public SysPostManageController(GrantTableService grantTableService) {
+		this.grantTableService = grantTableService;
 	}
 
 	@Operation(summary = "查询岗位已分配角色")
 	@PreAuthorize("@auth.decide('sysPost:query')")
 	@GetMapping("/{postId}/roles")
 	public Result<List<GrantTableAssignedRoleRow>> listRoles(@PathVariable("postId") Long postId) {
-		return Result.success(grantTableSubjectRoleService.listAssignedRoles(GrantTableSubjectType.POST, postId));
+		return Result.success(grantTableService.listAssignedRoles(GrantTableSubjectType.POST, postId));
 	}
 
 	@OperationLog(targetType = "POST_ROLE", serviceDomain = AuditServiceDomain.SYSTEM,
@@ -49,7 +49,7 @@ public class SysPostManageController {
 	@PutMapping("/{postId}/roles")
 	public Result<Void> replaceRoles(@PathVariable("postId") Long postId,
 			@Valid @RequestBody GrantTableAssignRoleForm form) {
-		grantTableSubjectRoleService.replaceSubjectRoles(GrantTableSubjectType.POST, postId, form);
+		grantTableService.replaceOrgSubjectRoles(GrantTableSubjectType.POST, postId, form);
 		return Result.success(null, ASSIGN_COMPLETED.getMessage());
 	}
 

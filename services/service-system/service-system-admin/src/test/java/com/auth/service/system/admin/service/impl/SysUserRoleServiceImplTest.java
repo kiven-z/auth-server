@@ -3,12 +3,11 @@ package com.auth.service.system.admin.service.impl;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
-import com.auth.service.system.admin.mapper.GrantTableMapper;
 import com.auth.service.system.admin.mapper.SysUserMapper;
 import com.auth.service.system.admin.model.enums.RoleTypeEnum;
 import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
-import com.auth.service.system.admin.model.po.granttable.GrantTableBoundRolePO;
 import com.auth.service.system.admin.model.vo.granttable.GrantTableAssignedRoleRow;
+import com.auth.service.system.admin.service.GrantTableService;
 import com.auth.service.system.admin.support.role.RoleGrantReferenceChecker;
 import com.auth.service.system.admin.support.user.UserOperationChecker;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
@@ -27,7 +26,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -52,7 +50,7 @@ class SysUserRoleServiceImplTest {
 	private RoleGrantReferenceChecker roleGrantReferenceChecker;
 
 	@Mock
-	private GrantTableMapper grantTableMapper;
+	private GrantTableService grantTableService;
 
 	@Mock
 	private UserAuthorizationInvalidationTrigger userAuthorizationInvalidationTrigger;
@@ -63,19 +61,17 @@ class SysUserRoleServiceImplTest {
 	void setUp() {
 		UserReferenceChecker userReferenceChecker = new UserReferenceChecker(sysUserMapper);
 		sysUserRoleService = new SysUserRoleServiceImpl(userReferenceChecker, userOperationChecker,
-				roleGrantReferenceChecker, grantTableMapper, userAuthorizationInvalidationTrigger);
+				roleGrantReferenceChecker, grantTableService, userAuthorizationInvalidationTrigger);
 	}
 
 	@Test
 	@DisplayName("查询已分配角色：用户存在时返回转换结果")
 	void listAssignedRolesReturnsRowsWhenUserExists() {
 		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser(USER_ID));
-		GrantTableBoundRolePO boundRole = new GrantTableBoundRolePO();
-		boundRole.setRoleCode("CUSTOM_A");
-		boundRole.setRoleName("业务角色A");
-		when(grantTableMapper.selectBoundRolesBySubject(GrantTableSubjectType.USER.name(), USER_ID,
-				RoleTypeEnum.SUBJECT_GRANT_TYPES))
-			.thenReturn(List.of(boundRole));
+		GrantTableAssignedRoleRow row = new GrantTableAssignedRoleRow();
+		row.setRoleCode("CUSTOM_A");
+		row.setRoleName("业务角色A");
+		when(grantTableService.listBoundRoles(GrantTableSubjectType.USER, USER_ID)).thenReturn(List.of(row));
 
 		List<GrantTableAssignedRoleRow> rows = sysUserRoleService.listAssignedRoles(USER_ID);
 
@@ -107,9 +103,8 @@ class SysUserRoleServiceImplTest {
 		verify(userOperationChecker).requireOperable(List.of(USER_ID));
 		verify(roleGrantReferenceChecker).requireGrantEligibleRoles(List.of("BIZ_ADMIN", "CUSTOM_A"),
 				RoleTypeEnum.SUBJECT_GRANT_TYPES, SystemCommonResultCode.GRANT_REFERENCE_INVALID);
-		verify(grantTableMapper).deleteBySubject(GrantTableSubjectType.USER.name(), USER_ID);
-		verify(grantTableMapper).batchInsertSubjectRoleGrants(eq(GrantTableSubjectType.USER.name()), eq(USER_ID),
-				eq(List.of("BIZ_ADMIN", "CUSTOM_A")), any());
+		verify(grantTableService).replaceSubjectRoleGrants(GrantTableSubjectType.USER.name(), USER_ID,
+				List.of("BIZ_ADMIN", "CUSTOM_A"));
 		verify(userAuthorizationInvalidationTrigger).submitByUserIds(List.of(USER_ID), "replace-roles");
 	}
 
@@ -122,8 +117,7 @@ class SysUserRoleServiceImplTest {
 
 		sysUserRoleService.replaceUserRoles(USER_ID, form);
 
-		verify(grantTableMapper).deleteBySubject(GrantTableSubjectType.USER.name(), USER_ID);
-		verify(grantTableMapper, never()).batchInsertSubjectRoleGrants(any(), any(), any(), any());
+		verify(grantTableService).replaceSubjectRoleGrants(GrantTableSubjectType.USER.name(), USER_ID, List.of());
 		verify(userAuthorizationInvalidationTrigger).submitByUserIds(List.of(USER_ID), "replace-roles");
 	}
 
@@ -142,7 +136,7 @@ class SysUserRoleServiceImplTest {
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemAdminResultCode.USER_OPERATION_FORBIDDEN);
 
-		verify(grantTableMapper, never()).deleteBySubject(any(), any());
+		verify(grantTableService, never()).replaceSubjectRoleGrants(any(), any(), any());
 		verify(userAuthorizationInvalidationTrigger, never()).submitByUserIds(any(), any());
 	}
 

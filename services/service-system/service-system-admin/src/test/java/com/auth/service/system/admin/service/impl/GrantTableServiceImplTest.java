@@ -2,10 +2,10 @@ package com.auth.service.system.admin.service.impl;
 
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.module.security.contract.dto.invalidation.GrantSubjectKey;
-import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.admin.mapper.GrantTableMapper;
 import com.auth.service.system.admin.mapper.PostReferenceMapper;
 import com.auth.service.system.admin.mapper.SysPostMapper;
+import com.auth.service.system.admin.model.entity.GrantTableEntity;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.enums.RoleTypeEnum;
 import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
@@ -16,6 +16,8 @@ import com.auth.service.system.admin.support.post.PostReferenceChecker;
 import com.auth.service.system.admin.support.role.RoleGrantReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.GrantAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,22 +26,26 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.lang.reflect.Field;
+import java.util.Collection;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * {@link GrantTableSubjectRoleServiceImpl} 单元测试
+ * {@link GrantTableServiceImpl} 单元测试
  */
-@DisplayName("GrantTableSubjectRoleServiceImpl grant_table 主体角色授权")
+@DisplayName("GrantTableServiceImpl grant_table 读写与授权编排")
 @ExtendWith(MockitoExtension.class)
-class GrantTableSubjectRoleServiceImplTest {
+class GrantTableServiceImplTest {
 
 	private static final Long SUBJECT_ID = 10L;
 
@@ -58,15 +64,19 @@ class GrantTableSubjectRoleServiceImplTest {
 	@Mock
 	private GrantAuthorizationInvalidationTrigger grantInvalidationTrigger;
 
-	private GrantTableSubjectRoleServiceImpl grantTableSubjectRoleService;
+	private GrantTableServiceImpl grantTableService;
 
 	@BeforeEach
-	void setUp() {
+	void setUp() throws Exception {
 		PostReferenceChecker postReferenceChecker = new PostReferenceChecker(sysPostMapper, postReferenceMapper);
 		GrantTableSubjectExistenceVerifier subjectExistenceVerifier = new GrantTableSubjectExistenceVerifier(null,
 				postReferenceChecker);
-		grantTableSubjectRoleService = new GrantTableSubjectRoleServiceImpl(subjectExistenceVerifier, grantTableMapper,
-				roleGrantReferenceChecker, grantInvalidationTrigger);
+		grantTableService = spy(new GrantTableServiceImpl(subjectExistenceVerifier, roleGrantReferenceChecker,
+				grantInvalidationTrigger));
+		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
+		baseMapperField.setAccessible(true);
+		baseMapperField.set(grantTableService, grantTableMapper);
+		lenient().doReturn(true).when(grantTableService).saveBatch(any(Collection.class));
 	}
 
 	@Test
@@ -80,8 +90,8 @@ class GrantTableSubjectRoleServiceImplTest {
 				RoleTypeEnum.SUBJECT_GRANT_TYPES))
 			.thenReturn(List.of(boundRole));
 
-		List<GrantTableAssignedRoleRow> rows = grantTableSubjectRoleService
-			.listAssignedRoles(GrantTableSubjectType.POST, SUBJECT_ID);
+		List<GrantTableAssignedRoleRow> rows = grantTableService.listAssignedRoles(GrantTableSubjectType.POST,
+				SUBJECT_ID);
 
 		assertThat(rows).hasSize(1);
 		assertThat(rows.get(0).getRoleCode()).isEqualTo("CUSTOM_A");
@@ -89,30 +99,29 @@ class GrantTableSubjectRoleServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("查询已分配角色：主体不存在时抛出 POST_NOT_FOUND")
+	@DisplayName("查询已分配角色：主体不存在时抛出 DATA_NOT_EXIST")
 	void listAssignedRolesThrowsWhenSubjectMissing() {
 		when(sysPostMapper.selectById(SUBJECT_ID)).thenReturn(null);
 
-		assertThatThrownBy(() -> grantTableSubjectRoleService.listAssignedRoles(GrantTableSubjectType.POST, SUBJECT_ID))
+		assertThatThrownBy(() -> grantTableService.listAssignedRoles(GrantTableSubjectType.POST, SUBJECT_ID))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
 	}
 
 	@Test
-	@DisplayName("全量覆盖：写入 grant_table 并提交授权边失效")
-	void replaceSubjectRolesWritesGrantAndSubmitsInvalidation() {
+	@DisplayName("组织类全量覆盖：校验、写入 grant_table 并提交授权边失效")
+	void replaceOrgSubjectRolesWritesGrantAndSubmitsInvalidation() {
 		when(sysPostMapper.selectById(SUBJECT_ID)).thenReturn(activePost(SUBJECT_ID));
 		GrantTableAssignRoleForm form = new GrantTableAssignRoleForm();
 		form.setRoleCodes(List.of("BIZ_ADMIN", "CUSTOM_A"));
 
-		grantTableSubjectRoleService.replaceSubjectRoles(GrantTableSubjectType.POST, SUBJECT_ID, form);
+		grantTableService.replaceOrgSubjectRoles(GrantTableSubjectType.POST, SUBJECT_ID, form);
 
 		verify(roleGrantReferenceChecker).requireGrantTableOrgRoles(GrantTableSubjectType.POST,
 				List.of("BIZ_ADMIN", "CUSTOM_A"));
 		verify(grantTableMapper).deleteBySubject(GrantTableSubjectType.POST.name(), SUBJECT_ID);
-		verify(grantTableMapper).batchInsertSubjectRoleGrants(eq(GrantTableSubjectType.POST.name()), eq(SUBJECT_ID),
-				eq(List.of("BIZ_ADMIN", "CUSTOM_A")), any());
+		verify(grantTableService).saveBatch(any(Collection.class));
 
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<List<GrantSubjectKey>> subjectsCaptor = ArgumentCaptor.forClass(List.class);
@@ -122,17 +131,45 @@ class GrantTableSubjectRoleServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("全量覆盖：空角色列表仅删除 grant 行仍触发失效")
-	void replaceSubjectRolesClearsGrantsWhenRoleCodesEmpty() {
+	@DisplayName("组织类全量覆盖：空角色列表仅删除 grant 行仍触发失效")
+	void replaceOrgSubjectRolesClearsGrantsWhenRoleCodesEmpty() {
 		when(sysPostMapper.selectById(SUBJECT_ID)).thenReturn(activePost(SUBJECT_ID));
 		GrantTableAssignRoleForm form = new GrantTableAssignRoleForm();
 		form.setRoleCodes(List.of());
 
-		grantTableSubjectRoleService.replaceSubjectRoles(GrantTableSubjectType.POST, SUBJECT_ID, form);
+		grantTableService.replaceOrgSubjectRoles(GrantTableSubjectType.POST, SUBJECT_ID, form);
 
 		verify(grantTableMapper).deleteBySubject(GrantTableSubjectType.POST.name(), SUBJECT_ID);
-		verify(grantTableMapper, never()).batchInsertSubjectRoleGrants(any(), any(), any(), any());
+		verify(grantTableService, never()).saveBatch(any(Collection.class));
 		verify(grantInvalidationTrigger).submitByGrantSubjects(any(), eq("replace-roles"));
+	}
+
+	@Test
+	@DisplayName("全量覆盖：先删后批量 insert 授权边")
+	void replaceSubjectRoleGrantsDeletesThenInsertsEntities() {
+		grantTableService.replaceSubjectRoleGrants("USER", SUBJECT_ID, List.of("BIZ_ADMIN", "CUSTOM_A"));
+
+		verify(grantTableMapper).deleteBySubject("USER", SUBJECT_ID);
+
+		@SuppressWarnings("unchecked")
+		ArgumentCaptor<Collection<GrantTableEntity>> entitiesCaptor = ArgumentCaptor.forClass(Collection.class);
+		verify(grantTableService).saveBatch(entitiesCaptor.capture());
+		assertThat(entitiesCaptor.getValue()).hasSize(2);
+		assertThat(entitiesCaptor.getValue())
+			.allSatisfy(entity -> assertThat(entity.getSubjectType()).isEqualTo("USER"))
+			.allSatisfy(entity -> assertThat(entity.getSubjectId()).isEqualTo(SUBJECT_ID))
+			.allSatisfy(entity -> assertThat(entity.getGrantTime()).isNotNull());
+		assertThat(entitiesCaptor.getValue().stream().map(GrantTableEntity::getRoleCode).toList())
+			.containsExactlyInAnyOrder("BIZ_ADMIN", "CUSTOM_A");
+	}
+
+	@Test
+	@DisplayName("全量覆盖：空角色列表仅删除不 insert")
+	void replaceSubjectRoleGrantsDeletesOnlyWhenRoleCodesEmpty() {
+		grantTableService.replaceSubjectRoleGrants("DEPT", SUBJECT_ID, List.of());
+
+		verify(grantTableMapper).deleteBySubject("DEPT", SUBJECT_ID);
+		verify(grantTableService, never()).saveBatch(any(Collection.class));
 	}
 
 	private static SysPostEntity activePost(Long id) {

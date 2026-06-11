@@ -17,27 +17,6 @@
           AND subject_id = #{subjectId}
     </delete>
 
-    <!-- 批量插入主体-角色授权边 -->
-    <insert id="batchInsertSubjectRoleGrants">
-        INSERT INTO grant_table (subject_type,
-        subject_id,
-        role_code,
-        grant_time,
-        create_user,
-        update_user,
-        version)
-        VALUES
-        <foreach collection="roleCodes" item="roleCode" separator=",">
-            (#{subjectType},
-            #{subjectId},
-            #{roleCode},
-            NOW(3),
-            #{operatorId},
-            #{operatorId},
-            0)
-        </foreach>
-    </insert>
-
     <!-- 按授权主体查询已绑定角色 -->
     <select id="selectBoundRolesBySubject"
             resultType="com.auth.service.system.admin.model.po.granttable.GrantTableBoundRolePO">
