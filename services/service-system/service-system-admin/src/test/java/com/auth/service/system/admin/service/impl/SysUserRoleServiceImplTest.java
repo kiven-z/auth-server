@@ -26,10 +26,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link SysUserRoleServiceImpl} 单元测试
@@ -57,6 +54,13 @@ class SysUserRoleServiceImplTest {
 
 	private SysUserRoleServiceImpl sysUserRoleService;
 
+	private static UserEntity activeUser() {
+		UserEntity entity = new UserEntity();
+		entity.setId(SysUserRoleServiceImplTest.USER_ID);
+		entity.setUsername("tester");
+		return entity;
+	}
+
 	@BeforeEach
 	void setUp() {
 		UserReferenceChecker userReferenceChecker = new UserReferenceChecker(sysUserMapper);
@@ -67,7 +71,7 @@ class SysUserRoleServiceImplTest {
 	@Test
 	@DisplayName("查询已分配角色：用户存在时返回转换结果")
 	void listAssignedRolesReturnsRowsWhenUserExists() {
-		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser(USER_ID));
+		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
 		GrantTableAssignedRoleRow row = new GrantTableAssignedRoleRow();
 		row.setRoleCode("CUSTOM_A");
 		row.setRoleName("业务角色A");
@@ -94,7 +98,7 @@ class SysUserRoleServiceImplTest {
 	@Test
 	@DisplayName("全量覆盖：写入 grant_table 并提交用户授权失效")
 	void replaceUserRolesWritesGrantAndSubmitsInvalidation() {
-		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser(USER_ID));
+		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
 		GrantTableAssignRoleForm form = new GrantTableAssignRoleForm();
 		form.setRoleCodes(List.of("BIZ_ADMIN", "CUSTOM_A"));
 
@@ -111,7 +115,7 @@ class SysUserRoleServiceImplTest {
 	@Test
 	@DisplayName("全量覆盖：空角色列表仅删除 grant 行仍触发用户失效")
 	void replaceUserRolesClearsGrantsWhenRoleCodesEmpty() {
-		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser(USER_ID));
+		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
 		GrantTableAssignRoleForm form = new GrantTableAssignRoleForm();
 		form.setRoleCodes(List.of());
 
@@ -124,7 +128,7 @@ class SysUserRoleServiceImplTest {
 	@Test
 	@DisplayName("全量覆盖：受保护用户不允许分配角色")
 	void replaceUserRolesThrowsWhenUserNotOperable() {
-		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser(USER_ID));
+		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
 		doThrow(new SystemBusinessException(SystemAdminResultCode.USER_OPERATION_FORBIDDEN, USER_ID))
 			.when(userOperationChecker)
 			.requireOperable(List.of(USER_ID));
@@ -138,13 +142,6 @@ class SysUserRoleServiceImplTest {
 
 		verify(grantTableService, never()).replaceSubjectRoleGrants(any(), any(), any());
 		verify(userAuthorizationInvalidationTrigger, never()).submitByUserIds(any(), any());
-	}
-
-	private static UserEntity activeUser(Long id) {
-		UserEntity entity = new UserEntity();
-		entity.setId(id);
-		entity.setUsername("tester");
-		return entity;
 	}
 
 }

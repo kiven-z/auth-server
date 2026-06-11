@@ -1,6 +1,11 @@
 package com.auth.service.system.admin.service.impl;
 
-import cn.hutool.core.collection.CollUtil;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.module.security.contract.dto.invalidation.GrantSubjectKey;
 import com.auth.service.system.admin.convert.GrantTableSubjectRoleConverter;
@@ -15,12 +20,9 @@ import com.auth.service.system.admin.support.granttable.GrantTableSubjectExisten
 import com.auth.service.system.admin.support.role.RoleGrantReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.GrantAuthorizationInvalidationTrigger;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import cn.hutool.core.collection.CollUtil;
+import lombok.RequiredArgsConstructor;
 
 /**
  * grant_table 读写与主体角色授权编排实现。
@@ -44,7 +46,9 @@ public class GrantTableServiceImpl extends ServiceImpl<GrantTableMapper, GrantTa
 	 */
 	@Override
 	public List<GrantTableAssignedRoleRow> listAssignedRoles(GrantTableSubjectType subjectType, Long subjectId) {
+		// 校验主体是否存在
 		subjectExistenceVerifier.requireExistingActive(subjectType, subjectId);
+
 		return listBoundRoles(subjectType, subjectId);
 	}
 
@@ -55,6 +59,7 @@ public class GrantTableServiceImpl extends ServiceImpl<GrantTableMapper, GrantTa
 	public List<GrantTableAssignedRoleRow> listBoundRoles(GrantTableSubjectType subjectType, Long subjectId) {
 		List<GrantTableBoundRolePO> poList = baseMapper.selectBoundRolesBySubject(subjectType.name(), subjectId,
 				RoleTypeEnum.SUBJECT_GRANT_TYPES);
+
 		return GrantTableSubjectRoleConverter.INSTANCE.toAssignedRoleRowList(poList);
 	}
 
@@ -64,9 +69,14 @@ public class GrantTableServiceImpl extends ServiceImpl<GrantTableMapper, GrantTa
 	@Override
 	public void replaceOrgSubjectRoles(GrantTableSubjectType subjectType, Long subjectId,
 			GrantTableAssignRoleForm form) {
+		// 校验主体是否存在
 		subjectExistenceVerifier.requireExistingActive(subjectType, subjectId);
+
+		// 校验角色编码
 		List<String> roleCodes = CollUtil.emptyIfNull(form.getRoleCodes()).stream().distinct().toList();
 		roleGrantReferenceChecker.requireGrantTableOrgRoles(subjectType, roleCodes);
+
+		// 替换主体角色授权
 		replaceSubjectRoleGrants(subjectType.name(), subjectId, roleCodes);
 		grantInvalidationTrigger.submitByGrantSubjects(List.of(new GrantSubjectKey(subjectType, subjectId)),
 				"replace-roles");

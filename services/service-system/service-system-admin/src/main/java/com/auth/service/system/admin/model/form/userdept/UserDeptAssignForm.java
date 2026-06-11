@@ -34,7 +34,8 @@ public class UserDeptAssignForm implements Serializable {
 	@NotNull(message = "状态必填")
 	private Integer status;
 
-	@Schema(title = "是否主部门；不传时由服务端按规则推断")
+	@Schema(title = "是否主部门", requiredMode = Schema.RequiredMode.REQUIRED)
+	@NotNull(message = "是否主部门必填")
 	private Boolean isPrimary;
 
 	@Schema(title = "备注")

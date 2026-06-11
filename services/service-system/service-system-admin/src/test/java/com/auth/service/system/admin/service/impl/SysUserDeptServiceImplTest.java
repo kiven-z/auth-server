@@ -2,15 +2,23 @@ package com.auth.service.system.admin.service.impl;
 
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.platform.persistence.model.UserEntity;
+import com.auth.service.system.admin.exception.SystemAdminResultCode;
+import com.auth.service.system.admin.mapper.DeptReferenceMapper;
+import com.auth.service.system.admin.mapper.SysDeptMapper;
 import com.auth.service.system.admin.mapper.SysUserMapper;
 import com.auth.service.system.admin.mapper.UserDeptMapper;
+import com.auth.service.system.admin.model.entity.SysDeptEntity;
+import com.auth.service.system.admin.model.entity.UserDeptEntity;
 import com.auth.service.system.admin.model.enums.UserOrgRelationStatusEnum;
+import com.auth.service.system.admin.model.form.userdept.UserDeptAssignForm;
 import com.auth.service.system.admin.model.po.userdept.UserDeptPageRowPO;
 import com.auth.service.system.admin.model.query.user.UserDeptPageQuery;
 import com.auth.service.system.admin.model.vo.userdept.UserDeptPageVO;
+import com.auth.service.system.admin.support.dept.DeptReferenceChecker;
 import com.auth.service.system.admin.support.user.UserOperationChecker;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.UserAuthorizationInvalidationTrigger;
+import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -19,6 +27,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -27,8 +37,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -49,6 +61,12 @@ class SysUserDeptServiceImplTest {
 	private SysUserMapper sysUserMapper;
 
 	@Mock
+	private SysDeptMapper sysDeptMapper;
+
+	@Mock
+	private DeptReferenceMapper deptReferenceMapper;
+
+	@Mock
 	private UserOperationChecker userOperationChecker;
 
 	@Mock
@@ -60,6 +78,9 @@ class SysUserDeptServiceImplTest {
 	@Mock
 	private AuditUserDisplayService auditUserDisplayService;
 
+	@Captor
+	private ArgumentCaptor<UserDeptEntity> entityCaptor;
+
 	private SysUserDeptServiceImpl sysUserDeptService;
 
 	private static UserEntity activeUser() {
@@ -69,11 +90,29 @@ class SysUserDeptServiceImplTest {
 		return entity;
 	}
 
+	private static SysDeptEntity activeDept() {
+		SysDeptEntity entity = new SysDeptEntity();
+		entity.setId(DEPT_ID);
+		entity.setDeptName("研发部");
+		entity.setDeptCode("RD");
+		return entity;
+	}
+
+	private static UserDeptAssignForm createForm(Integer status, Boolean isPrimary, String remark) {
+		UserDeptAssignForm form = new UserDeptAssignForm();
+		form.setDeptId(DEPT_ID);
+		form.setStatus(status);
+		form.setIsPrimary(isPrimary);
+		form.setRemark(remark);
+		return form;
+	}
+
 	@BeforeEach
 	void setUp() throws Exception {
 		UserReferenceChecker userReferenceChecker = new UserReferenceChecker(sysUserMapper);
+		DeptReferenceChecker deptReferenceChecker = new DeptReferenceChecker(sysDeptMapper, deptReferenceMapper);
 		sysUserDeptService = new SysUserDeptServiceImpl(userReferenceChecker, userOperationChecker,
-				userAuthorizationInvalidationTrigger, auditUserDisplayService);
+				deptReferenceChecker, userAuthorizationInvalidationTrigger, auditUserDisplayService);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysUserDeptService, userDeptMapper);
@@ -82,7 +121,6 @@ class SysUserDeptServiceImplTest {
 	@Test
 	@DisplayName("分页查询：映射业务字段并补充审计用户名")
 	void getPageMapsRowsAndEnrichesAuditUsernames() {
-		// 准备分页查询条件与模拟数据
 		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
 		UserDeptPageQuery query = new UserDeptPageQuery();
 		query.setPageIndex(1);
@@ -121,6 +159,78 @@ class SysUserDeptServiceImplTest {
 		assertThat(vo.getCreateTime()).isEqualTo(now);
 		assertThat(vo.getUpdateTime()).isEqualTo(now);
 		verify(auditUserDisplayService).enrichAuditUsernames(any(IPage.class));
+	}
+
+	@Test
+	@DisplayName("创建关联：非主部门时不降级其他关联")
+	void createNonPrimarySkipsDemote() {
+		stubCreatePrerequisites();
+		when(userDeptMapper.countByUserIdAndDeptId(USER_ID, DEPT_ID)).thenReturn(0);
+		when(userDeptMapper.insert(any(UserDeptEntity.class))).thenReturn(1);
+
+		sysUserDeptService.create(USER_ID, createForm(UserOrgRelationStatusEnum.NORMAL.getCode(), false, "备注"));
+
+		verify(userDeptMapper, never()).demotePrimaryByUserId(USER_ID);
+		verify(userDeptMapper).insert(entityCaptor.capture());
+		UserDeptEntity saved = entityCaptor.getValue();
+		assertThat(saved.getUserId()).isEqualTo(USER_ID);
+		assertThat(saved.getDeptId()).isEqualTo(DEPT_ID);
+		assertThat(saved.getIsPrimary()).isFalse();
+		assertThat(saved.getStatus()).isEqualTo(UserOrgRelationStatusEnum.NORMAL.getCode());
+		assertThat(saved.getRemark()).isEqualTo("备注");
+		verify(userAuthorizationInvalidationTrigger).submitByUserIds(List.of(USER_ID), "create-dept");
+	}
+
+	@Test
+	@DisplayName("创建关联：主部门时降级其他有效关联")
+	void createPrimaryDemotesExistingPrimary() {
+		stubCreatePrerequisites();
+		when(userDeptMapper.countByUserIdAndDeptId(USER_ID, DEPT_ID)).thenReturn(0);
+		when(userDeptMapper.insert(any(UserDeptEntity.class))).thenReturn(1);
+
+		sysUserDeptService.create(USER_ID, createForm(UserOrgRelationStatusEnum.NORMAL.getCode(), true, null));
+
+		verify(userDeptMapper).demotePrimaryByUserId(USER_ID);
+		verify(userDeptMapper).insert(entityCaptor.capture());
+		assertThat(entityCaptor.getValue().getIsPrimary()).isTrue();
+		verify(userAuthorizationInvalidationTrigger).submitByUserIds(List.of(USER_ID), "create-dept");
+	}
+
+	@Test
+	@DisplayName("创建关联：重复部门时拒绝保存")
+	void createRejectsDuplicateDeptRelation() {
+		stubCreatePrerequisites();
+		when(userDeptMapper.countByUserIdAndDeptId(USER_ID, DEPT_ID)).thenReturn(1);
+
+		assertThatThrownBy(() -> sysUserDeptService.create(USER_ID,
+				createForm(UserOrgRelationStatusEnum.NORMAL.getCode(), false, null)))
+			.isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemAdminResultCode.USER_DEPT_DUPLICATE);
+
+		verify(userDeptMapper, never()).insert(any(UserDeptEntity.class));
+		verify(userAuthorizationInvalidationTrigger, never()).submitByUserIds(any(), any());
+	}
+
+	@Test
+	@DisplayName("创建关联：非正常状态不可设为主部门")
+	void createRejectsPrimaryWhenStatusNotNormal() {
+		stubCreatePrerequisites();
+		when(userDeptMapper.countByUserIdAndDeptId(USER_ID, DEPT_ID)).thenReturn(0);
+
+		assertThatThrownBy(() -> sysUserDeptService.create(USER_ID,
+				createForm(UserOrgRelationStatusEnum.TRANSFERRED.getCode(), true, null)))
+			.isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemAdminResultCode.USER_DEPT_PRIMARY_NOT_ELIGIBLE);
+
+		verify(userDeptMapper, never()).insert(any(UserDeptEntity.class));
+		verify(userAuthorizationInvalidationTrigger, never()).submitByUserIds(any(), any());
+	}
+
+	private void stubCreatePrerequisites() {
+		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
+		when(sysDeptMapper.selectById(DEPT_ID)).thenReturn(activeDept());
 	}
 
 }

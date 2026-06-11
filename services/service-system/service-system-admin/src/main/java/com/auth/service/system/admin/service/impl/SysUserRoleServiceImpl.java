@@ -1,6 +1,10 @@
 package com.auth.service.system.admin.service.impl;
 
-import cn.hutool.core.collection.CollUtil;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.model.enums.RoleTypeEnum;
 import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
@@ -12,12 +16,10 @@ import com.auth.service.system.admin.support.user.UserOperationChecker;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.UserAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
+
+import cn.hutool.core.collection.CollUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 /**
  * 用户直连角色授权实现
@@ -54,15 +56,20 @@ public class SysUserRoleServiceImpl implements SysUserRoleService {
 	 */
 	@Override
 	public void replaceUserRoles(Long userId, GrantTableAssignRoleForm form) {
+		// 校验用户是否存在
 		userReferenceChecker.getExistingActive(userId);
+		// 校验用户是否可操作
 		userOperationChecker.requireOperable(List.of(userId));
 
+		// 校验角色是否可授权
 		List<String> roleCodes = CollUtil.emptyIfNull(form.getRoleCodes()).stream().distinct().toList();
 		roleGrantReferenceChecker.requireGrantEligibleRoles(roleCodes, RoleTypeEnum.SUBJECT_GRANT_TYPES,
 				SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 
+		// 替换用户角色授权
 		grantTableService.replaceSubjectRoleGrants(GrantTableSubjectType.USER.name(), userId, roleCodes);
 
+		// 提交用户授权失效
 		userAuthorizationInvalidationTrigger.submitByUserIds(List.of(userId), "replace-roles");
 	}
 
