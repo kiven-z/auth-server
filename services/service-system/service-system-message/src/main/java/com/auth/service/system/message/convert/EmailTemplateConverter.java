@@ -1,5 +1,6 @@
 package com.auth.service.system.message.convert;
 
+import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
 import com.auth.service.system.message.model.form.EmailTemplateForm;
 import com.auth.service.system.message.model.po.EmailTemplatePageRowPO;
@@ -17,7 +18,7 @@ import java.util.List;
  *
  * @author Bunny
  */
-@Mapper(unmappedTargetPolicy = ReportingPolicy.ERROR)
+@Mapper(config = AuthMapperConfig.class)
 public interface EmailTemplateConverter {
 
 	EmailTemplateConverter INSTANCE = Mappers.getMapper(EmailTemplateConverter.class);

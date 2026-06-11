@@ -1,5 +1,6 @@
 package com.auth.service.system.admin.convert;
 
+import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.service.system.admin.model.po.role.SysRoleAssignedPermissionPO;
 import com.auth.service.system.admin.model.vo.role.SysRoleAssignedPermissionRow;
 import com.auth.service.system.admin.model.vo.role.SysRoleBoundPermissionItemVO;
@@ -13,7 +14,7 @@ import java.util.List;
  *
  * @author Bunny
  */
-@Mapper
+@Mapper(config = AuthMapperConfig.class)
 public interface SysRolePermissionConverter {
 
 	SysRolePermissionConverter INSTANCE = Mappers.getMapper(SysRolePermissionConverter.class);

@@ -1,5 +1,6 @@
 package com.auth.service.system.admin.convert;
 
+import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.service.system.admin.model.po.menu.SysMenuAssignedPermissionPO;
 import com.auth.service.system.admin.model.po.menu.SysMenuAssignedRolePO;
 import com.auth.service.system.admin.model.vo.menu.SysMenuAssignedPermissionRow;
@@ -13,7 +14,7 @@ import org.mapstruct.factory.Mappers;
  *
  * @author Bunny
  */
-@Mapper
+@Mapper(config = AuthMapperConfig.class)
 public interface SysMenuManageConverter {
 
 	SysMenuManageConverter INSTANCE = Mappers.getMapper(SysMenuManageConverter.class);

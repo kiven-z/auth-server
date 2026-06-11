@@ -1,12 +1,12 @@
 package com.auth.service.system.admin.convert;
 
+import com.auth.common.mapstruct.config.AuthSymmetricMapperConfig;
 import com.auth.common.mapstruct.qualifier.MapStructStringQualifiers;
 import com.auth.module.security.contract.event.OperationLogPayloadEvent;
 import com.auth.service.system.admin.model.entity.LogOperationEntity;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
 /**
@@ -14,8 +14,7 @@ import org.mapstruct.factory.Mappers;
  *
  * @author Bunny
  */
-@Mapper(uses = MapStructStringQualifiers.class, unmappedTargetPolicy = ReportingPolicy.ERROR,
-		unmappedSourcePolicy = ReportingPolicy.ERROR)
+@Mapper(config = AuthSymmetricMapperConfig.class, uses = MapStructStringQualifiers.class)
 public interface LogOperationPayloadConverter {
 
 	LogOperationPayloadConverter INSTANCE = Mappers.getMapper(LogOperationPayloadConverter.class);

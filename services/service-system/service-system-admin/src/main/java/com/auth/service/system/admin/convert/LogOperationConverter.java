@@ -1,5 +1,6 @@
 package com.auth.service.system.admin.convert;
 
+import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.service.system.admin.model.entity.LogOperationEntity;
 import com.auth.service.system.admin.model.po.logoperation.LogOperationPageRowPO;
 import com.auth.service.system.admin.model.vo.logoperation.LogOperationDetailVO;
@@ -13,7 +14,7 @@ import org.mapstruct.factory.Mappers;
  *
  * @author Bunny
  */
-@Mapper
+@Mapper(config = AuthMapperConfig.class)
 public interface LogOperationConverter {
 
 	LogOperationConverter INSTANCE = Mappers.getMapper(LogOperationConverter.class);

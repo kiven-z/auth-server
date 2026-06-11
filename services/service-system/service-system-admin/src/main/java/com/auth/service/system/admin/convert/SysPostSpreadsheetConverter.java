@@ -1,5 +1,6 @@
 package com.auth.service.system.admin.convert;
 
+import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.common.mapstruct.qualifier.MapStructExportQualifiers;
 import com.auth.service.system.admin.excel.post.SysPostSpreadsheetRow;
 import com.auth.service.system.admin.model.po.post.SysPostPageRowPO;
@@ -14,7 +15,7 @@ import java.util.List;
  *
  * @author Bunny
  */
-@Mapper(uses = MapStructExportQualifiers.class)
+@Mapper(config = AuthMapperConfig.class, uses = MapStructExportQualifiers.class)
 public interface SysPostSpreadsheetConverter {
 
 	SysPostSpreadsheetConverter INSTANCE = Mappers.getMapper(SysPostSpreadsheetConverter.class);

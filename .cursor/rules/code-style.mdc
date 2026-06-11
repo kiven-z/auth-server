@@ -37,6 +37,8 @@ alwaysApply: true
 
 - 业务层稳定 Java 类型之间的映射（Entity/PO/Form/VO/Response/领域 record），放在 `{module}/convert`，命名 `XxxConverter`，使用
   `INSTANCE = Mappers.getMapper(...)`。
+- MapStruct `@Mapper` 必须引用 `config = AuthMapperConfig.class`（`common-mapstruct`）：目标未映射、类型转换失败在**编译期**报错。
+- 源、目标字段一一对应的对称 DTO（如事件 payload）使用 `config = AuthSymmetricMapperConfig.class`；Form 类映射默认仅用 `AuthMapperConfig`。
 - 主要收益：类型安全、字段集中维护、减少 Service 噪音。
 
 ### 适用 MapStruct（应优先）

@@ -1,5 +1,6 @@
 package com.auth.service.system.schedule.convert;
 
+import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.form.SysJobCreateForm;
 import com.auth.service.system.schedule.model.form.SysJobUpdateForm;
@@ -17,7 +18,7 @@ import org.mapstruct.factory.Mappers;
  *
  * @author Bunny
  */
-@Mapper
+@Mapper(config = AuthMapperConfig.class)
 public interface SysJobConverter {
 
 	SysJobConverter INSTANCE = Mappers.getMapper(SysJobConverter.class);

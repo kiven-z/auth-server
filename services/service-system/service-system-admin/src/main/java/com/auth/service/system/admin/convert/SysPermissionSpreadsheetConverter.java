@@ -1,5 +1,6 @@
 package com.auth.service.system.admin.convert;
 
+import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.common.mapstruct.qualifier.MapStructExportQualifiers;
 import com.auth.service.system.admin.excel.permission.SysPermissionSpreadsheetRow;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
@@ -16,7 +17,7 @@ import java.util.List;
  *
  * @author Bunny
  */
-@Mapper(uses = MapStructExportQualifiers.class)
+@Mapper(config = AuthMapperConfig.class, uses = MapStructExportQualifiers.class)
 public interface SysPermissionSpreadsheetConverter {
 
 	SysPermissionSpreadsheetConverter INSTANCE = Mappers.getMapper(SysPermissionSpreadsheetConverter.class);

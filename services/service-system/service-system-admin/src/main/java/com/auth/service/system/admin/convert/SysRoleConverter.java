@@ -1,5 +1,6 @@
 package com.auth.service.system.admin.convert;
 
+import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.form.role.SysRoleForm;
 import com.auth.service.system.admin.model.vo.role.SysRoleDetailVO;
@@ -16,7 +17,7 @@ import java.util.List;
  *
  * @author Bunny
  */
-@Mapper
+@Mapper(config = AuthMapperConfig.class)
 public interface SysRoleConverter {
 
 	SysRoleConverter INSTANCE = Mappers.getMapper(SysRoleConverter.class);

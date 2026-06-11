@@ -1,5 +1,6 @@
 package com.auth.service.system.admin.convert;
 
+import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.admin.model.form.menu.SysMenuSaveForm;
 import com.auth.service.system.admin.model.vo.menu.SysMenuDetailVO;
@@ -15,7 +16,7 @@ import java.util.List;
  *
  * @author Bunny
  */
-@Mapper
+@Mapper(config = AuthMapperConfig.class)
 public interface SysMenuConverter {
 
 	SysMenuConverter INSTANCE = Mappers.getMapper(SysMenuConverter.class);

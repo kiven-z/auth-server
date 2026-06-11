@@ -1,5 +1,6 @@
 package com.auth.service.system.admin.convert;
 
+import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.admin.model.SysUserSearchItemResponse;
 import com.auth.service.system.admin.model.po.sysuser.UserDeptProfilePO;
@@ -19,7 +20,7 @@ import java.util.List;
  *
  * @author Bunny
  */
-@Mapper()
+@Mapper(config = AuthMapperConfig.class)
 public interface SysUserProfileConverter {
 
 	SysUserProfileConverter INSTANCE = Mappers.getMapper(SysUserProfileConverter.class);

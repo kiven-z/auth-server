@@ -1,5 +1,6 @@
 package com.auth.service.auth.authorization.convert;
 
+import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.service.auth.authorization.domain.invalidation.model.InvalidationProcessingMarker;
 import com.auth.service.auth.authorization.domain.model.po.AuthorizationInvalidationEventDetailRowPO;
 import com.auth.service.auth.authorization.domain.model.po.AuthorizationInvalidationEventPageRowPO;
@@ -15,7 +16,7 @@ import org.mapstruct.factory.Mappers;
  *
  * @author Bunny
  */
-@Mapper
+@Mapper(config = AuthMapperConfig.class)
 public interface AuthorizationInvalidationEventConverter {
 
 	AuthorizationInvalidationEventConverter INSTANCE = Mappers.getMapper(AuthorizationInvalidationEventConverter.class);

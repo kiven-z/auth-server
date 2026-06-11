@@ -1,5 +1,6 @@
 package com.auth.service.system.admin.convert;
 
+import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.form.dept.SysDeptForm;
 import com.auth.service.system.admin.model.po.dept.SysDeptBoundPostPO;
@@ -18,7 +19,7 @@ import java.util.List;
  *
  * @author Bunny
  */
-@Mapper
+@Mapper(config = AuthMapperConfig.class)
 public interface SysDeptConverter {
 
 	SysDeptConverter INSTANCE = Mappers.getMapper(SysDeptConverter.class);

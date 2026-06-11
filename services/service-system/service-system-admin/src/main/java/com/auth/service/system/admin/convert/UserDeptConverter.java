@@ -1,5 +1,6 @@
 package com.auth.service.system.admin.convert;
 
+import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.service.system.admin.model.entity.UserDeptEntity;
 import com.auth.service.system.admin.model.form.userdept.UserDeptAssignForm;
 import com.auth.service.system.admin.model.po.userdept.UserDeptPageRowPO;
@@ -13,7 +14,7 @@ import org.mapstruct.factory.Mappers;
  *
  * @author Bunny
  */
-@Mapper
+@Mapper(config = AuthMapperConfig.class)
 public interface UserDeptConverter {
 
 	/**
@@ -26,6 +27,8 @@ public interface UserDeptConverter {
 	 * @param row 分页行
 	 * @return VO
 	 */
+	@Mapping(target = "createUsername", ignore = true)
+	@Mapping(target = "updateUsername", ignore = true)
 	UserDeptPageVO toPageVo(UserDeptPageRowPO row);
 
 	/**

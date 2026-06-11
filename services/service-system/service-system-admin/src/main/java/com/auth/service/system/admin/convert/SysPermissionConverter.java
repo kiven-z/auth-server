@@ -1,5 +1,6 @@
 package com.auth.service.system.admin.convert;
 
+import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.form.permission.SysPermissionForm;
 import com.auth.service.system.admin.model.po.permission.SysPermissionBoundMenuPO;
@@ -20,7 +21,7 @@ import java.util.List;
  *
  * @author Bunny
  */
-@Mapper
+@Mapper(config = AuthMapperConfig.class)
 public interface SysPermissionConverter {
 
 	SysPermissionConverter INSTANCE = Mappers.getMapper(SysPermissionConverter.class);

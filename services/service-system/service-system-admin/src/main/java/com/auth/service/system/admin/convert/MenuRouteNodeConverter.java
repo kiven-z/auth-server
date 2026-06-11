@@ -1,5 +1,6 @@
 package com.auth.service.system.admin.convert;
 
+import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.service.system.admin.model.vo.menu.RouteNodeVO;
 import com.auth.service.system.admin.support.menu.MenuRouteMetaVoFactory;
 import com.auth.service.system.admin.support.menu.MenuRouteTreeNode;
@@ -15,7 +16,7 @@ import org.mapstruct.factory.Mappers;
  *
  * @author Bunny
  */
-@Mapper
+@Mapper(config = AuthMapperConfig.class)
 public interface MenuRouteNodeConverter {
 
 	MenuRouteNodeConverter INSTANCE = Mappers.getMapper(MenuRouteNodeConverter.class);
