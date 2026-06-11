@@ -31,10 +31,6 @@
             <artifactId>HikariCP</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.dromara.x-file-storage</groupId>
-            <artifactId>x-file-storage-spring</artifactId>
-        </dependency>
-        <dependency>
             <groupId>io.minio</groupId>
             <artifactId>minio</artifactId>
         </dependency>
