@@ -39,4 +39,46 @@
         ORDER BY up.is_primary DESC, up.create_time DESC, up.id DESC
     </select>
 
+    <!-- 按用户与关联主键加载 -->
+    <select id="selectByIdAndUserId" resultType="com.auth.service.system.admin.model.entity.UserPostEntity">
+        SELECT id,
+        user_id,
+        post_id,
+        is_primary,
+        status,
+        create_time,
+        update_time,
+        create_user,
+        update_user,
+        version,
+        remark
+        FROM user_post
+        WHERE id = #{id}
+        AND user_id = #{userId}
+    </select>
+
+    <!-- 统计用户与岗位是否已有关联 -->
+    <select id="countByUserIdAndPostId" resultType="int">
+        SELECT COUNT(1)
+        FROM user_post
+        WHERE user_id = #{userId}
+        AND post_id = #{postId}
+    </select>
+
+    <!-- 将用户全部有效关联的 is_primary 置为 false -->
+    <update id="demotePrimaryByUserId">
+        UPDATE user_post
+        SET is_primary = 0
+        WHERE user_id = #{userId}
+          AND status IN (1, 2)
+          AND is_primary = 1
+    </update>
+
+    <!-- 删除用户全部岗位关联 -->
+    <delete id="deleteByUserId">
+        DELETE
+        FROM user_post
+        WHERE user_id = #{userId}
+    </delete>
+
 </mapper>

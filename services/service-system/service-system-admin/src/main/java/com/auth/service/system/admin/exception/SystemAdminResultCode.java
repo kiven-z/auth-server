@@ -53,7 +53,17 @@ public enum SystemAdminResultCode implements SystemResultCode {
 	/**
 	 * 仅正常状态的部门关联可设为主部门
 	 */
-	USER_DEPT_PRIMARY_NOT_ELIGIBLE(400, 324, "USER_DEPT_PRIMARY_NOT_ELIGIBLE", "system.user.dept_primary_not_eligible");
+	USER_DEPT_PRIMARY_NOT_ELIGIBLE(400, 324, "USER_DEPT_PRIMARY_NOT_ELIGIBLE", "system.user.dept_primary_not_eligible"),
+
+	/**
+	 * 用户岗位关联已存在
+	 */
+	USER_POST_DUPLICATE(409, 325, "USER_POST_DUPLICATE", "system.user.post_duplicate"),
+
+	/**
+	 * 仅正常状态的岗位关联可设为主岗位
+	 */
+	USER_POST_PRIMARY_NOT_ELIGIBLE(400, 326, "USER_POST_PRIMARY_NOT_ELIGIBLE", "system.user.post_primary_not_eligible");
 
 	private final int httpStatus;
 

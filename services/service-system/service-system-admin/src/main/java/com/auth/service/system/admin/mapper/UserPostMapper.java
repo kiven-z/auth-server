@@ -27,4 +27,34 @@ public interface UserPostMapper extends BaseMapper<UserPostEntity> {
 	IPage<UserPostPageRowPO> selectListByPage(@Param("page") Page<UserPostEntity> page, @Param("userId") Long userId,
 			@Param("query") UserPostPageQuery query);
 
+	/**
+	 * 按用户与关联主键加载
+	 * @param id 关联主键
+	 * @param userId 用户 ID
+	 * @return 实体，不存在时为 null
+	 */
+	UserPostEntity selectByIdAndUserId(@Param("id") Long id, @Param("userId") Long userId);
+
+	/**
+	 * 统计用户与岗位是否已有关联
+	 * @param userId 用户 ID
+	 * @param postId 岗位 ID
+	 * @return 行数
+	 */
+	int countByUserIdAndPostId(@Param("userId") Long userId, @Param("postId") Long postId);
+
+	/**
+	 * 将用户全部有效关联的 is_primary 置为 false
+	 * @param userId 用户 ID
+	 * @return 影响行数
+	 */
+	int demotePrimaryByUserId(@Param("userId") Long userId);
+
+	/**
+	 * 删除用户全部岗位关联
+	 * @param userId 用户 ID
+	 * @return 影响行数
+	 */
+	int deleteByUserId(@Param("userId") Long userId);
+
 }
