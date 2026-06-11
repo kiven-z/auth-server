@@ -18,6 +18,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -51,6 +52,17 @@ public class SysUserDeptController {
 	@PostMapping("/{userId}")
 	public Result<Void> create(@PathVariable("userId") Long userId, @Valid @RequestBody UserDeptAssignForm form) {
 		sysUserDeptService.create(userId, form);
+		return Result.success();
+	}
+
+	@OperationLog(targetType = "USER_DEPT", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
+	@Operation(summary = "更新用户部门关联")
+	@PreAuthorize("@auth.decide('sysUserDept:update')")
+	@PutMapping("/{userId}/{id}")
+	public Result<Void> update(@PathVariable("userId") Long userId, @PathVariable("id") Long id,
+			@Valid @RequestBody UserDeptAssignForm form) {
+		sysUserDeptService.update(userId, id, form);
 		return Result.success();
 	}
 

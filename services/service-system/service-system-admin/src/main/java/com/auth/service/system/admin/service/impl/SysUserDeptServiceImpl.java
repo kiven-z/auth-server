@@ -17,6 +17,7 @@ import com.auth.service.system.admin.support.user.UserOperationChecker;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.UserAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 用户部门关联服务实现
@@ -76,7 +78,48 @@ public class SysUserDeptServiceImpl extends ServiceImpl<UserDeptMapper, UserDept
 			throw new SystemBusinessException(SystemAdminResultCode.USER_DEPT_DUPLICATE, form.getDeptId());
 		}
 
-		// 判断是否为主部门，若是主部门先将其余的都设置为非主部门
+		applyPrimaryDeptRules(userId, form);
+
+		UserDeptEntity entity = UserDeptConverter.INSTANCE.toEntity(form);
+		entity.setUserId(userId);
+		save(entity);
+
+		userAuthorizationInvalidationTrigger.submitByUserIds(List.of(userId), "create-dept");
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void update(Long userId, Long id, UserDeptAssignForm form) {
+		userReferenceChecker.getExistingActive(userId);
+		userOperationChecker.requireOperable(List.of(userId));
+
+		UserDeptEntity existing = baseMapper.selectByIdAndUserId(id, userId);
+		if (existing == null) {
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST, id);
+		}
+
+		if (!Objects.equals(existing.getDeptId(), form.getDeptId())) {
+			deptReferenceChecker.getExistingActive(form.getDeptId());
+			UserDeptEntity conflict = baseMapper.selectByUserIdAndDeptId(userId, form.getDeptId());
+			if (conflict != null && !Objects.equals(conflict.getId(), id)) {
+				throw new SystemBusinessException(SystemAdminResultCode.USER_DEPT_DUPLICATE, form.getDeptId());
+			}
+		}
+
+		applyPrimaryDeptRules(userId, form);
+		UserDeptConverter.INSTANCE.applyUpdateForm(form, existing);
+		updateById(existing);
+		userAuthorizationInvalidationTrigger.submitByUserIds(List.of(userId), "update-dept");
+	}
+
+	/**
+	 * 主部门规则：非正常状态不可设为主部门；设为主部门时降级该用户其他主部门。
+	 * @param userId 用户 ID
+	 * @param form 关联表单
+	 */
+	private void applyPrimaryDeptRules(Long userId, UserDeptAssignForm form) {
 		boolean isPrimary = BooleanUtil.isTrue(form.getIsPrimary());
 		if (isPrimary && !UserOrgRelationStatusEnum.canBePrimary(form.getStatus())) {
 			throw new SystemBusinessException(SystemAdminResultCode.USER_DEPT_PRIMARY_NOT_ELIGIBLE);
@@ -84,12 +127,6 @@ public class SysUserDeptServiceImpl extends ServiceImpl<UserDeptMapper, UserDept
 		if (isPrimary) {
 			baseMapper.demotePrimaryByUserId(userId);
 		}
-
-		UserDeptEntity entity = UserDeptConverter.INSTANCE.toEntity(form);
-		entity.setUserId(userId);
-		save(entity);
-
-		userAuthorizationInvalidationTrigger.submitByUserIds(List.of(userId), "create-dept");
 	}
 
 }

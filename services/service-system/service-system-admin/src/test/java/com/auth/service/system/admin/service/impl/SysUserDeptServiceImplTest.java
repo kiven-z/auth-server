@@ -19,6 +19,7 @@ import com.auth.service.system.admin.support.user.UserOperationChecker;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.UserAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -56,6 +57,8 @@ class SysUserDeptServiceImplTest {
 	private static final Long RELATION_ID = 100L;
 
 	private static final Long DEPT_ID = 20L;
+
+	private static final Long OTHER_DEPT_ID = 21L;
 
 	@Mock
 	private SysUserMapper sysUserMapper;
@@ -231,6 +234,105 @@ class SysUserDeptServiceImplTest {
 	private void stubCreatePrerequisites() {
 		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
 		when(sysDeptMapper.selectById(DEPT_ID)).thenReturn(activeDept());
+	}
+
+	private static UserDeptEntity existingRelation() {
+		UserDeptEntity entity = new UserDeptEntity();
+		entity.setId(RELATION_ID);
+		entity.setUserId(USER_ID);
+		entity.setDeptId(DEPT_ID);
+		entity.setStatus(UserOrgRelationStatusEnum.NORMAL.getCode());
+		entity.setIsPrimary(false);
+		entity.setRemark("原备注");
+		entity.setVersion(1L);
+		return entity;
+	}
+
+	@Test
+	@DisplayName("更新关联：仅修改备注时不降级主部门并触发授权失效")
+	void updateRemarkOnlySkipsDemoteAndTriggersInvalidation() {
+		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
+		UserDeptEntity existing = existingRelation();
+		when(userDeptMapper.selectByIdAndUserId(RELATION_ID, USER_ID)).thenReturn(existing);
+		when(userDeptMapper.updateById(any(UserDeptEntity.class))).thenReturn(1);
+
+		sysUserDeptService.update(USER_ID, RELATION_ID,
+				createForm(UserOrgRelationStatusEnum.NORMAL.getCode(), false, "新备注"));
+
+		verify(userDeptMapper, never()).demotePrimaryByUserId(USER_ID);
+		verify(userDeptMapper).updateById(entityCaptor.capture());
+		assertThat(entityCaptor.getValue().getRemark()).isEqualTo("新备注");
+		verify(userAuthorizationInvalidationTrigger).submitByUserIds(List.of(USER_ID), "update-dept");
+	}
+
+	@Test
+	@DisplayName("更新关联：设为主部门时降级其他有效关联")
+	void updatePrimaryDemotesExistingPrimary() {
+		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
+		when(userDeptMapper.selectByIdAndUserId(RELATION_ID, USER_ID)).thenReturn(existingRelation());
+		when(userDeptMapper.updateById(any(UserDeptEntity.class))).thenReturn(1);
+
+		sysUserDeptService.update(USER_ID, RELATION_ID,
+				createForm(UserOrgRelationStatusEnum.NORMAL.getCode(), true, null));
+
+		verify(userDeptMapper).demotePrimaryByUserId(USER_ID);
+		verify(userDeptMapper).updateById(entityCaptor.capture());
+		assertThat(entityCaptor.getValue().getIsPrimary()).isTrue();
+		verify(userAuthorizationInvalidationTrigger).submitByUserIds(List.of(USER_ID), "update-dept");
+	}
+
+	@Test
+	@DisplayName("更新关联：部门改到已存在关联时拒绝保存")
+	void updateRejectsDuplicateDeptRelation() {
+		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
+		when(userDeptMapper.selectByIdAndUserId(RELATION_ID, USER_ID)).thenReturn(existingRelation());
+		SysDeptEntity otherDept = activeDept();
+		otherDept.setId(OTHER_DEPT_ID);
+		when(sysDeptMapper.selectById(OTHER_DEPT_ID)).thenReturn(otherDept);
+		UserDeptEntity conflict = new UserDeptEntity();
+		conflict.setId(200L);
+		conflict.setUserId(USER_ID);
+		conflict.setDeptId(OTHER_DEPT_ID);
+		when(userDeptMapper.selectByUserIdAndDeptId(USER_ID, OTHER_DEPT_ID)).thenReturn(conflict);
+		UserDeptAssignForm form = createForm(UserOrgRelationStatusEnum.NORMAL.getCode(), false, null);
+		form.setDeptId(OTHER_DEPT_ID);
+
+		assertThatThrownBy(() -> sysUserDeptService.update(USER_ID, RELATION_ID, form))
+			.isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemAdminResultCode.USER_DEPT_DUPLICATE);
+
+		verify(userDeptMapper, never()).updateById(any(UserDeptEntity.class));
+	}
+
+	@Test
+	@DisplayName("更新关联：非正常状态不可设为主部门")
+	void updateRejectsPrimaryWhenStatusNotNormal() {
+		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
+		when(userDeptMapper.selectByIdAndUserId(RELATION_ID, USER_ID)).thenReturn(existingRelation());
+
+		assertThatThrownBy(() -> sysUserDeptService.update(USER_ID, RELATION_ID,
+				createForm(UserOrgRelationStatusEnum.TRANSFERRED.getCode(), true, null)))
+			.isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemAdminResultCode.USER_DEPT_PRIMARY_NOT_ELIGIBLE);
+
+		verify(userDeptMapper, never()).updateById(any(UserDeptEntity.class));
+	}
+
+	@Test
+	@DisplayName("更新关联：记录不存在时拒绝保存")
+	void updateRejectsMissingRelation() {
+		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
+		when(userDeptMapper.selectByIdAndUserId(RELATION_ID, USER_ID)).thenReturn(null);
+
+		assertThatThrownBy(() -> sysUserDeptService.update(USER_ID, RELATION_ID,
+				createForm(UserOrgRelationStatusEnum.NORMAL.getCode(), false, null)))
+			.isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
+
+		verify(userDeptMapper, never()).updateById(any(UserDeptEntity.class));
 	}
 
 }
