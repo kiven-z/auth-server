@@ -41,6 +41,7 @@ public interface SysJobConverter {
 	 */
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "jobGroupName", ignore = true)
 	@Mapping(target = "previousFireTime", ignore = true)
 	@Mapping(target = "nextFireTime", ignore = true)
 	SysJobDetailVO toDetailVo(SysJobEntity entity);

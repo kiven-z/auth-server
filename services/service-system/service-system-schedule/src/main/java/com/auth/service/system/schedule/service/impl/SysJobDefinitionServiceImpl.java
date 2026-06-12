@@ -32,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_GROUP_NOT_AVAILABLE;
@@ -83,10 +84,17 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		}
 
 		SysJobDetailVO vo = SysJobConverter.INSTANCE.toDetailVo(sysJob);
+		SysJobGroupEntity jobGroupEntity = sysJobGroupMapper.selectOne(
+				Wrappers.<SysJobGroupEntity>lambdaQuery().eq(SysJobGroupEntity::getGroupCode, sysJob.getJobGroup()));
+		if (jobGroupEntity != null) {
+			vo.setJobGroupName(jobGroupEntity.getGroupName());
+		}
 		SysJobSchedulerManager.FireTimes fireTimes = quartzAdmin.getFireTimes(sysJob.getJobName(),
 				sysJob.getJobGroup());
 		vo.setPreviousFireTime(toLocalDateTime(fireTimes.previousFireTime()));
 		vo.setNextFireTime(toLocalDateTime(fireTimes.nextFireTime()));
+
+		auditUserDisplayService.enrichAuditUsernames(List.of(vo));
 		return vo;
 	}
 

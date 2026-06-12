@@ -31,6 +31,9 @@ public class SysJobDetailVO extends BaseResponse {
 	@Schema(title = "任务分组")
 	private String jobGroup;
 
+	@Schema(title = "任务分组名称")
+	private String jobGroupName;
+
 	@Schema(title = "白名单任务类")
 	private String jobClass;
 
