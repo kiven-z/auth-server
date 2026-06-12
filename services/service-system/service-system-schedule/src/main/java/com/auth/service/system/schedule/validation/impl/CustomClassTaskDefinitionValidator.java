@@ -4,10 +4,14 @@ import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
+import com.auth.service.system.schedule.support.QuartzTaskRegistry;
 import com.auth.service.system.schedule.validation.SysJobTaskTypeDefinitionValidator;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CLASS_EMPTY;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CLASS_LOAD_FAILED;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CLASS_NOT_WHITELISTED;
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_MODE_CUSTOM_FORBIDS_INVOKE_TARGET;
 
 /**
@@ -16,7 +20,10 @@ import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_
  * @author Bunny
  */
 @Component
+@RequiredArgsConstructor
 public class CustomClassTaskDefinitionValidator implements SysJobTaskTypeDefinitionValidator {
+
+	private final QuartzTaskRegistry quartzTaskRegistry;
 
 	@Override
 	public SysJobTaskType taskType() {
@@ -30,6 +37,16 @@ public class CustomClassTaskDefinitionValidator implements SysJobTaskTypeDefinit
 		}
 		if (CharSequenceUtil.isNotBlank(job.getInvokeTarget())) {
 			throw new SystemBusinessException(JOB_MODE_CUSTOM_FORBIDS_INVOKE_TARGET);
+		}
+		String jobClass = job.getJobClass();
+		if (!quartzTaskRegistry.isAllowed(jobClass)) {
+			throw new SystemBusinessException(JOB_CLASS_NOT_WHITELISTED);
+		}
+		try {
+			Class.forName(jobClass);
+		}
+		catch (ClassNotFoundException exception) {
+			throw new SystemBusinessException(JOB_CLASS_LOAD_FAILED, exception.getMessage());
 		}
 	}
 

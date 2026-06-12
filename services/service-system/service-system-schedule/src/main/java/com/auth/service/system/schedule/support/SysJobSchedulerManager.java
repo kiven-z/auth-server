@@ -116,12 +116,14 @@ public class SysJobSchedulerManager {
 	public void scheduleOrReplace(SysJobEntity job) throws SchedulerException {
 		String jobName = job.getJobName();
 		String jobGroup = job.getJobGroup();
-		Boolean jobStatus = job.getStatus();
 
 		// 当前任务存在并且为暂停直接返回，不做任何操作
 		JobKey jobKey = JobKey.jobKey(jobName, jobGroup);
-		boolean exists = scheduler.checkExists(jobKey);
-		if (exists && BooleanUtil.isFalse(jobStatus)) {
+
+		if (BooleanUtil.isFalse(job.getStatus())) {
+			if (scheduler.checkExists(jobKey)) {
+				pauseJob(jobName, jobGroup);
+			}
 			return;
 		}
 
@@ -142,9 +144,12 @@ public class SysJobSchedulerManager {
 	 * @param job 任务实体
 	 */
 	public void rescheduleTrigger(SysJobEntity job) throws SchedulerException {
-		// 构建 JobKey
+		if (BooleanUtil.isFalse(job.getStatus())) {
+			pauseJob(job.getJobName(), job.getJobGroup());
+			return;
+		}
+
 		JobKey jk = JobKey.jobKey(job.getJobName(), job.getJobGroup());
-		// 如果 Job 不存在，则重建调度
 		if (!scheduler.checkExists(jk)) {
 			scheduleOrReplace(job);
 			return;

@@ -6,7 +6,6 @@ import com.auth.service.system.schedule.mapper.JobLogMapper;
 import com.auth.service.system.schedule.mapper.SysJobMapper;
 import com.auth.service.system.schedule.model.entity.JobLogEntity;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.SchedulerException;
 import org.springframework.stereotype.Component;
@@ -66,7 +65,7 @@ public class SysJobCircuitBreaker {
 
 		// 1. 检查任务是否已暂停
 		SysJobEntity job = sysJobMapper.selectById(jobId);
-		if (job == null || BooleanUtil.isFalse(job.getStatus())) {
+		if (job == null) {
 			return;
 		}
 
@@ -81,18 +80,23 @@ public class SysJobCircuitBreaker {
 			return;
 		}
 
-		// 3. 更新数据库状态
-		LambdaUpdateWrapper<SysJobEntity> wrapper = new LambdaUpdateWrapper<>();
-		wrapper.eq(SysJobEntity::getId, jobId).set(SysJobEntity::getStatus, false);
-		sysJobMapper.update(null, wrapper);
+		boolean wasActive = BooleanUtil.isTrue(job.getStatus());
+		if (wasActive) {
+			SysJobEntity patch = new SysJobEntity();
+			patch.setId(jobId);
+			patch.setStatus(false);
+			sysJobMapper.updateById(patch);
+		}
 
-		// 4. 暂停 Quartz 任务（失败则回滚事务）
 		try {
 			sysJobSchedulerManager.pauseJob(jobName, jobGroup);
 		}
 		catch (SchedulerException ex) {
 			log.error("熔断后暂停 Quartz 任务失败: {}.{}", jobGroup, jobName, ex);
-			throw new SysJobCircuitBreakerException("熔断暂停任务失败", ex);
+			if (wasActive) {
+				throw new SysJobCircuitBreakerException("熔断暂停任务失败", ex);
+			}
+			return;
 		}
 
 		log.warn("任务已连续失败 {} 次，已暂停: {} / {}", threshold, jobGroup, jobName);
