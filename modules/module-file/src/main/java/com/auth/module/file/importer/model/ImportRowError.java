@@ -1,4 +1,4 @@
-package com.auth.module.file.importer;
+package com.auth.module.file.importer.model;
 
 /**
  * 单行导入失败信息

@@ -4,11 +4,11 @@ import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.file.export.AbstractSyncPagedExportService;
 import com.auth.module.file.export.ExportScopeQueryFields;
 import com.auth.module.file.export.delivery.SyncFileDelivery;
-import com.auth.module.file.export.model.enums.ZebraStripeStyleType;
 import com.auth.module.file.export.writer.ExcelExportWriter;
-import com.auth.module.file.importer.ImportRowError;
-import com.auth.module.file.importer.SpreadsheetImportResult;
-import com.auth.module.file.importer.reader.ExcelImportReader;
+import com.auth.module.file.importer.AbstractSheetImporter;
+import com.auth.module.file.importer.model.ImportLabelParser;
+import com.auth.module.file.importer.model.ImportRowError;
+import com.auth.module.file.importer.model.SpreadsheetImportResult;
 import com.auth.service.system.admin.convert.SysDeptSpreadsheetConverter;
 import com.auth.service.system.admin.excel.StatusColorCellWriteHandler;
 import com.auth.service.system.admin.mapper.SysDeptMapper;
@@ -27,7 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -39,11 +38,6 @@ import java.util.Map;
 @Service
 public class SysDeptSpreadsheetService
 		extends AbstractSyncPagedExportService<SysDeptPageQuery, SysDeptPageRowPO, SysDeptSpreadsheetRow> {
-
-	/**
-	 * 单次导入最大行数
-	 */
-	private static final int MAX_IMPORT_ROWS = 500;
 
 	private static final String SHEET_NAME = "部门";
 
@@ -59,30 +53,11 @@ public class SysDeptSpreadsheetService
 
 	public SysDeptSpreadsheetService(SysDeptMapper sysDeptMapper, DeptPathResolver deptPathResolver,
 			SysDeptService sysDeptService) {
-		super(buildExcelWriter(), FILENAME_PREFIX);
+		super(ExcelExportWriter.withStatusStyle(SysDeptSpreadsheetRow.class, SHEET_NAME,
+				new StatusColorCellWriteHandler(STATUS_COLUMN_INDEX)), FILENAME_PREFIX);
 		this.sysDeptMapper = sysDeptMapper;
 		this.deptPathResolver = deptPathResolver;
 		this.sysDeptService = sysDeptService;
-	}
-
-	/**
-	 * 构建 Excel 导出 writer
-	 * @return Excel 导出 writer
-	 */
-	private static ExcelExportWriter<SysDeptSpreadsheetRow> buildExcelWriter() {
-		return new ExcelExportWriter<>(SysDeptSpreadsheetRow.class, SHEET_NAME)
-			.registerWriteHandler(ZebraStripeStyleType.getHandler(ZebraStripeStyleType.BLUE_GREY_TECH))
-			.registerWriteHandler(new StatusColorCellWriteHandler(STATUS_COLUMN_INDEX));
-	}
-
-	/**
-	 * 状态文案 → 布尔值（缺省启用）
-	 */
-	private static Boolean parseStatusLabel(String label) {
-		if ("停用".equals(label)) {
-			return Boolean.FALSE;
-		}
-		return Boolean.TRUE;
 	}
 
 	/**
@@ -123,55 +98,8 @@ public class SysDeptSpreadsheetService
 	 * @return 导入结果（含行级错误）
 	 * @throws IOException 文件读取失败
 	 */
-	@Transactional(rollbackFor = Exception.class)
 	public SpreadsheetImportResult importExcel(MultipartFile file) throws IOException {
-		List<SysDeptImportRow> rows = new ExcelImportReader<>(SysDeptImportRow.class).read(file);
-
-		if (rows.isEmpty()) {
-			return SpreadsheetImportResult.success(0);
-		}
-		if (rows.size() > MAX_IMPORT_ROWS) {
-			return SpreadsheetImportResult
-				.withErrors(List.of(new ImportRowError(0, "Import row count exceeds limit: max=" + MAX_IMPORT_ROWS)));
-		}
-
-		List<ImportRowError> errors = new ArrayList<>();
-		List<SysDeptForm> forms = new ArrayList<>(rows.size());
-
-		for (int i = 0; i < rows.size(); i++) {
-			int rowNum = i + 1;
-			SysDeptImportRow row = rows.get(i);
-
-			if (CharSequenceUtil.isBlank(row.getDeptCode())) {
-				errors.add(new ImportRowError(rowNum, "Row " + rowNum + ": deptCode is required"));
-				continue;
-			}
-			if (CharSequenceUtil.isBlank(row.getDeptName())) {
-				errors.add(new ImportRowError(rowNum, "Row " + rowNum + ": deptName is required"));
-				continue;
-			}
-
-			Long parentId = resolveParentId(row.getParentDeptCode(), rowNum, errors);
-			if (parentId == null && CharSequenceUtil.isNotBlank(row.getParentDeptCode())) {
-				continue;
-			}
-
-			SysDeptForm form = new SysDeptForm();
-			form.setParentId(parentId != null ? parentId : 0L);
-			form.setDeptCode(row.getDeptCode().trim());
-			form.setDeptName(row.getDeptName().trim());
-			form.setStatus(parseStatusLabel(row.getStatusLabel()));
-			form.setOrderNum(row.getOrderNum());
-			form.setRemark(row.getRemark());
-			forms.add(form);
-		}
-
-		if (!errors.isEmpty()) {
-			return SpreadsheetImportResult.withErrors(errors);
-		}
-
-		sysDeptService.importBatch(forms);
-		return SpreadsheetImportResult.success(forms.size());
+		return new DeptSheetImporter().doImport(file);
 	}
 
 	/**
@@ -195,20 +123,58 @@ public class SysDeptSpreadsheetService
 	}
 
 	/**
-	 * 通过父部门编码查询父部门 ID；找不到时记录错误并返回 null
+	 * 部门导入器：封装行级校验与批量写入逻辑
 	 */
-	private Long resolveParentId(String parentDeptCode, int rowNum, List<ImportRowError> errors) {
-		if (CharSequenceUtil.isBlank(parentDeptCode)) {
-			return 0L;
+	private final class DeptSheetImporter extends AbstractSheetImporter<SysDeptImportRow, SysDeptForm> {
+
+		@Override
+		protected Class<SysDeptImportRow> rowType() {
+			return SysDeptImportRow.class;
 		}
-		SysDeptEntity parent = sysDeptMapper
-			.selectOne(new LambdaQueryWrapper<SysDeptEntity>().eq(SysDeptEntity::getDeptCode, parentDeptCode.trim()));
-		if (parent == null) {
-			errors.add(new ImportRowError(rowNum,
-					"Row " + rowNum + ": parentDeptCode '" + parentDeptCode + "' not found"));
-			return null;
+
+		@Override
+		protected SysDeptForm convertRow(SysDeptImportRow row, int rowNum, List<ImportRowError> errors) {
+			if (CharSequenceUtil.isBlank(row.getDeptCode())) {
+				errors.add(new ImportRowError(rowNum, "Row " + rowNum + ": deptCode is required"));
+				return null;
+			}
+			if (CharSequenceUtil.isBlank(row.getDeptName())) {
+				errors.add(new ImportRowError(rowNum, "Row " + rowNum + ": deptName is required"));
+				return null;
+			}
+			Long parentId = resolveParentId(row.getParentDeptCode(), rowNum, errors);
+			if (parentId == null && CharSequenceUtil.isNotBlank(row.getParentDeptCode())) {
+				return null;
+			}
+			SysDeptForm form = new SysDeptForm();
+			form.setParentId(parentId != null ? parentId : 0L);
+			form.setDeptCode(row.getDeptCode().trim());
+			form.setDeptName(row.getDeptName().trim());
+			form.setStatus(ImportLabelParser.parseStatus(row.getStatusLabel()));
+			form.setOrderNum(row.getOrderNum());
+			form.setRemark(row.getRemark());
+			return form;
 		}
-		return parent.getId();
+
+		@Override
+		protected void saveBatch(List<SysDeptForm> forms) {
+			sysDeptService.importBatch(forms);
+		}
+
+		private Long resolveParentId(String parentDeptCode, int rowNum, List<ImportRowError> errors) {
+			if (CharSequenceUtil.isBlank(parentDeptCode)) {
+				return 0L;
+			}
+			SysDeptEntity parent = sysDeptMapper.selectOne(
+					new LambdaQueryWrapper<SysDeptEntity>().eq(SysDeptEntity::getDeptCode, parentDeptCode.trim()));
+			if (parent == null) {
+				errors.add(new ImportRowError(rowNum,
+						"Row " + rowNum + ": parentDeptCode '" + parentDeptCode + "' not found"));
+				return null;
+			}
+			return parent.getId();
+		}
+
 	}
 
 }

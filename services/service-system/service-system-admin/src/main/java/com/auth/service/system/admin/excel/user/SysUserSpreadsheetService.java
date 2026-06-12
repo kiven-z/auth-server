@@ -2,7 +2,6 @@ package com.auth.service.system.admin.excel.user;
 
 import com.auth.module.file.export.AbstractSyncPagedExportService;
 import com.auth.module.file.export.ExportScopeQueryFields;
-import com.auth.module.file.export.model.enums.ZebraStripeStyleType;
 import com.auth.module.file.export.writer.ExcelExportWriter;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.admin.convert.SysUserSpreadsheetConverter;
@@ -38,18 +37,9 @@ public class SysUserSpreadsheetService
 	private final SysUserMapper sysUserMapper;
 
 	public SysUserSpreadsheetService(SysUserMapper sysUserMapper) {
-		super(buildExcelWriter(), FILENAME_PREFIX);
+		super(ExcelExportWriter.withStatusStyle(SysUserSpreadsheetRow.class, SHEET_NAME,
+				new UserStatusColorCellWriteHandler(STATUS_COLUMN_INDEX)), FILENAME_PREFIX);
 		this.sysUserMapper = sysUserMapper;
-	}
-
-	/**
-	 * 构建 Excel 导出 writer
-	 * @return Excel 导出 writer
-	 */
-	private static ExcelExportWriter<SysUserSpreadsheetRow> buildExcelWriter() {
-		return new ExcelExportWriter<>(SysUserSpreadsheetRow.class, SHEET_NAME)
-			.registerWriteHandler(ZebraStripeStyleType.getHandler(ZebraStripeStyleType.BLUE_GREY_TECH))
-			.registerWriteHandler(new UserStatusColorCellWriteHandler(STATUS_COLUMN_INDEX));
 	}
 
 	/**

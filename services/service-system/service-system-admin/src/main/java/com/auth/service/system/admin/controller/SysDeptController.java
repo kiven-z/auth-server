@@ -5,7 +5,7 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.common.web.valid.group.CreateGroup;
 import com.auth.common.web.valid.group.UpdateGroup;
 import com.auth.module.file.export.ExportScopeQueryFields;
-import com.auth.module.file.importer.SpreadsheetImportResult;
+import com.auth.module.file.importer.model.SpreadsheetImportResult;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;

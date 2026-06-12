@@ -4,11 +4,11 @@ import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.file.export.AbstractSyncPagedExportService;
 import com.auth.module.file.export.ExportScopeQueryFields;
 import com.auth.module.file.export.delivery.SyncFileDelivery;
-import com.auth.module.file.export.model.enums.ZebraStripeStyleType;
 import com.auth.module.file.export.writer.ExcelExportWriter;
-import com.auth.module.file.importer.ImportRowError;
-import com.auth.module.file.importer.SpreadsheetImportResult;
-import com.auth.module.file.importer.reader.ExcelImportReader;
+import com.auth.module.file.importer.AbstractSheetImporter;
+import com.auth.module.file.importer.model.ImportLabelParser;
+import com.auth.module.file.importer.model.ImportRowError;
+import com.auth.module.file.importer.model.SpreadsheetImportResult;
 import com.auth.service.system.admin.convert.SysPostSpreadsheetConverter;
 import com.auth.service.system.admin.excel.StatusColorCellWriteHandler;
 import com.auth.service.system.admin.mapper.SysDeptMapper;
@@ -29,7 +29,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -40,11 +39,6 @@ import java.util.List;
 @Service
 public class SysPostSpreadsheetService
 		extends AbstractSyncPagedExportService<SysPostQuery, SysPostPageRowPO, SysPostSpreadsheetRow> {
-
-	/**
-	 * 单次导入最大行数
-	 */
-	private static final int MAX_IMPORT_ROWS = 500;
 
 	private static final String SHEET_NAME = "岗位";
 
@@ -60,30 +54,11 @@ public class SysPostSpreadsheetService
 
 	public SysPostSpreadsheetService(SysPostMapper sysPostMapper, SysDeptMapper sysDeptMapper,
 			SysPostService sysPostService) {
-		super(buildExcelWriter(), FILENAME_PREFIX);
+		super(ExcelExportWriter.withStatusStyle(SysPostSpreadsheetRow.class, SHEET_NAME,
+				new StatusColorCellWriteHandler(STATUS_COLUMN_INDEX)), FILENAME_PREFIX);
 		this.sysPostMapper = sysPostMapper;
 		this.sysDeptMapper = sysDeptMapper;
 		this.sysPostService = sysPostService;
-	}
-
-	/**
-	 * 构建 Excel 导出 writer
-	 * @return Excel 导出 writer
-	 */
-	private static ExcelExportWriter<SysPostSpreadsheetRow> buildExcelWriter() {
-		return new ExcelExportWriter<>(SysPostSpreadsheetRow.class, SHEET_NAME)
-			.registerWriteHandler(ZebraStripeStyleType.getHandler(ZebraStripeStyleType.BLUE_GREY_TECH))
-			.registerWriteHandler(new StatusColorCellWriteHandler(STATUS_COLUMN_INDEX));
-	}
-
-	/**
-	 * 状态文案 → 布尔值（缺省启用）
-	 */
-	private static Boolean parseStatusLabel(String label) {
-		if ("停用".equals(label)) {
-			return Boolean.FALSE;
-		}
-		return Boolean.TRUE;
 	}
 
 	/**
@@ -118,66 +93,12 @@ public class SysPostSpreadsheetService
 	 * @return 导入结果（含行级错误）
 	 * @throws IOException 文件读取失败
 	 */
-	@Transactional(rollbackFor = Exception.class)
 	public SpreadsheetImportResult importExcel(MultipartFile file) throws IOException {
-		List<SysPostImportRow> rows = new ExcelImportReader<>(SysPostImportRow.class).read(file);
-
-		if (rows.isEmpty()) {
-			return SpreadsheetImportResult.success(0);
-		}
-		if (rows.size() > MAX_IMPORT_ROWS) {
-			return SpreadsheetImportResult
-				.withErrors(List.of(new ImportRowError(0, "Import row count exceeds limit: max=" + MAX_IMPORT_ROWS)));
-		}
-
-		List<ImportRowError> errors = new ArrayList<>();
-		List<SysPostForm> forms = new ArrayList<>(rows.size());
-
-		for (int i = 0; i < rows.size(); i++) {
-			int rowNum = i + 1;
-			SysPostImportRow row = rows.get(i);
-
-			if (CharSequenceUtil.isBlank(row.getDeptCode())) {
-				errors.add(new ImportRowError(rowNum, "Row " + rowNum + ": deptCode is required"));
-				continue;
-			}
-			if (CharSequenceUtil.isBlank(row.getPostCode())) {
-				errors.add(new ImportRowError(rowNum, "Row " + rowNum + ": postCode is required"));
-				continue;
-			}
-			if (CharSequenceUtil.isBlank(row.getPostName())) {
-				errors.add(new ImportRowError(rowNum, "Row " + rowNum + ": postName is required"));
-				continue;
-			}
-
-			Long deptId = resolveDeptId(row.getDeptCode(), rowNum, errors);
-			if (deptId == null) {
-				continue;
-			}
-
-			SysPostForm form = new SysPostForm();
-			form.setDeptId(deptId);
-			form.setPostCode(row.getPostCode().trim());
-			form.setPostName(row.getPostName().trim());
-			form.setStatus(parseStatusLabel(row.getStatusLabel()));
-			form.setOrderNum(row.getOrderNum());
-			form.setRemark(row.getRemark());
-			forms.add(form);
-		}
-
-		if (!errors.isEmpty()) {
-			return SpreadsheetImportResult.withErrors(errors);
-		}
-
-		sysPostService.importBatch(forms);
-		return SpreadsheetImportResult.success(forms.size());
+		return new PostSheetImporter().doImport(file);
 	}
 
 	/**
 	 * 生成岗位导入模板并返回文件响应
-	 *
-	 * <p>
-	 * 模板含一条示例行，方便用户了解填写格式。
 	 * @return 模板文件响应
 	 * @throws IOException 写入失败
 	 */
@@ -194,16 +115,58 @@ public class SysPostSpreadsheetService
 	}
 
 	/**
-	 * 通过部门编码查询部门 ID；找不到时记录错误并返回 null
+	 * 岗位导入器：封装行级校验与批量写入逻辑
 	 */
-	private Long resolveDeptId(String deptCode, int rowNum, List<ImportRowError> errors) {
-		SysDeptEntity dept = sysDeptMapper
-			.selectOne(new LambdaQueryWrapper<SysDeptEntity>().eq(SysDeptEntity::getDeptCode, deptCode.trim()));
-		if (dept == null) {
-			errors.add(new ImportRowError(rowNum, "Row " + rowNum + ": deptCode '" + deptCode + "' not found"));
-			return null;
+	private final class PostSheetImporter extends AbstractSheetImporter<SysPostImportRow, SysPostForm> {
+
+		@Override
+		protected Class<SysPostImportRow> rowType() {
+			return SysPostImportRow.class;
 		}
-		return dept.getId();
+
+		@Override
+		protected SysPostForm convertRow(SysPostImportRow row, int rowNum, List<ImportRowError> errors) {
+			if (CharSequenceUtil.isBlank(row.getDeptCode())) {
+				errors.add(new ImportRowError(rowNum, "Row " + rowNum + ": deptCode is required"));
+				return null;
+			}
+			if (CharSequenceUtil.isBlank(row.getPostCode())) {
+				errors.add(new ImportRowError(rowNum, "Row " + rowNum + ": postCode is required"));
+				return null;
+			}
+			if (CharSequenceUtil.isBlank(row.getPostName())) {
+				errors.add(new ImportRowError(rowNum, "Row " + rowNum + ": postName is required"));
+				return null;
+			}
+			Long deptId = resolveDeptId(row.getDeptCode(), rowNum, errors);
+			if (deptId == null) {
+				return null;
+			}
+			SysPostForm form = new SysPostForm();
+			form.setDeptId(deptId);
+			form.setPostCode(row.getPostCode().trim());
+			form.setPostName(row.getPostName().trim());
+			form.setStatus(ImportLabelParser.parseStatus(row.getStatusLabel()));
+			form.setOrderNum(row.getOrderNum());
+			form.setRemark(row.getRemark());
+			return form;
+		}
+
+		@Override
+		protected void saveBatch(List<SysPostForm> forms) {
+			sysPostService.importBatch(forms);
+		}
+
+		private Long resolveDeptId(String deptCode, int rowNum, List<ImportRowError> errors) {
+			SysDeptEntity dept = sysDeptMapper
+				.selectOne(new LambdaQueryWrapper<SysDeptEntity>().eq(SysDeptEntity::getDeptCode, deptCode.trim()));
+			if (dept == null) {
+				errors.add(new ImportRowError(rowNum, "Row " + rowNum + ": deptCode '" + deptCode + "' not found"));
+				return null;
+			}
+			return dept.getId();
+		}
+
 	}
 
 }

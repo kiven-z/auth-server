@@ -1,4 +1,4 @@
-package com.auth.module.file.importer;
+package com.auth.module.file.importer.model;
 
 import java.util.List;
 

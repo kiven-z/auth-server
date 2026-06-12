@@ -3,7 +3,7 @@ package com.auth.service.system.admin.controller;
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.file.export.ExportScopeQueryFields;
-import com.auth.module.file.importer.SpreadsheetImportResult;
+import com.auth.module.file.importer.model.SpreadsheetImportResult;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;

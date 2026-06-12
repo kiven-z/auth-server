@@ -2,7 +2,6 @@ package com.auth.service.system.admin.excel.permission;
 
 import com.auth.module.file.export.AbstractSyncPagedExportService;
 import com.auth.module.file.export.ExportScopeQueryFields;
-import com.auth.module.file.export.model.enums.ZebraStripeStyleType;
 import com.auth.module.file.export.writer.ExcelExportWriter;
 import com.auth.service.system.admin.convert.SysPermissionSpreadsheetConverter;
 import com.auth.service.system.admin.excel.StatusColorCellWriteHandler;
@@ -37,18 +36,9 @@ public class SysPermissionSpreadsheetService
 	private final SysPermissionMapper sysPermissionMapper;
 
 	public SysPermissionSpreadsheetService(SysPermissionMapper sysPermissionMapper) {
-		super(buildExcelWriter(), FILENAME_PREFIX);
+		super(ExcelExportWriter.withStatusStyle(SysPermissionSpreadsheetRow.class, SHEET_NAME,
+				new StatusColorCellWriteHandler(STATUS_COLUMN_INDEX)), FILENAME_PREFIX);
 		this.sysPermissionMapper = sysPermissionMapper;
-	}
-
-	/**
-	 * 构建 Excel 导出 writer
-	 * @return Excel 导出 writer
-	 */
-	private static ExcelExportWriter<SysPermissionSpreadsheetRow> buildExcelWriter() {
-		return new ExcelExportWriter<>(SysPermissionSpreadsheetRow.class, SHEET_NAME)
-			.registerWriteHandler(ZebraStripeStyleType.getHandler(ZebraStripeStyleType.BLUE_GREY_TECH))
-			.registerWriteHandler(new StatusColorCellWriteHandler(STATUS_COLUMN_INDEX));
 	}
 
 	/**
