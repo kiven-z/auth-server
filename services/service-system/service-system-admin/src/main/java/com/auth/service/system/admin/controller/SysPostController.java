@@ -43,83 +43,90 @@ import java.util.List;
 @RestController
 public class SysPostController {
 
-    private final SysPostService sysPostService;
+	private final SysPostService sysPostService;
 
-    private final SysPostSpreadsheetService sysPostSpreadsheetService;
+	private final SysPostSpreadsheetService sysPostSpreadsheetService;
 
-    public SysPostController(SysPostService sysPostService, SysPostSpreadsheetService sysPostSpreadsheetService) {
-        this.sysPostService = sysPostService;
-        this.sysPostSpreadsheetService = sysPostSpreadsheetService;
-    }
+	public SysPostController(SysPostService sysPostService, SysPostSpreadsheetService sysPostSpreadsheetService) {
+		this.sysPostService = sysPostService;
+		this.sysPostSpreadsheetService = sysPostSpreadsheetService;
+	}
 
-    @Operation(summary = "岗位 Excel 导出")
-    @PreAuthorize("@auth.decide('sysPost:export')")
-    @GetMapping("/export")
-    public ResponseEntity<byte[]> export(@Validated SysPostQuery filter, @Validated ExportScopeQueryFields scope)
-            throws IOException {
-        return sysPostSpreadsheetService.export(filter, scope);
-    }
+	@Operation(summary = "岗位 Excel 导出")
+	@PreAuthorize("@auth.decide('sysPost:export')")
+	@GetMapping("/export")
+	public ResponseEntity<byte[]> export(@Validated SysPostQuery filter, @Validated ExportScopeQueryFields scope)
+			throws IOException {
+		return sysPostSpreadsheetService.export(filter, scope);
+	}
 
-    @Operation(summary = "岗位 Excel 导入")
-    @PreAuthorize("@auth.decide('sysPost:import')")
-    @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Result<SpreadsheetImportResult> importExcel(@RequestPart("file") MultipartFile file) throws IOException {
-        return Result.success(sysPostSpreadsheetService.importExcel(file));
-    }
+	@Operation(summary = "岗位导入模板下载")
+	@PreAuthorize("@auth.decide('sysPost:import')")
+	@GetMapping("/import/template")
+	public ResponseEntity<byte[]> importTemplate() throws IOException {
+		return sysPostSpreadsheetService.downloadImportTemplate();
+	}
 
-    @Operation(summary = "岗位分页查询")
-    @PreAuthorize("@auth.decide('sysPost:query')")
-    @GetMapping("/page")
-    public Result<PageResponse<SysPostPageResponse>> page(SysPostQuery query) {
-        Page<SysPostEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
-        PageResponse<SysPostPageResponse> result = sysPostService.getPage(pageParams, query);
-        return Result.success(result);
-    }
+	@Operation(summary = "岗位 Excel 导入")
+	@PreAuthorize("@auth.decide('sysPost:import')")
+	@PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public Result<SpreadsheetImportResult> importExcel(@RequestPart("file") MultipartFile file) throws IOException {
+		return Result.success(sysPostSpreadsheetService.importExcel(file));
+	}
 
-    @Operation(summary = "岗位关键词搜索")
-    @PreAuthorize("@auth.decide('sysPost:query')")
-    @GetMapping("/search")
-    public Result<List<SysPostSearchItemResponse>> search(
-            @Parameter(description = "搜索关键字（前缀匹配岗位编码或名称）") @RequestParam(required = false) String keyword,
-            @Parameter(description = "启用状态(true=启用，false=停用)") @RequestParam(required = false) Boolean status,
-            @Parameter(description = "返回条数上限，默认 20，最大 50") @RequestParam(required = false,
-                    defaultValue = "20") Integer limit) {
-        return Result.success(sysPostService.search(keyword, status, limit));
-    }
+	@Operation(summary = "岗位分页查询")
+	@PreAuthorize("@auth.decide('sysPost:query')")
+	@GetMapping("/page")
+	public Result<PageResponse<SysPostPageResponse>> page(SysPostQuery query) {
+		Page<SysPostEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
+		PageResponse<SysPostPageResponse> result = sysPostService.getPage(pageParams, query);
+		return Result.success(result);
+	}
 
-    @Operation(summary = "岗位详情")
-    @PreAuthorize("@auth.decide('sysPost:query')")
-    @GetMapping("/{id}")
-    public Result<SysPostDetailVO> detail(@PathVariable("id") Long id) {
-        return Result.success(sysPostService.getDetail(id));
-    }
+	@Operation(summary = "岗位关键词搜索")
+	@PreAuthorize("@auth.decide('sysPost:query')")
+	@GetMapping("/search")
+	public Result<List<SysPostSearchItemResponse>> search(
+			@Parameter(description = "搜索关键字（前缀匹配岗位编码或名称）") @RequestParam(required = false) String keyword,
+			@Parameter(description = "启用状态(true=启用，false=停用)") @RequestParam(required = false) Boolean status,
+			@Parameter(description = "返回条数上限，默认 20，最大 50") @RequestParam(required = false,
+					defaultValue = "20") Integer limit) {
+		return Result.success(sysPostService.search(keyword, status, limit));
+	}
 
-    @Operation(summary = "新增岗位")
-    @PreAuthorize("@auth.decide('sysPost:create')")
-    @PostMapping
-    public Result<Void> create(@Valid @RequestBody SysPostForm form) {
-        sysPostService.create(form);
-        return Result.success();
-    }
+	@Operation(summary = "岗位详情")
+	@PreAuthorize("@auth.decide('sysPost:query')")
+	@GetMapping("/{id}")
+	public Result<SysPostDetailVO> detail(@PathVariable("id") Long id) {
+		return Result.success(sysPostService.getDetail(id));
+	}
 
-    @OperationLog(targetType = "POST", serviceDomain = AuditServiceDomain.SYSTEM,
-            bizModule = SystemAuditBizModule.SYS_POST, operation = OperationLogKind.UPDATE)
-    @Operation(summary = "更新岗位")
-    @PreAuthorize("@auth.decide('sysPost:update')")
-    @PutMapping("/{id}")
-    public Result<Void> update(@PathVariable("id") Long id, @Valid @RequestBody SysPostForm form) {
-        sysPostService.update(id, form);
-        return Result.success();
-    }
+	@Operation(summary = "新增岗位")
+	@PreAuthorize("@auth.decide('sysPost:create')")
+	@PostMapping
+	public Result<Void> create(@Valid @RequestBody SysPostForm form) {
+		sysPostService.create(form);
+		return Result.success();
+	}
 
-    @OperationLog(targetType = "POST", serviceDomain = AuditServiceDomain.SYSTEM,
-            bizModule = SystemAuditBizModule.SYS_POST, operation = OperationLogKind.DELETE)
-    @Operation(summary = "删除岗位")
-    @PreAuthorize("@auth.decide('sysPost:delete')")
-    @DeleteMapping("/{id}")
-    public Result<Void> delete(@PathVariable("id") Long id) {
-        sysPostService.deleteById(id);
-        return Result.success();
-    }
+	@OperationLog(targetType = "POST", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_POST, operation = OperationLogKind.UPDATE)
+	@Operation(summary = "更新岗位")
+	@PreAuthorize("@auth.decide('sysPost:update')")
+	@PutMapping("/{id}")
+	public Result<Void> update(@PathVariable("id") Long id, @Valid @RequestBody SysPostForm form) {
+		sysPostService.update(id, form);
+		return Result.success();
+	}
+
+	@OperationLog(targetType = "POST", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_POST, operation = OperationLogKind.DELETE)
+	@Operation(summary = "删除岗位")
+	@PreAuthorize("@auth.decide('sysPost:delete')")
+	@DeleteMapping("/{id}")
+	public Result<Void> delete(@PathVariable("id") Long id) {
+		sysPostService.deleteById(id);
+		return Result.success();
+	}
 
 }

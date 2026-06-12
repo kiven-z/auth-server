@@ -45,10 +45,10 @@ class SysPostSpreadsheetServiceTest {
 
 	private SysPostSpreadsheetService spreadsheetService;
 
-	private static ExportScopeQueryFields pageRangeScope(int fromPage, int toPage) {
+	private static ExportScopeQueryFields pageRangeScope() {
 		ExportScopeQueryFields scope = new ExportScopeQueryFields();
-		scope.setFromPage(fromPage);
-		scope.setToPage(toPage);
+		scope.setFromPage(1);
+		scope.setToPage(1);
 		return scope;
 	}
 
@@ -63,7 +63,7 @@ class SysPostSpreadsheetServiceTest {
 		// 构造单页导出筛选与范围
 		SysPostQuery filter = new SysPostQuery();
 		filter.setPageSize(10);
-		ExportScopeQueryFields scope = pageRangeScope(1, 1);
+		ExportScopeQueryFields scope = pageRangeScope();
 
 		SysPostPageRowPO row = new SysPostPageRowPO();
 		row.setId(1L);

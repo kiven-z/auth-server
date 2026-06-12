@@ -13,22 +13,22 @@ import lombok.Setter;
 @Setter
 public class SysDeptImportRow {
 
-    @ExcelProperty(value = "父部门编码", index = 0)
-    private String parentDeptCode;
+	@ExcelProperty(value = "父部门编码", index = 0)
+	private String parentDeptCode;
 
-    @ExcelProperty(value = "部门编码", index = 1)
-    private String deptCode;
+	@ExcelProperty(value = "部门编码", index = 1)
+	private String deptCode;
 
-    @ExcelProperty(value = "部门名称", index = 2)
-    private String deptName;
+	@ExcelProperty(value = "部门名称", index = 2)
+	private String deptName;
 
-    @ExcelProperty(value = "状态", index = 3)
-    private String statusLabel;
+	@ExcelProperty(value = "状态", index = 3)
+	private String statusLabel;
 
-    @ExcelProperty(value = "显示顺序", index = 4)
-    private Integer orderNum;
+	@ExcelProperty(value = "显示顺序", index = 4)
+	private Integer orderNum;
 
-    @ExcelProperty(value = "备注", index = 5)
-    private String remark;
+	@ExcelProperty(value = "备注", index = 5)
+	private String remark;
 
 }

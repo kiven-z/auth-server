@@ -50,10 +50,10 @@ class SysDeptSpreadsheetServiceTest {
 
 	private SysDeptSpreadsheetService spreadsheetService;
 
-	private static ExportScopeQueryFields pageRangeScope(int fromPage, int toPage) {
+	private static ExportScopeQueryFields pageRangeScope() {
 		ExportScopeQueryFields scope = new ExportScopeQueryFields();
-		scope.setFromPage(fromPage);
-		scope.setToPage(toPage);
+		scope.setFromPage(1);
+		scope.setToPage(1);
 		return scope;
 	}
 
@@ -68,7 +68,7 @@ class SysDeptSpreadsheetServiceTest {
 		// 构造单页导出筛选与范围
 		SysDeptPageQuery filter = new SysDeptPageQuery();
 		filter.setPageSize(10);
-		ExportScopeQueryFields scope = pageRangeScope(1, 1);
+		ExportScopeQueryFields scope = pageRangeScope();
 
 		SysDeptPageRowPO row = new SysDeptPageRowPO();
 		row.setId(2L);
@@ -98,7 +98,7 @@ class SysDeptSpreadsheetServiceTest {
 	void export_whenPathResolved_writesDeptPathColumn() throws IOException {
 		SysDeptPageQuery filter = new SysDeptPageQuery();
 		filter.setPageSize(10);
-		ExportScopeQueryFields scope = pageRangeScope(1, 1);
+		ExportScopeQueryFields scope = pageRangeScope();
 
 		SysDeptPageRowPO row = new SysDeptPageRowPO();
 		row.setId(2L);

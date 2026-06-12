@@ -16,37 +16,37 @@ import java.util.List;
  */
 public class ExcelImportReader<T> {
 
-    /**
-     * 每次触发回调的批次大小
-     */
-    private static final int BATCH_SIZE = 100;
+	/**
+	 * 每次触发回调的批次大小
+	 */
+	private static final int BATCH_SIZE = 100;
 
-    private final Class<T> clazz;
+	private final Class<T> clazz;
 
-    /**
-     * @param clazz 行类型
-     */
-    public ExcelImportReader(Class<T> clazz) {
-        this.clazz = clazz;
-    }
+	/**
+	 * @param clazz 行类型
+	 */
+	public ExcelImportReader(Class<T> clazz) {
+		this.clazz = clazz;
+	}
 
-    /**
-     * 读取上传文件的第一个 Sheet，返回所有行
-     *
-     * @param file 上传文件
-     * @return 行列表（不含表头）
-     * @throws IOException 读取失败
-     */
-    public List<T> read(MultipartFile file) throws IOException {
-        List<T> rows = new ArrayList<>();
-        try {
-            EasyExcelFactory.read(file.getInputStream(), clazz, new PageReadListener<T>(rows::addAll, BATCH_SIZE))
-                    .sheet()
-                    .doRead();
-        } catch (Exception e) {
-            throw new IOException("Excel import read failed", e);
-        }
-        return rows;
-    }
+	/**
+	 * 读取上传文件的第一个 Sheet，返回所有行
+	 * @param file 上传文件
+	 * @return 行列表（不含表头）
+	 * @throws IOException 读取失败
+	 */
+	public List<T> read(MultipartFile file) throws IOException {
+		List<T> rows = new ArrayList<>();
+		try {
+			EasyExcelFactory.read(file.getInputStream(), clazz, new PageReadListener<T>(rows::addAll, BATCH_SIZE))
+				.sheet()
+				.doRead();
+		}
+		catch (Exception e) {
+			throw new IOException("Excel import read failed", e);
+		}
+		return rows;
+	}
 
 }

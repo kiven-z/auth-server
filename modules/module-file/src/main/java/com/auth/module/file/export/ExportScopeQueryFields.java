@@ -21,18 +21,18 @@ import java.io.Serializable;
 @EqualsAndHashCode
 public class ExportScopeQueryFields implements Serializable {
 
-    @Serial
-    private static final long serialVersionUID = 1L;
+	@Serial
+	private static final long serialVersionUID = 1L;
 
-    @Schema(title = "导出范围；未传时按 PAGE_RANGE 处理", example = "PAGE_RANGE")
-    private ExportScope exportScope;
+	@Schema(title = "导出范围；未传时按 PAGE_RANGE 处理", example = "PAGE_RANGE")
+	private ExportScope exportScope;
 
-    @Schema(title = "起始页码（1-based，含；PAGE_RANGE 时必填）", example = "1")
-    @Min(value = 1, message = "起始页码不能小于1")
-    private Integer fromPage;
+	@Schema(title = "起始页码（1-based，含；PAGE_RANGE 时必填）", example = "1")
+	@Min(value = 1, message = "起始页码不能小于1")
+	private Integer fromPage;
 
-    @Schema(title = "结束页码（1-based，含；PAGE_RANGE 时必填）", example = "1")
-    @Min(value = 1, message = "结束页码不能小于1")
-    private Integer toPage;
+	@Schema(title = "结束页码（1-based，含；PAGE_RANGE 时必填）", example = "1")
+	@Min(value = 1, message = "结束页码不能小于1")
+	private Integer toPage;
 
 }
