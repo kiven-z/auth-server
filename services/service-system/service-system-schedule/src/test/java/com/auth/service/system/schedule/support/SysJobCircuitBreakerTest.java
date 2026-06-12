@@ -16,15 +16,13 @@ import org.quartz.SchedulerException;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link SysJobCircuitBreaker} 单元测试。
  */
-@ExtendWith(MockitoExtension.class)
 @DisplayName("SysJobCircuitBreaker 连续失败熔断")
+@ExtendWith(MockitoExtension.class)
 class SysJobCircuitBreakerTest {
 
 	@Mock
@@ -42,6 +40,10 @@ class SysJobCircuitBreakerTest {
 	@InjectMocks
 	private SysJobCircuitBreaker sysJobCircuitBreaker;
 
+	private static List<JobLogEntity> failedLogs() {
+		return java.util.stream.IntStream.range(0, 5).mapToObj(i -> new JobLogEntity().setStatus(false)).toList();
+	}
+
 	@Test
 	@DisplayName("evaluateAfterFailure：运行中任务连续失败达到阈值时应置暂停并 pauseJob")
 	void evaluateAfterFailure_whenActiveAndThresholdReached_pausesJob() throws SchedulerException {
@@ -51,7 +53,7 @@ class SysJobCircuitBreakerTest {
 		job.setId(1L);
 		job.setStatus(true);
 		when(sysJobMapper.selectById(1L)).thenReturn(job);
-		when(jobLogMapper.selectRecentByJobNameAndGroup("demoJob", "DEFAULT", 5)).thenReturn(failedLogs(5));
+		when(jobLogMapper.selectRecentByJobNameAndGroup("demoJob", "DEFAULT", 5)).thenReturn(failedLogs());
 
 		sysJobCircuitBreaker.evaluateAfterFailure(1L, "demoJob", "DEFAULT");
 
@@ -68,16 +70,12 @@ class SysJobCircuitBreakerTest {
 		job.setId(1L);
 		job.setStatus(false);
 		when(sysJobMapper.selectById(1L)).thenReturn(job);
-		when(jobLogMapper.selectRecentByJobNameAndGroup("demoJob", "DEFAULT", 5)).thenReturn(failedLogs(5));
+		when(jobLogMapper.selectRecentByJobNameAndGroup("demoJob", "DEFAULT", 5)).thenReturn(failedLogs());
 
 		sysJobCircuitBreaker.evaluateAfterFailure(1L, "demoJob", "DEFAULT");
 
 		verify(sysJobMapper, never()).updateById(any(SysJobEntity.class));
 		verify(sysJobSchedulerManager).pauseJob("demoJob", "DEFAULT");
-	}
-
-	private static List<JobLogEntity> failedLogs(int count) {
-		return java.util.stream.IntStream.range(0, count).mapToObj(i -> new JobLogEntity().setStatus(false)).toList();
 	}
 
 }

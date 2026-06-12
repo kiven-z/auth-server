@@ -140,38 +140,6 @@ public class SysJobSchedulerManager {
 	}
 
 	/**
-	 * 仅重排触发器（不删 JobDetail ），用于已存在任务修改 Cron/策略/时间窗
-	 * @param job 任务实体
-	 */
-	public void rescheduleTrigger(SysJobEntity job) throws SchedulerException {
-		if (BooleanUtil.isFalse(job.getStatus())) {
-			pauseJob(job.getJobName(), job.getJobGroup());
-			return;
-		}
-
-		JobKey jk = JobKey.jobKey(job.getJobName(), job.getJobGroup());
-		if (!scheduler.checkExists(jk)) {
-			scheduleOrReplace(job);
-			return;
-		}
-
-		// 构建 TriggerKey
-		TriggerKey tk = TriggerKey.triggerKey(triggerName(job.getJobName()), job.getJobGroup());
-		// 构建 CronTrigger
-		CronTrigger newTrigger = buildCronTrigger(job, jk);
-
-		// 如果 Trigger 存在，则重排触发器
-		if (scheduler.checkExists(tk)) {
-			scheduler.rescheduleJob(tk, newTrigger);
-		}
-
-		// 如果 Trigger 不存在，则调度 Job
-		else {
-			scheduler.scheduleJob(newTrigger);
-		}
-	}
-
-	/**
 	 * 暂停调度
 	 * @param jobName 任务名
 	 * @param jobGroup 分组

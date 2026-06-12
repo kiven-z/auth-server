@@ -21,8 +21,9 @@ import java.util.List;
 class RequestAuthenticatorConfiguration {
 
 	@Bean
-	InternalRequestAuthenticator internalRequestAuthenticator(InternalTokenProvider internalTokenProvider) {
-		return new InternalRequestAuthenticator(internalTokenProvider);
+	InternalRequestAuthenticator internalRequestAuthenticator(InternalTokenProvider internalTokenProvider,
+			AuthProfileCacheService authProfileCacheService) {
+		return new InternalRequestAuthenticator(internalTokenProvider, authProfileCacheService);
 	}
 
 	@Bean

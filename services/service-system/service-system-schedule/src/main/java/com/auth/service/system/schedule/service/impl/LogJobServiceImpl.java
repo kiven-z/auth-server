@@ -40,8 +40,8 @@ public class LogJobServiceImpl extends ServiceImpl<LogJobMapper, JobLogEntity> i
 	@Override
 	public PageResponse<LogJobPageResponse> getPage(Page<JobLogEntity> pageParams, LogJobQuery query) {
 		IPage<SysJobLogPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
-		// PO 转 VO
 		IPage<LogJobPageResponse> voPage = page.convert(SysJobLogConverter.INSTANCE::toPageResponse);
+
 		auditUserDisplayService.enrichAuditUsernames(voPage);
 		return PageResponse.of(voPage);
 	}

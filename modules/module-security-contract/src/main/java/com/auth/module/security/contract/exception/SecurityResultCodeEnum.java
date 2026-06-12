@@ -85,7 +85,13 @@ public enum SecurityResultCodeEnum {
 	 * 授权画像反序列化失败
 	 */
 	PROFILE_DESERIALIZE_FAILED(500, 102, "PROFILE_DESERIALIZE_FAILED", "security.profile.deserialize.failed",
-			"Failed to deserialize AuthProfile."),;
+			"Failed to deserialize AuthProfile."),
+
+	/**
+	 * 用户画像缓存未命中（内部服务调用时，用户画像不在缓存中）
+	 */
+	PROFILE_CACHE_MISS(401, 103, "PROFILE_CACHE_MISS", "security.profile.cache.miss",
+			"User profile not found in cache."),;
 
 	private final int httpStatus;
 
