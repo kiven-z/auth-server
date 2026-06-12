@@ -12,12 +12,12 @@ import org.springframework.validation.annotation.Validated;
  */
 @Getter
 @Setter
-@Validated
 @ConfigurationProperties(prefix = "auth.system.schedule.job")
+@Validated
 public class ScheduleJobProperties {
 
 	/**
-	 * 连续失败次数达到该值后，自动将任务置为暂停并调用 {@code pauseJob}
+	 * 连续失败次数达到该值后，自动将任务置为暂停并调用 pauseJob
 	 */
 	private int consecutiveFailureThreshold = 5;
 

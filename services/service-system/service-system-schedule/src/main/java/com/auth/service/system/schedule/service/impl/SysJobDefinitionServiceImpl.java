@@ -23,6 +23,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobKey;
 import org.quartz.SchedulerException;
@@ -43,6 +44,7 @@ import static com.auth.service.system.schedule.model.constans.SysJobQuartzDataKe
  *
  * @author Bunny
  */
+@RequiredArgsConstructor
 @Slf4j
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -59,16 +61,6 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 
 	private final SysJobDefinitionValidationManager validationManager;
 
-	public SysJobDefinitionServiceImpl(SysJobSchedulerManager quartzAdmin,
-			AuditUserDisplayService auditUserDisplayService, SysJobGroupMapper sysJobGroupMapper,
-			JobLogMapper jobLogMapper, SysJobDefinitionValidationManager validationManager) {
-		this.quartzAdmin = quartzAdmin;
-		this.auditUserDisplayService = auditUserDisplayService;
-		this.sysJobGroupMapper = sysJobGroupMapper;
-		this.jobLogMapper = jobLogMapper;
-		this.validationManager = validationManager;
-	}
-
 	/**
 	 * {@inheritDoc}
 	 */
@@ -76,6 +68,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 	public PageResponse<SysJobPageResponse> getPage(Page<SysJobEntity> pageParams, SysJobQuery query) {
 		IPage<SysJobPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
 		IPage<SysJobPageResponse> voPage = page.convert(SysJobConverter.INSTANCE::toPageResponse);
+
 		auditUserDisplayService.enrichAuditUsernames(voPage);
 		return PageResponse.of(voPage);
 	}
@@ -151,18 +144,16 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 
 		try {
 			quartzAdmin.deleteJobIfExists(JobKey.jobKey(jobName, jobGroup));
+			jobLogMapper.deleteByJobNameAndGroup(jobName, jobGroup);
+			removeById(id);
 		}
 		catch (SchedulerException ex) {
 			log.error("删除 Quartz Job 失败", ex);
 			throw new SystemBusinessException(JOB_QUARTZ_OPERATION_FAILED, "delete", ex.getMessage());
 		}
-		try {
-			jobLogMapper.deleteByJobNameAndGroup(jobName, jobGroup);
-		}
 		catch (Exception exception) {
 			log.error("级联物理删除日志失败", exception);
 		}
-		removeById(id);
 	}
 
 	/**
