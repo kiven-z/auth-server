@@ -83,7 +83,7 @@ class SysJobFormConsistencyValidationTest {
 		form.setJobName("demo-job");
 		form.setJobGroup("DEFAULT");
 		form.setTaskType("BEAN_INVOKE");
-		form.setInvokeTarget("demoQuartzTask.run()");
+		form.setInvokeTarget("beanInvokeDemoTask.run()");
 		form.setCronExpression("0/30 * * * * ?");
 		form.setMisfirePolicy(2);
 		form.setConcurrent(false);

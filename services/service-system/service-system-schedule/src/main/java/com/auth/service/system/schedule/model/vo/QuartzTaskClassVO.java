@@ -7,6 +7,7 @@ import lombok.ToString;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * 前端「执行配置」下拉：白名单任务类信息
@@ -30,5 +31,8 @@ public class QuartzTaskClassVO implements Serializable {
 
 	@Schema(title = "说明")
 	private String description;
+
+	@Schema(title = "适用调度模式(BEAN_INVOKE/CUSTOM_CLASS)")
+	private List<String> invokeModes;
 
 }

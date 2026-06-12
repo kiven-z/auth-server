@@ -1,5 +1,7 @@
 package com.auth.service.system.schedule.annotation;
 
+import com.auth.service.system.schedule.model.enums.SysJobTaskType;
+
 import java.lang.annotation.*;
 
 /**
@@ -23,5 +25,11 @@ public @interface QuartzTask {
 	 * @return 描述
 	 */
 	String description();
+
+	/**
+	 * 适用的调度模式（Bean 调用 / 自定义类）
+	 * @return 模式列表
+	 */
+	SysJobTaskType[] modes() default { SysJobTaskType.BEAN_INVOKE };
 
 }

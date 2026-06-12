@@ -1,8 +1,8 @@
 package com.auth.service.system.schedule.model.form;
 
 import com.auth.common.web.valid.group.UpdateGroup;
-import io.swagger.v3.oas.annotations.media.Schema;
 import com.auth.service.system.schedule.validation.form.ValidSysJobUpdateForm;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -18,8 +18,8 @@ import java.time.LocalDateTime;
  *
  * @author Bunny
  */
-@Schema(name = "SysJobUpdateForm", title = "修改定时任务")
 @ValidSysJobUpdateForm(groups = UpdateGroup.class)
+@Schema(name = "SysJobUpdateForm", title = "修改定时任务")
 @Getter
 @Setter
 public class SysJobUpdateForm implements Serializable {
@@ -57,7 +57,7 @@ public class SysJobUpdateForm implements Serializable {
 	@Schema(title = "执行参数 JSON")
 	private String jobParams;
 
-	@Schema(title = "任务类型(BEAN_INVOKE/CUSTOM_CLASS/MESSAGE_DISPATCH)")
+	@Schema(title = "任务类型")
 	@Size(max = 32)
 	@NotBlank(groups = UpdateGroup.class)
 	private String taskType;

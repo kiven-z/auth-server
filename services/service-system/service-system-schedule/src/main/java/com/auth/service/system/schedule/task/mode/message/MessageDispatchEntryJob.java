@@ -4,7 +4,7 @@ import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.service.system.message.service.MessageDispatchService;
 import com.auth.service.system.schedule.model.constans.SysJobQuartzDataKeys;
 import com.auth.service.system.schedule.support.MessageDispatchCommandParser;
-import com.auth.service.system.schedule.task.mode.QuartzJobSupport;
+import com.auth.service.system.schedule.task.QuartzJobSupport;
 import org.quartz.*;
 import org.springframework.context.ApplicationContext;
 

@@ -1,5 +1,6 @@
 package com.auth.service.system.schedule.validation;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.schedule.handler.SysJobTaskHandler;
 import com.auth.service.system.schedule.handler.SysJobTaskHandlerRegistry;
@@ -43,7 +44,7 @@ public class SysJobDefinitionValidationManager {
 		job.setTaskType(resolvedTaskType.name());
 
 		SysJobTaskHandler taskHandler = taskHandlerRegistry.resolve(job);
-		if (job.getHandlerCode() == null || job.getHandlerCode().isBlank()) {
+		if (CharSequenceUtil.isBlank(job.getHandlerCode())) {
 			job.setHandlerCode(taskHandler.handlerCode());
 		}
 

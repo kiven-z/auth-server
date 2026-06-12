@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 /**
  * 扫描容器中带 {@link QuartzTask} 的 Bean 类型，维护反射调用白名单
@@ -50,6 +51,7 @@ public class QuartzTaskRegistry {
 				vo.setClassName(type.getName());
 				vo.setName(ann.name());
 				vo.setDescription(ann.description());
+				vo.setInvokeModes(Stream.of(ann.modes()).map(Enum::name).toList());
 				allowedClasses.put(type.getName(), vo);
 			}
 		}

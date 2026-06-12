@@ -2,7 +2,7 @@ package com.auth.service.system.schedule.task.mode.bean;
 
 import com.auth.service.system.schedule.model.constans.SysJobQuartzDataKeys;
 import com.auth.service.system.schedule.support.QuartzBeanInvoker;
-import com.auth.service.system.schedule.task.mode.QuartzJobSupport;
+import com.auth.service.system.schedule.task.QuartzJobSupport;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
 import org.springframework.context.ApplicationContext;
@@ -30,10 +30,8 @@ public class BeanInvokeEntryJob implements Job {
 			// 调用QuartzBeanInvoker实例
 			String out = invoker.invoke(invokeTarget);
 			// 如果日志级别为DEBUG，则打印日志
-			if (log.isDebugEnabled()) {
-				JobDetail jobDetail = context.getJobDetail();
-				log.debug("Quartz bean job ok jobKey={} result={}", jobDetail.getKey(), out);
-			}
+			JobDetail jobDetail = context.getJobDetail();
+			log.debug("Quartz bean job ok jobKey={} result={}", jobDetail.getKey(), out);
 		}
 		catch (JobExecutionException e) {
 			throw e;

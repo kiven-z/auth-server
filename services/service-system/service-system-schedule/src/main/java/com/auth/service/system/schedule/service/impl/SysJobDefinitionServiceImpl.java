@@ -1,6 +1,5 @@
 package com.auth.service.system.schedule.service.impl;
 
-import cn.hutool.core.util.BooleanUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
@@ -19,8 +18,8 @@ import com.auth.service.system.schedule.model.vo.SysJobPageResponse;
 import com.auth.service.system.schedule.service.SysJobDefinitionService;
 import com.auth.service.system.schedule.support.SysJobSchedulerManager;
 import com.auth.service.system.schedule.validation.SysJobDefinitionValidationManager;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -82,6 +81,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		if (sysJob == null) {
 			throw new SystemBusinessException(DATA_NOT_EXIST);
 		}
+
 		SysJobDetailVO vo = SysJobConverter.INSTANCE.toDetailVo(sysJob);
 		SysJobSchedulerManager.FireTimes fireTimes = quartzAdmin.getFireTimes(sysJob.getJobName(),
 				sysJob.getJobGroup());
@@ -95,10 +95,20 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 	 */
 	@Override
 	public void create(SysJobCreateForm form) {
-		validateGroupEnabled(form.getJobGroup());
+		// 验证分组是否启用
+		String groupCode = form.getJobGroup();
+		SysJobGroupEntity sysJobGroup = sysJobGroupMapper.selectOne(Wrappers.<SysJobGroupEntity>lambdaQuery()
+			.eq(SysJobGroupEntity::getGroupCode, groupCode)
+			.eq(SysJobGroupEntity::getStatus, true));
+		if (sysJobGroup == null) {
+			throw new SystemBusinessException(JOB_GROUP_NOT_AVAILABLE);
+		}
+
 		SysJobEntity sysJob = SysJobConverter.INSTANCE.toEntity(form);
-		normalizeTaskDefinition(sysJob);
+		// 统一规范任务定义并执行类型校验
+		validationManager.normalizeAndValidate(sysJob);
 		save(sysJob);
+
 		try {
 			quartzAdmin.scheduleOrReplace(sysJob);
 		}
@@ -119,8 +129,10 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		}
 
 		SysJobConverter.INSTANCE.updateEntity(form, dbJob);
-		normalizeTaskDefinition(dbJob);
+		// 统一规范任务定义并执行类型校验
+		validationManager.normalizeAndValidate(dbJob);
 		updateById(dbJob);
+
 		try {
 			quartzAdmin.scheduleOrReplace(dbJob);
 		}
@@ -156,32 +168,11 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		}
 	}
 
-	/**
-	 * 统一规范任务定义并执行类型校验
-	 * @param job 任务定义
-	 */
-	private void normalizeTaskDefinition(SysJobEntity job) {
-		validationManager.normalizeAndValidate(job);
-	}
-
 	private LocalDateTime toLocalDateTime(Date date) {
 		if (date == null) {
 			return null;
 		}
 		return LocalDateTime.ofInstant(Instant.ofEpochMilli(date.getTime()), JOB_ZONE);
-	}
-
-	/**
-	 * 验证分组是否启用
-	 * @param groupCode 分组编码
-	 */
-	private void validateGroupEnabled(String groupCode) {
-		LambdaQueryWrapper<SysJobGroupEntity> queryWrapper = new LambdaQueryWrapper<SysJobGroupEntity>()
-			.eq(SysJobGroupEntity::getGroupCode, groupCode);
-		SysJobGroupEntity sysJobGroup = sysJobGroupMapper.selectOne(queryWrapper);
-		if (sysJobGroup == null || !BooleanUtil.isTrue(sysJobGroup.getStatus())) {
-			throw new SystemBusinessException(JOB_GROUP_NOT_AVAILABLE);
-		}
 	}
 
 }

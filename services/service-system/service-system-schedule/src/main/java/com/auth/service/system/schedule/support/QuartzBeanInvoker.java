@@ -110,8 +110,8 @@ public class QuartzBeanInvoker {
 
 	/**
 	 * 执行调用目标字符串
-	 * @param invokeTarget 如 {@code demoQuartzTask.run()} 或
-	 * {@code demoQuartzTask.run('x')}
+	 * @param invokeTarget 如 {@code beanInvokeDemoTask.run()} 或
+	 * {@code beanInvokeDemoTask.runWithMessage('x')}
 	 * @return 方法返回值转字符串（无返回则为空串）
 	 */
 	public String invoke(@Nullable String invokeTarget) {

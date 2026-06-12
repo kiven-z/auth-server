@@ -49,7 +49,8 @@ public class SysJobTaskCatalogController {
 	@PreAuthorize("@auth.decide('sysJob:query')")
 	@GetMapping("message-payload-template")
 	public Result<MessageDispatchPayload> messagePayloadTemplate() {
-		return Result.success(sysJobTaskCatalogService.messageDispatchPayloadTemplate());
+		MessageDispatchPayload data = sysJobTaskCatalogService.messageDispatchPayloadTemplate();
+		return Result.success(data);
 	}
 
 }
