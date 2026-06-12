@@ -5,6 +5,8 @@ import com.auth.module.file.export.model.enums.ExportScope;
 import com.auth.service.system.admin.mapper.SysDeptMapper;
 import com.auth.service.system.admin.model.po.dept.SysDeptPageRowPO;
 import com.auth.service.system.admin.model.query.SysDeptPageQuery;
+import com.auth.service.system.admin.service.SysDeptService;
+import com.auth.service.system.admin.support.dept.DeptCodeIdResolver;
 import com.auth.service.system.admin.support.dept.DeptPathResolver;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -45,6 +47,11 @@ class SysDeptSpreadsheetServiceTest {
 	private DeptPathResolver deptPathResolver;
 
 	@Mock
+	private SysDeptService sysDeptService;
+
+	@Mock
+	private DeptCodeIdResolver deptCodeIdResolver;
+
 	private DeptSheetImporter deptSheetImporter;
 
 	private SysDeptSpreadsheetService spreadsheetService;
@@ -58,6 +65,8 @@ class SysDeptSpreadsheetServiceTest {
 
 	@BeforeEach
 	void setUp() {
+		// 导出测试不触发导入逻辑，使用真实 importer 实例避免 mock 继承类失败
+		deptSheetImporter = new DeptSheetImporter(sysDeptService, deptCodeIdResolver);
 		spreadsheetService = new SysDeptSpreadsheetService(sysDeptMapper, deptPathResolver, deptSheetImporter);
 	}
 

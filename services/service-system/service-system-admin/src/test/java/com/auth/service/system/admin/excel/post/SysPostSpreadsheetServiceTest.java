@@ -5,6 +5,8 @@ import com.auth.module.file.export.model.enums.ExportScope;
 import com.auth.service.system.admin.mapper.SysPostMapper;
 import com.auth.service.system.admin.model.po.post.SysPostPageRowPO;
 import com.auth.service.system.admin.model.query.post.SysPostQuery;
+import com.auth.service.system.admin.service.SysPostService;
+import com.auth.service.system.admin.support.dept.DeptCodeIdResolver;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,7 +38,10 @@ class SysPostSpreadsheetServiceTest {
 	private SysPostMapper sysPostMapper;
 
 	@Mock
-	private PostSheetImporter postSheetImporter;
+	private DeptCodeIdResolver deptCodeIdResolver;
+
+	@Mock
+	private SysPostService sysPostService;
 
 	private SysPostSpreadsheetService spreadsheetService;
 
@@ -49,6 +54,8 @@ class SysPostSpreadsheetServiceTest {
 
 	@BeforeEach
 	void setUp() {
+		// 导出测试不触发导入逻辑，使用真实 importer 实例避免 mock 继承类失败
+		PostSheetImporter postSheetImporter = new PostSheetImporter(deptCodeIdResolver, sysPostService);
 		spreadsheetService = new SysPostSpreadsheetService(sysPostMapper, postSheetImporter);
 	}
 

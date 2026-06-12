@@ -1,8 +1,12 @@
 package com.auth.service.system.admin.controller;
 
 import com.auth.common.core.model.response.Result;
+import com.auth.service.system.admin.excel.post.PostSheetImporter;
+import com.auth.service.system.admin.excel.post.SysPostSpreadsheetService;
+import com.auth.service.system.admin.mapper.SysPostMapper;
 import com.auth.service.system.admin.model.vo.post.SysPostSearchItemResponse;
 import com.auth.service.system.admin.service.SysPostService;
+import com.auth.service.system.admin.support.dept.DeptCodeIdResolver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,12 +33,18 @@ class SysPostControllerTest {
 	private SysPostService sysPostService;
 
 	@Mock
-	private com.auth.service.system.admin.excel.post.SysPostSpreadsheetService sysPostSpreadsheetService;
+	private SysPostMapper sysPostMapper;
+
+	@Mock
+	private DeptCodeIdResolver deptCodeIdResolver;
 
 	private SysPostController controller;
 
 	@BeforeEach
 	void setUp() {
+		PostSheetImporter postSheetImporter = new PostSheetImporter(deptCodeIdResolver, sysPostService);
+		SysPostSpreadsheetService sysPostSpreadsheetService = new SysPostSpreadsheetService(sysPostMapper,
+				postSheetImporter);
 		controller = new SysPostController(sysPostService, sysPostSpreadsheetService);
 	}
 

@@ -90,12 +90,10 @@ public final class InternalRequestAuthenticator implements RequestAuthenticator 
 		}
 
 		// 版本校验：防止权限变更后仍使用旧令牌
-		if (tokenPermVersion != null && profile.getPermVersion() != null) {
-			if (!tokenPermVersion.equals(profile.getPermVersion())) {
-				throw new SecurityTokenException(SecurityResultCodeEnum.PERMISSION_VERSION_MISMATCH,
-						"Permission version mismatch: token=" + tokenPermVersion + ", cache="
-								+ profile.getPermVersion());
-			}
+		if (tokenPermVersion != null && profile.getPermVersion() != null
+				&& !tokenPermVersion.equals(profile.getPermVersion())) {
+			throw new SecurityTokenException(SecurityResultCodeEnum.PERMISSION_VERSION_MISMATCH,
+					"Permission version mismatch: token=" + tokenPermVersion + ", cache=" + profile.getPermVersion());
 		}
 
 		return profile;

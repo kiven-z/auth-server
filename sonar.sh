@@ -1,12 +1,3 @@
-mvn clean
-
-mvn spring-javaformat:apply
-
-mvn clean compile test sonar:sonar \
-  -Dsonar.host.url=http://192.168.3.19:9001 \
-  -Dsonar.login=squ_9769fe801279ad52dfe625464403d32ef4d62d55 \
-  -Dsonar.coverage.jacoco.xmlReportPaths=**/target/jacoco-ut/jacoco.xml,**/target/site/jacoco/jacoco.xml
-
 mvn spring-javaformat:apply && mvn clean compile test sonar:sonar \
   -Dsonar.host.url=http://192.168.3.4:9001 \
   -Dsonar.login=squ_f104666d9a20f8f0b0128af66d4694b2c379d75e \
