@@ -2,11 +2,9 @@ package com.auth.service.system.admin.excel.post;
 
 import com.auth.module.file.export.ExportScopeQueryFields;
 import com.auth.module.file.export.model.enums.ExportScope;
-import com.auth.service.system.admin.mapper.SysDeptMapper;
 import com.auth.service.system.admin.mapper.SysPostMapper;
 import com.auth.service.system.admin.model.po.post.SysPostPageRowPO;
 import com.auth.service.system.admin.model.query.post.SysPostQuery;
-import com.auth.service.system.admin.service.SysPostService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,10 +36,7 @@ class SysPostSpreadsheetServiceTest {
 	private SysPostMapper sysPostMapper;
 
 	@Mock
-	private SysDeptMapper sysDeptMapper;
-
-	@Mock
-	private SysPostService sysPostService;
+	private PostSheetImporter postSheetImporter;
 
 	private SysPostSpreadsheetService spreadsheetService;
 
@@ -54,7 +49,7 @@ class SysPostSpreadsheetServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		spreadsheetService = new SysPostSpreadsheetService(sysPostMapper, sysDeptMapper, sysPostService);
+		spreadsheetService = new SysPostSpreadsheetService(sysPostMapper, postSheetImporter);
 	}
 
 	@Test

@@ -17,8 +17,8 @@ class SysPostMapperAssignableDeptSqlContractTest {
 
 	private static String readClasspathText() throws IOException {
 		try (InputStream in = SysPostMapperAssignableDeptSqlContractTest.class
-			.getResourceAsStream("/mapper/admin/SysPostMapper.xml")) {
-			assertThat(in).as("resource %s must exist", "/mapper/admin/SysPostMapper.xml").isNotNull();
+			.getResourceAsStream("/mapper/SysPostMapper.xml")) {
+			assertThat(in).as("resource %s must exist", "/mapper/SysPostMapper.xml").isNotNull();
 			return new String(in.readAllBytes(), StandardCharsets.UTF_8);
 		}
 	}

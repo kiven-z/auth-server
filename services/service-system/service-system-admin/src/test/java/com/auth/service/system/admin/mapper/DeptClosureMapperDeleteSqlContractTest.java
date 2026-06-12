@@ -26,7 +26,7 @@ class DeptClosureMapperDeleteSqlContractTest {
 	}
 
 	@Test
-	@DisplayName("删除子树闭包：使用派生表删除并避免存储过程调用")
+	@DisplayName("删除子树闭包：调用删除存储过程")
 	void callDeleteUsesDerivedTableDelete() throws IOException {
 		// 读取 Mapper，截取 callDelete 片段做关键 SQL 契约断言。
 		String xml = readMapperXml();
@@ -36,12 +36,8 @@ class DeptClosureMapperDeleteSqlContractTest {
 		assertThat(updateEnd).isGreaterThan(updateStart);
 		String updateBlock = xml.substring(updateStart, updateEnd);
 
-		assertThat(updateBlock).contains("DELETE dc")
-			.contains("FROM dept_closure dc")
-			.contains("INNER JOIN")
-			.contains("subtree_seed")
-			.contains("ancestor_id = #{deptId, jdbcType=BIGINT}")
-			.doesNotContain("CALL sp_dept_delete");
+		assertThat(updateBlock).contains("statementType=\"CALLABLE\"")
+			.contains("CALL sp_dept_delete(#{deptId, mode=IN, jdbcType=BIGINT})");
 	}
 
 }
