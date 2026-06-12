@@ -18,7 +18,6 @@ import com.auth.service.system.admin.model.po.dept.SysDeptPageRowPO;
 import com.auth.service.system.admin.model.query.SysDeptPageQuery;
 import com.auth.service.system.admin.service.SysDeptService;
 import com.auth.service.system.admin.support.dept.DeptPathResolver;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.http.ResponseEntity;
@@ -27,8 +26,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 部门 Excel 导入导出
@@ -127,9 +128,29 @@ public class SysDeptSpreadsheetService
 	 */
 	private final class DeptSheetImporter extends AbstractSheetImporter<SysDeptImportRow, SysDeptForm> {
 
+		private Map<String, Long> parentIdByCode = Map.of();
+
 		@Override
 		protected Class<SysDeptImportRow> rowType() {
 			return SysDeptImportRow.class;
+		}
+
+		@Override
+		protected void beforeConvert(List<SysDeptImportRow> rows) {
+			List<String> parentDeptCodes = rows.stream()
+				.map(SysDeptImportRow::getParentDeptCode)
+				.filter(CharSequenceUtil::isNotBlank)
+				.map(String::trim)
+				.distinct()
+				.toList();
+			if (parentDeptCodes.isEmpty()) {
+				parentIdByCode = Map.of();
+				return;
+			}
+			parentIdByCode = sysDeptMapper.selectActiveByDeptCodes(parentDeptCodes)
+				.stream()
+				.collect(Collectors.toMap(SysDeptEntity::getDeptCode, SysDeptEntity::getId, (left, right) -> left,
+						HashMap::new));
 		}
 
 		@Override
@@ -165,14 +186,14 @@ public class SysDeptSpreadsheetService
 			if (CharSequenceUtil.isBlank(parentDeptCode)) {
 				return 0L;
 			}
-			SysDeptEntity parent = sysDeptMapper.selectOne(
-					new LambdaQueryWrapper<SysDeptEntity>().eq(SysDeptEntity::getDeptCode, parentDeptCode.trim()));
-			if (parent == null) {
+			String parentDeptCodeTrimmed = parentDeptCode.trim();
+			Long parentId = parentIdByCode.get(parentDeptCodeTrimmed);
+			if (parentId == null) {
 				errors.add(new ImportRowError(rowNum,
 						"Row " + rowNum + ": parentDeptCode '" + parentDeptCode + "' not found"));
 				return null;
 			}
-			return parent.getId();
+			return parentId;
 		}
 
 	}

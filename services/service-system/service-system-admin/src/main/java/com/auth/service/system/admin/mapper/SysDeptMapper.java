@@ -61,4 +61,11 @@ public interface SysDeptMapper extends BaseMapper<SysDeptEntity> {
 	 */
 	List<SysDeptPathRowPO> selectDeptPathByIds(@Param("ids") List<Long> ids);
 
+	/**
+	 * 按部门编码批量查询启用中的部门
+	 * @param deptCodes 部门编码列表
+	 * @return 部门实体列表
+	 */
+	List<SysDeptEntity> selectActiveByDeptCodes(@Param("deptCodes") List<String> deptCodes);
+
 }

@@ -47,6 +47,14 @@ public abstract class AbstractSheetImporter<R, F> {
 	protected abstract void saveBatch(List<F> forms);
 
 	/**
+	 * 行转换前的预处理钩子，子类可用于批量预加载上下文数据（如编码映射）
+	 * @param rows 已解析的所有行
+	 */
+	protected void beforeConvert(List<R> rows) {
+		// default no-op
+	}
+
+	/**
 	 * 执行导入（模板方法，不可 override）
 	 * @param file 上传文件
 	 * @return 导入结果
@@ -65,6 +73,7 @@ public abstract class AbstractSheetImporter<R, F> {
 
 		List<ImportRowError> errors = new ArrayList<>();
 		List<F> forms = new ArrayList<>(rows.size());
+		beforeConvert(rows);
 
 		for (int i = 0; i < rows.size(); i++) {
 			F form = convertRow(rows.get(i), i + 1, errors);

@@ -20,7 +20,6 @@ import com.auth.service.system.admin.model.po.post.SysPostPageRowPO;
 import com.auth.service.system.admin.model.query.post.SysPostQuery;
 import com.auth.service.system.admin.service.SysPostService;
 import com.auth.service.system.admin.support.sqlbuild.SysPostPageOrderSqlBuilder;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +28,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 岗位 Excel 导入导出
@@ -119,9 +121,29 @@ public class SysPostSpreadsheetService
 	 */
 	private final class PostSheetImporter extends AbstractSheetImporter<SysPostImportRow, SysPostForm> {
 
+		private Map<String, Long> deptIdByCode = Map.of();
+
 		@Override
 		protected Class<SysPostImportRow> rowType() {
 			return SysPostImportRow.class;
+		}
+
+		@Override
+		protected void beforeConvert(List<SysPostImportRow> rows) {
+			List<String> deptCodes = rows.stream()
+				.map(SysPostImportRow::getDeptCode)
+				.filter(CharSequenceUtil::isNotBlank)
+				.map(String::trim)
+				.distinct()
+				.toList();
+			if (deptCodes.isEmpty()) {
+				deptIdByCode = Map.of();
+				return;
+			}
+			deptIdByCode = sysDeptMapper.selectActiveByDeptCodes(deptCodes)
+				.stream()
+				.collect(Collectors.toMap(SysDeptEntity::getDeptCode, SysDeptEntity::getId, (left, right) -> left,
+						HashMap::new));
 		}
 
 		@Override
@@ -158,13 +180,13 @@ public class SysPostSpreadsheetService
 		}
 
 		private Long resolveDeptId(String deptCode, int rowNum, List<ImportRowError> errors) {
-			SysDeptEntity dept = sysDeptMapper
-				.selectOne(new LambdaQueryWrapper<SysDeptEntity>().eq(SysDeptEntity::getDeptCode, deptCode.trim()));
-			if (dept == null) {
+			String deptCodeTrimmed = deptCode.trim();
+			Long deptId = deptIdByCode.get(deptCodeTrimmed);
+			if (deptId == null) {
 				errors.add(new ImportRowError(rowNum, "Row " + rowNum + ": deptCode '" + deptCode + "' not found"));
 				return null;
 			}
-			return dept.getId();
+			return deptId;
 		}
 
 	}

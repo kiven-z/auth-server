@@ -71,7 +71,8 @@ public class SysDeptController {
 	@PreAuthorize("@auth.decide('sysDept:import')")
 	@PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public Result<SpreadsheetImportResult> importExcel(@RequestPart("file") MultipartFile file) throws IOException {
-		return Result.success(sysDeptSpreadsheetService.importExcel(file));
+		SpreadsheetImportResult data = sysDeptSpreadsheetService.importExcel(file);
+		return Result.success(data);
 	}
 
 	@OperationLog(targetType = "DEPT_LIST", serviceDomain = AuditServiceDomain.SYSTEM,

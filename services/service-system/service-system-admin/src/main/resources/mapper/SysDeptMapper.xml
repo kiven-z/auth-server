@@ -82,4 +82,26 @@
         GROUP BY dc.descendant_id
     </select>
 
+    <!-- 按编码批量查询未逻辑删除部门（供导入阶段预加载映射） -->
+    <select id="selectActiveByDeptCodes"
+            resultType="com.auth.service.system.admin.model.entity.SysDeptEntity">
+        SELECT d.id,
+               d.parent_id,
+               d.dept_name,
+               d.dept_code,
+               d.status,
+               d.order_num,
+               d.remark,
+               d.create_time,
+               d.update_time,
+               d.create_user,
+               d.update_user
+        FROM sys_dept d
+        WHERE d.is_deleted = 0
+          AND d.dept_code IN
+        <foreach collection="deptCodes" item="deptCode" open="(" separator="," close=")">
+            #{deptCode}
+        </foreach>
+    </select>
+
 </mapper>
