@@ -7,7 +7,7 @@ import lombok.Getter;
  * 系统管理域结果码（岗位、用户部门等 Admin 特有场景）
  *
  * <p>
- * 号段：268、276、315–324
+ * 号段：268、276、315–326、340–341
  * </p>
  *
  * @author Bunny
@@ -65,7 +65,17 @@ public enum SystemAdminResultCode implements SystemResultCode {
 	 * 仅正常状态的关联可设为主要关联
 	 */
 	USER_POST_PRIMARY_NOT_ELIGIBLE(400, 326, "USER_POST_PRIMARY_NOT_ELIGIBLE",
-			"system.user.org_relation_primary_not_eligible");
+			"system.user.org_relation_primary_not_eligible"),
+
+	/**
+	 * Excel 导入文件格式或读取失败
+	 */
+	IMPORT_FILE_INVALID(422, 340, "IMPORT_FILE_INVALID", "system.import.file_invalid"),
+
+	/**
+	 * Excel 导入存在行级数据错误（部分行未通过校验）
+	 */
+	IMPORT_ROW_VALIDATION_FAILED(422, 341, "IMPORT_ROW_VALIDATION_FAILED", "system.import.row_validation_failed");
 
 	private final int httpStatus;
 

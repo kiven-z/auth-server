@@ -5,6 +5,7 @@ import com.auth.module.file.export.model.enums.ExportScope;
 import com.auth.service.system.admin.mapper.SysDeptMapper;
 import com.auth.service.system.admin.model.po.dept.SysDeptPageRowPO;
 import com.auth.service.system.admin.model.query.SysDeptPageQuery;
+import com.auth.service.system.admin.service.SysDeptService;
 import com.auth.service.system.admin.support.dept.DeptPathResolver;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -44,18 +45,21 @@ class SysDeptSpreadsheetServiceTest {
 	@Mock
 	private DeptPathResolver deptPathResolver;
 
+	@Mock
+	private SysDeptService sysDeptService;
+
 	private SysDeptSpreadsheetService spreadsheetService;
 
-	private static ExportScopeQueryFields baseScope(int toPage) {
+	private static ExportScopeQueryFields pageRangeScope(int fromPage, int toPage) {
 		ExportScopeQueryFields scope = new ExportScopeQueryFields();
-		scope.setFromPage(1);
+		scope.setFromPage(fromPage);
 		scope.setToPage(toPage);
 		return scope;
 	}
 
 	@BeforeEach
 	void setUp() {
-		spreadsheetService = new SysDeptSpreadsheetService(sysDeptMapper, deptPathResolver);
+		spreadsheetService = new SysDeptSpreadsheetService(sysDeptMapper, deptPathResolver, sysDeptService);
 	}
 
 	@Test
@@ -64,7 +68,7 @@ class SysDeptSpreadsheetServiceTest {
 		// 构造单页导出筛选与范围
 		SysDeptPageQuery filter = new SysDeptPageQuery();
 		filter.setPageSize(10);
-		ExportScopeQueryFields scope = baseScope(1);
+		ExportScopeQueryFields scope = pageRangeScope(1, 1);
 
 		SysDeptPageRowPO row = new SysDeptPageRowPO();
 		row.setId(2L);
@@ -94,7 +98,7 @@ class SysDeptSpreadsheetServiceTest {
 	void export_whenPathResolved_writesDeptPathColumn() throws IOException {
 		SysDeptPageQuery filter = new SysDeptPageQuery();
 		filter.setPageSize(10);
-		ExportScopeQueryFields scope = baseScope(1);
+		ExportScopeQueryFields scope = pageRangeScope(1, 1);
 
 		SysDeptPageRowPO row = new SysDeptPageRowPO();
 		row.setId(2L);
@@ -121,12 +125,13 @@ class SysDeptSpreadsheetServiceTest {
 	}
 
 	@Test
-	@DisplayName("CURRENT_PAGE 使用 filter 的 pageIndex 导出单页")
+	@DisplayName("CURRENT_PAGE 只需 filter.pageIndex，不需要 fromPage/toPage")
 	void export_whenCurrentPage_usesFilterPageIndex() throws IOException {
+		// CURRENT_PAGE 无需 fromPage/toPage
 		SysDeptPageQuery filter = new SysDeptPageQuery();
 		filter.setPageIndex(3);
 		filter.setPageSize(10);
-		ExportScopeQueryFields scope = baseScope(99);
+		ExportScopeQueryFields scope = new ExportScopeQueryFields();
 		scope.setExportScope(ExportScope.CURRENT_PAGE);
 
 		SysDeptPageRowPO row = new SysDeptPageRowPO();

@@ -20,6 +20,10 @@
         </dependency>
         <dependency>
             <groupId>com.auth</groupId>
+            <artifactId>service-system-file</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.auth</groupId>
             <artifactId>service-system-schedule</artifactId>
         </dependency>
         <dependency>

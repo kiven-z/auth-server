@@ -11,6 +11,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 import java.util.List;
 
+
 /**
  * 系统岗位服务
  *
@@ -60,5 +61,11 @@ public interface SysPostService {
 	 * @param id 岗位主键
 	 */
 	void deleteById(Long id);
+
+	/**
+	 * 批量导入岗位（单事务，任意行失败全部回滚）
+	 * @param forms 已校验并转换好的表单列表
+	 */
+	void importBatch(List<SysPostForm> forms);
 
 }

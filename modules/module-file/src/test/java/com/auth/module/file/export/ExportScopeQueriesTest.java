@@ -36,15 +36,14 @@ class ExportScopeQueriesTest {
 	}
 
 	@Test
-	@DisplayName("merge 后 CURRENT_PAGE 使用 filter 的 pageIndex")
+	@DisplayName("merge 后 CURRENT_PAGE 使用 filter 的 pageIndex，无需 fromPage/toPage")
 	void merge_whenCurrentPage_usesFilterPageIndex() {
+		// CURRENT_PAGE 只依赖 filter.pageIndex，scope 中无需提供 fromPage/toPage
 		PageQueryRequest filter = new PageQueryRequest();
 		filter.setPageIndex(3);
 		filter.setPageSize(15);
 		ExportScopeQueryFields scope = new ExportScopeQueryFields();
 		scope.setExportScope(ExportScope.CURRENT_PAGE);
-		scope.setFromPage(99);
-		scope.setToPage(99);
 
 		ExportScopeQuery merged = ExportScopeQueries.merge(filter, scope);
 		ExportPageRange range = ExportScopeResolver.resolve(merged);

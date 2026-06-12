@@ -48,6 +48,55 @@ class ExportScopeResolverTest {
 	}
 
 	@Test
+	@DisplayName("CURRENT_PAGE 未传 pageIndex 时抛出缺省异常")
+	void resolve_whenCurrentPage_pageIndexNull_throws() {
+		// pageIndex 为 null → 不可解析为当前页
+		StubExportQuery query = new StubExportQuery();
+		query.setExportScope(ExportScope.CURRENT_PAGE);
+		query.setPageSize(10);
+
+		assertThatThrownBy(() -> ExportScopeResolver.resolve(query)).isInstanceOf(ExportException.class)
+			.hasMessageContaining("Current page index is required");
+	}
+
+	@Test
+	@DisplayName("CURRENT_PAGE pageIndex 为 0 时抛出缺省异常")
+	void resolve_whenCurrentPage_pageIndexZero_throws() {
+		// pageIndex < 1 无效
+		StubExportQuery query = new StubExportQuery();
+		query.setExportScope(ExportScope.CURRENT_PAGE);
+		query.setPageSize(10);
+		query.setPageIndexValue(0);
+
+		assertThatThrownBy(() -> ExportScopeResolver.resolve(query)).isInstanceOf(ExportException.class)
+			.hasMessageContaining("Current page index is required");
+	}
+
+	@Test
+	@DisplayName("PAGE_RANGE 未传 fromPage 时抛出缺省异常")
+	void resolve_whenPageRange_fromPageNull_throws() {
+		// fromPage 为 null 时 PAGE_RANGE 不可解析
+		StubExportQuery query = new StubExportQuery();
+		query.setPageSize(10);
+		query.setToPage();
+
+		assertThatThrownBy(() -> ExportScopeResolver.resolve(query)).isInstanceOf(ExportException.class)
+			.hasMessageContaining("fromPage and toPage must be provided");
+	}
+
+	@Test
+	@DisplayName("PAGE_RANGE 未传 toPage 时抛出缺省异常")
+	void resolve_whenPageRange_toPageNull_throws() {
+		// toPage 为 null 时 PAGE_RANGE 不可解析
+		StubExportQuery query = new StubExportQuery();
+		query.setPageSize(10);
+		query.setFromPage();
+
+		assertThatThrownBy(() -> ExportScopeResolver.resolve(query)).isInstanceOf(ExportException.class)
+			.hasMessageContaining("fromPage and toPage must be provided");
+	}
+
+	@Test
 	@DisplayName("FULL_ASYNC 抛出英文尚未支持异常")
 	void resolve_whenFullAsync_throwsNotSupported() {
 		StubExportQuery query = new StubExportQuery();
@@ -107,6 +156,10 @@ class ExportScopeResolverTest {
 
 		void setPageIndex() {
 			this.pageIndex = 5;
+		}
+
+		void setPageIndexValue(int value) {
+			this.pageIndex = value;
 		}
 
 		void setFromPage() {

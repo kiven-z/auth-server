@@ -19,6 +19,7 @@
         <module>service-system-message</module>
         <module>service-system-schedule</module>
         <module>service-system-admin</module>
+        <module>service-system-file</module>
         <module>service-system-bootstrap</module>
     </modules>
 
@@ -51,6 +52,11 @@
             <dependency>
                 <groupId>com.auth</groupId>
                 <artifactId>service-system-admin</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.auth</groupId>
+                <artifactId>service-system-file</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

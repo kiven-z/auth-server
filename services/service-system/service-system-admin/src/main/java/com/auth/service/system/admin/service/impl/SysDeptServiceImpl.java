@@ -224,4 +224,12 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 		removeById(deptId);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void importBatch(List<SysDeptForm> forms) {
+		forms.forEach(this::create);
+	}
+
 }

@@ -155,4 +155,12 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity
 		removeById(id);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void importBatch(List<SysPostForm> forms) {
+		forms.forEach(this::create);
+	}
+
 }
