@@ -14,6 +14,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
@@ -104,6 +105,7 @@ public class SysJobOperationServiceImpl implements SysJobOperationService {
 			sysJobMapper.update(null,
 					Wrappers.lambdaUpdate(SysJobEntity.class)
 						.set(SysJobEntity::getStatus, false)
+						.set(SysJobEntity::getUpdateTime, LocalDateTime.now())
 						.in(SysJobEntity::getId, ids));
 		}
 		try {
@@ -128,6 +130,7 @@ public class SysJobOperationServiceImpl implements SysJobOperationService {
 		sysJobMapper.update(null,
 				Wrappers.lambdaUpdate(SysJobEntity.class)
 					.set(SysJobEntity::getStatus, true)
+					.set(SysJobEntity::getUpdateTime, LocalDateTime.now())
 					.in(SysJobEntity::getId, ids));
 		for (SysJobEntity job : jobs) {
 			job.setStatus(true);

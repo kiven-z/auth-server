@@ -7,11 +7,13 @@ import com.auth.service.system.schedule.mapper.LogJobMapper;
 import com.auth.service.system.schedule.mapper.SysJobMapper;
 import com.auth.service.system.schedule.model.entity.LogJobEntity;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.SchedulerException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CIRCUIT_BREAKER_PAUSE_FAILED;
@@ -85,10 +87,11 @@ public class SysJobCircuitBreaker {
 
 		boolean wasActive = BooleanUtil.isTrue(job.getStatus());
 		if (wasActive) {
-			SysJobEntity patch = new SysJobEntity();
-			patch.setId(jobId);
-			patch.setStatus(false);
-			sysJobMapper.updateById(patch);
+			sysJobMapper.update(null,
+					Wrappers.lambdaUpdate(SysJobEntity.class)
+						.set(SysJobEntity::getStatus, false)
+						.set(SysJobEntity::getUpdateTime, LocalDateTime.now())
+						.eq(SysJobEntity::getId, jobId));
 		}
 
 		try {

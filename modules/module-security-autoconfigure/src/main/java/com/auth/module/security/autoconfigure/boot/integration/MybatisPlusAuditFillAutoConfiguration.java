@@ -51,10 +51,10 @@ public class MybatisPlusAuditFillAutoConfiguration implements BaseMybatisPlusCon
 	 */
 	@Override
 	public void updateFill(MetaObject metaObject) {
-		Long userId = SecurityUserUtils.getUserId();
+		this.setFieldValByName(UPDATE_TIME, LocalDateTime.now(), metaObject);
 
+		Long userId = SecurityUserUtils.getUserId();
 		if (userId != null) {
-			this.setFieldValByName(UPDATE_TIME, LocalDateTime.now(), metaObject);
 			this.setFieldValByName(UPDATE_USER, userId, metaObject);
 		}
 	}

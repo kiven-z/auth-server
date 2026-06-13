@@ -6,6 +6,10 @@ import com.auth.service.system.schedule.mapper.LogJobMapper;
 import com.auth.service.system.schedule.mapper.SysJobMapper;
 import com.auth.service.system.schedule.model.entity.LogJobEntity;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
+import com.baomidou.mybatisplus.core.MybatisConfiguration;
+import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
+import org.apache.ibatis.builder.MapperBuilderAssistant;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,6 +23,7 @@ import java.util.List;
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CIRCUIT_BREAKER_PAUSE_FAILED;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
 /**
@@ -43,6 +48,12 @@ class SysJobCircuitBreakerTest {
 	@InjectMocks
 	private SysJobCircuitBreaker sysJobCircuitBreaker;
 
+	@BeforeAll
+	static void initMybatisPlusTableInfo() {
+		// LambdaUpdateWrapper 依赖实体元数据缓存，纯 Mockito 单测需预先初始化
+		TableInfoHelper.initTableInfo(new MapperBuilderAssistant(new MybatisConfiguration(), ""), SysJobEntity.class);
+	}
+
 	private static List<LogJobEntity> failedLogs() {
 		return java.util.stream.IntStream.range(0, 5).mapToObj(i -> new LogJobEntity().setStatus(false)).toList();
 	}
@@ -60,7 +71,8 @@ class SysJobCircuitBreakerTest {
 
 		sysJobCircuitBreaker.evaluateAfterFailure(1L, "demoJob", "DEFAULT");
 
-		verify(sysJobMapper).updateById(any(SysJobEntity.class));
+		verify(sysJobMapper).update(isNull(), any());
+		verify(sysJobMapper, never()).updateById(any(SysJobEntity.class));
 		verify(sysJobSchedulerManager).pauseJob("demoJob", "DEFAULT");
 	}
 
@@ -77,6 +89,7 @@ class SysJobCircuitBreakerTest {
 
 		sysJobCircuitBreaker.evaluateAfterFailure(1L, "demoJob", "DEFAULT");
 
+		verify(sysJobMapper, never()).update(isNull(), any());
 		verify(sysJobMapper, never()).updateById(any(SysJobEntity.class));
 		verify(sysJobSchedulerManager).pauseJob("demoJob", "DEFAULT");
 	}
