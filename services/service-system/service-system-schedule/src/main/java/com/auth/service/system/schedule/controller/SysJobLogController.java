@@ -2,7 +2,7 @@ package com.auth.service.system.schedule.controller;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
-import com.auth.service.system.schedule.model.entity.JobLogEntity;
+import com.auth.service.system.schedule.model.entity.LogJobEntity;
 import com.auth.service.system.schedule.model.query.SysJobLogQuery;
 import com.auth.service.system.schedule.model.vo.SysJobLogDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobLogPageResponse;
@@ -37,7 +37,7 @@ public class SysJobLogController {
 	@PreAuthorize("@auth.decide('sysJobLog:query')")
 	@GetMapping("page")
 	public Result<PageResponse<SysJobLogPageResponse>> page(SysJobLogQuery query) {
-		Page<JobLogEntity> page = new Page<>(query.getPageIndex(), query.getPageSize());
+		Page<LogJobEntity> page = new Page<>(query.getPageIndex(), query.getPageSize());
 		PageResponse<SysJobLogPageResponse> response = sysJobLogService.getPage(page, query);
 
 		return Result.success(response);

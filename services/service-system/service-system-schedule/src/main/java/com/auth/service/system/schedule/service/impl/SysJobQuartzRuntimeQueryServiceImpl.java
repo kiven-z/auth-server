@@ -1,7 +1,7 @@
 package com.auth.service.system.schedule.service.impl;
 
-import com.auth.service.system.schedule.mapper.JobLogMapper;
-import com.auth.service.system.schedule.model.entity.JobLogEntity;
+import com.auth.service.system.schedule.mapper.LogJobMapper;
+import com.auth.service.system.schedule.model.entity.LogJobEntity;
 import com.auth.service.system.schedule.model.enums.SysJobQuartzRuntimeStatus;
 import com.auth.service.system.schedule.model.vo.SysJobPageResponse;
 import com.auth.service.system.schedule.service.SysJobQuartzRuntimeQueryService;
@@ -26,7 +26,7 @@ public class SysJobQuartzRuntimeQueryServiceImpl implements SysJobQuartzRuntimeQ
 
 	private final SysJobSchedulerManager quartzAdmin;
 
-	private final JobLogMapper jobLogMapper;
+	private final LogJobMapper logJobMapper;
 
 	/**
 	 * {@inheritDoc}
@@ -67,11 +67,11 @@ public class SysJobQuartzRuntimeQueryServiceImpl implements SysJobQuartzRuntimeQ
 		if (status != SysJobQuartzRuntimeStatus.IDLE) {
 			return status;
 		}
-		List<JobLogEntity> recentLogs = jobLogMapper.selectRecentByJobNameAndGroup(jobName, jobGroup, 1);
+		List<LogJobEntity> recentLogs = logJobMapper.selectRecentByJobNameAndGroup(jobName, jobGroup, 1);
 		if (recentLogs.isEmpty()) {
 			return status;
 		}
-		JobLogEntity latest = recentLogs.get(0);
+		LogJobEntity latest = recentLogs.get(0);
 		if (Boolean.FALSE.equals(latest.getStatus())) {
 			return SysJobQuartzRuntimeStatus.FAILED;
 		}
@@ -79,11 +79,11 @@ public class SysJobQuartzRuntimeQueryServiceImpl implements SysJobQuartzRuntimeQ
 	}
 
 	private java.time.LocalDateTime resolveLastFailedTime(String jobName, String jobGroup) {
-		List<JobLogEntity> recentLogs = jobLogMapper.selectRecentByJobNameAndGroup(jobName, jobGroup, 1);
+		List<LogJobEntity> recentLogs = logJobMapper.selectRecentByJobNameAndGroup(jobName, jobGroup, 1);
 		if (recentLogs.isEmpty()) {
 			return null;
 		}
-		JobLogEntity latest = recentLogs.get(0);
+		LogJobEntity latest = recentLogs.get(0);
 		return Boolean.FALSE.equals(latest.getStatus()) ? latest.getCreateTime() : null;
 	}
 

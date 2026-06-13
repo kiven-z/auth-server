@@ -2,7 +2,7 @@ package com.auth.service.system.schedule.convert;
 
 import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.common.mapstruct.qualifier.MapStructStringQualifiers;
-import com.auth.service.system.schedule.model.entity.JobLogEntity;
+import com.auth.service.system.schedule.model.entity.LogJobEntity;
 import com.auth.service.system.schedule.model.po.SysJobLogPageRowPO;
 import com.auth.service.system.schedule.model.vo.SysJobLogDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobLogPageResponse;
@@ -36,6 +36,6 @@ public interface SysJobLogConverter {
 	 */
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
-	SysJobLogDetailVO toDetailVo(JobLogEntity entity);
+	SysJobLogDetailVO toDetailVo(LogJobEntity entity);
 
 }

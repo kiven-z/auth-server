@@ -2,11 +2,11 @@ package com.auth.service.system.schedule.service.impl;
 
 import cn.hutool.core.exceptions.ExceptionUtil;
 import com.auth.common.data.model.PageResponse;
-import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.schedule.convert.SysJobLogConverter;
-import com.auth.service.system.schedule.mapper.JobLogMapper;
-import com.auth.service.system.schedule.model.entity.JobLogEntity;
+import com.auth.service.system.schedule.exception.SysJobException;
+import com.auth.service.system.schedule.mapper.LogJobMapper;
+import com.auth.service.system.schedule.model.entity.LogJobEntity;
 import com.auth.service.system.schedule.model.po.SysJobLogPageRowPO;
 import com.auth.service.system.schedule.model.query.SysJobLogQuery;
 import com.auth.service.system.schedule.model.vo.SysJobLogDetailVO;
@@ -32,7 +32,7 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
 @Slf4j
 @Service
 @Transactional(rollbackFor = Exception.class)
-public class SysJobLogServiceImpl extends ServiceImpl<JobLogMapper, JobLogEntity> implements SysJobLogService {
+public class SysJobLogServiceImpl extends ServiceImpl<LogJobMapper, LogJobEntity> implements SysJobLogService {
 
 	private final AuditUserDisplayService auditUserDisplayService;
 
@@ -41,38 +41,11 @@ public class SysJobLogServiceImpl extends ServiceImpl<JobLogMapper, JobLogEntity
 	}
 
 	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public PageResponse<SysJobLogPageResponse> getPage(Page<JobLogEntity> pageParams, SysJobLogQuery query) {
-		IPage<SysJobLogPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
-		IPage<SysJobLogPageResponse> voPage = page.convert(SysJobLogConverter.INSTANCE::toPageResponse);
-
-		auditUserDisplayService.enrichAuditUsernames(voPage);
-		return PageResponse.of(voPage);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public SysJobLogDetailVO getDetail(Long id) {
-		JobLogEntity jobLog = getById(id);
-		if (jobLog == null) {
-			throw new SysJobException(DATA_NOT_EXIST);
-		}
-
-		SysJobLogDetailVO vo = SysJobLogConverter.INSTANCE.toDetailVo(jobLog);
-		auditUserDisplayService.enrichAuditUsernames(List.of(vo));
-		return vo;
-	}
-
-	/**
 	 * 组装公共字段；审计列由 MyBatis 填充（无登录用户时为 NULL）。
 	 */
-	private static JobLogEntity buildBaseLog(Long jobId, String jobName, String jobGroup, String invokeTarget,
+	private static LogJobEntity buildBaseLog(Long jobId, String jobName, String jobGroup, String invokeTarget,
 			String triggerType, long elapsedMs) {
-		JobLogEntity entity = new JobLogEntity();
+		LogJobEntity entity = new LogJobEntity();
 		entity.setJobId(jobId);
 		entity.setJobName(jobName);
 		entity.setJobGroup(jobGroup);
@@ -86,9 +59,36 @@ public class SysJobLogServiceImpl extends ServiceImpl<JobLogMapper, JobLogEntity
 	 * {@inheritDoc}
 	 */
 	@Override
+	public PageResponse<SysJobLogPageResponse> getPage(Page<LogJobEntity> pageParams, SysJobLogQuery query) {
+		IPage<SysJobLogPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
+		IPage<SysJobLogPageResponse> voPage = page.convert(SysJobLogConverter.INSTANCE::toPageResponse);
+
+		auditUserDisplayService.enrichAuditUsernames(voPage);
+		return PageResponse.of(voPage);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public SysJobLogDetailVO getDetail(Long id) {
+		LogJobEntity jobLog = getById(id);
+		if (jobLog == null) {
+			throw new SysJobException(DATA_NOT_EXIST);
+		}
+
+		SysJobLogDetailVO vo = SysJobLogConverter.INSTANCE.toDetailVo(jobLog);
+		auditUserDisplayService.enrichAuditUsernames(List.of(vo));
+		return vo;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public void recordSuccess(Long jobId, String jobName, String jobGroup, String invokeTarget, String triggerType,
 			long elapsedMs, String message) {
-		JobLogEntity entity = buildBaseLog(jobId, jobName, jobGroup, invokeTarget, triggerType, elapsedMs);
+		LogJobEntity entity = buildBaseLog(jobId, jobName, jobGroup, invokeTarget, triggerType, elapsedMs);
 		entity.setJobMessage(message);
 		entity.setStatus(true);
 		save(entity);
@@ -100,7 +100,7 @@ public class SysJobLogServiceImpl extends ServiceImpl<JobLogMapper, JobLogEntity
 	@Override
 	public void recordFailure(Long jobId, String jobName, String jobGroup, String invokeTarget, String triggerType,
 			long elapsedMs, JobExecutionException ex) {
-		JobLogEntity entity = buildBaseLog(jobId, jobName, jobGroup, invokeTarget, triggerType, elapsedMs);
+		LogJobEntity entity = buildBaseLog(jobId, jobName, jobGroup, invokeTarget, triggerType, elapsedMs);
 		entity.setJobMessage("FAILED");
 		entity.setStatus(false);
 		if (ex != null) {

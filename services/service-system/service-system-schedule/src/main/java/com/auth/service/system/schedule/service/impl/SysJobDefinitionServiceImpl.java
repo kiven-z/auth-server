@@ -1,10 +1,10 @@
 package com.auth.service.system.schedule.service.impl;
 
 import com.auth.common.data.model.PageResponse;
-import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.schedule.convert.SysJobConverter;
-import com.auth.service.system.schedule.mapper.JobLogMapper;
+import com.auth.service.system.schedule.exception.SysJobException;
+import com.auth.service.system.schedule.mapper.LogJobMapper;
 import com.auth.service.system.schedule.mapper.SysJobGroupMapper;
 import com.auth.service.system.schedule.mapper.SysJobMapper;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
@@ -58,7 +58,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 
 	private final SysJobGroupMapper sysJobGroupMapper;
 
-	private final JobLogMapper jobLogMapper;
+	private final LogJobMapper logJobMapper;
 
 	private final SysJobDefinitionValidationManager validationManager;
 
@@ -168,7 +168,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 
 		try {
 			quartzAdmin.deleteJobIfExists(JobKey.jobKey(jobName, jobGroup));
-			jobLogMapper.deleteByJobNameAndGroup(jobName, jobGroup);
+			logJobMapper.deleteByJobNameAndGroup(jobName, jobGroup);
 			removeById(id);
 		}
 		catch (SchedulerException ex) {

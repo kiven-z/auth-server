@@ -1,7 +1,7 @@
 package com.auth.service.system.admin.convert;
 
 import com.auth.service.system.schedule.convert.SysJobLogConverter;
-import com.auth.service.system.schedule.model.entity.JobLogEntity;
+import com.auth.service.system.schedule.model.entity.LogJobEntity;
 import com.auth.service.system.schedule.model.po.SysJobLogPageRowPO;
 import com.auth.service.system.schedule.model.vo.SysJobLogDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobLogPageResponse;
@@ -57,7 +57,7 @@ class SysJobLogConverterTest {
 	@Test
 	@DisplayName("实体 status=true 映射为 API true（成功）")
 	void toDetailVo_mapsEntitySuccess() {
-		JobLogEntity entity = new JobLogEntity();
+		LogJobEntity entity = new LogJobEntity();
 		entity.setId(1L);
 		entity.setJobName("demo");
 		entity.setStatus(Boolean.TRUE);
@@ -70,7 +70,7 @@ class SysJobLogConverterTest {
 	@Test
 	@DisplayName("实体 status=false 映射为 API false（失败）")
 	void toDetailVo_mapsEntityFailure() {
-		JobLogEntity entity = new JobLogEntity();
+		LogJobEntity entity = new LogJobEntity();
 		entity.setStatus(Boolean.FALSE);
 
 		SysJobLogDetailVO vo = SysJobLogConverter.INSTANCE.toDetailVo(entity);

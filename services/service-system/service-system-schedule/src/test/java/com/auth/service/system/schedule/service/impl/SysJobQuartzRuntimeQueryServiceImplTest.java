@@ -1,7 +1,7 @@
 package com.auth.service.system.schedule.service.impl;
 
-import com.auth.service.system.schedule.mapper.JobLogMapper;
-import com.auth.service.system.schedule.model.entity.JobLogEntity;
+import com.auth.service.system.schedule.mapper.LogJobMapper;
+import com.auth.service.system.schedule.model.entity.LogJobEntity;
 import com.auth.service.system.schedule.model.enums.SysJobQuartzRuntimeStatus;
 import com.auth.service.system.schedule.model.vo.SysJobPageResponse;
 import com.auth.service.system.schedule.support.SysJobQuartzRuntimeSnapshot;
@@ -34,7 +34,7 @@ class SysJobQuartzRuntimeQueryServiceImplTest {
 	private SysJobSchedulerManager quartzAdmin;
 
 	@Mock
-	private JobLogMapper jobLogMapper;
+	private LogJobMapper logJobMapper;
 
 	@InjectMocks
 	private SysJobQuartzRuntimeQueryServiceImpl sysJobQuartzRuntimeQueryService;
@@ -61,10 +61,10 @@ class SysJobQuartzRuntimeQueryServiceImplTest {
 		JobKey jobKey = JobKey.jobKey("demo", "G");
 		when(quartzAdmin.batchResolveRuntimeSnapshots(List.of(jobKey)))
 			.thenReturn(Map.of(jobKey, SysJobQuartzRuntimeSnapshot.of(SysJobQuartzRuntimeStatus.IDLE, null)));
-		JobLogEntity failedLog = new JobLogEntity();
+		LogJobEntity failedLog = new LogJobEntity();
 		failedLog.setStatus(false);
 		failedLog.setCreateTime(LocalDateTime.of(2026, 6, 13, 9, 0));
-		when(jobLogMapper.selectRecentByJobNameAndGroup("demo", "G", 1)).thenReturn(List.of(failedLog));
+		when(logJobMapper.selectRecentByJobNameAndGroup("demo", "G", 1)).thenReturn(List.of(failedLog));
 
 		sysJobQuartzRuntimeQueryService.enrichPageRows(List.of(row));
 

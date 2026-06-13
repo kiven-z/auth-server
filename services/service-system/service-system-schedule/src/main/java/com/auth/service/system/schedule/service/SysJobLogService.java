@@ -1,7 +1,7 @@
 package com.auth.service.system.schedule.service;
 
 import com.auth.common.data.model.PageResponse;
-import com.auth.service.system.schedule.model.entity.JobLogEntity;
+import com.auth.service.system.schedule.model.entity.LogJobEntity;
 import com.auth.service.system.schedule.model.query.SysJobLogQuery;
 import com.auth.service.system.schedule.model.vo.SysJobLogDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobLogPageResponse;
@@ -14,7 +14,7 @@ import org.quartz.JobExecutionException;
  *
  * @author Bunny
  */
-public interface SysJobLogService extends IService<JobLogEntity> {
+public interface SysJobLogService extends IService<LogJobEntity> {
 
 	/**
 	 * 分页查询
@@ -22,7 +22,7 @@ public interface SysJobLogService extends IService<JobLogEntity> {
 	 * @param query 条件
 	 * @return 分页数据
 	 */
-	PageResponse<SysJobLogPageResponse> getPage(Page<JobLogEntity> pageParams, SysJobLogQuery query);
+	PageResponse<SysJobLogPageResponse> getPage(Page<LogJobEntity> pageParams, SysJobLogQuery query);
 
 	/**
 	 * 详情（含异常堆栈）

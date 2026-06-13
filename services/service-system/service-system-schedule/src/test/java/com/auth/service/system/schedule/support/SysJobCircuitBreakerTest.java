@@ -1,11 +1,11 @@
 package com.auth.service.system.schedule.support;
 
 import com.auth.service.system.schedule.config.ScheduleJobProperties;
-import com.auth.service.system.schedule.mapper.JobLogMapper;
-import com.auth.service.system.schedule.mapper.SysJobMapper;
-import com.auth.service.system.schedule.model.entity.JobLogEntity;
-import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.exception.SysJobException;
+import com.auth.service.system.schedule.mapper.LogJobMapper;
+import com.auth.service.system.schedule.mapper.SysJobMapper;
+import com.auth.service.system.schedule.model.entity.LogJobEntity;
+import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,7 +35,7 @@ class SysJobCircuitBreakerTest {
 	private SysJobMapper sysJobMapper;
 
 	@Mock
-	private JobLogMapper jobLogMapper;
+	private LogJobMapper logJobMapper;
 
 	@Mock
 	private ScheduleJobProperties scheduleJobProperties;
@@ -43,8 +43,8 @@ class SysJobCircuitBreakerTest {
 	@InjectMocks
 	private SysJobCircuitBreaker sysJobCircuitBreaker;
 
-	private static List<JobLogEntity> failedLogs() {
-		return java.util.stream.IntStream.range(0, 5).mapToObj(i -> new JobLogEntity().setStatus(false)).toList();
+	private static List<LogJobEntity> failedLogs() {
+		return java.util.stream.IntStream.range(0, 5).mapToObj(i -> new LogJobEntity().setStatus(false)).toList();
 	}
 
 	@Test
@@ -56,7 +56,7 @@ class SysJobCircuitBreakerTest {
 		job.setId(1L);
 		job.setStatus(true);
 		when(sysJobMapper.selectById(1L)).thenReturn(job);
-		when(jobLogMapper.selectRecentByJobNameAndGroup("demoJob", "DEFAULT", 5)).thenReturn(failedLogs());
+		when(logJobMapper.selectRecentByJobNameAndGroup("demoJob", "DEFAULT", 5)).thenReturn(failedLogs());
 
 		sysJobCircuitBreaker.evaluateAfterFailure(1L, "demoJob", "DEFAULT");
 
@@ -73,7 +73,7 @@ class SysJobCircuitBreakerTest {
 		job.setId(1L);
 		job.setStatus(false);
 		when(sysJobMapper.selectById(1L)).thenReturn(job);
-		when(jobLogMapper.selectRecentByJobNameAndGroup("demoJob", "DEFAULT", 5)).thenReturn(failedLogs());
+		when(logJobMapper.selectRecentByJobNameAndGroup("demoJob", "DEFAULT", 5)).thenReturn(failedLogs());
 
 		sysJobCircuitBreaker.evaluateAfterFailure(1L, "demoJob", "DEFAULT");
 
@@ -90,7 +90,7 @@ class SysJobCircuitBreakerTest {
 		job.setId(1L);
 		job.setStatus(true);
 		when(sysJobMapper.selectById(1L)).thenReturn(job);
-		when(jobLogMapper.selectRecentByJobNameAndGroup("demoJob", "DEFAULT", 5)).thenReturn(failedLogs());
+		when(logJobMapper.selectRecentByJobNameAndGroup("demoJob", "DEFAULT", 5)).thenReturn(failedLogs());
 		doThrow(new SchedulerException("pause failed")).when(sysJobSchedulerManager).pauseJob("demoJob", "DEFAULT");
 
 		assertThatThrownBy(() -> sysJobCircuitBreaker.evaluateAfterFailure(1L, "demoJob", "DEFAULT"))

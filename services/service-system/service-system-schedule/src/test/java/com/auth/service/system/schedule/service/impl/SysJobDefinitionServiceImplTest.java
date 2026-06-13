@@ -1,17 +1,17 @@
 package com.auth.service.system.schedule.service.impl;
 
-import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
-import com.auth.service.system.schedule.mapper.JobLogMapper;
+import com.auth.service.system.schedule.exception.SysJobException;
+import com.auth.service.system.schedule.mapper.LogJobMapper;
 import com.auth.service.system.schedule.mapper.SysJobGroupMapper;
 import com.auth.service.system.schedule.mapper.SysJobMapper;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
 import com.auth.service.system.schedule.model.form.SysJobUpdateForm;
 import com.auth.service.system.schedule.model.vo.SysJobDetailVO;
+import com.auth.service.system.schedule.service.SysJobQuartzRuntimeQueryService;
 import com.auth.service.system.schedule.support.SysJobSchedulerManager;
 import com.auth.service.system.schedule.validation.SysJobDefinitionValidationManager;
-import com.auth.service.system.schedule.service.SysJobQuartzRuntimeQueryService;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,9 +30,7 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link SysJobDefinitionServiceImpl} 单元测试。
@@ -56,7 +54,7 @@ class SysJobDefinitionServiceImplTest {
 	private SysJobGroupMapper sysJobGroupMapper;
 
 	@Mock
-	private JobLogMapper jobLogMapper;
+	private LogJobMapper logJobMapper;
 
 	@Mock
 	private SysJobDefinitionValidationManager validationManager;
@@ -69,7 +67,7 @@ class SysJobDefinitionServiceImplTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		sysJobDefinitionService = new SysJobDefinitionServiceImpl(quartzAdmin, auditUserDisplayService,
-				sysJobGroupMapper, jobLogMapper, validationManager, sysJobQuartzRuntimeQueryService);
+				sysJobGroupMapper, logJobMapper, validationManager, sysJobQuartzRuntimeQueryService);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysJobDefinitionService, sysJobMapper);

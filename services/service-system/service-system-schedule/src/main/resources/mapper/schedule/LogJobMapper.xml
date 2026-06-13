@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.auth.service.system.schedule.mapper.JobLogMapper">
+<mapper namespace="com.auth.service.system.schedule.mapper.LogJobMapper">
 
     <!-- 分页查询日志 -->
     <select id="selectListByPage"
@@ -60,7 +60,7 @@
 
     <!-- 按任务取最近若干条 -->
     <select id="selectRecentByJobNameAndGroup"
-            resultType="com.auth.service.system.schedule.model.entity.JobLogEntity">
+            resultType="com.auth.service.system.schedule.model.entity.LogJobEntity">
         SELECT id,
         job_id,
         job_name,
