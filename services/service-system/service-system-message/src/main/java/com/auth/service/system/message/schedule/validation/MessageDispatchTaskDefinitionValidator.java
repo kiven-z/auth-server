@@ -1,8 +1,8 @@
-package com.auth.service.system.schedule.validation.impl;
+package com.auth.service.system.message.schedule.validation;
 
+import com.auth.service.system.message.schedule.support.MessageDispatchCommandParser;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
-import com.auth.service.system.schedule.support.MessageDispatchCommandParser;
 import com.auth.service.system.schedule.validation.SysJobTaskTypeDefinitionValidator;
 import org.springframework.stereotype.Component;
 

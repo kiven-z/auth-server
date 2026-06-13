@@ -2,7 +2,6 @@ package com.auth.service.system.schedule.service;
 
 import com.auth.service.system.schedule.model.vo.QuartzTaskClassVO;
 import com.auth.service.system.schedule.model.vo.QuartzTaskMethodVO;
-import com.auth.service.system.schedule.model.payload.MessageDispatchPayload;
 
 import java.util.List;
 
@@ -30,6 +29,6 @@ public interface SysJobTaskCatalogService {
 	 * 获取消息调度 payload 模板
 	 * @return 消息载荷模板
 	 */
-	MessageDispatchPayload messageDispatchPayloadTemplate();
+	Object messageDispatchPayloadTemplate();
 
 }

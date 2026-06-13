@@ -1,4 +1,4 @@
-package com.auth.service.system.schedule.model.payload;
+package com.auth.service.system.message.schedule.model;
 
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import io.swagger.v3.oas.annotations.media.Schema;

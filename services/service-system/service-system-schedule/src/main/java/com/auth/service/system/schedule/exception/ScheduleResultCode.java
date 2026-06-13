@@ -124,7 +124,13 @@ public enum ScheduleResultCode implements SystemResultCode {
 	 * 熔断后暂停 Quartz 任务失败（{0}=jobGroup，{1}=jobName）
 	 */
 	JOB_CIRCUIT_BREAKER_PAUSE_FAILED(500, 246, "JOB_CIRCUIT_BREAKER_PAUSE_FAILED",
-			"system.job.circuit_breaker.pause_failed");
+			"system.job.circuit_breaker.pause_failed"),
+
+	/**
+	 * 消息调度能力未启用（message 模块未装配）
+	 */
+	JOB_MESSAGE_DISPATCH_UNAVAILABLE(404, 247, "JOB_MESSAGE_DISPATCH_UNAVAILABLE",
+			"system.job.message_dispatch.unavailable");
 
 	private final int httpStatus;
 

@@ -1,8 +1,6 @@
 package com.auth.service.system.schedule.model.enums;
 
-import com.auth.service.system.schedule.task.mode.bean.BeanInvokeEntryJob;
-import com.auth.service.system.schedule.task.mode.custom.DelegatingCustomEntryJob;
-import com.auth.service.system.schedule.task.mode.message.MessageDispatchEntryJob;
+import com.auth.service.system.schedule.task.SysJobEntryJob;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -25,18 +23,12 @@ class SysJobTaskTypeTest {
 	}
 
 	@Test
-	@DisplayName("resolveEntryJobClass：并发与禁止并发返回对应入口 Job")
-	void resolveEntryJobClassReturnsMatchedEntryJobs() {
-		assertThat(SysJobTaskType.BEAN_INVOKE.resolveEntryJobClass(true)).isEqualTo(BeanInvokeEntryJob.class);
-		assertThat(SysJobTaskType.BEAN_INVOKE.resolveEntryJobClass(false)).isEqualTo(BeanInvokeEntryJob.Disallow.class);
-
-		assertThat(SysJobTaskType.CUSTOM_CLASS.resolveEntryJobClass(true)).isEqualTo(DelegatingCustomEntryJob.class);
-		assertThat(SysJobTaskType.CUSTOM_CLASS.resolveEntryJobClass(false))
-			.isEqualTo(DelegatingCustomEntryJob.Disallow.class);
-
-		assertThat(SysJobTaskType.MESSAGE_DISPATCH.resolveEntryJobClass(true)).isEqualTo(MessageDispatchEntryJob.class);
-		assertThat(SysJobTaskType.MESSAGE_DISPATCH.resolveEntryJobClass(false))
-			.isEqualTo(MessageDispatchEntryJob.Disallow.class);
+	@DisplayName("resolveEntryJobClass：所有类型共用统一入口 Job")
+	void resolveEntryJobClassReturnsUnifiedEntryJobs() {
+		for (SysJobTaskType taskType : SysJobTaskType.values()) {
+			assertThat(taskType.resolveEntryJobClass(true)).isEqualTo(SysJobEntryJob.class);
+			assertThat(taskType.resolveEntryJobClass(false)).isEqualTo(SysJobEntryJob.Disallow.class);
+		}
 	}
 
 }

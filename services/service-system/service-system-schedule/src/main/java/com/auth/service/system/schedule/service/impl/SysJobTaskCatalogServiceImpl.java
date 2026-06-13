@@ -1,12 +1,11 @@
 package com.auth.service.system.schedule.service.impl;
 
 import cn.hutool.core.text.CharSequenceUtil;
+import com.auth.service.system.schedule.catalog.MessageDispatchPayloadTemplateProvider;
 import com.auth.service.system.schedule.exception.SysJobException;
-import com.auth.service.system.schedule.model.payload.MessageDispatchPayload;
 import com.auth.service.system.schedule.model.vo.QuartzTaskClassVO;
 import com.auth.service.system.schedule.model.vo.QuartzTaskMethodVO;
 import com.auth.service.system.schedule.service.SysJobTaskCatalogService;
-import com.auth.service.system.schedule.support.MessageDispatchCommandParser;
 import com.auth.service.system.schedule.support.QuartzTaskRegistry;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -17,6 +16,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.*;
 
@@ -32,13 +32,13 @@ public class SysJobTaskCatalogServiceImpl implements SysJobTaskCatalogService {
 
 	private final ApplicationContext applicationContext;
 
-	private final MessageDispatchCommandParser messageDispatchCommandParser;
+	private final Optional<MessageDispatchPayloadTemplateProvider> messageDispatchPayloadTemplateProvider;
 
 	public SysJobTaskCatalogServiceImpl(QuartzTaskRegistry quartzTaskRegistry, ApplicationContext applicationContext,
-			MessageDispatchCommandParser messageDispatchCommandParser) {
+			Optional<MessageDispatchPayloadTemplateProvider> messageDispatchPayloadTemplateProvider) {
 		this.quartzTaskRegistry = quartzTaskRegistry;
 		this.applicationContext = applicationContext;
-		this.messageDispatchCommandParser = messageDispatchCommandParser;
+		this.messageDispatchPayloadTemplateProvider = messageDispatchPayloadTemplateProvider;
 	}
 
 	@Override
@@ -79,8 +79,9 @@ public class SysJobTaskCatalogServiceImpl implements SysJobTaskCatalogService {
 	}
 
 	@Override
-	public MessageDispatchPayload messageDispatchPayloadTemplate() {
-		return messageDispatchCommandParser.buildTemplatePayload();
+	public Object messageDispatchPayloadTemplate() {
+		return messageDispatchPayloadTemplateProvider.map(MessageDispatchPayloadTemplateProvider::buildTemplatePayload)
+			.orElseThrow(() -> new SysJobException(JOB_MESSAGE_DISPATCH_UNAVAILABLE));
 	}
 
 	/**

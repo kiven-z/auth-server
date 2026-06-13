@@ -1,4 +1,4 @@
-package com.auth.service.system.schedule.task.mode.bean.job;
+package com.auth.service.system.schedule.example.bean;
 
 import com.auth.service.system.schedule.annotation.QuartzTask;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;

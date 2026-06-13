@@ -3,7 +3,7 @@ package com.auth.service.system.schedule.validation.impl;
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.support.QuartzTaskRegistry;
-import com.auth.service.system.schedule.task.mode.custom.job.SpringInjectDemoJob;
+import com.auth.service.system.schedule.example.custom.SpringInjectDemoJob;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

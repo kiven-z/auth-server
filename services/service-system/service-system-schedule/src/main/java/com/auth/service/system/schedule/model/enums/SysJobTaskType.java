@@ -1,9 +1,7 @@
 package com.auth.service.system.schedule.model.enums;
 
 import com.auth.service.system.schedule.exception.SysJobException;
-import com.auth.service.system.schedule.task.mode.bean.BeanInvokeEntryJob;
-import com.auth.service.system.schedule.task.mode.custom.DelegatingCustomEntryJob;
-import com.auth.service.system.schedule.task.mode.message.MessageDispatchEntryJob;
+import com.auth.service.system.schedule.task.ConcurrentEntryJobSupport;
 import org.quartz.Job;
 
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_TASK_TYPE_UNSUPPORTED;
@@ -62,26 +60,7 @@ public enum SysJobTaskType {
 	 * @return 入口 Job 类
 	 */
 	public Class<? extends Job> resolveEntryJobClass(boolean concurrent) {
-		if (concurrent) {
-			return concurrentEntryJobClass();
-		}
-		return nonConcurrentEntryJobClass();
-	}
-
-	private Class<? extends Job> concurrentEntryJobClass() {
-		return switch (this) {
-			case BEAN_INVOKE -> BeanInvokeEntryJob.class;
-			case CUSTOM_CLASS -> DelegatingCustomEntryJob.class;
-			case MESSAGE_DISPATCH -> MessageDispatchEntryJob.class;
-		};
-	}
-
-	private Class<? extends Job> nonConcurrentEntryJobClass() {
-		return switch (this) {
-			case BEAN_INVOKE -> BeanInvokeEntryJob.Disallow.class;
-			case CUSTOM_CLASS -> DelegatingCustomEntryJob.Disallow.class;
-			case MESSAGE_DISPATCH -> MessageDispatchEntryJob.Disallow.class;
-		};
+		return ConcurrentEntryJobSupport.resolveEntryJobClass(concurrent);
 	}
 
 }

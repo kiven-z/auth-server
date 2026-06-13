@@ -1,4 +1,4 @@
-package com.auth.service.system.schedule.task.mode.custom.job;
+package com.auth.service.system.schedule.example.custom;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.schedule.annotation.QuartzTask;
@@ -33,7 +33,7 @@ public class SpringInjectDemoJob implements Job {
 		JobDataMap map = context.getMergedJobDataMap();
 		String url = Objects.toString(map.get("url"), null);
 		if (CharSequenceUtil.isBlank(url)) {
-			url = "https://httpbin.org/get";
+			url = "https://www.baidu.com/";
 		}
 		try {
 			String resp = restTemplate.getForObject(Objects.requireNonNull(url, "url"), String.class);
