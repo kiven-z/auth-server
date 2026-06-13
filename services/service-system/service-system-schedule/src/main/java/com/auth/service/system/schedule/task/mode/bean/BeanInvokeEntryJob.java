@@ -1,6 +1,6 @@
 package com.auth.service.system.schedule.task.mode.bean;
 
-import com.auth.service.system.schedule.model.constans.SysJobQuartzDataKeys;
+import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
 import com.auth.service.system.schedule.support.QuartzBeanInvoker;
 import com.auth.service.system.schedule.task.QuartzJobSupport;
 import lombok.extern.slf4j.Slf4j;
@@ -8,7 +8,7 @@ import org.quartz.*;
 import org.springframework.context.ApplicationContext;
 
 /**
- * Bean 调用模式入口 Job：从 JobDataMap 读取 invoke_target 并委派给 {@link QuartzBeanInvoker}
+ * Bean 调用模式入口 Job
  *
  * @author Bunny
  */

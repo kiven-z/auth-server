@@ -1,4 +1,4 @@
-package com.auth.service.system.schedule.model.constans;
+package com.auth.service.system.schedule.model.constants;
 
 import lombok.experimental.UtilityClass;
 

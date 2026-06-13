@@ -1,14 +1,14 @@
 package com.auth.service.system.schedule.task.mode.custom;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import com.auth.service.system.schedule.model.constans.SysJobQuartzDataKeys;
+import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
 import com.auth.service.system.schedule.task.QuartzJobSupport;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
 import org.springframework.context.ApplicationContext;
 
 /**
- * 自定义 Job 模式入口：从 {@code JobDataMap.jobClass} 读取目标 Job 类并委派执行
+ * 自定义 Job 模式入口
  *
  * @author Bunny
  */

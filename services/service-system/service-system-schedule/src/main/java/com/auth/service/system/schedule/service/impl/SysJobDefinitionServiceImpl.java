@@ -38,7 +38,7 @@ import java.util.List;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_GROUP_NOT_AVAILABLE;
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_QUARTZ_OPERATION_FAILED;
-import static com.auth.service.system.schedule.model.constans.SysJobQuartzDataKeys.JOB_ZONE;
+import static com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys.JOB_ZONE;
 
 /**
  * 定时任务定义服务实现

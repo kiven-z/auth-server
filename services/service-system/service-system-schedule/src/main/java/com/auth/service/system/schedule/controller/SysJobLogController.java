@@ -23,7 +23,7 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
  * @author Bunny
  */
 @Tag(name = "定时任务-日志", description = "log_job")
-@RequestMapping("/api/system/job-log")
+@RequestMapping("/api/system/log/job")
 @RestController
 public class SysJobLogController {
 

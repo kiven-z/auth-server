@@ -4,7 +4,7 @@ import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.auth.service.system.schedule.model.constans.SysJobQuartzDataKeys;
+import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.enums.SysJobQuartzRuntimeStatus;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
@@ -18,8 +18,8 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static com.auth.service.system.schedule.model.constans.SysJobQuartzDataKeys.JOB_ZONE;
-import static com.auth.service.system.schedule.model.constans.SysJobQuartzDataKeys.TRIGGER_SUFFIX;
+import static com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys.JOB_ZONE;
+import static com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys.TRIGGER_SUFFIX;
 
 /**
  * 将 {@link SysJobEntity} 与 Quartz {@link Scheduler} 同步（增删改、暂停、恢复、立即执行）

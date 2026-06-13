@@ -1,7 +1,7 @@
 package com.auth.service.system.schedule.listener;
 
 import com.auth.service.system.schedule.config.ScheduleJobProperties;
-import com.auth.service.system.schedule.model.constans.SysJobQuartzDataKeys;
+import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
 import com.auth.service.system.schedule.service.SysJobLogService;
 import com.auth.service.system.schedule.support.SysJobCircuitBreaker;
 import org.quartz.*;

@@ -7,7 +7,7 @@ import com.auth.service.system.schedule.model.form.SysJobStatusForm;
 import com.auth.service.system.schedule.service.SysJobOperationService;
 import com.auth.service.system.schedule.support.SysJobSchedulerManager;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.SchedulerException;
 import org.springframework.scheduling.annotation.Async;
@@ -25,16 +25,14 @@ import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_
  * @author Bunny
  */
 @Slf4j
+@RequiredArgsConstructor
 @Service
 @Transactional(rollbackFor = Exception.class)
-public class SysJobOperationServiceImpl extends ServiceImpl<SysJobMapper, SysJobEntity>
-		implements SysJobOperationService {
+public class SysJobOperationServiceImpl implements SysJobOperationService {
+
+	private final SysJobMapper sysJobMapper;
 
 	private final SysJobSchedulerManager quartzAdmin;
-
-	public SysJobOperationServiceImpl(SysJobSchedulerManager quartzAdmin) {
-		this.quartzAdmin = quartzAdmin;
-	}
 
 	/**
 	 * {@inheritDoc}
@@ -42,7 +40,7 @@ public class SysJobOperationServiceImpl extends ServiceImpl<SysJobMapper, SysJob
 	@Override
 	@Async
 	public void syncAllFromDatabase() {
-		List<SysJobEntity> allJobs = list();
+		List<SysJobEntity> allJobs = sysJobMapper.selectList(null);
 		for (SysJobEntity job : allJobs) {
 			try {
 				quartzAdmin.scheduleOrReplace(job);
@@ -60,19 +58,14 @@ public class SysJobOperationServiceImpl extends ServiceImpl<SysJobMapper, SysJob
 	@Override
 	public void batchUpdateStatus(SysJobStatusForm form) {
 		for (Long id : form.getIds()) {
-			SysJobEntity dbJob = getById(id);
+			SysJobEntity dbJob = sysJobMapper.selectById(id);
 			if (dbJob == null) {
 				continue;
 			}
 			dbJob.setStatus(form.getStatus());
-			updateById(dbJob);
+			sysJobMapper.updateById(dbJob);
 			try {
-				if (Boolean.TRUE.equals(form.getStatus())) {
-					quartzAdmin.resumeJob(dbJob.getJobName(), dbJob.getJobGroup());
-				}
-				else {
-					quartzAdmin.pauseJob(dbJob.getJobName(), dbJob.getJobGroup());
-				}
+				quartzAdmin.scheduleOrReplace(dbJob);
 			}
 			catch (SchedulerException ex) {
 				log.warn("批量更新任务状态同步 Quartz 失败 id={} : {}", id, ex.getMessage());
@@ -85,7 +78,7 @@ public class SysJobOperationServiceImpl extends ServiceImpl<SysJobMapper, SysJob
 	 */
 	@Override
 	public void runOnce(Long id) {
-		SysJobEntity dbJob = getById(id);
+		SysJobEntity dbJob = sysJobMapper.selectById(id);
 		if (dbJob == null) {
 			throw new SysJobException(DATA_NOT_EXIST);
 		}
@@ -104,11 +97,14 @@ public class SysJobOperationServiceImpl extends ServiceImpl<SysJobMapper, SysJob
 	 */
 	@Override
 	public void pauseAllInGroup(String groupCode) {
-		List<SysJobEntity> jobs = list(
-				Wrappers.lambdaQuery(SysJobEntity.class).eq(SysJobEntity::getJobGroup, groupCode));
+		List<SysJobEntity> jobs = sysJobMapper
+			.selectList(Wrappers.lambdaQuery(SysJobEntity.class).eq(SysJobEntity::getJobGroup, groupCode));
 		List<Long> ids = jobs.stream().map(SysJobEntity::getId).toList();
 		if (!ids.isEmpty()) {
-			lambdaUpdate().set(SysJobEntity::getStatus, false).in(SysJobEntity::getId, ids).update();
+			sysJobMapper.update(null,
+					Wrappers.lambdaUpdate(SysJobEntity.class)
+						.set(SysJobEntity::getStatus, false)
+						.in(SysJobEntity::getId, ids));
 		}
 		try {
 			quartzAdmin.pauseGroup(groupCode);
@@ -123,17 +119,24 @@ public class SysJobOperationServiceImpl extends ServiceImpl<SysJobMapper, SysJob
 	 */
 	@Override
 	public void resumeAllInGroup(String groupCode) {
-		List<SysJobEntity> jobs = list(
-				Wrappers.lambdaQuery(SysJobEntity.class).eq(SysJobEntity::getJobGroup, groupCode));
+		List<SysJobEntity> jobs = sysJobMapper
+			.selectList(Wrappers.lambdaQuery(SysJobEntity.class).eq(SysJobEntity::getJobGroup, groupCode));
+		if (jobs.isEmpty()) {
+			return;
+		}
 		List<Long> ids = jobs.stream().map(SysJobEntity::getId).toList();
-		if (!ids.isEmpty()) {
-			lambdaUpdate().set(SysJobEntity::getStatus, true).in(SysJobEntity::getId, ids).update();
-		}
-		try {
-			quartzAdmin.resumeGroup(groupCode);
-		}
-		catch (SchedulerException ex) {
-			log.warn("分组恢复失败 groupCode={} : {}", groupCode, ex.getMessage());
+		sysJobMapper.update(null,
+				Wrappers.lambdaUpdate(SysJobEntity.class)
+					.set(SysJobEntity::getStatus, true)
+					.in(SysJobEntity::getId, ids));
+		for (SysJobEntity job : jobs) {
+			job.setStatus(true);
+			try {
+				quartzAdmin.scheduleOrReplace(job);
+			}
+			catch (SchedulerException ex) {
+				log.warn("分组恢复失败 {} / {} : {}", job.getJobGroup(), job.getJobName(), ex.getMessage());
+			}
 		}
 	}
 

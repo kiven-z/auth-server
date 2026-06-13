@@ -13,8 +13,8 @@ import java.lang.reflect.Method;
 import java.util.Objects;
 
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.*;
-import static com.auth.service.system.schedule.model.constans.SysJobQuartzDataKeys.BEAN_NAME;
-import static com.auth.service.system.schedule.model.constans.SysJobQuartzDataKeys.METHOD_NAME;
+import static com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys.BEAN_NAME;
+import static com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys.METHOD_NAME;
 
 /**
  * 解析 {@code invoke_target}（首个 {@code .} 前为 Spring Bean 名，后为方法及可选参数）并反射调用
