@@ -16,7 +16,7 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
  *
  * @author Bunny
  */
-@Tag(name = "定时任务-操作", description = "启停、立即执行、分组操作")
+@Tag(name = "定时任务-操作", description = "启停、立即执行")
 @RequestMapping("/api/system/job")
 @RestController
 public class SysJobOperationController {
@@ -40,22 +40,6 @@ public class SysJobOperationController {
 	@PostMapping("{id}/run")
 	public Result<String> runOnce(@PathVariable("id") Long id) {
 		sysJobOperationService.runOnce(id);
-		return Result.success(null, MODIFY_SUCCESS.getMessage());
-	}
-
-	@Operation(summary = "按分组一键暂停")
-	@PreAuthorize("@auth.decide('sysJob:update')")
-	@PutMapping("group/{groupCode}/pause")
-	public Result<String> pauseGroup(@PathVariable("groupCode") String groupCode) {
-		sysJobOperationService.pauseAllInGroup(groupCode);
-		return Result.success(null, MODIFY_SUCCESS.getMessage());
-	}
-
-	@Operation(summary = "按分组一键恢复")
-	@PreAuthorize("@auth.decide('sysJob:update')")
-	@PutMapping("group/{groupCode}/resume")
-	public Result<String> resumeGroup(@PathVariable("groupCode") String groupCode) {
-		sysJobOperationService.resumeAllInGroup(groupCode);
 		return Result.success(null, MODIFY_SUCCESS.getMessage());
 	}
 

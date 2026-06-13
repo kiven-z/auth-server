@@ -15,6 +15,7 @@ import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
 import com.auth.service.system.schedule.model.vo.SysJobGroupDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobGroupPageResponse;
 import com.auth.service.system.schedule.service.SysJobGroupService;
+import com.auth.service.system.schedule.service.SysJobOperationService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -38,8 +39,11 @@ public class SysJobGroupController {
 
 	private final SysJobGroupService sysJobGroupService;
 
-	public SysJobGroupController(SysJobGroupService sysJobGroupService) {
+	private final SysJobOperationService sysJobOperationService;
+
+	public SysJobGroupController(SysJobGroupService sysJobGroupService, SysJobOperationService sysJobOperationService) {
 		this.sysJobGroupService = sysJobGroupService;
+		this.sysJobOperationService = sysJobOperationService;
 	}
 
 	@Operation(summary = "分页查询任务分组")
@@ -100,6 +104,22 @@ public class SysJobGroupController {
 	public Result<String> delete(@PathVariable("id") Long id) {
 		sysJobGroupService.deleteById(id);
 		return Result.success(null, DELETE_SUCCESS.getMessage());
+	}
+
+	@Operation(summary = "暂停分组下全部任务")
+	@PreAuthorize("@auth.decide('sysJob:update')")
+	@PutMapping("{groupCode}/pause-jobs")
+	public Result<String> pauseAllJobs(@PathVariable("groupCode") String groupCode) {
+		sysJobOperationService.pauseAllInGroup(groupCode);
+		return Result.success(null, MODIFY_SUCCESS.getMessage());
+	}
+
+	@Operation(summary = "恢复分组下全部任务")
+	@PreAuthorize("@auth.decide('sysJob:update')")
+	@PutMapping("{groupCode}/resume-jobs")
+	public Result<String> resumeAllJobs(@PathVariable("groupCode") String groupCode) {
+		sysJobOperationService.resumeAllInGroup(groupCode);
+		return Result.success(null, MODIFY_SUCCESS.getMessage());
 	}
 
 }
