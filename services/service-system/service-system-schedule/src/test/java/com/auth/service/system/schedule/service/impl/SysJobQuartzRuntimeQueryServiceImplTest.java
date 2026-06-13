@@ -2,6 +2,7 @@ package com.auth.service.system.schedule.service.impl;
 
 import com.auth.service.system.schedule.mapper.LogJobMapper;
 import com.auth.service.system.schedule.model.entity.LogJobEntity;
+import com.auth.service.system.schedule.model.enums.SysJobLastExecutionStatus;
 import com.auth.service.system.schedule.model.enums.SysJobQuartzRuntimeStatus;
 import com.auth.service.system.schedule.model.vo.SysJobPageResponse;
 import com.auth.service.system.schedule.support.SysJobQuartzRuntimeSnapshot;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 /**
@@ -55,21 +57,40 @@ class SysJobQuartzRuntimeQueryServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("分页补充：IDLE 且最近日志失败时标记 FAILED")
-	void enrichPageRowsMarksFailedWhenLatestLogFailed() {
+	@DisplayName("分页补充：IDLE 且最近日志失败时运行态仍为 IDLE，最近结果为 FAILED")
+	void enrichPageRowsKeepsIdleAndMarksLastExecutionFailed() {
 		SysJobPageResponse row = jobRow();
+		row.setId(1L);
 		JobKey jobKey = JobKey.jobKey("demo", "G");
 		when(quartzAdmin.batchResolveRuntimeSnapshots(List.of(jobKey)))
 			.thenReturn(Map.of(jobKey, SysJobQuartzRuntimeSnapshot.of(SysJobQuartzRuntimeStatus.IDLE, null)));
 		LogJobEntity failedLog = new LogJobEntity();
+		failedLog.setJobId(1L);
 		failedLog.setStatus(false);
 		failedLog.setCreateTime(LocalDateTime.of(2026, 6, 13, 9, 0));
-		when(logJobMapper.selectRecentByJobNameAndGroup("demo", "G", 1)).thenReturn(List.of(failedLog));
+		when(logJobMapper.selectList(any())).thenReturn(List.of(failedLog));
 
 		sysJobQuartzRuntimeQueryService.enrichPageRows(List.of(row));
 
-		assertThat(row.getQuartzRuntimeStatus()).isEqualTo(SysJobQuartzRuntimeStatus.FAILED);
-		assertThat(row.getQuartzLastFailedTime()).isEqualTo(failedLog.getCreateTime());
+		assertThat(row.getQuartzRuntimeStatus()).isEqualTo(SysJobQuartzRuntimeStatus.IDLE);
+		assertThat(row.getLastExecutionStatus()).isEqualTo(SysJobLastExecutionStatus.FAILED);
+		assertThat(row.getLastExecutionTime()).isEqualTo(failedLog.getCreateTime());
+	}
+
+	@Test
+	@DisplayName("分页补充：无日志时最近结果为 UNKNOWN")
+	void enrichPageRowsMarksUnknownWhenNoLog() {
+		SysJobPageResponse row = jobRow();
+		row.setId(1L);
+		JobKey jobKey = JobKey.jobKey("demo", "G");
+		when(quartzAdmin.batchResolveRuntimeSnapshots(List.of(jobKey)))
+			.thenReturn(Map.of(jobKey, SysJobQuartzRuntimeSnapshot.of(SysJobQuartzRuntimeStatus.IDLE, null)));
+		when(logJobMapper.selectList(any())).thenReturn(List.of());
+
+		sysJobQuartzRuntimeQueryService.enrichPageRows(List.of(row));
+
+		assertThat(row.getQuartzRuntimeStatus()).isEqualTo(SysJobQuartzRuntimeStatus.IDLE);
+		assertThat(row.getLastExecutionStatus()).isEqualTo(SysJobLastExecutionStatus.UNKNOWN);
 	}
 
 	@Test

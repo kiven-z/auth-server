@@ -4,17 +4,21 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.system.schedule.mapper.LogJobMapper;
 import com.auth.service.system.schedule.model.entity.LogJobEntity;
-import com.auth.service.system.schedule.model.enums.SysJobQuartzRuntimeStatus;
+import com.auth.service.system.schedule.model.enums.SysJobLastExecutionStatus;
 import com.auth.service.system.schedule.model.vo.SysJobPageResponse;
 import com.auth.service.system.schedule.service.SysJobQuartzRuntimeQueryService;
 import com.auth.service.system.schedule.support.SysJobQuartzRuntimeSnapshot;
 import com.auth.service.system.schedule.support.SysJobSchedulerManager;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import org.quartz.JobKey;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Quartz 任务运行时状态查询实现
@@ -41,34 +45,41 @@ public class SysJobQuartzRuntimeQueryServiceImpl implements SysJobQuartzRuntimeQ
 		List<JobKey> jobKeys = rows.stream().map(row -> JobKey.jobKey(row.getJobName(), row.getJobGroup())).toList();
 		Map<JobKey, SysJobQuartzRuntimeSnapshot> snapshots = quartzAdmin.batchResolveRuntimeSnapshots(jobKeys);
 
+		List<Long> jobIds = rows.stream().map(SysJobPageResponse::getId).filter(Objects::nonNull).toList();
+		Map<Long, LogJobEntity> latestLogByJobId = loadLatestLogsByJobIds(jobIds);
+
 		for (SysJobPageResponse row : rows) {
 			JobKey jobKey = JobKey.jobKey(row.getJobName(), row.getJobGroup());
 			SysJobQuartzRuntimeSnapshot snapshot = snapshots.get(jobKey);
 			if (snapshot == null) {
 				continue;
 			}
-			applyRuntimeSnapshot(row, snapshot);
+			row.setQuartzRuntimeStatus(snapshot.status());
+			row.setQuartzFireTime(snapshot.fireTime());
+
+			Long jobId = row.getId();
+			LogJobEntity latestLog = jobId == null ? null : latestLogByJobId.get(jobId);
+			if (latestLog == null) {
+				row.setLastExecutionStatus(SysJobLastExecutionStatus.UNKNOWN);
+				continue;
+			}
+			row.setLastExecutionTime(latestLog.getCreateTime());
+			row.setLastExecutionStatus(BooleanUtil.isTrue(latestLog.getStatus()) ? SysJobLastExecutionStatus.SUCCESS
+					: SysJobLastExecutionStatus.FAILED);
 		}
 	}
 
-	private void applyRuntimeSnapshot(SysJobPageResponse row, SysJobQuartzRuntimeSnapshot snapshot) {
-		SysJobQuartzRuntimeStatus status = snapshot.status();
-		row.setQuartzFireTime(snapshot.fireTime());
-		if (status != SysJobQuartzRuntimeStatus.IDLE) {
-			row.setQuartzRuntimeStatus(status);
-			return;
+	private Map<Long, LogJobEntity> loadLatestLogsByJobIds(List<Long> jobIds) {
+		if (CollUtil.isEmpty(jobIds)) {
+			return Map.of();
 		}
-
-		LogJobEntity latestLog = CollUtil
-			.getFirst(logJobMapper.selectRecentByJobNameAndGroup(row.getJobName(), row.getJobGroup(), 1));
-
-		if (latestLog != null && BooleanUtil.isFalse(latestLog.getStatus())) {
-			row.setQuartzRuntimeStatus(SysJobQuartzRuntimeStatus.FAILED);
-			row.setQuartzLastFailedTime(latestLog.getCreateTime());
-			return;
-		}
-
-		row.setQuartzRuntimeStatus(status);
+		return logJobMapper
+			.selectList(Wrappers.<LogJobEntity>lambdaQuery()
+				.in(LogJobEntity::getJobId, jobIds)
+				.orderByDesc(LogJobEntity::getCreateTime))
+			.stream()
+			.filter(log -> log.getJobId() != null)
+			.collect(Collectors.toMap(LogJobEntity::getJobId, Function.identity(), (first, ignored) -> first));
 	}
 
 }

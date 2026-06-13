@@ -35,11 +35,6 @@ public enum SysJobQuartzRuntimeStatus {
 	/**
 	 * Trigger 处于 ERROR
 	 */
-	ERROR,
-
-	/**
-	 * 最近一次执行失败且当前未在运行
-	 */
-	FAILED
+	ERROR
 
 }

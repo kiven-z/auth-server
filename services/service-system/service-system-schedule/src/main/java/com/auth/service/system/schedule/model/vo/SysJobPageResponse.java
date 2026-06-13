@@ -1,7 +1,9 @@
 package com.auth.service.system.schedule.model.vo;
 
 import com.auth.common.core.model.response.BaseResponse;
+import com.auth.service.system.schedule.model.enums.SysJobLastExecutionStatus;
 import com.auth.service.system.schedule.model.enums.SysJobQuartzRuntimeStatus;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -52,9 +54,11 @@ public class SysJobPageResponse extends BaseResponse implements Serializable {
 	@Schema(title = "是否并发(true=允许并发执行，false=禁止)")
 	private Boolean concurrent;
 
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "开始时间")
 	private LocalDateTime startTime;
 
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "结束时间")
 	private LocalDateTime endTime;
 
@@ -70,19 +74,26 @@ public class SysJobPageResponse extends BaseResponse implements Serializable {
 	@Schema(title = "备注")
 	private String remark;
 
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "上次触发时间")
 	private LocalDateTime previousFireTime;
 
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "下次触发时间")
 	private LocalDateTime nextFireTime;
 
-	@Schema(title = "Quartz 运行时状态")
+	@Schema(title = "Quartz 运行态")
 	private SysJobQuartzRuntimeStatus quartzRuntimeStatus;
 
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "Quartz 本次开始执行时间")
 	private LocalDateTime quartzFireTime;
 
-	@Schema(title = "Quartz 最近一次失败时间")
-	private LocalDateTime quartzLastFailedTime;
+	@Schema(title = "最近一次执行结果")
+	private SysJobLastExecutionStatus lastExecutionStatus;
+
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@Schema(title = "最近一次执行时间")
+	private LocalDateTime lastExecutionTime;
 
 }

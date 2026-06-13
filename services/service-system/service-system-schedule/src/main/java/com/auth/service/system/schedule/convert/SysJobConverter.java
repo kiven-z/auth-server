@@ -34,7 +34,8 @@ public interface SysJobConverter {
 	@Mapping(target = "nextFireTime", ignore = true)
 	@Mapping(target = "quartzRuntimeStatus", ignore = true)
 	@Mapping(target = "quartzFireTime", ignore = true)
-	@Mapping(target = "quartzLastFailedTime", ignore = true)
+	@Mapping(target = "lastExecutionStatus", ignore = true)
+	@Mapping(target = "lastExecutionTime", ignore = true)
 	SysJobPageResponse toPageResponse(SysJobPageRowPO po);
 
 	/**
