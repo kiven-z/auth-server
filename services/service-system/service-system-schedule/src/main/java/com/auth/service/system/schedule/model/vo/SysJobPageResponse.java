@@ -1,6 +1,7 @@
 package com.auth.service.system.schedule.model.vo;
 
 import com.auth.common.core.model.response.BaseResponse;
+import com.auth.service.system.schedule.model.enums.SysJobQuartzRuntimeStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -74,5 +75,14 @@ public class SysJobPageResponse extends BaseResponse implements Serializable {
 
 	@Schema(title = "下次触发时间")
 	private LocalDateTime nextFireTime;
+
+	@Schema(title = "Quartz 运行时状态")
+	private SysJobQuartzRuntimeStatus quartzRuntimeStatus;
+
+	@Schema(title = "Quartz 本次开始执行时间")
+	private LocalDateTime quartzFireTime;
+
+	@Schema(title = "Quartz 最近一次失败时间")
+	private LocalDateTime quartzLastFailedTime;
 
 }

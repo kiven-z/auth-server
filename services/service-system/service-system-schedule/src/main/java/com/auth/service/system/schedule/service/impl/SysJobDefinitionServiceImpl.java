@@ -16,6 +16,7 @@ import com.auth.service.system.schedule.model.query.SysJobQuery;
 import com.auth.service.system.schedule.model.vo.SysJobDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobPageResponse;
 import com.auth.service.system.schedule.service.SysJobDefinitionService;
+import com.auth.service.system.schedule.service.SysJobQuartzRuntimeQueryService;
 import com.auth.service.system.schedule.support.SysJobSchedulerManager;
 import com.auth.service.system.schedule.validation.SysJobDefinitionValidationManager;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -61,6 +62,8 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 
 	private final SysJobDefinitionValidationManager validationManager;
 
+	private final SysJobQuartzRuntimeQueryService sysJobQuartzRuntimeQueryService;
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -69,6 +72,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		IPage<SysJobPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
 		IPage<SysJobPageResponse> voPage = page.convert(SysJobConverter.INSTANCE::toPageResponse);
 
+		sysJobQuartzRuntimeQueryService.enrichPageRows(voPage.getRecords());
 		auditUserDisplayService.enrichAuditUsernames(voPage);
 		return PageResponse.of(voPage);
 	}
@@ -131,7 +135,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 	 */
 	@Override
 	public void update(SysJobUpdateForm form) {
-		SysJobEntity dbJob = getById(Long.parseLong(form.getId()));
+		SysJobEntity dbJob = getById(form.getId());
 		if (dbJob == null) {
 			throw new SystemBusinessException(DATA_NOT_EXIST);
 		}

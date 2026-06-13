@@ -10,6 +10,7 @@ import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
 import com.auth.service.system.schedule.model.vo.SysJobDetailVO;
 import com.auth.service.system.schedule.support.SysJobSchedulerManager;
 import com.auth.service.system.schedule.validation.SysJobDefinitionValidationManager;
+import com.auth.service.system.schedule.service.SysJobQuartzRuntimeQueryService;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,12 +57,15 @@ class SysJobDefinitionServiceImplTest {
 	@Mock
 	private SysJobDefinitionValidationManager validationManager;
 
+	@Mock
+	private SysJobQuartzRuntimeQueryService sysJobQuartzRuntimeQueryService;
+
 	private SysJobDefinitionServiceImpl sysJobDefinitionService;
 
 	@BeforeEach
 	void setUp() throws Exception {
 		sysJobDefinitionService = new SysJobDefinitionServiceImpl(quartzAdmin, auditUserDisplayService,
-				sysJobGroupMapper, jobLogMapper, validationManager);
+				sysJobGroupMapper, jobLogMapper, validationManager, sysJobQuartzRuntimeQueryService);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysJobDefinitionService, sysJobMapper);
