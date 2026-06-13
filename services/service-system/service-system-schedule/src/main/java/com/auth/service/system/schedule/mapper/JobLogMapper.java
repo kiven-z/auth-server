@@ -1,7 +1,11 @@
 package com.auth.service.system.schedule.mapper;
 
 import com.auth.service.system.schedule.model.entity.JobLogEntity;
+import com.auth.service.system.schedule.model.po.SysJobLogPageRowPO;
+import com.auth.service.system.schedule.model.query.SysJobLogQuery;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -14,6 +18,15 @@ import java.util.List;
  */
 @Mapper
 public interface JobLogMapper extends BaseMapper<JobLogEntity> {
+
+	/**
+	 * 分页查询日志
+	 * @param page 分页
+	 * @param query 条件
+	 * @return 分页结果
+	 */
+	IPage<SysJobLogPageRowPO> selectListByPage(@Param("page") Page<JobLogEntity> page,
+			@Param("query") SysJobLogQuery query);
 
 	/**
 	 * 按任务取最近若干条（按时间倒序），用于熔断判断

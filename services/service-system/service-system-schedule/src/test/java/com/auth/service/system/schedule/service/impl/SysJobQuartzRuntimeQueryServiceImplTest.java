@@ -26,8 +26,8 @@ import static org.mockito.Mockito.when;
  *
  * @author Bunny
  */
-@ExtendWith(MockitoExtension.class)
 @DisplayName("SysJobQuartzRuntimeQueryServiceImpl Quartz 运行时状态查询")
+@ExtendWith(MockitoExtension.class)
 class SysJobQuartzRuntimeQueryServiceImplTest {
 
 	@Mock
@@ -42,7 +42,7 @@ class SysJobQuartzRuntimeQueryServiceImplTest {
 	@Test
 	@DisplayName("分页补充：RUNNING 时写入 fireTime")
 	void enrichPageRowsSetsRunningSnapshot() {
-		SysJobPageResponse row = jobRow("demo", "G");
+		SysJobPageResponse row = jobRow();
 		LocalDateTime fireTime = LocalDateTime.of(2026, 6, 13, 10, 0);
 		JobKey jobKey = JobKey.jobKey("demo", "G");
 		when(quartzAdmin.batchResolveRuntimeSnapshots(List.of(jobKey)))
@@ -57,7 +57,7 @@ class SysJobQuartzRuntimeQueryServiceImplTest {
 	@Test
 	@DisplayName("分页补充：IDLE 且最近日志失败时标记 FAILED")
 	void enrichPageRowsMarksFailedWhenLatestLogFailed() {
-		SysJobPageResponse row = jobRow("demo", "G");
+		SysJobPageResponse row = jobRow();
 		JobKey jobKey = JobKey.jobKey("demo", "G");
 		when(quartzAdmin.batchResolveRuntimeSnapshots(List.of(jobKey)))
 			.thenReturn(Map.of(jobKey, SysJobQuartzRuntimeSnapshot.of(SysJobQuartzRuntimeStatus.IDLE, null)));
@@ -75,7 +75,7 @@ class SysJobQuartzRuntimeQueryServiceImplTest {
 	@Test
 	@DisplayName("分页补充：批量写入 quartzRuntimeStatus")
 	void enrichPageRowsSetsQuartzRuntimeStatus() {
-		SysJobPageResponse row = jobRow("demo", "G");
+		SysJobPageResponse row = jobRow();
 		JobKey jobKey = JobKey.jobKey("demo", "G");
 		when(quartzAdmin.batchResolveRuntimeSnapshots(List.of(jobKey)))
 			.thenReturn(Map.of(jobKey, SysJobQuartzRuntimeSnapshot.of(SysJobQuartzRuntimeStatus.PENDING, null)));
@@ -85,10 +85,10 @@ class SysJobQuartzRuntimeQueryServiceImplTest {
 		assertThat(row.getQuartzRuntimeStatus()).isEqualTo(SysJobQuartzRuntimeStatus.PENDING);
 	}
 
-	private SysJobPageResponse jobRow(String jobName, String jobGroup) {
+	private SysJobPageResponse jobRow() {
 		SysJobPageResponse row = new SysJobPageResponse();
-		row.setJobName(jobName);
-		row.setJobGroup(jobGroup);
+		row.setJobName("demo");
+		row.setJobGroup("G");
 		return row;
 	}
 

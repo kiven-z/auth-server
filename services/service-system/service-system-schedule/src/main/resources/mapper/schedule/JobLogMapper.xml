@@ -2,6 +2,62 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.auth.service.system.schedule.mapper.JobLogMapper">
 
+    <!-- 分页查询日志 -->
+    <select id="selectListByPage"
+            resultType="com.auth.service.system.schedule.model.po.SysJobLogPageRowPO">
+        SELECT id,
+        job_id,
+        job_name,
+        job_group,
+        invoke_target,
+        trigger_type,
+        job_message,
+        status,
+        elapsed_time,
+        create_time,
+        update_time,
+        create_user,
+        update_user
+        FROM log_job
+        <where>
+            <if test="query.jobId != null">
+                AND job_id =
+                #{query.jobId}
+            </if>
+            <if test="query.jobName != null and query.jobName != ''">
+                AND job_name LIKE CONCAT('%',
+                #{query.jobName},
+                '%'
+                )
+            </if>
+            <if test="query.jobGroup != null and query.jobGroup != ''">
+                AND job_group LIKE CONCAT('%',
+                #{query.jobGroup},
+                '%'
+                )
+            </if>
+            <if test="query.triggerType != null and query.triggerType != ''">
+                AND trigger_type =
+                #{query.triggerType}
+            </if>
+            <if test="query.invokeTarget != null and query.invokeTarget != ''">
+                AND invoke_target LIKE CONCAT('%',
+                #{query.invokeTarget},
+                '%'
+                )
+            </if>
+            <if test="query.status != null">
+                AND status =
+                #{query.status}
+            </if>
+            <if test="query.elapsedTime != null">
+                AND elapsed_time =
+                #{query.elapsedTime}
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
     <!-- 按任务取最近若干条 -->
     <select id="selectRecentByJobNameAndGroup"
             resultType="com.auth.service.system.schedule.model.entity.JobLogEntity">

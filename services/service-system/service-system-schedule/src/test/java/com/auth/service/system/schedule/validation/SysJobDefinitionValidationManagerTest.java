@@ -1,7 +1,6 @@
 package com.auth.service.system.schedule.validation;
 
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.schedule.handler.SysJobTaskHandlerRegistry;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import org.junit.jupiter.api.DisplayName;
@@ -26,12 +25,8 @@ class SysJobDefinitionValidationManagerTest {
 	void normalizeAndValidateRoutesToMatchedValidator() {
 		RecorderValidator beanValidator = new RecorderValidator(SysJobTaskType.BEAN_INVOKE);
 		RecorderValidator customValidator = new RecorderValidator(SysJobTaskType.CUSTOM_CLASS);
-		SysJobTaskHandlerRegistry registry = new SysJobTaskHandlerRegistry(
-				List.of(new com.auth.service.system.schedule.handler.BeanInvokeSysJobTaskHandler(),
-						new com.auth.service.system.schedule.handler.CustomClassSysJobTaskHandler(),
-						new com.auth.service.system.schedule.handler.MessageDispatchSysJobTaskHandler()));
 		SysJobDefinitionValidationManager manager = new SysJobDefinitionValidationManager(
-				List.of(beanValidator, customValidator), registry);
+				List.of(beanValidator, customValidator));
 
 		SysJobEntity job = new SysJobEntity();
 		job.setTaskType(SysJobTaskType.BEAN_INVOKE.name());
@@ -48,12 +43,8 @@ class SysJobDefinitionValidationManagerTest {
 	@Test
 	@DisplayName("normalizeAndValidate：缺少对应类型校验器时抛出 JOB_TASK_TYPE_UNSUPPORTED")
 	void normalizeAndValidateThrowsWhenValidatorMissing() {
-		SysJobTaskHandlerRegistry registry = new SysJobTaskHandlerRegistry(
-				List.of(new com.auth.service.system.schedule.handler.BeanInvokeSysJobTaskHandler(),
-						new com.auth.service.system.schedule.handler.CustomClassSysJobTaskHandler(),
-						new com.auth.service.system.schedule.handler.MessageDispatchSysJobTaskHandler()));
 		SysJobDefinitionValidationManager manager = new SysJobDefinitionValidationManager(
-				List.of(new RecorderValidator(SysJobTaskType.BEAN_INVOKE)), registry);
+				List.of(new RecorderValidator(SysJobTaskType.BEAN_INVOKE)));
 
 		SysJobEntity job = new SysJobEntity();
 		job.setTaskType(SysJobTaskType.CUSTOM_CLASS.name());

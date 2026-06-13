@@ -1,44 +1,42 @@
 package com.auth.service.system.schedule.model.enums;
 
-import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.schedule.task.mode.bean.BeanInvokeEntryJob;
+import com.auth.service.system.schedule.task.mode.custom.DelegatingCustomEntryJob;
+import com.auth.service.system.schedule.task.mode.message.MessageDispatchEntryJob;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_TASK_TYPE_UNSUPPORTED;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * {@link SysJobTaskType} 单元测试。
  *
  * @author Bunny
  */
-@DisplayName("SysJobTaskType 任务类型解析")
+@DisplayName("SysJobTaskType 任务类型枚举")
 class SysJobTaskTypeTest {
 
 	@Test
-	@DisplayName("显式传入 taskType 时优先使用 taskType")
-	void resolveReturnsExplicitTaskType() {
-		// 显式任务类型应直接解析。
-		SysJobTaskType result = SysJobTaskType.resolve("CUSTOM_CLASS");
-
-		assertThat(result).isEqualTo(SysJobTaskType.CUSTOM_CLASS);
+	@DisplayName("defaultHandlerCode：各类型返回约定编码")
+	void defaultHandlerCodeReturnsExpectedCodes() {
+		assertThat(SysJobTaskType.BEAN_INVOKE.defaultHandlerCode()).isEqualTo("beanInvokeHandler");
+		assertThat(SysJobTaskType.CUSTOM_CLASS.defaultHandlerCode()).isEqualTo("customClassHandler");
+		assertThat(SysJobTaskType.MESSAGE_DISPATCH.defaultHandlerCode()).isEqualTo("messageDispatchHandler");
 	}
 
 	@Test
-	@DisplayName("显式传入 MESSAGE_DISPATCH 时直接返回消息任务类型")
-	void resolveReturnsMessageDispatchTaskType() {
-		SysJobTaskType result = SysJobTaskType.resolve("MESSAGE_DISPATCH");
+	@DisplayName("resolveEntryJobClass：并发与禁止并发返回对应入口 Job")
+	void resolveEntryJobClassReturnsMatchedEntryJobs() {
+		assertThat(SysJobTaskType.BEAN_INVOKE.resolveEntryJobClass(true)).isEqualTo(BeanInvokeEntryJob.class);
+		assertThat(SysJobTaskType.BEAN_INVOKE.resolveEntryJobClass(false)).isEqualTo(BeanInvokeEntryJob.Disallow.class);
 
-		assertThat(result).isEqualTo(SysJobTaskType.MESSAGE_DISPATCH);
-	}
+		assertThat(SysJobTaskType.CUSTOM_CLASS.resolveEntryJobClass(true)).isEqualTo(DelegatingCustomEntryJob.class);
+		assertThat(SysJobTaskType.CUSTOM_CLASS.resolveEntryJobClass(false))
+			.isEqualTo(DelegatingCustomEntryJob.Disallow.class);
 
-	@Test
-	@DisplayName("taskType 非法时抛出 JOB_TASK_TYPE_UNSUPPORTED")
-	void resolveThrowsWhenTaskTypeInvalid() {
-		assertThatThrownBy(() -> SysJobTaskType.resolve("INVALID_TYPE")).isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(JOB_TASK_TYPE_UNSUPPORTED);
+		assertThat(SysJobTaskType.MESSAGE_DISPATCH.resolveEntryJobClass(true)).isEqualTo(MessageDispatchEntryJob.class);
+		assertThat(SysJobTaskType.MESSAGE_DISPATCH.resolveEntryJobClass(false))
+			.isEqualTo(MessageDispatchEntryJob.Disallow.class);
 	}
 
 }

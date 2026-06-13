@@ -1,14 +1,28 @@
 package com.auth.service.system.schedule.service.impl;
 
 import cn.hutool.core.exceptions.ExceptionUtil;
+import com.auth.common.data.model.PageResponse;
+import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.common.service.AuditUserDisplayService;
+import com.auth.service.system.schedule.convert.SysJobLogConverter;
 import com.auth.service.system.schedule.mapper.JobLogMapper;
 import com.auth.service.system.schedule.model.entity.JobLogEntity;
+import com.auth.service.system.schedule.model.po.SysJobLogPageRowPO;
+import com.auth.service.system.schedule.model.query.SysJobLogQuery;
+import com.auth.service.system.schedule.model.vo.SysJobLogDetailVO;
+import com.auth.service.system.schedule.model.vo.SysJobLogPageResponse;
 import com.auth.service.system.schedule.service.SysJobLogService;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobExecutionException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 
 /**
  * 任务执行日志实现
@@ -19,6 +33,39 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class SysJobLogServiceImpl extends ServiceImpl<JobLogMapper, JobLogEntity> implements SysJobLogService {
+
+	private final AuditUserDisplayService auditUserDisplayService;
+
+	public SysJobLogServiceImpl(AuditUserDisplayService auditUserDisplayService) {
+		this.auditUserDisplayService = auditUserDisplayService;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public PageResponse<SysJobLogPageResponse> getPage(Page<JobLogEntity> pageParams, SysJobLogQuery query) {
+		IPage<SysJobLogPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
+		IPage<SysJobLogPageResponse> voPage = page.convert(SysJobLogConverter.INSTANCE::toPageResponse);
+
+		auditUserDisplayService.enrichAuditUsernames(voPage);
+		return PageResponse.of(voPage);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public SysJobLogDetailVO getDetail(Long id) {
+		JobLogEntity jobLog = getById(id);
+		if (jobLog == null) {
+			throw new SystemBusinessException(DATA_NOT_EXIST);
+		}
+
+		SysJobLogDetailVO vo = SysJobLogConverter.INSTANCE.toDetailVo(jobLog);
+		auditUserDisplayService.enrichAuditUsernames(List.of(vo));
+		return vo;
+	}
 
 	/**
 	 * 组装公共字段；审计列由 MyBatis 填充（无登录用户时为 NULL）。

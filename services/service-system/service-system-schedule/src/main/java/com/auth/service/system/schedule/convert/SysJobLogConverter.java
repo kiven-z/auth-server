@@ -4,8 +4,8 @@ import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.common.mapstruct.qualifier.MapStructStringQualifiers;
 import com.auth.service.system.schedule.model.entity.JobLogEntity;
 import com.auth.service.system.schedule.model.po.SysJobLogPageRowPO;
-import com.auth.service.system.schedule.model.vo.LogJobDetailVO;
-import com.auth.service.system.schedule.model.vo.LogJobPageResponse;
+import com.auth.service.system.schedule.model.vo.SysJobLogDetailVO;
+import com.auth.service.system.schedule.model.vo.SysJobLogPageResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
@@ -27,7 +27,7 @@ public interface SysJobLogConverter {
 	 */
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
-	LogJobPageResponse toPageResponse(SysJobLogPageRowPO po);
+	SysJobLogPageResponse toPageResponse(SysJobLogPageRowPO po);
 
 	/**
 	 * 实体 → 详情 VO（实体 Boolean 与 API 语义一致，直接映射）
@@ -36,6 +36,6 @@ public interface SysJobLogConverter {
 	 */
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
-	LogJobDetailVO toDetailVo(JobLogEntity entity);
+	SysJobLogDetailVO toDetailVo(JobLogEntity entity);
 
 }

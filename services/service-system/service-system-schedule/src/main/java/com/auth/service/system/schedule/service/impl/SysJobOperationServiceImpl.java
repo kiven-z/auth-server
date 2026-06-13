@@ -42,21 +42,16 @@ public class SysJobOperationServiceImpl extends ServiceImpl<SysJobMapper, SysJob
 	@Override
 	@Async
 	public void syncAllFromDatabase() {
-		try {
-			List<SysJobEntity> allJobs = list();
-			for (SysJobEntity job : allJobs) {
-				try {
-					quartzAdmin.scheduleOrReplace(job);
-				}
-				catch (Exception e) {
-					log.error("启动同步定时任务失败: {} / {}", job.getJobGroup(), job.getJobName(), e);
-				}
+		List<SysJobEntity> allJobs = list();
+		for (SysJobEntity job : allJobs) {
+			try {
+				quartzAdmin.scheduleOrReplace(job);
 			}
-			log.info("定时任务已从数据库同步至 Quartz");
+			catch (Exception e) {
+				log.error("启动同步定时任务失败: {} / {}", job.getJobGroup(), job.getJobName(), e);
+			}
 		}
-		catch (Exception e) {
-			log.error("定时任务启动同步失败", e);
-		}
+		log.info("定时任务已从数据库同步至 Quartz");
 	}
 
 	/**

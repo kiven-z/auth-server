@@ -1,6 +1,5 @@
 package com.auth.service.system.schedule.support;
 
-import com.auth.service.system.schedule.handler.SysJobTaskHandlerRegistry;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.enums.SysJobQuartzRuntimeStatus;
 import org.junit.jupiter.api.DisplayName;
@@ -31,9 +30,6 @@ class SysJobSchedulerManagerTest {
 
 	@Mock
 	private Scheduler scheduler;
-
-	@Mock
-	private SysJobTaskHandlerRegistry taskHandlerRegistry;
 
 	@InjectMocks
 	private SysJobSchedulerManager sysJobSchedulerManager;
@@ -106,7 +102,7 @@ class SysJobSchedulerManagerTest {
 		sysJobSchedulerManager.pauseJob("missing", "DEFAULT");
 
 		verify(scheduler).checkExists(jobKey);
-		verifyNoInteractions(taskHandlerRegistry);
+		verify(scheduler, never()).pauseJob(any());
 	}
 
 	@Test

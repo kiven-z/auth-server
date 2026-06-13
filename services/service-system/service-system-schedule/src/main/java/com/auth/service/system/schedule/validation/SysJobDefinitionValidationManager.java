@@ -2,8 +2,6 @@ package com.auth.service.system.schedule.validation;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.schedule.handler.SysJobTaskHandler;
-import com.auth.service.system.schedule.handler.SysJobTaskHandlerRegistry;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import org.springframework.stereotype.Component;
@@ -24,15 +22,11 @@ public class SysJobDefinitionValidationManager {
 
 	private final Map<SysJobTaskType, SysJobTaskTypeDefinitionValidator> validators;
 
-	private final SysJobTaskHandlerRegistry taskHandlerRegistry;
-
-	public SysJobDefinitionValidationManager(List<SysJobTaskTypeDefinitionValidator> validatorList,
-			SysJobTaskHandlerRegistry taskHandlerRegistry) {
+	public SysJobDefinitionValidationManager(List<SysJobTaskTypeDefinitionValidator> validatorList) {
 		this.validators = new EnumMap<>(SysJobTaskType.class);
 		for (SysJobTaskTypeDefinitionValidator validator : validatorList) {
 			this.validators.put(validator.taskType(), validator);
 		}
-		this.taskHandlerRegistry = taskHandlerRegistry;
 	}
 
 	/**
@@ -43,9 +37,8 @@ public class SysJobDefinitionValidationManager {
 		SysJobTaskType resolvedTaskType = SysJobTaskType.resolve(job.getTaskType());
 		job.setTaskType(resolvedTaskType.name());
 
-		SysJobTaskHandler taskHandler = taskHandlerRegistry.resolve(job);
 		if (CharSequenceUtil.isBlank(job.getHandlerCode())) {
-			job.setHandlerCode(taskHandler.handlerCode());
+			job.setHandlerCode(resolvedTaskType.defaultHandlerCode());
 		}
 
 		SysJobTaskTypeDefinitionValidator validator = validators.get(resolvedTaskType);

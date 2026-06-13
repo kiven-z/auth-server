@@ -4,8 +4,6 @@ import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.auth.service.system.schedule.handler.SysJobTaskHandler;
-import com.auth.service.system.schedule.handler.SysJobTaskHandlerRegistry;
 import com.auth.service.system.schedule.model.constans.SysJobQuartzDataKeys;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.enums.SysJobQuartzRuntimeStatus;
@@ -34,11 +32,8 @@ public class SysJobSchedulerManager {
 
 	private final Scheduler scheduler;
 
-	private final SysJobTaskHandlerRegistry taskHandlerRegistry;
-
-	public SysJobSchedulerManager(@Lazy Scheduler scheduler, SysJobTaskHandlerRegistry taskHandlerRegistry) {
+	public SysJobSchedulerManager(@Lazy Scheduler scheduler) {
 		this.scheduler = scheduler;
-		this.taskHandlerRegistry = taskHandlerRegistry;
 	}
 
 	// =============== 静态工具方法 ===============
@@ -255,12 +250,11 @@ public class SysJobSchedulerManager {
 		String jobName = job.getJobName();
 		String jobGroup = job.getJobGroup();
 		Boolean jobConcurrent = job.getConcurrent();
-		SysJobTaskHandler handler = taskHandlerRegistry.resolve(job);
 		SysJobTaskType resolvedTaskType = SysJobTaskType.resolve(job.getTaskType());
 
 		// 判断是否并发
 		boolean concurrent = BooleanUtil.isTrue(jobConcurrent);
-		Class<? extends Job> jobClass = handler.resolveEntryJobClass(concurrent);
+		Class<? extends Job> jobClass = resolvedTaskType.resolveEntryJobClass(concurrent);
 
 		// 构建 JobDataMap
 		JobDataMap map = new JobDataMap();
@@ -271,7 +265,7 @@ public class SysJobSchedulerManager {
 		// 添加任务类
 		map.put(SysJobQuartzDataKeys.JOB_CLASS, job.getJobClass());
 		map.put(SysJobQuartzDataKeys.TASK_TYPE, resolvedTaskType.name());
-		map.put(SysJobQuartzDataKeys.HANDLER_CODE, handler.handlerCode());
+		map.put(SysJobQuartzDataKeys.HANDLER_CODE, resolvedTaskType.defaultHandlerCode());
 		map.put(SysJobQuartzDataKeys.PAYLOAD_JSON, job.getPayloadJson());
 		map.put(SysJobQuartzDataKeys.TRIGGER_TYPE, SysJobQuartzDataKeys.TRIGGER_TYPE_SCHEDULE);
 

@@ -102,6 +102,12 @@ public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJo
 		}
 
 		SysJobGroupEntity jobGroup = SysJobGroupConverter.INSTANCE.toEntity(form);
+		if (jobGroup.getIsSystem() == null) {
+			jobGroup.setIsSystem(false);
+		}
+		if (jobGroup.getOrderNum() == null) {
+			jobGroup.setOrderNum(0);
+		}
 		save(jobGroup);
 	}
 

@@ -3,8 +3,8 @@ package com.auth.service.system.admin.convert;
 import com.auth.service.system.schedule.convert.SysJobLogConverter;
 import com.auth.service.system.schedule.model.entity.JobLogEntity;
 import com.auth.service.system.schedule.model.po.SysJobLogPageRowPO;
-import com.auth.service.system.schedule.model.vo.LogJobDetailVO;
-import com.auth.service.system.schedule.model.vo.LogJobPageResponse;
+import com.auth.service.system.schedule.model.vo.SysJobLogDetailVO;
+import com.auth.service.system.schedule.model.vo.SysJobLogPageResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -34,7 +34,7 @@ class SysJobLogConverterTest {
 		po.setCreateUser(1L);
 		po.setUpdateUser(2L);
 
-		LogJobPageResponse vo = SysJobLogConverter.INSTANCE.toPageResponse(po);
+		SysJobLogPageResponse vo = SysJobLogConverter.INSTANCE.toPageResponse(po);
 
 		assertThat(vo.getId()).isEqualTo(10L);
 		assertThat(vo.getJobName()).isEqualTo("demoJob");
@@ -49,7 +49,7 @@ class SysJobLogConverterTest {
 		SysJobLogPageRowPO po = new SysJobLogPageRowPO();
 		po.setStatus(false);
 
-		LogJobPageResponse vo = SysJobLogConverter.INSTANCE.toPageResponse(po);
+		SysJobLogPageResponse vo = SysJobLogConverter.INSTANCE.toPageResponse(po);
 
 		assertThat(vo.getStatus()).isFalse();
 	}
@@ -62,7 +62,7 @@ class SysJobLogConverterTest {
 		entity.setJobName("demo");
 		entity.setStatus(Boolean.TRUE);
 
-		LogJobDetailVO vo = SysJobLogConverter.INSTANCE.toDetailVo(entity);
+		SysJobLogDetailVO vo = SysJobLogConverter.INSTANCE.toDetailVo(entity);
 
 		assertThat(vo.getStatus()).isTrue();
 	}
@@ -73,7 +73,7 @@ class SysJobLogConverterTest {
 		JobLogEntity entity = new JobLogEntity();
 		entity.setStatus(Boolean.FALSE);
 
-		LogJobDetailVO vo = SysJobLogConverter.INSTANCE.toDetailVo(entity);
+		SysJobLogDetailVO vo = SysJobLogConverter.INSTANCE.toDetailVo(entity);
 
 		assertThat(vo.getStatus()).isFalse();
 	}
