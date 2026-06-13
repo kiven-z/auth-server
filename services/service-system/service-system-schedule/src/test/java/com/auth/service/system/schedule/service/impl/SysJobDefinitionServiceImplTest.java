@@ -7,6 +7,7 @@ import com.auth.service.system.schedule.mapper.SysJobGroupMapper;
 import com.auth.service.system.schedule.mapper.SysJobMapper;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
+import com.auth.service.system.schedule.model.form.SysJobStatusForm;
 import com.auth.service.system.schedule.model.form.SysJobUpdateForm;
 import com.auth.service.system.schedule.model.vo.SysJobDetailVO;
 import com.auth.service.system.schedule.service.SysJobQuartzRuntimeQueryService;
@@ -22,6 +23,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.quartz.SchedulerException;
+
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,6 +33,7 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
 /**
@@ -142,13 +146,50 @@ class SysJobDefinitionServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("详情：任务不存在时抛出 DATA_NOT_EXIST")
-	void getDetailThrowsWhenMissing() {
+	@DisplayName("立即执行：任务不存在时抛出 DATA_NOT_EXIST")
+	void runOnceThrowsWhenMissing() {
 		when(sysJobMapper.selectById(99L)).thenReturn(null);
 
-		assertThatThrownBy(() -> sysJobDefinitionService.getDetail(99L)).isInstanceOf(SysJobException.class)
+		assertThatThrownBy(() -> sysJobDefinitionService.runOnce(99L)).isInstanceOf(SysJobException.class)
 			.extracting(ex -> ((SysJobException) ex).getResultCode())
 			.isEqualTo(DATA_NOT_EXIST);
+	}
+
+	@Test
+	@DisplayName("立即执行：存在时 ensureJobDetail 并 trigger")
+	void runOnceTriggersWhenExists() throws SchedulerException {
+		SysJobEntity entity = new SysJobEntity();
+		entity.setId(5L);
+		entity.setJobName("demoJob");
+		entity.setJobGroup("DEFAULT");
+		when(sysJobMapper.selectById(5L)).thenReturn(entity);
+
+		sysJobDefinitionService.runOnce(5L);
+
+		verify(quartzAdmin).ensureJobDetail(entity);
+		verify(quartzAdmin).triggerJob("demoJob", "DEFAULT");
+	}
+
+	@Test
+	@DisplayName("批量启停：跳过不存在的任务并同步 Quartz")
+	void batchUpdateStatusSkipsMissingAndSyncsQuartz() throws SchedulerException {
+		SysJobEntity entity = new SysJobEntity();
+		entity.setId(1L);
+		entity.setJobName("demoJob");
+		entity.setJobGroup("DEFAULT");
+		entity.setStatus(true);
+		when(sysJobMapper.selectById(1L)).thenReturn(entity);
+		when(sysJobMapper.selectById(2L)).thenReturn(null);
+		when(sysJobMapper.updateById(any(SysJobEntity.class))).thenReturn(1);
+
+		SysJobStatusForm form = new SysJobStatusForm();
+		form.setIds(List.of(1L, 2L));
+		form.setStatus(false);
+
+		sysJobDefinitionService.batchUpdateStatus(form);
+
+		verify(sysJobMapper).updateById(argThat((SysJobEntity job) -> Boolean.FALSE.equals(job.getStatus())));
+		verify(quartzAdmin).scheduleOrReplace(argThat(job -> job.getId().equals(1L)));
 	}
 
 }

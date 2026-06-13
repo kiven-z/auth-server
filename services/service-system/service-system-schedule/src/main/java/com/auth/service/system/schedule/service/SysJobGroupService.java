@@ -59,4 +59,16 @@ public interface SysJobGroupService {
 	 */
 	void deleteById(Long id);
 
+	/**
+	 * 暂停分组下全部任务（库状态 + Quartz）
+	 * @param groupCode 分组编码
+	 */
+	void pauseAllInGroup(String groupCode);
+
+	/**
+	 * 恢复分组下全部任务（库状态 + Quartz）
+	 * @param groupCode 分组编码
+	 */
+	void resumeAllInGroup(String groupCode);
+
 }

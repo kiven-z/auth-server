@@ -1,10 +1,11 @@
 package com.auth.service.system.schedule.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.common.data.model.PageResponse;
-import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.schedule.convert.SysJobGroupConverter;
+import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.mapper.SysJobGroupMapper;
 import com.auth.service.system.schedule.mapper.SysJobMapper;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
@@ -16,13 +17,17 @@ import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
 import com.auth.service.system.schedule.model.vo.SysJobGroupDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobGroupPageResponse;
 import com.auth.service.system.schedule.service.SysJobGroupService;
+import com.auth.service.system.schedule.support.SysJobSchedulerManager;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.extern.slf4j.Slf4j;
+import org.quartz.SchedulerException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
@@ -33,18 +38,23 @@ import static com.auth.service.system.schedule.exception.ScheduleResultCode.*;
  *
  * @author Bunny
  */
+@Slf4j
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJobGroupEntity>
 		implements SysJobGroupService {
 
-	private final AuditUserDisplayService auditUserDisplayService;
-
 	private final SysJobMapper sysJobMapper;
 
-	public SysJobGroupServiceImpl(AuditUserDisplayService auditUserDisplayService, SysJobMapper sysJobMapper) {
+	private final AuditUserDisplayService auditUserDisplayService;
+
+	private final SysJobSchedulerManager sysJobSchedulerManager;
+
+	public SysJobGroupServiceImpl(AuditUserDisplayService auditUserDisplayService, SysJobMapper sysJobMapper,
+			SysJobSchedulerManager sysJobSchedulerManager) {
 		this.auditUserDisplayService = auditUserDisplayService;
 		this.sysJobMapper = sysJobMapper;
+		this.sysJobSchedulerManager = sysJobSchedulerManager;
 	}
 
 	/**
@@ -53,10 +63,9 @@ public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJo
 	@Override
 	public PageResponse<SysJobGroupPageResponse> getPage(Page<SysJobGroupEntity> pageParams, SysJobGroupQuery query) {
 		IPage<SysJobGroupPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
-		// PO 转 VO
 		IPage<SysJobGroupPageResponse> voPage = page.convert(SysJobGroupConverter.INSTANCE::toPageResponse);
-		auditUserDisplayService.enrichAuditUsernames(voPage);
 
+		auditUserDisplayService.enrichAuditUsernames(voPage);
 		return PageResponse.of(voPage);
 	}
 
@@ -145,6 +154,56 @@ public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJo
 		}
 
 		removeById(id);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void pauseAllInGroup(String groupCode) {
+		try {
+			List<SysJobEntity> jobs = sysJobMapper
+				.selectList(Wrappers.lambdaQuery(SysJobEntity.class).eq(SysJobEntity::getJobGroup, groupCode));
+			List<Long> ids = jobs.stream().map(SysJobEntity::getId).toList();
+			if (CollUtil.isNotEmpty(ids)) {
+				sysJobMapper.update(null,
+						Wrappers.lambdaUpdate(SysJobEntity.class)
+							.set(SysJobEntity::getStatus, false)
+							.set(SysJobEntity::getUpdateTime, LocalDateTime.now())
+							.in(SysJobEntity::getId, ids));
+			}
+			sysJobSchedulerManager.pauseGroup(groupCode);
+		}
+		catch (SchedulerException ex) {
+			log.warn("分组暂停失败 groupCode={} : {}", groupCode, ex.getMessage());
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void resumeAllInGroup(String groupCode) {
+		List<SysJobEntity> jobs = sysJobMapper
+			.selectList(Wrappers.lambdaQuery(SysJobEntity.class).eq(SysJobEntity::getJobGroup, groupCode));
+		if (jobs.isEmpty()) {
+			return;
+		}
+		List<Long> ids = jobs.stream().map(SysJobEntity::getId).toList();
+		sysJobMapper.update(null,
+				Wrappers.lambdaUpdate(SysJobEntity.class)
+					.set(SysJobEntity::getStatus, true)
+					.set(SysJobEntity::getUpdateTime, LocalDateTime.now())
+					.in(SysJobEntity::getId, ids));
+		for (SysJobEntity job : jobs) {
+			job.setStatus(true);
+			try {
+				sysJobSchedulerManager.scheduleOrReplace(job);
+			}
+			catch (SchedulerException ex) {
+				log.warn("分组恢复失败 {} / {} : {}", job.getJobGroup(), job.getJobName(), ex.getMessage());
+			}
+		}
 	}
 
 }

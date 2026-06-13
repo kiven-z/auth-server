@@ -1,6 +1,5 @@
 package com.auth.service.system.schedule.runner;
 
-import com.auth.service.system.schedule.service.SysJobOperationService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,7 +25,7 @@ import static org.mockito.Mockito.verify;
 class SysJobBootstrapRunnerTest {
 
 	@Mock
-	private SysJobOperationService sysJobOperationService;
+	private SysJobBootstrapSynchronizer sysJobBootstrapSynchronizer;
 
 	@InjectMocks
 	private SysJobBootstrapRunner sysJobBootstrapRunner;
@@ -40,7 +39,7 @@ class SysJobBootstrapRunnerTest {
 
 		sysJobBootstrapRunner.onApplicationReady(event);
 
-		verify(sysJobOperationService).syncAllFromDatabase();
+		verify(sysJobBootstrapSynchronizer).syncFromDatabase();
 	}
 
 }

@@ -6,6 +6,7 @@ import com.auth.common.web.valid.group.CreateGroup;
 import com.auth.common.web.valid.group.UpdateGroup;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.form.SysJobCreateForm;
+import com.auth.service.system.schedule.model.form.SysJobStatusForm;
 import com.auth.service.system.schedule.model.form.SysJobUpdateForm;
 import com.auth.service.system.schedule.model.query.SysJobQuery;
 import com.auth.service.system.schedule.model.vo.SysJobDetailVO;
@@ -21,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.*;
 
 /**
- * 定时任务与 Quartz 操作接口
+ * 定时任务接口（定义 CRUD + 启停与立即执行）
  *
  * @author Bunny
  */
@@ -80,6 +81,22 @@ public class SysJobController {
 		sysJobDefinitionService.deleteById(id);
 
 		return Result.success(null, DELETE_SUCCESS.getMessage());
+	}
+
+	@Operation(summary = "批量启停任务")
+	@PreAuthorize("@auth.decide('sysJob:update')")
+	@PutMapping("status")
+	public Result<String> batchStatus(@Validated @RequestBody SysJobStatusForm form) {
+		sysJobDefinitionService.batchUpdateStatus(form);
+		return Result.success(null, MODIFY_SUCCESS.getMessage());
+	}
+
+	@Operation(summary = "立即执行一次")
+	@PreAuthorize("@auth.decide('sysJob:update')")
+	@PostMapping("{id}/run")
+	public Result<String> runOnce(@PathVariable("id") Long id) {
+		sysJobDefinitionService.runOnce(id);
+		return Result.success(null, MODIFY_SUCCESS.getMessage());
 	}
 
 }

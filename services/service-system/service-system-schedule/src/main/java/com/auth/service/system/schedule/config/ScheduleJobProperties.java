@@ -26,4 +26,9 @@ public class ScheduleJobProperties {
 	 */
 	private boolean successEnabled = false;
 
+	/**
+	 * 启动时从 sys_job 同步至 Quartz 的分页大小
+	 */
+	private int bootstrapBatchSize = 100;
+
 }

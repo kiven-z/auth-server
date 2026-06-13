@@ -4,11 +4,13 @@ import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.schedule.mapper.SysJobGroupMapper;
 import com.auth.service.system.schedule.mapper.SysJobMapper;
+import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
 import com.auth.service.system.schedule.model.form.SysJobGroupForm;
 import com.auth.service.system.schedule.model.po.SysJobGroupPageRowPO;
 import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
 import com.auth.service.system.schedule.model.vo.SysJobGroupDetailVO;
+import com.auth.service.system.schedule.support.SysJobSchedulerManager;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -18,6 +20,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import org.quartz.SchedulerException;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -49,6 +53,9 @@ class SysJobGroupServiceImplTest {
 	@Mock
 	private AuditUserDisplayService auditUserDisplayService;
 
+	@Mock
+	private SysJobSchedulerManager sysJobSchedulerManager;
+
 	private SysJobGroupServiceImpl sysJobGroupService;
 
 	/**
@@ -64,7 +71,7 @@ class SysJobGroupServiceImplTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		sysJobGroupService = new SysJobGroupServiceImpl(auditUserDisplayService, sysJobMapper);
+		sysJobGroupService = new SysJobGroupServiceImpl(auditUserDisplayService, sysJobMapper, sysJobSchedulerManager);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysJobGroupService, sysJobGroupMapper);
@@ -213,6 +220,37 @@ class SysJobGroupServiceImplTest {
 		sysJobGroupService.deleteById(3L);
 
 		verify(sysJobGroupMapper).deleteById(3L);
+	}
+
+	@Test
+	@DisplayName("分组暂停：更新库状态并 pauseGroup")
+	void pauseAllInGroupUpdatesDbAndPausesQuartz() throws SchedulerException {
+		SysJobEntity job = new SysJobEntity();
+		job.setId(1L);
+		job.setJobGroup("G1");
+		when(sysJobMapper.selectList(any())).thenReturn(List.of(job));
+		when(sysJobMapper.update(any(), any())).thenReturn(1);
+
+		sysJobGroupService.pauseAllInGroup("G1");
+
+		verify(sysJobMapper).update(any(), any());
+		verify(sysJobSchedulerManager).pauseGroup("G1");
+	}
+
+	@Test
+	@DisplayName("分组恢复：更新库状态并 scheduleOrReplace")
+	void resumeAllInGroupUpdatesDbAndSchedulesJobs() throws SchedulerException {
+		SysJobEntity job = new SysJobEntity();
+		job.setId(1L);
+		job.setJobName("demoJob");
+		job.setJobGroup("G1");
+		when(sysJobMapper.selectList(any())).thenReturn(List.of(job));
+		when(sysJobMapper.update(any(), any())).thenReturn(1);
+
+		sysJobGroupService.resumeAllInGroup("G1");
+
+		verify(sysJobMapper).update(any(), any());
+		verify(sysJobSchedulerManager).scheduleOrReplace(job);
 	}
 
 }

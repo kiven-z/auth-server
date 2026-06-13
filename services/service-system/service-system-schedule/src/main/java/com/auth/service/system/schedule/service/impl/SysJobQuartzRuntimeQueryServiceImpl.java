@@ -1,5 +1,7 @@
 package com.auth.service.system.schedule.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.system.schedule.mapper.LogJobMapper;
 import com.auth.service.system.schedule.model.entity.LogJobEntity;
 import com.auth.service.system.schedule.model.enums.SysJobQuartzRuntimeStatus;
@@ -11,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.quartz.JobKey;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -33,14 +34,13 @@ public class SysJobQuartzRuntimeQueryServiceImpl implements SysJobQuartzRuntimeQ
 	 */
 	@Override
 	public void enrichPageRows(List<SysJobPageResponse> rows) {
-		if (rows == null || rows.isEmpty()) {
+		if (CollUtil.isEmpty(rows)) {
 			return;
 		}
-		List<JobKey> jobKeys = new ArrayList<>(rows.size());
-		for (SysJobPageResponse row : rows) {
-			jobKeys.add(JobKey.jobKey(row.getJobName(), row.getJobGroup()));
-		}
+
+		List<JobKey> jobKeys = rows.stream().map(row -> JobKey.jobKey(row.getJobName(), row.getJobGroup())).toList();
 		Map<JobKey, SysJobQuartzRuntimeSnapshot> snapshots = quartzAdmin.batchResolveRuntimeSnapshots(jobKeys);
+
 		for (SysJobPageResponse row : rows) {
 			JobKey jobKey = JobKey.jobKey(row.getJobName(), row.getJobGroup());
 			SysJobQuartzRuntimeSnapshot snapshot = snapshots.get(jobKey);
@@ -52,39 +52,23 @@ public class SysJobQuartzRuntimeQueryServiceImpl implements SysJobQuartzRuntimeQ
 	}
 
 	private void applyRuntimeSnapshot(SysJobPageResponse row, SysJobQuartzRuntimeSnapshot snapshot) {
-		String jobName = row.getJobName();
-		String jobGroup = row.getJobGroup();
-		SysJobQuartzRuntimeStatus status = applyFailedIfIdle(jobName, jobGroup, snapshot.status());
-		row.setQuartzRuntimeStatus(status);
+		SysJobQuartzRuntimeStatus status = snapshot.status();
 		row.setQuartzFireTime(snapshot.fireTime());
-		if (status == SysJobQuartzRuntimeStatus.FAILED) {
-			row.setQuartzLastFailedTime(resolveLastFailedTime(jobName, jobGroup));
-		}
-	}
-
-	private SysJobQuartzRuntimeStatus applyFailedIfIdle(String jobName, String jobGroup,
-			SysJobQuartzRuntimeStatus status) {
 		if (status != SysJobQuartzRuntimeStatus.IDLE) {
-			return status;
+			row.setQuartzRuntimeStatus(status);
+			return;
 		}
-		List<LogJobEntity> recentLogs = logJobMapper.selectRecentByJobNameAndGroup(jobName, jobGroup, 1);
-		if (recentLogs.isEmpty()) {
-			return status;
-		}
-		LogJobEntity latest = recentLogs.get(0);
-		if (Boolean.FALSE.equals(latest.getStatus())) {
-			return SysJobQuartzRuntimeStatus.FAILED;
-		}
-		return status;
-	}
 
-	private java.time.LocalDateTime resolveLastFailedTime(String jobName, String jobGroup) {
-		List<LogJobEntity> recentLogs = logJobMapper.selectRecentByJobNameAndGroup(jobName, jobGroup, 1);
-		if (recentLogs.isEmpty()) {
-			return null;
+		LogJobEntity latestLog = CollUtil
+			.getFirst(logJobMapper.selectRecentByJobNameAndGroup(row.getJobName(), row.getJobGroup(), 1));
+
+		if (latestLog != null && BooleanUtil.isFalse(latestLog.getStatus())) {
+			row.setQuartzRuntimeStatus(SysJobQuartzRuntimeStatus.FAILED);
+			row.setQuartzLastFailedTime(latestLog.getCreateTime());
+			return;
 		}
-		LogJobEntity latest = recentLogs.get(0);
-		return Boolean.FALSE.equals(latest.getStatus()) ? latest.getCreateTime() : null;
+
+		row.setQuartzRuntimeStatus(status);
 	}
 
 }

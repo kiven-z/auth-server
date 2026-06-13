@@ -10,6 +10,7 @@ import com.auth.service.system.schedule.mapper.SysJobMapper;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
 import com.auth.service.system.schedule.model.form.SysJobCreateForm;
+import com.auth.service.system.schedule.model.form.SysJobStatusForm;
 import com.auth.service.system.schedule.model.form.SysJobUpdateForm;
 import com.auth.service.system.schedule.model.po.SysJobPageRowPO;
 import com.auth.service.system.schedule.model.query.SysJobQuery;
@@ -177,6 +178,46 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		}
 		catch (Exception exception) {
 			log.error("级联物理删除日志失败", exception);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void batchUpdateStatus(SysJobStatusForm form) {
+		for (Long id : form.getIds()) {
+			SysJobEntity dbJob = getById(id);
+			if (dbJob == null) {
+				continue;
+			}
+			dbJob.setStatus(form.getStatus());
+			updateById(dbJob);
+			try {
+				quartzAdmin.scheduleOrReplace(dbJob);
+			}
+			catch (SchedulerException ex) {
+				log.warn("批量更新任务状态同步 Quartz 失败 id={} : {}", id, ex.getMessage());
+			}
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void runOnce(Long id) {
+		SysJobEntity dbJob = getById(id);
+		if (dbJob == null) {
+			throw new SysJobException(DATA_NOT_EXIST);
+		}
+		try {
+			quartzAdmin.ensureJobDetail(dbJob);
+			quartzAdmin.triggerJob(dbJob.getJobName(), dbJob.getJobGroup());
+		}
+		catch (SchedulerException ex) {
+			log.error("立即执行失败", ex);
+			throw new SysJobException(JOB_QUARTZ_OPERATION_FAILED, "runOnce", ex.getMessage());
 		}
 	}
 
