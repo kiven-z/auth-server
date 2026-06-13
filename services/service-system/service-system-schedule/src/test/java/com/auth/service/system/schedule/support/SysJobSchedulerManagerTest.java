@@ -3,20 +3,13 @@ package com.auth.service.system.schedule.support;
 import com.auth.service.system.schedule.handler.SysJobTaskHandlerRegistry;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.enums.SysJobQuartzRuntimeStatus;
-import com.auth.service.system.schedule.support.SysJobQuartzRuntimeSnapshot;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.quartz.JobDetail;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobKey;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
-import org.quartz.Trigger;
-import org.quartz.TriggerKey;
+import org.quartz.*;
 
 import java.util.Collections;
 import java.util.Date;
@@ -24,19 +17,15 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link SysJobSchedulerManager} 单元测试。
  *
  * @author Bunny
  */
-@ExtendWith(MockitoExtension.class)
 @DisplayName("SysJobSchedulerManager Quartz 调度管理")
+@ExtendWith(MockitoExtension.class)
 class SysJobSchedulerManagerTest {
 
 	@Mock

@@ -99,6 +99,30 @@ class SysJobConverterTest {
 	}
 
 	@Test
+	@DisplayName("更新表单 startTime/endTime 为 null 时清空实体原值")
+	void updateEntity_clearsScheduleWindowWhenNull() {
+		LocalDateTime oldStart = LocalDateTime.of(2026, 6, 1, 8, 0);
+		LocalDateTime oldEnd = LocalDateTime.of(2026, 12, 31, 18, 0);
+		SysJobUpdateForm form = new SysJobUpdateForm();
+		form.setCronExpression("0 0 1 * * ?");
+		form.setMisfirePolicy(2);
+		form.setConcurrent(true);
+		form.setStatus(true);
+		form.setTaskType("BEAN_INVOKE");
+		form.setStartTime(null);
+		form.setEndTime(null);
+
+		SysJobEntity entity = new SysJobEntity();
+		entity.setStartTime(oldStart);
+		entity.setEndTime(oldEnd);
+
+		SysJobConverter.INSTANCE.updateEntity(form, entity);
+
+		assertThat(entity.getStartTime()).isNull();
+		assertThat(entity.getEndTime()).isNull();
+	}
+
+	@Test
 	@DisplayName("更新表单 invokeTarget 非 null 时覆盖实体")
 	void updateEntity_overwritesInvokeTargetWhenPresent() {
 		SysJobUpdateForm form = new SysJobUpdateForm();

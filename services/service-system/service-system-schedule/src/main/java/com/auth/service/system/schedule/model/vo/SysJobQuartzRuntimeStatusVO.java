@@ -4,6 +4,7 @@ import com.auth.service.system.schedule.model.enums.SysJobQuartzRuntimeStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -17,6 +18,7 @@ import java.time.LocalDateTime;
 @Schema(name = "SysJobQuartzRuntimeStatusVO", title = "Quartz 任务运行时状态")
 @Getter
 @Setter
+@ToString
 public class SysJobQuartzRuntimeStatusVO implements Serializable {
 
 	@Serial

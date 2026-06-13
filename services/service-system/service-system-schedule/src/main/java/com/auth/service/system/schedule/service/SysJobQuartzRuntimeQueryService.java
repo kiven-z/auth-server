@@ -1,8 +1,7 @@
 package com.auth.service.system.schedule.service;
 
-import com.auth.service.system.schedule.model.enums.SysJobQuartzRuntimeStatus;
-import com.auth.service.system.schedule.model.vo.SysJobQuartzRuntimeStatusVO;
 import com.auth.service.system.schedule.model.vo.SysJobPageResponse;
+import com.auth.service.system.schedule.model.vo.SysJobQuartzRuntimeStatusVO;
 
 import java.util.List;
 
@@ -26,14 +25,5 @@ public interface SysJobQuartzRuntimeQueryService {
 	 * @param rows 分页行
 	 */
 	void enrichPageRows(List<SysJobPageResponse> rows);
-
-	/**
-	 * 是否处于忙碌态（正在执行或排队）
-	 * @param status Quartz 运行时状态
-	 * @return 是否忙碌
-	 */
-	static boolean isBusy(SysJobQuartzRuntimeStatus status) {
-		return status == SysJobQuartzRuntimeStatus.RUNNING || status == SysJobQuartzRuntimeStatus.PENDING;
-	}
 
 }

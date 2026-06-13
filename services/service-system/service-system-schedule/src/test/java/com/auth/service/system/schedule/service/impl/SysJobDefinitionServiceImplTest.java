@@ -7,6 +7,7 @@ import com.auth.service.system.schedule.mapper.SysJobGroupMapper;
 import com.auth.service.system.schedule.mapper.SysJobMapper;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
+import com.auth.service.system.schedule.model.form.SysJobUpdateForm;
 import com.auth.service.system.schedule.model.vo.SysJobDetailVO;
 import com.auth.service.system.schedule.support.SysJobSchedulerManager;
 import com.auth.service.system.schedule.validation.SysJobDefinitionValidationManager;
@@ -17,16 +18,19 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Field;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -94,6 +98,49 @@ class SysJobDefinitionServiceImplTest {
 		assertThat(detail.getJobGroup()).isEqualTo("DEFAULT");
 		assertThat(detail.getJobGroupName()).isEqualTo("默认分组");
 		verify(auditUserDisplayService).enrichAuditUsernames(any(List.class));
+	}
+
+	@Test
+	@DisplayName("更新：清空开始/结束时间后持久化实体对应字段为 null")
+	void updateClearsScheduleWindowWhenFormTimesAreNull() throws Exception {
+		LocalDateTime oldStart = LocalDateTime.of(2026, 6, 1, 8, 0);
+		LocalDateTime oldEnd = LocalDateTime.of(2026, 12, 31, 18, 0);
+		SysJobEntity dbJob = new SysJobEntity();
+		dbJob.setId(10L);
+		dbJob.setJobName("demoJob");
+		dbJob.setJobGroup("DEFAULT");
+		dbJob.setTaskType("BEAN_INVOKE");
+		dbJob.setCronExpression("0 0 12 * * ?");
+		dbJob.setMisfirePolicy(2);
+		dbJob.setConcurrent(false);
+		dbJob.setStatus(true);
+		dbJob.setStartTime(oldStart);
+		dbJob.setEndTime(oldEnd);
+		when(sysJobMapper.selectById("10")).thenReturn(dbJob);
+		doAnswer(invocation -> {
+			SysJobEntity entity = invocation.getArgument(0);
+			entity.setVersion(1L);
+			return 1;
+		}).when(sysJobMapper).updateById(any(SysJobEntity.class));
+
+		SysJobUpdateForm form = new SysJobUpdateForm();
+		form.setId("10");
+		form.setCronExpression("0 0 1 * * ?");
+		form.setMisfirePolicy(2);
+		form.setConcurrent(true);
+		form.setStatus(true);
+		form.setTaskType("BEAN_INVOKE");
+		form.setStartTime(null);
+		form.setEndTime(null);
+
+		sysJobDefinitionService.update(form);
+
+		ArgumentCaptor<SysJobEntity> entityCaptor = ArgumentCaptor.forClass(SysJobEntity.class);
+		verify(sysJobMapper).updateById(entityCaptor.capture());
+		SysJobEntity persisted = entityCaptor.getValue();
+		assertThat(persisted.getStartTime()).isNull();
+		assertThat(persisted.getEndTime()).isNull();
+		verify(quartzAdmin).scheduleOrReplace(persisted);
 	}
 
 	@Test

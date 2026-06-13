@@ -1,13 +1,12 @@
 package com.auth.service.system.schedule.model.entity;
 
-import java.time.LocalDateTime;
-
 import com.auth.common.data.model.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.time.LocalDateTime;
 
 /**
  * 定时任务业务主表（与 QRTZ_* 中 JobKey 一致）
