@@ -7,7 +7,7 @@ import lombok.Getter;
  * 定时任务 / Quartz / Job 配置结果码
  *
  * <p>
- * 号段：212–218、220、224–245（219、221–223、229–237 已释放）
+ * 号段：212–218、220、224–246（219、221–223、229–237 已释放）
  * </p>
  *
  * @author Bunny
@@ -118,7 +118,13 @@ public enum ScheduleResultCode implements SystemResultCode {
 	 * payload_json 版本不支持
 	 */
 	JOB_PAYLOAD_VERSION_UNSUPPORTED(422, 245, "JOB_PAYLOAD_VERSION_UNSUPPORTED",
-			"system.job.payload.version.unsupported");
+			"system.job.payload.version.unsupported"),
+
+	/**
+	 * 熔断后暂停 Quartz 任务失败（{0}=jobGroup，{1}=jobName）
+	 */
+	JOB_CIRCUIT_BREAKER_PAUSE_FAILED(500, 246, "JOB_CIRCUIT_BREAKER_PAUSE_FAILED",
+			"system.job.circuit_breaker.pause_failed");
 
 	private final int httpStatus;
 

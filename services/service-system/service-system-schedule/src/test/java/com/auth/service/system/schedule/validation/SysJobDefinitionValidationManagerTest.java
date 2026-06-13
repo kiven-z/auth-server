@@ -1,6 +1,6 @@
 package com.auth.service.system.schedule.validation;
 
-import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import org.junit.jupiter.api.DisplayName;
@@ -49,8 +49,8 @@ class SysJobDefinitionValidationManagerTest {
 		SysJobEntity job = new SysJobEntity();
 		job.setTaskType(SysJobTaskType.CUSTOM_CLASS.name());
 
-		assertThatThrownBy(() -> manager.normalizeAndValidate(job)).isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+		assertThatThrownBy(() -> manager.normalizeAndValidate(job)).isInstanceOf(SysJobException.class)
+			.extracting(ex -> ((SysJobException) ex).getResultCode())
 			.isEqualTo(JOB_TASK_TYPE_UNSUPPORTED);
 	}
 

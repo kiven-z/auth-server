@@ -1,6 +1,6 @@
 package com.auth.service.system.schedule.service.impl;
 
-import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.mapper.SysJobMapper;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.form.SysJobStatusForm;
@@ -87,7 +87,7 @@ public class SysJobOperationServiceImpl extends ServiceImpl<SysJobMapper, SysJob
 	public void runOnce(Long id) {
 		SysJobEntity dbJob = getById(id);
 		if (dbJob == null) {
-			throw new SystemBusinessException(DATA_NOT_EXIST);
+			throw new SysJobException(DATA_NOT_EXIST);
 		}
 		try {
 			quartzAdmin.ensureJobDetail(dbJob);
@@ -95,7 +95,7 @@ public class SysJobOperationServiceImpl extends ServiceImpl<SysJobMapper, SysJob
 		}
 		catch (SchedulerException ex) {
 			log.error("立即执行失败", ex);
-			throw new SystemBusinessException(JOB_QUARTZ_OPERATION_FAILED, "runOnce", ex.getMessage());
+			throw new SysJobException(JOB_QUARTZ_OPERATION_FAILED, "runOnce", ex.getMessage());
 		}
 	}
 

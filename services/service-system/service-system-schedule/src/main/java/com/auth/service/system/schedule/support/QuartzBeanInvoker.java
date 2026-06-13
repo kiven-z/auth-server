@@ -1,7 +1,7 @@
 package com.auth.service.system.schedule.support;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.schedule.exception.SysJobException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.lang.NonNull;
@@ -29,19 +29,19 @@ public class QuartzBeanInvoker {
 
 	private static @NonNull InvocationSpec parseSpec(@Nullable String invokeTarget) {
 		if (CharSequenceUtil.isBlank(invokeTarget)) {
-			throw new SystemBusinessException(JOB_INVOKE_TARGET_EMPTY);
+			throw new SysJobException(JOB_INVOKE_TARGET_EMPTY);
 		}
 
 		String nonNullInvokeTarget = Objects.requireNonNull(invokeTarget, "invokeTarget");
 		int dot = nonNullInvokeTarget.indexOf('.');
 		if (dot <= 0 || dot >= invokeTarget.length() - 1) {
-			throw new SystemBusinessException(JOB_INVOKE_TARGET_FORMAT);
+			throw new SysJobException(JOB_INVOKE_TARGET_FORMAT);
 		}
 
 		String beanName = nonNullInvokeTarget.substring(0, dot).trim();
 		String tail = nonNullInvokeTarget.substring(dot + 1).trim();
 		if (tail.isEmpty()) {
-			throw new SystemBusinessException(JOB_INVOKE_TARGET_FORMAT);
+			throw new SysJobException(JOB_INVOKE_TARGET_FORMAT);
 		}
 
 		String nonNullBeanName = Objects.requireNonNull(beanName, BEAN_NAME);
@@ -53,7 +53,7 @@ public class QuartzBeanInvoker {
 
 		String suffix = ")";
 		if (!tail.endsWith(suffix)) {
-			throw new SystemBusinessException(JOB_INVOKE_TARGET_PAREN_MISMATCH);
+			throw new SysJobException(JOB_INVOKE_TARGET_PAREN_MISMATCH);
 		}
 
 		String methodName = tail.substring(0, lp).trim();
@@ -80,7 +80,7 @@ public class QuartzBeanInvoker {
 		if (unwrapped.length() < t.length()) {
 			return new Object[] { unwrapped };
 		}
-		throw new SystemBusinessException(JOB_INVOKE_PARAM_NOT_SUPPORTED);
+		throw new SysJobException(JOB_INVOKE_PARAM_NOT_SUPPORTED);
 	}
 
 	private static @NonNull Method resolveMethod(@NonNull Class<?> clazz, @NonNull String methodName, int argCount) {
@@ -95,14 +95,14 @@ public class QuartzBeanInvoker {
 			signature = "(String)";
 		}
 		else {
-			throw new SystemBusinessException(JOB_INVOKE_PARAM_NOT_SUPPORTED);
+			throw new SysJobException(JOB_INVOKE_PARAM_NOT_SUPPORTED);
 		}
 
 		Class<?> nonNullClazz = Objects.requireNonNull(clazz, "clazz");
 		String nonNullMethodName = Objects.requireNonNull(methodName, METHOD_NAME);
 		Method m = ReflectionUtils.findMethod(nonNullClazz, nonNullMethodName, paramTypes);
 		if (m == null) {
-			throw new SystemBusinessException(JOB_REFLECT_METHOD_NOT_FOUND, signature, nonNullMethodName);
+			throw new SysJobException(JOB_REFLECT_METHOD_NOT_FOUND, signature, nonNullMethodName);
 		}
 		ReflectionUtils.makeAccessible(m);
 		return m;

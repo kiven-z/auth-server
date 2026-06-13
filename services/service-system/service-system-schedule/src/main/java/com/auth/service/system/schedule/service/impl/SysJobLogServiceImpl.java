@@ -2,7 +2,7 @@ package com.auth.service.system.schedule.service.impl;
 
 import cn.hutool.core.exceptions.ExceptionUtil;
 import com.auth.common.data.model.PageResponse;
-import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.schedule.convert.SysJobLogConverter;
 import com.auth.service.system.schedule.mapper.JobLogMapper;
@@ -59,7 +59,7 @@ public class SysJobLogServiceImpl extends ServiceImpl<JobLogMapper, JobLogEntity
 	public SysJobLogDetailVO getDetail(Long id) {
 		JobLogEntity jobLog = getById(id);
 		if (jobLog == null) {
-			throw new SystemBusinessException(DATA_NOT_EXIST);
+			throw new SysJobException(DATA_NOT_EXIST);
 		}
 
 		SysJobLogDetailVO vo = SysJobLogConverter.INSTANCE.toDetailVo(jobLog);

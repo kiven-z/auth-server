@@ -2,6 +2,9 @@ package com.auth.service.system.schedule.support;
 
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.system.schedule.config.ScheduleJobProperties;
+import com.auth.service.system.schedule.exception.SysJobException;
+
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CIRCUIT_BREAKER_PAUSE_FAILED;
 import com.auth.service.system.schedule.mapper.JobLogMapper;
 import com.auth.service.system.schedule.mapper.SysJobMapper;
 import com.auth.service.system.schedule.model.entity.JobLogEntity;
@@ -94,7 +97,7 @@ public class SysJobCircuitBreaker {
 		catch (SchedulerException ex) {
 			log.error("熔断后暂停 Quartz 任务失败: {}.{}", jobGroup, jobName, ex);
 			if (wasActive) {
-				throw new SysJobCircuitBreakerException("熔断暂停任务失败", ex);
+				throw new SysJobException(JOB_CIRCUIT_BREAKER_PAUSE_FAILED, ex, jobGroup, jobName);
 			}
 			return;
 		}

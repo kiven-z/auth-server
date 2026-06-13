@@ -1,7 +1,7 @@
 package com.auth.service.system.schedule.validation;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import org.springframework.stereotype.Component;
@@ -43,7 +43,7 @@ public class SysJobDefinitionValidationManager {
 
 		SysJobTaskTypeDefinitionValidator validator = validators.get(resolvedTaskType);
 		if (validator == null) {
-			throw new SystemBusinessException(JOB_TASK_TYPE_UNSUPPORTED, resolvedTaskType.name());
+			throw new SysJobException(JOB_TASK_TYPE_UNSUPPORTED, resolvedTaskType.name());
 		}
 		validator.validate(job);
 	}

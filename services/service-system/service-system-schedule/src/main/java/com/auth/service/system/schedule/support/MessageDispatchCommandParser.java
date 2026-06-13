@@ -2,7 +2,7 @@ package com.auth.service.system.schedule.support;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.message.api.command.TemplateMessageCommand;
-import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.model.payload.MessageDispatchPayload;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,7 +38,7 @@ public class MessageDispatchCommandParser {
 	 */
 	public TemplateMessageCommand parseAndValidate(String payloadJson) {
 		if (CharSequenceUtil.isBlank(payloadJson)) {
-			throw new SystemBusinessException(JOB_PAYLOAD_JSON_EMPTY);
+			throw new SysJobException(JOB_PAYLOAD_JSON_EMPTY);
 		}
 		return parseCommand(payloadJson);
 	}
@@ -63,17 +63,17 @@ public class MessageDispatchCommandParser {
 		try {
 			JsonNode root = objectMapper.readTree(payloadJson);
 			if (root == null || !root.has("command")) {
-				throw new SystemBusinessException(JOB_PAYLOAD_JSON_INVALID, "payload must contain version and command");
+				throw new SysJobException(JOB_PAYLOAD_JSON_INVALID, "payload must contain version and command");
 			}
 			MessageDispatchPayload payload = objectMapper.treeToValue(root, MessageDispatchPayload.class);
 			validatePayload(payload);
 			return payload.getCommand();
 		}
-		catch (SystemBusinessException exception) {
+		catch (SysJobException exception) {
 			throw exception;
 		}
 		catch (Exception exception) {
-			throw new SystemBusinessException(JOB_PAYLOAD_JSON_INVALID, exception.getMessage());
+			throw new SysJobException(JOB_PAYLOAD_JSON_INVALID, exception.getMessage());
 		}
 	}
 
@@ -85,10 +85,10 @@ public class MessageDispatchCommandParser {
 		Set<ConstraintViolation<MessageDispatchPayload>> payloadViolations = validator.validate(payload);
 		if (!payloadViolations.isEmpty()) {
 			String message = payloadViolations.iterator().next().getMessage();
-			throw new SystemBusinessException(JOB_PAYLOAD_JSON_INVALID, message);
+			throw new SysJobException(JOB_PAYLOAD_JSON_INVALID, message);
 		}
 		if (payload.getVersion() != MessageDispatchPayload.VERSION_1) {
-			throw new SystemBusinessException(JOB_PAYLOAD_VERSION_UNSUPPORTED, String.valueOf(payload.getVersion()));
+			throw new SysJobException(JOB_PAYLOAD_VERSION_UNSUPPORTED, String.valueOf(payload.getVersion()));
 		}
 	}
 

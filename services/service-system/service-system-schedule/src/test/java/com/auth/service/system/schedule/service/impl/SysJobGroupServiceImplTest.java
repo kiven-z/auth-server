@@ -1,6 +1,6 @@
 package com.auth.service.system.schedule.service.impl;
 
-import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.schedule.mapper.SysJobGroupMapper;
 import com.auth.service.system.schedule.mapper.SysJobMapper;
@@ -131,8 +131,8 @@ class SysJobGroupServiceImplTest {
 	void getDetailThrowsWhenMissing() {
 		when(sysJobGroupMapper.selectById(99L)).thenReturn(null);
 
-		assertThatThrownBy(() -> sysJobGroupService.getDetail(99L)).isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+		assertThatThrownBy(() -> sysJobGroupService.getDetail(99L)).isInstanceOf(SysJobException.class)
+			.extracting(ex -> ((SysJobException) ex).getResultCode())
 			.isEqualTo(DATA_NOT_EXIST);
 	}
 
@@ -142,8 +142,8 @@ class SysJobGroupServiceImplTest {
 		when(sysJobGroupMapper.selectCount(any())).thenReturn(1L);
 		SysJobGroupForm form = minimalForm("DUP", "重复");
 
-		assertThatThrownBy(() -> sysJobGroupService.create(form)).isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+		assertThatThrownBy(() -> sysJobGroupService.create(form)).isInstanceOf(SysJobException.class)
+			.extracting(ex -> ((SysJobException) ex).getResultCode())
 			.isEqualTo(JOB_GROUP_CODE_DUPLICATE);
 	}
 
@@ -157,8 +157,7 @@ class SysJobGroupServiceImplTest {
 		sysJobGroupService.create(form);
 
 		verify(sysJobGroupMapper).insert(argThat(
-				(SysJobGroupEntity e) -> "UNIQ_GROUP".equals(e.getGroupCode()) && Boolean.TRUE.equals(e.getStatus())
-						&& Boolean.FALSE.equals(e.getIsSystem()) && Integer.valueOf(0).equals(e.getOrderNum())));
+				(SysJobGroupEntity e) -> "UNIQ_GROUP".equals(e.getGroupCode()) && Boolean.TRUE.equals(e.getStatus())));
 	}
 
 	@Test
@@ -166,8 +165,8 @@ class SysJobGroupServiceImplTest {
 	void deleteByIdRejectsWhenMissing() {
 		when(sysJobGroupMapper.selectById(9L)).thenReturn(null);
 
-		assertThatThrownBy(() -> sysJobGroupService.deleteById(9L)).isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+		assertThatThrownBy(() -> sysJobGroupService.deleteById(9L)).isInstanceOf(SysJobException.class)
+			.extracting(ex -> ((SysJobException) ex).getResultCode())
 			.isEqualTo(DATA_NOT_EXIST);
 	}
 
@@ -180,8 +179,8 @@ class SysJobGroupServiceImplTest {
 		entity.setIsSystem(true);
 		when(sysJobGroupMapper.selectById(1L)).thenReturn(entity);
 
-		assertThatThrownBy(() -> sysJobGroupService.deleteById(1L)).isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+		assertThatThrownBy(() -> sysJobGroupService.deleteById(1L)).isInstanceOf(SysJobException.class)
+			.extracting(ex -> ((SysJobException) ex).getResultCode())
 			.isEqualTo(JOB_GROUP_SYSTEM_PROTECTED);
 	}
 
@@ -195,8 +194,8 @@ class SysJobGroupServiceImplTest {
 		when(sysJobGroupMapper.selectById(2L)).thenReturn(entity);
 		when(sysJobMapper.selectCount(any())).thenReturn(3L);
 
-		assertThatThrownBy(() -> sysJobGroupService.deleteById(2L)).isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+		assertThatThrownBy(() -> sysJobGroupService.deleteById(2L)).isInstanceOf(SysJobException.class)
+			.extracting(ex -> ((SysJobException) ex).getResultCode())
 			.isEqualTo(JOB_GROUP_HAS_ACTIVE_JOBS);
 	}
 

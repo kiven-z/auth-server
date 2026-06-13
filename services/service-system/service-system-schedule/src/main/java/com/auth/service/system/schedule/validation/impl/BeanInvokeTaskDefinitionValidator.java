@@ -1,7 +1,7 @@
 package com.auth.service.system.schedule.validation.impl;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import com.auth.service.system.schedule.validation.SysJobTaskTypeDefinitionValidator;
@@ -25,7 +25,7 @@ public class BeanInvokeTaskDefinitionValidator implements SysJobTaskTypeDefiniti
 	@Override
 	public void validate(SysJobEntity job) {
 		if (CharSequenceUtil.isBlank(job.getInvokeTarget())) {
-			throw new SystemBusinessException(JOB_MODE_BEAN_REQUIRES_INVOKE_TARGET);
+			throw new SysJobException(JOB_MODE_BEAN_REQUIRES_INVOKE_TARGET);
 		}
 	}
 

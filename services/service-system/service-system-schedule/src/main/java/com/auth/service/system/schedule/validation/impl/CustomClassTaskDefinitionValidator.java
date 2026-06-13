@@ -1,7 +1,7 @@
 package com.auth.service.system.schedule.validation.impl;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import com.auth.service.system.schedule.support.QuartzTaskRegistry;
@@ -33,20 +33,20 @@ public class CustomClassTaskDefinitionValidator implements SysJobTaskTypeDefinit
 	@Override
 	public void validate(SysJobEntity job) {
 		if (CharSequenceUtil.isBlank(job.getJobClass())) {
-			throw new SystemBusinessException(JOB_CLASS_EMPTY);
+			throw new SysJobException(JOB_CLASS_EMPTY);
 		}
 		if (CharSequenceUtil.isNotBlank(job.getInvokeTarget())) {
-			throw new SystemBusinessException(JOB_MODE_CUSTOM_FORBIDS_INVOKE_TARGET);
+			throw new SysJobException(JOB_MODE_CUSTOM_FORBIDS_INVOKE_TARGET);
 		}
 		String jobClass = job.getJobClass();
 		if (!quartzTaskRegistry.isAllowed(jobClass)) {
-			throw new SystemBusinessException(JOB_CLASS_NOT_WHITELISTED);
+			throw new SysJobException(JOB_CLASS_NOT_WHITELISTED);
 		}
 		try {
 			Class.forName(jobClass);
 		}
 		catch (ClassNotFoundException exception) {
-			throw new SystemBusinessException(JOB_CLASS_LOAD_FAILED, exception.getMessage());
+			throw new SysJobException(JOB_CLASS_LOAD_FAILED, exception.getMessage());
 		}
 	}
 

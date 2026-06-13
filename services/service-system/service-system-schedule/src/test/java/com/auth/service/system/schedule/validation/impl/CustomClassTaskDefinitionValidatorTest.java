@@ -1,6 +1,6 @@
 package com.auth.service.system.schedule.validation.impl;
 
-import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.support.QuartzTaskRegistry;
 import com.auth.service.system.schedule.task.mode.custom.job.SpringInjectDemoJob;
@@ -50,8 +50,8 @@ class CustomClassTaskDefinitionValidatorTest {
 		SysJobEntity job = new SysJobEntity();
 		job.setJobClass(className);
 
-		assertThatThrownBy(() -> validator.validate(job)).isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+		assertThatThrownBy(() -> validator.validate(job)).isInstanceOf(SysJobException.class)
+			.extracting(ex -> ((SysJobException) ex).getResultCode())
 			.isEqualTo(JOB_CLASS_NOT_WHITELISTED);
 	}
 
@@ -64,8 +64,8 @@ class CustomClassTaskDefinitionValidatorTest {
 		SysJobEntity job = new SysJobEntity();
 		job.setJobClass(className);
 
-		assertThatThrownBy(() -> validator.validate(job)).isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+		assertThatThrownBy(() -> validator.validate(job)).isInstanceOf(SysJobException.class)
+			.extracting(ex -> ((SysJobException) ex).getResultCode())
 			.isEqualTo(JOB_CLASS_LOAD_FAILED);
 	}
 

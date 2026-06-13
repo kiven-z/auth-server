@@ -1,6 +1,6 @@
 package com.auth.service.system.schedule.service.impl;
 
-import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.schedule.mapper.JobLogMapper;
 import com.auth.service.system.schedule.mapper.SysJobGroupMapper;
@@ -148,8 +148,8 @@ class SysJobDefinitionServiceImplTest {
 	void getDetailThrowsWhenMissing() {
 		when(sysJobMapper.selectById(99L)).thenReturn(null);
 
-		assertThatThrownBy(() -> sysJobDefinitionService.getDetail(99L)).isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+		assertThatThrownBy(() -> sysJobDefinitionService.getDetail(99L)).isInstanceOf(SysJobException.class)
+			.extracting(ex -> ((SysJobException) ex).getResultCode())
 			.isEqualTo(DATA_NOT_EXIST);
 	}
 

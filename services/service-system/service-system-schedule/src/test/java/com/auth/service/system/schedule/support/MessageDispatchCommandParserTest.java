@@ -2,7 +2,7 @@ package com.auth.service.system.schedule.support;
 
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
-import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.model.payload.MessageDispatchPayload;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Validation;
@@ -45,8 +45,8 @@ class MessageDispatchCommandParserTest {
 				}
 				""";
 
-		assertThatThrownBy(() -> parser.parseAndValidate(payload)).isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+		assertThatThrownBy(() -> parser.parseAndValidate(payload)).isInstanceOf(SysJobException.class)
+			.extracting(ex -> ((SysJobException) ex).getResultCode())
 			.isEqualTo(JOB_PAYLOAD_JSON_INVALID);
 	}
 
@@ -74,16 +74,16 @@ class MessageDispatchCommandParserTest {
 	@Test
 	@DisplayName("payload_json 为空时抛出 JOB_PAYLOAD_JSON_EMPTY")
 	void parseAndValidateThrowsWhenPayloadBlank() {
-		assertThatThrownBy(() -> parser.parseAndValidate(" ")).isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+		assertThatThrownBy(() -> parser.parseAndValidate(" ")).isInstanceOf(SysJobException.class)
+			.extracting(ex -> ((SysJobException) ex).getResultCode())
 			.isEqualTo(JOB_PAYLOAD_JSON_EMPTY);
 	}
 
 	@Test
 	@DisplayName("payload_json 非法 JSON 时抛出 JOB_PAYLOAD_JSON_INVALID")
 	void parseAndValidateThrowsWhenPayloadMalformed() {
-		assertThatThrownBy(() -> parser.parseAndValidate("{")).isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+		assertThatThrownBy(() -> parser.parseAndValidate("{")).isInstanceOf(SysJobException.class)
+			.extracting(ex -> ((SysJobException) ex).getResultCode())
 			.isEqualTo(JOB_PAYLOAD_JSON_INVALID);
 	}
 
@@ -121,8 +121,8 @@ class MessageDispatchCommandParserTest {
 				}
 				""";
 
-		assertThatThrownBy(() -> parser.parseAndValidate(payload)).isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+		assertThatThrownBy(() -> parser.parseAndValidate(payload)).isInstanceOf(SysJobException.class)
+			.extracting(ex -> ((SysJobException) ex).getResultCode())
 			.isEqualTo(JOB_PAYLOAD_VERSION_UNSUPPORTED);
 	}
 

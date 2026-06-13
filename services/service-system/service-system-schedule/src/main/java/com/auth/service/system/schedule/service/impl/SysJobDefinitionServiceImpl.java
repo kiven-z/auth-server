@@ -1,7 +1,7 @@
 package com.auth.service.system.schedule.service.impl;
 
 import com.auth.common.data.model.PageResponse;
-import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.schedule.convert.SysJobConverter;
 import com.auth.service.system.schedule.mapper.JobLogMapper;
@@ -84,7 +84,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 	public SysJobDetailVO getDetail(Long id) {
 		SysJobEntity sysJob = getById(id);
 		if (sysJob == null) {
-			throw new SystemBusinessException(DATA_NOT_EXIST);
+			throw new SysJobException(DATA_NOT_EXIST);
 		}
 
 		SysJobDetailVO vo = SysJobConverter.INSTANCE.toDetailVo(sysJob);
@@ -113,7 +113,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 			.eq(SysJobGroupEntity::getGroupCode, groupCode)
 			.eq(SysJobGroupEntity::getStatus, true));
 		if (sysJobGroup == null) {
-			throw new SystemBusinessException(JOB_GROUP_NOT_AVAILABLE);
+			throw new SysJobException(JOB_GROUP_NOT_AVAILABLE);
 		}
 
 		SysJobEntity sysJob = SysJobConverter.INSTANCE.toEntity(form);
@@ -126,7 +126,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		}
 		catch (SchedulerException ex) {
 			log.error("注册 Quartz 失败", ex);
-			throw new SystemBusinessException(JOB_QUARTZ_OPERATION_FAILED, "register", ex.getMessage());
+			throw new SysJobException(JOB_QUARTZ_OPERATION_FAILED, "register", ex.getMessage());
 		}
 	}
 
@@ -137,7 +137,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 	public void update(SysJobUpdateForm form) {
 		SysJobEntity dbJob = getById(form.getId());
 		if (dbJob == null) {
-			throw new SystemBusinessException(DATA_NOT_EXIST);
+			throw new SysJobException(DATA_NOT_EXIST);
 		}
 
 		SysJobConverter.INSTANCE.updateEntity(form, dbJob);
@@ -150,7 +150,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		}
 		catch (SchedulerException ex) {
 			log.error("更新 Quartz 失败", ex);
-			throw new SystemBusinessException(JOB_QUARTZ_OPERATION_FAILED, "update", ex.getMessage());
+			throw new SysJobException(JOB_QUARTZ_OPERATION_FAILED, "update", ex.getMessage());
 		}
 	}
 
@@ -161,7 +161,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 	public void deleteById(Long id) {
 		SysJobEntity dbJob = getById(id);
 		if (dbJob == null) {
-			throw new SystemBusinessException(DATA_NOT_EXIST);
+			throw new SysJobException(DATA_NOT_EXIST);
 		}
 		String jobName = dbJob.getJobName();
 		String jobGroup = dbJob.getJobGroup();
@@ -173,7 +173,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		}
 		catch (SchedulerException ex) {
 			log.error("删除 Quartz Job 失败", ex);
-			throw new SystemBusinessException(JOB_QUARTZ_OPERATION_FAILED, "delete", ex.getMessage());
+			throw new SysJobException(JOB_QUARTZ_OPERATION_FAILED, "delete", ex.getMessage());
 		}
 		catch (Exception exception) {
 			log.error("级联物理删除日志失败", exception);

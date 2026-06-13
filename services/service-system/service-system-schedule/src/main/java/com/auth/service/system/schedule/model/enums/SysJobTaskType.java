@@ -1,6 +1,6 @@
 package com.auth.service.system.schedule.model.enums;
 
-import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.task.mode.bean.BeanInvokeEntryJob;
 import com.auth.service.system.schedule.task.mode.custom.DelegatingCustomEntryJob;
 import com.auth.service.system.schedule.task.mode.message.MessageDispatchEntryJob;
@@ -40,7 +40,7 @@ public enum SysJobTaskType {
 			return SysJobTaskType.valueOf(taskTypeRaw);
 		}
 		catch (Exception exception) {
-			throw new SystemBusinessException(JOB_TASK_TYPE_UNSUPPORTED, taskTypeRaw);
+			throw new SysJobException(JOB_TASK_TYPE_UNSUPPORTED, taskTypeRaw);
 		}
 	}
 

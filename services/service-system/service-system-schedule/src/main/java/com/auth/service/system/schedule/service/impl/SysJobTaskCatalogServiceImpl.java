@@ -1,7 +1,7 @@
 package com.auth.service.system.schedule.service.impl;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.model.payload.MessageDispatchPayload;
 import com.auth.service.system.schedule.model.vo.QuartzTaskClassVO;
 import com.auth.service.system.schedule.model.vo.QuartzTaskMethodVO;
@@ -49,17 +49,17 @@ public class SysJobTaskCatalogServiceImpl implements SysJobTaskCatalogService {
 	@Override
 	public List<QuartzTaskMethodVO> listCallableMethods(String className) {
 		if (CharSequenceUtil.isBlank(className)) {
-			throw new SystemBusinessException(JOB_CLASS_EMPTY);
+			throw new SysJobException(JOB_CLASS_EMPTY);
 		}
 		if (!quartzTaskRegistry.isAllowed(className)) {
-			throw new SystemBusinessException(JOB_CLASS_NOT_WHITELISTED);
+			throw new SysJobException(JOB_CLASS_NOT_WHITELISTED);
 		}
 		Class<?> targetClass;
 		try {
 			targetClass = Class.forName(className);
 		}
 		catch (ClassNotFoundException exception) {
-			throw new SystemBusinessException(JOB_CLASS_LOAD_FAILED, exception.getMessage());
+			throw new SysJobException(JOB_CLASS_LOAD_FAILED, exception.getMessage());
 		}
 
 		String beanName = resolveBeanName(targetClass);
