@@ -34,14 +34,16 @@ public class SysJobTaskCatalogController {
 	@PreAuthorize("@auth.decide('sysJob:query')")
 	@GetMapping("classes")
 	public Result<List<QuartzTaskClassVO>> classes() {
-		return Result.success(sysJobTaskCatalogService.listQuartzClasses());
+		List<QuartzTaskClassVO> data = sysJobTaskCatalogService.listQuartzClasses();
+		return Result.success(data);
 	}
 
 	@Operation(summary = "白名单类可调用方法列表")
 	@PreAuthorize("@auth.decide('sysJob:query')")
 	@GetMapping("methods")
 	public Result<List<QuartzTaskMethodVO>> methods(@RequestParam("className") String className) {
-		return Result.success(sysJobTaskCatalogService.listCallableMethods(className));
+		List<QuartzTaskMethodVO> data = sysJobTaskCatalogService.listCallableMethods(className);
+		return Result.success(data);
 	}
 
 	@Operation(summary = "消息调度 payload 模板")

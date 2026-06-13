@@ -41,11 +41,17 @@ public class SysJobTaskCatalogServiceImpl implements SysJobTaskCatalogService {
 		this.messageDispatchPayloadTemplateProvider = messageDispatchPayloadTemplateProvider;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public List<QuartzTaskClassVO> listQuartzClasses() {
 		return quartzTaskRegistry.listAll();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public List<QuartzTaskMethodVO> listCallableMethods(String className) {
 		if (CharSequenceUtil.isBlank(className)) {
@@ -78,6 +84,9 @@ public class SysJobTaskCatalogServiceImpl implements SysJobTaskCatalogService {
 		return methodList;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Object messageDispatchPayloadTemplate() {
 		return messageDispatchPayloadTemplateProvider.map(MessageDispatchPayloadTemplateProvider::buildTemplatePayload)

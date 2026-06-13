@@ -15,7 +15,7 @@ public interface SysJobOperationService {
 	void syncAllFromDatabase();
 
 	/**
-	 * 批量变更状态并 pause/resume
+	 * 批量变更状态并
 	 * @param form 表单
 	 */
 	void batchUpdateStatus(SysJobStatusForm form);

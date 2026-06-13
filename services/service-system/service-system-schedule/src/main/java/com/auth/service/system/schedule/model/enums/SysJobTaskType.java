@@ -1,7 +1,7 @@
 package com.auth.service.system.schedule.model.enums;
 
 import com.auth.service.system.schedule.exception.SysJobException;
-import com.auth.service.system.schedule.task.ConcurrentEntryJobSupport;
+import com.auth.service.system.schedule.task.SysJobEntryJob;
 import org.quartz.Job;
 
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_TASK_TYPE_UNSUPPORTED;
@@ -60,7 +60,7 @@ public enum SysJobTaskType {
 	 * @return 入口 Job 类
 	 */
 	public Class<? extends Job> resolveEntryJobClass(boolean concurrent) {
-		return ConcurrentEntryJobSupport.resolveEntryJobClass(concurrent);
+		return concurrent ? SysJobEntryJob.class : SysJobEntryJob.Disallow.class;
 	}
 
 }

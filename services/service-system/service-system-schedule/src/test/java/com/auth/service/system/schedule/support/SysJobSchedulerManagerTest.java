@@ -54,14 +54,6 @@ class SysJobSchedulerManagerTest {
 	}
 
 	@Test
-	@DisplayName("resumeGroup：分组编码有效时应调用 scheduler.resumeJobs")
-	void resumeGroup_whenGroupCodePresent_resumesSchedulerGroup() throws SchedulerException {
-		sysJobSchedulerManager.resumeGroup("G");
-
-		verify(scheduler).resumeJobs(GroupMatcher.groupEquals("G"));
-	}
-
-	@Test
 	@DisplayName("scheduleOrReplace：暂停且 Quartz 无任务时不注册调度")
 	void scheduleOrReplace_whenPausedAndMissing_doesNotSchedule() throws SchedulerException {
 		SysJobEntity job = new SysJobEntity();

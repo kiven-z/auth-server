@@ -22,7 +22,7 @@ import static com.auth.service.system.schedule.model.constants.SysJobQuartzDataK
 import static com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys.TRIGGER_SUFFIX;
 
 /**
- * 将 {@link SysJobEntity} 与 Quartz {@link Scheduler} 同步（增删改、暂停、恢复、立即执行）
+ * 将 {@link SysJobEntity} 与 Quartz {@link Scheduler} 同步（增删改、暂停、立即执行）
  *
  * @author Bunny
  */
@@ -36,7 +36,13 @@ public class SysJobSchedulerManager {
 		this.scheduler = scheduler;
 	}
 
-	// =============== 静态工具方法 ===============
+	/*
+	 * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	 *
+	 * 静态工具方法
+	 *
+	 * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	 */
 
 	/**
 	 * Trigger 名称规则：{@code jobName + "_TRIGGER"}
@@ -92,7 +98,13 @@ public class SysJobSchedulerManager {
 		};
 	}
 
-	// =============== 调度管理方法 ===============
+	/*
+	 * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	 *
+	 * 调度管理方法
+	 *
+	 * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	 */
 
 	/**
 	 * 删除 Quartz 中的 Job （若存在）
@@ -106,14 +118,13 @@ public class SysJobSchedulerManager {
 	}
 
 	/**
-	 * 按当前实体状态重建调度：先删后建；若 {@code status != 1} 则仅删除不落调度
+	 * 按当前实体状态同步调度：启用时先删后建；停用时仅暂停 Quartz，不重建 Trigger
 	 * @param job 任务实体
 	 */
 	public void scheduleOrReplace(SysJobEntity job) throws SchedulerException {
 		String jobName = job.getJobName();
 		String jobGroup = job.getJobGroup();
 
-		// 当前任务存在并且为暂停直接返回，不做任何操作
 		JobKey jobKey = JobKey.jobKey(jobName, jobGroup);
 
 		if (BooleanUtil.isFalse(job.getStatus())) {
@@ -151,21 +162,6 @@ public class SysJobSchedulerManager {
 	}
 
 	/**
-	 * 恢复调度
-	 * @param jobName 任务名
-	 * @param jobGroup 分组
-	 */
-	public void resumeJob(String jobName, String jobGroup) throws SchedulerException {
-		// 构建 JobKey
-		JobKey jk = JobKey.jobKey(jobName, jobGroup);
-
-		// 如果 Job 存在，则恢复调度
-		if (scheduler.checkExists(jk)) {
-			scheduler.resumeJob(jk);
-		}
-	}
-
-	/**
 	 * 暂停整个分组下的所有任务（仅暂停 Quartz 调度状态，不删除 Trigger）
 	 * @param groupCode 分组编码
 	 */
@@ -175,18 +171,6 @@ public class SysJobSchedulerManager {
 		}
 
 		scheduler.pauseJobs(GroupMatcher.groupEquals(groupCode));
-	}
-
-	/**
-	 * 恢复整个分组下的所有任务（仅恢复 Quartz 调度状态，不重建 Trigger）
-	 * @param groupCode 分组编码
-	 */
-	public void resumeGroup(String groupCode) throws SchedulerException {
-		if (CharSequenceUtil.isBlank(groupCode)) {
-			return;
-		}
-
-		scheduler.resumeJobs(GroupMatcher.groupEquals(groupCode));
 	}
 
 	/**

@@ -1,5 +1,6 @@
 package com.auth.service.system.schedule.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.mapper.SysJobMapper;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
@@ -25,8 +26,8 @@ import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_
  *
  * @author Bunny
  */
-@Slf4j
 @RequiredArgsConstructor
+@Slf4j
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class SysJobOperationServiceImpl implements SysJobOperationService {
@@ -98,17 +99,18 @@ public class SysJobOperationServiceImpl implements SysJobOperationService {
 	 */
 	@Override
 	public void pauseAllInGroup(String groupCode) {
-		List<SysJobEntity> jobs = sysJobMapper
-			.selectList(Wrappers.lambdaQuery(SysJobEntity.class).eq(SysJobEntity::getJobGroup, groupCode));
-		List<Long> ids = jobs.stream().map(SysJobEntity::getId).toList();
-		if (!ids.isEmpty()) {
-			sysJobMapper.update(null,
-					Wrappers.lambdaUpdate(SysJobEntity.class)
-						.set(SysJobEntity::getStatus, false)
-						.set(SysJobEntity::getUpdateTime, LocalDateTime.now())
-						.in(SysJobEntity::getId, ids));
-		}
 		try {
+			List<SysJobEntity> jobs = sysJobMapper
+				.selectList(Wrappers.lambdaQuery(SysJobEntity.class).eq(SysJobEntity::getJobGroup, groupCode));
+			List<Long> ids = jobs.stream().map(SysJobEntity::getId).toList();
+			if (CollUtil.isNotEmpty(ids)) {
+				sysJobMapper.update(null,
+						Wrappers.lambdaUpdate(SysJobEntity.class)
+							.set(SysJobEntity::getStatus, false)
+							.set(SysJobEntity::getUpdateTime, LocalDateTime.now())
+							.in(SysJobEntity::getId, ids));
+			}
+
 			quartzAdmin.pauseGroup(groupCode);
 		}
 		catch (SchedulerException ex) {
