@@ -2,9 +2,7 @@ package com.auth.service.system.schedule.controller;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.service.system.schedule.model.form.SysJobStatusForm;
-import com.auth.service.system.schedule.model.vo.SysJobQuartzRuntimeStatusVO;
 import com.auth.service.system.schedule.service.SysJobOperationService;
-import com.auth.service.system.schedule.service.SysJobQuartzRuntimeQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,12 +23,8 @@ public class SysJobOperationController {
 
 	private final SysJobOperationService sysJobOperationService;
 
-	private final SysJobQuartzRuntimeQueryService sysJobQuartzRuntimeQueryService;
-
-	public SysJobOperationController(SysJobOperationService sysJobOperationService,
-			SysJobQuartzRuntimeQueryService sysJobQuartzRuntimeQueryService) {
+	public SysJobOperationController(SysJobOperationService sysJobOperationService) {
 		this.sysJobOperationService = sysJobOperationService;
-		this.sysJobQuartzRuntimeQueryService = sysJobQuartzRuntimeQueryService;
 	}
 
 	@Operation(summary = "批量启停任务")
@@ -47,14 +41,6 @@ public class SysJobOperationController {
 	public Result<String> runOnce(@PathVariable("id") Long id) {
 		sysJobOperationService.runOnce(id);
 		return Result.success(null, MODIFY_SUCCESS.getMessage());
-	}
-
-	@Operation(summary = "查询 Quartz 运行时状态")
-	@PreAuthorize("@auth.decide('sysJob:query')")
-	@GetMapping("runtime")
-	public Result<SysJobQuartzRuntimeStatusVO> runtime(@RequestParam("jobName") String jobName,
-			@RequestParam("jobGroup") String jobGroup) {
-		return Result.success(sysJobQuartzRuntimeQueryService.getRuntimeStatus(jobName, jobGroup));
 	}
 
 	@Operation(summary = "按分组一键暂停")

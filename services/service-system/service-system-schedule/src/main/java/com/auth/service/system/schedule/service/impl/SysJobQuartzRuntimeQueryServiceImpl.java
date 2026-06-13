@@ -4,7 +4,6 @@ import com.auth.service.system.schedule.mapper.JobLogMapper;
 import com.auth.service.system.schedule.model.entity.JobLogEntity;
 import com.auth.service.system.schedule.model.enums.SysJobQuartzRuntimeStatus;
 import com.auth.service.system.schedule.model.vo.SysJobPageResponse;
-import com.auth.service.system.schedule.model.vo.SysJobQuartzRuntimeStatusVO;
 import com.auth.service.system.schedule.service.SysJobQuartzRuntimeQueryService;
 import com.auth.service.system.schedule.support.SysJobQuartzRuntimeSnapshot;
 import com.auth.service.system.schedule.support.SysJobSchedulerManager;
@@ -33,15 +32,6 @@ public class SysJobQuartzRuntimeQueryServiceImpl implements SysJobQuartzRuntimeQ
 	 * {@inheritDoc}
 	 */
 	@Override
-	public SysJobQuartzRuntimeStatusVO getRuntimeStatus(String jobName, String jobGroup) {
-		SysJobQuartzRuntimeSnapshot snapshot = quartzAdmin.resolveRuntimeSnapshot(jobName, jobGroup);
-		return toVo(jobName, jobGroup, snapshot);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
 	public void enrichPageRows(List<SysJobPageResponse> rows) {
 		if (rows == null || rows.isEmpty()) {
 			return;
@@ -57,24 +47,19 @@ public class SysJobQuartzRuntimeQueryServiceImpl implements SysJobQuartzRuntimeQ
 			if (snapshot == null) {
 				continue;
 			}
-			SysJobQuartzRuntimeStatusVO vo = toVo(row.getJobName(), row.getJobGroup(), snapshot);
-			row.setQuartzRuntimeStatus(vo.getStatus());
-			row.setQuartzFireTime(vo.getFireTime());
-			row.setQuartzLastFailedTime(vo.getLastFailedTime());
+			applyRuntimeSnapshot(row, snapshot);
 		}
 	}
 
-	private SysJobQuartzRuntimeStatusVO toVo(String jobName, String jobGroup, SysJobQuartzRuntimeSnapshot snapshot) {
+	private void applyRuntimeSnapshot(SysJobPageResponse row, SysJobQuartzRuntimeSnapshot snapshot) {
+		String jobName = row.getJobName();
+		String jobGroup = row.getJobGroup();
 		SysJobQuartzRuntimeStatus status = applyFailedIfIdle(jobName, jobGroup, snapshot.status());
-		SysJobQuartzRuntimeStatusVO vo = new SysJobQuartzRuntimeStatusVO();
-		vo.setJobName(jobName);
-		vo.setJobGroup(jobGroup);
-		vo.setStatus(status);
-		vo.setFireTime(snapshot.fireTime());
+		row.setQuartzRuntimeStatus(status);
+		row.setQuartzFireTime(snapshot.fireTime());
 		if (status == SysJobQuartzRuntimeStatus.FAILED) {
-			vo.setLastFailedTime(resolveLastFailedTime(jobName, jobGroup));
+			row.setQuartzLastFailedTime(resolveLastFailedTime(jobName, jobGroup));
 		}
-		return vo;
 	}
 
 	private SysJobQuartzRuntimeStatus applyFailedIfIdle(String jobName, String jobGroup,

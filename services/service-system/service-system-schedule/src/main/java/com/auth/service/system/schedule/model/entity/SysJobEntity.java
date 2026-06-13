@@ -1,6 +1,8 @@
 package com.auth.service.system.schedule.model.entity;
 
 import com.auth.common.data.model.BaseEntity;
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
@@ -46,9 +48,11 @@ public class SysJobEntity extends BaseEntity {
 	@Schema(title = "是否并发(0否 1是)")
 	private Boolean concurrent;
 
+	@TableField(updateStrategy = FieldStrategy.ALWAYS)
 	@Schema(title = "开始时间")
 	private LocalDateTime startTime;
 
+	@TableField(updateStrategy = FieldStrategy.ALWAYS)
 	@Schema(title = "结束时间")
 	private LocalDateTime endTime;
 

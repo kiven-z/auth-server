@@ -4,7 +4,6 @@ import com.auth.service.system.schedule.mapper.JobLogMapper;
 import com.auth.service.system.schedule.model.entity.JobLogEntity;
 import com.auth.service.system.schedule.model.enums.SysJobQuartzRuntimeStatus;
 import com.auth.service.system.schedule.model.vo.SysJobPageResponse;
-import com.auth.service.system.schedule.model.vo.SysJobQuartzRuntimeStatusVO;
 import com.auth.service.system.schedule.support.SysJobQuartzRuntimeSnapshot;
 import com.auth.service.system.schedule.support.SysJobSchedulerManager;
 import org.junit.jupiter.api.DisplayName;
@@ -41,40 +40,42 @@ class SysJobQuartzRuntimeQueryServiceImplTest {
 	private SysJobQuartzRuntimeQueryServiceImpl sysJobQuartzRuntimeQueryService;
 
 	@Test
-	@DisplayName("查询运行时状态：RUNNING 时直接返回")
-	void getRuntimeStatusReturnsRunningSnapshot() {
+	@DisplayName("分页补充：RUNNING 时写入 fireTime")
+	void enrichPageRowsSetsRunningSnapshot() {
+		SysJobPageResponse row = jobRow("demo", "G");
 		LocalDateTime fireTime = LocalDateTime.of(2026, 6, 13, 10, 0);
-		when(quartzAdmin.resolveRuntimeSnapshot("demo", "G"))
-			.thenReturn(SysJobQuartzRuntimeSnapshot.of(SysJobQuartzRuntimeStatus.RUNNING, fireTime));
+		JobKey jobKey = JobKey.jobKey("demo", "G");
+		when(quartzAdmin.batchResolveRuntimeSnapshots(List.of(jobKey)))
+			.thenReturn(Map.of(jobKey, SysJobQuartzRuntimeSnapshot.of(SysJobQuartzRuntimeStatus.RUNNING, fireTime)));
 
-		SysJobQuartzRuntimeStatusVO vo = sysJobQuartzRuntimeQueryService.getRuntimeStatus("demo", "G");
+		sysJobQuartzRuntimeQueryService.enrichPageRows(List.of(row));
 
-		assertThat(vo.getStatus()).isEqualTo(SysJobQuartzRuntimeStatus.RUNNING);
-		assertThat(vo.getFireTime()).isEqualTo(fireTime);
+		assertThat(row.getQuartzRuntimeStatus()).isEqualTo(SysJobQuartzRuntimeStatus.RUNNING);
+		assertThat(row.getQuartzFireTime()).isEqualTo(fireTime);
 	}
 
 	@Test
-	@DisplayName("查询运行时状态：IDLE 且最近日志失败时标记 FAILED")
-	void getRuntimeStatusMarksFailedWhenLatestLogFailed() {
-		when(quartzAdmin.resolveRuntimeSnapshot("demo", "G"))
-			.thenReturn(SysJobQuartzRuntimeSnapshot.of(SysJobQuartzRuntimeStatus.IDLE, null));
+	@DisplayName("分页补充：IDLE 且最近日志失败时标记 FAILED")
+	void enrichPageRowsMarksFailedWhenLatestLogFailed() {
+		SysJobPageResponse row = jobRow("demo", "G");
+		JobKey jobKey = JobKey.jobKey("demo", "G");
+		when(quartzAdmin.batchResolveRuntimeSnapshots(List.of(jobKey)))
+			.thenReturn(Map.of(jobKey, SysJobQuartzRuntimeSnapshot.of(SysJobQuartzRuntimeStatus.IDLE, null)));
 		JobLogEntity failedLog = new JobLogEntity();
 		failedLog.setStatus(false);
 		failedLog.setCreateTime(LocalDateTime.of(2026, 6, 13, 9, 0));
 		when(jobLogMapper.selectRecentByJobNameAndGroup("demo", "G", 1)).thenReturn(List.of(failedLog));
 
-		SysJobQuartzRuntimeStatusVO vo = sysJobQuartzRuntimeQueryService.getRuntimeStatus("demo", "G");
+		sysJobQuartzRuntimeQueryService.enrichPageRows(List.of(row));
 
-		assertThat(vo.getStatus()).isEqualTo(SysJobQuartzRuntimeStatus.FAILED);
-		assertThat(vo.getLastFailedTime()).isEqualTo(failedLog.getCreateTime());
+		assertThat(row.getQuartzRuntimeStatus()).isEqualTo(SysJobQuartzRuntimeStatus.FAILED);
+		assertThat(row.getQuartzLastFailedTime()).isEqualTo(failedLog.getCreateTime());
 	}
 
 	@Test
 	@DisplayName("分页补充：批量写入 quartzRuntimeStatus")
 	void enrichPageRowsSetsQuartzRuntimeStatus() {
-		SysJobPageResponse row = new SysJobPageResponse();
-		row.setJobName("demo");
-		row.setJobGroup("G");
+		SysJobPageResponse row = jobRow("demo", "G");
 		JobKey jobKey = JobKey.jobKey("demo", "G");
 		when(quartzAdmin.batchResolveRuntimeSnapshots(List.of(jobKey)))
 			.thenReturn(Map.of(jobKey, SysJobQuartzRuntimeSnapshot.of(SysJobQuartzRuntimeStatus.PENDING, null)));
@@ -82,6 +83,13 @@ class SysJobQuartzRuntimeQueryServiceImplTest {
 		sysJobQuartzRuntimeQueryService.enrichPageRows(List.of(row));
 
 		assertThat(row.getQuartzRuntimeStatus()).isEqualTo(SysJobQuartzRuntimeStatus.PENDING);
+	}
+
+	private SysJobPageResponse jobRow(String jobName, String jobGroup) {
+		SysJobPageResponse row = new SysJobPageResponse();
+		row.setJobName(jobName);
+		row.setJobGroup(jobGroup);
+		return row;
 	}
 
 }
