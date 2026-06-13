@@ -61,10 +61,4 @@ public interface SysPostService {
 	 */
 	void deleteById(Long id);
 
-	/**
-	 * 批量导入岗位（单事务，任意行失败全部回滚）
-	 * @param forms 已校验并转换好的表单列表
-	 */
-	void importBatch(List<SysPostForm> forms);
-
 }

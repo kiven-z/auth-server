@@ -91,6 +91,7 @@ public class SysDeptSpreadsheetService
 	 * @return 导入结果（含行级错误）
 	 * @throws IOException 文件读取失败
 	 */
+	@Transactional(rollbackFor = Exception.class)
 	public SpreadsheetImportResult importExcel(MultipartFile file) throws IOException {
 		return deptSheetImporter.doImport(file);
 	}

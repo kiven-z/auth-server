@@ -67,10 +67,4 @@ public interface SysDeptService extends IService<SysDeptEntity> {
 	 */
 	void deleteById(Long deptId);
 
-	/**
-	 * 批量导入部门（单事务，任意行失败全部回滚）
-	 * @param forms 已校验并转换好的表单列表
-	 */
-	void importBatch(List<SysDeptForm> forms);
-
 }

@@ -64,7 +64,7 @@ public class DeptSheetImporter extends AbstractSheetImporter<SysDeptImportRow, S
 
 	@Override
 	protected void saveBatch(List<SysDeptForm> forms) {
-		sysDeptService.importBatch(forms);
+		forms.forEach(sysDeptService::create);
 	}
 
 	private Long resolveParentId(String parentDeptCode, int rowNum, List<ImportRowError> errors) {

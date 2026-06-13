@@ -68,7 +68,7 @@ public class PostSheetImporter extends AbstractSheetImporter<SysPostImportRow, S
 
 	@Override
 	protected void saveBatch(List<SysPostForm> forms) {
-		sysPostService.importBatch(forms);
+		forms.forEach(sysPostService::create);
 	}
 
 	private Long resolveDeptId(String deptCode, int rowNum, List<ImportRowError> errors) {

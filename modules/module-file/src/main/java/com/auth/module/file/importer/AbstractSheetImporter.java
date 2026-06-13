@@ -41,7 +41,7 @@ public abstract class AbstractSheetImporter<R, F> {
 	protected abstract F convertRow(R row, int rowNum, List<ImportRowError> errors);
 
 	/**
-	 * 批量写入，实现类应在事务内调用业务服务的 importBatch 方法
+	 * 批量写入，实现类应在事务内逐条调用业务 create 等方法
 	 * @param forms 已通过校验的表单列表
 	 */
 	protected abstract void saveBatch(List<F> forms);
