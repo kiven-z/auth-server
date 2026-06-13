@@ -36,115 +36,115 @@ import static com.auth.service.system.schedule.exception.ScheduleResultCode.*;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJobGroupEntity>
-        implements SysJobGroupService {
+		implements SysJobGroupService {
 
-    private final AuditUserDisplayService auditUserDisplayService;
+	private final AuditUserDisplayService auditUserDisplayService;
 
-    private final SysJobMapper sysJobMapper;
+	private final SysJobMapper sysJobMapper;
 
-    public SysJobGroupServiceImpl(AuditUserDisplayService auditUserDisplayService, SysJobMapper sysJobMapper) {
-        this.auditUserDisplayService = auditUserDisplayService;
-        this.sysJobMapper = sysJobMapper;
-    }
+	public SysJobGroupServiceImpl(AuditUserDisplayService auditUserDisplayService, SysJobMapper sysJobMapper) {
+		this.auditUserDisplayService = auditUserDisplayService;
+		this.sysJobMapper = sysJobMapper;
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public PageResponse<SysJobGroupPageResponse> getPage(Page<SysJobGroupEntity> pageParams, SysJobGroupQuery query) {
-        IPage<SysJobGroupPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
-        // PO 转 VO
-        IPage<SysJobGroupPageResponse> voPage = page.convert(SysJobGroupConverter.INSTANCE::toPageResponse);
-        auditUserDisplayService.enrichAuditUsernames(voPage);
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public PageResponse<SysJobGroupPageResponse> getPage(Page<SysJobGroupEntity> pageParams, SysJobGroupQuery query) {
+		IPage<SysJobGroupPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
+		// PO 转 VO
+		IPage<SysJobGroupPageResponse> voPage = page.convert(SysJobGroupConverter.INSTANCE::toPageResponse);
+		auditUserDisplayService.enrichAuditUsernames(voPage);
 
-        return PageResponse.of(voPage);
-    }
+		return PageResponse.of(voPage);
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public List<SysJobGroupPageResponse> listEnabledOptions(String keyword, int limit) {
-        List<SysJobGroupPageRowPO> list = baseMapper.selectEnabledOptions(keyword, limit);
-        List<SysJobGroupPageResponse> voList = list.stream()
-                .map(SysJobGroupConverter.INSTANCE::toPageResponse)
-                .toList();
-        auditUserDisplayService.enrichAuditUsernames(voList);
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public List<SysJobGroupPageResponse> listEnabledOptions(String keyword, int limit) {
+		List<SysJobGroupPageRowPO> list = baseMapper.selectEnabledOptions(keyword, limit);
+		List<SysJobGroupPageResponse> voList = list.stream()
+			.map(SysJobGroupConverter.INSTANCE::toPageResponse)
+			.toList();
+		auditUserDisplayService.enrichAuditUsernames(voList);
 
-        return voList;
-    }
+		return voList;
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public SysJobGroupDetailVO getDetail(Long id) {
-        SysJobGroupEntity entity = getById(id);
-        if (entity == null) {
-            throw new SystemBusinessException(DATA_NOT_EXIST);
-        }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public SysJobGroupDetailVO getDetail(Long id) {
+		SysJobGroupEntity entity = getById(id);
+		if (entity == null) {
+			throw new SystemBusinessException(DATA_NOT_EXIST);
+		}
 
-        SysJobGroupDetailVO detail = SysJobGroupConverter.INSTANCE.toDetailVo(entity);
-        auditUserDisplayService.enrichAuditUsernames(List.of(detail));
-        return detail;
-    }
+		SysJobGroupDetailVO detail = SysJobGroupConverter.INSTANCE.toDetailVo(entity);
+		auditUserDisplayService.enrichAuditUsernames(List.of(detail));
+		return detail;
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void create(SysJobGroupForm form) {
-        // 验证分组编码是否已存在
-        long exists = count(
-                Wrappers.<SysJobGroupEntity>lambdaQuery().eq(SysJobGroupEntity::getGroupCode, form.getGroupCode()));
-        if (exists > 0) {
-            throw new SystemBusinessException(JOB_GROUP_CODE_DUPLICATE);
-        }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void create(SysJobGroupForm form) {
+		// 验证分组编码是否已存在
+		long exists = count(
+				Wrappers.<SysJobGroupEntity>lambdaQuery().eq(SysJobGroupEntity::getGroupCode, form.getGroupCode()));
+		if (exists > 0) {
+			throw new SystemBusinessException(JOB_GROUP_CODE_DUPLICATE);
+		}
 
-        SysJobGroupEntity jobGroup = SysJobGroupConverter.INSTANCE.toEntity(form);
-        save(jobGroup);
-    }
+		SysJobGroupEntity jobGroup = SysJobGroupConverter.INSTANCE.toEntity(form);
+		save(jobGroup);
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void update(SysJobGroupUpdateForm form) {
-        SysJobGroupEntity jobGroup = getById(form.getId());
-        if (jobGroup == null) {
-            throw new SystemBusinessException(DATA_NOT_EXIST);
-        }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void update(SysJobGroupUpdateForm form) {
+		SysJobGroupEntity jobGroup = getById(form.getId());
+		if (jobGroup == null) {
+			throw new SystemBusinessException(DATA_NOT_EXIST);
+		}
 
-        SysJobGroupConverter.INSTANCE.updateEntity(form, jobGroup);
-        updateById(jobGroup);
-    }
+		SysJobGroupConverter.INSTANCE.updateEntity(form, jobGroup);
+		updateById(jobGroup);
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void deleteById(Long id) {
-        SysJobGroupEntity jobGroup = getById(id);
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void deleteById(Long id) {
+		SysJobGroupEntity jobGroup = getById(id);
 
-        // 查询该分组是否存在
-        if (jobGroup == null) {
-            throw new SystemBusinessException(DATA_NOT_EXIST);
-        }
+		// 查询该分组是否存在
+		if (jobGroup == null) {
+			throw new SystemBusinessException(DATA_NOT_EXIST);
+		}
 
-        // 查询当前是否为系统任务，如果系统任务则不允许删除
-        Boolean isSystem = jobGroup.getIsSystem();
-        if (BooleanUtil.isTrue(isSystem)) {
-            throw new SystemBusinessException(JOB_GROUP_SYSTEM_PROTECTED);
-        }
+		// 查询当前是否为系统任务，如果系统任务则不允许删除
+		Boolean isSystem = jobGroup.getIsSystem();
+		if (BooleanUtil.isTrue(isSystem)) {
+			throw new SystemBusinessException(JOB_GROUP_SYSTEM_PROTECTED);
+		}
 
-        // 验证分组下无任务，如果存在则不允许删除
-        long cnt = sysJobMapper
-                .selectCount(Wrappers.<SysJobEntity>lambdaQuery().eq(SysJobEntity::getJobGroup, jobGroup.getGroupCode()));
-        if (cnt > 0) {
-            throw new SystemBusinessException(JOB_GROUP_HAS_ACTIVE_JOBS, cnt);
-        }
+		// 验证分组下无任务，如果存在则不允许删除
+		long cnt = sysJobMapper
+			.selectCount(Wrappers.<SysJobEntity>lambdaQuery().eq(SysJobEntity::getJobGroup, jobGroup.getGroupCode()));
+		if (cnt > 0) {
+			throw new SystemBusinessException(JOB_GROUP_HAS_ACTIVE_JOBS, cnt);
+		}
 
-        removeById(id);
-    }
+		removeById(id);
+	}
 
 }

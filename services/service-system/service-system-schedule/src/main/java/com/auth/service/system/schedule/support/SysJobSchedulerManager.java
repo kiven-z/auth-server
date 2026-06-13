@@ -18,15 +18,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TimeZone;
+import java.util.*;
 
 import static com.auth.service.system.schedule.model.constans.SysJobQuartzDataKeys.JOB_ZONE;
 import static com.auth.service.system.schedule.model.constans.SysJobQuartzDataKeys.TRIGGER_SUFFIX;
@@ -179,16 +171,26 @@ public class SysJobSchedulerManager {
 	}
 
 	/**
+	 * 暂停整个分组下的所有任务（仅暂停 Quartz 调度状态，不删除 Trigger）
+	 * @param groupCode 分组编码
+	 */
+	public void pauseGroup(String groupCode) throws SchedulerException {
+		if (CharSequenceUtil.isBlank(groupCode)) {
+			return;
+		}
+
+		scheduler.pauseJobs(GroupMatcher.groupEquals(groupCode));
+	}
+
+	/**
 	 * 恢复整个分组下的所有任务（仅恢复 Quartz 调度状态，不重建 Trigger）
 	 * @param groupCode 分组编码
 	 */
 	public void resumeGroup(String groupCode) throws SchedulerException {
-		// 如果分组编码为空，则返回
-		if (groupCode == null || groupCode.isBlank()) {
+		if (CharSequenceUtil.isBlank(groupCode)) {
 			return;
 		}
 
-		// 恢复分组下的所有任务
 		scheduler.resumeJobs(GroupMatcher.groupEquals(groupCode));
 	}
 

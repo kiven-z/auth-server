@@ -10,6 +10,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.SchedulerException;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,15 +40,22 @@ public class SysJobOperationServiceImpl extends ServiceImpl<SysJobMapper, SysJob
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Async
 	public void syncAllFromDatabase() {
-		List<SysJobEntity> allJobs = list();
-		for (SysJobEntity job : allJobs) {
-			try {
-				quartzAdmin.scheduleOrReplace(job);
+		try {
+			List<SysJobEntity> allJobs = list();
+			for (SysJobEntity job : allJobs) {
+				try {
+					quartzAdmin.scheduleOrReplace(job);
+				}
+				catch (Exception e) {
+					log.error("启动同步定时任务失败: {} / {}", job.getJobGroup(), job.getJobName(), e);
+				}
 			}
-			catch (Exception e) {
-				log.error("启动同步定时任务失败: {} / {}", job.getJobGroup(), job.getJobName(), e);
-			}
+			log.info("定时任务已从数据库同步至 Quartz");
+		}
+		catch (Exception e) {
+			log.error("定时任务启动同步失败", e);
 		}
 	}
 
@@ -103,15 +111,15 @@ public class SysJobOperationServiceImpl extends ServiceImpl<SysJobMapper, SysJob
 	public void pauseAllInGroup(String groupCode) {
 		List<SysJobEntity> jobs = list(
 				Wrappers.lambdaQuery(SysJobEntity.class).eq(SysJobEntity::getJobGroup, groupCode));
-		for (SysJobEntity job : jobs) {
-			job.setStatus(false);
-			updateById(job);
-			try {
-				quartzAdmin.pauseJob(job.getJobName(), job.getJobGroup());
-			}
-			catch (SchedulerException ex) {
-				log.warn("分组暂停失败 {} : {}", job.getJobName(), ex.getMessage());
-			}
+		List<Long> ids = jobs.stream().map(SysJobEntity::getId).toList();
+		if (!ids.isEmpty()) {
+			lambdaUpdate().set(SysJobEntity::getStatus, false).in(SysJobEntity::getId, ids).update();
+		}
+		try {
+			quartzAdmin.pauseGroup(groupCode);
+		}
+		catch (SchedulerException ex) {
+			log.warn("分组暂停失败 groupCode={} : {}", groupCode, ex.getMessage());
 		}
 	}
 

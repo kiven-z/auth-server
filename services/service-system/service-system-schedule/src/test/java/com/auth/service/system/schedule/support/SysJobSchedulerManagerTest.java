@@ -10,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.*;
+import org.quartz.impl.matchers.GroupMatcher;
 
 import java.util.Collections;
 import java.util.Date;
@@ -46,6 +47,22 @@ class SysJobSchedulerManagerTest {
 		sysJobSchedulerManager.pauseJob("demoJob", "DEFAULT");
 
 		verify(scheduler).pauseJob(jobKey);
+	}
+
+	@Test
+	@DisplayName("pauseGroup：分组编码有效时应调用 scheduler.pauseJobs")
+	void pauseGroup_whenGroupCodePresent_pausesSchedulerGroup() throws SchedulerException {
+		sysJobSchedulerManager.pauseGroup("G");
+
+		verify(scheduler).pauseJobs(GroupMatcher.groupEquals("G"));
+	}
+
+	@Test
+	@DisplayName("resumeGroup：分组编码有效时应调用 scheduler.resumeJobs")
+	void resumeGroup_whenGroupCodePresent_resumesSchedulerGroup() throws SchedulerException {
+		sysJobSchedulerManager.resumeGroup("G");
+
+		verify(scheduler).resumeJobs(GroupMatcher.groupEquals("G"));
 	}
 
 	@Test

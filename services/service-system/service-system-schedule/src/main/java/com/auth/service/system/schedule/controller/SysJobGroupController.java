@@ -106,6 +106,8 @@ public class SysJobGroupController {
 		return Result.success(null, DELETE_SUCCESS.getMessage());
 	}
 
+	@OperationLog(targetType = "JOB_GROUP", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_JOB_GROUP, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "暂停分组下全部任务")
 	@PreAuthorize("@auth.decide('sysJob:update')")
 	@PutMapping("{groupCode}/pause-jobs")
@@ -114,6 +116,8 @@ public class SysJobGroupController {
 		return Result.success(null, MODIFY_SUCCESS.getMessage());
 	}
 
+	@OperationLog(targetType = "JOB_GROUP", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_JOB_GROUP, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "恢复分组下全部任务")
 	@PreAuthorize("@auth.decide('sysJob:update')")
 	@PutMapping("{groupCode}/resume-jobs")
