@@ -17,7 +17,7 @@ import com.auth.service.system.schedule.model.query.SysJobQuery;
 import com.auth.service.system.schedule.model.vo.SysJobDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobPageResponse;
 import com.auth.service.system.schedule.service.SysJobDefinitionService;
-import com.auth.service.system.schedule.service.SysJobQuartzRuntimeQueryService;
+import com.auth.service.system.schedule.service.SysJobRuntimeEnrichmentService;
 import com.auth.service.system.schedule.support.SysJobSchedulerManager;
 import com.auth.service.system.schedule.validation.SysJobDefinitionValidationManager;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -31,15 +31,12 @@ import org.quartz.SchedulerException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_BUSY;
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_GROUP_NOT_AVAILABLE;
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_QUARTZ_OPERATION_FAILED;
-import static com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys.JOB_ZONE;
 
 /**
  * 定时任务定义服务实现
@@ -63,7 +60,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 
 	private final SysJobDefinitionValidationManager validationManager;
 
-	private final SysJobQuartzRuntimeQueryService sysJobQuartzRuntimeQueryService;
+	private final SysJobRuntimeEnrichmentService sysJobRuntimeEnrichmentService;
 
 	/**
 	 * {@inheritDoc}
@@ -73,7 +70,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		IPage<SysJobPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
 		IPage<SysJobPageResponse> voPage = page.convert(SysJobConverter.INSTANCE::toPageResponse);
 
-		sysJobQuartzRuntimeQueryService.enrichPageRows(voPage.getRecords());
+		sysJobRuntimeEnrichmentService.enrichPageLastExecution(voPage.getRecords());
 		auditUserDisplayService.enrichAuditUsernames(voPage);
 		return PageResponse.of(voPage);
 	}
@@ -94,10 +91,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		if (jobGroupEntity != null) {
 			vo.setJobGroupName(jobGroupEntity.getGroupName());
 		}
-		SysJobSchedulerManager.FireTimes fireTimes = quartzAdmin.getFireTimes(sysJob.getJobName(),
-				sysJob.getJobGroup());
-		vo.setPreviousFireTime(toLocalDateTime(fireTimes.previousFireTime()));
-		vo.setNextFireTime(toLocalDateTime(fireTimes.nextFireTime()));
+		sysJobRuntimeEnrichmentService.enrichDetail(vo, sysJob.getId(), sysJob.getJobName(), sysJob.getJobGroup());
 
 		auditUserDisplayService.enrichAuditUsernames(List.of(vo));
 		return vo;
@@ -211,6 +205,9 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		if (dbJob == null) {
 			throw new SysJobException(DATA_NOT_EXIST);
 		}
+		if (sysJobRuntimeEnrichmentService.isBusy(dbJob.getJobName(), dbJob.getJobGroup())) {
+			throw new SysJobException(JOB_BUSY);
+		}
 		try {
 			quartzAdmin.ensureJobDetail(dbJob);
 			quartzAdmin.triggerJob(dbJob.getJobName(), dbJob.getJobGroup());
@@ -219,13 +216,6 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 			log.error("立即执行失败", ex);
 			throw new SysJobException(JOB_QUARTZ_OPERATION_FAILED, "runOnce", ex.getMessage());
 		}
-	}
-
-	private LocalDateTime toLocalDateTime(Date date) {
-		if (date == null) {
-			return null;
-		}
-		return LocalDateTime.ofInstant(Instant.ofEpochMilli(date.getTime()), JOB_ZONE);
 	}
 
 }

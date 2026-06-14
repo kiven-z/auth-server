@@ -10,7 +10,7 @@ import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
 import com.auth.service.system.schedule.model.form.SysJobStatusForm;
 import com.auth.service.system.schedule.model.form.SysJobUpdateForm;
 import com.auth.service.system.schedule.model.vo.SysJobDetailVO;
-import com.auth.service.system.schedule.service.SysJobQuartzRuntimeQueryService;
+import com.auth.service.system.schedule.service.SysJobRuntimeEnrichmentService;
 import com.auth.service.system.schedule.support.SysJobSchedulerManager;
 import com.auth.service.system.schedule.validation.SysJobDefinitionValidationManager;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
@@ -30,6 +30,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_BUSY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -64,21 +65,21 @@ class SysJobDefinitionServiceImplTest {
 	private SysJobDefinitionValidationManager validationManager;
 
 	@Mock
-	private SysJobQuartzRuntimeQueryService sysJobQuartzRuntimeQueryService;
+	private SysJobRuntimeEnrichmentService sysJobRuntimeEnrichmentService;
 
 	private SysJobDefinitionServiceImpl sysJobDefinitionService;
 
 	@BeforeEach
 	void setUp() throws Exception {
 		sysJobDefinitionService = new SysJobDefinitionServiceImpl(quartzAdmin, auditUserDisplayService,
-				sysJobGroupMapper, logJobMapper, validationManager, sysJobQuartzRuntimeQueryService);
+				sysJobGroupMapper, logJobMapper, validationManager, sysJobRuntimeEnrichmentService);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysJobDefinitionService, sysJobMapper);
 	}
 
 	@Test
-	@DisplayName("详情：存在时补全分组名称、Quartz 触发时间与审计展示名")
+	@DisplayName("详情：存在时补全分组名称与运行时信息")
 	void getDetailReturnsVoWhenExists() {
 		SysJobEntity entity = new SysJobEntity();
 		entity.setId(1L);
@@ -91,14 +92,13 @@ class SysJobDefinitionServiceImplTest {
 		groupEntity.setGroupCode("DEFAULT");
 		groupEntity.setGroupName("默认分组");
 		when(sysJobGroupMapper.selectOne(any(Wrapper.class))).thenReturn(groupEntity);
-		when(quartzAdmin.getFireTimes("demoJob", "DEFAULT"))
-			.thenReturn(new SysJobSchedulerManager.FireTimes(null, null));
 
 		SysJobDetailVO detail = sysJobDefinitionService.getDetail(1L);
 
 		assertThat(detail.getJobName()).isEqualTo("demoJob");
 		assertThat(detail.getJobGroup()).isEqualTo("DEFAULT");
 		assertThat(detail.getJobGroupName()).isEqualTo("默认分组");
+		verify(sysJobRuntimeEnrichmentService).enrichDetail(detail, 1L, "demoJob", "DEFAULT");
 		verify(auditUserDisplayService).enrichAuditUsernames(any(List.class));
 	}
 
@@ -163,11 +163,27 @@ class SysJobDefinitionServiceImplTest {
 		entity.setJobName("demoJob");
 		entity.setJobGroup("DEFAULT");
 		when(sysJobMapper.selectById(5L)).thenReturn(entity);
+		when(sysJobRuntimeEnrichmentService.isBusy("demoJob", "DEFAULT")).thenReturn(false);
 
 		sysJobDefinitionService.runOnce(5L);
 
 		verify(quartzAdmin).ensureJobDetail(entity);
 		verify(quartzAdmin).triggerJob("demoJob", "DEFAULT");
+	}
+
+	@Test
+	@DisplayName("立即执行：任务 busy 时抛出 JOB_BUSY")
+	void runOnceThrowsWhenBusy() {
+		SysJobEntity entity = new SysJobEntity();
+		entity.setId(5L);
+		entity.setJobName("demoJob");
+		entity.setJobGroup("DEFAULT");
+		when(sysJobMapper.selectById(5L)).thenReturn(entity);
+		when(sysJobRuntimeEnrichmentService.isBusy("demoJob", "DEFAULT")).thenReturn(true);
+
+		assertThatThrownBy(() -> sysJobDefinitionService.runOnce(5L)).isInstanceOf(SysJobException.class)
+			.extracting(ex -> ((SysJobException) ex).getResultCode())
+			.isEqualTo(JOB_BUSY);
 	}
 
 	@Test

@@ -2,7 +2,6 @@ package com.auth.service.system.schedule.model.vo;
 
 import com.auth.common.core.model.response.BaseResponse;
 import com.auth.service.system.schedule.model.enums.SysJobLastExecutionStatus;
-import com.auth.service.system.schedule.model.enums.SysJobQuartzRuntimeStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
@@ -14,7 +13,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 定时任务分页行（含 Quartz 运行态补充字段）
+ * 定时任务分页行（含最近一次执行结果补充字段）
  *
  * @author Bunny
  */
@@ -22,7 +21,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
-public class SysJobPageResponse extends BaseResponse implements Serializable {
+public class SysJobPageResponse extends BaseResponse implements Serializable, SysJobLastExecutionView {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
@@ -73,21 +72,6 @@ public class SysJobPageResponse extends BaseResponse implements Serializable {
 
 	@Schema(title = "备注")
 	private String remark;
-
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	@Schema(title = "上次触发时间")
-	private LocalDateTime previousFireTime;
-
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	@Schema(title = "下次触发时间")
-	private LocalDateTime nextFireTime;
-
-	@Schema(title = "Quartz 运行态")
-	private SysJobQuartzRuntimeStatus quartzRuntimeStatus;
-
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	@Schema(title = "Quartz 本次开始执行时间")
-	private LocalDateTime quartzFireTime;
 
 	@Schema(title = "最近一次执行结果")
 	private SysJobLastExecutionStatus lastExecutionStatus;

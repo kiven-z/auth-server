@@ -1,6 +1,9 @@
 package com.auth.service.system.schedule.model.vo;
 
 import com.auth.common.core.model.response.BaseResponse;
+import com.auth.service.system.schedule.model.enums.SysJobLastExecutionStatus;
+import com.auth.service.system.schedule.model.enums.SysJobQuartzRuntimeStatus;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -20,7 +23,7 @@ import java.time.LocalDateTime;
 @Setter
 @ToString
 @EqualsAndHashCode(callSuper = true)
-public class SysJobDetailVO extends BaseResponse {
+public class SysJobDetailVO extends BaseResponse implements SysJobLastExecutionView {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
@@ -73,10 +76,26 @@ public class SysJobDetailVO extends BaseResponse {
 	@Schema(title = "备注")
 	private String remark;
 
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "上次触发时间")
 	private LocalDateTime previousFireTime;
 
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "下次触发时间")
 	private LocalDateTime nextFireTime;
+
+	@Schema(title = "Quartz 运行态")
+	private SysJobQuartzRuntimeStatus quartzRuntimeStatus;
+
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@Schema(title = "Quartz 本次开始执行时间")
+	private LocalDateTime quartzFireTime;
+
+	@Schema(title = "最近一次执行结果")
+	private SysJobLastExecutionStatus lastExecutionStatus;
+
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@Schema(title = "最近一次执行时间")
+	private LocalDateTime lastExecutionTime;
 
 }

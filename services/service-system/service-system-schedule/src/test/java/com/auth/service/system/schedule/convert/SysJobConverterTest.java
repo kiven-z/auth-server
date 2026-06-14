@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class SysJobConverterTest {
 
 	@Test
-	@DisplayName("分页 PO 映射为分页 VO，审计人名与 Quartz 时间由 Service 补充")
+	@DisplayName("分页 PO 映射为分页 VO，最近执行结果由 Service 补充")
 	void toPageResponse_mapsPoFields() {
 		LocalDateTime now = LocalDateTime.of(2026, 5, 23, 10, 0);
 		SysJobPageRowPO po = new SysJobPageRowPO();
@@ -38,7 +38,7 @@ class SysJobConverterTest {
 		assertThat(vo.getCronExpression()).isEqualTo("0 0/5 * * * ?");
 		assertThat(vo.getCreateTime()).isEqualTo(now);
 		assertThat(vo.getCreateUsername()).isNull();
-		assertThat(vo.getPreviousFireTime()).isNull();
+		assertThat(vo.getLastExecutionStatus()).isNull();
 	}
 
 	@Test

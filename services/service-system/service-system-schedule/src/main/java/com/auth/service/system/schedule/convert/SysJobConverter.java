@@ -30,10 +30,6 @@ public interface SysJobConverter {
 	 */
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
-	@Mapping(target = "previousFireTime", ignore = true)
-	@Mapping(target = "nextFireTime", ignore = true)
-	@Mapping(target = "quartzRuntimeStatus", ignore = true)
-	@Mapping(target = "quartzFireTime", ignore = true)
 	@Mapping(target = "lastExecutionStatus", ignore = true)
 	@Mapping(target = "lastExecutionTime", ignore = true)
 	SysJobPageResponse toPageResponse(SysJobPageRowPO po);
@@ -48,6 +44,10 @@ public interface SysJobConverter {
 	@Mapping(target = "jobGroupName", ignore = true)
 	@Mapping(target = "previousFireTime", ignore = true)
 	@Mapping(target = "nextFireTime", ignore = true)
+	@Mapping(target = "quartzRuntimeStatus", ignore = true)
+	@Mapping(target = "quartzFireTime", ignore = true)
+	@Mapping(target = "lastExecutionStatus", ignore = true)
+	@Mapping(target = "lastExecutionTime", ignore = true)
 	SysJobDetailVO toDetailVo(SysJobEntity entity);
 
 	/**

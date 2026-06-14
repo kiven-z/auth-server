@@ -130,7 +130,12 @@ public enum ScheduleResultCode implements SystemResultCode {
 	 * 消息调度能力未启用（message 模块未装配）
 	 */
 	JOB_MESSAGE_DISPATCH_UNAVAILABLE(404, 247, "JOB_MESSAGE_DISPATCH_UNAVAILABLE",
-			"system.job.message_dispatch.unavailable");
+			"system.job.message_dispatch.unavailable"),
+
+	/**
+	 * 任务正在执行或排队中，禁止立即执行
+	 */
+	JOB_BUSY(422, 248, "JOB_BUSY", "system.job.busy");
 
 	private final int httpStatus;
 
