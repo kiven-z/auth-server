@@ -5,7 +5,7 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
-import com.auth.service.auth.session.application.OnlineSessionQueryApplicationService;
+import com.auth.service.auth.session.application.SessionAdminApplicationService;
 import com.auth.service.auth.session.domain.model.query.OnlineSessionPageQuery;
 import com.auth.service.auth.session.domain.model.vo.OnlineSessionPageVO;
 import com.auth.service.auth.shared.audit.AuthAuditBizModule;
@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class AdminOnlineSessionController {
 
-	private final OnlineSessionQueryApplicationService onlineSessionQueryApplicationService;
+	private final SessionAdminApplicationService sessionAdminApplicationService;
 
 	@OperationLog(targetType = "ONLINE_SESSION_LIST", serviceDomain = AuditServiceDomain.AUTH,
 			bizModule = AuthAuditBizModule.AUTH_SESSION, operation = OperationLogKind.QUERY)
@@ -36,7 +36,7 @@ public class AdminOnlineSessionController {
 	@PreAuthorize("@auth.decide('ADMIN')")
 	@GetMapping("/online")
 	public Result<PageResponse<OnlineSessionPageVO>> page(OnlineSessionPageQuery query) {
-		PageResponse<OnlineSessionPageVO> page = onlineSessionQueryApplicationService.getPage(query);
+		PageResponse<OnlineSessionPageVO> page = sessionAdminApplicationService.getOnlineSessionPage(query);
 		return Result.success(page);
 	}
 

@@ -4,6 +4,7 @@ import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.module.security.contract.redis.SecurityRedisKey;
 import com.auth.service.auth.TestConstants;
 import com.auth.service.auth.session.infrastructure.redis.script.UserSessionRedisScripts;
+import com.auth.service.auth.session.infrastructure.redis.support.UserSessionIndexRedisCodec;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -72,7 +73,11 @@ class RedisUserSessionIndexRepositoryTest {
 		when(redisTemplate.opsForHash()).thenReturn(hashOperations);
 		when(redisTemplate.opsForSet()).thenReturn(setOperations);
 		when(redisTemplate.opsForZSet()).thenReturn(zSetOperations);
-		repository = new RedisUserSessionIndexRepository(redisTemplate, userSessionRedisScripts);
+		UserSessionIndexRedisCodec codec = new UserSessionIndexRedisCodec();
+		UserSessionLifecycleStore lifecycleStore = new UserSessionLifecycleStore(redisTemplate, userSessionRedisScripts,
+				codec);
+		UserSessionIndexStore indexStore = new UserSessionIndexStore(redisTemplate, codec, lifecycleStore);
+		repository = new RedisUserSessionIndexRepository(lifecycleStore, indexStore, redisTemplate, codec);
 	}
 
 	@Test
@@ -177,8 +182,6 @@ class RedisUserSessionIndexRepositoryTest {
 			.thenReturn(Map.of("userId", TestConstants.USER_ID, "sessionId", TestConstants.JTI, "loginAt",
 					1_700_000_000_000L, "ipAddress", "10.0.0.1"));
 		when(hashOperations.entries(SecurityRedisKey.USER_SESSION.key("stale-jti"))).thenReturn(Map.of());
-		when(setOperations.isMember(SecurityRedisKey.USER_SESSIONS.key(TestConstants.USER_ID), TestConstants.JTI))
-			.thenReturn(true);
 		when(zSetOperations.remove(GLOBAL_KEY, "stale-jti")).thenReturn(1L);
 
 		var slice = repository.pageGlobalSessions(1, 10, null, null);
@@ -199,9 +202,6 @@ class RedisUserSessionIndexRepositoryTest {
 					1_700_000_000_000L, "ipAddress", "10.0.0.1"));
 		when(hashOperations.entries(SecurityRedisKey.USER_SESSION.key("other-jti"))).thenReturn(Map.of("userId", 99L,
 				"sessionId", "other-jti", "loginAt", 1_700_000_000_100L, "ipAddress", "172.16.0.2"));
-		when(setOperations.isMember(SecurityRedisKey.USER_SESSIONS.key(TestConstants.USER_ID), TestConstants.JTI))
-			.thenReturn(true);
-		when(setOperations.isMember(SecurityRedisKey.USER_SESSIONS.key(99L), "other-jti")).thenReturn(true);
 
 		var slice = repository.pageGlobalSessions(1, 10, Set.of(TestConstants.USER_ID), "10.0");
 

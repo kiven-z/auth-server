@@ -1,27 +1,24 @@
 package com.auth.service.auth.session.infrastructure.redis;
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.NumberUtil;
-import cn.hutool.core.util.ObjectUtil;
 import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.service.auth.session.domain.model.OnlineSessionPageSlice;
-import com.auth.service.auth.session.infrastructure.redis.script.UserSessionRedisScripts;
+import com.auth.service.auth.session.infrastructure.redis.support.UserSessionIndexRedisCodec;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
-import static com.auth.module.security.contract.redis.SecurityRedisKey.*;
+import static com.auth.module.security.contract.redis.SecurityRedisKey.GLOBAL_SESSIONS;
+import static com.auth.module.security.contract.redis.SecurityRedisKey.USER_SESSION;
 
 /**
- * 用户会话 Redis 索引：注册、终止、查询与僵尸索引清理
+ * 用户会话 Redis 索引：生命周期、单用户索引与全局在线分页
  *
  * @author Bunny
  */
@@ -38,14 +35,21 @@ public class RedisUserSessionIndexRepository {
 	 */
 	private static final int MAX_PAGE_SIZE = 100;
 
+	private final UserSessionLifecycleStore userSessionLifecycleStore;
+
+	private final UserSessionIndexStore userSessionIndexStore;
+
 	private final RedisTemplate<String, Object> redisTemplate;
 
-	private final UserSessionRedisScripts userSessionRedisScripts;
+	private final UserSessionIndexRedisCodec userSessionIndexRedisCodec;
 
-	public RedisUserSessionIndexRepository(RedisTemplate<String, Object> redisTemplate,
-			UserSessionRedisScripts userSessionRedisScripts) {
+	public RedisUserSessionIndexRepository(UserSessionLifecycleStore userSessionLifecycleStore,
+			UserSessionIndexStore userSessionIndexStore, RedisTemplate<String, Object> redisTemplate,
+			UserSessionIndexRedisCodec userSessionIndexRedisCodec) {
+		this.userSessionLifecycleStore = userSessionLifecycleStore;
+		this.userSessionIndexStore = userSessionIndexStore;
 		this.redisTemplate = redisTemplate;
-		this.userSessionRedisScripts = userSessionRedisScripts;
+		this.userSessionIndexRedisCodec = userSessionIndexRedisCodec;
 	}
 
 	/**
@@ -54,7 +58,7 @@ public class RedisUserSessionIndexRepository {
 	 * @return 活跃会话数
 	 */
 	public long countActiveSessions(long userId) {
-		return ObjectUtil.defaultIfNull(redisTemplate.opsForSet().size(USER_SESSIONS.key(userId)), 0L);
+		return userSessionIndexStore.countActiveSessions(userId);
 	}
 
 	/**
@@ -62,16 +66,7 @@ public class RedisUserSessionIndexRepository {
 	 * @param userSessionIndex 用户会话索引
 	 */
 	public void registerSession(@NotNull UserSessionIndex userSessionIndex) {
-		String sessionId = userSessionIndex.getSessionId();
-		Long userId = userSessionIndex.getUserId();
-		if (CharSequenceUtil.isBlank(sessionId) || userId == null) {
-			throw new IllegalArgumentException("sessionId and userId are required for session registration");
-		}
-
-		List<String> keys = List.of(USER_SESSION.key(sessionId), USER_SESSIONS.key(userId), GLOBAL_SESSIONS.fixedKey());
-		Object[] args = buildRegisterScriptArgs(userSessionIndex, sessionId, resolveLoginAtScore(userSessionIndex),
-				resolveSessionTtl(userSessionIndex));
-		redisTemplate.execute(userSessionRedisScripts.registerScript(), keys, args);
+		userSessionLifecycleStore.registerSession(userSessionIndex);
 	}
 
 	/**
@@ -80,11 +75,7 @@ public class RedisUserSessionIndexRepository {
 	 * @param jti 会话唯一标识
 	 */
 	public void terminateSession(long userId, @NotNull String jti) {
-		if (CharSequenceUtil.isBlank(jti)) {
-			return;
-		}
-		List<String> keys = List.of(USER_SESSION.key(jti), USER_SESSIONS.key(userId), GLOBAL_SESSIONS.fixedKey());
-		redisTemplate.execute(userSessionRedisScripts.terminateScript(), keys, jti);
+		userSessionLifecycleStore.terminateSession(userId, jti);
 	}
 
 	/**
@@ -92,10 +83,7 @@ public class RedisUserSessionIndexRepository {
 	 * @param userId 用户 ID
 	 */
 	public void terminateAllSessions(long userId) {
-		String userSessionsKey = USER_SESSIONS.key(userId);
-		List<String> jtis = streamActiveJtis(userSessionsKey).toList();
-		redisTemplate.delete(userSessionsKey);
-		jtis.forEach(jti -> terminateSession(userId, jti));
+		userSessionLifecycleStore.terminateAllSessions(userId);
 	}
 
 	/**
@@ -104,14 +92,7 @@ public class RedisUserSessionIndexRepository {
 	 * @return 会话索引
 	 */
 	public Optional<UserSessionIndex> loadUserSessionIndex(@NotNull String jti) {
-		if (CharSequenceUtil.isBlank(jti)) {
-			return Optional.empty();
-		}
-		Map<Object, Object> hash = redisTemplate.opsForHash().entries(USER_SESSION.key(jti));
-		if (CollUtil.isEmpty(hash)) {
-			return Optional.empty();
-		}
-		return Optional.of(toSessionIndex(jti, hash, null));
+		return userSessionLifecycleStore.loadUserSessionIndex(jti);
 	}
 
 	/**
@@ -123,10 +104,7 @@ public class RedisUserSessionIndexRepository {
 	 */
 	public void updateRefreshInfo(@NotNull String jti, @NotNull String refreshTokenHash, long refreshTokenExpiresAt,
 			@NotNull Duration ttl) {
-		String sessionKey = USER_SESSION.key(jti);
-		redisTemplate.opsForHash().put(sessionKey, "refreshTokenHash", refreshTokenHash);
-		redisTemplate.opsForHash().put(sessionKey, "refreshTokenExpiresAt", refreshTokenExpiresAt);
-		redisTemplate.expire(sessionKey, ttl);
+		userSessionLifecycleStore.updateRefreshInfo(jti, refreshTokenHash, refreshTokenExpiresAt, ttl);
 	}
 
 	/**
@@ -135,10 +113,7 @@ public class RedisUserSessionIndexRepository {
 	 * @return 会话列表
 	 */
 	public List<UserSessionIndex> listUserSessions(long userId) {
-		String userSessionsKey = USER_SESSIONS.key(userId);
-		return streamActiveJtis(userSessionsKey).map(jti -> loadListedSession(userSessionsKey, userId, jti))
-			.flatMap(Optional::stream)
-			.toList();
+		return userSessionIndexStore.listUserSessions(userId);
 	}
 
 	/**
@@ -151,9 +126,18 @@ public class RedisUserSessionIndexRepository {
 	 */
 	public OnlineSessionPageSlice pageGlobalSessions(int pageIndex, int pageSize, Set<Long> allowedUserIds,
 			String ipAddress) {
-		int normalizedPageIndex = normalizePageIndex(pageIndex);
-		int normalizedPageSize = normalizePageSize(pageSize);
-		Predicate<UserSessionIndex> filter = buildGlobalSessionFilter(allowedUserIds, ipAddress);
+		int normalizedPageIndex = Math.max(1, pageIndex);
+		int normalizedPageSize = Math.min(Math.max(1, pageSize), MAX_PAGE_SIZE);
+		String ipKeyword = CharSequenceUtil.trim(ipAddress);
+		Predicate<UserSessionIndex> filter = session -> {
+			if (allowedUserIds != null) {
+				Long userId = session.getUserId();
+				if (userId == null || !allowedUserIds.contains(userId)) {
+					return false;
+				}
+			}
+			return CharSequenceUtil.isBlank(ipKeyword) || CharSequenceUtil.contains(session.getIpAddress(), ipKeyword);
+		};
 		GlobalSessionScanResult scanResult = scanGlobalSessions(filter, normalizedPageIndex, normalizedPageSize);
 		return new OnlineSessionPageSlice(scanResult.matchedCount(), scanResult.pageRecords());
 	}
@@ -174,7 +158,8 @@ public class RedisUserSessionIndexRepository {
 			.filter(String.class::isInstance)
 			.map(String.class::cast)
 			.filter(jti -> CollUtil.isEmpty(redisTemplate.opsForHash().entries(USER_SESSION.key(jti))))
-			.filter(this::removeStaleGlobalIndex)
+			.filter(jti -> NumberUtil
+				.nullToZero(redisTemplate.opsForZSet().remove(GLOBAL_SESSIONS.fixedKey(), jti)) > 0)
 			.count();
 	}
 
@@ -184,11 +169,7 @@ public class RedisUserSessionIndexRepository {
 	 * @return 清理数量
 	 */
 	public int cleanupStaleActiveSessions(long userId) {
-		String userSessionsKey = USER_SESSIONS.key(userId);
-		return (int) streamActiveJtis(userSessionsKey)
-			.filter(jti -> CollUtil.isEmpty(redisTemplate.opsForHash().entries(USER_SESSION.key(jti))))
-			.filter(jti -> removeStaleIndexes(userSessionsKey, jti))
-			.count();
+		return userSessionIndexStore.cleanupStaleActiveSessions(userId);
 	}
 
 	/**
@@ -197,15 +178,7 @@ public class RedisUserSessionIndexRepository {
 	 * @return 被淘汰会话ID，若无可淘汰会话则为空
 	 */
 	public Optional<String> evictOldestActiveSession(long userId) {
-		String userSessionsKey = USER_SESSIONS.key(userId);
-		return streamActiveJtis(userSessionsKey)
-			.map(jti -> loadListedSession(userSessionsKey, userId, jti).map(index -> jti))
-			.flatMap(Optional::stream)
-			.min(Comparator.comparingLong(this::ttlRank))
-			.map(evictedJti -> {
-				terminateSession(userId, evictedJti);
-				return evictedJti;
-			});
+		return userSessionIndexStore.evictOldestActiveSession(userId);
 	}
 
 	/**
@@ -213,76 +186,9 @@ public class RedisUserSessionIndexRepository {
 	 * @param jti 会话唯一标识
 	 */
 	public void terminateSession(@NotNull String jti) {
-		if (CharSequenceUtil.isBlank(jti)) {
-			return;
-		}
-		Optional<UserSessionIndex> sessionIndex = loadUserSessionIndex(jti);
-		if (sessionIndex.isPresent() && sessionIndex.get().getUserId() != null) {
-			terminateSession(sessionIndex.get().getUserId(), jti);
-			return;
-		}
-		List<String> keys = List.of(USER_SESSION.key(jti), GLOBAL_SESSIONS.fixedKey());
-		redisTemplate.execute(userSessionRedisScripts.terminateOrphanScript(), keys, jti);
+		userSessionLifecycleStore.terminateSession(jti);
 	}
 
-	/**
-	 * 用户活跃会话 Set 中的 jti 流
-	 * @param userSessionsKey 用户会话 Set key
-	 * @return 非空 jti 流
-	 */
-	private Stream<String> streamActiveJtis(String userSessionsKey) {
-		return Optional.ofNullable(redisTemplate.opsForSet().members(userSessionsKey))
-			.orElseGet(Collections::emptySet)
-			.stream()
-			.filter(String.class::isInstance)
-			.map(String.class::cast)
-			.filter(CharSequenceUtil::isNotBlank);
-	}
-
-	/**
-	 * 列表场景：一次 HGETALL；空 Hash 则清理 Set/ZSet 并返回 empty
-	 * @param userSessionsKey 用户会话 Set key
-	 * @param userId 用户 ID
-	 * @param jti 会话唯一标识
-	 * @return 会话索引
-	 */
-	private Optional<UserSessionIndex> loadListedSession(String userSessionsKey, long userId, String jti) {
-		Map<Object, Object> hash = redisTemplate.opsForHash().entries(USER_SESSION.key(jti));
-		if (CollUtil.isEmpty(hash)) {
-			removeStaleIndexes(userSessionsKey, jti);
-			return Optional.empty();
-		}
-		return Optional.of(toSessionIndex(jti, hash, userId));
-	}
-
-	/**
-	 * 全局列表场景：空 Hash 时清理 ZSet 与用户 Set 残留
-	 * @param jti 会话唯一标识
-	 * @return 会话索引
-	 */
-	private Optional<UserSessionIndex> loadGlobalListedSession(String jti) {
-		Map<Object, Object> hash = redisTemplate.opsForHash().entries(USER_SESSION.key(jti));
-		if (CollUtil.isEmpty(hash)) {
-			removeStaleGlobalIndex(jti);
-			return Optional.empty();
-		}
-		UserSessionIndex sessionIndex = toSessionIndex(jti, hash, null);
-		Long userId = sessionIndex.getUserId();
-		if (userId != null) {
-			String userSessionsKey = USER_SESSIONS.key(userId);
-			Boolean member = redisTemplate.opsForSet().isMember(userSessionsKey, jti);
-			if (Boolean.FALSE.equals(member)) {
-				redisTemplate.opsForSet().add(userSessionsKey, jti);
-			}
-		}
-		return Optional.of(sessionIndex);
-	}
-
-	/**
-	 * 统计符合筛选条件的全局会话数
-	 * @param filter 筛选条件
-	 * @return 会话总数
-	 */
 	/**
 	 * 扫描全局 ZSet：统计匹配总数，并收集当前页记录
 	 * @param filter 筛选条件
@@ -331,167 +237,17 @@ public class RedisUserSessionIndexRepository {
 	}
 
 	/**
-	 * 构建全局会话筛选条件
-	 * @param allowedUserIds 允许的用户 ID 集合；{@code null} 表示不过滤
-	 * @param ipAddress IP 地址关键字
-	 * @return 筛选谓词
-	 */
-	private Predicate<UserSessionIndex> buildGlobalSessionFilter(Set<Long> allowedUserIds, String ipAddress) {
-		String ipKeyword = CharSequenceUtil.trim(ipAddress);
-		return session -> matchesUserFilter(session, allowedUserIds) && matchesIpFilter(session, ipKeyword);
-	}
-
-	/**
-	 * 用户 ID 筛选
-	 * @param session 会话索引
-	 * @param allowedUserIds 允许的用户 ID 集合
-	 * @return 是否匹配
-	 */
-	private boolean matchesUserFilter(UserSessionIndex session, Set<Long> allowedUserIds) {
-		if (allowedUserIds == null) {
-			return true;
-		}
-		Long userId = session.getUserId();
-		return userId != null && allowedUserIds.contains(userId);
-	}
-
-	/**
-	 * IP 地址包含匹配
-	 * @param session 会话索引
-	 * @param ipKeyword IP 关键字
-	 * @return 是否匹配
-	 */
-	private boolean matchesIpFilter(UserSessionIndex session, String ipKeyword) {
-		if (CharSequenceUtil.isBlank(ipKeyword)) {
-			return true;
-		}
-		return CharSequenceUtil.contains(session.getIpAddress(), ipKeyword);
-	}
-
-	/**
-	 * 清理全局 ZSet 僵尸 jti；若能从 Hash 解析 userId 则同步清理用户 Set
+	 * 全局列表场景：空 Hash 时仅清理 ZSet 残留，不反向补写用户 Set
 	 * @param jti 会话唯一标识
-	 * @return 是否移除了任一索引
-	 */
-	private boolean removeStaleGlobalIndex(String jti) {
-		Long zsetRemoved = redisTemplate.opsForZSet().remove(GLOBAL_SESSIONS.fixedKey(), jti);
-		return NumberUtil.nullToZero(zsetRemoved) > 0;
-	}
-
-	/**
-	 * 规范化页码
-	 * @param pageIndex 页码
-	 * @return 不小于 1 的页码
-	 */
-	private int normalizePageIndex(int pageIndex) {
-		return Math.max(1, pageIndex);
-	}
-
-	/**
-	 * 规范化分页大小
-	 * @param pageSize 分页大小
-	 * @return 限制在 1～{@link #MAX_PAGE_SIZE} 的分页大小
-	 */
-	private int normalizePageSize(int pageSize) {
-		return Math.min(Math.max(1, pageSize), MAX_PAGE_SIZE);
-	}
-
-	/**
-	 * 从 Hash 组装会话索引
-	 * @param jti 会话唯一标识
-	 * @param hash 会话 Hash
-	 * @param overrideUserId 覆盖 userId（列表场景传入；单条加载时为 null）
 	 * @return 会话索引
 	 */
-	private UserSessionIndex toSessionIndex(String jti, Map<Object, Object> hash, Long overrideUserId) {
-		UserSessionIndex sessionIndex = BeanUtil.toBean(hash, UserSessionIndex.class);
-		if (overrideUserId != null) {
-			sessionIndex.setUserId(overrideUserId);
+	private Optional<UserSessionIndex> loadGlobalListedSession(String jti) {
+		Map<Object, Object> hash = redisTemplate.opsForHash().entries(USER_SESSION.key(jti));
+		if (CollUtil.isEmpty(hash)) {
+			redisTemplate.opsForZSet().remove(GLOBAL_SESSIONS.fixedKey(), jti);
+			return Optional.empty();
 		}
-		sessionIndex.setSessionId(jti);
-		return sessionIndex;
-	}
-
-	/**
-	 * 清理用户 Set 与全局 ZSet 中的僵尸 jti
-	 * @param userSessionsKey 用户会话 Set key
-	 * @param jti 会话唯一标识
-	 * @return 是否移除了任一索引
-	 */
-	private boolean removeStaleIndexes(String userSessionsKey, String jti) {
-		Long setRemoved = redisTemplate.opsForSet().remove(userSessionsKey, jti);
-		Long zsetRemoved = redisTemplate.opsForZSet().remove(GLOBAL_SESSIONS.fixedKey(), jti);
-		return NumberUtil.nullToZero(setRemoved) > 0 || NumberUtil.nullToZero(zsetRemoved) > 0;
-	}
-
-	/**
-	 * 构建 register Lua 脚本参数
-	 * @param userSessionIndex 会话索引
-	 * @param sessionId 会话 ID
-	 * @param loginAtScore 登录时间分值
-	 * @param ttl 会话 TTL
-	 * @return ARGV 数组
-	 */
-	private Object[] buildRegisterScriptArgs(UserSessionIndex userSessionIndex, String sessionId, double loginAtScore,
-			Duration ttl) {
-		List<Object> args = new ArrayList<>();
-		args.add(sessionId);
-		args.add(loginAtScore);
-		args.add(ttl != null ? ttl.getSeconds() : 0L);
-
-		Map<String, Object> sessionMap = BeanUtil.beanToMap(userSessionIndex);
-		sessionMap.forEach((field, value) -> {
-			if (value != null) {
-				args.add(field);
-				args.add(String.valueOf(value));
-			}
-		});
-		return args.toArray();
-	}
-
-	/**
-	 * 根据 refreshToken 过期时间计算会话 TTL
-	 * @param userSessionIndex 会话索引
-	 * @return TTL，无法计算时返回默认 TTL
-	 */
-	private Duration resolveSessionTtl(@NotNull UserSessionIndex userSessionIndex) {
-		Long refreshTokenExpiresAt = userSessionIndex.getRefreshTokenExpiresAt();
-		Duration ttl = USER_SESSION.getDefaultTtl();
-		if (refreshTokenExpiresAt != null) {
-			long ttlSeconds = (refreshTokenExpiresAt - System.currentTimeMillis()) / 1000;
-			if (ttlSeconds > 0) {
-				ttl = Duration.ofSeconds(ttlSeconds);
-			}
-		}
-		return ttl;
-	}
-
-	/**
-	 * 解析全局 ZSet 排序分值
-	 * @param userSessionIndex 会话索引
-	 * @return loginAt 毫秒时间戳
-	 */
-	private double resolveLoginAtScore(@NotNull UserSessionIndex userSessionIndex) {
-		Long loginAt = userSessionIndex.getLoginAt();
-		if (loginAt != null) {
-			return loginAt.doubleValue();
-		}
-		return System.currentTimeMillis();
-	}
-
-	/**
-	 * 获取会话剩余TTL
-	 * @param jti 会话唯一标识
-	 * @return 剩余TTL
-	 */
-	private Long ttlRank(String jti) {
-		Long ttl = redisTemplate.getExpire(USER_SESSION.key(jti), TimeUnit.SECONDS);
-
-		// null: Redis 未返回 TTL；-2: key 不存在；-1: 无过期都视为较新，避免误淘汰有效长会话
-		if (ttl == null || ttl < 0) {
-			return Long.MAX_VALUE;
-		}
-		return ttl;
+		return Optional.of(userSessionIndexRedisCodec.toSessionIndex(jti, hash, null));
 	}
 
 	/**
