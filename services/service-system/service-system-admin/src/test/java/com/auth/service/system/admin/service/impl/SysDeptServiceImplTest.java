@@ -1,5 +1,6 @@
 package com.auth.service.system.admin.service.impl;
 
+import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.system.admin.mapper.GrantTableMapper;
 import com.auth.service.system.admin.mapper.SysDeptDetailMapper;
 import com.auth.service.system.admin.mapper.SysDeptMapper;
@@ -145,7 +146,7 @@ class SysDeptServiceImplTest {
 		SysDeptForm form = minimalForm(deptId, 0L, "D002", "原部门", false);
 		sysDeptService.updateMeta(form);
 
-		verify(sysDeptMapper).updateById(argThat((SysDeptEntity e) -> Boolean.FALSE.equals(e.getStatus())));
+		verify(sysDeptMapper).updateById(argThat((SysDeptEntity e) -> BooleanUtil.isFalse(e.getStatus())));
 		verify(deptInvalidationTrigger).submitByDeptIds(List.of(deptId), "update");
 		verify(deptClosureMaintainer, never()).moveNode(anyLong(), anyLong());
 	}

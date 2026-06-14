@@ -1,5 +1,6 @@
 package com.auth.service.system.schedule.service.impl;
 
+import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.schedule.mapper.SysJobGroupMapper;
@@ -165,7 +166,7 @@ class SysJobGroupServiceImplTest {
 		sysJobGroupService.create(form);
 
 		verify(sysJobGroupMapper).insert(argThat(
-				(SysJobGroupEntity e) -> "UNIQ_GROUP".equals(e.getGroupCode()) && Boolean.TRUE.equals(e.getStatus())));
+				(SysJobGroupEntity e) -> "UNIQ_GROUP".equals(e.getGroupCode()) && BooleanUtil.isTrue(e.getStatus())));
 	}
 
 	@Test

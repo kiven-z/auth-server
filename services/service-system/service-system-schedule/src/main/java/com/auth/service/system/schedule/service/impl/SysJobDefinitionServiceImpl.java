@@ -1,17 +1,7 @@
 package com.auth.service.system.schedule.service.impl;
 
-import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_BUSY;
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_GROUP_NOT_AVAILABLE;
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_QUARTZ_OPERATION_FAILED;
-
-import java.util.List;
-
-import org.quartz.JobKey;
-import org.quartz.SchedulerException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.BooleanUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.schedule.convert.SysJobConverter;
@@ -37,11 +27,17 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.BooleanUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.quartz.JobKey;
+import org.quartz.SchedulerException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.*;
 
 /**
  * 定时任务定义服务实现
@@ -106,7 +102,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		if (sysJobGroup == null) {
 			throw new SysJobException(DATA_NOT_EXIST);
 		}
-		if (Boolean.FALSE.equals(sysJobGroup.getStatus())) {
+		if (BooleanUtil.isFalse(sysJobGroup.getStatus())) {
 			throw new SysJobException(JOB_GROUP_NOT_AVAILABLE);
 		}
 
@@ -114,7 +110,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		validationManager.normalizeAndValidate(sysJob);
 		save(sysJob);
 
-		if (Boolean.TRUE.equals(sysJob.getStatus())) {
+		if (BooleanUtil.isTrue(sysJob.getStatus())) {
 			try {
 				quartzAdmin.scheduleOrReplace(sysJob);
 			}

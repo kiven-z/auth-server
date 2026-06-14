@@ -1,5 +1,6 @@
 package com.auth.service.system.schedule.service.impl;
 
+import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.mapper.LogJobMapper;
@@ -302,7 +303,7 @@ class SysJobDefinitionServiceImplTest {
 		ArgumentCaptor<Collection<SysJobEntity>> updateCaptor = ArgumentCaptor.forClass(Collection.class);
 		verify(sysJobDefinitionService).updateBatchById(updateCaptor.capture());
 		assertThat(updateCaptor.getValue()).hasSize(2).extracting(SysJobEntity::getId).containsExactly(1L, 2L);
-		assertThat(updateCaptor.getValue()).allMatch(job -> Boolean.FALSE.equals(job.getStatus()));
+		assertThat(updateCaptor.getValue()).allMatch(job -> BooleanUtil.isFalse(job.getStatus()));
 		verify(quartzAdmin).pauseJob("demoJob", "DEFAULT");
 		verify(quartzAdmin, never()).scheduleOrReplace(any());
 	}
@@ -326,7 +327,7 @@ class SysJobDefinitionServiceImplTest {
 		verify(sysJobDefinitionService).updateBatchById(anyList());
 		verify(quartzAdmin, times(1)).scheduleOrReplace(any());
 		verify(quartzAdmin)
-			.scheduleOrReplace(argThat(job -> job.getId().equals(2L) && Boolean.TRUE.equals(job.getStatus())));
+			.scheduleOrReplace(argThat(job -> job.getId().equals(2L) && BooleanUtil.isTrue(job.getStatus())));
 	}
 
 	@Test

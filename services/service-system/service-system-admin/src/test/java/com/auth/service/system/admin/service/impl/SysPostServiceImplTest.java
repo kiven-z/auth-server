@@ -1,5 +1,6 @@
 package com.auth.service.system.admin.service.impl;
 
+import cn.hutool.core.util.BooleanUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
@@ -292,7 +293,7 @@ class SysPostServiceImplTest {
 
 		verify(sysPostMapper).insert(argThat(
 				(SysPostEntity e) -> Long.valueOf(2L).equals(e.getDeptId()) && "NEW_CODE".equals(e.getPostCode())
-						&& Boolean.TRUE.equals(e.getStatus()) && Integer.valueOf(0).equals(e.getOrderNum())));
+						&& BooleanUtil.isTrue(e.getStatus()) && Integer.valueOf(0).equals(e.getOrderNum())));
 	}
 
 	@Test
@@ -361,7 +362,7 @@ class SysPostServiceImplTest {
 		sysPostService.update(postId, form);
 
 		verify(sysPostMapper).updateById(argThat(
-				(SysPostEntity e) -> Long.valueOf(2L).equals(e.getDeptId()) && Boolean.FALSE.equals(e.getStatus())));
+				(SysPostEntity e) -> Long.valueOf(2L).equals(e.getDeptId()) && BooleanUtil.isFalse(e.getStatus())));
 		verify(postInvalidationTrigger).submitByPostIds(List.of(postId), "update");
 	}
 

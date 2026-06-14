@@ -19,6 +19,7 @@ import com.auth.service.system.message.channel.email.RenderedEmail;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.BooleanUtil;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -75,7 +76,7 @@ public class MimeMailTransport {
 		helper.setFrom(defaultFrom);
 		helper.setTo(emailSendDTO.getTo().toArray(String[]::new));
 		helper.setSubject(subject);
-		helper.setText(body, Boolean.TRUE.equals(emailSendDTO.getHasHtml()));
+		helper.setText(body, BooleanUtil.isTrue(emailSendDTO.getHasHtml()));
 
 		if (CharSequenceUtil.isNotBlank(emailSendDTO.getReplyTo())) {
 			helper.setReplyTo(emailSendDTO.getReplyTo());

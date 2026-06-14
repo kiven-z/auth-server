@@ -69,7 +69,7 @@ public final class SessionCountChecker {
 					"Session set is empty - data inconsistent.");
 		}
 		Boolean member = redisTemplate.opsForSet().isMember(indexKey, sessionId);
-		if (!Boolean.TRUE.equals(member)) {
+		if (!BooleanUtil.isTrue(member)) {
 			throw new SecurityTokenException(SecurityResultCodeEnum.SESSION_MISSING, "Session is not active.");
 		}
 		int max = userConfigProperties.getMaxSessionCount() != null ? userConfigProperties.getMaxSessionCount() : 3;

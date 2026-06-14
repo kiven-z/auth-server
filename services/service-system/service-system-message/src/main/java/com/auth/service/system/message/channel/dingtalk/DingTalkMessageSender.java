@@ -1,6 +1,7 @@
 package com.auth.service.system.message.channel.dingtalk;
 
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.BooleanUtil;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.service.system.message.support.ChannelOptionsSupport;
 import com.auth.module.message.api.command.TemplateMessageCommand;
@@ -84,7 +85,7 @@ public class DingTalkMessageSender implements MessageSender {
 	 */
 	private RenderedDingTalkNotice resolveContent(TemplateMessageCommand command) {
 		Boolean customBody = command.getCustomBody();
-		if (Boolean.TRUE.equals(customBody)) {
+		if (BooleanUtil.isTrue(customBody)) {
 			String body = command.getBody();
 			if (CharSequenceUtil.isBlank(body)) {
 				throw new SystemBusinessException(PARAM_REQUIRED, "钉钉消息正文");

@@ -1,5 +1,6 @@
 package com.auth.service.system.message.channel.sms.dypns;
 
+import cn.hutool.core.util.BooleanUtil;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.channel.MessageSender;
 import com.auth.module.message.api.command.TemplateMessageCommand;
@@ -33,7 +34,7 @@ public class DypnsVerifyCodeMessageSender implements MessageSender {
 
 	@Override
 	public void sendByTemplate(TemplateMessageCommand command) {
-		if (Boolean.TRUE.equals(command.getCustomBody())) {
+		if (BooleanUtil.isTrue(command.getCustomBody())) {
 			throw new SystemBusinessException(SMS_CUSTOM_BODY_NOT_SUPPORTED);
 		}
 

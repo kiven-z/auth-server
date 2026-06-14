@@ -1,5 +1,6 @@
 package com.auth.service.system.authorization.job;
 
+import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.system.authorization.config.AuthorizationInvalidationProperties;
 import com.auth.service.system.authorization.mapper.SysAuthorizationInvalidationOutboxMapper;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +29,7 @@ public class AuthorizationInvalidationOutboxHistoryCleanupJob {
 	 */
 	@Scheduled(fixedDelayString = "${auth.system.authorization-invalidation.success-cleanup-interval-ms:86400000}")
 	public void purgeSuccessHistory() {
-		if (!Boolean.TRUE.equals(properties.getSuccessCleanupEnabled())) {
+		if (!BooleanUtil.isTrue(properties.getSuccessCleanupEnabled())) {
 			return;
 		}
 

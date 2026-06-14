@@ -90,7 +90,7 @@ public class RefreshTokenService {
 			rotateRefreshInSession(refreshJti, tokenPair.refreshToken());
 
 			// 获取是否记住我
-			boolean rememberMe = Boolean.TRUE.equals(sessionIndex.getRememberMe());
+			boolean rememberMe = BooleanUtil.isTrue(sessionIndex.getRememberMe());
 			// 记录成功刷新令牌
 
 			loginAuditService.auditRefreshTokenSuccess(request, refreshUserId, refreshJti);
