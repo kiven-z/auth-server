@@ -18,6 +18,7 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
 import static com.auth.service.system.message.exception.MessageResultCode.*;
 
 /**
@@ -81,13 +82,13 @@ public class DingTalkAccessTokenClient {
 			ResponseEntity<String> response = restTemplate.postForEntity(OAUTH_TOKEN_URL, entity, String.class);
 			String responseBody = response.getBody();
 			if (CharSequenceUtil.isBlank(responseBody)) {
-				throw new SystemBusinessException(DING_TALK_OAUTH_EMPTY_RESPONSE);
+				throw new SystemBusinessException(PARAM_REQUIRED, "OAuth 响应体");
 			}
 
 			JSONObject json = JSONUtil.parseObj(responseBody);
 			String accessToken = json.getStr("accessToken");
 			if (CharSequenceUtil.isBlank(accessToken)) {
-				throw new SystemBusinessException(DING_TALK_OAUTH_ACCESS_TOKEN_BLANK);
+				throw new SystemBusinessException(PARAM_REQUIRED, "accessToken");
 			}
 
 			Long expireIn = json.getLong("expireIn");

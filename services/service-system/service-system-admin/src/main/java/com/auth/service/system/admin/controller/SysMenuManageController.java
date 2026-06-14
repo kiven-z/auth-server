@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static com.auth.service.system.admin.exception.SystemAdminResultCode.ASSIGN_COMPLETED;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
 /**
  * 系统菜单管理
@@ -52,7 +52,7 @@ public class SysMenuManageController {
 	@PutMapping("/{id}/roles")
 	public Result<String> replaceRoles(@PathVariable("id") Long id, @Valid @RequestBody SysMenuAssignRoleForm form) {
 		sysMenuManageService.replaceMenuRoles(id, form);
-		return Result.success(null, ASSIGN_COMPLETED.getMessage());
+		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
 	@Operation(summary = "查询权限列表并标记菜单是否已关联（sys_menu_permission）")
@@ -70,7 +70,7 @@ public class SysMenuManageController {
 	public Result<String> replacePermissions(@PathVariable("id") Long id,
 			@Valid @RequestBody SysMenuAssignPermissionForm form) {
 		sysMenuManageService.replaceMenuPermissions(id, form);
-		return Result.success(null, ASSIGN_COMPLETED.getMessage());
+		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
 }

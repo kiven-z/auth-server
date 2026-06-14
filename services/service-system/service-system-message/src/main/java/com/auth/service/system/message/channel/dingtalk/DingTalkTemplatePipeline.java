@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
 import static com.auth.service.system.message.exception.MessageResultCode.*;
 
 /**
@@ -91,7 +92,7 @@ public class DingTalkTemplatePipeline {
 
 	private String renderBody(MessageTemplateEntity template, Map<String, Object> variables) {
 		if (CharSequenceUtil.isBlank(template.getBodyContent())) {
-			throw new SystemBusinessException(DING_TALK_BODY_EMPTY);
+			throw new SystemBusinessException(PARAM_REQUIRED, "钉钉消息正文");
 		}
 		try {
 			return FreemarkerTemplateRenderer.processTemplate(template.getTemplateName(), template.getBodyContent(),

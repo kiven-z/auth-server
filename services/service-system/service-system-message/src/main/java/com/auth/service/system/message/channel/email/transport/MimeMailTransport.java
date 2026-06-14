@@ -1,7 +1,7 @@
 package com.auth.service.system.message.channel.email.transport;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
-import static com.auth.service.system.message.exception.MessageResultCode.EXTERNAL_REQUEST_FAILED;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_FAILED;
 
 import java.util.Date;
 import java.util.List;
@@ -56,7 +56,7 @@ public class MimeMailTransport {
 		catch (MessagingException e) {
 			log.error("Failed to send email, templateCode={}, reason={}", emailSendDTO.getTemplateCode(),
 					e.getMessage(), e);
-			throw new SystemBusinessException(EXTERNAL_REQUEST_FAILED, "Email send", e.getMessage());
+			throw new SystemBusinessException(OPERATION_FAILED, "Email send", e.getMessage());
 		}
 	}
 

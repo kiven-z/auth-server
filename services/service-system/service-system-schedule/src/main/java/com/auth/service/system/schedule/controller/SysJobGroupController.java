@@ -79,7 +79,7 @@ public class SysJobGroupController {
 	@PostMapping
 	public Result<String> create(@Validated(CreateGroup.class) @RequestBody SysJobGroupForm form) {
 		sysJobGroupService.create(form);
-		return Result.success(null, ADD_SUCCESS.getMessage());
+		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
 	@OperationLog(targetType = "JOB_GROUP", serviceDomain = AuditServiceDomain.SYSTEM,
@@ -89,7 +89,7 @@ public class SysJobGroupController {
 	@PutMapping
 	public Result<String> update(@Validated(UpdateGroup.class) @RequestBody SysJobGroupUpdateForm form) {
 		sysJobGroupService.update(form);
-		return Result.success(null, MODIFY_SUCCESS.getMessage());
+		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
 	@OperationLog(targetType = "JOB_GROUP", serviceDomain = AuditServiceDomain.SYSTEM,
@@ -99,7 +99,7 @@ public class SysJobGroupController {
 	@DeleteMapping("{id}")
 	public Result<String> delete(@PathVariable("id") Long id) {
 		sysJobGroupService.deleteById(id);
-		return Result.success(null, DELETE_SUCCESS.getMessage());
+		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
 	@OperationLog(targetType = "JOB_GROUP", serviceDomain = AuditServiceDomain.SYSTEM,
@@ -109,7 +109,7 @@ public class SysJobGroupController {
 	@PutMapping("{groupCode}/pause-jobs")
 	public Result<String> pauseAllJobs(@PathVariable("groupCode") String groupCode) {
 		sysJobGroupService.pauseAllInGroup(groupCode);
-		return Result.success(null, MODIFY_SUCCESS.getMessage());
+		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
 	@OperationLog(targetType = "JOB_GROUP", serviceDomain = AuditServiceDomain.SYSTEM,
@@ -119,7 +119,7 @@ public class SysJobGroupController {
 	@PutMapping("{groupCode}/resume-jobs")
 	public Result<String> resumeAllJobs(@PathVariable("groupCode") String groupCode) {
 		sysJobGroupService.resumeAllInGroup(groupCode);
-		return Result.success(null, MODIFY_SUCCESS.getMessage());
+		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
 }

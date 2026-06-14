@@ -71,7 +71,7 @@ public class SysJobController {
 	public Result<String> update(@Validated(UpdateGroup.class) @RequestBody SysJobUpdateForm form) {
 		sysJobDefinitionService.update(form);
 
-		return Result.success(null, MODIFY_SUCCESS.getMessage());
+		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
 	@Operation(summary = "删除定时任务")
@@ -80,7 +80,7 @@ public class SysJobController {
 	public Result<String> delete(@PathVariable("id") Long id) {
 		sysJobDefinitionService.deleteById(id);
 
-		return Result.success(null, DELETE_SUCCESS.getMessage());
+		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
 	@Operation(summary = "批量启停任务")
@@ -88,7 +88,7 @@ public class SysJobController {
 	@PutMapping("status")
 	public Result<String> batchStatus(@Validated @RequestBody SysJobStatusForm form) {
 		sysJobDefinitionService.batchUpdateStatus(form);
-		return Result.success(null, MODIFY_SUCCESS.getMessage());
+		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
 	@Operation(summary = "立即执行一次")
@@ -96,7 +96,7 @@ public class SysJobController {
 	@PostMapping("{id}/run")
 	public Result<String> runOnce(@PathVariable("id") Long id) {
 		sysJobDefinitionService.runOnce(id);
-		return Result.success(null, MODIFY_SUCCESS.getMessage());
+		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
 }

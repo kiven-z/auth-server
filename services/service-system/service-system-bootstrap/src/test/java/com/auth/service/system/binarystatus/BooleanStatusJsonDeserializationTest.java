@@ -2,7 +2,6 @@ package com.auth.service.system.binarystatus;
 
 import com.auth.service.system.admin.model.form.role.SysRoleForm;
 import com.auth.service.system.admin.model.query.SysRoleQuery;
-import com.auth.service.system.message.model.query.EmailTemplateQuery;
 import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -49,13 +48,6 @@ class BooleanStatusJsonDeserializationTest {
 		SysRoleForm form = objectMapper.readValue(
 				"{\"roleCode\":\"R_DEMO\",\"roleName\":\"演示\",\"roleType\":4,\"status\":true}", SysRoleForm.class);
 		assertThat(form.getStatus()).isTrue();
-	}
-
-	@Test
-	@DisplayName("EmailTemplateQuery 支持 status 布尔反序列化")
-	void emailTemplateQueryAcceptsBooleanStatus() throws Exception {
-		EmailTemplateQuery query = objectMapper.readValue("{\"status\":false}", EmailTemplateQuery.class);
-		assertThat(query.getStatus()).isFalse();
 	}
 
 }

@@ -9,7 +9,7 @@ import com.auth.service.system.schedule.validation.SysJobTaskTypeDefinitionValid
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CLASS_EMPTY;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CLASS_LOAD_FAILED;
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CLASS_NOT_WHITELISTED;
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_MODE_CUSTOM_FORBIDS_INVOKE_TARGET;
@@ -33,7 +33,7 @@ public class CustomClassTaskDefinitionValidator implements SysJobTaskTypeDefinit
 	@Override
 	public void validate(SysJobEntity job) {
 		if (CharSequenceUtil.isBlank(job.getJobClass())) {
-			throw new SysJobException(JOB_CLASS_EMPTY);
+			throw new SysJobException(PARAM_REQUIRED, "job_class");
 		}
 		if (CharSequenceUtil.isNotBlank(job.getInvokeTarget())) {
 			throw new SysJobException(JOB_MODE_CUSTOM_FORBIDS_INVOKE_TARGET);

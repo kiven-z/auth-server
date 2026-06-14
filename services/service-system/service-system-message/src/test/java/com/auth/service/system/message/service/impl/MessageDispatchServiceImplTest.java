@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Collections;
 import java.util.List;
 
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
 import static com.auth.service.system.message.exception.MessageResultCode.*;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -98,7 +99,7 @@ class MessageDispatchServiceImplTest {
 	void sendByTemplate_shouldThrowWhenCommandNull() {
 		assertThatThrownBy(() -> dispatchService.sendByTemplate(null)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(MESSAGE_SEND_COMMAND_NULL);
+			.isEqualTo(PARAM_REQUIRED);
 	}
 
 	@Test

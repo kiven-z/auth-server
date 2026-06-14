@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
 import static com.auth.service.system.message.exception.MessageResultCode.*;
 
 /**
@@ -68,10 +69,10 @@ public class AliyunDypnsVerifyCodeSender implements AutoCloseable {
 	 */
 	public void sendVerifyCode(String phone, String providerTemplateCode, String templateParamJson) {
 		if (CharSequenceUtil.isBlank(phone)) {
-			throw new SystemBusinessException(SMS_DYPNS_PHONE_BLANK);
+			throw new SystemBusinessException(PARAM_REQUIRED, "手机号");
 		}
 		if (CharSequenceUtil.isBlank(providerTemplateCode)) {
-			throw new SystemBusinessException(SMS_DYPNS_TEMPLATE_CODE_BLANK);
+			throw new SystemBusinessException(PARAM_REQUIRED, "厂商模板编码");
 		}
 
 		SendSmsVerifyCodeRequest request = SendSmsVerifyCodeRequest.builder()

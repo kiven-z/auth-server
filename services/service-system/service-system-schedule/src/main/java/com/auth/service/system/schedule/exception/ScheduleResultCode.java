@@ -16,11 +16,6 @@ import lombok.Getter;
 public enum ScheduleResultCode implements SystemResultCode {
 
 	/**
-	 * invoke_target 为空
-	 */
-	JOB_INVOKE_TARGET_EMPTY(422, 215, "JOB_INVOKE_TARGET_EMPTY", "system.job.invoke_target.empty"),
-
-	/**
 	 * invoke_target 格式应为 beanName.method
 	 */
 	JOB_INVOKE_TARGET_FORMAT(422, 216, "JOB_INVOKE_TARGET_FORMAT", "system.job.invoke_target.format"),
@@ -65,11 +60,6 @@ public enum ScheduleResultCode implements SystemResultCode {
 	JOB_GROUP_NOT_AVAILABLE(422, 226, "JOB_GROUP_NOT_AVAILABLE", "system.job.group.not_available"),
 
 	/**
-	 * job_class 为空
-	 */
-	JOB_CLASS_EMPTY(422, 227, "JOB_CLASS_EMPTY", "system.job.class.empty"),
-
-	/**
 	 * 任务类未在白名单
 	 */
 	JOB_CLASS_NOT_WHITELISTED(422, 228, "JOB_CLASS_NOT_WHITELISTED", "system.job.class.not_whitelisted"),
@@ -78,11 +68,6 @@ public enum ScheduleResultCode implements SystemResultCode {
 	 * 任务类无法加载
 	 */
 	JOB_CLASS_LOAD_FAILED(422, 235, "JOB_CLASS_LOAD_FAILED", "system.job.class.load_failed"),
-
-	/**
-	 * 分组编码已存在
-	 */
-	JOB_GROUP_CODE_DUPLICATE(422, 238, "JOB_GROUP_CODE_DUPLICATE", "system.job.group.code_duplicate"),
 
 	/**
 	 * 系统核心分组禁止删除
@@ -98,11 +83,6 @@ public enum ScheduleResultCode implements SystemResultCode {
 	 * 任务类型不支持
 	 */
 	JOB_TASK_TYPE_UNSUPPORTED(422, 241, "JOB_TASK_TYPE_UNSUPPORTED", "system.job.task_type.unsupported"),
-
-	/**
-	 * payload_json 为空
-	 */
-	JOB_PAYLOAD_JSON_EMPTY(422, 242, "JOB_PAYLOAD_JSON_EMPTY", "system.job.payload.empty"),
 
 	/**
 	 * payload_json 非法

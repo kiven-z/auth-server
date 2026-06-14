@@ -16,11 +16,6 @@ import lombok.Getter;
 public enum SystemAdminResultCode implements SystemResultCode {
 
 	/**
-	 * 分配完成
-	 */
-	ASSIGN_COMPLETED(200, 268, "ASSIGN_COMPLETED", "system.admin.assign_completed"),
-
-	/**
 	 * 同一部门下岗位编码已存在
 	 */
 	POST_CODE_DUPLICATE_IN_DEPT(409, 276, "POST_CODE_DUPLICATE_IN_DEPT", "system.post.code_duplicate_in_dept"),

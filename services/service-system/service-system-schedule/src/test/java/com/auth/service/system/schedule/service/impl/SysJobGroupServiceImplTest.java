@@ -26,6 +26,7 @@ import org.quartz.SchedulerException;
 import java.lang.reflect.Field;
 import java.util.List;
 
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_CODE_DUPLICATE;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -144,14 +145,14 @@ class SysJobGroupServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("新增：分组编码重复时抛出 JOB_GROUP_CODE_DUPLICATE")
+	@DisplayName("新增：分组编码重复时抛出 DATA_CODE_DUPLICATE")
 	void createRejectsDuplicateGroupCode() {
 		when(sysJobGroupMapper.selectCount(any())).thenReturn(1L);
 		SysJobGroupForm form = minimalForm("DUP", "重复");
 
 		assertThatThrownBy(() -> sysJobGroupService.create(form)).isInstanceOf(SysJobException.class)
 			.extracting(ex -> ((SysJobException) ex).getResultCode())
-			.isEqualTo(JOB_GROUP_CODE_DUPLICATE);
+			.isEqualTo(DATA_CODE_DUPLICATE);
 	}
 
 	@Test

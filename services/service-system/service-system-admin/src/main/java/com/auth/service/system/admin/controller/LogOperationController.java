@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DELETE_SUCCESS;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
 /**
  * 操作日志接口
@@ -55,7 +55,7 @@ public class LogOperationController {
 	@DeleteMapping
 	public Result<String> batchDelete(@RequestBody List<Long> ids) {
 		logOperationService.removeBatchByIds(ids);
-		return Result.success(null, DELETE_SUCCESS.getMessage());
+		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
 }

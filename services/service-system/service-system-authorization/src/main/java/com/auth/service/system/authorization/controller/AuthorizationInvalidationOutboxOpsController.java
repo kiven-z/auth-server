@@ -21,7 +21,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import static com.auth.service.system.authorization.exception.AuthorizationInvalidationOpsResultCode.RETRY_FAILED;
-import static com.auth.service.system.authorization.exception.AuthorizationInvalidationOpsResultCode.RETRY_SUCCESS;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
 /**
  * 授权失效 Outbox 运维接口
@@ -74,7 +74,7 @@ public class AuthorizationInvalidationOutboxOpsController {
 		AuthorizationInvalidationOutboxRetryResultVO resultVO = authorizationInvalidationOutboxManualRetryService
 			.retryById(id, form);
 		if (BooleanUtil.isTrue(resultVO.getDispatched())) {
-			return Result.success(resultVO, RETRY_SUCCESS.getMessage());
+			return Result.success(resultVO, OPERATION_SUCCESS.getMessage());
 		}
 		return Result.success(resultVO, RETRY_FAILED.getMessage());
 	}

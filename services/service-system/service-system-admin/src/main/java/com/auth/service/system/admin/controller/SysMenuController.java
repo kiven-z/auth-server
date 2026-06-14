@@ -86,7 +86,7 @@ public class SysMenuController {
 	@PostMapping
 	public Result<String> create(@Valid @RequestBody SysMenuSaveForm form) {
 		String id = sysMenuService.create(form);
-		return Result.success(id, ADD_SUCCESS.getMessage());
+		return Result.success(id, OPERATION_SUCCESS.getMessage());
 	}
 
 	@OperationLog(targetType = "MENU", serviceDomain = AuditServiceDomain.SYSTEM,
@@ -96,7 +96,7 @@ public class SysMenuController {
 	@PutMapping
 	public Result<String> update(@Validated(UpdateGroup.class) @RequestBody SysMenuSaveForm form) {
 		sysMenuService.update(form);
-		return Result.success(null, MODIFY_SUCCESS.getMessage());
+		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
 	@OperationLog(targetType = "MENU", serviceDomain = AuditServiceDomain.SYSTEM,
@@ -106,7 +106,7 @@ public class SysMenuController {
 	@DeleteMapping
 	public Result<String> remove(@RequestBody List<Long> ids) {
 		sysMenuService.deleteByIds(ids);
-		return Result.success(null, DELETE_SUCCESS.getMessage());
+		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
 	@OperationLog(targetType = "MENU", serviceDomain = AuditServiceDomain.SYSTEM,
@@ -116,7 +116,7 @@ public class SysMenuController {
 	@PutMapping("/{id}/move")
 	public Result<String> move(@PathVariable("id") Long id, @Valid @RequestBody SysMenuMoveForm form) {
 		sysMenuService.move(id, form);
-		return Result.success(null, MODIFY_SUCCESS.getMessage());
+		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
 	@OperationLog(targetType = "MENU", serviceDomain = AuditServiceDomain.SYSTEM,
@@ -126,7 +126,7 @@ public class SysMenuController {
 	@PutMapping("/status")
 	public Result<String> batchUpdateStatus(@Valid @RequestBody SysMenuBatchStatusForm form) {
 		sysMenuService.batchUpdateStatus(form);
-		return Result.success(null, MODIFY_SUCCESS.getMessage());
+		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
 }

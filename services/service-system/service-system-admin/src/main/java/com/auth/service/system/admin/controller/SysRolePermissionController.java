@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static com.auth.service.system.admin.exception.SystemAdminResultCode.ASSIGN_COMPLETED;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
 /**
  * 角色权限分配 Controller。
@@ -49,7 +49,7 @@ public class SysRolePermissionController {
 	public Result<Void> assign(@PathVariable("roleCode") String roleCode,
 			@Valid @RequestBody SysRolePermissionAssignForm form) {
 		sysRolePermissionService.assignPermissions(roleCode, form.getPermissionCodes());
-		return Result.success(null, ASSIGN_COMPLETED.getMessage());
+		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
 }

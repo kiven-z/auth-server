@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static com.auth.service.system.admin.exception.SystemAdminResultCode.ASSIGN_COMPLETED;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
 /**
  * 岗位扩展管理
@@ -50,7 +50,7 @@ public class SysPostManageController {
 	public Result<Void> replaceRoles(@PathVariable("postId") Long postId,
 			@Valid @RequestBody GrantTableAssignRoleForm form) {
 		grantTableService.replaceOrgSubjectRoles(GrantTableSubjectType.POST, postId, form);
-		return Result.success(null, ASSIGN_COMPLETED.getMessage());
+		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
 }

@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static com.auth.service.system.admin.exception.SystemAdminResultCode.ASSIGN_COMPLETED;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
 /**
  * 用户直连角色授权
@@ -47,7 +47,7 @@ public class SysUserRoleController {
 	public Result<Void> replaceRoles(@PathVariable("userId") Long userId,
 			@Valid @RequestBody GrantTableAssignRoleForm form) {
 		sysUserRoleService.replaceUserRoles(userId, form);
-		return Result.success(null, ASSIGN_COMPLETED.getMessage());
+		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
 }

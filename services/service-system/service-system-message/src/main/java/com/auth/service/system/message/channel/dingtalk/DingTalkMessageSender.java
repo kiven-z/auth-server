@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.auth.service.system.message.exception.MessageResultCode.DING_TALK_BODY_EMPTY;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
 
 /**
  * 钉钉工作通知渠道发送实现（统一消息编排）
@@ -87,7 +87,7 @@ public class DingTalkMessageSender implements MessageSender {
 		if (Boolean.TRUE.equals(customBody)) {
 			String body = command.getBody();
 			if (CharSequenceUtil.isBlank(body)) {
-				throw new SystemBusinessException(DING_TALK_BODY_EMPTY);
+				throw new SystemBusinessException(PARAM_REQUIRED, "钉钉消息正文");
 			}
 
 			DingTalkChannelOptions options = ChannelOptionsSupport.asDingTalk(command.getOptions());

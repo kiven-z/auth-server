@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.Locale;
 
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_CODE_DUPLICATE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -48,20 +49,20 @@ class SysJobExceptionHandlerTest {
 	@DisplayName("SysJobException 应映射为对应 HTTP 状态与 Result")
 	void handleSysJobException_mapsToResultWithI18n() {
 		LocaleContextHolder.setLocale(Locale.ENGLISH);
-		String messageKey = ScheduleResultCode.JOB_GROUP_CODE_DUPLICATE.getMessageKey();
+		String messageKey = DATA_CODE_DUPLICATE.getMessageKey();
 		when(messageSource.getMessage(eq(messageKey), any(), eq(messageKey), eq(Locale.ENGLISH)))
-			.thenReturn("Group code already exists");
-		when(messageSource.getMessage(eq(messageKey), any(), eq("Group code already exists"), eq(Locale.ENGLISH)))
-			.thenReturn("Group code already exists");
+			.thenReturn("Code already exists: DUP");
+		when(messageSource.getMessage(eq(messageKey), any(), eq("Code already exists: DUP"), eq(Locale.ENGLISH)))
+			.thenReturn("Code already exists: DUP");
 
-		SysJobException exception = new SysJobException(ScheduleResultCode.JOB_GROUP_CODE_DUPLICATE);
+		SysJobException exception = new SysJobException(DATA_CODE_DUPLICATE, "DUP");
 		ResponseEntity<Result<Object>> response = handler.handleSysJobException(exception);
 
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
 		assertThat(response.getBody()).isNotNull();
-		assertThat(response.getBody().getCode()).isEqualTo(ScheduleResultCode.JOB_GROUP_CODE_DUPLICATE.getBizCode());
-		assertThat(response.getBody().getError()).isEqualTo("JOB_GROUP_CODE_DUPLICATE");
-		assertThat(response.getBody().getMessage()).isEqualTo("Group code already exists");
+		assertThat(response.getBody().getCode()).isEqualTo(DATA_CODE_DUPLICATE.getBizCode());
+		assertThat(response.getBody().getError()).isEqualTo("DATA_CODE_DUPLICATE");
+		assertThat(response.getBody().getMessage()).isEqualTo("Code already exists: DUP");
 		assertThat(response.getBody().getExt()).containsEntry("i18nKey", messageKey);
 	}
 

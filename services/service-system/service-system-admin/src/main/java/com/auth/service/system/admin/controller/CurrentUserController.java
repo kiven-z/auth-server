@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static com.auth.service.system.common.exception.code.SystemCommonResultCode.MODIFY_SUCCESS;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
 /**
  * 当前登录用户自助接口
@@ -45,7 +45,7 @@ public class CurrentUserController {
 			HttpServletRequest request) {
 		String changeIp = ipAddressService.resolveIpInfo(request).getIpAddr();
 		userPasswordService.changeOwnPassword(form, changeIp);
-		return Result.success(null, MODIFY_SUCCESS.getMessage());
+		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
 }

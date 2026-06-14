@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.auth.service.system.message.exception.MessageResultCode.RENDER_FAILED;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_FAILED;
 import static com.auth.service.system.message.exception.MessageResultCode.TEMPLATE_NOT_FOUND;
 import static com.auth.service.system.message.exception.MessageResultCode.TEMPLATE_VARS_MISSING;
 
@@ -57,7 +57,7 @@ public class EmailTemplatePipeline {
 					template.getSubject(), variables);
 		}
 		catch (TemplateRenderException e) {
-			throw new SystemBusinessException(RENDER_FAILED, "subject", e.getMessage());
+			throw new SystemBusinessException(OPERATION_FAILED, "subject", e.getMessage());
 		}
 	}
 
@@ -67,7 +67,7 @@ public class EmailTemplatePipeline {
 					variables);
 		}
 		catch (TemplateRenderException e) {
-			throw new SystemBusinessException(RENDER_FAILED, "body", e.getMessage());
+			throw new SystemBusinessException(OPERATION_FAILED, "body", e.getMessage());
 		}
 	}
 

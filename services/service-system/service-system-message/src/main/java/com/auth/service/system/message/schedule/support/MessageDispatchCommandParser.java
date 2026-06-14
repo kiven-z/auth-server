@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Set;
 
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.*;
 
 /**
@@ -38,7 +39,7 @@ public class MessageDispatchCommandParser {
 	 */
 	public TemplateMessageCommand parseAndValidate(String payloadJson) {
 		if (CharSequenceUtil.isBlank(payloadJson)) {
-			throw new SysJobException(JOB_PAYLOAD_JSON_EMPTY);
+			throw new SysJobException(PARAM_REQUIRED, "payload_json");
 		}
 		return parseCommand(payloadJson);
 	}

@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
 import static com.auth.service.system.message.exception.MessageResultCode.*;
 
 /**
@@ -56,10 +57,10 @@ public class DingTalkWorkNoticeClient {
 	 */
 	public void sendWorkNotice(List<String> userIds, DingTalkMessageType messageType, String title, String content) {
 		if (CollUtil.isEmpty(userIds)) {
-			throw new SystemBusinessException(DING_TALK_WORK_NOTICE_USER_IDS_EMPTY);
+			throw new SystemBusinessException(PARAM_REQUIRED, "接收人");
 		}
 		if (CharSequenceUtil.isBlank(content)) {
-			throw new SystemBusinessException(DING_TALK_WORK_NOTICE_CONTENT_BLANK);
+			throw new SystemBusinessException(PARAM_REQUIRED, "正文");
 		}
 
 		Long agentId = dingTalkProperties.getAgentId();
@@ -116,7 +117,7 @@ public class DingTalkWorkNoticeClient {
 
 	private void assertSendSuccess(String responseBody, Long agentId, String useridList) {
 		if (CharSequenceUtil.isBlank(responseBody)) {
-			throw new SystemBusinessException(DING_TALK_WORK_NOTICE_EMPTY_RESPONSE);
+			throw new SystemBusinessException(PARAM_REQUIRED, "响应体");
 		}
 
 		JSONObject json = JSONUtil.parseObj(responseBody);

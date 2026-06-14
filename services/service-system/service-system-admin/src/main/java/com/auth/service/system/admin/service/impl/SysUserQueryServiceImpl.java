@@ -38,7 +38,7 @@ public class SysUserQueryServiceImpl extends ServiceImpl<SysUserQueryMapper, Use
 	@Override
 	public SysUserProfileResponse getProfile(Long userId) {
 		if (userId == null) {
-			throw new SystemBusinessException(SystemCommonResultCode.ILLEGAL_USER_ID_NOT_NULL);
+			throw new SystemBusinessException(SystemCommonResultCode.PARAM_REQUIRED, "userId");
 		}
 		UserEntity user = userReferenceChecker.getExistingActive(userId);
 

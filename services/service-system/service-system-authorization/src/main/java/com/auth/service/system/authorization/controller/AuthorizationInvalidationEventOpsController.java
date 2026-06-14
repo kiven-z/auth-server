@@ -17,7 +17,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import static com.auth.service.system.authorization.exception.AuthorizationInvalidationOpsResultCode.EVENT_RELEASE_SUCCESS;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
 /**
  * 授权失效幂等事件运维查询接口
@@ -67,7 +67,7 @@ public class AuthorizationInvalidationEventOpsController {
 
 		// 释放 processing 占位，允许 Outbox 重新投递
 		boolean released = authorizationInvalidationEventOpsService.releaseProcessingClaim(id);
-		return Result.success(released, EVENT_RELEASE_SUCCESS.getMessage());
+		return Result.success(released, OPERATION_SUCCESS.getMessage());
 	}
 
 }

@@ -90,7 +90,7 @@ public class SysEmailTemplateController {
 	public Result<String> create(@Validated(CreateGroup.class) @RequestBody EmailTemplateForm dto) {
 		sysEmailTemplateService.create(dto);
 
-		return Result.success(null, ADD_SUCCESS.getMessage());
+		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
 	@OperationLog(targetType = "EMAIL_TEMPLATE", serviceDomain = AuditServiceDomain.SYSTEM,
@@ -101,7 +101,7 @@ public class SysEmailTemplateController {
 	public Result<String> update(@Validated(UpdateGroup.class) @RequestBody EmailTemplateForm dto) {
 		sysEmailTemplateService.update(dto);
 
-		return Result.success(null, MODIFY_SUCCESS.getMessage());
+		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
 	@OperationLog(targetType = "EMAIL_TEMPLATE", serviceDomain = AuditServiceDomain.SYSTEM,
@@ -113,7 +113,7 @@ public class SysEmailTemplateController {
 			@Validated @RequestBody EmailTemplateContentForm dto) {
 		sysEmailTemplateService.updateContent(id, dto);
 
-		return Result.success(null, MODIFY_SUCCESS.getMessage());
+		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
 	@OperationLog(targetType = "EMAIL_TEMPLATE", serviceDomain = AuditServiceDomain.SYSTEM,
@@ -125,7 +125,7 @@ public class SysEmailTemplateController {
 			@Validated @RequestBody EmailTemplateRequireFieldsForm form) {
 		sysEmailTemplateService.updateRequireFields(id, form);
 
-		return Result.success(null, MODIFY_SUCCESS.getMessage());
+		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
 	@OperationLog(targetType = "EMAIL_TEMPLATE_DELETE", serviceDomain = AuditServiceDomain.SYSTEM,
@@ -136,7 +136,7 @@ public class SysEmailTemplateController {
 	public Result<String> batchDelete(@RequestBody List<Long> ids) {
 		sysEmailTemplateService.removeBatchByIds(ids);
 
-		return Result.success(null, DELETE_SUCCESS.getMessage());
+		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
 	@OperationLog(targetType = "EMAIL_TEMPLATE", serviceDomain = AuditServiceDomain.SYSTEM,
@@ -147,7 +147,7 @@ public class SysEmailTemplateController {
 	public Result<String> batchUpdateStatus(@Validated @RequestBody EmailTemplateStatusForm form) {
 		sysEmailTemplateService.batchUpdateStatus(form);
 
-		return Result.success(null, MODIFY_SUCCESS.getMessage());
+		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
 }

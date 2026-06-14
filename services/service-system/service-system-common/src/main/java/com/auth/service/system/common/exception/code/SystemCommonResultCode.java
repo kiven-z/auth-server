@@ -17,22 +17,7 @@ public enum SystemCommonResultCode implements SystemResultCode {
 	/**
 	 * 操作成功
 	 */
-	OPERATION_SUCCESS(200, 0, "OPERATION_SUCCESS", "result.operation.success"),
-
-	/**
-	 * 添加成功
-	 */
-	ADD_SUCCESS(200, 265, "ADD_SUCCESS", "system.admin.add_success"),
-
-	/**
-	 * 删除成功
-	 */
-	DELETE_SUCCESS(200, 266, "DELETE_SUCCESS", "system.admin.delete_success"),
-
-	/**
-	 * 修改成功
-	 */
-	MODIFY_SUCCESS(200, 267, "MODIFY_SUCCESS", "system.admin.modify_success"),
+	OPERATION_SUCCESS(200, 0, "OPERATION_SUCCESS", "operation.success"),
 
 	/**
 	 * 数据不存在
@@ -85,6 +70,11 @@ public enum SystemCommonResultCode implements SystemResultCode {
 	PARAM_DUPLICATE(409, 314, "PARAM_DUPLICATE", "param.duplicate"),
 
 	/**
+	 * 操作失败（外部请求、渲染等）
+	 */
+	OPERATION_FAILED(502, 315, "OPERATION_FAILED", "operation.failed"),
+
+	/**
 	 * 验证码错误
 	 */
 	VERIFY_CODE_ERROR(422, 205, "VERIFY_CODE_ERROR", "verify.code.error"),
@@ -93,11 +83,6 @@ public enum SystemCommonResultCode implements SystemResultCode {
 	 * 用户邮箱未绑定
 	 */
 	USER_EMAIL_NOT_BIND(422, 208, "USER_EMAIL_NOT_BIND", "user.email.not.bind"),
-
-	/**
-	 * 用户 ID 不能为空
-	 */
-	ILLEGAL_USER_ID_NOT_NULL(422, 209, "ILLEGAL_USER_ID_NOT_NULL", "illegal.user.id.not.null"),
 
 	/**
 	 * 用户不存在

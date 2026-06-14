@@ -1,6 +1,6 @@
 package com.auth.service.system.message.channel.email.transport;
 
-import static com.auth.service.system.message.exception.MessageResultCode.EXTERNAL_REQUEST_FAILED;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_FAILED;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -70,7 +70,7 @@ public class EmailAttachmentResolver {
 				return Base64.decode(attachment.getBase64());
 			}
 			catch (IllegalArgumentException e) {
-				throw new SystemBusinessException(EXTERNAL_REQUEST_FAILED, "Attachment Base64 decode", e.getMessage());
+				throw new SystemBusinessException(OPERATION_FAILED, "Attachment Base64 decode", e.getMessage());
 			}
 		}
 		if (attachment.getBytes() != null && attachment.getBytes().length > 0) {
@@ -82,7 +82,7 @@ public class EmailAttachmentResolver {
 				if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
 					return response.getBody();
 				}
-				throw new SystemBusinessException(EXTERNAL_REQUEST_FAILED, "Attachment download",
+				throw new SystemBusinessException(OPERATION_FAILED, "Attachment download",
 						"HTTP " + response.getStatusCode().value());
 			}
 			catch (SystemBusinessException e) {
@@ -90,7 +90,7 @@ public class EmailAttachmentResolver {
 			}
 			catch (Exception e) {
 				log.error("Failed to download attachment from URL", e);
-				throw new SystemBusinessException(EXTERNAL_REQUEST_FAILED, "Attachment download", e.getMessage());
+				throw new SystemBusinessException(OPERATION_FAILED, "Attachment download", e.getMessage());
 			}
 		}
 		return new byte[0];

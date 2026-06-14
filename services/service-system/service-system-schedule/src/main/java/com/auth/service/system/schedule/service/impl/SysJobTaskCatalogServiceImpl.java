@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.*;
 
 /**
@@ -55,7 +56,7 @@ public class SysJobTaskCatalogServiceImpl implements SysJobTaskCatalogService {
 	@Override
 	public List<QuartzTaskMethodVO> listCallableMethods(String className) {
 		if (CharSequenceUtil.isBlank(className)) {
-			throw new SysJobException(JOB_CLASS_EMPTY);
+			throw new SysJobException(PARAM_REQUIRED, "job_class");
 		}
 		if (!quartzTaskRegistry.isAllowed(className)) {
 			throw new SysJobException(JOB_CLASS_NOT_WHITELISTED);

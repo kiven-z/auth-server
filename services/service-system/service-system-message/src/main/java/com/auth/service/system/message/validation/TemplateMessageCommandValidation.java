@@ -12,8 +12,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Set;
 
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
 import static com.auth.service.system.message.exception.MessageResultCode.MESSAGE_COMMAND_INVALID;
-import static com.auth.service.system.message.exception.MessageResultCode.MESSAGE_SEND_COMMAND_NULL;
 
 /**
  * 统一发送命令入参校验
@@ -57,7 +57,7 @@ public class TemplateMessageCommandValidation {
 	 */
 	public void validate(TemplateMessageCommand command) {
 		if (command == null) {
-			throw new SystemBusinessException(MESSAGE_SEND_COMMAND_NULL);
+			throw new SystemBusinessException(PARAM_REQUIRED, "消息发送参数");
 		}
 
 		Set<ConstraintViolation<TemplateMessageCommand>> violations = validator.validate(command);

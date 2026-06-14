@@ -99,10 +99,10 @@ class SystemResultResponseFactoryTest {
 	}
 
 	@Test
-	@DisplayName("resolveHttpStatus：用户 ID 为空 -> 422")
-	void resolveHttpStatus_illegalUserId() {
+	@DisplayName("resolveHttpStatus：必填参数为空 -> 422")
+	void resolveHttpStatus_paramRequired() {
 		assertEquals(HttpStatus.UNPROCESSABLE_ENTITY,
-				SystemResultResponseFactory.resolveHttpStatus(SystemCommonResultCode.ILLEGAL_USER_ID_NOT_NULL));
+				SystemResultResponseFactory.resolveHttpStatus(SystemCommonResultCode.PARAM_REQUIRED));
 	}
 
 	@Test

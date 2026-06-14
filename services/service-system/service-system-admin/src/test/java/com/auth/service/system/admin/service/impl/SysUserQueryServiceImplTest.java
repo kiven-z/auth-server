@@ -56,11 +56,11 @@ class SysUserQueryServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("userId 为空时抛出 ILLEGAL_USER_ID_NOT_NULL")
+	@DisplayName("userId 为空时抛出 PARAM_REQUIRED")
 	void getProfileRejectsNullUserId() {
 		assertThatThrownBy(() -> sysUserQueryService.getProfile(null)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemCommonResultCode.ILLEGAL_USER_ID_NOT_NULL);
+			.isEqualTo(SystemCommonResultCode.PARAM_REQUIRED);
 	}
 
 	@Test

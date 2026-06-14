@@ -12,6 +12,7 @@ import org.springframework.util.ReflectionUtils;
 import java.lang.reflect.Method;
 import java.util.Objects;
 
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.*;
 import static com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys.BEAN_NAME;
 import static com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys.METHOD_NAME;
@@ -29,7 +30,7 @@ public class QuartzBeanInvoker {
 
 	private static @NonNull InvocationSpec parseSpec(@Nullable String invokeTarget) {
 		if (CharSequenceUtil.isBlank(invokeTarget)) {
-			throw new SysJobException(JOB_INVOKE_TARGET_EMPTY);
+			throw new SysJobException(PARAM_REQUIRED, "invoke_target");
 		}
 
 		String nonNullInvokeTarget = Objects.requireNonNull(invokeTarget, "invokeTarget");

@@ -14,8 +14,8 @@ import org.junit.jupiter.api.Test;
 import java.util.Collections;
 import java.util.List;
 
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
 import static com.auth.service.system.message.exception.MessageResultCode.MESSAGE_COMMAND_INVALID;
-import static com.auth.service.system.message.exception.MessageResultCode.MESSAGE_SEND_COMMAND_NULL;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -34,11 +34,11 @@ class TemplateMessageCommandValidationTest {
 	}
 
 	@Test
-	@DisplayName("command 为 null 时抛出 MESSAGE_SEND_COMMAND_NULL")
+	@DisplayName("command 为 null 时抛出 PARAM_REQUIRED")
 	void validate_shouldThrowWhenCommandNull() {
 		assertThatThrownBy(() -> commandValidation.validate(null)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(MESSAGE_SEND_COMMAND_NULL);
+			.isEqualTo(PARAM_REQUIRED);
 	}
 
 	@Test

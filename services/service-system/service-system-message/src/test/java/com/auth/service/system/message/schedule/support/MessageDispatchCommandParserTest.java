@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -72,11 +73,11 @@ class MessageDispatchCommandParserTest {
 	}
 
 	@Test
-	@DisplayName("payload_json 为空时抛出 JOB_PAYLOAD_JSON_EMPTY")
+	@DisplayName("payload_json 为空时抛出 PARAM_REQUIRED")
 	void parseAndValidateThrowsWhenPayloadBlank() {
 		assertThatThrownBy(() -> parser.parseAndValidate(" ")).isInstanceOf(SysJobException.class)
 			.extracting(ex -> ((SysJobException) ex).getResultCode())
-			.isEqualTo(JOB_PAYLOAD_JSON_EMPTY);
+			.isEqualTo(PARAM_REQUIRED);
 	}
 
 	@Test

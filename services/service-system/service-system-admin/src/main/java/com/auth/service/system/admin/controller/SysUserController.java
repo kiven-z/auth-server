@@ -33,8 +33,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.util.List;
 
-import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DELETE_SUCCESS;
-import static com.auth.service.system.common.exception.code.SystemCommonResultCode.MODIFY_SUCCESS;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
 /**
  * 系统用户管理 Controller
@@ -93,7 +92,7 @@ public class SysUserController {
 			@Valid @RequestBody SysUserAdminResetPasswordForm form, HttpServletRequest request) {
 		String changeIp = ipAddressService.resolveIpInfo(request).getIpAddr();
 		userPasswordService.resetPasswordByAdmin(id, form, changeIp);
-		return Result.success(null, MODIFY_SUCCESS.getMessage());
+		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
 	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
@@ -114,7 +113,7 @@ public class SysUserController {
 	@PutMapping("/status")
 	public Result<String> batchUpdateStatus(@Valid @RequestBody SysUserBatchStatusForm form) {
 		sysUserService.batchUpdateStatus(form);
-		return Result.success(null, MODIFY_SUCCESS.getMessage());
+		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
 	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
@@ -124,7 +123,7 @@ public class SysUserController {
 	@DeleteMapping
 	public Result<String> batchDelete(@RequestBody List<Long> ids) {
 		sysUserService.deleteByIds(ids);
-		return Result.success(null, DELETE_SUCCESS.getMessage());
+		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
 }

@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_CODE_DUPLICATE;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.*;
 
@@ -107,7 +108,7 @@ public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJo
 		long exists = count(
 				Wrappers.<SysJobGroupEntity>lambdaQuery().eq(SysJobGroupEntity::getGroupCode, form.getGroupCode()));
 		if (exists > 0) {
-			throw new SysJobException(JOB_GROUP_CODE_DUPLICATE);
+			throw new SysJobException(DATA_CODE_DUPLICATE, form.getGroupCode());
 		}
 
 		SysJobGroupEntity jobGroup = SysJobGroupConverter.INSTANCE.toEntity(form);
