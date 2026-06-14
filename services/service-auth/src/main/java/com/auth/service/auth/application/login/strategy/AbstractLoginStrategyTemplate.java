@@ -13,7 +13,7 @@ import com.auth.service.auth.domain.authentication.model.LoginResult;
 import com.auth.service.auth.domain.authentication.service.UserAccountLoginEligibility;
 import com.auth.service.auth.shared.exception.AuthBadCredentialsException;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
-import com.auth.service.auth.shared.exception.enums.AuthResultCode;
+import com.auth.service.auth.shared.exception.AuthResultCode;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**

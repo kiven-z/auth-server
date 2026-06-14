@@ -13,7 +13,7 @@ import com.auth.service.auth.application.port.TokenGateway;
 import com.auth.service.auth.domain.authentication.model.RefreshSessionResult;
 import com.auth.service.auth.domain.authentication.model.TokenPair;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
-import com.auth.service.auth.shared.exception.enums.AuthResultCode;
+import com.auth.service.auth.shared.exception.AuthResultCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

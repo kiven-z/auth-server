@@ -1,7 +1,6 @@
 package com.auth.service.auth.shared.exception;
 
 import com.auth.common.core.model.response.Result;
-import com.auth.service.auth.shared.exception.enums.AuthResultCode;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

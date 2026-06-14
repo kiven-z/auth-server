@@ -11,7 +11,7 @@ import com.auth.service.auth.domain.authorization.model.vo.AuthorizationInvalida
 import com.auth.service.auth.domain.authorization.model.vo.AuthorizationInvalidationEventPageVO;
 import com.auth.service.auth.domain.authorization.model.vo.AuthorizationInvalidationEventStatsVO;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
-import com.auth.service.auth.shared.exception.enums.AuthResultCode;
+import com.auth.service.auth.shared.exception.AuthResultCode;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;

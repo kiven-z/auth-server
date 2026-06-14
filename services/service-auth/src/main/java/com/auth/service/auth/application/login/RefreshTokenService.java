@@ -15,7 +15,7 @@ import com.auth.service.auth.domain.authentication.model.LogoutSessionHint;
 import com.auth.service.auth.domain.authentication.model.RefreshSessionResult;
 import com.auth.service.auth.domain.authentication.model.TokenPair;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
-import com.auth.service.auth.shared.exception.enums.AuthResultCode;
+import com.auth.service.auth.shared.exception.AuthResultCode;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

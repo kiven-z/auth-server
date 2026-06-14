@@ -4,7 +4,7 @@ import com.auth.module.security.autoconfigure.config.user.SessionLimitStrategy;
 import com.auth.module.security.autoconfigure.config.user.UserConfigProperties;
 import com.auth.service.auth.infrastructure.redis.session.RedisUserSessionIndexRepository;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
-import com.auth.service.auth.shared.exception.enums.AuthResultCode;
+import com.auth.service.auth.shared.exception.AuthResultCode;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 

@@ -5,7 +5,7 @@ import com.auth.module.security.autoconfigure.config.user.UserConfigProperties;
 import com.auth.service.auth.TestConstants;
 import com.auth.service.auth.infrastructure.redis.session.RedisUserSessionIndexRepository;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
-import com.auth.service.auth.shared.exception.enums.AuthResultCode;
+import com.auth.service.auth.shared.exception.AuthResultCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

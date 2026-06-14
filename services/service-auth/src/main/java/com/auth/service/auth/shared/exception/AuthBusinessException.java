@@ -1,7 +1,6 @@
 package com.auth.service.auth.shared.exception;
 
 import com.auth.common.core.i18n.I18nMessageProvider;
-import com.auth.service.auth.shared.exception.enums.AuthResultCode;
 import lombok.Getter;
 
 import java.util.Arrays;

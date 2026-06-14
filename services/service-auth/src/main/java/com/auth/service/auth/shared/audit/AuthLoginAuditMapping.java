@@ -1,7 +1,7 @@
 package com.auth.service.auth.shared.audit;
 
 import com.auth.service.auth.domain.authentication.enums.AuthLoginLogResult;
-import com.auth.service.auth.shared.exception.enums.AuthResultCode;
+import com.auth.service.auth.shared.exception.AuthResultCode;
 import lombok.experimental.UtilityClass;
 
 import java.util.Map;

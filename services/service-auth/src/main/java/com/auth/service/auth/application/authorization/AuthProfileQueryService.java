@@ -11,7 +11,7 @@ import com.auth.service.auth.application.port.UserReadPort;
 import com.auth.service.auth.domain.authorization.model.UserAccountSnapshot;
 import com.auth.service.auth.infrastructure.persistence.UserAuthorizationGrantMapper;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
-import com.auth.service.auth.shared.exception.enums.AuthResultCode;
+import com.auth.service.auth.shared.exception.AuthResultCode;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

@@ -13,7 +13,7 @@ import com.auth.service.auth.domain.authentication.model.LoginAuditSnapshot;
 import com.auth.service.auth.domain.authorization.model.UserAccountSnapshot;
 import com.auth.service.auth.shared.audit.AuthLoginAuditMapping;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
-import com.auth.service.auth.shared.exception.enums.AuthResultCode;
+import com.auth.service.auth.shared.exception.AuthResultCode;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 

@@ -1,7 +1,6 @@
 package com.auth.service.auth.shared.exception;
 
 import com.auth.common.core.model.response.Result;
-import com.auth.service.auth.shared.exception.enums.AuthResultCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.core.annotation.Order;
