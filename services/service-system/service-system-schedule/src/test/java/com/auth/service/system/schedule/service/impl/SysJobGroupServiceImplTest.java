@@ -10,7 +10,7 @@ import com.auth.service.system.schedule.model.form.SysJobGroupForm;
 import com.auth.service.system.schedule.model.po.SysJobGroupPageRowPO;
 import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
 import com.auth.service.system.schedule.model.vo.SysJobGroupDetailVO;
-import com.auth.service.system.schedule.service.SysJobDefinitionService;
+import com.auth.service.system.schedule.service.SysJobScheduleSyncService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -51,7 +51,7 @@ class SysJobGroupServiceImplTest {
 	private SysJobMapper sysJobMapper;
 
 	@Mock
-	private SysJobDefinitionService sysJobDefinitionService;
+	private SysJobScheduleSyncService sysJobScheduleSyncService;
 
 	@Mock
 	private AuditUserDisplayService auditUserDisplayService;
@@ -71,7 +71,8 @@ class SysJobGroupServiceImplTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		sysJobGroupService = new SysJobGroupServiceImpl(sysJobMapper, sysJobDefinitionService, auditUserDisplayService);
+		sysJobGroupService = new SysJobGroupServiceImpl(sysJobMapper, sysJobScheduleSyncService,
+				auditUserDisplayService);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysJobGroupService, sysJobGroupMapper);
@@ -227,7 +228,7 @@ class SysJobGroupServiceImplTest {
 	void updateAllJobsStatusInGroupDelegatesToDefinitionService() {
 		sysJobGroupService.updateAllJobsStatusInGroup("G1", false);
 
-		verify(sysJobDefinitionService).batchUpdateStatusByGroupCode("G1", false);
+		verify(sysJobScheduleSyncService).batchUpdateStatusByGroupCode("G1", false);
 	}
 
 }

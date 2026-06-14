@@ -15,8 +15,8 @@ import com.auth.service.system.schedule.model.po.SysJobGroupPageRowPO;
 import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
 import com.auth.service.system.schedule.model.vo.SysJobGroupDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobGroupPageResponse;
-import com.auth.service.system.schedule.service.SysJobDefinitionService;
 import com.auth.service.system.schedule.service.SysJobGroupService;
+import com.auth.service.system.schedule.service.SysJobScheduleSyncService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -45,7 +45,7 @@ public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJo
 
 	private final SysJobMapper sysJobMapper;
 
-	private final SysJobDefinitionService sysJobDefinitionService;
+	private final SysJobScheduleSyncService sysJobScheduleSyncService;
 
 	private final AuditUserDisplayService auditUserDisplayService;
 
@@ -147,8 +147,7 @@ public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJo
 	 */
 	@Override
 	public void updateAllJobsStatusInGroup(String groupCode, Boolean status) {
-		// FIXME 接口转移到 sysJobDefinitionService
-		sysJobDefinitionService.batchUpdateStatusByGroupCode(groupCode, status);
+		sysJobScheduleSyncService.batchUpdateStatusByGroupCode(groupCode, status);
 	}
 
 }

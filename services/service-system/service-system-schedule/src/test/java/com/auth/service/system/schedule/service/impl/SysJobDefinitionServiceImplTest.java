@@ -14,7 +14,8 @@ import com.auth.service.system.schedule.model.form.SysJobUpdateForm;
 import com.auth.service.system.schedule.model.po.SysJobDetailRowPO;
 import com.auth.service.system.schedule.model.vo.SysJobDetailVO;
 import com.auth.service.system.schedule.service.SysJobRuntimeEnrichmentService;
-import com.auth.service.system.schedule.support.SysJobSchedulerManager;
+import com.auth.service.system.schedule.service.SysJobScheduleSyncService;
+import com.auth.service.system.schedule.support.quartz.SysJobSchedulerManager;
 import com.auth.service.system.schedule.validation.SysJobDefinitionValidationManager;
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
@@ -28,7 +29,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import org.quartz.SchedulerException;
 
 import java.lang.reflect.Field;
@@ -37,14 +37,10 @@ import java.util.Collection;
 import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_BUSY;
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_GROUP_NOT_AVAILABLE;
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_QUARTZ_OPERATION_FAILED;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**
@@ -61,6 +57,9 @@ class SysJobDefinitionServiceImplTest {
 
 	@Mock
 	private SysJobSchedulerManager sysJobSchedulerManager;
+
+	@Mock
+	private SysJobScheduleSyncService sysJobScheduleSyncService;
 
 	@Mock
 	private AuditUserDisplayService auditUserDisplayService;
@@ -84,16 +83,6 @@ class SysJobDefinitionServiceImplTest {
 		TableInfoHelper.initTableInfo(new MapperBuilderAssistant(new MybatisConfiguration(), ""), SysJobEntity.class);
 	}
 
-	@BeforeEach
-	void setUp() throws Exception {
-		sysJobDefinitionService = spy(new SysJobDefinitionServiceImpl(sysJobSchedulerManager, auditUserDisplayService,
-				sysJobGroupMapper, logJobMapper, validationManager, sysJobRuntimeEnrichmentService));
-		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
-		baseMapperField.setAccessible(true);
-		baseMapperField.set(sysJobDefinitionService, sysJobMapper);
-		lenient().doReturn(true).when(sysJobDefinitionService).updateBatchById(anyList());
-	}
-
 	private static SysJobCreateForm minimalCreateForm(String jobGroup, boolean status) {
 		SysJobCreateForm form = new SysJobCreateForm();
 		form.setJobName("demoJob");
@@ -112,6 +101,17 @@ class SysJobDefinitionServiceImplTest {
 		group.setGroupCode(groupCode);
 		group.setStatus(true);
 		return group;
+	}
+
+	@BeforeEach
+	void setUp() throws Exception {
+		sysJobDefinitionService = spy(new SysJobDefinitionServiceImpl(sysJobSchedulerManager, sysJobScheduleSyncService,
+				auditUserDisplayService, sysJobGroupMapper, logJobMapper, validationManager,
+				sysJobRuntimeEnrichmentService));
+		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
+		baseMapperField.setAccessible(true);
+		baseMapperField.set(sysJobDefinitionService, sysJobMapper);
+		lenient().doReturn(true).when(sysJobDefinitionService).updateBatchById(anyList());
 	}
 
 	@Test
@@ -284,110 +284,15 @@ class SysJobDefinitionServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("批量停用：跳过不存在任务，批量落库并 pauseJob")
-	void batchUpdateStatusSkipsMissingAndPausesQuartz() throws SchedulerException {
-		SysJobEntity entity = new SysJobEntity();
-		entity.setId(1L);
-		entity.setJobName("demoJob");
-		entity.setJobGroup("DEFAULT");
-		entity.setStatus(true);
-		when(sysJobMapper.selectList(any())).thenReturn(List.of(entity));
-
-		SysJobStatusForm form = new SysJobStatusForm();
-		form.setIds(List.of(1L, 2L));
-		form.setStatus(false);
-
-		sysJobDefinitionService.batchUpdateStatus(form);
-
-		@SuppressWarnings("unchecked")
-		ArgumentCaptor<Collection<SysJobEntity>> updateCaptor = ArgumentCaptor.forClass(Collection.class);
-		verify(sysJobDefinitionService).updateBatchById(updateCaptor.capture());
-		assertThat(updateCaptor.getValue()).hasSize(2).extracting(SysJobEntity::getId).containsExactly(1L, 2L);
-		assertThat(updateCaptor.getValue()).allMatch(job -> BooleanUtil.isFalse(job.getStatus()));
-		verify(sysJobSchedulerManager).pauseJob("demoJob", "DEFAULT");
-		verify(sysJobSchedulerManager, never()).scheduleOrReplace(any());
-	}
-
-	@Test
-	@DisplayName("批量启用：仅对原暂停任务注册 Quartz")
-	void batchUpdateStatusEnableOnlySchedulesPreviouslyPausedJobs() throws SchedulerException {
-		SysJobEntity paused = new SysJobEntity();
-		paused.setId(2L);
-		paused.setJobName("jobB");
-		paused.setJobGroup("DEFAULT");
-		paused.setStatus(false);
-		when(sysJobMapper.selectList(any())).thenReturn(List.of(paused));
-
-		SysJobStatusForm form = new SysJobStatusForm();
-		form.setIds(List.of(1L, 2L));
-		form.setStatus(true);
-
-		sysJobDefinitionService.batchUpdateStatus(form);
-
-		verify(sysJobDefinitionService).updateBatchById(anyList());
-		verify(sysJobSchedulerManager, times(1)).scheduleOrReplace(any());
-		verify(sysJobSchedulerManager)
-			.scheduleOrReplace(argThat(job -> job.getId().equals(2L) && BooleanUtil.isTrue(job.getStatus())));
-	}
-
-	@Test
-	@DisplayName("批量启停：Quartz 同步失败时抛出 JOB_QUARTZ_OPERATION_FAILED")
-	void batchUpdateStatusThrowsWhenQuartzSyncFails() throws SchedulerException {
-		SysJobEntity entity = new SysJobEntity();
-		entity.setId(1L);
-		entity.setJobName("demoJob");
-		entity.setJobGroup("DEFAULT");
-		entity.setStatus(true);
-		when(sysJobMapper.selectList(any())).thenReturn(List.of(entity));
-		doThrow(new SchedulerException("sync failed")).when(sysJobSchedulerManager).pauseJob("demoJob", "DEFAULT");
-
+	@DisplayName("批量启停：委托 SysJobScheduleSyncService")
+	void batchUpdateStatusDelegatesToSyncService() {
 		SysJobStatusForm form = new SysJobStatusForm();
 		form.setIds(List.of(1L));
 		form.setStatus(false);
 
-		assertThatThrownBy(() -> sysJobDefinitionService.batchUpdateStatus(form)).isInstanceOf(SysJobException.class)
-			.extracting(ex -> ((SysJobException) ex).getResultCode())
-			.isEqualTo(JOB_QUARTZ_OPERATION_FAILED);
-	}
+		sysJobDefinitionService.batchUpdateStatus(form);
 
-	@Test
-	@DisplayName("分组批量停用：无任务时仍 pauseGroup")
-	void batchUpdateStatusByGroupCodePauseEmptyGroupStillPausesQuartz() throws SchedulerException {
-		when(sysJobMapper.selectList(any())).thenReturn(List.of());
-
-		sysJobDefinitionService.batchUpdateStatusByGroupCode("G1", false);
-
-		verify(sysJobSchedulerManager).pauseGroup("G1");
-		verify(sysJobDefinitionService, never()).updateBatchById(anyList());
-	}
-
-	@Test
-	@DisplayName("分组批量启用：落库并 scheduleOrReplace 分组内全部任务")
-	void batchUpdateStatusByGroupCodeEnableSchedulesAllJobsInGroup() throws SchedulerException {
-		SysJobEntity job = new SysJobEntity();
-		job.setId(1L);
-		job.setJobName("demoJob");
-		job.setJobGroup("G1");
-		job.setStatus(false);
-		when(sysJobMapper.selectList(any())).thenReturn(List.of(job));
-
-		sysJobDefinitionService.batchUpdateStatusByGroupCode("G1", true);
-
-		verify(sysJobDefinitionService).updateBatchById(anyList());
-		verify(sysJobSchedulerManager)
-			.scheduleOrReplace(argThat(entity -> entity.getId().equals(1L) && BooleanUtil.isTrue(entity.getStatus())));
-	}
-
-	@Test
-	@DisplayName("分组批量启停：Quartz 同步失败时抛出 JOB_QUARTZ_OPERATION_FAILED")
-	void batchUpdateStatusByGroupCodeThrowsWhenQuartzSyncFails() throws SchedulerException {
-		when(sysJobMapper.selectList(any())).thenReturn(List.of());
-		doThrow(new SchedulerException("pause failed")).when(sysJobSchedulerManager).pauseGroup("G1");
-
-		assertThatThrownBy(() -> sysJobDefinitionService.batchUpdateStatusByGroupCode("G1", false))
-			.isInstanceOf(SysJobException.class)
-			.extracting(ex -> ((SysJobException) ex).getResultCode())
-			.isEqualTo(JOB_QUARTZ_OPERATION_FAILED);
+		verify(sysJobScheduleSyncService).batchUpdateStatus(form);
 	}
 
 }

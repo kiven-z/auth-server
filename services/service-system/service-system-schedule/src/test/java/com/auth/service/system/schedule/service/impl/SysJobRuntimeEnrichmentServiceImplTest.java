@@ -7,7 +7,7 @@ import com.auth.service.system.schedule.model.enums.SysJobQuartzRuntimeStatus;
 import com.auth.service.system.schedule.model.vo.SysJobDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobPageResponse;
 import com.auth.service.system.schedule.support.SysJobQuartzRuntimeSnapshot;
-import com.auth.service.system.schedule.support.SysJobSchedulerManager;
+import com.auth.service.system.schedule.support.quartz.SysJobQuartzRuntimeReader;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,7 +33,7 @@ import static org.mockito.Mockito.when;
 class SysJobRuntimeEnrichmentServiceImplTest {
 
 	@Mock
-	private SysJobSchedulerManager sysJobSchedulerManager;
+	private SysJobQuartzRuntimeReader sysJobQuartzRuntimeReader;
 
 	@Mock
 	private LogJobMapper logJobMapper;
@@ -78,10 +78,10 @@ class SysJobRuntimeEnrichmentServiceImplTest {
 		detail.setId(1L);
 		Date previous = new Date(1_700_000_000_000L);
 		Date next = new Date(1_700_000_600_000L);
-		when(sysJobSchedulerManager.getFireTimes("demo", "G"))
-			.thenReturn(new SysJobSchedulerManager.FireTimes(previous, next));
+		when(sysJobQuartzRuntimeReader.getFireTimes("demo", "G"))
+			.thenReturn(new SysJobQuartzRuntimeReader.FireTimes(previous, next));
 		LocalDateTime fireTime = LocalDateTime.of(2026, 6, 13, 10, 0);
-		when(sysJobSchedulerManager.resolveRuntimeSnapshot("demo", "G"))
+		when(sysJobQuartzRuntimeReader.resolveRuntimeSnapshot("demo", "G"))
 			.thenReturn(SysJobQuartzRuntimeSnapshot.of(SysJobQuartzRuntimeStatus.RUNNING, fireTime));
 		LogJobEntity successLog = new LogJobEntity();
 		successLog.setJobId(1L);
@@ -102,16 +102,16 @@ class SysJobRuntimeEnrichmentServiceImplTest {
 	@Test
 	@DisplayName("busy 判定：RUNNING 或 PENDING 返回 true")
 	void isBusyReturnsTrueForRunningOrPending() {
-		when(sysJobSchedulerManager.resolveRuntimeSnapshot("demo", "G"))
+		when(sysJobQuartzRuntimeReader.resolveRuntimeSnapshot("demo", "G"))
 			.thenReturn(SysJobQuartzRuntimeSnapshot.of(SysJobQuartzRuntimeStatus.RUNNING, null));
 
 		assertThat(sysJobRuntimeEnrichmentService.isBusy("demo", "G")).isTrue();
 
-		when(sysJobSchedulerManager.resolveRuntimeSnapshot("demo", "G"))
+		when(sysJobQuartzRuntimeReader.resolveRuntimeSnapshot("demo", "G"))
 			.thenReturn(SysJobQuartzRuntimeSnapshot.of(SysJobQuartzRuntimeStatus.PENDING, null));
 		assertThat(sysJobRuntimeEnrichmentService.isBusy("demo", "G")).isTrue();
 
-		when(sysJobSchedulerManager.resolveRuntimeSnapshot("demo", "G"))
+		when(sysJobQuartzRuntimeReader.resolveRuntimeSnapshot("demo", "G"))
 			.thenReturn(SysJobQuartzRuntimeSnapshot.of(SysJobQuartzRuntimeStatus.IDLE, null));
 		assertThat(sysJobRuntimeEnrichmentService.isBusy("demo", "G")).isFalse();
 	}

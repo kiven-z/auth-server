@@ -1,6 +1,5 @@
 package com.auth.service.system.schedule.service.impl;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.common.service.AuditUserDisplayService;
@@ -21,7 +20,8 @@ import com.auth.service.system.schedule.model.vo.SysJobDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobPageResponse;
 import com.auth.service.system.schedule.service.SysJobDefinitionService;
 import com.auth.service.system.schedule.service.SysJobRuntimeEnrichmentService;
-import com.auth.service.system.schedule.support.SysJobSchedulerManager;
+import com.auth.service.system.schedule.service.SysJobScheduleSyncService;
+import com.auth.service.system.schedule.support.quartz.SysJobSchedulerManager;
 import com.auth.service.system.schedule.validation.SysJobDefinitionValidationManager;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -53,6 +53,8 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		implements SysJobDefinitionService {
 
 	private final SysJobSchedulerManager sysJobSchedulerManager;
+
+	private final SysJobScheduleSyncService sysJobScheduleSyncService;
 
 	private final AuditUserDisplayService auditUserDisplayService;
 
@@ -180,80 +182,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 	 */
 	@Override
 	public void batchUpdateStatus(SysJobStatusForm form) {
-		List<Long> ids = form.getIds();
-		if (CollUtil.isEmpty(ids)) {
-			return;
-		}
-		Boolean targetStatus = form.getStatus();
-
-		List<SysJobEntity> jobsToSchedule = BooleanUtil.isTrue(targetStatus) ? list(
-				Wrappers.<SysJobEntity>lambdaQuery().in(SysJobEntity::getId, ids).eq(SysJobEntity::getStatus, false))
-				: List.of();
-
-		List<SysJobEntity> updates = ids.stream().map(id -> {
-			SysJobEntity entity = new SysJobEntity();
-			entity.setId(id);
-			entity.setStatus(targetStatus);
-			return entity;
-		}).toList();
-		updateBatchById(updates);
-
-		try {
-			if (BooleanUtil.isFalse(targetStatus)) {
-				List<SysJobEntity> jobs = list(Wrappers.<SysJobEntity>lambdaQuery().in(SysJobEntity::getId, ids));
-				if (CollUtil.isEmpty(jobs)) {
-					return;
-				}
-				for (SysJobEntity job : jobs) {
-					sysJobSchedulerManager.pauseJob(job.getJobName(), job.getJobGroup());
-				}
-				return;
-			}
-			if (CollUtil.isEmpty(jobsToSchedule)) {
-				return;
-			}
-			for (SysJobEntity job : jobsToSchedule) {
-				job.setStatus(true);
-				sysJobSchedulerManager.scheduleOrReplace(job);
-			}
-		}
-		catch (SchedulerException ex) {
-			log.error("批量更新任务状态同步 Quartz 失败", ex);
-			throw new SysJobException(JOB_QUARTZ_OPERATION_FAILED, "batchStatus", ex.getMessage());
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void batchUpdateStatusByGroupCode(String groupCode, Boolean status) {
-		List<SysJobEntity> jobs = list(Wrappers.<SysJobEntity>lambdaQuery().eq(SysJobEntity::getJobGroup, groupCode));
-
-		if (CollUtil.isNotEmpty(jobs)) {
-			List<SysJobEntity> updates = jobs.stream().map(job -> {
-				SysJobEntity entity = new SysJobEntity();
-				entity.setId(job.getId());
-				entity.setStatus(status);
-				return entity;
-			}).toList();
-			updateBatchById(updates);
-		}
-
-		try {
-			if (BooleanUtil.isFalse(status)) {
-				sysJobSchedulerManager.pauseGroup(groupCode);
-				return;
-			}
-			for (SysJobEntity job : jobs) {
-				job.setStatus(true);
-				sysJobSchedulerManager.scheduleOrReplace(job);
-			}
-		}
-		catch (SchedulerException ex) {
-			log.error("分组批量更新任务状态同步 Quartz 失败 groupCode={}", groupCode, ex);
-			throw new SysJobException(JOB_QUARTZ_OPERATION_FAILED, "batchGroupStatus", ex.getMessage());
-		}
+		sysJobScheduleSyncService.batchUpdateStatus(form);
 	}
 
 	/**

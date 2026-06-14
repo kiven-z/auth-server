@@ -10,7 +10,7 @@ import com.auth.service.system.schedule.model.vo.SysJobDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobLastExecutionView;
 import com.auth.service.system.schedule.service.SysJobRuntimeEnrichmentService;
 import com.auth.service.system.schedule.support.SysJobQuartzRuntimeSnapshot;
-import com.auth.service.system.schedule.support.SysJobSchedulerManager;
+import com.auth.service.system.schedule.support.quartz.SysJobQuartzRuntimeReader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +34,7 @@ import static com.auth.service.system.schedule.model.constants.SysJobQuartzDataK
 @Service
 public class SysJobRuntimeEnrichmentServiceImpl implements SysJobRuntimeEnrichmentService {
 
-	private final SysJobSchedulerManager sysJobSchedulerManager;
+	private final SysJobQuartzRuntimeReader sysJobQuartzRuntimeReader;
 
 	private final LogJobMapper logJobMapper;
 
@@ -43,11 +43,11 @@ public class SysJobRuntimeEnrichmentServiceImpl implements SysJobRuntimeEnrichme
 	 */
 	@Override
 	public void enrichDetail(SysJobDetailVO detail, String jobName, String jobGroup) {
-		SysJobSchedulerManager.FireTimes fireTimes = sysJobSchedulerManager.getFireTimes(jobName, jobGroup);
+		SysJobQuartzRuntimeReader.FireTimes fireTimes = sysJobQuartzRuntimeReader.getFireTimes(jobName, jobGroup);
 		detail.setPreviousFireTime(toLocalDateTime(fireTimes.previousFireTime()));
 		detail.setNextFireTime(toLocalDateTime(fireTimes.nextFireTime()));
 
-		SysJobQuartzRuntimeSnapshot snapshot = sysJobSchedulerManager.resolveRuntimeSnapshot(jobName, jobGroup);
+		SysJobQuartzRuntimeSnapshot snapshot = sysJobQuartzRuntimeReader.resolveRuntimeSnapshot(jobName, jobGroup);
 		detail.setQuartzRuntimeStatus(snapshot.status());
 		detail.setQuartzFireTime(snapshot.fireTime());
 
@@ -59,7 +59,7 @@ public class SysJobRuntimeEnrichmentServiceImpl implements SysJobRuntimeEnrichme
 	 */
 	@Override
 	public boolean isBusy(String jobName, String jobGroup) {
-		SysJobQuartzRuntimeSnapshot snapshot = sysJobSchedulerManager.resolveRuntimeSnapshot(jobName, jobGroup);
+		SysJobQuartzRuntimeSnapshot snapshot = sysJobQuartzRuntimeReader.resolveRuntimeSnapshot(jobName, jobGroup);
 		SysJobQuartzRuntimeStatus status = snapshot.status();
 		return status == SysJobQuartzRuntimeStatus.RUNNING || status == SysJobQuartzRuntimeStatus.PENDING;
 	}
