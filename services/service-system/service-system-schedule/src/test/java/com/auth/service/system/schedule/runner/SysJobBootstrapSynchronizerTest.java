@@ -12,12 +12,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.ConfigurableApplicationContext;
 
+import java.time.Duration;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link SysJobBootstrapSynchronizer} 单元测试。
@@ -38,17 +45,22 @@ class SysJobBootstrapSynchronizerTest {
 
 	private SysJobBootstrapSynchronizer sysJobBootstrapSynchronizer;
 
+	private ApplicationReadyEvent applicationReadyEvent;
+
 	@BeforeEach
 	void setUp() {
 		scheduleJobProperties = new ScheduleJobProperties();
 		scheduleJobProperties.setBootstrapBatchSize(100);
 		sysJobBootstrapSynchronizer = new SysJobBootstrapSynchronizer(sysJobMapper, sysJobSchedulerManager,
 				scheduleJobProperties);
+		ConfigurableApplicationContext context = mock(ConfigurableApplicationContext.class);
+		applicationReadyEvent = new ApplicationReadyEvent(mock(SpringApplication.class), new String[] {}, context,
+				Duration.ZERO);
 	}
 
 	@Test
-	@DisplayName("同步：启用任务走 scheduleOrReplace，停用任务走 pauseJob")
-	void syncFromDatabase_schedulesEnabledAndPausesDisabled() throws Exception {
+	@DisplayName("应用就绪后应同步 Quartz 任务")
+	void onApplicationReady_schedulesEnabledAndPausesDisabled() throws Exception {
 		SysJobEntity enabledJob = new SysJobEntity();
 		enabledJob.setId(1L);
 		enabledJob.setJobName("enabledJob");
@@ -73,7 +85,7 @@ class SysJobBootstrapSynchronizerTest {
 
 		when(sysJobMapper.selectPage(any(Page.class), any())).thenReturn(enabledPage, disabledPage);
 
-		sysJobBootstrapSynchronizer.syncFromDatabase();
+		sysJobBootstrapSynchronizer.onApplicationReady(applicationReadyEvent);
 
 		verify(sysJobSchedulerManager).scheduleOrReplace(enabledJob);
 		verify(sysJobSchedulerManager).pauseJob("disabledJob", "DEFAULT");
@@ -81,7 +93,7 @@ class SysJobBootstrapSynchronizerTest {
 
 	@Test
 	@DisplayName("同步：按配置分页大小查询")
-	void syncFromDatabase_usesConfiguredBatchSize() {
+	void onApplicationReady_usesConfiguredBatchSize() {
 		scheduleJobProperties.setBootstrapBatchSize(50);
 		sysJobBootstrapSynchronizer = new SysJobBootstrapSynchronizer(sysJobMapper, sysJobSchedulerManager,
 				scheduleJobProperties);
@@ -92,7 +104,7 @@ class SysJobBootstrapSynchronizerTest {
 		emptyPage.setPages(0);
 		when(sysJobMapper.selectPage(any(Page.class), any())).thenReturn(emptyPage);
 
-		sysJobBootstrapSynchronizer.syncFromDatabase();
+		sysJobBootstrapSynchronizer.onApplicationReady(applicationReadyEvent);
 
 		ArgumentCaptor<Page<SysJobEntity>> pageCaptor = ArgumentCaptor.forClass(Page.class);
 		verify(sysJobMapper, times(2)).selectPage(pageCaptor.capture(), any());

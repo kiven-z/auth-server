@@ -7,6 +7,7 @@ import com.auth.service.system.schedule.model.vo.QuartzTaskClassVO;
 import com.auth.service.system.schedule.model.vo.QuartzTaskMethodVO;
 import com.auth.service.system.schedule.service.SysJobTaskCatalogService;
 import com.auth.service.system.schedule.support.QuartzTaskRegistry;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +15,6 @@ import java.beans.Introspector;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,6 +40,19 @@ public class SysJobTaskCatalogServiceImpl implements SysJobTaskCatalogService {
 		this.quartzTaskRegistry = quartzTaskRegistry;
 		this.applicationContext = applicationContext;
 		this.messageDispatchPayloadTemplateProvider = messageDispatchPayloadTemplateProvider;
+	}
+
+	@NotNull
+	private static QuartzTaskMethodVO getQuartzTaskMethodVO(Method method, String beanName) {
+		String methodName = method.getName();
+		boolean noArg = method.getParameterCount() == 0;
+		QuartzTaskMethodVO methodVO = new QuartzTaskMethodVO();
+		methodVO.setMethodName(methodName);
+		methodVO.setParameterSignature(noArg ? "()" : "(String)");
+		methodVO.setReturnType(method.getReturnType().getSimpleName());
+		methodVO.setInvokeTargetExample(
+				noArg ? beanName + "." + methodName + "()" : beanName + "." + methodName + "('demo')");
+		return methodVO;
 	}
 
 	/**
@@ -69,17 +82,15 @@ public class SysJobTaskCatalogServiceImpl implements SysJobTaskCatalogService {
 			throw new SysJobException(JOB_CLASS_LOAD_FAILED, exception.getMessage());
 		}
 
-		String beanName = resolveBeanName(targetClass);
+		// 解析 bean 名称
+		String[] beanNames = applicationContext.getBeanNamesForType(targetClass);
+		String beanName = beanNames.length > 0 ? beanNames[0] : Introspector.decapitalize(targetClass.getSimpleName());
 		List<QuartzTaskMethodVO> methodList = new ArrayList<>();
 		for (Method method : targetClass.getMethods()) {
 			if (!isCallableMethod(method)) {
 				continue;
 			}
-			QuartzTaskMethodVO methodVO = new QuartzTaskMethodVO();
-			methodVO.setMethodName(method.getName());
-			methodVO.setParameterSignature(buildParameterSignature(method));
-			methodVO.setReturnType(method.getReturnType().getSimpleName());
-			methodVO.setInvokeTargetExample(buildInvokeTarget(beanName, method));
+			QuartzTaskMethodVO methodVO = getQuartzTaskMethodVO(method, beanName);
 			methodList.add(methodVO);
 		}
 		return methodList;
@@ -111,49 +122,6 @@ public class SysJobTaskCatalogServiceImpl implements SysJobTaskCatalogService {
 			return true;
 		}
 		return parameterTypes.length == 1 && parameterTypes[0] == String.class;
-	}
-
-	/**
-	 * 构建参数签名文本
-	 * @param method 方法
-	 * @return 签名
-	 */
-	private String buildParameterSignature(Method method) {
-		Class<?>[] parameterTypes = method.getParameterTypes();
-		if (parameterTypes.length == 0) {
-			return "()";
-		}
-		String joined = Arrays.stream(parameterTypes)
-			.map(Class::getSimpleName)
-			.reduce((a, b) -> a + ", " + b)
-			.orElse("");
-		return "(" + joined + ")";
-	}
-
-	/**
-	 * 构建 invoke_target 示例
-	 * @param beanName bean 名称
-	 * @param method 方法
-	 * @return invoke_target 示例
-	 */
-	private String buildInvokeTarget(String beanName, Method method) {
-		if (method.getParameterCount() == 0) {
-			return beanName + "." + method.getName() + "()";
-		}
-		return beanName + "." + method.getName() + "('demo')";
-	}
-
-	/**
-	 * 解析 bean 名称
-	 * @param type 任务类
-	 * @return bean 名称
-	 */
-	private String resolveBeanName(Class<?> type) {
-		String[] beanNames = applicationContext.getBeanNamesForType(type);
-		if (beanNames.length > 0) {
-			return beanNames[0];
-		}
-		return Introspector.decapitalize(type.getSimpleName());
 	}
 
 }

@@ -318,31 +318,6 @@ public class SysJobSchedulerManager {
 		}
 	}
 
-	/**
-	 * 批量解析 Quartz 运行时状态（复用一次 {@code getCurrentlyExecutingJobs}）
-	 * @param jobKeys 任务键集合
-	 * @return 任务键 → 快照
-	 */
-	public Map<JobKey, SysJobQuartzRuntimeSnapshot> batchResolveRuntimeSnapshots(Collection<JobKey> jobKeys) {
-		Map<JobKey, SysJobQuartzRuntimeSnapshot> result = new HashMap<>();
-		if (CollUtil.isEmpty(jobKeys)) {
-			return result;
-		}
-		try {
-			Set<JobKey> runningJobKeys = collectRunningJobKeys();
-			for (JobKey jobKey : jobKeys) {
-				result.put(jobKey, resolveRuntimeSnapshot(jobKey, runningJobKeys));
-			}
-		}
-		catch (SchedulerException exception) {
-			log.warn("批量解析 Quartz 运行时状态失败", exception);
-			for (JobKey jobKey : jobKeys) {
-				result.putIfAbsent(jobKey, SysJobQuartzRuntimeSnapshot.of(SysJobQuartzRuntimeStatus.ERROR, null));
-			}
-		}
-		return result;
-	}
-
 	private Set<JobKey> collectRunningJobKeys() throws SchedulerException {
 		Set<JobKey> runningJobKeys = new HashSet<>();
 		for (JobExecutionContext context : scheduler.getCurrentlyExecutingJobs()) {
