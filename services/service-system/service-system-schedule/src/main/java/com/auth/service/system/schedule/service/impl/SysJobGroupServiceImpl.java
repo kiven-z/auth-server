@@ -16,7 +16,6 @@ import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
 import com.auth.service.system.schedule.model.vo.SysJobGroupDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobGroupPageResponse;
 import com.auth.service.system.schedule.service.SysJobGroupService;
-import com.auth.service.system.schedule.service.SysJobScheduleSyncService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -39,13 +38,10 @@ import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_
  */
 @RequiredArgsConstructor
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJobGroupEntity>
 		implements SysJobGroupService {
 
 	private final SysJobMapper sysJobMapper;
-
-	private final SysJobScheduleSyncService sysJobScheduleSyncService;
 
 	private final AuditUserDisplayService auditUserDisplayService;
 
@@ -94,6 +90,7 @@ public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJo
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(rollbackFor = Exception.class)
 	public void create(SysJobGroupForm form) {
 		long exists = count(
 				Wrappers.<SysJobGroupEntity>lambdaQuery().eq(SysJobGroupEntity::getGroupCode, form.getGroupCode()));
@@ -109,6 +106,7 @@ public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJo
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(rollbackFor = Exception.class)
 	public void update(SysJobGroupUpdateForm form) {
 		SysJobGroupEntity jobGroup = getById(form.getId());
 		if (jobGroup == null) {
@@ -123,6 +121,7 @@ public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJo
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(rollbackFor = Exception.class)
 	public void deleteById(Long id) {
 		SysJobGroupEntity jobGroup = getById(id);
 		if (jobGroup == null) {
@@ -140,14 +139,6 @@ public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJo
 		}
 
 		removeById(id);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void updateAllJobsStatusInGroup(String groupCode, Boolean status) {
-		sysJobScheduleSyncService.batchUpdateStatusByGroupCode(groupCode, status);
 	}
 
 }

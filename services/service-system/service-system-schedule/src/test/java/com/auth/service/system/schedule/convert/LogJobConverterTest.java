@@ -1,9 +1,9 @@
 package com.auth.service.system.schedule.convert;
 
 import com.auth.service.system.schedule.model.entity.LogJobEntity;
-import com.auth.service.system.schedule.model.po.SysJobLogPageRowPO;
-import com.auth.service.system.schedule.model.vo.SysJobLogDetailVO;
-import com.auth.service.system.schedule.model.vo.SysJobLogPageResponse;
+import com.auth.service.system.schedule.model.po.LogJobPageRowPO;
+import com.auth.service.system.schedule.model.vo.LogJobDetailVO;
+import com.auth.service.system.schedule.model.vo.LogJobPageResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -12,16 +12,16 @@ import java.time.LocalDateTime;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * {@link SysJobLogConverter} 映射校验（1=成功，0=失败）
+ * {@link LogJobConverter} 映射校验（1=成功，0=失败）
  */
-@DisplayName("SysJobLogConverter 任务日志映射")
-class SysJobLogConverterTest {
+@DisplayName("LogJobConverter 任务日志映射")
+class LogJobConverterTest {
 
 	@Test
 	@DisplayName("分页 PO status=1 映射为 true（成功）")
 	void toPageResponse_mapsSuccessStatus() {
 		LocalDateTime now = LocalDateTime.of(2026, 1, 1, 12, 0, 0);
-		SysJobLogPageRowPO po = new SysJobLogPageRowPO();
+		LogJobPageRowPO po = new LogJobPageRowPO();
 		po.setId(10L);
 		po.setJobName("demoJob");
 		po.setJobGroup("DEFAULT");
@@ -34,7 +34,7 @@ class SysJobLogConverterTest {
 		po.setCreateUser(1L);
 		po.setUpdateUser(2L);
 
-		SysJobLogPageResponse vo = SysJobLogConverter.INSTANCE.toPageResponse(po);
+		LogJobPageResponse vo = LogJobConverter.INSTANCE.toPageResponse(po);
 
 		assertThat(vo.getId()).isEqualTo(10L);
 		assertThat(vo.getJobName()).isEqualTo("demoJob");
@@ -46,10 +46,10 @@ class SysJobLogConverterTest {
 	@Test
 	@DisplayName("分页 PO status=0 映射为 false（失败）")
 	void toPageResponse_mapsFailureStatus() {
-		SysJobLogPageRowPO po = new SysJobLogPageRowPO();
+		LogJobPageRowPO po = new LogJobPageRowPO();
 		po.setStatus(false);
 
-		SysJobLogPageResponse vo = SysJobLogConverter.INSTANCE.toPageResponse(po);
+		LogJobPageResponse vo = LogJobConverter.INSTANCE.toPageResponse(po);
 
 		assertThat(vo.getStatus()).isFalse();
 	}
@@ -62,7 +62,7 @@ class SysJobLogConverterTest {
 		entity.setJobName("demo");
 		entity.setStatus(Boolean.TRUE);
 
-		SysJobLogDetailVO vo = SysJobLogConverter.INSTANCE.toDetailVo(entity);
+		LogJobDetailVO vo = LogJobConverter.INSTANCE.toDetailVo(entity);
 
 		assertThat(vo.getStatus()).isTrue();
 	}
@@ -73,7 +73,7 @@ class SysJobLogConverterTest {
 		LogJobEntity entity = new LogJobEntity();
 		entity.setStatus(Boolean.FALSE);
 
-		SysJobLogDetailVO vo = SysJobLogConverter.INSTANCE.toDetailVo(entity);
+		LogJobDetailVO vo = LogJobConverter.INSTANCE.toDetailVo(entity);
 
 		assertThat(vo.getStatus()).isFalse();
 	}

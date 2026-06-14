@@ -1,6 +1,27 @@
 package com.auth.service.system.schedule.service.impl;
 
-import cn.hutool.core.util.BooleanUtil;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_BUSY;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_GROUP_NOT_AVAILABLE;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_LOG_DELETE_FAILED;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_QUARTZ_OPERATION_FAILED;
+import static com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys.JOB_ZONE;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.quartz.JobKey;
+import org.quartz.SchedulerException;
+import org.springframework.dao.DataAccessException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.schedule.convert.SysJobConverter;
@@ -8,37 +29,34 @@ import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.mapper.LogJobMapper;
 import com.auth.service.system.schedule.mapper.SysJobGroupMapper;
 import com.auth.service.system.schedule.mapper.SysJobMapper;
+import com.auth.service.system.schedule.model.entity.LogJobEntity;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
+import com.auth.service.system.schedule.model.enums.SysJobLastExecutionStatus;
+import com.auth.service.system.schedule.model.enums.SysJobQuartzRuntimeStatus;
 import com.auth.service.system.schedule.model.form.SysJobCreateForm;
-import com.auth.service.system.schedule.model.form.SysJobStatusForm;
 import com.auth.service.system.schedule.model.form.SysJobUpdateForm;
 import com.auth.service.system.schedule.model.po.SysJobDetailRowPO;
 import com.auth.service.system.schedule.model.po.SysJobPageRowPO;
 import com.auth.service.system.schedule.model.query.SysJobQuery;
 import com.auth.service.system.schedule.model.vo.SysJobDetailVO;
+import com.auth.service.system.schedule.model.vo.SysJobLastExecutionView;
 import com.auth.service.system.schedule.model.vo.SysJobPageResponse;
+import com.auth.service.system.schedule.service.LogJobService;
 import com.auth.service.system.schedule.service.SysJobDefinitionService;
-import com.auth.service.system.schedule.service.SysJobRuntimeEnrichmentService;
-import com.auth.service.system.schedule.service.SysJobScheduleSyncService;
+import com.auth.service.system.schedule.support.SysJobQuartzRuntimeSnapshot;
+import com.auth.service.system.schedule.support.quartz.SysJobQuartzRuntimeReader;
 import com.auth.service.system.schedule.support.quartz.SysJobSchedulerManager;
 import com.auth.service.system.schedule.validation.SysJobDefinitionValidationManager;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.BooleanUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.quartz.JobKey;
-import org.quartz.SchedulerException;
-import org.springframework.dao.DataAccessException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-
-import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.*;
 
 /**
  * 定时任务定义服务实现
@@ -48,23 +66,22 @@ import static com.auth.service.system.schedule.exception.ScheduleResultCode.*;
 @RequiredArgsConstructor
 @Slf4j
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJobEntity>
 		implements SysJobDefinitionService {
 
 	private final SysJobSchedulerManager sysJobSchedulerManager;
 
-	private final SysJobScheduleSyncService sysJobScheduleSyncService;
-
 	private final AuditUserDisplayService auditUserDisplayService;
 
 	private final SysJobGroupMapper sysJobGroupMapper;
+
+	private final LogJobService logJobService;
 
 	private final LogJobMapper logJobMapper;
 
 	private final SysJobDefinitionValidationManager validationManager;
 
-	private final SysJobRuntimeEnrichmentService sysJobRuntimeEnrichmentService;
+	private final SysJobQuartzRuntimeReader sysJobQuartzRuntimeReader;
 
 	/**
 	 * {@inheritDoc}
@@ -74,7 +91,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		IPage<SysJobPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
 		IPage<SysJobPageResponse> voPage = page.convert(SysJobConverter.INSTANCE::toPageResponse);
 
-		sysJobRuntimeEnrichmentService.enrichLastExecution(voPage.getRecords());
+		enrichLastExecution(voPage.getRecords());
 		auditUserDisplayService.enrichAuditUsernames(voPage);
 		return PageResponse.of(voPage);
 	}
@@ -90,7 +107,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		}
 
 		SysJobDetailVO vo = SysJobConverter.INSTANCE.toDetailVo(detailRow);
-		sysJobRuntimeEnrichmentService.enrichDetail(vo, detailRow.getJobName(), detailRow.getJobGroup());
+		enrichDetail(vo, detailRow.getJobName(), detailRow.getJobGroup());
 		auditUserDisplayService.enrichAuditUsernames(List.of(vo));
 		return vo;
 	}
@@ -99,6 +116,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(rollbackFor = Exception.class)
 	public void create(SysJobCreateForm form) {
 		SysJobGroupEntity sysJobGroup = sysJobGroupMapper.selectOne(
 				Wrappers.<SysJobGroupEntity>lambdaQuery().eq(SysJobGroupEntity::getGroupCode, form.getJobGroup()));
@@ -128,6 +146,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(rollbackFor = Exception.class)
 	public void update(SysJobUpdateForm form) {
 		SysJobEntity dbJob = getById(form.getId());
 		if (dbJob == null) {
@@ -151,6 +170,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(rollbackFor = Exception.class)
 	public void deleteById(Long id) {
 		SysJobEntity dbJob = getById(id);
 		if (dbJob == null) {
@@ -168,7 +188,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		}
 
 		try {
-			logJobMapper.deleteByJobNameAndGroup(jobName, jobGroup);
+			logJobService.deleteByJobNameAndGroup(jobName, jobGroup);
 			removeById(id);
 		}
 		catch (DataAccessException ex) {
@@ -181,20 +201,16 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void batchUpdateStatus(SysJobStatusForm form) {
-		sysJobScheduleSyncService.batchUpdateStatus(form);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
+	@Transactional(rollbackFor = Exception.class)
 	public void runOnce(Long id) {
 		SysJobEntity dbJob = getById(id);
 		if (dbJob == null) {
 			throw new SysJobException(DATA_NOT_EXIST);
 		}
-		if (sysJobRuntimeEnrichmentService.isBusy(dbJob.getJobName(), dbJob.getJobGroup())) {
+		SysJobQuartzRuntimeStatus runtimeStatus = sysJobQuartzRuntimeReader
+			.resolveRuntimeSnapshot(dbJob.getJobName(), dbJob.getJobGroup())
+			.status();
+		if (runtimeStatus == SysJobQuartzRuntimeStatus.RUNNING || runtimeStatus == SysJobQuartzRuntimeStatus.PENDING) {
 			throw new SysJobException(JOB_BUSY);
 		}
 		try {
@@ -204,6 +220,57 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		catch (SchedulerException ex) {
 			log.error("立即执行失败", ex);
 			throw new SysJobException(JOB_QUARTZ_OPERATION_FAILED, "runOnce", ex.getMessage());
+		}
+	}
+
+	/**
+	 * 丰富详情
+	 * @param detail 详情
+	 * @param jobName 任务名称
+	 * @param jobGroup 任务组
+	 */
+	private void enrichDetail(SysJobDetailVO detail, String jobName, String jobGroup) {
+		SysJobQuartzRuntimeReader.FireTimes fireTimes = sysJobQuartzRuntimeReader.getFireTimes(jobName, jobGroup);
+		Date previousFireTime = fireTimes.previousFireTime();
+		detail.setPreviousFireTime(previousFireTime == null ? null
+				: LocalDateTime.ofInstant(Instant.ofEpochMilli(previousFireTime.getTime()), JOB_ZONE));
+		Date nextFireTime = fireTimes.nextFireTime();
+		detail.setNextFireTime(nextFireTime == null ? null
+				: LocalDateTime.ofInstant(Instant.ofEpochMilli(nextFireTime.getTime()), JOB_ZONE));
+
+		SysJobQuartzRuntimeSnapshot snapshot = sysJobQuartzRuntimeReader.resolveRuntimeSnapshot(jobName, jobGroup);
+		detail.setQuartzRuntimeStatus(snapshot.status());
+		detail.setQuartzFireTime(snapshot.fireTime());
+
+		enrichLastExecution(List.of(detail));
+	}
+
+	/**
+	 * 丰富最近一次执行
+	 * @param views 视图
+	 */
+	private void enrichLastExecution(List<? extends SysJobLastExecutionView> views) {
+		if (CollUtil.isEmpty(views)) {
+			return;
+		}
+
+		List<Long> jobIds = views.stream().map(SysJobLastExecutionView::getId).filter(Objects::nonNull).toList();
+		Map<Long, LogJobEntity> latestLogByJobId = CollUtil.isEmpty(jobIds) ? Map.of()
+				: logJobMapper.selectLatestByJobIds(jobIds)
+					.stream()
+					.filter(log -> log.getJobId() != null)
+					.collect(Collectors.toMap(LogJobEntity::getJobId, Function.identity(), (first, ignored) -> first));
+
+		for (SysJobLastExecutionView view : views) {
+			Long jobId = view.getId();
+			LogJobEntity latestLog = jobId == null ? null : latestLogByJobId.get(jobId);
+			if (latestLog == null) {
+				view.setLastExecutionStatus(SysJobLastExecutionStatus.UNKNOWN);
+				continue;
+			}
+			view.setLastExecutionTime(latestLog.getCreateTime());
+			view.setLastExecutionStatus(BooleanUtil.isTrue(latestLog.getStatus()) ? SysJobLastExecutionStatus.SUCCESS
+					: SysJobLastExecutionStatus.FAILED);
 		}
 	}
 

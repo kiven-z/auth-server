@@ -4,7 +4,7 @@
 
     <!-- 分页查询日志 -->
     <select id="selectListByPage"
-            resultType="com.auth.service.system.schedule.model.po.SysJobLogPageRowPO">
+            resultType="com.auth.service.system.schedule.model.po.LogJobPageRowPO">
         SELECT id,
         job_id,
         job_name,

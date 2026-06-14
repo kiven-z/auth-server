@@ -1,28 +1,30 @@
 package com.auth.service.system.schedule.service.impl;
 
-import cn.hutool.core.exceptions.ExceptionUtil;
-import com.auth.common.data.model.PageResponse;
-import com.auth.service.system.common.service.AuditUserDisplayService;
-import com.auth.service.system.schedule.convert.SysJobLogConverter;
-import com.auth.service.system.schedule.exception.SysJobException;
-import com.auth.service.system.schedule.mapper.LogJobMapper;
-import com.auth.service.system.schedule.model.entity.LogJobEntity;
-import com.auth.service.system.schedule.model.po.SysJobLogPageRowPO;
-import com.auth.service.system.schedule.model.query.SysJobLogQuery;
-import com.auth.service.system.schedule.model.vo.SysJobLogDetailVO;
-import com.auth.service.system.schedule.model.vo.SysJobLogPageResponse;
-import com.auth.service.system.schedule.service.SysJobLogService;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.extern.slf4j.Slf4j;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
+
+import java.util.List;
+
 import org.quartz.JobExecutionException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import com.auth.common.data.model.PageResponse;
+import com.auth.service.system.common.service.AuditUserDisplayService;
+import com.auth.service.system.schedule.convert.LogJobConverter;
+import com.auth.service.system.schedule.exception.SysJobException;
+import com.auth.service.system.schedule.mapper.LogJobMapper;
+import com.auth.service.system.schedule.model.entity.LogJobEntity;
+import com.auth.service.system.schedule.model.po.LogJobPageRowPO;
+import com.auth.service.system.schedule.model.query.LogJobQuery;
+import com.auth.service.system.schedule.model.vo.LogJobDetailVO;
+import com.auth.service.system.schedule.model.vo.LogJobPageResponse;
+import com.auth.service.system.schedule.service.LogJobService;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
-import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
+import cn.hutool.core.exceptions.ExceptionUtil;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 任务执行日志实现
@@ -31,17 +33,23 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
  */
 @Slf4j
 @Service
-@Transactional(rollbackFor = Exception.class)
-public class SysJobLogServiceImpl extends ServiceImpl<LogJobMapper, LogJobEntity> implements SysJobLogService {
+public class LogJobServiceImpl extends ServiceImpl<LogJobMapper, LogJobEntity> implements LogJobService {
 
 	private final AuditUserDisplayService auditUserDisplayService;
 
-	public SysJobLogServiceImpl(AuditUserDisplayService auditUserDisplayService) {
+	public LogJobServiceImpl(AuditUserDisplayService auditUserDisplayService) {
 		this.auditUserDisplayService = auditUserDisplayService;
 	}
 
 	/**
-	 * 组装公共字段；审计列由 MyBatis 填充（无登录用户时为 NULL）。
+	 * 构建基础日志实体
+	 * @param jobId 任务ID
+	 * @param jobName 任务名称
+	 * @param jobGroup 任务组
+	 * @param invokeTarget 任务执行目标
+	 * @param triggerType 触发类型
+	 * @param elapsedMs 执行时间
+	 * @return 基础日志实体
 	 */
 	private static LogJobEntity buildBaseLog(Long jobId, String jobName, String jobGroup, String invokeTarget,
 			String triggerType, long elapsedMs) {
@@ -59,9 +67,9 @@ public class SysJobLogServiceImpl extends ServiceImpl<LogJobMapper, LogJobEntity
 	 * {@inheritDoc}
 	 */
 	@Override
-	public PageResponse<SysJobLogPageResponse> getPage(Page<LogJobEntity> pageParams, SysJobLogQuery query) {
-		IPage<SysJobLogPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
-		IPage<SysJobLogPageResponse> voPage = page.convert(SysJobLogConverter.INSTANCE::toPageResponse);
+	public PageResponse<LogJobPageResponse> getPage(Page<LogJobEntity> pageParams, LogJobQuery query) {
+		IPage<LogJobPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
+		IPage<LogJobPageResponse> voPage = page.convert(LogJobConverter.INSTANCE::toPageResponse);
 
 		auditUserDisplayService.enrichAuditUsernames(voPage);
 		return PageResponse.of(voPage);
@@ -71,13 +79,13 @@ public class SysJobLogServiceImpl extends ServiceImpl<LogJobMapper, LogJobEntity
 	 * {@inheritDoc}
 	 */
 	@Override
-	public SysJobLogDetailVO getDetail(Long id) {
+	public LogJobDetailVO getDetail(Long id) {
 		LogJobEntity jobLog = getById(id);
 		if (jobLog == null) {
 			throw new SysJobException(DATA_NOT_EXIST);
 		}
 
-		SysJobLogDetailVO vo = SysJobLogConverter.INSTANCE.toDetailVo(jobLog);
+		LogJobDetailVO vo = LogJobConverter.INSTANCE.toDetailVo(jobLog);
 		auditUserDisplayService.enrichAuditUsernames(List.of(vo));
 		return vo;
 	}
@@ -86,6 +94,7 @@ public class SysJobLogServiceImpl extends ServiceImpl<LogJobMapper, LogJobEntity
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(rollbackFor = Exception.class)
 	public void recordSuccess(Long jobId, String jobName, String jobGroup, String invokeTarget, String triggerType,
 			long elapsedMs, String message) {
 		LogJobEntity entity = buildBaseLog(jobId, jobName, jobGroup, invokeTarget, triggerType, elapsedMs);
@@ -98,6 +107,7 @@ public class SysJobLogServiceImpl extends ServiceImpl<LogJobMapper, LogJobEntity
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(rollbackFor = Exception.class)
 	public void recordFailure(Long jobId, String jobName, String jobGroup, String invokeTarget, String triggerType,
 			long elapsedMs, JobExecutionException ex) {
 		LogJobEntity entity = buildBaseLog(jobId, jobName, jobGroup, invokeTarget, triggerType, elapsedMs);
@@ -107,6 +117,15 @@ public class SysJobLogServiceImpl extends ServiceImpl<LogJobMapper, LogJobEntity
 			entity.setExceptionInfo(ExceptionUtil.stacktraceToString(ex, 8000));
 		}
 		save(entity);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void deleteByJobNameAndGroup(String jobName, String jobGroup) {
+		baseMapper.deleteByJobNameAndGroup(jobName, jobGroup);
 	}
 
 }

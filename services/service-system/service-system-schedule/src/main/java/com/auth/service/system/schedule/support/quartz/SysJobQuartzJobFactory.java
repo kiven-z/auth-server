@@ -1,18 +1,20 @@
 package com.auth.service.system.schedule.support.quartz;
 
-import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.util.BooleanUtil;
-import cn.hutool.json.JSONObject;
-import cn.hutool.json.JSONUtil;
-import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
-import com.auth.service.system.schedule.model.entity.SysJobEntity;
-import com.auth.service.system.schedule.model.enums.SysJobTaskType;
-import lombok.extern.slf4j.Slf4j;
 import org.quartz.Job;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.springframework.stereotype.Component;
+
+import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
+import com.auth.service.system.schedule.model.entity.SysJobEntity;
+import com.auth.service.system.schedule.model.enums.SysJobTaskType;
+
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.BooleanUtil;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 根据 {@link SysJobEntity} 构建 Quartz {@link JobDetail}
@@ -50,6 +52,11 @@ public class SysJobQuartzJobFactory {
 		return JobBuilder.newJob(jobClass).withIdentity(jobName, jobGroup).usingJobData(map).storeDurably().build();
 	}
 
+	/**
+	 * 合并 JSON 参数
+	 * @param map 参数映射
+	 * @param jobParamsJson 参数 JSON
+	 */
 	private static void mergeJsonParams(JobDataMap map, String jobParamsJson) {
 		if (CharSequenceUtil.isBlank(jobParamsJson)) {
 			return;

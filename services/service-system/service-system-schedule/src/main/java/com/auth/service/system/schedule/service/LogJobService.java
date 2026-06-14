@@ -2,9 +2,9 @@ package com.auth.service.system.schedule.service;
 
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.schedule.model.entity.LogJobEntity;
-import com.auth.service.system.schedule.model.query.SysJobLogQuery;
-import com.auth.service.system.schedule.model.vo.SysJobLogDetailVO;
-import com.auth.service.system.schedule.model.vo.SysJobLogPageResponse;
+import com.auth.service.system.schedule.model.query.LogJobQuery;
+import com.auth.service.system.schedule.model.vo.LogJobDetailVO;
+import com.auth.service.system.schedule.model.vo.LogJobPageResponse;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.quartz.JobExecutionException;
@@ -14,7 +14,7 @@ import org.quartz.JobExecutionException;
  *
  * @author Bunny
  */
-public interface SysJobLogService extends IService<LogJobEntity> {
+public interface LogJobService extends IService<LogJobEntity> {
 
 	/**
 	 * 分页查询
@@ -22,14 +22,14 @@ public interface SysJobLogService extends IService<LogJobEntity> {
 	 * @param query 条件
 	 * @return 分页数据
 	 */
-	PageResponse<SysJobLogPageResponse> getPage(Page<LogJobEntity> pageParams, SysJobLogQuery query);
+	PageResponse<LogJobPageResponse> getPage(Page<LogJobEntity> pageParams, LogJobQuery query);
 
 	/**
 	 * 详情（含异常堆栈）
 	 * @param id 主键
 	 * @return 详情
 	 */
-	SysJobLogDetailVO getDetail(Long id);
+	LogJobDetailVO getDetail(Long id);
 
 	/**
 	 * 记录成功日志
@@ -56,5 +56,12 @@ public interface SysJobLogService extends IService<LogJobEntity> {
 	 */
 	void recordFailure(Long jobId, String jobName, String jobGroup, String invokeTarget, String triggerType,
 			long elapsedMs, JobExecutionException ex);
+
+	/**
+	 * 按任务键物理删除全部日志
+	 * @param jobName 任务名
+	 * @param jobGroup 分组
+	 */
+	void deleteByJobNameAndGroup(String jobName, String jobGroup);
 
 }

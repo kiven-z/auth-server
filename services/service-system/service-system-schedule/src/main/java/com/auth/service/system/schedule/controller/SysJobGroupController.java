@@ -15,6 +15,7 @@ import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
 import com.auth.service.system.schedule.model.vo.SysJobGroupDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobGroupPageResponse;
 import com.auth.service.system.schedule.service.SysJobGroupService;
+import com.auth.service.system.schedule.service.SysJobScheduleSyncService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -40,8 +41,12 @@ public class SysJobGroupController {
 
 	private final SysJobGroupService sysJobGroupService;
 
-	public SysJobGroupController(SysJobGroupService sysJobGroupService) {
+	private final SysJobScheduleSyncService sysJobScheduleSyncService;
+
+	public SysJobGroupController(SysJobGroupService sysJobGroupService,
+			SysJobScheduleSyncService sysJobScheduleSyncService) {
 		this.sysJobGroupService = sysJobGroupService;
+		this.sysJobScheduleSyncService = sysJobScheduleSyncService;
 	}
 
 	@Operation(summary = "分页查询任务分组")
@@ -112,7 +117,7 @@ public class SysJobGroupController {
 	public Result<String> updateAllJobsStatus(@PathVariable("groupCode") String groupCode,
 			@Parameter(description = "运行状态(true=正常调度，false=暂停)") @RequestParam Boolean status) {
 		Assert.notNull(status, "status must not be null");
-		sysJobGroupService.updateAllJobsStatusInGroup(groupCode, status);
+		sysJobScheduleSyncService.batchUpdateStatusByGroupCode(groupCode, status);
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 

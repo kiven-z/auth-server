@@ -1,13 +1,10 @@
 package com.auth.service.system.schedule.validation.impl;
 
-import cn.hutool.core.text.CharSequenceUtil;
-import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import com.auth.service.system.schedule.validation.SysJobTaskTypeDefinitionValidator;
+import com.auth.service.system.schedule.validation.SysJobTaskTypeFieldRules;
 import org.springframework.stereotype.Component;
-
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_MODE_BEAN_REQUIRES_INVOKE_TARGET;
 
 /**
  * Bean 调用任务定义校验器
@@ -24,9 +21,9 @@ public class BeanInvokeTaskDefinitionValidator implements SysJobTaskTypeDefiniti
 
 	@Override
 	public void validate(SysJobEntity job) {
-		if (CharSequenceUtil.isBlank(job.getInvokeTarget())) {
-			throw new SysJobException(JOB_MODE_BEAN_REQUIRES_INVOKE_TARGET);
-		}
+		SysJobTaskTypeFieldRules
+			.detect(SysJobTaskType.BEAN_INVOKE, job.getJobClass(), job.getInvokeTarget(), job.getPayloadJson(), false)
+			.ifPresent(SysJobTaskTypeFieldRules::throwIfPresent);
 	}
 
 }

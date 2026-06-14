@@ -1,21 +1,26 @@
 package com.auth.service.system.schedule.support;
 
-import cn.hutool.core.text.CharSequenceUtil;
-import com.auth.service.system.schedule.exception.SysJobException;
-import lombok.RequiredArgsConstructor;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_INVOKE_PARAM_NOT_SUPPORTED;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_INVOKE_TARGET_FORMAT;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_INVOKE_TARGET_PAREN_MISMATCH;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_REFLECT_METHOD_NOT_FOUND;
+import static com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys.BEAN_NAME;
+import static com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys.METHOD_NAME;
+
+import java.lang.reflect.Method;
+import java.util.Objects;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
-import java.lang.reflect.Method;
-import java.util.Objects;
+import com.auth.service.system.schedule.exception.SysJobException;
 
-import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.*;
-import static com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys.BEAN_NAME;
-import static com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys.METHOD_NAME;
+import cn.hutool.core.text.CharSequenceUtil;
+import lombok.RequiredArgsConstructor;
 
 /**
  * 解析 {@code invoke_target}（首个 {@code .} 前为 Spring Bean 名，后为方法及可选参数）并反射调用
@@ -28,6 +33,11 @@ public class QuartzBeanInvoker {
 
 	private final ApplicationContext applicationContext;
 
+	/**
+	 * 解析调用目标字符串
+	 * @param invokeTarget 如 {@code beanInvokeDemoTask.run()}
+	 * @return 调用规范
+	 */
 	private static @NonNull InvocationSpec parseSpec(@Nullable String invokeTarget) {
 		if (CharSequenceUtil.isBlank(invokeTarget)) {
 			throw new SysJobException(PARAM_REQUIRED, "invoke_target");
@@ -63,6 +73,11 @@ public class QuartzBeanInvoker {
 		return new InvocationSpec(nonNullBeanName, nonNullMethodName, argsInner);
 	}
 
+	/**
+	 * 解析方法参数
+	 * @param inner 参数字符串
+	 * @return 参数数组
+	 */
 	private static Object[] parseArgs(@Nullable String inner) {
 		// 1. 前置检查与去空格
 		if (CharSequenceUtil.isBlank(inner)) {
@@ -84,6 +99,13 @@ public class QuartzBeanInvoker {
 		throw new SysJobException(JOB_INVOKE_PARAM_NOT_SUPPORTED);
 	}
 
+	/**
+	 * 解析方法
+	 * @param clazz 类
+	 * @param methodName 方法名
+	 * @param argCount 参数数量
+	 * @return 方法
+	 */
 	private static @NonNull Method resolveMethod(@NonNull Class<?> clazz, @NonNull String methodName, int argCount) {
 		Class<?>[] paramTypes;
 		String signature;
@@ -127,6 +149,13 @@ public class QuartzBeanInvoker {
 		return result == null ? "" : String.valueOf(result);
 	}
 
+	/**
+	 * 调用规范
+	 *
+	 * @param beanName 类名
+	 * @param methodName 方法名
+	 * @param argsInner 参数
+	 */
 	private record InvocationSpec(@NonNull String beanName, @NonNull String methodName, @Nullable String argsInner) {
 		private InvocationSpec(@NonNull String beanName, @NonNull String methodName, @Nullable String argsInner) {
 			this.beanName = Objects.requireNonNull(beanName, BEAN_NAME);

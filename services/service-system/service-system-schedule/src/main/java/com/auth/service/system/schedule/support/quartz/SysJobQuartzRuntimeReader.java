@@ -10,10 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys.JOB_ZONE;
 
@@ -91,10 +88,8 @@ public class SysJobQuartzRuntimeReader {
 			return SysJobQuartzRuntimeSnapshot.of(SysJobQuartzRuntimeStatus.RUNNING, fireTime);
 		}
 		SysJobQuartzRuntimeStatus triggerStatus = resolveTriggerStatus(jobKey);
-		if (triggerStatus != null) {
-			return SysJobQuartzRuntimeSnapshot.of(triggerStatus, null);
-		}
-		return SysJobQuartzRuntimeSnapshot.of(SysJobQuartzRuntimeStatus.IDLE, null);
+		return SysJobQuartzRuntimeSnapshot.of(Objects.requireNonNullElse(triggerStatus, SysJobQuartzRuntimeStatus.IDLE),
+				null);
 	}
 
 	private LocalDateTime resolveRunningFireTime(JobKey jobKey) throws SchedulerException {

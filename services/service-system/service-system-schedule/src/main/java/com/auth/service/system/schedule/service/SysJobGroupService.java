@@ -59,11 +59,4 @@ public interface SysJobGroupService {
 	 */
 	void deleteById(Long id);
 
-	/**
-	 * 批量变更分组下全部任务状态并同步 Quartz
-	 * @param groupCode 分组编码
-	 * @param status true=恢复调度，false=暂停
-	 */
-	void updateAllJobsStatusInGroup(String groupCode, Boolean status);
-
 }

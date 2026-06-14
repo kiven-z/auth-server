@@ -1,8 +1,8 @@
 package com.auth.service.system.schedule.mapper;
 
 import com.auth.service.system.schedule.model.entity.LogJobEntity;
-import com.auth.service.system.schedule.model.po.SysJobLogPageRowPO;
-import com.auth.service.system.schedule.model.query.SysJobLogQuery;
+import com.auth.service.system.schedule.model.po.LogJobPageRowPO;
+import com.auth.service.system.schedule.model.query.LogJobQuery;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -25,8 +25,7 @@ public interface LogJobMapper extends BaseMapper<LogJobEntity> {
 	 * @param query 条件
 	 * @return 分页结果
 	 */
-	IPage<SysJobLogPageRowPO> selectListByPage(@Param("page") Page<LogJobEntity> page,
-			@Param("query") SysJobLogQuery query);
+	IPage<LogJobPageRowPO> selectListByPage(@Param("page") Page<LogJobEntity> page, @Param("query") LogJobQuery query);
 
 	/**
 	 * 按任务取最近若干条（按时间倒序），用于熔断判断

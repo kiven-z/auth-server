@@ -1,24 +1,29 @@
 package com.auth.service.system.schedule.service.impl;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.BooleanUtil;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_QUARTZ_OPERATION_FAILED;
+
+import java.util.List;
+
+import org.quartz.SchedulerException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.mapper.SysJobMapper;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.form.SysJobStatusForm;
 import com.auth.service.system.schedule.service.SysJobScheduleSyncService;
+import com.auth.service.system.schedule.support.quartz.SysJobScheduleReconciler;
 import com.auth.service.system.schedule.support.quartz.SysJobSchedulerManager;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.BooleanUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.quartz.SchedulerException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_QUARTZ_OPERATION_FAILED;
 
 /**
  * 定时任务运行态同步实现
@@ -28,16 +33,18 @@ import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_
 @RequiredArgsConstructor
 @Slf4j
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class SysJobScheduleSyncServiceImpl extends ServiceImpl<SysJobMapper, SysJobEntity>
 		implements SysJobScheduleSyncService {
 
 	private final SysJobSchedulerManager sysJobSchedulerManager;
 
+	private final SysJobScheduleReconciler sysJobScheduleReconciler;
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(rollbackFor = Exception.class)
 	public void batchUpdateStatus(SysJobStatusForm form) {
 		List<Long> ids = form.getIds();
 		if (CollUtil.isEmpty(ids)) {
@@ -78,6 +85,7 @@ public class SysJobScheduleSyncServiceImpl extends ServiceImpl<SysJobMapper, Sys
 		}
 		catch (SchedulerException ex) {
 			log.error("批量更新任务状态同步 Quartz 失败", ex);
+			registerReconcileAfterRollback(() -> sysJobScheduleReconciler.reconcileByJobIds(ids));
 			throw new SysJobException(JOB_QUARTZ_OPERATION_FAILED, "batchStatus", ex.getMessage());
 		}
 	}
@@ -86,6 +94,7 @@ public class SysJobScheduleSyncServiceImpl extends ServiceImpl<SysJobMapper, Sys
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(rollbackFor = Exception.class)
 	public void batchUpdateStatusByGroupCode(String groupCode, Boolean status) {
 		List<SysJobEntity> jobs = list(Wrappers.<SysJobEntity>lambdaQuery().eq(SysJobEntity::getJobGroup, groupCode));
 
@@ -111,8 +120,28 @@ public class SysJobScheduleSyncServiceImpl extends ServiceImpl<SysJobMapper, Sys
 		}
 		catch (SchedulerException ex) {
 			log.error("分组批量更新任务状态同步 Quartz 失败 groupCode={}", groupCode, ex);
+			registerReconcileAfterRollback(() -> sysJobScheduleReconciler.reconcileByGroupCode(groupCode));
 			throw new SysJobException(JOB_QUARTZ_OPERATION_FAILED, "batchGroupStatus", ex.getMessage());
 		}
+	}
+
+	/**
+	 * 注册回滚后执行
+	 * @param action 执行动作
+	 */
+	private void registerReconcileAfterRollback(Runnable action) {
+		if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+			action.run();
+			return;
+		}
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+			@Override
+			public void afterCompletion(int status) {
+				if (status == STATUS_ROLLED_BACK) {
+					action.run();
+				}
+			}
+		});
 	}
 
 }

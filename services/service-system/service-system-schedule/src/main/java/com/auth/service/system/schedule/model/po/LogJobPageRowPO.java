@@ -16,11 +16,11 @@ import java.time.LocalDateTime;
  *
  * @author Bunny
  */
-@Schema(name = "SysJobLogPageRowPO", title = "任务日志分页行（PO）")
+@Schema(name = "LogJobPageRowPO", title = "任务日志分页行（PO）")
 @Getter
 @Setter
 @ToString
-public class SysJobLogPageRowPO implements Serializable {
+public class LogJobPageRowPO implements Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 1L;

@@ -3,10 +3,10 @@ package com.auth.service.system.schedule.controller;
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.schedule.model.entity.LogJobEntity;
-import com.auth.service.system.schedule.model.query.SysJobLogQuery;
-import com.auth.service.system.schedule.model.vo.SysJobLogDetailVO;
-import com.auth.service.system.schedule.model.vo.SysJobLogPageResponse;
-import com.auth.service.system.schedule.service.SysJobLogService;
+import com.auth.service.system.schedule.model.query.LogJobQuery;
+import com.auth.service.system.schedule.model.vo.LogJobDetailVO;
+import com.auth.service.system.schedule.model.vo.LogJobPageResponse;
+import com.auth.service.system.schedule.service.LogJobService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,20 +25,20 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
 @Tag(name = "定时任务-日志", description = "log_job")
 @RequestMapping("/api/system/log/job")
 @RestController
-public class SysJobLogController {
+public class LogJobController {
 
-	private final SysJobLogService sysJobLogService;
+	private final LogJobService logJobService;
 
-	public SysJobLogController(SysJobLogService sysJobLogService) {
-		this.sysJobLogService = sysJobLogService;
+	public LogJobController(LogJobService logJobService) {
+		this.logJobService = logJobService;
 	}
 
 	@Operation(summary = "分页查询任务日志")
 	@PreAuthorize("@auth.decide('sysJobLog:query')")
 	@GetMapping("page")
-	public Result<PageResponse<SysJobLogPageResponse>> page(SysJobLogQuery query) {
+	public Result<PageResponse<LogJobPageResponse>> page(LogJobQuery query) {
 		Page<LogJobEntity> page = new Page<>(query.getPageIndex(), query.getPageSize());
-		PageResponse<SysJobLogPageResponse> response = sysJobLogService.getPage(page, query);
+		PageResponse<LogJobPageResponse> response = logJobService.getPage(page, query);
 
 		return Result.success(response);
 	}
@@ -46,8 +46,8 @@ public class SysJobLogController {
 	@Operation(summary = "日志详情")
 	@PreAuthorize("@auth.decide('sysJobLog:detail')")
 	@GetMapping("{id}")
-	public Result<SysJobLogDetailVO> detail(@PathVariable("id") Long id) {
-		SysJobLogDetailVO detailVO = sysJobLogService.getDetail(id);
+	public Result<LogJobDetailVO> detail(@PathVariable("id") Long id) {
+		LogJobDetailVO detailVO = logJobService.getDetail(id);
 
 		return Result.success(detailVO);
 	}
@@ -56,7 +56,7 @@ public class SysJobLogController {
 	@PreAuthorize("@auth.decide('sysJobLog:delete')")
 	@DeleteMapping
 	public Result<String> batchDelete(@RequestBody List<Long> ids) {
-		sysJobLogService.removeByIds(ids);
+		logJobService.removeByIds(ids);
 
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}

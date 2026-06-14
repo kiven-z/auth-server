@@ -2,7 +2,7 @@ package com.auth.service.system.schedule.listener;
 
 import com.auth.service.system.schedule.config.ScheduleJobProperties;
 import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
-import com.auth.service.system.schedule.service.SysJobLogService;
+import com.auth.service.system.schedule.service.LogJobService;
 import com.auth.service.system.schedule.support.SysJobCircuitBreaker;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,7 @@ import static org.mockito.Mockito.*;
 class SysJobExecutionListenerTest {
 
 	@Mock
-	private SysJobLogService sysJobLogService;
+	private LogJobService logJobService;
 
 	@Mock
 	private SysJobCircuitBreaker sysJobCircuitBreaker;
@@ -57,7 +57,7 @@ class SysJobExecutionListenerTest {
 		sysJobExecutionListener.jobToBeExecuted(context);
 		sysJobExecutionListener.jobWasExecuted(context, jobException);
 
-		verify(sysJobLogService).recordFailure(eq(1L), eq("demoJob"), eq("DEFAULT"), eq("demoBean.run()"),
+		verify(logJobService).recordFailure(eq(1L), eq("demoJob"), eq("DEFAULT"), eq("demoBean.run()"),
 				eq(SysJobQuartzDataKeys.TRIGGER_TYPE_SCHEDULE), org.mockito.ArgumentMatchers.anyLong(),
 				eq(jobException));
 		verify(sysJobCircuitBreaker).evaluateAfterFailure(1L, "demoJob", "DEFAULT");
@@ -80,7 +80,7 @@ class SysJobExecutionListenerTest {
 		sysJobExecutionListener.jobToBeExecuted(context);
 		sysJobExecutionListener.jobWasExecuted(context, null);
 
-		verifyNoInteractions(sysJobLogService);
+		verifyNoInteractions(logJobService);
 		verifyNoInteractions(sysJobCircuitBreaker);
 	}
 

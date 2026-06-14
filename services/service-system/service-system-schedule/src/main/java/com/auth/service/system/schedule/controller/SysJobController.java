@@ -12,6 +12,7 @@ import com.auth.service.system.schedule.model.query.SysJobQuery;
 import com.auth.service.system.schedule.model.vo.SysJobDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobPageResponse;
 import com.auth.service.system.schedule.service.SysJobDefinitionService;
+import com.auth.service.system.schedule.service.SysJobScheduleSyncService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,8 +34,12 @@ public class SysJobController {
 
 	private final SysJobDefinitionService sysJobDefinitionService;
 
-	public SysJobController(SysJobDefinitionService sysJobDefinitionService) {
+	private final SysJobScheduleSyncService sysJobScheduleSyncService;
+
+	public SysJobController(SysJobDefinitionService sysJobDefinitionService,
+			SysJobScheduleSyncService sysJobScheduleSyncService) {
 		this.sysJobDefinitionService = sysJobDefinitionService;
+		this.sysJobScheduleSyncService = sysJobScheduleSyncService;
 	}
 
 	@Operation(summary = "分页查询定时任务")
@@ -87,7 +92,7 @@ public class SysJobController {
 	@PreAuthorize("@auth.decide('sysJob:update')")
 	@PutMapping("status")
 	public Result<String> batchStatus(@Validated @RequestBody SysJobStatusForm form) {
-		sysJobDefinitionService.batchUpdateStatus(form);
+		sysJobScheduleSyncService.batchUpdateStatus(form);
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 

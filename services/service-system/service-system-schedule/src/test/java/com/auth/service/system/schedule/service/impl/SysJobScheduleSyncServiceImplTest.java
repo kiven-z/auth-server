@@ -5,6 +5,7 @@ import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.mapper.SysJobMapper;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.form.SysJobStatusForm;
+import com.auth.service.system.schedule.support.quartz.SysJobScheduleReconciler;
 import com.auth.service.system.schedule.support.quartz.SysJobSchedulerManager;
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
@@ -20,15 +21,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.SchedulerException;
 
 import java.lang.reflect.Field;
-import java.util.Collection;
 import java.util.List;
 
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_QUARTZ_OPERATION_FAILED;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**
@@ -46,6 +43,9 @@ class SysJobScheduleSyncServiceImplTest {
 	@Mock
 	private SysJobSchedulerManager sysJobSchedulerManager;
 
+	@Mock
+	private SysJobScheduleReconciler sysJobScheduleReconciler;
+
 	private SysJobScheduleSyncServiceImpl sysJobScheduleSyncService;
 
 	@BeforeAll
@@ -55,7 +55,8 @@ class SysJobScheduleSyncServiceImplTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		sysJobScheduleSyncService = spy(new SysJobScheduleSyncServiceImpl(sysJobSchedulerManager));
+		sysJobScheduleSyncService = spy(
+				new SysJobScheduleSyncServiceImpl(sysJobSchedulerManager, sysJobScheduleReconciler));
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysJobScheduleSyncService, sysJobMapper);

@@ -1,24 +1,31 @@
 package com.auth.service.system.schedule.service.impl;
 
-import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.mapper.LogJobMapper;
 import com.auth.service.system.schedule.mapper.SysJobGroupMapper;
 import com.auth.service.system.schedule.mapper.SysJobMapper;
+import com.auth.service.system.schedule.model.entity.LogJobEntity;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
+import com.auth.service.system.schedule.model.enums.SysJobLastExecutionStatus;
+import com.auth.service.system.schedule.model.enums.SysJobQuartzRuntimeStatus;
 import com.auth.service.system.schedule.model.form.SysJobCreateForm;
-import com.auth.service.system.schedule.model.form.SysJobStatusForm;
 import com.auth.service.system.schedule.model.form.SysJobUpdateForm;
 import com.auth.service.system.schedule.model.po.SysJobDetailRowPO;
+import com.auth.service.system.schedule.model.po.SysJobPageRowPO;
+import com.auth.service.system.schedule.model.query.SysJobQuery;
 import com.auth.service.system.schedule.model.vo.SysJobDetailVO;
-import com.auth.service.system.schedule.service.SysJobRuntimeEnrichmentService;
-import com.auth.service.system.schedule.service.SysJobScheduleSyncService;
+import com.auth.service.system.schedule.model.vo.SysJobPageResponse;
+import com.auth.service.system.schedule.service.LogJobService;
+import com.auth.service.system.schedule.support.SysJobQuartzRuntimeSnapshot;
+import com.auth.service.system.schedule.support.quartz.SysJobQuartzRuntimeReader;
 import com.auth.service.system.schedule.support.quartz.SysJobSchedulerManager;
 import com.auth.service.system.schedule.validation.SysJobDefinitionValidationManager;
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.junit.jupiter.api.BeforeAll;
@@ -33,7 +40,6 @@ import org.quartz.SchedulerException;
 
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
@@ -59,13 +65,13 @@ class SysJobDefinitionServiceImplTest {
 	private SysJobSchedulerManager sysJobSchedulerManager;
 
 	@Mock
-	private SysJobScheduleSyncService sysJobScheduleSyncService;
-
-	@Mock
 	private AuditUserDisplayService auditUserDisplayService;
 
 	@Mock
 	private SysJobGroupMapper sysJobGroupMapper;
+
+	@Mock
+	private LogJobService logJobService;
 
 	@Mock
 	private LogJobMapper logJobMapper;
@@ -74,7 +80,7 @@ class SysJobDefinitionServiceImplTest {
 	private SysJobDefinitionValidationManager validationManager;
 
 	@Mock
-	private SysJobRuntimeEnrichmentService sysJobRuntimeEnrichmentService;
+	private SysJobQuartzRuntimeReader sysJobQuartzRuntimeReader;
 
 	private SysJobDefinitionServiceImpl sysJobDefinitionService;
 
@@ -105,9 +111,8 @@ class SysJobDefinitionServiceImplTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		sysJobDefinitionService = spy(new SysJobDefinitionServiceImpl(sysJobSchedulerManager, sysJobScheduleSyncService,
-				auditUserDisplayService, sysJobGroupMapper, logJobMapper, validationManager,
-				sysJobRuntimeEnrichmentService));
+		sysJobDefinitionService = spy(new SysJobDefinitionServiceImpl(sysJobSchedulerManager, auditUserDisplayService,
+				sysJobGroupMapper, logJobService, logJobMapper, validationManager, sysJobQuartzRuntimeReader));
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysJobDefinitionService, sysJobMapper);
@@ -179,13 +184,18 @@ class SysJobDefinitionServiceImplTest {
 		detailRow.setJobGroupName("默认分组");
 		detailRow.setTaskType("BEAN_INVOKE");
 		when(sysJobMapper.selectDetailById(1L)).thenReturn(detailRow);
+		when(sysJobQuartzRuntimeReader.getFireTimes("demoJob", "DEFAULT"))
+			.thenReturn(new SysJobQuartzRuntimeReader.FireTimes(null, null));
+		when(sysJobQuartzRuntimeReader.resolveRuntimeSnapshot("demoJob", "DEFAULT"))
+			.thenReturn(SysJobQuartzRuntimeSnapshot.of(SysJobQuartzRuntimeStatus.IDLE, null));
+		when(logJobMapper.selectLatestByJobIds(any())).thenReturn(List.of());
 
 		SysJobDetailVO detail = sysJobDefinitionService.getDetail(1L);
 
 		assertThat(detail.getJobName()).isEqualTo("demoJob");
 		assertThat(detail.getJobGroup()).isEqualTo("DEFAULT");
 		assertThat(detail.getJobGroupName()).isEqualTo("默认分组");
-		verify(sysJobRuntimeEnrichmentService).enrichDetail(detail, "demoJob", "DEFAULT");
+		assertThat(detail.getLastExecutionStatus()).isEqualTo(SysJobLastExecutionStatus.UNKNOWN);
 		verify(auditUserDisplayService).enrichAuditUsernames(any(List.class));
 	}
 
@@ -197,6 +207,27 @@ class SysJobDefinitionServiceImplTest {
 		assertThatThrownBy(() -> sysJobDefinitionService.getDetail(99L)).isInstanceOf(SysJobException.class)
 			.extracting(ex -> ((SysJobException) ex).getResultCode())
 			.isEqualTo(DATA_NOT_EXIST);
+	}
+
+	@Test
+	@DisplayName("分页：最近执行补充失败日志")
+	void getPageEnrichesLastExecutionFromLog() {
+		SysJobPageRowPO rowPo = new SysJobPageRowPO();
+		rowPo.setId(1L);
+		rowPo.setJobName("demoJob");
+		IPage<SysJobPageRowPO> page = new Page<SysJobPageRowPO>().setRecords(List.of(rowPo));
+		when(sysJobMapper.selectListByPage(any(), any(SysJobQuery.class))).thenReturn(page);
+		LogJobEntity failedLog = new LogJobEntity();
+		failedLog.setJobId(1L);
+		failedLog.setStatus(false);
+		failedLog.setCreateTime(LocalDateTime.of(2026, 6, 13, 9, 0));
+		when(logJobMapper.selectLatestByJobIds(any())).thenReturn(List.of(failedLog));
+
+		var response = sysJobDefinitionService.getPage(new Page<>(1, 10), new SysJobQuery());
+
+		SysJobPageResponse row = response.getList().get(0);
+		assertThat(row.getLastExecutionStatus()).isEqualTo(SysJobLastExecutionStatus.FAILED);
+		assertThat(row.getLastExecutionTime()).isEqualTo(failedLog.getCreateTime());
 	}
 
 	@Test
@@ -260,7 +291,8 @@ class SysJobDefinitionServiceImplTest {
 		entity.setJobName("demoJob");
 		entity.setJobGroup("DEFAULT");
 		when(sysJobMapper.selectById(5L)).thenReturn(entity);
-		when(sysJobRuntimeEnrichmentService.isBusy("demoJob", "DEFAULT")).thenReturn(false);
+		when(sysJobQuartzRuntimeReader.resolveRuntimeSnapshot("demoJob", "DEFAULT"))
+			.thenReturn(SysJobQuartzRuntimeSnapshot.of(SysJobQuartzRuntimeStatus.IDLE, null));
 
 		sysJobDefinitionService.runOnce(5L);
 
@@ -276,7 +308,8 @@ class SysJobDefinitionServiceImplTest {
 		entity.setJobName("demoJob");
 		entity.setJobGroup("DEFAULT");
 		when(sysJobMapper.selectById(5L)).thenReturn(entity);
-		when(sysJobRuntimeEnrichmentService.isBusy("demoJob", "DEFAULT")).thenReturn(true);
+		when(sysJobQuartzRuntimeReader.resolveRuntimeSnapshot("demoJob", "DEFAULT"))
+			.thenReturn(SysJobQuartzRuntimeSnapshot.of(SysJobQuartzRuntimeStatus.RUNNING, null));
 
 		assertThatThrownBy(() -> sysJobDefinitionService.runOnce(5L)).isInstanceOf(SysJobException.class)
 			.extracting(ex -> ((SysJobException) ex).getResultCode())
@@ -284,15 +317,20 @@ class SysJobDefinitionServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("批量启停：委托 SysJobScheduleSyncService")
-	void batchUpdateStatusDelegatesToSyncService() {
-		SysJobStatusForm form = new SysJobStatusForm();
-		form.setIds(List.of(1L));
-		form.setStatus(false);
+	@DisplayName("删除：级联清理日志并移除 Quartz")
+	void deleteByIdRemovesQuartzAndLogs() throws SchedulerException {
+		SysJobEntity dbJob = new SysJobEntity();
+		dbJob.setId(3L);
+		dbJob.setJobName("demoJob");
+		dbJob.setJobGroup("DEFAULT");
+		when(sysJobMapper.selectById(3L)).thenReturn(dbJob);
+		doReturn(true).when(sysJobDefinitionService).removeById(3L);
 
-		sysJobDefinitionService.batchUpdateStatus(form);
+		sysJobDefinitionService.deleteById(3L);
 
-		verify(sysJobScheduleSyncService).batchUpdateStatus(form);
+		verify(sysJobSchedulerManager).deleteJobIfExists(org.quartz.JobKey.jobKey("demoJob", "DEFAULT"));
+		verify(logJobService).deleteByJobNameAndGroup("demoJob", "DEFAULT");
+		verify(sysJobDefinitionService).removeById(3L);
 	}
 
 }

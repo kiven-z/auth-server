@@ -3,7 +3,7 @@ package com.auth.service.system.schedule.listener;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.schedule.config.ScheduleJobProperties;
 import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
-import com.auth.service.system.schedule.service.SysJobLogService;
+import com.auth.service.system.schedule.service.LogJobService;
 import com.auth.service.system.schedule.support.SysJobCircuitBreaker;
 import org.quartz.*;
 import org.springframework.context.annotation.Lazy;
@@ -25,7 +25,7 @@ public class SysJobExecutionListener implements JobListener {
 	/**
 	 * 系统任务日志服务
 	 */
-	private final SysJobLogService sysJobLogService;
+	private final LogJobService logJobService;
 
 	/**
 	 * 系统任务熔断器
@@ -35,13 +35,13 @@ public class SysJobExecutionListener implements JobListener {
 	private final ScheduleJobProperties scheduleJobProperties;
 
 	/**
-	 * @param sysJobLogService 任务日志服务
+	 * @param logJobService 任务日志服务
 	 * @param sysJobCircuitBreaker 熔断器（延迟注入，避免参与 Quartz Scheduler 创建期的循环依赖）
 	 * @param scheduleJobProperties 任务配置
 	 */
-	public SysJobExecutionListener(SysJobLogService sysJobLogService, @Lazy SysJobCircuitBreaker sysJobCircuitBreaker,
+	public SysJobExecutionListener(LogJobService logJobService, @Lazy SysJobCircuitBreaker sysJobCircuitBreaker,
 			ScheduleJobProperties scheduleJobProperties) {
-		this.sysJobLogService = sysJobLogService;
+		this.logJobService = logJobService;
 		this.sysJobCircuitBreaker = sysJobCircuitBreaker;
 		this.scheduleJobProperties = scheduleJobProperties;
 	}
@@ -108,13 +108,12 @@ public class SysJobExecutionListener implements JobListener {
 			// 是否记录成功的日志
 			boolean hasRecordSuccessLogEnable = scheduleJobProperties.isSuccessEnabled();
 			if (jobException == null && hasRecordSuccessLogEnable) {
-				sysJobLogService.recordSuccess(jobId, jobName, jobGroup, invokeTarget, triggerType, elapsed, "OK");
+				logJobService.recordSuccess(jobId, jobName, jobGroup, invokeTarget, triggerType, elapsed, "OK");
 			}
 
 			// 记录失败日志
 			if (jobException != null) {
-				sysJobLogService.recordFailure(jobId, jobName, jobGroup, invokeTarget, triggerType, elapsed,
-						jobException);
+				logJobService.recordFailure(jobId, jobName, jobGroup, invokeTarget, triggerType, elapsed, jobException);
 				// 触发熔断判断
 				sysJobCircuitBreaker.evaluateAfterFailure(jobId, jobName, jobGroup);
 			}

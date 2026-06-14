@@ -5,21 +5,20 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 import java.io.Serial;
+import java.io.Serializable;
 
 /**
- * 任务日志详情
+ * 任务日志分页行
  *
  * @author Bunny
  */
-@Schema(name = "SysJobLogDetailVO", title = "任务日志详情")
+@Schema(name = "LogJobPageResponse", title = "任务日志分页行")
 @Getter
 @Setter
-@ToString
 @EqualsAndHashCode(callSuper = true)
-public class SysJobLogDetailVO extends BaseResponse {
+public class LogJobPageResponse extends BaseResponse implements Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
@@ -42,11 +41,8 @@ public class SysJobLogDetailVO extends BaseResponse {
 	@Schema(title = "执行报告")
 	private String jobMessage;
 
-	@Schema(title = "执行是否成功(1=成功，0=失败)")
+	@Schema(title = "执行是否成功(true=成功，false=失败)")
 	private Boolean status;
-
-	@Schema(title = "异常信息")
-	private String exceptionInfo;
 
 	@Schema(title = "耗时毫秒")
 	private Long elapsedTime;

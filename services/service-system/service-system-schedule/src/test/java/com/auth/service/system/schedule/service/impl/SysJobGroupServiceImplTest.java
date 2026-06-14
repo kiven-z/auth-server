@@ -10,7 +10,6 @@ import com.auth.service.system.schedule.model.form.SysJobGroupForm;
 import com.auth.service.system.schedule.model.po.SysJobGroupPageRowPO;
 import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
 import com.auth.service.system.schedule.model.vo.SysJobGroupDetailVO;
-import com.auth.service.system.schedule.service.SysJobScheduleSyncService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -51,9 +50,6 @@ class SysJobGroupServiceImplTest {
 	private SysJobMapper sysJobMapper;
 
 	@Mock
-	private SysJobScheduleSyncService sysJobScheduleSyncService;
-
-	@Mock
 	private AuditUserDisplayService auditUserDisplayService;
 
 	private SysJobGroupServiceImpl sysJobGroupService;
@@ -71,8 +67,7 @@ class SysJobGroupServiceImplTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		sysJobGroupService = new SysJobGroupServiceImpl(sysJobMapper, sysJobScheduleSyncService,
-				auditUserDisplayService);
+		sysJobGroupService = new SysJobGroupServiceImpl(sysJobMapper, auditUserDisplayService);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysJobGroupService, sysJobGroupMapper);
@@ -221,14 +216,6 @@ class SysJobGroupServiceImplTest {
 		sysJobGroupService.deleteById(3L);
 
 		verify(sysJobGroupMapper).deleteById(3L);
-	}
-
-	@Test
-	@DisplayName("分组批量启停：委托 DefinitionService 统一同步 Quartz")
-	void updateAllJobsStatusInGroupDelegatesToDefinitionService() {
-		sysJobGroupService.updateAllJobsStatusInGroup("G1", false);
-
-		verify(sysJobScheduleSyncService).batchUpdateStatusByGroupCode("G1", false);
 	}
 
 }
