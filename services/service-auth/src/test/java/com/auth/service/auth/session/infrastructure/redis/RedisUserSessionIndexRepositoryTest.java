@@ -19,12 +19,14 @@ import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 
 import java.time.Duration;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -165,6 +167,75 @@ class RedisUserSessionIndexRepositoryTest {
 		assertEquals(TestConstants.JTI, sessions.get(0).getSessionId());
 		verify(setOperations).remove(SecurityRedisKey.USER_SESSIONS.key(TestConstants.USER_ID), "stale-jti");
 		verify(zSetOperations).remove(GLOBAL_KEY, "stale-jti");
+	}
+
+	@Test
+	@DisplayName("pageGlobalSessions：Hash 不存在时清理 ZSet 且不纳入结果")
+	void pageGlobalSessions_shouldCleanupStaleGlobalIndexAndSkipMissingHash() {
+		when(zSetOperations.zCard(GLOBAL_KEY)).thenReturn(2L);
+		when(zSetOperations.reverseRange(GLOBAL_KEY, 0L, 63L))
+			.thenReturn(new LinkedHashSet<>(List.of(TestConstants.JTI, "stale-jti")));
+		when(hashOperations.entries(SecurityRedisKey.USER_SESSION.key(TestConstants.JTI)))
+			.thenReturn(Map.of("userId", TestConstants.USER_ID, "sessionId", TestConstants.JTI, "loginAt",
+					1_700_000_000_000L, "ipAddress", "10.0.0.1"));
+		when(hashOperations.entries(SecurityRedisKey.USER_SESSION.key("stale-jti"))).thenReturn(Map.of());
+		when(setOperations.isMember(SecurityRedisKey.USER_SESSIONS.key(TestConstants.USER_ID), TestConstants.JTI))
+			.thenReturn(true);
+		when(zSetOperations.remove(GLOBAL_KEY, "stale-jti")).thenReturn(1L);
+
+		var slice = repository.pageGlobalSessions(1, 10, null, null);
+
+		assertEquals(1L, slice.total());
+		assertEquals(1, slice.sessions().size());
+		assertEquals(TestConstants.JTI, slice.sessions().get(0).getSessionId());
+		verify(zSetOperations).remove(GLOBAL_KEY, "stale-jti");
+	}
+
+	@Test
+	@DisplayName("pageGlobalSessions：支持用户名与 IP 筛选")
+	void pageGlobalSessions_shouldApplyUserAndIpFilters() {
+		when(zSetOperations.zCard(GLOBAL_KEY)).thenReturn(1L);
+		when(zSetOperations.reverseRange(GLOBAL_KEY, 0L, 63L)).thenReturn(Set.of(TestConstants.JTI, "other-jti"));
+		when(hashOperations.entries(SecurityRedisKey.USER_SESSION.key(TestConstants.JTI)))
+			.thenReturn(Map.of("userId", TestConstants.USER_ID, "sessionId", TestConstants.JTI, "loginAt",
+					1_700_000_000_000L, "ipAddress", "10.0.0.1"));
+		when(hashOperations.entries(SecurityRedisKey.USER_SESSION.key("other-jti"))).thenReturn(Map.of("userId", 99L,
+				"sessionId", "other-jti", "loginAt", 1_700_000_000_100L, "ipAddress", "172.16.0.2"));
+		when(setOperations.isMember(SecurityRedisKey.USER_SESSIONS.key(TestConstants.USER_ID), TestConstants.JTI))
+			.thenReturn(true);
+		when(setOperations.isMember(SecurityRedisKey.USER_SESSIONS.key(99L), "other-jti")).thenReturn(true);
+
+		var slice = repository.pageGlobalSessions(1, 10, Set.of(TestConstants.USER_ID), "10.0");
+
+		assertEquals(1L, slice.total());
+		assertEquals(1, slice.sessions().size());
+		assertEquals(TestConstants.JTI, slice.sessions().get(0).getSessionId());
+	}
+
+	@Test
+	@DisplayName("cleanupStaleGlobalSessions：清理 Hash 已丢失的 ZSet 成员")
+	void cleanupStaleGlobalSessions_shouldRemoveOrphanZsetMembers() {
+		when(zSetOperations.reverseRange(GLOBAL_KEY, 0L, 99L)).thenReturn(Set.of(TestConstants.JTI, "orphan-jti"));
+		when(hashOperations.entries(SecurityRedisKey.USER_SESSION.key(TestConstants.JTI)))
+			.thenReturn(Map.of("userId", TestConstants.USER_ID));
+		when(hashOperations.entries(SecurityRedisKey.USER_SESSION.key("orphan-jti"))).thenReturn(Map.of());
+		when(zSetOperations.remove(GLOBAL_KEY, "orphan-jti")).thenReturn(1L);
+
+		int cleaned = repository.cleanupStaleGlobalSessions(100);
+
+		assertEquals(1, cleaned);
+		verify(zSetOperations).remove(GLOBAL_KEY, "orphan-jti");
+	}
+
+	@Test
+	@DisplayName("pageGlobalSessions：全局 ZSet 为空时返回空切片")
+	void pageGlobalSessions_shouldReturnEmptyWhenGlobalZsetEmpty() {
+		when(zSetOperations.zCard(GLOBAL_KEY)).thenReturn(0L);
+
+		var slice = repository.pageGlobalSessions(1, 10, null, null);
+
+		assertEquals(0L, slice.total());
+		assertTrue(slice.sessions().isEmpty());
 	}
 
 	@Test

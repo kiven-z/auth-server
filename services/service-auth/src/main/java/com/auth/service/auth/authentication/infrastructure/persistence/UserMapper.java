@@ -37,4 +37,11 @@ public interface UserMapper extends BaseMapper<UserEntity> {
 	 */
 	List<UserInvalidationStateProjection> selectInvalidationStatesByUserIds(@Param("userIds") List<Long> userIds);
 
+	/**
+	 * 按用户名模糊匹配查询用户 ID。
+	 * @param username 用户名关键字
+	 * @return 用户 ID 列表
+	 */
+	List<Long> selectIdsByUsernameLike(@Param("username") String username);
+
 }

@@ -1,14 +1,15 @@
 package com.auth.service.auth.authentication.api.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Getter;
-import lombok.Setter;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * 刷新令牌响应
@@ -22,8 +23,6 @@ public class RefreshTokenResponse implements Serializable {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
-	private static final String EXPIRES_FORMATTER = "yyyy/MM/dd HH:mm:ss";
-
 	@Schema(description = "访问令牌")
 	private String accessToken;
 
@@ -34,7 +33,7 @@ public class RefreshTokenResponse implements Serializable {
 	@Schema(description = "阅读过期天数")
 	private Long readMeDay;
 
-	@JsonFormat(pattern = EXPIRES_FORMATTER)
+	@JsonFormat(pattern = "yyyy/MM/dd HH:mm:ss")
 	@Schema(description = "过期时间")
 	private LocalDateTime expires;
 

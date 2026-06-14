@@ -6,6 +6,7 @@ import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.auth.module.security.contract.api.UserSessionIndex;
+import com.auth.service.auth.session.domain.model.OnlineSessionPageSlice;
 import com.auth.service.auth.session.infrastructure.redis.script.UserSessionRedisScripts;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static com.auth.module.security.contract.redis.SecurityRedisKey.*;
@@ -25,6 +27,16 @@ import static com.auth.module.security.contract.redis.SecurityRedisKey.*;
  */
 @Service
 public class RedisUserSessionIndexRepository {
+
+	/**
+	 * 全局 ZSet 扫描批次大小
+	 */
+	private static final int GLOBAL_SCAN_BATCH = 64;
+
+	/**
+	 * 单页最大条数
+	 */
+	private static final int MAX_PAGE_SIZE = 100;
 
 	private final RedisTemplate<String, Object> redisTemplate;
 
@@ -130,6 +142,43 @@ public class RedisUserSessionIndexRepository {
 	}
 
 	/**
+	 * 全局在线会话分页（按 loginAt 倒序；Hash 不存在时清理 ZSet 残留）
+	 * @param pageIndex 页码（从 1 开始）
+	 * @param pageSize 每页条数
+	 * @param allowedUserIds 用户名筛选后的用户 ID 集合；{@code null} 表示不过滤用户
+	 * @param ipAddress IP 地址关键字（包含匹配）；空白表示不过滤
+	 * @return 分页切片
+	 */
+	public OnlineSessionPageSlice pageGlobalSessions(int pageIndex, int pageSize, Set<Long> allowedUserIds,
+			String ipAddress) {
+		int normalizedPageIndex = normalizePageIndex(pageIndex);
+		int normalizedPageSize = normalizePageSize(pageSize);
+		Predicate<UserSessionIndex> filter = buildGlobalSessionFilter(allowedUserIds, ipAddress);
+		GlobalSessionScanResult scanResult = scanGlobalSessions(filter, normalizedPageIndex, normalizedPageSize);
+		return new OnlineSessionPageSlice(scanResult.matchedCount(), scanResult.pageRecords());
+	}
+
+	/**
+	 * 清理全局 ZSet 中 Hash 已不存在的僵尸 jti
+	 * @param batchSize 单批扫描条数
+	 * @return 本批清理数量
+	 */
+	public int cleanupStaleGlobalSessions(int batchSize) {
+		int normalizedBatch = Math.max(1, batchSize);
+		Set<Object> members = redisTemplate.opsForZSet()
+			.reverseRange(GLOBAL_SESSIONS.fixedKey(), 0, normalizedBatch - 1L);
+		if (CollUtil.isEmpty(members)) {
+			return 0;
+		}
+		return (int) members.stream()
+			.filter(String.class::isInstance)
+			.map(String.class::cast)
+			.filter(jti -> CollUtil.isEmpty(redisTemplate.opsForHash().entries(USER_SESSION.key(jti))))
+			.filter(this::removeStaleGlobalIndex)
+			.count();
+	}
+
+	/**
 	 * 清理活跃会话集合中的僵尸会话（session 详情已不存在）
 	 * @param userId 用户ID
 	 * @return 清理数量
@@ -204,6 +253,157 @@ public class RedisUserSessionIndexRepository {
 			return Optional.empty();
 		}
 		return Optional.of(toSessionIndex(jti, hash, userId));
+	}
+
+	/**
+	 * 全局列表场景：空 Hash 时清理 ZSet 与用户 Set 残留
+	 * @param jti 会话唯一标识
+	 * @return 会话索引
+	 */
+	private Optional<UserSessionIndex> loadGlobalListedSession(String jti) {
+		Map<Object, Object> hash = redisTemplate.opsForHash().entries(USER_SESSION.key(jti));
+		if (CollUtil.isEmpty(hash)) {
+			removeStaleGlobalIndex(jti);
+			return Optional.empty();
+		}
+		UserSessionIndex sessionIndex = toSessionIndex(jti, hash, null);
+		Long userId = sessionIndex.getUserId();
+		if (userId != null) {
+			String userSessionsKey = USER_SESSIONS.key(userId);
+			Boolean member = redisTemplate.opsForSet().isMember(userSessionsKey, jti);
+			if (Boolean.FALSE.equals(member)) {
+				redisTemplate.opsForSet().add(userSessionsKey, jti);
+			}
+		}
+		return Optional.of(sessionIndex);
+	}
+
+	/**
+	 * 统计符合筛选条件的全局会话数
+	 * @param filter 筛选条件
+	 * @return 会话总数
+	 */
+	/**
+	 * 扫描全局 ZSet：统计匹配总数，并收集当前页记录
+	 * @param filter 筛选条件
+	 * @param pageIndex 页码
+	 * @param pageSize 每页条数
+	 * @return 扫描结果
+	 */
+	private GlobalSessionScanResult scanGlobalSessions(Predicate<UserSessionIndex> filter, int pageIndex,
+			int pageSize) {
+		int toSkip = (pageIndex - 1) * pageSize;
+		List<UserSessionIndex> pageRecords = new ArrayList<>(pageSize);
+		long matchedCount = 0L;
+		int skipped = 0;
+		long rank = 0L;
+		Long zcard = redisTemplate.opsForZSet().zCard(GLOBAL_SESSIONS.fixedKey());
+		if (zcard == null || zcard <= 0) {
+			return new GlobalSessionScanResult(0L, pageRecords);
+		}
+
+		while (rank < zcard) {
+			Set<Object> members = redisTemplate.opsForZSet()
+				.reverseRange(GLOBAL_SESSIONS.fixedKey(), rank, rank + GLOBAL_SCAN_BATCH - 1L);
+			if (CollUtil.isEmpty(members)) {
+				break;
+			}
+			for (Object member : members) {
+				if (!(member instanceof String jti) || CharSequenceUtil.isBlank(jti)) {
+					continue;
+				}
+				Optional<UserSessionIndex> session = loadGlobalListedSession(jti);
+				if (session.isEmpty() || !filter.test(session.get())) {
+					continue;
+				}
+				matchedCount++;
+				if (skipped < toSkip) {
+					skipped++;
+					continue;
+				}
+				if (pageRecords.size() < pageSize) {
+					pageRecords.add(session.get());
+				}
+			}
+			rank += GLOBAL_SCAN_BATCH;
+		}
+		return new GlobalSessionScanResult(matchedCount, pageRecords);
+	}
+
+	/**
+	 * 全局会话扫描结果
+	 *
+	 * @param matchedCount 匹配会话总数
+	 * @param pageRecords 当前页记录
+	 */
+	private record GlobalSessionScanResult(long matchedCount, List<UserSessionIndex> pageRecords) {
+
+	}
+
+	/**
+	 * 构建全局会话筛选条件
+	 * @param allowedUserIds 允许的用户 ID 集合；{@code null} 表示不过滤
+	 * @param ipAddress IP 地址关键字
+	 * @return 筛选谓词
+	 */
+	private Predicate<UserSessionIndex> buildGlobalSessionFilter(Set<Long> allowedUserIds, String ipAddress) {
+		String ipKeyword = CharSequenceUtil.trim(ipAddress);
+		return session -> matchesUserFilter(session, allowedUserIds) && matchesIpFilter(session, ipKeyword);
+	}
+
+	/**
+	 * 用户 ID 筛选
+	 * @param session 会话索引
+	 * @param allowedUserIds 允许的用户 ID 集合
+	 * @return 是否匹配
+	 */
+	private boolean matchesUserFilter(UserSessionIndex session, Set<Long> allowedUserIds) {
+		if (allowedUserIds == null) {
+			return true;
+		}
+		Long userId = session.getUserId();
+		return userId != null && allowedUserIds.contains(userId);
+	}
+
+	/**
+	 * IP 地址包含匹配
+	 * @param session 会话索引
+	 * @param ipKeyword IP 关键字
+	 * @return 是否匹配
+	 */
+	private boolean matchesIpFilter(UserSessionIndex session, String ipKeyword) {
+		if (CharSequenceUtil.isBlank(ipKeyword)) {
+			return true;
+		}
+		return CharSequenceUtil.contains(session.getIpAddress(), ipKeyword);
+	}
+
+	/**
+	 * 清理全局 ZSet 僵尸 jti；若能从 Hash 解析 userId 则同步清理用户 Set
+	 * @param jti 会话唯一标识
+	 * @return 是否移除了任一索引
+	 */
+	private boolean removeStaleGlobalIndex(String jti) {
+		Long zsetRemoved = redisTemplate.opsForZSet().remove(GLOBAL_SESSIONS.fixedKey(), jti);
+		return NumberUtil.nullToZero(zsetRemoved) > 0;
+	}
+
+	/**
+	 * 规范化页码
+	 * @param pageIndex 页码
+	 * @return 不小于 1 的页码
+	 */
+	private int normalizePageIndex(int pageIndex) {
+		return Math.max(1, pageIndex);
+	}
+
+	/**
+	 * 规范化分页大小
+	 * @param pageSize 分页大小
+	 * @return 限制在 1～{@link #MAX_PAGE_SIZE} 的分页大小
+	 */
+	private int normalizePageSize(int pageSize) {
+		return Math.min(Math.max(1, pageSize), MAX_PAGE_SIZE);
 	}
 
 	/**

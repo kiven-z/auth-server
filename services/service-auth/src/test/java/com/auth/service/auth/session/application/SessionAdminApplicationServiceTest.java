@@ -30,6 +30,14 @@ class SessionAdminApplicationServiceTest {
 	private SessionAdminApplicationService sessionAdminApplicationService;
 
 	@Test
+	@DisplayName("踢单会话：委托 terminateSession")
+	void kickSession_shouldTerminateSingleSession() {
+		sessionAdminApplicationService.kickSession(TestConstants.USER_ID, TestConstants.JTI);
+
+		verify(redisUserSessionIndexRepository).terminateSession(TestConstants.USER_ID, TestConstants.JTI);
+	}
+
+	@Test
 	@DisplayName("批量踢会话：入参为空/含 null 时不抛异常且跳过 null；下游异常会被吞掉")
 	void kickAllSessionsBatch_shouldIgnoreEmptyAndNullAndSwallowExceptions() {
 		assertDoesNotThrow(() -> sessionAdminApplicationService.kickAllSessions(List.of()));

@@ -56,4 +56,12 @@
         </foreach>
     </select>
 
+    <!-- 按用户名模糊匹配查询用户 ID -->
+    <select id="selectIdsByUsernameLike" resultType="java.lang.Long">
+        SELECT id
+        FROM sys_user
+        WHERE is_deleted = 0
+          AND username LIKE CONCAT('%', #{username}, '%')
+    </select>
+
 </mapper>
