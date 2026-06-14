@@ -1,5 +1,6 @@
 package com.auth.service.system.schedule.support;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.json.JSONObject;
@@ -324,7 +325,7 @@ public class SysJobSchedulerManager {
 	 */
 	public Map<JobKey, SysJobQuartzRuntimeSnapshot> batchResolveRuntimeSnapshots(Collection<JobKey> jobKeys) {
 		Map<JobKey, SysJobQuartzRuntimeSnapshot> result = new HashMap<>();
-		if (jobKeys == null || jobKeys.isEmpty()) {
+		if (CollUtil.isEmpty(jobKeys)) {
 			return result;
 		}
 		try {
@@ -377,7 +378,7 @@ public class SysJobSchedulerManager {
 
 	private SysJobQuartzRuntimeStatus resolveTriggerStatus(JobKey jobKey) throws SchedulerException {
 		List<? extends Trigger> triggers = scheduler.getTriggersOfJob(jobKey);
-		if (triggers == null || triggers.isEmpty()) {
+		if (CollUtil.isEmpty(triggers)) {
 			return null;
 		}
 		boolean paused = false;
@@ -419,7 +420,7 @@ public class SysJobSchedulerManager {
 				return FireTimes.empty();
 			}
 			java.util.List<? extends Trigger> triggers = scheduler.getTriggersOfJob(jobKey);
-			if (triggers == null || triggers.isEmpty()) {
+			if (CollUtil.isEmpty(triggers)) {
 				return FireTimes.empty();
 			}
 			Trigger trigger = triggers.get(0);

@@ -1,5 +1,6 @@
 package com.auth.service.system.message.schedule.support;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.service.system.message.schedule.model.MessageDispatchPayload;
@@ -84,7 +85,7 @@ public class MessageDispatchCommandParser {
 	 */
 	private void validatePayload(MessageDispatchPayload payload) {
 		Set<ConstraintViolation<MessageDispatchPayload>> payloadViolations = validator.validate(payload);
-		if (!payloadViolations.isEmpty()) {
+		if (CollUtil.isNotEmpty(payloadViolations)) {
 			String message = payloadViolations.iterator().next().getMessage();
 			throw new SysJobException(JOB_PAYLOAD_JSON_INVALID, message);
 		}

@@ -1,5 +1,6 @@
 package com.auth.service.system.authorization.job;
 
+import cn.hutool.core.collection.CollUtil;
 import com.auth.service.system.authorization.config.AuthorizationInvalidationProperties;
 import com.auth.service.system.authorization.dispatch.AuthorizationInvalidationOutboxProcessor;
 import com.auth.service.system.authorization.mapper.SysAuthorizationInvalidationOutboxMapper;
@@ -48,7 +49,7 @@ public class AuthorizationInvalidationOutboxJob {
 
 		List<SysAuthorizationInvalidationOutboxEntity> rows = outboxMapper.selectClaimable(CLAIMABLE_STATUSES, now,
 				pollBatchSize);
-		if (rows.isEmpty()) {
+		if (CollUtil.isEmpty(rows)) {
 			return;
 		}
 

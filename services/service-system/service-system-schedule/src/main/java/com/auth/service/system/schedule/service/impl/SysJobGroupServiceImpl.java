@@ -166,8 +166,8 @@ public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJo
 		try {
 			List<SysJobEntity> jobs = sysJobMapper
 				.selectList(Wrappers.lambdaQuery(SysJobEntity.class).eq(SysJobEntity::getJobGroup, groupCode));
-			List<Long> ids = jobs.stream().map(SysJobEntity::getId).toList();
-			if (CollUtil.isNotEmpty(ids)) {
+			if (CollUtil.isNotEmpty(jobs)) {
+				List<Long> ids = jobs.stream().map(SysJobEntity::getId).toList();
 				sysJobMapper.update(null,
 						Wrappers.lambdaUpdate(SysJobEntity.class)
 							.set(SysJobEntity::getStatus, false)
@@ -188,7 +188,7 @@ public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJo
 	public void resumeAllInGroup(String groupCode) {
 		List<SysJobEntity> jobs = sysJobMapper
 			.selectList(Wrappers.lambdaQuery(SysJobEntity.class).eq(SysJobEntity::getJobGroup, groupCode));
-		if (jobs.isEmpty()) {
+		if (CollUtil.isEmpty(jobs)) {
 			return;
 		}
 		List<Long> ids = jobs.stream().map(SysJobEntity::getId).toList();

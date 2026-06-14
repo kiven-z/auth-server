@@ -198,12 +198,18 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 			// 停用：查全部存在任务，逐个 pause
 			if (BooleanUtil.isFalse(targetStatus)) {
 				List<SysJobEntity> jobs = list(Wrappers.<SysJobEntity>lambdaQuery().in(SysJobEntity::getId, ids));
+				if (CollUtil.isEmpty(jobs)) {
+					return;
+				}
 				for (SysJobEntity job : jobs) {
 					quartzAdmin.pauseJob(job.getJobName(), job.getJobGroup());
 				}
 				return;
 			}
 			// 启用：仅对原暂停任务注册 Quartz
+			if (CollUtil.isEmpty(jobsToSchedule)) {
+				return;
+			}
 			for (SysJobEntity job : jobsToSchedule) {
 				job.setStatus(true);
 				quartzAdmin.scheduleOrReplace(job);

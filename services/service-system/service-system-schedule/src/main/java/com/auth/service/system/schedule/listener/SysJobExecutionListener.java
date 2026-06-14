@@ -1,5 +1,6 @@
 package com.auth.service.system.schedule.listener;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.schedule.config.ScheduleJobProperties;
 import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
 import com.auth.service.system.schedule.service.SysJobLogService;
@@ -94,7 +95,7 @@ public class SysJobExecutionListener implements JobListener {
 			String invokeTarget = jobDataMap.getString(SysJobQuartzDataKeys.INVOKE_TARGET);
 			String sysJobIdStr = jobDataMap.getString(SysJobQuartzDataKeys.SYS_JOB_ID);
 			String triggerType = jobDataMap.getString(SysJobQuartzDataKeys.TRIGGER_TYPE);
-			if (triggerType == null || triggerType.isBlank()) {
+			if (CharSequenceUtil.isBlank(triggerType)) {
 				triggerType = SysJobQuartzDataKeys.TRIGGER_TYPE_SCHEDULE;
 			}
 

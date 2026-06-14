@@ -41,7 +41,7 @@ public class QuartzBeanInvoker {
 
 		String beanName = nonNullInvokeTarget.substring(0, dot).trim();
 		String tail = nonNullInvokeTarget.substring(dot + 1).trim();
-		if (tail.isEmpty()) {
+		if (CharSequenceUtil.isEmpty(tail)) {
 			throw new SysJobException(JOB_INVOKE_TARGET_FORMAT);
 		}
 
