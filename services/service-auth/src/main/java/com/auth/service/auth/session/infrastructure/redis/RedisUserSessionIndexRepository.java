@@ -143,6 +143,15 @@ public class RedisUserSessionIndexRepository {
 	}
 
 	/**
+	 * 统计 global ZSet 成员数（索引条数；reconcile 前可能含僵尸 jti）
+	 * @return 在线会话索引条数
+	 */
+	public long countGlobalSessionIndex() {
+		Long zcard = redisTemplate.opsForZSet().zCard(GLOBAL_SESSIONS.fixedKey());
+		return zcard != null ? zcard : 0L;
+	}
+
+	/**
 	 * 清理全局 ZSet 中 Hash 已不存在的僵尸 jti
 	 * @param batchSize 单批扫描条数
 	 * @return 本批清理数量

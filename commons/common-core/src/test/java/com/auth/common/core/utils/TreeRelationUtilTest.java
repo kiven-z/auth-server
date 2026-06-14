@@ -16,7 +16,7 @@ class TreeRelationUtilTest {
 	void isDescendantOfReturnsTrueWhenAncestorOnChain() {
 		// 20 -> 15 -> 10
 		boolean descendant = TreeRelationUtil.isDescendantOf(10L, 20L,
-				id -> id.equals(20L) ? 15L : id.equals(15L) ? 10L : null);
+				id -> id.equals(20L) ? Long.valueOf(15L) : id.equals(15L) ? 10L : null);
 
 		assertThat(descendant).isTrue();
 	}

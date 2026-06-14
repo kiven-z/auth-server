@@ -62,9 +62,9 @@ class GrantTableServiceImplTest {
 
 	private GrantTableServiceImpl grantTableService;
 
-	private static SysPostEntity activePost(Long id) {
+	private static SysPostEntity activePost() {
 		SysPostEntity entity = new SysPostEntity();
-		entity.setId(id);
+		entity.setId(GrantTableServiceImplTest.SUBJECT_ID);
 		entity.setDeptId(1L);
 		entity.setPostCode("DEV");
 		entity.setPostName("开发岗");
@@ -88,7 +88,7 @@ class GrantTableServiceImplTest {
 	@Test
 	@DisplayName("查询已分配角色：主体存在时返回转换结果")
 	void listAssignedRolesReturnsRowsWhenSubjectExists() {
-		when(sysPostMapper.selectById(SUBJECT_ID)).thenReturn(activePost(SUBJECT_ID));
+		when(sysPostMapper.selectById(SUBJECT_ID)).thenReturn(activePost());
 		GrantTableBoundRolePO boundRole = new GrantTableBoundRolePO();
 		boundRole.setRoleCode("CUSTOM_A");
 		boundRole.setRoleName("业务角色A");
@@ -118,7 +118,7 @@ class GrantTableServiceImplTest {
 	@Test
 	@DisplayName("组织类全量覆盖：校验、写入 grant_table 并提交授权边失效")
 	void replaceOrgSubjectRolesWritesGrantAndSubmitsInvalidation() {
-		when(sysPostMapper.selectById(SUBJECT_ID)).thenReturn(activePost(SUBJECT_ID));
+		when(sysPostMapper.selectById(SUBJECT_ID)).thenReturn(activePost());
 		GrantTableAssignRoleForm form = new GrantTableAssignRoleForm();
 		form.setRoleCodes(List.of("BIZ_ADMIN", "CUSTOM_A"));
 
@@ -139,7 +139,7 @@ class GrantTableServiceImplTest {
 	@Test
 	@DisplayName("组织类全量覆盖：空角色列表仅删除 grant 行仍触发失效")
 	void replaceOrgSubjectRolesClearsGrantsWhenRoleCodesEmpty() {
-		when(sysPostMapper.selectById(SUBJECT_ID)).thenReturn(activePost(SUBJECT_ID));
+		when(sysPostMapper.selectById(SUBJECT_ID)).thenReturn(activePost());
 		GrantTableAssignRoleForm form = new GrantTableAssignRoleForm();
 		form.setRoleCodes(List.of());
 

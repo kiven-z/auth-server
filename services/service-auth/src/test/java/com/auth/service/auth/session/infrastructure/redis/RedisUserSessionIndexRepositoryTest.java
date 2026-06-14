@@ -237,6 +237,14 @@ class RedisUserSessionIndexRepositoryTest {
 	}
 
 	@Test
+	@DisplayName("countGlobalSessionIndex：返回 global ZSet 基数")
+	void countGlobalSessionIndex_shouldReturnZcard() {
+		when(zSetOperations.zCard(GLOBAL_KEY)).thenReturn(8L);
+
+		assertEquals(8L, repository.countGlobalSessionIndex());
+	}
+
+	@Test
 	@DisplayName("registerSession：缺少 sessionId 或 userId 时抛异常")
 	void registerSession_shouldRejectMissingIdentifiers() {
 		UserSessionIndex index = new UserSessionIndex();

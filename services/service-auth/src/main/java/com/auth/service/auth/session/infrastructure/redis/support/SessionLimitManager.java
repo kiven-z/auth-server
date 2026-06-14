@@ -20,11 +20,6 @@ import org.springframework.util.Assert;
 @Component
 public class SessionLimitManager {
 
-	/**
-	 * userId 非空断言文案
-	 */
-	private static final String USER_ID_NOT_NULL = "userId must not be null";
-
 	private final RedisUserSessionIndexRepository redisUserSessionIndexRepository;
 
 	private final UserConfigProperties userConfigProperties;
@@ -41,7 +36,7 @@ public class SessionLimitManager {
 	 * @throws AuthBusinessException 会话达上限且策略为拒绝时抛出
 	 */
 	public void assertSessionLimit(Long userId) {
-		Assert.notNull(userId, USER_ID_NOT_NULL);
+		Assert.notNull(userId, "userId must not be null");
 		redisUserSessionIndexRepository.cleanupStaleActiveSessions(userId);
 		Integer maxSessionCount = userConfigProperties.getMaxSessionCount();
 		if (maxSessionCount == null || maxSessionCount <= 0) {

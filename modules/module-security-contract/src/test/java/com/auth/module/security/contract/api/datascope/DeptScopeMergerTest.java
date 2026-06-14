@@ -41,6 +41,7 @@ class DeptScopeMergerTest {
 		ScopeGrant merged = DeptScopeMerger
 			.mergeLoose(List.of(ScopeGrant.builder().scopeType(DataScopeStorageType.DEPT).values(List.of(2L)).build(),
 					ScopeGrant.builder().scopeType(DataScopeStorageType.DEPT).values(List.of(2L)).build()));
+		assertNotNull(merged);
 		assertEquals(DataScopeStorageType.DEPT, merged.getScopeType());
 		assertEquals(List.of(2L), merged.getValues());
 	}

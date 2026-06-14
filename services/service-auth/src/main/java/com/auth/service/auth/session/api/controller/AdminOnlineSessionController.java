@@ -8,6 +8,7 @@ import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.auth.session.application.SessionAdminApplicationService;
 import com.auth.service.auth.session.domain.model.query.OnlineSessionPageQuery;
 import com.auth.service.auth.session.domain.model.vo.OnlineSessionPageVO;
+import com.auth.service.auth.session.domain.model.vo.OnlineSessionSummaryVO;
 import com.auth.service.auth.shared.audit.AuthAuditBizModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -38,6 +39,15 @@ public class AdminOnlineSessionController {
 	public Result<PageResponse<OnlineSessionPageVO>> page(OnlineSessionPageQuery query) {
 		PageResponse<OnlineSessionPageVO> page = sessionAdminApplicationService.getOnlineSessionPage(query);
 		return Result.success(page);
+	}
+
+	@OperationLog(targetType = "ONLINE_SESSION_SUMMARY", serviceDomain = AuditServiceDomain.AUTH,
+			bizModule = AuthAuditBizModule.AUTH_SESSION, operation = OperationLogKind.QUERY)
+	@Operation(summary = "全局在线会话统计摘要")
+	@PreAuthorize("@auth.decide('ADMIN')")
+	@GetMapping("/online/summary")
+	public Result<OnlineSessionSummaryVO> summary() {
+		return Result.success(sessionAdminApplicationService.getOnlineSessionSummary());
 	}
 
 }

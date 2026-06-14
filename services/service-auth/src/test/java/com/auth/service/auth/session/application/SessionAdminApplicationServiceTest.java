@@ -4,15 +4,19 @@ import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.service.auth.TestConstants;
 import com.auth.service.auth.authentication.infrastructure.persistence.UserMapper;
+import com.auth.service.auth.session.config.OnlineSessionProperties;
 import com.auth.service.auth.session.domain.model.OnlineSessionPageSlice;
 import com.auth.service.auth.session.domain.model.query.OnlineSessionPageQuery;
 import com.auth.service.auth.session.infrastructure.redis.RedisUserSessionIndexRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.util.Arrays;
 import java.util.List;
@@ -27,6 +31,7 @@ import static org.mockito.Mockito.*;
  * {@link SessionAdminApplicationService} 管理端会话单元测试
  */
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class SessionAdminApplicationServiceTest {
 
 	@Mock
@@ -35,8 +40,24 @@ class SessionAdminApplicationServiceTest {
 	@Mock
 	private UserMapper userMapper;
 
+	@Mock
+	private OnlineSessionProperties onlineSessionProperties;
+
 	@InjectMocks
 	private SessionAdminApplicationService sessionAdminApplicationService;
+
+	private OnlineSessionProperties.Reconcile reconcileConfig;
+
+	@BeforeEach
+	void setUp() {
+		OnlineSessionProperties.Query queryConfig = new OnlineSessionProperties.Query();
+		queryConfig.setPreCleanupBatch(100);
+		reconcileConfig = new OnlineSessionProperties.Reconcile();
+		reconcileConfig.setBatchSize(200);
+		reconcileConfig.setMaxRounds(50);
+		when(onlineSessionProperties.getQuery()).thenReturn(queryConfig);
+		when(onlineSessionProperties.getReconcile()).thenReturn(reconcileConfig);
+	}
 
 	@Test
 	@DisplayName("踢单会话：委托 terminateSession")
@@ -120,6 +141,48 @@ class SessionAdminApplicationServiceTest {
 		sessionAdminApplicationService.getOnlineSessionPage(query);
 
 		verify(redisUserSessionIndexRepository).pageGlobalSessions(1, 30, Set.of(TestConstants.USER_ID), "192.168");
+	}
+
+	@Test
+	@DisplayName("reconcile：本批无清理时只执行一轮")
+	void reconcileStaleGlobalSessions_shouldStopWhenBatchReturnsZero() {
+		when(redisUserSessionIndexRepository.cleanupStaleGlobalSessions(200)).thenReturn(0);
+
+		assertEquals(0, sessionAdminApplicationService.reconcileStaleGlobalSessions());
+
+		verify(redisUserSessionIndexRepository, times(1)).cleanupStaleGlobalSessions(200);
+	}
+
+	@Test
+	@DisplayName("reconcile：多轮累计清理直至无僵尸")
+	void reconcileStaleGlobalSessions_shouldLoopUntilNoStale() {
+		when(redisUserSessionIndexRepository.cleanupStaleGlobalSessions(200)).thenReturn(5, 2, 0);
+
+		assertEquals(7, sessionAdminApplicationService.reconcileStaleGlobalSessions());
+
+		verify(redisUserSessionIndexRepository, times(3)).cleanupStaleGlobalSessions(200);
+	}
+
+	@Test
+	@DisplayName("reconcile：达到 maxRounds 时停止即使本批仍有清理")
+	void reconcileStaleGlobalSessions_shouldStopAtMaxRounds() {
+		reconcileConfig.setMaxRounds(2);
+		when(redisUserSessionIndexRepository.cleanupStaleGlobalSessions(200)).thenReturn(1);
+
+		assertEquals(2, sessionAdminApplicationService.reconcileStaleGlobalSessions());
+
+		verify(redisUserSessionIndexRepository, times(2)).cleanupStaleGlobalSessions(200);
+	}
+
+	@Test
+	@DisplayName("统计摘要：委托 Repository 统计 global ZSet 条数")
+	void getOnlineSessionSummary_shouldReturnGlobalIndexCount() {
+		when(redisUserSessionIndexRepository.countGlobalSessionIndex()).thenReturn(12L);
+
+		var summary = sessionAdminApplicationService.getOnlineSessionSummary();
+
+		assertEquals(12L, summary.getSessionCount());
+		verify(redisUserSessionIndexRepository).countGlobalSessionIndex();
 	}
 
 	/**

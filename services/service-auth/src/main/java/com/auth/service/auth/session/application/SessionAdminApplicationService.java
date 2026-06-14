@@ -6,11 +6,13 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.service.auth.authentication.infrastructure.persistence.UserMapper;
+import com.auth.service.auth.session.config.OnlineSessionProperties;
 import com.auth.service.auth.session.convert.OnlineSessionPageConverter;
 import com.auth.service.auth.session.domain.model.OnlineSessionPageSlice;
 import com.auth.service.auth.session.domain.model.UserOnlineBrief;
 import com.auth.service.auth.session.domain.model.query.OnlineSessionPageQuery;
 import com.auth.service.auth.session.domain.model.vo.OnlineSessionPageVO;
+import com.auth.service.auth.session.domain.model.vo.OnlineSessionSummaryVO;
 import com.auth.service.auth.session.infrastructure.redis.RedisUserSessionIndexRepository;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.RequiredArgsConstructor;
@@ -31,14 +33,11 @@ import java.util.stream.Collectors;
 @Service
 public class SessionAdminApplicationService {
 
-	/**
-	 * 列表查询前预清理的僵尸索引批次大小
-	 */
-	private static final int PRE_QUERY_CLEANUP_BATCH = 100;
-
 	private final RedisUserSessionIndexRepository redisUserSessionIndexRepository;
 
 	private final UserMapper userMapper;
+
+	private final OnlineSessionProperties onlineSessionProperties;
 
 	/**
 	 * 踢出指定会话
@@ -88,7 +87,8 @@ public class SessionAdminApplicationService {
 	 */
 	@Transactional(readOnly = true)
 	public PageResponse<OnlineSessionPageVO> getOnlineSessionPage(OnlineSessionPageQuery query) {
-		redisUserSessionIndexRepository.cleanupStaleGlobalSessions(PRE_QUERY_CLEANUP_BATCH);
+		redisUserSessionIndexRepository
+			.cleanupStaleGlobalSessions(onlineSessionProperties.getQuery().getPreCleanupBatch());
 
 		int pageIndex = Objects.requireNonNullElse(query.getPageIndex(), 1);
 		int pageSize = Objects.requireNonNullElse(query.getPageSize(), 30);
@@ -115,6 +115,36 @@ public class SessionAdminApplicationService {
 			.map(session -> OnlineSessionPageConverter.INSTANCE.toPageVo(session, briefMap.get(session.getUserId())))
 			.toList();
 		return PageResponse.of((long) pageIndex, (long) pageSize, slice.total(), records);
+	}
+
+	/**
+	 * 全局在线会话统计摘要
+	 * @return 在线会话索引条数
+	 */
+	@Transactional(readOnly = true)
+	public OnlineSessionSummaryVO getOnlineSessionSummary() {
+		OnlineSessionSummaryVO summary = new OnlineSessionSummaryVO();
+		summary.setSessionCount(redisUserSessionIndexRepository.countGlobalSessionIndex());
+		return summary;
+	}
+
+	/**
+	 * 后台 reconcile：循环清理 global ZSet 中 Hash 已不存在的僵尸 jti，直到本批无清理或达到 maxRounds
+	 * @return 本次累计清理条数
+	 */
+	public int reconcileStaleGlobalSessions() {
+		OnlineSessionProperties.Reconcile reconcile = onlineSessionProperties.getReconcile();
+		int batchSize = reconcile.getBatchSize();
+		int maxRounds = reconcile.getMaxRounds();
+		int totalCleaned = 0;
+		for (int round = 0; round < maxRounds; round++) {
+			int cleaned = redisUserSessionIndexRepository.cleanupStaleGlobalSessions(batchSize);
+			totalCleaned += cleaned;
+			if (cleaned <= 0) {
+				break;
+			}
+		}
+		return totalCleaned;
 	}
 
 	/**

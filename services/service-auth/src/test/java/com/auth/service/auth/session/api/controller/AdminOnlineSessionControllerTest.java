@@ -4,6 +4,7 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.service.auth.session.application.SessionAdminApplicationService;
 import com.auth.service.auth.session.domain.model.query.OnlineSessionPageQuery;
 import com.auth.service.auth.session.domain.model.vo.OnlineSessionPageVO;
+import com.auth.service.auth.session.domain.model.vo.OnlineSessionSummaryVO;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,6 +46,19 @@ class AdminOnlineSessionControllerTest {
 		verify(sessionAdminApplicationService).getOnlineSessionPage(query);
 		assertSame(page, result.getData());
 		assertEquals(0L, result.getData().getTotal());
+	}
+
+	@Test
+	@DisplayName("统计摘要：委托 SessionAdminApplicationService")
+	void summary_shouldDelegateToApplicationService() {
+		OnlineSessionSummaryVO summary = new OnlineSessionSummaryVO();
+		summary.setSessionCount(5L);
+		when(sessionAdminApplicationService.getOnlineSessionSummary()).thenReturn(summary);
+
+		var result = adminOnlineSessionController.summary();
+
+		verify(sessionAdminApplicationService).getOnlineSessionSummary();
+		assertEquals(5L, result.getData().getSessionCount());
 	}
 
 }
