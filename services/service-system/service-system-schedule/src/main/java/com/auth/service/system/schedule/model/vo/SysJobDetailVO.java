@@ -18,7 +18,6 @@ import java.time.LocalDateTime;
  *
  * @author Bunny
  */
-@Schema(name = "SysJobDetailVO", title = "定时任务详情")
 @Getter
 @Setter
 @ToString
@@ -37,25 +36,25 @@ public class SysJobDetailVO extends BaseResponse implements SysJobLastExecutionV
 	@Schema(title = "任务分组名称")
 	private String jobGroupName;
 
-	@Schema(title = "白名单任务类")
+	@Schema(title = "任务类")
 	private String jobClass;
 
-	@Schema(title = "任务类型(BEAN_INVOKE/CUSTOM_CLASS)")
+	@Schema(title = "任务类型", description = "BEAN_INVOKE/CUSTOM_CLASS")
 	private String taskType;
 
-	@Schema(title = "执行处理器编码")
+	@Schema(title = "执行处理器")
 	private String handlerCode;
 
 	@Schema(title = "调用目标")
 	private String invokeTarget;
 
-	@Schema(title = "Cron")
+	@Schema(title = "Cron 表达式")
 	private String cronExpression;
 
 	@Schema(title = "错失策略")
 	private Integer misfirePolicy;
 
-	@Schema(title = "是否并发(true=允许并发执行，false=禁止)")
+	@Schema(title = "是否并发", description = "true=允许并发执行，false=禁止")
 	private Boolean concurrent;
 
 	@Schema(title = "开始时间")
@@ -64,7 +63,7 @@ public class SysJobDetailVO extends BaseResponse implements SysJobLastExecutionV
 	@Schema(title = "结束时间")
 	private LocalDateTime endTime;
 
-	@Schema(title = "运行状态(true=正常调度，false=暂停)")
+	@Schema(title = "运行状态", description = "true=正常调度，false=暂停")
 	private Boolean status;
 
 	@Schema(title = "执行参数 JSON")
@@ -77,25 +76,25 @@ public class SysJobDetailVO extends BaseResponse implements SysJobLastExecutionV
 	private String remark;
 
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	@Schema(title = "上次触发时间")
+	@Schema(title = "上次触发")
 	private LocalDateTime previousFireTime;
 
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	@Schema(title = "下次触发时间")
+	@Schema(title = "下次触发")
 	private LocalDateTime nextFireTime;
 
-	@Schema(title = "Quartz 运行态")
+	@Schema(title = "运行态", description = "Quartz 实时状态，与 sys_job.status 启停无关")
 	private SysJobQuartzRuntimeStatus quartzRuntimeStatus;
 
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	@Schema(title = "Quartz 本次开始执行时间")
+	@Schema(title = "本次开始执行时间", description = "RUNNING 时本次触发的开始时间")
 	private LocalDateTime quartzFireTime;
 
-	@Schema(title = "最近一次执行结果")
+	@Schema(title = "最近结果", description = "SUCCESS/FAILED/UNKNOWN")
 	private SysJobLastExecutionStatus lastExecutionStatus;
 
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	@Schema(title = "最近一次执行时间")
+	@Schema(title = "最近执行时间")
 	private LocalDateTime lastExecutionTime;
 
 }

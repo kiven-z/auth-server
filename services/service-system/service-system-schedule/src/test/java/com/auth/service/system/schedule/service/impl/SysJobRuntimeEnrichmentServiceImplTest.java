@@ -42,21 +42,21 @@ class SysJobRuntimeEnrichmentServiceImplTest {
 	private SysJobRuntimeEnrichmentServiceImpl sysJobRuntimeEnrichmentService;
 
 	@Test
-	@DisplayName("分页补充：无日志时最近结果为 UNKNOWN")
-	void enrichPageLastExecutionMarksUnknownWhenNoLog() {
+	@DisplayName("最近执行补充：无日志时最近结果为 UNKNOWN")
+	void enrichLastExecutionMarksUnknownWhenNoLog() {
 		SysJobPageResponse row = pageRow();
 		row.setId(1L);
 		when(logJobMapper.selectList(any())).thenReturn(List.of());
 
-		sysJobRuntimeEnrichmentService.enrichPageLastExecution(List.of(row));
+		sysJobRuntimeEnrichmentService.enrichLastExecution(List.of(row));
 
 		assertThat(row.getLastExecutionStatus()).isEqualTo(SysJobLastExecutionStatus.UNKNOWN);
 		assertThat(row.getLastExecutionTime()).isNull();
 	}
 
 	@Test
-	@DisplayName("分页补充：最近日志失败时写入 FAILED 与时间")
-	void enrichPageLastExecutionMarksFailedFromLog() {
+	@DisplayName("最近执行补充：最近日志失败时写入 FAILED 与时间")
+	void enrichLastExecutionMarksFailedFromLog() {
 		SysJobPageResponse row = pageRow();
 		row.setId(1L);
 		LogJobEntity failedLog = new LogJobEntity();
@@ -65,7 +65,7 @@ class SysJobRuntimeEnrichmentServiceImplTest {
 		failedLog.setCreateTime(LocalDateTime.of(2026, 6, 13, 9, 0));
 		when(logJobMapper.selectList(any())).thenReturn(List.of(failedLog));
 
-		sysJobRuntimeEnrichmentService.enrichPageLastExecution(List.of(row));
+		sysJobRuntimeEnrichmentService.enrichLastExecution(List.of(row));
 
 		assertThat(row.getLastExecutionStatus()).isEqualTo(SysJobLastExecutionStatus.FAILED);
 		assertThat(row.getLastExecutionTime()).isEqualTo(failedLog.getCreateTime());
@@ -88,7 +88,7 @@ class SysJobRuntimeEnrichmentServiceImplTest {
 		successLog.setCreateTime(LocalDateTime.of(2026, 6, 13, 9, 30));
 		when(logJobMapper.selectList(any())).thenReturn(List.of(successLog));
 
-		sysJobRuntimeEnrichmentService.enrichDetail(detail, 1L, "demo", "G");
+		sysJobRuntimeEnrichmentService.enrichDetail(detail, "demo", "G");
 
 		assertThat(detail.getPreviousFireTime()).isNotNull();
 		assertThat(detail.getNextFireTime()).isNotNull();

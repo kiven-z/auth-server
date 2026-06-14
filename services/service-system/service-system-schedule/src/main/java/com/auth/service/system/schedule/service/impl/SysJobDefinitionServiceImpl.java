@@ -71,7 +71,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		IPage<SysJobPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
 		IPage<SysJobPageResponse> voPage = page.convert(SysJobConverter.INSTANCE::toPageResponse);
 
-		sysJobRuntimeEnrichmentService.enrichPageLastExecution(voPage.getRecords());
+		sysJobRuntimeEnrichmentService.enrichLastExecution(voPage.getRecords());
 		auditUserDisplayService.enrichAuditUsernames(voPage);
 		return PageResponse.of(voPage);
 	}
@@ -87,8 +87,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		}
 
 		SysJobDetailVO vo = SysJobConverter.INSTANCE.toDetailVo(detailRow);
-		sysJobRuntimeEnrichmentService.enrichDetail(vo, detailRow.getId(), detailRow.getJobName(),
-				detailRow.getJobGroup());
+		sysJobRuntimeEnrichmentService.enrichDetail(vo, detailRow.getJobName(), detailRow.getJobGroup());
 		auditUserDisplayService.enrichAuditUsernames(List.of(vo));
 		return vo;
 	}

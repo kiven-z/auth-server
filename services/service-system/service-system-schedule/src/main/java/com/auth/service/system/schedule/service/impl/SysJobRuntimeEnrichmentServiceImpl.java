@@ -8,7 +8,6 @@ import com.auth.service.system.schedule.model.enums.SysJobLastExecutionStatus;
 import com.auth.service.system.schedule.model.enums.SysJobQuartzRuntimeStatus;
 import com.auth.service.system.schedule.model.vo.SysJobDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobLastExecutionView;
-import com.auth.service.system.schedule.model.vo.SysJobPageResponse;
 import com.auth.service.system.schedule.service.SysJobRuntimeEnrichmentService;
 import com.auth.service.system.schedule.support.SysJobQuartzRuntimeSnapshot;
 import com.auth.service.system.schedule.support.SysJobSchedulerManager;
@@ -44,15 +43,7 @@ public class SysJobRuntimeEnrichmentServiceImpl implements SysJobRuntimeEnrichme
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void enrichPageLastExecution(List<SysJobPageResponse> rows) {
-		enrichLastExecution(rows);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void enrichDetail(SysJobDetailVO detail, Long jobId, String jobName, String jobGroup) {
+	public void enrichDetail(SysJobDetailVO detail, String jobName, String jobGroup) {
 		SysJobSchedulerManager.FireTimes fireTimes = quartzAdmin.getFireTimes(jobName, jobGroup);
 		detail.setPreviousFireTime(toLocalDateTime(fireTimes.previousFireTime()));
 		detail.setNextFireTime(toLocalDateTime(fireTimes.nextFireTime()));

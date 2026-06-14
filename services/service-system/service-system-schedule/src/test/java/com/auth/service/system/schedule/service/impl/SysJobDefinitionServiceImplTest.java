@@ -93,7 +93,7 @@ class SysJobDefinitionServiceImplTest {
 		assertThat(detail.getJobName()).isEqualTo("demoJob");
 		assertThat(detail.getJobGroup()).isEqualTo("DEFAULT");
 		assertThat(detail.getJobGroupName()).isEqualTo("默认分组");
-		verify(sysJobRuntimeEnrichmentService).enrichDetail(detail, 1L, "demoJob", "DEFAULT");
+		verify(sysJobRuntimeEnrichmentService).enrichDetail(detail, "demoJob", "DEFAULT");
 		verify(auditUserDisplayService).enrichAuditUsernames(any(List.class));
 	}
 
