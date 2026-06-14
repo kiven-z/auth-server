@@ -4,6 +4,7 @@ import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.form.SysJobCreateForm;
 import com.auth.service.system.schedule.model.form.SysJobUpdateForm;
+import com.auth.service.system.schedule.model.po.SysJobDetailRowPO;
 import com.auth.service.system.schedule.model.po.SysJobPageRowPO;
 import com.auth.service.system.schedule.model.vo.SysJobDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobPageResponse;
@@ -35,20 +36,19 @@ public interface SysJobConverter {
 	SysJobPageResponse toPageResponse(SysJobPageRowPO po);
 
 	/**
-	 * 实体 → 详情 VO（Quartz 触发时间在 Service 层补充）
-	 * @param entity 任务实体
+	 * 详情行 PO → 详情 VO（运行时字段在 Service 层补充）
+	 * @param po 持久层查询投影
 	 * @return 详情 VO
 	 */
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
-	@Mapping(target = "jobGroupName", ignore = true)
 	@Mapping(target = "previousFireTime", ignore = true)
 	@Mapping(target = "nextFireTime", ignore = true)
 	@Mapping(target = "quartzRuntimeStatus", ignore = true)
 	@Mapping(target = "quartzFireTime", ignore = true)
 	@Mapping(target = "lastExecutionStatus", ignore = true)
 	@Mapping(target = "lastExecutionTime", ignore = true)
-	SysJobDetailVO toDetailVo(SysJobEntity entity);
+	SysJobDetailVO toDetailVo(SysJobDetailRowPO po);
 
 	/**
 	 * 新增表单 → 实体

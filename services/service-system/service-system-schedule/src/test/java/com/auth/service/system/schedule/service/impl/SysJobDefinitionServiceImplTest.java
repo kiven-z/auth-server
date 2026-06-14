@@ -6,14 +6,13 @@ import com.auth.service.system.schedule.mapper.LogJobMapper;
 import com.auth.service.system.schedule.mapper.SysJobGroupMapper;
 import com.auth.service.system.schedule.mapper.SysJobMapper;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
-import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
 import com.auth.service.system.schedule.model.form.SysJobStatusForm;
 import com.auth.service.system.schedule.model.form.SysJobUpdateForm;
+import com.auth.service.system.schedule.model.po.SysJobDetailRowPO;
 import com.auth.service.system.schedule.model.vo.SysJobDetailVO;
 import com.auth.service.system.schedule.service.SysJobRuntimeEnrichmentService;
 import com.auth.service.system.schedule.support.SysJobSchedulerManager;
 import com.auth.service.system.schedule.validation.SysJobDefinitionValidationManager;
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -81,17 +80,13 @@ class SysJobDefinitionServiceImplTest {
 	@Test
 	@DisplayName("详情：存在时补全分组名称与运行时信息")
 	void getDetailReturnsVoWhenExists() {
-		SysJobEntity entity = new SysJobEntity();
-		entity.setId(1L);
-		entity.setJobName("demoJob");
-		entity.setJobGroup("DEFAULT");
-		entity.setTaskType("BEAN_INVOKE");
-		when(sysJobMapper.selectById(1L)).thenReturn(entity);
-
-		SysJobGroupEntity groupEntity = new SysJobGroupEntity();
-		groupEntity.setGroupCode("DEFAULT");
-		groupEntity.setGroupName("默认分组");
-		when(sysJobGroupMapper.selectOne(any(Wrapper.class))).thenReturn(groupEntity);
+		SysJobDetailRowPO detailRow = new SysJobDetailRowPO();
+		detailRow.setId(1L);
+		detailRow.setJobName("demoJob");
+		detailRow.setJobGroup("DEFAULT");
+		detailRow.setJobGroupName("默认分组");
+		detailRow.setTaskType("BEAN_INVOKE");
+		when(sysJobMapper.selectDetailById(1L)).thenReturn(detailRow);
 
 		SysJobDetailVO detail = sysJobDefinitionService.getDetail(1L);
 
@@ -100,6 +95,16 @@ class SysJobDefinitionServiceImplTest {
 		assertThat(detail.getJobGroupName()).isEqualTo("默认分组");
 		verify(sysJobRuntimeEnrichmentService).enrichDetail(detail, 1L, "demoJob", "DEFAULT");
 		verify(auditUserDisplayService).enrichAuditUsernames(any(List.class));
+	}
+
+	@Test
+	@DisplayName("详情：不存在时抛出 DATA_NOT_EXIST")
+	void getDetailThrowsWhenMissing() {
+		when(sysJobMapper.selectDetailById(99L)).thenReturn(null);
+
+		assertThatThrownBy(() -> sysJobDefinitionService.getDetail(99L)).isInstanceOf(SysJobException.class)
+			.extracting(ex -> ((SysJobException) ex).getResultCode())
+			.isEqualTo(DATA_NOT_EXIST);
 	}
 
 	@Test

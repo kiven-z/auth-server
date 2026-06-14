@@ -3,6 +3,7 @@ package com.auth.service.system.schedule.convert;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.form.SysJobCreateForm;
 import com.auth.service.system.schedule.model.form.SysJobUpdateForm;
+import com.auth.service.system.schedule.model.po.SysJobDetailRowPO;
 import com.auth.service.system.schedule.model.po.SysJobPageRowPO;
 import com.auth.service.system.schedule.model.vo.SysJobDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobPageResponse;
@@ -42,17 +43,20 @@ class SysJobConverterTest {
 	}
 
 	@Test
-	@DisplayName("实体映射为详情 VO，Quartz 触发时间字段保持 null")
-	void toDetailVo_mapsEntityFields() {
-		SysJobEntity entity = new SysJobEntity();
-		entity.setId(2L);
-		entity.setJobName("job");
-		entity.setTaskType("BEAN_INVOKE");
+	@DisplayName("详情 PO 映射为详情 VO，运行时字段保持 null")
+	void toDetailVo_mapsDetailRowFields() {
+		SysJobDetailRowPO po = new SysJobDetailRowPO();
+		po.setId(2L);
+		po.setJobName("job");
+		po.setJobGroup("DEFAULT");
+		po.setJobGroupName("默认分组");
+		po.setTaskType("BEAN_INVOKE");
 
-		SysJobDetailVO vo = SysJobConverter.INSTANCE.toDetailVo(entity);
+		SysJobDetailVO vo = SysJobConverter.INSTANCE.toDetailVo(po);
 
 		assertThat(vo.getId()).isEqualTo(2L);
 		assertThat(vo.getTaskType()).isEqualTo("BEAN_INVOKE");
+		assertThat(vo.getJobGroupName()).isEqualTo("默认分组");
 		assertThat(vo.getNextFireTime()).isNull();
 	}
 

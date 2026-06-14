@@ -78,8 +78,7 @@ class SysJobRuntimeEnrichmentServiceImplTest {
 		detail.setId(1L);
 		Date previous = new Date(1_700_000_000_000L);
 		Date next = new Date(1_700_000_600_000L);
-		when(quartzAdmin.getFireTimes("demo", "G"))
-			.thenReturn(new SysJobSchedulerManager.FireTimes(previous, next));
+		when(quartzAdmin.getFireTimes("demo", "G")).thenReturn(new SysJobSchedulerManager.FireTimes(previous, next));
 		LocalDateTime fireTime = LocalDateTime.of(2026, 6, 13, 10, 0);
 		when(quartzAdmin.resolveRuntimeSnapshot("demo", "G"))
 			.thenReturn(SysJobQuartzRuntimeSnapshot.of(SysJobQuartzRuntimeStatus.RUNNING, fireTime));

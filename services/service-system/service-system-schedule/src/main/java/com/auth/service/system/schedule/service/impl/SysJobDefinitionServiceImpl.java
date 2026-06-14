@@ -12,6 +12,7 @@ import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
 import com.auth.service.system.schedule.model.form.SysJobCreateForm;
 import com.auth.service.system.schedule.model.form.SysJobStatusForm;
 import com.auth.service.system.schedule.model.form.SysJobUpdateForm;
+import com.auth.service.system.schedule.model.po.SysJobDetailRowPO;
 import com.auth.service.system.schedule.model.po.SysJobPageRowPO;
 import com.auth.service.system.schedule.model.query.SysJobQuery;
 import com.auth.service.system.schedule.model.vo.SysJobDetailVO;
@@ -80,19 +81,14 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 	 */
 	@Override
 	public SysJobDetailVO getDetail(Long id) {
-		SysJobEntity sysJob = getById(id);
-		if (sysJob == null) {
+		SysJobDetailRowPO detailRow = baseMapper.selectDetailById(id);
+		if (detailRow == null) {
 			throw new SysJobException(DATA_NOT_EXIST);
 		}
 
-		SysJobDetailVO vo = SysJobConverter.INSTANCE.toDetailVo(sysJob);
-		SysJobGroupEntity jobGroupEntity = sysJobGroupMapper.selectOne(
-				Wrappers.<SysJobGroupEntity>lambdaQuery().eq(SysJobGroupEntity::getGroupCode, sysJob.getJobGroup()));
-		if (jobGroupEntity != null) {
-			vo.setJobGroupName(jobGroupEntity.getGroupName());
-		}
-		sysJobRuntimeEnrichmentService.enrichDetail(vo, sysJob.getId(), sysJob.getJobName(), sysJob.getJobGroup());
-
+		SysJobDetailVO vo = SysJobConverter.INSTANCE.toDetailVo(detailRow);
+		sysJobRuntimeEnrichmentService.enrichDetail(vo, detailRow.getId(), detailRow.getJobName(),
+				detailRow.getJobGroup());
 		auditUserDisplayService.enrichAuditUsernames(List.of(vo));
 		return vo;
 	}
