@@ -9,13 +9,14 @@ import com.auth.service.system.schedule.model.query.SysJobQuery;
 import com.auth.service.system.schedule.model.vo.SysJobDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobPageResponse;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
  * 定时任务服务（定义态 CRUD + 运行态启停与立即执行）
  *
  * @author Bunny
  */
-public interface SysJobDefinitionService {
+public interface SysJobDefinitionService extends IService<SysJobEntity> {
 
 	/**
 	 * 分页查询

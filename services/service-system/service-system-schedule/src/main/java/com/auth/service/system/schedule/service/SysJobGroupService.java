@@ -60,15 +60,10 @@ public interface SysJobGroupService {
 	void deleteById(Long id);
 
 	/**
-	 * 暂停分组下全部任务（库状态 + Quartz）
+	 * 批量变更分组下全部任务状态并同步 Quartz
 	 * @param groupCode 分组编码
+	 * @param status true=恢复调度，false=暂停
 	 */
-	void pauseAllInGroup(String groupCode);
-
-	/**
-	 * 恢复分组下全部任务（库状态 + Quartz）
-	 * @param groupCode 分组编码
-	 */
-	void resumeAllInGroup(String groupCode);
+	void updateAllJobsStatusInGroup(String groupCode, Boolean status);
 
 }

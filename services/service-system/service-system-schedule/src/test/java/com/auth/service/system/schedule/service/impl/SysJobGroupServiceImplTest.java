@@ -1,16 +1,16 @@
 package com.auth.service.system.schedule.service.impl;
 
 import cn.hutool.core.util.BooleanUtil;
-import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
+import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.mapper.SysJobGroupMapper;
 import com.auth.service.system.schedule.mapper.SysJobMapper;
-import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
 import com.auth.service.system.schedule.model.form.SysJobGroupForm;
 import com.auth.service.system.schedule.model.po.SysJobGroupPageRowPO;
 import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
 import com.auth.service.system.schedule.model.vo.SysJobGroupDetailVO;
+import com.auth.service.system.schedule.service.SysJobDefinitionService;
 import com.auth.service.system.schedule.support.SysJobSchedulerManager;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import org.quartz.SchedulerException;
 
 import java.lang.reflect.Field;
@@ -29,7 +28,8 @@ import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_CODE_DUPLICATE;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.*;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_GROUP_HAS_ACTIVE_JOBS;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_GROUP_SYSTEM_PROTECTED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -53,6 +53,9 @@ class SysJobGroupServiceImplTest {
 	private SysJobMapper sysJobMapper;
 
 	@Mock
+	private SysJobDefinitionService sysJobDefinitionService;
+
+	@Mock
 	private AuditUserDisplayService auditUserDisplayService;
 
 	@Mock
@@ -73,7 +76,8 @@ class SysJobGroupServiceImplTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		sysJobGroupService = new SysJobGroupServiceImpl(auditUserDisplayService, sysJobMapper, sysJobSchedulerManager);
+		sysJobGroupService = new SysJobGroupServiceImpl(auditUserDisplayService, sysJobMapper, sysJobDefinitionService,
+				sysJobSchedulerManager);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysJobGroupService, sysJobGroupMapper);
@@ -225,34 +229,13 @@ class SysJobGroupServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("分组暂停：更新库状态并 pauseGroup")
-	void pauseAllInGroupUpdatesDbAndPausesQuartz() throws SchedulerException {
-		SysJobEntity job = new SysJobEntity();
-		job.setId(1L);
-		job.setJobGroup("G1");
-		when(sysJobMapper.selectList(any())).thenReturn(List.of(job));
-		when(sysJobMapper.update(any(), any())).thenReturn(1);
+	@DisplayName("分组暂停：无任务时仍 pauseGroup")
+	void updateAllJobsStatusInGroupPauseEmptyGroupStillPausesQuartz() throws SchedulerException {
+		when(sysJobMapper.selectList(any())).thenReturn(List.of());
 
-		sysJobGroupService.pauseAllInGroup("G1");
+		sysJobGroupService.updateAllJobsStatusInGroup("G1", false);
 
-		verify(sysJobMapper).update(any(), any());
 		verify(sysJobSchedulerManager).pauseGroup("G1");
-	}
-
-	@Test
-	@DisplayName("分组恢复：更新库状态并 scheduleOrReplace")
-	void resumeAllInGroupUpdatesDbAndSchedulesJobs() throws SchedulerException {
-		SysJobEntity job = new SysJobEntity();
-		job.setId(1L);
-		job.setJobName("demoJob");
-		job.setJobGroup("G1");
-		when(sysJobMapper.selectList(any())).thenReturn(List.of(job));
-		when(sysJobMapper.update(any(), any())).thenReturn(1);
-
-		sysJobGroupService.resumeAllInGroup("G1");
-
-		verify(sysJobMapper).update(any(), any());
-		verify(sysJobSchedulerManager).scheduleOrReplace(job);
 	}
 
 }

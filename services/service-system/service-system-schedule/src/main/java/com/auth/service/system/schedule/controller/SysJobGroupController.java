@@ -17,8 +17,10 @@ import com.auth.service.system.schedule.model.vo.SysJobGroupPageResponse;
 import com.auth.service.system.schedule.service.SysJobGroupService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -104,21 +106,13 @@ public class SysJobGroupController {
 
 	@OperationLog(targetType = "JOB_GROUP", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_JOB_GROUP, operation = OperationLogKind.UPDATE)
-	@Operation(summary = "暂停分组下全部任务")
+	@Operation(summary = "批量启停分组下全部任务")
 	@PreAuthorize("@auth.decide('sysJob:update')")
-	@PutMapping("{groupCode}/pause-jobs")
-	public Result<String> pauseAllJobs(@PathVariable("groupCode") String groupCode) {
-		sysJobGroupService.pauseAllInGroup(groupCode);
-		return Result.success(null, OPERATION_SUCCESS.getMessage());
-	}
-
-	@OperationLog(targetType = "JOB_GROUP", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_JOB_GROUP, operation = OperationLogKind.UPDATE)
-	@Operation(summary = "恢复分组下全部任务")
-	@PreAuthorize("@auth.decide('sysJob:update')")
-	@PutMapping("{groupCode}/resume-jobs")
-	public Result<String> resumeAllJobs(@PathVariable("groupCode") String groupCode) {
-		sysJobGroupService.resumeAllInGroup(groupCode);
+	@PutMapping("{groupCode}/jobs/status")
+	public Result<String> updateAllJobsStatus(@PathVariable("groupCode") String groupCode,
+			@Parameter(description = "运行状态(true=正常调度，false=暂停)") @RequestParam Boolean status) {
+		Assert.notNull(status, "status must not be null");
+		sysJobGroupService.updateAllJobsStatusInGroup(groupCode, status);
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 

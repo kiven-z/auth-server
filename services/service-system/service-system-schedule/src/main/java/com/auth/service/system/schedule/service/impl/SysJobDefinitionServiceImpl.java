@@ -192,7 +192,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 			entity.setStatus(targetStatus);
 			return entity;
 		}).toList();
-		updateBatchById(updates);
+		this.updateBatchById(updates);
 
 		try {
 			// 停用：查全部存在任务，逐个 pause

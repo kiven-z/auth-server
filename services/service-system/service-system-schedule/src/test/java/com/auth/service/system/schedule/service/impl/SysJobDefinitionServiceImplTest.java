@@ -118,9 +118,9 @@ class SysJobDefinitionServiceImplTest {
 	@DisplayName("新增：分组不存在时抛出 DATA_NOT_EXIST")
 	void createThrowsWhenJobGroupMissing() {
 		when(sysJobGroupMapper.selectOne(any())).thenReturn(null);
+		SysJobCreateForm form = minimalCreateForm("MISSING", true);
 
-		assertThatThrownBy(() -> sysJobDefinitionService.create(minimalCreateForm("MISSING", true)))
-			.isInstanceOf(SysJobException.class)
+		assertThatThrownBy(() -> sysJobDefinitionService.create(form)).isInstanceOf(SysJobException.class)
 			.extracting(ex -> ((SysJobException) ex).getResultCode())
 			.isEqualTo(DATA_NOT_EXIST);
 		verify(sysJobMapper, never()).insert(org.mockito.ArgumentMatchers.<SysJobEntity>any());
@@ -132,9 +132,9 @@ class SysJobDefinitionServiceImplTest {
 		SysJobGroupEntity disabledGroup = enabledGroup("DISABLED");
 		disabledGroup.setStatus(false);
 		when(sysJobGroupMapper.selectOne(any())).thenReturn(disabledGroup);
+		SysJobCreateForm form = minimalCreateForm("DISABLED", true);
 
-		assertThatThrownBy(() -> sysJobDefinitionService.create(minimalCreateForm("DISABLED", true)))
-			.isInstanceOf(SysJobException.class)
+		assertThatThrownBy(() -> sysJobDefinitionService.create(form)).isInstanceOf(SysJobException.class)
 			.extracting(ex -> ((SysJobException) ex).getResultCode())
 			.isEqualTo(JOB_GROUP_NOT_AVAILABLE);
 		verify(sysJobMapper, never()).insert(org.mockito.ArgumentMatchers.<SysJobEntity>any());

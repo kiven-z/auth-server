@@ -16,6 +16,7 @@ import com.auth.service.system.schedule.model.po.SysJobGroupPageRowPO;
 import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
 import com.auth.service.system.schedule.model.vo.SysJobGroupDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobGroupPageResponse;
+import com.auth.service.system.schedule.service.SysJobDefinitionService;
 import com.auth.service.system.schedule.service.SysJobGroupService;
 import com.auth.service.system.schedule.support.SysJobSchedulerManager;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -27,7 +28,6 @@ import org.quartz.SchedulerException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_CODE_DUPLICATE;
@@ -48,14 +48,17 @@ public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJo
 
 	private final SysJobMapper sysJobMapper;
 
+	private final SysJobDefinitionService sysJobDefinitionService;
+
 	private final AuditUserDisplayService auditUserDisplayService;
 
 	private final SysJobSchedulerManager sysJobSchedulerManager;
 
 	public SysJobGroupServiceImpl(AuditUserDisplayService auditUserDisplayService, SysJobMapper sysJobMapper,
-			SysJobSchedulerManager sysJobSchedulerManager) {
+			SysJobDefinitionService sysJobDefinitionService, SysJobSchedulerManager sysJobSchedulerManager) {
 		this.auditUserDisplayService = auditUserDisplayService;
 		this.sysJobMapper = sysJobMapper;
+		this.sysJobDefinitionService = sysJobDefinitionService;
 		this.sysJobSchedulerManager = sysJobSchedulerManager;
 	}
 
@@ -162,48 +165,39 @@ public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJo
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void pauseAllInGroup(String groupCode) {
-		try {
-			List<SysJobEntity> jobs = sysJobMapper
-				.selectList(Wrappers.lambdaQuery(SysJobEntity.class).eq(SysJobEntity::getJobGroup, groupCode));
-			if (CollUtil.isNotEmpty(jobs)) {
-				List<Long> ids = jobs.stream().map(SysJobEntity::getId).toList();
-				sysJobMapper.update(null,
-						Wrappers.lambdaUpdate(SysJobEntity.class)
-							.set(SysJobEntity::getStatus, false)
-							.set(SysJobEntity::getUpdateTime, LocalDateTime.now())
-							.in(SysJobEntity::getId, ids));
-			}
-			sysJobSchedulerManager.pauseGroup(groupCode);
-		}
-		catch (SchedulerException ex) {
-			log.warn("分组暂停失败 groupCode={} : {}", groupCode, ex.getMessage());
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void resumeAllInGroup(String groupCode) {
+	public void updateAllJobsStatusInGroup(String groupCode, Boolean status) {
 		List<SysJobEntity> jobs = sysJobMapper
 			.selectList(Wrappers.lambdaQuery(SysJobEntity.class).eq(SysJobEntity::getJobGroup, groupCode));
-		if (CollUtil.isEmpty(jobs)) {
-			return;
+
+		if (CollUtil.isNotEmpty(jobs)) {
+			List<SysJobEntity> updates = jobs.stream().map(job -> {
+				SysJobEntity entity = new SysJobEntity();
+				entity.setId(job.getId());
+				entity.setStatus(status);
+				return entity;
+			}).toList();
+			sysJobDefinitionService.updateBatchById(updates);
+
+			if (BooleanUtil.isTrue(status)) {
+				for (SysJobEntity job : jobs) {
+					try {
+						job.setStatus(true);
+						sysJobSchedulerManager.scheduleOrReplace(job);
+					}
+					catch (SchedulerException ex) {
+						log.warn("分组恢复失败 {} / {} : {}", job.getJobGroup(), job.getJobName(), ex.getMessage());
+					}
+				}
+				return;
+			}
 		}
-		List<Long> ids = jobs.stream().map(SysJobEntity::getId).toList();
-		sysJobMapper.update(null,
-				Wrappers.lambdaUpdate(SysJobEntity.class)
-					.set(SysJobEntity::getStatus, true)
-					.set(SysJobEntity::getUpdateTime, LocalDateTime.now())
-					.in(SysJobEntity::getId, ids));
-		for (SysJobEntity job : jobs) {
-			job.setStatus(true);
+
+		if (BooleanUtil.isFalse(status)) {
 			try {
-				sysJobSchedulerManager.scheduleOrReplace(job);
+				sysJobSchedulerManager.pauseGroup(groupCode);
 			}
 			catch (SchedulerException ex) {
-				log.warn("分组恢复失败 {} / {} : {}", job.getJobGroup(), job.getJobName(), ex.getMessage());
+				log.warn("分组暂停失败 groupCode={} : {}", groupCode, ex.getMessage());
 			}
 		}
 	}
