@@ -1,5 +1,17 @@
 package com.auth.service.system.schedule.service.impl;
 
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_BUSY;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_GROUP_NOT_AVAILABLE;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_QUARTZ_OPERATION_FAILED;
+
+import java.util.List;
+
+import org.quartz.JobKey;
+import org.quartz.SchedulerException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.schedule.convert.SysJobConverter;
@@ -25,19 +37,11 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.BooleanUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.quartz.JobKey;
-import org.quartz.SchedulerException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-
-import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_BUSY;
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_GROUP_NOT_AVAILABLE;
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_QUARTZ_OPERATION_FAILED;
 
 /**
  * 定时任务定义服务实现
@@ -97,26 +101,27 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 	 */
 	@Override
 	public void create(SysJobCreateForm form) {
-		// 验证分组是否启用
-		String groupCode = form.getJobGroup();
-		SysJobGroupEntity sysJobGroup = sysJobGroupMapper.selectOne(Wrappers.<SysJobGroupEntity>lambdaQuery()
-			.eq(SysJobGroupEntity::getGroupCode, groupCode)
-			.eq(SysJobGroupEntity::getStatus, true));
+		SysJobGroupEntity sysJobGroup = sysJobGroupMapper.selectOne(
+				Wrappers.<SysJobGroupEntity>lambdaQuery().eq(SysJobGroupEntity::getGroupCode, form.getJobGroup()));
 		if (sysJobGroup == null) {
+			throw new SysJobException(DATA_NOT_EXIST);
+		}
+		if (Boolean.FALSE.equals(sysJobGroup.getStatus())) {
 			throw new SysJobException(JOB_GROUP_NOT_AVAILABLE);
 		}
 
 		SysJobEntity sysJob = SysJobConverter.INSTANCE.toEntity(form);
-		// 统一规范任务定义并执行类型校验
 		validationManager.normalizeAndValidate(sysJob);
 		save(sysJob);
 
-		try {
-			quartzAdmin.scheduleOrReplace(sysJob);
-		}
-		catch (SchedulerException ex) {
-			log.error("注册 Quartz 失败", ex);
-			throw new SysJobException(JOB_QUARTZ_OPERATION_FAILED, "register", ex.getMessage());
+		if (Boolean.TRUE.equals(sysJob.getStatus())) {
+			try {
+				quartzAdmin.scheduleOrReplace(sysJob);
+			}
+			catch (SchedulerException ex) {
+				log.error("注册 Quartz 失败", ex);
+				throw new SysJobException(JOB_QUARTZ_OPERATION_FAILED, "register", ex.getMessage());
+			}
 		}
 	}
 
@@ -175,19 +180,42 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 	 */
 	@Override
 	public void batchUpdateStatus(SysJobStatusForm form) {
-		for (Long id : form.getIds()) {
-			SysJobEntity dbJob = getById(id);
-			if (dbJob == null) {
-				continue;
+		List<Long> ids = form.getIds();
+		if (CollUtil.isEmpty(ids)) {
+			return;
+		}
+		Boolean targetStatus = form.getStatus();
+
+		List<SysJobEntity> jobsToSchedule = BooleanUtil.isTrue(targetStatus) ? list(
+				Wrappers.<SysJobEntity>lambdaQuery().in(SysJobEntity::getId, ids).eq(SysJobEntity::getStatus, false))
+				: List.of();
+
+		List<SysJobEntity> updates = ids.stream().map(id -> {
+			SysJobEntity entity = new SysJobEntity();
+			entity.setId(id);
+			entity.setStatus(targetStatus);
+			return entity;
+		}).toList();
+		updateBatchById(updates);
+
+		try {
+			// 停用：查全部存在任务，逐个 pause
+			if (BooleanUtil.isFalse(targetStatus)) {
+				List<SysJobEntity> jobs = list(Wrappers.<SysJobEntity>lambdaQuery().in(SysJobEntity::getId, ids));
+				for (SysJobEntity job : jobs) {
+					quartzAdmin.pauseJob(job.getJobName(), job.getJobGroup());
+				}
+				return;
 			}
-			dbJob.setStatus(form.getStatus());
-			updateById(dbJob);
-			try {
-				quartzAdmin.scheduleOrReplace(dbJob);
+			// 启用：仅对原暂停任务注册 Quartz
+			for (SysJobEntity job : jobsToSchedule) {
+				job.setStatus(true);
+				quartzAdmin.scheduleOrReplace(job);
 			}
-			catch (SchedulerException ex) {
-				log.warn("批量更新任务状态同步 Quartz 失败 id={} : {}", id, ex.getMessage());
-			}
+		}
+		catch (SchedulerException ex) {
+			log.error("批量更新任务状态同步 Quartz 失败", ex);
+			throw new SysJobException(JOB_QUARTZ_OPERATION_FAILED, "batchStatus", ex.getMessage());
 		}
 	}
 

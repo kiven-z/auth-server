@@ -36,5 +36,5 @@ spring:
 
 logging:
   level:
-    root: warn
+    root: info
     com.auth: debug

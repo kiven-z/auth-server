@@ -27,6 +27,10 @@
             <artifactId>service-system-schedule</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.auth</groupId>
+            <artifactId>service-system-message</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
         </dependency>

@@ -4,6 +4,7 @@ import com.auth.service.system.schedule.config.ScheduleJobProperties;
 import com.auth.service.system.schedule.mapper.SysJobMapper;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.support.SysJobSchedulerManager;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -41,23 +42,19 @@ public class SysJobBootstrapSynchronizer {
 	}
 
 	private void syncByStatus(boolean enabled, int batchSize) {
-		long pageNum = 1;
-		while (true) {
-			Page<SysJobEntity> page = new Page<>(pageNum, batchSize);
-			IPage<SysJobEntity> result = sysJobMapper.selectPage(page,
-					Wrappers.lambdaQuery(SysJobEntity.class)
-						.eq(SysJobEntity::getStatus, enabled)
-						.orderByAsc(SysJobEntity::getId));
-			if (result.getRecords().isEmpty()) {
-				break;
-			}
+		LambdaQueryWrapper<SysJobEntity> query = Wrappers.lambdaQuery(SysJobEntity.class)
+			.eq(SysJobEntity::getStatus, enabled)
+			.orderByAsc(SysJobEntity::getId);
+
+		IPage<SysJobEntity> firstPage = sysJobMapper.selectPage(new Page<>(1, batchSize), query);
+		long totalPages = firstPage.getPages();
+
+		for (long pageNum = 1; pageNum <= totalPages; pageNum++) {
+			IPage<SysJobEntity> result = pageNum == 1 ? firstPage
+					: sysJobMapper.selectPage(new Page<>(pageNum, batchSize), query);
 			for (SysJobEntity job : result.getRecords()) {
 				syncSingleJob(job, enabled);
 			}
-			if (pageNum >= result.getPages()) {
-				break;
-			}
-			pageNum++;
 		}
 	}
 

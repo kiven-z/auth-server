@@ -32,7 +32,8 @@ import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_CODE_DUPLICATE;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.*;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_GROUP_HAS_ACTIVE_JOBS;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_GROUP_SYSTEM_PROTECTED;
 
 /**
  * 任务分组实现
@@ -79,8 +80,8 @@ public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJo
 		List<SysJobGroupPageResponse> voList = list.stream()
 			.map(SysJobGroupConverter.INSTANCE::toPageResponse)
 			.toList();
-		auditUserDisplayService.enrichAuditUsernames(voList);
 
+		auditUserDisplayService.enrichAuditUsernames(voList);
 		return voList;
 	}
 

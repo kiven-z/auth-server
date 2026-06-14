@@ -134,12 +134,49 @@ class SystemArchitectureTest {
 
 	private static final String AUTHORIZATION_ROOT = "com.auth.service.system.authorization";
 
+	private static final String SCHEDULE_ROOT = "com.auth.service.system.schedule";
+
+	/**
+	 * message 实现 schedule 任务 SPI 时允许依赖的 schedule 子包（扩展点与共享契约类型）。
+	 */
+	private static final DescribedPredicate<JavaClass> SCHEDULE_SPI_FOR_MESSAGE = new DescribedPredicate<>(
+			"schedule SPI packages allowed for message task integration") {
+		@Override
+		public boolean test(JavaClass javaClass) {
+			String pkg = javaClass.getPackageName();
+			return pkg.startsWith(SCHEDULE_ROOT + ".task") || pkg.startsWith(SCHEDULE_ROOT + ".catalog")
+					|| pkg.startsWith(SCHEDULE_ROOT + ".validation") || pkg.startsWith(SCHEDULE_ROOT + ".model")
+					|| pkg.startsWith(SCHEDULE_ROOT + ".exception");
+		}
+	};
+
+	private static final DescribedPredicate<JavaClass> FORBIDDEN_DEPENDENCIES_FOR_MESSAGE = new DescribedPredicate<>(
+			"admin, authorization, or schedule internals outside SPI") {
+		@Override
+		public boolean test(JavaClass javaClass) {
+			String pkg = javaClass.getPackageName();
+			if (pkg.startsWith("com.auth.service.system.admin")) {
+				return true;
+			}
+			if (pkg.startsWith(AUTHORIZATION_ROOT)) {
+				return true;
+			}
+			if (!pkg.startsWith(SCHEDULE_ROOT)) {
+				return false;
+			}
+			return !SCHEDULE_SPI_FOR_MESSAGE.test(javaClass);
+		}
+	};
+
+	/**
+	 * message 不得依赖 admin / authorization；依赖 schedule 时仅限任务 SPI（task、catalog、validation
+	 * 及共享 model/exception）。
+	 */
 	@ArchTest
 	static final ArchRule message_must_not_depend_on_other_domains = noClasses().that()
 		.resideInAPackage(MESSAGE)
 		.should()
-		.dependOnClassesThat()
-		.resideInAnyPackage(ADMIN, SCHEDULE, AUTHORIZATION_ROOT + "..");
+		.dependOnClassesThat(FORBIDDEN_DEPENDENCIES_FOR_MESSAGE);
 
 	@ArchTest
 	static final ArchRule authorization_must_not_depend_on_admin = noClasses().that()
