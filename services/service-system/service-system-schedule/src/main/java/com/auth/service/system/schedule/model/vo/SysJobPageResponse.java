@@ -34,7 +34,7 @@ public class SysJobPageResponse extends BaseResponse implements Serializable, Sy
 	@Schema(title = "任务类")
 	private String jobClass;
 
-	@Schema(title = "任务类型", description = "BEAN_INVOKE/CUSTOM_CLASS")
+	@Schema(title = "任务类型", description = "BEAN_INVOKE/CUSTOM_CLASS/MESSAGE_DISPATCH")
 	private String taskType;
 
 	@Schema(title = "执行处理器")

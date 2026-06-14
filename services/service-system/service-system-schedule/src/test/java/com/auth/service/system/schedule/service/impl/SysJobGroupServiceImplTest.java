@@ -11,7 +11,6 @@ import com.auth.service.system.schedule.model.po.SysJobGroupPageRowPO;
 import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
 import com.auth.service.system.schedule.model.vo.SysJobGroupDetailVO;
 import com.auth.service.system.schedule.service.SysJobDefinitionService;
-import com.auth.service.system.schedule.support.SysJobSchedulerManager;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -21,7 +20,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.quartz.SchedulerException;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -58,9 +56,6 @@ class SysJobGroupServiceImplTest {
 	@Mock
 	private AuditUserDisplayService auditUserDisplayService;
 
-	@Mock
-	private SysJobSchedulerManager sysJobSchedulerManager;
-
 	private SysJobGroupServiceImpl sysJobGroupService;
 
 	/**
@@ -76,8 +71,7 @@ class SysJobGroupServiceImplTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		sysJobGroupService = new SysJobGroupServiceImpl(auditUserDisplayService, sysJobMapper, sysJobDefinitionService,
-				sysJobSchedulerManager);
+		sysJobGroupService = new SysJobGroupServiceImpl(sysJobMapper, sysJobDefinitionService, auditUserDisplayService);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysJobGroupService, sysJobGroupMapper);
@@ -229,13 +223,11 @@ class SysJobGroupServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("分组暂停：无任务时仍 pauseGroup")
-	void updateAllJobsStatusInGroupPauseEmptyGroupStillPausesQuartz() throws SchedulerException {
-		when(sysJobMapper.selectList(any())).thenReturn(List.of());
-
+	@DisplayName("分组批量启停：委托 DefinitionService 统一同步 Quartz")
+	void updateAllJobsStatusInGroupDelegatesToDefinitionService() {
 		sysJobGroupService.updateAllJobsStatusInGroup("G1", false);
 
-		verify(sysJobSchedulerManager).pauseGroup("G1");
+		verify(sysJobDefinitionService).batchUpdateStatusByGroupCode("G1", false);
 	}
 
 }

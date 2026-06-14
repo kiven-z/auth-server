@@ -7,7 +7,7 @@ import lombok.Getter;
  * 定时任务 / Quartz / Job 配置结果码
  *
  * <p>
- * 号段：212–218、220、224–246（219、221–223、229–237 已释放）
+ * 号段：212–218、220、224–246、248–249（219、221–223、229–237 已释放）
  * </p>
  *
  * @author Bunny
@@ -115,7 +115,12 @@ public enum ScheduleResultCode implements SystemResultCode {
 	/**
 	 * 任务正在执行或排队中，禁止立即执行
 	 */
-	JOB_BUSY(422, 248, "JOB_BUSY", "system.job.busy");
+	JOB_BUSY(422, 248, "JOB_BUSY", "system.job.busy"),
+
+	/**
+	 * 删除任务时级联清理执行日志失败（{0}=详情）
+	 */
+	JOB_LOG_DELETE_FAILED(500, 249, "JOB_LOG_DELETE_FAILED", "system.job.log.delete_failed");
 
 	private final int httpStatus;
 

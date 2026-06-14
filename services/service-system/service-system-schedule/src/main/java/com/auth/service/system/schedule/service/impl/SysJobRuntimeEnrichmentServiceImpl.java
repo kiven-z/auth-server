@@ -11,7 +11,6 @@ import com.auth.service.system.schedule.model.vo.SysJobLastExecutionView;
 import com.auth.service.system.schedule.service.SysJobRuntimeEnrichmentService;
 import com.auth.service.system.schedule.support.SysJobQuartzRuntimeSnapshot;
 import com.auth.service.system.schedule.support.SysJobSchedulerManager;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +34,7 @@ import static com.auth.service.system.schedule.model.constants.SysJobQuartzDataK
 @Service
 public class SysJobRuntimeEnrichmentServiceImpl implements SysJobRuntimeEnrichmentService {
 
-	private final SysJobSchedulerManager quartzAdmin;
+	private final SysJobSchedulerManager sysJobSchedulerManager;
 
 	private final LogJobMapper logJobMapper;
 
@@ -44,11 +43,11 @@ public class SysJobRuntimeEnrichmentServiceImpl implements SysJobRuntimeEnrichme
 	 */
 	@Override
 	public void enrichDetail(SysJobDetailVO detail, String jobName, String jobGroup) {
-		SysJobSchedulerManager.FireTimes fireTimes = quartzAdmin.getFireTimes(jobName, jobGroup);
+		SysJobSchedulerManager.FireTimes fireTimes = sysJobSchedulerManager.getFireTimes(jobName, jobGroup);
 		detail.setPreviousFireTime(toLocalDateTime(fireTimes.previousFireTime()));
 		detail.setNextFireTime(toLocalDateTime(fireTimes.nextFireTime()));
 
-		SysJobQuartzRuntimeSnapshot snapshot = quartzAdmin.resolveRuntimeSnapshot(jobName, jobGroup);
+		SysJobQuartzRuntimeSnapshot snapshot = sysJobSchedulerManager.resolveRuntimeSnapshot(jobName, jobGroup);
 		detail.setQuartzRuntimeStatus(snapshot.status());
 		detail.setQuartzFireTime(snapshot.fireTime());
 
@@ -60,7 +59,7 @@ public class SysJobRuntimeEnrichmentServiceImpl implements SysJobRuntimeEnrichme
 	 */
 	@Override
 	public boolean isBusy(String jobName, String jobGroup) {
-		SysJobQuartzRuntimeSnapshot snapshot = quartzAdmin.resolveRuntimeSnapshot(jobName, jobGroup);
+		SysJobQuartzRuntimeSnapshot snapshot = sysJobSchedulerManager.resolveRuntimeSnapshot(jobName, jobGroup);
 		SysJobQuartzRuntimeStatus status = snapshot.status();
 		return status == SysJobQuartzRuntimeStatus.RUNNING || status == SysJobQuartzRuntimeStatus.PENDING;
 	}
@@ -94,10 +93,7 @@ public class SysJobRuntimeEnrichmentServiceImpl implements SysJobRuntimeEnrichme
 		if (CollUtil.isEmpty(jobIds)) {
 			return Map.of();
 		}
-		return logJobMapper
-			.selectList(Wrappers.<LogJobEntity>lambdaQuery()
-				.in(LogJobEntity::getJobId, jobIds)
-				.orderByDesc(LogJobEntity::getCreateTime))
+		return logJobMapper.selectLatestByJobIds(jobIds)
 			.stream()
 			.filter(log -> log.getJobId() != null)
 			.collect(Collectors.toMap(LogJobEntity::getJobId, Function.identity(), (first, ignored) -> first));

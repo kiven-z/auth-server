@@ -1,6 +1,5 @@
-package com.auth.service.system.admin.convert;
+package com.auth.service.system.schedule.convert;
 
-import com.auth.service.system.schedule.convert.SysJobLogConverter;
 import com.auth.service.system.schedule.model.entity.LogJobEntity;
 import com.auth.service.system.schedule.model.po.SysJobLogPageRowPO;
 import com.auth.service.system.schedule.model.vo.SysJobLogDetailVO;
@@ -15,6 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * {@link SysJobLogConverter} 映射校验（1=成功，0=失败）
  */
+@DisplayName("SysJobLogConverter 任务日志映射")
 class SysJobLogConverterTest {
 
 	@Test

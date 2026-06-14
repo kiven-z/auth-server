@@ -46,4 +46,11 @@ public interface LogJobMapper extends BaseMapper<LogJobEntity> {
 	 */
 	int deleteByJobNameAndGroup(@Param("jobName") String jobName, @Param("jobGroup") String jobGroup);
 
+	/**
+	 * 批量查询各任务最近一条执行日志
+	 * @param jobIds 任务主键列表
+	 * @return 每个任务最近一条日志
+	 */
+	List<LogJobEntity> selectLatestByJobIds(@Param("jobIds") List<Long> jobIds);
+
 }

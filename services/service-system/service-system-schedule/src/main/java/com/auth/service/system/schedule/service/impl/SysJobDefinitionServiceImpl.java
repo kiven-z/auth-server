@@ -31,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobKey;
 import org.quartz.SchedulerException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,7 +52,7 @@ import static com.auth.service.system.schedule.exception.ScheduleResultCode.*;
 public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJobEntity>
 		implements SysJobDefinitionService {
 
-	private final SysJobSchedulerManager quartzAdmin;
+	private final SysJobSchedulerManager sysJobSchedulerManager;
 
 	private final AuditUserDisplayService auditUserDisplayService;
 
@@ -112,7 +113,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 
 		if (BooleanUtil.isTrue(sysJob.getStatus())) {
 			try {
-				quartzAdmin.scheduleOrReplace(sysJob);
+				sysJobSchedulerManager.scheduleOrReplace(sysJob);
 			}
 			catch (SchedulerException ex) {
 				log.error("注册 Quartz 失败", ex);
@@ -132,12 +133,11 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		}
 
 		SysJobConverter.INSTANCE.updateEntity(form, dbJob);
-		// 统一规范任务定义并执行类型校验
 		validationManager.normalizeAndValidate(dbJob);
 		updateById(dbJob);
 
 		try {
-			quartzAdmin.scheduleOrReplace(dbJob);
+			sysJobSchedulerManager.scheduleOrReplace(dbJob);
 		}
 		catch (SchedulerException ex) {
 			log.error("更新 Quartz 失败", ex);
@@ -158,16 +158,20 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		String jobGroup = dbJob.getJobGroup();
 
 		try {
-			quartzAdmin.deleteJobIfExists(JobKey.jobKey(jobName, jobGroup));
-			logJobMapper.deleteByJobNameAndGroup(jobName, jobGroup);
-			removeById(id);
+			sysJobSchedulerManager.deleteJobIfExists(JobKey.jobKey(jobName, jobGroup));
 		}
 		catch (SchedulerException ex) {
 			log.error("删除 Quartz Job 失败", ex);
 			throw new SysJobException(JOB_QUARTZ_OPERATION_FAILED, "delete", ex.getMessage());
 		}
-		catch (Exception exception) {
-			log.error("级联物理删除日志失败", exception);
+
+		try {
+			logJobMapper.deleteByJobNameAndGroup(jobName, jobGroup);
+			removeById(id);
+		}
+		catch (DataAccessException ex) {
+			log.error("级联物理删除日志失败", ex);
+			throw new SysJobException(JOB_LOG_DELETE_FAILED, ex.getMessage());
 		}
 	}
 
@@ -192,32 +196,63 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 			entity.setStatus(targetStatus);
 			return entity;
 		}).toList();
-		this.updateBatchById(updates);
+		updateBatchById(updates);
 
 		try {
-			// 停用：查全部存在任务，逐个 pause
 			if (BooleanUtil.isFalse(targetStatus)) {
 				List<SysJobEntity> jobs = list(Wrappers.<SysJobEntity>lambdaQuery().in(SysJobEntity::getId, ids));
 				if (CollUtil.isEmpty(jobs)) {
 					return;
 				}
 				for (SysJobEntity job : jobs) {
-					quartzAdmin.pauseJob(job.getJobName(), job.getJobGroup());
+					sysJobSchedulerManager.pauseJob(job.getJobName(), job.getJobGroup());
 				}
 				return;
 			}
-			// 启用：仅对原暂停任务注册 Quartz
 			if (CollUtil.isEmpty(jobsToSchedule)) {
 				return;
 			}
 			for (SysJobEntity job : jobsToSchedule) {
 				job.setStatus(true);
-				quartzAdmin.scheduleOrReplace(job);
+				sysJobSchedulerManager.scheduleOrReplace(job);
 			}
 		}
 		catch (SchedulerException ex) {
 			log.error("批量更新任务状态同步 Quartz 失败", ex);
 			throw new SysJobException(JOB_QUARTZ_OPERATION_FAILED, "batchStatus", ex.getMessage());
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void batchUpdateStatusByGroupCode(String groupCode, Boolean status) {
+		List<SysJobEntity> jobs = list(Wrappers.<SysJobEntity>lambdaQuery().eq(SysJobEntity::getJobGroup, groupCode));
+
+		if (CollUtil.isNotEmpty(jobs)) {
+			List<SysJobEntity> updates = jobs.stream().map(job -> {
+				SysJobEntity entity = new SysJobEntity();
+				entity.setId(job.getId());
+				entity.setStatus(status);
+				return entity;
+			}).toList();
+			updateBatchById(updates);
+		}
+
+		try {
+			if (BooleanUtil.isFalse(status)) {
+				sysJobSchedulerManager.pauseGroup(groupCode);
+				return;
+			}
+			for (SysJobEntity job : jobs) {
+				job.setStatus(true);
+				sysJobSchedulerManager.scheduleOrReplace(job);
+			}
+		}
+		catch (SchedulerException ex) {
+			log.error("分组批量更新任务状态同步 Quartz 失败 groupCode={}", groupCode, ex);
+			throw new SysJobException(JOB_QUARTZ_OPERATION_FAILED, "batchGroupStatus", ex.getMessage());
 		}
 	}
 
@@ -234,8 +269,8 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 			throw new SysJobException(JOB_BUSY);
 		}
 		try {
-			quartzAdmin.ensureJobDetail(dbJob);
-			quartzAdmin.triggerJob(dbJob.getJobName(), dbJob.getJobGroup());
+			sysJobSchedulerManager.ensureJobDetail(dbJob);
+			sysJobSchedulerManager.triggerJob(dbJob.getJobName(), dbJob.getJobGroup());
 		}
 		catch (SchedulerException ex) {
 			log.error("立即执行失败", ex);

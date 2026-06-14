@@ -33,7 +33,7 @@ import static org.mockito.Mockito.when;
 class SysJobRuntimeEnrichmentServiceImplTest {
 
 	@Mock
-	private SysJobSchedulerManager quartzAdmin;
+	private SysJobSchedulerManager sysJobSchedulerManager;
 
 	@Mock
 	private LogJobMapper logJobMapper;
@@ -46,7 +46,7 @@ class SysJobRuntimeEnrichmentServiceImplTest {
 	void enrichLastExecutionMarksUnknownWhenNoLog() {
 		SysJobPageResponse row = pageRow();
 		row.setId(1L);
-		when(logJobMapper.selectList(any())).thenReturn(List.of());
+		when(logJobMapper.selectLatestByJobIds(any())).thenReturn(List.of());
 
 		sysJobRuntimeEnrichmentService.enrichLastExecution(List.of(row));
 
@@ -63,7 +63,7 @@ class SysJobRuntimeEnrichmentServiceImplTest {
 		failedLog.setJobId(1L);
 		failedLog.setStatus(false);
 		failedLog.setCreateTime(LocalDateTime.of(2026, 6, 13, 9, 0));
-		when(logJobMapper.selectList(any())).thenReturn(List.of(failedLog));
+		when(logJobMapper.selectLatestByJobIds(any())).thenReturn(List.of(failedLog));
 
 		sysJobRuntimeEnrichmentService.enrichLastExecution(List.of(row));
 
@@ -78,15 +78,16 @@ class SysJobRuntimeEnrichmentServiceImplTest {
 		detail.setId(1L);
 		Date previous = new Date(1_700_000_000_000L);
 		Date next = new Date(1_700_000_600_000L);
-		when(quartzAdmin.getFireTimes("demo", "G")).thenReturn(new SysJobSchedulerManager.FireTimes(previous, next));
+		when(sysJobSchedulerManager.getFireTimes("demo", "G"))
+			.thenReturn(new SysJobSchedulerManager.FireTimes(previous, next));
 		LocalDateTime fireTime = LocalDateTime.of(2026, 6, 13, 10, 0);
-		when(quartzAdmin.resolveRuntimeSnapshot("demo", "G"))
+		when(sysJobSchedulerManager.resolveRuntimeSnapshot("demo", "G"))
 			.thenReturn(SysJobQuartzRuntimeSnapshot.of(SysJobQuartzRuntimeStatus.RUNNING, fireTime));
 		LogJobEntity successLog = new LogJobEntity();
 		successLog.setJobId(1L);
 		successLog.setStatus(true);
 		successLog.setCreateTime(LocalDateTime.of(2026, 6, 13, 9, 30));
-		when(logJobMapper.selectList(any())).thenReturn(List.of(successLog));
+		when(logJobMapper.selectLatestByJobIds(any())).thenReturn(List.of(successLog));
 
 		sysJobRuntimeEnrichmentService.enrichDetail(detail, "demo", "G");
 
@@ -101,16 +102,16 @@ class SysJobRuntimeEnrichmentServiceImplTest {
 	@Test
 	@DisplayName("busy 判定：RUNNING 或 PENDING 返回 true")
 	void isBusyReturnsTrueForRunningOrPending() {
-		when(quartzAdmin.resolveRuntimeSnapshot("demo", "G"))
+		when(sysJobSchedulerManager.resolveRuntimeSnapshot("demo", "G"))
 			.thenReturn(SysJobQuartzRuntimeSnapshot.of(SysJobQuartzRuntimeStatus.RUNNING, null));
 
 		assertThat(sysJobRuntimeEnrichmentService.isBusy("demo", "G")).isTrue();
 
-		when(quartzAdmin.resolveRuntimeSnapshot("demo", "G"))
+		when(sysJobSchedulerManager.resolveRuntimeSnapshot("demo", "G"))
 			.thenReturn(SysJobQuartzRuntimeSnapshot.of(SysJobQuartzRuntimeStatus.PENDING, null));
 		assertThat(sysJobRuntimeEnrichmentService.isBusy("demo", "G")).isTrue();
 
-		when(quartzAdmin.resolveRuntimeSnapshot("demo", "G"))
+		when(sysJobSchedulerManager.resolveRuntimeSnapshot("demo", "G"))
 			.thenReturn(SysJobQuartzRuntimeSnapshot.of(SysJobQuartzRuntimeStatus.IDLE, null));
 		assertThat(sysJobRuntimeEnrichmentService.isBusy("demo", "G")).isFalse();
 	}

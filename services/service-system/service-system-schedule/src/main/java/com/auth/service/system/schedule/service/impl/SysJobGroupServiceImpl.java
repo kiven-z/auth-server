@@ -1,6 +1,5 @@
 package com.auth.service.system.schedule.service.impl;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.common.service.AuditUserDisplayService;
@@ -18,13 +17,11 @@ import com.auth.service.system.schedule.model.vo.SysJobGroupDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobGroupPageResponse;
 import com.auth.service.system.schedule.service.SysJobDefinitionService;
 import com.auth.service.system.schedule.service.SysJobGroupService;
-import com.auth.service.system.schedule.support.SysJobSchedulerManager;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import lombok.extern.slf4j.Slf4j;
-import org.quartz.SchedulerException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,7 +37,7 @@ import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_
  *
  * @author Bunny
  */
-@Slf4j
+@RequiredArgsConstructor
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJobGroupEntity>
@@ -51,16 +48,6 @@ public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJo
 	private final SysJobDefinitionService sysJobDefinitionService;
 
 	private final AuditUserDisplayService auditUserDisplayService;
-
-	private final SysJobSchedulerManager sysJobSchedulerManager;
-
-	public SysJobGroupServiceImpl(AuditUserDisplayService auditUserDisplayService, SysJobMapper sysJobMapper,
-			SysJobDefinitionService sysJobDefinitionService, SysJobSchedulerManager sysJobSchedulerManager) {
-		this.auditUserDisplayService = auditUserDisplayService;
-		this.sysJobMapper = sysJobMapper;
-		this.sysJobDefinitionService = sysJobDefinitionService;
-		this.sysJobSchedulerManager = sysJobSchedulerManager;
-	}
 
 	/**
 	 * {@inheritDoc}
@@ -108,7 +95,6 @@ public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJo
 	 */
 	@Override
 	public void create(SysJobGroupForm form) {
-		// 验证分组编码是否已存在
 		long exists = count(
 				Wrappers.<SysJobGroupEntity>lambdaQuery().eq(SysJobGroupEntity::getGroupCode, form.getGroupCode()));
 		if (exists > 0) {
@@ -139,19 +125,14 @@ public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJo
 	@Override
 	public void deleteById(Long id) {
 		SysJobGroupEntity jobGroup = getById(id);
-
-		// 查询该分组是否存在
 		if (jobGroup == null) {
 			throw new SysJobException(DATA_NOT_EXIST);
 		}
 
-		// 查询当前是否为系统任务，如果系统任务则不允许删除
-		Boolean isSystem = jobGroup.getIsSystem();
-		if (BooleanUtil.isTrue(isSystem)) {
+		if (BooleanUtil.isTrue(jobGroup.getIsSystem())) {
 			throw new SysJobException(JOB_GROUP_SYSTEM_PROTECTED);
 		}
 
-		// 验证分组下无任务，如果存在则不允许删除
 		long cnt = sysJobMapper
 			.selectCount(Wrappers.<SysJobEntity>lambdaQuery().eq(SysJobEntity::getJobGroup, jobGroup.getGroupCode()));
 		if (cnt > 0) {
@@ -166,40 +147,8 @@ public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJo
 	 */
 	@Override
 	public void updateAllJobsStatusInGroup(String groupCode, Boolean status) {
-		List<SysJobEntity> jobs = sysJobMapper
-			.selectList(Wrappers.lambdaQuery(SysJobEntity.class).eq(SysJobEntity::getJobGroup, groupCode));
-
-		if (CollUtil.isNotEmpty(jobs)) {
-			List<SysJobEntity> updates = jobs.stream().map(job -> {
-				SysJobEntity entity = new SysJobEntity();
-				entity.setId(job.getId());
-				entity.setStatus(status);
-				return entity;
-			}).toList();
-			sysJobDefinitionService.updateBatchById(updates);
-
-			if (BooleanUtil.isTrue(status)) {
-				for (SysJobEntity job : jobs) {
-					try {
-						job.setStatus(true);
-						sysJobSchedulerManager.scheduleOrReplace(job);
-					}
-					catch (SchedulerException ex) {
-						log.warn("分组恢复失败 {} / {} : {}", job.getJobGroup(), job.getJobName(), ex.getMessage());
-					}
-				}
-				return;
-			}
-		}
-
-		if (BooleanUtil.isFalse(status)) {
-			try {
-				sysJobSchedulerManager.pauseGroup(groupCode);
-			}
-			catch (SchedulerException ex) {
-				log.warn("分组暂停失败 groupCode={} : {}", groupCode, ex.getMessage());
-			}
-		}
+		// FIXME 接口转移到 sysJobDefinitionService
+		sysJobDefinitionService.batchUpdateStatusByGroupCode(groupCode, status);
 	}
 
 }

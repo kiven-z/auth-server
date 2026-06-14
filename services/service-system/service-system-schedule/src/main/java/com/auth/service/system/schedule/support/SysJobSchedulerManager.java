@@ -1,5 +1,6 @@
 package com.auth.service.system.schedule.support;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.BooleanUtil;
@@ -250,7 +251,9 @@ public class SysJobSchedulerManager {
 		// 添加任务类
 		map.put(SysJobQuartzDataKeys.JOB_CLASS, job.getJobClass());
 		map.put(SysJobQuartzDataKeys.TASK_TYPE, resolvedTaskType.name());
-		map.put(SysJobQuartzDataKeys.HANDLER_CODE, resolvedTaskType.defaultHandlerCode());
+		String handlerCode = CharSequenceUtil.isNotBlank(job.getHandlerCode()) ? job.getHandlerCode()
+				: resolvedTaskType.defaultHandlerCode();
+		map.put(SysJobQuartzDataKeys.HANDLER_CODE, handlerCode);
 		map.put(SysJobQuartzDataKeys.PAYLOAD_JSON, job.getPayloadJson());
 		map.put(SysJobQuartzDataKeys.TRIGGER_TYPE, SysJobQuartzDataKeys.TRIGGER_TYPE_SCHEDULE);
 

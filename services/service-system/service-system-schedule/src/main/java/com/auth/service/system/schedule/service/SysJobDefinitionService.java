@@ -58,6 +58,13 @@ public interface SysJobDefinitionService extends IService<SysJobEntity> {
 	void batchUpdateStatus(SysJobStatusForm form);
 
 	/**
+	 * 按分组批量变更任务状态并同步 Quartz（停用走 pauseGroup，启用重建分组内全部调度）
+	 * @param groupCode 分组编码
+	 * @param status true=恢复调度，false=暂停
+	 */
+	void batchUpdateStatusByGroupCode(String groupCode, Boolean status);
+
+	/**
 	 * 立即执行一次（不影响 Cron）
 	 * @param id 主键
 	 */
