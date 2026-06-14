@@ -2,8 +2,8 @@ package com.auth.service.auth.authentication.infrastructure.audit;
 
 import com.auth.common.ip.IpAddressService;
 import com.auth.common.ip.IpInfo;
-import com.auth.service.auth.authentication.domain.model.LoginAuditSnapshot;
 import com.auth.common.web.model.entity.UserAgent;
+import com.auth.service.auth.authentication.domain.model.LoginAuditSnapshot;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -1,8 +1,8 @@
 package com.auth.gateway.exception;
 
-import java.util.Map;
-
 import lombok.Getter;
+
+import java.util.Map;
 
 /**
  * 网关公共业务代码，模块前缀为{@code 00}

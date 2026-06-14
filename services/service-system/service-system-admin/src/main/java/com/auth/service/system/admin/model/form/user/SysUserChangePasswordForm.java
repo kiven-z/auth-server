@@ -27,8 +27,8 @@ public class SysUserChangePasswordForm implements Serializable {
 	private String oldPassword;
 
 	@Schema(title = "新密码")
-	@NotBlank(message = "新密码不能为空")
 	@Size(min = 8, max = 18, message = "新密码长度应为8-18位")
+	@NotBlank(message = "新密码不能为空")
 	private String newPassword;
 
 	@Schema(title = "确认密码")

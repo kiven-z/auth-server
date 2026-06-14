@@ -1,13 +1,6 @@
 package com.auth.service.system.admin.service.impl;
 
-import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
-
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
+import cn.hutool.core.collection.CollUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.convert.LogOperationConverter;
 import com.auth.service.system.admin.mapper.LogOperationMapper;
@@ -22,8 +15,13 @@ import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import cn.hutool.core.collection.CollUtil;
+import java.util.List;
+import java.util.Map;
+
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 
 /**
  * 审计管道与内部上报写入

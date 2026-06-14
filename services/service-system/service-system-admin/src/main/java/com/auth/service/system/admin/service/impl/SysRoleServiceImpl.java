@@ -1,11 +1,5 @@
 package com.auth.service.system.admin.service.impl;
 
-import java.util.Collections;
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.convert.SysRoleConverter;
 import com.auth.service.system.admin.convert.SysRolePermissionConverter;
@@ -31,9 +25,13 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * 系统角色服务实现

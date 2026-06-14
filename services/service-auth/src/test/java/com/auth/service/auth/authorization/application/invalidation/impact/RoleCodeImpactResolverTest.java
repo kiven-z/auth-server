@@ -19,8 +19,8 @@ import static org.mockito.Mockito.when;
 /**
  * {@link RoleCodeImpactResolver} 单元测试
  */
-@ExtendWith(MockitoExtension.class)
 @DisplayName("RoleCodeImpactResolver 角色码影响面")
+@ExtendWith(MockitoExtension.class)
 class RoleCodeImpactResolverTest {
 
 	@Mock

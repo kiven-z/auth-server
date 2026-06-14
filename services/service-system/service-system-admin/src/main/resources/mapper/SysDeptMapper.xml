@@ -2,33 +2,47 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.auth.service.system.admin.mapper.SysDeptMapper">
 
-      <!-- 部门扁平列表查询（无分页，供树形构建） -->
+    <!-- 部门扁平列表查询（无分页，供树形构建） -->
     <select id="selectListByQuery"
             resultType="com.auth.service.system.admin.model.entity.SysDeptEntity">
         SELECT d.id,
-               d.parent_id,
-               d.dept_name,
-               d.dept_code,
-               d.status,
-               d.order_num,
-               d.remark,
-               d.create_time,
-               d.update_time,
-               d.create_user,
-               d.update_user
+        d.parent_id,
+        d.dept_name,
+        d.dept_code,
+        d.status,
+        d.order_num,
+        d.remark,
+        d.create_time,
+        d.update_time,
+        d.create_user,
+        d.update_user
         FROM sys_dept d
         <where>
             d.is_deleted = 0
             <if test="query.status != null">
-                AND d.status = #{query.status}
+                AND d.status =
+                #{query.status}
             </if>
             <if test="query.keyword != null and query.keyword != ''">
                 AND d.id IN (
                     SELECT dc.ancestor_id
                     FROM dept_closure dc
                              INNER JOIN sys_dept m ON m.id = dc.descendant_id AND m.is_deleted = 0
-                    WHERE m.dept_name LIKE CONCAT('%', #{query.keyword}, '%')
-                       OR m.dept_code LIKE CONCAT('%', #{query.keyword}, '%')
+                    WHERE m.dept_name LIKE CONCAT('%',
+                #{query.keyword},
+                '%'
+                )
+                OR
+                m
+                .
+                dept_code
+                LIKE
+                CONCAT
+                (
+                '%',
+                #{query.keyword},
+                '%'
+                )
                 )
             </if>
         </where>
@@ -39,30 +53,37 @@
     <select id="selectListByPage"
             resultType="com.auth.service.system.admin.model.po.dept.SysDeptPageRowPO">
         SELECT d.id,
-               d.parent_id,
-               p.dept_code AS parent_dept_code,
-               p.dept_name AS parent_dept_name,
-               d.dept_name,
-               d.dept_code,
-               d.status,
-               d.order_num,
-               d.remark,
-               d.create_time,
-               d.update_time,
-               d.create_user,
-               d.update_user
+        d.parent_id,
+        p.dept_code AS parent_dept_code,
+        p.dept_name AS parent_dept_name,
+        d.dept_name,
+        d.dept_code,
+        d.status,
+        d.order_num,
+        d.remark,
+        d.create_time,
+        d.update_time,
+        d.create_user,
+        d.update_user
         FROM sys_dept d
-                 LEFT JOIN sys_dept p ON d.parent_id = p.id AND p.is_deleted = 0
+        LEFT JOIN sys_dept p ON d.parent_id = p.id AND p.is_deleted = 0
         <where>
             d.is_deleted = 0
             <if test="query.status != null">
-                AND d.status = #{query.status}
+                AND d.status =
+                #{query.status}
             </if>
             <if test="query.deptName != null and query.deptName != ''">
-                AND d.dept_name LIKE CONCAT('%', #{query.deptName}, '%')
+                AND d.dept_name LIKE CONCAT('%',
+                #{query.deptName},
+                '%'
+                )
             </if>
             <if test="query.deptCode != null and query.deptCode != ''">
-                AND d.dept_code LIKE CONCAT('%', #{query.deptCode}, '%')
+                AND d.dept_code LIKE CONCAT('%',
+                #{query.deptCode},
+                '%'
+                )
             </if>
         </where>
         ORDER BY d.order_num, d.id
@@ -72,9 +93,9 @@
     <select id="selectDeptPathByIds"
             resultType="com.auth.service.system.admin.model.po.dept.SysDeptPathRowPO">
         SELECT dc.descendant_id AS id,
-               GROUP_CONCAT(a.dept_name ORDER BY dc.depth DESC SEPARATOR '/') AS dept_path
+        GROUP_CONCAT(a.dept_name ORDER BY dc.depth DESC SEPARATOR '/') AS dept_path
         FROM dept_closure dc
-                 INNER JOIN sys_dept a ON a.id = dc.ancestor_id AND a.is_deleted = 0
+        INNER JOIN sys_dept a ON a.id = dc.ancestor_id AND a.is_deleted = 0
         WHERE dc.descendant_id IN
         <foreach collection="ids" item="id" open="(" separator="," close=")">
             #{id}
@@ -86,19 +107,19 @@
     <select id="selectActiveByDeptCodes"
             resultType="com.auth.service.system.admin.model.entity.SysDeptEntity">
         SELECT d.id,
-               d.parent_id,
-               d.dept_name,
-               d.dept_code,
-               d.status,
-               d.order_num,
-               d.remark,
-               d.create_time,
-               d.update_time,
-               d.create_user,
-               d.update_user
+        d.parent_id,
+        d.dept_name,
+        d.dept_code,
+        d.status,
+        d.order_num,
+        d.remark,
+        d.create_time,
+        d.update_time,
+        d.create_user,
+        d.update_user
         FROM sys_dept d
         WHERE d.is_deleted = 0
-          AND d.dept_code IN
+        AND d.dept_code IN
         <foreach collection="deptCodes" item="deptCode" open="(" separator="," close=")">
             #{deptCode}
         </foreach>

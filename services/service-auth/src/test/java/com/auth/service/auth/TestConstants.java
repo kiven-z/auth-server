@@ -8,12 +8,6 @@ package com.auth.service.auth;
 public final class TestConstants {
 
 	/**
-	 * 禁止实例化
-	 */
-	private TestConstants() {
-	}
-
-	/**
 	 * 固定用户 ID
 	 */
 	public static final long USER_ID = 10001L;
@@ -32,5 +26,11 @@ public final class TestConstants {
 	 * 固定 access token
 	 */
 	public static final String ACCESS_TOKEN = "test-access-token";
+
+	/**
+	 * 禁止实例化
+	 */
+	private TestConstants() {
+	}
 
 }

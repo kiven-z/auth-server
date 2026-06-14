@@ -18,16 +18,24 @@
         FROM sys_permission p
         <where>
             <if test="query.permissionCode != null and query.permissionCode != ''">
-                AND p.permission_code LIKE CONCAT('%', #{query.permissionCode}, '%')
+                AND p.permission_code LIKE CONCAT('%',
+                #{query.permissionCode},
+                '%'
+                )
             </if>
             <if test="query.permissionName != null and query.permissionName != ''">
-                AND p.permission_name LIKE CONCAT('%', #{query.permissionName}, '%')
+                AND p.permission_name LIKE CONCAT('%',
+                #{query.permissionName},
+                '%'
+                )
             </if>
             <if test="query.permissionType != null">
-                AND p.permission_type = #{query.permissionType}
+                AND p.permission_type =
+                #{query.permissionType}
             </if>
             <if test="query.status != null">
-                AND p.status = #{query.status}
+                AND p.status =
+                #{query.status}
             </if>
         </where>
         ORDER BY ${orderBySql}

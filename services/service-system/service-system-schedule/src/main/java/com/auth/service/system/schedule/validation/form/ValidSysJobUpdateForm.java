@@ -3,21 +3,17 @@ package com.auth.service.system.schedule.validation.form;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * 修改任务表单一致性校验
  *
  * @author Bunny
  */
-@Documented
+@Constraint(validatedBy = SysJobUpdateFormConsistencyValidator.class)
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = SysJobUpdateFormConsistencyValidator.class)
+@Documented
 public @interface ValidSysJobUpdateForm {
 
 	String message() default "invalid job update form";

@@ -20,7 +20,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import static com.auth.service.system.common.exception.code.SystemCommonResultCode.*;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
 /**
  * 定时任务接口（定义 CRUD + 启停与立即执行）

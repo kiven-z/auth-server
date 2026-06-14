@@ -4,7 +4,7 @@
 
     <!-- 菜单列表查询条件 -->
     <sql id="listWhere">
-        SELECT   m.id,
+        SELECT m.id,
         m.parent_id,
         m.name,
         m.title,
@@ -19,26 +19,37 @@
         m.fixed_tag,
         m.remark,
         m.create_time,
-        m.update_time, 
+        m.update_time,
         m.create_user,
-        m.update_user   FROM sys_menu m
+        m.update_user FROM sys_menu m
         <where>
             <if test="query.name != null and query.name != ''">
-                AND m.name LIKE CONCAT('%', #{query.name}, '%')
+                AND m.name LIKE CONCAT('%',
+                #{query.name},
+                '%'
+                )
             </if>
             <if test="query.title != null and query.title != ''">
-                AND m.title LIKE CONCAT('%', #{query.title}, '%')
+                AND m.title LIKE CONCAT('%',
+                #{query.title},
+                '%'
+                )
             </if>
             <if test="query.menuType != null">
-                AND m.menu_type = #{query.menuType}
+                AND m.menu_type =
+                #{query.menuType}
             </if>
             <if test="query.status != null">
-                AND m.status = #{query.status}
+                AND m.status =
+                #{query.status}
             </if>
             <if test="query.component != null and query.component != ''">
-                AND m.component LIKE CONCAT('%', #{query.component}, '%')
+                AND m.component LIKE CONCAT('%',
+                #{query.component},
+                '%'
+                )
             </if>
-        </where>       
+        </where>
         ORDER BY m.menu_rank , m.id
     </sql>
 
@@ -62,7 +73,7 @@
         <foreach collection="ids" item="id" open="(" separator="," close=")">
             #{id}
         </foreach>
-          AND id NOT IN
+        AND id NOT IN
         <foreach collection="ids" item="id" open="(" separator="," close=")">
             #{id}
         </foreach>

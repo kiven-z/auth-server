@@ -4,11 +4,11 @@ import com.auth.common.core.model.response.Result;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.message.api.model.email.EmailChannelOptions;
+import com.auth.service.auth.authentication.application.gateway.CredentialGateway;
 import com.auth.service.auth.authentication.application.message.AuthMessageScene;
 import com.auth.service.auth.authentication.domain.enums.CredentialDimension;
 import com.auth.service.auth.authentication.domain.model.LoginAccount;
 import com.auth.service.auth.authentication.domain.model.LoginAuditSnapshot;
-import com.auth.service.auth.authentication.application.gateway.CredentialGateway;
 import com.auth.service.auth.authentication.domain.port.LoginAuditSnapshotPort;
 import com.auth.service.auth.shared.integration.SystemSecurityIngestFeignClient;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,9 +26,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link AuthMessageService} 单元测试

@@ -1,10 +1,6 @@
 package com.auth.service.system.admin.service.impl;
 
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
+import cn.hutool.core.collection.CollUtil;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.model.enums.RoleTypeEnum;
 import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
@@ -16,10 +12,12 @@ import com.auth.service.system.admin.support.user.UserOperationChecker;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.UserAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
-
-import cn.hutool.core.collection.CollUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * 用户直连角色授权实现

@@ -31,6 +31,16 @@ public class SysJobQuartzTriggerFactory {
 		return jobName + TRIGGER_SUFFIX;
 	}
 
+	private static CronScheduleBuilder applyMisfire(CronScheduleBuilder cron, Integer policy) {
+		int resolvedPolicy = Objects.requireNonNullElse(policy, 2);
+		return switch (resolvedPolicy) {
+			case 1 -> cron.withMisfireHandlingInstructionIgnoreMisfires();
+			case 2 -> cron.withMisfireHandlingInstructionFireAndProceed();
+			case 3 -> cron.withMisfireHandlingInstructionDoNothing();
+			default -> cron.withMisfireHandlingInstructionFireAndProceed();
+		};
+	}
+
 	/**
 	 * 构建 CronTrigger
 	 * @param job 任务实体
@@ -57,16 +67,6 @@ public class SysJobQuartzTriggerFactory {
 			triggerBuilder.endAt(Date.from(job.getEndTime().atZone(JOB_ZONE).toInstant()));
 		}
 		return triggerBuilder.build();
-	}
-
-	private static CronScheduleBuilder applyMisfire(CronScheduleBuilder cron, Integer policy) {
-		int resolvedPolicy = Objects.requireNonNullElse(policy, 2);
-		return switch (resolvedPolicy) {
-			case 1 -> cron.withMisfireHandlingInstructionIgnoreMisfires();
-			case 2 -> cron.withMisfireHandlingInstructionFireAndProceed();
-			case 3 -> cron.withMisfireHandlingInstructionDoNothing();
-			default -> cron.withMisfireHandlingInstructionFireAndProceed();
-		};
 	}
 
 }

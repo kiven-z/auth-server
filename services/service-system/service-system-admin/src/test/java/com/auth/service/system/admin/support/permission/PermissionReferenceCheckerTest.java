@@ -1,8 +1,8 @@
 package com.auth.service.system.admin.support.permission;
 
-import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.admin.mapper.SysPermissionMapper;
 import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,9 +15,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link PermissionReferenceChecker} 单元测试。

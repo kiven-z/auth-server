@@ -6,7 +6,7 @@
     <select id="selectByUserId"
             resultType="com.auth.service.auth.authorization.infrastructure.persistence.projection.UserScopeProjection">
         SELECT scope_type,
-               scope_dept_ids
+        scope_dept_ids
         FROM user_scope
         WHERE user_id = #{userId}
         LIMIT 1

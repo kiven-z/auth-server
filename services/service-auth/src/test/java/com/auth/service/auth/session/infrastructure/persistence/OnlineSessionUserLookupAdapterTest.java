@@ -13,15 +13,13 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link OnlineSessionUserLookupAdapter} 单元测试
  */
-@ExtendWith(MockitoExtension.class)
 @DisplayName("OnlineSessionUserLookupAdapter 在线用户展示查询")
+@ExtendWith(MockitoExtension.class)
 class OnlineSessionUserLookupAdapterTest {
 
 	@Mock

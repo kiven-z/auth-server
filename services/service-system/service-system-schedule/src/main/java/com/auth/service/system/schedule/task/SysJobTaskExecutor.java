@@ -1,9 +1,8 @@
 package com.auth.service.system.schedule.task;
 
+import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-
-import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 
 /**
  * 定时任务类型执行 SPI（调度层通过 {@link SysJobEntryJob} 委派）

@@ -2,7 +2,6 @@ package com.auth.gateway.support;
 
 import com.auth.gateway.exception.GatewayResultCodeEnum;
 import com.auth.module.security.contract.exception.SecurityTokenException;
-
 import lombok.experimental.UtilityClass;
 
 /**

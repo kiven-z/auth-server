@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
-import static com.auth.service.system.message.exception.MessageResultCode.*;
+import static com.auth.service.system.message.exception.MessageResultCode.DING_TALK_OAUTH_TOKEN_REQUEST_FAILED;
 
 /**
  * 钉钉应用 accessToken 获取与内存缓存

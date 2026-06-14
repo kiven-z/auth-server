@@ -43,10 +43,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.*;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_BUSY;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_GROUP_NOT_AVAILABLE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.*;
 
 /**

@@ -134,6 +134,13 @@ class SystemArchitectureTest {
 
 	private static final String AUTHORIZATION_ROOT = "com.auth.service.system.authorization";
 
+	@ArchTest
+	static final ArchRule authorization_must_not_depend_on_admin = noClasses().that()
+		.resideInAPackage(AUTHORIZATION_ROOT + "..")
+		.should()
+		.dependOnClassesThat()
+		.resideInAPackage(ADMIN);
+
 	private static final String SCHEDULE_ROOT = "com.auth.service.system.schedule";
 
 	/**
@@ -177,13 +184,6 @@ class SystemArchitectureTest {
 		.resideInAPackage(MESSAGE)
 		.should()
 		.dependOnClassesThat(FORBIDDEN_DEPENDENCIES_FOR_MESSAGE);
-
-	@ArchTest
-	static final ArchRule authorization_must_not_depend_on_admin = noClasses().that()
-		.resideInAPackage(AUTHORIZATION_ROOT + "..")
-		.should()
-		.dependOnClassesThat()
-		.resideInAPackage(ADMIN);
 
 	private static final String AUTHORIZATION_DISPATCH_TRIGGER = AUTHORIZATION_ROOT + ".dispatch.trigger";
 

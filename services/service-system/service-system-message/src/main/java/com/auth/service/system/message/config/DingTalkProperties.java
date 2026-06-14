@@ -34,7 +34,9 @@ public class DingTalkProperties {
 	@NotBlank
 	private String clientSecret;
 
-	/** 未指定消息类型时的默认值 */
+	/**
+	 * 未指定消息类型时的默认值
+	 */
 	private DingTalkMessageType defaultMessageType = DingTalkMessageType.TEXT;
 
 }

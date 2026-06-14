@@ -91,35 +91,35 @@
     <select id="selectLatestByJobIds"
             resultType="com.auth.service.system.schedule.model.entity.LogJobEntity">
         SELECT id,
-               job_id,
-               job_name,
-               job_group,
-               invoke_target,
-               trigger_type,
-               job_message,
-               status,
-               exception_info,
-               elapsed_time,
-               create_time
+        job_id,
+        job_name,
+        job_group,
+        invoke_target,
+        trigger_type,
+        job_message,
+        status,
+        exception_info,
+        elapsed_time,
+        create_time
         FROM (
-                 SELECT l.id,
-                        l.job_id,
-                        l.job_name,
-                        l.job_group,
-                        l.invoke_target,
-                        l.trigger_type,
-                        l.job_message,
-                        l.status,
-                        l.exception_info,
-                        l.elapsed_time,
-                        l.create_time,
-                        ROW_NUMBER() OVER (PARTITION BY l.job_id ORDER BY l.create_time DESC) AS row_num
-                 FROM log_job l
-                 WHERE l.job_id IN
-                 <foreach collection="jobIds" item="jobId" open="(" separator="," close=")">
-                     #{jobId}
-                 </foreach>
-             ) latest
+        SELECT l.id,
+        l.job_id,
+        l.job_name,
+        l.job_group,
+        l.invoke_target,
+        l.trigger_type,
+        l.job_message,
+        l.status,
+        l.exception_info,
+        l.elapsed_time,
+        l.create_time,
+        ROW_NUMBER() OVER (PARTITION BY l.job_id ORDER BY l.create_time DESC) AS row_num
+        FROM log_job l
+        WHERE l.job_id IN
+        <foreach collection="jobIds" item="jobId" open="(" separator="," close=")">
+            #{jobId}
+        </foreach>
+        ) latest
         WHERE latest.row_num = 1
     </select>
 

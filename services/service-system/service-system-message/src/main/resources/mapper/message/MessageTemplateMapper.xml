@@ -6,33 +6,33 @@
     <select id="selectEnabledBySceneCodeAndChannel"
             resultType="com.auth.service.system.message.model.entity.MessageTemplateEntity">
         SELECT id,
-               scene_code,
-               channel,
-               template_name,
-               description,
-               subject,
-               body_content,
-               require_fields,
-               provider_template_code,
-               im_message_type,
-               channel_defaults_json,
-               priority,
-               status,
-               create_time,
-               update_time,
-               update_user,
-               create_user,
-               version,
-               remark
+        scene_code,
+        channel,
+        template_name,
+        description,
+        subject,
+        body_content,
+        require_fields,
+        provider_template_code,
+        im_message_type,
+        channel_defaults_json,
+        priority,
+        status,
+        create_time,
+        update_time,
+        update_user,
+        create_user,
+        version,
+        remark
         FROM sys_message_template
         WHERE scene_code = #{sceneCode}
-          AND channel = #{channel}
-          AND status = 1
-          AND priority = (SELECT MAX(priority)
-                          FROM sys_message_template
-                          WHERE scene_code = #{sceneCode}
-                            AND channel = #{channel}
-                            AND status = 1)
+        AND channel = #{channel}
+        AND status = 1
+        AND priority = (SELECT MAX(priority)
+        FROM sys_message_template
+        WHERE scene_code = #{sceneCode}
+        AND channel = #{channel}
+        AND status = 1)
         LIMIT 1
     </select>
 

@@ -3,8 +3,8 @@ package com.auth.service.auth.authorization.infrastructure.persistence;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;

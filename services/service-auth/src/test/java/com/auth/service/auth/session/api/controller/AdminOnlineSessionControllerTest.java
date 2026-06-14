@@ -21,8 +21,8 @@ import static org.mockito.Mockito.when;
 /**
  * {@link AdminOnlineSessionController} 单元测试
  */
-@ExtendWith(MockitoExtension.class)
 @DisplayName("AdminOnlineSessionController 全局在线会话")
+@ExtendWith(MockitoExtension.class)
 class AdminOnlineSessionControllerTest {
 
 	@Mock

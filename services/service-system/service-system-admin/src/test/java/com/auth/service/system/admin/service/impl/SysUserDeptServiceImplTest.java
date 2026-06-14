@@ -40,12 +40,8 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyCollection;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link SysUserDeptServiceImpl} 单元测试
@@ -110,6 +106,18 @@ class SysUserDeptServiceImplTest {
 		form.setIsPrimary(isPrimary);
 		form.setRemark(remark);
 		return form;
+	}
+
+	private static UserDeptEntity existingRelation() {
+		UserDeptEntity entity = new UserDeptEntity();
+		entity.setId(RELATION_ID);
+		entity.setUserId(USER_ID);
+		entity.setDeptId(DEPT_ID);
+		entity.setStatus(UserOrgRelationStatusEnum.NORMAL.getCode());
+		entity.setIsPrimary(false);
+		entity.setRemark("原备注");
+		entity.setVersion(1L);
+		return entity;
 	}
 
 	@BeforeEach
@@ -237,18 +245,6 @@ class SysUserDeptServiceImplTest {
 	private void stubCreatePrerequisites() {
 		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
 		when(sysDeptMapper.selectById(DEPT_ID)).thenReturn(activeDept());
-	}
-
-	private static UserDeptEntity existingRelation() {
-		UserDeptEntity entity = new UserDeptEntity();
-		entity.setId(RELATION_ID);
-		entity.setUserId(USER_ID);
-		entity.setDeptId(DEPT_ID);
-		entity.setStatus(UserOrgRelationStatusEnum.NORMAL.getCode());
-		entity.setIsPrimary(false);
-		entity.setRemark("原备注");
-		entity.setVersion(1L);
-		return entity;
 	}
 
 	@Test

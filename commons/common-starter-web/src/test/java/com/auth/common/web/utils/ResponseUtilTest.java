@@ -1,23 +1,22 @@
 package com.auth.common.web.utils;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
+import com.auth.common.core.model.response.Result;
+import com.auth.common.web.exception.ResponseWriteException;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.auth.common.core.model.response.Result;
-import com.auth.common.web.exception.ResponseWriteException;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
-import jakarta.servlet.http.HttpServletResponse;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.*;
 
 /**
  * ResponseUtil单元测试类

@@ -18,8 +18,8 @@ import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_
  *
  * @author Bunny
  */
-@Component
 @RequiredArgsConstructor
+@Component
 public class CustomClassTaskDefinitionValidator implements SysJobTaskTypeDefinitionValidator {
 
 	private final QuartzTaskRegistry quartzTaskRegistry;

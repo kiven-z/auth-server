@@ -6,16 +6,16 @@
     <select id="selectBoundUsersByDeptId"
             resultType="com.auth.service.system.admin.model.po.dept.SysDeptBoundUserPO">
         SELECT ud.user_id,
-               u.username,
-               u.nickname,
-               u.employee_no,
-               u.status  AS user_status,
-               ud.is_primary,
-               ud.status AS relation_status
+        u.username,
+        u.nickname,
+        u.employee_no,
+        u.status AS user_status,
+        ud.is_primary,
+        ud.status AS relation_status
         FROM user_dept ud
-                 INNER JOIN sys_user u ON u.id = ud.user_id AND u.is_deleted = 0
+        INNER JOIN sys_user u ON u.id = ud.user_id AND u.is_deleted = 0
         WHERE ud.dept_id = #{deptId}
-          AND ud.status IN (1, 2)
+        AND ud.status IN (1, 2)
         ORDER BY ud.is_primary DESC, ud.create_time DESC, u.username
     </select>
 
@@ -23,12 +23,12 @@
     <select id="selectBoundPostsByDeptId"
             resultType="com.auth.service.system.admin.model.po.dept.SysDeptBoundPostPO">
         SELECT p.id,
-               p.post_code,
-               p.post_name,
-               p.status
+        p.post_code,
+        p.post_name,
+        p.status
         FROM sys_post p
         WHERE p.dept_id = #{deptId}
-          AND p.is_deleted = 0
+        AND p.is_deleted = 0
         ORDER BY p.order_num, p.post_code
     </select>
 

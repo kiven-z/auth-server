@@ -4,10 +4,7 @@ import com.auth.common.core.i18n.I18nMessageProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * {@link GatewayBusinessException} 与 {@link I18nMessageProvider} 契约对齐测试

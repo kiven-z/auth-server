@@ -14,7 +14,8 @@ import org.springframework.stereotype.Component;
 import java.util.Set;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.*;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_PAYLOAD_JSON_INVALID;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_PAYLOAD_VERSION_UNSUPPORTED;
 
 /**
  * 解析消息调度载荷

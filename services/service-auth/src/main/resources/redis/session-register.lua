@@ -5,11 +5,11 @@ local loginAt = tonumber(ARGV[2])
 local ttlSeconds = tonumber(ARGV[3])
 
 for i = 4, #ARGV, 2 do
-  redis.call('HSET', KEYS[1], ARGV[i], ARGV[i + 1])
+	redis.call('HSET', KEYS[1], ARGV[i], ARGV[i + 1])
 end
 
 if ttlSeconds > 0 then
-  redis.call('EXPIRE', KEYS[1], ttlSeconds)
+	redis.call('EXPIRE', KEYS[1], ttlSeconds)
 end
 
 redis.call('SADD', KEYS[2], jti)

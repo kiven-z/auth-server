@@ -24,6 +24,15 @@ public class LoginAccountLookupAdapter {
 	}
 
 	/**
+	 * 将凭证维度转换为用户凭证字段
+	 * @param dimension 凭证维度
+	 * @return 用户凭证字段
+	 */
+	private static UserCredentialField toField(CredentialDimension dimension) {
+		return UserCredentialField.valueOf(dimension.name());
+	}
+
+	/**
 	 * 根据凭证维度查询登录账户
 	 * @param dimension 凭证维度
 	 * @param value 凭证值
@@ -43,15 +52,6 @@ public class LoginAccountLookupAdapter {
 	public Optional<LoginAccount> findActiveOnly(CredentialDimension dimension, String value) {
 		return Optional.ofNullable(UserCredentialQueries.activeOnly(userMapper, toField(dimension), value))
 			.map(LoginAccount::from);
-	}
-
-	/**
-	 * 将凭证维度转换为用户凭证字段
-	 * @param dimension 凭证维度
-	 * @return 用户凭证字段
-	 */
-	private static UserCredentialField toField(CredentialDimension dimension) {
-		return UserCredentialField.valueOf(dimension.name());
 	}
 
 }

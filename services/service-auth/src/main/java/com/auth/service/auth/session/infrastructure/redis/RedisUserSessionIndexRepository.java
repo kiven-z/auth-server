@@ -331,16 +331,6 @@ public class RedisUserSessionIndexRepository {
 	}
 
 	/**
-	 * 全局会话扫描结果
-	 *
-	 * @param matchedCount 匹配会话总数
-	 * @param pageRecords 当前页记录
-	 */
-	private record GlobalSessionScanResult(long matchedCount, List<UserSessionIndex> pageRecords) {
-
-	}
-
-	/**
 	 * 构建全局会话筛选条件
 	 * @param allowedUserIds 允许的用户 ID 集合；{@code null} 表示不过滤
 	 * @param ipAddress IP 地址关键字
@@ -502,6 +492,16 @@ public class RedisUserSessionIndexRepository {
 			return Long.MAX_VALUE;
 		}
 		return ttl;
+	}
+
+	/**
+	 * 全局会话扫描结果
+	 *
+	 * @param matchedCount 匹配会话总数
+	 * @param pageRecords 当前页记录
+	 */
+	private record GlobalSessionScanResult(long matchedCount, List<UserSessionIndex> pageRecords) {
+
 	}
 
 }

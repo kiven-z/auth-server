@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static com.auth.service.system.common.exception.code.SystemCommonResultCode.*;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
 /**
  * 菜单 Web 端接口（动态路由等）

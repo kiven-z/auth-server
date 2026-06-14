@@ -1,14 +1,12 @@
 package com.auth.service.system.schedule.runner;
 
+import com.auth.service.system.schedule.support.quartz.SysJobScheduleReconciler;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-
-import com.auth.service.system.schedule.support.quartz.SysJobScheduleReconciler;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * 应用就绪后异步将 {@code sys_job} 分页同步至 Quartz（业务表为单一事实来源）

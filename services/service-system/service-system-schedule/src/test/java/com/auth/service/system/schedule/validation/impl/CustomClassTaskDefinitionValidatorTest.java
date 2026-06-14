@@ -1,9 +1,9 @@
 package com.auth.service.system.schedule.validation.impl;
 
+import com.auth.service.system.schedule.example.custom.SpringInjectDemoJob;
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.support.QuartzTaskRegistry;
-import com.auth.service.system.schedule.example.custom.SpringInjectDemoJob;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,8 +19,8 @@ import static org.mockito.Mockito.when;
 /**
  * {@link CustomClassTaskDefinitionValidator} 单元测试。
  */
-@ExtendWith(MockitoExtension.class)
 @DisplayName("CustomClassTaskDefinitionValidator 自定义类任务校验")
+@ExtendWith(MockitoExtension.class)
 class CustomClassTaskDefinitionValidatorTest {
 
 	@Mock

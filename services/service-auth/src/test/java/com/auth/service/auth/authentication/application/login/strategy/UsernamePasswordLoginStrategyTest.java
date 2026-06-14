@@ -1,11 +1,11 @@
 package com.auth.service.auth.authentication.application.login.strategy;
 
+import com.auth.service.auth.authentication.application.gateway.CredentialGateway;
 import com.auth.service.auth.authentication.application.input.credential.UsernamePasswordLogin;
 import com.auth.service.auth.authentication.application.login.audit.LoginAuditService;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.enums.CredentialDimension;
 import com.auth.service.auth.authentication.domain.model.LoginAccount;
-import com.auth.service.auth.authentication.application.gateway.CredentialGateway;
 import com.auth.service.auth.authorization.domain.port.AuthProfileQueryPort;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.enums.AuthResultCode;

@@ -1,11 +1,11 @@
 package com.auth.module.security.contract.convention;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * {@link AuthCodeConvention} 格式校验单测
@@ -32,10 +32,10 @@ class AuthCodeConventionTest {
 		assertThat(AuthCodeConvention.isWellFormedPermissionCode(null)).isFalse();
 	}
 
+	@DisplayName("权限码：非法样例")
 	@ParameterizedTest
 	@ValueSource(strings = { "", "   ", "Sysdept:query", "sysdept:Query", "sysdept:query:extra:more", "9ab", "_x",
 			"sysdept:", ":query", "sys dept:query" })
-	@DisplayName("权限码：非法样例")
 	void permissionMalformed(String code) {
 		assertThat(AuthCodeConvention.isWellFormedPermissionCode(code.trim())).isFalse();
 	}
@@ -54,9 +54,9 @@ class AuthCodeConventionTest {
 		assertThat(AuthCodeConvention.isWellFormedRoleCode(null)).isFalse();
 	}
 
+	@DisplayName("角色码：非法样例")
 	@ParameterizedTest
 	@ValueSource(strings = { "", "admin", "Admin", "SYS-ADMIN", "SYS ADMIN", "1ADMIN", "ROLE_1" })
-	@DisplayName("角色码：非法样例")
 	void roleMalformed(String code) {
 		assertThat(AuthCodeConvention.isWellFormedRoleCode(code)).isFalse();
 	}

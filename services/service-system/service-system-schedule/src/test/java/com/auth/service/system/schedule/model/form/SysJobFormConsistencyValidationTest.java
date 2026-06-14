@@ -2,13 +2,13 @@ package com.auth.service.system.schedule.model.form;
 
 import com.auth.common.web.valid.group.CreateGroup;
 import com.auth.common.web.valid.group.UpdateGroup;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,6 +26,30 @@ class SysJobFormConsistencyValidationTest {
 	@BeforeAll
 	static void initValidator() {
 		validator = Validation.buildDefaultValidatorFactory().getValidator();
+	}
+
+	private static SysJobCreateForm validCreateForm() {
+		SysJobCreateForm form = new SysJobCreateForm();
+		form.setJobName("demo-job");
+		form.setJobGroup("DEFAULT");
+		form.setTaskType("BEAN_INVOKE");
+		form.setInvokeTarget("beanInvokeDemoTask.run()");
+		form.setCronExpression("0/30 * * * * ?");
+		form.setMisfirePolicy(2);
+		form.setConcurrent(false);
+		form.setStatus(true);
+		form.setTaskType("BEAN_INVOKE");
+		return form;
+	}
+
+	private static SysJobUpdateForm validUpdateForm() {
+		SysJobUpdateForm form = new SysJobUpdateForm();
+		form.setId("1");
+		form.setCronExpression("0/30 * * * * ?");
+		form.setMisfirePolicy(2);
+		form.setConcurrent(false);
+		form.setStatus(true);
+		return form;
 	}
 
 	@Test
@@ -76,30 +100,6 @@ class SysJobFormConsistencyValidationTest {
 		Set<ConstraintViolation<SysJobUpdateForm>> violations = validator.validate(form, UpdateGroup.class);
 
 		assertThat(violations).anyMatch(v -> "taskType".equals(v.getPropertyPath().toString()));
-	}
-
-	private static SysJobCreateForm validCreateForm() {
-		SysJobCreateForm form = new SysJobCreateForm();
-		form.setJobName("demo-job");
-		form.setJobGroup("DEFAULT");
-		form.setTaskType("BEAN_INVOKE");
-		form.setInvokeTarget("beanInvokeDemoTask.run()");
-		form.setCronExpression("0/30 * * * * ?");
-		form.setMisfirePolicy(2);
-		form.setConcurrent(false);
-		form.setStatus(true);
-		form.setTaskType("BEAN_INVOKE");
-		return form;
-	}
-
-	private static SysJobUpdateForm validUpdateForm() {
-		SysJobUpdateForm form = new SysJobUpdateForm();
-		form.setId("1");
-		form.setCronExpression("0/30 * * * * ?");
-		form.setMisfirePolicy(2);
-		form.setConcurrent(false);
-		form.setStatus(true);
-		return form;
 	}
 
 }

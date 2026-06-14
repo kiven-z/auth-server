@@ -1,11 +1,10 @@
 package com.auth.module.security.contract.api;
 
-import static org.junit.jupiter.api.Assertions.*;
-
+import com.auth.module.security.contract.api.authorization.AuthProfile;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import com.auth.module.security.contract.api.authorization.AuthProfile;
+import static org.junit.jupiter.api.Assertions.*;
 
 class AuthProfileTest {
 

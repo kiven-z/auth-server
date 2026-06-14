@@ -16,8 +16,8 @@ import org.springframework.stereotype.Component;
  *
  * @author Bunny
  */
-@Slf4j
 @RequiredArgsConstructor
+@Slf4j
 @Component
 public class BeanInvokeTaskExecutor implements SysJobTaskExecutor {
 

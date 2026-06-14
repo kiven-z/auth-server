@@ -1,9 +1,8 @@
 package com.auth.common.ip.config;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * IP工具配置属性 配置前缀使用 kebab-case 遵循项目约定 配置前缀：{@code auth.common.ip-tool}

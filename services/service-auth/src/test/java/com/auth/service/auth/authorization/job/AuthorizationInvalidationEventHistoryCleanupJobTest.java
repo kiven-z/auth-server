@@ -11,16 +11,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link AuthorizationInvalidationEventHistoryCleanupJob} 单元测试
  */
-@ExtendWith(MockitoExtension.class)
 @DisplayName("AuthorizationInvalidationEventHistoryCleanupJob SUCCESS 历史清理")
+@ExtendWith(MockitoExtension.class)
 class AuthorizationInvalidationEventHistoryCleanupJobTest {
 
 	@Mock

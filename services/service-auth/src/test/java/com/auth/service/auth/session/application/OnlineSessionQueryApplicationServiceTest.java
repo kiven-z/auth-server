@@ -27,8 +27,8 @@ import static org.mockito.Mockito.when;
 /**
  * {@link OnlineSessionQueryApplicationService} 全局在线会话查询单元测试
  */
-@ExtendWith(MockitoExtension.class)
 @DisplayName("OnlineSessionQueryApplicationService 全局在线会话")
+@ExtendWith(MockitoExtension.class)
 class OnlineSessionQueryApplicationServiceTest {
 
 	@Mock

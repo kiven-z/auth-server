@@ -1,11 +1,11 @@
 package com.auth.module.security.starter.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-
+import com.auth.module.security.core.matcher.PermissionMatcher;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import com.auth.module.security.core.matcher.PermissionMatcher;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PermissionMatcherTest {
 

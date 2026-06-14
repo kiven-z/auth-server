@@ -1,15 +1,14 @@
 package com.auth.service.auth.authentication.api.dto.response;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.LocalDateTime;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * 刷新令牌响应

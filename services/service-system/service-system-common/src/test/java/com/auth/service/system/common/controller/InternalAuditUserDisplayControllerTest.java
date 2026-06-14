@@ -1,11 +1,7 @@
 package com.auth.service.system.common.controller;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-import java.util.List;
-import java.util.Map;
-
+import com.auth.common.core.model.response.Result;
+import com.auth.service.system.common.service.AuditUserDisplayService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,8 +9,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.auth.common.core.model.response.Result;
-import com.auth.service.system.common.service.AuditUserDisplayService;
+import java.util.List;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link InternalAuditUserDisplayController} 单元测试。

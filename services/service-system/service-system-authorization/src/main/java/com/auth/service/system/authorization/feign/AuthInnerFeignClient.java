@@ -1,7 +1,11 @@
 package com.auth.service.system.authorization.feign;
 
-import java.util.List;
-
+import com.auth.common.core.model.response.Result;
+import com.auth.common.data.model.PageResponse;
+import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest;
+import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateResponse;
+import com.auth.service.system.authorization.feign.dto.*;
+import com.auth.service.system.authorization.feign.fallback.AuthInnerFeignClientFallback;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,16 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import com.auth.common.core.model.response.Result;
-import com.auth.common.data.model.PageResponse;
-import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest;
-import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateResponse;
-import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidationEventDetailInnerDTO;
-import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidationEventInnerQuery;
-import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidationEventPageInnerDTO;
-import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidationEventStatsInnerDTO;
-import com.auth.service.system.authorization.feign.dto.EffectiveCodesInnerDTO;
-import com.auth.service.system.authorization.feign.fallback.AuthInnerFeignClientFallback;
+import java.util.List;
 
 /**
  * 鉴权服务内部 Feign 客户端

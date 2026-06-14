@@ -7,7 +7,7 @@
         SELECT COUNT(1)
         FROM user_post up
         WHERE up.post_id = #{postId}
-          AND up.status IN (1, 2)
+        AND up.status IN (1, 2)
     </select>
 
     <!-- grant_table POST 主体 -->
@@ -15,7 +15,7 @@
         SELECT COUNT(1)
         FROM grant_table gt
         WHERE gt.subject_type = 'POST'
-          AND gt.subject_id = #{postId}
+        AND gt.subject_id = #{postId}
     </select>
 
 </mapper>

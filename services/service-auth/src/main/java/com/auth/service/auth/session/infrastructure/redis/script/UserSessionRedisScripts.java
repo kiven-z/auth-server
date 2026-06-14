@@ -18,6 +18,13 @@ public class UserSessionRedisScripts {
 
 	private final DefaultRedisScript<Long> terminateOrphanScript = script("redis/session-terminate-orphan.lua");
 
+	private static DefaultRedisScript<Long> script(String path) {
+		DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>();
+		redisScript.setLocation(new ClassPathResource(path));
+		redisScript.setResultType(Long.class);
+		return redisScript;
+	}
+
 	/**
 	 * 注册会话：Hash + 用户 Set + 全局 ZSet
 	 * @return 注册脚本
@@ -40,13 +47,6 @@ public class UserSessionRedisScripts {
 	 */
 	public DefaultRedisScript<Long> terminateOrphanScript() {
 		return terminateOrphanScript;
-	}
-
-	private static DefaultRedisScript<Long> script(String path) {
-		DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>();
-		redisScript.setLocation(new ClassPathResource(path));
-		redisScript.setResultType(Long.class);
-		return redisScript;
 	}
 
 }

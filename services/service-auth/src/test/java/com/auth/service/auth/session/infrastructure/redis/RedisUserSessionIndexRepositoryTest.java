@@ -24,18 +24,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**
  * {@link RedisUserSessionIndexRepository} 会话生命周期单元测试
  */
+@DisplayName("RedisUserSessionIndexRepository 会话生命周期")
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-@DisplayName("RedisUserSessionIndexRepository 会话生命周期")
 class RedisUserSessionIndexRepositoryTest {
 
 	private static final String GLOBAL_KEY = SecurityRedisKey.GLOBAL_SESSIONS.fixedKey();

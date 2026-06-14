@@ -6,10 +6,10 @@
     <select id="selectAssignedRolesByMenuId"
             resultType="com.auth.service.system.admin.model.po.menu.SysMenuAssignedRolePO">
         SELECT r.role_code,
-               r.role_name
+        r.role_name
         FROM sys_menu_role mr
-                 JOIN sys_role r
-                      ON r.role_code = mr.role_code AND r.role_type = 2 AND r.status = 1
+        JOIN sys_role r
+        ON r.role_code = mr.role_code AND r.role_type = 2 AND r.status = 1
         WHERE mr.menu_id = #{menuId}
         ORDER BY r.order_num
     </select>
@@ -18,10 +18,10 @@
     <select id="selectActiveRoleLinksByMenuIds"
             resultType="com.auth.service.system.admin.model.po.menu.SysMenuRoleLinkRowPO">
         SELECT mr.menu_id,
-               mr.role_code
+        mr.role_code
         FROM sys_menu_role mr
-                 INNER JOIN sys_role r ON r.role_code = mr.role_code
-            AND r.status = 1
+        INNER JOIN sys_role r ON r.role_code = mr.role_code
+        AND r.status = 1
         WHERE mr.menu_id IN
         <foreach collection="menuIds" item="id" open="(" separator="," close=")">
             #{id}

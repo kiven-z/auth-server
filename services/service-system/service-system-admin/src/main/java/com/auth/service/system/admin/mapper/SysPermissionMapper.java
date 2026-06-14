@@ -1,13 +1,12 @@
 package com.auth.service.system.admin.mapper;
 
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.query.SysPermissionQuery;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * 系统权限 Mapper

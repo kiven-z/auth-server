@@ -17,7 +17,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
-import static com.auth.service.system.message.exception.MessageResultCode.*;
+import static com.auth.service.system.message.exception.MessageResultCode.SMS_DYPNS_SEND_FAILED;
+import static com.auth.service.system.message.exception.MessageResultCode.SMS_DYPNS_SEND_INTERRUPTED;
 
 /**
  * 阿里云 Dypns 验证码短信发送

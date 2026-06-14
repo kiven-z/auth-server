@@ -1,17 +1,15 @@
 package com.auth.service.system.admin.support.permission;
 
-import java.util.List;
-
-import org.springframework.stereotype.Component;
-
-import com.auth.service.system.common.exception.code.SystemCommonResultCode;
+import cn.hutool.core.collection.CollUtil;
 import com.auth.service.system.admin.mapper.SysPermissionMapper;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-
-import cn.hutool.core.collection.CollUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * 权限关联写入前的存在性与启用状态校验。

@@ -1,6 +1,5 @@
 package com.auth.service.system.admin.service.impl;
 
-import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.admin.mapper.GrantTableMapper;
 import com.auth.service.system.admin.mapper.SysRoleMapper;
 import com.auth.service.system.admin.mapper.SysRolePermissionMapper;
@@ -10,6 +9,7 @@ import com.auth.service.system.admin.model.po.role.SysRoleAssignedPermissionPO;
 import com.auth.service.system.admin.model.vo.role.SysRoleDetailVO;
 import com.auth.service.system.authorization.dispatch.trigger.RoleAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,13 +25,8 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link SysRoleServiceImpl} 单元测试。

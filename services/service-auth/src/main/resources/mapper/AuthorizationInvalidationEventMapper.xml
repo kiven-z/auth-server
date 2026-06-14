@@ -6,13 +6,13 @@
     <select id="selectByEventId"
             resultType="com.auth.service.auth.authorization.infrastructure.persistence.projection.AuthorizationInvalidationEventProjection">
         SELECT id,
-               event_id,
-               change_kind,
-               impacted_user_count,
-               version_bumped_count,
-               profile_refreshed_count,
-               profile_evicted_count,
-               processed_at
+        event_id,
+        change_kind,
+        impacted_user_count,
+        version_bumped_count,
+        profile_refreshed_count,
+        profile_evicted_count,
+        processed_at
         FROM auth_authorization_invalidation_event
         WHERE event_id = #{eventId}
         LIMIT 1
@@ -114,18 +114,18 @@
     <select id="selectDetailById"
             resultType="com.auth.service.auth.authorization.domain.model.po.AuthorizationInvalidationEventDetailRowPO">
         SELECT aie.id,
-               aie.event_id,
-               aie.change_kind,
-               aie.impacted_user_count,
-               aie.version_bumped_count,
-               aie.profile_refreshed_count,
-               aie.profile_evicted_count,
-               aie.processed_at,
-               aie.create_time,
-               aie.update_time,
-               aie.create_user,
-               aie.update_user,
-               aie.remark
+        aie.event_id,
+        aie.change_kind,
+        aie.impacted_user_count,
+        aie.version_bumped_count,
+        aie.profile_refreshed_count,
+        aie.profile_evicted_count,
+        aie.processed_at,
+        aie.create_time,
+        aie.update_time,
+        aie.create_user,
+        aie.update_user,
+        aie.remark
         FROM auth_authorization_invalidation_event aie
         WHERE aie.id = #{id}
     </select>
@@ -133,9 +133,9 @@
     <!-- 幂等事件统计（运维只读） -->
     <select id="selectEventStats"
             resultType="com.auth.service.auth.authorization.domain.model.po.AuthorizationInvalidationEventStatsPO">
-        SELECT COUNT(*)                                     AS total_count,
-               SUM(IF(aie.impacted_user_count = -1, 1, 0))  AS processing_count,
-               SUM(IF(aie.impacted_user_count != -1, 1, 0)) AS completed_count
+        SELECT COUNT(*) AS total_count,
+        SUM(IF(aie.impacted_user_count = -1, 1, 0)) AS processing_count,
+        SUM(IF(aie.impacted_user_count != -1, 1, 0)) AS completed_count
         FROM auth_authorization_invalidation_event aie
     </select>
 

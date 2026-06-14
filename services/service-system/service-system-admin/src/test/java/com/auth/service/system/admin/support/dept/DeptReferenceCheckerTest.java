@@ -1,8 +1,8 @@
 package com.auth.service.system.admin.support.dept;
 
-import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.admin.mapper.SysDeptMapper;
 import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

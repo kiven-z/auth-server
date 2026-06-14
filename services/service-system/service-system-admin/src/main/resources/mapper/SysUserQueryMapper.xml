@@ -6,12 +6,12 @@
     <select id="selectDeptProfileByUserId"
             resultType="com.auth.service.system.admin.model.po.sysuser.UserDeptProfilePO">
         SELECT d.id AS dept_id,
-               d.dept_name,
-               d.dept_code,
-               ud.is_primary,
-               ud.status
+        d.dept_name,
+        d.dept_code,
+        ud.is_primary,
+        ud.status
         FROM user_dept ud
-                 INNER JOIN sys_dept d ON ud.dept_id = d.id  AND d.status = 1 AND d.is_deleted = 0
+        INNER JOIN sys_dept d ON ud.dept_id = d.id AND d.status = 1 AND d.is_deleted = 0
         WHERE ud.user_id = #{userId}
         ORDER BY ud.is_primary DESC, ud.create_time DESC
     </select>
@@ -20,13 +20,13 @@
     <select id="selectPostProfileByUserId"
             resultType="com.auth.service.system.admin.model.po.sysuser.UserPostProfilePO">
         SELECT up.id,
-               up.post_id,
-               sp.post_name,
-               sp.post_code,
-               up.is_primary,
-               up.status
+        up.post_id,
+        sp.post_name,
+        sp.post_code,
+        up.is_primary,
+        up.status
         FROM user_post up
-                 INNER JOIN sys_post sp ON up.post_id = sp.id AND sp.status = 1 AND sp.is_deleted = 0
+        INNER JOIN sys_post sp ON up.post_id = sp.id AND sp.status = 1 AND sp.is_deleted = 0
         WHERE up.user_id = #{userId}
         ORDER BY up.is_primary DESC, up.create_time DESC
     </select>
@@ -35,18 +35,18 @@
     <select id="searchByKeyword"
             resultType="com.auth.service.system.admin.model.po.sysuser.UserSearchItemPO">
         SELECT id,
-               username,
-               nickname
+        username,
+        nickname
         FROM sys_user
         WHERE status = 1
-          AND is_deleted = 0
-          AND (
-            username LIKE CONCAT(#{keyword}, '%')
-                OR nickname LIKE CONCAT(#{keyword}, '%')
-                OR email LIKE CONCAT(#{keyword}, '%')
-                OR phone LIKE CONCAT(#{keyword}, '%')
-                OR employee_no LIKE CONCAT(#{keyword}, '%')
-            )
+        AND is_deleted = 0
+        AND (
+        username LIKE CONCAT(#{keyword}, '%')
+        OR nickname LIKE CONCAT(#{keyword}, '%')
+        OR email LIKE CONCAT(#{keyword}, '%')
+        OR phone LIKE CONCAT(#{keyword}, '%')
+        OR employee_no LIKE CONCAT(#{keyword}, '%')
+        )
         ORDER BY id DESC
         LIMIT #{limit}
     </select>

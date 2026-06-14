@@ -13,8 +13,8 @@ import java.util.function.Consumer;
  *
  * @author Bunny
  */
-@Component
 @RequiredArgsConstructor
+@Component
 public class UserOrgRelationBatchRemoveSupport {
 
 	private final UserReferenceChecker userReferenceChecker;

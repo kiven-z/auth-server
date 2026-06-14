@@ -14,10 +14,11 @@ import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.enums.AuthResultCode;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Objects;
 
 /**
  * 授权失效幂等事件只读查询应用服务

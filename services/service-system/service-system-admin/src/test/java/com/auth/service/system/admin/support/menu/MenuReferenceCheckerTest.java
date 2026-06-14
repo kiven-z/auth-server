@@ -1,9 +1,9 @@
 package com.auth.service.system.admin.support.menu;
 
-import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.admin.mapper.SysMenuMapper;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,6 +27,13 @@ class MenuReferenceCheckerTest {
 	private SysMenuMapper sysMenuMapper;
 
 	private MenuReferenceChecker menuReferenceChecker;
+
+	private static SysMenuEntity menuEntity(Long id, Long parentId) {
+		SysMenuEntity entity = new SysMenuEntity();
+		entity.setId(id);
+		entity.setParentId(parentId);
+		return entity;
+	}
 
 	@BeforeEach
 	void setUp() {
@@ -77,13 +84,6 @@ class MenuReferenceCheckerTest {
 		assertThatThrownBy(() -> menuReferenceChecker.requireMoveTargetValid(10L, 20L))
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessage("Cannot move tree node under its descendant, nodeId=10, newParentId=20");
-	}
-
-	private static SysMenuEntity menuEntity(Long id, Long parentId) {
-		SysMenuEntity entity = new SysMenuEntity();
-		entity.setId(id);
-		entity.setParentId(parentId);
-		return entity;
 	}
 
 }

@@ -14,7 +14,8 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.*;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_PAYLOAD_JSON_INVALID;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_PAYLOAD_VERSION_UNSUPPORTED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 

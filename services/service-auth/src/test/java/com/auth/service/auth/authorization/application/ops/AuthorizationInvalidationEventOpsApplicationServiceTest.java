@@ -11,18 +11,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link AuthorizationInvalidationEventOpsApplicationService} 单元测试
  */
-@ExtendWith(MockitoExtension.class)
 @DisplayName("AuthorizationInvalidationEventOpsApplicationService 幂等事件运维")
+@ExtendWith(MockitoExtension.class)
 class AuthorizationInvalidationEventOpsApplicationServiceTest {
 
 	@Mock

@@ -30,9 +30,9 @@ public class SysUserBatchStatusForm implements Serializable {
 	private List<Long> ids;
 
 	@Schema(title = "目标状态（0=禁用，1=正常，2=锁定）", requiredMode = Schema.RequiredMode.REQUIRED)
-	@NotNull(message = "目标状态不能为空")
-	@Min(value = 0, message = "目标状态值无效")
 	@Max(value = 2, message = "目标状态值无效")
+	@Min(value = 0, message = "目标状态值无效")
+	@NotNull(message = "目标状态不能为空")
 	private Integer status;
 
 }

@@ -8,7 +8,10 @@ import com.auth.service.system.message.model.vo.EmailTemplateDetailVO;
 import com.auth.service.system.message.model.vo.EmailTemplatePageResponse;
 import com.auth.service.system.message.model.vo.EmailTemplateRequireFieldRow;
 import com.auth.service.system.message.template.MessageTemplateRequireFieldsJsonSupport;
-import org.mapstruct.*;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 
 import java.util.List;

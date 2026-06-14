@@ -1,8 +1,8 @@
 package com.auth.module.security.contract.exception;
 
-import java.util.Map;
-
 import lombok.Getter;
+
+import java.util.Map;
 
 /**
  * SecurityResultCodeEnum 是安全模块的公共业务代码，用于表示安全模块的错误状态 (module=00).

@@ -1,9 +1,10 @@
 package com.auth.service.auth.session.application;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.api.UserSessionIndex;
-import com.auth.service.auth.session.application.assembler.OnlineSessionVoAssembler;
+import com.auth.service.auth.session.convert.OnlineSessionPageConverter;
 import com.auth.service.auth.session.domain.model.OnlineSessionPageSlice;
 import com.auth.service.auth.session.domain.model.UserOnlineBrief;
 import com.auth.service.auth.session.domain.model.query.OnlineSessionPageQuery;
@@ -45,60 +46,38 @@ public class OnlineSessionQueryApplicationService {
 	 * @return 分页结果
 	 */
 	public PageResponse<OnlineSessionPageVO> getPage(OnlineSessionPageQuery query) {
+		// 清理僵尸索引
 		redisUserSessionIndexRepository.cleanupStaleGlobalSessions(PRE_QUERY_CLEANUP_BATCH);
 
-		Set<Long> allowedUserIds = resolveAllowedUserIds(query.getUsername());
-		if (allowedUserIds != null && allowedUserIds.isEmpty()) {
-			return emptyPage(query);
+		// 根据用户名筛选用户ID
+		Set<Long> allowedUserIds = null;
+		if (CharSequenceUtil.isNotBlank(query.getUsername())) {
+			allowedUserIds = Set.copyOf(onlineSessionUserLookupPort.findUserIdsByUsernameLike(query.getUsername()));
 		}
 
+		// 规范化页码和分页大小
 		int pageIndex = Objects.requireNonNullElse(query.getPageIndex(), 1);
 		int pageSize = Objects.requireNonNullElse(query.getPageSize(), 30);
+		if (CollUtil.isEmpty(allowedUserIds)) {
+			return PageResponse.of((long) pageIndex, (long) pageSize, 0L, List.of());
+		}
+
+		// 分页查询全局在线会话
 		OnlineSessionPageSlice slice = redisUserSessionIndexRepository.pageGlobalSessions(pageIndex, pageSize,
 				allowedUserIds, query.getIpAddress());
-		List<OnlineSessionPageVO> records = assemblePage(slice);
-		return PageResponse.of((long) pageIndex, (long) pageSize, slice.total(), records);
-	}
-
-	/**
-	 * 解析用户名筛选对应的用户 ID 集合
-	 * @param username 用户名关键字
-	 * @return {@code null} 表示不过滤；空集合表示无匹配用户
-	 */
-	private Set<Long> resolveAllowedUserIds(String username) {
-		if (CharSequenceUtil.isBlank(username)) {
-			return null;
-		}
-		return Set.copyOf(onlineSessionUserLookupPort.findUserIdsByUsernameLike(username));
-	}
-
-	/**
-	 * 组装分页 VO 列表
-	 * @param slice 会话分页切片
-	 * @return VO 列表
-	 */
-	private List<OnlineSessionPageVO> assemblePage(OnlineSessionPageSlice slice) {
 		Set<Long> userIds = slice.sessions()
 			.stream()
 			.map(UserSessionIndex::getUserId)
 			.filter(Objects::nonNull)
 			.collect(Collectors.toSet());
-		Map<Long, UserOnlineBrief> briefMap = onlineSessionUserLookupPort.findBriefByIds(userIds);
-		return slice.sessions()
-			.stream()
-			.map(session -> OnlineSessionVoAssembler.toPageVo(session, briefMap.get(session.getUserId())))
-			.toList();
-	}
 
-	/**
-	 * 构建空分页结果
-	 * @param query 查询条件
-	 * @return 空分页
-	 */
-	private PageResponse<OnlineSessionPageVO> emptyPage(OnlineSessionPageQuery query) {
-		long pageIndex = Objects.requireNonNullElse(query.getPageIndex(), 1);
-		long pageSize = Objects.requireNonNullElse(query.getPageSize(), 30);
-		return PageResponse.of(pageIndex, pageSize, 0L, List.of());
+		// 查询用户在线简要信息
+		Map<Long, UserOnlineBrief> briefMap = onlineSessionUserLookupPort.findBriefByIds(userIds);
+		List<OnlineSessionPageVO> records = slice.sessions()
+			.stream()
+			.map(session -> OnlineSessionPageConverter.INSTANCE.toPageVo(session, briefMap.get(session.getUserId())))
+			.toList();
+		return PageResponse.of((long) pageIndex, (long) pageSize, slice.total(), records);
 	}
 
 }

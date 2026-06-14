@@ -18,13 +18,20 @@
         FROM sys_role r
         <where>
             <if test="query.roleCode != null and query.roleCode != ''">
-                AND r.role_code LIKE CONCAT('%', #{query.roleCode}, '%')
+                AND r.role_code LIKE CONCAT('%',
+                #{query.roleCode},
+                '%'
+                )
             </if>
             <if test="query.roleName != null and query.roleName != ''">
-                AND r.role_name LIKE CONCAT('%', #{query.roleName}, '%')
+                AND r.role_name LIKE CONCAT('%',
+                #{query.roleName},
+                '%'
+                )
             </if>
             <if test="query.status != null">
-                AND r.status = #{query.status}
+                AND r.status =
+                #{query.status}
             </if>
             <if test="query.roleTypes != null and query.roleTypes.size() > 0">
                 AND r.role_type IN
@@ -41,8 +48,14 @@
         SELECT id, role_code, role_name FROM sys_role
         <where>
             status = 1
-            <if test="roleName != null and roleName != ''">AND role_name LIKE CONCAT('%', #{roleName}, '%')</if>
-            <if test="roleCode != null and roleCode != ''">AND role_code LIKE CONCAT('%', #{roleCode}, '%')</if>
+            <if test="roleName != null and roleName != ''">AND role_name LIKE CONCAT('%',
+            #{roleName},
+            '%'
+            )</if>
+            <if test="roleCode != null and roleCode != ''">AND role_code LIKE CONCAT('%',
+            #{roleCode},
+            '%'
+            )</if>
         </where>
         ORDER BY order_num LIMIT 15
     </select>

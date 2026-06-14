@@ -2,12 +2,12 @@ package com.auth.service.auth.authentication.application.login.strategy;
 
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.TestConstants;
+import com.auth.service.auth.authentication.application.gateway.CredentialGateway;
 import com.auth.service.auth.authentication.application.input.credential.AbstractCredentialLogin;
 import com.auth.service.auth.authentication.application.login.audit.LoginAuditService;
 import com.auth.service.auth.authentication.domain.enums.AuthLoginLogType;
 import com.auth.service.auth.authentication.domain.model.LoginAccount;
 import com.auth.service.auth.authentication.domain.model.LoginResult;
-import com.auth.service.auth.authentication.application.gateway.CredentialGateway;
 import com.auth.service.auth.authorization.domain.port.AuthProfileQueryPort;
 import com.auth.service.auth.shared.exception.AuthBadCredentialsException;
 import com.auth.service.auth.shared.exception.AuthBusinessException;

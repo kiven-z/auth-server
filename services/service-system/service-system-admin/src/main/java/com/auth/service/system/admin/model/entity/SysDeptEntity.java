@@ -3,7 +3,6 @@ package com.auth.service.system.admin.model.entity;
 import com.auth.common.data.model.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;

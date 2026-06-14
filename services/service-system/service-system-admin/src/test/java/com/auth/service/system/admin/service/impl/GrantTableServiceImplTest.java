@@ -34,11 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link GrantTableServiceImpl} 单元测试
@@ -65,6 +61,16 @@ class GrantTableServiceImplTest {
 	private GrantAuthorizationInvalidationTrigger grantInvalidationTrigger;
 
 	private GrantTableServiceImpl grantTableService;
+
+	private static SysPostEntity activePost(Long id) {
+		SysPostEntity entity = new SysPostEntity();
+		entity.setId(id);
+		entity.setDeptId(1L);
+		entity.setPostCode("DEV");
+		entity.setPostName("开发岗");
+		entity.setStatus(true);
+		return entity;
+	}
 
 	@BeforeEach
 	void setUp() throws Exception {
@@ -170,16 +176,6 @@ class GrantTableServiceImplTest {
 
 		verify(grantTableMapper).deleteBySubject("DEPT", SUBJECT_ID);
 		verify(grantTableService, never()).saveBatch(any(Collection.class));
-	}
-
-	private static SysPostEntity activePost(Long id) {
-		SysPostEntity entity = new SysPostEntity();
-		entity.setId(id);
-		entity.setDeptId(1L);
-		entity.setPostCode("DEV");
-		entity.setPostName("开发岗");
-		entity.setStatus(true);
-		return entity;
 	}
 
 }

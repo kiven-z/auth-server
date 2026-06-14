@@ -1,11 +1,11 @@
 package com.auth.service.auth.authorization.domain.model.po;
 
-import java.io.Serial;
-import java.io.Serializable;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * 授权失效幂等事件统计 PO

@@ -26,8 +26,8 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
  *
  * @author Bunny
  */
-@Tag(name = "当前用户", description = "登录用户自助操作")
 @AuthenticatedApi
+@Tag(name = "当前用户", description = "登录用户自助操作")
 @RequiredArgsConstructor
 @RequestMapping("/api/system/user")
 @RestController

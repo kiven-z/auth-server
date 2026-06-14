@@ -1,8 +1,8 @@
 package com.auth.module.security.contract.convention;
 
-import java.util.regex.Pattern;
-
 import lombok.experimental.UtilityClass;
+
+import java.util.regex.Pattern;
 
 /**
  * 权限码、角色码等安全侧编码格式约定（供 system 等模块在写入前校验；不包含业务状态判断）。
@@ -33,12 +33,12 @@ public class AuthCodeConvention {
 	public static final String PERMISSION_CODE_REGEX = "^" + PERMISSION_CODE_SEGMENT_REGEX + "(?::"
 			+ PERMISSION_CODE_SEGMENT_REGEX + "){0,2}$";
 
+	private static final Pattern PERMISSION_CODE_PATTERN = Pattern.compile(PERMISSION_CODE_REGEX);
+
 	/**
 	 * 角色码：大写字母与下划线，且首字符为大写字母
 	 */
 	public static final String ROLE_CODE_REGEX = "^[A-Z][A-Z_]*$";
-
-	private static final Pattern PERMISSION_CODE_PATTERN = Pattern.compile(PERMISSION_CODE_REGEX);
 
 	private static final Pattern ROLE_CODE_PATTERN = Pattern.compile(ROLE_CODE_REGEX);
 

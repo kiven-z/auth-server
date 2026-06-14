@@ -6,7 +6,10 @@ import com.auth.service.system.admin.model.form.dept.SysDeptForm;
 import com.auth.service.system.admin.model.po.dept.SysDeptBoundPostPO;
 import com.auth.service.system.admin.model.po.dept.SysDeptBoundUserPO;
 import com.auth.service.system.admin.model.po.dept.SysDeptPageRowPO;
-import com.auth.service.system.admin.model.vo.dept.*;
+import com.auth.service.system.admin.model.vo.dept.SysDeptBoundPostItemVO;
+import com.auth.service.system.admin.model.vo.dept.SysDeptBoundUserItemVO;
+import com.auth.service.system.admin.model.vo.dept.SysDeptDetailVO;
+import com.auth.service.system.admin.model.vo.dept.SysDeptListVO;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -45,9 +48,9 @@ public interface SysDeptConverter {
 	 * @param row 分页持久层投影
 	 * @return 列表 VO
 	 */
-	@BeanMapping(ignoreUnmappedSourceProperties = { "parentDeptCode", "parentDeptName" })
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
+	@BeanMapping(ignoreUnmappedSourceProperties = { "parentDeptCode", "parentDeptName" })
 	SysDeptListVO toListVoFromPageRow(SysDeptPageRowPO row);
 
 	/**

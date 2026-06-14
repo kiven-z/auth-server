@@ -18,7 +18,8 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
-import static com.auth.service.system.message.exception.MessageResultCode.*;
+import static com.auth.service.system.message.exception.MessageResultCode.MESSAGE_CHANNEL_UNSUPPORTED;
+import static com.auth.service.system.message.exception.MessageResultCode.MESSAGE_COMMAND_INVALID;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;

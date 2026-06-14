@@ -6,12 +6,12 @@
     <select id="selectAssignedPermissionByMenuId"
             resultType="com.auth.service.system.admin.model.po.menu.SysMenuAssignedPermissionPO">
         SELECT p.permission_code,
-               p.permission_name
+        p.permission_name
         FROM sys_menu_permission mp
-                 JOIN sys_permission p
-                      ON p.permission_code = mp.permission_code
-                          AND p.permission_type = 0
-                          AND p.status = 1
+        JOIN sys_permission p
+        ON p.permission_code = mp.permission_code
+        AND p.permission_type = 0
+        AND p.status = 1
         WHERE mp.menu_id = #{menuId}
         ORDER BY p.permission_code
     </select>
@@ -20,11 +20,11 @@
     <select id="selectActiveButtonPermissionLinksByMenuIds"
             resultType="com.auth.service.system.admin.model.po.menu.SysMenuPermissionLinkRowPO">
         SELECT mp.menu_id,
-               mp.permission_code
+        mp.permission_code
         FROM sys_menu_permission mp
-                 INNER JOIN sys_permission p ON p.permission_code = mp.permission_code
-            AND p.permission_type = 0
-            AND p.status = 1
+        INNER JOIN sys_permission p ON p.permission_code = mp.permission_code
+        AND p.permission_type = 0
+        AND p.status = 1
         WHERE mp.menu_id IN
         <foreach collection="menuIds" item="id" open="(" separator="," close=")">
             #{id}
@@ -35,13 +35,13 @@
     <select id="selectBoundMenusByPermissionCode"
             resultType="com.auth.service.system.admin.model.po.permission.SysPermissionBoundMenuPO">
         SELECT m.id,
-               m.title,
-               m.name,
-               m.path,
-               m.menu_type,
-               m.status
+        m.title,
+        m.name,
+        m.path,
+        m.menu_type,
+        m.status
         FROM sys_menu_permission mp
-                 INNER JOIN sys_menu m ON m.id = mp.menu_id
+        INNER JOIN sys_menu m ON m.id = mp.menu_id
         WHERE mp.permission_code = #{permissionCode}
         ORDER BY m.menu_rank, m.id
     </select>

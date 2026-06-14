@@ -1,14 +1,13 @@
 package com.auth.service.auth.authorization.application.invalidation.impact;
 
+import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
+import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidatePayload;
+import org.springframework.stereotype.Component;
+
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.springframework.stereotype.Component;
-
-import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
-import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidatePayload;
 
 /**
  * 影响面解析器注册表：按 {@link AuthorizationChangeKind} 分发到对应 {@link ImpactResolver}

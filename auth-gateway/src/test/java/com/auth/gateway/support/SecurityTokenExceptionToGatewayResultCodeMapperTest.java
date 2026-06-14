@@ -1,13 +1,12 @@
 package com.auth.gateway.support;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
 import com.auth.gateway.exception.GatewayResultCodeEnum;
 import com.auth.module.security.contract.exception.SecurityResultCodeEnum;
 import com.auth.module.security.contract.exception.SecurityTokenException;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SecurityTokenExceptionToGatewayResultCodeMapperTest {
 

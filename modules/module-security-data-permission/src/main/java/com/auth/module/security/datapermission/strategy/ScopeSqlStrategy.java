@@ -1,8 +1,8 @@
 package com.auth.module.security.datapermission.strategy;
 
-import java.util.Set;
-
 import com.auth.module.security.contract.api.datascope.DataScopeStorageType;
+
+import java.util.Set;
 
 /**
  * 数据范围 SQL 生成策略

@@ -22,7 +22,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
-import static com.auth.service.system.message.exception.MessageResultCode.*;
+import static com.auth.service.system.message.exception.MessageResultCode.DING_TALK_WORK_NOTICE_FAILED;
+import static com.auth.service.system.message.exception.MessageResultCode.DING_TALK_WORK_NOTICE_HTTP_ERROR;
 
 /**
  * 钉钉工作通知客户端

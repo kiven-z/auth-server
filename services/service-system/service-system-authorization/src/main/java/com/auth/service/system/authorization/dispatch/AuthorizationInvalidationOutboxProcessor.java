@@ -6,10 +6,10 @@ import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidat
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateResponse;
 import com.auth.service.system.authorization.config.AuthorizationInvalidationProperties;
 import com.auth.service.system.authorization.feign.AuthInnerFeignClient;
-import com.auth.service.system.authorization.outbox.InvalidationOutboxPayloadCodec;
 import com.auth.service.system.authorization.mapper.SysAuthorizationInvalidationOutboxMapper;
 import com.auth.service.system.authorization.model.entity.SysAuthorizationInvalidationOutboxEntity;
 import com.auth.service.system.authorization.model.enums.AuthorizationInvalidationOutboxStatus;
+import com.auth.service.system.authorization.outbox.InvalidationOutboxPayloadCodec;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

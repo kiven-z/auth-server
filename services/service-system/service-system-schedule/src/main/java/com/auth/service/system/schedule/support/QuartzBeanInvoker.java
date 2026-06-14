@@ -1,26 +1,21 @@
 package com.auth.service.system.schedule.support;
 
-import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_INVOKE_PARAM_NOT_SUPPORTED;
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_INVOKE_TARGET_FORMAT;
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_INVOKE_TARGET_PAREN_MISMATCH;
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_REFLECT_METHOD_NOT_FOUND;
-import static com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys.BEAN_NAME;
-import static com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys.METHOD_NAME;
-
-import java.lang.reflect.Method;
-import java.util.Objects;
-
+import cn.hutool.core.text.CharSequenceUtil;
+import com.auth.service.system.schedule.exception.SysJobException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;
 
-import com.auth.service.system.schedule.exception.SysJobException;
+import java.lang.reflect.Method;
+import java.util.Objects;
 
-import cn.hutool.core.text.CharSequenceUtil;
-import lombok.RequiredArgsConstructor;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.*;
+import static com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys.BEAN_NAME;
+import static com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys.METHOD_NAME;
 
 /**
  * 解析 {@code invoke_target}（首个 {@code .} 前为 Spring Bean 名，后为方法及可选参数）并反射调用

@@ -1,21 +1,19 @@
 package com.auth.service.system.schedule.support.quartz;
 
-import java.util.List;
-
-import org.quartz.SchedulerException;
-import org.springframework.stereotype.Component;
-
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.system.schedule.config.ScheduleJobProperties;
 import com.auth.service.system.schedule.mapper.SysJobMapper;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.BooleanUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.quartz.SchedulerException;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * 按 {@code sys_job} 补偿 Quartz 运行态（DB 为单一事实来源）

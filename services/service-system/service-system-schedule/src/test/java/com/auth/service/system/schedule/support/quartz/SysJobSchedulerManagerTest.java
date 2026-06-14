@@ -34,6 +34,19 @@ class SysJobSchedulerManagerTest {
 	@InjectMocks
 	private SysJobSchedulerManager sysJobSchedulerManager;
 
+	private static SysJobEntity enabledJob() {
+		SysJobEntity job = new SysJobEntity();
+		job.setId(1L);
+		job.setJobName("demo");
+		job.setJobGroup("G");
+		job.setTaskType("BEAN_INVOKE");
+		job.setInvokeTarget("demo.run()");
+		job.setCronExpression("0 0 12 * * ?");
+		job.setStatus(true);
+		job.setConcurrent(false);
+		return job;
+	}
+
 	@Test
 	@DisplayName("pauseJob：任务存在时应调用 scheduler.pauseJob")
 	void pauseJob_whenJobExists_pausesSchedulerJob() throws SchedulerException {
@@ -111,19 +124,6 @@ class SysJobSchedulerManagerTest {
 		sysJobSchedulerManager.scheduleOrReplace(job);
 
 		verify(scheduler).scheduleJob(jobDetail, trigger);
-	}
-
-	private static SysJobEntity enabledJob() {
-		SysJobEntity job = new SysJobEntity();
-		job.setId(1L);
-		job.setJobName("demo");
-		job.setJobGroup("G");
-		job.setTaskType("BEAN_INVOKE");
-		job.setInvokeTarget("demo.run()");
-		job.setCronExpression("0 0 12 * * ?");
-		job.setStatus(true);
-		job.setConcurrent(false);
-		return job;
 	}
 
 }

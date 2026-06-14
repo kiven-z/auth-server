@@ -7,8 +7,8 @@
         UPDATE sys_user
         SET perm_version = perm_version + 1
         WHERE is_deleted = 0
-          AND status = 1
-          AND id IN
+        AND status = 1
+        AND id IN
         <foreach collection="userIds" item="userId" open="(" separator="," close=")">
             #{userId}
         </foreach>
