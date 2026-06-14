@@ -90,8 +90,7 @@ class RefreshTokenServiceTest {
 				() -> service.refreshToken(TestConstants.REFRESH_TOKEN, null));
 
 		assertEquals(AuthResultCode.REFRESH_TOKEN_EXPIRED, ex.getResultCode());
-		verify(sessionGateway).deleteSession(TestConstants.JTI);
-		verify(sessionGateway).removeActiveSession(TestConstants.USER_ID, TestConstants.JTI);
+		verify(sessionGateway).terminateSession(TestConstants.USER_ID, TestConstants.JTI);
 	}
 
 	@Test
@@ -111,8 +110,7 @@ class RefreshTokenServiceTest {
 				() -> service.refreshToken(TestConstants.REFRESH_TOKEN, null));
 
 		assertEquals(AuthResultCode.REFRESH_TOKEN_EXPIRED, ex.getResultCode());
-		verify(sessionGateway).deleteSession(TestConstants.JTI);
-		verify(sessionGateway).removeActiveSession(TestConstants.USER_ID, TestConstants.JTI);
+		verify(sessionGateway).terminateSession(TestConstants.USER_ID + 1L, TestConstants.JTI);
 	}
 
 	@Test

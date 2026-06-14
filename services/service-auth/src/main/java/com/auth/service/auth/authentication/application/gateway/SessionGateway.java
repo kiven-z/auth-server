@@ -37,10 +37,10 @@ public interface SessionGateway {
 			String refreshToken, boolean rememberMe);
 
 	/**
-	 * 创建用户会话索引。
+	 * 注册活跃会话索引。
 	 * @param userSessionIndex 会话索引
 	 */
-	void createUserSessionIndex(@NotNull UserSessionIndex userSessionIndex);
+	void registerSession(@NotNull UserSessionIndex userSessionIndex);
 
 	/**
 	 * 按 jti 加载会话索引。
@@ -59,16 +59,10 @@ public interface SessionGateway {
 	void updateRefreshInfo(String sessionId, String refreshTokenHash, long refreshTokenExpiresAt, Duration ttl);
 
 	/**
-	 * 按 jti 删除会话详情。
-	 * @param sessionId 会话 ID（jti）
-	 */
-	void deleteSession(String sessionId);
-
-	/**
-	 * 从用户活跃会话集合中移除指定 jti。
+	 * 终止单条会话（Hash、用户 Set、全局 ZSet）。
 	 * @param userId 用户 ID
 	 * @param sessionId 会话 ID（jti）
 	 */
-	void removeActiveSession(long userId, String sessionId);
+	void terminateSession(long userId, String sessionId);
 
 }

@@ -40,8 +40,8 @@ public class SessionGatewayImpl implements SessionGateway {
 	}
 
 	@Override
-	public void createUserSessionIndex(@NotNull UserSessionIndex userSessionIndex) {
-		redisUserSessionIndexRepository.createUserSessionIndex(userSessionIndex);
+	public void registerSession(@NotNull UserSessionIndex userSessionIndex) {
+		redisUserSessionIndexRepository.registerSession(userSessionIndex);
 	}
 
 	@Override
@@ -55,13 +55,8 @@ public class SessionGatewayImpl implements SessionGateway {
 	}
 
 	@Override
-	public void deleteSession(String sessionId) {
-		redisUserSessionIndexRepository.deleteSession(sessionId);
-	}
-
-	@Override
-	public void removeActiveSession(long userId, String sessionId) {
-		redisUserSessionIndexRepository.removeActiveSession(userId, sessionId);
+	public void terminateSession(long userId, String sessionId) {
+		redisUserSessionIndexRepository.terminateSession(userId, sessionId);
 	}
 
 }

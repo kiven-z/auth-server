@@ -90,7 +90,7 @@ public class LoginSessionOrchestrator {
 			// 构建用户会话索引
 			UserSessionIndex sessionIndex = sessionGateway.buildSessionIndex(request, userId, jti,
 					response.getRefreshToken(), rememberMe);
-			sessionGateway.createUserSessionIndex(sessionIndex);
+			sessionGateway.registerSession(sessionIndex);
 			// 标记会话已创建
 			sessionCreated = true;
 
@@ -119,8 +119,7 @@ public class LoginSessionOrchestrator {
 	 */
 	private void rollbackLoginArtifacts(Long userId, String jti, boolean profileCached, boolean sessionCreated) {
 		if (sessionCreated && jti != null) {
-			sessionGateway.deleteSession(jti);
-			sessionGateway.removeActiveSession(userId, jti);
+			sessionGateway.terminateSession(userId, jti);
 		}
 		if (profileCached) {
 			authProfileCachePort.evictProfile(userId);

@@ -59,4 +59,9 @@ public class UserSessionIndex {
 	 */
 	private Boolean rememberMe;
 
+	/**
+	 * 登录时间戳（毫秒），用于全局在线会话排序
+	 */
+	private Long loginAt;
+
 }

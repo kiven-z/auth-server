@@ -144,15 +144,14 @@ public class RefreshTokenService {
 			throw new AuthBusinessException(AuthResultCode.REFRESH_TOKEN_EXPIRED);
 		}
 		if (BooleanUtil.isFalse(Objects.equals(userId, sessionUserId))) {
-			sessionGateway.deleteSession(jti);
-			sessionGateway.removeActiveSession(userId, jti);
+			long indexUserId = sessionUserId != null ? sessionUserId : userId;
+			sessionGateway.terminateSession(indexUserId, jti);
 			throw new AuthBusinessException(AuthResultCode.REFRESH_TOKEN_EXPIRED);
 		}
 
 		boolean hashMatches = CharSequenceUtil.isNotBlank(redisHash) && Objects.equals(redisHash, requestHash);
 		if (BooleanUtil.isFalse(hashMatches)) {
-			sessionGateway.deleteSession(jti);
-			sessionGateway.removeActiveSession(userId, jti);
+			sessionGateway.terminateSession(userId, jti);
 			throw new AuthBusinessException(AuthResultCode.REFRESH_TOKEN_EXPIRED);
 		}
 	}
@@ -197,8 +196,7 @@ public class RefreshTokenService {
 	private LogoutSessionHint revokeServerSession(JwtUserToken userToken) {
 		String jti = userToken.getJti();
 		Long userId = userToken.getUserId();
-		sessionGateway.deleteSession(jti);
-		sessionGateway.removeActiveSession(userId, jti);
+		sessionGateway.terminateSession(userId, jti);
 		return new LogoutSessionHint(userId, jti);
 	}
 

@@ -5,15 +5,17 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.security.contract.api.UserSessionIndex;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-import static com.auth.module.security.contract.redis.SecurityRedisKey.USER_SESSION;
-import static com.auth.module.security.contract.redis.SecurityRedisKey.USER_SESSIONS;
+import static com.auth.module.security.contract.redis.SecurityRedisKey.*;
 
 /**
  * 负责用户 UserSessionIndex 会话创建和查询
@@ -41,38 +43,99 @@ public class RedisUserSessionIndexRepository {
 	}
 
 	/**
-	 * 添加会话，使用 jti 向Redis中添加会话
+	 * 注册活跃会话：写入 Hash、用户 Set 与全局 ZSet（原子 MULTI/EXEC）
 	 * @param userSessionIndex 用户会话索引
 	 */
-	public void createUserSessionIndex(@NotNull UserSessionIndex userSessionIndex) {
-		// jti
+	public void registerSession(@NotNull UserSessionIndex userSessionIndex) {
 		String sessionId = userSessionIndex.getSessionId();
-		String userSessionKey = USER_SESSION.key(sessionId);
-
-		// userId
 		Long userId = userSessionIndex.getUserId();
-		String userSessionsKey = USER_SESSIONS.key(userId);
-
-		// 将 UserSessionIndex 转为 Map 作为 Hash 字段（不含手写 map.put，一行完成）
-		Map<String, Object> sessionMap = BeanUtil.beanToMap(userSessionIndex);
-
-		// 写入会话详情 Hash
-		redisTemplate.opsForHash().putAll(userSessionKey, sessionMap);
-
-		// 将当前 jti 加入用户活跃会话集合
-		redisTemplate.opsForSet().add(userSessionsKey, sessionId);
-
-		// 根据 refreshToken 过期时间戳为 Hash 设置 TTL，保证会话自然过期
-		Long refreshTokenExpiresAt = userSessionIndex.getRefreshTokenExpiresAt();
-		Duration ttl = USER_SESSION.getDefaultTtl();
-		if (refreshTokenExpiresAt != null) {
-			long ttlSeconds = (refreshTokenExpiresAt - System.currentTimeMillis()) / 1000;
-			if (ttlSeconds > 0) {
-				ttl = Duration.ofSeconds(ttlSeconds);
-			}
+		if (CharSequenceUtil.isBlank(sessionId) || userId == null) {
+			throw new IllegalArgumentException("sessionId and userId are required for session registration");
 		}
-		if (ttl != null) {
-			redisTemplate.expire(userSessionKey, ttl);
+
+		String userSessionKey = USER_SESSION.key(sessionId);
+		String userSessionsKey = USER_SESSIONS.key(userId);
+		String globalSessionsKey = GLOBAL_SESSIONS.fixedKey();
+		Map<String, Object> sessionMap = BeanUtil.beanToMap(userSessionIndex);
+		Duration ttl = resolveSessionTtl(userSessionIndex);
+		double loginAtScore = resolveLoginAtScore(userSessionIndex);
+
+		redisTemplate.execute(new SessionCallback<>() {
+			@Override
+			@SuppressWarnings("unchecked")
+			public List<Object> execute(@NotNull RedisOperations operations) throws DataAccessException {
+				operations.multi();
+				operations.opsForHash().putAll(userSessionKey, sessionMap);
+				if (ttl != null) {
+					operations.expire(userSessionKey, ttl);
+				}
+				operations.opsForSet().add(userSessionsKey, sessionId);
+				operations.opsForZSet().add(globalSessionsKey, sessionId, loginAtScore);
+				return operations.exec();
+			}
+		});
+	}
+
+	/**
+	 * 终止单条会话：删除 Hash、用户 Set 与全局 ZSet（原子 MULTI/EXEC，幂等）
+	 * @param userId 用户 ID
+	 * @param jti 会话唯一标识
+	 */
+	public void terminateSession(long userId, @NotNull String jti) {
+		if (CharSequenceUtil.isBlank(jti)) {
+			return;
+		}
+		String userSessionKey = USER_SESSION.key(jti);
+		String userSessionsKey = USER_SESSIONS.key(userId);
+		String globalSessionsKey = GLOBAL_SESSIONS.fixedKey();
+
+		redisTemplate.execute(new SessionCallback<>() {
+			@Override
+			@SuppressWarnings("unchecked")
+			public List<Object> execute(@NotNull RedisOperations operations) throws DataAccessException {
+				operations.multi();
+				operations.delete(userSessionKey);
+				operations.opsForSet().remove(userSessionsKey, jti);
+				operations.opsForZSet().remove(globalSessionsKey, jti);
+				return operations.exec();
+			}
+		});
+	}
+
+	/**
+	 * 终止单条会话：从 Hash 解析 userId；Hash 已丢失时仍清理全局 ZSet
+	 * @param jti 会话唯一标识
+	 */
+	public void terminateSession(@NotNull String jti) {
+		if (CharSequenceUtil.isBlank(jti)) {
+			return;
+		}
+		Optional<UserSessionIndex> sessionIndex = loadUserSessionIndex(jti);
+		if (sessionIndex.isPresent() && sessionIndex.get().getUserId() != null) {
+			terminateSession(sessionIndex.get().getUserId(), jti);
+			return;
+		}
+		terminateSessionWithoutUserIndex(jti);
+	}
+
+	/**
+	 * 终止用户全部活跃会话
+	 * @param userId 用户 ID
+	 */
+	public void terminateAllSessions(long userId) {
+		String userSessionsKey = USER_SESSIONS.key(userId);
+		Set<Object> members = Optional.ofNullable(redisTemplate.opsForSet().members(userSessionsKey))
+			.orElseGet(Collections::emptySet);
+		redisTemplate.delete(userSessionsKey);
+
+		if (CollUtil.isEmpty(members)) {
+			return;
+		}
+
+		for (Object member : members) {
+			if (member instanceof String jti) {
+				terminateSession(userId, jti);
+			}
 		}
 	}
 
@@ -126,7 +189,6 @@ public class RedisUserSessionIndexRepository {
 			.map(jti -> {
 				String sessionKey = USER_SESSION.key(jti);
 				Map<Object, Object> hash = redisTemplate.opsForHash().entries(sessionKey);
-				// 直接用 BeanUtil 将 Map 转为 UserSessionIndex
 				UserSessionIndex sessionIndex = BeanUtil.toBean(hash, UserSessionIndex.class);
 				sessionIndex.setUserId(userId);
 				sessionIndex.setSessionId(jti);
@@ -136,51 +198,13 @@ public class RedisUserSessionIndexRepository {
 	}
 
 	/**
-	 * 删除会话详情 key（不存在也视为成功）
-	 * @param jti 会话唯一标识
-	 */
-	public void deleteSession(@NotNull String jti) {
-		String userSessionKey = USER_SESSION.key(jti);
-		redisTemplate.delete(userSessionKey);
-	}
-
-	/**
-	 * 从用户活跃会话索引移除指定 jti
-	 * @param userId 用户ID
-	 * @param jti 会话唯一标识
-	 */
-	public void removeActiveSession(long userId, @NotNull String jti) {
-		String userSessionsKey = USER_SESSIONS.key(userId);
-		redisTemplate.opsForSet().remove(userSessionsKey, jti);
-	}
-
-	/**
-	 * 删除用户所有会话
-	 * @param userId 用户ID
-	 */
-	public void deleteAllSessions(long userId) {
-		String userSessionsKey = USER_SESSIONS.key(userId);
-		Set<Object> members = redisTemplate.opsForSet().members(userSessionsKey);
-		redisTemplate.delete(userSessionsKey);
-
-		if (CollUtil.isEmpty(members)) {
-			return;
-		}
-
-		for (Object member : members) {
-			if (member instanceof String jti) {
-				deleteSession(jti);
-			}
-		}
-	}
-
-	/**
 	 * 清理活跃会话集合中的僵尸会话（session 详情已不存在）
 	 * @param userId 用户ID
 	 * @return 清理数量
 	 */
 	public int cleanupStaleActiveSessions(long userId) {
 		String activeSessionKey = USER_SESSIONS.key(userId);
+		String globalSessionsKey = GLOBAL_SESSIONS.fixedKey();
 		Set<Object> members = Optional.ofNullable(redisTemplate.opsForSet().members(activeSessionKey))
 			.orElseGet(Collections::emptySet);
 
@@ -189,8 +213,9 @@ public class RedisUserSessionIndexRepository {
 			.map(String.class::cast)
 			.filter(jti -> !redisTemplate.hasKey(USER_SESSION.key(jti)))
 			.filter(jti -> {
-				Long num = redisTemplate.opsForSet().remove(activeSessionKey, jti);
-				return num != null && num > 0;
+				Long setRemoved = redisTemplate.opsForSet().remove(activeSessionKey, jti);
+				Long zsetRemoved = redisTemplate.opsForZSet().remove(globalSessionsKey, jti);
+				return (setRemoved != null && setRemoved > 0) || (zsetRemoved != null && zsetRemoved > 0);
 			})
 			.count();
 	}
@@ -210,10 +235,58 @@ public class RedisUserSessionIndexRepository {
 			.map(String.class::cast)
 			.min(Comparator.comparingLong(this::ttlRank))
 			.map(evictedJti -> {
-				removeActiveSession(userId, evictedJti);
-				deleteSession(evictedJti);
+				terminateSession(userId, evictedJti);
 				return evictedJti;
 			});
+	}
+
+	/**
+	 * Hash 已丢失时仍清理全局 ZSet 残留
+	 * @param jti 会话唯一标识
+	 */
+	private void terminateSessionWithoutUserIndex(@NotNull String jti) {
+		String userSessionKey = USER_SESSION.key(jti);
+		String globalSessionsKey = GLOBAL_SESSIONS.fixedKey();
+		redisTemplate.execute(new SessionCallback<>() {
+			@Override
+			@SuppressWarnings("unchecked")
+			public List<Object> execute(@NotNull RedisOperations operations) throws DataAccessException {
+				operations.multi();
+				operations.delete(userSessionKey);
+				operations.opsForZSet().remove(globalSessionsKey, jti);
+				return operations.exec();
+			}
+		});
+	}
+
+	/**
+	 * 根据 refreshToken 过期时间计算会话 TTL
+	 * @param userSessionIndex 会话索引
+	 * @return TTL，无法计算时返回默认 TTL
+	 */
+	private Duration resolveSessionTtl(@NotNull UserSessionIndex userSessionIndex) {
+		Long refreshTokenExpiresAt = userSessionIndex.getRefreshTokenExpiresAt();
+		Duration ttl = USER_SESSION.getDefaultTtl();
+		if (refreshTokenExpiresAt != null) {
+			long ttlSeconds = (refreshTokenExpiresAt - System.currentTimeMillis()) / 1000;
+			if (ttlSeconds > 0) {
+				ttl = Duration.ofSeconds(ttlSeconds);
+			}
+		}
+		return ttl;
+	}
+
+	/**
+	 * 解析全局 ZSet 排序分值
+	 * @param userSessionIndex 会话索引
+	 * @return loginAt 毫秒时间戳
+	 */
+	private double resolveLoginAtScore(@NotNull UserSessionIndex userSessionIndex) {
+		Long loginAt = userSessionIndex.getLoginAt();
+		if (loginAt != null) {
+			return loginAt.doubleValue();
+		}
+		return System.currentTimeMillis();
 	}
 
 	/**
@@ -226,7 +299,7 @@ public class RedisUserSessionIndexRepository {
 		Long ttl = redisTemplate.getExpire(userSessionKey, TimeUnit.SECONDS);
 
 		// null: Redis 未返回 TTL；-2: key 不存在；-1: 无过期都视为较新，避免误淘汰有效长会话
-		if (ttl == null || ttl < 0) {
+		if (ttl < 0) {
 			return Long.MAX_VALUE;
 		}
 		return ttl;

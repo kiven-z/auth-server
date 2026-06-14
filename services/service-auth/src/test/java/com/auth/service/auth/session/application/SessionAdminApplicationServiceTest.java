@@ -36,10 +36,10 @@ class SessionAdminApplicationServiceTest {
 		verifyNoInteractions(redisUserSessionIndexRepository);
 
 		doThrow(new RuntimeException("boom")).when(redisUserSessionIndexRepository)
-			.deleteAllSessions(TestConstants.USER_ID);
+			.terminateAllSessions(TestConstants.USER_ID);
 		assertDoesNotThrow(
 				() -> sessionAdminApplicationService.kickAllSessions(Arrays.asList(null, TestConstants.USER_ID)));
-		verify(redisUserSessionIndexRepository).deleteAllSessions(TestConstants.USER_ID);
+		verify(redisUserSessionIndexRepository).terminateAllSessions(TestConstants.USER_ID);
 	}
 
 }

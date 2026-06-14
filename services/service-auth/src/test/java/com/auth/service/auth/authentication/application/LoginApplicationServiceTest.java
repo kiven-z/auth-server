@@ -198,8 +198,7 @@ class LoginApplicationServiceTest {
 
 		var hint = service.logout(TestConstants.ACCESS_TOKEN);
 
-		verify(sessionGateway).deleteSession(TestConstants.JTI);
-		verify(sessionGateway).removeActiveSession(TestConstants.USER_ID, TestConstants.JTI);
+		verify(sessionGateway).terminateSession(TestConstants.USER_ID, TestConstants.JTI);
 		verifyNoInteractions(loginAuditService);
 		assertTrue(hint.isPresent());
 		assertEquals(TestConstants.USER_ID, hint.get().userId());

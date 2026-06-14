@@ -50,6 +50,7 @@ public class UserSessionIndexBuilder {
 		long refreshTokenExpiresAtMillis = System.currentTimeMillis() + refreshExpiredSeconds * 1000L;
 		userSessionIndex.setRefreshTokenExpiresAt(refreshTokenExpiresAtMillis);
 		userSessionIndex.setRememberMe(rememberMe);
+		userSessionIndex.setLoginAt(System.currentTimeMillis());
 		return userSessionIndex;
 	}
 

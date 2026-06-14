@@ -26,6 +26,12 @@ public enum SecurityRedisKey {
 	USER_SESSIONS("auth:security:user:sessions:", null),
 
 	/**
+	 * 全局活跃会话索引（ZSet，member=jti，score=loginAt 毫秒时间戳） 默认 TTL: null（随会话 Hash 过期后由 reconcile
+	 * 清理）
+	 */
+	GLOBAL_SESSIONS("auth:security:global:sessions", null),
+
+	/**
 	 * 用户权限缓存（Value） 默认 TTL: 15 天 key 后缀: userId 最好和 JwtProperties 配置一致
 	 */
 	USER_PERM("auth:security:user:perm:", Duration.ofDays(7)),
@@ -75,6 +81,14 @@ public enum SecurityRedisKey {
 	 */
 	public String key(long suffix) {
 		return prefix + suffix;
+	}
+
+	/**
+	 * 构建无动态后缀的固定 Redis Key（如全局 ZSet）
+	 * @return 完整 Redis Key
+	 */
+	public String fixedKey() {
+		return prefix;
 	}
 
 }

@@ -107,7 +107,7 @@ class LoginSessionOrchestratorTest {
 		inOrder.verify(sessionGateway)
 			.buildSessionIndex(same(httpServletRequest), eq(TestConstants.USER_ID), anyString(),
 					eq(TestConstants.REFRESH_TOKEN), eq(false));
-		inOrder.verify(sessionGateway).createUserSessionIndex(sessionIndex);
+		inOrder.verify(sessionGateway).registerSession(sessionIndex);
 		inOrder.verify(rememberMePolicyPort).resolveReadMeDay();
 		inOrder.verify(credentialGateway).recordSuccess(TestConstants.USER_ID);
 		inOrder.verify(loginAuditService)
@@ -157,7 +157,7 @@ class LoginSessionOrchestratorTest {
 
 		verify(authProfileCachePort).cacheProfile(profile);
 		verify(authProfileCachePort).evictProfile(TestConstants.USER_ID);
-		verify(sessionGateway, never()).createUserSessionIndex(any());
+		verify(sessionGateway, never()).registerSession(any());
 		verify(loginAuditService).auditOrchestrationFailure(same(httpServletRequest),
 				eq(AuthLoginLogType.LOGIN_PASSWORD), eq(TestConstants.USER_ID), eq("user"),
 				any(AuthBusinessException.class));

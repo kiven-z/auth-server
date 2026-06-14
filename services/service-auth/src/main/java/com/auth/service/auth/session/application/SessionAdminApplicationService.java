@@ -30,8 +30,7 @@ public class SessionAdminApplicationService {
 	 * @param sessionId 会话 ID（jti）
 	 */
 	public void kickSession(long userId, String sessionId) {
-		redisUserSessionIndexRepository.deleteSession(sessionId);
-		redisUserSessionIndexRepository.removeActiveSession(userId, sessionId);
+		redisUserSessionIndexRepository.terminateSession(userId, sessionId);
 	}
 
 	/**
@@ -39,7 +38,7 @@ public class SessionAdminApplicationService {
 	 * @param userId 用户 ID
 	 */
 	public void kickAllSessions(long userId) {
-		redisUserSessionIndexRepository.deleteAllSessions(userId);
+		redisUserSessionIndexRepository.terminateAllSessions(userId);
 	}
 
 	/**

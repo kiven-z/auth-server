@@ -103,8 +103,7 @@ public class LoginApplicationService {
 		return tokenGateway.parseAccessTokenSafe(accessToken).map(userToken -> {
 			String jti = userToken.getJti();
 			Long userId = userToken.getUserId();
-			sessionGateway.deleteSession(jti);
-			sessionGateway.removeActiveSession(userId, jti);
+			sessionGateway.terminateSession(userId, jti);
 			return new LogoutSessionHint(userId, jti);
 		});
 	}
