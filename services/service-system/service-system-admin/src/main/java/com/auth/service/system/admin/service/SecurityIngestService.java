@@ -4,7 +4,7 @@ import com.auth.module.security.contract.event.OperationLogPayloadEvent;
 import com.auth.module.security.contract.event.SecurityAuthorizationAuditPayloadEvent;
 
 /**
- * 接收内部上报的安全相关负载并落库（授权审计、操作日志等）。
+ * 接收内部上报的安全相关负载并落库（授权审计、操作日志等）
  *
  * @author Bunny
  */

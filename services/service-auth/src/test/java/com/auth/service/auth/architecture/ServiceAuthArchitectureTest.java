@@ -44,14 +44,14 @@ class ServiceAuthArchitectureTest {
 
 	@ArchTest
 	static final ArchRule authorization_must_not_depend_on_authentication_domain = noClasses().that()
-		.resideInAPackage("..authorization..")
+		.resideInAPackage("..application.authorization..")
 		.should()
 		.dependOnClassesThat()
-		.resideInAPackage("..authentication.domain..");
+		.resideInAPackage("..domain.authentication..");
 
 	@ArchTest
 	static final ArchRule authorization_application_must_not_use_user_entity = noClasses().that()
-		.resideInAPackage("..authorization.application..")
+		.resideInAPackage("..application.authorization..")
 		.should()
 		.dependOnClassesThat()
 		.haveFullyQualifiedName("com.auth.module.platform.persistence.model.UserEntity");
@@ -94,24 +94,20 @@ class ServiceAuthArchitectureTest {
 		.dependOnClassesThat()
 		.areAssignableTo(RestTemplate.class);
 
-	private static final String AUTH_APPLICATION = "..authentication.application..";
+	private static final String AUTH_LOGIN_APPLICATION = "..application.login..";
 
 	@ArchTest
 	static final ArchRule authentication_application_must_not_depend_on_authorization_application = noClasses().that()
-		.resideInAPackage(AUTH_APPLICATION)
+		.resideInAPackage(AUTH_LOGIN_APPLICATION)
 		.should()
 		.dependOnClassesThat()
-		.resideInAPackage("..authorization.application..");
-
-	private static final String AUTH_INFRA = "..authentication.infrastructure..";
-
-	private static final String SESSION_INFRA = "..session.infrastructure..";
+		.resideInAPackage("..application.authorization..");
 
 	@ArchTest
 	static final ArchRule authentication_application_must_not_depend_on_infrastructure = noClasses().that()
-		.resideInAPackage(AUTH_APPLICATION)
+		.resideInAPackage(AUTH_LOGIN_APPLICATION)
 		.should()
 		.dependOnClassesThat()
-		.resideInAnyPackage(AUTH_INFRA, SESSION_INFRA);
+		.resideInAnyPackage("..infrastructure..");
 
 }

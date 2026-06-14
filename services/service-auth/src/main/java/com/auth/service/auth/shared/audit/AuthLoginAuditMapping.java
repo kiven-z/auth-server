@@ -1,6 +1,6 @@
 package com.auth.service.auth.shared.audit;
 
-import com.auth.service.auth.authentication.domain.enums.AuthLoginLogResult;
+import com.auth.service.auth.domain.authentication.enums.AuthLoginLogResult;
 import com.auth.service.auth.shared.exception.enums.AuthResultCode;
 import lombok.experimental.UtilityClass;
 
