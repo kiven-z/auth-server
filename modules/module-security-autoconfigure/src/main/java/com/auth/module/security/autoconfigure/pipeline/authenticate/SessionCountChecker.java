@@ -7,6 +7,7 @@ import com.auth.module.security.contract.exception.SecurityResultCodeEnum;
 import com.auth.module.security.contract.exception.SecurityTokenException;
 import com.auth.module.security.contract.redis.SecurityRedisKey;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import static com.auth.module.security.contract.redis.SecurityRedisKey.USER_SESSIONS;
@@ -20,17 +21,18 @@ import static com.auth.module.security.contract.redis.SecurityRedisKey.USER_SESS
 public final class SessionCountChecker {
 
 	/**
-	 * Redis 模板
+	 * 会话索引 Redis 模板（与登录注册使用同一套纯字符串序列化）
 	 */
-	private final RedisTemplate<String, Object> redisTemplate;
+	private final RedisTemplate<String, String> sessionRedisTemplate;
 
 	/**
 	 * 用户配置属性
 	 */
 	private final UserConfigProperties userConfigProperties;
 
-	public SessionCountChecker(RedisTemplate<String, Object> redisTemplate, UserConfigProperties userConfigProperties) {
-		this.redisTemplate = redisTemplate;
+	public SessionCountChecker(@Qualifier("sessionRedisTemplate") RedisTemplate<String, String> sessionRedisTemplate,
+			UserConfigProperties userConfigProperties) {
+		this.sessionRedisTemplate = sessionRedisTemplate;
 		this.userConfigProperties = userConfigProperties;
 	}
 
@@ -43,7 +45,7 @@ public final class SessionCountChecker {
 			throw new SecurityTokenException(SecurityResultCodeEnum.TOKEN_INVALID, "Session id is missing.");
 		}
 		String sessionKey = SecurityRedisKey.USER_SESSION.key(sessionId);
-		Boolean exists = redisTemplate.hasKey(sessionKey);
+		Boolean exists = sessionRedisTemplate.hasKey(sessionKey);
 		if (BooleanUtil.isFalse(exists)) {
 			throw new SecurityTokenException(SecurityResultCodeEnum.SESSION_MISSING, "Session is missing.");
 		}
@@ -59,16 +61,16 @@ public final class SessionCountChecker {
 			throw new SecurityTokenException(SecurityResultCodeEnum.TOKEN_INVALID, "Session id is missing.");
 		}
 		String indexKey = USER_SESSIONS.key(userId);
-		Boolean indexExists = redisTemplate.hasKey(indexKey);
+		Boolean indexExists = sessionRedisTemplate.hasKey(indexKey);
 		if (BooleanUtil.isFalse(indexExists)) {
 			return;
 		}
-		Long size = redisTemplate.opsForSet().size(indexKey);
+		Long size = sessionRedisTemplate.opsForSet().size(indexKey);
 		if (size == null || size == 0) {
 			throw new SecurityTokenException(SecurityResultCodeEnum.SESSION_INCONSISTENT,
 					"Session set is empty - data inconsistent.");
 		}
-		Boolean member = redisTemplate.opsForSet().isMember(indexKey, sessionId);
+		Boolean member = sessionRedisTemplate.opsForSet().isMember(indexKey, sessionId);
 		if (!BooleanUtil.isTrue(member)) {
 			throw new SecurityTokenException(SecurityResultCodeEnum.SESSION_MISSING, "Session is not active.");
 		}

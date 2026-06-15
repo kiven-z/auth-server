@@ -1,14 +1,12 @@
 package com.auth.service.auth.application.session;
 
-import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.service.auth.TestConstants;
 import com.auth.service.auth.application.port.UserBriefQueryPort;
-import com.auth.service.auth.config.OnlineSessionProperties;
-import com.auth.service.auth.domain.session.model.OnlineSessionPageSlice;
+import com.auth.service.auth.domain.session.model.OnlineUserPageSlice;
+import com.auth.service.auth.domain.session.model.OnlineUserPageSlice.OnlineUserEntry;
 import com.auth.service.auth.domain.session.model.UserOnlineBrief;
-import com.auth.service.auth.domain.session.model.query.OnlineSessionPageQuery;
+import com.auth.service.auth.domain.session.model.query.OnlineUserPageQuery;
 import com.auth.service.auth.infrastructure.redis.session.RedisUserSessionIndexRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,24 +39,8 @@ class SessionAdminApplicationServiceTest {
 	@Mock
 	private UserBriefQueryPort userBriefQueryPort;
 
-	@Mock
-	private OnlineSessionProperties onlineSessionProperties;
-
 	@InjectMocks
 	private SessionAdminApplicationService sessionAdminApplicationService;
-
-	private OnlineSessionProperties.Reconcile reconcileConfig;
-
-	@BeforeEach
-	void setUp() {
-		OnlineSessionProperties.Query queryConfig = new OnlineSessionProperties.Query();
-		queryConfig.setPreCleanupBatch(100);
-		reconcileConfig = new OnlineSessionProperties.Reconcile();
-		reconcileConfig.setBatchSize(200);
-		reconcileConfig.setMaxRounds(50);
-		when(onlineSessionProperties.getQuery()).thenReturn(queryConfig);
-		when(onlineSessionProperties.getReconcile()).thenReturn(reconcileConfig);
-	}
 
 	@Test
 	@DisplayName("踢单会话：委托 terminateSession")
@@ -82,118 +64,66 @@ class SessionAdminApplicationServiceTest {
 	}
 
 	@Test
-	@DisplayName("全局在线分页：无用户名筛选时 allowedUserIds 为 null")
-	void getOnlineSessionPage_shouldQueryAllWhenUsernameBlank() {
-		OnlineSessionPageQuery query = new OnlineSessionPageQuery();
+	@DisplayName("在线用户分页：无用户名筛选时 allowedUserIds 为 null")
+	void getOnlineUserPage_shouldQueryAllWhenUsernameBlank() {
+		OnlineUserPageQuery query = new OnlineUserPageQuery();
 		query.setPageIndex(1);
 		query.setPageSize(20);
 
-		UserSessionIndex session = sampleSession();
-		when(redisUserSessionIndexRepository.cleanupStaleGlobalSessions(100)).thenReturn(0);
-		when(redisUserSessionIndexRepository.pageGlobalSessions(1, 20, null, null))
-			.thenReturn(new OnlineSessionPageSlice(1L, List.of(session)));
+		OnlineUserEntry entry = new OnlineUserEntry(TestConstants.USER_ID, 1_700_000_000_000L, 2);
+		when(redisUserSessionIndexRepository.pageOnlineUsers(1, 20, null))
+			.thenReturn(new OnlineUserPageSlice(1L, List.of(entry)));
 
 		UserOnlineBrief userBrief = new UserOnlineBrief(TestConstants.USER_ID, "alice", "Alice");
 		when(userBriefQueryPort.findByIds(any())).thenReturn(Map.of(TestConstants.USER_ID, userBrief));
 
-		var page = sessionAdminApplicationService.getOnlineSessionPage(query);
+		var page = sessionAdminApplicationService.getOnlineUserPage(query);
 
-		verify(redisUserSessionIndexRepository).cleanupStaleGlobalSessions(100);
-		verify(redisUserSessionIndexRepository).pageGlobalSessions(1, 20, null, null);
+		verify(redisUserSessionIndexRepository).pageOnlineUsers(1, 20, null);
 		verify(userBriefQueryPort, never()).findIdsByUsernameLike(any());
 		assertEquals(1L, page.getTotal());
 		assertEquals(1, page.getList().size());
 		assertEquals("alice", page.getList().get(0).getUsername());
-		assertEquals(TestConstants.JTI, page.getList().get(0).getSessionId());
+		assertEquals(2, page.getList().get(0).getActiveSessionCount());
 	}
 
 	@Test
-	@DisplayName("全局在线分页：用户名筛选无匹配时返回空且不访问 Redis 分页")
-	void getOnlineSessionPage_shouldReturnEmptyWhenUsernameFilterMisses() {
-		OnlineSessionPageQuery query = new OnlineSessionPageQuery();
+	@DisplayName("在线用户分页：用户名筛选无匹配时返回空且不访问 Redis 分页")
+	void getOnlineUserPage_shouldReturnEmptyWhenUsernameFilterMisses() {
+		OnlineUserPageQuery query = new OnlineUserPageQuery();
 		query.setUsername("nobody");
-		when(redisUserSessionIndexRepository.cleanupStaleGlobalSessions(100)).thenReturn(0);
 		when(userBriefQueryPort.findIdsByUsernameLike("nobody")).thenReturn(List.of());
 
-		var page = sessionAdminApplicationService.getOnlineSessionPage(query);
+		var page = sessionAdminApplicationService.getOnlineUserPage(query);
 
 		assertEquals(0L, page.getTotal());
 		assertTrue(page.getList().isEmpty());
-		verify(redisUserSessionIndexRepository).cleanupStaleGlobalSessions(100);
-		verify(redisUserSessionIndexRepository, never()).pageGlobalSessions(any(Integer.class), any(Integer.class),
-				any(), any());
+		verify(redisUserSessionIndexRepository, never()).pageOnlineUsers(any(Integer.class), any(Integer.class), any());
 	}
 
 	@Test
-	@DisplayName("全局在线分页：用户名筛选有匹配时传入 allowedUserIds")
-	void getOnlineSessionPage_shouldPassAllowedUserIdsWhenUsernameProvided() {
-		OnlineSessionPageQuery query = new OnlineSessionPageQuery();
+	@DisplayName("在线用户分页：用户名筛选有匹配时传入 allowedUserIds")
+	void getOnlineUserPage_shouldPassAllowedUserIdsWhenUsernameProvided() {
+		OnlineUserPageQuery query = new OnlineUserPageQuery();
 		query.setUsername("ali");
-		query.setIpAddress("192.168");
-		when(redisUserSessionIndexRepository.cleanupStaleGlobalSessions(100)).thenReturn(0);
 		when(userBriefQueryPort.findIdsByUsernameLike("ali")).thenReturn(List.of(TestConstants.USER_ID));
-		when(redisUserSessionIndexRepository.pageGlobalSessions(eq(1), eq(30), eq(Set.of(TestConstants.USER_ID)),
-				eq("192.168")))
-			.thenReturn(new OnlineSessionPageSlice(0L, List.of()));
+		when(redisUserSessionIndexRepository.pageOnlineUsers(eq(1), eq(30), eq(Set.of(TestConstants.USER_ID))))
+			.thenReturn(new OnlineUserPageSlice(0L, List.of()));
 
-		sessionAdminApplicationService.getOnlineSessionPage(query);
+		sessionAdminApplicationService.getOnlineUserPage(query);
 
-		verify(redisUserSessionIndexRepository).pageGlobalSessions(1, 30, Set.of(TestConstants.USER_ID), "192.168");
+		verify(redisUserSessionIndexRepository).pageOnlineUsers(1, 30, Set.of(TestConstants.USER_ID));
 	}
 
 	@Test
-	@DisplayName("reconcile：本批无清理时只执行一轮")
-	void reconcileStaleGlobalSessions_shouldStopWhenBatchReturnsZero() {
-		when(redisUserSessionIndexRepository.cleanupStaleGlobalSessions(200)).thenReturn(0);
+	@DisplayName("统计摘要：委托 Repository 统计在线用户 ZSet 条数")
+	void getOnlineUserSummary_shouldReturnOnlineUserCount() {
+		when(redisUserSessionIndexRepository.countOnlineUsers()).thenReturn(12L);
 
-		assertEquals(0, sessionAdminApplicationService.reconcileStaleGlobalSessions());
+		var summary = sessionAdminApplicationService.getOnlineUserSummary();
 
-		verify(redisUserSessionIndexRepository, times(1)).cleanupStaleGlobalSessions(200);
-	}
-
-	@Test
-	@DisplayName("reconcile：多轮累计清理直至无僵尸")
-	void reconcileStaleGlobalSessions_shouldLoopUntilNoStale() {
-		when(redisUserSessionIndexRepository.cleanupStaleGlobalSessions(200)).thenReturn(5, 2, 0);
-
-		assertEquals(7, sessionAdminApplicationService.reconcileStaleGlobalSessions());
-
-		verify(redisUserSessionIndexRepository, times(3)).cleanupStaleGlobalSessions(200);
-	}
-
-	@Test
-	@DisplayName("reconcile：达到 maxRounds 时停止即使本批仍有清理")
-	void reconcileStaleGlobalSessions_shouldStopAtMaxRounds() {
-		reconcileConfig.setMaxRounds(2);
-		when(redisUserSessionIndexRepository.cleanupStaleGlobalSessions(200)).thenReturn(1);
-
-		assertEquals(2, sessionAdminApplicationService.reconcileStaleGlobalSessions());
-
-		verify(redisUserSessionIndexRepository, times(2)).cleanupStaleGlobalSessions(200);
-	}
-
-	@Test
-	@DisplayName("统计摘要：委托 Repository 统计 global ZSet 条数")
-	void getOnlineSessionSummary_shouldReturnGlobalIndexCount() {
-		when(redisUserSessionIndexRepository.countGlobalSessionIndex()).thenReturn(12L);
-
-		var summary = sessionAdminApplicationService.getOnlineSessionSummary();
-
-		assertEquals(12L, summary.getSessionCount());
-		verify(redisUserSessionIndexRepository).countGlobalSessionIndex();
-	}
-
-	/**
-	 * 构造样例会话索引
-	 * @return 会话索引
-	 */
-	private UserSessionIndex sampleSession() {
-		UserSessionIndex session = new UserSessionIndex();
-		session.setUserId(TestConstants.USER_ID);
-		session.setSessionId(TestConstants.JTI);
-		session.setLoginAt(1_700_000_000_000L);
-		session.setIpAddress("192.168.1.1");
-		return session;
+		assertEquals(12L, summary.getOnlineUserCount());
+		verify(redisUserSessionIndexRepository).countOnlineUsers();
 	}
 
 }

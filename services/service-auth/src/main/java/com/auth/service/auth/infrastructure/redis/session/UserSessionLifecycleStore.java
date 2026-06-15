@@ -6,6 +6,7 @@ import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.service.auth.infrastructure.redis.session.script.UserSessionRedisScripts;
 import com.auth.service.auth.infrastructure.redis.session.support.UserSessionIndexRedisCodec;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -26,21 +27,22 @@ import static com.auth.module.security.contract.redis.SecurityRedisKey.*;
 @Service
 public class UserSessionLifecycleStore {
 
-	private final RedisTemplate<String, Object> redisTemplate;
+	private final RedisTemplate<String, String> sessionRedisTemplate;
 
 	private final UserSessionRedisScripts userSessionRedisScripts;
 
 	private final UserSessionIndexRedisCodec userSessionIndexRedisCodec;
 
-	public UserSessionLifecycleStore(RedisTemplate<String, Object> redisTemplate,
+	public UserSessionLifecycleStore(
+			@Qualifier("sessionRedisTemplate") RedisTemplate<String, String> sessionRedisTemplate,
 			UserSessionRedisScripts userSessionRedisScripts, UserSessionIndexRedisCodec userSessionIndexRedisCodec) {
-		this.redisTemplate = redisTemplate;
+		this.sessionRedisTemplate = sessionRedisTemplate;
 		this.userSessionRedisScripts = userSessionRedisScripts;
 		this.userSessionIndexRedisCodec = userSessionIndexRedisCodec;
 	}
 
 	/**
-	 * 注册活跃会话：写入 Hash、用户 Set 与全局 ZSet（Lua 原子）
+	 * 注册活跃会话：写入 Hash、用户 Set 与在线用户 ZSet（Lua 原子）
 	 * @param userSessionIndex 用户会话索引
 	 */
 	public void registerSession(@NotNull UserSessionIndex userSessionIndex) {
@@ -50,15 +52,15 @@ public class UserSessionLifecycleStore {
 			throw new IllegalArgumentException("sessionId and userId are required for session registration");
 		}
 
-		List<String> keys = List.of(USER_SESSION.key(sessionId), USER_SESSIONS.key(userId), GLOBAL_SESSIONS.fixedKey());
-		Object[] args = userSessionIndexRedisCodec.buildRegisterScriptArgs(userSessionIndex, sessionId,
+		List<String> keys = List.of(USER_SESSION.key(sessionId), USER_SESSIONS.key(userId), ONLINE_USERS.fixedKey());
+		Object[] scriptArgs = userSessionIndexRedisCodec.buildRegisterScriptArgs(userSessionIndex, sessionId,
 				userSessionIndexRedisCodec.resolveLoginAtScore(userSessionIndex),
 				userSessionIndexRedisCodec.resolveSessionTtl(userSessionIndex));
-		redisTemplate.execute(userSessionRedisScripts.registerScript(), keys, args);
+		sessionRedisTemplate.execute(userSessionRedisScripts.registerScript(), keys, scriptArgs);
 	}
 
 	/**
-	 * 终止单条会话：删除 Hash、用户 Set 与全局 ZSet（Lua 原子，幂等）
+	 * 终止单条会话：删除 Hash 与用户 Set（Lua 原子，幂等）；在线用户 ZSet 由 Java 侧按 SCARD 同步
 	 * @param userId 用户 ID
 	 * @param jti 会话唯一标识
 	 */
@@ -66,8 +68,8 @@ public class UserSessionLifecycleStore {
 		if (CharSequenceUtil.isBlank(jti)) {
 			return;
 		}
-		List<String> keys = List.of(USER_SESSION.key(jti), USER_SESSIONS.key(userId), GLOBAL_SESSIONS.fixedKey());
-		redisTemplate.execute(userSessionRedisScripts.terminateScript(), keys, jti);
+		List<String> keys = List.of(USER_SESSION.key(jti), USER_SESSIONS.key(userId));
+		sessionRedisTemplate.execute(userSessionRedisScripts.terminateScript(), keys, jti);
 	}
 
 	/**
@@ -77,7 +79,7 @@ public class UserSessionLifecycleStore {
 	public void terminateAllSessions(long userId) {
 		String userSessionsKey = USER_SESSIONS.key(userId);
 		List<String> jtis = streamActiveJtis(userSessionsKey).toList();
-		redisTemplate.delete(userSessionsKey);
+		sessionRedisTemplate.delete(userSessionsKey);
 		jtis.forEach(jti -> terminateSession(userId, jti));
 	}
 
@@ -90,7 +92,8 @@ public class UserSessionLifecycleStore {
 		if (CharSequenceUtil.isBlank(jti)) {
 			return Optional.empty();
 		}
-		Map<Object, Object> hash = redisTemplate.opsForHash().entries(USER_SESSION.key(jti));
+		Map<String, String> hash = userSessionIndexRedisCodec
+			.asStringHash(sessionRedisTemplate.opsForHash().entries(USER_SESSION.key(jti)));
 		if (CollUtil.isEmpty(hash)) {
 			return Optional.empty();
 		}
@@ -107,13 +110,14 @@ public class UserSessionLifecycleStore {
 	public void updateRefreshInfo(@NotNull String jti, @NotNull String refreshTokenHash, long refreshTokenExpiresAt,
 			@NotNull Duration ttl) {
 		String sessionKey = USER_SESSION.key(jti);
-		redisTemplate.opsForHash().put(sessionKey, "refreshTokenHash", refreshTokenHash);
-		redisTemplate.opsForHash().put(sessionKey, "refreshTokenExpiresAt", refreshTokenExpiresAt);
-		redisTemplate.expire(sessionKey, ttl);
+		sessionRedisTemplate.opsForHash().put(sessionKey, "refreshTokenHash", refreshTokenHash);
+		sessionRedisTemplate.opsForHash()
+			.put(sessionKey, "refreshTokenExpiresAt", String.valueOf(refreshTokenExpiresAt));
+		sessionRedisTemplate.expire(sessionKey, ttl);
 	}
 
 	/**
-	 * 从 Hash 解析 userId 后终止；Hash 已丢失时仍清理全局 ZSet
+	 * 从 Hash 解析 userId 后终止；Hash 已丢失时仅删除残留 Hash key
 	 * @param jti 会话唯一标识
 	 */
 	public void terminateSession(@NotNull String jti) {
@@ -125,8 +129,8 @@ public class UserSessionLifecycleStore {
 			terminateSession(sessionIndex.get().getUserId(), jti);
 			return;
 		}
-		List<String> keys = List.of(USER_SESSION.key(jti), GLOBAL_SESSIONS.fixedKey());
-		redisTemplate.execute(userSessionRedisScripts.terminateOrphanScript(), keys, jti);
+		List<String> keys = List.of(USER_SESSION.key(jti));
+		sessionRedisTemplate.execute(userSessionRedisScripts.terminateOrphanScript(), keys, jti);
 	}
 
 	/**
@@ -135,11 +139,9 @@ public class UserSessionLifecycleStore {
 	 * @return 非空 jti 流
 	 */
 	private Stream<String> streamActiveJtis(String userSessionsKey) {
-		return Optional.ofNullable(redisTemplate.opsForSet().members(userSessionsKey))
+		return Optional.ofNullable(sessionRedisTemplate.opsForSet().members(userSessionsKey))
 			.orElseGet(Collections::emptySet)
 			.stream()
-			.filter(String.class::isInstance)
-			.map(String.class::cast)
 			.filter(CharSequenceUtil::isNotBlank);
 	}
 

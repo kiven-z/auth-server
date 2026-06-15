@@ -26,10 +26,10 @@ public enum SecurityRedisKey {
 	USER_SESSIONS("auth:security:user:sessions:", null),
 
 	/**
-	 * 全局活跃会话索引（ZSet，member=jti，score=loginAt 毫秒时间戳） 默认 TTL: null（随会话 Hash 过期后由 reconcile
-	 * 清理）
+	 * 在线用户索引（ZSet，member=userId 字符串，score=lastLoginAt 毫秒时间戳） 默认 TTL: null（无活跃会话时由 Java
+	 * 侧移除）
 	 */
-	GLOBAL_SESSIONS("auth:security:global:sessions", null),
+	ONLINE_USERS("auth:security:online:users", null),
 
 	/**
 	 * 用户权限缓存（Value） 默认 TTL: 15 天 key 后缀: userId 最好和 JwtProperties 配置一致

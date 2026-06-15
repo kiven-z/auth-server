@@ -1,5 +1,4 @@
--- KEYS[1]=session hash, KEYS[2]=global zset
--- ARGV[1]=jti
+-- KEYS[1]=session hash
+-- ARGV[1]=jti（保留占位，便于脚本签名与 terminate 一致）
 redis.call('DEL', KEYS[1])
-redis.call('ZREM', KEYS[2], ARGV[1])
 return 1

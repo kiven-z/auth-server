@@ -6,6 +6,7 @@ import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.service.auth.infrastructure.redis.session.support.UserSessionIndexRedisCodec;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -23,16 +24,16 @@ import static com.auth.module.security.contract.redis.SecurityRedisKey.*;
 @Service
 public class UserSessionIndexStore {
 
-	private final RedisTemplate<String, Object> redisTemplate;
+	private final RedisTemplate<String, String> sessionRedisTemplate;
 
 	private final UserSessionIndexRedisCodec userSessionIndexRedisCodec;
 
 	private final UserSessionLifecycleStore userSessionLifecycleStore;
 
-	public UserSessionIndexStore(RedisTemplate<String, Object> redisTemplate,
+	public UserSessionIndexStore(@Qualifier("sessionRedisTemplate") RedisTemplate<String, String> sessionRedisTemplate,
 			UserSessionIndexRedisCodec userSessionIndexRedisCodec,
 			UserSessionLifecycleStore userSessionLifecycleStore) {
-		this.redisTemplate = redisTemplate;
+		this.sessionRedisTemplate = sessionRedisTemplate;
 		this.userSessionIndexRedisCodec = userSessionIndexRedisCodec;
 		this.userSessionLifecycleStore = userSessionLifecycleStore;
 	}
@@ -43,7 +44,7 @@ public class UserSessionIndexStore {
 	 * @return 活跃会话数
 	 */
 	public long countActiveSessions(long userId) {
-		return ObjectUtil.defaultIfNull(redisTemplate.opsForSet().size(USER_SESSIONS.key(userId)), 0L);
+		return ObjectUtil.defaultIfNull(sessionRedisTemplate.opsForSet().size(USER_SESSIONS.key(userId)), 0L);
 	}
 
 	/**
@@ -66,7 +67,8 @@ public class UserSessionIndexStore {
 	public int cleanupStaleActiveSessions(long userId) {
 		String userSessionsKey = USER_SESSIONS.key(userId);
 		return (int) streamActiveJtis(userSessionsKey)
-			.filter(jti -> CollUtil.isEmpty(redisTemplate.opsForHash().entries(USER_SESSION.key(jti))))
+			.filter(jti -> CollUtil.isEmpty(userSessionIndexRedisCodec
+				.asStringHash(sessionRedisTemplate.opsForHash().entries(USER_SESSION.key(jti)))))
 			.filter(jti -> removeStaleIndexes(userSessionsKey, jti))
 			.count();
 	}
@@ -82,7 +84,7 @@ public class UserSessionIndexStore {
 			.map(jti -> loadListedSession(userSessionsKey, userId, jti).map(index -> jti))
 			.flatMap(Optional::stream)
 			.min(Comparator.comparingLong(jti -> {
-				Long ttl = redisTemplate.getExpire(USER_SESSION.key(jti), TimeUnit.SECONDS);
+				Long ttl = sessionRedisTemplate.getExpire(USER_SESSION.key(jti), TimeUnit.SECONDS);
 				// null / -2 / -1 视为较新，避免误淘汰有效长会话
 				if (ttl == null || ttl < 0) {
 					return Long.MAX_VALUE;
@@ -101,11 +103,9 @@ public class UserSessionIndexStore {
 	 * @return 非空 jti 流
 	 */
 	private Stream<String> streamActiveJtis(String userSessionsKey) {
-		return Optional.ofNullable(redisTemplate.opsForSet().members(userSessionsKey))
+		return Optional.ofNullable(sessionRedisTemplate.opsForSet().members(userSessionsKey))
 			.orElseGet(Collections::emptySet)
 			.stream()
-			.filter(String.class::isInstance)
-			.map(String.class::cast)
 			.filter(CharSequenceUtil::isNotBlank);
 	}
 
@@ -117,7 +117,8 @@ public class UserSessionIndexStore {
 	 * @return 会话索引
 	 */
 	private Optional<UserSessionIndex> loadListedSession(String userSessionsKey, long userId, String jti) {
-		Map<Object, Object> hash = redisTemplate.opsForHash().entries(USER_SESSION.key(jti));
+		Map<String, String> hash = userSessionIndexRedisCodec
+			.asStringHash(sessionRedisTemplate.opsForHash().entries(USER_SESSION.key(jti)));
 		if (CollUtil.isEmpty(hash)) {
 			removeStaleIndexes(userSessionsKey, jti);
 			return Optional.empty();
@@ -126,15 +127,14 @@ public class UserSessionIndexStore {
 	}
 
 	/**
-	 * 清理用户 Set 与全局 ZSet 中的僵尸 jti
+	 * 清理用户 Set 中的僵尸 jti
 	 * @param userSessionsKey 用户会话 Set key
 	 * @param jti 会话唯一标识
-	 * @return 是否移除了任一索引
+	 * @return 是否移除了 Set 成员
 	 */
 	private boolean removeStaleIndexes(String userSessionsKey, String jti) {
-		Long setRemoved = redisTemplate.opsForSet().remove(userSessionsKey, jti);
-		Long zsetRemoved = redisTemplate.opsForZSet().remove(GLOBAL_SESSIONS.fixedKey(), jti);
-		return NumberUtil.nullToZero(setRemoved) > 0 || NumberUtil.nullToZero(zsetRemoved) > 0;
+		Long setRemoved = sessionRedisTemplate.opsForSet().remove(userSessionsKey, jti);
+		return NumberUtil.nullToZero(setRemoved) > 0;
 	}
 
 }

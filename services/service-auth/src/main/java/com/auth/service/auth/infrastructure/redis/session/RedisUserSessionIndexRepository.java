@@ -4,21 +4,25 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.NumberUtil;
 import com.auth.module.security.contract.api.UserSessionIndex;
-import com.auth.service.auth.domain.session.model.OnlineSessionPageSlice;
-import com.auth.service.auth.infrastructure.redis.session.support.UserSessionIndexRedisCodec;
+import com.auth.service.auth.domain.session.model.OnlineUserPageSlice;
+import com.auth.service.auth.domain.session.model.OnlineUserPageSlice.OnlineUserEntry;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 
-import static com.auth.module.security.contract.redis.SecurityRedisKey.GLOBAL_SESSIONS;
-import static com.auth.module.security.contract.redis.SecurityRedisKey.USER_SESSION;
+import static com.auth.module.security.contract.redis.SecurityRedisKey.ONLINE_USERS;
+import static com.auth.module.security.contract.redis.SecurityRedisKey.USER_SESSIONS;
 
 /**
- * 用户会话 Redis 索引：生命周期、单用户索引与全局在线分页
+ * 用户会话 Redis 索引：生命周期、单用户索引与在线用户分页
  *
  * @author Bunny
  */
@@ -26,9 +30,9 @@ import static com.auth.module.security.contract.redis.SecurityRedisKey.USER_SESS
 public class RedisUserSessionIndexRepository {
 
 	/**
-	 * 全局 ZSet 扫描批次大小
+	 * 在线用户 ZSet 扫描批次大小
 	 */
-	private static final int GLOBAL_SCAN_BATCH = 64;
+	private static final int ONLINE_USER_SCAN_BATCH = 64;
 
 	/**
 	 * 单页最大条数
@@ -39,17 +43,14 @@ public class RedisUserSessionIndexRepository {
 
 	private final UserSessionIndexStore userSessionIndexStore;
 
-	private final RedisTemplate<String, Object> redisTemplate;
-
-	private final UserSessionIndexRedisCodec userSessionIndexRedisCodec;
+	private final RedisTemplate<String, String> sessionRedisTemplate;
 
 	public RedisUserSessionIndexRepository(UserSessionLifecycleStore userSessionLifecycleStore,
-			UserSessionIndexStore userSessionIndexStore, RedisTemplate<String, Object> redisTemplate,
-			UserSessionIndexRedisCodec userSessionIndexRedisCodec) {
+			UserSessionIndexStore userSessionIndexStore,
+			@Qualifier("sessionRedisTemplate") RedisTemplate<String, String> sessionRedisTemplate) {
 		this.userSessionLifecycleStore = userSessionLifecycleStore;
 		this.userSessionIndexStore = userSessionIndexStore;
-		this.redisTemplate = redisTemplate;
-		this.userSessionIndexRedisCodec = userSessionIndexRedisCodec;
+		this.sessionRedisTemplate = sessionRedisTemplate;
 	}
 
 	/**
@@ -62,7 +63,7 @@ public class RedisUserSessionIndexRepository {
 	}
 
 	/**
-	 * 注册活跃会话：写入 Hash、用户 Set 与全局 ZSet（Lua 原子）
+	 * 注册活跃会话：写入 Hash、用户 Set 与在线用户 ZSet（Lua 原子）
 	 * @param userSessionIndex 用户会话索引
 	 */
 	public void registerSession(@NotNull UserSessionIndex userSessionIndex) {
@@ -70,20 +71,22 @@ public class RedisUserSessionIndexRepository {
 	}
 
 	/**
-	 * 终止单条会话：删除 Hash、用户 Set 与全局 ZSet（Lua 原子，幂等）
+	 * 终止单条会话并在无活跃会话时移出在线用户索引
 	 * @param userId 用户 ID
 	 * @param jti 会话唯一标识
 	 */
 	public void terminateSession(long userId, @NotNull String jti) {
 		userSessionLifecycleStore.terminateSession(userId, jti);
+		syncOnlineUserAfterTerminate(userId);
 	}
 
 	/**
-	 * 终止用户全部活跃会话
+	 * 终止用户全部活跃会话并移出在线用户索引
 	 * @param userId 用户 ID
 	 */
 	public void terminateAllSessions(long userId) {
 		userSessionLifecycleStore.terminateAllSessions(userId);
+		syncOnlineUserAfterTerminate(userId);
 	}
 
 	/**
@@ -108,68 +111,49 @@ public class RedisUserSessionIndexRepository {
 	}
 
 	/**
-	 * 获取用户所有活跃会话（Hash 不存在时清理 Set/ZSet 残留）
+	 * 获取用户所有活跃会话（Hash 不存在时清理 Set 残留）
 	 * @param userId 用户ID
 	 * @return 会话列表
 	 */
 	public List<UserSessionIndex> listUserSessions(long userId) {
-		return userSessionIndexStore.listUserSessions(userId);
+		List<UserSessionIndex> sessions = userSessionIndexStore.listUserSessions(userId);
+		syncOnlineUserAfterTerminate(userId);
+		return sessions;
 	}
 
 	/**
-	 * 全局在线会话分页（按 loginAt 倒序；Hash 不存在时清理 ZSet 残留）
+	 * 在线用户分页（按 lastLoginAt 倒序；无活跃会话时清理 ZSet 残留）
 	 * @param pageIndex 页码（从 1 开始）
 	 * @param pageSize 每页条数
 	 * @param allowedUserIds 用户名筛选后的用户 ID 集合；{@code null} 表示不过滤用户
-	 * @param ipAddress IP 地址关键字（包含匹配）；空白表示不过滤
 	 * @return 分页切片
 	 */
-	public OnlineSessionPageSlice pageGlobalSessions(int pageIndex, int pageSize, Set<Long> allowedUserIds,
-			String ipAddress) {
+	public OnlineUserPageSlice pageOnlineUsers(int pageIndex, int pageSize, Set<Long> allowedUserIds) {
 		int normalizedPageIndex = Math.max(1, pageIndex);
 		int normalizedPageSize = Math.min(Math.max(1, pageSize), MAX_PAGE_SIZE);
-		String ipKeyword = CharSequenceUtil.trim(ipAddress);
-		Predicate<UserSessionIndex> filter = session -> {
-			if (allowedUserIds != null) {
-				Long userId = session.getUserId();
-				if (userId == null || !allowedUserIds.contains(userId)) {
-					return false;
-				}
-			}
-			return CharSequenceUtil.isBlank(ipKeyword) || CharSequenceUtil.contains(session.getIpAddress(), ipKeyword);
-		};
-		GlobalSessionScanResult scanResult = scanGlobalSessions(filter, normalizedPageIndex, normalizedPageSize);
-		return new OnlineSessionPageSlice(scanResult.matchedCount(), scanResult.pageRecords());
+		Predicate<Long> filter = userId -> allowedUserIds == null || allowedUserIds.contains(userId);
+		OnlineUserScanResult scanResult = scanOnlineUsers(filter, normalizedPageIndex, normalizedPageSize);
+		return new OnlineUserPageSlice(scanResult.matchedCount(), scanResult.pageRecords());
 	}
 
 	/**
-	 * 统计 global ZSet 成员数（索引条数；reconcile 前可能含僵尸 jti）
-	 * @return 在线会话索引条数
+	 * 统计在线用户 ZSet 成员数
+	 * @return 在线用户数
 	 */
-	public long countGlobalSessionIndex() {
-		Long zcard = redisTemplate.opsForZSet().zCard(GLOBAL_SESSIONS.fixedKey());
+	public long countOnlineUsers() {
+		Long zcard = sessionRedisTemplate.opsForZSet().zCard(ONLINE_USERS.fixedKey());
 		return zcard != null ? zcard : 0L;
 	}
 
 	/**
-	 * 清理全局 ZSet 中 Hash 已不存在的僵尸 jti
-	 * @param batchSize 单批扫描条数
-	 * @return 本批清理数量
+	 * 会话终止后：若无活跃会话则从在线用户 ZSet 移除
+	 * @param userId 用户 ID
 	 */
-	public int cleanupStaleGlobalSessions(int batchSize) {
-		int normalizedBatch = Math.max(1, batchSize);
-		Set<Object> members = redisTemplate.opsForZSet()
-			.reverseRange(GLOBAL_SESSIONS.fixedKey(), 0, normalizedBatch - 1L);
-		if (CollUtil.isEmpty(members)) {
-			return 0;
+	public void syncOnlineUserAfterTerminate(long userId) {
+		Long sessionCount = sessionRedisTemplate.opsForSet().size(USER_SESSIONS.key(userId));
+		if (NumberUtil.nullToZero(sessionCount) <= 0) {
+			sessionRedisTemplate.opsForZSet().remove(ONLINE_USERS.fixedKey(), String.valueOf(userId));
 		}
-		return (int) members.stream()
-			.filter(String.class::isInstance)
-			.map(String.class::cast)
-			.filter(jti -> CollUtil.isEmpty(redisTemplate.opsForHash().entries(USER_SESSION.key(jti))))
-			.filter(jti -> NumberUtil
-				.nullToZero(redisTemplate.opsForZSet().remove(GLOBAL_SESSIONS.fixedKey(), jti)) > 0)
-			.count();
 	}
 
 	/**
@@ -178,7 +162,9 @@ public class RedisUserSessionIndexRepository {
 	 * @return 清理数量
 	 */
 	public int cleanupStaleActiveSessions(long userId) {
-		return userSessionIndexStore.cleanupStaleActiveSessions(userId);
+		int cleaned = userSessionIndexStore.cleanupStaleActiveSessions(userId);
+		syncOnlineUserAfterTerminate(userId);
+		return cleaned;
 	}
 
 	/**
@@ -187,48 +173,51 @@ public class RedisUserSessionIndexRepository {
 	 * @return 被淘汰会话ID，若无可淘汰会话则为空
 	 */
 	public Optional<String> evictOldestActiveSession(long userId) {
-		return userSessionIndexStore.evictOldestActiveSession(userId);
+		Optional<String> evicted = userSessionIndexStore.evictOldestActiveSession(userId);
+		evicted.ifPresent(jti -> syncOnlineUserAfterTerminate(userId));
+		return evicted;
 	}
 
 	/**
-	 * 从 Hash 解析 userId 后终止；Hash 已丢失时仍清理全局 ZSet
+	 * 从 Hash 解析 userId 后终止；Hash 已丢失时仍尝试清理在线用户索引
 	 * @param jti 会话唯一标识
 	 */
 	public void terminateSession(@NotNull String jti) {
+		Optional<UserSessionIndex> sessionIndex = loadUserSessionIndex(jti);
 		userSessionLifecycleStore.terminateSession(jti);
+		sessionIndex.map(UserSessionIndex::getUserId).ifPresent(this::syncOnlineUserAfterTerminate);
 	}
 
 	/**
-	 * 扫描全局 ZSet：统计匹配总数，并收集当前页记录
+	 * 扫描在线用户 ZSet：统计匹配总数，并收集当前页记录
 	 * @param filter 筛选条件
 	 * @param pageIndex 页码
 	 * @param pageSize 每页条数
 	 * @return 扫描结果
 	 */
-	private GlobalSessionScanResult scanGlobalSessions(Predicate<UserSessionIndex> filter, int pageIndex,
-			int pageSize) {
+	private OnlineUserScanResult scanOnlineUsers(Predicate<Long> filter, int pageIndex, int pageSize) {
 		int toSkip = (pageIndex - 1) * pageSize;
-		List<UserSessionIndex> pageRecords = new ArrayList<>(pageSize);
+		List<OnlineUserEntry> pageRecords = new ArrayList<>(pageSize);
 		long matchedCount = 0L;
 		int skipped = 0;
 		long rank = 0L;
-		Long zcard = redisTemplate.opsForZSet().zCard(GLOBAL_SESSIONS.fixedKey());
+		Long zcard = sessionRedisTemplate.opsForZSet().zCard(ONLINE_USERS.fixedKey());
 		if (zcard == null || zcard <= 0) {
-			return new GlobalSessionScanResult(0L, pageRecords);
+			return new OnlineUserScanResult(0L, pageRecords);
 		}
 
 		while (rank < zcard) {
-			Set<Object> members = redisTemplate.opsForZSet()
-				.reverseRange(GLOBAL_SESSIONS.fixedKey(), rank, rank + GLOBAL_SCAN_BATCH - 1L);
+			Set<String> members = sessionRedisTemplate.opsForZSet()
+				.reverseRange(ONLINE_USERS.fixedKey(), rank, rank + ONLINE_USER_SCAN_BATCH - 1L);
 			if (CollUtil.isEmpty(members)) {
 				break;
 			}
-			for (Object member : members) {
-				if (!(member instanceof String jti) || CharSequenceUtil.isBlank(jti)) {
+			for (String userIdText : members) {
+				if (CharSequenceUtil.isBlank(userIdText)) {
 					continue;
 				}
-				Optional<UserSessionIndex> session = loadGlobalListedSession(jti);
-				if (session.isEmpty() || !filter.test(session.get())) {
+				Optional<OnlineUserEntry> entry = loadOnlineUserEntry(userIdText);
+				if (entry.isEmpty() || !filter.test(entry.get().userId())) {
 					continue;
 				}
 				matchedCount++;
@@ -237,35 +226,45 @@ public class RedisUserSessionIndexRepository {
 					continue;
 				}
 				if (pageRecords.size() < pageSize) {
-					pageRecords.add(session.get());
+					pageRecords.add(entry.get());
 				}
 			}
-			rank += GLOBAL_SCAN_BATCH;
+			rank += ONLINE_USER_SCAN_BATCH;
 		}
-		return new GlobalSessionScanResult(matchedCount, pageRecords);
+		return new OnlineUserScanResult(matchedCount, pageRecords);
 	}
 
 	/**
-	 * 全局列表场景：空 Hash 时仅清理 ZSet 残留，不反向补写用户 Set
-	 * @param jti 会话唯一标识
-	 * @return 会话索引
+	 * 加载在线用户条目；无活跃会话时清理 ZSet 残留
+	 * @param userIdText 用户 ID 字符串
+	 * @return 在线用户条目
 	 */
-	private Optional<UserSessionIndex> loadGlobalListedSession(String jti) {
-		Map<Object, Object> hash = redisTemplate.opsForHash().entries(USER_SESSION.key(jti));
-		if (CollUtil.isEmpty(hash)) {
-			redisTemplate.opsForZSet().remove(GLOBAL_SESSIONS.fixedKey(), jti);
+	private Optional<OnlineUserEntry> loadOnlineUserEntry(String userIdText) {
+		long userId;
+		try {
+			userId = Long.parseLong(userIdText);
+		}
+		catch (NumberFormatException ex) {
+			sessionRedisTemplate.opsForZSet().remove(ONLINE_USERS.fixedKey(), userIdText);
 			return Optional.empty();
 		}
-		return Optional.of(userSessionIndexRedisCodec.toSessionIndex(jti, hash, null));
+		long sessionCount = countActiveSessions(userId);
+		if (sessionCount <= 0) {
+			sessionRedisTemplate.opsForZSet().remove(ONLINE_USERS.fixedKey(), userIdText);
+			return Optional.empty();
+		}
+		Double score = sessionRedisTemplate.opsForZSet().score(ONLINE_USERS.fixedKey(), userIdText);
+		long lastLoginAt = score != null ? score.longValue() : 0L;
+		return Optional.of(new OnlineUserEntry(userId, lastLoginAt, (int) sessionCount));
 	}
 
 	/**
-	 * 全局会话扫描结果
+	 * 在线用户扫描结果
 	 *
-	 * @param matchedCount 匹配会话总数
+	 * @param matchedCount 匹配用户总数
 	 * @param pageRecords 当前页记录
 	 */
-	private record GlobalSessionScanResult(long matchedCount, List<UserSessionIndex> pageRecords) {
+	private record OnlineUserScanResult(long matchedCount, List<OnlineUserEntry> pageRecords) {
 
 	}
 

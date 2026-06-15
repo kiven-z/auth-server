@@ -43,6 +43,22 @@ public class RedisConfig {
 		return redisTemplate;
 	}
 
+	/**
+	 * 会话索引专用：Hash / Set / ZSet 与 Lua ARGV 均使用纯字符串，避免 JSON 序列化污染 field 名
+	 */
+	@Bean("sessionRedisTemplate")
+	public RedisTemplate<String, String> sessionRedisTemplate(LettuceConnectionFactory connectionFactory) {
+		RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
+		redisTemplate.setConnectionFactory(connectionFactory);
+		RedisSerializer<String> stringSerializer = keySerializer();
+		redisTemplate.setKeySerializer(stringSerializer);
+		redisTemplate.setValueSerializer(stringSerializer);
+		redisTemplate.setHashKeySerializer(stringSerializer);
+		redisTemplate.setHashValueSerializer(stringSerializer);
+		redisTemplate.afterPropertiesSet();
+		return redisTemplate;
+	}
+
 	private RedisSerializer<String> keySerializer() {
 		return new StringRedisSerializer();
 	}
