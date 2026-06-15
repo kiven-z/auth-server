@@ -23,7 +23,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * {@link BuiltinJobParamsParser} 与 {@link BuiltinJobParamsSupport} 单元测试。
+ * {@link BuiltinJobParamsParser} 单元测试。
  *
  * @author Bunny
  */
@@ -83,7 +83,7 @@ class BuiltinJobParamsParserTest {
 		JobExecutionContext context = mock(JobExecutionContext.class);
 		when(context.getMergedJobDataMap()).thenReturn(new JobDataMap());
 
-		assertThatThrownBy(() -> BuiltinJobParamsSupport.requireRawJson(context)).isInstanceOf(SysJobException.class);
+		assertThatThrownBy(() -> BuiltinJobParamsParser.requireRawJson(context)).isInstanceOf(SysJobException.class);
 	}
 
 	@Getter

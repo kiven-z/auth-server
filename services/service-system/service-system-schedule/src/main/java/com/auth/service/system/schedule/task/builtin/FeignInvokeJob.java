@@ -4,9 +4,8 @@ import com.auth.service.system.schedule.annotation.QuartzTask;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import com.auth.service.system.schedule.model.jobparams.BuiltinRemoteHttpMethod;
 import com.auth.service.system.schedule.model.jobparams.FeignInvokeJobParams;
+import com.auth.service.system.schedule.support.builtin.BuiltinHttpSupport;
 import com.auth.service.system.schedule.support.builtin.BuiltinJobParamsParser;
-import com.auth.service.system.schedule.support.builtin.FeignInvokeSupport;
-import com.auth.service.system.schedule.support.builtin.HttpInvokeExecutor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -43,12 +42,12 @@ public class FeignInvokeJob implements BuiltinQuartzJob {
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		try {
 			FeignInvokeJobParams params = builtinJobParamsParser.parseFromContext(context, FeignInvokeJobParams.class);
-			String url = FeignInvokeSupport.buildServiceUrl(
+			String url = BuiltinHttpSupport.buildServiceUrl(
 					Objects.requireNonNull(params.getServiceName(), "serviceName"),
 					Objects.requireNonNull(params.getPath(), "path"));
 			BuiltinRemoteHttpMethod builtinMethod = Objects.requireNonNull(params.getMethod(), "method");
 			HttpMethod method = HttpMethod.valueOf(builtinMethod.name());
-			ResponseEntity<String> response = HttpInvokeExecutor.exchange(loadBalancedRestTemplate, url, method,
+			ResponseEntity<String> response = BuiltinHttpSupport.exchange(loadBalancedRestTemplate, url, method,
 					params.getHeaders(), params.getBody());
 			String responseBody = response.getBody();
 			log.debug("FeignInvokeJob ok service={} path={} method={} status={} respLen={}", params.getServiceName(),

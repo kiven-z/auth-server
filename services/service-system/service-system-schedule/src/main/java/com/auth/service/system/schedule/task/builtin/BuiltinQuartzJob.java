@@ -8,11 +8,9 @@ import org.quartz.Job;
  * 生产级内置实现见 {@link HttpInvokeJob}、{@link FeignInvokeJob}；演示代码保留在 {@code example} 包。
  * </p>
  * <p>
- * 阅读路径：{@code SysJobEntryJob} → {@code CustomClassTaskExecutor} → 具体内置 Job； 保存时校验
+ * 阅读路径：{@code SysJobEntryJob} → {@code CustomClassTaskExecutor} → 具体内置 Job；保存时校验
  * {@code CustomClassTaskDefinitionValidator} →
- * {@link com.auth.service.system.schedule.validation.builtin.BuiltinJobDefinitionValidatorRegistry}；
- * 内置校验映射见
- * {@link com.auth.service.system.schedule.validation.builtin.BuiltinJobDefinitionValidatorConfig}。
+ * {@link com.auth.service.system.schedule.validation.builtin.BuiltinJobParamsValidator}。
  * </p>
  *
  * @author Bunny

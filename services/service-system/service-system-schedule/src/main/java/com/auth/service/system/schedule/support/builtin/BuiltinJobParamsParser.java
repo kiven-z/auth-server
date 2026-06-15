@@ -3,10 +3,12 @@ package com.auth.service.system.schedule.support.builtin;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.schedule.exception.SysJobException;
+import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
 import com.auth.service.system.schedule.model.jobparams.VersionedJobParams;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
+import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.springframework.stereotype.Component;
 
@@ -34,6 +36,20 @@ public class BuiltinJobParamsParser {
 	}
 
 	/**
+	 * 从 {@link JobExecutionContext} 读取 {@code job_params} 原始 JSON（非空）
+	 * @param context Quartz 执行上下文
+	 * @return 原始 JSON 字符串
+	 */
+	public static String requireRawJson(JobExecutionContext context) {
+		JobDataMap jobDataMap = context.getMergedJobDataMap();
+		String raw = jobDataMap.getString(SysJobQuartzDataKeys.JOB_PARAMS);
+		if (CharSequenceUtil.isBlank(raw)) {
+			throw new SysJobException(PARAM_REQUIRED, "job_params");
+		}
+		return raw;
+	}
+
+	/**
 	 * 校验版本化载荷协议版本
 	 * @param versioned 版本化载荷
 	 */
@@ -52,7 +68,7 @@ public class BuiltinJobParamsParser {
 	 * @return 校验后的载荷
 	 */
 	public <T> T parseFromContext(JobExecutionContext context, Class<T> paramsType) {
-		return parseAndValidate(BuiltinJobParamsSupport.requireRawJson(context), paramsType);
+		return parseAndValidate(requireRawJson(context), paramsType);
 	}
 
 	/**
@@ -68,7 +84,13 @@ public class BuiltinJobParamsParser {
 		}
 		try {
 			T params = objectMapper.readValue(jobParamsJson, paramsType);
-			validateBean(params);
+
+			// Bean Validation 校验
+			Set<ConstraintViolation<T>> violations = validator.validate(params);
+			if (CollUtil.isNotEmpty(violations)) {
+				String message = violations.iterator().next().getMessage();
+				throw new SysJobException(JOB_PARAMS_JSON_INVALID, message);
+			}
 			if (params instanceof VersionedJobParams versioned) {
 				assertSupportedVersion(versioned);
 			}
@@ -79,19 +101,6 @@ public class BuiltinJobParamsParser {
 		}
 		catch (Exception exception) {
 			throw new SysJobException(JOB_PARAMS_JSON_INVALID, exception.getMessage());
-		}
-	}
-
-	/**
-	 * Bean Validation 校验
-	 * @param params 载荷对象
-	 * @param <T> 载荷类型
-	 */
-	private <T> void validateBean(T params) {
-		Set<ConstraintViolation<T>> violations = validator.validate(params);
-		if (CollUtil.isNotEmpty(violations)) {
-			String message = violations.iterator().next().getMessage();
-			throw new SysJobException(JOB_PARAMS_JSON_INVALID, message);
 		}
 	}
 

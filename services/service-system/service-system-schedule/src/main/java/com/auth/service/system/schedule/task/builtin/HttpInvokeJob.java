@@ -5,7 +5,6 @@ import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import com.auth.service.system.schedule.model.jobparams.HttpInvokeJobParams;
 import com.auth.service.system.schedule.support.builtin.BuiltinHttpSupport;
 import com.auth.service.system.schedule.support.builtin.BuiltinJobParamsParser;
-import com.auth.service.system.schedule.support.builtin.HttpInvokeExecutor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobExecutionContext;
@@ -48,7 +47,7 @@ public class HttpInvokeJob implements BuiltinQuartzJob {
 			String url = BuiltinHttpSupport.buildUrlWithQuery(Objects.requireNonNull(params.getUrl(), "url"),
 					params.getQuery());
 			HttpMethod method = HttpMethod.valueOf(Objects.requireNonNull(params.getMethod(), "method").name());
-			ResponseEntity<String> response = HttpInvokeExecutor.exchange(restTemplate, url, method,
+			ResponseEntity<String> response = BuiltinHttpSupport.exchange(restTemplate, url, method,
 					params.getHeaders(), params.getBody());
 			String body = response.getBody();
 			log.debug("HttpInvokeJob ok method={} url={} status={} respLen={}", method, url,

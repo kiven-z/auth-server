@@ -5,7 +5,7 @@ import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.support.QuartzTaskRegistry;
 import com.auth.service.system.schedule.task.builtin.HttpInvokeJob;
-import com.auth.service.system.schedule.validation.builtin.BuiltinJobDefinitionValidatorRegistry;
+import com.auth.service.system.schedule.validation.builtin.BuiltinJobParamsValidator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,7 +30,7 @@ class CustomClassTaskDefinitionValidatorTest {
 	private QuartzTaskRegistry quartzTaskRegistry;
 
 	@Mock
-	private BuiltinJobDefinitionValidatorRegistry builtinJobDefinitionValidatorRegistry;
+	private BuiltinJobParamsValidator builtinJobParamsValidator;
 
 	@InjectMocks
 	private CustomClassTaskDefinitionValidator validator;
@@ -59,7 +59,7 @@ class CustomClassTaskDefinitionValidatorTest {
 
 		validator.validate(job);
 
-		verify(builtinJobDefinitionValidatorRegistry).validateIfPresent(job);
+		verify(builtinJobParamsValidator).validateIfPresent(job);
 	}
 
 	@Test

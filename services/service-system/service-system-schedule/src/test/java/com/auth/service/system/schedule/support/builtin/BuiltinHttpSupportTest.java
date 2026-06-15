@@ -2,9 +2,6 @@ package com.auth.service.system.schedule.support.builtin;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpHeaders;
-
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -13,38 +10,21 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Bunny
  */
-@DisplayName("BuiltinHttpSupport HTTP 请求头组装")
+@DisplayName("BuiltinHttpSupport HTTP 与微服务 URL 组装")
 class BuiltinHttpSupportTest {
 
 	@Test
-	@DisplayName("toHttpHeaders：空 Map 应返回空请求头")
-	void toHttpHeaders_whenEmpty_returnsEmptyHeaders() {
-		HttpHeaders headers = BuiltinHttpSupport.toHttpHeaders(Map.of());
-
-		assertThat(headers).isEmpty();
+	@DisplayName("buildServiceUrl：path 无斜杠时应自动补全")
+	void buildServiceUrl_whenPathMissingLeadingSlash_normalizes() {
+		assertThat(BuiltinHttpSupport.buildServiceUrl("order-service", "api/orders"))
+			.isEqualTo("http://order-service/api/orders");
 	}
 
 	@Test
-	@DisplayName("toHttpHeaders：应复制 Map 中的键值")
-	void toHttpHeaders_whenPresent_copiesEntries() {
-		HttpHeaders headers = BuiltinHttpSupport.toHttpHeaders(Map.of("X-Token", "abc"));
-
-		assertThat(headers.getFirst("X-Token")).isEqualTo("abc");
-	}
-
-	@Test
-	@DisplayName("buildUrlWithQuery：无 query 时应返回原 URL")
-	void buildUrlWithQuery_whenEmpty_returnsOriginalUrl() {
-		assertThat(BuiltinHttpSupport.buildUrlWithQuery("https://example.com/api", Map.of()))
-			.isEqualTo("https://example.com/api");
-	}
-
-	@Test
-	@DisplayName("buildUrlWithQuery：应拼接查询参数")
-	void buildUrlWithQuery_whenPresent_appendsQuery() {
-		String url = BuiltinHttpSupport.buildUrlWithQuery("https://example.com/api", Map.of("page", "1", "size", "10"));
-
-		assertThat(url).contains("page=1").contains("size=10");
+	@DisplayName("buildServiceUrl：path 已有斜杠时应保持")
+	void buildServiceUrl_whenPathHasLeadingSlash_keepsPath() {
+		assertThat(BuiltinHttpSupport.buildServiceUrl("order-service", "/api/orders"))
+			.isEqualTo("http://order-service/api/orders");
 	}
 
 }
