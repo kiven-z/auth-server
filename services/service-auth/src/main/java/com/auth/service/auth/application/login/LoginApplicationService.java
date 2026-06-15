@@ -5,7 +5,7 @@ import com.auth.service.auth.api.dto.authentication.response.UserLoginResponse;
 import com.auth.service.auth.application.login.assembler.LoginResponseAssembler;
 import com.auth.service.auth.application.login.audit.LoginAuditService;
 import com.auth.service.auth.application.login.input.credential.AbstractCredentialLogin;
-import com.auth.service.auth.application.login.port.LoginStrategy;
+import com.auth.service.auth.application.port.login.LoginStrategy;
 import com.auth.service.auth.application.port.SessionGateway;
 import com.auth.service.auth.application.port.TokenGateway;
 import com.auth.service.auth.domain.authentication.model.LoginResult;

@@ -96,6 +96,15 @@ class ServiceAuthArchitectureTest {
 
 	private static final String AUTH_LOGIN_APPLICATION = "..application.login..";
 
+	private static final String AUTH_APPLICATION = "..application..";
+
+	@ArchTest
+	static final ArchRule application_must_not_depend_on_infrastructure = noClasses().that()
+		.resideInAPackage(AUTH_APPLICATION)
+		.should()
+		.dependOnClassesThat()
+		.resideInAnyPackage("..infrastructure..");
+
 	@ArchTest
 	static final ArchRule authentication_application_must_not_depend_on_authorization_application = noClasses().that()
 		.resideInAPackage(AUTH_LOGIN_APPLICATION)

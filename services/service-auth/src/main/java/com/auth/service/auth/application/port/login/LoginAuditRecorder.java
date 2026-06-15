@@ -1,4 +1,4 @@
-package com.auth.service.auth.application.login.port;
+package com.auth.service.auth.application.port.login;
 
 import com.auth.service.auth.domain.authentication.enums.AuthLoginLogResult;
 import com.auth.service.auth.domain.authentication.enums.AuthLoginLogType;

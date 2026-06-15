@@ -2,6 +2,7 @@ package com.auth.service.auth.application.authorization;
 
 import cn.hutool.core.collection.CollUtil;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
+import com.auth.service.auth.application.port.login.AuthProfileCachePort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,7 @@ public class AdminAuthorizationService {
 
 	private final AuthProfileQueryService authProfileQueryService;
 
-	private final AuthProfileCacheApplicationService authProfileCacheApplicationService;
+	private final AuthProfileCachePort authProfileCachePort;
 
 	/**
 	 * 刷新用户授权画像缓存
@@ -35,7 +36,7 @@ public class AdminAuthorizationService {
 		userIds.stream().filter(Objects::nonNull).forEach(userId -> {
 			try {
 				AuthProfile profile = authProfileQueryService.buildByUserId(userId);
-				authProfileCacheApplicationService.cacheProfile(profile);
+				authProfileCachePort.cacheProfile(profile);
 			}
 			catch (RuntimeException ex) {
 				log.warn("Failed to refresh auth profile cache for userId={}: {}", userId, ex.getMessage());

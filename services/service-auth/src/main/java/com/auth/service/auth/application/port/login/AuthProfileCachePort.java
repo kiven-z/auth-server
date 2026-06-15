@@ -1,4 +1,4 @@
-package com.auth.service.auth.application.login.port;
+package com.auth.service.auth.application.port.login;
 
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import org.jetbrains.annotations.NotNull;

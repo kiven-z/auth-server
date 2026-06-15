@@ -1,4 +1,4 @@
-package com.auth.service.auth.application.login.port;
+package com.auth.service.auth.application.port.login;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

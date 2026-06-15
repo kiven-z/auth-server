@@ -2,6 +2,7 @@ package com.auth.service.auth.application.authorization;
 
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.TestConstants;
+import com.auth.service.auth.application.port.login.AuthProfileCachePort;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,7 +27,7 @@ class AdminAuthorizationServiceTest {
 	private AuthProfileQueryService authProfileQueryService;
 
 	@Mock
-	private AuthProfileCacheApplicationService authProfileCacheApplicationService;
+	private AuthProfileCachePort authProfileCachePort;
 
 	@InjectMocks
 	private AdminAuthorizationService adminAuthorizationService;
@@ -34,19 +35,17 @@ class AdminAuthorizationServiceTest {
 	@Test
 	@DisplayName("刷新缓存：入参为空/含 null 时不抛异常且跳过 null")
 	void refreshUserCache_shouldIgnoreEmptyAndNullAndSwallowExceptions() {
-		// 空列表直接返回
 		assertDoesNotThrow(() -> adminAuthorizationService.refreshUserCache(List.of()));
-		verifyNoInteractions(authProfileQueryService, authProfileCacheApplicationService);
+		verifyNoInteractions(authProfileQueryService, authProfileCachePort);
 
 		AuthProfile profile = mock(AuthProfile.class);
 		when(authProfileQueryService.buildByUserId(TestConstants.USER_ID)).thenReturn(profile);
-		doThrow(new RuntimeException("boom")).when(authProfileCacheApplicationService).cacheProfile(profile);
+		doThrow(new RuntimeException("boom")).when(authProfileCachePort).cacheProfile(profile);
 
-		// 含 null 时跳过 null，单用户失败不向外抛
 		assertDoesNotThrow(
 				() -> adminAuthorizationService.refreshUserCache(Arrays.asList(null, TestConstants.USER_ID)));
 		verify(authProfileQueryService).buildByUserId(TestConstants.USER_ID);
-		verify(authProfileCacheApplicationService).cacheProfile(profile);
+		verify(authProfileCachePort).cacheProfile(profile);
 	}
 
 }

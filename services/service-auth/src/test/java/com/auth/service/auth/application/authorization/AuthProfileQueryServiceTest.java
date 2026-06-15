@@ -4,8 +4,8 @@ import com.auth.module.security.contract.api.authorization.ScopeGrant;
 import com.auth.module.security.contract.api.datascope.DataScopeStorageType;
 import com.auth.service.auth.application.authorization.datascope.DeptDataScopeResolver;
 import com.auth.service.auth.application.port.UserReadPort;
+import com.auth.service.auth.application.port.authorization.AuthProfileGrantQueryPort;
 import com.auth.service.auth.domain.authorization.model.UserAccountSnapshot;
-import com.auth.service.auth.infrastructure.persistence.UserAuthorizationGrantMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,7 +24,7 @@ import static org.mockito.Mockito.*;
 class AuthProfileQueryServiceTest {
 
 	@Mock
-	private UserAuthorizationGrantMapper userAuthorizationGrantMapper;
+	private AuthProfileGrantQueryPort authProfileGrantQueryPort;
 
 	@Mock
 	private UserReadPort userReadPort;
@@ -36,12 +36,12 @@ class AuthProfileQueryServiceTest {
 	@DisplayName("构建画像时注入生效数据权限")
 	void buildByAccount_shouldContainResolvedDeptScope() {
 		UserAccountSnapshot account = new UserAccountSnapshot(10L, "u10", 1L);
-		when(userAuthorizationGrantMapper.selectRolesByUserId(10L)).thenReturn(List.of("COMMON"));
-		when(userAuthorizationGrantMapper.selectPermissionsByUserId(10L)).thenReturn(List.of("system:user:list"));
+		when(authProfileGrantQueryPort.selectRolesByUserId(10L)).thenReturn(List.of("COMMON"));
+		when(authProfileGrantQueryPort.selectPermissionsByUserId(10L)).thenReturn(List.of("system:user:list"));
 		ScopeGrant grant = ScopeGrant.builder().scopeType(DataScopeStorageType.DEPT).values(List.of(2L)).build();
 		when(deptDataScopeResolver.resolveEffectiveGrant(10L, List.of("COMMON"))).thenReturn(grant);
 
-		AuthProfileQueryService service = new AuthProfileQueryService(userAuthorizationGrantMapper, userReadPort,
+		AuthProfileQueryService service = new AuthProfileQueryService(authProfileGrantQueryPort, userReadPort,
 				deptDataScopeResolver);
 
 		assertEquals(grant, service.buildByAccount(account).getDeptScope());
@@ -52,10 +52,10 @@ class AuthProfileQueryServiceTest {
 	@DisplayName("管理员写入 ALL 数据范围且不调用 resolver")
 	void admin_shouldReceiveAllDeptScope() {
 		UserAccountSnapshot account = new UserAccountSnapshot(2L, "admin", 1L);
-		when(userAuthorizationGrantMapper.selectRolesByUserId(2L)).thenReturn(List.of("ADMIN"));
-		when(userAuthorizationGrantMapper.selectPermissionsByUserId(2L)).thenReturn(List.of("*"));
+		when(authProfileGrantQueryPort.selectRolesByUserId(2L)).thenReturn(List.of("ADMIN"));
+		when(authProfileGrantQueryPort.selectPermissionsByUserId(2L)).thenReturn(List.of("*"));
 
-		AuthProfileQueryService service = new AuthProfileQueryService(userAuthorizationGrantMapper, userReadPort,
+		AuthProfileQueryService service = new AuthProfileQueryService(authProfileGrantQueryPort, userReadPort,
 				deptDataScopeResolver);
 
 		assertEquals(DataScopeStorageType.ALL, service.buildByAccount(account).getDeptScope().getScopeType());

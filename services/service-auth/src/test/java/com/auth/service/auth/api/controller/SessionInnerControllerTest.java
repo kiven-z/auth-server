@@ -1,6 +1,6 @@
 package com.auth.service.auth.api.controller;
 
-import com.auth.service.auth.application.session.SessionAdminApplicationService;
+import com.auth.service.auth.application.port.SessionRevocationPort;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,19 +20,19 @@ import static org.mockito.Mockito.verify;
 class SessionInnerControllerTest {
 
 	@Mock
-	private SessionAdminApplicationService sessionAdminApplicationService;
+	private SessionRevocationPort sessionRevocationPort;
 
 	@InjectMocks
 	private SessionInnerController sessionInnerController;
 
 	@Test
-	@DisplayName("批量踢会话：委托 SessionAdminApplicationService")
+	@DisplayName("批量踢会话：委托 SessionRevocationPort")
 	void kickAllSessionsShouldDelegateToApplicationService() {
 		List<Long> userIds = List.of(2L, 3L);
 
 		sessionInnerController.kickAllSessions(userIds);
 
-		verify(sessionAdminApplicationService).kickAllSessions(userIds);
+		verify(sessionRevocationPort).kickAllSessions(userIds);
 	}
 
 }

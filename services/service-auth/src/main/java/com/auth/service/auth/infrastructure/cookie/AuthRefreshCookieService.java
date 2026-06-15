@@ -1,7 +1,7 @@
 package com.auth.service.auth.infrastructure.cookie;
 
-import com.auth.service.auth.application.login.port.RefreshCookiePort;
-import com.auth.service.auth.application.login.port.RememberMePolicyPort;
+import com.auth.service.auth.application.port.login.RefreshCookiePort;
+import com.auth.service.auth.application.port.login.RememberMePolicyPort;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;

@@ -3,7 +3,7 @@ package com.auth.service.auth.infrastructure.audit;
 import com.auth.common.ip.IpAddressService;
 import com.auth.common.ip.IpInfo;
 import com.auth.common.web.model.entity.UserAgent;
-import com.auth.service.auth.application.login.port.LoginAuditSnapshotPort;
+import com.auth.service.auth.application.port.login.LoginAuditSnapshotPort;
 import com.auth.service.auth.domain.authentication.model.LoginAuditSnapshot;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Component;

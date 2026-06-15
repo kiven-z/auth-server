@@ -1,7 +1,7 @@
 package com.auth.service.auth.api.controller;
 
 import com.auth.common.data.model.PageResponse;
-import com.auth.service.auth.application.session.SessionAdminApplicationService;
+import com.auth.service.auth.application.session.OnlineUserQueryApplicationService;
 import com.auth.service.auth.domain.session.model.query.OnlineUserPageQuery;
 import com.auth.service.auth.domain.session.model.vo.OnlineUserPageVO;
 import com.auth.service.auth.domain.session.model.vo.OnlineUserSummaryVO;
@@ -27,37 +27,37 @@ import static org.mockito.Mockito.when;
 class AdminOnlineUserControllerTest {
 
 	@Mock
-	private SessionAdminApplicationService sessionAdminApplicationService;
+	private OnlineUserQueryApplicationService onlineUserQueryApplicationService;
 
 	@InjectMocks
 	private AdminOnlineUserController adminOnlineUserController;
 
 	@Test
-	@DisplayName("分页查询：委托 SessionAdminApplicationService")
+	@DisplayName("分页查询：委托 OnlineUserQueryApplicationService")
 	void page_shouldDelegateToApplicationService() {
 		OnlineUserPageQuery query = new OnlineUserPageQuery();
 		query.setPageIndex(2);
 		query.setPageSize(10);
 		PageResponse<OnlineUserPageVO> page = PageResponse.of(2L, 10L, 0L, List.of());
-		when(sessionAdminApplicationService.getOnlineUserPage(query)).thenReturn(page);
+		when(onlineUserQueryApplicationService.getOnlineUserPage(query)).thenReturn(page);
 
 		var result = adminOnlineUserController.page(query);
 
-		verify(sessionAdminApplicationService).getOnlineUserPage(query);
+		verify(onlineUserQueryApplicationService).getOnlineUserPage(query);
 		assertSame(page, result.getData());
 		assertEquals(0L, result.getData().getTotal());
 	}
 
 	@Test
-	@DisplayName("统计摘要：委托 SessionAdminApplicationService")
+	@DisplayName("统计摘要：委托 OnlineUserQueryApplicationService")
 	void summary_shouldDelegateToApplicationService() {
 		OnlineUserSummaryVO summary = new OnlineUserSummaryVO();
 		summary.setOnlineUserCount(5L);
-		when(sessionAdminApplicationService.getOnlineUserSummary()).thenReturn(summary);
+		when(onlineUserQueryApplicationService.getOnlineUserSummary()).thenReturn(summary);
 
 		var result = adminOnlineUserController.summary();
 
-		verify(sessionAdminApplicationService).getOnlineUserSummary();
+		verify(onlineUserQueryApplicationService).getOnlineUserSummary();
 		assertEquals(5L, result.getData().getOnlineUserCount());
 	}
 

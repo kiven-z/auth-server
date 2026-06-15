@@ -2,11 +2,7 @@ package com.auth.service.auth.application.authorization.datascope;
 
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
 import com.auth.module.security.contract.api.datascope.DataScopeStorageType;
-import com.auth.service.auth.infrastructure.persistence.DeptClosureMapper;
-import com.auth.service.auth.infrastructure.persistence.RoleScopeMapper;
-import com.auth.service.auth.infrastructure.persistence.UserScopeMapper;
-import com.auth.service.auth.infrastructure.persistence.projection.RoleScopeProjection;
-import com.auth.service.auth.infrastructure.persistence.projection.UserScopeProjection;
+import com.auth.service.auth.application.port.authorization.DataScopeQueryPort;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -27,13 +24,7 @@ import static org.mockito.Mockito.*;
 class DeptDataScopeResolverTest {
 
 	@Mock
-	private UserScopeMapper userScopeMapper;
-
-	@Mock
-	private RoleScopeMapper roleScopeMapper;
-
-	@Mock
-	private DeptClosureMapper deptClosureMapper;
+	private DataScopeQueryPort dataScopeQueryPort;
 
 	@InjectMocks
 	private DeptDataScopeResolver resolver;
@@ -41,24 +32,19 @@ class DeptDataScopeResolverTest {
 	@Test
 	@DisplayName("user_scope 存在时覆盖 role_scope 且类型与库表一致")
 	void userScope_shouldOverrideRoleScope() {
-		UserScopeProjection userScope = new UserScopeProjection();
-		userScope.setScopeType("DEPT");
-		userScope.setScopeDeptIds("[1,2]");
-		when(userScopeMapper.selectByUserId(10L)).thenReturn(userScope);
+		when(dataScopeQueryPort.findUserScopeByUserId(10L)).thenReturn(Optional.of(new UserScopeRow("DEPT", "[1,2]")));
 
 		ScopeGrant grant = resolver.resolveEffectiveGrant(10L, List.of("ADMIN"));
 
 		assertEquals(DataScopeStorageType.DEPT, grant.getScopeType());
 		assertEquals(List.of(1L, 2L), grant.getValues());
-		verify(roleScopeMapper, never()).selectByRoleCodes(anyList());
+		verify(dataScopeQueryPort, never()).findRoleScopesByRoleCodes(anyList());
 	}
 
 	@Test
 	@DisplayName("user_scope 为 SELF 时仍走 SELF")
 	void userScope_self_shouldStaySelf() {
-		UserScopeProjection userScope = new UserScopeProjection();
-		userScope.setScopeType("SELF");
-		when(userScopeMapper.selectByUserId(10L)).thenReturn(userScope);
+		when(dataScopeQueryPort.findUserScopeByUserId(10L)).thenReturn(Optional.of(new UserScopeRow("SELF", null)));
 
 		ScopeGrant grant = resolver.resolveEffectiveGrant(10L, List.of("ADMIN"));
 
@@ -68,11 +54,9 @@ class DeptDataScopeResolverTest {
 	@Test
 	@DisplayName("user_scope 为 DEPT_AND_CHILD 时展开闭包后仍为 DEPT_AND_CHILD")
 	void userScope_deptAndChild_shouldExpandClosure() {
-		UserScopeProjection userScope = new UserScopeProjection();
-		userScope.setScopeType("DEPT_AND_CHILD");
-		userScope.setScopeDeptIds("[10]");
-		when(userScopeMapper.selectByUserId(10L)).thenReturn(userScope);
-		when(deptClosureMapper.selectDescendantDeptIdsByAncestorIds(List.of(10L))).thenReturn(List.of(10L, 11L, 12L));
+		when(dataScopeQueryPort.findUserScopeByUserId(10L))
+			.thenReturn(Optional.of(new UserScopeRow("DEPT_AND_CHILD", "[10]")));
+		when(dataScopeQueryPort.expandDescendantDeptIds(List.of(10L))).thenReturn(List.of(10L, 11L, 12L));
 
 		ScopeGrant grant = resolver.resolveEffectiveGrant(10L, List.of("R1"));
 
@@ -83,19 +67,9 @@ class DeptDataScopeResolverTest {
 	@Test
 	@DisplayName("无 user_scope 时多角色 DEPT merge 仍为 DEPT")
 	void roleScopes_shouldMergeAsDept() {
-		when(userScopeMapper.selectByUserId(10L)).thenReturn(null);
-
-		RoleScopeProjection roleA = new RoleScopeProjection();
-		roleA.setRoleCode("R1");
-		roleA.setScopeType("DEPT");
-		roleA.setScopeDeptIds("[1,2]");
-
-		RoleScopeProjection roleB = new RoleScopeProjection();
-		roleB.setRoleCode("R2");
-		roleB.setScopeType("DEPT");
-		roleB.setScopeDeptIds("[2,3]");
-
-		when(roleScopeMapper.selectByRoleCodes(List.of("R1", "R2"))).thenReturn(List.of(roleA, roleB));
+		when(dataScopeQueryPort.findUserScopeByUserId(10L)).thenReturn(Optional.empty());
+		when(dataScopeQueryPort.findRoleScopesByRoleCodes(List.of("R1", "R2")))
+			.thenReturn(List.of(new RoleScopeRow("R1", "DEPT", "[1,2]"), new RoleScopeRow("R2", "DEPT", "[2,3]")));
 
 		ScopeGrant grant = resolver.resolveEffectiveGrant(10L, List.of("R1", "R2"));
 
@@ -106,8 +80,8 @@ class DeptDataScopeResolverTest {
 	@Test
 	@DisplayName("无 user_scope 且无 role_scope 时默认 SELF")
 	void noScopeRows_shouldDefaultSelf() {
-		when(userScopeMapper.selectByUserId(10L)).thenReturn(null);
-		when(roleScopeMapper.selectByRoleCodes(List.of("R1"))).thenReturn(List.of());
+		when(dataScopeQueryPort.findUserScopeByUserId(10L)).thenReturn(Optional.empty());
+		when(dataScopeQueryPort.findRoleScopesByRoleCodes(List.of("R1"))).thenReturn(List.of());
 
 		ScopeGrant grant = resolver.resolveEffectiveGrant(10L, List.of("R1"));
 
@@ -117,14 +91,10 @@ class DeptDataScopeResolverTest {
 	@Test
 	@DisplayName("DEPT_AND_CHILD 展开闭包后仍为 DEPT_AND_CHILD")
 	void deptAndChild_shouldExpandClosure() {
-		when(userScopeMapper.selectByUserId(10L)).thenReturn(null);
-
-		RoleScopeProjection roleScope = new RoleScopeProjection();
-		roleScope.setRoleCode("R1");
-		roleScope.setScopeType("DEPT_AND_CHILD");
-		roleScope.setScopeDeptIds("[10]");
-		when(roleScopeMapper.selectByRoleCodes(List.of("R1"))).thenReturn(List.of(roleScope));
-		when(deptClosureMapper.selectDescendantDeptIdsByAncestorIds(List.of(10L))).thenReturn(List.of(10L, 11L, 12L));
+		when(dataScopeQueryPort.findUserScopeByUserId(10L)).thenReturn(Optional.empty());
+		when(dataScopeQueryPort.findRoleScopesByRoleCodes(List.of("R1")))
+			.thenReturn(List.of(new RoleScopeRow("R1", "DEPT_AND_CHILD", "[10]")));
+		when(dataScopeQueryPort.expandDescendantDeptIds(List.of(10L))).thenReturn(List.of(10L, 11L, 12L));
 
 		ScopeGrant grant = resolver.resolveEffectiveGrant(10L, List.of("R1"));
 
@@ -135,13 +105,9 @@ class DeptDataScopeResolverTest {
 	@Test
 	@DisplayName("scope_dept_ids 为空时 DEPT fail-close 为空列表")
 	void blankScopeDeptIds_shouldMaterializeEmptyValues() {
-		when(userScopeMapper.selectByUserId(10L)).thenReturn(null);
-
-		RoleScopeProjection roleScope = new RoleScopeProjection();
-		roleScope.setRoleCode("R1");
-		roleScope.setScopeType("DEPT");
-		roleScope.setScopeDeptIds(null);
-		when(roleScopeMapper.selectByRoleCodes(List.of("R1"))).thenReturn(List.of(roleScope));
+		when(dataScopeQueryPort.findUserScopeByUserId(10L)).thenReturn(Optional.empty());
+		when(dataScopeQueryPort.findRoleScopesByRoleCodes(List.of("R1")))
+			.thenReturn(List.of(new RoleScopeRow("R1", "DEPT", null)));
 
 		ScopeGrant grant = resolver.resolveEffectiveGrant(10L, List.of("R1"));
 

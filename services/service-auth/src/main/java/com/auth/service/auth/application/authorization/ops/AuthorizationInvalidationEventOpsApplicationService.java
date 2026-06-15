@@ -1,9 +1,8 @@
 package com.auth.service.auth.application.authorization.ops;
 
+import com.auth.service.auth.application.port.invalidation.InvalidationEventOpsPort;
 import com.auth.service.auth.application.port.invalidation.InvalidationIdempotencyPort;
 import com.auth.service.auth.domain.authorization.invalidation.model.InvalidationProcessingMarker;
-import com.auth.service.auth.infrastructure.persistence.AuthorizationInvalidationEventMapper;
-import com.auth.service.auth.infrastructure.persistence.projection.AuthorizationInvalidationEventProjection;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +19,7 @@ import java.time.LocalDateTime;
 @Transactional(rollbackFor = Exception.class)
 public class AuthorizationInvalidationEventOpsApplicationService {
 
-	private final AuthorizationInvalidationEventMapper authorizationInvalidationEventMapper;
+	private final InvalidationEventOpsPort invalidationEventOpsPort;
 
 	private final InvalidationIdempotencyPort invalidationIdempotencyPort;
 
@@ -30,13 +29,10 @@ public class AuthorizationInvalidationEventOpsApplicationService {
 	 * @return 是否实际删除了占位行
 	 */
 	public boolean releaseProcessingClaim(String eventId) {
-		AuthorizationInvalidationEventProjection projection = authorizationInvalidationEventMapper
-			.selectByEventId(eventId);
-
-		if (projection == null || !InvalidationProcessingMarker.isProcessing(projection.getImpactedUserCount())) {
+		Integer impactedUserCount = invalidationEventOpsPort.findImpactedUserCountByEventId(eventId);
+		if (!InvalidationProcessingMarker.isProcessing(impactedUserCount)) {
 			return false;
 		}
-
 		return invalidationIdempotencyPort.releaseClaim(eventId);
 	}
 
@@ -47,7 +43,7 @@ public class AuthorizationInvalidationEventOpsApplicationService {
 	 * @return 实际删除行数
 	 */
 	public int cleanupStaleProcessingClaims(LocalDateTime cutoffTime, int batchSize) {
-		return authorizationInvalidationEventMapper.deleteStaleProcessingClaims(cutoffTime, batchSize);
+		return invalidationEventOpsPort.deleteStaleProcessingClaims(cutoffTime, batchSize);
 	}
 
 	/**
@@ -57,7 +53,7 @@ public class AuthorizationInvalidationEventOpsApplicationService {
 	 * @return 实际删除行数
 	 */
 	public int purgeCompletedBefore(LocalDateTime cutoffTime, int batchSize) {
-		return authorizationInvalidationEventMapper.deleteCompletedBefore(cutoffTime, batchSize);
+		return invalidationEventOpsPort.deleteCompletedBefore(cutoffTime, batchSize);
 	}
 
 }

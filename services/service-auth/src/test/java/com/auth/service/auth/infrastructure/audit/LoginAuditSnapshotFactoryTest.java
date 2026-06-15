@@ -18,7 +18,7 @@ import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
 
 /**
- * {@link LoginAuditSnapshotFactory}（{@link com.auth.service.auth.application.login.port.LoginAuditSnapshotPort}）单元测试
+ * {@link LoginAuditSnapshotFactory}（{@link com.auth.service.auth.application.port.login.LoginAuditSnapshotPort}）单元测试
  *
  * @author Bunny
  */

@@ -1,7 +1,7 @@
 package com.auth.service.auth.infrastructure.cookie;
 
 import com.auth.common.jwt.autoconfigure.JwtProperties;
-import com.auth.service.auth.application.login.port.RememberMePolicyPort;
+import com.auth.service.auth.application.port.login.RememberMePolicyPort;
 import org.springframework.stereotype.Component;
 
 /**

@@ -1,7 +1,7 @@
 package com.auth.service.auth.infrastructure.audit;
 
 import com.auth.module.platform.persistence.model.LoginLogEntity;
-import com.auth.service.auth.application.login.port.LoginAuditRecorder;
+import com.auth.service.auth.application.port.login.LoginAuditRecorder;
 import com.auth.service.auth.domain.authentication.enums.AuthLoginLogResult;
 import com.auth.service.auth.domain.authentication.enums.AuthLoginLogType;
 import com.auth.service.auth.domain.authentication.model.LoginAuditSnapshot;

@@ -5,7 +5,7 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
-import com.auth.service.auth.application.session.SessionAdminApplicationService;
+import com.auth.service.auth.application.session.OnlineUserQueryApplicationService;
 import com.auth.service.auth.domain.session.model.query.OnlineUserPageQuery;
 import com.auth.service.auth.domain.session.model.vo.OnlineUserPageVO;
 import com.auth.service.auth.domain.session.model.vo.OnlineUserSummaryVO;
@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class AdminOnlineUserController {
 
-	private final SessionAdminApplicationService sessionAdminApplicationService;
+	private final OnlineUserQueryApplicationService onlineUserQueryApplicationService;
 
 	@OperationLog(targetType = "ONLINE_USER_LIST", serviceDomain = AuditServiceDomain.AUTH,
 			bizModule = AuthAuditBizModule.AUTH_SESSION, operation = OperationLogKind.QUERY)
@@ -37,7 +37,7 @@ public class AdminOnlineUserController {
 	@PreAuthorize("@auth.decide('ADMIN')")
 	@GetMapping("/online")
 	public Result<PageResponse<OnlineUserPageVO>> page(OnlineUserPageQuery query) {
-		PageResponse<OnlineUserPageVO> page = sessionAdminApplicationService.getOnlineUserPage(query);
+		PageResponse<OnlineUserPageVO> page = onlineUserQueryApplicationService.getOnlineUserPage(query);
 		return Result.success(page);
 	}
 
@@ -47,7 +47,7 @@ public class AdminOnlineUserController {
 	@PreAuthorize("@auth.decide('ADMIN')")
 	@GetMapping("/online/summary")
 	public Result<OnlineUserSummaryVO> summary() {
-		OnlineUserSummaryVO onlineUserSummary = sessionAdminApplicationService.getOnlineUserSummary();
+		OnlineUserSummaryVO onlineUserSummary = onlineUserQueryApplicationService.getOnlineUserSummary();
 		return Result.success(onlineUserSummary);
 	}
 

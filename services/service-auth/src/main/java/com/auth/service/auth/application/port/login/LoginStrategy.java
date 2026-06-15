@@ -1,4 +1,4 @@
-package com.auth.service.auth.application.login.port;
+package com.auth.service.auth.application.port.login;
 
 import com.auth.service.auth.application.login.input.credential.AbstractCredentialLogin;
 import com.auth.service.auth.domain.authentication.model.LoginResult;

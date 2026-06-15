@@ -5,7 +5,7 @@ import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.message.api.model.email.EmailChannelOptions;
 import com.auth.service.auth.application.login.message.AuthMessageScene;
-import com.auth.service.auth.application.login.port.LoginAuditSnapshotPort;
+import com.auth.service.auth.application.port.login.LoginAuditSnapshotPort;
 import com.auth.service.auth.application.port.CredentialGateway;
 import com.auth.service.auth.domain.authentication.enums.CredentialDimension;
 import com.auth.service.auth.domain.authentication.model.LoginAccount;

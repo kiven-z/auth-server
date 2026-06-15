@@ -7,7 +7,7 @@ import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.TestConstants;
 import com.auth.service.auth.application.login.audit.LoginAuditService;
-import com.auth.service.auth.application.login.port.AuthProfileCachePort;
+import com.auth.service.auth.application.port.login.AuthProfileCachePort;
 import com.auth.service.auth.application.port.SessionGateway;
 import com.auth.service.auth.application.port.TokenGateway;
 import com.auth.service.auth.domain.authentication.model.RefreshSessionResult;

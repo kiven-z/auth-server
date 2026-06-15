@@ -2,6 +2,7 @@ package com.auth.service.auth.application.authorization;
 
 import cn.hutool.core.collection.CollUtil;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
+import com.auth.service.auth.application.port.login.AuthProfileCachePort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,7 @@ public class AuthProfileMaterializationService {
 
 	private final AuthProfileQueryService authProfileQueryService;
 
-	private final AuthProfileCacheApplicationService authProfileCacheApplicationService;
+	private final AuthProfileCachePort authProfileCachePort;
 
 	/**
 	 * 分批处理用户ID集合
@@ -109,7 +110,7 @@ public class AuthProfileMaterializationService {
 		// 构建用户授权画像
 		try {
 			AuthProfile profile = authProfileQueryService.buildByUserId(userId);
-			authProfileCacheApplicationService.cacheProfile(profile);
+			authProfileCachePort.cacheProfile(profile);
 			return true;
 		}
 		catch (RuntimeException ex) {
@@ -131,7 +132,7 @@ public class AuthProfileMaterializationService {
 
 		try {
 			// 移除用户授权画像缓存
-			authProfileCacheApplicationService.evictProfile(userId);
+			authProfileCachePort.evictProfile(userId);
 			return true;
 		}
 		catch (RuntimeException ex) {

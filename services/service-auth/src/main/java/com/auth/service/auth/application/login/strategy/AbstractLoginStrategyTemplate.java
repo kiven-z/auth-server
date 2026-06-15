@@ -3,7 +3,7 @@ package com.auth.service.auth.application.login.strategy;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.application.login.audit.LoginAuditService;
 import com.auth.service.auth.application.login.input.credential.AbstractCredentialLogin;
-import com.auth.service.auth.application.login.port.LoginStrategy;
+import com.auth.service.auth.application.port.login.LoginStrategy;
 import com.auth.service.auth.application.port.AuthProfileQueryPort;
 import com.auth.service.auth.application.port.CredentialGateway;
 import com.auth.service.auth.domain.authentication.enums.AuthLoginLogType;

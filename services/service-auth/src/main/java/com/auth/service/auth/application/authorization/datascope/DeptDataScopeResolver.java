@@ -5,11 +5,7 @@ import cn.hutool.json.JSONUtil;
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
 import com.auth.module.security.contract.api.datascope.DataScopeStorageType;
 import com.auth.module.security.contract.api.datascope.DeptScopeMerger;
-import com.auth.service.auth.infrastructure.persistence.DeptClosureMapper;
-import com.auth.service.auth.infrastructure.persistence.RoleScopeMapper;
-import com.auth.service.auth.infrastructure.persistence.UserScopeMapper;
-import com.auth.service.auth.infrastructure.persistence.projection.RoleScopeProjection;
-import com.auth.service.auth.infrastructure.persistence.projection.UserScopeProjection;
+import com.auth.service.auth.application.port.authorization.DataScopeQueryPort;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -27,23 +23,12 @@ import java.util.stream.Stream;
 @Service
 public class DeptDataScopeResolver {
 
-	private final UserScopeMapper userScopeMapper;
+	private final DataScopeQueryPort dataScopeQueryPort;
 
-	private final RoleScopeMapper roleScopeMapper;
-
-	private final DeptClosureMapper deptClosureMapper;
-
-	public DeptDataScopeResolver(UserScopeMapper userScopeMapper, RoleScopeMapper roleScopeMapper,
-			DeptClosureMapper deptClosureMapper) {
-		this.userScopeMapper = userScopeMapper;
-		this.roleScopeMapper = roleScopeMapper;
-		this.deptClosureMapper = deptClosureMapper;
+	public DeptDataScopeResolver(DataScopeQueryPort dataScopeQueryPort) {
+		this.dataScopeQueryPort = dataScopeQueryPort;
 	}
 
-	/**
-	 * 默认数据权限
-	 * @return 数据权限
-	 */
 	private static ScopeGrant selfGrant() {
 		return ScopeGrant.builder().scopeType(DataScopeStorageType.SELF).build();
 	}
@@ -59,22 +44,22 @@ public class DeptDataScopeResolver {
 			return selfGrant();
 		}
 
-		// 有 user_scope 则不再读 role_scope
-		UserScopeProjection userScope = userScopeMapper.selectByUserId(userId);
-		if (userScope != null) {
-			ScopeGrant grant = materializeRow(userScope.getScopeType(), userScope.getScopeDeptIds());
+		var userScope = dataScopeQueryPort.findUserScopeByUserId(userId);
+		if (userScope.isPresent()) {
+			UserScopeRow row = userScope.get();
+			ScopeGrant grant = materializeRow(row.scopeType(), row.scopeDeptIds());
 			log.debug("user_scope 生效: userId={}, scopeType={}", userId, grant.getScopeType());
 			return grant;
 		}
 
-		List<RoleScopeProjection> roleScopes = roleScopeMapper.selectByRoleCodes(roleCodes);
+		List<RoleScopeRow> roleScopes = dataScopeQueryPort.findRoleScopesByRoleCodes(roleCodes);
 		if (CollUtil.isEmpty(roleScopes)) {
 			log.debug("无 role_scope: userId={}, 默认 SELF", userId);
 			return selfGrant();
 		}
 
 		List<ScopeGrant> grants = roleScopes.stream()
-			.map(projection -> materializeRow(projection.getScopeType(), projection.getScopeDeptIds()))
+			.map(row -> materializeRow(row.scopeType(), row.scopeDeptIds()))
 			.toList();
 		ScopeGrant merged = DeptScopeMerger.mergeLoose(grants);
 		if (merged == null) {
@@ -85,12 +70,6 @@ public class DeptDataScopeResolver {
 		return merged;
 	}
 
-	/**
-	 * 将数据库中的数据权限转换为ScopeGrant对象
-	 * @param scopeTypeRaw 数据权限类型
-	 * @param scopeDeptIdsRaw 数据权限部门ID列表
-	 * @return ScopeGrant对象
-	 */
 	private ScopeGrant materializeRow(String scopeTypeRaw, String scopeDeptIdsRaw) {
 		DataScopeStorageType storageType = DataScopeStorageType.parse(scopeTypeRaw);
 		if (storageType == null) {
@@ -108,12 +87,6 @@ public class DeptDataScopeResolver {
 		};
 	}
 
-	/**
-	 * DEPT 存锚点；DEPT_AND_CHILD 登录时经 dept_closure 展开后写入 values
-	 * @param storageType 数据权限类型
-	 * @param anchorDeptIds 锚点部门ID列表
-	 * @return 部门ID列表
-	 */
 	private List<Long> resolveValuesForRedis(DataScopeStorageType storageType, List<Long> anchorDeptIds) {
 		if (storageType != DataScopeStorageType.DEPT_AND_CHILD) {
 			return anchorDeptIds;
@@ -122,8 +95,7 @@ public class DeptDataScopeResolver {
 			return List.of();
 		}
 
-		// 按照部门展开
-		List<Long> expanded = deptClosureMapper.selectDescendantDeptIdsByAncestorIds(anchorDeptIds);
+		List<Long> expanded = dataScopeQueryPort.expandDescendantDeptIds(anchorDeptIds);
 		if (CollUtil.isEmpty(expanded)) {
 			return anchorDeptIds;
 		}

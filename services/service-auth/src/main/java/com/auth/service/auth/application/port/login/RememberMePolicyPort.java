@@ -1,4 +1,4 @@
-package com.auth.service.auth.application.login.port;
+package com.auth.service.auth.application.port.login;
 
 /**
  * 「记住我」与 Refresh Cookie / 响应 readMeDay 策略端口。

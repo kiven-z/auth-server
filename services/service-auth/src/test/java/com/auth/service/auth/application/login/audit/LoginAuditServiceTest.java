@@ -2,9 +2,9 @@ package com.auth.service.auth.application.login.audit;
 
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.TestConstants;
-import com.auth.service.auth.application.login.port.AuthProfileCachePort;
-import com.auth.service.auth.application.login.port.LoginAuditRecorder;
-import com.auth.service.auth.application.login.port.LoginAuditSnapshotPort;
+import com.auth.service.auth.application.port.login.AuthProfileCachePort;
+import com.auth.service.auth.application.port.login.LoginAuditRecorder;
+import com.auth.service.auth.application.port.login.LoginAuditSnapshotPort;
 import com.auth.service.auth.application.port.UserReadPort;
 import com.auth.service.auth.domain.authentication.enums.AuthLoginLogResult;
 import com.auth.service.auth.domain.authentication.enums.AuthLoginLogType;

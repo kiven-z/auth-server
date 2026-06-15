@@ -8,8 +8,8 @@ import com.auth.module.security.contract.constants.PermissionConstant;
 import com.auth.service.auth.application.authorization.datascope.DeptDataScopeResolver;
 import com.auth.service.auth.application.port.AuthProfileQueryPort;
 import com.auth.service.auth.application.port.UserReadPort;
+import com.auth.service.auth.application.port.authorization.AuthProfileGrantQueryPort;
 import com.auth.service.auth.domain.authorization.model.UserAccountSnapshot;
-import com.auth.service.auth.infrastructure.persistence.UserAuthorizationGrantMapper;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.AuthResultCode;
 import org.springframework.stereotype.Service;
@@ -24,15 +24,15 @@ import java.util.List;
 @Service
 public class AuthProfileQueryService implements AuthProfileQueryPort {
 
-	private final UserAuthorizationGrantMapper userAuthorizationGrantMapper;
+	private final AuthProfileGrantQueryPort authProfileGrantQueryPort;
 
 	private final UserReadPort userReadPort;
 
 	private final DeptDataScopeResolver deptDataScopeResolver;
 
-	public AuthProfileQueryService(UserAuthorizationGrantMapper userAuthorizationGrantMapper, UserReadPort userReadPort,
+	public AuthProfileQueryService(AuthProfileGrantQueryPort authProfileGrantQueryPort, UserReadPort userReadPort,
 			DeptDataScopeResolver deptDataScopeResolver) {
-		this.userAuthorizationGrantMapper = userAuthorizationGrantMapper;
+		this.authProfileGrantQueryPort = authProfileGrantQueryPort;
 		this.userReadPort = userReadPort;
 		this.deptDataScopeResolver = deptDataScopeResolver;
 	}
@@ -61,8 +61,8 @@ public class AuthProfileQueryService implements AuthProfileQueryPort {
 		}
 		long userId = account.id();
 
-		List<String> roles = userAuthorizationGrantMapper.selectRolesByUserId(userId);
-		List<String> permissions = userAuthorizationGrantMapper.selectPermissionsByUserId(userId);
+		List<String> roles = authProfileGrantQueryPort.selectRolesByUserId(userId);
+		List<String> permissions = authProfileGrantQueryPort.selectPermissionsByUserId(userId);
 		boolean admin = PermissionConstant.isAdmin(userId, roles);
 		ScopeGrant deptScope;
 		if (admin) {
