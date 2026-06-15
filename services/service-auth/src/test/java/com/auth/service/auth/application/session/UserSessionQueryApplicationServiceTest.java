@@ -28,21 +28,17 @@ class UserSessionQueryApplicationServiceTest {
 	private UserSessionQueryApplicationService userSessionQueryApplicationService;
 
 	@Test
-	@DisplayName("查询活跃会话：映射为 UserSessionVO 且不含 refreshTokenHash")
-	void listActiveSessions_shouldMapToVo() {
+	@DisplayName("查询活跃会话：委托 UserSessionQueryPort")
+	void listActiveSessions_shouldDelegateToPort() {
 		UserSessionIndex index = new UserSessionIndex();
 		index.setUserId(TestConstants.USER_ID);
 		index.setSessionId(TestConstants.JTI);
-		index.setIpAddress("127.0.0.1");
-		index.setRefreshTokenHash("secret-hash");
 		when(userSessionQueryPort.listActiveSessions(TestConstants.USER_ID)).thenReturn(List.of(index));
 
-		var sessions = userSessionQueryApplicationService.listActiveSessions(TestConstants.USER_ID);
+		List<UserSessionIndex> sessions = userSessionQueryApplicationService.listActiveSessions(TestConstants.USER_ID);
 
 		assertEquals(1, sessions.size());
-		assertEquals(TestConstants.USER_ID, sessions.get(0).getUserId());
 		assertEquals(TestConstants.JTI, sessions.get(0).getSessionId());
-		assertEquals("127.0.0.1", sessions.get(0).getIpAddress());
 	}
 
 }

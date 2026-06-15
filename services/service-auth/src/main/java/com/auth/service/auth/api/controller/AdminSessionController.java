@@ -8,6 +8,7 @@ import com.auth.module.security.contract.context.OperationLogContext;
 import com.auth.service.auth.api.dto.session.UserSessionVO;
 import com.auth.service.auth.application.port.SessionRevocationPort;
 import com.auth.service.auth.application.session.UserSessionQueryApplicationService;
+import com.auth.service.auth.convert.UserSessionConverter;
 import com.auth.service.auth.shared.audit.AuthAuditBizModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -71,7 +72,8 @@ public class AdminSessionController {
 	@GetMapping("{userId}/sessions")
 	public Result<List<UserSessionVO>> getListSessions(@PathVariable("userId") long userId) {
 		OperationLogContext.setTargetId(userId);
-		return Result.success(userSessionQueryApplicationService.listActiveSessions(userId));
+		return Result.success(
+				UserSessionConverter.INSTANCE.toVoList(userSessionQueryApplicationService.listActiveSessions(userId)));
 	}
 
 }

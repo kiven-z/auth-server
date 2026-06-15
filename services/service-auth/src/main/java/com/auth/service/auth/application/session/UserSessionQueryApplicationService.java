@@ -1,6 +1,6 @@
 package com.auth.service.auth.application.session;
 
-import com.auth.service.auth.api.dto.session.UserSessionVO;
+import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.service.auth.application.port.session.UserSessionQueryPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,25 +19,12 @@ public class UserSessionQueryApplicationService {
 	private final UserSessionQueryPort userSessionQueryPort;
 
 	/**
-	 * 查询用户活跃会话列表（管理端 VO）
+	 * 查询用户活跃会话列表
 	 * @param userId 用户 ID
-	 * @return 活跃会话 VO 列表
+	 * @return 活跃会话索引列表
 	 */
-	public List<UserSessionVO> listActiveSessions(long userId) {
-		return userSessionQueryPort.listActiveSessions(userId).stream().map(index -> {
-			UserSessionVO vo = new UserSessionVO();
-			vo.setUserId(index.getUserId());
-			vo.setSessionId(index.getSessionId());
-			vo.setIpAddress(index.getIpAddress());
-			vo.setIpRegion(index.getIpRegion());
-			vo.setDeviceType(index.getDeviceType());
-			vo.setBrowserType(index.getBrowserType());
-			vo.setOsType(index.getOsType());
-			vo.setRememberMe(index.getRememberMe());
-			vo.setRefreshTokenExpiresAt(index.getRefreshTokenExpiresAt());
-			vo.setLoginAt(index.getLoginAt());
-			return vo;
-		}).toList();
+	public List<UserSessionIndex> listActiveSessions(long userId) {
+		return userSessionQueryPort.listActiveSessions(userId);
 	}
 
 }

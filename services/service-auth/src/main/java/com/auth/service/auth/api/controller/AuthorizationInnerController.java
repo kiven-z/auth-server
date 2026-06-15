@@ -10,6 +10,7 @@ import com.auth.service.auth.application.authorization.AuthorizationInnerService
 import com.auth.service.auth.application.authorization.AuthorizationInvalidationService;
 import com.auth.service.auth.application.authorization.ops.AuthorizationInvalidationEventOpsApplicationService;
 import com.auth.service.auth.application.authorization.query.AuthorizationInvalidationEventQueryApplicationService;
+import com.auth.service.auth.convert.EffectiveCodesConverter;
 import com.auth.service.auth.domain.authorization.model.query.AuthorizationInvalidationEventQuery;
 import com.auth.service.auth.domain.authorization.model.vo.AuthorizationInvalidationEventDetailVO;
 import com.auth.service.auth.domain.authorization.model.vo.AuthorizationInvalidationEventPageVO;
@@ -43,7 +44,8 @@ public class AuthorizationInnerController {
 	@Operation(summary = "查询用户生效角色码与权限码（供 system 动态菜单等内部调用）")
 	@GetMapping("/principal/{userId}/effective-codes")
 	public Result<EffectiveCodesVO> effectiveCodes(@PathVariable("userId") Long userId) {
-		EffectiveCodesVO body = authorizationInnerService.resolveEffectiveCodes(userId);
+		EffectiveCodesVO body = EffectiveCodesConverter.INSTANCE
+			.toVoOrEmpty(authorizationInnerService.resolveAuthProfile(userId));
 		return Result.success(body);
 	}
 

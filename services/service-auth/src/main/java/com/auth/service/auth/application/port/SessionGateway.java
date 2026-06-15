@@ -59,7 +59,7 @@ public interface SessionGateway {
 	void updateRefreshInfo(String sessionId, String refreshTokenHash, long refreshTokenExpiresAt, Duration ttl);
 
 	/**
-	 * 终止单条会话（Hash、用户 Set、全局 ZSet）。
+	 * 终止单条会话（Hash、用户 Set；无活跃会话时同步移出在线用户 ZSet）。
 	 * @param userId 用户 ID
 	 * @param sessionId 会话 ID（jti）
 	 */

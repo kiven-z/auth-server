@@ -74,6 +74,7 @@ public class SysJobController {
 	@PreAuthorize("@auth.decide('sysJob:update')")
 	@PutMapping
 	public Result<String> update(@Validated(UpdateGroup.class) @RequestBody SysJobUpdateForm form) {
+		// FIXME 加上 OperationLog 注解
 		sysJobDefinitionService.update(form);
 
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
@@ -83,6 +84,7 @@ public class SysJobController {
 	@PreAuthorize("@auth.decide('sysJob:delete')")
 	@DeleteMapping("{id}")
 	public Result<String> delete(@PathVariable("id") Long id) {
+		// FIXME 加上 OperationLog 注解
 		sysJobDefinitionService.deleteById(id);
 
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
@@ -92,6 +94,7 @@ public class SysJobController {
 	@PreAuthorize("@auth.decide('sysJob:update')")
 	@PutMapping("status")
 	public Result<String> batchStatus(@Validated @RequestBody SysJobStatusForm form) {
+		// FIXME 加上 OperationLog 注解
 		sysJobScheduleSyncService.batchUpdateStatus(form);
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}

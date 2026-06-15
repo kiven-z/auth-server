@@ -2,7 +2,6 @@ package com.auth.service.auth.application.authorization;
 
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.TestConstants;
-import com.auth.service.auth.api.dto.authorization.EffectiveCodesVO;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,7 +12,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link AuthorizationInnerService} 单元测试
@@ -28,8 +29,8 @@ class AuthorizationInnerServiceTest {
 	private AuthorizationInnerService authorizationInnerService;
 
 	@Test
-	@DisplayName("resolveEffectiveCodes：委托 AuthProfileQueryService 并拷贝角色与权限列表")
-	void resolveEffectiveCodes_mapsProfileRolesAndPermissions() {
+	@DisplayName("resolveAuthProfile：委托 AuthProfileQueryService")
+	void resolveAuthProfile_shouldDelegateToQueryService() {
 		AuthProfile profile = AuthProfile.builder()
 			.userId(TestConstants.USER_ID)
 			.username("u1")
@@ -38,10 +39,9 @@ class AuthorizationInnerServiceTest {
 			.build();
 		when(authProfileQueryService.buildByUserId(TestConstants.USER_ID)).thenReturn(profile);
 
-		EffectiveCodesVO vo = authorizationInnerService.resolveEffectiveCodes(TestConstants.USER_ID);
+		AuthProfile result = authorizationInnerService.resolveAuthProfile(TestConstants.USER_ID);
 
-		assertEquals(List.of("ADMIN"), vo.getRoleCodes());
-		assertEquals(List.of("*"), vo.getPermissionCodes());
+		assertEquals(profile, result);
 		verify(authProfileQueryService).buildByUserId(TestConstants.USER_ID);
 		verifyNoMoreInteractions(authProfileQueryService);
 	}

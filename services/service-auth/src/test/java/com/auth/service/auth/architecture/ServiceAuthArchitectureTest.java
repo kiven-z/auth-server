@@ -98,12 +98,35 @@ class ServiceAuthArchitectureTest {
 
 	private static final String AUTH_APPLICATION = "..application..";
 
+	private static final String AUTH_SESSION_APPLICATION = "..application.session..";
+
+	private static final String AUTH_AUTHORIZATION_APPLICATION = "..application.authorization..";
+
 	@ArchTest
 	static final ArchRule application_must_not_depend_on_infrastructure = noClasses().that()
 		.resideInAPackage(AUTH_APPLICATION)
 		.should()
 		.dependOnClassesThat()
 		.resideInAnyPackage("..infrastructure..");
+
+	/**
+	 * session / authorization 已 Port 化，禁止反向依赖本模块 api（DTO 映射留在 Controller + convert）。 不含
+	 * {@code module-security-contract} 的 {@code ..contract.api..} 包。
+	 * {@code application.login} 仍使用 api.dto 响应类型，待 login 读模型拆分后再收紧全局规则。
+	 */
+	@ArchTest
+	static final ArchRule session_application_must_not_depend_on_api = noClasses().that()
+		.resideInAPackage(AUTH_SESSION_APPLICATION)
+		.should()
+		.dependOnClassesThat()
+		.resideInAnyPackage("com.auth.service.auth.api..");
+
+	@ArchTest
+	static final ArchRule authorization_application_must_not_depend_on_api = noClasses().that()
+		.resideInAPackage(AUTH_AUTHORIZATION_APPLICATION)
+		.should()
+		.dependOnClassesThat()
+		.resideInAnyPackage("com.auth.service.auth.api..");
 
 	@ArchTest
 	static final ArchRule authentication_application_must_not_depend_on_authorization_application = noClasses().that()

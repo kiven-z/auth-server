@@ -13,7 +13,6 @@ import com.auth.service.auth.domain.session.model.vo.OnlineUserPageVO;
 import com.auth.service.auth.domain.session.model.vo.OnlineUserSummaryVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -39,7 +38,6 @@ public class OnlineUserQueryApplicationService {
 	 * @param query 查询条件
 	 * @return 分页结果
 	 */
-	@Transactional(readOnly = true)
 	public PageResponse<OnlineUserPageVO> getOnlineUserPage(OnlineUserPageQuery query) {
 		int pageIndex = Objects.requireNonNullElse(query.getPageIndex(), 1);
 		int pageSize = Objects.requireNonNullElse(query.getPageSize(), 30);
@@ -76,7 +74,6 @@ public class OnlineUserQueryApplicationService {
 	 * 在线用户统计摘要
 	 * @return 在线用户数
 	 */
-	@Transactional(readOnly = true)
 	public OnlineUserSummaryVO getOnlineUserSummary() {
 		OnlineUserSummaryVO summary = new OnlineUserSummaryVO();
 		summary.setOnlineUserCount(onlineUserQueryPort.countOnlineUsers());

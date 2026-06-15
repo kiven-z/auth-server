@@ -1,1 +1,27 @@
-package com.auth.service.auth.application.authorization;import com.auth.module.security.contract.api.authorization.AuthProfile;import com.auth.service.auth.api.dto.authorization.EffectiveCodesVO;import lombok.RequiredArgsConstructor;import org.springframework.stereotype.Service;import java.util.List;import java.util.Objects;/** * 授权域内部查询编排 * * @author Bunny */@RequiredArgsConstructor@Servicepublic class AuthorizationInnerService {	private final AuthProfileQueryService authProfileQueryService;	/**	 * 解析用户生效角色码与权限码。	 * @param userId 用户 ID	 * @return 角色码与权限码	 */	public EffectiveCodesVO resolveEffectiveCodes(Long userId) {		// 构建用户授权画像		AuthProfile profile = authProfileQueryService.buildByUserId(userId);		// 如果用户授权画像为空，则返回空角色码和权限码		EffectiveCodesVO vo = new EffectiveCodesVO();		if (profile == null) {			vo.setRoleCodes(List.of());			vo.setPermissionCodes(List.of());			return vo;		}		// 设置角色码和权限码		vo.setRoleCodes(Objects.requireNonNullElse(profile.getRoles(), List.of()));		vo.setPermissionCodes(Objects.requireNonNullElse(profile.getPermissions(), List.of()));		return vo;	}}
+package com.auth.service.auth.application.authorization;
+
+import com.auth.module.security.contract.api.authorization.AuthProfile;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+/**
+ * 授权域内部查询编排
+ *
+ * @author Bunny
+ */
+@RequiredArgsConstructor
+@Service
+public class AuthorizationInnerService {
+
+	private final AuthProfileQueryService authProfileQueryService;
+
+	/**
+	 * 构建用户授权画像
+	 * @param userId 用户 ID
+	 * @return 授权画像，用户不存在等业务失败时由 {@link AuthProfileQueryService} 抛异常
+	 */
+	public AuthProfile resolveAuthProfile(Long userId) {
+		return authProfileQueryService.buildByUserId(userId);
+	}
+
+}
