@@ -4,6 +4,8 @@ import com.auth.service.system.schedule.example.custom.SpringInjectDemoJob;
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.support.QuartzTaskRegistry;
+import com.auth.service.system.schedule.task.builtin.http.HttpGetInvokeJob;
+import com.auth.service.system.schedule.task.builtin.validation.BuiltinJobDefinitionValidatorRegistry;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CLASS_LOAD_FAILED;
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CLASS_NOT_WHITELISTED;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -25,6 +28,9 @@ class CustomClassTaskDefinitionValidatorTest {
 
 	@Mock
 	private QuartzTaskRegistry quartzTaskRegistry;
+
+	@Mock
+	private BuiltinJobDefinitionValidatorRegistry builtinJobDefinitionValidatorRegistry;
 
 	@InjectMocks
 	private CustomClassTaskDefinitionValidator validator;
@@ -39,6 +45,21 @@ class CustomClassTaskDefinitionValidatorTest {
 		job.setJobClass(className);
 
 		validator.validate(job);
+	}
+
+	@Test
+	@DisplayName("validate：内置 HttpGet 任务应触发 job_params 校验")
+	void validate_whenBuiltinHttpGetJob_validatesJobParams() {
+		String className = HttpGetInvokeJob.class.getName();
+		when(quartzTaskRegistry.isAllowed(className)).thenReturn(true);
+
+		SysJobEntity job = new SysJobEntity();
+		job.setJobClass(className);
+		job.setJobParams("{\"version\":1,\"url\":\"https://example.com\"}");
+
+		validator.validate(job);
+
+		verify(builtinJobDefinitionValidatorRegistry).validateIfPresent(job);
 	}
 
 	@Test
