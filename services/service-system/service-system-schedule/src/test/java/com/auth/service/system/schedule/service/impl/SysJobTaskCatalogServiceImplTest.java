@@ -12,7 +12,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import java.util.Optional;
 
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CLASS_NOT_WHITELISTED;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,7 +36,7 @@ class SysJobTaskCatalogServiceImplTest {
 
 	@BeforeEach
 	void setUp() {
-		sysJobTaskCatalogService = new SysJobTaskCatalogServiceImpl(quartzTaskRegistry, Optional.empty());
+		sysJobTaskCatalogService = new SysJobTaskCatalogServiceImpl(quartzTaskRegistry);
 	}
 
 	@Test

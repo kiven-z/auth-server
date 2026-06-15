@@ -1,7 +1,6 @@
 package com.auth.service.system.schedule.service.impl;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import com.auth.service.system.schedule.catalog.MessageDispatchPayloadTemplateProvider;
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.model.vo.QuartzTaskClassVO;
 import com.auth.service.system.schedule.model.vo.QuartzTaskMethodVO;
@@ -13,10 +12,10 @@ import org.springframework.stereotype.Service;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.*;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CLASS_LOAD_FAILED;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CLASS_NOT_WHITELISTED;
 
 /**
  * 任务目录服务实现
@@ -28,12 +27,8 @@ public class SysJobTaskCatalogServiceImpl implements SysJobTaskCatalogService {
 
 	private final QuartzTaskRegistry quartzTaskRegistry;
 
-	private final Optional<MessageDispatchPayloadTemplateProvider> messageDispatchPayloadTemplateProvider;
-
-	public SysJobTaskCatalogServiceImpl(QuartzTaskRegistry quartzTaskRegistry,
-			Optional<MessageDispatchPayloadTemplateProvider> messageDispatchPayloadTemplateProvider) {
+	public SysJobTaskCatalogServiceImpl(QuartzTaskRegistry quartzTaskRegistry) {
 		this.quartzTaskRegistry = quartzTaskRegistry;
-		this.messageDispatchPayloadTemplateProvider = messageDispatchPayloadTemplateProvider;
 	}
 
 	/**
@@ -76,15 +71,6 @@ public class SysJobTaskCatalogServiceImpl implements SysJobTaskCatalogService {
 			methodList.add(InvokeTargetSupport.toMethodCatalog(beanName, method));
 		}
 		return methodList;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Object messageDispatchPayloadTemplate() {
-		return messageDispatchPayloadTemplateProvider.map(MessageDispatchPayloadTemplateProvider::buildTemplatePayload)
-			.orElseThrow(() -> new SysJobException(JOB_MESSAGE_DISPATCH_UNAVAILABLE));
 	}
 
 }

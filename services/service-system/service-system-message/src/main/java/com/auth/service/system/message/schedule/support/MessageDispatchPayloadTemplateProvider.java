@@ -1,21 +1,27 @@
 package com.auth.service.system.message.schedule.support;
 
 import com.auth.service.system.message.schedule.model.MessageDispatchPayload;
-import com.auth.service.system.schedule.catalog.MessageDispatchPayloadTemplateProvider;
+import com.auth.service.system.schedule.catalog.SysJobPayloadTemplateProvider;
+import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import org.springframework.stereotype.Component;
 
 /**
- * 消息调度 payload 模板 SPI 实现
+ * 消息派发任务 payload 模板提供者
  *
  * @author Bunny
  */
 @Component
-public class MessageDispatchPayloadTemplateProviderImpl implements MessageDispatchPayloadTemplateProvider {
+public class MessageDispatchPayloadTemplateProvider implements SysJobPayloadTemplateProvider {
 
 	private final MessageDispatchCommandParser messageDispatchCommandParser;
 
-	public MessageDispatchPayloadTemplateProviderImpl(MessageDispatchCommandParser messageDispatchCommandParser) {
+	public MessageDispatchPayloadTemplateProvider(MessageDispatchCommandParser messageDispatchCommandParser) {
 		this.messageDispatchCommandParser = messageDispatchCommandParser;
+	}
+
+	@Override
+	public SysJobTaskType taskType() {
+		return SysJobTaskType.MESSAGE_DISPATCH;
 	}
 
 	@Override
