@@ -18,7 +18,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 /**
@@ -69,9 +68,8 @@ class BuiltinJobParamsValidatorTest {
 	@DisplayName("validateIfPresent：内置类参数非法时应抛出 SysJobException")
 	void validateIfPresent_whenParamsInvalid_propagates() {
 		String json = "bad";
-		when(builtinJobParamsParser.parseAndValidate(eq(json), eq(HttpInvokeJobParams.class)))
-			.thenThrow(new SysJobException(
-					com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_PARAMS_JSON_INVALID, "bad"));
+		when(builtinJobParamsParser.parseAndValidate(json, HttpInvokeJobParams.class)).thenThrow(new SysJobException(
+				com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_PARAMS_JSON_INVALID, "bad"));
 
 		SysJobEntity job = new SysJobEntity();
 		job.setJobClass(HttpInvokeJob.class.getName());

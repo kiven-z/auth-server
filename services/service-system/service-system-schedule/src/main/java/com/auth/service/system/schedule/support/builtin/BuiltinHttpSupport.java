@@ -1,6 +1,5 @@
 package com.auth.service.system.schedule.support.builtin;
 
-import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.net.url.UrlBuilder;
 import cn.hutool.core.text.CharSequenceUtil;
 import lombok.experimental.UtilityClass;
@@ -32,9 +31,9 @@ public class BuiltinHttpSupport {
 	 * @param headers 请求头 Map
 	 * @return HttpHeaders
 	 */
-	public static @NonNull HttpHeaders toHttpHeaders(Map<String, String> headers) {
+	public static @NonNull HttpHeaders toHttpHeaders(@Nullable Map<String, String> headers) {
 		HttpHeaders httpHeaders = new HttpHeaders();
-		if (MapUtil.isNotEmpty(headers)) {
+		if (headers != null) {
 			headers.forEach(httpHeaders::set);
 		}
 		return httpHeaders;
@@ -47,7 +46,7 @@ public class BuiltinHttpSupport {
 	 * @return 拼接后的 URL
 	 */
 	public static @NonNull String buildUrlWithQuery(@NonNull String url, @Nullable Map<String, String> query) {
-		if (MapUtil.isEmpty(query)) {
+		if (query == null || query.isEmpty()) {
 			return url;
 		}
 		UrlBuilder builder = UrlBuilder.ofHttp(url);

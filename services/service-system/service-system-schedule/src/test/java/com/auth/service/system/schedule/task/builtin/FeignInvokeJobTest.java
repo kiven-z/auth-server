@@ -1,5 +1,6 @@
 package com.auth.service.system.schedule.task.builtin;
 
+import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
 import com.auth.service.system.schedule.model.jobparams.BuiltinRemoteHttpMethod;
 import com.auth.service.system.schedule.model.jobparams.FeignInvokeJobParams;
 import com.auth.service.system.schedule.support.builtin.BuiltinJobParamsParser;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.http.HttpEntity;
@@ -19,6 +21,7 @@ import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -56,7 +59,7 @@ class FeignInvokeJobTest {
 		params.setMethod(BuiltinRemoteHttpMethod.POST);
 		params.setHeaders(java.util.Map.of("Content-Type", "application/json"));
 		params.setBody("{\"id\":1}");
-		when(builtinJobParamsParser.parseFromContext(context, FeignInvokeJobParams.class)).thenReturn(params);
+		stubJobParams(context, params);
 		when(loadBalancedRestTemplate.exchange(eq("http://order-service/api/internal/sync"), eq(HttpMethod.POST),
 				org.mockito.ArgumentMatchers.<HttpEntity<String>>any(), eq(String.class)))
 			.thenReturn(ResponseEntity.ok("ok"));
@@ -80,7 +83,7 @@ class FeignInvokeJobTest {
 		params.setServiceName("auth-service");
 		params.setPath("api/health");
 		params.setMethod(BuiltinRemoteHttpMethod.GET);
-		when(builtinJobParamsParser.parseFromContext(context, FeignInvokeJobParams.class)).thenReturn(params);
+		stubJobParams(context, params);
 		when(loadBalancedRestTemplate.exchange(eq("http://auth-service/api/health"), eq(HttpMethod.GET),
 				org.mockito.ArgumentMatchers.<HttpEntity<Void>>any(), eq(String.class)))
 			.thenReturn(ResponseEntity.ok("UP"));
@@ -101,13 +104,20 @@ class FeignInvokeJobTest {
 		params.setServiceName("order-service");
 		params.setPath("/api/fail");
 		params.setMethod(BuiltinRemoteHttpMethod.DELETE);
-		when(builtinJobParamsParser.parseFromContext(context, FeignInvokeJobParams.class)).thenReturn(params);
+		stubJobParams(context, params);
 		when(loadBalancedRestTemplate.exchange(eq("http://order-service/api/fail"), eq(HttpMethod.DELETE),
 				org.mockito.ArgumentMatchers.<HttpEntity<Void>>any(), eq(String.class)))
 			.thenThrow(new RuntimeException("connection refused"));
 
 		assertThatThrownBy(() -> feignInvokeJob.execute(context)).isInstanceOf(JobExecutionException.class)
 			.hasCauseInstanceOf(RuntimeException.class);
+	}
+
+	private void stubJobParams(JobExecutionContext context, FeignInvokeJobParams params) {
+		JobDataMap jobDataMap = new JobDataMap();
+		jobDataMap.put(SysJobQuartzDataKeys.JOB_PARAMS, "{}");
+		when(context.getMergedJobDataMap()).thenReturn(jobDataMap);
+		when(builtinJobParamsParser.parseAndValidate(anyString(), eq(FeignInvokeJobParams.class))).thenReturn(params);
 	}
 
 }

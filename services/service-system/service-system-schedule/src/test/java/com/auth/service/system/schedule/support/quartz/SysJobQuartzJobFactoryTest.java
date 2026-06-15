@@ -37,7 +37,7 @@ class SysJobQuartzJobFactoryTest {
 		assertThat(map.getString(SysJobQuartzDataKeys.JOB_PARAMS))
 			.isEqualTo("{\"url\":\"https://example.com\",\"timeout\":3000}");
 		assertThat(map.getString("url")).isEqualTo("https://example.com");
-		assertThat(map.get("timeout")).isEqualTo(3000);
+		assertThat(map).containsEntry("timeout", 3000);
 	}
 
 }

@@ -43,7 +43,8 @@ public class HttpInvokeJob implements BuiltinQuartzJob {
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		try {
-			HttpInvokeJobParams params = builtinJobParamsParser.parseFromContext(context, HttpInvokeJobParams.class);
+			HttpInvokeJobParams params = builtinJobParamsParser
+				.parseAndValidate(BuiltinJobParamsParser.requireRawJson(context), HttpInvokeJobParams.class);
 			String url = BuiltinHttpSupport.buildUrlWithQuery(Objects.requireNonNull(params.getUrl(), "url"),
 					params.getQuery());
 			HttpMethod method = HttpMethod.valueOf(Objects.requireNonNull(params.getMethod(), "method").name());

@@ -1,5 +1,6 @@
 package com.auth.service.system.schedule.task.builtin;
 
+import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
 import com.auth.service.system.schedule.model.jobparams.BuiltinRemoteHttpMethod;
 import com.auth.service.system.schedule.model.jobparams.HttpInvokeJobParams;
 import com.auth.service.system.schedule.support.builtin.BuiltinJobParamsParser;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.http.HttpEntity;
@@ -19,6 +21,7 @@ import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -55,7 +58,7 @@ class HttpInvokeJobTest {
 		params.setUrl("https://example.com/api");
 		params.setQuery(java.util.Map.of("page", "1"));
 		params.setHeaders(java.util.Map.of("X-Token", "abc"));
-		when(builtinJobParamsParser.parseFromContext(context, HttpInvokeJobParams.class)).thenReturn(params);
+		stubJobParams(context, params);
 		when(restTemplate.exchange(org.mockito.ArgumentMatchers.contains("https://example.com/api"), eq(HttpMethod.GET),
 				org.mockito.ArgumentMatchers.<HttpEntity<Void>>any(), eq(String.class)))
 			.thenReturn(ResponseEntity.ok("ok"));
@@ -77,7 +80,7 @@ class HttpInvokeJobTest {
 		params.setMethod(BuiltinRemoteHttpMethod.POST);
 		params.setUrl("https://example.com/api");
 		params.setBody("{\"id\":1}");
-		when(builtinJobParamsParser.parseFromContext(context, HttpInvokeJobParams.class)).thenReturn(params);
+		stubJobParams(context, params);
 		when(restTemplate.exchange(eq("https://example.com/api"), eq(HttpMethod.POST),
 				org.mockito.ArgumentMatchers.<HttpEntity<String>>any(), eq(String.class)))
 			.thenReturn(ResponseEntity.ok("ok"));
@@ -97,13 +100,20 @@ class HttpInvokeJobTest {
 		HttpInvokeJobParams params = new HttpInvokeJobParams();
 		params.setMethod(BuiltinRemoteHttpMethod.GET);
 		params.setUrl("https://example.com/fail");
-		when(builtinJobParamsParser.parseFromContext(context, HttpInvokeJobParams.class)).thenReturn(params);
+		stubJobParams(context, params);
 		when(restTemplate.exchange(eq("https://example.com/fail"), eq(HttpMethod.GET),
 				org.mockito.ArgumentMatchers.<HttpEntity<Void>>any(), eq(String.class)))
 			.thenThrow(new RuntimeException("timeout"));
 
 		assertThatThrownBy(() -> httpInvokeJob.execute(context)).isInstanceOf(JobExecutionException.class)
 			.hasCauseInstanceOf(RuntimeException.class);
+	}
+
+	private void stubJobParams(JobExecutionContext context, HttpInvokeJobParams params) {
+		JobDataMap jobDataMap = new JobDataMap();
+		jobDataMap.put(SysJobQuartzDataKeys.JOB_PARAMS, "{}");
+		when(context.getMergedJobDataMap()).thenReturn(jobDataMap);
+		when(builtinJobParamsParser.parseAndValidate(anyString(), eq(HttpInvokeJobParams.class))).thenReturn(params);
 	}
 
 }

@@ -41,7 +41,8 @@ public class FeignInvokeJob implements BuiltinQuartzJob {
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		try {
-			FeignInvokeJobParams params = builtinJobParamsParser.parseFromContext(context, FeignInvokeJobParams.class);
+			FeignInvokeJobParams params = builtinJobParamsParser
+				.parseAndValidate(BuiltinJobParamsParser.requireRawJson(context), FeignInvokeJobParams.class);
 			String url = BuiltinHttpSupport.buildServiceUrl(
 					Objects.requireNonNull(params.getServiceName(), "serviceName"),
 					Objects.requireNonNull(params.getPath(), "path"));

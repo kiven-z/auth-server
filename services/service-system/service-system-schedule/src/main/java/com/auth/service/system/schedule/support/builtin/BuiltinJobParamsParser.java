@@ -61,17 +61,6 @@ public class BuiltinJobParamsParser {
 	}
 
 	/**
-	 * 从执行上下文读取并解析 {@code job_params}
-	 * @param context Quartz 执行上下文
-	 * @param paramsType 载荷类型
-	 * @param <T> 载荷类型
-	 * @return 校验后的载荷
-	 */
-	public <T> T parseFromContext(JobExecutionContext context, Class<T> paramsType) {
-		return parseAndValidate(requireRawJson(context), paramsType);
-	}
-
-	/**
 	 * 解析并校验 {@code job_params} JSON
 	 * @param jobParamsJson 原始 JSON
 	 * @param paramsType 载荷类型

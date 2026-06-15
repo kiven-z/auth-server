@@ -14,7 +14,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.quartz.JobDataMap;
-import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -63,16 +62,15 @@ class BuiltinJobParamsParserTest {
 	}
 
 	@Test
-	@DisplayName("parseFromContext：应从 JobDataMap 读取 jobParams 原文")
-	void parseFromContext_readsRawJsonFromJobDataMap() {
+	@DisplayName("requireRawJson + parseAndValidate：应从 JobDataMap 读取并解析 jobParams")
+	void parseAndValidate_fromContext_readsRawJsonFromJobDataMap() {
 		JobExecutionContext context = mock(JobExecutionContext.class);
-		JobDetail jobDetail = mock(JobDetail.class);
 		JobDataMap jobDataMap = new JobDataMap();
 		jobDataMap.put(SysJobQuartzDataKeys.JOB_PARAMS, "{\"version\":1,\"name\":\"from-map\"}");
 		when(context.getMergedJobDataMap()).thenReturn(jobDataMap);
-		when(context.getJobDetail()).thenReturn(jobDetail);
 
-		SampleParams actual = parser.parseFromContext(context, SampleParams.class);
+		SampleParams actual = parser.parseAndValidate(BuiltinJobParamsParser.requireRawJson(context),
+				SampleParams.class);
 
 		assertThat(actual.getName()).isEqualTo("from-map");
 	}

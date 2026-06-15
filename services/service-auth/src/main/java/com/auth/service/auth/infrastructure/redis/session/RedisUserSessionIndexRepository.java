@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Predicate;
+import java.util.function.LongPredicate;
 
 import static com.auth.module.security.contract.redis.SecurityRedisKey.ONLINE_USERS;
 import static com.auth.module.security.contract.redis.SecurityRedisKey.USER_SESSIONS;
@@ -131,7 +131,7 @@ public class RedisUserSessionIndexRepository {
 	public OnlineUserPageSlice pageOnlineUsers(int pageIndex, int pageSize, Set<Long> allowedUserIds) {
 		int normalizedPageIndex = Math.max(1, pageIndex);
 		int normalizedPageSize = Math.min(Math.max(1, pageSize), MAX_PAGE_SIZE);
-		Predicate<Long> filter = userId -> allowedUserIds == null || allowedUserIds.contains(userId);
+		LongPredicate filter = userId -> allowedUserIds == null || allowedUserIds.contains(userId);
 		OnlineUserScanResult scanResult = scanOnlineUsers(filter, normalizedPageIndex, normalizedPageSize);
 		return new OnlineUserPageSlice(scanResult.matchedCount(), scanResult.pageRecords());
 	}
@@ -195,7 +195,7 @@ public class RedisUserSessionIndexRepository {
 	 * @param pageSize 每页条数
 	 * @return 扫描结果
 	 */
-	private OnlineUserScanResult scanOnlineUsers(Predicate<Long> filter, int pageIndex, int pageSize) {
+	private OnlineUserScanResult scanOnlineUsers(LongPredicate filter, int pageIndex, int pageSize) {
 		int toSkip = (pageIndex - 1) * pageSize;
 		List<OnlineUserEntry> pageRecords = new ArrayList<>(pageSize);
 		Long zcard = sessionRedisTemplate.opsForZSet().zCard(ONLINE_USERS.fixedKey());
@@ -225,8 +225,7 @@ public class RedisUserSessionIndexRepository {
 	 * @param collector 分页收集器
 	 * @return 本批匹配数
 	 */
-	private long collectOnlineUserBatch(Set<String> members, Predicate<Long> filter,
-			OnlineUserPageCollector collector) {
+	private long collectOnlineUserBatch(Set<String> members, LongPredicate filter, OnlineUserPageCollector collector) {
 		long batchMatched = 0L;
 		for (String userIdText : members) {
 			batchMatched += tryCollectOnlineUser(userIdText, filter, collector);
@@ -241,7 +240,7 @@ public class RedisUserSessionIndexRepository {
 	 * @param collector 分页收集器
 	 * @return 是否匹配（0 或 1）
 	 */
-	private int tryCollectOnlineUser(String userIdText, Predicate<Long> filter, OnlineUserPageCollector collector) {
+	private int tryCollectOnlineUser(String userIdText, LongPredicate filter, OnlineUserPageCollector collector) {
 		if (CharSequenceUtil.isBlank(userIdText)) {
 			return 0;
 		}
