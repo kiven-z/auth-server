@@ -1,7 +1,6 @@
 package com.auth.service.system.schedule.validation;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import jakarta.validation.ConstraintValidatorContext;
 import lombok.Getter;
@@ -9,12 +8,8 @@ import lombok.experimental.UtilityClass;
 
 import java.util.Optional;
 
-import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_MODE_BEAN_REQUIRES_INVOKE_TARGET;
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_MODE_CUSTOM_FORBIDS_INVOKE_TARGET;
-
 /**
- * 任务类型字段互斥/必填规则（Form 与 Entity 共用）
+ * 任务类型字段互斥/必填规则（表单 Bean Validation 使用）
  *
  * @author Bunny
  */
@@ -50,22 +45,6 @@ public class SysJobTaskTypeFieldRules {
 			case MESSAGE_DISPATCH -> CharSequenceUtil.isBlank(payloadJson)
 					? Optional.of(Violation.MESSAGE_MISSING_PAYLOAD) : Optional.empty();
 		};
-	}
-
-	/**
-	 * 将违反类型转为业务异常（Service 层）
-	 * @param violation 违反类型
-	 */
-	public static void throwIfPresent(Violation violation) {
-		switch (violation) {
-			case BEAN_MISSING_INVOKE_TARGET -> throw new SysJobException(JOB_MODE_BEAN_REQUIRES_INVOKE_TARGET);
-			case CUSTOM_MISSING_JOB_CLASS -> throw new SysJobException(PARAM_REQUIRED, "job_class");
-			case CUSTOM_FORBIDS_INVOKE_TARGET -> throw new SysJobException(JOB_MODE_CUSTOM_FORBIDS_INVOKE_TARGET);
-			case MESSAGE_MISSING_PAYLOAD -> throw new SysJobException(PARAM_REQUIRED, "payload_json");
-			default -> {
-				// default
-			}
-		}
 	}
 
 	/**

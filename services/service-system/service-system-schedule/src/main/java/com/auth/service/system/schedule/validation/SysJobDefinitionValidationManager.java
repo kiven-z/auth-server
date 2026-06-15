@@ -1,7 +1,6 @@
 package com.auth.service.system.schedule.validation;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import org.springframework.stereotype.Component;
@@ -9,8 +8,6 @@ import org.springframework.stereotype.Component;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_TASK_TYPE_UNSUPPORTED;
 
 /**
  * 任务定义校验管理器
@@ -42,10 +39,9 @@ public class SysJobDefinitionValidationManager {
 		}
 
 		SysJobTaskTypeDefinitionValidator validator = validators.get(resolvedTaskType);
-		if (validator == null) {
-			throw new SysJobException(JOB_TASK_TYPE_UNSUPPORTED, resolvedTaskType.name());
+		if (validator != null) {
+			validator.validate(job);
 		}
-		validator.validate(job);
 	}
 
 }

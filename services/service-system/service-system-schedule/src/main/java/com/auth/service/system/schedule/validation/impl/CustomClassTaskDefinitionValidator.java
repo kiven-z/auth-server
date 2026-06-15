@@ -6,7 +6,6 @@ import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import com.auth.service.system.schedule.support.QuartzTaskRegistry;
 import com.auth.service.system.schedule.validation.SysJobTaskTypeDefinitionValidator;
-import com.auth.service.system.schedule.validation.SysJobTaskTypeFieldRules;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -31,10 +30,6 @@ public class CustomClassTaskDefinitionValidator implements SysJobTaskTypeDefinit
 
 	@Override
 	public void validate(SysJobEntity job) {
-		SysJobTaskTypeFieldRules
-			.detect(SysJobTaskType.CUSTOM_CLASS, job.getJobClass(), job.getInvokeTarget(), job.getPayloadJson(), true)
-			.ifPresent(SysJobTaskTypeFieldRules::throwIfPresent);
-
 		String jobClass = job.getJobClass();
 		if (!quartzTaskRegistry.isAllowed(jobClass)) {
 			throw new SysJobException(JOB_CLASS_NOT_WHITELISTED);

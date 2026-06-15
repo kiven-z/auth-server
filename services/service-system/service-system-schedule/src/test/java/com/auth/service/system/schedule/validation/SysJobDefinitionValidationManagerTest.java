@@ -1,6 +1,5 @@
 package com.auth.service.system.schedule.validation;
 
-import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import org.junit.jupiter.api.DisplayName;
@@ -8,9 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_TASK_TYPE_UNSUPPORTED;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * {@link SysJobDefinitionValidationManager} 单元测试。
@@ -41,17 +38,19 @@ class SysJobDefinitionValidationManagerTest {
 	}
 
 	@Test
-	@DisplayName("normalizeAndValidate：缺少对应类型校验器时抛出 JOB_TASK_TYPE_UNSUPPORTED")
-	void normalizeAndValidateThrowsWhenValidatorMissing() {
+	@DisplayName("normalizeAndValidate：无专属校验器时仅归一化字段")
+	void normalizeAndValidateSkipsWhenValidatorMissing() {
 		SysJobDefinitionValidationManager manager = new SysJobDefinitionValidationManager(
-				List.of(new RecorderValidator(SysJobTaskType.BEAN_INVOKE)));
+				List.of(new RecorderValidator(SysJobTaskType.CUSTOM_CLASS)));
 
 		SysJobEntity job = new SysJobEntity();
-		job.setTaskType(SysJobTaskType.CUSTOM_CLASS.name());
+		job.setTaskType(SysJobTaskType.BEAN_INVOKE.name());
+		job.setInvokeTarget("beanInvokeDemoTask.run()");
 
-		assertThatThrownBy(() -> manager.normalizeAndValidate(job)).isInstanceOf(SysJobException.class)
-			.extracting(ex -> ((SysJobException) ex).getResultCode())
-			.isEqualTo(JOB_TASK_TYPE_UNSUPPORTED);
+		manager.normalizeAndValidate(job);
+
+		assertThat(job.getTaskType()).isEqualTo(SysJobTaskType.BEAN_INVOKE.name());
+		assertThat(job.getHandlerCode()).isEqualTo("beanInvokeHandler");
 	}
 
 	/**
