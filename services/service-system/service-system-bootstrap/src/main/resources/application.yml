@@ -51,7 +51,6 @@ spring:
 
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
-    time-zone: GMT+8
 
   # Quartz：JDBC JobStore + 集群（禁止 RAMJobStore；运行时数据持久化到 QRTZ_* 表）
   quartz:

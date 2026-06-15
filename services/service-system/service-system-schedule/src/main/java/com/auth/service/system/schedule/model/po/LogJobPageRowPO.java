@@ -1,7 +1,6 @@
 package com.auth.service.system.schedule.model.po;
 
 import com.auth.common.core.annotation.JsonStringFormat;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -52,11 +51,9 @@ public class LogJobPageRowPO implements Serializable {
 	@Schema(title = "耗时毫秒")
 	private Long elapsedTime;
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "创建时间")
 	private LocalDateTime createTime;
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "更新时间")
 	private LocalDateTime updateTime;
 

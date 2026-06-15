@@ -7,7 +7,7 @@ import org.quartz.Job;
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_TASK_TYPE_UNSUPPORTED;
 
 /**
- * 定时任务类型（仅表达调度执行入口，不承载业务语义）
+ * 定时任务类型
  *
  * @author Bunny
  */

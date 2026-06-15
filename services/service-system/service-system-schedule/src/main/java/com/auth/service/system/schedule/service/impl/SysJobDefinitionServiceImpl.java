@@ -38,9 +38,6 @@ import org.quartz.SchedulerException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -49,7 +46,6 @@ import java.util.stream.Collectors;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.*;
-import static com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys.JOB_ZONE;
 
 /**
  * 定时任务定义服务实现
@@ -97,8 +93,21 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 			throw new SysJobException(DATA_NOT_EXIST);
 		}
 
+		String jobName = detailRow.getJobName();
+		String jobGroup = detailRow.getJobGroup();
+
 		SysJobDetailVO vo = SysJobConverter.INSTANCE.toDetailVo(detailRow);
-		enrichDetail(vo, detailRow.getJobName(), detailRow.getJobGroup());
+		// 查询任务触发时间
+		SysJobQuartzRuntimeReader.FireTimes fireTimes = sysJobQuartzRuntimeReader.getFireTimes(jobName, jobGroup);
+		vo.setPreviousFireTime(fireTimes.previousFireTime());
+		vo.setNextFireTime(fireTimes.nextFireTime());
+
+		// 解析单个任务的 Quartz 运行时状态
+		SysJobQuartzRuntimeSnapshot snapshot = sysJobQuartzRuntimeReader.resolveRuntimeSnapshot(jobName, jobGroup);
+		vo.setQuartzRuntimeStatus(snapshot.status());
+		vo.setQuartzFireTime(snapshot.fireTime());
+
+		enrichLastExecution(List.of(vo));
 		auditUserDisplayService.enrichAuditUsernames(List.of(vo));
 		return vo;
 	}
@@ -205,28 +214,6 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 			log.error("立即执行失败", ex);
 			throw new SysJobException(JOB_QUARTZ_OPERATION_FAILED, "runOnce", ex.getMessage());
 		}
-	}
-
-	/**
-	 * 丰富详情
-	 * @param detail 详情
-	 * @param jobName 任务名称
-	 * @param jobGroup 任务组
-	 */
-	private void enrichDetail(SysJobDetailVO detail, String jobName, String jobGroup) {
-		SysJobQuartzRuntimeReader.FireTimes fireTimes = sysJobQuartzRuntimeReader.getFireTimes(jobName, jobGroup);
-		Date previousFireTime = fireTimes.previousFireTime();
-		detail.setPreviousFireTime(previousFireTime == null ? null
-				: LocalDateTime.ofInstant(Instant.ofEpochMilli(previousFireTime.getTime()), JOB_ZONE));
-		Date nextFireTime = fireTimes.nextFireTime();
-		detail.setNextFireTime(nextFireTime == null ? null
-				: LocalDateTime.ofInstant(Instant.ofEpochMilli(nextFireTime.getTime()), JOB_ZONE));
-
-		SysJobQuartzRuntimeSnapshot snapshot = sysJobQuartzRuntimeReader.resolveRuntimeSnapshot(jobName, jobGroup);
-		detail.setQuartzRuntimeStatus(snapshot.status());
-		detail.setQuartzFireTime(snapshot.fireTime());
-
-		enrichLastExecution(List.of(detail));
 	}
 
 	/**

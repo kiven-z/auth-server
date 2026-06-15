@@ -8,11 +8,7 @@ import org.quartz.*;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.*;
-
-import static com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys.JOB_ZONE;
 
 /**
  * 读取 Quartz 运行时快照与触发时间（只读，不参与调度写入）
@@ -84,7 +80,7 @@ public class SysJobQuartzRuntimeReader {
 			return SysJobQuartzRuntimeSnapshot.of(SysJobQuartzRuntimeStatus.NOT_REGISTERED, null);
 		}
 		if (runningJobKeys.contains(jobKey)) {
-			LocalDateTime fireTime = resolveRunningFireTime(jobKey);
+			Date fireTime = resolveRunningFireTime(jobKey);
 			return SysJobQuartzRuntimeSnapshot.of(SysJobQuartzRuntimeStatus.RUNNING, fireTime);
 		}
 		SysJobQuartzRuntimeStatus triggerStatus = resolveTriggerStatus(jobKey);
@@ -92,10 +88,10 @@ public class SysJobQuartzRuntimeReader {
 				null);
 	}
 
-	private LocalDateTime resolveRunningFireTime(JobKey jobKey) throws SchedulerException {
+	private Date resolveRunningFireTime(JobKey jobKey) throws SchedulerException {
 		for (JobExecutionContext context : scheduler.getCurrentlyExecutingJobs()) {
 			if (jobKey.equals(context.getJobDetail().getKey())) {
-				return toLocalDateTime(context.getFireTime());
+				return context.getFireTime();
 			}
 		}
 		return null;
@@ -123,13 +119,6 @@ public class SysJobQuartzRuntimeReader {
 			return SysJobQuartzRuntimeStatus.PAUSED;
 		}
 		return null;
-	}
-
-	private LocalDateTime toLocalDateTime(Date date) {
-		if (date == null) {
-			return null;
-		}
-		return LocalDateTime.ofInstant(Instant.ofEpochMilli(date.getTime()), JOB_ZONE);
 	}
 
 	/**

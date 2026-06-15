@@ -4,6 +4,10 @@ import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.common.web.valid.group.CreateGroup;
 import com.auth.common.web.valid.group.UpdateGroup;
+import com.auth.module.security.contract.annotation.OperationLog;
+import com.auth.module.security.contract.api.audit.AuditServiceDomain;
+import com.auth.module.security.contract.api.audit.OperationLogKind;
+import com.auth.service.system.common.model.SystemAuditBizModule;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.form.SysJobCreateForm;
 import com.auth.service.system.schedule.model.form.SysJobStatusForm;
@@ -70,31 +74,34 @@ public class SysJobController {
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
+	@OperationLog(targetType = "JOB", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_JOB, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "修改定时任务")
 	@PreAuthorize("@auth.decide('sysJob:update')")
 	@PutMapping
 	public Result<String> update(@Validated(UpdateGroup.class) @RequestBody SysJobUpdateForm form) {
-		// FIXME 加上 OperationLog 注解
 		sysJobDefinitionService.update(form);
 
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
+	@OperationLog(targetType = "JOB", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_JOB, operation = OperationLogKind.DELETE)
 	@Operation(summary = "删除定时任务")
 	@PreAuthorize("@auth.decide('sysJob:delete')")
 	@DeleteMapping("{id}")
 	public Result<String> delete(@PathVariable("id") Long id) {
-		// FIXME 加上 OperationLog 注解
 		sysJobDefinitionService.deleteById(id);
 
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
+	@OperationLog(targetType = "JOB", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_JOB, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "批量启停任务")
 	@PreAuthorize("@auth.decide('sysJob:update')")
 	@PutMapping("status")
 	public Result<String> batchStatus(@Validated @RequestBody SysJobStatusForm form) {
-		// FIXME 加上 OperationLog 注解
 		sysJobScheduleSyncService.batchUpdateStatus(form);
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}

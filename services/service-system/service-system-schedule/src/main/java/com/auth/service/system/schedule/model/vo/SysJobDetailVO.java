@@ -12,6 +12,7 @@ import lombok.ToString;
 
 import java.io.Serial;
 import java.time.LocalDateTime;
+import java.util.Date;
 
 /**
  * 定时任务详情
@@ -77,18 +78,18 @@ public class SysJobDetailVO extends BaseResponse implements SysJobLastExecutionV
 
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "上次触发")
-	private LocalDateTime previousFireTime;
+	private Date previousFireTime;
 
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "下次触发")
-	private LocalDateTime nextFireTime;
+	private Date nextFireTime;
 
 	@Schema(title = "运行态", description = "Quartz 实时状态，与 sys_job.status 启停无关")
 	private SysJobQuartzRuntimeStatus quartzRuntimeStatus;
 
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "本次开始执行时间", description = "RUNNING 时本次触发的开始时间")
-	private LocalDateTime quartzFireTime;
+	private Date quartzFireTime;
 
 	@Schema(title = "最近结果", description = "SUCCESS/FAILED/UNKNOWN")
 	private SysJobLastExecutionStatus lastExecutionStatus;

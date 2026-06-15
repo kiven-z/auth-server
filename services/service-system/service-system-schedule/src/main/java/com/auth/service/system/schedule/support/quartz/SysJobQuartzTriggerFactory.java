@@ -7,11 +7,10 @@ import org.quartz.JobKey;
 import org.quartz.TriggerBuilder;
 import org.springframework.stereotype.Component;
 
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.Objects;
-import java.util.TimeZone;
 
-import static com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys.JOB_ZONE;
 import static com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys.TRIGGER_SUFFIX;
 
 /**
@@ -51,8 +50,7 @@ public class SysJobQuartzTriggerFactory {
 		String jobName = job.getJobName();
 		String jobGroup = job.getJobGroup();
 
-		CronScheduleBuilder cron = CronScheduleBuilder.cronSchedule(job.getCronExpression())
-			.inTimeZone(TimeZone.getTimeZone(JOB_ZONE));
+		CronScheduleBuilder cron = CronScheduleBuilder.cronSchedule(job.getCronExpression());
 		cron = applyMisfire(cron, job.getMisfirePolicy());
 
 		TriggerBuilder<CronTrigger> triggerBuilder = TriggerBuilder.newTrigger()
@@ -61,10 +59,10 @@ public class SysJobQuartzTriggerFactory {
 			.withSchedule(cron);
 
 		if (job.getStartTime() != null) {
-			triggerBuilder.startAt(Date.from(job.getStartTime().atZone(JOB_ZONE).toInstant()));
+			triggerBuilder.startAt(Date.from(job.getStartTime().atZone(ZoneId.systemDefault()).toInstant()));
 		}
 		if (job.getEndTime() != null) {
-			triggerBuilder.endAt(Date.from(job.getEndTime().atZone(JOB_ZONE).toInstant()));
+			triggerBuilder.endAt(Date.from(job.getEndTime().atZone(ZoneId.systemDefault()).toInstant()));
 		}
 		return triggerBuilder.build();
 	}

@@ -2,8 +2,6 @@ package com.auth.service.system.schedule.model.constants;
 
 import lombok.experimental.UtilityClass;
 
-import java.time.ZoneId;
-
 /**
  * Quartz {@link org.quartz.JobDataMap} 中与业务任务相关的键名约定
  *
@@ -61,11 +59,6 @@ public class SysJobQuartzDataKeys {
 	 * Trigger 名称规则：{@code jobName + "_TRIGGER"}
 	 */
 	public static final String TRIGGER_SUFFIX = "_TRIGGER";
-
-	/**
-	 * 与 {@code spring.jackson.time-zone} 及业务库一致，Cron 按东八区解析
-	 */
-	public static final ZoneId JOB_ZONE = ZoneId.of("Asia/Shanghai");
 
 	/**
 	 * bean名称

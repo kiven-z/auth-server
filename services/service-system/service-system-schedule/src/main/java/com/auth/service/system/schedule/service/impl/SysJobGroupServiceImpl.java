@@ -128,10 +128,12 @@ public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJo
 			throw new SysJobException(DATA_NOT_EXIST);
 		}
 
+		// 系统内置的不能删除
 		if (BooleanUtil.isTrue(jobGroup.getIsSystem())) {
 			throw new SysJobException(JOB_GROUP_SYSTEM_PROTECTED);
 		}
 
+		// 分组下还有绑定任务不能删
 		long cnt = sysJobMapper
 			.selectCount(Wrappers.<SysJobEntity>lambdaQuery().eq(SysJobEntity::getJobGroup, jobGroup.getGroupCode()));
 		if (cnt > 0) {
