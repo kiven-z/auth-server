@@ -1,9 +1,9 @@
 package com.auth.service.system.schedule.task.builtin.http;
 
-import cn.hutool.core.map.MapUtil;
 import com.auth.service.system.schedule.annotation.QuartzTask;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import com.auth.service.system.schedule.task.builtin.BuiltinQuartzJob;
+import com.auth.service.system.schedule.task.builtin.feign.support.FeignInvokeSupport;
 import com.auth.service.system.schedule.task.builtin.http.model.HttpPutJobParams;
 import com.auth.service.system.schedule.task.builtin.support.BuiltinJobParamsParser;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +21,14 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * 通用 HTTP PUT 内置任务：从 {@code job_params} 读取 URL、可选请求头与请求体并发起 PUT
+ * 通用 HTTP PUT 内置任务：从 {@code job_params} 读取 URL、可选请求头与请求体并发起 PUT <pre>
+ * {
+ *   "version": 1,
+ *   "url": "https://api.example.com/resource/1",
+ *   "headers": { "Content-Type": "application/json" },
+ *   "body": "{\"status\":\"active\"}"
+ * }
+ * </pre>
  *
  * @author Bunny
  */
@@ -42,11 +49,7 @@ public class HttpPutInvokeJob implements BuiltinQuartzJob {
 	 * @return HttpHeaders
 	 */
 	private static HttpHeaders toHttpHeaders(Map<String, String> headers) {
-		HttpHeaders httpHeaders = new HttpHeaders();
-		if (MapUtil.isNotEmpty(headers)) {
-			headers.forEach(httpHeaders::set);
-		}
-		return httpHeaders;
+		return FeignInvokeSupport.toHttpHeaders(headers);
 	}
 
 	@Override

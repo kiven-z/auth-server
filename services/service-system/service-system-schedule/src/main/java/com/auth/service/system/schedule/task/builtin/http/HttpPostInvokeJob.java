@@ -1,9 +1,9 @@
 package com.auth.service.system.schedule.task.builtin.http;
 
-import cn.hutool.core.map.MapUtil;
 import com.auth.service.system.schedule.annotation.QuartzTask;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import com.auth.service.system.schedule.task.builtin.BuiltinQuartzJob;
+import com.auth.service.system.schedule.task.builtin.feign.support.FeignInvokeSupport;
 import com.auth.service.system.schedule.task.builtin.http.model.HttpPostJobParams;
 import com.auth.service.system.schedule.task.builtin.support.BuiltinJobParamsParser;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +21,14 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * 通用 HTTP POST 内置任务：从 {@code job_params} 读取 URL、可选请求头与请求体并发起 POST
+ * 通用 HTTP POST 内置任务：从 {@code job_params} 读取 URL、可选请求头与请求体并发起 POST <pre>
+ * {
+ *   "version": 1,
+ *   "url": "https://api.example.com/orders",
+ *   "headers": { "Content-Type": "application/json" },
+ *   "body": "{\"id\":1}"
+ * }
+ * </pre>
  *
  * @author Bunny
  */
@@ -35,6 +42,15 @@ public class HttpPostInvokeJob implements BuiltinQuartzJob {
 	private final BuiltinJobParamsParser builtinJobParamsParser;
 
 	private final RestTemplate restTemplate;
+
+	/**
+	 * 将参数 Map 转为 HTTP 请求头
+	 * @param headers 请求头 Map
+	 * @return HttpHeaders
+	 */
+	private static HttpHeaders toHttpHeaders(Map<String, String> headers) {
+		return FeignInvokeSupport.toHttpHeaders(headers);
+	}
 
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
@@ -51,19 +67,6 @@ public class HttpPostInvokeJob implements BuiltinQuartzJob {
 		catch (Exception exception) {
 			throw new JobExecutionException(exception);
 		}
-	}
-
-	/**
-	 * 将参数 Map 转为 HTTP 请求头
-	 * @param headers 请求头 Map
-	 * @return HttpHeaders
-	 */
-	private static HttpHeaders toHttpHeaders(Map<String, String> headers) {
-		HttpHeaders httpHeaders = new HttpHeaders();
-		if (MapUtil.isNotEmpty(headers)) {
-			headers.forEach(httpHeaders::set);
-		}
-		return httpHeaders;
 	}
 
 }
