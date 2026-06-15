@@ -3,17 +3,16 @@ package com.auth.service.system.schedule.task.builtin;
 import org.quartz.Job;
 
 /**
- * 内置 {@link org.quartz.Job} 标记：通过 {@code CUSTOM_CLASS} 调度，从 {@code job_params} 读取 JSON
- * 参数。
+ * 内置 {@link Job} 标记：通过 {@code CUSTOM_CLASS} 调度，从 {@code job_params} 读取 JSON 参数。
  * <p>
- * 生产级内置实现按能力分子包：
+ * 生产级内置实现见 {@link HttpInvokeJob}、{@link FeignInvokeJob}；演示代码保留在 {@code example} 包。
  * </p>
- * <ul>
- * <li>{@code task.builtin.http} — 通用 HTTP 调用（GET/POST/DELETE 等）</li>
- * <li>{@code task.builtin.feign} — 通用 Feign 微服务调用</li>
- * </ul>
  * <p>
- * 演示代码保留在 {@code example} 包，与生产内置类分离。
+ * 阅读路径：{@code SysJobEntryJob} → {@code CustomClassTaskExecutor} → 具体内置 Job； 保存时校验
+ * {@code CustomClassTaskDefinitionValidator} →
+ * {@link com.auth.service.system.schedule.validation.builtin.BuiltinJobDefinitionValidatorRegistry}；
+ * 内置校验映射见
+ * {@link com.auth.service.system.schedule.validation.builtin.BuiltinJobDefinitionValidatorConfig}。
  * </p>
  *
  * @author Bunny

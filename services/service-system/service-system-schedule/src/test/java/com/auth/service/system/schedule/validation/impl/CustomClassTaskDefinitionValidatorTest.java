@@ -4,8 +4,8 @@ import com.auth.service.system.schedule.example.custom.SpringInjectDemoJob;
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.support.QuartzTaskRegistry;
-import com.auth.service.system.schedule.task.builtin.http.HttpGetInvokeJob;
-import com.auth.service.system.schedule.task.builtin.validation.BuiltinJobDefinitionValidatorRegistry;
+import com.auth.service.system.schedule.task.builtin.HttpInvokeJob;
+import com.auth.service.system.schedule.validation.builtin.BuiltinJobDefinitionValidatorRegistry;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,14 +48,14 @@ class CustomClassTaskDefinitionValidatorTest {
 	}
 
 	@Test
-	@DisplayName("validate：内置 HttpGet 任务应触发 job_params 校验")
-	void validate_whenBuiltinHttpGetJob_validatesJobParams() {
-		String className = HttpGetInvokeJob.class.getName();
+	@DisplayName("validate：内置 HttpInvoke 任务应触发 job_params 校验")
+	void validate_whenBuiltinHttpInvokeJob_validatesJobParams() {
+		String className = HttpInvokeJob.class.getName();
 		when(quartzTaskRegistry.isAllowed(className)).thenReturn(true);
 
 		SysJobEntity job = new SysJobEntity();
 		job.setJobClass(className);
-		job.setJobParams("{\"version\":1,\"url\":\"https://example.com\"}");
+		job.setJobParams("{\"version\":1,\"method\":\"GET\",\"url\":\"https://example.com\"}");
 
 		validator.validate(job);
 

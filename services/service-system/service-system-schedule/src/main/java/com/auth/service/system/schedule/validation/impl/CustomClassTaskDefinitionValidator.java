@@ -5,8 +5,8 @@ import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import com.auth.service.system.schedule.support.QuartzTaskRegistry;
-import com.auth.service.system.schedule.task.builtin.validation.BuiltinJobDefinitionValidatorRegistry;
 import com.auth.service.system.schedule.validation.SysJobTaskTypeDefinitionValidator;
+import com.auth.service.system.schedule.validation.builtin.BuiltinJobDefinitionValidatorRegistry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
