@@ -1,0 +1,89 @@
+package com.auth.service.system.schedule.support;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import java.lang.reflect.Method;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+/**
+ * {@link InvokeTargetSupport} 单元测试。
+ *
+ * @author Bunny
+ */
+@DisplayName("InvokeTargetSupport Bean 调用目标")
+class InvokeTargetSupportTest {
+
+	@Test
+	@DisplayName("isCallableMethod：public 无参或单 String 参数实例方法可调用")
+	void isCallableMethodAllowsSupportedSignatures() throws NoSuchMethodException {
+		Method run = SampleTask.class.getMethod("run");
+		Method echo = SampleTask.class.getMethod("echo", String.class);
+		Method hidden = SampleTask.class.getDeclaredMethod("hidden");
+		Method staticRun = SampleTask.class.getMethod("staticRun");
+
+		assertThat(InvokeTargetSupport.isCallableMethod(run)).isTrue();
+		assertThat(InvokeTargetSupport.isCallableMethod(echo)).isTrue();
+		assertThat(InvokeTargetSupport.isCallableMethod(hidden)).isFalse();
+		assertThat(InvokeTargetSupport.isCallableMethod(staticRun)).isFalse();
+	}
+
+	@Test
+	@DisplayName("parameterSignature：按参数数量返回固定签名")
+	void parameterSignatureMatchesArgCount() throws NoSuchMethodException {
+		Method run = SampleTask.class.getMethod("run");
+		Method echo = SampleTask.class.getMethod("echo", String.class);
+
+		assertThat(InvokeTargetSupport.parameterSignature(run)).isEqualTo("()");
+		assertThat(InvokeTargetSupport.parameterSignature(echo)).isEqualTo("(String)");
+	}
+
+	@Test
+	@DisplayName("formatInvokeTarget：无参方法与 String 参数方法分别生成示例")
+	void formatInvokeTargetBuildsExpectedExamples() throws NoSuchMethodException {
+		Method run = SampleTask.class.getMethod("run");
+		Method echo = SampleTask.class.getMethod("echo", String.class);
+
+		assertThat(InvokeTargetSupport.formatInvokeTarget("sampleTask", run)).isEqualTo("sampleTask.run()");
+		assertThat(InvokeTargetSupport.formatInvokeTarget("sampleTask", echo)).isEqualTo("sampleTask.echo('')");
+	}
+
+	@Test
+	@DisplayName("toMethodCatalog：组装目录 VO 字段")
+	void toMethodCatalogBuildsVo() throws NoSuchMethodException {
+		Method echo = SampleTask.class.getMethod("echo", String.class);
+
+		var vo = InvokeTargetSupport.toMethodCatalog("sampleTask", echo);
+
+		assertThat(vo.getMethodName()).isEqualTo("echo");
+		assertThat(vo.getParameterSignature()).isEqualTo("(String)");
+		assertThat(vo.getReturnType()).isEqualTo("String");
+		assertThat(vo.getInvokeTargetExample()).isEqualTo("sampleTask.echo('')");
+		assertThat(vo.getRequiresStringParam()).isTrue();
+	}
+
+	/**
+	 * 无参与单 String 参数的可调用方法
+	 */
+	public static class SampleTask {
+
+		public static void staticRun() {
+			// 测试用
+		}
+
+		public void run() {
+			// 测试用
+		}
+
+		public String echo(String message) {
+			return message;
+		}
+
+		private void hidden() {
+			// 测试用
+		}
+
+	}
+
+}

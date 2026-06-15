@@ -95,38 +95,6 @@ public class QuartzBeanInvoker {
 	}
 
 	/**
-	 * 解析方法
-	 * @param clazz 类
-	 * @param methodName 方法名
-	 * @param argCount 参数数量
-	 * @return 方法
-	 */
-	private static @NonNull Method resolveMethod(@NonNull Class<?> clazz, @NonNull String methodName, int argCount) {
-		Class<?>[] paramTypes;
-		String signature;
-		if (argCount == 0) {
-			paramTypes = new Class<?>[0];
-			signature = "()";
-		}
-		else if (argCount == 1) {
-			paramTypes = new Class<?>[] { String.class };
-			signature = "(String)";
-		}
-		else {
-			throw new SysJobException(JOB_INVOKE_PARAM_NOT_SUPPORTED);
-		}
-
-		Class<?> nonNullClazz = Objects.requireNonNull(clazz, "clazz");
-		String nonNullMethodName = Objects.requireNonNull(methodName, METHOD_NAME);
-		Method m = ReflectionUtils.findMethod(nonNullClazz, nonNullMethodName, paramTypes);
-		if (m == null) {
-			throw new SysJobException(JOB_REFLECT_METHOD_NOT_FOUND, signature, nonNullMethodName);
-		}
-		ReflectionUtils.makeAccessible(m);
-		return m;
-	}
-
-	/**
 	 * 执行调用目标字符串
 	 * @param invokeTarget 如 {@code beanInvokeDemoTask.run()}
 	 * @return 方法返回值转字符串（无返回则为空串）
@@ -139,7 +107,7 @@ public class QuartzBeanInvoker {
 
 		Object bean = applicationContext.getBean(beanName);
 		Object[] args = parseArgs(spec.argsInner);
-		Method method = resolveMethod(bean.getClass(), methodName, args.length);
+		Method method = InvokeTargetSupport.resolveMethod(bean.getClass(), methodName, args.length);
 		Object result = ReflectionUtils.invokeMethod(method, bean, args);
 		return result == null ? "" : String.valueOf(result);
 	}

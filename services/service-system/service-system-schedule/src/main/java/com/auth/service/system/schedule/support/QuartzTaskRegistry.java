@@ -27,6 +27,11 @@ public class QuartzTaskRegistry {
 	private final Map<String, QuartzTaskClassVO> allowedClasses = new ConcurrentHashMap<>();
 
 	/**
+	 * 类全限定名 -> 扫描到的 Spring Bean 名
+	 */
+	private final Map<String, String> classNameToBeanName = new ConcurrentHashMap<>();
+
+	/**
 	 * Spring 上下文
 	 */
 	private final ApplicationContext applicationContext;
@@ -52,9 +57,20 @@ public class QuartzTaskRegistry {
 				vo.setName(ann.name());
 				vo.setDescription(ann.description());
 				vo.setInvokeModes(Stream.of(ann.modes()).map(Enum::name).toList());
-				allowedClasses.put(type.getName(), vo);
+				String className = type.getName();
+				allowedClasses.put(className, vo);
+				classNameToBeanName.put(className, beanName);
 			}
 		}
+	}
+
+	/**
+	 * 解析白名单类对应的 Spring Bean 名
+	 * @param className 类全限定名
+	 * @return Bean 名；不在白名单时返回 {@code null}
+	 */
+	public String resolveBeanName(String className) {
+		return classNameToBeanName.get(className);
 	}
 
 	/**

@@ -60,7 +60,7 @@ public class SysJobScheduleSyncServiceImpl extends ServiceImpl<SysJobMapper, Sys
 			entity.setStatus(targetStatus);
 			return entity;
 		}).toList();
-		this.updateBatchById(updates);
+		super.updateBatchById(updates);
 
 		try {
 			if (BooleanUtil.isFalse(targetStatus)) {
@@ -103,7 +103,7 @@ public class SysJobScheduleSyncServiceImpl extends ServiceImpl<SysJobMapper, Sys
 				entity.setStatus(status);
 				return entity;
 			}).toList();
-			this.updateBatchById(updates);
+			super.updateBatchById(updates);
 		}
 
 		try {
