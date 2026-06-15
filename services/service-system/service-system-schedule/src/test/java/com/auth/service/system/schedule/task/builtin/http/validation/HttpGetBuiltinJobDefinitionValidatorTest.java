@@ -1,7 +1,6 @@
 package com.auth.service.system.schedule.task.builtin.http.validation;
 
 import com.auth.service.system.schedule.exception.SysJobException;
-import com.auth.service.system.schedule.task.builtin.http.model.HttpGetJobParams;
 import com.auth.service.system.schedule.task.builtin.support.BuiltinJobParamsParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Validation;
