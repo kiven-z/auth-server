@@ -198,40 +198,59 @@ public class RedisUserSessionIndexRepository {
 	private OnlineUserScanResult scanOnlineUsers(Predicate<Long> filter, int pageIndex, int pageSize) {
 		int toSkip = (pageIndex - 1) * pageSize;
 		List<OnlineUserEntry> pageRecords = new ArrayList<>(pageSize);
-		long matchedCount = 0L;
-		int skipped = 0;
-		long rank = 0L;
 		Long zcard = sessionRedisTemplate.opsForZSet().zCard(ONLINE_USERS.fixedKey());
 		if (zcard == null || zcard <= 0) {
 			return new OnlineUserScanResult(0L, pageRecords);
 		}
 
+		OnlineUserPageCollector collector = new OnlineUserPageCollector(toSkip, pageSize, pageRecords);
+		long matchedCount = 0L;
+		long rank = 0L;
 		while (rank < zcard) {
 			Set<String> members = sessionRedisTemplate.opsForZSet()
 				.reverseRange(ONLINE_USERS.fixedKey(), rank, rank + ONLINE_USER_SCAN_BATCH - 1L);
 			if (CollUtil.isEmpty(members)) {
 				break;
 			}
-			for (String userIdText : members) {
-				if (CharSequenceUtil.isBlank(userIdText)) {
-					continue;
-				}
-				Optional<OnlineUserEntry> entry = loadOnlineUserEntry(userIdText);
-				if (entry.isEmpty() || !filter.test(entry.get().userId())) {
-					continue;
-				}
-				matchedCount++;
-				if (skipped < toSkip) {
-					skipped++;
-					continue;
-				}
-				if (pageRecords.size() < pageSize) {
-					pageRecords.add(entry.get());
-				}
-			}
+			matchedCount += collectOnlineUserBatch(members, filter, collector);
 			rank += ONLINE_USER_SCAN_BATCH;
 		}
 		return new OnlineUserScanResult(matchedCount, pageRecords);
+	}
+
+	/**
+	 * 处理一批 ZSet 成员，累计匹配数并写入分页收集器
+	 * @param members 批次成员
+	 * @param filter 筛选条件
+	 * @param collector 分页收集器
+	 * @return 本批匹配数
+	 */
+	private long collectOnlineUserBatch(Set<String> members, Predicate<Long> filter,
+			OnlineUserPageCollector collector) {
+		long batchMatched = 0L;
+		for (String userIdText : members) {
+			batchMatched += tryCollectOnlineUser(userIdText, filter, collector);
+		}
+		return batchMatched;
+	}
+
+	/**
+	 * 单条在线用户：通过筛选则计入匹配并可能加入当前页
+	 * @param userIdText 用户 ID 字符串
+	 * @param filter 筛选条件
+	 * @param collector 分页收集器
+	 * @return 是否匹配（0 或 1）
+	 */
+	private int tryCollectOnlineUser(String userIdText, Predicate<Long> filter, OnlineUserPageCollector collector) {
+		if (CharSequenceUtil.isBlank(userIdText)) {
+			return 0;
+		}
+		Optional<OnlineUserEntry> entry = loadOnlineUserEntry(userIdText);
+		if (entry.isEmpty() || !filter.test(entry.get().userId())) {
+			return 0;
+		}
+		collector.accept(entry.get());
+		return 1;
 	}
 
 	/**
@@ -256,6 +275,37 @@ public class RedisUserSessionIndexRepository {
 		Double score = sessionRedisTemplate.opsForZSet().score(ONLINE_USERS.fixedKey(), userIdText);
 		long lastLoginAt = score != null ? score.longValue() : 0L;
 		return Optional.of(new OnlineUserEntry(userId, lastLoginAt, (int) sessionCount));
+	}
+
+	/**
+	 * 在线用户分页收集器：跳过前 N 条匹配记录后填充当前页
+	 */
+	private static final class OnlineUserPageCollector {
+
+		private final int toSkip;
+
+		private final int pageSize;
+
+		private final List<OnlineUserEntry> pageRecords;
+
+		private int skipped;
+
+		private OnlineUserPageCollector(int toSkip, int pageSize, List<OnlineUserEntry> pageRecords) {
+			this.toSkip = toSkip;
+			this.pageSize = pageSize;
+			this.pageRecords = pageRecords;
+		}
+
+		private void accept(OnlineUserEntry entry) {
+			if (skipped < toSkip) {
+				skipped++;
+				return;
+			}
+			if (pageRecords.size() < pageSize) {
+				pageRecords.add(entry);
+			}
+		}
+
 	}
 
 	/**

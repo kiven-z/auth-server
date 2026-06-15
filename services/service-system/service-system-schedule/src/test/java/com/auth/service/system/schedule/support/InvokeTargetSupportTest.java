@@ -20,12 +20,12 @@ class InvokeTargetSupportTest {
 	void isCallableMethodAllowsSupportedSignatures() throws NoSuchMethodException {
 		Method run = SampleTask.class.getMethod("run");
 		Method echo = SampleTask.class.getMethod("echo", String.class);
-		Method hidden = SampleTask.class.getDeclaredMethod("hidden");
+		Method twoParams = SampleTask.class.getMethod("twoParams", String.class, String.class);
 		Method staticRun = SampleTask.class.getMethod("staticRun");
 
 		assertThat(InvokeTargetSupport.isCallableMethod(run)).isTrue();
 		assertThat(InvokeTargetSupport.isCallableMethod(echo)).isTrue();
-		assertThat(InvokeTargetSupport.isCallableMethod(hidden)).isFalse();
+		assertThat(InvokeTargetSupport.isCallableMethod(twoParams)).isFalse();
 		assertThat(InvokeTargetSupport.isCallableMethod(staticRun)).isFalse();
 	}
 
@@ -80,8 +80,8 @@ class InvokeTargetSupportTest {
 			return message;
 		}
 
-		private void hidden() {
-			// 测试用
+		public void twoParams(String first, String second) {
+			// 测试用：不支持的双 String 参数
 		}
 
 	}

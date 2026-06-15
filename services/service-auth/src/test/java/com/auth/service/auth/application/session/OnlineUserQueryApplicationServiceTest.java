@@ -22,7 +22,6 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 /**
@@ -84,7 +83,7 @@ class OnlineUserQueryApplicationServiceTest {
 		OnlineUserPageQuery query = new OnlineUserPageQuery();
 		query.setUsername("ali");
 		when(userBriefQueryPort.findIdsByUsernameLike("ali")).thenReturn(List.of(TestConstants.USER_ID));
-		when(onlineUserQueryPort.pageOnlineUsers(eq(1), eq(30), eq(Set.of(TestConstants.USER_ID))))
+		when(onlineUserQueryPort.pageOnlineUsers(1, 30, Set.of(TestConstants.USER_ID)))
 			.thenReturn(new OnlineUserPageSlice(0L, List.of()));
 
 		onlineUserQueryApplicationService.getOnlineUserPage(query);
