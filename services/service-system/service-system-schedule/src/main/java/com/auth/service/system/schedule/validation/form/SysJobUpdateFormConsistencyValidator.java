@@ -1,5 +1,6 @@
 package com.auth.service.system.schedule.validation.form;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import com.auth.service.system.schedule.model.form.SysJobUpdateForm;
 import com.auth.service.system.schedule.validation.SysJobTaskTypeFieldRules;
@@ -16,10 +17,10 @@ public class SysJobUpdateFormConsistencyValidator
 
 	@Override
 	public boolean isValid(SysJobUpdateForm form, ConstraintValidatorContext context) {
-		if (form == null || SysJobFormConstraintSupport.isBlank(form.getTaskType())) {
+		if (form == null || CharSequenceUtil.isBlank(form.getTaskType())) {
 			return true;
 		}
-		SysJobTaskType taskType = SysJobFormConstraintSupport.resolveTaskType(form.getTaskType());
+		SysJobTaskType taskType = SysJobTaskType.resolve(form.getTaskType());
 		return SysJobTaskTypeFieldRules.detect(taskType, null, form.getInvokeTarget(), form.getPayloadJson(), false)
 			.map(violation -> SysJobTaskTypeFieldRules.applyFormViolation(violation, context))
 			.orElse(true);

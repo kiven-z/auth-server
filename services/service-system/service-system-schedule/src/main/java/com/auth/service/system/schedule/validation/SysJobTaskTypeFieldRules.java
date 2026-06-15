@@ -3,7 +3,6 @@ package com.auth.service.system.schedule.validation;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
-import com.auth.service.system.schedule.validation.form.SysJobFormConstraintSupport;
 import jakarta.validation.ConstraintValidatorContext;
 import lombok.Getter;
 import lombok.experimental.UtilityClass;
@@ -34,8 +33,10 @@ public class SysJobTaskTypeFieldRules {
 	public static Optional<Violation> detect(SysJobTaskType taskType, String jobClass, String invokeTarget,
 			String payloadJson, boolean requireJobClass) {
 		return switch (taskType) {
+			// Bean 调用模式必须填写 invokeTarget
 			case BEAN_INVOKE -> CharSequenceUtil.isBlank(invokeTarget)
 					? Optional.of(Violation.BEAN_MISSING_INVOKE_TARGET) : Optional.empty();
+			// 自定义类模式必须填写 jobClass
 			case CUSTOM_CLASS -> {
 				if (requireJobClass && CharSequenceUtil.isBlank(jobClass)) {
 					yield Optional.of(Violation.CUSTOM_MISSING_JOB_CLASS);
@@ -45,6 +46,7 @@ public class SysJobTaskTypeFieldRules {
 				}
 				yield Optional.empty();
 			}
+			// 消息派发模式必须填写 payloadJson
 			case MESSAGE_DISPATCH -> CharSequenceUtil.isBlank(payloadJson)
 					? Optional.of(Violation.MESSAGE_MISSING_PAYLOAD) : Optional.empty();
 		};
@@ -61,6 +63,7 @@ public class SysJobTaskTypeFieldRules {
 			case CUSTOM_FORBIDS_INVOKE_TARGET -> throw new SysJobException(JOB_MODE_CUSTOM_FORBIDS_INVOKE_TARGET);
 			case MESSAGE_MISSING_PAYLOAD -> throw new SysJobException(PARAM_REQUIRED, "payload_json");
 			default -> {
+				// default
 			}
 		}
 	}
@@ -72,7 +75,10 @@ public class SysJobTaskTypeFieldRules {
 	 * @return 始终 false
 	 */
 	public static boolean applyFormViolation(Violation violation, ConstraintValidatorContext context) {
-		SysJobFormConstraintSupport.addViolation(context, violation.getProperty(), violation.getFormMessage());
+		context.disableDefaultConstraintViolation();
+		context.buildConstraintViolationWithTemplate(violation.getFormMessage())
+			.addPropertyNode(violation.getProperty())
+			.addConstraintViolation();
 		return false;
 	}
 
