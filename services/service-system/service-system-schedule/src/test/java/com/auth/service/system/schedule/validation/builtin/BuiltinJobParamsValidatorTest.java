@@ -3,7 +3,7 @@ package com.auth.service.system.schedule.validation.builtin;
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.jobparams.HttpInvokeJobParams;
-import com.auth.service.system.schedule.support.builtin.BuiltinJobParamsParser;
+import com.auth.service.system.schedule.support.task.BuiltinJobParamsParser;
 import com.auth.service.system.schedule.task.builtin.FeignInvokeJob;
 import com.auth.service.system.schedule.task.builtin.HttpInvokeJob;
 import com.fasterxml.jackson.databind.ObjectMapper;

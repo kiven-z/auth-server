@@ -3,7 +3,7 @@ package com.auth.service.system.schedule.task.executor;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
-import com.auth.service.system.schedule.task.QuartzJobSupport;
+import com.auth.service.system.schedule.support.task.QuartzJobSupport;
 import com.auth.service.system.schedule.task.SysJobTaskExecutor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.Job;

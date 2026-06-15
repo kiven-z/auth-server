@@ -5,7 +5,7 @@ import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.model.vo.QuartzTaskClassVO;
 import com.auth.service.system.schedule.model.vo.QuartzTaskMethodVO;
 import com.auth.service.system.schedule.service.SysJobTaskCatalogService;
-import com.auth.service.system.schedule.support.InvokeTargetSupport;
+import com.auth.service.system.schedule.support.task.InvokeTargetSupport;
 import com.auth.service.system.schedule.support.QuartzTaskRegistry;
 import org.springframework.stereotype.Service;
 

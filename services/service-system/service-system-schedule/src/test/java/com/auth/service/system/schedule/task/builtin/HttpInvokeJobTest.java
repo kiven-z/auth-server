@@ -3,7 +3,7 @@ package com.auth.service.system.schedule.task.builtin;
 import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
 import com.auth.service.system.schedule.model.jobparams.BuiltinRemoteHttpMethod;
 import com.auth.service.system.schedule.model.jobparams.HttpInvokeJobParams;
-import com.auth.service.system.schedule.support.builtin.BuiltinJobParamsParser;
+import com.auth.service.system.schedule.support.task.BuiltinJobParamsParser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

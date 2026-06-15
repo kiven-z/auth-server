@@ -2,7 +2,7 @@ package com.auth.service.system.schedule.task.executor;
 
 import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
-import com.auth.service.system.schedule.support.QuartzBeanInvoker;
+import com.auth.service.system.schedule.support.task.QuartzBeanInvoker;
 import com.auth.service.system.schedule.task.SysJobTaskExecutor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

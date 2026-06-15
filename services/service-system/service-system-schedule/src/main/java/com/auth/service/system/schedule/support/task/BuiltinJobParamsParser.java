@@ -1,4 +1,4 @@
-package com.auth.service.system.schedule.support.builtin;
+package com.auth.service.system.schedule.support.task;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;

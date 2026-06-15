@@ -4,7 +4,7 @@ import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.schedule.annotation.QuartzTask;
 import com.auth.service.system.schedule.model.jobparams.FeignInvokeJobParams;
 import com.auth.service.system.schedule.model.jobparams.HttpInvokeJobParams;
-import com.auth.service.system.schedule.support.builtin.BuiltinJobParamsParser;
+import com.auth.service.system.schedule.support.task.BuiltinJobParamsParser;
 import com.auth.service.system.schedule.task.builtin.BuiltinQuartzJob;
 import com.auth.service.system.schedule.task.builtin.FeignInvokeJob;
 import com.auth.service.system.schedule.task.builtin.HttpInvokeJob;

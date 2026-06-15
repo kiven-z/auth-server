@@ -5,7 +5,7 @@ import com.auth.common.web.resttemplate.RestTemplateUtil;
 import com.auth.service.system.schedule.annotation.QuartzTask;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import com.auth.service.system.schedule.model.jobparams.HttpInvokeJobParams;
-import com.auth.service.system.schedule.support.builtin.BuiltinJobParamsParser;
+import com.auth.service.system.schedule.support.task.BuiltinJobParamsParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobExecutionContext;
@@ -21,15 +21,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * 通用 HTTP 内置任务：从 {@code job_params} 读取 method、url 与可选 headers/query/body 并发起调用 <pre>
- * {
- *   "version": 1,
- *   "method": "GET",
- *   "url": "https://example.com/api/health",
- *   "headers": { "X-Token": "your-token" },
- *   "query": { "page": "1" }
- * }
- * </pre>
+ * 通用 HTTP 内置任务：从 {@code job_params} 读取 method、url 与可选 headers/query/body 并发起调用
  *
  * @author Bunny
  */

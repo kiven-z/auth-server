@@ -1,4 +1,4 @@
-package com.auth.service.system.schedule.support;
+package com.auth.service.system.schedule.support.task;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.schedule.exception.SysJobException;

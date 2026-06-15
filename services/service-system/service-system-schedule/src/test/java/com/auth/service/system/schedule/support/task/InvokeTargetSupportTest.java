@@ -1,4 +1,4 @@
-package com.auth.service.system.schedule.support;
+package com.auth.service.system.schedule.support.task;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

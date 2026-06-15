@@ -1,4 +1,4 @@
-package com.auth.service.system.schedule.support.builtin;
+package com.auth.service.system.schedule.support.task;
 
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
