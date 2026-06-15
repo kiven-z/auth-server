@@ -122,12 +122,4 @@
         ) latest
         WHERE latest.row_num = 1
     </select>
-
-    <!-- 按任务键物理删除全部日志 -->
-    <delete id="deleteByJobNameAndGroup">
-        DELETE
-        FROM log_job
-        WHERE job_name = #{jobName}
-          AND job_group = #{jobGroup}
-    </delete>
 </mapper>

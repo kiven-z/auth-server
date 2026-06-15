@@ -115,12 +115,7 @@ public enum ScheduleResultCode implements SystemResultCode {
 	/**
 	 * 任务正在执行或排队中，禁止立即执行
 	 */
-	JOB_BUSY(422, 248, "JOB_BUSY", "system.job.busy"),
-
-	/**
-	 * 删除任务时级联清理执行日志失败（{0}=详情）
-	 */
-	JOB_LOG_DELETE_FAILED(500, 249, "JOB_LOG_DELETE_FAILED", "system.job.log.delete_failed");
+	JOB_BUSY(422, 248, "JOB_BUSY", "system.job.busy");
 
 	private final int httpStatus;
 

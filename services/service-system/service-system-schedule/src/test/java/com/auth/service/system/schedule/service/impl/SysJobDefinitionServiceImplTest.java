@@ -17,7 +17,6 @@ import com.auth.service.system.schedule.model.po.SysJobPageRowPO;
 import com.auth.service.system.schedule.model.query.SysJobQuery;
 import com.auth.service.system.schedule.model.vo.SysJobDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobPageResponse;
-import com.auth.service.system.schedule.service.LogJobService;
 import com.auth.service.system.schedule.support.SysJobQuartzRuntimeSnapshot;
 import com.auth.service.system.schedule.support.quartz.SysJobQuartzRuntimeReader;
 import com.auth.service.system.schedule.support.quartz.SysJobSchedulerManager;
@@ -73,9 +72,6 @@ class SysJobDefinitionServiceImplTest {
 	private SysJobGroupMapper sysJobGroupMapper;
 
 	@Mock
-	private LogJobService logJobService;
-
-	@Mock
 	private LogJobMapper logJobMapper;
 
 	@Mock
@@ -114,7 +110,7 @@ class SysJobDefinitionServiceImplTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		sysJobDefinitionService = spy(new SysJobDefinitionServiceImpl(sysJobSchedulerManager, auditUserDisplayService,
-				sysJobGroupMapper, logJobService, logJobMapper, validationManager, sysJobQuartzRuntimeReader));
+				sysJobGroupMapper, logJobMapper, validationManager, sysJobQuartzRuntimeReader));
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysJobDefinitionService, sysJobMapper);
@@ -319,8 +315,8 @@ class SysJobDefinitionServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("删除：级联清理日志并移除 Quartz")
-	void deleteByIdRemovesQuartzAndLogs() throws SchedulerException {
+	@DisplayName("删除：移除 Quartz 与任务定义，保留执行日志")
+	void deleteByIdRemovesQuartzAndJobDefinition() throws SchedulerException {
 		SysJobEntity dbJob = new SysJobEntity();
 		dbJob.setId(3L);
 		dbJob.setJobName("demoJob");
@@ -331,7 +327,6 @@ class SysJobDefinitionServiceImplTest {
 		sysJobDefinitionService.deleteById(3L);
 
 		verify(sysJobSchedulerManager).deleteJobIfExists(org.quartz.JobKey.jobKey("demoJob", "DEFAULT"));
-		verify(logJobService).deleteByJobNameAndGroup("demoJob", "DEFAULT");
 		verify(sysJobDefinitionService).removeById(3L);
 	}
 

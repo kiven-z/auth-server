@@ -117,13 +117,4 @@ public class LogJobServiceImpl extends ServiceImpl<LogJobMapper, LogJobEntity> i
 		save(entity);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	@Transactional(rollbackFor = Exception.class)
-	public void deleteByJobNameAndGroup(String jobName, String jobGroup) {
-		baseMapper.deleteByJobNameAndGroup(jobName, jobGroup);
-	}
-
 }

@@ -57,11 +57,4 @@ public interface LogJobService extends IService<LogJobEntity> {
 	void recordFailure(Long jobId, String jobName, String jobGroup, String invokeTarget, String triggerType,
 			long elapsedMs, JobExecutionException ex);
 
-	/**
-	 * 按任务键物理删除全部日志
-	 * @param jobName 任务名
-	 * @param jobGroup 分组
-	 */
-	void deleteByJobNameAndGroup(String jobName, String jobGroup);
-
 }

@@ -22,7 +22,6 @@ import com.auth.service.system.schedule.model.query.SysJobQuery;
 import com.auth.service.system.schedule.model.vo.SysJobDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobLastExecutionView;
 import com.auth.service.system.schedule.model.vo.SysJobPageResponse;
-import com.auth.service.system.schedule.service.LogJobService;
 import com.auth.service.system.schedule.service.SysJobDefinitionService;
 import com.auth.service.system.schedule.support.SysJobQuartzRuntimeSnapshot;
 import com.auth.service.system.schedule.support.quartz.SysJobQuartzRuntimeReader;
@@ -36,7 +35,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobKey;
 import org.quartz.SchedulerException;
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,8 +67,6 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 	private final AuditUserDisplayService auditUserDisplayService;
 
 	private final SysJobGroupMapper sysJobGroupMapper;
-
-	private final LogJobService logJobService;
 
 	private final LogJobMapper logJobMapper;
 
@@ -182,14 +178,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 			throw new SysJobException(JOB_QUARTZ_OPERATION_FAILED, "delete", ex.getMessage());
 		}
 
-		try {
-			logJobService.deleteByJobNameAndGroup(jobName, jobGroup);
-			removeById(id);
-		}
-		catch (DataAccessException ex) {
-			log.error("级联物理删除日志失败", ex);
-			throw new SysJobException(JOB_LOG_DELETE_FAILED, ex.getMessage());
-		}
+		removeById(id);
 	}
 
 	/**
