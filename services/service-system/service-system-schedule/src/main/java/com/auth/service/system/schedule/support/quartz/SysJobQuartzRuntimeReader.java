@@ -1,14 +1,24 @@
 package com.auth.service.system.schedule.support.quartz;
 
-import cn.hutool.core.collection.CollUtil;
-import com.auth.service.system.schedule.model.enums.SysJobQuartzRuntimeStatus;
-import com.auth.service.system.schedule.support.SysJobQuartzRuntimeSnapshot;
-import lombok.extern.slf4j.Slf4j;
-import org.quartz.*;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+
+import org.quartz.JobExecutionContext;
+import org.quartz.JobKey;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.Trigger;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import com.auth.service.system.schedule.model.enums.SysJobQuartzRuntimeStatus;
+import com.auth.service.system.schedule.support.SysJobQuartzRuntimeSnapshot;
+
+import cn.hutool.core.collection.CollUtil;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 读取 Quartz 运行时快照与触发时间（只读，不参与调度写入）
@@ -66,6 +76,11 @@ public class SysJobQuartzRuntimeReader {
 		}
 	}
 
+	/**
+	 * 收集正在运行的任务键
+	 * @return 正在运行的任务键
+	 * @throws SchedulerException SchedulerException
+	 */
 	private Set<JobKey> collectRunningJobKeys() throws SchedulerException {
 		Set<JobKey> runningJobKeys = new HashSet<>();
 		for (JobExecutionContext context : scheduler.getCurrentlyExecutingJobs()) {
@@ -74,6 +89,13 @@ public class SysJobQuartzRuntimeReader {
 		return runningJobKeys;
 	}
 
+	/**
+	 * 解析任务的 Quartz 运行时状态
+	 * @param jobKey 任务键
+	 * @param runningJobKeys 正在运行的任务键
+	 * @return 运行时状态快照
+	 * @throws SchedulerException SchedulerException
+	 */
 	private SysJobQuartzRuntimeSnapshot resolveRuntimeSnapshot(JobKey jobKey, Set<JobKey> runningJobKeys)
 			throws SchedulerException {
 		if (!scheduler.checkExists(jobKey)) {
@@ -88,6 +110,12 @@ public class SysJobQuartzRuntimeReader {
 				null);
 	}
 
+	/**
+	 * 解析正在运行的任务的触发时间
+	 * @param jobKey 任务键
+	 * @return 触发时间
+	 * @throws SchedulerException SchedulerException
+	 */
 	private Date resolveRunningFireTime(JobKey jobKey) throws SchedulerException {
 		for (JobExecutionContext context : scheduler.getCurrentlyExecutingJobs()) {
 			if (jobKey.equals(context.getJobDetail().getKey())) {
@@ -97,6 +125,12 @@ public class SysJobQuartzRuntimeReader {
 		return null;
 	}
 
+	/**
+	 * 解析任务的 Quartz 触发状态
+	 * @param jobKey 任务键
+	 * @return 触发状态
+	 * @throws SchedulerException SchedulerException
+	 */
 	private SysJobQuartzRuntimeStatus resolveTriggerStatus(JobKey jobKey) throws SchedulerException {
 		List<? extends Trigger> triggers = scheduler.getTriggersOfJob(jobKey);
 		if (CollUtil.isEmpty(triggers)) {

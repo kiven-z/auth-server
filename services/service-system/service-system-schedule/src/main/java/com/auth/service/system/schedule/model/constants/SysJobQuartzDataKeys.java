@@ -36,6 +36,11 @@ public class SysJobQuartzDataKeys {
 	public static final String HANDLER_CODE = "handlerCode";
 
 	/**
+	 * 执行参数 JSON 原文（与 {@code sys_job.job_params} 一致，供内置 Job 解析嵌套结构）
+	 */
+	public static final String JOB_PARAMS = "jobParams";
+
+	/**
 	 * 扩展载荷 JSON
 	 */
 	public static final String PAYLOAD_JSON = "payloadJson";

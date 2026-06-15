@@ -115,7 +115,12 @@ public enum ScheduleResultCode implements SystemResultCode {
 	/**
 	 * 任务正在执行或排队中，禁止立即执行
 	 */
-	JOB_BUSY(422, 248, "JOB_BUSY", "system.job.busy");
+	JOB_BUSY(422, 248, "JOB_BUSY", "system.job.busy"),
+
+	/**
+	 * job_params 非法
+	 */
+	JOB_PARAMS_JSON_INVALID(422, 249, "JOB_PARAMS_JSON_INVALID", "system.job.params.invalid");
 
 	private final int httpStatus;
 

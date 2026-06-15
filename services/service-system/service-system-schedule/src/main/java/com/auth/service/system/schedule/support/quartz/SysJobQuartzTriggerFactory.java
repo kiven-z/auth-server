@@ -21,15 +21,6 @@ import static com.auth.service.system.schedule.model.constants.SysJobQuartzDataK
 @Component
 public class SysJobQuartzTriggerFactory {
 
-	/**
-	 * Trigger 名称规则：{@code jobName + "_TRIGGER"}
-	 * @param jobName 任务名
-	 * @return Trigger 名
-	 */
-	public static String triggerName(String jobName) {
-		return jobName + TRIGGER_SUFFIX;
-	}
-
 	private static CronScheduleBuilder applyMisfire(CronScheduleBuilder cron, Integer policy) {
 		int resolvedPolicy = Objects.requireNonNullElse(policy, 2);
 		return switch (resolvedPolicy) {
@@ -54,7 +45,7 @@ public class SysJobQuartzTriggerFactory {
 		cron = applyMisfire(cron, job.getMisfirePolicy());
 
 		TriggerBuilder<CronTrigger> triggerBuilder = TriggerBuilder.newTrigger()
-			.withIdentity(triggerName(jobName), jobGroup)
+			.withIdentity(jobName + TRIGGER_SUFFIX, jobGroup)
 			.forJob(jobKey)
 			.withSchedule(cron);
 

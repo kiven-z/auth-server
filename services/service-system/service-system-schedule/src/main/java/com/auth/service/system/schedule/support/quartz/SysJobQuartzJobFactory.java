@@ -48,12 +48,14 @@ public class SysJobQuartzJobFactory {
 	 * @return JobDetail
 	 */
 	public JobDetail build(SysJobEntity job) {
+		// 1. 获取任务名称、分组、任务类型、并发标志
 		String jobName = job.getJobName();
 		String jobGroup = job.getJobGroup();
 		SysJobTaskType resolvedTaskType = SysJobTaskType.resolve(job.getTaskType());
 		boolean concurrent = BooleanUtil.isTrue(job.getConcurrent());
 		Class<? extends Job> jobClass = resolvedTaskType.resolveEntryJobClass(concurrent);
 
+		// 2. 构建 JobDataMap
 		JobDataMap map = new JobDataMap();
 		map.put(SysJobQuartzDataKeys.SYS_JOB_ID, String.valueOf(job.getId()));
 		map.put(SysJobQuartzDataKeys.INVOKE_TARGET, job.getInvokeTarget());
@@ -63,9 +65,11 @@ public class SysJobQuartzJobFactory {
 				: resolvedTaskType.defaultHandlerCode();
 		map.put(SysJobQuartzDataKeys.HANDLER_CODE, handlerCode);
 		map.put(SysJobQuartzDataKeys.PAYLOAD_JSON, job.getPayloadJson());
+		map.put(SysJobQuartzDataKeys.JOB_PARAMS, job.getJobParams());
 		map.put(SysJobQuartzDataKeys.TRIGGER_TYPE, SysJobQuartzDataKeys.TRIGGER_TYPE_SCHEDULE);
 		mergeJsonParams(map, job.getJobParams());
 
+		// 3. 构建 JobDetail
 		return JobBuilder.newJob(jobClass).withIdentity(jobName, jobGroup).usingJobData(map).storeDurably().build();
 	}
 
