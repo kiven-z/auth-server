@@ -12,7 +12,7 @@ import org.springframework.context.ApplicationContext;
  * @author Bunny
  */
 @UtilityClass
-public final class QuartzJobSupport {
+public class QuartzJobSupport {
 
 	/**
 	 * 从 SchedulerContext 获取 Spring 容器等

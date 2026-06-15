@@ -32,4 +32,6 @@ public @interface QuartzTask {
 	 */
 	SysJobTaskType[] modes() default { SysJobTaskType.BEAN_INVOKE };
 
+	String example() default "";
+
 }

@@ -35,4 +35,7 @@ public class QuartzTaskClassVO implements Serializable {
 	@Schema(title = "适用调度模式(BEAN_INVOKE/CUSTOM_CLASS)")
 	private List<String> invokeModes;
 
+	@Schema(title = "job_params 示例 JSON（CUSTOM_CLASS 可选）")
+	private String jobParamsExample;
+
 }

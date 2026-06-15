@@ -1,5 +1,6 @@
 package com.auth.service.system.schedule.support;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.schedule.annotation.QuartzTask;
 import com.auth.service.system.schedule.model.vo.QuartzTaskClassVO;
 import jakarta.annotation.PostConstruct;
@@ -57,6 +58,7 @@ public class QuartzTaskRegistry {
 				vo.setName(ann.name());
 				vo.setDescription(ann.description());
 				vo.setInvokeModes(Stream.of(ann.modes()).map(Enum::name).toList());
+				vo.setJobParamsExample(CharSequenceUtil.trim(ann.example()));
 				String className = type.getName();
 				allowedClasses.put(className, vo);
 				classNameToBeanName.put(className, beanName);

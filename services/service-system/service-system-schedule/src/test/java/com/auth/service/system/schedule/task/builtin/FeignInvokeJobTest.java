@@ -48,6 +48,26 @@ class FeignInvokeJobTest {
 	}
 
 	@Test
+	@DisplayName("execute：serviceName 含首尾空格时应 trim 后拼接 URL")
+	void execute_trimsServiceNameBeforeBuildingUrl() throws JobExecutionException {
+		JobExecutionContext context = mock(JobExecutionContext.class);
+
+		FeignInvokeJobParams params = new FeignInvokeJobParams();
+		params.setServiceName("  auth-service  ");
+		params.setPath("/api/health");
+		params.setMethod(BuiltinRemoteHttpMethod.GET);
+		stubJobParams(context, params);
+		when(loadBalancedRestTemplate.exchange(eq("http://auth-service/api/health"), eq(HttpMethod.GET),
+				org.mockito.ArgumentMatchers.<HttpEntity<Void>>any(), eq(String.class)))
+			.thenReturn(ResponseEntity.ok("UP"));
+
+		feignInvokeJob.execute(context);
+
+		verify(loadBalancedRestTemplate).exchange(eq("http://auth-service/api/health"), eq(HttpMethod.GET),
+				org.mockito.ArgumentMatchers.<HttpEntity<Void>>any(), eq(String.class));
+	}
+
+	@Test
 	@DisplayName("execute：应使用负载均衡 URL 与 POST body 发起调用")
 	void execute_invokesPostAgainstLoadBalancedServiceUrl() throws JobExecutionException {
 		JobExecutionContext context = mock(JobExecutionContext.class);

@@ -2,6 +2,7 @@ package com.auth.service.system.schedule.support;
 
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.model.vo.QuartzTaskMethodVO;
+import lombok.experimental.UtilityClass;
 import org.springframework.lang.NonNull;
 import org.springframework.util.ReflectionUtils;
 
@@ -18,10 +19,8 @@ import static com.auth.service.system.schedule.model.constants.SysJobQuartzDataK
  *
  * @author Bunny
  */
-public final class InvokeTargetSupport {
-
-	private InvokeTargetSupport() {
-	}
+@UtilityClass
+public class InvokeTargetSupport {
 
 	/**
 	 * 是否可被 {@code invoke_target} 反射调用
