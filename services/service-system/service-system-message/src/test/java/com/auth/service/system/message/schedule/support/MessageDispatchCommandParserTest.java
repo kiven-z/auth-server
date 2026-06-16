@@ -2,7 +2,6 @@ package com.auth.service.system.message.schedule.support;
 
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
-import com.auth.service.system.message.schedule.model.MessageDispatchPayload;
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Validation;
@@ -126,15 +125,6 @@ class MessageDispatchCommandParserTest {
 		assertThatThrownBy(() -> parser.parseAndValidate(payload)).isInstanceOf(SysJobException.class)
 			.extracting(ex -> ((SysJobException) ex).getResultCode())
 			.isEqualTo(JOB_PAYLOAD_VERSION_UNSUPPORTED);
-	}
-
-	@Test
-	@DisplayName("buildTemplatePayload 返回版本化标准模板")
-	void buildTemplatePayloadReturnsVersionedTemplate() {
-		MessageDispatchPayload payload = parser.buildTemplatePayload();
-
-		assertThat(payload.getVersion()).isEqualTo(MessageDispatchPayload.VERSION_1);
-		assertThat(payload.getCommand()).isNotNull();
 	}
 
 }

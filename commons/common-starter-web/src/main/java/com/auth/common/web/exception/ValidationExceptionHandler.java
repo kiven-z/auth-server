@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -74,6 +75,17 @@ public class ValidationExceptionHandler extends BaseExceptionResponseBuilder {
 	public ResponseEntity<Result<Object>> handleMethodArgumentTypeMismatch(
 			MethodArgumentTypeMismatchException exception) {
 		return validationFailed(exception.getName() + ": " + INVALID_VALUE_FORMAT, exception);
+	}
+
+	/**
+	 * 处理请求参数绑定异常（如必填 {@code @RequestParam} 缺失）
+	 * @param exception 异常
+	 * @return 响应实体
+	 */
+	@ExceptionHandler({ ServletRequestBindingException.class, })
+	public ResponseEntity<Result<Object>> handleServletRequestBinding(ServletRequestBindingException exception) {
+		String details = exception.getMessage() != null ? exception.getMessage() : "request parameter binding failed";
+		return validationFailed(details, exception);
 	}
 
 	/**

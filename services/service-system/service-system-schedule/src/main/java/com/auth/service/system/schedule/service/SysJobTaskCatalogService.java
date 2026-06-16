@@ -25,4 +25,11 @@ public interface SysJobTaskCatalogService {
 	 */
 	List<QuartzTaskMethodVO> listCallableMethods(String className);
 
+	/**
+	 * 获取指定任务类型的 payload 模板
+	 * @param taskType 任务类型
+	 * @return 载荷模板
+	 */
+	Object resolvePayloadTemplate(String taskType);
+
 }

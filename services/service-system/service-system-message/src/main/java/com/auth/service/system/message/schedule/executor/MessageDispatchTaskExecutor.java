@@ -5,7 +5,7 @@ import com.auth.service.system.message.schedule.support.MessageDispatchCommandPa
 import com.auth.service.system.message.service.MessageDispatchService;
 import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
-import com.auth.service.system.schedule.task.SysJobTaskExecutor;
+import com.auth.service.system.schedule.task.executor.SysJobTaskExecutor;
 import lombok.RequiredArgsConstructor;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;

@@ -1,9 +1,13 @@
 package com.auth.service.system.message.schedule.support;
 
+import com.auth.module.message.api.channel.MessageChannel;
+import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.service.system.message.schedule.model.MessageDispatchPayload;
 import com.auth.service.system.schedule.catalog.SysJobPayloadTemplateProvider;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * 消息派发任务 payload 模板提供者
@@ -13,12 +17,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class MessageDispatchPayloadTemplateProvider implements SysJobPayloadTemplateProvider {
 
-	private final MessageDispatchCommandParser messageDispatchCommandParser;
-
-	public MessageDispatchPayloadTemplateProvider(MessageDispatchCommandParser messageDispatchCommandParser) {
-		this.messageDispatchCommandParser = messageDispatchCommandParser;
-	}
-
 	@Override
 	public SysJobTaskType taskType() {
 		return SysJobTaskType.MESSAGE_DISPATCH;
@@ -26,7 +24,14 @@ public class MessageDispatchPayloadTemplateProvider implements SysJobPayloadTemp
 
 	@Override
 	public MessageDispatchPayload buildTemplatePayload() {
-		return messageDispatchCommandParser.buildTemplatePayload();
+		MessageDispatchPayload payload = new MessageDispatchPayload();
+		payload.setVersion(MessageDispatchPayload.VERSION_1);
+		payload.setCommand(TemplateMessageCommand.builder()
+			.channel(MessageChannel.EMAIL)
+			.templateCode("LOGIN_NOTICE")
+			.targets(List.of("dev@example.com"))
+			.build());
+		return payload;
 	}
 
 }

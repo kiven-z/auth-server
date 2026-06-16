@@ -31,9 +31,10 @@ public class BuiltinJobParamsValidator {
 	 */
 	public void validateIfPresent(SysJobEntity job) {
 		Class<?> paramsType = JOB_CLASS_TO_PARAMS.get(job.getJobClass());
-		if (paramsType != null) {
-			builtinJobParamsParser.parseAndValidate(job.getJobParams(), paramsType);
+		if (paramsType == null) {
+			return;
 		}
+		builtinJobParamsParser.parseAndValidate(job.getJobParams(), paramsType);
 	}
 
 }

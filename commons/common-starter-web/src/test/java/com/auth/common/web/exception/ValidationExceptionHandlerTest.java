@@ -11,6 +11,7 @@ import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.lang.reflect.Method;
@@ -71,6 +72,20 @@ class ValidationExceptionHandlerTest {
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 		assertNotNull(response.getBody());
 		assertEquals("Validation failed: jobId: invalid value format", response.getBody().getMessage());
+	}
+
+	@Test
+	@DisplayName("MissingServletRequestParameterException：必填参数缺失应返回 required")
+	void handleServletRequestBinding_missingRequestParam_returnsRequiredMessage() {
+		MissingServletRequestParameterException exception = new MissingServletRequestParameterException("taskType",
+				"String");
+
+		ResponseEntity<Result<Object>> response = handler.handleServletRequestBinding(exception);
+
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+		assertNotNull(response.getBody());
+		assertEquals(400, response.getBody().getCode());
+		assertEquals("Validation failed: taskType: required", response.getBody().getMessage());
 	}
 
 	@Test

@@ -2,6 +2,7 @@ package com.auth.service.system.schedule.task;
 
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
+import com.auth.service.system.schedule.task.executor.SysJobTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import java.util.EnumMap;

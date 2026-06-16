@@ -1,4 +1,4 @@
-package com.auth.service.system.schedule.support;
+package com.auth.service.system.schedule.catalog;
 
 import com.auth.service.system.schedule.model.vo.QuartzTaskClassVO;
 import com.auth.service.system.schedule.task.builtin.HttpInvokeJob;

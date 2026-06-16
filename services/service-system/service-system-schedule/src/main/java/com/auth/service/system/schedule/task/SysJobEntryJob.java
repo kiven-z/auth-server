@@ -1,8 +1,9 @@
 package com.auth.service.system.schedule.task;
 
-import com.auth.service.system.schedule.support.task.QuartzJobSupport;
 import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
+import com.auth.service.system.schedule.support.task.QuartzJobSupport;
+import com.auth.service.system.schedule.task.executor.SysJobTaskExecutor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
 import org.springframework.context.ApplicationContext;

@@ -1,10 +1,10 @@
 package com.auth.service.system.schedule.validation.impl;
 
 import cn.hutool.core.text.CharSequenceUtil;
+import com.auth.service.system.schedule.catalog.QuartzTaskRegistry;
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
-import com.auth.service.system.schedule.support.QuartzTaskRegistry;
 import com.auth.service.system.schedule.validation.SysJobTaskTypeDefinitionValidator;
 import com.auth.service.system.schedule.validation.builtin.BuiltinJobParamsValidator;
 import lombok.RequiredArgsConstructor;

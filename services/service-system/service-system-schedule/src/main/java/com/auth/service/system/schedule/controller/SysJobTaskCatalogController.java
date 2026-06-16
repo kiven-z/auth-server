@@ -3,7 +3,6 @@ package com.auth.service.system.schedule.controller;
 import com.auth.common.core.model.response.Result;
 import com.auth.service.system.schedule.model.vo.QuartzTaskClassVO;
 import com.auth.service.system.schedule.model.vo.QuartzTaskMethodVO;
-import com.auth.service.system.schedule.service.SysJobPayloadTemplateService;
 import com.auth.service.system.schedule.service.SysJobTaskCatalogService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,12 +26,8 @@ public class SysJobTaskCatalogController {
 
 	private final SysJobTaskCatalogService sysJobTaskCatalogService;
 
-	private final SysJobPayloadTemplateService sysJobPayloadTemplateService;
-
-	public SysJobTaskCatalogController(SysJobTaskCatalogService sysJobTaskCatalogService,
-			SysJobPayloadTemplateService sysJobPayloadTemplateService) {
+	public SysJobTaskCatalogController(SysJobTaskCatalogService sysJobTaskCatalogService) {
 		this.sysJobTaskCatalogService = sysJobTaskCatalogService;
-		this.sysJobPayloadTemplateService = sysJobPayloadTemplateService;
 	}
 
 	@Operation(summary = "白名单类列表")
@@ -55,7 +50,7 @@ public class SysJobTaskCatalogController {
 	@PreAuthorize("@auth.decide('sysJob:query')")
 	@GetMapping("payload-template")
 	public Result<Object> payloadTemplate(@RequestParam("taskType") String taskType) {
-		Object data = sysJobPayloadTemplateService.resolvePayloadTemplate(taskType);
+		Object data = sysJobTaskCatalogService.resolvePayloadTemplate(taskType);
 		return Result.success(data);
 	}
 

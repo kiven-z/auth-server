@@ -1,9 +1,9 @@
 package com.auth.service.system.schedule.validation.impl;
 
+import com.auth.service.system.schedule.catalog.QuartzTaskRegistry;
 import com.auth.service.system.schedule.example.custom.SpringInjectDemoJob;
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
-import com.auth.service.system.schedule.support.QuartzTaskRegistry;
 import com.auth.service.system.schedule.task.builtin.HttpInvokeJob;
 import com.auth.service.system.schedule.validation.builtin.BuiltinJobParamsValidator;
 import org.junit.jupiter.api.DisplayName;

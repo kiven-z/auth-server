@@ -47,17 +47,6 @@ public class MessageDispatchCommandParser {
 	}
 
 	/**
-	 * 构建标准消息调度载荷模板
-	 * @return 标准载荷模板
-	 */
-	public MessageDispatchPayload buildTemplatePayload() {
-		MessageDispatchPayload payload = new MessageDispatchPayload();
-		payload.setVersion(MessageDispatchPayload.VERSION_1);
-		payload.setCommand(new TemplateMessageCommand());
-		return payload;
-	}
-
-	/**
 	 * 解析载荷并提取消息命令
 	 * @param payloadJson 载荷 JSON
 	 * @return 消息命令
