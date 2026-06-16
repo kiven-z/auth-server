@@ -29,7 +29,7 @@ public class SysJobUpdateForm implements Serializable {
 
 	@Schema(title = "主键 ID")
 	@NotBlank(groups = UpdateGroup.class)
-	private String id;
+	private Long id;
 
 	@Schema(title = "Cron 表达式")
 	@Size(max = 255)

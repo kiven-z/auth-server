@@ -1,4 +1,4 @@
-package com.auth.service.system.schedule.validation;
+package com.auth.service.system.schedule.validation.form;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;

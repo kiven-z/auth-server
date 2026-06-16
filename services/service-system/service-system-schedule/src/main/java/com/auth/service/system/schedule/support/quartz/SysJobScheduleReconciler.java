@@ -48,6 +48,8 @@ public class SysJobScheduleReconciler {
 		if (CollUtil.isEmpty(jobIds)) {
 			return;
 		}
+
+		// 查询任务列表
 		List<SysJobEntity> jobs = sysJobMapper.selectBatchIds(jobIds);
 		for (SysJobEntity job : jobs) {
 			reconcileSingle(job);
@@ -61,6 +63,8 @@ public class SysJobScheduleReconciler {
 	public void reconcileByGroupCode(String groupCode) {
 		List<SysJobEntity> jobs = sysJobMapper
 			.selectList(Wrappers.<SysJobEntity>lambdaQuery().eq(SysJobEntity::getJobGroup, groupCode));
+
+		// 对账任务
 		for (SysJobEntity job : jobs) {
 			reconcileSingle(job);
 		}
@@ -75,11 +79,17 @@ public class SysJobScheduleReconciler {
 		var query = Wrappers.lambdaQuery(SysJobEntity.class)
 			.eq(SysJobEntity::getStatus, enabled)
 			.orderByAsc(SysJobEntity::getId);
+
+		// 查询第一页
 		IPage<SysJobEntity> firstPage = sysJobMapper.selectPage(new Page<>(1, batchSize), query);
 		long totalPages = firstPage.getPages();
+
+		// 遍历所有页
 		for (long pageNum = 1; pageNum <= totalPages; pageNum++) {
 			IPage<SysJobEntity> result = pageNum == 1 ? firstPage
 					: sysJobMapper.selectPage(new Page<>(pageNum, batchSize), query);
+
+			// 对账任务
 			for (SysJobEntity job : result.getRecords()) {
 				reconcileSingle(job);
 			}
@@ -96,6 +106,7 @@ public class SysJobScheduleReconciler {
 				sysJobSchedulerManager.scheduleOrReplace(job);
 				return;
 			}
+
 			sysJobSchedulerManager.pauseJob(job.getJobName(), job.getJobGroup());
 		}
 		catch (SchedulerException exception) {

@@ -41,17 +41,22 @@ public class SysJobQuartzTriggerFactory {
 		String jobName = job.getJobName();
 		String jobGroup = job.getJobGroup();
 
+		// 构建 CronScheduleBuilder
 		CronScheduleBuilder cron = CronScheduleBuilder.cronSchedule(job.getCronExpression());
 		cron = applyMisfire(cron, job.getMisfirePolicy());
 
+		// 构建 TriggerBuilder
 		TriggerBuilder<CronTrigger> triggerBuilder = TriggerBuilder.newTrigger()
 			.withIdentity(jobName + TRIGGER_SUFFIX, jobGroup)
 			.forJob(jobKey)
 			.withSchedule(cron);
 
+		// 设置开始时间
 		if (job.getStartTime() != null) {
 			triggerBuilder.startAt(Date.from(job.getStartTime().atZone(ZoneId.systemDefault()).toInstant()));
 		}
+
+		// 设置结束时间
 		if (job.getEndTime() != null) {
 			triggerBuilder.endAt(Date.from(job.getEndTime().atZone(ZoneId.systemDefault()).toInstant()));
 		}

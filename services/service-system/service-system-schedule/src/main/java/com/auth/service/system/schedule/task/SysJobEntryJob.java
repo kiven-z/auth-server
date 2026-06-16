@@ -19,8 +19,11 @@ public class SysJobEntryJob implements Job {
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		try {
+			//
 			ApplicationContext app = QuartzJobSupport.getApplicationContext(context);
 			JobDataMap jobDataMap = context.getMergedJobDataMap();
+
+			//
 			SysJobTaskType taskType = SysJobTaskType.resolve(jobDataMap.getString(SysJobQuartzDataKeys.TASK_TYPE));
 			SysJobTaskExecutorRegistry registry = app.getBean(SysJobTaskExecutorRegistry.class);
 			registry.resolve(taskType).execute(context);

@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -84,7 +85,13 @@ public class ValidationExceptionHandler extends BaseExceptionResponseBuilder {
 	 */
 	@ExceptionHandler({ ServletRequestBindingException.class, })
 	public ResponseEntity<Result<Object>> handleServletRequestBinding(ServletRequestBindingException exception) {
-		String details = exception.getMessage() != null ? exception.getMessage() : "request parameter binding failed";
+		String details;
+		if (exception instanceof MissingServletRequestParameterException missingParam) {
+			details = missingParam.getParameterName() + ": required";
+		}
+		else {
+			details = exception.getMessage() != null ? exception.getMessage() : "request parameter binding failed";
+		}
 		return validationFailed(details, exception);
 	}
 

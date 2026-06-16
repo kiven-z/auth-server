@@ -6,6 +6,7 @@ import com.auth.service.system.schedule.model.jobparams.HttpInvokeJobParams;
 import com.auth.service.system.schedule.support.task.BuiltinJobParamsParser;
 import com.auth.service.system.schedule.task.builtin.FeignInvokeJob;
 import com.auth.service.system.schedule.task.builtin.HttpInvokeJob;
+import com.auth.service.system.schedule.validation.task.BuiltinJobParamsValidator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;

@@ -5,7 +5,6 @@ import com.auth.service.system.schedule.annotation.QuartzTask;
 import com.auth.service.system.schedule.model.jobparams.FeignInvokeJobParams;
 import com.auth.service.system.schedule.model.jobparams.HttpInvokeJobParams;
 import com.auth.service.system.schedule.support.task.BuiltinJobParamsParser;
-import com.auth.service.system.schedule.task.builtin.BuiltinQuartzJob;
 import com.auth.service.system.schedule.task.builtin.FeignInvokeJob;
 import com.auth.service.system.schedule.task.builtin.HttpInvokeJob;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,7 +22,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 /**
- * 内置 {@link BuiltinQuartzJob} 的 {@link QuartzTask#example()} 应与载荷校验规则一致。
+ * 内置 {@link QuartzTask#example()} 应与载荷校验规则一致。
  *
  * @author Bunny
  */
@@ -43,9 +42,9 @@ class QuartzTaskExampleValidationTest {
 				Arguments.of(FeignInvokeJob.class, FeignInvokeJobParams.class));
 	}
 
+	@DisplayName("@QuartzTask example 应能通过 parseAndValidate")
 	@ParameterizedTest(name = "{0}")
 	@MethodSource("builtinJobExamples")
-	@DisplayName("@QuartzTask example 应能通过 parseAndValidate")
 	void quartzTaskExample_passesValidation(Class<?> jobClass, Class<?> paramsClass) {
 		QuartzTask ann = AnnotationUtils.findAnnotation(jobClass, QuartzTask.class);
 		String example = CharSequenceUtil.trim(ann.example());

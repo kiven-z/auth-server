@@ -50,12 +50,15 @@ public class SysJobTaskCatalogServiceImpl implements SysJobTaskCatalogService {
 	 */
 	@Override
 	public List<QuartzTaskMethodVO> listCallableMethods(String className) {
+		// 验证类名是否为空
 		if (CharSequenceUtil.isBlank(className)) {
 			throw new SysJobException(PARAM_REQUIRED, "job_class");
 		}
+		// 验证类名是否在白名单
 		if (!quartzTaskRegistry.isAllowed(className)) {
 			throw new SysJobException(JOB_CLASS_NOT_WHITELISTED);
 		}
+		// 解析类名对应的 Bean 名称
 		String beanName = quartzTaskRegistry.resolveBeanName(className);
 		if (CharSequenceUtil.isBlank(beanName)) {
 			throw new SysJobException(JOB_CLASS_NOT_WHITELISTED);
@@ -69,6 +72,7 @@ public class SysJobTaskCatalogServiceImpl implements SysJobTaskCatalogService {
 			throw new SysJobException(JOB_CLASS_LOAD_FAILED, exception.getMessage());
 		}
 
+		// 获取方法列表
 		List<QuartzTaskMethodVO> methodList = new ArrayList<>();
 		for (Method method : targetClass.getDeclaredMethods()) {
 			if (!InvokeTargetSupport.isCallableMethod(method)) {

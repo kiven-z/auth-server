@@ -1,24 +1,14 @@
 package com.auth.service.system.schedule.support.quartz;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-
-import org.quartz.JobExecutionContext;
-import org.quartz.JobKey;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
-import org.quartz.Trigger;
+import cn.hutool.core.collection.CollUtil;
+import com.auth.service.system.schedule.model.enums.SysJobQuartzRuntimeStatus;
+import com.auth.service.system.schedule.support.SysJobQuartzRuntimeSnapshot;
+import lombok.extern.slf4j.Slf4j;
+import org.quartz.*;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
-import com.auth.service.system.schedule.model.enums.SysJobQuartzRuntimeStatus;
-import com.auth.service.system.schedule.support.SysJobQuartzRuntimeSnapshot;
-
-import cn.hutool.core.collection.CollUtil;
-import lombok.extern.slf4j.Slf4j;
+import java.util.*;
 
 /**
  * 读取 Quartz 运行时快照与触发时间（只读，不参与调度写入）
@@ -43,7 +33,8 @@ public class SysJobQuartzRuntimeReader {
 	 */
 	public SysJobQuartzRuntimeSnapshot resolveRuntimeSnapshot(String jobName, String jobGroup) {
 		try {
-			return resolveRuntimeSnapshot(JobKey.jobKey(jobName, jobGroup), collectRunningJobKeys());
+			JobKey jobKey = JobKey.jobKey(jobName, jobGroup);
+			return resolveRuntimeSnapshot(jobKey, collectRunningJobKeys());
 		}
 		catch (SchedulerException exception) {
 			log.warn("解析 Quartz 运行时状态失败: {} / {}", jobGroup, jobName, exception);
@@ -59,14 +50,19 @@ public class SysJobQuartzRuntimeReader {
 	 */
 	public FireTimes getFireTimes(String jobName, String jobGroup) {
 		try {
+			// 构建任务键
 			JobKey jobKey = JobKey.jobKey(jobName, jobGroup);
 			if (!scheduler.checkExists(jobKey)) {
 				return FireTimes.empty();
 			}
+
+			// 获取任务的触发器
 			List<? extends Trigger> triggers = scheduler.getTriggersOfJob(jobKey);
 			if (CollUtil.isEmpty(triggers)) {
 				return FireTimes.empty();
 			}
+
+			// 获取触发器的触发时间
 			Trigger trigger = triggers.get(0);
 			return new FireTimes(trigger.getPreviousFireTime(), trigger.getNextFireTime());
 		}
@@ -82,6 +78,7 @@ public class SysJobQuartzRuntimeReader {
 	 * @throws SchedulerException SchedulerException
 	 */
 	private Set<JobKey> collectRunningJobKeys() throws SchedulerException {
+		// 收集正在运行的任务键
 		Set<JobKey> runningJobKeys = new HashSet<>();
 		for (JobExecutionContext context : scheduler.getCurrentlyExecutingJobs()) {
 			runningJobKeys.add(context.getJobDetail().getKey());
@@ -98,13 +95,18 @@ public class SysJobQuartzRuntimeReader {
 	 */
 	private SysJobQuartzRuntimeSnapshot resolveRuntimeSnapshot(JobKey jobKey, Set<JobKey> runningJobKeys)
 			throws SchedulerException {
+		// 验证任务是否存在
 		if (!scheduler.checkExists(jobKey)) {
 			return SysJobQuartzRuntimeSnapshot.of(SysJobQuartzRuntimeStatus.NOT_REGISTERED, null);
 		}
+
+		// 验证任务是否正在运行
 		if (runningJobKeys.contains(jobKey)) {
 			Date fireTime = resolveRunningFireTime(jobKey);
 			return SysJobQuartzRuntimeSnapshot.of(SysJobQuartzRuntimeStatus.RUNNING, fireTime);
 		}
+
+		// 解析任务的触发状态
 		SysJobQuartzRuntimeStatus triggerStatus = resolveTriggerStatus(jobKey);
 		return SysJobQuartzRuntimeSnapshot.of(Objects.requireNonNullElse(triggerStatus, SysJobQuartzRuntimeStatus.IDLE),
 				null);
@@ -117,6 +119,7 @@ public class SysJobQuartzRuntimeReader {
 	 * @throws SchedulerException SchedulerException
 	 */
 	private Date resolveRunningFireTime(JobKey jobKey) throws SchedulerException {
+		// 解析正在运行的任务的触发时间
 		for (JobExecutionContext context : scheduler.getCurrentlyExecutingJobs()) {
 			if (jobKey.equals(context.getJobDetail().getKey())) {
 				return context.getFireTime();
@@ -132,23 +135,30 @@ public class SysJobQuartzRuntimeReader {
 	 * @throws SchedulerException SchedulerException
 	 */
 	private SysJobQuartzRuntimeStatus resolveTriggerStatus(JobKey jobKey) throws SchedulerException {
+		// 解析任务的触发状态
 		List<? extends Trigger> triggers = scheduler.getTriggersOfJob(jobKey);
 		if (CollUtil.isEmpty(triggers)) {
 			return null;
 		}
+
+		// 解析任务的触发状态
 		boolean paused = false;
 		for (Trigger trigger : triggers) {
 			Trigger.TriggerState state = scheduler.getTriggerState(trigger.getKey());
 			if (state == Trigger.TriggerState.BLOCKED) {
 				return SysJobQuartzRuntimeStatus.PENDING;
 			}
+
 			if (state == Trigger.TriggerState.ERROR) {
 				return SysJobQuartzRuntimeStatus.ERROR;
 			}
+
 			if (state == Trigger.TriggerState.PAUSED) {
 				paused = true;
 			}
 		}
+
+		// 解析任务的触发状态
 		if (paused) {
 			return SysJobQuartzRuntimeStatus.PAUSED;
 		}

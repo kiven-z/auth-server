@@ -3,7 +3,6 @@ package com.auth.service.system.schedule.validation.form;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import com.auth.service.system.schedule.model.form.SysJobUpdateForm;
-import com.auth.service.system.schedule.validation.SysJobTaskTypeFieldRules;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 

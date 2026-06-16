@@ -26,13 +26,14 @@ import com.auth.service.system.schedule.service.SysJobDefinitionService;
 import com.auth.service.system.schedule.support.SysJobQuartzRuntimeSnapshot;
 import com.auth.service.system.schedule.support.quartz.SysJobQuartzRuntimeReader;
 import com.auth.service.system.schedule.support.quartz.SysJobSchedulerManager;
-import com.auth.service.system.schedule.validation.SysJobDefinitionValidationManager;
+import com.auth.service.system.schedule.validation.task.SysJobDefinitionValidationManager;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.quartz.JobKey;
 import org.quartz.SchedulerException;
 import org.springframework.stereotype.Service;
@@ -78,7 +79,10 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		IPage<SysJobPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
 		IPage<SysJobPageResponse> voPage = page.convert(SysJobConverter.INSTANCE::toPageResponse);
 
+		// 丰富最近一次执行
 		enrichLastExecution(voPage.getRecords());
+
+		// 丰富审计用户名
 		auditUserDisplayService.enrichAuditUsernames(voPage);
 		return PageResponse.of(voPage);
 	}
@@ -93,12 +97,13 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 			throw new SysJobException(DATA_NOT_EXIST);
 		}
 
+		// 查询任务触发时间
 		String jobName = detailRow.getJobName();
 		String jobGroup = detailRow.getJobGroup();
-
-		SysJobDetailVO vo = SysJobConverter.INSTANCE.toDetailVo(detailRow);
-		// 查询任务触发时间
 		SysJobQuartzRuntimeReader.FireTimes fireTimes = sysJobQuartzRuntimeReader.getFireTimes(jobName, jobGroup);
+
+		// 构建详情VO
+		SysJobDetailVO vo = SysJobConverter.INSTANCE.toDetailVo(detailRow);
 		vo.setPreviousFireTime(fireTimes.previousFireTime());
 		vo.setNextFireTime(fireTimes.nextFireTime());
 
@@ -118,27 +123,34 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void create(SysJobCreateForm form) {
+		// 验证分组是否存在
 		SysJobGroupEntity sysJobGroup = sysJobGroupMapper.selectOne(
 				Wrappers.<SysJobGroupEntity>lambdaQuery().eq(SysJobGroupEntity::getGroupCode, form.getJobGroup()));
 		if (sysJobGroup == null) {
 			throw new SysJobException(DATA_NOT_EXIST);
 		}
+
+		// 验证分组是否启用
 		if (BooleanUtil.isFalse(sysJobGroup.getStatus())) {
 			throw new SysJobException(JOB_GROUP_NOT_AVAILABLE);
 		}
 
+		// 转换为实体
 		SysJobEntity sysJob = SysJobConverter.INSTANCE.toEntity(form);
 		validationManager.normalizeAndValidate(sysJob);
 		save(sysJob);
 
-		if (BooleanUtil.isTrue(sysJob.getStatus())) {
-			try {
-				sysJobSchedulerManager.scheduleOrReplace(sysJob);
-			}
-			catch (SchedulerException ex) {
-				log.error("注册 Quartz 失败", ex);
-				throw new SysJobException(JOB_QUARTZ_OPERATION_FAILED, "register", ex.getMessage());
-			}
+		// 如果任务禁用，则直接返回
+		if (BooleanUtil.isFalse(sysJob.getStatus())) {
+			return;
+		}
+
+		try {
+			sysJobSchedulerManager.scheduleOrReplace(sysJob);
+		}
+		catch (SchedulerException ex) {
+			log.error("注册 Quartz 失败", ex);
+			throw new SysJobException(JOB_QUARTZ_OPERATION_FAILED, "register", ex.getMessage());
 		}
 	}
 
@@ -148,16 +160,16 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void update(SysJobUpdateForm form) {
-		SysJobEntity dbJob = getById(form.getId());
-		if (dbJob == null) {
-			throw new SysJobException(DATA_NOT_EXIST);
-		}
+		// 验证 id 是否存在
+		SysJobEntity dbJob = getDbJob(form.getId());
 
+		// 更新实体
 		SysJobConverter.INSTANCE.updateEntity(form, dbJob);
 		validationManager.normalizeAndValidate(dbJob);
 		updateById(dbJob);
 
 		try {
+			// 注册 Quartz
 			sysJobSchedulerManager.scheduleOrReplace(dbJob);
 		}
 		catch (SchedulerException ex) {
@@ -166,20 +178,27 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		}
 	}
 
+	@NotNull
+	private SysJobEntity getDbJob(Long id) {
+		SysJobEntity dbJob = getById(id);
+		if (dbJob == null) {
+			throw new SysJobException(DATA_NOT_EXIST);
+		}
+		return dbJob;
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void deleteById(Long id) {
-		SysJobEntity dbJob = getById(id);
-		if (dbJob == null) {
-			throw new SysJobException(DATA_NOT_EXIST);
-		}
-		String jobName = dbJob.getJobName();
-		String jobGroup = dbJob.getJobGroup();
+		SysJobEntity dbJob = getDbJob(id);
 
 		try {
+			// 删除 Quartz Job
+			String jobName = dbJob.getJobName();
+			String jobGroup = dbJob.getJobGroup();
 			sysJobSchedulerManager.deleteJobIfExists(JobKey.jobKey(jobName, jobGroup));
 		}
 		catch (SchedulerException ex) {
@@ -196,19 +215,23 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void runOnce(Long id) {
-		SysJobEntity dbJob = getById(id);
-		if (dbJob == null) {
-			throw new SysJobException(DATA_NOT_EXIST);
-		}
-		SysJobQuartzRuntimeStatus runtimeStatus = sysJobQuartzRuntimeReader
-			.resolveRuntimeSnapshot(dbJob.getJobName(), dbJob.getJobGroup())
+		SysJobEntity dbJob = getDbJob(id);
+
+		// 验证 Quartz 运行状态
+		String jobName = dbJob.getJobName();
+		String jobGroup = dbJob.getJobGroup();
+		SysJobQuartzRuntimeStatus runtimeStatus = sysJobQuartzRuntimeReader.resolveRuntimeSnapshot(jobName, jobGroup)
 			.status();
 		if (runtimeStatus == SysJobQuartzRuntimeStatus.RUNNING || runtimeStatus == SysJobQuartzRuntimeStatus.PENDING) {
 			throw new SysJobException(JOB_BUSY);
 		}
+
 		try {
+			// 确保 JobDetail 存在
 			sysJobSchedulerManager.ensureJobDetail(dbJob);
-			sysJobSchedulerManager.triggerJob(dbJob.getJobName(), dbJob.getJobGroup());
+
+			// 触发 Job
+			sysJobSchedulerManager.triggerJob(jobName, jobGroup);
 		}
 		catch (SchedulerException ex) {
 			log.error("立即执行失败", ex);
@@ -221,10 +244,11 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 	 * @param views 视图
 	 */
 	private void enrichLastExecution(List<? extends SysJobLastExecutionView> views) {
+		// 如果视图列表为空，则直接返回
 		if (CollUtil.isEmpty(views)) {
 			return;
 		}
-
+		// 获取任务 ID 列表
 		List<Long> jobIds = views.stream().map(SysJobLastExecutionView::getId).filter(Objects::nonNull).toList();
 		Map<Long, LogJobEntity> latestLogByJobId = CollUtil.isEmpty(jobIds) ? Map.of()
 				: logJobMapper.selectLatestByJobIds(jobIds)
@@ -232,6 +256,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 					.filter(log -> log.getJobId() != null)
 					.collect(Collectors.toMap(LogJobEntity::getJobId, Function.identity(), (first, ignored) -> first));
 
+		// 丰富最近一次执行
 		for (SysJobLastExecutionView view : views) {
 			Long jobId = view.getId();
 			LogJobEntity latestLog = jobId == null ? null : latestLogByJobId.get(jobId);

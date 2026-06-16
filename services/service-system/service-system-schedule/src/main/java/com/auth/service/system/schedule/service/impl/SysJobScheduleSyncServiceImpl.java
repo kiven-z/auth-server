@@ -50,10 +50,12 @@ public class SysJobScheduleSyncServiceImpl extends ServiceImpl<SysJobMapper, Sys
 		}
 		Boolean targetStatus = form.getStatus();
 
+		// 获取需要注册的 Quartz 任务
 		List<SysJobEntity> jobsToSchedule = BooleanUtil.isTrue(targetStatus) ? list(
 				Wrappers.<SysJobEntity>lambdaQuery().in(SysJobEntity::getId, ids).eq(SysJobEntity::getStatus, false))
 				: List.of();
 
+		// 更新任务状态
 		List<SysJobEntity> updates = ids.stream().map(id -> {
 			SysJobEntity entity = new SysJobEntity();
 			entity.setId(id);
@@ -63,6 +65,7 @@ public class SysJobScheduleSyncServiceImpl extends ServiceImpl<SysJobMapper, Sys
 		super.updateBatchById(updates);
 
 		try {
+			// 如果目标状态为 false，则暂停 Quartz 任务
 			if (BooleanUtil.isFalse(targetStatus)) {
 				List<SysJobEntity> jobs = list(Wrappers.<SysJobEntity>lambdaQuery().in(SysJobEntity::getId, ids));
 				if (CollUtil.isEmpty(jobs)) {
@@ -73,9 +76,13 @@ public class SysJobScheduleSyncServiceImpl extends ServiceImpl<SysJobMapper, Sys
 				}
 				return;
 			}
+
+			// 如果需要注册的 Quartz 任务为空，则直接返回
 			if (CollUtil.isEmpty(jobsToSchedule)) {
 				return;
 			}
+
+			// 注册 Quartz 任务
 			for (SysJobEntity job : jobsToSchedule) {
 				job.setStatus(true);
 				sysJobSchedulerManager.scheduleOrReplace(job);
@@ -94,8 +101,10 @@ public class SysJobScheduleSyncServiceImpl extends ServiceImpl<SysJobMapper, Sys
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void batchUpdateStatusByGroupCode(String groupCode, Boolean status) {
+		// 获取分组内的任务
 		List<SysJobEntity> jobs = list(Wrappers.<SysJobEntity>lambdaQuery().eq(SysJobEntity::getJobGroup, groupCode));
 
+		// 更新任务状态
 		if (CollUtil.isNotEmpty(jobs)) {
 			List<SysJobEntity> updates = jobs.stream().map(job -> {
 				SysJobEntity entity = new SysJobEntity();
@@ -107,10 +116,13 @@ public class SysJobScheduleSyncServiceImpl extends ServiceImpl<SysJobMapper, Sys
 		}
 
 		try {
+			// 如果目标状态为 false，则暂停 Quartz 任务
 			if (BooleanUtil.isFalse(status)) {
 				sysJobSchedulerManager.pauseGroup(groupCode);
 				return;
 			}
+
+			// 注册 Quartz 任务
 			for (SysJobEntity job : jobs) {
 				job.setStatus(true);
 				sysJobSchedulerManager.scheduleOrReplace(job);
@@ -128,10 +140,13 @@ public class SysJobScheduleSyncServiceImpl extends ServiceImpl<SysJobMapper, Sys
 	 * @param action 执行动作
 	 */
 	private void registerReconcileAfterRollback(Runnable action) {
+		// 如果事务同步未激活，则直接执行
 		if (!TransactionSynchronizationManager.isSynchronizationActive()) {
 			action.run();
 			return;
 		}
+
+		// 注册事务同步
 		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 			@Override
 			public void afterCompletion(int status) {

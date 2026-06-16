@@ -1,4 +1,4 @@
-package com.auth.service.system.schedule.validation.builtin;
+package com.auth.service.system.schedule.validation.task;
 
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.jobparams.FeignInvokeJobParams;
@@ -30,11 +30,16 @@ public class BuiltinJobParamsValidator {
 	 * @param job 任务定义
 	 */
 	public void validateIfPresent(SysJobEntity job) {
-		Class<?> paramsType = JOB_CLASS_TO_PARAMS.get(job.getJobClass());
+		String jobClass = job.getJobClass();
+
+		Class<?> paramsType = JOB_CLASS_TO_PARAMS.get(jobClass);
 		if (paramsType == null) {
 			return;
 		}
-		builtinJobParamsParser.parseAndValidate(job.getJobParams(), paramsType);
+
+		//
+		String jobParams = job.getJobParams();
+		builtinJobParamsParser.parseAndValidate(jobParams, paramsType);
 	}
 
 }

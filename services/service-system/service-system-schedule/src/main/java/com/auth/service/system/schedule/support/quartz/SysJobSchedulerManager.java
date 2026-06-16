@@ -122,6 +122,7 @@ public class SysJobSchedulerManager {
 		if (scheduler.checkExists(jobKey)) {
 			return;
 		}
+
 		JobDetail detail = sysJobQuartzJobFactory.build(job);
 		scheduler.addJob(detail, false);
 	}

@@ -20,7 +20,7 @@ import com.auth.service.system.schedule.model.vo.SysJobPageResponse;
 import com.auth.service.system.schedule.support.SysJobQuartzRuntimeSnapshot;
 import com.auth.service.system.schedule.support.quartz.SysJobQuartzRuntimeReader;
 import com.auth.service.system.schedule.support.quartz.SysJobSchedulerManager;
-import com.auth.service.system.schedule.validation.SysJobDefinitionValidationManager;
+import com.auth.service.system.schedule.validation.task.SysJobDefinitionValidationManager;
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
@@ -252,7 +252,7 @@ class SysJobDefinitionServiceImplTest {
 		}).when(sysJobMapper).updateById(any(SysJobEntity.class));
 
 		SysJobUpdateForm form = new SysJobUpdateForm();
-		form.setId("10");
+		form.setId(10L);
 		form.setCronExpression("0 0 1 * * ?");
 		form.setMisfirePolicy(2);
 		form.setConcurrent(true);

@@ -1,5 +1,6 @@
 package com.auth.service.system.schedule.task.builtin;
 
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.net.url.UrlBuilder;
 import com.auth.common.web.resttemplate.RestTemplateUtil;
 import com.auth.service.system.schedule.annotation.QuartzTask;
@@ -8,6 +9,7 @@ import com.auth.service.system.schedule.model.jobparams.HttpInvokeJobParams;
 import com.auth.service.system.schedule.support.task.BuiltinJobParamsParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.http.HttpMethod;
@@ -33,7 +35,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 @Slf4j
 @Component
-public class HttpInvokeJob implements BuiltinQuartzJob {
+public class HttpInvokeJob implements Job {
 
 	private final BuiltinJobParamsParser builtinJobParamsParser;
 
@@ -46,9 +48,10 @@ public class HttpInvokeJob implements BuiltinQuartzJob {
 	 * @return 拼接后的 URL
 	 */
 	static @NonNull String buildUrlWithQuery(@NonNull String url, @Nullable Map<String, String> query) {
-		if (query == null || query.isEmpty()) {
+		if (MapUtil.isEmpty(query)) {
 			return url;
 		}
+
 		UrlBuilder builder = UrlBuilder.ofHttp(url);
 		query.forEach(builder::addQuery);
 		return builder.build();
@@ -57,17 +60,28 @@ public class HttpInvokeJob implements BuiltinQuartzJob {
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		try {
-			HttpInvokeJobParams params = builtinJobParamsParser
-				.parseAndValidate(BuiltinJobParamsParser.requireRawJson(context), HttpInvokeJobParams.class);
-			String url = buildUrlWithQuery(Objects.requireNonNull(params.getUrl(), "url"), params.getQuery());
+			//
+			String jobParamsJson = BuiltinJobParamsParser.requireRawJson(context);
+			HttpInvokeJobParams params = builtinJobParamsParser.parseAndValidate(jobParamsJson,
+					HttpInvokeJobParams.class);
 
+			//
+			String paramsUrl = params.getUrl();
+			Map<String, String> query = params.getQuery();
+			String url = buildUrlWithQuery(Objects.requireNonNull(paramsUrl, "url"), query);
+
+			//
 			HttpMethod method = HttpMethod.valueOf(Objects.requireNonNull(params.getMethod(), "method").name());
 
-			ResponseEntity<String> response = RestTemplateUtil.exchange(restTemplate, url, method, params.getHeaders(),
-					params.getBody());
-			String body = response.getBody();
+			//
+			Map<String, String> headers = params.getHeaders();
+			String body = params.getBody();
+			ResponseEntity<String> response = RestTemplateUtil.exchange(restTemplate, url, method, headers, body);
+
+			//
+			String responseBody = response.getBody();
 			log.debug("HttpInvokeJob ok method={} url={} status={} respLen={}", method, url,
-					response.getStatusCode().value(), body == null ? 0 : body.length());
+					response.getStatusCode().value(), responseBody == null ? 0 : responseBody.length());
 		}
 		catch (Exception exception) {
 			throw new JobExecutionException(exception);

@@ -1,11 +1,12 @@
 package com.auth.service.system.schedule.validation.impl;
 
 import com.auth.service.system.schedule.catalog.QuartzTaskRegistry;
-import com.auth.service.system.schedule.example.custom.SpringInjectDemoJob;
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.task.builtin.HttpInvokeJob;
-import com.auth.service.system.schedule.validation.builtin.BuiltinJobParamsValidator;
+import com.auth.service.system.schedule.task.example.SpringInjectDemoJob;
+import com.auth.service.system.schedule.validation.task.BuiltinJobParamsValidator;
+import com.auth.service.system.schedule.validation.task.CustomClassTaskDefinitionValidator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -79,7 +80,7 @@ class CustomClassTaskDefinitionValidatorTest {
 	@Test
 	@DisplayName("validate：白名单内但类无法加载时应抛出 JOB_CLASS_LOAD_FAILED")
 	void validate_whenClassNotFound_throws() {
-		String className = "com.auth.service.system.schedule.task.custom.SpringInjectDemoJob";
+		String className = "com.auth.service.system.schedule.task.example.SpringInjectDemoJob";
 		when(quartzTaskRegistry.isAllowed(className)).thenReturn(true);
 
 		SysJobEntity job = new SysJobEntity();

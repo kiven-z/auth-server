@@ -2,6 +2,8 @@ package com.auth.service.system.schedule.validation;
 
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
+import com.auth.service.system.schedule.validation.task.SysJobDefinitionValidationManager;
+import com.auth.service.system.schedule.validation.task.SysJobTaskTypeDefinitionValidator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

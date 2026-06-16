@@ -2,11 +2,11 @@ package com.auth.service.system.schedule.service.impl;
 
 import com.auth.service.system.schedule.catalog.QuartzTaskRegistry;
 import com.auth.service.system.schedule.catalog.SysJobPayloadTemplateRegistry;
-import com.auth.service.system.schedule.example.bean.BeanInvokeDemoTask;
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import com.auth.service.system.schedule.model.vo.QuartzTaskClassVO;
 import com.auth.service.system.schedule.model.vo.QuartzTaskMethodVO;
+import com.auth.service.system.schedule.task.example.BeanInvokeDemoTask;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

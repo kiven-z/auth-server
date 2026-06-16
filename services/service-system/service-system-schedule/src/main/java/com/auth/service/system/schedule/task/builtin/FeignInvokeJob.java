@@ -7,6 +7,7 @@ import com.auth.service.system.schedule.model.jobparams.BuiltinRemoteHttpMethod;
 import com.auth.service.system.schedule.model.jobparams.FeignInvokeJobParams;
 import com.auth.service.system.schedule.support.task.BuiltinJobParamsParser;
 import lombok.extern.slf4j.Slf4j;
+import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -16,6 +17,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -30,7 +32,7 @@ import java.util.Objects;
 				""")
 @Slf4j
 @Component
-public class FeignInvokeJob implements BuiltinQuartzJob {
+public class FeignInvokeJob implements Job {
 
 	private final BuiltinJobParamsParser builtinJobParamsParser;
 
@@ -50,22 +52,33 @@ public class FeignInvokeJob implements BuiltinQuartzJob {
 	 */
 	private static @NonNull String buildServiceUrl(@NonNull String serviceName, @NonNull String path) {
 		String normalizedPath = path.startsWith("/") ? path : "/" + path;
-		return "http://" + serviceName.trim() + normalizedPath;
+		return "http://" + serviceName + normalizedPath;
 	}
 
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		try {
-			FeignInvokeJobParams params = builtinJobParamsParser
-				.parseAndValidate(BuiltinJobParamsParser.requireRawJson(context), FeignInvokeJobParams.class);
-			String url = buildServiceUrl(Objects.requireNonNull(params.getServiceName(), "serviceName"),
-					Objects.requireNonNull(params.getPath(), "path"));
+			// 获取jobParamsJson
+			String jobParamsJson = BuiltinJobParamsParser.requireRawJson(context);
+			FeignInvokeJobParams params = builtinJobParamsParser.parseAndValidate(jobParamsJson,
+					FeignInvokeJobParams.class);
 
+			// 获取serviceName和path
+			String serviceName = Objects.requireNonNull(params.getServiceName(), "serviceName");
+			String path = Objects.requireNonNull(params.getPath(), "path");
+			String url = buildServiceUrl(serviceName, path);
+
+			// 获取method
 			BuiltinRemoteHttpMethod builtinMethod = Objects.requireNonNull(params.getMethod(), "method");
 			HttpMethod method = HttpMethod.valueOf(builtinMethod.name());
 
-			ResponseEntity<String> response = RestTemplateUtil.exchange(loadBalancedRestTemplate, url, method,
-					params.getHeaders(), params.getBody());
+			// 获取headers和body
+			Map<String, String> headers = params.getHeaders();
+			String body = params.getBody();
+			ResponseEntity<String> response = RestTemplateUtil.exchange(loadBalancedRestTemplate, url, method, headers,
+					body);
+
+			// 获取responseBody
 			String responseBody = response.getBody();
 			log.debug("FeignInvokeJob ok service={} path={} method={} status={} respLen={}", params.getServiceName(),
 					params.getPath(), builtinMethod, response.getStatusCode().value(),

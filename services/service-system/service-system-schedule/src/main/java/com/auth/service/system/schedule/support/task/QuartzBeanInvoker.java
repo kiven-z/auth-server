@@ -38,18 +38,21 @@ public class QuartzBeanInvoker {
 			throw new SysJobException(PARAM_REQUIRED, "invoke_target");
 		}
 
+		// 验证invokeTarget是否为空
 		String nonNullInvokeTarget = Objects.requireNonNull(invokeTarget, "invokeTarget");
 		int dot = nonNullInvokeTarget.indexOf('.');
 		if (dot <= 0 || dot >= invokeTarget.length() - 1) {
 			throw new SysJobException(JOB_INVOKE_TARGET_FORMAT);
 		}
 
+		// 解析beanName和methodName
 		String beanName = nonNullInvokeTarget.substring(0, dot).trim();
 		String tail = nonNullInvokeTarget.substring(dot + 1).trim();
 		if (CharSequenceUtil.isEmpty(tail)) {
 			throw new SysJobException(JOB_INVOKE_TARGET_FORMAT);
 		}
 
+		// 验证beanName是否为空
 		String nonNullBeanName = Objects.requireNonNull(beanName, BEAN_NAME);
 		int lp = tail.indexOf('(');
 		if (lp < 0) {
@@ -107,8 +110,12 @@ public class QuartzBeanInvoker {
 
 		Object bean = applicationContext.getBean(beanName);
 		Object[] args = parseArgs(spec.argsInner);
+
+		// 解析方法
 		Method method = InvokeTargetSupport.resolveMethod(bean.getClass(), methodName, args.length);
+		// 调用方法
 		Object result = ReflectionUtils.invokeMethod(method, bean, args);
+
 		return result == null ? "" : String.valueOf(result);
 	}
 
