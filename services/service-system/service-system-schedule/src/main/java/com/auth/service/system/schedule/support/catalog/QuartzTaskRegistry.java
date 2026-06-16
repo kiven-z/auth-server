@@ -1,4 +1,4 @@
-package com.auth.service.system.schedule.catalog;
+package com.auth.service.system.schedule.support.catalog;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.schedule.annotation.QuartzTask;

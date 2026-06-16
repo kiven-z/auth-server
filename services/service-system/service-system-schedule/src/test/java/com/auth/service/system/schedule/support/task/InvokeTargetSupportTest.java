@@ -1,5 +1,6 @@
 package com.auth.service.system.schedule.support.task;
 
+import com.auth.service.system.schedule.task.support.InvokeTargetSupport;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

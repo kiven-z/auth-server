@@ -1,4 +1,4 @@
-package com.auth.service.system.schedule.support.task;
+package com.auth.service.system.schedule.task.support;
 
 import com.auth.service.system.schedule.config.ScheduleQuartzConfiguration;
 import lombok.experimental.UtilityClass;

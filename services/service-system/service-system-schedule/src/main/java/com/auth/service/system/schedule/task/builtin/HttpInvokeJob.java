@@ -6,7 +6,7 @@ import com.auth.common.web.resttemplate.RestTemplateUtil;
 import com.auth.service.system.schedule.annotation.QuartzTask;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import com.auth.service.system.schedule.model.jobparams.HttpInvokeJobParams;
-import com.auth.service.system.schedule.support.task.BuiltinJobParamsParser;
+import com.auth.service.system.schedule.task.support.BuiltinJobParamsParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.Job;

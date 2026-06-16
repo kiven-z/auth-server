@@ -1,6 +1,7 @@
 package com.auth.service.system.schedule.catalog;
 
 import com.auth.service.system.schedule.model.vo.QuartzTaskClassVO;
+import com.auth.service.system.schedule.support.catalog.QuartzTaskRegistry;
 import com.auth.service.system.schedule.task.builtin.HttpInvokeJob;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

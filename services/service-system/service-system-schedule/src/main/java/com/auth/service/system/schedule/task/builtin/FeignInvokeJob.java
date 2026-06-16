@@ -5,7 +5,7 @@ import com.auth.service.system.schedule.annotation.QuartzTask;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import com.auth.service.system.schedule.model.jobparams.BuiltinRemoteHttpMethod;
 import com.auth.service.system.schedule.model.jobparams.FeignInvokeJobParams;
-import com.auth.service.system.schedule.support.task.BuiltinJobParamsParser;
+import com.auth.service.system.schedule.task.support.BuiltinJobParamsParser;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;

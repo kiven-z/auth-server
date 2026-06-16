@@ -1,4 +1,4 @@
-package com.auth.service.system.schedule.catalog;
+package com.auth.service.system.schedule.support.catalog;
 
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;

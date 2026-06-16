@@ -3,9 +3,9 @@ package com.auth.service.system.schedule.validation.task;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.jobparams.FeignInvokeJobParams;
 import com.auth.service.system.schedule.model.jobparams.HttpInvokeJobParams;
-import com.auth.service.system.schedule.support.task.BuiltinJobParamsParser;
 import com.auth.service.system.schedule.task.builtin.FeignInvokeJob;
 import com.auth.service.system.schedule.task.builtin.HttpInvokeJob;
+import com.auth.service.system.schedule.task.support.BuiltinJobParamsParser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
