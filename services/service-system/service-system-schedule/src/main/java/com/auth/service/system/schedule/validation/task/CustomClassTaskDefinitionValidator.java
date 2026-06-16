@@ -31,7 +31,7 @@ public class CustomClassTaskDefinitionValidator implements SysJobTaskTypeDefinit
 
 	@Override
 	public void validate(SysJobEntity job) {
-		//
+		// 校验 job_class 是否在 @QuartzTask 白名单内
 		String jobClass = job.getJobClass();
 		if (!quartzTaskRegistry.isAllowed(jobClass)) {
 			throw new SysJobException(JOB_CLASS_NOT_WHITELISTED);
@@ -44,7 +44,7 @@ public class CustomClassTaskDefinitionValidator implements SysJobTaskTypeDefinit
 			throw new SysJobException(JOB_CLASS_LOAD_FAILED, exception.getMessage());
 		}
 
-		//
+		// 内置 Job 额外校验 job_params 结构
 		builtinJobParamsValidator.validateIfPresent(job);
 	}
 

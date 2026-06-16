@@ -1,6 +1,5 @@
-package com.auth.service.system.schedule.support.task;
+package com.auth.service.system.schedule.task.support;
 
-import com.auth.service.system.schedule.task.support.InvokeTargetSupport;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -31,7 +30,7 @@ class InvokeTargetSupportTest {
 	}
 
 	@Test
-	@DisplayName("parameterSignature：按参数数量返回固定签名")
+	@DisplayName("parameterSignature：按反射参数类型生成签名")
 	void parameterSignatureMatchesArgCount() throws NoSuchMethodException {
 		Method run = SampleTask.class.getMethod("run");
 		Method echo = SampleTask.class.getMethod("echo", String.class);
@@ -61,7 +60,6 @@ class InvokeTargetSupportTest {
 		assertThat(vo.getParameterSignature()).isEqualTo("(String)");
 		assertThat(vo.getReturnType()).isEqualTo("String");
 		assertThat(vo.getInvokeTargetExample()).isEqualTo("sampleTask.echo('')");
-		assertThat(vo.getRequiresStringParam()).isTrue();
 	}
 
 	/**

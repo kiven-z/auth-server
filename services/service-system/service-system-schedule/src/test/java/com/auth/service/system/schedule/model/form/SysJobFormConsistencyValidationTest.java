@@ -44,7 +44,7 @@ class SysJobFormConsistencyValidationTest {
 
 	private static SysJobUpdateForm validUpdateForm() {
 		SysJobUpdateForm form = new SysJobUpdateForm();
-		form.setId("1");
+		form.setId(1L);
 		form.setCronExpression("0/30 * * * * ?");
 		form.setMisfirePolicy(2);
 		form.setConcurrent(false);

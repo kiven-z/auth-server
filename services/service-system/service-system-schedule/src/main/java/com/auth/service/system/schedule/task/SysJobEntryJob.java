@@ -19,11 +19,11 @@ public class SysJobEntryJob implements Job {
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		try {
-			//
+			// 从 SchedulerContext 获取 Spring 容器
 			ApplicationContext app = QuartzJobSupport.getApplicationContext(context);
 			JobDataMap jobDataMap = context.getMergedJobDataMap();
 
-			//
+			// 按 taskType 委派对应执行器
 			SysJobTaskType taskType = SysJobTaskType.resolve(jobDataMap.getString(SysJobQuartzDataKeys.TASK_TYPE));
 			SysJobTaskExecutorRegistry registry = app.getBean(SysJobTaskExecutorRegistry.class);
 			registry.resolve(taskType).execute(context);

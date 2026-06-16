@@ -37,7 +37,7 @@ public class BuiltinJobParamsValidator {
 			return;
 		}
 
-		//
+		// 解析并校验 job_params JSON
 		String jobParams = job.getJobParams();
 		builtinJobParamsParser.parseAndValidate(jobParams, paramsType);
 	}

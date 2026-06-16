@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.http.HttpMethod;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -27,9 +28,9 @@ public class HttpInvokeJobParams implements VersionedJobParams, Serializable {
 	@NotNull
 	private Integer version = VersionedJobParams.VERSION_1;
 
-	@Schema(title = "HTTP 方法")
+	@Schema(title = "HTTP 方法", allowableValues = { "GET", "POST", "PUT", "DELETE" })
 	@NotNull
-	private BuiltinRemoteHttpMethod method;
+	private HttpMethod method;
 
 	@Schema(title = "请求 URL")
 	@NotBlank

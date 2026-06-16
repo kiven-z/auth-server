@@ -20,9 +20,6 @@ public class FreemarkerTemplateRenderer {
 
 	public static final Configuration CONFIGURATION = createConfiguration();
 
-	/**
-	 * @param templateName 逻辑名，仅用于错误定位
-	 */
 	public static String processTemplate(String templateName, String templateContent, Object dataModel) {
 		try {
 			Template template = new Template(templateName, templateContent, CONFIGURATION);

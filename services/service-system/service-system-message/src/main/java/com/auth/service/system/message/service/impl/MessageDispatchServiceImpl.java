@@ -34,6 +34,9 @@ public class MessageDispatchServiceImpl implements MessageDispatchService {
 		this.commandValidation = commandValidation;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void sendByTemplate(TemplateMessageCommand command) {
 		commandValidation.validate(command);

@@ -9,6 +9,8 @@ import org.springframework.util.ReflectionUtils;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_INVOKE_PARAM_NOT_SUPPORTED;
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_REFLECT_METHOD_NOT_FOUND;
@@ -44,26 +46,30 @@ public class InvokeTargetSupport {
 	}
 
 	/**
-	 * 返回前端展示用参数签名
+	 * 返回前端展示用参数列表（含括号），如 {@code ()}、{@code (String)}
 	 * @param method 已判定为可调用的方法
-	 * @return {@code ()} 或 {@code (String)}
+	 * @return 参数签名
 	 */
 	public static @NonNull String parameterSignature(@NonNull Method method) {
-		return method.getParameterCount() == 0 ? "()" : "(String)";
+		return formatParameterList(method.getParameterTypes());
 	}
 
 	/**
-	 * 生成 {@code invoke_target} 示例；String 参数留空引号供用户填写
+	 * 生成 {@code invoke_target} 示例；按参数类型生成占位符供用户填写
 	 * @param beanName Spring Bean 名
 	 * @param method 已判定为可调用的方法
 	 * @return 示例字符串
 	 */
 	public static @NonNull String formatInvokeTarget(@NonNull String beanName, @NonNull Method method) {
 		String methodName = method.getName();
-		if (method.getParameterCount() == 0) {
+		Class<?>[] parameterTypes = method.getParameterTypes();
+		if (parameterTypes.length == 0) {
 			return beanName + "." + methodName + "()";
 		}
-		return beanName + "." + methodName + "('')";
+		String args = Stream.of(parameterTypes)
+			.map(InvokeTargetSupport::formatInvokeArgPlaceholder)
+			.collect(Collectors.joining(", "));
+		return beanName + "." + methodName + "(" + args + ")";
 	}
 
 	/**
@@ -78,7 +84,6 @@ public class InvokeTargetSupport {
 		methodVO.setParameterSignature(parameterSignature(method));
 		methodVO.setReturnType(method.getReturnType().getSimpleName());
 		methodVO.setInvokeTargetExample(formatInvokeTarget(beanName, method));
-		methodVO.setRequiresStringParam(method.getParameterCount() == 1);
 		return methodVO;
 	}
 
@@ -91,25 +96,48 @@ public class InvokeTargetSupport {
 	 */
 	public static @NonNull Method resolveMethod(@NonNull Class<?> clazz, @NonNull String methodName, int argCount) {
 		Class<?>[] paramTypes;
-		String signature;
 		if (argCount == 0) {
 			paramTypes = new Class<?>[0];
-			signature = "()";
 		}
 		else if (argCount == 1) {
 			paramTypes = new Class<?>[] { String.class };
-			signature = "(String)";
 		}
 		else {
 			throw new SysJobException(JOB_INVOKE_PARAM_NOT_SUPPORTED);
 		}
 
+		String signature = formatParameterList(paramTypes);
 		Method method = ReflectionUtils.findMethod(clazz, methodName, paramTypes);
 		if (method == null) {
 			throw new SysJobException(JOB_REFLECT_METHOD_NOT_FOUND, signature, methodName);
 		}
 		ReflectionUtils.makeAccessible(method);
 		return Objects.requireNonNull(method, METHOD_NAME);
+	}
+
+	/**
+	 * 将参数类型格式化为展示用括号段
+	 * @param parameterTypes 参数类型数组
+	 * @return 如 {@code ()} 或 {@code (String, int)}
+	 */
+	private static @NonNull String formatParameterList(@NonNull Class<?>[] parameterTypes) {
+		if (parameterTypes.length == 0) {
+			return "()";
+		}
+		String inner = Stream.of(parameterTypes).map(Class::getSimpleName).collect(Collectors.joining(", "));
+		return "(" + inner + ")";
+	}
+
+	/**
+	 * 按参数类型生成 invoke_target 占位字面量
+	 * @param parameterType 参数类型
+	 * @return 占位字符串
+	 */
+	private static @NonNull String formatInvokeArgPlaceholder(@NonNull Class<?> parameterType) {
+		if (parameterType == String.class) {
+			return "''";
+		}
+		throw new IllegalArgumentException("Unsupported invoke_target parameter type: " + parameterType.getName());
 	}
 
 }

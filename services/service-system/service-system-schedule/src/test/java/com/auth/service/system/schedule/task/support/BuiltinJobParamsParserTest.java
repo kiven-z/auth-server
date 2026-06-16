@@ -1,9 +1,9 @@
-package com.auth.service.system.schedule.support.task;
+package com.auth.service.system.schedule.task.support;
 
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
+import com.auth.service.system.schedule.model.jobparams.HttpInvokeJobParams;
 import com.auth.service.system.schedule.model.jobparams.VersionedJobParams;
-import com.auth.service.system.schedule.task.support.BuiltinJobParamsParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -16,6 +16,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
+import org.springframework.http.HttpMethod;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -60,6 +61,16 @@ class BuiltinJobParamsParserTest {
 	void parseAndValidate_whenVersionUnsupported_throws() {
 		assertThatThrownBy(() -> parser.parseAndValidate("{\"version\":2,\"name\":\"demo\"}", SampleParams.class))
 			.isInstanceOf(SysJobException.class);
+	}
+
+	@Test
+	@DisplayName("parseAndValidate：HttpInvokeJobParams method 应反序列化为 HttpMethod")
+	void parseAndValidate_whenHttpInvokeParams_deserializesHttpMethod() {
+		HttpInvokeJobParams actual = parser.parseAndValidate(
+				"{\"version\":1,\"method\":\"POST\",\"url\":\"https://example.com\"}", HttpInvokeJobParams.class);
+
+		assertThat(actual.getMethod()).isEqualTo(HttpMethod.POST);
+		assertThat(actual.getUrl()).isEqualTo("https://example.com");
 	}
 
 	@Test

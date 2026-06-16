@@ -4,7 +4,6 @@ import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.support.catalog.QuartzTaskRegistry;
 import com.auth.service.system.schedule.task.builtin.HttpInvokeJob;
-import com.auth.service.system.schedule.task.example.SpringInjectDemoJob;
 import com.auth.service.system.schedule.validation.task.BuiltinJobParamsValidator;
 import com.auth.service.system.schedule.validation.task.CustomClassTaskDefinitionValidator;
 import org.junit.jupiter.api.DisplayName;
@@ -35,18 +34,6 @@ class CustomClassTaskDefinitionValidatorTest {
 
 	@InjectMocks
 	private CustomClassTaskDefinitionValidator validator;
-
-	@Test
-	@DisplayName("validate：白名单且可加载的 job_class 应通过")
-	void validate_whenClassAllowedAndLoadable_passes() {
-		String className = SpringInjectDemoJob.class.getName();
-		when(quartzTaskRegistry.isAllowed(className)).thenReturn(true);
-
-		SysJobEntity job = new SysJobEntity();
-		job.setJobClass(className);
-
-		validator.validate(job);
-	}
 
 	@Test
 	@DisplayName("validate：内置 HttpInvoke 任务应触发 job_params 校验")

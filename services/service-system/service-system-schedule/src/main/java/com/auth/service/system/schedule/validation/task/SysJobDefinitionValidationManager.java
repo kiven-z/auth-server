@@ -31,18 +31,18 @@ public class SysJobDefinitionValidationManager {
 	 * @param job 任务定义
 	 */
 	public void normalizeAndValidate(SysJobEntity job) {
-		//
+		// 归一化 taskType 枚举名
 		String taskType = job.getTaskType();
 		SysJobTaskType resolvedTaskType = SysJobTaskType.resolve(taskType);
 		job.setTaskType(resolvedTaskType.name());
 
-		//
+		// 补全默认 handlerCode
 		if (CharSequenceUtil.isBlank(job.getHandlerCode())) {
 			String handlerCode = resolvedTaskType.defaultHandlerCode();
 			job.setHandlerCode(handlerCode);
 		}
 
-		//
+		// 按任务类型执行定义层校验
 		SysJobTaskTypeDefinitionValidator validator = validators.get(resolvedTaskType);
 		if (validator != null) {
 			validator.validate(job);

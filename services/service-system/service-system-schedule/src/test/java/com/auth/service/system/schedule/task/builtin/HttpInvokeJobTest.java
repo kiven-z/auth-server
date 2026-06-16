@@ -1,7 +1,6 @@
 package com.auth.service.system.schedule.task.builtin;
 
 import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
-import com.auth.service.system.schedule.model.jobparams.BuiltinRemoteHttpMethod;
 import com.auth.service.system.schedule.model.jobparams.HttpInvokeJobParams;
 import com.auth.service.system.schedule.task.support.BuiltinJobParamsParser;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,7 +53,7 @@ class HttpInvokeJobTest {
 
 		HttpInvokeJobParams params = new HttpInvokeJobParams();
 		params.setVersion(1);
-		params.setMethod(BuiltinRemoteHttpMethod.GET);
+		params.setMethod(HttpMethod.GET);
 		params.setUrl("https://example.com/api");
 		params.setQuery(java.util.Map.of("page", "1"));
 		params.setHeaders(java.util.Map.of("X-Token", "abc"));
@@ -77,7 +76,7 @@ class HttpInvokeJobTest {
 		JobExecutionContext context = mock(JobExecutionContext.class);
 
 		HttpInvokeJobParams params = new HttpInvokeJobParams();
-		params.setMethod(BuiltinRemoteHttpMethod.POST);
+		params.setMethod(HttpMethod.POST);
 		params.setUrl("https://example.com/api");
 		params.setBody("{\"id\":1}");
 		stubJobParams(context, params);
@@ -98,7 +97,7 @@ class HttpInvokeJobTest {
 	void execute_whenRestTemplateFails_wrapsJobExecutionException() {
 		JobExecutionContext context = mock(JobExecutionContext.class);
 		HttpInvokeJobParams params = new HttpInvokeJobParams();
-		params.setMethod(BuiltinRemoteHttpMethod.GET);
+		params.setMethod(HttpMethod.GET);
 		params.setUrl("https://example.com/fail");
 		stubJobParams(context, params);
 		when(restTemplate.exchange(eq("https://example.com/fail"), eq(HttpMethod.GET),

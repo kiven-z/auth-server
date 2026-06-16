@@ -34,7 +34,4 @@ public class QuartzTaskMethodVO implements Serializable {
 	@Schema(title = "invoke_target 示例")
 	private String invokeTargetExample;
 
-	@Schema(title = "是否需要填写 String 参数")
-	private Boolean requiresStringParam;
-
 }

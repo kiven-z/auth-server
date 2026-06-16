@@ -82,7 +82,7 @@ class SysJobTaskCatalogServiceImplTest {
 			.findFirst()
 			.orElseThrow();
 		assertThat(runWithMessage.getInvokeTargetExample()).isEqualTo("beanInvokeDemoTask.runWithMessage('')");
-		assertThat(runWithMessage.getRequiresStringParam()).isTrue();
+		assertThat(runWithMessage.getParameterSignature()).isEqualTo("(String)");
 	}
 
 	@Test

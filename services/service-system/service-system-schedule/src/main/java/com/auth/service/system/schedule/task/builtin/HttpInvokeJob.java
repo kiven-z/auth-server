@@ -60,25 +60,24 @@ public class HttpInvokeJob implements Job {
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		try {
-			//
+			// 读取并校验 job_params
 			String jobParamsJson = BuiltinJobParamsParser.requireRawJson(context);
 			HttpInvokeJobParams params = builtinJobParamsParser.parseAndValidate(jobParamsJson,
 					HttpInvokeJobParams.class);
 
-			//
+			// 拼接 URL 与 query 参数
 			String paramsUrl = params.getUrl();
 			Map<String, String> query = params.getQuery();
 			String url = buildUrlWithQuery(Objects.requireNonNull(paramsUrl, "url"), query);
 
-			//
-			HttpMethod method = HttpMethod.valueOf(Objects.requireNonNull(params.getMethod(), "method").name());
+			HttpMethod method = Objects.requireNonNull(params.getMethod(), "method");
 
-			//
+			// 发起 HTTP 调用
 			Map<String, String> headers = params.getHeaders();
 			String body = params.getBody();
 			ResponseEntity<String> response = RestTemplateUtil.exchange(restTemplate, url, method, headers, body);
 
-			//
+			// 记录响应摘要
 			String responseBody = response.getBody();
 			log.debug("HttpInvokeJob ok method={} url={} status={} respLen={}", method, url,
 					response.getStatusCode().value(), responseBody == null ? 0 : responseBody.length());
