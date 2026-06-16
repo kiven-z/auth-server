@@ -2,7 +2,7 @@ package com.auth.service.auth.application.port.invalidation;
 
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateResponse;
-import com.auth.service.auth.domain.authorization.invalidation.model.InvalidationIdempotencyGate;
+import com.auth.service.auth.domain.authorization.invalidation.InvalidationIdempotencyGate;
 
 /**
  * 授权失效幂等端口（{@code eventId} 去重）

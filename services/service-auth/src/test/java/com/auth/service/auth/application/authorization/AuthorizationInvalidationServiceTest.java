@@ -11,9 +11,9 @@ import com.auth.service.auth.application.port.invalidation.InvalidationIdempoten
 import com.auth.service.auth.application.port.invalidation.UserInvalidationStateQueryPort;
 import com.auth.service.auth.application.port.invalidation.UserPermVersionPort;
 import com.auth.service.auth.config.AuthorizationInvalidationProperties;
-import com.auth.service.auth.domain.authorization.invalidation.model.InvalidationIdempotencyGate;
-import com.auth.service.auth.domain.authorization.invalidation.model.UserInvalidationBuckets;
-import com.auth.service.auth.domain.authorization.invalidation.model.UserInvalidationState;
+import com.auth.service.auth.domain.authorization.invalidation.InvalidationIdempotencyGate;
+import com.auth.service.auth.domain.authorization.invalidation.UserInvalidationBuckets;
+import com.auth.service.auth.domain.authorization.invalidation.UserInvalidationState;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

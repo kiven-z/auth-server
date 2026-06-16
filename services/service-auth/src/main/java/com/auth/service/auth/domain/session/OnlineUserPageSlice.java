@@ -1,4 +1,6 @@
-package com.auth.service.auth.domain.session.model;
+package com.auth.service.auth.domain.session;
+
+import java.util.List;
 
 /**
  * 在线用户分页切片（Repository 层返回）
@@ -7,7 +9,7 @@ package com.auth.service.auth.domain.session.model;
  * @param users 当前页用户条目
  * @author Bunny
  */
-public record OnlineUserPageSlice(long total, java.util.List<OnlineUserEntry> users) {
+public record OnlineUserPageSlice(long total, List<OnlineUserEntry> users) {
 
 	/**
 	 * 在线用户索引条目

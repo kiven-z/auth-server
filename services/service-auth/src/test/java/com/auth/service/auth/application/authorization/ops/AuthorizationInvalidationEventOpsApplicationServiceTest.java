@@ -2,7 +2,7 @@ package com.auth.service.auth.application.authorization.ops;
 
 import com.auth.service.auth.application.port.invalidation.InvalidationEventOpsPort;
 import com.auth.service.auth.application.port.invalidation.InvalidationIdempotencyPort;
-import com.auth.service.auth.domain.authorization.invalidation.model.InvalidationProcessingMarker;
+import com.auth.service.auth.domain.authorization.invalidation.InvalidationProcessingMarker;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

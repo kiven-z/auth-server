@@ -2,6 +2,7 @@ package com.auth.service.auth.domain.authorization.invalidation.model;
 
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 import com.auth.module.security.contract.dto.invalidation.RoleInvalidatePayload;
+import com.auth.service.auth.domain.authorization.invalidation.InvalidationCommand;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

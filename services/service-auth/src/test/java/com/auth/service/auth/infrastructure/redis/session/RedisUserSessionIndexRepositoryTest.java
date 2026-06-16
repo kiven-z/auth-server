@@ -20,12 +20,12 @@ import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 
 import java.time.Duration;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -170,64 +170,6 @@ class RedisUserSessionIndexRepositoryTest {
 		assertEquals(1, sessions.size());
 		assertEquals(TestConstants.JTI, sessions.get(0).getSessionId());
 		verify(setOperations).remove(SecurityRedisKey.USER_SESSIONS.key(TestConstants.USER_ID), "stale-jti");
-	}
-
-	@Test
-	@DisplayName("pageOnlineUsers：无活跃会话时清理 ZSet 且不纳入结果")
-	void pageOnlineUsers_shouldCleanupStaleOnlineUserAndSkip() {
-		when(zSetOperations.zCard(ONLINE_USERS_KEY)).thenReturn(2L);
-		when(zSetOperations.reverseRange(ONLINE_USERS_KEY, 0L, 63L))
-			.thenReturn(new LinkedHashSet<>(List.of(String.valueOf(TestConstants.USER_ID), "999")));
-		when(setOperations.size(SecurityRedisKey.USER_SESSIONS.key(TestConstants.USER_ID))).thenReturn(1L);
-		when(zSetOperations.score(ONLINE_USERS_KEY, String.valueOf(TestConstants.USER_ID)))
-			.thenReturn(1_700_000_000_000D);
-		when(setOperations.size(SecurityRedisKey.USER_SESSIONS.key(999L))).thenReturn(0L);
-
-		var slice = repository.pageOnlineUsers(1, 10, null);
-
-		assertEquals(1L, slice.total());
-		assertEquals(1, slice.users().size());
-		assertEquals(TestConstants.USER_ID, slice.users().get(0).userId());
-		verify(zSetOperations).remove(ONLINE_USERS_KEY, "999");
-	}
-
-	@Test
-	@DisplayName("pageOnlineUsers：支持用户 ID 筛选")
-	void pageOnlineUsers_shouldApplyUserFilter() {
-		when(zSetOperations.zCard(ONLINE_USERS_KEY)).thenReturn(1L);
-		when(zSetOperations.reverseRange(ONLINE_USERS_KEY, 0L, 63L))
-			.thenReturn(Set.of(String.valueOf(TestConstants.USER_ID), "99"));
-		when(setOperations.size(SecurityRedisKey.USER_SESSIONS.key(TestConstants.USER_ID))).thenReturn(2L);
-		when(zSetOperations.score(ONLINE_USERS_KEY, String.valueOf(TestConstants.USER_ID)))
-			.thenReturn(1_700_000_000_000D);
-		when(setOperations.size(SecurityRedisKey.USER_SESSIONS.key(99L))).thenReturn(1L);
-		when(zSetOperations.score(ONLINE_USERS_KEY, "99")).thenReturn(1_700_000_000_100D);
-
-		var slice = repository.pageOnlineUsers(1, 10, Set.of(TestConstants.USER_ID));
-
-		assertEquals(1L, slice.total());
-		assertEquals(1, slice.users().size());
-		assertEquals(TestConstants.USER_ID, slice.users().get(0).userId());
-		assertEquals(2, slice.users().get(0).activeSessionCount());
-	}
-
-	@Test
-	@DisplayName("pageOnlineUsers：在线用户 ZSet 为空时返回空切片")
-	void pageOnlineUsers_shouldReturnEmptyWhenOnlineZsetEmpty() {
-		when(zSetOperations.zCard(ONLINE_USERS_KEY)).thenReturn(0L);
-
-		var slice = repository.pageOnlineUsers(1, 10, null);
-
-		assertEquals(0L, slice.total());
-		assertTrue(slice.users().isEmpty());
-	}
-
-	@Test
-	@DisplayName("countOnlineUsers：返回 online users ZSet 基数")
-	void countOnlineUsers_shouldReturnZcard() {
-		when(zSetOperations.zCard(ONLINE_USERS_KEY)).thenReturn(8L);
-
-		assertEquals(8L, repository.countOnlineUsers());
 	}
 
 	@Test

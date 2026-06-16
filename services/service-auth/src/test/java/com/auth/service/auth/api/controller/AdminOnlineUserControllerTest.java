@@ -2,9 +2,9 @@ package com.auth.service.auth.api.controller;
 
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.auth.application.session.OnlineUserQueryApplicationService;
-import com.auth.service.auth.domain.session.model.query.OnlineUserPageQuery;
-import com.auth.service.auth.domain.session.model.vo.OnlineUserPageVO;
-import com.auth.service.auth.domain.session.model.vo.OnlineUserSummaryVO;
+import com.auth.service.auth.domain.session.query.OnlineUserPageQuery;
+import com.auth.service.auth.domain.session.vo.OnlineUserPageVO;
+import com.auth.service.auth.domain.session.vo.OnlineUserSummaryVO;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

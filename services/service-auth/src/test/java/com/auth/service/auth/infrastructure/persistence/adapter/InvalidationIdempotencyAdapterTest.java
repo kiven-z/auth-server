@@ -2,8 +2,8 @@ package com.auth.service.auth.infrastructure.persistence.adapter;
 
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateResponse;
-import com.auth.service.auth.domain.authorization.invalidation.model.InvalidationIdempotencyGate;
-import com.auth.service.auth.domain.authorization.invalidation.model.InvalidationProcessingMarker;
+import com.auth.service.auth.domain.authorization.invalidation.InvalidationIdempotencyGate;
+import com.auth.service.auth.domain.authorization.invalidation.InvalidationProcessingMarker;
 import com.auth.service.auth.infrastructure.persistence.AuthorizationInvalidationEventMapper;
 import com.auth.service.auth.infrastructure.persistence.projection.AuthorizationInvalidationEventProjection;
 import org.junit.jupiter.api.DisplayName;

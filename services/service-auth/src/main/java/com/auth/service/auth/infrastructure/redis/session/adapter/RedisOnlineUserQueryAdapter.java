@@ -1,8 +1,8 @@
 package com.auth.service.auth.infrastructure.redis.session.adapter;
 
 import com.auth.service.auth.application.port.session.OnlineUserQueryPort;
-import com.auth.service.auth.domain.session.model.OnlineUserPageSlice;
-import com.auth.service.auth.infrastructure.redis.session.RedisUserSessionIndexRepository;
+import com.auth.service.auth.domain.session.OnlineUserPageSlice;
+import com.auth.service.auth.infrastructure.redis.session.RedisOnlineUserIndexReader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -17,14 +17,14 @@ import java.util.Set;
 @Repository
 public class RedisOnlineUserQueryAdapter implements OnlineUserQueryPort {
 
-	private final RedisUserSessionIndexRepository redisUserSessionIndexRepository;
+	private final RedisOnlineUserIndexReader redisOnlineUserIndexReader;
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public OnlineUserPageSlice pageOnlineUsers(int pageIndex, int pageSize, Set<Long> allowedUserIds) {
-		return redisUserSessionIndexRepository.pageOnlineUsers(pageIndex, pageSize, allowedUserIds);
+		return redisOnlineUserIndexReader.pageOnlineUsers(pageIndex, pageSize, allowedUserIds);
 	}
 
 	/**
@@ -32,7 +32,7 @@ public class RedisOnlineUserQueryAdapter implements OnlineUserQueryPort {
 	 */
 	@Override
 	public long countOnlineUsers() {
-		return redisUserSessionIndexRepository.countOnlineUsers();
+		return redisOnlineUserIndexReader.countOnlineUsers();
 	}
 
 }

@@ -2,7 +2,7 @@ package com.auth.service.auth.infrastructure.persistence.adapter;
 
 import cn.hutool.core.collection.CollUtil;
 import com.auth.service.auth.application.port.invalidation.UserInvalidationStateQueryPort;
-import com.auth.service.auth.domain.authorization.invalidation.model.UserInvalidationState;
+import com.auth.service.auth.domain.authorization.invalidation.UserInvalidationState;
 import com.auth.service.auth.infrastructure.persistence.UserMapper;
 import com.auth.service.auth.infrastructure.persistence.projection.UserInvalidationStateProjection;
 import org.springframework.stereotype.Repository;

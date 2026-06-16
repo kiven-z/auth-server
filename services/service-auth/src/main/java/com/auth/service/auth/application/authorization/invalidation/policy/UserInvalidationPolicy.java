@@ -1,8 +1,8 @@
 package com.auth.service.auth.application.authorization.invalidation.policy;
 
 import cn.hutool.core.collection.CollUtil;
-import com.auth.service.auth.domain.authorization.invalidation.model.UserInvalidationBuckets;
-import com.auth.service.auth.domain.authorization.invalidation.model.UserInvalidationState;
+import com.auth.service.auth.domain.authorization.invalidation.UserInvalidationBuckets;
+import com.auth.service.auth.domain.authorization.invalidation.UserInvalidationState;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;

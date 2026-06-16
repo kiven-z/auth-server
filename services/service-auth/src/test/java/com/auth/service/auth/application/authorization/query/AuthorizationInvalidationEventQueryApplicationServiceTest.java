@@ -2,7 +2,7 @@ package com.auth.service.auth.application.authorization.query;
 
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.auth.application.port.invalidation.InvalidationEventQueryPort;
-import com.auth.service.auth.domain.authorization.invalidation.model.InvalidationProcessingMarker;
+import com.auth.service.auth.domain.authorization.invalidation.InvalidationProcessingMarker;
 import com.auth.service.auth.domain.authorization.model.po.AuthorizationInvalidationEventDetailRowPO;
 import com.auth.service.auth.domain.authorization.model.po.AuthorizationInvalidationEventPageRowPO;
 import com.auth.service.auth.domain.authorization.model.po.AuthorizationInvalidationEventStatsPO;

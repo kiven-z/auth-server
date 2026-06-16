@@ -2,7 +2,7 @@ package com.auth.service.auth.application.authorization.ops;
 
 import com.auth.service.auth.application.port.invalidation.InvalidationEventOpsPort;
 import com.auth.service.auth.application.port.invalidation.InvalidationIdempotencyPort;
-import com.auth.service.auth.domain.authorization.invalidation.model.InvalidationProcessingMarker;
+import com.auth.service.auth.domain.authorization.invalidation.InvalidationProcessingMarker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

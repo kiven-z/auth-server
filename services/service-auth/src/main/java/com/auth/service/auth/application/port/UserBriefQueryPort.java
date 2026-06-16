@@ -1,6 +1,6 @@
 package com.auth.service.auth.application.port;
 
-import com.auth.service.auth.domain.session.model.UserOnlineBrief;
+import com.auth.service.auth.domain.session.UserOnlineBrief;
 
 import java.util.Collection;
 import java.util.Map;

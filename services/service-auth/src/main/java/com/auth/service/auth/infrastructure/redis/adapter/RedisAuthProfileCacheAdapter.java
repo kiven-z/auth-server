@@ -29,28 +29,43 @@ public class RedisAuthProfileCacheAdapter implements AuthProfileCachePort {
 		this.objectMapper = objectMapper;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void cacheProfile(@NotNull AuthProfile authProfile) {
 		Long userId = authProfile.getUserId();
 		Assert.notNull(userId, "用户ID不能为空");
+
 		redisTemplate.opsForValue().set(USER_PERM.key(userId), authProfile, USER_PERM.getDefaultTtl());
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Optional<AuthProfile> loadCachedProfile(long userId) {
 		Object value = redisTemplate.opsForValue().get(USER_PERM.key(userId));
+
 		if (value == null) {
 			return Optional.empty();
 		}
+
 		if (value instanceof AuthProfile profile) {
 			return Optional.of(profile);
 		}
-		return Optional.ofNullable(objectMapper.convertValue(value, AuthProfile.class));
+
+		AuthProfile profile = objectMapper.convertValue(value, AuthProfile.class);
+		return Optional.ofNullable(profile);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void evictProfile(long userId) {
-		redisTemplate.delete(USER_PERM.key(userId));
+		String key = USER_PERM.key(userId);
+		redisTemplate.delete(key);
 	}
 
 }

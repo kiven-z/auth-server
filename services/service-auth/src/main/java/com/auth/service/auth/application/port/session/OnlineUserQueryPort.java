@@ -1,6 +1,6 @@
 package com.auth.service.auth.application.port.session;
 
-import com.auth.service.auth.domain.session.model.OnlineUserPageSlice;
+import com.auth.service.auth.domain.session.OnlineUserPageSlice;
 
 import java.util.Set;
 

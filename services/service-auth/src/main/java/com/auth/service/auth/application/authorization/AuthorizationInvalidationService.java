@@ -10,10 +10,10 @@ import com.auth.service.auth.application.port.invalidation.InvalidationIdempoten
 import com.auth.service.auth.application.port.invalidation.UserInvalidationStateQueryPort;
 import com.auth.service.auth.application.port.invalidation.UserPermVersionPort;
 import com.auth.service.auth.config.AuthorizationInvalidationProperties;
-import com.auth.service.auth.domain.authorization.invalidation.model.InvalidationCommand;
-import com.auth.service.auth.domain.authorization.invalidation.model.InvalidationIdempotencyGate;
-import com.auth.service.auth.domain.authorization.invalidation.model.UserInvalidationBuckets;
-import com.auth.service.auth.domain.authorization.invalidation.model.UserInvalidationState;
+import com.auth.service.auth.domain.authorization.invalidation.InvalidationCommand;
+import com.auth.service.auth.domain.authorization.invalidation.InvalidationIdempotencyGate;
+import com.auth.service.auth.domain.authorization.invalidation.UserInvalidationBuckets;
+import com.auth.service.auth.domain.authorization.invalidation.UserInvalidationState;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

@@ -1,6 +1,6 @@
 package com.auth.service.auth.application.port.invalidation;
 
-import com.auth.service.auth.domain.authorization.invalidation.model.UserInvalidationState;
+import com.auth.service.auth.domain.authorization.invalidation.UserInvalidationState;
 
 import java.util.Collection;
 import java.util.List;

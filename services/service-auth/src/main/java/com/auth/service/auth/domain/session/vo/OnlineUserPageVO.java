@@ -1,4 +1,4 @@
-package com.auth.service.auth.domain.session.model.vo;
+package com.auth.service.auth.domain.session.vo;
 
 import com.auth.common.core.annotation.JsonStringFormat;
 import io.swagger.v3.oas.annotations.media.Schema;

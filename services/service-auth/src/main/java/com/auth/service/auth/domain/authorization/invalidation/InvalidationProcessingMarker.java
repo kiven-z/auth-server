@@ -1,4 +1,4 @@
-package com.auth.service.auth.domain.authorization.invalidation.model;
+package com.auth.service.auth.domain.authorization.invalidation;
 
 import lombok.experimental.UtilityClass;
 

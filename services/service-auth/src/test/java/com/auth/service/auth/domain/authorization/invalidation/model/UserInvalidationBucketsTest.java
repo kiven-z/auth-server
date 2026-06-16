@@ -1,5 +1,6 @@
 package com.auth.service.auth.domain.authorization.invalidation.model;
 
+import com.auth.service.auth.domain.authorization.invalidation.UserInvalidationBuckets;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

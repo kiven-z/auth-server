@@ -1,4 +1,4 @@
-package com.auth.service.auth.domain.session.model;
+package com.auth.service.auth.domain.session;
 
 /**
  * 在线会话列表所需的用户展示快照
