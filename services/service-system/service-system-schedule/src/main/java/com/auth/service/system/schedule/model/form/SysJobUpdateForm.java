@@ -28,7 +28,7 @@ public class SysJobUpdateForm implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Schema(title = "主键 ID")
-	@NotBlank(groups = UpdateGroup.class)
+	@NotNull(groups = UpdateGroup.class)
 	private Long id;
 
 	@Schema(title = "Cron 表达式")

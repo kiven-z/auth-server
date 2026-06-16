@@ -244,7 +244,7 @@ class SysJobDefinitionServiceImplTest {
 		dbJob.setStatus(true);
 		dbJob.setStartTime(oldStart);
 		dbJob.setEndTime(oldEnd);
-		when(sysJobMapper.selectById("10")).thenReturn(dbJob);
+		when(sysJobMapper.selectById(10L)).thenReturn(dbJob);
 		doAnswer(invocation -> {
 			SysJobEntity entity = invocation.getArgument(0);
 			entity.setVersion(1L);

@@ -2,6 +2,7 @@ package com.auth.service.system.message.schedule.support;
 
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
+import com.auth.service.system.message.support.MessageDispatchCommandParser;
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Validation;

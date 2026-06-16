@@ -9,6 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.JobDataMap;
@@ -58,13 +59,13 @@ class FeignInvokeJobTest {
 		params.setMethod(BuiltinRemoteHttpMethod.GET);
 		stubJobParams(context, params);
 		when(loadBalancedRestTemplate.exchange(eq("http://auth-service/api/health"), eq(HttpMethod.GET),
-				org.mockito.ArgumentMatchers.<HttpEntity<Void>>any(), eq(String.class)))
+				ArgumentMatchers.any(), eq(String.class)))
 			.thenReturn(ResponseEntity.ok("UP"));
 
 		feignInvokeJob.execute(context);
 
 		verify(loadBalancedRestTemplate).exchange(eq("http://auth-service/api/health"), eq(HttpMethod.GET),
-				org.mockito.ArgumentMatchers.<HttpEntity<Void>>any(), eq(String.class));
+				ArgumentMatchers.any(), eq(String.class));
 	}
 
 	@Test
@@ -81,7 +82,7 @@ class FeignInvokeJobTest {
 		params.setBody("{\"id\":1}");
 		stubJobParams(context, params);
 		when(loadBalancedRestTemplate.exchange(eq("http://order-service/api/internal/sync"), eq(HttpMethod.POST),
-				org.mockito.ArgumentMatchers.<HttpEntity<String>>any(), eq(String.class)))
+				ArgumentMatchers.any(), eq(String.class)))
 			.thenReturn(ResponseEntity.ok("ok"));
 
 		feignInvokeJob.execute(context);
@@ -105,7 +106,7 @@ class FeignInvokeJobTest {
 		params.setMethod(BuiltinRemoteHttpMethod.GET);
 		stubJobParams(context, params);
 		when(loadBalancedRestTemplate.exchange(eq("http://auth-service/api/health"), eq(HttpMethod.GET),
-				org.mockito.ArgumentMatchers.<HttpEntity<Void>>any(), eq(String.class)))
+				ArgumentMatchers.any(), eq(String.class)))
 			.thenReturn(ResponseEntity.ok("UP"));
 
 		feignInvokeJob.execute(context);
@@ -126,7 +127,7 @@ class FeignInvokeJobTest {
 		params.setMethod(BuiltinRemoteHttpMethod.DELETE);
 		stubJobParams(context, params);
 		when(loadBalancedRestTemplate.exchange(eq("http://order-service/api/fail"), eq(HttpMethod.DELETE),
-				org.mockito.ArgumentMatchers.<HttpEntity<Void>>any(), eq(String.class)))
+				ArgumentMatchers.any(), eq(String.class)))
 			.thenThrow(new RuntimeException("connection refused"));
 
 		assertThatThrownBy(() -> feignInvokeJob.execute(context)).isInstanceOf(JobExecutionException.class)

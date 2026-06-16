@@ -64,8 +64,8 @@ public class FeignInvokeJob implements Job {
 					FeignInvokeJobParams.class);
 
 			// 获取serviceName和path
-			String serviceName = Objects.requireNonNull(params.getServiceName(), "serviceName");
-			String path = Objects.requireNonNull(params.getPath(), "path");
+			String serviceName = Objects.requireNonNull(params.getServiceName(), "serviceName").trim();
+			String path = Objects.requireNonNull(params.getPath(), "path").trim();
 			String url = buildServiceUrl(serviceName, path);
 
 			// 获取method

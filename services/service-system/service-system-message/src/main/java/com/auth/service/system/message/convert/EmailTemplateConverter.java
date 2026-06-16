@@ -7,7 +7,7 @@ import com.auth.service.system.message.model.po.EmailTemplatePageRowPO;
 import com.auth.service.system.message.model.vo.EmailTemplateDetailVO;
 import com.auth.service.system.message.model.vo.EmailTemplatePageResponse;
 import com.auth.service.system.message.model.vo.EmailTemplateRequireFieldRow;
-import com.auth.service.system.message.template.MessageTemplateRequireFieldsJsonSupport;
+import com.auth.service.system.message.support.template.MessageTemplateRequireFieldsJsonSupport;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;

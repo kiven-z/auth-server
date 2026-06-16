@@ -5,7 +5,7 @@ import com.auth.module.message.api.channel.MessageSender;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.message.service.MessageDispatchService;
-import com.auth.service.system.message.validation.TemplateMessageCommandValidation;
+import com.auth.service.system.message.support.validation.TemplateMessageCommandValidation;
 import org.springframework.stereotype.Service;
 
 import java.util.EnumMap;

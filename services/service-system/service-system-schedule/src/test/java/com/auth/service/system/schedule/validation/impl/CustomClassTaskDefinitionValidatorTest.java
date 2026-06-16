@@ -67,7 +67,7 @@ class CustomClassTaskDefinitionValidatorTest {
 	@Test
 	@DisplayName("validate：白名单内但类无法加载时应抛出 JOB_CLASS_LOAD_FAILED")
 	void validate_whenClassNotFound_throws() {
-		String className = "com.auth.service.system.schedule.task.example.SpringInjectDemoJob";
+		String className = "com.auth.service.system.schedule.task.example.WhitelistedButMissingJob";
 		when(quartzTaskRegistry.isAllowed(className)).thenReturn(true);
 
 		SysJobEntity job = new SysJobEntity();

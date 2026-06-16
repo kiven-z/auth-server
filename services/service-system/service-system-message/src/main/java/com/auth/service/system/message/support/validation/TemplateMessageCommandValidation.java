@@ -1,4 +1,4 @@
-package com.auth.service.system.message.validation;
+package com.auth.service.system.message.support.validation;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;

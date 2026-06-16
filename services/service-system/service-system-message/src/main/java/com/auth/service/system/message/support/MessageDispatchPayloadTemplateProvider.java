@@ -1,8 +1,8 @@
-package com.auth.service.system.message.schedule.support;
+package com.auth.service.system.message.support;
 
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
-import com.auth.service.system.message.schedule.model.MessageDispatchPayload;
+import com.auth.service.system.message.model.MessageDispatchPayload;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import com.auth.service.system.schedule.support.catalog.SysJobPayloadTemplateProvider;
 import org.springframework.stereotype.Component;
