@@ -3,6 +3,7 @@ package com.auth.service.system.schedule.task.builtin;
 import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
 import com.auth.service.system.schedule.model.jobparams.HttpInvokeJobParams;
 import com.auth.service.system.schedule.task.support.BuiltinJobParamsParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class HttpInvokeJobTest {
 
+	private final ObjectMapper objectMapper = new ObjectMapper();
+
 	@Mock
 	private BuiltinJobParamsParser builtinJobParamsParser;
 
@@ -43,7 +46,7 @@ class HttpInvokeJobTest {
 
 	@BeforeEach
 	void setUp() {
-		httpInvokeJob = new HttpInvokeJob(builtinJobParamsParser, restTemplate);
+		httpInvokeJob = new HttpInvokeJob(builtinJobParamsParser, restTemplate, objectMapper);
 	}
 
 	@Test
@@ -71,14 +74,14 @@ class HttpInvokeJobTest {
 	}
 
 	@Test
-	@DisplayName("execute：POST 应携带 body 发起调用")
-	void execute_invokesPostWithBody() throws JobExecutionException {
+	@DisplayName("execute：POST 应携带 JSON 对象 body 发起调用")
+	void execute_invokesPostWithJsonObjectBody() throws Exception {
 		JobExecutionContext context = mock(JobExecutionContext.class);
 
 		HttpInvokeJobParams params = new HttpInvokeJobParams();
 		params.setMethod(HttpMethod.POST);
 		params.setUrl("https://example.com/api");
-		params.setBody("{\"id\":1}");
+		params.setBody(objectMapper.readTree("{\"id\":1}"));
 		stubJobParams(context, params);
 		when(restTemplate.exchange(eq("https://example.com/api"), eq(HttpMethod.POST),
 				org.mockito.ArgumentMatchers.<HttpEntity<String>>any(), eq(String.class)))

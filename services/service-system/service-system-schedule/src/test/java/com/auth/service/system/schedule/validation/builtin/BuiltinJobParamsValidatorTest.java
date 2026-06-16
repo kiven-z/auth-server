@@ -108,6 +108,21 @@ class BuiltinJobParamsValidatorTest {
 	}
 
 	@Test
+	@DisplayName("集成：HttpInvoke JSON 对象 body 应通过校验")
+	void integration_whenHttpParamsWithJsonObjectBody_passes() {
+		Validator beanValidator = Validation.buildDefaultValidatorFactory().getValidator();
+		BuiltinJobParamsParser parser = new BuiltinJobParamsParser(new ObjectMapper(), beanValidator);
+		BuiltinJobParamsValidator integrationValidator = new BuiltinJobParamsValidator(parser);
+
+		SysJobEntity job = new SysJobEntity();
+		job.setJobClass(HttpInvokeJob.class.getName());
+		job.setJobParams(
+				"{\"version\":1,\"method\":\"POST\",\"url\":\"https://example.com\",\"body\":{\"title\":\"foo\",\"userId\":1}}");
+
+		assertThatCode(() -> integrationValidator.validateIfPresent(job)).doesNotThrowAnyException();
+	}
+
+	@Test
 	@DisplayName("集成：缺少 url 应抛出 SysJobException")
 	void integration_whenUrlMissing_throws() {
 		Validator beanValidator = Validation.buildDefaultValidatorFactory().getValidator();

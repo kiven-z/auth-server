@@ -1,5 +1,6 @@
 package com.auth.service.system.schedule.task.builtin;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -26,6 +27,25 @@ class HttpInvokeJobUrlTest {
 	@DisplayName("buildUrlWithQuery：应拼接 query 参数")
 	void buildUrlWithQuery_whenQueryPresent_appendsParams() {
 		assertThat(HttpInvokeJob.buildUrlWithQuery("https://example.com/api", Map.of("page", "1"))).contains("page=1");
+	}
+
+	@Test
+	@DisplayName("serializeBody：JSON 对象应序列化为 HTTP 文本")
+	void serializeBody_whenJsonObject_returnsJsonText() throws Exception {
+		ObjectMapper objectMapper = new ObjectMapper();
+		String actual = HttpInvokeJob.serializeBody(objectMapper.readTree("{\"title\":\"foo\",\"userId\":1}"),
+				objectMapper);
+
+		assertThat(actual).isEqualTo("{\"title\":\"foo\",\"userId\":1}");
+	}
+
+	@Test
+	@DisplayName("serializeBody：null 或 JSON null 应返回 null")
+	void serializeBody_whenNull_returnsNull() throws Exception {
+		ObjectMapper objectMapper = new ObjectMapper();
+
+		assertThat(HttpInvokeJob.serializeBody(null, objectMapper)).isNull();
+		assertThat(HttpInvokeJob.serializeBody(objectMapper.nullNode(), objectMapper)).isNull();
 	}
 
 }

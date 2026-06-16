@@ -7,6 +7,9 @@ import com.auth.service.system.schedule.annotation.QuartzTask;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import com.auth.service.system.schedule.model.jobparams.HttpInvokeJobParams;
 import com.auth.service.system.schedule.task.support.BuiltinJobParamsParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.Job;
@@ -28,7 +31,7 @@ import java.util.Objects;
 @QuartzTask(name = "HttpInvoke", description = "通用 HTTP 调用：job_params 配置 method、url 与可选 headers/query/body",
 		modes = { SysJobTaskType.CUSTOM_CLASS },
 		example = """
-				{"version":1,"method":"GET","url":"https://example.com/api/health","headers":{"X-Token":"your-token"},"query":{"page":"1"}}
+				{"version":1,"method":"POST","url":"https://example.com/api/items","headers":{"Content-Type":"application/json"},"query": { "userId": 2 },"body":{"id":1}}
 				""")
 @RequiredArgsConstructor
 @Slf4j
@@ -39,13 +42,15 @@ public class HttpInvokeJob implements Job {
 
 	private final RestTemplate restTemplate;
 
+	private final ObjectMapper objectMapper;
+
 	/**
 	 * 将查询参数拼接到 URL
 	 * @param url 原始 URL
 	 * @param query 查询参数
 	 * @return 拼接后的 URL
 	 */
-	static String buildUrlWithQuery(String url, Map<String, String> query) {
+	private String buildUrlWithQuery(String url, Map<String, String> query) {
 		if (MapUtil.isEmpty(query)) {
 			return url;
 		}
@@ -53,6 +58,18 @@ public class HttpInvokeJob implements Job {
 		UrlBuilder builder = UrlBuilder.ofHttp(url);
 		query.forEach(builder::addQuery);
 		return builder.build();
+	}
+
+	/**
+	 * 将 JSON 请求体序列化为 HTTP 原始文本
+	 * @param body JSON 节点
+	 * @return 序列化后的文本；{@code null} 或 JSON null 时返回 {@code null}
+	 */
+	private String serializeBody(JsonNode body) throws JsonProcessingException {
+		if (body == null || body.isNull()) {
+			return null;
+		}
+		return objectMapper.writeValueAsString(body);
 	}
 
 	@Override
@@ -72,7 +89,7 @@ public class HttpInvokeJob implements Job {
 
 			// 发起 HTTP 调用
 			Map<String, String> headers = params.getHeaders();
-			String body = params.getBody();
+			String body = serializeBody(params.getBody());
 			ResponseEntity<String> response = RestTemplateUtil.exchange(restTemplate, url, method, headers, body);
 
 			// 记录响应摘要

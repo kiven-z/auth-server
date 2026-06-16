@@ -1,5 +1,6 @@
 package com.auth.service.system.schedule.model.jobparams;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -42,7 +43,7 @@ public class HttpInvokeJobParams implements VersionedJobParams, Serializable {
 	@Schema(title = "查询参数（拼接到 URL）")
 	private Map<String, String> query;
 
-	@Schema(title = "请求体（原始字符串，如 JSON；GET/DELETE 忽略）")
-	private String body;
+	@Schema(title = "请求体（JSON 对象或数组；GET/DELETE 忽略）")
+	private JsonNode body;
 
 }

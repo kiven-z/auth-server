@@ -74,6 +74,18 @@ class BuiltinJobParamsParserTest {
 	}
 
 	@Test
+	@DisplayName("parseAndValidate：HttpInvokeJobParams body 应反序列化为 JSON 对象")
+	void parseAndValidate_whenHttpInvokeParams_deserializesJsonObjectBody() {
+		HttpInvokeJobParams actual = parser.parseAndValidate(
+				"{\"version\":1,\"method\":\"POST\",\"url\":\"https://example.com\",\"body\":{\"title\":\"foo\",\"userId\":1}}",
+				HttpInvokeJobParams.class);
+
+		assertThat(actual.getBody()).isNotNull();
+		assertThat(actual.getBody().get("title").asText()).isEqualTo("foo");
+		assertThat(actual.getBody().get("userId").asInt()).isEqualTo(1);
+	}
+
+	@Test
 	@DisplayName("requireRawJson + parseAndValidate：应从 JobDataMap 读取并解析 jobParams")
 	void parseAndValidate_fromContext_readsRawJsonFromJobDataMap() {
 		JobExecutionContext context = mock(JobExecutionContext.class);

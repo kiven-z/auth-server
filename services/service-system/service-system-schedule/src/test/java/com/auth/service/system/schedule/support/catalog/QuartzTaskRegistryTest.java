@@ -41,8 +41,8 @@ class QuartzTaskRegistryTest {
 			.findFirst()
 			.orElseThrow();
 
-		assertThat(httpInvoke.getJobParamsExample()).contains("\"method\":\"GET\"");
-		assertThat(httpInvoke.getJobParamsExample()).contains("https://example.com/api/health");
+		assertThat(httpInvoke.getJobParamsExample()).contains("\"method\":\"POST\"");
+		assertThat(httpInvoke.getJobParamsExample()).contains("https://example.com/api/items");
 	}
 
 }
