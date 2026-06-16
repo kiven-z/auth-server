@@ -14,8 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CLASS_LOAD_FAILED;
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CLASS_NOT_WHITELISTED;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CLASS_INVALID;
 
 /**
  * 任务目录服务实现
@@ -50,12 +49,12 @@ public class SysJobTaskCatalogServiceImpl implements SysJobTaskCatalogService {
 		}
 		// 验证类名是否在白名单
 		if (!quartzTaskRegistry.isAllowed(className)) {
-			throw new SysJobException(JOB_CLASS_NOT_WHITELISTED);
+			throw new SysJobException(JOB_CLASS_INVALID, "not in whitelist");
 		}
 		// 解析类名对应的 Bean 名称
 		String beanName = quartzTaskRegistry.resolveBeanName(className);
 		if (CharSequenceUtil.isBlank(beanName)) {
-			throw new SysJobException(JOB_CLASS_NOT_WHITELISTED);
+			throw new SysJobException(JOB_CLASS_INVALID, "not in whitelist");
 		}
 
 		Class<?> targetClass;
@@ -63,7 +62,7 @@ public class SysJobTaskCatalogServiceImpl implements SysJobTaskCatalogService {
 			targetClass = Class.forName(className);
 		}
 		catch (ClassNotFoundException exception) {
-			throw new SysJobException(JOB_CLASS_LOAD_FAILED, exception.getMessage());
+			throw new SysJobException(JOB_CLASS_INVALID, exception.getMessage());
 		}
 
 		// 获取方法列表

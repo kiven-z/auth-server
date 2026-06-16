@@ -13,7 +13,7 @@ import java.lang.reflect.Method;
 import java.util.Objects;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.*;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_INVOKE_TARGET_INVALID;
 import static com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys.BEAN_NAME;
 import static com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys.METHOD_NAME;
 
@@ -42,14 +42,16 @@ public class QuartzBeanInvoker {
 		String nonNullInvokeTarget = Objects.requireNonNull(invokeTarget, "invokeTarget");
 		int dot = nonNullInvokeTarget.indexOf('.');
 		if (dot <= 0 || dot >= invokeTarget.length() - 1) {
-			throw new SysJobException(JOB_INVOKE_TARGET_FORMAT);
+			throw new SysJobException(JOB_INVOKE_TARGET_INVALID,
+					"format must be beanName.method or beanName.method(...)");
 		}
 
 		// 解析beanName和methodName
 		String beanName = nonNullInvokeTarget.substring(0, dot).trim();
 		String tail = nonNullInvokeTarget.substring(dot + 1).trim();
 		if (CharSequenceUtil.isEmpty(tail)) {
-			throw new SysJobException(JOB_INVOKE_TARGET_FORMAT);
+			throw new SysJobException(JOB_INVOKE_TARGET_INVALID,
+					"format must be beanName.method or beanName.method(...)");
 		}
 
 		// 验证beanName是否为空
@@ -62,7 +64,7 @@ public class QuartzBeanInvoker {
 
 		String suffix = ")";
 		if (!tail.endsWith(suffix)) {
-			throw new SysJobException(JOB_INVOKE_TARGET_PAREN_MISMATCH);
+			throw new SysJobException(JOB_INVOKE_TARGET_INVALID, "mismatched parentheses");
 		}
 
 		String methodName = tail.substring(0, lp).trim();
@@ -94,7 +96,8 @@ public class QuartzBeanInvoker {
 		if (unwrapped.length() < t.length()) {
 			return new Object[] { unwrapped };
 		}
-		throw new SysJobException(JOB_INVOKE_PARAM_NOT_SUPPORTED);
+		throw new SysJobException(JOB_INVOKE_TARGET_INVALID,
+				"only no-arg or single string literal parameter is supported");
 	}
 
 	/**

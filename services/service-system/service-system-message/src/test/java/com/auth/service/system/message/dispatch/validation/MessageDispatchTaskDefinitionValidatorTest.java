@@ -14,7 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_PAYLOAD_JSON_INVALID;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CONFIG_INVALID;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -70,7 +70,7 @@ class MessageDispatchTaskDefinitionValidatorTest {
 	void validate_whenParserFails_propagates() {
 		String payloadJson = "bad";
 		when(messageDispatchCommandParser.parseAndValidate(payloadJson))
-			.thenThrow(new SysJobException(JOB_PAYLOAD_JSON_INVALID, "bad"));
+			.thenThrow(new SysJobException(JOB_CONFIG_INVALID, "payload_json", "bad"));
 
 		SysJobEntity job = new SysJobEntity();
 		job.setPayloadJson(payloadJson);

@@ -8,8 +8,7 @@ import com.auth.service.system.schedule.support.catalog.QuartzTaskRegistry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CLASS_LOAD_FAILED;
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CLASS_NOT_WHITELISTED;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CLASS_INVALID;
 
 /**
  * 自定义类任务定义校验器
@@ -34,14 +33,14 @@ public class CustomClassTaskDefinitionValidator implements SysJobTaskTypeDefinit
 		// 校验 job_class 是否在 @QuartzTask 白名单内
 		String jobClass = job.getJobClass();
 		if (!quartzTaskRegistry.isAllowed(jobClass)) {
-			throw new SysJobException(JOB_CLASS_NOT_WHITELISTED);
+			throw new SysJobException(JOB_CLASS_INVALID, "not in whitelist");
 		}
 
 		try {
 			Class.forName(CharSequenceUtil.nullToEmpty(jobClass));
 		}
 		catch (ClassNotFoundException exception) {
-			throw new SysJobException(JOB_CLASS_LOAD_FAILED, exception.getMessage());
+			throw new SysJobException(JOB_CLASS_INVALID, exception.getMessage());
 		}
 
 		// 内置 Job 额外校验 job_params 结构

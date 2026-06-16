@@ -14,8 +14,7 @@ import org.springframework.stereotype.Component;
 import java.util.Set;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_PAYLOAD_JSON_INVALID;
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_PAYLOAD_VERSION_UNSUPPORTED;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CONFIG_INVALID;
 
 /**
  * 解析消息调度载荷
@@ -55,7 +54,8 @@ public class MessageDispatchCommandParser {
 		try {
 			JsonNode root = objectMapper.readTree(payloadJson);
 			if (root == null || !root.has("command")) {
-				throw new SysJobException(JOB_PAYLOAD_JSON_INVALID, "payload must contain version and command");
+				throw new SysJobException(JOB_CONFIG_INVALID, "payload_json",
+						"payload must contain version and command");
 			}
 			MessageDispatchPayload payload = objectMapper.treeToValue(root, MessageDispatchPayload.class);
 			validatePayload(payload);
@@ -65,7 +65,7 @@ public class MessageDispatchCommandParser {
 			throw exception;
 		}
 		catch (Exception exception) {
-			throw new SysJobException(JOB_PAYLOAD_JSON_INVALID, exception.getMessage());
+			throw new SysJobException(JOB_CONFIG_INVALID, "payload_json", exception.getMessage());
 		}
 	}
 
@@ -77,10 +77,11 @@ public class MessageDispatchCommandParser {
 		Set<ConstraintViolation<MessageDispatchPayload>> payloadViolations = validator.validate(payload);
 		if (CollUtil.isNotEmpty(payloadViolations)) {
 			String message = payloadViolations.iterator().next().getMessage();
-			throw new SysJobException(JOB_PAYLOAD_JSON_INVALID, message);
+			throw new SysJobException(JOB_CONFIG_INVALID, "payload_json", message);
 		}
 		if (payload.getVersion() != MessageDispatchPayload.VERSION_1) {
-			throw new SysJobException(JOB_PAYLOAD_VERSION_UNSUPPORTED, String.valueOf(payload.getVersion()));
+			throw new SysJobException(JOB_CONFIG_INVALID, "payload_json",
+					"unsupported version: " + payload.getVersion());
 		}
 	}
 

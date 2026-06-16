@@ -70,7 +70,7 @@ class BuiltinJobParamsValidatorTest {
 	void validateIfPresent_whenParamsInvalid_propagates() {
 		String json = "bad";
 		when(builtinJobParamsParser.parseAndValidate(json, HttpInvokeJobParams.class)).thenThrow(new SysJobException(
-				com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_PARAMS_JSON_INVALID, "bad"));
+				com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CONFIG_INVALID, "job_params", "bad"));
 
 		SysJobEntity job = new SysJobEntity();
 		job.setJobClass(HttpInvokeJob.class.getName());

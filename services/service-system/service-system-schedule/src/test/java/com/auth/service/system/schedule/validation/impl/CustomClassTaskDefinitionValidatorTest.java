@@ -13,8 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CLASS_LOAD_FAILED;
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CLASS_NOT_WHITELISTED;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CLASS_INVALID;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -51,7 +50,7 @@ class CustomClassTaskDefinitionValidatorTest {
 	}
 
 	@Test
-	@DisplayName("validate：不在白名单的 job_class 应抛出 JOB_CLASS_NOT_WHITELISTED")
+	@DisplayName("validate：不在白名单的 job_class 应抛出 JOB_CLASS_INVALID")
 	void validate_whenClassNotWhitelisted_throws() {
 		String className = "com.example.MissingJob";
 		when(quartzTaskRegistry.isAllowed(className)).thenReturn(false);
@@ -61,11 +60,11 @@ class CustomClassTaskDefinitionValidatorTest {
 
 		assertThatThrownBy(() -> validator.validate(job)).isInstanceOf(SysJobException.class)
 			.extracting(ex -> ((SysJobException) ex).getResultCode())
-			.isEqualTo(JOB_CLASS_NOT_WHITELISTED);
+			.isEqualTo(JOB_CLASS_INVALID);
 	}
 
 	@Test
-	@DisplayName("validate：白名单内但类无法加载时应抛出 JOB_CLASS_LOAD_FAILED")
+	@DisplayName("validate：白名单内但类无法加载时应抛出 JOB_CLASS_INVALID")
 	void validate_whenClassNotFound_throws() {
 		String className = "com.auth.service.system.schedule.task.example.WhitelistedButMissingJob";
 		when(quartzTaskRegistry.isAllowed(className)).thenReturn(true);
@@ -75,7 +74,7 @@ class CustomClassTaskDefinitionValidatorTest {
 
 		assertThatThrownBy(() -> validator.validate(job)).isInstanceOf(SysJobException.class)
 			.extracting(ex -> ((SysJobException) ex).getResultCode())
-			.isEqualTo(JOB_CLASS_LOAD_FAILED);
+			.isEqualTo(JOB_CLASS_INVALID);
 	}
 
 }

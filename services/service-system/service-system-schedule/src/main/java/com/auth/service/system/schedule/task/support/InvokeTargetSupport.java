@@ -12,8 +12,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_INVOKE_PARAM_NOT_SUPPORTED;
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_REFLECT_METHOD_NOT_FOUND;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_INVOKE_TARGET_INVALID;
 import static com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys.METHOD_NAME;
 
 /**
@@ -103,13 +102,15 @@ public class InvokeTargetSupport {
 			paramTypes = new Class<?>[] { String.class };
 		}
 		else {
-			throw new SysJobException(JOB_INVOKE_PARAM_NOT_SUPPORTED);
+			throw new SysJobException(JOB_INVOKE_TARGET_INVALID,
+					"only no-arg or single string literal parameter is supported");
 		}
 
 		String signature = formatParameterList(paramTypes);
 		Method method = ReflectionUtils.findMethod(clazz, methodName, paramTypes);
 		if (method == null) {
-			throw new SysJobException(JOB_REFLECT_METHOD_NOT_FOUND, signature, methodName);
+			throw new SysJobException(JOB_INVOKE_TARGET_INVALID,
+					"method not found for signature " + signature + ": " + methodName);
 		}
 		ReflectionUtils.makeAccessible(method);
 		return Objects.requireNonNull(method, METHOD_NAME);

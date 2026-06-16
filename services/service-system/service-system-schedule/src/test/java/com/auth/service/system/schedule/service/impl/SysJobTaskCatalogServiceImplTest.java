@@ -15,7 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CLASS_NOT_WHITELISTED;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CLASS_INVALID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
@@ -81,14 +81,14 @@ class SysJobTaskCatalogServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("listCallableMethods：非白名单类抛出 JOB_CLASS_NOT_WHITELISTED")
+	@DisplayName("listCallableMethods：非白名单类抛出 JOB_CLASS_INVALID")
 	void listCallableMethodsRejectsNonWhitelistedClass() {
 		when(quartzTaskRegistry.isAllowed(DEMO_CLASS)).thenReturn(false);
 
 		assertThatThrownBy(() -> sysJobTaskCatalogService.listCallableMethods(DEMO_CLASS))
 			.isInstanceOf(SysJobException.class)
 			.extracting(ex -> ((SysJobException) ex).getResultCode())
-			.isEqualTo(JOB_CLASS_NOT_WHITELISTED);
+			.isEqualTo(JOB_CLASS_INVALID);
 	}
 
 }

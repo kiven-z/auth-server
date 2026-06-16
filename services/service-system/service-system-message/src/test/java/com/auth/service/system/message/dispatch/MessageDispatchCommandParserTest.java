@@ -14,8 +14,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_PAYLOAD_JSON_INVALID;
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_PAYLOAD_VERSION_UNSUPPORTED;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CONFIG_INVALID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -39,7 +38,7 @@ class MessageDispatchCommandParserTest {
 	}
 
 	@Test
-	@DisplayName("标准载荷缺少 command 时抛出 JOB_PAYLOAD_JSON_INVALID")
+	@DisplayName("标准载荷缺少 command 时抛出 JOB_CONFIG_INVALID")
 	void parseAndValidateReturnsCommandWhenPayloadValid() {
 		String payload = """
 				{
@@ -49,7 +48,7 @@ class MessageDispatchCommandParserTest {
 
 		assertThatThrownBy(() -> parser.parseAndValidate(payload)).isInstanceOf(SysJobException.class)
 			.extracting(ex -> ((SysJobException) ex).getResultCode())
-			.isEqualTo(JOB_PAYLOAD_JSON_INVALID);
+			.isEqualTo(JOB_CONFIG_INVALID);
 	}
 
 	@Test
@@ -82,11 +81,11 @@ class MessageDispatchCommandParserTest {
 	}
 
 	@Test
-	@DisplayName("payload_json 非法 JSON 时抛出 JOB_PAYLOAD_JSON_INVALID")
+	@DisplayName("payload_json 非法 JSON 时抛出 JOB_CONFIG_INVALID")
 	void parseAndValidateThrowsWhenPayloadMalformed() {
 		assertThatThrownBy(() -> parser.parseAndValidate("{")).isInstanceOf(SysJobException.class)
 			.extracting(ex -> ((SysJobException) ex).getResultCode())
-			.isEqualTo(JOB_PAYLOAD_JSON_INVALID);
+			.isEqualTo(JOB_CONFIG_INVALID);
 	}
 
 	@Test
@@ -110,7 +109,7 @@ class MessageDispatchCommandParserTest {
 	}
 
 	@Test
-	@DisplayName("标准载荷版本不支持时抛出 JOB_PAYLOAD_VERSION_UNSUPPORTED")
+	@DisplayName("标准载荷版本不支持时抛出 JOB_CONFIG_INVALID")
 	void parseAndValidateThrowsWhenPayloadVersionUnsupported() {
 		String payload = """
 				{
@@ -125,7 +124,7 @@ class MessageDispatchCommandParserTest {
 
 		assertThatThrownBy(() -> parser.parseAndValidate(payload)).isInstanceOf(SysJobException.class)
 			.extracting(ex -> ((SysJobException) ex).getResultCode())
-			.isEqualTo(JOB_PAYLOAD_VERSION_UNSUPPORTED);
+			.isEqualTo(JOB_CONFIG_INVALID);
 	}
 
 }

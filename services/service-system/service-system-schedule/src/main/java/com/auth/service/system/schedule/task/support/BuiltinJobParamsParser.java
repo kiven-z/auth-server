@@ -15,8 +15,7 @@ import org.springframework.stereotype.Component;
 import java.util.Set;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_PARAMS_JSON_INVALID;
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_PAYLOAD_VERSION_UNSUPPORTED;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CONFIG_INVALID;
 
 /**
  * 内置任务 {@code job_params} 通用解析与 Bean Validation 校验
@@ -56,7 +55,7 @@ public class BuiltinJobParamsParser {
 	private static void assertSupportedVersion(VersionedJobParams versioned) {
 		Integer version = versioned.getVersion();
 		if (version == null || version != VersionedJobParams.VERSION_1) {
-			throw new SysJobException(JOB_PAYLOAD_VERSION_UNSUPPORTED, String.valueOf(version));
+			throw new SysJobException(JOB_CONFIG_INVALID, "job_params", "unsupported version: " + version);
 		}
 	}
 
@@ -78,7 +77,7 @@ public class BuiltinJobParamsParser {
 			Set<ConstraintViolation<T>> violations = validator.validate(params);
 			if (CollUtil.isNotEmpty(violations)) {
 				String message = violations.iterator().next().getMessage();
-				throw new SysJobException(JOB_PARAMS_JSON_INVALID, message);
+				throw new SysJobException(JOB_CONFIG_INVALID, "job_params", message);
 			}
 			if (params instanceof VersionedJobParams versioned) {
 				assertSupportedVersion(versioned);
@@ -89,7 +88,7 @@ public class BuiltinJobParamsParser {
 			throw exception;
 		}
 		catch (Exception exception) {
-			throw new SysJobException(JOB_PARAMS_JSON_INVALID, exception.getMessage());
+			throw new SysJobException(JOB_CONFIG_INVALID, "job_params", exception.getMessage());
 		}
 	}
 
