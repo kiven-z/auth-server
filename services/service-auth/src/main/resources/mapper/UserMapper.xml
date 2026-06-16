@@ -31,13 +31,13 @@
             AND status = 1
         </if>
         <choose>
-            <when test="field.name() == 'USERNAME'">
+            <when test="dimension.name() == 'USERNAME'">
                 AND username = #{value}
             </when>
-            <when test="field.name() == 'EMAIL'">
+            <when test="dimension.name() == 'EMAIL'">
                 AND email = #{value}
             </when>
-            <when test="field.name() == 'PHONE'">
+            <when test="dimension.name() == 'PHONE'">
                 AND phone = #{value}
             </when>
         </choose>

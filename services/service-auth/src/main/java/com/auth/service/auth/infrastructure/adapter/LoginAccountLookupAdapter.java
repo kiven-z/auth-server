@@ -2,8 +2,6 @@ package com.auth.service.auth.infrastructure.adapter;
 
 import com.auth.service.auth.domain.authentication.enums.CredentialDimension;
 import com.auth.service.auth.domain.authentication.model.LoginAccount;
-import com.auth.service.auth.infrastructure.persistence.UserCredentialField;
-import com.auth.service.auth.infrastructure.persistence.UserCredentialQueries;
 import com.auth.service.auth.infrastructure.persistence.UserMapper;
 import org.springframework.stereotype.Component;
 
@@ -24,34 +22,23 @@ public class LoginAccountLookupAdapter {
 	}
 
 	/**
-	 * 将凭证维度转换为用户凭证字段
-	 * @param dimension 凭证维度
-	 * @return 用户凭证字段
-	 */
-	private static UserCredentialField toField(CredentialDimension dimension) {
-		return UserCredentialField.valueOf(dimension.name());
-	}
-
-	/**
-	 * 根据凭证维度查询登录账户
+	 * 根据凭证维度查询登录账户（仅过滤已删除用户，禁用/锁定由策略层校验）
 	 * @param dimension 凭证维度
 	 * @param value 凭证值
 	 * @return 登录账户
 	 */
 	public Optional<LoginAccount> findForLogin(CredentialDimension dimension, String value) {
-		return Optional.ofNullable(UserCredentialQueries.forLogin(userMapper, toField(dimension), value))
-			.map(LoginAccount::from);
+		return Optional.ofNullable(userMapper.selectByCredential(dimension, value, false)).map(LoginAccount::from);
 	}
 
 	/**
-	 * 根据凭证维度查询当前有效的登录账户
+	 * 根据凭证维度查询当前有效的登录账户（未删除且 status 正常）
 	 * @param dimension 凭证维度
 	 * @param value 凭证值
 	 * @return 登录账户
 	 */
 	public Optional<LoginAccount> findActiveOnly(CredentialDimension dimension, String value) {
-		return Optional.ofNullable(UserCredentialQueries.activeOnly(userMapper, toField(dimension), value))
-			.map(LoginAccount::from);
+		return Optional.ofNullable(userMapper.selectByCredential(dimension, value, true)).map(LoginAccount::from);
 	}
 
 }

@@ -26,41 +26,65 @@ public class CredentialGatewayImpl implements CredentialGateway {
 
 	private final LoginFailureRateLimiter loginFailureRateLimiter;
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Optional<LoginAccount> findForLogin(CredentialDimension dimension, String value) {
 		return loginAccountLookupAdapter.findForLogin(dimension, value);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Optional<LoginAccount> findActiveOnly(CredentialDimension dimension, String value) {
 		return loginAccountLookupAdapter.findActiveOnly(dimension, value);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public String getStoredDigest(CredentialDimension dimension, String target) {
 		return redisLoginVerificationCodeAdapter.getStoredDigest(dimension, target);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void deleteCode(CredentialDimension dimension, String target) {
 		redisLoginVerificationCodeAdapter.deleteCode(dimension, target);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void storeDigest(CredentialDimension dimension, String target, String digestHex16) {
 		redisLoginVerificationCodeAdapter.storeDigest(dimension, target, digestHex16);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void assertNotLocked(Long userId) {
 		loginFailureRateLimiter.assertNotLocked(userId);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public int recordFailure(Long userId) {
 		return loginFailureRateLimiter.recordFailure(userId);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void recordSuccess(Long userId) {
 		loginFailureRateLimiter.recordSuccess(userId);
