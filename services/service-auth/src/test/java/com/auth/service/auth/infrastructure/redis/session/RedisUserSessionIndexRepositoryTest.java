@@ -192,7 +192,7 @@ class RedisUserSessionIndexRepositoryTest {
 	}
 
 	@Test
-	@DisplayName("pageOnlineUsers：支持用户名筛选")
+	@DisplayName("pageOnlineUsers：支持用户 ID 筛选")
 	void pageOnlineUsers_shouldApplyUserFilter() {
 		when(zSetOperations.zCard(ONLINE_USERS_KEY)).thenReturn(1L);
 		when(zSetOperations.reverseRange(ONLINE_USERS_KEY, 0L, 63L))

@@ -44,6 +44,6 @@ public class HttpInvokeJobParams implements VersionedJobParams, Serializable {
 	private Map<String, String> query;
 
 	@Schema(title = "请求体（JSON 对象或数组；GET/DELETE 忽略）")
-	private JsonNode body;
+	private transient JsonNode body;
 
 }

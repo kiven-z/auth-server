@@ -48,7 +48,6 @@ public class UserInvalidationPolicy {
 		// 仅驱逐缓存的用户ID集合
 		Set<Long> evictOnlyUserIds = new HashSet<>();
 
-		// 遍历用户状态快照
 		for (UserInvalidationState state : states) {
 			// 如果用户状态为空或用户ID为空，则跳过
 			if (state.userId() == null) {

@@ -19,11 +19,17 @@ public class RedisOnlineUserQueryAdapter implements OnlineUserQueryPort {
 
 	private final RedisUserSessionIndexRepository redisUserSessionIndexRepository;
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public OnlineUserPageSlice pageOnlineUsers(int pageIndex, int pageSize, Set<Long> allowedUserIds) {
 		return redisUserSessionIndexRepository.pageOnlineUsers(pageIndex, pageSize, allowedUserIds);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public long countOnlineUsers() {
 		return redisUserSessionIndexRepository.countOnlineUsers();

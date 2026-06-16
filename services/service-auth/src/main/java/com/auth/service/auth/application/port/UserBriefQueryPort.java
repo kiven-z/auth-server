@@ -3,7 +3,6 @@ package com.auth.service.auth.application.port;
 import com.auth.service.auth.domain.session.model.UserOnlineBrief;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -19,12 +18,5 @@ public interface UserBriefQueryPort {
 	 * @return 用户 ID 到展示快照的映射
 	 */
 	Map<Long, UserOnlineBrief> findByIds(Collection<Long> userIds);
-
-	/**
-	 * 按用户名模糊匹配查询用户 ID
-	 * @param username 用户名关键字
-	 * @return 匹配的用户 ID 列表
-	 */
-	List<Long> findIdsByUsernameLike(String username);
 
 }

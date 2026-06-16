@@ -20,9 +20,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link OnlineUserQueryApplicationService} 单元测试
@@ -41,8 +42,8 @@ class OnlineUserQueryApplicationServiceTest {
 	private OnlineUserQueryApplicationService onlineUserQueryApplicationService;
 
 	@Test
-	@DisplayName("在线用户分页：无用户名筛选时 allowedUserIds 为 null")
-	void getOnlineUserPage_shouldQueryAllWhenUsernameBlank() {
+	@DisplayName("在线用户分页：无用户筛选时 allowedUserIds 为 null")
+	void getOnlineUserPage_shouldQueryAllWhenUserIdBlank() {
 		OnlineUserPageQuery query = new OnlineUserPageQuery();
 		query.setPageIndex(1);
 		query.setPageSize(20);
@@ -56,7 +57,6 @@ class OnlineUserQueryApplicationServiceTest {
 		var page = onlineUserQueryApplicationService.getOnlineUserPage(query);
 
 		verify(onlineUserQueryPort).pageOnlineUsers(1, 20, null);
-		verify(userBriefQueryPort, never()).findIdsByUsernameLike(any());
 		assertEquals(1L, page.getTotal());
 		assertEquals(1, page.getList().size());
 		assertEquals("alice", page.getList().get(0).getUsername());
@@ -64,25 +64,10 @@ class OnlineUserQueryApplicationServiceTest {
 	}
 
 	@Test
-	@DisplayName("在线用户分页：用户名筛选无匹配时返回空且不访问 Redis 分页")
-	void getOnlineUserPage_shouldReturnEmptyWhenUsernameFilterMisses() {
+	@DisplayName("在线用户分页：传入 userId 时按单用户筛选")
+	void getOnlineUserPage_shouldPassAllowedUserIdsWhenUserIdProvided() {
 		OnlineUserPageQuery query = new OnlineUserPageQuery();
-		query.setUsername("nobody");
-		when(userBriefQueryPort.findIdsByUsernameLike("nobody")).thenReturn(List.of());
-
-		var page = onlineUserQueryApplicationService.getOnlineUserPage(query);
-
-		assertEquals(0L, page.getTotal());
-		assertTrue(page.getList().isEmpty());
-		verify(onlineUserQueryPort, never()).pageOnlineUsers(any(Integer.class), any(Integer.class), any());
-	}
-
-	@Test
-	@DisplayName("在线用户分页：用户名筛选有匹配时传入 allowedUserIds")
-	void getOnlineUserPage_shouldPassAllowedUserIdsWhenUsernameProvided() {
-		OnlineUserPageQuery query = new OnlineUserPageQuery();
-		query.setUsername("ali");
-		when(userBriefQueryPort.findIdsByUsernameLike("ali")).thenReturn(List.of(TestConstants.USER_ID));
+		query.setUserId(TestConstants.USER_ID);
 		when(onlineUserQueryPort.pageOnlineUsers(1, 30, Set.of(TestConstants.USER_ID)))
 			.thenReturn(new OnlineUserPageSlice(0L, List.of()));
 

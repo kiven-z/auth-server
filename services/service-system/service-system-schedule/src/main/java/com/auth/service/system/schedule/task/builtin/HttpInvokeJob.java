@@ -50,7 +50,7 @@ public class HttpInvokeJob implements Job {
 	 * @param query 查询参数
 	 * @return 拼接后的 URL
 	 */
-	private String buildUrlWithQuery(String url, Map<String, String> query) {
+	static String buildUrlWithQuery(String url, Map<String, String> query) {
 		if (MapUtil.isEmpty(query)) {
 			return url;
 		}
@@ -63,9 +63,10 @@ public class HttpInvokeJob implements Job {
 	/**
 	 * 将 JSON 请求体序列化为 HTTP 原始文本
 	 * @param body JSON 节点
+	 * @param objectMapper JSON 序列化器
 	 * @return 序列化后的文本；{@code null} 或 JSON null 时返回 {@code null}
 	 */
-	private String serializeBody(JsonNode body) throws JsonProcessingException {
+	static String serializeBody(JsonNode body, ObjectMapper objectMapper) throws JsonProcessingException {
 		if (body == null || body.isNull()) {
 			return null;
 		}
@@ -89,7 +90,7 @@ public class HttpInvokeJob implements Job {
 
 			// 发起 HTTP 调用
 			Map<String, String> headers = params.getHeaders();
-			String body = serializeBody(params.getBody());
+			String body = serializeBody(params.getBody(), objectMapper);
 			ResponseEntity<String> response = RestTemplateUtil.exchange(restTemplate, url, method, headers, body);
 
 			// 记录响应摘要

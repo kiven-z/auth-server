@@ -125,12 +125,14 @@ public class RedisUserSessionIndexRepository {
 	 * 在线用户分页（按 lastLoginAt 倒序；无活跃会话时清理 ZSet 残留）
 	 * @param pageIndex 页码（从 1 开始）
 	 * @param pageSize 每页条数
-	 * @param allowedUserIds 用户名筛选后的用户 ID 集合；{@code null} 表示不过滤用户
+	 * @param allowedUserIds 用户 ID 筛选集合；{@code null} 表示不过滤用户
 	 * @return 分页切片
 	 */
 	public OnlineUserPageSlice pageOnlineUsers(int pageIndex, int pageSize, Set<Long> allowedUserIds) {
 		int normalizedPageIndex = Math.max(1, pageIndex);
 		int normalizedPageSize = Math.min(Math.max(1, pageSize), MAX_PAGE_SIZE);
+
+		// 根据用户名筛选后的用户 ID 集合过滤在线用户
 		LongPredicate filter = userId -> allowedUserIds == null || allowedUserIds.contains(userId);
 		OnlineUserScanResult scanResult = scanOnlineUsers(filter, normalizedPageIndex, normalizedPageSize);
 		return new OnlineUserPageSlice(scanResult.matchedCount(), scanResult.pageRecords());

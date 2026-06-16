@@ -1,7 +1,5 @@
 package com.auth.service.auth.application.session;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.auth.application.port.UserBriefQueryPort;
 import com.auth.service.auth.application.port.session.OnlineUserQueryPort;
@@ -42,14 +40,7 @@ public class OnlineUserQueryApplicationService {
 		int pageIndex = Objects.requireNonNullElse(query.getPageIndex(), 1);
 		int pageSize = Objects.requireNonNullElse(query.getPageSize(), 30);
 
-		Set<Long> allowedUserIds = null;
-		if (CharSequenceUtil.isNotBlank(query.getUsername())) {
-			List<Long> matchedUserIds = userBriefQueryPort.findIdsByUsernameLike(query.getUsername());
-			if (CollUtil.isEmpty(matchedUserIds)) {
-				return PageResponse.of((long) pageIndex, (long) pageSize, 0L, List.of());
-			}
-			allowedUserIds = Set.copyOf(matchedUserIds);
-		}
+		Set<Long> allowedUserIds = query.getUserId() != null ? Set.of(query.getUserId()) : null;
 
 		OnlineUserPageSlice slice = onlineUserQueryPort.pageOnlineUsers(pageIndex, pageSize, allowedUserIds);
 		Set<Long> userIds = slice.users().stream().map(OnlineUserEntry::userId).collect(Collectors.toSet());

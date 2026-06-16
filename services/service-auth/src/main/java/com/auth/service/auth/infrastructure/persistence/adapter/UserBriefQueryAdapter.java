@@ -23,6 +23,9 @@ public class UserBriefQueryAdapter implements UserBriefQueryPort {
 
 	private final UserMapper userMapper;
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Map<Long, UserOnlineBrief> findByIds(Collection<Long> userIds) {
 		if (CollUtil.isEmpty(userIds)) {
@@ -40,11 +43,6 @@ public class UserBriefQueryAdapter implements UserBriefQueryPort {
 			.collect(Collectors.toMap(UserEntity::getId,
 					entity -> new UserOnlineBrief(entity.getId(), entity.getUsername(), entity.getNickname()),
 					(left, right) -> left));
-	}
-
-	@Override
-	public List<Long> findIdsByUsernameLike(String username) {
-		return userMapper.selectIdsByUsernameLike(username);
 	}
 
 }

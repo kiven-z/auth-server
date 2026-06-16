@@ -23,7 +23,7 @@ public class OnlineUserPageQuery extends PageQueryRequest implements Serializabl
 	@Serial
 	private static final long serialVersionUID = 1L;
 
-	@Schema(title = "用户名（模糊匹配）")
-	private String username;
+	@Schema(title = "用户 ID")
+	private Long userId;
 
 }
