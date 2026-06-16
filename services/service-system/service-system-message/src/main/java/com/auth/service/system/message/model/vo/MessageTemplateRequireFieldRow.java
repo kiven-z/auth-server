@@ -11,14 +11,14 @@ import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * 邮件模板变量声明（与 require_fields JSON 数组中单条结构一致）
+ * 消息模板变量声明（与 require_fields JSON 数组中单条结构一致）
  *
  * @author Bunny
  */
-@Schema(name = "EmailTemplateRequireFieldRow", title = "邮件模板变量声明")
+@Schema(name = "MessageTemplateRequireFieldRow", title = "消息模板变量声明")
 @Getter
 @Setter
-public class EmailTemplateRequireFieldRow implements Serializable {
+public class MessageTemplateRequireFieldRow implements Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 1L;

@@ -1,5 +1,6 @@
 package com.auth.service.system.schedule.task.builtin;
 
+import cn.hutool.core.net.url.UrlBuilder;
 import com.auth.common.web.resttemplate.RestTemplateUtil;
 import com.auth.service.system.schedule.annotation.QuartzTask;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
@@ -13,7 +14,6 @@ import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -44,17 +44,6 @@ public class FeignInvokeJob implements Job {
 		this.loadBalancedRestTemplate = loadBalancedRestTemplate;
 	}
 
-	/**
-	 * 拼接负载均衡调用地址：{@code http://{serviceName}{path}}
-	 * @param serviceName 微服务名
-	 * @param path 请求路径
-	 * @return 完整 URL
-	 */
-	private static @NonNull String buildServiceUrl(@NonNull String serviceName, @NonNull String path) {
-		String normalizedPath = path.startsWith("/") ? path : "/" + path;
-		return "http://" + serviceName + normalizedPath;
-	}
-
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		try {
@@ -66,7 +55,7 @@ public class FeignInvokeJob implements Job {
 			// 获取serviceName和path
 			String serviceName = Objects.requireNonNull(params.getServiceName(), "serviceName").trim();
 			String path = Objects.requireNonNull(params.getPath(), "path").trim();
-			String url = buildServiceUrl(serviceName, path);
+			String url = UrlBuilder.of().setScheme("http").setHost(serviceName).addPath(path).build();
 
 			// 获取method
 			BuiltinRemoteHttpMethod builtinMethod = Objects.requireNonNull(params.getMethod(), "method");

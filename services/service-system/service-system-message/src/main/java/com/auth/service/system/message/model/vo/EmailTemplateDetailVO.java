@@ -42,7 +42,7 @@ public class EmailTemplateDetailVO extends BaseResponse implements Serializable 
 	private String content;
 
 	@Schema(name = "requireFields", title = "变量声明列表")
-	private List<EmailTemplateRequireFieldRow> requireFields;
+	private List<MessageTemplateRequireFieldRow> requireFields;
 
 	@Schema(name = "priority", title = "发送优先级")
 	private Integer priority;

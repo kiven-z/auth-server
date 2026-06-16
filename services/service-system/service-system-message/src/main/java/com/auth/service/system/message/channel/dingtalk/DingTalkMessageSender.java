@@ -9,6 +9,7 @@ import com.auth.module.message.api.model.dingtalk.DingTalkChannelOptions;
 import com.auth.module.message.api.model.dingtalk.DingTalkMessageType;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.message.channel.dingtalk.client.DingTalkWorkNoticeClient;
+import com.auth.service.system.message.model.channel.dingtalk.RenderedDingTalkNotice;
 import com.auth.service.system.message.support.ChannelOptionsSupport;
 import org.springframework.stereotype.Component;
 
@@ -47,6 +48,7 @@ public class DingTalkMessageSender implements MessageSender {
 		if (options != null && options.getMessageType() != null) {
 			return options.getMessageType();
 		}
+
 		return rendered.messageType() != null ? rendered.messageType() : DingTalkMessageType.TEXT;
 	}
 
@@ -60,6 +62,7 @@ public class DingTalkMessageSender implements MessageSender {
 		if (options != null && CharSequenceUtil.isNotBlank(options.getTitle())) {
 			return options.getTitle();
 		}
+
 		return rendered.title();
 	}
 
@@ -84,6 +87,7 @@ public class DingTalkMessageSender implements MessageSender {
 	 * @return 渲染结果
 	 */
 	private RenderedDingTalkNotice resolveContent(TemplateMessageCommand command) {
+		// 有自定义消息体，解析自定义正文
 		Boolean customBody = command.getCustomBody();
 		if (BooleanUtil.isTrue(customBody)) {
 			String body = command.getBody();
@@ -91,6 +95,7 @@ public class DingTalkMessageSender implements MessageSender {
 				throw new SystemBusinessException(PARAM_REQUIRED, "钉钉消息正文");
 			}
 
+			// 解析渠道扩展参数
 			DingTalkChannelOptions options = ChannelOptionsSupport.asDingTalk(command.getOptions());
 			DingTalkMessageType type = options != null && options.getMessageType() != null ? options.getMessageType()
 					: DingTalkMessageType.TEXT;
@@ -98,6 +103,7 @@ public class DingTalkMessageSender implements MessageSender {
 			return new RenderedDingTalkNotice(type, title, command.getBody());
 		}
 
+		// 没有自定义消息体，解析模板渲染
 		Map<String, Object> variables = Optional.ofNullable(command.getVariables()).orElseGet(HashMap::new);
 		return dingTalkTemplatePipeline.render(command.getTemplateCode(), variables);
 	}

@@ -4,8 +4,8 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.message.channel.email.EmailSendDTO;
-import com.auth.service.system.message.channel.email.RenderedEmail;
+import com.auth.service.system.message.model.channel.email.EmailSendDTO;
+import com.auth.service.system.message.model.channel.email.RenderedEmail;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -67,9 +67,12 @@ public class MimeMailTransport {
 	 * @throws MessagingException 邮件发送异常
 	 */
 	private void sendMime(EmailSendDTO emailSendDTO, String subject, String body) throws MessagingException {
+		// 验证发送请求
 		validate(emailSendDTO, subject, body);
 
+		// 创建 MIME 消息
 		MimeMessage message = mailSender.createMimeMessage();
+
 		MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 		helper.setFrom(defaultFrom);
 		helper.setTo(emailSendDTO.getTo().toArray(String[]::new));
@@ -87,6 +90,7 @@ public class MimeMailTransport {
 		}
 		helper.setSentDate(new Date());
 
+		// 解析附件
 		List<MultipartFile> attachmentFiles = attachmentResolver.resolve(emailSendDTO.getAttachments());
 		addAttachments(helper, attachmentFiles);
 

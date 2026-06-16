@@ -15,7 +15,7 @@ import com.auth.service.system.message.model.po.EmailTemplatePageRowPO;
 import com.auth.service.system.message.model.query.EmailTemplateQuery;
 import com.auth.service.system.message.model.vo.EmailTemplateDetailVO;
 import com.auth.service.system.message.model.vo.EmailTemplatePageResponse;
-import com.auth.service.system.message.model.vo.EmailTemplateRequireFieldRow;
+import com.auth.service.system.message.model.vo.MessageTemplateRequireFieldRow;
 import com.auth.service.system.message.service.MessageDispatchService;
 import com.auth.service.system.message.service.SysEmailTemplateService;
 import com.auth.service.system.message.support.template.FreemarkerTemplateRenderer;
@@ -158,7 +158,7 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<MessageTemplateMapp
 			return null;
 		}
 
-		List<EmailTemplateRequireFieldRow> rows = MessageTemplateRequireFieldsJsonSupport
+		List<MessageTemplateRequireFieldRow> rows = MessageTemplateRequireFieldsJsonSupport
 			.parse(entity.getRequireFields());
 		Map<String, Object> model = MessageTemplateRequireFieldsJsonSupport.toExampleModel(rows);
 		return FreemarkerTemplateRenderer.processTemplate(entity.getTemplateName(), entity.getBodyContent(), model);
@@ -190,7 +190,7 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<MessageTemplateMapp
 			throw new SystemBusinessException(DATA_NOT_EXIST);
 		}
 
-		List<EmailTemplateRequireFieldRow> rows = MessageTemplateRequireFieldsJsonSupport
+		List<MessageTemplateRequireFieldRow> rows = MessageTemplateRequireFieldsJsonSupport
 			.parse(entity.getRequireFields());
 		Map<String, Object> model = MessageTemplateRequireFieldsJsonSupport.toExampleModel(rows);
 

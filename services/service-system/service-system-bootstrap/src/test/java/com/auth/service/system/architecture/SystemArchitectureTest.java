@@ -113,8 +113,8 @@ class SystemArchitectureTest {
 		.dependOnClassesThat()
 		.resideInAnyPackage("com.auth.service.system.message.controller..", "com.auth.service.system.message.channel..",
 				"com.auth.service.system.message.config..", "com.auth.service.system.message.convert..",
-				"com.auth.service.system.message.mapper..", "com.auth.service.system.message.model..",
-				"com.auth.service.system.message.template..", "com.auth.service.system.message.validation..");
+				"com.auth.service.system.message.dispatch..", "com.auth.service.system.message.mapper..",
+				"com.auth.service.system.message.model..", "com.auth.service.system.message.support..");
 
 	private static final String MESSAGE = "com.auth.service.system.message..";
 
@@ -141,43 +141,17 @@ class SystemArchitectureTest {
 		.dependOnClassesThat()
 		.resideInAPackage(ADMIN);
 
-	private static final String SCHEDULE_ROOT = "com.auth.service.system.schedule";
-
-	/**
-	 * message 实现 schedule 任务 SPI 时允许依赖的 schedule 子包（扩展点与共享契约类型）。
-	 */
-	private static final DescribedPredicate<JavaClass> SCHEDULE_SPI_FOR_MESSAGE = new DescribedPredicate<>(
-			"schedule SPI packages allowed for message task integration") {
-		@Override
-		public boolean test(JavaClass javaClass) {
-			String pkg = javaClass.getPackageName();
-			return pkg.startsWith(SCHEDULE_ROOT + ".task") || pkg.startsWith(SCHEDULE_ROOT + ".catalog")
-					|| pkg.startsWith(SCHEDULE_ROOT + ".validation") || pkg.startsWith(SCHEDULE_ROOT + ".model")
-					|| pkg.startsWith(SCHEDULE_ROOT + ".exception");
-		}
-	};
-
 	private static final DescribedPredicate<JavaClass> FORBIDDEN_DEPENDENCIES_FOR_MESSAGE = new DescribedPredicate<>(
-			"admin, authorization, or schedule internals outside SPI") {
+			"admin or authorization") {
 		@Override
 		public boolean test(JavaClass javaClass) {
 			String pkg = javaClass.getPackageName();
-			if (pkg.startsWith("com.auth.service.system.admin")) {
-				return true;
-			}
-			if (pkg.startsWith(AUTHORIZATION_ROOT)) {
-				return true;
-			}
-			if (!pkg.startsWith(SCHEDULE_ROOT)) {
-				return false;
-			}
-			return !SCHEDULE_SPI_FOR_MESSAGE.test(javaClass);
+			return pkg.startsWith("com.auth.service.system.admin") || pkg.startsWith(AUTHORIZATION_ROOT);
 		}
 	};
 
 	/**
-	 * message 不得依赖 admin / authorization；依赖 schedule 时仅限任务 SPI（task、catalog、validation
-	 * 及共享 model/exception）。
+	 * message 不得依赖 admin / authorization；与 schedule 的集成由 Maven 模块依赖约束。
 	 */
 	@ArchTest
 	static final ArchRule message_must_not_depend_on_other_domains = noClasses().that()

@@ -4,10 +4,10 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.json.JSONUtil;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
-import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.message.mapper.MessageTemplateMapper;
+import com.auth.service.system.message.model.channel.sms.dypns.DypnsVerifyCodeSendPayload;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
-import com.auth.service.system.message.model.vo.EmailTemplateRequireFieldRow;
+import com.auth.service.system.message.model.vo.MessageTemplateRequireFieldRow;
+import com.auth.service.system.message.support.template.MessageTemplateLoader;
 import com.auth.service.system.message.support.template.MessageTemplateRequireFieldsJsonSupport;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.auth.service.system.message.exception.MessageResultCode.TEMPLATE_NOT_FOUND;
 import static com.auth.service.system.message.exception.MessageResultCode.TEMPLATE_VARS_MISSING;
 
 /**
@@ -27,18 +26,25 @@ import static com.auth.service.system.message.exception.MessageResultCode.TEMPLA
 @Component
 public class DypnsVerifyCodeTemplatePipeline {
 
-	private final MessageTemplateMapper messageTemplateMapper;
+	private final MessageTemplateLoader messageTemplateLoader;
 
-	public DypnsVerifyCodeTemplatePipeline(MessageTemplateMapper messageTemplateMapper) {
-		this.messageTemplateMapper = messageTemplateMapper;
+	public DypnsVerifyCodeTemplatePipeline(MessageTemplateLoader messageTemplateLoader) {
+		this.messageTemplateLoader = messageTemplateLoader;
 	}
 
-	private static String buildTemplateParam(List<EmailTemplateRequireFieldRow> requireFields,
+	/**
+	 * 构建模板参数
+	 * @param requireFields 必填字段
+	 * @param variables 变量
+	 * @return 模板参数
+	 */
+	private static String buildTemplateParam(List<MessageTemplateRequireFieldRow> requireFields,
 			Map<String, Object> variables) {
 		Map<String, String> paramMap = new LinkedHashMap<>();
 
+		// 有必填字段，遍历必填字段
 		if (CollUtil.isNotEmpty(requireFields)) {
-			for (EmailTemplateRequireFieldRow field : requireFields) {
+			for (MessageTemplateRequireFieldRow field : requireFields) {
 				Object value = variables.get(field.getKey());
 				paramMap.put(field.getKey(), value == null ? "" : String.valueOf(value));
 			}
@@ -50,21 +56,27 @@ public class DypnsVerifyCodeTemplatePipeline {
 		return JSONUtil.toJsonStr(paramMap);
 	}
 
+	/**
+	 * 准备发送参数
+	 * @param command 命令
+	 * @return 发送参数
+	 */
 	public DypnsVerifyCodeSendPayload prepare(TemplateMessageCommand command) {
 		String sceneCode = command.getTemplateCode();
 
-		MessageTemplateEntity template = messageTemplateMapper.selectEnabledBySceneCodeAndChannel(sceneCode,
-				MessageChannel.SMS_ALIYUN_DYPNS.name());
-		if (template == null) {
-			throw new SystemBusinessException(TEMPLATE_NOT_FOUND, MessageChannel.SMS_ALIYUN_DYPNS.name(), sceneCode);
-		}
+		// 加载模板
+		MessageTemplateEntity template = messageTemplateLoader.loadEnabled(MessageChannel.SMS_ALIYUN_DYPNS, sceneCode);
 
+		// 获取变量
 		Map<String, Object> variables = Optional.ofNullable(command.getVariables()).orElseGet(LinkedHashMap::new);
-		List<EmailTemplateRequireFieldRow> requireFields = MessageTemplateRequireFieldsJsonSupport
+
+		// 解析必填字段
+		List<MessageTemplateRequireFieldRow> requireFields = MessageTemplateRequireFieldsJsonSupport
 			.parse(template.getRequireFields());
 		MessageTemplateRequireFieldsJsonSupport.assertVariablesPresent(requireFields, variables, TEMPLATE_VARS_MISSING,
 				MessageChannel.SMS_ALIYUN_DYPNS.name());
 
+		// 构建模板参数
 		String templateParam = buildTemplateParam(requireFields, variables);
 		return new DypnsVerifyCodeSendPayload(template.getProviderTemplateCode(), templateParam);
 	}

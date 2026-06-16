@@ -70,31 +70,37 @@ public class DingTalkAccessTokenClient {
 			return current.token();
 		}
 
+		// 获取clientId和clientSecret
 		String clientId = dingTalkProperties.getClientId();
 		String clientSecret = dingTalkProperties.getClientSecret();
 
+		// 创建请求头
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		Map<String, String> body = Map.of("appKey", clientId, "appSecret", clientSecret);
 		HttpEntity<Map<String, String>> entity = new HttpEntity<>(body, headers);
 
 		try {
+			// 发起请求
 			ResponseEntity<String> response = restTemplate.postForEntity(OAUTH_TOKEN_URL, entity, String.class);
 			String responseBody = response.getBody();
 			if (CharSequenceUtil.isBlank(responseBody)) {
 				throw new SystemBusinessException(PARAM_REQUIRED, "OAuth 响应体");
 			}
 
+			// 解析响应体
 			JSONObject json = JSONUtil.parseObj(responseBody);
 			String accessToken = json.getStr("accessToken");
 			if (CharSequenceUtil.isBlank(accessToken)) {
 				throw new SystemBusinessException(PARAM_REQUIRED, "accessToken");
 			}
 
+			// 计算过期时间
 			Long expireIn = json.getLong("expireIn");
 			long expireSeconds = expireIn != null && expireIn > 0 ? expireIn : 7200L;
-
 			Instant expiresAt = Instant.now().plusSeconds(expireSeconds);
+
+			// 缓存token
 			cachedToken.set(new CachedToken(accessToken, expiresAt));
 			log.debug("DingTalk accessToken refreshed, expiresIn={}s", expireSeconds);
 			return accessToken;

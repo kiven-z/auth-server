@@ -4,6 +4,9 @@ import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.channel.MessageSender;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.service.system.message.channel.email.transport.MimeMailTransport;
+import com.auth.service.system.message.convert.TemplateMessageCommandConverter;
+import com.auth.service.system.message.model.channel.email.EmailSendDTO;
+import com.auth.service.system.message.model.channel.email.RenderedEmail;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -27,11 +30,17 @@ public class EmailMessageSender implements MessageSender {
 		this.mimeMailTransport = mimeMailTransport;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public MessageChannel channel() {
 		return MessageChannel.EMAIL;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void sendByTemplate(TemplateMessageCommand command) {
 		EmailSendDTO emailSendDTO = TemplateMessageCommandConverter.toEmailDto(command);

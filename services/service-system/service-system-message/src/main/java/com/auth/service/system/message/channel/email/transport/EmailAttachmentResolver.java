@@ -63,6 +63,7 @@ public class EmailAttachmentResolver {
 	 * @return 可随信发送的二进制内容
 	 */
 	private byte[] resolveBytes(AttachmentDTO attachment) {
+		// 有Base64编码，解析为二进制内容
 		if (CharSequenceUtil.isNotBlank(attachment.getBase64())) {
 			try {
 				return Base64.decode(attachment.getBase64());
@@ -71,27 +72,32 @@ public class EmailAttachmentResolver {
 				throw new SystemBusinessException(OPERATION_FAILED, "Attachment Base64 decode", e.getMessage());
 			}
 		}
+
+		// 有字节数组，直接返回
 		if (attachment.getBytes() != null && attachment.getBytes().length > 0) {
 			return attachment.getBytes();
 		}
-		if (CharSequenceUtil.isNotBlank(attachment.getUrl())) {
-			try {
-				ResponseEntity<byte[]> response = restTemplate.getForEntity(attachment.getUrl(), byte[].class);
-				if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-					return response.getBody();
-				}
-				throw new SystemBusinessException(OPERATION_FAILED, "Attachment download",
-						"HTTP " + response.getStatusCode().value());
-			}
-			catch (SystemBusinessException e) {
-				throw e;
-			}
-			catch (Exception e) {
-				log.error("Failed to download attachment from URL", e);
-				throw new SystemBusinessException(OPERATION_FAILED, "Attachment download", e.getMessage());
-			}
+
+		if (CharSequenceUtil.isBlank(attachment.getUrl())) {
+			return new byte[0];
 		}
-		return new byte[0];
+
+		// 有URL，下载为二进制内容
+		try {
+			ResponseEntity<byte[]> response = restTemplate.getForEntity(attachment.getUrl(), byte[].class);
+			if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+				return response.getBody();
+			}
+			throw new SystemBusinessException(OPERATION_FAILED, "Attachment download",
+					"HTTP " + response.getStatusCode().value());
+		}
+		catch (SystemBusinessException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			log.error("Failed to download attachment from URL", e);
+			throw new SystemBusinessException(OPERATION_FAILED, "Attachment download", e.getMessage());
+		}
 	}
 
 }

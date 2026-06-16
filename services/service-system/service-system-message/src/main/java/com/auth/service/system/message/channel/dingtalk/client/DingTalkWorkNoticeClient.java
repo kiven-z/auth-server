@@ -66,23 +66,28 @@ public class DingTalkWorkNoticeClient {
 
 		Long agentId = dingTalkProperties.getAgentId();
 
+		// 解析消息类型
 		DingTalkMessageType resolvedType = messageType != null ? messageType
 				: dingTalkProperties.getDefaultMessageType();
 		String accessToken = accessTokenClient.getAccessToken();
 		String useridList = userIds.stream().filter(CharSequenceUtil::isNotBlank).collect(Collectors.joining(","));
 
+		// 构建请求体
 		Map<String, Object> requestBody = Map.of("agent_id", agentId, "userid_list", useridList, "msg",
 				buildMsgJson(resolvedType, title, content));
 
+		// 构建请求URL
 		String url = UriComponentsBuilder.fromUriString(WORK_NOTICE_URL)
 			.queryParam("access_token", accessToken)
 			.toUriString();
 
+		// 构建请求头
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
 
 		try {
+			// 发起请求
 			ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
 			assertSendSuccess(response.getBody(), agentId, useridList);
 			log.debug("DingTalk work notice sent, agentId={}, userIds={}", agentId, useridList);
@@ -93,6 +98,13 @@ public class DingTalkWorkNoticeClient {
 		}
 	}
 
+	/**
+	 * 构建消息JSON
+	 * @param messageType 消息类型
+	 * @param title 标题
+	 * @param content 内容
+	 * @return 消息JSON
+	 */
 	private JSONObject buildMsgJson(DingTalkMessageType messageType, String title, String content) {
 		JSONObject payload = new JSONObject();
 		String msgType;
@@ -116,6 +128,12 @@ public class DingTalkWorkNoticeClient {
 		return msg;
 	}
 
+	/**
+	 * 断言发送成功
+	 * @param responseBody 响应体
+	 * @param agentId 代理ID
+	 * @param useridList 用户ID列表
+	 */
 	private void assertSendSuccess(String responseBody, Long agentId, String useridList) {
 		if (CharSequenceUtil.isBlank(responseBody)) {
 			throw new SystemBusinessException(PARAM_REQUIRED, "响应体");

@@ -20,6 +20,13 @@ public class FreemarkerTemplateRenderer {
 
 	public static final Configuration CONFIGURATION = createConfiguration();
 
+	/**
+	 * 渲染模板
+	 * @param templateName 模板名称
+	 * @param templateContent 模板内容
+	 * @param dataModel 数据模型
+	 * @return 渲染后的模板
+	 */
 	public static String processTemplate(String templateName, String templateContent, Object dataModel) {
 		try {
 			Template template = new Template(templateName, templateContent, CONFIGURATION);
@@ -34,6 +41,10 @@ public class FreemarkerTemplateRenderer {
 		}
 	}
 
+	/**
+	 * 创建配置
+	 * @return 配置
+	 */
 	private static Configuration createConfiguration() {
 		try {
 			Configuration cfg = new Configuration(Configuration.VERSION_2_3_31);

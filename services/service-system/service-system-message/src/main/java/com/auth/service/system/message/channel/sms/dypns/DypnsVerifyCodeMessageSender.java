@@ -5,6 +5,8 @@ import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.channel.MessageSender;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.message.channel.sms.dypns.transport.AliyunDypnsTransport;
+import com.auth.service.system.message.model.channel.sms.dypns.DypnsVerifyCodeSendPayload;
 import org.springframework.stereotype.Component;
 
 import static com.auth.service.system.message.exception.MessageResultCode.SMS_CUSTOM_BODY_NOT_SUPPORTED;
@@ -19,19 +21,25 @@ public class DypnsVerifyCodeMessageSender implements MessageSender {
 
 	private final DypnsVerifyCodeTemplatePipeline dypnsVerifyCodeTemplatePipeline;
 
-	private final AliyunDypnsVerifyCodeSender aliyunDypnsVerifyCodeSender;
+	private final AliyunDypnsTransport aliyunDypnsTransport;
 
 	public DypnsVerifyCodeMessageSender(DypnsVerifyCodeTemplatePipeline dypnsVerifyCodeTemplatePipeline,
-			AliyunDypnsVerifyCodeSender aliyunDypnsVerifyCodeSender) {
+			AliyunDypnsTransport aliyunDypnsTransport) {
 		this.dypnsVerifyCodeTemplatePipeline = dypnsVerifyCodeTemplatePipeline;
-		this.aliyunDypnsVerifyCodeSender = aliyunDypnsVerifyCodeSender;
+		this.aliyunDypnsTransport = aliyunDypnsTransport;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public MessageChannel channel() {
 		return MessageChannel.SMS_ALIYUN_DYPNS;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void sendByTemplate(TemplateMessageCommand command) {
 		if (BooleanUtil.isTrue(command.getCustomBody())) {
@@ -40,8 +48,7 @@ public class DypnsVerifyCodeMessageSender implements MessageSender {
 
 		DypnsVerifyCodeSendPayload prepared = dypnsVerifyCodeTemplatePipeline.prepare(command);
 		for (String phone : command.getTargets()) {
-			aliyunDypnsVerifyCodeSender.sendVerifyCode(phone, prepared.providerTemplateCode(),
-					prepared.templateParam());
+			aliyunDypnsTransport.sendVerifyCode(phone, prepared.providerTemplateCode(), prepared.templateParam());
 		}
 	}
 

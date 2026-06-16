@@ -14,8 +14,6 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -47,7 +45,7 @@ public class HttpInvokeJob implements Job {
 	 * @param query 查询参数
 	 * @return 拼接后的 URL
 	 */
-	static @NonNull String buildUrlWithQuery(@NonNull String url, @Nullable Map<String, String> query) {
+	static String buildUrlWithQuery(String url, Map<String, String> query) {
 		if (MapUtil.isEmpty(query)) {
 			return url;
 		}

@@ -6,7 +6,7 @@ import com.auth.service.system.message.model.form.EmailTemplateForm;
 import com.auth.service.system.message.model.po.EmailTemplatePageRowPO;
 import com.auth.service.system.message.model.vo.EmailTemplateDetailVO;
 import com.auth.service.system.message.model.vo.EmailTemplatePageResponse;
-import com.auth.service.system.message.model.vo.EmailTemplateRequireFieldRow;
+import com.auth.service.system.message.model.vo.MessageTemplateRequireFieldRow;
 import com.auth.service.system.message.support.template.MessageTemplateRequireFieldsJsonSupport;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -32,7 +32,7 @@ public interface EmailTemplateConverter {
 	 * @return 变量声明列表
 	 */
 	@Named("parseRequireFields")
-	default List<EmailTemplateRequireFieldRow> parseRequireFields(String json) {
+	default List<MessageTemplateRequireFieldRow> parseRequireFields(String json) {
 		return MessageTemplateRequireFieldsJsonSupport.parse(json);
 	}
 

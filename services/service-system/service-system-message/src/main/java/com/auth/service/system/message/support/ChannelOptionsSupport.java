@@ -1,13 +1,12 @@
 package com.auth.service.system.message.support;
 
-import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.ChannelOptions;
 import com.auth.module.message.api.model.dingtalk.DingTalkChannelOptions;
 import com.auth.module.message.api.model.email.EmailChannelOptions;
 import lombok.experimental.UtilityClass;
 
 /**
- * {@link ChannelOptions} 类型安全访问
+ * 渠道扩展参数类型转换
  *
  * @author Bunny
  */
@@ -36,24 +35,6 @@ public class ChannelOptionsSupport {
 			return dingTalk;
 		}
 		return null;
-	}
-
-	/**
-	 * 判断渠道与扩展参数类型是否匹配（options 为空时视为匹配）
-	 * @param channel 发送渠道
-	 * @param options 渠道扩展参数
-	 * @return 是否匹配
-	 */
-	public static boolean matches(MessageChannel channel, ChannelOptions options) {
-		if (channel == null || options == null) {
-			return true;
-		}
-
-		return switch (channel) {
-			case EMAIL -> options instanceof EmailChannelOptions;
-			case DING_TALK -> options instanceof DingTalkChannelOptions;
-			case SMS_ALIYUN_DYPNS, IN_APP -> false;
-		};
 	}
 
 }

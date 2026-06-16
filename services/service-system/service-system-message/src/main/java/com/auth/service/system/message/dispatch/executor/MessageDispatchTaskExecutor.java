@@ -1,8 +1,7 @@
-package com.auth.service.system.message.support.executor;
+package com.auth.service.system.message.dispatch.executor;
 
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.service.system.message.service.MessageDispatchService;
-import com.auth.service.system.message.support.MessageDispatchCommandParser;
 import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import com.auth.service.system.schedule.task.executor.SysJobTaskExecutor;
@@ -24,11 +23,17 @@ public class MessageDispatchTaskExecutor implements SysJobTaskExecutor {
 
 	private final MessageDispatchService messageDispatchService;
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public SysJobTaskType taskType() {
 		return SysJobTaskType.MESSAGE_DISPATCH;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		try {

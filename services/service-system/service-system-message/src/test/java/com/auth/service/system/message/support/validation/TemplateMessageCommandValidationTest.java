@@ -1,11 +1,10 @@
-package com.auth.service.system.message.validation;
+package com.auth.service.system.message.support.validation;
 
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.message.api.model.dingtalk.DingTalkChannelOptions;
 import com.auth.module.message.api.model.email.EmailChannelOptions;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.message.support.validation.TemplateMessageCommandValidation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;

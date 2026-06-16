@@ -1,8 +1,7 @@
-package com.auth.service.system.message.schedule.support;
+package com.auth.service.system.message.dispatch;
 
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.service.system.message.model.MessageDispatchPayload;
-import com.auth.service.system.message.support.MessageDispatchPayloadTemplateProvider;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -1,6 +1,6 @@
-package com.auth.service.system.message.support.validation;
+package com.auth.service.system.message.dispatch.validation;
 
-import com.auth.service.system.message.support.MessageDispatchCommandParser;
+import com.auth.service.system.message.dispatch.executor.MessageDispatchCommandParser;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import com.auth.service.system.schedule.validation.task.SysJobTaskTypeDefinitionValidator;
@@ -20,11 +20,17 @@ public class MessageDispatchTaskDefinitionValidator implements SysJobTaskTypeDef
 		this.messageDispatchCommandParser = messageDispatchCommandParser;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public SysJobTaskType taskType() {
 		return SysJobTaskType.MESSAGE_DISPATCH;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void validate(SysJobEntity job) {
 		messageDispatchCommandParser.parseAndValidate(job.getPayloadJson());

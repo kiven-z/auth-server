@@ -4,7 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemResultCode;
-import com.auth.service.system.message.model.vo.EmailTemplateRequireFieldRow;
+import com.auth.service.system.message.model.vo.MessageTemplateRequireFieldRow;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,11 +31,13 @@ public class MessageTemplateRequireFieldsJsonSupport {
 	 * @param rows 变量列表
 	 * @return JSON 字符串
 	 */
-	public static String toJson(List<EmailTemplateRequireFieldRow> rows) {
+	public static String toJson(List<MessageTemplateRequireFieldRow> rows) {
 		if (rows == null) {
 			throw new SystemBusinessException(DATA_INVALID, "require_fields");
 		}
+
 		validate(rows);
+
 		try {
 			return MAPPER.writeValueAsString(rows);
 		}
@@ -46,14 +48,17 @@ public class MessageTemplateRequireFieldsJsonSupport {
 
 	/**
 	 * 解析必填变量声明 JSON，校验结构与 key 唯一性
+	 * @param json 必填变量声明 JSON
+	 * @return 必填变量声明列表
 	 */
-	public static List<EmailTemplateRequireFieldRow> parse(String json) {
+	public static List<MessageTemplateRequireFieldRow> parse(String json) {
 		if (CharSequenceUtil.isBlank(json)) {
 			return Collections.emptyList();
 		}
+
 		try {
-			List<EmailTemplateRequireFieldRow> rows = MAPPER.readValue(json,
-					MAPPER.getTypeFactory().constructCollectionType(List.class, EmailTemplateRequireFieldRow.class));
+			List<MessageTemplateRequireFieldRow> rows = MAPPER.readValue(json,
+					MAPPER.getTypeFactory().constructCollectionType(List.class, MessageTemplateRequireFieldRow.class));
 			validate(rows);
 			return rows;
 		}
@@ -68,14 +73,16 @@ public class MessageTemplateRequireFieldsJsonSupport {
 	/**
 	 * 业务校验：列表非空、key 非空且唯一、exampleValue 非空
 	 * @param rows 变量列表
+	 * @throws SystemBusinessException 如果变量列表为空、key 为空、exampleValue 为空、key 重复
 	 */
-	public static void validate(List<EmailTemplateRequireFieldRow> rows) {
+	public static void validate(List<MessageTemplateRequireFieldRow> rows) {
 		if (CollUtil.isEmpty(rows)) {
 			return;
 		}
 
+		// 校验变量列表是否为空、key 是否为空、exampleValue 是否为空、key 是否重复
 		Set<String> keys = new HashSet<>();
-		for (EmailTemplateRequireFieldRow row : rows) {
+		for (MessageTemplateRequireFieldRow row : rows) {
 			if (row == null || CharSequenceUtil.isBlank(row.getKey())) {
 				throw new SystemBusinessException(PARAM_REQUIRED, "Variable key");
 			}
@@ -94,14 +101,16 @@ public class MessageTemplateRequireFieldsJsonSupport {
 	 * @param variables 实际变量
 	 * @return 缺失的 key 列表
 	 */
-	public static List<String> findMissingKeys(List<EmailTemplateRequireFieldRow> requireFields,
+	public static List<String> findMissingKeys(List<MessageTemplateRequireFieldRow> requireFields,
 			Map<String, Object> variables) {
 		if (CollUtil.isEmpty(requireFields)) {
 			return List.of();
 		}
+
+		// 如果 variables 为空，则返回空列表
 		Map<String, Object> safeVariables = variables != null ? variables : Map.of();
 		return requireFields.stream()
-			.map(EmailTemplateRequireFieldRow::getKey)
+			.map(MessageTemplateRequireFieldRow::getKey)
 			.filter(key -> !safeVariables.containsKey(key))
 			.toList();
 	}
@@ -113,7 +122,7 @@ public class MessageTemplateRequireFieldsJsonSupport {
 	 * @param missingCode 变量缺失时的业务码（邮件/短信/钉钉各自传入）
 	 * @param channel 渠道名（写入 i18n 占位 {0}）
 	 */
-	public static void assertVariablesPresent(List<EmailTemplateRequireFieldRow> requireFields,
+	public static void assertVariablesPresent(List<MessageTemplateRequireFieldRow> requireFields,
 			Map<String, Object> variables, SystemResultCode missingCode, String channel) {
 		List<String> missingKeys = findMissingKeys(requireFields, variables);
 		if (CollUtil.isNotEmpty(missingKeys)) {
@@ -133,14 +142,16 @@ public class MessageTemplateRequireFieldsJsonSupport {
 
 	/**
 	 * 用各字段的 exampleValue 组装预览/示例数据模型
+	 * @param rows 变量列表
+	 * @return 预览/示例数据模型
 	 */
-	public static Map<String, Object> toExampleModel(List<EmailTemplateRequireFieldRow> rows) {
+	public static Map<String, Object> toExampleModel(List<MessageTemplateRequireFieldRow> rows) {
 		if (rows == null) {
 			throw new SystemBusinessException(DATA_INVALID, "require_fields");
 		}
 		validate(rows);
 		Map<String, Object> model = new LinkedHashMap<>();
-		for (EmailTemplateRequireFieldRow row : rows) {
+		for (MessageTemplateRequireFieldRow row : rows) {
 			model.put(row.getKey(), MAPPER.convertValue(row.getExampleValue(), Object.class));
 		}
 		return model;

@@ -6,9 +6,10 @@ import com.auth.module.message.api.model.dingtalk.DingTalkMessageType;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.message.config.DingTalkProperties;
 import com.auth.service.system.message.exception.TemplateRenderException;
-import com.auth.service.system.message.mapper.MessageTemplateMapper;
+import com.auth.service.system.message.model.channel.dingtalk.RenderedDingTalkNotice;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
 import com.auth.service.system.message.support.template.FreemarkerTemplateRenderer;
+import com.auth.service.system.message.support.template.MessageTemplateLoader;
 import com.auth.service.system.message.support.template.MessageTemplateRequireFieldsJsonSupport;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -18,7 +19,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
-import static com.auth.service.system.message.exception.MessageResultCode.*;
+import static com.auth.service.system.message.exception.MessageResultCode.DING_TALK_RENDER_FAILED;
+import static com.auth.service.system.message.exception.MessageResultCode.TEMPLATE_VARS_MISSING;
 
 /**
  * 钉钉模板加载、变量校验与渲染
@@ -29,13 +31,13 @@ import static com.auth.service.system.message.exception.MessageResultCode.*;
 @Component
 public class DingTalkTemplatePipeline {
 
-	private final MessageTemplateMapper messageTemplateMapper;
+	private final MessageTemplateLoader messageTemplateLoader;
 
 	private final DingTalkProperties dingTalkProperties;
 
-	public DingTalkTemplatePipeline(MessageTemplateMapper messageTemplateMapper,
+	public DingTalkTemplatePipeline(MessageTemplateLoader messageTemplateLoader,
 			DingTalkProperties dingTalkProperties) {
-		this.messageTemplateMapper = messageTemplateMapper;
+		this.messageTemplateLoader = messageTemplateLoader;
 		this.dingTalkProperties = dingTalkProperties;
 	}
 
@@ -46,11 +48,7 @@ public class DingTalkTemplatePipeline {
 	 * @return 渲染结果
 	 */
 	public RenderedDingTalkNotice render(String sceneCode, Map<String, Object> variables) {
-		MessageTemplateEntity template = messageTemplateMapper.selectEnabledBySceneCodeAndChannel(sceneCode,
-				MessageChannel.DING_TALK.name());
-		if (template == null) {
-			throw new SystemBusinessException(TEMPLATE_NOT_FOUND, MessageChannel.DING_TALK.name(), sceneCode);
-		}
+		MessageTemplateEntity template = messageTemplateLoader.loadEnabled(MessageChannel.DING_TALK, sceneCode);
 
 		Map<String, Object> safeVariables = Optional.ofNullable(variables).orElseGet(HashMap::new);
 		MessageTemplateRequireFieldsJsonSupport.assertVariablesPresent(template.getRequireFields(), safeVariables,
@@ -64,6 +62,8 @@ public class DingTalkTemplatePipeline {
 
 	/**
 	 * 模板上的消息类型优先，无效或缺失时用渠道默认
+	 * @param template 模板
+	 * @return 消息类型
 	 */
 	private DingTalkMessageType resolveMessageType(MessageTemplateEntity template) {
 		if (CharSequenceUtil.isNotBlank(template.getImMessageType())) {
@@ -78,11 +78,19 @@ public class DingTalkTemplatePipeline {
 		return dingTalkProperties.getDefaultMessageType();
 	}
 
+	/**
+	 * 渲染可选字段
+	 * @param templateKey 模板键
+	 * @param templateContent 模板内容
+	 * @param variables 变量
+	 * @return 渲染后的字段
+	 */
 	private String renderOptionalField(String templateKey, String templateContent, Map<String, Object> variables) {
-		if (CharSequenceUtil.isBlank(templateContent)) {
-			return null;
-		}
 		try {
+			if (CharSequenceUtil.isBlank(templateContent)) {
+				return null;
+			}
+
 			return FreemarkerTemplateRenderer.processTemplate(templateKey, templateContent, variables);
 		}
 		catch (TemplateRenderException e) {
@@ -90,11 +98,18 @@ public class DingTalkTemplatePipeline {
 		}
 	}
 
+	/**
+	 * 渲染正文
+	 * @param template 模板
+	 * @param variables 变量
+	 * @return 渲染后的正文
+	 */
 	private String renderBody(MessageTemplateEntity template, Map<String, Object> variables) {
-		if (CharSequenceUtil.isBlank(template.getBodyContent())) {
-			throw new SystemBusinessException(PARAM_REQUIRED, "钉钉消息正文");
-		}
 		try {
+			if (CharSequenceUtil.isBlank(template.getBodyContent())) {
+				throw new SystemBusinessException(PARAM_REQUIRED, "钉钉消息正文");
+			}
+
 			return FreemarkerTemplateRenderer.processTemplate(template.getTemplateName(), template.getBodyContent(),
 					variables);
 		}

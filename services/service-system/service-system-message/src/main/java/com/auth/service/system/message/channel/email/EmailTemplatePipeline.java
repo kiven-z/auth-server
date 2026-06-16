@@ -3,9 +3,10 @@ package com.auth.service.system.message.channel.email;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.message.exception.TemplateRenderException;
-import com.auth.service.system.message.mapper.MessageTemplateMapper;
+import com.auth.service.system.message.model.channel.email.RenderedEmail;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
 import com.auth.service.system.message.support.template.FreemarkerTemplateRenderer;
+import com.auth.service.system.message.support.template.MessageTemplateLoader;
 import com.auth.service.system.message.support.template.MessageTemplateRequireFieldsJsonSupport;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +15,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_FAILED;
-import static com.auth.service.system.message.exception.MessageResultCode.TEMPLATE_NOT_FOUND;
 import static com.auth.service.system.message.exception.MessageResultCode.TEMPLATE_VARS_MISSING;
 
 /**
@@ -25,10 +25,10 @@ import static com.auth.service.system.message.exception.MessageResultCode.TEMPLA
 @Component
 public class EmailTemplatePipeline {
 
-	private final MessageTemplateMapper messageTemplateMapper;
+	private final MessageTemplateLoader messageTemplateLoader;
 
-	public EmailTemplatePipeline(MessageTemplateMapper messageTemplateMapper) {
-		this.messageTemplateMapper = messageTemplateMapper;
+	public EmailTemplatePipeline(MessageTemplateLoader messageTemplateLoader) {
+		this.messageTemplateLoader = messageTemplateLoader;
 	}
 
 	/**
@@ -38,11 +38,7 @@ public class EmailTemplatePipeline {
 	 * @return 渲染结果
 	 */
 	public RenderedEmail render(String templateCode, Map<String, Object> variables) {
-		MessageTemplateEntity template = messageTemplateMapper.selectEnabledBySceneCodeAndChannel(templateCode,
-				MessageChannel.EMAIL.name());
-		if (template == null) {
-			throw new SystemBusinessException(TEMPLATE_NOT_FOUND, MessageChannel.EMAIL.name(), templateCode);
-		}
+		MessageTemplateEntity template = messageTemplateLoader.loadEnabled(MessageChannel.EMAIL, templateCode);
 		Map<String, Object> safeVariables = Optional.ofNullable(variables).orElseGet(HashMap::new);
 		MessageTemplateRequireFieldsJsonSupport.assertVariablesPresent(template.getRequireFields(), safeVariables,
 				TEMPLATE_VARS_MISSING, MessageChannel.EMAIL.name());
@@ -51,6 +47,12 @@ public class EmailTemplatePipeline {
 		return new RenderedEmail(subject, body);
 	}
 
+	/**
+	 * 渲染主题
+	 * @param template 模板
+	 * @param variables 变量
+	 * @return 渲染后的主题
+	 */
 	private String renderSubject(MessageTemplateEntity template, Map<String, Object> variables) {
 		try {
 			return FreemarkerTemplateRenderer.processTemplate(template.getTemplateName() + "_subject",
@@ -61,6 +63,12 @@ public class EmailTemplatePipeline {
 		}
 	}
 
+	/**
+	 * 渲染正文
+	 * @param template 模板
+	 * @param variables 变量
+	 * @return 渲染后的正文
+	 */
 	private String renderContent(MessageTemplateEntity template, Map<String, Object> variables) {
 		try {
 			return FreemarkerTemplateRenderer.processTemplate(template.getTemplateName(), template.getBodyContent(),
