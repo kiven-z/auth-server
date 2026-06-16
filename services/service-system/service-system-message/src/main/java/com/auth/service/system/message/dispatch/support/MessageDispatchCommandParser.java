@@ -1,4 +1,4 @@
-package com.auth.service.system.message.dispatch.executor;
+package com.auth.service.system.message.dispatch.support;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;

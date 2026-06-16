@@ -1,6 +1,7 @@
 package com.auth.service.system.message.dispatch.executor;
 
 import com.auth.module.message.api.command.TemplateMessageCommand;
+import com.auth.service.system.message.dispatch.support.MessageDispatchCommandParser;
 import com.auth.service.system.message.service.MessageDispatchService;
 import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;

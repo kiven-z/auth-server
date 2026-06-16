@@ -2,12 +2,10 @@ package com.auth.service.system.schedule.service.impl;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.schedule.exception.SysJobException;
-import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import com.auth.service.system.schedule.model.vo.QuartzTaskClassVO;
 import com.auth.service.system.schedule.model.vo.QuartzTaskMethodVO;
 import com.auth.service.system.schedule.service.SysJobTaskCatalogService;
 import com.auth.service.system.schedule.support.catalog.QuartzTaskRegistry;
-import com.auth.service.system.schedule.support.catalog.SysJobPayloadTemplateRegistry;
 import com.auth.service.system.schedule.task.support.InvokeTargetSupport;
 import org.springframework.stereotype.Service;
 
@@ -29,12 +27,8 @@ public class SysJobTaskCatalogServiceImpl implements SysJobTaskCatalogService {
 
 	private final QuartzTaskRegistry quartzTaskRegistry;
 
-	private final SysJobPayloadTemplateRegistry sysJobPayloadTemplateRegistry;
-
-	public SysJobTaskCatalogServiceImpl(QuartzTaskRegistry quartzTaskRegistry,
-			SysJobPayloadTemplateRegistry sysJobPayloadTemplateRegistry) {
+	public SysJobTaskCatalogServiceImpl(QuartzTaskRegistry quartzTaskRegistry) {
 		this.quartzTaskRegistry = quartzTaskRegistry;
-		this.sysJobPayloadTemplateRegistry = sysJobPayloadTemplateRegistry;
 	}
 
 	/**
@@ -81,15 +75,6 @@ public class SysJobTaskCatalogServiceImpl implements SysJobTaskCatalogService {
 			methodList.add(InvokeTargetSupport.toMethodCatalog(beanName, method));
 		}
 		return methodList;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Object resolvePayloadTemplate(String taskType) {
-		SysJobTaskType resolve = SysJobTaskType.resolve(taskType);
-		return sysJobPayloadTemplateRegistry.buildTemplate(resolve);
 	}
 
 }

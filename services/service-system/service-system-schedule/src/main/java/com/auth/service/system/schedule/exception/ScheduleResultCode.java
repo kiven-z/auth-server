@@ -107,12 +107,6 @@ public enum ScheduleResultCode implements SystemResultCode {
 			"system.job.circuit_breaker.pause_failed"),
 
 	/**
-	 * 指定任务类型无 payload 模板提供者（{0}=taskType）
-	 */
-	JOB_PAYLOAD_TEMPLATE_UNAVAILABLE(404, 247, "JOB_PAYLOAD_TEMPLATE_UNAVAILABLE",
-			"system.job.payload_template.unavailable"),
-
-	/**
 	 * 任务正在执行或排队中，禁止立即执行
 	 */
 	JOB_BUSY(422, 248, "JOB_BUSY", "system.job.busy"),

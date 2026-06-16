@@ -46,12 +46,4 @@ public class SysJobTaskCatalogController {
 		return Result.success(data);
 	}
 
-	@Operation(summary = "任务 payload 模板")
-	@PreAuthorize("@auth.decide('sysJob:query')")
-	@GetMapping("payload-template")
-	public Result<Object> payloadTemplate(@RequestParam("taskType") String taskType) {
-		Object data = sysJobTaskCatalogService.resolvePayloadTemplate(taskType);
-		return Result.success(data);
-	}
-
 }
