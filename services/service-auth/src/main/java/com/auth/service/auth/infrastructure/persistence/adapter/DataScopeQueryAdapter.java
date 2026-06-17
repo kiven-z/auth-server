@@ -1,12 +1,11 @@
 package com.auth.service.auth.infrastructure.persistence.adapter;
 
-import com.auth.service.auth.application.authorization.datascope.RoleScopeRow;
-import com.auth.service.auth.application.authorization.datascope.UserScopeRow;
 import com.auth.service.auth.application.port.authorization.DataScopeQueryPort;
-import com.auth.service.auth.infrastructure.persistence.DeptClosureMapper;
-import com.auth.service.auth.infrastructure.persistence.RoleScopeMapper;
-import com.auth.service.auth.infrastructure.persistence.UserScopeMapper;
-import com.auth.service.auth.infrastructure.persistence.projection.RoleScopeProjection;
+import com.auth.service.auth.application.port.authorization.model.RoleScopeRow;
+import com.auth.service.auth.application.port.authorization.model.UserScopeRow;
+import com.auth.service.auth.infrastructure.persistence.mapper.DeptClosureMapper;
+import com.auth.service.auth.infrastructure.persistence.mapper.RoleScopeMapper;
+import com.auth.service.auth.infrastructure.persistence.mapper.UserScopeMapper;
 import com.auth.service.auth.infrastructure.persistence.projection.UserScopeProjection;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -29,27 +28,42 @@ public class DataScopeQueryAdapter implements DataScopeQueryPort {
 
 	private final DeptClosureMapper deptClosureMapper;
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Optional<UserScopeRow> findUserScopeByUserId(Long userId) {
 		UserScopeProjection projection = userScopeMapper.selectByUserId(userId);
 		if (projection == null) {
 			return Optional.empty();
 		}
-		return Optional.of(new UserScopeRow(projection.getScopeType(), projection.getScopeDeptIds()));
+
+		String scopeType = projection.getScopeType();
+		String scopeDeptIds = projection.getScopeDeptIds();
+		return Optional.of(new UserScopeRow(scopeType, scopeDeptIds));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public List<RoleScopeRow> findRoleScopesByRoleCodes(List<String> roleCodes) {
-		return roleScopeMapper.selectByRoleCodes(roleCodes).stream().map(this::toRoleScopeRow).toList();
+		// 将 RoleScopeProjection 转换为 RoleScopeRow
+		return roleScopeMapper.selectByRoleCodes(roleCodes).stream().map(projection -> {
+			String roleCode = projection.getRoleCode();
+			String scopeType = projection.getScopeType();
+			String scopeDeptIds = projection.getScopeDeptIds();
+
+			return new RoleScopeRow(roleCode, scopeType, scopeDeptIds);
+		}).toList();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public List<Long> expandDescendantDeptIds(List<Long> ancestorDeptIds) {
 		return deptClosureMapper.selectDescendantDeptIdsByAncestorIds(ancestorDeptIds);
-	}
-
-	private RoleScopeRow toRoleScopeRow(RoleScopeProjection projection) {
-		return new RoleScopeRow(projection.getRoleCode(), projection.getScopeType(), projection.getScopeDeptIds());
 	}
 
 }

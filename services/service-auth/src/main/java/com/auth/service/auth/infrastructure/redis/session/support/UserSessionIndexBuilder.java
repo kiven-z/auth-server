@@ -1,14 +1,16 @@
 package com.auth.service.auth.infrastructure.redis.session.support;
 
-import cn.hutool.crypto.digest.MD5;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Service;
+
 import com.auth.common.ip.IpAddressService;
 import com.auth.common.ip.IpInfo;
 import com.auth.common.jwt.autoconfigure.JwtProperties;
 import com.auth.common.web.model.entity.UserAgent;
 import com.auth.module.security.contract.api.UserSessionIndex;
+
+import cn.hutool.crypto.digest.MD5;
 import jakarta.servlet.http.HttpServletRequest;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.stereotype.Service;
 
 /**
  * 从 HTTP 请求与令牌参数构建 {@link UserSessionIndex}
@@ -35,6 +37,7 @@ public class UserSessionIndexBuilder {
 		IpInfo ipInfo = ipAddressService.resolveIpInfo(request);
 		UserAgent userAgent = UserAgent.getUserAgent(request);
 
+		// 构建用户会话索引
 		UserSessionIndex userSessionIndex = new UserSessionIndex();
 		userSessionIndex.setUserId(userId);
 		userSessionIndex.setSessionId(jti);
@@ -44,6 +47,7 @@ public class UserSessionIndexBuilder {
 		userSessionIndex.setBrowserType(userAgent.getBrowser());
 		userSessionIndex.setOsType(userAgent.getOs());
 
+		// 计算刷新令牌哈希
 		String refreshTokenHash = MD5.create().digestHex16(refreshToken);
 		userSessionIndex.setRefreshTokenHash(refreshTokenHash);
 		long refreshExpiredSeconds = properties.getRefreshExpired();

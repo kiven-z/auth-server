@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.auth.service.auth.infrastructure.persistence.UserAuthorizationGrantMapper">
+<mapper namespace="com.auth.service.auth.infrastructure.persistence.mapper.UserAuthorizationGrantMapper">
 
     <!-- 查询用户角色码 -->
     <select id="selectRolesByUserId" resultType="java.lang.String">
         <include
-                refid="com.auth.service.auth.infrastructure.persistence.AuthorizationGrantForwardFragments.fwdUserSubjectsForFunctionalGrant"/>
+                refid="com.auth.service.auth.infrastructure.persistence.mapper.AuthorizationGrantForwardFragments.fwdUserSubjectsForFunctionalGrant"/>
         SELECT DISTINCT gt.role_code
         FROM grant_table gt
         JOIN user_subjects us ON gt.subject_type = us.sub_type AND gt.subject_id = us.sub_id
@@ -16,7 +16,7 @@
     <!-- 根据用户ID查询所有有效权限 -->
     <select id="selectPermissionsByUserId" resultType="java.lang.String">
         <include
-                refid="com.auth.service.auth.infrastructure.persistence.AuthorizationGrantForwardFragments.fwdUserSubjectsForFunctionalGrant"/>
+                refid="com.auth.service.auth.infrastructure.persistence.mapper.AuthorizationGrantForwardFragments.fwdUserSubjectsForFunctionalGrant"/>
         ,
         all_role_codes AS (
         SELECT DISTINCT gt.role_code

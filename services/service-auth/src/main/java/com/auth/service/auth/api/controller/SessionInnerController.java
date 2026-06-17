@@ -2,7 +2,7 @@ package com.auth.service.auth.api.controller;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.module.security.autoconfigure.annotation.InternalApi;
-import com.auth.service.auth.application.port.SessionRevocationPort;
+import com.auth.service.auth.application.session.command.SessionManagementApplicationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,7 @@ import java.util.List;
 @RestController
 public class SessionInnerController {
 
-	private final SessionRevocationPort sessionRevocationPort;
+	private final SessionManagementApplicationService sessionManagementApplicationService;
 
 	/**
 	 * 批量踢出用户全部会话（账户禁用、删除等场景）
@@ -35,7 +35,7 @@ public class SessionInnerController {
 	@Operation(summary = "批量踢出用户全部会话")
 	@PostMapping("/kick-all")
 	public Result<Void> kickAllSessions(@RequestBody(required = false) List<Long> userIds) {
-		sessionRevocationPort.kickAllSessions(userIds);
+		sessionManagementApplicationService.kickAllSessions(userIds);
 		return Result.success();
 	}
 

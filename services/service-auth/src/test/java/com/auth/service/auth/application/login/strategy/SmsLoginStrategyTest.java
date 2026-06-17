@@ -2,13 +2,13 @@ package com.auth.service.auth.application.login.strategy;
 
 import cn.hutool.crypto.digest.MD5;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
-import com.auth.service.auth.application.login.audit.LoginAuditService;
-import com.auth.service.auth.application.login.input.credential.SmsLogin;
-import com.auth.service.auth.application.port.AuthProfileQueryPort;
-import com.auth.service.auth.application.port.CredentialGateway;
-import com.auth.service.auth.domain.authentication.enums.AuthLoginLogType;
-import com.auth.service.auth.domain.authentication.enums.CredentialDimension;
+import com.auth.service.auth.application.login.LoginAuditService;
+import com.auth.service.auth.application.login.input.SmsCommand;
+import com.auth.service.auth.application.port.authorization.AuthProfileQueryPort;
+import com.auth.service.auth.application.port.login.CredentialPort;
 import com.auth.service.auth.domain.authentication.model.LoginAccount;
+import com.auth.service.auth.domain.authentication.model.enums.AuthLoginLogType;
+import com.auth.service.auth.domain.authentication.model.enums.CredentialDimension;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.AuthResultCode;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,7 +35,7 @@ import static org.mockito.Mockito.*;
 class SmsLoginStrategyTest {
 
 	@Mock
-	private CredentialGateway credentialGateway;
+	private CredentialPort credentialGateway;
 
 	@Mock
 	private AuthProfileQueryPort authProfileQueryPort;
@@ -56,16 +56,16 @@ class SmsLoginStrategyTest {
 		when(credentialGateway.findForLogin(CredentialDimension.PHONE, "13800138000")).thenReturn(Optional.empty());
 		SmsLoginStrategy strategy = createStrategy();
 
-		SmsLogin credential = new SmsLogin();
-		credential.setPhone("13800138000");
-		credential.setCode("123456");
-		when(loginAuditService.resolvePrincipal(credential)).thenReturn("13800138000");
+		SmsCommand command = new SmsCommand();
+		command.setPhone("13800138000");
+		command.setCode("123456");
+		when(loginAuditService.resolvePrincipal(command)).thenReturn("13800138000");
 
 		AuthBusinessException exception = assertThrows(AuthBusinessException.class,
-				() -> strategy.authenticate(credential, httpServletRequest));
+				() -> strategy.authenticate(command, httpServletRequest));
 
 		assertEquals(AuthResultCode.USERNAME_OR_PASSWORD_ERROR, exception.getResultCode());
-		verify(loginAuditService).resolvePrincipal(credential);
+		verify(loginAuditService).resolvePrincipal(command);
 		verify(loginAuditService).auditUserUnknownAfterResolve(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_SMS),
 				eq("13800138000"), eq(exception.getMessageKey()));
 	}
@@ -82,12 +82,12 @@ class SmsLoginStrategyTest {
 
 		SmsLoginStrategy strategy = createStrategy();
 
-		SmsLogin credential = new SmsLogin();
-		credential.setPhone("13800138000");
-		credential.setCode("000000");
+		SmsCommand command = new SmsCommand();
+		command.setPhone("13800138000");
+		command.setCode("000000");
 
 		AuthBusinessException exception = assertThrows(AuthBusinessException.class,
-				() -> strategy.authenticate(credential, httpServletRequest));
+				() -> strategy.authenticate(command, httpServletRequest));
 
 		assertEquals(AuthResultCode.AUTH_CODE_ERROR, exception.getResultCode());
 		verify(loginAuditService).auditMappedCredentialFailure(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_SMS),
@@ -110,20 +110,20 @@ class SmsLoginStrategyTest {
 			.thenReturn(MD5.create().digestHex16(code));
 
 		SmsLoginStrategy strategy = createStrategy();
-		SmsLogin credential = new SmsLogin();
-		credential.setPhone(phone);
-		credential.setCode(code);
+		SmsCommand command = new SmsCommand();
+		command.setPhone(phone);
+		command.setCode(code);
 
-		strategy.authenticate(credential, httpServletRequest);
+		strategy.authenticate(command, httpServletRequest);
 
 		verify(credentialGateway).deleteCode(CredentialDimension.PHONE, phone);
 	}
 
 	@Test
-	@DisplayName("supports 返回 SmsLogin.class")
-	void supports_shouldReturnSmsLoginClass() {
+	@DisplayName("supports 返回 SmsCommand.class")
+	void supports_shouldReturnSmsCommandClass() {
 		SmsLoginStrategy strategy = createStrategy();
-		assertEquals(SmsLogin.class, strategy.supports());
+		assertEquals(SmsCommand.class, strategy.supports());
 	}
 
 }

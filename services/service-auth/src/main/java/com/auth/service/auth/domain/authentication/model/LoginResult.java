@@ -1,7 +1,7 @@
 package com.auth.service.auth.domain.authentication.model;
 
 import com.auth.module.security.contract.api.authorization.AuthProfile;
-import com.auth.service.auth.domain.authentication.enums.AuthLoginLogType;
+import com.auth.service.auth.domain.authentication.model.enums.AuthLoginLogType;
 import org.jetbrains.annotations.NotNull;
 
 /**

@@ -1,16 +1,16 @@
 package com.auth.service.auth.application.login.strategy;
 
 import com.auth.module.security.contract.api.authorization.AuthProfile;
-import com.auth.service.auth.application.login.audit.LoginAuditService;
-import com.auth.service.auth.application.login.input.credential.AbstractCredentialLogin;
+import com.auth.service.auth.application.login.LoginAuditService;
+import com.auth.service.auth.application.login.input.BaseLoginCommand;
+import com.auth.service.auth.application.port.authorization.AuthProfileQueryPort;
+import com.auth.service.auth.application.port.login.CredentialPort;
 import com.auth.service.auth.application.port.login.LoginStrategy;
-import com.auth.service.auth.application.port.AuthProfileQueryPort;
-import com.auth.service.auth.application.port.CredentialGateway;
-import com.auth.service.auth.domain.authentication.enums.AuthLoginLogType;
 import com.auth.service.auth.domain.authentication.model.AuthenticatedUser;
 import com.auth.service.auth.domain.authentication.model.LoginAccount;
 import com.auth.service.auth.domain.authentication.model.LoginResult;
-import com.auth.service.auth.domain.authentication.service.UserAccountLoginEligibility;
+import com.auth.service.auth.domain.authentication.model.enums.AuthLoginLogType;
+import com.auth.service.auth.domain.authentication.model.enums.UserAccountLoginEligibility;
 import com.auth.service.auth.shared.exception.AuthBadCredentialsException;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.AuthResultCode;
@@ -21,16 +21,16 @@ import jakarta.servlet.http.HttpServletRequest;
  *
  * @author Bunny
  */
-public abstract class AbstractLoginStrategyTemplate<T extends AbstractCredentialLogin> implements LoginStrategy<T> {
+public abstract class AbstractLoginStrategyTemplate<T extends BaseLoginCommand> implements LoginStrategy<T> {
 
-	protected final CredentialGateway credentialGateway;
+	protected final CredentialPort credentialGateway;
 
 	private final AuthProfileQueryPort authProfileQueryPort;
 
 	private final LoginAuditService loginAuditService;
 
-	protected AbstractLoginStrategyTemplate(CredentialGateway credentialGateway,
-			AuthProfileQueryPort authProfileQueryPort, LoginAuditService loginAuditService) {
+	protected AbstractLoginStrategyTemplate(CredentialPort credentialGateway, AuthProfileQueryPort authProfileQueryPort,
+			LoginAuditService loginAuditService) {
 		this.credentialGateway = credentialGateway;
 		this.authProfileQueryPort = authProfileQueryPort;
 		this.loginAuditService = loginAuditService;

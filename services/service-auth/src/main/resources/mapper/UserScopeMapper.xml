@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.auth.service.auth.infrastructure.persistence.UserScopeMapper">
+<mapper namespace="com.auth.service.auth.infrastructure.persistence.mapper.UserScopeMapper">
 
     <!-- 按用户 ID 查询数据范围（用户级覆盖，存在则不再读 role_scope） -->
     <select id="selectByUserId"

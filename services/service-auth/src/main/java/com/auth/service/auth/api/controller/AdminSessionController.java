@@ -2,12 +2,12 @@ package com.auth.service.auth.api.controller;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.module.security.contract.annotation.OperationLog;
+import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.module.security.contract.context.OperationLogContext;
-import com.auth.service.auth.api.dto.session.UserSessionVO;
-import com.auth.service.auth.application.port.SessionRevocationPort;
-import com.auth.service.auth.application.session.UserSessionQueryApplicationService;
+import com.auth.service.auth.api.dto.session.response.UserSessionVO;
+import com.auth.service.auth.application.session.command.SessionManagementApplicationService;
 import com.auth.service.auth.convert.UserSessionConverter;
 import com.auth.service.auth.shared.audit.AuthAuditBizModule;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,9 +29,7 @@ import java.util.List;
 @RestController
 public class AdminSessionController {
 
-	private final SessionRevocationPort sessionRevocationPort;
-
-	private final UserSessionQueryApplicationService userSessionQueryApplicationService;
+	private final SessionManagementApplicationService sessionManagementApplicationService;
 
 	@OperationLog(targetType = "USER_SESSION", serviceDomain = AuditServiceDomain.AUTH,
 			bizModule = AuthAuditBizModule.AUTH_SESSION, operation = OperationLogKind.DELETE)
@@ -40,7 +38,8 @@ public class AdminSessionController {
 	@PostMapping("{userId}/sessions/{sessionId}/kick")
 	public Result<Void> kick(@PathVariable("userId") long userId, @PathVariable("sessionId") String sessionId) {
 		OperationLogContext.setTargetId(userId);
-		sessionRevocationPort.kickSession(userId, sessionId);
+		sessionManagementApplicationService.kickSession(userId, sessionId);
+
 		return Result.success();
 	}
 
@@ -51,7 +50,8 @@ public class AdminSessionController {
 	@PostMapping("{userId}/sessions/kick-all")
 	public Result<Void> kickAll(@PathVariable("userId") long userId) {
 		OperationLogContext.setTargetId(userId);
-		sessionRevocationPort.kickAllSessions(userId);
+		sessionManagementApplicationService.kickAllSessions(userId);
+
 		return Result.success();
 	}
 
@@ -61,7 +61,7 @@ public class AdminSessionController {
 	@PreAuthorize("@auth.decide('ADMIN')")
 	@PostMapping("/kick-all")
 	public Result<Void> kickAllSessions(@RequestBody(required = false) List<Long> userIds) {
-		sessionRevocationPort.kickAllSessions(userIds);
+		sessionManagementApplicationService.kickAllSessions(userIds);
 		return Result.success();
 	}
 
@@ -72,8 +72,10 @@ public class AdminSessionController {
 	@GetMapping("{userId}/sessions")
 	public Result<List<UserSessionVO>> getListSessions(@PathVariable("userId") long userId) {
 		OperationLogContext.setTargetId(userId);
-		return Result.success(
-				UserSessionConverter.INSTANCE.toVoList(userSessionQueryApplicationService.listActiveSessions(userId)));
+		List<UserSessionIndex> userSessionIndices = sessionManagementApplicationService.listActiveSessions(userId);
+		List<UserSessionVO> voList = UserSessionConverter.INSTANCE.toVoList(userSessionIndices);
+
+		return Result.success(voList);
 	}
 
 }

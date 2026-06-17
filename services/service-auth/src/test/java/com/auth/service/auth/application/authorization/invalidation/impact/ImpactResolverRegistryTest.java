@@ -1,5 +1,6 @@
 package com.auth.service.auth.application.authorization.invalidation.impact;
 
+import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 import com.auth.module.security.contract.dto.invalidation.PermissionInvalidatePayload;
 import com.auth.module.security.contract.dto.invalidation.RoleInvalidatePayload;
 import com.auth.service.auth.application.port.invalidation.AuthorizationImpactQueryPort;
@@ -31,8 +32,10 @@ class ImpactResolverRegistryTest {
 	void resolve_shouldDispatchByPayloadKind() {
 		when(authorizationImpactQueryPort.findUserIdsByRoleCodes(List.of("ADMIN"))).thenReturn(Set.of(1L));
 
-		ImpactResolverRegistry registry = new ImpactResolverRegistry(
-				List.of(new RoleCodeImpactResolver(authorizationImpactQueryPort)));
+		ImpactResolver<RoleInvalidatePayload> roleResolver = new PortBackedImpactResolver<>(
+				AuthorizationChangeKind.ROLE, RoleInvalidatePayload.class,
+				payload -> authorizationImpactQueryPort.findUserIdsByRoleCodes(payload.roleCodes()));
+		ImpactResolverRegistry registry = new ImpactResolverRegistry(List.of(roleResolver));
 
 		Set<Long> userIds = registry.resolve(new RoleInvalidatePayload(List.of("ADMIN")));
 
@@ -42,8 +45,10 @@ class ImpactResolverRegistryTest {
 	@Test
 	@DisplayName("未注册 kind 时抛出 IllegalStateException")
 	void resolve_unregisteredKind_shouldThrow() {
-		ImpactResolverRegistry registry = new ImpactResolverRegistry(
-				List.of(new RoleCodeImpactResolver(authorizationImpactQueryPort)));
+		ImpactResolver<RoleInvalidatePayload> roleResolver = new PortBackedImpactResolver<>(
+				AuthorizationChangeKind.ROLE, RoleInvalidatePayload.class,
+				payload -> authorizationImpactQueryPort.findUserIdsByRoleCodes(payload.roleCodes()));
+		ImpactResolverRegistry registry = new ImpactResolverRegistry(List.of(roleResolver));
 
 		PermissionInvalidatePayload unregisteredPayload = new PermissionInvalidatePayload(List.of("sys:user:list"));
 		assertThrows(IllegalStateException.class, () -> registry.resolve(unregisteredPayload));

@@ -1,6 +1,6 @@
 package com.auth.service.auth.job;
 
-import com.auth.service.auth.application.authorization.ops.AuthorizationInvalidationEventOpsApplicationService;
+import com.auth.service.auth.application.authorization.command.AuthorizationInvalidationEventOpsApplicationService;
 import com.auth.service.auth.config.AuthorizationInvalidationProperties;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

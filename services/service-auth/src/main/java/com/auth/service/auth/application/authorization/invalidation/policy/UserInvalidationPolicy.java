@@ -1,8 +1,8 @@
 package com.auth.service.auth.application.authorization.invalidation.policy;
 
 import cn.hutool.core.collection.CollUtil;
-import com.auth.service.auth.domain.authorization.invalidation.UserInvalidationBuckets;
-import com.auth.service.auth.domain.authorization.invalidation.UserInvalidationState;
+import com.auth.service.auth.domain.authorization.model.UserInvalidationBuckets;
+import com.auth.service.auth.domain.authorization.model.UserInvalidationState;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
@@ -19,17 +19,12 @@ import java.util.Set;
 public class UserInvalidationPolicy {
 
 	/**
-	 * 正常启用
-	 */
-	private static final int STATUS_NORMAL = 1;
-
-	/**
 	 * 判断用户状态是否需要递增版本+刷画像
 	 * @param state 用户状态
 	 * @return 是否需要递增版本+刷画像
 	 */
 	private static boolean shouldVersionBump(UserInvalidationState state) {
-		return !state.deleted() && state.status() != null && state.status() == STATUS_NORMAL;
+		return !state.deleted() && state.status() != null && state.status() == 1;
 	}
 
 	/**

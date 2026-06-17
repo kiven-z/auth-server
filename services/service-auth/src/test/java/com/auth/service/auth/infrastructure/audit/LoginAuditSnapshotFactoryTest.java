@@ -4,6 +4,7 @@ import com.auth.common.ip.IpAddressService;
 import com.auth.common.ip.IpInfo;
 import com.auth.common.web.model.entity.UserAgent;
 import com.auth.service.auth.domain.authentication.model.LoginAuditSnapshot;
+import com.auth.service.auth.infrastructure.audit.adapter.LoginAuditSnapshotAdapter;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,12 +19,12 @@ import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
 
 /**
- * {@link LoginAuditSnapshotFactory}（{@link com.auth.service.auth.application.port.login.LoginAuditSnapshotPort}）单元测试
+ * {@link LoginAuditSnapshotAdapter} 单元测试
  *
  * @author Bunny
  */
 @ExtendWith(MockitoExtension.class)
-class LoginAuditSnapshotFactoryTest {
+class LoginAuditSnapshotAdapterTest {
 
 	@Mock
 	private IpAddressService ipAddressService;
@@ -31,8 +32,8 @@ class LoginAuditSnapshotFactoryTest {
 	@Test
 	@DisplayName("请求为 null 时应返回空快照")
 	void build_shouldReturnEmpty_whenRequestNull() {
-		LoginAuditSnapshotFactory factory = new LoginAuditSnapshotFactory(ipAddressService);
-		LoginAuditSnapshot snapshot = factory.build(null);
+		LoginAuditSnapshotAdapter adapter = new LoginAuditSnapshotAdapter(ipAddressService);
+		LoginAuditSnapshot snapshot = adapter.build(null);
 		assertEquals(LoginAuditSnapshot.empty(), snapshot);
 	}
 
@@ -49,10 +50,10 @@ class LoginAuditSnapshotFactoryTest {
 		when(ua.getOs()).thenReturn("Linux");
 		when(ua.getBrowser()).thenReturn("Firefox");
 
-		LoginAuditSnapshotFactory factory = new LoginAuditSnapshotFactory(ipAddressService);
+		LoginAuditSnapshotAdapter adapter = new LoginAuditSnapshotAdapter(ipAddressService);
 		try (MockedStatic<UserAgent> userAgentMock = mockStatic(UserAgent.class)) {
 			userAgentMock.when(() -> UserAgent.getUserAgent(request)).thenReturn(ua);
-			LoginAuditSnapshot snapshot = factory.build(request);
+			LoginAuditSnapshot snapshot = adapter.build(request);
 			assertEquals("192.0.2.1", snapshot.loginIp());
 			assertEquals("Test-Region", snapshot.loginRegion());
 			assertEquals("Mozilla/5.0", snapshot.userAgent());

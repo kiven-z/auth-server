@@ -5,10 +5,10 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
-import com.auth.service.auth.application.session.OnlineUserQueryApplicationService;
-import com.auth.service.auth.domain.session.query.OnlineUserPageQuery;
-import com.auth.service.auth.domain.session.vo.OnlineUserPageVO;
-import com.auth.service.auth.domain.session.vo.OnlineUserSummaryVO;
+import com.auth.service.auth.api.dto.session.request.OnlineUserPageQuery;
+import com.auth.service.auth.api.dto.session.response.OnlineUserPageVO;
+import com.auth.service.auth.api.dto.session.response.OnlineUserSummaryVO;
+import com.auth.service.auth.application.session.query.OnlineUserQueryService;
 import com.auth.service.auth.shared.audit.AuthAuditBizModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class AdminOnlineUserController {
 
-	private final OnlineUserQueryApplicationService onlineUserQueryApplicationService;
+	private final OnlineUserQueryService onlineUserQueryService;
 
 	@OperationLog(targetType = "ONLINE_USER_LIST", serviceDomain = AuditServiceDomain.AUTH,
 			bizModule = AuthAuditBizModule.AUTH_SESSION, operation = OperationLogKind.QUERY)
@@ -37,8 +37,7 @@ public class AdminOnlineUserController {
 	@PreAuthorize("@auth.decide('ADMIN')")
 	@GetMapping("/online")
 	public Result<PageResponse<OnlineUserPageVO>> page(OnlineUserPageQuery query) {
-		PageResponse<OnlineUserPageVO> page = onlineUserQueryApplicationService.getOnlineUserPage(query);
-		return Result.success(page);
+		return Result.success(onlineUserQueryService.getOnlineUserPage(query));
 	}
 
 	@OperationLog(targetType = "ONLINE_USER_SUMMARY", serviceDomain = AuditServiceDomain.AUTH,
@@ -47,8 +46,12 @@ public class AdminOnlineUserController {
 	@PreAuthorize("@auth.decide('ADMIN')")
 	@GetMapping("/online/summary")
 	public Result<OnlineUserSummaryVO> summary() {
-		OnlineUserSummaryVO onlineUserSummary = onlineUserQueryApplicationService.getOnlineUserSummary();
-		return Result.success(onlineUserSummary);
+		long onlineUserCount = onlineUserQueryService.getOnlineUserCount();
+
+		OnlineUserSummaryVO summary = new OnlineUserSummaryVO();
+		summary.setOnlineUserCount(onlineUserCount);
+
+		return Result.success(summary);
 	}
 
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.auth.service.auth.infrastructure.persistence.UserMapper">
+<mapper namespace="com.auth.service.auth.infrastructure.persistence.mapper.UserMapper">
     <!-- 按凭证维度查询用户：activeOnly 控制是否过滤 status=1 -->
     <select id="selectByCredential" resultType="com.auth.module.platform.persistence.model.UserEntity">
         SELECT

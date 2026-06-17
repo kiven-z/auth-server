@@ -11,11 +11,6 @@ import lombok.experimental.UtilityClass;
 public class SysUserDefaults {
 
 	/**
-	 * 新增用户初始明文密码（入库前 BCrypt 加密）
-	 */
-	public static final String DEFAULT_PASSWORD = "admin123";
-
-	/**
 	 * 默认版本号
 	 */
 	public static final Long DEFAULT_PERM_VERSION = 0L;

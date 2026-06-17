@@ -84,6 +84,13 @@ else
         for (week in count) { sum+=count[week]; weeks++ }
         if (weeks > 0) printf "    -> 【每周】跨越总周数: %d 周 | 平均每周提交: \033[1;33m%.2f\033[0m 次\n", weeks, sum/weeks
     }'
+
+    git log --format='%ad' --date=format:'%Y-%m' 2>/dev/null | awk '
+    {count[$1]++}
+    END {
+        for (month in count) { sum+=count[month]; months++ }
+        if (months > 0) printf "    -> 【每月】跨越总月数: %d 月 | 平均每月提交: \033[1;33m%.2f\033[0m 次\n", months, sum/months
+    }'
 fi
 
 # 7. 贡献者提交次数排行（新增部分）

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.auth.service.auth.infrastructure.persistence.AuthorizationInvalidationEventMapper">
+<mapper namespace="com.auth.service.auth.infrastructure.persistence.mapper.AuthorizationInvalidationEventMapper">
 
     <!-- 按 eventId 查询已处理失效事件 -->
     <select id="selectByEventId"
@@ -67,7 +67,7 @@
 
     <!-- 分页查询幂等事件（运维只读） -->
     <select id="selectListByPage"
-            resultType="com.auth.service.auth.domain.authorization.model.po.AuthorizationInvalidationEventPageRowPO">
+            resultType="com.auth.service.auth.infrastructure.persistence.projection.AuthorizationInvalidationEventPageRow">
         SELECT aie.id,
         aie.event_id,
         aie.change_kind,
@@ -112,7 +112,7 @@
 
     <!-- 按主键查询幂等事件详情 -->
     <select id="selectDetailById"
-            resultType="com.auth.service.auth.domain.authorization.model.po.AuthorizationInvalidationEventDetailRowPO">
+            resultType="com.auth.service.auth.infrastructure.persistence.projection.AuthorizationInvalidationEventDetailRow">
         SELECT aie.id,
         aie.event_id,
         aie.change_kind,
@@ -132,7 +132,7 @@
 
     <!-- 幂等事件统计（运维只读） -->
     <select id="selectEventStats"
-            resultType="com.auth.service.auth.domain.authorization.model.po.AuthorizationInvalidationEventStatsPO">
+            resultType="com.auth.service.auth.infrastructure.persistence.projection.AuthorizationInvalidationEventStatsRow">
         SELECT COUNT(*) AS total_count,
         SUM(IF(aie.impacted_user_count = -1, 1, 0)) AS processing_count,
         SUM(IF(aie.impacted_user_count != -1, 1, 0)) AS completed_count

@@ -1,5 +1,6 @@
 package com.auth.service.auth.domain.authentication.service;
 
+import com.auth.service.auth.domain.authentication.model.enums.UserAccountLoginEligibility;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

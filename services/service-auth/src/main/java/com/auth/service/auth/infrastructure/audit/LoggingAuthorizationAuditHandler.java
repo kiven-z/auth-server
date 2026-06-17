@@ -4,7 +4,7 @@ import com.auth.common.core.model.response.Result;
 import com.auth.module.security.contract.dto.AuthorizationAuditIngestRequest;
 import com.auth.module.security.contract.event.SecurityAuthorizationAuditPayloadEvent;
 import com.auth.module.security.contract.spi.AuthorizationAuditHandler;
-import com.auth.service.auth.shared.integration.SystemSecurityIngestFeignClient;
+import com.auth.service.auth.infrastructure.integration.SystemSecurityIngestFeignClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;

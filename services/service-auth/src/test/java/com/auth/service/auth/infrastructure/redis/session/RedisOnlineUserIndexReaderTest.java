@@ -2,6 +2,7 @@ package com.auth.service.auth.infrastructure.redis.session;
 
 import com.auth.module.security.contract.redis.SecurityRedisKey;
 import com.auth.service.auth.TestConstants;
+import com.auth.service.auth.infrastructure.redis.session.adapter.OnlineUserQueryAdapter;
 import com.auth.service.auth.infrastructure.redis.session.script.UserSessionRedisScripts;
 import com.auth.service.auth.infrastructure.redis.session.support.UserSessionIndexRedisCodec;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.ZSetOperations;
@@ -19,6 +21,7 @@ import org.springframework.data.redis.core.script.DefaultRedisScript;
 
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -27,12 +30,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * {@link RedisOnlineUserIndexReader} 在线用户读侧单元测试
+ * {@link OnlineUserQueryAdapter} 在线用户读侧单元测试
  */
-@DisplayName("RedisOnlineUserIndexReader 在线用户读侧")
+@DisplayName("OnlineUserQueryAdapter 在线用户读侧")
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-class RedisOnlineUserIndexReaderTest {
+class OnlineUserQueryAdapterTest {
 
 	private static final String ONLINE_USERS_KEY = SecurityRedisKey.ONLINE_USERS.fixedKey();
 
@@ -55,9 +58,12 @@ class RedisOnlineUserIndexReaderTest {
 	private SetOperations<String, String> setOperations;
 
 	@Mock
+	private HashOperations<String, Object, Object> hashOperations;
+
+	@Mock
 	private ZSetOperations<String, String> zSetOperations;
 
-	private RedisOnlineUserIndexReader reader;
+	private OnlineUserQueryAdapter reader;
 
 	@BeforeEach
 	void setUp() {
@@ -65,12 +71,13 @@ class RedisOnlineUserIndexReaderTest {
 		when(userSessionRedisScripts.terminateScript()).thenReturn(terminateScript);
 		when(userSessionRedisScripts.terminateOrphanScript()).thenReturn(terminateOrphanScript);
 		when(sessionRedisTemplate.opsForSet()).thenReturn(setOperations);
+		when(sessionRedisTemplate.opsForHash()).thenReturn(hashOperations);
 		when(sessionRedisTemplate.opsForZSet()).thenReturn(zSetOperations);
 		UserSessionIndexRedisCodec codec = new UserSessionIndexRedisCodec();
 		UserSessionLifecycleStore lifecycleStore = new UserSessionLifecycleStore(sessionRedisTemplate,
 				userSessionRedisScripts, codec);
 		UserSessionIndexStore indexStore = new UserSessionIndexStore(sessionRedisTemplate, codec, lifecycleStore);
-		reader = new RedisOnlineUserIndexReader(indexStore, sessionRedisTemplate);
+		reader = new OnlineUserQueryAdapter(indexStore, sessionRedisTemplate);
 	}
 
 	@Test
@@ -121,6 +128,52 @@ class RedisOnlineUserIndexReaderTest {
 
 		assertEquals(0L, slice.total());
 		assertTrue(slice.users().isEmpty());
+	}
+
+	@Test
+	@DisplayName("pageOnlineUsers：Set 含僵尸 jti 时清理后移出 ZSet 且不纳入结果")
+	void pageOnlineUsers_shouldCleanupZombieSessionsBeforeCount() {
+		when(zSetOperations.zCard(ONLINE_USERS_KEY)).thenReturn(1L);
+		when(zSetOperations.reverseRange(ONLINE_USERS_KEY, 0L, 63L))
+			.thenReturn(Set.of(String.valueOf(TestConstants.USER_ID)));
+		when(setOperations.members(SecurityRedisKey.USER_SESSIONS.key(TestConstants.USER_ID)))
+			.thenReturn(Set.of("stale-jti"));
+		when(hashOperations.entries(SecurityRedisKey.USER_SESSION.key("stale-jti"))).thenReturn(Map.of());
+		when(setOperations.remove(SecurityRedisKey.USER_SESSIONS.key(TestConstants.USER_ID), "stale-jti"))
+			.thenReturn(1L);
+		when(setOperations.size(SecurityRedisKey.USER_SESSIONS.key(TestConstants.USER_ID))).thenReturn(0L);
+
+		var slice = reader.pageOnlineUsers(1, 10, null);
+
+		assertEquals(0L, slice.total());
+		assertTrue(slice.users().isEmpty());
+		verify(zSetOperations).remove(ONLINE_USERS_KEY, String.valueOf(TestConstants.USER_ID));
+	}
+
+	@Test
+	@DisplayName("pageOnlineUsers：清理僵尸 jti 后仍保留有效会话用户")
+	void pageOnlineUsers_shouldKeepUserWhenValidSessionsRemainAfterCleanup() {
+		when(zSetOperations.zCard(ONLINE_USERS_KEY)).thenReturn(1L);
+		when(zSetOperations.reverseRange(ONLINE_USERS_KEY, 0L, 63L))
+			.thenReturn(Set.of(String.valueOf(TestConstants.USER_ID)));
+		when(setOperations.members(SecurityRedisKey.USER_SESSIONS.key(TestConstants.USER_ID)))
+			.thenReturn(Set.of(TestConstants.JTI, "stale-jti"));
+		when(hashOperations.entries(SecurityRedisKey.USER_SESSION.key(TestConstants.JTI))).thenReturn(Map.of("userId",
+				String.valueOf(TestConstants.USER_ID), "sessionId", TestConstants.JTI, "loginAt", "1700000000000"));
+		when(hashOperations.entries(SecurityRedisKey.USER_SESSION.key("stale-jti"))).thenReturn(Map.of());
+		when(setOperations.remove(SecurityRedisKey.USER_SESSIONS.key(TestConstants.USER_ID), "stale-jti"))
+			.thenReturn(1L);
+		when(setOperations.size(SecurityRedisKey.USER_SESSIONS.key(TestConstants.USER_ID))).thenReturn(1L);
+		when(zSetOperations.score(ONLINE_USERS_KEY, String.valueOf(TestConstants.USER_ID)))
+			.thenReturn(1_700_000_000_000D);
+
+		var slice = reader.pageOnlineUsers(1, 10, null);
+
+		assertEquals(1L, slice.total());
+		assertEquals(1, slice.users().size());
+		assertEquals(TestConstants.USER_ID, slice.users().get(0).userId());
+		assertEquals(1, slice.users().get(0).activeSessionCount());
+		verify(setOperations).remove(SecurityRedisKey.USER_SESSIONS.key(TestConstants.USER_ID), "stale-jti");
 	}
 
 	@Test

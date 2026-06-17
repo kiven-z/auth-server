@@ -1,13 +1,13 @@
 package com.auth.service.auth.application.login.strategy;
 
 import cn.hutool.crypto.digest.MD5;
-import com.auth.service.auth.application.login.audit.LoginAuditService;
-import com.auth.service.auth.application.login.input.credential.EmailLogin;
-import com.auth.service.auth.application.port.AuthProfileQueryPort;
-import com.auth.service.auth.application.port.CredentialGateway;
-import com.auth.service.auth.domain.authentication.enums.AuthLoginLogType;
-import com.auth.service.auth.domain.authentication.enums.CredentialDimension;
+import com.auth.service.auth.application.login.LoginAuditService;
+import com.auth.service.auth.application.login.input.EmailCommand;
+import com.auth.service.auth.application.port.authorization.AuthProfileQueryPort;
+import com.auth.service.auth.application.port.login.CredentialPort;
 import com.auth.service.auth.domain.authentication.model.LoginAccount;
+import com.auth.service.auth.domain.authentication.model.enums.AuthLoginLogType;
+import com.auth.service.auth.domain.authentication.model.enums.CredentialDimension;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.AuthResultCode;
 import org.springframework.stereotype.Component;
@@ -20,9 +20,9 @@ import java.util.Objects;
  * @author Bunny
  */
 @Component
-public class EmailLoginStrategy extends AbstractLoginStrategyTemplate<EmailLogin> {
+public class EmailLoginStrategy extends AbstractLoginStrategyTemplate<EmailCommand> {
 
-	public EmailLoginStrategy(CredentialGateway credentialGateway, AuthProfileQueryPort authProfileQueryPort,
+	public EmailLoginStrategy(CredentialPort credentialGateway, AuthProfileQueryPort authProfileQueryPort,
 			LoginAuditService loginAuditService) {
 		super(credentialGateway, authProfileQueryPort, loginAuditService);
 	}
@@ -33,15 +33,15 @@ public class EmailLoginStrategy extends AbstractLoginStrategyTemplate<EmailLogin
 	}
 
 	@Override
-	protected LoginAccount resolveAccount(EmailLogin credential) {
-		return credentialGateway.findForLogin(CredentialDimension.EMAIL, credential.getEmail())
+	protected LoginAccount resolveAccount(EmailCommand command) {
+		return credentialGateway.findForLogin(CredentialDimension.EMAIL, command.getEmail())
 			.orElseThrow(() -> new AuthBusinessException(AuthResultCode.USERNAME_OR_PASSWORD_ERROR));
 	}
 
 	@Override
-	protected AuthLoginLogType doAuthenticate(EmailLogin credential, LoginAccount account) {
-		String email = Objects.requireNonNull(credential.getEmail());
-		String codeDigest = MD5.create().digestHex16(Objects.requireNonNull(credential.getCode()));
+	protected AuthLoginLogType doAuthenticate(EmailCommand command, LoginAccount account) {
+		String email = Objects.requireNonNull(command.getEmail());
+		String codeDigest = MD5.create().digestHex16(Objects.requireNonNull(command.getCode()));
 		String stored = credentialGateway.getStoredDigest(CredentialDimension.EMAIL, email);
 
 		if (!Objects.equals(codeDigest, stored)) {
@@ -53,8 +53,8 @@ public class EmailLoginStrategy extends AbstractLoginStrategyTemplate<EmailLogin
 	}
 
 	@Override
-	public Class<EmailLogin> supports() {
-		return EmailLogin.class;
+	public Class<EmailCommand> supports() {
+		return EmailCommand.class;
 	}
 
 }

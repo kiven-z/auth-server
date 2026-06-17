@@ -1,13 +1,15 @@
 package com.auth.service.auth.infrastructure.redis.session.adapter;
 
-import com.auth.service.auth.application.port.SessionRevocationPort;
-import com.auth.service.auth.infrastructure.redis.session.RedisUserSessionIndexRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Repository;
-
 import java.util.Collection;
 import java.util.Objects;
+
+import org.springframework.stereotype.Repository;
+
+import com.auth.service.auth.application.port.session.SessionRevocationPort;
+import com.auth.service.auth.infrastructure.redis.session.RedisUserSessionIndexRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 会话撤销 Port 适配器
@@ -21,16 +23,25 @@ public class RedisSessionRevocationAdapter implements SessionRevocationPort {
 
 	private final RedisUserSessionIndexRepository redisUserSessionIndexRepository;
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void kickSession(long userId, String sessionId) {
 		redisUserSessionIndexRepository.terminateSession(userId, sessionId);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void kickAllSessions(long userId) {
 		redisUserSessionIndexRepository.terminateAllSessions(userId);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void kickAllSessions(Collection<Long> userIds) {
 		userIds.stream().filter(Objects::nonNull).forEach(userId -> {

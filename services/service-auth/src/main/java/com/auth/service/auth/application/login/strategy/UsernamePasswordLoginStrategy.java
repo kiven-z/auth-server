@@ -1,12 +1,12 @@
 package com.auth.service.auth.application.login.strategy;
 
-import com.auth.service.auth.application.login.audit.LoginAuditService;
-import com.auth.service.auth.application.login.input.credential.UsernamePasswordLogin;
-import com.auth.service.auth.application.port.AuthProfileQueryPort;
-import com.auth.service.auth.application.port.CredentialGateway;
-import com.auth.service.auth.domain.authentication.enums.AuthLoginLogType;
-import com.auth.service.auth.domain.authentication.enums.CredentialDimension;
+import com.auth.service.auth.application.login.LoginAuditService;
+import com.auth.service.auth.application.login.input.UsernamePasswordCommand;
+import com.auth.service.auth.application.port.authorization.AuthProfileQueryPort;
+import com.auth.service.auth.application.port.login.CredentialPort;
 import com.auth.service.auth.domain.authentication.model.LoginAccount;
+import com.auth.service.auth.domain.authentication.model.enums.AuthLoginLogType;
+import com.auth.service.auth.domain.authentication.model.enums.CredentialDimension;
 import com.auth.service.auth.shared.exception.AuthBadCredentialsException;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.AuthResultCode;
@@ -19,11 +19,11 @@ import org.springframework.stereotype.Component;
  * @author Bunny
  */
 @Component
-public class UsernamePasswordLoginStrategy extends AbstractLoginStrategyTemplate<UsernamePasswordLogin> {
+public class UsernamePasswordLoginStrategy extends AbstractLoginStrategyTemplate<UsernamePasswordCommand> {
 
 	private final PasswordEncoder passwordEncoder;
 
-	public UsernamePasswordLoginStrategy(CredentialGateway credentialGateway, AuthProfileQueryPort authProfileQueryPort,
+	public UsernamePasswordLoginStrategy(CredentialPort credentialGateway, AuthProfileQueryPort authProfileQueryPort,
 			PasswordEncoder passwordEncoder, LoginAuditService loginAuditService) {
 		super(credentialGateway, authProfileQueryPort, loginAuditService);
 		this.passwordEncoder = passwordEncoder;
@@ -35,22 +35,22 @@ public class UsernamePasswordLoginStrategy extends AbstractLoginStrategyTemplate
 	}
 
 	@Override
-	protected LoginAccount resolveAccount(UsernamePasswordLogin credential) {
-		return credentialGateway.findForLogin(CredentialDimension.USERNAME, credential.getUsername())
+	protected LoginAccount resolveAccount(UsernamePasswordCommand command) {
+		return credentialGateway.findForLogin(CredentialDimension.USERNAME, command.getUsername())
 			.orElseThrow(() -> new AuthBusinessException(AuthResultCode.USERNAME_OR_PASSWORD_ERROR));
 	}
 
 	@Override
-	protected AuthLoginLogType doAuthenticate(UsernamePasswordLogin credential, LoginAccount account) {
-		if (!passwordEncoder.matches(credential.getPassword(), account.encodedPassword())) {
+	protected AuthLoginLogType doAuthenticate(UsernamePasswordCommand command, LoginAccount account) {
+		if (!passwordEncoder.matches(command.getPassword(), account.encodedPassword())) {
 			throw new AuthBadCredentialsException("Password mismatch");
 		}
 		return AuthLoginLogType.LOGIN_PASSWORD;
 	}
 
 	@Override
-	public Class<UsernamePasswordLogin> supports() {
-		return UsernamePasswordLogin.class;
+	public Class<UsernamePasswordCommand> supports() {
+		return UsernamePasswordCommand.class;
 	}
 
 }

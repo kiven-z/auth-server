@@ -73,7 +73,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 	@Override
 	public void create(SysUserForm form) {
 		UserEntity entity = SysUserConverter.INSTANCE.toEntity(form);
-		entity.setPassword(passwordEncoder.encode(SysUserDefaults.DEFAULT_PASSWORD));
+		String initialPassword = form.getInitialPassword();
+		entity.setPassword(passwordEncoder.encode(initialPassword));
 		if (form.getBirthday() != null) {
 			entity.setAge(Period.between(form.getBirthday(), LocalDate.now()).getYears());
 		}

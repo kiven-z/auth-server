@@ -5,6 +5,7 @@ import com.auth.common.jwt.autoconfigure.JwtProperties;
 import com.auth.common.jwt.model.JwtUserToken;
 import com.auth.module.security.core.token.provider.AccessTokenProvider;
 import com.auth.module.security.core.token.provider.RefreshTokenProvider;
+import com.auth.service.auth.application.port.login.TokenPort;
 import com.auth.service.auth.domain.authentication.model.TokenPair;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.AuthResultCode;
@@ -26,7 +27,7 @@ import java.util.Optional;
  */
 @Slf4j
 @Component
-public class TokenService {
+public class TokenService implements TokenPort {
 
 	private final AccessTokenProvider accessTokenProvider;
 
@@ -42,12 +43,9 @@ public class TokenService {
 	}
 
 	/**
-	 * 签发访问令牌与刷新令牌
-	 * @param userId 用户ID
-	 * @param jti 会话唯一标识
-	 * @param permVersion 权限版本快照
-	 * @return 令牌对
+	 * {@inheritDoc}
 	 */
+	@Override
 	public TokenPair buildTokenPair(Long userId, String jti, Long permVersion) {
 		String accessToken = accessTokenProvider.buildToken(userId, jti, permVersion);
 		String refreshToken = refreshTokenProvider.buildToken(userId, jti, null);
@@ -55,10 +53,9 @@ public class TokenService {
 	}
 
 	/**
-	 * 容错解析访问令牌（永不抛出异常）
-	 * @param token 访问令牌原始字符串
-	 * @return 用户载荷
+	 * {@inheritDoc}
 	 */
+	@Override
 	public Optional<JwtUserToken> parseAccessTokenSafe(String token) {
 		if (CharSequenceUtil.isBlank(token)) {
 			return Optional.empty();
@@ -77,10 +74,9 @@ public class TokenService {
 	}
 
 	/**
-	 * 解析刷新令牌
-	 * @param token 刷新令牌原始字符串
-	 * @return 用户载荷
+	 * {@inheritDoc}
 	 */
+	@Override
 	public JwtUserToken parseRefreshToken(String token) {
 		try {
 			JwtUserToken userToken = refreshTokenProvider.parseToken(token).getUserToken();

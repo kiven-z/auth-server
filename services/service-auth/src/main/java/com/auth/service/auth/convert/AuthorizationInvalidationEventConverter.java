@@ -1,54 +1,51 @@
 package com.auth.service.auth.convert;
 
 import com.auth.common.mapstruct.config.AuthMapperConfig;
-import com.auth.service.auth.domain.authorization.invalidation.InvalidationProcessingMarker;
-import com.auth.service.auth.domain.authorization.model.po.AuthorizationInvalidationEventDetailRowPO;
-import com.auth.service.auth.domain.authorization.model.po.AuthorizationInvalidationEventPageRowPO;
-import com.auth.service.auth.domain.authorization.model.vo.AuthorizationInvalidationEventDetailVO;
-import com.auth.service.auth.domain.authorization.model.vo.AuthorizationInvalidationEventPageVO;
+import com.auth.service.auth.api.dto.authorization.response.AuthorizationInvalidationEventDetailVO;
+import com.auth.service.auth.api.dto.authorization.response.AuthorizationInvalidationEventPageVO;
+import com.auth.service.auth.api.dto.authorization.response.AuthorizationInvalidationEventStatsVO;
+import com.auth.service.auth.infrastructure.persistence.projection.AuthorizationInvalidationEventDetailRow;
+import com.auth.service.auth.infrastructure.persistence.projection.AuthorizationInvalidationEventPageRow;
+import com.auth.service.auth.infrastructure.persistence.projection.AuthorizationInvalidationEventStatsRow;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 
 /**
- * 授权失效幂等事件转换器
+ * 授权失效幂等事件 Row → VO 映射
  *
  * @author Bunny
  */
-@Mapper(config = AuthMapperConfig.class)
+@Mapper(config = AuthMapperConfig.class, uses = AuthorizationInvalidationEventMappingSupport.class)
 public interface AuthorizationInvalidationEventConverter {
 
 	AuthorizationInvalidationEventConverter INSTANCE = Mappers.getMapper(AuthorizationInvalidationEventConverter.class);
 
 	/**
-	 * 分页行 PO → VO
-	 * @param po 持久层投影
+	 * 分页行投影 → 分页 VO
+	 * @param row 分页行投影
 	 * @return 分页 VO
 	 */
 	@Mapping(target = "processing", source = "impactedUserCount", qualifiedByName = "toProcessingFlag")
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
-	AuthorizationInvalidationEventPageVO toPageVO(AuthorizationInvalidationEventPageRowPO po);
+	AuthorizationInvalidationEventPageVO toPageVO(AuthorizationInvalidationEventPageRow row);
 
 	/**
-	 * 详情 PO → 详情 VO
-	 * @param po 持久层详情投影
+	 * 详情行投影 → 详情 VO
+	 * @param row 详情行投影
 	 * @return 详情 VO
 	 */
 	@Mapping(target = "processing", source = "impactedUserCount", qualifiedByName = "toProcessingFlag")
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
-	AuthorizationInvalidationEventDetailVO toDetailVo(AuthorizationInvalidationEventDetailRowPO po);
+	AuthorizationInvalidationEventDetailVO toDetailVo(AuthorizationInvalidationEventDetailRow row);
 
 	/**
-	 * 影响面计数是否为处理中占位
-	 * @param impactedUserCount 影响面用户数
-	 * @return 处理中时为 true
+	 * 统计行投影 → 统计 VO
+	 * @param row 统计行投影
+	 * @return 统计 VO
 	 */
-	@Named("toProcessingFlag")
-	default Boolean toProcessingFlag(Integer impactedUserCount) {
-		return InvalidationProcessingMarker.isProcessing(impactedUserCount);
-	}
+	AuthorizationInvalidationEventStatsVO toStatsVo(AuthorizationInvalidationEventStatsRow row);
 
 }

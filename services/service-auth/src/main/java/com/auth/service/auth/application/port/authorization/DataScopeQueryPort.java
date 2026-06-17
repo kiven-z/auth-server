@@ -1,7 +1,7 @@
 package com.auth.service.auth.application.port.authorization;
 
-import com.auth.service.auth.application.authorization.datascope.RoleScopeRow;
-import com.auth.service.auth.application.authorization.datascope.UserScopeRow;
+import com.auth.service.auth.application.port.authorization.model.RoleScopeRow;
+import com.auth.service.auth.application.port.authorization.model.UserScopeRow;
 
 import java.util.List;
 import java.util.Optional;

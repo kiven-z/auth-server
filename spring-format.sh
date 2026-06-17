@@ -2,4 +2,4 @@
 set -euo pipefail
 
 cd "$(dirname "$0")"
-mvn spring-javaformat:apply
+mvn spring-javaformat:apply spotless:apply

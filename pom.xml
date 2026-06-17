@@ -84,6 +84,7 @@
 
         <!-- Code format -->
         <spring-javaformat.version>0.0.47</spring-javaformat.version>
+        <spotless.version>2.44.5</spotless.version>
 
         <!-- Architecture tests -->
         <archunit.version>1.4.0</archunit.version>
@@ -302,6 +303,21 @@
                 <groupId>io.spring.javaformat</groupId>
                 <artifactId>spring-javaformat-maven-plugin</artifactId>
                 <version>${spring-javaformat.version}</version>
+            </plugin>
+
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>${spotless.version}</version>
+                <configuration>
+                    <java>
+                        <includes>
+                            <include>src/main/java/**/*.java</include>
+                            <include>src/test/java/**/*.java</include>
+                        </includes>
+                        <removeUnusedImports/>
+                    </java>
+                </configuration>
             </plugin>
 
             <!-- JaCoCo 配置 -->

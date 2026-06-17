@@ -1,6 +1,6 @@
 package com.auth.service.auth.api.controller;
 
-import com.auth.service.auth.application.authorization.AdminAuthorizationService;
+import com.auth.service.auth.application.authorization.command.AdminAuthorizationService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -4,7 +4,7 @@ import com.auth.common.core.model.response.Result;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
-import com.auth.service.auth.application.authorization.AdminAuthorizationService;
+import com.auth.service.auth.application.authorization.command.AdminAuthorizationService;
 import com.auth.service.auth.shared.audit.AuthAuditBizModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

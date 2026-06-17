@@ -1,6 +1,7 @@
 package com.auth.service.auth.infrastructure.cookie;
 
 import com.auth.common.jwt.autoconfigure.JwtProperties;
+import com.auth.service.auth.infrastructure.cookie.adapter.RememberMePolicyAdapter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,10 +12,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 /**
- * RememberMeCookiePolicy 单元测试
+ * RememberMePolicyAdapter 单元测试
  */
 @ExtendWith(MockitoExtension.class)
-class RememberMeCookiePolicyTest {
+class RememberMePolicyAdapterTest {
 
 	@Mock
 	private JwtProperties jwtProperties;
@@ -23,7 +24,7 @@ class RememberMeCookiePolicyTest {
 	@DisplayName("勾选记住我时 Max-Age 为 refreshExpired")
 	void resolveMaxAgeSeconds_shouldUseRefreshExpired_whenRemembered() {
 		when(jwtProperties.getRefreshExpired()).thenReturn(604800L);
-		RememberMeCookiePolicy policy = new RememberMeCookiePolicy(jwtProperties);
+		RememberMePolicyAdapter policy = new RememberMePolicyAdapter(jwtProperties);
 
 		assertEquals(604800L, policy.resolveMaxAgeSeconds(true));
 	}
@@ -31,7 +32,7 @@ class RememberMeCookiePolicyTest {
 	@Test
 	@DisplayName("未勾选记住我时会话级 Max-Age")
 	void resolveMaxAgeSeconds_shouldUseSession_whenNotRemembered() {
-		RememberMeCookiePolicy policy = new RememberMeCookiePolicy(jwtProperties);
+		RememberMePolicyAdapter policy = new RememberMePolicyAdapter(jwtProperties);
 
 		assertEquals(RefreshTokenCookieWriter.SESSION_COOKIE_MAX_AGE_SECONDS, policy.resolveMaxAgeSeconds(false));
 	}
@@ -40,7 +41,7 @@ class RememberMeCookiePolicyTest {
 	@DisplayName("readMeDay 由 refreshExpired 向上取整为天")
 	void resolveReadMeDay_shouldCeilToDays() {
 		when(jwtProperties.getRefreshExpired()).thenReturn(604800L);
-		RememberMeCookiePolicy policy = new RememberMeCookiePolicy(jwtProperties);
+		RememberMePolicyAdapter policy = new RememberMePolicyAdapter(jwtProperties);
 
 		assertEquals(7L, policy.resolveReadMeDay());
 	}

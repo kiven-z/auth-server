@@ -2,10 +2,11 @@ package com.auth.service.auth.api.controller;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.module.security.autoconfigure.annotation.PublicApi;
-import com.auth.service.auth.application.login.AuthMessageService;
+import com.auth.service.auth.application.login.command.AuthMessageApplicationService;
 import com.auth.service.auth.shared.ratelimit.RateLimit;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -16,15 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * @author Bunny
  */
+@RequiredArgsConstructor
 @RequestMapping("/api/auth/message")
 @RestController
 public class AuthMessageController {
 
-	private final AuthMessageService messageService;
-
-	public AuthMessageController(AuthMessageService messageService) {
-		this.messageService = messageService;
-	}
+	private final AuthMessageApplicationService messageService;
 
 	@PublicApi
 	@RateLimit(principal = "#email")

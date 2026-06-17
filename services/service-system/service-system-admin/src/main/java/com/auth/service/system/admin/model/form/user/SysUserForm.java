@@ -29,6 +29,11 @@ public class SysUserForm implements Serializable {
 	@NotBlank(message = "用户名不能为空", groups = { CreateGroup.class, UpdateGroup.class })
 	private String username;
 
+	@Schema(title = "初始密码")
+	@Size(min = 8, max = 18, message = "初始密码长度应为8-18位", groups = CreateGroup.class)
+	@NotBlank(message = "初始密码不能为空", groups = CreateGroup.class)
+	private String initialPassword;
+
 	@Schema(title = "昵称", requiredMode = Schema.RequiredMode.REQUIRED)
 	@Size(max = 64, message = "昵称长度不能超过64个字符", groups = { CreateGroup.class, UpdateGroup.class })
 	@NotBlank(message = "昵称不能为空", groups = { CreateGroup.class, UpdateGroup.class })

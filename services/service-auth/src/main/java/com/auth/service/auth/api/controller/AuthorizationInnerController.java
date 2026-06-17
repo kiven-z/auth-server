@@ -3,18 +3,19 @@ package com.auth.service.auth.api.controller;
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.autoconfigure.annotation.InternalApi;
+import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateResponse;
-import com.auth.service.auth.api.dto.authorization.EffectiveCodesVO;
-import com.auth.service.auth.application.authorization.AuthorizationInnerService;
-import com.auth.service.auth.application.authorization.AuthorizationInvalidationService;
-import com.auth.service.auth.application.authorization.ops.AuthorizationInvalidationEventOpsApplicationService;
-import com.auth.service.auth.application.authorization.query.AuthorizationInvalidationEventQueryApplicationService;
+import com.auth.service.auth.api.dto.authorization.request.AuthorizationInvalidationEventQuery;
+import com.auth.service.auth.api.dto.authorization.response.AuthorizationInvalidationEventDetailVO;
+import com.auth.service.auth.api.dto.authorization.response.AuthorizationInvalidationEventPageVO;
+import com.auth.service.auth.api.dto.authorization.response.AuthorizationInvalidationEventStatsVO;
+import com.auth.service.auth.api.dto.authorization.response.EffectiveCodesVO;
+import com.auth.service.auth.application.authorization.command.AdminAuthorizationService;
+import com.auth.service.auth.application.authorization.command.AuthorizationInvalidationEventOpsApplicationService;
+import com.auth.service.auth.application.authorization.command.AuthorizationInvalidationService;
+import com.auth.service.auth.application.authorization.query.AuthorizationInvalidationEventQueryService;
 import com.auth.service.auth.convert.EffectiveCodesConverter;
-import com.auth.service.auth.domain.authorization.model.query.AuthorizationInvalidationEventQuery;
-import com.auth.service.auth.domain.authorization.model.vo.AuthorizationInvalidationEventDetailVO;
-import com.auth.service.auth.domain.authorization.model.vo.AuthorizationInvalidationEventPageVO;
-import com.auth.service.auth.domain.authorization.model.vo.AuthorizationInvalidationEventStatsVO;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,11 +33,11 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 public class AuthorizationInnerController {
 
-	private final AuthorizationInnerService authorizationInnerService;
+	private final AdminAuthorizationService adminAuthorizationService;
 
 	private final AuthorizationInvalidationService authorizationInvalidationService;
 
-	private final AuthorizationInvalidationEventQueryApplicationService authorizationInvalidationEventQueryApplicationService;
+	private final AuthorizationInvalidationEventQueryService authorizationInvalidationEventQueryService;
 
 	private final AuthorizationInvalidationEventOpsApplicationService authorizationInvalidationEventOpsApplicationService;
 
@@ -44,8 +45,8 @@ public class AuthorizationInnerController {
 	@Operation(summary = "查询用户生效角色码与权限码（供 system 动态菜单等内部调用）")
 	@GetMapping("/principal/{userId}/effective-codes")
 	public Result<EffectiveCodesVO> effectiveCodes(@PathVariable("userId") Long userId) {
-		EffectiveCodesVO body = EffectiveCodesConverter.INSTANCE
-			.toVoOrEmpty(authorizationInnerService.resolveAuthProfile(userId));
+		AuthProfile profile = adminAuthorizationService.loadAuthProfile(userId);
+		EffectiveCodesVO body = EffectiveCodesConverter.INSTANCE.toVoOrEmpty(profile);
 		return Result.success(body);
 	}
 
@@ -63,21 +64,25 @@ public class AuthorizationInnerController {
 	@GetMapping("/invalidation/event/page")
 	public Result<PageResponse<AuthorizationInvalidationEventPageVO>> invalidationEventPage(
 			AuthorizationInvalidationEventQuery query) {
-		return Result.success(authorizationInvalidationEventQueryApplicationService.getPage(query));
+		PageResponse<AuthorizationInvalidationEventPageVO> page = authorizationInvalidationEventQueryService
+			.getPage(query);
+		return Result.success(page);
 	}
 
 	@InternalApi
 	@Operation(summary = "授权失效幂等事件详情")
 	@GetMapping("/invalidation/event/{id}")
 	public Result<AuthorizationInvalidationEventDetailVO> invalidationEventDetail(@PathVariable("id") Long id) {
-		return Result.success(authorizationInvalidationEventQueryApplicationService.getDetail(id));
+		AuthorizationInvalidationEventDetailVO detailVO = authorizationInvalidationEventQueryService.getDetail(id);
+		return Result.success(detailVO);
 	}
 
 	@InternalApi
 	@Operation(summary = "授权失效幂等事件统计")
 	@GetMapping("/invalidation/event/summary")
 	public Result<AuthorizationInvalidationEventStatsVO> invalidationEventSummary() {
-		return Result.success(authorizationInvalidationEventQueryApplicationService.getStats());
+		AuthorizationInvalidationEventStatsVO statsVO = authorizationInvalidationEventQueryService.getStats();
+		return Result.success(statsVO);
 	}
 
 	@InternalApi
@@ -85,6 +90,7 @@ public class AuthorizationInnerController {
 	@PostMapping("/invalidation/event/{eventId}/release-claim")
 	public Result<Boolean> releaseInvalidationEventClaim(@PathVariable("eventId") String eventId) {
 		boolean released = authorizationInvalidationEventOpsApplicationService.releaseProcessingClaim(eventId);
+
 		return Result.success(released);
 	}
 

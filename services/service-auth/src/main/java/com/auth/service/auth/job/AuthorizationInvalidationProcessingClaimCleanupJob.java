@@ -1,6 +1,6 @@
 package com.auth.service.auth.job;
 
-import com.auth.service.auth.application.authorization.ops.AuthorizationInvalidationEventOpsApplicationService;
+import com.auth.service.auth.application.authorization.command.AuthorizationInvalidationEventOpsApplicationService;
 import com.auth.service.auth.config.AuthorizationInvalidationProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -1,12 +1,12 @@
 package com.auth.service.auth.application.login.strategy;
 
-import com.auth.service.auth.application.login.audit.LoginAuditService;
-import com.auth.service.auth.application.login.input.credential.UsernamePasswordLogin;
-import com.auth.service.auth.application.port.AuthProfileQueryPort;
-import com.auth.service.auth.application.port.CredentialGateway;
-import com.auth.service.auth.domain.authentication.enums.AuthLoginLogType;
-import com.auth.service.auth.domain.authentication.enums.CredentialDimension;
+import com.auth.service.auth.application.login.LoginAuditService;
+import com.auth.service.auth.application.login.input.UsernamePasswordCommand;
+import com.auth.service.auth.application.port.authorization.AuthProfileQueryPort;
+import com.auth.service.auth.application.port.login.CredentialPort;
 import com.auth.service.auth.domain.authentication.model.LoginAccount;
+import com.auth.service.auth.domain.authentication.model.enums.AuthLoginLogType;
+import com.auth.service.auth.domain.authentication.model.enums.CredentialDimension;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.AuthResultCode;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,7 +34,7 @@ import static org.mockito.Mockito.*;
 class UsernamePasswordLoginStrategyTest {
 
 	@Mock
-	private CredentialGateway credentialGateway;
+	private CredentialPort credentialGateway;
 
 	@Mock
 	private AuthProfileQueryPort authProfileQueryPort;
@@ -55,16 +55,16 @@ class UsernamePasswordLoginStrategyTest {
 		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(credentialGateway,
 				authProfileQueryPort, passwordEncoder, loginAuditService);
 
-		UsernamePasswordLogin credential = new UsernamePasswordLogin();
-		credential.setUsername("u");
-		credential.setPassword("p");
-		when(loginAuditService.resolvePrincipal(credential)).thenReturn("u");
+		UsernamePasswordCommand command = new UsernamePasswordCommand();
+		command.setUsername("u");
+		command.setPassword("p");
+		when(loginAuditService.resolvePrincipal(command)).thenReturn("u");
 
 		AuthBusinessException exception = assertThrows(AuthBusinessException.class,
-				() -> strategy.authenticate(credential, httpServletRequest));
+				() -> strategy.authenticate(command, httpServletRequest));
 
 		assertEquals(AuthResultCode.USERNAME_OR_PASSWORD_ERROR, exception.getResultCode());
-		verify(loginAuditService).resolvePrincipal(credential);
+		verify(loginAuditService).resolvePrincipal(command);
 		verify(loginAuditService).auditUserUnknownAfterResolve(same(httpServletRequest),
 				eq(AuthLoginLogType.LOGIN_PASSWORD), eq("u"), eq(exception.getMessageKey()));
 	}
@@ -78,12 +78,12 @@ class UsernamePasswordLoginStrategyTest {
 		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(credentialGateway,
 				authProfileQueryPort, passwordEncoder, loginAuditService);
 
-		UsernamePasswordLogin credential = new UsernamePasswordLogin();
-		credential.setUsername("u");
-		credential.setPassword("p");
+		UsernamePasswordCommand command = new UsernamePasswordCommand();
+		command.setUsername("u");
+		command.setPassword("p");
 
 		AuthBusinessException exception = assertThrows(AuthBusinessException.class,
-				() -> strategy.authenticate(credential, httpServletRequest));
+				() -> strategy.authenticate(command, httpServletRequest));
 
 		assertEquals(AuthResultCode.USER_DISABLED, exception.getResultCode());
 		verify(loginAuditService).auditAccountDisabled(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_PASSWORD),
@@ -92,12 +92,12 @@ class UsernamePasswordLoginStrategyTest {
 	}
 
 	@Test
-	@DisplayName("supports 返回 UsernamePasswordLogin.class")
-	void supports_shouldReturnUsernamePasswordLoginClass() {
+	@DisplayName("supports 返回 UsernamePasswordCommand.class")
+	void supports_shouldReturnUsernamePasswordCommandClass() {
 		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(credentialGateway,
 				authProfileQueryPort, passwordEncoder, loginAuditService);
 
-		assertEquals(UsernamePasswordLogin.class, strategy.supports());
+		assertEquals(UsernamePasswordCommand.class, strategy.supports());
 	}
 
 	@Test
@@ -113,12 +113,12 @@ class UsernamePasswordLoginStrategyTest {
 		UsernamePasswordLoginStrategy strategy = new UsernamePasswordLoginStrategy(credentialGateway,
 				authProfileQueryPort, passwordEncoder, loginAuditService);
 
-		UsernamePasswordLogin credential = new UsernamePasswordLogin();
-		credential.setUsername("u");
-		credential.setPassword("p");
+		UsernamePasswordCommand command = new UsernamePasswordCommand();
+		command.setUsername("u");
+		command.setPassword("p");
 
 		AuthBusinessException exception = assertThrows(AuthBusinessException.class,
-				() -> strategy.authenticate(credential, httpServletRequest));
+				() -> strategy.authenticate(command, httpServletRequest));
 
 		assertEquals(AuthResultCode.USERNAME_OR_PASSWORD_ERROR_WITH_REMAINING, exception.getResultCode());
 		verify(loginAuditService).auditBadCredentialsWithRemaining(same(httpServletRequest),

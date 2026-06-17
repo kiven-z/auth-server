@@ -1,11 +1,6 @@
 package com.auth.service.auth.infrastructure.redis.session.support;
 
-import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.text.CharSequenceUtil;
-import com.auth.module.security.contract.api.UserSessionIndex;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.stereotype.Component;
+import static com.auth.module.security.contract.redis.SecurityRedisKey.USER_SESSION;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -14,7 +9,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.auth.module.security.contract.redis.SecurityRedisKey.USER_SESSION;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Component;
+
+import com.auth.module.security.contract.api.UserSessionIndex;
+
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 
 /**
  * 会话索引 Redis Hash 与 {@link UserSessionIndex} 互转；infrastructure: Map↔Bean
@@ -116,8 +118,11 @@ public class UserSessionIndexRedisCodec {
 	 * @return TTL，无法计算时返回默认 TTL
 	 */
 	public Duration resolveSessionTtl(@NotNull UserSessionIndex userSessionIndex) {
+		// 获取刷新令牌过期时间
 		Long refreshTokenExpiresAt = userSessionIndex.getRefreshTokenExpiresAt();
 		Duration ttl = USER_SESSION.getDefaultTtl();
+
+		// 计算会话 TTL
 		if (refreshTokenExpiresAt != null) {
 			long ttlSeconds = (refreshTokenExpiresAt - System.currentTimeMillis()) / 1000;
 			if (ttlSeconds > 0) {

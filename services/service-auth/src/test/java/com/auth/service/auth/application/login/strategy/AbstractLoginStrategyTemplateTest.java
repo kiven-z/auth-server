@@ -2,13 +2,13 @@ package com.auth.service.auth.application.login.strategy;
 
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.TestConstants;
-import com.auth.service.auth.application.login.audit.LoginAuditService;
-import com.auth.service.auth.application.login.input.credential.AbstractCredentialLogin;
-import com.auth.service.auth.application.port.AuthProfileQueryPort;
-import com.auth.service.auth.application.port.CredentialGateway;
-import com.auth.service.auth.domain.authentication.enums.AuthLoginLogType;
+import com.auth.service.auth.application.login.LoginAuditService;
+import com.auth.service.auth.application.login.input.BaseLoginCommand;
+import com.auth.service.auth.application.port.authorization.AuthProfileQueryPort;
+import com.auth.service.auth.application.port.login.CredentialPort;
 import com.auth.service.auth.domain.authentication.model.LoginAccount;
 import com.auth.service.auth.domain.authentication.model.LoginResult;
+import com.auth.service.auth.domain.authentication.model.enums.AuthLoginLogType;
 import com.auth.service.auth.shared.exception.AuthBadCredentialsException;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.AuthResultCode;
@@ -19,6 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.Serial;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -36,7 +37,7 @@ import static org.mockito.Mockito.when;
 class AbstractLoginStrategyTemplateTest {
 
 	@Mock
-	private CredentialGateway credentialGateway;
+	private CredentialPort credentialGateway;
 
 	@Mock
 	private AuthProfileQueryPort authProfileQueryPort;
@@ -63,7 +64,7 @@ class AbstractLoginStrategyTemplateTest {
 		TestStrategy strategy = new TestStrategy(credentialGateway, authProfileQueryPort, loginAuditService, account,
 				null);
 
-		LoginResult result = strategy.authenticate(new TestCredentialLogin(), httpServletRequest);
+		LoginResult result = strategy.authenticate(new TestLoginCommand(), httpServletRequest);
 
 		verify(credentialGateway).assertNotLocked(TestConstants.USER_ID);
 		verify(authProfileQueryPort).buildByUserId(TestConstants.USER_ID);
@@ -83,10 +84,10 @@ class AbstractLoginStrategyTemplateTest {
 
 		TestStrategy strategy = new TestStrategy(credentialGateway, authProfileQueryPort, loginAuditService, account,
 				new AuthBadCredentialsException("bad"));
-		TestCredentialLogin credential = new TestCredentialLogin();
+		TestLoginCommand command = new TestLoginCommand();
 
 		AuthBusinessException exception = assertThrows(AuthBusinessException.class,
-				() -> strategy.authenticate(credential, httpServletRequest));
+				() -> strategy.authenticate(command, httpServletRequest));
 
 		assertEquals(AuthResultCode.USERNAME_OR_PASSWORD_ERROR_WITH_REMAINING, exception.getResultCode());
 		verify(credentialGateway).recordFailure(TestConstants.USER_ID);
@@ -94,7 +95,10 @@ class AbstractLoginStrategyTemplateTest {
 				eq(AuthLoginLogType.LOGIN_PASSWORD), eq(TestConstants.USER_ID), eq("u"), eq(3));
 	}
 
-	static class TestCredentialLogin extends AbstractCredentialLogin {
+	static class TestLoginCommand extends BaseLoginCommand {
+
+		@Serial
+		private static final long serialVersionUID = 1L;
 
 		@Override
 		public AuthLoginLogType loginLogType() {
@@ -108,13 +112,13 @@ class AbstractLoginStrategyTemplateTest {
 
 	}
 
-	static class TestStrategy extends AbstractLoginStrategyTemplate<TestCredentialLogin> {
+	static class TestStrategy extends AbstractLoginStrategyTemplate<TestLoginCommand> {
 
 		private final LoginAccount accountToReturn;
 
 		private final RuntimeException authenticateException;
 
-		TestStrategy(CredentialGateway credentialGateway, AuthProfileQueryPort authProfileQueryPort,
+		TestStrategy(CredentialPort credentialGateway, AuthProfileQueryPort authProfileQueryPort,
 				LoginAuditService loginAuditService, LoginAccount accountToReturn,
 				RuntimeException authenticateException) {
 			super(credentialGateway, authProfileQueryPort, loginAuditService);
@@ -128,12 +132,12 @@ class AbstractLoginStrategyTemplateTest {
 		}
 
 		@Override
-		protected LoginAccount resolveAccount(TestCredentialLogin credential) {
+		protected LoginAccount resolveAccount(TestLoginCommand command) {
 			return accountToReturn;
 		}
 
 		@Override
-		protected AuthLoginLogType doAuthenticate(TestCredentialLogin credential, LoginAccount account) {
+		protected AuthLoginLogType doAuthenticate(TestLoginCommand command, LoginAccount account) {
 			if (authenticateException != null) {
 				throw authenticateException;
 			}
@@ -141,8 +145,8 @@ class AbstractLoginStrategyTemplateTest {
 		}
 
 		@Override
-		public Class<TestCredentialLogin> supports() {
-			return TestCredentialLogin.class;
+		public Class<TestLoginCommand> supports() {
+			return TestLoginCommand.class;
 		}
 
 	}

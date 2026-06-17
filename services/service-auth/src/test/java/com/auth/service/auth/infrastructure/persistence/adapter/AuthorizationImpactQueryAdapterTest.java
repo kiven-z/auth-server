@@ -3,7 +3,7 @@ package com.auth.service.auth.infrastructure.persistence.adapter;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.module.security.contract.dto.invalidation.GrantSubjectKey;
 import com.auth.service.auth.config.AuthorizationInvalidationProperties;
-import com.auth.service.auth.infrastructure.persistence.AuthorizationImpactMapper;
+import com.auth.service.auth.infrastructure.persistence.mapper.AuthorizationImpactMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -111,6 +112,40 @@ class AuthorizationImpactQueryAdapterTest {
 		Set<Long> userIds = adapter.findUserIdsByPolicyCodes(List.of("POL_A"));
 
 		assertEquals(Set.of(1L, 2L), userIds);
+	}
+
+	@Test
+	@DisplayName("部门 ID 超过分片大小时应分批查询并合并去重")
+	void findUserIdsByDeptIds_largeInput_shouldQueryInChunks() {
+		invalidationProperties.setBatchSize(500);
+		List<Long> deptIds = IntStream.rangeClosed(1, 1200).mapToObj(Long::valueOf).toList();
+
+		when(authorizationImpactMapper.selectUserIdsByDeptIds(anyList())).thenAnswer(invocation -> {
+			List<Long> chunk = invocation.getArgument(0);
+			return List.of(chunk.get(0));
+		});
+
+		Set<Long> userIds = adapter.findUserIdsByDeptIds(deptIds);
+
+		assertEquals(3, userIds.size());
+		verify(authorizationImpactMapper, times(3)).selectUserIdsByDeptIds(anyList());
+	}
+
+	@Test
+	@DisplayName("角色码超过分片大小时应分批查询")
+	void findUserIdsByRoleCodes_largeInput_shouldQueryInChunks() {
+		invalidationProperties.setBatchSize(2);
+		List<String> roleCodes = List.of("R_1", "R_2", "R_3", "R_4", "R_5");
+
+		when(authorizationImpactMapper.selectUserIdsByRoleCodes(anyList())).thenAnswer(invocation -> {
+			List<String> chunk = invocation.getArgument(0);
+			return List.of((long) chunk.size());
+		});
+
+		Set<Long> userIds = adapter.findUserIdsByRoleCodes(roleCodes);
+
+		assertEquals(Set.of(1L, 2L), userIds);
+		verify(authorizationImpactMapper, times(3)).selectUserIdsByRoleCodes(anyList());
 	}
 
 }
