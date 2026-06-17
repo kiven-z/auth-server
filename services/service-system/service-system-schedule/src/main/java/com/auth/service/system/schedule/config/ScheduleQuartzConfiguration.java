@@ -30,6 +30,8 @@ public class ScheduleQuartzConfiguration {
 		return factory -> {
 			factory.setApplicationContextSchedulerContextKey(APPLICATION_CONTEXT_KEY);
 			factory.setGlobalJobListeners(sysJobExecutionListener);
+			// 由 SysJobBootstrapSynchronizer 在对账完成后再 start，避免与删建 Trigger 竞态
+			factory.setAutoStartup(false);
 		};
 	}
 
