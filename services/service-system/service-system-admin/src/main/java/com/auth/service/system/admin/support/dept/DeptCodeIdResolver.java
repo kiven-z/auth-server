@@ -35,6 +35,7 @@ public class DeptCodeIdResolver {
 		if (CollUtil.isEmpty(rows)) {
 			return Map.of();
 		}
+
 		List<String> deptCodes = rows.stream()
 			.map(deptCodeGetter)
 			.filter(CharSequenceUtil::isNotBlank)
@@ -44,6 +45,7 @@ public class DeptCodeIdResolver {
 		if (deptCodes.isEmpty()) {
 			return Map.of();
 		}
+
 		return sysDeptMapper.selectActiveByDeptCodes(deptCodes)
 			.stream()
 			.collect(Collectors.toMap(SysDeptEntity::getDeptCode, SysDeptEntity::getId, (left, right) -> left,

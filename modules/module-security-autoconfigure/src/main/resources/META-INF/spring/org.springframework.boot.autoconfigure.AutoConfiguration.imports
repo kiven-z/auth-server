@@ -1,1 +1,2 @@
 com.auth.module.security.autoconfigure.boot.ModuleSecurityAutoConfiguration
+com.auth.module.security.autoconfigure.boot.outbound.SecurityOutboundAutoConfiguration

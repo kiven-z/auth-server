@@ -1,6 +1,7 @@
-package com.auth.module.security.starter.feign;
+package com.auth.module.security.starter.outbound;
 
-import com.auth.module.security.autoconfigure.feign.InternalJwtFeignRequestInterceptor;
+import com.auth.module.security.autoconfigure.outbound.InternalJwtFeignRequestInterceptor;
+import com.auth.module.security.autoconfigure.outbound.OutboundInternalJwtIssuer;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.module.security.contract.constants.SecurityInternalTokenConstants;
 import com.auth.module.security.core.token.provider.InternalTokenProvider;
@@ -36,7 +37,8 @@ class InternalJwtFeignRequestInterceptorTest {
 		InternalTokenProvider provider = mock(InternalTokenProvider.class);
 		when(provider.buildServiceToken(eq(SERVICE_ID), anyString())).thenReturn("svc.internal.jwt");
 
-		InternalJwtFeignRequestInterceptor interceptor = new InternalJwtFeignRequestInterceptor(provider, SERVICE_ID);
+		InternalJwtFeignRequestInterceptor interceptor = new InternalJwtFeignRequestInterceptor(
+				new OutboundInternalJwtIssuer(provider, SERVICE_ID));
 
 		RequestTemplate template = new RequestTemplate();
 		template.header(HttpHeaders.AUTHORIZATION, "Bearer external.token");
@@ -57,7 +59,8 @@ class InternalJwtFeignRequestInterceptorTest {
 		InternalTokenProvider provider = mock(InternalTokenProvider.class);
 		when(provider.buildServiceToken(eq(SERVICE_ID), anyString())).thenReturn("svc.internal.jwt");
 
-		InternalJwtFeignRequestInterceptor interceptor = new InternalJwtFeignRequestInterceptor(provider, SERVICE_ID);
+		InternalJwtFeignRequestInterceptor interceptor = new InternalJwtFeignRequestInterceptor(
+				new OutboundInternalJwtIssuer(provider, SERVICE_ID));
 
 		RequestTemplate template = new RequestTemplate();
 		template.header(SecurityInternalTokenConstants.INTERNAL_HEADER, "stale-token");
@@ -82,7 +85,8 @@ class InternalJwtFeignRequestInterceptorTest {
 		InternalTokenProvider provider = mock(InternalTokenProvider.class);
 		when(provider.buildToken(eq(1001L), anyString(), eq(5L))).thenReturn("user.internal.jwt");
 
-		InternalJwtFeignRequestInterceptor interceptor = new InternalJwtFeignRequestInterceptor(provider, SERVICE_ID);
+		InternalJwtFeignRequestInterceptor interceptor = new InternalJwtFeignRequestInterceptor(
+				new OutboundInternalJwtIssuer(provider, SERVICE_ID));
 
 		RequestTemplate template = new RequestTemplate();
 		template.header(HttpHeaders.AUTHORIZATION, "Bearer external.token");
@@ -111,7 +115,8 @@ class InternalJwtFeignRequestInterceptorTest {
 		InternalTokenProvider provider = mock(InternalTokenProvider.class);
 		when(provider.buildServiceToken(eq(SERVICE_ID), anyString())).thenReturn("svc.internal.jwt");
 
-		InternalJwtFeignRequestInterceptor interceptor = new InternalJwtFeignRequestInterceptor(provider, SERVICE_ID);
+		InternalJwtFeignRequestInterceptor interceptor = new InternalJwtFeignRequestInterceptor(
+				new OutboundInternalJwtIssuer(provider, SERVICE_ID));
 
 		RequestTemplate template = new RequestTemplate();
 		interceptor.apply(template);
@@ -136,7 +141,8 @@ class InternalJwtFeignRequestInterceptorTest {
 		InternalTokenProvider provider = mock(InternalTokenProvider.class);
 		when(provider.buildServiceToken(eq(SERVICE_ID), anyString())).thenReturn("svc.internal.jwt");
 
-		InternalJwtFeignRequestInterceptor interceptor = new InternalJwtFeignRequestInterceptor(provider, SERVICE_ID);
+		InternalJwtFeignRequestInterceptor interceptor = new InternalJwtFeignRequestInterceptor(
+				new OutboundInternalJwtIssuer(provider, SERVICE_ID));
 
 		RequestTemplate template = new RequestTemplate();
 		interceptor.apply(template);

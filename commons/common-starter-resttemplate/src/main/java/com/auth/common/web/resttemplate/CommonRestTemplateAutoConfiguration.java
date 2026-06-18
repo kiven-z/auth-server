@@ -1,6 +1,7 @@
 package com.auth.common.web.resttemplate;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -40,8 +41,10 @@ public class CommonRestTemplateAutoConfiguration implements ApplicationRunner {
 	@ConditionalOnMissingBean(name = "loadBalancedRestTemplate")
 	@LoadBalanced
 	@Bean
-	public RestTemplate loadBalancedRestTemplate() {
-		return new RestTemplate();
+	public RestTemplate loadBalancedRestTemplate(ObjectProvider<LoadBalancedRestTemplateCustomizer> customizers) {
+		RestTemplate restTemplate = new RestTemplate();
+		customizers.orderedStream().forEach(customizer -> customizer.customize(restTemplate));
+		return restTemplate;
 	}
 
 }

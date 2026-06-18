@@ -36,6 +36,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.auth</groupId>
+            <artifactId>common-starter-resttemplate</artifactId>
+            <version>0.0.2-beta</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>

@@ -1,6 +1,5 @@
 package com.auth.service.system.schedule.task.builtin;
 
-import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
 import com.auth.service.system.schedule.model.jobparams.HttpInvokeJobParams;
 import com.auth.service.system.schedule.task.support.BuiltinJobParamsParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,7 +10,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.http.HttpEntity;
@@ -21,8 +19,8 @@ import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
 
 /**
@@ -51,11 +49,10 @@ class HttpInvokeJobTest {
 
 	@Test
 	@DisplayName("execute：应使用 job_params 中的 url、query 与 headers 发起 GET")
-	void execute_invokesGetWithConfiguredUrlQueryAndHeaders() throws JobExecutionException {
+	void execute_invokesGetWithConfiguredUrlQueryAndHeaders() throws Exception {
 		JobExecutionContext context = mock(JobExecutionContext.class);
 
 		HttpInvokeJobParams params = new HttpInvokeJobParams();
-		params.setVersion(1);
 		params.setMethod(HttpMethod.GET);
 		params.setUrl("https://example.com/api");
 		params.setQuery(java.util.Map.of("page", "1"));
@@ -112,10 +109,7 @@ class HttpInvokeJobTest {
 	}
 
 	private void stubJobParams(JobExecutionContext context, HttpInvokeJobParams params) {
-		JobDataMap jobDataMap = new JobDataMap();
-		jobDataMap.put(SysJobQuartzDataKeys.JOB_PARAMS, "{}");
-		when(context.getMergedJobDataMap()).thenReturn(jobDataMap);
-		when(builtinJobParamsParser.parseAndValidate(anyString(), eq(HttpInvokeJobParams.class))).thenReturn(params);
+		when(builtinJobParamsParser.parse(same(context), eq(HttpInvokeJobParams.class))).thenReturn(params);
 	}
 
 }

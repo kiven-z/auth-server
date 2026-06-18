@@ -4,9 +4,10 @@ import cn.hutool.core.net.url.UrlBuilder;
 import com.auth.common.web.resttemplate.RestTemplateUtil;
 import com.auth.service.system.schedule.annotation.QuartzTask;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
-import com.auth.service.system.schedule.model.jobparams.BuiltinRemoteHttpMethod;
 import com.auth.service.system.schedule.model.jobparams.FeignInvokeJobParams;
 import com.auth.service.system.schedule.task.support.BuiltinJobParamsParser;
+import com.auth.service.system.schedule.task.support.BuiltinRemoteHttpParamsSupport;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -18,17 +19,18 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
-import java.util.Objects;
 
 /**
- * 通用微服务远程调用内置任务：通过负载均衡 {@link RestTemplate} 访问 {@code http://{serviceName}{path}}
+ * 通用微服务远程调用内置任务：通过负载均衡 {@link RestTemplate} 访问 {@code http://{serviceName}{path}}。 出站
+ * {@code X-Internal-JWT} 由 security 模块自动附加，无需在 job_params 中配置。
  *
  * @author Bunny
  */
-@QuartzTask(name = "FeignInvoke", description = "通用微服务调用：job_params 配置 serviceName、path、method 与可选 headers/body",
+@QuartzTask(name = "FeignInvoke",
+		description = "微服务 HTTP：serviceName+path+method 必填；headers/query/body 为 JSON；JWT 自动附加",
 		modes = { SysJobTaskType.CUSTOM_CLASS },
 		example = """
-				{"version":1,"serviceName":"order-service","path":"/api/order/health","method":"GET","headers":{"X-Token":"your-token"}}
+				{"serviceName":"service-example","path":"/api/example/inner/schedule","method":"DELETE","headers":{"Content-Type":"application/json"},"query":{"id":1},"body":{"id":1}}
 				""")
 @Slf4j
 @Component
@@ -38,39 +40,35 @@ public class FeignInvokeJob implements Job {
 
 	private final RestTemplate loadBalancedRestTemplate;
 
+	private final ObjectMapper objectMapper;
+
 	public FeignInvokeJob(BuiltinJobParamsParser builtinJobParamsParser,
-			@Qualifier("loadBalancedRestTemplate") RestTemplate loadBalancedRestTemplate) {
+			@Qualifier("loadBalancedRestTemplate") RestTemplate loadBalancedRestTemplate, ObjectMapper objectMapper) {
 		this.builtinJobParamsParser = builtinJobParamsParser;
 		this.loadBalancedRestTemplate = loadBalancedRestTemplate;
+		this.objectMapper = objectMapper;
 	}
 
 	@Override
 	public void execute(JobExecutionContext context) throws JobExecutionException {
 		try {
-			// 获取jobParamsJson
-			String jobParamsJson = BuiltinJobParamsParser.requireRawJson(context);
-			FeignInvokeJobParams params = builtinJobParamsParser.parseAndValidate(jobParamsJson,
-					FeignInvokeJobParams.class);
+			FeignInvokeJobParams params = builtinJobParamsParser.parse(context, FeignInvokeJobParams.class);
 
-			// 获取serviceName和path
-			String serviceName = Objects.requireNonNull(params.getServiceName(), "serviceName").trim();
-			String path = Objects.requireNonNull(params.getPath(), "path").trim();
-			String url = UrlBuilder.of().setScheme("http").setHost(serviceName).addPath(path).build();
+			String serviceName = params.getServiceName().trim();
+			String path = params.getPath().trim();
+			String baseUrl = UrlBuilder.of().setScheme("http").setHost(serviceName).addPath(path).build();
+			String url = BuiltinRemoteHttpParamsSupport.buildUrlWithQuery(baseUrl, params.getQuery());
 
-			// 获取method
-			BuiltinRemoteHttpMethod builtinMethod = Objects.requireNonNull(params.getMethod(), "method");
-			HttpMethod method = HttpMethod.valueOf(builtinMethod.name());
+			HttpMethod method = HttpMethod.valueOf(params.getMethod().name());
 
-			// 获取headers和body
 			Map<String, String> headers = params.getHeaders();
-			String body = params.getBody();
+			String body = BuiltinRemoteHttpParamsSupport.serializeBody(params.getBody(), objectMapper);
 			ResponseEntity<String> response = RestTemplateUtil.exchange(loadBalancedRestTemplate, url, method, headers,
 					body);
 
-			// 获取responseBody
 			String responseBody = response.getBody();
 			log.debug("FeignInvokeJob ok service={} path={} method={} status={} respLen={}", params.getServiceName(),
-					params.getPath(), builtinMethod, response.getStatusCode().value(),
+					params.getPath(), params.getMethod(), response.getStatusCode().value(),
 					responseBody == null ? 0 : responseBody.length());
 		}
 		catch (Exception exception) {

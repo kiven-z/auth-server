@@ -12,6 +12,7 @@ import com.auth.service.auth.domain.authentication.model.RefreshSessionResult;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -80,16 +81,16 @@ public class AuthSessionApplicationService {
 	public void completeLogout(HttpServletRequest request, HttpServletResponse response) {
 		try {
 			Optional<LogoutSessionHint> auditHint = Optional.empty();
+			String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-			String authHeader = request.getHeader("Authorization");
 			if (authHeader != null && authHeader.startsWith(BEARER_PREFIX)) {
 				String token = authHeader.substring(BEARER_PREFIX.length());
 				auditHint = loginApplicationService.logout(token);
 			}
+
 			String refreshToken = refreshCookiePort.readRefreshToken(request);
 			Optional<LogoutSessionHint> refreshHint = refreshTokenService.revokeByRefreshToken(refreshToken);
 			auditHint = auditHint.or(() -> refreshHint);
-
 			auditHint.ifPresent(hint -> loginAuditService.auditLogoutSuccess(request, hint.userId(), hint.jti()));
 		}
 		finally {

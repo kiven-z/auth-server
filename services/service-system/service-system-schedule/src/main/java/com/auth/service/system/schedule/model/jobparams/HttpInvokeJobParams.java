@@ -20,14 +20,10 @@ import java.util.Map;
 @Schema(name = "HttpInvokeJobParams", title = "HTTP 调用任务参数")
 @Getter
 @Setter
-public class HttpInvokeJobParams implements VersionedJobParams, Serializable {
+public class HttpInvokeJobParams implements Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
-
-	@Schema(title = "载荷协议版本")
-	@NotNull
-	private Integer version = VersionedJobParams.VERSION_1;
 
 	@Schema(title = "HTTP 方法", allowableValues = { "GET", "POST", "PUT", "DELETE" })
 	@NotNull
@@ -40,7 +36,7 @@ public class HttpInvokeJobParams implements VersionedJobParams, Serializable {
 	@Schema(title = "请求头")
 	private Map<String, String> headers;
 
-	@Schema(title = "查询参数（拼接到 URL）")
+	@Schema(title = "查询参数（一层键值对）")
 	private Map<String, String> query;
 
 	@Schema(title = "请求体（JSON 对象或数组；GET/DELETE 忽略）")

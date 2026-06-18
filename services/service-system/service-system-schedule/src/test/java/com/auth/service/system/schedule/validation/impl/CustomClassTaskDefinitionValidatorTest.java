@@ -42,7 +42,7 @@ class CustomClassTaskDefinitionValidatorTest {
 
 		SysJobEntity job = new SysJobEntity();
 		job.setJobClass(className);
-		job.setJobParams("{\"version\":1,\"method\":\"GET\",\"url\":\"https://example.com\"}");
+		job.setJobParams("{\"method\":\"GET\",\"url\":\"https://example.com\"}");
 
 		validator.validate(job);
 

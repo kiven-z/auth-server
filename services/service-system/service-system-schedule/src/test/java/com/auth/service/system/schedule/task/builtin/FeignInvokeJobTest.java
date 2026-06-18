@@ -1,9 +1,9 @@
 package com.auth.service.system.schedule.task.builtin;
 
-import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
 import com.auth.service.system.schedule.model.jobparams.BuiltinRemoteHttpMethod;
 import com.auth.service.system.schedule.model.jobparams.FeignInvokeJobParams;
 import com.auth.service.system.schedule.task.support.BuiltinJobParamsParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,7 +12,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.http.HttpEntity;
@@ -22,8 +21,8 @@ import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
 
 /**
@@ -35,6 +34,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class FeignInvokeJobTest {
 
+	private final ObjectMapper objectMapper = new ObjectMapper();
+
 	@Mock
 	private BuiltinJobParamsParser builtinJobParamsParser;
 
@@ -45,7 +46,7 @@ class FeignInvokeJobTest {
 
 	@BeforeEach
 	void setUp() {
-		feignInvokeJob = new FeignInvokeJob(builtinJobParamsParser, loadBalancedRestTemplate);
+		feignInvokeJob = new FeignInvokeJob(builtinJobParamsParser, loadBalancedRestTemplate, objectMapper);
 	}
 
 	@Test
@@ -69,17 +70,16 @@ class FeignInvokeJobTest {
 	}
 
 	@Test
-	@DisplayName("execute：应使用负载均衡 URL 与 POST body 发起调用")
-	void execute_invokesPostAgainstLoadBalancedServiceUrl() throws JobExecutionException {
+	@DisplayName("execute：应使用负载均衡 URL 与 POST JSON body 发起调用")
+	void execute_invokesPostAgainstLoadBalancedServiceUrl() throws Exception {
 		JobExecutionContext context = mock(JobExecutionContext.class);
 
 		FeignInvokeJobParams params = new FeignInvokeJobParams();
-		params.setVersion(1);
 		params.setServiceName("order-service");
 		params.setPath("/api/internal/sync");
 		params.setMethod(BuiltinRemoteHttpMethod.POST);
 		params.setHeaders(java.util.Map.of("Content-Type", "application/json"));
-		params.setBody("{\"id\":1}");
+		params.setBody(objectMapper.readTree("{\"id\":1}"));
 		stubJobParams(context, params);
 		when(loadBalancedRestTemplate.exchange(eq("http://order-service/api/internal/sync"), eq(HttpMethod.POST),
 				ArgumentMatchers.any(), eq(String.class)))
@@ -96,24 +96,25 @@ class FeignInvokeJobTest {
 	}
 
 	@Test
-	@DisplayName("execute：GET 调用不应携带 body")
-	void execute_getRequest_usesHeadersOnlyEntity() throws JobExecutionException {
+	@DisplayName("execute：GET 应拼接 query 且不携带 body")
+	void execute_getRequest_appendsQueryWithoutBody() throws Exception {
 		JobExecutionContext context = mock(JobExecutionContext.class);
 
 		FeignInvokeJobParams params = new FeignInvokeJobParams();
 		params.setServiceName("auth-service");
-		params.setPath("api/health");
+		params.setPath("/api/health");
 		params.setMethod(BuiltinRemoteHttpMethod.GET);
+		params.setQuery(java.util.Map.of("verbose", "true"));
 		stubJobParams(context, params);
-		when(loadBalancedRestTemplate.exchange(eq("http://auth-service/api/health"), eq(HttpMethod.GET),
-				ArgumentMatchers.any(), eq(String.class)))
+		when(loadBalancedRestTemplate.exchange(org.mockito.ArgumentMatchers.contains("verbose=true"),
+				eq(HttpMethod.GET), ArgumentMatchers.any(), eq(String.class)))
 			.thenReturn(ResponseEntity.ok("UP"));
 
 		feignInvokeJob.execute(context);
 
 		ArgumentCaptor<HttpEntity<Void>> entityCaptor = ArgumentCaptor.forClass(HttpEntity.class);
-		verify(loadBalancedRestTemplate).exchange(eq("http://auth-service/api/health"), eq(HttpMethod.GET),
-				entityCaptor.capture(), eq(String.class));
+		verify(loadBalancedRestTemplate).exchange(org.mockito.ArgumentMatchers.contains("verbose=true"),
+				eq(HttpMethod.GET), entityCaptor.capture(), eq(String.class));
 		assertThat(entityCaptor.getValue().getBody()).isNull();
 	}
 
@@ -135,10 +136,7 @@ class FeignInvokeJobTest {
 	}
 
 	private void stubJobParams(JobExecutionContext context, FeignInvokeJobParams params) {
-		JobDataMap jobDataMap = new JobDataMap();
-		jobDataMap.put(SysJobQuartzDataKeys.JOB_PARAMS, "{}");
-		when(context.getMergedJobDataMap()).thenReturn(jobDataMap);
-		when(builtinJobParamsParser.parseAndValidate(anyString(), eq(FeignInvokeJobParams.class))).thenReturn(params);
+		when(builtinJobParamsParser.parse(same(context), eq(FeignInvokeJobParams.class))).thenReturn(params);
 	}
 
 }

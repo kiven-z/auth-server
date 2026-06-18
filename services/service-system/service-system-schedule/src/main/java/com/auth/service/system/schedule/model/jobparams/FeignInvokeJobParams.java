@@ -1,5 +1,6 @@
 package com.auth.service.system.schedule.model.jobparams;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -18,14 +19,10 @@ import java.util.Map;
 @Schema(name = "FeignInvokeJobParams", title = "微服务远程调用任务参数")
 @Getter
 @Setter
-public class FeignInvokeJobParams implements VersionedJobParams, Serializable {
+public class FeignInvokeJobParams implements Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
-
-	@Schema(title = "载荷协议版本")
-	@NotNull
-	private Integer version = VersionedJobParams.VERSION_1;
 
 	@Schema(title = "目标微服务名（注册中心 serviceId）")
 	@NotBlank
@@ -42,7 +39,10 @@ public class FeignInvokeJobParams implements VersionedJobParams, Serializable {
 	@Schema(title = "请求头")
 	private Map<String, String> headers;
 
-	@Schema(title = "请求体（原始字符串，如 JSON；GET/DELETE 可省略）")
-	private String body;
+	@Schema(title = "查询参数（一层键值对）")
+	private Map<String, String> query;
+
+	@Schema(title = "请求体（JSON 对象或数组；GET/DELETE 可省略）")
+	private transient JsonNode body;
 
 }

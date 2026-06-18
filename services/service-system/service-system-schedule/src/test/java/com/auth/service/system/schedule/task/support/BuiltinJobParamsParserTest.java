@@ -3,14 +3,7 @@ package com.auth.service.system.schedule.task.support;
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
 import com.auth.service.system.schedule.model.jobparams.HttpInvokeJobParams;
-import com.auth.service.system.schedule.model.jobparams.VersionedJobParams;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.Setter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,49 +28,32 @@ class BuiltinJobParamsParserTest {
 
 	@BeforeEach
 	void setUp() {
-		Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
-		parser = new BuiltinJobParamsParser(new ObjectMapper(), validator);
+		parser = new BuiltinJobParamsParser(new ObjectMapper());
 	}
 
 	@Test
-	@DisplayName("parseAndValidate：合法 JSON 应反序列化并通过校验")
-	void parseAndValidate_whenJsonValid_returnsParams() {
-		SampleParams actual = parser.parseAndValidate("{\"version\":1,\"name\":\"demo\"}", SampleParams.class);
+	@DisplayName("parse：合法 JSON 应反序列化")
+	void parse_whenJsonValid_returnsParams() {
+		SampleParams actual = parser.parse("{\"name\":\"demo\"}", SampleParams.class);
 
-		assertThat(actual.getVersion()).isEqualTo(1);
 		assertThat(actual.getName()).isEqualTo("demo");
 	}
 
 	@Test
-	@DisplayName("parseAndValidate：缺少必填字段应抛出 SysJobException")
-	void parseAndValidate_whenBeanValidationFails_throws() {
-		assertThatThrownBy(() -> parser.parseAndValidate("{\"version\":1}", SampleParams.class))
-			.isInstanceOf(SysJobException.class)
-			.hasMessageContaining("must not be blank");
-	}
-
-	@Test
-	@DisplayName("parseAndValidate：不支持的版本号应抛出 SysJobException")
-	void parseAndValidate_whenVersionUnsupported_throws() {
-		assertThatThrownBy(() -> parser.parseAndValidate("{\"version\":2,\"name\":\"demo\"}", SampleParams.class))
-			.isInstanceOf(SysJobException.class);
-	}
-
-	@Test
-	@DisplayName("parseAndValidate：HttpInvokeJobParams method 应反序列化为 HttpMethod")
-	void parseAndValidate_whenHttpInvokeParams_deserializesHttpMethod() {
-		HttpInvokeJobParams actual = parser.parseAndValidate(
-				"{\"version\":1,\"method\":\"POST\",\"url\":\"https://example.com\"}", HttpInvokeJobParams.class);
+	@DisplayName("parse：HttpInvokeJobParams method 应反序列化为 HttpMethod")
+	void parse_whenHttpInvokeParams_deserializesHttpMethod() {
+		HttpInvokeJobParams actual = parser.parse("{\"method\":\"POST\",\"url\":\"https://example.com\"}",
+				HttpInvokeJobParams.class);
 
 		assertThat(actual.getMethod()).isEqualTo(HttpMethod.POST);
 		assertThat(actual.getUrl()).isEqualTo("https://example.com");
 	}
 
 	@Test
-	@DisplayName("parseAndValidate：HttpInvokeJobParams body 应反序列化为 JSON 对象")
-	void parseAndValidate_whenHttpInvokeParams_deserializesJsonObjectBody() {
-		HttpInvokeJobParams actual = parser.parseAndValidate(
-				"{\"version\":1,\"method\":\"POST\",\"url\":\"https://example.com\",\"body\":{\"title\":\"foo\",\"userId\":1}}",
+	@DisplayName("parse：HttpInvokeJobParams body 应反序列化为 JSON 对象")
+	void parse_whenHttpInvokeParams_deserializesJsonObjectBody() {
+		HttpInvokeJobParams actual = parser.parse(
+				"{\"method\":\"POST\",\"url\":\"https://example.com\",\"body\":{\"title\":\"foo\",\"userId\":1}}",
 				HttpInvokeJobParams.class);
 
 		assertThat(actual.getBody()).isNotNull();
@@ -86,37 +62,38 @@ class BuiltinJobParamsParserTest {
 	}
 
 	@Test
-	@DisplayName("requireRawJson + parseAndValidate：应从 JobDataMap 读取并解析 jobParams")
-	void parseAndValidate_fromContext_readsRawJsonFromJobDataMap() {
+	@DisplayName("parse(context)：应从 JobDataMap 读取并解析 jobParams")
+	void parse_fromContext_readsRawJsonFromJobDataMap() {
 		JobExecutionContext context = mock(JobExecutionContext.class);
 		JobDataMap jobDataMap = new JobDataMap();
-		jobDataMap.put(SysJobQuartzDataKeys.JOB_PARAMS, "{\"version\":1,\"name\":\"from-map\"}");
+		jobDataMap.put(SysJobQuartzDataKeys.JOB_PARAMS, "{\"name\":\"from-map\"}");
 		when(context.getMergedJobDataMap()).thenReturn(jobDataMap);
 
-		SampleParams actual = parser.parseAndValidate(BuiltinJobParamsParser.requireRawJson(context),
-				SampleParams.class);
+		SampleParams actual = parser.parse(context, SampleParams.class);
 
 		assertThat(actual.getName()).isEqualTo("from-map");
 	}
 
 	@Test
-	@DisplayName("requireRawJson：job_params 为空时应抛出 SysJobException")
-	void requireRawJson_whenMissing_throws() {
+	@DisplayName("parse(context)：job_params 为空时应抛出 SysJobException")
+	void parse_fromContext_whenMissing_throws() {
 		JobExecutionContext context = mock(JobExecutionContext.class);
 		when(context.getMergedJobDataMap()).thenReturn(new JobDataMap());
 
-		assertThatThrownBy(() -> BuiltinJobParamsParser.requireRawJson(context)).isInstanceOf(SysJobException.class);
+		assertThatThrownBy(() -> parser.parse(context, SampleParams.class)).isInstanceOf(SysJobException.class);
 	}
 
-	@Getter
-	@Setter
-	private static class SampleParams implements VersionedJobParams {
+	private static class SampleParams {
 
-		@NotNull
-		private Integer version;
-
-		@NotBlank
 		private String name;
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
 
 	}
 

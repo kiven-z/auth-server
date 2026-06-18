@@ -2,14 +2,13 @@ package com.auth.service.system.schedule.support;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.schedule.annotation.QuartzTask;
-import com.auth.service.system.schedule.model.jobparams.FeignInvokeJobParams;
-import com.auth.service.system.schedule.model.jobparams.HttpInvokeJobParams;
-import com.auth.service.system.schedule.task.builtin.FeignInvokeJob;
-import com.auth.service.system.schedule.task.builtin.HttpInvokeJob;
+import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.task.support.BuiltinJobParamsParser;
+import com.auth.service.system.schedule.validation.task.BuiltinJobParamsValidator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -29,27 +28,32 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 @DisplayName("QuartzTask example 与 job_params 校验一致性")
 class QuartzTaskExampleValidationTest {
 
-	private static BuiltinJobParamsParser parser;
+	private static BuiltinJobParamsValidator validator;
 
 	@BeforeAll
-	static void setUpParser() {
+	static void setUpValidator() {
 		Validator beanValidator = Validation.buildDefaultValidatorFactory().getValidator();
-		parser = new BuiltinJobParamsParser(new ObjectMapper(), beanValidator);
+		validator = new BuiltinJobParamsValidator(new BuiltinJobParamsParser(new ObjectMapper()), beanValidator);
 	}
 
 	static Stream<Arguments> builtinJobExamples() {
-		return Stream.of(Arguments.of(HttpInvokeJob.class, HttpInvokeJobParams.class),
-				Arguments.of(FeignInvokeJob.class, FeignInvokeJobParams.class));
+		return Stream.of(Arguments.of(com.auth.service.system.schedule.task.builtin.HttpInvokeJob.class),
+				Arguments.of(com.auth.service.system.schedule.task.builtin.FeignInvokeJob.class));
 	}
 
-	@DisplayName("@QuartzTask example 应能通过 parseAndValidate")
+	@DisplayName("@QuartzTask example 应能通过 validateIfPresent")
 	@ParameterizedTest(name = "{0}")
 	@MethodSource("builtinJobExamples")
-	void quartzTaskExample_passesValidation(Class<?> jobClass, Class<?> paramsClass) {
+	void quartzTaskExample_passesValidation(Class<?> jobClass) {
 		QuartzTask ann = AnnotationUtils.findAnnotation(jobClass, QuartzTask.class);
+		Assertions.assertNotNull(ann);
 		String example = CharSequenceUtil.trim(ann.example());
 
-		assertThatCode(() -> parser.parseAndValidate(example, paramsClass)).doesNotThrowAnyException();
+		SysJobEntity job = new SysJobEntity();
+		job.setJobClass(jobClass.getName());
+		job.setJobParams(example);
+
+		assertThatCode(() -> validator.validateIfPresent(job)).doesNotThrowAnyException();
 	}
 
 }

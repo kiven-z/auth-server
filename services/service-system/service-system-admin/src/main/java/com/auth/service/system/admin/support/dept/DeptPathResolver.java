@@ -31,6 +31,7 @@ public class DeptPathResolver {
 		if (CollUtil.isEmpty(ids)) {
 			return Collections.emptyMap();
 		}
+
 		List<SysDeptPathRowPO> rows = sysDeptMapper.selectDeptPathByIds(ids);
 		return rows.stream()
 			.collect(Collectors.toMap(SysDeptPathRowPO::getId, SysDeptPathRowPO::getDeptPath, (left, right) -> left));

@@ -1,25 +1,27 @@
 package com.auth.service.auth.application.login.command;
 
+import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
 import com.auth.module.security.contract.api.UserSessionIndex;
-import com.auth.service.auth.application.login.LoginAuditService;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
-import com.auth.service.auth.application.port.login.CredentialPort;
-import com.auth.service.auth.application.port.session.SessionPort;
-import com.auth.service.auth.application.port.login.TokenPort;
+import com.auth.service.auth.application.login.LoginAuditService;
 import com.auth.service.auth.application.port.login.AuthProfileCachePort;
+import com.auth.service.auth.application.port.login.CredentialPort;
 import com.auth.service.auth.application.port.login.RememberMePolicyPort;
+import com.auth.service.auth.application.port.login.TokenPort;
+import com.auth.service.auth.application.port.session.SessionPort;
 import com.auth.service.auth.domain.authentication.model.AuthenticatedUser;
 import com.auth.service.auth.domain.authentication.model.CompletedLoginSession;
 import com.auth.service.auth.domain.authentication.model.LoginResult;
 import com.auth.service.auth.domain.authentication.model.TokenPair;
 import com.auth.service.auth.domain.authentication.model.enums.AuthLoginLogType;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
+
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
-import java.util.UUID;
 
 /**
  * 登录会话签发编排：凭证校验通过后，统一完成会话上限检查、画像缓存、令牌签发、Redis 会话建立与成功审计。
@@ -109,7 +111,11 @@ public class LoginSessionOrchestrator {
 	}
 
 	/**
-	 * 会话签发失败时回滚已写入的 Redis 状态，避免孤儿画像或会话。
+	 * 会话签发失败时回滚已写入的 Redis 状态，避免孤儿画像或会话
+	 * @param userId 用户ID
+	 * @param jti 令牌ID
+	 * @param profileCached 画像是否已缓存
+	 * @param sessionCreated 会话是否已创建
 	 */
 	private void rollbackLoginArtifacts(Long userId, String jti, boolean profileCached, boolean sessionCreated) {
 		if (sessionCreated && jti != null) {

@@ -3,9 +3,9 @@ package com.auth.service.auth.application.login.command;
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.auth.application.login.LoginAuditService;
 import com.auth.service.auth.application.login.input.BaseLoginCommand;
-import com.auth.service.auth.application.port.session.SessionPort;
-import com.auth.service.auth.application.port.login.TokenPort;
 import com.auth.service.auth.application.port.login.LoginStrategy;
+import com.auth.service.auth.application.port.login.TokenPort;
+import com.auth.service.auth.application.port.session.SessionPort;
 import com.auth.service.auth.domain.authentication.model.CompletedLoginSession;
 import com.auth.service.auth.domain.authentication.model.LoginResult;
 import com.auth.service.auth.domain.authentication.model.LogoutSessionHint;
@@ -95,6 +95,7 @@ public class LoginApplicationService {
 		return tokenGateway.parseAccessTokenSafe(accessToken).map(userToken -> {
 			String jti = userToken.getJti();
 			Long userId = userToken.getUserId();
+
 			sessionGateway.terminateSession(userId, jti);
 			return new LogoutSessionHint(userId, jti);
 		});

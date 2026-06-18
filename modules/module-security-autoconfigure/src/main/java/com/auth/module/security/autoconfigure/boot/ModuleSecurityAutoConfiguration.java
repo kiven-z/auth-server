@@ -1,7 +1,6 @@
 package com.auth.module.security.autoconfigure.boot;
 
 import com.auth.common.jwt.autoconfigure.JwtAutoConfiguration;
-import com.auth.module.security.autoconfigure.boot.feign.SecurityFeignAutoConfiguration;
 import com.auth.module.security.autoconfigure.boot.integration.MybatisPlusAuditFillAutoConfiguration;
 import com.auth.module.security.autoconfigure.boot.pipeline.SecurityAuthenticationPipelineConfiguration;
 import com.auth.module.security.autoconfigure.boot.validation.SecurityAnnotationConflictAutoConfiguration;
@@ -20,8 +19,6 @@ import org.springframework.context.annotation.Import;
 @Import({
 		// 资源配置包含 SpringSecurity 配置
 		ResourceServerSecurityAutoConfiguration.class,
-		// Feign 内部调用内部拦截器
-		SecurityFeignAutoConfiguration.class,
 		// 内部注解定义等
 		SecurityAuthenticationPipelineConfiguration.class,
 		// 启动期安全注解冲突校验自动配置
