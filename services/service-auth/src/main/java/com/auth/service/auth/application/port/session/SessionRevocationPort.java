@@ -10,13 +10,6 @@ import java.util.Collection;
 public interface SessionRevocationPort {
 
 	/**
-	 * 踢出指定会话
-	 * @param userId 用户 ID
-	 * @param sessionId 会话 ID（jti）
-	 */
-	void kickSession(long userId, String sessionId);
-
-	/**
 	 * 踢出用户全部会话
 	 * @param userId 用户 ID
 	 */

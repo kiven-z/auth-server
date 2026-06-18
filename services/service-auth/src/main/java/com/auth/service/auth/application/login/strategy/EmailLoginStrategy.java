@@ -1,6 +1,9 @@
 package com.auth.service.auth.application.login.strategy;
 
-import cn.hutool.crypto.digest.MD5;
+import java.util.Objects;
+
+import org.springframework.stereotype.Component;
+
 import com.auth.service.auth.application.login.LoginAuditService;
 import com.auth.service.auth.application.login.input.EmailCommand;
 import com.auth.service.auth.application.port.authorization.AuthProfileQueryPort;
@@ -10,9 +13,8 @@ import com.auth.service.auth.domain.authentication.model.enums.AuthLoginLogType;
 import com.auth.service.auth.domain.authentication.model.enums.CredentialDimension;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.AuthResultCode;
-import org.springframework.stereotype.Component;
 
-import java.util.Objects;
+import cn.hutool.crypto.digest.MD5;
 
 /**
  * 邮箱验证码登录策略。
@@ -27,17 +29,26 @@ public class EmailLoginStrategy extends AbstractLoginStrategyTemplate<EmailComma
 		super(credentialGateway, authProfileQueryPort, loginAuditService);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	protected AuthLoginLogType loginLogType() {
 		return AuthLoginLogType.LOGIN_EMAIL;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	protected LoginAccount resolveAccount(EmailCommand command) {
 		return credentialGateway.findForLogin(CredentialDimension.EMAIL, command.getEmail())
 			.orElseThrow(() -> new AuthBusinessException(AuthResultCode.USERNAME_OR_PASSWORD_ERROR));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	protected AuthLoginLogType doAuthenticate(EmailCommand command, LoginAccount account) {
 		String email = Objects.requireNonNull(command.getEmail());
@@ -52,6 +63,9 @@ public class EmailLoginStrategy extends AbstractLoginStrategyTemplate<EmailComma
 		return AuthLoginLogType.LOGIN_EMAIL;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Class<EmailCommand> supports() {
 		return EmailCommand.class;

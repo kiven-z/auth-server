@@ -15,6 +15,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 /**
@@ -34,11 +35,12 @@ class SessionManagementApplicationServiceTest {
 	private SessionManagementApplicationService sessionManagementApplicationService;
 
 	@Test
-	@DisplayName("踢出指定会话：委托 SessionRevocationPort")
+	@DisplayName("踢出指定会话：委托 SessionPort.terminateSession")
 	void kickSessionShouldDelegateToPort() {
 		sessionManagementApplicationService.kickSession(TestConstants.USER_ID, TestConstants.JTI);
 
-		verify(sessionRevocationPort).kickSession(TestConstants.USER_ID, TestConstants.JTI);
+		verify(sessionPort).terminateSession(TestConstants.USER_ID, TestConstants.JTI);
+		verifyNoInteractions(sessionRevocationPort);
 	}
 
 	@Test

@@ -77,7 +77,7 @@ public class SecurityOutboundAutoConfiguration {
 		return restTemplate -> {
 			List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>(restTemplate.getInterceptors());
 			boolean alreadyPresent = interceptors.stream()
-				.anyMatch(existing -> existing instanceof InternalJwtClientHttpRequestInterceptor);
+				.anyMatch(InternalJwtClientHttpRequestInterceptor.class::isInstance);
 			if (!alreadyPresent) {
 				interceptors.add(interceptor);
 				restTemplate.setInterceptors(interceptors);

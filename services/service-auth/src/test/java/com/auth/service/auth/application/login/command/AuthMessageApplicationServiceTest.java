@@ -5,7 +5,7 @@ import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.message.api.model.email.EmailChannelOptions;
 import com.auth.service.auth.application.login.model.AuthMessageScene;
 import com.auth.service.auth.application.port.login.CredentialPort;
-import com.auth.service.auth.application.port.login.LoginAuditSnapshotPort;
+import com.auth.service.auth.application.port.login.LoginAuditPort;
 import com.auth.service.auth.domain.authentication.model.LoginAccount;
 import com.auth.service.auth.domain.authentication.model.LoginAuditSnapshot;
 import com.auth.service.auth.domain.authentication.model.enums.CredentialDimension;
@@ -38,7 +38,7 @@ class AuthMessageApplicationServiceTest {
 	private CredentialPort credentialGateway;
 
 	@Mock
-	private LoginAuditSnapshotPort loginAuditSnapshotPort;
+	private LoginAuditPort loginAuditPort;
 
 	@Mock
 	private TemplateMessageDispatchPort templateMessageDispatchPort;
@@ -50,7 +50,7 @@ class AuthMessageApplicationServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		authMessageService = new AuthMessageApplicationService(credentialGateway, loginAuditSnapshotPort,
+		authMessageService = new AuthMessageApplicationService(credentialGateway, loginAuditPort,
 				templateMessageDispatchPort);
 	}
 
@@ -64,7 +64,7 @@ class AuthMessageApplicationServiceTest {
 			String email = "bunny@example.com";
 			LoginAccount account = new LoginAccount(1L, "bunny", 1, null, null, null, 1L);
 			when(credentialGateway.findActiveOnly(CredentialDimension.EMAIL, email)).thenReturn(Optional.of(account));
-			when(loginAuditSnapshotPort.build(request))
+			when(loginAuditPort.buildSnapshot(request))
 				.thenReturn(new LoginAuditSnapshot("127.0.0.1", "本地", "ua", "pc", "win", "chrome"));
 			doNothing().when(templateMessageDispatchPort).sendByTemplate(any(TemplateMessageCommand.class));
 

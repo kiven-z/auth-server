@@ -1,6 +1,9 @@
 package com.auth.service.auth.application.login.strategy;
 
-import cn.hutool.crypto.digest.MD5;
+import java.util.Objects;
+
+import org.springframework.stereotype.Component;
+
 import com.auth.service.auth.application.login.LoginAuditService;
 import com.auth.service.auth.application.login.input.SmsCommand;
 import com.auth.service.auth.application.port.authorization.AuthProfileQueryPort;
@@ -10,9 +13,8 @@ import com.auth.service.auth.domain.authentication.model.enums.AuthLoginLogType;
 import com.auth.service.auth.domain.authentication.model.enums.CredentialDimension;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.AuthResultCode;
-import org.springframework.stereotype.Component;
 
-import java.util.Objects;
+import cn.hutool.crypto.digest.MD5;
 
 /**
  * 短信验证码登录策略。
@@ -27,17 +29,26 @@ public class SmsLoginStrategy extends AbstractLoginStrategyTemplate<SmsCommand> 
 		super(credentialGateway, authProfileQueryPort, loginAuditService);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	protected AuthLoginLogType loginLogType() {
 		return AuthLoginLogType.LOGIN_SMS;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	protected LoginAccount resolveAccount(SmsCommand command) {
 		return credentialGateway.findForLogin(CredentialDimension.PHONE, command.getPhone())
 			.orElseThrow(() -> new AuthBusinessException(AuthResultCode.USERNAME_OR_PASSWORD_ERROR));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	protected AuthLoginLogType doAuthenticate(SmsCommand command, LoginAccount account) {
 		String phone = Objects.requireNonNull(command.getPhone());
@@ -52,6 +63,9 @@ public class SmsLoginStrategy extends AbstractLoginStrategyTemplate<SmsCommand> 
 		return AuthLoginLogType.LOGIN_SMS;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Class<SmsCommand> supports() {
 		return SmsCommand.class;

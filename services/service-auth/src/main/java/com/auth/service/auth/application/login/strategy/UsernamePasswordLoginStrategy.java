@@ -1,5 +1,8 @@
 package com.auth.service.auth.application.login.strategy;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
+
 import com.auth.service.auth.application.login.LoginAuditService;
 import com.auth.service.auth.application.login.input.UsernamePasswordCommand;
 import com.auth.service.auth.application.port.authorization.AuthProfileQueryPort;
@@ -10,8 +13,6 @@ import com.auth.service.auth.domain.authentication.model.enums.CredentialDimensi
 import com.auth.service.auth.shared.exception.AuthBadCredentialsException;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.AuthResultCode;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
 
 /**
  * 用户名密码认证策略：查询用户并用 {@link PasswordEncoder} 校验密码。
@@ -29,17 +30,26 @@ public class UsernamePasswordLoginStrategy extends AbstractLoginStrategyTemplate
 		this.passwordEncoder = passwordEncoder;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	protected AuthLoginLogType loginLogType() {
 		return AuthLoginLogType.LOGIN_PASSWORD;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	protected LoginAccount resolveAccount(UsernamePasswordCommand command) {
 		return credentialGateway.findForLogin(CredentialDimension.USERNAME, command.getUsername())
 			.orElseThrow(() -> new AuthBusinessException(AuthResultCode.USERNAME_OR_PASSWORD_ERROR));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	protected AuthLoginLogType doAuthenticate(UsernamePasswordCommand command, LoginAccount account) {
 		if (!passwordEncoder.matches(command.getPassword(), account.encodedPassword())) {
@@ -48,6 +58,9 @@ public class UsernamePasswordLoginStrategy extends AbstractLoginStrategyTemplate
 		return AuthLoginLogType.LOGIN_PASSWORD;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Class<UsernamePasswordCommand> supports() {
 		return UsernamePasswordCommand.class;

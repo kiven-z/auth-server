@@ -7,7 +7,7 @@ import com.auth.module.message.api.model.email.EmailChannelOptions;
 import com.auth.service.auth.application.login.model.AuthMessageScene;
 import com.auth.service.auth.application.login.model.AuthMessageVariables;
 import com.auth.service.auth.application.port.login.CredentialPort;
-import com.auth.service.auth.application.port.login.LoginAuditSnapshotPort;
+import com.auth.service.auth.application.port.login.LoginAuditPort;
 import com.auth.service.auth.domain.authentication.model.LoginAccount;
 import com.auth.service.auth.domain.authentication.model.LoginAuditSnapshot;
 import com.auth.service.auth.domain.authentication.model.enums.CredentialDimension;
@@ -36,7 +36,7 @@ public class AuthMessageApplicationService {
 
 	private final CredentialPort credentialGateway;
 
-	private final LoginAuditSnapshotPort loginAuditSnapshotPort;
+	private final LoginAuditPort loginAuditPort;
 
 	private final TemplateMessageDispatchPort templateMessageDispatchPort;
 
@@ -56,7 +56,7 @@ public class AuthMessageApplicationService {
 		long expireMinutes = EMAIL_CODE.getDefaultTtl().toMinutes();
 
 		// IP地址等信息
-		LoginAuditSnapshot snapshot = loginAuditSnapshotPort.build(request);
+		LoginAuditSnapshot snapshot = loginAuditPort.buildSnapshot(request);
 
 		// 未找到活跃用户时静默返回，不暴露账号不存在
 		LoginAccount account = credentialGateway.findActiveOnly(CredentialDimension.EMAIL, email).orElse(null);

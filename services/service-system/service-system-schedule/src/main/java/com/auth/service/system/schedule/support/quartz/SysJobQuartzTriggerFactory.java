@@ -25,8 +25,8 @@ public class SysJobQuartzTriggerFactory {
 		int resolvedPolicy = Objects.requireNonNullElse(policy, 2);
 		return switch (resolvedPolicy) {
 			case 1 -> cron.withMisfireHandlingInstructionIgnoreMisfires();
-			case 2 -> cron.withMisfireHandlingInstructionFireAndProceed();
 			case 3 -> cron.withMisfireHandlingInstructionDoNothing();
+			// 默认 case 2
 			default -> cron.withMisfireHandlingInstructionFireAndProceed();
 		};
 	}

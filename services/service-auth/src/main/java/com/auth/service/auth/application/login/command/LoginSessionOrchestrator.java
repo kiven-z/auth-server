@@ -9,7 +9,7 @@ import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.application.login.LoginAuditService;
 import com.auth.service.auth.application.port.login.AuthProfileCachePort;
 import com.auth.service.auth.application.port.login.CredentialPort;
-import com.auth.service.auth.application.port.login.RememberMePolicyPort;
+import com.auth.service.auth.application.port.login.RefreshCookiePort;
 import com.auth.service.auth.application.port.login.TokenPort;
 import com.auth.service.auth.application.port.session.SessionPort;
 import com.auth.service.auth.domain.authentication.model.AuthenticatedUser;
@@ -46,7 +46,7 @@ public class LoginSessionOrchestrator {
 
 	private final LoginAuditService loginAuditService;
 
-	private final RememberMePolicyPort rememberMePolicyPort;
+	private final RefreshCookiePort refreshCookiePort;
 
 	/**
 	 * 在凭证已校验通过后签发令牌并建立服务端会话。
@@ -92,7 +92,7 @@ public class LoginSessionOrchestrator {
 			sessionGateway.registerSession(sessionIndex);
 			sessionCreated = true;
 
-			session.setReadMeDay(rememberMePolicyPort.resolveReadMeDay());
+			session.setReadMeDay(refreshCookiePort.resolveReadMeDay());
 
 			credentialGateway.recordSuccess(userId);
 			loginAuditService.auditLoginSuccess(request, loginLogType, userId, username, jti);

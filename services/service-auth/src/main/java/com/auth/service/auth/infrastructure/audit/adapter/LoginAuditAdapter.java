@@ -1,12 +1,16 @@
 package com.auth.service.auth.infrastructure.audit.adapter;
 
+import com.auth.common.ip.IpAddressService;
+import com.auth.common.ip.IpInfo;
+import com.auth.common.web.model.entity.UserAgent;
 import com.auth.module.platform.persistence.model.LoginLogEntity;
-import com.auth.service.auth.application.port.login.LoginAuditWritePort;
+import com.auth.service.auth.application.port.login.LoginAuditPort;
 import com.auth.service.auth.domain.authentication.model.LoginAuditSnapshot;
 import com.auth.service.auth.domain.authentication.model.enums.AuthLoginLogResult;
 import com.auth.service.auth.domain.authentication.model.enums.AuthLoginLogType;
 import com.auth.service.auth.infrastructure.persistence.mapper.LoginLogMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Repository;
@@ -14,13 +18,33 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 
 /**
- * 登录审计落库适配器：异步将认证审计写入 {@code log_login}。
+ * 登录审计适配器：解析请求快照并异步写入 {@code log_login}。
  *
  * @author Bunny
  */
 @Slf4j
 @Repository
-public class LoginAuditWriteAdapter extends ServiceImpl<LoginLogMapper, LoginLogEntity> implements LoginAuditWritePort {
+public class LoginAuditAdapter extends ServiceImpl<LoginLogMapper, LoginLogEntity> implements LoginAuditPort {
+
+	private final IpAddressService ipAddressService;
+
+	public LoginAuditAdapter(IpAddressService ipAddressService) {
+		this.ipAddressService = ipAddressService;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public LoginAuditSnapshot buildSnapshot(HttpServletRequest request) {
+		if (request == null) {
+			return LoginAuditSnapshot.empty();
+		}
+		IpInfo ipInfo = ipAddressService.resolveIpInfo(request);
+		UserAgent userAgent = UserAgent.getUserAgent(request);
+		return new LoginAuditSnapshot(ipInfo.getIpAddr(), ipInfo.getIpRegion(), request.getHeader("User-Agent"),
+				userAgent.getDeviceType(), userAgent.getOs(), userAgent.getBrowser());
+	}
 
 	/**
 	 * {@inheritDoc}

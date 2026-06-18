@@ -1,9 +1,10 @@
 package com.auth.service.auth.infrastructure.login.adapter;
 
+import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.auth.application.port.login.CredentialPort;
 import com.auth.service.auth.domain.authentication.model.LoginAccount;
 import com.auth.service.auth.domain.authentication.model.enums.CredentialDimension;
-import com.auth.service.auth.infrastructure.persistence.adapter.LoginAccountLookupAdapter;
+import com.auth.service.auth.infrastructure.persistence.mapper.UserMapper;
 import com.auth.service.auth.infrastructure.redis.adapter.RedisLoginVerificationCodeAdapter;
 import com.auth.service.auth.infrastructure.token.LoginFailureRateLimiter;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,7 @@ import java.util.Optional;
 @Repository
 public class CredentialAdapter implements CredentialPort {
 
-	private final LoginAccountLookupAdapter loginAccountLookupAdapter;
+	private final UserMapper userMapper;
 
 	private final RedisLoginVerificationCodeAdapter redisLoginVerificationCodeAdapter;
 
@@ -31,7 +32,8 @@ public class CredentialAdapter implements CredentialPort {
 	 */
 	@Override
 	public Optional<LoginAccount> findForLogin(CredentialDimension dimension, String value) {
-		return loginAccountLookupAdapter.findForLogin(dimension, value);
+		UserEntity userEntity = userMapper.selectByCredential(dimension, value, false);
+		return Optional.ofNullable(userEntity).map(LoginAccount::from);
 	}
 
 	/**
@@ -39,7 +41,8 @@ public class CredentialAdapter implements CredentialPort {
 	 */
 	@Override
 	public Optional<LoginAccount> findActiveOnly(CredentialDimension dimension, String value) {
-		return loginAccountLookupAdapter.findActiveOnly(dimension, value);
+		UserEntity userEntity = userMapper.selectByCredential(dimension, value, true);
+		return Optional.ofNullable(userEntity).map(LoginAccount::from);
 	}
 
 	/**

@@ -1,24 +1,26 @@
 package com.auth.service.auth.infrastructure.cookie.adapter;
 
+import com.auth.common.jwt.autoconfigure.JwtProperties;
 import com.auth.service.auth.application.port.login.RefreshCookiePort;
-import com.auth.service.auth.application.port.login.RememberMePolicyPort;
 import com.auth.service.auth.infrastructure.cookie.RefreshTokenCookieWriter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Repository;
 
 /**
- * Refresh Cookie 端口适配器：组合策略与底层 HTTP 写入。
+ * Refresh Cookie 端口适配器：读写 Cookie 并解析「记住我」策略。
  *
  * @author Bunny
  */
 @Repository
 public class RefreshCookieAdapter implements RefreshCookiePort {
 
-	private final RememberMePolicyPort rememberMePolicyPort;
+	private static final long SECONDS_PER_DAY = 86_400L;
 
-	public RefreshCookieAdapter(RememberMePolicyPort rememberMePolicyPort) {
-		this.rememberMePolicyPort = rememberMePolicyPort;
+	private final JwtProperties jwtProperties;
+
+	public RefreshCookieAdapter(JwtProperties jwtProperties) {
+		this.jwtProperties = jwtProperties;
 	}
 
 	/**
@@ -35,7 +37,9 @@ public class RefreshCookieAdapter implements RefreshCookiePort {
 	@Override
 	public void writeRefreshToken(HttpServletResponse response, HttpServletRequest request, String refreshToken,
 			boolean rememberMe) {
-		long maxAgeSeconds = rememberMePolicyPort.resolveMaxAgeSeconds(rememberMe);
+		long maxAgeSeconds = !rememberMe ? RefreshTokenCookieWriter.SESSION_COOKIE_MAX_AGE_SECONDS
+				: jwtProperties.getRefreshExpired();
+
 		RefreshTokenCookieWriter.writeToken(response, request, refreshToken, maxAgeSeconds);
 	}
 
@@ -45,6 +49,18 @@ public class RefreshCookieAdapter implements RefreshCookiePort {
 	@Override
 	public void clearRefreshToken(HttpServletResponse response, HttpServletRequest request) {
 		RefreshTokenCookieWriter.clearToken(response, request);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public long resolveReadMeDay() {
+		long refreshExpiredSeconds = jwtProperties.getRefreshExpired();
+		if (refreshExpiredSeconds <= 0) {
+			return 1L;
+		}
+		return (refreshExpiredSeconds + SECONDS_PER_DAY - 1) / SECONDS_PER_DAY;
 	}
 
 }

@@ -28,7 +28,7 @@ public class SessionManagementApplicationService {
 	 * @param sessionId 会话 ID（jti）
 	 */
 	public void kickSession(long userId, String sessionId) {
-		sessionRevocationPort.kickSession(userId, sessionId);
+		sessionPort.terminateSession(userId, sessionId);
 	}
 
 	/**

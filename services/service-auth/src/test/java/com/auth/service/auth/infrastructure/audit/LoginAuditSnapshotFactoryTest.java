@@ -4,7 +4,7 @@ import com.auth.common.ip.IpAddressService;
 import com.auth.common.ip.IpInfo;
 import com.auth.common.web.model.entity.UserAgent;
 import com.auth.service.auth.domain.authentication.model.LoginAuditSnapshot;
-import com.auth.service.auth.infrastructure.audit.adapter.LoginAuditSnapshotAdapter;
+import com.auth.service.auth.infrastructure.audit.adapter.LoginAuditAdapter;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,7 +19,7 @@ import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.*;
 
 /**
- * {@link LoginAuditSnapshotAdapter} 单元测试
+ * {@link LoginAuditAdapter} 快照构建单元测试
  *
  * @author Bunny
  */
@@ -31,15 +31,15 @@ class LoginAuditSnapshotAdapterTest {
 
 	@Test
 	@DisplayName("请求为 null 时应返回空快照")
-	void build_shouldReturnEmpty_whenRequestNull() {
-		LoginAuditSnapshotAdapter adapter = new LoginAuditSnapshotAdapter(ipAddressService);
-		LoginAuditSnapshot snapshot = adapter.build(null);
+	void buildSnapshot_shouldReturnEmpty_whenRequestNull() {
+		LoginAuditAdapter adapter = new LoginAuditAdapter(ipAddressService);
+		LoginAuditSnapshot snapshot = adapter.buildSnapshot(null);
 		assertEquals(LoginAuditSnapshot.empty(), snapshot);
 	}
 
 	@Test
-	@DisplayName("作为 Port 实现：有效请求时应解析 IP 与 UA 相关字段")
-	void build_shouldPopulateFields_whenRequestPresent() {
+	@DisplayName("有效请求时应解析 IP 与 UA 相关字段")
+	void buildSnapshot_shouldPopulateFields_whenRequestPresent() {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		when(request.getHeader("User-Agent")).thenReturn("Mozilla/5.0");
 		when(ipAddressService.resolveIpInfo(same(request)))
@@ -50,10 +50,10 @@ class LoginAuditSnapshotAdapterTest {
 		when(ua.getOs()).thenReturn("Linux");
 		when(ua.getBrowser()).thenReturn("Firefox");
 
-		LoginAuditSnapshotAdapter adapter = new LoginAuditSnapshotAdapter(ipAddressService);
+		LoginAuditAdapter adapter = new LoginAuditAdapter(ipAddressService);
 		try (MockedStatic<UserAgent> userAgentMock = mockStatic(UserAgent.class)) {
 			userAgentMock.when(() -> UserAgent.getUserAgent(request)).thenReturn(ua);
-			LoginAuditSnapshot snapshot = adapter.build(request);
+			LoginAuditSnapshot snapshot = adapter.buildSnapshot(request);
 			assertEquals("192.0.2.1", snapshot.loginIp());
 			assertEquals("Test-Region", snapshot.loginRegion());
 			assertEquals("Mozilla/5.0", snapshot.userAgent());

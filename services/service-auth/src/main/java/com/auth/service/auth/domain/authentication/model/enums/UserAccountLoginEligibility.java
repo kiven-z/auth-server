@@ -23,12 +23,12 @@ public enum UserAccountLoginEligibility {
 	STATUS_LOCKED;
 
 	/**
-	 * 与 {@link com.auth.module.platform.persistence.model.UserEntity#getStatus()} 对齐：0=禁用
+	 * 0=禁用
 	 */
 	private static final int SYS_USER_STATUS_DISABLED = 0;
 
 	/**
-	 * 与 {@link com.auth.module.platform.persistence.model.UserEntity#getStatus()} 对齐：2=锁定
+	 * 2=锁定
 	 */
 	private static final int SYS_USER_STATUS_LOCKED = 2;
 

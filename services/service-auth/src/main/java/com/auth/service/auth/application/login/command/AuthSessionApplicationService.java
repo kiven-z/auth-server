@@ -4,7 +4,6 @@ import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.auth.application.login.LoginAuditService;
 import com.auth.service.auth.application.login.input.BaseLoginCommand;
 import com.auth.service.auth.application.port.login.RefreshCookiePort;
-import com.auth.service.auth.application.port.login.RememberMePolicyPort;
 import com.auth.service.auth.domain.authentication.model.CompletedLoginSession;
 import com.auth.service.auth.domain.authentication.model.CompletedRefreshSession;
 import com.auth.service.auth.domain.authentication.model.LogoutSessionHint;
@@ -33,8 +32,6 @@ public class AuthSessionApplicationService {
 	private final RefreshTokenApplicationService refreshTokenService;
 
 	private final RefreshCookiePort refreshCookiePort;
-
-	private final RememberMePolicyPort rememberMePolicyPort;
 
 	private final LoginAuditService loginAuditService;
 
@@ -67,7 +64,7 @@ public class AuthSessionApplicationService {
 		session.setAccessToken(result.tokenPair().accessToken());
 		session.setRefreshToken(result.tokenPair().refreshToken());
 		session.setExpires(result.tokenPair().accessExpiresAt());
-		session.setReadMeDay(rememberMePolicyPort.resolveReadMeDay());
+		session.setReadMeDay(refreshCookiePort.resolveReadMeDay());
 
 		refreshCookiePort.writeRefreshToken(response, request, result.tokenPair().refreshToken(), result.rememberMe());
 		return session;

@@ -3,13 +3,21 @@ package com.auth.service.auth.application.port.login;
 import com.auth.service.auth.domain.authentication.model.LoginAuditSnapshot;
 import com.auth.service.auth.domain.authentication.model.enums.AuthLoginLogResult;
 import com.auth.service.auth.domain.authentication.model.enums.AuthLoginLogType;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
- * 登录审计落库端口：由基础设施异步实现；调用方须在请求线程传入已解析的 {@link LoginAuditSnapshot}。
+ * 登录审计端口：请求快照解析与异步落库。
  *
  * @author Bunny
  */
-public interface LoginAuditWritePort {
+public interface LoginAuditPort {
+
+	/**
+	 * 解析请求为审计快照；{@code request == null} 时返回空快照。
+	 * @param request HTTP 请求，可为 null
+	 * @return 不可变快照
+	 */
+	LoginAuditSnapshot buildSnapshot(HttpServletRequest request);
 
 	/**
 	 * 记录一条认证相关审计（登录、登出、刷新令牌等）；实现类通常以 {@code @Async} 落库。

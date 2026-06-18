@@ -5,7 +5,6 @@ import com.auth.service.auth.application.login.LoginAuditService;
 import com.auth.service.auth.application.login.input.BaseLoginCommand;
 import com.auth.service.auth.application.login.input.UsernamePasswordCommand;
 import com.auth.service.auth.application.port.login.RefreshCookiePort;
-import com.auth.service.auth.application.port.login.RememberMePolicyPort;
 import com.auth.service.auth.domain.authentication.model.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -40,9 +39,6 @@ class AuthSessionApplicationServiceTest {
 
 	@Mock
 	private RefreshCookiePort refreshCookiePort;
-
-	@Mock
-	private RememberMePolicyPort rememberMePolicyPort;
 
 	@Mock
 	private LoginAuditService loginAuditService;
@@ -83,7 +79,7 @@ class AuthSessionApplicationServiceTest {
 		when(refreshCookiePort.readRefreshToken(request)).thenReturn("old-refresh");
 		when(refreshTokenService.refreshToken("old-refresh", request))
 			.thenReturn(new RefreshSessionResult(tokenPair, false));
-		when(rememberMePolicyPort.resolveReadMeDay()).thenReturn(5L);
+		when(refreshCookiePort.resolveReadMeDay()).thenReturn(5L);
 
 		CompletedRefreshSession actual = authSessionApplicationService.completeRefresh(request, response);
 
@@ -91,7 +87,7 @@ class AuthSessionApplicationServiceTest {
 		assertEquals("new-refresh", actual.getRefreshToken());
 		assertEquals(expires, actual.getExpires());
 		assertEquals(5L, actual.getReadMeDay());
-		verify(rememberMePolicyPort).resolveReadMeDay();
+		verify(refreshCookiePort).resolveReadMeDay();
 		verify(refreshCookiePort).writeRefreshToken(response, request, "new-refresh", false);
 	}
 

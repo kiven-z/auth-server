@@ -4,7 +4,7 @@ import com.auth.module.platform.persistence.model.LoginLogEntity;
 import com.auth.service.auth.domain.authentication.model.LoginAuditSnapshot;
 import com.auth.service.auth.domain.authentication.model.enums.AuthLoginLogResult;
 import com.auth.service.auth.domain.authentication.model.enums.AuthLoginLogType;
-import com.auth.service.auth.infrastructure.audit.adapter.LoginAuditWriteAdapter;
+import com.auth.service.auth.infrastructure.audit.adapter.LoginAuditAdapter;
 import com.auth.service.auth.infrastructure.persistence.mapper.LoginLogMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,30 +23,30 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
 /**
- * {@link LoginAuditWriteAdapter} 单元测试
+ * {@link LoginAuditAdapter} 单元测试
  *
  * @author Bunny
  */
 @ExtendWith(MockitoExtension.class)
-class LoginAuditWriteAdapterTest {
+class LoginAuditAdapterTest {
 
 	@Mock
 	private LoginLogMapper loginLogMapper;
 
-	private LoginAuditWriteAdapter loginAuditWriteAdapter;
+	private LoginAuditAdapter loginAuditAdapter;
 
 	@BeforeEach
 	void setUp() throws Exception {
-		loginAuditWriteAdapter = new LoginAuditWriteAdapter();
+		loginAuditAdapter = new LoginAuditAdapter(null);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
-		baseMapperField.set(loginAuditWriteAdapter, loginLogMapper);
+		baseMapperField.set(loginAuditAdapter, loginLogMapper);
 	}
 
 	@Test
 	@DisplayName("审计写入：空快照仍写入 loginResult 与事件类型")
 	void recordLoginLog_shouldInsertEntity_whenSnapshotEmpty() {
-		loginAuditWriteAdapter.recordLoginLog(LoginAuditSnapshot.empty(), AuthLoginLogType.LOGIN_PASSWORD,
+		loginAuditAdapter.recordLoginLog(LoginAuditSnapshot.empty(), AuthLoginLogType.LOGIN_PASSWORD,
 				AuthLoginLogResult.SUCCESS, 1L, "user", null, "jti-1");
 
 		ArgumentCaptor<LoginLogEntity> captor = ArgumentCaptor.forClass(LoginLogEntity.class);
@@ -63,7 +63,7 @@ class LoginAuditWriteAdapterTest {
 	@Test
 	@DisplayName("审计写入：未识别用户时 user_id 与审计字段均为 null")
 	void recordLoginLog_shouldLeaveAuditFieldsNull_whenUserIdNull() {
-		loginAuditWriteAdapter.recordLoginLog(LoginAuditSnapshot.empty(), AuthLoginLogType.LOGIN_PASSWORD,
+		loginAuditAdapter.recordLoginLog(LoginAuditSnapshot.empty(), AuthLoginLogType.LOGIN_PASSWORD,
 				AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR, null, "13800138000", "user.not.found", null);
 
 		ArgumentCaptor<LoginLogEntity> captor = ArgumentCaptor.forClass(LoginLogEntity.class);
@@ -81,7 +81,7 @@ class LoginAuditWriteAdapterTest {
 		doThrow(new RuntimeException("db down")).when(loginLogMapper).insert(any(LoginLogEntity.class));
 
 		assertDoesNotThrow(
-				() -> loginAuditWriteAdapter.recordLoginLog(LoginAuditSnapshot.empty(), AuthLoginLogType.REFRESH_TOKEN,
+				() -> loginAuditAdapter.recordLoginLog(LoginAuditSnapshot.empty(), AuthLoginLogType.REFRESH_TOKEN,
 						AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR, null, null, "token.invalid", null));
 
 		verify(loginLogMapper).insert(any(LoginLogEntity.class));
@@ -92,7 +92,7 @@ class LoginAuditWriteAdapterTest {
 	void recordLoginLog_shouldPersistSnapshotFields_whenSnapshotProvided() {
 		LoginAuditSnapshot snapshot = new LoginAuditSnapshot("203.0.113.1", "TestRegion", "TestUA", "Desktop", "Linux",
 				"Firefox");
-		loginAuditWriteAdapter.recordLoginLog(snapshot, AuthLoginLogType.LOGIN_EMAIL, AuthLoginLogResult.SUCCESS, 2L,
+		loginAuditAdapter.recordLoginLog(snapshot, AuthLoginLogType.LOGIN_EMAIL, AuthLoginLogResult.SUCCESS, 2L,
 				"e@x.com", null, null);
 
 		ArgumentCaptor<LoginLogEntity> captor = ArgumentCaptor.forClass(LoginLogEntity.class);

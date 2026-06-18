@@ -5,8 +5,7 @@ import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.application.login.input.BaseLoginCommand;
 import com.auth.service.auth.application.port.UserReadPort;
 import com.auth.service.auth.application.port.login.AuthProfileCachePort;
-import com.auth.service.auth.application.port.login.LoginAuditWritePort;
-import com.auth.service.auth.application.port.login.LoginAuditSnapshotPort;
+import com.auth.service.auth.application.port.login.LoginAuditPort;
 import com.auth.service.auth.domain.authentication.model.LoginAuditSnapshot;
 import com.auth.service.auth.domain.authentication.model.enums.AuthLoginLogResult;
 import com.auth.service.auth.domain.authentication.model.enums.AuthLoginLogType;
@@ -27,9 +26,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class LoginAuditService {
 
-	private final LoginAuditSnapshotPort loginAuditSnapshotPort;
-
-	private final LoginAuditWritePort loginAuditWritePort;
+	private final LoginAuditPort loginAuditPort;
 
 	private final AuthProfileCachePort authProfileCachePort;
 
@@ -219,9 +216,9 @@ public class LoginAuditService {
 
 	private void publishNormalized(HttpServletRequest request, AuthLoginLogType eventType, AuthLoginLogResult result,
 			Long userId, String principal, String failureReason, String sessionId) {
-		LoginAuditSnapshot snapshot = loginAuditSnapshotPort.build(request);
+		LoginAuditSnapshot snapshot = loginAuditPort.buildSnapshot(request);
 		String normalizedPrincipal = normalizePrincipal(userId, principal);
-		loginAuditWritePort.recordLoginLog(snapshot, eventType, result, userId, normalizedPrincipal, failureReason,
+		loginAuditPort.recordLoginLog(snapshot, eventType, result, userId, normalizedPrincipal, failureReason,
 				sessionId);
 	}
 

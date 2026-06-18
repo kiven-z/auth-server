@@ -1,16 +1,16 @@
 package com.auth.service.auth.application.login.command;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import com.auth.service.auth.application.login.LoginAuditService;
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.crypto.digest.MD5;
 import com.auth.common.jwt.autoconfigure.JwtProperties;
 import com.auth.common.jwt.model.JwtUserToken;
 import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
+import com.auth.service.auth.application.login.LoginAuditService;
 import com.auth.service.auth.application.port.login.AuthProfileCachePort;
-import com.auth.service.auth.application.port.session.SessionPort;
 import com.auth.service.auth.application.port.login.TokenPort;
+import com.auth.service.auth.application.port.session.SessionPort;
 import com.auth.service.auth.domain.authentication.model.LogoutSessionHint;
 import com.auth.service.auth.domain.authentication.model.RefreshSessionResult;
 import com.auth.service.auth.domain.authentication.model.TokenPair;
@@ -18,6 +18,7 @@ import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.AuthResultCode;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -25,7 +26,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * 刷新令牌应用服务：校验会话、旋转 Refresh Token、撤销会话。
+ * 刷新令牌应用服务：校验会话、旋转 Refresh Token、撤销会话
  *
  * @author Bunny
  */
@@ -92,7 +93,6 @@ public class RefreshTokenApplicationService {
 			// 获取是否记住我
 			boolean rememberMe = BooleanUtil.isTrue(sessionIndex.getRememberMe());
 			// 记录成功刷新令牌
-
 			loginAuditService.auditRefreshTokenSuccess(request, refreshUserId, refreshJti);
 			// 返回刷新令牌结果
 			return new RefreshSessionResult(tokenPair, rememberMe);
@@ -123,7 +123,7 @@ public class RefreshTokenApplicationService {
 	}
 
 	/**
-	 * 断言刷新令牌与会话中存储的哈希及过期时间一致。
+	 * 断言刷新令牌与会话中存储的哈希及过期时间一致
 	 * <p>
 	 * 过期仅抛错；哈希为空或与请求令牌摘要不一致时视为脏会话，先撤销服务端会话再抛错
 	 * </p>
@@ -132,7 +132,7 @@ public class RefreshTokenApplicationService {
 	 * @param sessionIndex 会话索引
 	 * @param refreshToken 刷新令牌
 	 */
-	private void assertRefreshTokenMatches(Long userId, String jti, UserSessionIndex sessionIndex,
+	private void assertRefreshTokenMatches(Long userId, String jti, @NotNull UserSessionIndex sessionIndex,
 			String refreshToken) {
 		Long expiresAt = sessionIndex.getRefreshTokenExpiresAt();
 		Long sessionUserId = sessionIndex.getUserId();
@@ -171,7 +171,7 @@ public class RefreshTokenApplicationService {
 	}
 
 	/**
-	 * 按刷新令牌撤销服务端会话（登出等场景；令牌无效时静默跳过）。
+	 * 按刷新令牌撤销服务端会话（登出等场景；令牌无效时静默跳过）
 	 * @param refreshToken 刷新令牌
 	 */
 	public Optional<LogoutSessionHint> revokeByRefreshToken(String refreshToken) {
@@ -189,7 +189,7 @@ public class RefreshTokenApplicationService {
 	}
 
 	/**
-	 * 删除刷新令牌对应的服务端会话。
+	 * 删除刷新令牌对应的服务端会话
 	 * @param userToken 刷新令牌解析结果
 	 * @return 登出审计上下文
 	 */

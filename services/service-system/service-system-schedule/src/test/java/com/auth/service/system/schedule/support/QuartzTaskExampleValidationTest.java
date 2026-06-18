@@ -3,8 +3,9 @@ package com.auth.service.system.schedule.support;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.schedule.annotation.QuartzTask;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
+import com.auth.service.system.schedule.support.catalog.QuartzTaskRegistry;
 import com.auth.service.system.schedule.task.support.BuiltinJobParamsParser;
-import com.auth.service.system.schedule.validation.task.BuiltinJobParamsValidator;
+import com.auth.service.system.schedule.validation.task.CustomClassTaskDefinitionValidator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -19,6 +20,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.mockito.Mockito.mock;
 
 /**
  * 内置 {@link QuartzTask#example()} 应与载荷校验规则一致。
@@ -28,12 +30,13 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 @DisplayName("QuartzTask example 与 job_params 校验一致性")
 class QuartzTaskExampleValidationTest {
 
-	private static BuiltinJobParamsValidator validator;
+	private static CustomClassTaskDefinitionValidator validator;
 
 	@BeforeAll
 	static void setUpValidator() {
 		Validator beanValidator = Validation.buildDefaultValidatorFactory().getValidator();
-		validator = new BuiltinJobParamsValidator(new BuiltinJobParamsParser(new ObjectMapper()), beanValidator);
+		validator = new CustomClassTaskDefinitionValidator(mock(QuartzTaskRegistry.class),
+				new BuiltinJobParamsParser(new ObjectMapper()), beanValidator);
 	}
 
 	static Stream<Arguments> builtinJobExamples() {

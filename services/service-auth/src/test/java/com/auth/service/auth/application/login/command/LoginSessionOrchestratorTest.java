@@ -8,7 +8,7 @@ import com.auth.service.auth.application.port.login.CredentialPort;
 import com.auth.service.auth.application.port.session.SessionPort;
 import com.auth.service.auth.application.port.login.TokenPort;
 import com.auth.service.auth.application.port.login.AuthProfileCachePort;
-import com.auth.service.auth.application.port.login.RememberMePolicyPort;
+import com.auth.service.auth.application.port.login.RefreshCookiePort;
 import com.auth.service.auth.domain.authentication.model.AuthenticatedUser;
 import com.auth.service.auth.domain.authentication.model.CompletedLoginSession;
 import com.auth.service.auth.domain.authentication.model.LoginResult;
@@ -55,7 +55,7 @@ class LoginSessionOrchestratorTest {
 	private LoginAuditService loginAuditService;
 
 	@Mock
-	private RememberMePolicyPort rememberMePolicyPort;
+	private RefreshCookiePort refreshCookiePort;
 
 	@Mock
 	private HttpServletRequest httpServletRequest;
@@ -67,7 +67,7 @@ class LoginSessionOrchestratorTest {
 
 	private LoginSessionOrchestrator newOrchestrator() {
 		return new LoginSessionOrchestrator(sessionGateway, authProfileCachePort, tokenGateway, credentialGateway,
-				loginAuditService, rememberMePolicyPort);
+				loginAuditService, refreshCookiePort);
 	}
 
 	@Test
@@ -89,7 +89,7 @@ class LoginSessionOrchestratorTest {
 			.thenReturn(sessionIndex);
 		when(tokenGateway.buildTokenPair(anyLong(), anyString(), anyLong())).thenReturn(new TokenPair(
 				TestConstants.ACCESS_TOKEN, TestConstants.REFRESH_TOKEN, LocalDateTime.now().plusMinutes(1)));
-		when(rememberMePolicyPort.resolveReadMeDay()).thenReturn(7L);
+		when(refreshCookiePort.resolveReadMeDay()).thenReturn(7L);
 
 		CompletedLoginSession actual = newOrchestrator().issueSession(loginResult, false, httpServletRequest);
 
@@ -100,7 +100,7 @@ class LoginSessionOrchestratorTest {
 		assertEquals(TestConstants.USER_ID, actual.getId());
 		assertEquals("user", actual.getUsername());
 
-		InOrder inOrder = inOrder(sessionGateway, authProfileCachePort, tokenGateway, rememberMePolicyPort,
+		InOrder inOrder = inOrder(sessionGateway, authProfileCachePort, tokenGateway, refreshCookiePort,
 				credentialGateway, loginAuditService);
 		inOrder.verify(sessionGateway).assertSessionLimit(TestConstants.USER_ID);
 		inOrder.verify(authProfileCachePort).cacheProfile(profile);
@@ -109,7 +109,7 @@ class LoginSessionOrchestratorTest {
 			.buildSessionIndex(same(httpServletRequest), eq(TestConstants.USER_ID), anyString(),
 					eq(TestConstants.REFRESH_TOKEN), eq(false));
 		inOrder.verify(sessionGateway).registerSession(sessionIndex);
-		inOrder.verify(rememberMePolicyPort).resolveReadMeDay();
+		inOrder.verify(refreshCookiePort).resolveReadMeDay();
 		inOrder.verify(credentialGateway).recordSuccess(TestConstants.USER_ID);
 		inOrder.verify(loginAuditService)
 			.auditLoginSuccess(same(httpServletRequest), eq(AuthLoginLogType.LOGIN_PASSWORD), eq(TestConstants.USER_ID),
