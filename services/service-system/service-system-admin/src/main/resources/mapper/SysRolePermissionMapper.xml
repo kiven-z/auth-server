@@ -30,7 +30,6 @@
         SELECT r.role_code,
         r.role_name,
         r.status,
-        r.role_type,
         rp.create_time,
         rp.update_time
         FROM sys_role_permission rp

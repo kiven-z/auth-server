@@ -9,9 +9,38 @@
         r.role_name
         FROM sys_menu_role mr
         JOIN sys_role r
-        ON r.role_code = mr.role_code AND r.role_type = 2 AND r.status = 1
+        ON r.role_code = mr.role_code AND r.status = 1
         WHERE mr.menu_id = #{menuId}
         ORDER BY r.order_num
+    </select>
+
+    <!-- 按菜单 ID 反查已绑定角色 -->
+    <select id="selectBoundRolesByMenuId"
+            resultType="com.auth.service.system.admin.model.po.permission.SysPermissionBoundRolePO">
+        SELECT r.role_code,
+        r.role_name,
+        r.status,
+        mr.create_time,
+        mr.update_time
+        FROM sys_menu_role mr
+        INNER JOIN sys_role r ON r.role_code = mr.role_code
+        WHERE mr.menu_id = #{menuId}
+        ORDER BY r.role_code
+    </select>
+
+    <!-- 按角色码反查已绑定菜单 -->
+    <select id="selectBoundMenusByRoleCode"
+            resultType="com.auth.service.system.admin.model.po.permission.SysPermissionBoundMenuPO">
+        SELECT m.id,
+        m.title,
+        m.name,
+        m.path,
+        m.menu_type,
+        m.status
+        FROM sys_menu_role mr
+        INNER JOIN sys_menu m ON m.id = mr.menu_id
+        WHERE mr.role_code = #{roleCode}
+        ORDER BY m.menu_rank, m.id
     </select>
 
     <!-- 批量查询菜单关联角色编码（仅启用且未删除的角色；供动态路由 meta） -->

@@ -36,7 +36,8 @@ public class SysUserRoleController {
 	@PreAuthorize("@auth.decide('sysUserRole:query')")
 	@GetMapping("/{userId}")
 	public Result<List<GrantTableAssignedRoleRow>> listRoles(@PathVariable("userId") Long userId) {
-		return Result.success(sysUserRoleService.listAssignedRoles(userId));
+		List<GrantTableAssignedRoleRow> rows = sysUserRoleService.listAssignedRoles(userId);
+		return Result.success(rows);
 	}
 
 	@OperationLog(targetType = "USER_ROLE", serviceDomain = AuditServiceDomain.SYSTEM,

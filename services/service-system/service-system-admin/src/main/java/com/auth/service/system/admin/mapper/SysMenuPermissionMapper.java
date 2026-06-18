@@ -4,6 +4,7 @@ import com.auth.service.system.admin.model.entity.SysMenuPermissionEntity;
 import com.auth.service.system.admin.model.po.menu.SysMenuAssignedPermissionPO;
 import com.auth.service.system.admin.model.po.menu.SysMenuPermissionLinkRowPO;
 import com.auth.service.system.admin.model.po.permission.SysPermissionBoundMenuPO;
+import com.auth.service.system.admin.model.po.role.SysRoleAssignedPermissionPO;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
@@ -39,6 +40,13 @@ public interface SysMenuPermissionMapper extends BaseMapper<SysMenuPermissionEnt
 	 * @return 已绑定菜单列表
 	 */
 	List<SysPermissionBoundMenuPO> selectBoundMenusByPermissionCode(@Param("permissionCode") String permissionCode);
+
+	/**
+	 * 按菜单 ID 反查已绑定权限（详情展示，不按权限类型过滤）
+	 * @param menuId 菜单 ID
+	 * @return 已绑定权限列表
+	 */
+	List<SysRoleAssignedPermissionPO> selectBoundPermissionsByMenuId(@Param("menuId") Long menuId);
 
 	/**
 	 * 删除菜单-权限关联

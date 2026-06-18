@@ -30,7 +30,8 @@ public class SysUserQueryController {
 	@PreAuthorize("@auth.decide('sysUser:query')")
 	@GetMapping("/{userId}/profile")
 	public Result<SysUserProfileResponse> profile(@PathVariable("userId") Long userId) {
-		return Result.success(sysUserQueryService.getProfile(userId));
+		SysUserProfileResponse profile = sysUserQueryService.getProfile(userId);
+		return Result.success(profile);
 	}
 
 	@Operation(summary = "用户关键词搜索")

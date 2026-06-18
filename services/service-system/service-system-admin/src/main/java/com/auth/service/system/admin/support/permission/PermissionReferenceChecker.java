@@ -30,9 +30,11 @@ public class PermissionReferenceChecker {
 		if (CollUtil.isEmpty(permissionCodes)) {
 			return;
 		}
+
 		Long activeCount = sysPermissionMapper.selectCount(Wrappers.<SysPermissionEntity>lambdaQuery()
 			.in(SysPermissionEntity::getPermissionCode, permissionCodes)
 			.eq(SysPermissionEntity::getStatus, true));
+
 		if (activeCount != permissionCodes.size()) {
 			throw new SystemBusinessException(SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 		}

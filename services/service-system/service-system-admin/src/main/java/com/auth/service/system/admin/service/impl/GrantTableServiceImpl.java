@@ -6,7 +6,6 @@ import com.auth.module.security.contract.dto.invalidation.GrantSubjectKey;
 import com.auth.service.system.admin.convert.GrantTableSubjectRoleConverter;
 import com.auth.service.system.admin.mapper.GrantTableMapper;
 import com.auth.service.system.admin.model.entity.GrantTableEntity;
-import com.auth.service.system.admin.model.enums.RoleTypeEnum;
 import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
 import com.auth.service.system.admin.model.po.granttable.GrantTableBoundRolePO;
 import com.auth.service.system.admin.model.vo.granttable.GrantTableAssignedRoleRow;
@@ -43,7 +42,6 @@ public class GrantTableServiceImpl extends ServiceImpl<GrantTableMapper, GrantTa
 	 */
 	@Override
 	public List<GrantTableAssignedRoleRow> listAssignedRoles(GrantTableSubjectType subjectType, Long subjectId) {
-		// 校验主体是否存在
 		subjectExistenceVerifier.requireExistingActive(subjectType, subjectId);
 
 		return listBoundRoles(subjectType, subjectId);
@@ -54,8 +52,7 @@ public class GrantTableServiceImpl extends ServiceImpl<GrantTableMapper, GrantTa
 	 */
 	@Override
 	public List<GrantTableAssignedRoleRow> listBoundRoles(GrantTableSubjectType subjectType, Long subjectId) {
-		List<GrantTableBoundRolePO> poList = baseMapper.selectBoundRolesBySubject(subjectType.name(), subjectId,
-				RoleTypeEnum.SUBJECT_GRANT_TYPES);
+		List<GrantTableBoundRolePO> poList = baseMapper.selectBoundRolesBySubject(subjectType.name(), subjectId);
 
 		return GrantTableSubjectRoleConverter.INSTANCE.toAssignedRoleRowList(poList);
 	}

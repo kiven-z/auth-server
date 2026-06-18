@@ -5,6 +5,7 @@ import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.admin.convert.SysUserProfileConverter;
 import com.auth.service.system.admin.mapper.SysUserQueryMapper;
 import com.auth.service.system.admin.model.SysUserSearchItemResponse;
+import com.auth.service.system.admin.model.po.sysuser.UserSearchItemPO;
 import com.auth.service.system.admin.model.vo.sysuser.SysUserProfileResponse;
 import com.auth.service.system.admin.service.SysUserQueryService;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
@@ -60,9 +61,11 @@ public class SysUserQueryServiceImpl extends ServiceImpl<SysUserQueryMapper, Use
 			return Collections.emptyList();
 		}
 
-		return SysUserProfileConverter.INSTANCE.toSearchItemResponseList(Objects.requireNonNullElse(
-				sysUserQueryMapper.searchByKeyword(keyword, limit == null ? 20 : Math.max(1, Math.min(limit, 50))),
-				List.of()));
+		limit = limit == null ? 20 : Math.max(1, Math.min(limit, 50));
+		List<UserSearchItemPO> searchItemList = sysUserQueryMapper.searchByKeyword(keyword, limit);
+		List<UserSearchItemPO> list = Objects.requireNonNullElse(searchItemList, List.of());
+
+		return SysUserProfileConverter.INSTANCE.toSearchItemResponseList(list);
 	}
 
 }

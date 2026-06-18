@@ -7,7 +7,6 @@ import com.auth.service.system.admin.mapper.PostReferenceMapper;
 import com.auth.service.system.admin.mapper.SysPostMapper;
 import com.auth.service.system.admin.model.entity.GrantTableEntity;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
-import com.auth.service.system.admin.model.enums.RoleTypeEnum;
 import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
 import com.auth.service.system.admin.model.po.granttable.GrantTableBoundRolePO;
 import com.auth.service.system.admin.model.vo.granttable.GrantTableAssignedRoleRow;
@@ -92,8 +91,7 @@ class GrantTableServiceImplTest {
 		GrantTableBoundRolePO boundRole = new GrantTableBoundRolePO();
 		boundRole.setRoleCode("CUSTOM_A");
 		boundRole.setRoleName("业务角色A");
-		when(grantTableMapper.selectBoundRolesBySubject(GrantTableSubjectType.POST.name(), SUBJECT_ID,
-				RoleTypeEnum.SUBJECT_GRANT_TYPES))
+		when(grantTableMapper.selectBoundRolesBySubject(GrantTableSubjectType.POST.name(), SUBJECT_ID))
 			.thenReturn(List.of(boundRole));
 
 		List<GrantTableAssignedRoleRow> rows = grantTableService.listAssignedRoles(GrantTableSubjectType.POST,
@@ -105,7 +103,24 @@ class GrantTableServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("查询已分配角色：主体不存在时抛出 DATA_NOT_EXIST")
+	@DisplayName("查询已分配角色：包含非主体授权类型角色时仍返回")
+	void listAssignedRolesReturnsLinkedRoleRegardlessOfType() {
+		when(sysPostMapper.selectById(SUBJECT_ID)).thenReturn(activePost());
+		GrantTableBoundRolePO menuRole = new GrantTableBoundRolePO();
+		menuRole.setRoleCode("MENU_ADMIN");
+		menuRole.setRoleName("菜单管理员");
+		when(grantTableMapper.selectBoundRolesBySubject(GrantTableSubjectType.POST.name(), SUBJECT_ID))
+			.thenReturn(List.of(menuRole));
+
+		List<GrantTableAssignedRoleRow> rows = grantTableService.listAssignedRoles(GrantTableSubjectType.POST,
+				SUBJECT_ID);
+
+		assertThat(rows).hasSize(1);
+		assertThat(rows.get(0).getRoleCode()).isEqualTo("MENU_ADMIN");
+		assertThat(rows.get(0).getRoleName()).isEqualTo("菜单管理员");
+	}
+
+	@Test
 	void listAssignedRolesThrowsWhenSubjectMissing() {
 		when(sysPostMapper.selectById(SUBJECT_ID)).thenReturn(null);
 

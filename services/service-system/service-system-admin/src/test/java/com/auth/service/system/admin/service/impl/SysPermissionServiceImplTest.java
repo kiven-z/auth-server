@@ -204,6 +204,7 @@ class SysPermissionServiceImplTest {
 		entity.setStatus(true);
 		when(sysPermissionMapper.selectById(3L)).thenReturn(entity);
 		when(sysRolePermissionMapper.selectBoundRolesByPermissionCode("sys:dept:query")).thenReturn(List.of());
+		when(sysMenuPermissionMapper.selectBoundMenusByPermissionCode("sys:dept:query")).thenReturn(List.of());
 
 		SysPermissionDetailVO detail = sysPermissionService.getDetail(3L);
 
@@ -212,8 +213,37 @@ class SysPermissionServiceImplTest {
 		assertThat(detail.getBoundRoles()).isEmpty();
 		assertThat(detail.getBoundMenus()).isEmpty();
 		verify(sysRolePermissionMapper).selectBoundRolesByPermissionCode("sys:dept:query");
-		verify(sysMenuPermissionMapper, never()).selectBoundMenusByPermissionCode(any());
+		verify(sysMenuPermissionMapper).selectBoundMenusByPermissionCode("sys:dept:query");
 		verify(auditUserDisplayService).enrichAuditUsernames(anyList());
+	}
+
+	@Test
+	@DisplayName("权限详情：API 权限仍反查并展示菜单绑定")
+	void getDetailShouldIncludeBoundMenusForApiPermissionWhenLinked() {
+		SysPermissionEntity entity = new SysPermissionEntity();
+		entity.setId(8L);
+		entity.setPermissionCode("sys:dept:query");
+		entity.setPermissionName("部门查询");
+		entity.setPermissionType(1);
+		entity.setStatus(true);
+		when(sysPermissionMapper.selectById(8L)).thenReturn(entity);
+		when(sysRolePermissionMapper.selectBoundRolesByPermissionCode("sys:dept:query")).thenReturn(List.of());
+
+		SysPermissionBoundMenuPO boundMenu = new SysPermissionBoundMenuPO();
+		boundMenu.setId(200L);
+		boundMenu.setTitle("部门管理");
+		boundMenu.setName("SystemDept");
+		boundMenu.setPath("/system/dept");
+		boundMenu.setMenuType(0);
+		boundMenu.setStatus(true);
+		when(sysMenuPermissionMapper.selectBoundMenusByPermissionCode("sys:dept:query")).thenReturn(List.of(boundMenu));
+
+		SysPermissionDetailVO detail = sysPermissionService.getDetail(8L);
+
+		assertThat(detail.getPermissionType()).isEqualTo(1);
+		assertThat(detail.getBoundMenus()).hasSize(1);
+		assertThat(detail.getBoundMenus().get(0).getTitle()).isEqualTo("部门管理");
+		verify(sysMenuPermissionMapper).selectBoundMenusByPermissionCode("sys:dept:query");
 	}
 
 	@Test
@@ -231,7 +261,6 @@ class SysPermissionServiceImplTest {
 		boundRole.setRoleCode("ADMIN");
 		boundRole.setRoleName("管理员");
 		boundRole.setStatus(true);
-		boundRole.setRoleType(1);
 		boundRole.setCreateTime(LocalDateTime.of(2026, 6, 4, 10, 30, 0));
 		boundRole.setUpdateTime(LocalDateTime.of(2026, 6, 4, 10, 30, 0));
 		when(sysRolePermissionMapper.selectBoundRolesByPermissionCode("sys:user:create"))

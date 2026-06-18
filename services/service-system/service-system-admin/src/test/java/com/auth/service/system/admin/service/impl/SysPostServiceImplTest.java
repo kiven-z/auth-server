@@ -9,7 +9,6 @@ import com.auth.service.system.admin.mapper.PostReferenceMapper;
 import com.auth.service.system.admin.mapper.SysPostDetailMapper;
 import com.auth.service.system.admin.mapper.SysPostMapper;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
-import com.auth.service.system.admin.model.enums.RoleTypeEnum;
 import com.auth.service.system.admin.model.form.post.SysPostForm;
 import com.auth.service.system.admin.model.po.granttable.GrantTableBoundRolePO;
 import com.auth.service.system.admin.model.po.post.SysPostBoundDeptPO;
@@ -221,8 +220,7 @@ class SysPostServiceImplTest {
 		when(sysPostMapper.selectById(postId)).thenReturn(entity);
 		when(sysPostDetailMapper.selectBoundDeptByPostId(postId)).thenReturn(boundDept);
 		when(sysPostDetailMapper.selectBoundUsersByPostId(postId)).thenReturn(List.of(boundUser));
-		when(grantTableMapper.selectBoundRolesBySubject(GrantTableSubjectType.POST.name(), postId,
-				RoleTypeEnum.SUBJECT_GRANT_TYPES))
+		when(grantTableMapper.selectBoundRolesBySubject(GrantTableSubjectType.POST.name(), postId))
 			.thenReturn(List.of(boundRole));
 
 		SysPostDetailVO detail = sysPostService.getDetail(postId);
@@ -238,8 +236,7 @@ class SysPostServiceImplTest {
 		assertThat(detail.getBoundRoles().get(0).getRoleCode()).isEqualTo("CUSTOM_A");
 		verify(sysPostDetailMapper).selectBoundDeptByPostId(postId);
 		verify(sysPostDetailMapper).selectBoundUsersByPostId(postId);
-		verify(grantTableMapper).selectBoundRolesBySubject(GrantTableSubjectType.POST.name(), postId,
-				RoleTypeEnum.SUBJECT_GRANT_TYPES);
+		verify(grantTableMapper).selectBoundRolesBySubject(GrantTableSubjectType.POST.name(), postId);
 		verify(auditUserDisplayService).enrichAuditUsernames(anyList());
 	}
 

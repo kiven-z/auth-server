@@ -4,7 +4,6 @@ import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.SysUserMapper;
-import com.auth.service.system.admin.model.enums.RoleTypeEnum;
 import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
 import com.auth.service.system.admin.model.vo.granttable.GrantTableAssignedRoleRow;
 import com.auth.service.system.admin.service.GrantTableService;
@@ -105,8 +104,8 @@ class SysUserRoleServiceImplTest {
 		sysUserRoleService.replaceUserRoles(USER_ID, form);
 
 		verify(userOperationChecker).requireOperable(List.of(USER_ID));
-		verify(roleGrantReferenceChecker).requireGrantEligibleRoles(List.of("BIZ_ADMIN", "CUSTOM_A"),
-				RoleTypeEnum.SUBJECT_GRANT_TYPES, SystemCommonResultCode.GRANT_REFERENCE_INVALID);
+		verify(roleGrantReferenceChecker).requireExistingEnabledRoles(List.of("BIZ_ADMIN", "CUSTOM_A"),
+				SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 		verify(grantTableService).replaceSubjectRoleGrants(GrantTableSubjectType.USER.name(), USER_ID,
 				List.of("BIZ_ADMIN", "CUSTOM_A"));
 		verify(userAuthorizationInvalidationTrigger).submitByUserIds(List.of(USER_ID), "replace-roles");

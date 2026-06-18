@@ -9,7 +9,6 @@ import com.auth.service.system.admin.mapper.GrantTableMapper;
 import com.auth.service.system.admin.mapper.SysDeptDetailMapper;
 import com.auth.service.system.admin.mapper.SysDeptMapper;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
-import com.auth.service.system.admin.model.enums.RoleTypeEnum;
 import com.auth.service.system.admin.model.form.dept.SysDeptForm;
 import com.auth.service.system.admin.model.form.dept.SysDeptMoveForm;
 import com.auth.service.system.admin.model.po.dept.SysDeptBoundPostPO;
@@ -105,7 +104,7 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 		detail.setBoundPosts(SysDeptConverter.INSTANCE.toBoundPostItemList(boundPosts));
 
 		List<GrantTableBoundRolePO> poList = grantTableMapper
-			.selectBoundRolesBySubject(GrantTableSubjectType.DEPT.name(), id, RoleTypeEnum.SUBJECT_GRANT_TYPES);
+			.selectBoundRolesBySubject(GrantTableSubjectType.DEPT.name(), id);
 		detail.setBoundRoles(GrantTableSubjectRoleConverter.INSTANCE.toBoundRoleItemList(poList));
 
 		// 补充审计用户名

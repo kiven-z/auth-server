@@ -1,14 +1,21 @@
 package com.auth.service.system.admin.service.impl;
 
 import com.auth.common.data.model.PageResponse;
+import com.auth.service.system.admin.convert.GrantTableBoundSubjectConverter;
+import com.auth.service.system.admin.convert.SysPermissionConverter;
 import com.auth.service.system.admin.convert.SysRoleConverter;
 import com.auth.service.system.admin.convert.SysRolePermissionConverter;
 import com.auth.service.system.admin.mapper.GrantTableMapper;
+import com.auth.service.system.admin.mapper.SysMenuRoleMapper;
 import com.auth.service.system.admin.mapper.SysRoleMapper;
 import com.auth.service.system.admin.mapper.SysRolePermissionMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
-import com.auth.service.system.admin.model.enums.RoleTypeEnum;
 import com.auth.service.system.admin.model.form.role.SysRoleForm;
+import com.auth.service.system.admin.model.po.granttable.GrantTableBoundDeptPO;
+import com.auth.service.system.admin.model.po.granttable.GrantTableBoundPostPO;
+import com.auth.service.system.admin.model.po.granttable.GrantTableBoundUserPO;
+import com.auth.service.system.admin.model.po.permission.SysPermissionBoundMenuPO;
+import com.auth.service.system.admin.model.po.role.SysRoleAssignedPermissionPO;
 import com.auth.service.system.admin.model.query.SysRoleQuery;
 import com.auth.service.system.admin.model.vo.role.SysRoleDetailVO;
 import com.auth.service.system.admin.model.vo.role.SysRoleOptionVO;
@@ -52,6 +59,8 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 
 	private final SysRolePermissionMapper sysRolePermissionMapper;
 
+	private final SysMenuRoleMapper sysMenuRoleMapper;
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -76,9 +85,24 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 		}
 
 		SysRoleDetailVO detail = SysRoleConverter.INSTANCE.toDetailVo(entity);
-		detail.setRoleTypeDesc(RoleTypeEnum.getDesc(entity.getRoleType()));
-		detail.setBoundPermissions(SysRolePermissionConverter.INSTANCE.toBoundPermissionItemList(
-				sysRolePermissionMapper.selectAssignedPermissionsByRoleCode(entity.getRoleCode())));
+		String roleCode = entity.getRoleCode();
+
+		List<SysRoleAssignedPermissionPO> permissions = sysRolePermissionMapper
+			.selectAssignedPermissionsByRoleCode(roleCode);
+		detail.setBoundPermissions(SysRolePermissionConverter.INSTANCE.toBoundPermissionItemList(permissions));
+
+		List<SysPermissionBoundMenuPO> permissionBoundMenus = sysMenuRoleMapper.selectBoundMenusByRoleCode(roleCode);
+		detail.setBoundMenus(SysPermissionConverter.INSTANCE.toBoundMenuItemList(permissionBoundMenus));
+
+		List<GrantTableBoundUserPO> grantTableBoundUsers = grantTableMapper.selectBoundUsersByRoleCode(roleCode);
+		detail.setBoundUsers(GrantTableBoundSubjectConverter.INSTANCE.toBoundUserItemList(grantTableBoundUsers));
+
+		List<GrantTableBoundDeptPO> grantTableBoundDeptList = grantTableMapper.selectBoundDeptsByRoleCode(roleCode);
+		detail.setBoundDepts(GrantTableBoundSubjectConverter.INSTANCE.toBoundDeptItemList(grantTableBoundDeptList));
+
+		List<GrantTableBoundPostPO> grantTableBoundPosts = grantTableMapper.selectBoundPostsByRoleCode(roleCode);
+		detail.setBoundPosts(GrantTableBoundSubjectConverter.INSTANCE.toBoundPostItemList(grantTableBoundPosts));
+
 		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail));
 		return detail;
 	}

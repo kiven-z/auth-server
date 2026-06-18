@@ -45,8 +45,8 @@ class BooleanStatusJsonDeserializationTest {
 	@Test
 	@DisplayName("SysRoleSaveForm 必填 status 布尔")
 	void sysRoleSaveFormAcceptsBooleanStatus() throws Exception {
-		SysRoleForm form = objectMapper.readValue(
-				"{\"roleCode\":\"R_DEMO\",\"roleName\":\"演示\",\"roleType\":4,\"status\":true}", SysRoleForm.class);
+		SysRoleForm form = objectMapper.readValue("{\"roleCode\":\"R_DEMO\",\"roleName\":\"演示\",\"status\":true}",
+				SysRoleForm.class);
 		assertThat(form.getStatus()).isTrue();
 	}
 

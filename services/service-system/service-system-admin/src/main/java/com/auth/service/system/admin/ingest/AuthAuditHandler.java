@@ -21,6 +21,9 @@ public class AuthAuditHandler implements AuthorizationAuditHandler {
 		this.securityIngestService = securityIngestService;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void handle(SecurityAuthorizationAuditPayloadEvent event) {
 		try {

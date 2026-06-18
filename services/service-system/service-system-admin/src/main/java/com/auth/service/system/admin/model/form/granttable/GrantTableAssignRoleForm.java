@@ -22,7 +22,7 @@ public class GrantTableAssignRoleForm implements Serializable {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
-	@Schema(title = "角色编码列表（组织类主体仅允许 roleType=3/4）", requiredMode = Schema.RequiredMode.REQUIRED)
+	@Schema(title = "角色编码列表", requiredMode = Schema.RequiredMode.REQUIRED)
 	@NotNull(message = "roleCodes is required")
 	private List<String> roleCodes;
 

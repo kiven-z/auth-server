@@ -60,7 +60,6 @@ class SysRoleSpreadsheetServiceTest {
 		row.setId(1L);
 		row.setRoleCode("ADMIN");
 		row.setRoleName("管理员");
-		row.setRoleType(1);
 		row.setStatus(true);
 		row.setOrderNum(1);
 		row.setRemark("备注样例");

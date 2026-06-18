@@ -1,7 +1,6 @@
 package com.auth.service.system.admin.service.impl;
 
 import com.auth.service.system.admin.mapper.SysMenuRoleMapper;
-import com.auth.service.system.admin.model.enums.RoleTypeEnum;
 import com.auth.service.system.admin.model.form.menu.SysMenuAssignRoleForm;
 import com.auth.service.system.admin.support.role.RoleGrantReferenceChecker;
 import com.auth.service.system.common.exception.SystemBusinessException;
@@ -44,8 +43,8 @@ class SysMenuManageServiceImplTest {
 
 		sysMenuManageService.replaceMenuRoles(menuId, form);
 
-		verify(roleGrantReferenceChecker).requireGrantEligibleRoles(List.of("MENU_ADMIN", "MENU_GUEST"),
-				RoleTypeEnum.MENU_ASSIGN_TYPES, SystemCommonResultCode.GRANT_REFERENCE_INVALID);
+		verify(roleGrantReferenceChecker).requireExistingEnabledRoles(List.of("MENU_ADMIN", "MENU_GUEST"),
+				SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 		verify(sysMenuRoleMapper).deleteByMenuId(menuId);
 		verify(sysMenuRoleMapper).batchInsertMenuRoles(menuId, List.of("MENU_ADMIN", "MENU_GUEST"));
 	}
@@ -59,7 +58,7 @@ class SysMenuManageServiceImplTest {
 
 		sysMenuManageService.replaceMenuRoles(menuId, form);
 
-		verify(roleGrantReferenceChecker).requireGrantEligibleRoles(List.of(), RoleTypeEnum.MENU_ASSIGN_TYPES,
+		verify(roleGrantReferenceChecker).requireExistingEnabledRoles(List.of(),
 				SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 		verify(sysMenuRoleMapper).deleteByMenuId(menuId);
 		verify(sysMenuRoleMapper, never()).batchInsertMenuRoles(any(), any());
@@ -74,8 +73,7 @@ class SysMenuManageServiceImplTest {
 
 		doThrow(new SystemBusinessException(SystemCommonResultCode.GRANT_REFERENCE_INVALID))
 			.when(roleGrantReferenceChecker)
-			.requireGrantEligibleRoles(List.of("BIZ_ADMIN"), RoleTypeEnum.MENU_ASSIGN_TYPES,
-					SystemCommonResultCode.GRANT_REFERENCE_INVALID);
+			.requireExistingEnabledRoles(List.of("BIZ_ADMIN"), SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 
 		assertThatThrownBy(() -> sysMenuManageService.replaceMenuRoles(menuId, form))
 			.isInstanceOf(SystemBusinessException.class)

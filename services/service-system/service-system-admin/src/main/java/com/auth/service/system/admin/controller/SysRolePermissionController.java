@@ -38,7 +38,8 @@ public class SysRolePermissionController {
 	@PreAuthorize("@auth.decide('sysRole:query')")
 	@GetMapping
 	public Result<List<SysRoleAssignedPermissionRow>> list(@PathVariable("roleCode") String roleCode) {
-		return Result.success(sysRolePermissionService.listAssignedPermissions(roleCode));
+		List<SysRoleAssignedPermissionRow> data = sysRolePermissionService.listAssignedPermissions(roleCode);
+		return Result.success(data);
 	}
 
 	@OperationLog(targetType = "ROLE_PERMISSION", serviceDomain = AuditServiceDomain.SYSTEM,

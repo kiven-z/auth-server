@@ -71,7 +71,8 @@ public class SysPostController {
 	@PreAuthorize("@auth.decide('sysPost:import')")
 	@PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public Result<SpreadsheetImportResult> importExcel(@RequestPart("file") MultipartFile file) throws IOException {
-		return Result.success(sysPostSpreadsheetService.importExcel(file));
+		SpreadsheetImportResult data = sysPostSpreadsheetService.importExcel(file);
+		return Result.success(data);
 	}
 
 	@Operation(summary = "岗位分页查询")
@@ -91,14 +92,16 @@ public class SysPostController {
 			@Parameter(description = "启用状态(true=启用，false=停用)") @RequestParam(required = false) Boolean status,
 			@Parameter(description = "返回条数上限，默认 20，最大 50") @RequestParam(required = false,
 					defaultValue = "20") Integer limit) {
-		return Result.success(sysPostService.search(keyword, status, limit));
+		List<SysPostSearchItemResponse> search = sysPostService.search(keyword, status, limit);
+		return Result.success(search);
 	}
 
 	@Operation(summary = "岗位详情")
 	@PreAuthorize("@auth.decide('sysPost:query')")
 	@GetMapping("/{id}")
 	public Result<SysPostDetailVO> detail(@PathVariable("id") Long id) {
-		return Result.success(sysPostService.getDetail(id));
+		SysPostDetailVO detail = sysPostService.getDetail(id);
+		return Result.success(detail);
 	}
 
 	@Operation(summary = "新增岗位")

@@ -39,10 +39,9 @@ public class DeptCodeIdResolver {
 		List<String> deptCodes = rows.stream()
 			.map(deptCodeGetter)
 			.filter(CharSequenceUtil::isNotBlank)
-			.map(String::trim)
 			.distinct()
 			.toList();
-		if (deptCodes.isEmpty()) {
+		if (CollUtil.isEmpty(deptCodes)) {
 			return Map.of();
 		}
 

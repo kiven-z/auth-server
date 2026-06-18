@@ -7,10 +7,14 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.constants.PermissionConstant;
 import com.auth.service.system.admin.convert.SysMenuConverter;
 import com.auth.service.system.admin.mapper.SysMenuMapper;
+import com.auth.service.system.admin.mapper.SysMenuPermissionMapper;
+import com.auth.service.system.admin.mapper.SysMenuRoleMapper;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.admin.model.form.menu.SysMenuBatchStatusForm;
 import com.auth.service.system.admin.model.form.menu.SysMenuMoveForm;
 import com.auth.service.system.admin.model.form.menu.SysMenuSaveForm;
+import com.auth.service.system.admin.model.po.permission.SysPermissionBoundRolePO;
+import com.auth.service.system.admin.model.po.role.SysRoleAssignedPermissionPO;
 import com.auth.service.system.admin.model.query.SysMenuQuery;
 import com.auth.service.system.admin.model.vo.menu.RouteNodeVO;
 import com.auth.service.system.admin.model.vo.menu.SysMenuDetailVO;
@@ -27,6 +31,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +45,7 @@ import java.util.Objects;
  *
  * @author Bunny
  */
+@RequiredArgsConstructor
 @Slf4j
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -53,14 +59,9 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuEntity
 
 	private final MenuReferenceChecker menuReferenceChecker;
 
-	public SysMenuServiceImpl(AuditUserDisplayService auditUserDisplayService,
-			UserEffectiveCodesResolver userEffectiveCodesResolver, MenuWebRouteTreeBuilder menuWebRouteTreeBuilder,
-			MenuReferenceChecker menuReferenceChecker) {
-		this.auditUserDisplayService = auditUserDisplayService;
-		this.userEffectiveCodesResolver = userEffectiveCodesResolver;
-		this.menuWebRouteTreeBuilder = menuWebRouteTreeBuilder;
-		this.menuReferenceChecker = menuReferenceChecker;
-	}
+	private final SysMenuRoleMapper sysMenuRoleMapper;
+
+	private final SysMenuPermissionMapper sysMenuPermissionMapper;
 
 	/**
 	 * {@inheritDoc}
@@ -117,8 +118,17 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuEntity
 	 */
 	@Override
 	public SysMenuDetailVO getDetail(Long id) {
-		SysMenuEntity entity = getById(id);
-		return SysMenuConverter.INSTANCE.toDetailVo(entity);
+		SysMenuEntity entity = menuReferenceChecker.getExisting(id);
+
+		SysMenuDetailVO detail = SysMenuConverter.INSTANCE.toDetailVo(entity);
+		List<SysPermissionBoundRolePO> boundRoles = sysMenuRoleMapper.selectBoundRolesByMenuId(id);
+		detail.setBoundRoles(SysMenuConverter.INSTANCE.toBoundRoleItemList(boundRoles));
+
+		List<SysRoleAssignedPermissionPO> boundPermissions = sysMenuPermissionMapper.selectBoundPermissionsByMenuId(id);
+		detail.setBoundPermissions(SysMenuConverter.INSTANCE.toBoundPermissionItemList(boundPermissions));
+
+		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail));
+		return detail;
 	}
 
 	/**

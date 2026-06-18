@@ -1,8 +1,13 @@
 package com.auth.service.system.admin.service.impl;
 
 import com.auth.service.system.admin.mapper.SysMenuMapper;
+import com.auth.service.system.admin.mapper.SysMenuPermissionMapper;
+import com.auth.service.system.admin.mapper.SysMenuRoleMapper;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.admin.model.form.menu.SysMenuMoveForm;
+import com.auth.service.system.admin.model.po.permission.SysPermissionBoundRolePO;
+import com.auth.service.system.admin.model.po.role.SysRoleAssignedPermissionPO;
+import com.auth.service.system.admin.model.vo.menu.SysMenuDetailVO;
 import com.auth.service.system.admin.service.MenuWebRouteTreeBuilder;
 import com.auth.service.system.admin.support.menu.MenuReferenceChecker;
 import com.auth.service.system.authorization.dispatch.query.UserEffectiveCodesResolver;
@@ -18,9 +23,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Field;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -49,6 +56,12 @@ class SysMenuServiceImplTest {
 	@Mock
 	private MenuReferenceChecker menuReferenceChecker;
 
+	@Mock
+	private SysMenuRoleMapper sysMenuRoleMapper;
+
+	@Mock
+	private SysMenuPermissionMapper sysMenuPermissionMapper;
+
 	private SysMenuServiceImpl sysMenuService;
 
 	private static SysMenuEntity menuEntity(Long id) {
@@ -61,7 +74,7 @@ class SysMenuServiceImplTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		sysMenuService = new SysMenuServiceImpl(auditUserDisplayService, userEffectiveCodesResolver,
-				menuWebRouteTreeBuilder, menuReferenceChecker);
+				menuWebRouteTreeBuilder, menuReferenceChecker, sysMenuRoleMapper, sysMenuPermissionMapper);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysMenuService, sysMenuMapper);
@@ -127,6 +140,54 @@ class SysMenuServiceImplTest {
 
 		verify(sysMenuMapper).selectFirstBlockedParentId(List.of(3L, 3L, 4L));
 		verify(sysMenuMapper).deleteByIds(anyCollection());
+	}
+
+	@Test
+	@DisplayName("菜单详情：不存在时抛出 DATA_NOT_EXIST")
+	void getDetailThrowsWhenNotFound() {
+		when(menuReferenceChecker.getExisting(9L))
+			.thenThrow(new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST, 9L));
+
+		assertThatThrownBy(() -> sysMenuService.getDetail(9L)).isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
+	}
+
+	@Test
+	@DisplayName("菜单详情：反查并填充已绑定角色与权限")
+	void getDetailShouldIncludeBoundRolesAndPermissions() {
+		SysMenuEntity entity = menuEntity(5L);
+		entity.setName("SystemUser");
+		entity.setTitle("用户管理");
+		when(menuReferenceChecker.getExisting(5L)).thenReturn(entity);
+
+		SysPermissionBoundRolePO boundRole = new SysPermissionBoundRolePO();
+		boundRole.setRoleCode("MENU_ADMIN");
+		boundRole.setRoleName("菜单管理员");
+		boundRole.setStatus(true);
+		boundRole.setCreateTime(LocalDateTime.of(2026, 6, 4, 10, 30, 0));
+		boundRole.setUpdateTime(LocalDateTime.of(2026, 6, 4, 10, 30, 0));
+		when(sysMenuRoleMapper.selectBoundRolesByMenuId(5L)).thenReturn(List.of(boundRole));
+
+		SysRoleAssignedPermissionPO boundPermission = new SysRoleAssignedPermissionPO();
+		boundPermission.setPermissionCode("sys:user:create");
+		boundPermission.setPermissionName("新增用户");
+		boundPermission.setPermissionType(0);
+		boundPermission.setStatus(true);
+		boundPermission.setCreateTime(LocalDateTime.of(2026, 6, 4, 11, 0, 0));
+		boundPermission.setUpdateTime(LocalDateTime.of(2026, 6, 4, 11, 0, 0));
+		when(sysMenuPermissionMapper.selectBoundPermissionsByMenuId(5L)).thenReturn(List.of(boundPermission));
+
+		SysMenuDetailVO detail = sysMenuService.getDetail(5L);
+
+		assertThat(detail.getName()).isEqualTo("SystemUser");
+		assertThat(detail.getBoundRoles()).hasSize(1);
+		assertThat(detail.getBoundRoles().get(0).getRoleCode()).isEqualTo("MENU_ADMIN");
+		assertThat(detail.getBoundPermissions()).hasSize(1);
+		assertThat(detail.getBoundPermissions().get(0).getPermissionCode()).isEqualTo("sys:user:create");
+		verify(sysMenuRoleMapper).selectBoundRolesByMenuId(5L);
+		verify(sysMenuPermissionMapper).selectBoundPermissionsByMenuId(5L);
+		verify(auditUserDisplayService).enrichAuditUsernames(anyList());
 	}
 
 }

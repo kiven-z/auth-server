@@ -1,7 +1,10 @@
 package com.auth.service.system.admin.mapper;
 
 import com.auth.service.system.admin.model.entity.GrantTableEntity;
+import com.auth.service.system.admin.model.po.granttable.GrantTableBoundDeptPO;
+import com.auth.service.system.admin.model.po.granttable.GrantTableBoundPostPO;
 import com.auth.service.system.admin.model.po.granttable.GrantTableBoundRolePO;
+import com.auth.service.system.admin.model.po.granttable.GrantTableBoundUserPO;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -32,13 +35,33 @@ public interface GrantTableMapper extends BaseMapper<GrantTableEntity> {
 	int deleteBySubject(@Param("subjectType") String subjectType, @Param("subjectId") Long subjectId);
 
 	/**
-	 * 按授权主体查询已绑定角色（联表 sys_role）。
+	 * 按授权主体查询已绑定角色（联表 sys_role，返回 grant_table 中的全部关联）。
 	 * @param subjectType 主体类型
 	 * @param subjectId 主体 ID
-	 * @param roleTypes 允许展示的 role_type 集合
 	 * @return 已授权角色投影列表
 	 */
 	List<GrantTableBoundRolePO> selectBoundRolesBySubject(@Param("subjectType") String subjectType,
-			@Param("subjectId") Long subjectId, @Param("roleTypes") List<Integer> roleTypes);
+			@Param("subjectId") Long subjectId);
+
+	/**
+	 * 按角色码反查已授权用户（联表 sys_user，返回 grant_table 中的全部关联）。
+	 * @param roleCode 角色编码
+	 * @return 已授权用户投影列表
+	 */
+	List<GrantTableBoundUserPO> selectBoundUsersByRoleCode(@Param("roleCode") String roleCode);
+
+	/**
+	 * 按角色码反查已授权部门（联表 sys_dept，返回 grant_table 中的全部关联）。
+	 * @param roleCode 角色编码
+	 * @return 已授权部门投影列表
+	 */
+	List<GrantTableBoundDeptPO> selectBoundDeptsByRoleCode(@Param("roleCode") String roleCode);
+
+	/**
+	 * 按角色码反查已授权岗位（联表 sys_post，返回 grant_table 中的全部关联）。
+	 * @param roleCode 角色编码
+	 * @return 已授权岗位投影列表
+	 */
+	List<GrantTableBoundPostPO> selectBoundPostsByRoleCode(@Param("roleCode") String roleCode);
 
 }

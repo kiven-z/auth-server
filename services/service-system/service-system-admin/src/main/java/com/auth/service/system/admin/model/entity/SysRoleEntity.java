@@ -26,9 +26,6 @@ public class SysRoleEntity extends BaseEntity {
 	@Schema(title = "启用状态(true=正常启用，false=停用)")
 	private Boolean status;
 
-	@Schema(title = "角色类型(1=系统,2=菜单,3=业务,4=自定义)")
-	private Integer roleType;
-
 	@Schema(title = "显示顺序")
 	private Integer orderNum;
 

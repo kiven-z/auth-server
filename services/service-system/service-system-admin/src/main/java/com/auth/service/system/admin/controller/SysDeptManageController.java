@@ -55,7 +55,8 @@ public class SysDeptManageController {
 	@PreAuthorize("@auth.decide('sysDept:query')")
 	@GetMapping("/{deptId}/roles")
 	public Result<List<GrantTableAssignedRoleRow>> listRoles(@PathVariable("deptId") Long deptId) {
-		return Result.success(grantTableService.listAssignedRoles(GrantTableSubjectType.DEPT, deptId));
+		List<GrantTableAssignedRoleRow> rows = grantTableService.listAssignedRoles(GrantTableSubjectType.DEPT, deptId);
+		return Result.success(rows);
 	}
 
 	@OperationLog(targetType = "DEPT_ROLE", serviceDomain = AuditServiceDomain.SYSTEM,

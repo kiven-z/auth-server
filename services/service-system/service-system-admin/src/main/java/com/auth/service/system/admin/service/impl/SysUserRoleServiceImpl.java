@@ -2,7 +2,6 @@ package com.auth.service.system.admin.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
-import com.auth.service.system.admin.model.enums.RoleTypeEnum;
 import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
 import com.auth.service.system.admin.model.vo.granttable.GrantTableAssignedRoleRow;
 import com.auth.service.system.admin.service.GrantTableService;
@@ -61,7 +60,7 @@ public class SysUserRoleServiceImpl implements SysUserRoleService {
 
 		// 校验角色是否可授权
 		List<String> roleCodes = CollUtil.emptyIfNull(form.getRoleCodes()).stream().distinct().toList();
-		roleGrantReferenceChecker.requireGrantEligibleRoles(roleCodes, RoleTypeEnum.SUBJECT_GRANT_TYPES,
+		roleGrantReferenceChecker.requireExistingEnabledRoles(roleCodes,
 				SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 
 		// 替换用户角色授权

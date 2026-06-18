@@ -3,6 +3,8 @@ package com.auth.service.system.admin.mapper;
 import com.auth.service.system.admin.model.entity.SysMenuRoleEntity;
 import com.auth.service.system.admin.model.po.menu.SysMenuAssignedRolePO;
 import com.auth.service.system.admin.model.po.menu.SysMenuRoleLinkRowPO;
+import com.auth.service.system.admin.model.po.permission.SysPermissionBoundMenuPO;
+import com.auth.service.system.admin.model.po.permission.SysPermissionBoundRolePO;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
@@ -24,6 +26,20 @@ public interface SysMenuRoleMapper extends BaseMapper<SysMenuRoleEntity> {
 	 * @return 已分配角色 DTO 列表
 	 */
 	List<SysMenuAssignedRolePO> selectAssignedRolesByMenuId(@Param("menuId") Long menuId);
+
+	/**
+	 * 按菜单 ID 反查已绑定角色（详情展示，不按角色类型过滤）
+	 * @param menuId 菜单 ID
+	 * @return 已绑定角色列表
+	 */
+	List<SysPermissionBoundRolePO> selectBoundRolesByMenuId(@Param("menuId") Long menuId);
+
+	/**
+	 * 按角色码反查已绑定菜单（详情展示，不按菜单类型过滤）
+	 * @param roleCode 角色编码
+	 * @return 已绑定菜单列表
+	 */
+	List<SysPermissionBoundMenuPO> selectBoundMenusByRoleCode(@Param("roleCode") String roleCode);
 
 	/**
 	 * 批量查询菜单下已启用、未删除的角色关联

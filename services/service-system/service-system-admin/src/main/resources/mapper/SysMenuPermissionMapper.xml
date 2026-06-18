@@ -31,6 +31,21 @@
         </foreach>
     </select>
 
+    <!-- 按菜单 ID 反查已绑定权限 -->
+    <select id="selectBoundPermissionsByMenuId"
+            resultType="com.auth.service.system.admin.model.po.role.SysRoleAssignedPermissionPO">
+        SELECT mp.permission_code,
+        COALESCE(p.permission_name, mp.permission_code) AS permission_name,
+        p.permission_type,
+        p.status,
+        mp.create_time,
+        mp.update_time
+        FROM sys_menu_permission mp
+        LEFT JOIN sys_permission p ON p.permission_code = mp.permission_code
+        WHERE mp.menu_id = #{menuId}
+        ORDER BY mp.permission_code
+    </select>
+
     <!-- 按权限码反查已绑定菜单 -->
     <select id="selectBoundMenusByPermissionCode"
             resultType="com.auth.service.system.admin.model.po.permission.SysPermissionBoundMenuPO">

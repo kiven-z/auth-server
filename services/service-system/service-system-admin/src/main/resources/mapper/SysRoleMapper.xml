@@ -9,7 +9,6 @@
         r.role_code,
         r.role_name,
         r.status,
-        r.role_type,
         r.order_num,
         r.create_time,
         r.update_time,
@@ -32,12 +31,6 @@
             <if test="query.status != null">
                 AND r.status =
                 #{query.status}
-            </if>
-            <if test="query.roleTypes != null and query.roleTypes.size() > 0">
-                AND r.role_type IN
-                <foreach collection="query.roleTypes" item="roleTypeItem" open="(" separator="," close=")">
-                    #{roleTypeItem}
-                </foreach>
             </if>
         </where>
         ORDER BY ${orderBySql}

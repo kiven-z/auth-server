@@ -1,10 +1,15 @@
 package com.auth.service.system.admin.service.impl;
 
 import com.auth.service.system.admin.mapper.GrantTableMapper;
+import com.auth.service.system.admin.mapper.SysMenuRoleMapper;
 import com.auth.service.system.admin.mapper.SysRoleMapper;
 import com.auth.service.system.admin.mapper.SysRolePermissionMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.form.role.SysRoleForm;
+import com.auth.service.system.admin.model.po.granttable.GrantTableBoundDeptPO;
+import com.auth.service.system.admin.model.po.granttable.GrantTableBoundPostPO;
+import com.auth.service.system.admin.model.po.granttable.GrantTableBoundUserPO;
+import com.auth.service.system.admin.model.po.permission.SysPermissionBoundMenuPO;
 import com.auth.service.system.admin.model.po.role.SysRoleAssignedPermissionPO;
 import com.auth.service.system.admin.model.vo.role.SysRoleDetailVO;
 import com.auth.service.system.authorization.dispatch.trigger.RoleAuthorizationInvalidationTrigger;
@@ -52,6 +57,9 @@ class SysRoleServiceImplTest {
 	@Mock
 	private SysRolePermissionMapper sysRolePermissionMapper;
 
+	@Mock
+	private SysMenuRoleMapper sysMenuRoleMapper;
+
 	private SysRoleServiceImpl sysRoleService;
 
 	private static SysRoleForm updateForm(Long id, String roleCode, boolean status) {
@@ -60,7 +68,6 @@ class SysRoleServiceImplTest {
 		form.setRoleCode(roleCode);
 		form.setRoleName("测试角色");
 		form.setStatus(status);
-		form.setRoleType(4);
 		form.setOrderNum(0);
 		return form;
 	}
@@ -71,14 +78,13 @@ class SysRoleServiceImplTest {
 		entity.setRoleCode(roleCode);
 		entity.setRoleName("测试角色");
 		entity.setStatus(true);
-		entity.setRoleType(4);
 		return entity;
 	}
 
 	@BeforeEach
 	void setUp() throws Exception {
 		sysRoleService = new SysRoleServiceImpl(auditUserDisplayService, roleInvalidationTrigger, grantTableMapper,
-				sysRolePermissionMapper);
+				sysRolePermissionMapper, sysMenuRoleMapper);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysRoleService, sysRoleMapper);
@@ -93,7 +99,7 @@ class SysRoleServiceImplTest {
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
 
-		verifyNoInteractions(sysRolePermissionMapper);
+		verifyNoInteractions(sysRolePermissionMapper, sysMenuRoleMapper);
 	}
 
 	@Test
@@ -109,11 +115,14 @@ class SysRoleServiceImplTest {
 		permission.setCreateTime(LocalDateTime.of(2026, 6, 4, 11, 0, 0));
 		permission.setUpdateTime(LocalDateTime.of(2026, 6, 4, 11, 0, 0));
 		when(sysRolePermissionMapper.selectAssignedPermissionsByRoleCode("ADMIN")).thenReturn(List.of(permission));
+		when(sysMenuRoleMapper.selectBoundMenusByRoleCode("ADMIN")).thenReturn(List.of());
+		when(grantTableMapper.selectBoundUsersByRoleCode("ADMIN")).thenReturn(List.of());
+		when(grantTableMapper.selectBoundDeptsByRoleCode("ADMIN")).thenReturn(List.of());
+		when(grantTableMapper.selectBoundPostsByRoleCode("ADMIN")).thenReturn(List.of());
 
 		SysRoleDetailVO detail = sysRoleService.getDetail(1L);
 
 		assertThat(detail.getRoleCode()).isEqualTo("ADMIN");
-		assertThat(detail.getRoleTypeDesc()).isEqualTo("自定义角色");
 		assertThat(detail.getBoundPermissions()).hasSize(1);
 		assertThat(detail.getBoundPermissions().get(0).getPermissionCode()).isEqualTo("sys:user:query");
 		assertThat(detail.getBoundPermissions().get(0).getPermissionType()).isEqualTo(1);
@@ -122,7 +131,75 @@ class SysRoleServiceImplTest {
 		assertThat(detail.getBoundPermissions().get(0).getUpdateTime())
 			.isEqualTo(LocalDateTime.of(2026, 6, 4, 11, 0, 0));
 		verify(sysRolePermissionMapper).selectAssignedPermissionsByRoleCode("ADMIN");
+		verify(sysMenuRoleMapper).selectBoundMenusByRoleCode("ADMIN");
+		verify(grantTableMapper).selectBoundUsersByRoleCode("ADMIN");
+		verify(grantTableMapper).selectBoundDeptsByRoleCode("ADMIN");
+		verify(grantTableMapper).selectBoundPostsByRoleCode("ADMIN");
 		verify(auditUserDisplayService).enrichAuditUsernames(anyList());
+	}
+
+	@Test
+	@DisplayName("角色详情：反查并填充已绑定菜单与 grant 授权主体")
+	void getDetailShouldIncludeBoundMenusAndGrantSubjects() {
+		when(sysRoleMapper.selectById(2L)).thenReturn(roleEntity(2L, "EDITOR"));
+
+		SysPermissionBoundMenuPO boundMenu = new SysPermissionBoundMenuPO();
+		boundMenu.setId(10L);
+		boundMenu.setTitle("用户管理");
+		boundMenu.setName("SystemUser");
+		boundMenu.setPath("/system/user");
+		boundMenu.setMenuType(0);
+		boundMenu.setStatus(true);
+		when(sysMenuRoleMapper.selectBoundMenusByRoleCode("EDITOR")).thenReturn(List.of(boundMenu));
+
+		GrantTableBoundUserPO boundUser = new GrantTableBoundUserPO();
+		boundUser.setUserId(100L);
+		boundUser.setUsername("alice");
+		boundUser.setNickname("Alice");
+		boundUser.setEmployeeNo("E001");
+		boundUser.setUserStatus(1);
+		boundUser.setCreateTime(LocalDateTime.of(2026, 6, 4, 9, 0, 0));
+		boundUser.setUpdateTime(LocalDateTime.of(2026, 6, 4, 9, 30, 0));
+		when(grantTableMapper.selectBoundUsersByRoleCode("EDITOR")).thenReturn(List.of(boundUser));
+
+		GrantTableBoundDeptPO boundDept = new GrantTableBoundDeptPO();
+		boundDept.setDeptId(20L);
+		boundDept.setDeptCode("RD");
+		boundDept.setDeptName("研发部");
+		boundDept.setStatus(true);
+		boundDept.setCreateTime(LocalDateTime.of(2026, 6, 4, 10, 0, 0));
+		boundDept.setUpdateTime(LocalDateTime.of(2026, 6, 4, 10, 0, 0));
+		when(grantTableMapper.selectBoundDeptsByRoleCode("EDITOR")).thenReturn(List.of(boundDept));
+
+		GrantTableBoundPostPO boundPost = new GrantTableBoundPostPO();
+		boundPost.setPostId(30L);
+		boundPost.setPostCode("DEV");
+		boundPost.setPostName("开发岗");
+		boundPost.setStatus(true);
+		boundPost.setDeptId(20L);
+		boundPost.setDeptName("研发部");
+		boundPost.setCreateTime(LocalDateTime.of(2026, 6, 4, 11, 0, 0));
+		boundPost.setUpdateTime(LocalDateTime.of(2026, 6, 4, 11, 0, 0));
+		when(grantTableMapper.selectBoundPostsByRoleCode("EDITOR")).thenReturn(List.of(boundPost));
+
+		when(sysRolePermissionMapper.selectAssignedPermissionsByRoleCode("EDITOR")).thenReturn(List.of());
+
+		SysRoleDetailVO detail = sysRoleService.getDetail(2L);
+
+		assertThat(detail.getBoundMenus()).hasSize(1);
+		assertThat(detail.getBoundMenus().get(0).getTitle()).isEqualTo("用户管理");
+		assertThat(detail.getBoundUsers()).hasSize(1);
+		assertThat(detail.getBoundUsers().get(0).getUsername()).isEqualTo("alice");
+		assertThat(detail.getBoundDepts()).hasSize(1);
+		assertThat(detail.getBoundDepts().get(0).getDeptCode()).isEqualTo("RD");
+		assertThat(detail.getBoundPosts()).hasSize(1);
+		assertThat(detail.getBoundPosts().get(0).getPostCode()).isEqualTo("DEV");
+		assertThat(detail.getBoundPosts().get(0).getDeptName()).isEqualTo("研发部");
+
+		verify(sysMenuRoleMapper).selectBoundMenusByRoleCode("EDITOR");
+		verify(grantTableMapper).selectBoundUsersByRoleCode("EDITOR");
+		verify(grantTableMapper).selectBoundDeptsByRoleCode("EDITOR");
+		verify(grantTableMapper).selectBoundPostsByRoleCode("EDITOR");
 	}
 
 	@Test

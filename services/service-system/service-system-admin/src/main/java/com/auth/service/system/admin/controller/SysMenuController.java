@@ -59,7 +59,8 @@ public class SysMenuController {
 	@PreAuthorize("@auth.decide('sysMenu:query')")
 	@GetMapping("/list")
 	public Result<List<SysMenuListVO>> list(SysMenuQuery query) {
-		return Result.success(sysMenuService.listFlat(query));
+		List<SysMenuListVO> data = sysMenuService.listFlat(query);
+		return Result.success(data);
 	}
 
 	@Operation(summary = "菜单分页查询（表格视图）")

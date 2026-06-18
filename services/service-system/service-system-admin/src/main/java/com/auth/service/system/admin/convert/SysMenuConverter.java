@@ -3,8 +3,12 @@ package com.auth.service.system.admin.convert;
 import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.admin.model.form.menu.SysMenuSaveForm;
+import com.auth.service.system.admin.model.po.permission.SysPermissionBoundRolePO;
+import com.auth.service.system.admin.model.po.role.SysRoleAssignedPermissionPO;
 import com.auth.service.system.admin.model.vo.menu.SysMenuDetailVO;
 import com.auth.service.system.admin.model.vo.menu.SysMenuListVO;
+import com.auth.service.system.admin.model.vo.permission.SysPermissionBoundRoleItemVO;
+import com.auth.service.system.admin.model.vo.role.SysRoleBoundPermissionItemVO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
@@ -29,7 +33,23 @@ public interface SysMenuConverter {
 	 */
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "boundRoles", ignore = true)
+	@Mapping(target = "boundPermissions", ignore = true)
 	SysMenuDetailVO toDetailVo(SysMenuEntity entity);
+
+	/**
+	 * 已绑定角色 PO 列表 → 详情项 VO 列表
+	 * @param poList 持久层投影列表
+	 * @return 详情项 VO 列表
+	 */
+	List<SysPermissionBoundRoleItemVO> toBoundRoleItemList(List<SysPermissionBoundRolePO> poList);
+
+	/**
+	 * 已绑定权限 PO 列表 → 详情项 VO 列表
+	 * @param poList 持久层投影列表
+	 * @return 详情项 VO 列表
+	 */
+	List<SysRoleBoundPermissionItemVO> toBoundPermissionItemList(List<SysRoleAssignedPermissionPO> poList);
 
 	/**
 	 * 列表行 VO

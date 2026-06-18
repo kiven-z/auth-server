@@ -76,7 +76,6 @@ public class LogOperationServiceImpl extends ServiceImpl<LogOperationMapper, Log
 		}
 		LogOperationDetailVO vo = LogOperationConverter.INSTANCE.toDetailVo(entity);
 
-		// 填充创建人/更新人用户名
 		auditUserDisplayService.enrichAuditUsernames(List.of(vo));
 
 		// 填充操作用户名（注意用 userId，不是 id）

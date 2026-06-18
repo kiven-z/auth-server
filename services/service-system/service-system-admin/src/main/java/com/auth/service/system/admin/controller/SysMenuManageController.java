@@ -42,7 +42,8 @@ public class SysMenuManageController {
 	@PreAuthorize("@auth.decide('sysMenu:query')")
 	@GetMapping("/{id}/roles")
 	public Result<List<SysMenuAssignedRoleRow>> listRoles(@PathVariable("id") Long id) {
-		return Result.success(sysMenuManageService.listAssignedRoles(id));
+		List<SysMenuAssignedRoleRow> data = sysMenuManageService.listAssignedRoles(id);
+		return Result.success(data);
 	}
 
 	@OperationLog(targetType = "MENU_ROLE", serviceDomain = AuditServiceDomain.SYSTEM,
@@ -59,7 +60,8 @@ public class SysMenuManageController {
 	@PreAuthorize("@auth.decide('sysMenu:query')")
 	@GetMapping("/{id}/permissions")
 	public Result<List<SysMenuAssignedPermissionRow>> listPermissions(@PathVariable("id") Long id) {
-		return Result.success(sysMenuManageService.listPermissionsWithAssignFlags(id));
+		List<SysMenuAssignedPermissionRow> data = sysMenuManageService.listPermissionsWithAssignFlags(id);
+		return Result.success(data);
 	}
 
 	@OperationLog(targetType = "MENU_PERMISSION", serviceDomain = AuditServiceDomain.SYSTEM,

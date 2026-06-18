@@ -8,7 +8,6 @@ import com.auth.service.system.admin.mapper.SysMenuPermissionMapper;
 import com.auth.service.system.admin.mapper.SysPermissionMapper;
 import com.auth.service.system.admin.mapper.SysRolePermissionMapper;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
-import com.auth.service.system.admin.model.enums.PermissionTypeEnum;
 import com.auth.service.system.admin.model.form.permission.SysPermissionForm;
 import com.auth.service.system.admin.model.po.permission.SysPermissionBoundMenuPO;
 import com.auth.service.system.admin.model.po.permission.SysPermissionBoundRolePO;
@@ -86,19 +85,14 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 
 		// 查询绑定的角色和菜单
 		String permissionCode = entity.getPermissionCode();
+
 		List<SysPermissionBoundRolePO> boundRoles = sysRolePermissionMapper
 			.selectBoundRolesByPermissionCode(permissionCode);
 		detail.setBoundRoles(SysPermissionConverter.INSTANCE.toBoundRoleItemList(boundRoles));
 
-		Integer permissionType = entity.getPermissionType();
-		if (PermissionTypeEnum.BUTTON.getCode().equals(permissionType)) {
-			List<SysPermissionBoundMenuPO> permissionCodes = sysMenuPermissionMapper
-				.selectBoundMenusByPermissionCode(permissionCode);
-			detail.setBoundMenus(SysPermissionConverter.INSTANCE.toBoundMenuItemList(permissionCodes));
-		}
-		else {
-			detail.setBoundMenus(List.of());
-		}
+		List<SysPermissionBoundMenuPO> boundMenus = sysMenuPermissionMapper
+			.selectBoundMenusByPermissionCode(permissionCode);
+		detail.setBoundMenus(SysPermissionConverter.INSTANCE.toBoundMenuItemList(boundMenus));
 
 		// 关联用户
 		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail));
@@ -187,7 +181,6 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 
 		// 删除权限
 		removeById(id);
-		log.info("Permission deleted: id={}, permissionCode={}", id, permissionCode);
 	}
 
 }

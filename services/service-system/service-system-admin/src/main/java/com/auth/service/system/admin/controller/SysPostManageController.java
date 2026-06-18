@@ -39,7 +39,8 @@ public class SysPostManageController {
 	@PreAuthorize("@auth.decide('sysPost:query')")
 	@GetMapping("/{postId}/roles")
 	public Result<List<GrantTableAssignedRoleRow>> listRoles(@PathVariable("postId") Long postId) {
-		return Result.success(grantTableService.listAssignedRoles(GrantTableSubjectType.POST, postId));
+		List<GrantTableAssignedRoleRow> rows = grantTableService.listAssignedRoles(GrantTableSubjectType.POST, postId);
+		return Result.success(rows);
 	}
 
 	@OperationLog(targetType = "POST_ROLE", serviceDomain = AuditServiceDomain.SYSTEM,

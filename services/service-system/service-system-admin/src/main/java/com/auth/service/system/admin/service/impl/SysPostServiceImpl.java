@@ -8,8 +8,10 @@ import com.auth.service.system.admin.mapper.GrantTableMapper;
 import com.auth.service.system.admin.mapper.SysPostDetailMapper;
 import com.auth.service.system.admin.mapper.SysPostMapper;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
-import com.auth.service.system.admin.model.enums.RoleTypeEnum;
 import com.auth.service.system.admin.model.form.post.SysPostForm;
+import com.auth.service.system.admin.model.po.granttable.GrantTableBoundRolePO;
+import com.auth.service.system.admin.model.po.post.SysPostBoundDeptPO;
+import com.auth.service.system.admin.model.po.post.SysPostBoundUserPO;
 import com.auth.service.system.admin.model.po.post.SysPostPageRowPO;
 import com.auth.service.system.admin.model.po.post.SysPostSearchItemPO;
 import com.auth.service.system.admin.model.query.post.SysPostQuery;
@@ -86,11 +88,15 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity
 		SysPostEntity entity = postReferenceChecker.getExistingActive(id);
 
 		SysPostDetailVO detail = SysPostConverter.INSTANCE.toDetailVo(entity);
-		detail.setBoundDept(SysPostConverter.INSTANCE.toBoundDeptItem(sysPostDetailMapper.selectBoundDeptByPostId(id)));
-		detail.setBoundUsers(
-				SysPostConverter.INSTANCE.toBoundUserItemList(sysPostDetailMapper.selectBoundUsersByPostId(id)));
-		detail.setBoundRoles(GrantTableSubjectRoleConverter.INSTANCE.toBoundRoleItemList(grantTableMapper
-			.selectBoundRolesBySubject(GrantTableSubjectType.POST.name(), id, RoleTypeEnum.SUBJECT_GRANT_TYPES)));
+		SysPostBoundDeptPO deptList = sysPostDetailMapper.selectBoundDeptByPostId(id);
+		detail.setBoundDept(SysPostConverter.INSTANCE.toBoundDeptItem(deptList));
+
+		List<SysPostBoundUserPO> userList = sysPostDetailMapper.selectBoundUsersByPostId(id);
+		detail.setBoundUsers(SysPostConverter.INSTANCE.toBoundUserItemList(userList));
+
+		List<GrantTableBoundRolePO> roleList = grantTableMapper
+			.selectBoundRolesBySubject(GrantTableSubjectType.POST.name(), id);
+		detail.setBoundRoles(GrantTableSubjectRoleConverter.INSTANCE.toBoundRoleItemList(roleList));
 
 		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail));
 		return detail;
@@ -148,7 +154,6 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity
 		postReferenceChecker.getExistingActive(id);
 		// 校验岗位是否有被引用
 		postReferenceChecker.requireDeletable(id);
-
 		// 删除岗位后，提交授权失效
 		postInvalidationTrigger.submitByPostIds(List.of(id), "delete");
 

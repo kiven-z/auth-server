@@ -42,12 +42,6 @@ public class SysRoleForm implements Serializable {
 	@NotNull(message = "状态不能为空")
 	private Boolean status;
 
-	@Schema(title = "角色类型(1=系统,2=菜单,3=业务,4=自定义)", requiredMode = Schema.RequiredMode.REQUIRED)
-	@Max(value = 4, message = "角色类型值无效")
-	@Min(value = 1, message = "角色类型值无效")
-	@NotNull(message = "角色类型不能为空")
-	private Integer roleType;
-
 	@Schema(title = "显示顺序")
 	private Integer orderNum;
 

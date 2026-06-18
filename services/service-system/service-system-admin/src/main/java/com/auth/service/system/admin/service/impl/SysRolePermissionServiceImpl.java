@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.service.system.admin.convert.SysRolePermissionConverter;
 import com.auth.service.system.admin.mapper.SysRolePermissionMapper;
+import com.auth.service.system.admin.model.po.role.SysRoleAssignedPermissionPO;
 import com.auth.service.system.admin.model.vo.role.SysRoleAssignedPermissionRow;
 import com.auth.service.system.admin.service.SysRolePermissionService;
 import com.auth.service.system.admin.support.permission.PermissionReferenceChecker;
@@ -42,8 +43,10 @@ public class SysRolePermissionServiceImpl implements SysRolePermissionService {
 	@Override
 	public List<SysRoleAssignedPermissionRow> listAssignedPermissions(String roleCode) {
 		String normalized = roleReferenceChecker.getExistingByRoleCode(roleCode).getRoleCode();
-		return SysRolePermissionConverter.INSTANCE
-			.toAssignedPermissionRowList(sysRolePermissionMapper.selectAssignedPermissionsByRoleCode(normalized));
+		List<SysRoleAssignedPermissionPO> permissionList = sysRolePermissionMapper
+			.selectAssignedPermissionsByRoleCode(normalized);
+
+		return SysRolePermissionConverter.INSTANCE.toAssignedPermissionRowList(permissionList);
 	}
 
 	/**

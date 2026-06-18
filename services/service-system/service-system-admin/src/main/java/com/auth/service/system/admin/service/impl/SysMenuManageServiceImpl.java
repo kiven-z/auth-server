@@ -6,7 +6,6 @@ import com.auth.service.system.admin.mapper.SysMenuMapper;
 import com.auth.service.system.admin.mapper.SysMenuPermissionMapper;
 import com.auth.service.system.admin.mapper.SysMenuRoleMapper;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
-import com.auth.service.system.admin.model.enums.RoleTypeEnum;
 import com.auth.service.system.admin.model.form.menu.SysMenuAssignPermissionForm;
 import com.auth.service.system.admin.model.form.menu.SysMenuAssignRoleForm;
 import com.auth.service.system.admin.model.po.menu.SysMenuAssignedPermissionPO;
@@ -63,7 +62,7 @@ public class SysMenuManageServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu
 	@Override
 	public void replaceMenuRoles(Long menuId, SysMenuAssignRoleForm form) {
 		List<String> roleCodes = CollUtil.emptyIfNull(form.getRoleCodes()).stream().distinct().toList();
-		roleGrantReferenceChecker.requireGrantEligibleRoles(roleCodes, RoleTypeEnum.MENU_ASSIGN_TYPES,
+		roleGrantReferenceChecker.requireExistingEnabledRoles(roleCodes,
 				SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 
 		// 删除当前菜单已分配角色
