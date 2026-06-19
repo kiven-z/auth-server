@@ -4,6 +4,8 @@ import com.auth.common.core.model.response.BaseResponse;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.common.mapper.AuditUserDisplayMapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import lombok.Getter;
+import lombok.Setter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,8 +17,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
@@ -132,6 +137,66 @@ class AuditUserDisplayServiceImplTest {
 		auditUserDisplayService.enrichAuditUsernames(page);
 
 		verifyNoInteractions(auditUserDisplayMapper);
+	}
+
+	@Test
+	@DisplayName("enrichAuditUsernames：审计与额外用户 ID 合并为一次批量查询")
+	void enrichAuditUsernamesMergesAuditAndExtraIdsIntoSingleDbCall() {
+		RowWithOperator row = new RowWithOperator();
+		row.setCreateUser(1L);
+		row.setUpdateUser(2L);
+		row.setOperatorId(3L);
+
+		UserEntity u1 = userEntity(1L, "alice");
+		UserEntity u2 = userEntity(2L, "bob");
+		UserEntity u3 = userEntity(3L, "carol");
+		when(auditUserDisplayMapper.selectBatchIds(List.of(1L, 2L, 3L))).thenReturn(List.of(u1, u2, u3));
+
+		auditUserDisplayService.enrichAuditUsernames(List.of(row),
+				r -> Objects.requireNonNullElse(r.getOperatorId(), 0L), RowWithOperator::setOperatorUsername);
+
+		assertThat(row.getCreateUsername()).isEqualTo("alice");
+		assertThat(row.getUpdateUsername()).isEqualTo("bob");
+		assertThat(row.getOperatorUsername()).isEqualTo("carol");
+		verify(auditUserDisplayMapper).selectBatchIds(List.of(1L, 2L, 3L));
+	}
+
+	@Test
+	@DisplayName("enrichAuditUsernames：额外用户 ID 与 createUser 相同时只查询一次该 ID")
+	void enrichAuditUsernamesDedupesWhenExtraUserIdEqualsCreateUser() {
+		RowWithOperator row = new RowWithOperator();
+		row.setCreateUser(1L);
+		row.setUpdateUser(2L);
+		row.setOperatorId(1L);
+
+		UserEntity u1 = userEntity(1L, "alice");
+		UserEntity u2 = userEntity(2L, "bob");
+		when(auditUserDisplayMapper.selectBatchIds(anyList())).thenReturn(List.of(u1, u2));
+
+		auditUserDisplayService.enrichAuditUsernames(List.of(row),
+				r -> Objects.requireNonNullElse(r.getOperatorId(), 0L), RowWithOperator::setOperatorUsername);
+
+		assertThat(row.getCreateUsername()).isEqualTo("alice");
+		assertThat(row.getUpdateUsername()).isEqualTo("bob");
+		assertThat(row.getOperatorUsername()).isEqualTo("alice");
+		verify(auditUserDisplayMapper).selectBatchIds(List.of(1L, 2L));
+	}
+
+	private static UserEntity userEntity(Long id, String username) {
+		UserEntity entity = new UserEntity();
+		entity.setId(id);
+		entity.setUsername(username);
+		return entity;
+	}
+
+	@Getter
+	@Setter
+	static class RowWithOperator extends BaseResponse {
+
+		private Long operatorId;
+
+		private String operatorUsername;
+
 	}
 
 }

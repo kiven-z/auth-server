@@ -1,6 +1,6 @@
 package com.auth.service.system.admin.support.dept;
 
-import com.auth.service.system.admin.mapper.SysDeptMapper;
+import com.auth.service.system.admin.mapper.dept.SysDeptMapper;
 import com.auth.service.system.admin.model.po.dept.SysDeptPathRowPO;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -1,6 +1,6 @@
 package com.auth.service.system.admin.support.menu;
 
-import com.auth.service.system.admin.convert.MenuConvertContext;
+import com.auth.service.system.admin.convert.menu.MenuConvertContext;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.admin.model.vo.menu.RouteMetaVO;
 import lombok.experimental.UtilityClass;

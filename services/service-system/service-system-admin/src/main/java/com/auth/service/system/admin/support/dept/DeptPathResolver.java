@@ -1,7 +1,7 @@
 package com.auth.service.system.admin.support.dept;
 
 import cn.hutool.core.collection.CollUtil;
-import com.auth.service.system.admin.mapper.SysDeptMapper;
+import com.auth.service.system.admin.mapper.dept.SysDeptMapper;
 import com.auth.service.system.admin.model.po.dept.SysDeptPathRowPO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

@@ -1,6 +1,7 @@
 package com.auth.gateway.filter;
 
 import cn.hutool.core.date.LocalDateTimeUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.auth.gateway.exception.GatewayBusinessException;
 import com.auth.gateway.exception.GatewayResultCodeEnum;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +49,7 @@ public class RtfFilter implements GlobalFilter, Ordered {
 			if (e instanceof GatewayBusinessException gbe) {
 				return Mono.error(gbe);
 			}
-			String detail = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
+			String detail = ObjectUtil.defaultIfNull(e.getMessage(), e.getClass().getSimpleName());
 			return Mono.error(new GatewayBusinessException(GatewayResultCodeEnum.INTERNAL_ERROR, detail));
 		}).doFinally(result -> {
 			long end = System.currentTimeMillis();

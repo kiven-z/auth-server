@@ -1,8 +1,8 @@
 package com.auth.service.system.admin.support.post;
 
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
-import com.auth.service.system.admin.mapper.PostReferenceMapper;
-import com.auth.service.system.admin.mapper.SysPostMapper;
+import com.auth.service.system.admin.mapper.post.PostReferenceCheckerMapper;
+import com.auth.service.system.admin.mapper.post.SysPostMapper;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
@@ -21,7 +21,7 @@ public class PostReferenceChecker {
 
 	private final SysPostMapper sysPostMapper;
 
-	private final PostReferenceMapper postReferenceMapper;
+	private final PostReferenceCheckerMapper postReferenceCheckerMapper;
 
 	/**
 	 * 加载未逻辑删除的岗位，不存在则抛业务异常
@@ -71,8 +71,8 @@ public class PostReferenceChecker {
 	 * @param postId 岗位 ID
 	 */
 	public void requireDeletable(Long postId) {
-		if (postReferenceMapper.countUserPostByPostId(postId) > 0
-				|| postReferenceMapper.countGrantPostSubjectByPostId(postId) > 0) {
+		if (postReferenceCheckerMapper.countUserPostByPostId(postId) > 0
+				|| postReferenceCheckerMapper.countGrantPostSubjectByPostId(postId) > 0) {
 			throw new SystemBusinessException(SystemCommonResultCode.DATA_IN_USE, postId);
 		}
 	}

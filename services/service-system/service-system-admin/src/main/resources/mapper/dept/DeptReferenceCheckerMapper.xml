@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.auth.service.system.admin.mapper.dept.DeptReferenceCheckerMapper">
+
+    <!-- 子树内用户-部门关联 -->
+    <select id="countUserDeptInSubtree" resultType="long">
+        SELECT
+            COUNT(1)
+        FROM
+            user_dept ud
+            INNER JOIN dept_closure dc ON ud.dept_id = dc.descendant_id
+            INNER JOIN sys_dept d ON d.id = dc.descendant_id
+            AND d.is_deleted = 0
+        WHERE
+            dc.ancestor_id = #{deptId}
+            AND ud.status IN (1, 2)
+    </select>
+
+    <!-- 子树内 grant_table DEPT 主体 -->
+    <select id="countGrantDeptSubjectInSubtree" resultType="long">
+        SELECT
+            COUNT(1)
+        FROM
+            grant_table gt
+            INNER JOIN dept_closure dc ON gt.subject_id = dc.descendant_id
+            INNER JOIN sys_dept d ON d.id = dc.descendant_id
+            AND d.is_deleted = 0
+        WHERE
+            dc.ancestor_id = #{deptId}
+            AND gt.subject_type = 'DEPT'
+    </select>
+
+    <!-- 子树内未删除岗位 -->
+    <select id="countPostInSubtree" resultType="long">
+        SELECT
+            COUNT(1)
+        FROM
+            sys_post p
+            INNER JOIN dept_closure dc ON p.dept_id = dc.descendant_id
+            INNER JOIN sys_dept d ON d.id = dc.descendant_id
+            AND d.is_deleted = 0
+        WHERE
+            dc.ancestor_id = #{deptId}
+            AND p.is_deleted = 0
+    </select>
+
+    <!-- 后代关系（含 depth=0 自身） -->
+    <select id="countDescendantRelation" resultType="long">
+        SELECT
+            COUNT(1)
+        FROM
+            dept_closure dc
+            INNER JOIN sys_dept d ON d.id = dc.descendant_id
+            AND d.is_deleted = 0
+        WHERE
+            dc.ancestor_id = #{ancestorId}
+            AND dc.descendant_id = #{descendantId}
+    </select>
+
+</mapper>

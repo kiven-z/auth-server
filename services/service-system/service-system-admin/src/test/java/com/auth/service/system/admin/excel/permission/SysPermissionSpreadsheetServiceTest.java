@@ -1,9 +1,9 @@
 package com.auth.service.system.admin.excel.permission;
 
 import com.auth.module.file.export.ExportScopeQueryFields;
-import com.auth.service.system.admin.mapper.SysPermissionMapper;
+import com.auth.service.system.admin.mapper.permission.SysPermissionMapper;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
-import com.auth.service.system.admin.model.query.SysPermissionQuery;
+import com.auth.service.system.admin.model.query.permission.SysPermissionQuery;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.junit.jupiter.api.BeforeEach;

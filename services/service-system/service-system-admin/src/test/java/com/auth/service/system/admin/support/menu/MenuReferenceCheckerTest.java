@@ -1,6 +1,6 @@
 package com.auth.service.system.admin.support.menu;
 
-import com.auth.service.system.admin.mapper.SysMenuMapper;
+import com.auth.service.system.admin.mapper.menu.SysMenuMapper;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;

@@ -2,6 +2,7 @@ package com.auth.service.system.message.support.template;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemResultCode;
 import com.auth.service.system.message.model.vo.MessageTemplateRequireFieldRow;
@@ -108,7 +109,7 @@ public class MessageTemplateRequireFieldsJsonSupport {
 		}
 
 		// 如果 variables 为空，则返回空列表
-		Map<String, Object> safeVariables = variables != null ? variables : Map.of();
+		Map<String, Object> safeVariables = ObjectUtil.defaultIfNull(variables, Map.of());
 		return requireFields.stream()
 			.map(MessageTemplateRequireFieldRow::getKey)
 			.filter(key -> !safeVariables.containsKey(key))

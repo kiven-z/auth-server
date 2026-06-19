@@ -1,7 +1,7 @@
 package com.auth.service.system.admin.excel.user;
 
 import com.auth.module.file.export.ExportScopeQueryFields;
-import com.auth.service.system.admin.mapper.SysUserMapper;
+import com.auth.service.system.admin.mapper.user.SysUserMapper;
 import com.auth.service.system.admin.model.po.user.SysUserPageRowPO;
 import com.auth.service.system.admin.model.query.user.SysUserPageQuery;
 import com.baomidou.mybatisplus.core.metadata.IPage;

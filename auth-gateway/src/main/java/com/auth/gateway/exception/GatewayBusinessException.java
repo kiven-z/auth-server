@@ -1,5 +1,6 @@
 package com.auth.gateway.exception;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.auth.common.core.i18n.I18nMessageProvider;
 import lombok.Getter;
 import lombok.ToString;
@@ -35,7 +36,7 @@ public class GatewayBusinessException extends RuntimeException implements I18nMe
 			throw new IllegalArgumentException("rc is required");
 		}
 		this.resultCode = rc;
-		this.messageArgs = messageArgs != null ? messageArgs : new Object[0];
+		this.messageArgs = ObjectUtil.defaultIfNull(messageArgs, new Object[0]);
 	}
 
 	@Override

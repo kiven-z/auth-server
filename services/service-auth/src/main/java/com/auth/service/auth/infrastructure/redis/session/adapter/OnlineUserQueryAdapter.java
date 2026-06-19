@@ -2,6 +2,7 @@ package com.auth.service.auth.infrastructure.redis.session.adapter;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.auth.service.auth.application.port.session.OnlineUserQueryPort;
 import com.auth.service.auth.domain.session.model.OnlineUserPageSlice;
 import com.auth.service.auth.domain.session.model.OnlineUserPageSlice.OnlineUserEntry;
@@ -68,7 +69,7 @@ public class OnlineUserQueryAdapter implements OnlineUserQueryPort {
 		String key = ONLINE_USERS.fixedKey();
 		Long zcard = sessionRedisTemplate.opsForZSet().zCard(key);
 
-		return zcard != null ? zcard : 0L;
+		return ObjectUtil.defaultIfNull(zcard, 0L);
 	}
 
 	/**

@@ -1,5 +1,6 @@
 package com.auth.gateway.exception;
 
+import cn.hutool.core.util.ObjectUtil;
 import lombok.Getter;
 
 import java.util.Map;
@@ -132,7 +133,7 @@ public enum GatewayResultCodeEnum {
 	 * @return 扩展信息
 	 */
 	public Map<String, Object> ext(Object... args) {
-		return Map.of("i18nKey", i18nKey, "i18nArgs", args != null ? args : new Object[0]);
+		return Map.of("i18nKey", i18nKey, "i18nArgs", ObjectUtil.defaultIfNull(args, new Object[0]));
 	}
 
 }

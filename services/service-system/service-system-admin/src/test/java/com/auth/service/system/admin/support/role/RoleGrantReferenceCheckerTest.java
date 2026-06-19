@@ -1,7 +1,7 @@
 package com.auth.service.system.admin.support.role;
 
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
-import com.auth.service.system.admin.mapper.SysRoleMapper;
+import com.auth.service.system.admin.mapper.role.SysRoleMapper;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import org.junit.jupiter.api.DisplayName;

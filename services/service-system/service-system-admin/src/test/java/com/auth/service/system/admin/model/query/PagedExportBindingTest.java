@@ -1,6 +1,7 @@
 package com.auth.service.system.admin.model.query;
 
 import com.auth.module.file.export.ExportScopeQueryFields;
+import com.auth.service.system.admin.model.query.permission.SysPermissionQuery;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.MutablePropertyValues;

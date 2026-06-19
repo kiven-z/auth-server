@@ -1,6 +1,7 @@
 package com.auth.service.system.message.channel.sms.dypns;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.convert.Convert;
 import cn.hutool.json.JSONUtil;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
@@ -46,11 +47,11 @@ public class DypnsVerifyCodeTemplatePipeline {
 		if (CollUtil.isNotEmpty(requireFields)) {
 			for (MessageTemplateRequireFieldRow field : requireFields) {
 				Object value = variables.get(field.getKey());
-				paramMap.put(field.getKey(), value == null ? "" : String.valueOf(value));
+				paramMap.put(field.getKey(), Convert.toStr(value, ""));
 			}
 		}
 		else {
-			variables.forEach((key, value) -> paramMap.put(key, value == null ? "" : String.valueOf(value)));
+			variables.forEach((key, value) -> paramMap.put(key, Convert.toStr(value, "")));
 		}
 
 		return JSONUtil.toJsonStr(paramMap);

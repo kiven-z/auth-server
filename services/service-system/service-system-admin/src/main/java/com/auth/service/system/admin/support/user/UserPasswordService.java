@@ -3,14 +3,13 @@ package com.auth.service.system.admin.support.user;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
-import com.auth.service.system.admin.mapper.SysUserMapper;
+import com.auth.service.system.admin.mapper.user.SysUserMapper;
 import com.auth.service.system.admin.model.form.user.SysUserAdminResetPasswordForm;
 import com.auth.service.system.admin.model.form.user.SysUserChangePasswordForm;
-import com.auth.service.system.admin.service.LogUserPasswordHistoryService;
+import com.auth.service.system.admin.service.admin.LogUserPasswordHistoryService;
 import com.auth.service.system.authorization.dispatch.trigger.UserSessionRevocationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,7 +26,9 @@ import java.util.Objects;
 @RequiredArgsConstructor
 @Service
 @Transactional(rollbackFor = Exception.class)
-public class UserPasswordService extends ServiceImpl<SysUserMapper, UserEntity> {
+public class UserPasswordService {
+
+	private final SysUserMapper sysUserMapper;
 
 	private final LogUserPasswordHistoryService logUserPasswordHistoryService;
 
@@ -51,7 +52,7 @@ public class UserPasswordService extends ServiceImpl<SysUserMapper, UserEntity> 
 
 		String encodedPassword = passwordEncoder.encode(newPassword);
 		user.setPassword(encodedPassword);
-		updateById(user);
+		sysUserMapper.updateById(user);
 
 		logUserPasswordHistoryService.recordChange(user.getId(), encodedPassword, changeIp);
 		userSessionRevocationTrigger.revokeAllSessionsAfterCommit(List.of(user.getId()));
@@ -68,7 +69,7 @@ public class UserPasswordService extends ServiceImpl<SysUserMapper, UserEntity> 
 			throw new SystemBusinessException(SystemCommonResultCode.JWT_INVALID);
 		}
 
-		UserEntity existing = getById(currentUserId);
+		UserEntity existing = sysUserMapper.selectById(currentUserId);
 		if (existing == null) {
 			throw new SystemBusinessException(SystemCommonResultCode.USER_NOT_FOUND, currentUserId);
 		}
@@ -87,7 +88,7 @@ public class UserPasswordService extends ServiceImpl<SysUserMapper, UserEntity> 
 	 * @param changeIp 客户端 IP
 	 */
 	public void resetPasswordByAdmin(Long userId, SysUserAdminResetPasswordForm form, String changeIp) {
-		UserEntity existing = getById(userId);
+		UserEntity existing = sysUserMapper.selectById(userId);
 		if (existing == null) {
 			throw new SystemBusinessException(SystemCommonResultCode.USER_NOT_FOUND, userId);
 		}

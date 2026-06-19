@@ -1,7 +1,7 @@
 package com.auth.service.system.admin.support.user;
 
 import com.auth.module.platform.persistence.model.UserEntity;
-import com.auth.service.system.admin.mapper.SysUserMapper;
+import com.auth.service.system.admin.mapper.user.SysUserMapper;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import lombok.RequiredArgsConstructor;

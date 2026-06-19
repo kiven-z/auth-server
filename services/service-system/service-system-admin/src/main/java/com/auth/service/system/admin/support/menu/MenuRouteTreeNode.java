@@ -1,5 +1,6 @@
 package com.auth.service.system.admin.support.menu;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.auth.common.core.model.entity.TreeNode;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import lombok.Getter;
@@ -34,7 +35,7 @@ public class MenuRouteTreeNode extends TreeNode<MenuRouteTreeNode> implements Se
 
 		Long parentId = entity.getParentId();
 		node.setId(entity.getId());
-		node.setParentId(parentId == null ? 0L : parentId);
+		node.setParentId(ObjectUtil.defaultIfNull(parentId, 0L));
 		node.setMenuRank(entity.getMenuRank());
 		node.setMenu(entity);
 		return node;

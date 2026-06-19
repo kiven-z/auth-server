@@ -1,6 +1,7 @@
 package com.auth.common.core.model.query;
 
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.ObjectUtil;
 
 import java.util.Map;
 import java.util.Optional;
@@ -28,7 +29,7 @@ public abstract class AbstractOrderSqlBuilder {
 		if (column == null) {
 			return Optional.empty();
 		}
-		SortDirection direction = spec.getDirection() != null ? spec.getDirection() : SortDirection.DESC;
+		SortDirection direction = ObjectUtil.defaultIfNull(spec.getDirection(), SortDirection.DESC);
 		return Optional.of(column + " " + direction.name());
 	}
 

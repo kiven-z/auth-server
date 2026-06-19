@@ -2,8 +2,8 @@ package com.auth.service.system.admin.support.dept;
 
 import com.auth.common.core.utils.TreeParentIdUtil;
 import com.auth.common.core.utils.TreeRelationUtil;
-import com.auth.service.system.admin.mapper.DeptReferenceMapper;
-import com.auth.service.system.admin.mapper.SysDeptMapper;
+import com.auth.service.system.admin.mapper.dept.DeptReferenceCheckerMapper;
+import com.auth.service.system.admin.mapper.dept.SysDeptMapper;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
@@ -21,7 +21,7 @@ public class DeptReferenceChecker {
 
 	private final SysDeptMapper sysDeptMapper;
 
-	private final DeptReferenceMapper deptReferenceMapper;
+	private final DeptReferenceCheckerMapper deptReferenceCheckerMapper;
 
 	/**
 	 * 加载未删除部门，不存在则抛业务异常
@@ -56,7 +56,7 @@ public class DeptReferenceChecker {
 	 */
 	public void requireMoveTargetValid(Long deptId, Long newParentId) {
 		TreeRelationUtil.requireValidMoveTarget(deptId, newParentId,
-				(ancestorId, nodeId) -> deptReferenceMapper.countDescendantRelation(ancestorId, nodeId) > 0);
+				(ancestorId, nodeId) -> deptReferenceCheckerMapper.countDescendantRelation(ancestorId, nodeId) > 0);
 	}
 
 	/**
@@ -64,9 +64,9 @@ public class DeptReferenceChecker {
 	 * @param deptId 部门 ID
 	 */
 	public void requireSubtreeUnused(Long deptId) {
-		if (deptReferenceMapper.countUserDeptInSubtree(deptId) > 0
-				|| deptReferenceMapper.countGrantDeptSubjectInSubtree(deptId) > 0
-				|| deptReferenceMapper.countPostInSubtree(deptId) > 0) {
+		if (deptReferenceCheckerMapper.countUserDeptInSubtree(deptId) > 0
+				|| deptReferenceCheckerMapper.countGrantDeptSubjectInSubtree(deptId) > 0
+				|| deptReferenceCheckerMapper.countPostInSubtree(deptId) > 0) {
 			throw new SystemBusinessException(SystemCommonResultCode.DATA_IN_USE, deptId);
 		}
 	}

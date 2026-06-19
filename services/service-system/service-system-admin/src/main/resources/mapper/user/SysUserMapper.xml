@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.auth.service.system.admin.mapper.user.SysUserMapper">
+
+    <!-- 用户分页查询 -->
+    <select id="selectListByPage"
+            resultType="com.auth.service.system.admin.model.po.user.SysUserPageRowPO">
+        SELECT
+            u.id,
+            u.username,
+            u.nickname,
+            u.avatar,
+            u.phone,
+            u.email,
+            u.employee_no,
+            u.status,
+            u.create_time,
+            u.update_time,
+            u.create_user,
+            u.update_user
+        FROM
+            sys_user u
+        <where>
+            u.is_deleted = 0
+            <if test="query.username != null and query.username != ''">
+                AND u.username LIKE CONCAT('%', #{query.username}, '%')
+            </if>
+            <if test="query.nickname != null and query.nickname != ''">
+                AND u.nickname LIKE CONCAT('%', #{query.nickname}, '%')
+            </if>
+            <if test="query.phone != null and query.phone != ''">
+                AND u.phone LIKE CONCAT('%', #{query.phone}, '%')
+            </if>
+            <if test="query.email != null and query.email != ''">
+                AND u.email LIKE CONCAT('%', #{query.email}, '%')
+            </if>
+            <if test="query.employeeNo != null and query.employeeNo != ''">
+                AND u.employee_no LIKE CONCAT('%', #{query.employeeNo}, '%')
+            </if>
+            <if test="query.status != null">
+                AND u.status = #{query.status}
+            </if>
+            <if test="query.deptId != null">
+                AND EXISTS (
+                    SELECT
+                        1
+                    FROM
+                        user_dept ud
+                        INNER JOIN dept_closure dc ON ud.dept_id = dc.descendant_id
+                        INNER JOIN sys_dept d ON d.id = dc.descendant_id
+                        AND d.is_deleted = 0
+                    WHERE
+                        ud.user_id = u.id
+                        AND dc.ancestor_id = #{query.deptId}
+                        AND ud.status IN (1, 2)
+                )
+            </if>
+        </where>
+        ORDER BY
+            ${orderBySql}
+    </select>
+
+</mapper>

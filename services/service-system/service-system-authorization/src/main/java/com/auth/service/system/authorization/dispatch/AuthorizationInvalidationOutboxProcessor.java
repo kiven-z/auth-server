@@ -9,6 +9,8 @@ import com.auth.service.system.authorization.feign.AuthInnerFeignClient;
 import com.auth.service.system.authorization.mapper.SysAuthorizationInvalidationOutboxMapper;
 import com.auth.service.system.authorization.model.entity.SysAuthorizationInvalidationOutboxEntity;
 import com.auth.service.system.authorization.model.enums.AuthorizationInvalidationOutboxStatus;
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.auth.service.system.authorization.outbox.InvalidationOutboxPayloadCodec;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +40,7 @@ public class AuthorizationInvalidationOutboxProcessor {
 		if (message == null) {
 			return "unknown error";
 		}
-		return message.length() > 1900 ? message.substring(0, 1900) : message;
+		return CharSequenceUtil.subPre(message, 1900);
 	}
 
 	/**
@@ -119,7 +121,7 @@ public class AuthorizationInvalidationOutboxProcessor {
 			return;
 		}
 		int nextRetry = row.getRetryCount() + 1;
-		int maxRetry = row.getMaxRetry() != null ? row.getMaxRetry() : 5;
+		int maxRetry = ObjectUtil.defaultIfNull(row.getMaxRetry(), 5);
 		if (nextRetry >= maxRetry) {
 			outboxMapper.markFailure(row.getId(), AuthorizationInvalidationOutboxStatus.DEAD.name(), nextRetry, null,
 					truncated);

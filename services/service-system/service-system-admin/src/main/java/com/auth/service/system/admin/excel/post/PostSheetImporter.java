@@ -5,7 +5,7 @@ import com.auth.module.file.importer.AbstractSheetImporter;
 import com.auth.module.file.importer.model.ImportLabelParser;
 import com.auth.module.file.importer.model.ImportRowError;
 import com.auth.service.system.admin.model.form.post.SysPostForm;
-import com.auth.service.system.admin.service.SysPostService;
+import com.auth.service.system.admin.service.admin.SysPostService;
 import com.auth.service.system.admin.support.dept.DeptCodeIdResolver;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

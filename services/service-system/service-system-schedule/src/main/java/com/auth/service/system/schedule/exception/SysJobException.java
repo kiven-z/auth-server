@@ -1,5 +1,6 @@
 package com.auth.service.system.schedule.exception;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.auth.common.core.i18n.I18nMessageProvider;
 import com.auth.service.system.common.exception.code.SystemResultCode;
 import lombok.Getter;
@@ -26,7 +27,7 @@ public class SysJobException extends RuntimeException implements I18nMessageProv
 	public SysJobException(SystemResultCode resultCode, Object... args) {
 		super(resultCode != null ? resultCode.getMessageKey() : null);
 		this.resultCode = Objects.requireNonNull(resultCode, "resultCode");
-		this.args = args != null ? args : new Object[0];
+		this.args = ObjectUtil.defaultIfNull(args, new Object[0]);
 	}
 
 	/**
@@ -38,7 +39,7 @@ public class SysJobException extends RuntimeException implements I18nMessageProv
 	public SysJobException(SystemResultCode resultCode, Throwable cause, Object... args) {
 		super(resultCode != null ? resultCode.getMessageKey() : null, cause);
 		this.resultCode = Objects.requireNonNull(resultCode, "resultCode");
-		this.args = args != null ? args : new Object[0];
+		this.args = ObjectUtil.defaultIfNull(args, new Object[0]);
 	}
 
 	@Override

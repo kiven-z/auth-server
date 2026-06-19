@@ -2,6 +2,7 @@ package com.auth.service.auth.application.login.command;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.BooleanUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.crypto.digest.MD5;
 import com.auth.common.jwt.autoconfigure.JwtProperties;
 import com.auth.common.jwt.model.JwtUserToken;
@@ -144,7 +145,7 @@ public class RefreshTokenApplicationService {
 			throw new AuthBusinessException(AuthResultCode.REFRESH_TOKEN_EXPIRED);
 		}
 		if (BooleanUtil.isFalse(Objects.equals(userId, sessionUserId))) {
-			long indexUserId = sessionUserId != null ? sessionUserId : userId;
+			long indexUserId = ObjectUtil.defaultIfNull(sessionUserId, userId);
 			sessionGateway.terminateSession(indexUserId, jti);
 			throw new AuthBusinessException(AuthResultCode.REFRESH_TOKEN_EXPIRED);
 		}

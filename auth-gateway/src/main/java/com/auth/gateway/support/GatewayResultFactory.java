@@ -1,6 +1,7 @@
 package com.auth.gateway.support;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.auth.common.core.model.response.Result;
 import com.auth.gateway.exception.GatewayBusinessException;
 import com.auth.gateway.exception.GatewayResultCodeEnum;
@@ -86,8 +87,8 @@ public class GatewayResultFactory {
 		Objects.requireNonNull(rc, "rc");
 		Objects.requireNonNull(messageSource, "messageSource");
 
-		Locale finalLocale = locale != null ? locale : Locale.ENGLISH;
-		Object[] safeArgs = args != null ? args : new Object[0];
+		Locale finalLocale = ObjectUtil.defaultIfNull(locale, Locale.ENGLISH);
+		Object[] safeArgs = ObjectUtil.defaultIfNull(args, new Object[0]);
 		String i18nKey = rc.getI18nKey();
 		String defaultEnglish = messageSource.getMessage(i18nKey, safeArgs, rc.getDefaultMessageEn(), Locale.ENGLISH);
 		String message = messageSource.getMessage(i18nKey, safeArgs, defaultEnglish, finalLocale);

@@ -1,5 +1,6 @@
 package com.auth.service.auth.shared.exception;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.auth.common.core.model.response.Result;
 import lombok.experimental.UtilityClass;
 import org.springframework.context.MessageSource;
@@ -31,7 +32,7 @@ public class AuthBusinessExceptionResultBuilder {
 		AuthResultCode resultCode = Objects.requireNonNull(exception.getResultCode(), "resultCode");
 
 		Locale locale = LocaleContextHolder.getLocale();
-		Object[] args = exception.getMessageArgs() != null ? exception.getMessageArgs() : new Object[0];
+		Object[] args = ObjectUtil.defaultIfNull(exception.getMessageArgs(), new Object[0]);
 		// 与枚举单一事实来源对齐，避免 I18nMessageProvider 与 resultCode 漂移
 		String messageKey = Objects.requireNonNull(resultCode.getMessageKey(), "messageKey");
 		// 英文兜底：仅用 MessageSource，避免依赖 SpringContextHolder（便于单测与无上下文场景）

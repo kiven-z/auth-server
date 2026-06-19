@@ -1,6 +1,7 @@
 package com.auth.service.system.common.exception;
 
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.auth.common.core.model.response.Result;
 import com.auth.service.system.common.exception.code.SystemResultCode;
 import lombok.experimental.UtilityClass;
@@ -41,7 +42,7 @@ public class SystemResultResponseFactory {
 	public static Result<Object> build(MessageSource messageSource, SystemResultCode rc, Object... args) {
 		Objects.requireNonNull(messageSource, "messageSource");
 		Objects.requireNonNull(rc, "rc");
-		Object[] safeArgs = args != null ? args : new Object[0];
+		Object[] safeArgs = ObjectUtil.defaultIfNull(args, new Object[0]);
 		return buildBody(messageSource, rc, safeArgs);
 	}
 

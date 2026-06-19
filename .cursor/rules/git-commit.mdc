@@ -5,66 +5,75 @@ globs: **/*.java,**/*.xml
 
 ## Git提交规范
 
-当生成 Git Commit Message 时，必须严格遵循以下格式，**禁止**使用模糊词汇（如“修改”、“优化”）。
+当生成 Git Commit Message 时，必须严格遵循以下格式。
 
 ### 标准格式
+
+> [!IMPORTANT]
+> 生成提交信息时尽量的精简和准确，简要的概述本次需要提交的内容
 
 `<表情符号> <类型>(<范围>): <简短描述>`
 
 - **表情符号**：必须使用下表中对应的符号。
 - **类型**：feat, fix, docs, style, refactor, perf, test, build, ci, chore。
-- **范围**：可选，表示影响模块（如 auth, order, ui）。
+- **范围**：（可选）简要的描述下当前修改了什么内容。
+
+### 示例
+
+```
+:tada: feat(init): 初始化项目骨架
+:sparkles: feat(login): 增加第三方微信扫码入口
+:recycle: refactor(system): 重构 system-service roleType,角色,主体绑定查询
+:bug: fix(pay): 修复微信支付回调签名校验失败
+:memo: docs(readme): 更新部署说明文档
+:recycle: refactor(mapper): 将 log 域 Mapper 迁入 mapper/log 包
+:zap: perf(query): 优化用户列表查询缓存策略
+:lipstick: style(button): 调整按钮圆角和阴影样式
+:white_check_mark: test(order): 增加订单超时自动取消的单元测试
+:fire: chore(utils): 移除已废弃的日期工具类
+```
 
 ### 类型与表情对照表
 
-| emoji           | emoji 代码                      | commit 说明       |
-|-----------------|-------------------------------|-----------------|
-| 🎉 (庆祝)         | `:tada:`                      | 初次提交            |
-| ✨(星星)           | `sparkles`                    | 新增功能            |
-| 🆕 (全新)         | `:new:`                       | 引入新功能           |
-| 🔖 (书签)         | `:bookmark:`                  | 发行/版本标签         |
-| 🐛 (bug)        | `:bug:`                       | 修复 bug          |
-| 🚑 (急救车)        | `:ambulance:`                 | 重要补丁            |
-| 🌐 (地球)         | `:globe_with_meridians:`      | 国际化与本地化         |
-| 💄 (口红)         | `:lipstick:`                  | 更新 UI 和样式文件     |
-| 🎬 (场记板)        | `:clapper:`                   | 更新演示/示例         |
-| 🚨 (警车灯)        | `:rotating_light:`            | 移除 linter 警告    |
-| 🔧 (扳手)         | `:wrench:`                    | 修改配置文件          |
-| ➕ (加号)          | `:heavy_plus_sign:`           | 增加一个依赖          |
-| ➖ (减号)          | `:heavy_minus_sign:`          | 减少一个依赖          |
-| ⬆️ (上升箭头)       | `:arrow_up:`                  | 升级依赖            |
-| ⬇️ (下降箭头)       | `:arrow_down:`                | 降级依赖            |
-| ⚡ (闪电) 🐎 (赛马)  | `:zap:` `:racehorse:`         | 提升性能            |
-| 📈 (上升趋势图)      | `:chart_with_upwards_trend:`  | 添加分析或跟踪代码       |
-| 🚀 (火箭)         | `:rocket:`                    | 部署功能            |
-| ✅ (白色复选框)       | `:white_check_mark:`          | 增加测试            |
-| 📝 (备忘录) 📖 (书) | `:memo:` `:book:`             | 撰写文档            |
-| 🔨 (锤子)         | `:hammer:`                    | 重大重构            |
-| 🎨 (调色板)        | `:art:`                       | 改进代码结构/代码格式     |
-| 🔥 (火焰)         | `:fire:`                      | 移除代码或文件         |
-| ✏️ (铅笔)         | `:pencil2:`                   | 修复 typo         |
-| 🚧 (施工)         | `:construction:`              | 工作进行中           |
-| 🗑️ (垃圾桶)       | `:wastebasket:`               | 废弃或删除           |
-| ♿ (轮椅)          | `:wheelchair:`                | 可访问性            |
-| 👷 (工人)         | `:construction_worker:`       | 添加 CI 构建系统      |
-| 💚 (绿心)         | `:green_heart:`               | 修复 CI 构建问题      |
-| 🔒 (锁)          | `:lock:`                      | 修复安全问题          |
-| 🐳 (鲸鱼)         | `:whale:`                     | Docker 相关工作     |
-| 🍎 (苹果)         | `:apple:`                     | 修复 macOS 下的问题   |
-| 🐧 (企鹅)         | `:penguin:`                   | 修复 Linux 下的问题   |
-| 🏁 (旗帜)         | `:checkered_flag:`            | 修复 Windows 下的问题 |
-| 🔀 (交叉箭头)       | `:twisted_rightwards_arrows:` | 分支合并            |
+> [!WARNING]
+>
+> **注意**：提交消息内容必须使用中文。
 
-### 错误示例 vs 正确示例
-
-**在生成 Git Commit 时，请直接使用 Unicode 表情符号（如 ✨）而非代码（如 :sparkles:），以确保在 IDE 提交历史中拥有最佳视觉效果。
-**
-
-**消息内容必须使用中文！**
-
-- ❌ `✨ feat: 修改代码`
-- ✅ `✨ feat(login): 增加第三方微信扫码入口`
-
-- ❌ `🐛 fix: 修复bug`
-
-- ✅ `🐛 fix(pay): 修复微信支付回调签名校验失败`
+| emoji                       | emoji 代码                      | commit 说明       |
+|-----------------------------|-------------------------------|-----------------|
+| :tada:                      | `:tada:`                      | 初次提交            |
+| :sparkles:                  | `:sparkles:`                  | 新增功能            |
+| :recycle:                   | `:recycle:`                   | 重构              |
+| :new:                       | `:new:`                       | 引入新功能           |
+| :bookmark:                  | `:bookmark:`                  | 发行/版本标签         |
+| :bug:                       | `:bug:`                       | 修复 bug          |
+| :ambulance:                 | `:ambulance:`                 | 重要补丁            |
+| :globe_with_meridians:      | `:globe_with_meridians:`      | 国际化与本地化         |
+| :lipstick:                  | `:lipstick:`                  | 更新 UI 和样式文件     |
+| :clapper:                   | `:clapper:`                   | 更新演示/示例         |
+| :rotating_light:            | `:rotating_light:`            | 移除 linter 警告    |
+| :wrench:                    | `:wrench:`                    | 修改配置文件          |
+| :heavy_plus_sign:           | `:heavy_plus_sign:`           | 增加一个依赖          |
+| :heavy_minus_sign:          | `:heavy_minus_sign:`          | 减少一个依赖          |
+| :arrow_up:                  | `:arrow_up:`                  | 升级依赖            |
+| :arrow_down:                | `:arrow_down:`                | 降级依赖            |
+| :zap:                       | `:zap:`                       | 提升性能            |
+| :chart_with_upwards_trend:  | `:chart_with_upwards_trend:`  | 添加分析或跟踪代码       |
+| :rocket:                    | `:rocket:`                    | 部署功能            |
+| :white_check_mark:          | `:white_check_mark:`          | 增加测试            |
+| :memo:                      | `:memo:`                      | 撰写文档            |
+| :hammer:                    | `:hammer:`                    | 重大重构            |
+| :art:                       | `:art:`                       | 改进代码结构/代码格式     |
+| :fire:                      | `:fire:`                      | 移除代码或文件         |
+| :pencil2:                   | `:pencil2:`                   | 修复 typo         |
+| :construction:              | `:construction:`              | 工作进行中           |
+| :wastebasket:               | `:wastebasket:`               | 废弃或删除           |
+| :wheelchair:                | `:wheelchair:`                | 可访问性            |
+| :construction_worker:       | `:construction_worker:`       | 添加 CI 构建系统      |
+| :green_heart:               | `:green_heart:`               | 修复 CI 构建问题      |
+| :lock:                      | `:lock:`                      | 修复安全问题          |
+| :whale:                     | `:whale:`                     | Docker 相关工作     |
+| :apple:                     | `:apple:`                     | 修复 macOS 下的问题   |
+| :penguin:                   | `:penguin:`                   | 修复 Linux 下的问题   |
+| :checkered_flag:            | `:checkered_flag:`            | 修复 Windows 下的问题 |
+| :twisted_rightwards_arrows: | `:twisted_rightwards_arrows:` | 分支合并            |

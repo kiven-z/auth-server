@@ -1,5 +1,6 @@
 package com.auth.module.security.contract.dto;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.auth.module.security.contract.event.OperationLogPayloadEvent;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -87,7 +88,7 @@ public class OperationLogIngestRequest implements Serializable {
 	 * @return 操作日志负载
 	 */
 	public OperationLogPayloadEvent toPayload() {
-		Instant ts = this.timestamp != null ? this.timestamp : Instant.now();
+		Instant ts = ObjectUtil.defaultIfNull(this.timestamp, Instant.now());
 		return OperationLogPayloadEvent.builder()
 			.userId(this.userId)
 			.operationType(this.operationType)

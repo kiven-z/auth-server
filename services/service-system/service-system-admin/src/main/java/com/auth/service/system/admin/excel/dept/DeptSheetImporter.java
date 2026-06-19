@@ -1,11 +1,12 @@
 package com.auth.service.system.admin.excel.dept;
 
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.auth.module.file.importer.AbstractSheetImporter;
 import com.auth.module.file.importer.model.ImportLabelParser;
 import com.auth.module.file.importer.model.ImportRowError;
 import com.auth.service.system.admin.model.form.dept.SysDeptForm;
-import com.auth.service.system.admin.service.SysDeptService;
+import com.auth.service.system.admin.service.admin.SysDeptService;
 import com.auth.service.system.admin.support.dept.DeptCodeIdResolver;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -53,7 +54,7 @@ public class DeptSheetImporter extends AbstractSheetImporter<SysDeptImportRow, S
 			return null;
 		}
 		SysDeptForm form = new SysDeptForm();
-		form.setParentId(parentId != null ? parentId : 0L);
+		form.setParentId(ObjectUtil.defaultIfNull(parentId, 0L));
 		form.setDeptCode(row.getDeptCode().trim());
 		form.setDeptName(row.getDeptName().trim());
 		form.setStatus(ImportLabelParser.parseStatus(row.getStatusLabel()));

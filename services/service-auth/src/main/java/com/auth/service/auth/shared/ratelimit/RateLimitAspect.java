@@ -118,7 +118,7 @@ public class RateLimitAspect {
 				context.setVariable(parameterNames[i], args[i]);
 			}
 			String value = parser.parseExpression(expression).getValue(context, String.class);
-			return value != null ? value : "";
+			return CharSequenceUtil.nullToEmpty(value);
 		}
 		catch (Exception e) {
 			return "";

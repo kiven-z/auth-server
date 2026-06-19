@@ -1,7 +1,7 @@
 package com.auth.service.system.admin.support.role;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import com.auth.service.system.admin.mapper.SysRoleMapper;
+import com.auth.service.system.admin.mapper.role.SysRoleMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;

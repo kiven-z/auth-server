@@ -1,5 +1,6 @@
 package com.auth.common.web.exception;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.auth.common.core.model.response.Result;
 import jakarta.servlet.ServletException;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +46,7 @@ public class FallbackExceptionHandler extends BaseExceptionResponseBuilder {
 		}
 
 		// 消息不支持异常
-		String message = exception.getMessage() != null ? exception.getMessage() : "Internal server error.";
+		String message = ObjectUtil.defaultIfNull(exception.getMessage(), "Internal server error.");
 
 		Matcher methodErrorMatcher = METHOD_NOT_SUPPORTED_PATTERN.matcher(message);
 		// 方法不支持异常

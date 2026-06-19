@@ -2,6 +2,7 @@ package com.auth.service.system.message.channel.dingtalk;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.BooleanUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.channel.MessageSender;
 import com.auth.module.message.api.command.TemplateMessageCommand;
@@ -49,7 +50,7 @@ public class DingTalkMessageSender implements MessageSender {
 			return options.getMessageType();
 		}
 
-		return rendered.messageType() != null ? rendered.messageType() : DingTalkMessageType.TEXT;
+		return ObjectUtil.defaultIfNull(rendered.messageType(), DingTalkMessageType.TEXT);
 	}
 
 	/**

@@ -2,6 +2,7 @@ package com.auth.module.security.autoconfigure.pipeline.authenticate;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.BooleanUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.auth.module.security.autoconfigure.config.user.UserConfigProperties;
 import com.auth.module.security.contract.exception.SecurityResultCodeEnum;
 import com.auth.module.security.contract.exception.SecurityTokenException;
@@ -74,7 +75,7 @@ public final class SessionCountChecker {
 		if (!BooleanUtil.isTrue(member)) {
 			throw new SecurityTokenException(SecurityResultCodeEnum.SESSION_MISSING, "Session is not active.");
 		}
-		int max = userConfigProperties.getMaxSessionCount() != null ? userConfigProperties.getMaxSessionCount() : 3;
+		int max = ObjectUtil.defaultIfNull(userConfigProperties.getMaxSessionCount(), 3);
 		if (size > max) {
 			log.warn("User {} has {} concurrent sessions, exceeding limit of {}. Consider cleaning up stale sessions.",
 					userId, size, max);

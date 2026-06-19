@@ -2,10 +2,10 @@ package com.auth.service.system.admin.excel.dept;
 
 import com.auth.module.file.export.ExportScopeQueryFields;
 import com.auth.module.file.export.model.enums.ExportScope;
-import com.auth.service.system.admin.mapper.SysDeptMapper;
+import com.auth.service.system.admin.mapper.dept.SysDeptMapper;
 import com.auth.service.system.admin.model.po.dept.SysDeptPageRowPO;
-import com.auth.service.system.admin.model.query.SysDeptPageQuery;
-import com.auth.service.system.admin.service.SysDeptService;
+import com.auth.service.system.admin.model.query.dept.SysDeptPageQuery;
+import com.auth.service.system.admin.service.admin.SysDeptService;
 import com.auth.service.system.admin.support.dept.DeptCodeIdResolver;
 import com.auth.service.system.admin.support.dept.DeptPathResolver;
 import com.baomidou.mybatisplus.core.metadata.IPage;

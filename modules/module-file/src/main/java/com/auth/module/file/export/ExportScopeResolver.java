@@ -1,5 +1,6 @@
 package com.auth.module.file.export;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.auth.module.file.exception.ExportException;
 import com.auth.module.file.export.model.ExportPageRange;
 import com.auth.module.file.export.model.enums.ExportScope;
@@ -20,7 +21,7 @@ public class ExportScopeResolver {
 	 * @return 页码区间
 	 */
 	public static ExportPageRange resolve(ExportScopeQuery query) {
-		ExportScope scope = query.getExportScope() != null ? query.getExportScope() : ExportScope.PAGE_RANGE;
+		ExportScope scope = ObjectUtil.defaultIfNull(query.getExportScope(), ExportScope.PAGE_RANGE);
 		return switch (scope) {
 			case CURRENT_PAGE -> resolveCurrentPage(query);
 			case PAGE_RANGE -> resolvePageRange(query);

@@ -1,6 +1,6 @@
 package com.auth.service.system.admin.support.dept;
 
-import com.auth.service.system.admin.mapper.DeptClosureMapper;
+import com.auth.service.system.admin.mapper.dept.DeptClosureMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +25,7 @@ public class DeptClosureMaintainer {
 	}
 
 	/**
-	 * 物理删除该部门在
+	 * 物理删除该部门,物理删除子树
 	 * @param deptId 部门 ID
 	 */
 	public void removeClosurePaths(long deptId) {

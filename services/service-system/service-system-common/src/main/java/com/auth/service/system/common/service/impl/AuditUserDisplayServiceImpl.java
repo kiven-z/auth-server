@@ -9,6 +9,8 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.ToLongFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -48,10 +50,7 @@ public class AuditUserDisplayServiceImpl implements AuditUserDisplayService {
 	 */
 	@Override
 	public <T extends BaseResponse> void enrichAuditUsernames(IPage<T> page) {
-		if (page == null) {
-			return;
-		}
-		enrichAuditUsernames(page.getRecords());
+		enrichAuditUsernames(page, null, null);
 	}
 
 	/**
@@ -59,24 +58,80 @@ public class AuditUserDisplayServiceImpl implements AuditUserDisplayService {
 	 */
 	@Override
 	public void enrichAuditUsernames(List<? extends BaseResponse> records) {
+		enrichAuditUsernames(records, null, null);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public <T extends BaseResponse> void enrichAuditUsernames(IPage<T> page, ToLongFunction<T> extraUserIdGetter,
+			BiConsumer<T, String> extraUsernameSetter) {
+		if (page == null) {
+			return;
+		}
+		enrichAuditUsernames(page.getRecords(), extraUserIdGetter, extraUsernameSetter);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public <T extends BaseResponse> void enrichAuditUsernames(List<T> records, ToLongFunction<T> extraUserIdGetter,
+			BiConsumer<T, String> extraUsernameSetter) {
+		enrichAuditUsernamesInternal(records, extraUserIdGetter, extraUsernameSetter);
+	}
+
+	/**
+	 * 填充审计用户名，并可选填充额外用户字段。
+	 * @param records 行列表
+	 * @param extraUserIdGetter 额外用户 ID 读取
+	 * @param extraUsernameSetter 额外用户名写入
+	 * @param <T> 行类型
+	 */
+	private <T extends BaseResponse> void enrichAuditUsernamesInternal(List<? extends T> records,
+			ToLongFunction<T> extraUserIdGetter, BiConsumer<T, String> extraUsernameSetter) {
 		if (CollUtil.isEmpty(records)) {
 			return;
 		}
 
-		List<Long> list = records.stream()
-			.flatMap(vo -> Stream.of(vo.getCreateUser(), vo.getUpdateUser()))
+		List<Long> userIds = records.stream()
+			.flatMap(vo -> collectUserIds(vo, extraUserIdGetter))
 			.filter(Objects::nonNull)
 			.distinct()
 			.toList();
-		Map<Long, String> usernameMap = mapUsernamesByIds(list);
+		Map<Long, String> usernameMap = mapUsernamesByIds(userIds);
 
-		for (BaseResponse vo : records) {
-			String createUsername = usernameMap.get(vo.getCreateUser());
-			vo.setCreateUsername(createUsername);
-
-			String updateUsername = usernameMap.get(vo.getUpdateUser());
-			vo.setUpdateUsername(updateUsername);
+		for (T vo : records) {
+			vo.setCreateUsername(usernameMap.get(vo.getCreateUser()));
+			vo.setUpdateUsername(usernameMap.get(vo.getUpdateUser()));
+			if (extraUserIdGetter != null && extraUsernameSetter != null) {
+				long extraUserId = extraUserIdGetter.applyAsLong(vo);
+				if (extraUserId != 0L) {
+					extraUsernameSetter.accept(vo, usernameMap.get(extraUserId));
+				}
+			}
 		}
+	}
+
+	/**
+	 * 收集单条记录涉及的用户 ID（审计列 + 可选额外列）。
+	 * @param vo 行对象
+	 * @param extraUserIdGetter 额外用户 ID 读取
+	 * @param <T> 行类型
+	 * @return 用户 ID 流
+	 */
+	private <T extends BaseResponse> Stream<Long> collectUserIds(T vo, ToLongFunction<T> extraUserIdGetter) {
+		Stream.Builder<Long> builder = Stream.builder();
+		builder.add(vo.getCreateUser());
+		builder.add(vo.getUpdateUser());
+		if (extraUserIdGetter != null) {
+			long extraUserId = extraUserIdGetter.applyAsLong(vo);
+			if (extraUserId != 0L) {
+				builder.add(extraUserId);
+			}
+		}
+		return builder.build();
 	}
 
 }

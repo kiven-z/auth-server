@@ -1,5 +1,6 @@
 package com.auth.service.system.schedule.task.support;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.schedule.exception.SysJobException;
 import lombok.RequiredArgsConstructor;
@@ -119,7 +120,7 @@ public class QuartzBeanInvoker {
 		// 调用方法
 		Object result = ReflectionUtils.invokeMethod(method, bean, args);
 
-		return result == null ? "" : String.valueOf(result);
+		return Convert.toStr(result, "");
 	}
 
 	/**

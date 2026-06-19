@@ -2,7 +2,7 @@ package com.auth.service.system.admin.support.dept;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
-import com.auth.service.system.admin.mapper.SysDeptMapper;
+import com.auth.service.system.admin.mapper.dept.SysDeptMapper;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
