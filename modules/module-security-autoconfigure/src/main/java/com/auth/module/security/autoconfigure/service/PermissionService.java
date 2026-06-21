@@ -1,9 +1,11 @@
 package com.auth.module.security.autoconfigure.service;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.module.security.autoconfigure.config.security.AuditPolicy;
 import com.auth.module.security.autoconfigure.config.security.SecurityConfigProperties;
 import com.auth.module.security.autoconfigure.pipeline.resolver.HandlerMethodResolver;
+import com.auth.module.security.autoconfigure.security.SecurityRequestAttributes;
 import com.auth.module.security.autoconfigure.security.SecurityRequirement;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.module.security.contract.event.SecurityAuthorizationAuditPayloadEvent;
@@ -59,7 +61,7 @@ public class PermissionService {
 			return null;
 		}
 		HttpServletRequest request = attrs.getRequest();
-		Object raw = request.getAttribute(SecurityRequirement.REQUEST_ATTRIBUTE);
+		Object raw = request.getAttribute(SecurityRequestAttributes.REQUIREMENT);
 		return raw instanceof SecurityRequirement req ? req : null;
 	}
 
@@ -72,7 +74,7 @@ public class PermissionService {
 		String forwarded = request.getHeader("X-Forwarded-For");
 		if (forwarded != null && !forwarded.isBlank()) {
 			String first = forwarded.split(",")[0].trim();
-			if (!first.isEmpty() && !"unknown".equalsIgnoreCase(first)) {
+			if (CharSequenceUtil.isNotEmpty(first) && !CharSequenceUtil.equalsIgnoreCase(first, "unknown")) {
 				return first;
 			}
 		}

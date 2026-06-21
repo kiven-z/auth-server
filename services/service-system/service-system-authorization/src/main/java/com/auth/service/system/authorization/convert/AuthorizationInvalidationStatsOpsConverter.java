@@ -1,5 +1,6 @@
 package com.auth.service.system.authorization.convert;
 
+import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidationEventStatsInnerDTO;
 import com.auth.service.system.authorization.model.po.AuthorizationInvalidationEventStatsPO;
 import com.auth.service.system.authorization.model.po.AuthorizationInvalidationOutboxStatsPO;
 import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationEventStatsVO;
@@ -50,6 +51,20 @@ public class AuthorizationInvalidationStatsOpsConverter {
 		statsVo.setDeadCount(dead);
 		statsVo.setFailureRatePercent(calculateFailureRatePercent(total, failed, dead));
 		return statsVo;
+	}
+
+	/**
+	 * Feign 统计摘要 → 统计 PO
+	 * @param statsDto Feign 统计
+	 * @return 统计 PO
+	 */
+	public static AuthorizationInvalidationEventStatsPO toEventStatsPo(
+			AuthorizationInvalidationEventStatsInnerDTO statsDto) {
+		AuthorizationInvalidationEventStatsPO statsPo = new AuthorizationInvalidationEventStatsPO();
+		statsPo.setTotalCount(statsDto.getTotalCount());
+		statsPo.setProcessingCount(statsDto.getProcessingCount());
+		statsPo.setCompletedCount(statsDto.getCompletedCount());
+		return statsPo;
 	}
 
 	/**

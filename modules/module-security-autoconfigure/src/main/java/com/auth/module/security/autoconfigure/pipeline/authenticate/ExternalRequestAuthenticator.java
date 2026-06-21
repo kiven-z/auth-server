@@ -2,6 +2,7 @@ package com.auth.module.security.autoconfigure.pipeline.authenticate;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.jwt.model.JwtUserToken;
+import com.auth.module.security.autoconfigure.security.SecurityRequestAttributes;
 import com.auth.module.security.autoconfigure.service.AuthProfileCacheService;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.module.security.contract.constants.SecurityInternalTokenConstants;
@@ -72,8 +73,8 @@ public final class ExternalRequestAuthenticator implements RequestAuthenticator 
 		JwtUserToken userToken = result.getUserToken();
 		Long userId = userToken.getUserId();
 
-		// sessionId 需要在缓存中存在
 		String sessionId = userToken.getJti();
+		request.setAttribute(SecurityRequestAttributes.SESSION_ID, sessionId);
 		if (userId == null) {
 			throw new SecurityTokenException(SecurityResultCodeEnum.TOKEN_INVALID, "User id is missing in token.");
 		}

@@ -36,10 +36,8 @@
         <sonar.coverage.exclusions>
             **/config/**,**/*Config.*,**/*Configuration.*,**/*Properties.*,**/model/**,**/model/*,**/constants/**
         </sonar.coverage.exclusions>
-        <!-- CPD (duplications): exclude same boilerplate paths; coverage.exclusions does NOT apply here -->
-        <sonar.cpd.exclusions>
-            **/config/**,**/*Config.*,**/*Configuration.*,**/*Properties.*,**/model/**,**/model/*,**/constants/**,**/common/exception/**,**/exception/**,**/feign/dto/**,**/excel/**
-        </sonar.cpd.exclusions>
+        <!-- CPD (duplications): exclude data carriers & boilerplate; coverage.exclusions does NOT apply here -->
+        <sonar.cpd.exclusions>**/*VO.java,**/*DTO.java,**/*PO.java,**/*Form.java,**/*Entity.java,**/*PageRow*.java,**/model/**,**/api/dto/**,**/feign/dto/**,**/integration/**/dto/**,**/projection/**,**/config/**,**/*Config.*,**/*Configuration.*,**/*Properties.*,**/constants/**,**/common/exception/**,**/exception/**,**/excel/**</sonar.cpd.exclusions>
 
         <!-- JaCoCo 版本 -->
         <jacoco.version>0.8.12</jacoco.version>

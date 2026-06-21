@@ -1,5 +1,6 @@
 package com.auth.service.system.authorization.convert;
 
+import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidationEventStatsInnerDTO;
 import com.auth.service.system.authorization.model.po.AuthorizationInvalidationEventStatsPO;
 import com.auth.service.system.authorization.model.po.AuthorizationInvalidationOutboxStatsPO;
 import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationEventStatsVO;
@@ -99,6 +100,22 @@ class AuthorizationInvalidationStatsOpsConverterTest {
 		assertThat(statsVo.getTotalCount()).isZero();
 		assertThat(statsVo.getProcessingCount()).isZero();
 		assertThat(statsVo.getCompletedCount()).isZero();
+	}
+
+	@Test
+	@DisplayName("Feign 统计摘要应映射为统计 PO")
+	void toEventStatsPo_shouldMapCounts() {
+		AuthorizationInvalidationEventStatsInnerDTO statsDto = new AuthorizationInvalidationEventStatsInnerDTO();
+		statsDto.setTotalCount(8L);
+		statsDto.setProcessingCount(1L);
+		statsDto.setCompletedCount(7L);
+
+		AuthorizationInvalidationEventStatsPO statsPo = AuthorizationInvalidationStatsOpsConverter
+			.toEventStatsPo(statsDto);
+
+		assertThat(statsPo.getTotalCount()).isEqualTo(8L);
+		assertThat(statsPo.getProcessingCount()).isEqualTo(1L);
+		assertThat(statsPo.getCompletedCount()).isEqualTo(7L);
 	}
 
 	@Test

@@ -1,7 +1,7 @@
 package com.auth.service.system.authorization.dispatch.query;
 
 import com.auth.common.core.model.response.Result;
-import com.auth.service.system.authorization.feign.AuthInnerFeignClient;
+import com.auth.service.system.authorization.feign.AuthorizationInnerFeignClient;
 import com.auth.service.system.authorization.feign.dto.EffectiveCodesInnerDTO;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,7 +26,7 @@ import static org.mockito.Mockito.when;
 class UserEffectiveCodesResolverTest {
 
 	@Mock
-	private AuthInnerFeignClient authInnerFeignClient;
+	private AuthorizationInnerFeignClient authorizationInnerFeignClient;
 
 	@InjectMocks
 	private UserEffectiveCodesResolver userEffectiveCodesResolver;
@@ -37,7 +37,7 @@ class UserEffectiveCodesResolverTest {
 		Optional<UserEffectiveCodesSnapshot> snapshot = userEffectiveCodesResolver.resolve(null);
 
 		assertTrue(snapshot.isEmpty());
-		verifyNoInteractions(authInnerFeignClient);
+		verifyNoInteractions(authorizationInnerFeignClient);
 	}
 
 	@Test
@@ -46,7 +46,7 @@ class UserEffectiveCodesResolverTest {
 		EffectiveCodesInnerDTO dto = new EffectiveCodesInnerDTO();
 		dto.setRoleCodes(List.of("ADMIN"));
 		dto.setPermissionCodes(List.of("sys:user:query"));
-		when(authInnerFeignClient.getEffectiveCodes(2L)).thenReturn(Result.success(dto));
+		when(authorizationInnerFeignClient.getEffectiveCodes(2L)).thenReturn(Result.success(dto));
 
 		UserEffectiveCodesSnapshot snapshot = userEffectiveCodesResolver.resolve(2L).orElseThrow();
 
@@ -57,7 +57,7 @@ class UserEffectiveCodesResolverTest {
 	@Test
 	@DisplayName("Feign 失败时返回空")
 	void resolve_whenFeignFails_shouldReturnEmpty() {
-		when(authInnerFeignClient.getEffectiveCodes(3L)).thenReturn(Result.error("unavailable"));
+		when(authorizationInnerFeignClient.getEffectiveCodes(3L)).thenReturn(Result.error("unavailable"));
 
 		Optional<UserEffectiveCodesSnapshot> snapshot = userEffectiveCodesResolver.resolve(3L);
 

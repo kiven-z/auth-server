@@ -3,7 +3,7 @@ package com.auth.service.system.authorization.service.impl;
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.authorization.exception.AuthorizationInvalidationOpsResultCode;
-import com.auth.service.system.authorization.feign.AuthInnerFeignClient;
+import com.auth.service.system.authorization.feign.AuthorizationInnerFeignClient;
 import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidationEventDetailInnerDTO;
 import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidationEventPageInnerDTO;
 import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidationEventStatsInnerDTO;
@@ -33,19 +33,19 @@ import static org.mockito.Mockito.*;
 class AuthorizationInvalidationEventOpsServiceImplTest {
 
 	@Mock
-	private AuthInnerFeignClient authInnerFeignClient;
+	private AuthorizationInnerFeignClient authorizationInnerFeignClient;
 
 	private AuthorizationInvalidationEventOpsServiceImpl opsService;
 
 	@BeforeEach
 	void setUpService() {
-		opsService = new AuthorizationInvalidationEventOpsServiceImpl(authInnerFeignClient);
+		opsService = new AuthorizationInvalidationEventOpsServiceImpl(authorizationInnerFeignClient);
 	}
 
 	@Test
 	@DisplayName("分页查询：Feign 失败时抛出 SERVICE_UNAVAILABLE")
 	void getPage_shouldThrowWhenFeignFailed() {
-		when(authInnerFeignClient.getInvalidationEventPage(any())).thenReturn(Result.error("unavailable"));
+		when(authorizationInnerFeignClient.getInvalidationEventPage(any())).thenReturn(Result.error("unavailable"));
 		AuthorizationInvalidationEventOpsQuery query = new AuthorizationInvalidationEventOpsQuery();
 
 		SystemBusinessException exception = assertThrows(SystemBusinessException.class,
@@ -62,7 +62,7 @@ class AuthorizationInvalidationEventOpsServiceImplTest {
 		innerDto.setEventId("evt-1");
 		PageResponse<AuthorizationInvalidationEventPageInnerDTO> pageData = PageResponse.of(1L, 10L, 1L,
 				List.of(innerDto));
-		when(authInnerFeignClient.getInvalidationEventPage(any())).thenReturn(Result.success(pageData));
+		when(authorizationInnerFeignClient.getInvalidationEventPage(any())).thenReturn(Result.success(pageData));
 
 		PageResponse<AuthorizationInvalidationEventPageInnerDTO> response = opsService
 			.getPage(new AuthorizationInvalidationEventOpsQuery());
@@ -74,7 +74,7 @@ class AuthorizationInvalidationEventOpsServiceImplTest {
 	@Test
 	@DisplayName("详情查询：Feign 无数据时抛出 DATA_NOT_EXIST")
 	void getDetail_shouldThrowWhenFeignFailed() {
-		when(authInnerFeignClient.getInvalidationEventDetail(1L)).thenReturn(Result.error("not found"));
+		when(authorizationInnerFeignClient.getInvalidationEventDetail(1L)).thenReturn(Result.error("not found"));
 
 		SystemBusinessException exception = assertThrows(SystemBusinessException.class, () -> opsService.getDetail(1L));
 
@@ -84,7 +84,7 @@ class AuthorizationInvalidationEventOpsServiceImplTest {
 	@Test
 	@DisplayName("统计摘要：Feign 失败时抛出 SERVICE_UNAVAILABLE")
 	void getEventStats_shouldThrowWhenFeignFailed() {
-		when(authInnerFeignClient.getInvalidationEventSummary()).thenReturn(Result.error("unavailable"));
+		when(authorizationInnerFeignClient.getInvalidationEventSummary()).thenReturn(Result.error("unavailable"));
 
 		SystemBusinessException exception = assertThrows(SystemBusinessException.class, opsService::getEventStats);
 
@@ -98,7 +98,7 @@ class AuthorizationInvalidationEventOpsServiceImplTest {
 		statsDto.setTotalCount(8L);
 		statsDto.setProcessingCount(1L);
 		statsDto.setCompletedCount(7L);
-		when(authInnerFeignClient.getInvalidationEventSummary()).thenReturn(Result.success(statsDto));
+		when(authorizationInnerFeignClient.getInvalidationEventSummary()).thenReturn(Result.success(statsDto));
 
 		AuthorizationInvalidationEventStatsPO statsPo = opsService.getEventStats();
 
@@ -114,13 +114,13 @@ class AuthorizationInvalidationEventOpsServiceImplTest {
 		innerDto.setId(3L);
 		innerDto.setEventId("evt-done");
 		innerDto.setProcessing(Boolean.FALSE);
-		when(authInnerFeignClient.getInvalidationEventDetail(3L)).thenReturn(Result.success(innerDto));
+		when(authorizationInnerFeignClient.getInvalidationEventDetail(3L)).thenReturn(Result.success(innerDto));
 
 		SystemBusinessException exception = assertThrows(SystemBusinessException.class,
 				() -> opsService.releaseProcessingClaim(3L));
 
 		assertEquals(AuthorizationInvalidationOpsResultCode.EVENT_RELEASE_NOT_PROCESSING, exception.getResultCode());
-		verify(authInnerFeignClient, never()).releaseInvalidationEventClaim("evt-done");
+		verify(authorizationInnerFeignClient, never()).releaseInvalidationEventClaim("evt-done");
 	}
 
 	@Test
@@ -130,13 +130,14 @@ class AuthorizationInvalidationEventOpsServiceImplTest {
 		innerDto.setId(4L);
 		innerDto.setEventId("evt-processing");
 		innerDto.setProcessing(Boolean.TRUE);
-		when(authInnerFeignClient.getInvalidationEventDetail(4L)).thenReturn(Result.success(innerDto));
-		when(authInnerFeignClient.releaseInvalidationEventClaim("evt-processing")).thenReturn(Result.success(true));
+		when(authorizationInnerFeignClient.getInvalidationEventDetail(4L)).thenReturn(Result.success(innerDto));
+		when(authorizationInnerFeignClient.releaseInvalidationEventClaim("evt-processing"))
+			.thenReturn(Result.success(true));
 
 		boolean released = opsService.releaseProcessingClaim(4L);
 
 		assertTrue(released);
-		verify(authInnerFeignClient).releaseInvalidationEventClaim("evt-processing");
+		verify(authorizationInnerFeignClient).releaseInvalidationEventClaim("evt-processing");
 	}
 
 }

@@ -5,7 +5,7 @@ import com.auth.module.security.contract.api.authorization.AuthorizationChangeKi
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateResponse;
 import com.auth.service.system.authorization.config.AuthorizationInvalidationProperties;
-import com.auth.service.system.authorization.feign.AuthInnerFeignClient;
+import com.auth.service.system.authorization.feign.AuthorizationInnerFeignClient;
 import com.auth.service.system.authorization.mapper.SysAuthorizationInvalidationOutboxMapper;
 import com.auth.service.system.authorization.model.entity.SysAuthorizationInvalidationOutboxEntity;
 import com.auth.service.system.authorization.model.enums.AuthorizationInvalidationOutboxStatus;
@@ -32,7 +32,7 @@ public class AuthorizationInvalidationOutboxProcessor {
 
 	private final InvalidationOutboxPayloadCodec payloadCodec;
 
-	private final AuthInnerFeignClient authInnerFeignClient;
+	private final AuthorizationInnerFeignClient authorizationInnerFeignClient;
 
 	private final AuthorizationInvalidationProperties properties;
 
@@ -90,7 +90,7 @@ public class AuthorizationInvalidationOutboxProcessor {
 				payloadCodec.deserialize(kind, row.getPayload()));
 
 		try {
-			Result<AuthorizationInvalidateResponse> result = authInnerFeignClient.invalidate(request);
+			Result<AuthorizationInvalidateResponse> result = authorizationInnerFeignClient.invalidate(request);
 			if (result != null && Integer.valueOf(Result.SUCCESS_CODE).equals(result.getCode())) {
 				outboxMapper.markSuccess(row.getId(), LocalDateTime.now());
 				log.info("Authorization invalidation dispatched: eventId={}, outboxId={}", row.getEventId(),

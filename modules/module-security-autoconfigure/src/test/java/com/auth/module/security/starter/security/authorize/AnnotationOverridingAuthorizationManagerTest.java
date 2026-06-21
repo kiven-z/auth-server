@@ -2,6 +2,7 @@ package com.auth.module.security.starter.security.authorize;
 
 import com.auth.module.security.autoconfigure.config.security.SecurityConfigProperties;
 import com.auth.module.security.autoconfigure.security.AnnotationOverridingAuthorizationManager;
+import com.auth.module.security.autoconfigure.security.SecurityRequestAttributes;
 import com.auth.module.security.autoconfigure.security.SecurityRequirement;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -44,7 +45,7 @@ class AnnotationOverridingAuthorizationManagerTest {
 		request.setContextPath("");
 		request.setServletPath("/api/example/conflict");
 		request.setRequestURI("/api/example/conflict");
-		request.setAttribute(SecurityRequirement.REQUEST_ATTRIBUTE, SecurityRequirement.PUBLIC);
+		request.setAttribute(SecurityRequestAttributes.REQUIREMENT, SecurityRequirement.PUBLIC);
 		RequestAuthorizationContext ctx = new RequestAuthorizationContext(request);
 		AuthorizationResult result = mgr.authorize(
 				() -> new AnonymousAuthenticationToken("k", "n", AuthorityUtils.createAuthorityList("ROLE_ANONYMOUS")),
@@ -60,7 +61,7 @@ class AnnotationOverridingAuthorizationManagerTest {
 		request.setContextPath("");
 		request.setServletPath("/health");
 		request.setRequestURI("/health");
-		request.setAttribute(SecurityRequirement.REQUEST_ATTRIBUTE, SecurityRequirement.AUTHENTICATED);
+		request.setAttribute(SecurityRequestAttributes.REQUIREMENT, SecurityRequirement.AUTHENTICATED);
 		RequestAuthorizationContext ctx = new RequestAuthorizationContext(request);
 		AuthorizationResult result = mgr.authorize(
 				() -> new AnonymousAuthenticationToken("k", "n", AuthorityUtils.createAuthorityList("ROLE_ANONYMOUS")),
@@ -76,7 +77,7 @@ class AnnotationOverridingAuthorizationManagerTest {
 		request.setContextPath("");
 		request.setServletPath("/health");
 		request.setRequestURI("/health");
-		request.setAttribute(SecurityRequirement.REQUEST_ATTRIBUTE, SecurityRequirement.AUTHENTICATED);
+		request.setAttribute(SecurityRequestAttributes.REQUIREMENT, SecurityRequirement.AUTHENTICATED);
 		RequestAuthorizationContext ctx = new RequestAuthorizationContext(request);
 		UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken("user", "n/a",
 				AuthorityUtils.createAuthorityList("ROLE_USER"));
@@ -105,7 +106,7 @@ class AnnotationOverridingAuthorizationManagerTest {
 		request.setContextPath("");
 		request.setServletPath("/api/foo");
 		request.setRequestURI("/api/foo");
-		request.setAttribute(SecurityRequirement.REQUEST_ATTRIBUTE, SecurityRequirement.FALLBACK_TO_PATH);
+		request.setAttribute(SecurityRequestAttributes.REQUIREMENT, SecurityRequirement.FALLBACK_TO_PATH);
 		RequestAuthorizationContext ctx = new RequestAuthorizationContext(request);
 		AuthorizationResult result = mgr.authorize(() -> null, ctx);
 		assertDenied(result);
@@ -119,7 +120,7 @@ class AnnotationOverridingAuthorizationManagerTest {
 		request.setContextPath("");
 		request.setServletPath("/api/foo");
 		request.setRequestURI("/api/foo");
-		request.setAttribute(SecurityRequirement.REQUEST_ATTRIBUTE, SecurityRequirement.FALLBACK_TO_PATH);
+		request.setAttribute(SecurityRequestAttributes.REQUIREMENT, SecurityRequirement.FALLBACK_TO_PATH);
 		RequestAuthorizationContext ctx = new RequestAuthorizationContext(request);
 		UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken("user", "n/a",
 				AuthorityUtils.createAuthorityList("ROLE_USER"));

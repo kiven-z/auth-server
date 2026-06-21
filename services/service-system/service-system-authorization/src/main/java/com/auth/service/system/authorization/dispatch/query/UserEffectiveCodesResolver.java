@@ -2,7 +2,7 @@ package com.auth.service.system.authorization.dispatch.query;
 
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.common.core.model.response.Result;
-import com.auth.service.system.authorization.feign.AuthInnerFeignClient;
+import com.auth.service.system.authorization.feign.AuthorizationInnerFeignClient;
 import com.auth.service.system.authorization.feign.dto.EffectiveCodesInnerDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +22,7 @@ import static com.auth.common.web.resttemplate.FeignUtil.isSuccessWithData;
 @Component
 public class UserEffectiveCodesResolver {
 
-	private final AuthInnerFeignClient authInnerFeignClient;
+	private final AuthorizationInnerFeignClient authorizationInnerFeignClient;
 
 	/**
 	 * 解析用户生效角色码与权限码
@@ -34,7 +34,7 @@ public class UserEffectiveCodesResolver {
 			return Optional.empty();
 		}
 
-		Result<EffectiveCodesInnerDTO> result = authInnerFeignClient.getEffectiveCodes(userId);
+		Result<EffectiveCodesInnerDTO> result = authorizationInnerFeignClient.getEffectiveCodes(userId);
 		if (BooleanUtil.isFalse(isSuccessWithData(result))) {
 			log.warn("Effective codes unavailable: userId={}", userId);
 			return Optional.empty();

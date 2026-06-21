@@ -1,6 +1,7 @@
 package com.auth.module.security.autoconfigure.pipeline.authenticate;
 
-import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -19,32 +20,26 @@ import java.util.stream.Stream;
 public final class AuthProfileSecurityContextPopulator {
 
 	/**
-	 * 将列表转换为流，如果列表为空，则返回空流
-	 * @param list 列表
-	 * @param <T> 列表元素类型
-	 * @return 流
-	 */
-	private static <T> Stream<T> nullSafeStream(List<T> list) {
-		return list != null ? list.stream() : Stream.empty();
-	}
-
-	/**
 	 * 构建授权权限
 	 * @param profile 授权画像
 	 * @return 授权权限
 	 */
-	@SuppressWarnings("java:S6204")
 	private static List<GrantedAuthority> buildAuthorities(AuthProfile profile) {
 		return Stream.concat(
 				// 构建权限
-				nullSafeStream(profile.getPermissions()).filter(CharSequenceUtil::isNotBlank)
-					.map(p -> new SimpleGrantedAuthority(CharSequenceUtil.trim(p))),
+				CollUtil.emptyIfNull(profile.getPermissions())
+					.stream()
+					.filter(StrUtil::isNotBlank)
+					.map(StrUtil::trim)
+					.map(SimpleGrantedAuthority::new),
 
 				// 构建角色
-				nullSafeStream(profile.getRoles()).filter(CharSequenceUtil::isNotBlank).map(r -> {
-					String trim = CharSequenceUtil.trim(r);
-					return trim.startsWith("ROLE_") ? trim : "ROLE_" + trim;
-				}).map(SimpleGrantedAuthority::new))
+				CollUtil.emptyIfNull(profile.getRoles())
+					.stream()
+					.filter(StrUtil::isNotBlank)
+					.map(StrUtil::trim)
+					.map(role -> role.startsWith("ROLE_") ? role : "ROLE_" + role)
+					.map(SimpleGrantedAuthority::new))
 			.collect(Collectors.toList());
 	}
 

@@ -4,11 +4,12 @@ import cn.hutool.core.util.BooleanUtil;
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.common.web.resttemplate.FeignUtil;
-import com.auth.service.system.authorization.feign.AuthInnerFeignClient;
+import com.auth.service.system.authorization.feign.AuthorizationInnerFeignClient;
 import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidationEventDetailInnerDTO;
+import com.auth.service.system.authorization.convert.AuthorizationInvalidationEventOpsConverter;
+import com.auth.service.system.authorization.convert.AuthorizationInvalidationStatsOpsConverter;
 import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidationEventInnerQuery;
 import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidationEventPageInnerDTO;
-import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidationEventStatsInnerDTO;
 import com.auth.service.system.authorization.model.po.AuthorizationInvalidationEventStatsPO;
 import com.auth.service.system.authorization.model.query.AuthorizationInvalidationEventOpsQuery;
 import com.auth.service.system.authorization.service.AuthorizationInvalidationEventOpsService;
@@ -33,7 +34,7 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
 @Transactional(readOnly = true)
 public class AuthorizationInvalidationEventOpsServiceImpl implements AuthorizationInvalidationEventOpsService {
 
-	private final AuthInnerFeignClient authInnerFeignClient;
+	private final AuthorizationInnerFeignClient authorizationInnerFeignClient;
 
 	/**
 	 * {@inheritDoc}
@@ -41,8 +42,10 @@ public class AuthorizationInvalidationEventOpsServiceImpl implements Authorizati
 	@Override
 	public PageResponse<AuthorizationInvalidationEventPageInnerDTO> getPage(
 			AuthorizationInvalidationEventOpsQuery query) {
-		Result<PageResponse<AuthorizationInvalidationEventPageInnerDTO>> result = authInnerFeignClient
-			.getInvalidationEventPage(toInnerQuery(query));
+		AuthorizationInvalidationEventInnerQuery innerQuery = AuthorizationInvalidationEventOpsConverter.INSTANCE
+			.toInnerQuery(query);
+		var result = authorizationInnerFeignClient.getInvalidationEventPage(innerQuery);
+
 		if (!FeignUtil.isSuccessWithData(result)) {
 			log.warn("Authorization invalidation event page unavailable");
 			throw new SystemBusinessException(SERVICE_UNAVAILABLE);
@@ -55,8 +58,8 @@ public class AuthorizationInvalidationEventOpsServiceImpl implements Authorizati
 	 */
 	@Override
 	public AuthorizationInvalidationEventDetailInnerDTO getDetail(Long id) {
-		Result<AuthorizationInvalidationEventDetailInnerDTO> result = authInnerFeignClient
-			.getInvalidationEventDetail(id);
+		var result = authorizationInnerFeignClient.getInvalidationEventDetail(id);
+
 		if (!FeignUtil.isSuccessWithData(result)) {
 			log.warn("Authorization invalidation event detail unavailable, id={}", id);
 			throw new SystemBusinessException(DATA_NOT_EXIST);
@@ -69,12 +72,13 @@ public class AuthorizationInvalidationEventOpsServiceImpl implements Authorizati
 	 */
 	@Override
 	public AuthorizationInvalidationEventStatsPO getEventStats() {
-		Result<AuthorizationInvalidationEventStatsInnerDTO> result = authInnerFeignClient.getInvalidationEventSummary();
+		var result = authorizationInnerFeignClient.getInvalidationEventSummary();
 		if (!FeignUtil.isSuccessWithData(result)) {
 			log.warn("Authorization invalidation event summary unavailable");
 			throw new SystemBusinessException(SERVICE_UNAVAILABLE);
 		}
-		return toStatsPo(result.getData());
+
+		return AuthorizationInvalidationStatsOpsConverter.toEventStatsPo(result.getData());
 	}
 
 	/**
@@ -88,32 +92,12 @@ public class AuthorizationInvalidationEventOpsServiceImpl implements Authorizati
 			throw new SystemBusinessException(EVENT_RELEASE_NOT_PROCESSING);
 		}
 
-		Result<Boolean> result = authInnerFeignClient.releaseInvalidationEventClaim(detail.getEventId());
+		Result<Boolean> result = authorizationInnerFeignClient.releaseInvalidationEventClaim(detail.getEventId());
 		if (!FeignUtil.isSuccessWithData(result)) {
 			log.warn("Authorization invalidation event release claim unavailable, id={}", id);
 			throw new SystemBusinessException(SERVICE_UNAVAILABLE);
 		}
 		return BooleanUtil.isTrue(result.getData());
-	}
-
-	private AuthorizationInvalidationEventInnerQuery toInnerQuery(AuthorizationInvalidationEventOpsQuery query) {
-		AuthorizationInvalidationEventInnerQuery innerQuery = new AuthorizationInvalidationEventInnerQuery();
-		innerQuery.setPageIndex(Math.toIntExact(query.getPageIndex()));
-		innerQuery.setPageSize(Math.toIntExact(query.getPageSize()));
-		innerQuery.setEventId(query.getEventId());
-		innerQuery.setChangeKind(query.getChangeKind());
-		innerQuery.setProcessing(query.getProcessing());
-		innerQuery.setProcessedAtStart(query.getProcessedAtStart());
-		innerQuery.setProcessedAtEnd(query.getProcessedAtEnd());
-		return innerQuery;
-	}
-
-	private AuthorizationInvalidationEventStatsPO toStatsPo(AuthorizationInvalidationEventStatsInnerDTO statsDto) {
-		AuthorizationInvalidationEventStatsPO statsPo = new AuthorizationInvalidationEventStatsPO();
-		statsPo.setTotalCount(statsDto.getTotalCount());
-		statsPo.setProcessingCount(statsDto.getProcessingCount());
-		statsPo.setCompletedCount(statsDto.getCompletedCount());
-		return statsPo;
 	}
 
 }

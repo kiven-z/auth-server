@@ -1,6 +1,8 @@
 package com.auth.service.system.authorization.model.query;
 
+import com.auth.common.core.model.query.PageQueryRequest;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,16 +17,11 @@ import java.time.LocalDateTime;
  */
 @Getter
 @Setter
-public class AuthorizationInvalidationEventOpsQuery implements Serializable {
+@EqualsAndHashCode(callSuper = true)
+public class AuthorizationInvalidationEventOpsQuery extends PageQueryRequest implements Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
-
-	@Schema(title = "页码")
-	private long pageIndex;
-
-	@Schema(title = "每页条数")
-	private long pageSize;
 
 	@Schema(title = "业务事件 ID（精确匹配）")
 	private String eventId;

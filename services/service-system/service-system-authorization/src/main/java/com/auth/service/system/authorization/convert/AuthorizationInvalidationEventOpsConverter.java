@@ -2,6 +2,7 @@ package com.auth.service.system.authorization.convert;
 
 import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidationEventDetailInnerDTO;
+import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidationEventInnerQuery;
 import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidationEventPageInnerDTO;
 import com.auth.service.system.authorization.model.query.AuthorizationInvalidationEventOpsQuery;
 import com.auth.service.system.authorization.model.query.AuthorizationInvalidationEventQuery;
@@ -28,6 +29,13 @@ public interface AuthorizationInvalidationEventOpsConverter {
 	 * @return 运维查询
 	 */
 	AuthorizationInvalidationEventOpsQuery toOpsQuery(AuthorizationInvalidationEventQuery query);
+
+	/**
+	 * 运维查询 → Feign 分页查询
+	 * @param query 运维查询
+	 * @return Feign 查询
+	 */
+	AuthorizationInvalidationEventInnerQuery toInnerQuery(AuthorizationInvalidationEventOpsQuery query);
 
 	/**
 	 * Feign 分页行 → 分页 VO

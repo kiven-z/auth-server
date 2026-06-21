@@ -1,13 +1,13 @@
 package com.auth.module.security.autoconfigure.security;
 
-import jakarta.servlet.http.HttpServletRequest;
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import lombok.experimental.UtilityClass;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -18,35 +18,30 @@ import java.util.List;
 @UtilityClass
 public class AnnotationOverridingAuthorizationSupport {
 
+	/**
+	 * 将路径模式列表转换为 RequestMatcher 列表
+	 * @param patterns 路径模式列表
+	 * @return RequestMatcher 列表
+	 */
 	public static List<RequestMatcher> toPathMatchers(List<String> patterns) {
-		if (patterns == null || patterns.isEmpty()) {
-			return List.of();
-		}
-		List<RequestMatcher> out = new ArrayList<>();
-		for (String p : patterns) {
-			if (p == null || p.isBlank()) {
-				continue;
-			}
-			out.add(PathPatternRequestMatcher.withDefaults().matcher(p.trim()));
-		}
-		return List.copyOf(out);
-	}
-
-	public static boolean matchesAny(List<RequestMatcher> matchers, HttpServletRequest request) {
-		for (RequestMatcher matcher : matchers) {
-			if (matcher.matches(request)) {
-				return true;
-			}
-		}
-		return false;
+		PathPatternRequestMatcher.Builder matcherBuilder = PathPatternRequestMatcher.withDefaults();
+		return CollUtil.emptyIfNull(patterns)
+			.stream()
+			.filter(CharSequenceUtil::isNotBlank)
+			.<RequestMatcher>map(pattern -> matcherBuilder.matcher(pattern.trim()))
+			.toList();
 	}
 
 	/**
-	 * 与 {@code authenticated()} 语义对齐：匿名主体不算已认证
+	 * 与 authenticated() 语义对齐：匿名主体不算已认证
+	 * @param authentication 认证
+	 * @return 是否认证
 	 */
 	public static boolean isNonAnonymousAuthenticated(Authentication authentication) {
-		return authentication != null && authentication.isAuthenticated()
-				&& !(authentication instanceof AnonymousAuthenticationToken);
+		if (authentication == null || !authentication.isAuthenticated()) {
+			return false;
+		}
+		return !(authentication instanceof AnonymousAuthenticationToken);
 	}
 
 }

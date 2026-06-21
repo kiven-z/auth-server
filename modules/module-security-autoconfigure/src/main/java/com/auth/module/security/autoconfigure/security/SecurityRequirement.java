@@ -25,12 +25,6 @@ public enum SecurityRequirement {
 	/**
 	 * 无注解 / 取不到 handler
 	 */
-	FALLBACK_TO_PATH;
-
-	/**
-	 * {@link jakarta.servlet.http.HttpServletRequest#setAttribute(String, Object)} 使用的
-	 * key， 供授权阶段读取 {@link SecurityRequirement}，使注解语义压过 {@code authorizeHttpRequests} 路径规则
-	 */
-	public static final String REQUEST_ATTRIBUTE = "com.auth.security.requirement";
+	FALLBACK_TO_PATH,
 
 }

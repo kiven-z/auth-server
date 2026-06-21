@@ -2,6 +2,7 @@ package com.auth.module.security.autoconfigure.web.error;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.common.web.utils.ResponseUtil;
+import com.auth.module.security.autoconfigure.security.SecurityRequestAttributes;
 import com.auth.module.security.contract.exception.SecurityResultCodeEnum;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -16,11 +17,6 @@ import java.util.Map;
  */
 @UtilityClass
 public final class SecurityErrorResponseSupport {
-
-	/**
-	 * 安全错误属性
-	 */
-	public static final String ATTR_SECURITY_ERROR = "security.error";
 
 	/**
 	 * 构建安全错误响应体（供 MVC Advice / FilterChain 复用）
@@ -47,7 +43,7 @@ public final class SecurityErrorResponseSupport {
 	 * @param fallbackError 回退错误
 	 */
 	public static void write(HttpServletRequest request, HttpServletResponse response, String fallbackError) {
-		Object raw = request != null ? request.getAttribute(ATTR_SECURITY_ERROR) : null;
+		Object raw = request != null ? request.getAttribute(SecurityRequestAttributes.SECURITY_ERROR) : null;
 		String error = raw instanceof String s ? s : fallbackError;
 		SecurityResultCodeEnum rc = SecurityResultCodeEnum.fromError(error);
 

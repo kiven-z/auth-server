@@ -1,23 +1,30 @@
 package com.auth.service.system.admin.controller.me;
 
 import com.auth.common.core.model.response.Result;
+import com.auth.common.data.model.PageResponse;
 import com.auth.common.ip.IpAddressService;
+import com.auth.module.platform.persistence.model.LoginLogEntity;
 import com.auth.module.security.autoconfigure.annotation.AuthenticatedApi;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.admin.model.form.user.SysUserChangePasswordForm;
+import com.auth.service.system.admin.model.query.me.MeLoginLogPageQuery;
+import com.auth.service.system.admin.model.vo.me.MeLoginLogPageVO;
+import com.auth.service.system.admin.model.vo.me.MeUserSessionVO;
+import com.auth.service.system.admin.service.me.CurrentUserLoginLogService;
+import com.auth.service.system.admin.service.me.CurrentUserSessionService;
 import com.auth.service.system.admin.support.user.UserPasswordService;
 import com.auth.service.system.common.model.SystemAuditBizModule;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
@@ -33,10 +40,15 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
 @RestController
 public class CurrentUserController {
 
-	private final UserPasswordService userPasswordService;
-
 	private final IpAddressService ipAddressService;
 
+	private final UserPasswordService userPasswordService;
+
+	private final CurrentUserSessionService currentUserSessionService;
+
+	private final CurrentUserLoginLogService currentUserLoginLogService;
+
+	@AuthenticatedApi
 	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "当前用户修改密码")
@@ -46,6 +58,37 @@ public class CurrentUserController {
 		String changeIp = ipAddressService.resolveIpInfo(request).getIpAddr();
 		userPasswordService.changeOwnPassword(form, changeIp);
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
+	}
+
+	@AuthenticatedApi
+	@OperationLog(targetType = "USER_SESSION", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.QUERY)
+	@Operation(summary = "查询当前用户活跃会话")
+	@GetMapping("/me/sessions")
+	public Result<List<MeUserSessionVO>> listMySessions() {
+		List<MeUserSessionVO> data = currentUserSessionService.listMySessions();
+		return Result.success(data);
+	}
+
+	@AuthenticatedApi
+	@OperationLog(targetType = "USER_SESSION", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.DELETE)
+	@Operation(summary = "踢出当前用户指定会话")
+	@PostMapping("/me/sessions/{sessionId}/kick")
+	public Result<Void> kickMySession(@PathVariable("sessionId") String sessionId) {
+		currentUserSessionService.kickSession(sessionId);
+		return Result.success();
+	}
+
+	@AuthenticatedApi
+	@OperationLog(targetType = "LOGIN_LOG", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.QUERY)
+	@Operation(summary = "分页查询当前用户登录日志（最近180天）")
+	@GetMapping("/me/login-logs/page")
+	public Result<PageResponse<MeLoginLogPageVO>> loginLogPage(MeLoginLogPageQuery query) {
+		Page<LoginLogEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
+		PageResponse<MeLoginLogPageVO> response = currentUserLoginLogService.getPage(pageParams, query);
+		return Result.success(response);
 	}
 
 }

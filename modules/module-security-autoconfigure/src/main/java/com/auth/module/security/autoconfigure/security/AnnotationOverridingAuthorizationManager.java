@@ -1,8 +1,12 @@
 package com.auth.module.security.autoconfigure.security;
 
-import com.auth.module.security.autoconfigure.config.security.SecurityConfigProperties;
-import com.auth.module.security.autoconfigure.pipeline.filter.TokenAuthenticationFilter;
-import jakarta.servlet.http.HttpServletRequest;
+import static com.auth.module.security.autoconfigure.security.AnnotationOverridingAuthorizationSupport.isNonAnonymousAuthenticated;
+import static com.auth.module.security.autoconfigure.security.AnnotationOverridingAuthorizationSupport.toPathMatchers;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Supplier;
+
 import org.springframework.lang.Nullable;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
@@ -11,11 +15,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.function.Supplier;
+import com.auth.module.security.autoconfigure.config.security.SecurityConfigProperties;
+import com.auth.module.security.autoconfigure.pipeline.filter.TokenAuthenticationFilter;
 
-import static com.auth.module.security.autoconfigure.security.AnnotationOverridingAuthorizationSupport.*;
+import cn.hutool.core.collection.CollUtil;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * 在 HTTP 授权阶段
@@ -38,11 +42,14 @@ public class AnnotationOverridingAuthorizationManager implements AuthorizationMa
 		this.securityProperties = Objects.requireNonNull(securityProperties, "securityProperties");
 	}
 
+	/**
+	 * 获取当前的 permit matchers
+	 * @return 当前的 permit matchers
+	 */
 	private List<RequestMatcher> currentPermitMatchers() {
 		List<String> paths = this.securityProperties.getPermitPaths();
-		if (paths == null) {
-			paths = List.of();
-		}
+		paths = CollUtil.emptyIfNull(paths);
+
 		synchronized (this.matcherCacheLock) {
 			if (paths != this.permitPathsIdentity) {
 				this.permitPathsIdentity = paths;
@@ -56,7 +63,7 @@ public class AnnotationOverridingAuthorizationManager implements AuthorizationMa
 	@Nullable
 	public AuthorizationResult authorize(Supplier<Authentication> authentication, RequestAuthorizationContext context) {
 		HttpServletRequest request = context.getRequest();
-		Object raw = request.getAttribute(SecurityRequirement.REQUEST_ATTRIBUTE);
+		Object raw = request.getAttribute(SecurityRequestAttributes.REQUIREMENT);
 		if (raw instanceof SecurityRequirement requirement) {
 			if (requirement == SecurityRequirement.PUBLIC) {
 				return new AuthorizationDecision(true);
@@ -67,10 +74,13 @@ public class AnnotationOverridingAuthorizationManager implements AuthorizationMa
 			// FALLBACK_TO_PATH：继续走路径规则
 		}
 
-		List<RequestMatcher> permitMatchers = currentPermitMatchers();
-		if (matchesAny(permitMatchers, request)) {
+		boolean matchesAny = CollUtil.emptyIfNull(currentPermitMatchers())
+			.stream()
+			.anyMatch(matcher -> matcher.matches(request));
+		if (matchesAny) {
 			return new AuthorizationDecision(true);
 		}
+
 		// 默认需认证
 		return new AuthorizationDecision(isNonAnonymousAuthenticated(authentication.get()));
 	}

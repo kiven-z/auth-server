@@ -3,6 +3,7 @@ package com.auth.module.security.autoconfigure.pipeline.filter;
 import com.auth.module.security.autoconfigure.pipeline.authenticate.SecurityAuthExecutor;
 import com.auth.module.security.autoconfigure.pipeline.resolver.SecurityRequirementResolver;
 import com.auth.module.security.autoconfigure.security.AuthAction;
+import com.auth.module.security.autoconfigure.security.SecurityRequestAttributes;
 import com.auth.module.security.autoconfigure.security.SecurityRequirement;
 import com.auth.module.security.autoconfigure.web.error.SecurityErrorResponseSupport;
 import com.auth.module.security.contract.exception.SecurityTokenException;
@@ -62,14 +63,14 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 		try {
 			// 解析当前
 			SecurityRequirement requirement = requirementResolver.resolve(request);
-			request.setAttribute(SecurityRequirement.REQUEST_ATTRIBUTE, requirement);
+			request.setAttribute(SecurityRequestAttributes.REQUIREMENT, requirement);
 
 			AuthAction action = dispatch.getOrDefault(requirement, AuthAction.TRY);
 			action.execute(authExecutor, request);
 			filterChain.doFilter(request, response);
 		}
 		catch (SecurityTokenException ex) {
-			request.setAttribute(SecurityErrorResponseSupport.ATTR_SECURITY_ERROR, ex.getCode());
+			request.setAttribute(SecurityRequestAttributes.SECURITY_ERROR, ex.getCode());
 			SecurityErrorResponseSupport.write(request, response, ex.getCode());
 		}
 	}

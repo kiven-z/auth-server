@@ -1,7 +1,7 @@
 package com.auth.service.system.authorization.service.impl;
 
 import com.auth.common.core.model.response.Result;
-import com.auth.service.system.authorization.feign.AuthInnerFeignClient;
+import com.auth.service.system.authorization.feign.SessionRevocationInnerFeignClient;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,7 +22,7 @@ import static org.mockito.Mockito.*;
 class UserSessionRevocationServiceImplTest {
 
 	@Mock
-	private AuthInnerFeignClient authInnerFeignClient;
+	private SessionRevocationInnerFeignClient sessionRevocationInnerFeignClient;
 
 	@InjectMocks
 	private UserSessionRevocationServiceImpl userSessionRevocationService;
@@ -32,29 +32,29 @@ class UserSessionRevocationServiceImplTest {
 	void revokeAllSessionsIgnoresEmptyIds() {
 		userSessionRevocationService.revokeAllSessions(List.of());
 
-		verify(authInnerFeignClient, never()).kickAllSessions(anyList());
+		verify(sessionRevocationInnerFeignClient, never()).kickAllSessions(anyList());
 	}
 
 	@Test
 	@DisplayName("有用户 ID：调用内部踢会话接口")
 	void revokeAllSessionsShouldCallFeign() {
 		List<Long> userIds = List.of(2L, 3L);
-		when(authInnerFeignClient.kickAllSessions(userIds)).thenReturn(Result.success());
+		when(sessionRevocationInnerFeignClient.kickAllSessions(userIds)).thenReturn(Result.success());
 
 		userSessionRevocationService.revokeAllSessions(userIds);
 
-		verify(authInnerFeignClient).kickAllSessions(userIds);
+		verify(sessionRevocationInnerFeignClient).kickAllSessions(userIds);
 	}
 
 	@Test
 	@DisplayName("Feign 抛异常：吞掉异常不向外传播")
 	void revokeAllSessionsShouldSwallowFeignException() {
 		List<Long> userIds = List.of(2L);
-		when(authInnerFeignClient.kickAllSessions(userIds)).thenThrow(new RuntimeException("boom"));
+		when(sessionRevocationInnerFeignClient.kickAllSessions(userIds)).thenThrow(new RuntimeException("boom"));
 
 		userSessionRevocationService.revokeAllSessions(userIds);
 
-		verify(authInnerFeignClient).kickAllSessions(userIds);
+		verify(sessionRevocationInnerFeignClient).kickAllSessions(userIds);
 	}
 
 }

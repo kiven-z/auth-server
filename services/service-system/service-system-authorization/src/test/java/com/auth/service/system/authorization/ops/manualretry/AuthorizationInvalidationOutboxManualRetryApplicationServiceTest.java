@@ -4,7 +4,7 @@ import com.auth.common.core.model.response.Result;
 import com.auth.service.system.authorization.config.AuthorizationInvalidationProperties;
 import com.auth.service.system.authorization.dispatch.AuthorizationInvalidationOutboxProcessor;
 import com.auth.service.system.authorization.exception.AuthorizationInvalidationOpsResultCode;
-import com.auth.service.system.authorization.feign.AuthInnerFeignClient;
+import com.auth.service.system.authorization.feign.AuthorizationInnerFeignClient;
 import com.auth.service.system.authorization.mapper.SysAuthorizationInvalidationOutboxMapper;
 import com.auth.service.system.authorization.model.entity.SysAuthorizationInvalidationOutboxEntity;
 import com.auth.service.system.authorization.model.enums.AuthorizationInvalidationOutboxStatus;
@@ -39,7 +39,7 @@ class AuthorizationInvalidationOutboxManualRetryApplicationServiceTest {
 	private AuthorizationInvalidationOutboxProcessor outboxProcessor;
 
 	@Mock
-	private AuthInnerFeignClient authInnerFeignClient;
+	private AuthorizationInnerFeignClient authorizationInnerFeignClient;
 
 	private AuthorizationInvalidationOutboxManualRetryApplicationService manualRetryService;
 
@@ -55,7 +55,7 @@ class AuthorizationInvalidationOutboxManualRetryApplicationServiceTest {
 	@BeforeEach
 	void setUpService() {
 		manualRetryService = new AuthorizationInvalidationOutboxManualRetryApplicationService(outboxMapper,
-				outboxProcessor, authInnerFeignClient, properties);
+				outboxProcessor, authorizationInnerFeignClient, properties);
 	}
 
 	@Test
@@ -82,7 +82,8 @@ class AuthorizationInvalidationOutboxManualRetryApplicationServiceTest {
 				AuthorizationInvalidationOutboxStatus.PENDING.name());
 		when(outboxMapper.selectById(2L)).thenReturn(deadRow, pendingRow);
 		when(outboxMapper.resetForManualRetry(2L, 1L)).thenReturn(1);
-		when(authInnerFeignClient.releaseInvalidationEventClaim("role:1001")).thenReturn(Result.success(false));
+		when(authorizationInnerFeignClient.releaseInvalidationEventClaim("role:1001"))
+			.thenReturn(Result.success(false));
 		when(outboxProcessor.processById(2L)).thenReturn(true);
 
 		var outcome = manualRetryService.retryManual(2L, false);
@@ -119,7 +120,7 @@ class AuthorizationInvalidationOutboxManualRetryApplicationServiceTest {
 				AuthorizationInvalidationOutboxStatus.PENDING.name());
 		when(outboxMapper.selectById(4L)).thenReturn(processingRow, pendingRow);
 		when(outboxMapper.resetForManualRetry(4L, 1L)).thenReturn(1);
-		when(authInnerFeignClient.releaseInvalidationEventClaim("role:1001")).thenReturn(Result.success(true));
+		when(authorizationInnerFeignClient.releaseInvalidationEventClaim("role:1001")).thenReturn(Result.success(true));
 		when(outboxProcessor.processById(4L)).thenReturn(false);
 
 		var outcome = manualRetryService.retryManual(4L, true);

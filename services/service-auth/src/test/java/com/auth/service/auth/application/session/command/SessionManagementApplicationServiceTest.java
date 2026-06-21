@@ -1,9 +1,9 @@
 package com.auth.service.auth.application.session.command;
 
 import com.auth.module.security.contract.api.UserSessionIndex;
+import com.auth.service.auth.TestConstants;
 import com.auth.service.auth.application.port.session.SessionPort;
 import com.auth.service.auth.application.port.session.SessionRevocationPort;
-import com.auth.service.auth.TestConstants;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -175,6 +175,15 @@ class SystemArchitectureTest {
 		}
 	};
 
+	private static final String AUTHORIZATION_FEIGN = AUTHORIZATION_ROOT + ".feign..";
+
+	@ArchTest
+	static final ArchRule admin_must_not_depend_on_authorization_feign = noClasses().that()
+		.resideInAPackage(ADMIN)
+		.should()
+		.dependOnClassesThat()
+		.resideInAPackage(AUTHORIZATION_FEIGN);
+
 	/**
 	 * admin 访问 authorization 仅允许依赖对外门面：{@code dispatch.trigger}（写）与
 	 * {@code dispatch.query}（读）。
