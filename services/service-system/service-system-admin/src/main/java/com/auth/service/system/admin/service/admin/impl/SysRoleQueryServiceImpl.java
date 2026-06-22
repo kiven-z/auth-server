@@ -78,11 +78,10 @@ public class SysRoleQueryServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleE
 		SysRoleDetailVO detail = SysRoleConverter.INSTANCE.toDetailVo(entity);
 		String roleCode = entity.getRoleCode();
 
-		List<SysRoleAssignedPermissionPO> permissions = sysRolePermissionMapper
-			.selectAssignedPermissionsByRoleCode(roleCode);
+		List<SysRoleAssignedPermissionPO> permissions = sysRolePermissionMapper.selectAssignedPermissionsByRoleId(id);
 		detail.setBoundPermissions(SysRolePermissionConverter.INSTANCE.toBoundPermissionItemList(permissions));
 
-		List<SysPermissionBoundMenuPO> permissionBoundMenus = sysMenuRoleMapper.selectBoundMenusByRoleCode(roleCode);
+		List<SysPermissionBoundMenuPO> permissionBoundMenus = sysMenuRoleMapper.selectBoundMenusByRoleId(id);
 		detail.setBoundMenus(SysPermissionConverter.INSTANCE.toBoundMenuItemList(permissionBoundMenus));
 
 		List<GrantTableBoundUserPO> grantTableBoundUsers = grantTableMapper.selectBoundUsersByRoleCode(roleCode);

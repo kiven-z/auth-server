@@ -1,5 +1,6 @@
 package com.auth.service.system.admin.model.vo.granttable;
 
+import com.auth.common.core.annotation.JsonStringFormat;
 import com.auth.service.system.admin.model.vo.role.RoleCodeNameRow;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
@@ -14,5 +15,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class GrantTableAssignedRoleRow extends RoleCodeNameRow {
+
+	@JsonStringFormat
+	@Schema(title = "角色 ID")
+	private Long roleId;
 
 }

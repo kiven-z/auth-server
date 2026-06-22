@@ -58,13 +58,11 @@ public class SysUserRoleServiceImpl implements SysUserRoleService {
 		// 校验用户是否可操作
 		userOperationChecker.requireOperable(List.of(userId));
 
-		// 校验角色是否可授权
-		List<String> roleCodes = CollUtil.emptyIfNull(form.getRoleCodes()).stream().distinct().toList();
-		roleGrantReferenceChecker.requireExistingEnabledRoles(roleCodes,
+		List<Long> roleIds = CollUtil.emptyIfNull(form.getRoleIds()).stream().distinct().toList();
+		roleGrantReferenceChecker.requireExistingEnabledRoleIds(roleIds,
 				SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 
-		// 替换用户角色授权
-		grantTableService.replaceSubjectRoleGrants(GrantTableSubjectType.USER.name(), userId, roleCodes);
+		grantTableService.replaceSubjectRoleGrants(GrantTableSubjectType.USER.name(), userId, roleIds);
 
 		// 提交用户授权失效
 		userAuthorizationInvalidationTrigger.submitByUserIds(List.of(userId), "replace-roles");

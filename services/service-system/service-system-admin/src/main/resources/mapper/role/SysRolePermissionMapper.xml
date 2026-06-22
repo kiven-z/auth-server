@@ -3,26 +3,26 @@
 <mapper namespace="com.auth.service.system.admin.mapper.role.SysRolePermissionMapper">
 
     <!-- 查询角色已分配权限 -->
-    <select id="selectAssignedPermissionsByRoleCode"
+    <select id="selectAssignedPermissionsByRoleId"
             resultType="com.auth.service.system.admin.model.po.role.SysRoleAssignedPermissionPO">
         SELECT
-            rp.permission_code,
-            COALESCE(p.permission_name, rp.permission_code) AS permission_name,
+            p.permission_code,
+            COALESCE(p.permission_name, p.permission_code) AS permission_name,
             p.permission_type,
             p.status,
             rp.create_time,
             rp.update_time
         FROM
             sys_role_permission rp
-            LEFT JOIN sys_permission p ON p.permission_code = rp.permission_code
+            INNER JOIN sys_permission p ON p.id = rp.permission_id
         WHERE
-            rp.role_code = #{roleCode}
+            rp.role_id = #{roleId}
         ORDER BY
-            rp.permission_code
+            p.permission_code
     </select>
 
-    <!-- 按权限码反查已绑定角色 -->
-    <select id="selectBoundRolesByPermissionCode"
+    <!-- 按权限 ID 反查已绑定角色 -->
+    <select id="selectBoundRolesByPermissionId"
             resultType="com.auth.service.system.admin.model.po.permission.SysPermissionBoundRolePO">
         SELECT
             r.role_code,
@@ -32,9 +32,9 @@
             rp.update_time
         FROM
             sys_role_permission rp
-            INNER JOIN sys_role r ON r.role_code = rp.role_code
+            INNER JOIN sys_role r ON r.id = rp.role_id
         WHERE
-            rp.permission_code = #{permissionCode}
+            rp.permission_id = #{permissionId}
         ORDER BY
             r.role_code
     </select>
@@ -43,18 +43,18 @@
     <insert id="batchInsertRolePermissions">
         INSERT INTO
             sys_role_permission (
-                role_code,
-                permission_code,
+                role_id,
+                permission_id,
                 grantor_id,
                 create_user,
                 update_user,
                 version
             )
         VALUES
-        <foreach collection="permissionCodes" item="permissionCode" separator=",">
+        <foreach collection="permissionIds" item="permissionId" separator=",">
             (
-                #{roleCode},
-                #{permissionCode},
+                #{roleId},
+                #{permissionId},
                 #{grantorId},
                 #{createUser},
                 #{createUser},

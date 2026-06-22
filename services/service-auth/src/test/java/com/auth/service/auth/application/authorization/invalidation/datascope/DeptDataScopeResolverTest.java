@@ -71,7 +71,7 @@ class DeptDataScopeResolverTest {
 	void roleScopes_shouldMergeAsDept() {
 		when(dataScopeQueryPort.findUserScopeByUserId(10L)).thenReturn(Optional.empty());
 		when(dataScopeQueryPort.findRoleScopesByRoleCodes(List.of("R1", "R2")))
-			.thenReturn(List.of(new RoleScopeRow("R1", "DEPT", "[1,2]"), new RoleScopeRow("R2", "DEPT", "[2,3]")));
+			.thenReturn(List.of(new RoleScopeRow("DEPT", "[1,2]"), new RoleScopeRow("DEPT", "[2,3]")));
 
 		ScopeGrant grant = resolver.resolveEffectiveGrant(10L, List.of("R1", "R2"));
 
@@ -95,7 +95,7 @@ class DeptDataScopeResolverTest {
 	void deptAndChild_shouldExpandClosure() {
 		when(dataScopeQueryPort.findUserScopeByUserId(10L)).thenReturn(Optional.empty());
 		when(dataScopeQueryPort.findRoleScopesByRoleCodes(List.of("R1")))
-			.thenReturn(List.of(new RoleScopeRow("R1", "DEPT_AND_CHILD", "[10]")));
+			.thenReturn(List.of(new RoleScopeRow("DEPT_AND_CHILD", "[10]")));
 		when(dataScopeQueryPort.expandDescendantDeptIds(List.of(10L))).thenReturn(List.of(10L, 11L, 12L));
 
 		ScopeGrant grant = resolver.resolveEffectiveGrant(10L, List.of("R1"));
@@ -109,7 +109,7 @@ class DeptDataScopeResolverTest {
 	void blankScopeDeptIds_shouldMaterializeEmptyValues() {
 		when(dataScopeQueryPort.findUserScopeByUserId(10L)).thenReturn(Optional.empty());
 		when(dataScopeQueryPort.findRoleScopesByRoleCodes(List.of("R1")))
-			.thenReturn(List.of(new RoleScopeRow("R1", "DEPT", null)));
+			.thenReturn(List.of(new RoleScopeRow("DEPT", null)));
 
 		ScopeGrant grant = resolver.resolveEffectiveGrant(10L, List.of("R1"));
 

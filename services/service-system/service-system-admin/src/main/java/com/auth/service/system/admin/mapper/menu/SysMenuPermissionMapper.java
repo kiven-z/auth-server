@@ -35,11 +35,11 @@ public interface SysMenuPermissionMapper extends BaseMapper<SysMenuPermissionEnt
 	List<SysMenuPermissionLinkRowPO> selectActiveButtonPermissionLinksByMenuIds(@Param("menuIds") List<Long> menuIds);
 
 	/**
-	 * 按权限码反查已绑定菜单
-	 * @param permissionCode 权限编码
+	 * 按权限 ID 反查已绑定菜单
+	 * @param permissionId 权限 ID
 	 * @return 已绑定菜单列表
 	 */
-	List<SysPermissionBoundMenuPO> selectBoundMenusByPermissionCode(@Param("permissionCode") String permissionCode);
+	List<SysPermissionBoundMenuPO> selectBoundMenusByPermissionId(@Param("permissionId") Long permissionId);
 
 	/**
 	 * 按菜单 ID 反查已绑定权限（详情展示，不按权限类型过滤）
@@ -58,10 +58,9 @@ public interface SysMenuPermissionMapper extends BaseMapper<SysMenuPermissionEnt
 	/**
 	 * 批量插入菜单-权限关联
 	 * @param menuId 菜单ID
-	 * @param permissionCodes 权限编码列表
+	 * @param permissionIds 权限 ID 列表
 	 * @return 插入行数
 	 */
-	int batchInsertMenuPermissions(@Param("menuId") Long menuId,
-			@Param("permissionCodes") List<String> permissionCodes);
+	int batchInsertMenuPermissions(@Param("menuId") Long menuId, @Param("permissionIds") List<Long> permissionIds);
 
 }

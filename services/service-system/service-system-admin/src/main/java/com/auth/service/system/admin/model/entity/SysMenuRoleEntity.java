@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * 菜单与角色编码关联，对应 sys_menu_role
+ * 菜单与角色关联，对应 sys_menu_role
  *
  * @author Bunny
  */
@@ -20,7 +20,7 @@ public class SysMenuRoleEntity extends BaseEntity {
 	@Schema(title = "菜单ID")
 	private Long menuId;
 
-	@Schema(title = "角色编码")
-	private String roleCode;
+	@Schema(title = "角色ID")
+	private Long roleId;
 
 }

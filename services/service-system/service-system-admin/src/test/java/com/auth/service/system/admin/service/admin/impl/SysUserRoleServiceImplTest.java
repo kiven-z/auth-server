@@ -99,15 +99,15 @@ class SysUserRoleServiceImplTest {
 	void replaceUserRolesWritesGrantAndSubmitsInvalidation() {
 		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
 		GrantTableAssignRoleForm form = new GrantTableAssignRoleForm();
-		form.setRoleCodes(List.of("BIZ_ADMIN", "CUSTOM_A"));
+		form.setRoleIds(List.of(101L, 102L));
 
 		sysUserRoleService.replaceUserRoles(USER_ID, form);
 
 		verify(userOperationChecker).requireOperable(List.of(USER_ID));
-		verify(roleGrantReferenceChecker).requireExistingEnabledRoles(List.of("BIZ_ADMIN", "CUSTOM_A"),
+		verify(roleGrantReferenceChecker).requireExistingEnabledRoleIds(List.of(101L, 102L),
 				SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 		verify(grantTableService).replaceSubjectRoleGrants(GrantTableSubjectType.USER.name(), USER_ID,
-				List.of("BIZ_ADMIN", "CUSTOM_A"));
+				List.of(101L, 102L));
 		verify(userAuthorizationInvalidationTrigger).submitByUserIds(List.of(USER_ID), "replace-roles");
 	}
 
@@ -116,7 +116,7 @@ class SysUserRoleServiceImplTest {
 	void replaceUserRolesClearsGrantsWhenRoleCodesEmpty() {
 		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
 		GrantTableAssignRoleForm form = new GrantTableAssignRoleForm();
-		form.setRoleCodes(List.of());
+		form.setRoleIds(List.of());
 
 		sysUserRoleService.replaceUserRoles(USER_ID, form);
 
@@ -132,7 +132,7 @@ class SysUserRoleServiceImplTest {
 			.when(userOperationChecker)
 			.requireOperable(List.of(USER_ID));
 		GrantTableAssignRoleForm form = new GrantTableAssignRoleForm();
-		form.setRoleCodes(List.of("CUSTOM_A"));
+		form.setRoleIds(List.of(101L));
 
 		assertThatThrownBy(() -> sysUserRoleService.replaceUserRoles(USER_ID, form))
 			.isInstanceOf(SystemBusinessException.class)

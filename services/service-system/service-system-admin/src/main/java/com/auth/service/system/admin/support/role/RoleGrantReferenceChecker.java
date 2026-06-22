@@ -25,32 +25,32 @@ public class RoleGrantReferenceChecker {
 	private final SysRoleMapper sysRoleMapper;
 
 	/**
-	 * 写入前：角色均存在且已启用
-	 * @param roleCodes 待写入角色编码（调用方应已去重）
+	 * 写入前：角色 ID 均存在且已启用
+	 * @param roleIds 待写入角色 ID（调用方应已去重）
 	 * @param invalidCode 校验失败时抛出的结果码
 	 */
-	public void requireExistingEnabledRoles(List<String> roleCodes, SystemResultCode invalidCode) {
-		if (CollUtil.isEmpty(roleCodes)) {
+	public void requireExistingEnabledRoleIds(List<Long> roleIds, SystemResultCode invalidCode) {
+		if (CollUtil.isEmpty(roleIds)) {
 			return;
 		}
 		Long eligibleCount = sysRoleMapper.selectCount(Wrappers.<SysRoleEntity>lambdaQuery()
-			.in(SysRoleEntity::getRoleCode, roleCodes)
+			.in(SysRoleEntity::getId, roleIds)
 			.eq(SysRoleEntity::getStatus, true));
-		if (eligibleCount == null || eligibleCount != roleCodes.size()) {
+		if (eligibleCount == null || eligibleCount != roleIds.size()) {
 			throw new SystemBusinessException(invalidCode);
 		}
 	}
 
 	/**
-	 * 组织类 grant_table 主体（部门、岗位等）：校验角色存在且已启用
+	 * 组织类 grant_table 主体（部门、岗位等）：按角色 ID 校验存在且已启用
 	 * @param subjectType 授权主体类型（部门、岗位等）
-	 * @param roleCodes 待写入角色编码
+	 * @param roleIds 待写入角色 ID
 	 */
-	public void requireGrantTableOrgRoles(GrantTableSubjectType subjectType, List<String> roleCodes) {
+	public void requireGrantTableOrgRoleIds(GrantTableSubjectType subjectType, List<Long> roleIds) {
 		if (subjectType != GrantTableSubjectType.DEPT && subjectType != GrantTableSubjectType.POST) {
 			throw new IllegalArgumentException("Unsupported org grant subject type: " + subjectType);
 		}
-		requireExistingEnabledRoles(roleCodes, SystemCommonResultCode.GRANT_REFERENCE_INVALID);
+		requireExistingEnabledRoleIds(roleIds, SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 	}
 
 }

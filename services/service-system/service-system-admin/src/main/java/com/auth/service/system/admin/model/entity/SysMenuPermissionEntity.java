@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * 菜单与权限编码关联（页面按钮子集），对应 sys_menu_permission
+ * 菜单与权限关联（页面按钮子集），对应 sys_menu_permission
  *
  * @author Bunny
  */
@@ -20,7 +20,7 @@ public class SysMenuPermissionEntity extends BaseEntity {
 	@Schema(title = "菜单ID")
 	private Long menuId;
 
-	@Schema(title = "权限编码")
-	private String permissionCode;
+	@Schema(title = "权限ID")
+	private Long permissionId;
 
 }

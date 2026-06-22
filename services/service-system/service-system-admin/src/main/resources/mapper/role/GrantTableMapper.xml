@@ -6,6 +6,7 @@
     <select id="selectBoundRolesBySubject"
             resultType="com.auth.service.system.admin.model.po.granttable.GrantTableBoundRolePO">
         SELECT
+            r.id AS role_id,
             r.role_code,
             r.role_name,
             r.status,
@@ -13,7 +14,7 @@
             gt.update_time
         FROM
             grant_table gt
-            INNER JOIN sys_role r ON r.role_code = gt.role_code
+            INNER JOIN sys_role r ON r.id = gt.role_id
         WHERE
             gt.subject_type = #{subjectType}
             AND gt.subject_id = #{subjectId}
@@ -37,7 +38,14 @@
             INNER JOIN sys_user u ON u.id = gt.subject_id
             AND u.is_deleted = 0
         WHERE
-            gt.role_code = #{roleCode}
+            gt.role_id = (
+                SELECT
+                    id
+                FROM
+                    sys_role
+                WHERE
+                    role_code = #{roleCode}
+            )
             AND gt.subject_type = 'USER'
         ORDER BY
             u.username
@@ -58,7 +66,14 @@
             INNER JOIN sys_dept d ON d.id = gt.subject_id
             AND d.is_deleted = 0
         WHERE
-            gt.role_code = #{roleCode}
+            gt.role_id = (
+                SELECT
+                    id
+                FROM
+                    sys_role
+                WHERE
+                    role_code = #{roleCode}
+            )
             AND gt.subject_type = 'DEPT'
         ORDER BY
             d.dept_code
@@ -83,7 +98,14 @@
             LEFT JOIN sys_dept d ON d.id = p.dept_id
             AND d.is_deleted = 0
         WHERE
-            gt.role_code = #{roleCode}
+            gt.role_id = (
+                SELECT
+                    id
+                FROM
+                    sys_role
+                WHERE
+                    role_code = #{roleCode}
+            )
             AND gt.subject_type = 'POST'
         ORDER BY
             p.post_code

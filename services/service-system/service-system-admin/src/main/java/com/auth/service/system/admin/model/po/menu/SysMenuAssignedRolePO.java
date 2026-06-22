@@ -20,6 +20,9 @@ public class SysMenuAssignedRolePO implements Serializable {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
+	@Schema(title = "角色 ID")
+	private Long roleId;
+
 	@Schema(title = "角色编码")
 	private String roleCode;
 

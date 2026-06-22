@@ -32,88 +32,74 @@ class RoleGrantReferenceCheckerTest {
 	private RoleGrantReferenceChecker roleGrantReferenceChecker;
 
 	@Test
-	@DisplayName("空列表跳过校验")
-	void requireGrantTableOrgRolesSkipsWhenEmpty() {
-		assertThatCode(() -> roleGrantReferenceChecker.requireGrantTableOrgRoles(GrantTableSubjectType.DEPT, List.of()))
+	@DisplayName("requireExistingEnabledRoleIds 可指定结果码")
+	void requireExistingEnabledRoleIdsUsesCustomResultCode() {
+		when(sysRoleMapper.selectCount(any())).thenReturn(1L);
+
+		assertThatCode(() -> roleGrantReferenceChecker.requireExistingEnabledRoleIds(List.of(1L),
+				SystemCommonResultCode.DATA_NOT_EXIST))
+			.doesNotThrowAnyException();
+	}
+
+	@Test
+	@DisplayName("按 ID：空列表跳过校验")
+	void requireExistingEnabledRoleIdsSkipsWhenEmpty() {
+		assertThatCode(() -> roleGrantReferenceChecker.requireExistingEnabledRoleIds(List.of(),
+				SystemCommonResultCode.GRANT_REFERENCE_INVALID))
 			.doesNotThrowAnyException();
 
 		verify(sysRoleMapper, never()).selectCount(any());
 	}
 
 	@Test
-	@DisplayName("部门主体：全部 eligible 时不抛异常")
-	void requireGrantTableOrgRolesPassesForDeptWhenAllEligible() {
+	@DisplayName("按 ID：全部 eligible 时不抛异常")
+	void requireExistingEnabledRoleIdsPassesWhenAllEligible() {
+		when(sysRoleMapper.selectCount(any())).thenReturn(1L);
+
+		assertThatCode(() -> roleGrantReferenceChecker.requireExistingEnabledRoleIds(List.of(1L),
+				SystemCommonResultCode.GRANT_REFERENCE_INVALID))
+			.doesNotThrowAnyException();
+	}
+
+	@Test
+	@DisplayName("按 ID：存在无效角色时抛出指定结果码")
+	void requireExistingEnabledRoleIdsThrowsWhenNotAllEligible() {
+		when(sysRoleMapper.selectCount(any())).thenReturn(0L);
+
+		assertThatThrownBy(() -> roleGrantReferenceChecker.requireExistingEnabledRoleIds(List.of(99L),
+				SystemCommonResultCode.GRANT_REFERENCE_INVALID))
+			.isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemCommonResultCode.GRANT_REFERENCE_INVALID);
+	}
+
+	@Test
+	@DisplayName("grant_table 按 ID：空列表跳过校验")
+	void requireGrantTableOrgRoleIdsSkipsWhenEmpty() {
+		assertThatCode(
+				() -> roleGrantReferenceChecker.requireGrantTableOrgRoleIds(GrantTableSubjectType.DEPT, List.of()))
+			.doesNotThrowAnyException();
+
+		verify(sysRoleMapper, never()).selectCount(any());
+	}
+
+	@Test
+	@DisplayName("grant_table 按 ID：全部 eligible 时不抛异常")
+	void requireGrantTableOrgRoleIdsPassesWhenAllEligible() {
 		when(sysRoleMapper.selectCount(any())).thenReturn(2L);
 
-		assertThatCode(() -> roleGrantReferenceChecker.requireGrantTableOrgRoles(GrantTableSubjectType.DEPT,
-				List.of("BIZ_ADMIN", "CUSTOM_A")))
+		assertThatCode(() -> roleGrantReferenceChecker.requireGrantTableOrgRoleIds(GrantTableSubjectType.DEPT,
+				List.of(101L, 102L)))
 			.doesNotThrowAnyException();
 	}
 
 	@Test
-	@DisplayName("部门主体：存在无效角色时抛出 GRANT_REFERENCE_INVALID")
-	void requireGrantTableOrgRolesThrowsDeptInvalidWhenNotAllEligible() {
+	@DisplayName("grant_table 按 ID：存在无效角色时抛出 GRANT_REFERENCE_INVALID")
+	void requireGrantTableOrgRoleIdsThrowsWhenNotAllEligible() {
 		when(sysRoleMapper.selectCount(any())).thenReturn(0L);
 
-		List<String> roleCodes = List.of("SYS_ADMIN");
 		assertThatThrownBy(
-				() -> roleGrantReferenceChecker.requireGrantTableOrgRoles(GrantTableSubjectType.DEPT, roleCodes))
-			.isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemCommonResultCode.GRANT_REFERENCE_INVALID);
-	}
-
-	@Test
-	@DisplayName("requireExistingEnabledRoles 可指定结果码")
-	void requireExistingEnabledRolesUsesCustomResultCode() {
-		when(sysRoleMapper.selectCount(any())).thenReturn(1L);
-
-		assertThatCode(() -> roleGrantReferenceChecker.requireExistingEnabledRoles(List.of("MENU_ADMIN"),
-				SystemCommonResultCode.DATA_NOT_EXIST))
-			.doesNotThrowAnyException();
-	}
-
-	@Test
-	@DisplayName("菜单关联：全部 eligible 时不抛异常")
-	void requireExistingEnabledRolesPassesWhenAllEligible() {
-		when(sysRoleMapper.selectCount(any())).thenReturn(1L);
-
-		assertThatCode(() -> roleGrantReferenceChecker.requireExistingEnabledRoles(List.of("MENU_ADMIN"),
-				SystemCommonResultCode.GRANT_REFERENCE_INVALID))
-			.doesNotThrowAnyException();
-	}
-
-	@Test
-	@DisplayName("岗位主体：全部 eligible 时不抛异常")
-	void requireGrantTableOrgRolesPassesForPostWhenAllEligible() {
-		when(sysRoleMapper.selectCount(any())).thenReturn(1L);
-
-		assertThatCode(() -> roleGrantReferenceChecker.requireGrantTableOrgRoles(GrantTableSubjectType.POST,
-				List.of("CUSTOM_A")))
-			.doesNotThrowAnyException();
-	}
-
-	@Test
-	@DisplayName("岗位主体：存在无效角色时抛出 GRANT_REFERENCE_INVALID")
-	void requireGrantTableOrgRolesThrowsPostInvalidWhenNotAllEligible() {
-		when(sysRoleMapper.selectCount(any())).thenReturn(0L);
-
-		List<String> roleCodes = List.of("SYS_ADMIN");
-		assertThatThrownBy(
-				() -> roleGrantReferenceChecker.requireGrantTableOrgRoles(GrantTableSubjectType.POST, roleCodes))
-			.isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemCommonResultCode.GRANT_REFERENCE_INVALID);
-	}
-
-	@Test
-	@DisplayName("菜单关联：存在无效角色时抛出 GRANT_REFERENCE_INVALID")
-	void requireExistingEnabledRolesThrowsWhenNotAllEligible() {
-		when(sysRoleMapper.selectCount(any())).thenReturn(0L);
-
-		List<String> roleCodes = List.of("BIZ_ADMIN");
-		assertThatThrownBy(() -> roleGrantReferenceChecker.requireExistingEnabledRoles(roleCodes,
-				SystemCommonResultCode.GRANT_REFERENCE_INVALID))
+				() -> roleGrantReferenceChecker.requireGrantTableOrgRoleIds(GrantTableSubjectType.POST, List.of(101L)))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.GRANT_REFERENCE_INVALID);

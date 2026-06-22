@@ -13,6 +13,7 @@ import com.auth.service.system.admin.model.po.menu.SysMenuAssignedRolePO;
 import com.auth.service.system.admin.model.vo.menu.SysMenuAssignedPermissionRow;
 import com.auth.service.system.admin.model.vo.menu.SysMenuAssignedRoleRow;
 import com.auth.service.system.admin.service.admin.SysMenuManageService;
+import com.auth.service.system.admin.support.permission.PermissionReferenceChecker;
 import com.auth.service.system.admin.support.role.RoleGrantReferenceChecker;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -39,11 +40,15 @@ public class SysMenuManageServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu
 
 	private final RoleGrantReferenceChecker roleGrantReferenceChecker;
 
+	private final PermissionReferenceChecker permissionReferenceChecker;
+
 	public SysMenuManageServiceImpl(SysMenuRoleMapper sysMenuRoleMapper,
-			SysMenuPermissionMapper sysMenuPermissionMapper, RoleGrantReferenceChecker roleGrantReferenceChecker) {
+			SysMenuPermissionMapper sysMenuPermissionMapper, RoleGrantReferenceChecker roleGrantReferenceChecker,
+			PermissionReferenceChecker permissionReferenceChecker) {
 		this.sysMenuRoleMapper = sysMenuRoleMapper;
 		this.sysMenuPermissionMapper = sysMenuPermissionMapper;
 		this.roleGrantReferenceChecker = roleGrantReferenceChecker;
+		this.permissionReferenceChecker = permissionReferenceChecker;
 	}
 
 	/**
@@ -61,16 +66,14 @@ public class SysMenuManageServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu
 	 */
 	@Override
 	public void replaceMenuRoles(Long menuId, SysMenuAssignRoleForm form) {
-		List<String> roleCodes = CollUtil.emptyIfNull(form.getRoleCodes()).stream().distinct().toList();
-		roleGrantReferenceChecker.requireExistingEnabledRoles(roleCodes,
+		List<Long> roleIds = CollUtil.emptyIfNull(form.getRoleIds()).stream().distinct().toList();
+		roleGrantReferenceChecker.requireExistingEnabledRoleIds(roleIds,
 				SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 
-		// 删除当前菜单已分配角色
 		sysMenuRoleMapper.deleteByMenuId(menuId);
 
-		// 插入新的菜单-角色关联
-		if (CollUtil.isNotEmpty(roleCodes)) {
-			sysMenuRoleMapper.batchInsertMenuRoles(menuId, roleCodes);
+		if (CollUtil.isNotEmpty(roleIds)) {
+			sysMenuRoleMapper.batchInsertMenuRoles(menuId, roleIds);
 		}
 	}
 
@@ -89,11 +92,12 @@ public class SysMenuManageServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu
 	 */
 	@Override
 	public void replaceMenuPermissions(Long menuId, SysMenuAssignPermissionForm form) {
-		List<String> permissionCodes = CollUtil.emptyIfNull(form.getPermissionCodes());
+		List<String> permissionCodes = CollUtil.emptyIfNull(form.getPermissionCodes()).stream().distinct().toList();
+		List<Long> permissionIds = permissionReferenceChecker.resolveActivePermissionIds(permissionCodes);
 
 		sysMenuPermissionMapper.deleteByMenuId(menuId);
-		if (CollUtil.isNotEmpty(permissionCodes)) {
-			sysMenuPermissionMapper.batchInsertMenuPermissions(menuId, permissionCodes);
+		if (CollUtil.isNotEmpty(permissionIds)) {
+			sysMenuPermissionMapper.batchInsertMenuPermissions(menuId, permissionIds);
 		}
 	}
 

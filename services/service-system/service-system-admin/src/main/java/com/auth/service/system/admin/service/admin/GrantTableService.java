@@ -35,7 +35,7 @@ public interface GrantTableService extends IService<GrantTableEntity> {
 	 * 全量覆盖组织类主体（DEPT/POST）在 grant_table 中的角色授权
 	 * @param subjectType 授权主体类型
 	 * @param subjectId 主体 ID
-	 * @param form 角色编码列表
+	 * @param form 角色 ID 列表
 	 */
 	void replaceOrgSubjectRoles(GrantTableSubjectType subjectType, Long subjectId, GrantTableAssignRoleForm form);
 
@@ -43,8 +43,8 @@ public interface GrantTableService extends IService<GrantTableEntity> {
 	 * 全量覆盖指定主体的角色授权边（仅持久化，不含业务校验与失效触发）
 	 * @param subjectType 主体类型
 	 * @param subjectId 主体 ID
-	 * @param roleCodes 角色编码列表
+	 * @param roleIds 角色 ID 列表
 	 */
-	void replaceSubjectRoleGrants(String subjectType, Long subjectId, List<String> roleCodes);
+	void replaceSubjectRoleGrants(String subjectType, Long subjectId, List<Long> roleIds);
 
 }

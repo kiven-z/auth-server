@@ -19,36 +19,35 @@ import java.util.List;
 public interface SysRolePermissionMapper extends BaseMapper<SysRolePermissionEntity> {
 
 	/**
-	 * 按角色编码删除全部权限关联
-	 * @param roleCode 角色编码
+	 * 按角色 ID 删除全部权限关联
+	 * @param roleId 角色 ID
 	 */
-	@Delete("DELETE FROM sys_role_permission WHERE role_code = #{roleCode}")
-	void deleteByRoleCode(@Param("roleCode") String roleCode);
+	@Delete("DELETE FROM sys_role_permission WHERE role_id = #{roleId}")
+	void deleteByRoleId(@Param("roleId") Long roleId);
 
 	/**
 	 * 查询角色已分配权限
-	 * @param roleCode 角色编码
+	 * @param roleId 角色 ID
 	 * @return 已分配权限列表
 	 */
-	List<SysRoleAssignedPermissionPO> selectAssignedPermissionsByRoleCode(@Param("roleCode") String roleCode);
+	List<SysRoleAssignedPermissionPO> selectAssignedPermissionsByRoleId(@Param("roleId") Long roleId);
 
 	/**
-	 * 按权限码反查已绑定角色
-	 * @param permissionCode 权限编码
+	 * 按权限 ID 反查已绑定角色
+	 * @param permissionId 权限 ID
 	 * @return 已绑定角色列表
 	 */
-	List<SysPermissionBoundRolePO> selectBoundRolesByPermissionCode(@Param("permissionCode") String permissionCode);
+	List<SysPermissionBoundRolePO> selectBoundRolesByPermissionId(@Param("permissionId") Long permissionId);
 
 	/**
 	 * 批量插入角色权限关联
-	 * @param roleCode 角色编码
-	 * @param permissionCodes 权限码列表
+	 * @param roleId 角色 ID
+	 * @param permissionIds 权限 ID 列表
 	 * @param grantorId 授权人 ID
 	 * @param createUser 创建人 ID
 	 * @return 插入行数
 	 */
-	int batchInsertRolePermissions(@Param("roleCode") String roleCode,
-			@Param("permissionCodes") List<String> permissionCodes, @Param("grantorId") Long grantorId,
-			@Param("createUser") Long createUser);
+	int batchInsertRolePermissions(@Param("roleId") Long roleId, @Param("permissionIds") List<Long> permissionIds,
+			@Param("grantorId") Long grantorId, @Param("createUser") Long createUser);
 
 }

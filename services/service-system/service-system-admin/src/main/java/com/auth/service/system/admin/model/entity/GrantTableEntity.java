@@ -23,7 +23,7 @@ public class GrantTableEntity extends BaseEntity {
 	@Schema(title = "授权主体 ID")
 	private Long subjectId;
 
-	@Schema(title = "角色编码")
-	private String roleCode;
+	@Schema(title = "角色 ID")
+	private Long roleId;
 
 }

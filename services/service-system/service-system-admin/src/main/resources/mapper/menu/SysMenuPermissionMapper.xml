@@ -10,7 +10,7 @@
             p.permission_name
         FROM
             sys_menu_permission mp
-            JOIN sys_permission p ON p.permission_code = mp.permission_code
+            JOIN sys_permission p ON p.id = mp.permission_id
             AND p.permission_type = 0
             AND p.status = 1
         WHERE
@@ -24,10 +24,10 @@
             resultType="com.auth.service.system.admin.model.po.menu.SysMenuPermissionLinkRowPO">
         SELECT
             mp.menu_id,
-            mp.permission_code
+            p.permission_code
         FROM
             sys_menu_permission mp
-            INNER JOIN sys_permission p ON p.permission_code = mp.permission_code
+            INNER JOIN sys_permission p ON p.id = mp.permission_id
             AND p.permission_type = 0
             AND p.status = 1
         WHERE
@@ -41,23 +41,23 @@
     <select id="selectBoundPermissionsByMenuId"
             resultType="com.auth.service.system.admin.model.po.role.SysRoleAssignedPermissionPO">
         SELECT
-            mp.permission_code,
-            COALESCE(p.permission_name, mp.permission_code) AS permission_name,
+            p.permission_code,
+            COALESCE(p.permission_name, p.permission_code) AS permission_name,
             p.permission_type,
             p.status,
             mp.create_time,
             mp.update_time
         FROM
             sys_menu_permission mp
-            LEFT JOIN sys_permission p ON p.permission_code = mp.permission_code
+            LEFT JOIN sys_permission p ON p.id = mp.permission_id
         WHERE
             mp.menu_id = #{menuId}
         ORDER BY
-            mp.permission_code
+            p.permission_code
     </select>
 
-    <!-- 按权限码反查已绑定菜单 -->
-    <select id="selectBoundMenusByPermissionCode"
+    <!-- 按权限 ID 反查已绑定菜单 -->
+    <select id="selectBoundMenusByPermissionId"
             resultType="com.auth.service.system.admin.model.po.permission.SysPermissionBoundMenuPO">
         SELECT
             m.id,
@@ -70,7 +70,7 @@
             sys_menu_permission mp
             INNER JOIN sys_menu m ON m.id = mp.menu_id
         WHERE
-            mp.permission_code = #{permissionCode}
+            mp.permission_id = #{permissionId}
         ORDER BY
             m.menu_rank,
             m.id
@@ -79,10 +79,10 @@
     <!-- 批量插入菜单-权限关联 -->
     <insert id="batchInsertMenuPermissions">
         INSERT INTO
-            sys_menu_permission (menu_id, permission_code)
+            sys_menu_permission (menu_id, permission_id)
         VALUES
-        <foreach collection="permissionCodes" item="permissionCode" separator=",">
-            (#{menuId}, #{permissionCode})
+        <foreach collection="permissionIds" item="permissionId" separator=",">
+            (#{menuId}, #{permissionId})
         </foreach>
     </insert>
 </mapper>

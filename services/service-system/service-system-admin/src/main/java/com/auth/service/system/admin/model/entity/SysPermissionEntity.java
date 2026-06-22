@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * 系统权限主数据，对应 {@code sys_permission}（物理删除；与 {@code sys_menu_permission.permission_code}
+ * 系统权限主数据，对应 {@code sys_permission}（物理删除；与 {@code sys_menu_permission.permission_id}
  * 外键一致）。
  *
  * @author Bunny

@@ -2,6 +2,7 @@ package com.auth.service.system.admin.service.admin.impl;
 
 import com.auth.service.system.admin.mapper.permission.SysPermissionMapper;
 import com.auth.service.system.admin.mapper.role.SysRolePermissionMapper;
+import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.po.role.SysRoleAssignedPermissionPO;
 import com.auth.service.system.admin.model.vo.role.SysRoleAssignedPermissionRow;
@@ -57,6 +58,7 @@ class SysRolePermissionServiceImplTest {
 	@DisplayName("查询已分配权限：返回权限码与名称")
 	void listAssignedPermissionsShouldReturnCodeAndName() {
 		SysRoleEntity role = new SysRoleEntity();
+		role.setId(1L);
 		role.setRoleCode("ADMIN");
 		when(roleReferenceChecker.getExistingByRoleCode("ADMIN")).thenReturn(role);
 
@@ -65,7 +67,7 @@ class SysRolePermissionServiceImplTest {
 		po.setPermissionName("用户查询");
 		po.setCreateTime(LocalDateTime.of(2026, 6, 4, 9, 15, 0));
 		po.setUpdateTime(LocalDateTime.of(2026, 6, 4, 9, 15, 0));
-		when(sysRolePermissionMapper.selectAssignedPermissionsByRoleCode("ADMIN")).thenReturn(List.of(po));
+		when(sysRolePermissionMapper.selectAssignedPermissionsByRoleId(1L)).thenReturn(List.of(po));
 
 		List<SysRoleAssignedPermissionRow> rows = sysRolePermissionService.listAssignedPermissions("ADMIN");
 
@@ -93,15 +95,15 @@ class SysRolePermissionServiceImplTest {
 	@DisplayName("分配权限：全量替换后触发 ROLE 失效")
 	void assignShouldReplaceAndInvalidate() {
 		SysRoleEntity role = new SysRoleEntity();
+		role.setId(1L);
 		role.setRoleCode("ADMIN");
 		when(roleReferenceChecker.getExistingByRoleCode("ADMIN")).thenReturn(role);
-		when(sysPermissionMapper.selectCount(any())).thenReturn(1L);
+		when(sysPermissionMapper.selectList(any())).thenReturn(List.of(permissionEntity()));
 
 		sysRolePermissionService.assignPermissions("ADMIN", List.of("sys:user:list"));
 
-		verify(sysRolePermissionMapper).deleteByRoleCode("ADMIN");
-		verify(sysRolePermissionMapper).batchInsertRolePermissions(eq("ADMIN"), eq(List.of("sys:user:list")), isNull(),
-				isNull());
+		verify(sysRolePermissionMapper).deleteByRoleId(1L);
+		verify(sysRolePermissionMapper).batchInsertRolePermissions(eq(1L), eq(List.of(10L)), isNull(), isNull());
 		verify(roleInvalidationTrigger).submitByRoleCodes(List.of("ADMIN"), "assign-permissions");
 	}
 
@@ -109,12 +111,13 @@ class SysRolePermissionServiceImplTest {
 	@DisplayName("分配权限：空列表仅清空关联且不校验权限表")
 	void assignEmptyListShouldClearOnly() {
 		SysRoleEntity role = new SysRoleEntity();
+		role.setId(1L);
 		role.setRoleCode("ADMIN");
 		when(roleReferenceChecker.getExistingByRoleCode("ADMIN")).thenReturn(role);
 
 		sysRolePermissionService.assignPermissions("ADMIN", List.of());
 
-		verify(sysRolePermissionMapper).deleteByRoleCode("ADMIN");
+		verify(sysRolePermissionMapper).deleteByRoleId(1L);
 		verify(sysPermissionMapper, never()).selectCount(any());
 		verify(sysRolePermissionMapper, never()).batchInsertRolePermissions(any(), any(), any(), any());
 		verify(roleInvalidationTrigger).submitByRoleCodes(List.of("ADMIN"), "assign-permissions");
@@ -124,9 +127,10 @@ class SysRolePermissionServiceImplTest {
 	@DisplayName("分配权限：权限码无效时抛出 GRANT_REFERENCE_INVALID")
 	void assignWhenPermissionInvalidShouldThrow() {
 		SysRoleEntity role = new SysRoleEntity();
+		role.setId(1L);
 		role.setRoleCode("ADMIN");
 		when(roleReferenceChecker.getExistingByRoleCode("ADMIN")).thenReturn(role);
-		when(sysPermissionMapper.selectCount(any())).thenReturn(0L);
+		when(sysPermissionMapper.selectList(any())).thenReturn(List.of());
 
 		List<String> permissionCodes = List.of("missing:perm");
 		assertThatThrownBy(() -> sysRolePermissionService.assignPermissions("ADMIN", permissionCodes))
@@ -134,8 +138,16 @@ class SysRolePermissionServiceImplTest {
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 
-		verify(sysRolePermissionMapper).deleteByRoleCode("ADMIN");
+		verify(sysRolePermissionMapper).deleteByRoleId(1L);
 		verify(sysRolePermissionMapper, never()).batchInsertRolePermissions(any(), any(), any(), any());
+	}
+
+	private SysPermissionEntity permissionEntity() {
+		SysPermissionEntity entity = new SysPermissionEntity();
+		entity.setId(10L);
+		entity.setPermissionCode("sys:user:list");
+		entity.setStatus(true);
+		return entity;
 	}
 
 }

@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.service.system.admin.convert.sys.SysRolePermissionConverter;
 import com.auth.service.system.admin.mapper.role.SysRolePermissionMapper;
+import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.po.role.SysRoleAssignedPermissionPO;
 import com.auth.service.system.admin.model.vo.role.SysRoleAssignedPermissionRow;
 import com.auth.service.system.admin.service.admin.SysRolePermissionService;
@@ -42,9 +43,9 @@ public class SysRolePermissionServiceImpl implements SysRolePermissionService {
 	 */
 	@Override
 	public List<SysRoleAssignedPermissionRow> listAssignedPermissions(String roleCode) {
-		String normalized = roleReferenceChecker.getExistingByRoleCode(roleCode).getRoleCode();
+		Long roleId = roleReferenceChecker.getExistingByRoleCode(roleCode).getId();
 		List<SysRoleAssignedPermissionPO> permissionList = sysRolePermissionMapper
-			.selectAssignedPermissionsByRoleCode(normalized);
+			.selectAssignedPermissionsByRoleId(roleId);
 
 		return SysRolePermissionConverter.INSTANCE.toAssignedPermissionRowList(permissionList);
 	}
@@ -54,18 +55,18 @@ public class SysRolePermissionServiceImpl implements SysRolePermissionService {
 	 */
 	@Override
 	public void assignPermissions(String roleCode, List<String> permissionCodes) {
-		String normalized = roleReferenceChecker.getExistingByRoleCode(roleCode).getRoleCode();
+		SysRoleEntity role = roleReferenceChecker.getExistingByRoleCode(roleCode);
 		List<String> codes = permissionCodes.stream().distinct().toList();
 
 		Long operatorId = SecurityUserUtils.getUserId();
-		sysRolePermissionMapper.deleteByRoleCode(normalized);
+		sysRolePermissionMapper.deleteByRoleId(role.getId());
 		if (CollUtil.isNotEmpty(codes)) {
-			permissionReferenceChecker.requireActivePermissionCodes(codes);
-			sysRolePermissionMapper.batchInsertRolePermissions(normalized, codes, operatorId, operatorId);
+			List<Long> permissionIds = permissionReferenceChecker.resolveActivePermissionIds(codes);
+			sysRolePermissionMapper.batchInsertRolePermissions(role.getId(), permissionIds, operatorId, operatorId);
 		}
 
-		roleInvalidationTrigger.submitByRoleCodes(List.of(normalized), "assign-permissions");
-		log.info("Role permissions replaced: roleCode={}, count={}", normalized, codes.size());
+		roleInvalidationTrigger.submitByRoleCodes(List.of(role.getRoleCode()), "assign-permissions");
+		log.info("Role permissions replaced: roleCode={}, count={}", role.getRoleCode(), codes.size());
 	}
 
 }

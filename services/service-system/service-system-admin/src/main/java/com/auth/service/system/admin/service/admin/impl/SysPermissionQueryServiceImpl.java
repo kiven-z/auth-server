@@ -67,14 +67,11 @@ public class SysPermissionQueryServiceImpl extends ServiceImpl<SysPermissionMapp
 		}
 
 		SysPermissionDetailVO detail = SysPermissionConverter.INSTANCE.toDetailVo(entity);
-		String permissionCode = entity.getPermissionCode();
 
-		List<SysPermissionBoundRolePO> boundRoles = sysRolePermissionMapper
-			.selectBoundRolesByPermissionCode(permissionCode);
+		List<SysPermissionBoundRolePO> boundRoles = sysRolePermissionMapper.selectBoundRolesByPermissionId(id);
 		detail.setBoundRoles(SysPermissionConverter.INSTANCE.toBoundRoleItemList(boundRoles));
 
-		List<SysPermissionBoundMenuPO> boundMenus = sysMenuPermissionMapper
-			.selectBoundMenusByPermissionCode(permissionCode);
+		List<SysPermissionBoundMenuPO> boundMenus = sysMenuPermissionMapper.selectBoundMenusByPermissionId(id);
 		detail.setBoundMenus(SysPermissionConverter.INSTANCE.toBoundMenuItemList(boundMenus));
 
 		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail));

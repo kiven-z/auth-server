@@ -89,6 +89,7 @@ class GrantTableServiceImplTest {
 	void listAssignedRolesReturnsRowsWhenSubjectExists() {
 		when(sysPostMapper.selectById(SUBJECT_ID)).thenReturn(activePost());
 		GrantTableBoundRolePO boundRole = new GrantTableBoundRolePO();
+		boundRole.setRoleId(101L);
 		boundRole.setRoleCode("CUSTOM_A");
 		boundRole.setRoleName("业务角色A");
 		when(grantTableMapper.selectBoundRolesBySubject(GrantTableSubjectType.POST.name(), SUBJECT_ID))
@@ -98,6 +99,7 @@ class GrantTableServiceImplTest {
 				SUBJECT_ID);
 
 		assertThat(rows).hasSize(1);
+		assertThat(rows.get(0).getRoleId()).isEqualTo(101L);
 		assertThat(rows.get(0).getRoleCode()).isEqualTo("CUSTOM_A");
 		assertThat(rows.get(0).getRoleName()).isEqualTo("业务角色A");
 	}
@@ -107,6 +109,7 @@ class GrantTableServiceImplTest {
 	void listAssignedRolesReturnsLinkedRoleRegardlessOfType() {
 		when(sysPostMapper.selectById(SUBJECT_ID)).thenReturn(activePost());
 		GrantTableBoundRolePO menuRole = new GrantTableBoundRolePO();
+		menuRole.setRoleId(102L);
 		menuRole.setRoleCode("MENU_ADMIN");
 		menuRole.setRoleName("菜单管理员");
 		when(grantTableMapper.selectBoundRolesBySubject(GrantTableSubjectType.POST.name(), SUBJECT_ID))
@@ -116,6 +119,7 @@ class GrantTableServiceImplTest {
 				SUBJECT_ID);
 
 		assertThat(rows).hasSize(1);
+		assertThat(rows.get(0).getRoleId()).isEqualTo(102L);
 		assertThat(rows.get(0).getRoleCode()).isEqualTo("MENU_ADMIN");
 		assertThat(rows.get(0).getRoleName()).isEqualTo("菜单管理员");
 	}
@@ -135,12 +139,11 @@ class GrantTableServiceImplTest {
 	void replaceOrgSubjectRolesWritesGrantAndSubmitsInvalidation() {
 		when(sysPostMapper.selectById(SUBJECT_ID)).thenReturn(activePost());
 		GrantTableAssignRoleForm form = new GrantTableAssignRoleForm();
-		form.setRoleCodes(List.of("BIZ_ADMIN", "CUSTOM_A"));
+		form.setRoleIds(List.of(101L, 102L));
 
 		grantTableService.replaceOrgSubjectRoles(GrantTableSubjectType.POST, SUBJECT_ID, form);
 
-		verify(roleGrantReferenceChecker).requireGrantTableOrgRoles(GrantTableSubjectType.POST,
-				List.of("BIZ_ADMIN", "CUSTOM_A"));
+		verify(roleGrantReferenceChecker).requireGrantTableOrgRoleIds(GrantTableSubjectType.POST, List.of(101L, 102L));
 		verify(grantTableMapper).deleteBySubject(GrantTableSubjectType.POST.name(), SUBJECT_ID);
 		verify(grantTableService).saveBatch(any(Collection.class));
 
@@ -153,10 +156,10 @@ class GrantTableServiceImplTest {
 
 	@Test
 	@DisplayName("组织类全量覆盖：空角色列表仅删除 grant 行仍触发失效")
-	void replaceOrgSubjectRolesClearsGrantsWhenRoleCodesEmpty() {
+	void replaceOrgSubjectRolesClearsGrantsWhenRoleIdsEmpty() {
 		when(sysPostMapper.selectById(SUBJECT_ID)).thenReturn(activePost());
 		GrantTableAssignRoleForm form = new GrantTableAssignRoleForm();
-		form.setRoleCodes(List.of());
+		form.setRoleIds(List.of());
 
 		grantTableService.replaceOrgSubjectRoles(GrantTableSubjectType.POST, SUBJECT_ID, form);
 
@@ -168,7 +171,7 @@ class GrantTableServiceImplTest {
 	@Test
 	@DisplayName("全量覆盖：先删后批量 insert 授权边")
 	void replaceSubjectRoleGrantsDeletesThenInsertsEntities() {
-		grantTableService.replaceSubjectRoleGrants("USER", SUBJECT_ID, List.of("BIZ_ADMIN", "CUSTOM_A"));
+		grantTableService.replaceSubjectRoleGrants("USER", SUBJECT_ID, List.of(101L, 102L));
 
 		verify(grantTableMapper).deleteBySubject("USER", SUBJECT_ID);
 
@@ -178,15 +181,14 @@ class GrantTableServiceImplTest {
 		assertThat(entitiesCaptor.getValue()).hasSize(2);
 		assertThat(entitiesCaptor.getValue())
 			.allSatisfy(entity -> assertThat(entity.getSubjectType()).isEqualTo("USER"))
-			.allSatisfy(entity -> assertThat(entity.getSubjectId()).isEqualTo(SUBJECT_ID))
-			.allSatisfy(entity -> assertThat(entity.getRoleCode()).isNotBlank());
-		assertThat(entitiesCaptor.getValue().stream().map(GrantTableEntity::getRoleCode).toList())
-			.containsExactlyInAnyOrder("BIZ_ADMIN", "CUSTOM_A");
+			.allSatisfy(entity -> assertThat(entity.getSubjectId()).isEqualTo(SUBJECT_ID));
+		assertThat(entitiesCaptor.getValue().stream().map(GrantTableEntity::getRoleId).toList())
+			.containsExactlyInAnyOrder(101L, 102L);
 	}
 
 	@Test
 	@DisplayName("全量覆盖：空角色列表仅删除不 insert")
-	void replaceSubjectRoleGrantsDeletesOnlyWhenRoleCodesEmpty() {
+	void replaceSubjectRoleGrantsDeletesOnlyWhenRoleIdsEmpty() {
 		grantTableService.replaceSubjectRoleGrants("DEPT", SUBJECT_ID, List.of());
 
 		verify(grantTableMapper).deleteBySubject("DEPT", SUBJECT_ID);

@@ -19,9 +19,6 @@ public class RoleScopeProjection implements Serializable {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
-	@Schema(description = "角色编码")
-	private String roleCode;
-
 	@Schema(description = "范围类型：ALL/SELF/DEPT/DEPT_AND_CHILD")
 	private String scopeType;
 

@@ -208,8 +208,8 @@ class SysPermissionServiceImplTest {
 		entity.setPermissionType(1);
 		entity.setStatus(true);
 		when(sysPermissionMapper.selectById(3L)).thenReturn(entity);
-		when(sysRolePermissionMapper.selectBoundRolesByPermissionCode("sys:dept:query")).thenReturn(List.of());
-		when(sysMenuPermissionMapper.selectBoundMenusByPermissionCode("sys:dept:query")).thenReturn(List.of());
+		when(sysRolePermissionMapper.selectBoundRolesByPermissionId(3L)).thenReturn(List.of());
+		when(sysMenuPermissionMapper.selectBoundMenusByPermissionId(3L)).thenReturn(List.of());
 
 		SysPermissionDetailVO detail = sysPermissionQueryService.getDetail(3L);
 
@@ -217,8 +217,8 @@ class SysPermissionServiceImplTest {
 		assertThat(detail.getPermissionType()).isEqualTo(1);
 		assertThat(detail.getBoundRoles()).isEmpty();
 		assertThat(detail.getBoundMenus()).isEmpty();
-		verify(sysRolePermissionMapper).selectBoundRolesByPermissionCode("sys:dept:query");
-		verify(sysMenuPermissionMapper).selectBoundMenusByPermissionCode("sys:dept:query");
+		verify(sysRolePermissionMapper).selectBoundRolesByPermissionId(3L);
+		verify(sysMenuPermissionMapper).selectBoundMenusByPermissionId(3L);
 		verify(auditUserDisplayService).enrichAuditUsernames(anyList());
 	}
 
@@ -232,23 +232,21 @@ class SysPermissionServiceImplTest {
 		entity.setPermissionType(1);
 		entity.setStatus(true);
 		when(sysPermissionMapper.selectById(8L)).thenReturn(entity);
-		when(sysRolePermissionMapper.selectBoundRolesByPermissionCode("sys:dept:query")).thenReturn(List.of());
-
-		SysPermissionBoundMenuPO boundMenu = new SysPermissionBoundMenuPO();
+		when(sysRolePermissionMapper.selectBoundRolesByPermissionId(8L)).thenReturn(List.of());
 		boundMenu.setId(200L);
 		boundMenu.setTitle("部门管理");
 		boundMenu.setName("SystemDept");
 		boundMenu.setPath("/system/dept");
 		boundMenu.setMenuType(0);
 		boundMenu.setStatus(true);
-		when(sysMenuPermissionMapper.selectBoundMenusByPermissionCode("sys:dept:query")).thenReturn(List.of(boundMenu));
+		when(sysMenuPermissionMapper.selectBoundMenusByPermissionId(8L)).thenReturn(List.of(boundMenu));
 
 		SysPermissionDetailVO detail = sysPermissionQueryService.getDetail(8L);
 
 		assertThat(detail.getPermissionType()).isEqualTo(1);
 		assertThat(detail.getBoundMenus()).hasSize(1);
 		assertThat(detail.getBoundMenus().get(0).getTitle()).isEqualTo("部门管理");
-		verify(sysMenuPermissionMapper).selectBoundMenusByPermissionCode("sys:dept:query");
+		verify(sysMenuPermissionMapper).selectBoundMenusByPermissionId(8L);
 	}
 
 	@Test
@@ -268,8 +266,7 @@ class SysPermissionServiceImplTest {
 		boundRole.setStatus(true);
 		boundRole.setCreateTime(LocalDateTime.of(2026, 6, 4, 10, 30, 0));
 		boundRole.setUpdateTime(LocalDateTime.of(2026, 6, 4, 10, 30, 0));
-		when(sysRolePermissionMapper.selectBoundRolesByPermissionCode("sys:user:create"))
-			.thenReturn(List.of(boundRole));
+		when(sysRolePermissionMapper.selectBoundRolesByPermissionId(7L)).thenReturn(List.of(boundRole));
 
 		SysPermissionBoundMenuPO boundMenu = new SysPermissionBoundMenuPO();
 		boundMenu.setId(100L);
@@ -278,8 +275,7 @@ class SysPermissionServiceImplTest {
 		boundMenu.setPath("/system/user");
 		boundMenu.setMenuType(0);
 		boundMenu.setStatus(true);
-		when(sysMenuPermissionMapper.selectBoundMenusByPermissionCode("sys:user:create"))
-			.thenReturn(List.of(boundMenu));
+		when(sysMenuPermissionMapper.selectBoundMenusByPermissionId(7L)).thenReturn(List.of(boundMenu));
 
 		SysPermissionDetailVO detail = sysPermissionQueryService.getDetail(7L);
 
@@ -289,7 +285,7 @@ class SysPermissionServiceImplTest {
 		assertThat(detail.getBoundRoles().get(0).getUpdateTime()).isEqualTo(LocalDateTime.of(2026, 6, 4, 10, 30, 0));
 		assertThat(detail.getBoundMenus()).hasSize(1);
 		assertThat(detail.getBoundMenus().get(0).getTitle()).isEqualTo("用户管理");
-		verify(sysMenuPermissionMapper).selectBoundMenusByPermissionCode("sys:user:create");
+		verify(sysMenuPermissionMapper).selectBoundMenusByPermissionId(7L);
 	}
 
 	@Test
@@ -313,8 +309,7 @@ class SysPermissionServiceImplTest {
 		when(sysPermissionMapper.selectById(5L)).thenReturn(entity);
 		SysPermissionBoundRolePO boundRole = new SysPermissionBoundRolePO();
 		boundRole.setRoleCode("TEST");
-		when(sysRolePermissionMapper.selectBoundRolesByPermissionCode("sys:role:delete"))
-			.thenReturn(List.of(boundRole));
+		when(sysRolePermissionMapper.selectBoundRolesByPermissionId(5L)).thenReturn(List.of(boundRole));
 
 		sysPermissionService.deleteById(5L);
 
@@ -331,7 +326,7 @@ class SysPermissionServiceImplTest {
 		entity.setId(6L);
 		entity.setPermissionCode("sys:orphan:perm");
 		when(sysPermissionMapper.selectById(6L)).thenReturn(entity);
-		when(sysRolePermissionMapper.selectBoundRolesByPermissionCode("sys:orphan:perm")).thenReturn(List.of());
+		when(sysRolePermissionMapper.selectBoundRolesByPermissionId(6L)).thenReturn(List.of());
 
 		sysPermissionService.deleteById(6L);
 

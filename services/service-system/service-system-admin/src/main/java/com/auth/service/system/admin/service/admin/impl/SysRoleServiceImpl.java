@@ -95,7 +95,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 		}
 
 		String roleCode = existing.getRoleCode();
-		if (grantTableMapper.countByRoleCode(roleCode) > 0) {
+		if (grantTableMapper.countByRoleId(existing.getId()) > 0) {
 			throw new SystemBusinessException(SystemCommonResultCode.DATA_IN_USE, roleCode);
 		}
 

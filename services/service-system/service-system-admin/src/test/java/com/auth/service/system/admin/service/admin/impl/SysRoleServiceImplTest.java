@@ -118,8 +118,8 @@ class SysRoleServiceImplTest {
 		permission.setStatus(true);
 		permission.setCreateTime(LocalDateTime.of(2026, 6, 4, 11, 0, 0));
 		permission.setUpdateTime(LocalDateTime.of(2026, 6, 4, 11, 0, 0));
-		when(sysRolePermissionMapper.selectAssignedPermissionsByRoleCode("ADMIN")).thenReturn(List.of(permission));
-		when(sysMenuRoleMapper.selectBoundMenusByRoleCode("ADMIN")).thenReturn(List.of());
+		when(sysRolePermissionMapper.selectAssignedPermissionsByRoleId(1L)).thenReturn(List.of(permission));
+		when(sysMenuRoleMapper.selectBoundMenusByRoleId(1L)).thenReturn(List.of());
 		when(grantTableMapper.selectBoundUsersByRoleCode("ADMIN")).thenReturn(List.of());
 		when(grantTableMapper.selectBoundDeptsByRoleCode("ADMIN")).thenReturn(List.of());
 		when(grantTableMapper.selectBoundPostsByRoleCode("ADMIN")).thenReturn(List.of());
@@ -134,8 +134,8 @@ class SysRoleServiceImplTest {
 			.isEqualTo(LocalDateTime.of(2026, 6, 4, 11, 0, 0));
 		assertThat(detail.getBoundPermissions().get(0).getUpdateTime())
 			.isEqualTo(LocalDateTime.of(2026, 6, 4, 11, 0, 0));
-		verify(sysRolePermissionMapper).selectAssignedPermissionsByRoleCode("ADMIN");
-		verify(sysMenuRoleMapper).selectBoundMenusByRoleCode("ADMIN");
+		verify(sysRolePermissionMapper).selectAssignedPermissionsByRoleId(1L);
+		verify(sysMenuRoleMapper).selectBoundMenusByRoleId(1L);
 		verify(grantTableMapper).selectBoundUsersByRoleCode("ADMIN");
 		verify(grantTableMapper).selectBoundDeptsByRoleCode("ADMIN");
 		verify(grantTableMapper).selectBoundPostsByRoleCode("ADMIN");
@@ -154,7 +154,7 @@ class SysRoleServiceImplTest {
 		boundMenu.setPath("/system/user");
 		boundMenu.setMenuType(0);
 		boundMenu.setStatus(true);
-		when(sysMenuRoleMapper.selectBoundMenusByRoleCode("EDITOR")).thenReturn(List.of(boundMenu));
+		when(sysMenuRoleMapper.selectBoundMenusByRoleId(2L)).thenReturn(List.of(boundMenu));
 
 		GrantTableBoundUserPO boundUser = new GrantTableBoundUserPO();
 		boundUser.setUserId(100L);
@@ -186,7 +186,7 @@ class SysRoleServiceImplTest {
 		boundPost.setUpdateTime(LocalDateTime.of(2026, 6, 4, 11, 0, 0));
 		when(grantTableMapper.selectBoundPostsByRoleCode("EDITOR")).thenReturn(List.of(boundPost));
 
-		when(sysRolePermissionMapper.selectAssignedPermissionsByRoleCode("EDITOR")).thenReturn(List.of());
+		when(sysRolePermissionMapper.selectAssignedPermissionsByRoleId(2L)).thenReturn(List.of());
 
 		SysRoleDetailVO detail = sysRoleQueryService.getDetail(2L);
 
@@ -200,7 +200,7 @@ class SysRoleServiceImplTest {
 		assertThat(detail.getBoundPosts().get(0).getPostCode()).isEqualTo("DEV");
 		assertThat(detail.getBoundPosts().get(0).getDeptName()).isEqualTo("研发部");
 
-		verify(sysMenuRoleMapper).selectBoundMenusByRoleCode("EDITOR");
+		verify(sysMenuRoleMapper).selectBoundMenusByRoleId(2L);
 		verify(grantTableMapper).selectBoundUsersByRoleCode("EDITOR");
 		verify(grantTableMapper).selectBoundDeptsByRoleCode("EDITOR");
 		verify(grantTableMapper).selectBoundPostsByRoleCode("EDITOR");
@@ -261,7 +261,7 @@ class SysRoleServiceImplTest {
 	@DisplayName("删除角色：grant_table 引用存在时抛出 ROLE_IN_USE")
 	void deleteThrowsWhenGrantInUse() {
 		when(sysRoleMapper.selectById(2L)).thenReturn(roleEntity(2L, "CUSTOM"));
-		when(grantTableMapper.countByRoleCode("CUSTOM")).thenReturn(1L);
+		when(grantTableMapper.countByRoleId(2L)).thenReturn(1L);
 
 		assertThatThrownBy(() -> sysRoleService.deleteById(2L)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
@@ -275,7 +275,7 @@ class SysRoleServiceImplTest {
 	@DisplayName("删除角色：物理删除主表并触发授权失效（子表由数据库 CASCADE 维护）")
 	void deleteShouldPhysicallyDeleteAndInvalidate() {
 		when(sysRoleMapper.selectById(3L)).thenReturn(roleEntity(3L, "EMPTY_ROLE"));
-		when(grantTableMapper.countByRoleCode("EMPTY_ROLE")).thenReturn(0L);
+		when(grantTableMapper.countByRoleId(3L)).thenReturn(0L);
 		when(sysRoleMapper.deleteById(3L)).thenReturn(1);
 
 		sysRoleService.deleteById(3L);

@@ -48,13 +48,10 @@ public class DataScopeQueryAdapter implements DataScopeQueryPort {
 	 */
 	@Override
 	public List<RoleScopeRow> findRoleScopesByRoleCodes(List<String> roleCodes) {
-		// 将 RoleScopeProjection 转换为 RoleScopeRow
 		return roleScopeMapper.selectByRoleCodes(roleCodes).stream().map(projection -> {
-			String roleCode = projection.getRoleCode();
 			String scopeType = projection.getScopeType();
 			String scopeDeptIds = projection.getScopeDeptIds();
-
-			return new RoleScopeRow(roleCode, scopeType, scopeDeptIds);
+			return new RoleScopeRow(scopeType, scopeDeptIds);
 		}).toList();
 	}
 

@@ -35,11 +35,11 @@ public interface SysMenuRoleMapper extends BaseMapper<SysMenuRoleEntity> {
 	List<SysPermissionBoundRolePO> selectBoundRolesByMenuId(@Param("menuId") Long menuId);
 
 	/**
-	 * 按角色码反查已绑定菜单（详情展示，不按菜单类型过滤）
-	 * @param roleCode 角色编码
+	 * 按角色 ID 反查已绑定菜单（详情展示，不按菜单类型过滤）
+	 * @param roleId 角色 ID
 	 * @return 已绑定菜单列表
 	 */
-	List<SysPermissionBoundMenuPO> selectBoundMenusByRoleCode(@Param("roleCode") String roleCode);
+	List<SysPermissionBoundMenuPO> selectBoundMenusByRoleId(@Param("roleId") Long roleId);
 
 	/**
 	 * 批量查询菜单下已启用、未删除的角色关联
@@ -58,9 +58,9 @@ public interface SysMenuRoleMapper extends BaseMapper<SysMenuRoleEntity> {
 	/**
 	 * 批量插入菜单-角色关联
 	 * @param menuId 菜单ID
-	 * @param roleCodes 角色编码列表
+	 * @param roleIds 角色 ID 列表
 	 * @return 插入行数
 	 */
-	int batchInsertMenuRoles(@Param("menuId") Long menuId, @Param("roleCodes") List<String> roleCodes);
+	int batchInsertMenuRoles(@Param("menuId") Long menuId, @Param("roleIds") List<Long> roleIds);
 
 }

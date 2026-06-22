@@ -1,5 +1,6 @@
 package com.auth.service.system.admin.model.vo.menu;
 
+import com.auth.common.core.annotation.JsonStringFormat;
 import com.auth.service.system.admin.model.vo.role.RoleCodeNameRow;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
@@ -14,6 +15,10 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SysMenuAssignedRoleRow extends RoleCodeNameRow {
+
+	@JsonStringFormat
+	@Schema(title = "角色 ID")
+	private Long roleId;
 
 	@Schema(title = "是否已分配给当前菜单")
 	private Boolean assigned;

@@ -54,7 +54,7 @@ auth:
   auth:
     invalidation:
       batch-size: 500
-      # role_policy 表落地后改为 true，启用 POLICY → role_code 桥接
+      # role_policy 已按 role_id / policy_id 关联；失效入参仍为 policy_code，SQL 经 definition 桥接
       policy-role-bridge-enabled: false
       processing-claim-timeout-minutes: 30
       processing-claim-cleanup-enabled: true

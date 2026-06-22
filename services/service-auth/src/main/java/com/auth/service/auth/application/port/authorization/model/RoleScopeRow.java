@@ -3,11 +3,10 @@ package com.auth.service.auth.application.port.authorization.model;
 /**
  * role_scope 只读行
  *
- * @param roleCode 角色编码
  * @param scopeType 范围类型
  * @param scopeDeptIds scope_dept_ids JSON 字符串
  * @author Bunny
  */
-public record RoleScopeRow(String roleCode, String scopeType, String scopeDeptIds) {
+public record RoleScopeRow(String scopeType, String scopeDeptIds) {
 
 }

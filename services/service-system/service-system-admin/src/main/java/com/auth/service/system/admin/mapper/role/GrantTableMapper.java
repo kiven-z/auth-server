@@ -22,12 +22,12 @@ import java.util.List;
 public interface GrantTableMapper extends BaseMapper<GrantTableEntity> {
 
 	/**
-	 * 统计指定角色码在 grant_table 中的引用行数。
-	 * @param roleCode 角色编码
+	 * 统计指定角色在 grant_table 中的引用行数。
+	 * @param roleId 角色 ID
 	 * @return 引用行数
 	 */
-	@Select("SELECT COUNT(1) FROM grant_table WHERE role_code = #{roleCode}")
-	long countByRoleCode(@Param("roleCode") String roleCode);
+	@Select("SELECT COUNT(1) FROM grant_table WHERE role_id = #{roleId}")
+	long countByRoleId(@Param("roleId") Long roleId);
 
 	/**
 	 * 按授权主体删除全部 grant 行。

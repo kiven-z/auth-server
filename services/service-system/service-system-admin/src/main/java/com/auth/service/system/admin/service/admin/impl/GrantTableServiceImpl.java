@@ -63,15 +63,12 @@ public class GrantTableServiceImpl extends ServiceImpl<GrantTableMapper, GrantTa
 	@Override
 	public void replaceOrgSubjectRoles(GrantTableSubjectType subjectType, Long subjectId,
 			GrantTableAssignRoleForm form) {
-		// 校验主体是否存在
 		subjectExistenceVerifier.requireExistingActive(subjectType, subjectId);
 
-		// 校验角色编码
-		List<String> roleCodes = CollUtil.emptyIfNull(form.getRoleCodes()).stream().distinct().toList();
-		roleGrantReferenceChecker.requireGrantTableOrgRoles(subjectType, roleCodes);
+		List<Long> roleIds = CollUtil.emptyIfNull(form.getRoleIds()).stream().distinct().toList();
+		roleGrantReferenceChecker.requireGrantTableOrgRoleIds(subjectType, roleIds);
 
-		// 替换主体角色授权
-		replaceSubjectRoleGrants(subjectType.name(), subjectId, roleCodes);
+		replaceSubjectRoleGrants(subjectType.name(), subjectId, roleIds);
 		grantInvalidationTrigger.submitByGrantSubjects(List.of(new GrantSubjectKey(subjectType, subjectId)),
 				"replace-roles");
 	}
@@ -80,17 +77,17 @@ public class GrantTableServiceImpl extends ServiceImpl<GrantTableMapper, GrantTa
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void replaceSubjectRoleGrants(String subjectType, Long subjectId, List<String> roleCodes) {
+	public void replaceSubjectRoleGrants(String subjectType, Long subjectId, List<Long> roleIds) {
 		baseMapper.deleteBySubject(subjectType, subjectId);
-		if (CollUtil.isEmpty(roleCodes)) {
+		if (CollUtil.isEmpty(roleIds)) {
 			return;
 		}
 
-		List<GrantTableEntity> entities = roleCodes.stream().map(roleCode -> {
+		List<GrantTableEntity> entities = roleIds.stream().map(roleId -> {
 			GrantTableEntity entity = new GrantTableEntity();
 			entity.setSubjectType(subjectType);
 			entity.setSubjectId(subjectId);
-			entity.setRoleCode(roleCode);
+			entity.setRoleId(roleId);
 			return entity;
 		}).toList();
 		super.saveBatch(entities);

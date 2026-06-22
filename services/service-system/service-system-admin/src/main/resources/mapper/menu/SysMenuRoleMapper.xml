@@ -6,11 +6,12 @@
     <select id="selectAssignedRolesByMenuId"
             resultType="com.auth.service.system.admin.model.po.menu.SysMenuAssignedRolePO">
         SELECT
+            r.id AS role_id,
             r.role_code,
             r.role_name
         FROM
             sys_menu_role mr
-            JOIN sys_role r ON r.role_code = mr.role_code
+            JOIN sys_role r ON r.id = mr.role_id
             AND r.status = 1
         WHERE
             mr.menu_id = #{menuId}
@@ -29,15 +30,15 @@
             mr.update_time
         FROM
             sys_menu_role mr
-            INNER JOIN sys_role r ON r.role_code = mr.role_code
+            INNER JOIN sys_role r ON r.id = mr.role_id
         WHERE
             mr.menu_id = #{menuId}
         ORDER BY
             r.role_code
     </select>
 
-    <!-- 按角色码反查已绑定菜单 -->
-    <select id="selectBoundMenusByRoleCode"
+    <!-- 按角色 ID 反查已绑定菜单 -->
+    <select id="selectBoundMenusByRoleId"
             resultType="com.auth.service.system.admin.model.po.permission.SysPermissionBoundMenuPO">
         SELECT
             m.id,
@@ -50,7 +51,7 @@
             sys_menu_role mr
             INNER JOIN sys_menu m ON m.id = mr.menu_id
         WHERE
-            mr.role_code = #{roleCode}
+            mr.role_id = #{roleId}
         ORDER BY
             m.menu_rank,
             m.id
@@ -61,10 +62,10 @@
             resultType="com.auth.service.system.admin.model.po.menu.SysMenuRoleLinkRowPO">
         SELECT
             mr.menu_id,
-            mr.role_code
+            r.role_code
         FROM
             sys_menu_role mr
-            INNER JOIN sys_role r ON r.role_code = mr.role_code
+            INNER JOIN sys_role r ON r.id = mr.role_id
             AND r.status = 1
         WHERE
             mr.menu_id IN
@@ -76,10 +77,10 @@
     <!-- 批量插入菜单-角色关联 -->
     <insert id="batchInsertMenuRoles">
         INSERT INTO
-            sys_menu_role (menu_id, role_code)
+            sys_menu_role (menu_id, role_id)
         VALUES
-        <foreach collection="roleCodes" item="roleCode" separator=",">
-            (#{menuId}, #{roleCode})
+        <foreach collection="roleIds" item="roleId" separator=",">
+            (#{menuId}, #{roleId})
         </foreach>
     </insert>
 </mapper>

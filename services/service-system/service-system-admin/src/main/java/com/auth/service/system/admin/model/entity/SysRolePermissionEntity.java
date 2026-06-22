@@ -27,11 +27,11 @@ public class SysRolePermissionEntity extends BaseEntity {
 	@TableId(type = IdType.AUTO)
 	private Long id;
 
-	@Schema(title = "角色编码")
-	private String roleCode;
+	@Schema(title = "角色 ID")
+	private Long roleId;
 
-	@Schema(title = "权限码")
-	private String permissionCode;
+	@Schema(title = "权限 ID")
+	private Long permissionId;
 
 	@Schema(title = "授权人 userId")
 	private Long grantorId;

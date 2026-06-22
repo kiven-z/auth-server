@@ -104,7 +104,7 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 		String permissionCode = existing.getPermissionCode();
 		permissionInvalidationTrigger.submitByPermissionCodes(List.of(permissionCode), "delete");
 
-		List<String> boundRoleCodes = sysRolePermissionMapper.selectBoundRolesByPermissionCode(permissionCode)
+		List<String> boundRoleCodes = sysRolePermissionMapper.selectBoundRolesByPermissionId(id)
 			.stream()
 			.map(SysPermissionBoundRolePO::getRoleCode)
 			.filter(CharSequenceUtil::isNotBlank)
