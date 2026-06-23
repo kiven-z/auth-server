@@ -1,6 +1,6 @@
 package com.auth.service.system.admin.service.admin;
 
-import com.auth.service.system.admin.model.vo.role.SysRoleAssignedPermissionRow;
+import com.auth.service.system.admin.model.vo.reference.PermissionReferenceVO;
 
 import java.util.List;
 
@@ -13,16 +13,16 @@ public interface SysRolePermissionService {
 
 	/**
 	 * 查询角色已分配权限
-	 * @param roleCode 角色编码
+	 * @param roleId 角色 ID
 	 * @return 已分配权限行列表
 	 */
-	List<SysRoleAssignedPermissionRow> listAssignedPermissions(String roleCode);
+	List<PermissionReferenceVO> listAssignedPermissions(Long roleId);
 
 	/**
-	 * 全量替换角色权限码并触发授权失效。
-	 * @param roleCode 角色编码
-	 * @param permissionCodes 权限码列表（可为空表示清空）
+	 * 全量替换角色权限并触发授权失效。
+	 * @param roleId 角色 ID
+	 * @param permissionIds 权限 ID 列表（可为空表示清空）
 	 */
-	void assignPermissions(String roleCode, List<String> permissionCodes);
+	void assignPermissions(Long roleId, List<Long> permissionIds);
 
 }

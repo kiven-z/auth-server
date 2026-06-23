@@ -3,11 +3,7 @@ package com.auth.service.system.admin.convert.sys;
 import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.form.dept.SysDeptForm;
-import com.auth.service.system.admin.model.po.dept.SysDeptBoundPostPO;
-import com.auth.service.system.admin.model.po.dept.SysDeptBoundUserPO;
 import com.auth.service.system.admin.model.po.dept.SysDeptPageRowPO;
-import com.auth.service.system.admin.model.vo.dept.SysDeptBoundPostItemVO;
-import com.auth.service.system.admin.model.vo.dept.SysDeptBoundUserItemVO;
 import com.auth.service.system.admin.model.vo.dept.SysDeptDetailVO;
 import com.auth.service.system.admin.model.vo.dept.SysDeptListVO;
 import org.mapstruct.BeanMapping;
@@ -93,19 +89,5 @@ public interface SysDeptConverter {
 	@Mapping(target = "boundPosts", ignore = true)
 	@Mapping(target = "boundRoles", ignore = true)
 	SysDeptDetailVO toDetailVo(SysDeptEntity entity);
-
-	/**
-	 * 关联用户 PO 列表 → 详情项 VO 列表
-	 * @param poList 持久层投影列表
-	 * @return 详情项 VO 列表
-	 */
-	List<SysDeptBoundUserItemVO> toBoundUserItemList(List<SysDeptBoundUserPO> poList);
-
-	/**
-	 * 下属岗位 PO 列表 → 详情项 VO 列表
-	 * @param poList 持久层投影列表
-	 * @return 详情项 VO 列表
-	 */
-	List<SysDeptBoundPostItemVO> toBoundPostItemList(List<SysDeptBoundPostPO> poList);
 
 }

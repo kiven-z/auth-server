@@ -19,15 +19,6 @@ import java.util.Set;
 public class UserInvalidationPolicy {
 
 	/**
-	 * 判断用户状态是否需要递增版本+刷画像
-	 * @param state 用户状态
-	 * @return 是否需要递增版本+刷画像
-	 */
-	private static boolean shouldVersionBump(UserInvalidationState state) {
-		return !state.deleted() && state.status() != null && state.status() == 1;
-	}
-
-	/**
 	 * 将反查得到的用户按状态分为「递增版本+刷画像」与「仅驱逐缓存」
 	 * @param states 用户状态快照（须含反查得到的每个 userId）
 	 * @return 分桶结果
@@ -50,7 +41,7 @@ public class UserInvalidationPolicy {
 			}
 
 			// 如果用户状态需要递增版本+刷画像，则将用户ID添加到递增版本+刷画像的用户ID集合中
-			if (shouldVersionBump(state)) {
+			if (state.status() != null && state.status() == 1) {
 				versionBumpUserIds.add(state.userId());
 			}
 			else {

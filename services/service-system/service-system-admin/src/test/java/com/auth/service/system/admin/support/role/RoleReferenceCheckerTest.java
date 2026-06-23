@@ -13,13 +13,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 /**
  * {@link RoleReferenceChecker} 单元测试。
  */
-@DisplayName("RoleReferenceChecker 角色编码校验")
+@DisplayName("RoleReferenceChecker 角色 ID 校验")
 @ExtendWith(MockitoExtension.class)
 class RoleReferenceCheckerTest {
 
@@ -30,9 +29,9 @@ class RoleReferenceCheckerTest {
 	private RoleReferenceChecker roleReferenceChecker;
 
 	@Test
-	@DisplayName("角色编码为空时抛出 DATA_NOT_EXIST")
-	void getExistingByRoleCodeThrowsWhenBlank() {
-		assertThatThrownBy(() -> roleReferenceChecker.getExistingByRoleCode(" "))
+	@DisplayName("角色 ID 为空时抛出 DATA_NOT_EXIST")
+	void getExistingByRoleIdThrowsWhenNull() {
+		assertThatThrownBy(() -> roleReferenceChecker.getExistingByRoleId(null))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
@@ -40,10 +39,10 @@ class RoleReferenceCheckerTest {
 
 	@Test
 	@DisplayName("角色不存在时抛出 DATA_NOT_EXIST")
-	void getExistingByRoleCodeThrowsWhenMissing() {
-		when(sysRoleMapper.selectOne(any())).thenReturn(null);
+	void getExistingByRoleIdThrowsWhenMissing() {
+		when(sysRoleMapper.selectById(99L)).thenReturn(null);
 
-		assertThatThrownBy(() -> roleReferenceChecker.getExistingByRoleCode("MISSING"))
+		assertThatThrownBy(() -> roleReferenceChecker.getExistingByRoleId(99L))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
@@ -51,13 +50,15 @@ class RoleReferenceCheckerTest {
 
 	@Test
 	@DisplayName("角色存在时返回实体")
-	void getExistingByRoleCodeReturnsEntity() {
+	void getExistingByRoleIdReturnsEntity() {
 		SysRoleEntity role = new SysRoleEntity();
+		role.setId(1L);
 		role.setRoleCode("ADMIN");
-		when(sysRoleMapper.selectOne(any())).thenReturn(role);
+		when(sysRoleMapper.selectById(1L)).thenReturn(role);
 
-		SysRoleEntity result = roleReferenceChecker.getExistingByRoleCode("ADMIN");
+		SysRoleEntity result = roleReferenceChecker.getExistingByRoleId(1L);
 
+		assertThat(result.getId()).isEqualTo(1L);
 		assertThat(result.getRoleCode()).isEqualTo("ADMIN");
 	}
 

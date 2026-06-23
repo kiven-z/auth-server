@@ -45,7 +45,6 @@ public interface SysUserConverter {
 	@Mapping(target = "createUser", ignore = true)
 	@Mapping(target = "updateUser", ignore = true)
 	@Mapping(target = "version", ignore = true)
-	@Mapping(target = "isDeleted", ignore = true)
 	UserEntity toEntity(SysUserForm form);
 
 	/**
@@ -63,7 +62,6 @@ public interface SysUserConverter {
 	@Mapping(target = "createUser", ignore = true)
 	@Mapping(target = "updateUser", ignore = true)
 	@Mapping(target = "version", ignore = true)
-	@Mapping(target = "isDeleted", ignore = true)
 	@BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 	void applyUpdateForm(SysUserForm form, @org.mapstruct.MappingTarget UserEntity entity);
 

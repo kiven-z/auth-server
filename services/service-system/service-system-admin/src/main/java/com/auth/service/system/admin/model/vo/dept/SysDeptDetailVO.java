@@ -2,6 +2,9 @@ package com.auth.service.system.admin.model.vo.dept;
 
 import com.auth.common.core.annotation.JsonStringFormat;
 import com.auth.common.core.model.response.BaseResponse;
+import com.auth.service.system.admin.model.vo.reference.PostReferenceVO;
+import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
+import com.auth.service.system.admin.model.vo.reference.ext.DeptBoundUserReferenceVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -46,12 +49,12 @@ public class SysDeptDetailVO extends BaseResponse {
 	private String remark;
 
 	@Schema(title = "关联用户列表（user_dept 反查，仅本部门）")
-	private List<SysDeptBoundUserItemVO> boundUsers;
+	private List<DeptBoundUserReferenceVO> boundUsers;
 
 	@Schema(title = "下属岗位列表（sys_post 反查，仅本部门）")
-	private List<SysDeptBoundPostItemVO> boundPosts;
+	private List<PostReferenceVO> boundPosts;
 
 	@Schema(title = "已授权角色列表（grant_table DEPT 主体反查）")
-	private List<SysDeptBoundRoleItemVO> boundRoles;
+	private List<RoleReferenceVO> boundRoles;
 
 }

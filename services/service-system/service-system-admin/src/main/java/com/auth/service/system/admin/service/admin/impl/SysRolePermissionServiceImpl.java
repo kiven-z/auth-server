@@ -2,11 +2,11 @@ package com.auth.service.system.admin.service.admin.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
-import com.auth.service.system.admin.convert.sys.SysRolePermissionConverter;
+import com.auth.service.system.admin.convert.reference.ReferenceConverter;
 import com.auth.service.system.admin.mapper.role.SysRolePermissionMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
-import com.auth.service.system.admin.model.po.role.SysRoleAssignedPermissionPO;
-import com.auth.service.system.admin.model.vo.role.SysRoleAssignedPermissionRow;
+import com.auth.service.system.admin.model.po.reference.PermissionReferencePO;
+import com.auth.service.system.admin.model.vo.reference.PermissionReferenceVO;
 import com.auth.service.system.admin.service.admin.SysRolePermissionService;
 import com.auth.service.system.admin.support.permission.PermissionReferenceChecker;
 import com.auth.service.system.admin.support.role.RoleReferenceChecker;
@@ -42,31 +42,30 @@ public class SysRolePermissionServiceImpl implements SysRolePermissionService {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public List<SysRoleAssignedPermissionRow> listAssignedPermissions(String roleCode) {
-		Long roleId = roleReferenceChecker.getExistingByRoleCode(roleCode).getId();
-		List<SysRoleAssignedPermissionPO> permissionList = sysRolePermissionMapper
-			.selectAssignedPermissionsByRoleId(roleId);
+	public List<PermissionReferenceVO> listAssignedPermissions(Long roleId) {
+		roleReferenceChecker.getExistingByRoleId(roleId);
+		List<PermissionReferencePO> permissionList = sysRolePermissionMapper.selectAssignedPermissionsByRoleId(roleId);
 
-		return SysRolePermissionConverter.INSTANCE.toAssignedPermissionRowList(permissionList);
+		return ReferenceConverter.INSTANCE.toPermissionReferenceList(permissionList);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void assignPermissions(String roleCode, List<String> permissionCodes) {
-		SysRoleEntity role = roleReferenceChecker.getExistingByRoleCode(roleCode);
-		List<String> codes = permissionCodes.stream().distinct().toList();
+	public void assignPermissions(Long roleId, List<Long> permissionIds) {
+		SysRoleEntity role = roleReferenceChecker.getExistingByRoleId(roleId);
+		List<Long> ids = permissionIds.stream().distinct().toList();
 
 		Long operatorId = SecurityUserUtils.getUserId();
 		sysRolePermissionMapper.deleteByRoleId(role.getId());
-		if (CollUtil.isNotEmpty(codes)) {
-			List<Long> permissionIds = permissionReferenceChecker.resolveActivePermissionIds(codes);
-			sysRolePermissionMapper.batchInsertRolePermissions(role.getId(), permissionIds, operatorId, operatorId);
+		if (CollUtil.isNotEmpty(ids)) {
+			permissionReferenceChecker.requireActivePermissionIds(ids);
+			sysRolePermissionMapper.batchInsertRolePermissions(role.getId(), ids, operatorId, operatorId);
 		}
 
 		roleInvalidationTrigger.submitByRoleCodes(List.of(role.getRoleCode()), "assign-permissions");
-		log.info("Role permissions replaced: roleCode={}, count={}", role.getRoleCode(), codes.size());
+		log.info("Role permissions replaced: roleId={}, count={}", role.getId(), ids.size());
 	}
 
 }

@@ -6,11 +6,11 @@ spring:
 
   cloud:
     nacos:
-      server-addr: 192.168.3.19:8848
+      server-addr: 192.168.3.4:8848
 
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:mysql://192.168.3.19:3306/auth_admin_base?serverTimezone=GMT%2B8&useSSL=false&characterEncoding=utf-8&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://192.168.3.4:3306/auth_admin_base?serverTimezone=GMT%2B8&useSSL=false&characterEncoding=utf-8&allowPublicKeyRetrieval=true
     username: dev_user
     password: Dev1234!
     hikari:
@@ -22,65 +22,19 @@ spring:
 
   data:
     redis:
-      host: 192.168.3.19
+      host: 192.168.3.4
       port: 6379
       database: 0
       password: "Dev1234!"
       lettuce:
         pool:
           enabled: true
-          # 最大连接数
           max-active: 200
-          # 最大阻塞等待时间(负数表示没限制)
           max-wait: 5000ms
-          # 最大空闲
           max-idle: 50
-          # 最小空闲
           min-idle: 10
 
 logging:
   level:
-    root: warn
+    root: info
     com.auth: debug
-
-# auth:
-#   common:
-#     # JWT配置
-#     jwt:
-#       # algorithm: RS256
-#       # keystore-path: classpath:keystore/auth.p12
-#       # password: Dev1234!
-#       # alias: auth-key
-#       # auto-generate: true
-#
-#       algorithm: hs256
-#       issuer: auth-service
-#       # 至少 32 字节 UTF-8；生产请替换为高强度随机密钥
-#       # aVeryLongAndSecureRandomStringWithAtLeast32Characters
-#       secret: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789ab"
-#       access-expired: 3600
-#       refresh-expired: 604800
-#       clock-skew-seconds: 30
-#
-#     # 认证和鉴权配置
-#     security:
-#       secured-paths:
-#         - "/api/**"
-#       permit-all-paths:
-#         - "/api/local-file/**"
-#         - "/api/public/**"
-#         - "/api/*/login"
-#         - "/api/*/refresh-token"
-#         - "/"
-#
-#     user-config:
-#       # 密码历史保留天数
-#       password-history-retention-days: 30
-#       # 根据上面天数，查询重置密码历史检查次数
-#       password-history-check-count: 1
-#       # 用户默认密码
-#       default-password: user123456!1
-#       # 默认用户头像
-#       default-avatar: "https://thirdwx.qlogo.cn/mmopen/vi_32/DYAIOgq83eoj0hHXhgJNOTSOFsS4uZs8x1ConecaVOB8eIl115xmJZcT4oCicvia7wMEufibKtTLqiaJeanU2Lpg3w/132"
-#       # 用户输入密码错误次数
-#       max-password-attempts: 8

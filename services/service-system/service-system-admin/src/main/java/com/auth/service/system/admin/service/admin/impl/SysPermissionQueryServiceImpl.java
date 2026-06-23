@@ -1,13 +1,14 @@
 package com.auth.service.system.admin.service.admin.impl;
 
 import com.auth.common.data.model.PageResponse;
+import com.auth.service.system.admin.convert.reference.ReferenceConverter;
 import com.auth.service.system.admin.convert.sys.SysPermissionConverter;
 import com.auth.service.system.admin.mapper.menu.SysMenuPermissionMapper;
 import com.auth.service.system.admin.mapper.permission.SysPermissionMapper;
 import com.auth.service.system.admin.mapper.role.SysRolePermissionMapper;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.po.permission.SysPermissionBoundMenuPO;
-import com.auth.service.system.admin.model.po.permission.SysPermissionBoundRolePO;
+import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.auth.service.system.admin.model.query.permission.SysPermissionQuery;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionDetailVO;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionPageVO;
@@ -68,8 +69,8 @@ public class SysPermissionQueryServiceImpl extends ServiceImpl<SysPermissionMapp
 
 		SysPermissionDetailVO detail = SysPermissionConverter.INSTANCE.toDetailVo(entity);
 
-		List<SysPermissionBoundRolePO> boundRoles = sysRolePermissionMapper.selectBoundRolesByPermissionId(id);
-		detail.setBoundRoles(SysPermissionConverter.INSTANCE.toBoundRoleItemList(boundRoles));
+		List<RoleReferencePO> boundRoles = sysRolePermissionMapper.selectBoundRolesByPermissionId(id);
+		detail.setBoundRoles(ReferenceConverter.INSTANCE.toRoleReferenceList(boundRoles));
 
 		List<SysPermissionBoundMenuPO> boundMenus = sysMenuPermissionMapper.selectBoundMenusByPermissionId(id);
 		detail.setBoundMenus(SysPermissionConverter.INSTANCE.toBoundMenuItemList(boundMenus));

@@ -1,10 +1,9 @@
 package com.auth.service.system.admin.mapper.menu;
 
 import com.auth.service.system.admin.model.entity.SysMenuRoleEntity;
-import com.auth.service.system.admin.model.po.menu.SysMenuAssignedRolePO;
 import com.auth.service.system.admin.model.po.menu.SysMenuRoleLinkRowPO;
 import com.auth.service.system.admin.model.po.permission.SysPermissionBoundMenuPO;
-import com.auth.service.system.admin.model.po.permission.SysPermissionBoundRolePO;
+import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
@@ -25,14 +24,14 @@ public interface SysMenuRoleMapper extends BaseMapper<SysMenuRoleEntity> {
 	 * @param menuId 菜单ID
 	 * @return 已分配角色 DTO 列表
 	 */
-	List<SysMenuAssignedRolePO> selectAssignedRolesByMenuId(@Param("menuId") Long menuId);
+	List<RoleReferencePO> selectAssignedRolesByMenuId(@Param("menuId") Long menuId);
 
 	/**
 	 * 按菜单 ID 反查已绑定角色（详情展示，不按角色类型过滤）
 	 * @param menuId 菜单 ID
 	 * @return 已绑定角色列表
 	 */
-	List<SysPermissionBoundRolePO> selectBoundRolesByMenuId(@Param("menuId") Long menuId);
+	List<RoleReferencePO> selectBoundRolesByMenuId(@Param("menuId") Long menuId);
 
 	/**
 	 * 按角色 ID 反查已绑定菜单（详情展示，不按菜单类型过滤）

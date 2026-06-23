@@ -1,20 +1,19 @@
 package com.auth.service.system.admin.service.admin.impl;
 
 import com.auth.common.data.model.PageResponse;
-import com.auth.service.system.admin.convert.grant.GrantTableBoundSubjectConverter;
+import com.auth.service.system.admin.convert.reference.ReferenceConverter;
 import com.auth.service.system.admin.convert.sys.SysPermissionConverter;
 import com.auth.service.system.admin.convert.sys.SysRoleConverter;
-import com.auth.service.system.admin.convert.sys.SysRolePermissionConverter;
 import com.auth.service.system.admin.mapper.menu.SysMenuRoleMapper;
 import com.auth.service.system.admin.mapper.role.GrantTableMapper;
 import com.auth.service.system.admin.mapper.role.SysRoleMapper;
 import com.auth.service.system.admin.mapper.role.SysRolePermissionMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
-import com.auth.service.system.admin.model.po.granttable.GrantTableBoundDeptPO;
-import com.auth.service.system.admin.model.po.granttable.GrantTableBoundPostPO;
-import com.auth.service.system.admin.model.po.granttable.GrantTableBoundUserPO;
 import com.auth.service.system.admin.model.po.permission.SysPermissionBoundMenuPO;
-import com.auth.service.system.admin.model.po.role.SysRoleAssignedPermissionPO;
+import com.auth.service.system.admin.model.po.reference.DeptReferencePO;
+import com.auth.service.system.admin.model.po.reference.PermissionReferencePO;
+import com.auth.service.system.admin.model.po.reference.PostReferencePO;
+import com.auth.service.system.admin.model.po.reference.UserReferencePO;
 import com.auth.service.system.admin.model.query.role.SysRoleQuery;
 import com.auth.service.system.admin.model.vo.role.SysRoleDetailVO;
 import com.auth.service.system.admin.model.vo.role.SysRoleOptionVO;
@@ -76,22 +75,21 @@ public class SysRoleQueryServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleE
 		}
 
 		SysRoleDetailVO detail = SysRoleConverter.INSTANCE.toDetailVo(entity);
-		String roleCode = entity.getRoleCode();
 
-		List<SysRoleAssignedPermissionPO> permissions = sysRolePermissionMapper.selectAssignedPermissionsByRoleId(id);
-		detail.setBoundPermissions(SysRolePermissionConverter.INSTANCE.toBoundPermissionItemList(permissions));
+		List<PermissionReferencePO> permissions = sysRolePermissionMapper.selectAssignedPermissionsByRoleId(id);
+		detail.setBoundPermissions(ReferenceConverter.INSTANCE.toPermissionReferenceList(permissions));
 
 		List<SysPermissionBoundMenuPO> permissionBoundMenus = sysMenuRoleMapper.selectBoundMenusByRoleId(id);
 		detail.setBoundMenus(SysPermissionConverter.INSTANCE.toBoundMenuItemList(permissionBoundMenus));
 
-		List<GrantTableBoundUserPO> grantTableBoundUsers = grantTableMapper.selectBoundUsersByRoleCode(roleCode);
-		detail.setBoundUsers(GrantTableBoundSubjectConverter.INSTANCE.toBoundUserItemList(grantTableBoundUsers));
+		List<UserReferencePO> grantTableBoundUsers = grantTableMapper.selectBoundUsersByRoleId(id);
+		detail.setBoundUsers(ReferenceConverter.INSTANCE.toUserReferenceList(grantTableBoundUsers));
 
-		List<GrantTableBoundDeptPO> grantTableBoundDeptList = grantTableMapper.selectBoundDeptsByRoleCode(roleCode);
-		detail.setBoundDepts(GrantTableBoundSubjectConverter.INSTANCE.toBoundDeptItemList(grantTableBoundDeptList));
+		List<DeptReferencePO> grantTableBoundDeptList = grantTableMapper.selectBoundDeptsByRoleId(id);
+		detail.setBoundDepts(ReferenceConverter.INSTANCE.toDeptReferenceList(grantTableBoundDeptList));
 
-		List<GrantTableBoundPostPO> grantTableBoundPosts = grantTableMapper.selectBoundPostsByRoleCode(roleCode);
-		detail.setBoundPosts(GrantTableBoundSubjectConverter.INSTANCE.toBoundPostItemList(grantTableBoundPosts));
+		List<PostReferencePO> grantTableBoundPosts = grantTableMapper.selectBoundPostsByRoleId(id);
+		detail.setBoundPosts(ReferenceConverter.INSTANCE.toPostReferenceList(grantTableBoundPosts));
 
 		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail));
 		return detail;

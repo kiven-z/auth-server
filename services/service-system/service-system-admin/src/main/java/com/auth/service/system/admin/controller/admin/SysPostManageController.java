@@ -6,7 +6,7 @@ import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
-import com.auth.service.system.admin.model.vo.granttable.GrantTableAssignedRoleRow;
+import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
 import com.auth.service.system.admin.service.admin.GrantTableService;
 import com.auth.service.system.common.model.SystemAuditBizModule;
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,8 +38,8 @@ public class SysPostManageController {
 	@Operation(summary = "查询岗位已分配角色")
 	@PreAuthorize("@auth.decide('sysPost:query')")
 	@GetMapping("/{postId}/roles")
-	public Result<List<GrantTableAssignedRoleRow>> listRoles(@PathVariable("postId") Long postId) {
-		List<GrantTableAssignedRoleRow> rows = grantTableService.listAssignedRoles(GrantTableSubjectType.POST, postId);
+	public Result<List<RoleReferenceVO>> listRoles(@PathVariable("postId") Long postId) {
+		List<RoleReferenceVO> rows = grantTableService.listAssignedRoles(GrantTableSubjectType.POST, postId);
 		return Result.success(rows);
 	}
 

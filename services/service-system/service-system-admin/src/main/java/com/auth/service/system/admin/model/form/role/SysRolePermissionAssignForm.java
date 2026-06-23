@@ -10,7 +10,7 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * 角色分配权限码表单（全量替换）。
+ * 角色分配权限表单（全量替换）。
  *
  * @author Bunny
  */
@@ -22,8 +22,8 @@ public class SysRolePermissionAssignForm implements Serializable {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
-	@Schema(title = "权限码列表（全量替换；空数组表示清空该角色全部权限）", requiredMode = Schema.RequiredMode.REQUIRED)
-	@NotNull(message = "权限码列表不能为 null")
-	private List<String> permissionCodes;
+	@Schema(title = "权限 ID 列表（全量替换；空数组表示清空该角色全部权限）", requiredMode = Schema.RequiredMode.REQUIRED)
+	@NotNull(message = "permissionIds is required")
+	private List<Long> permissionIds;
 
 }

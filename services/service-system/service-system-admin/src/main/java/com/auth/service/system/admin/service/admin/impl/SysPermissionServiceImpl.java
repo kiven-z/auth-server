@@ -7,7 +7,7 @@ import com.auth.service.system.admin.mapper.permission.SysPermissionMapper;
 import com.auth.service.system.admin.mapper.role.SysRolePermissionMapper;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.form.permission.SysPermissionForm;
-import com.auth.service.system.admin.model.po.permission.SysPermissionBoundRolePO;
+import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.auth.service.system.admin.service.admin.SysPermissionService;
 import com.auth.service.system.authorization.dispatch.trigger.PermissionAuthorizationInvalidationTrigger;
 import com.auth.service.system.authorization.dispatch.trigger.RoleAuthorizationInvalidationTrigger;
@@ -106,7 +106,7 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 
 		List<String> boundRoleCodes = sysRolePermissionMapper.selectBoundRolesByPermissionId(id)
 			.stream()
-			.map(SysPermissionBoundRolePO::getRoleCode)
+			.map(RoleReferencePO::getRoleCode)
 			.filter(CharSequenceUtil::isNotBlank)
 			.distinct()
 			.toList();

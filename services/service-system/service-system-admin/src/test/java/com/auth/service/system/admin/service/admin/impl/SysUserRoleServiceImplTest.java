@@ -5,8 +5,9 @@ import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.user.SysUserMapper;
 import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
-import com.auth.service.system.admin.model.vo.granttable.GrantTableAssignedRoleRow;
+import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
 import com.auth.service.system.admin.service.admin.GrantTableService;
+import com.auth.service.system.admin.service.admin.SysUserService;
 import com.auth.service.system.admin.support.role.RoleGrantReferenceChecker;
 import com.auth.service.system.admin.support.user.UserOperationChecker;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
@@ -40,6 +41,9 @@ class SysUserRoleServiceImplTest {
 	private SysUserMapper sysUserMapper;
 
 	@Mock
+	private SysUserService sysUserService;
+
+	@Mock
 	private UserOperationChecker userOperationChecker;
 
 	@Mock
@@ -62,7 +66,7 @@ class SysUserRoleServiceImplTest {
 
 	@BeforeEach
 	void setUp() {
-		UserReferenceChecker userReferenceChecker = new UserReferenceChecker(sysUserMapper);
+		UserReferenceChecker userReferenceChecker = new UserReferenceChecker(sysUserMapper, sysUserService);
 		sysUserRoleService = new SysUserRoleServiceImpl(userReferenceChecker, userOperationChecker,
 				roleGrantReferenceChecker, grantTableService, userAuthorizationInvalidationTrigger);
 	}
@@ -71,12 +75,12 @@ class SysUserRoleServiceImplTest {
 	@DisplayName("查询已分配角色：用户存在时返回转换结果")
 	void listAssignedRolesReturnsRowsWhenUserExists() {
 		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
-		GrantTableAssignedRoleRow row = new GrantTableAssignedRoleRow();
+		RoleReferenceVO row = new RoleReferenceVO();
 		row.setRoleCode("CUSTOM_A");
 		row.setRoleName("业务角色A");
 		when(grantTableService.listBoundRoles(GrantTableSubjectType.USER, USER_ID)).thenReturn(List.of(row));
 
-		List<GrantTableAssignedRoleRow> rows = sysUserRoleService.listAssignedRoles(USER_ID);
+		List<RoleReferenceVO> rows = sysUserRoleService.listAssignedRoles(USER_ID);
 
 		assertThat(rows).hasSize(1);
 		assertThat(rows.get(0).getRoleCode()).isEqualTo("CUSTOM_A");

@@ -1,7 +1,6 @@
 package com.auth.module.platform.persistence.model;
 
 import com.auth.common.data.model.BaseEntity;
-import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Getter;
 import lombok.Setter;
@@ -88,11 +87,5 @@ public class UserEntity extends BaseEntity {
 	 * 权限版本号
 	 */
 	private Long permVersion;
-
-	/**
-	 * 逻辑删除(0=未删除,1=已删除)
-	 */
-	@TableLogic(value = "0", delval = "1")
-	private Boolean isDeleted;
 
 }

@@ -5,8 +5,8 @@ import com.auth.service.system.admin.mapper.menu.SysMenuPermissionMapper;
 import com.auth.service.system.admin.mapper.menu.SysMenuRoleMapper;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.admin.model.form.menu.SysMenuMoveForm;
-import com.auth.service.system.admin.model.po.permission.SysPermissionBoundRolePO;
-import com.auth.service.system.admin.model.po.role.SysRoleAssignedPermissionPO;
+import com.auth.service.system.admin.model.po.reference.PermissionReferencePO;
+import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.auth.service.system.admin.model.vo.menu.SysMenuDetailVO;
 import com.auth.service.system.admin.support.menu.MenuWebRouteTreeAssembler;
 import com.auth.service.system.admin.support.menu.MenuReferenceChecker;
@@ -23,7 +23,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Field;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -165,29 +164,29 @@ class SysMenuServiceImplTest {
 		entity.setTitle("用户管理");
 		when(menuReferenceChecker.getExisting(5L)).thenReturn(entity);
 
-		SysPermissionBoundRolePO boundRole = new SysPermissionBoundRolePO();
+		RoleReferencePO boundRole = new RoleReferencePO();
+		boundRole.setId(20L);
 		boundRole.setRoleCode("MENU_ADMIN");
 		boundRole.setRoleName("菜单管理员");
 		boundRole.setStatus(true);
-		boundRole.setCreateTime(LocalDateTime.of(2026, 6, 4, 10, 30, 0));
-		boundRole.setUpdateTime(LocalDateTime.of(2026, 6, 4, 10, 30, 0));
 		when(sysMenuRoleMapper.selectBoundRolesByMenuId(5L)).thenReturn(List.of(boundRole));
 
-		SysRoleAssignedPermissionPO boundPermission = new SysRoleAssignedPermissionPO();
+		PermissionReferencePO boundPermission = new PermissionReferencePO();
+		boundPermission.setId(30L);
 		boundPermission.setPermissionCode("sys:user:create");
 		boundPermission.setPermissionName("新增用户");
 		boundPermission.setPermissionType(0);
 		boundPermission.setStatus(true);
-		boundPermission.setCreateTime(LocalDateTime.of(2026, 6, 4, 11, 0, 0));
-		boundPermission.setUpdateTime(LocalDateTime.of(2026, 6, 4, 11, 0, 0));
 		when(sysMenuPermissionMapper.selectBoundPermissionsByMenuId(5L)).thenReturn(List.of(boundPermission));
 
 		SysMenuDetailVO detail = sysMenuQueryService.getDetail(5L);
 
 		assertThat(detail.getName()).isEqualTo("SystemUser");
 		assertThat(detail.getBoundRoles()).hasSize(1);
+		assertThat(detail.getBoundRoles().get(0).getId()).isEqualTo(20L);
 		assertThat(detail.getBoundRoles().get(0).getRoleCode()).isEqualTo("MENU_ADMIN");
 		assertThat(detail.getBoundPermissions()).hasSize(1);
+		assertThat(detail.getBoundPermissions().get(0).getId()).isEqualTo(30L);
 		assertThat(detail.getBoundPermissions().get(0).getPermissionCode()).isEqualTo("sys:user:create");
 		verify(sysMenuRoleMapper).selectBoundRolesByMenuId(5L);
 		verify(sysMenuPermissionMapper).selectBoundPermissionsByMenuId(5L);

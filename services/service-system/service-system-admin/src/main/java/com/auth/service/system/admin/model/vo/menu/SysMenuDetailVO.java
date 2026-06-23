@@ -9,8 +9,8 @@ import lombok.ToString;
 import java.io.Serial;
 import java.util.List;
 
-import com.auth.service.system.admin.model.vo.permission.SysPermissionBoundRoleItemVO;
-import com.auth.service.system.admin.model.vo.role.SysRoleBoundPermissionItemVO;
+import com.auth.service.system.admin.model.vo.reference.PermissionReferenceVO;
+import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
 
 /**
  * 菜单详情（在列表行基础上扩展路由元数据字段，与前端 {@code SysMenuDetailVO} 对齐）
@@ -64,9 +64,9 @@ public class SysMenuDetailVO extends SysMenuListVO {
 	private String activePath;
 
 	@Schema(title = "已绑定角色列表（sys_menu_role 反查）")
-	private List<SysPermissionBoundRoleItemVO> boundRoles;
+	private List<RoleReferenceVO> boundRoles;
 
 	@Schema(title = "已绑定权限列表（sys_menu_permission 反查）")
-	private List<SysRoleBoundPermissionItemVO> boundPermissions;
+	private List<PermissionReferenceVO> boundPermissions;
 
 }

@@ -6,11 +6,11 @@ import com.auth.service.system.admin.mapper.role.SysRoleMapper;
 import com.auth.service.system.admin.mapper.role.SysRolePermissionMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.form.role.SysRoleForm;
-import com.auth.service.system.admin.model.po.granttable.GrantTableBoundDeptPO;
-import com.auth.service.system.admin.model.po.granttable.GrantTableBoundPostPO;
-import com.auth.service.system.admin.model.po.granttable.GrantTableBoundUserPO;
 import com.auth.service.system.admin.model.po.permission.SysPermissionBoundMenuPO;
-import com.auth.service.system.admin.model.po.role.SysRoleAssignedPermissionPO;
+import com.auth.service.system.admin.model.po.reference.DeptReferencePO;
+import com.auth.service.system.admin.model.po.reference.PermissionReferencePO;
+import com.auth.service.system.admin.model.po.reference.PostReferencePO;
+import com.auth.service.system.admin.model.po.reference.UserReferencePO;
 import com.auth.service.system.admin.model.vo.role.SysRoleDetailVO;
 import com.auth.service.system.authorization.dispatch.trigger.RoleAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
@@ -25,7 +25,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Field;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -111,34 +110,30 @@ class SysRoleServiceImplTest {
 	void getDetailShouldIncludeBoundPermissions() {
 		when(sysRoleMapper.selectById(1L)).thenReturn(roleEntity(1L, "ADMIN"));
 
-		SysRoleAssignedPermissionPO permission = new SysRoleAssignedPermissionPO();
+		PermissionReferencePO permission = new PermissionReferencePO();
+		permission.setId(100L);
 		permission.setPermissionCode("sys:user:query");
 		permission.setPermissionName("用户查询");
 		permission.setPermissionType(1);
 		permission.setStatus(true);
-		permission.setCreateTime(LocalDateTime.of(2026, 6, 4, 11, 0, 0));
-		permission.setUpdateTime(LocalDateTime.of(2026, 6, 4, 11, 0, 0));
 		when(sysRolePermissionMapper.selectAssignedPermissionsByRoleId(1L)).thenReturn(List.of(permission));
 		when(sysMenuRoleMapper.selectBoundMenusByRoleId(1L)).thenReturn(List.of());
-		when(grantTableMapper.selectBoundUsersByRoleCode("ADMIN")).thenReturn(List.of());
-		when(grantTableMapper.selectBoundDeptsByRoleCode("ADMIN")).thenReturn(List.of());
-		when(grantTableMapper.selectBoundPostsByRoleCode("ADMIN")).thenReturn(List.of());
+		when(grantTableMapper.selectBoundUsersByRoleId(1L)).thenReturn(List.of());
+		when(grantTableMapper.selectBoundDeptsByRoleId(1L)).thenReturn(List.of());
+		when(grantTableMapper.selectBoundPostsByRoleId(1L)).thenReturn(List.of());
 
 		SysRoleDetailVO detail = sysRoleQueryService.getDetail(1L);
 
 		assertThat(detail.getRoleCode()).isEqualTo("ADMIN");
 		assertThat(detail.getBoundPermissions()).hasSize(1);
+		assertThat(detail.getBoundPermissions().get(0).getId()).isEqualTo(100L);
 		assertThat(detail.getBoundPermissions().get(0).getPermissionCode()).isEqualTo("sys:user:query");
 		assertThat(detail.getBoundPermissions().get(0).getPermissionType()).isEqualTo(1);
-		assertThat(detail.getBoundPermissions().get(0).getCreateTime())
-			.isEqualTo(LocalDateTime.of(2026, 6, 4, 11, 0, 0));
-		assertThat(detail.getBoundPermissions().get(0).getUpdateTime())
-			.isEqualTo(LocalDateTime.of(2026, 6, 4, 11, 0, 0));
 		verify(sysRolePermissionMapper).selectAssignedPermissionsByRoleId(1L);
 		verify(sysMenuRoleMapper).selectBoundMenusByRoleId(1L);
-		verify(grantTableMapper).selectBoundUsersByRoleCode("ADMIN");
-		verify(grantTableMapper).selectBoundDeptsByRoleCode("ADMIN");
-		verify(grantTableMapper).selectBoundPostsByRoleCode("ADMIN");
+		verify(grantTableMapper).selectBoundUsersByRoleId(1L);
+		verify(grantTableMapper).selectBoundDeptsByRoleId(1L);
+		verify(grantTableMapper).selectBoundPostsByRoleId(1L);
 		verify(auditUserDisplayService).enrichAuditUsernames(anyList());
 	}
 
@@ -156,35 +151,27 @@ class SysRoleServiceImplTest {
 		boundMenu.setStatus(true);
 		when(sysMenuRoleMapper.selectBoundMenusByRoleId(2L)).thenReturn(List.of(boundMenu));
 
-		GrantTableBoundUserPO boundUser = new GrantTableBoundUserPO();
-		boundUser.setUserId(100L);
+		UserReferencePO boundUser = new UserReferencePO();
+		boundUser.setId(100L);
 		boundUser.setUsername("alice");
 		boundUser.setNickname("Alice");
 		boundUser.setEmployeeNo("E001");
-		boundUser.setUserStatus(1);
-		boundUser.setCreateTime(LocalDateTime.of(2026, 6, 4, 9, 0, 0));
-		boundUser.setUpdateTime(LocalDateTime.of(2026, 6, 4, 9, 30, 0));
-		when(grantTableMapper.selectBoundUsersByRoleCode("EDITOR")).thenReturn(List.of(boundUser));
+		boundUser.setStatus(1);
+		when(grantTableMapper.selectBoundUsersByRoleId(2L)).thenReturn(List.of(boundUser));
 
-		GrantTableBoundDeptPO boundDept = new GrantTableBoundDeptPO();
-		boundDept.setDeptId(20L);
+		DeptReferencePO boundDept = new DeptReferencePO();
+		boundDept.setId(20L);
 		boundDept.setDeptCode("RD");
 		boundDept.setDeptName("研发部");
 		boundDept.setStatus(true);
-		boundDept.setCreateTime(LocalDateTime.of(2026, 6, 4, 10, 0, 0));
-		boundDept.setUpdateTime(LocalDateTime.of(2026, 6, 4, 10, 0, 0));
-		when(grantTableMapper.selectBoundDeptsByRoleCode("EDITOR")).thenReturn(List.of(boundDept));
+		when(grantTableMapper.selectBoundDeptsByRoleId(2L)).thenReturn(List.of(boundDept));
 
-		GrantTableBoundPostPO boundPost = new GrantTableBoundPostPO();
-		boundPost.setPostId(30L);
+		PostReferencePO boundPost = new PostReferencePO();
+		boundPost.setId(30L);
 		boundPost.setPostCode("DEV");
 		boundPost.setPostName("开发岗");
 		boundPost.setStatus(true);
-		boundPost.setDeptId(20L);
-		boundPost.setDeptName("研发部");
-		boundPost.setCreateTime(LocalDateTime.of(2026, 6, 4, 11, 0, 0));
-		boundPost.setUpdateTime(LocalDateTime.of(2026, 6, 4, 11, 0, 0));
-		when(grantTableMapper.selectBoundPostsByRoleCode("EDITOR")).thenReturn(List.of(boundPost));
+		when(grantTableMapper.selectBoundPostsByRoleId(2L)).thenReturn(List.of(boundPost));
 
 		when(sysRolePermissionMapper.selectAssignedPermissionsByRoleId(2L)).thenReturn(List.of());
 
@@ -193,17 +180,19 @@ class SysRoleServiceImplTest {
 		assertThat(detail.getBoundMenus()).hasSize(1);
 		assertThat(detail.getBoundMenus().get(0).getTitle()).isEqualTo("用户管理");
 		assertThat(detail.getBoundUsers()).hasSize(1);
+		assertThat(detail.getBoundUsers().get(0).getId()).isEqualTo(100L);
 		assertThat(detail.getBoundUsers().get(0).getUsername()).isEqualTo("alice");
 		assertThat(detail.getBoundDepts()).hasSize(1);
+		assertThat(detail.getBoundDepts().get(0).getId()).isEqualTo(20L);
 		assertThat(detail.getBoundDepts().get(0).getDeptCode()).isEqualTo("RD");
 		assertThat(detail.getBoundPosts()).hasSize(1);
+		assertThat(detail.getBoundPosts().get(0).getId()).isEqualTo(30L);
 		assertThat(detail.getBoundPosts().get(0).getPostCode()).isEqualTo("DEV");
-		assertThat(detail.getBoundPosts().get(0).getDeptName()).isEqualTo("研发部");
 
 		verify(sysMenuRoleMapper).selectBoundMenusByRoleId(2L);
-		verify(grantTableMapper).selectBoundUsersByRoleCode("EDITOR");
-		verify(grantTableMapper).selectBoundDeptsByRoleCode("EDITOR");
-		verify(grantTableMapper).selectBoundPostsByRoleCode("EDITOR");
+		verify(grantTableMapper).selectBoundUsersByRoleId(2L);
+		verify(grantTableMapper).selectBoundDeptsByRoleId(2L);
+		verify(grantTableMapper).selectBoundPostsByRoleId(2L);
 	}
 
 	@Test

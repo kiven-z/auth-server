@@ -1,10 +1,8 @@
 package com.auth.service.system.admin.service.admin;
 
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
-import com.auth.service.system.admin.model.entity.GrantTableEntity;
 import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
-import com.auth.service.system.admin.model.vo.granttable.GrantTableAssignedRoleRow;
-import com.baomidou.mybatisplus.extension.service.IService;
+import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
 
 import java.util.List;
 
@@ -13,35 +11,35 @@ import java.util.List;
  *
  * @author Bunny
  */
-public interface GrantTableService extends IService<GrantTableEntity> {
+public interface GrantTableService {
 
 	/**
 	 * 查询主体已分配角色
-	 * @param subjectType 授权主体类型
+	 * @param subjectType 主体类型
 	 * @param subjectId 主体 ID
-	 * @return 已分配角色行列表
+	 * @return 已分配角色回显列表
 	 */
-	List<GrantTableAssignedRoleRow> listAssignedRoles(GrantTableSubjectType subjectType, Long subjectId);
+	List<RoleReferenceVO> listAssignedRoles(GrantTableSubjectType subjectType, Long subjectId);
 
 	/**
-	 * 按主体查询已绑定角色
-	 * @param subjectType 授权主体类型
+	 * 查询主体已绑定角色
+	 * @param subjectType 主体类型
 	 * @param subjectId 主体 ID
-	 * @return 已分配角色行列表
+	 * @return 已绑定角色回显列表
 	 */
-	List<GrantTableAssignedRoleRow> listBoundRoles(GrantTableSubjectType subjectType, Long subjectId);
+	List<RoleReferenceVO> listBoundRoles(GrantTableSubjectType subjectType, Long subjectId);
 
 	/**
-	 * 全量覆盖组织类主体（DEPT/POST）在 grant_table 中的角色授权
-	 * @param subjectType 授权主体类型
+	 * 组织类主体全量覆盖角色授权
+	 * @param subjectType 主体类型（DEPT/POST）
 	 * @param subjectId 主体 ID
 	 * @param form 角色 ID 列表
 	 */
 	void replaceOrgSubjectRoles(GrantTableSubjectType subjectType, Long subjectId, GrantTableAssignRoleForm form);
 
 	/**
-	 * 全量覆盖指定主体的角色授权边（仅持久化，不含业务校验与失效触发）
-	 * @param subjectType 主体类型
+	 * 全量覆盖主体角色 grant 行
+	 * @param subjectType 主体类型字符串
 	 * @param subjectId 主体 ID
 	 * @param roleIds 角色 ID 列表
 	 */

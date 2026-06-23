@@ -2,6 +2,10 @@ package com.auth.service.system.admin.model.vo.role;
 
 import com.auth.common.core.model.response.BaseResponse;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionBoundMenuItemVO;
+import com.auth.service.system.admin.model.vo.reference.DeptReferenceVO;
+import com.auth.service.system.admin.model.vo.reference.PermissionReferenceVO;
+import com.auth.service.system.admin.model.vo.reference.PostReferenceVO;
+import com.auth.service.system.admin.model.vo.reference.UserReferenceVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -42,18 +46,18 @@ public class SysRoleDetailVO extends BaseResponse {
 	private String remark;
 
 	@Schema(title = "已分配权限列表（sys_role_permission 正查）")
-	private List<SysRoleBoundPermissionItemVO> boundPermissions;
+	private List<PermissionReferenceVO> boundPermissions;
 
 	@Schema(title = "已绑定菜单列表（sys_menu_role 反查）")
 	private List<SysPermissionBoundMenuItemVO> boundMenus;
 
 	@Schema(title = "已授权用户列表（grant_table 反查）")
-	private List<SysRoleBoundUserItemVO> boundUsers;
+	private List<UserReferenceVO> boundUsers;
 
 	@Schema(title = "已授权部门列表（grant_table 反查）")
-	private List<SysRoleBoundDeptItemVO> boundDepts;
+	private List<DeptReferenceVO> boundDepts;
 
 	@Schema(title = "已授权岗位列表（grant_table 反查）")
-	private List<SysRoleBoundPostItemVO> boundPosts;
+	private List<PostReferenceVO> boundPosts;
 
 }

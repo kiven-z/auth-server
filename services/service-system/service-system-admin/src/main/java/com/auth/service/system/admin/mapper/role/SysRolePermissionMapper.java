@@ -1,8 +1,8 @@
 package com.auth.service.system.admin.mapper.role;
 
 import com.auth.service.system.admin.model.entity.SysRolePermissionEntity;
-import com.auth.service.system.admin.model.po.permission.SysPermissionBoundRolePO;
-import com.auth.service.system.admin.model.po.role.SysRoleAssignedPermissionPO;
+import com.auth.service.system.admin.model.po.reference.PermissionReferencePO;
+import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
@@ -30,14 +30,14 @@ public interface SysRolePermissionMapper extends BaseMapper<SysRolePermissionEnt
 	 * @param roleId 角色 ID
 	 * @return 已分配权限列表
 	 */
-	List<SysRoleAssignedPermissionPO> selectAssignedPermissionsByRoleId(@Param("roleId") Long roleId);
+	List<PermissionReferencePO> selectAssignedPermissionsByRoleId(@Param("roleId") Long roleId);
 
 	/**
 	 * 按权限 ID 反查已绑定角色
 	 * @param permissionId 权限 ID
 	 * @return 已绑定角色列表
 	 */
-	List<SysPermissionBoundRolePO> selectBoundRolesByPermissionId(@Param("permissionId") Long permissionId);
+	List<RoleReferencePO> selectBoundRolesByPermissionId(@Param("permissionId") Long permissionId);
 
 	/**
 	 * 批量插入角色权限关联

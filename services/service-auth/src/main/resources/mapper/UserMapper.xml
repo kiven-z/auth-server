@@ -23,12 +23,11 @@
         create_user,
         update_user,
         version,
-        remark,
-        is_deleted
+        remark
         FROM sys_user
-        WHERE is_deleted = 0
+        <where>
         <if test="activeOnly">
-            AND status = 1
+            status = 1
         </if>
         <choose>
             <when test="dimension.name() == 'USERNAME'">
@@ -41,14 +40,14 @@
                 AND phone = #{value}
             </when>
         </choose>
+        </where>
     </select>
 
     <!-- 批量查询用户失效分桶状态 -->
     <select id="selectInvalidationStatesByUserIds"
             resultType="com.auth.service.auth.infrastructure.persistence.projection.UserInvalidationStateProjection">
         SELECT id AS userId,
-        status,
-        is_deleted
+        status
         FROM sys_user
         WHERE id IN
         <foreach collection="userIds" item="userId" open="(" separator="," close=")">

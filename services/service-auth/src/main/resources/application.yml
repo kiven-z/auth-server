@@ -19,8 +19,9 @@ spring:
   config:
     import:
       - nacos:common-config.yaml?group=AUTH_COMMON
+      - nacos:${spring.application.name}-${spring.profiles.active}.yaml?group=${spring.cloud.nacos.config.group}
   profiles:
-    active: test
+    active: dev
 
   cloud:
     nacos:
@@ -43,27 +44,10 @@ spring:
   messages:
     encoding: UTF-8
     cache-duration: 3600
-    # 如果当前语言不存在是否应用系统语言
     fallback-to-system-locale: false
-    # basename: i18n/messages
 
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
-
-auth:
-  auth:
-    invalidation:
-      batch-size: 500
-      # role_policy 已按 role_id / policy_id 关联；失效入参仍为 policy_code，SQL 经 definition 桥接
-      policy-role-bridge-enabled: false
-      processing-claim-timeout-minutes: 30
-      processing-claim-cleanup-enabled: true
-      processing-claim-cleanup-interval-ms: 300000
-      processing-claim-cleanup-batch-size: 100
-      success-retention-days: 90
-      success-cleanup-enabled: true
-      success-cleanup-interval-ms: 86400000
-      success-cleanup-batch-size: 500
 
 mybatis-plus:
   mapper-locations:
@@ -72,7 +56,6 @@ mybatis-plus:
     db-config:
       id-type: assign_id
 
-# 默认关闭 knife4j
 knife4j:
   basic:
     enable: false

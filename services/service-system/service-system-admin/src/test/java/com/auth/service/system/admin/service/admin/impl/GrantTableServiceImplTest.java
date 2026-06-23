@@ -8,8 +8,8 @@ import com.auth.service.system.admin.mapper.role.GrantTableMapper;
 import com.auth.service.system.admin.model.entity.GrantTableEntity;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
-import com.auth.service.system.admin.model.po.granttable.GrantTableBoundRolePO;
-import com.auth.service.system.admin.model.vo.granttable.GrantTableAssignedRoleRow;
+import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
+import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
 import com.auth.service.system.admin.support.granttable.GrantTableSubjectExistenceVerifier;
 import com.auth.service.system.admin.support.post.PostReferenceChecker;
 import com.auth.service.system.admin.support.role.RoleGrantReferenceChecker;
@@ -88,18 +88,18 @@ class GrantTableServiceImplTest {
 	@DisplayName("查询已分配角色：主体存在时返回转换结果")
 	void listAssignedRolesReturnsRowsWhenSubjectExists() {
 		when(sysPostMapper.selectById(SUBJECT_ID)).thenReturn(activePost());
-		GrantTableBoundRolePO boundRole = new GrantTableBoundRolePO();
-		boundRole.setRoleId(101L);
+		RoleReferencePO boundRole = new RoleReferencePO();
+		boundRole.setId(101L);
 		boundRole.setRoleCode("CUSTOM_A");
 		boundRole.setRoleName("业务角色A");
+		boundRole.setStatus(true);
 		when(grantTableMapper.selectBoundRolesBySubject(GrantTableSubjectType.POST.name(), SUBJECT_ID))
 			.thenReturn(List.of(boundRole));
 
-		List<GrantTableAssignedRoleRow> rows = grantTableService.listAssignedRoles(GrantTableSubjectType.POST,
-				SUBJECT_ID);
+		List<RoleReferenceVO> rows = grantTableService.listAssignedRoles(GrantTableSubjectType.POST, SUBJECT_ID);
 
 		assertThat(rows).hasSize(1);
-		assertThat(rows.get(0).getRoleId()).isEqualTo(101L);
+		assertThat(rows.get(0).getId()).isEqualTo(101L);
 		assertThat(rows.get(0).getRoleCode()).isEqualTo("CUSTOM_A");
 		assertThat(rows.get(0).getRoleName()).isEqualTo("业务角色A");
 	}
@@ -108,18 +108,18 @@ class GrantTableServiceImplTest {
 	@DisplayName("查询已分配角色：包含非主体授权类型角色时仍返回")
 	void listAssignedRolesReturnsLinkedRoleRegardlessOfType() {
 		when(sysPostMapper.selectById(SUBJECT_ID)).thenReturn(activePost());
-		GrantTableBoundRolePO menuRole = new GrantTableBoundRolePO();
-		menuRole.setRoleId(102L);
+		RoleReferencePO menuRole = new RoleReferencePO();
+		menuRole.setId(102L);
 		menuRole.setRoleCode("MENU_ADMIN");
 		menuRole.setRoleName("菜单管理员");
+		menuRole.setStatus(true);
 		when(grantTableMapper.selectBoundRolesBySubject(GrantTableSubjectType.POST.name(), SUBJECT_ID))
 			.thenReturn(List.of(menuRole));
 
-		List<GrantTableAssignedRoleRow> rows = grantTableService.listAssignedRoles(GrantTableSubjectType.POST,
-				SUBJECT_ID);
+		List<RoleReferenceVO> rows = grantTableService.listAssignedRoles(GrantTableSubjectType.POST, SUBJECT_ID);
 
 		assertThat(rows).hasSize(1);
-		assertThat(rows.get(0).getRoleId()).isEqualTo(102L);
+		assertThat(rows.get(0).getId()).isEqualTo(102L);
 		assertThat(rows.get(0).getRoleCode()).isEqualTo("MENU_ADMIN");
 		assertThat(rows.get(0).getRoleName()).isEqualTo("菜单管理员");
 	}

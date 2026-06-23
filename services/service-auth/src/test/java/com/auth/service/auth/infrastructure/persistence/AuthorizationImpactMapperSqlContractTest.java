@@ -24,18 +24,24 @@ class AuthorizationImpactMapperSqlContractTest {
 	}
 
 	@Test
-	@DisplayName("权限码桥接不应按权限启用状态过滤")
-	void permissionCodeBridgeShouldNotFilterByPermissionStatus() throws IOException {
+	@DisplayName("权限码桥接：经 permission_id/role_id 关联，但不按权限启用状态过滤")
+	void permissionCodeBridgeShouldJoinByIdWithoutStatusFilter() throws IOException {
 		String xml = readClasspathText();
 
-		// 反查桥接只需要 sys_role_permission；不应依赖 sys_permission.status=1
-		assertThat(xml).contains("selectRoleCodesByPermissionCodes")
-			.doesNotContain("JOIN sys_permission")
-			.doesNotContain("INNER JOIN sys_permission")
+		int selectStart = xml.indexOf("<select id=\"selectRoleCodesByPermissionCodes\"");
+		assertThat(selectStart).isNotNegative();
+		int selectEnd = xml.indexOf("</select>", selectStart);
+		String selectBlock = xml.substring(selectStart, selectEnd);
+
+		// grant 表已改为 id 关联，须 join sys_permission / sys_role 才能按 permission_code 桥接
+		assertThat(selectBlock).contains("selectRoleCodesByPermissionCodes")
+			.contains("sys_role_permission rp")
+			.contains("INNER JOIN sys_permission p ON p.id = rp.permission_id")
+			.contains("INNER JOIN sys_role r ON r.id = rp.role_id")
+			.contains("p.permission_code IN")
 			// 注意：XML 中存在 ud.status / up.status；这里只禁止 sys_permission 的别名 p.status
-			.doesNotContain(" p.status")
-			.doesNotContain(" p.status ")
-			.doesNotContain("p.status =");
+			.doesNotContain("p.status")
+			.doesNotContain(" p.status ");
 	}
 
 }

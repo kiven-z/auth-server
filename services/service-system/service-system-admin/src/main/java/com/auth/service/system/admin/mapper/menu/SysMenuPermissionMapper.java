@@ -1,10 +1,9 @@
 package com.auth.service.system.admin.mapper.menu;
 
 import com.auth.service.system.admin.model.entity.SysMenuPermissionEntity;
-import com.auth.service.system.admin.model.po.menu.SysMenuAssignedPermissionPO;
 import com.auth.service.system.admin.model.po.menu.SysMenuPermissionLinkRowPO;
 import com.auth.service.system.admin.model.po.permission.SysPermissionBoundMenuPO;
-import com.auth.service.system.admin.model.po.role.SysRoleAssignedPermissionPO;
+import com.auth.service.system.admin.model.po.reference.PermissionReferencePO;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
@@ -25,7 +24,7 @@ public interface SysMenuPermissionMapper extends BaseMapper<SysMenuPermissionEnt
 	 * @param menuId 菜单ID
 	 * @return 已分配权限 DTO 列表
 	 */
-	List<SysMenuAssignedPermissionPO> selectAssignedPermissionByMenuId(@Param("menuId") Long menuId);
+	List<PermissionReferencePO> selectAssignedPermissionByMenuId(@Param("menuId") Long menuId);
 
 	/**
 	 * 批量查询菜单下已启用、未删除的按钮类权限关联
@@ -46,7 +45,7 @@ public interface SysMenuPermissionMapper extends BaseMapper<SysMenuPermissionEnt
 	 * @param menuId 菜单 ID
 	 * @return 已绑定权限列表
 	 */
-	List<SysRoleAssignedPermissionPO> selectBoundPermissionsByMenuId(@Param("menuId") Long menuId);
+	List<PermissionReferencePO> selectBoundPermissionsByMenuId(@Param("menuId") Long menuId);
 
 	/**
 	 * 删除菜单-权限关联

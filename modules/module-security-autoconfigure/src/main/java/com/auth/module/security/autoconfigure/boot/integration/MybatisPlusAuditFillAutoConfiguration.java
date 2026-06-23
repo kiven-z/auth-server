@@ -33,8 +33,6 @@ public class MybatisPlusAuditFillAutoConfiguration implements BaseMybatisPlusCon
 	 */
 	@Override
 	public void insertFill(MetaObject metaObject) {
-		// 设置属性值
-		this.strictInsertFill(metaObject, "isDeleted", Integer.class, 0);
 		this.strictInsertFill(metaObject, "version", Long.class, 0L);
 		this.setFieldValByName(CREATE_TIME, LocalDateTime.now(), metaObject);
 		this.setFieldValByName(UPDATE_TIME, LocalDateTime.now(), metaObject);

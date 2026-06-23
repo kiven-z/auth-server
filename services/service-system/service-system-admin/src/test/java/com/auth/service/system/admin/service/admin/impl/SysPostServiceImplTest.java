@@ -10,8 +10,8 @@ import com.auth.service.system.admin.mapper.post.SysPostQueryMapper;
 import com.auth.service.system.admin.mapper.role.GrantTableMapper;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.form.post.SysPostForm;
-import com.auth.service.system.admin.model.po.granttable.GrantTableBoundRolePO;
-import com.auth.service.system.admin.model.po.post.SysPostBoundDeptPO;
+import com.auth.service.system.admin.model.po.reference.DeptReferencePO;
+import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.auth.service.system.admin.model.po.post.SysPostBoundUserPO;
 import com.auth.service.system.admin.model.po.post.SysPostPageRowPO;
 import com.auth.service.system.admin.model.po.post.SysPostSearchItemPO;
@@ -206,18 +206,17 @@ class SysPostServiceImplTest {
 		entity.setOrderNum(1);
 		entity.setRemark("备注");
 
-		SysPostBoundDeptPO boundDept = new SysPostBoundDeptPO();
-		boundDept.setDeptId(2L);
+		DeptReferencePO boundDept = new DeptReferencePO();
+		boundDept.setId(2L);
 		boundDept.setDeptCode("RD");
 		boundDept.setDeptName("研发部");
 		boundDept.setStatus(true);
-		boundDept.setParentId(0L);
 
 		SysPostBoundUserPO boundUser = new SysPostBoundUserPO();
-		boundUser.setUserId(100L);
+		boundUser.setId(100L);
 		boundUser.setUsername("alice");
 
-		GrantTableBoundRolePO boundRole = new GrantTableBoundRolePO();
+		RoleReferencePO boundRole = new RoleReferencePO();
 		boundRole.setRoleCode("CUSTOM_A");
 		boundRole.setRoleName("业务角色A");
 

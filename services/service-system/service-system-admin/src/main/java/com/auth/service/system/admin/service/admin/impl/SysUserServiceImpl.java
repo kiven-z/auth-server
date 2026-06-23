@@ -6,6 +6,7 @@ import com.auth.common.data.model.enums.UserStatus;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.admin.convert.sys.SysUserConverter;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
+import com.auth.service.system.admin.mapper.role.GrantTableMapper;
 import com.auth.service.system.admin.mapper.user.SysUserMapper;
 import com.auth.service.system.admin.model.form.user.SysUserBatchStatusForm;
 import com.auth.service.system.admin.model.form.user.SysUserForm;
@@ -44,6 +45,8 @@ import java.util.Objects;
 @Transactional(rollbackFor = Exception.class)
 public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> implements SysUserService {
 
+	private static final String GRANT_SUBJECT_TYPE_USER = "USER";
+
 	private final AuditUserDisplayService auditUserDisplayService;
 
 	private final UserOperationChecker userOperationChecker;
@@ -53,6 +56,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 	private final PasswordEncoder passwordEncoder;
 
 	private final UserSessionRevocationTrigger userSessionRevocationTrigger;
+
+	private final GrantTableMapper grantTableMapper;
 
 	/**
 	 * {@inheritDoc}
@@ -72,6 +77,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 	 */
 	@Override
 	public void create(SysUserForm form) {
+		userReferenceChecker.assertUniqueBusinessKeys(form, null);
+
 		UserEntity entity = SysUserConverter.INSTANCE.toEntity(form);
 		String initialPassword = form.getInitialPassword();
 		entity.setPassword(passwordEncoder.encode(initialPassword));
@@ -92,6 +99,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 
 		List<Long> userIds = List.of(id);
 		userOperationChecker.requireOperable(userIds);
+
+		userReferenceChecker.assertUniqueBusinessKeys(form, id);
 
 		// 敏感字段变更时踢出全部会话
 		boolean revoke = FieldChangeSupport.anyChanged(
@@ -127,6 +136,9 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 
 		userOperationChecker.requireOperable(idsToDelete);
 
+		for (Long userId : idsToDelete) {
+			grantTableMapper.deleteBySubject(GRANT_SUBJECT_TYPE_USER, userId);
+		}
 		removeByIds(idsToDelete);
 		userSessionRevocationTrigger.revokeAllSessionsAfterCommit(idsToDelete);
 	}

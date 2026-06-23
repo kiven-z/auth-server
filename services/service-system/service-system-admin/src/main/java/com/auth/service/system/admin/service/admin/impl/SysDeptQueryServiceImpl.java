@@ -2,16 +2,16 @@ package com.auth.service.system.admin.service.admin.impl;
 
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
-import com.auth.service.system.admin.convert.grant.GrantTableSubjectRoleConverter;
+import com.auth.service.system.admin.convert.reference.ReferenceConverter;
 import com.auth.service.system.admin.convert.sys.SysDeptConverter;
 import com.auth.service.system.admin.mapper.dept.SysDeptMapper;
 import com.auth.service.system.admin.mapper.dept.SysDeptQueryMapper;
 import com.auth.service.system.admin.mapper.role.GrantTableMapper;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
-import com.auth.service.system.admin.model.po.dept.SysDeptBoundPostPO;
 import com.auth.service.system.admin.model.po.dept.SysDeptBoundUserPO;
 import com.auth.service.system.admin.model.po.dept.SysDeptPageRowPO;
-import com.auth.service.system.admin.model.po.granttable.GrantTableBoundRolePO;
+import com.auth.service.system.admin.model.po.reference.PostReferencePO;
+import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.auth.service.system.admin.model.query.dept.SysDeptListQuery;
 import com.auth.service.system.admin.model.query.dept.SysDeptPageQuery;
 import com.auth.service.system.admin.model.vo.dept.SysDeptDetailVO;
@@ -80,14 +80,14 @@ public class SysDeptQueryServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptE
 
 		SysDeptDetailVO detail = SysDeptConverter.INSTANCE.toDetailVo(entity);
 		List<SysDeptBoundUserPO> boundUsers = sysDeptQueryMapper.selectBoundUsersByDeptId(id);
-		detail.setBoundUsers(SysDeptConverter.INSTANCE.toBoundUserItemList(boundUsers));
+		detail.setBoundUsers(ReferenceConverter.INSTANCE.toDeptBoundUserReferenceList(boundUsers));
 
-		List<SysDeptBoundPostPO> boundPosts = sysDeptQueryMapper.selectBoundPostsByDeptId(id);
-		detail.setBoundPosts(SysDeptConverter.INSTANCE.toBoundPostItemList(boundPosts));
+		List<PostReferencePO> boundPosts = sysDeptQueryMapper.selectBoundPostsByDeptId(id);
+		detail.setBoundPosts(ReferenceConverter.INSTANCE.toPostReferenceList(boundPosts));
 
-		List<GrantTableBoundRolePO> poList = grantTableMapper
-			.selectBoundRolesBySubject(GrantTableSubjectType.DEPT.name(), id);
-		detail.setBoundRoles(GrantTableSubjectRoleConverter.INSTANCE.toBoundRoleItemList(poList));
+		List<RoleReferencePO> poList = grantTableMapper.selectBoundRolesBySubject(GrantTableSubjectType.DEPT.name(),
+				id);
+		detail.setBoundRoles(ReferenceConverter.INSTANCE.toRoleReferenceList(poList));
 
 		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail));
 		return detail;

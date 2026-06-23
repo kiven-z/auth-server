@@ -8,6 +8,7 @@ import com.auth.service.system.admin.model.po.user.UserDeptProfilePO;
 import com.auth.service.system.admin.model.po.user.UserPostProfilePO;
 import com.auth.service.system.admin.model.po.user.UserSearchItemPO;
 import com.auth.service.system.admin.model.vo.user.SysUserProfileVO;
+import com.auth.service.system.admin.service.admin.SysUserService;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
@@ -44,11 +45,14 @@ class SysUserQueryServiceImplTest {
 	@Mock
 	private SysUserMapper sysUserMapper;
 
+	@Mock
+	private SysUserService sysUserService;
+
 	private SysUserQueryServiceImpl sysUserQueryService;
 
 	@BeforeEach
 	void setUp() throws Exception {
-		UserReferenceChecker userReferenceChecker = new UserReferenceChecker(sysUserMapper);
+		UserReferenceChecker userReferenceChecker = new UserReferenceChecker(sysUserMapper, sysUserService);
 		sysUserQueryService = new SysUserQueryServiceImpl(userReferenceChecker);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
@@ -91,13 +95,12 @@ class SysUserQueryServiceImplTest {
 		when(sysUserMapper.selectById(1L)).thenReturn(user);
 
 		UserDeptProfilePO deptRow = new UserDeptProfilePO();
-		deptRow.setDeptId(10L);
+		deptRow.setId(10L);
 		deptRow.setDeptName("研发部");
 		when(sysUserQueryMapper.selectDeptProfileByUserId(1L)).thenReturn(List.of(deptRow));
 
 		UserPostProfilePO postRow = new UserPostProfilePO();
-		postRow.setId(100L);
-		postRow.setPostId(20L);
+		postRow.setId(20L);
 		postRow.setPostName("工程师");
 		when(sysUserQueryMapper.selectPostProfileByUserId(1L)).thenReturn(List.of(postRow));
 

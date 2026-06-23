@@ -2,6 +2,7 @@ package com.auth.service.system.admin.service.admin.impl;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.platform.persistence.model.UserEntity;
+import com.auth.service.system.admin.convert.reference.ReferenceConverter;
 import com.auth.service.system.admin.convert.sys.SysUserProfileConverter;
 import com.auth.service.system.admin.mapper.user.SysUserQueryMapper;
 import com.auth.service.system.admin.model.po.user.UserDeptProfilePO;
@@ -46,10 +47,10 @@ public class SysUserQueryServiceImpl extends ServiceImpl<SysUserQueryMapper, Use
 		SysUserProfileVO response = SysUserProfileConverter.INSTANCE.toProfileVo(user);
 
 		List<UserDeptProfilePO> deptProfileList = baseMapper.selectDeptProfileByUserId(userId);
-		response.setDeptList(SysUserProfileConverter.INSTANCE.toDeptItemVoList(deptProfileList));
+		response.setDeptList(ReferenceConverter.INSTANCE.toUserDeptReferenceList(deptProfileList));
 
 		List<UserPostProfilePO> postProfileList = baseMapper.selectPostProfileByUserId(userId);
-		response.setPostList(SysUserProfileConverter.INSTANCE.toPostItemVoList(postProfileList));
+		response.setPostList(ReferenceConverter.INSTANCE.toUserPostReferenceList(postProfileList));
 
 		return response;
 	}

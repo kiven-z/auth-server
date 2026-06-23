@@ -5,7 +5,7 @@ import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
-import com.auth.service.system.admin.model.vo.granttable.GrantTableAssignedRoleRow;
+import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
 import com.auth.service.system.admin.service.admin.SysUserRoleService;
 import com.auth.service.system.common.model.SystemAuditBizModule;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,8 +35,8 @@ public class SysUserRoleController {
 	@Operation(summary = "查询用户已分配角色")
 	@PreAuthorize("@auth.decide('sysUserRole:query')")
 	@GetMapping("/{userId}")
-	public Result<List<GrantTableAssignedRoleRow>> listRoles(@PathVariable("userId") Long userId) {
-		List<GrantTableAssignedRoleRow> rows = sysUserRoleService.listAssignedRoles(userId);
+	public Result<List<RoleReferenceVO>> listRoles(@PathVariable("userId") Long userId) {
+		List<RoleReferenceVO> rows = sysUserRoleService.listAssignedRoles(userId);
 		return Result.success(rows);
 	}
 

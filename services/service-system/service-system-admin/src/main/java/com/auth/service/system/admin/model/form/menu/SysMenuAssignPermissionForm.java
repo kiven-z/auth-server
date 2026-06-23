@@ -10,7 +10,7 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * 菜单分配权限（按钮/UI 权限码）
+ * 菜单分配权限
  *
  * @author Bunny
  */
@@ -22,8 +22,8 @@ public class SysMenuAssignPermissionForm implements Serializable {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
-	@Schema(title = "权限编码列表（全量覆盖）", requiredMode = Schema.RequiredMode.REQUIRED)
-	@NotNull(message = "permissionCodes is required")
-	private List<String> permissionCodes;
+	@Schema(title = "权限 ID 列表（全量覆盖）", requiredMode = Schema.RequiredMode.REQUIRED)
+	@NotNull(message = "permissionIds is required")
+	private List<Long> permissionIds;
 
 }

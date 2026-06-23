@@ -1,17 +1,17 @@
 package com.auth.service.system.admin.service.admin.impl;
 
 import cn.hutool.core.collection.CollUtil;
-import com.auth.service.system.admin.convert.menu.SysMenuManageConverter;
+import com.auth.service.system.admin.convert.reference.ReferenceConverter;
 import com.auth.service.system.admin.mapper.menu.SysMenuMapper;
 import com.auth.service.system.admin.mapper.menu.SysMenuPermissionMapper;
 import com.auth.service.system.admin.mapper.menu.SysMenuRoleMapper;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.admin.model.form.menu.SysMenuAssignPermissionForm;
 import com.auth.service.system.admin.model.form.menu.SysMenuAssignRoleForm;
-import com.auth.service.system.admin.model.po.menu.SysMenuAssignedPermissionPO;
-import com.auth.service.system.admin.model.po.menu.SysMenuAssignedRolePO;
-import com.auth.service.system.admin.model.vo.menu.SysMenuAssignedPermissionRow;
-import com.auth.service.system.admin.model.vo.menu.SysMenuAssignedRoleRow;
+import com.auth.service.system.admin.model.po.reference.PermissionReferencePO;
+import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
+import com.auth.service.system.admin.model.vo.reference.ext.MenuAssignedPermissionReferenceVO;
+import com.auth.service.system.admin.model.vo.reference.ext.MenuAssignedRoleReferenceVO;
 import com.auth.service.system.admin.service.admin.SysMenuManageService;
 import com.auth.service.system.admin.support.permission.PermissionReferenceChecker;
 import com.auth.service.system.admin.support.role.RoleGrantReferenceChecker;
@@ -55,10 +55,10 @@ public class SysMenuManageServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu
 	 * {@inheritDoc}
 	 */
 	@Override
-	public List<SysMenuAssignedRoleRow> listAssignedRoles(Long menuId) {
-		List<SysMenuAssignedRolePO> dtoList = sysMenuRoleMapper.selectAssignedRolesByMenuId(menuId);
+	public List<MenuAssignedRoleReferenceVO> listAssignedRoles(Long menuId) {
+		List<RoleReferencePO> dtoList = sysMenuRoleMapper.selectAssignedRolesByMenuId(menuId);
 
-		return dtoList.stream().map(SysMenuManageConverter.INSTANCE::toAssignedRoleRow).toList();
+		return ReferenceConverter.INSTANCE.toMenuAssignedRoleList(dtoList);
 	}
 
 	/**
@@ -81,10 +81,10 @@ public class SysMenuManageServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu
 	 * {@inheritDoc}
 	 */
 	@Override
-	public List<SysMenuAssignedPermissionRow> listPermissionsWithAssignFlags(Long menuId) {
-		List<SysMenuAssignedPermissionPO> dtoList = sysMenuPermissionMapper.selectAssignedPermissionByMenuId(menuId);
+	public List<MenuAssignedPermissionReferenceVO> listPermissionsWithAssignFlags(Long menuId) {
+		List<PermissionReferencePO> dtoList = sysMenuPermissionMapper.selectAssignedPermissionByMenuId(menuId);
 
-		return dtoList.stream().map(SysMenuManageConverter.INSTANCE::toAssignedPermissionRow).toList();
+		return ReferenceConverter.INSTANCE.toMenuAssignedPermissionList(dtoList);
 	}
 
 	/**
@@ -92,8 +92,8 @@ public class SysMenuManageServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu
 	 */
 	@Override
 	public void replaceMenuPermissions(Long menuId, SysMenuAssignPermissionForm form) {
-		List<String> permissionCodes = CollUtil.emptyIfNull(form.getPermissionCodes()).stream().distinct().toList();
-		List<Long> permissionIds = permissionReferenceChecker.resolveActivePermissionIds(permissionCodes);
+		List<Long> permissionIds = CollUtil.emptyIfNull(form.getPermissionIds()).stream().distinct().toList();
+		permissionReferenceChecker.requireActivePermissionIds(permissionIds);
 
 		sysMenuPermissionMapper.deleteByMenuId(menuId);
 		if (CollUtil.isNotEmpty(permissionIds)) {

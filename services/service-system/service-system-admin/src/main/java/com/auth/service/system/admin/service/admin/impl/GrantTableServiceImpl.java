@@ -3,12 +3,12 @@ package com.auth.service.system.admin.service.admin.impl;
 import cn.hutool.core.collection.CollUtil;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.module.security.contract.dto.invalidation.GrantSubjectKey;
-import com.auth.service.system.admin.convert.grant.GrantTableSubjectRoleConverter;
+import com.auth.service.system.admin.convert.reference.ReferenceConverter;
 import com.auth.service.system.admin.mapper.role.GrantTableMapper;
 import com.auth.service.system.admin.model.entity.GrantTableEntity;
 import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
-import com.auth.service.system.admin.model.po.granttable.GrantTableBoundRolePO;
-import com.auth.service.system.admin.model.vo.granttable.GrantTableAssignedRoleRow;
+import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
+import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
 import com.auth.service.system.admin.service.admin.GrantTableService;
 import com.auth.service.system.admin.support.granttable.GrantTableSubjectExistenceVerifier;
 import com.auth.service.system.admin.support.role.RoleGrantReferenceChecker;
@@ -41,7 +41,7 @@ public class GrantTableServiceImpl extends ServiceImpl<GrantTableMapper, GrantTa
 	 * {@inheritDoc}
 	 */
 	@Override
-	public List<GrantTableAssignedRoleRow> listAssignedRoles(GrantTableSubjectType subjectType, Long subjectId) {
+	public List<RoleReferenceVO> listAssignedRoles(GrantTableSubjectType subjectType, Long subjectId) {
 		subjectExistenceVerifier.requireExistingActive(subjectType, subjectId);
 
 		return listBoundRoles(subjectType, subjectId);
@@ -51,10 +51,10 @@ public class GrantTableServiceImpl extends ServiceImpl<GrantTableMapper, GrantTa
 	 * {@inheritDoc}
 	 */
 	@Override
-	public List<GrantTableAssignedRoleRow> listBoundRoles(GrantTableSubjectType subjectType, Long subjectId) {
-		List<GrantTableBoundRolePO> poList = baseMapper.selectBoundRolesBySubject(subjectType.name(), subjectId);
+	public List<RoleReferenceVO> listBoundRoles(GrantTableSubjectType subjectType, Long subjectId) {
+		List<RoleReferencePO> poList = baseMapper.selectBoundRolesBySubject(subjectType.name(), subjectId);
 
-		return GrantTableSubjectRoleConverter.INSTANCE.toAssignedRoleRowList(poList);
+		return ReferenceConverter.INSTANCE.toRoleReferenceList(poList);
 	}
 
 	/**

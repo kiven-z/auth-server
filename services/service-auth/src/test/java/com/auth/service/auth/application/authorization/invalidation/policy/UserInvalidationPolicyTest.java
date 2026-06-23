@@ -22,7 +22,7 @@ class UserInvalidationPolicyTest {
 	@Test
 	@DisplayName("正常用户进入 versionBump 桶")
 	void partition_activeUser_shouldVersionBump() {
-		UserInvalidationBuckets buckets = policy.partition(List.of(new UserInvalidationState(1L, 1, false)));
+		UserInvalidationBuckets buckets = policy.partition(List.of(new UserInvalidationState(1L, 1)));
 
 		assertEquals(Set.of(1L), buckets.versionBumpUserIds());
 		assertTrue(buckets.evictOnlyUserIds().isEmpty());
@@ -31,7 +31,7 @@ class UserInvalidationPolicyTest {
 	@Test
 	@DisplayName("禁用用户仅驱逐缓存")
 	void partition_disabledUser_shouldEvictOnly() {
-		UserInvalidationBuckets buckets = policy.partition(List.of(new UserInvalidationState(2L, 0, false)));
+		UserInvalidationBuckets buckets = policy.partition(List.of(new UserInvalidationState(2L, 0)));
 
 		assertTrue(buckets.versionBumpUserIds().isEmpty());
 		assertEquals(Set.of(2L), buckets.evictOnlyUserIds());
@@ -40,19 +40,10 @@ class UserInvalidationPolicyTest {
 	@Test
 	@DisplayName("锁定用户仅驱逐缓存")
 	void partition_lockedUser_shouldEvictOnly() {
-		UserInvalidationBuckets buckets = policy.partition(List.of(new UserInvalidationState(3L, 2, false)));
+		UserInvalidationBuckets buckets = policy.partition(List.of(new UserInvalidationState(3L, 2)));
 
 		assertTrue(buckets.versionBumpUserIds().isEmpty());
 		assertEquals(Set.of(3L), buckets.evictOnlyUserIds());
-	}
-
-	@Test
-	@DisplayName("逻辑删除用户仅驱逐缓存")
-	void partition_deletedUser_shouldEvictOnly() {
-		UserInvalidationBuckets buckets = policy.partition(List.of(new UserInvalidationState(4L, 1, true)));
-
-		assertTrue(buckets.versionBumpUserIds().isEmpty());
-		assertEquals(Set.of(4L), buckets.evictOnlyUserIds());
 	}
 
 	@Test

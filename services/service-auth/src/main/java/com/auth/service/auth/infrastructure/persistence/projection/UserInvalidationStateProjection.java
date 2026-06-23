@@ -19,7 +19,4 @@ public class UserInvalidationStateProjection {
 	@Schema(description = "用户状态（0=禁用,1=正常,2=锁定）")
 	private Integer status;
 
-	@Schema(description = "逻辑删除标记（0=否,1=是）")
-	private Integer isDeleted;
-
 }

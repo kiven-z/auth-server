@@ -5,8 +5,8 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import com.auth.service.system.admin.model.po.post.SysPostBoundDeptPO;
 import com.auth.service.system.admin.model.po.post.SysPostBoundUserPO;
+import com.auth.service.system.admin.model.po.reference.DeptReferencePO;
 
 /**
  * 岗位详情关联数据只读查询
@@ -21,7 +21,7 @@ public interface SysPostQueryMapper {
 	 * @param postId 岗位 ID
 	 * @return 部门快照，岗位或部门不存在时为 null
 	 */
-	SysPostBoundDeptPO selectBoundDeptByPostId(@Param("postId") Long postId);
+	DeptReferencePO selectBoundDeptByPostId(@Param("postId") Long postId);
 
 	/**
 	 * 查询岗位下有效用户-岗位关联

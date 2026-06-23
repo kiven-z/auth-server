@@ -3,8 +3,8 @@ package com.auth.service.system.admin.service.admin;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.admin.model.form.menu.SysMenuAssignPermissionForm;
 import com.auth.service.system.admin.model.form.menu.SysMenuAssignRoleForm;
-import com.auth.service.system.admin.model.vo.menu.SysMenuAssignedPermissionRow;
-import com.auth.service.system.admin.model.vo.menu.SysMenuAssignedRoleRow;
+import com.auth.service.system.admin.model.vo.reference.ext.MenuAssignedPermissionReferenceVO;
+import com.auth.service.system.admin.model.vo.reference.ext.MenuAssignedRoleReferenceVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
@@ -21,12 +21,12 @@ public interface SysMenuManageService extends IService<SysMenuEntity> {
 	 * @param menuId 菜单主键
 	 * @return 已分配行，{@code assigned} 恒为 true
 	 */
-	List<SysMenuAssignedRoleRow> listAssignedRoles(Long menuId);
+	List<MenuAssignedRoleReferenceVO> listAssignedRoles(Long menuId);
 
 	/**
 	 * 覆盖写入菜单-角色关联
 	 * @param menuId 菜单主键
-	 * @param form 角色编码列表
+	 * @param form 角色 ID 列表
 	 */
 	void replaceMenuRoles(Long menuId, SysMenuAssignRoleForm form);
 
@@ -35,7 +35,7 @@ public interface SysMenuManageService extends IService<SysMenuEntity> {
 	 * @param menuId 菜单主键
 	 * @return 权限行
 	 */
-	List<SysMenuAssignedPermissionRow> listPermissionsWithAssignFlags(Long menuId);
+	List<MenuAssignedPermissionReferenceVO> listPermissionsWithAssignFlags(Long menuId);
 
 	/**
 	 * 覆盖写入菜单-权限关联

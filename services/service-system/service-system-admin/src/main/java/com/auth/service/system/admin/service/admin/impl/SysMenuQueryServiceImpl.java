@@ -3,12 +3,13 @@ package com.auth.service.system.admin.service.admin.impl;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.constants.PermissionConstant;
 import com.auth.service.system.admin.convert.menu.SysMenuConverter;
+import com.auth.service.system.admin.convert.reference.ReferenceConverter;
 import com.auth.service.system.admin.mapper.menu.SysMenuMapper;
 import com.auth.service.system.admin.mapper.menu.SysMenuPermissionMapper;
 import com.auth.service.system.admin.mapper.menu.SysMenuRoleMapper;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
-import com.auth.service.system.admin.model.po.permission.SysPermissionBoundRolePO;
-import com.auth.service.system.admin.model.po.role.SysRoleAssignedPermissionPO;
+import com.auth.service.system.admin.model.po.reference.PermissionReferencePO;
+import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.auth.service.system.admin.model.query.menu.SysMenuQuery;
 import com.auth.service.system.admin.model.vo.menu.RouteNodeVO;
 import com.auth.service.system.admin.model.vo.menu.SysMenuDetailVO;
@@ -111,11 +112,11 @@ public class SysMenuQueryServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuE
 		SysMenuEntity entity = menuReferenceChecker.getExisting(id);
 
 		SysMenuDetailVO detail = SysMenuConverter.INSTANCE.toDetailVo(entity);
-		List<SysPermissionBoundRolePO> boundRoles = sysMenuRoleMapper.selectBoundRolesByMenuId(id);
-		detail.setBoundRoles(SysMenuConverter.INSTANCE.toBoundRoleItemList(boundRoles));
+		List<RoleReferencePO> boundRoles = sysMenuRoleMapper.selectBoundRolesByMenuId(id);
+		detail.setBoundRoles(ReferenceConverter.INSTANCE.toRoleReferenceList(boundRoles));
 
-		List<SysRoleAssignedPermissionPO> boundPermissions = sysMenuPermissionMapper.selectBoundPermissionsByMenuId(id);
-		detail.setBoundPermissions(SysMenuConverter.INSTANCE.toBoundPermissionItemList(boundPermissions));
+		List<PermissionReferencePO> boundPermissions = sysMenuPermissionMapper.selectBoundPermissionsByMenuId(id);
+		detail.setBoundPermissions(ReferenceConverter.INSTANCE.toPermissionReferenceList(boundPermissions));
 
 		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail));
 		return detail;

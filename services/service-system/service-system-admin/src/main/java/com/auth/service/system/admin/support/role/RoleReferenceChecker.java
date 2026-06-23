@@ -1,11 +1,9 @@
 package com.auth.service.system.admin.support.role;
 
-import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.admin.mapper.role.SysRoleMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -21,19 +19,18 @@ public class RoleReferenceChecker {
 	private final SysRoleMapper sysRoleMapper;
 
 	/**
-	 * 按角色编码加载角色，不存在或为空则抛业务异常
-	 * @param roleCode 角色编码
+	 * 按角色 ID 加载角色，不存在则抛业务异常
+	 * @param roleId 角色 ID
 	 * @return 角色实体
 	 */
-	public SysRoleEntity getExistingByRoleCode(String roleCode) {
-		if (CharSequenceUtil.isBlank(roleCode)) {
-			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST, roleCode);
+	public SysRoleEntity getExistingByRoleId(Long roleId) {
+		if (roleId == null) {
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST, roleId);
 		}
 
-		SysRoleEntity role = sysRoleMapper
-			.selectOne(Wrappers.<SysRoleEntity>lambdaQuery().eq(SysRoleEntity::getRoleCode, roleCode).last("LIMIT 1"));
+		SysRoleEntity role = sysRoleMapper.selectById(roleId);
 		if (role == null) {
-			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST, roleCode);
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST, roleId);
 		}
 		return role;
 	}

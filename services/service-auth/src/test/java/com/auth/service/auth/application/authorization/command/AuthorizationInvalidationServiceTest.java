@@ -7,7 +7,6 @@ import com.auth.module.security.contract.dto.invalidation.RoleInvalidatePayload;
 import com.auth.service.auth.application.authorization.invalidation.impact.ImpactResolverRegistry;
 import com.auth.service.auth.application.authorization.invalidation.policy.UserInvalidationPolicy;
 import com.auth.service.auth.application.port.invalidation.AuthorizationInvalidationEventPort;
-import com.auth.service.auth.application.port.session.SessionRevocationPort;
 import com.auth.service.auth.application.port.invalidation.UserInvalidationStatePort;
 import com.auth.service.auth.config.AuthorizationInvalidationProperties;
 import com.auth.service.auth.domain.authorization.model.InvalidationIdempotencyGate;
@@ -52,9 +51,6 @@ class AuthorizationInvalidationServiceTest {
 	private AuthProfileMaterializationService authProfileMaterializationService;
 
 	@Mock
-	private SessionRevocationPort sessionRevocationPort;
-
-	@Mock
 	private AuthorizationInvalidationProperties authorizationInvalidationProperties;
 
 	@InjectMocks
@@ -97,8 +93,7 @@ class AuthorizationInvalidationServiceTest {
 		when(authorizationInvalidationEventPort.acquireGate("evt-3", AuthorizationChangeKind.ROLE))
 			.thenReturn(new InvalidationIdempotencyGate.Claimed());
 		when(impactResolverRegistry.resolve(any())).thenReturn(Set.of(1L));
-		when(userInvalidationStatePort.loadByUserIds(Set.of(1L)))
-			.thenReturn(List.of(new UserInvalidationState(1L, 1, false)));
+		when(userInvalidationStatePort.loadByUserIds(Set.of(1L))).thenReturn(List.of(new UserInvalidationState(1L, 1)));
 		when(userInvalidationPolicy.partition(anyCollection()))
 			.thenReturn(new UserInvalidationBuckets(Set.of(1L), Set.of()));
 		when(authorizationInvalidationProperties.getBatchSize()).thenReturn(500);
@@ -117,28 +112,6 @@ class AuthorizationInvalidationServiceTest {
 		order.verify(authProfileMaterializationService).refreshInBatches(Set.of(1L), 500);
 		verify(authorizationInvalidationEventPort).completeProcessedOutcome("evt-3", AuthorizationChangeKind.ROLE,
 				new AuthorizationInvalidateResponse(1, 1, 1, 0));
-	}
-
-	@Test
-	@DisplayName("逻辑删除用户驱逐后踢掉全部会话")
-	void invalidate_deletedUser_shouldKickSessions() {
-		when(authorizationInvalidationEventPort.acquireGate("evt-4", AuthorizationChangeKind.ROLE))
-			.thenReturn(new InvalidationIdempotencyGate.Claimed());
-		when(impactResolverRegistry.resolve(any())).thenReturn(Set.of(9L));
-		when(userInvalidationStatePort.loadByUserIds(Set.of(9L)))
-			.thenReturn(List.of(new UserInvalidationState(9L, 1, true)));
-		when(userInvalidationPolicy.partition(anyCollection()))
-			.thenReturn(new UserInvalidationBuckets(Set.of(), Set.of(9L)));
-		when(authorizationInvalidationProperties.getBatchSize()).thenReturn(500);
-		when(userInvalidationStatePort.incrementPermVersionInBatches(Set.of(), 500)).thenReturn(0);
-		when(authProfileMaterializationService.refreshInBatches(Set.of(), 500)).thenReturn(0);
-		when(authProfileMaterializationService.evictInBatches(Set.of(9L), 500)).thenReturn(1);
-
-		AuthorizationInvalidateRequest request = new AuthorizationInvalidateRequest("evt-4",
-				AuthorizationChangeKind.ROLE, new RoleInvalidatePayload(List.of("ADMIN")));
-		authorizationInvalidationService.invalidate(request);
-
-		verify(sessionRevocationPort).kickAllSessions(Set.of(9L));
 	}
 
 	@Test

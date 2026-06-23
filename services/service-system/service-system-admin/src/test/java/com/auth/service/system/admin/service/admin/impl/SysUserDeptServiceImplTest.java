@@ -14,6 +14,7 @@ import com.auth.service.system.admin.model.form.user.UserDeptAssignForm;
 import com.auth.service.system.admin.model.po.user.UserDeptPageRowPO;
 import com.auth.service.system.admin.model.query.user.UserDeptPageQuery;
 import com.auth.service.system.admin.model.vo.user.UserDeptPageVO;
+import com.auth.service.system.admin.service.admin.SysUserService;
 import com.auth.service.system.admin.support.dept.DeptReferenceChecker;
 import com.auth.service.system.admin.support.user.UserOperationChecker;
 import com.auth.service.system.admin.support.user.UserOrgRelationBatchRemoveSupport;
@@ -60,6 +61,9 @@ class SysUserDeptServiceImplTest {
 
 	@Mock
 	private SysUserMapper sysUserMapper;
+
+	@Mock
+	private SysUserService sysUserService;
 
 	@Mock
 	private SysDeptMapper sysDeptMapper;
@@ -122,7 +126,7 @@ class SysUserDeptServiceImplTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		UserReferenceChecker userReferenceChecker = new UserReferenceChecker(sysUserMapper);
+		UserReferenceChecker userReferenceChecker = new UserReferenceChecker(sysUserMapper, sysUserService);
 		DeptReferenceChecker deptReferenceChecker = new DeptReferenceChecker(sysDeptMapper, deptReferenceCheckerMapper);
 		UserOrgRelationBatchRemoveSupport batchRemoveSupport = new UserOrgRelationBatchRemoveSupport(
 				userReferenceChecker, userOperationChecker, userAuthorizationInvalidationTrigger);

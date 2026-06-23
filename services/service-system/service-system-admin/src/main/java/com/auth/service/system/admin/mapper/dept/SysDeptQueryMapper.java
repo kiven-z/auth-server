@@ -1,7 +1,7 @@
 package com.auth.service.system.admin.mapper.dept;
 
-import com.auth.service.system.admin.model.po.dept.SysDeptBoundPostPO;
 import com.auth.service.system.admin.model.po.dept.SysDeptBoundUserPO;
+import com.auth.service.system.admin.model.po.reference.PostReferencePO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -27,6 +27,6 @@ public interface SysDeptQueryMapper {
 	 * @param deptId 部门 ID
 	 * @return 岗位列表
 	 */
-	List<SysDeptBoundPostPO> selectBoundPostsByDeptId(@Param("deptId") Long deptId);
+	List<PostReferencePO> selectBoundPostsByDeptId(@Param("deptId") Long deptId);
 
 }

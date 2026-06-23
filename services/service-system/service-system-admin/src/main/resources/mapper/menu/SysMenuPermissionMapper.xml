@@ -4,10 +4,13 @@
 
     <!-- 查询菜单已分配权限（左连 sys_permission 获取权限名称；仅展示按钮类且启用未删的权限元数据） -->
     <select id="selectAssignedPermissionByMenuId"
-            resultType="com.auth.service.system.admin.model.po.menu.SysMenuAssignedPermissionPO">
+            resultType="com.auth.service.system.admin.model.po.reference.PermissionReferencePO">
         SELECT
+            p.id,
             p.permission_code,
-            p.permission_name
+            COALESCE(p.permission_name, p.permission_code) AS permission_name,
+            p.permission_type,
+            p.status
         FROM
             sys_menu_permission mp
             JOIN sys_permission p ON p.id = mp.permission_id
@@ -39,14 +42,13 @@
 
     <!-- 按菜单 ID 反查已绑定权限 -->
     <select id="selectBoundPermissionsByMenuId"
-            resultType="com.auth.service.system.admin.model.po.role.SysRoleAssignedPermissionPO">
+            resultType="com.auth.service.system.admin.model.po.reference.PermissionReferencePO">
         SELECT
+            p.id,
             p.permission_code,
             COALESCE(p.permission_name, p.permission_code) AS permission_name,
             p.permission_type,
-            p.status,
-            mp.create_time,
-            mp.update_time
+            p.status
         FROM
             sys_menu_permission mp
             LEFT JOIN sys_permission p ON p.id = mp.permission_id

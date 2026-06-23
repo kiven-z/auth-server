@@ -1,5 +1,4 @@
 # service-example：集成验证专用；JWT/密钥等以 Nacos common-config 为准
-# 如需覆盖本机 Nacos 地址，可在此追加 spring.cloud.nacos.server-addr 等
 spring:
   autoconfigure:
     exclude:
@@ -7,20 +6,20 @@ spring:
       - org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration
       - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
 
+  cloud:
+    nacos:
+      server-addr: 192.168.3.4:8848
+
   data:
     redis:
-      host: 192.168.3.19
+      host: 192.168.3.4
       port: 6379
       database: 0
       password: "Dev1234!"
       lettuce:
         pool:
           enabled: true
-          # 最大连接数
           max-active: 200
-          # 最大阻塞等待时间(负数表示没限制)
           max-wait: 5000ms
-          # 最大空闲
           max-idle: 50
-          # 最小空闲
           min-idle: 10

@@ -6,11 +6,12 @@
     <select id="selectDeptProfileByUserId"
             resultType="com.auth.service.system.admin.model.po.user.UserDeptProfilePO">
         SELECT
-            d.id AS dept_id,
+            d.id,
             d.dept_name,
             d.dept_code,
+            d.status,
             ud.is_primary,
-            ud.status
+            ud.status AS relation_status
         FROM
             user_dept ud
             INNER JOIN sys_dept d ON ud.dept_id = d.id
@@ -27,12 +28,12 @@
     <select id="selectPostProfileByUserId"
             resultType="com.auth.service.system.admin.model.po.user.UserPostProfilePO">
         SELECT
-            up.id,
-            up.post_id,
-            sp.post_name,
+            sp.id,
             sp.post_code,
+            sp.post_name,
+            sp.status,
             up.is_primary,
-            up.status
+            up.status AS relation_status
         FROM
             user_post up
             INNER JOIN sys_post sp ON up.post_id = sp.id
@@ -56,7 +57,6 @@
             sys_user
         WHERE
             status = 1
-            AND is_deleted = 0
             AND (
                 username LIKE CONCAT(#{keyword}, '%')
                 OR nickname LIKE CONCAT(#{keyword}, '%')

@@ -4,9 +4,7 @@ import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.form.permission.SysPermissionForm;
 import com.auth.service.system.admin.model.po.permission.SysPermissionBoundMenuPO;
-import com.auth.service.system.admin.model.po.permission.SysPermissionBoundRolePO;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionBoundMenuItemVO;
-import com.auth.service.system.admin.model.vo.permission.SysPermissionBoundRoleItemVO;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionDetailVO;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionPageVO;
 import org.mapstruct.Mapper;
@@ -63,13 +61,6 @@ public interface SysPermissionConverter {
 	@Mapping(target = "boundRoles", ignore = true)
 	@Mapping(target = "boundMenus", ignore = true)
 	SysPermissionDetailVO toDetailVo(SysPermissionEntity entity);
-
-	/**
-	 * 已绑定角色 PO 列表 → 详情项 VO 列表
-	 * @param poList 持久层投影列表
-	 * @return 详情项 VO 列表
-	 */
-	List<SysPermissionBoundRoleItemVO> toBoundRoleItemList(List<SysPermissionBoundRolePO> poList);
 
 	/**
 	 * 已绑定菜单 PO 列表 → 详情项 VO 列表

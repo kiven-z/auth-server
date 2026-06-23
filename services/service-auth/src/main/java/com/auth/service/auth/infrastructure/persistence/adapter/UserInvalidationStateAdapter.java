@@ -65,8 +65,7 @@ public class UserInvalidationStateAdapter implements UserInvalidationStatePort {
 		return projections.stream()
 			.filter(Objects::nonNull)
 			.filter(projection -> projection.getUserId() != null)
-			.map(projection -> new UserInvalidationState(projection.getUserId(), projection.getStatus(),
-					projection.getIsDeleted() == 1))
+			.map(projection -> new UserInvalidationState(projection.getUserId(), projection.getStatus()))
 			.toList();
 	}
 

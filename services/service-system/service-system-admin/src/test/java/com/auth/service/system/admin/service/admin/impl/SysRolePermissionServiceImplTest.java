@@ -2,10 +2,9 @@ package com.auth.service.system.admin.service.admin.impl;
 
 import com.auth.service.system.admin.mapper.permission.SysPermissionMapper;
 import com.auth.service.system.admin.mapper.role.SysRolePermissionMapper;
-import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
-import com.auth.service.system.admin.model.po.role.SysRoleAssignedPermissionPO;
-import com.auth.service.system.admin.model.vo.role.SysRoleAssignedPermissionRow;
+import com.auth.service.system.admin.model.po.reference.PermissionReferencePO;
+import com.auth.service.system.admin.model.vo.reference.PermissionReferenceVO;
 import com.auth.service.system.admin.support.permission.PermissionReferenceChecker;
 import com.auth.service.system.admin.support.role.RoleReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.RoleAuthorizationInvalidationTrigger;
@@ -18,7 +17,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -60,32 +58,30 @@ class SysRolePermissionServiceImplTest {
 		SysRoleEntity role = new SysRoleEntity();
 		role.setId(1L);
 		role.setRoleCode("ADMIN");
-		when(roleReferenceChecker.getExistingByRoleCode("ADMIN")).thenReturn(role);
+		when(roleReferenceChecker.getExistingByRoleId(1L)).thenReturn(role);
 
-		SysRoleAssignedPermissionPO po = new SysRoleAssignedPermissionPO();
+		PermissionReferencePO po = new PermissionReferencePO();
+		po.setId(10L);
 		po.setPermissionCode("sys:user:list");
 		po.setPermissionName("用户查询");
-		po.setCreateTime(LocalDateTime.of(2026, 6, 4, 9, 15, 0));
-		po.setUpdateTime(LocalDateTime.of(2026, 6, 4, 9, 15, 0));
 		when(sysRolePermissionMapper.selectAssignedPermissionsByRoleId(1L)).thenReturn(List.of(po));
 
-		List<SysRoleAssignedPermissionRow> rows = sysRolePermissionService.listAssignedPermissions("ADMIN");
+		List<PermissionReferenceVO> rows = sysRolePermissionService.listAssignedPermissions(1L);
 
 		assertThat(rows).hasSize(1);
+		assertThat(rows.get(0).getId()).isEqualTo(10L);
 		assertThat(rows.get(0).getPermissionCode()).isEqualTo("sys:user:list");
 		assertThat(rows.get(0).getPermissionName()).isEqualTo("用户查询");
-		assertThat(rows.get(0).getCreateTime()).isEqualTo(LocalDateTime.of(2026, 6, 4, 9, 15, 0));
-		assertThat(rows.get(0).getUpdateTime()).isEqualTo(LocalDateTime.of(2026, 6, 4, 9, 15, 0));
 	}
 
 	@Test
 	@DisplayName("分配权限：角色不存在时抛出 DATA_NOT_EXIST")
 	void assignWhenRoleMissingShouldThrow() {
-		when(roleReferenceChecker.getExistingByRoleCode("MISSING"))
-			.thenThrow(new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST, "MISSING"));
+		when(roleReferenceChecker.getExistingByRoleId(99L))
+			.thenThrow(new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST, 99L));
 
-		List<String> permissionCodes = List.of("sys:user:list");
-		assertThatThrownBy(() -> sysRolePermissionService.assignPermissions("MISSING", permissionCodes))
+		List<Long> permissionIds = List.of(10L);
+		assertThatThrownBy(() -> sysRolePermissionService.assignPermissions(99L, permissionIds))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
@@ -97,10 +93,10 @@ class SysRolePermissionServiceImplTest {
 		SysRoleEntity role = new SysRoleEntity();
 		role.setId(1L);
 		role.setRoleCode("ADMIN");
-		when(roleReferenceChecker.getExistingByRoleCode("ADMIN")).thenReturn(role);
-		when(sysPermissionMapper.selectList(any())).thenReturn(List.of(permissionEntity()));
+		when(roleReferenceChecker.getExistingByRoleId(1L)).thenReturn(role);
+		when(sysPermissionMapper.selectCount(any())).thenReturn(1L);
 
-		sysRolePermissionService.assignPermissions("ADMIN", List.of("sys:user:list"));
+		sysRolePermissionService.assignPermissions(1L, List.of(10L));
 
 		verify(sysRolePermissionMapper).deleteByRoleId(1L);
 		verify(sysRolePermissionMapper).batchInsertRolePermissions(eq(1L), eq(List.of(10L)), isNull(), isNull());
@@ -113,9 +109,9 @@ class SysRolePermissionServiceImplTest {
 		SysRoleEntity role = new SysRoleEntity();
 		role.setId(1L);
 		role.setRoleCode("ADMIN");
-		when(roleReferenceChecker.getExistingByRoleCode("ADMIN")).thenReturn(role);
+		when(roleReferenceChecker.getExistingByRoleId(1L)).thenReturn(role);
 
-		sysRolePermissionService.assignPermissions("ADMIN", List.of());
+		sysRolePermissionService.assignPermissions(1L, List.of());
 
 		verify(sysRolePermissionMapper).deleteByRoleId(1L);
 		verify(sysPermissionMapper, never()).selectCount(any());
@@ -124,30 +120,22 @@ class SysRolePermissionServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("分配权限：权限码无效时抛出 GRANT_REFERENCE_INVALID")
+	@DisplayName("分配权限：权限 ID 无效时抛出 GRANT_REFERENCE_INVALID")
 	void assignWhenPermissionInvalidShouldThrow() {
 		SysRoleEntity role = new SysRoleEntity();
 		role.setId(1L);
 		role.setRoleCode("ADMIN");
-		when(roleReferenceChecker.getExistingByRoleCode("ADMIN")).thenReturn(role);
-		when(sysPermissionMapper.selectList(any())).thenReturn(List.of());
+		when(roleReferenceChecker.getExistingByRoleId(1L)).thenReturn(role);
+		when(sysPermissionMapper.selectCount(any())).thenReturn(0L);
 
-		List<String> permissionCodes = List.of("missing:perm");
-		assertThatThrownBy(() -> sysRolePermissionService.assignPermissions("ADMIN", permissionCodes))
+		List<Long> permissionIds = List.of(99L);
+		assertThatThrownBy(() -> sysRolePermissionService.assignPermissions(1L, permissionIds))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 
 		verify(sysRolePermissionMapper).deleteByRoleId(1L);
 		verify(sysRolePermissionMapper, never()).batchInsertRolePermissions(any(), any(), any(), any());
-	}
-
-	private SysPermissionEntity permissionEntity() {
-		SysPermissionEntity entity = new SysPermissionEntity();
-		entity.setId(10L);
-		entity.setPermissionCode("sys:user:list");
-		entity.setStatus(true);
-		return entity;
 	}
 
 }

@@ -6,8 +6,8 @@ import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.admin.model.form.menu.SysMenuAssignPermissionForm;
 import com.auth.service.system.admin.model.form.menu.SysMenuAssignRoleForm;
-import com.auth.service.system.admin.model.vo.menu.SysMenuAssignedPermissionRow;
-import com.auth.service.system.admin.model.vo.menu.SysMenuAssignedRoleRow;
+import com.auth.service.system.admin.model.vo.reference.ext.MenuAssignedPermissionReferenceVO;
+import com.auth.service.system.admin.model.vo.reference.ext.MenuAssignedRoleReferenceVO;
 import com.auth.service.system.admin.service.admin.SysMenuManageService;
 import com.auth.service.system.common.model.SystemAuditBizModule;
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,8 +41,8 @@ public class SysMenuManageController {
 	@Operation(summary = "查询菜单已分配角色")
 	@PreAuthorize("@auth.decide('sysMenu:query')")
 	@GetMapping("/{id}/roles")
-	public Result<List<SysMenuAssignedRoleRow>> listRoles(@PathVariable("id") Long id) {
-		List<SysMenuAssignedRoleRow> data = sysMenuManageService.listAssignedRoles(id);
+	public Result<List<MenuAssignedRoleReferenceVO>> listRoles(@PathVariable("id") Long id) {
+		List<MenuAssignedRoleReferenceVO> data = sysMenuManageService.listAssignedRoles(id);
 		return Result.success(data);
 	}
 
@@ -59,8 +59,8 @@ public class SysMenuManageController {
 	@Operation(summary = "查询权限列表并标记菜单是否已关联（sys_menu_permission）")
 	@PreAuthorize("@auth.decide('sysMenu:query')")
 	@GetMapping("/{id}/permissions")
-	public Result<List<SysMenuAssignedPermissionRow>> listPermissions(@PathVariable("id") Long id) {
-		List<SysMenuAssignedPermissionRow> data = sysMenuManageService.listPermissionsWithAssignFlags(id);
+	public Result<List<MenuAssignedPermissionReferenceVO>> listPermissions(@PathVariable("id") Long id) {
+		List<MenuAssignedPermissionReferenceVO> data = sysMenuManageService.listPermissionsWithAssignFlags(id);
 		return Result.success(data);
 	}
 

@@ -3,8 +3,9 @@
 <mapper namespace="com.auth.service.auth.infrastructure.persistence.mapper.AuthorizationImpactMapper">
     <!--
         反向影响面：业务键 → userId。
-        DEPT 展开须与 AuthorizationGrantForwardFragments.fwdUserSubjectsForFunctionalGrant 同源
-        （user_dept + dept_closure.ancestor_id，status IN (1, 2)）。
+        DEPT/POST 的 GRANT 主体反查须与 selectUserIdsByDeptIds / selectUserIdsByPostIds 同源，
+        不依赖 grant_table 现存行（失效提交时 grant 行可能已删除）。
+        按角色码反查（selectUserIdsByRoleCodes）仍经 grant_table，因角色变更时行通常仍在。
     -->
 
     <!-- 角色码 IN 条件（grant_table 反查复用） -->
@@ -19,23 +20,21 @@
         )
     </sql>
 
-    <!-- grant_table DEPT 主体 → user_id -->
+    <!-- GRANT DEPT 主体 → user_id（不 JOIN grant_table，与 selectUserIdsByDeptIds 同源） -->
     <sql id="grantTableDeptToUserIds">
         SELECT ud.user_id
-        FROM grant_table gt
-                 INNER JOIN user_dept ud ON gt.subject_type = 'DEPT'
-                 INNER JOIN dept_closure dc ON ud.dept_id = dc.descendant_id AND dc.ancestor_id = gt.subject_id
+        FROM user_dept ud
+                 INNER JOIN dept_closure dc ON ud.dept_id = dc.descendant_id
                  INNER JOIN sys_dept d ON d.id = dc.descendant_id AND d.is_deleted = 0
-        WHERE gt.subject_type = 'DEPT'
+        WHERE 1 = 1
     </sql>
 
-    <!-- grant_table POST 主体 → user_id -->
+    <!-- GRANT POST 主体 → user_id（不 JOIN grant_table，与 selectUserIdsByPostIds 同源） -->
     <sql id="grantTablePostToUserIds">
         SELECT up.user_id
-        FROM grant_table gt
-                 INNER JOIN user_post up ON gt.subject_type = 'POST' AND up.post_id = gt.subject_id
+        FROM user_post up
                  INNER JOIN sys_post sp ON sp.id = up.post_id AND sp.is_deleted = 0
-        WHERE gt.subject_type = 'POST'
+        WHERE 1 = 1
     </sql>
 
     <!-- 按角色码反查受影响用户 ID（grant_table USER/DEPT/POST） -->
@@ -89,12 +88,12 @@
         </foreach>
     </select>
 
-    <!-- 按 grant_table DEPT 主体反查用户 ID -->
+    <!-- 按 grant_table DEPT 主体反查用户 ID（grant 行可能已删，经部门成员展开） -->
     <select id="selectUserIdsByGrantDeptSubjectIds" resultType="java.lang.Long">
         SELECT DISTINCT user_id
         FROM (
         <include refid="grantTableDeptToUserIds"/>
-        AND gt.subject_id IN
+        AND dc.ancestor_id IN
         <foreach collection="subjectIds" item="subjectId" open="(" separator="," close=")">
             #{subjectId}
         </foreach>
@@ -102,12 +101,12 @@
         ) impacted
     </select>
 
-    <!-- 按 grant_table POST 主体反查用户 ID -->
+    <!-- 按 grant_table POST 主体反查用户 ID（grant 行可能已删，经岗位成员定位） -->
     <select id="selectUserIdsByGrantPostSubjectIds" resultType="java.lang.Long">
         SELECT DISTINCT user_id
         FROM (
         <include refid="grantTablePostToUserIds"/>
-        AND gt.subject_id IN
+        AND up.post_id IN
         <foreach collection="subjectIds" item="subjectId" open="(" separator="," close=")">
             #{subjectId}
         </foreach>

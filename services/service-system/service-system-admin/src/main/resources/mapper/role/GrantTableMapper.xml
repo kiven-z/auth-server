@@ -4,14 +4,12 @@
 
     <!-- 按授权主体查询已绑定角色 -->
     <select id="selectBoundRolesBySubject"
-            resultType="com.auth.service.system.admin.model.po.granttable.GrantTableBoundRolePO">
+            resultType="com.auth.service.system.admin.model.po.reference.RoleReferencePO">
         SELECT
-            r.id AS role_id,
+            r.id,
             r.role_code,
             r.role_name,
-            r.status,
-            gt.create_time,
-            gt.update_time
+            r.status
         FROM
             grant_table gt
             INNER JOIN sys_role r ON r.id = gt.role_id
@@ -22,90 +20,60 @@
             r.role_code
     </select>
 
-    <!-- 按角色码反查已授权用户 -->
-    <select id="selectBoundUsersByRoleCode"
-            resultType="com.auth.service.system.admin.model.po.granttable.GrantTableBoundUserPO">
+    <!-- 按角色 ID 反查已授权用户 -->
+    <select id="selectBoundUsersByRoleId"
+            resultType="com.auth.service.system.admin.model.po.reference.UserReferencePO">
         SELECT
-            gt.subject_id AS user_id,
+            u.id,
             u.username,
             u.nickname,
+            u.avatar,
+            u.gender,
             u.employee_no,
-            u.status AS user_status,
-            gt.create_time,
-            gt.update_time
+            u.status
         FROM
             grant_table gt
             INNER JOIN sys_user u ON u.id = gt.subject_id
-            AND u.is_deleted = 0
         WHERE
-            gt.role_id = (
-                SELECT
-                    id
-                FROM
-                    sys_role
-                WHERE
-                    role_code = #{roleCode}
-            )
+            gt.role_id = #{roleId}
             AND gt.subject_type = 'USER'
         ORDER BY
             u.username
     </select>
 
-    <!-- 按角色码反查已授权部门 -->
-    <select id="selectBoundDeptsByRoleCode"
-            resultType="com.auth.service.system.admin.model.po.granttable.GrantTableBoundDeptPO">
+    <!-- 按角色 ID 反查已授权部门 -->
+    <select id="selectBoundDeptsByRoleId"
+            resultType="com.auth.service.system.admin.model.po.reference.DeptReferencePO">
         SELECT
-            gt.subject_id AS dept_id,
+            d.id,
             d.dept_code,
             d.dept_name,
-            d.status,
-            gt.create_time,
-            gt.update_time
+            d.status
         FROM
             grant_table gt
             INNER JOIN sys_dept d ON d.id = gt.subject_id
             AND d.is_deleted = 0
         WHERE
-            gt.role_id = (
-                SELECT
-                    id
-                FROM
-                    sys_role
-                WHERE
-                    role_code = #{roleCode}
-            )
+            gt.role_id = #{roleId}
             AND gt.subject_type = 'DEPT'
         ORDER BY
             d.dept_code
     </select>
 
-    <!-- 按角色码反查已授权岗位 -->
-    <select id="selectBoundPostsByRoleCode"
-            resultType="com.auth.service.system.admin.model.po.granttable.GrantTableBoundPostPO">
+    <!-- 按角色 ID 反查已授权岗位 -->
+    <select id="selectBoundPostsByRoleId"
+            resultType="com.auth.service.system.admin.model.po.reference.PostReferencePO">
         SELECT
-            gt.subject_id AS post_id,
+            p.id,
             p.post_code,
             p.post_name,
-            p.status,
-            p.dept_id,
-            d.dept_name,
-            gt.create_time,
-            gt.update_time
+            p.status
         FROM
             grant_table gt
             INNER JOIN sys_post p ON p.id = gt.subject_id
             AND p.is_deleted = 0
-            LEFT JOIN sys_dept d ON d.id = p.dept_id
-            AND d.is_deleted = 0
         WHERE
-            gt.role_id = (
-                SELECT
-                    id
-                FROM
-                    sys_role
-                WHERE
-                    role_code = #{roleCode}
-            )
+            gt.role_id = #{roleId}
             AND gt.subject_type = 'POST'
         ORDER BY
             p.post_code

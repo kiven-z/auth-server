@@ -50,7 +50,6 @@ class UserInvalidationStateAdapterTest {
 			UserInvalidationStateProjection projection = new UserInvalidationStateProjection();
 			projection.setUserId(chunk.get(0));
 			projection.setStatus(1);
-			projection.setIsDeleted(0);
 			return List.of(projection);
 		});
 

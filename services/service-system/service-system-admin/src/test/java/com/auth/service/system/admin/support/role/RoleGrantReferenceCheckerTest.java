@@ -66,7 +66,8 @@ class RoleGrantReferenceCheckerTest {
 	void requireExistingEnabledRoleIdsThrowsWhenNotAllEligible() {
 		when(sysRoleMapper.selectCount(any())).thenReturn(0L);
 
-		assertThatThrownBy(() -> roleGrantReferenceChecker.requireExistingEnabledRoleIds(List.of(99L),
+		List<Long> roleIds = List.of(99L);
+		assertThatThrownBy(() -> roleGrantReferenceChecker.requireExistingEnabledRoleIds(roleIds,
 				SystemCommonResultCode.GRANT_REFERENCE_INVALID))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
@@ -98,8 +99,9 @@ class RoleGrantReferenceCheckerTest {
 	void requireGrantTableOrgRoleIdsThrowsWhenNotAllEligible() {
 		when(sysRoleMapper.selectCount(any())).thenReturn(0L);
 
+		List<Long> roleIds = List.of(101L);
 		assertThatThrownBy(
-				() -> roleGrantReferenceChecker.requireGrantTableOrgRoleIds(GrantTableSubjectType.POST, List.of(101L)))
+				() -> roleGrantReferenceChecker.requireGrantTableOrgRoleIds(GrantTableSubjectType.POST, roleIds))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.GRANT_REFERENCE_INVALID);

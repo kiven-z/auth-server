@@ -7,7 +7,7 @@ import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
 import com.auth.service.system.admin.model.vo.dept.DeptClosureHealthVO;
-import com.auth.service.system.admin.model.vo.granttable.GrantTableAssignedRoleRow;
+import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
 import com.auth.service.system.admin.service.admin.DeptClosureHealthQueryService;
 import com.auth.service.system.admin.service.admin.GrantTableService;
 import com.auth.service.system.common.model.SystemAuditBizModule;
@@ -54,8 +54,8 @@ public class SysDeptManageController {
 	@Operation(summary = "查询部门已分配角色")
 	@PreAuthorize("@auth.decide('sysDept:query')")
 	@GetMapping("/{deptId}/roles")
-	public Result<List<GrantTableAssignedRoleRow>> listRoles(@PathVariable("deptId") Long deptId) {
-		List<GrantTableAssignedRoleRow> rows = grantTableService.listAssignedRoles(GrantTableSubjectType.DEPT, deptId);
+	public Result<List<RoleReferenceVO>> listRoles(@PathVariable("deptId") Long deptId) {
+		List<RoleReferenceVO> rows = grantTableService.listAssignedRoles(GrantTableSubjectType.DEPT, deptId);
 		return Result.success(rows);
 	}
 

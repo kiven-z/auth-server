@@ -1,6 +1,8 @@
 package com.auth.service.system.admin.model.vo.user;
 
 import com.auth.common.core.annotation.JsonStringFormat;
+import com.auth.service.system.admin.model.vo.reference.ext.UserDeptReferenceVO;
+import com.auth.service.system.admin.model.vo.reference.ext.UserPostReferenceVO;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
@@ -66,9 +68,9 @@ public class SysUserProfileVO implements Serializable {
 	private String remark;
 
 	@Schema(title = "所属部门列表")
-	private List<SysUserDeptProfileItemVO> deptList = new ArrayList<>();
+	private List<UserDeptReferenceVO> deptList = new ArrayList<>();
 
 	@Schema(title = "岗位列表")
-	private List<SysUserPostProfileItemVO> postList = new ArrayList<>();
+	private List<UserPostReferenceVO> postList = new ArrayList<>();
 
 }

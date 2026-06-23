@@ -4,14 +4,13 @@
 
     <!-- 查询角色已分配权限 -->
     <select id="selectAssignedPermissionsByRoleId"
-            resultType="com.auth.service.system.admin.model.po.role.SysRoleAssignedPermissionPO">
+            resultType="com.auth.service.system.admin.model.po.reference.PermissionReferencePO">
         SELECT
+            p.id,
             p.permission_code,
             COALESCE(p.permission_name, p.permission_code) AS permission_name,
             p.permission_type,
-            p.status,
-            rp.create_time,
-            rp.update_time
+            p.status
         FROM
             sys_role_permission rp
             INNER JOIN sys_permission p ON p.id = rp.permission_id
@@ -23,13 +22,12 @@
 
     <!-- 按权限 ID 反查已绑定角色 -->
     <select id="selectBoundRolesByPermissionId"
-            resultType="com.auth.service.system.admin.model.po.permission.SysPermissionBoundRolePO">
+            resultType="com.auth.service.system.admin.model.po.reference.RoleReferencePO">
         SELECT
+            r.id,
             r.role_code,
             r.role_name,
-            r.status,
-            rp.create_time,
-            rp.update_time
+            r.status
         FROM
             sys_role_permission rp
             INNER JOIN sys_role r ON r.id = rp.role_id

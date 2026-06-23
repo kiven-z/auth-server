@@ -39,4 +39,53 @@ class AuthorizationImpactMapperDeptSqlContractTest {
 			.contains("ud.status IN (1, 2)");
 	}
 
+	@Test
+	@DisplayName("GRANT DEPT 主体反查：经 user_dept + dept_closure 展开，不依赖 grant_table 现存行")
+	void selectUserIdsByGrantDeptSubjectIdsShouldExpandDeptWithoutGrantTable() throws IOException {
+		String xml = readClasspathText();
+
+		int fragmentStart = xml.indexOf("<sql id=\"grantTableDeptToUserIds\"");
+		assertThat(fragmentStart).isNotNegative();
+		int fragmentEnd = xml.indexOf("</sql>", fragmentStart);
+		String fragmentBlock = xml.substring(fragmentStart, fragmentEnd);
+
+		int selectStart = xml.indexOf("<select id=\"selectUserIdsByGrantDeptSubjectIds\"");
+		assertThat(selectStart).isNotNegative();
+		int selectEnd = xml.indexOf("</select>", selectStart);
+		String selectBlock = xml.substring(selectStart, selectEnd);
+
+		// grant_table 行可能已删除，反查须与 selectUserIdsByDeptIds 同源展开
+		assertThat(fragmentBlock).contains("user_dept ud")
+			.contains("dept_closure dc")
+			.contains("is_deleted = 0")
+			.doesNotContain("grant_table")
+			.doesNotContain("d.status =");
+		assertThat(selectBlock).contains("selectUserIdsByGrantDeptSubjectIds")
+			.contains("dc.ancestor_id IN")
+			.contains("ud.status IN (1, 2)")
+			.doesNotContain("gt.subject_id");
+	}
+
+	@Test
+	@DisplayName("GRANT POST 主体反查：经 user_post 定位成员，不依赖 grant_table 现存行")
+	void selectUserIdsByGrantPostSubjectIdsShouldResolvePostWithoutGrantTable() throws IOException {
+		String xml = readClasspathText();
+
+		int fragmentStart = xml.indexOf("<sql id=\"grantTablePostToUserIds\"");
+		assertThat(fragmentStart).isNotNegative();
+		int fragmentEnd = xml.indexOf("</sql>", fragmentStart);
+		String fragmentBlock = xml.substring(fragmentStart, fragmentEnd);
+
+		int selectStart = xml.indexOf("<select id=\"selectUserIdsByGrantPostSubjectIds\"");
+		assertThat(selectStart).isNotNegative();
+		int selectEnd = xml.indexOf("</select>", selectStart);
+		String selectBlock = xml.substring(selectStart, selectEnd);
+
+		assertThat(fragmentBlock).contains("user_post up").contains("sys_post sp").doesNotContain("grant_table");
+		assertThat(selectBlock).contains("selectUserIdsByGrantPostSubjectIds")
+			.contains("up.post_id IN")
+			.contains("up.status IN (1, 2)")
+			.doesNotContain("gt.subject_id");
+	}
+
 }

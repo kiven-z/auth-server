@@ -1,7 +1,7 @@
 package com.auth.service.system.admin.service.admin;
 
 import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
-import com.auth.service.system.admin.model.vo.granttable.GrantTableAssignedRoleRow;
+import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ public interface SysUserRoleService {
 	 * @param userId 用户 ID
 	 * @return 已分配角色行列表
 	 */
-	List<GrantTableAssignedRoleRow> listAssignedRoles(Long userId);
+	List<RoleReferenceVO> listAssignedRoles(Long userId);
 
 	/**
 	 * 全量覆盖用户在 grant_table 中的直连角色授权

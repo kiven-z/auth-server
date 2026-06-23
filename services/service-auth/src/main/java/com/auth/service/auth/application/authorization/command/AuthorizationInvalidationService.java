@@ -6,7 +6,6 @@ import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidat
 import com.auth.service.auth.application.authorization.invalidation.impact.ImpactResolverRegistry;
 import com.auth.service.auth.application.authorization.invalidation.policy.UserInvalidationPolicy;
 import com.auth.service.auth.application.port.invalidation.AuthorizationInvalidationEventPort;
-import com.auth.service.auth.application.port.session.SessionRevocationPort;
 import com.auth.service.auth.application.port.invalidation.UserInvalidationStatePort;
 import com.auth.service.auth.config.AuthorizationInvalidationProperties;
 import com.auth.service.auth.domain.authorization.model.InvalidationCommand;
@@ -19,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * 授权失效编排唯一入口
@@ -40,8 +38,6 @@ public class AuthorizationInvalidationService {
 	private final UserInvalidationPolicy userInvalidationPolicy;
 
 	private final AuthProfileMaterializationService authProfileMaterializationService;
-
-	private final SessionRevocationPort sessionRevocationPort;
 
 	private final AuthorizationInvalidationProperties authorizationInvalidationProperties;
 
@@ -101,9 +97,6 @@ public class AuthorizationInvalidationService {
 			// 分批驱逐画像
 			int profileEvictedCount = authProfileMaterializationService.evictInBatches(evictOnlyUserIds, batchSize);
 
-			// 逻辑删除用户：驱逐画像后踢掉全部会话
-			kickSessionsForDeletedUsers(invalidationStateList);
-
 			// 构建执行结果
 			int impactedUserCount = impactedUserIds.size();
 			AuthorizationInvalidateResponse response = new AuthorizationInvalidateResponse(impactedUserCount,
@@ -120,32 +113,6 @@ public class AuthorizationInvalidationService {
 			authorizationInvalidationEventPort.releaseClaim(eventId);
 			throw ex;
 		}
-	}
-
-	/**
-	 * 逻辑删除用户
-	 * @param states 用户状态快照
-	 */
-	private void kickSessionsForDeletedUsers(List<UserInvalidationState> states) {
-		// 如果用户状态快照为空，则返回
-		if (CollUtil.isEmpty(states)) {
-			return;
-		}
-
-		// 获取逻辑删除用户ID集合
-		Set<Long> deletedUserIds = states.stream()
-			.filter(state -> state != null && state.deleted() && state.userId() != null)
-			.map(UserInvalidationState::userId)
-			.collect(Collectors.toUnmodifiableSet());
-
-		// 如果逻辑删除用户ID集合为空，则返回
-		if (CollUtil.isEmpty(deletedUserIds)) {
-			return;
-		}
-
-		// 踢掉全部会话
-		sessionRevocationPort.kickAllSessions(deletedUserIds);
-		log.info("Kicked sessions for logically deleted users: count={}", deletedUserIds.size());
 	}
 
 }

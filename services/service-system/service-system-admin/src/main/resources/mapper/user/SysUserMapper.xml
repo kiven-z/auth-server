@@ -21,7 +21,6 @@
         FROM
             sys_user u
         <where>
-            u.is_deleted = 0
             <if test="query.username != null and query.username != ''">
                 AND u.username LIKE CONCAT('%', #{query.username}, '%')
             </if>

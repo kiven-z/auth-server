@@ -98,13 +98,11 @@ class SysMenuManageServiceImplTest {
 	void replaceMenuPermissionsReplacesAssociationsWhenEligible() {
 		Long menuId = 5L;
 		SysMenuAssignPermissionForm form = new SysMenuAssignPermissionForm();
-		form.setPermissionCodes(List.of("sys:user:create", "sys:user:query"));
-		when(permissionReferenceChecker.resolveActivePermissionIds(List.of("sys:user:create", "sys:user:query")))
-			.thenReturn(List.of(10L, 20L));
+		form.setPermissionIds(List.of(10L, 20L));
 
 		sysMenuManageService.replaceMenuPermissions(menuId, form);
 
-		verify(permissionReferenceChecker).resolveActivePermissionIds(List.of("sys:user:create", "sys:user:query"));
+		verify(permissionReferenceChecker).requireActivePermissionIds(List.of(10L, 20L));
 		verify(sysMenuPermissionMapper).deleteByMenuId(menuId);
 		verify(sysMenuPermissionMapper).batchInsertMenuPermissions(menuId, List.of(10L, 20L));
 	}
@@ -114,12 +112,11 @@ class SysMenuManageServiceImplTest {
 	void replaceMenuPermissionsWithEmptyListDeletesOnly() {
 		Long menuId = 5L;
 		SysMenuAssignPermissionForm form = new SysMenuAssignPermissionForm();
-		form.setPermissionCodes(List.of());
-		when(permissionReferenceChecker.resolveActivePermissionIds(List.of())).thenReturn(List.of());
+		form.setPermissionIds(List.of());
 
 		sysMenuManageService.replaceMenuPermissions(menuId, form);
 
-		verify(permissionReferenceChecker).resolveActivePermissionIds(List.of());
+		verify(permissionReferenceChecker).requireActivePermissionIds(List.of());
 		verify(sysMenuPermissionMapper).deleteByMenuId(menuId);
 		verify(sysMenuPermissionMapper, never()).batchInsertMenuPermissions(any(), any());
 	}
@@ -129,9 +126,10 @@ class SysMenuManageServiceImplTest {
 	void replaceMenuPermissionsThrowsWhenPermissionInvalid() {
 		Long menuId = 5L;
 		SysMenuAssignPermissionForm form = new SysMenuAssignPermissionForm();
-		form.setPermissionCodes(List.of("missing:perm"));
-		when(permissionReferenceChecker.resolveActivePermissionIds(List.of("missing:perm")))
-			.thenThrow(new SystemBusinessException(SystemCommonResultCode.GRANT_REFERENCE_INVALID));
+		form.setPermissionIds(List.of(99L));
+		doThrow(new SystemBusinessException(SystemCommonResultCode.GRANT_REFERENCE_INVALID))
+			.when(permissionReferenceChecker)
+			.requireActivePermissionIds(List.of(99L));
 
 		assertThatThrownBy(() -> sysMenuManageService.replaceMenuPermissions(menuId, form))
 			.isInstanceOf(SystemBusinessException.class)

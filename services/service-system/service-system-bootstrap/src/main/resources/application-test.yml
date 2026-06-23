@@ -6,7 +6,7 @@ spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://192.168.3.4:3306/auth_admin_base?serverTimezone=GMT%2B8&useSSL=false&characterEncoding=utf-8&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://192.168.3.4:3306/auth_admin_test?serverTimezone=GMT%2B8&useSSL=false&characterEncoding=utf-8&allowPublicKeyRetrieval=true
     username: dev_user
     password: Dev1234!
     hikari:
@@ -20,21 +20,17 @@ spring:
     redis:
       host: 192.168.3.4
       port: 6379
-      database: 0
+      database: 1
       password: "Dev1234!"
       lettuce:
         pool:
           enabled: true
-          # 最大连接数
           max-active: 200
-          # 最大阻塞等待时间(负数表示没限制)
           max-wait: 5000ms
-          # 最大空闲
           max-idle: 50
-          # 最小空闲
           min-idle: 10
 
 logging:
   level:
-    root: info
+    root: warn
     com.auth: debug

@@ -6,7 +6,7 @@ import com.auth.service.system.admin.mapper.role.SysRolePermissionMapper;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.form.permission.SysPermissionForm;
 import com.auth.service.system.admin.model.po.permission.SysPermissionBoundMenuPO;
-import com.auth.service.system.admin.model.po.permission.SysPermissionBoundRolePO;
+import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionDetailVO;
 import com.auth.service.system.authorization.dispatch.trigger.PermissionAuthorizationInvalidationTrigger;
 import com.auth.service.system.authorization.dispatch.trigger.RoleAuthorizationInvalidationTrigger;
@@ -24,7 +24,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Field;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -233,6 +232,7 @@ class SysPermissionServiceImplTest {
 		entity.setStatus(true);
 		when(sysPermissionMapper.selectById(8L)).thenReturn(entity);
 		when(sysRolePermissionMapper.selectBoundRolesByPermissionId(8L)).thenReturn(List.of());
+		SysPermissionBoundMenuPO boundMenu = new SysPermissionBoundMenuPO();
 		boundMenu.setId(200L);
 		boundMenu.setTitle("部门管理");
 		boundMenu.setName("SystemDept");
@@ -260,12 +260,11 @@ class SysPermissionServiceImplTest {
 		entity.setStatus(true);
 		when(sysPermissionMapper.selectById(7L)).thenReturn(entity);
 
-		SysPermissionBoundRolePO boundRole = new SysPermissionBoundRolePO();
+		RoleReferencePO boundRole = new RoleReferencePO();
+		boundRole.setId(10L);
 		boundRole.setRoleCode("ADMIN");
 		boundRole.setRoleName("管理员");
 		boundRole.setStatus(true);
-		boundRole.setCreateTime(LocalDateTime.of(2026, 6, 4, 10, 30, 0));
-		boundRole.setUpdateTime(LocalDateTime.of(2026, 6, 4, 10, 30, 0));
 		when(sysRolePermissionMapper.selectBoundRolesByPermissionId(7L)).thenReturn(List.of(boundRole));
 
 		SysPermissionBoundMenuPO boundMenu = new SysPermissionBoundMenuPO();
@@ -280,9 +279,8 @@ class SysPermissionServiceImplTest {
 		SysPermissionDetailVO detail = sysPermissionQueryService.getDetail(7L);
 
 		assertThat(detail.getBoundRoles()).hasSize(1);
+		assertThat(detail.getBoundRoles().get(0).getId()).isEqualTo(10L);
 		assertThat(detail.getBoundRoles().get(0).getRoleCode()).isEqualTo("ADMIN");
-		assertThat(detail.getBoundRoles().get(0).getCreateTime()).isEqualTo(LocalDateTime.of(2026, 6, 4, 10, 30, 0));
-		assertThat(detail.getBoundRoles().get(0).getUpdateTime()).isEqualTo(LocalDateTime.of(2026, 6, 4, 10, 30, 0));
 		assertThat(detail.getBoundMenus()).hasSize(1);
 		assertThat(detail.getBoundMenus().get(0).getTitle()).isEqualTo("用户管理");
 		verify(sysMenuPermissionMapper).selectBoundMenusByPermissionId(7L);
@@ -307,7 +305,7 @@ class SysPermissionServiceImplTest {
 		entity.setId(5L);
 		entity.setPermissionCode("sys:role:delete");
 		when(sysPermissionMapper.selectById(5L)).thenReturn(entity);
-		SysPermissionBoundRolePO boundRole = new SysPermissionBoundRolePO();
+		RoleReferencePO boundRole = new RoleReferencePO();
 		boundRole.setRoleCode("TEST");
 		when(sysRolePermissionMapper.selectBoundRolesByPermissionId(5L)).thenReturn(List.of(boundRole));
 

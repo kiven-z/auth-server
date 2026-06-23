@@ -1,6 +1,7 @@
 package com.auth.service.system.admin.model.vo.permission;
 
 import com.auth.common.core.model.response.BaseResponse;
+import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -44,7 +45,7 @@ public class SysPermissionDetailVO extends BaseResponse {
 	private String remark;
 
 	@Schema(title = "已绑定角色列表（sys_role_permission 反查）")
-	private List<SysPermissionBoundRoleItemVO> boundRoles;
+	private List<RoleReferenceVO> boundRoles;
 
 	@Schema(title = "已绑定菜单列表（sys_menu_permission 反查")
 	private List<SysPermissionBoundMenuItemVO> boundMenus;

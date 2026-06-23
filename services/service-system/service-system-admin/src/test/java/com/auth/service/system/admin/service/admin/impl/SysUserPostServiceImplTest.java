@@ -14,6 +14,7 @@ import com.auth.service.system.admin.model.form.user.UserPostRelationUpdateForm;
 import com.auth.service.system.admin.model.po.user.UserPostPageRowPO;
 import com.auth.service.system.admin.model.query.user.UserPostPageQuery;
 import com.auth.service.system.admin.model.vo.user.UserPostPageVO;
+import com.auth.service.system.admin.service.admin.SysUserService;
 import com.auth.service.system.admin.support.post.PostReferenceChecker;
 import com.auth.service.system.admin.support.user.UserOperationChecker;
 import com.auth.service.system.admin.support.user.UserOrgRelationBatchRemoveSupport;
@@ -59,6 +60,9 @@ class SysUserPostServiceImplTest {
 
 	@Mock
 	private SysUserMapper sysUserMapper;
+
+	@Mock
+	private SysUserService sysUserService;
 
 	@Mock
 	private SysPostMapper sysPostMapper;
@@ -113,7 +117,7 @@ class SysUserPostServiceImplTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		UserReferenceChecker userReferenceChecker = new UserReferenceChecker(sysUserMapper);
+		UserReferenceChecker userReferenceChecker = new UserReferenceChecker(sysUserMapper, sysUserService);
 		PostReferenceChecker postReferenceChecker = new PostReferenceChecker(sysPostMapper, null);
 		UserOrgRelationBatchRemoveSupport batchRemoveSupport = new UserOrgRelationBatchRemoveSupport(
 				userReferenceChecker, userOperationChecker, userAuthorizationInvalidationTrigger);

@@ -8,7 +8,8 @@ import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * 用户档案-岗位关联查询行
+ * 用户档案-岗位关联查询行（对齐
+ * {@link com.auth.service.system.admin.model.vo.reference.PostReferenceVO} 基础字段 + 关联扩展）
  *
  * @author Bunny
  */
@@ -19,22 +20,22 @@ public class UserPostProfilePO implements Serializable {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
-	@Schema(title = "用户Id")
+	@Schema(title = "岗位 ID")
 	private Long id;
-
-	@Schema(title = "岗位ID")
-	private Long postId;
-
-	@Schema(title = "岗位名称")
-	private String postName;
 
 	@Schema(title = "岗位编码")
 	private String postCode;
 
+	@Schema(title = "岗位名称")
+	private String postName;
+
+	@Schema(title = "启用状态(true=启用，false=停用)")
+	private Boolean status;
+
 	@Schema(title = "是否主岗位")
 	private Boolean isPrimary;
 
-	@Schema(title = "状态")
-	private Integer status;
+	@Schema(title = "关联状态(0=已调离,1=正常,2=兼职)")
+	private Integer relationStatus;
 
 }
