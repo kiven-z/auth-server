@@ -12,6 +12,7 @@ import com.auth.service.system.schedule.mapper.SysJobMapper;
 import com.auth.service.system.schedule.model.entity.LogJobEntity;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
+import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
 import com.auth.service.system.schedule.model.enums.SysJobLastExecutionStatus;
 import com.auth.service.system.schedule.model.enums.SysJobQuartzRuntimeStatus;
 import com.auth.service.system.schedule.model.form.SysJobCreateForm;
@@ -83,7 +84,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		enrichLastExecution(voPage.getRecords());
 
 		// 丰富审计用户名
-		auditUserDisplayService.enrichAuditUsernames(voPage);
+		auditUserDisplayService.enrichAuditUsernames(voPage, null, null);
 		return PageResponse.of(voPage);
 	}
 
@@ -113,7 +114,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		vo.setQuartzFireTime(snapshot.fireTime());
 
 		enrichLastExecution(List.of(vo));
-		auditUserDisplayService.enrichAuditUsernames(List.of(vo));
+		auditUserDisplayService.enrichAuditUsernames(List.of(vo), null, null);
 		return vo;
 	}
 
@@ -231,7 +232,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 			sysJobSchedulerManager.ensureJobDetail(dbJob);
 
 			// 触发 Job
-			sysJobSchedulerManager.triggerJob(jobName, jobGroup);
+			sysJobSchedulerManager.triggerJob(jobName, jobGroup, SysJobQuartzDataKeys.TRIGGER_TYPE_MANUAL);
 		}
 		catch (SchedulerException ex) {
 			log.error("立即执行失败", ex);

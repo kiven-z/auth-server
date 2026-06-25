@@ -68,7 +68,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 		IPage<SysUserPageRowPO> page = baseMapper.selectListByPage(pageParams, query, orderBySql);
 		IPage<SysUserPageVO> voPage = page.convert(SysUserConverter.INSTANCE::toPageVo);
 
-		auditUserDisplayService.enrichAuditUsernames(voPage);
+		auditUserDisplayService.enrichAuditUsernames(voPage, null, null);
 		return PageResponse.of(voPage);
 	}
 

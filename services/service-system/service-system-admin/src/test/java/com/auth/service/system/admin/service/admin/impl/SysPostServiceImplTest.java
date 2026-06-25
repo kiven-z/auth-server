@@ -41,6 +41,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
 /**
@@ -181,7 +182,7 @@ class SysPostServiceImplTest {
 		PageResponse<SysPostPageVO> result = sysPostQueryService.getPage(pageParams, query);
 
 		assertThat(result.getList()).hasSize(1);
-		verify(auditUserDisplayService).enrichAuditUsernames(any(IPage.class));
+		verify(auditUserDisplayService).enrichAuditUsernames(any(IPage.class), isNull(), isNull());
 	}
 
 	@Test
@@ -194,7 +195,7 @@ class SysPostServiceImplTest {
 			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
 
 		verifyNoInteractions(sysPostQueryMapper);
-		verify(auditUserDisplayService, never()).enrichAuditUsernames(anyList());
+		verify(auditUserDisplayService, never()).enrichAuditUsernames(anyList(), isNull(), isNull());
 	}
 
 	@Test
@@ -240,7 +241,7 @@ class SysPostServiceImplTest {
 		verify(sysPostQueryMapper).selectBoundDeptByPostId(postId);
 		verify(sysPostQueryMapper).selectBoundUsersByPostId(postId);
 		verify(grantTableMapper).selectBoundRolesBySubject(GrantTableSubjectType.POST.name(), postId);
-		verify(auditUserDisplayService).enrichAuditUsernames(anyList());
+		verify(auditUserDisplayService).enrichAuditUsernames(anyList(), isNull(), isNull());
 	}
 
 	@Test

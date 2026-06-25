@@ -45,7 +45,8 @@ class SystemResultResponseFactoryTest {
 		when(messageSource.getMessage(eq(key), any(), eq("resolved-en"), eq(Locale.ENGLISH))).thenReturn("resolved-en");
 
 		SystemBusinessException ex = new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST);
-		Result<Object> result = SystemResultResponseFactory.build(messageSource, ex);
+		Result<Object> result = SystemResultResponseFactory.build(messageSource, ex.getResultCode(),
+				ex.getMessageArgs());
 
 		assertEquals(SystemCommonResultCode.DATA_NOT_EXIST.getBizCode(), result.getCode());
 		assertEquals(SystemCommonResultCode.DATA_NOT_EXIST.getError(), result.getError());
@@ -66,7 +67,8 @@ class SystemResultResponseFactoryTest {
 		when(messageSource.getMessage(eq(key), any(), eq("in-use"), eq(Locale.ENGLISH))).thenReturn("in-use");
 
 		SystemBusinessException ex = new SystemBusinessException(SystemCommonResultCode.DATA_IN_USE, "sys_role");
-		Result<Object> result = SystemResultResponseFactory.build(messageSource, ex);
+		Result<Object> result = SystemResultResponseFactory.build(messageSource, ex.getResultCode(),
+				ex.getMessageArgs());
 
 		assertEquals(SystemCommonResultCode.DATA_IN_USE.getBizCode(), result.getCode());
 		Map<String, Object> ext = result.getExt();

@@ -3,6 +3,9 @@ package com.auth.service.system.schedule.support.quartz;
 import cn.hutool.core.collection.CollUtil;
 import com.auth.service.system.schedule.model.enums.SysJobQuartzRuntimeStatus;
 import com.auth.service.system.schedule.support.SysJobQuartzRuntimeSnapshot;
+import lombok.Builder;
+import lombok.Value;
+import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
 import org.springframework.context.annotation.Lazy;
@@ -64,7 +67,10 @@ public class SysJobQuartzRuntimeReader {
 
 			// 获取触发器的触发时间
 			Trigger trigger = triggers.get(0);
-			return new FireTimes(trigger.getPreviousFireTime(), trigger.getNextFireTime());
+			return FireTimes.builder()
+				.previousFireTime(trigger.getPreviousFireTime())
+				.nextFireTime(trigger.getNextFireTime())
+				.build();
 		}
 		catch (Exception exception) {
 			log.warn("查询触发时间失败: {} / {}", jobGroup, jobName, exception);
@@ -168,11 +174,29 @@ public class SysJobQuartzRuntimeReader {
 	/**
 	 * 触发时间值对象
 	 */
-	public record FireTimes(Date previousFireTime, Date nextFireTime) {
+	@Value
+	@Builder
+	@Accessors(fluent = true)
+	public static class FireTimes {
 
+		/**
+		 * 上次触发时间
+		 */
+		Date previousFireTime;
+
+		/**
+		 * 下次触发时间
+		 */
+		Date nextFireTime;
+
+		/**
+		 * 空触发时间
+		 * @return 无触发时间
+		 */
 		public static FireTimes empty() {
-			return new FireTimes(null, null);
+			return FireTimes.builder().build();
 		}
+
 	}
 
 }

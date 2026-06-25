@@ -34,7 +34,8 @@ public class SystemBusinessExceptionHandler {
 	public ResponseEntity<Result<Object>> handleSystemBusiness(SystemBusinessException exception) {
 		log.warn("System business exception: {}", exception.toString(), exception);
 
-		Result<Object> body = SystemResultResponseFactory.build(messageSource, exception);
+		Result<Object> body = SystemResultResponseFactory.build(messageSource, exception.getResultCode(),
+				exception.getMessageArgs());
 		HttpStatus status = SystemResultResponseFactory.resolveHttpStatus(exception.getResultCode());
 		return ResponseEntity.status(status).body(body);
 	}

@@ -46,7 +46,7 @@ public class LogUserPasswordHistoryQueryServiceImpl
 		IPage<LogUserPasswordHistoryPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
 		IPage<LogUserPasswordHistoryPageVO> voPage = page.convert(LogUserPasswordHistoryConverter.INSTANCE::toPageVO);
 
-		auditUserDisplayService.enrichAuditUsernames(voPage);
+		auditUserDisplayService.enrichAuditUsernames(voPage, null, null);
 		return PageResponse.of(voPage);
 	}
 
@@ -61,7 +61,7 @@ public class LogUserPasswordHistoryQueryServiceImpl
 		}
 
 		LogUserPasswordHistoryDetailVO vo = LogUserPasswordHistoryConverter.INSTANCE.toDetailVo(po);
-		auditUserDisplayService.enrichAuditUsernames(List.of(vo));
+		auditUserDisplayService.enrichAuditUsernames(List.of(vo), null, null);
 		return vo;
 	}
 

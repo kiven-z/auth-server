@@ -8,12 +8,14 @@ import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.common.model.SystemAuditBizModule;
+import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
 import com.auth.service.system.message.model.form.*;
 import com.auth.service.system.message.model.query.EmailTemplateQuery;
 import com.auth.service.system.message.model.vo.EmailTemplateDetailVO;
 import com.auth.service.system.message.model.vo.EmailTemplatePageResponse;
 import com.auth.service.system.message.service.SysEmailTemplateService;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -145,7 +147,10 @@ public class SysEmailTemplateController {
 	@PreAuthorize("@auth.decide('emailTemplate:update')")
 	@PutMapping("status")
 	public Result<String> batchUpdateStatus(@Validated @RequestBody EmailTemplateStatusForm form) {
-		sysEmailTemplateService.batchUpdateStatus(form);
+		sysEmailTemplateService.update(Wrappers.<MessageTemplateEntity>lambdaUpdate()
+			.in(MessageTemplateEntity::getId, form.getIds())
+			.eq(MessageTemplateEntity::getChannel, MessageChannel.EMAIL.name())
+			.set(MessageTemplateEntity::getStatus, form.getStatus()));
 
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}

@@ -42,6 +42,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
 /**
@@ -178,7 +179,7 @@ class SysUserDeptServiceImplTest {
 		assertThat(vo.getRemark()).isEqualTo("负责人");
 		assertThat(vo.getCreateTime()).isEqualTo(now);
 		assertThat(vo.getUpdateTime()).isEqualTo(now);
-		verify(auditUserDisplayService).enrichAuditUsernames(any(IPage.class));
+		verify(auditUserDisplayService).enrichAuditUsernames(any(IPage.class), isNull(), isNull());
 	}
 
 	@Test

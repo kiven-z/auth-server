@@ -133,16 +133,6 @@ public class MessageTemplateRequireFieldsJsonSupport {
 	}
 
 	/**
-	 * 解析声明并校验发送变量是否齐全
-	 * @param missingCode 变量缺失时的业务码（各渠道传入）
-	 * @param channel 渠道名（i18n 占位 {0}）
-	 */
-	public static void assertVariablesPresent(String requireFieldsJson, Map<String, Object> variables,
-			SystemResultCode missingCode, String channel) {
-		assertVariablesPresent(parse(requireFieldsJson), variables, missingCode, channel);
-	}
-
-	/**
 	 * 用各字段的 exampleValue 组装预览/示例数据模型
 	 * @param rows 变量列表
 	 * @return 预览/示例数据模型

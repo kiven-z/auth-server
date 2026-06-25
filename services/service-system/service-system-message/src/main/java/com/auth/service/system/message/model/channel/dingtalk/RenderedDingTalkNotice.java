@@ -2,14 +2,33 @@ package com.auth.service.system.message.model.channel.dingtalk;
 
 import com.auth.module.message.api.model.dingtalk.DingTalkMessageType;
 
+import lombok.Builder;
+import lombok.Value;
+import lombok.experimental.Accessors;
+
 /**
  * 渲染后的钉钉工作通知负载
  *
- * @param messageType 消息类型
- * @param title Markdown 标题（可选用于TEXT）
- * @param content 正文内容
  * @author Bunny
  */
-public record RenderedDingTalkNotice(DingTalkMessageType messageType, String title, String content) {
+@Value
+@Builder
+@Accessors(fluent = true)
+public class RenderedDingTalkNotice {
+
+	/**
+	 * 消息类型
+	 */
+	DingTalkMessageType messageType;
+
+	/**
+	 * Markdown 标题（可选用于TEXT）
+	 */
+	String title;
+
+	/**
+	 * 正文内容
+	 */
+	String content;
 
 }

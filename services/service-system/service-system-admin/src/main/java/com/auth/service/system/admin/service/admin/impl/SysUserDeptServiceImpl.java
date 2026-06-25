@@ -63,7 +63,7 @@ public class SysUserDeptServiceImpl extends ServiceImpl<UserDeptMapper, UserDept
 		IPage<UserDeptPageRowPO> page = baseMapper.selectListByPage(pageParams, userId, query);
 		IPage<UserDeptPageVO> voPage = page.convert(UserDeptConverter.INSTANCE::toPageVo);
 
-		auditUserDisplayService.enrichAuditUsernames(voPage);
+		auditUserDisplayService.enrichAuditUsernames(voPage, null, null);
 		return PageResponse.of(voPage);
 	}
 

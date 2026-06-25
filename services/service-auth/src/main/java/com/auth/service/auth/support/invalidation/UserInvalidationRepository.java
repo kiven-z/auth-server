@@ -1,0 +1,83 @@
+package com.auth.service.auth.support.invalidation;
+
+import cn.hutool.core.collection.CollUtil;
+import com.auth.service.auth.config.AuthorizationInvalidationProperties;
+import com.auth.service.auth.mapper.UserMapper;
+import com.auth.service.auth.mapper.UserPermVersionMapper;
+import com.auth.service.auth.model.po.user.UserInvalidationStatePO;
+import com.auth.service.auth.util.BatchPartition;
+import org.springframework.stereotype.Repository;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ * 用户失效状态读写：分桶前加载状态、分批递增 perm_version。
+ *
+ * @author Bunny
+ */
+@Repository
+public class UserInvalidationRepository {
+
+	private final UserMapper userMapper;
+
+	private final UserPermVersionMapper userPermVersionMapper;
+
+	private final AuthorizationInvalidationProperties authorizationInvalidationProperties;
+
+	public UserInvalidationRepository(UserMapper userMapper, UserPermVersionMapper userPermVersionMapper,
+			AuthorizationInvalidationProperties authorizationInvalidationProperties) {
+		this.userMapper = userMapper;
+		this.userPermVersionMapper = userPermVersionMapper;
+		this.authorizationInvalidationProperties = authorizationInvalidationProperties;
+	}
+
+	/**
+	 * 批量加载用户失效分桶所需状态。
+	 * @param userIds 用户 ID 集合
+	 * @return 状态快照列表
+	 */
+	public List<UserInvalidationStatePO> loadByUserIds(Collection<Long> userIds) {
+		List<Long> ids = userIds.stream().filter(Objects::nonNull).distinct().toList();
+		if (CollUtil.isEmpty(ids)) {
+			return List.of();
+		}
+
+		List<UserInvalidationStatePO> projections = new ArrayList<>();
+		for (List<Long> batch : BatchPartition.partitionIds(ids, authorizationInvalidationProperties.getBatchSize())) {
+			List<UserInvalidationStatePO> batchProjections = userMapper.selectInvalidationStatesByUserIds(batch);
+			if (CollUtil.isNotEmpty(batchProjections)) {
+				projections.addAll(batchProjections);
+			}
+		}
+		if (CollUtil.isEmpty(projections)) {
+			return List.of();
+		}
+
+		return projections.stream()
+			.filter(Objects::nonNull)
+			.filter(projection -> projection.getUserId() != null)
+			.toList();
+	}
+
+	/**
+	 * 分批递增 {@code perm_version}（仅正常且未删除用户，与 Mapper 防御条件一致）。
+	 * @param userIds 待递增用户 ID
+	 * @param batchSize 每批大小，须 &gt; 0
+	 * @return 实际更新行数合计
+	 */
+	public int incrementPermVersionInBatches(Collection<Long> userIds, int batchSize) {
+		if (CollUtil.isEmpty(userIds) || batchSize <= 0) {
+			return 0;
+		}
+
+		int totalUpdated = 0;
+		for (List<Long> batch : BatchPartition.partitionIds(userIds, batchSize)) {
+			totalUpdated += userPermVersionMapper.incrementPermVersionByUserIds(batch);
+		}
+		return totalUpdated;
+	}
+
+}

@@ -1,6 +1,6 @@
 package com.auth.service.auth.job;
 
-import com.auth.service.auth.application.authorization.command.AuthorizationInvalidationEventOpsApplicationService;
+import com.auth.service.auth.service.AuthorizationInvalidationEventService;
 import com.auth.service.auth.config.AuthorizationInvalidationProperties;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,7 +21,7 @@ import static org.mockito.Mockito.*;
 class AuthorizationInvalidationEventHistoryCleanupJobTest {
 
 	@Mock
-	private AuthorizationInvalidationEventOpsApplicationService authorizationInvalidationEventOpsApplicationService;
+	private AuthorizationInvalidationEventService authorizationInvalidationEventService;
 
 	@Mock
 	private AuthorizationInvalidationProperties properties;
@@ -36,7 +36,7 @@ class AuthorizationInvalidationEventHistoryCleanupJobTest {
 
 		historyCleanupJob.purgeCompletedHistory();
 
-		verify(authorizationInvalidationEventOpsApplicationService, never()).purgeCompletedBefore(any(), anyInt());
+		verify(authorizationInvalidationEventService, never()).purgeCompletedBefore(any(), anyInt());
 	}
 
 	@Test
@@ -45,12 +45,11 @@ class AuthorizationInvalidationEventHistoryCleanupJobTest {
 		when(properties.getSuccessCleanupEnabled()).thenReturn(true);
 		when(properties.getSuccessRetentionDays()).thenReturn(90);
 		when(properties.getSuccessCleanupBatchSize()).thenReturn(500);
-		when(authorizationInvalidationEventOpsApplicationService.purgeCompletedBefore(any(), anyInt())).thenReturn(500,
-				120);
+		when(authorizationInvalidationEventService.purgeCompletedBefore(any(), anyInt())).thenReturn(500, 120);
 
 		historyCleanupJob.purgeCompletedHistory();
 
-		verify(authorizationInvalidationEventOpsApplicationService, times(2)).purgeCompletedBefore(any(), anyInt());
+		verify(authorizationInvalidationEventService, times(2)).purgeCompletedBefore(any(), anyInt());
 	}
 
 }

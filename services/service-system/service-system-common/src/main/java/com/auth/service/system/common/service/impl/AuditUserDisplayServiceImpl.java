@@ -49,22 +49,6 @@ public class AuditUserDisplayServiceImpl implements AuditUserDisplayService {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public <T extends BaseResponse> void enrichAuditUsernames(IPage<T> page) {
-		enrichAuditUsernames(page, null, null);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void enrichAuditUsernames(List<? extends BaseResponse> records) {
-		enrichAuditUsernames(records, null, null);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
 	public <T extends BaseResponse> void enrichAuditUsernames(IPage<T> page, ToLongFunction<T> extraUserIdGetter,
 			BiConsumer<T, String> extraUsernameSetter) {
 		if (page == null) {

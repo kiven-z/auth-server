@@ -79,7 +79,10 @@ public class DypnsVerifyCodeTemplatePipeline {
 
 		// 构建模板参数
 		String templateParam = buildTemplateParam(requireFields, variables);
-		return new DypnsVerifyCodeSendPayload(template.getProviderTemplateCode(), templateParam);
+		return DypnsVerifyCodeSendPayload.builder()
+			.providerTemplateCode(template.getProviderTemplateCode())
+			.templateParam(templateParam)
+			.build();
 	}
 
 }

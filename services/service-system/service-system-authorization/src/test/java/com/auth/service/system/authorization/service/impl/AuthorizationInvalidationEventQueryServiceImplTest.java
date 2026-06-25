@@ -24,6 +24,7 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -76,7 +77,7 @@ class AuthorizationInvalidationEventQueryServiceImplTest {
 
 		assertEquals(1L, response.getTotal());
 		assertEquals("evt-1", response.getList().get(0).getEventId());
-		verify(auditUserDisplayService).enrichAuditUsernames(anyList());
+		verify(auditUserDisplayService).enrichAuditUsernames(anyList(), isNull(), isNull());
 	}
 
 	@Test
@@ -102,7 +103,7 @@ class AuthorizationInvalidationEventQueryServiceImplTest {
 		AuthorizationInvalidationEventDetailVO detailVO = queryService.getDetail(2L);
 
 		assertEquals("evt-detail", detailVO.getEventId());
-		verify(auditUserDisplayService).enrichAuditUsernames(anyList());
+		verify(auditUserDisplayService).enrichAuditUsernames(anyList(), isNull(), isNull());
 	}
 
 }

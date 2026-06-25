@@ -102,7 +102,7 @@ public class DingTalkMessageSender implements MessageSender {
 			DingTalkMessageType type = options != null && options.getMessageType() != null ? options.getMessageType()
 					: DingTalkMessageType.TEXT;
 			String title = options != null ? options.getTitle() : null;
-			return new RenderedDingTalkNotice(type, title, command.getBody());
+			return RenderedDingTalkNotice.builder().messageType(type).title(title).content(command.getBody()).build();
 		}
 
 		// 没有自定义消息体，解析模板渲染

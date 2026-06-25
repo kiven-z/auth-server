@@ -93,7 +93,7 @@ class AuditUserDisplayServiceImplTest {
 		u2.setUsername("bob");
 		when(auditUserDisplayMapper.selectBatchIds(List.of(1L, 2L))).thenReturn(List.of(u1, u2));
 
-		auditUserDisplayService.enrichAuditUsernames(page);
+		auditUserDisplayService.enrichAuditUsernames(page, null, null);
 
 		assertThat(row.getCreateUsername()).isEqualTo("alice");
 		assertThat(row.getUpdateUsername()).isEqualTo("bob");
@@ -115,7 +115,7 @@ class AuditUserDisplayServiceImplTest {
 		u2.setUsername("bob");
 		when(auditUserDisplayMapper.selectBatchIds(List.of(1L, 2L))).thenReturn(List.of(u1, u2));
 
-		auditUserDisplayService.enrichAuditUsernames(list);
+		auditUserDisplayService.enrichAuditUsernames(list, null, null);
 
 		assertThat(row.getCreateUsername()).isEqualTo("alice");
 		assertThat(row.getUpdateUsername()).isEqualTo("bob");
@@ -124,7 +124,7 @@ class AuditUserDisplayServiceImplTest {
 	@Test
 	@DisplayName("enrichAuditUsernames(IPage)：page 为 null 时不访问数据库")
 	void enrichAuditUsernamesPageNullSkipsDb() {
-		auditUserDisplayService.enrichAuditUsernames((Page<BaseResponse>) null);
+		auditUserDisplayService.enrichAuditUsernames((Page<BaseResponse>) null, null, null);
 		verifyNoInteractions(auditUserDisplayMapper);
 	}
 
@@ -134,7 +134,7 @@ class AuditUserDisplayServiceImplTest {
 		Page<BaseResponse> page = new Page<>();
 		page.setRecords(Collections.emptyList());
 
-		auditUserDisplayService.enrichAuditUsernames(page);
+		auditUserDisplayService.enrichAuditUsernames(page, null, null);
 
 		verifyNoInteractions(auditUserDisplayMapper);
 	}

@@ -21,17 +21,6 @@ import java.util.Objects;
 public class SystemResultResponseFactory {
 
 	/**
-	 * 构建系统服务错误响应体（业务异常）
-	 * @param messageSource 消息源
-	 * @param exception 业务异常
-	 * @return Result
-	 */
-	public static Result<Object> build(MessageSource messageSource, SystemBusinessException exception) {
-		return build(messageSource, Objects.requireNonNull(exception, "exception").getResultCode(),
-				exception.getMessageArgs());
-	}
-
-	/**
 	 * 由枚举与占位参数直接构建错误体（技术异常等场景）
 	 * @param messageSource 消息源
 	 * @param rc 结果码枚举

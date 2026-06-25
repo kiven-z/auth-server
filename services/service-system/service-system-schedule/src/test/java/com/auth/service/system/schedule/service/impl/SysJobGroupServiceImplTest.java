@@ -30,6 +30,7 @@ import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -84,7 +85,7 @@ class SysJobGroupServiceImplTest {
 
 		sysJobGroupService.getPage(pageParams, query);
 
-		verify(auditUserDisplayService).enrichAuditUsernames(any(IPage.class));
+		verify(auditUserDisplayService).enrichAuditUsernames(any(IPage.class), isNull(), isNull());
 	}
 
 	@Test
@@ -97,7 +98,7 @@ class SysJobGroupServiceImplTest {
 
 		assertThat(result).hasSize(1);
 		verify(sysJobGroupMapper).selectEnabledOptions("  kw  ", 999);
-		verify(auditUserDisplayService).enrichAuditUsernames(any(List.class));
+		verify(auditUserDisplayService).enrichAuditUsernames(any(List.class), isNull(), isNull());
 	}
 
 	@Test
@@ -126,7 +127,7 @@ class SysJobGroupServiceImplTest {
 
 		assertThat(detail.getGroupCode()).isEqualTo("G1");
 		assertThat(detail.getGroupName()).isEqualTo("分组一");
-		verify(auditUserDisplayService).enrichAuditUsernames(any(List.class));
+		verify(auditUserDisplayService).enrichAuditUsernames(any(List.class), isNull(), isNull());
 	}
 
 	@Test

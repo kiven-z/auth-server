@@ -88,7 +88,7 @@ public class SysMenuQueryServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuE
 		List<SysMenuEntity> entities = baseMapper.selectListByQuery(query);
 		List<SysMenuListVO> list = SysMenuConverter.INSTANCE.toListVoList(entities);
 
-		auditUserDisplayService.enrichAuditUsernames(list);
+		auditUserDisplayService.enrichAuditUsernames(list, null, null);
 		return list;
 	}
 
@@ -100,7 +100,7 @@ public class SysMenuQueryServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuE
 		IPage<SysMenuEntity> entityPage = baseMapper.selectPageByQuery(pageParams, query);
 		IPage<SysMenuListVO> result = entityPage.convert(SysMenuConverter.INSTANCE::toListVo);
 
-		auditUserDisplayService.enrichAuditUsernames(result);
+		auditUserDisplayService.enrichAuditUsernames(result, null, null);
 		return PageResponse.of(result);
 	}
 
@@ -118,7 +118,7 @@ public class SysMenuQueryServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuE
 		List<PermissionReferencePO> boundPermissions = sysMenuPermissionMapper.selectBoundPermissionsByMenuId(id);
 		detail.setBoundPermissions(ReferenceConverter.INSTANCE.toPermissionReferenceList(boundPermissions));
 
-		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail));
+		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail), null, null);
 		return detail;
 	}
 

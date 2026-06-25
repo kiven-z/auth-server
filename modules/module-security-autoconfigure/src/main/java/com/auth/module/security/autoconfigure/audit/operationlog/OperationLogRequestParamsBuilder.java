@@ -50,17 +50,6 @@ public class OperationLogRequestParamsBuilder {
 	private static final String GET = "GET";
 
 	/**
-	 * 组装请求参数摘要：不携带方法实参（与历史行为一致）。
-	 * @param request HTTP 请求
-	 * @param hasRecord 是否记录
-	 * @param objectMapper JSON 序列化
-	 * @return 摘要或 {@code null}
-	 */
-	public static String build(HttpServletRequest request, boolean hasRecord, ObjectMapper objectMapper) {
-		return build(request, hasRecord, objectMapper, null);
-	}
-
-	/**
 	 * 组装请求参数摘要：GET 使用 query string；其它方法序列化 parameterMap；并合并可记录的 控制器方法实参（与
 	 * {@link org.aspectj.lang.JoinPoint#getArgs()} 一致，如 {@code @RequestBody} 绑定结果）。
 	 * @param request HTTP 请求

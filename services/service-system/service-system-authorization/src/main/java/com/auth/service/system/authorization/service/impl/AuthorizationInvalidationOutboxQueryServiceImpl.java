@@ -43,7 +43,8 @@ public class AuthorizationInvalidationOutboxQueryServiceImpl implements Authoriz
 			.getPage(opsQuery);
 		IPage<AuthorizationInvalidationOutboxPageVO> voPage = page
 			.convert(AuthorizationInvalidationOutboxOpsConverter.INSTANCE::toPageVO);
-		auditUserDisplayService.enrichAuditUsernames(voPage);
+
+		auditUserDisplayService.enrichAuditUsernames(voPage, null, null);
 		return PageResponse.of(voPage);
 	}
 
@@ -55,7 +56,8 @@ public class AuthorizationInvalidationOutboxQueryServiceImpl implements Authoriz
 		AuthorizationInvalidationOutboxDetailRowPO detailRow = authorizationInvalidationOutboxOpsService.getDetail(id);
 		AuthorizationInvalidationOutboxDetailVO detailVO = AuthorizationInvalidationOutboxOpsConverter.INSTANCE
 			.toDetailVo(detailRow);
-		auditUserDisplayService.enrichAuditUsernames(List.of(detailVO));
+
+		auditUserDisplayService.enrichAuditUsernames(List.of(detailVO), null, null);
 		return detailVO;
 	}
 

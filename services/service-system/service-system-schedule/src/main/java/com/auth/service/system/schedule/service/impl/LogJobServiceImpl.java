@@ -69,7 +69,7 @@ public class LogJobServiceImpl extends ServiceImpl<LogJobMapper, LogJobEntity> i
 		IPage<LogJobPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
 		IPage<LogJobPageResponse> voPage = page.convert(LogJobConverter.INSTANCE::toPageResponse);
 
-		auditUserDisplayService.enrichAuditUsernames(voPage);
+		auditUserDisplayService.enrichAuditUsernames(voPage, null, null);
 		return PageResponse.of(voPage);
 	}
 
@@ -84,7 +84,7 @@ public class LogJobServiceImpl extends ServiceImpl<LogJobMapper, LogJobEntity> i
 		}
 
 		LogJobDetailVO vo = LogJobConverter.INSTANCE.toDetailVo(jobLog);
-		auditUserDisplayService.enrichAuditUsernames(List.of(vo));
+		auditUserDisplayService.enrichAuditUsernames(List.of(vo), null, null);
 		return vo;
 	}
 

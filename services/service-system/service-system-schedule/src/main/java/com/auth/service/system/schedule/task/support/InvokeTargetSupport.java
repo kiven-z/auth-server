@@ -45,15 +45,6 @@ public class InvokeTargetSupport {
 	}
 
 	/**
-	 * 返回前端展示用参数列表（含括号），如 {@code ()}、{@code (String)}
-	 * @param method 已判定为可调用的方法
-	 * @return 参数签名
-	 */
-	public static @NonNull String parameterSignature(@NonNull Method method) {
-		return formatParameterList(method.getParameterTypes());
-	}
-
-	/**
 	 * 生成 {@code invoke_target} 示例；按参数类型生成占位符供用户填写
 	 * @param beanName Spring Bean 名
 	 * @param method 已判定为可调用的方法
@@ -80,7 +71,8 @@ public class InvokeTargetSupport {
 	public static @NonNull QuartzTaskMethodVO toMethodCatalog(@NonNull String beanName, @NonNull Method method) {
 		QuartzTaskMethodVO methodVO = new QuartzTaskMethodVO();
 		methodVO.setMethodName(method.getName());
-		methodVO.setParameterSignature(parameterSignature(method));
+		String parameterSignature = formatParameterList(method.getParameterTypes());
+		methodVO.setParameterSignature(parameterSignature);
 		methodVO.setReturnType(method.getReturnType().getSimpleName());
 		methodVO.setInvokeTargetExample(formatInvokeTarget(beanName, method));
 		return methodVO;
@@ -121,7 +113,7 @@ public class InvokeTargetSupport {
 	 * @param parameterTypes 参数类型数组
 	 * @return 如 {@code ()} 或 {@code (String, int)}
 	 */
-	private static @NonNull String formatParameterList(@NonNull Class<?>[] parameterTypes) {
+	public static @NonNull String formatParameterList(@NonNull Class<?>[] parameterTypes) {
 		if (parameterTypes.length == 0) {
 			return "()";
 		}

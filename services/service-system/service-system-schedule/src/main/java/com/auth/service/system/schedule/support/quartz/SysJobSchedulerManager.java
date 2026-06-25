@@ -91,15 +91,6 @@ public class SysJobSchedulerManager {
 	 * 立即触发一次（不影响 Cron）
 	 * @param jobName 任务名
 	 * @param jobGroup 分组
-	 */
-	public void triggerJob(String jobName, String jobGroup) throws SchedulerException {
-		triggerJob(jobName, jobGroup, SysJobQuartzDataKeys.TRIGGER_TYPE_MANUAL);
-	}
-
-	/**
-	 * 立即触发一次（不影响 Cron）
-	 * @param jobName 任务名
-	 * @param jobGroup 分组
 	 * @param triggerType 触发类型
 	 */
 	public void triggerJob(String jobName, String jobGroup, String triggerType) throws SchedulerException {

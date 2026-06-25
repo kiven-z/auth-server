@@ -16,7 +16,6 @@
         <module>common-starter-web</module>
         <module>common-starter-ip</module>
         <module>common-starter-webdoc</module>
-        <module>common-starter-nacos-config</module>
         <module>common-starter-resttemplate</module>
         <module>common-starter-cache</module>
         <module>common-starter-jwt</module>

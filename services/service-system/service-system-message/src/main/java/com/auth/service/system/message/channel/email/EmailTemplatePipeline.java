@@ -40,11 +40,12 @@ public class EmailTemplatePipeline {
 	public RenderedEmail render(String templateCode, Map<String, Object> variables) {
 		MessageTemplateEntity template = messageTemplateLoader.loadEnabled(MessageChannel.EMAIL, templateCode);
 		Map<String, Object> safeVariables = Optional.ofNullable(variables).orElseGet(HashMap::new);
-		MessageTemplateRequireFieldsJsonSupport.assertVariablesPresent(template.getRequireFields(), safeVariables,
+		MessageTemplateRequireFieldsJsonSupport.assertVariablesPresent(
+				MessageTemplateRequireFieldsJsonSupport.parse(template.getRequireFields()), safeVariables,
 				TEMPLATE_VARS_MISSING, MessageChannel.EMAIL.name());
 		String subject = renderSubject(template, safeVariables);
 		String body = renderContent(template, safeVariables);
-		return new RenderedEmail(subject, body);
+		return RenderedEmail.builder().subject(subject).body(body).build();
 	}
 
 	/**

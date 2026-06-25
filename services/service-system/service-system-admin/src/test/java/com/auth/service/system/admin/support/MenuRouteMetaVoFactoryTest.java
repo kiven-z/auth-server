@@ -27,8 +27,10 @@ class MenuRouteMetaVoFactoryTest {
 		menu.setMenuRank(99);
 		menu.setTransitionName("fade");
 
-		MenuConvertContext context = new MenuConvertContext(Map.of(10L, List.of("admin")),
-				Map.of(10L, List.of("system:user:list")));
+		MenuConvertContext context = MenuConvertContext.builder()
+			.roleMap(Map.of(10L, List.of("admin")))
+			.permissionMap(Map.of(10L, List.of("system:user:list")))
+			.build();
 
 		RouteMetaVO meta = MenuRouteMetaVoFactory.fromMenuEntity(menu, context);
 
@@ -45,7 +47,7 @@ class MenuRouteMetaVoFactoryTest {
 	void fromMenuEntity_usesEmptyListsWhenContextMissing() {
 		SysMenuEntity menu = new SysMenuEntity();
 		menu.setId(1L);
-		MenuConvertContext context = new MenuConvertContext(Map.of(), Map.of());
+		MenuConvertContext context = MenuConvertContext.builder().roleMap(Map.of()).permissionMap(Map.of()).build();
 
 		RouteMetaVO meta = MenuRouteMetaVoFactory.fromMenuEntity(menu, context);
 

@@ -46,10 +46,6 @@ public class InternalTokenProvider extends AbstractSecurityTokenProvider {
 		return super.jwtTokenProvider.generatorJwtToken(builder);
 	}
 
-	public String buildToken(Long userId, String jti) {
-		return buildToken(userId, jti, null);
-	}
-
 	/**
 	 * 构建服务身份内部令牌：sub 占位为 真实服务名写入 {@code service_id} claim，{@code principal_type=SERVICE}
 	 * @param serviceId 服务名（一般为 spring.application.name）

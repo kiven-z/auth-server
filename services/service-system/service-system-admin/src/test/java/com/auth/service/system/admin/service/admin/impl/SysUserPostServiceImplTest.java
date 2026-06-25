@@ -42,6 +42,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -161,7 +162,7 @@ class SysUserPostServiceImplTest {
 		UserPostPageVO vo = result.getList().get(0);
 		assertThat(vo.getPostCode()).isEqualTo("DEV");
 		assertThat(vo.getIsPrimary()).isTrue();
-		verify(auditUserDisplayService).enrichAuditUsernames(any(IPage.class));
+		verify(auditUserDisplayService).enrichAuditUsernames(any(IPage.class), isNull(), isNull());
 	}
 
 	@Test

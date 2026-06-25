@@ -29,6 +29,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
 /**
@@ -190,7 +191,7 @@ class SysMenuServiceImplTest {
 		assertThat(detail.getBoundPermissions().get(0).getPermissionCode()).isEqualTo("sys:user:create");
 		verify(sysMenuRoleMapper).selectBoundRolesByMenuId(5L);
 		verify(sysMenuPermissionMapper).selectBoundPermissionsByMenuId(5L);
-		verify(auditUserDisplayService).enrichAuditUsernames(anyList());
+		verify(auditUserDisplayService).enrichAuditUsernames(anyList(), isNull(), isNull());
 	}
 
 }

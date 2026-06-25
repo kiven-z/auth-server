@@ -60,7 +60,7 @@ public class SysRoleQueryServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleE
 		IPage<SysRoleEntity> entityPage = baseMapper.selectListByPage(pageParams, query, orderBySql);
 		IPage<SysRolePageVO> page = entityPage.convert(SysRoleConverter.INSTANCE::toPageVo);
 
-		auditUserDisplayService.enrichAuditUsernames(page);
+		auditUserDisplayService.enrichAuditUsernames(page, null, null);
 		return PageResponse.of(page);
 	}
 
@@ -91,7 +91,7 @@ public class SysRoleQueryServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleE
 		List<PostReferencePO> grantTableBoundPosts = grantTableMapper.selectBoundPostsByRoleId(id);
 		detail.setBoundPosts(ReferenceConverter.INSTANCE.toPostReferenceList(grantTableBoundPosts));
 
-		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail));
+		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail), null, null);
 		return detail;
 	}
 

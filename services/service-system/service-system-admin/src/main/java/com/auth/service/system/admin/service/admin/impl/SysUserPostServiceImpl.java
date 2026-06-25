@@ -65,7 +65,7 @@ public class SysUserPostServiceImpl extends ServiceImpl<UserPostMapper, UserPost
 		IPage<UserPostPageRowPO> page = baseMapper.selectListByPage(pageParams, userId, query);
 		IPage<UserPostPageVO> voPage = page.convert(UserPostConverter.INSTANCE::toPageVo);
 
-		auditUserDisplayService.enrichAuditUsernames(voPage);
+		auditUserDisplayService.enrichAuditUsernames(voPage, null, null);
 		return PageResponse.of(voPage);
 	}
 

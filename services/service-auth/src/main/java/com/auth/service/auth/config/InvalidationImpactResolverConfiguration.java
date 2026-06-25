@@ -2,9 +2,10 @@ package com.auth.service.auth.config;
 
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 import com.auth.module.security.contract.dto.invalidation.*;
-import com.auth.service.auth.application.authorization.invalidation.impact.ImpactResolver;
-import com.auth.service.auth.application.authorization.invalidation.impact.PortBackedImpactResolver;
-import com.auth.service.auth.application.port.invalidation.AuthorizationImpactQueryPort;
+import com.auth.service.auth.mapper.AuthorizationImpactMapper;
+import com.auth.service.auth.support.invalidation.impact.AuthorizationImpactQuerySupport;
+import com.auth.service.auth.support.invalidation.impact.ImpactResolver;
+import com.auth.service.auth.support.invalidation.impact.PortBackedImpactResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -20,68 +21,72 @@ public class InvalidationImpactResolverConfiguration {
 
 	/**
 	 * 按角色码反查受影响用户 ID。
-	 * @param port 授权影响面查询端口
+	 * @param impactQuery 授权影响面查询
 	 * @return 角色码影响面解析器
 	 */
 	@Bean
-	ImpactResolver<RoleInvalidatePayload> roleImpactResolver(AuthorizationImpactQueryPort port) {
+	ImpactResolver<RoleInvalidatePayload> roleImpactResolver(AuthorizationImpactQuerySupport impactQuery) {
 		return new PortBackedImpactResolver<>(AuthorizationChangeKind.ROLE, RoleInvalidatePayload.class,
-				payload -> port.findUserIdsByRoleCodes(payload.roleCodes()));
+				payload -> impactQuery.findUserIdsByRoleCodes(payload.roleCodes()));
 	}
 
 	/**
-	 * 按权限码反查受影响用户 ID（P4→P1 桥接委托 Port）。
-	 * @param port 授权影响面查询端口
+	 * 按权限码反查受影响用户 ID（P4→P1 桥接）。
+	 * @param impactQuery 授权影响面查询
 	 * @return 权限码影响面解析器
 	 */
 	@Bean
-	ImpactResolver<PermissionInvalidatePayload> permissionImpactResolver(AuthorizationImpactQueryPort port) {
+	ImpactResolver<PermissionInvalidatePayload> permissionImpactResolver(AuthorizationImpactQuerySupport impactQuery) {
 		return new PortBackedImpactResolver<>(AuthorizationChangeKind.PERMISSION, PermissionInvalidatePayload.class,
-				payload -> port.findUserIdsByPermissionCodes(payload.permissionCodes()));
+				payload -> impactQuery.findUserIdsByPermissionCodes(payload.permissionCodes()));
 	}
 
 	/**
 	 * 按策略码反查受影响用户 ID（用户直连绑定 + 可选角色桥接）。
-	 * @param port 授权影响面查询端口
+	 * @param impactQuery 授权影响面查询
 	 * @return 策略码影响面解析器
 	 */
 	@Bean
-	ImpactResolver<PolicyInvalidatePayload> policyImpactResolver(AuthorizationImpactQueryPort port) {
+	ImpactResolver<PolicyInvalidatePayload> policyImpactResolver(AuthorizationImpactQuerySupport impactQuery) {
 		return new PortBackedImpactResolver<>(AuthorizationChangeKind.POLICY, PolicyInvalidatePayload.class,
-				payload -> port.findUserIdsByPolicyCodes(payload.policyCodes()));
+				payload -> impactQuery.findUserIdsByPolicyCodes(payload.policyCodes()));
 	}
 
 	/**
 	 * 按 grant_table 授权主体反查受影响用户 ID（P2）。
-	 * @param port 授权影响面查询端口
+	 * @param impactQuery 授权影响面查询
 	 * @return 授权主体影响面解析器
 	 */
 	@Bean
-	ImpactResolver<GrantInvalidatePayload> grantSubjectImpactResolver(AuthorizationImpactQueryPort port) {
+	ImpactResolver<GrantInvalidatePayload> grantSubjectImpactResolver(AuthorizationImpactQuerySupport impactQuery) {
 		return new PortBackedImpactResolver<>(AuthorizationChangeKind.GRANT, GrantInvalidatePayload.class,
-				payload -> port.findUserIdsByGrantSubjects(payload.subjects()));
+				payload -> impactQuery.findUserIdsByGrantSubjects(payload.subjects()));
 	}
 
 	/**
 	 * 按部门 ID 反查成员用户 ID（P3，含子部门）。
-	 * @param port 授权影响面查询端口
+	 * @param impactQuery 授权影响面查询
 	 * @return 部门成员影响面解析器
 	 */
 	@Bean
-	ImpactResolver<UserDeptInvalidatePayload> userDeptImpactResolver(AuthorizationImpactQueryPort port) {
+	ImpactResolver<UserDeptInvalidatePayload> userDeptImpactResolver(AuthorizationImpactQuerySupport impactQuery,
+			AuthorizationImpactMapper authorizationImpactMapper) {
 		return new PortBackedImpactResolver<>(AuthorizationChangeKind.USER_DEPT, UserDeptInvalidatePayload.class,
-				payload -> port.findUserIdsByDeptIds(payload.deptIds()));
+				payload -> impactQuery.findUserIdsByLongKeys(payload.deptIds(),
+						authorizationImpactMapper::selectUserIdsByDeptIds));
 	}
 
 	/**
 	 * 按岗位 ID 反查成员用户 ID（P3）。
-	 * @param port 授权影响面查询端口
+	 * @param impactQuery 授权影响面查询
 	 * @return 岗位成员影响面解析器
 	 */
 	@Bean
-	ImpactResolver<UserPostInvalidatePayload> userPostImpactResolver(AuthorizationImpactQueryPort port) {
+	ImpactResolver<UserPostInvalidatePayload> userPostImpactResolver(AuthorizationImpactQuerySupport impactQuery,
+			AuthorizationImpactMapper authorizationImpactMapper) {
 		return new PortBackedImpactResolver<>(AuthorizationChangeKind.USER_POST, UserPostInvalidatePayload.class,
-				payload -> port.findUserIdsByPostIds(payload.postIds()));
+				payload -> impactQuery.findUserIdsByLongKeys(payload.postIds(),
+						authorizationImpactMapper::selectUserIdsByPostIds));
 	}
 
 	/**

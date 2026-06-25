@@ -49,7 +49,7 @@ class InternalTokenProviderTest {
 		InternalTokenProvider provider = new InternalTokenProvider(jwt, props);
 
 		Date before = new Date();
-		String token = provider.buildToken(100L, "jti-1");
+		String token = provider.buildToken(100L, "jti-1", null);
 		Date after = new Date();
 
 		var claims = jwt.getClaims(token);
@@ -73,7 +73,7 @@ class InternalTokenProviderTest {
 		HmacJwtTokenProvider jwt = new HmacJwtTokenProvider(props, key);
 		InternalTokenProvider provider = new InternalTokenProvider(jwt, props);
 
-		String token = provider.buildToken(100L, "jti-user");
+		String token = provider.buildToken(100L, "jti-user", null);
 		var claims = jwt.getClaims(token);
 
 		assertEquals(PRINCIPAL_TYPE_USER, claims.get(PRINCIPAL_TYPE));
@@ -102,7 +102,7 @@ class InternalTokenProviderTest {
 		JwtProperties props = hmacJwtProperties();
 		InternalTokenProvider provider = newProvider(props);
 
-		String token = provider.buildToken(100L, "jti-u");
+		String token = provider.buildToken(100L, "jti-u", null);
 		SecurityTokenResult result = provider.parseToken(token);
 
 		assertEquals(PRINCIPAL_TYPE_USER, result.getPrincipalType());

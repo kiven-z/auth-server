@@ -1,6 +1,6 @@
 package com.auth.service.auth.job;
 
-import com.auth.service.auth.application.authorization.command.AuthorizationInvalidationEventOpsApplicationService;
+import com.auth.service.auth.service.AuthorizationInvalidationEventService;
 import com.auth.service.auth.config.AuthorizationInvalidationProperties;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,7 +21,7 @@ import static org.mockito.Mockito.*;
 class AuthorizationInvalidationProcessingClaimCleanupJobTest {
 
 	@Mock
-	private AuthorizationInvalidationEventOpsApplicationService authorizationInvalidationEventOpsApplicationService;
+	private AuthorizationInvalidationEventService authorizationInvalidationEventService;
 
 	@Mock
 	private AuthorizationInvalidationProperties properties;
@@ -36,8 +36,7 @@ class AuthorizationInvalidationProcessingClaimCleanupJobTest {
 
 		cleanupJob.cleanupStaleProcessingClaims();
 
-		verify(authorizationInvalidationEventOpsApplicationService, never()).cleanupStaleProcessingClaims(any(),
-				anyInt());
+		verify(authorizationInvalidationEventService, never()).cleanupStaleProcessingClaims(any(), anyInt());
 	}
 
 	@Test
@@ -46,12 +45,11 @@ class AuthorizationInvalidationProcessingClaimCleanupJobTest {
 		when(properties.getProcessingClaimCleanupEnabled()).thenReturn(true);
 		when(properties.getProcessingClaimTimeoutMinutes()).thenReturn(30);
 		when(properties.getProcessingClaimCleanupBatchSize()).thenReturn(100);
-		when(authorizationInvalidationEventOpsApplicationService.cleanupStaleProcessingClaims(any(), anyInt()))
-			.thenReturn(2);
+		when(authorizationInvalidationEventService.cleanupStaleProcessingClaims(any(), anyInt())).thenReturn(2);
 
 		cleanupJob.cleanupStaleProcessingClaims();
 
-		verify(authorizationInvalidationEventOpsApplicationService).cleanupStaleProcessingClaims(any(), anyInt());
+		verify(authorizationInvalidationEventService).cleanupStaleProcessingClaims(any(), anyInt());
 	}
 
 }

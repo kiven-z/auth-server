@@ -29,7 +29,7 @@ class OperationLogRequestParamsBuilderTest {
 	void build_shouldReturnNullWhenRecordDisabled() {
 		MockHttpServletRequest req = new MockHttpServletRequest("GET", "/a");
 		req.setQueryString("k=v");
-		assertNull(OperationLogRequestParamsBuilder.build(req, false, objectMapper));
+		assertNull(OperationLogRequestParamsBuilder.build(req, false, objectMapper, null));
 	}
 
 	@Test
@@ -37,7 +37,7 @@ class OperationLogRequestParamsBuilderTest {
 	void build_shouldUseQueryStringForGet() {
 		MockHttpServletRequest req = new MockHttpServletRequest("GET", "/a");
 		req.setQueryString("a".repeat(OperationLogRequestParamsBuilder.MAX_REQUEST_TEXT + 50));
-		String out = OperationLogRequestParamsBuilder.build(req, true, objectMapper);
+		String out = OperationLogRequestParamsBuilder.build(req, true, objectMapper, null);
 		assertEquals(OperationLogRequestParamsBuilder.MAX_REQUEST_TEXT, out.length());
 	}
 
@@ -46,7 +46,7 @@ class OperationLogRequestParamsBuilderTest {
 	void build_shouldSerializeParameterMapForNonGet() {
 		MockHttpServletRequest req = new MockHttpServletRequest("POST", "/a");
 		req.addParameter("id", "1");
-		String out = OperationLogRequestParamsBuilder.build(req, true, objectMapper);
+		String out = OperationLogRequestParamsBuilder.build(req, true, objectMapper, null);
 		assertTrue(out.contains("id"));
 		assertTrue(out.contains("1"));
 	}

@@ -59,12 +59,6 @@ public interface SysEmailTemplateService extends IService<MessageTemplateEntity>
 	void updateRequireFields(Long id, EmailTemplateRequireFieldsForm form);
 
 	/**
-	 * 批量启用/禁用邮件模板
-	 * @param form 批量启用/禁用参数
-	 */
-	void batchUpdateStatus(EmailTemplateStatusForm form);
-
-	/**
 	 * 预览：将数据库模板按 exampleValue 渲染为 HTML
 	 * @param id 模板ID
 	 * @return 渲染后的 HTML

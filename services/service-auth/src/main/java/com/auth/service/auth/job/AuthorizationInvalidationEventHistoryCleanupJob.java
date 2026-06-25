@@ -1,13 +1,15 @@
 package com.auth.service.auth.job;
 
-import com.auth.service.auth.application.authorization.command.AuthorizationInvalidationEventOpsApplicationService;
-import com.auth.service.auth.config.AuthorizationInvalidationProperties;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.time.LocalDateTime;
+
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import com.auth.service.auth.config.AuthorizationInvalidationProperties;
+import com.auth.service.auth.service.AuthorizationInvalidationEventService;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 授权失效幂等事件 SUCCESS 历史清理：删除已完成且超过保留期的记录
@@ -19,7 +21,7 @@ import java.time.LocalDateTime;
 @Component
 public class AuthorizationInvalidationEventHistoryCleanupJob {
 
-	private final AuthorizationInvalidationEventOpsApplicationService authorizationInvalidationEventOpsApplicationService;
+	private final AuthorizationInvalidationEventService authorizationInvalidationEventService;
 
 	private final AuthorizationInvalidationProperties properties;
 
@@ -48,13 +50,12 @@ public class AuthorizationInvalidationEventHistoryCleanupJob {
 	 */
 	private int purgeInBatches(LocalDateTime cutoff, int batchSize) {
 		int totalDeleted = 0;
-		while (true) {
-			int deleted = authorizationInvalidationEventOpsApplicationService.purgeCompletedBefore(cutoff, batchSize);
+		int deleted;
+		do {
+			deleted = authorizationInvalidationEventService.purgeCompletedBefore(cutoff, batchSize);
 			totalDeleted += deleted;
-			if (deleted < batchSize) {
-				break;
-			}
 		}
+		while (deleted >= batchSize);
 		return totalDeleted;
 	}
 

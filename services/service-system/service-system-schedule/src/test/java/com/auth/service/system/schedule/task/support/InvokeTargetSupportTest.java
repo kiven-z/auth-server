@@ -30,13 +30,13 @@ class InvokeTargetSupportTest {
 	}
 
 	@Test
-	@DisplayName("parameterSignature：按反射参数类型生成签名")
-	void parameterSignatureMatchesArgCount() throws NoSuchMethodException {
+	@DisplayName("formatParameterList：按反射参数类型生成签名")
+	void formatParameterListMatchesArgCount() throws NoSuchMethodException {
 		Method run = SampleTask.class.getMethod("run");
 		Method echo = SampleTask.class.getMethod("echo", String.class);
 
-		assertThat(InvokeTargetSupport.parameterSignature(run)).isEqualTo("()");
-		assertThat(InvokeTargetSupport.parameterSignature(echo)).isEqualTo("(String)");
+		assertThat(InvokeTargetSupport.formatParameterList(run.getParameterTypes())).isEqualTo("()");
+		assertThat(InvokeTargetSupport.formatParameterList(echo.getParameterTypes())).isEqualTo("(String)");
 	}
 
 	@Test

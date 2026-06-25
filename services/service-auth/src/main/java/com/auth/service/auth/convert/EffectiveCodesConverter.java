@@ -2,7 +2,7 @@ package com.auth.service.auth.convert;
 
 import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
-import com.auth.service.auth.api.dto.authorization.response.EffectiveCodesVO;
+import com.auth.service.auth.model.vo.authorization.EffectiveCodesVO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;

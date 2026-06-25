@@ -41,7 +41,10 @@ public class UserEffectiveCodesResolver {
 		}
 
 		EffectiveCodesInnerDTO data = result.getData();
-		return Optional.of(new UserEffectiveCodesSnapshot(data.getRoleCodes(), data.getPermissionCodes()));
+		return Optional.of(UserEffectiveCodesSnapshot.builder()
+			.roleCodes(data.getRoleCodes())
+			.permissionCodes(data.getPermissionCodes())
+			.build());
 	}
 
 }

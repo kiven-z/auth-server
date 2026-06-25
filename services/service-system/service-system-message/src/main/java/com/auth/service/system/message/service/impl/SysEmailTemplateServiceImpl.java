@@ -21,7 +21,6 @@ import com.auth.service.system.message.service.SysEmailTemplateService;
 import com.auth.service.system.message.support.template.FreemarkerTemplateRenderer;
 import com.auth.service.system.message.support.template.MessageTemplateRequireFieldsJsonSupport;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.scheduling.annotation.Async;
@@ -62,7 +61,7 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<MessageTemplateMapp
 			EmailTemplateQuery query) {
 		IPage<EmailTemplatePageRowPO> page = baseMapper.selectEmailTemplatePage(pageParams, query);
 		IPage<EmailTemplatePageResponse> voPage = page.convert(EmailTemplateConverter.INSTANCE::toPageResponse);
-		auditUserDisplayService.enrichAuditUsernames(voPage);
+		auditUserDisplayService.enrichAuditUsernames(voPage, null, null);
 		return PageResponse.of(voPage);
 	}
 
@@ -77,7 +76,7 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<MessageTemplateMapp
 		}
 
 		EmailTemplateDetailVO vo = EmailTemplateConverter.INSTANCE.toDetailVo(entity);
-		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(vo));
+		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(vo), null, null);
 		return vo;
 	}
 
@@ -135,17 +134,6 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<MessageTemplateMapp
 		String json = MessageTemplateRequireFieldsJsonSupport.toJson(form.getRequireFields());
 		entity.setRequireFields(json);
 		updateById(entity);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void batchUpdateStatus(EmailTemplateStatusForm form) {
-		update(Wrappers.<MessageTemplateEntity>lambdaUpdate()
-			.in(MessageTemplateEntity::getId, form.getIds())
-			.eq(MessageTemplateEntity::getChannel, MessageChannel.EMAIL.name())
-			.set(MessageTemplateEntity::getStatus, form.getStatus()));
 	}
 
 	/**

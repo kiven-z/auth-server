@@ -27,6 +27,7 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -70,7 +71,7 @@ class LogAuthorizationAuditQueryServiceImplTest {
 		assertThat(detail.getId()).isEqualTo(1L);
 		assertThat(detail.getEventType()).isEqualTo("DENIED");
 		assertThat(detail.getDecisionReason()).isEqualTo("missing permission");
-		verify(auditUserDisplayService).enrichAuditUsernames(any(List.class));
+		verify(auditUserDisplayService).enrichAuditUsernames(any(List.class), isNull(), isNull());
 	}
 
 	@Test
@@ -95,7 +96,7 @@ class LogAuthorizationAuditQueryServiceImplTest {
 		PageResponse<LogAuthorizationAuditPageVO> result = logAuthorizationAuditQueryService.getPage(pageParams, query);
 
 		assertThat(result.getList()).isEmpty();
-		verify(auditUserDisplayService).enrichAuditUsernames(any(IPage.class));
+		verify(auditUserDisplayService).enrichAuditUsernames(any(IPage.class), isNull(), isNull());
 	}
 
 }

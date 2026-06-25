@@ -2,7 +2,7 @@ package com.auth.service.auth.convert;
 
 import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.service.auth.TestConstants;
-import com.auth.service.auth.api.dto.session.response.UserSessionVO;
+import com.auth.service.auth.model.vo.UserSessionVO;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

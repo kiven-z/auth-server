@@ -37,7 +37,10 @@ public class AuthorizationInvalidationCoordinator {
 		// 事务提交后是否同步
 		Boolean enabled = properties.getSyncDispatchEnabled();
 		if (BooleanUtil.isTrue(enabled)) {
-			applicationEventPublisher.publishEvent(new AuthorizationInvalidationDispatchEvent(outboxId));
+			AuthorizationInvalidationDispatchEvent event = AuthorizationInvalidationDispatchEvent.builder()
+				.outboxId(outboxId)
+				.build();
+			applicationEventPublisher.publishEvent(event);
 		}
 	}
 

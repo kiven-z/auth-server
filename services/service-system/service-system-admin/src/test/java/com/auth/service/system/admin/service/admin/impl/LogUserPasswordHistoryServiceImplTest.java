@@ -24,6 +24,7 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -65,7 +66,7 @@ class LogUserPasswordHistoryQueryServiceImplTest {
 
 		assertThat(detail.getId()).isEqualTo(1L);
 		assertThat(detail.getUserId()).isEqualTo(10L);
-		verify(auditUserDisplayService).enrichAuditUsernames(any(List.class));
+		verify(auditUserDisplayService).enrichAuditUsernames(any(List.class), isNull(), isNull());
 	}
 
 	@Test
@@ -89,7 +90,8 @@ class LogUserPasswordHistoryQueryServiceImplTest {
 
 		logUserPasswordHistoryQueryService.getPage(pageParams, query);
 
-		verify(auditUserDisplayService).enrichAuditUsernames(any(com.baomidou.mybatisplus.core.metadata.IPage.class));
+		verify(auditUserDisplayService).enrichAuditUsernames(any(com.baomidou.mybatisplus.core.metadata.IPage.class),
+				isNull(), isNull());
 	}
 
 }

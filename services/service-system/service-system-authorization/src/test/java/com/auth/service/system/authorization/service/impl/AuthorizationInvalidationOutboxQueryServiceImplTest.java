@@ -25,6 +25,7 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -74,7 +75,7 @@ class AuthorizationInvalidationOutboxQueryServiceImplTest {
 		assertEquals(1L, response.getTotal());
 		assertEquals("evt-1", response.getList().get(0).getEventId());
 		assertEquals("PENDING", response.getList().get(0).getStatus());
-		verify(auditUserDisplayService).enrichAuditUsernames(any(IPage.class));
+		verify(auditUserDisplayService).enrichAuditUsernames(any(IPage.class), isNull(), isNull());
 	}
 
 	@Test
@@ -106,7 +107,7 @@ class AuthorizationInvalidationOutboxQueryServiceImplTest {
 		assertEquals("evt-detail", detailVO.getEventId());
 		assertEquals("DEAD", detailVO.getStatus());
 		assertEquals("{\"roleCode\":\"ADMIN\"}", detailVO.getPayload());
-		verify(auditUserDisplayService).enrichAuditUsernames(anyList());
+		verify(auditUserDisplayService).enrichAuditUsernames(anyList(), isNull(), isNull());
 	}
 
 }

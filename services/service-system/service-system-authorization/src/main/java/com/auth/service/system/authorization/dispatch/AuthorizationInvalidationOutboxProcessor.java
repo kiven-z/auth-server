@@ -1,7 +1,6 @@
 package com.auth.service.system.authorization.dispatch;
 
-import java.util.Objects;
-
+import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.core.model.response.Result;
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest;
@@ -11,13 +10,13 @@ import com.auth.service.system.authorization.feign.AuthorizationInnerFeignClient
 import com.auth.service.system.authorization.mapper.SysAuthorizationInvalidationOutboxMapper;
 import com.auth.service.system.authorization.model.entity.SysAuthorizationInvalidationOutboxEntity;
 import com.auth.service.system.authorization.model.enums.AuthorizationInvalidationOutboxStatus;
-import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.authorization.outbox.InvalidationOutboxPayloadCodec;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Outbox 投递执行：调用 auth {@code /invalidate} 并更新 Outbox 状态。
@@ -36,13 +35,6 @@ public class AuthorizationInvalidationOutboxProcessor {
 	private final AuthorizationInnerFeignClient authorizationInnerFeignClient;
 
 	private final AuthorizationInvalidationProperties properties;
-
-	private static String truncateError(String message) {
-		if (message == null) {
-			return "unknown error";
-		}
-		return CharSequenceUtil.subPre(message, 1900);
-	}
 
 	/**
 	 * 处理单条 Outbox（同步或补偿 Job 共用）。
@@ -116,7 +108,8 @@ public class AuthorizationInvalidationOutboxProcessor {
 	 * @param errorMessage 错误消息
 	 */
 	private void handleFailure(SysAuthorizationInvalidationOutboxEntity row, String errorMessage) {
-		String truncated = truncateError(errorMessage);
+		String truncated = CharSequenceUtil.subPre(CharSequenceUtil.blankToDefault(errorMessage, "unknown error"),
+				1900);
 		if (AuthorizationInvalidationOutboxStatus.PENDING.name().equals(row.getStatus())) {
 			outboxMapper.recordSyncFailure(row.getId(), truncated);
 			return;

@@ -26,6 +26,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.anyLong;
 
@@ -105,7 +106,7 @@ class SysDeptServiceImplTest {
 
 		assertEquals(1, result.size());
 		verify(sysDeptMapper).selectListByQuery(argThat((SysDeptListQuery q) -> q.getKeyword() == null));
-		verify(auditUserDisplayService).enrichAuditUsernames(anyList());
+		verify(auditUserDisplayService).enrichAuditUsernames(anyList(), isNull(), isNull());
 	}
 
 	@Test

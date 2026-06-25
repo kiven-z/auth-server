@@ -24,19 +24,6 @@ public interface AuditUserDisplayService {
 	Map<Long, String> mapUsernamesByIds(Collection<Long> userIds);
 
 	/**
-	 * 为分页结果中的每条
-	 * @param page MyBatis-Plus 分页结果
-	 * @param <T> 继承 {@link BaseResponse} 的行类型
-	 */
-	<T extends BaseResponse> void enrichAuditUsernames(IPage<T> page);
-
-	/**
-	 * 为列表中的每条 {@link BaseResponse} 填充
-	 * @param records 行列表
-	 */
-	void enrichAuditUsernames(List<? extends BaseResponse> records);
-
-	/**
 	 * 为分页结果填充审计用户名，并可选填充额外用户字段（一次批量查询）。
 	 * @param page MyBatis-Plus 分页结果
 	 * @param extraUserIdGetter 额外用户 ID 读取；为 null 时仅填充审计列

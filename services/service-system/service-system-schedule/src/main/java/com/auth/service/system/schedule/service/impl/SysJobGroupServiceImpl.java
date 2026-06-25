@@ -53,7 +53,7 @@ public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJo
 		IPage<SysJobGroupPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
 		IPage<SysJobGroupPageResponse> voPage = page.convert(SysJobGroupConverter.INSTANCE::toPageResponse);
 
-		auditUserDisplayService.enrichAuditUsernames(voPage);
+		auditUserDisplayService.enrichAuditUsernames(voPage, null, null);
 		return PageResponse.of(voPage);
 	}
 
@@ -67,7 +67,7 @@ public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJo
 			.map(SysJobGroupConverter.INSTANCE::toPageResponse)
 			.toList();
 
-		auditUserDisplayService.enrichAuditUsernames(voList);
+		auditUserDisplayService.enrichAuditUsernames(voList, null, null);
 		return voList;
 	}
 
@@ -82,7 +82,7 @@ public class SysJobGroupServiceImpl extends ServiceImpl<SysJobGroupMapper, SysJo
 		}
 
 		SysJobGroupDetailVO detail = SysJobGroupConverter.INSTANCE.toDetailVo(entity);
-		auditUserDisplayService.enrichAuditUsernames(List.of(detail));
+		auditUserDisplayService.enrichAuditUsernames(List.of(detail), null, null);
 		return detail;
 	}
 

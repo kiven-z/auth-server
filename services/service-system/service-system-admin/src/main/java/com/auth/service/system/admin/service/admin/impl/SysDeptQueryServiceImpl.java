@@ -55,7 +55,7 @@ public class SysDeptQueryServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptE
 		List<SysDeptEntity> entities = baseMapper.selectListByQuery(query);
 		List<SysDeptListVO> list = SysDeptConverter.INSTANCE.toListVoList(entities);
 
-		auditUserDisplayService.enrichAuditUsernames(list);
+		auditUserDisplayService.enrichAuditUsernames(list, null, null);
 		return list;
 	}
 
@@ -67,7 +67,7 @@ public class SysDeptQueryServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptE
 		IPage<SysDeptPageRowPO> poPage = baseMapper.selectListByPage(pageParams, query);
 		IPage<SysDeptListVO> result = poPage.convert(SysDeptConverter.INSTANCE::toListVoFromPageRow);
 
-		auditUserDisplayService.enrichAuditUsernames(result);
+		auditUserDisplayService.enrichAuditUsernames(result, null, null);
 		return PageResponse.of(result);
 	}
 
@@ -89,7 +89,7 @@ public class SysDeptQueryServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptE
 				id);
 		detail.setBoundRoles(ReferenceConverter.INSTANCE.toRoleReferenceList(poList));
 
-		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail));
+		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail), null, null);
 		return detail;
 	}
 

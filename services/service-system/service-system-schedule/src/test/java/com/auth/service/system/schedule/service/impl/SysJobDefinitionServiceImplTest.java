@@ -8,6 +8,7 @@ import com.auth.service.system.schedule.mapper.SysJobMapper;
 import com.auth.service.system.schedule.model.entity.LogJobEntity;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
+import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
 import com.auth.service.system.schedule.model.enums.SysJobLastExecutionStatus;
 import com.auth.service.system.schedule.model.enums.SysJobQuartzRuntimeStatus;
 import com.auth.service.system.schedule.model.form.SysJobCreateForm;
@@ -47,6 +48,7 @@ import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.*;
 
@@ -183,7 +185,7 @@ class SysJobDefinitionServiceImplTest {
 		detailRow.setTaskType("BEAN_INVOKE");
 		when(sysJobMapper.selectDetailById(1L)).thenReturn(detailRow);
 		when(sysJobQuartzRuntimeReader.getFireTimes("demoJob", "DEFAULT"))
-			.thenReturn(new SysJobQuartzRuntimeReader.FireTimes(null, null));
+			.thenReturn(SysJobQuartzRuntimeReader.FireTimes.empty());
 		when(sysJobQuartzRuntimeReader.resolveRuntimeSnapshot("demoJob", "DEFAULT"))
 			.thenReturn(SysJobQuartzRuntimeSnapshot.of(SysJobQuartzRuntimeStatus.IDLE, null));
 		when(logJobMapper.selectLatestByJobIds(any())).thenReturn(List.of());
@@ -194,7 +196,7 @@ class SysJobDefinitionServiceImplTest {
 		assertThat(detail.getJobGroup()).isEqualTo("DEFAULT");
 		assertThat(detail.getJobGroupName()).isEqualTo("默认分组");
 		assertThat(detail.getLastExecutionStatus()).isEqualTo(SysJobLastExecutionStatus.UNKNOWN);
-		verify(auditUserDisplayService).enrichAuditUsernames(any(List.class));
+		verify(auditUserDisplayService).enrichAuditUsernames(any(List.class), isNull(), isNull());
 	}
 
 	@Test
@@ -295,7 +297,7 @@ class SysJobDefinitionServiceImplTest {
 		sysJobDefinitionService.runOnce(5L);
 
 		verify(sysJobSchedulerManager).ensureJobDetail(entity);
-		verify(sysJobSchedulerManager).triggerJob("demoJob", "DEFAULT");
+		verify(sysJobSchedulerManager).triggerJob("demoJob", "DEFAULT", SysJobQuartzDataKeys.TRIGGER_TYPE_MANUAL);
 	}
 
 	@Test

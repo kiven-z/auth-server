@@ -1,31 +1,22 @@
 package com.auth.gateway.architecture;
 
-import com.auth.common.web.exception.ValidationExceptionHandler;
 import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.RestTemplate;
 
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noMethods;
 
 /**
- * auth-gateway 模块架构约束（ArchUnit）
+ * auth-gateway 模块架构约束（ArchUnit）。 网关为 WebFlux 响应式栈，全局错误由
+ * {@code AbstractErrorWebExceptionHandler} 处理，无 {@code @RestControllerAdvice}。
  *
  * @author Bunny
  */
 @AnalyzeClasses(packages = "com.auth.gateway", importOptions = ImportOption.DoNotIncludeTests.class)
 class GatewayArchitectureTest {
-
-	@ArchTest
-	static final ArchRule business_exception_handlers_must_not_extend_validation_handler = noClasses().that()
-		.resideInAPackage("..exception..")
-		.and()
-		.areAnnotatedWith(RestControllerAdvice.class)
-		.should()
-		.beAssignableTo(ValidationExceptionHandler.class);
 
 	private static final String GATEWAY_ROOT = "..gateway..";
 

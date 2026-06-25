@@ -58,7 +58,7 @@ public class SysPostQueryServiceImpl extends ServiceImpl<SysPostMapper, SysPostE
 		IPage<SysPostPageRowPO> page = baseMapper.selectListByPage(pageParams, query, orderBySql);
 		IPage<SysPostPageVO> voPage = page.convert(SysPostConverter.INSTANCE::toPageVo);
 
-		auditUserDisplayService.enrichAuditUsernames(voPage);
+		auditUserDisplayService.enrichAuditUsernames(voPage, null, null);
 		return PageResponse.of(voPage);
 	}
 
@@ -91,7 +91,7 @@ public class SysPostQueryServiceImpl extends ServiceImpl<SysPostMapper, SysPostE
 				id);
 		detail.setBoundRoles(ReferenceConverter.INSTANCE.toRoleReferenceList(roleList));
 
-		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail));
+		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail), null, null);
 		return detail;
 	}
 

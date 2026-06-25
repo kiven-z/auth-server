@@ -1,10 +1,10 @@
 package com.auth.service.auth.convert;
 
 import com.auth.common.mapstruct.config.AuthMapperConfig;
-import com.auth.service.auth.api.dto.authentication.response.RefreshTokenResponse;
-import com.auth.service.auth.api.dto.authentication.response.UserLoginResponse;
-import com.auth.service.auth.domain.authentication.model.CompletedLoginSession;
-import com.auth.service.auth.domain.authentication.model.CompletedRefreshSession;
+import com.auth.service.auth.model.response.RefreshTokenResponse;
+import com.auth.service.auth.model.response.UserLoginResponse;
+import com.auth.service.auth.model.value.login.CompletedLoginSession;
+import com.auth.service.auth.model.value.login.CompletedRefreshSession;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 

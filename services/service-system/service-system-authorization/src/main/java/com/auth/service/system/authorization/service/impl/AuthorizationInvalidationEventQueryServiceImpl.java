@@ -48,7 +48,7 @@ public class AuthorizationInvalidationEventQueryServiceImpl implements Authoriza
 		PageResponse<AuthorizationInvalidationEventPageVO> response = PageResponse.of(pageData.getPageNo(),
 				pageData.getPageSize(), pageData.getTotal(), records);
 
-		auditUserDisplayService.enrichAuditUsernames(response.getList());
+		auditUserDisplayService.enrichAuditUsernames(response.getList(), null, null);
 		return response;
 	}
 
@@ -61,7 +61,7 @@ public class AuthorizationInvalidationEventQueryServiceImpl implements Authoriza
 		AuthorizationInvalidationEventDetailVO detailVO = AuthorizationInvalidationEventOpsConverter.INSTANCE
 			.toDetailVO(detailDto);
 
-		auditUserDisplayService.enrichAuditUsernames(List.of(detailVO));
+		auditUserDisplayService.enrichAuditUsernames(List.of(detailVO), null, null);
 		return detailVO;
 	}
 

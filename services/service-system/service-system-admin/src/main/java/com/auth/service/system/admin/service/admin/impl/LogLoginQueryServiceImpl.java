@@ -41,7 +41,7 @@ public class LogLoginQueryServiceImpl extends ServiceImpl<LogLoginLogMapper, Log
 		IPage<LogLoginLogPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
 		IPage<LogLoginLogPageVO> voPage = page.convert(LogLoginLogConverter.INSTANCE::toPageVO);
 
-		auditUserDisplayService.enrichAuditUsernames(voPage);
+		auditUserDisplayService.enrichAuditUsernames(voPage, null, null);
 		return PageResponse.of(voPage);
 	}
 

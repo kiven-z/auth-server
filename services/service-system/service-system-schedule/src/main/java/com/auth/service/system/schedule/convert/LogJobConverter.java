@@ -1,7 +1,6 @@
 package com.auth.service.system.schedule.convert;
 
 import com.auth.common.mapstruct.config.AuthMapperConfig;
-import com.auth.common.mapstruct.qualifier.MapStructStringQualifiers;
 import com.auth.service.system.schedule.model.entity.LogJobEntity;
 import com.auth.service.system.schedule.model.po.LogJobPageRowPO;
 import com.auth.service.system.schedule.model.vo.LogJobDetailVO;
@@ -15,7 +14,7 @@ import org.mapstruct.factory.Mappers;
  *
  * @author Bunny
  */
-@Mapper(config = AuthMapperConfig.class, uses = MapStructStringQualifiers.class)
+@Mapper(config = AuthMapperConfig.class)
 public interface LogJobConverter {
 
 	LogJobConverter INSTANCE = Mappers.getMapper(LogJobConverter.class);

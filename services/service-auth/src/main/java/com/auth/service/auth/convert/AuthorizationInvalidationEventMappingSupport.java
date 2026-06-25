@@ -1,21 +1,22 @@
 package com.auth.service.auth.convert;
 
-import java.util.Objects;
-
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateResponse;
-import com.auth.service.auth.domain.authorization.model.InvalidationProcessingMarker;
-import com.auth.service.auth.infrastructure.persistence.projection.AuthorizationInvalidationEventProjection;
+import com.auth.service.auth.model.po.invalidation.AuthorizationInvalidationEventPO;
+import com.auth.service.auth.support.invalidation.InvalidationProcessingMarker;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
+import lombok.experimental.UtilityClass;
 import org.mapstruct.Named;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
- * 授权失效幂等事件映射辅助
+ * 授权失效幂等事件写侧投影组装与 MapStruct 辅助映射。
  *
  * @author Bunny
  */
+@UtilityClass
 public class AuthorizationInvalidationEventMappingSupport {
 
 	/**
@@ -27,10 +28,9 @@ public class AuthorizationInvalidationEventMappingSupport {
 	 * @param kind 变更类型
 	 * @return 待插入的占位投影
 	 */
-	public static AuthorizationInvalidationEventProjection buildProcessingClaim(String eventId,
-			AuthorizationChangeKind kind) {
+	public static AuthorizationInvalidationEventPO buildProcessingClaim(String eventId, AuthorizationChangeKind kind) {
 		LocalDateTime now = LocalDateTime.now();
-		AuthorizationInvalidationEventProjection projection = new AuthorizationInvalidationEventProjection();
+		AuthorizationInvalidationEventPO projection = new AuthorizationInvalidationEventPO();
 		projection.setId(IdWorker.getId());
 		projection.setEventId(eventId);
 		projection.setChangeKind(kind.name());
@@ -50,7 +50,7 @@ public class AuthorizationInvalidationEventMappingSupport {
 	 * @param projection 持久化投影
 	 * @return 失效处理结果
 	 */
-	public static AuthorizationInvalidateResponse toResponse(AuthorizationInvalidationEventProjection projection) {
+	public static AuthorizationInvalidateResponse toResponse(AuthorizationInvalidationEventPO projection) {
 		return new AuthorizationInvalidateResponse(Objects.requireNonNullElse(projection.getImpactedUserCount(), 0),
 				Objects.requireNonNullElse(projection.getVersionBumpedCount(), 0),
 				Objects.requireNonNullElse(projection.getProfileRefreshedCount(), 0),
@@ -67,9 +67,9 @@ public class AuthorizationInvalidationEventMappingSupport {
 	 * @param response 处理结果
 	 * @return 待 update 的投影
 	 */
-	public static AuthorizationInvalidationEventProjection toProcessedOutcomeProjection(String eventId,
+	public static AuthorizationInvalidationEventPO toProcessedOutcomeProjection(String eventId,
 			AuthorizationChangeKind kind, AuthorizationInvalidateResponse response) {
-		AuthorizationInvalidationEventProjection projection = new AuthorizationInvalidationEventProjection();
+		AuthorizationInvalidationEventPO projection = new AuthorizationInvalidationEventPO();
 		projection.setEventId(eventId);
 		projection.setChangeKind(kind.name());
 		projection.setImpactedUserCount(response.impactedUserCount());
@@ -86,7 +86,7 @@ public class AuthorizationInvalidationEventMappingSupport {
 	 * @return 处理中时为 true
 	 */
 	@Named("toProcessingFlag")
-	public Boolean toProcessingFlag(Integer impactedUserCount) {
+	public static Boolean toProcessingFlag(Integer impactedUserCount) {
 		return InvalidationProcessingMarker.isProcessing(impactedUserCount);
 	}
 

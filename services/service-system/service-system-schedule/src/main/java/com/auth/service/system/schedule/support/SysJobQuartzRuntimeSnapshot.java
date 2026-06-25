@@ -4,12 +4,29 @@ import com.auth.service.system.schedule.model.enums.SysJobQuartzRuntimeStatus;
 
 import java.util.Date;
 
+import lombok.Builder;
+import lombok.Value;
+import lombok.experimental.Accessors;
+
 /**
  * Quartz 运行时状态快照（不含失败日志补充）
  *
  * @author Bunny
  */
-public record SysJobQuartzRuntimeSnapshot(SysJobQuartzRuntimeStatus status, Date fireTime) {
+@Value
+@Builder
+@Accessors(fluent = true)
+public class SysJobQuartzRuntimeSnapshot {
+
+	/**
+	 * 运行时状态
+	 */
+	SysJobQuartzRuntimeStatus status;
+
+	/**
+	 * 开始执行时间
+	 */
+	Date fireTime;
 
 	/**
 	 * 构建快照
@@ -18,7 +35,7 @@ public record SysJobQuartzRuntimeSnapshot(SysJobQuartzRuntimeStatus status, Date
 	 * @return 快照
 	 */
 	public static SysJobQuartzRuntimeSnapshot of(SysJobQuartzRuntimeStatus status, Date fireTime) {
-		return new SysJobQuartzRuntimeSnapshot(status, fireTime);
+		return SysJobQuartzRuntimeSnapshot.builder().status(status).fireTime(fireTime).build();
 	}
 
 }

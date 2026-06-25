@@ -55,7 +55,7 @@ public class MenuWebRouteTreeAssembler {
 		Map<Long, List<String>> permissionMap = menuList.stream()
 			.collect(Collectors.toMap(SysMenuEntity::getId, menu -> PermissionConstant.ADMIN_WILDCARD_PERMISSIONS,
 					(a, b) -> a));
-		MenuConvertContext context = new MenuConvertContext(roleMap, permissionMap);
+		MenuConvertContext context = MenuConvertContext.builder().roleMap(roleMap).permissionMap(permissionMap).build();
 		return buildRouteTree(menuList, context);
 	}
 
@@ -72,7 +72,7 @@ public class MenuWebRouteTreeAssembler {
 		List<Long> menuIds = menuList.stream().map(SysMenuEntity::getId).toList();
 		Map<Long, List<String>> roleMap = queryRoleMap(menuIds);
 		Map<Long, List<String>> permissionMap = queryPermissionMap(menuIds);
-		MenuConvertContext context = new MenuConvertContext(roleMap, permissionMap);
+		MenuConvertContext context = MenuConvertContext.builder().roleMap(roleMap).permissionMap(permissionMap).build();
 
 		return buildRouteTree(menuList, context);
 	}

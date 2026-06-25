@@ -46,7 +46,7 @@ public class LogAuthorizationAuditQueryServiceImpl
 		IPage<LogAuthorizationAuditPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
 		IPage<LogAuthorizationAuditPageVO> voPage = page.convert(LogAuthorizationAuditConverter.INSTANCE::toPageVO);
 
-		auditUserDisplayService.enrichAuditUsernames(voPage);
+		auditUserDisplayService.enrichAuditUsernames(voPage, null, null);
 		return PageResponse.of(voPage);
 	}
 
@@ -61,7 +61,7 @@ public class LogAuthorizationAuditQueryServiceImpl
 		}
 
 		LogAuthorizationAuditDetailVO vo = LogAuthorizationAuditConverter.INSTANCE.toDetailVo(po);
-		auditUserDisplayService.enrichAuditUsernames(List.of(vo));
+		auditUserDisplayService.enrichAuditUsernames(List.of(vo), null, null);
 		return vo;
 	}
 

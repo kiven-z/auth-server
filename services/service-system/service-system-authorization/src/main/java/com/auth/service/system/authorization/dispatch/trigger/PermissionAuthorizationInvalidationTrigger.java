@@ -1,12 +1,12 @@
 package com.auth.service.system.authorization.dispatch.trigger;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest;
 import com.auth.module.security.contract.dto.invalidation.PermissionInvalidatePayload;
 import com.auth.service.system.authorization.dispatch.AuthorizationInvalidationCoordinator;
-import com.auth.service.system.authorization.dispatch.support.InvalidationEventIds;
-import com.auth.service.system.authorization.dispatch.support.InvalidationSourceBizIds;
+import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.auth.service.system.common.model.SystemAuditBizModule;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -36,8 +36,8 @@ public class PermissionAuthorizationInvalidationTrigger {
 			return;
 		}
 
-		String sourceBizId = InvalidationSourceBizIds.of(operation, InvalidationSourceBizIds.joinCodes(codes));
-		String eventId = InvalidationEventIds.next(AuthorizationChangeKind.PERMISSION);
+		String sourceBizId = CharSequenceUtil.blankToDefault(operation, "invalidate") + ":" + String.join(",", codes);
+		String eventId = AuthorizationChangeKind.PERMISSION.eventIdPrefix() + ":" + IdWorker.getId();
 
 		PermissionInvalidatePayload payload = new PermissionInvalidatePayload(codes);
 		AuthorizationInvalidateRequest request = new AuthorizationInvalidateRequest(eventId,

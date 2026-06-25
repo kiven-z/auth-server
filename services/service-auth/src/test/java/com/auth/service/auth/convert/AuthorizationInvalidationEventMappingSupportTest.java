@@ -2,14 +2,12 @@ package com.auth.service.auth.convert;
 
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateResponse;
-import com.auth.service.auth.domain.authorization.model.InvalidationProcessingMarker;
-import com.auth.service.auth.infrastructure.persistence.projection.AuthorizationInvalidationEventProjection;
+import com.auth.service.auth.support.invalidation.InvalidationProcessingMarker;
+import com.auth.service.auth.model.po.invalidation.AuthorizationInvalidationEventPO;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * {@link AuthorizationInvalidationEventMappingSupport} 写侧投影组装单元测试
@@ -20,7 +18,7 @@ class AuthorizationInvalidationEventMappingSupportTest {
 	@Test
 	@DisplayName("buildProcessingClaim 生成处理中占位投影")
 	void buildProcessingClaim_shouldSetProcessingMarkers() {
-		AuthorizationInvalidationEventProjection projection = AuthorizationInvalidationEventMappingSupport
+		AuthorizationInvalidationEventPO projection = AuthorizationInvalidationEventMappingSupport
 			.buildProcessingClaim("evt-1", AuthorizationChangeKind.ROLE);
 
 		assertEquals("evt-1", projection.getEventId());
@@ -34,7 +32,7 @@ class AuthorizationInvalidationEventMappingSupportTest {
 	@Test
 	@DisplayName("toResponse 将投影转为失效结果 DTO")
 	void toResponse_shouldMapCountsWithDefaults() {
-		AuthorizationInvalidationEventProjection projection = new AuthorizationInvalidationEventProjection();
+		AuthorizationInvalidationEventPO projection = new AuthorizationInvalidationEventPO();
 		projection.setImpactedUserCount(5);
 		projection.setVersionBumpedCount(4);
 		projection.setProfileRefreshedCount(3);
@@ -48,7 +46,7 @@ class AuthorizationInvalidationEventMappingSupportTest {
 	@Test
 	@DisplayName("toResponse 空计数默认为零")
 	void toResponse_shouldDefaultNullCountsToZero() {
-		AuthorizationInvalidationEventProjection projection = new AuthorizationInvalidationEventProjection();
+		AuthorizationInvalidationEventPO projection = new AuthorizationInvalidationEventPO();
 
 		AuthorizationInvalidateResponse response = AuthorizationInvalidationEventMappingSupport.toResponse(projection);
 
@@ -60,7 +58,7 @@ class AuthorizationInvalidationEventMappingSupportTest {
 	void toProcessedOutcomeProjection_shouldMapResponseFields() {
 		AuthorizationInvalidateResponse response = new AuthorizationInvalidateResponse(1, 1, 1, 0);
 
-		AuthorizationInvalidationEventProjection projection = AuthorizationInvalidationEventMappingSupport
+		AuthorizationInvalidationEventPO projection = AuthorizationInvalidationEventMappingSupport
 			.toProcessedOutcomeProjection("evt-2", AuthorizationChangeKind.USER, response);
 
 		assertEquals("evt-2", projection.getEventId());
@@ -75,9 +73,8 @@ class AuthorizationInvalidationEventMappingSupportTest {
 	@Test
 	@DisplayName("toProcessingFlag 识别处理中占位")
 	void toProcessingFlag_shouldDetectProcessingCount() {
-		AuthorizationInvalidationEventMappingSupport support = new AuthorizationInvalidationEventMappingSupport();
-
-		assertTrue(support.toProcessingFlag(InvalidationProcessingMarker.PROCESSING_COUNT));
+		assertTrue(AuthorizationInvalidationEventMappingSupport
+			.toProcessingFlag(InvalidationProcessingMarker.PROCESSING_COUNT));
 	}
 
 }

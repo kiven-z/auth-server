@@ -1,18 +1,19 @@
 package com.auth.service.system.authorization.dispatch.trigger;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest;
 import com.auth.module.security.contract.dto.invalidation.UserPostInvalidatePayload;
 import com.auth.service.system.authorization.dispatch.AuthorizationInvalidationCoordinator;
-import com.auth.service.system.authorization.dispatch.support.InvalidationEventIds;
-import com.auth.service.system.authorization.dispatch.support.InvalidationSourceBizIds;
+import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.auth.service.system.common.model.SystemAuditBizModule;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 岗位启用状态变更后触发授权失效
@@ -36,8 +37,9 @@ public class PostAuthorizationInvalidationTrigger {
 			return;
 		}
 
-		String sourceBizId = InvalidationSourceBizIds.of(operation, InvalidationSourceBizIds.joinLongIds(ids));
-		String eventId = InvalidationEventIds.next(AuthorizationChangeKind.USER_POST);
+		String sourceBizId = CharSequenceUtil.blankToDefault(operation, "invalidate") + ":"
+				+ ids.stream().map(String::valueOf).collect(Collectors.joining(","));
+		String eventId = AuthorizationChangeKind.USER_POST.eventIdPrefix() + ":" + IdWorker.getId();
 		UserPostInvalidatePayload payload = new UserPostInvalidatePayload(ids);
 		AuthorizationInvalidateRequest request = new AuthorizationInvalidateRequest(eventId,
 				AuthorizationChangeKind.USER_POST, payload);

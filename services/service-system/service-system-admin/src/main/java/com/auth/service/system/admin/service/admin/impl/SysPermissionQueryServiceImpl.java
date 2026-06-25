@@ -53,7 +53,7 @@ public class SysPermissionQueryServiceImpl extends ServiceImpl<SysPermissionMapp
 		IPage<SysPermissionEntity> entityPage = baseMapper.selectListByPage(pageParams, query, orderBySql);
 		IPage<SysPermissionPageVO> page = entityPage.convert(SysPermissionConverter.INSTANCE::toPageVo);
 
-		auditUserDisplayService.enrichAuditUsernames(page);
+		auditUserDisplayService.enrichAuditUsernames(page, null, null);
 		return PageResponse.of(page);
 	}
 
@@ -75,7 +75,7 @@ public class SysPermissionQueryServiceImpl extends ServiceImpl<SysPermissionMapp
 		List<SysPermissionBoundMenuPO> boundMenus = sysMenuPermissionMapper.selectBoundMenusByPermissionId(id);
 		detail.setBoundMenus(SysPermissionConverter.INSTANCE.toBoundMenuItemList(boundMenus));
 
-		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail));
+		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail), null, null);
 		return detail;
 	}
 

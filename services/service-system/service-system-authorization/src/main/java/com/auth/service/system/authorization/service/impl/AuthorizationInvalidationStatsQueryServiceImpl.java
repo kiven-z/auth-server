@@ -61,13 +61,13 @@ public class AuthorizationInvalidationStatsQueryServiceImpl implements Authoriza
 			query.setEndTime(endDate.atTime(LocalTime.MAX));
 		}
 
-		List<AuthorizationInvalidationFailureRateTrendBucketPO> buckets = authorizationInvalidationOutboxOpsMapper
-			.selectFailureRateTrendBuckets(query);
-
 		AuthorizationInvalidationFailureRateTrendVO trendVo = new AuthorizationInvalidationFailureRateTrendVO();
 		trendVo.setGranularity(query.getGranularity().name());
 		trendVo.setStartTime(query.getStartTime());
 		trendVo.setEndTime(query.getEndTime());
+
+		List<AuthorizationInvalidationFailureRateTrendBucketPO> buckets = authorizationInvalidationOutboxOpsMapper
+			.selectFailureRateTrendBuckets(query);
 		List<AuthorizationInvalidationFailureRateTrendPointVO> list = buckets.stream()
 			.map(AuthorizationInvalidationStatsOpsConverter::toFailureRateTrendPointVo)
 			.toList();

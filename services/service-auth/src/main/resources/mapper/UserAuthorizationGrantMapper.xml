@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.auth.service.auth.infrastructure.persistence.mapper.UserAuthorizationGrantMapper">
+<mapper namespace="com.auth.service.auth.mapper.UserAuthorizationGrantMapper">
 
     <!-- 查询用户角色码 -->
     <select id="selectRolesByUserId" resultType="java.lang.String">
-        <include refid="com.auth.service.auth.infrastructure.persistence.mapper.AuthorizationGrantForwardFragments.fwdUserSubjectsForFunctionalGrant"/>
+        <include refid="com.auth.service.auth.mapper.AuthorizationGrantForwardFragments.fwdUserSubjectsForFunctionalGrant"/>
         SELECT DISTINCT
             r.role_code
         FROM
@@ -18,7 +18,7 @@
 
     <!-- 根据用户ID查询所有有效权限 -->
     <select id="selectPermissionsByUserId" resultType="java.lang.String">
-        <include refid="com.auth.service.auth.infrastructure.persistence.mapper.AuthorizationGrantForwardFragments.fwdUserSubjectsForFunctionalGrant"/>,
+        <include refid="com.auth.service.auth.mapper.AuthorizationGrantForwardFragments.fwdUserSubjectsForFunctionalGrant"/>,
         all_role_ids AS (
             SELECT DISTINCT
                 r.id AS role_id

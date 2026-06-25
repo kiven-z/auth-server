@@ -1,12 +1,9 @@
 package com.auth.service.auth.convert;
 
 import com.auth.common.mapstruct.config.AuthMapperConfig;
-import com.auth.service.auth.api.dto.authorization.response.AuthorizationInvalidationEventDetailVO;
-import com.auth.service.auth.api.dto.authorization.response.AuthorizationInvalidationEventPageVO;
-import com.auth.service.auth.api.dto.authorization.response.AuthorizationInvalidationEventStatsVO;
-import com.auth.service.auth.infrastructure.persistence.projection.AuthorizationInvalidationEventDetailRow;
-import com.auth.service.auth.infrastructure.persistence.projection.AuthorizationInvalidationEventPageRow;
-import com.auth.service.auth.infrastructure.persistence.projection.AuthorizationInvalidationEventStatsRow;
+import com.auth.service.auth.model.po.invalidation.AuthorizationInvalidationEventPageRowPO;
+import com.auth.service.auth.model.vo.authorization.AuthorizationInvalidationEventDetailVO;
+import com.auth.service.auth.model.vo.authorization.AuthorizationInvalidationEventPageVO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
@@ -29,7 +26,7 @@ public interface AuthorizationInvalidationEventConverter {
 	@Mapping(target = "processing", source = "impactedUserCount", qualifiedByName = "toProcessingFlag")
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
-	AuthorizationInvalidationEventPageVO toPageVO(AuthorizationInvalidationEventPageRow row);
+	AuthorizationInvalidationEventPageVO toPageVO(AuthorizationInvalidationEventPageRowPO row);
 
 	/**
 	 * 详情行投影 → 详情 VO
@@ -39,13 +36,6 @@ public interface AuthorizationInvalidationEventConverter {
 	@Mapping(target = "processing", source = "impactedUserCount", qualifiedByName = "toProcessingFlag")
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
-	AuthorizationInvalidationEventDetailVO toDetailVo(AuthorizationInvalidationEventDetailRow row);
-
-	/**
-	 * 统计行投影 → 统计 VO
-	 * @param row 统计行投影
-	 * @return 统计 VO
-	 */
-	AuthorizationInvalidationEventStatsVO toStatsVo(AuthorizationInvalidationEventStatsRow row);
+	AuthorizationInvalidationEventDetailVO toDetailVo(AuthorizationInvalidationEventPageRowPO row);
 
 }
