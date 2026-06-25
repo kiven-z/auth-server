@@ -2,8 +2,10 @@ package com.auth.service.system.authorization.convert;
 
 import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidationEventStatsInnerDTO;
 import com.auth.service.system.authorization.model.po.AuthorizationInvalidationEventStatsPO;
+import com.auth.service.system.authorization.model.po.AuthorizationInvalidationFailureRateTrendBucketPO;
 import com.auth.service.system.authorization.model.po.AuthorizationInvalidationOutboxStatsPO;
 import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationEventStatsVO;
+import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationFailureRateTrendPointVO;
 import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationOutboxStatsVO;
 import lombok.experimental.UtilityClass;
 
@@ -19,8 +21,6 @@ import java.util.Objects;
 @UtilityClass
 public class AuthorizationInvalidationStatsOpsConverter {
 
-	private static final int FAILURE_RATE_SCALE = 2;
-
 	/**
 	 * Outbox 统计 PO 转 VO
 	 * @param statsPo 统计 PO
@@ -28,25 +28,17 @@ public class AuthorizationInvalidationStatsOpsConverter {
 	 */
 	public static AuthorizationInvalidationOutboxStatsVO toOutboxStatsVo(
 			AuthorizationInvalidationOutboxStatsPO statsPo) {
+		AuthorizationInvalidationOutboxStatsPO safePo = Objects.requireNonNullElse(statsPo,
+				new AuthorizationInvalidationOutboxStatsPO());
 		AuthorizationInvalidationOutboxStatsVO statsVo = new AuthorizationInvalidationOutboxStatsVO();
-		if (statsPo == null) {
-			statsVo.setTotalCount(0L);
-			statsVo.setPendingCount(0L);
-			statsVo.setProcessingCount(0L);
-			statsVo.setSuccessCount(0L);
-			statsVo.setFailedCount(0L);
-			statsVo.setDeadCount(0L);
-			statsVo.setFailureRatePercent(BigDecimal.ZERO);
-			return statsVo;
-		}
 
-		long total = Objects.requireNonNullElse(statsPo.getTotalCount(), 0L);
-		long failed = Objects.requireNonNullElse(statsPo.getFailedCount(), 0L);
-		long dead = Objects.requireNonNullElse(statsPo.getDeadCount(), 0L);
+		long total = Objects.requireNonNullElse(safePo.getTotalCount(), 0L);
+		long failed = Objects.requireNonNullElse(safePo.getFailedCount(), 0L);
+		long dead = Objects.requireNonNullElse(safePo.getDeadCount(), 0L);
 		statsVo.setTotalCount(total);
-		statsVo.setPendingCount(Objects.requireNonNullElse(statsPo.getPendingCount(), 0L));
-		statsVo.setProcessingCount(Objects.requireNonNullElse(statsPo.getProcessingCount(), 0L));
-		statsVo.setSuccessCount(Objects.requireNonNullElse(statsPo.getSuccessCount(), 0L));
+		statsVo.setPendingCount(Objects.requireNonNullElse(safePo.getPendingCount(), 0L));
+		statsVo.setProcessingCount(Objects.requireNonNullElse(safePo.getProcessingCount(), 0L));
+		statsVo.setSuccessCount(Objects.requireNonNullElse(safePo.getSuccessCount(), 0L));
 		statsVo.setFailedCount(failed);
 		statsVo.setDeadCount(dead);
 		statsVo.setFailureRatePercent(calculateFailureRatePercent(total, failed, dead));
@@ -61,6 +53,7 @@ public class AuthorizationInvalidationStatsOpsConverter {
 	public static AuthorizationInvalidationEventStatsPO toEventStatsPo(
 			AuthorizationInvalidationEventStatsInnerDTO statsDto) {
 		AuthorizationInvalidationEventStatsPO statsPo = new AuthorizationInvalidationEventStatsPO();
+
 		statsPo.setTotalCount(statsDto.getTotalCount());
 		statsPo.setProcessingCount(statsDto.getProcessingCount());
 		statsPo.setCompletedCount(statsDto.getCompletedCount());
@@ -73,17 +66,37 @@ public class AuthorizationInvalidationStatsOpsConverter {
 	 * @return 事件统计 VO
 	 */
 	public static AuthorizationInvalidationEventStatsVO toEventStatsVo(AuthorizationInvalidationEventStatsPO statsPo) {
+		AuthorizationInvalidationEventStatsPO safePo = Objects.requireNonNullElse(statsPo,
+				new AuthorizationInvalidationEventStatsPO());
 		AuthorizationInvalidationEventStatsVO statsVo = new AuthorizationInvalidationEventStatsVO();
-		if (statsPo == null) {
-			statsVo.setTotalCount(0L);
-			statsVo.setProcessingCount(0L);
-			statsVo.setCompletedCount(0L);
-			return statsVo;
-		}
-		statsVo.setTotalCount(Objects.requireNonNullElse(statsPo.getTotalCount(), 0L));
-		statsVo.setProcessingCount(Objects.requireNonNullElse(statsPo.getProcessingCount(), 0L));
-		statsVo.setCompletedCount(Objects.requireNonNullElse(statsPo.getCompletedCount(), 0L));
+
+		statsVo.setTotalCount(Objects.requireNonNullElse(safePo.getTotalCount(), 0L));
+		statsVo.setProcessingCount(Objects.requireNonNullElse(safePo.getProcessingCount(), 0L));
+		statsVo.setCompletedCount(Objects.requireNonNullElse(safePo.getCompletedCount(), 0L));
 		return statsVo;
+	}
+
+	/**
+	 * 失败率趋势分桶 PO 转 VO
+	 * @param bucketPo 分桶统计 PO
+	 * @return 趋势点 VO
+	 */
+	public static AuthorizationInvalidationFailureRateTrendPointVO toFailureRateTrendPointVo(
+			AuthorizationInvalidationFailureRateTrendBucketPO bucketPo) {
+		AuthorizationInvalidationFailureRateTrendBucketPO safePo = Objects.requireNonNullElse(bucketPo,
+				new AuthorizationInvalidationFailureRateTrendBucketPO());
+		AuthorizationInvalidationFailureRateTrendPointVO pointVo = new AuthorizationInvalidationFailureRateTrendPointVO();
+
+		long total = Objects.requireNonNullElse(safePo.getTotalCount(), 0L);
+		long failed = Objects.requireNonNullElse(safePo.getFailedCount(), 0L);
+		long dead = Objects.requireNonNullElse(safePo.getDeadCount(), 0L);
+
+		pointVo.setBucket(safePo.getBucket());
+		pointVo.setTotalCount(total);
+		pointVo.setFailedCount(failed);
+		pointVo.setDeadCount(dead);
+		pointVo.setFailureRatePercent(calculateFailureRatePercent(total, failed, dead));
+		return pointVo;
 	}
 
 	/**
@@ -93,13 +106,13 @@ public class AuthorizationInvalidationStatsOpsConverter {
 	 * @param dead 死信记录数
 	 * @return 失败率百分比
 	 */
-	private static BigDecimal calculateFailureRatePercent(long total, long failed, long dead) {
+	static BigDecimal calculateFailureRatePercent(long total, long failed, long dead) {
 		if (total <= 0L) {
 			return BigDecimal.ZERO;
 		}
 		return BigDecimal.valueOf(failed + dead)
 			.multiply(BigDecimal.valueOf(100))
-			.divide(BigDecimal.valueOf(total), FAILURE_RATE_SCALE, RoundingMode.HALF_UP);
+			.divide(BigDecimal.valueOf(total), 2, RoundingMode.HALF_UP);
 	}
 
 }

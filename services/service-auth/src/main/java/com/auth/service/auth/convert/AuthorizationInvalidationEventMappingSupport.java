@@ -1,6 +1,7 @@
 package com.auth.service.auth.convert;
 
-import cn.hutool.core.util.ObjectUtil;
+import java.util.Objects;
+
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateResponse;
 import com.auth.service.auth.domain.authorization.model.InvalidationProcessingMarker;
@@ -50,10 +51,10 @@ public class AuthorizationInvalidationEventMappingSupport {
 	 * @return 失效处理结果
 	 */
 	public static AuthorizationInvalidateResponse toResponse(AuthorizationInvalidationEventProjection projection) {
-		return new AuthorizationInvalidateResponse(ObjectUtil.defaultIfNull(projection.getImpactedUserCount(), 0),
-				ObjectUtil.defaultIfNull(projection.getVersionBumpedCount(), 0),
-				ObjectUtil.defaultIfNull(projection.getProfileRefreshedCount(), 0),
-				ObjectUtil.defaultIfNull(projection.getProfileEvictedCount(), 0));
+		return new AuthorizationInvalidateResponse(Objects.requireNonNullElse(projection.getImpactedUserCount(), 0),
+				Objects.requireNonNullElse(projection.getVersionBumpedCount(), 0),
+				Objects.requireNonNullElse(projection.getProfileRefreshedCount(), 0),
+				Objects.requireNonNullElse(projection.getProfileEvictedCount(), 0));
 	}
 
 	/**

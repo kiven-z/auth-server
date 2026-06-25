@@ -1,7 +1,8 @@
 package com.auth.service.system.admin.excel.dept;
 
+import java.util.Objects;
+
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.util.ObjectUtil;
 import com.auth.module.file.importer.AbstractSheetImporter;
 import com.auth.module.file.importer.model.ImportLabelParser;
 import com.auth.module.file.importer.model.ImportRowError;
@@ -54,7 +55,7 @@ public class DeptSheetImporter extends AbstractSheetImporter<SysDeptImportRow, S
 			return null;
 		}
 		SysDeptForm form = new SysDeptForm();
-		form.setParentId(ObjectUtil.defaultIfNull(parentId, 0L));
+		form.setParentId(Objects.requireNonNullElse(parentId, 0L));
 		form.setDeptCode(row.getDeptCode().trim());
 		form.setDeptName(row.getDeptName().trim());
 		form.setStatus(ImportLabelParser.parseStatus(row.getStatusLabel()));

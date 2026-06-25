@@ -176,12 +176,4 @@ class OnlineUserQueryAdapterTest {
 		verify(setOperations).remove(SecurityRedisKey.USER_SESSIONS.key(TestConstants.USER_ID), "stale-jti");
 	}
 
-	@Test
-	@DisplayName("countOnlineUsers：返回 online users ZSet 基数")
-	void countOnlineUsers_shouldReturnZcard() {
-		when(zSetOperations.zCard(ONLINE_USERS_KEY)).thenReturn(8L);
-
-		assertEquals(8L, reader.countOnlineUsers());
-	}
-
 }

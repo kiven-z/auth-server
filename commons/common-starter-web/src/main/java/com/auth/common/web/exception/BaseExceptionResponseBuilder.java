@@ -1,7 +1,8 @@
 package com.auth.common.web.exception;
 
+import java.util.Objects;
+
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.util.ObjectUtil;
 import com.auth.common.core.model.response.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -23,7 +24,7 @@ public abstract class BaseExceptionResponseBuilder {
 	 * @return 响应实体
 	 */
 	protected ResponseEntity<Result<Object>> respond(HttpStatus status, Integer code, String message) {
-		int finalCode = ObjectUtil.defaultIfNull(code, status.value());
+		int finalCode = Objects.requireNonNullElse(code, status.value());
 		String finalMessage = CharSequenceUtil.blankToDefault(message, status.getReasonPhrase());
 		return ResponseEntity.status(status).body(Result.error(null, finalCode, finalMessage));
 	}

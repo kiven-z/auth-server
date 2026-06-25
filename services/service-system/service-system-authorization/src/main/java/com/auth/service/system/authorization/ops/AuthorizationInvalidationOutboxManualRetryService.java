@@ -1,8 +1,9 @@
 package com.auth.service.system.authorization.ops;
 
 import cn.hutool.core.util.BooleanUtil;
+import com.auth.service.system.authorization.convert.AuthorizationInvalidationOutboxManualRetryConverter;
+import com.auth.service.system.authorization.model.dto.AuthorizationInvalidationOutboxManualRetryOutcome;
 import com.auth.service.system.authorization.model.form.AuthorizationInvalidationOutboxRetryForm;
-import com.auth.service.system.authorization.model.record.AuthorizationInvalidationOutboxManualRetryOutcome;
 import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationOutboxRetryResultVO;
 import com.auth.service.system.authorization.service.AuthorizationInvalidationOutboxOpsService;
 import lombok.RequiredArgsConstructor;
@@ -28,17 +29,10 @@ public class AuthorizationInvalidationOutboxManualRetryService {
 	public AuthorizationInvalidationOutboxRetryResultVO retryById(Long outboxId,
 			AuthorizationInvalidationOutboxRetryForm form) {
 		boolean force = form != null && BooleanUtil.isTrue(form.getForce());
+
 		AuthorizationInvalidationOutboxManualRetryOutcome outcome = authorizationInvalidationOutboxOpsService
 			.retryManual(outboxId, force);
-		AuthorizationInvalidationOutboxRetryResultVO resultVO = new AuthorizationInvalidationOutboxRetryResultVO();
-		resultVO.setOutboxId(outcome.outboxId());
-		resultVO.setEventId(outcome.eventId());
-		resultVO.setPreviousStatus(outcome.previousStatus());
-		resultVO.setCurrentStatus(outcome.currentStatus());
-		resultVO.setLastError(outcome.lastError());
-		resultVO.setDispatched(outcome.dispatched());
-		resultVO.setClaimReleased(outcome.claimReleased());
-		return resultVO;
+		return AuthorizationInvalidationOutboxManualRetryConverter.INSTANCE.toRetryResultVo(outcome);
 	}
 
 }

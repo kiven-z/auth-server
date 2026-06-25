@@ -1,7 +1,11 @@
 package com.auth.service.auth.api.controller;
 
+import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.api.UserSessionIndex;
+import com.auth.service.auth.api.dto.session.request.OnlineUserPageQuery;
+import com.auth.service.auth.api.dto.session.response.OnlineUserPageVO;
 import com.auth.service.auth.application.session.command.SessionManagementApplicationService;
+import com.auth.service.auth.application.session.query.OnlineUserQueryService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -25,8 +30,26 @@ class AdminSessionControllerTest {
 	@Mock
 	private SessionManagementApplicationService sessionManagementApplicationService;
 
+	@Mock
+	private OnlineUserQueryService onlineUserQueryService;
+
 	@InjectMocks
 	private AdminSessionController adminSessionController;
+
+	@Test
+	@DisplayName("分页查询在线用户：委托 OnlineUserQueryService 并返回 VO 分页")
+	void pageOnlineUsers_shouldDelegateToQueryService() {
+		OnlineUserPageQuery query = new OnlineUserPageQuery();
+		query.setPageIndex(2);
+		query.setPageSize(10);
+		PageResponse<OnlineUserPageVO> page = PageResponse.of(2L, 10L, 0L, List.of());
+		when(onlineUserQueryService.getOnlineUserPage(any(OnlineUserPageQuery.class))).thenReturn(page);
+
+		var result = adminSessionController.pageOnlineUsers(query);
+
+		verify(onlineUserQueryService).getOnlineUserPage(any(OnlineUserPageQuery.class));
+		assertEquals(0L, result.getData().getTotal());
+	}
 
 	@Test
 	@DisplayName("踢出指定会话：委托 SessionManagementApplicationService")

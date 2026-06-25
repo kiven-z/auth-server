@@ -1,27 +1,28 @@
 package com.auth.service.auth.infrastructure.persistence.adapter;
 
-import java.util.List;
-
-import org.springframework.stereotype.Repository;
-
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.module.security.contract.api.authorization.PolicyBundle;
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
 import com.auth.module.security.contract.api.datascope.DataScopeStorageType;
 import com.auth.module.security.contract.constants.PermissionConstant;
 import com.auth.service.auth.application.authorization.invalidation.datascope.DeptDataScopeResolver;
-import com.auth.service.auth.application.port.authorization.AuthProfileQueryPort;
 import com.auth.service.auth.application.port.UserReadPort;
+import com.auth.service.auth.application.port.authorization.AuthProfileQueryPort;
 import com.auth.service.auth.domain.authorization.model.UserAccountSnapshot;
 import com.auth.service.auth.infrastructure.persistence.mapper.UserAuthorizationGrantMapper;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
 import com.auth.service.auth.shared.exception.AuthResultCode;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 /**
  * 授权画像查询适配器：聚合用户快照、角色权限与数据范围，构建 {@link AuthProfile}。
  *
  * @author Bunny
  */
+@RequiredArgsConstructor
 @Repository
 public class AuthProfileQueryAdapter implements AuthProfileQueryPort {
 
@@ -30,13 +31,6 @@ public class AuthProfileQueryAdapter implements AuthProfileQueryPort {
 	private final UserReadPort userReadPort;
 
 	private final DeptDataScopeResolver deptDataScopeResolver;
-
-	public AuthProfileQueryAdapter(UserAuthorizationGrantMapper userAuthorizationGrantMapper, UserReadPort userReadPort,
-			DeptDataScopeResolver deptDataScopeResolver) {
-		this.userAuthorizationGrantMapper = userAuthorizationGrantMapper;
-		this.userReadPort = userReadPort;
-		this.deptDataScopeResolver = deptDataScopeResolver;
-	}
 
 	/**
 	 * {@inheritDoc}

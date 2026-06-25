@@ -54,7 +54,7 @@ class JwtValidateGlobalFilterTest {
 	}
 
 	@Test
-	@DisplayName("测试严格路径在无 Authorization 时返回 TOKEN_MISSING")
+	@DisplayName("测试严格路径在无 Authorization 时返回 UNAUTHORIZED")
 	void filter_shouldReject_whenStrictPathAndAuthorizationMissing() {
 		JwtValidateGlobalFilter filter = newFilter(true, List.of("/strict/**"));
 		MockServerWebExchange exchange = MockServerWebExchange
@@ -62,7 +62,7 @@ class JwtValidateGlobalFilterTest {
 
 		StepVerifier.create(filter.filter(exchange, filterChain))
 			.expectErrorMatches(throwable -> throwable instanceof GatewayBusinessException gbe
-					&& gbe.getResultCode() == GatewayResultCodeEnum.UNAUTHORIZED_TOKEN_MISSING)
+					&& gbe.getResultCode() == GatewayResultCodeEnum.UNAUTHORIZED)
 			.verify();
 
 		verifyNoInteractions(accessTokenProvider, filterChain);
@@ -98,7 +98,7 @@ class JwtValidateGlobalFilterTest {
 
 		StepVerifier.create(filter.filter(exchange, filterChain))
 			.expectErrorMatches(throwable -> throwable instanceof GatewayBusinessException gbe
-					&& gbe.getResultCode() == GatewayResultCodeEnum.UNAUTHORIZED_TOKEN_EXPIRED)
+					&& gbe.getResultCode() == GatewayResultCodeEnum.UNAUTHORIZED)
 			.verify();
 	}
 
@@ -115,7 +115,7 @@ class JwtValidateGlobalFilterTest {
 
 		StepVerifier.create(filter.filter(exchange, filterChain))
 			.expectErrorMatches(throwable -> throwable instanceof GatewayBusinessException gbe
-					&& gbe.getResultCode() == GatewayResultCodeEnum.UNAUTHORIZED_TOKEN_INVALID)
+					&& gbe.getResultCode() == GatewayResultCodeEnum.UNAUTHORIZED)
 			.verify();
 	}
 

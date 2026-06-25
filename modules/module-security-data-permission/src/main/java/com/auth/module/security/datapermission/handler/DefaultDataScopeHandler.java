@@ -1,8 +1,9 @@
 package com.auth.module.security.datapermission.handler;
 
+import java.util.Objects;
+
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.util.ObjectUtil;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
 import com.auth.module.security.contract.api.datascope.DataScopeStorageType;
@@ -46,7 +47,7 @@ public class DefaultDataScopeHandler implements DataScopeHandler {
 			return FAIL_CLOSE_CONDITION;
 		}
 		ScopeGrant grant = resolveGrant(profile);
-		DataScopeStorageType scopeType = ObjectUtil.defaultIfNull(grant.getScopeType(), DataScopeStorageType.SELF);
+		DataScopeStorageType scopeType = Objects.requireNonNullElse(grant.getScopeType(), DataScopeStorageType.SELF);
 		ScopeSqlStrategy strategy = strategyRegistry.getOrDefault(scopeType,
 				strategyRegistry.get(DataScopeStorageType.SELF));
 		ScopeSqlBuildContext context = ScopeSqlBuildContext.builder()

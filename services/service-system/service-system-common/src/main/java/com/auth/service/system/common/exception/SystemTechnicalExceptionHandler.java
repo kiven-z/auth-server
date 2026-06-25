@@ -1,6 +1,7 @@
 package com.auth.service.system.common.exception;
 
-import cn.hutool.core.util.ObjectUtil;
+import java.util.Objects;
+
 import com.auth.common.core.model.response.Result;
 import com.auth.common.jwt.exception.JwtExpiredException;
 import com.auth.common.jwt.exception.JwtParseException;
@@ -40,7 +41,7 @@ public class SystemTechnicalExceptionHandler extends BaseExceptionResponseBuilde
 	 */
 	@ExceptionHandler({ JwtExpiredException.class, JwtParseException.class })
 	public ResponseEntity<Result<Object>> handleJwtException(RuntimeException exception) {
-		String fallback = ObjectUtil.defaultIfNull(exception.getMessage(), "Invalid JWT token.");
+		String fallback = Objects.requireNonNullElse(exception.getMessage(), "Invalid JWT token.");
 		Result<Object> body = SystemResultResponseFactory.build(messageSource, JWT_INVALID, fallback);
 		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
 	}
@@ -52,7 +53,7 @@ public class SystemTechnicalExceptionHandler extends BaseExceptionResponseBuilde
 	 */
 	@ExceptionHandler(RedisSystemException.class)
 	public ResponseEntity<Result<Object>> handleRedisException(RedisSystemException exception) {
-		String fallback = ObjectUtil.defaultIfNull(exception.getMessage(), "Redis service unavailable.");
+		String fallback = Objects.requireNonNullElse(exception.getMessage(), "Redis service unavailable.");
 		Result<Object> body = SystemResultResponseFactory.build(messageSource, REDIS_SYSTEM_ERROR, fallback);
 		return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(body);
 	}

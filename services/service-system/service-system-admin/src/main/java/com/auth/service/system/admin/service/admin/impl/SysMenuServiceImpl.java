@@ -1,7 +1,6 @@
 package com.auth.service.system.admin.service.admin.impl;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.ObjectUtil;
 import com.auth.common.core.utils.TreeParentIdUtil;
 import com.auth.service.system.admin.convert.menu.SysMenuConverter;
 import com.auth.service.system.admin.mapper.menu.SysMenuMapper;
@@ -41,7 +40,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuEntity
 	@Override
 	public Long create(SysMenuSaveForm form) {
 		SysMenuEntity entity = SysMenuConverter.INSTANCE.toMenuEntity(form);
-		entity.setParentId(ObjectUtil.defaultIfNull(entity.getParentId(), 0L));
+		entity.setParentId(Objects.requireNonNullElse(entity.getParentId(), 0L));
 		save(entity);
 
 		return entity.getId();
@@ -53,7 +52,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuEntity
 	@Override
 	public void update(SysMenuSaveForm form) {
 		SysMenuEntity entity = SysMenuConverter.INSTANCE.toMenuEntity(form);
-		entity.setParentId(ObjectUtil.defaultIfNull(entity.getParentId(), 0L));
+		entity.setParentId(Objects.requireNonNullElse(entity.getParentId(), 0L));
 		updateById(entity);
 	}
 

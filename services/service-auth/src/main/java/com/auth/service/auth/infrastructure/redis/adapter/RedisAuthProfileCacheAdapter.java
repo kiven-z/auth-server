@@ -1,7 +1,7 @@
 package com.auth.service.auth.infrastructure.redis.adapter;
 
 import com.auth.module.security.contract.api.authorization.AuthProfile;
-import com.auth.service.auth.application.port.login.AuthProfileCachePort;
+import com.auth.service.auth.application.port.authorization.AuthProfileCachePort;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.redis.core.RedisTemplate;

@@ -1,9 +1,10 @@
 package com.auth.service.auth.infrastructure.redis.session;
 
+import java.util.Objects;
+
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.NumberUtil;
-import cn.hutool.core.util.ObjectUtil;
 import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.service.auth.infrastructure.redis.session.support.UserSessionIndexRedisCodec;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -44,7 +45,7 @@ public class UserSessionIndexStore {
 	 * @return 活跃会话数
 	 */
 	public long countActiveSessions(long userId) {
-		return ObjectUtil.defaultIfNull(sessionRedisTemplate.opsForSet().size(USER_SESSIONS.key(userId)), 0L);
+		return Objects.requireNonNullElse(sessionRedisTemplate.opsForSet().size(USER_SESSIONS.key(userId)), 0L);
 	}
 
 	/**

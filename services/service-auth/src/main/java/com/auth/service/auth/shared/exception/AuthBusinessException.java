@@ -1,6 +1,7 @@
 package com.auth.service.auth.shared.exception;
 
-import cn.hutool.core.util.ObjectUtil;
+import java.util.Objects;
+
 import com.auth.common.core.i18n.I18nMessageProvider;
 import lombok.Getter;
 
@@ -26,7 +27,7 @@ public class AuthBusinessException extends RuntimeException implements I18nMessa
 	public AuthBusinessException(AuthResultCode resultCode, Object... args) {
 		super(resultCode != null ? resultCode.getMessageKey() : null);
 		this.resultCode = resultCode;
-		this.args = ObjectUtil.defaultIfNull(args, new Object[0]);
+		this.args = Objects.requireNonNullElse(args, new Object[0]);
 	}
 
 	@Override

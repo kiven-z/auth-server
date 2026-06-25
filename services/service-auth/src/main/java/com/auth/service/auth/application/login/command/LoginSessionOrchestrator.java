@@ -1,13 +1,9 @@
 package com.auth.service.auth.application.login.command;
 
-import java.util.UUID;
-
-import org.springframework.stereotype.Service;
-
 import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.application.login.LoginAuditService;
-import com.auth.service.auth.application.port.login.AuthProfileCachePort;
+import com.auth.service.auth.application.port.authorization.AuthProfileCachePort;
 import com.auth.service.auth.application.port.login.CredentialPort;
 import com.auth.service.auth.application.port.login.RefreshCookiePort;
 import com.auth.service.auth.application.port.login.TokenPort;
@@ -18,10 +14,12 @@ import com.auth.service.auth.domain.authentication.model.LoginResult;
 import com.auth.service.auth.domain.authentication.model.TokenPair;
 import com.auth.service.auth.domain.authentication.model.enums.AuthLoginLogType;
 import com.auth.service.auth.shared.exception.AuthBusinessException;
-
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 /**
  * 登录会话签发编排：凭证校验通过后，统一完成会话上限检查、画像缓存、令牌签发、Redis 会话建立与成功审计。

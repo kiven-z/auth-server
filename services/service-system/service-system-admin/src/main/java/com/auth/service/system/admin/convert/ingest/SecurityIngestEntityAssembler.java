@@ -1,8 +1,9 @@
 package com.auth.service.system.admin.convert.ingest;
 
+import java.util.Objects;
+
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.fastjson2.JSON;
 import com.auth.module.security.contract.event.OperationLogPayloadEvent;
 import com.auth.module.security.contract.event.SecurityAuthorizationAuditPayloadEvent;
@@ -64,7 +65,7 @@ public class SecurityIngestEntityAssembler {
 	 */
 	public static LogAuthorizationAuditEntity toEntity(SecurityAuthorizationAuditPayloadEvent event) {
 		LogAuthorizationAuditEntity entity = new LogAuthorizationAuditEntity();
-		entity.setEventType(ObjectUtil.defaultIfNull(event.getEventType(), SecurityEventType.DENIED).name());
+		entity.setEventType(Objects.requireNonNullElse(event.getEventType(), SecurityEventType.DENIED).name());
 		entity.setRequiredPermission(event.getRequiredAuthority());
 		entity.setRequestMethod(event.getRequestMethod());
 		entity.setRequestUri(event.getRequestUri());
@@ -80,7 +81,7 @@ public class SecurityIngestEntityAssembler {
 			entity.setMethodParams(CharSequenceUtil.subPre(json, MAX_PARAM_JSON_LENGTH));
 		}
 
-		entity.setCreateUser(ObjectUtil.defaultIfNull(event.getUserId(), 0L));
+		entity.setCreateUser(Objects.requireNonNullElse(event.getUserId(), 0L));
 		return entity;
 	}
 

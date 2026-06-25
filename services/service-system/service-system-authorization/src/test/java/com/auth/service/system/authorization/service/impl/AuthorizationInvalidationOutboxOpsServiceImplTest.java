@@ -1,7 +1,6 @@
 package com.auth.service.system.authorization.service.impl;
 
 import com.auth.service.system.authorization.mapper.AuthorizationInvalidationOutboxOpsMapper;
-import com.auth.service.system.authorization.model.record.AuthorizationInvalidationOutboxManualRetryOutcome;
 import com.auth.service.system.authorization.ops.AuthorizationInvalidationOutboxManualRetryApplicationService;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,7 +13,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -36,20 +34,6 @@ class AuthorizationInvalidationOutboxOpsServiceImplTest {
 	void setUpService() {
 		opsService = new AuthorizationInvalidationOutboxOpsServiceImpl(authorizationInvalidationOutboxOpsMapper,
 				manualRetryApplicationService);
-	}
-
-	@Test
-	@DisplayName("retryManual 应委托给人工重试应用服务")
-	void retryManual_shouldDelegateToManualRetryApplicationService() {
-		// 运维门面只负责转发人工重试请求
-		AuthorizationInvalidationOutboxManualRetryOutcome expected = new AuthorizationInvalidationOutboxManualRetryOutcome(
-				1L, "role:1001", "DEAD", "PENDING", null, true, false);
-		when(manualRetryApplicationService.retryManual(1L, true)).thenReturn(expected);
-
-		AuthorizationInvalidationOutboxManualRetryOutcome outcome = opsService.retryManual(1L, true);
-
-		assertSame(expected, outcome);
-		verify(manualRetryApplicationService).retryManual(1L, true);
 	}
 
 	@Test

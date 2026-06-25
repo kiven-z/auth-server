@@ -1,5 +1,6 @@
 package com.auth.service.auth.infrastructure.persistence.mapper;
 
+import com.auth.service.auth.infrastructure.persistence.filter.InvalidationEventPageFilter;
 import com.auth.service.auth.infrastructure.persistence.projection.AuthorizationInvalidationEventDetailRow;
 import com.auth.service.auth.infrastructure.persistence.projection.AuthorizationInvalidationEventPageRow;
 import com.auth.service.auth.infrastructure.persistence.projection.AuthorizationInvalidationEventProjection;

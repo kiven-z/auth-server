@@ -1,6 +1,7 @@
 package com.auth.common.web.exception;
 
-import cn.hutool.core.util.ObjectUtil;
+import java.util.Objects;
+
 import com.auth.common.core.model.response.Result;
 import com.auth.common.web.utils.ExceptionCauseUtil;
 import jakarta.validation.ConstraintViolationException;
@@ -91,7 +92,7 @@ public class ValidationExceptionHandler extends BaseExceptionResponseBuilder {
 			details = missingParam.getParameterName() + ": required";
 		}
 		else {
-			details = ObjectUtil.defaultIfNull(exception.getMessage(), "request parameter binding failed");
+			details = Objects.requireNonNullElse(exception.getMessage(), "request parameter binding failed");
 		}
 		return validationFailed(details, exception);
 	}

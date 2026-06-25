@@ -20,10 +20,4 @@ public interface OnlineUserQueryPort {
 	 */
 	OnlineUserPageSlice pageOnlineUsers(int pageIndex, int pageSize, Set<Long> allowedUserIds);
 
-	/**
-	 * 统计在线用户 ZSet 成员数
-	 * @return 在线用户数
-	 */
-	long countOnlineUsers();
-
 }

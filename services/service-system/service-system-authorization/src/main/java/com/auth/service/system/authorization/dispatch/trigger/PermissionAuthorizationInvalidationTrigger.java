@@ -38,6 +38,7 @@ public class PermissionAuthorizationInvalidationTrigger {
 
 		String sourceBizId = InvalidationSourceBizIds.of(operation, InvalidationSourceBizIds.joinCodes(codes));
 		String eventId = InvalidationEventIds.next(AuthorizationChangeKind.PERMISSION);
+
 		PermissionInvalidatePayload payload = new PermissionInvalidatePayload(codes);
 		AuthorizationInvalidateRequest request = new AuthorizationInvalidateRequest(eventId,
 				AuthorizationChangeKind.PERMISSION, payload);

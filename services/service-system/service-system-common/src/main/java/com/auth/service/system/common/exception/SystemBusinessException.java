@@ -1,6 +1,5 @@
 package com.auth.service.system.common.exception;
 
-import cn.hutool.core.util.ObjectUtil;
 import com.auth.common.core.i18n.I18nMessageProvider;
 import com.auth.service.system.common.exception.code.SystemResultCode;
 import lombok.Getter;
@@ -23,7 +22,7 @@ public class SystemBusinessException extends RuntimeException implements I18nMes
 	public SystemBusinessException(SystemResultCode resultCode, Object... args) {
 		super(resultCode != null ? resultCode.getMessageKey() : null);
 		this.resultCode = Objects.requireNonNull(resultCode, "resultCode");
-		this.args = ObjectUtil.defaultIfNull(args, new Object[0]);
+		this.args = Objects.requireNonNullElse(args, new Object[0]);
 	}
 
 	@Override

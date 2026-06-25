@@ -6,8 +6,8 @@ import com.auth.service.auth.api.dto.authorization.response.AuthorizationInvalid
 import com.auth.service.auth.api.dto.authorization.response.AuthorizationInvalidationEventPageVO;
 import com.auth.service.auth.api.dto.authorization.response.AuthorizationInvalidationEventStatsVO;
 import com.auth.service.auth.convert.AuthorizationInvalidationEventConverter;
+import com.auth.service.auth.infrastructure.persistence.filter.InvalidationEventPageFilter;
 import com.auth.service.auth.infrastructure.persistence.mapper.AuthorizationInvalidationEventMapper;
-import com.auth.service.auth.infrastructure.persistence.mapper.InvalidationEventPageFilter;
 import com.auth.service.auth.infrastructure.persistence.projection.AuthorizationInvalidationEventDetailRow;
 import com.auth.service.auth.infrastructure.persistence.projection.AuthorizationInvalidationEventPageRow;
 import com.auth.service.auth.infrastructure.persistence.projection.AuthorizationInvalidationEventStatsRow;

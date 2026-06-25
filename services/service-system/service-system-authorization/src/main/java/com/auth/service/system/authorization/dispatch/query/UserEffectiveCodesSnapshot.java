@@ -1,6 +1,6 @@
 package com.auth.service.system.authorization.dispatch.query;
 
-import cn.hutool.core.util.ObjectUtil;
+import java.util.Objects;
 
 import java.util.List;
 
@@ -17,8 +17,8 @@ public record UserEffectiveCodesSnapshot(List<String> roleCodes, List<String> pe
 	 * 规范化列表字段，避免 null 向外泄漏
 	 */
 	public UserEffectiveCodesSnapshot {
-		roleCodes = List.copyOf(ObjectUtil.defaultIfNull(roleCodes, List.of()));
-		permissionCodes = List.copyOf(ObjectUtil.defaultIfNull(permissionCodes, List.of()));
+		roleCodes = List.copyOf(Objects.requireNonNullElse(roleCodes, List.of()));
+		permissionCodes = List.copyOf(Objects.requireNonNullElse(permissionCodes, List.of()));
 	}
 
 }

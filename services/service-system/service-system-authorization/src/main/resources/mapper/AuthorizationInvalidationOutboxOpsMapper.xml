@@ -5,105 +5,167 @@
     <!-- 分页查询 Outbox（运维只读） -->
     <select id="selectListByPage"
             resultType="com.auth.service.system.authorization.model.po.AuthorizationInvalidationOutboxPageRowPO">
-        SELECT aio.id,
-        aio.event_id,
-        aio.change_kind,
-        aio.status,
-        aio.retry_count,
-        aio.max_retry,
-        aio.next_retry_at,
-        aio.last_error,
-        aio.locked_by,
-        aio.locked_at,
-        aio.processed_at,
-        aio.source_module,
-        aio.source_biz_id,
-        aio.create_time,
-        aio.update_time,
-        aio.create_user,
-        aio.update_user
-        FROM sys_authorization_invalidation_outbox aio
+        SELECT
+            aio.id,
+            aio.event_id,
+            aio.change_kind,
+            aio.status,
+            aio.retry_count,
+            aio.max_retry,
+            aio.next_retry_at,
+            aio.last_error,
+            aio.locked_by,
+            aio.locked_at,
+            aio.processed_at,
+            aio.source_module,
+            aio.source_biz_id,
+            aio.create_time,
+            aio.update_time,
+            aio.create_user,
+            aio.update_user
+        FROM
+            sys_authorization_invalidation_outbox aio
         <where>
             <if test="query.eventId != null and query.eventId != ''">
-                AND aio.event_id LIKE CONCAT(
-                #{query.eventId},
-                '%'
-                )
+                AND aio.event_id LIKE CONCAT(#{query.eventId}, '%')
             </if>
             <if test="query.changeKind != null and query.changeKind != ''">
-                AND aio.change_kind =
-                #{query.changeKind}
+                AND aio.change_kind = #{query.changeKind}
             </if>
             <if test="query.status != null and query.status != ''">
-                AND aio.status =
-                #{query.status}
+                AND aio.status = #{query.status}
             </if>
             <if test="query.sourceModule != null and query.sourceModule != ''">
-                AND aio.source_module =
-                #{query.sourceModule}
+                AND aio.source_module = #{query.sourceModule}
             </if>
             <if test="query.sourceBizId != null and query.sourceBizId != ''">
-                AND aio.source_biz_id LIKE CONCAT(
-                #{query.sourceBizId},
-                '%'
-                )
+                AND aio.source_biz_id LIKE CONCAT(#{query.sourceBizId}, '%')
             </if>
             <if test="query.createTimeStart != null">
-                AND aio.create_time &gt;=
-                #{query.createTimeStart}
+                AND aio.create_time &gt;= #{query.createTimeStart}
             </if>
             <if test="query.createTimeEnd != null">
-                AND aio.create_time &lt;=
-                #{query.createTimeEnd}
+                AND aio.create_time &lt;= #{query.createTimeEnd}
             </if>
             <if test="query.processedAtStart != null">
-                AND aio.processed_at &gt;=
-                #{query.processedAtStart}
+                AND aio.processed_at &gt;= #{query.processedAtStart}
             </if>
             <if test="query.processedAtEnd != null">
-                AND aio.processed_at &lt;=
-                #{query.processedAtEnd}
+                AND aio.processed_at &lt;= #{query.processedAtEnd}
             </if>
         </where>
-        ORDER BY aio.create_time DESC
+        ORDER BY
+            aio.create_time DESC
     </select>
 
     <!-- 按主键查询 Outbox 详情 -->
     <select id="selectDetailById"
             resultType="com.auth.service.system.authorization.model.po.AuthorizationInvalidationOutboxDetailRowPO">
-        SELECT aio.id,
-        aio.event_id,
-        aio.change_kind,
-        aio.payload,
-        aio.status,
-        aio.retry_count,
-        aio.max_retry,
-        aio.next_retry_at,
-        aio.last_error,
-        aio.locked_by,
-        aio.locked_at,
-        aio.processed_at,
-        aio.source_module,
-        aio.source_biz_id,
-        aio.create_time,
-        aio.update_time,
-        aio.create_user,
-        aio.update_user,
-        aio.remark
-        FROM sys_authorization_invalidation_outbox aio
-        WHERE aio.id = #{id}
+        SELECT
+            aio.id,
+            aio.event_id,
+            aio.change_kind,
+            aio.payload,
+            aio.status,
+            aio.retry_count,
+            aio.max_retry,
+            aio.next_retry_at,
+            aio.last_error,
+            aio.locked_by,
+            aio.locked_at,
+            aio.processed_at,
+            aio.source_module,
+            aio.source_biz_id,
+            aio.create_time,
+            aio.update_time,
+            aio.create_user,
+            aio.update_user,
+            aio.remark
+        FROM
+            sys_authorization_invalidation_outbox aio
+        WHERE
+            aio.id = #{id}
     </select>
 
     <!-- Outbox 状态统计（运维只读） -->
     <select id="selectOutboxStats"
             resultType="com.auth.service.system.authorization.model.po.AuthorizationInvalidationOutboxStatsPO">
-        SELECT COUNT(*) AS total_count,
-        SUM(CASE WHEN aio.status = 'PENDING' THEN 1 ELSE 0 END) AS pending_count,
-        SUM(CASE WHEN aio.status = 'PROCESSING' THEN 1 ELSE 0 END) AS processing_count,
-        SUM(CASE WHEN aio.status = 'SUCCESS' THEN 1 ELSE 0 END) AS success_count,
-        SUM(CASE WHEN aio.status = 'FAILED' THEN 1 ELSE 0 END) AS failed_count,
-        SUM(CASE WHEN aio.status = 'DEAD' THEN 1 ELSE 0 END) AS dead_count
-        FROM sys_authorization_invalidation_outbox aio
+        SELECT
+            COUNT(*) AS total_count,
+            SUM(
+                CASE
+                    WHEN aio.status = 'PENDING' THEN 1
+                    ELSE 0
+                END
+            ) AS pending_count,
+            SUM(
+                CASE
+                    WHEN aio.status = 'PROCESSING' THEN 1
+                    ELSE 0
+                END
+            ) AS processing_count,
+            SUM(
+                CASE
+                    WHEN aio.status = 'SUCCESS' THEN 1
+                    ELSE 0
+                END
+            ) AS success_count,
+            SUM(
+                CASE
+                    WHEN aio.status = 'FAILED' THEN 1
+                    ELSE 0
+                END
+            ) AS failed_count,
+            SUM(
+                CASE
+                    WHEN aio.status = 'DEAD' THEN 1
+                    ELSE 0
+                END
+            ) AS dead_count
+        FROM
+            sys_authorization_invalidation_outbox aio
+    </select>
+
+    <!-- 失败率趋势分桶统计（按 create_time） -->
+    <select id="selectFailureRateTrendBuckets"
+            resultType="com.auth.service.system.authorization.model.po.AuthorizationInvalidationFailureRateTrendBucketPO">
+        SELECT
+        <choose>
+            <when test="query.granularity.name() == 'DAY'">
+                DATE_FORMAT(aio.create_time, '%Y-%m-%d') AS bucket,
+            </when>
+            <otherwise>
+                DATE_FORMAT(
+                    DATE_SUB(
+                        aio.create_time,
+                        INTERVAL WEEKDAY(aio.create_time) DAY
+                    ),
+                    '%Y-%m-%d'
+                ) AS bucket,
+            </otherwise>
+        </choose>
+        COUNT(*) AS total_count,
+        SUM(
+            CASE
+                WHEN aio.status = 'FAILED' THEN 1
+                ELSE 0
+            END
+        ) AS failed_count,
+        SUM(
+            CASE
+                WHEN aio.status = 'DEAD' THEN 1
+                ELSE 0
+            END
+        ) AS dead_count
+        FROM
+            sys_authorization_invalidation_outbox aio
+        WHERE
+            aio.create_time &gt;= #{query.startTime}
+            AND aio.create_time &lt;= #{query.endTime}
+        GROUP BY
+            bucket
+        ORDER BY
+            bucket ASC
     </select>
 
 </mapper>

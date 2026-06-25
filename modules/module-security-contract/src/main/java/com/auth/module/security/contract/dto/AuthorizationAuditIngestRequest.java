@@ -1,6 +1,7 @@
 package com.auth.module.security.contract.dto;
 
-import cn.hutool.core.util.ObjectUtil;
+import java.util.Objects;
+
 import com.auth.module.security.contract.event.SecurityAuthorizationAuditPayloadEvent;
 import com.auth.module.security.contract.event.SecurityEventType;
 import lombok.AllArgsConstructor;
@@ -84,9 +85,9 @@ public class AuthorizationAuditIngestRequest implements Serializable {
 	 * @return 与持久化逻辑一致的事件对象
 	 */
 	public SecurityAuthorizationAuditPayloadEvent toPayloadEvent() {
-		SecurityEventType type = ObjectUtil.defaultIfNull(this.eventType, SecurityEventType.DENIED);
-		Map<String, Object> params = ObjectUtil.defaultIfNull(this.methodParams, Collections.emptyMap());
-		Instant ts = ObjectUtil.defaultIfNull(this.timestamp, Instant.now());
+		SecurityEventType type = Objects.requireNonNullElse(this.eventType, SecurityEventType.DENIED);
+		Map<String, Object> params = Objects.requireNonNullElse(this.methodParams, Collections.emptyMap());
+		Instant ts = Objects.requireNonNullElseGet(this.timestamp, Instant::now);
 		return SecurityAuthorizationAuditPayloadEvent.builder()
 			.eventType(type)
 			.userId(this.userId)

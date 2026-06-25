@@ -5,7 +5,7 @@ import com.auth.service.system.authorization.model.po.AuthorizationInvalidationO
 import com.auth.service.system.authorization.model.po.AuthorizationInvalidationOutboxPageRowPO;
 import com.auth.service.system.authorization.model.po.AuthorizationInvalidationOutboxStatsPO;
 import com.auth.service.system.authorization.model.query.AuthorizationInvalidationOutboxOpsQuery;
-import com.auth.service.system.authorization.model.record.AuthorizationInvalidationOutboxManualRetryOutcome;
+import com.auth.service.system.authorization.model.dto.AuthorizationInvalidationOutboxManualRetryOutcome;
 import com.auth.service.system.authorization.ops.AuthorizationInvalidationOutboxManualRetryApplicationService;
 import com.auth.service.system.authorization.service.AuthorizationInvalidationOutboxOpsService;
 import com.auth.service.system.common.exception.SystemBusinessException;

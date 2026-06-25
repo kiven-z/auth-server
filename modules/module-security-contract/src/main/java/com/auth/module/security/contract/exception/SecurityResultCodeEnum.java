@@ -1,6 +1,7 @@
 package com.auth.module.security.contract.exception;
 
-import cn.hutool.core.util.ObjectUtil;
+import java.util.Objects;
+
 import lombok.Getter;
 
 import java.util.Map;
@@ -135,7 +136,7 @@ public enum SecurityResultCodeEnum {
 	 * @return 扩展信息
 	 */
 	public Map<String, Object> ext(Object... args) {
-		return Map.of("i18nKey", i18nKey, "i18nArgs", ObjectUtil.defaultIfNull(args, new Object[0]));
+		return Map.of("i18nKey", i18nKey, "i18nArgs", Objects.requireNonNullElse(args, new Object[0]));
 	}
 
 }

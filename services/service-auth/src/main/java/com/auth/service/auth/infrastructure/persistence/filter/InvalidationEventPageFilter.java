@@ -1,4 +1,4 @@
-package com.auth.service.auth.infrastructure.persistence.mapper;
+package com.auth.service.auth.infrastructure.persistence.filter;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -14,14 +14,29 @@ import java.time.LocalDateTime;
 @Setter
 public class InvalidationEventPageFilter {
 
+	/**
+	 * 业务事件 ID（前缀匹配）
+	 */
 	private String eventId;
 
+	/**
+	 * 变更维度（AuthorizationChangeKind）
+	 */
 	private String changeKind;
 
+	/**
+	 * 是否处理中占位（impacted_user_count = -1）
+	 */
 	private Boolean processing;
 
+	/**
+	 * 处理完成时间（开始）
+	 */
 	private LocalDateTime processedAtStart;
 
+	/**
+	 * 处理完成时间（结束）
+	 */
 	private LocalDateTime processedAtEnd;
 
 }

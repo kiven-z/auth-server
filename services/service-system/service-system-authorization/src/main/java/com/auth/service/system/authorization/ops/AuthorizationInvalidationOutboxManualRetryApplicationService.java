@@ -7,9 +7,9 @@ import com.auth.service.system.authorization.config.AuthorizationInvalidationPro
 import com.auth.service.system.authorization.dispatch.AuthorizationInvalidationOutboxProcessor;
 import com.auth.service.system.authorization.feign.AuthorizationInnerFeignClient;
 import com.auth.service.system.authorization.mapper.SysAuthorizationInvalidationOutboxMapper;
+import com.auth.service.system.authorization.model.dto.AuthorizationInvalidationOutboxManualRetryOutcome;
 import com.auth.service.system.authorization.model.entity.SysAuthorizationInvalidationOutboxEntity;
 import com.auth.service.system.authorization.model.enums.AuthorizationInvalidationOutboxStatus;
-import com.auth.service.system.authorization.model.record.AuthorizationInvalidationOutboxManualRetryOutcome;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -69,8 +69,16 @@ public class AuthorizationInvalidationOutboxManualRetryApplicationService {
 		SysAuthorizationInvalidationOutboxEntity latest = outboxMapper.selectById(outboxId);
 		String currentStatus = latest != null ? latest.getStatus() : null;
 		String lastError = latest != null ? latest.getLastError() : null;
-		return new AuthorizationInvalidationOutboxManualRetryOutcome(outboxId, row.getEventId(), previousStatus,
-				currentStatus, lastError, dispatched, claimReleased);
+
+		AuthorizationInvalidationOutboxManualRetryOutcome outcome = new AuthorizationInvalidationOutboxManualRetryOutcome();
+		outcome.setOutboxId(outboxId);
+		outcome.setEventId(row.getEventId());
+		outcome.setPreviousStatus(previousStatus);
+		outcome.setCurrentStatus(currentStatus);
+		outcome.setLastError(lastError);
+		outcome.setDispatched(dispatched);
+		outcome.setClaimReleased(claimReleased);
+		return outcome;
 	}
 
 	/**

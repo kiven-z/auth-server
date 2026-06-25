@@ -1,6 +1,7 @@
 package com.auth.module.file.export.handler;
 
-import cn.hutool.core.util.ObjectUtil;
+import java.util.Objects;
+
 import com.alibaba.excel.metadata.Head;
 import com.alibaba.excel.metadata.data.DataFormatData;
 import com.alibaba.excel.metadata.data.WriteCellData;
@@ -47,7 +48,7 @@ public record ZebraStripeStyleHandler(ZebraStripeStyle styleConfig) implements C
 		Workbook workbook = writeSheetHolder.getSheet().getWorkbook();
 
 		// 确定当前行索引，如果为 null 则默认为 0
-		int rowIdx = ObjectUtil.defaultIfNull(relativeRowIndex, 0);
+		int rowIdx = Objects.requireNonNullElse(relativeRowIndex, 0);
 
 		// 获取当前列索引
 		int colIdx = cell.getColumnIndex();

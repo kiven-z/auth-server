@@ -1,5 +1,7 @@
 package com.auth.service.system.authorization.dispatch;
 
+import java.util.Objects;
+
 import com.auth.common.core.model.response.Result;
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest;
@@ -10,7 +12,6 @@ import com.auth.service.system.authorization.mapper.SysAuthorizationInvalidation
 import com.auth.service.system.authorization.model.entity.SysAuthorizationInvalidationOutboxEntity;
 import com.auth.service.system.authorization.model.enums.AuthorizationInvalidationOutboxStatus;
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.util.ObjectUtil;
 import com.auth.service.system.authorization.outbox.InvalidationOutboxPayloadCodec;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -121,7 +122,7 @@ public class AuthorizationInvalidationOutboxProcessor {
 			return;
 		}
 		int nextRetry = row.getRetryCount() + 1;
-		int maxRetry = ObjectUtil.defaultIfNull(row.getMaxRetry(), 5);
+		int maxRetry = Objects.requireNonNullElse(row.getMaxRetry(), 5);
 		if (nextRetry >= maxRetry) {
 			outboxMapper.markFailure(row.getId(), AuthorizationInvalidationOutboxStatus.DEAD.name(), nextRetry, null,
 					truncated);

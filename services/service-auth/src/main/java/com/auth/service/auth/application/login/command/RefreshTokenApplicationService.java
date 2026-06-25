@@ -2,14 +2,13 @@ package com.auth.service.auth.application.login.command;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.BooleanUtil;
-import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.crypto.digest.MD5;
 import com.auth.common.jwt.autoconfigure.JwtProperties;
 import com.auth.common.jwt.model.JwtUserToken;
 import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.application.login.LoginAuditService;
-import com.auth.service.auth.application.port.login.AuthProfileCachePort;
+import com.auth.service.auth.application.port.authorization.AuthProfileCachePort;
 import com.auth.service.auth.application.port.login.TokenPort;
 import com.auth.service.auth.application.port.session.SessionPort;
 import com.auth.service.auth.domain.authentication.model.LogoutSessionHint;
@@ -145,7 +144,7 @@ public class RefreshTokenApplicationService {
 			throw new AuthBusinessException(AuthResultCode.REFRESH_TOKEN_EXPIRED);
 		}
 		if (BooleanUtil.isFalse(Objects.equals(userId, sessionUserId))) {
-			long indexUserId = ObjectUtil.defaultIfNull(sessionUserId, userId);
+			long indexUserId = Objects.requireNonNullElse(sessionUserId, userId);
 			sessionGateway.terminateSession(indexUserId, jti);
 			throw new AuthBusinessException(AuthResultCode.REFRESH_TOKEN_EXPIRED);
 		}

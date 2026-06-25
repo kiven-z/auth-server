@@ -17,6 +17,7 @@ import com.auth.service.system.authorization.service.AuthorizationInvalidationOu
 import com.auth.service.system.common.model.SystemAuditBizModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +30,7 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
  * @author Bunny
  */
 @Tag(name = "授权失效 Outbox", description = "sys_authorization_invalidation_outbox")
+@RequiredArgsConstructor
 @RequestMapping("/api/system/ops/authorization-invalidation/outbox")
 @RestController
 public class AuthorizationInvalidationOutboxOpsController {
@@ -36,13 +38,6 @@ public class AuthorizationInvalidationOutboxOpsController {
 	private final AuthorizationInvalidationOutboxQueryService authorizationInvalidationOutboxQueryService;
 
 	private final AuthorizationInvalidationOutboxManualRetryService authorizationInvalidationOutboxManualRetryService;
-
-	public AuthorizationInvalidationOutboxOpsController(
-			AuthorizationInvalidationOutboxQueryService authorizationInvalidationOutboxQueryService,
-			AuthorizationInvalidationOutboxManualRetryService authorizationInvalidationOutboxManualRetryService) {
-		this.authorizationInvalidationOutboxQueryService = authorizationInvalidationOutboxQueryService;
-		this.authorizationInvalidationOutboxManualRetryService = authorizationInvalidationOutboxManualRetryService;
-	}
 
 	@Operation(summary = "分页查询授权失效 Outbox")
 	@PreAuthorize("@auth.decide('sysAuthInvalidationOutbox:query')")

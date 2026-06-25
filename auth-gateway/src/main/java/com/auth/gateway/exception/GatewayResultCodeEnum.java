@@ -1,16 +1,12 @@
 package com.auth.gateway.exception;
 
-import cn.hutool.core.util.ObjectUtil;
 import lombok.Getter;
 
-import java.util.Map;
-
 /**
- * 网关公共业务代码，模块前缀为{@code 00}
+ * 网关基础设施错误码，模块前缀为 {@code 00}
  *
  * <p>
- * 故意避免与安全公共段重叠： 安全使用{@code 00401-00406}和{@code 00101}
- * 网关使用{@code 002xx}/{@code 003xx}/{@code 00102+}
+ * 鉴权/会话/权限语义由下游 auth-service 返回，网关仅保留自身故障与轻量鉴权拒绝类错误码
  * </p>
  *
  * @author Bunny
@@ -19,69 +15,14 @@ import java.util.Map;
 public enum GatewayResultCodeEnum {
 
 	/**
-	 * 路由未找到
-	 */
-	ROUTE_NOT_FOUND(404, 201, "GATEWAY_ROUTE_NOT_FOUND", "gateway.route.not.found", "No route matched this request."),
-
-	/**
-	 * 上游服务超时
-	 */
-	UPSTREAM_TIMEOUT(504, 102, "GATEWAY_UPSTREAM_TIMEOUT", "gateway.upstream.timeout", "Upstream service timed out."),
-
-	/**
-	 * 上游服务连接失败
-	 */
-	UPSTREAM_CONNECT_FAILED(502, 103, "GATEWAY_UPSTREAM_CONNECT_FAILED", "gateway.upstream.connect.failed",
-			"Failed to connect to upstream service."),
-
-	/**
 	 * 网关内部错误
 	 */
-	INTERNAL_ERROR(500, 199, "GATEWAY_INTERNAL_ERROR", "gateway.internal.error", "Gateway internal error: {0}"),
+	INTERNAL_ERROR(500, 199, "GATEWAY_INTERNAL_ERROR", "Gateway internal error."),
 
 	/**
-	 * 未携带访问令牌（网关侧校验）
+	 * 严格路径下缺少或无法解析访问令牌（网关轻量校验拒绝）
 	 */
-	UNAUTHORIZED_TOKEN_MISSING(401, 202, "GATEWAY_TOKEN_MISSING", "gateway.token.missing", "Token is missing."),
-
-	/**
-	 * 访问令牌无效（网关侧校验）
-	 */
-	UNAUTHORIZED_TOKEN_INVALID(401, 203, "GATEWAY_TOKEN_INVALID", "gateway.token.invalid", "Token is invalid."),
-
-	/**
-	 * 访问令牌过期（网关侧校验）
-	 */
-	UNAUTHORIZED_TOKEN_EXPIRED(401, 204, "GATEWAY_TOKEN_EXPIRED", "gateway.token.expired", "Token has expired."),
-	/**
-	 * 访问令牌类型不匹配（网关侧校验）
-	 */
-	UNAUTHORIZED_TOKEN_KIND_MISMATCH(401, 205, "GATEWAY_TOKEN_KIND_MISMATCH", "gateway.token.kind.mismatch",
-			"Token kind is not supported."),
-	/**
-	 * 会话缺失（网关侧校验）
-	 */
-	UNAUTHORIZED_SESSION_MISSING(401, 206, "GATEWAY_SESSION_MISSING", "gateway.session.missing", "Session is missing."),
-	/**
-	 * 会话禁用（网关侧校验）
-	 */
-	UNAUTHORIZED_SESSION_DISABLED(401, 207, "GATEWAY_SESSION_DISABLED", "gateway.session.disabled",
-			"Session is disabled."),
-	/**
-	 * 会话数据不一致（网关侧校验）
-	 */
-	UNAUTHORIZED_SESSION_INCONSISTENT(401, 208, "GATEWAY_SESSION_INCONSISTENT", "gateway.session.inconsistent",
-			"Session data inconsistent, please re-authenticate."),
-	/**
-	 * 并发会话超限（网关侧校验）
-	 */
-	UNAUTHORIZED_SESSION_LIMIT_EXCEEDED(401, 209, "GATEWAY_SESSION_LIMIT_EXCEEDED", "gateway.session.limit.exceeded",
-			"Concurrent session limit exceeded."),
-	/**
-	 * 权限版本不匹配（网关侧透传）
-	 */
-	UNAUTHORIZED_PERMISSION_VERSION_MISMATCH(409, 210, "GATEWAY_PERMISSION_VERSION_MISMATCH",
-			"gateway.permission.version.mismatch", "Permission version mismatch, please refresh.");
+	UNAUTHORIZED(401, 202, "GATEWAY_UNAUTHORIZED", "Unauthorized.");
 
 	/**
 	 * HTTP状态码
@@ -99,21 +40,15 @@ public enum GatewayResultCodeEnum {
 	private final String error;
 
 	/**
-	 * 国际化键
+	 * 响应消息
 	 */
-	private final String i18nKey;
+	private final String message;
 
-	/**
-	 * 默认消息（英文）
-	 */
-	private final String defaultMessageEn;
-
-	GatewayResultCodeEnum(int httpStatus, int code, String error, String i18nKey, String defaultMessageEn) {
+	GatewayResultCodeEnum(int httpStatus, int code, String error, String message) {
 		this.httpStatus = httpStatus;
 		this.code = code;
 		this.error = error;
-		this.i18nKey = i18nKey;
-		this.defaultMessageEn = defaultMessageEn;
+		this.message = message;
 	}
 
 	/**
@@ -125,15 +60,6 @@ public enum GatewayResultCodeEnum {
 	 */
 	public int fullBizCode() {
 		return 10_000 + code;
-	}
-
-	/**
-	 * 扩展信息
-	 * @param args 参数
-	 * @return 扩展信息
-	 */
-	public Map<String, Object> ext(Object... args) {
-		return Map.of("i18nKey", i18nKey, "i18nArgs", ObjectUtil.defaultIfNull(args, new Object[0]));
 	}
 
 }

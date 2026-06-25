@@ -2,7 +2,6 @@ package com.auth.service.auth.infrastructure.redis.session.adapter;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.util.ObjectUtil;
 import com.auth.service.auth.application.port.session.OnlineUserQueryPort;
 import com.auth.service.auth.domain.session.model.OnlineUserPageSlice;
 import com.auth.service.auth.domain.session.model.OnlineUserPageSlice.OnlineUserEntry;
@@ -21,7 +20,7 @@ import java.util.function.LongPredicate;
 import static com.auth.module.security.contract.redis.SecurityRedisKey.ONLINE_USERS;
 
 /**
- * 在线用户 ZSet 只读查询适配器：分页扫描、统计与读时清理残留成员。
+ * 在线用户 ZSet 只读查询适配器
  *
  * @author Bunny
  */
@@ -59,17 +58,6 @@ public class OnlineUserQueryAdapter implements OnlineUserQueryPort {
 		LongPredicate filter = userId -> allowedUserIds == null || allowedUserIds.contains(userId);
 		OnlineUserScanResult scanResult = scanOnlineUsers(filter, normalizedPageIndex, normalizedPageSize);
 		return new OnlineUserPageSlice(scanResult.matchedCount(), scanResult.pageRecords());
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public long countOnlineUsers() {
-		String key = ONLINE_USERS.fixedKey();
-		Long zcard = sessionRedisTemplate.opsForZSet().zCard(key);
-
-		return ObjectUtil.defaultIfNull(zcard, 0L);
 	}
 
 	/**

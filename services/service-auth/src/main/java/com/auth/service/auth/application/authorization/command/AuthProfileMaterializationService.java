@@ -2,13 +2,12 @@ package com.auth.service.auth.application.authorization.command;
 
 import cn.hutool.core.collection.CollUtil;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
+import com.auth.service.auth.application.port.authorization.AuthProfileCachePort;
 import com.auth.service.auth.application.port.authorization.AuthProfileQueryPort;
-import com.auth.service.auth.application.port.login.AuthProfileCachePort;
+import com.auth.service.auth.shared.support.BatchPartition;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import com.auth.service.auth.shared.support.BatchPartition;
 
 import java.util.Collection;
 import java.util.List;

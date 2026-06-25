@@ -1,5 +1,14 @@
 package com.auth.service.system.authorization.controller;
 
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
+
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.annotation.OperationLog;
@@ -12,12 +21,10 @@ import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationE
 import com.auth.service.system.authorization.service.AuthorizationInvalidationEventOpsService;
 import com.auth.service.system.authorization.service.AuthorizationInvalidationEventQueryService;
 import com.auth.service.system.common.model.SystemAuditBizModule;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-
-import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
+import lombok.RequiredArgsConstructor;
 
 /**
  * 授权失效幂等事件运维查询接口
@@ -27,18 +34,12 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
 @Tag(name = "授权失效幂等事件", description = "auth_authorization_invalidation_event")
 @RequestMapping("/api/system/ops/authorization-invalidation/event")
 @RestController
+@RequiredArgsConstructor
 public class AuthorizationInvalidationEventOpsController {
 
 	private final AuthorizationInvalidationEventQueryService authorizationInvalidationEventQueryService;
 
 	private final AuthorizationInvalidationEventOpsService authorizationInvalidationEventOpsService;
-
-	public AuthorizationInvalidationEventOpsController(
-			AuthorizationInvalidationEventQueryService authorizationInvalidationEventQueryService,
-			AuthorizationInvalidationEventOpsService authorizationInvalidationEventOpsService) {
-		this.authorizationInvalidationEventQueryService = authorizationInvalidationEventQueryService;
-		this.authorizationInvalidationEventOpsService = authorizationInvalidationEventOpsService;
-	}
 
 	@Operation(summary = "分页查询授权失效幂等事件")
 	@PreAuthorize("@auth.decide('sysAuthInvalidationEvent:query')")

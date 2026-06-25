@@ -73,8 +73,7 @@ class RtfFilterTest {
 
 		StepVerifier.create(result)
 			.expectErrorMatches(throwable -> throwable instanceof GatewayBusinessException gbe
-					&& gbe.getHttpStatus() == GatewayResultCodeEnum.INTERNAL_ERROR.getHttpStatus()
-					&& GatewayResultCodeEnum.INTERNAL_ERROR.getError().equals(gbe.getError()))
+					&& gbe.getResultCode() == GatewayResultCodeEnum.INTERNAL_ERROR)
 			.verify();
 
 		verify(filterChain, times(1)).filter(exchange);

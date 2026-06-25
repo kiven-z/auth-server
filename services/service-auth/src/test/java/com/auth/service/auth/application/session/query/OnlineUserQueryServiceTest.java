@@ -76,15 +76,4 @@ class OnlineUserQueryServiceTest {
 		verify(onlineUserQueryPort).pageOnlineUsers(1, 30, Set.of(TestConstants.USER_ID));
 	}
 
-	@Test
-	@DisplayName("统计摘要：委托 Port 统计在线用户 ZSet 条数")
-	void getOnlineUserCount_shouldReturnOnlineUserCount() {
-		when(onlineUserQueryPort.countOnlineUsers()).thenReturn(12L);
-
-		long count = onlineUserQueryService.getOnlineUserCount();
-
-		assertEquals(12L, count);
-		verify(onlineUserQueryPort).countOnlineUsers();
-	}
-
 }

@@ -3,7 +3,7 @@ package com.auth.service.auth.application.login;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.TestConstants;
 import com.auth.service.auth.application.port.UserReadPort;
-import com.auth.service.auth.application.port.login.AuthProfileCachePort;
+import com.auth.service.auth.application.port.authorization.AuthProfileCachePort;
 import com.auth.service.auth.application.port.login.LoginAuditPort;
 import com.auth.service.auth.domain.authentication.model.LoginAuditSnapshot;
 import com.auth.service.auth.domain.authentication.model.enums.AuthLoginLogResult;

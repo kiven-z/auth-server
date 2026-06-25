@@ -2,8 +2,8 @@ package com.auth.service.auth.application.authorization.command;
 
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.TestConstants;
+import com.auth.service.auth.application.port.authorization.AuthProfileCachePort;
 import com.auth.service.auth.application.port.authorization.AuthProfileQueryPort;
-import com.auth.service.auth.application.port.login.AuthProfileCachePort;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

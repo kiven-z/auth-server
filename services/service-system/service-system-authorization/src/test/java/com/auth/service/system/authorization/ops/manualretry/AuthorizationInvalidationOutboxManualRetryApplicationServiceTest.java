@@ -88,9 +88,9 @@ class AuthorizationInvalidationOutboxManualRetryApplicationServiceTest {
 
 		var outcome = manualRetryService.retryManual(2L, false);
 
-		assertEquals("DEAD", outcome.previousStatus());
-		assertEquals(AuthorizationInvalidationOutboxStatus.PENDING.name(), outcome.currentStatus());
-		assertTrue(outcome.dispatched());
+		assertEquals("DEAD", outcome.getPreviousStatus());
+		assertEquals(AuthorizationInvalidationOutboxStatus.PENDING.name(), outcome.getCurrentStatus());
+		assertTrue(outcome.isDispatched());
 		verify(outboxMapper).resetForManualRetry(2L, 1L);
 	}
 
@@ -125,9 +125,9 @@ class AuthorizationInvalidationOutboxManualRetryApplicationServiceTest {
 
 		var outcome = manualRetryService.retryManual(4L, true);
 
-		assertEquals("PROCESSING", outcome.previousStatus());
-		assertTrue(outcome.claimReleased());
-		assertFalse(outcome.dispatched());
+		assertEquals("PROCESSING", outcome.getPreviousStatus());
+		assertTrue(outcome.isClaimReleased());
+		assertFalse(outcome.isDispatched());
 		verify(outboxMapper).resetForManualRetry(4L, 1L);
 	}
 

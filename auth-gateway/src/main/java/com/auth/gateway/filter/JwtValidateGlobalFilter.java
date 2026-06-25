@@ -3,7 +3,7 @@ package com.auth.gateway.filter;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.gateway.config.GatewaySecurityProperties;
 import com.auth.gateway.exception.GatewayBusinessException;
-import com.auth.gateway.support.SecurityTokenExceptionToGatewayResultCodeMapper;
+import com.auth.gateway.exception.GatewayResultCodeEnum;
 import com.auth.module.security.contract.exception.SecurityResultCodeEnum;
 import com.auth.module.security.contract.exception.SecurityTokenException;
 import com.auth.module.security.core.token.provider.AccessTokenProvider;
@@ -54,18 +54,15 @@ public class JwtValidateGlobalFilter implements GlobalFilter {
 		String path = request.getURI().getPath();
 		boolean strictPath = gatewaySecurityProperties.isStrictPath(path);
 
-		// 外部Token轻量检查：仅当 Authorization 存在时进行可解析校验
 		String authorization = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
 		if (CharSequenceUtil.isBlank(authorization)) {
 			if (strictPath) {
-				return Mono.error(new GatewayBusinessException(SecurityTokenExceptionToGatewayResultCodeMapper
-					.map(new SecurityTokenException(SecurityResultCodeEnum.TOKEN_MISSING, "Token is missing."))));
+				return Mono.error(new GatewayBusinessException(GatewayResultCodeEnum.UNAUTHORIZED));
 			}
 			return chain.filter(exchange);
 		}
 
 		try {
-			// 解析外部访问令牌
 			accessTokenProvider.parseToken(authorization);
 		}
 		catch (SecurityTokenException ex) {
@@ -75,7 +72,7 @@ public class JwtValidateGlobalFilter implements GlobalFilter {
 			}
 			log.debug("Gateway token parse failed: code={}, path={}", ex.getCode(),
 					exchange.getRequest().getURI().getPath());
-			return Mono.error(new GatewayBusinessException(SecurityTokenExceptionToGatewayResultCodeMapper.map(ex)));
+			return Mono.error(new GatewayBusinessException(GatewayResultCodeEnum.UNAUTHORIZED));
 		}
 		return chain.filter(exchange);
 	}

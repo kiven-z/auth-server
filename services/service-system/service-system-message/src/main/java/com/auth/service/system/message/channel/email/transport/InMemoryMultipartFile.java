@@ -1,6 +1,7 @@
 package com.auth.service.system.message.channel.email.transport;
 
-import cn.hutool.core.util.ObjectUtil;
+import java.util.Objects;
+
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.FileCopyUtils;
@@ -30,7 +31,7 @@ public class InMemoryMultipartFile implements MultipartFile {
 		this.name = name;
 		this.originalFilename = originalFilename;
 		this.contentType = contentType;
-		this.content = ObjectUtil.defaultIfNull(content, new byte[0]);
+		this.content = Objects.requireNonNullElse(content, new byte[0]);
 	}
 
 	@Override

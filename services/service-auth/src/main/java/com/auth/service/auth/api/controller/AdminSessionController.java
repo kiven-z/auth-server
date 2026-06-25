@@ -1,13 +1,17 @@
 package com.auth.service.auth.api.controller;
 
 import com.auth.common.core.model.response.Result;
+import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.module.security.contract.context.OperationLogContext;
+import com.auth.service.auth.api.dto.session.request.OnlineUserPageQuery;
+import com.auth.service.auth.api.dto.session.response.OnlineUserPageVO;
 import com.auth.service.auth.api.dto.session.response.UserSessionVO;
 import com.auth.service.auth.application.session.command.SessionManagementApplicationService;
+import com.auth.service.auth.application.session.query.OnlineUserQueryService;
 import com.auth.service.auth.convert.UserSessionConverter;
 import com.auth.service.auth.shared.audit.AuthAuditBizModule;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,17 +23,29 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 管理端会话管理（踢人等）
+ * 管理端会话管理（踢人、在线用户查询等）
  *
  * @author Bunny
  */
-@Tag(name = "管理端会话", description = "管理员踢人/会话管理")
+@Tag(name = "管理端会话", description = "管理员踢人/会话管理/在线用户查询")
 @RequiredArgsConstructor
 @RequestMapping("/api/auth/admin/users")
 @RestController
 public class AdminSessionController {
 
 	private final SessionManagementApplicationService sessionManagementApplicationService;
+
+	private final OnlineUserQueryService onlineUserQueryService;
+
+	@OperationLog(targetType = "ONLINE_USER_LIST", serviceDomain = AuditServiceDomain.AUTH,
+			bizModule = AuthAuditBizModule.AUTH_SESSION, operation = OperationLogKind.QUERY)
+	@Operation(summary = "分页查询在线用户")
+	@PreAuthorize("@auth.decide('ADMIN')")
+	@GetMapping("/online")
+	public Result<PageResponse<OnlineUserPageVO>> pageOnlineUsers(OnlineUserPageQuery query) {
+		PageResponse<OnlineUserPageVO> page = onlineUserQueryService.getOnlineUserPage(query);
+		return Result.success(page);
+	}
 
 	@OperationLog(targetType = "USER_SESSION", serviceDomain = AuditServiceDomain.AUTH,
 			bizModule = AuthAuditBizModule.AUTH_SESSION, operation = OperationLogKind.DELETE)

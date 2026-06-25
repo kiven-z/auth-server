@@ -1,6 +1,6 @@
 package com.auth.service.auth.domain.authorization.model;
 
-import cn.hutool.core.util.ObjectUtil;
+import java.util.Objects;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -15,8 +15,8 @@ import java.util.Set;
 public record UserInvalidationBuckets(Set<Long> versionBumpUserIds, Set<Long> evictOnlyUserIds) {
 
 	public UserInvalidationBuckets {
-		versionBumpUserIds = Set.copyOf(ObjectUtil.defaultIfNull(versionBumpUserIds, Set.of()));
-		evictOnlyUserIds = Set.copyOf(ObjectUtil.defaultIfNull(evictOnlyUserIds, Set.of()));
+		versionBumpUserIds = Set.copyOf(Objects.requireNonNullElse(versionBumpUserIds, Set.of()));
+		evictOnlyUserIds = Set.copyOf(Objects.requireNonNullElse(evictOnlyUserIds, Set.of()));
 	}
 
 	/**

@@ -95,18 +95,13 @@ public class DeptClosureHealthQueryServiceImpl implements DeptClosureHealthQuery
 	 * @return 健康度统计 VO
 	 */
 	private DeptClosureHealthStatsVO toHealthStats(DeptClosureHealthStatsPO statsPo) {
+		DeptClosureHealthStatsPO safePo = Objects.requireNonNullElse(statsPo, new DeptClosureHealthStatsPO());
+
 		DeptClosureHealthStatsVO vo = new DeptClosureHealthStatsVO();
-		if (statsPo == null) {
-			vo.setOnlySelf(0L);
-			vo.setHasAncestors(0L);
-			vo.setZeroClosure(0L);
-			vo.setTotal(0L);
-			return vo;
-		}
-		vo.setOnlySelf(Objects.requireNonNullElse(statsPo.getOnlySelf(), 0L));
-		vo.setHasAncestors(Objects.requireNonNullElse(statsPo.getHasAncestors(), 0L));
-		vo.setZeroClosure(Objects.requireNonNullElse(statsPo.getZeroClosure(), 0L));
-		vo.setTotal(Objects.requireNonNullElse(statsPo.getTotal(), 0L));
+		vo.setOnlySelf(Objects.requireNonNullElse(safePo.getOnlySelf(), 0L));
+		vo.setHasAncestors(Objects.requireNonNullElse(safePo.getHasAncestors(), 0L));
+		vo.setZeroClosure(Objects.requireNonNullElse(safePo.getZeroClosure(), 0L));
+		vo.setTotal(Objects.requireNonNullElse(safePo.getTotal(), 0L));
 		return vo;
 	}
 

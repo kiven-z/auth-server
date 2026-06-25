@@ -2,8 +2,10 @@ package com.auth.service.system.authorization.convert;
 
 import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidationEventStatsInnerDTO;
 import com.auth.service.system.authorization.model.po.AuthorizationInvalidationEventStatsPO;
+import com.auth.service.system.authorization.model.po.AuthorizationInvalidationFailureRateTrendBucketPO;
 import com.auth.service.system.authorization.model.po.AuthorizationInvalidationOutboxStatsPO;
 import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationEventStatsVO;
+import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationFailureRateTrendPointVO;
 import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationOutboxStatsVO;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -132,6 +134,23 @@ class AuthorizationInvalidationStatsOpsConverterTest {
 		assertThat(statsVo.getTotalCount()).isEqualTo(8L);
 		assertThat(statsVo.getProcessingCount()).isEqualTo(1L);
 		assertThat(statsVo.getCompletedCount()).isEqualTo(7L);
+	}
+
+	@Test
+	@DisplayName("失败率趋势点：应映射分桶并计算失败率")
+	void toFailureRateTrendPointVo_shouldMapBucketAndFailureRate() {
+		AuthorizationInvalidationFailureRateTrendBucketPO bucketPo = new AuthorizationInvalidationFailureRateTrendBucketPO();
+		bucketPo.setBucket("2026-06-01");
+		bucketPo.setTotalCount(10L);
+		bucketPo.setFailedCount(1L);
+		bucketPo.setDeadCount(1L);
+
+		AuthorizationInvalidationFailureRateTrendPointVO pointVo = AuthorizationInvalidationStatsOpsConverter
+			.toFailureRateTrendPointVo(bucketPo);
+
+		assertThat(pointVo.getBucket()).isEqualTo("2026-06-01");
+		assertThat(pointVo.getTotalCount()).isEqualTo(10L);
+		assertThat(pointVo.getFailureRatePercent()).isEqualByComparingTo(new BigDecimal("20.00"));
 	}
 
 }
