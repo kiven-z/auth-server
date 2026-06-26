@@ -29,9 +29,6 @@ public class PermissionReferencePO implements Serializable {
 	@Schema(title = "权限名称")
 	private String permissionName;
 
-	@Schema(title = "权限类型(0=按钮, 1=API)")
-	private Integer permissionType;
-
 	@Schema(title = "启用状态(true=启用，false=停用)")
 	private Boolean status;
 

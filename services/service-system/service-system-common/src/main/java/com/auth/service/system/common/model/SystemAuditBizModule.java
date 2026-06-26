@@ -36,11 +36,6 @@ public class SystemAuditBizModule {
 	public static final String SYS_MENU = "SYS_MENU";
 
 	/**
-	 * 菜单权限
-	 */
-	public static final String SYS_MENU_PERMISSION = "SYS_MENU_PERMISSION";
-
-	/**
 	 * 菜单角色
 	 */
 	public static final String SYS_MENU_ROLE = "SYS_MENU_ROLE";

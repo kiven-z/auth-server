@@ -31,11 +31,6 @@
         </dependency>
         <dependency>
             <groupId>com.auth</groupId>
-            <artifactId>common-starter-nacos-config</artifactId>
-            <version>0.0.2-beta</version>
-        </dependency>
-        <dependency>
-            <groupId>com.auth</groupId>
             <artifactId>common-starter-resttemplate</artifactId>
             <version>0.0.2-beta</version>
         </dependency>
@@ -95,6 +90,10 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-loadbalancer</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
         </dependency>
 
         <!-- mapstruct -->

@@ -1,9 +1,9 @@
 package com.auth.service.system.message.convert;
 
+import com.auth.module.message.api.command.ChannelOptions;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.message.api.model.email.EmailChannelOptions;
 import com.auth.service.system.message.model.channel.email.EmailSendDTO;
-import com.auth.service.system.message.support.ChannelOptionsSupport;
 import lombok.experimental.UtilityClass;
 
 /**
@@ -20,7 +20,7 @@ public class TemplateMessageCommandConverter {
 	 * @return 邮件发送请求
 	 */
 	public static EmailSendDTO toEmailDto(TemplateMessageCommand command) {
-		EmailChannelOptions options = ChannelOptionsSupport.asEmail(command.getOptions());
+		EmailChannelOptions options = asEmail(command.getOptions());
 
 		EmailSendDTO.EmailSendDTOBuilder builder = EmailSendDTO.builder()
 			.templateCode(command.getTemplateCode())
@@ -35,6 +35,18 @@ public class TemplateMessageCommandConverter {
 				.attachments(options.getAttachments());
 		}
 		return builder.build();
+	}
+
+	/**
+	 * 转为邮件扩展参数
+	 * @param options 渠道扩展参数
+	 * @return 邮件参数，类型不匹配时返回 {@code null}
+	 */
+	public static EmailChannelOptions asEmail(ChannelOptions options) {
+		if (options instanceof EmailChannelOptions email) {
+			return email;
+		}
+		return null;
 	}
 
 }

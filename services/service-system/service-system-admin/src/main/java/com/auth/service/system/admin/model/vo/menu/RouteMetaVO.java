@@ -10,7 +10,7 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * 动态路由 meta，供前端菜单与按钮权限展示；roles/auths 来自关联表聚合
+ * 动态路由 meta，供前端菜单展示；roles 来自 sys_menu_role 聚合
  *
  * @author Bunny
  */
@@ -37,9 +37,6 @@ public class RouteMetaVO implements Serializable {
 
 	@Schema(title = "页面可见角色编码（来自 sys_menu_role）")
 	private List<String> roles;
-
-	@Schema(title = "按钮权限码（来自 sys_menu_permission）")
-	private List<String> auths;
 
 	@Schema(title = "额外图标")
 	private String extraIcon;

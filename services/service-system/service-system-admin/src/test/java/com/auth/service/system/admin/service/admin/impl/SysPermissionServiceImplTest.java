@@ -1,11 +1,9 @@
 package com.auth.service.system.admin.service.admin.impl;
 
-import com.auth.service.system.admin.mapper.menu.SysMenuPermissionMapper;
 import com.auth.service.system.admin.mapper.permission.SysPermissionMapper;
 import com.auth.service.system.admin.mapper.role.SysRolePermissionMapper;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.form.permission.SysPermissionForm;
-import com.auth.service.system.admin.model.po.permission.SysPermissionBoundMenuPO;
 import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionDetailVO;
 import com.auth.service.system.authorization.dispatch.trigger.PermissionAuthorizationInvalidationTrigger;
@@ -57,9 +55,6 @@ class SysPermissionServiceImplTest {
 	@Mock
 	private SysRolePermissionMapper sysRolePermissionMapper;
 
-	@Mock
-	private SysMenuPermissionMapper sysMenuPermissionMapper;
-
 	private SysPermissionServiceImpl sysPermissionService;
 
 	private SysPermissionQueryServiceImpl sysPermissionQueryService;
@@ -69,7 +64,6 @@ class SysPermissionServiceImplTest {
 		entity.setId(id);
 		entity.setPermissionCode("sys:user:query");
 		entity.setPermissionName("测试权限");
-		entity.setPermissionType(1);
 		entity.setStatus(true);
 		entity.setOrderNum(0);
 		return entity;
@@ -89,8 +83,7 @@ class SysPermissionServiceImplTest {
 	void setUp() throws Exception {
 		sysPermissionService = new SysPermissionServiceImpl(permissionInvalidationTrigger, roleInvalidationTrigger,
 				sysRolePermissionMapper);
-		sysPermissionQueryService = new SysPermissionQueryServiceImpl(auditUserDisplayService, sysRolePermissionMapper,
-				sysMenuPermissionMapper);
+		sysPermissionQueryService = new SysPermissionQueryServiceImpl(auditUserDisplayService, sysRolePermissionMapper);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysPermissionService, sysPermissionMapper);
@@ -103,7 +96,6 @@ class SysPermissionServiceImplTest {
 		SysPermissionForm form = new SysPermissionForm();
 		form.setPermissionCode("sys:user:list");
 		form.setPermissionName("列表");
-		form.setPermissionType(0);
 		when(sysPermissionMapper.selectCount(any())).thenReturn(1L);
 
 		assertThatThrownBy(() -> sysPermissionService.create(form)).isInstanceOf(SystemBusinessException.class)
@@ -136,20 +128,6 @@ class SysPermissionServiceImplTest {
 			.isEqualTo(SystemCommonResultCode.DATA_CODE_DUPLICATE);
 
 		verifyNoInteractions(permissionInvalidationTrigger);
-	}
-
-	@Test
-	@DisplayName("更新权限：不修改 permission_type")
-	void updateShouldNotChangePermissionType() {
-		SysPermissionEntity entity = permissionEntity(1L);
-		entity.setPermissionType(0);
-		SysPermissionForm form = updateForm(1L, "sys:user:query", true);
-		form.setPermissionName("重命名");
-		when(sysPermissionMapper.selectById(1L)).thenReturn(entity);
-
-		sysPermissionService.update(form);
-
-		assertThat(entity.getPermissionType()).isZero();
 	}
 
 	@Test
@@ -205,59 +183,25 @@ class SysPermissionServiceImplTest {
 		entity.setId(3L);
 		entity.setPermissionCode("sys:dept:query");
 		entity.setPermissionName("部门查询");
-		entity.setPermissionType(1);
 		entity.setStatus(true);
 		when(sysPermissionMapper.selectById(3L)).thenReturn(entity);
 		when(sysRolePermissionMapper.selectBoundRolesByPermissionId(3L)).thenReturn(List.of());
-		when(sysMenuPermissionMapper.selectBoundMenusByPermissionId(3L)).thenReturn(List.of());
 
 		SysPermissionDetailVO detail = sysPermissionQueryService.getDetail(3L);
 
 		assertThat(detail.getPermissionCode()).isEqualTo("sys:dept:query");
-		assertThat(detail.getPermissionType()).isEqualTo(1);
 		assertThat(detail.getBoundRoles()).isEmpty();
-		assertThat(detail.getBoundMenus()).isEmpty();
 		verify(sysRolePermissionMapper).selectBoundRolesByPermissionId(3L);
-		verify(sysMenuPermissionMapper).selectBoundMenusByPermissionId(3L);
 		verify(auditUserDisplayService).enrichAuditUsernames(anyList(), isNull(), isNull());
 	}
 
 	@Test
-	@DisplayName("权限详情：API 权限仍反查并展示菜单绑定")
-	void getDetailShouldIncludeBoundMenusForApiPermissionWhenLinked() {
-		SysPermissionEntity entity = new SysPermissionEntity();
-		entity.setId(8L);
-		entity.setPermissionCode("sys:dept:query");
-		entity.setPermissionName("部门查询");
-		entity.setPermissionType(1);
-		entity.setStatus(true);
-		when(sysPermissionMapper.selectById(8L)).thenReturn(entity);
-		when(sysRolePermissionMapper.selectBoundRolesByPermissionId(8L)).thenReturn(List.of());
-		SysPermissionBoundMenuPO boundMenu = new SysPermissionBoundMenuPO();
-		boundMenu.setId(200L);
-		boundMenu.setTitle("部门管理");
-		boundMenu.setName("SystemDept");
-		boundMenu.setPath("/system/dept");
-		boundMenu.setMenuType(0);
-		boundMenu.setStatus(true);
-		when(sysMenuPermissionMapper.selectBoundMenusByPermissionId(8L)).thenReturn(List.of(boundMenu));
-
-		SysPermissionDetailVO detail = sysPermissionQueryService.getDetail(8L);
-
-		assertThat(detail.getPermissionType()).isEqualTo(1);
-		assertThat(detail.getBoundMenus()).hasSize(1);
-		assertThat(detail.getBoundMenus().get(0).getTitle()).isEqualTo("部门管理");
-		verify(sysMenuPermissionMapper).selectBoundMenusByPermissionId(8L);
-	}
-
-	@Test
-	@DisplayName("权限详情：按钮权限填充角色与菜单引用")
-	void getDetailShouldIncludeBoundRolesAndMenusForButtonPermission() {
+	@DisplayName("权限详情：按钮权限填充角色引用")
+	void getDetailShouldIncludeBoundRolesForButtonPermission() {
 		SysPermissionEntity entity = new SysPermissionEntity();
 		entity.setId(7L);
 		entity.setPermissionCode("sys:user:create");
 		entity.setPermissionName("新增用户");
-		entity.setPermissionType(0);
 		entity.setStatus(true);
 		when(sysPermissionMapper.selectById(7L)).thenReturn(entity);
 
@@ -268,23 +212,11 @@ class SysPermissionServiceImplTest {
 		boundRole.setStatus(true);
 		when(sysRolePermissionMapper.selectBoundRolesByPermissionId(7L)).thenReturn(List.of(boundRole));
 
-		SysPermissionBoundMenuPO boundMenu = new SysPermissionBoundMenuPO();
-		boundMenu.setId(100L);
-		boundMenu.setTitle("用户管理");
-		boundMenu.setName("SystemUser");
-		boundMenu.setPath("/system/user");
-		boundMenu.setMenuType(0);
-		boundMenu.setStatus(true);
-		when(sysMenuPermissionMapper.selectBoundMenusByPermissionId(7L)).thenReturn(List.of(boundMenu));
-
 		SysPermissionDetailVO detail = sysPermissionQueryService.getDetail(7L);
 
 		assertThat(detail.getBoundRoles()).hasSize(1);
 		assertThat(detail.getBoundRoles().get(0).getId()).isEqualTo(10L);
 		assertThat(detail.getBoundRoles().get(0).getRoleCode()).isEqualTo("ADMIN");
-		assertThat(detail.getBoundMenus()).hasSize(1);
-		assertThat(detail.getBoundMenus().get(0).getTitle()).isEqualTo("用户管理");
-		verify(sysMenuPermissionMapper).selectBoundMenusByPermissionId(7L);
 	}
 
 	@Test

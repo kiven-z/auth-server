@@ -41,12 +41,6 @@ public class SysPermissionForm implements Serializable {
 	@NotBlank(message = "权限名称不能为空", groups = { CreateGroup.class, UpdateGroup.class })
 	private String permissionName;
 
-	@Schema(title = "权限类型(0=按钮, 1=API)，仅创建时有效", requiredMode = Schema.RequiredMode.REQUIRED)
-	@Max(value = 1, message = "权限类型值无效", groups = CreateGroup.class)
-	@Min(value = 0, message = "权限类型值无效", groups = CreateGroup.class)
-	@NotNull(message = "权限类型不能为空", groups = CreateGroup.class)
-	private Integer permissionType;
-
 	@Schema(title = "显示顺序")
 	private Integer orderNum;
 

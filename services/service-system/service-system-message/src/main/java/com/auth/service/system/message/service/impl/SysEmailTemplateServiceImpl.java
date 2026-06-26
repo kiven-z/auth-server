@@ -61,6 +61,7 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<MessageTemplateMapp
 			EmailTemplateQuery query) {
 		IPage<EmailTemplatePageRowPO> page = baseMapper.selectEmailTemplatePage(pageParams, query);
 		IPage<EmailTemplatePageResponse> voPage = page.convert(EmailTemplateConverter.INSTANCE::toPageResponse);
+
 		auditUserDisplayService.enrichAuditUsernames(voPage, null, null);
 		return PageResponse.of(voPage);
 	}
@@ -89,6 +90,7 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<MessageTemplateMapp
 		entity.setChannel(MessageChannel.EMAIL.name());
 		entity.setBodyContent(CharSequenceUtil.nullToDefault(entity.getBodyContent(), "Template content is empty"));
 		entity.setRequireFields(MessageTemplateRequireFieldsJsonSupport.toJson(Collections.emptyList()));
+
 		save(entity);
 	}
 

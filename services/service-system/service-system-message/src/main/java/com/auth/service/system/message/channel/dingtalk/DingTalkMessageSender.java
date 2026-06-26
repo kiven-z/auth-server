@@ -1,22 +1,21 @@
 package com.auth.service.system.message.channel.dingtalk;
 
-import java.util.Objects;
-
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.channel.MessageSender;
+import com.auth.module.message.api.command.ChannelOptions;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.message.api.model.dingtalk.DingTalkChannelOptions;
 import com.auth.module.message.api.model.dingtalk.DingTalkMessageType;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.message.channel.dingtalk.client.DingTalkWorkNoticeClient;
 import com.auth.service.system.message.model.channel.dingtalk.RenderedDingTalkNotice;
-import com.auth.service.system.message.support.ChannelOptionsSupport;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
@@ -68,6 +67,18 @@ public class DingTalkMessageSender implements MessageSender {
 		return rendered.title();
 	}
 
+	/**
+	 * 转为钉钉扩展参数
+	 * @param options 渠道扩展参数
+	 * @return 钉钉参数，类型不匹配时返回 {@code null}
+	 */
+	public static DingTalkChannelOptions asDingTalk(ChannelOptions options) {
+		if (options instanceof DingTalkChannelOptions dingTalk) {
+			return dingTalk;
+		}
+		return null;
+	}
+
 	@Override
 	public MessageChannel channel() {
 		return MessageChannel.DING_TALK;
@@ -76,7 +87,7 @@ public class DingTalkMessageSender implements MessageSender {
 	@Override
 	public void sendByTemplate(TemplateMessageCommand command) {
 		RenderedDingTalkNotice rendered = resolveContent(command);
-		DingTalkChannelOptions options = ChannelOptionsSupport.asDingTalk(command.getOptions());
+		DingTalkChannelOptions options = asDingTalk(command.getOptions());
 		DingTalkMessageType messageType = resolveMessageType(rendered, options);
 		String title = resolveTitle(rendered, options);
 
@@ -98,7 +109,7 @@ public class DingTalkMessageSender implements MessageSender {
 			}
 
 			// 解析渠道扩展参数
-			DingTalkChannelOptions options = ChannelOptionsSupport.asDingTalk(command.getOptions());
+			DingTalkChannelOptions options = asDingTalk(command.getOptions());
 			DingTalkMessageType type = options != null && options.getMessageType() != null ? options.getMessageType()
 					: DingTalkMessageType.TEXT;
 			String title = options != null ? options.getTitle() : null;

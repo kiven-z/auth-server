@@ -3,17 +3,12 @@ package com.auth.service.system.admin.service.admin.impl;
 import cn.hutool.core.collection.CollUtil;
 import com.auth.service.system.admin.convert.reference.ReferenceConverter;
 import com.auth.service.system.admin.mapper.menu.SysMenuMapper;
-import com.auth.service.system.admin.mapper.menu.SysMenuPermissionMapper;
 import com.auth.service.system.admin.mapper.menu.SysMenuRoleMapper;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
-import com.auth.service.system.admin.model.form.menu.SysMenuAssignPermissionForm;
 import com.auth.service.system.admin.model.form.menu.SysMenuAssignRoleForm;
-import com.auth.service.system.admin.model.po.reference.PermissionReferencePO;
 import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
-import com.auth.service.system.admin.model.vo.reference.ext.MenuAssignedPermissionReferenceVO;
 import com.auth.service.system.admin.model.vo.reference.ext.MenuAssignedRoleReferenceVO;
 import com.auth.service.system.admin.service.admin.SysMenuManageService;
-import com.auth.service.system.admin.support.permission.PermissionReferenceChecker;
 import com.auth.service.system.admin.support.role.RoleGrantReferenceChecker;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -36,19 +31,12 @@ public class SysMenuManageServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu
 
 	private final SysMenuRoleMapper sysMenuRoleMapper;
 
-	private final SysMenuPermissionMapper sysMenuPermissionMapper;
-
 	private final RoleGrantReferenceChecker roleGrantReferenceChecker;
 
-	private final PermissionReferenceChecker permissionReferenceChecker;
-
 	public SysMenuManageServiceImpl(SysMenuRoleMapper sysMenuRoleMapper,
-			SysMenuPermissionMapper sysMenuPermissionMapper, RoleGrantReferenceChecker roleGrantReferenceChecker,
-			PermissionReferenceChecker permissionReferenceChecker) {
+			RoleGrantReferenceChecker roleGrantReferenceChecker) {
 		this.sysMenuRoleMapper = sysMenuRoleMapper;
-		this.sysMenuPermissionMapper = sysMenuPermissionMapper;
 		this.roleGrantReferenceChecker = roleGrantReferenceChecker;
-		this.permissionReferenceChecker = permissionReferenceChecker;
 	}
 
 	/**
@@ -74,30 +62,6 @@ public class SysMenuManageServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu
 
 		if (CollUtil.isNotEmpty(roleIds)) {
 			sysMenuRoleMapper.batchInsertMenuRoles(menuId, roleIds);
-		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public List<MenuAssignedPermissionReferenceVO> listPermissionsWithAssignFlags(Long menuId) {
-		List<PermissionReferencePO> dtoList = sysMenuPermissionMapper.selectAssignedPermissionByMenuId(menuId);
-
-		return ReferenceConverter.INSTANCE.toMenuAssignedPermissionList(dtoList);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void replaceMenuPermissions(Long menuId, SysMenuAssignPermissionForm form) {
-		List<Long> permissionIds = CollUtil.emptyIfNull(form.getPermissionIds()).stream().distinct().toList();
-		permissionReferenceChecker.requireActivePermissionIds(permissionIds);
-
-		sysMenuPermissionMapper.deleteByMenuId(menuId);
-		if (CollUtil.isNotEmpty(permissionIds)) {
-			sysMenuPermissionMapper.batchInsertMenuPermissions(menuId, permissionIds);
 		}
 	}
 

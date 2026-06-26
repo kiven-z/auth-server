@@ -113,8 +113,8 @@ public class DingTalkAccessTokenClient {
 
 	private record CachedToken(String token, Instant expiresAt) {
 		boolean isValid() {
-			return CharSequenceUtil.isNotBlank(token)
-					&& Instant.now().isBefore(expiresAt.minusSeconds(REFRESH_SKEW_SECONDS));
+			Instant otherInstant = expiresAt.minusSeconds(REFRESH_SKEW_SECONDS);
+			return CharSequenceUtil.isNotBlank(token) && Instant.now().isBefore(otherInstant);
 		}
 	}
 

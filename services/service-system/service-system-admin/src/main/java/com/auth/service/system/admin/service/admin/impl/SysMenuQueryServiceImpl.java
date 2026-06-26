@@ -5,18 +5,16 @@ import com.auth.module.security.contract.constants.PermissionConstant;
 import com.auth.service.system.admin.convert.menu.SysMenuConverter;
 import com.auth.service.system.admin.convert.reference.ReferenceConverter;
 import com.auth.service.system.admin.mapper.menu.SysMenuMapper;
-import com.auth.service.system.admin.mapper.menu.SysMenuPermissionMapper;
 import com.auth.service.system.admin.mapper.menu.SysMenuRoleMapper;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
-import com.auth.service.system.admin.model.po.reference.PermissionReferencePO;
 import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.auth.service.system.admin.model.query.menu.SysMenuQuery;
 import com.auth.service.system.admin.model.vo.menu.RouteNodeVO;
 import com.auth.service.system.admin.model.vo.menu.SysMenuDetailVO;
 import com.auth.service.system.admin.model.vo.menu.SysMenuListVO;
-import com.auth.service.system.admin.support.menu.MenuWebRouteTreeAssembler;
 import com.auth.service.system.admin.service.admin.SysMenuQueryService;
 import com.auth.service.system.admin.support.menu.MenuReferenceChecker;
+import com.auth.service.system.admin.support.menu.MenuWebRouteTreeAssembler;
 import com.auth.service.system.authorization.dispatch.query.UserEffectiveCodesResolver;
 import com.auth.service.system.authorization.dispatch.query.UserEffectiveCodesSnapshot;
 import com.auth.service.system.common.service.AuditUserDisplayService;
@@ -53,8 +51,6 @@ public class SysMenuQueryServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuE
 
 	private final SysMenuRoleMapper sysMenuRoleMapper;
 
-	private final SysMenuPermissionMapper sysMenuPermissionMapper;
-
 	/**
 	 * {@inheritDoc}
 	 */
@@ -70,12 +66,11 @@ public class SysMenuQueryServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuE
 			return Collections.emptyList();
 		}
 
-		List<String> roleCodes = codes.roleCodes();
-		boolean isAdmin = PermissionConstant.isAdmin(userId, roleCodes);
-
 		List<SysMenuEntity> menuList = list(
 				Wrappers.lambdaQuery(SysMenuEntity.class).eq(SysMenuEntity::getStatus, Boolean.TRUE));
 
+		List<String> roleCodes = codes.roleCodes();
+		boolean isAdmin = PermissionConstant.isAdmin(userId, roleCodes);
 		return isAdmin ? menuWebRouteTreeAssembler.buildAdminRoutes(menuList)
 				: menuWebRouteTreeAssembler.buildRoutes(menuList);
 	}
@@ -110,13 +105,10 @@ public class SysMenuQueryServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuE
 	@Override
 	public SysMenuDetailVO getDetail(Long id) {
 		SysMenuEntity entity = menuReferenceChecker.getExisting(id);
-
 		SysMenuDetailVO detail = SysMenuConverter.INSTANCE.toDetailVo(entity);
+
 		List<RoleReferencePO> boundRoles = sysMenuRoleMapper.selectBoundRolesByMenuId(id);
 		detail.setBoundRoles(ReferenceConverter.INSTANCE.toRoleReferenceList(boundRoles));
-
-		List<PermissionReferencePO> boundPermissions = sysMenuPermissionMapper.selectBoundPermissionsByMenuId(id);
-		detail.setBoundPermissions(ReferenceConverter.INSTANCE.toPermissionReferenceList(boundPermissions));
 
 		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail), null, null);
 		return detail;

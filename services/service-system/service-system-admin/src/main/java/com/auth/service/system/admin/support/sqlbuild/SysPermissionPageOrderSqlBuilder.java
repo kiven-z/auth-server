@@ -26,7 +26,7 @@ public class SysPermissionPageOrderSqlBuilder extends AbstractOrderSqlBuilder {
 	private static final Map<String, String> FIELD_TO_COLUMN = Map.ofEntries(Map.entry("orderNum", "p.order_num"),
 			Map.entry("createTime", "p.create_time"), Map.entry("updateTime", "p.update_time"),
 			Map.entry("permissionCode", "p.permission_code"), Map.entry("permissionName", "p.permission_name"),
-			Map.entry("permissionType", "p.permission_type"), Map.entry("status", "p.status"));
+			Map.entry("status", "p.status"));
 
 	/**
 	 * 根据前端传入的排序规则生成 ORDER BY 子句（不含 ORDER BY 关键字）。

@@ -29,9 +29,6 @@ public class SysPermissionQuery extends PageQueryRequest implements Serializable
 	@Schema(title = "权限名称（模糊）")
 	private String permissionName;
 
-	@Schema(title = "权限类型(0=按钮, 1=API)")
-	private Integer permissionType;
-
 	@Schema(title = "启用状态(true=正常启用，false=停用)")
 	private Boolean status;
 

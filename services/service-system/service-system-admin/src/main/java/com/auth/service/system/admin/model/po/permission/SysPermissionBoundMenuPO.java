@@ -8,11 +8,11 @@ import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * 权限已绑定菜单行
+ * 角色已绑定菜单行
  *
  * @author Bunny
  */
-@Schema(name = "SysPermissionBoundMenuPO", title = "权限已绑定菜单 PO")
+@Schema(name = "SysPermissionBoundMenuPO", title = "角色已绑定菜单 PO")
 @Getter
 @Setter
 public class SysPermissionBoundMenuPO implements Serializable {

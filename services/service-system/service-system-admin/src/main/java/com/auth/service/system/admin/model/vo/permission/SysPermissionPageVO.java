@@ -31,9 +31,6 @@ public class SysPermissionPageVO extends BaseResponse implements Serializable {
 	@Schema(title = "权限名称")
 	private String permissionName;
 
-	@Schema(title = "权限类型(0=按钮, 1=API)")
-	private Integer permissionType;
-
 	@Schema(title = "显示顺序")
 	private Integer orderNum;
 

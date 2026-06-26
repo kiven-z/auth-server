@@ -32,9 +32,6 @@ public class SysPermissionDetailVO extends BaseResponse {
 	@Schema(title = "权限名称")
 	private String permissionName;
 
-	@Schema(title = "权限类型(0=按钮, 1=API)")
-	private Integer permissionType;
-
 	@Schema(title = "显示顺序")
 	private Integer orderNum;
 
@@ -46,8 +43,5 @@ public class SysPermissionDetailVO extends BaseResponse {
 
 	@Schema(title = "已绑定角色列表（sys_role_permission 反查）")
 	private List<RoleReferenceVO> boundRoles;
-
-	@Schema(title = "已绑定菜单列表（sys_menu_permission 反查")
-	private List<SysPermissionBoundMenuItemVO> boundMenus;
 
 }

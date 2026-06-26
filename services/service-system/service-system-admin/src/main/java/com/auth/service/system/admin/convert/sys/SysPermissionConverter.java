@@ -43,7 +43,6 @@ public interface SysPermissionConverter {
 	 * @param entity 已有实体
 	 */
 	@Mapping(target = "id", ignore = true)
-	@Mapping(target = "permissionType", ignore = true)
 	@Mapping(target = "createTime", ignore = true)
 	@Mapping(target = "updateTime", ignore = true)
 	@Mapping(target = "createUser", ignore = true)
@@ -59,11 +58,10 @@ public interface SysPermissionConverter {
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
 	@Mapping(target = "boundRoles", ignore = true)
-	@Mapping(target = "boundMenus", ignore = true)
 	SysPermissionDetailVO toDetailVo(SysPermissionEntity entity);
 
 	/**
-	 * 已绑定菜单 PO 列表 → 详情项 VO 列表
+	 * 角色已绑定菜单 PO 列表 → 详情项 VO 列表（数据来自 sys_menu_role，供 {@code SysRoleDetailVO.boundMenus}）
 	 * @param poList 持久层投影列表
 	 * @return 详情项 VO 列表
 	 */

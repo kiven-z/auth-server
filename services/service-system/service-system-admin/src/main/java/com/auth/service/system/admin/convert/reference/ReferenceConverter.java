@@ -16,7 +16,6 @@ import com.auth.service.system.admin.model.vo.reference.PostReferenceVO;
 import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
 import com.auth.service.system.admin.model.vo.reference.UserReferenceVO;
 import com.auth.service.system.admin.model.vo.reference.ext.DeptBoundUserReferenceVO;
-import com.auth.service.system.admin.model.vo.reference.ext.MenuAssignedPermissionReferenceVO;
 import com.auth.service.system.admin.model.vo.reference.ext.MenuAssignedRoleReferenceVO;
 import com.auth.service.system.admin.model.vo.reference.ext.PostBoundUserReferenceVO;
 import com.auth.service.system.admin.model.vo.reference.ext.UserDeptReferenceVO;
@@ -121,21 +120,6 @@ public interface ReferenceConverter {
 	 * @return 菜单角色分配回显列表
 	 */
 	List<MenuAssignedRoleReferenceVO> toMenuAssignedRoleList(List<RoleReferencePO> poList);
-
-	/**
-	 * 菜单已分配权限 PO → 菜单权限分配回显
-	 * @param po 持久层投影
-	 * @return 菜单权限分配回显
-	 */
-	@Mapping(target = "assigned", constant = "true")
-	MenuAssignedPermissionReferenceVO toMenuAssignedPermission(PermissionReferencePO po);
-
-	/**
-	 * 菜单已分配权限 PO 列表 → 菜单权限分配回显列表
-	 * @param poList 持久层投影列表
-	 * @return 菜单权限分配回显列表
-	 */
-	List<MenuAssignedPermissionReferenceVO> toMenuAssignedPermissionList(List<PermissionReferencePO> poList);
 
 	/**
 	 * 用户档案部门 PO → 用户部门关联回显

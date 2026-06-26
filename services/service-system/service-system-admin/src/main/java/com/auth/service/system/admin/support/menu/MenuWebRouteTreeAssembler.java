@@ -5,10 +5,8 @@ import com.auth.common.core.utils.TreeNodeProcessorUtil;
 import com.auth.module.security.contract.constants.PermissionConstant;
 import com.auth.service.system.admin.convert.menu.MenuConvertContext;
 import com.auth.service.system.admin.convert.menu.MenuRouteNodeConverter;
-import com.auth.service.system.admin.mapper.menu.SysMenuPermissionMapper;
 import com.auth.service.system.admin.mapper.menu.SysMenuRoleMapper;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
-import com.auth.service.system.admin.model.po.menu.SysMenuPermissionLinkRowPO;
 import com.auth.service.system.admin.model.po.menu.SysMenuRoleLinkRowPO;
 import com.auth.service.system.admin.model.vo.menu.RouteMetaVO;
 import com.auth.service.system.admin.model.vo.menu.RouteNodeVO;
@@ -32,12 +30,8 @@ public class MenuWebRouteTreeAssembler {
 
 	private final SysMenuRoleMapper sysMenuRoleMapper;
 
-	private final SysMenuPermissionMapper sysMenuPermissionMapper;
-
-	public MenuWebRouteTreeAssembler(SysMenuRoleMapper sysMenuRoleMapper,
-			SysMenuPermissionMapper sysMenuPermissionMapper) {
+	public MenuWebRouteTreeAssembler(SysMenuRoleMapper sysMenuRoleMapper) {
 		this.sysMenuRoleMapper = sysMenuRoleMapper;
-		this.sysMenuPermissionMapper = sysMenuPermissionMapper;
 	}
 
 	/**
@@ -52,10 +46,7 @@ public class MenuWebRouteTreeAssembler {
 
 		Map<Long, List<String>> roleMap = menuList.stream()
 			.collect(Collectors.toMap(SysMenuEntity::getId, menu -> PermissionConstant.ADMIN_ROLES, (a, b) -> a));
-		Map<Long, List<String>> permissionMap = menuList.stream()
-			.collect(Collectors.toMap(SysMenuEntity::getId, menu -> PermissionConstant.ADMIN_WILDCARD_PERMISSIONS,
-					(a, b) -> a));
-		MenuConvertContext context = MenuConvertContext.builder().roleMap(roleMap).permissionMap(permissionMap).build();
+		MenuConvertContext context = MenuConvertContext.builder().roleMap(roleMap).build();
 		return buildRouteTree(menuList, context);
 	}
 
@@ -71,14 +62,13 @@ public class MenuWebRouteTreeAssembler {
 
 		List<Long> menuIds = menuList.stream().map(SysMenuEntity::getId).toList();
 		Map<Long, List<String>> roleMap = queryRoleMap(menuIds);
-		Map<Long, List<String>> permissionMap = queryPermissionMap(menuIds);
-		MenuConvertContext context = MenuConvertContext.builder().roleMap(roleMap).permissionMap(permissionMap).build();
+		MenuConvertContext context = MenuConvertContext.builder().roleMap(roleMap).build();
 
 		return buildRouteTree(menuList, context);
 	}
 
 	/**
-	 * 核心建树方法：批量查询角色 / 权限关联，建树，转为 VO
+	 * 核心建树方法：批量查询角色关联，建树，转为 VO
 	 * @param menuList 启用菜单列表
 	 * @return 路由树根列表
 	 */
@@ -109,26 +99,9 @@ public class MenuWebRouteTreeAssembler {
 	}
 
 	/**
-	 * 批量查询菜单权限关联
-	 * @param menuIds 菜单 ID 集合
-	 * @return menuId -> permissionCode 列表
-	 */
-	private Map<Long, List<String>> queryPermissionMap(List<Long> menuIds) {
-		if (CollUtil.isEmpty(menuIds)) {
-			return Collections.emptyMap();
-		}
-		List<SysMenuPermissionLinkRowPO> menuPermissions = sysMenuPermissionMapper
-			.selectActiveButtonPermissionLinksByMenuIds(menuIds);
-
-		return menuPermissions.stream()
-			.collect(Collectors.groupingBy(SysMenuPermissionLinkRowPO::getMenuId,
-					Collectors.mapping(SysMenuPermissionLinkRowPO::getPermissionCode, Collectors.toList())));
-	}
-
-	/**
 	 * 递归将树节点列表转为 VO 列表
 	 * @param nodes 树节点列表
-	 * @param context 转换上下文（角色 / 权限 Map）
+	 * @param context 转换上下文（角色 Map）
 	 * @return 路由 VO 列表
 	 */
 	private List<RouteNodeVO> convertTreeToVO(List<MenuRouteTreeNode> nodes, MenuConvertContext context) {

@@ -9,7 +9,6 @@ import lombok.ToString;
 import java.io.Serial;
 import java.util.List;
 
-import com.auth.service.system.admin.model.vo.reference.PermissionReferenceVO;
 import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
 
 /**
@@ -65,8 +64,5 @@ public class SysMenuDetailVO extends SysMenuListVO {
 
 	@Schema(title = "已绑定角色列表（sys_menu_role 反查）")
 	private List<RoleReferenceVO> boundRoles;
-
-	@Schema(title = "已绑定权限列表（sys_menu_permission 反查）")
-	private List<PermissionReferenceVO> boundPermissions;
 
 }

@@ -168,4 +168,3 @@ alwaysApply: true
 4. **HTTP 客户端规范**：通过 Spring 注入 `RestTemplate`；外部 URL 使用默认 `restTemplate`，微服务名使用
    `loadBalancedRestTemplate`。
 5. **无状态国际化**：服务端不维护 Locale 状态；`common-*` 模块禁止 i18n，运行时消息必须英文。
-6. **依赖纯净度**：`common-starter-web` 仅允许依赖 Web 基础库；Nacos 相关配置与枚举收拢于 `common-starter-nacos-config`。

@@ -9,11 +9,11 @@ import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * 权限详情-已绑定菜单项
+ * 角色详情
  *
  * @author Bunny
  */
-@Schema(name = "SysPermissionBoundMenuItemVO", title = "权限已绑定菜单项")
+@Schema(name = "SysPermissionBoundMenuItemVO", title = "角色已绑定菜单项")
 @Getter
 @Setter
 @ToString

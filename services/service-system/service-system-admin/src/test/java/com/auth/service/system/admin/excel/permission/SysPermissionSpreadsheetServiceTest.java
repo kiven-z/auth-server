@@ -60,7 +60,6 @@ class SysPermissionSpreadsheetServiceTest {
 		row.setId(1L);
 		row.setPermissionCode("sysPermission:query");
 		row.setPermissionName("权限查询");
-		row.setPermissionType(1);
 		row.setStatus(true);
 		row.setOrderNum(1);
 

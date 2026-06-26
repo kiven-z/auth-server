@@ -115,7 +115,6 @@ class SysRoleServiceImplTest {
 		permission.setId(100L);
 		permission.setPermissionCode("sys:user:query");
 		permission.setPermissionName("用户查询");
-		permission.setPermissionType(1);
 		permission.setStatus(true);
 		when(sysRolePermissionMapper.selectAssignedPermissionsByRoleId(1L)).thenReturn(List.of(permission));
 		when(sysMenuRoleMapper.selectBoundMenusByRoleId(1L)).thenReturn(List.of());
@@ -129,7 +128,6 @@ class SysRoleServiceImplTest {
 		assertThat(detail.getBoundPermissions()).hasSize(1);
 		assertThat(detail.getBoundPermissions().get(0).getId()).isEqualTo(100L);
 		assertThat(detail.getBoundPermissions().get(0).getPermissionCode()).isEqualTo("sys:user:query");
-		assertThat(detail.getBoundPermissions().get(0).getPermissionType()).isEqualTo(1);
 		verify(sysRolePermissionMapper).selectAssignedPermissionsByRoleId(1L);
 		verify(sysMenuRoleMapper).selectBoundMenusByRoleId(1L);
 		verify(grantTableMapper).selectBoundUsersByRoleId(1L);

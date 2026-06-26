@@ -6,11 +6,11 @@ import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.module.security.contract.context.OperationLogContext;
-import com.auth.service.auth.service.SessionManagementService;
+import com.auth.service.auth.model.constants.AuthAuditBizModule;
 import com.auth.service.auth.model.query.OnlineUserPageQuery;
 import com.auth.service.auth.model.vo.OnlineUserPageVO;
 import com.auth.service.auth.model.vo.UserSessionVO;
-import com.auth.service.auth.model.constants.AuthAuditBizModule;
+import com.auth.service.auth.service.SessionManagementService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +35,7 @@ public class AdminSessionController {
 	@OperationLog(targetType = "ONLINE_USER_LIST", serviceDomain = AuditServiceDomain.AUTH,
 			bizModule = AuthAuditBizModule.AUTH_SESSION, operation = OperationLogKind.QUERY)
 	@Operation(summary = "分页查询在线用户")
-	@PreAuthorize("@auth.decide('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN')")
 	@GetMapping("/online")
 	public Result<PageResponse<OnlineUserPageVO>> pageOnlineUsers(OnlineUserPageQuery query) {
 		PageResponse<OnlineUserPageVO> page = sessionManagementService.getOnlineUserPage(query);
@@ -45,7 +45,7 @@ public class AdminSessionController {
 	@OperationLog(targetType = "USER_SESSION", serviceDomain = AuditServiceDomain.AUTH,
 			bizModule = AuthAuditBizModule.AUTH_SESSION, operation = OperationLogKind.DELETE)
 	@Operation(summary = "管理员踢下线（按 sessionId/jti）")
-	@PreAuthorize("@auth.decide('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("{userId}/sessions/{sessionId}/kick")
 	public Result<Void> kick(@PathVariable("userId") long userId, @PathVariable("sessionId") String sessionId) {
 		OperationLogContext.setTargetId(userId);
@@ -57,7 +57,7 @@ public class AdminSessionController {
 	@OperationLog(targetType = "USER_SESSION", serviceDomain = AuditServiceDomain.AUTH,
 			bizModule = AuthAuditBizModule.AUTH_SESSION, operation = OperationLogKind.DELETE)
 	@Operation(summary = "踢出全部会话")
-	@PreAuthorize("@auth.decide('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("{userId}/sessions/kick-all")
 	public Result<Void> kickAll(@PathVariable("userId") long userId) {
 		OperationLogContext.setTargetId(userId);
@@ -69,7 +69,7 @@ public class AdminSessionController {
 	@OperationLog(targetType = "USER_SESSION_LIST", serviceDomain = AuditServiceDomain.AUTH,
 			bizModule = AuthAuditBizModule.AUTH_SESSION, operation = OperationLogKind.DELETE)
 	@Operation(summary = "批量踢出用户全部会话")
-	@PreAuthorize("@auth.decide('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/kick-all")
 	public Result<Void> kickAllSessions(@RequestBody(required = false) List<Long> userIds) {
 		sessionManagementService.kickAllSessions(userIds);
@@ -79,7 +79,7 @@ public class AdminSessionController {
 	@OperationLog(targetType = "USER_SESSION", serviceDomain = AuditServiceDomain.AUTH,
 			bizModule = AuthAuditBizModule.AUTH_SESSION, operation = OperationLogKind.QUERY)
 	@Operation(summary = "查询用户活跃会话列表")
-	@PreAuthorize("@auth.decide('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN')")
 	@GetMapping("{userId}/sessions")
 	public Result<List<UserSessionVO>> getListSessions(@PathVariable("userId") long userId) {
 		OperationLogContext.setTargetId(userId);

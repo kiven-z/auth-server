@@ -7,8 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * 系统权限主数据，对应 {@code sys_permission}（物理删除；与 {@code sys_menu_permission.permission_id}
- * 外键一致）。
+ * 系统权限主数据
  *
  * @author Bunny
  */
@@ -23,9 +22,6 @@ public class SysPermissionEntity extends BaseEntity {
 
 	@Schema(title = "权限名称")
 	private String permissionName;
-
-	@Schema(title = "权限类型(0=按钮, 1=API)")
-	private Integer permissionType;
 
 	@Schema(title = "显示顺序")
 	private Integer orderNum;

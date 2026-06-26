@@ -29,7 +29,6 @@ public interface SysMenuConverter {
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
 	@Mapping(target = "boundRoles", ignore = true)
-	@Mapping(target = "boundPermissions", ignore = true)
 	SysMenuDetailVO toDetailVo(SysMenuEntity entity);
 
 	/**

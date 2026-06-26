@@ -1,10 +1,7 @@
 package com.auth.service.system.admin.service.admin.impl;
 
-import com.auth.service.system.admin.mapper.menu.SysMenuPermissionMapper;
 import com.auth.service.system.admin.mapper.menu.SysMenuRoleMapper;
-import com.auth.service.system.admin.model.form.menu.SysMenuAssignPermissionForm;
 import com.auth.service.system.admin.model.form.menu.SysMenuAssignRoleForm;
-import com.auth.service.system.admin.support.permission.PermissionReferenceChecker;
 import com.auth.service.system.admin.support.role.RoleGrantReferenceChecker;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
@@ -32,13 +29,7 @@ class SysMenuManageServiceImplTest {
 	private SysMenuRoleMapper sysMenuRoleMapper;
 
 	@Mock
-	private SysMenuPermissionMapper sysMenuPermissionMapper;
-
-	@Mock
 	private RoleGrantReferenceChecker roleGrantReferenceChecker;
-
-	@Mock
-	private PermissionReferenceChecker permissionReferenceChecker;
 
 	@InjectMocks
 	private SysMenuManageServiceImpl sysMenuManageService;
@@ -91,53 +82,6 @@ class SysMenuManageServiceImplTest {
 
 		verify(sysMenuRoleMapper, never()).deleteByMenuId(any());
 		verify(sysMenuRoleMapper, never()).batchInsertMenuRoles(any(), any());
-	}
-
-	@Test
-	@DisplayName("覆盖分配权限：校验通过后删除旧关联并批量插入 permission_id")
-	void replaceMenuPermissionsReplacesAssociationsWhenEligible() {
-		Long menuId = 5L;
-		SysMenuAssignPermissionForm form = new SysMenuAssignPermissionForm();
-		form.setPermissionIds(List.of(10L, 20L));
-
-		sysMenuManageService.replaceMenuPermissions(menuId, form);
-
-		verify(permissionReferenceChecker).requireActivePermissionIds(List.of(10L, 20L));
-		verify(sysMenuPermissionMapper).deleteByMenuId(menuId);
-		verify(sysMenuPermissionMapper).batchInsertMenuPermissions(menuId, List.of(10L, 20L));
-	}
-
-	@Test
-	@DisplayName("覆盖分配权限：空列表仅删除关联不插入")
-	void replaceMenuPermissionsWithEmptyListDeletesOnly() {
-		Long menuId = 5L;
-		SysMenuAssignPermissionForm form = new SysMenuAssignPermissionForm();
-		form.setPermissionIds(List.of());
-
-		sysMenuManageService.replaceMenuPermissions(menuId, form);
-
-		verify(permissionReferenceChecker).requireActivePermissionIds(List.of());
-		verify(sysMenuPermissionMapper).deleteByMenuId(menuId);
-		verify(sysMenuPermissionMapper, never()).batchInsertMenuPermissions(any(), any());
-	}
-
-	@Test
-	@DisplayName("覆盖分配权限：权限校验失败时不写 sys_menu_permission")
-	void replaceMenuPermissionsThrowsWhenPermissionInvalid() {
-		Long menuId = 5L;
-		SysMenuAssignPermissionForm form = new SysMenuAssignPermissionForm();
-		form.setPermissionIds(List.of(99L));
-		doThrow(new SystemBusinessException(SystemCommonResultCode.GRANT_REFERENCE_INVALID))
-			.when(permissionReferenceChecker)
-			.requireActivePermissionIds(List.of(99L));
-
-		assertThatThrownBy(() -> sysMenuManageService.replaceMenuPermissions(menuId, form))
-			.isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemCommonResultCode.GRANT_REFERENCE_INVALID);
-
-		verify(sysMenuPermissionMapper, never()).deleteByMenuId(any());
-		verify(sysMenuPermissionMapper, never()).batchInsertMenuPermissions(any(), any());
 	}
 
 }

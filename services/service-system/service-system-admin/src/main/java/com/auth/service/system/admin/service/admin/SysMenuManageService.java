@@ -1,16 +1,14 @@
 package com.auth.service.system.admin.service.admin;
 
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
-import com.auth.service.system.admin.model.form.menu.SysMenuAssignPermissionForm;
 import com.auth.service.system.admin.model.form.menu.SysMenuAssignRoleForm;
-import com.auth.service.system.admin.model.vo.reference.ext.MenuAssignedPermissionReferenceVO;
 import com.auth.service.system.admin.model.vo.reference.ext.MenuAssignedRoleReferenceVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
 
 /**
- * 菜单管理（列表 / 分页 / CRUD / 分配角色与权限）
+ * 菜单管理（列表 / 分页 / CRUD / 分配角色）
  *
  * @author Bunny
  */
@@ -29,19 +27,5 @@ public interface SysMenuManageService extends IService<SysMenuEntity> {
 	 * @param form 角色 ID 列表
 	 */
 	void replaceMenuRoles(Long menuId, SysMenuAssignRoleForm form);
-
-	/**
-	 * 全量权限列表并标记当前菜单是否已关联（供分配抽屉） 不包含 API 权限 不包含禁用
-	 * @param menuId 菜单主键
-	 * @return 权限行
-	 */
-	List<MenuAssignedPermissionReferenceVO> listPermissionsWithAssignFlags(Long menuId);
-
-	/**
-	 * 覆盖写入菜单-权限关联
-	 * @param menuId 菜单主键
-	 * @param form 权限编码列表
-	 */
-	void replaceMenuPermissions(Long menuId, SysMenuAssignPermissionForm form);
 
 }

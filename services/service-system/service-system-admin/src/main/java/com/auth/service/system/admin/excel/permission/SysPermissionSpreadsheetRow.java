@@ -20,25 +20,22 @@ public class SysPermissionSpreadsheetRow {
 	@ExcelProperty(value = "权限名称", index = 1)
 	private String permissionName;
 
-	@ExcelProperty(value = "权限类型", index = 2)
-	private String permissionTypeLabel;
-
-	@ExcelProperty(value = "状态", index = 3)
+	@ExcelProperty(value = "状态", index = 2)
 	private String statusLabel;
 
-	@ExcelProperty(value = "显示顺序", index = 4)
+	@ExcelProperty(value = "显示顺序", index = 3)
 	private Integer orderNum;
 
-	@ExcelProperty(value = "备注", index = 5)
+	@ExcelProperty(value = "备注", index = 4)
 	private String remark;
 
-	@ExcelProperty(value = "创建时间", index = 6)
+	@ExcelProperty(value = "创建时间", index = 5)
 	private String createTimeText;
 
-	@ExcelProperty(value = "更新时间", index = 7)
+	@ExcelProperty(value = "更新时间", index = 6)
 	private String updateTimeText;
 
-	@ExcelProperty(value = "主键ID", index = 8, converter = LongIdExcelConverter.class)
+	@ExcelProperty(value = "主键ID", index = 7, converter = LongIdExcelConverter.class)
 	private Long id;
 
 }

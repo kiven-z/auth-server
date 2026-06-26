@@ -8,7 +8,7 @@ import lombok.experimental.UtilityClass;
 import java.util.Collections;
 
 /**
- * 路由 meta VO 构建（菜单实体 + 角色/权限上下文）。
+ * 路由 meta VO 构建（菜单实体 + 角色上下文）。
  *
  * @author Bunny
  */
@@ -18,7 +18,7 @@ public class MenuRouteMetaVoFactory {
 	/**
 	 * 由菜单实体与关联上下文生成路由 meta。
 	 * @param menu 菜单实体
-	 * @param context 角色 / 权限聚合上下文
+	 * @param context 角色聚合上下文
 	 * @return 路由 meta；menu 为 null 时返回 null
 	 */
 	public static RouteMetaVO fromMenuEntity(SysMenuEntity menu, MenuConvertContext context) {
@@ -43,7 +43,6 @@ public class MenuRouteMetaVoFactory {
 
 		Long menuId = menu.getId();
 		meta.setRoles(context.roleMap().getOrDefault(menuId, Collections.emptyList()));
-		meta.setAuths(context.permissionMap().getOrDefault(menuId, Collections.emptyList()));
 		meta.setTransition(RouteTransitionVoFactory.fromMenuEntity(menu));
 		return meta;
 	}

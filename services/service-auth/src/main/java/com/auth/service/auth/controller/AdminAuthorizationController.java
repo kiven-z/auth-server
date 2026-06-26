@@ -33,7 +33,7 @@ public class AdminAuthorizationController {
 	@OperationLog(targetType = "AUTH_PROFILE", serviceDomain = AuditServiceDomain.AUTH,
 			bizModule = AuthAuditBizModule.AUTH_PROFILE, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "批量刷新用户授权画像缓存（AuthProfile）")
-	@PreAuthorize("@auth.decide('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/authorization/refresh")
 	public Result<Void> refreshAuthorization(@RequestBody(required = false) List<Long> userIds) {
 		adminAuthorizationService.refreshUserCache(userIds);

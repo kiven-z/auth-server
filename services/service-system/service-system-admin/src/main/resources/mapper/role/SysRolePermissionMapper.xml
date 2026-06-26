@@ -9,7 +9,6 @@
             p.id,
             p.permission_code,
             COALESCE(p.permission_name, p.permission_code) AS permission_name,
-            p.permission_type,
             p.status
         FROM
             sys_role_permission rp

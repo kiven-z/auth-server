@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class MenuRouteMetaVoFactoryTest {
 
 	@Test
-	@DisplayName("从菜单与上下文组装 meta，含 rank、roles、auths")
+	@DisplayName("从菜单与上下文组装 meta，含 rank、roles")
 	void fromMenuEntity_mapsFieldsAndContext() {
 		SysMenuEntity menu = new SysMenuEntity();
 		menu.setId(10L);
@@ -27,32 +27,27 @@ class MenuRouteMetaVoFactoryTest {
 		menu.setMenuRank(99);
 		menu.setTransitionName("fade");
 
-		MenuConvertContext context = MenuConvertContext.builder()
-			.roleMap(Map.of(10L, List.of("admin")))
-			.permissionMap(Map.of(10L, List.of("system:user:list")))
-			.build();
+		MenuConvertContext context = MenuConvertContext.builder().roleMap(Map.of(10L, List.of("admin"))).build();
 
 		RouteMetaVO meta = MenuRouteMetaVoFactory.fromMenuEntity(menu, context);
 
 		assertThat(meta.getTitle()).isEqualTo("系统管理");
 		assertThat(meta.getRank()).isEqualTo(99);
 		assertThat(meta.getRoles()).containsExactly("admin");
-		assertThat(meta.getAuths()).containsExactly("system:user:list");
 		assertThat(meta.getTransition()).isNotNull();
 		assertThat(meta.getTransition().getName()).contains("fade");
 	}
 
 	@Test
-	@DisplayName("菜单 ID 无上下文条目时使用空列表")
+	@DisplayName("菜单 ID 无上下文条目时使用空角色列表")
 	void fromMenuEntity_usesEmptyListsWhenContextMissing() {
 		SysMenuEntity menu = new SysMenuEntity();
 		menu.setId(1L);
-		MenuConvertContext context = MenuConvertContext.builder().roleMap(Map.of()).permissionMap(Map.of()).build();
+		MenuConvertContext context = MenuConvertContext.builder().roleMap(Map.of()).build();
 
 		RouteMetaVO meta = MenuRouteMetaVoFactory.fromMenuEntity(menu, context);
 
 		assertThat(meta.getRoles()).isEmpty();
-		assertThat(meta.getAuths()).isEmpty();
 	}
 
 }
