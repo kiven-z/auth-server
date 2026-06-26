@@ -28,6 +28,8 @@ public interface SysUserProfileConverter {
 	 */
 	@Mapping(target = "deptList", ignore = true)
 	@Mapping(target = "postList", ignore = true)
+	@Mapping(target = "createUsername", ignore = true)
+	@Mapping(target = "updateUsername", ignore = true)
 	SysUserProfileVO toProfileVo(UserEntity user);
 
 	/**

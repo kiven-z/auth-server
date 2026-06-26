@@ -1,8 +1,17 @@
 package com.auth.service.system.admin.service.admin.impl;
 
+import com.auth.common.data.model.PageResponse;
 import com.auth.module.platform.persistence.model.UserEntity;
+import com.auth.service.system.admin.mapper.permission.SysPermissionMapper;
+import com.auth.service.system.admin.mapper.role.SysRoleMapper;
 import com.auth.service.system.admin.mapper.user.SysUserMapper;
 import com.auth.service.system.admin.mapper.user.SysUserQueryMapper;
+import com.auth.service.system.admin.model.po.reference.PermissionReferencePO;
+import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
+import com.auth.service.system.admin.model.po.user.SysUserPageRowPO;
+import com.auth.service.system.admin.model.query.user.SysUserPageQuery;
+import com.auth.service.system.admin.model.vo.user.SysUserDetailVO;
+import com.auth.service.system.admin.model.vo.user.SysUserPageVO;
 import com.auth.service.system.admin.model.vo.user.SysUserSearchItemVO;
 import com.auth.service.system.admin.model.po.user.UserDeptProfilePO;
 import com.auth.service.system.admin.model.po.user.UserPostProfilePO;
@@ -10,8 +19,13 @@ import com.auth.service.system.admin.model.po.user.UserSearchItemPO;
 import com.auth.service.system.admin.model.vo.user.SysUserProfileVO;
 import com.auth.service.system.admin.service.admin.SysUserService;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
+import com.auth.service.system.authorization.dispatch.query.UserEffectiveCodesResolver;
+import com.auth.service.system.authorization.dispatch.query.UserEffectiveCodesSnapshot;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
+import com.auth.service.system.common.service.AuditUserDisplayService;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -24,6 +38,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -48,15 +63,42 @@ class SysUserQueryServiceImplTest {
 	@Mock
 	private SysUserService sysUserService;
 
+	@Mock
+	private AuditUserDisplayService auditUserDisplayService;
+
+	@Mock
+	private SysRoleMapper sysRoleMapper;
+
+	@Mock
+	private SysPermissionMapper sysPermissionMapper;
+
+	@Mock
+	private UserEffectiveCodesResolver userEffectiveCodesResolver;
+
 	private SysUserQueryServiceImpl sysUserQueryService;
 
 	@BeforeEach
 	void setUp() throws Exception {
 		UserReferenceChecker userReferenceChecker = new UserReferenceChecker(sysUserMapper, sysUserService);
-		sysUserQueryService = new SysUserQueryServiceImpl(userReferenceChecker);
+		sysUserQueryService = new SysUserQueryServiceImpl(auditUserDisplayService, sysUserMapper, sysRoleMapper,
+				sysPermissionMapper, userReferenceChecker, userEffectiveCodesResolver);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysUserQueryService, sysUserQueryMapper);
+	}
+
+	@Test
+	@DisplayName("分页查询：调用审计用户展示填充")
+	void getPageInvokesAuditEnrichment() {
+		Page<UserEntity> pageParams = new Page<>(1, 10);
+		SysUserPageQuery query = new SysUserPageQuery();
+		Page<SysUserPageRowPO> emptyPage = new Page<>(1, 10);
+		when(sysUserMapper.selectListByPage(eq(pageParams), eq(query), anyString())).thenReturn(emptyPage);
+
+		PageResponse<SysUserPageVO> result = sysUserQueryService.getPage(pageParams, query);
+
+		assertThat(result.getList()).isEmpty();
+		verify(auditUserDisplayService).enrichAuditUsernames(any(IPage.class), isNull(), isNull());
 	}
 
 	@Test
@@ -113,6 +155,92 @@ class SysUserQueryServiceImplTest {
 		assertThat(profile.getPostList().get(0).getPostName()).isEqualTo("工程师");
 		verify(sysUserQueryMapper).selectDeptProfileByUserId(1L);
 		verify(sysUserQueryMapper).selectPostProfileByUserId(1L);
+	}
+
+	@Test
+	@DisplayName("用户详情：聚合档案、组织绑定与生效授权")
+	void getDetailReturnsAggregatedData() {
+		UserEntity user = new UserEntity();
+		user.setId(1L);
+		user.setUsername("alice");
+		user.setNickname("Alice");
+		user.setEmail("a@example.com");
+		user.setPhone("13800000000");
+		user.setEmployeeNo("E001");
+		user.setAvatar("https://example.com/a.png");
+		user.setStatus(1);
+		user.setGender(1);
+		user.setBirthday(LocalDate.of(1990, 1, 2));
+		user.setIntroduction("bio");
+		user.setRemark("note");
+
+		when(sysUserMapper.selectById(1L)).thenReturn(user);
+
+		UserDeptProfilePO deptRow = new UserDeptProfilePO();
+		deptRow.setId(10L);
+		deptRow.setDeptName("研发部");
+		when(sysUserQueryMapper.selectDeptProfileByUserId(1L)).thenReturn(List.of(deptRow));
+
+		UserPostProfilePO postRow = new UserPostProfilePO();
+		postRow.setId(20L);
+		postRow.setPostName("工程师");
+		when(sysUserQueryMapper.selectPostProfileByUserId(1L)).thenReturn(List.of(postRow));
+
+		UserEffectiveCodesSnapshot codes = UserEffectiveCodesSnapshot.builder()
+			.roleCodes(List.of("ADMIN"))
+			.permissionCodes(List.of("sysUser:query"))
+			.build();
+		when(userEffectiveCodesResolver.resolve(1L)).thenReturn(Optional.of(codes));
+
+		RoleReferencePO roleRow = new RoleReferencePO();
+		roleRow.setId(100L);
+		roleRow.setRoleCode("ADMIN");
+		roleRow.setRoleName("管理员");
+		when(sysRoleMapper.selectReferenceByRoleCodes(List.of("ADMIN"))).thenReturn(List.of(roleRow));
+
+		PermissionReferencePO permissionRow = new PermissionReferencePO();
+		permissionRow.setId(200L);
+		permissionRow.setPermissionCode("sysUser:query");
+		permissionRow.setPermissionName("用户查询");
+		when(sysPermissionMapper.selectReferenceByPermissionCodes(List.of("sysUser:query")))
+			.thenReturn(List.of(permissionRow));
+
+		SysUserDetailVO detail = sysUserQueryService.getDetail(1L);
+
+		assertThat(detail.getUsername()).isEqualTo("alice");
+		assertThat(detail.getEmployeeNo()).isEqualTo("E001");
+		assertThat(detail.getRemark()).isEqualTo("note");
+		assertThat(detail.getDeptList()).hasSize(1);
+		assertThat(detail.getDeptList().get(0).getDeptName()).isEqualTo("研发部");
+		assertThat(detail.getPostList()).hasSize(1);
+		assertThat(detail.getPostList().get(0).getPostName()).isEqualTo("工程师");
+		assertThat(detail.getEffectiveRoles()).hasSize(1);
+		assertThat(detail.getEffectiveRoles().get(0).getRoleCode()).isEqualTo("ADMIN");
+		assertThat(detail.getEffectivePermissions()).hasSize(1);
+		assertThat(detail.getEffectivePermissions().get(0).getPermissionCode()).isEqualTo("sysUser:query");
+		verify(auditUserDisplayService).enrichAuditUsernames(anyList(), isNull(), isNull());
+	}
+
+	@Test
+	@DisplayName("用户详情：授权服务不可用时返回空生效列表")
+	void getDetailReturnsEmptyEffectiveWhenAuthUnavailable() {
+		UserEntity user = new UserEntity();
+		user.setId(2L);
+		user.setUsername("bob");
+		when(sysUserMapper.selectById(2L)).thenReturn(user);
+		when(sysUserQueryMapper.selectDeptProfileByUserId(2L)).thenReturn(List.of());
+		when(sysUserQueryMapper.selectPostProfileByUserId(2L)).thenReturn(List.of());
+		when(userEffectiveCodesResolver.resolve(2L)).thenReturn(Optional.empty());
+
+		SysUserDetailVO detail = sysUserQueryService.getDetail(2L);
+
+		assertThat(detail.getUsername()).isEqualTo("bob");
+		assertThat(detail.getDeptList()).isEmpty();
+		assertThat(detail.getPostList()).isEmpty();
+		assertThat(detail.getEffectiveRoles()).isEmpty();
+		assertThat(detail.getEffectivePermissions()).isEmpty();
+		verify(sysRoleMapper, never()).selectReferenceByRoleCodes(any());
+		verify(sysPermissionMapper, never()).selectReferenceByPermissionCodes(any());
 	}
 
 	@Test

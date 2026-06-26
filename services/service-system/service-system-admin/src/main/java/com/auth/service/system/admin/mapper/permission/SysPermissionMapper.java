@@ -1,12 +1,15 @@
 package com.auth.service.system.admin.mapper.permission;
 
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
+import com.auth.service.system.admin.model.po.reference.PermissionReferencePO;
 import com.auth.service.system.admin.model.query.permission.SysPermissionQuery;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * 系统权限 Mapper
@@ -25,5 +28,13 @@ public interface SysPermissionMapper extends BaseMapper<SysPermissionEntity> {
 	 */
 	IPage<SysPermissionEntity> selectListByPage(@Param("page") Page<SysPermissionEntity> page,
 			@Param("query") SysPermissionQuery query, @Param("orderBySql") String orderBySql);
+
+	/**
+	 * 按权限编码批量查询权限关联投影
+	 * @param permissionCodes 权限编码列表
+	 * @return 权限关联投影列表
+	 */
+	List<PermissionReferencePO> selectReferenceByPermissionCodes(
+			@Param("permissionCodes") List<String> permissionCodes);
 
 }

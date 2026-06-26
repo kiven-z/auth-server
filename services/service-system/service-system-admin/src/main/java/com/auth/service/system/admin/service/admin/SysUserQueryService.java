@@ -1,8 +1,13 @@
 package com.auth.service.system.admin.service.admin;
 
+import com.auth.common.data.model.PageResponse;
 import com.auth.module.platform.persistence.model.UserEntity;
+import com.auth.service.system.admin.model.query.user.SysUserPageQuery;
+import com.auth.service.system.admin.model.vo.user.SysUserDetailVO;
+import com.auth.service.system.admin.model.vo.user.SysUserPageVO;
 import com.auth.service.system.admin.model.vo.user.SysUserSearchItemVO;
 import com.auth.service.system.admin.model.vo.user.SysUserProfileVO;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
@@ -15,11 +20,26 @@ import java.util.List;
 public interface SysUserQueryService extends IService<UserEntity> {
 
 	/**
+	 * 用户分页查询
+	 * @param pageParams 分页参数
+	 * @param query 筛选条件
+	 * @return 分页结果
+	 */
+	PageResponse<SysUserPageVO> getPage(Page<UserEntity> pageParams, SysUserPageQuery query);
+
+	/**
 	 * 查询用户档案（基本信息、部门、岗位），含已禁用用户
 	 * @param userId 用户ID
 	 * @return 用户档案
 	 */
 	SysUserProfileVO getProfile(Long userId);
+
+	/**
+	 * 查询用户详情（基本信息、审计字段、组织绑定与生效授权）
+	 * @param userId 用户ID
+	 * @return 用户详情
+	 */
+	SysUserDetailVO getDetail(Long userId);
 
 	/**
 	 * 按关键字搜索用户；仅返回未删除且状态为「正常」的用户。

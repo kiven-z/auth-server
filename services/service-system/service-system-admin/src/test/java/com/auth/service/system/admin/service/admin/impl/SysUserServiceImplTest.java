@@ -10,7 +10,6 @@ import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.UserSessionRevocationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
-import com.auth.service.system.common.service.AuditUserDisplayService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -46,9 +45,6 @@ class SysUserServiceImplTest {
 	private SysUserMapper sysUserMapper;
 
 	@Mock
-	private AuditUserDisplayService auditUserDisplayService;
-
-	@Mock
 	private UserOperationChecker userOperationChecker;
 
 	@Mock
@@ -78,8 +74,8 @@ class SysUserServiceImplTest {
 
 	@BeforeEach
 	void setUp() {
-		sysUserService = new SysUserServiceImpl(auditUserDisplayService, userOperationChecker, userReferenceChecker,
-				passwordEncoder, userSessionRevocationTrigger, grantTableMapper);
+		sysUserService = new SysUserServiceImpl(userOperationChecker, userReferenceChecker, passwordEncoder,
+				userSessionRevocationTrigger, grantTableMapper);
 		ReflectionTestUtils.setField(sysUserService, "baseMapper", sysUserMapper);
 	}
 

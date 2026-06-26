@@ -1,7 +1,6 @@
 package com.auth.service.system.admin.service.admin.impl;
 
 import cn.hutool.core.collection.CollUtil;
-import com.auth.common.data.model.PageResponse;
 import com.auth.common.data.model.enums.UserStatus;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.admin.convert.sys.SysUserConverter;
@@ -10,20 +9,13 @@ import com.auth.service.system.admin.mapper.role.GrantTableMapper;
 import com.auth.service.system.admin.mapper.user.SysUserMapper;
 import com.auth.service.system.admin.model.form.user.SysUserBatchStatusForm;
 import com.auth.service.system.admin.model.form.user.SysUserForm;
-import com.auth.service.system.admin.model.po.user.SysUserPageRowPO;
-import com.auth.service.system.admin.model.query.user.SysUserPageQuery;
-import com.auth.service.system.admin.model.vo.user.SysUserPageVO;
 import com.auth.service.system.admin.service.admin.SysUserService;
-import com.auth.service.system.admin.support.sqlbuild.SysUserPageOrderSqlBuilder;
 import com.auth.service.system.admin.support.user.SysUserDefaults;
 import com.auth.service.system.admin.support.user.UserOperationChecker;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.UserSessionRevocationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.common.support.FieldChangeSupport;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -47,8 +39,6 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 
 	private static final String GRANT_SUBJECT_TYPE_USER = "USER";
 
-	private final AuditUserDisplayService auditUserDisplayService;
-
 	private final UserOperationChecker userOperationChecker;
 
 	private final UserReferenceChecker userReferenceChecker;
@@ -63,23 +53,10 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 	 * {@inheritDoc}
 	 */
 	@Override
-	public PageResponse<SysUserPageVO> getPage(Page<UserEntity> pageParams, SysUserPageQuery query) {
-		String orderBySql = SysUserPageOrderSqlBuilder.buildOrderBySql(query.getSort());
-		IPage<SysUserPageRowPO> page = baseMapper.selectListByPage(pageParams, query, orderBySql);
-		IPage<SysUserPageVO> voPage = page.convert(SysUserConverter.INSTANCE::toPageVo);
-
-		auditUserDisplayService.enrichAuditUsernames(voPage, null, null);
-		return PageResponse.of(voPage);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
 	public void create(SysUserForm form) {
 		userReferenceChecker.assertUniqueBusinessKeys(form, null);
-
 		UserEntity entity = SysUserConverter.INSTANCE.toEntity(form);
+
 		String initialPassword = form.getInitialPassword();
 		entity.setPassword(passwordEncoder.encode(initialPassword));
 		if (form.getBirthday() != null) {
@@ -99,7 +76,6 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 
 		List<Long> userIds = List.of(id);
 		userOperationChecker.requireOperable(userIds);
-
 		userReferenceChecker.assertUniqueBusinessKeys(form, id);
 
 		// 敏感字段变更时踢出全部会话
@@ -135,7 +111,6 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 		}
 
 		userOperationChecker.requireOperable(idsToDelete);
-
 		for (Long userId : idsToDelete) {
 			grantTableMapper.deleteBySubject(GRANT_SUBJECT_TYPE_USER, userId);
 		}
@@ -159,7 +134,6 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 		}
 
 		userOperationChecker.requireOperable(idsToUpdate);
-
 		List<UserEntity> updates = idsToUpdate.stream().map(userId -> {
 			UserEntity entity = new UserEntity();
 			entity.setId(userId);
@@ -167,6 +141,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 			return entity;
 		}).toList();
 		super.updateBatchById(updates);
+
 		userSessionRevocationTrigger.revokeAllSessionsAfterCommit(idsToUpdate);
 	}
 

@@ -1,12 +1,8 @@
 package com.auth.service.system.admin.service.admin;
 
-import com.auth.common.data.model.PageResponse;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.admin.model.form.user.SysUserBatchStatusForm;
 import com.auth.service.system.admin.model.form.user.SysUserForm;
-import com.auth.service.system.admin.model.query.user.SysUserPageQuery;
-import com.auth.service.system.admin.model.vo.user.SysUserPageVO;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
@@ -17,14 +13,6 @@ import java.util.List;
  * @author Bunny
  */
 public interface SysUserService extends IService<UserEntity> {
-
-	/**
-	 * 用户分页查询
-	 * @param pageParams 分页参数
-	 * @param query 筛选条件
-	 * @return 分页结果
-	 */
-	PageResponse<SysUserPageVO> getPage(Page<UserEntity> pageParams, SysUserPageQuery query);
 
 	/**
 	 * 新增用户

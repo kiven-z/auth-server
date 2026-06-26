@@ -1,16 +1,15 @@
 package com.auth.service.system.admin.model.vo.user;
 
-import com.auth.common.core.annotation.JsonStringFormat;
+import com.auth.common.core.model.response.BaseResponse;
 import com.auth.service.system.admin.model.vo.reference.ext.UserDeptReferenceVO;
 import com.auth.service.system.admin.model.vo.reference.ext.UserPostReferenceVO;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.io.Serial;
-import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,14 +23,8 @@ import java.util.List;
 @Getter
 @Setter
 @ToString
-public class SysUserProfileVO implements Serializable {
-
-	@Serial
-	private static final long serialVersionUID = 1L;
-
-	@JsonStringFormat
-	@Schema(title = "用户ID")
-	private Long id;
+@EqualsAndHashCode(callSuper = true)
+public class SysUserProfileVO extends BaseResponse {
 
 	@Schema(title = "登录账号")
 	private String username;

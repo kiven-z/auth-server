@@ -1,6 +1,7 @@
 package com.auth.service.system.admin.mapper.role;
 
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
+import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.auth.service.system.admin.model.query.role.SysRoleQuery;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -35,5 +36,12 @@ public interface SysRoleMapper extends BaseMapper<SysRoleEntity> {
 	 * @return 角色选项列表
 	 */
 	List<SysRoleEntity> selectRoleOptions(@Param("roleName") String roleName, @Param("roleCode") String roleCode);
+
+	/**
+	 * 按角色编码批量查询角色关联投影
+	 * @param roleCodes 角色编码列表
+	 * @return 角色关联投影列表
+	 */
+	List<RoleReferencePO> selectReferenceByRoleCodes(@Param("roleCodes") List<String> roleCodes);
 
 }

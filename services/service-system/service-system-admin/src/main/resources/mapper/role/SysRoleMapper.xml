@@ -53,4 +53,23 @@
         LIMIT
             15
     </select>
+
+    <!-- 按角色编码批量查询角色关联投影 -->
+    <select id="selectReferenceByRoleCodes"
+            resultType="com.auth.service.system.admin.model.po.reference.RoleReferencePO">
+        SELECT
+            r.id,
+            r.role_code,
+            r.role_name,
+            r.status
+        FROM
+            sys_role r
+        WHERE
+            r.role_code IN
+        <foreach collection="roleCodes" item="roleCode" open="(" separator="," close=")">
+            #{roleCode}
+        </foreach>
+        ORDER BY
+            r.role_code
+    </select>
 </mapper>

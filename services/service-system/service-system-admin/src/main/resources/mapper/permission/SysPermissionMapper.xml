@@ -31,4 +31,23 @@
             ${orderBySql}
     </select>
 
+    <!-- 按权限编码批量查询权限关联投影 -->
+    <select id="selectReferenceByPermissionCodes"
+            resultType="com.auth.service.system.admin.model.po.reference.PermissionReferencePO">
+        SELECT
+            p.id,
+            p.permission_code,
+            COALESCE(p.permission_name, p.permission_code) AS permission_name,
+            p.status
+        FROM
+            sys_permission p
+        WHERE
+            p.permission_code IN
+        <foreach collection="permissionCodes" item="permissionCode" open="(" separator="," close=")">
+            #{permissionCode}
+        </foreach>
+        ORDER BY
+            p.permission_code
+    </select>
+
 </mapper>
