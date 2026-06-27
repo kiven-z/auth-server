@@ -4,6 +4,7 @@ import com.auth.module.file.export.ExportScopeQueryFields;
 import com.auth.service.system.admin.mapper.permission.SysPermissionMapper;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.query.permission.SysPermissionQuery;
+import com.auth.service.system.admin.service.admin.SysPermissionService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,6 +35,9 @@ class SysPermissionSpreadsheetServiceTest {
 	@Mock
 	private SysPermissionMapper sysPermissionMapper;
 
+	@Mock
+	private SysPermissionService sysPermissionService;
+
 	private SysPermissionSpreadsheetService spreadsheetService;
 
 	private static ExportScopeQueryFields baseScope() {
@@ -45,7 +49,9 @@ class SysPermissionSpreadsheetServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		spreadsheetService = new SysPermissionSpreadsheetService(sysPermissionMapper);
+		PermissionSheetImporter permissionSheetImporter = new PermissionSheetImporter(sysPermissionMapper,
+				sysPermissionService);
+		spreadsheetService = new SysPermissionSpreadsheetService(sysPermissionMapper, permissionSheetImporter);
 	}
 
 	@Test

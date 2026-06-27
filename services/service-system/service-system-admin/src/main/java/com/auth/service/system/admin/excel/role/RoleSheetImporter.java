@@ -1,12 +1,6 @@
 package com.auth.service.system.admin.excel.role;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Component;
-
+import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.file.importer.AbstractSheetImporter;
 import com.auth.module.file.importer.model.ImportLabelParser;
 import com.auth.module.file.importer.model.ImportRowError;
@@ -15,9 +9,13 @@ import com.auth.service.system.admin.mapper.role.SysRoleMapper;
 import com.auth.service.system.admin.model.form.role.SysRoleForm;
 import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.auth.service.system.admin.service.admin.SysRoleService;
-
-import cn.hutool.core.text.CharSequenceUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 角色导入器：封装行级校验与批量写入逻辑。
@@ -27,8 +25,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Component
 public class RoleSheetImporter extends AbstractSheetImporter<SysRoleImportRow, SysRoleForm> {
-
-	private final String role_code = ": roleCode '";
 
 	private final SysRoleMapper sysRoleMapper;
 
@@ -51,6 +47,7 @@ public class RoleSheetImporter extends AbstractSheetImporter<SysRoleImportRow, S
 
 	@Override
 	protected SysRoleForm convertRow(SysRoleImportRow row, int rowNum, List<ImportRowError> errors) {
+		final String roleCodeStr = ": roleCode '";
 		if (CharSequenceUtil.isBlank(row.getRoleCode())) {
 			errors.add(new ImportRowError(rowNum, "Row " + rowNum + ": roleCode is required"));
 			return null;
@@ -61,16 +58,16 @@ public class RoleSheetImporter extends AbstractSheetImporter<SysRoleImportRow, S
 		}
 		String roleCode = row.getRoleCode().trim();
 		if (duplicateRoleCodesInFile.contains(roleCode)) {
-			errors.add(new ImportRowError(rowNum, "Row " + rowNum + role_code + roleCode + " duplicated in file"));
+			errors.add(new ImportRowError(rowNum, "Row " + rowNum + roleCodeStr + roleCode + " duplicated in file"));
 			return null;
 		}
 		if (existingRoleCodes.contains(roleCode)) {
-			errors.add(new ImportRowError(rowNum, "Row " + rowNum + role_code + roleCode + "' already exists"));
+			errors.add(new ImportRowError(rowNum, "Row " + rowNum + roleCodeStr + roleCode + "' already exists"));
 			return null;
 		}
 		if (!AuthCodeConvention.isWellFormedRoleCode(roleCode)) {
 			errors.add(new ImportRowError(rowNum,
-					"Row " + rowNum + role_code + roleCode + "' does not match required format"));
+					"Row " + rowNum + roleCodeStr + roleCode + "' does not match required format"));
 			return null;
 		}
 		SysRoleForm form = new SysRoleForm();
