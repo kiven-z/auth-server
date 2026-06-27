@@ -8,7 +8,7 @@ import com.auth.module.file.importer.model.ImportLabelParser;
 import com.auth.module.file.importer.model.ImportRowError;
 import com.auth.service.system.admin.model.form.dept.SysDeptForm;
 import com.auth.service.system.admin.service.admin.SysDeptService;
-import com.auth.service.system.admin.support.dept.DeptCodeIdResolver;
+import com.auth.service.system.admin.support.dept.DeptLookupSupport;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -26,7 +26,7 @@ public class DeptSheetImporter extends AbstractSheetImporter<SysDeptImportRow, S
 
 	private final SysDeptService sysDeptService;
 
-	private final DeptCodeIdResolver deptCodeIdResolver;
+	private final DeptLookupSupport deptLookupSupport;
 
 	private Map<String, Long> parentIdByCode = Map.of();
 
@@ -37,7 +37,7 @@ public class DeptSheetImporter extends AbstractSheetImporter<SysDeptImportRow, S
 
 	@Override
 	protected void beforeConvert(List<SysDeptImportRow> rows) {
-		parentIdByCode = deptCodeIdResolver.resolveIdsByCodes(rows, SysDeptImportRow::getParentDeptCode);
+		parentIdByCode = deptLookupSupport.resolveIdsByCodes(rows, SysDeptImportRow::getParentDeptCode);
 	}
 
 	@Override

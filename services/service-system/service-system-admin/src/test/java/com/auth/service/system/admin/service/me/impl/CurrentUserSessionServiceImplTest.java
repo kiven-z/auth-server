@@ -1,10 +1,12 @@
 package com.auth.service.system.admin.service.me.impl;
 
 import com.auth.common.core.model.response.Result;
+import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.autoconfigure.security.SecurityRequestAttributes;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
-import com.auth.service.system.admin.integration.auth.session.MeSessionInnerFeignClient;
-import com.auth.service.system.admin.integration.auth.session.dto.UserSessionRemoteDTO;
+import com.auth.service.system.admin.feign.MeSessionInnerFeignClient;
+import com.auth.service.system.admin.feign.dto.UserSessionRemoteDTO;
+import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,6 +35,9 @@ class CurrentUserSessionServiceImplTest {
 
 	@Mock
 	private MeSessionInnerFeignClient meSessionInnerFeignClient;
+
+	@Mock
+	private UserReferenceChecker userReferenceChecker;
 
 	@InjectMocks
 	private CurrentUserSessionServiceImpl currentUserSessionService;
@@ -75,6 +80,7 @@ class CurrentUserSessionServiceImplTest {
 	private void setCurrentUser() {
 		AuthProfile profile = AuthProfile.builder().userId(100L).username("tester").build();
 		SecurityContextHolder.getContext().setAuthentication(new TestingAuthenticationToken(profile, null));
+		when(userReferenceChecker.getExistingActive(100L)).thenReturn(new UserEntity());
 
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setAttribute(SecurityRequestAttributes.SESSION_ID, "current-jti");

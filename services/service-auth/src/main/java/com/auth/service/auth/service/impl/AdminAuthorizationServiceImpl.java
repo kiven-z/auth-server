@@ -2,7 +2,6 @@ package com.auth.service.auth.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
-import com.auth.service.auth.convert.EffectiveCodesConverter;
 import com.auth.service.auth.model.vo.authorization.EffectiveCodesVO;
 import com.auth.service.auth.service.AdminAuthorizationService;
 import com.auth.service.auth.support.authorization.AuthProfileRepository;
@@ -12,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -46,7 +46,18 @@ public class AdminAuthorizationServiceImpl implements AdminAuthorizationService 
 	@Override
 	public EffectiveCodesVO getEffectiveCodes(Long userId) {
 		AuthProfile profile = authProfileRepository.buildByUserId(userId);
-		return EffectiveCodesConverter.INSTANCE.toVoOrEmpty(profile);
+
+		if (profile == null) {
+			EffectiveCodesVO vo = new EffectiveCodesVO();
+			vo.setRoleCodes(List.of());
+			vo.setPermissionCodes(List.of());
+			return vo;
+		}
+
+		EffectiveCodesVO vo = new EffectiveCodesVO();
+		vo.setRoleCodes(profile.getRoles());
+		vo.setPermissionCodes(profile.getPermissions());
+		return vo;
 	}
 
 	/**

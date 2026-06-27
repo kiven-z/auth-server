@@ -1,7 +1,7 @@
 package com.auth.service.system.admin.service.admin.impl;
 
 import cn.hutool.core.collection.CollUtil;
-import com.auth.service.system.admin.convert.reference.ReferenceConverter;
+import com.auth.service.system.admin.convert.admin.ReferenceConverter;
 import com.auth.service.system.admin.mapper.menu.SysMenuMapper;
 import com.auth.service.system.admin.mapper.menu.SysMenuRoleMapper;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
@@ -9,9 +9,10 @@ import com.auth.service.system.admin.model.form.menu.SysMenuAssignRoleForm;
 import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.auth.service.system.admin.model.vo.reference.ext.MenuAssignedRoleReferenceVO;
 import com.auth.service.system.admin.service.admin.SysMenuManageService;
-import com.auth.service.system.admin.support.role.RoleGrantReferenceChecker;
+import com.auth.service.system.admin.support.role.RoleReferenceChecker;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +24,7 @@ import java.util.List;
  *
  * @author Bunny
  */
+@RequiredArgsConstructor
 @Slf4j
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -31,13 +33,7 @@ public class SysMenuManageServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu
 
 	private final SysMenuRoleMapper sysMenuRoleMapper;
 
-	private final RoleGrantReferenceChecker roleGrantReferenceChecker;
-
-	public SysMenuManageServiceImpl(SysMenuRoleMapper sysMenuRoleMapper,
-			RoleGrantReferenceChecker roleGrantReferenceChecker) {
-		this.sysMenuRoleMapper = sysMenuRoleMapper;
-		this.roleGrantReferenceChecker = roleGrantReferenceChecker;
-	}
+	private final RoleReferenceChecker roleReferenceChecker;
 
 	/**
 	 * {@inheritDoc}
@@ -55,8 +51,7 @@ public class SysMenuManageServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu
 	@Override
 	public void replaceMenuRoles(Long menuId, SysMenuAssignRoleForm form) {
 		List<Long> roleIds = CollUtil.emptyIfNull(form.getRoleIds()).stream().distinct().toList();
-		roleGrantReferenceChecker.requireExistingEnabledRoleIds(roleIds,
-				SystemCommonResultCode.GRANT_REFERENCE_INVALID);
+		roleReferenceChecker.requireExistingEnabledRoleIds(roleIds, SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 
 		sysMenuRoleMapper.deleteByMenuId(menuId);
 

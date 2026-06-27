@@ -8,11 +8,13 @@ import com.auth.module.security.autoconfigure.annotation.AuthenticatedApi;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
+import com.auth.service.system.admin.model.form.me.MeProfileUpdateForm;
 import com.auth.service.system.admin.model.form.user.SysUserChangePasswordForm;
 import com.auth.service.system.admin.model.query.me.MeLoginLogPageQuery;
 import com.auth.service.system.admin.model.vo.me.MeLoginLogPageVO;
 import com.auth.service.system.admin.model.vo.me.MeUserSessionVO;
 import com.auth.service.system.admin.service.me.CurrentUserLoginLogService;
+import com.auth.service.system.admin.service.me.CurrentUserProfileService;
 import com.auth.service.system.admin.service.me.CurrentUserSessionService;
 import com.auth.service.system.admin.support.user.UserPasswordService;
 import com.auth.service.system.common.model.SystemAuditBizModule;
@@ -47,6 +49,18 @@ public class CurrentUserController {
 	private final CurrentUserSessionService currentUserSessionService;
 
 	private final CurrentUserLoginLogService currentUserLoginLogService;
+
+	private final CurrentUserProfileService currentUserProfileService;
+
+	@AuthenticatedApi
+	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
+	@Operation(summary = "当前用户更新个人资料")
+	@PutMapping("/me/profile")
+	public Result<String> updateMyProfile(@Valid @RequestBody MeProfileUpdateForm form) {
+		currentUserProfileService.updateMyProfile(form);
+		return Result.success(null, OPERATION_SUCCESS.getMessage());
+	}
 
 	@AuthenticatedApi
 	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,

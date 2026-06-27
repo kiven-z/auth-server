@@ -2,7 +2,7 @@ package com.auth.service.system.admin.service.admin.impl;
 
 import com.auth.service.system.admin.mapper.menu.SysMenuRoleMapper;
 import com.auth.service.system.admin.model.form.menu.SysMenuAssignRoleForm;
-import com.auth.service.system.admin.support.role.RoleGrantReferenceChecker;
+import com.auth.service.system.admin.support.role.RoleReferenceChecker;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import org.junit.jupiter.api.DisplayName;
@@ -29,7 +29,7 @@ class SysMenuManageServiceImplTest {
 	private SysMenuRoleMapper sysMenuRoleMapper;
 
 	@Mock
-	private RoleGrantReferenceChecker roleGrantReferenceChecker;
+	private RoleReferenceChecker roleReferenceChecker;
 
 	@InjectMocks
 	private SysMenuManageServiceImpl sysMenuManageService;
@@ -43,7 +43,7 @@ class SysMenuManageServiceImplTest {
 
 		sysMenuManageService.replaceMenuRoles(menuId, form);
 
-		verify(roleGrantReferenceChecker).requireExistingEnabledRoleIds(List.of(1L, 2L),
+		verify(roleReferenceChecker).requireExistingEnabledRoleIds(List.of(1L, 2L),
 				SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 		verify(sysMenuRoleMapper).deleteByMenuId(menuId);
 		verify(sysMenuRoleMapper).batchInsertMenuRoles(menuId, List.of(1L, 2L));
@@ -58,7 +58,7 @@ class SysMenuManageServiceImplTest {
 
 		sysMenuManageService.replaceMenuRoles(menuId, form);
 
-		verify(roleGrantReferenceChecker).requireExistingEnabledRoleIds(List.of(),
+		verify(roleReferenceChecker).requireExistingEnabledRoleIds(List.of(),
 				SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 		verify(sysMenuRoleMapper).deleteByMenuId(menuId);
 		verify(sysMenuRoleMapper, never()).batchInsertMenuRoles(any(), any());
@@ -71,8 +71,7 @@ class SysMenuManageServiceImplTest {
 		SysMenuAssignRoleForm form = new SysMenuAssignRoleForm();
 		form.setRoleIds(List.of(99L));
 
-		doThrow(new SystemBusinessException(SystemCommonResultCode.GRANT_REFERENCE_INVALID))
-			.when(roleGrantReferenceChecker)
+		doThrow(new SystemBusinessException(SystemCommonResultCode.GRANT_REFERENCE_INVALID)).when(roleReferenceChecker)
 			.requireExistingEnabledRoleIds(List.of(99L), SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 
 		assertThatThrownBy(() -> sysMenuManageService.replaceMenuRoles(menuId, form))

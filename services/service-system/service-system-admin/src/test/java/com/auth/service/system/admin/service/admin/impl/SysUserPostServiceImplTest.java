@@ -16,7 +16,6 @@ import com.auth.service.system.admin.model.query.user.UserPostPageQuery;
 import com.auth.service.system.admin.model.vo.user.UserPostPageVO;
 import com.auth.service.system.admin.service.admin.SysUserService;
 import com.auth.service.system.admin.support.post.PostReferenceChecker;
-import com.auth.service.system.admin.support.user.UserOperationChecker;
 import com.auth.service.system.admin.support.user.UserOrgRelationBatchRemoveSupport;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.UserAuthorizationInvalidationTrigger;
@@ -72,9 +71,6 @@ class SysUserPostServiceImplTest {
 	private UserPostMapper userPostMapper;
 
 	@Mock
-	private UserOperationChecker userOperationChecker;
-
-	@Mock
 	private UserAuthorizationInvalidationTrigger userAuthorizationInvalidationTrigger;
 
 	@Mock
@@ -118,13 +114,12 @@ class SysUserPostServiceImplTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		UserReferenceChecker userReferenceChecker = new UserReferenceChecker(sysUserMapper, sysUserService);
+		UserReferenceChecker userReferenceChecker = new UserReferenceChecker(sysUserMapper);
 		PostReferenceChecker postReferenceChecker = new PostReferenceChecker(sysPostMapper, null);
 		UserOrgRelationBatchRemoveSupport batchRemoveSupport = new UserOrgRelationBatchRemoveSupport(
-				userReferenceChecker, userOperationChecker, userAuthorizationInvalidationTrigger);
-		sysUserPostService = new SysUserPostServiceImpl(userReferenceChecker, userOperationChecker,
-				postReferenceChecker, userAuthorizationInvalidationTrigger, auditUserDisplayService,
-				batchRemoveSupport);
+				userReferenceChecker, userAuthorizationInvalidationTrigger);
+		sysUserPostService = new SysUserPostServiceImpl(userReferenceChecker, postReferenceChecker,
+				userAuthorizationInvalidationTrigger, auditUserDisplayService, batchRemoveSupport);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysUserPostService, userPostMapper);

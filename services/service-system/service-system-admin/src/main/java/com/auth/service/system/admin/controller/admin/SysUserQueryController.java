@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,10 +37,10 @@ public class SysUserQueryController {
 
 	private final SysUserQueryService sysUserQueryService;
 
-	@AuthenticatedApi
 	@OperationLog(targetType = "USER_LIST", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.QUERY)
 	@Operation(summary = "用户分页查询")
+	@PreAuthorize("@auth.decide('sysUser:query')")
 	@GetMapping("/page")
 	public Result<PageResponse<SysUserPageVO>> page(SysUserPageQuery query) {
 		Page<UserEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
@@ -55,8 +56,8 @@ public class SysUserQueryController {
 		return Result.success(profile);
 	}
 
-	@AuthenticatedApi
 	@Operation(summary = "用户详情")
+	@PreAuthorize("@auth.decide('sysUser:query')")
 	@GetMapping("/{userId}/detail")
 	public Result<SysUserDetailVO> detail(@PathVariable("userId") Long userId) {
 		SysUserDetailVO detail = sysUserQueryService.getDetail(userId);

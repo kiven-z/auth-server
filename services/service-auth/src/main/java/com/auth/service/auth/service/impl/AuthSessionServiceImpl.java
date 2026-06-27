@@ -5,7 +5,6 @@ import com.auth.service.auth.convert.LoginSessionConverter;
 import com.auth.service.auth.model.response.RefreshTokenResponse;
 import com.auth.service.auth.model.response.UserLoginResponse;
 import com.auth.service.auth.model.value.login.CompletedLoginSession;
-import com.auth.service.auth.model.value.login.CompletedRefreshSession;
 import com.auth.service.auth.model.value.login.LogoutSessionHint;
 import com.auth.service.auth.model.value.login.RefreshSessionResult;
 import com.auth.service.auth.model.value.login.command.BaseLoginCommand;
@@ -70,15 +69,15 @@ public class AuthSessionServiceImpl implements AuthSessionService {
 		String refreshToken = refreshTokenCookieWriter.readToken(request);
 		RefreshSessionResult result = refreshTokenService.refreshToken(refreshToken, request);
 
-		CompletedRefreshSession session = new CompletedRefreshSession();
-		session.setAccessToken(result.tokenPair().accessToken());
-		session.setRefreshToken(result.tokenPair().refreshToken());
-		session.setExpires(result.tokenPair().accessExpiresAt());
-		session.setReadMeDay(refreshTokenCookieWriter.resolveReadMeDay());
+		RefreshTokenResponse refreshResponse = new RefreshTokenResponse();
+		refreshResponse.setAccessToken(result.tokenPair().accessToken());
+		refreshResponse.setRefreshToken(result.tokenPair().refreshToken());
+		refreshResponse.setExpires(result.tokenPair().accessExpiresAt());
+		refreshResponse.setReadMeDay(refreshTokenCookieWriter.resolveReadMeDay());
 
 		refreshTokenCookieWriter.writeRefreshToken(response, request, result.tokenPair().refreshToken(),
 				result.rememberMe());
-		return LoginSessionConverter.INSTANCE.toRefreshTokenResponse(session);
+		return refreshResponse;
 	}
 
 	/**

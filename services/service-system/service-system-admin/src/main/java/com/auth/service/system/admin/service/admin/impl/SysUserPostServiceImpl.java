@@ -2,7 +2,7 @@ package com.auth.service.system.admin.service.admin.impl;
 
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.common.data.model.PageResponse;
-import com.auth.service.system.admin.convert.sys.UserPostConverter;
+import com.auth.service.system.admin.convert.admin.user.UserPostConverter;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.user.UserPostMapper;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
@@ -15,7 +15,6 @@ import com.auth.service.system.admin.model.query.user.UserPostPageQuery;
 import com.auth.service.system.admin.model.vo.user.UserPostPageVO;
 import com.auth.service.system.admin.service.admin.SysUserPostService;
 import com.auth.service.system.admin.support.post.PostReferenceChecker;
-import com.auth.service.system.admin.support.user.UserOperationChecker;
 import com.auth.service.system.admin.support.user.UserOrgRelationBatchRemoveSupport;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.UserAuthorizationInvalidationTrigger;
@@ -42,8 +41,6 @@ import java.util.List;
 public class SysUserPostServiceImpl extends ServiceImpl<UserPostMapper, UserPostEntity> implements SysUserPostService {
 
 	private final UserReferenceChecker userReferenceChecker;
-
-	private final UserOperationChecker userOperationChecker;
 
 	private final PostReferenceChecker postReferenceChecker;
 
@@ -75,7 +72,7 @@ public class SysUserPostServiceImpl extends ServiceImpl<UserPostMapper, UserPost
 	@Override
 	public void create(Long userId, UserPostAssignForm form) {
 		userReferenceChecker.getExistingActive(userId);
-		userOperationChecker.requireOperable(List.of(userId));
+		userReferenceChecker.requireOperable(List.of(userId));
 
 		SysPostEntity post = postReferenceChecker.getExistingActive(form.getPostId());
 		if (BooleanUtil.isFalse(post.getStatus())) {
@@ -101,7 +98,7 @@ public class SysUserPostServiceImpl extends ServiceImpl<UserPostMapper, UserPost
 	@Override
 	public void update(Long userId, Long id, UserPostRelationUpdateForm form) {
 		userReferenceChecker.getExistingActive(userId);
-		userOperationChecker.requireOperable(List.of(userId));
+		userReferenceChecker.requireOperable(List.of(userId));
 
 		UserPostEntity existing = baseMapper.selectByIdAndUserId(id, userId);
 		if (existing == null) {
@@ -129,7 +126,7 @@ public class SysUserPostServiceImpl extends ServiceImpl<UserPostMapper, UserPost
 	@Override
 	public void removeAll(Long userId) {
 		userReferenceChecker.getExistingActive(userId);
-		userOperationChecker.requireOperable(List.of(userId));
+		userReferenceChecker.requireOperable(List.of(userId));
 
 		if (baseMapper.deleteByUserId(userId) > 0) {
 			userAuthorizationInvalidationTrigger.submitByUserIds(List.of(userId), "clear-post");

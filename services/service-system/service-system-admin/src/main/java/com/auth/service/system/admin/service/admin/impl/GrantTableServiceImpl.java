@@ -3,7 +3,7 @@ package com.auth.service.system.admin.service.admin.impl;
 import cn.hutool.core.collection.CollUtil;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.module.security.contract.dto.invalidation.GrantSubjectKey;
-import com.auth.service.system.admin.convert.reference.ReferenceConverter;
+import com.auth.service.system.admin.convert.admin.ReferenceConverter;
 import com.auth.service.system.admin.mapper.role.GrantTableMapper;
 import com.auth.service.system.admin.model.entity.GrantTableEntity;
 import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
@@ -11,8 +11,9 @@ import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
 import com.auth.service.system.admin.service.admin.GrantTableService;
 import com.auth.service.system.admin.support.granttable.GrantTableSubjectExistenceVerifier;
-import com.auth.service.system.admin.support.role.RoleGrantReferenceChecker;
+import com.auth.service.system.admin.support.role.RoleReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.GrantAuthorizationInvalidationTrigger;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -33,7 +34,7 @@ public class GrantTableServiceImpl extends ServiceImpl<GrantTableMapper, GrantTa
 
 	private final GrantTableSubjectExistenceVerifier subjectExistenceVerifier;
 
-	private final RoleGrantReferenceChecker roleGrantReferenceChecker;
+	private final RoleReferenceChecker roleReferenceChecker;
 
 	private final GrantAuthorizationInvalidationTrigger grantInvalidationTrigger;
 
@@ -64,9 +65,12 @@ public class GrantTableServiceImpl extends ServiceImpl<GrantTableMapper, GrantTa
 	public void replaceOrgSubjectRoles(GrantTableSubjectType subjectType, Long subjectId,
 			GrantTableAssignRoleForm form) {
 		subjectExistenceVerifier.requireExistingActive(subjectType, subjectId);
-
 		List<Long> roleIds = CollUtil.emptyIfNull(form.getRoleIds()).stream().distinct().toList();
-		roleGrantReferenceChecker.requireGrantTableOrgRoleIds(subjectType, roleIds);
+
+		if (subjectType != GrantTableSubjectType.DEPT && subjectType != GrantTableSubjectType.POST) {
+			throw new IllegalArgumentException("Unsupported org grant subject type: " + subjectType);
+		}
+		roleReferenceChecker.requireExistingEnabledRoleIds(roleIds, SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 
 		replaceSubjectRoleGrants(subjectType.name(), subjectId, roleIds);
 		grantInvalidationTrigger.submitByGrantSubjects(List.of(new GrantSubjectKey(subjectType, subjectId)),

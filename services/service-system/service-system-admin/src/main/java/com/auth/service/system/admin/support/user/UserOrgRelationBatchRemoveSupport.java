@@ -1,12 +1,14 @@
 package com.auth.service.system.admin.support.user;
 
-import cn.hutool.core.collection.CollUtil;
-import com.auth.service.system.authorization.dispatch.trigger.UserAuthorizationInvalidationTrigger;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
-
 import java.util.List;
 import java.util.function.Consumer;
+
+import org.springframework.stereotype.Component;
+
+import com.auth.service.system.authorization.dispatch.trigger.UserAuthorizationInvalidationTrigger;
+
+import cn.hutool.core.collection.CollUtil;
+import lombok.RequiredArgsConstructor;
 
 /**
  * 用户组织关联（部门/岗位）批量删除编排
@@ -19,8 +21,6 @@ public class UserOrgRelationBatchRemoveSupport {
 
 	private final UserReferenceChecker userReferenceChecker;
 
-	private final UserOperationChecker userOperationChecker;
-
 	private final UserAuthorizationInvalidationTrigger userAuthorizationInvalidationTrigger;
 
 	/**
@@ -31,12 +31,12 @@ public class UserOrgRelationBatchRemoveSupport {
 	 * @param invalidationReason 授权失效原因标识
 	 */
 	public void removeBatch(Long userId, List<Long> ids, Consumer<List<Long>> removeByIds, String invalidationReason) {
-		if (ids == null || CollUtil.isEmpty(ids)) {
+		if (CollUtil.isEmpty(ids)) {
 			return;
 		}
 
 		userReferenceChecker.getExistingActive(userId);
-		userOperationChecker.requireOperable(List.of(userId));
+		userReferenceChecker.requireOperable(List.of(userId));
 
 		List<Long> distinctIds = ids.stream().distinct().toList();
 		removeByIds.accept(distinctIds);

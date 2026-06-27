@@ -1,6 +1,8 @@
 package com.auth.service.system.admin.service.admin.impl;
 
-import com.auth.service.system.admin.convert.sys.SysRoleConverter;
+import com.auth.common.core.utils.FieldChangeSupport;
+import com.auth.common.data.support.BusinessKeyAssert;
+import com.auth.service.system.admin.convert.admin.SysRoleConverter;
 import com.auth.service.system.admin.mapper.role.GrantTableMapper;
 import com.auth.service.system.admin.mapper.role.SysRoleMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
@@ -9,8 +11,6 @@ import com.auth.service.system.admin.service.admin.SysRoleService;
 import com.auth.service.system.authorization.dispatch.trigger.RoleAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
-import com.auth.service.system.common.support.BusinessKeyAssert;
-import com.auth.service.system.common.support.FieldChangeSupport;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -42,9 +42,9 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 	public void create(SysRoleForm form) {
 		String roleCode = form.getRoleCode();
 
-		BusinessKeyAssert.requireAbsent(this,
+		BusinessKeyAssert.requireAbsent(baseMapper,
 				Wrappers.<SysRoleEntity>lambdaQuery().eq(SysRoleEntity::getRoleCode, roleCode),
-				SystemCommonResultCode.DATA_CODE_DUPLICATE, roleCode);
+				() -> new SystemBusinessException(SystemCommonResultCode.DATA_CODE_DUPLICATE, roleCode));
 
 		SysRoleEntity entity = SysRoleConverter.INSTANCE.toEntity(form);
 		entity.setRoleCode(roleCode);
@@ -68,11 +68,11 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 		String newRoleCode = form.getRoleCode();
 		boolean roleCodeChanged = FieldChangeSupport.codeChanged(oldRoleCode, newRoleCode);
 		if (roleCodeChanged) {
-			BusinessKeyAssert.requireAbsent(this,
+			BusinessKeyAssert.requireAbsent(baseMapper,
 					Wrappers.<SysRoleEntity>lambdaQuery()
 						.eq(SysRoleEntity::getRoleCode, newRoleCode)
 						.ne(SysRoleEntity::getId, existing.getId()),
-					SystemCommonResultCode.DATA_CODE_DUPLICATE, newRoleCode);
+					() -> new SystemBusinessException(SystemCommonResultCode.DATA_CODE_DUPLICATE, newRoleCode));
 		}
 
 		SysRoleConverter.INSTANCE.applyUpdateForm(form, existing);

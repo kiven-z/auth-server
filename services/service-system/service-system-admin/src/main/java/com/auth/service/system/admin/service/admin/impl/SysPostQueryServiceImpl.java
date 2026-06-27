@@ -2,8 +2,8 @@ package com.auth.service.system.admin.service.admin.impl;
 
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
-import com.auth.service.system.admin.convert.reference.ReferenceConverter;
-import com.auth.service.system.admin.convert.sys.SysPostConverter;
+import com.auth.service.system.admin.convert.admin.SysPostConverter;
+import com.auth.service.system.admin.convert.admin.ReferenceConverter;
 import com.auth.service.system.admin.mapper.post.SysPostMapper;
 import com.auth.service.system.admin.mapper.post.SysPostQueryMapper;
 import com.auth.service.system.admin.mapper.role.GrantTableMapper;

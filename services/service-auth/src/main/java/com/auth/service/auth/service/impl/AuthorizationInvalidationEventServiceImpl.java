@@ -5,7 +5,6 @@ import com.auth.module.security.contract.api.authorization.AuthorizationChangeKi
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateResponse;
 import com.auth.service.auth.convert.AuthorizationInvalidationEventConverter;
 import com.auth.service.auth.convert.AuthorizationInvalidationEventMappingSupport;
-import com.auth.service.auth.convert.AuthorizationInvalidationEventStatsConverter;
 import com.auth.service.auth.exception.AuthBusinessException;
 import com.auth.service.auth.exception.AuthResultCode;
 import com.auth.service.auth.mapper.AuthorizationInvalidationEventMapper;
@@ -13,11 +12,11 @@ import com.auth.service.auth.model.po.invalidation.AuthorizationInvalidationEven
 import com.auth.service.auth.model.po.invalidation.AuthorizationInvalidationEventPageRowPO;
 import com.auth.service.auth.model.po.invalidation.AuthorizationInvalidationEventStatsPO;
 import com.auth.service.auth.model.query.AuthorizationInvalidationEventQuery;
+import com.auth.service.auth.model.value.invalidation.InvalidationIdempotencyGate;
 import com.auth.service.auth.model.vo.authorization.AuthorizationInvalidationEventDetailVO;
 import com.auth.service.auth.model.vo.authorization.AuthorizationInvalidationEventPageVO;
 import com.auth.service.auth.model.vo.authorization.AuthorizationInvalidationEventStatsVO;
 import com.auth.service.auth.service.AuthorizationInvalidationEventService;
-import com.auth.service.auth.model.value.invalidation.InvalidationIdempotencyGate;
 import com.auth.service.auth.support.invalidation.InvalidationProcessingMarker;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -27,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * 授权失效幂等事件：运维门禁与查询
@@ -80,8 +80,15 @@ public class AuthorizationInvalidationEventServiceImpl implements AuthorizationI
 	@Override
 	@Transactional(readOnly = true)
 	public AuthorizationInvalidationEventStatsVO getStats() {
-		AuthorizationInvalidationEventStatsPO row = invalidationEventMapper.selectEventStats();
-		return AuthorizationInvalidationEventStatsConverter.toVo(row);
+		AuthorizationInvalidationEventStatsPO statsPo = invalidationEventMapper.selectEventStats();
+		AuthorizationInvalidationEventStatsPO defaultObj = new AuthorizationInvalidationEventStatsPO();
+		AuthorizationInvalidationEventStatsPO safePo = Objects.requireNonNullElse(statsPo, defaultObj);
+
+		AuthorizationInvalidationEventStatsVO statsVo = new AuthorizationInvalidationEventStatsVO();
+		statsVo.setTotalCount(Objects.requireNonNullElse(safePo.getTotalCount(), 0L));
+		statsVo.setProcessingCount(Objects.requireNonNullElse(safePo.getProcessingCount(), 0L));
+		statsVo.setCompletedCount(Objects.requireNonNullElse(safePo.getCompletedCount(), 0L));
+		return statsVo;
 	}
 
 	/**

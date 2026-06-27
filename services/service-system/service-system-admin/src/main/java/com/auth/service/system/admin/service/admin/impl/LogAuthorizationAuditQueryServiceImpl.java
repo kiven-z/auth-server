@@ -1,7 +1,7 @@
 package com.auth.service.system.admin.service.admin.impl;
 
 import com.auth.common.data.model.PageResponse;
-import com.auth.service.system.admin.convert.log.LogAuthorizationAuditConverter;
+import com.auth.service.system.admin.convert.admin.log.LogAuthorizationAuditConverter;
 import com.auth.service.system.admin.mapper.log.LogAuthorizationAuditMapper;
 import com.auth.service.system.admin.model.entity.LogAuthorizationAuditEntity;
 import com.auth.service.system.admin.model.po.logauthorizationaudit.LogAuthorizationAuditDetailRowPO;

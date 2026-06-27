@@ -4,8 +4,6 @@ import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.admin.mapper.role.GrantTableMapper;
 import com.auth.service.system.admin.mapper.user.SysUserMapper;
 import com.auth.service.system.admin.model.form.user.SysUserForm;
-import com.auth.service.system.admin.support.user.SysUserDefaults;
-import com.auth.service.system.admin.support.user.UserOperationChecker;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.UserSessionRevocationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
@@ -45,9 +43,6 @@ class SysUserServiceImplTest {
 	private SysUserMapper sysUserMapper;
 
 	@Mock
-	private UserOperationChecker userOperationChecker;
-
-	@Mock
 	private UserReferenceChecker userReferenceChecker;
 
 	@Mock
@@ -74,8 +69,8 @@ class SysUserServiceImplTest {
 
 	@BeforeEach
 	void setUp() {
-		sysUserService = new SysUserServiceImpl(userOperationChecker, userReferenceChecker, passwordEncoder,
-				userSessionRevocationTrigger, grantTableMapper);
+		sysUserService = new SysUserServiceImpl(userReferenceChecker, passwordEncoder, userSessionRevocationTrigger,
+				grantTableMapper);
 		ReflectionTestUtils.setField(sysUserService, "baseMapper", sysUserMapper);
 	}
 
@@ -93,7 +88,7 @@ class SysUserServiceImplTest {
 		ArgumentCaptor<UserEntity> captor = ArgumentCaptor.forClass(UserEntity.class);
 		verify(sysUserMapper).insert(captor.capture());
 		assertThat(captor.getValue().getPassword()).isEqualTo("$2a$encoded");
-		assertThat(captor.getValue().getPermVersion()).isEqualTo(SysUserDefaults.DEFAULT_PERM_VERSION);
+		assertThat(captor.getValue().getPermVersion()).isZero();
 		verify(passwordEncoder).encode("SecurePwd1");
 		verify(userReferenceChecker).assertUniqueBusinessKeys(form, null);
 	}
@@ -120,7 +115,7 @@ class SysUserServiceImplTest {
 
 		sysUserService.deleteByIds(ids);
 
-		verify(userOperationChecker).requireOperable(ids);
+		verify(userReferenceChecker).requireOperable(ids);
 		verify(grantTableMapper).deleteBySubject("USER", USER_ID);
 		verify(sysUserMapper).deleteByIds(ids);
 		verify(userSessionRevocationTrigger).revokeAllSessionsAfterCommit(ids);

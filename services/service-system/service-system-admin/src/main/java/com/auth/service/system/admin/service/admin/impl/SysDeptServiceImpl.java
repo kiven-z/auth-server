@@ -1,7 +1,9 @@
 package com.auth.service.system.admin.service.admin.impl;
 
+import com.auth.common.core.utils.FieldChangeSupport;
 import com.auth.common.core.utils.TreeParentIdUtil;
-import com.auth.service.system.admin.convert.sys.SysDeptConverter;
+import com.auth.common.data.support.BusinessKeyAssert;
+import com.auth.service.system.admin.convert.admin.SysDeptConverter;
 import com.auth.service.system.admin.mapper.dept.SysDeptMapper;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.form.dept.SysDeptForm;
@@ -12,8 +14,6 @@ import com.auth.service.system.admin.support.dept.DeptReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.DeptAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
-import com.auth.service.system.common.support.BusinessKeyAssert;
-import com.auth.service.system.common.support.FieldChangeSupport;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -49,9 +49,9 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 		parentId = deptReferenceChecker.normalizeAndRequireActiveParent(parentId);
 
 		String deptCode = form.getDeptCode();
-		BusinessKeyAssert.requireAbsent(this,
+		BusinessKeyAssert.requireAbsent(baseMapper,
 				Wrappers.<SysDeptEntity>lambdaQuery().eq(SysDeptEntity::getDeptCode, deptCode),
-				SystemCommonResultCode.DATA_CODE_DUPLICATE, deptCode);
+				() -> new SystemBusinessException(SystemCommonResultCode.DATA_CODE_DUPLICATE, deptCode));
 
 		SysDeptEntity entity = SysDeptConverter.INSTANCE.toEntity(form);
 		entity.setParentId(parentId);
@@ -72,11 +72,11 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 		String rawDeptCode = existing.getDeptCode();
 		boolean codeChanged = FieldChangeSupport.codeChanged(rawDeptCode, newDeptCode);
 		if (codeChanged) {
-			BusinessKeyAssert.requireAbsent(this,
+			BusinessKeyAssert.requireAbsent(baseMapper,
 					Wrappers.<SysDeptEntity>lambdaQuery()
 						.eq(SysDeptEntity::getDeptCode, newDeptCode)
 						.ne(SysDeptEntity::getId, id),
-					SystemCommonResultCode.DATA_CODE_DUPLICATE, newDeptCode);
+					() -> new SystemBusinessException(SystemCommonResultCode.DATA_CODE_DUPLICATE, newDeptCode));
 		}
 
 		long newParentId = deptReferenceChecker.normalizeAndRequireActiveParent(form.getParentId());

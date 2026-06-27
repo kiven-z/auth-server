@@ -1,21 +1,19 @@
 package com.auth.service.system.admin.service.admin.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import com.auth.common.core.utils.FieldChangeSupport;
 import com.auth.common.data.model.enums.UserStatus;
 import com.auth.module.platform.persistence.model.UserEntity;
-import com.auth.service.system.admin.convert.sys.SysUserConverter;
+import com.auth.service.system.admin.convert.admin.user.SysUserConverter;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.role.GrantTableMapper;
 import com.auth.service.system.admin.mapper.user.SysUserMapper;
 import com.auth.service.system.admin.model.form.user.SysUserBatchStatusForm;
 import com.auth.service.system.admin.model.form.user.SysUserForm;
 import com.auth.service.system.admin.service.admin.SysUserService;
-import com.auth.service.system.admin.support.user.SysUserDefaults;
-import com.auth.service.system.admin.support.user.UserOperationChecker;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.UserSessionRevocationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.common.support.FieldChangeSupport;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -39,7 +37,10 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 
 	private static final String GRANT_SUBJECT_TYPE_USER = "USER";
 
-	private final UserOperationChecker userOperationChecker;
+	/**
+	 * 新建用户默认权限版本号
+	 */
+	private static final Long DEFAULT_PERM_VERSION = 0L;
 
 	private final UserReferenceChecker userReferenceChecker;
 
@@ -62,7 +63,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 		if (form.getBirthday() != null) {
 			entity.setAge(Period.between(form.getBirthday(), LocalDate.now()).getYears());
 		}
-		entity.setPermVersion(SysUserDefaults.DEFAULT_PERM_VERSION);
+		entity.setPermVersion(DEFAULT_PERM_VERSION);
 
 		save(entity);
 	}
@@ -75,7 +76,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 		UserEntity existing = userReferenceChecker.getExistingActive(id);
 
 		List<Long> userIds = List.of(id);
-		userOperationChecker.requireOperable(userIds);
+		userReferenceChecker.requireOperable(userIds);
 		userReferenceChecker.assertUniqueBusinessKeys(form, id);
 
 		// 敏感字段变更时踢出全部会话
@@ -110,7 +111,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 			return;
 		}
 
-		userOperationChecker.requireOperable(idsToDelete);
+		userReferenceChecker.requireOperable(idsToDelete);
 		for (Long userId : idsToDelete) {
 			grantTableMapper.deleteBySubject(GRANT_SUBJECT_TYPE_USER, userId);
 		}
@@ -133,7 +134,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 			return;
 		}
 
-		userOperationChecker.requireOperable(idsToUpdate);
+		userReferenceChecker.requireOperable(idsToUpdate);
 		List<UserEntity> updates = idsToUpdate.stream().map(userId -> {
 			UserEntity entity = new UserEntity();
 			entity.setId(userId);

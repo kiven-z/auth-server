@@ -63,6 +63,17 @@ class AdminAuthorizationServiceTest {
 	}
 
 	@Test
+	@DisplayName("查询生效码：画像为 null 时返回空列表")
+	void getEffectiveCodes_shouldReturnEmptyListsWhenProfileNull() {
+		when(authProfileRepository.buildByUserId(TestConstants.USER_ID)).thenReturn(null);
+
+		EffectiveCodesVO effectiveCodes = adminAuthorizationService.getEffectiveCodes(TestConstants.USER_ID);
+
+		assertEquals(List.of(), effectiveCodes.getRoleCodes());
+		assertEquals(List.of(), effectiveCodes.getPermissionCodes());
+	}
+
+	@Test
 	@DisplayName("刷新缓存：入参为空/含 null 时不抛异常且跳过 null")
 	void refreshUserCache_shouldIgnoreEmptyAndNullAndSwallowExceptions() {
 		assertDoesNotThrow(() -> adminAuthorizationService.refreshUserCache(List.of()));

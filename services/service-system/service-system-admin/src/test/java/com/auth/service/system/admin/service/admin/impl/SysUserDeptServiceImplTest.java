@@ -16,7 +16,6 @@ import com.auth.service.system.admin.model.query.user.UserDeptPageQuery;
 import com.auth.service.system.admin.model.vo.user.UserDeptPageVO;
 import com.auth.service.system.admin.service.admin.SysUserService;
 import com.auth.service.system.admin.support.dept.DeptReferenceChecker;
-import com.auth.service.system.admin.support.user.UserOperationChecker;
 import com.auth.service.system.admin.support.user.UserOrgRelationBatchRemoveSupport;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.UserAuthorizationInvalidationTrigger;
@@ -73,9 +72,6 @@ class SysUserDeptServiceImplTest {
 	private DeptReferenceCheckerMapper deptReferenceCheckerMapper;
 
 	@Mock
-	private UserOperationChecker userOperationChecker;
-
-	@Mock
 	private UserDeptMapper userDeptMapper;
 
 	@Mock
@@ -127,13 +123,12 @@ class SysUserDeptServiceImplTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		UserReferenceChecker userReferenceChecker = new UserReferenceChecker(sysUserMapper, sysUserService);
+		UserReferenceChecker userReferenceChecker = new UserReferenceChecker(sysUserMapper);
 		DeptReferenceChecker deptReferenceChecker = new DeptReferenceChecker(sysDeptMapper, deptReferenceCheckerMapper);
 		UserOrgRelationBatchRemoveSupport batchRemoveSupport = new UserOrgRelationBatchRemoveSupport(
-				userReferenceChecker, userOperationChecker, userAuthorizationInvalidationTrigger);
-		sysUserDeptService = new SysUserDeptServiceImpl(userReferenceChecker, userOperationChecker,
-				deptReferenceChecker, userAuthorizationInvalidationTrigger, auditUserDisplayService,
-				batchRemoveSupport);
+				userReferenceChecker, userAuthorizationInvalidationTrigger);
+		sysUserDeptService = new SysUserDeptServiceImpl(userReferenceChecker, deptReferenceChecker,
+				userAuthorizationInvalidationTrigger, auditUserDisplayService, batchRemoveSupport);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysUserDeptService, userDeptMapper);

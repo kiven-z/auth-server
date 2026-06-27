@@ -6,8 +6,7 @@ import com.auth.service.system.admin.mapper.dept.SysDeptMapper;
 import com.auth.service.system.admin.model.po.dept.SysDeptPageRowPO;
 import com.auth.service.system.admin.model.query.dept.SysDeptPageQuery;
 import com.auth.service.system.admin.service.admin.SysDeptService;
-import com.auth.service.system.admin.support.dept.DeptCodeIdResolver;
-import com.auth.service.system.admin.support.dept.DeptPathResolver;
+import com.auth.service.system.admin.support.dept.DeptLookupSupport;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.poi.ss.usermodel.Row;
@@ -44,13 +43,10 @@ class SysDeptSpreadsheetServiceTest {
 	private SysDeptMapper sysDeptMapper;
 
 	@Mock
-	private DeptPathResolver deptPathResolver;
+	private DeptLookupSupport deptLookupSupport;
 
 	@Mock
 	private SysDeptService sysDeptService;
-
-	@Mock
-	private DeptCodeIdResolver deptCodeIdResolver;
 
 	private DeptSheetImporter deptSheetImporter;
 
@@ -66,8 +62,8 @@ class SysDeptSpreadsheetServiceTest {
 	@BeforeEach
 	void setUp() {
 		// 导出测试不触发导入逻辑，使用真实 importer 实例避免 mock 继承类失败
-		deptSheetImporter = new DeptSheetImporter(sysDeptService, deptCodeIdResolver);
-		spreadsheetService = new SysDeptSpreadsheetService(sysDeptMapper, deptPathResolver, deptSheetImporter);
+		deptSheetImporter = new DeptSheetImporter(sysDeptService, deptLookupSupport);
+		spreadsheetService = new SysDeptSpreadsheetService(sysDeptMapper, deptLookupSupport, deptSheetImporter);
 	}
 
 	@Test
@@ -92,7 +88,7 @@ class SysDeptSpreadsheetServiceTest {
 		IPage<SysDeptPageRowPO> page = new Page<>(1, 10, 1);
 		page.setRecords(List.of(row));
 		when(sysDeptMapper.selectListByPage(any(Page.class), eq(filter))).thenReturn(page);
-		when(deptPathResolver.resolve(List.of(2L))).thenReturn(Map.of(2L, "总部/研发部"));
+		when(deptLookupSupport.resolvePaths(List.of(2L))).thenReturn(Map.of(2L, "总部/研发部"));
 
 		ResponseEntity<byte[]> response = spreadsheetService.export(filter, scope);
 
@@ -119,7 +115,7 @@ class SysDeptSpreadsheetServiceTest {
 		IPage<SysDeptPageRowPO> page = new Page<>(1, 10, 1);
 		page.setRecords(List.of(row));
 		when(sysDeptMapper.selectListByPage(any(Page.class), eq(filter))).thenReturn(page);
-		when(deptPathResolver.resolve(List.of(2L))).thenReturn(Map.of(2L, "总部/研发部"));
+		when(deptLookupSupport.resolvePaths(List.of(2L))).thenReturn(Map.of(2L, "总部/研发部"));
 
 		ResponseEntity<byte[]> response = spreadsheetService.export(filter, scope);
 
@@ -153,7 +149,7 @@ class SysDeptSpreadsheetServiceTest {
 		IPage<SysDeptPageRowPO> page = new Page<>(3, 10, 1);
 		page.setRecords(List.of(row));
 		when(sysDeptMapper.selectListByPage(any(Page.class), eq(filter))).thenReturn(page);
-		when(deptPathResolver.resolve(List.of(1L))).thenReturn(Map.of(1L, "总部"));
+		when(deptLookupSupport.resolvePaths(List.of(1L))).thenReturn(Map.of(1L, "总部"));
 
 		ResponseEntity<byte[]> response = spreadsheetService.export(filter, scope);
 

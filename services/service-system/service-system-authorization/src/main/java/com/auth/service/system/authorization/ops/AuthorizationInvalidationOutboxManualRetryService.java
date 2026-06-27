@@ -1,7 +1,6 @@
 package com.auth.service.system.authorization.ops;
 
 import cn.hutool.core.util.BooleanUtil;
-import com.auth.service.system.authorization.convert.AuthorizationInvalidationOutboxManualRetryConverter;
 import com.auth.service.system.authorization.model.dto.AuthorizationInvalidationOutboxManualRetryOutcome;
 import com.auth.service.system.authorization.model.form.AuthorizationInvalidationOutboxRetryForm;
 import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationOutboxRetryResultVO;
@@ -32,7 +31,16 @@ public class AuthorizationInvalidationOutboxManualRetryService {
 
 		AuthorizationInvalidationOutboxManualRetryOutcome outcome = authorizationInvalidationOutboxOpsService
 			.retryManual(outboxId, force);
-		return AuthorizationInvalidationOutboxManualRetryConverter.INSTANCE.toRetryResultVo(outcome);
+
+		AuthorizationInvalidationOutboxRetryResultVO vo = new AuthorizationInvalidationOutboxRetryResultVO();
+		vo.setOutboxId(outcome.getOutboxId());
+		vo.setEventId(outcome.getEventId());
+		vo.setPreviousStatus(outcome.getPreviousStatus());
+		vo.setCurrentStatus(outcome.getCurrentStatus());
+		vo.setLastError(outcome.getLastError());
+		vo.setDispatched(outcome.isDispatched());
+		vo.setClaimReleased(outcome.isClaimReleased());
+		return vo;
 	}
 
 }

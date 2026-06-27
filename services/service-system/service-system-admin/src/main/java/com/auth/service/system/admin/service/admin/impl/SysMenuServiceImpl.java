@@ -2,7 +2,7 @@ package com.auth.service.system.admin.service.admin.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import com.auth.common.core.utils.TreeParentIdUtil;
-import com.auth.service.system.admin.convert.menu.SysMenuConverter;
+import com.auth.service.system.admin.convert.admin.menu.SysMenuConverter;
 import com.auth.service.system.admin.mapper.menu.SysMenuMapper;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.admin.model.form.menu.SysMenuBatchStatusForm;

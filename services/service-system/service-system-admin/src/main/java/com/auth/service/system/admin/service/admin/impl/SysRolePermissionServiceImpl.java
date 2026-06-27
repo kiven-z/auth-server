@@ -2,7 +2,7 @@ package com.auth.service.system.admin.service.admin.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
-import com.auth.service.system.admin.convert.reference.ReferenceConverter;
+import com.auth.service.system.admin.convert.admin.ReferenceConverter;
 import com.auth.service.system.admin.mapper.role.SysRolePermissionMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.po.reference.PermissionReferencePO;
@@ -43,7 +43,7 @@ public class SysRolePermissionServiceImpl implements SysRolePermissionService {
 	 */
 	@Override
 	public List<PermissionReferenceVO> listAssignedPermissions(Long roleId) {
-		roleReferenceChecker.getExistingByRoleId(roleId);
+		roleReferenceChecker.getExistingActive(roleId);
 		List<PermissionReferencePO> permissionList = sysRolePermissionMapper.selectAssignedPermissionsByRoleId(roleId);
 
 		return ReferenceConverter.INSTANCE.toPermissionReferenceList(permissionList);
@@ -54,10 +54,11 @@ public class SysRolePermissionServiceImpl implements SysRolePermissionService {
 	 */
 	@Override
 	public void assignPermissions(Long roleId, List<Long> permissionIds) {
-		SysRoleEntity role = roleReferenceChecker.getExistingByRoleId(roleId);
-		List<Long> ids = permissionIds.stream().distinct().toList();
+		SysRoleEntity role = roleReferenceChecker.getExistingActive(roleId);
 
+		List<Long> ids = permissionIds.stream().distinct().toList();
 		Long operatorId = SecurityUserUtils.getUserId();
+
 		sysRolePermissionMapper.deleteByRoleId(role.getId());
 		if (CollUtil.isNotEmpty(ids)) {
 			permissionReferenceChecker.requireActivePermissionIds(ids);

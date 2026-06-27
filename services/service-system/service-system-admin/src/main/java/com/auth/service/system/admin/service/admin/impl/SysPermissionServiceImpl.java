@@ -2,7 +2,9 @@ package com.auth.service.system.admin.service.admin.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
-import com.auth.service.system.admin.convert.sys.SysPermissionConverter;
+import com.auth.common.core.utils.FieldChangeSupport;
+import com.auth.common.data.support.BusinessKeyAssert;
+import com.auth.service.system.admin.convert.admin.SysPermissionConverter;
 import com.auth.service.system.admin.mapper.permission.SysPermissionMapper;
 import com.auth.service.system.admin.mapper.role.SysRolePermissionMapper;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
@@ -13,8 +15,6 @@ import com.auth.service.system.authorization.dispatch.trigger.PermissionAuthoriz
 import com.auth.service.system.authorization.dispatch.trigger.RoleAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
-import com.auth.service.system.common.support.BusinessKeyAssert;
-import com.auth.service.system.common.support.FieldChangeSupport;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -74,11 +74,11 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 		String newPermissionCode = form.getPermissionCode();
 		boolean permissionCodeChanged = FieldChangeSupport.codeChanged(oldPermissionCode, newPermissionCode);
 		if (permissionCodeChanged) {
-			BusinessKeyAssert.requireAbsent(this,
+			BusinessKeyAssert.requireAbsent(baseMapper,
 					Wrappers.<SysPermissionEntity>lambdaQuery()
 						.eq(SysPermissionEntity::getPermissionCode, newPermissionCode)
 						.ne(SysPermissionEntity::getId, existing.getId()),
-					SystemCommonResultCode.DATA_CODE_DUPLICATE, newPermissionCode);
+					() -> new SystemBusinessException(SystemCommonResultCode.DATA_CODE_DUPLICATE, newPermissionCode));
 		}
 
 		SysPermissionConverter.INSTANCE.applyUpdateForm(form, existing);

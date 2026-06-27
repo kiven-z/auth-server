@@ -1,9 +1,9 @@
 package com.auth.service.system.admin.service.admin.impl;
 
 import com.auth.common.data.model.PageResponse;
-import com.auth.service.system.admin.convert.reference.ReferenceConverter;
-import com.auth.service.system.admin.convert.sys.SysPermissionConverter;
-import com.auth.service.system.admin.convert.sys.SysRoleConverter;
+import com.auth.service.system.admin.convert.admin.SysPermissionConverter;
+import com.auth.service.system.admin.convert.admin.SysRoleConverter;
+import com.auth.service.system.admin.convert.admin.ReferenceConverter;
 import com.auth.service.system.admin.mapper.menu.SysMenuRoleMapper;
 import com.auth.service.system.admin.mapper.role.GrantTableMapper;
 import com.auth.service.system.admin.mapper.role.SysRoleMapper;

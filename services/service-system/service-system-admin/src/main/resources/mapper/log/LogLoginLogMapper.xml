@@ -27,10 +27,10 @@
                 AND ll.login_result = #{query.loginResult}
             </if>
             <if test="query.loginTimeStart != null">
-                AND ll.login_time &gt; = #{query.loginTimeStart}
+                AND ll.login_time &gt;= #{query.loginTimeStart}
             </if>
             <if test="query.loginTimeEnd != null">
-                AND ll.login_time &lt; = #{query.loginTimeEnd}
+                AND ll.login_time &lt;= #{query.loginTimeEnd}
             </if>
             <if test="query.loginType != null and query.loginType != ''">
                 AND ll.login_type = #{query.loginType}

@@ -3,8 +3,9 @@ package com.auth.service.system.admin.support.menu;
 import cn.hutool.core.collection.CollUtil;
 import com.auth.common.core.utils.TreeNodeProcessorUtil;
 import com.auth.module.security.contract.constants.PermissionConstant;
-import com.auth.service.system.admin.convert.menu.MenuConvertContext;
-import com.auth.service.system.admin.convert.menu.MenuRouteNodeConverter;
+import com.auth.service.system.admin.convert.admin.menu.MenuConvertContext;
+import com.auth.service.system.admin.convert.admin.menu.MenuRouteMetaConverter;
+import com.auth.service.system.admin.convert.admin.menu.MenuRouteTreeNode;
 import com.auth.service.system.admin.mapper.menu.SysMenuRoleMapper;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.admin.model.po.menu.SysMenuRoleLinkRowPO;
@@ -106,16 +107,19 @@ public class MenuWebRouteTreeAssembler {
 	 */
 	private List<RouteNodeVO> convertTreeToVO(List<MenuRouteTreeNode> nodes, MenuConvertContext context) {
 		return nodes.stream().map(node -> {
-			RouteMetaVO routeMetaVO = MenuRouteMetaVoFactory.fromMenuEntity(node.getMenu(), context);
-			RouteNodeVO vo = MenuRouteNodeConverter.INSTANCE.toRouteNodeVO(node);
+			SysMenuEntity menu = node.getMenu();
+			RouteMetaVO routeMetaVO = MenuRouteMetaConverter.fromMenuEntity(menu, context);
+			RouteNodeVO vo = new RouteNodeVO();
+			vo.setPath(menu.getPath());
+			vo.setName(menu.getName());
+			vo.setRedirect(menu.getRedirect());
+			vo.setComponent(menu.getComponent());
 			vo.setMeta(routeMetaVO);
+			vo.setChildren(Collections.emptyList());
 
 			if (CollUtil.isNotEmpty(node.getChildren())) {
 				List<RouteNodeVO> children = convertTreeToVO(node.getChildren(), context);
 				vo.setChildren(children);
-			}
-			else {
-				vo.setChildren(Collections.emptyList());
 			}
 			return vo;
 		}).toList();

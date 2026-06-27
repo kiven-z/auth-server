@@ -79,7 +79,7 @@ class SysUserQueryServiceImplTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		UserReferenceChecker userReferenceChecker = new UserReferenceChecker(sysUserMapper, sysUserService);
+		UserReferenceChecker userReferenceChecker = new UserReferenceChecker(sysUserMapper);
 		sysUserQueryService = new SysUserQueryServiceImpl(auditUserDisplayService, sysUserMapper, sysRoleMapper,
 				sysPermissionMapper, userReferenceChecker, userEffectiveCodesResolver);
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");

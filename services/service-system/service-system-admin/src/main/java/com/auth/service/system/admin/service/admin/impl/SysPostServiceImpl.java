@@ -1,13 +1,13 @@
 package com.auth.service.system.admin.service.admin.impl;
 
-import com.auth.service.system.admin.convert.sys.SysPostConverter;
+import com.auth.common.core.utils.FieldChangeSupport;
+import com.auth.service.system.admin.convert.admin.SysPostConverter;
 import com.auth.service.system.admin.mapper.post.SysPostMapper;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.form.post.SysPostForm;
 import com.auth.service.system.admin.service.admin.SysPostService;
 import com.auth.service.system.admin.support.post.PostReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.PostAuthorizationInvalidationTrigger;
-import com.auth.service.system.common.support.FieldChangeSupport;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

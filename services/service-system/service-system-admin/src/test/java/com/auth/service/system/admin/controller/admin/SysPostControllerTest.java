@@ -7,7 +7,7 @@ import com.auth.service.system.admin.mapper.post.SysPostMapper;
 import com.auth.service.system.admin.model.vo.post.SysPostSearchItemVO;
 import com.auth.service.system.admin.service.admin.SysPostQueryService;
 import com.auth.service.system.admin.service.admin.SysPostService;
-import com.auth.service.system.admin.support.dept.DeptCodeIdResolver;
+import com.auth.service.system.admin.support.dept.DeptLookupSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,13 +40,13 @@ class SysPostControllerTest {
 	private SysPostMapper sysPostMapper;
 
 	@Mock
-	private DeptCodeIdResolver deptCodeIdResolver;
+	private DeptLookupSupport deptLookupSupport;
 
 	private SysPostController controller;
 
 	@BeforeEach
 	void setUp() {
-		PostSheetImporter postSheetImporter = new PostSheetImporter(deptCodeIdResolver, sysPostService);
+		PostSheetImporter postSheetImporter = new PostSheetImporter(deptLookupSupport, sysPostService);
 		SysPostSpreadsheetService sysPostSpreadsheetService = new SysPostSpreadsheetService(sysPostMapper,
 				postSheetImporter);
 		controller = new SysPostController(sysPostQueryService, sysPostService, sysPostSpreadsheetService);

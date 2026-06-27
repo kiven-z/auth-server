@@ -6,7 +6,7 @@ import com.auth.module.file.importer.model.ImportLabelParser;
 import com.auth.module.file.importer.model.ImportRowError;
 import com.auth.service.system.admin.model.form.post.SysPostForm;
 import com.auth.service.system.admin.service.admin.SysPostService;
-import com.auth.service.system.admin.support.dept.DeptCodeIdResolver;
+import com.auth.service.system.admin.support.dept.DeptLookupSupport;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +22,7 @@ import java.util.Map;
 @Component
 public class PostSheetImporter extends AbstractSheetImporter<SysPostImportRow, SysPostForm> {
 
-	private final DeptCodeIdResolver deptCodeIdResolver;
+	private final DeptLookupSupport deptLookupSupport;
 
 	private final SysPostService sysPostService;
 
@@ -35,7 +35,7 @@ public class PostSheetImporter extends AbstractSheetImporter<SysPostImportRow, S
 
 	@Override
 	protected void beforeConvert(List<SysPostImportRow> rows) {
-		deptIdByCode = deptCodeIdResolver.resolveIdsByCodes(rows, SysPostImportRow::getDeptCode);
+		deptIdByCode = deptLookupSupport.resolveIdsByCodes(rows, SysPostImportRow::getDeptCode);
 	}
 
 	@Override

@@ -2,7 +2,7 @@ package com.auth.service.system.admin.service.admin.impl;
 
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.common.data.model.PageResponse;
-import com.auth.service.system.admin.convert.sys.UserDeptConverter;
+import com.auth.service.system.admin.convert.admin.user.UserDeptConverter;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.user.UserDeptMapper;
 import com.auth.service.system.admin.model.entity.UserDeptEntity;
@@ -13,7 +13,6 @@ import com.auth.service.system.admin.model.query.user.UserDeptPageQuery;
 import com.auth.service.system.admin.model.vo.user.UserDeptPageVO;
 import com.auth.service.system.admin.service.admin.SysUserDeptService;
 import com.auth.service.system.admin.support.dept.DeptReferenceChecker;
-import com.auth.service.system.admin.support.user.UserOperationChecker;
 import com.auth.service.system.admin.support.user.UserOrgRelationBatchRemoveSupport;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.UserAuthorizationInvalidationTrigger;
@@ -41,8 +40,6 @@ import java.util.Objects;
 public class SysUserDeptServiceImpl extends ServiceImpl<UserDeptMapper, UserDeptEntity> implements SysUserDeptService {
 
 	private final UserReferenceChecker userReferenceChecker;
-
-	private final UserOperationChecker userOperationChecker;
 
 	private final DeptReferenceChecker deptReferenceChecker;
 
@@ -74,7 +71,7 @@ public class SysUserDeptServiceImpl extends ServiceImpl<UserDeptMapper, UserDept
 	public void create(Long userId, UserDeptAssignForm form) {
 		// 校验用户是否存在
 		userReferenceChecker.getExistingActive(userId);
-		userOperationChecker.requireOperable(List.of(userId));
+		userReferenceChecker.requireOperable(List.of(userId));
 		deptReferenceChecker.getExistingActive(form.getDeptId());
 
 		if (baseMapper.countByUserIdAndDeptId(userId, form.getDeptId()) > 0) {
@@ -96,7 +93,7 @@ public class SysUserDeptServiceImpl extends ServiceImpl<UserDeptMapper, UserDept
 	@Override
 	public void update(Long userId, Long id, UserDeptAssignForm form) {
 		userReferenceChecker.getExistingActive(userId);
-		userOperationChecker.requireOperable(List.of(userId));
+		userReferenceChecker.requireOperable(List.of(userId));
 
 		UserDeptEntity existing = baseMapper.selectByIdAndUserId(id, userId);
 		if (existing == null) {
@@ -131,7 +128,7 @@ public class SysUserDeptServiceImpl extends ServiceImpl<UserDeptMapper, UserDept
 	@Override
 	public void removeAll(Long userId) {
 		userReferenceChecker.getExistingActive(userId);
-		userOperationChecker.requireOperable(List.of(userId));
+		userReferenceChecker.requireOperable(List.of(userId));
 
 		if (baseMapper.deleteByUserId(userId) > 0) {
 			userAuthorizationInvalidationTrigger.submitByUserIds(List.of(userId), "clear-dept");

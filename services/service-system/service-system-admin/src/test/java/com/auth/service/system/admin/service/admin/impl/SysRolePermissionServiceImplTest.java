@@ -59,7 +59,7 @@ class SysRolePermissionServiceImplTest {
 		SysRoleEntity role = new SysRoleEntity();
 		role.setId(1L);
 		role.setRoleCode("ADMIN");
-		when(roleReferenceChecker.getExistingByRoleId(1L)).thenReturn(role);
+		when(roleReferenceChecker.getExistingActive(1L)).thenReturn(role);
 
 		PermissionReferencePO po = new PermissionReferencePO();
 		po.setId(10L);
@@ -78,7 +78,7 @@ class SysRolePermissionServiceImplTest {
 	@Test
 	@DisplayName("分配权限：角色不存在时抛出 DATA_NOT_EXIST")
 	void assignWhenRoleMissingShouldThrow() {
-		when(roleReferenceChecker.getExistingByRoleId(99L))
+		when(roleReferenceChecker.getExistingActive(99L))
 			.thenThrow(new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST, 99L));
 
 		List<Long> permissionIds = List.of(10L);
@@ -94,7 +94,7 @@ class SysRolePermissionServiceImplTest {
 		SysRoleEntity role = new SysRoleEntity();
 		role.setId(1L);
 		role.setRoleCode("ADMIN");
-		when(roleReferenceChecker.getExistingByRoleId(1L)).thenReturn(role);
+		when(roleReferenceChecker.getExistingActive(1L)).thenReturn(role);
 		when(sysPermissionMapper.selectCount(any())).thenReturn(1L);
 
 		sysRolePermissionService.assignPermissions(1L, List.of(10L));
@@ -110,7 +110,7 @@ class SysRolePermissionServiceImplTest {
 		SysRoleEntity role = new SysRoleEntity();
 		role.setId(1L);
 		role.setRoleCode("ADMIN");
-		when(roleReferenceChecker.getExistingByRoleId(1L)).thenReturn(role);
+		when(roleReferenceChecker.getExistingActive(1L)).thenReturn(role);
 
 		sysRolePermissionService.assignPermissions(1L, List.of());
 
@@ -126,7 +126,7 @@ class SysRolePermissionServiceImplTest {
 		SysRoleEntity role = new SysRoleEntity();
 		role.setId(1L);
 		role.setRoleCode("ADMIN");
-		when(roleReferenceChecker.getExistingByRoleId(1L)).thenReturn(role);
+		when(roleReferenceChecker.getExistingActive(1L)).thenReturn(role);
 		when(sysPermissionMapper.selectCount(any())).thenReturn(0L);
 
 		List<Long> permissionIds = List.of(99L);

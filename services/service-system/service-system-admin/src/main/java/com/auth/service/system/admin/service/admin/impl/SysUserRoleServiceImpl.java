@@ -6,8 +6,7 @@ import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleF
 import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
 import com.auth.service.system.admin.service.admin.GrantTableService;
 import com.auth.service.system.admin.service.admin.SysUserRoleService;
-import com.auth.service.system.admin.support.role.RoleGrantReferenceChecker;
-import com.auth.service.system.admin.support.user.UserOperationChecker;
+import com.auth.service.system.admin.support.role.RoleReferenceChecker;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.UserAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
@@ -31,9 +30,7 @@ public class SysUserRoleServiceImpl implements SysUserRoleService {
 
 	private final UserReferenceChecker userReferenceChecker;
 
-	private final UserOperationChecker userOperationChecker;
-
-	private final RoleGrantReferenceChecker roleGrantReferenceChecker;
+	private final RoleReferenceChecker roleReferenceChecker;
 
 	private final GrantTableService grantTableService;
 
@@ -56,11 +53,10 @@ public class SysUserRoleServiceImpl implements SysUserRoleService {
 		// 校验用户是否存在
 		userReferenceChecker.getExistingActive(userId);
 		// 校验用户是否可操作
-		userOperationChecker.requireOperable(List.of(userId));
+		userReferenceChecker.requireOperable(List.of(userId));
 
 		List<Long> roleIds = CollUtil.emptyIfNull(form.getRoleIds()).stream().distinct().toList();
-		roleGrantReferenceChecker.requireExistingEnabledRoleIds(roleIds,
-				SystemCommonResultCode.GRANT_REFERENCE_INVALID);
+		roleReferenceChecker.requireExistingEnabledRoleIds(roleIds, SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 
 		grantTableService.replaceSubjectRoleGrants(GrantTableSubjectType.USER.name(), userId, roleIds);
 

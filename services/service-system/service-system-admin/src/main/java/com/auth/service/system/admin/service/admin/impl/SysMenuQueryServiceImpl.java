@@ -2,8 +2,8 @@ package com.auth.service.system.admin.service.admin.impl;
 
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.constants.PermissionConstant;
-import com.auth.service.system.admin.convert.menu.SysMenuConverter;
-import com.auth.service.system.admin.convert.reference.ReferenceConverter;
+import com.auth.service.system.admin.convert.admin.menu.SysMenuConverter;
+import com.auth.service.system.admin.convert.admin.ReferenceConverter;
 import com.auth.service.system.admin.mapper.menu.SysMenuMapper;
 import com.auth.service.system.admin.mapper.menu.SysMenuRoleMapper;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;

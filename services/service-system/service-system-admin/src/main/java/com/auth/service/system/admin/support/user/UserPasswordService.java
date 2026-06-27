@@ -9,7 +9,6 @@ import com.auth.service.system.admin.model.form.user.SysUserChangePasswordForm;
 import com.auth.service.system.admin.service.admin.LogUserPasswordHistoryService;
 import com.auth.service.system.authorization.dispatch.trigger.UserSessionRevocationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -34,7 +33,7 @@ public class UserPasswordService {
 
 	private final UserSessionRevocationTrigger userSessionRevocationTrigger;
 
-	private final UserOperationChecker userOperationChecker;
+	private final UserReferenceChecker userReferenceChecker;
 
 	private final PasswordEncoder passwordEncoder;
 
@@ -64,15 +63,8 @@ public class UserPasswordService {
 	 * @param changeIp 客户端 IP
 	 */
 	public void changeOwnPassword(SysUserChangePasswordForm form, String changeIp) {
-		Long currentUserId = SecurityUserUtils.getUserId();
-		if (currentUserId == null) {
-			throw new SystemBusinessException(SystemCommonResultCode.JWT_INVALID);
-		}
-
-		UserEntity existing = sysUserMapper.selectById(currentUserId);
-		if (existing == null) {
-			throw new SystemBusinessException(SystemCommonResultCode.USER_NOT_FOUND, currentUserId);
-		}
+		Long userId = SecurityUserUtils.getUserId();
+		UserEntity existing = userReferenceChecker.getExistingActive(userId);
 
 		if (!passwordEncoder.matches(form.getOldPassword(), existing.getPassword())) {
 			throw new SystemBusinessException(SystemAdminResultCode.OLD_PASSWORD_INCORRECT);
@@ -88,12 +80,9 @@ public class UserPasswordService {
 	 * @param changeIp 客户端 IP
 	 */
 	public void resetPasswordByAdmin(Long userId, SysUserAdminResetPasswordForm form, String changeIp) {
-		UserEntity existing = sysUserMapper.selectById(userId);
-		if (existing == null) {
-			throw new SystemBusinessException(SystemCommonResultCode.USER_NOT_FOUND, userId);
-		}
+		UserEntity existing = userReferenceChecker.getExistingActive(userId);
 
-		userOperationChecker.requireOperable(List.of(userId));
+		userReferenceChecker.requireOperable(List.of(userId));
 		applyPasswordChange(existing, form.getNewPassword(), form.getConfirmPassword(), changeIp);
 	}
 

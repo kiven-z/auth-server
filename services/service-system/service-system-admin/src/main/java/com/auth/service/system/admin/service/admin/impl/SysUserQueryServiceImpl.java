@@ -4,10 +4,8 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.platform.persistence.model.UserEntity;
-import com.auth.service.system.admin.convert.reference.ReferenceConverter;
-import com.auth.service.system.admin.convert.sys.SysUserConverter;
-import com.auth.service.system.admin.convert.sys.SysUserDetailConverter;
-import com.auth.service.system.admin.convert.sys.SysUserProfileConverter;
+import com.auth.service.system.admin.convert.admin.ReferenceConverter;
+import com.auth.service.system.admin.convert.admin.user.SysUserConverter;
 import com.auth.service.system.admin.mapper.permission.SysPermissionMapper;
 import com.auth.service.system.admin.mapper.role.SysRoleMapper;
 import com.auth.service.system.admin.mapper.user.SysUserMapper;
@@ -87,7 +85,7 @@ public class SysUserQueryServiceImpl extends ServiceImpl<SysUserQueryMapper, Use
 			throw new SystemBusinessException(SystemCommonResultCode.PARAM_REQUIRED, "userId");
 		}
 		UserEntity user = userReferenceChecker.getExistingActive(userId);
-		SysUserProfileVO response = SysUserProfileConverter.INSTANCE.toProfileVo(user);
+		SysUserProfileVO response = SysUserConverter.INSTANCE.toProfileVo(user);
 
 		List<UserDeptProfilePO> deptProfileList = baseMapper.selectDeptProfileByUserId(userId);
 		response.setDeptList(ReferenceConverter.INSTANCE.toUserDeptReferenceList(deptProfileList));
@@ -104,7 +102,7 @@ public class SysUserQueryServiceImpl extends ServiceImpl<SysUserQueryMapper, Use
 	@Override
 	public SysUserDetailVO getDetail(Long userId) {
 		SysUserProfileVO profile = getProfile(userId);
-		SysUserDetailVO detail = SysUserDetailConverter.INSTANCE.fromProfile(profile);
+		SysUserDetailVO detail = SysUserConverter.INSTANCE.fromProfile(profile);
 
 		UserEffectiveCodesSnapshot effectiveCodesSnapshot = UserEffectiveCodesSnapshot.builder()
 			.permissionCodes(List.of())
@@ -143,7 +141,7 @@ public class SysUserQueryServiceImpl extends ServiceImpl<SysUserQueryMapper, Use
 		List<UserSearchItemPO> searchItemList = baseMapper.searchByKeyword(keyword, limit);
 		List<UserSearchItemPO> list = Objects.requireNonNullElse(searchItemList, List.of());
 
-		return SysUserProfileConverter.INSTANCE.toSearchItemVoList(list);
+		return SysUserConverter.INSTANCE.toSearchItemVoList(list);
 	}
 
 }

@@ -11,7 +11,7 @@ import com.auth.service.system.admin.mapper.dept.SysDeptMapper;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.po.dept.SysDeptPageRowPO;
 import com.auth.service.system.admin.model.query.dept.SysDeptPageQuery;
-import com.auth.service.system.admin.support.dept.DeptPathResolver;
+import com.auth.service.system.admin.support.dept.DeptLookupSupport;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.http.ResponseEntity;
@@ -40,16 +40,16 @@ public class SysDeptSpreadsheetService
 
 	private final SysDeptMapper sysDeptMapper;
 
-	private final DeptPathResolver deptPathResolver;
+	private final DeptLookupSupport deptLookupSupport;
 
 	private final DeptSheetImporter deptSheetImporter;
 
-	public SysDeptSpreadsheetService(SysDeptMapper sysDeptMapper, DeptPathResolver deptPathResolver,
+	public SysDeptSpreadsheetService(SysDeptMapper sysDeptMapper, DeptLookupSupport deptLookupSupport,
 			DeptSheetImporter deptSheetImporter) {
 		super(ExcelExportWriter.withStatusStyle(SysDeptSpreadsheetRow.class, SHEET_NAME,
 				new StatusColorCellWriteHandler(STATUS_COLUMN_INDEX)), FILENAME_PREFIX);
 		this.sysDeptMapper = sysDeptMapper;
-		this.deptPathResolver = deptPathResolver;
+		this.deptLookupSupport = deptLookupSupport;
 		this.deptSheetImporter = deptSheetImporter;
 	}
 
@@ -76,7 +76,7 @@ public class SysDeptSpreadsheetService
 	@Override
 	protected List<SysDeptSpreadsheetRow> toExportRows(List<SysDeptPageRowPO> rows) {
 		List<Long> deptIds = rows.stream().map(SysDeptPageRowPO::getId).toList();
-		Map<Long, String> deptPathById = deptPathResolver.resolve(deptIds);
+		Map<Long, String> deptPathById = deptLookupSupport.resolvePaths(deptIds);
 
 		return rows.stream().map(row -> {
 			SysDeptSpreadsheetRow exportRow = SysDeptSpreadsheetConverter.INSTANCE.toSpreadsheetRow(row);
@@ -98,9 +98,6 @@ public class SysDeptSpreadsheetService
 
 	/**
 	 * 生成部门导入模板并返回文件响应
-	 *
-	 * <p>
-	 * 模板含一条示例行，方便用户了解填写格式。
 	 * @return 模板文件响应
 	 * @throws IOException 写入失败
 	 */

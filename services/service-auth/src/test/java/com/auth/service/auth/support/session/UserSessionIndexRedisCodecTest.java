@@ -56,7 +56,8 @@ class UserSessionIndexRedisCodecTest {
 		assertThat(args).hasSizeGreaterThanOrEqualTo(6);
 		assertThat(args[0]).isEqualTo(TestConstants.JTI);
 		assertThat(args[1]).isEqualTo("1700000000000");
-		assertThat(args[2]).isEqualTo("3600");
+		// TTL 按剩余秒数向下取整，设置过期时间与计算之间可能相差 1ms，允许 3599~3600
+		assertThat(Long.parseLong((String) args[2])).isBetween(3599L, 3600L);
 		assertThat(args[3]).isEqualTo(String.valueOf(TestConstants.USER_ID));
 		assertThat(args[4]).isInstanceOf(String.class);
 	}

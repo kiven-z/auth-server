@@ -12,7 +12,7 @@ import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
 import com.auth.service.system.admin.support.granttable.GrantTableSubjectExistenceVerifier;
 import com.auth.service.system.admin.support.post.PostReferenceChecker;
-import com.auth.service.system.admin.support.role.RoleGrantReferenceChecker;
+import com.auth.service.system.admin.support.role.RoleReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.GrantAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
@@ -54,7 +54,7 @@ class GrantTableServiceImplTest {
 	private GrantTableMapper grantTableMapper;
 
 	@Mock
-	private RoleGrantReferenceChecker roleGrantReferenceChecker;
+	private RoleReferenceChecker roleReferenceChecker;
 
 	@Mock
 	private GrantAuthorizationInvalidationTrigger grantInvalidationTrigger;
@@ -76,8 +76,8 @@ class GrantTableServiceImplTest {
 		PostReferenceChecker postReferenceChecker = new PostReferenceChecker(sysPostMapper, postReferenceCheckerMapper);
 		GrantTableSubjectExistenceVerifier subjectExistenceVerifier = new GrantTableSubjectExistenceVerifier(null,
 				postReferenceChecker);
-		grantTableService = spy(new GrantTableServiceImpl(subjectExistenceVerifier, roleGrantReferenceChecker,
-				grantInvalidationTrigger));
+		grantTableService = spy(
+				new GrantTableServiceImpl(subjectExistenceVerifier, roleReferenceChecker, grantInvalidationTrigger));
 		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(grantTableService, grantTableMapper);
@@ -143,7 +143,8 @@ class GrantTableServiceImplTest {
 
 		grantTableService.replaceOrgSubjectRoles(GrantTableSubjectType.POST, SUBJECT_ID, form);
 
-		verify(roleGrantReferenceChecker).requireGrantTableOrgRoleIds(GrantTableSubjectType.POST, List.of(101L, 102L));
+		verify(roleReferenceChecker).requireExistingEnabledRoleIds(List.of(101L, 102L),
+				SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 		verify(grantTableMapper).deleteBySubject(GrantTableSubjectType.POST.name(), SUBJECT_ID);
 		verify(grantTableService).saveBatch(any(Collection.class));
 
