@@ -74,4 +74,13 @@ class SysPermissionSpreadsheetServiceTest {
 		verify(sysPermissionMapper).selectListByPage(any(Page.class), eq(filter), anyString());
 	}
 
+	@Test
+	@DisplayName("导入模板下载返回非空 Excel 字节")
+	void downloadImportTemplate_returnsNonEmptyExcelBytes() throws IOException {
+		ResponseEntity<byte[]> response = spreadsheetService.downloadImportTemplate();
+
+		assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
+		assertThat(response.getBody()).isNotNull().isNotEmpty();
+	}
+
 }

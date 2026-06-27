@@ -55,6 +55,13 @@ public class SysPermissionController {
 		return sysPermissionSpreadsheetService.export(filter, scope);
 	}
 
+	@Operation(summary = "权限导入模板下载")
+	@PreAuthorize("@auth.decide('sysPermission:import')")
+	@GetMapping("/import/template")
+	public ResponseEntity<byte[]> importTemplate() throws IOException {
+		return sysPermissionSpreadsheetService.downloadImportTemplate();
+	}
+
 	@Operation(summary = "权限分页查询")
 	@PreAuthorize("@auth.decide('sysPermission:query')")
 	@GetMapping("/page")

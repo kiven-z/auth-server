@@ -2,6 +2,7 @@ package com.auth.service.system.admin.excel.permission;
 
 import com.auth.module.file.export.AbstractSyncPagedExportService;
 import com.auth.module.file.export.ExportScopeQueryFields;
+import com.auth.module.file.export.delivery.SyncFileDelivery;
 import com.auth.module.file.export.writer.ExcelExportWriter;
 import com.auth.service.system.admin.convert.spreadsheet.SysPermissionSpreadsheetConverter;
 import com.auth.service.system.admin.excel.StatusColorCellWriteHandler;
@@ -65,6 +66,22 @@ public class SysPermissionSpreadsheetService
 	@Override
 	protected List<SysPermissionSpreadsheetRow> toExportRows(List<SysPermissionEntity> rows) {
 		return SysPermissionSpreadsheetConverter.INSTANCE.toSpreadsheetRows(rows);
+	}
+
+	/**
+	 * 生成权限导入模板并返回文件响应
+	 * @return 模板文件响应
+	 * @throws IOException 写入失败
+	 */
+	public ResponseEntity<byte[]> downloadImportTemplate() throws IOException {
+		SysPermissionImportRow row = new SysPermissionImportRow();
+		row.setPermissionCode("（示例：sysdept:query，全小写，1～3段冒号分隔）");
+		row.setPermissionName("（示例：部门查询）");
+		row.setStatusLabel("启用");
+		row.setOrderNum(1);
+		row.setRemark("（可选）");
+		byte[] bytes = new ExcelExportWriter<>(SysPermissionImportRow.class, "权限导入模板").write(List.of(row));
+		return SyncFileDelivery.deliver(bytes, "permission_import_template.xlsx");
 	}
 
 }
