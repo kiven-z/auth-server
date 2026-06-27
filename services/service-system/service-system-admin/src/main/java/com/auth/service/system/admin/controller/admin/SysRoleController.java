@@ -57,6 +57,13 @@ public class SysRoleController {
 		return sysRoleSpreadsheetService.export(filter, scope);
 	}
 
+	@Operation(summary = "角色导入模板下载")
+	@PreAuthorize("@auth.decide('sysRole:import')")
+	@GetMapping("/import/template")
+	public ResponseEntity<byte[]> importTemplate() throws IOException {
+		return sysRoleSpreadsheetService.downloadImportTemplate();
+	}
+
 	@Operation(summary = "角色分页查询")
 	@PreAuthorize("@auth.decide('sysRole:query')")
 	@GetMapping("/page")

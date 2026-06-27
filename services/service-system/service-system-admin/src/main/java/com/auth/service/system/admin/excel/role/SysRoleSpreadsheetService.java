@@ -2,6 +2,7 @@ package com.auth.service.system.admin.excel.role;
 
 import com.auth.module.file.export.AbstractSyncPagedExportService;
 import com.auth.module.file.export.ExportScopeQueryFields;
+import com.auth.module.file.export.delivery.SyncFileDelivery;
 import com.auth.module.file.export.writer.ExcelExportWriter;
 import com.auth.service.system.admin.convert.spreadsheet.SysRoleSpreadsheetConverter;
 import com.auth.service.system.admin.excel.StatusColorCellWriteHandler;
@@ -65,6 +66,22 @@ public class SysRoleSpreadsheetService
 	@Override
 	protected List<SysRoleSpreadsheetRow> toExportRows(List<SysRoleEntity> rows) {
 		return SysRoleSpreadsheetConverter.INSTANCE.toSpreadsheetRows(rows);
+	}
+
+	/**
+	 * 生成角色导入模板并返回文件响应
+	 * @return 模板文件响应
+	 * @throws IOException 写入失败
+	 */
+	public ResponseEntity<byte[]> downloadImportTemplate() throws IOException {
+		SysRoleImportRow row = new SysRoleImportRow();
+		row.setRoleCode("（示例：ADMIN，全大写+下划线，首字符大写字母）");
+		row.setRoleName("（示例：系统管理员）");
+		row.setStatusLabel("启用");
+		row.setOrderNum(1);
+		row.setRemark("（可选）");
+		byte[] bytes = new ExcelExportWriter<>(SysRoleImportRow.class, "角色导入模板").write(List.of(row));
+		return SyncFileDelivery.deliver(bytes, "role_import_template.xlsx");
 	}
 
 }
