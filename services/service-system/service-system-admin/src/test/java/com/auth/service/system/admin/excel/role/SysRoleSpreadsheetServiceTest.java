@@ -4,6 +4,7 @@ import com.auth.module.file.export.ExportScopeQueryFields;
 import com.auth.service.system.admin.mapper.role.SysRoleMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.query.role.SysRoleQuery;
+import com.auth.service.system.admin.service.admin.SysRoleService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.poi.ss.usermodel.Row;
@@ -38,6 +39,9 @@ class SysRoleSpreadsheetServiceTest {
 	@Mock
 	private SysRoleMapper sysRoleMapper;
 
+	@Mock
+	private SysRoleService sysRoleService;
+
 	private SysRoleSpreadsheetService spreadsheetService;
 
 	private static ExportScopeQueryFields baseScope() {
@@ -49,7 +53,8 @@ class SysRoleSpreadsheetServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		spreadsheetService = new SysRoleSpreadsheetService(sysRoleMapper);
+		RoleSheetImporter roleSheetImporter = new RoleSheetImporter(sysRoleMapper, sysRoleService);
+		spreadsheetService = new SysRoleSpreadsheetService(sysRoleMapper, roleSheetImporter);
 	}
 
 	@Test

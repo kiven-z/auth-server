@@ -4,6 +4,7 @@ import com.auth.module.file.export.AbstractSyncPagedExportService;
 import com.auth.module.file.export.ExportScopeQueryFields;
 import com.auth.module.file.export.delivery.SyncFileDelivery;
 import com.auth.module.file.export.writer.ExcelExportWriter;
+import com.auth.module.file.importer.model.SpreadsheetImportResult;
 import com.auth.service.system.admin.convert.spreadsheet.SysRoleSpreadsheetConverter;
 import com.auth.service.system.admin.excel.StatusColorCellWriteHandler;
 import com.auth.service.system.admin.mapper.role.SysRoleMapper;
@@ -15,6 +16,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
@@ -36,10 +38,13 @@ public class SysRoleSpreadsheetService
 
 	private final SysRoleMapper sysRoleMapper;
 
-	public SysRoleSpreadsheetService(SysRoleMapper sysRoleMapper) {
+	private final RoleSheetImporter roleSheetImporter;
+
+	public SysRoleSpreadsheetService(SysRoleMapper sysRoleMapper, RoleSheetImporter roleSheetImporter) {
 		super(ExcelExportWriter.withStatusStyle(SysRoleSpreadsheetRow.class, SHEET_NAME,
 				new StatusColorCellWriteHandler(STATUS_COLUMN_INDEX)), FILENAME_PREFIX);
 		this.sysRoleMapper = sysRoleMapper;
+		this.roleSheetImporter = roleSheetImporter;
 	}
 
 	/**
@@ -66,6 +71,17 @@ public class SysRoleSpreadsheetService
 	@Override
 	protected List<SysRoleSpreadsheetRow> toExportRows(List<SysRoleEntity> rows) {
 		return SysRoleSpreadsheetConverter.INSTANCE.toSpreadsheetRows(rows);
+	}
+
+	/**
+	 * 从上传文件批量导入角色（解析 → 校验 → 写入，全部通过才落库）
+	 * @param file 上传的 Excel 文件
+	 * @return 导入结果（含行级错误）
+	 * @throws IOException 文件读取失败
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	public SpreadsheetImportResult importExcel(MultipartFile file) throws IOException {
+		return roleSheetImporter.doImport(file);
 	}
 
 	/**
