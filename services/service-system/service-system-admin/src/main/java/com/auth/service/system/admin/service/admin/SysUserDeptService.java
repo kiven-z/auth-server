@@ -1,13 +1,13 @@
 package com.auth.service.system.admin.service.admin;
 
+import java.util.List;
+
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.model.entity.UserDeptEntity;
 import com.auth.service.system.admin.model.form.user.UserDeptAssignForm;
 import com.auth.service.system.admin.model.query.user.UserDeptPageQuery;
 import com.auth.service.system.admin.model.vo.user.UserDeptPageVO;
 import com.baomidou.mybatisplus.extension.service.IService;
-
-import java.util.List;
 
 /**
  * 用户部门关联管理

@@ -1,5 +1,8 @@
 package com.auth.service.system.admin.model.vo.user;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.auth.service.system.admin.model.vo.reference.PermissionReferenceVO;
 import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -7,9 +10,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 用户详情 VO（档案 + 生效授权）

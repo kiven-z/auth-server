@@ -1,6 +1,12 @@
 package com.auth.module.security.datapermission.handler;
 
+import java.util.EnumMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
@@ -9,11 +15,11 @@ import com.auth.module.security.contract.api.authorization.ScopeGrant;
 import com.auth.module.security.contract.api.datascope.DataScopeStorageType;
 import com.auth.module.security.contract.constants.PermissionConstant;
 import com.auth.module.security.datapermission.annotation.DataScope;
-import com.auth.module.security.datapermission.strategy.*;
-
-import java.util.*;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import com.auth.module.security.datapermission.strategy.AllScopeSqlStrategy;
+import com.auth.module.security.datapermission.strategy.DimensionValuesScopeSqlStrategy;
+import com.auth.module.security.datapermission.strategy.ScopeSqlBuildContext;
+import com.auth.module.security.datapermission.strategy.ScopeSqlStrategy;
+import com.auth.module.security.datapermission.strategy.SelfScopeSqlStrategy;
 
 /**
  * 默认处理器用于部门/自身过滤

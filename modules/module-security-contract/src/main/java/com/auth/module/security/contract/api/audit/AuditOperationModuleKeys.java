@@ -1,8 +1,8 @@
 package com.auth.module.security.contract.api.audit;
 
-import lombok.experimental.UtilityClass;
-
 import java.util.Objects;
+
+import lombok.experimental.UtilityClass;
 
 /**
  * 将 {@link AuditServiceDomain} 与小模块编码组合为写入 {@code log_operation.module} 的稳定键。

@@ -1,13 +1,13 @@
 package com.auth.service.system.admin.model.po.dept;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.LocalDateTime;
 
 /**
  * 部门分页行（持久层查询投影，含父部门信息）

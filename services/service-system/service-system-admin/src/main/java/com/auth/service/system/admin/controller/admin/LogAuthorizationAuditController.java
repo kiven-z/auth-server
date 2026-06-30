@@ -1,5 +1,7 @@
 package com.auth.service.system.admin.controller.admin;
 
+import java.util.List;
+
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.model.entity.LogAuthorizationAuditEntity;
@@ -11,10 +13,14 @@ import com.auth.service.system.admin.service.admin.LogAuthorizationAuditService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
@@ -39,7 +45,7 @@ public class LogAuthorizationAuditController {
 	}
 
 	@Operation(summary = "分页查询权限决策审计")
-	@PreAuthorize("@auth.decide('sysLogAuthorizationAudit:query')")
+	@PreAuthorize("@auth.decide('log:authaudit:query')")
 	@GetMapping("page")
 	public Result<PageResponse<LogAuthorizationAuditPageVO>> page(LogAuthorizationAuditQuery query) {
 		Page<LogAuthorizationAuditEntity> page = new Page<>(query.getPageIndex(), query.getPageSize());
@@ -48,7 +54,7 @@ public class LogAuthorizationAuditController {
 	}
 
 	@Operation(summary = "权限决策审计详情")
-	@PreAuthorize("@auth.decide('sysLogAuthorizationAudit:detail')")
+	@PreAuthorize("@auth.decide('log:authaudit:detail')")
 	@GetMapping("{id}")
 	public Result<LogAuthorizationAuditDetailVO> detail(@PathVariable("id") Long id) {
 		LogAuthorizationAuditDetailVO detail = logAuthorizationAuditQueryService.getDetail(id);
@@ -56,7 +62,7 @@ public class LogAuthorizationAuditController {
 	}
 
 	@Operation(summary = "批量删除权限决策审计（仅接收 ID 列表）")
-	@PreAuthorize("@auth.decide('sysLogAuthorizationAudit:delete')")
+	@PreAuthorize("@auth.decide('log:authaudit:delete')")
 	@DeleteMapping
 	public Result<String> batchDelete(@RequestBody List<Long> ids) {
 		logAuthorizationAuditService.removeBatchByIds(ids);

@@ -35,7 +35,7 @@ alwaysApply: true
 
 ### 默认策略
 
-- 业务层稳定 Java 类型之间的映射（Entity/PO/Form/VO/Response/领域 record），放在 `{module}/convert`，命名 `XxxConverter`，使用
+- 业务层稳定 Java 类型之间的映射（Entity/PO/Form/VO/Response），放在 `{module}/convert`，命名 `XxxConverter`，使用
   `INSTANCE = Mappers.getMapper(...)`。
 - MapStruct `@Mapper` 必须引用 `config = AuthMapperConfig.class`（`common-mapstruct`）：目标未映射、类型转换失败在**编译期**
   报错。
@@ -56,7 +56,7 @@ alwaysApply: true
 
 | 场景                                        | 推荐做法                                                                                                                       |
 |-------------------------------------------|----------------------------------------------------------------------------------------------------------------------------|
-| ≤3 个简单同名字段                                | 内联赋值或 record 构造                                                                                                            |
+| ≤3 个简单同名字段                                | 内联赋值                                                                                                                       |
 | `Map` / `Map<Object,Object>` / Redis Hash | `infrastructure` 下 `*RedisCodec`，或 Repository 内私有方法；基础设施层可用 hutool `BeanUtil` 做 `Map↔Bean`，类上注释 `infrastructure: Map↔Bean` |
 | 含 MD5、TTL、签名、多步编排                         | Builder / 领域工厂；MapStruct 只映射已算好的值                                                                                          |
 | 映射规则频繁变化、强 if/else                        | 显式 Java                                                                                                                    |
@@ -66,7 +66,7 @@ alwaysApply: true
 
 引入或保留 MapStruct 前必须自问：
 
-- 是否比手写 setter、record 构造或基础设施层 `BeanUtil` 更短、更清晰？
+- 是否比手写 setter 构造或基础设施层 `BeanUtil` 更短、更清晰？
 - 新人能否一眼看出字段来源与去向？
 
 若答案为否 → 不用 MapStruct，并在 Javadoc 或 PR 说明中标注 **复杂度否决**。

@@ -1,9 +1,9 @@
 package com.auth.module.security.autoconfigure.boot.filter;
 
+import java.util.Set;
+
 import org.springframework.boot.autoconfigure.AutoConfigurationImportFilter;
 import org.springframework.boot.autoconfigure.AutoConfigurationMetadata;
-
-import java.util.Set;
 
 /**
  * 因为在此处使用了SpringSecurity，在每个服务引入时会在控制台输出密码，虽然不会影响程序的运行也不会有什么额外影响

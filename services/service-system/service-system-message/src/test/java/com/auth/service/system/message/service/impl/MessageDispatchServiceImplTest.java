@@ -1,5 +1,8 @@
 package com.auth.service.system.message.service.impl;
 
+import java.util.Collections;
+import java.util.List;
+
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.channel.MessageSender;
 import com.auth.module.message.api.command.TemplateMessageCommand;
@@ -14,15 +17,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Collections;
-import java.util.List;
-
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
 import static com.auth.service.system.message.exception.MessageResultCode.MESSAGE_CHANNEL_UNSUPPORTED;
 import static com.auth.service.system.message.exception.MessageResultCode.MESSAGE_COMMAND_INVALID;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link MessageDispatchServiceImpl} 单元测试

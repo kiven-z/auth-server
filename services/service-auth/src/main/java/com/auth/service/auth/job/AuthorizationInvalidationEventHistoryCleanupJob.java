@@ -2,14 +2,13 @@ package com.auth.service.auth.job;
 
 import java.time.LocalDateTime;
 
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-
 import com.auth.service.auth.config.AuthorizationInvalidationProperties;
 import com.auth.service.auth.service.AuthorizationInvalidationEventService;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 /**
  * 授权失效幂等事件 SUCCESS 历史清理：删除已完成且超过保留期的记录

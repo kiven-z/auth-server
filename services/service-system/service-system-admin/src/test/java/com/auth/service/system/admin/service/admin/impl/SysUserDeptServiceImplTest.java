@@ -1,9 +1,12 @@
 package com.auth.service.system.admin.service.admin.impl;
 
+import java.lang.reflect.Field;
+import java.time.LocalDateTime;
+import java.util.List;
+
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
-import com.auth.service.system.admin.mapper.dept.DeptReferenceCheckerMapper;
 import com.auth.service.system.admin.mapper.dept.SysDeptMapper;
 import com.auth.service.system.admin.mapper.user.SysUserMapper;
 import com.auth.service.system.admin.mapper.user.UserDeptMapper;
@@ -24,7 +27,7 @@ import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.extension.repository.CrudRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,15 +37,15 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.lang.reflect.Field;
-import java.time.LocalDateTime;
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link SysUserDeptServiceImpl} 单元测试
@@ -67,9 +70,6 @@ class SysUserDeptServiceImplTest {
 
 	@Mock
 	private SysDeptMapper sysDeptMapper;
-
-	@Mock
-	private DeptReferenceCheckerMapper deptReferenceCheckerMapper;
 
 	@Mock
 	private UserDeptMapper userDeptMapper;
@@ -124,12 +124,12 @@ class SysUserDeptServiceImplTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		UserReferenceChecker userReferenceChecker = new UserReferenceChecker(sysUserMapper);
-		DeptReferenceChecker deptReferenceChecker = new DeptReferenceChecker(sysDeptMapper, deptReferenceCheckerMapper);
+		DeptReferenceChecker deptReferenceChecker = new DeptReferenceChecker(sysDeptMapper);
 		UserOrgRelationBatchRemoveSupport batchRemoveSupport = new UserOrgRelationBatchRemoveSupport(
 				userReferenceChecker, userAuthorizationInvalidationTrigger);
 		sysUserDeptService = new SysUserDeptServiceImpl(userReferenceChecker, deptReferenceChecker,
 				userAuthorizationInvalidationTrigger, auditUserDisplayService, batchRemoveSupport);
-		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
+		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysUserDeptService, userDeptMapper);
 	}

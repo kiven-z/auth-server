@@ -1,12 +1,12 @@
 package com.auth.service.auth.model.vo.authorization;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-
-import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * 授权失效幂等事件统计 VO

@@ -1,10 +1,10 @@
 package com.auth.common.core.utils;
 
-import cn.hutool.core.text.CharSequenceUtil;
-import lombok.experimental.UtilityClass;
-
 import java.util.List;
 import java.util.Objects;
+
+import cn.hutool.core.text.CharSequenceUtil;
+import lombok.experimental.UtilityClass;
 
 /**
  * 管理端实体更新前后的字段变更判断

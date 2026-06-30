@@ -1,9 +1,8 @@
 package com.auth.service.system.schedule.support;
 
-import com.auth.service.system.schedule.model.enums.SysJobQuartzRuntimeStatus;
-
 import java.util.Date;
 
+import com.auth.service.system.schedule.model.enums.SysJobQuartzRuntimeStatus;
 import lombok.Builder;
 import lombok.Value;
 import lombok.experimental.Accessors;

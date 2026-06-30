@@ -1,10 +1,10 @@
 package com.auth.common.web.jackson;
 
+import java.io.IOException;
+
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.StdScalarDeserializer;
-
-import java.io.IOException;
 
 /**
  * 修剪JSON字符串值的前后Unicode空白字符，使用{@link String#strip()}

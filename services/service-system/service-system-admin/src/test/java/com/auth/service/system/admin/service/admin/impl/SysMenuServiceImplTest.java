@@ -1,18 +1,22 @@
 package com.auth.service.system.admin.service.admin.impl;
 
+import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.List;
+
 import com.auth.service.system.admin.mapper.menu.SysMenuMapper;
 import com.auth.service.system.admin.mapper.menu.SysMenuRoleMapper;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.admin.model.form.menu.SysMenuMoveForm;
 import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.auth.service.system.admin.model.vo.menu.SysMenuDetailVO;
-import com.auth.service.system.admin.support.menu.MenuWebRouteTreeAssembler;
 import com.auth.service.system.admin.support.menu.MenuReferenceChecker;
+import com.auth.service.system.admin.support.menu.MenuWebRouteTreeAssembler;
 import com.auth.service.system.authorization.dispatch.query.UserEffectiveCodesResolver;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.common.service.AuditUserDisplayService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.extension.repository.CrudRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,15 +24,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link SysMenuServiceImpl} 单元测试。
@@ -73,7 +79,7 @@ class SysMenuServiceImplTest {
 		sysMenuService = new SysMenuServiceImpl(menuReferenceChecker);
 		sysMenuQueryService = new SysMenuQueryServiceImpl(auditUserDisplayService, userEffectiveCodesResolver,
 				menuWebRouteTreeAssembler, menuReferenceChecker, sysMenuRoleMapper);
-		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
+		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysMenuService, sysMenuMapper);
 		baseMapperField.set(sysMenuQueryService, sysMenuMapper);

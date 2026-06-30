@@ -1,9 +1,16 @@
 package com.auth.service.system.admin.service.admin.impl;
 
+import java.time.LocalDate;
+import java.time.Period;
+import java.util.List;
+import java.util.Objects;
+
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.core.utils.FieldChangeSupport;
 import com.auth.common.data.model.enums.UserStatus;
 import com.auth.module.platform.persistence.model.UserEntity;
+import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.convert.admin.user.SysUserConverter;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.role.GrantTableMapper;
@@ -16,14 +23,10 @@ import com.auth.service.system.authorization.dispatch.trigger.UserSessionRevocat
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.time.Period;
-import java.util.List;
-import java.util.Objects;
 
 /**
  * 系统用户服务实现
@@ -35,12 +38,15 @@ import java.util.Objects;
 @Transactional(rollbackFor = Exception.class)
 public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> implements SysUserService {
 
-	private static final String GRANT_SUBJECT_TYPE_USER = "USER";
-
 	/**
 	 * 新建用户默认权限版本号
 	 */
 	private static final Long DEFAULT_PERM_VERSION = 0L;
+
+	/**
+	 * Excel 导入与批量新增时的持久化批次大小
+	 */
+	private static final int IMPORT_SAVE_BATCH_SIZE = 500;
 
 	private final UserReferenceChecker userReferenceChecker;
 
@@ -54,36 +60,52 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void create(SysUserForm form) {
-		userReferenceChecker.assertUniqueBusinessKeys(form, null);
-		UserEntity entity = SysUserConverter.INSTANCE.toEntity(form);
-
-		String initialPassword = form.getInitialPassword();
-		entity.setPassword(passwordEncoder.encode(initialPassword));
-		if (form.getBirthday() != null) {
-			entity.setAge(Period.between(form.getBirthday(), LocalDate.now()).getYears());
+	public void createBatchFromImport(List<SysUserForm> forms) {
+		if (CollUtil.isEmpty(forms)) {
+			return;
 		}
-		entity.setPermVersion(DEFAULT_PERM_VERSION);
 
-		save(entity);
+		List<String> usernames = forms.stream().map(SysUserForm::getUsername).toList();
+		List<String> emails = forms.stream().map(SysUserForm::getEmail).toList();
+		List<String> phones = forms.stream().map(SysUserForm::getPhone).toList();
+		List<String> employeeNos = forms.stream().map(SysUserForm::getEmployeeNo).toList();
+		userReferenceChecker.requireAbsentUserBusinessKeys(usernames, emails, phones, employeeNos, null);
+
+		List<UserEntity> entities = forms.stream().map(form -> {
+			UserEntity entity = SysUserConverter.INSTANCE.toEntity(form);
+			entity.setPassword(passwordEncoder.encode(form.getInitialPassword()));
+			if (form.getBirthday() != null) {
+				entity.setAge(Period.between(form.getBirthday(), LocalDate.now()).getYears());
+			}
+			entity.setPermVersion(DEFAULT_PERM_VERSION);
+			return entity;
+		}).toList();
+
+		super.saveBatch(entities, IMPORT_SAVE_BATCH_SIZE);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void update(Long id, SysUserForm form) {
+	public void update(SysUserForm form) {
+		Long id = form.getId();
 		UserEntity existing = userReferenceChecker.getExistingActive(id);
-
 		List<Long> userIds = List.of(id);
+		String username = form.getUsername();
+		String email = form.getEmail();
+		String phone = form.getPhone();
+		String employeeNo = form.getEmployeeNo();
+		List<String> employeeNos = CharSequenceUtil.isNotBlank(employeeNo) ? List.of(employeeNo) : List.of();
+
 		userReferenceChecker.requireOperable(userIds);
-		userReferenceChecker.assertUniqueBusinessKeys(form, id);
+		userReferenceChecker.requireAbsentUserBusinessKeys(List.of(username), List.of(email), List.of(phone),
+				employeeNos, id);
 
 		// 敏感字段变更时踢出全部会话
-		boolean revoke = FieldChangeSupport.anyChanged(
-				FieldChangeSupport.codeChanged(existing.getUsername(), form.getUsername()),
-				FieldChangeSupport.codeChanged(existing.getEmail(), form.getEmail()),
-				FieldChangeSupport.codeChanged(existing.getPhone(), form.getPhone()),
+		boolean revoke = FieldChangeSupport.anyChanged(FieldChangeSupport.codeChanged(existing.getUsername(), username),
+				FieldChangeSupport.codeChanged(existing.getEmail(), email),
+				FieldChangeSupport.codeChanged(existing.getPhone(), phone),
 				FieldChangeSupport.valueChanged(existing.getStatus(), form.getStatus()));
 		if (revoke) {
 			userSessionRevocationTrigger.revokeAllSessionsAfterCommit(userIds);
@@ -112,9 +134,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 		}
 
 		userReferenceChecker.requireOperable(idsToDelete);
-		for (Long userId : idsToDelete) {
-			grantTableMapper.deleteBySubject(GRANT_SUBJECT_TYPE_USER, userId);
-		}
+		grantTableMapper.deleteBySubjectIds(GrantTableSubjectType.USER.name(), idsToDelete);
 		removeByIds(idsToDelete);
 		userSessionRevocationTrigger.revokeAllSessionsAfterCommit(idsToDelete);
 	}

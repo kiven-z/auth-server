@@ -1,13 +1,14 @@
 package com.auth.service.auth.support.redis;
 
+import java.util.Optional;
+
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jetbrains.annotations.NotNull;
+
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
-
-import java.util.Optional;
 
 import static com.auth.module.security.contract.redis.SecurityRedisKey.USER_PERM;
 

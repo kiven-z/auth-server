@@ -1,22 +1,27 @@
 package com.auth.service.system.admin.support.user;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.auth.common.data.support.BusinessKeyAssert;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.module.security.contract.constants.PermissionConstant;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.user.SysUserMapper;
-import com.auth.service.system.admin.model.form.user.SysUserForm;
+import com.auth.service.system.admin.model.po.user.UserBusinessKeyRowPO;
+import com.auth.service.system.admin.model.po.user.UserBusinessKeysExisting;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 
-import java.util.Collection;
+import org.springframework.stereotype.Component;
 
 /**
  * 用户写操作前的存在性、业务键唯一性与受保护账号校验。
@@ -26,6 +31,14 @@ import java.util.Collection;
 @RequiredArgsConstructor
 @Component
 public class UserReferenceChecker {
+
+	private static final String FIELD_USERNAME = "用户名";
+
+	private static final String FIELD_EMAIL = "邮箱";
+
+	private static final String FIELD_PHONE = "手机号";
+
+	private static final String FIELD_EMPLOYEE_NO = "工号";
 
 	private final SysUserMapper sysUserMapper;
 
@@ -43,32 +56,94 @@ public class UserReferenceChecker {
 	}
 
 	/**
-	 * 校验用户名、邮箱、手机号、工号唯一性
-	 * @param form 表单
+	 * 批量查询库内已占用的用户业务键（单次 SQL，四类 OR 命中）
+	 * @param usernames 待匹配用户名
+	 * @param emails 待匹配邮箱
+	 * @param phones 待匹配手机号
+	 * @param employeeNos 待匹配工号
+	 * @param excludeUserId 更新时排除的用户 ID，新增时为 null
+	 * @return 与候选集合交集后的已占用键
+	 */
+	public UserBusinessKeysExisting findExistingBusinessKeys(Set<String> usernames, Set<String> emails,
+			Set<String> phones, Set<String> employeeNos, Long excludeUserId) {
+		if (ObjectUtil.isAllEmpty(usernames, emails, phones, employeeNos)) {
+			return UserBusinessKeysExisting.empty();
+		}
+
+		List<UserBusinessKeyRowPO> rows = sysUserMapper.selectRowsByBusinessKeys(usernames, emails, phones, employeeNos,
+				excludeUserId);
+
+		return UserBusinessKeysExisting.builder()
+			.usernames(rows.stream()
+				.map(UserBusinessKeyRowPO::getUsername)
+				.filter(Objects::nonNull)
+				.filter(usernames::contains)
+				.collect(Collectors.toUnmodifiableSet()))
+			.emails(rows.stream()
+				.map(UserBusinessKeyRowPO::getEmail)
+				.filter(Objects::nonNull)
+				.filter(emails::contains)
+				.collect(Collectors.toUnmodifiableSet()))
+			.phones(rows.stream()
+				.map(UserBusinessKeyRowPO::getPhone)
+				.filter(Objects::nonNull)
+				.filter(phones::contains)
+				.collect(Collectors.toUnmodifiableSet()))
+			.employeeNos(rows.stream()
+				.map(UserBusinessKeyRowPO::getEmployeeNo)
+				.filter(Objects::nonNull)
+				.filter(employeeNos::contains)
+				.collect(Collectors.toUnmodifiableSet()))
+			.build();
+	}
+
+	/**
+	 * 批量写入前校验用户名、邮箱、手机号、工号在请求内及库内均唯一；更新时可排除当前用户。
+	 * @param usernames 待写入用户名
+	 * @param emails 待写入邮箱
+	 * @param phones 待写入手机号
+	 * @param employeeNos 待写入工号
 	 * @param excludeUserId 更新时排除的用户 ID，新增时为 null
 	 */
-	public void assertUniqueBusinessKeys(SysUserForm form, Long excludeUserId) {
-		LambdaQueryWrapper<UserEntity> usernameWrapper = buildUniqueKeyQuery(UserEntity::getUsername,
-				form.getUsername(), excludeUserId);
-		BusinessKeyAssert.requireAbsent(sysUserMapper, usernameWrapper,
-				() -> new SystemBusinessException(SystemCommonResultCode.PARAM_DUPLICATE, "用户名", form.getUsername()));
+	public void requireAbsentUserBusinessKeys(List<String> usernames, List<String> emails, List<String> phones,
+			List<String> employeeNos, Long excludeUserId) {
+		List<String> distinctUsernames = BusinessKeyAssert.requireDistinct(usernames,
+				value -> new SystemBusinessException(SystemCommonResultCode.PARAM_DUPLICATE, FIELD_USERNAME, value));
+		List<String> distinctEmails = BusinessKeyAssert.requireDistinct(emails,
+				value -> new SystemBusinessException(SystemCommonResultCode.PARAM_DUPLICATE, FIELD_EMAIL, value));
+		List<String> distinctPhones = BusinessKeyAssert.requireDistinct(phones,
+				value -> new SystemBusinessException(SystemCommonResultCode.PARAM_DUPLICATE, FIELD_PHONE, value));
 
-		LambdaQueryWrapper<UserEntity> emailWrapper = buildUniqueKeyQuery(UserEntity::getEmail, form.getEmail(),
-				excludeUserId);
-		BusinessKeyAssert.requireAbsent(sysUserMapper, emailWrapper,
-				() -> new SystemBusinessException(SystemCommonResultCode.PARAM_DUPLICATE, "邮箱", form.getEmail()));
+		List<String> presentEmployeeNos = CollUtil.defaultIfEmpty(employeeNos, List.of())
+			.stream()
+			.filter(CharSequenceUtil::isNotBlank)
+			.map(String::trim)
+			.toList();
+		List<String> distinctEmployeeNos = BusinessKeyAssert.requireDistinct(presentEmployeeNos,
+				value -> new SystemBusinessException(SystemCommonResultCode.PARAM_DUPLICATE, FIELD_EMPLOYEE_NO, value));
 
-		LambdaQueryWrapper<UserEntity> phoneWrapper = buildUniqueKeyQuery(UserEntity::getPhone, form.getPhone(),
-				excludeUserId);
-		BusinessKeyAssert.requireAbsent(sysUserMapper, phoneWrapper,
-				() -> new SystemBusinessException(SystemCommonResultCode.PARAM_DUPLICATE, "手机号", form.getPhone()));
+		UserBusinessKeysExisting existing = findExistingBusinessKeys(Set.copyOf(distinctUsernames),
+				Set.copyOf(distinctEmails), Set.copyOf(distinctPhones), Set.copyOf(distinctEmployeeNos), excludeUserId);
 
-		if (CharSequenceUtil.isNotBlank(form.getEmployeeNo())) {
-			LambdaQueryWrapper<UserEntity> wrapper = buildUniqueKeyQuery(UserEntity::getEmployeeNo,
-					form.getEmployeeNo(), excludeUserId);
-			BusinessKeyAssert.requireAbsent(sysUserMapper, wrapper,
-					() -> new SystemBusinessException(SystemCommonResultCode.PARAM_DUPLICATE, "工号",
-							form.getEmployeeNo()));
+		Set<String> existingUsername = existing.usernames();
+		if (CollUtil.isNotEmpty(existingUsername)) {
+			throw new SystemBusinessException(SystemCommonResultCode.PARAM_DUPLICATE, FIELD_USERNAME,
+					existingUsername.iterator().next());
+		}
+		Set<String> existingEmail = existing.emails();
+		if (CollUtil.isNotEmpty(existingEmail)) {
+			throw new SystemBusinessException(SystemCommonResultCode.PARAM_DUPLICATE, FIELD_EMAIL,
+					existingEmail.iterator().next());
+		}
+		Set<String> existingPhone = existing.phones();
+		if (CollUtil.isNotEmpty(existingPhone)) {
+			throw new SystemBusinessException(SystemCommonResultCode.PARAM_DUPLICATE, FIELD_PHONE,
+					existingPhone.iterator().next());
+		}
+		Set<String> existingEmployeeNo = existing.employeeNos();
+		if (CollUtil.isNotEmpty(existingEmployeeNo)) {
+			throw new SystemBusinessException(SystemCommonResultCode.PARAM_DUPLICATE, FIELD_EMPLOYEE_NO,
+					existingEmployeeNo.iterator().next());
 		}
 	}
 
@@ -87,15 +162,6 @@ public class UserReferenceChecker {
 				throw new SystemBusinessException(SystemAdminResultCode.USER_OPERATION_FORBIDDEN, userId);
 			}
 		}
-	}
-
-	private LambdaQueryWrapper<UserEntity> buildUniqueKeyQuery(SFunction<UserEntity, ?> column, String value,
-			Long excludeUserId) {
-		var query = Wrappers.<UserEntity>lambdaQuery().eq(column, value);
-		if (excludeUserId != null) {
-			query.ne(UserEntity::getId, excludeUserId);
-		}
-		return query;
 	}
 
 }

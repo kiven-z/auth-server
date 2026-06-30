@@ -1,14 +1,16 @@
 package com.auth.module.security.contract.dto.invalidation;
 
+import java.util.List;
+
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * {@link AuthorizationInvalidateRequest} 契约测试

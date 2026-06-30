@@ -1,5 +1,7 @@
 package com.auth.service.system.admin.controller.admin;
 
+import java.util.List;
+
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.common.web.valid.group.UpdateGroup;
@@ -23,11 +25,17 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
@@ -60,7 +68,7 @@ public class SysMenuController {
 	}
 
 	@Operation(summary = "菜单扁平列表（全量，前端建树）")
-	@PreAuthorize("@auth.decide('sysMenu:query')")
+	@PreAuthorize("@auth.decide('sys:menu:query')")
 	@GetMapping("/list")
 	public Result<List<SysMenuListVO>> list(SysMenuQuery query) {
 		List<SysMenuListVO> data = sysMenuQueryService.listFlat(query);
@@ -68,7 +76,7 @@ public class SysMenuController {
 	}
 
 	@Operation(summary = "菜单分页查询（表格视图）")
-	@PreAuthorize("@auth.decide('sysMenu:query')")
+	@PreAuthorize("@auth.decide('sys:menu:query')")
 	@GetMapping("/page")
 	public Result<PageResponse<SysMenuListVO>> page(SysMenuQuery query) {
 		Page<SysMenuEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
@@ -77,7 +85,7 @@ public class SysMenuController {
 	}
 
 	@Operation(summary = "菜单详情")
-	@PreAuthorize("@auth.decide('sysMenu:query')")
+	@PreAuthorize("@auth.decide('sys:menu:query')")
 	@GetMapping("/{id}")
 	public Result<SysMenuDetailVO> detail(@PathVariable("id") Long id) {
 		SysMenuDetailVO detail = sysMenuQueryService.getDetail(id);
@@ -87,7 +95,7 @@ public class SysMenuController {
 	@OperationLog(targetType = "MENU", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_MENU, operation = OperationLogKind.CREATE)
 	@Operation(summary = "新增菜单")
-	@PreAuthorize("@auth.decide('sysMenu:create')")
+	@PreAuthorize("@auth.decide('sys:menu:create')")
 	@PostMapping
 	public Result<Long> create(@Valid @RequestBody SysMenuSaveForm form) {
 		Long id = sysMenuService.create(form);
@@ -97,7 +105,7 @@ public class SysMenuController {
 	@OperationLog(targetType = "MENU", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_MENU, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "更新菜单")
-	@PreAuthorize("@auth.decide('sysMenu:update')")
+	@PreAuthorize("@auth.decide('sys:menu:update')")
 	@PutMapping
 	public Result<String> update(@Validated(UpdateGroup.class) @RequestBody SysMenuSaveForm form) {
 		sysMenuService.update(form);
@@ -107,7 +115,7 @@ public class SysMenuController {
 	@OperationLog(targetType = "MENU", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_MENU, operation = OperationLogKind.DELETE)
 	@Operation(summary = "批量删除菜单")
-	@PreAuthorize("@auth.decide('sysMenu:delete')")
+	@PreAuthorize("@auth.decide('sys:menu:delete')")
 	@DeleteMapping
 	public Result<String> remove(@RequestBody List<Long> ids) {
 		sysMenuService.deleteByIds(ids);
@@ -117,7 +125,7 @@ public class SysMenuController {
 	@OperationLog(targetType = "MENU", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_MENU, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "移动菜单")
-	@PreAuthorize("@auth.decide('sysMenu:update')")
+	@PreAuthorize("@auth.decide('sys:menu:update')")
 	@PutMapping("/{id}/move")
 	public Result<String> move(@PathVariable("id") Long id, @Valid @RequestBody SysMenuMoveForm form) {
 		sysMenuService.move(id, form);
@@ -127,7 +135,7 @@ public class SysMenuController {
 	@OperationLog(targetType = "MENU", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_MENU, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "批量更新菜单状态")
-	@PreAuthorize("@auth.decide('sysMenu:update')")
+	@PreAuthorize("@auth.decide('sys:menu:update')")
 	@PutMapping("/status")
 	public Result<String> batchUpdateStatus(@Valid @RequestBody SysMenuBatchStatusForm form) {
 		sysMenuService.batchUpdateStatus(form);

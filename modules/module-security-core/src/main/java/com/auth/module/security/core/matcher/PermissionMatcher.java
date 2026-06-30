@@ -1,9 +1,9 @@
 package com.auth.module.security.core.matcher;
 
+import java.util.List;
+
 import cn.hutool.core.text.CharSequenceUtil;
 import lombok.experimental.UtilityClass;
-
-import java.util.List;
 
 import static com.auth.module.security.contract.constants.PermissionConstant.isAdminPermission;
 

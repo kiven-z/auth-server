@@ -10,6 +10,7 @@ import com.auth.module.security.autoconfigure.service.PermissionService;
 import com.auth.module.security.autoconfigure.web.ResourceServerAccessDeniedHandler;
 import com.auth.module.security.autoconfigure.web.ResourceServerAuthenticationEntryPoint;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

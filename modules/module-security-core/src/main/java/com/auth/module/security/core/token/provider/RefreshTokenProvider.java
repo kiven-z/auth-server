@@ -1,5 +1,9 @@
 package com.auth.module.security.core.token.provider;
 
+import java.util.Date;
+import java.util.Map;
+import java.util.Objects;
+
 import com.auth.common.jwt.api.JwtTokenProvider;
 import com.auth.common.jwt.autoconfigure.JwtProperties;
 import com.auth.common.jwt.model.JwtUserToken;
@@ -8,10 +12,6 @@ import com.auth.module.security.core.token.model.SecurityTokenResult;
 import com.auth.module.security.core.token.model.SecurityTokenResult.SecurityTokenResultBuilder;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
-
-import java.util.Date;
-import java.util.Map;
-import java.util.Objects;
 
 import static com.auth.module.security.contract.constants.SecurityExternalTokenConstants.TOKEN_TYPE;
 

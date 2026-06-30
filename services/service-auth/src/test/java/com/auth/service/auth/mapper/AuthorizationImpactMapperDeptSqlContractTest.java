@@ -1,16 +1,16 @@
 package com.auth.service.auth.mapper;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * SQL 契约：部门失效反查须覆盖禁用节点（仅 is_deleted），与正向画像重算规则分离。
+ * SQL 契约：部门失效反查须覆盖禁用节点（不按 status 过滤），与正向画像重算规则分离。
  */
 @DisplayName("AuthorizationImpactMapper 部门反查 SQL 契约")
 class AuthorizationImpactMapperDeptSqlContractTest {
@@ -34,7 +34,7 @@ class AuthorizationImpactMapperDeptSqlContractTest {
 		String selectBlock = xml.substring(selectStart, selectEnd);
 
 		assertThat(selectBlock).contains("selectUserIdsByDeptIds")
-			.contains("is_deleted = 0")
+			.doesNotContain("is_deleted")
 			.doesNotContain("d.status =")
 			.contains("ud.status IN (1, 2)");
 	}
@@ -57,7 +57,7 @@ class AuthorizationImpactMapperDeptSqlContractTest {
 		// grant_table 行可能已删除，反查须与 selectUserIdsByDeptIds 同源展开
 		assertThat(fragmentBlock).contains("user_dept ud")
 			.contains("dept_closure dc")
-			.contains("is_deleted = 0")
+			.doesNotContain("is_deleted")
 			.doesNotContain("grant_table")
 			.doesNotContain("d.status =");
 		assertThat(selectBlock).contains("selectUserIdsByGrantDeptSubjectIds")
@@ -81,7 +81,7 @@ class AuthorizationImpactMapperDeptSqlContractTest {
 		int selectEnd = xml.indexOf("</select>", selectStart);
 		String selectBlock = xml.substring(selectStart, selectEnd);
 
-		assertThat(fragmentBlock).contains("user_post up").contains("sys_post sp").doesNotContain("grant_table");
+		assertThat(fragmentBlock).contains("user_post up").doesNotContain("grant_table").doesNotContain("is_deleted");
 		assertThat(selectBlock).contains("selectUserIdsByGrantPostSubjectIds")
 			.contains("up.post_id IN")
 			.contains("up.status IN (1, 2)")

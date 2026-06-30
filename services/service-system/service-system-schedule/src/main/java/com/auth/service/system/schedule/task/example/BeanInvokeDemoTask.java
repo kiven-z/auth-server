@@ -3,6 +3,7 @@ package com.auth.service.system.schedule.task.example;
 import com.auth.service.system.schedule.annotation.QuartzTask;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Component;
 
 /**

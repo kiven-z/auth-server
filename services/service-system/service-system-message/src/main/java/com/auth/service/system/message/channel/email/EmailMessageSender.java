@@ -1,5 +1,9 @@
 package com.auth.service.system.message.channel.email;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.channel.MessageSender;
 import com.auth.module.message.api.command.TemplateMessageCommand;
@@ -7,11 +11,8 @@ import com.auth.service.system.message.channel.email.transport.MimeMailTransport
 import com.auth.service.system.message.convert.TemplateMessageCommandConverter;
 import com.auth.service.system.message.model.channel.email.EmailSendDTO;
 import com.auth.service.system.message.model.channel.email.RenderedEmail;
-import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import org.springframework.stereotype.Component;
 
 /**
  * 电子邮件渠道发送实现

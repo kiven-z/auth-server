@@ -1,13 +1,13 @@
 package com.auth.service.system.admin.model.query.me;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 import com.auth.common.core.model.query.PageQueryRequest;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * 个人中心登录日志分页查询（仅 loginType、loginResult 与分页）

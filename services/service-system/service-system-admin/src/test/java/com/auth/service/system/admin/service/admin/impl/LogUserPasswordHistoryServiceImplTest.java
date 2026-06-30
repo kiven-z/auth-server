@@ -1,5 +1,8 @@
 package com.auth.service.system.admin.service.admin.impl;
 
+import java.lang.reflect.Field;
+import java.util.List;
+
 import com.auth.service.system.admin.mapper.log.LogUserPasswordHistoryMapper;
 import com.auth.service.system.admin.model.entity.LogUserPasswordHistoryEntity;
 import com.auth.service.system.admin.model.po.loguserpasswordhistory.LogUserPasswordHistoryDetailRowPO;
@@ -9,16 +12,13 @@ import com.auth.service.system.admin.model.vo.loguserpasswordhistory.LogUserPass
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.extension.repository.CrudRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.lang.reflect.Field;
-import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,7 +48,7 @@ class LogUserPasswordHistoryQueryServiceImplTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		logUserPasswordHistoryQueryService = new LogUserPasswordHistoryQueryServiceImpl(auditUserDisplayService);
-		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
+		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(logUserPasswordHistoryQueryService, logUserPasswordHistoryMapper);
 	}

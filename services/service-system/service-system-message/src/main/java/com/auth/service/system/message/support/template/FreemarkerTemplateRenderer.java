@@ -1,13 +1,13 @@
 package com.auth.service.system.message.support.template;
 
+import java.io.StringWriter;
+
 import com.auth.service.system.message.exception.TemplateRenderException;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateExceptionHandler;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
-
-import java.io.StringWriter;
 
 /**
  * 字符串模板渲染（多渠道共用）

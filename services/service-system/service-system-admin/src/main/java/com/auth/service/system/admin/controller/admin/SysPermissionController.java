@@ -1,5 +1,8 @@
 package com.auth.service.system.admin.controller.admin;
 
+import java.io.IOException;
+import java.util.List;
+
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.common.web.valid.group.CreateGroup;
@@ -23,14 +26,21 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
 
 /**
  * 系统权限管理 Controller
@@ -51,7 +61,7 @@ public class SysPermissionController {
 	private final SysPermissionSpreadsheetService sysPermissionSpreadsheetService;
 
 	@Operation(summary = "权限 Excel 导出")
-	@PreAuthorize("@auth.decide('sysPermission:export')")
+	@PreAuthorize("@auth.decide('sys:permission:export')")
 	@GetMapping("/export")
 	public ResponseEntity<byte[]> export(@Validated SysPermissionQuery filter, @Validated ExportScopeQueryFields scope)
 			throws IOException {
@@ -59,21 +69,21 @@ public class SysPermissionController {
 	}
 
 	@Operation(summary = "权限导入模板下载")
-	@PreAuthorize("@auth.decide('sysPermission:import')")
+	@PreAuthorize("@auth.decide('sys:permission:import')")
 	@GetMapping("/import/template")
 	public ResponseEntity<byte[]> importTemplate() throws IOException {
 		return sysPermissionSpreadsheetService.downloadImportTemplate();
 	}
 
 	@Operation(summary = "权限 Excel 导入")
-	@PreAuthorize("@auth.decide('sysPermission:import')")
+	@PreAuthorize("@auth.decide('sys:permission:import')")
 	@PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public Result<SpreadsheetImportResult> importExcel(@RequestPart("file") MultipartFile file) throws IOException {
 		return Result.success(sysPermissionSpreadsheetService.importExcel(file));
 	}
 
 	@Operation(summary = "权限分页查询")
-	@PreAuthorize("@auth.decide('sysPermission:query')")
+	@PreAuthorize("@auth.decide('sys:permission:query')")
 	@GetMapping("/page")
 	public Result<PageResponse<SysPermissionPageVO>> page(SysPermissionQuery query) {
 		Page<SysPermissionEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
@@ -82,7 +92,7 @@ public class SysPermissionController {
 	}
 
 	@Operation(summary = "权限详情")
-	@PreAuthorize("@auth.decide('sysPermission:detail')")
+	@PreAuthorize("@auth.decide('sys:permission:detail')")
 	@GetMapping("/{id}")
 	public Result<SysPermissionDetailVO> detail(@PathVariable("id") Long id) {
 		SysPermissionDetailVO vo = sysPermissionQueryService.getDetail(id);
@@ -90,21 +100,19 @@ public class SysPermissionController {
 	}
 
 	@Operation(summary = "新增权限")
-	@PreAuthorize("@auth.decide('sysPermission:create')")
+	@PreAuthorize("@auth.decide('sys:permission:create')")
 	@PostMapping
 	public Result<Void> create(@Validated(CreateGroup.class) @RequestBody SysPermissionForm form) {
-		sysPermissionService.create(form);
+		sysPermissionService.createBatchFromImport(List.of(form));
 		return Result.success();
 	}
 
 	@OperationLog(targetType = "PERMISSION", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_PERMISSION, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "更新权限")
-	@PreAuthorize("@auth.decide('sysPermission:update')")
-	@PutMapping("/{id}")
-	public Result<Void> update(@PathVariable("id") Long id,
-			@Validated(UpdateGroup.class) @RequestBody SysPermissionForm form) {
-		form.setId(id);
+	@PreAuthorize("@auth.decide('sys:permission:update')")
+	@PutMapping
+	public Result<Void> update(@Validated(UpdateGroup.class) @RequestBody SysPermissionForm form) {
 		sysPermissionService.update(form);
 		return Result.success();
 	}
@@ -112,7 +120,7 @@ public class SysPermissionController {
 	@OperationLog(targetType = "PERMISSION", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_PERMISSION, operation = OperationLogKind.DELETE)
 	@Operation(summary = "删除权限")
-	@PreAuthorize("@auth.decide('sysPermission:delete')")
+	@PreAuthorize("@auth.decide('sys:permission:delete')")
 	@DeleteMapping("/{id}")
 	public Result<Void> delete(@PathVariable("id") Long id) {
 		sysPermissionService.deleteById(id);

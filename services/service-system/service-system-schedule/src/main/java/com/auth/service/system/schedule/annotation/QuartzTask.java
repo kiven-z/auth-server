@@ -1,8 +1,12 @@
 package com.auth.service.system.schedule.annotation;
 
-import com.auth.service.system.schedule.model.enums.SysJobTaskType;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import java.lang.annotation.*;
+import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 
 /**
  * 标记可被定时任务安全调度的 Spring Bean 类型；启动时扫描并作为反射白名单

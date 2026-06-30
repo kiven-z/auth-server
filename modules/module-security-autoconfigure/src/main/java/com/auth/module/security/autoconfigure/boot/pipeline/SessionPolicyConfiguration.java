@@ -2,6 +2,7 @@ package com.auth.module.security.autoconfigure.boot.pipeline;
 
 import com.auth.module.security.autoconfigure.config.user.UserConfigProperties;
 import com.auth.module.security.autoconfigure.pipeline.authenticate.SessionCountChecker;
+
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,10 +1,13 @@
 package com.auth.common.web.exception;
 
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.auth.common.core.model.response.Result;
 import jakarta.servlet.ServletException;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -12,9 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * 最低优先级处理异常 此建议必须不能在任何更高优先级的处理程序中过于广泛，以避免吞噬特定异常

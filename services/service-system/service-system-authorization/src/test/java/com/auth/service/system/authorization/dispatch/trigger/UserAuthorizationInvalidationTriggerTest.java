@@ -1,5 +1,9 @@
 package com.auth.service.system.authorization.dispatch.trigger;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest;
 import com.auth.module.security.contract.dto.invalidation.UserInvalidatePayload;
@@ -12,10 +16,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;

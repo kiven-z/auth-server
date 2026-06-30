@@ -1,5 +1,7 @@
 package com.auth.service.system.admin.service.admin;
 
+import java.util.List;
+
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.model.entity.UserPostEntity;
 import com.auth.service.system.admin.model.form.user.UserPostAssignForm;
@@ -7,8 +9,6 @@ import com.auth.service.system.admin.model.form.user.UserPostRelationUpdateForm;
 import com.auth.service.system.admin.model.query.user.UserPostPageQuery;
 import com.auth.service.system.admin.model.vo.user.UserPostPageVO;
 import com.baomidou.mybatisplus.extension.service.IService;
-
-import java.util.List;
 
 /**
  * 用户岗位关联管理

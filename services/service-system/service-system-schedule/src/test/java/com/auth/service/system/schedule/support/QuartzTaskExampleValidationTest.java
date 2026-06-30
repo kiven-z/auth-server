@@ -1,5 +1,7 @@
 package com.auth.service.system.schedule.support;
 
+import java.util.stream.Stream;
+
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.schedule.annotation.QuartzTask;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
@@ -15,9 +17,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.core.annotation.AnnotationUtils;
 
-import java.util.stream.Stream;
+import org.springframework.core.annotation.AnnotationUtils;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.Mockito.mock;

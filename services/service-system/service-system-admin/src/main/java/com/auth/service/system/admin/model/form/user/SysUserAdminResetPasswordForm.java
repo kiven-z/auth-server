@@ -1,13 +1,13 @@
 package com.auth.service.system.admin.model.form.user;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * 管理员重置用户密码表单

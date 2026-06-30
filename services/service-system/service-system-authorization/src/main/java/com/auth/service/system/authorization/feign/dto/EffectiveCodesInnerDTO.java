@@ -1,14 +1,14 @@
 package com.auth.service.system.authorization.feign.dto;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.List;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.List;
 
 /**
  * 用户生效角色码与权限码（内部 Feign 传输）

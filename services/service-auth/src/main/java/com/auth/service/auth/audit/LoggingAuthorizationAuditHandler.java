@@ -6,6 +6,7 @@ import com.auth.module.security.contract.event.SecurityAuthorizationAuditPayload
 import com.auth.module.security.contract.spi.AuthorizationAuditHandler;
 import com.auth.service.auth.feign.SystemSecurityIngestFeignClient;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 

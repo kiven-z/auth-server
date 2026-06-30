@@ -4,6 +4,7 @@ import com.auth.common.core.model.response.Result;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.security.contract.dto.AuthorizationAuditIngestRequest;
 import com.auth.module.security.contract.dto.OperationLogIngestRequest;
+
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

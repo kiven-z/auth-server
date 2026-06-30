@@ -1,7 +1,11 @@
 package com.auth.service.system.admin.service.admin.impl;
 
+import java.util.List;
+
+import cn.hutool.core.collection.CollUtil;
 import com.auth.common.core.utils.FieldChangeSupport;
 import com.auth.common.core.utils.TreeParentIdUtil;
+import com.auth.common.core.utils.TreeRelationUtil;
 import com.auth.common.data.support.BusinessKeyAssert;
 import com.auth.service.system.admin.convert.admin.SysDeptConverter;
 import com.auth.service.system.admin.mapper.dept.SysDeptMapper;
@@ -18,10 +22,9 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 /**
  * 部门写服务实现。
@@ -34,6 +37,11 @@ import java.util.List;
 @Transactional(rollbackFor = Exception.class)
 public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity> implements SysDeptService {
 
+	/**
+	 * Excel 导入与批量新增时的持久化批次大小
+	 */
+	private static final int IMPORT_SAVE_BATCH_SIZE = 500;
+
 	private final DeptReferenceChecker deptReferenceChecker;
 
 	private final DeptClosureMaintainer deptClosureMaintainer;
@@ -44,20 +52,25 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void create(SysDeptForm form) {
-		Long parentId = form.getParentId();
-		parentId = deptReferenceChecker.normalizeAndRequireActiveParent(parentId);
+	public void createBatchFromImport(List<SysDeptForm> forms) {
+		if (CollUtil.isEmpty(forms)) {
+			return;
+		}
 
-		String deptCode = form.getDeptCode();
-		BusinessKeyAssert.requireAbsent(baseMapper,
-				Wrappers.<SysDeptEntity>lambdaQuery().eq(SysDeptEntity::getDeptCode, deptCode),
-				() -> new SystemBusinessException(SystemCommonResultCode.DATA_CODE_DUPLICATE, deptCode));
+		List<String> deptCodes = forms.stream().map(SysDeptForm::getDeptCode).toList();
+		deptReferenceChecker.requireAbsentDeptCodes(deptCodes);
 
-		SysDeptEntity entity = SysDeptConverter.INSTANCE.toEntity(form);
-		entity.setParentId(parentId);
-		save(entity);
+		List<SysDeptEntity> entities = forms.stream().map(form -> {
+			Long parentId = deptReferenceChecker.normalizeAndRequireActiveParent(form.getParentId());
+			SysDeptEntity entity = SysDeptConverter.INSTANCE.toEntity(form);
+			entity.setParentId(parentId);
+			return entity;
+		}).toList();
+		super.saveBatch(entities, IMPORT_SAVE_BATCH_SIZE);
 
-		deptClosureMaintainer.insertNode(entity.getId(), parentId);
+		for (SysDeptEntity entity : entities) {
+			deptClosureMaintainer.insertNode(entity.getId(), entity.getParentId());
+		}
 	}
 
 	/**
@@ -83,7 +96,8 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 		boolean parentChanged = TreeParentIdUtil.normalize(existing.getParentId()) != newParentId;
 		boolean statusChanged = FieldChangeSupport.valueChanged(existing.getStatus(), form.getStatus());
 		if (parentChanged) {
-			deptReferenceChecker.requireMoveTargetValid(id, newParentId);
+			TreeRelationUtil.requireValidMoveTarget(id, newParentId,
+					(ancestorId, nodeId) -> baseMapper.countDescendantRelation(ancestorId, nodeId) > 0);
 			existing.setParentId(newParentId);
 		}
 
@@ -112,7 +126,8 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 			return;
 		}
 
-		deptReferenceChecker.requireMoveTargetValid(deptId, newParentId);
+		TreeRelationUtil.requireValidMoveTarget(deptId, newParentId,
+				(ancestorId, nodeId) -> baseMapper.countDescendantRelation(ancestorId, nodeId) > 0);
 		existing.setParentId(newParentId);
 		updateById(existing);
 
@@ -130,10 +145,10 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 		if (baseMapper.countActiveDirectChildren(deptId) > 0) {
 			throw new SystemBusinessException(SystemCommonResultCode.TREE_HAS_ACTIVE_CHILDREN, deptId);
 		}
-		deptReferenceChecker.requireSubtreeUnused(deptId);
-
+		if (baseMapper.existsSubtreeReference(deptId)) {
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_IN_USE, deptId);
+		}
 		deptInvalidationTrigger.submitByDeptIds(List.of(deptId), "delete");
-
 		deptClosureMaintainer.removeClosurePaths(deptId);
 
 		removeById(deptId);

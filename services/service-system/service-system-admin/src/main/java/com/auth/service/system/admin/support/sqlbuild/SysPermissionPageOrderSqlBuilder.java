@@ -1,14 +1,14 @@
 package com.auth.service.system.admin.support.sqlbuild;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.core.model.query.AbstractOrderSqlBuilder;
 import com.auth.common.core.model.query.SortSpec;
 import lombok.experimental.UtilityClass;
-
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * 权限分页 ORDER BY 片段构建：仅允许白名单字段，防止 SQL 注入。

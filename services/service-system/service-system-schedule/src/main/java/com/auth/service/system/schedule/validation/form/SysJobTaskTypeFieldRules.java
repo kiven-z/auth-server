@@ -1,12 +1,12 @@
 package com.auth.service.system.schedule.validation.form;
 
+import java.util.Optional;
+
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import jakarta.validation.ConstraintValidatorContext;
 import lombok.Getter;
 import lombok.experimental.UtilityClass;
-
-import java.util.Optional;
 
 /**
  * 任务类型字段互斥/必填规则（表单 Bean Validation 使用）

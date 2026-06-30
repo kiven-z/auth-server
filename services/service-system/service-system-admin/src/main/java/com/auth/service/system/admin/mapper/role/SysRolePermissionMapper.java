@@ -1,5 +1,7 @@
 package com.auth.service.system.admin.mapper.role;
 
+import java.util.List;
+
 import com.auth.service.system.admin.model.entity.SysRolePermissionEntity;
 import com.auth.service.system.admin.model.po.reference.PermissionReferencePO;
 import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
@@ -7,8 +9,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-
-import java.util.List;
 
 /**
  * 角色权限关联 Mapper

@@ -1,21 +1,24 @@
 package com.auth.service.auth.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateResponse;
 import com.auth.service.auth.exception.AuthBusinessException;
 import com.auth.service.auth.exception.AuthResultCode;
 import com.auth.service.auth.mapper.AuthorizationInvalidationEventMapper;
-import com.auth.service.auth.model.po.invalidation.AuthorizationInvalidationEventPageRowPO;
 import com.auth.service.auth.model.po.invalidation.AuthorizationInvalidationEventPO;
+import com.auth.service.auth.model.po.invalidation.AuthorizationInvalidationEventPageRowPO;
 import com.auth.service.auth.model.po.invalidation.AuthorizationInvalidationEventStatsPO;
 import com.auth.service.auth.model.query.AuthorizationInvalidationEventQuery;
 import com.auth.service.auth.model.value.invalidation.InvalidationIdempotencyGate;
-import com.auth.service.auth.support.invalidation.InvalidationProcessingMarker;
 import com.auth.service.auth.model.vo.authorization.AuthorizationInvalidationEventDetailVO;
 import com.auth.service.auth.model.vo.authorization.AuthorizationInvalidationEventPageVO;
 import com.auth.service.auth.model.vo.authorization.AuthorizationInvalidationEventStatsVO;
 import com.auth.service.auth.service.impl.AuthorizationInvalidationEventServiceImpl;
+import com.auth.service.auth.support.invalidation.InvalidationProcessingMarker;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,14 +27,18 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import org.springframework.dao.DuplicateKeyException;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link AuthorizationInvalidationEventService} 单元测试

@@ -1,14 +1,18 @@
 package com.auth.service.system.schedule.service.impl;
 
+import java.lang.reflect.Field;
+import java.time.LocalDateTime;
+import java.util.List;
+
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.mapper.LogJobMapper;
 import com.auth.service.system.schedule.mapper.SysJobGroupMapper;
 import com.auth.service.system.schedule.mapper.SysJobMapper;
+import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
 import com.auth.service.system.schedule.model.entity.LogJobEntity;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
-import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
 import com.auth.service.system.schedule.model.enums.SysJobLastExecutionStatus;
 import com.auth.service.system.schedule.model.enums.SysJobQuartzRuntimeStatus;
 import com.auth.service.system.schedule.model.form.SysJobCreateForm;
@@ -26,7 +30,7 @@ import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.extension.repository.CrudRepository;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,19 +42,22 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.SchedulerException;
 
-import java.lang.reflect.Field;
-import java.time.LocalDateTime;
-import java.util.List;
-
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_BUSY;
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_GROUP_NOT_AVAILABLE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link SysJobDefinitionServiceImpl} 单元测试。
@@ -113,7 +120,7 @@ class SysJobDefinitionServiceImplTest {
 	void setUp() throws Exception {
 		sysJobDefinitionService = spy(new SysJobDefinitionServiceImpl(sysJobSchedulerManager, auditUserDisplayService,
 				sysJobGroupMapper, logJobMapper, validationManager, sysJobQuartzRuntimeReader));
-		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
+		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysJobDefinitionService, sysJobMapper);
 		lenient().doReturn(true).when(sysJobDefinitionService).updateBatchById(anyList());

@@ -2,6 +2,7 @@ package com.auth.module.security.autoconfigure.boot.pipeline;
 
 import com.auth.module.security.autoconfigure.service.NoopAuthorizationAuditHandler;
 import com.auth.module.security.contract.spi.AuthorizationAuditHandler;
+
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,5 +1,7 @@
 package com.auth.service.system.schedule.support.quartz;
 
+import java.util.List;
+
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.system.schedule.config.ScheduleJobProperties;
@@ -11,9 +13,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.SchedulerException;
-import org.springframework.stereotype.Component;
 
-import java.util.List;
+import org.springframework.stereotype.Component;
 
 /**
  * 按 {@code sys_job} 补偿 Quartz 运行态（DB 为单一事实来源）

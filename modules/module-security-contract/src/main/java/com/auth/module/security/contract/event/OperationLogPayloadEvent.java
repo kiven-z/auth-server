@@ -1,9 +1,9 @@
 package com.auth.module.security.contract.event;
 
+import java.time.Instant;
+
 import lombok.Builder;
 import lombok.Value;
-
-import java.time.Instant;
 
 /**
  * 操作日志负载（契约层），由切面组装后交给 {@link com.auth.module.security.contract.spi.OperationLogHandler}。

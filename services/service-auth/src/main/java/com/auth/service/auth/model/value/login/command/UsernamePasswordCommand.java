@@ -1,10 +1,10 @@
 package com.auth.service.auth.model.value.login.command;
 
+import java.io.Serial;
+
 import com.auth.service.auth.model.enums.AuthLoginLogType;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.io.Serial;
 
 /**
  * 用户名密码登录命令。

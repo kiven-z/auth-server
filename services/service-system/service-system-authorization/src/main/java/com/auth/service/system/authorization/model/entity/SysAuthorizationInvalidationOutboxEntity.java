@@ -1,13 +1,13 @@
 package com.auth.service.system.authorization.model.entity;
 
+import java.io.Serial;
+import java.time.LocalDateTime;
+
 import com.auth.common.data.model.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.io.Serial;
-import java.time.LocalDateTime;
 
 /**
  * 授权失效 Outbox

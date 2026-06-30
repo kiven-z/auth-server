@@ -1,5 +1,7 @@
 package com.auth.service.system.admin.service.admin;
 
+import java.util.List;
+
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.form.post.SysPostForm;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -12,17 +14,16 @@ import com.baomidou.mybatisplus.extension.service.IService;
 public interface SysPostService extends IService<SysPostEntity> {
 
 	/**
-	 * 新增岗位
-	 * @param form 新增表单
+	 * 批量新增岗位
+	 * @param forms 新增表单列表
 	 */
-	void create(SysPostForm form);
+	void createBatchFromImport(List<SysPostForm> forms);
 
 	/**
 	 * 更新岗位
-	 * @param id 岗位主键
-	 * @param form 表单（与新增字段一致；所属部门不可变更）
+	 * @param form 表单（须含主键；字段与新增一致）
 	 */
-	void update(Long id, SysPostForm form);
+	void update(SysPostForm form);
 
 	/**
 	 * 按主键逻辑删除岗位；user_post 或 grant_table 仍有引用时拒绝删除，成功后触发授权失效。

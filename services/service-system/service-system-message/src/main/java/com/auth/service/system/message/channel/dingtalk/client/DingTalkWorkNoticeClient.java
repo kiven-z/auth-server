@@ -1,5 +1,9 @@
 package com.auth.service.system.message.channel.dingtalk.client;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONObject;
@@ -8,6 +12,7 @@ import com.auth.module.message.api.model.dingtalk.DingTalkMessageType;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.message.config.DingTalkProperties;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -16,10 +21,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
 import static com.auth.service.system.message.exception.MessageResultCode.DING_TALK_WORK_NOTICE_FAILED;

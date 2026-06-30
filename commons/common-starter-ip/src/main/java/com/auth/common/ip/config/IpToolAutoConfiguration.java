@@ -1,5 +1,10 @@
 package com.auth.common.ip.config;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
+
 import com.auth.common.ip.DefaultIpAddressServiceImpl;
 import com.auth.common.ip.IpAddressService;
 import com.auth.common.ip.format.DefaultRegionFormatter;
@@ -14,20 +19,24 @@ import com.auth.common.ip.region.Ip2RegionSearcherRegionResolver;
 import com.auth.common.ip.region.NoopRegionResolver;
 import com.auth.common.ip.region.RegionResolver;
 import com.auth.common.ip.region.RoutingRegionResolver;
-import com.auth.common.ip.resolver.*;
+import com.auth.common.ip.resolver.ClientIpResolver;
+import com.auth.common.ip.resolver.CompositeClientIpResolver;
+import com.auth.common.ip.resolver.HttpClientIpResolver;
+import com.auth.common.ip.resolver.HttpXForwardedForResolver;
+import com.auth.common.ip.resolver.ProxyClientIpResolver;
+import com.auth.common.ip.resolver.RemoteAddrResolver;
+import com.auth.common.ip.resolver.WLProxyClientIpResolver;
+import com.auth.common.ip.resolver.XForwardedForResolver;
+import com.auth.common.ip.resolver.XRealIpResolver;
 import lombok.extern.slf4j.Slf4j;
 import org.lionsoul.ip2region.xdb.LongByteArray;
 import org.lionsoul.ip2region.xdb.Searcher;
 import org.lionsoul.ip2region.xdb.Version;
+
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * IP工具模块的自动配置

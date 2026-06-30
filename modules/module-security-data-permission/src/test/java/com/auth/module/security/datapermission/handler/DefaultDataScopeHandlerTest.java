@@ -1,14 +1,14 @@
 package com.auth.module.security.datapermission.handler;
 
+import java.lang.reflect.Method;
+import java.util.List;
+
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
 import com.auth.module.security.contract.api.datascope.DataScopeStorageType;
 import com.auth.module.security.datapermission.annotation.DataScope;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.lang.reflect.Method;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;

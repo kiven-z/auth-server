@@ -4,6 +4,7 @@ import com.auth.service.system.schedule.support.quartz.SysJobScheduleReconciler;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
+
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.EventListener;

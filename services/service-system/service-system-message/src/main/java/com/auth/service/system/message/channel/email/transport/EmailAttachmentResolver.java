@@ -1,5 +1,9 @@
 package com.auth.service.system.message.channel.email.transport;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
@@ -7,14 +11,11 @@ import cn.hutool.core.util.PrimitiveArrayUtil;
 import com.auth.module.message.api.model.email.AttachmentDTO;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_FAILED;
 

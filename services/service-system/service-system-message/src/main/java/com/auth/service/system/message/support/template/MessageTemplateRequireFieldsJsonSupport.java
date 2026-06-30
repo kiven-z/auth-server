@@ -1,6 +1,12 @@
 package com.auth.service.system.message.support.template;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
@@ -13,9 +19,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import lombok.experimental.UtilityClass;
 
-import java.util.*;
-
-import static com.auth.service.system.common.exception.code.SystemCommonResultCode.*;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_INVALID;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_DUPLICATE;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
 
 /**
  * 消息模板必填变量声明：序列化、解析与发送前完整性校验（多渠道共用）

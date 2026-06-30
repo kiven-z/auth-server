@@ -1,5 +1,8 @@
 package com.auth.service.system.authorization.job;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 import cn.hutool.core.collection.CollUtil;
 import com.auth.service.system.authorization.config.AuthorizationInvalidationProperties;
 import com.auth.service.system.authorization.dispatch.AuthorizationInvalidationOutboxProcessor;
@@ -8,12 +11,10 @@ import com.auth.service.system.authorization.model.entity.SysAuthorizationInvali
 import com.auth.service.system.authorization.model.enums.AuthorizationInvalidationOutboxStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 /**
  * 授权失效 Outbox 补偿任务：扫描 PENDING / FAILED 并重试投递 auth。

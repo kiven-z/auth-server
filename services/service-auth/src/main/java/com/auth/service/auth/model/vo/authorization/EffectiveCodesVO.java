@@ -1,13 +1,13 @@
 package com.auth.service.auth.model.vo.authorization;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.List;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.List;
 
 /**
  * 内部接口返回：用户生效角色码与权限码

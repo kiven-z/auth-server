@@ -10,7 +10,9 @@ import org.junit.jupiter.api.Test;
 
 import static com.auth.common.jwt.model.SignatureAlgorithm.HS256;
 import static com.auth.module.security.core.token.support.SecurityTokenSupport.parsePermVersionClaim;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class AccessTokenProviderTest {
 

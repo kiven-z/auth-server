@@ -6,6 +6,7 @@ import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
+
 import org.springframework.stereotype.Component;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;

@@ -1,5 +1,7 @@
 package com.auth.service.system.message.convert;
 
+import java.util.List;
+
 import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
 import com.auth.service.system.message.model.form.EmailTemplateForm;
@@ -13,8 +15,6 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
-
-import java.util.List;
 
 /**
  * 邮件模板转换器

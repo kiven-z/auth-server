@@ -1,5 +1,11 @@
 package com.auth.module.security.core.token.provider;
 
+import java.util.Date;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
+import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.jwt.api.JwtTokenProvider;
 import com.auth.common.jwt.autoconfigure.JwtProperties;
 import com.auth.common.jwt.model.JwtUserToken;
@@ -9,12 +15,13 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 
-import java.util.Date;
-import java.util.Map;
-import java.util.Objects;
-
 import static com.auth.module.security.contract.constants.SecurityExternalTokenConstants.TOKEN_TYPE;
-import static com.auth.module.security.contract.constants.SecurityInternalTokenConstants.*;
+import static com.auth.module.security.contract.constants.SecurityInternalTokenConstants.INTERNAL_MAX_TTL_SECONDS;
+import static com.auth.module.security.contract.constants.SecurityInternalTokenConstants.PRINCIPAL_TYPE;
+import static com.auth.module.security.contract.constants.SecurityInternalTokenConstants.PRINCIPAL_TYPE_SERVICE;
+import static com.auth.module.security.contract.constants.SecurityInternalTokenConstants.PRINCIPAL_TYPE_USER;
+import static com.auth.module.security.contract.constants.SecurityInternalTokenConstants.SERVICE_ID;
+import static com.auth.module.security.contract.constants.SecurityInternalTokenConstants.SERVICE_SUB_PLACEHOLDER;
 
 /**
  * 内部令牌：双模签发——「用户身份」与「服务身份」共用一种令牌种类，由 {@code principal_type} claim 区分
@@ -28,6 +35,21 @@ public class InternalTokenProvider extends AbstractSecurityTokenProvider {
 	public InternalTokenProvider(JwtTokenProvider jwtTokenProvider, JwtProperties jwtProperties) {
 		super(jwtTokenProvider);
 		this.jwtProperties = jwtProperties;
+	}
+
+	/**
+	 * 应用内部令牌 claims
+	 * @param builder 构建器
+	 * @param claims claims
+	 */
+	private static void applyInternalClaims(SecurityTokenResult.SecurityTokenResultBuilder builder, Claims claims) {
+		Optional.ofNullable(claims.get(PRINCIPAL_TYPE, String.class))
+			.filter(CharSequenceUtil::isNotBlank)
+			.ifPresent(builder::principalType);
+
+		Optional.ofNullable(claims.get(SERVICE_ID, String.class))
+			.filter(CharSequenceUtil::isNotBlank)
+			.ifPresent(builder::serviceId);
 	}
 
 	/**
@@ -65,27 +87,13 @@ public class InternalTokenProvider extends AbstractSecurityTokenProvider {
 	 * {@code serviceId}
 	 */
 	@Override
-	@SuppressWarnings("java:S1854")
 	protected void enrichTokenResult(SecurityTokenResult.SecurityTokenResultBuilder builder, String token,
 			JwtUserToken jwtUserToken, SecurityTokenKind kind) {
 		// 内部令牌类型不匹配，返回
 		if (kind != SecurityTokenKind.INTERNAL) {
 			return;
 		}
-
-		// 获取令牌声明
-		Claims claims = super.jwtTokenProvider.getClaims(token);
-		// 获取主体类型
-		Object principalType = claims.get(PRINCIPAL_TYPE);
-		if (principalType != null) {
-			builder.principalType(principalType.toString());
-		}
-
-		// 获取服务ID
-		Object serviceId = claims.get(SERVICE_ID);
-		if (serviceId != null) {
-			builder.serviceId(serviceId.toString());
-		}
+		applyInternalClaims(builder, super.jwtTokenProvider.getClaims(token));
 	}
 
 	/**

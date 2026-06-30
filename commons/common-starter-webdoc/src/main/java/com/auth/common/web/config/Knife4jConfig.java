@@ -1,5 +1,8 @@
 package com.auth.common.web.config;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.auth.common.web.config.properties.WebDocProperties;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -8,14 +11,12 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 import lombok.extern.slf4j.Slf4j;
 import org.springdoc.core.models.GroupedOpenApi;
+
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 如果要自定义，需要自己声明一个 Knife4jConfig Bean

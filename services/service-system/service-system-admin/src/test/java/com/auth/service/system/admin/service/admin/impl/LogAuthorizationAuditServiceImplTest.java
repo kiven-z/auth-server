@@ -1,5 +1,8 @@
 package com.auth.service.system.admin.service.admin.impl;
 
+import java.lang.reflect.Field;
+import java.util.List;
+
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.mapper.log.LogAuthorizationAuditMapper;
 import com.auth.service.system.admin.model.entity.LogAuthorizationAuditEntity;
@@ -12,16 +15,13 @@ import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.extension.repository.CrudRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.lang.reflect.Field;
-import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -51,7 +51,7 @@ class LogAuthorizationAuditQueryServiceImplTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		logAuthorizationAuditQueryService = new LogAuthorizationAuditQueryServiceImpl(auditUserDisplayService);
-		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
+		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(logAuthorizationAuditQueryService, logAuthorizationAuditMapper);
 	}

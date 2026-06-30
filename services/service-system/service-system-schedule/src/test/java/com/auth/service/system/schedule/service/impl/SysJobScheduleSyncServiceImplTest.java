@@ -1,5 +1,8 @@
 package com.auth.service.system.schedule.service.impl;
 
+import java.lang.reflect.Field;
+import java.util.List;
+
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.mapper.SysJobMapper;
@@ -9,7 +12,7 @@ import com.auth.service.system.schedule.support.quartz.SysJobScheduleReconciler;
 import com.auth.service.system.schedule.support.quartz.SysJobSchedulerManager;
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.extension.repository.CrudRepository;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,13 +23,18 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.SchedulerException;
 
-import java.lang.reflect.Field;
-import java.util.List;
-
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_QUARTZ_OPERATION_FAILED;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link SysJobScheduleSyncServiceImpl} 单元测试。
@@ -57,7 +65,7 @@ class SysJobScheduleSyncServiceImplTest {
 	void setUp() throws Exception {
 		sysJobScheduleSyncService = spy(
 				new SysJobScheduleSyncServiceImpl(sysJobSchedulerManager, sysJobScheduleReconciler));
-		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
+		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysJobScheduleSyncService, sysJobMapper);
 		lenient().doReturn(true).when(sysJobScheduleSyncService).updateBatchById(anyList());

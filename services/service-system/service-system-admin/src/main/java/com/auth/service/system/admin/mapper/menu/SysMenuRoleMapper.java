@@ -1,5 +1,7 @@
 package com.auth.service.system.admin.mapper.menu;
 
+import java.util.List;
+
 import com.auth.service.system.admin.model.entity.SysMenuRoleEntity;
 import com.auth.service.system.admin.model.po.menu.SysMenuRoleLinkRowPO;
 import com.auth.service.system.admin.model.po.permission.SysPermissionBoundMenuPO;
@@ -8,8 +10,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-
-import java.util.List;
 
 /**
  * 菜单角色关联 Mapper

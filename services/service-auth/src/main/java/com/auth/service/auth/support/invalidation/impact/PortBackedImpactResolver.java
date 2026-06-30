@@ -1,10 +1,10 @@
 package com.auth.service.auth.support.invalidation.impact;
 
-import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
-import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidatePayload;
-
 import java.util.Set;
 import java.util.function.Function;
+
+import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
+import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidatePayload;
 
 /**
  * 通过委托函数将类型化失效 Payload 解析为受影响用户 ID。

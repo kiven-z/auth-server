@@ -1,9 +1,12 @@
 package com.auth.service.system.admin.service.admin.impl;
 
+import java.util.Collections;
+import java.util.List;
+
 import com.auth.common.data.model.PageResponse;
+import com.auth.service.system.admin.convert.admin.ReferenceConverter;
 import com.auth.service.system.admin.convert.admin.SysPermissionConverter;
 import com.auth.service.system.admin.convert.admin.SysRoleConverter;
-import com.auth.service.system.admin.convert.admin.ReferenceConverter;
 import com.auth.service.system.admin.mapper.menu.SysMenuRoleMapper;
 import com.auth.service.system.admin.mapper.role.GrantTableMapper;
 import com.auth.service.system.admin.mapper.role.SysRoleMapper;
@@ -27,11 +30,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Collections;
-import java.util.List;
 
 /**
  * 系统角色只读查询实现。

@@ -1,11 +1,11 @@
 package com.auth.module.security.contract.event;
 
-import lombok.Builder;
-import lombok.Value;
-
 import java.time.Instant;
 import java.util.Collections;
 import java.util.Map;
+
+import lombok.Builder;
+import lombok.Value;
 
 /**
  * 授权审计负载（契约层） 注意：不要将原始令牌/密码/cookie 放入任何字段

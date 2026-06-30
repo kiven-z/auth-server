@@ -6,6 +6,7 @@ import com.auth.module.security.autoconfigure.boot.pipeline.SecurityAuthenticati
 import com.auth.module.security.autoconfigure.boot.validation.SecurityAnnotationConflictAutoConfiguration;
 import com.auth.module.security.autoconfigure.boot.web.ResourceServerSecurityAutoConfiguration;
 import com.auth.module.security.autoconfigure.web.exception.SecurityExceptionHandler;
+
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
 import org.springframework.context.annotation.Import;

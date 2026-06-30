@@ -1,5 +1,7 @@
 package com.auth.service.system.admin.convert.admin.user;
 
+import java.util.List;
+
 import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.admin.model.form.user.SysUserForm;
@@ -14,8 +16,6 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.factory.Mappers;
-
-import java.util.List;
 
 /**
  * 用户域 MapStruct 转换器（分页、表单、档案、详情、搜索）。

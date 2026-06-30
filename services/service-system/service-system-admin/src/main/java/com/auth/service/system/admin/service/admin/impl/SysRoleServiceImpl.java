@@ -1,5 +1,8 @@
 package com.auth.service.system.admin.service.admin.impl;
 
+import java.util.List;
+
+import cn.hutool.core.collection.CollUtil;
 import com.auth.common.core.utils.FieldChangeSupport;
 import com.auth.common.data.support.BusinessKeyAssert;
 import com.auth.service.system.admin.convert.admin.SysRoleConverter;
@@ -7,6 +10,7 @@ import com.auth.service.system.admin.mapper.role.GrantTableMapper;
 import com.auth.service.system.admin.mapper.role.SysRoleMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.form.role.SysRoleForm;
+import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.auth.service.system.admin.service.admin.SysRoleService;
 import com.auth.service.system.authorization.dispatch.trigger.RoleAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
@@ -15,10 +19,9 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 /**
  * 系统角色写服务实现。
@@ -31,6 +34,11 @@ import java.util.List;
 @Transactional(rollbackFor = Exception.class)
 public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity> implements SysRoleService {
 
+	/**
+	 * Excel 导入与批量新增时的持久化批次大小
+	 */
+	private static final int IMPORT_SAVE_BATCH_SIZE = 500;
+
 	private final RoleAuthorizationInvalidationTrigger roleInvalidationTrigger;
 
 	private final GrantTableMapper grantTableMapper;
@@ -39,17 +47,23 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void create(SysRoleForm form) {
-		String roleCode = form.getRoleCode();
+	public void createBatchFromImport(List<SysRoleForm> forms) {
+		if (CollUtil.isEmpty(forms)) {
+			return;
+		}
 
-		BusinessKeyAssert.requireAbsent(baseMapper,
-				Wrappers.<SysRoleEntity>lambdaQuery().eq(SysRoleEntity::getRoleCode, roleCode),
-				() -> new SystemBusinessException(SystemCommonResultCode.DATA_CODE_DUPLICATE, roleCode));
+		List<String> roleCodes = forms.stream().map(SysRoleForm::getRoleCode).toList();
+		List<String> distinctCodes = BusinessKeyAssert.requireDistinct(roleCodes,
+				code -> new SystemBusinessException(SystemCommonResultCode.DATA_CODE_DUPLICATE, code));
 
-		SysRoleEntity entity = SysRoleConverter.INSTANCE.toEntity(form);
-		entity.setRoleCode(roleCode);
+		List<RoleReferencePO> existing = baseMapper.selectReferenceByRoleCodes(distinctCodes);
+		if (CollUtil.isNotEmpty(existing)) {
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_CODE_DUPLICATE,
+					existing.get(0).getRoleCode());
+		}
 
-		save(entity);
+		List<SysRoleEntity> entities = forms.stream().map(SysRoleConverter.INSTANCE::toEntity).toList();
+		super.saveBatch(entities, IMPORT_SAVE_BATCH_SIZE);
 	}
 
 	/**

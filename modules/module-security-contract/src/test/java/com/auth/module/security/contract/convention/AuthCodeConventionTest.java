@@ -21,9 +21,10 @@ class AuthCodeConventionTest {
 		assertThat(AuthCodeConvention.isWellFormedPermissionCode("*")).isTrue();
 		assertThat(AuthCodeConvention.isWellFormedPermissionCode("*:*")).isTrue();
 		assertThat(AuthCodeConvention.isWellFormedPermissionCode("*:*:*")).isTrue();
-		assertThat(AuthCodeConvention.isWellFormedPermissionCode("sysdept")).isTrue();
-		assertThat(AuthCodeConvention.isWellFormedPermissionCode("sysdept:query")).isTrue();
-		assertThat(AuthCodeConvention.isWellFormedPermissionCode("sysdept:query:detail")).isTrue();
+		assertThat(AuthCodeConvention.isWellFormedPermissionCode("sys")).isTrue();
+		assertThat(AuthCodeConvention.isWellFormedPermissionCode("sys:dept")).isTrue();
+		assertThat(AuthCodeConvention.isWellFormedPermissionCode("sys:dept:query")).isTrue();
+		assertThat(AuthCodeConvention.isWellFormedPermissionCode("sys:dept:detail")).isTrue();
 	}
 
 	@Test
@@ -34,8 +35,8 @@ class AuthCodeConventionTest {
 
 	@DisplayName("权限码：非法样例")
 	@ParameterizedTest
-	@ValueSource(strings = { "", "   ", "Sysdept:query", "sysdept:Query", "sysdept:query:extra:more", "9ab", "_x",
-			"sysdept:", ":query", "sys dept:query" })
+	@ValueSource(strings = { "", "   ", "Sys:dept:query", "sys:dept:Query", "sys:dept:query:extra:more", "9ab", "_x",
+			"sys:dept:", ":query", "sys dept:query" })
 	void permissionMalformed(String code) {
 		assertThat(AuthCodeConvention.isWellFormedPermissionCode(code.trim())).isFalse();
 	}

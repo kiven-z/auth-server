@@ -8,6 +8,7 @@ import com.auth.service.system.authorization.service.AuthorizationInvalidationSt
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,7 +29,7 @@ public class AuthorizationInvalidationStatsOpsController {
 	private final AuthorizationInvalidationStatsQueryService statsQueryService;
 
 	@Operation(summary = "授权失效运维统计摘要")
-	@PreAuthorize("@auth.decide('sysAuthInvalidationOutbox:query')")
+	@PreAuthorize("@auth.decide('ops:invalidationoutbox:query')")
 	@GetMapping("summary")
 	public Result<AuthorizationInvalidationSummaryVO> summary() {
 		AuthorizationInvalidationSummaryVO summary = statsQueryService.getSummary();
@@ -36,7 +37,7 @@ public class AuthorizationInvalidationStatsOpsController {
 	}
 
 	@Operation(summary = "授权失效失败率趋势")
-	@PreAuthorize("@auth.decide('sysAuthInvalidationOutbox:query')")
+	@PreAuthorize("@auth.decide('ops:invalidationoutbox:query')")
 	@GetMapping("stats/failure-rate/trend")
 	public Result<AuthorizationInvalidationFailureRateTrendVO> failureRateTrend(
 			@Validated AuthorizationInvalidationFailureRateTrendQuery query) {

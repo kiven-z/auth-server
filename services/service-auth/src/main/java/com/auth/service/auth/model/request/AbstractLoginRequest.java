@@ -1,11 +1,11 @@
 package com.auth.service.auth.model.request;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * 登录请求基类（HTTP 入站 DTO）。

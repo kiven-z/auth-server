@@ -1,13 +1,13 @@
 package com.auth.service.system.admin.mapper.menu;
 
+import java.util.List;
+
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.admin.model.query.menu.SysMenuQuery;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-
-import java.util.List;
 
 /**
  * 系统菜单 Mapper

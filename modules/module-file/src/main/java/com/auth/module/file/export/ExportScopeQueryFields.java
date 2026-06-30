@@ -1,14 +1,14 @@
 package com.auth.module.file.export;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 import com.auth.module.file.export.model.enums.ExportScope;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * 同步导出共用的范围字段

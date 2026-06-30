@@ -2,6 +2,7 @@ package com.auth.service.system.admin.support.dept;
 
 import com.auth.service.system.admin.mapper.dept.DeptClosureMapper;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Component;
 
 /**

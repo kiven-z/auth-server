@@ -1,15 +1,17 @@
 package com.auth.service.system.admin.service.admin.impl;
 
-import com.auth.service.system.admin.mapper.permission.SysPermissionMapper;
+import java.lang.reflect.Field;
+import java.util.List;
+
 import com.auth.service.system.admin.mapper.role.SysRolePermissionMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.po.reference.PermissionReferencePO;
 import com.auth.service.system.admin.model.vo.reference.PermissionReferenceVO;
-import com.auth.service.system.admin.support.permission.PermissionReferenceChecker;
-import com.auth.service.system.admin.support.role.RoleReferenceChecker;
+import com.auth.service.system.admin.support.grant.RbacReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.RoleAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
+import com.baomidou.mybatisplus.extension.repository.CrudRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,13 +19,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link SysRolePermissionServiceImpl} 单元测试。
@@ -33,13 +38,10 @@ import static org.mockito.Mockito.*;
 class SysRolePermissionServiceImplTest {
 
 	@Mock
-	private RoleReferenceChecker roleReferenceChecker;
+	private RbacReferenceChecker rbacReferenceChecker;
 
 	@Mock
 	private SysRolePermissionMapper sysRolePermissionMapper;
-
-	@Mock
-	private SysPermissionMapper sysPermissionMapper;
 
 	@Mock
 	private RoleAuthorizationInvalidationTrigger roleInvalidationTrigger;
@@ -47,10 +49,11 @@ class SysRolePermissionServiceImplTest {
 	private SysRolePermissionServiceImpl sysRolePermissionService;
 
 	@BeforeEach
-	void setUp() {
-		PermissionReferenceChecker permissionReferenceChecker = new PermissionReferenceChecker(sysPermissionMapper);
-		sysRolePermissionService = new SysRolePermissionServiceImpl(roleReferenceChecker, sysRolePermissionMapper,
-				permissionReferenceChecker, roleInvalidationTrigger);
+	void setUp() throws Exception {
+		sysRolePermissionService = spy(new SysRolePermissionServiceImpl(rbacReferenceChecker, roleInvalidationTrigger));
+		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
+		baseMapperField.setAccessible(true);
+		baseMapperField.set(sysRolePermissionService, sysRolePermissionMapper);
 	}
 
 	@Test
@@ -59,7 +62,7 @@ class SysRolePermissionServiceImplTest {
 		SysRoleEntity role = new SysRoleEntity();
 		role.setId(1L);
 		role.setRoleCode("ADMIN");
-		when(roleReferenceChecker.getExistingActive(1L)).thenReturn(role);
+		when(rbacReferenceChecker.getExisting(1L)).thenReturn(role);
 
 		PermissionReferencePO po = new PermissionReferencePO();
 		po.setId(10L);
@@ -78,7 +81,7 @@ class SysRolePermissionServiceImplTest {
 	@Test
 	@DisplayName("分配权限：角色不存在时抛出 DATA_NOT_EXIST")
 	void assignWhenRoleMissingShouldThrow() {
-		when(roleReferenceChecker.getExistingActive(99L))
+		when(rbacReferenceChecker.getExisting(99L))
 			.thenThrow(new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST, 99L));
 
 		List<Long> permissionIds = List.of(10L);
@@ -94,8 +97,7 @@ class SysRolePermissionServiceImplTest {
 		SysRoleEntity role = new SysRoleEntity();
 		role.setId(1L);
 		role.setRoleCode("ADMIN");
-		when(roleReferenceChecker.getExistingActive(1L)).thenReturn(role);
-		when(sysPermissionMapper.selectCount(any())).thenReturn(1L);
+		when(rbacReferenceChecker.getExisting(1L)).thenReturn(role);
 
 		sysRolePermissionService.assignPermissions(1L, List.of(10L));
 
@@ -110,12 +112,12 @@ class SysRolePermissionServiceImplTest {
 		SysRoleEntity role = new SysRoleEntity();
 		role.setId(1L);
 		role.setRoleCode("ADMIN");
-		when(roleReferenceChecker.getExistingActive(1L)).thenReturn(role);
+		when(rbacReferenceChecker.getExisting(1L)).thenReturn(role);
 
 		sysRolePermissionService.assignPermissions(1L, List.of());
 
 		verify(sysRolePermissionMapper).deleteByRoleId(1L);
-		verify(sysPermissionMapper, never()).selectCount(any());
+		verify(rbacReferenceChecker, never()).requireActivePermissionIds(any());
 		verify(sysRolePermissionMapper, never()).batchInsertRolePermissions(any(), any(), any(), any());
 		verify(roleInvalidationTrigger).submitByRoleCodes(List.of("ADMIN"), "assign-permissions");
 	}
@@ -126,8 +128,9 @@ class SysRolePermissionServiceImplTest {
 		SysRoleEntity role = new SysRoleEntity();
 		role.setId(1L);
 		role.setRoleCode("ADMIN");
-		when(roleReferenceChecker.getExistingActive(1L)).thenReturn(role);
-		when(sysPermissionMapper.selectCount(any())).thenReturn(0L);
+		when(rbacReferenceChecker.getExisting(1L)).thenReturn(role);
+		doThrow(new SystemBusinessException(SystemCommonResultCode.GRANT_REFERENCE_INVALID)).when(rbacReferenceChecker)
+			.requireActivePermissionIds(List.of(99L));
 
 		List<Long> permissionIds = List.of(99L);
 		assertThatThrownBy(() -> sysRolePermissionService.assignPermissions(1L, permissionIds))

@@ -4,6 +4,7 @@ import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.message.mapper.MessageTemplateMapper;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
+
 import org.springframework.stereotype.Component;
 
 import static com.auth.service.system.message.exception.MessageResultCode.TEMPLATE_NOT_FOUND;

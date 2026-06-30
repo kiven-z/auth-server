@@ -1,5 +1,8 @@
 package com.auth.service.system.authorization.dispatch.trigger;
 
+import java.util.Collections;
+import java.util.List;
+
 import com.auth.service.system.authorization.service.UserSessionRevocationService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -7,9 +10,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Collections;
-import java.util.List;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;

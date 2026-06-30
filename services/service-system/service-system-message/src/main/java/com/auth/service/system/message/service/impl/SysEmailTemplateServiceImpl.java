@@ -1,5 +1,9 @@
 package com.auth.service.system.message.service.impl;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.message.api.channel.MessageChannel;
@@ -10,7 +14,11 @@ import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.message.convert.EmailTemplateConverter;
 import com.auth.service.system.message.mapper.MessageTemplateMapper;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
-import com.auth.service.system.message.model.form.*;
+import com.auth.service.system.message.model.form.EmailTemplateContentForm;
+import com.auth.service.system.message.model.form.EmailTemplateForm;
+import com.auth.service.system.message.model.form.EmailTemplateRenderForm;
+import com.auth.service.system.message.model.form.EmailTemplateRequireFieldsForm;
+import com.auth.service.system.message.model.form.EmailTemplateTestSendForm;
 import com.auth.service.system.message.model.po.EmailTemplatePageRowPO;
 import com.auth.service.system.message.model.query.EmailTemplateQuery;
 import com.auth.service.system.message.model.vo.EmailTemplateDetailVO;
@@ -23,13 +31,10 @@ import com.auth.service.system.message.support.template.MessageTemplateRequireFi
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 

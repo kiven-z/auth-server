@@ -1,7 +1,6 @@
 package com.auth.service.system.message.model.channel.dingtalk;
 
 import com.auth.module.message.api.model.dingtalk.DingTalkMessageType;
-
 import lombok.Builder;
 import lombok.Value;
 import lombok.experimental.Accessors;

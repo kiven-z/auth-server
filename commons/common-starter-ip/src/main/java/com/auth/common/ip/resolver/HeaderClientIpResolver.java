@@ -1,9 +1,9 @@
 package com.auth.common.ip.resolver;
 
+import java.util.Optional;
+
 import cn.hutool.core.text.CharSequenceUtil;
 import jakarta.servlet.http.HttpServletRequest;
-
-import java.util.Optional;
 
 /**
  * 从单个头解析客户端IP

@@ -1,14 +1,14 @@
 package com.auth.service.system.authorization.model.query;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
 import com.auth.common.core.model.query.PageQueryRequest;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.LocalDateTime;
 
 /**
  * 授权失效 Outbox 分页查询条件

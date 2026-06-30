@@ -1,5 +1,7 @@
 package com.auth.service.system.message.support.validation;
 
+import java.util.Set;
+
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.BooleanUtil;
@@ -11,9 +13,8 @@ import com.auth.module.message.api.model.email.EmailChannelOptions;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
-import org.springframework.stereotype.Component;
 
-import java.util.Set;
+import org.springframework.stereotype.Component;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
 import static com.auth.service.system.message.exception.MessageResultCode.MESSAGE_COMMAND_INVALID;

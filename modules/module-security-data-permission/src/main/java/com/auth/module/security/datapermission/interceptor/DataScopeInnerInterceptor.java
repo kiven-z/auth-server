@@ -1,5 +1,10 @@
 package com.auth.module.security.datapermission.interceptor;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.module.security.datapermission.annotation.DataScope;
@@ -12,11 +17,6 @@ import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * MyBatis-Plus 拦截器，追加数据范围条件

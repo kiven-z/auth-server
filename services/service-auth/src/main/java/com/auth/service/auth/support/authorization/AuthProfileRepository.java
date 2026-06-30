@@ -1,5 +1,8 @@
 package com.auth.service.auth.support.authorization;
 
+import java.util.List;
+import java.util.Optional;
+
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
@@ -13,10 +16,8 @@ import com.auth.service.auth.mapper.UserAuthorizationGrantMapper;
 import com.auth.service.auth.mapper.UserMapper;
 import com.auth.service.auth.model.value.authorization.UserAccountSnapshot;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
+import org.springframework.stereotype.Repository;
 
 /**
  * 授权画像查询：聚合用户快照、角色权限与数据范围，构建 {@link AuthProfile}。

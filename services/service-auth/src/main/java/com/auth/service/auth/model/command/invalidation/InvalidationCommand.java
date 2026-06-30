@@ -2,7 +2,6 @@ package com.auth.service.auth.model.command.invalidation;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidatePayload;
-
 import lombok.Builder;
 import lombok.Value;
 import lombok.experimental.Accessors;

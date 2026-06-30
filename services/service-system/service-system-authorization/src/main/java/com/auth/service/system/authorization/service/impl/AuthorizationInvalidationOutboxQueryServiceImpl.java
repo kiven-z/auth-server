@@ -1,5 +1,7 @@
 package com.auth.service.system.authorization.service.impl;
 
+import java.util.List;
+
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.authorization.convert.AuthorizationInvalidationOutboxOpsConverter;
 import com.auth.service.system.authorization.model.po.AuthorizationInvalidationOutboxDetailRowPO;
@@ -13,10 +15,9 @@ import com.auth.service.system.authorization.service.AuthorizationInvalidationOu
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 /**
  * 授权失效 Outbox 运维查询服务实现

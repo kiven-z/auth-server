@@ -1,5 +1,7 @@
 package com.auth.service.system.schedule.mapper;
 
+import java.util.List;
+
 import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
 import com.auth.service.system.schedule.model.po.SysJobGroupPageRowPO;
 import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
@@ -8,8 +10,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-
-import java.util.List;
 
 /**
  * 任务分组 Mapper

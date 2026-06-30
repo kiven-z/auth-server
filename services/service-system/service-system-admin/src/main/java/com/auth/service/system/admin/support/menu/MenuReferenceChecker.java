@@ -6,6 +6,7 @@ import com.auth.service.system.admin.mapper.menu.SysMenuMapper;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
+
 import org.springframework.stereotype.Component;
 
 /**
@@ -54,14 +55,11 @@ public class MenuReferenceChecker {
 	 * @param newParentId 新父菜单
 	 */
 	public void requireMoveTargetValid(Long menuId, Long newParentId) {
-		TreeRelationUtil.requireValidMoveTarget(menuId, newParentId, this::isDescendantOf);
-	}
-
-	private boolean isDescendantOf(Long ancestorId, Long nodeId) {
-		return TreeRelationUtil.isDescendantOf(ancestorId, nodeId, id -> {
-			SysMenuEntity node = sysMenuMapper.selectById(id);
-			return node == null ? null : node.getParentId();
-		});
+		TreeRelationUtil.requireValidMoveTarget(menuId, newParentId,
+				(ancestorId, nodeId) -> TreeRelationUtil.isDescendantOf(ancestorId, nodeId, id -> {
+					SysMenuEntity node = sysMenuMapper.selectById(id);
+					return node == null ? null : node.getParentId();
+				}));
 	}
 
 }

@@ -1,12 +1,12 @@
 package com.auth.service.system.admin.model.po.user;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Getter;
-import lombok.Setter;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * 用户岗位关联分页行

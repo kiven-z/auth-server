@@ -8,6 +8,8 @@ import com.auth.module.security.contract.exception.SecurityResultCodeEnum;
 import com.auth.module.security.contract.exception.SecurityTokenException;
 import com.auth.module.security.core.token.provider.AccessTokenProvider;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Mono;
+
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -16,7 +18,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
-import reactor.core.publisher.Mono;
 
 /**
  * 网关 JWT 轻量校验：仅在携带 Authorization 时校验“可解析”

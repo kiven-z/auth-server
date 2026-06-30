@@ -1,5 +1,9 @@
 package com.auth.service.system.admin.service.admin.impl;
 
+import java.lang.reflect.Field;
+import java.time.LocalDateTime;
+import java.util.List;
+
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
@@ -14,7 +18,6 @@ import com.auth.service.system.admin.model.form.user.UserPostRelationUpdateForm;
 import com.auth.service.system.admin.model.po.user.UserPostPageRowPO;
 import com.auth.service.system.admin.model.query.user.UserPostPageQuery;
 import com.auth.service.system.admin.model.vo.user.UserPostPageVO;
-import com.auth.service.system.admin.service.admin.SysUserService;
 import com.auth.service.system.admin.support.post.PostReferenceChecker;
 import com.auth.service.system.admin.support.user.UserOrgRelationBatchRemoveSupport;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
@@ -24,7 +27,7 @@ import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.extension.repository.CrudRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,16 +37,14 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.lang.reflect.Field;
-import java.time.LocalDateTime;
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link SysUserPostServiceImpl} 单元测试
@@ -60,9 +61,6 @@ class SysUserPostServiceImplTest {
 
 	@Mock
 	private SysUserMapper sysUserMapper;
-
-	@Mock
-	private SysUserService sysUserService;
 
 	@Mock
 	private SysPostMapper sysPostMapper;
@@ -115,12 +113,12 @@ class SysUserPostServiceImplTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		UserReferenceChecker userReferenceChecker = new UserReferenceChecker(sysUserMapper);
-		PostReferenceChecker postReferenceChecker = new PostReferenceChecker(sysPostMapper, null);
+		PostReferenceChecker postReferenceChecker = new PostReferenceChecker(sysPostMapper);
 		UserOrgRelationBatchRemoveSupport batchRemoveSupport = new UserOrgRelationBatchRemoveSupport(
 				userReferenceChecker, userAuthorizationInvalidationTrigger);
 		sysUserPostService = new SysUserPostServiceImpl(userReferenceChecker, postReferenceChecker,
 				userAuthorizationInvalidationTrigger, auditUserDisplayService, batchRemoveSupport);
-		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
+		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysUserPostService, userPostMapper);
 	}

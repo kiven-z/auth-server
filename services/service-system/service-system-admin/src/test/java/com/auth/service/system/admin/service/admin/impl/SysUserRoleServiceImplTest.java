@@ -1,12 +1,14 @@
 package com.auth.service.system.admin.service.admin.impl;
 
+import java.util.List;
+
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
 import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
 import com.auth.service.system.admin.service.admin.GrantTableService;
-import com.auth.service.system.admin.support.role.RoleReferenceChecker;
+import com.auth.service.system.admin.support.grant.RbacReferenceChecker;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.UserAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
@@ -18,12 +20,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link SysUserRoleServiceImpl} 单元测试
@@ -38,7 +41,7 @@ class SysUserRoleServiceImplTest {
 	private UserReferenceChecker userReferenceChecker;
 
 	@Mock
-	private RoleReferenceChecker roleReferenceChecker;
+	private RbacReferenceChecker rbacReferenceChecker;
 
 	@Mock
 	private GrantTableService grantTableService;
@@ -57,7 +60,7 @@ class SysUserRoleServiceImplTest {
 
 	@BeforeEach
 	void setUp() {
-		sysUserRoleService = new SysUserRoleServiceImpl(userReferenceChecker, roleReferenceChecker, grantTableService,
+		sysUserRoleService = new SysUserRoleServiceImpl(userReferenceChecker, rbacReferenceChecker, grantTableService,
 				userAuthorizationInvalidationTrigger);
 	}
 
@@ -100,7 +103,7 @@ class SysUserRoleServiceImplTest {
 		sysUserRoleService.replaceUserRoles(USER_ID, form);
 
 		verify(userReferenceChecker).requireOperable(List.of(USER_ID));
-		verify(roleReferenceChecker).requireExistingEnabledRoleIds(List.of(101L, 102L),
+		verify(rbacReferenceChecker).requireExistingEnabledRoleIds(List.of(101L, 102L),
 				SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 		verify(grantTableService).replaceSubjectRoleGrants(GrantTableSubjectType.USER.name(), USER_ID,
 				List.of(101L, 102L));

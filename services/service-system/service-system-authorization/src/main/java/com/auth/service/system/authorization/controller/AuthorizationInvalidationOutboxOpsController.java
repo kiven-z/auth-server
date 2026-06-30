@@ -18,8 +18,14 @@ import com.auth.service.system.common.model.SystemAuditBizModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import static com.auth.service.system.authorization.exception.AuthorizationInvalidationOpsResultCode.RETRY_FAILED;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
@@ -40,7 +46,7 @@ public class AuthorizationInvalidationOutboxOpsController {
 	private final AuthorizationInvalidationOutboxManualRetryService authorizationInvalidationOutboxManualRetryService;
 
 	@Operation(summary = "分页查询授权失效 Outbox")
-	@PreAuthorize("@auth.decide('sysAuthInvalidationOutbox:query')")
+	@PreAuthorize("@auth.decide('ops:invalidationoutbox:query')")
 	@GetMapping("page")
 	public Result<PageResponse<AuthorizationInvalidationOutboxPageVO>> page(
 			AuthorizationInvalidationOutboxQuery query) {
@@ -50,7 +56,7 @@ public class AuthorizationInvalidationOutboxOpsController {
 	}
 
 	@Operation(summary = "授权失效 Outbox 详情")
-	@PreAuthorize("@auth.decide('sysAuthInvalidationOutbox:detail')")
+	@PreAuthorize("@auth.decide('ops:invalidationoutbox:detail')")
 	@GetMapping("{id}")
 	public Result<AuthorizationInvalidationOutboxDetailVO> detail(@PathVariable("id") Long id) {
 		AuthorizationInvalidationOutboxDetailVO detail = authorizationInvalidationOutboxQueryService.getDetail(id);
@@ -60,7 +66,7 @@ public class AuthorizationInvalidationOutboxOpsController {
 	@OperationLog(targetType = "AUTH_INVALIDATION_OUTBOX", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.AUTH_INVALIDATION_OUTBOX, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "人工重试授权失效 Outbox 投递")
-	@PreAuthorize("@auth.decide('sysAuthInvalidationOutbox:retry')")
+	@PreAuthorize("@auth.decide('ops:invalidationoutbox:retry')")
 	@PostMapping("{id}/retry")
 	public Result<AuthorizationInvalidationOutboxRetryResultVO> retry(@PathVariable("id") Long id,
 			@RequestBody(required = false) AuthorizationInvalidationOutboxRetryForm form) {

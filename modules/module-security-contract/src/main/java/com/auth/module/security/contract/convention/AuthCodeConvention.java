@@ -1,16 +1,16 @@
 package com.auth.module.security.contract.convention;
 
-import lombok.experimental.UtilityClass;
-
 import java.util.regex.Pattern;
+
+import lombok.experimental.UtilityClass;
 
 /**
  * 权限码、角色码等安全侧编码格式约定（供 system 等模块在写入前校验；不包含业务状态判断）。
  *
  * <p>
  * 权限码：全小写语义段；结构为 1～3 段，以 {@code :} 分隔。每段为通配 {@code *} 或小写标识
- * {@code [a-z][a-z0-9]*}。合法示例：{@code *}、{@code *:*}、{@code *:*:*}、{@code sysdept}、
- * {@code sysdept:query}、{@code sysdept:query:detail}。
+ * {@code [a-z][a-z0-9]*}。合法示例：{@code *}、{@code *:*}、{@code *:*:*}、{@code sys}、
+ * {@code sys:dept}、{@code sys:dept:query}、{@code sys:dept:detail}。
  * </p>
  *
  * <p>

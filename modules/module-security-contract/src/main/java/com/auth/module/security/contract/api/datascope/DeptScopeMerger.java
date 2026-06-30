@@ -1,12 +1,12 @@
 package com.auth.module.security.contract.api.datascope;
 
-import cn.hutool.core.collection.CollUtil;
-import com.auth.module.security.contract.api.authorization.ScopeGrant;
-import lombok.experimental.UtilityClass;
-
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
+
+import cn.hutool.core.collection.CollUtil;
+import com.auth.module.security.contract.api.authorization.ScopeGrant;
+import lombok.experimental.UtilityClass;
 
 /**
  * 将多条 {@link ScopeGrant} 宽松合并为一条，供角色级 role_scope 画像构建使用。

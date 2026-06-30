@@ -1,5 +1,7 @@
 package com.auth.service.auth.support.login.strategy;
 
+import java.util.Objects;
+
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.auth.exception.AuthBusinessException;
 import com.auth.service.auth.exception.AuthResultCode;
@@ -12,9 +14,8 @@ import com.auth.service.auth.support.authorization.AuthProfileRepository;
 import com.auth.service.auth.support.login.LoginAuditService;
 import com.auth.service.auth.support.redis.store.LoginVerificationCodeStore;
 import com.auth.service.auth.support.token.LoginFailureRateLimiter;
-import org.springframework.stereotype.Component;
 
-import java.util.Objects;
+import org.springframework.stereotype.Component;
 
 /**
  * 邮箱验证码登录策略。

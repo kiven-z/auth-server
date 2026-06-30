@@ -1,15 +1,17 @@
 package com.auth.service.system.admin.service.admin;
 
-import com.auth.service.system.admin.model.vo.reference.PermissionReferenceVO;
-
 import java.util.List;
+
+import com.auth.service.system.admin.model.entity.SysRolePermissionEntity;
+import com.auth.service.system.admin.model.vo.reference.PermissionReferenceVO;
+import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
  * 角色权限分配服务。
  *
  * @author Bunny
  */
-public interface SysRolePermissionService {
+public interface SysRolePermissionService extends IService<SysRolePermissionEntity> {
 
 	/**
 	 * 查询角色已分配权限

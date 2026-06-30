@@ -1,13 +1,13 @@
 package com.auth.service.auth.mapper;
 
+import java.util.List;
+
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.auth.model.enums.CredentialDimension;
 import com.auth.service.auth.model.po.user.UserInvalidationStatePO;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-
-import java.util.List;
 
 /**
  * 用户 Mapper（auth 服务共用）
@@ -33,5 +33,12 @@ public interface UserMapper extends BaseMapper<UserEntity> {
 	 * @return 状态投影
 	 */
 	List<UserInvalidationStatePO> selectInvalidationStatesByUserIds(@Param("userIds") List<Long> userIds);
+
+	/**
+	 * 批量递增 {@code perm_version}（仅正常且未删除用户，防御性条件与分桶策略一致）。
+	 * @param userIds 用户 ID 列表，非空
+	 * @return 更新行数
+	 */
+	int incrementPermVersionByUserIds(@Param("userIds") List<Long> userIds);
 
 }

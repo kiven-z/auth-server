@@ -1,5 +1,9 @@
 package com.auth.service.system.message.channel.email.transport;
 
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.BooleanUtil;
@@ -9,15 +13,12 @@ import com.auth.service.system.message.model.channel.email.RenderedEmail;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_FAILED;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;

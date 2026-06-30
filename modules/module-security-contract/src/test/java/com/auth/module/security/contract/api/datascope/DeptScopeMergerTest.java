@@ -1,12 +1,14 @@
 package com.auth.module.security.contract.api.datascope;
 
+import java.util.List;
+
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * {@link DeptScopeMerger} 单元测试

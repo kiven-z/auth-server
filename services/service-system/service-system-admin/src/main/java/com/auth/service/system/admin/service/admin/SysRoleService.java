@@ -1,5 +1,7 @@
 package com.auth.service.system.admin.service.admin;
 
+import java.util.List;
+
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.form.role.SysRoleForm;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -12,10 +14,10 @@ import com.baomidou.mybatisplus.extension.service.IService;
 public interface SysRoleService extends IService<SysRoleEntity> {
 
 	/**
-	 * 新增角色
-	 * @param form 新增表单
+	 * 批量新增角色
+	 * @param forms 新增表单列表
 	 */
-	void create(SysRoleForm form);
+	void createBatchFromImport(List<SysRoleForm> forms);
 
 	/**
 	 * 更新角色

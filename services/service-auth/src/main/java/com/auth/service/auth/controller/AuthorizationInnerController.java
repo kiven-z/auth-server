@@ -5,19 +5,25 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.autoconfigure.annotation.InternalApi;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateResponse;
-import com.auth.service.auth.service.AdminAuthorizationService;
-import com.auth.service.auth.service.AuthorizationInvalidationEventService;
-import com.auth.service.auth.service.AuthorizationInvalidationService;
 import com.auth.service.auth.model.query.AuthorizationInvalidationEventQuery;
 import com.auth.service.auth.model.vo.authorization.AuthorizationInvalidationEventDetailVO;
 import com.auth.service.auth.model.vo.authorization.AuthorizationInvalidationEventPageVO;
 import com.auth.service.auth.model.vo.authorization.AuthorizationInvalidationEventStatsVO;
 import com.auth.service.auth.model.vo.authorization.EffectiveCodesVO;
+import com.auth.service.auth.service.AdminAuthorizationService;
+import com.auth.service.auth.service.AuthorizationInvalidationEventService;
+import com.auth.service.auth.service.AuthorizationInvalidationService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 授权域内部接口

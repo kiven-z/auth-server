@@ -1,10 +1,10 @@
 package com.auth.common.core.utils;
 
+import java.util.List;
+
 import cn.hutool.core.collection.CollUtil;
 import com.auth.common.core.model.entity.TreeNode;
 import lombok.experimental.UtilityClass;
-
-import java.util.List;
 
 /**
  * 树形结构 构造

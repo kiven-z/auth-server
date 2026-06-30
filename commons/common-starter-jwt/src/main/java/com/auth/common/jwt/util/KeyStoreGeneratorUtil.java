@@ -1,5 +1,15 @@
 package com.auth.common.jwt.util;
 
+import java.io.FileOutputStream;
+import java.math.BigInteger;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.KeyStore;
+import java.security.SecureRandom;
+import java.security.Security;
+import java.security.cert.X509Certificate;
+import java.util.Date;
+
 import com.auth.common.jwt.exception.JwtKeyLoadException;
 import lombok.experimental.UtilityClass;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -8,12 +18,6 @@ import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-
-import java.io.FileOutputStream;
-import java.math.BigInteger;
-import java.security.*;
-import java.security.cert.X509Certificate;
-import java.util.Date;
 
 /**
  * 生成 PKCS12（RSA 2048）用于 RS256 开发联调

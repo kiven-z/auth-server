@@ -1,12 +1,12 @@
 package com.auth.service.system.admin.support;
 
+import java.util.List;
+
 import com.auth.common.core.model.query.SortDirection;
 import com.auth.common.core.model.query.SortSpec;
 import com.auth.service.system.admin.support.sqlbuild.SysPostPageOrderSqlBuilder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

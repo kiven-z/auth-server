@@ -1,15 +1,10 @@
 package com.auth.common.web.context;
 
-import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.BeansException;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.MessageSource;
-import org.springframework.stereotype.Component;
-
 import java.util.Locale;
 import java.util.Objects;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.MessageSource;
 
 /**
  * Spring上下文持有者 用于在非Spring管理的类中获取Spring容器中的Bean实例， 提供静态方法访问Spring
@@ -17,14 +12,15 @@ import java.util.Objects;
  *
  * @author Bunny
  */
-@ConditionalOnMissingBean(SpringContextHolder.class)
-@Component
-public class SpringContextHolder implements ApplicationContextAware {
+public final class SpringContextHolder {
 
 	/**
 	 * Spring 应用上下文实例
 	 */
 	private static ApplicationContext applicationContext;
+
+	private SpringContextHolder() {
+	}
 
 	/**
 	 * 获取配置属性值
@@ -70,14 +66,10 @@ public class SpringContextHolder implements ApplicationContextAware {
 	}
 
 	/**
-	 * 设置Spring应用上下文
-	 * @param context Spring应用上下文实例
-	 * @throws BeansException Bean异常
+	 * 注册 Spring 应用上下文
+	 * @param context Spring 应用上下文实例
 	 */
-	@Override
-	@SuppressWarnings("java:S2696")
-	public void setApplicationContext(@NotNull ApplicationContext context) throws BeansException {
-		// 使用局部变量名避免冲突
+	public static void registerApplicationContext(ApplicationContext context) {
 		applicationContext = context;
 	}
 

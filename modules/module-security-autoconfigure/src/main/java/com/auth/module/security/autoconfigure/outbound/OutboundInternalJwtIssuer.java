@@ -1,10 +1,10 @@
 package com.auth.module.security.autoconfigure.outbound;
 
+import java.util.UUID;
+
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.module.security.core.token.provider.InternalTokenProvider;
-
-import java.util.UUID;
 
 /**
  * 出站内部 JWT 签发：按当前安全上下文选择 USER 或 SERVICE 身份。

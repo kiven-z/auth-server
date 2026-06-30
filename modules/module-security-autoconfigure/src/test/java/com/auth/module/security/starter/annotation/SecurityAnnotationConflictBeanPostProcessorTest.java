@@ -1,5 +1,8 @@
 package com.auth.module.security.starter.annotation;
 
+import java.util.List;
+import java.util.Set;
+
 import com.auth.module.security.autoconfigure.annotation.AuthenticatedApi;
 import com.auth.module.security.autoconfigure.annotation.InternalApi;
 import com.auth.module.security.autoconfigure.annotation.PublicApi;
@@ -7,14 +10,14 @@ import com.auth.module.security.autoconfigure.annotation.processor.MutuallyExclu
 import com.auth.module.security.autoconfigure.annotation.processor.SecurityAnnotationConflictBeanPostProcessor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SecurityAnnotationConflictBeanPostProcessorTest {
 

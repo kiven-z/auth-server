@@ -1,13 +1,13 @@
 package com.auth.common.core.model.response;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.Map;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.Map;
 
 /**
  * 通用返回结果

@@ -1,14 +1,15 @@
 package com.auth.service.system.authorization.dispatch.query;
 
+import java.util.Optional;
+
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.common.core.model.response.Result;
 import com.auth.service.system.authorization.feign.AuthorizationInnerFeignClient;
 import com.auth.service.system.authorization.feign.dto.EffectiveCodesInnerDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
-import java.util.Optional;
+import org.springframework.stereotype.Component;
 
 import static com.auth.common.web.resttemplate.FeignUtil.isSuccessWithData;
 

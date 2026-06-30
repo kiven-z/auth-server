@@ -1,14 +1,15 @@
 package com.auth.service.auth.support.token;
 
+import java.time.Duration;
+import java.util.concurrent.TimeUnit;
+
 import com.auth.module.security.autoconfigure.config.user.UserConfigProperties;
 import com.auth.service.auth.exception.AuthBusinessException;
 import com.auth.service.auth.exception.AuthResultCode;
+
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
-
-import java.time.Duration;
-import java.util.concurrent.TimeUnit;
 
 import static com.auth.module.security.contract.redis.SecurityRedisKey.LOGIN_FAILURE_COUNT;
 

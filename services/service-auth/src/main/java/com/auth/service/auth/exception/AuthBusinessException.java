@@ -1,10 +1,10 @@
 package com.auth.service.auth.exception;
 
-import com.auth.common.core.i18n.I18nMessageProvider;
-import lombok.Getter;
-
 import java.util.Arrays;
 import java.util.Objects;
+
+import com.auth.common.core.i18n.I18nMessageProvider;
+import lombok.Getter;
 
 /**
  * 认证服务业务异常：语义以 {@link AuthResultCode} 为唯一来源，可选携带 i18n 占位参数

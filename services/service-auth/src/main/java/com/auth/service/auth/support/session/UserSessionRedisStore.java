@@ -1,20 +1,28 @@
 package com.auth.service.auth.support.session;
 
+import java.time.Duration;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
+
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.NumberUtil;
 import com.auth.module.security.contract.api.UserSessionIndex;
 import org.jetbrains.annotations.NotNull;
+
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
-
-import static com.auth.module.security.contract.redis.SecurityRedisKey.*;
+import static com.auth.module.security.contract.redis.SecurityRedisKey.ONLINE_USERS;
+import static com.auth.module.security.contract.redis.SecurityRedisKey.USER_SESSION;
+import static com.auth.module.security.contract.redis.SecurityRedisKey.USER_SESSIONS;
 
 /**
  * 用户会话 Redis 写路径编排：生命周期、索引维护与在线用户同步

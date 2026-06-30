@@ -17,17 +17,17 @@ import lombok.Getter;
 public enum UserStatus {
 
 	/**
-	 * 禁用（不可登录）
+	 * 禁用
 	 */
 	DISABLED(0, "禁用"),
 
 	/**
-	 * 正常
+	 * 启用
 	 */
-	NORMAL(1, "正常"),
+	NORMAL(1, "启用"),
 
 	/**
-	 * 锁定（不可登录）
+	 * 锁定
 	 */
 	LOCKED(2, "锁定");
 

@@ -1,5 +1,7 @@
 package com.auth.service.system.admin.controller.admin;
 
+import java.util.List;
+
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.annotation.OperationLog;
@@ -14,10 +16,16 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 用户部门关联管理
@@ -33,7 +41,7 @@ public class SysUserDeptController {
 	private final SysUserDeptService sysUserDeptService;
 
 	@Operation(summary = "分页查询用户部门关联")
-	@PreAuthorize("@auth.decide('sysUserDept:query')")
+	@PreAuthorize("@auth.decide('sys:userdept:query')")
 	@GetMapping("/{userId}/page")
 	public Result<PageResponse<UserDeptPageVO>> pageDepts(@PathVariable("userId") Long userId,
 			UserDeptPageQuery query) {
@@ -44,7 +52,7 @@ public class SysUserDeptController {
 	@OperationLog(targetType = "USER_DEPT", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.CREATE)
 	@Operation(summary = "新增用户部门关联")
-	@PreAuthorize("@auth.decide('sysUserDept:create')")
+	@PreAuthorize("@auth.decide('sys:userdept:create')")
 	@PostMapping("/{userId}")
 	public Result<Void> create(@PathVariable("userId") Long userId, @Valid @RequestBody UserDeptAssignForm form) {
 		sysUserDeptService.create(userId, form);
@@ -54,7 +62,7 @@ public class SysUserDeptController {
 	@OperationLog(targetType = "USER_DEPT", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "更新用户部门关联")
-	@PreAuthorize("@auth.decide('sysUserDept:update')")
+	@PreAuthorize("@auth.decide('sys:userdept:update')")
 	@PutMapping("/{userId}/{id}")
 	public Result<Void> update(@PathVariable("userId") Long userId, @PathVariable("id") Long id,
 			@Valid @RequestBody UserDeptAssignForm form) {
@@ -65,7 +73,7 @@ public class SysUserDeptController {
 	@OperationLog(targetType = "USER_DEPT", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.DELETE)
 	@Operation(summary = "批量删除用户部门关联")
-	@PreAuthorize("@auth.decide('sysUserDept:delete')")
+	@PreAuthorize("@auth.decide('sys:userdept:delete')")
 	@DeleteMapping("/{userId}")
 	public Result<Void> removeBatch(@PathVariable("userId") Long userId, @RequestBody List<Long> ids) {
 		sysUserDeptService.removeBatch(userId, ids);
@@ -75,7 +83,7 @@ public class SysUserDeptController {
 	@OperationLog(targetType = "USER_DEPT", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.DELETE)
 	@Operation(summary = "清空用户全部部门关联")
-	@PreAuthorize("@auth.decide('sysUserDept:delete')")
+	@PreAuthorize("@auth.decide('sys:userdept:delete')")
 	@DeleteMapping("/{userId}/all")
 	public Result<Void> removeAll(@PathVariable("userId") Long userId) {
 		sysUserDeptService.removeAll(userId);

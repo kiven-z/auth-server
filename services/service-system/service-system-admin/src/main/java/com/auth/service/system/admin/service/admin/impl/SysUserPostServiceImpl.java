@@ -1,5 +1,7 @@
 package com.auth.service.system.admin.service.admin.impl;
 
+import java.util.List;
+
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.convert.admin.user.UserPostConverter;
@@ -25,10 +27,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 /**
  * 用户岗位关联服务实现

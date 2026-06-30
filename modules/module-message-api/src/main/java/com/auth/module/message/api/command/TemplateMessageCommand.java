@@ -1,5 +1,10 @@
 package com.auth.module.message.api.command;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
+
 import com.auth.module.message.api.channel.MessageChannel;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
@@ -8,11 +13,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.List;
-import java.util.Map;
 
 /**
  * 跨渠道模板化消息发送命令（跨服务契约）

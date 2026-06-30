@@ -1,10 +1,10 @@
 package com.auth.service.auth.mapper;
 
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-
 import java.util.Collection;
 import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * 部门闭包表只读 Mapper（dept_closure）

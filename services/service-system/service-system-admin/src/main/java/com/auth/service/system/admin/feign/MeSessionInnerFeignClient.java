@@ -1,14 +1,15 @@
 package com.auth.service.system.admin.feign;
 
+import java.util.List;
+
 import com.auth.common.core.model.response.Result;
 import com.auth.service.system.admin.feign.dto.UserSessionRemoteDTO;
 import com.auth.service.system.admin.feign.fallback.MeSessionInnerFeignClientFallback;
+
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-
-import java.util.List;
 
 /**
  * 个人中心会话内部 Feign 客户端

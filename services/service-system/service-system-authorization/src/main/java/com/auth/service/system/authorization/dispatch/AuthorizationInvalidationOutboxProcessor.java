@@ -1,5 +1,8 @@
 package com.auth.service.system.authorization.dispatch;
 
+import java.time.LocalDateTime;
+import java.util.Objects;
+
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.core.model.response.Result;
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
@@ -13,10 +16,8 @@ import com.auth.service.system.authorization.model.enums.AuthorizationInvalidati
 import com.auth.service.system.authorization.outbox.InvalidationOutboxPayloadCodec;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.Objects;
+import org.springframework.stereotype.Service;
 
 /**
  * Outbox 投递执行：调用 auth {@code /invalidate} 并更新 Outbox 状态。

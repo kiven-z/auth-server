@@ -1,12 +1,13 @@
 package com.auth.service.system.admin.feign.fallback;
 
+import java.util.List;
+
 import com.auth.common.core.model.response.Result;
 import com.auth.service.system.admin.feign.MeSessionInnerFeignClient;
 import com.auth.service.system.admin.feign.dto.UserSessionRemoteDTO;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
-import java.util.List;
+import org.springframework.stereotype.Component;
 
 /**
  * 个人中心会话内部 Feign 降级

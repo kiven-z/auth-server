@@ -1,11 +1,11 @@
 package com.auth.service.system.admin.model.po.permission;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * 角色已绑定菜单行

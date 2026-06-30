@@ -1,5 +1,7 @@
 package com.auth.module.security.starter.service;
 
+import java.util.Map;
+
 import com.auth.module.security.autoconfigure.service.AuthProfileCacheService;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.module.security.contract.exception.SecurityResultCodeEnum;
@@ -8,19 +10,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
-import java.util.Map;
-
 import static com.auth.module.security.contract.redis.SecurityRedisKey.USER_PERM;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@SuppressWarnings("java:S6068")
 class AuthProfileCacheServiceTest {
 
 	private ValueOperations<String, Object> valueOps;
@@ -58,7 +59,7 @@ class AuthProfileCacheServiceTest {
 		when(valueOps.get(USER_PERM.key(100L))).thenReturn(raw);
 
 		AuthProfile converted = AuthProfile.builder().userId(100L).username("alice").permVersion(42L).build();
-		when(objectMapper.convertValue(eq(raw), eq(AuthProfile.class))).thenReturn(converted);
+		when(objectMapper.convertValue(raw, AuthProfile.class)).thenReturn(converted);
 
 		AuthProfile result = cacheService.load(100L);
 		assertNotNull(result);
@@ -88,7 +89,7 @@ class AuthProfileCacheServiceTest {
 	void load_throws_whenDeserializationFails() {
 		Map<String, Object> raw = Map.of("invalid", "data");
 		when(valueOps.get(USER_PERM.key(100L))).thenReturn(raw);
-		when(objectMapper.convertValue(any(), eq(AuthProfile.class)))
+		when(objectMapper.convertValue(raw, AuthProfile.class))
 			.thenThrow(new IllegalArgumentException("Cannot deserialize"));
 
 		SecurityTokenException ex = assertThrows(SecurityTokenException.class, () -> cacheService.load(100L));

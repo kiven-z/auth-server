@@ -1,11 +1,15 @@
 package com.auth.common.core.annotation;
 
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 import com.auth.common.core.desensitize.DesensitizedJsonSerializer;
 import com.auth.common.core.desensitize.DesensitizedType;
 import com.fasterxml.jackson.annotation.JacksonAnnotationsInside;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
-import java.lang.annotation.*;
 
 /**
  * 响应 JSON 序列化时对字符串字段脱敏，基于 Hutool {@link cn.hutool.core.util.DesensitizedUtil}

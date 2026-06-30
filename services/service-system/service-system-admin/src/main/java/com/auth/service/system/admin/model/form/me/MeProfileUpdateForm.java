@@ -1,5 +1,9 @@
 package com.auth.service.system.admin.model.form.me;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.LocalDate;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Max;
@@ -9,10 +13,6 @@ import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.LocalDate;
 
 /**
  * 当前用户更新个人资料表单

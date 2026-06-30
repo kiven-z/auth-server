@@ -1,14 +1,14 @@
 package com.auth.service.system.authorization.feign.dto;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.LocalDateTime;
 
 /**
  * 授权失效幂等事件分页行（Feign 传输）

@@ -1,11 +1,11 @@
 package com.auth.common.core.model.query;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
+
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * 基础分页请求

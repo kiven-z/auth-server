@@ -1,0 +1,84 @@
+package com.auth.service.system.admin.support.grant;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import cn.hutool.core.collection.CollUtil;
+import com.auth.service.system.admin.mapper.permission.SysPermissionMapper;
+import com.auth.service.system.admin.mapper.role.SysRoleMapper;
+import com.auth.service.system.admin.model.entity.SysRoleEntity;
+import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
+import com.auth.service.system.common.exception.code.SystemResultCode;
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Component;
+
+/**
+ * RBAC 授权写入前的关联引用存在性与启用状态校验
+ *
+ * @author Bunny
+ */
+@RequiredArgsConstructor
+@Component
+public class RbacReferenceChecker {
+
+	private final SysPermissionMapper sysPermissionMapper;
+
+	private final SysRoleMapper sysRoleMapper;
+
+	/**
+	 * 权限 ID 均存在且已启用
+	 * @param permissionIds 待写入权限 ID（内部会去重）
+	 */
+	public void requireActivePermissionIds(List<Long> permissionIds) {
+		if (CollUtil.isEmpty(permissionIds)) {
+			return;
+		}
+
+		List<Long> distinctIds = permissionIds.stream().distinct().toList();
+		Set<Long> activeIds = new HashSet<>(sysPermissionMapper.selectActivePermissionIds(distinctIds));
+		if (activeIds.size() != distinctIds.size()) {
+			Long invalidId = distinctIds.stream()
+				.filter(id -> !activeIds.contains(id))
+				.findFirst()
+				.orElseThrow(() -> new IllegalStateException("active permission mismatch without invalid id"));
+			throw new SystemBusinessException(SystemCommonResultCode.GRANT_REFERENCE_INVALID, invalidId);
+		}
+	}
+
+	/**
+	 * 读取已存在角色，不存在时抛出业务异常；不校验启用状态
+	 * @param roleId 角色 ID
+	 * @return 角色实体
+	 */
+	public SysRoleEntity getExisting(Long roleId) {
+		SysRoleEntity role = sysRoleMapper.selectById(roleId);
+		if (role == null) {
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST, roleId);
+		}
+		return role;
+	}
+
+	/**
+	 * 写入前：角色 ID 均存在且已启用
+	 * @param roleIds 待写入角色 ID（内部会去重）
+	 * @param invalidCode 校验失败时抛出的结果码
+	 */
+	public void requireExistingEnabledRoleIds(List<Long> roleIds, SystemResultCode invalidCode) {
+		if (CollUtil.isEmpty(roleIds)) {
+			return;
+		}
+		List<Long> distinctIds = roleIds.stream().distinct().toList();
+		Set<Long> activeIds = new HashSet<>(sysRoleMapper.selectActiveRoleIds(distinctIds));
+		if (activeIds.size() != distinctIds.size()) {
+			Long invalidId = distinctIds.stream()
+				.filter(id -> !activeIds.contains(id))
+				.findFirst()
+				.orElseThrow(() -> new IllegalStateException("active role mismatch without invalid id"));
+			throw new SystemBusinessException(invalidCode, invalidId);
+		}
+	}
+
+}

@@ -1,19 +1,20 @@
 package com.auth.service.system.authorization.dispatch.trigger;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest;
 import com.auth.module.security.contract.dto.invalidation.UserPostInvalidatePayload;
 import com.auth.service.system.authorization.dispatch.AuthorizationInvalidationCoordinator;
-import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.auth.service.system.common.model.SystemAuditBizModule;
+import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.stereotype.Component;
 
 /**
  * 岗位启用状态变更后触发授权失效

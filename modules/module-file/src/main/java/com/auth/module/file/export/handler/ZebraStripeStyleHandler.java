@@ -1,5 +1,8 @@
 package com.auth.module.file.export.handler;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import com.alibaba.excel.metadata.Head;
@@ -9,26 +12,42 @@ import com.alibaba.excel.write.handler.CellWriteHandler;
 import com.alibaba.excel.write.metadata.holder.WriteSheetHolder;
 import com.alibaba.excel.write.metadata.holder.WriteTableHolder;
 import com.auth.module.file.export.model.ZebraStripeStyle;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.BorderStyle;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * 斑马纹样式处理器 用于在 Excel 导出时为单元格应用斑马纹样式，包括交替行颜色、特殊列高亮等功能
  *
- * @param styleConfig 斑马纹样式配置对象，定义颜色、字体等样式参数
  * @author Bunny
  */
-public record ZebraStripeStyleHandler(ZebraStripeStyle styleConfig) implements CellWriteHandler {
+public class ZebraStripeStyleHandler implements CellWriteHandler {
+
+	private final ZebraStripeStyle styleConfig;
 
 	/**
-	 * 缓存样式：Key 是 "背景颜色 Index_数据格式 Index"，避免重复创建 使用静态缓存减少样式对象的重复创建，提升性能
+	 * 单次写出会话内的样式缓存；POI {@link CellStyle} 绑定所属 {@link Workbook}，禁止跨工作簿复用。
 	 */
-	private static final Map<String, CellStyle> STYLE_CACHE = new HashMap<>();
+	private final Map<String, CellStyle> styleCache = new HashMap<>();
+
+	/**
+	 * 当前缓存绑定的工作簿；导出服务会复用同一处理器，新工作簿写出前清空缓存。
+	 */
+	private Workbook boundWorkbook;
+
+	/**
+	 * @param styleConfig 斑马纹样式配置对象，定义颜色、字体等样式参数
+	 */
+	public ZebraStripeStyleHandler(ZebraStripeStyle styleConfig) {
+		this.styleConfig = styleConfig;
+	}
 
 	/**
 	 * 单元格处理完成后的回调方法 在此方法中为每个单元格应用斑马纹样式
@@ -72,13 +91,20 @@ public record ZebraStripeStyleHandler(ZebraStripeStyle styleConfig) implements C
 			}
 		}
 
-		// 3. 从缓存获取或创建样式
-		String cacheKey = String.format("%d_%d_%d_%b", rgbColor[0], rgbColor[1], dataFormat, isHead);
+		// 3. 工作簿切换时丢弃旧缓存，避免 CellStyle 跨 Workbook 污染
+		if (boundWorkbook != workbook) {
+			styleCache.clear();
+			boundWorkbook = workbook;
+		}
+
+		// 4. 从缓存获取或创建样式
+		String cacheKey = String.format("%d_%d_%d_%d_%b", rgbColor[0] & 0xFF, rgbColor[1] & 0xFF, rgbColor[2] & 0xFF,
+				dataFormat, isHead);
 		short finalDataFormat = dataFormat;
-		CellStyle finalStyle = STYLE_CACHE.computeIfAbsent(cacheKey,
+		CellStyle finalStyle = styleCache.computeIfAbsent(cacheKey,
 				k -> createBaseStyle(workbook, rgbColor, finalDataFormat, isHead));
 
-		// 4. 应用样式并清理
+		// 5. 应用样式并清理
 		cell.setCellStyle(finalStyle);
 		if (cellDataList != null && !cellDataList.isEmpty()) {
 			cellDataList.get(0).setWriteCellStyle(null);

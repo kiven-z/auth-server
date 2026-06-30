@@ -1,5 +1,7 @@
 package com.auth.service.auth.support.authorization;
 
+import java.util.List;
+
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
 import com.auth.module.security.contract.api.datascope.DataScopeStorageType;
 import com.auth.service.auth.mapper.UserAuthorizationGrantMapper;
@@ -11,10 +13,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link AuthProfileRepository} 单元测试

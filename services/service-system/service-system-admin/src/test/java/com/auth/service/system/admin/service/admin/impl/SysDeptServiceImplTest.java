@@ -1,8 +1,11 @@
 package com.auth.service.system.admin.service.admin.impl;
 
+import java.lang.reflect.Field;
+import java.util.Collections;
+import java.util.List;
+
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.system.admin.mapper.dept.SysDeptMapper;
-import com.auth.service.system.admin.mapper.dept.SysDeptQueryMapper;
 import com.auth.service.system.admin.mapper.role.GrantTableMapper;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.form.dept.SysDeptForm;
@@ -11,8 +14,11 @@ import com.auth.service.system.admin.model.vo.dept.SysDeptListVO;
 import com.auth.service.system.admin.support.dept.DeptClosureMaintainer;
 import com.auth.service.system.admin.support.dept.DeptReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.DeptAuthorizationInvalidationTrigger;
+import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.common.service.AuditUserDisplayService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.extension.repository.CrudRepository;
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,15 +26,21 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.lang.reflect.Field;
-import java.util.Collections;
-import java.util.List;
-
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link SysDeptServiceImpl} 单元测试
@@ -53,9 +65,6 @@ class SysDeptServiceImplTest {
 
 	@Mock
 	private DeptAuthorizationInvalidationTrigger deptInvalidationTrigger;
-
-	@Mock
-	private SysDeptQueryMapper sysDeptQueryMapper;
 
 	@Mock
 	private GrantTableMapper grantTableMapper;
@@ -87,17 +96,66 @@ class SysDeptServiceImplTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		sysDeptService = new SysDeptServiceImpl(deptReferenceChecker, deptClosureMaintainer, deptInvalidationTrigger);
+		sysDeptService = spy(
+				new SysDeptServiceImpl(deptReferenceChecker, deptClosureMaintainer, deptInvalidationTrigger));
 		sysDeptQueryService = new SysDeptQueryServiceImpl(auditUserDisplayService, deptReferenceChecker,
-				sysDeptQueryMapper, grantTableMapper);
-		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
+				grantTableMapper);
+		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysDeptService, sysDeptMapper);
 		baseMapperField.set(sysDeptQueryService, sysDeptMapper);
+		lenient().doAnswer(invocation -> {
+			List<SysDeptEntity> entities = invocation.getArgument(0);
+			long id = 1L;
+			for (SysDeptEntity entity : entities) {
+				entity.setId(id++);
+			}
+			return true;
+		}).when(sysDeptService).saveBatch(anyList(), anyInt());
 	}
 
 	@Test
-	@DisplayName("扁平列表：无关键词时查询全量未删除部门")
+	@DisplayName("批量新增部门：空列表直接返回")
+	void createBatchFromImportSkipsWhenEmpty() {
+		sysDeptService.createBatchFromImport(List.of());
+
+		verify(deptReferenceChecker, never()).requireAbsentDeptCodes(anyList());
+		verify(sysDeptService, never()).saveBatch(anyList(), anyInt());
+	}
+
+	@Test
+	@DisplayName("批量新增部门：校验通过后批量落库并维护闭包")
+	void createBatchFromImportPersistsEntitiesAndInsertsClosure() {
+		SysDeptForm form = minimalForm(null, 0L, "RD", "研发部", true);
+		when(deptReferenceChecker.normalizeAndRequireActiveParent(0L)).thenReturn(0L);
+
+		sysDeptService.createBatchFromImport(List.of(form));
+
+		verify(deptReferenceChecker).requireAbsentDeptCodes(List.of("RD"));
+		verify(deptReferenceChecker).normalizeAndRequireActiveParent(0L);
+		verify(sysDeptService).saveBatch(anyList(), eq(500));
+		verify(deptClosureMaintainer).insertNode(anyLong(), eq(0L));
+	}
+
+	@Test
+	@DisplayName("批量新增部门：编码已存在时抛出 DATA_CODE_DUPLICATE")
+	void createBatchFromImportThrowsWhenDeptCodeExists() {
+		SysDeptForm form = minimalForm(null, 0L, "RD", "研发部", true);
+		doThrow(new SystemBusinessException(SystemCommonResultCode.DATA_CODE_DUPLICATE, "RD"))
+			.when(deptReferenceChecker)
+			.requireAbsentDeptCodes(List.of("RD"));
+
+		ThrowingCallable executable = () -> sysDeptService.createBatchFromImport(List.of(form));
+		assertThatThrownBy(executable).isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemCommonResultCode.DATA_CODE_DUPLICATE);
+
+		verify(sysDeptService, never()).saveBatch(anyList(), anyInt());
+		verify(deptClosureMaintainer, never()).insertNode(anyLong(), anyLong());
+	}
+
+	@Test
+	@DisplayName("扁平列表：无关键词时查询全量部门")
 	void listFlatWithoutKeywordQueriesAllActiveDepts() {
 		SysDeptEntity entity = activeDept(1L, "D001");
 		when(sysDeptMapper.selectListByQuery(any(SysDeptListQuery.class))).thenReturn(List.of(entity));
@@ -162,6 +220,7 @@ class SysDeptServiceImplTest {
 		SysDeptEntity existing = activeDept(deptId, "D003");
 		when(deptReferenceChecker.getExistingActive(deptId)).thenReturn(existing);
 		when(deptReferenceChecker.normalizeAndRequireActiveParent(10L)).thenReturn(10L);
+		when(sysDeptMapper.countDescendantRelation(deptId, 10L)).thenReturn(0L);
 		when(sysDeptMapper.updateById(any(SysDeptEntity.class))).thenReturn(1);
 
 		SysDeptForm form = minimalForm(deptId, 10L, "D003", "原部门", true);

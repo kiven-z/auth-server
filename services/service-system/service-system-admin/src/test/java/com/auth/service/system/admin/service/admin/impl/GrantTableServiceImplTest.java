@@ -1,8 +1,11 @@
 package com.auth.service.system.admin.service.admin.impl;
 
+import java.lang.reflect.Field;
+import java.util.Collection;
+import java.util.List;
+
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.module.security.contract.dto.invalidation.GrantSubjectKey;
-import com.auth.service.system.admin.mapper.post.PostReferenceCheckerMapper;
 import com.auth.service.system.admin.mapper.post.SysPostMapper;
 import com.auth.service.system.admin.mapper.role.GrantTableMapper;
 import com.auth.service.system.admin.model.entity.GrantTableEntity;
@@ -10,13 +13,14 @@ import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
 import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
-import com.auth.service.system.admin.support.granttable.GrantTableSubjectExistenceVerifier;
+import com.auth.service.system.admin.support.grant.GrantTableSubjectExistenceVerifier;
+import com.auth.service.system.admin.support.grant.RbacReferenceChecker;
+import com.auth.service.system.admin.support.grant.TypedGrantTableActiveSubjectChecker;
 import com.auth.service.system.admin.support.post.PostReferenceChecker;
-import com.auth.service.system.admin.support.role.RoleReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.GrantAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.extension.repository.CrudRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,15 +29,15 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.lang.reflect.Field;
-import java.util.Collection;
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link GrantTableServiceImpl} 单元测试
@@ -48,13 +52,10 @@ class GrantTableServiceImplTest {
 	private SysPostMapper sysPostMapper;
 
 	@Mock
-	private PostReferenceCheckerMapper postReferenceCheckerMapper;
-
-	@Mock
 	private GrantTableMapper grantTableMapper;
 
 	@Mock
-	private RoleReferenceChecker roleReferenceChecker;
+	private RbacReferenceChecker rbacReferenceChecker;
 
 	@Mock
 	private GrantAuthorizationInvalidationTrigger grantInvalidationTrigger;
@@ -73,12 +74,14 @@ class GrantTableServiceImplTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		PostReferenceChecker postReferenceChecker = new PostReferenceChecker(sysPostMapper, postReferenceCheckerMapper);
-		GrantTableSubjectExistenceVerifier subjectExistenceVerifier = new GrantTableSubjectExistenceVerifier(null,
-				postReferenceChecker);
+		PostReferenceChecker postReferenceChecker = new PostReferenceChecker(sysPostMapper);
+		TypedGrantTableActiveSubjectChecker postSubjectChecker = new TypedGrantTableActiveSubjectChecker(
+				GrantTableSubjectType.POST, postReferenceChecker::getExistingActive);
+		GrantTableSubjectExistenceVerifier subjectExistenceVerifier = new GrantTableSubjectExistenceVerifier(
+				List.of(postSubjectChecker));
 		grantTableService = spy(
-				new GrantTableServiceImpl(subjectExistenceVerifier, roleReferenceChecker, grantInvalidationTrigger));
-		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
+				new GrantTableServiceImpl(subjectExistenceVerifier, rbacReferenceChecker, grantInvalidationTrigger));
+		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(grantTableService, grantTableMapper);
 		lenient().doReturn(true).when(grantTableService).saveBatch(any(Collection.class));
@@ -143,9 +146,9 @@ class GrantTableServiceImplTest {
 
 		grantTableService.replaceOrgSubjectRoles(GrantTableSubjectType.POST, SUBJECT_ID, form);
 
-		verify(roleReferenceChecker).requireExistingEnabledRoleIds(List.of(101L, 102L),
+		verify(rbacReferenceChecker).requireExistingEnabledRoleIds(List.of(101L, 102L),
 				SystemCommonResultCode.GRANT_REFERENCE_INVALID);
-		verify(grantTableMapper).deleteBySubject(GrantTableSubjectType.POST.name(), SUBJECT_ID);
+		verify(grantTableMapper).deleteBySubjectIds(GrantTableSubjectType.POST.name(), List.of(SUBJECT_ID));
 		verify(grantTableService).saveBatch(any(Collection.class));
 
 		@SuppressWarnings("unchecked")
@@ -164,7 +167,7 @@ class GrantTableServiceImplTest {
 
 		grantTableService.replaceOrgSubjectRoles(GrantTableSubjectType.POST, SUBJECT_ID, form);
 
-		verify(grantTableMapper).deleteBySubject(GrantTableSubjectType.POST.name(), SUBJECT_ID);
+		verify(grantTableMapper).deleteBySubjectIds(GrantTableSubjectType.POST.name(), List.of(SUBJECT_ID));
 		verify(grantTableService, never()).saveBatch(any(Collection.class));
 		verify(grantInvalidationTrigger).submitByGrantSubjects(any(), eq("replace-roles"));
 	}
@@ -174,7 +177,7 @@ class GrantTableServiceImplTest {
 	void replaceSubjectRoleGrantsDeletesThenInsertsEntities() {
 		grantTableService.replaceSubjectRoleGrants("USER", SUBJECT_ID, List.of(101L, 102L));
 
-		verify(grantTableMapper).deleteBySubject("USER", SUBJECT_ID);
+		verify(grantTableMapper).deleteBySubjectIds(GrantTableSubjectType.USER.name(), List.of(SUBJECT_ID));
 
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<Collection<GrantTableEntity>> entitiesCaptor = ArgumentCaptor.forClass(Collection.class);
@@ -192,7 +195,7 @@ class GrantTableServiceImplTest {
 	void replaceSubjectRoleGrantsDeletesOnlyWhenRoleIdsEmpty() {
 		grantTableService.replaceSubjectRoleGrants("DEPT", SUBJECT_ID, List.of());
 
-		verify(grantTableMapper).deleteBySubject("DEPT", SUBJECT_ID);
+		verify(grantTableMapper).deleteBySubjectIds(GrantTableSubjectType.DEPT.name(), List.of(SUBJECT_ID));
 		verify(grantTableService, never()).saveBatch(any(Collection.class));
 	}
 

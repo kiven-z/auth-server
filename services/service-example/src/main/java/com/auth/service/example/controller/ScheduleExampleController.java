@@ -1,15 +1,21 @@
 package com.auth.service.example.controller;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import com.auth.common.core.model.response.Result;
 import com.auth.module.security.autoconfigure.annotation.InternalApi;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 定时任务调度集成验证用 HTTP 接口

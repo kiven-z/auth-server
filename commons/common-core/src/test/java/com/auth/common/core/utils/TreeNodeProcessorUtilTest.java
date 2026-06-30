@@ -1,14 +1,18 @@
 package com.auth.common.core.utils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.auth.common.core.model.entity.TreeNode;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * 树形结构处理器测试

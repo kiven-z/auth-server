@@ -1,5 +1,7 @@
 package com.auth.module.security.starter.service;
 
+import java.util.List;
+
 import com.auth.module.security.autoconfigure.config.security.AuditPolicy;
 import com.auth.module.security.autoconfigure.config.security.SecurityConfigProperties;
 import com.auth.module.security.autoconfigure.pipeline.resolver.HandlerMethodResolver;
@@ -9,15 +11,19 @@ import com.auth.module.security.contract.event.SecurityAuthorizationAuditPayload
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class PermissionServiceTest {
 

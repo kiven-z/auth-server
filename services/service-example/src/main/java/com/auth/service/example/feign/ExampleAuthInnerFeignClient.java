@@ -2,6 +2,7 @@ package com.auth.service.example.feign;
 
 import com.auth.common.core.model.response.Result;
 import io.swagger.v3.oas.annotations.Operation;
+
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 

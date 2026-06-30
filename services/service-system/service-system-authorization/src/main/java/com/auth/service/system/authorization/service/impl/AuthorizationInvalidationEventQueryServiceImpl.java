@@ -1,5 +1,7 @@
 package com.auth.service.system.authorization.service.impl;
 
+import java.util.List;
+
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.authorization.convert.AuthorizationInvalidationEventOpsConverter;
 import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidationEventDetailInnerDTO;
@@ -12,10 +14,9 @@ import com.auth.service.system.authorization.service.AuthorizationInvalidationEv
 import com.auth.service.system.authorization.service.AuthorizationInvalidationEventQueryService;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 /**
  * 授权失效幂等事件运维查询服务实现

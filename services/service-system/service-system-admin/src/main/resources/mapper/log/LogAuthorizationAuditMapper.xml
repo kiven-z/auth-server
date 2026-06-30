@@ -2,68 +2,74 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.auth.service.system.admin.mapper.log.LogAuthorizationAuditMapper">
 
-    <!-- 分页查询权限决策审计 -->
-    <select id="selectListByPage"
-            resultType="com.auth.service.system.admin.model.po.logauthorizationaudit.LogAuthorizationAuditPageRowPO">
-        SELECT
-            laa.id,
-            laa.event_type,
-            laa.decision_reason,
-            laa.class_name,
-            laa.method_name,
-            laa.create_time,
-            laa.update_time,
-            laa.create_user,
-            laa.update_user
-        FROM
-            log_authorization_audit laa
-        <where>
-            <if test="query.eventType != null and query.eventType != ''">
-                AND laa.event_type = #{query.eventType}
-            </if>
-            <if test="query.decisionReason != null and query.decisionReason != ''">
-                AND laa.decision_reason = #{query.decisionReason}
-            </if>
-            <if test="query.className != null and query.className != ''">
-                AND laa.class_name LIKE CONCAT('%', #{query.className}, '%')
-            </if>
-            <if test="query.createUserId != null">
-                AND laa.create_user = #{query.createUserId}
-            </if>
-        </where>
-        ORDER BY
-            laa.create_time DESC
-    </select>
+	<!-- 分页查询权限决策审计 -->
+	<select id="selectListByPage"
+			resultType="com.auth.service.system.admin.model.po.logauthorizationaudit.LogAuthorizationAuditPageRowPO">
+		SELECT
+		laa.id,
+		laa.event_type,
+		laa.decision_reason,
+		laa.class_name,
+		laa.method_name,
+		laa.create_time,
+		laa.update_time,
+		laa.create_user,
+		laa.update_user
+		FROM
+		log_authorization_audit laa
+		<where>
+			<if test="query.eventType != null and query.eventType != ''">
+				AND laa.event_type =
+				#{query.eventType}
+			</if>
+			<if test="query.decisionReason != null and query.decisionReason != ''">
+				AND laa.decision_reason =
+				#{query.decisionReason}
+			</if>
+			<if test="query.className != null and query.className != ''">
+				AND laa.class_name LIKE CONCAT('%',
+				#{query.className},
+				'%'
+				)
+			</if>
+			<if test="query.createUserId != null">
+				AND laa.create_user =
+				#{query.createUserId}
+			</if>
+		</where>
+		ORDER BY
+		laa.create_time DESC
+	</select>
 
-    <!-- 根据主键查询详情 -->
-    <select id="selectDetailById"
-            resultType="com.auth.service.system.admin.model.po.logauthorizationaudit.LogAuthorizationAuditDetailRowPO">
-        SELECT
-            laa.id,
-            laa.event_type,
-            laa.session_id,
-            laa.required_permission,
-            laa.request_method,
-            laa.request_uri,
-            laa.request_ip,
-            laa.decision_reason,
-            laa.decision_detail,
-            laa.user_permissions_summary,
-            laa.policy_code,
-            laa.policy_decision,
-            laa.class_name,
-            laa.method_name,
-            laa.method_params,
-            laa.exception_message,
-            laa.remark,
-            laa.create_time,
-            laa.update_time,
-            laa.create_user,
-            laa.update_user
-        FROM
-            log_authorization_audit laa
-        WHERE
-            laa.id = #{id}
-    </select>
+	<!-- 根据主键查询详情 -->
+	<select id="selectDetailById"
+			resultType="com.auth.service.system.admin.model.po.logauthorizationaudit.LogAuthorizationAuditDetailRowPO">
+		SELECT
+		laa.id,
+		laa.event_type,
+		laa.session_id,
+		laa.required_permission,
+		laa.request_method,
+		laa.request_uri,
+		laa.request_ip,
+		laa.decision_reason,
+		laa.decision_detail,
+		laa.user_permissions_summary,
+		laa.policy_code,
+		laa.policy_decision,
+		laa.class_name,
+		laa.method_name,
+		laa.method_params,
+		laa.exception_message,
+		laa.remark,
+		laa.create_time,
+		laa.update_time,
+		laa.create_user,
+		laa.update_user
+		FROM
+		log_authorization_audit laa
+		WHERE
+		laa.id = #{id}
+	</select>
 
 </mapper>

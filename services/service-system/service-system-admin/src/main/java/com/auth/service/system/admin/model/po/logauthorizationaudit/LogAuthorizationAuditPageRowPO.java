@@ -1,14 +1,14 @@
 package com.auth.service.system.admin.model.po.logauthorizationaudit;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.LocalDateTime;
 
 /**
  * 权限决策审计分页行

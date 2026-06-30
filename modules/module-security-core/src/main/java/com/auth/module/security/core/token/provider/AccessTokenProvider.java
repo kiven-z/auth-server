@@ -1,17 +1,16 @@
 package com.auth.module.security.core.token.provider;
 
+import java.util.Date;
+import java.util.Map;
+import java.util.Objects;
+
 import com.auth.common.jwt.api.JwtTokenProvider;
 import com.auth.common.jwt.autoconfigure.JwtProperties;
 import com.auth.common.jwt.model.JwtUserToken;
 import com.auth.module.security.contract.constants.SecurityTokenKind;
 import com.auth.module.security.core.token.model.SecurityTokenResult;
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
-
-import java.util.Date;
-import java.util.Map;
-import java.util.Objects;
 
 import static com.auth.module.security.contract.constants.SecurityExternalTokenConstants.PERM_VERSION;
 import static com.auth.module.security.contract.constants.SecurityExternalTokenConstants.TOKEN_TYPE;
@@ -70,7 +69,6 @@ public class AccessTokenProvider extends AbstractSecurityTokenProvider {
 	 * @param kind 令牌类型
 	 */
 	@Override
-	@SuppressWarnings("java:S1854")
 	protected void enrichTokenResult(SecurityTokenResult.SecurityTokenResultBuilder builder, String token,
 			JwtUserToken jwtUserToken, SecurityTokenKind kind) {
 		// 访问令牌类型不匹配，返回
@@ -78,14 +76,7 @@ public class AccessTokenProvider extends AbstractSecurityTokenProvider {
 			return;
 		}
 
-		// 获取令牌声明
-		Claims claims = jwtTokenProvider.getClaims(token);
-		// 获取版本号
-		Object raw = claims.get(PERM_VERSION);
-		// 解析版本号
-		Long permVersion = parsePermVersionClaim(raw);
-		// 设置版本号
-		builder.permVersion(permVersion);
+		builder.permVersion(parsePermVersionClaim(jwtTokenProvider.getClaims(token).get(PERM_VERSION)));
 	}
 
 	/**

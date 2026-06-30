@@ -1,5 +1,7 @@
 package com.auth.service.system.message.dispatch.support;
 
+import java.util.Set;
+
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.message.api.command.TemplateMessageCommand;
@@ -9,9 +11,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
-import org.springframework.stereotype.Component;
 
-import java.util.Set;
+import org.springframework.stereotype.Component;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CONFIG_INVALID;

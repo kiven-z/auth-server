@@ -1,12 +1,12 @@
 package com.auth.common.ip.inner;
 
-import cn.hutool.core.text.CharSequenceUtil;
-
 import java.math.BigInteger;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Optional;
+
+import cn.hutool.core.text.CharSequenceUtil;
 
 /**
  * IPv6内部/私有IP检查器 Rules:

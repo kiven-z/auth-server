@@ -1,5 +1,7 @@
 package com.auth.service.system.admin.convert.admin;
 
+import java.util.List;
+
 import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.form.permission.SysPermissionForm;
@@ -11,8 +13,6 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.factory.Mappers;
-
-import java.util.List;
 
 /**
  * 权限转换器
@@ -36,6 +36,13 @@ public interface SysPermissionConverter {
 	@Mapping(target = "updateUser", ignore = true)
 	@Mapping(target = "version", ignore = true)
 	SysPermissionEntity toEntity(SysPermissionForm form);
+
+	/**
+	 * 新增表单列表 → 实体列表
+	 * @param forms 表单列表
+	 * @return 实体列表
+	 */
+	List<SysPermissionEntity> toEntityList(List<SysPermissionForm> forms);
 
 	/**
 	 * 更新表单字段合并到已有实体

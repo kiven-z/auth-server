@@ -1,5 +1,8 @@
 package com.auth.service.system.admin.controller.admin;
 
+import java.io.IOException;
+import java.util.List;
+
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.common.web.valid.group.CreateGroup;
@@ -25,15 +28,21 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.util.List;
 
 /**
  * 系统部门管理 Controller
@@ -53,7 +62,7 @@ public class SysDeptController {
 	private final SysDeptSpreadsheetService sysDeptSpreadsheetService;
 
 	@Operation(summary = "部门 Excel 导出")
-	@PreAuthorize("@auth.decide('sysDept:export')")
+	@PreAuthorize("@auth.decide('sys:dept:export')")
 	@GetMapping("/export")
 	public ResponseEntity<byte[]> export(@Validated SysDeptPageQuery query, @Validated ExportScopeQueryFields scope)
 			throws IOException {
@@ -61,14 +70,14 @@ public class SysDeptController {
 	}
 
 	@Operation(summary = "部门导入模板下载")
-	@PreAuthorize("@auth.decide('sysDept:import')")
+	@PreAuthorize("@auth.decide('sys:dept:import')")
 	@GetMapping("/import/template")
 	public ResponseEntity<byte[]> importTemplate() throws IOException {
 		return sysDeptSpreadsheetService.downloadImportTemplate();
 	}
 
 	@Operation(summary = "部门 Excel 导入")
-	@PreAuthorize("@auth.decide('sysDept:import')")
+	@PreAuthorize("@auth.decide('sys:dept:import')")
 	@PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public Result<SpreadsheetImportResult> importExcel(@RequestPart("file") MultipartFile file) throws IOException {
 		SpreadsheetImportResult data = sysDeptSpreadsheetService.importExcel(file);
@@ -78,7 +87,7 @@ public class SysDeptController {
 	@OperationLog(targetType = "DEPT_LIST", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_DEPT, operation = OperationLogKind.QUERY)
 	@Operation(summary = "部门扁平列表（全量或关键词过滤，前端建树）")
-	@PreAuthorize("@auth.decide('sysDept:query')")
+	@PreAuthorize("@auth.decide('sys:dept:query')")
 	@GetMapping("/list")
 	public Result<List<SysDeptListVO>> list(SysDeptListQuery query) {
 		List<SysDeptListVO> data = sysDeptQueryService.listFlat(query);
@@ -86,7 +95,7 @@ public class SysDeptController {
 	}
 
 	@Operation(summary = "部门分页查询（表格视图）")
-	@PreAuthorize("@auth.decide('sysDept:query')")
+	@PreAuthorize("@auth.decide('sys:dept:query')")
 	@GetMapping("/page")
 	public Result<PageResponse<SysDeptListVO>> page(SysDeptPageQuery query) {
 		Page<SysDeptEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
@@ -95,7 +104,7 @@ public class SysDeptController {
 	}
 
 	@Operation(summary = "部门详情")
-	@PreAuthorize("@auth.decide('sysDept:query')")
+	@PreAuthorize("@auth.decide('sys:dept:query')")
 	@GetMapping("/{id}")
 	public Result<SysDeptDetailVO> detail(@PathVariable("id") Long id) {
 		SysDeptDetailVO detail = sysDeptQueryService.getDetail(id);
@@ -105,21 +114,19 @@ public class SysDeptController {
 	@OperationLog(targetType = "DEPT", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_DEPT, operation = OperationLogKind.CREATE)
 	@Operation(summary = "新增部门")
-	@PreAuthorize("@auth.decide('sysDept:create')")
+	@PreAuthorize("@auth.decide('sys:dept:create')")
 	@PostMapping
 	public Result<Void> create(@Validated(CreateGroup.class) @RequestBody SysDeptForm form) {
-		sysDeptService.create(form);
+		sysDeptService.createBatchFromImport(List.of(form));
 		return Result.success();
 	}
 
 	@OperationLog(targetType = "DEPT", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_DEPT, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "更新部门")
-	@PreAuthorize("@auth.decide('sysDept:update')")
-	@PutMapping("/{id}")
-	public Result<Void> update(@PathVariable("id") Long id,
-			@Validated(UpdateGroup.class) @RequestBody SysDeptForm form) {
-		form.setId(id);
+	@PreAuthorize("@auth.decide('sys:dept:update')")
+	@PutMapping
+	public Result<Void> update(@Validated(UpdateGroup.class) @RequestBody SysDeptForm form) {
 		sysDeptService.updateMeta(form);
 		return Result.success();
 	}
@@ -127,7 +134,7 @@ public class SysDeptController {
 	@OperationLog(targetType = "DEPT", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_DEPT, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "移动部门（变更父部门）")
-	@PreAuthorize("@auth.decide('sysDept:update')")
+	@PreAuthorize("@auth.decide('sys:dept:update')")
 	@PutMapping("/{id}/move")
 	public Result<Void> move(@PathVariable("id") Long id, @Valid @RequestBody SysDeptMoveForm form) {
 		sysDeptService.move(id, form);
@@ -137,7 +144,7 @@ public class SysDeptController {
 	@OperationLog(targetType = "DEPT", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_DEPT, operation = OperationLogKind.DELETE)
 	@Operation(summary = "删除部门（逻辑删除）")
-	@PreAuthorize("@auth.decide('sysDept:delete')")
+	@PreAuthorize("@auth.decide('sys:dept:delete')")
 	@DeleteMapping("/{id}")
 	public Result<Void> delete(@PathVariable("id") Long id) {
 		sysDeptService.deleteById(id);

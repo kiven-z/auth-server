@@ -4,6 +4,7 @@ import com.auth.service.system.admin.mapper.log.LogUserPasswordHistoryMapper;
 import com.auth.service.system.admin.model.entity.LogUserPasswordHistoryEntity;
 import com.auth.service.system.admin.service.admin.LogUserPasswordHistoryService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

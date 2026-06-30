@@ -1,8 +1,8 @@
 package com.auth.common.ip.normalize;
 
-import cn.hutool.core.text.CharSequenceUtil;
-
 import java.util.Optional;
+
+import cn.hutool.core.text.CharSequenceUtil;
 
 /**
  * 默认的ip正常化器

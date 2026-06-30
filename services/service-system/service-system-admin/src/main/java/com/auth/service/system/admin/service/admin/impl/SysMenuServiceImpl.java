@@ -1,5 +1,8 @@
 package com.auth.service.system.admin.service.admin.impl;
 
+import java.util.List;
+import java.util.Objects;
+
 import cn.hutool.core.collection.CollUtil;
 import com.auth.common.core.utils.TreeParentIdUtil;
 import com.auth.service.system.admin.convert.admin.menu.SysMenuConverter;
@@ -15,11 +18,9 @@ import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Objects;
 
 /**
  * 菜单写服务实现。

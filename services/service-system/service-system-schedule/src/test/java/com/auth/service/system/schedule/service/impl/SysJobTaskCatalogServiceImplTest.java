@@ -1,5 +1,7 @@
 package com.auth.service.system.schedule.service.impl;
 
+import java.util.List;
+
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.model.vo.QuartzTaskClassVO;
 import com.auth.service.system.schedule.model.vo.QuartzTaskMethodVO;
@@ -11,8 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CLASS_INVALID;

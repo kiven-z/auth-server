@@ -1,14 +1,14 @@
 package com.auth.common.jwt.provider;
 
+import java.security.PrivateKey;
+import java.security.PublicKey;
+
 import com.auth.common.jwt.autoconfigure.JwtProperties;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.Jwts.SIG;
 import org.jetbrains.annotations.NotNull;
-
-import java.security.PrivateKey;
-import java.security.PublicKey;
 
 /**
  * RS256 实现

@@ -1,20 +1,22 @@
 package com.auth.service.system.admin.service.admin.impl;
 
+import java.lang.reflect.Field;
+import java.util.List;
+
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
-import com.auth.service.system.admin.mapper.post.PostReferenceCheckerMapper;
 import com.auth.service.system.admin.mapper.post.SysPostMapper;
-import com.auth.service.system.admin.mapper.post.SysPostQueryMapper;
 import com.auth.service.system.admin.mapper.role.GrantTableMapper;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
+import com.auth.service.system.admin.model.po.post.PostDeptCodePairPO;
 import com.auth.service.system.admin.model.form.post.SysPostForm;
-import com.auth.service.system.admin.model.po.reference.DeptReferencePO;
-import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.auth.service.system.admin.model.po.post.SysPostBoundUserPO;
 import com.auth.service.system.admin.model.po.post.SysPostPageRowPO;
 import com.auth.service.system.admin.model.po.post.SysPostSearchItemPO;
+import com.auth.service.system.admin.model.po.reference.DeptReferencePO;
+import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.auth.service.system.admin.model.query.post.SysPostQuery;
 import com.auth.service.system.admin.model.vo.post.SysPostDetailVO;
 import com.auth.service.system.admin.model.vo.post.SysPostPageVO;
@@ -26,7 +28,8 @@ import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.extension.repository.CrudRepository;
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,14 +38,22 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.lang.reflect.Field;
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link SysPostServiceImpl} 单元测试
@@ -63,12 +74,6 @@ class SysPostServiceImplTest {
 	private PostAuthorizationInvalidationTrigger postInvalidationTrigger;
 
 	@Mock
-	private PostReferenceCheckerMapper postReferenceCheckerMapper;
-
-	@Mock
-	private SysPostQueryMapper sysPostQueryMapper;
-
-	@Mock
 	private GrantTableMapper grantTableMapper;
 
 	private SysPostServiceImpl sysPostService;
@@ -76,7 +81,12 @@ class SysPostServiceImplTest {
 	private SysPostQueryServiceImpl sysPostQueryService;
 
 	private static SysPostForm minimalForm(Long deptId, String postCode, String postName) {
+		return minimalForm(null, deptId, postCode, postName);
+	}
+
+	private static SysPostForm minimalForm(Long id, Long deptId, String postCode, String postName) {
 		SysPostForm form = new SysPostForm();
+		form.setId(id);
 		form.setDeptId(deptId);
 		form.setPostCode(postCode);
 		form.setPostName(postName);
@@ -97,14 +107,15 @@ class SysPostServiceImplTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		PostReferenceChecker postReferenceChecker = new PostReferenceChecker(sysPostMapper, postReferenceCheckerMapper);
-		sysPostService = new SysPostServiceImpl(postInvalidationTrigger, postReferenceChecker);
+		PostReferenceChecker postReferenceChecker = new PostReferenceChecker(sysPostMapper);
+		sysPostService = spy(new SysPostServiceImpl(postInvalidationTrigger, postReferenceChecker));
 		sysPostQueryService = new SysPostQueryServiceImpl(auditUserDisplayService, postReferenceChecker,
-				sysPostQueryMapper, grantTableMapper);
-		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
+				grantTableMapper);
+		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysPostService, sysPostMapper);
 		baseMapperField.set(sysPostQueryService, sysPostMapper);
+		lenient().doReturn(true).when(sysPostService).saveBatch(anyList(), anyInt());
 	}
 
 	@Test
@@ -194,7 +205,7 @@ class SysPostServiceImplTest {
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
 
-		verifyNoInteractions(sysPostQueryMapper);
+		verifyNoInteractions(grantTableMapper);
 		verify(auditUserDisplayService, never()).enrichAuditUsernames(anyList(), isNull(), isNull());
 	}
 
@@ -222,8 +233,8 @@ class SysPostServiceImplTest {
 		boundRole.setRoleName("业务角色A");
 
 		when(sysPostMapper.selectById(postId)).thenReturn(entity);
-		when(sysPostQueryMapper.selectBoundDeptByPostId(postId)).thenReturn(boundDept);
-		when(sysPostQueryMapper.selectBoundUsersByPostId(postId)).thenReturn(List.of(boundUser));
+		when(sysPostMapper.selectBoundDeptByPostId(postId)).thenReturn(boundDept);
+		when(sysPostMapper.selectBoundUsersByPostId(postId)).thenReturn(List.of(boundUser));
 		when(grantTableMapper.selectBoundRolesBySubject(GrantTableSubjectType.POST.name(), postId))
 			.thenReturn(List.of(boundRole));
 
@@ -238,19 +249,29 @@ class SysPostServiceImplTest {
 		assertThat(detail.getBoundUsers().get(0).getUsername()).isEqualTo("alice");
 		assertThat(detail.getBoundRoles()).hasSize(1);
 		assertThat(detail.getBoundRoles().get(0).getRoleCode()).isEqualTo("CUSTOM_A");
-		verify(sysPostQueryMapper).selectBoundDeptByPostId(postId);
-		verify(sysPostQueryMapper).selectBoundUsersByPostId(postId);
+		verify(sysPostMapper).selectBoundDeptByPostId(postId);
+		verify(sysPostMapper).selectBoundUsersByPostId(postId);
 		verify(grantTableMapper).selectBoundRolesBySubject(GrantTableSubjectType.POST.name(), postId);
 		verify(auditUserDisplayService).enrichAuditUsernames(anyList(), isNull(), isNull());
 	}
 
 	@Test
+	@DisplayName("批量新增岗位：空列表直接返回")
+	void createBatchFromImportSkipsWhenEmpty() {
+		sysPostService.createBatchFromImport(List.of());
+
+		verify(sysPostMapper, never()).selectAssignableDeptIds(any());
+		verify(sysPostService, never()).saveBatch(anyList(), anyInt());
+	}
+
+	@Test
 	@DisplayName("新增：部门不可挂载时 POST_DEPT_NOT_FOUND")
 	void createThrowsWhenDeptNotAssignable() {
-		when(sysPostMapper.countAssignableDept(99L)).thenReturn(0);
+		when(sysPostMapper.selectAssignableDeptIds(List.of(99L))).thenReturn(List.of());
 		SysPostForm form = minimalForm(99L, "P1", "开发");
 
-		assertThatThrownBy(() -> sysPostService.create(form)).isInstanceOf(SystemBusinessException.class)
+		ThrowingCallable executable = () -> sysPostService.createBatchFromImport(List.of(form));
+		assertThatThrownBy(executable).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.DATA_UNAVAILABLE);
 	}
@@ -258,52 +279,62 @@ class SysPostServiceImplTest {
 	@Test
 	@DisplayName("新增：父级停用导致子级不可挂载时 POST_DEPT_NOT_FOUND")
 	void createThrowsWhenAncestorDeptDisabled() {
-		// 子部门自身可启用，但祖先停用后 countAssignableDept 为 0
-		when(sysPostMapper.countAssignableDept(100L)).thenReturn(0);
+		// 子部门自身可启用，但祖先停用后 selectAssignableDeptIds 为空
+		when(sysPostMapper.selectAssignableDeptIds(List.of(100L))).thenReturn(List.of());
 		SysPostForm form = minimalForm(100L, "P2", "子岗");
 
-		assertThatThrownBy(() -> sysPostService.create(form)).isInstanceOf(SystemBusinessException.class)
+		ThrowingCallable executable = () -> sysPostService.createBatchFromImport(List.of(form));
+		assertThatThrownBy(executable).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.DATA_UNAVAILABLE);
 
-		verify(sysPostMapper).countAssignableDept(100L);
-		verify(sysPostMapper, never()).insert(any(SysPostEntity.class));
+		verify(sysPostMapper, atLeastOnce()).selectAssignableDeptIds(List.of(100L));
+		verify(sysPostService, never()).saveBatch(anyList(), anyInt());
 	}
 
 	@Test
 	@DisplayName("新增：部门内编码重复时 POST_CODE_DUPLICATE_IN_DEPT")
 	void createThrowsWhenPostCodeDuplicateInDept() {
-		when(sysPostMapper.countAssignableDept(1L)).thenReturn(1);
-		when(sysPostMapper.selectCount(any())).thenReturn(1L);
+		when(sysPostMapper.selectAssignableDeptIds(List.of(1L))).thenReturn(List.of(1L));
+		PostDeptCodePairPO existing = new PostDeptCodePairPO();
+		existing.setDeptId(1L);
+		existing.setPostCode("DUP");
+		when(sysPostMapper.selectReferenceByDeptPostPairs(anyList())).thenReturn(List.of(existing));
 		SysPostForm form = minimalForm(1L, "DUP", "重复岗");
 
-		assertThatThrownBy(() -> sysPostService.create(form)).isInstanceOf(SystemBusinessException.class)
+		ThrowingCallable executable = () -> sysPostService.createBatchFromImport(List.of(form));
+		assertThatThrownBy(executable).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemAdminResultCode.POST_CODE_DUPLICATE_IN_DEPT);
+
+		verify(sysPostMapper).selectReferenceByDeptPostPairs(anyList());
+		verify(sysPostMapper, never()).selectList(any());
 	}
 
 	@Test
-	@DisplayName("新增：校验通过时落库")
+	@DisplayName("新增：校验通过时批量落库")
 	void createPersistsWhenValid() {
-		when(sysPostMapper.countAssignableDept(2L)).thenReturn(1);
-		when(sysPostMapper.selectCount(any())).thenReturn(0L);
-		when(sysPostMapper.insert(any(SysPostEntity.class))).thenReturn(1);
+		when(sysPostMapper.selectAssignableDeptIds(List.of(2L))).thenReturn(List.of(2L));
+		when(sysPostMapper.selectReferenceByDeptPostPairs(anyList())).thenReturn(List.of());
 		SysPostForm form = minimalForm(2L, "NEW_CODE", "新岗位");
 
-		sysPostService.create(form);
+		sysPostService.createBatchFromImport(List.of(form));
 
-		verify(sysPostMapper).insert(argThat(
-				(SysPostEntity e) -> Long.valueOf(2L).equals(e.getDeptId()) && "NEW_CODE".equals(e.getPostCode())
-						&& BooleanUtil.isTrue(e.getStatus()) && Integer.valueOf(0).equals(e.getOrderNum())));
+		verify(sysPostMapper).selectReferenceByDeptPostPairs(anyList());
+		verify(sysPostMapper, never()).selectList(any());
+		verify(sysPostService).saveBatch(argThat((List<SysPostEntity> entities) -> entities.size() == 1
+				&& Long.valueOf(2L).equals(entities.get(0).getDeptId())
+				&& "NEW_CODE".equals(entities.get(0).getPostCode()) && BooleanUtil.isTrue(entities.get(0).getStatus())
+				&& Integer.valueOf(0).equals(entities.get(0).getOrderNum())), eq(500));
 	}
 
 	@Test
 	@DisplayName("更新：岗位不存在时 POST_NOT_FOUND")
 	void updateThrowsWhenPostNotFound() {
 		when(sysPostMapper.selectById(9L)).thenReturn(null);
-		SysPostForm form = minimalForm(1L, "C1", "岗位");
+		SysPostForm form = minimalForm(9L, 1L, "C1", "岗位");
 
-		assertThatThrownBy(() -> sysPostService.update(9L, form)).isInstanceOf(SystemBusinessException.class)
+		assertThatThrownBy(() -> sysPostService.update(form)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
 	}
@@ -314,14 +345,14 @@ class SysPostServiceImplTest {
 		Long postId = 10L;
 		SysPostEntity existing = activePost(postId, 1L, "DEV");
 		when(sysPostMapper.selectById(postId)).thenReturn(existing);
-		when(sysPostMapper.countAssignableDept(1L)).thenReturn(1);
+		when(sysPostMapper.selectAssignableDeptIds(List.of(1L))).thenReturn(List.of(1L));
 		when(sysPostMapper.selectCount(any())).thenReturn(0L);
 		when(sysPostMapper.updateById(any(SysPostEntity.class))).thenReturn(1);
 
-		SysPostForm form = minimalForm(1L, "DEV", "研发岗");
+		SysPostForm form = minimalForm(postId, 1L, "DEV", "研发岗");
 		form.setStatus(true);
 
-		sysPostService.update(postId, form);
+		sysPostService.update(form);
 
 		verify(sysPostMapper).updateById(argThat((SysPostEntity e) -> "研发岗".equals(e.getPostName())));
 		verify(postInvalidationTrigger, never()).submitByPostIds(any(), any());
@@ -333,16 +364,16 @@ class SysPostServiceImplTest {
 		Long postId = 12L;
 		SysPostEntity existing = activePost(postId, 1L, "DEV");
 		when(sysPostMapper.selectById(postId)).thenReturn(existing);
-		when(sysPostMapper.countAssignableDept(5L)).thenReturn(1);
+		when(sysPostMapper.selectAssignableDeptIds(List.of(5L))).thenReturn(List.of(5L));
 		when(sysPostMapper.selectCount(any())).thenReturn(0L);
 		when(sysPostMapper.updateById(any(SysPostEntity.class))).thenReturn(1);
 
-		SysPostForm form = minimalForm(5L, "DEV", "原名");
+		SysPostForm form = minimalForm(postId, 5L, "DEV", "原名");
 		form.setStatus(true);
 
-		sysPostService.update(postId, form);
+		sysPostService.update(form);
 
-		verify(sysPostMapper).countAssignableDept(5L);
+		verify(sysPostMapper).selectAssignableDeptIds(List.of(5L));
 		verify(sysPostMapper).updateById(argThat((SysPostEntity e) -> Long.valueOf(5L).equals(e.getDeptId())));
 		verify(postInvalidationTrigger, never()).submitByPostIds(any(), any());
 	}
@@ -353,14 +384,14 @@ class SysPostServiceImplTest {
 		Long postId = 11L;
 		SysPostEntity existing = activePost(postId, 2L, "OPS");
 		when(sysPostMapper.selectById(postId)).thenReturn(existing);
-		when(sysPostMapper.countAssignableDept(2L)).thenReturn(1);
+		when(sysPostMapper.selectAssignableDeptIds(List.of(2L))).thenReturn(List.of(2L));
 		when(sysPostMapper.selectCount(any())).thenReturn(0L);
 		when(sysPostMapper.updateById(any(SysPostEntity.class))).thenReturn(1);
 
-		SysPostForm form = minimalForm(2L, "OPS", "运维");
+		SysPostForm form = minimalForm(postId, 2L, "OPS", "运维");
 		form.setStatus(false);
 
-		sysPostService.update(postId, form);
+		sysPostService.update(form);
 
 		verify(sysPostMapper).updateById(argThat(
 				(SysPostEntity e) -> Long.valueOf(2L).equals(e.getDeptId()) && BooleanUtil.isFalse(e.getStatus())));
@@ -384,7 +415,7 @@ class SysPostServiceImplTest {
 	void deleteThrowsWhenUserPostInUse() {
 		Long postId = 20L;
 		when(sysPostMapper.selectById(postId)).thenReturn(activePost(postId, 1L, "U1"));
-		when(postReferenceCheckerMapper.countUserPostByPostId(postId)).thenReturn(1L);
+		when(sysPostMapper.countUserPostByPostId(postId)).thenReturn(1L);
 
 		assertThatThrownBy(() -> sysPostService.deleteById(postId)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
@@ -399,8 +430,8 @@ class SysPostServiceImplTest {
 	void deleteThrowsWhenGrantPostSubjectInUse() {
 		Long postId = 21L;
 		when(sysPostMapper.selectById(postId)).thenReturn(activePost(postId, 1L, "G1"));
-		when(postReferenceCheckerMapper.countUserPostByPostId(postId)).thenReturn(0L);
-		when(postReferenceCheckerMapper.countGrantPostSubjectByPostId(postId)).thenReturn(1L);
+		when(sysPostMapper.countUserPostByPostId(postId)).thenReturn(0L);
+		when(sysPostMapper.countGrantPostSubjectByPostId(postId)).thenReturn(1L);
 
 		assertThatThrownBy(() -> sysPostService.deleteById(postId)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
@@ -411,12 +442,12 @@ class SysPostServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("删除：无引用时逻辑删除并仅提交 USER_POST 授权失效")
+	@DisplayName("删除：无引用时物理删除并仅提交 USER_POST 授权失效")
 	void deleteShouldInvalidateAndRemoveWhenDeletable() {
 		Long postId = 22L;
 		when(sysPostMapper.selectById(postId)).thenReturn(activePost(postId, 1L, "OK"));
-		when(postReferenceCheckerMapper.countUserPostByPostId(postId)).thenReturn(0L);
-		when(postReferenceCheckerMapper.countGrantPostSubjectByPostId(postId)).thenReturn(0L);
+		when(sysPostMapper.countUserPostByPostId(postId)).thenReturn(0L);
+		when(sysPostMapper.countGrantPostSubjectByPostId(postId)).thenReturn(0L);
 		when(sysPostMapper.deleteById(postId)).thenReturn(1);
 
 		sysPostService.deleteById(postId);

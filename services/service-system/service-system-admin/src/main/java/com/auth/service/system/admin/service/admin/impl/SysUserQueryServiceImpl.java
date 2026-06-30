@@ -1,5 +1,9 @@
 package com.auth.service.system.admin.service.admin.impl;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.data.model.PageResponse;
@@ -9,7 +13,6 @@ import com.auth.service.system.admin.convert.admin.user.SysUserConverter;
 import com.auth.service.system.admin.mapper.permission.SysPermissionMapper;
 import com.auth.service.system.admin.mapper.role.SysRoleMapper;
 import com.auth.service.system.admin.mapper.user.SysUserMapper;
-import com.auth.service.system.admin.mapper.user.SysUserQueryMapper;
 import com.auth.service.system.admin.model.po.reference.PermissionReferencePO;
 import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.auth.service.system.admin.model.po.user.SysUserPageRowPO;
@@ -33,12 +36,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
 
 /**
  * 系统用户只读查询实现
@@ -48,12 +48,9 @@ import java.util.Objects;
 @RequiredArgsConstructor
 @Service
 @Transactional(readOnly = true)
-public class SysUserQueryServiceImpl extends ServiceImpl<SysUserQueryMapper, UserEntity>
-		implements SysUserQueryService {
+public class SysUserQueryServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> implements SysUserQueryService {
 
 	private final AuditUserDisplayService auditUserDisplayService;
-
-	private final SysUserMapper sysUserMapper;
 
 	private final SysRoleMapper sysRoleMapper;
 
@@ -69,7 +66,7 @@ public class SysUserQueryServiceImpl extends ServiceImpl<SysUserQueryMapper, Use
 	@Override
 	public PageResponse<SysUserPageVO> getPage(Page<UserEntity> pageParams, SysUserPageQuery query) {
 		String orderBySql = SysUserPageOrderSqlBuilder.buildOrderBySql(query.getSort());
-		IPage<SysUserPageRowPO> page = sysUserMapper.selectListByPage(pageParams, query, orderBySql);
+		IPage<SysUserPageRowPO> page = baseMapper.selectListByPage(pageParams, query, orderBySql);
 		IPage<SysUserPageVO> voPage = page.convert(SysUserConverter.INSTANCE::toPageVo);
 
 		auditUserDisplayService.enrichAuditUsernames(voPage, null, null);
@@ -92,7 +89,6 @@ public class SysUserQueryServiceImpl extends ServiceImpl<SysUserQueryMapper, Use
 
 		List<UserPostProfilePO> postProfileList = baseMapper.selectPostProfileByUserId(userId);
 		response.setPostList(ReferenceConverter.INSTANCE.toUserPostReferenceList(postProfileList));
-
 		return response;
 	}
 

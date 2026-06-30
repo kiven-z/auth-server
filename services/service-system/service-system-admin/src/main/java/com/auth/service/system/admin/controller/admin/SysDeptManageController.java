@@ -1,5 +1,7 @@
 package com.auth.service.system.admin.controller.admin;
 
+import java.util.List;
+
 import com.auth.common.core.model.response.Result;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
@@ -14,10 +16,14 @@ import com.auth.service.system.common.model.SystemAuditBizModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
@@ -44,7 +50,7 @@ public class SysDeptManageController {
 	@OperationLog(targetType = "DEPT_CLOSURE_HEALTH", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.DEPT_CLOSURE, operation = OperationLogKind.QUERY)
 	@Operation(summary = "部门闭包表健康检查（只读运维）")
-	@PreAuthorize("@auth.decide('sysDept:diagnose')")
+	@PreAuthorize("@auth.decide('sys:dept:diagnose')")
 	@GetMapping("/closure/health")
 	public Result<DeptClosureHealthVO> closureHealth() {
 		DeptClosureHealthVO healthVO = deptClosureHealthQueryService.inspect();
@@ -52,7 +58,7 @@ public class SysDeptManageController {
 	}
 
 	@Operation(summary = "查询部门已分配角色")
-	@PreAuthorize("@auth.decide('sysDept:query')")
+	@PreAuthorize("@auth.decide('sys:dept:query')")
 	@GetMapping("/{deptId}/roles")
 	public Result<List<RoleReferenceVO>> listRoles(@PathVariable("deptId") Long deptId) {
 		List<RoleReferenceVO> rows = grantTableService.listAssignedRoles(GrantTableSubjectType.DEPT, deptId);
@@ -62,7 +68,7 @@ public class SysDeptManageController {
 	@OperationLog(targetType = "DEPT_ROLE", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.GRANT_TABLE, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "全量覆盖部门角色授权")
-	@PreAuthorize("@auth.decide('sysDept:update')")
+	@PreAuthorize("@auth.decide('sys:dept:update')")
 	@PutMapping("/{deptId}/roles")
 	public Result<Void> replaceRoles(@PathVariable("deptId") Long deptId,
 			@Valid @RequestBody GrantTableAssignRoleForm form) {

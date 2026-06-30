@@ -1,5 +1,7 @@
 package com.auth.service.system.admin.model.form.user;
 
+import java.util.Set;
+
 import com.auth.common.web.valid.group.CreateGroup;
 import com.auth.common.web.valid.group.UpdateGroup;
 import jakarta.validation.ConstraintViolation;
@@ -7,8 +9,6 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -19,6 +19,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 class SysUserFormValidationTest {
 
 	private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+
+	private static SysUserForm validCreateForm() {
+		SysUserForm form = new SysUserForm();
+		form.setUsername("alice");
+		form.setNickname("Alice");
+		form.setEmail("alice@example.com");
+		form.setPhone("13800000000");
+		form.setStatus(1);
+		form.setInitialPassword("SecurePwd1");
+		return form;
+	}
 
 	@Test
 	@DisplayName("新增时初始密码不能为空")
@@ -40,17 +51,6 @@ class SysUserFormValidationTest {
 		Set<ConstraintViolation<SysUserForm>> violations = validator.validate(form, UpdateGroup.class);
 
 		assertThat(violations).noneMatch(v -> "initialPassword".equals(v.getPropertyPath().toString()));
-	}
-
-	private static SysUserForm validCreateForm() {
-		SysUserForm form = new SysUserForm();
-		form.setUsername("alice");
-		form.setNickname("Alice");
-		form.setEmail("alice@example.com");
-		form.setPhone("13800000000");
-		form.setStatus(1);
-		form.setInitialPassword("SecurePwd1");
-		return form;
 	}
 
 }

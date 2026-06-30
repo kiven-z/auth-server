@@ -1,18 +1,23 @@
 package com.auth.service.system.common.service.impl;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.BiConsumer;
+import java.util.function.ToLongFunction;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import cn.hutool.core.collection.CollUtil;
 import com.auth.common.core.model.response.BaseResponse;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.common.mapper.AuditUserDisplayMapper;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import org.springframework.stereotype.Service;
 
-import java.util.*;
-import java.util.function.BiConsumer;
-import java.util.function.ToLongFunction;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import org.springframework.stereotype.Service;
 
 /**
  * 审计用户展示名

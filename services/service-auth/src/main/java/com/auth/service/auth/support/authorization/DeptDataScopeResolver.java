@@ -1,24 +1,24 @@
 package com.auth.service.auth.support.authorization;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.json.JSONUtil;
-import com.auth.module.security.contract.api.authorization.ScopeGrant;
-import com.auth.module.security.contract.api.datascope.DataScopeStorageType;
-import com.auth.module.security.contract.api.datascope.DeptScopeMerger;
-import com.auth.service.auth.mapper.DeptClosureMapper;
-import com.auth.service.auth.mapper.RoleScopeMapper;
-import com.auth.service.auth.mapper.UserScopeMapper;
-import com.auth.service.auth.model.po.scope.RoleScopePO;
-import com.auth.service.auth.model.po.scope.UserScopePO;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.json.JSONUtil;
+import com.auth.module.security.contract.api.authorization.ScopeGrant;
+import com.auth.module.security.contract.api.datascope.DataScopeStorageType;
+import com.auth.module.security.contract.api.datascope.DeptScopeMerger;
+import com.auth.service.auth.mapper.DataScopeMapper;
+import com.auth.service.auth.mapper.DeptClosureMapper;
+import com.auth.service.auth.model.po.scope.RoleScopePO;
+import com.auth.service.auth.model.po.scope.UserScopePO;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.stereotype.Service;
 
 /**
  * 部门维数据权限生效解析：user_scope 覆盖 role_scope，多角色宽松合并
@@ -30,9 +30,7 @@ import java.util.stream.Stream;
 @Service
 public class DeptDataScopeResolver {
 
-	private final UserScopeMapper userScopeMapper;
-
-	private final RoleScopeMapper roleScopeMapper;
+	private final DataScopeMapper dataScopeMapper;
 
 	private final DeptClosureMapper deptClosureMapper;
 
@@ -55,7 +53,7 @@ public class DeptDataScopeResolver {
 			return selfGrant();
 		}
 
-		Optional<UserScopePO> userScope = Optional.ofNullable(userScopeMapper.selectByUserId(userId));
+		Optional<UserScopePO> userScope = Optional.ofNullable(dataScopeMapper.selectByUserId(userId));
 		if (userScope.isPresent()) {
 			UserScopePO scope = userScope.get();
 			ScopeGrant grant = materializeRow(scope.getScopeType(), scope.getScopeDeptIds());
@@ -63,7 +61,7 @@ public class DeptDataScopeResolver {
 			return grant;
 		}
 
-		List<RoleScopePO> roleScopes = roleScopeMapper.selectByRoleCodes(roleCodes);
+		List<RoleScopePO> roleScopes = dataScopeMapper.selectByRoleCodes(roleCodes);
 		if (CollUtil.isEmpty(roleScopes)) {
 			log.debug("无 role_scope: userId={}, 默认 SELF", userId);
 			return selfGrant();

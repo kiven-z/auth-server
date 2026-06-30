@@ -1,5 +1,7 @@
 package com.auth.service.system.admin.convert.admin.menu;
 
+import java.util.List;
+
 import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.admin.model.form.menu.SysMenuSaveForm;
@@ -8,8 +10,6 @@ import com.auth.service.system.admin.model.vo.menu.SysMenuListVO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
-
-import java.util.List;
 
 /**
  * 菜单转换器

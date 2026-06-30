@@ -1,13 +1,13 @@
 package com.auth.module.security.contract.api.authorization;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
+
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * 用户授权画像（契约层，缓存/JWT 下游可消费的稳定模型）

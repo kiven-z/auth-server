@@ -1,11 +1,11 @@
 package com.auth.service.system.admin.service.admin;
 
+import java.util.List;
+
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.admin.model.form.user.SysUserBatchStatusForm;
 import com.auth.service.system.admin.model.form.user.SysUserForm;
 import com.baomidou.mybatisplus.extension.service.IService;
-
-import java.util.List;
 
 /**
  * 系统用户服务
@@ -15,17 +15,16 @@ import java.util.List;
 public interface SysUserService extends IService<UserEntity> {
 
 	/**
-	 * 新增用户
-	 * @param form 用户资料
+	 * 批量新增用户（单条创建与 Excel 导入共用）
+	 * @param forms 用户资料列表
 	 */
-	void create(SysUserForm form);
+	void createBatchFromImport(List<SysUserForm> forms);
 
 	/**
 	 * 更新用户基础资料（不含用户名与账号状态）
-	 * @param id 用户主键
-	 * @param form 更新表单
+	 * @param form 更新表单（须含主键）
 	 */
-	void update(Long id, SysUserForm form);
+	void update(SysUserForm form);
 
 	/**
 	 * 批量逻辑删除用户

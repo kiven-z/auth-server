@@ -1,5 +1,8 @@
 package com.auth.service.system.admin.excel.role;
 
+import java.io.IOException;
+import java.util.List;
+
 import com.auth.module.file.export.writer.ExcelExportWriter;
 import com.auth.module.file.importer.model.SpreadsheetImportResult;
 import com.auth.service.system.admin.mapper.role.SysRoleMapper;
@@ -13,10 +16,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.mock.web.MockMultipartFile;
 
-import java.io.IOException;
-import java.util.List;
+import org.springframework.mock.web.MockMultipartFile;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -42,13 +43,29 @@ class RoleSheetImporterTest {
 
 	private RoleSheetImporter roleSheetImporter;
 
+	private static SysRoleImportRow validRow(String roleCode, String roleName) {
+		SysRoleImportRow row = new SysRoleImportRow();
+		row.setRoleCode(roleCode);
+		row.setRoleName(roleName);
+		row.setStatusLabel("启用");
+		row.setOrderNum(1);
+		row.setRemark("备注");
+		return row;
+	}
+
+	private static MockMultipartFile buildImportFile(List<SysRoleImportRow> rows) throws IOException {
+		byte[] bytes = new ExcelExportWriter<>(SysRoleImportRow.class, "角色导入").write(rows);
+		return new MockMultipartFile("file", "role_import.xlsx",
+				"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", bytes);
+	}
+
 	@BeforeEach
 	void setUp() {
 		roleSheetImporter = new RoleSheetImporter(sysRoleMapper, sysRoleService);
 	}
 
 	@Test
-	@DisplayName("合法行全部导入成功并逐条调用 create")
+	@DisplayName("合法行全部导入成功并批量调用 createBatchFromImport")
 	void doImport_whenRowsValid_importsAllRows() throws IOException {
 		// 两行合法角色数据
 		MockMultipartFile file = buildImportFile(List.of(validRow("AUDITOR", "审计员"), validRow("OPERATOR", "操作员")));
@@ -59,10 +76,10 @@ class RoleSheetImporterTest {
 		assertThat(result.success()).isTrue();
 		assertThat(result.importedCount()).isEqualTo(2);
 		assertThat(result.errors()).isEmpty();
-		ArgumentCaptor<SysRoleForm> formCaptor = ArgumentCaptor.forClass(SysRoleForm.class);
-		verify(sysRoleService, org.mockito.Mockito.times(2)).create(formCaptor.capture());
-		assertThat(formCaptor.getAllValues()).extracting(SysRoleForm::getRoleCode)
-			.containsExactly("AUDITOR", "OPERATOR");
+		@SuppressWarnings("unchecked")
+		ArgumentCaptor<List<SysRoleForm>> formCaptor = ArgumentCaptor.forClass(List.class);
+		verify(sysRoleService).createBatchFromImport(formCaptor.capture());
+		assertThat(formCaptor.getValue()).extracting(SysRoleForm::getRoleCode).containsExactly("AUDITOR", "OPERATOR");
 	}
 
 	@Test
@@ -82,7 +99,7 @@ class RoleSheetImporterTest {
 		assertThat(result.errors()).hasSize(2);
 		assertThat(result.errors().get(0).message()).contains("roleCode is required");
 		assertThat(result.errors().get(1).message()).contains("roleName is required");
-		verify(sysRoleService, never()).create(any());
+		verify(sysRoleService, never()).createBatchFromImport(any());
 	}
 
 	@Test
@@ -96,7 +113,7 @@ class RoleSheetImporterTest {
 		assertThat(result.success()).isFalse();
 		assertThat(result.errors()).hasSize(1);
 		assertThat(result.errors().get(0).message()).contains("does not match required format");
-		verify(sysRoleService, never()).create(any());
+		verify(sysRoleService, never()).createBatchFromImport(any());
 	}
 
 	@Test
@@ -110,7 +127,7 @@ class RoleSheetImporterTest {
 		assertThat(result.success()).isFalse();
 		assertThat(result.errors()).hasSize(2);
 		assertThat(result.errors()).allMatch(error -> error.message().contains("duplicated in file"));
-		verify(sysRoleService, never()).create(any());
+		verify(sysRoleService, never()).createBatchFromImport(any());
 	}
 
 	@Test
@@ -126,23 +143,7 @@ class RoleSheetImporterTest {
 		assertThat(result.success()).isFalse();
 		assertThat(result.errors()).hasSize(1);
 		assertThat(result.errors().get(0).message()).contains("already exists");
-		verify(sysRoleService, never()).create(any());
-	}
-
-	private static SysRoleImportRow validRow(String roleCode, String roleName) {
-		SysRoleImportRow row = new SysRoleImportRow();
-		row.setRoleCode(roleCode);
-		row.setRoleName(roleName);
-		row.setStatusLabel("启用");
-		row.setOrderNum(1);
-		row.setRemark("备注");
-		return row;
-	}
-
-	private static MockMultipartFile buildImportFile(List<SysRoleImportRow> rows) throws IOException {
-		byte[] bytes = new ExcelExportWriter<>(SysRoleImportRow.class, "角色导入").write(rows);
-		return new MockMultipartFile("file", "role_import.xlsx",
-				"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", bytes);
+		verify(sysRoleService, never()).createBatchFromImport(any());
 	}
 
 }

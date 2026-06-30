@@ -1,5 +1,7 @@
 package com.auth.service.system.admin.service.me.impl;
 
+import java.util.List;
+
 import com.auth.common.core.model.response.Result;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.autoconfigure.security.SecurityRequestAttributes;
@@ -14,13 +16,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;

@@ -2,84 +2,90 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.auth.service.system.admin.mapper.user.UserDeptMapper">
 
-    <!-- 用户部门关联分页 -->
-    <select id="selectListByPage" resultType="com.auth.service.system.admin.model.po.user.UserDeptPageRowPO">
-        SELECT
-            ud.id,
-            ud.user_id,
-            ud.dept_id,
-            d.dept_name,
-            d.dept_code,
-            ud.is_primary,
-            ud.status,
-            ud.create_time,
-            ud.update_time,
-            ud.create_user,
-            ud.update_user,
-            ud.version,
-            ud.remark
-        FROM
-            user_dept ud
-            INNER JOIN sys_dept d ON d.id = ud.dept_id
-            AND d.is_deleted = 0
-        WHERE
-            ud.user_id = #{userId}
-        <if test="query.deptName != null and query.deptName != ''">
-            AND d.dept_name LIKE CONCAT('%', #{query.deptName}, '%')
-        </if>
-        <if test="query.deptCode != null and query.deptCode != ''">
-            AND d.dept_code LIKE CONCAT('%', #{query.deptCode}, '%')
-        </if>
-        <if test="query.status != null">
-            AND ud.status = #{query.status}
-        </if>
-        ORDER BY
-            ud.is_primary DESC,
-            ud.create_time DESC,
-            ud.id DESC
-    </select>
+	<!-- 用户部门关联分页 -->
+	<select id="selectListByPage" resultType="com.auth.service.system.admin.model.po.user.UserDeptPageRowPO">
+		SELECT
+		ud.id,
+		ud.user_id,
+		ud.dept_id,
+		d.dept_name,
+		d.dept_code,
+		ud.is_primary,
+		ud.status,
+		ud.create_time,
+		ud.update_time,
+		ud.create_user,
+		ud.update_user,
+		ud.version,
+		ud.remark
+		FROM
+		user_dept ud
+		INNER JOIN sys_dept d ON d.id = ud.dept_id
+		WHERE
+		ud.user_id = #{userId}
+		<if test="query.deptName != null and query.deptName != ''">
+			AND d.dept_name LIKE CONCAT('%',
+			#{query.deptName},
+			'%'
+			)
+		</if>
+		<if test="query.deptCode != null and query.deptCode != ''">
+			AND d.dept_code LIKE CONCAT('%',
+			#{query.deptCode},
+			'%'
+			)
+		</if>
+		<if test="query.status != null">
+			AND ud.status =
+			#{query.status}
+		</if>
+		ORDER BY
+		ud.is_primary DESC,
+		ud.create_time DESC,
+		ud.id DESC
+	</select>
 
-    <!-- 按用户与关联主键加载 -->
-    <select id="selectByIdAndUserId" resultType="com.auth.service.system.admin.model.entity.UserDeptEntity">
-        SELECT
-            id,
-            user_id,
-            dept_id,
-            is_primary,
-            status,
-            create_time,
-            update_time,
-            create_user,
-            update_user,
-            version,
-            remark
-        FROM
-            user_dept
-        WHERE
-            id = #{id}
-            AND user_id = #{userId}
-    </select>
+	<!-- 按用户与关联主键加载 -->
+	<select id="selectByIdAndUserId" resultType="com.auth.service.system.admin.model.entity.UserDeptEntity">
+		SELECT
+		id,
+		user_id,
+		dept_id,
+		is_primary,
+		status,
+		create_time,
+		update_time,
+		create_user,
+		update_user,
+		version,
+		remark
+		FROM
+		user_dept
+		WHERE
+		id = #{id}
+		AND user_id = #{userId}
+	</select>
 
-    <!-- 按用户与部门加载关联 -->
-    <select id="selectByUserIdAndDeptId" resultType="com.auth.service.system.admin.model.entity.UserDeptEntity">
-        SELECT
-            id,
-            user_id,
-            dept_id,
-            is_primary,
-            status,
-            create_time,
-            update_time,
-            create_user,
-            update_user,
-            version,
-            remark
-        FROM
-            user_dept
-        WHERE
-            user_id = #{userId}
-            AND dept_id = #{deptId}
-        LIMIT
-            1
-    </select>
+	<!-- 按用户与部门加载关联 -->
+	<select id="selectByUserIdAndDeptId" resultType="com.auth.service.system.admin.model.entity.UserDeptEntity">
+		SELECT
+		id,
+		user_id,
+		dept_id,
+		is_primary,
+		status,
+		create_time,
+		update_time,
+		create_user,
+		update_user,
+		version,
+		remark
+		FROM
+		user_dept
+		WHERE
+		user_id = #{userId}
+		AND dept_id = #{deptId}
+		LIMIT
+		1
+	</select>
 </mapper>

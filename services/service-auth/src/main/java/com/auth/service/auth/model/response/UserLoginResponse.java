@@ -1,11 +1,11 @@
 package com.auth.service.auth.model.response;
 
+import java.util.List;
+
 import com.auth.common.core.annotation.JsonStringFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.List;
 
 /**
  * 用户登录响应

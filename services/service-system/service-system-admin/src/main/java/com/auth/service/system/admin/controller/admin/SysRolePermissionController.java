@@ -1,5 +1,7 @@
 package com.auth.service.system.admin.controller.admin;
 
+import java.util.List;
+
 import com.auth.common.core.model.response.Result;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
@@ -13,10 +15,14 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
@@ -35,7 +41,7 @@ public class SysRolePermissionController {
 	private final SysRolePermissionService sysRolePermissionService;
 
 	@Operation(summary = "查询角色已分配权限码")
-	@PreAuthorize("@auth.decide('sysRole:query')")
+	@PreAuthorize("@auth.decide('sys:role:query')")
 	@GetMapping
 	public Result<List<PermissionReferenceVO>> list(@PathVariable("roleId") Long roleId) {
 		List<PermissionReferenceVO> data = sysRolePermissionService.listAssignedPermissions(roleId);
@@ -45,7 +51,7 @@ public class SysRolePermissionController {
 	@OperationLog(targetType = "ROLE_PERMISSION", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_ROLE_PERMISSION, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "全量分配角色权限码（触发 perm_version 失效）")
-	@PreAuthorize("@auth.decide('sysRole:update')")
+	@PreAuthorize("@auth.decide('sys:role:update')")
 	@PostMapping
 	public Result<Void> assign(@PathVariable("roleId") Long roleId,
 			@Valid @RequestBody SysRolePermissionAssignForm form) {

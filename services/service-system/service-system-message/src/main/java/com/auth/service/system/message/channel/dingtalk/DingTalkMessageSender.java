@@ -1,5 +1,10 @@
 package com.auth.service.system.message.channel.dingtalk;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.module.message.api.channel.MessageChannel;
@@ -11,12 +16,8 @@ import com.auth.module.message.api.model.dingtalk.DingTalkMessageType;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.message.channel.dingtalk.client.DingTalkWorkNoticeClient;
 import com.auth.service.system.message.model.channel.dingtalk.RenderedDingTalkNotice;
-import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import org.springframework.stereotype.Component;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
 

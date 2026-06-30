@@ -1,9 +1,13 @@
 package com.auth.module.security.datapermission.annotation;
 
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 import com.auth.module.security.datapermission.handler.DataScopeHandler;
 import com.auth.module.security.datapermission.handler.DefaultDataScopeHandler;
-
-import java.lang.annotation.*;
 
 /**
  * 申明一个 mapper 方法需要数据范围过滤

@@ -1,11 +1,10 @@
 package com.auth.common.core.model.query;
 
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import cn.hutool.core.text.CharSequenceUtil;
-
-import java.util.Map;
-import java.util.Optional;
 
 /**
  * 抽象排序 SQL 构建器

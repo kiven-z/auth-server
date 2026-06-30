@@ -3,6 +3,7 @@ package com.auth.common.jwt.autoconfigure;
 import com.auth.common.jwt.api.JwtTokenProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 

@@ -1,5 +1,7 @@
 package com.auth.module.security.autoconfigure.pipeline.authenticate;
 
+import java.util.Objects;
+
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.jwt.model.JwtUserToken;
 import com.auth.module.security.autoconfigure.security.SecurityRequestAttributes;
@@ -11,9 +13,8 @@ import com.auth.module.security.contract.exception.SecurityTokenException;
 import com.auth.module.security.core.token.model.SecurityTokenResult;
 import com.auth.module.security.core.token.provider.AccessTokenProvider;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.http.HttpHeaders;
 
-import java.util.Objects;
+import org.springframework.http.HttpHeaders;
 
 /**
  * 外部 Bearer Token 认证：校验令牌、强会话、权限版本与并发会话

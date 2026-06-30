@@ -1,13 +1,17 @@
 package com.auth.service.auth.service;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.service.auth.TestConstants;
 import com.auth.service.auth.mapper.UserMapper;
 import com.auth.service.auth.model.query.OnlineUserPageQuery;
-import com.auth.service.auth.model.vo.UserSessionVO;
 import com.auth.service.auth.model.value.session.OnlineUserPageSlice;
 import com.auth.service.auth.model.value.session.OnlineUserPageSlice.OnlineUserEntry;
+import com.auth.service.auth.model.vo.UserSessionVO;
 import com.auth.service.auth.service.impl.SessionManagementServiceImpl;
 import com.auth.service.auth.support.session.OnlineUserSessionReader;
 import com.auth.service.auth.support.session.UserSessionRedisStore;
@@ -18,14 +22,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link SessionManagementService} 单元测试

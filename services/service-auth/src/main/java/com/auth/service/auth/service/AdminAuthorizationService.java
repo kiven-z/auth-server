@@ -1,9 +1,9 @@
 package com.auth.service.auth.service;
 
+import java.util.Collection;
+
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.model.vo.authorization.EffectiveCodesVO;
-
-import java.util.Collection;
 
 /**
  * 管理端授权画像运维：按用户重建并写入 Redis

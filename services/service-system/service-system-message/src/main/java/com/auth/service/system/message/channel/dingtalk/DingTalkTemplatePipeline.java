@@ -1,5 +1,9 @@
 package com.auth.service.system.message.channel.dingtalk;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.model.dingtalk.DingTalkMessageType;
@@ -12,11 +16,8 @@ import com.auth.service.system.message.support.template.FreemarkerTemplateRender
 import com.auth.service.system.message.support.template.MessageTemplateLoader;
 import com.auth.service.system.message.support.template.MessageTemplateRequireFieldsJsonSupport;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import org.springframework.stereotype.Component;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
 import static com.auth.service.system.message.exception.MessageResultCode.DING_TALK_RENDER_FAILED;

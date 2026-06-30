@@ -1,5 +1,7 @@
 package com.auth.common.jwt.autoconfigure;
 
+import javax.crypto.SecretKey;
+
 import com.auth.common.jwt.api.JwtTokenProvider;
 import com.auth.common.jwt.key.HmacSecretKeys;
 import com.auth.common.jwt.key.RsaKeyPairMaterial;
@@ -7,6 +9,7 @@ import com.auth.common.jwt.key.RsaKeyStoreLoader;
 import com.auth.common.jwt.provider.HmacJwtTokenProvider;
 import com.auth.common.jwt.provider.RsaJwtTokenProvider;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -16,8 +19,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-
-import javax.crypto.SecretKey;
 
 /**
  * JWT 自动配置：按 {@code auth.common.jwt.algorithm} 选择 HS256 / RS256

@@ -1,25 +1,26 @@
 package com.auth.service.auth.service.impl;
 
+import java.util.List;
+import java.util.Set;
+
 import cn.hutool.core.collection.CollUtil;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateResponse;
 import com.auth.service.auth.config.AuthorizationInvalidationProperties;
+import com.auth.service.auth.model.command.invalidation.InvalidationCommand;
+import com.auth.service.auth.model.po.user.UserInvalidationStatePO;
+import com.auth.service.auth.model.value.invalidation.InvalidationIdempotencyGate;
+import com.auth.service.auth.model.value.invalidation.UserInvalidationBuckets;
 import com.auth.service.auth.service.AuthorizationInvalidationEventService;
 import com.auth.service.auth.service.AuthorizationInvalidationService;
 import com.auth.service.auth.support.invalidation.AuthProfileMaterializationService;
 import com.auth.service.auth.support.invalidation.UserInvalidationRepository;
 import com.auth.service.auth.support.invalidation.impact.ImpactResolverRegistry;
-import com.auth.service.auth.model.command.invalidation.InvalidationCommand;
-import com.auth.service.auth.model.value.invalidation.InvalidationIdempotencyGate;
-import com.auth.service.auth.model.po.user.UserInvalidationStatePO;
-import com.auth.service.auth.model.value.invalidation.UserInvalidationBuckets;
 import com.auth.service.auth.support.invalidation.policy.UserInvalidationPolicy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Set;
+import org.springframework.stereotype.Service;
 
 /**
  * 授权失效编排唯一入口

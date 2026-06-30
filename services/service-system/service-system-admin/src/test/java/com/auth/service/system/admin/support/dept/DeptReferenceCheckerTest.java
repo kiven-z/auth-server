@@ -1,10 +1,12 @@
 package com.auth.service.system.admin.support.dept;
 
-import com.auth.service.system.admin.mapper.dept.DeptReferenceCheckerMapper;
+import java.util.List;
+
 import com.auth.service.system.admin.mapper.dept.SysDeptMapper;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,7 +17,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link DeptReferenceChecker} 单元测试。
@@ -28,26 +34,28 @@ class DeptReferenceCheckerTest {
 
 	private static final Long PARENT_ID = 8L;
 
-	private static final Long CHILD_DEPT_ID = 20L;
-
 	@Mock
 	private SysDeptMapper sysDeptMapper;
-
-	@Mock
-	private DeptReferenceCheckerMapper deptReferenceCheckerMapper;
 
 	@InjectMocks
 	private DeptReferenceChecker deptReferenceChecker;
 
+	private static SysDeptEntity activeDept() {
+		SysDeptEntity entity = new SysDeptEntity();
+		entity.setId(DeptReferenceCheckerTest.DEPT_ID);
+		entity.setDeptCode("D" + DeptReferenceCheckerTest.DEPT_ID);
+		entity.setDeptName("部门-" + DeptReferenceCheckerTest.DEPT_ID);
+		return entity;
+	}
+
 	@Test
 	@DisplayName("getExistingActive：部门存在时返回实体")
 	void getExistingActiveReturnsEntityWhenPresent() {
-		SysDeptEntity entity = activeDept(DEPT_ID);
+		SysDeptEntity entity = activeDept();
 		when(sysDeptMapper.selectById(DEPT_ID)).thenReturn(entity);
 
 		assertThat(deptReferenceChecker.getExistingActive(DEPT_ID)).isSameAs(entity);
 		verify(sysDeptMapper).selectById(DEPT_ID);
-		verifyNoInteractions(deptReferenceCheckerMapper);
 	}
 
 	@Test
@@ -67,7 +75,7 @@ class DeptReferenceCheckerTest {
 		assertThat(deptReferenceChecker.normalizeAndRequireActiveParent(null)).isZero();
 		assertThat(deptReferenceChecker.normalizeAndRequireActiveParent(0L)).isZero();
 
-		verifyNoInteractions(sysDeptMapper, deptReferenceCheckerMapper);
+		verifyNoInteractions(sysDeptMapper);
 	}
 
 	@Test
@@ -77,7 +85,6 @@ class DeptReferenceCheckerTest {
 
 		assertThat(deptReferenceChecker.normalizeAndRequireActiveParent(PARENT_ID)).isEqualTo(PARENT_ID);
 		verify(sysDeptMapper).countActiveById(PARENT_ID);
-		verifyNoInteractions(deptReferenceCheckerMapper);
 	}
 
 	@Test
@@ -92,101 +99,48 @@ class DeptReferenceCheckerTest {
 	}
 
 	@Test
-	@DisplayName("requireMoveTargetValid：不能移动到自身")
-	void requireMoveTargetValidRejectsSelf() {
-		assertThatThrownBy(() -> deptReferenceChecker.requireMoveTargetValid(DEPT_ID, DEPT_ID))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("Cannot move tree node under itself, nodeId=" + DEPT_ID);
+	@DisplayName("requireAbsentDeptCodes：空列表跳过校验")
+	void requireAbsentDeptCodesSkipsWhenEmpty() {
+		assertThatCode(() -> deptReferenceChecker.requireAbsentDeptCodes(List.of())).doesNotThrowAnyException();
 
-		verifyNoInteractions(deptReferenceCheckerMapper);
+		verifyNoInteractions(sysDeptMapper);
 	}
 
 	@Test
-	@DisplayName("requireMoveTargetValid：不能移动到后代")
-	void requireMoveTargetValidRejectsDescendant() {
-		when(deptReferenceCheckerMapper.countDescendantRelation(DEPT_ID, CHILD_DEPT_ID)).thenReturn(1L);
-
-		assertThatThrownBy(() -> deptReferenceChecker.requireMoveTargetValid(DEPT_ID, CHILD_DEPT_ID))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessage(
-					"Cannot move tree node under its descendant, nodeId=" + DEPT_ID + ", newParentId=" + CHILD_DEPT_ID);
-
-		verify(deptReferenceCheckerMapper).countDescendantRelation(DEPT_ID, CHILD_DEPT_ID);
-	}
-
-	@Test
-	@DisplayName("requireMoveTargetValid：合法目标不查闭包关系")
-	void requireMoveTargetValidAcceptsValidTarget() {
-		assertThatCode(() -> deptReferenceChecker.requireMoveTargetValid(DEPT_ID, 0L)).doesNotThrowAnyException();
-
-		verifyNoInteractions(deptReferenceCheckerMapper);
-	}
-
-	@Test
-	@DisplayName("requireSubtreeUnused：子树无引用时不抛异常")
-	void requireSubtreeUnusedPassesWhenUnused() {
-		when(deptReferenceCheckerMapper.countUserDeptInSubtree(DEPT_ID)).thenReturn(0L);
-		when(deptReferenceCheckerMapper.countGrantDeptSubjectInSubtree(DEPT_ID)).thenReturn(0L);
-		when(deptReferenceCheckerMapper.countPostInSubtree(DEPT_ID)).thenReturn(0L);
-
-		assertThatCode(() -> deptReferenceChecker.requireSubtreeUnused(DEPT_ID)).doesNotThrowAnyException();
-
-		verify(deptReferenceCheckerMapper).countUserDeptInSubtree(DEPT_ID);
-		verify(deptReferenceCheckerMapper).countGrantDeptSubjectInSubtree(DEPT_ID);
-		verify(deptReferenceCheckerMapper).countPostInSubtree(DEPT_ID);
-	}
-
-	@Test
-	@DisplayName("requireSubtreeUnused：存在用户-部门关联时抛出 DATA_IN_USE")
-	void requireSubtreeUnusedThrowsWhenUserDeptReferenced() {
-		when(deptReferenceCheckerMapper.countUserDeptInSubtree(DEPT_ID)).thenReturn(1L);
-
-		assertThatThrownBy(() -> deptReferenceChecker.requireSubtreeUnused(DEPT_ID))
-			.isInstanceOf(SystemBusinessException.class)
+	@DisplayName("requireAbsentDeptCodes：请求内编码重复时抛出 DATA_CODE_DUPLICATE")
+	void requireAbsentDeptCodesThrowsWhenDuplicatedInRequest() {
+		ThrowingCallable executable = () -> deptReferenceChecker.requireAbsentDeptCodes(List.of("RD", "RD"));
+		assertThatThrownBy(executable).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemCommonResultCode.DATA_IN_USE);
+			.isEqualTo(SystemCommonResultCode.DATA_CODE_DUPLICATE);
 
-		verify(deptReferenceCheckerMapper).countUserDeptInSubtree(DEPT_ID);
-		verify(deptReferenceCheckerMapper, never()).countGrantDeptSubjectInSubtree(anyLong());
-		verify(deptReferenceCheckerMapper, never()).countPostInSubtree(anyLong());
+		verify(sysDeptMapper, never()).selectActiveByDeptCodes(any());
 	}
 
 	@Test
-	@DisplayName("requireSubtreeUnused：存在 grant DEPT 引用时抛出 DATA_IN_USE")
-	void requireSubtreeUnusedThrowsWhenGrantReferenced() {
-		when(deptReferenceCheckerMapper.countUserDeptInSubtree(DEPT_ID)).thenReturn(0L);
-		when(deptReferenceCheckerMapper.countGrantDeptSubjectInSubtree(DEPT_ID)).thenReturn(1L);
+	@DisplayName("requireAbsentDeptCodes：库中已存在编码时抛出 DATA_CODE_DUPLICATE")
+	void requireAbsentDeptCodesThrowsWhenDeptCodeExists() {
+		SysDeptEntity existing = activeDept();
+		existing.setDeptCode("RD");
+		when(sysDeptMapper.selectActiveByDeptCodes(List.of("RD"))).thenReturn(List.of(existing));
 
-		assertThatThrownBy(() -> deptReferenceChecker.requireSubtreeUnused(DEPT_ID))
-			.isInstanceOf(SystemBusinessException.class)
+		ThrowingCallable executable = () -> deptReferenceChecker.requireAbsentDeptCodes(List.of("RD"));
+		assertThatThrownBy(executable).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemCommonResultCode.DATA_IN_USE);
+			.isEqualTo(SystemCommonResultCode.DATA_CODE_DUPLICATE);
 
-		verify(deptReferenceCheckerMapper).countGrantDeptSubjectInSubtree(DEPT_ID);
-		verify(deptReferenceCheckerMapper, never()).countPostInSubtree(anyLong());
+		verify(sysDeptMapper).selectActiveByDeptCodes(List.of("RD"));
 	}
 
 	@Test
-	@DisplayName("requireSubtreeUnused：存在岗位引用时抛出 DATA_IN_USE")
-	void requireSubtreeUnusedThrowsWhenPostReferenced() {
-		when(deptReferenceCheckerMapper.countUserDeptInSubtree(DEPT_ID)).thenReturn(0L);
-		when(deptReferenceCheckerMapper.countGrantDeptSubjectInSubtree(DEPT_ID)).thenReturn(0L);
-		when(deptReferenceCheckerMapper.countPostInSubtree(DEPT_ID)).thenReturn(1L);
+	@DisplayName("requireAbsentDeptCodes：编码均未占用时不抛异常")
+	void requireAbsentDeptCodesPassesWhenAllAbsent() {
+		when(sysDeptMapper.selectActiveByDeptCodes(List.of("RD", "OPS"))).thenReturn(List.of());
 
-		assertThatThrownBy(() -> deptReferenceChecker.requireSubtreeUnused(DEPT_ID))
-			.isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemCommonResultCode.DATA_IN_USE);
+		assertThatCode(() -> deptReferenceChecker.requireAbsentDeptCodes(List.of("RD", "OPS")))
+			.doesNotThrowAnyException();
 
-		verify(deptReferenceCheckerMapper).countPostInSubtree(DEPT_ID);
-	}
-
-	private static SysDeptEntity activeDept(Long id) {
-		SysDeptEntity entity = new SysDeptEntity();
-		entity.setId(id);
-		entity.setDeptCode("D" + id);
-		entity.setDeptName("部门-" + id);
-		return entity;
+		verify(sysDeptMapper).selectActiveByDeptCodes(List.of("RD", "OPS"));
 	}
 
 }

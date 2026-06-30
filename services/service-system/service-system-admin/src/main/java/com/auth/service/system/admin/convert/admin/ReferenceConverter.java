@@ -1,5 +1,7 @@
 package com.auth.service.system.admin.convert.admin;
 
+import java.util.List;
+
 import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.service.system.admin.model.po.dept.SysDeptBoundUserPO;
 import com.auth.service.system.admin.model.po.post.SysPostBoundUserPO;
@@ -23,8 +25,6 @@ import com.auth.service.system.admin.model.vo.reference.ext.UserPostReferenceVO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
-
-import java.util.List;
 
 /**
  * 关联回显 PO → ReferenceVO 集中转换

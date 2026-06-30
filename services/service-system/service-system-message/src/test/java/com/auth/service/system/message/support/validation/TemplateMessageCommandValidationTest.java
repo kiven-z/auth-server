@@ -1,5 +1,8 @@
 package com.auth.service.system.message.support.validation;
 
+import java.util.Collections;
+import java.util.List;
+
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.message.api.model.dingtalk.DingTalkChannelOptions;
@@ -10,9 +13,6 @@ import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.Collections;
-import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
 import static com.auth.service.system.message.exception.MessageResultCode.MESSAGE_COMMAND_INVALID;

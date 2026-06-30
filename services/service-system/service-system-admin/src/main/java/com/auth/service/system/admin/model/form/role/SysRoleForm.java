@@ -1,14 +1,17 @@
 package com.auth.service.system.admin.model.form.role;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 import com.auth.common.web.valid.group.UpdateGroup;
 import com.auth.module.security.contract.convention.AuthCodeConvention;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * 角色新增/更新表单

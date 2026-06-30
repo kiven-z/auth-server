@@ -1,13 +1,13 @@
 package com.auth.service.system.message.model;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * 消息派发任务载荷（payload_json 标准结构）

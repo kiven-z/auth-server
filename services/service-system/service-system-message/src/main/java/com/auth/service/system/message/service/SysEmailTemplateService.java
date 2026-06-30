@@ -2,7 +2,11 @@ package com.auth.service.system.message.service;
 
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
-import com.auth.service.system.message.model.form.*;
+import com.auth.service.system.message.model.form.EmailTemplateContentForm;
+import com.auth.service.system.message.model.form.EmailTemplateForm;
+import com.auth.service.system.message.model.form.EmailTemplateRenderForm;
+import com.auth.service.system.message.model.form.EmailTemplateRequireFieldsForm;
+import com.auth.service.system.message.model.form.EmailTemplateTestSendForm;
 import com.auth.service.system.message.model.query.EmailTemplateQuery;
 import com.auth.service.system.message.model.vo.EmailTemplateDetailVO;
 import com.auth.service.system.message.model.vo.EmailTemplatePageResponse;

@@ -1,17 +1,17 @@
 package com.auth.service.auth.support.invalidation;
 
-import cn.hutool.core.collection.CollUtil;
-import com.auth.service.auth.config.AuthorizationInvalidationProperties;
-import com.auth.service.auth.mapper.UserMapper;
-import com.auth.service.auth.mapper.UserPermVersionMapper;
-import com.auth.service.auth.model.po.user.UserInvalidationStatePO;
-import com.auth.service.auth.util.BatchPartition;
-import org.springframework.stereotype.Repository;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+
+import cn.hutool.core.collection.CollUtil;
+import com.auth.service.auth.config.AuthorizationInvalidationProperties;
+import com.auth.service.auth.mapper.UserMapper;
+import com.auth.service.auth.model.po.user.UserInvalidationStatePO;
+import com.auth.service.auth.util.BatchPartition;
+
+import org.springframework.stereotype.Repository;
 
 /**
  * 用户失效状态读写：分桶前加载状态、分批递增 perm_version。
@@ -23,14 +23,11 @@ public class UserInvalidationRepository {
 
 	private final UserMapper userMapper;
 
-	private final UserPermVersionMapper userPermVersionMapper;
-
 	private final AuthorizationInvalidationProperties authorizationInvalidationProperties;
 
-	public UserInvalidationRepository(UserMapper userMapper, UserPermVersionMapper userPermVersionMapper,
+	public UserInvalidationRepository(UserMapper userMapper,
 			AuthorizationInvalidationProperties authorizationInvalidationProperties) {
 		this.userMapper = userMapper;
-		this.userPermVersionMapper = userPermVersionMapper;
 		this.authorizationInvalidationProperties = authorizationInvalidationProperties;
 	}
 
@@ -75,7 +72,7 @@ public class UserInvalidationRepository {
 
 		int totalUpdated = 0;
 		for (List<Long> batch : BatchPartition.partitionIds(userIds, batchSize)) {
-			totalUpdated += userPermVersionMapper.incrementPermVersionByUserIds(batch);
+			totalUpdated += userMapper.incrementPermVersionByUserIds(batch);
 		}
 		return totalUpdated;
 	}

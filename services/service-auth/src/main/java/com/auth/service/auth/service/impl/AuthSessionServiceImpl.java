@@ -1,5 +1,7 @@
 package com.auth.service.auth.service.impl;
 
+import java.util.Optional;
+
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.auth.convert.LoginSessionConverter;
 import com.auth.service.auth.model.response.RefreshTokenResponse;
@@ -16,10 +18,9 @@ import com.auth.service.auth.support.login.RefreshTokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 import static com.auth.common.jwt.provider.AbstractJwtTokenProvider.BEARER_PREFIX;
 

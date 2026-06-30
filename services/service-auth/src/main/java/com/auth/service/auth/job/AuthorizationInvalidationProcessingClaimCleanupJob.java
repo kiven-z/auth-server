@@ -2,14 +2,13 @@ package com.auth.service.auth.job;
 
 import java.time.LocalDateTime;
 
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-
 import com.auth.service.auth.config.AuthorizationInvalidationProperties;
 import com.auth.service.auth.service.AuthorizationInvalidationEventService;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 /**
  * 授权失效幂等事件 processing 占位超时清理：删除孤儿占位行，允许 Outbox 重新投递

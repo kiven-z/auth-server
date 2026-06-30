@@ -2,25 +2,28 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.auth.service.auth.mapper.DeptClosureMapper">
 
-    <!-- DEPT_AND_CHILD：ancestor 锚点 → 全部 descendant（含 depth=0 自身） -->
-    <select id="selectDescendantDeptIdsByAncestorIds" resultType="long">
-        SELECT DISTINCT dc.descendant_id
-        FROM dept_closure dc
-        INNER JOIN sys_dept d ON d.id = dc.descendant_id AND d.is_deleted = 0
-        <where>
-            <choose>
-                <when test="ancestorDeptIds != null and ancestorDeptIds.size() > 0">
-                    dc.ancestor_id IN
-                    <foreach collection="ancestorDeptIds" item="deptId" open="(" separator="," close=")">
-                        #{deptId}
-                    </foreach>
-                </when>
-                <otherwise>
-                    1 = 0
-                </otherwise>
-            </choose>
-        </where>
-        ORDER BY dc.descendant_id
-    </select>
+	<!-- DEPT_AND_CHILD：ancestor 锚点 → 全部 descendant（含 depth=0 自身） -->
+	<select id="selectDescendantDeptIdsByAncestorIds" resultType="long">
+		SELECT DISTINCT
+		    dc.descendant_id
+		FROM
+		    dept_closure dc
+		    INNER JOIN sys_dept d ON d.id = dc.descendant_id
+		<where>
+		    <choose>
+		        <when test="ancestorDeptIds != null and ancestorDeptIds.size() > 0">
+		            dc.ancestor_id IN
+		            <foreach collection="ancestorDeptIds" item="deptId" open="(" separator="," close=")">
+		                #{deptId}
+		            </foreach>
+		        </when>
+		        <otherwise>
+		            1 = 0
+		        </otherwise>
+		    </choose>
+		</where>
+		ORDER BY
+		    dc.descendant_id
+	</select>
 
 </mapper>

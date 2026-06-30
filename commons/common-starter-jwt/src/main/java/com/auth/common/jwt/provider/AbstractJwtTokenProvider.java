@@ -1,5 +1,7 @@
 package com.auth.common.jwt.provider;
 
+import java.util.Date;
+
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.jwt.api.JwtTokenProvider;
 import com.auth.common.jwt.autoconfigure.JwtProperties;
@@ -10,9 +12,8 @@ import com.auth.common.jwt.support.JwtAudienceCodec;
 import com.auth.common.jwt.support.JwtExceptionTranslator;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtParser;
-import org.springframework.util.Assert;
 
-import java.util.Date;
+import org.springframework.util.Assert;
 
 /**
  * JJWT 0.12 模板：子类绑定算法与密钥材料

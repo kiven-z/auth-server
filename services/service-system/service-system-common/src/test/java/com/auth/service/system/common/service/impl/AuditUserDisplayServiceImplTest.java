@@ -1,5 +1,11 @@
 package com.auth.service.system.common.service.impl;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
 import com.auth.common.core.model.response.BaseResponse;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.common.mapper.AuditUserDisplayMapper;
@@ -12,12 +18,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -39,6 +39,13 @@ class AuditUserDisplayServiceImplTest {
 
 	@InjectMocks
 	private AuditUserDisplayServiceImpl auditUserDisplayService;
+
+	private static UserEntity userEntity(Long id, String username) {
+		UserEntity entity = new UserEntity();
+		entity.setId(id);
+		entity.setUsername(username);
+		return entity;
+	}
 
 	@Test
 	@DisplayName("mapUsernamesByIds：空集合与 null 不访问数据库并返回空 Map")
@@ -180,13 +187,6 @@ class AuditUserDisplayServiceImplTest {
 		assertThat(row.getUpdateUsername()).isEqualTo("bob");
 		assertThat(row.getOperatorUsername()).isEqualTo("alice");
 		verify(auditUserDisplayMapper).selectBatchIds(List.of(1L, 2L));
-	}
-
-	private static UserEntity userEntity(Long id, String username) {
-		UserEntity entity = new UserEntity();
-		entity.setId(id);
-		entity.setUsername(username);
-		return entity;
 	}
 
 	@Getter

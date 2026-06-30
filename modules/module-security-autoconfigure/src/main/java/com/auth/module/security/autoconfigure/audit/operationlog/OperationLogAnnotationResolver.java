@@ -1,13 +1,14 @@
 package com.auth.module.security.autoconfigure.audit.operationlog;
 
+import java.lang.reflect.Method;
+
 import com.auth.module.security.contract.annotation.OperationLog;
 import lombok.experimental.UtilityClass;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
+
 import org.springframework.aop.support.AopUtils;
 import org.springframework.core.annotation.AnnotationUtils;
-
-import java.lang.reflect.Method;
 
 /**
  * 从 AOP 连接点解析 {@link OperationLog} 元数据（方法优先，其次类级别）。

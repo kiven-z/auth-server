@@ -1,9 +1,9 @@
 package com.auth.service.auth.model.value.login;
 
+import java.time.LocalDateTime;
+
 import lombok.Getter;
 import lombok.Setter;
-
-import java.time.LocalDateTime;
 
 /**
  * 刷新令牌完成后的应用读模型。

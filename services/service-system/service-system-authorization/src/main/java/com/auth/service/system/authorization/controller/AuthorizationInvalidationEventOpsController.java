@@ -1,14 +1,5 @@
 package com.auth.service.system.authorization.controller;
 
-import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
-
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.annotation.OperationLog;
@@ -21,10 +12,18 @@ import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationE
 import com.auth.service.system.authorization.service.AuthorizationInvalidationEventOpsService;
 import com.auth.service.system.authorization.service.AuthorizationInvalidationEventQueryService;
 import com.auth.service.system.common.model.SystemAuditBizModule;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
 /**
  * 授权失效幂等事件运维查询接口
@@ -32,9 +31,9 @@ import lombok.RequiredArgsConstructor;
  * @author Bunny
  */
 @Tag(name = "授权失效幂等事件", description = "auth_authorization_invalidation_event")
+@RequiredArgsConstructor
 @RequestMapping("/api/system/ops/authorization-invalidation/event")
 @RestController
-@RequiredArgsConstructor
 public class AuthorizationInvalidationEventOpsController {
 
 	private final AuthorizationInvalidationEventQueryService authorizationInvalidationEventQueryService;
@@ -42,7 +41,7 @@ public class AuthorizationInvalidationEventOpsController {
 	private final AuthorizationInvalidationEventOpsService authorizationInvalidationEventOpsService;
 
 	@Operation(summary = "分页查询授权失效幂等事件")
-	@PreAuthorize("@auth.decide('sysAuthInvalidationEvent:query')")
+	@PreAuthorize("@auth.decide('ops:invalidationevent:query')")
 	@GetMapping("page")
 	public Result<PageResponse<AuthorizationInvalidationEventPageVO>> page(AuthorizationInvalidationEventQuery query) {
 		PageResponse<AuthorizationInvalidationEventPageVO> page = authorizationInvalidationEventQueryService
@@ -51,7 +50,7 @@ public class AuthorizationInvalidationEventOpsController {
 	}
 
 	@Operation(summary = "授权失效幂等事件详情")
-	@PreAuthorize("@auth.decide('sysAuthInvalidationEvent:detail')")
+	@PreAuthorize("@auth.decide('ops:invalidationevent:detail')")
 	@GetMapping("{id}")
 	public Result<AuthorizationInvalidationEventDetailVO> detail(@PathVariable("id") Long id) {
 		AuthorizationInvalidationEventDetailVO detail = authorizationInvalidationEventQueryService.getDetail(id);
@@ -61,7 +60,7 @@ public class AuthorizationInvalidationEventOpsController {
 	@OperationLog(targetType = "AUTH_INVALIDATION_EVENT", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.AUTH_INVALIDATION_EVENT, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "释放授权失效幂等事件 processing 占位")
-	@PreAuthorize("@auth.decide('sysAuthInvalidationEvent:releaseClaim')")
+	@PreAuthorize("@auth.decide('ops:invalidationevent:releaseclaim')")
 	@PostMapping("{id}/release-claim")
 	public Result<Boolean> releaseClaim(@PathVariable("id") Long id) {
 		OperationLogContext.setTargetId(id);

@@ -1,23 +1,26 @@
 package com.auth.service.system.admin.excel.user;
 
+import java.io.IOException;
+import java.util.List;
+
 import com.auth.module.file.export.AbstractSyncPagedExportService;
 import com.auth.module.file.export.ExportScopeQueryFields;
+import com.auth.module.file.export.delivery.SyncFileDelivery;
 import com.auth.module.file.export.writer.ExcelExportWriter;
+import com.auth.module.file.importer.model.SpreadsheetImportResult;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.admin.convert.spreadsheet.SysUserSpreadsheetConverter;
-import com.auth.service.system.admin.excel.UserStatusColorCellWriteHandler;
 import com.auth.service.system.admin.mapper.user.SysUserMapper;
 import com.auth.service.system.admin.model.po.user.SysUserPageRowPO;
 import com.auth.service.system.admin.model.query.user.SysUserPageQuery;
 import com.auth.service.system.admin.support.sqlbuild.SysUserPageOrderSqlBuilder;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.io.IOException;
-import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 用户 Excel 导出
@@ -36,10 +39,13 @@ public class SysUserSpreadsheetService
 
 	private final SysUserMapper sysUserMapper;
 
-	public SysUserSpreadsheetService(SysUserMapper sysUserMapper) {
+	private final UserSheetImporter userSheetImporter;
+
+	public SysUserSpreadsheetService(SysUserMapper sysUserMapper, UserSheetImporter userSheetImporter) {
 		super(ExcelExportWriter.withStatusStyle(SysUserSpreadsheetRow.class, SHEET_NAME,
 				new UserStatusColorCellWriteHandler(STATUS_COLUMN_INDEX)), FILENAME_PREFIX);
 		this.sysUserMapper = sysUserMapper;
+		this.userSheetImporter = userSheetImporter;
 	}
 
 	/**
@@ -66,6 +72,38 @@ public class SysUserSpreadsheetService
 	@Override
 	protected List<SysUserSpreadsheetRow> toExportRows(List<SysUserPageRowPO> rows) {
 		return SysUserSpreadsheetConverter.INSTANCE.toSpreadsheetRows(rows);
+	}
+
+	/**
+	 * 从上传文件批量导入用户（解析 → 校验 → 写入，全部通过才落库）
+	 * @param file 上传的 Excel 文件
+	 * @return 导入结果（含行级错误）
+	 * @throws IOException 文件读取失败
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	public SpreadsheetImportResult importExcel(MultipartFile file) throws IOException {
+		return userSheetImporter.doImport(file);
+	}
+
+	/**
+	 * 生成用户导入模板并返回文件响应
+	 * @return 模板文件响应
+	 * @throws IOException 写入失败
+	 */
+	public ResponseEntity<byte[]> downloadImportTemplate() throws IOException {
+		SysUserImportRow row = new SysUserImportRow();
+		row.setUsername("（示例：zhangsan，全局唯一）");
+		row.setNickname("（示例：张三）");
+		row.setEmail("（示例：zhangsan@example.com，全局唯一）");
+		row.setPhone("（示例：13800000000，全局唯一）");
+		row.setEmployeeNo("（可选，示例：E001，全局唯一）");
+		row.setStatusLabel("启用");
+		row.setInitialPassword("（示例：Abcd1234，8-18位）");
+		row.setGenderLabel("（可选，男/女/未知）");
+		row.setBirthday("（可选，示例：1990-01-01）");
+		row.setRemark("（可选）");
+		byte[] bytes = new ExcelExportWriter<>(SysUserImportRow.class, "用户导入模板").write(List.of(row));
+		return SyncFileDelivery.deliver(bytes, "user_import_template.xlsx");
 	}
 
 }

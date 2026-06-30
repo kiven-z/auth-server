@@ -1,8 +1,12 @@
 package com.auth.service.system.admin.mapper.dept;
 
+import java.util.List;
+
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
+import com.auth.service.system.admin.model.po.dept.SysDeptBoundUserPO;
 import com.auth.service.system.admin.model.po.dept.SysDeptPageRowPO;
 import com.auth.service.system.admin.model.po.dept.SysDeptPathRowPO;
+import com.auth.service.system.admin.model.po.reference.PostReferencePO;
 import com.auth.service.system.admin.model.query.dept.SysDeptListQuery;
 import com.auth.service.system.admin.model.query.dept.SysDeptPageQuery;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -11,8 +15,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
-
-import java.util.List;
 
 /**
  * 系统部门 Mapper
@@ -39,19 +41,19 @@ public interface SysDeptMapper extends BaseMapper<SysDeptEntity> {
 			@Param("query") SysDeptPageQuery query);
 
 	/**
-	 * 未逻辑删除的部门数量
+	 * 部门是否存在
 	 * @param deptId 部门 ID
 	 * @return 匹配行数
 	 */
-	@Select("SELECT COUNT(1) FROM sys_dept WHERE id = #{deptId} AND is_deleted = 0")
+	@Select("SELECT COUNT(1) FROM sys_dept WHERE id = #{deptId}")
 	int countActiveById(@Param("deptId") Long deptId);
 
 	/**
-	 * 未删除的直接子部门数量
+	 * 直接子部门数量
 	 * @param parentId 父部门 ID
 	 * @return 子部门行数
 	 */
-	@Select("SELECT COUNT(1) FROM sys_dept WHERE parent_id = #{parentId} AND is_deleted = 0")
+	@Select("SELECT COUNT(1) FROM sys_dept WHERE parent_id = #{parentId}")
 	int countActiveDirectChildren(@Param("parentId") Long parentId);
 
 	/**
@@ -67,5 +69,34 @@ public interface SysDeptMapper extends BaseMapper<SysDeptEntity> {
 	 * @return 部门实体列表
 	 */
 	List<SysDeptEntity> selectActiveByDeptCodes(@Param("deptCodes") List<String> deptCodes);
+
+	/**
+	 * 查询直接挂靠本部门的有效用户-部门关联（不含子部门）
+	 * @param deptId 部门 ID
+	 * @return 关联用户列表
+	 */
+	List<SysDeptBoundUserPO> selectBoundUsersByDeptId(@Param("deptId") Long deptId);
+
+	/**
+	 * 查询本部门下未删除岗位（不含子部门）
+	 * @param deptId 部门 ID
+	 * @return 岗位列表
+	 */
+	List<PostReferencePO> selectBoundPostsByDeptId(@Param("deptId") Long deptId);
+
+	/**
+	 * 子树内是否存在用户-部门关联、grant DEPT 主体或未删除岗位（任一即视为占用）
+	 * @param deptId 子树根部门 ID
+	 * @return {@code true} 表示子树仍被引用，不可删除
+	 */
+	boolean existsSubtreeReference(@Param("deptId") Long deptId);
+
+	/**
+	 * {@code descendantId} 是否位于 {@code ancestorId} 的子树中（含自身）
+	 * @param ancestorId 祖先部门 ID
+	 * @param descendantId 候选后代部门 ID
+	 * @return 匹配行数，大于 0 表示是后代
+	 */
+	long countDescendantRelation(@Param("ancestorId") Long ancestorId, @Param("descendantId") Long descendantId);
 
 }

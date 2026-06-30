@@ -1,9 +1,9 @@
 package com.auth.service.system.admin.service.admin;
 
+import java.util.List;
+
 import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
 import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
-
-import java.util.List;
 
 /**
  * 用户直连角色授权（grant_table）

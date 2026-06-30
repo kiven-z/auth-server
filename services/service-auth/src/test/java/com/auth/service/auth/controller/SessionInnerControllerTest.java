@@ -1,5 +1,7 @@
 package com.auth.service.auth.controller;
 
+import java.util.List;
+
 import com.auth.service.auth.model.vo.UserSessionVO;
 import com.auth.service.auth.service.SessionManagementService;
 import org.junit.jupiter.api.DisplayName;
@@ -8,8 +10,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;

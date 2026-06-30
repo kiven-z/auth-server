@@ -1,12 +1,12 @@
 package com.auth.service.auth.support.invalidation.policy;
 
+import java.util.List;
+import java.util.Set;
+
 import com.auth.service.auth.model.po.user.UserInvalidationStatePO;
 import com.auth.service.auth.model.value.invalidation.UserInvalidationBuckets;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.List;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -18,6 +18,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class UserInvalidationPolicyTest {
 
 	private final UserInvalidationPolicy policy = new UserInvalidationPolicy();
+
+	private static UserInvalidationStatePO state(Long userId, Integer status) {
+		UserInvalidationStatePO state = new UserInvalidationStatePO();
+		state.setUserId(userId);
+		state.setStatus(status);
+		return state;
+	}
 
 	@Test
 	@DisplayName("正常用户进入 versionBump 桶")
@@ -52,13 +59,6 @@ class UserInvalidationPolicyTest {
 		UserInvalidationBuckets buckets = policy.partition(List.of());
 
 		assertEquals(Set.of(), buckets.allUserIds());
-	}
-
-	private static UserInvalidationStatePO state(Long userId, Integer status) {
-		UserInvalidationStatePO state = new UserInvalidationStatePO();
-		state.setUserId(userId);
-		state.setStatus(status);
-		return state;
 	}
 
 }

@@ -1,11 +1,11 @@
 package com.auth.service.system.authorization.convert;
 
+import java.time.LocalDateTime;
+
 import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidationEventInnerQuery;
 import com.auth.service.system.authorization.model.query.AuthorizationInvalidationEventOpsQuery;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

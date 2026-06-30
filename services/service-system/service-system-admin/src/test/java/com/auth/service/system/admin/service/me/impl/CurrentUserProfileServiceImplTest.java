@@ -1,5 +1,8 @@
 package com.auth.service.system.admin.service.me.impl;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.system.admin.mapper.user.SysUserMapper;
@@ -8,6 +11,7 @@ import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.UserSessionRevocationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
+import com.baomidou.mybatisplus.extension.repository.CrudRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,11 +21,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-
-import java.time.LocalDate;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -51,13 +53,31 @@ class CurrentUserProfileServiceImplTest {
 	@InjectMocks
 	private CurrentUserProfileServiceImpl currentUserProfileService;
 
+	private static UserEntity existingUser() {
+		UserEntity entity = new UserEntity();
+		entity.setId(USER_ID);
+		entity.setNickname("Old Nick");
+		entity.setEmail("old@example.com");
+		entity.setPhone("13800000000");
+		entity.setGender(0);
+		return entity;
+	}
+
+	private static MeProfileUpdateForm buildForm() {
+		MeProfileUpdateForm form = new MeProfileUpdateForm();
+		form.setNickname("Alice");
+		form.setEmail("old@example.com");
+		form.setPhone("13800000000");
+		form.setGender(1);
+		return form;
+	}
+
 	@BeforeEach
 	void setUp() throws Exception {
 		AuthProfile profile = AuthProfile.builder().userId(USER_ID).username("tester").build();
 		SecurityContextHolder.getContext().setAuthentication(new TestingAuthenticationToken(profile, null));
 
-		var baseMapperField = com.baomidou.mybatisplus.extension.service.impl.ServiceImpl.class
-			.getDeclaredField("baseMapper");
+		var baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(currentUserProfileService, sysUserMapper);
 	}
@@ -166,25 +186,6 @@ class CurrentUserProfileServiceImplTest {
 		currentUserProfileService.updateMyProfile(form);
 
 		verify(userSessionRevocationTrigger, never()).revokeAllSessionsAfterCommit(any());
-	}
-
-	private static UserEntity existingUser() {
-		UserEntity entity = new UserEntity();
-		entity.setId(USER_ID);
-		entity.setNickname("Old Nick");
-		entity.setEmail("old@example.com");
-		entity.setPhone("13800000000");
-		entity.setGender(0);
-		return entity;
-	}
-
-	private static MeProfileUpdateForm buildForm() {
-		MeProfileUpdateForm form = new MeProfileUpdateForm();
-		form.setNickname("Alice");
-		form.setEmail("old@example.com");
-		form.setPhone("13800000000");
-		form.setGender(1);
-		return form;
 	}
 
 }

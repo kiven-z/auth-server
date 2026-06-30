@@ -1,5 +1,8 @@
 package com.auth.service.system.authorization.model.vo;
 
+import java.io.Serial;
+import java.time.LocalDateTime;
+
 import com.auth.common.core.model.response.BaseResponse;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -7,9 +10,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-
-import java.io.Serial;
-import java.time.LocalDateTime;
 
 /**
  * 授权失效 Outbox 分页行

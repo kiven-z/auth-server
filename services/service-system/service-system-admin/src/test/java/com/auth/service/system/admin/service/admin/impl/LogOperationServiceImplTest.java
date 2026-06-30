@@ -1,5 +1,10 @@
 package com.auth.service.system.admin.service.admin.impl;
 
+import java.lang.reflect.Field;
+import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.ToLongFunction;
+
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.mapper.log.LogOperationMapper;
 import com.auth.service.system.admin.model.entity.LogOperationEntity;
@@ -11,7 +16,7 @@ import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.extension.repository.CrudRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,16 +24,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.lang.reflect.Field;
-import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.ToLongFunction;
-
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link LogOperationQueryServiceImpl} 单元测试。
@@ -50,7 +53,7 @@ class LogOperationQueryServiceImplTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		logOperationQueryService = new LogOperationQueryServiceImpl(auditUserDisplayService);
-		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
+		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(logOperationQueryService, logOperationMapper);
 	}

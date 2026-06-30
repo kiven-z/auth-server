@@ -1,5 +1,8 @@
 package com.auth.service.system.admin.model.vo.loglogin;
 
+import java.io.Serial;
+import java.time.LocalDateTime;
+
 import com.auth.common.core.annotation.JsonStringFormat;
 import com.auth.common.core.model.response.BaseResponse;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -8,9 +11,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-
-import java.io.Serial;
-import java.time.LocalDateTime;
 
 /**
  * 登录日志分页行

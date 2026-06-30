@@ -1,5 +1,8 @@
 package com.auth.service.auth.support.invalidation.impact;
 
+import java.util.List;
+import java.util.Set;
+
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 import com.auth.module.security.contract.dto.invalidation.RoleInvalidatePayload;
 import com.auth.module.security.contract.dto.invalidation.UserInvalidatePayload;
@@ -8,9 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.List;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;

@@ -1,5 +1,14 @@
 package com.auth.service.auth.service.impl;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import cn.hutool.core.collection.CollUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.platform.persistence.model.UserEntity;
@@ -7,29 +16,27 @@ import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.service.auth.convert.UserSessionConverter;
 import com.auth.service.auth.mapper.UserMapper;
 import com.auth.service.auth.model.query.OnlineUserPageQuery;
+import com.auth.service.auth.model.value.session.OnlineUserPageSlice;
+import com.auth.service.auth.model.value.session.OnlineUserPageSlice.OnlineUserEntry;
+import com.auth.service.auth.model.value.session.UserOnlineBrief;
 import com.auth.service.auth.model.vo.OnlineUserPageVO;
 import com.auth.service.auth.model.vo.UserSessionVO;
 import com.auth.service.auth.service.SessionManagementService;
 import com.auth.service.auth.support.session.OnlineUserSessionReader;
 import com.auth.service.auth.support.session.UserSessionRedisStore;
-import com.auth.service.auth.model.value.session.OnlineUserPageSlice;
-import com.auth.service.auth.model.value.session.OnlineUserPageSlice.OnlineUserEntry;
-import com.auth.service.auth.model.value.session.UserOnlineBrief;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import org.springframework.stereotype.Service;
 
 /**
  * 会话管理：踢人、活跃会话与在线用户查询
  *
  * @author Bunny
  */
-@Slf4j
 @RequiredArgsConstructor
+@Slf4j
 @Service
 public class SessionManagementServiceImpl implements SessionManagementService {
 

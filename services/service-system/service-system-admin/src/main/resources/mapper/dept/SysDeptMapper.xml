@@ -2,131 +2,231 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.auth.service.system.admin.mapper.dept.SysDeptMapper">
 
-    <!-- 部门扁平列表查询（无分页，供树形构建） -->
-    <select id="selectListByQuery"
-            resultType="com.auth.service.system.admin.model.entity.SysDeptEntity">
-        SELECT
-            d.id,
-            d.parent_id,
-            d.dept_name,
-            d.dept_code,
-            d.status,
-            d.order_num,
-            d.remark,
-            d.create_time,
-            d.update_time,
-            d.create_user,
-            d.update_user
-        FROM
-            sys_dept d
-        <where>
-            d.is_deleted = 0
-            <if test="query.status != null">
-                AND d.status = #{query.status}
-            </if>
-            <if test="query.keyword != null and query.keyword != ''">
-                AND d.id IN (
-                    SELECT
-                        dc.ancestor_id
-                    FROM
-                        dept_closure dc
-                        INNER JOIN sys_dept m ON m.id = dc.descendant_id
-                        AND m.is_deleted = 0
-                    WHERE
-                        m.dept_name LIKE CONCAT('%', #{query.keyword}, '%')
-                        OR m.dept_code LIKE CONCAT('%', #{query.keyword}, '%')
-                )
-            </if>
-        </where>
-        ORDER BY
-            d.order_num,
-            d.id
-    </select>
+	<!-- 部门扁平列表查询（无分页，供树形构建） -->
+	<select id="selectListByQuery"
+			resultType="com.auth.service.system.admin.model.entity.SysDeptEntity">
+		SELECT
+		    d.id,
+		    d.parent_id,
+		    d.dept_name,
+		    d.dept_code,
+		    d.status,
+		    d.order_num,
+		    d.remark,
+		    d.create_time,
+		    d.update_time,
+		    d.create_user,
+		    d.update_user
+		FROM
+		    sys_dept d
+		<where>
+		    <if test="query.status != null">
+		        d.status = #{query.status}
+		    </if>
+		    <if test="query.keyword != null and query.keyword != ''">
+		        <if test="query.status != null">
+		            AND
+		        </if>
+		        d.id IN (
+		            SELECT
+		                dc.ancestor_id
+		            FROM
+		                dept_closure dc
+		                INNER JOIN sys_dept m ON m.id = dc.descendant_id
+		            WHERE
+		                m.dept_name LIKE CONCAT('%', #{query.keyword}, '%')
+		                OR m.dept_code LIKE CONCAT('%', #{query.keyword}, '%')
+		        )
+		    </if>
+		</where>
+		ORDER BY
+		    d.order_num,
+		    d.id
+	</select>
 
-    <!-- 分页查询部门（含父部门信息；表格视图与 Excel 导出共用） -->
-    <select id="selectListByPage"
-            resultType="com.auth.service.system.admin.model.po.dept.SysDeptPageRowPO">
-        SELECT
-            d.id,
-            d.parent_id,
-            p.dept_code AS parent_dept_code,
-            p.dept_name AS parent_dept_name,
-            d.dept_name,
-            d.dept_code,
-            d.status,
-            d.order_num,
-            d.remark,
-            d.create_time,
-            d.update_time,
-            d.create_user,
-            d.update_user
-        FROM
-            sys_dept d
-            LEFT JOIN sys_dept p ON d.parent_id = p.id
-            AND p.is_deleted = 0
-        <where>
-            d.is_deleted = 0
-            <if test="query.status != null">
-                AND d.status = #{query.status}
-            </if>
-            <if test="query.deptName != null and query.deptName != ''">
-                AND d.dept_name LIKE CONCAT('%', #{query.deptName}, '%')
-            </if>
-            <if test="query.deptCode != null and query.deptCode != ''">
-                AND d.dept_code LIKE CONCAT('%', #{query.deptCode}, '%')
-            </if>
-        </where>
-        ORDER BY
-            d.order_num,
-            d.id
-    </select>
+	<!-- 分页查询部门（含父部门信息；表格视图与 Excel 导出共用） -->
+	<select id="selectListByPage"
+			resultType="com.auth.service.system.admin.model.po.dept.SysDeptPageRowPO">
+		SELECT
+		    d.id,
+		    d.parent_id,
+		    p.dept_code AS parent_dept_code,
+		    p.dept_name AS parent_dept_name,
+		    d.dept_name,
+		    d.dept_code,
+		    d.status,
+		    d.order_num,
+		    d.remark,
+		    d.create_time,
+		    d.update_time,
+		    d.create_user,
+		    d.update_user
+		FROM
+		    sys_dept d
+		    LEFT JOIN sys_dept p ON d.parent_id = p.id
+		<where>
+		    <if test="query.status != null">
+		        d.status = #{query.status}
+		    </if>
+		    <if test="query.deptName != null and query.deptName != ''">
+		        <if test="query.status != null">
+		            AND
+		        </if>
+		        d.dept_name LIKE CONCAT('%', #{query.deptName}, '%')
+		    </if>
+		    <if test="query.deptCode != null and query.deptCode != ''">
+		        <if test="query.status != null or (query.deptName != null and query.deptName != '')">
+		            AND
+		        </if>
+		        d.dept_code LIKE CONCAT('%', #{query.deptCode}, '%')
+		    </if>
+		</where>
+		ORDER BY
+		    d.order_num,
+		    d.id
+	</select>
 
-    <!-- 批量查询部门全路径（根到叶，基于 dept_closure） -->
-    <select id="selectDeptPathByIds"
-            resultType="com.auth.service.system.admin.model.po.dept.SysDeptPathRowPO">
-        SELECT
-            dc.descendant_id AS id,
-            GROUP_CONCAT(
-                a.dept_name
-                ORDER BY
-                    dc.depth DESC SEPARATOR '/'
-            ) AS dept_path
-        FROM
-            dept_closure dc
-            INNER JOIN sys_dept a ON a.id = dc.ancestor_id
-            AND a.is_deleted = 0
-        WHERE
-            dc.descendant_id IN
-        <foreach collection="ids" item="id" open="(" separator="," close=")">
-            #{id}
-        </foreach>
-        GROUP BY
-            dc.descendant_id
-    </select>
+	<!-- 批量查询部门全路径（根到叶，基于 dept_closure） -->
+	<select id="selectDeptPathByIds"
+			resultType="com.auth.service.system.admin.model.po.dept.SysDeptPathRowPO">
+		SELECT
+		    dc.descendant_id AS id,
+		    GROUP_CONCAT(
+		        a.dept_name
+		        ORDER BY
+		            dc.depth DESC SEPARATOR '/'
+		    ) AS dept_path
+		FROM
+		    dept_closure dc
+		    INNER JOIN sys_dept a ON a.id = dc.ancestor_id
+		WHERE
+		    dc.descendant_id IN
+		<foreach collection="ids" item="id" open="(" separator="," close=")">
+		    #{id}
+		</foreach>
+		GROUP BY
+		    dc.descendant_id
+	</select>
 
-    <!-- 按编码批量查询未逻辑删除部门（供导入阶段预加载映射） -->
-    <select id="selectActiveByDeptCodes"
-            resultType="com.auth.service.system.admin.model.entity.SysDeptEntity">
-        SELECT
-            d.id,
-            d.parent_id,
-            d.dept_name,
-            d.dept_code,
-            d.status,
-            d.order_num,
-            d.remark,
-            d.create_time,
-            d.update_time,
-            d.create_user,
-            d.update_user
-        FROM
-            sys_dept d
-        WHERE
-            d.is_deleted = 0
-            AND d.dept_code IN
-        <foreach collection="deptCodes" item="deptCode" open="(" separator="," close=")">
-            #{deptCode}
-        </foreach>
-    </select>
+	<!-- 按编码批量查询部门（供导入阶段预加载映射） -->
+	<select id="selectActiveByDeptCodes"
+			resultType="com.auth.service.system.admin.model.entity.SysDeptEntity">
+		SELECT
+		    d.id,
+		    d.parent_id,
+		    d.dept_name,
+		    d.dept_code,
+		    d.status,
+		    d.order_num,
+		    d.remark,
+		    d.create_time,
+		    d.update_time,
+		    d.create_user,
+		    d.update_user
+		FROM
+		    sys_dept d
+		WHERE
+		    d.dept_code IN
+		<foreach collection="deptCodes" item="deptCode" open="(" separator="," close=")">
+		    #{deptCode}
+		</foreach>
+	</select>
 
+	<!-- 部门详情：直接挂靠用户（user_dept.status IN 1,2；与删除前引用检查口径一致） -->
+	<select id="selectBoundUsersByDeptId"
+			resultType="com.auth.service.system.admin.model.po.dept.SysDeptBoundUserPO">
+		SELECT
+		    u.id,
+		    u.username,
+		    u.status,
+		    u.nickname,
+		    u.avatar,
+		    u.gender,
+		    u.employee_no,
+		    ud.is_primary,
+		    ud.status AS relation_status
+		FROM
+		    user_dept ud
+		    INNER JOIN sys_user u ON u.id = ud.user_id
+		WHERE
+		    ud.dept_id = #{deptId}
+		    AND ud.status IN (1, 2)
+		ORDER BY
+		    ud.is_primary DESC,
+		    ud.create_time DESC,
+		    u.username
+	</select>
+
+	<!-- 部门详情：本部门岗位 -->
+	<select id="selectBoundPostsByDeptId"
+			resultType="com.auth.service.system.admin.model.po.reference.PostReferencePO">
+		SELECT
+		    p.id,
+		    p.post_code,
+		    p.post_name,
+		    p.status
+		FROM
+		    sys_post p
+		WHERE
+		    p.dept_id = #{deptId}
+		ORDER BY
+		    p.order_num,
+		    p.post_code
+	</select>
+
+	<!-- 引用检查：子树内是否存在用户-部门 / grant DEPT / 岗位引用 -->
+	<select id="existsSubtreeReference" resultType="boolean">
+		WITH
+		    subtree AS (
+		        SELECT
+		            dc.descendant_id
+		        FROM
+		            dept_closure dc
+		        WHERE
+		            dc.ancestor_id = #{deptId}
+		    )
+		SELECT
+		    EXISTS (
+		        SELECT
+		            1
+		        FROM
+		            user_dept ud
+		            INNER JOIN subtree s ON ud.dept_id = s.descendant_id
+		        WHERE
+		            ud.status IN (1, 2)
+		        LIMIT
+		            1
+		    )
+		    OR EXISTS (
+		        SELECT
+		            1
+		        FROM
+		            grant_table gt
+		            INNER JOIN subtree s ON gt.subject_id = s.descendant_id
+		        WHERE
+		            gt.subject_type = 'DEPT'
+		        LIMIT
+		            1
+		    )
+		    OR EXISTS (
+		        SELECT
+		            1
+		        FROM
+		            sys_post p
+		            INNER JOIN subtree s ON p.dept_id = s.descendant_id
+		        LIMIT
+		            1
+		    )
+	</select>
+
+	<!-- 引用检查：后代关系（含 depth=0 自身） -->
+	<select id="countDescendantRelation" resultType="long">
+		SELECT
+		    COUNT(1)
+		FROM
+		    dept_closure dc
+		WHERE
+		    dc.ancestor_id = #{ancestorId}
+		    AND dc.descendant_id = #{descendantId}
+	</select>
 </mapper>

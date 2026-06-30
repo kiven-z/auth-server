@@ -1,11 +1,14 @@
 package com.auth.common.web.exception;
 
+import java.util.Comparator;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.common.web.utils.ExceptionCauseUtil;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -18,9 +21,6 @@ import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-
-import java.util.Comparator;
-import java.util.stream.Collectors;
 
 /**
  * 验证 / 请求体相关异常处理 此处理器必须具有最高优先级，以避免被通用回退吞噬

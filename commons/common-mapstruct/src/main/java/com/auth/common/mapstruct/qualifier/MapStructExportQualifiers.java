@@ -1,11 +1,11 @@
 package com.auth.common.mapstruct.qualifier;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import cn.hutool.core.util.BooleanUtil;
 import lombok.experimental.UtilityClass;
 import org.mapstruct.Named;
-
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 /**
  * Excel 导出列映射辅助方法
@@ -27,7 +27,7 @@ public class MapStructExportQualifiers {
 	 */
 	@Named("statusLabel")
 	public String statusLabel(Boolean status) {
-		return BooleanUtil.isTrue(status) ? "启用" : "停用";
+		return BooleanUtil.isTrue(status) ? "启用" : "禁用";
 	}
 
 	/**

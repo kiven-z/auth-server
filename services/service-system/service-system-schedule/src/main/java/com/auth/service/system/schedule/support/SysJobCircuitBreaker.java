@@ -1,14 +1,9 @@
 package com.auth.service.system.schedule.support;
 
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CIRCUIT_BREAKER_PAUSE_FAILED;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
-import org.quartz.SchedulerException;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
+import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.system.schedule.config.ScheduleJobProperties;
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.mapper.LogJobMapper;
@@ -17,9 +12,13 @@ import com.auth.service.system.schedule.model.entity.LogJobEntity;
 import com.auth.service.system.schedule.model.entity.SysJobEntity;
 import com.auth.service.system.schedule.support.quartz.SysJobSchedulerManager;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-
-import cn.hutool.core.util.BooleanUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.quartz.SchedulerException;
+
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CIRCUIT_BREAKER_PAUSE_FAILED;
 
 /**
  * 根据最近执行日志连续失败次数触发熔断

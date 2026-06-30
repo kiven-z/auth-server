@@ -1,14 +1,14 @@
 package com.auth.module.security.contract.api.authorization;
 
-import com.auth.module.security.contract.api.datascope.DataScopeStorageType;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import lombok.Builder;
-import lombok.Getter;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
+
+import com.auth.module.security.contract.api.datascope.DataScopeStorageType;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import lombok.Builder;
+import lombok.Getter;
 
 /**
  * 部门维数据范围

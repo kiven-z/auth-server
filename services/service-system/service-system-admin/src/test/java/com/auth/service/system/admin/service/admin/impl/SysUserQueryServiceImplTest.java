@@ -1,22 +1,26 @@
 package com.auth.service.system.admin.service.admin.impl;
 
+import java.lang.reflect.Field;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.admin.mapper.permission.SysPermissionMapper;
 import com.auth.service.system.admin.mapper.role.SysRoleMapper;
 import com.auth.service.system.admin.mapper.user.SysUserMapper;
-import com.auth.service.system.admin.mapper.user.SysUserQueryMapper;
 import com.auth.service.system.admin.model.po.reference.PermissionReferencePO;
 import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.auth.service.system.admin.model.po.user.SysUserPageRowPO;
-import com.auth.service.system.admin.model.query.user.SysUserPageQuery;
-import com.auth.service.system.admin.model.vo.user.SysUserDetailVO;
-import com.auth.service.system.admin.model.vo.user.SysUserPageVO;
-import com.auth.service.system.admin.model.vo.user.SysUserSearchItemVO;
 import com.auth.service.system.admin.model.po.user.UserDeptProfilePO;
 import com.auth.service.system.admin.model.po.user.UserPostProfilePO;
 import com.auth.service.system.admin.model.po.user.UserSearchItemPO;
+import com.auth.service.system.admin.model.query.user.SysUserPageQuery;
+import com.auth.service.system.admin.model.vo.user.SysUserDetailVO;
+import com.auth.service.system.admin.model.vo.user.SysUserPageVO;
 import com.auth.service.system.admin.model.vo.user.SysUserProfileVO;
+import com.auth.service.system.admin.model.vo.user.SysUserSearchItemVO;
 import com.auth.service.system.admin.service.admin.SysUserService;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import com.auth.service.system.authorization.dispatch.query.UserEffectiveCodesResolver;
@@ -26,7 +30,7 @@ import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.extension.repository.CrudRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,15 +39,18 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.lang.reflect.Field;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link SysUserQueryServiceImpl} 单元测试。
@@ -53,9 +60,6 @@ import static org.mockito.Mockito.*;
 @DisplayName("SysUserQueryServiceImpl 用户只读查询")
 @ExtendWith(MockitoExtension.class)
 class SysUserQueryServiceImplTest {
-
-	@Mock
-	private SysUserQueryMapper sysUserQueryMapper;
 
 	@Mock
 	private SysUserMapper sysUserMapper;
@@ -80,11 +84,11 @@ class SysUserQueryServiceImplTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		UserReferenceChecker userReferenceChecker = new UserReferenceChecker(sysUserMapper);
-		sysUserQueryService = new SysUserQueryServiceImpl(auditUserDisplayService, sysUserMapper, sysRoleMapper,
-				sysPermissionMapper, userReferenceChecker, userEffectiveCodesResolver);
-		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
+		sysUserQueryService = new SysUserQueryServiceImpl(auditUserDisplayService, sysRoleMapper, sysPermissionMapper,
+				userReferenceChecker, userEffectiveCodesResolver);
+		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
-		baseMapperField.set(sysUserQueryService, sysUserQueryMapper);
+		baseMapperField.set(sysUserQueryService, sysUserMapper);
 	}
 
 	@Test
@@ -139,12 +143,12 @@ class SysUserQueryServiceImplTest {
 		UserDeptProfilePO deptRow = new UserDeptProfilePO();
 		deptRow.setId(10L);
 		deptRow.setDeptName("研发部");
-		when(sysUserQueryMapper.selectDeptProfileByUserId(1L)).thenReturn(List.of(deptRow));
+		when(sysUserMapper.selectDeptProfileByUserId(1L)).thenReturn(List.of(deptRow));
 
 		UserPostProfilePO postRow = new UserPostProfilePO();
 		postRow.setId(20L);
 		postRow.setPostName("工程师");
-		when(sysUserQueryMapper.selectPostProfileByUserId(1L)).thenReturn(List.of(postRow));
+		when(sysUserMapper.selectPostProfileByUserId(1L)).thenReturn(List.of(postRow));
 
 		SysUserProfileVO profile = sysUserQueryService.getProfile(1L);
 
@@ -153,8 +157,8 @@ class SysUserQueryServiceImplTest {
 		assertThat(profile.getDeptList().get(0).getDeptName()).isEqualTo("研发部");
 		assertThat(profile.getPostList()).hasSize(1);
 		assertThat(profile.getPostList().get(0).getPostName()).isEqualTo("工程师");
-		verify(sysUserQueryMapper).selectDeptProfileByUserId(1L);
-		verify(sysUserQueryMapper).selectPostProfileByUserId(1L);
+		verify(sysUserMapper).selectDeptProfileByUserId(1L);
+		verify(sysUserMapper).selectPostProfileByUserId(1L);
 	}
 
 	@Test
@@ -179,16 +183,16 @@ class SysUserQueryServiceImplTest {
 		UserDeptProfilePO deptRow = new UserDeptProfilePO();
 		deptRow.setId(10L);
 		deptRow.setDeptName("研发部");
-		when(sysUserQueryMapper.selectDeptProfileByUserId(1L)).thenReturn(List.of(deptRow));
+		when(sysUserMapper.selectDeptProfileByUserId(1L)).thenReturn(List.of(deptRow));
 
 		UserPostProfilePO postRow = new UserPostProfilePO();
 		postRow.setId(20L);
 		postRow.setPostName("工程师");
-		when(sysUserQueryMapper.selectPostProfileByUserId(1L)).thenReturn(List.of(postRow));
+		when(sysUserMapper.selectPostProfileByUserId(1L)).thenReturn(List.of(postRow));
 
 		UserEffectiveCodesSnapshot codes = UserEffectiveCodesSnapshot.builder()
 			.roleCodes(List.of("ADMIN"))
-			.permissionCodes(List.of("sysUser:query"))
+			.permissionCodes(List.of("sys:user:query"))
 			.build();
 		when(userEffectiveCodesResolver.resolve(1L)).thenReturn(Optional.of(codes));
 
@@ -200,9 +204,9 @@ class SysUserQueryServiceImplTest {
 
 		PermissionReferencePO permissionRow = new PermissionReferencePO();
 		permissionRow.setId(200L);
-		permissionRow.setPermissionCode("sysUser:query");
+		permissionRow.setPermissionCode("sys:user:query");
 		permissionRow.setPermissionName("用户查询");
-		when(sysPermissionMapper.selectReferenceByPermissionCodes(List.of("sysUser:query")))
+		when(sysPermissionMapper.selectReferenceByPermissionCodes(List.of("sys:user:query")))
 			.thenReturn(List.of(permissionRow));
 
 		SysUserDetailVO detail = sysUserQueryService.getDetail(1L);
@@ -217,7 +221,7 @@ class SysUserQueryServiceImplTest {
 		assertThat(detail.getEffectiveRoles()).hasSize(1);
 		assertThat(detail.getEffectiveRoles().get(0).getRoleCode()).isEqualTo("ADMIN");
 		assertThat(detail.getEffectivePermissions()).hasSize(1);
-		assertThat(detail.getEffectivePermissions().get(0).getPermissionCode()).isEqualTo("sysUser:query");
+		assertThat(detail.getEffectivePermissions().get(0).getPermissionCode()).isEqualTo("sys:user:query");
 		verify(auditUserDisplayService).enrichAuditUsernames(anyList(), isNull(), isNull());
 	}
 
@@ -228,8 +232,8 @@ class SysUserQueryServiceImplTest {
 		user.setId(2L);
 		user.setUsername("bob");
 		when(sysUserMapper.selectById(2L)).thenReturn(user);
-		when(sysUserQueryMapper.selectDeptProfileByUserId(2L)).thenReturn(List.of());
-		when(sysUserQueryMapper.selectPostProfileByUserId(2L)).thenReturn(List.of());
+		when(sysUserMapper.selectDeptProfileByUserId(2L)).thenReturn(List.of());
+		when(sysUserMapper.selectPostProfileByUserId(2L)).thenReturn(List.of());
 		when(userEffectiveCodesResolver.resolve(2L)).thenReturn(Optional.empty());
 
 		SysUserDetailVO detail = sysUserQueryService.getDetail(2L);
@@ -247,49 +251,49 @@ class SysUserQueryServiceImplTest {
 	@DisplayName("关键词为 null 时不查库并返回空列表")
 	void searchReturnsEmptyWhenKeywordNull() {
 		assertThat(sysUserQueryService.searchByKeyword(null, 10)).isEmpty();
-		verifyNoInteractions(sysUserQueryMapper);
+		verifyNoInteractions(sysUserMapper);
 	}
 
 	@Test
 	@DisplayName("关键词为空白时不查库并返回空列表")
 	void searchReturnsEmptyWhenKeywordBlank() {
 		assertThat(sysUserQueryService.searchByKeyword("   ", 10)).isEmpty();
-		verifyNoInteractions(sysUserQueryMapper);
+		verifyNoInteractions(sysUserMapper);
 	}
 
 	@Test
 	@DisplayName("limit 为 null 时默认使用 20")
 	void searchUsesDefaultLimitWhenNull() {
-		when(sysUserQueryMapper.searchByKeyword(anyString(), anyInt())).thenReturn(List.of());
+		when(sysUserMapper.searchByKeyword(anyString(), anyInt())).thenReturn(List.of());
 
 		sysUserQueryService.searchByKeyword("alice", null);
 
 		ArgumentCaptor<Integer> limitCap = ArgumentCaptor.forClass(Integer.class);
-		verify(sysUserQueryMapper).searchByKeyword(eq("alice"), limitCap.capture());
+		verify(sysUserMapper).searchByKeyword(eq("alice"), limitCap.capture());
 		assertThat(limitCap.getValue()).isEqualTo(20);
 	}
 
 	@Test
 	@DisplayName("limit 超过 50 时封顶为 50")
 	void searchCapsLimitAtFifty() {
-		when(sysUserQueryMapper.searchByKeyword(anyString(), anyInt())).thenReturn(List.of());
+		when(sysUserMapper.searchByKeyword(anyString(), anyInt())).thenReturn(List.of());
 
 		sysUserQueryService.searchByKeyword("bob", 200);
 
 		ArgumentCaptor<Integer> limitCap = ArgumentCaptor.forClass(Integer.class);
-		verify(sysUserQueryMapper).searchByKeyword(eq("bob"), limitCap.capture());
+		verify(sysUserMapper).searchByKeyword(eq("bob"), limitCap.capture());
 		assertThat(limitCap.getValue()).isEqualTo(50);
 	}
 
 	@Test
 	@DisplayName("limit 小于 1 时提升为 1")
 	void searchRaisesTinyLimitToOne() {
-		when(sysUserQueryMapper.searchByKeyword(anyString(), anyInt())).thenReturn(List.of());
+		when(sysUserMapper.searchByKeyword(anyString(), anyInt())).thenReturn(List.of());
 
 		sysUserQueryService.searchByKeyword("c", 0);
 
 		ArgumentCaptor<Integer> limitCap = ArgumentCaptor.forClass(Integer.class);
-		verify(sysUserQueryMapper).searchByKeyword(eq("c"), limitCap.capture());
+		verify(sysUserMapper).searchByKeyword(eq("c"), limitCap.capture());
 		assertThat(limitCap.getValue()).isEqualTo(1);
 	}
 
@@ -299,7 +303,7 @@ class SysUserQueryServiceImplTest {
 		UserSearchItemPO row = new UserSearchItemPO();
 		row.setId(1L);
 		row.setUsername("u1");
-		when(sysUserQueryMapper.searchByKeyword("kw", 15)).thenReturn(List.of(row));
+		when(sysUserMapper.searchByKeyword("kw", 15)).thenReturn(List.of(row));
 
 		List<SysUserSearchItemVO> result = sysUserQueryService.searchByKeyword("kw", 15);
 

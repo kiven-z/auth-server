@@ -1,21 +1,22 @@
 package com.auth.service.system.admin.service.admin.impl;
 
+import java.util.List;
+
 import cn.hutool.core.collection.CollUtil;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
 import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
 import com.auth.service.system.admin.service.admin.GrantTableService;
 import com.auth.service.system.admin.service.admin.SysUserRoleService;
-import com.auth.service.system.admin.support.role.RoleReferenceChecker;
+import com.auth.service.system.admin.support.grant.RbacReferenceChecker;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.UserAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 /**
  * 用户直连角色授权实现
@@ -30,7 +31,7 @@ public class SysUserRoleServiceImpl implements SysUserRoleService {
 
 	private final UserReferenceChecker userReferenceChecker;
 
-	private final RoleReferenceChecker roleReferenceChecker;
+	private final RbacReferenceChecker rbacReferenceChecker;
 
 	private final GrantTableService grantTableService;
 
@@ -56,8 +57,7 @@ public class SysUserRoleServiceImpl implements SysUserRoleService {
 		userReferenceChecker.requireOperable(List.of(userId));
 
 		List<Long> roleIds = CollUtil.emptyIfNull(form.getRoleIds()).stream().distinct().toList();
-		roleReferenceChecker.requireExistingEnabledRoleIds(roleIds, SystemCommonResultCode.GRANT_REFERENCE_INVALID);
-
+		rbacReferenceChecker.requireExistingEnabledRoleIds(roleIds, SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 		grantTableService.replaceSubjectRoleGrants(GrantTableSubjectType.USER.name(), userId, roleIds);
 
 		// 提交用户授权失效

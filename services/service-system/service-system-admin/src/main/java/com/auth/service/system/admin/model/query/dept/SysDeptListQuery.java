@@ -1,11 +1,11 @@
 package com.auth.service.system.admin.model.query.dept;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * 部门扁平列表查询（无分页，供前端建树）

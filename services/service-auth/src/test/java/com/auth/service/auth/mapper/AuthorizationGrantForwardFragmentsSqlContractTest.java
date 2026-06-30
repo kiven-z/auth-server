@@ -1,11 +1,11 @@
 package com.auth.service.auth.mapper;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,6 +33,17 @@ class AuthorizationGrantForwardFragmentsSqlContractTest {
 			.contains("d.status = 1")
 			.contains("da.id = dc.ancestor_id")
 			.contains("da.status = 1");
+	}
+
+	@Test
+	@DisplayName("POST 正向展开：岗位须 status = 1")
+	void postForwardExpansionRequiresEnabledPostStatus() throws IOException {
+		String xml = readClasspathText();
+
+		assertThat(xml).contains("fwdUserSubjectsForFunctionalGrant")
+			.contains("sp.id = up.post_id")
+			.contains("sp.status = 1")
+			.doesNotContain("is_deleted");
 	}
 
 }

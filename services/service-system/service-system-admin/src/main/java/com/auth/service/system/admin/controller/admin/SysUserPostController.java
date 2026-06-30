@@ -1,5 +1,7 @@
 package com.auth.service.system.admin.controller.admin;
 
+import java.util.List;
+
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.annotation.OperationLog;
@@ -15,10 +17,16 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 用户岗位关联管理
@@ -34,7 +42,7 @@ public class SysUserPostController {
 	private final SysUserPostService sysUserPostService;
 
 	@Operation(summary = "分页查询用户岗位关联")
-	@PreAuthorize("@auth.decide('sysUserPost:query')")
+	@PreAuthorize("@auth.decide('sys:userpost:query')")
 	@GetMapping("/{userId}/page")
 	public Result<PageResponse<UserPostPageVO>> pagePosts(@PathVariable("userId") Long userId,
 			UserPostPageQuery query) {
@@ -45,7 +53,7 @@ public class SysUserPostController {
 	@OperationLog(targetType = "USER_POST", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.CREATE)
 	@Operation(summary = "新增用户岗位关联")
-	@PreAuthorize("@auth.decide('sysUserPost:create')")
+	@PreAuthorize("@auth.decide('sys:userpost:create')")
 	@PostMapping("/{userId}")
 	public Result<Void> create(@PathVariable("userId") Long userId, @Valid @RequestBody UserPostAssignForm form) {
 		sysUserPostService.create(userId, form);
@@ -55,7 +63,7 @@ public class SysUserPostController {
 	@OperationLog(targetType = "USER_POST", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "更新用户岗位关联")
-	@PreAuthorize("@auth.decide('sysUserPost:update')")
+	@PreAuthorize("@auth.decide('sys:userpost:update')")
 	@PutMapping("/{userId}/{id}")
 	public Result<Void> update(@PathVariable("userId") Long userId, @PathVariable("id") Long id,
 			@Valid @RequestBody UserPostRelationUpdateForm form) {
@@ -66,7 +74,7 @@ public class SysUserPostController {
 	@OperationLog(targetType = "USER_POST", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.DELETE)
 	@Operation(summary = "批量删除用户岗位关联")
-	@PreAuthorize("@auth.decide('sysUserPost:delete')")
+	@PreAuthorize("@auth.decide('sys:userpost:delete')")
 	@DeleteMapping("/{userId}")
 	public Result<Void> removeBatch(@PathVariable("userId") Long userId, @RequestBody List<Long> ids) {
 		sysUserPostService.removeBatch(userId, ids);
@@ -76,7 +84,7 @@ public class SysUserPostController {
 	@OperationLog(targetType = "USER_POST", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.DELETE)
 	@Operation(summary = "清空用户全部岗位关联")
-	@PreAuthorize("@auth.decide('sysUserPost:delete')")
+	@PreAuthorize("@auth.decide('sys:userpost:delete')")
 	@DeleteMapping("/{userId}/all")
 	public Result<Void> removeAll(@PathVariable("userId") Long userId) {
 		sysUserPostService.removeAll(userId);

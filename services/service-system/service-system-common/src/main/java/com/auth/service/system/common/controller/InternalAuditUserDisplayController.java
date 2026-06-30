@@ -1,17 +1,18 @@
 package com.auth.service.system.common.controller;
 
+import java.util.List;
+import java.util.Map;
+
 import com.auth.common.core.model.response.Result;
 import com.auth.module.security.autoconfigure.annotation.InternalApi;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * 对内接口-按用户 ID 批量解析用户名

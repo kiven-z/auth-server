@@ -1,7 +1,7 @@
 package com.auth.service.auth.job;
 
-import com.auth.service.auth.service.AuthorizationInvalidationEventService;
 import com.auth.service.auth.config.AuthorizationInvalidationProperties;
+import com.auth.service.auth.service.AuthorizationInvalidationEventService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,7 +11,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link AuthorizationInvalidationEventHistoryCleanupJob} 单元测试

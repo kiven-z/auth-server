@@ -1,5 +1,9 @@
 package com.auth.service.system.message.model.form;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.List;
+
 import com.auth.service.system.message.model.vo.MessageTemplateRequireFieldRow;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
@@ -7,10 +11,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.List;
 
 /**
  * 邮件模板离线渲染请求（不依赖数据库中的模板记录）

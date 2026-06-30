@@ -1,13 +1,13 @@
 package com.auth.module.platform.persistence.model;
 
+import java.io.Serial;
+import java.time.LocalDate;
+
 import com.auth.common.data.model.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-
-import java.io.Serial;
-import java.time.LocalDate;
 
 /**
  * 系统用户 系统用户的实体类对象

@@ -1,11 +1,11 @@
 package com.auth.module.security.autoconfigure.security;
 
-import com.auth.module.security.autoconfigure.pipeline.authenticate.SecurityAuthExecutor;
-import jakarta.servlet.http.HttpServletRequest;
-
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
+
+import com.auth.module.security.autoconfigure.pipeline.authenticate.SecurityAuthExecutor;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * 按 {@link SecurityRequirement} 分派认证动作（避免在过滤器中写分支）

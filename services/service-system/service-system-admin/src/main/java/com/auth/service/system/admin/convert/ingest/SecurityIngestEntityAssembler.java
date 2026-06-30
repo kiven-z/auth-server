@@ -1,5 +1,6 @@
 package com.auth.service.system.admin.convert.ingest;
 
+import java.util.Map;
 import java.util.Objects;
 
 import cn.hutool.core.map.MapUtil;
@@ -11,8 +12,6 @@ import com.auth.module.security.contract.event.SecurityEventType;
 import com.auth.service.system.admin.model.entity.LogAuthorizationAuditEntity;
 import com.auth.service.system.admin.model.entity.LogOperationEntity;
 import lombok.experimental.UtilityClass;
-
-import java.util.Map;
 
 /**
  * 操作日志事件到持久化实体的映射。

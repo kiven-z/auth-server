@@ -1,8 +1,10 @@
 package com.auth.service.system.admin.service.admin.impl;
 
+import java.util.List;
+
 import com.auth.service.system.admin.mapper.menu.SysMenuRoleMapper;
 import com.auth.service.system.admin.model.form.menu.SysMenuAssignRoleForm;
-import com.auth.service.system.admin.support.role.RoleReferenceChecker;
+import com.auth.service.system.admin.support.grant.RbacReferenceChecker;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import org.junit.jupiter.api.DisplayName;
@@ -12,11 +14,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 /**
  * {@link SysMenuManageServiceImpl} 单元测试。
@@ -29,7 +31,7 @@ class SysMenuManageServiceImplTest {
 	private SysMenuRoleMapper sysMenuRoleMapper;
 
 	@Mock
-	private RoleReferenceChecker roleReferenceChecker;
+	private RbacReferenceChecker rbacReferenceChecker;
 
 	@InjectMocks
 	private SysMenuManageServiceImpl sysMenuManageService;
@@ -43,7 +45,7 @@ class SysMenuManageServiceImplTest {
 
 		sysMenuManageService.replaceMenuRoles(menuId, form);
 
-		verify(roleReferenceChecker).requireExistingEnabledRoleIds(List.of(1L, 2L),
+		verify(rbacReferenceChecker).requireExistingEnabledRoleIds(List.of(1L, 2L),
 				SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 		verify(sysMenuRoleMapper).deleteByMenuId(menuId);
 		verify(sysMenuRoleMapper).batchInsertMenuRoles(menuId, List.of(1L, 2L));
@@ -58,7 +60,7 @@ class SysMenuManageServiceImplTest {
 
 		sysMenuManageService.replaceMenuRoles(menuId, form);
 
-		verify(roleReferenceChecker).requireExistingEnabledRoleIds(List.of(),
+		verify(rbacReferenceChecker).requireExistingEnabledRoleIds(List.of(),
 				SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 		verify(sysMenuRoleMapper).deleteByMenuId(menuId);
 		verify(sysMenuRoleMapper, never()).batchInsertMenuRoles(any(), any());
@@ -71,7 +73,7 @@ class SysMenuManageServiceImplTest {
 		SysMenuAssignRoleForm form = new SysMenuAssignRoleForm();
 		form.setRoleIds(List.of(99L));
 
-		doThrow(new SystemBusinessException(SystemCommonResultCode.GRANT_REFERENCE_INVALID)).when(roleReferenceChecker)
+		doThrow(new SystemBusinessException(SystemCommonResultCode.GRANT_REFERENCE_INVALID)).when(rbacReferenceChecker)
 			.requireExistingEnabledRoleIds(List.of(99L), SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 
 		assertThatThrownBy(() -> sysMenuManageService.replaceMenuRoles(menuId, form))

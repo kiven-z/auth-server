@@ -1,5 +1,11 @@
 package com.auth.service.system.admin.service.me.impl;
 
+import java.time.LocalDate;
+import java.time.Period;
+import java.util.List;
+
+import com.auth.common.core.utils.FieldChangeSupport;
+import com.auth.common.data.support.BusinessKeyAssert;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.service.system.admin.mapper.user.SysUserMapper;
@@ -7,19 +13,14 @@ import com.auth.service.system.admin.model.form.me.MeProfileUpdateForm;
 import com.auth.service.system.admin.service.me.CurrentUserProfileService;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.UserSessionRevocationTrigger;
-import com.auth.common.core.utils.FieldChangeSupport;
-import com.auth.common.data.support.BusinessKeyAssert;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.time.Period;
-import java.util.List;
 
 /**
  * 当前登录用户个人资料维护实现

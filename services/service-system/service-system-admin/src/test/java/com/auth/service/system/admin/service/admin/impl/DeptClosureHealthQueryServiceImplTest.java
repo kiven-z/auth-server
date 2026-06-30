@@ -1,6 +1,8 @@
 package com.auth.service.system.admin.service.admin.impl;
 
-import com.auth.service.system.admin.mapper.dept.DeptClosureQueryMapper;
+import java.util.List;
+
+import com.auth.service.system.admin.mapper.dept.DeptClosureMapper;
 import com.auth.service.system.admin.model.po.dept.DeptClosureDepthChainRowPO;
 import com.auth.service.system.admin.model.po.dept.DeptClosureHealthStatsPO;
 import com.auth.service.system.admin.model.po.dept.DeptClosureParentLinkRowPO;
@@ -11,8 +13,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -26,7 +26,7 @@ import static org.mockito.Mockito.when;
 class DeptClosureHealthQueryServiceImplTest {
 
 	@Mock
-	private DeptClosureQueryMapper deptClosureQueryMapper;
+	private DeptClosureMapper deptClosureMapper;
 
 	@InjectMocks
 	private DeptClosureHealthQueryServiceImpl deptClosureHealthQueryService;
@@ -39,9 +39,9 @@ class DeptClosureHealthQueryServiceImplTest {
 		stats.setHasAncestors(2L);
 		stats.setZeroClosure(0L);
 		stats.setTotal(3L);
-		when(deptClosureQueryMapper.countParentLinkAnomalies()).thenReturn(0L);
-		when(deptClosureQueryMapper.countDepthChainAnomalies()).thenReturn(0L);
-		when(deptClosureQueryMapper.selectHealthStats()).thenReturn(stats);
+		when(deptClosureMapper.countParentLinkAnomalies()).thenReturn(0L);
+		when(deptClosureMapper.countDepthChainAnomalies()).thenReturn(0L);
+		when(deptClosureMapper.selectHealthStats()).thenReturn(stats);
 
 		DeptClosureHealthVO result = deptClosureHealthQueryService.inspect();
 
@@ -61,10 +61,10 @@ class DeptClosureHealthQueryServiceImplTest {
 		row.setId(10L);
 		row.setDeptName("研发一部");
 		row.setParentId(1L);
-		when(deptClosureQueryMapper.countParentLinkAnomalies()).thenReturn(1L);
-		when(deptClosureQueryMapper.selectParentLinkAnomalies(anyInt())).thenReturn(List.of(row));
-		when(deptClosureQueryMapper.countDepthChainAnomalies()).thenReturn(0L);
-		when(deptClosureQueryMapper.selectHealthStats()).thenReturn(new DeptClosureHealthStatsPO());
+		when(deptClosureMapper.countParentLinkAnomalies()).thenReturn(1L);
+		when(deptClosureMapper.selectParentLinkAnomalies(anyInt())).thenReturn(List.of(row));
+		when(deptClosureMapper.countDepthChainAnomalies()).thenReturn(0L);
+		when(deptClosureMapper.selectHealthStats()).thenReturn(new DeptClosureHealthStatsPO());
 
 		DeptClosureHealthVO result = deptClosureHealthQueryService.inspect();
 
@@ -76,9 +76,9 @@ class DeptClosureHealthQueryServiceImplTest {
 	@Test
 	@DisplayName("inspect：异常数超过样本上限时标记截断")
 	void inspect_whenCountExceedsSample_truncatedTrue() {
-		when(deptClosureQueryMapper.countParentLinkAnomalies()).thenReturn(250L);
-		when(deptClosureQueryMapper.countDepthChainAnomalies()).thenReturn(0L);
-		when(deptClosureQueryMapper.selectHealthStats()).thenReturn(new DeptClosureHealthStatsPO());
+		when(deptClosureMapper.countParentLinkAnomalies()).thenReturn(250L);
+		when(deptClosureMapper.countDepthChainAnomalies()).thenReturn(0L);
+		when(deptClosureMapper.selectHealthStats()).thenReturn(new DeptClosureHealthStatsPO());
 
 		DeptClosureHealthVO result = deptClosureHealthQueryService.inspect();
 
@@ -96,10 +96,10 @@ class DeptClosureHealthQueryServiceImplTest {
 		row.setChildClosureCnt(1L);
 		row.setParentClosureCnt(3L);
 		row.setExpectedChildCnt(4L);
-		when(deptClosureQueryMapper.countParentLinkAnomalies()).thenReturn(0L);
-		when(deptClosureQueryMapper.countDepthChainAnomalies()).thenReturn(1L);
-		when(deptClosureQueryMapper.selectDepthChainAnomalies(anyInt())).thenReturn(List.of(row));
-		when(deptClosureQueryMapper.selectHealthStats()).thenReturn(new DeptClosureHealthStatsPO());
+		when(deptClosureMapper.countParentLinkAnomalies()).thenReturn(0L);
+		when(deptClosureMapper.countDepthChainAnomalies()).thenReturn(1L);
+		when(deptClosureMapper.selectDepthChainAnomalies(anyInt())).thenReturn(List.of(row));
+		when(deptClosureMapper.selectHealthStats()).thenReturn(new DeptClosureHealthStatsPO());
 
 		DeptClosureHealthVO result = deptClosureHealthQueryService.inspect();
 

@@ -1,5 +1,10 @@
 package com.auth.service.system.message.model.channel.email;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
+
 import com.auth.module.message.api.model.email.AttachmentDTO;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -7,11 +12,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.List;
-import java.util.Map;
 
 /**
  * 基于模板的邮件发送请求（跨服务契约）

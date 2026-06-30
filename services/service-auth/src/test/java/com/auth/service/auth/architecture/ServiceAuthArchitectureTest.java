@@ -6,6 +6,7 @@ import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
 import org.junit.jupiter.api.DisplayName;
+
 import org.springframework.web.client.RestTemplate;
 
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods;
@@ -26,9 +27,21 @@ class ServiceAuthArchitectureTest {
 
 	private static final String AUTH_ROOT = "..service.auth..";
 
-	private static final String AUTH_CONTROLLER = "..controller..";
+	@ArchTest
+	static final ArchRule no_printStackTrace = noMethods().that()
+		.areDeclaredInClassesThat()
+		.resideInAPackage(AUTH_ROOT)
+		.should()
+		.haveName("printStackTrace");
 
-	private static final String SYSTEM_IMPLEMENTATION = "com.auth.service.system..";
+	@ArchTest
+	static final ArchRule must_not_declare_rest_template = noClasses().that()
+		.resideInAPackage(AUTH_ROOT)
+		.should()
+		.dependOnClassesThat()
+		.areAssignableTo(RestTemplate.class);
+
+	private static final String AUTH_CONTROLLER = "..controller..";
 
 	@ArchTest
 	static final ArchRule controllers_must_not_depend_on_mappers = noClasses().that()
@@ -52,25 +65,13 @@ class ServiceAuthArchitectureTest {
 		.should()
 		.haveRawReturnType(Result.class);
 
+	private static final String SYSTEM_IMPLEMENTATION = "com.auth.service.system..";
+
 	@ArchTest
 	static final ArchRule must_not_depend_on_system_implementation = noClasses().that()
 		.resideInAPackage(AUTH_ROOT)
 		.should()
 		.dependOnClassesThat()
 		.resideInAnyPackage(SYSTEM_IMPLEMENTATION);
-
-	@ArchTest
-	static final ArchRule no_printStackTrace = noMethods().that()
-		.areDeclaredInClassesThat()
-		.resideInAPackage(AUTH_ROOT)
-		.should()
-		.haveName("printStackTrace");
-
-	@ArchTest
-	static final ArchRule must_not_declare_rest_template = noClasses().that()
-		.resideInAPackage(AUTH_ROOT)
-		.should()
-		.dependOnClassesThat()
-		.areAssignableTo(RestTemplate.class);
 
 }

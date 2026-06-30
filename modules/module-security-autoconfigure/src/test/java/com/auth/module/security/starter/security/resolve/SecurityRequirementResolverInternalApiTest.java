@@ -1,5 +1,7 @@
 package com.auth.module.security.starter.security.resolve;
 
+import java.util.List;
+
 import com.auth.module.security.autoconfigure.pipeline.resolver.HandlerMethodResolver;
 import com.auth.module.security.autoconfigure.pipeline.resolver.SecurityRequirementResolver;
 import com.auth.module.security.autoconfigure.pipeline.resolver.SecurityRequirementRule;
@@ -11,12 +13,11 @@ import com.auth.module.security.starter.fixture.InternalApiFixtureController;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
-
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

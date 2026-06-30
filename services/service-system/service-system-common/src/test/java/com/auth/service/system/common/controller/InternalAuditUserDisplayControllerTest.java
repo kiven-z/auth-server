@@ -1,5 +1,8 @@
 package com.auth.service.system.common.controller;
 
+import java.util.List;
+import java.util.Map;
+
 import com.auth.common.core.model.response.Result;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,9 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;

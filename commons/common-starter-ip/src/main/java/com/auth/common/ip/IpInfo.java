@@ -1,11 +1,11 @@
 package com.auth.common.ip;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * Client IP information.

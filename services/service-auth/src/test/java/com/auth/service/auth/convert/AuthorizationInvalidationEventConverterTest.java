@@ -1,13 +1,15 @@
 package com.auth.service.auth.convert;
 
+import java.time.LocalDateTime;
+
 import com.auth.service.auth.model.po.invalidation.AuthorizationInvalidationEventPageRowPO;
 import com.auth.service.auth.support.invalidation.InvalidationProcessingMarker;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDateTime;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * {@link AuthorizationInvalidationEventConverter} 单元测试

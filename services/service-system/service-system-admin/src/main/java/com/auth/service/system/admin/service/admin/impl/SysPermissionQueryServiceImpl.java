@@ -1,8 +1,11 @@
 package com.auth.service.system.admin.service.admin.impl;
 
+import java.util.Collections;
+import java.util.List;
+
 import com.auth.common.data.model.PageResponse;
-import com.auth.service.system.admin.convert.admin.SysPermissionConverter;
 import com.auth.service.system.admin.convert.admin.ReferenceConverter;
+import com.auth.service.system.admin.convert.admin.SysPermissionConverter;
 import com.auth.service.system.admin.mapper.permission.SysPermissionMapper;
 import com.auth.service.system.admin.mapper.role.SysRolePermissionMapper;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
@@ -19,11 +22,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Collections;
-import java.util.List;
 
 /**
  * 系统权限只读查询实现。
@@ -64,7 +65,6 @@ public class SysPermissionQueryServiceImpl extends ServiceImpl<SysPermissionMapp
 		}
 
 		SysPermissionDetailVO detail = SysPermissionConverter.INSTANCE.toDetailVo(entity);
-
 		List<RoleReferencePO> boundRoles = sysRolePermissionMapper.selectBoundRolesByPermissionId(id);
 		detail.setBoundRoles(ReferenceConverter.INSTANCE.toRoleReferenceList(boundRoles));
 

@@ -1,14 +1,14 @@
 package com.auth.service.system.schedule.model.po;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
 import com.auth.common.core.annotation.JsonStringFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.LocalDateTime;
 
 /**
  * 任务日志分页行

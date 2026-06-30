@@ -1,11 +1,11 @@
 package com.auth.service.auth.support.session;
 
+import java.util.Map;
+
 import com.auth.module.security.contract.api.UserSessionIndex;
 import com.auth.service.auth.TestConstants;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

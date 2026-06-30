@@ -1,13 +1,13 @@
 package com.auth.service.system.schedule.model.vo;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.List;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.List;
 
 /**
  * 前端「执行配置」下拉：白名单任务类信息

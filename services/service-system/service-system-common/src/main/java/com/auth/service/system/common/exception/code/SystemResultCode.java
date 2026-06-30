@@ -1,9 +1,10 @@
 package com.auth.service.system.common.exception.code;
 
-import com.auth.common.web.context.SpringContextHolder;
-import org.springframework.context.i18n.LocaleContextHolder;
-
 import java.util.Locale;
+
+import com.auth.common.web.context.SpringContextHolder;
+
+import org.springframework.context.i18n.LocaleContextHolder;
 
 /**
  * 系统服务结果码契约（模块 {@code 10}）
@@ -67,9 +68,8 @@ public interface SystemResultCode {
 	 * 渲染当前区域消息（无占位参数）
 	 * @return 翻译文案
 	 */
-	@SuppressWarnings("java:S3878")
 	default String getMessage() {
-		return getMessage(new Object[0]);
+		return getMessage(LocaleContextHolder.getLocale());
 	}
 
 }

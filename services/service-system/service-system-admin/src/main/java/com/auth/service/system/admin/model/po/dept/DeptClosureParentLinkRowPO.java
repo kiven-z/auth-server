@@ -1,11 +1,11 @@
 package com.auth.service.system.admin.model.po.dept;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-
-import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * 闭包父子直连异常行（Mapper 结果）

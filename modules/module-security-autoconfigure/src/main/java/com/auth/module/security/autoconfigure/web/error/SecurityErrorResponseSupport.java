@@ -1,5 +1,7 @@
 package com.auth.module.security.autoconfigure.web.error;
 
+import java.util.Map;
+
 import com.auth.common.core.model.response.Result;
 import com.auth.common.web.utils.ResponseUtil;
 import com.auth.module.security.autoconfigure.security.SecurityRequestAttributes;
@@ -7,8 +9,6 @@ import com.auth.module.security.contract.exception.SecurityResultCodeEnum;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.experimental.UtilityClass;
-
-import java.util.Map;
 
 /**
  * 安全错误响应支持

@@ -1,11 +1,11 @@
 package com.auth.service.system.authorization.mapper;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 import com.auth.service.system.authorization.model.entity.SysAuthorizationInvalidationOutboxEntity;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 /**
  * 授权失效 Outbox Mapper

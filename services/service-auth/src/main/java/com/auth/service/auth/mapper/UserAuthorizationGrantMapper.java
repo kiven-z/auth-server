@@ -1,9 +1,9 @@
 package com.auth.service.auth.mapper;
 
+import java.util.List;
+
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-
-import java.util.List;
 
 /**
  * 用户角色权限 Mapper（认证专用） 查询用户角色 查询用户权限 查询用户数据权限范围 查询用户策略

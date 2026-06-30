@@ -1,12 +1,12 @@
 package com.auth.service.auth.model.po.invalidation;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Getter;
-import lombok.Setter;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * 授权失效幂等事件分页行投影

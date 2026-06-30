@@ -1,16 +1,15 @@
 package com.auth.service.system.message.channel.email.transport;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Objects;
 
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * 内存中的MultipartFile，用于邮件附件组装

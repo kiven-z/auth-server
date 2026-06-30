@@ -1,11 +1,11 @@
 package com.auth.service.auth.model.value.login.command;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 import com.auth.service.auth.model.enums.AuthLoginLogType;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * 登录命令基类：持有认证所需的凭证数据，无 HTTP 展示注解

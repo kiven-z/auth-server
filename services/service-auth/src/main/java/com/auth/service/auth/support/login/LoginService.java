@@ -1,5 +1,11 @@
 package com.auth.service.auth.support.login;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.auth.exception.AuthBusinessException;
 import com.auth.service.auth.exception.AuthResultCode;
@@ -11,13 +17,8 @@ import com.auth.service.auth.support.login.strategy.LoginStrategy;
 import com.auth.service.auth.support.session.UserSessionRedisStore;
 import com.auth.service.auth.support.token.TokenService;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import org.springframework.stereotype.Service;
 
 /**
  * 登录应用服务：策略路由、凭证校验，会话签发委托 {@link LoginSessionOrchestrator}。

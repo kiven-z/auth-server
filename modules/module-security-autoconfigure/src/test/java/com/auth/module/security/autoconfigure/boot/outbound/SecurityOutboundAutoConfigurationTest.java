@@ -8,6 +8,7 @@ import com.auth.module.security.autoconfigure.outbound.OutboundInternalJwtIssuer
 import com.auth.module.security.core.autoconfigure.ModuleSecurityCore;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.web.client.RestTemplate;

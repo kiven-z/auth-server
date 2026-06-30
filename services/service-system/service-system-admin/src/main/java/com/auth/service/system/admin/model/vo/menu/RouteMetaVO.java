@@ -1,13 +1,13 @@
 package com.auth.service.system.admin.model.vo.menu;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.List;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.List;
 
 /**
  * 动态路由 meta，供前端菜单展示；roles 来自 sys_menu_role 聚合

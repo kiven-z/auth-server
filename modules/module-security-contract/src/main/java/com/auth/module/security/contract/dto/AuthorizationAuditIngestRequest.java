@@ -1,5 +1,10 @@
 package com.auth.module.security.contract.dto;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.Instant;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Objects;
 
 import com.auth.module.security.contract.event.SecurityAuthorizationAuditPayloadEvent;
@@ -8,12 +13,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.Instant;
-import java.util.Collections;
-import java.util.Map;
 
 /**
  * 授权审计负载的传输 DTO（HTTP / Feign / 未来 MQ 消息体），与

@@ -1,5 +1,7 @@
 package com.auth.service.system.authorization.service.impl;
 
+import java.util.List;
+
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidationEventDetailInnerDTO;
 import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidationEventPageInnerDTO;
@@ -17,15 +19,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
-
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.SERVICE_UNAVAILABLE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 

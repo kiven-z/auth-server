@@ -1,6 +1,9 @@
 package com.auth.gateway.exception;
 
+import java.util.Objects;
+
 import com.auth.common.core.model.response.Result;
+
 import org.springframework.boot.autoconfigure.web.WebProperties;
 import org.springframework.boot.autoconfigure.web.reactive.error.AbstractErrorWebExceptionHandler;
 import org.springframework.boot.web.reactive.error.ErrorAttributes;
@@ -14,8 +17,6 @@ import org.springframework.web.reactive.function.server.RequestPredicates;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerResponse;
-
-import java.util.Objects;
 
 /**
  * 响应式全局错误处理器，用于 Spring Cloud Gateway（GlobalFilter 等链路上的错误）

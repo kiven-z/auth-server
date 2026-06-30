@@ -6,6 +6,7 @@ import com.auth.service.system.authorization.model.form.AuthorizationInvalidatio
 import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationOutboxRetryResultVO;
 import com.auth.service.system.authorization.service.AuthorizationInvalidationOutboxOpsService;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 
 /**

@@ -1,16 +1,20 @@
 package com.auth.service.system.admin.mapper.post;
 
+import java.util.List;
+
 import com.auth.service.system.admin.model.entity.SysPostEntity;
+import com.auth.service.system.admin.model.po.post.PostDeptCodePairPO;
+import com.auth.service.system.admin.model.po.post.SysPostBoundUserPO;
 import com.auth.service.system.admin.model.po.post.SysPostPageRowPO;
 import com.auth.service.system.admin.model.po.post.SysPostSearchItemPO;
+import com.auth.service.system.admin.model.po.reference.DeptReferencePO;
 import com.auth.service.system.admin.model.query.post.SysPostQuery;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-
-import java.util.List;
+import org.apache.ibatis.annotations.Select;
 
 /**
  * 系统岗位 Mapper
@@ -31,11 +35,34 @@ public interface SysPostMapper extends BaseMapper<SysPostEntity> {
 			@Param("query") SysPostQuery query, @Param("orderBySql") String orderBySql);
 
 	/**
-	 * 统计可用于挂载岗位的部门
-	 * @param deptId 部门主键
-	 * @return 命中条数
+	 * 是否存在有效的用户-岗位关联
+	 * @param postId 岗位 ID
+	 * @return 引用行数
 	 */
-	int countAssignableDept(@Param("deptId") Long deptId);
+	@Select("SELECT COUNT(1) FROM user_post up WHERE up.post_id = #{postId} AND up.status IN (1, 2)")
+	long countUserPostByPostId(@Param("postId") Long postId);
+
+	/**
+	 * 是否存在 grant_table 的 POST 主体引用
+	 * @param postId 岗位 ID
+	 * @return 引用行数
+	 */
+	@Select("SELECT COUNT(1) FROM grant_table gt WHERE gt.subject_type = 'POST' AND gt.subject_id = #{postId}")
+	long countGrantPostSubjectByPostId(@Param("postId") Long postId);
+
+	/**
+	 * 查询可用于挂载岗位的部门主键
+	 * @param deptIds 部门主键列表
+	 * @return 可挂载的部门 ID 列表
+	 */
+	List<Long> selectAssignableDeptIds(@Param("deptIds") List<Long> deptIds);
+
+	/**
+	 * 按 (部门 ID, 岗位编码) 批量查询已存在的岗位键
+	 * @param pairs 部门与岗位编码对列表（调用方应已去重）
+	 * @return 库中已存在的键对
+	 */
+	List<PostDeptCodePairPO> selectReferenceByDeptPostPairs(@Param("pairs") List<PostDeptCodePairPO> pairs);
 
 	/**
 	 * 岗位关键词搜索（编码/名称前缀匹配，限制条数；无关键字时返回默认列表）
@@ -46,5 +73,19 @@ public interface SysPostMapper extends BaseMapper<SysPostEntity> {
 	 */
 	List<SysPostSearchItemPO> search(@Param("keyword") String keyword, @Param("status") Boolean status,
 			@Param("limit") int limit);
+
+	/**
+	 * 查询岗位所属部门快照
+	 * @param postId 岗位 ID
+	 * @return 部门快照，岗位或部门不存在时为 null
+	 */
+	DeptReferencePO selectBoundDeptByPostId(@Param("postId") Long postId);
+
+	/**
+	 * 查询岗位下有效用户-岗位关联
+	 * @param postId 岗位 ID
+	 * @return 关联用户列表
+	 */
+	List<SysPostBoundUserPO> selectBoundUsersByPostId(@Param("postId") Long postId);
 
 }

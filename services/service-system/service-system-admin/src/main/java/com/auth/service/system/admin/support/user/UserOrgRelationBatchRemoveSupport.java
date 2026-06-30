@@ -3,12 +3,11 @@ package com.auth.service.system.admin.support.user;
 import java.util.List;
 import java.util.function.Consumer;
 
-import org.springframework.stereotype.Component;
-
-import com.auth.service.system.authorization.dispatch.trigger.UserAuthorizationInvalidationTrigger;
-
 import cn.hutool.core.collection.CollUtil;
+import com.auth.service.system.authorization.dispatch.trigger.UserAuthorizationInvalidationTrigger;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Component;
 
 /**
  * 用户组织关联（部门/岗位）批量删除编排

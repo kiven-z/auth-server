@@ -1,10 +1,10 @@
 package com.auth.service.auth.model.value.login;
 
+import java.time.LocalDateTime;
+
 import lombok.Builder;
 import lombok.Value;
 import lombok.experimental.Accessors;
-
-import java.time.LocalDateTime;
 
 /**
  * 访问令牌与刷新令牌值对象

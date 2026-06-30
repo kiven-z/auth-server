@@ -1,5 +1,8 @@
 package com.auth.service.auth.convert;
 
+import java.time.LocalDateTime;
+import java.util.Objects;
+
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateResponse;
 import com.auth.service.auth.model.po.invalidation.AuthorizationInvalidationEventPO;
@@ -7,9 +10,6 @@ import com.auth.service.auth.support.invalidation.InvalidationProcessingMarker;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import lombok.experimental.UtilityClass;
 import org.mapstruct.Named;
-
-import java.time.LocalDateTime;
-import java.util.Objects;
 
 /**
  * 授权失效幂等事件写侧投影组装与 MapStruct 辅助映射。

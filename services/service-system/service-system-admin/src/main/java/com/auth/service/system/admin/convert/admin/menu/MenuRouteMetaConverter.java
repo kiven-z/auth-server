@@ -1,12 +1,12 @@
 package com.auth.service.system.admin.convert.admin.menu;
 
+import java.util.Collections;
+
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.admin.model.vo.menu.RouteMetaVO;
 import com.auth.service.system.admin.model.vo.menu.RouteTransitionVO;
 import lombok.experimental.UtilityClass;
-
-import java.util.Collections;
 
 /**
  * 路由 meta VO 构建（菜单实体 + 角色上下文）。

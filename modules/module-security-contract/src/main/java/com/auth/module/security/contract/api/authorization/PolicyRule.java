@@ -1,13 +1,13 @@
 package com.auth.module.security.contract.api.authorization;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import lombok.Builder;
-import lombok.Getter;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Map;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import lombok.Builder;
+import lombok.Getter;
 
 /**
  * 轻量策略规则（type + params）

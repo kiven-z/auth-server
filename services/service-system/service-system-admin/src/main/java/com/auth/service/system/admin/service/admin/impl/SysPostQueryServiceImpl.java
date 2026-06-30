@@ -1,11 +1,13 @@
 package com.auth.service.system.admin.service.admin.impl;
 
+import java.util.Collections;
+import java.util.List;
+
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
-import com.auth.service.system.admin.convert.admin.SysPostConverter;
 import com.auth.service.system.admin.convert.admin.ReferenceConverter;
+import com.auth.service.system.admin.convert.admin.SysPostConverter;
 import com.auth.service.system.admin.mapper.post.SysPostMapper;
-import com.auth.service.system.admin.mapper.post.SysPostQueryMapper;
 import com.auth.service.system.admin.mapper.role.GrantTableMapper;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.po.post.SysPostBoundUserPO;
@@ -25,11 +27,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Collections;
-import java.util.List;
 
 /**
  * 系统岗位只读查询实现。
@@ -44,8 +44,6 @@ public class SysPostQueryServiceImpl extends ServiceImpl<SysPostMapper, SysPostE
 	private final AuditUserDisplayService auditUserDisplayService;
 
 	private final PostReferenceChecker postReferenceChecker;
-
-	private final SysPostQueryMapper sysPostQueryMapper;
 
 	private final GrantTableMapper grantTableMapper;
 
@@ -81,10 +79,10 @@ public class SysPostQueryServiceImpl extends ServiceImpl<SysPostMapper, SysPostE
 		SysPostEntity entity = postReferenceChecker.getExistingActive(id);
 
 		SysPostDetailVO detail = SysPostConverter.INSTANCE.toDetailVo(entity);
-		DeptReferencePO deptList = sysPostQueryMapper.selectBoundDeptByPostId(id);
+		DeptReferencePO deptList = baseMapper.selectBoundDeptByPostId(id);
 		detail.setBoundDept(ReferenceConverter.INSTANCE.toDeptReference(deptList));
 
-		List<SysPostBoundUserPO> userList = sysPostQueryMapper.selectBoundUsersByPostId(id);
+		List<SysPostBoundUserPO> userList = baseMapper.selectBoundUsersByPostId(id);
 		detail.setBoundUsers(ReferenceConverter.INSTANCE.toPostBoundUserReferenceList(userList));
 
 		List<RoleReferencePO> roleList = grantTableMapper.selectBoundRolesBySubject(GrantTableSubjectType.POST.name(),

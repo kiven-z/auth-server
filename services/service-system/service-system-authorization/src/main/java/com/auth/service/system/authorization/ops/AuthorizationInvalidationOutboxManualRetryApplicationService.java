@@ -1,5 +1,8 @@
 package com.auth.service.system.authorization.ops;
 
+import java.time.LocalDateTime;
+import java.util.Set;
+
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.common.core.model.response.Result;
 import com.auth.common.web.resttemplate.FeignUtil;
@@ -13,13 +16,13 @@ import com.auth.service.system.authorization.model.enums.AuthorizationInvalidati
 import com.auth.service.system.common.exception.SystemBusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.Set;
-
-import static com.auth.service.system.authorization.exception.AuthorizationInvalidationOpsResultCode.*;
+import static com.auth.service.system.authorization.exception.AuthorizationInvalidationOpsResultCode.PROCESSING_LOCKED;
+import static com.auth.service.system.authorization.exception.AuthorizationInvalidationOpsResultCode.RETRY_CONFLICT;
+import static com.auth.service.system.authorization.exception.AuthorizationInvalidationOpsResultCode.RETRY_NOT_ALLOWED;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 
 /**

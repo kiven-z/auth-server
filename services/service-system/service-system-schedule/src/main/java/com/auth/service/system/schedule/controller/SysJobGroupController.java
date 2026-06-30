@@ -1,5 +1,7 @@
 package com.auth.service.system.schedule.controller;
 
+import java.util.List;
+
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.common.web.valid.group.CreateGroup;
@@ -20,12 +22,19 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.Assert;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
@@ -50,7 +59,7 @@ public class SysJobGroupController {
 	}
 
 	@Operation(summary = "分页查询任务分组")
-	@PreAuthorize("@auth.decide('sysJobGroup:query')")
+	@PreAuthorize("@auth.decide('schedule:jobgroup:query')")
 	@GetMapping
 	public Result<PageResponse<SysJobGroupPageResponse>> page(SysJobGroupQuery query) {
 		Page<SysJobGroupEntity> page = new Page<>(query.getPageIndex(), query.getPageSize());
@@ -60,7 +69,7 @@ public class SysJobGroupController {
 	}
 
 	@Operation(summary = "启用分组下拉/远程搜索")
-	@PreAuthorize("@auth.decide('sysJobGroup:query')")
+	@PreAuthorize("@auth.decide('schedule:jobgroup:query')")
 	@GetMapping("options")
 	public Result<List<SysJobGroupPageResponse>> options(
 			@RequestParam(value = "keyword", required = false) String keyword,
@@ -73,7 +82,7 @@ public class SysJobGroupController {
 	}
 
 	@Operation(summary = "任务分组详情")
-	@PreAuthorize("@auth.decide('sysJobGroup:query')")
+	@PreAuthorize("@auth.decide('schedule:jobgroup:query')")
 	@GetMapping("{id}")
 	public Result<SysJobGroupDetailVO> detail(@PathVariable("id") Long id) {
 		SysJobGroupDetailVO detail = sysJobGroupService.getDetail(id);
@@ -82,7 +91,7 @@ public class SysJobGroupController {
 	}
 
 	@Operation(summary = "新增任务分组")
-	@PreAuthorize("@auth.decide('sysJobGroup:create')")
+	@PreAuthorize("@auth.decide('schedule:jobgroup:create')")
 	@PostMapping
 	public Result<String> create(@Validated(CreateGroup.class) @RequestBody SysJobGroupForm form) {
 		sysJobGroupService.create(form);
@@ -92,7 +101,7 @@ public class SysJobGroupController {
 	@OperationLog(targetType = "JOB_GROUP", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_JOB_GROUP, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "修改任务分组")
-	@PreAuthorize("@auth.decide('sysJobGroup:update')")
+	@PreAuthorize("@auth.decide('schedule:jobgroup:update')")
 	@PutMapping
 	public Result<String> update(@Validated(UpdateGroup.class) @RequestBody SysJobGroupUpdateForm form) {
 		sysJobGroupService.update(form);
@@ -102,7 +111,7 @@ public class SysJobGroupController {
 	@OperationLog(targetType = "JOB_GROUP", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_JOB_GROUP, operation = OperationLogKind.DELETE)
 	@Operation(summary = "删除任务分组")
-	@PreAuthorize("@auth.decide('sysJobGroup:delete')")
+	@PreAuthorize("@auth.decide('schedule:jobgroup:delete')")
 	@DeleteMapping("{id}")
 	public Result<String> delete(@PathVariable("id") Long id) {
 		sysJobGroupService.deleteById(id);
@@ -112,7 +121,7 @@ public class SysJobGroupController {
 	@OperationLog(targetType = "JOB_GROUP", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_JOB_GROUP, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "批量启停分组下全部任务")
-	@PreAuthorize("@auth.decide('sysJob:update')")
+	@PreAuthorize("@auth.decide('schedule:job:update')")
 	@PutMapping("{groupCode}/jobs/status")
 	public Result<String> updateAllJobsStatus(@PathVariable("groupCode") String groupCode,
 			@Parameter(description = "运行状态(true=正常调度，false=暂停)") @RequestParam Boolean status) {

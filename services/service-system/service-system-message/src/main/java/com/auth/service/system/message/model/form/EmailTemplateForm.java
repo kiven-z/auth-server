@@ -1,5 +1,8 @@
 package com.auth.service.system.message.model.form;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 import com.auth.common.web.valid.group.CreateGroup;
 import com.auth.common.web.valid.group.UpdateGroup;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -8,9 +11,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.io.Serial;
-import java.io.Serializable;
 
 import static com.auth.common.web.validation.ValidationPatterns.LETTER_UNDERSCORE_HYPHEN_REQUIRE_LETTER;
 

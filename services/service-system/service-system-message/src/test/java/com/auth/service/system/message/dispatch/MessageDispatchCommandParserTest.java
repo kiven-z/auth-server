@@ -1,5 +1,7 @@
 package com.auth.service.system.message.dispatch;
 
+import java.util.List;
+
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.service.system.message.dispatch.support.MessageDispatchCommandParser;
@@ -10,8 +12,6 @@ import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CONFIG_INVALID;

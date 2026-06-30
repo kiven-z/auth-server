@@ -1,12 +1,12 @@
 package com.auth.service.system.admin.service.admin;
 
+import java.util.List;
+
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.admin.model.form.menu.SysMenuBatchStatusForm;
 import com.auth.service.system.admin.model.form.menu.SysMenuMoveForm;
 import com.auth.service.system.admin.model.form.menu.SysMenuSaveForm;
 import com.baomidou.mybatisplus.extension.service.IService;
-
-import java.util.List;
 
 /**
  * 菜单写服务。

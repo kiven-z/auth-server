@@ -1,5 +1,8 @@
 package com.auth.service.auth.support.invalidation;
 
+import java.util.Collection;
+import java.util.List;
+
 import cn.hutool.core.collection.CollUtil;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.support.authorization.AuthProfileRepository;
@@ -7,10 +10,8 @@ import com.auth.service.auth.support.redis.AuthProfileRedisCache;
 import com.auth.service.auth.util.BatchPartition;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.List;
+import org.springframework.stereotype.Service;
 
 /**
  * 授权画像物化：分批重建缓存或驱逐 Redis 画像

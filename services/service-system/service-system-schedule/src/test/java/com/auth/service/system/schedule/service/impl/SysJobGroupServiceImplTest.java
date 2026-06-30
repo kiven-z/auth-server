@@ -1,5 +1,8 @@
 package com.auth.service.system.schedule.service.impl;
 
+import java.lang.reflect.Field;
+import java.util.List;
+
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.schedule.exception.SysJobException;
@@ -12,16 +15,13 @@ import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
 import com.auth.service.system.schedule.model.vo.SysJobGroupDetailVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.extension.repository.CrudRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.lang.reflect.Field;
-import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_CODE_DUPLICATE;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
@@ -30,8 +30,8 @@ import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -69,7 +69,7 @@ class SysJobGroupServiceImplTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		sysJobGroupService = new SysJobGroupServiceImpl(sysJobMapper, auditUserDisplayService);
-		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
+		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysJobGroupService, sysJobGroupMapper);
 	}

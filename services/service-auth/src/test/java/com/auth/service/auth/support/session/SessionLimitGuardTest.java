@@ -1,5 +1,7 @@
 package com.auth.service.auth.support.session;
 
+import java.util.Optional;
+
 import com.auth.module.security.autoconfigure.config.user.SessionLimitStrategy;
 import com.auth.module.security.autoconfigure.config.user.UserConfigProperties;
 import com.auth.service.auth.TestConstants;
@@ -14,12 +16,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link SessionLimitGuard#assertSessionLimit(Long)} 单元测试

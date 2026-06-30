@@ -1,10 +1,10 @@
 package com.auth.module.security.contract.constants;
 
-import cn.hutool.core.text.CharSequenceUtil;
-import lombok.experimental.UtilityClass;
-
 import java.util.List;
 import java.util.Set;
+
+import cn.hutool.core.text.CharSequenceUtil;
+import lombok.experimental.UtilityClass;
 
 /**
  * 权限相关常量（契约层） 敏感操作 bypass 语义必须由代码定义（不得远程配置）

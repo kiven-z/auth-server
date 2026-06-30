@@ -1,5 +1,8 @@
 package com.auth.module.security.autoconfigure.boot.outbound;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.auth.common.web.resttemplate.CommonRestTemplateAutoConfiguration;
 import com.auth.common.web.resttemplate.LoadBalancedRestTemplateCustomizer;
 import com.auth.module.security.autoconfigure.outbound.InternalJwtClientHttpRequestInterceptor;
@@ -7,6 +10,7 @@ import com.auth.module.security.autoconfigure.outbound.InternalJwtFeignRequestIn
 import com.auth.module.security.autoconfigure.outbound.OutboundInternalJwtIssuer;
 import com.auth.module.security.core.autoconfigure.ModuleSecurityCore;
 import com.auth.module.security.core.token.provider.InternalTokenProvider;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -14,9 +18,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 微服务出站内部 JWT：Feign 与负载均衡 RestTemplate 共用签发逻辑

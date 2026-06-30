@@ -1,9 +1,9 @@
 package com.auth.module.security.datapermission.strategy;
 
-import com.auth.module.security.contract.api.datascope.DataScopeStorageType;
-
 import java.util.EnumSet;
 import java.util.Set;
+
+import com.auth.module.security.contract.api.datascope.DataScopeStorageType;
 
 /**
  * 仅本人范围策略

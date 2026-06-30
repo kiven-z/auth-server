@@ -1,12 +1,12 @@
 package com.auth.module.security.contract.dto.invalidation;
 
+import java.io.IOException;
+
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
-
-import java.io.IOException;
 
 /**
  * {@link AuthorizationInvalidateRequest} 反序列化：按外层 {@code kind} 解析 {@code payload}。

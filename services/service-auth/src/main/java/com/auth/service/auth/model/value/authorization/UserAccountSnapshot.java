@@ -1,7 +1,6 @@
 package com.auth.service.auth.model.value.authorization;
 
 import com.auth.module.platform.persistence.model.UserEntity;
-
 import lombok.Builder;
 import lombok.Value;
 import lombok.experimental.Accessors;

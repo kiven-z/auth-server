@@ -1,5 +1,9 @@
 package com.auth.service.auth.service.impl;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+
 import cn.hutool.core.collection.CollUtil;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.model.vo.authorization.EffectiveCodesVO;
@@ -8,11 +12,8 @@ import com.auth.service.auth.support.authorization.AuthProfileRepository;
 import com.auth.service.auth.support.redis.AuthProfileRedisCache;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import org.springframework.stereotype.Service;
 
 /**
  * 管理端授权画像运维：按用户重建并写入 Redis

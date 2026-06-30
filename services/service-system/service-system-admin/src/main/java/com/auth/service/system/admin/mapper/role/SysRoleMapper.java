@@ -1,5 +1,7 @@
 package com.auth.service.system.admin.mapper.role;
 
+import java.util.List;
+
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.auth.service.system.admin.model.query.role.SysRoleQuery;
@@ -8,8 +10,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-
-import java.util.List;
 
 /**
  * 系统角色 Mapper
@@ -43,5 +43,12 @@ public interface SysRoleMapper extends BaseMapper<SysRoleEntity> {
 	 * @return 角色关联投影列表
 	 */
 	List<RoleReferencePO> selectReferenceByRoleCodes(@Param("roleCodes") List<String> roleCodes);
+
+	/**
+	 * 批量查询存在且已启用的角色 ID
+	 * @param roleIds 角色 ID 列表（调用方应已去重）
+	 * @return 符合条件的角色 ID
+	 */
+	List<Long> selectActiveRoleIds(@Param("roleIds") List<Long> roleIds);
 
 }

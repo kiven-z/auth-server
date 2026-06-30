@@ -1,5 +1,7 @@
 package com.auth.gateway.filter;
 
+import java.util.List;
+
 import com.auth.gateway.config.GatewaySecurityProperties;
 import com.auth.gateway.exception.GatewayBusinessException;
 import com.auth.gateway.exception.GatewayResultCodeEnum;
@@ -11,17 +13,18 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
+
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.mock.web.server.MockServerWebExchange;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
-import java.util.List;
-
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class JwtValidateGlobalFilterTest {

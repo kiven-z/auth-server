@@ -1,5 +1,7 @@
 package com.auth.service.system.schedule.controller;
 
+import java.util.List;
+
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.schedule.model.entity.LogJobEntity;
@@ -10,10 +12,14 @@ import com.auth.service.system.schedule.service.LogJobService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
@@ -34,7 +40,7 @@ public class LogJobController {
 	}
 
 	@Operation(summary = "分页查询任务日志")
-	@PreAuthorize("@auth.decide('sysJobLog:query')")
+	@PreAuthorize("@auth.decide('schedule:joblog:query')")
 	@GetMapping("page")
 	public Result<PageResponse<LogJobPageResponse>> page(LogJobQuery query) {
 		Page<LogJobEntity> page = new Page<>(query.getPageIndex(), query.getPageSize());
@@ -44,7 +50,7 @@ public class LogJobController {
 	}
 
 	@Operation(summary = "日志详情")
-	@PreAuthorize("@auth.decide('sysJobLog:detail')")
+	@PreAuthorize("@auth.decide('schedule:joblog:detail')")
 	@GetMapping("{id}")
 	public Result<LogJobDetailVO> detail(@PathVariable("id") Long id) {
 		LogJobDetailVO detailVO = logJobService.getDetail(id);
@@ -53,7 +59,7 @@ public class LogJobController {
 	}
 
 	@Operation(summary = "批量删除日志")
-	@PreAuthorize("@auth.decide('sysJobLog:delete')")
+	@PreAuthorize("@auth.decide('schedule:joblog:delete')")
 	@DeleteMapping
 	public Result<String> batchDelete(@RequestBody List<Long> ids) {
 		logJobService.removeByIds(ids);

@@ -1,15 +1,21 @@
 package com.auth.service.system.admin.model.form.user;
 
-import com.auth.common.web.valid.group.CreateGroup;
-import com.auth.common.web.valid.group.UpdateGroup;
-import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.*;
-import lombok.Getter;
-import lombok.Setter;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDate;
+
+import com.auth.common.web.valid.group.CreateGroup;
+import com.auth.common.web.valid.group.UpdateGroup;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * 用户新增/更新表单
@@ -23,6 +29,10 @@ public class SysUserForm implements Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
+
+	@Schema(title = "用户主键，更新时必填")
+	@NotNull(groups = UpdateGroup.class, message = "用户ID不能为空")
+	private Long id;
 
 	@Schema(title = "用户名")
 	@Size(max = 64, message = "用户名长度不能超过64个字符", groups = { CreateGroup.class, UpdateGroup.class })

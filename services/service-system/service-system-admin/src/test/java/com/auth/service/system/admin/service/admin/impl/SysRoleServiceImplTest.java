@@ -1,5 +1,8 @@
 package com.auth.service.system.admin.service.admin.impl;
 
+import java.lang.reflect.Field;
+import java.util.List;
+
 import com.auth.service.system.admin.mapper.menu.SysMenuRoleMapper;
 import com.auth.service.system.admin.mapper.role.GrantTableMapper;
 import com.auth.service.system.admin.mapper.role.SysRoleMapper;
@@ -10,13 +13,15 @@ import com.auth.service.system.admin.model.po.permission.SysPermissionBoundMenuP
 import com.auth.service.system.admin.model.po.reference.DeptReferencePO;
 import com.auth.service.system.admin.model.po.reference.PermissionReferencePO;
 import com.auth.service.system.admin.model.po.reference.PostReferencePO;
+import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.auth.service.system.admin.model.po.reference.UserReferencePO;
 import com.auth.service.system.admin.model.vo.role.SysRoleDetailVO;
 import com.auth.service.system.authorization.dispatch.trigger.RoleAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.common.service.AuditUserDisplayService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.extension.repository.CrudRepository;
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,14 +29,20 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.lang.reflect.Field;
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link SysRoleServiceImpl} 单元测试。
@@ -85,13 +96,75 @@ class SysRoleServiceImplTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		sysRoleService = new SysRoleServiceImpl(roleInvalidationTrigger, grantTableMapper);
+		sysRoleService = spy(new SysRoleServiceImpl(roleInvalidationTrigger, grantTableMapper));
 		sysRoleQueryService = new SysRoleQueryServiceImpl(auditUserDisplayService, grantTableMapper,
 				sysRolePermissionMapper, sysMenuRoleMapper);
-		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
+		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysRoleService, sysRoleMapper);
 		baseMapperField.set(sysRoleQueryService, sysRoleMapper);
+		lenient().doReturn(true).when(sysRoleService).saveBatch(anyList(), anyInt());
+	}
+
+	@Test
+	@DisplayName("批量新增角色：空列表直接返回")
+	void createBatchFromImportSkipsWhenEmpty() {
+		sysRoleService.createBatchFromImport(List.of());
+
+		verify(sysRoleMapper, never()).selectReferenceByRoleCodes(anyList());
+		verify(sysRoleService, never()).saveBatch(anyList(), anyInt());
+	}
+
+	@Test
+	@DisplayName("批量新增角色：校验通过后批量落库")
+	void createBatchFromImportPersistsEntities() {
+		SysRoleForm form = new SysRoleForm();
+		form.setRoleCode("AUDITOR");
+		form.setRoleName("审计员");
+		form.setStatus(true);
+		when(sysRoleMapper.selectReferenceByRoleCodes(List.of("AUDITOR"))).thenReturn(List.of());
+
+		sysRoleService.createBatchFromImport(List.of(form));
+
+		verify(sysRoleMapper).selectReferenceByRoleCodes(List.of("AUDITOR"));
+		verify(sysRoleService).saveBatch(anyList(), eq(500));
+	}
+
+	@Test
+	@DisplayName("批量新增角色：请求内编码重复时抛出 DATA_CODE_DUPLICATE")
+	void createBatchFromImportThrowsWhenDuplicatedInRequest() {
+		SysRoleForm form1 = new SysRoleForm();
+		form1.setRoleCode("ADMIN");
+		form1.setRoleName("管理员");
+		SysRoleForm form2 = new SysRoleForm();
+		form2.setRoleCode("ADMIN");
+		form2.setRoleName("管理员2");
+
+		ThrowingCallable executable = () -> sysRoleService.createBatchFromImport(List.of(form1, form2));
+		assertThatThrownBy(executable).isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemCommonResultCode.DATA_CODE_DUPLICATE);
+
+		verify(sysRoleMapper, never()).selectReferenceByRoleCodes(anyList());
+		verify(sysRoleService, never()).saveBatch(anyList(), anyInt());
+	}
+
+	@Test
+	@DisplayName("批量新增角色：编码已存在时抛出 DATA_CODE_DUPLICATE")
+	void createBatchFromImportThrowsWhenRoleCodeExists() {
+		SysRoleForm form = new SysRoleForm();
+		form.setRoleCode("ADMIN");
+		form.setRoleName("管理员");
+		RoleReferencePO existing = new RoleReferencePO();
+		existing.setRoleCode("ADMIN");
+		when(sysRoleMapper.selectReferenceByRoleCodes(List.of("ADMIN"))).thenReturn(List.of(existing));
+
+		ThrowingCallable executable = () -> sysRoleService.createBatchFromImport(List.of(form));
+		assertThatThrownBy(executable).isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemCommonResultCode.DATA_CODE_DUPLICATE);
+
+		verify(sysRoleService, never()).saveBatch(anyList(), anyInt());
 	}
 
 	@Test

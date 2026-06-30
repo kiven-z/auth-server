@@ -1,13 +1,13 @@
 package com.auth.service.system.authorization.model.vo;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.math.BigDecimal;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-
-import java.io.Serial;
-import java.io.Serializable;
-import java.math.BigDecimal;
 
 /**
  * 授权失效 Outbox 状态统计 VO

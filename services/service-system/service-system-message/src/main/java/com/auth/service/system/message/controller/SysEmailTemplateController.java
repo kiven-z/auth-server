@@ -1,16 +1,23 @@
 package com.auth.service.system.message.controller;
 
+import java.util.List;
+
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.common.web.valid.group.CreateGroup;
 import com.auth.common.web.valid.group.UpdateGroup;
+import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.common.model.SystemAuditBizModule;
-import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
-import com.auth.service.system.message.model.form.*;
+import com.auth.service.system.message.model.form.EmailTemplateContentForm;
+import com.auth.service.system.message.model.form.EmailTemplateForm;
+import com.auth.service.system.message.model.form.EmailTemplateRenderForm;
+import com.auth.service.system.message.model.form.EmailTemplateRequireFieldsForm;
+import com.auth.service.system.message.model.form.EmailTemplateStatusForm;
+import com.auth.service.system.message.model.form.EmailTemplateTestSendForm;
 import com.auth.service.system.message.model.query.EmailTemplateQuery;
 import com.auth.service.system.message.model.vo.EmailTemplateDetailVO;
 import com.auth.service.system.message.model.vo.EmailTemplatePageResponse;
@@ -19,11 +26,17 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
@@ -44,7 +57,7 @@ public class SysEmailTemplateController {
 	}
 
 	@Operation(summary = "分页查询邮件模板", description = "分页查询邮件模板")
-	@PreAuthorize("@auth.decide('emailTemplate:query')")
+	@PreAuthorize("@auth.decide('message:template:query')")
 	@GetMapping()
 	public Result<PageResponse<EmailTemplatePageResponse>> getEmailTemplatePage(EmailTemplateQuery query) {
 		Page<MessageTemplateEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
@@ -54,7 +67,7 @@ public class SysEmailTemplateController {
 	}
 
 	@Operation(summary = "离线渲染模板（示例值）", description = "用于编辑态实时预览")
-	@PreAuthorize("@auth.decide('emailTemplate:detail')")
+	@PreAuthorize("@auth.decide('message:template:detail')")
 	@PostMapping("render")
 	public Result<String> render(@Validated @RequestBody EmailTemplateRenderForm form) {
 		String html = sysEmailTemplateService.render(form);
@@ -62,7 +75,7 @@ public class SysEmailTemplateController {
 	}
 
 	@Operation(summary = "测试发送邮件", description = "使用模板与 require_fields 示例值渲染后发送")
-	@PreAuthorize("@auth.decide('emailTemplate:update')")
+	@PreAuthorize("@auth.decide('message:template:update')")
 	@PostMapping("test-send")
 	public Result<String> testSend(@Validated @RequestBody EmailTemplateTestSendForm form) {
 		sysEmailTemplateService.testSend(form);
@@ -71,7 +84,7 @@ public class SysEmailTemplateController {
 	}
 
 	@Operation(summary = "邮件模板详情", description = "邮件模板详情")
-	@PreAuthorize("@auth.decide('emailTemplate:detail')")
+	@PreAuthorize("@auth.decide('message:template:detail')")
 	@GetMapping("{id}")
 	public Result<EmailTemplateDetailVO> getEmailTemplateById(@PathVariable("id") Long id) {
 		EmailTemplateDetailVO detailVO = sysEmailTemplateService.getEmailTemplateById(id);
@@ -79,7 +92,7 @@ public class SysEmailTemplateController {
 	}
 
 	@Operation(summary = "预览邮件模板（FreeMarker 按示例值渲染为 HTML）", description = "预览邮件模板（渲染后 HTML）")
-	@PreAuthorize("@auth.decide('emailTemplate:detail')")
+	@PreAuthorize("@auth.decide('message:template:detail')")
 	@GetMapping("{id}/preview")
 	public Result<String> preview(@PathVariable("id") Long id) {
 		String html = sysEmailTemplateService.previewRenderedHtml(id);
@@ -87,7 +100,7 @@ public class SysEmailTemplateController {
 	}
 
 	@Operation(summary = "添加邮件模板", description = "添加邮件模板")
-	@PreAuthorize("@auth.decide('emailTemplate:create')")
+	@PreAuthorize("@auth.decide('message:template:create')")
 	@PostMapping()
 	public Result<String> create(@Validated(CreateGroup.class) @RequestBody EmailTemplateForm dto) {
 		sysEmailTemplateService.create(dto);
@@ -98,7 +111,7 @@ public class SysEmailTemplateController {
 	@OperationLog(targetType = "EMAIL_TEMPLATE", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_EMAIL_TEMPLATE, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "更新邮件模板", description = "更新邮件模板")
-	@PreAuthorize("@auth.decide('emailTemplate:update')")
+	@PreAuthorize("@auth.decide('message:template:update')")
 	@PutMapping()
 	public Result<String> update(@Validated(UpdateGroup.class) @RequestBody EmailTemplateForm dto) {
 		sysEmailTemplateService.update(dto);
@@ -109,7 +122,7 @@ public class SysEmailTemplateController {
 	@OperationLog(targetType = "EMAIL_TEMPLATE", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_EMAIL_TEMPLATE, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "仅更新邮件模板正文", description = "仅更新 content 字段")
-	@PreAuthorize("@auth.decide('emailTemplate:update')")
+	@PreAuthorize("@auth.decide('message:template:update')")
 	@PutMapping("{id}/content")
 	public Result<String> updateContent(@PathVariable("id") Long id,
 			@Validated @RequestBody EmailTemplateContentForm dto) {
@@ -121,7 +134,7 @@ public class SysEmailTemplateController {
 	@OperationLog(targetType = "EMAIL_TEMPLATE", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_EMAIL_TEMPLATE, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "仅更新变量列表 require_fields", description = "仅更新变量列表 require_fields")
-	@PreAuthorize("@auth.decide('emailTemplate:update')")
+	@PreAuthorize("@auth.decide('message:template:update')")
 	@PutMapping("{id}/require-fields")
 	public Result<String> updateRequireFields(@PathVariable("id") Long id,
 			@Validated @RequestBody EmailTemplateRequireFieldsForm form) {
@@ -133,7 +146,7 @@ public class SysEmailTemplateController {
 	@OperationLog(targetType = "EMAIL_TEMPLATE_DELETE", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_EMAIL_TEMPLATE, operation = OperationLogKind.DELETE)
 	@Operation(summary = "删除邮件模板", description = "删除邮件模板")
-	@PreAuthorize("@auth.decide('emailTemplate:delete')")
+	@PreAuthorize("@auth.decide('message:template:delete')")
 	@DeleteMapping()
 	public Result<String> batchDelete(@RequestBody List<Long> ids) {
 		sysEmailTemplateService.removeBatchByIds(ids);
@@ -144,7 +157,7 @@ public class SysEmailTemplateController {
 	@OperationLog(targetType = "EMAIL_TEMPLATE", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_EMAIL_TEMPLATE, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "批量启用/禁用邮件模板", description = "批量启用/禁用邮件模板")
-	@PreAuthorize("@auth.decide('emailTemplate:update')")
+	@PreAuthorize("@auth.decide('message:template:update')")
 	@PutMapping("status")
 	public Result<String> batchUpdateStatus(@Validated @RequestBody EmailTemplateStatusForm form) {
 		sysEmailTemplateService.update(Wrappers.<MessageTemplateEntity>lambdaUpdate()

@@ -6,6 +6,7 @@ import com.auth.common.jwt.autoconfigure.JwtProperties;
 import com.auth.module.security.core.token.provider.AccessTokenProvider;
 import com.auth.module.security.core.token.provider.InternalTokenProvider;
 import com.auth.module.security.core.token.provider.RefreshTokenProvider;
+
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;

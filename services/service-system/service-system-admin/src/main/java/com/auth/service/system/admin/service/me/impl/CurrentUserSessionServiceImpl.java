@@ -1,5 +1,8 @@
 package com.auth.service.system.admin.service.me.impl;
 
+import java.util.List;
+import java.util.Objects;
+
 import cn.hutool.core.collection.CollUtil;
 import com.auth.common.core.model.response.Result;
 import com.auth.common.web.resttemplate.FeignUtil;
@@ -11,11 +14,9 @@ import com.auth.service.system.admin.service.me.CurrentUserSessionService;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Objects;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_FAILED;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.SERVICE_UNAVAILABLE;

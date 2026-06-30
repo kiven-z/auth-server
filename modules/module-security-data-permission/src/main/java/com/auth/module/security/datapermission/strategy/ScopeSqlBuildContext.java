@@ -1,9 +1,9 @@
 package com.auth.module.security.datapermission.strategy;
 
+import java.util.List;
+
 import lombok.Builder;
 import lombok.Getter;
-
-import java.util.List;
 
 /**
  * 数据范围 SQL 构建上下文

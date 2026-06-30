@@ -1,9 +1,13 @@
 package com.auth.service.system.admin.service.admin.impl;
 
+import java.lang.reflect.Field;
+import java.util.List;
+
 import com.auth.service.system.admin.mapper.permission.SysPermissionMapper;
 import com.auth.service.system.admin.mapper.role.SysRolePermissionMapper;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.form.permission.SysPermissionForm;
+import com.auth.service.system.admin.model.po.reference.PermissionReferencePO;
 import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionDetailVO;
 import com.auth.service.system.authorization.dispatch.trigger.PermissionAuthorizationInvalidationTrigger;
@@ -11,7 +15,8 @@ import com.auth.service.system.authorization.dispatch.trigger.RoleAuthorizationI
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.common.service.AuditUserDisplayService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.extension.repository.CrudRepository;
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,15 +26,19 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.lang.reflect.Field;
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link SysPermissionServiceImpl} 单元测试。
@@ -81,26 +90,76 @@ class SysPermissionServiceImplTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		sysPermissionService = new SysPermissionServiceImpl(permissionInvalidationTrigger, roleInvalidationTrigger,
-				sysRolePermissionMapper);
+		sysPermissionService = spy(new SysPermissionServiceImpl(permissionInvalidationTrigger, roleInvalidationTrigger,
+				sysRolePermissionMapper));
 		sysPermissionQueryService = new SysPermissionQueryServiceImpl(auditUserDisplayService, sysRolePermissionMapper);
-		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
+		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysPermissionService, sysPermissionMapper);
 		baseMapperField.set(sysPermissionQueryService, sysPermissionMapper);
+		lenient().doReturn(true).when(sysPermissionService).saveBatch(anyList(), anyInt());
 	}
 
 	@Test
-	@DisplayName("新增权限：编码已存在时抛出 PERMISSION_CODE_DUPLICATE")
-	void createThrowsWhenPermissionCodeExists() {
+	@DisplayName("批量新增权限：空列表直接返回")
+	void createBatchFromImportSkipsWhenEmpty() {
+		sysPermissionService.createBatchFromImport(List.of());
+
+		verify(sysPermissionMapper, never()).selectReferenceByPermissionCodes(anyList());
+		verify(sysPermissionService, never()).saveBatch(anyList(), anyInt());
+	}
+
+	@Test
+	@DisplayName("批量新增权限：校验通过后批量落库")
+	void createBatchFromImportPersistsEntities() {
 		SysPermissionForm form = new SysPermissionForm();
 		form.setPermissionCode("sys:user:list");
 		form.setPermissionName("列表");
-		when(sysPermissionMapper.selectCount(any())).thenReturn(1L);
+		form.setStatus(true);
+		when(sysPermissionMapper.selectReferenceByPermissionCodes(List.of("sys:user:list"))).thenReturn(List.of());
 
-		assertThatThrownBy(() -> sysPermissionService.create(form)).isInstanceOf(SystemBusinessException.class)
+		sysPermissionService.createBatchFromImport(List.of(form));
+
+		verify(sysPermissionMapper).selectReferenceByPermissionCodes(List.of("sys:user:list"));
+		verify(sysPermissionService).saveBatch(anyList(), eq(500));
+	}
+
+	@Test
+	@DisplayName("批量新增权限：请求内编码重复时抛出 DATA_CODE_DUPLICATE")
+	void createBatchFromImportThrowsWhenDuplicatedInRequest() {
+		SysPermissionForm form1 = new SysPermissionForm();
+		form1.setPermissionCode("sys:user:query");
+		form1.setPermissionName("查询");
+		SysPermissionForm form2 = new SysPermissionForm();
+		form2.setPermissionCode("sys:user:query");
+		form2.setPermissionName("查询2");
+
+		ThrowingCallable executable = () -> sysPermissionService.createBatchFromImport(List.of(form1, form2));
+		assertThatThrownBy(executable).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.DATA_CODE_DUPLICATE);
+
+		verify(sysPermissionMapper, never()).selectReferenceByPermissionCodes(anyList());
+		verify(sysPermissionService, never()).saveBatch(anyList(), anyInt());
+	}
+
+	@Test
+	@DisplayName("批量新增权限：编码已存在时抛出 DATA_CODE_DUPLICATE")
+	void createBatchFromImportThrowsWhenPermissionCodeExists() {
+		SysPermissionForm form = new SysPermissionForm();
+		form.setPermissionCode("sys:user:list");
+		form.setPermissionName("列表");
+		PermissionReferencePO existing = new PermissionReferencePO();
+		existing.setPermissionCode("sys:user:list");
+		when(sysPermissionMapper.selectReferenceByPermissionCodes(List.of("sys:user:list")))
+			.thenReturn(List.of(existing));
+
+		ThrowingCallable executable = () -> sysPermissionService.createBatchFromImport(List.of(form));
+		assertThatThrownBy(executable).isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemCommonResultCode.DATA_CODE_DUPLICATE);
+
+		verify(sysPermissionService, never()).saveBatch(anyList(), anyInt());
 	}
 
 	@Test

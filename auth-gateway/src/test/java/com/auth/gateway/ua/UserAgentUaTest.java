@@ -1,5 +1,7 @@
 package com.auth.gateway.ua;
 
+import java.lang.reflect.Method;
+
 import com.auth.common.web.model.entity.UserAgent;
 import nl.basjes.parse.useragent.UserAgentAnalyzer;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,14 +11,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
+
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.mock.web.server.MockServerWebExchange;
 import org.springframework.web.server.ServerWebExchange;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
-
-import java.lang.reflect.Method;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;

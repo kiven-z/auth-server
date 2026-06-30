@@ -1,13 +1,14 @@
 package com.auth.service.auth.support.invalidation.policy;
 
-import cn.hutool.core.collection.CollUtil;
-import com.auth.service.auth.model.po.user.UserInvalidationStatePO;
-import com.auth.service.auth.model.value.invalidation.UserInvalidationBuckets;
-import org.springframework.stereotype.Component;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+
+import cn.hutool.core.collection.CollUtil;
+import com.auth.service.auth.model.po.user.UserInvalidationStatePO;
+import com.auth.service.auth.model.value.invalidation.UserInvalidationBuckets;
+
+import org.springframework.stereotype.Component;
 
 /**
  * 用户失效分桶策略：与 {@link com.auth.module.platform.persistence.model.UserEntity#getStatus()}

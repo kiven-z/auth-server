@@ -2,12 +2,14 @@ package com.auth.service.auth.convert;
 
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateResponse;
-import com.auth.service.auth.support.invalidation.InvalidationProcessingMarker;
 import com.auth.service.auth.model.po.invalidation.AuthorizationInvalidationEventPO;
+import com.auth.service.auth.support.invalidation.InvalidationProcessingMarker;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * {@link AuthorizationInvalidationEventMappingSupport} 写侧投影组装单元测试

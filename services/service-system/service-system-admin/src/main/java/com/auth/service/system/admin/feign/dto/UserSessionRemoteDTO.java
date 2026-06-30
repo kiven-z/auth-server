@@ -1,13 +1,13 @@
 package com.auth.service.system.admin.feign.dto;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-
-import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * auth 用户活跃会话远程 DTO（对齐 {@code UserSessionVO} JSON，不依赖 service-auth）

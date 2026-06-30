@@ -1,5 +1,7 @@
 package com.auth.service.system.admin.controller.admin;
 
+import java.util.List;
+
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.platform.persistence.model.UserEntity;
@@ -19,10 +21,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 系统用户只读查询接口（档案、关键词搜索）
@@ -40,7 +45,7 @@ public class SysUserQueryController {
 	@OperationLog(targetType = "USER_LIST", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.QUERY)
 	@Operation(summary = "用户分页查询")
-	@PreAuthorize("@auth.decide('sysUser:query')")
+	@PreAuthorize("@auth.decide('sys:user:query')")
 	@GetMapping("/page")
 	public Result<PageResponse<SysUserPageVO>> page(SysUserPageQuery query) {
 		Page<UserEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
@@ -57,7 +62,7 @@ public class SysUserQueryController {
 	}
 
 	@Operation(summary = "用户详情")
-	@PreAuthorize("@auth.decide('sysUser:query')")
+	@PreAuthorize("@auth.decide('sys:user:query')")
 	@GetMapping("/{userId}/detail")
 	public Result<SysUserDetailVO> detail(@PathVariable("userId") Long userId) {
 		SysUserDetailVO detail = sysUserQueryService.getDetail(userId);

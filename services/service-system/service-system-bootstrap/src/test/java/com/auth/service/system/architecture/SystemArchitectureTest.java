@@ -11,11 +11,15 @@ import com.tngtech.archunit.lang.ArchCondition;
 import com.tngtech.archunit.lang.ArchRule;
 import com.tngtech.archunit.lang.ConditionEvents;
 import com.tngtech.archunit.lang.SimpleConditionEvent;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.RestTemplate;
 
-import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.*;
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods;
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noMethods;
 
 /**
  * service-system 模块化单体架构约束（ArchUnit）。
@@ -175,15 +179,6 @@ class SystemArchitectureTest {
 		}
 	};
 
-	private static final String AUTHORIZATION_FEIGN = AUTHORIZATION_ROOT + ".feign..";
-
-	@ArchTest
-	static final ArchRule admin_must_not_depend_on_authorization_feign = noClasses().that()
-		.resideInAPackage(ADMIN)
-		.should()
-		.dependOnClassesThat()
-		.resideInAPackage(AUTHORIZATION_FEIGN);
-
 	/**
 	 * admin 访问 authorization 仅允许依赖对外门面：{@code dispatch.trigger}（写）与
 	 * {@code dispatch.query}（读）。
@@ -193,5 +188,14 @@ class SystemArchitectureTest {
 		.resideInAPackage(ADMIN)
 		.should()
 		.dependOnClassesThat(AUTHORIZATION_INTERNALS_FOR_ADMIN);
+
+	private static final String AUTHORIZATION_FEIGN = AUTHORIZATION_ROOT + ".feign..";
+
+	@ArchTest
+	static final ArchRule admin_must_not_depend_on_authorization_feign = noClasses().that()
+		.resideInAPackage(ADMIN)
+		.should()
+		.dependOnClassesThat()
+		.resideInAPackage(AUTHORIZATION_FEIGN);
 
 }

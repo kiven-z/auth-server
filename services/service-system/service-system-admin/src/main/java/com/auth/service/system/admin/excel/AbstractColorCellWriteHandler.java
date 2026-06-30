@@ -41,7 +41,6 @@ public abstract class AbstractColorCellWriteHandler implements CellWriteHandler 
 
 		// 获取单元格字符串的值
 		String cellValue = getCellStringValue(cellData);
-
 		WriteCellStyle writeCellStyle = cellData.getOrCreateStyle();
 		WriteFont writeFont = createWriteFont(cellValue.trim());
 		writeCellStyle.setWriteFont(writeFont);

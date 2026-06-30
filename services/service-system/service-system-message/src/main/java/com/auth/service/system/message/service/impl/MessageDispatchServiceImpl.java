@@ -1,16 +1,17 @@
 package com.auth.service.system.message.service.impl;
 
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.channel.MessageSender;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.message.service.MessageDispatchService;
 import com.auth.service.system.message.support.validation.TemplateMessageCommandValidation;
-import org.springframework.stereotype.Service;
 
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
+import org.springframework.stereotype.Service;
 
 import static com.auth.service.system.message.exception.MessageResultCode.MESSAGE_CHANNEL_UNSUPPORTED;
 

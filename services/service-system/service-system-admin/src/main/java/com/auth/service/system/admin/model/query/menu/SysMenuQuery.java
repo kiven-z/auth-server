@@ -1,13 +1,13 @@
 package com.auth.service.system.admin.model.query.menu;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 import com.auth.common.core.model.query.PageQueryRequest;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * 菜单扁平列表查询（无分页，供树形构建）

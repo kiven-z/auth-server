@@ -1,12 +1,12 @@
 package com.auth.service.system.schedule.task;
 
+import java.util.List;
+
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import com.auth.service.system.schedule.task.executor.BeanInvokeTaskExecutor;
 import com.auth.service.system.schedule.task.executor.CustomClassTaskExecutor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

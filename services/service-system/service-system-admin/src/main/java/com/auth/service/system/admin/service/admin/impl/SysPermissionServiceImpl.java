@@ -1,5 +1,7 @@
 package com.auth.service.system.admin.service.admin.impl;
 
+import java.util.List;
+
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.core.utils.FieldChangeSupport;
@@ -9,6 +11,7 @@ import com.auth.service.system.admin.mapper.permission.SysPermissionMapper;
 import com.auth.service.system.admin.mapper.role.SysRolePermissionMapper;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.form.permission.SysPermissionForm;
+import com.auth.service.system.admin.model.po.reference.PermissionReferencePO;
 import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.auth.service.system.admin.service.admin.SysPermissionService;
 import com.auth.service.system.authorization.dispatch.trigger.PermissionAuthorizationInvalidationTrigger;
@@ -19,13 +22,12 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 /**
- * 系统权限写服务实现。
+ * 系统权限写服务实现
  *
  * @author Bunny
  */
@@ -35,6 +37,11 @@ import java.util.List;
 @Transactional(rollbackFor = Exception.class)
 public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, SysPermissionEntity>
 		implements SysPermissionService {
+
+	/**
+	 * Excel 导入与批量新增时的持久化批次大小
+	 */
+	private static final int IMPORT_SAVE_BATCH_SIZE = 500;
 
 	private final PermissionAuthorizationInvalidationTrigger permissionInvalidationTrigger;
 
@@ -46,16 +53,22 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void create(SysPermissionForm form) {
-		String permissionCode = form.getPermissionCode();
-		long exists = count(Wrappers.lambdaQuery(SysPermissionEntity.class)
-			.eq(SysPermissionEntity::getPermissionCode, permissionCode));
-		if (exists > 0) {
-			throw new SystemBusinessException(SystemCommonResultCode.DATA_CODE_DUPLICATE, permissionCode);
+	public void createBatchFromImport(List<SysPermissionForm> forms) {
+		if (CollUtil.isEmpty(forms)) {
+			return;
 		}
 
-		SysPermissionEntity entity = SysPermissionConverter.INSTANCE.toEntity(form);
-		save(entity);
+		List<String> permissionCodes = forms.stream().map(SysPermissionForm::getPermissionCode).toList();
+		List<String> distinctCodes = BusinessKeyAssert.requireDistinct(permissionCodes,
+				code -> new SystemBusinessException(SystemCommonResultCode.DATA_CODE_DUPLICATE, code));
+		List<PermissionReferencePO> existing = baseMapper.selectReferenceByPermissionCodes(distinctCodes);
+		if (CollUtil.isNotEmpty(existing)) {
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_CODE_DUPLICATE,
+					existing.get(0).getPermissionCode());
+		}
+
+		List<SysPermissionEntity> entities = SysPermissionConverter.INSTANCE.toEntityList(forms);
+		super.saveBatch(entities, IMPORT_SAVE_BATCH_SIZE);
 	}
 
 	/**

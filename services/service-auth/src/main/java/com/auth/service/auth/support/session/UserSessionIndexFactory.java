@@ -8,6 +8,7 @@ import com.auth.common.web.model.entity.UserAgent;
 import com.auth.module.security.contract.api.UserSessionIndex;
 import jakarta.servlet.http.HttpServletRequest;
 import org.jetbrains.annotations.NotNull;
+
 import org.springframework.stereotype.Component;
 
 /**

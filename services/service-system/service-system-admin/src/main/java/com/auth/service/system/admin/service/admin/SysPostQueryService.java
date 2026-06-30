@@ -1,5 +1,7 @@
 package com.auth.service.system.admin.service.admin;
 
+import java.util.List;
+
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.query.post.SysPostQuery;
@@ -8,8 +10,6 @@ import com.auth.service.system.admin.model.vo.post.SysPostPageVO;
 import com.auth.service.system.admin.model.vo.post.SysPostSearchItemVO;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-
-import java.util.List;
 
 /**
  * 系统岗位只读查询。

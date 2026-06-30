@@ -1,5 +1,8 @@
 package com.auth.service.system.admin.controller.admin;
 
+import java.io.IOException;
+import java.util.List;
+
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.common.web.valid.group.CreateGroup;
@@ -24,15 +27,22 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.util.List;
 
 /**
  * 系统角色管理 Controller
@@ -53,7 +63,7 @@ public class SysRoleController {
 	private final SysRoleSpreadsheetService sysRoleSpreadsheetService;
 
 	@Operation(summary = "角色 Excel 导出")
-	@PreAuthorize("@auth.decide('sysRole:export')")
+	@PreAuthorize("@auth.decide('sys:role:export')")
 	@GetMapping("/export")
 	public ResponseEntity<byte[]> export(@Validated SysRoleQuery filter, @Validated ExportScopeQueryFields scope)
 			throws IOException {
@@ -61,14 +71,14 @@ public class SysRoleController {
 	}
 
 	@Operation(summary = "角色导入模板下载")
-	@PreAuthorize("@auth.decide('sysRole:import')")
+	@PreAuthorize("@auth.decide('sys:role:import')")
 	@GetMapping("/import/template")
 	public ResponseEntity<byte[]> importTemplate() throws IOException {
 		return sysRoleSpreadsheetService.downloadImportTemplate();
 	}
 
 	@Operation(summary = "角色 Excel 导入")
-	@PreAuthorize("@auth.decide('sysRole:import')")
+	@PreAuthorize("@auth.decide('sys:role:import')")
 	@PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public Result<SpreadsheetImportResult> importExcel(@RequestPart("file") MultipartFile file) throws IOException {
 		SpreadsheetImportResult data = sysRoleSpreadsheetService.importExcel(file);
@@ -76,7 +86,7 @@ public class SysRoleController {
 	}
 
 	@Operation(summary = "角色分页查询")
-	@PreAuthorize("@auth.decide('sysRole:query')")
+	@PreAuthorize("@auth.decide('sys:role:query')")
 	@GetMapping("/page")
 	public Result<PageResponse<SysRolePageVO>> page(SysRoleQuery query) {
 		Page<SysRoleEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
@@ -85,7 +95,7 @@ public class SysRoleController {
 	}
 
 	@Operation(summary = "角色详情")
-	@PreAuthorize("@auth.decide('sysRole:detail')")
+	@PreAuthorize("@auth.decide('sys:role:detail')")
 	@GetMapping("/{id}")
 	public Result<SysRoleDetailVO> detail(@PathVariable("id") Long id) {
 		SysRoleDetailVO vo = sysRoleQueryService.getDetail(id);
@@ -93,21 +103,19 @@ public class SysRoleController {
 	}
 
 	@Operation(summary = "新增角色")
-	@PreAuthorize("@auth.decide('sysRole:create')")
+	@PreAuthorize("@auth.decide('sys:role:create')")
 	@PostMapping
 	public Result<Void> create(@Validated(CreateGroup.class) @RequestBody SysRoleForm form) {
-		sysRoleService.create(form);
+		sysRoleService.createBatchFromImport(List.of(form));
 		return Result.success();
 	}
 
 	@OperationLog(targetType = "ROLE", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_ROLE, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "更新角色")
-	@PreAuthorize("@auth.decide('sysRole:update')")
-	@PutMapping("/{id}")
-	public Result<Void> update(@PathVariable("id") Long id,
-			@Validated(UpdateGroup.class) @RequestBody SysRoleForm form) {
-		form.setId(id);
+	@PreAuthorize("@auth.decide('sys:role:update')")
+	@PutMapping
+	public Result<Void> update(@Validated(UpdateGroup.class) @RequestBody SysRoleForm form) {
 		sysRoleService.update(form);
 		return Result.success();
 	}
@@ -115,7 +123,7 @@ public class SysRoleController {
 	@OperationLog(targetType = "ROLE", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_ROLE, operation = OperationLogKind.DELETE)
 	@Operation(summary = "删除角色")
-	@PreAuthorize("@auth.decide('sysRole:delete')")
+	@PreAuthorize("@auth.decide('sys:role:delete')")
 	@DeleteMapping("/{id}")
 	public Result<Void> delete(@PathVariable("id") Long id) {
 		sysRoleService.deleteById(id);
@@ -123,7 +131,7 @@ public class SysRoleController {
 	}
 
 	@Operation(summary = "角色下拉选项")
-	@PreAuthorize("@auth.decide('sysRole:query')")
+	@PreAuthorize("@auth.decide('sys:role:query')")
 	@GetMapping("/options")
 	public Result<List<SysRoleOptionVO>> options(@RequestParam(value = "roleName", required = false) String roleName,
 			@RequestParam(value = "roleCode", required = false) String roleCode) {

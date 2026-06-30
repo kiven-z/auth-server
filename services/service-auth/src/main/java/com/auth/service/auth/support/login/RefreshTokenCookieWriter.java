@@ -1,5 +1,8 @@
 package com.auth.service.auth.support.login;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.ArrayUtil;
 import com.auth.common.jwt.autoconfigure.JwtProperties;
@@ -7,12 +10,10 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
-
-import java.util.Arrays;
-import java.util.Optional;
 
 /**
  * 刷新令牌 Cookie 读写及「记住我」策略。

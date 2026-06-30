@@ -1,5 +1,7 @@
 package com.auth.service.system.admin.service.admin;
 
+import java.util.List;
+
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.query.dept.SysDeptListQuery;
@@ -8,8 +10,6 @@ import com.auth.service.system.admin.model.vo.dept.SysDeptDetailVO;
 import com.auth.service.system.admin.model.vo.dept.SysDeptListVO;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-
-import java.util.List;
 
 /**
  * 部门只读查询。

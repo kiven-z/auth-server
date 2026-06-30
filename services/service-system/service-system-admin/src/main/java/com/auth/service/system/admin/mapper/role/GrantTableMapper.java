@@ -1,17 +1,16 @@
 package com.auth.service.system.admin.mapper.role;
 
+import java.util.List;
+
 import com.auth.service.system.admin.model.entity.GrantTableEntity;
 import com.auth.service.system.admin.model.po.reference.DeptReferencePO;
 import com.auth.service.system.admin.model.po.reference.PostReferencePO;
 import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.auth.service.system.admin.model.po.reference.UserReferencePO;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
-
-import java.util.List;
 
 /**
  * grant_table 读写
@@ -30,12 +29,12 @@ public interface GrantTableMapper extends BaseMapper<GrantTableEntity> {
 	long countByRoleId(@Param("roleId") Long roleId);
 
 	/**
-	 * 按授权主体删除全部 grant 行
+	 * 按授权主体类型与主体 ID 列表批量删除 grant 行
 	 * @param subjectType 主体类型
-	 * @param subjectId 主体 ID
+	 * @param subjectIds 主体 ID 列表
+	 * @return 删除行数
 	 */
-	@Delete("DELETE FROM grant_table WHERE subject_type = #{subjectType} AND subject_id = #{subjectId}")
-	void deleteBySubject(@Param("subjectType") String subjectType, @Param("subjectId") Long subjectId);
+	int deleteBySubjectIds(@Param("subjectType") String subjectType, @Param("subjectIds") List<Long> subjectIds);
 
 	/**
 	 * 按授权主体查询已绑定角色

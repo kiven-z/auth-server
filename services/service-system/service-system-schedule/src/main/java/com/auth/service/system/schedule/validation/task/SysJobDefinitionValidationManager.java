@@ -1,13 +1,14 @@
 package com.auth.service.system.schedule.validation.task;
 
-import cn.hutool.core.text.CharSequenceUtil;
-import com.auth.service.system.schedule.model.entity.SysJobEntity;
-import com.auth.service.system.schedule.model.enums.SysJobTaskType;
-import org.springframework.stereotype.Component;
-
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+
+import cn.hutool.core.text.CharSequenceUtil;
+import com.auth.service.system.schedule.model.entity.SysJobEntity;
+import com.auth.service.system.schedule.model.enums.SysJobTaskType;
+
+import org.springframework.stereotype.Component;
 
 /**
  * 任务定义校验管理器

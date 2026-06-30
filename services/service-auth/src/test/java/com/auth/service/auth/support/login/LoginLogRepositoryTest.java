@@ -1,11 +1,13 @@
 package com.auth.service.auth.support.login;
 
+import java.lang.reflect.Field;
+
 import com.auth.module.platform.persistence.model.LoginLogEntity;
 import com.auth.service.auth.mapper.LoginLogMapper;
 import com.auth.service.auth.model.enums.AuthLoginLogResult;
 import com.auth.service.auth.model.enums.AuthLoginLogType;
 import com.auth.service.auth.model.value.login.LoginAuditSnapshot;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.extension.repository.CrudRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,9 +16,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.lang.reflect.Field;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -37,7 +39,7 @@ class LoginLogRepositoryTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		loginLogRepository = new LoginLogRepository(null);
-		Field baseMapperField = ServiceImpl.class.getDeclaredField("baseMapper");
+		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(loginLogRepository, loginLogMapper);
 	}

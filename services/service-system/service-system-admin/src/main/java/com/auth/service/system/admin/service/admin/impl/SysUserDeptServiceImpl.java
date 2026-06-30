@@ -1,5 +1,8 @@
 package com.auth.service.system.admin.service.admin.impl;
 
+import java.util.List;
+import java.util.Objects;
+
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.convert.admin.user.UserDeptConverter;
@@ -23,11 +26,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Objects;
 
 /**
  * 用户部门关联服务实现
@@ -69,13 +70,13 @@ public class SysUserDeptServiceImpl extends ServiceImpl<UserDeptMapper, UserDept
 	 */
 	@Override
 	public void create(Long userId, UserDeptAssignForm form) {
-		// 校验用户是否存在
+		Long deptId = form.getDeptId();
 		userReferenceChecker.getExistingActive(userId);
 		userReferenceChecker.requireOperable(List.of(userId));
-		deptReferenceChecker.getExistingActive(form.getDeptId());
+		deptReferenceChecker.getExistingActive(deptId);
 
-		if (baseMapper.countByUserIdAndDeptId(userId, form.getDeptId()) > 0) {
-			throw new SystemBusinessException(SystemAdminResultCode.USER_DEPT_DUPLICATE, form.getDeptId());
+		if (baseMapper.countByUserIdAndDeptId(userId, deptId) > 0) {
+			throw new SystemBusinessException(SystemAdminResultCode.USER_DEPT_DUPLICATE, deptId);
 		}
 
 		applyPrimaryDeptRules(userId, form);

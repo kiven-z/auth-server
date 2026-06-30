@@ -1,11 +1,11 @@
 package com.auth.module.message.api.command;
 
+import java.io.Serializable;
+
 import com.auth.module.message.api.model.dingtalk.DingTalkChannelOptions;
 import com.auth.module.message.api.model.email.EmailChannelOptions;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-
-import java.io.Serializable;
 
 /**
  * 渠道扩展参数

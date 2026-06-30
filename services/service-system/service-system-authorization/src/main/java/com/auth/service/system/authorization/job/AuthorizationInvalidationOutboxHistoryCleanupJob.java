@@ -1,14 +1,15 @@
 package com.auth.service.system.authorization.job;
 
+import java.time.LocalDateTime;
+
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.system.authorization.config.AuthorizationInvalidationProperties;
 import com.auth.service.system.authorization.mapper.SysAuthorizationInvalidationOutboxMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
-import java.time.LocalDateTime;
 
 /**
  * 授权失效 Outbox SUCCESS 历史清理：删除已完成且超过保留期的投递记录

@@ -20,9 +20,17 @@ import com.auth.service.system.schedule.service.SysJobScheduleSyncService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
@@ -47,7 +55,7 @@ public class SysJobController {
 	}
 
 	@Operation(summary = "分页查询定时任务")
-	@PreAuthorize("@auth.decide('sysJob:query')")
+	@PreAuthorize("@auth.decide('schedule:job:query')")
 	@GetMapping
 	public Result<PageResponse<SysJobPageResponse>> page(SysJobQuery query) {
 		Page<SysJobEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
@@ -57,7 +65,7 @@ public class SysJobController {
 	}
 
 	@Operation(summary = "任务详情")
-	@PreAuthorize("@auth.decide('sysJob:detail')")
+	@PreAuthorize("@auth.decide('schedule:job:detail')")
 	@GetMapping("{id}")
 	public Result<SysJobDetailVO> detail(@PathVariable("id") Long id) {
 		SysJobDetailVO detail = sysJobDefinitionService.getDetail(id);
@@ -66,7 +74,7 @@ public class SysJobController {
 	}
 
 	@Operation(summary = "新增定时任务")
-	@PreAuthorize("@auth.decide('sysJob:create')")
+	@PreAuthorize("@auth.decide('schedule:job:create')")
 	@PostMapping
 	public Result<String> create(@Validated(CreateGroup.class) @RequestBody SysJobCreateForm form) {
 		sysJobDefinitionService.create(form);
@@ -77,7 +85,7 @@ public class SysJobController {
 	@OperationLog(targetType = "JOB", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_JOB, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "修改定时任务")
-	@PreAuthorize("@auth.decide('sysJob:update')")
+	@PreAuthorize("@auth.decide('schedule:job:update')")
 	@PutMapping
 	public Result<String> update(@Validated(UpdateGroup.class) @RequestBody SysJobUpdateForm form) {
 		sysJobDefinitionService.update(form);
@@ -88,7 +96,7 @@ public class SysJobController {
 	@OperationLog(targetType = "JOB", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_JOB, operation = OperationLogKind.DELETE)
 	@Operation(summary = "删除定时任务")
-	@PreAuthorize("@auth.decide('sysJob:delete')")
+	@PreAuthorize("@auth.decide('schedule:job:delete')")
 	@DeleteMapping("{id}")
 	public Result<String> delete(@PathVariable("id") Long id) {
 		sysJobDefinitionService.deleteById(id);
@@ -99,7 +107,7 @@ public class SysJobController {
 	@OperationLog(targetType = "JOB", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_JOB, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "批量启停任务")
-	@PreAuthorize("@auth.decide('sysJob:update')")
+	@PreAuthorize("@auth.decide('schedule:job:update')")
 	@PutMapping("status")
 	public Result<String> batchStatus(@Validated @RequestBody SysJobStatusForm form) {
 		sysJobScheduleSyncService.batchUpdateStatus(form);
@@ -107,7 +115,7 @@ public class SysJobController {
 	}
 
 	@Operation(summary = "立即执行一次")
-	@PreAuthorize("@auth.decide('sysJob:update')")
+	@PreAuthorize("@auth.decide('schedule:job:update')")
 	@PostMapping("{id}/run")
 	public Result<String> runOnce(@PathVariable("id") Long id) {
 		sysJobDefinitionService.runOnce(id);

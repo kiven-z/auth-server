@@ -1,14 +1,14 @@
 package com.auth.service.system.admin.model.form.menu;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 import com.auth.common.web.valid.group.UpdateGroup;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.io.Serial;
-import java.io.Serializable;
 
 /**
  * 菜单新增/更新表单（字段与前端 {@code MenuSaveRequest} camelCase 对齐）

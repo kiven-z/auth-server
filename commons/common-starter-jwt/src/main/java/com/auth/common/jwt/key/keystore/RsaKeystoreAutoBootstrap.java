@@ -1,13 +1,13 @@
 package com.auth.common.jwt.key.keystore;
 
+import java.io.File;
+import java.nio.file.Path;
+
 import cn.hutool.core.io.FileUtil;
 import com.auth.common.jwt.autoconfigure.JwtProperties;
 import com.auth.common.jwt.exception.JwtKeyLoadException;
 import com.auth.common.jwt.util.KeyStoreGeneratorUtil;
 import lombok.experimental.UtilityClass;
-
-import java.io.File;
-import java.nio.file.Path;
 
 /**
  * 开发联调：在目标文件不存在时生成 PKCS12 开发联调时，如果 autoGenerate=true 且 keystore 文件不存在，则自动生成新的 PKCS12

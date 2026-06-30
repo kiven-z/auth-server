@@ -1,5 +1,13 @@
 package com.auth.module.security.autoconfigure.audit.operationlog;
 
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -11,14 +19,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
 import lombok.experimental.UtilityClass;
+
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.security.Principal;
-import java.util.*;
-import java.util.function.Function;
 
 /**
  * 操作日志请求参数摘要构建（长度与表字段对齐）。

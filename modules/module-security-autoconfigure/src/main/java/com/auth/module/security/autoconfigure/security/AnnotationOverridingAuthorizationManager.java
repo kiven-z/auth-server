@@ -1,11 +1,13 @@
 package com.auth.module.security.autoconfigure.security;
 
-import static com.auth.module.security.autoconfigure.security.AnnotationOverridingAuthorizationSupport.isNonAnonymousAuthenticated;
-import static com.auth.module.security.autoconfigure.security.AnnotationOverridingAuthorizationSupport.toPathMatchers;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
+
+import cn.hutool.core.collection.CollUtil;
+import com.auth.module.security.autoconfigure.config.security.SecurityConfigProperties;
+import com.auth.module.security.autoconfigure.pipeline.filter.TokenAuthenticationFilter;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.lang.Nullable;
 import org.springframework.security.authorization.AuthorizationDecision;
@@ -15,11 +17,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
-import com.auth.module.security.autoconfigure.config.security.SecurityConfigProperties;
-import com.auth.module.security.autoconfigure.pipeline.filter.TokenAuthenticationFilter;
-
-import cn.hutool.core.collection.CollUtil;
-import jakarta.servlet.http.HttpServletRequest;
+import static com.auth.module.security.autoconfigure.security.AnnotationOverridingAuthorizationSupport.isNonAnonymousAuthenticated;
+import static com.auth.module.security.autoconfigure.security.AnnotationOverridingAuthorizationSupport.toPathMatchers;
 
 /**
  * 在 HTTP 授权阶段

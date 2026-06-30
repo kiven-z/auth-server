@@ -4,6 +4,7 @@ import com.auth.module.file.export.ExportScopeQueryFields;
 import com.auth.service.system.admin.model.query.permission.SysPermissionQuery;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.validation.DataBinder;
 
@@ -26,7 +27,7 @@ class PagedExportBindingTest {
 		MutablePropertyValues values = new MutablePropertyValues().add("fromPage", 2)
 			.add("toPage", 3)
 			.add("pageSize", 20)
-			.add("permissionCode", "sysPermission:query");
+			.add("permissionCode", "sys:permission:query");
 
 		DataBinder filterBinder = new DataBinder(filter);
 		filterBinder.bind(values);
@@ -34,7 +35,7 @@ class PagedExportBindingTest {
 		scopeBinder.bind(values);
 
 		assertThat(filter.getPageSize()).isEqualTo(20);
-		assertThat(filter.getPermissionCode()).isEqualTo("sysPermission:query");
+		assertThat(filter.getPermissionCode()).isEqualTo("sys:permission:query");
 		assertThat(scope.getFromPage()).isEqualTo(2);
 		assertThat(scope.getToPage()).isEqualTo(3);
 	}

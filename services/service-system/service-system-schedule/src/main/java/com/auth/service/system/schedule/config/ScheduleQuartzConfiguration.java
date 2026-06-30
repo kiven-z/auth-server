@@ -1,6 +1,7 @@
 package com.auth.service.system.schedule.config;
 
 import com.auth.service.system.schedule.listener.SysJobExecutionListener;
+
 import org.springframework.boot.autoconfigure.quartz.SchedulerFactoryBeanCustomizer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;

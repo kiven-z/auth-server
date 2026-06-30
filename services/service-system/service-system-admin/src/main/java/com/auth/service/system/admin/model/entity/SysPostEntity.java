@@ -1,14 +1,13 @@
 package com.auth.service.system.admin.model.entity;
 
 import com.auth.common.data.model.BaseEntity;
-import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
 /**
- * 系统岗位主表，对应 {@code sys_post}。
+ * 系统岗位主表
  *
  * @author Bunny
  */
@@ -32,9 +31,5 @@ public class SysPostEntity extends BaseEntity {
 
 	@Schema(title = "显示顺序")
 	private Integer orderNum;
-
-	@TableLogic(value = "0", delval = "1")
-	@Schema(title = "逻辑删除(0=否,1=是)")
-	private Integer isDeleted;
 
 }

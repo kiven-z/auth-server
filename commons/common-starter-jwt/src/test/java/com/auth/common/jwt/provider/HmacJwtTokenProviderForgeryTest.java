@@ -1,5 +1,9 @@
 package com.auth.common.jwt.provider;
 
+import java.util.Date;
+
+import javax.crypto.SecretKey;
+
 import com.auth.common.jwt.autoconfigure.JwtProperties;
 import com.auth.common.jwt.exception.InvalidTokenException;
 import com.auth.common.jwt.exception.JwtExpiredException;
@@ -8,10 +12,9 @@ import io.jsonwebtoken.Jwts;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import javax.crypto.SecretKey;
-import java.util.Date;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class HmacJwtTokenProviderForgeryTest {
 

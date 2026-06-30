@@ -1,10 +1,10 @@
 package com.auth.common.jwt.key.keystore;
 
-import lombok.experimental.UtilityClass;
-
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import lombok.experimental.UtilityClass;
 
 /**
  * 将配置中的路径解析（支持 {@code file:}）

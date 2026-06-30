@@ -1,13 +1,16 @@
 package com.auth.service.system.admin.support.dept;
 
+import java.util.List;
+
+import cn.hutool.core.collection.CollUtil;
 import com.auth.common.core.utils.TreeParentIdUtil;
-import com.auth.common.core.utils.TreeRelationUtil;
-import com.auth.service.system.admin.mapper.dept.DeptReferenceCheckerMapper;
+import com.auth.common.data.support.BusinessKeyAssert;
 import com.auth.service.system.admin.mapper.dept.SysDeptMapper;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Component;
 
 /**
@@ -21,10 +24,8 @@ public class DeptReferenceChecker {
 
 	private final SysDeptMapper sysDeptMapper;
 
-	private final DeptReferenceCheckerMapper deptReferenceCheckerMapper;
-
 	/**
-	 * 加载未删除部门，不存在则抛业务异常
+	 * 加载部门，不存在则抛业务异常（含禁用节点）
 	 * @param deptId 部门 ID
 	 * @return 部门实体
 	 */
@@ -50,24 +51,20 @@ public class DeptReferenceChecker {
 	}
 
 	/**
-	 * 移动目标不能是自身或自身后代
-	 * @param deptId 被移动部门
-	 * @param newParentId 新父部门
+	 * 批量写入前校验部门编码在请求内及库内均唯一
+	 * @param deptCodes 待写入部门编码
 	 */
-	public void requireMoveTargetValid(Long deptId, Long newParentId) {
-		TreeRelationUtil.requireValidMoveTarget(deptId, newParentId,
-				(ancestorId, nodeId) -> deptReferenceCheckerMapper.countDescendantRelation(ancestorId, nodeId) > 0);
-	}
+	public void requireAbsentDeptCodes(List<String> deptCodes) {
+		List<String> distinctCodes = BusinessKeyAssert.requireDistinct(deptCodes,
+				code -> new SystemBusinessException(SystemCommonResultCode.DATA_CODE_DUPLICATE, code));
+		if (CollUtil.isEmpty(distinctCodes)) {
+			return;
+		}
 
-	/**
-	 * 逻辑删除前：子树内无用户、授权、岗位引用
-	 * @param deptId 部门 ID
-	 */
-	public void requireSubtreeUnused(Long deptId) {
-		if (deptReferenceCheckerMapper.countUserDeptInSubtree(deptId) > 0
-				|| deptReferenceCheckerMapper.countGrantDeptSubjectInSubtree(deptId) > 0
-				|| deptReferenceCheckerMapper.countPostInSubtree(deptId) > 0) {
-			throw new SystemBusinessException(SystemCommonResultCode.DATA_IN_USE, deptId);
+		List<SysDeptEntity> existing = sysDeptMapper.selectActiveByDeptCodes(distinctCodes);
+		if (CollUtil.isNotEmpty(existing)) {
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_CODE_DUPLICATE,
+					existing.get(0).getDeptCode());
 		}
 	}
 

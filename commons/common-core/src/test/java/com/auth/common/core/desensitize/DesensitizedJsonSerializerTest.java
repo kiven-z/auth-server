@@ -8,6 +8,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -15,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * {@link DesensitizedJsonSerializer} 与 {@link Desensitized} 组合行为测试
  */
-@SuppressWarnings("java:S5976")
 class DesensitizedJsonSerializerTest {
 
 	private final ObjectMapper mapper = new ObjectMapper();
@@ -177,31 +178,14 @@ class DesensitizedJsonSerializerTest {
 		assertEquals(DesensitizedUtil.creditCode("91110108MA01ABCDE7"), mapper.readTree(json).get("code").asText());
 	}
 
-	@Test
-	@DisplayName("MONEY_DECIMAL：千分位金额掩码小数数字")
-	void moneyDecimalMasksFraction() throws JsonProcessingException {
+	@DisplayName("MONEY_DECIMAL：金额小数掩码")
+	@ParameterizedTest(name = "input={0} -> {1}")
+	@CsvSource({ "'1,234.56', '1,234.**'", "'1,234.567', '1,234.***'", "1234, 1234" })
+	void moneyDecimalMasksFraction(String input, String expected) throws JsonProcessingException {
 		MoneyDto dto = new MoneyDto();
-		dto.setAmount("1,234.56");
+		dto.setAmount(input);
 		String json = mapper.writeValueAsString(dto);
-		assertEquals("1,234.**", mapper.readTree(json).get("amount").asText());
-	}
-
-	@Test
-	@DisplayName("MONEY_DECIMAL：多位小数逐位掩码")
-	void moneyDecimalThreeFractionDigits() throws JsonProcessingException {
-		MoneyDto dto = new MoneyDto();
-		dto.setAmount("1,234.567");
-		String json = mapper.writeValueAsString(dto);
-		assertEquals("1,234.***", mapper.readTree(json).get("amount").asText());
-	}
-
-	@Test
-	@DisplayName("MONEY_DECIMAL：无小数点时原样")
-	void moneyDecimalNoDotUnchanged() throws JsonProcessingException {
-		MoneyDto dto = new MoneyDto();
-		dto.setAmount("1234");
-		String json = mapper.writeValueAsString(dto);
-		assertEquals("1234", mapper.readTree(json).get("amount").asText());
+		assertEquals(expected, mapper.readTree(json).get("amount").asText());
 	}
 
 	@Data

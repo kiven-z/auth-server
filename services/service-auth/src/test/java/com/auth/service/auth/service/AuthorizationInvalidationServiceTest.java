@@ -1,17 +1,20 @@
 package com.auth.service.auth.service;
 
+import java.util.List;
+import java.util.Set;
+
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateResponse;
 import com.auth.module.security.contract.dto.invalidation.RoleInvalidatePayload;
 import com.auth.service.auth.config.AuthorizationInvalidationProperties;
 import com.auth.service.auth.model.po.user.UserInvalidationStatePO;
+import com.auth.service.auth.model.value.invalidation.InvalidationIdempotencyGate;
+import com.auth.service.auth.model.value.invalidation.UserInvalidationBuckets;
 import com.auth.service.auth.service.impl.AuthorizationInvalidationServiceImpl;
 import com.auth.service.auth.support.invalidation.AuthProfileMaterializationService;
 import com.auth.service.auth.support.invalidation.UserInvalidationRepository;
 import com.auth.service.auth.support.invalidation.impact.ImpactResolverRegistry;
-import com.auth.service.auth.model.value.invalidation.InvalidationIdempotencyGate;
-import com.auth.service.auth.model.value.invalidation.UserInvalidationBuckets;
 import com.auth.service.auth.support.invalidation.policy.UserInvalidationPolicy;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,13 +24,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
-import java.util.Set;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link AuthorizationInvalidationService} 单元测试

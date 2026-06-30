@@ -10,6 +10,7 @@ import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidation
 import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidationEventStatsInnerDTO;
 import com.auth.service.system.authorization.feign.dto.EffectiveCodesInnerDTO;
 import com.auth.service.system.authorization.feign.fallback.AuthorizationInnerFeignClientFallback;
+
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.web.bind.annotation.GetMapping;
