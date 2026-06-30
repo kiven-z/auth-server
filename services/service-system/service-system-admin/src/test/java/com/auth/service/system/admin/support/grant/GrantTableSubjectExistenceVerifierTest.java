@@ -15,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
@@ -46,7 +47,8 @@ class GrantTableSubjectExistenceVerifierTest {
 		entity.setId(SUBJECT_ID);
 		when(sysPostMapper.selectById(SUBJECT_ID)).thenReturn(entity);
 
-		verifier.requireExistingActive(GrantTableSubjectType.POST, SUBJECT_ID);
+		assertThatCode(() -> verifier.requireExistingActive(GrantTableSubjectType.POST, SUBJECT_ID))
+			.doesNotThrowAnyException();
 	}
 
 	@Test
@@ -74,7 +76,8 @@ class GrantTableSubjectExistenceVerifierTest {
 		GrantTableActiveSubjectChecker duplicate = new TypedGrantTableActiveSubjectChecker(GrantTableSubjectType.POST,
 				new PostReferenceChecker(sysPostMapper)::getExistingActive);
 
-		assertThatThrownBy(() -> new GrantTableSubjectExistenceVerifier(List.of(duplicate, duplicate)))
+		List<GrantTableActiveSubjectChecker> duplicateCheckers = List.of(duplicate, duplicate);
+		assertThatThrownBy(() -> new GrantTableSubjectExistenceVerifier(duplicateCheckers))
 			.isInstanceOf(IllegalStateException.class)
 			.hasMessageContaining("Duplicate grant table subject checker");
 	}

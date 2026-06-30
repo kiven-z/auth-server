@@ -45,7 +45,7 @@ public class AuditUserDisplayServiceImpl implements AuditUserDisplayService {
 		if (CollUtil.isEmpty(distinctIds)) {
 			return Collections.emptyMap();
 		}
-		return auditUserDisplayMapper.selectBatchIds(distinctIds)
+		return auditUserDisplayMapper.selectByIds(distinctIds)
 			.stream()
 			.collect(Collectors.toMap(UserEntity::getId, UserEntity::getUsername));
 	}

@@ -69,7 +69,7 @@ class AuditUserDisplayServiceImplTest {
 		u2.setId(2L);
 		u2.setUsername("bob");
 
-		when(auditUserDisplayMapper.selectBatchIds(List.of(1L, 2L))).thenReturn(List.of(u1, u2));
+		when(auditUserDisplayMapper.selectByIds(List.of(1L, 2L))).thenReturn(List.of(u1, u2));
 
 		Map<Long, String> result = auditUserDisplayService.mapUsernamesByIds(Arrays.asList(1L, null, 1L, 2L));
 
@@ -98,7 +98,7 @@ class AuditUserDisplayServiceImplTest {
 		UserEntity u2 = new UserEntity();
 		u2.setId(2L);
 		u2.setUsername("bob");
-		when(auditUserDisplayMapper.selectBatchIds(List.of(1L, 2L))).thenReturn(List.of(u1, u2));
+		when(auditUserDisplayMapper.selectByIds(List.of(1L, 2L))).thenReturn(List.of(u1, u2));
 
 		auditUserDisplayService.enrichAuditUsernames(page, null, null);
 
@@ -120,7 +120,7 @@ class AuditUserDisplayServiceImplTest {
 		UserEntity u2 = new UserEntity();
 		u2.setId(2L);
 		u2.setUsername("bob");
-		when(auditUserDisplayMapper.selectBatchIds(List.of(1L, 2L))).thenReturn(List.of(u1, u2));
+		when(auditUserDisplayMapper.selectByIds(List.of(1L, 2L))).thenReturn(List.of(u1, u2));
 
 		auditUserDisplayService.enrichAuditUsernames(list, null, null);
 
@@ -157,7 +157,7 @@ class AuditUserDisplayServiceImplTest {
 		UserEntity u1 = userEntity(1L, "alice");
 		UserEntity u2 = userEntity(2L, "bob");
 		UserEntity u3 = userEntity(3L, "carol");
-		when(auditUserDisplayMapper.selectBatchIds(List.of(1L, 2L, 3L))).thenReturn(List.of(u1, u2, u3));
+		when(auditUserDisplayMapper.selectByIds(List.of(1L, 2L, 3L))).thenReturn(List.of(u1, u2, u3));
 
 		auditUserDisplayService.enrichAuditUsernames(List.of(row),
 				r -> Objects.requireNonNullElse(r.getOperatorId(), 0L), RowWithOperator::setOperatorUsername);
@@ -165,7 +165,7 @@ class AuditUserDisplayServiceImplTest {
 		assertThat(row.getCreateUsername()).isEqualTo("alice");
 		assertThat(row.getUpdateUsername()).isEqualTo("bob");
 		assertThat(row.getOperatorUsername()).isEqualTo("carol");
-		verify(auditUserDisplayMapper).selectBatchIds(List.of(1L, 2L, 3L));
+		verify(auditUserDisplayMapper).selectByIds(List.of(1L, 2L, 3L));
 	}
 
 	@Test
@@ -178,7 +178,7 @@ class AuditUserDisplayServiceImplTest {
 
 		UserEntity u1 = userEntity(1L, "alice");
 		UserEntity u2 = userEntity(2L, "bob");
-		when(auditUserDisplayMapper.selectBatchIds(anyList())).thenReturn(List.of(u1, u2));
+		when(auditUserDisplayMapper.selectByIds(anyList())).thenReturn(List.of(u1, u2));
 
 		auditUserDisplayService.enrichAuditUsernames(List.of(row),
 				r -> Objects.requireNonNullElse(r.getOperatorId(), 0L), RowWithOperator::setOperatorUsername);
@@ -186,7 +186,7 @@ class AuditUserDisplayServiceImplTest {
 		assertThat(row.getCreateUsername()).isEqualTo("alice");
 		assertThat(row.getUpdateUsername()).isEqualTo("bob");
 		assertThat(row.getOperatorUsername()).isEqualTo("alice");
-		verify(auditUserDisplayMapper).selectBatchIds(List.of(1L, 2L));
+		verify(auditUserDisplayMapper).selectByIds(List.of(1L, 2L));
 	}
 
 	@Getter

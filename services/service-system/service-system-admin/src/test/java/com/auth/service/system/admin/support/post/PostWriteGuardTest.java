@@ -60,7 +60,9 @@ class PostWriteGuardTest {
 	void requireBatchCreatableThrowsWhenDeptNotAssignable() {
 		when(sysPostMapper.selectAssignableDeptIds(List.of(99L))).thenReturn(List.of());
 
-		assertThatThrownBy(() -> PostWriteGuard.requireBatchCreatable(sysPostMapper, List.of(form(99L, "P1"))))
+		SysPostForm postForm = form(99L, "P1");
+		List<SysPostForm> forms = List.of(postForm);
+		assertThatThrownBy(() -> PostWriteGuard.requireBatchCreatable(sysPostMapper, forms))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.DATA_UNAVAILABLE);
@@ -75,7 +77,9 @@ class PostWriteGuardTest {
 		existing.setPostCode("DUP");
 		when(sysPostMapper.selectReferenceByDeptPostPairs(anyList())).thenReturn(List.of(existing));
 
-		assertThatThrownBy(() -> PostWriteGuard.requireBatchCreatable(sysPostMapper, List.of(form(1L, "DUP"))))
+		SysPostForm duplicateForm = form(1L, "DUP");
+		List<SysPostForm> duplicateForms = List.of(duplicateForm);
+		assertThatThrownBy(() -> PostWriteGuard.requireBatchCreatable(sysPostMapper, duplicateForms))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemAdminResultCode.POST_CODE_DUPLICATE_IN_DEPT);

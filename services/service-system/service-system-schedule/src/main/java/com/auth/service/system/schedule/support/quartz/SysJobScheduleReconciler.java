@@ -51,7 +51,7 @@ public class SysJobScheduleReconciler {
 		}
 
 		// 查询任务列表
-		List<SysJobEntity> jobs = sysJobMapper.selectBatchIds(jobIds);
+		List<SysJobEntity> jobs = sysJobMapper.selectByIds(jobIds);
 		for (SysJobEntity job : jobs) {
 			reconcileSingle(job);
 		}
