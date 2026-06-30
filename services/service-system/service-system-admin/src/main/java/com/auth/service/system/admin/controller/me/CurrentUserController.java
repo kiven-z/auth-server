@@ -45,7 +45,7 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
 @AuthenticatedApi
 @Tag(name = "当前用户", description = "登录用户自助操作")
 @RequiredArgsConstructor
-@RequestMapping("/api/system/user")
+@RequestMapping("/api/system/me")
 @RestController
 public class CurrentUserController {
 
@@ -59,21 +59,19 @@ public class CurrentUserController {
 
 	private final CurrentUserProfileService currentUserProfileService;
 
-	@AuthenticatedApi
 	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "当前用户更新个人资料")
-	@PutMapping("/me/profile")
+	@PutMapping("/profile")
 	public Result<String> updateMyProfile(@Valid @RequestBody MeProfileUpdateForm form) {
 		currentUserProfileService.updateMyProfile(form);
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
-	@AuthenticatedApi
 	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "当前用户修改密码")
-	@PutMapping("/me/password")
+	@PutMapping("/password")
 	public Result<String> changeOwnPassword(@Valid @RequestBody SysUserChangePasswordForm form,
 			HttpServletRequest request) {
 		String changeIp = ipAddressService.resolveIpInfo(request).getIpAddr();
@@ -81,31 +79,28 @@ public class CurrentUserController {
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
-	@AuthenticatedApi
 	@OperationLog(targetType = "USER_SESSION", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.QUERY)
 	@Operation(summary = "查询当前用户活跃会话")
-	@GetMapping("/me/sessions")
+	@GetMapping("/sessions")
 	public Result<List<MeUserSessionVO>> listMySessions() {
 		List<MeUserSessionVO> data = currentUserSessionService.listMySessions();
 		return Result.success(data);
 	}
 
-	@AuthenticatedApi
 	@OperationLog(targetType = "USER_SESSION", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.DELETE)
 	@Operation(summary = "踢出当前用户指定会话")
-	@PostMapping("/me/sessions/{sessionId}/kick")
+	@PostMapping("/sessions/{sessionId}/kick")
 	public Result<Void> kickMySession(@PathVariable("sessionId") String sessionId) {
 		currentUserSessionService.kickSession(sessionId);
 		return Result.success();
 	}
 
-	@AuthenticatedApi
 	@OperationLog(targetType = "LOGIN_LOG", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.QUERY)
 	@Operation(summary = "分页查询当前用户登录日志（最近180天）")
-	@GetMapping("/me/login-logs/page")
+	@GetMapping("/login-logs/page")
 	public Result<PageResponse<MeLoginLogPageVO>> loginLogPage(MeLoginLogPageQuery query) {
 		Page<LoginLogEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
 		PageResponse<MeLoginLogPageVO> response = currentUserLoginLogService.getPage(pageParams, query);
