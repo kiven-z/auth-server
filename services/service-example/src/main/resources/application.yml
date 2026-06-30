@@ -36,9 +36,6 @@ spring:
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
 
-knife4j:
-  basic:
-    enable: false
 springdoc:
   api-docs:
     enabled: false

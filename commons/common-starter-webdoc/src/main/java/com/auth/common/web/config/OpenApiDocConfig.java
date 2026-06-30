@@ -19,27 +19,27 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
 /**
- * 如果要自定义，需要自己声明一个 Knife4jConfig Bean
+ * SpringDoc OpenAPI 默认配置；如需自定义，可自行声明 {@link OpenApiDocConfig} Bean。
  *
  * @author Bunny
  */
 @Slf4j
 @ConditionalOnProperty(prefix = "auth.common.webdoc", name = "enabled", havingValue = "true", matchIfMissing = true)
-@ConditionalOnMissingBean(Knife4jConfig.class)
+@ConditionalOnMissingBean(OpenApiDocConfig.class)
 @Configuration
-public class Knife4jConfig {
+public class OpenApiDocConfig {
 
 	private final WebDocProperties webDocProperties;
 
 	private final Environment environment;
 
-	public Knife4jConfig(WebDocProperties webDocProperties, Environment environment) {
+	public OpenApiDocConfig(WebDocProperties webDocProperties, Environment environment) {
 		this.webDocProperties = webDocProperties;
 		this.environment = environment;
 	}
 
 	/**
-	 * 配置knife4j的OpenAPI 如果要自定义，需要自己声明一个 defaultOpenAPI Bean
+	 * 默认 OpenAPI 文档元信息；如需覆盖，可自行声明 {@code defaultOpenApi} Bean。
 	 * @return OpenAPI
 	 */
 	@Bean
@@ -48,13 +48,10 @@ public class Knife4jConfig {
 		String serviceName = environment.getProperty("spring.application.name", "service");
 		String url = "http://localhost:" + port;
 
-		// 作者等信息
 		Contact contact = new Contact().name(webDocProperties.getContactName())
 			.email(webDocProperties.getContactEmail())
 			.url(url);
-		// 使用协议
 		License license = new License().name(webDocProperties.getLicenseName()).url(webDocProperties.getLicenseUrl());
-		// 相关信息
 		Info info = new Info().title(webDocProperties.getTitle() + "-" + serviceName)
 			.contact(contact)
 			.license(license)
@@ -67,7 +64,7 @@ public class Knife4jConfig {
 	}
 
 	/**
-	 * 配置 knife4j 分组（默认 web/inner，可被配置覆盖）
+	 * OpenAPI 分组（默认 web/inner，可被配置覆盖）。
 	 * @return GroupedOpenApi 列表
 	 */
 	@Bean

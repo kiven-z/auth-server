@@ -9,7 +9,7 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * WebDoc/Knife4j configuration properties.
+ * WebDoc / SpringDoc configuration properties.
  *
  * @author Bunny
  */

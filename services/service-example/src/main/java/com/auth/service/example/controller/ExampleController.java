@@ -1,6 +1,5 @@
 package com.auth.service.example.controller;
 
-import com.alibaba.fastjson2.JSON;
 import com.auth.common.core.model.response.Result;
 import com.auth.module.security.autoconfigure.annotation.AuthenticatedApi;
 import com.auth.module.security.autoconfigure.annotation.PublicApi;
@@ -10,6 +9,8 @@ import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.example.audit.ExampleAuditBizModule;
 import com.auth.service.example.feign.ExampleAuthInnerFeignClient;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 
@@ -36,10 +37,13 @@ public class ExampleController {
 
 	private final SecurityProperties securityProperties;
 
+	private final ObjectMapper objectMapper;
+
 	public ExampleController(ExampleAuthInnerFeignClient exampleAuthInnerFeignClient,
-			SecurityProperties securityProperties) {
+			SecurityProperties securityProperties, ObjectMapper objectMapper) {
 		this.exampleAuthInnerFeignClient = exampleAuthInnerFeignClient;
 		this.securityProperties = securityProperties;
+		this.objectMapper = objectMapper;
 	}
 
 	@OperationLog(targetType = "Example", serviceDomain = AuditServiceDomain.EXAMPLE,
@@ -61,7 +65,12 @@ public class ExampleController {
 	@Operation(summary = "3-配置了放行路径，但是使用了认证注解")
 	@GetMapping("/conflict/permit-path-but-authenticated")
 	public Result<String> conflictPermitButAuthenticated() {
-		log.info(JSON.toJSONString(securityProperties));
+		try {
+			log.info(objectMapper.writeValueAsString(securityProperties));
+		}
+		catch (JsonProcessingException ex) {
+			log.warn("Failed to serialize security properties", ex);
+		}
 		return Result.success("ok-conflict-permit-authenticated");
 	}
 

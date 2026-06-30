@@ -49,10 +49,6 @@ spring:
               enabled: true
               # 服务名转为小写
               lower-case-service-id: true
-# 默认关闭 knife4j
-knife4j:
-  basic:
-    enable: false
 springdoc:
   api-docs:
     enabled: false

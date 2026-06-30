@@ -5,12 +5,13 @@ import java.util.Objects;
 
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.text.CharSequenceUtil;
-import com.alibaba.fastjson2.JSON;
 import com.auth.module.security.contract.event.OperationLogPayloadEvent;
 import com.auth.module.security.contract.event.SecurityAuthorizationAuditPayloadEvent;
 import com.auth.module.security.contract.event.SecurityEventType;
 import com.auth.service.system.admin.model.entity.LogAuthorizationAuditEntity;
 import com.auth.service.system.admin.model.entity.LogOperationEntity;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.experimental.UtilityClass;
 
 /**
@@ -30,6 +31,11 @@ public class SecurityIngestEntityAssembler {
 	 * 方法参数 JSON 最大长度
 	 */
 	private static final int MAX_PARAM_JSON_LENGTH = 2048;
+
+	/**
+	 * 方法参数 JSON 序列化
+	 */
+	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
 	/**
 	 * 将操作日志负载映射为待插入实体。
@@ -76,8 +82,13 @@ public class SecurityIngestEntityAssembler {
 
 		Map<String, Object> params = event.getMethodParams();
 		if (MapUtil.isNotEmpty(params)) {
-			String json = JSON.toJSONString(params);
-			entity.setMethodParams(CharSequenceUtil.subPre(json, MAX_PARAM_JSON_LENGTH));
+			try {
+				String json = OBJECT_MAPPER.writeValueAsString(params);
+				entity.setMethodParams(CharSequenceUtil.subPre(json, MAX_PARAM_JSON_LENGTH));
+			}
+			catch (JsonProcessingException ignored) {
+				// 参数无法序列化时跳过 methodParams 字段
+			}
 		}
 
 		entity.setCreateUser(Objects.requireNonNullElse(event.getUserId(), 0L));

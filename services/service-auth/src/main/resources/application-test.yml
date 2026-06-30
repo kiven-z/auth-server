@@ -34,9 +34,6 @@ spring:
           max-idle: 50
           min-idle: 10
 
-knife4j:
-  basic:
-    enable: false
 springdoc:
   api-docs:
     enabled: false

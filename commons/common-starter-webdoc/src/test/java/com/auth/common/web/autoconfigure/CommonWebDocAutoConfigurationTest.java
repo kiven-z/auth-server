@@ -2,7 +2,7 @@ package com.auth.common.web.autoconfigure;
 
 import java.util.List;
 
-import com.auth.common.web.config.Knife4jConfig;
+import com.auth.common.web.config.OpenApiDocConfig;
 import com.auth.common.web.config.properties.WebDocProperties;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.junit.jupiter.api.Test;
@@ -21,7 +21,7 @@ class CommonWebDocAutoConfigurationTest {
 	void testAutoConfiguration_WithDefaultSettings() {
 		contextRunner.run(context -> {
 			assertThat(context).hasSingleBean(WebDocProperties.class);
-			assertThat(context).hasSingleBean(Knife4jConfig.class);
+			assertThat(context).hasSingleBean(OpenApiDocConfig.class);
 			assertThat(context).hasSingleBean(OpenAPI.class);
 			assertThat(context).getBean("groupedOpenApis").isInstanceOf(List.class);
 		});
@@ -30,7 +30,7 @@ class CommonWebDocAutoConfigurationTest {
 	@Test
 	void testAutoConfiguration_WhenDisabled() {
 		contextRunner.withPropertyValues("auth.common.webdoc.enabled=false").run(context -> {
-			assertThat(context).doesNotHaveBean(Knife4jConfig.class);
+			assertThat(context).doesNotHaveBean(OpenApiDocConfig.class);
 			assertThat(context).doesNotHaveBean(OpenAPI.class);
 		});
 	}

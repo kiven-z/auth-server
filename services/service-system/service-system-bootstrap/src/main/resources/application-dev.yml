@@ -30,26 +30,6 @@ spring:
           max-idle: 50
           min-idle: 10
 
-knife4j:
-  basic:
-    enable: false
-springdoc:
-  show-actuator: false
-  api-docs:
-    enabled: false
-    path: /v3/api-docs
-  swagger-ui:
-    enabled: false
-    path: /swagger-ui.html
-    operations-sorter: method
-    tags-sorter: alpha
-    doc-expansion: none
-    display-request-duration: true
-    deep-linking: true
-    persist-authorization: true
-    display-operation-id: false
-    default-model-rendering: example
-
 logging:
   level:
     root: info

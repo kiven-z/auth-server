@@ -59,14 +59,12 @@
 		<lombok.version>1.18.42</lombok.version>
 		<hutool.version>5.8.41</hutool.version>
 		<mapstruct.version>1.6.3</mapstruct.version>
-		<fastjson2.version>2.0.59</fastjson2.version>
 		<commons-lang3.version>3.18.0</commons-lang3.version>
 
 		<!-- 文件/存储 -->
 		<minio.version>8.6.0</minio.version>
 
 		<!-- 文档 -->
-		<knife4j.version>4.5.0</knife4j.version>
 		<springdoc.version>2.8.14</springdoc.version>
 
 		<!-- jwt -->
@@ -144,11 +142,6 @@
 
 			<!-- API文档 -->
 			<dependency>
-				<groupId>com.github.xiaoymin</groupId>
-				<artifactId>knife4j-openapi3-spring-boot-starter</artifactId>
-				<version>${knife4j.version}</version>
-			</dependency>
-			<dependency>
 				<groupId>org.springdoc</groupId>
 				<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 				<version>${springdoc.version}</version>
@@ -181,11 +174,6 @@
 				<artifactId>mapstruct-processor</artifactId>
 				<version>${mapstruct.version}</version>
 				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>com.alibaba.fastjson2</groupId>
-				<artifactId>fastjson2</artifactId>
-				<version>${fastjson2.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.alibaba</groupId>

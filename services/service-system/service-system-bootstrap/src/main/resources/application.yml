@@ -79,9 +79,6 @@ mybatis-plus:
     db-config:
       id-type: assign_id
 
-knife4j:
-  basic:
-    enable: false
 springdoc:
   api-docs:
     enabled: false
