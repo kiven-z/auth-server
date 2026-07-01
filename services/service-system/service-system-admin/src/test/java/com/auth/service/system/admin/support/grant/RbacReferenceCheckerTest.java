@@ -7,6 +7,7 @@ import com.auth.service.system.admin.mapper.role.SysRoleMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -71,14 +72,12 @@ class RbacReferenceCheckerTest {
 	void requireActivePermissionIdsThrowsWhenNotAllActive() {
 		when(sysPermissionMapper.selectActivePermissionIds(List.of(99L))).thenReturn(List.of());
 
-		List<Long> permissionIds = List.of(99L);
-		assertThatThrownBy(() -> rbacReferenceChecker.requireActivePermissionIds(permissionIds))
-			.isInstanceOf(SystemBusinessException.class)
-			.satisfies(ex -> {
-				SystemBusinessException biz = (SystemBusinessException) ex;
-				assertThat(biz.getResultCode()).isEqualTo(SystemCommonResultCode.GRANT_REFERENCE_INVALID);
-				assertThat(biz.getMessageArgs()).containsExactly(99L);
-			});
+		ThrowingCallable executable = () -> rbacReferenceChecker.requireActivePermissionIds(List.of(99L));
+		assertThatThrownBy(executable).isInstanceOf(SystemBusinessException.class).satisfies(ex -> {
+			SystemBusinessException biz = (SystemBusinessException) ex;
+			assertThat(biz.getResultCode()).isEqualTo(SystemCommonResultCode.GRANT_REFERENCE_INVALID);
+			assertThat(biz.getMessageArgs()).containsExactly(99L);
+		});
 	}
 
 	@Test
@@ -86,7 +85,8 @@ class RbacReferenceCheckerTest {
 	void getExistingThrowsWhenNull() {
 		when(sysRoleMapper.selectById(null)).thenReturn(null);
 
-		assertThatThrownBy(() -> rbacReferenceChecker.getExisting(null)).isInstanceOf(SystemBusinessException.class)
+		ThrowingCallable executable = () -> rbacReferenceChecker.getExisting(null);
+		assertThatThrownBy(executable).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
 	}
@@ -96,7 +96,8 @@ class RbacReferenceCheckerTest {
 	void getExistingThrowsWhenMissing() {
 		when(sysRoleMapper.selectById(99L)).thenReturn(null);
 
-		assertThatThrownBy(() -> rbacReferenceChecker.getExisting(99L)).isInstanceOf(SystemBusinessException.class)
+		ThrowingCallable executable = () -> rbacReferenceChecker.getExisting(99L);
+		assertThatThrownBy(executable).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
 	}
@@ -162,15 +163,13 @@ class RbacReferenceCheckerTest {
 	void requireExistingEnabledRoleIdsThrowsWhenNotAllEligible() {
 		when(sysRoleMapper.selectActiveRoleIds(List.of(99L))).thenReturn(List.of());
 
-		List<Long> roleIds = List.of(99L);
-		assertThatThrownBy(() -> rbacReferenceChecker.requireExistingEnabledRoleIds(roleIds,
-				SystemCommonResultCode.GRANT_REFERENCE_INVALID))
-			.isInstanceOf(SystemBusinessException.class)
-			.satisfies(ex -> {
-				SystemBusinessException biz = (SystemBusinessException) ex;
-				assertThat(biz.getResultCode()).isEqualTo(SystemCommonResultCode.GRANT_REFERENCE_INVALID);
-				assertThat(biz.getMessageArgs()).containsExactly(99L);
-			});
+		ThrowingCallable executable = () -> rbacReferenceChecker.requireExistingEnabledRoleIds(List.of(99L),
+				SystemCommonResultCode.GRANT_REFERENCE_INVALID);
+		assertThatThrownBy(executable).isInstanceOf(SystemBusinessException.class).satisfies(ex -> {
+			SystemBusinessException biz = (SystemBusinessException) ex;
+			assertThat(biz.getResultCode()).isEqualTo(SystemCommonResultCode.GRANT_REFERENCE_INVALID);
+			assertThat(biz.getMessageArgs()).containsExactly(99L);
+		});
 	}
 
 }

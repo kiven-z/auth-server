@@ -26,8 +26,6 @@ spring:
       - nacos:${spring.application.name}-${spring.profiles.active}.yaml?group=${spring.cloud.nacos.config.group}
   profiles:
     active: dev
-    include:
-      - message
 
   cloud:
     openfeign:

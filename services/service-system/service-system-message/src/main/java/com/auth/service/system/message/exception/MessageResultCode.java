@@ -22,6 +22,11 @@ public enum MessageResultCode implements SystemResultCode {
 	MESSAGE_CHANNEL_UNSUPPORTED(400, 280, "MESSAGE_CHANNEL_UNSUPPORTED", "system.message.channel.unsupported"),
 
 	/**
+	 * 消息渠道已禁用
+	 */
+	MESSAGE_CHANNEL_DISABLED(400, 281, "MESSAGE_CHANNEL_DISABLED", "system.message.channel.disabled"),
+
+	/**
 	 * 消息模板不存在或已禁用
 	 */
 	TEMPLATE_NOT_FOUND(404, 316, "TEMPLATE_NOT_FOUND", "system.message.template.not_found"),

@@ -27,7 +27,7 @@ public class AuthorizationInvalidationProcessingClaimCleanupJob {
 	/**
 	 * 定时扫描并释放超时的 processing 占位
 	 */
-	@Scheduled(fixedDelayString = "${auth.auth.invalidation.processing-claim-cleanup-interval-ms:300000}")
+	@Scheduled(fixedDelayString = "${auth.invalidation.processing-claim-cleanup-interval-ms:300000}")
 	public void cleanupStaleProcessingClaims() {
 		if (!properties.getProcessingClaimCleanupEnabled()) {
 			return;

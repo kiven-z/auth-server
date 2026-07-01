@@ -12,35 +12,6 @@ spring:
     nacos:
       server-addr: 192.168.3.4:8848
 
-  datasource:
-    type: com.zaxxer.hikari.HikariDataSource
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://192.168.3.4:3306/auth_admin_dev?serverTimezone=GMT%2B8&useSSL=false&characterEncoding=utf-8&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true&cachePrepStmts=true&useServerPrepStmts=true&prepStmtCacheSize=250&prepStmtCacheSqlLimit=2048&useLocalSessionState=true
-    username: dev_user
-    password: Dev1234!
-    hikari:
-      maximum-pool-size: 20
-      minimum-idle: 5
-      connection-timeout: 10000
-      idle-timeout: 300000
-      max-lifetime: 1800000
-      leak-detection-threshold: 60000
-
-  data:
-    redis:
-      host: 192.168.3.4
-      port: 6379
-      database: 0
-      password: "Dev1234!"
-      timeout: 3000ms
-      lettuce:
-        pool:
-          enabled: true
-          max-active: 32
-          max-wait: 2000ms
-          max-idle: 16
-          min-idle: 4
-
 logging:
   level:
     root: info

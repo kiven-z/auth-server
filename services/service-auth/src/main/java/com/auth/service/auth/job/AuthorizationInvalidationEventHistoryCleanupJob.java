@@ -27,7 +27,7 @@ public class AuthorizationInvalidationEventHistoryCleanupJob {
 	/**
 	 * 定时清理已完成的过期幂等事件
 	 */
-	@Scheduled(fixedDelayString = "${auth.auth.invalidation.success-cleanup-interval-ms:86400000}")
+	@Scheduled(fixedDelayString = "${auth.invalidation.success-cleanup-interval-ms:86400000}")
 	public void purgeCompletedHistory() {
 		if (!properties.getSuccessCleanupEnabled()) {
 			return;

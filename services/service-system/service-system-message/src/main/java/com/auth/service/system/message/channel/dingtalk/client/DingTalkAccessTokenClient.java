@@ -1,16 +1,11 @@
 package com.auth.service.system.message.channel.dingtalk.client;
 
-import java.time.Instant;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.message.config.DingTalkProperties;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -18,6 +13,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+
+import java.time.Instant;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
 import static com.auth.service.system.message.exception.MessageResultCode.DING_TALK_OAUTH_TOKEN_REQUEST_FAILED;
@@ -70,6 +69,8 @@ public class DingTalkAccessTokenClient {
 		if (current != null && current.isValid()) {
 			return current.token();
 		}
+
+		dingTalkProperties.assertSendRequiredConfigured();
 
 		// 获取clientId和clientSecret
 		String clientId = dingTalkProperties.getClientId();

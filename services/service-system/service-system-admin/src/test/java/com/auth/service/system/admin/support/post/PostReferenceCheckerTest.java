@@ -4,6 +4,7 @@ import com.auth.service.system.admin.mapper.post.SysPostMapper;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -51,8 +52,8 @@ class PostReferenceCheckerTest {
 	void getExistingActiveThrowsWhenMissing() {
 		when(sysPostMapper.selectById(POST_ID)).thenReturn(null);
 
-		assertThatThrownBy(() -> postReferenceChecker.getExistingActive(POST_ID))
-			.isInstanceOf(SystemBusinessException.class)
+		ThrowingCallable executable = () -> postReferenceChecker.getExistingActive(POST_ID);
+		assertThatThrownBy(executable).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
 	}

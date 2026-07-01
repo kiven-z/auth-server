@@ -1,12 +1,10 @@
 package com.auth.service.system.message.service.impl;
 
-import java.util.Collections;
-import java.util.List;
-
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.channel.MessageSender;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.message.config.MessageChannelProperties;
 import com.auth.service.system.message.support.validation.TemplateMessageCommandValidation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -17,14 +15,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
+import java.util.List;
+
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
-import static com.auth.service.system.message.exception.MessageResultCode.MESSAGE_CHANNEL_UNSUPPORTED;
-import static com.auth.service.system.message.exception.MessageResultCode.MESSAGE_COMMAND_INVALID;
+import static com.auth.service.system.message.exception.MessageResultCode.*;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link MessageDispatchServiceImpl} 单元测试
@@ -39,6 +37,8 @@ class MessageDispatchServiceImplTest {
 	@Mock
 	private MessageSender dingTalkSender;
 
+	private MessageChannelProperties messageChannelProperties;
+
 	private MessageDispatchServiceImpl dispatchService;
 
 	@BeforeEach
@@ -47,7 +47,9 @@ class MessageDispatchServiceImplTest {
 		when(dingTalkSender.channel()).thenReturn(MessageChannel.DING_TALK);
 		Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 		TemplateMessageCommandValidation commandValidation = new TemplateMessageCommandValidation(validator);
-		dispatchService = new MessageDispatchServiceImpl(List.of(emailSender, dingTalkSender), commandValidation);
+		messageChannelProperties = new MessageChannelProperties();
+		dispatchService = new MessageDispatchServiceImpl(List.of(emailSender, dingTalkSender), commandValidation,
+				messageChannelProperties);
 	}
 
 	@Test
@@ -81,8 +83,29 @@ class MessageDispatchServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("不支持的渠道：抛出 SystemBusinessException")
+	@DisplayName("渠道禁用：抛出 MESSAGE_CHANNEL_DISABLED")
+	void sendByTemplate_shouldThrowWhenChannelDisabled() {
+		// 禁用短信渠道，验证分发层统一拦截
+		messageChannelProperties.setSmsAliyunDypnsEnabled(false);
+		TemplateMessageCommand command = TemplateMessageCommand.builder()
+			.channel(MessageChannel.SMS_ALIYUN_DYPNS)
+			.templateCode("100001")
+			.targets(List.of("13800000000"))
+			.build();
+
+		assertThatThrownBy(() -> dispatchService.sendByTemplate(command)).isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(MESSAGE_CHANNEL_DISABLED);
+
+		verify(emailSender, never()).sendByTemplate(any());
+		verify(dingTalkSender, never()).sendByTemplate(any());
+	}
+
+	@Test
+	@DisplayName("启用但无 sender：抛出 MESSAGE_CHANNEL_UNSUPPORTED")
 	void sendByTemplate_shouldThrowWhenChannelUnsupported() {
+		// 保持渠道启用，验证 sender 缺失仍然是“不支持/未实现”
+		messageChannelProperties.setSmsAliyunDypnsEnabled(true);
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
 			.channel(MessageChannel.SMS_ALIYUN_DYPNS)
 			.templateCode("100001")

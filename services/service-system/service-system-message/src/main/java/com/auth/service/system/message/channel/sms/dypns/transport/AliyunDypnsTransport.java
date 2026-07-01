@@ -1,8 +1,5 @@
 package com.auth.service.system.message.channel.sms.dypns.transport;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-
 import cn.hutool.core.text.CharSequenceUtil;
 import com.aliyun.auth.credentials.Credential;
 import com.aliyun.auth.credentials.provider.StaticCredentialProvider;
@@ -14,8 +11,11 @@ import com.auth.service.system.message.config.SmsProperties;
 import darabonba.core.client.ClientOverrideConfiguration;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.stereotype.Component;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
 import static com.auth.service.system.message.exception.MessageResultCode.SMS_DYPNS_SEND_FAILED;
@@ -30,13 +30,12 @@ import static com.auth.service.system.message.exception.MessageResultCode.SMS_DY
 @Component
 public class AliyunDypnsTransport implements AutoCloseable {
 
-	private final AsyncClient asyncClient;
-
 	private final SmsProperties smsProperties;
+
+	private final AtomicReference<AsyncClient> asyncClientRef = new AtomicReference<>();
 
 	public AliyunDypnsTransport(SmsProperties smsProperties) {
 		this.smsProperties = smsProperties;
-		this.asyncClient = createAsyncClient(smsProperties);
 	}
 
 	/**
@@ -76,12 +75,33 @@ public class AliyunDypnsTransport implements AutoCloseable {
 	}
 
 	/**
+	 * 获取或创建异步客户端
+	 * @return 异步客户端
+	 */
+	private AsyncClient getOrCreateAsyncClient() {
+		AsyncClient currentClient = asyncClientRef.get();
+		if (currentClient != null) {
+			return currentClient;
+		}
+		synchronized (this) {
+			currentClient = asyncClientRef.get();
+			if (currentClient == null) {
+				currentClient = createAsyncClient(smsProperties);
+				asyncClientRef.set(currentClient);
+			}
+			return currentClient;
+		}
+	}
+
+	/**
 	 * 向指定手机号发送验证码短信
 	 * @param phone 手机号
 	 * @param providerTemplateCode 厂商侧模板编码
 	 * @param templateParamJson 模板变量 JSON
 	 */
 	public void sendVerifyCode(String phone, String providerTemplateCode, String templateParamJson) {
+		smsProperties.assertSendRequiredConfigured();
+
 		// 验证手机号
 		if (CharSequenceUtil.isBlank(phone)) {
 			throw new SystemBusinessException(PARAM_REQUIRED, "手机号");
@@ -116,9 +136,10 @@ public class AliyunDypnsTransport implements AutoCloseable {
 	@PreDestroy
 	@Override
 	public void close() {
-		if (asyncClient != null) {
+		AsyncClient client = asyncClientRef.get();
+		if (client != null) {
 			try {
-				asyncClient.close();
+				client.close();
 			}
 			catch (Exception e) {
 				log.warn("Failed to close Dypns client", e);
@@ -135,7 +156,7 @@ public class AliyunDypnsTransport implements AutoCloseable {
 	 */
 	private SendSmsVerifyCodeResponse send(SendSmsVerifyCodeRequest request)
 			throws ExecutionException, InterruptedException {
-		CompletableFuture<SendSmsVerifyCodeResponse> future = asyncClient.sendSmsVerifyCode(request);
+		CompletableFuture<SendSmsVerifyCodeResponse> future = getOrCreateAsyncClient().sendSmsVerifyCode(request);
 		return future.get();
 	}
 

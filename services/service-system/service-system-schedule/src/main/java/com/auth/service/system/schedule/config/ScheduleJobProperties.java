@@ -2,7 +2,6 @@ package com.auth.service.system.schedule.config;
 
 import lombok.Getter;
 import lombok.Setter;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
@@ -13,7 +12,7 @@ import org.springframework.validation.annotation.Validated;
  */
 @Getter
 @Setter
-@ConfigurationProperties(prefix = "auth.system.schedule.job")
+@ConfigurationProperties(prefix = "auth.schedule.job")
 @Validated
 public class ScheduleJobProperties {
 
