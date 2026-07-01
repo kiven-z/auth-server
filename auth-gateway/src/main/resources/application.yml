@@ -1,11 +1,9 @@
 server:
   port: 8080
-  tomcat:
-    threads:
-      max: 300
-      min-spare: 30
-    accept-count: 200
-    max-connections: 10000
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/plain
+    min-response-size: 1024
   servlet:
     session:
       timeout: 40m
@@ -41,6 +39,13 @@ spring:
     gateway:
       server:
         webflux:
+          httpclient:
+            connect-timeout: 3000
+            response-timeout: 10s
+            pool:
+              type: elastic
+              max-connections: 500
+              max-idle-time: 30s
           loadbalancer:
             use404: true
           discovery:

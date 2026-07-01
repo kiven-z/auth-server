@@ -4,11 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.auth.common.web.config.properties.WebDocProperties;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import lombok.extern.slf4j.Slf4j;
 import org.springdoc.core.models.GroupedOpenApi;
 
@@ -28,6 +31,11 @@ import org.springframework.core.env.Environment;
 @ConditionalOnMissingBean(OpenApiDocConfig.class)
 @Configuration
 public class OpenApiDocConfig {
+
+	/**
+	 * OpenAPI 安全方案名称，对应 HTTP Bearer JWT
+	 */
+	private static final String BEARER_AUTH_SCHEME = "bearerAuth";
 
 	private final WebDocProperties webDocProperties;
 
@@ -60,7 +68,15 @@ public class OpenApiDocConfig {
 			.termsOfService(url)
 			.version(webDocProperties.getVersion());
 
-		return new OpenAPI().info(info).externalDocs(new ExternalDocumentation());
+		SecurityScheme bearerScheme = new SecurityScheme().type(SecurityScheme.Type.HTTP)
+			.scheme("bearer")
+			.bearerFormat("JWT");
+		Components components = new Components().addSecuritySchemes(BEARER_AUTH_SCHEME, bearerScheme);
+
+		return new OpenAPI().info(info)
+			.externalDocs(new ExternalDocumentation())
+			.components(components)
+			.addSecurityItem(new SecurityRequirement().addList(BEARER_AUTH_SCHEME));
 	}
 
 	/**

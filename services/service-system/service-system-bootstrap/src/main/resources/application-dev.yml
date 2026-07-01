@@ -1,3 +1,12 @@
+server:
+  port: 20002
+  tomcat:
+    threads:
+      max: 100
+      min-spare: 10
+    accept-count: 100
+    max-connections: 2000
+
 spring:
   cloud:
     nacos:
@@ -6,15 +15,16 @@ spring:
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://192.168.3.4:3306/auth_admin_base?serverTimezone=GMT%2B8&useSSL=false&characterEncoding=utf-8&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://192.168.3.4:3306/auth_admin_dev?serverTimezone=GMT%2B8&useSSL=false&characterEncoding=utf-8&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true&cachePrepStmts=true&useServerPrepStmts=true&prepStmtCacheSize=250&prepStmtCacheSqlLimit=2048&useLocalSessionState=true
     username: dev_user
     password: Dev1234!
     hikari:
-      maximum-pool-size: 200
-      minimum-idle: 20
-      connection-timeout: 30000
-      idle-timeout: 600000
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 10000
+      idle-timeout: 300000
       max-lifetime: 1800000
+      leak-detection-threshold: 60000
 
   data:
     redis:
@@ -22,13 +32,14 @@ spring:
       port: 6379
       database: 0
       password: "Dev1234!"
+      timeout: 3000ms
       lettuce:
         pool:
           enabled: true
-          max-active: 200
-          max-wait: 5000ms
-          max-idle: 50
-          min-idle: 10
+          max-active: 32
+          max-wait: 2000ms
+          max-idle: 16
+          min-idle: 4
 
 logging:
   level:

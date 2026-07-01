@@ -1,0 +1,14 @@
+server:
+  port: 8880
+
+spring:
+  cloud:
+    nacos:
+      server-addr: 192.168.3.4:8848
+
+logging:
+  level:
+    root: warn
+    com.auth: info
+    org.springframework: warn
+    reactor.netty: warn

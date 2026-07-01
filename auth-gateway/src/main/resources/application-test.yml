@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 9080
 
 spring:
   cloud:
@@ -9,4 +9,4 @@ spring:
 logging:
   level:
     root: warn
-    com.auth: debug
+    com.auth: info

@@ -1,0 +1,7 @@
+# Maven build context exclusions (auth-server root)
+.git
+.idea
+**/.cursor
+**/target
+assets
+*.md

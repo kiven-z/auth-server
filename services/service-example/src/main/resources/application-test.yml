@@ -1,3 +1,12 @@
+server:
+  port: 21009
+  tomcat:
+    threads:
+      max: 100
+      min-spare: 10
+    accept-count: 100
+    max-connections: 2000
+
 spring:
   autoconfigure:
     exclude:
@@ -15,10 +24,16 @@ spring:
       port: 6379
       database: 1
       password: "Dev1234!"
+      timeout: 3000ms
       lettuce:
         pool:
           enabled: true
-          max-active: 200
-          max-wait: 5000ms
-          max-idle: 50
-          min-idle: 10
+          max-active: 32
+          max-wait: 2000ms
+          max-idle: 16
+          min-idle: 4
+
+logging:
+  level:
+    root: warn
+    com.auth: info

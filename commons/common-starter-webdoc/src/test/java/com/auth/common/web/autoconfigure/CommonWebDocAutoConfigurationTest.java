@@ -5,6 +5,8 @@ import java.util.List;
 import com.auth.common.web.config.OpenApiDocConfig;
 import com.auth.common.web.config.properties.WebDocProperties;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -41,6 +43,25 @@ class CommonWebDocAutoConfigurationTest {
 			assertThat(context).hasSingleBean(OpenAPI.class);
 			OpenAPI openAPI = context.getBean(OpenAPI.class);
 			assertThat(openAPI.getInfo().getTitle()).contains("My Custom API");
+		});
+	}
+
+	@Test
+	@DisplayName("defaultOpenApi 注册 bearer JWT 安全方案并全局启用")
+	void testDefaultOpenApi_IncludesBearerSecurityScheme() {
+		contextRunner.run(context -> {
+			// 验证 Swagger UI Authorize 所需的 HTTP Bearer JWT 方案
+			OpenAPI openAPI = context.getBean(OpenAPI.class);
+			assertThat(openAPI.getComponents()).isNotNull();
+			assertThat(openAPI.getComponents().getSecuritySchemes()).containsKey("bearerAuth");
+
+			SecurityScheme scheme = openAPI.getComponents().getSecuritySchemes().get("bearerAuth");
+			assertThat(scheme.getType()).isEqualTo(SecurityScheme.Type.HTTP);
+			assertThat(scheme.getScheme()).isEqualTo("bearer");
+			assertThat(scheme.getBearerFormat()).isEqualTo("JWT");
+
+			assertThat(openAPI.getSecurity()).isNotEmpty();
+			assertThat(openAPI.getSecurity().get(0)).containsKey("bearerAuth");
 		});
 	}
 

@@ -1,11 +1,15 @@
 server:
   port: 20001
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/plain
+    min-response-size: 1024
   tomcat:
     threads:
-      max: 300
-      min-spare: 30
-    accept-count: 200
-    max-connections: 10000
+      max: 100
+      min-spare: 10
+    accept-count: 100
+    max-connections: 2000
   servlet:
     session:
       timeout: 40m
@@ -24,6 +28,13 @@ spring:
     active: dev
 
   cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connect-timeout: 3000
+            read-timeout: 10000
+            logger-level: basic
     nacos:
       server-addr: 192.168.3.4:8848
       discovery:
