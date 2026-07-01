@@ -2,19 +2,63 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.auth.service.system.admin.mapper.dept.DeptClosureMapper">
 
-	<!-- 新增部门：维护 dept_closure -->
-	<update id="callInsert" statementType="CALLABLE">
-		CALL sp_dept_insert (#{deptId, mode=IN, jdbcType=BIGINT}, #{parentId, mode=IN, jdbcType=BIGINT})
+	<!-- 新增部门：写入自环与父链，不依赖存储过程 -->
+	<update id="insertPaths">
+		INSERT INTO
+		    dept_closure (ancestor_id, descendant_id, depth)
+		SELECT
+		    chain.ancestor_id,
+		    #{deptId},
+		    chain.depth + 1
+		FROM
+		    dept_closure chain
+		WHERE
+		    #{parentId} > 0
+		    AND chain.descendant_id = #{parentId}
+		UNION ALL
+		SELECT
+		    #{deptId},
+		    #{deptId},
+		    0
 	</update>
 
-	<!-- 物理删除子树：移除闭包路径 -->
-	<update id="callDelete" statementType="CALLABLE">
-		CALL sp_dept_delete (#{deptId, mode=IN, jdbcType=BIGINT})
+	<!-- 物理删除子树：移除子树节点作为后代的全部闭包路径 -->
+	<update id="deletePaths">
+		DELETE dc
+		FROM
+		    dept_closure dc
+		    INNER JOIN dept_closure sub ON sub.descendant_id = dc.descendant_id
+		WHERE
+		    sub.ancestor_id = #{deptId}
 	</update>
 
-	<!-- 移动部门：重算闭包路径 -->
-	<update id="callMove" statementType="CALLABLE">
-		CALL sp_dept_move (#{deptId, mode=IN, jdbcType=BIGINT}, #{newParentId, mode=IN, jdbcType=BIGINT})
+	<!-- 移动部门（步骤1）：清理旧祖先到子树的跨树路径，保留子树内部路径 -->
+	<update id="deleteMovePaths">
+		DELETE stale
+		FROM
+		    dept_closure stale
+		    INNER JOIN dept_closure sub ON sub.descendant_id = stale.descendant_id
+		    LEFT JOIN dept_closure keep ON keep.ancestor_id = sub.ancestor_id
+		    AND keep.descendant_id = stale.ancestor_id
+		WHERE
+		    sub.ancestor_id = #{deptId}
+		    AND keep.ancestor_id IS NULL
+	</update>
+
+	<!-- 移动部门（步骤2）：补齐新祖先到子树的跨树路径 -->
+	<update id="insertMovePaths">
+		INSERT INTO
+		    dept_closure (ancestor_id, descendant_id, depth)
+		SELECT
+		    super_chain.ancestor_id,
+		    sub.descendant_id,
+		    super_chain.depth + sub.depth + 1
+		FROM
+		    dept_closure sub
+		    INNER JOIN dept_closure super_chain ON super_chain.descendant_id = #{newParentId}
+		WHERE
+		    #{newParentId} > 0
+		    AND sub.ancestor_id = #{deptId}
 	</update>
 
 	<!-- 统计：parent_id 与 dept_closure(depth=1) 不一致 -->

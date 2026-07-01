@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 /**
- * 闭包表维护入口：部门树结构变更时调用存储过程
+ * 闭包表维护入口：部门树结构变更时执行闭包 SQL
  *
  * @author Bunny
  */
@@ -22,7 +22,7 @@ public class DeptClosureMaintainer {
 	 * @param parentId 父部门 ID
 	 */
 	public void insertNode(long deptId, long parentId) {
-		deptClosureMapper.callInsert(deptId, parentId);
+		deptClosureMapper.insertPaths(deptId, parentId);
 	}
 
 	/**
@@ -30,7 +30,7 @@ public class DeptClosureMaintainer {
 	 * @param deptId 部门 ID
 	 */
 	public void removeClosurePaths(long deptId) {
-		deptClosureMapper.callDelete(deptId);
+		deptClosureMapper.deletePaths(deptId);
 	}
 
 	/**
@@ -39,7 +39,8 @@ public class DeptClosureMaintainer {
 	 * @param newParentId 新父部门 ID
 	 */
 	public void moveNode(long deptId, long newParentId) {
-		deptClosureMapper.callMove(deptId, newParentId);
+		deptClosureMapper.deleteMovePaths(deptId);
+		deptClosureMapper.insertMovePaths(deptId, newParentId);
 	}
 
 }

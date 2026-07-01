@@ -1,15 +1,15 @@
 package com.auth.service.system.admin.mapper.dept;
 
-import java.util.List;
-
 import com.auth.service.system.admin.model.po.dept.DeptClosureDepthChainRowPO;
 import com.auth.service.system.admin.model.po.dept.DeptClosureHealthStatsPO;
 import com.auth.service.system.admin.model.po.dept.DeptClosureParentLinkRowPO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 /**
- * 部门闭包表写（存储过程/物理删除）
+ * 部门闭包表写
  *
  * @author Bunny
  */
@@ -21,20 +21,26 @@ public interface DeptClosureMapper {
 	 * @param deptId 新部门主键
 	 * @param parentId 父部门 ID，顶级传
 	 */
-	void callInsert(@Param("deptId") Long deptId, @Param("parentId") Long parentId);
+	void insertPaths(@Param("deptId") Long deptId, @Param("parentId") Long parentId);
 
 	/**
 	 * 物理删除子树在闭包表中的全部路径
 	 * @param deptId 子树根节点 ID
 	 */
-	void callDelete(@Param("deptId") Long deptId);
+	void deletePaths(@Param("deptId") Long deptId);
 
 	/**
-	 * 变更父部门后重算闭包路径（须已更新 sys_dept.parent_id）
+	 * 移动前先清理旧祖先到子树的跨树路径（保留子树内部路径）
+	 * @param deptId 被移动部门 ID
+	 */
+	void deleteMovePaths(@Param("deptId") Long deptId);
+
+	/**
+	 * 移动后补齐新祖先到子树的跨树路径（须已更新 sys_dept.parent_id）
 	 * @param deptId 被移动部门 ID
 	 * @param newParentId 新父部门 ID，顶级传 0
 	 */
-	void callMove(@Param("deptId") Long deptId, @Param("newParentId") Long newParentId);
+	void insertMovePaths(@Param("deptId") Long deptId, @Param("newParentId") Long newParentId);
 
 	/**
 	 * 统计父子直连缺失的活跃部门数
