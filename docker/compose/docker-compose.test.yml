@@ -7,8 +7,6 @@ services:
       dockerfile: docker/service-auth/Dockerfile
     image: auth/service-auth:local-test
     container_name: service-auth-test
-    env_file:
-      - ../env/test/service-auth.env
     environment:
       SPRING_PROFILES_ACTIVE: test
       SERVER_PORT: 20001

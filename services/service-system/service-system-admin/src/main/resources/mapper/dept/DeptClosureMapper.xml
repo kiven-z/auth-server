@@ -3,7 +3,7 @@
 <mapper namespace="com.auth.service.system.admin.mapper.dept.DeptClosureMapper">
 
 	<!-- 新增部门：写入自环与父链，不依赖存储过程 -->
-	<update id="insertPaths">
+	<insert id="insertPaths">
 		INSERT INTO
 		    dept_closure (ancestor_id, descendant_id, depth)
 		SELECT
@@ -20,7 +20,7 @@
 		    #{deptId},
 		    #{deptId},
 		    0
-	</update>
+	</insert>
 
 	<!-- 物理删除子树：移除子树节点作为后代的全部闭包路径 -->
 	<update id="deletePaths">
@@ -46,7 +46,7 @@
 	</update>
 
 	<!-- 移动部门（步骤2）：补齐新祖先到子树的跨树路径 -->
-	<update id="insertMovePaths">
+	<insert id="insertMovePaths">
 		INSERT INTO
 		    dept_closure (ancestor_id, descendant_id, depth)
 		SELECT
@@ -59,7 +59,7 @@
 		WHERE
 		    #{newParentId} > 0
 		    AND sub.ancestor_id = #{deptId}
-	</update>
+	</insert>
 
 	<!-- 统计：parent_id 与 dept_closure(depth=1) 不一致 -->
 	<select id="countParentLinkAnomalies" resultType="long">
