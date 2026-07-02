@@ -4,11 +4,15 @@ import java.util.List;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
+import com.auth.common.ip.IpAddressService;
+import com.auth.service.system.admin.excel.user.SysUserSpreadsheetService;
 import com.auth.service.system.admin.model.query.user.SysUserPageQuery;
 import com.auth.service.system.admin.model.vo.user.SysUserDetailVO;
 import com.auth.service.system.admin.model.vo.user.SysUserPageVO;
 import com.auth.service.system.admin.model.vo.user.SysUserSearchItemVO;
 import com.auth.service.system.admin.service.admin.SysUserQueryService;
+import com.auth.service.system.admin.service.admin.SysUserService;
+import com.auth.service.system.admin.support.user.UserPasswordService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -24,22 +28,35 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * {@link SysUserQueryController} 单元测试。
+ * {@link SysUserController} 单元测试。
  *
  * @author Bunny
  */
-@DisplayName("SysUserQueryController 系统用户查询")
+@DisplayName("SysUserController 系统用户管理")
 @ExtendWith(MockitoExtension.class)
-class SysUserQueryControllerTest {
+class SysUserControllerTest {
+
+	@Mock
+	private SysUserService sysUserService;
 
 	@Mock
 	private SysUserQueryService sysUserQueryService;
 
-	private SysUserQueryController controller;
+	@Mock
+	private SysUserSpreadsheetService sysUserSpreadsheetService;
+
+	@Mock
+	private UserPasswordService userPasswordService;
+
+	@Mock
+	private IpAddressService ipAddressService;
+
+	private SysUserController controller;
 
 	@BeforeEach
 	void setUp() {
-		controller = new SysUserQueryController(sysUserQueryService);
+		controller = new SysUserController(sysUserService, sysUserQueryService, sysUserSpreadsheetService,
+				userPasswordService, ipAddressService);
 	}
 
 	@Test
