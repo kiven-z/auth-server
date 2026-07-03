@@ -92,7 +92,7 @@ public class SysPermissionSpreadsheetService
 	 */
 	public ResponseEntity<byte[]> downloadImportTemplate() throws IOException {
 		SysPermissionImportRow row = new SysPermissionImportRow();
-		row.setPermissionCode("（示例：sys:dept:query，全小写，1～3段冒号分隔）");
+		row.setPermissionCode("（示例：sys:dept:query，全小写，1～4段冒号分隔）");
 		row.setPermissionName("（示例：部门查询）");
 		row.setStatusLabel("启用");
 		row.setOrderNum(1);

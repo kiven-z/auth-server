@@ -47,7 +47,7 @@ public class FileRecordController {
 	}
 
 	@Operation(summary = "回收站文件分页查询")
-	@PreAuthorize("@auth.decide('sys:file:query')")
+	@PreAuthorize("@auth.decide('sys:file:recycle:query')")
 	@GetMapping("/recycle/page")
 	public Result<PageResponse<FileRecordPageVO>> recyclePage(@Valid FileRecordPageQuery query) {
 		PageResponse<FileRecordPageVO> pageResult = sysFileRecordService.getRecyclePage(query);

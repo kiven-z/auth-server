@@ -15,6 +15,7 @@ class PermissionMatcherTest {
 		assertTrue(PermissionMatcher.matches("*", "sys:user:add"));
 		assertTrue(PermissionMatcher.matches("*:*", "sys:user:add"));
 		assertTrue(PermissionMatcher.matches("*:*:*", "sys:user:add"));
+		assertTrue(PermissionMatcher.matches("*:*:*:*", "sys:file:recycle:query"));
 		assertTrue(PermissionMatcher.matches("sys:user:add", "sys:user:add"));
 		assertFalse(PermissionMatcher.matches("sys:user:add", "sys:user:del"));
 		assertTrue(PermissionMatcher.matches("sys:*:*", "sys:user:add"));

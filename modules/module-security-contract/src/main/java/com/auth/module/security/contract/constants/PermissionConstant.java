@@ -32,7 +32,7 @@ public class PermissionConstant {
 	/**
 	 * 管理员通配权限集合（命中任意一个即视为拥有所有权限） 权限码忽略大小写，存储时全部小写，返回时也是小写
 	 */
-	public static final List<String> ADMIN_WILDCARD_PERMISSIONS = List.of("*", "*:*", "*:*:*");
+	public static final List<String> ADMIN_WILDCARD_PERMISSIONS = List.of("*", "*:*", "*:*:*", "*:*:*:*");
 
 	/**
 	 * 是否是超级管理员

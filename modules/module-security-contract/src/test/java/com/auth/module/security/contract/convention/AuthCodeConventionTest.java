@@ -16,15 +16,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 class AuthCodeConventionTest {
 
 	@Test
-	@DisplayName("权限码：通配三种与业务三段均合法")
+	@DisplayName("权限码：通配四种与业务三段、四段均合法")
 	void permissionWellFormedSamples() {
 		assertThat(AuthCodeConvention.isWellFormedPermissionCode("*")).isTrue();
 		assertThat(AuthCodeConvention.isWellFormedPermissionCode("*:*")).isTrue();
 		assertThat(AuthCodeConvention.isWellFormedPermissionCode("*:*:*")).isTrue();
+		assertThat(AuthCodeConvention.isWellFormedPermissionCode("*:*:*:*")).isTrue();
 		assertThat(AuthCodeConvention.isWellFormedPermissionCode("sys")).isTrue();
 		assertThat(AuthCodeConvention.isWellFormedPermissionCode("sys:dept")).isTrue();
 		assertThat(AuthCodeConvention.isWellFormedPermissionCode("sys:dept:query")).isTrue();
 		assertThat(AuthCodeConvention.isWellFormedPermissionCode("sys:dept:detail")).isTrue();
+		assertThat(AuthCodeConvention.isWellFormedPermissionCode("sys:file:recycle:query")).isTrue();
 	}
 
 	@Test
@@ -35,7 +37,7 @@ class AuthCodeConventionTest {
 
 	@DisplayName("权限码：非法样例")
 	@ParameterizedTest
-	@ValueSource(strings = { "", "   ", "Sys:dept:query", "sys:dept:Query", "sys:dept:query:extra:more", "9ab", "_x",
+	@ValueSource(strings = { "", "   ", "Sys:dept:query", "sys:dept:Query", "sys:file:recycle:query:extra", "9ab", "_x",
 			"sys:dept:", ":query", "sys dept:query" })
 	void permissionMalformed(String code) {
 		assertThat(AuthCodeConvention.isWellFormedPermissionCode(code.trim())).isFalse();
