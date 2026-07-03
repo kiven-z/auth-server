@@ -2,9 +2,8 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.auth.service.system.file.mapper.SysFileRecordMapper">
 
-    <!-- 文件记录分页查询 -->
-    <select id="selectListByPage" resultType="com.auth.service.system.file.model.po.SysFileRecordPageRowPO">
-        SELECT
+    <!-- 文件分页查询返回列 -->
+    <sql id="fileRecordPageColumns">
         id,
         storage_platform,
         upload_mode,
@@ -21,31 +20,60 @@
         update_time,
         create_user,
         update_user
+    </sql>
+
+    <!-- 文件分页通用筛选条件 -->
+    <sql id="fileRecordPageCommonFilter">
+        <if test="query.bizType != null and query.bizType != ''">
+            AND biz_type =
+            #{query.bizType}
+        </if>
+        <if test="query.bizId != null and query.bizId != ''">
+            AND biz_id =
+            #{query.bizId}
+        </if>
+        <if test="query.originalName != null and query.originalName != ''">
+            AND original_name LIKE CONCAT('%',
+            #{query.originalName},
+            '%'
+            )
+        </if>
+        <if test="query.ownerUserId != null">
+            AND create_user =
+            #{query.ownerUserId}
+        </if>
+        <if test="query.startTime != null and query.endTime != null">
+            AND create_time <![CDATA[ >= ]]> #{query.startTime}
+            AND create_time <![CDATA[ <= ]]> #{query.endTime}
+        </if>
+    </sql>
+
+    <!-- 有效文件记录分页查询 -->
+    <select id="selectListByPage" resultType="com.auth.service.system.file.model.po.SysFileRecordPageRowPO">
+        SELECT
+        <include refid="fileRecordPageColumns"/>
         FROM
-        sys_file_record
+            sys_file_record
         <where>
             is_deleted = 0
-            <if test="query.bizType != null and query.bizType != ''">
-                AND biz_type =
-                #{query.bizType}
-            </if>
-            <if test="query.bizId != null and query.bizId != ''">
-                AND biz_id =
-                #{query.bizId}
-            </if>
-            <if test="query.originalName != null and query.originalName != ''">
-                AND original_name LIKE CONCAT('%',
-                #{query.originalName},
-                '%'
-                )
-            </if>
-            <if test="query.ownerUserId != null">
-                AND create_user =
-                #{query.ownerUserId}
-            </if>
+            <include refid="fileRecordPageCommonFilter"/>
         </where>
         ORDER BY
-        create_time DESC
+            create_time DESC
+    </select>
+
+    <!-- 回收站文件记录分页查询 -->
+    <select id="selectRecycleListByPage" resultType="com.auth.service.system.file.model.po.SysFileRecordPageRowPO">
+        SELECT
+        <include refid="fileRecordPageColumns"/>
+        FROM
+            sys_file_record
+        <where>
+            is_deleted = 1
+            <include refid="fileRecordPageCommonFilter"/>
+        </where>
+        ORDER BY
+            create_time DESC
     </select>
 
 </mapper>

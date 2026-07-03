@@ -8,6 +8,7 @@ import com.auth.service.system.file.model.value.StoredFile;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -83,6 +84,11 @@ class FileStorageProviderRegistryTest {
 
 		@Override
 		public StoredFile upload(FileUploadCommand command) {
+			throw new UnsupportedOperationException("not used");
+		}
+
+		@Override
+		public InputStream download(String bucket, String objectKey) {
 			throw new UnsupportedOperationException("not used");
 		}
 

@@ -2,10 +2,13 @@ package com.auth.service.system.file.model.query;
 
 import com.auth.common.core.model.query.PageQueryRequest;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Size;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.time.LocalDateTime;
 
 /**
  * 文件记录分页查询条件
@@ -44,5 +47,35 @@ public class FileRecordPageQuery extends PageQueryRequest {
 	@Schema(title = "原始文件名（模糊匹配）")
 	@Size(max = 255, message = "originalName 长度不能超过255个字符")
 	private String originalName;
+
+	/**
+	 * 开始时间
+	 */
+	@Schema(title = "创建开始时间（与 endTime 成对使用）")
+	private LocalDateTime startTime;
+
+	/**
+	 * 结束时间
+	 */
+	@Schema(title = "创建结束时间（与 startTime 成对使用）")
+	private LocalDateTime endTime;
+
+	/**
+	 * 校验起止时间是否成对传入
+	 * @return 校验结果
+	 */
+	@AssertTrue(message = "startTime 与 endTime 必须成对指定")
+	public boolean isTimeRangePaired() {
+		return (startTime == null && endTime == null) || (startTime != null && endTime != null);
+	}
+
+	/**
+	 * 校验起止时间顺序
+	 * @return 校验结果
+	 */
+	@AssertTrue(message = "startTime 不能晚于 endTime")
+	public boolean isTimeRangeOrdered() {
+		return startTime == null || endTime == null || !startTime.isAfter(endTime);
+	}
 
 }

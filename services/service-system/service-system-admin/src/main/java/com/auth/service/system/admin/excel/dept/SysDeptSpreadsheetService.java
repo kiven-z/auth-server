@@ -1,12 +1,8 @@
 package com.auth.service.system.admin.excel.dept;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-
 import com.auth.module.file.export.AbstractSyncPagedExportService;
 import com.auth.module.file.export.ExportScopeQueryFields;
-import com.auth.module.file.export.delivery.SyncFileDelivery;
+import com.auth.module.file.export.delivery.FileDelivery;
 import com.auth.module.file.export.writer.ExcelExportWriter;
 import com.auth.module.file.importer.model.SpreadsheetImportResult;
 import com.auth.service.system.admin.convert.spreadsheet.SysDeptSpreadsheetConverter;
@@ -18,11 +14,14 @@ import com.auth.service.system.admin.model.query.dept.SysDeptPageQuery;
 import com.auth.service.system.admin.support.dept.DeptLookupSupport;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 部门 Excel 导入导出
@@ -111,7 +110,7 @@ public class SysDeptSpreadsheetService
 		row.setOrderNum(1);
 		row.setRemark("（可选）");
 		byte[] bytes = new ExcelExportWriter<>(SysDeptImportRow.class, "部门导入模板").write(List.of(row));
-		return SyncFileDelivery.deliver(bytes, "dept_import_template.xlsx");
+		return FileDelivery.deliver(bytes, "dept_import_template.xlsx");
 	}
 
 }

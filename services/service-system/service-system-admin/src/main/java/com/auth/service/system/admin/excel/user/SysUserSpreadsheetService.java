@@ -1,11 +1,8 @@
 package com.auth.service.system.admin.excel.user;
 
-import java.io.IOException;
-import java.util.List;
-
 import com.auth.module.file.export.AbstractSyncPagedExportService;
 import com.auth.module.file.export.ExportScopeQueryFields;
-import com.auth.module.file.export.delivery.SyncFileDelivery;
+import com.auth.module.file.export.delivery.FileDelivery;
 import com.auth.module.file.export.writer.ExcelExportWriter;
 import com.auth.module.file.importer.model.SpreadsheetImportResult;
 import com.auth.module.platform.persistence.model.UserEntity;
@@ -16,11 +13,13 @@ import com.auth.service.system.admin.model.query.user.SysUserPageQuery;
 import com.auth.service.system.admin.support.sqlbuild.SysUserPageOrderSqlBuilder;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
 
 /**
  * 用户 Excel 导出
@@ -103,7 +102,7 @@ public class SysUserSpreadsheetService
 		row.setBirthday("（可选，示例：1990-01-01）");
 		row.setRemark("（可选）");
 		byte[] bytes = new ExcelExportWriter<>(SysUserImportRow.class, "用户导入模板").write(List.of(row));
-		return SyncFileDelivery.deliver(bytes, "user_import_template.xlsx");
+		return FileDelivery.deliver(bytes, "user_import_template.xlsx");
 	}
 
 }

@@ -4,6 +4,8 @@ import com.auth.module.file.api.enums.StoragePlatformEnum;
 import com.auth.service.system.file.model.value.FileUploadCommand;
 import com.auth.service.system.file.model.value.StoredFile;
 
+import java.io.InputStream;
+
 /**
  * 文件存储策略接口
  *
@@ -23,5 +25,13 @@ public interface FileStorageProvider {
 	 * @return 上传结果
 	 */
 	StoredFile upload(FileUploadCommand command);
+
+	/**
+	 * 下载文件输入流
+	 * @param bucket 存储桶
+	 * @param objectKey 对象键
+	 * @return 输入流
+	 */
+	InputStream download(String bucket, String objectKey);
 
 }

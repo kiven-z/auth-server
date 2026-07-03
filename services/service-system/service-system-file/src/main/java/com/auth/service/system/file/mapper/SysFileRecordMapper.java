@@ -26,4 +26,13 @@ public interface SysFileRecordMapper extends BaseMapper<SysFileRecordEntity> {
 	IPage<SysFileRecordPageRowPO> selectListByPage(@Param("page") Page<SysFileRecordEntity> page,
 			@Param("query") FileRecordPageQuery query);
 
+	/**
+	 * 分页查询回收站文件记录
+	 * @param page 分页参数
+	 * @param query 筛选条件
+	 * @return 分页结果
+	 */
+	IPage<SysFileRecordPageRowPO> selectRecycleListByPage(@Param("page") Page<SysFileRecordEntity> page,
+			@Param("query") FileRecordPageQuery query);
+
 }

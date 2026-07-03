@@ -1,18 +1,17 @@
 package com.auth.module.file.export;
 
+import com.auth.common.core.model.query.PageQueryRequest;
+import com.auth.module.file.export.delivery.FileDelivery;
+import com.auth.module.file.export.model.ExportPageRange;
+import com.auth.module.file.export.validation.ExportPageValidator;
+import com.auth.module.file.export.writer.ExcelExportWriter;
+import org.springframework.http.ResponseEntity;
+
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.auth.common.core.model.query.PageQueryRequest;
-import com.auth.module.file.export.delivery.SyncFileDelivery;
-import com.auth.module.file.export.model.ExportPageRange;
-import com.auth.module.file.export.validation.ExportPageValidator;
-import com.auth.module.file.export.writer.ExcelExportWriter;
-
-import org.springframework.http.ResponseEntity;
 
 /**
  * 同步分页导出模板：解析范围 → 分页拉取 → 转换行 → 写 Excel → 交付下载
@@ -55,7 +54,7 @@ public abstract class AbstractSyncPagedExportService<F extends PageQueryRequest,
 		List<R> exportRows = toExportRows(rows);
 		String filename = filenamePrefix + "_" + LocalDateTime.now().format(FILE_NAME_TIME) + ".xlsx";
 		byte[] bytes = excelWriter.write(exportRows);
-		return SyncFileDelivery.deliver(bytes, filename);
+		return FileDelivery.deliver(bytes, filename);
 	}
 
 	/**

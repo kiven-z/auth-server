@@ -9,9 +9,11 @@ import com.auth.service.system.file.model.value.FileUploadCommand;
 import com.auth.service.system.file.model.value.StoredFile;
 import com.auth.service.system.file.storage.FileStorageProvider;
 import com.auth.service.system.file.utils.StorageUrlUtil;
+import io.minio.GetObjectArgs;
 import io.minio.MinioClient;
 import io.minio.ObjectWriteResponse;
 import io.minio.PutObjectArgs;
+import jakarta.annotation.PreDestroy;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
@@ -27,6 +29,8 @@ public class MinioFileStorageProvider implements FileStorageProvider {
 	private static final String DEFAULT_CONTENT_TYPE = "application/octet-stream";
 
 	private final FileUploadProperties properties;
+
+	private volatile MinioClient minioClient;
 
 	public MinioFileStorageProvider(FileUploadProperties properties) {
 		this.properties = properties;
@@ -47,14 +51,9 @@ public class MinioFileStorageProvider implements FileStorageProvider {
 	public StoredFile upload(FileUploadCommand command) {
 		properties.assertMinioConfigured();
 		FileUploadProperties.MinioConfig config = properties.getMinio();
-		MinioClient minioClient = MinioClient.builder()
-			.endpoint(config.getEndpoint())
-			.credentials(config.getAccessKey(), config.getSecretKey())
-			.build();
-
 		String contentType = CharSequenceUtil.blankToDefault(command.getFile().getContentType(), DEFAULT_CONTENT_TYPE);
 		try (InputStream inputStream = command.getFile().getInputStream()) {
-			ObjectWriteResponse response = minioClient.putObject(PutObjectArgs.builder()
+			ObjectWriteResponse response = getMinioClient().putObject(PutObjectArgs.builder()
 				.bucket(config.getBucket())
 				.object(command.getObjectKey())
 				.stream(inputStream, command.getFile().getSize(), -1)
@@ -79,6 +78,19 @@ public class MinioFileStorageProvider implements FileStorageProvider {
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public InputStream download(String bucket, String objectKey) {
+		try {
+			return getMinioClient().getObject(GetObjectArgs.builder().bucket(bucket).object(objectKey).build());
+		}
+		catch (Exception exception) {
+			throw new FileException(FileUploadResultCode.FILE_UPLOAD_FAILED, platform().name(), exception.getMessage());
+		}
+	}
+
+	/**
 	 * 解析 MinIO 对外访问地址
 	 * @param config MinIO 配置
 	 * @param objectKey 对象键
@@ -91,6 +103,39 @@ public class MinioFileStorageProvider implements FileStorageProvider {
 		}
 		String endpointBaseUrl = StorageUrlUtil.trimTrailingSlash(config.getEndpoint());
 		return StorageUrlUtil.concatPublicUrl(endpointBaseUrl + "/" + config.getBucket(), objectPath);
+	}
+
+	/**
+	 * 获取 MinIO 客户端（懒加载单例）
+	 * @return MinIO 客户端
+	 */
+	private MinioClient getMinioClient() {
+		MinioClient localClient = minioClient;
+		if (localClient != null) {
+			return localClient;
+		}
+		synchronized (this) {
+			if (minioClient == null) {
+				properties.assertMinioConfigured();
+				FileUploadProperties.MinioConfig config = properties.getMinio();
+				minioClient = MinioClient.builder()
+					.endpoint(config.getEndpoint())
+					.credentials(config.getAccessKey(), config.getSecretKey())
+					.build();
+			}
+			return minioClient;
+		}
+	}
+
+	/**
+	 * Bean 销毁时关闭 MinIO 客户端
+	 */
+	@PreDestroy
+	public void destroy() throws Exception {
+		MinioClient localClient = this.minioClient;
+		if (localClient != null) {
+			localClient.close();
+		}
 	}
 
 }

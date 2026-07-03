@@ -4,6 +4,7 @@ import cn.hutool.core.text.CharSequenceUtil;
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClientBuilder;
 import com.aliyun.oss.model.ObjectMetadata;
+import com.aliyun.oss.model.OSSObject;
 import com.aliyun.oss.model.PutObjectRequest;
 import com.aliyun.oss.model.PutObjectResult;
 import com.auth.module.file.api.enums.StoragePlatformEnum;
@@ -16,6 +17,8 @@ import com.auth.service.system.file.storage.FileStorageProvider;
 import com.auth.service.system.file.utils.StorageUrlUtil;
 import org.springframework.stereotype.Component;
 
+import java.io.FilterInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -77,6 +80,36 @@ public class AliyunOssFileStorageProvider implements FileStorageProvider {
 		}
 		finally {
 			ossClient.shutdown();
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public InputStream download(String bucket, String objectKey) {
+		properties.assertAliyunOssConfigured();
+		FileUploadProperties.AliyunOssConfig config = properties.getAliyunOss();
+		OSS ossClient = new OSSClientBuilder().build(config.getEndpoint(), config.getAccessKeyId(),
+				config.getAccessKeySecret());
+		try {
+			OSSObject object = ossClient.getObject(bucket, objectKey);
+			InputStream objectStream = object.getObjectContent();
+			return new FilterInputStream(objectStream) {
+				@Override
+				public void close() throws IOException {
+					try {
+						super.close();
+					}
+					finally {
+						ossClient.shutdown();
+					}
+				}
+			};
+		}
+		catch (Exception exception) {
+			ossClient.shutdown();
+			throw new FileException(FileUploadResultCode.FILE_UPLOAD_FAILED, platform().name(), exception.getMessage());
 		}
 	}
 

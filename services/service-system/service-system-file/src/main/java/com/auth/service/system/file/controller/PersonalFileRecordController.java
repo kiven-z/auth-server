@@ -2,31 +2,39 @@ package com.auth.service.system.file.controller;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
+import com.auth.module.file.export.delivery.FileDelivery;
+import com.auth.module.security.autoconfigure.annotation.AuthenticatedApi;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.module.security.contract.annotation.OperationLog;
-import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
-import com.auth.service.system.common.model.SystemAuditBizModule;
 import com.auth.service.system.file.model.query.FileRecordPageQuery;
 import com.auth.service.system.file.model.vo.FileRecordDetailVO;
 import com.auth.service.system.file.model.vo.FileRecordPageVO;
 import com.auth.service.system.file.service.SysFileRecordService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+
+import java.util.List;
+
+import static com.auth.module.security.contract.api.audit.AuditServiceDomain.SYSTEM;
+import static com.auth.service.system.common.model.SystemAuditBizModule.SYS_FILE;
 
 /**
  * 当前用户文件查询与治理控制器
  *
  * @author Bunny
  */
+@AuthenticatedApi
 @RequestMapping("/api/system/me/file")
 @RestController
-public class CurrentController {
+public class PersonalFileRecordController {
 
 	private final SysFileRecordService sysFileRecordService;
 
-	public CurrentController(SysFileRecordService sysFileRecordService) {
+	public PersonalFileRecordController(SysFileRecordService sysFileRecordService) {
 		this.sysFileRecordService = sysFileRecordService;
 	}
 
@@ -48,13 +56,24 @@ public class CurrentController {
 		return Result.success(detail);
 	}
 
-	@OperationLog(targetType = "FILE_RECORD", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_FILE, operation = OperationLogKind.DELETE)
-	@Operation(summary = "文件逻辑删除")
-	@DeleteMapping("/{id}")
-	public Result<Void> delete(@PathVariable("id") Long id) {
+	@OperationLog(targetType = "FILE_RECORD_DOWNLOAD", serviceDomain = SYSTEM, bizModule = SYS_FILE,
+			operation = OperationLogKind.EXPORT)
+	@Operation(summary = "文件批量下载")
+	@PostMapping("/download")
+	public ResponseEntity<StreamingResponseBody> batchDownload(@RequestBody List<Long> ids) {
 		Long ownerUserId = SecurityUserUtils.getUserId();
-		sysFileRecordService.deleteById(id, ownerUserId);
+		StreamingResponseBody body = sysFileRecordService.batchDownload(ids, ownerUserId);
+		return FileDelivery.deliver(body, SysFileRecordService.BATCH_DOWNLOAD_FILE_NAME,
+				SysFileRecordService.BATCH_DOWNLOAD_CONTENT_TYPE);
+	}
+
+	@OperationLog(targetType = "FILE_RECORD", serviceDomain = SYSTEM, bizModule = SYS_FILE,
+			operation = OperationLogKind.DELETE)
+	@Operation(summary = "文件批量逻辑删除")
+	@DeleteMapping()
+	public Result<Void> delete(@RequestBody List<Long> ids) {
+		Long ownerUserId = SecurityUserUtils.getUserId();
+		sysFileRecordService.deleteByIds(ids, ownerUserId);
 		return Result.success();
 	}
 

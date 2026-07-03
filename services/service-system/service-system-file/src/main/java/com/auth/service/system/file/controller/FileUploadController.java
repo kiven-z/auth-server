@@ -1,6 +1,7 @@
 package com.auth.service.system.file.controller;
 
 import com.auth.common.core.model.response.Result;
+import com.auth.module.security.autoconfigure.annotation.AuthenticatedApi;
 import com.auth.service.system.file.model.form.FileUploadForm;
 import com.auth.service.system.file.model.vo.FileUploadResponseVO;
 import com.auth.service.system.file.service.FileUploadService;
@@ -26,6 +27,7 @@ public class FileUploadController {
 
 	private final FileUploadService fileUploadService;
 
+	@AuthenticatedApi
 	@Operation(summary = "单文件上传")
 	@PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public Result<FileUploadResponseVO> upload(@Valid FileUploadForm form) {
