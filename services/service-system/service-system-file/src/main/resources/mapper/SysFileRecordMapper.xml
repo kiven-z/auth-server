@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.auth.service.system.file.mapper.SysFileRecordMapper">
+
+    <!-- 文件记录分页查询 -->
+    <select id="selectListByPage" resultType="com.auth.service.system.file.model.po.SysFileRecordPageRowPO">
+        SELECT
+        id,
+        storage_platform,
+        upload_mode,
+        bucket,
+        object_key,
+        url,
+        original_name,
+        content_type,
+        size,
+        biz_type,
+        biz_id,
+        remark,
+        create_time,
+        update_time,
+        create_user,
+        update_user
+        FROM
+        sys_file_record
+        <where>
+            is_deleted = 0
+            <if test="query.bizType != null and query.bizType != ''">
+                AND biz_type =
+                #{query.bizType}
+            </if>
+            <if test="query.bizId != null and query.bizId != ''">
+                AND biz_id =
+                #{query.bizId}
+            </if>
+            <if test="query.originalName != null and query.originalName != ''">
+                AND original_name LIKE CONCAT('%',
+                #{query.originalName},
+                '%'
+                )
+            </if>
+            <if test="query.ownerUserId != null">
+                AND create_user =
+                #{query.ownerUserId}
+            </if>
+        </where>
+        ORDER BY
+        create_time DESC
+    </select>
+
+</mapper>

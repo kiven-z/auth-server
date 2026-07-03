@@ -56,6 +56,11 @@ public class SystemAuditBizModule {
 	public static final String DEPT_CLOSURE = "DEPT_CLOSURE";
 
 	/**
+	 * 文件
+	 */
+	public static final String SYS_FILE = "SYS_FILE";
+
+	/**
 	 * 邮件模板
 	 */
 	public static final String SYS_EMAIL_TEMPLATE = "SYS_EMAIL_TEMPLATE";

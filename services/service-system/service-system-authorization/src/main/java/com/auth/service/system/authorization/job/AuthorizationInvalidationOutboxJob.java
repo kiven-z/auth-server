@@ -43,7 +43,7 @@ public class AuthorizationInvalidationOutboxJob {
 	/**
 	 * 定时扫描并补偿投递失败的 Outbox 记录。
 	 */
-	@Scheduled(fixedDelayString = "${auth.system.authorization-invalidation.poll-interval-ms:30000}")
+	@Scheduled(fixedDelayString = "${auth.authorization.poll-interval-ms:30000}")
 	public void pollAndDispatch() {
 		LocalDateTime now = LocalDateTime.now();
 		Integer pollBatchSize = properties.getPollBatchSize();

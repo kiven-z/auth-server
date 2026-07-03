@@ -63,6 +63,7 @@
 
 		<!-- 文件/存储 -->
 		<minio.version>8.6.0</minio.version>
+		<aliyun-oss.version>3.18.2</aliyun-oss.version>
 
 		<!-- 文档 -->
 		<springdoc.version>2.8.14</springdoc.version>
@@ -138,6 +139,11 @@
 				<groupId>io.minio</groupId>
 				<artifactId>minio</artifactId>
 				<version>${minio.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.aliyun.oss</groupId>
+				<artifactId>aliyun-sdk-oss</artifactId>
+				<version>${aliyun-oss.version}</version>
 			</dependency>
 
 			<!-- API文档 -->

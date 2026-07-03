@@ -1,13 +1,11 @@
 package com.auth.service.system.message.config;
 
-import cn.hutool.core.text.CharSequenceUtil;
-import com.auth.service.system.common.exception.SystemBusinessException;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
+import static com.auth.service.system.message.utils.MessageConfigAssertions.assertNotBlank;
 
 /**
  * 短信渠道业务配置
@@ -42,17 +40,6 @@ public class SmsProperties {
 		assertNotBlank(accessKeyId, "短信 AccessKeyId");
 		assertNotBlank(accessKeySecret, "短信 AccessKeySecret");
 		assertNotBlank(signName, "短信签名");
-	}
-
-	/**
-	 * 断言字段不能为空
-	 * @param value 字段值
-	 * @param fieldName 字段名称
-	 */
-	private void assertNotBlank(String value, String fieldName) {
-		if (CharSequenceUtil.isBlank(value)) {
-			throw new SystemBusinessException(PARAM_REQUIRED, fieldName);
-		}
 	}
 
 }

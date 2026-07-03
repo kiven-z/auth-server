@@ -13,6 +13,7 @@ services:
       SPRING_PROFILES_ACTIVE: dev
     ports:
       - "20001:20001"
+    restart: unless-stopped
     networks:
       - auth-network
 
@@ -28,6 +29,7 @@ services:
       SPRING_PROFILES_ACTIVE: dev
     ports:
       - "20002:20002"
+    restart: unless-stopped
     networks:
       - auth-network
 
@@ -43,6 +45,7 @@ services:
       SPRING_PROFILES_ACTIVE: dev
     ports:
       - "8080:8080"
+    restart: unless-stopped
     networks:
       - auth-network
 
