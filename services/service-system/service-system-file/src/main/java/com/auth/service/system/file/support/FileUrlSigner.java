@@ -8,10 +8,11 @@ import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.file.config.FileUploadProperties;
 import com.auth.service.system.file.exception.FileException;
 import com.auth.service.system.file.exception.FileUploadResultCode;
+import com.auth.service.system.file.storage.FileStorageProvider;
+import com.auth.service.system.file.storage.FileStorageProviderRegistry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
 import java.util.List;
 
 /**
@@ -37,28 +38,32 @@ public class FileUrlSigner {
 
 	private final FileUploadProperties fileUploadProperties;
 
+	private final FileStorageProviderRegistry storageProviderRegistry;
+
 	/**
 	 * 生成带过期时间的访问地址
-	 * @param sourceUrl 源地址
+	 * @param bucket 存储桶
+	 * @param objectKey 对象键
 	 * @param contentType 文件类型
 	 * @param platform 存储平台
 	 * @return 临时访问地址
 	 */
-	public String sign(String sourceUrl, String contentType, StoragePlatformEnum platform) {
+	public String sign(String bucket, String objectKey, String contentType, StoragePlatformEnum platform) {
 		if (platform == null) {
 			throw new FileException(FileUploadResultCode.FILE_STORAGE_PLATFORM_UNSUPPORTED, "null");
 		}
-		if (CharSequenceUtil.isBlank(sourceUrl)) {
-			throw new SystemBusinessException(SystemCommonResultCode.DATA_UNAVAILABLE, "url");
+		if (CharSequenceUtil.isBlank(bucket)) {
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_UNAVAILABLE, "bucket");
+		}
+		if (CharSequenceUtil.isBlank(objectKey)) {
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_UNAVAILABLE, "objectKey");
 		}
 
 		requirePreviewContentTypeAllowed(contentType);
-
 		Integer expireSeconds = resolveExpireSeconds();
-		long expiresAt = Instant.now().plusSeconds(expireSeconds).getEpochSecond();
 
-		String delimiter = sourceUrl.contains("?") ? "&" : "?";
-		return sourceUrl + delimiter + "expires=" + expiresAt;
+		FileStorageProvider provider = storageProviderRegistry.resolve(platform);
+		return provider.presignGetUrl(bucket, objectKey, expireSeconds);
 	}
 
 	/**

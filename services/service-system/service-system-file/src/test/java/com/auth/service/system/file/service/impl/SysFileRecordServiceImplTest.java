@@ -17,10 +17,12 @@ import com.auth.service.system.file.model.vo.FileRecordPageVO;
 import com.auth.service.system.file.service.SysFileRecordService;
 import com.auth.service.system.file.storage.FileStorageProvider;
 import com.auth.service.system.file.storage.FileStorageProviderRegistry;
+import com.auth.service.system.file.support.FileRecordPageAssembler;
 import com.auth.service.system.file.support.FileRecordReferenceChecker;
 import com.auth.service.system.file.support.FileUrlSigner;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.repository.CrudRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -81,8 +83,10 @@ class SysFileRecordServiceImplTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		sysFileRecordService = spy(new SysFileRecordServiceImpl(fileRecordReferenceChecker, fileUrlSigner,
-				auditUserDisplayService, storageProviderRegistry));
+		FileRecordPageAssembler fileRecordPageAssembler = new FileRecordPageAssembler(fileUrlSigner,
+				auditUserDisplayService);
+		sysFileRecordService = spy(new SysFileRecordServiceImpl(fileRecordReferenceChecker, fileRecordPageAssembler,
+				fileUrlSigner, auditUserDisplayService, storageProviderRegistry));
 		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysFileRecordService, sysFileRecordMapper);
@@ -93,8 +97,9 @@ class SysFileRecordServiceImplTest {
 	void getDetailReturnsSignedAccessUrl() {
 		// 验证详情查询会补充签名访问地址。
 		SysFileRecordEntity entity = buildEntity(1001L);
-		when(fileRecordReferenceChecker.getExistingActiveBatch(List.of(1001L))).thenReturn(List.of(entity));
-		when(fileUrlSigner.sign(entity.getUrl(), entity.getContentType(), entity.getStoragePlatform()))
+		when(fileRecordReferenceChecker.getExistingBatch(List.of(1001L), false)).thenReturn(List.of(entity));
+		when(fileUrlSigner.sign(entity.getBucket(), entity.getObjectKey(), entity.getContentType(),
+				entity.getStoragePlatform()))
 			.thenReturn(entity.getUrl() + "?expires=100");
 
 		FileRecordDetailVO detail = sysFileRecordService.getDetail(1001L, null);
@@ -118,7 +123,8 @@ class SysFileRecordServiceImplTest {
 		Page<SysFileRecordPageRowPO> page = new Page<>(1, 20, 1);
 		page.setRecords(List.of(visible));
 		when(sysFileRecordMapper.selectListByPage(org.mockito.ArgumentMatchers.any(), eq(query))).thenReturn(page);
-		when(fileUrlSigner.sign(visible.getUrl(), visible.getContentType(), visible.getStoragePlatform()))
+		when(fileUrlSigner.sign(visible.getBucket(), visible.getObjectKey(), visible.getContentType(),
+				visible.getStoragePlatform()))
 			.thenReturn(visible.getUrl() + "?expires=200");
 
 		PageResponse<FileRecordPageVO> pageResult = sysFileRecordService.getPage(query);
@@ -143,7 +149,8 @@ class SysFileRecordServiceImplTest {
 		Page<SysFileRecordPageRowPO> page = new Page<>(1, 20, 1);
 		page.setRecords(List.of(visible));
 		when(sysFileRecordMapper.selectListByPage(org.mockito.ArgumentMatchers.any(), eq(query))).thenReturn(page);
-		when(fileUrlSigner.sign(visible.getUrl(), visible.getContentType(), visible.getStoragePlatform()))
+		when(fileUrlSigner.sign(visible.getBucket(), visible.getObjectKey(), visible.getContentType(),
+				visible.getStoragePlatform()))
 			.thenReturn(visible.getUrl() + "?expires=201");
 
 		PageResponse<FileRecordPageVO> pageResult = sysFileRecordService.getPage(query);
@@ -169,7 +176,8 @@ class SysFileRecordServiceImplTest {
 		Page<SysFileRecordPageRowPO> page = new Page<>(1, 20, 1);
 		page.setRecords(List.of(visible));
 		when(sysFileRecordMapper.selectListByPage(org.mockito.ArgumentMatchers.any(), eq(query))).thenReturn(page);
-		when(fileUrlSigner.sign(visible.getUrl(), visible.getContentType(), visible.getStoragePlatform()))
+		when(fileUrlSigner.sign(visible.getBucket(), visible.getObjectKey(), visible.getContentType(),
+				visible.getStoragePlatform()))
 			.thenReturn(visible.getUrl() + "?expires=202");
 
 		sysFileRecordService.getPage(query);
@@ -179,34 +187,11 @@ class SysFileRecordServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("getRecyclePage：回收站分页走专用 Mapper 查询")
-	void getRecyclePageUsesRecycleMapperQuery() {
-		// 验证回收站分页会调用回收站专用查询，而不是普通分页查询。
-		FileRecordPageQuery query = new FileRecordPageQuery();
-		query.setPageIndex(1);
-		query.setPageSize(20);
-
-		SysFileRecordPageRowPO recycled = buildPageRow(2101L);
-		Page<SysFileRecordPageRowPO> page = new Page<>(1, 20, 1);
-		page.setRecords(List.of(recycled));
-		when(sysFileRecordMapper.selectRecycleListByPage(org.mockito.ArgumentMatchers.any(), eq(query)))
-			.thenReturn(page);
-		when(fileUrlSigner.sign(recycled.getUrl(), recycled.getContentType(), recycled.getStoragePlatform()))
-			.thenReturn(recycled.getUrl() + "?expires=210");
-
-		PageResponse<FileRecordPageVO> pageResult = sysFileRecordService.getRecyclePage(query);
-
-		assertThat(pageResult.getList()).hasSize(1);
-		verify(sysFileRecordMapper).selectRecycleListByPage(org.mockito.ArgumentMatchers.any(), eq(query));
-		verify(sysFileRecordMapper, never()).selectListByPage(org.mockito.ArgumentMatchers.any(), any());
-	}
-
-	@Test
 	@DisplayName("getDetail：个人访问他人记录时拒绝")
 	void getDetailThrowsWhenOwnerMismatch() {
 		// 验证个人详情查询会进行归属校验并拒绝访问他人记录。
 		SysFileRecordEntity entity = buildEntity(3001L);
-		when(fileRecordReferenceChecker.getExistingActiveBatch(List.of(3001L))).thenReturn(List.of(entity));
+		when(fileRecordReferenceChecker.getExistingBatch(List.of(3001L), false)).thenReturn(List.of(entity));
 		doThrow(new FileException(FileUploadResultCode.FILE_ACCESS_DENIED, 3001L)).when(fileRecordReferenceChecker)
 			.requireOwnerBatch(List.of(entity), 9002L);
 
@@ -224,7 +209,7 @@ class SysFileRecordServiceImplTest {
 		// 验证个人批量删除会通过批量 owner 校验拒绝越权记录。
 		SysFileRecordEntity first = buildEntity(4001L);
 		SysFileRecordEntity second = buildEntity(4002L);
-		when(fileRecordReferenceChecker.getExistingActiveBatch(List.of(4001L, 4002L)))
+		when(fileRecordReferenceChecker.getExistingBatch(List.of(4001L, 4002L), false))
 			.thenReturn(List.of(first, second));
 		doThrow(new FileException(FileUploadResultCode.FILE_ACCESS_DENIED, 4002L)).when(fileRecordReferenceChecker)
 			.requireOwnerBatch(List.of(first, second), 9004L);
@@ -248,7 +233,7 @@ class SysFileRecordServiceImplTest {
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.PARAM_REQUIRED);
 		verify(sysFileRecordService, never()).removeByIds(anyList());
-		verify(fileRecordReferenceChecker, never()).getExistingActiveBatch(anyList());
+		verify(fileRecordReferenceChecker, never()).getExistingBatch(anyList(), anyBoolean());
 	}
 
 	@Test
@@ -257,7 +242,7 @@ class SysFileRecordServiceImplTest {
 		// 验证批量删除遇到缺失记录会直接中断并抛业务异常。
 		doThrow(new FileException(FileUploadResultCode.FILE_RECORD_NOT_FOUND, List.of(4101L, 4102L)))
 			.when(fileRecordReferenceChecker)
-			.getExistingActiveBatch(List.of(4101L, 4102L));
+			.getExistingBatch(List.of(4101L, 4102L), false);
 
 		List<Long> missingIds = List.of(4101L, 4102L);
 		assertThatThrownBy(() -> sysFileRecordService.deleteByIds(missingIds, null)).isInstanceOf(FileException.class)
@@ -272,13 +257,13 @@ class SysFileRecordServiceImplTest {
 		// 验证批量删除只进行一次批量加载，随后在内存中完成校验并删除。
 		SysFileRecordEntity first = buildEntity(5001L);
 		SysFileRecordEntity second = buildEntity(5002L);
-		when(fileRecordReferenceChecker.getExistingActiveBatch(List.of(5001L, 5002L)))
+		when(fileRecordReferenceChecker.getExistingBatch(List.of(5001L, 5002L), false))
 			.thenReturn(List.of(first, second));
 		doReturn(true).when(sysFileRecordService).removeByIds(List.of(5001L, 5002L));
 
 		sysFileRecordService.deleteByIds(Arrays.asList(5001L, null, 5002L, 5001L), null);
 
-		verify(fileRecordReferenceChecker).getExistingActiveBatch(List.of(5001L, 5002L));
+		verify(fileRecordReferenceChecker).getExistingBatch(List.of(5001L, 5002L), false);
 		verify(sysFileRecordService).removeByIds(List.of(5001L, 5002L));
 	}
 
@@ -291,7 +276,7 @@ class SysFileRecordServiceImplTest {
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.PARAM_REQUIRED);
-		verify(fileRecordReferenceChecker, never()).getExistingActiveBatch(anyList());
+		verify(fileRecordReferenceChecker, never()).getExistingBatch(anyList(), anyBoolean());
 	}
 
 	@Test
@@ -305,7 +290,7 @@ class SysFileRecordServiceImplTest {
 		second.setOriginalName("report.txt");
 		second.setObjectKey("reports/6002.txt");
 
-		when(fileRecordReferenceChecker.getExistingActiveBatch(List.of(6001L, 6002L)))
+		when(fileRecordReferenceChecker.getExistingBatch(List.of(6001L, 6002L), false))
 			.thenReturn(List.of(first, second));
 		when(storageProviderRegistry.resolve(StoragePlatformEnum.MINIO)).thenReturn(minioProvider);
 		when(minioProvider.download("public", "reports/6001.txt"))
@@ -328,7 +313,7 @@ class SysFileRecordServiceImplTest {
 	void batchDownloadChecksOwnerWhenOwnerUserIdPresent() throws IOException {
 		// 验证个人端批量下载会进行归属校验，防止越权读取。
 		SysFileRecordEntity entity = buildEntity(7001L);
-		when(fileRecordReferenceChecker.getExistingActiveBatch(List.of(7001L))).thenReturn(List.of(entity));
+		when(fileRecordReferenceChecker.getExistingBatch(List.of(7001L), false)).thenReturn(List.of(entity));
 		when(storageProviderRegistry.resolve(StoragePlatformEnum.MINIO)).thenReturn(minioProvider);
 		when(minioProvider.download("public", "a.png")).thenReturn(new ByteArrayInputStream("x".getBytes()));
 
@@ -347,6 +332,7 @@ class SysFileRecordServiceImplTest {
 			response.setContentType(headers.getContentType().toString());
 		}
 		response.setHeader(HttpHeaders.CONTENT_DISPOSITION, headers.getFirst(HttpHeaders.CONTENT_DISPOSITION));
+		Assertions.assertNotNull(downloadResponse.getBody());
 		downloadResponse.getBody().writeTo(response.getOutputStream());
 		return response;
 	}

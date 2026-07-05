@@ -14,18 +14,24 @@ import com.auth.service.system.file.exception.FileUploadResultCode;
 import com.auth.service.system.file.model.value.FileUploadCommand;
 import com.auth.service.system.file.model.value.StoredFile;
 import com.auth.service.system.file.storage.FileStorageProvider;
+import com.auth.service.system.file.utils.StorageDeleteSupport;
 import com.auth.service.system.file.utils.StorageUrlUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.time.Instant;
+import java.util.Date;
 
 /**
  * 阿里云 OSS 文件上传实现
  *
  * @author Bunny
  */
+@Slf4j
 @Component
 public class AliyunOssFileStorageProvider implements FileStorageProvider {
 
@@ -110,6 +116,53 @@ public class AliyunOssFileStorageProvider implements FileStorageProvider {
 		catch (Exception exception) {
 			ossClient.shutdown();
 			throw new FileException(FileUploadResultCode.FILE_UPLOAD_FAILED, platform().name(), exception.getMessage());
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String presignGetUrl(String bucket, String objectKey, int expireSeconds) {
+		properties.assertAliyunOssConfigured();
+		FileUploadProperties.AliyunOssConfig config = properties.getAliyunOss();
+		OSS ossClient = new OSSClientBuilder().build(config.getEndpoint(), config.getAccessKeyId(),
+				config.getAccessKeySecret());
+		try {
+			Date expiration = Date.from(Instant.now().plusSeconds(expireSeconds));
+			URL presignedUrl = ossClient.generatePresignedUrl(bucket, objectKey, expiration);
+			return presignedUrl.toString();
+		}
+		catch (Exception exception) {
+			throw new FileException(FileUploadResultCode.FILE_UPLOAD_FAILED, platform().name(), exception.getMessage());
+		}
+		finally {
+			ossClient.shutdown();
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void delete(String bucket, String objectKey) {
+		properties.assertAliyunOssConfigured();
+		FileUploadProperties.AliyunOssConfig config = properties.getAliyunOss();
+		OSS ossClient = new OSSClientBuilder().build(config.getEndpoint(), config.getAccessKeyId(),
+				config.getAccessKeySecret());
+		try {
+			ossClient.deleteObject(bucket, objectKey);
+		}
+		catch (Exception exception) {
+			if (StorageDeleteSupport.isOssObjectNotFound(exception)) {
+				log.warn("OSS object already absent, skip delete: bucket={}, objectKey={}, reason={}", bucket,
+						objectKey, exception.getMessage());
+				return;
+			}
+			throw new FileException(FileUploadResultCode.FILE_UPLOAD_FAILED, platform().name(), exception.getMessage());
+		}
+		finally {
+			ossClient.shutdown();
 		}
 	}
 

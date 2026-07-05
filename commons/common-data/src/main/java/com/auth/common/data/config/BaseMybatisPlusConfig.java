@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.BlockAttackInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
-
 import org.springframework.context.annotation.Bean;
 
 /**
@@ -31,6 +30,7 @@ public interface BaseMybatisPlusConfig extends MetaObjectHandler {
 		// 使用优化COUNT，如果是大数据量表会使用估算值
 		paginationInnerInterceptor.setOptimizeJoin(false);
 		paginationInnerInterceptor.setMaxLimit(600L);
+		paginationInnerInterceptor.setOverflow(true);
 		interceptor.addInnerInterceptor(paginationInnerInterceptor);
 
 		// 乐观锁

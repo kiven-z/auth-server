@@ -1,18 +1,19 @@
 package com.auth.service.system.file.support;
 
-import cn.hutool.core.collection.CollUtil;
+import java.util.List;
+import java.util.Objects;
+
+import org.springframework.stereotype.Component;
+
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.file.exception.FileException;
 import com.auth.service.system.file.exception.FileUploadResultCode;
 import com.auth.service.system.file.mapper.SysFileRecordMapper;
 import com.auth.service.system.file.model.entity.SysFileRecordEntity;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.Objects;
+import cn.hutool.core.collection.CollUtil;
+import lombok.RequiredArgsConstructor;
 
 /**
  * 文件记录存在性校验
@@ -26,19 +27,19 @@ public class FileRecordReferenceChecker {
 	private final SysFileRecordMapper sysFileRecordMapper;
 
 	/**
-	 * 批量加载可用文件记录，不存在或已删除则抛业务异常
+	 * 批量加载指定可见性下的文件记录，不满足条件则抛业务异常
 	 * @param fileIds 文件记录 ID 集合
+	 * @param expectedDeleted 期望的逻辑删除状态
 	 * @return 文件记录
 	 */
-	public List<SysFileRecordEntity> getExistingActiveBatch(List<Long> fileIds) {
+	public List<SysFileRecordEntity> getExistingBatch(List<Long> fileIds, Boolean expectedDeleted) {
 		List<Long> normalizedIds = fileIds == null ? List.of()
 				: fileIds.stream().filter(Objects::nonNull).distinct().toList();
 		if (CollUtil.isEmpty(normalizedIds)) {
 			return List.of();
 		}
 
-		List<SysFileRecordEntity> entities = sysFileRecordMapper
-			.selectList(Wrappers.<SysFileRecordEntity>lambdaQuery().in(SysFileRecordEntity::getId, normalizedIds));
+		List<SysFileRecordEntity> entities = sysFileRecordMapper.selectIsDeletedByIds(normalizedIds, expectedDeleted);
 		if (CollUtil.isEmpty(entities) || entities.size() != normalizedIds.size()) {
 			throw new FileException(FileUploadResultCode.FILE_RECORD_NOT_FOUND, normalizedIds);
 		}

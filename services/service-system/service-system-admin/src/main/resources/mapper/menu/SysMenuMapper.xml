@@ -15,6 +15,7 @@
 		m.menu_type,
 		m.status,
 		m.show_link,
+		m.public_access,
 		m.menu_rank,
 		m.keep_alive,
 		m.fixed_tag,

@@ -46,14 +46,6 @@ public class FileRecordController {
 		return Result.success(pageResult);
 	}
 
-	@Operation(summary = "回收站文件分页查询")
-	@PreAuthorize("@auth.decide('sys:file:recycle:query')")
-	@GetMapping("/recycle/page")
-	public Result<PageResponse<FileRecordPageVO>> recyclePage(@Valid FileRecordPageQuery query) {
-		PageResponse<FileRecordPageVO> pageResult = sysFileRecordService.getRecyclePage(query);
-		return Result.success(pageResult);
-	}
-
 	@Operation(summary = "文件详情")
 	@PreAuthorize("@auth.decide('sys:file:query')")
 	@GetMapping("/{id}")

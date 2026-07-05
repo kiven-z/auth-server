@@ -1,14 +1,14 @@
 package com.auth.service.system.admin.model.form.menu;
 
-import java.io.Serial;
-import java.io.Serializable;
-
 import com.auth.common.web.valid.group.UpdateGroup;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * 菜单新增/更新表单（字段与前端 {@code MenuSaveRequest} camelCase 对齐）
@@ -57,6 +57,10 @@ public class SysMenuSaveForm implements Serializable {
 	@Schema(title = "是否在菜单中显示：0 否 1 是", requiredMode = Schema.RequiredMode.REQUIRED)
 	@NotNull(message = "showLink is required")
 	private Boolean showLink;
+
+	@Schema(title = "登录可见（不校验角色）", requiredMode = Schema.RequiredMode.REQUIRED)
+	@NotNull(message = "publicAccess is required")
+	private Boolean publicAccess;
 
 	@Schema(title = "排序，越大越靠后", requiredMode = Schema.RequiredMode.REQUIRED)
 	@NotNull(message = "menuRank is required")

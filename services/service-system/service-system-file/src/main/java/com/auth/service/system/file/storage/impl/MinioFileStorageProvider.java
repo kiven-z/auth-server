@@ -8,21 +8,24 @@ import com.auth.service.system.file.exception.FileUploadResultCode;
 import com.auth.service.system.file.model.value.FileUploadCommand;
 import com.auth.service.system.file.model.value.StoredFile;
 import com.auth.service.system.file.storage.FileStorageProvider;
+import com.auth.service.system.file.utils.StorageDeleteSupport;
 import com.auth.service.system.file.utils.StorageUrlUtil;
-import io.minio.GetObjectArgs;
-import io.minio.MinioClient;
-import io.minio.ObjectWriteResponse;
-import io.minio.PutObjectArgs;
+import io.minio.*;
+import io.minio.http.Method;
 import jakarta.annotation.PreDestroy;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * MinIO 文件上传实现
  *
  * @author Bunny
  */
+@Slf4j
 @Component
 public class MinioFileStorageProvider implements FileStorageProvider {
 
@@ -30,7 +33,7 @@ public class MinioFileStorageProvider implements FileStorageProvider {
 
 	private final FileUploadProperties properties;
 
-	private volatile MinioClient minioClient;
+	private final AtomicReference<MinioClient> minioClientRef = new AtomicReference<>();
 
 	public MinioFileStorageProvider(FileUploadProperties properties) {
 		this.properties = properties;
@@ -91,6 +94,42 @@ public class MinioFileStorageProvider implements FileStorageProvider {
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String presignGetUrl(String bucket, String objectKey, int expireSeconds) {
+		try {
+			return getMinioClient().getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder()
+				.method(Method.GET)
+				.bucket(bucket)
+				.object(objectKey)
+				.expiry(expireSeconds, TimeUnit.SECONDS)
+				.build());
+		}
+		catch (Exception exception) {
+			throw new FileException(FileUploadResultCode.FILE_UPLOAD_FAILED, platform().name(), exception.getMessage());
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void delete(String bucket, String objectKey) {
+		try {
+			getMinioClient().removeObject(RemoveObjectArgs.builder().bucket(bucket).object(objectKey).build());
+		}
+		catch (Exception exception) {
+			if (StorageDeleteSupport.isMinioObjectNotFound(exception)) {
+				log.warn("MinIO object already absent, skip delete: bucket={}, objectKey={}, reason={}", bucket,
+						objectKey, exception.getMessage());
+				return;
+			}
+			throw new FileException(FileUploadResultCode.FILE_UPLOAD_FAILED, platform().name(), exception.getMessage());
+		}
+	}
+
+	/**
 	 * 解析 MinIO 对外访问地址
 	 * @param config MinIO 配置
 	 * @param objectKey 对象键
@@ -110,20 +149,22 @@ public class MinioFileStorageProvider implements FileStorageProvider {
 	 * @return MinIO 客户端
 	 */
 	private MinioClient getMinioClient() {
-		MinioClient localClient = minioClient;
+		MinioClient localClient = minioClientRef.get();
 		if (localClient != null) {
 			return localClient;
 		}
 		synchronized (this) {
-			if (minioClient == null) {
+			localClient = minioClientRef.get();
+			if (localClient == null) {
 				properties.assertMinioConfigured();
 				FileUploadProperties.MinioConfig config = properties.getMinio();
-				minioClient = MinioClient.builder()
+				localClient = MinioClient.builder()
 					.endpoint(config.getEndpoint())
 					.credentials(config.getAccessKey(), config.getSecretKey())
 					.build();
+				minioClientRef.set(localClient);
 			}
-			return minioClient;
+			return localClient;
 		}
 	}
 
@@ -132,7 +173,7 @@ public class MinioFileStorageProvider implements FileStorageProvider {
 	 */
 	@PreDestroy
 	public void destroy() throws Exception {
-		MinioClient localClient = this.minioClient;
+		MinioClient localClient = minioClientRef.getAndSet(null);
 		if (localClient != null) {
 			localClient.close();
 		}

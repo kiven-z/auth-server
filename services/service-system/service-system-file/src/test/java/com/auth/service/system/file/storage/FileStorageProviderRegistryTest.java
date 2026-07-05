@@ -92,6 +92,16 @@ class FileStorageProviderRegistryTest {
 			throw new UnsupportedOperationException("not used");
 		}
 
+		@Override
+		public String presignGetUrl(String bucket, String objectKey, int expireSeconds) {
+			throw new UnsupportedOperationException("not used");
+		}
+
+		@Override
+		public void delete(String bucket, String objectKey) {
+			throw new UnsupportedOperationException("not used");
+		}
+
 	}
 
 }

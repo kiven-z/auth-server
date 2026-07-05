@@ -35,13 +35,6 @@ public interface SysFileRecordService extends IService<SysFileRecordEntity> {
 	PageResponse<FileRecordPageVO> getPage(FileRecordPageQuery query);
 
 	/**
-	 * 分页查询回收站文件记录
-	 * @param query 查询条件
-	 * @return 分页结果
-	 */
-	PageResponse<FileRecordPageVO> getRecyclePage(FileRecordPageQuery query);
-
-	/**
 	 * 查询文件详情
 	 * @param id 文件记录主键
 	 * @param ownerUserId 归属用户ID

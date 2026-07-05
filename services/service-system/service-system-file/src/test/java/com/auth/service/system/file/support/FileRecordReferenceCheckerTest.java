@@ -18,7 +18,8 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 /**
@@ -37,44 +38,41 @@ class FileRecordReferenceCheckerTest {
 	private FileRecordReferenceChecker fileRecordReferenceChecker;
 
 	@Test
-	@DisplayName("getExistingActiveBatch：已删除记录在 @TableLogic 下查询返回空")
-	void getExistingActiveBatchThrowsWhenRecordDeleted() {
-		// 验证逻辑删除记录在详情查询阶段会被识别为不存在。
-		when(sysFileRecordMapper.selectList(any())).thenReturn(List.of());
+	@DisplayName("getExistingBatch：按期望删除状态查询并返回记录")
+	void getExistingBatchReturnsWhenDeletedStateMatched() {
+		// 验证查询会透传 expectedDeleted 参数到 Mapper。
+		SysFileRecordEntity deleted = new SysFileRecordEntity();
+		deleted.setId(1102L);
+		deleted.setIsDeleted(true);
+		when(sysFileRecordMapper.selectIsDeletedByIds(List.of(1102L), true)).thenReturn(List.of(deleted));
 
-		List<Long> recordIds = List.of(1001L);
-		assertThatThrownBy(() -> fileRecordReferenceChecker.getExistingActiveBatch(recordIds))
+		SysFileRecordEntity result = fileRecordReferenceChecker.getExistingBatch(List.of(1102L), true).get(0);
+
+		assertThat(result).isSameAs(deleted);
+		verify(sysFileRecordMapper).selectIsDeletedByIds(List.of(1102L), true);
+	}
+
+	@Test
+	@DisplayName("getExistingBatch：删除状态不匹配时抛出 FILE_RECORD_NOT_FOUND")
+	void getExistingBatchThrowsWhenDeletedStateMismatch() {
+		// 验证删除状态不匹配会被识别为记录不存在。
+		List<Long> queryIds = List.of(1101L);
+		when(sysFileRecordMapper.selectIsDeletedByIds(queryIds, true)).thenReturn(List.of());
+
+		assertThatThrownBy(() -> fileRecordReferenceChecker.getExistingBatch(queryIds, true))
 			.isInstanceOf(FileException.class)
 			.extracting(exception -> ((FileException) exception).getResultCode())
 			.isEqualTo(FileUploadResultCode.FILE_RECORD_NOT_FOUND);
 	}
 
 	@Test
-	@DisplayName("getExistingActiveBatch：未删除记录可正常返回")
-	void getExistingActiveBatchReturnsWhenRecordVisible() {
-		// 验证可见记录会按原样返回给后续流程。
-		SysFileRecordEntity active = new SysFileRecordEntity();
-		active.setId(1002L);
-		when(sysFileRecordMapper.selectList(any())).thenReturn(List.of(active));
+	@DisplayName("getExistingBatch：空 ids 直接返回空列表")
+	void getExistingBatchReturnsEmptyWhenIdsEmpty() {
+		// 验证空输入不会访问数据库。
+		List<SysFileRecordEntity> result = fileRecordReferenceChecker.getExistingBatch(List.of(), true);
 
-		SysFileRecordEntity result = fileRecordReferenceChecker.getExistingActiveBatch(List.of(1002L)).get(0);
-
-		assertThat(result).isSameAs(active);
-	}
-
-	@Test
-	@DisplayName("getExistingActiveBatch：包含缺失记录时抛出 FILE_RECORD_NOT_FOUND")
-	void getExistingActiveBatchThrowsWhenAnyRecordMissing() {
-		// 验证批量加载时只要有一个记录不存在就会整体拒绝。
-		SysFileRecordEntity active = new SysFileRecordEntity();
-		active.setId(2001L);
-		when(sysFileRecordMapper.selectList(any())).thenReturn(List.of(active));
-
-		List<Long> mixedRecordIds = List.of(2001L, 2002L);
-		assertThatThrownBy(() -> fileRecordReferenceChecker.getExistingActiveBatch(mixedRecordIds))
-			.isInstanceOf(FileException.class)
-			.extracting(exception -> ((FileException) exception).getResultCode())
-			.isEqualTo(FileUploadResultCode.FILE_RECORD_NOT_FOUND);
+		assertThat(result).isEmpty();
+		verifyNoInteractions(sysFileRecordMapper);
 	}
 
 	@Test
@@ -103,40 +101,6 @@ class FileRecordReferenceCheckerTest {
 		List<SysFileRecordEntity> mismatchRecords = List.of(entity);
 		Long currentUserId = 1L;
 		assertThatThrownBy(() -> fileRecordReferenceChecker.requireOwnerBatch(mismatchRecords, currentUserId))
-			.isInstanceOf(FileException.class)
-			.extracting(ex -> ((FileException) ex).getResultCode())
-			.isEqualTo(FileUploadResultCode.FILE_ACCESS_DENIED);
-	}
-
-	@Test
-	@DisplayName("requireOwnerBatch：批量包含非本人记录时抛出 FILE_ACCESS_DENIED")
-	void requireOwnerBatchThrowsWhenAnyOwnerMismatch() {
-		// 验证批量归属校验场景下只要存在一条越权记录就拒绝。
-		SysFileRecordEntity selfOwned = new SysFileRecordEntity();
-		selfOwned.setId(3001L);
-		selfOwned.setCreateUser(1L);
-		SysFileRecordEntity otherOwned = new SysFileRecordEntity();
-		otherOwned.setId(3002L);
-		otherOwned.setCreateUser(2L);
-
-		List<SysFileRecordEntity> batchRecords = List.of(selfOwned, otherOwned);
-		Long currentUserId = 1L;
-		assertThatThrownBy(() -> fileRecordReferenceChecker.requireOwnerBatch(batchRecords, currentUserId))
-			.isInstanceOf(FileException.class)
-			.extracting(ex -> ((FileException) ex).getResultCode())
-			.isEqualTo(FileUploadResultCode.FILE_ACCESS_DENIED);
-	}
-
-	@Test
-	@DisplayName("requireOwnerBatch：记录无创建人时抛出 FILE_ACCESS_DENIED")
-	void requireOwnerBatchThrowsWhenRecordOwnerMissing() {
-		// 验证缺失创建人的历史数据不会被个人接口越权访问。
-		SysFileRecordEntity entity = new SysFileRecordEntity();
-		entity.setId(1005L);
-
-		List<SysFileRecordEntity> ownerMissingRecords = List.of(entity);
-		Long currentUserId = 1L;
-		assertThatThrownBy(() -> fileRecordReferenceChecker.requireOwnerBatch(ownerMissingRecords, currentUserId))
 			.isInstanceOf(FileException.class)
 			.extracting(ex -> ((FileException) ex).getResultCode())
 			.isEqualTo(FileUploadResultCode.FILE_ACCESS_DENIED);

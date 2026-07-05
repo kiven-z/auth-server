@@ -1,7 +1,6 @@
 package com.auth.service.system.file.service.impl;
 
 import com.auth.common.data.model.PageResponse;
-import com.auth.module.file.api.enums.StoragePlatformEnum;
 import com.auth.module.file.zip.ZipStreamWriter;
 import com.auth.module.file.zip.ZipStreamWriter.ZipEntryPayload;
 import com.auth.service.system.common.exception.SystemBusinessException;
@@ -10,17 +9,15 @@ import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.file.convert.FileRecordQueryConverter;
 import com.auth.service.system.file.mapper.SysFileRecordMapper;
 import com.auth.service.system.file.model.entity.SysFileRecordEntity;
-import com.auth.service.system.file.model.po.SysFileRecordPageRowPO;
 import com.auth.service.system.file.model.query.FileRecordPageQuery;
 import com.auth.service.system.file.model.vo.FileRecordDetailVO;
 import com.auth.service.system.file.model.vo.FileRecordPageVO;
 import com.auth.service.system.file.service.SysFileRecordService;
 import com.auth.service.system.file.storage.FileStorageProvider;
 import com.auth.service.system.file.storage.FileStorageProviderRegistry;
+import com.auth.service.system.file.support.FileRecordPageAssembler;
 import com.auth.service.system.file.support.FileRecordReferenceChecker;
 import com.auth.service.system.file.support.FileUrlSigner;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,7 +29,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -48,6 +44,8 @@ public class SysFileRecordServiceImpl extends ServiceImpl<SysFileRecordMapper, S
 
 	private final FileRecordReferenceChecker fileRecordReferenceChecker;
 
+	private final FileRecordPageAssembler fileRecordPageAssembler;
+
 	private final FileUrlSigner fileUrlSigner;
 
 	private final AuditUserDisplayService auditUserDisplayService;
@@ -60,43 +58,7 @@ public class SysFileRecordServiceImpl extends ServiceImpl<SysFileRecordMapper, S
 	@Override
 	@Transactional(readOnly = true)
 	public PageResponse<FileRecordPageVO> getPage(FileRecordPageQuery query) {
-		return pageQuery(query, baseMapper::selectListByPage);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	@Transactional(readOnly = true)
-	public PageResponse<FileRecordPageVO> getRecyclePage(FileRecordPageQuery query) {
-		return pageQuery(query, baseMapper::selectRecycleListByPage);
-	}
-
-	/**
-	 * 按指定查询函数执行分页并组装签名访问地址。
-	 * @param query 查询条件
-	 * @param pageLoader 分页加载函数
-	 * @return 分页结果
-	 */
-	private PageResponse<FileRecordPageVO> pageQuery(FileRecordPageQuery query,
-			BiFunction<Page<SysFileRecordEntity>, FileRecordPageQuery, IPage<SysFileRecordPageRowPO>> pageLoader) {
-		Page<SysFileRecordEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
-		IPage<SysFileRecordPageRowPO> page = pageLoader.apply(pageParams, query);
-
-		List<FileRecordPageVO> records = page.getRecords().stream().map(row -> {
-			FileRecordPageVO pageVO = FileRecordQueryConverter.INSTANCE.toPageVo(row);
-			String url = pageVO.getUrl();
-			String contentType = pageVO.getContentType();
-			StoragePlatformEnum platform = pageVO.getStoragePlatform();
-			String accessUrl = fileUrlSigner.sign(url, contentType, platform);
-			pageVO.setAccessUrl(accessUrl);
-			return pageVO;
-		}).toList();
-
-		Page<FileRecordPageVO> voPage = new Page<>(page.getCurrent(), page.getSize(), page.getTotal());
-		voPage.setRecords(records);
-		auditUserDisplayService.enrichAuditUsernames(voPage, null, null);
-		return PageResponse.of(voPage);
+		return fileRecordPageAssembler.assemblePage(query, baseMapper::selectListByPage);
 	}
 
 	/**
@@ -105,14 +67,15 @@ public class SysFileRecordServiceImpl extends ServiceImpl<SysFileRecordMapper, S
 	@Override
 	@Transactional(readOnly = true)
 	public FileRecordDetailVO getDetail(Long id, Long ownerUserId) {
-		List<SysFileRecordEntity> entities = fileRecordReferenceChecker.getExistingActiveBatch(List.of(id));
+		List<SysFileRecordEntity> entities = fileRecordReferenceChecker.getExistingBatch(List.of(id), false);
 		if (ownerUserId != null) {
 			fileRecordReferenceChecker.requireOwnerBatch(entities, ownerUserId);
 		}
 		SysFileRecordEntity entity = entities.get(0);
 
 		FileRecordDetailVO detail = FileRecordQueryConverter.INSTANCE.toDetailVo(entity);
-		String accessUrl = fileUrlSigner.sign(entity.getUrl(), entity.getContentType(), entity.getStoragePlatform());
+		String accessUrl = fileUrlSigner.sign(entity.getBucket(), entity.getObjectKey(), entity.getContentType(),
+				entity.getStoragePlatform());
 		detail.setAccessUrl(accessUrl);
 
 		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail), null, null);
@@ -178,7 +141,7 @@ public class SysFileRecordServiceImpl extends ServiceImpl<SysFileRecordMapper, S
 			throw new SystemBusinessException(SystemCommonResultCode.PARAM_REQUIRED, "ids");
 		}
 
-		List<SysFileRecordEntity> entities = fileRecordReferenceChecker.getExistingActiveBatch(normalizedIds);
+		List<SysFileRecordEntity> entities = fileRecordReferenceChecker.getExistingBatch(normalizedIds, false);
 		if (ownerUserId != null) {
 			fileRecordReferenceChecker.requireOwnerBatch(entities, ownerUserId);
 		}

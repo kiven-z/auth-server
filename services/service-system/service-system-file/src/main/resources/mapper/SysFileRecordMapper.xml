@@ -76,4 +76,68 @@
             create_time DESC
     </select>
 
+    <!-- 按主键批量查询已逻辑删除的文件记录 -->
+    <select id="selectIsDeletedByIds" resultType="com.auth.service.system.file.model.entity.SysFileRecordEntity">
+        SELECT
+            id,
+            storage_platform,
+            upload_mode,
+            bucket,
+            object_key,
+            url,
+            original_name,
+            extension,
+            content_type,
+            size,
+            etag,
+            biz_type,
+            biz_id,
+            remark,
+            create_time,
+            update_time,
+            create_user,
+            update_user,
+            version,
+            is_deleted
+        FROM
+            sys_file_record
+        WHERE
+            is_deleted = #{expectedDeleted}
+            AND id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <!-- 恢复已逻辑删除的文件记录 -->
+    <update id="restoreByIds">
+        UPDATE sys_file_record
+        SET
+            is_deleted = 0,
+            version = version + 1,
+            update_user = IF(
+                #{updateUser} IS NULL,
+                update_user,
+                #{updateUser}
+            ),
+            update_time = NOW()
+        WHERE
+            is_deleted = 1
+            AND id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <!-- 物理删除已逻辑删除的文件记录 -->
+    <delete id="deletePhysicallyByIds">
+        DELETE FROM sys_file_record
+        WHERE
+            is_deleted = 1
+            AND id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
 </mapper>

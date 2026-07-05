@@ -1,12 +1,13 @@
 package com.auth.service.system.admin.convert.admin.menu;
 
-import java.util.Collections;
-
 import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.admin.model.vo.menu.RouteMetaVO;
 import com.auth.service.system.admin.model.vo.menu.RouteTransitionVO;
 import lombok.experimental.UtilityClass;
+
+import java.util.Collections;
 
 /**
  * 路由 meta VO 构建（菜单实体 + 角色上下文）。
@@ -31,6 +32,8 @@ public class MenuRouteMetaConverter {
 		meta.setTitle(menu.getTitle());
 		meta.setIcon(menu.getIcon());
 		meta.setShowLink(menu.getShowLink());
+		// null 视为 false，默认按角色校验
+		meta.setPublicAccess(BooleanUtil.isTrue(menu.getPublicAccess()));
 		meta.setRank(menu.getMenuRank());
 		meta.setExtraIcon(menu.getExtraIcon());
 		meta.setShowParent(menu.getShowParent());

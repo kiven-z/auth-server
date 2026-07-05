@@ -34,4 +34,20 @@ public interface FileStorageProvider {
 	 */
 	InputStream download(String bucket, String objectKey);
 
+	/**
+	 * 生成对象读取预签名地址
+	 * @param bucket 存储桶
+	 * @param objectKey 对象键
+	 * @param expireSeconds 过期秒数
+	 * @return 预签名地址
+	 */
+	String presignGetUrl(String bucket, String objectKey, int expireSeconds);
+
+	/**
+	 * 删除存储对象
+	 * @param bucket 存储桶
+	 * @param objectKey 对象键
+	 */
+	void delete(String bucket, String objectKey);
+
 }
