@@ -1,19 +1,17 @@
 package com.auth.service.system.file.support;
 
-import java.util.List;
-import java.util.Objects;
-
-import org.springframework.stereotype.Component;
-
+import cn.hutool.core.collection.CollUtil;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
-import com.auth.service.system.file.exception.FileException;
+import com.auth.service.system.file.exception.FileStorageException;
 import com.auth.service.system.file.exception.FileUploadResultCode;
 import com.auth.service.system.file.mapper.SysFileRecordMapper;
 import com.auth.service.system.file.model.entity.SysFileRecordEntity;
-
-import cn.hutool.core.collection.CollUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Objects;
 
 /**
  * 文件记录存在性校验
@@ -41,7 +39,7 @@ public class FileRecordReferenceChecker {
 
 		List<SysFileRecordEntity> entities = sysFileRecordMapper.selectIsDeletedByIds(normalizedIds, expectedDeleted);
 		if (CollUtil.isEmpty(entities) || entities.size() != normalizedIds.size()) {
-			throw new FileException(FileUploadResultCode.FILE_RECORD_NOT_FOUND, normalizedIds);
+			throw new FileStorageException(FileUploadResultCode.FILE_RECORD_NOT_FOUND, normalizedIds);
 		}
 		return entities;
 	}
@@ -62,7 +60,7 @@ public class FileRecordReferenceChecker {
 		boolean hasOwnerMismatch = entities.stream()
 			.anyMatch(entity -> entity == null || !ownerUserId.equals(entity.getCreateUser()));
 		if (hasOwnerMismatch) {
-			throw new FileException(FileUploadResultCode.FILE_ACCESS_DENIED);
+			throw new FileStorageException(FileUploadResultCode.FILE_ACCESS_DENIED);
 		}
 	}
 

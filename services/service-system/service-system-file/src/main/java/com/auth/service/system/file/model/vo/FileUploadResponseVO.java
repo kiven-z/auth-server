@@ -47,6 +47,9 @@ public class FileUploadResponseVO extends BaseResponse {
 	@Schema(title = "文件大小（字节）")
 	private Long size;
 
+	@Schema(title = "是否私有文件")
+	private Boolean isPrivate;
+
 	@Schema(title = "对象ETag")
 	private String etag;
 

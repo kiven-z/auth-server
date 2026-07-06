@@ -51,6 +51,9 @@ public class SysFileRecordPageRowPO implements Serializable {
 	@Schema(title = "文件大小（字节）")
 	private Long size;
 
+	@Schema(title = "是否私有文件")
+	private Boolean isPrivate;
+
 	@Schema(title = "业务类型")
 	private String bizType;
 
@@ -71,5 +74,14 @@ public class SysFileRecordPageRowPO implements Serializable {
 
 	@Schema(title = "更新用户")
 	private Long updateUser;
+
+	@Schema(title = "删除来源")
+	private String deleteSource;
+
+	@Schema(title = "删除人")
+	private Long deletedBy;
+
+	@Schema(title = "删除时间")
+	private LocalDateTime deletedAt;
 
 }

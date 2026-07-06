@@ -61,9 +61,8 @@
 		<mapstruct.version>1.6.3</mapstruct.version>
 		<commons-lang3.version>3.18.0</commons-lang3.version>
 
-		<!-- 文件/存储 -->
-		<minio.version>8.6.0</minio.version>
-		<aliyun-oss.version>3.18.2</aliyun-oss.version>
+		<!-- 文件/存储：统一走 AWS SDK v2 S3 协议 -->
+		<aws-java-sdk-v2.version>2.46.19</aws-java-sdk-v2.version>
 
 		<!-- 文档 -->
 		<springdoc.version>2.8.14</springdoc.version>
@@ -106,6 +105,14 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+			<!-- AWS SDK v2 BOM，统一管理 S3 / Presigner 等模块版本 -->
+			<dependency>
+				<groupId>software.amazon.awssdk</groupId>
+				<artifactId>bom</artifactId>
+				<version>${aws-java-sdk-v2.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
 
 			<!-- 数据库相关 -->
 			<dependency>
@@ -132,18 +139,6 @@
 				<groupId>com.baomidou</groupId>
 				<artifactId>dynamic-datasource-spring-boot3-starter</artifactId>
 				<version>${dynamic-datasource.version}</version>
-			</dependency>
-
-			<!-- 文件存储 -->
-			<dependency>
-				<groupId>io.minio</groupId>
-				<artifactId>minio</artifactId>
-				<version>${minio.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.aliyun.oss</groupId>
-				<artifactId>aliyun-sdk-oss</artifactId>
-				<version>${aliyun-oss.version}</version>
 			</dependency>
 
 			<!-- API文档 -->

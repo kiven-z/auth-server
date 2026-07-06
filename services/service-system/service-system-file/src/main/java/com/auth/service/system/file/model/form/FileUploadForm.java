@@ -44,4 +44,7 @@ public class FileUploadForm implements Serializable {
 	@Size(max = 500, message = "remark 长度不能超过500个字符")
 	private String remark;
 
+	@Schema(title = "是否私有文件")
+	private Boolean isPrivate;
+
 }

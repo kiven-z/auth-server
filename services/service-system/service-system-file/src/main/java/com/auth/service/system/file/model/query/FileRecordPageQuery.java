@@ -61,6 +61,17 @@ public class FileRecordPageQuery extends PageQueryRequest {
 	private LocalDateTime endTime;
 
 	/**
+	 * 仅查询私有文件（回收站内部分页由服务层注入）
+	 */
+	private Boolean privateOnly;
+
+	/**
+	 * 删除来源筛选（回收站内部分页由服务层注入）
+	 */
+	@Size(max = 32, message = "deleteSource 长度不能超过32个字符")
+	private String deleteSource;
+
+	/**
 	 * 校验起止时间是否成对传入
 	 * @return 校验结果
 	 */

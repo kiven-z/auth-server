@@ -3,11 +3,12 @@ package com.auth.service.system.file.support;
 import com.auth.module.file.api.enums.StoragePlatformEnum;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
-import com.auth.service.system.file.config.FileUploadProperties;
-import com.auth.service.system.file.exception.FileException;
+import com.auth.service.system.file.config.properties.FileUploadProperties;
+import com.auth.service.system.file.exception.FileStorageException;
 import com.auth.service.system.file.exception.FileUploadResultCode;
-import com.auth.service.system.file.storage.FileStorageProvider;
-import com.auth.service.system.file.storage.FileStorageProviderRegistry;
+import com.auth.service.system.file.storage.StoragePlatformFacade;
+import com.auth.service.system.file.storage.StoragePlatformFacadeRegistry;
+import com.auth.service.system.file.storage.core.provider.FileStorageProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,7 +30,10 @@ import static org.mockito.Mockito.when;
 class FileUrlSignerTest {
 
 	@Mock
-	private FileStorageProviderRegistry storageProviderRegistry;
+	private StoragePlatformFacadeRegistry facadeRegistry;
+
+	@Mock
+	private StoragePlatformFacade storagePlatformFacade;
 
 	@Mock
 	private FileStorageProvider storageProvider;
@@ -39,15 +43,16 @@ class FileUrlSignerTest {
 	void signDelegatesToProviderPresignGetUrl() {
 		// 验证签名器会调用存储平台能力生成真实预签名地址。
 		FileUploadProperties properties = new FileUploadProperties();
-		properties.getUrl().setExpireSeconds(600);
-		FileUrlSigner signer = new FileUrlSigner(properties, storageProviderRegistry);
-		when(storageProviderRegistry.resolve(StoragePlatformEnum.MINIO)).thenReturn(storageProvider);
+		properties.setExpireSeconds(600);
+		FileUrlSigner signer = new FileUrlSigner(properties, facadeRegistry);
+		when(facadeRegistry.resolve(StoragePlatformEnum.MINIO)).thenReturn(storagePlatformFacade);
+		when(storagePlatformFacade.provider()).thenReturn(storageProvider);
 		when(storageProvider.presignGetUrl("public", "avatar/a.png", 600))
 			.thenReturn("https://presigned.example.com/avatar/a.png?X-Amz-Signature=xxx");
 
 		String signedUrl = signer.sign("public", "avatar/a.png", "image/png", StoragePlatformEnum.MINIO);
 
-		verify(storageProviderRegistry).resolve(StoragePlatformEnum.MINIO);
+		verify(facadeRegistry).resolve(StoragePlatformEnum.MINIO);
 		verify(storageProvider).presignGetUrl("public", "avatar/a.png", 600);
 		assertThat(signedUrl).isEqualTo("https://presigned.example.com/avatar/a.png?X-Amz-Signature=xxx");
 	}
@@ -57,12 +62,12 @@ class FileUrlSignerTest {
 	void signThrowsWhenContentTypeNotAllowed() {
 		// 验证文件类型不符合白名单时会抛出统一业务异常码。
 		FileUploadProperties properties = new FileUploadProperties();
-		properties.getPreview().setAllowedContentTypes(java.util.List.of("image/*"));
-		FileUrlSigner signer = new FileUrlSigner(properties, storageProviderRegistry);
+		properties.setAllowedContentTypes(java.util.List.of("image/*"));
+		FileUrlSigner signer = new FileUrlSigner(properties, facadeRegistry);
 
 		assertThatThrownBy(() -> signer.sign("public", "archive/a.zip", "application/zip", StoragePlatformEnum.MINIO))
-			.isInstanceOf(FileException.class)
-			.extracting(exception -> ((FileException) exception).getResultCode())
+			.isInstanceOf(FileStorageException.class)
+			.extracting(exception -> ((FileStorageException) exception).getResultCode())
 			.isEqualTo(FileUploadResultCode.FILE_PREVIEW_CONTENT_TYPE_NOT_ALLOWED);
 	}
 
@@ -71,7 +76,7 @@ class FileUrlSignerTest {
 	void signThrowsWhenBucketBlank() {
 		// 验证缺少 bucket 时会阻断签名流程，避免生成无效访问地址。
 		FileUploadProperties properties = new FileUploadProperties();
-		FileUrlSigner signer = new FileUrlSigner(properties, storageProviderRegistry);
+		FileUrlSigner signer = new FileUrlSigner(properties, facadeRegistry);
 
 		assertThatThrownBy(() -> signer.sign("", "avatar/a.png", "image/png", StoragePlatformEnum.MINIO))
 			.isInstanceOf(SystemBusinessException.class)

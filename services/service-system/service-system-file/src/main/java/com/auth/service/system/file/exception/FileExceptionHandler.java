@@ -3,7 +3,6 @@ package com.auth.service.system.file.exception;
 import com.auth.common.core.model.response.Result;
 import com.auth.service.system.common.exception.SystemResultResponseFactory;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.context.MessageSource;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -32,8 +31,8 @@ public class FileExceptionHandler {
 	 * @param exception 业务异常
 	 * @return 响应实体
 	 */
-	@ExceptionHandler(FileException.class)
-	public ResponseEntity<Result<Object>> handleFileException(FileException exception) {
+	@ExceptionHandler(FileStorageException.class)
+	public ResponseEntity<Result<Object>> handleFileException(FileStorageException exception) {
 		log.warn("File module exception: {}", exception.toString(), exception);
 
 		Result<Object> body = SystemResultResponseFactory.build(messageSource, exception.getResultCode(),

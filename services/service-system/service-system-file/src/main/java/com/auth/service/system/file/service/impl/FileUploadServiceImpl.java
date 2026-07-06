@@ -1,19 +1,12 @@
 package com.auth.service.system.file.service.impl;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
+import com.auth.module.file.api.enums.FileBizType;
+import com.auth.module.file.api.enums.FileBizType.ResolvedVisibility;
 import com.auth.module.file.api.enums.StoragePlatformEnum;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
-import com.auth.service.system.file.config.FileUploadProperties;
+import com.auth.service.system.file.config.properties.FileUploadProperties;
 import com.auth.service.system.file.convert.FileUploadConverter;
-import com.auth.service.system.file.convert.FileUploadRecordAssembler;
-import com.auth.service.system.file.exception.FileException;
-import com.auth.service.system.file.exception.FileUploadResultCode;
 import com.auth.service.system.file.mapper.SysFileRecordMapper;
 import com.auth.service.system.file.model.entity.SysFileRecordEntity;
 import com.auth.service.system.file.model.form.FileUploadForm;
@@ -21,15 +14,15 @@ import com.auth.service.system.file.model.value.FileUploadCommand;
 import com.auth.service.system.file.model.value.StoredFile;
 import com.auth.service.system.file.model.vo.FileUploadResponseVO;
 import com.auth.service.system.file.service.FileUploadService;
-import com.auth.service.system.file.storage.FileStorageProvider;
-import com.auth.service.system.file.storage.FileStorageProviderRegistry;
+import com.auth.service.system.file.storage.StoragePlatformFacadeRegistry;
+import com.auth.service.system.file.support.FileObjectKeyUtil;
+import com.auth.service.system.file.storage.core.provider.FileStorageProvider;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.lang.UUID;
-import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.util.ReUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Objects;
 
 /**
  * 文件上传服务实现类
@@ -43,7 +36,37 @@ public class FileUploadServiceImpl extends ServiceImpl<SysFileRecordMapper, SysF
 
 	private final FileUploadProperties fileUploadProperties;
 
-	private final FileStorageProviderRegistry storageProviderRegistry;
+	private final StoragePlatformFacadeRegistry facadeRegistry;
+
+	/**
+	 * 组装文件上传记录实体
+	 * @param storedFile 存储结果
+	 * @param form 上传表单
+	 * @param resolvedBizTypeCode 归一化业务类型编码
+	 * @param resolvedIsPrivate 最终私有性
+	 * @return 文件记录实体
+	 */
+	public static SysFileRecordEntity toEntity(StoredFile storedFile, FileUploadForm form, String resolvedBizTypeCode,
+			boolean resolvedIsPrivate) {
+		SysFileRecordEntity entity = new SysFileRecordEntity();
+		entity.setStoragePlatform(storedFile.getStoragePlatform());
+		entity.setBucket(storedFile.getBucket());
+		entity.setObjectKey(storedFile.getObjectKey());
+		entity.setUrl(storedFile.getUrl());
+		entity.setOriginalName(storedFile.getOriginalName());
+		entity.setExtension(storedFile.getExtension());
+		entity.setContentType(storedFile.getContentType());
+		entity.setSize(storedFile.getSize());
+		entity.setEtag(storedFile.getEtag());
+
+		entity.setBizType(resolvedBizTypeCode);
+		entity.setBizId(form.getBizId());
+		entity.setRemark(form.getRemark());
+		entity.setIsPrivate(resolvedIsPrivate);
+
+		entity.setUploadMode("SIMPLE");
+		return entity;
+	}
 
 	/**
 	 * {@inheritDoc}
@@ -55,60 +78,28 @@ public class FileUploadServiceImpl extends ServiceImpl<SysFileRecordMapper, SysF
 			throw new SystemBusinessException(SystemCommonResultCode.PARAM_REQUIRED, "file");
 		}
 
-		StoragePlatformEnum platform = resolvePlatform(form.getStoragePlatform());
-		FileStorageProvider provider = storageProviderRegistry.resolve(platform);
+		// 解析存储平台
+		String storagePlatform = form.getStoragePlatform();
+		StoragePlatformEnum platform = StoragePlatformEnum.fromNullable(storagePlatform);
+		platform = Objects.requireNonNullElse(platform, fileUploadProperties.getDefaultPlatform());
+
+		ResolvedVisibility visibility = FileBizType.resolveVisibility(form.getBizType(), form.getIsPrivate());
+		String bizTypeCode = visibility.bizTypeCode();
+		boolean isPrivate = visibility.isPrivate();
+
+		FileStorageProvider provider = facadeRegistry.resolve(platform).provider();
+		String objectKey = FileObjectKeyUtil.build(bizTypeCode, isPrivate, form.getFile().getOriginalFilename());
 		FileUploadCommand command = FileUploadCommand.builder()
 			.storagePlatform(platform)
 			.file(form.getFile())
-			.objectKey(buildObjectKey(form.getBizType(), form.getFile().getOriginalFilename()))
+			.objectKey(objectKey)
 			.build();
 
 		StoredFile storedFile = provider.upload(command);
-		SysFileRecordEntity entity = FileUploadRecordAssembler.toEntity(storedFile, form);
+		SysFileRecordEntity entity = toEntity(storedFile, form, bizTypeCode, isPrivate);
 		save(entity);
 
 		return FileUploadConverter.INSTANCE.toUploadResponse(entity);
-	}
-
-	/**
-	 * 解析本次上传的平台
-	 * @param requestPlatform 请求平台
-	 * @return 存储平台
-	 */
-	private StoragePlatformEnum resolvePlatform(String requestPlatform) {
-		try {
-			StoragePlatformEnum platform = StoragePlatformEnum.fromNullable(requestPlatform);
-			if (platform != null) {
-				return platform;
-			}
-		}
-		catch (IllegalArgumentException exception) {
-			throw new FileException(FileUploadResultCode.FILE_STORAGE_PLATFORM_UNSUPPORTED, requestPlatform);
-		}
-		if (fileUploadProperties.getDefaultPlatform() == null) {
-			throw new FileException(FileUploadResultCode.FILE_STORAGE_CONFIG_MISSING, "auth.file.default-platform");
-		}
-		return fileUploadProperties.getDefaultPlatform();
-	}
-
-	/**
-	 * 生成对象键，避免同名覆盖
-	 * @param bizType 业务类型
-	 * @param originalFilename 原始文件名
-	 * @return 对象键
-	 */
-	private String buildObjectKey(String bizType, String originalFilename) {
-		String dateDir = LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE);
-		String extension = FileUtil.extName(originalFilename);
-		String randomName = UUID.fastUUID().toString(true);
-		String filename = CharSequenceUtil.isBlank(extension) ? randomName : randomName + "." + extension;
-
-		if (CharSequenceUtil.isBlank(bizType)) {
-			return dateDir + "/" + filename;
-		}
-
-		bizType = ReUtil.replaceAll(CharSequenceUtil.trim(bizType), "[^a-zA-Z0-9_-]", "_");
-		return bizType + "/" + dateDir + "/" + filename;
 	}
 
 }

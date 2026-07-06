@@ -3,17 +3,16 @@ package com.auth.service.system.file.service.impl;
 import com.auth.module.file.api.enums.StoragePlatformEnum;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
-import com.auth.service.system.file.config.FileUploadProperties;
-import com.auth.service.system.file.exception.FileException;
-import com.auth.service.system.file.exception.FileUploadResultCode;
+import com.auth.service.system.file.config.properties.FileUploadProperties;
 import com.auth.service.system.file.mapper.SysFileRecordMapper;
 import com.auth.service.system.file.model.entity.SysFileRecordEntity;
 import com.auth.service.system.file.model.form.FileUploadForm;
 import com.auth.service.system.file.model.value.FileUploadCommand;
 import com.auth.service.system.file.model.value.StoredFile;
 import com.auth.service.system.file.model.vo.FileUploadResponseVO;
-import com.auth.service.system.file.storage.FileStorageProvider;
-import com.auth.service.system.file.storage.FileStorageProviderRegistry;
+import com.auth.service.system.file.storage.StoragePlatformFacade;
+import com.auth.service.system.file.storage.StoragePlatformFacadeRegistry;
+import com.auth.service.system.file.storage.core.provider.FileStorageProvider;
 import com.baomidou.mybatisplus.extension.repository.CrudRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -41,7 +40,10 @@ import static org.mockito.Mockito.*;
 class FileUploadServiceImplTest {
 
 	@Mock
-	private FileStorageProviderRegistry storageProviderRegistry;
+	private StoragePlatformFacadeRegistry facadeRegistry;
+
+	@Mock
+	private StoragePlatformFacade storagePlatformFacade;
 
 	@Mock
 	private FileStorageProvider fileStorageProvider;
@@ -55,19 +57,21 @@ class FileUploadServiceImplTest {
 	void setUp() throws Exception {
 		FileUploadProperties fileUploadProperties = new FileUploadProperties();
 		fileUploadProperties.setDefaultPlatform(StoragePlatformEnum.MINIO);
-		fileUploadService = spy(new FileUploadServiceImpl(fileUploadProperties, storageProviderRegistry));
+		fileUploadService = spy(new FileUploadServiceImpl(fileUploadProperties, facadeRegistry));
 		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(fileUploadService, sysFileRecordMapper);
 	}
 
 	@Test
-	@DisplayName("upload：请求不指定平台时走默认平台并完成落库")
-	void uploadUsesDefaultPlatformWhenRequestPlatformMissing() {
-		// 验证默认平台路由、上传成功后落库与响应字段映射。
+	@DisplayName("upload：avatar 固定公开前缀并落库 isPrivate=false")
+	void uploadUsesPublicPrefixAndPersistsResolvedVisibilityForAvatar() {
+		// 验证 avatar 业务类型固定公开，且对象键以 public/avatar 开头。
 		FileUploadForm form = buildForm(new MockMultipartFile("file", "avatar.png", "image/png", "demo".getBytes()));
-		StoredFile storedFile = buildStoredFile(StoragePlatformEnum.MINIO, "avatar/20260702/object.png");
-		when(storageProviderRegistry.resolve(StoragePlatformEnum.MINIO)).thenReturn(fileStorageProvider);
+		form.setIsPrivate(true);
+		StoredFile storedFile = buildStoredFile(StoragePlatformEnum.MINIO, "public/avatar/20260702/object.png");
+		when(facadeRegistry.resolve(StoragePlatformEnum.MINIO)).thenReturn(storagePlatformFacade);
+		when(storagePlatformFacade.provider()).thenReturn(fileStorageProvider);
 		when(fileStorageProvider.upload(any(FileUploadCommand.class))).thenReturn(storedFile);
 		doAnswer(invocation -> {
 			SysFileRecordEntity entity = invocation.getArgument(0);
@@ -83,8 +87,45 @@ class FileUploadServiceImplTest {
 		assertThat(savedEntity.getStoragePlatform()).isEqualTo(StoragePlatformEnum.MINIO);
 		assertThat(savedEntity.getUploadMode()).isEqualTo("SIMPLE");
 		assertThat(savedEntity.getBizType()).isEqualTo("avatar");
+		assertThat(savedEntity.getIsPrivate()).isFalse();
+		ArgumentCaptor<FileUploadCommand> commandCaptor = ArgumentCaptor.forClass(FileUploadCommand.class);
+		verify(fileStorageProvider).upload(commandCaptor.capture());
+		assertThat(commandCaptor.getValue().getObjectKey()).startsWith("public/avatar/");
 		assertThat(response.getId()).isEqualTo(1001L);
 		assertThat(response.getStoragePlatform()).isEqualTo(StoragePlatformEnum.MINIO);
+	}
+
+	@Test
+	@DisplayName("upload：attachment 默认私有并写入 private 前缀")
+	void uploadPersistsPrivateFlagForAttachmentBizType() {
+		// 验证 attachment 策略默认私有，且对象键以 private/attachment 开头。
+		FileUploadForm form = buildForm(new MockMultipartFile("file", "private.txt", "text/plain", "demo".getBytes()));
+		form.setBizType("attachment");
+		StoredFile storedFile = buildStoredFile(StoragePlatformEnum.MINIO, "private/attachment/20260702/object.txt");
+		when(facadeRegistry.resolve(StoragePlatformEnum.MINIO)).thenReturn(storagePlatformFacade);
+		when(storagePlatformFacade.provider()).thenReturn(fileStorageProvider);
+		when(fileStorageProvider.upload(any(FileUploadCommand.class))).thenReturn(storedFile);
+		doReturn(true).when(fileUploadService).save(any(SysFileRecordEntity.class));
+
+		fileUploadService.upload(form);
+
+		ArgumentCaptor<SysFileRecordEntity> entityCaptor = ArgumentCaptor.forClass(SysFileRecordEntity.class);
+		verify(fileUploadService).save(entityCaptor.capture());
+		assertThat(entityCaptor.getValue().getIsPrivate()).isTrue();
+		ArgumentCaptor<FileUploadCommand> commandCaptor = ArgumentCaptor.forClass(FileUploadCommand.class);
+		verify(fileStorageProvider).upload(commandCaptor.capture());
+		assertThat(commandCaptor.getValue().getObjectKey()).startsWith("private/attachment/");
+	}
+
+	@Test
+	@DisplayName("upload：未知 bizType 时抛出 IllegalArgumentException")
+	void uploadThrowsWhenBizTypeInvalid() {
+		// 验证未知业务类型在严格模式下被拒绝。
+		FileUploadForm form = buildForm(new MockMultipartFile("file", "avatar.jpg", "image/jpeg", "demo".getBytes()));
+		form.setBizType("foo");
+
+		assertThatThrownBy(() -> fileUploadService.upload(form)).isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("foo");
 	}
 
 	@Test
@@ -94,31 +135,14 @@ class FileUploadServiceImplTest {
 		FileUploadForm form = buildForm(new MockMultipartFile("file", "doc.pdf", "application/pdf", "demo".getBytes()));
 		form.setStoragePlatform("aliyun_oss");
 		StoredFile storedFile = buildStoredFile(StoragePlatformEnum.ALIYUN_OSS, "attachment/20260702/object.pdf");
-		when(storageProviderRegistry.resolve(StoragePlatformEnum.ALIYUN_OSS)).thenReturn(fileStorageProvider);
+		when(facadeRegistry.resolve(StoragePlatformEnum.ALIYUN_OSS)).thenReturn(storagePlatformFacade);
+		when(storagePlatformFacade.provider()).thenReturn(fileStorageProvider);
 		when(fileStorageProvider.upload(any(FileUploadCommand.class))).thenReturn(storedFile);
 		doReturn(true).when(fileUploadService).save(any(SysFileRecordEntity.class));
 
 		fileUploadService.upload(form);
 
-		verify(storageProviderRegistry).resolve(StoragePlatformEnum.ALIYUN_OSS);
-	}
-
-	@Test
-	@DisplayName("upload：bizType 路径片段会按规则标准化")
-	void uploadNormalizesBizTypePathSegment() {
-		// 验证业务类型中的特殊字符会被替换为下划线，避免对象键出现非法片段。
-		FileUploadForm form = buildForm(new MockMultipartFile("file", "doc.txt", "text/plain", "demo".getBytes()));
-		form.setBizType("avatar test@2026");
-		StoredFile storedFile = buildStoredFile(StoragePlatformEnum.MINIO, "avatar_test_2026/20260702/object.txt");
-		when(storageProviderRegistry.resolve(StoragePlatformEnum.MINIO)).thenReturn(fileStorageProvider);
-		when(fileStorageProvider.upload(any(FileUploadCommand.class))).thenReturn(storedFile);
-		doReturn(true).when(fileUploadService).save(any(SysFileRecordEntity.class));
-
-		fileUploadService.upload(form);
-
-		ArgumentCaptor<FileUploadCommand> commandCaptor = ArgumentCaptor.forClass(FileUploadCommand.class);
-		verify(fileStorageProvider).upload(commandCaptor.capture());
-		assertThat(commandCaptor.getValue().getObjectKey()).startsWith("avatar_test_2026/");
+		verify(facadeRegistry).resolve(StoragePlatformEnum.ALIYUN_OSS);
 	}
 
 	@Test
@@ -133,15 +157,14 @@ class FileUploadServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("upload：平台非法时抛出 FILE_STORAGE_PLATFORM_UNSUPPORTED")
+	@DisplayName("upload：平台非法时抛出 IllegalArgumentException")
 	void uploadThrowsWhenPlatformInvalid() {
-		// 验证非法平台字符串能够映射为统一业务异常码。
+		// 验证非法平台字符串会被枚举严格解析直接拒绝。
 		FileUploadForm form = buildForm(new MockMultipartFile("file", "avatar.jpg", "image/jpeg", "demo".getBytes()));
 		form.setStoragePlatform("s3");
 
-		assertThatThrownBy(() -> fileUploadService.upload(form)).isInstanceOf(FileException.class)
-			.extracting(ex -> ((FileException) ex).getResultCode())
-			.isEqualTo(FileUploadResultCode.FILE_STORAGE_PLATFORM_UNSUPPORTED);
+		assertThatThrownBy(() -> fileUploadService.upload(form)).isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("Unsupported storage platform");
 	}
 
 	private FileUploadForm buildForm(MockMultipartFile file) {

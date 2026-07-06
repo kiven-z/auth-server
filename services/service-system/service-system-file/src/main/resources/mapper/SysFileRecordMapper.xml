@@ -13,8 +13,12 @@
         original_name,
         content_type,
         size,
+        is_private,
         biz_type,
         biz_id,
+        delete_source,
+        deleted_by,
+        deleted_at,
         remark,
         create_time,
         update_time,
@@ -70,6 +74,12 @@
             sys_file_record
         <where>
             is_deleted = 1
+            <if test="query.privateOnly != null and query.privateOnly">
+                AND is_private = 1
+            </if>
+            <if test="query.deleteSource != null and query.deleteSource != ''">
+                AND delete_source = #{query.deleteSource}
+            </if>
             <include refid="fileRecordPageCommonFilter"/>
         </where>
         ORDER BY
@@ -90,8 +100,12 @@
             content_type,
             size,
             etag,
+            is_private,
             biz_type,
             biz_id,
+            delete_source,
+            deleted_by,
+            deleted_at,
             remark,
             create_time,
             update_time,
@@ -114,6 +128,9 @@
         UPDATE sys_file_record
         SET
             is_deleted = 0,
+            delete_source = NULL,
+            deleted_by = NULL,
+            deleted_at = NULL,
             version = version + 1,
             update_user = IF(
                 #{updateUser} IS NULL,
@@ -123,6 +140,33 @@
             update_time = NOW()
         WHERE
             is_deleted = 1
+            AND id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <!-- 逻辑删除文件记录并补全删除审计字段 -->
+    <update id="markDeletedByIds">
+        UPDATE sys_file_record
+        SET
+            is_deleted = 1,
+            delete_source = #{deleteSource},
+            deleted_by = IF(
+                #{deletedBy} IS NULL,
+                deleted_by,
+                #{deletedBy}
+            ),
+            deleted_at = NOW(),
+            version = version + 1,
+            update_user = IF(
+                #{updateUser} IS NULL,
+                update_user,
+                #{updateUser}
+            ),
+            update_time = NOW()
+        WHERE
+            is_deleted = 0
             AND id IN
         <foreach collection="ids" item="id" open="(" separator="," close=")">
             #{id}
@@ -139,5 +183,31 @@
             #{id}
         </foreach>
     </delete>
+
+    <!-- 物理删除未逻辑删除的文件记录 -->
+    <delete id="deletePhysicallyActiveByIds">
+        DELETE FROM sys_file_record
+        WHERE
+            is_deleted = 0
+            AND id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!-- 按主键更新文件隐私属性 -->
+    <update id="updatePrivacyById">
+        UPDATE sys_file_record
+        SET
+            object_key = #{objectKey},
+            is_private = #{isPrivate},
+            url = #{url},
+            version = version + 1,
+            update_user = #{updateUser},
+            update_time = NOW()
+        WHERE
+            id = #{id}
+            AND is_deleted = 0
+    </update>
 
 </mapper>

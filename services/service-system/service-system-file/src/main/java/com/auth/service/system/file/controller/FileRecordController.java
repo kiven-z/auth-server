@@ -3,8 +3,10 @@ package com.auth.service.system.file.controller;
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.file.export.delivery.FileDelivery;
+import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
+import com.auth.service.system.file.model.form.FilePrivacyUpdateForm;
 import com.auth.service.system.file.model.query.FileRecordPageQuery;
 import com.auth.service.system.file.model.vo.FileRecordDetailVO;
 import com.auth.service.system.file.model.vo.FileRecordPageVO;
@@ -67,11 +69,23 @@ public class FileRecordController {
 
 	@OperationLog(targetType = "FILE_RECORD", serviceDomain = SYSTEM, bizModule = SYS_FILE,
 			operation = OperationLogKind.DELETE)
-	@Operation(summary = "文件批量逻辑删除")
+	@Operation(summary = "文件批量删除")
 	@PreAuthorize("@auth.decide('sys:file:delete')")
 	@DeleteMapping()
 	public Result<Void> delete(@RequestBody List<Long> ids) {
-		sysFileRecordService.deleteByIds(ids, null);
+		Long operatorUserId = SecurityUserUtils.getUserId();
+		sysFileRecordService.deleteByIds(ids, null, operatorUserId);
+		return Result.success();
+	}
+
+	@OperationLog(targetType = "FILE_RECORD_PRIVACY", serviceDomain = SYSTEM, bizModule = SYS_FILE,
+			operation = OperationLogKind.UPDATE)
+	@Operation(summary = "文件隐私切换")
+	@PreAuthorize("@auth.decide('sys:file:privacy')")
+	@PostMapping("/privacy")
+	public Result<Void> updatePrivacy(@Valid @RequestBody FilePrivacyUpdateForm form) {
+		Long operatorUserId = SecurityUserUtils.getUserId();
+		sysFileRecordService.updatePrivacyByIds(form.getIds(), form.getIsPrivate(), null, operatorUserId);
 		return Result.success();
 	}
 

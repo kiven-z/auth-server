@@ -2,7 +2,7 @@ package com.auth.service.system.file.support;
 
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
-import com.auth.service.system.file.exception.FileException;
+import com.auth.service.system.file.exception.FileStorageException;
 import com.auth.service.system.file.exception.FileUploadResultCode;
 import com.auth.service.system.file.mapper.SysFileRecordMapper;
 import com.auth.service.system.file.model.entity.SysFileRecordEntity;
@@ -15,12 +15,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link FileRecordReferenceChecker} 单元测试。
@@ -60,8 +56,8 @@ class FileRecordReferenceCheckerTest {
 		when(sysFileRecordMapper.selectIsDeletedByIds(queryIds, true)).thenReturn(List.of());
 
 		assertThatThrownBy(() -> fileRecordReferenceChecker.getExistingBatch(queryIds, true))
-			.isInstanceOf(FileException.class)
-			.extracting(exception -> ((FileException) exception).getResultCode())
+			.isInstanceOf(FileStorageException.class)
+			.extracting(exception -> ((FileStorageException) exception).getResultCode())
 			.isEqualTo(FileUploadResultCode.FILE_RECORD_NOT_FOUND);
 	}
 
@@ -101,8 +97,8 @@ class FileRecordReferenceCheckerTest {
 		List<SysFileRecordEntity> mismatchRecords = List.of(entity);
 		Long currentUserId = 1L;
 		assertThatThrownBy(() -> fileRecordReferenceChecker.requireOwnerBatch(mismatchRecords, currentUserId))
-			.isInstanceOf(FileException.class)
-			.extracting(ex -> ((FileException) ex).getResultCode())
+			.isInstanceOf(FileStorageException.class)
+			.extracting(ex -> ((FileStorageException) ex).getResultCode())
 			.isEqualTo(FileUploadResultCode.FILE_ACCESS_DENIED);
 	}
 

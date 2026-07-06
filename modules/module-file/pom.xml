@@ -19,6 +19,11 @@
 	<dependencies>
 		<dependency>
 			<groupId>com.auth</groupId>
+			<artifactId>module-file-api</artifactId>
+			<version>0.0.2-beta</version>
+		</dependency>
+		<dependency>
+			<groupId>com.auth</groupId>
 			<artifactId>common-starter-web</artifactId>
 			<version>0.0.2-beta</version>
 		</dependency>

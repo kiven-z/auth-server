@@ -1,0 +1,62 @@
+package com.auth.service.system.file.support;
+
+import com.auth.service.system.common.exception.SystemBusinessException;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+/**
+ * {@link FileObjectKeyUtil} 单元测试。
+ *
+ * @author Bunny
+ */
+@DisplayName("FileObjectKeyUtil 对象键工具")
+class FileObjectKeyUtilTest {
+
+	@Test
+	@DisplayName("build：公开文件使用 public 前缀并归一化 bizType")
+	void buildUsesPublicPrefixAndNormalizesBizType() {
+		// 验证公开对象键以 public/ 开头，且 bizType 非法字符被替换。
+		String objectKey = FileObjectKeyUtil.build("avatar", false, "photo.png");
+
+		assertThat(objectKey).startsWith(FileObjectKeyUtil.PUBLIC_PREFIX + "avatar/").endsWith(".png");
+	}
+
+	@Test
+	@DisplayName("build：私有文件使用 private 前缀")
+	void buildUsesPrivatePrefixForPrivateFiles() {
+		// 验证私有对象键以 private/ 开头。
+		String objectKey = FileObjectKeyUtil.build("attachment", true, "report.txt");
+
+		assertThat(objectKey).startsWith(FileObjectKeyUtil.PRIVATE_PREFIX + "attachment/").endsWith(".txt");
+	}
+
+	@Test
+	@DisplayName("build：无扩展名时仅使用随机文件名")
+	void buildUsesRandomNameWhenExtensionMissing() {
+		// 验证无扩展名文件不会追加多余点号。
+		String objectKey = FileObjectKeyUtil.build("avatar", false, "photo");
+
+		assertThat(objectKey).startsWith(FileObjectKeyUtil.PUBLIC_PREFIX + "avatar/").doesNotContain("..");
+	}
+
+	@Test
+	@DisplayName("switchVisibilityPrefix：public 切换为 private 保留后缀路径")
+	void switchVisibilityPrefixMovesPublicToPrivate() {
+		// 验证仅替换可见性前缀，bizType/date/uuid 段保持不变。
+		String switched = FileObjectKeyUtil.switchVisibilityPrefix("public/avatar/20260702/a.png", true);
+
+		assertThat(switched).isEqualTo("private/avatar/20260702/a.png");
+	}
+
+	@Test
+	@DisplayName("switchVisibilityPrefix：非法前缀时抛业务异常")
+	void switchVisibilityPrefixThrowsWhenPrefixInvalid() {
+		// 验证未知前缀对象键会被拒绝。
+		assertThatThrownBy(() -> FileObjectKeyUtil.switchVisibilityPrefix("unknown/avatar/a.png", true))
+			.isInstanceOf(SystemBusinessException.class);
+	}
+
+}

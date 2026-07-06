@@ -9,6 +9,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 /**
  * 文件元数据实体，对应 {@code sys_file_record}
  *
@@ -50,6 +52,10 @@ public class SysFileRecordEntity extends BaseEntity {
 	@Schema(title = "对象ETag")
 	private String etag;
 
+	@TableField("is_private")
+	@Schema(title = "是否私有文件")
+	private Boolean isPrivate;
+
 	@Schema(title = "业务类型")
 	private String bizType;
 
@@ -60,5 +66,14 @@ public class SysFileRecordEntity extends BaseEntity {
 	@TableLogic(value = "0", delval = "1")
 	@Schema(title = "逻辑删除")
 	private Boolean isDeleted;
+
+	@Schema(title = "删除来源")
+	private String deleteSource;
+
+	@Schema(title = "删除人")
+	private Long deletedBy;
+
+	@Schema(title = "删除时间")
+	private LocalDateTime deletedAt;
 
 }

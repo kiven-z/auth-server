@@ -1,26 +1,27 @@
 package com.auth.service.system.file.service.impl;
 
-import java.util.List;
-import java.util.Objects;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.auth.common.data.model.PageResponse;
+import com.auth.module.file.api.constants.FileDeleteSourceConstants;
 import com.auth.module.file.api.enums.StoragePlatformEnum;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
+import com.auth.service.system.file.exception.FileStorageException;
+import com.auth.service.system.file.exception.FileUploadResultCode;
 import com.auth.service.system.file.mapper.SysFileRecordMapper;
 import com.auth.service.system.file.model.entity.SysFileRecordEntity;
 import com.auth.service.system.file.model.query.FileRecordPageQuery;
 import com.auth.service.system.file.model.vo.FileRecordPageVO;
 import com.auth.service.system.file.service.FileRecycleService;
-import com.auth.service.system.file.storage.FileStorageProvider;
-import com.auth.service.system.file.storage.FileStorageProviderRegistry;
+import com.auth.service.system.file.storage.StoragePlatformFacadeRegistry;
+import com.auth.service.system.file.storage.core.provider.FileStorageProvider;
 import com.auth.service.system.file.support.FileRecordPageAssembler;
 import com.auth.service.system.file.support.FileRecordReferenceChecker;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Objects;
 
 /**
  * 文件回收站服务实现
@@ -37,7 +38,7 @@ public class FileRecycleServiceImpl implements FileRecycleService {
 
 	private final FileRecordReferenceChecker fileRecordReferenceChecker;
 
-	private final FileStorageProviderRegistry storageProviderRegistry;
+	private final StoragePlatformFacadeRegistry facadeRegistry;
 
 	/**
 	 * {@inheritDoc}
@@ -45,6 +46,12 @@ public class FileRecycleServiceImpl implements FileRecycleService {
 	@Override
 	@Transactional(readOnly = true)
 	public PageResponse<FileRecordPageVO> getPage(FileRecordPageQuery query) {
+		// 按入口注入回收站分页范围
+		query.setPrivateOnly(true);
+		if (query.getOwnerUserId() != null) {
+			query.setDeleteSource(FileDeleteSourceConstants.USER_SELF);
+		}
+
 		return fileRecordPageAssembler.assemblePage(query, sysFileRecordMapper::selectRecycleListByPage);
 	}
 
@@ -55,6 +62,7 @@ public class FileRecycleServiceImpl implements FileRecycleService {
 	@Transactional(rollbackFor = Exception.class)
 	public void restoreByIds(List<Long> ids, Long ownerUserId, Long operatorUserId) {
 		List<SysFileRecordEntity> entities = resolveDeletedEntities(ids, ownerUserId);
+		requireRestorablePrivateFiles(entities, ownerUserId);
 		List<Long> normalizedIds = entities.stream().map(SysFileRecordEntity::getId).toList();
 		sysFileRecordMapper.restoreByIds(normalizedIds, operatorUserId);
 	}
@@ -66,14 +74,32 @@ public class FileRecycleServiceImpl implements FileRecycleService {
 	@Transactional(rollbackFor = Exception.class)
 	public void purgeByIds(List<Long> ids, Long ownerUserId) {
 		List<SysFileRecordEntity> entities = resolveDeletedEntities(ids, ownerUserId);
+		requireRestorablePrivateFiles(entities, ownerUserId);
 		for (SysFileRecordEntity entity : entities) {
 			StoragePlatformEnum platform = entity.getStoragePlatform();
-			FileStorageProvider provider = storageProviderRegistry.resolve(platform);
+			FileStorageProvider provider = facadeRegistry.resolve(platform).provider();
 			provider.delete(entity.getBucket(), entity.getObjectKey());
 		}
 
 		List<Long> normalizedIds = entities.stream().map(SysFileRecordEntity::getId).toList();
 		sysFileRecordMapper.deletePhysicallyByIds(normalizedIds);
+	}
+
+	/**
+	 * 校验仅允许恢复/彻底删除逻辑删除的私有文件
+	 * @param entities 已删除文件记录
+	 * @param ownerUserId 归属用户 ID，非空时仅允许 USER_SELF 来源
+	 */
+	private void requireRestorablePrivateFiles(List<SysFileRecordEntity> entities, Long ownerUserId) {
+		boolean hasInvalidRecord = entities.stream().anyMatch(entity -> {
+			if (!Boolean.TRUE.equals(entity.getIsPrivate())) {
+				return true;
+			}
+			return ownerUserId != null && !FileDeleteSourceConstants.USER_SELF.equals(entity.getDeleteSource());
+		});
+		if (hasInvalidRecord) {
+			throw new FileStorageException(FileUploadResultCode.FILE_ACCESS_DENIED);
+		}
 	}
 
 	/**

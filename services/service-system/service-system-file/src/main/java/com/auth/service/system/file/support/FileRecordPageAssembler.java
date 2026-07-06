@@ -29,7 +29,7 @@ public class FileRecordPageAssembler {
 	private final AuditUserDisplayService auditUserDisplayService;
 
 	/**
-	 * 执行分页查询并组装签名访问地址与审计用户名
+	 * 执行分页查询并组装访问地址与审计用户名
 	 * @param query 查询条件
 	 * @param pageLoader 分页加载函数
 	 * @return 分页结果

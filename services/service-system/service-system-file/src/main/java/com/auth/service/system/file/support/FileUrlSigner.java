@@ -5,11 +5,11 @@ import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.file.api.enums.StoragePlatformEnum;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
-import com.auth.service.system.file.config.FileUploadProperties;
-import com.auth.service.system.file.exception.FileException;
+import com.auth.service.system.file.config.properties.FileUploadProperties;
+import com.auth.service.system.file.exception.FileStorageException;
 import com.auth.service.system.file.exception.FileUploadResultCode;
-import com.auth.service.system.file.storage.FileStorageProvider;
-import com.auth.service.system.file.storage.FileStorageProviderRegistry;
+import com.auth.service.system.file.storage.StoragePlatformFacadeRegistry;
+import com.auth.service.system.file.storage.core.provider.FileStorageProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -24,8 +24,6 @@ import java.util.List;
 @Component
 public class FileUrlSigner {
 
-	private static final int DEFAULT_EXPIRE_SECONDS = 300;
-
 	/**
 	 * MIME 类型通配后缀，如 image/*
 	 */
@@ -38,7 +36,7 @@ public class FileUrlSigner {
 
 	private final FileUploadProperties fileUploadProperties;
 
-	private final FileStorageProviderRegistry storageProviderRegistry;
+	private final StoragePlatformFacadeRegistry facadeRegistry;
 
 	/**
 	 * 生成带过期时间的访问地址
@@ -50,7 +48,7 @@ public class FileUrlSigner {
 	 */
 	public String sign(String bucket, String objectKey, String contentType, StoragePlatformEnum platform) {
 		if (platform == null) {
-			throw new FileException(FileUploadResultCode.FILE_STORAGE_PLATFORM_UNSUPPORTED, "null");
+			throw new FileStorageException(FileUploadResultCode.FILE_STORAGE_PLATFORM_UNSUPPORTED, "null");
 		}
 		if (CharSequenceUtil.isBlank(bucket)) {
 			throw new SystemBusinessException(SystemCommonResultCode.DATA_UNAVAILABLE, "bucket");
@@ -60,10 +58,9 @@ public class FileUrlSigner {
 		}
 
 		requirePreviewContentTypeAllowed(contentType);
-		Integer expireSeconds = resolveExpireSeconds();
 
-		FileStorageProvider provider = storageProviderRegistry.resolve(platform);
-		return provider.presignGetUrl(bucket, objectKey, expireSeconds);
+		FileStorageProvider provider = facadeRegistry.resolve(platform).provider();
+		return provider.presignGetUrl(bucket, objectKey, fileUploadProperties.getExpireSeconds());
 	}
 
 	/**
@@ -71,14 +68,14 @@ public class FileUrlSigner {
 	 * @param contentType 文件类型
 	 */
 	private void requirePreviewContentTypeAllowed(String contentType) {
-		List<String> allowedTypes = fileUploadProperties.getPreview().getAllowedContentTypes();
+		List<String> allowedTypes = fileUploadProperties.getAllowedContentTypes();
 		if (CollUtil.isEmpty(allowedTypes)) {
 			return;
 		}
 
 		boolean matched = allowedTypes.stream()
 			.filter(CharSequenceUtil::isNotBlank)
-			.map(String::trim)
+			.map(CharSequenceUtil::trim)
 			.anyMatch(pattern -> {
 				// 内容类型匹配（支持 image/* 形式）
 				if (CharSequenceUtil.isBlank(contentType) || CharSequenceUtil.isBlank(pattern)) {
@@ -91,20 +88,8 @@ public class FileUrlSigner {
 				return CharSequenceUtil.equalsIgnoreCase(contentType, pattern);
 			});
 		if (!matched) {
-			throw new FileException(FileUploadResultCode.FILE_PREVIEW_CONTENT_TYPE_NOT_ALLOWED, contentType);
+			throw new FileStorageException(FileUploadResultCode.FILE_PREVIEW_CONTENT_TYPE_NOT_ALLOWED, contentType);
 		}
-	}
-
-	/**
-	 * 解析临时地址有效期
-	 * @return 有效期（秒）
-	 */
-	private Integer resolveExpireSeconds() {
-		Integer expireSeconds = fileUploadProperties.getUrl().getExpireSeconds();
-		if (expireSeconds == null || expireSeconds <= 0) {
-			return DEFAULT_EXPIRE_SECONDS;
-		}
-		return expireSeconds;
 	}
 
 }
