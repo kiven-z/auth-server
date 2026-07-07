@@ -1,7 +1,10 @@
 package com.auth.service.system.file.service;
 
+import com.auth.module.file.api.dto.FileUploadResultDTO;
 import com.auth.service.system.file.model.form.FileUploadForm;
-import com.auth.service.system.file.model.vo.FileUploadResponseVO;
+import com.auth.service.system.file.model.form.MultipleFileUploadForm;
+
+import java.util.List;
 
 /**
  * 文件上传服务。
@@ -15,6 +18,13 @@ public interface FileUploadService {
 	 * @param form 上传表单
 	 * @return 上传结果
 	 */
-	FileUploadResponseVO upload(FileUploadForm form);
+	FileUploadResultDTO upload(FileUploadForm form);
+
+	/**
+	 * 上传多个文件并落库
+	 * @param form 上传表单
+	 * @return 上传结果
+	 */
+	List<FileUploadResultDTO> uploadMultiple(MultipleFileUploadForm form);
 
 }

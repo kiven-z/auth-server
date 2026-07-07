@@ -1,9 +1,10 @@
 package com.auth.service.system.file.controller;
 
 import com.auth.common.core.model.response.Result;
+import com.auth.module.file.api.dto.FileUploadResultDTO;
 import com.auth.module.security.autoconfigure.annotation.AuthenticatedApi;
 import com.auth.service.system.file.model.form.FileUploadForm;
-import com.auth.service.system.file.model.vo.FileUploadResponseVO;
+import com.auth.service.system.file.model.form.MultipleFileUploadForm;
 import com.auth.service.system.file.service.FileUploadService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -13,6 +14,8 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * 文件上传控制器
@@ -30,9 +33,17 @@ public class FileUploadController {
 	@AuthenticatedApi
 	@Operation(summary = "单文件上传")
 	@PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public Result<FileUploadResponseVO> upload(@Valid FileUploadForm form) {
-		FileUploadResponseVO response = fileUploadService.upload(form);
+	public Result<FileUploadResultDTO> upload(@Valid FileUploadForm form) {
+		FileUploadResultDTO response = fileUploadService.upload(form);
 		return Result.success(response);
+	}
+
+	@AuthenticatedApi
+	@Operation(summary = "多文件上传")
+	@PostMapping(value = "/upload/multiple", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public Result<List<FileUploadResultDTO>> uploadMultiple(@Valid MultipleFileUploadForm form) {
+		List<FileUploadResultDTO> responses = fileUploadService.uploadMultiple(form);
+		return Result.success(responses);
 	}
 
 }

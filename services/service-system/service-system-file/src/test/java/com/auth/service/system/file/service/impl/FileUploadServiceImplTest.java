@@ -1,5 +1,7 @@
 package com.auth.service.system.file.service.impl;
 
+import com.auth.module.file.api.dto.FileUploadResultDTO;
+import com.auth.module.file.api.enums.FileUploadMode;
 import com.auth.module.file.api.enums.StoragePlatformEnum;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
@@ -7,9 +9,9 @@ import com.auth.service.system.file.config.properties.FileUploadProperties;
 import com.auth.service.system.file.mapper.FileRecordMapper;
 import com.auth.service.system.file.model.entity.FileRecordEntity;
 import com.auth.service.system.file.model.form.FileUploadForm;
+import com.auth.service.system.file.model.form.MultipleFileUploadForm;
 import com.auth.service.system.file.model.value.FileUploadCommand;
 import com.auth.service.system.file.model.value.StoredFile;
-import com.auth.service.system.file.model.vo.FileUploadResponseVO;
 import com.auth.service.system.file.storage.core.StoragePlatformFacade;
 import com.auth.service.system.file.storage.core.StoragePlatformFacadeRegistry;
 import com.auth.service.system.file.storage.core.provider.FileStorageProvider;
@@ -22,12 +24,16 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.*;
 
 /**
@@ -79,13 +85,13 @@ class FileUploadServiceImplTest {
 			return true;
 		}).when(fileUploadService).save(any(FileRecordEntity.class));
 
-		FileUploadResponseVO response = fileUploadService.upload(form);
+		FileUploadResultDTO response = fileUploadService.upload(form);
 
 		ArgumentCaptor<FileRecordEntity> entityCaptor = ArgumentCaptor.forClass(FileRecordEntity.class);
 		verify(fileUploadService).save(entityCaptor.capture());
 		FileRecordEntity savedEntity = entityCaptor.getValue();
 		assertThat(savedEntity.getStoragePlatform()).isEqualTo(StoragePlatformEnum.MINIO);
-		assertThat(savedEntity.getUploadMode()).isEqualTo("SIMPLE");
+		assertThat(savedEntity.getUploadMode()).isEqualTo(FileUploadMode.SIMPLE.getCode());
 		assertThat(savedEntity.getBizType()).isEqualTo("avatar");
 		assertThat(savedEntity.getIsPrivate()).isFalse();
 		ArgumentCaptor<FileUploadCommand> commandCaptor = ArgumentCaptor.forClass(FileUploadCommand.class);
@@ -167,9 +173,89 @@ class FileUploadServiceImplTest {
 			.hasMessageContaining("Unsupported storage platform");
 	}
 
+	@Test
+	@DisplayName("uploadMultiple：多个文件均成功上传并批量落库")
+	void uploadMultipleSucceedsForMultipleFiles() {
+		// 验证多文件上传走统一路径并批量持久化。
+		MultipleFileUploadForm form = buildMultipleForm(
+				new MockMultipartFile("files", "a.png", "image/png", "a".getBytes()),
+				new MockMultipartFile("files", "b.png", "image/png", "b".getBytes()));
+		StoredFile storedFile = buildStoredFile(StoragePlatformEnum.MINIO, "public/avatar/20260702/object.png");
+		when(facadeRegistry.resolve(StoragePlatformEnum.MINIO)).thenReturn(storagePlatformFacade);
+		when(storagePlatformFacade.provider()).thenReturn(fileStorageProvider);
+		when(fileStorageProvider.upload(any(FileUploadCommand.class))).thenReturn(storedFile);
+		doReturn(true).when(fileUploadService).saveBatch(anyList());
+
+		List<FileUploadResultDTO> responses = fileUploadService.uploadMultiple(form);
+
+		ArgumentCaptor<List<FileRecordEntity>> entityCaptor = ArgumentCaptor.captor();
+		verify(fileUploadService).saveBatch(entityCaptor.capture());
+		assertThat(entityCaptor.getValue()).hasSize(2);
+		assertThat(responses).hasSize(2);
+		verify(fileStorageProvider, times(2)).upload(any(FileUploadCommand.class));
+	}
+
+	@Test
+	@DisplayName("uploadMultiple：列表含空文件时抛出 PARAM_REQUIRED")
+	void uploadMultipleThrowsWhenFileIsEmpty() {
+		// 验证批量上传不会静默跳过空文件。
+		MultipleFileUploadForm form = buildMultipleForm(
+				new MockMultipartFile("files", "empty.png", "image/png", new byte[0]),
+				new MockMultipartFile("files", "a.png", "image/png", "a".getBytes()));
+
+		assertThatThrownBy(() -> fileUploadService.uploadMultiple(form)).isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemCommonResultCode.PARAM_REQUIRED);
+	}
+
+	@Test
+	@DisplayName("uploadMultiple：列表含 null 文件时抛出 PARAM_REQUIRED")
+	void uploadMultipleThrowsWhenFileIsNull() {
+		// 验证批量上传对 null 文件与单文件上传一致地拒绝。
+		List<MultipartFile> files = new ArrayList<>();
+		files.add(null);
+		files.add(new MockMultipartFile("files", "a.png", "image/png", "a".getBytes()));
+		MultipleFileUploadForm form = buildMultipleForm(files);
+
+		assertThatThrownBy(() -> fileUploadService.uploadMultiple(form)).isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemCommonResultCode.PARAM_REQUIRED);
+	}
+
+	@Test
+	@DisplayName("uploadMultiple：请求指定平台时优先使用请求平台")
+	void uploadMultipleUsesRequestPlatformWhenSpecified() {
+		// 验证批量上传与单文件上传共享平台解析逻辑。
+		MultipleFileUploadForm form = buildMultipleForm(
+				new MockMultipartFile("files", "doc.pdf", "application/pdf", "demo".getBytes()));
+		form.setStoragePlatform("aliyun_oss");
+		StoredFile storedFile = buildStoredFile(StoragePlatformEnum.ALIYUN_OSS, "attachment/20260702/object.pdf");
+		when(facadeRegistry.resolve(StoragePlatformEnum.ALIYUN_OSS)).thenReturn(storagePlatformFacade);
+		when(storagePlatformFacade.provider()).thenReturn(fileStorageProvider);
+		when(fileStorageProvider.upload(any(FileUploadCommand.class))).thenReturn(storedFile);
+		doReturn(true).when(fileUploadService).saveBatch(anyList());
+
+		fileUploadService.uploadMultiple(form);
+
+		verify(facadeRegistry).resolve(StoragePlatformEnum.ALIYUN_OSS);
+	}
+
 	private FileUploadForm buildForm(MockMultipartFile file) {
 		FileUploadForm form = new FileUploadForm();
 		form.setFile(file);
+		form.setBizType("avatar");
+		form.setBizId("u1001");
+		form.setRemark("test");
+		return form;
+	}
+
+	private MultipleFileUploadForm buildMultipleForm(MockMultipartFile... files) {
+		return buildMultipleForm(List.of(files));
+	}
+
+	private MultipleFileUploadForm buildMultipleForm(List<MultipartFile> files) {
+		MultipleFileUploadForm form = new MultipleFileUploadForm();
+		form.setFiles(files);
 		form.setBizType("avatar");
 		form.setBizId("u1001");
 		form.setRemark("test");

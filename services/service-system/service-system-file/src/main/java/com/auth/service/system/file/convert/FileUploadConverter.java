@@ -1,8 +1,8 @@
 package com.auth.service.system.file.convert;
 
 import com.auth.common.mapstruct.config.AuthMapperConfig;
+import com.auth.module.file.api.dto.FileUploadResultDTO;
 import com.auth.service.system.file.model.entity.FileRecordEntity;
-import com.auth.service.system.file.model.vo.FileUploadResponseVO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
@@ -18,12 +18,12 @@ public interface FileUploadConverter {
 	FileUploadConverter INSTANCE = Mappers.getMapper(FileUploadConverter.class);
 
 	/**
-	 * 文件实体映射为上传响应
+	 * 文件实体映射为上传结果 DTO
 	 * @param entity 文件实体
-	 * @return 上传响应
+	 * @return 上传结果 DTO
 	 */
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
-	FileUploadResponseVO toUploadResponse(FileRecordEntity entity);
+	FileUploadResultDTO toResultDTO(FileRecordEntity entity);
 
 }

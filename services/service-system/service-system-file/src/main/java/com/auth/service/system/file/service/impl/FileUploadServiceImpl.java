@@ -1,7 +1,10 @@
 package com.auth.service.system.file.service.impl;
 
+import com.auth.module.file.api.dto.FileUploadMetadata;
+import com.auth.module.file.api.dto.FileUploadResultDTO;
 import com.auth.module.file.api.enums.FileBizType;
 import com.auth.module.file.api.enums.FileBizType.ResolvedVisibility;
+import com.auth.module.file.api.enums.FileUploadMode;
 import com.auth.module.file.api.enums.StoragePlatformEnum;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
@@ -10,9 +13,9 @@ import com.auth.service.system.file.convert.FileUploadConverter;
 import com.auth.service.system.file.mapper.FileRecordMapper;
 import com.auth.service.system.file.model.entity.FileRecordEntity;
 import com.auth.service.system.file.model.form.FileUploadForm;
+import com.auth.service.system.file.model.form.MultipleFileUploadForm;
 import com.auth.service.system.file.model.value.FileUploadCommand;
 import com.auth.service.system.file.model.value.StoredFile;
-import com.auth.service.system.file.model.vo.FileUploadResponseVO;
 import com.auth.service.system.file.service.FileUploadService;
 import com.auth.service.system.file.storage.core.StoragePlatformFacadeRegistry;
 import com.auth.service.system.file.storage.core.provider.FileStorageProvider;
@@ -21,7 +24,9 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -39,15 +44,64 @@ public class FileUploadServiceImpl extends ServiceImpl<FileRecordMapper, FileRec
 	private final StoragePlatformFacadeRegistry facadeRegistry;
 
 	/**
-	 * 组装文件上传记录实体
-	 * @param storedFile 存储结果
-	 * @param form 上传表单
-	 * @param resolvedBizTypeCode 归一化业务类型编码
-	 * @param resolvedIsPrivate 最终私有性
+	 * {@inheritDoc}
+	 */
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public FileUploadResultDTO upload(FileUploadForm form) {
+		FileRecordEntity entity = buildUploadedEntity(form.getFile(), form);
+		save(entity);
+
+		return FileUploadConverter.INSTANCE.toResultDTO(entity);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public List<FileUploadResultDTO> uploadMultiple(MultipleFileUploadForm form) {
+		List<FileRecordEntity> entities = form.getFiles()
+			.stream()
+			.map(file -> buildUploadedEntity(file, form))
+			.toList();
+
+		saveBatch(entities);
+		return entities.stream().map(FileUploadConverter.INSTANCE::toResultDTO).toList();
+	}
+
+	/**
+	 * 校验文件、解析平台并上传，组装待落库实体
+	 * @param file 上传文件
+	 * @param metadata 上传元数据
 	 * @return 文件记录实体
 	 */
-	public static FileRecordEntity toEntity(StoredFile storedFile, FileUploadForm form, String resolvedBizTypeCode,
-			boolean resolvedIsPrivate) {
+	private FileRecordEntity buildUploadedEntity(MultipartFile file, FileUploadMetadata metadata) {
+		if (file == null || file.isEmpty()) {
+			throw new SystemBusinessException(SystemCommonResultCode.PARAM_REQUIRED, "file");
+		}
+
+		// 1. 解析存储平台
+		String storagePlatform = metadata.getStoragePlatform();
+		StoragePlatformEnum platform = StoragePlatformEnum.fromNullable(storagePlatform);
+		platform = Objects.requireNonNullElse(platform, fileUploadProperties.getDefaultPlatform());
+
+		// 2. 解析业务类型
+		ResolvedVisibility visibility = FileBizType.resolveVisibility(metadata.getBizType(), metadata.getIsPrivate());
+		String bizTypeCode = visibility.bizTypeCode();
+		boolean isPrivate = visibility.isPrivate();
+
+		// 3. 上传文件
+		FileStorageProvider provider = facadeRegistry.resolve(platform).provider();
+		String objectKey = FileObjectKeyUtil.build(bizTypeCode, isPrivate, file.getOriginalFilename());
+		FileUploadCommand command = FileUploadCommand.builder()
+			.storagePlatform(platform)
+			.file(file)
+			.objectKey(objectKey)
+			.build();
+		StoredFile storedFile = provider.upload(command);
+
+		// 4. 组装待落库实体
 		FileRecordEntity entity = new FileRecordEntity();
 		entity.setStoragePlatform(storedFile.getStoragePlatform());
 		entity.setBucket(storedFile.getBucket());
@@ -58,48 +112,12 @@ public class FileUploadServiceImpl extends ServiceImpl<FileRecordMapper, FileRec
 		entity.setContentType(storedFile.getContentType());
 		entity.setSize(storedFile.getSize());
 		entity.setEtag(storedFile.getEtag());
-
-		entity.setBizType(resolvedBizTypeCode);
-		entity.setBizId(form.getBizId());
-		entity.setRemark(form.getRemark());
-		entity.setIsPrivate(resolvedIsPrivate);
-
-		entity.setUploadMode("SIMPLE");
+		entity.setBizType(bizTypeCode);
+		entity.setBizId(metadata.getBizId());
+		entity.setRemark(metadata.getRemark());
+		entity.setIsPrivate(isPrivate);
+		entity.setUploadMode(FileUploadMode.SIMPLE.getCode());
 		return entity;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	@Transactional(rollbackFor = Exception.class)
-	public FileUploadResponseVO upload(FileUploadForm form) {
-		if (form == null || form.getFile() == null || form.getFile().isEmpty()) {
-			throw new SystemBusinessException(SystemCommonResultCode.PARAM_REQUIRED, "file");
-		}
-
-		// 解析存储平台
-		String storagePlatform = form.getStoragePlatform();
-		StoragePlatformEnum platform = StoragePlatformEnum.fromNullable(storagePlatform);
-		platform = Objects.requireNonNullElse(platform, fileUploadProperties.getDefaultPlatform());
-
-		ResolvedVisibility visibility = FileBizType.resolveVisibility(form.getBizType(), form.getIsPrivate());
-		String bizTypeCode = visibility.bizTypeCode();
-		boolean isPrivate = visibility.isPrivate();
-
-		FileStorageProvider provider = facadeRegistry.resolve(platform).provider();
-		String objectKey = FileObjectKeyUtil.build(bizTypeCode, isPrivate, form.getFile().getOriginalFilename());
-		FileUploadCommand command = FileUploadCommand.builder()
-			.storagePlatform(platform)
-			.file(form.getFile())
-			.objectKey(objectKey)
-			.build();
-
-		StoredFile storedFile = provider.upload(command);
-		FileRecordEntity entity = toEntity(storedFile, form, bizTypeCode, isPrivate);
-		save(entity);
-
-		return FileUploadConverter.INSTANCE.toUploadResponse(entity);
 	}
 
 }
