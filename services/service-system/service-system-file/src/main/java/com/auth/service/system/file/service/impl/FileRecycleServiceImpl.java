@@ -1,6 +1,5 @@
 package com.auth.service.system.file.service.impl;
 
-import com.auth.common.data.model.PageResponse;
 import com.auth.module.file.api.constants.FileDeleteSourceConstants;
 import com.auth.module.file.api.enums.StoragePlatformEnum;
 import com.auth.service.system.common.exception.SystemBusinessException;
@@ -9,12 +8,9 @@ import com.auth.service.system.file.exception.FileStorageException;
 import com.auth.service.system.file.exception.FileUploadResultCode;
 import com.auth.service.system.file.mapper.FileRecordMapper;
 import com.auth.service.system.file.model.entity.FileRecordEntity;
-import com.auth.service.system.file.model.query.FileRecordPageQuery;
-import com.auth.service.system.file.model.vo.FileRecordPageVO;
 import com.auth.service.system.file.service.FileRecycleService;
 import com.auth.service.system.file.storage.core.StoragePlatformFacadeRegistry;
 import com.auth.service.system.file.storage.core.provider.FileStorageProvider;
-import com.auth.service.system.file.support.FileRecordPageAssembler;
 import com.auth.service.system.file.support.FileRecordReferenceChecker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -34,26 +30,9 @@ public class FileRecycleServiceImpl implements FileRecycleService {
 
 	private final FileRecordMapper fileRecordMapper;
 
-	private final FileRecordPageAssembler fileRecordPageAssembler;
-
 	private final FileRecordReferenceChecker fileRecordReferenceChecker;
 
 	private final StoragePlatformFacadeRegistry facadeRegistry;
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	@Transactional(readOnly = true)
-	public PageResponse<FileRecordPageVO> getPage(FileRecordPageQuery query) {
-		// 按入口注入回收站分页范围
-		query.setPrivateOnly(true);
-		if (query.getOwnerUserId() != null) {
-			query.setDeleteSource(FileDeleteSourceConstants.USER_SELF);
-		}
-
-		return fileRecordPageAssembler.assemblePage(query, fileRecordMapper::selectRecycleListByPage);
-	}
 
 	/**
 	 * {@inheritDoc}
@@ -91,14 +70,13 @@ public class FileRecycleServiceImpl implements FileRecycleService {
 	 * @param ownerUserId 归属用户 ID，非空时仅允许 USER_SELF 来源
 	 */
 	private void requireRestorablePrivateFiles(List<FileRecordEntity> entities, Long ownerUserId) {
-		boolean hasInvalidRecord = entities.stream().anyMatch(entity -> {
-			if (!Boolean.TRUE.equals(entity.getIsPrivate())) {
-				return true;
-			}
-			return ownerUserId != null && !FileDeleteSourceConstants.USER_SELF.equals(entity.getDeleteSource());
-		});
-		if (hasInvalidRecord) {
-			throw new FileStorageException(FileUploadResultCode.FILE_ACCESS_DENIED);
+		List<Long> invalidIds = entities.stream()
+			.filter(entity -> !Boolean.TRUE.equals(entity.getIsPrivate())
+					|| (ownerUserId != null && !FileDeleteSourceConstants.USER_SELF.equals(entity.getDeleteSource())))
+			.map(FileRecordEntity::getId)
+			.toList();
+		if (!invalidIds.isEmpty()) {
+			throw new FileStorageException(FileUploadResultCode.FILE_RECORD_NOT_FOUND, invalidIds);
 		}
 	}
 

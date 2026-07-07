@@ -11,6 +11,7 @@ import com.auth.service.system.file.model.form.FilePrivacyUpdateForm;
 import com.auth.service.system.file.model.query.FileRecordPageQuery;
 import com.auth.service.system.file.model.vo.FileRecordDetailVO;
 import com.auth.service.system.file.model.vo.FileRecordPageVO;
+import com.auth.service.system.file.service.FileRecordCommonService;
 import com.auth.service.system.file.service.FileRecordService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -33,19 +34,25 @@ import static com.auth.service.system.common.model.SystemAuditBizModule.SYS_FILE
 @RestController
 public class PersonalFileRecordController {
 
+	private final FileRecordCommonService fileRecordCommonService;
+
 	private final FileRecordService fileRecordService;
 
-	public PersonalFileRecordController(FileRecordService fileRecordService) {
+	public PersonalFileRecordController(FileRecordCommonService fileRecordCommonService,
+			FileRecordService fileRecordService) {
+		this.fileRecordCommonService = fileRecordCommonService;
 		this.fileRecordService = fileRecordService;
 	}
 
 	@Operation(summary = "文件分页查询")
 	@GetMapping("/page")
 	public Result<PageResponse<FileRecordPageVO>> page(@Valid FileRecordPageQuery query) {
+		// 固定查询人
 		Long ownerUserId = SecurityUserUtils.getUserId();
 		query.setOwnerUserId(ownerUserId);
+		query.setDeleteSource(null);
 
-		PageResponse<FileRecordPageVO> pageResult = fileRecordService.getPage(query);
+		PageResponse<FileRecordPageVO> pageResult = fileRecordCommonService.getPage(query, false);
 		return Result.success(pageResult);
 	}
 
@@ -53,7 +60,7 @@ public class PersonalFileRecordController {
 	@GetMapping("/{id}")
 	public Result<FileRecordDetailVO> detail(@PathVariable("id") Long id) {
 		Long ownerUserId = SecurityUserUtils.getUserId();
-		FileRecordDetailVO detail = fileRecordService.getDetail(id, ownerUserId);
+		FileRecordDetailVO detail = fileRecordCommonService.getDetail(id, ownerUserId, null, false, null);
 		return Result.success(detail);
 	}
 

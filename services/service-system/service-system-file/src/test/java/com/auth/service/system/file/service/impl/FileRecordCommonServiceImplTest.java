@@ -1,0 +1,216 @@
+package com.auth.service.system.file.service.impl;
+
+import com.auth.common.data.model.PageResponse;
+import com.auth.module.file.api.constants.FileDeleteSourceConstants;
+import com.auth.module.file.api.enums.StoragePlatformEnum;
+import com.auth.service.system.common.service.AuditUserDisplayService;
+import com.auth.service.system.file.exception.FileStorageException;
+import com.auth.service.system.file.exception.FileUploadResultCode;
+import com.auth.service.system.file.mapper.FileRecordMapper;
+import com.auth.service.system.file.model.entity.FileRecordEntity;
+import com.auth.service.system.file.model.po.FileRecordPageRowPO;
+import com.auth.service.system.file.model.query.FileRecordPageQuery;
+import com.auth.service.system.file.model.vo.FileRecordDetailVO;
+import com.auth.service.system.file.model.vo.FileRecordPageVO;
+import com.auth.service.system.file.support.FileUrlSigner;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.repository.CrudRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.lang.reflect.Field;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+/**
+ * {@link FileRecordCommonServiceImpl} 单元测试。
+ *
+ * @author Bunny
+ */
+@DisplayName("FileRecordCommonServiceImpl 公共查询")
+@ExtendWith(MockitoExtension.class)
+class FileRecordCommonServiceImplTest {
+
+	@Mock
+	private FileRecordMapper fileRecordMapper;
+
+	@Mock
+	private AuditUserDisplayService auditUserDisplayService;
+
+	@Mock
+	private FileUrlSigner fileUrlSigner;
+
+	private FileRecordCommonServiceImpl fileRecordCommonService;
+
+	@BeforeEach
+	void setUp() throws Exception {
+		fileRecordCommonService = new FileRecordCommonServiceImpl(auditUserDisplayService, fileUrlSigner);
+		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
+		baseMapperField.setAccessible(true);
+		baseMapperField.set(fileRecordCommonService, fileRecordMapper);
+	}
+
+	@Test
+	@DisplayName("getPage：管理端有效文件分页按 isDeleted=false 查询")
+	void getPageUsesActiveDeletedFlagForAdminList() {
+		// 验证管理端文件列表仅查询未删除记录。
+		FileRecordPageQuery query = buildBaseQuery();
+		mockPageResult(query, false);
+
+		PageResponse<FileRecordPageVO> pageResult = fileRecordCommonService.getPage(query, false);
+
+		assertThat(pageResult.getList()).hasSize(1);
+		verify(fileRecordMapper).selectListByPage(any(), eq(query), eq(false));
+		verify(auditUserDisplayService).enrichAuditUsernames(any(Page.class), isNull(), isNull());
+	}
+
+	@Test
+	@DisplayName("getPage：个人有效文件分页透传 ownerUserId")
+	void getPagePassesOwnerUserIdForPersonalList() {
+		// 验证个人文件列表会把归属用户透传给 Mapper。
+		FileRecordPageQuery query = buildBaseQuery();
+		query.setOwnerUserId(9001L);
+		mockPageResult(query, false);
+
+		fileRecordCommonService.getPage(query, false);
+
+		verify(fileRecordMapper).selectListByPage(any(),
+				argThat(param -> Long.valueOf(9001L).equals(param.getOwnerUserId())), eq(false));
+	}
+
+	@Test
+	@DisplayName("getPage：个人回收站分页透传 USER_SELF")
+	void getPageAppliesPersonalRecycleScope() {
+		// 验证个人回收站会限制删除来源与归属用户。
+		FileRecordPageQuery query = buildBaseQuery();
+		query.setOwnerUserId(9001L);
+		query.setDeleteSource(FileDeleteSourceConstants.USER_SELF);
+		mockPageResult(query, true);
+
+		fileRecordCommonService.getPage(query, true);
+
+		verify(fileRecordMapper).selectListByPage(any(),
+				argThat(param -> FileDeleteSourceConstants.USER_SELF.equals(param.getDeleteSource())
+						&& Long.valueOf(9001L).equals(param.getOwnerUserId())),
+				eq(true));
+	}
+
+	@Test
+	@DisplayName("getPage：时间范围参数按原样透传到 Mapper")
+	void getPagePassesTimeRangeParamsToMapper() {
+		// 验证时间范围筛选参数会传递到分页查询条件。
+		LocalDateTime startTime = LocalDateTime.of(2026, 7, 1, 0, 0, 0);
+		LocalDateTime endTime = LocalDateTime.of(2026, 7, 3, 23, 59, 59);
+		FileRecordPageQuery query = buildBaseQuery();
+		query.setStartTime(startTime);
+		query.setEndTime(endTime);
+		mockPageResult(query, false);
+
+		fileRecordCommonService.getPage(query, false);
+
+		verify(fileRecordMapper).selectListByPage(any(),
+				argThat(param -> startTime.equals(param.getStartTime()) && endTime.equals(param.getEndTime())),
+				eq(false));
+	}
+
+	@Test
+	@DisplayName("getDetail：返回详情并填充 accessUrl")
+	void getDetailReturnsDetailWithSignedAccessUrl() {
+		// 验证详情查询会映射实体、签名临时访问地址并补充审计用户名。
+		FileRecordEntity entity = buildDetailEntity(1001L);
+		when(fileRecordMapper.selectDetailById(1001L, null, null, false, null)).thenReturn(entity);
+		when(fileUrlSigner.sign(entity.getBucket(), entity.getObjectKey(), entity.getContentType(),
+				entity.getStoragePlatform()))
+			.thenReturn("https://minio.example.com/public/a.png?X-Amz-Signature=demo");
+
+		FileRecordDetailVO detail = fileRecordCommonService.getDetail(1001L, null, null, false, null);
+
+		assertThat(detail.getId()).isEqualTo(1001L);
+		assertThat(detail.getAccessUrl()).isEqualTo("https://minio.example.com/public/a.png?X-Amz-Signature=demo");
+		verify(auditUserDisplayService)
+			.enrichAuditUsernames(org.mockito.ArgumentMatchers.<List<FileRecordDetailVO>>any(), isNull(), isNull());
+	}
+
+	@Test
+	@DisplayName("getDetail：记录不存在时抛出 FILE_RECORD_NOT_FOUND")
+	void getDetailThrowsWhenRecordMissing() {
+		// 验证详情查询未命中记录时统一返回 404 语义。
+		when(fileRecordMapper.selectDetailById(2001L, 9001L, null, false, null)).thenReturn(null);
+
+		assertThatThrownBy(() -> fileRecordCommonService.getDetail(2001L, 9001L, null, false, null))
+			.isInstanceOf(FileStorageException.class)
+			.extracting(ex -> ((FileStorageException) ex).getResultCode())
+			.isEqualTo(FileUploadResultCode.FILE_RECORD_NOT_FOUND);
+	}
+
+	@Test
+	@DisplayName("getDetail：个人越权访问时按记录不存在处理")
+	void getDetailTreatsOwnerMismatchAsNotFound() {
+		// 验证个人详情通过 SQL 归属过滤，越权时不会暴露记录存在性。
+		when(fileRecordMapper.selectDetailById(3001L, 9002L, null, false, null)).thenReturn(null);
+
+		assertThatThrownBy(() -> fileRecordCommonService.getDetail(3001L, 9002L, null, false, null))
+			.isInstanceOf(FileStorageException.class)
+			.extracting(ex -> ((FileStorageException) ex).getResultCode())
+			.isEqualTo(FileUploadResultCode.FILE_RECORD_NOT_FOUND);
+	}
+
+	@Test
+	@DisplayName("getDetail：个人回收站透传删除范围条件")
+	void getDetailPassesPersonalRecycleScopeToMapper() {
+		// 验证个人回收站详情会限制私有、已删除与 USER_SELF 来源。
+		FileRecordEntity entity = buildDetailEntity(4001L);
+		entity.setIsPrivate(true);
+		entity.setIsDeleted(true);
+		entity.setDeleteSource(FileDeleteSourceConstants.USER_SELF);
+		when(fileRecordMapper.selectDetailById(4001L, 9001L, true, true, FileDeleteSourceConstants.USER_SELF))
+			.thenReturn(entity);
+		when(fileUrlSigner.sign(anyString(), anyString(), anyString(), any()))
+			.thenReturn("https://signed.example/a.png");
+
+		fileRecordCommonService.getDetail(4001L, 9001L, true, true, FileDeleteSourceConstants.USER_SELF);
+
+		verify(fileRecordMapper).selectDetailById(4001L, 9001L, true, true, FileDeleteSourceConstants.USER_SELF);
+	}
+
+	private FileRecordPageQuery buildBaseQuery() {
+		FileRecordPageQuery query = new FileRecordPageQuery();
+		query.setPageIndex(1);
+		query.setPageSize(20);
+		return query;
+	}
+
+	private void mockPageResult(FileRecordPageQuery query, boolean deleted) {
+		FileRecordPageRowPO row = new FileRecordPageRowPO();
+		row.setId(2001L);
+		row.setStoragePlatform(StoragePlatformEnum.MINIO);
+		row.setOriginalName("demo.png");
+		row.setContentType("image/png");
+		row.setCreateUser(1L);
+		Page<FileRecordPageRowPO> page = new Page<>(1, 20, 1);
+		page.setRecords(List.of(row));
+		when(fileRecordMapper.selectListByPage(any(), eq(query), eq(deleted))).thenReturn(page);
+	}
+
+	private FileRecordEntity buildDetailEntity(Long id) {
+		FileRecordEntity entity = new FileRecordEntity();
+		entity.setId(id);
+		entity.setStoragePlatform(StoragePlatformEnum.MINIO);
+		entity.setContentType("image/png");
+		entity.setBucket("public");
+		entity.setObjectKey("a.png");
+		entity.setCreateUser(1L);
+		return entity;
+	}
+
+}

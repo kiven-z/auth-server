@@ -2,8 +2,61 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.auth.service.system.file.mapper.FileRecordMapper">
 
-    <!-- 文件分页查询返回列 -->
-    <sql id="fileRecordPageColumns">
+    <!-- 文件记录分页查询 -->
+    <select id="selectListByPage" resultType="com.auth.service.system.file.model.po.FileRecordPageRowPO">
+        SELECT
+        id,
+        storage_platform,
+        upload_mode,
+        original_name,
+        content_type,
+        size,
+        is_private,
+        biz_type,
+        biz_id,
+        create_time,
+        update_time,
+        create_user,
+        update_user
+        FROM
+        file_record
+        <where>
+            <if test="isDeleted != null">
+                is_deleted = #{isDeleted}
+            </if>
+            <if test="query.isPrivate != null">
+                AND is_private = #{query.isPrivate}
+            </if>
+            <if test="query.deleteSource != null and query.deleteSource != ''">
+                AND delete_source = #{query.deleteSource}
+            </if>
+            <if test="query.ownerUserId != null">
+                AND create_user = #{query.ownerUserId}
+            </if>
+            <if test="query.bizType != null and query.bizType != ''">
+                AND biz_type = #{query.bizType}
+            </if>
+            <if test="query.bizId != null and query.bizId != ''">
+                AND biz_id = #{query.bizId}
+            </if>
+            <if test="query.contentType != null and query.contentType != ''">
+                AND content_type LIKE CONCAT(#{query.contentType}, '%')
+            </if>
+            <if test="query.originalName != null and query.originalName != ''">
+                AND original_name LIKE CONCAT('%', #{query.originalName}, '%')
+            </if>
+            <if test="query.startTime != null and query.endTime != null">
+                AND create_time <![CDATA[ >= ]]> #{query.startTime}
+                AND create_time <![CDATA[ <= ]]> #{query.endTime}
+            </if>
+        </where>
+        ORDER BY
+        create_time DESC
+    </select>
+
+    <!-- 按主键查询文件记录详情 -->
+    <select id="selectDetailById" resultType="com.auth.service.system.file.model.entity.FileRecordEntity">
+        SELECT
         id,
         storage_platform,
         upload_mode,
@@ -11,8 +64,10 @@
         object_key,
         url,
         original_name,
+        extension,
         content_type,
         size,
+        etag,
         is_private,
         biz_type,
         biz_id,
@@ -23,101 +78,60 @@
         create_time,
         update_time,
         create_user,
-        update_user
-    </sql>
-
-    <!-- 文件分页通用筛选条件 -->
-    <sql id="fileRecordPageCommonFilter">
-        <if test="query.bizType != null and query.bizType != ''">
-            AND biz_type =
-            #{query.bizType}
-        </if>
-        <if test="query.bizId != null and query.bizId != ''">
-            AND biz_id =
-            #{query.bizId}
-        </if>
-        <if test="query.originalName != null and query.originalName != ''">
-            AND original_name LIKE CONCAT('%',
-            #{query.originalName},
-            '%'
-            )
-        </if>
-        <if test="query.ownerUserId != null">
-            AND create_user =
-            #{query.ownerUserId}
-        </if>
-        <if test="query.startTime != null and query.endTime != null">
-            AND create_time <![CDATA[ >= ]]> #{query.startTime}
-            AND create_time <![CDATA[ <= ]]> #{query.endTime}
-        </if>
-    </sql>
-
-    <!-- 有效文件记录分页查询 -->
-    <select id="selectListByPage" resultType="com.auth.service.system.file.model.po.FileRecordPageRowPO">
-        SELECT
-        <include refid="fileRecordPageColumns"/>
+        update_user,
+        version,
+        is_deleted
         FROM
-            file_record
+        file_record
         <where>
-            is_deleted = 0
-            <include refid="fileRecordPageCommonFilter"/>
-        </where>
-        ORDER BY
-            create_time DESC
-    </select>
-
-    <!-- 回收站文件记录分页查询 -->
-    <select id="selectRecycleListByPage" resultType="com.auth.service.system.file.model.po.FileRecordPageRowPO">
-        SELECT
-        <include refid="fileRecordPageColumns"/>
-        FROM
-            file_record
-        <where>
-            is_deleted = 1
-            <if test="query.privateOnly != null and query.privateOnly">
-                AND is_private = 1
+            id = #{id}
+            <if test="expectedDeleted != null">
+                AND is_deleted = #{expectedDeleted}
             </if>
-            <if test="query.deleteSource != null and query.deleteSource != ''">
-                AND delete_source = #{query.deleteSource}
+            <if test="isPrivate != null">
+                AND is_private = #{isPrivate}
             </if>
-            <include refid="fileRecordPageCommonFilter"/>
+            <if test="deleteSource != null and deleteSource != ''">
+                AND delete_source = #{deleteSource}
+            </if>
+            <if test="ownerUserId != null">
+                AND create_user = #{ownerUserId}
+            </if>
         </where>
-        ORDER BY
-            create_time DESC
     </select>
 
     <!-- 按主键批量查询已逻辑删除的文件记录 -->
     <select id="selectIsDeletedByIds" resultType="com.auth.service.system.file.model.entity.FileRecordEntity">
         SELECT
-            id,
-            storage_platform,
-            upload_mode,
-            bucket,
-            object_key,
-            url,
-            original_name,
-            extension,
-            content_type,
-            size,
-            etag,
-            is_private,
-            biz_type,
-            biz_id,
-            delete_source,
-            deleted_by,
-            deleted_at,
-            remark,
-            create_time,
-            update_time,
-            create_user,
-            update_user,
-            version,
-            is_deleted
+        id,
+        storage_platform,
+        upload_mode,
+        bucket,
+        object_key,
+        url,
+        original_name,
+        extension,
+        content_type,
+        size,
+        etag,
+        is_private,
+        biz_type,
+        biz_id,
+        delete_source,
+        deleted_by,
+        deleted_at,
+        remark,
+        create_time,
+        update_time,
+        create_user,
+        update_user,
+        version,
+        is_deleted
         FROM
-            file_record
+        file_record
         WHERE
-            is_deleted = #{expectedDeleted}
-            AND id IN
+        is_deleted = #{expectedDeleted}
+        AND id IN
         <foreach collection="ids" item="id" open="(" separator="," close=")">
             #{id}
         </foreach>
@@ -127,20 +141,20 @@
     <update id="restoreByIds">
         UPDATE file_record
         SET
-            is_deleted = 0,
-            delete_source = NULL,
-            deleted_by = NULL,
-            deleted_at = NULL,
-            version = version + 1,
-            update_user = IF(
-                #{updateUser} IS NULL,
-                update_user,
-                #{updateUser}
-            ),
-            update_time = NOW()
+        is_deleted = 0,
+        delete_source = NULL,
+        deleted_by = NULL,
+        deleted_at = NULL,
+        version = version + 1,
+        update_user = IF(
+        #{updateUser} IS NULL,
+        update_user,
+        #{updateUser}
+        ),
+        update_time = NOW()
         WHERE
-            is_deleted = 1
-            AND id IN
+        is_deleted = 1
+        AND id IN
         <foreach collection="ids" item="id" open="(" separator="," close=")">
             #{id}
         </foreach>
@@ -150,24 +164,24 @@
     <update id="markDeletedByIds">
         UPDATE file_record
         SET
-            is_deleted = 1,
-            delete_source = #{deleteSource},
-            deleted_by = IF(
-                #{deletedBy} IS NULL,
-                deleted_by,
-                #{deletedBy}
-            ),
-            deleted_at = NOW(),
-            version = version + 1,
-            update_user = IF(
-                #{updateUser} IS NULL,
-                update_user,
-                #{updateUser}
-            ),
-            update_time = NOW()
+        is_deleted = 1,
+        delete_source = #{deleteSource},
+        deleted_by = IF(
+        #{deletedBy} IS NULL,
+        deleted_by,
+        #{deletedBy}
+        ),
+        deleted_at = NOW(),
+        version = version + 1,
+        update_user = IF(
+        #{updateUser} IS NULL,
+        update_user,
+        #{updateUser}
+        ),
+        update_time = NOW()
         WHERE
-            is_deleted = 0
-            AND id IN
+        is_deleted = 0
+        AND id IN
         <foreach collection="ids" item="id" open="(" separator="," close=")">
             #{id}
         </foreach>
@@ -177,8 +191,8 @@
     <delete id="deletePhysicallyByIds">
         DELETE FROM file_record
         WHERE
-            is_deleted = 1
-            AND id IN
+        is_deleted = 1
+        AND id IN
         <foreach collection="ids" item="id" open="(" separator="," close=")">
             #{id}
         </foreach>
@@ -188,8 +202,8 @@
     <delete id="deletePhysicallyActiveByIds">
         DELETE FROM file_record
         WHERE
-            is_deleted = 0
-            AND id IN
+        is_deleted = 0
+        AND id IN
         <foreach collection="ids" item="id" open="(" separator="," close=")">
             #{id}
         </foreach>
@@ -198,16 +212,14 @@
     <!-- 按主键更新文件隐私属性 -->
     <update id="updatePrivacyById">
         UPDATE file_record
-        SET
-            object_key = #{objectKey},
-            is_private = #{isPrivate},
-            url = #{url},
-            version = version + 1,
+        SET object_key  = #{objectKey},
+            is_private  = #{isPrivate},
+            url         = #{url},
+            version     = version + 1,
             update_user = #{updateUser},
             update_time = NOW()
-        WHERE
-            id = #{id}
-            AND is_deleted = 0
+        WHERE id = #{id}
+          AND is_deleted = 0
     </update>
 
 </mapper>

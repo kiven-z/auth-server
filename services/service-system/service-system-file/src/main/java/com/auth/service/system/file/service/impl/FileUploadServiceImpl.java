@@ -66,7 +66,7 @@ public class FileUploadServiceImpl extends ServiceImpl<FileRecordMapper, FileRec
 			.map(file -> buildUploadedEntity(file, form))
 			.toList();
 
-		saveBatch(entities);
+		persistEntities(entities);
 		return entities.stream().map(FileUploadConverter.INSTANCE::toResultDTO).toList();
 	}
 
@@ -118,6 +118,14 @@ public class FileUploadServiceImpl extends ServiceImpl<FileRecordMapper, FileRec
 		entity.setIsPrivate(isPrivate);
 		entity.setUploadMode(FileUploadMode.SIMPLE.getCode());
 		return entity;
+	}
+
+	/**
+	 * 在当前事务内批量插入文件记录，避免通过 {@code this} 调用带 {@link Transactional} 的 {@code saveBatch}。
+	 * @param entities 待落库实体
+	 */
+	private void persistEntities(List<FileRecordEntity> entities) {
+		entities.forEach(getBaseMapper()::insert);
 	}
 
 }

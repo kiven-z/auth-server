@@ -30,7 +30,7 @@ class PersonalFileRecycleControllerTest {
 	@DisplayName("restore：个人端归属用户与操作用户相同")
 	void restorePassesSameOwnerAndOperatorUser() {
 		// 验证个人端恢复会同时传递归属用户和操作用户。
-		PersonalFileRecycleController controller = new PersonalFileRecycleController(fileRecycleService);
+		PersonalFileRecycleController controller = new PersonalFileRecycleController(null, fileRecycleService);
 		List<Long> ids = List.of(9201L);
 		try (MockedStatic<SecurityUserUtils> securityUser = mockStatic(SecurityUserUtils.class)) {
 			securityUser.when(SecurityUserUtils::getUserId).thenReturn(8001L);

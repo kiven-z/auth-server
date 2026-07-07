@@ -33,15 +33,6 @@ public class FileRecordPageRowPO implements Serializable {
 	@Schema(title = "上传模式")
 	private String uploadMode;
 
-	@Schema(title = "存储桶")
-	private String bucket;
-
-	@Schema(title = "对象键")
-	private String objectKey;
-
-	@Schema(title = "访问URL")
-	private String url;
-
 	@Schema(title = "原始文件名")
 	private String originalName;
 
@@ -60,9 +51,6 @@ public class FileRecordPageRowPO implements Serializable {
 	@Schema(title = "业务ID")
 	private String bizId;
 
-	@Schema(title = "备注")
-	private String remark;
-
 	@Schema(title = "创建时间")
 	private LocalDateTime createTime;
 
@@ -74,14 +62,5 @@ public class FileRecordPageRowPO implements Serializable {
 
 	@Schema(title = "更新用户")
 	private Long updateUser;
-
-	@Schema(title = "删除来源")
-	private String deleteSource;
-
-	@Schema(title = "删除人")
-	private Long deletedBy;
-
-	@Schema(title = "删除时间")
-	private LocalDateTime deletedAt;
 
 }

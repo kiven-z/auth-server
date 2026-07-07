@@ -10,6 +10,7 @@ import com.auth.service.system.file.model.form.FilePrivacyUpdateForm;
 import com.auth.service.system.file.model.query.FileRecordPageQuery;
 import com.auth.service.system.file.model.vo.FileRecordDetailVO;
 import com.auth.service.system.file.model.vo.FileRecordPageVO;
+import com.auth.service.system.file.service.FileRecordCommonService;
 import com.auth.service.system.file.service.FileRecordService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -34,9 +35,12 @@ import static com.auth.service.system.common.model.SystemAuditBizModule.SYS_FILE
 @RestController
 public class FileRecordController {
 
+	private final FileRecordCommonService fileRecordCommonService;
+
 	private final FileRecordService fileRecordService;
 
-	public FileRecordController(FileRecordService fileRecordService) {
+	public FileRecordController(FileRecordCommonService fileRecordCommonService, FileRecordService fileRecordService) {
+		this.fileRecordCommonService = fileRecordCommonService;
 		this.fileRecordService = fileRecordService;
 	}
 
@@ -44,7 +48,7 @@ public class FileRecordController {
 	@PreAuthorize("@auth.decide('sys:file:query')")
 	@GetMapping("/page")
 	public Result<PageResponse<FileRecordPageVO>> page(@Valid FileRecordPageQuery query) {
-		PageResponse<FileRecordPageVO> pageResult = fileRecordService.getPage(query);
+		PageResponse<FileRecordPageVO> pageResult = fileRecordCommonService.getPage(query, false);
 		return Result.success(pageResult);
 	}
 
@@ -52,7 +56,7 @@ public class FileRecordController {
 	@PreAuthorize("@auth.decide('sys:file:query')")
 	@GetMapping("/{id}")
 	public Result<FileRecordDetailVO> detail(@PathVariable("id") Long id) {
-		FileRecordDetailVO detail = fileRecordService.getDetail(id, null);
+		FileRecordDetailVO detail = fileRecordCommonService.getDetail(id, null, null, false, null);
 		return Result.success(detail);
 	}
 

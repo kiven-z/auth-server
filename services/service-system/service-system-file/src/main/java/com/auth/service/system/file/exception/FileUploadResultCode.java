@@ -40,11 +40,6 @@ public enum FileUploadResultCode implements SystemResultCode {
 	FILE_RECORD_NOT_FOUND(404, 346, "FILE_RECORD_NOT_FOUND", "system.file.record.not_found"),
 
 	/**
-	 * 文件访问被拒绝
-	 */
-	FILE_ACCESS_DENIED(403, 347, "FILE_ACCESS_DENIED", "system.file.access.denied"),
-
-	/**
 	 * 文件类型不支持预览
 	 */
 	FILE_PREVIEW_CONTENT_TYPE_NOT_ALLOWED(422, 348, "FILE_PREVIEW_CONTENT_TYPE_NOT_ALLOWED",

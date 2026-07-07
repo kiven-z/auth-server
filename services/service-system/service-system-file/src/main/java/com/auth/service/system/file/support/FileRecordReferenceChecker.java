@@ -57,10 +57,13 @@ public class FileRecordReferenceChecker {
 			return;
 		}
 
-		boolean hasOwnerMismatch = entities.stream()
-			.anyMatch(entity -> entity == null || !ownerUserId.equals(entity.getCreateUser()));
-		if (hasOwnerMismatch) {
-			throw new FileStorageException(FileUploadResultCode.FILE_ACCESS_DENIED);
+		List<Long> mismatchedIds = entities.stream()
+			.filter(entity -> entity == null || !ownerUserId.equals(entity.getCreateUser()))
+			.filter(Objects::nonNull)
+			.map(FileRecordEntity::getId)
+			.toList();
+		if (!mismatchedIds.isEmpty()) {
+			throw new FileStorageException(FileUploadResultCode.FILE_RECORD_NOT_FOUND, mismatchedIds);
 		}
 	}
 

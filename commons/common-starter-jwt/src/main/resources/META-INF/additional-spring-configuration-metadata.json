@@ -59,12 +59,6 @@
       "type": "java.lang.Boolean",
       "description": "If true and keystore file is missing (non-classpath path), generate a dev keystore.",
       "sourceType": "com.auth.common.jwt.autoconfigure.JwtProperties"
-    },
-    {
-      "name": "auth.common.jwt.expired",
-      "type": "java.lang.Long",
-      "description": "Deprecated: use access-expired. Access token TTL in seconds.",
-      "sourceType": "com.auth.common.jwt.autoconfigure.JwtProperties"
     }
   ]
 }

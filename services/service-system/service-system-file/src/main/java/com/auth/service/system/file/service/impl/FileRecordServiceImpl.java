@@ -1,25 +1,17 @@
 package com.auth.service.system.file.service.impl;
 
 import cn.hutool.core.util.BooleanUtil;
-import com.auth.common.data.model.PageResponse;
 import com.auth.module.file.api.constants.FileDeleteSourceConstants;
 import com.auth.module.file.export.writer.ZipStreamWriter;
 import com.auth.module.file.export.writer.ZipStreamWriter.ZipEntryPayload;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
-import com.auth.service.system.common.service.AuditUserDisplayService;
-import com.auth.service.system.file.convert.FileRecordQueryConverter;
 import com.auth.service.system.file.mapper.FileRecordMapper;
 import com.auth.service.system.file.model.entity.FileRecordEntity;
-import com.auth.service.system.file.model.query.FileRecordPageQuery;
-import com.auth.service.system.file.model.vo.FileRecordDetailVO;
-import com.auth.service.system.file.model.vo.FileRecordPageVO;
 import com.auth.service.system.file.service.FileRecordService;
 import com.auth.service.system.file.storage.core.StoragePlatformFacadeRegistry;
 import com.auth.service.system.file.storage.core.provider.FileStorageProvider;
-import com.auth.service.system.file.support.FileRecordPageAssembler;
 import com.auth.service.system.file.support.FileRecordReferenceChecker;
-import com.auth.service.system.file.support.FileUrlSigner;
 import com.auth.service.system.file.utils.FileObjectKeyUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -44,43 +36,7 @@ public class FileRecordServiceImpl extends ServiceImpl<FileRecordMapper, FileRec
 
 	private final FileRecordReferenceChecker fileRecordReferenceChecker;
 
-	private final FileRecordPageAssembler fileRecordPageAssembler;
-
-	private final AuditUserDisplayService auditUserDisplayService;
-
 	private final StoragePlatformFacadeRegistry facadeRegistry;
-
-	private final FileUrlSigner fileUrlSigner;
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	@Transactional(readOnly = true)
-	public PageResponse<FileRecordPageVO> getPage(FileRecordPageQuery query) {
-		return fileRecordPageAssembler.assemblePage(query, baseMapper::selectListByPage);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	@Transactional(readOnly = true)
-	public FileRecordDetailVO getDetail(Long id, Long ownerUserId) {
-		List<FileRecordEntity> entities = fileRecordReferenceChecker.getExistingBatch(List.of(id), false);
-		if (ownerUserId != null) {
-			fileRecordReferenceChecker.requireOwnerBatch(entities, ownerUserId);
-		}
-		FileRecordEntity entity = entities.get(0);
-
-		FileRecordDetailVO detail = FileRecordQueryConverter.INSTANCE.toDetailVo(entity);
-		String accessUrl = fileUrlSigner.sign(entity.getBucket(), entity.getObjectKey(), entity.getContentType(),
-				entity.getStoragePlatform());
-		detail.setAccessUrl(accessUrl);
-
-		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail), null, null);
-		return detail;
-	}
 
 	/**
 	 * {@inheritDoc}

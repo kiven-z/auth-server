@@ -26,7 +26,6 @@ public interface FileRecordQueryConverter {
 	 */
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
-	@Mapping(target = "accessUrl", ignore = true)
 	FileRecordPageVO toPageVo(FileRecordPageRowPO po);
 
 	/**

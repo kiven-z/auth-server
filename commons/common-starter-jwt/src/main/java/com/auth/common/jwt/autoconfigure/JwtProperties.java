@@ -66,20 +66,11 @@ public class JwtProperties {
 	 */
 	private boolean autoGenerate = false;
 
-	/**
-	 * 兼容旧字段 {@code auth.common.jwt.expired}，语义同 access 过期秒数
-	 */
-	private Long expired;
-
 	@PostConstruct
 	public void validate() {
-		if (this.expired != null && this.expired > 0) {
-			this.accessExpired = this.expired;
-		}
-
 		if (this.refreshExpired <= this.accessExpired) {
 			throw new IllegalStateException(
-					"auth.common.jwt.refresh-expired must be greater than auth.common.jwt.access-expired (or legacy expired).");
+					"auth.common.jwt.refresh-expired must be greater than auth.common.jwt.access-expired.");
 		}
 
 		if (this.algorithm.equals(HS256) && CharSequenceUtil.isBlank(this.secret)) {

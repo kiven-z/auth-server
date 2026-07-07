@@ -87,9 +87,9 @@ class FileRecordReferenceCheckerTest {
 	}
 
 	@Test
-	@DisplayName("requireOwnerBatch：访问他人记录时抛出 FILE_ACCESS_DENIED")
+	@DisplayName("requireOwnerBatch：访问他人记录时抛出 FILE_RECORD_NOT_FOUND")
 	void requireOwnerBatchThrowsWhenOwnerMismatch() {
-		// 验证当前用户与创建人不一致时拒绝访问。
+		// 验证当前用户与创建人不一致时按记录不存在处理。
 		FileRecordEntity entity = new FileRecordEntity();
 		entity.setId(1004L);
 		entity.setCreateUser(2L);
@@ -99,7 +99,7 @@ class FileRecordReferenceCheckerTest {
 		assertThatThrownBy(() -> fileRecordReferenceChecker.requireOwnerBatch(mismatchRecords, currentUserId))
 			.isInstanceOf(FileStorageException.class)
 			.extracting(ex -> ((FileStorageException) ex).getResultCode())
-			.isEqualTo(FileUploadResultCode.FILE_ACCESS_DENIED);
+			.isEqualTo(FileUploadResultCode.FILE_RECORD_NOT_FOUND);
 	}
 
 	@Test

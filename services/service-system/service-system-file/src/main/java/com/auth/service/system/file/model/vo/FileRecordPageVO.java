@@ -9,7 +9,6 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.io.Serial;
-import java.time.LocalDateTime;
 
 /**
  * 文件记录分页行
@@ -32,18 +31,6 @@ public class FileRecordPageVO extends BaseResponse {
 	@Schema(title = "上传模式")
 	private String uploadMode;
 
-	@Schema(title = "存储桶名称")
-	private String bucket;
-
-	@Schema(title = "对象键")
-	private String objectKey;
-
-	@Schema(title = "访问URL")
-	private String url;
-
-	@Schema(title = "临时访问URL")
-	private String accessUrl;
-
 	@Schema(title = "原始文件名")
 	private String originalName;
 
@@ -61,17 +48,5 @@ public class FileRecordPageVO extends BaseResponse {
 
 	@Schema(title = "业务ID")
 	private String bizId;
-
-	@Schema(title = "备注")
-	private String remark;
-
-	@Schema(title = "删除来源")
-	private String deleteSource;
-
-	@Schema(title = "删除人")
-	private Long deletedBy;
-
-	@Schema(title = "删除时间")
-	private LocalDateTime deletedAt;
 
 }

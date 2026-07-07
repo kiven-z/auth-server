@@ -33,7 +33,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.*;
 
 /**
@@ -184,13 +183,15 @@ class FileUploadServiceImplTest {
 		when(facadeRegistry.resolve(StoragePlatformEnum.MINIO)).thenReturn(storagePlatformFacade);
 		when(storagePlatformFacade.provider()).thenReturn(fileStorageProvider);
 		when(fileStorageProvider.upload(any(FileUploadCommand.class))).thenReturn(storedFile);
-		doReturn(true).when(fileUploadService).saveBatch(anyList());
+		when(fileRecordMapper.insert(any(FileRecordEntity.class))).thenAnswer(invocation -> {
+			FileRecordEntity entity = invocation.getArgument(0);
+			entity.setId(1001L);
+			return 1;
+		});
 
 		List<FileUploadResultDTO> responses = fileUploadService.uploadMultiple(form);
 
-		ArgumentCaptor<List<FileRecordEntity>> entityCaptor = ArgumentCaptor.captor();
-		verify(fileUploadService).saveBatch(entityCaptor.capture());
-		assertThat(entityCaptor.getValue()).hasSize(2);
+		verify(fileRecordMapper, times(2)).insert(any(FileRecordEntity.class));
 		assertThat(responses).hasSize(2);
 		verify(fileStorageProvider, times(2)).upload(any(FileUploadCommand.class));
 	}
@@ -233,7 +234,7 @@ class FileUploadServiceImplTest {
 		when(facadeRegistry.resolve(StoragePlatformEnum.ALIYUN_OSS)).thenReturn(storagePlatformFacade);
 		when(storagePlatformFacade.provider()).thenReturn(fileStorageProvider);
 		when(fileStorageProvider.upload(any(FileUploadCommand.class))).thenReturn(storedFile);
-		doReturn(true).when(fileUploadService).saveBatch(anyList());
+		when(fileRecordMapper.insert(any(FileRecordEntity.class))).thenReturn(1);
 
 		fileUploadService.uploadMultiple(form);
 

@@ -1,25 +1,17 @@
 package com.auth.service.system.file.service.impl;
 
-import com.auth.common.data.model.PageResponse;
 import com.auth.module.file.api.constants.FileDeleteSourceConstants;
 import com.auth.module.file.api.enums.StoragePlatformEnum;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
-import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.file.exception.FileStorageException;
 import com.auth.service.system.file.exception.FileUploadResultCode;
 import com.auth.service.system.file.mapper.FileRecordMapper;
 import com.auth.service.system.file.model.entity.FileRecordEntity;
-import com.auth.service.system.file.model.po.FileRecordPageRowPO;
-import com.auth.service.system.file.model.query.FileRecordPageQuery;
-import com.auth.service.system.file.model.vo.FileRecordPageVO;
 import com.auth.service.system.file.storage.core.StoragePlatformFacade;
 import com.auth.service.system.file.storage.core.StoragePlatformFacadeRegistry;
 import com.auth.service.system.file.storage.core.provider.FileStorageProvider;
-import com.auth.service.system.file.support.FileRecordPageAssembler;
 import com.auth.service.system.file.support.FileRecordReferenceChecker;
-import com.auth.service.system.file.support.FileUrlSigner;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,7 +22,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -51,12 +42,6 @@ class FileRecycleServiceImplTest {
 	private FileRecordReferenceChecker fileRecordReferenceChecker;
 
 	@Mock
-	private FileUrlSigner fileUrlSigner;
-
-	@Mock
-	private AuditUserDisplayService auditUserDisplayService;
-
-	@Mock
 	private StoragePlatformFacadeRegistry facadeRegistry;
 
 	@Mock
@@ -69,56 +54,7 @@ class FileRecycleServiceImplTest {
 
 	@BeforeEach
 	void setUp() {
-		FileRecordPageAssembler fileRecordPageAssembler = new FileRecordPageAssembler(fileUrlSigner,
-				auditUserDisplayService);
-		fileRecycleService = new FileRecycleServiceImpl(fileRecordMapper, fileRecordPageAssembler,
-				fileRecordReferenceChecker, facadeRegistry);
-	}
-
-	@Test
-	@DisplayName("getPage：回收站分页走专用 Mapper 查询")
-	void getPageUsesRecycleMapperQuery() {
-		// 验证回收站分页会调用回收站专用查询。
-		FileRecordPageQuery query = new FileRecordPageQuery();
-		query.setPageIndex(1);
-		query.setPageSize(20);
-
-		FileRecordPageRowPO recycled = buildPageRow();
-		recycled.setIsPrivate(true);
-		Page<FileRecordPageRowPO> page = new Page<>(1, 20, 1);
-		page.setRecords(List.of(recycled));
-		when(fileRecordMapper.selectRecycleListByPage(any(), any())).thenReturn(page);
-		when(fileUrlSigner.sign(recycled.getBucket(), recycled.getObjectKey(), recycled.getContentType(),
-				recycled.getStoragePlatform()))
-			.thenReturn(recycled.getUrl() + "?expires=210");
-
-		PageResponse<FileRecordPageVO> pageResult = fileRecycleService.getPage(query);
-
-		assertThat(pageResult.getList()).hasSize(1);
-		verify(fileRecordMapper).selectRecycleListByPage(any(),
-				argThat(param -> Boolean.TRUE.equals(param.getPrivateOnly()) && param.getDeleteSource() == null));
-		verify(fileRecordMapper, never()).selectListByPage(any(), any());
-	}
-
-	@Test
-	@DisplayName("getPage：个人回收站仅查询 USER_SELF 私有文件")
-	void getPageAppliesUserRecycleScopeWhenOwnerPresent() {
-		// 验证个人回收站会限制 delete_source 与私有文件范围。
-		FileRecordPageQuery query = new FileRecordPageQuery();
-		query.setPageIndex(1);
-		query.setPageSize(20);
-		query.setOwnerUserId(9001L);
-
-		Page<FileRecordPageRowPO> page = new Page<>(1, 20, 0);
-		page.setRecords(List.of());
-		when(fileRecordMapper.selectRecycleListByPage(any(), any())).thenReturn(page);
-
-		fileRecycleService.getPage(query);
-
-		verify(fileRecordMapper).selectRecycleListByPage(any(),
-				argThat(param -> Boolean.TRUE.equals(param.getPrivateOnly())
-						&& FileDeleteSourceConstants.USER_SELF.equals(param.getDeleteSource())
-						&& Long.valueOf(9001L).equals(param.getOwnerUserId())));
+		fileRecycleService = new FileRecycleServiceImpl(fileRecordMapper, fileRecordReferenceChecker, facadeRegistry);
 	}
 
 	@Test
@@ -188,7 +124,7 @@ class FileRecycleServiceImplTest {
 		assertThatThrownBy(() -> fileRecycleService.restoreByIds(restoreIds, null, 7001L))
 			.isInstanceOf(FileStorageException.class)
 			.extracting(ex -> ((FileStorageException) ex).getResultCode())
-			.isEqualTo(FileUploadResultCode.FILE_ACCESS_DENIED);
+			.isEqualTo(FileUploadResultCode.FILE_RECORD_NOT_FOUND);
 		verify(fileRecordMapper, never()).restoreByIds(anyList(), any());
 	}
 
@@ -204,7 +140,7 @@ class FileRecycleServiceImplTest {
 		assertThatThrownBy(() -> fileRecycleService.restoreByIds(restoreIds, 9001L, 9001L))
 			.isInstanceOf(FileStorageException.class)
 			.extracting(ex -> ((FileStorageException) ex).getResultCode())
-			.isEqualTo(FileUploadResultCode.FILE_ACCESS_DENIED);
+			.isEqualTo(FileUploadResultCode.FILE_RECORD_NOT_FOUND);
 		verify(fileRecordMapper, never()).restoreByIds(anyList(), any());
 	}
 
@@ -214,14 +150,15 @@ class FileRecycleServiceImplTest {
 		// 验证个人恢复会进行归属校验。
 		FileRecordEntity deleted = buildDeletedEntity(8201L);
 		when(fileRecordReferenceChecker.getExistingBatch(List.of(8201L), true)).thenReturn(List.of(deleted));
-		doThrow(new FileStorageException(FileUploadResultCode.FILE_ACCESS_DENIED)).when(fileRecordReferenceChecker)
+		doThrow(new FileStorageException(FileUploadResultCode.FILE_RECORD_NOT_FOUND, List.of(8201L)))
+			.when(fileRecordReferenceChecker)
 			.requireOwnerBatch(List.of(deleted), 9001L);
 
 		List<Long> restoreIds = List.of(8201L);
 		assertThatThrownBy(() -> fileRecycleService.restoreByIds(restoreIds, 9001L, 9002L))
 			.isInstanceOf(FileStorageException.class)
 			.extracting(ex -> ((FileStorageException) ex).getResultCode())
-			.isEqualTo(FileUploadResultCode.FILE_ACCESS_DENIED);
+			.isEqualTo(FileUploadResultCode.FILE_RECORD_NOT_FOUND);
 		verify(fileRecordMapper, never()).restoreByIds(anyList(), any());
 	}
 
@@ -259,14 +196,15 @@ class FileRecycleServiceImplTest {
 		// 验证个人彻底删除会进行归属校验。
 		FileRecordEntity deleted = buildDeletedEntity(8401L);
 		when(fileRecordReferenceChecker.getExistingBatch(List.of(8401L), true)).thenReturn(List.of(deleted));
-		doThrow(new FileStorageException(FileUploadResultCode.FILE_ACCESS_DENIED)).when(fileRecordReferenceChecker)
+		doThrow(new FileStorageException(FileUploadResultCode.FILE_RECORD_NOT_FOUND, List.of(8401L)))
+			.when(fileRecordReferenceChecker)
 			.requireOwnerBatch(List.of(deleted), 9002L);
 
 		List<Long> purgeIds = List.of(8401L);
 		assertThatThrownBy(() -> fileRecycleService.purgeByIds(purgeIds, 9002L))
 			.isInstanceOf(FileStorageException.class)
 			.extracting(ex -> ((FileStorageException) ex).getResultCode())
-			.isEqualTo(FileUploadResultCode.FILE_ACCESS_DENIED);
+			.isEqualTo(FileUploadResultCode.FILE_RECORD_NOT_FOUND);
 		verify(facadeRegistry, never()).resolve(any());
 		verify(fileRecordMapper, never()).deletePhysicallyByIds(anyList());
 	}
@@ -282,19 +220,6 @@ class FileRecycleServiceImplTest {
 		entity.setDeleteSource(FileDeleteSourceConstants.USER_SELF);
 		entity.setIsDeleted(true);
 		return entity;
-	}
-
-	private FileRecordPageRowPO buildPageRow() {
-		FileRecordPageRowPO row = new FileRecordPageRowPO();
-		row.setId(2101L);
-		row.setStoragePlatform(StoragePlatformEnum.MINIO);
-		row.setContentType("image/png");
-		row.setUrl("https://cdn.example.com/a.png");
-		row.setOriginalName("a.png");
-		row.setBucket("public");
-		row.setObjectKey("a.png");
-		row.setCreateUser(1L);
-		return row;
 	}
 
 }

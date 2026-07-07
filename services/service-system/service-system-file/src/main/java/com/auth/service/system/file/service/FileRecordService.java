@@ -1,10 +1,6 @@
 package com.auth.service.system.file.service;
 
-import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.file.model.entity.FileRecordEntity;
-import com.auth.service.system.file.model.query.FileRecordPageQuery;
-import com.auth.service.system.file.model.vo.FileRecordDetailVO;
-import com.auth.service.system.file.model.vo.FileRecordPageVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
@@ -26,21 +22,6 @@ public interface FileRecordService extends IService<FileRecordEntity> {
 	 * 批量下载 ZIP MIME 类型
 	 */
 	String BATCH_DOWNLOAD_CONTENT_TYPE = "application/zip";
-
-	/**
-	 * 分页查询当前可见文件记录
-	 * @param query 查询条件
-	 * @return 分页结果
-	 */
-	PageResponse<FileRecordPageVO> getPage(FileRecordPageQuery query);
-
-	/**
-	 * 查询文件详情
-	 * @param id 文件记录主键
-	 * @param ownerUserId 归属用户ID
-	 * @return 文件详情
-	 */
-	FileRecordDetailVO getDetail(Long id, Long ownerUserId);
 
 	/**
 	 * 按主键集合删除文件记录：公开文件物理删除，私有文件逻辑删除

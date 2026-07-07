@@ -23,6 +23,6 @@ public class MultipleFileUploadForm extends FileUploadMetadata {
 	@Schema(title = "上传文件列表", requiredMode = Schema.RequiredMode.REQUIRED)
 	@Size(max = 20, message = "单次最多上传20个文件")
 	@NotEmpty(message = "files 不能为空")
-	private List<MultipartFile> files;
+	private transient List<MultipartFile> files;
 
 }

@@ -1,28 +1,19 @@
 package com.auth.service.system.file.service.impl;
 
-import com.auth.common.data.model.PageResponse;
 import com.auth.module.file.api.constants.FileDeleteSourceConstants;
 import com.auth.module.file.api.enums.StoragePlatformEnum;
 import com.auth.module.file.export.delivery.FileDelivery;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
-import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.file.exception.FileStorageException;
 import com.auth.service.system.file.exception.FileUploadResultCode;
 import com.auth.service.system.file.mapper.FileRecordMapper;
 import com.auth.service.system.file.model.entity.FileRecordEntity;
-import com.auth.service.system.file.model.po.FileRecordPageRowPO;
-import com.auth.service.system.file.model.query.FileRecordPageQuery;
-import com.auth.service.system.file.model.vo.FileRecordDetailVO;
-import com.auth.service.system.file.model.vo.FileRecordPageVO;
 import com.auth.service.system.file.service.FileRecordService;
 import com.auth.service.system.file.storage.core.StoragePlatformFacade;
 import com.auth.service.system.file.storage.core.StoragePlatformFacadeRegistry;
 import com.auth.service.system.file.storage.core.provider.FileStorageProvider;
-import com.auth.service.system.file.support.FileRecordPageAssembler;
 import com.auth.service.system.file.support.FileRecordReferenceChecker;
-import com.auth.service.system.file.support.FileUrlSigner;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.repository.CrudRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +32,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -70,12 +60,6 @@ class FileRecordServiceImplTest {
 	private FileRecordReferenceChecker fileRecordReferenceChecker;
 
 	@Mock
-	private FileUrlSigner fileUrlSigner;
-
-	@Mock
-	private AuditUserDisplayService auditUserDisplayService;
-
-	@Mock
 	private StoragePlatformFacadeRegistry facadeRegistry;
 
 	@Mock
@@ -88,132 +72,10 @@ class FileRecordServiceImplTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		FileRecordPageAssembler fileRecordPageAssembler = new FileRecordPageAssembler(fileUrlSigner,
-				auditUserDisplayService);
-		fileRecordService = spy(new FileRecordServiceImpl(fileRecordReferenceChecker, fileRecordPageAssembler,
-				auditUserDisplayService, facadeRegistry, fileUrlSigner));
+		fileRecordService = spy(new FileRecordServiceImpl(fileRecordReferenceChecker, facadeRegistry));
 		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(fileRecordService, fileRecordMapper);
-	}
-
-	@Test
-	@DisplayName("getDetail：公开文件返回 presign accessUrl")
-	void getDetailReturnsPresignAccessUrlWhenFileIsPublic() {
-		// 验证公开文件详情也统一返回临时签名访问地址。
-		FileRecordEntity entity = buildEntity(1001L);
-		entity.setIsPrivate(false);
-		when(fileRecordReferenceChecker.getExistingBatch(List.of(1001L), false)).thenReturn(List.of(entity));
-		when(fileUrlSigner.sign(entity.getBucket(), entity.getObjectKey(), entity.getContentType(),
-				entity.getStoragePlatform()))
-			.thenReturn("https://minio.example.com/public/a.png?X-Amz-Signature=demo");
-
-		FileRecordDetailVO detail = fileRecordService.getDetail(1001L, null);
-
-		verify(auditUserDisplayService)
-			.enrichAuditUsernames(org.mockito.ArgumentMatchers.<List<FileRecordDetailVO>>any(), isNull(), isNull());
-		assertThat(detail.getId()).isEqualTo(1001L);
-		assertThat(detail.getAccessUrl()).isEqualTo("https://minio.example.com/public/a.png?X-Amz-Signature=demo");
-	}
-
-	@Test
-	@DisplayName("getPage：个人分页携带 ownerUserId 时按本人过滤")
-	void getPageFiltersByOwnerWhenOwnerUserIdPresent() {
-		// 验证个人分页场景会把 ownerUserId 透传到 Mapper 过滤条件。
-		FileRecordPageQuery query = new FileRecordPageQuery();
-		query.setPageIndex(1);
-		query.setPageSize(20);
-		query.setOwnerUserId(9001L);
-
-		FileRecordPageRowPO visible = buildPageRow(2001L);
-		visible.setIsPrivate(false);
-		Page<FileRecordPageRowPO> page = new Page<>(1, 20, 1);
-		page.setRecords(List.of(visible));
-		when(fileRecordMapper.selectListByPage(org.mockito.ArgumentMatchers.any(), eq(query))).thenReturn(page);
-		when(fileUrlSigner.sign(visible.getBucket(), visible.getObjectKey(), visible.getContentType(),
-				visible.getStoragePlatform()))
-			.thenReturn("https://minio.example.com/public/a.png?X-Amz-Signature=demo");
-
-		PageResponse<FileRecordPageVO> pageResult = fileRecordService.getPage(query);
-
-		assertThat(pageResult.getList()).hasSize(1);
-		assertThat(pageResult.getList().get(0).getAccessUrl())
-			.isEqualTo("https://minio.example.com/public/a.png?X-Amz-Signature=demo");
-		verify(fileRecordMapper).selectListByPage(org.mockito.ArgumentMatchers.any(),
-				argThat(param -> Long.valueOf(9001L).equals(param.getOwnerUserId())));
-		verify(auditUserDisplayService).enrichAuditUsernames(org.mockito.ArgumentMatchers.<Page<FileRecordPageVO>>any(),
-				isNull(), isNull());
-	}
-
-	@Test
-	@DisplayName("getPage：管理分页不传 ownerUserId 仍可查询")
-	void getPageKeepsAdminQueryWhenOwnerUserIdMissing() {
-		// 验证管理端不传 ownerUserId 时，查询条件保持为空且不被强制注入。
-		FileRecordPageQuery query = new FileRecordPageQuery();
-		query.setPageIndex(1);
-		query.setPageSize(20);
-
-		FileRecordPageRowPO visible = buildPageRow(2002L);
-		visible.setIsPrivate(true);
-		Page<FileRecordPageRowPO> page = new Page<>(1, 20, 1);
-		page.setRecords(List.of(visible));
-		when(fileRecordMapper.selectListByPage(org.mockito.ArgumentMatchers.any(), eq(query))).thenReturn(page);
-		when(fileUrlSigner.sign(visible.getBucket(), visible.getObjectKey(), visible.getContentType(),
-				visible.getStoragePlatform()))
-			.thenReturn("https://minio.example.com/private/a.png?X-Amz-Signature=201");
-
-		PageResponse<FileRecordPageVO> pageResult = fileRecordService.getPage(query);
-
-		assertThat(pageResult.getList()).hasSize(1);
-		assertThat(pageResult.getList().get(0).getAccessUrl())
-			.isEqualTo("https://minio.example.com/private/a.png?X-Amz-Signature=201");
-		verify(fileRecordMapper).selectListByPage(org.mockito.ArgumentMatchers.any(),
-				argThat(param -> param.getOwnerUserId() == null));
-	}
-
-	@Test
-	@DisplayName("getPage：时间范围参数按原样透传到 Mapper")
-	void getPagePassesTimeRangeParamsToMapper() {
-		// 验证时间范围筛选参数会传递到分页查询条件。
-		LocalDateTime startTime = LocalDateTime.of(2026, 7, 1, 0, 0, 0);
-		LocalDateTime endTime = LocalDateTime.of(2026, 7, 3, 23, 59, 59);
-		FileRecordPageQuery query = new FileRecordPageQuery();
-		query.setPageIndex(1);
-		query.setPageSize(20);
-		query.setStartTime(startTime);
-		query.setEndTime(endTime);
-
-		FileRecordPageRowPO visible = buildPageRow(2003L);
-		visible.setIsPrivate(true);
-		Page<FileRecordPageRowPO> page = new Page<>(1, 20, 1);
-		page.setRecords(List.of(visible));
-		when(fileRecordMapper.selectListByPage(org.mockito.ArgumentMatchers.any(), eq(query))).thenReturn(page);
-		when(fileUrlSigner.sign(visible.getBucket(), visible.getObjectKey(), visible.getContentType(),
-				visible.getStoragePlatform()))
-			.thenReturn("https://minio.example.com/private/a.png?X-Amz-Signature=202");
-
-		fileRecordService.getPage(query);
-
-		verify(fileRecordMapper).selectListByPage(org.mockito.ArgumentMatchers.any(),
-				argThat(param -> startTime.equals(param.getStartTime()) && endTime.equals(param.getEndTime())));
-	}
-
-	@Test
-	@DisplayName("getDetail：个人访问他人记录时拒绝")
-	void getDetailThrowsWhenOwnerMismatch() {
-		// 验证个人详情查询会进行归属校验并拒绝访问他人记录。
-		FileRecordEntity entity = buildEntity(3001L);
-		when(fileRecordReferenceChecker.getExistingBatch(List.of(3001L), false)).thenReturn(List.of(entity));
-		doThrow(new FileStorageException(FileUploadResultCode.FILE_ACCESS_DENIED, 3001L))
-			.when(fileRecordReferenceChecker)
-			.requireOwnerBatch(List.of(entity), 9002L);
-
-		Long detailId = 3001L;
-		Long ownerUserId = 9002L;
-		assertThatThrownBy(() -> fileRecordService.getDetail(detailId, ownerUserId))
-			.isInstanceOf(FileStorageException.class)
-			.extracting(ex -> ((FileStorageException) ex).getResultCode())
-			.isEqualTo(FileUploadResultCode.FILE_ACCESS_DENIED);
 	}
 
 	@Test
@@ -224,7 +86,7 @@ class FileRecordServiceImplTest {
 		FileRecordEntity second = buildEntity(4002L);
 		when(fileRecordReferenceChecker.getExistingBatch(List.of(4001L, 4002L), false))
 			.thenReturn(List.of(first, second));
-		doThrow(new FileStorageException(FileUploadResultCode.FILE_ACCESS_DENIED, 4002L))
+		doThrow(new FileStorageException(FileUploadResultCode.FILE_RECORD_NOT_FOUND, List.of(4002L)))
 			.when(fileRecordReferenceChecker)
 			.requireOwnerBatch(List.of(first, second), 9004L);
 
@@ -233,7 +95,7 @@ class FileRecordServiceImplTest {
 		assertThatThrownBy(() -> fileRecordService.deleteByIds(deleteIds, deleteOwnerUserId, deleteOwnerUserId))
 			.isInstanceOf(FileStorageException.class)
 			.extracting(ex -> ((FileStorageException) ex).getResultCode())
-			.isEqualTo(FileUploadResultCode.FILE_ACCESS_DENIED);
+			.isEqualTo(FileUploadResultCode.FILE_RECORD_NOT_FOUND);
 		verify(fileRecordMapper, never()).markDeletedByIds(anyList(), any(), any(), anyString());
 	}
 
@@ -507,19 +369,6 @@ class FileRecordServiceImplTest {
 		entity.setObjectKey("a.png");
 		entity.setCreateUser(1L);
 		return entity;
-	}
-
-	private FileRecordPageRowPO buildPageRow(Long id) {
-		FileRecordPageRowPO row = new FileRecordPageRowPO();
-		row.setId(id);
-		row.setStoragePlatform(StoragePlatformEnum.MINIO);
-		row.setContentType("image/png");
-		row.setUrl("https://cdn.example.com/a.png");
-		row.setOriginalName("a.png");
-		row.setBucket("public");
-		row.setObjectKey("a.png");
-		row.setCreateUser(1L);
-		return row;
 	}
 
 }

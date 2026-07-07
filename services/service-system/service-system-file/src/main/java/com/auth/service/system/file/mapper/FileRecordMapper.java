@@ -24,19 +24,24 @@ public interface FileRecordMapper extends BaseMapper<FileRecordEntity> {
 	 * 分页查询文件记录
 	 * @param page 分页参数
 	 * @param query 筛选条件
+	 * @param isDeleted 逻辑删除状态
 	 * @return 分页结果
 	 */
 	IPage<FileRecordPageRowPO> selectListByPage(@Param("page") Page<FileRecordEntity> page,
-			@Param("query") FileRecordPageQuery query);
+			@Param("query") FileRecordPageQuery query, @Param("isDeleted") Boolean isDeleted);
 
 	/**
-	 * 分页查询回收站文件记录
-	 * @param page 分页参数
-	 * @param query 筛选条件
-	 * @return 分页结果
+	 * 按主键查询文件记录详情
+	 * @param id 文件记录主键
+	 * @param ownerUserId 归属用户ID
+	 * @param isPrivate 是否私有文件
+	 * @param expectedDeleted 是否预期删除
+	 * @param deleteSource 删除来源
+	 * @return 文件记录详情
 	 */
-	IPage<FileRecordPageRowPO> selectRecycleListByPage(@Param("page") Page<FileRecordEntity> page,
-			@Param("query") FileRecordPageQuery query);
+	FileRecordEntity selectDetailById(@Param("id") Long id, @Param("ownerUserId") Long ownerUserId,
+			@Param("isPrivate") Boolean isPrivate, @Param("expectedDeleted") Boolean expectedDeleted,
+			@Param("deleteSource") String deleteSource);
 
 	/**
 	 * 按主键批量查询已逻辑删除的文件记录

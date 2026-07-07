@@ -6,7 +6,9 @@ import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.file.model.query.FileRecordPageQuery;
+import com.auth.service.system.file.model.vo.FileRecordDetailVO;
 import com.auth.service.system.file.model.vo.FileRecordPageVO;
+import com.auth.service.system.file.service.FileRecordCommonService;
 import com.auth.service.system.file.service.FileRecycleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,9 +31,13 @@ import static com.auth.service.system.common.model.SystemAuditBizModule.SYS_FILE
 @RestController
 public class FileRecycleController {
 
+	private final FileRecordCommonService fileRecordCommonService;
+
 	private final FileRecycleService fileRecycleService;
 
-	public FileRecycleController(FileRecycleService fileRecycleService) {
+	public FileRecycleController(FileRecordCommonService fileRecordCommonService,
+			FileRecycleService fileRecycleService) {
+		this.fileRecordCommonService = fileRecordCommonService;
 		this.fileRecycleService = fileRecycleService;
 	}
 
@@ -39,8 +45,20 @@ public class FileRecycleController {
 	@PreAuthorize("@auth.decide('sys:file:recycle:query')")
 	@GetMapping("/page")
 	public Result<PageResponse<FileRecordPageVO>> page(@Valid FileRecordPageQuery query) {
-		PageResponse<FileRecordPageVO> pageResult = fileRecycleService.getPage(query);
+		// 能被删除的都是私有文件
+		query.setIsPrivate(true);
+
+		PageResponse<FileRecordPageVO> pageResult = fileRecordCommonService.getPage(query, true);
 		return Result.success(pageResult);
+	}
+
+	@Operation(summary = "文件详情")
+	@PreAuthorize("@auth.decide('sys:file:query')")
+	@GetMapping("/{id}")
+	public Result<FileRecordDetailVO> detail(@PathVariable("id") Long id) {
+		// 能被删除的都是私有文件
+		FileRecordDetailVO detail = fileRecordCommonService.getDetail(id, null, true, true, null);
+		return Result.success(detail);
 	}
 
 	@OperationLog(targetType = "FILE_RECYCLE_RESTORE", serviceDomain = SYSTEM, bizModule = SYS_FILE,
