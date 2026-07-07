@@ -5,6 +5,7 @@ import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Component;
 
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
  * @author Bunny
  */
 @RequiredArgsConstructor
+@Slf4j
 @Component
 public class PostReferenceChecker {
 
@@ -27,7 +29,8 @@ public class PostReferenceChecker {
 	public SysPostEntity getExistingActive(Long postId) {
 		SysPostEntity existing = sysPostMapper.selectById(postId);
 		if (existing == null) {
-			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST, postId);
+			log.warn("post not found: id={}", postId);
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST);
 		}
 		return existing;
 	}

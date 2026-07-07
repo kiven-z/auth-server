@@ -27,6 +27,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Bunny
  */
 @RequiredArgsConstructor
+@Slf4j
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class SysUserPostServiceImpl extends ServiceImpl<UserPostMapper, UserPostEntity> implements SysUserPostService {
@@ -77,11 +79,13 @@ public class SysUserPostServiceImpl extends ServiceImpl<UserPostMapper, UserPost
 
 		SysPostEntity post = postReferenceChecker.getExistingActive(form.getPostId());
 		if (BooleanUtil.isFalse(post.getStatus())) {
-			throw new SystemBusinessException(SystemCommonResultCode.DATA_UNAVAILABLE, form.getPostId());
+			log.warn("post unavailable: id={}", form.getPostId());
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_UNAVAILABLE);
 		}
 
 		if (baseMapper.countByUserIdAndPostId(userId, form.getPostId()) > 0) {
-			throw new SystemBusinessException(SystemAdminResultCode.USER_POST_DUPLICATE, form.getPostId());
+			log.warn("User post relation duplicate: userId={}, postId={}", userId, form.getPostId());
+			throw new SystemBusinessException(SystemAdminResultCode.USER_POST_DUPLICATE);
 		}
 
 		applyPrimaryPostRules(userId, form.getStatus(), form.getIsPrimary());
@@ -103,7 +107,8 @@ public class SysUserPostServiceImpl extends ServiceImpl<UserPostMapper, UserPost
 
 		UserPostEntity existing = baseMapper.selectByIdAndUserId(id, userId);
 		if (existing == null) {
-			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST, id);
+			log.warn("user post relation not found: id={}", id);
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST);
 		}
 
 		applyPrimaryPostRules(userId, form.getStatus(), form.getIsPrimary());

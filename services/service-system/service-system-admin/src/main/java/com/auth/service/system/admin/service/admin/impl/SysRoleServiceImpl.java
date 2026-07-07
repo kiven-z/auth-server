@@ -1,7 +1,5 @@
 package com.auth.service.system.admin.service.admin.impl;
 
-import java.util.List;
-
 import cn.hutool.core.collection.CollUtil;
 import com.auth.common.core.utils.FieldChangeSupport;
 import com.auth.common.data.support.BusinessKeyAssert;
@@ -19,9 +17,10 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * 系统角色写服务实现。
@@ -74,7 +73,8 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 		Long id = form.getId();
 		SysRoleEntity existing = baseMapper.selectById(id);
 		if (existing == null) {
-			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST, id);
+			log.warn("update role not found: id={}", id);
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST);
 		}
 
 		boolean statusChanged = FieldChangeSupport.valueChanged(existing.getStatus(), form.getStatus());
@@ -105,7 +105,8 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 	public void deleteById(Long id) {
 		SysRoleEntity existing = baseMapper.selectById(id);
 		if (existing == null) {
-			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST, id);
+			log.warn("delete role not found: id={}", id);
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST);
 		}
 
 		String roleCode = existing.getRoleCode();

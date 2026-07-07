@@ -106,7 +106,8 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuEntity
 
 		Long blockedParentId = baseMapper.selectFirstBlockedParentId(idsToDelete);
 		if (blockedParentId != null) {
-			throw new SystemBusinessException(SystemCommonResultCode.TREE_HAS_ACTIVE_CHILDREN, blockedParentId);
+			log.warn("Tree has active children: id={}", blockedParentId);
+			throw new SystemBusinessException(SystemCommonResultCode.TREE_HAS_ACTIVE_CHILDREN);
 		}
 
 		removeByIds(idsToDelete);

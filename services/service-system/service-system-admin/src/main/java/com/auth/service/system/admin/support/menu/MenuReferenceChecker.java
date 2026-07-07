@@ -6,6 +6,7 @@ import com.auth.service.system.admin.mapper.menu.SysMenuMapper;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Component;
 
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
  *
  * @author bunny
  */
+@Slf4j
 @Component
 public class MenuReferenceChecker {
 
@@ -31,7 +33,8 @@ public class MenuReferenceChecker {
 	public SysMenuEntity getExisting(Long menuId) {
 		SysMenuEntity existing = sysMenuMapper.selectById(menuId);
 		if (existing == null) {
-			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST, menuId);
+			log.warn("menu not found: id={}", menuId);
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST);
 		}
 		return existing;
 	}
@@ -44,7 +47,8 @@ public class MenuReferenceChecker {
 	public long normalizeAndRequireParent(Long rawParentId) {
 		long parentId = TreeParentIdUtil.normalize(rawParentId);
 		if (parentId > TreeParentIdUtil.ROOT_PARENT_ID && sysMenuMapper.selectById(parentId) == null) {
-			throw new SystemBusinessException(SystemCommonResultCode.TREE_PARENT_UNAVAILABLE, parentId);
+			log.warn("Tree parent unavailable: parentId={}", parentId);
+			throw new SystemBusinessException(SystemCommonResultCode.TREE_PARENT_UNAVAILABLE);
 		}
 		return parentId;
 	}

@@ -101,8 +101,7 @@ class FileRecycleServiceImplTest {
 	void restoreByIdsThrowsWhenRecordsMissing() {
 		// 验证恢复遇到缺失记录会直接中断。
 		List<Long> missingIds = List.of(8101L);
-		doThrow(new FileStorageException(FileUploadResultCode.FILE_RECORD_NOT_FOUND, missingIds))
-			.when(fileRecordReferenceChecker)
+		doThrow(new FileStorageException(FileUploadResultCode.FILE_RECORD_NOT_FOUND)).when(fileRecordReferenceChecker)
 			.getExistingBatch(missingIds, true);
 
 		assertThatThrownBy(() -> fileRecycleService.restoreByIds(missingIds, null, 7001L))
@@ -150,8 +149,7 @@ class FileRecycleServiceImplTest {
 		// 验证个人恢复会进行归属校验。
 		FileRecordEntity deleted = buildDeletedEntity(8201L);
 		when(fileRecordReferenceChecker.getExistingBatch(List.of(8201L), true)).thenReturn(List.of(deleted));
-		doThrow(new FileStorageException(FileUploadResultCode.FILE_RECORD_NOT_FOUND, List.of(8201L)))
-			.when(fileRecordReferenceChecker)
+		doThrow(new FileStorageException(FileUploadResultCode.FILE_RECORD_NOT_FOUND)).when(fileRecordReferenceChecker)
 			.requireOwnerBatch(List.of(deleted), 9001L);
 
 		List<Long> restoreIds = List.of(8201L);
@@ -196,8 +194,7 @@ class FileRecycleServiceImplTest {
 		// 验证个人彻底删除会进行归属校验。
 		FileRecordEntity deleted = buildDeletedEntity(8401L);
 		when(fileRecordReferenceChecker.getExistingBatch(List.of(8401L), true)).thenReturn(List.of(deleted));
-		doThrow(new FileStorageException(FileUploadResultCode.FILE_RECORD_NOT_FOUND, List.of(8401L)))
-			.when(fileRecordReferenceChecker)
+		doThrow(new FileStorageException(FileUploadResultCode.FILE_RECORD_NOT_FOUND)).when(fileRecordReferenceChecker)
 			.requireOwnerBatch(List.of(deleted), 9002L);
 
 		List<Long> purgeIds = List.of(8401L);

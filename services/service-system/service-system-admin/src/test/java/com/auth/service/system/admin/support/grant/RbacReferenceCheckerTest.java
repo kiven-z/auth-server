@@ -68,7 +68,7 @@ class RbacReferenceCheckerTest {
 	}
 
 	@Test
-	@DisplayName("requireActivePermissionIds：存在无效或未启用权限 ID 时抛出 GRANT_REFERENCE_INVALID 并携带首个无效 ID")
+	@DisplayName("requireActivePermissionIds：存在无效或未启用权限 ID 时抛出 GRANT_REFERENCE_INVALID 且不暴露 ID")
 	void requireActivePermissionIdsThrowsWhenNotAllActive() {
 		when(sysPermissionMapper.selectActivePermissionIds(List.of(99L))).thenReturn(List.of());
 
@@ -76,7 +76,7 @@ class RbacReferenceCheckerTest {
 		assertThatThrownBy(executable).isInstanceOf(SystemBusinessException.class).satisfies(ex -> {
 			SystemBusinessException biz = (SystemBusinessException) ex;
 			assertThat(biz.getResultCode()).isEqualTo(SystemCommonResultCode.GRANT_REFERENCE_INVALID);
-			assertThat(biz.getMessageArgs()).containsExactly(99L);
+			assertThat(biz.getMessageArgs()).isEmpty();
 		});
 	}
 
@@ -86,9 +86,11 @@ class RbacReferenceCheckerTest {
 		when(sysRoleMapper.selectById(null)).thenReturn(null);
 
 		ThrowingCallable executable = () -> rbacReferenceChecker.getExisting(null);
-		assertThatThrownBy(executable).isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
+		assertThatThrownBy(executable).isInstanceOf(SystemBusinessException.class).satisfies(ex -> {
+			SystemBusinessException biz = (SystemBusinessException) ex;
+			assertThat(biz.getResultCode()).isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
+			assertThat(biz.getMessageArgs()).isEmpty();
+		});
 	}
 
 	@Test
@@ -97,9 +99,11 @@ class RbacReferenceCheckerTest {
 		when(sysRoleMapper.selectById(99L)).thenReturn(null);
 
 		ThrowingCallable executable = () -> rbacReferenceChecker.getExisting(99L);
-		assertThatThrownBy(executable).isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
+		assertThatThrownBy(executable).isInstanceOf(SystemBusinessException.class).satisfies(ex -> {
+			SystemBusinessException biz = (SystemBusinessException) ex;
+			assertThat(biz.getResultCode()).isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
+			assertThat(biz.getMessageArgs()).isEmpty();
+		});
 	}
 
 	@Test
@@ -159,7 +163,7 @@ class RbacReferenceCheckerTest {
 	}
 
 	@Test
-	@DisplayName("requireExistingEnabledRoleIds：存在无效角色时抛出指定结果码并携带首个无效 ID")
+	@DisplayName("requireExistingEnabledRoleIds：存在无效角色时抛出指定结果码且不暴露 ID")
 	void requireExistingEnabledRoleIdsThrowsWhenNotAllEligible() {
 		when(sysRoleMapper.selectActiveRoleIds(List.of(99L))).thenReturn(List.of());
 
@@ -168,7 +172,7 @@ class RbacReferenceCheckerTest {
 		assertThatThrownBy(executable).isInstanceOf(SystemBusinessException.class).satisfies(ex -> {
 			SystemBusinessException biz = (SystemBusinessException) ex;
 			assertThat(biz.getResultCode()).isEqualTo(SystemCommonResultCode.GRANT_REFERENCE_INVALID);
-			assertThat(biz.getMessageArgs()).containsExactly(99L);
+			assertThat(biz.getMessageArgs()).isEmpty();
 		});
 	}
 

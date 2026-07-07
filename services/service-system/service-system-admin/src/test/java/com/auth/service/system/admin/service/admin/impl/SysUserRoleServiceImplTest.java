@@ -85,7 +85,7 @@ class SysUserRoleServiceImplTest {
 	@DisplayName("查询已分配角色：用户不存在时抛出 USER_NOT_FOUND")
 	void listAssignedRolesThrowsWhenUserMissing() {
 		when(userReferenceChecker.getExistingActive(USER_ID))
-			.thenThrow(new SystemBusinessException(SystemCommonResultCode.USER_NOT_FOUND, USER_ID));
+			.thenThrow(new SystemBusinessException(SystemCommonResultCode.USER_NOT_FOUND));
 
 		assertThatThrownBy(() -> sysUserRoleService.listAssignedRoles(USER_ID))
 			.isInstanceOf(SystemBusinessException.class)
@@ -127,8 +127,7 @@ class SysUserRoleServiceImplTest {
 	@DisplayName("全量覆盖：受保护用户不允许分配角色")
 	void replaceUserRolesThrowsWhenUserNotOperable() {
 		when(userReferenceChecker.getExistingActive(USER_ID)).thenReturn(activeUser());
-		doThrow(new SystemBusinessException(SystemAdminResultCode.USER_OPERATION_FORBIDDEN, USER_ID))
-			.when(userReferenceChecker)
+		doThrow(new SystemBusinessException(SystemAdminResultCode.USER_OPERATION_FORBIDDEN)).when(userReferenceChecker)
 			.requireOperable(List.of(USER_ID));
 		GrantTableAssignRoleForm form = new GrantTableAssignRoleForm();
 		form.setRoleIds(List.of(101L));

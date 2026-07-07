@@ -12,6 +12,7 @@ import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.common.exception.code.SystemResultCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Component;
 
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Component;
  * @author Bunny
  */
 @RequiredArgsConstructor
+@Slf4j
 @Component
 public class RbacReferenceChecker {
 
@@ -44,7 +46,8 @@ public class RbacReferenceChecker {
 				.filter(id -> !activeIds.contains(id))
 				.findFirst()
 				.orElseThrow(() -> new IllegalStateException("active permission mismatch without invalid id"));
-			throw new SystemBusinessException(SystemCommonResultCode.GRANT_REFERENCE_INVALID, invalidId);
+			log.warn("Grant reference invalid: id={}", invalidId);
+			throw new SystemBusinessException(SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 		}
 	}
 
@@ -56,7 +59,8 @@ public class RbacReferenceChecker {
 	public SysRoleEntity getExisting(Long roleId) {
 		SysRoleEntity role = sysRoleMapper.selectById(roleId);
 		if (role == null) {
-			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST, roleId);
+			log.warn("role not found: id={}", roleId);
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST);
 		}
 		return role;
 	}
@@ -77,7 +81,8 @@ public class RbacReferenceChecker {
 				.filter(id -> !activeIds.contains(id))
 				.findFirst()
 				.orElseThrow(() -> new IllegalStateException("active role mismatch without invalid id"));
-			throw new SystemBusinessException(invalidCode, invalidId);
+			log.warn("Grant reference invalid: id={}, code={}", invalidId, invalidCode);
+			throw new SystemBusinessException(invalidCode);
 		}
 	}
 

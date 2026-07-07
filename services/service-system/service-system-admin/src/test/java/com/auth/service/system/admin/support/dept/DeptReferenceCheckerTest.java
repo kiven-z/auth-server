@@ -65,8 +65,11 @@ class DeptReferenceCheckerTest {
 
 		assertThatThrownBy(() -> deptReferenceChecker.getExistingActive(DEPT_ID))
 			.isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
+			.satisfies(ex -> {
+				SystemBusinessException biz = (SystemBusinessException) ex;
+				assertThat(biz.getResultCode()).isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
+				assertThat(biz.getMessageArgs()).isEmpty();
+			});
 	}
 
 	@Test
@@ -94,8 +97,11 @@ class DeptReferenceCheckerTest {
 
 		assertThatThrownBy(() -> deptReferenceChecker.normalizeAndRequireActiveParent(9L))
 			.isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemCommonResultCode.TREE_PARENT_UNAVAILABLE);
+			.satisfies(ex -> {
+				SystemBusinessException biz = (SystemBusinessException) ex;
+				assertThat(biz.getResultCode()).isEqualTo(SystemCommonResultCode.TREE_PARENT_UNAVAILABLE);
+				assertThat(biz.getMessageArgs()).isEmpty();
+			});
 	}
 
 	@Test

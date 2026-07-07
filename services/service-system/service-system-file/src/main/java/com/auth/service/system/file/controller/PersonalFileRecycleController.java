@@ -57,7 +57,7 @@ public class PersonalFileRecycleController {
 		return Result.success(pageResult);
 	}
 
-	@Operation(summary = "文件详情")
+	@Operation(summary = "回收站文件详情")
 	@GetMapping("/{id}")
 	public Result<FileRecordDetailVO> detail(@PathVariable("id") Long id) {
 		Long ownerUserId = SecurityUserUtils.getUserId();

@@ -13,6 +13,7 @@ import com.auth.service.system.file.storage.core.StoragePlatformFacadeRegistry;
 import com.auth.service.system.file.storage.core.provider.FileStorageProvider;
 import com.auth.service.system.file.support.FileRecordReferenceChecker;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +26,7 @@ import java.util.Objects;
  * @author Bunny
  */
 @RequiredArgsConstructor
+@Slf4j
 @Service
 public class FileRecycleServiceImpl implements FileRecycleService {
 
@@ -76,7 +78,8 @@ public class FileRecycleServiceImpl implements FileRecycleService {
 			.map(FileRecordEntity::getId)
 			.toList();
 		if (!invalidIds.isEmpty()) {
-			throw new FileStorageException(FileUploadResultCode.FILE_RECORD_NOT_FOUND, invalidIds);
+			log.warn("File record not found or unavailable: fileIds={}", invalidIds);
+			throw new FileStorageException(FileUploadResultCode.FILE_RECORD_NOT_FOUND);
 		}
 	}
 

@@ -100,8 +100,11 @@ class SysMenuServiceImplTest {
 		List<Long> menuIds = List.of(2L);
 
 		assertThatThrownBy(() -> sysMenuService.deleteByIds(menuIds)).isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemCommonResultCode.TREE_HAS_ACTIVE_CHILDREN);
+			.satisfies(ex -> {
+				SystemBusinessException biz = (SystemBusinessException) ex;
+				assertThat(biz.getResultCode()).isEqualTo(SystemCommonResultCode.TREE_HAS_ACTIVE_CHILDREN);
+				assertThat(biz.getMessageArgs()).isEmpty();
+			});
 
 		verify(sysMenuMapper, never()).deleteByIds(any());
 	}
@@ -151,7 +154,7 @@ class SysMenuServiceImplTest {
 	@DisplayName("菜单详情：不存在时抛出 DATA_NOT_EXIST")
 	void getDetailThrowsWhenNotFound() {
 		when(menuReferenceChecker.getExisting(9L))
-			.thenThrow(new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST, 9L));
+			.thenThrow(new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST));
 
 		assertThatThrownBy(() -> sysMenuQueryService.getDetail(9L)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())

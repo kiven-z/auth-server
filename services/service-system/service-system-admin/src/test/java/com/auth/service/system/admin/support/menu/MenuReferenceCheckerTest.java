@@ -64,8 +64,11 @@ class MenuReferenceCheckerTest {
 
 		assertThatThrownBy(() -> menuReferenceChecker.normalizeAndRequireParent(9L))
 			.isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemCommonResultCode.TREE_PARENT_UNAVAILABLE);
+			.satisfies(ex -> {
+				SystemBusinessException biz = (SystemBusinessException) ex;
+				assertThat(biz.getResultCode()).isEqualTo(SystemCommonResultCode.TREE_PARENT_UNAVAILABLE);
+				assertThat(biz.getMessageArgs()).isEmpty();
+			});
 	}
 
 	@Test

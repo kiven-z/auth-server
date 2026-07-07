@@ -64,8 +64,11 @@ class PostWriteGuardTest {
 		List<SysPostForm> forms = List.of(postForm);
 		assertThatThrownBy(() -> PostWriteGuard.requireBatchCreatable(sysPostMapper, forms))
 			.isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemCommonResultCode.DATA_UNAVAILABLE);
+			.satisfies(ex -> {
+				SystemBusinessException biz = (SystemBusinessException) ex;
+				assertThat(biz.getResultCode()).isEqualTo(SystemCommonResultCode.DATA_UNAVAILABLE);
+				assertThat(biz.getMessageArgs()).isEmpty();
+			});
 	}
 
 	@Test

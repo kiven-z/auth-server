@@ -18,6 +18,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -28,6 +29,7 @@ import java.util.Collections;
  * @author Bunny
  */
 @RequiredArgsConstructor
+@Slf4j
 @Service
 public class FileRecordCommonServiceImpl extends ServiceImpl<FileRecordMapper, FileRecordEntity>
 		implements FileRecordCommonService {
@@ -59,7 +61,8 @@ public class FileRecordCommonServiceImpl extends ServiceImpl<FileRecordMapper, F
 		FileRecordEntity entity = baseMapper.selectDetailById(id, ownerUserId, isPrivate, expectedDeleted,
 				deleteSource);
 		if (entity == null) {
-			throw new FileStorageException(FileUploadResultCode.FILE_RECORD_NOT_FOUND, id);
+			log.warn("File record not found or unavailable: id={}, ownerUserId={}", id, ownerUserId);
+			throw new FileStorageException(FileUploadResultCode.FILE_RECORD_NOT_FOUND);
 		}
 
 		FileRecordDetailVO detailVo = FileRecordQueryConverter.INSTANCE.toDetailVo(entity);

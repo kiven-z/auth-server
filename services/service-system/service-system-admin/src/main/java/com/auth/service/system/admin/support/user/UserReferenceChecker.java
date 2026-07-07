@@ -20,6 +20,7 @@ import com.auth.service.system.admin.model.po.user.UserBusinessKeysExisting;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Component;
 
@@ -29,6 +30,7 @@ import org.springframework.stereotype.Component;
  * @author Bunny
  */
 @RequiredArgsConstructor
+@Slf4j
 @Component
 public class UserReferenceChecker {
 
@@ -50,7 +52,8 @@ public class UserReferenceChecker {
 	public UserEntity getExistingActive(Long userId) {
 		UserEntity existing = sysUserMapper.selectById(userId);
 		if (existing == null) {
-			throw new SystemBusinessException(SystemCommonResultCode.USER_NOT_FOUND, userId);
+			log.warn("User not found: userId={}", userId);
+			throw new SystemBusinessException(SystemCommonResultCode.USER_NOT_FOUND);
 		}
 		return existing;
 	}
@@ -159,7 +162,8 @@ public class UserReferenceChecker {
 					|| (currentUserId != null && currentUserId.equals(userId));
 
 			if (protectedTarget) {
-				throw new SystemBusinessException(SystemAdminResultCode.USER_OPERATION_FORBIDDEN, userId);
+				log.warn("User operation forbidden: userId={}", userId);
+				throw new SystemBusinessException(SystemAdminResultCode.USER_OPERATION_FORBIDDEN);
 			}
 		}
 	}

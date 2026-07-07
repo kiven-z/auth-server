@@ -30,6 +30,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Bunny
  */
 @RequiredArgsConstructor
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 public class SysRoleQueryServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity> implements SysRoleQueryService {
@@ -72,7 +74,8 @@ public class SysRoleQueryServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleE
 	public SysRoleDetailVO getDetail(Long id) {
 		SysRoleEntity entity = baseMapper.selectById(id);
 		if (entity == null) {
-			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST, id);
+			log.warn("role not found: id={}", id);
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST);
 		}
 
 		SysRoleDetailVO detail = SysRoleConverter.INSTANCE.toDetailVo(entity);

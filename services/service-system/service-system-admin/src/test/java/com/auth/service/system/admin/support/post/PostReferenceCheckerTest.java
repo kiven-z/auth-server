@@ -53,9 +53,11 @@ class PostReferenceCheckerTest {
 		when(sysPostMapper.selectById(POST_ID)).thenReturn(null);
 
 		ThrowingCallable executable = () -> postReferenceChecker.getExistingActive(POST_ID);
-		assertThatThrownBy(executable).isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
+		assertThatThrownBy(executable).isInstanceOf(SystemBusinessException.class).satisfies(ex -> {
+			SystemBusinessException biz = (SystemBusinessException) ex;
+			assertThat(biz.getResultCode()).isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
+			assertThat(biz.getMessageArgs()).isEmpty();
+		});
 	}
 
 }

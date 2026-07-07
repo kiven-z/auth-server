@@ -20,8 +20,8 @@ import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 系统岗位写服务实现。
@@ -29,6 +29,7 @@ import lombok.RequiredArgsConstructor;
  * @author Bunny
  */
 @RequiredArgsConstructor
+@Slf4j
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity> implements SysPostService {
@@ -68,7 +69,8 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity
 		Long deptId = form.getDeptId();
 		List<Long> assignableDeptIds = baseMapper.selectAssignableDeptIds(List.of(deptId));
 		if (assignableDeptIds.isEmpty()) {
-			throw new SystemBusinessException(SystemCommonResultCode.DATA_UNAVAILABLE, deptId);
+			log.warn("department unavailable: id={}", deptId);
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_UNAVAILABLE);
 		}
 
 		// 3. 检查变更后的复合键是否与其它岗位冲突（排除自己所在岗位，是自己放过）
@@ -78,7 +80,8 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity
 			.eq(SysPostEntity::getPostCode, postCode)
 			.ne(SysPostEntity::getId, id));
 		if (otherCount > 0) {
-			throw new SystemBusinessException(SystemAdminResultCode.POST_CODE_DUPLICATE_IN_DEPT, deptId, postCode);
+			log.warn("Post code duplicate in department: deptId={}, postCode={}", deptId, postCode);
+			throw new SystemBusinessException(SystemAdminResultCode.POST_CODE_DUPLICATE_IN_DEPT, postCode);
 		}
 
 		// 4. 更新岗位
@@ -101,7 +104,8 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity
 		long countUserPostByPostId = baseMapper.countUserPostByPostId(id);
 		long countGrantPostSubjectByPostId = baseMapper.countGrantPostSubjectByPostId(id);
 		if (countUserPostByPostId > 0 || countGrantPostSubjectByPostId > 0) {
-			throw new SystemBusinessException(SystemCommonResultCode.DATA_IN_USE, id);
+			log.warn("post in use: id={}", id);
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_IN_USE);
 		}
 
 		postInvalidationTrigger.submitByPostIds(List.of(id), "delete");

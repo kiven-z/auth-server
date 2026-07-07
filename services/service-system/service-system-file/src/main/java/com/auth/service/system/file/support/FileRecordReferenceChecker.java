@@ -8,6 +8,7 @@ import com.auth.service.system.file.exception.FileUploadResultCode;
 import com.auth.service.system.file.mapper.FileRecordMapper;
 import com.auth.service.system.file.model.entity.FileRecordEntity;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.Objects;
  * @author Bunny
  */
 @RequiredArgsConstructor
+@Slf4j
 @Component
 public class FileRecordReferenceChecker {
 
@@ -39,7 +41,8 @@ public class FileRecordReferenceChecker {
 
 		List<FileRecordEntity> entities = fileRecordMapper.selectIsDeletedByIds(normalizedIds, expectedDeleted);
 		if (CollUtil.isEmpty(entities) || entities.size() != normalizedIds.size()) {
-			throw new FileStorageException(FileUploadResultCode.FILE_RECORD_NOT_FOUND, normalizedIds);
+			log.warn("File record not found or unavailable: ids={}", normalizedIds);
+			throw new FileStorageException(FileUploadResultCode.FILE_RECORD_NOT_FOUND);
 		}
 		return entities;
 	}
@@ -63,7 +66,8 @@ public class FileRecordReferenceChecker {
 			.map(FileRecordEntity::getId)
 			.toList();
 		if (!mismatchedIds.isEmpty()) {
-			throw new FileStorageException(FileUploadResultCode.FILE_RECORD_NOT_FOUND, mismatchedIds);
+			log.warn("File record not found or unavailable: fileIds={}", mismatchedIds);
+			throw new FileStorageException(FileUploadResultCode.FILE_RECORD_NOT_FOUND);
 		}
 	}
 

@@ -20,6 +20,7 @@ import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import lombok.Builder;
 import lombok.Value;
 import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 岗位写入复合键校验：部门可挂载性与 (deptId, postCode) 唯一性。
@@ -27,6 +28,7 @@ import lombok.experimental.UtilityClass;
  * @author Bunny
  */
 @UtilityClass
+@Slf4j
 public class PostWriteGuard {
 
 	/**
@@ -83,13 +85,18 @@ public class PostWriteGuard {
 			.findFirst()
 			.orElse(null);
 		if (invalidDeptId != null) {
-			throw new SystemBusinessException(SystemCommonResultCode.DATA_UNAVAILABLE, invalidDeptId);
+			log.warn("department unavailable: id={}", invalidDeptId);
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_UNAVAILABLE);
 		}
 
 		// 4. 检查批次内复合键是否唯一
 		BusinessKeyAssert.requireDistinctBy(forms, form -> deptIdPostCodeKey(form.getDeptId(), form.getPostCode()),
-				form -> new SystemBusinessException(SystemAdminResultCode.POST_CODE_DUPLICATE_IN_DEPT, form.getDeptId(),
-						form.getPostCode()));
+				form -> {
+					log.warn("Post code duplicate in department: deptId={}, postCode={}", form.getDeptId(),
+							form.getPostCode());
+					return new SystemBusinessException(SystemAdminResultCode.POST_CODE_DUPLICATE_IN_DEPT,
+							form.getPostCode());
+				});
 
 		// 5. 检查库中是否存在复合键
 		List<PostDeptCodePairPO> pairs = forms.stream().map(form -> {
@@ -101,7 +108,9 @@ public class PostWriteGuard {
 		List<PostDeptCodePairPO> existing = mapper.selectReferenceByDeptPostPairs(pairs);
 		if (CollUtil.isNotEmpty(existing)) {
 			PostDeptCodePairPO conflict = existing.get(0);
-			throw new SystemBusinessException(SystemAdminResultCode.POST_CODE_DUPLICATE_IN_DEPT, conflict.getDeptId(),
+			log.warn("Post code duplicate in department: deptId={}, postCode={}", conflict.getDeptId(),
+					conflict.getPostCode());
+			throw new SystemBusinessException(SystemAdminResultCode.POST_CODE_DUPLICATE_IN_DEPT,
 					conflict.getPostCode());
 		}
 	}

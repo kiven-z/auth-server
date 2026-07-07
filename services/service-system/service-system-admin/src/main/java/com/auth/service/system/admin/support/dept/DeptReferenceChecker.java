@@ -10,6 +10,7 @@ import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Component;
 
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Component;
  * @author Bunny
  */
 @RequiredArgsConstructor
+@Slf4j
 @Component
 public class DeptReferenceChecker {
 
@@ -32,7 +34,8 @@ public class DeptReferenceChecker {
 	public SysDeptEntity getExistingActive(Long deptId) {
 		SysDeptEntity existing = sysDeptMapper.selectById(deptId);
 		if (existing == null) {
-			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST, deptId);
+			log.warn("department not found: id={}", deptId);
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST);
 		}
 		return existing;
 	}
@@ -45,7 +48,8 @@ public class DeptReferenceChecker {
 	public long normalizeAndRequireActiveParent(Long rawParentId) {
 		long parentId = TreeParentIdUtil.normalize(rawParentId);
 		if (parentId > TreeParentIdUtil.ROOT_PARENT_ID && sysDeptMapper.countActiveById(parentId) == 0) {
-			throw new SystemBusinessException(SystemCommonResultCode.TREE_PARENT_UNAVAILABLE, parentId);
+			log.warn("Tree parent unavailable: parentId={}", parentId);
+			throw new SystemBusinessException(SystemCommonResultCode.TREE_PARENT_UNAVAILABLE);
 		}
 		return parentId;
 	}

@@ -1,7 +1,5 @@
 package com.auth.service.system.admin.service.admin.impl;
 
-import java.util.List;
-
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.core.utils.FieldChangeSupport;
@@ -22,9 +20,10 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * 系统权限写服务实现
@@ -79,7 +78,8 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 		Long id = form.getId();
 		SysPermissionEntity existing = baseMapper.selectById(id);
 		if (existing == null) {
-			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST, id);
+			log.warn("update permission not found: id={}", id);
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST);
 		}
 
 		boolean statusChanged = FieldChangeSupport.valueChanged(existing.getStatus(), form.getStatus());
@@ -111,7 +111,8 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 	public void deleteById(Long id) {
 		SysPermissionEntity existing = baseMapper.selectById(id);
 		if (existing == null) {
-			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST, id);
+			log.warn("delete permission not found: id={}", id);
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST);
 		}
 
 		String permissionCode = existing.getPermissionCode();

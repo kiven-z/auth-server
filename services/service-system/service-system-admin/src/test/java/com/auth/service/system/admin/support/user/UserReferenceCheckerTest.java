@@ -83,6 +83,7 @@ class UserReferenceCheckerTest {
 			.isInstanceOf(SystemBusinessException.class)
 			.actual();
 		assertThat(exception.getResultCode()).isEqualTo(SystemCommonResultCode.USER_NOT_FOUND);
+		assertThat(exception.getMessageArgs()).isEmpty();
 	}
 
 	@Test
@@ -228,6 +229,7 @@ class UserReferenceCheckerTest {
 			.isInstanceOf(SystemBusinessException.class)
 			.actual();
 		assertThat(exception.getResultCode()).isEqualTo(SystemAdminResultCode.USER_OPERATION_FORBIDDEN);
+		assertThat(exception.getMessageArgs()).isEmpty();
 	}
 
 	@Test
@@ -241,6 +243,7 @@ class UserReferenceCheckerTest {
 			.isInstanceOf(SystemBusinessException.class)
 			.actual();
 		assertThat(exception.getResultCode()).isEqualTo(SystemAdminResultCode.USER_OPERATION_FORBIDDEN);
+		assertThat(exception.getMessageArgs()).isEmpty();
 	}
 
 }

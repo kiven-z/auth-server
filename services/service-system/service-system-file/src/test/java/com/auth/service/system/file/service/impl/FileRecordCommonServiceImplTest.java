@@ -149,8 +149,11 @@ class FileRecordCommonServiceImplTest {
 
 		assertThatThrownBy(() -> fileRecordCommonService.getDetail(2001L, 9001L, null, false, null))
 			.isInstanceOf(FileStorageException.class)
-			.extracting(ex -> ((FileStorageException) ex).getResultCode())
-			.isEqualTo(FileUploadResultCode.FILE_RECORD_NOT_FOUND);
+			.satisfies(exception -> {
+				FileStorageException fileException = (FileStorageException) exception;
+				assertThat(fileException.getResultCode()).isEqualTo(FileUploadResultCode.FILE_RECORD_NOT_FOUND);
+				assertThat(fileException.getMessageArgs()).isEmpty();
+			});
 	}
 
 	@Test

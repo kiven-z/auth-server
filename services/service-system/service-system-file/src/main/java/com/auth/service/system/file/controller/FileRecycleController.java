@@ -52,7 +52,7 @@ public class FileRecycleController {
 		return Result.success(pageResult);
 	}
 
-	@Operation(summary = "文件详情")
+	@Operation(summary = "回收站文件详情")
 	@PreAuthorize("@auth.decide('sys:file:query')")
 	@GetMapping("/{id}")
 	public Result<FileRecordDetailVO> detail(@PathVariable("id") Long id) {

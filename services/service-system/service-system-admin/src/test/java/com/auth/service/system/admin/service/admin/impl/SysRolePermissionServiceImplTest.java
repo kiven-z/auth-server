@@ -82,7 +82,7 @@ class SysRolePermissionServiceImplTest {
 	@DisplayName("分配权限：角色不存在时抛出 DATA_NOT_EXIST")
 	void assignWhenRoleMissingShouldThrow() {
 		when(rbacReferenceChecker.getExisting(99L))
-			.thenThrow(new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST, 99L));
+			.thenThrow(new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST));
 
 		List<Long> permissionIds = List.of(10L);
 		assertThatThrownBy(() -> sysRolePermissionService.assignPermissions(99L, permissionIds))

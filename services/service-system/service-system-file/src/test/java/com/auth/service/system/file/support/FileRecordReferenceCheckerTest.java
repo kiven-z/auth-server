@@ -57,8 +57,11 @@ class FileRecordReferenceCheckerTest {
 
 		assertThatThrownBy(() -> fileRecordReferenceChecker.getExistingBatch(queryIds, true))
 			.isInstanceOf(FileStorageException.class)
-			.extracting(exception -> ((FileStorageException) exception).getResultCode())
-			.isEqualTo(FileUploadResultCode.FILE_RECORD_NOT_FOUND);
+			.satisfies(exception -> {
+				FileStorageException fileException = (FileStorageException) exception;
+				assertThat(fileException.getResultCode()).isEqualTo(FileUploadResultCode.FILE_RECORD_NOT_FOUND);
+				assertThat(fileException.getMessageArgs()).isEmpty();
+			});
 	}
 
 	@Test

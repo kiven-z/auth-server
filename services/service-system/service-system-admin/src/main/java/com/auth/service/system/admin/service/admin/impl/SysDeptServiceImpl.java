@@ -143,10 +143,12 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 		deptReferenceChecker.getExistingActive(deptId);
 
 		if (baseMapper.countActiveDirectChildren(deptId) > 0) {
-			throw new SystemBusinessException(SystemCommonResultCode.TREE_HAS_ACTIVE_CHILDREN, deptId);
+			log.warn("Tree has active children: id={}", deptId);
+			throw new SystemBusinessException(SystemCommonResultCode.TREE_HAS_ACTIVE_CHILDREN);
 		}
 		if (baseMapper.existsSubtreeReference(deptId)) {
-			throw new SystemBusinessException(SystemCommonResultCode.DATA_IN_USE, deptId);
+			log.warn("department in use: id={}", deptId);
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_IN_USE);
 		}
 		deptInvalidationTrigger.submitByDeptIds(List.of(deptId), "delete");
 		deptClosureMaintainer.removeClosurePaths(deptId);

@@ -22,6 +22,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Bunny
  */
 @RequiredArgsConstructor
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 public class SysPermissionQueryServiceImpl extends ServiceImpl<SysPermissionMapper, SysPermissionEntity>
@@ -61,7 +63,8 @@ public class SysPermissionQueryServiceImpl extends ServiceImpl<SysPermissionMapp
 	public SysPermissionDetailVO getDetail(Long id) {
 		SysPermissionEntity entity = baseMapper.selectById(id);
 		if (entity == null) {
-			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST, id);
+			log.warn("permission not found: id={}", id);
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST);
 		}
 
 		SysPermissionDetailVO detail = SysPermissionConverter.INSTANCE.toDetailVo(entity);

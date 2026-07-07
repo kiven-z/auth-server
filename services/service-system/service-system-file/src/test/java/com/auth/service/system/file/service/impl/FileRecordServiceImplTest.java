@@ -86,8 +86,7 @@ class FileRecordServiceImplTest {
 		FileRecordEntity second = buildEntity(4002L);
 		when(fileRecordReferenceChecker.getExistingBatch(List.of(4001L, 4002L), false))
 			.thenReturn(List.of(first, second));
-		doThrow(new FileStorageException(FileUploadResultCode.FILE_RECORD_NOT_FOUND, List.of(4002L)))
-			.when(fileRecordReferenceChecker)
+		doThrow(new FileStorageException(FileUploadResultCode.FILE_RECORD_NOT_FOUND)).when(fileRecordReferenceChecker)
 			.requireOwnerBatch(List.of(first, second), 9004L);
 
 		List<Long> deleteIds = List.of(4001L, 4002L);
@@ -116,8 +115,7 @@ class FileRecordServiceImplTest {
 	@DisplayName("deleteByIds：存在缺失记录时抛出 FILE_RECORD_NOT_FOUND")
 	void deleteByIdsThrowsWhenRecordsMissing() {
 		// 验证批量删除遇到缺失记录会直接中断并抛业务异常。
-		doThrow(new FileStorageException(FileUploadResultCode.FILE_RECORD_NOT_FOUND, List.of(4101L, 4102L)))
-			.when(fileRecordReferenceChecker)
+		doThrow(new FileStorageException(FileUploadResultCode.FILE_RECORD_NOT_FOUND)).when(fileRecordReferenceChecker)
 			.getExistingBatch(List.of(4101L, 4102L), false);
 
 		List<Long> missingIds = List.of(4101L, 4102L);
@@ -319,8 +317,7 @@ class FileRecordServiceImplTest {
 	void updatePrivacyByIdsThrowsWhenFileDeleted() {
 		// 验证已逻辑删除文件在存在性校验阶段被拒绝。
 		List<Long> privacyIds = List.of(8004L);
-		doThrow(new FileStorageException(FileUploadResultCode.FILE_RECORD_NOT_FOUND, privacyIds))
-			.when(fileRecordReferenceChecker)
+		doThrow(new FileStorageException(FileUploadResultCode.FILE_RECORD_NOT_FOUND)).when(fileRecordReferenceChecker)
 			.getExistingBatch(privacyIds, false);
 
 		assertThatThrownBy(() -> fileRecordService.updatePrivacyByIds(privacyIds, true, null, 7004L))

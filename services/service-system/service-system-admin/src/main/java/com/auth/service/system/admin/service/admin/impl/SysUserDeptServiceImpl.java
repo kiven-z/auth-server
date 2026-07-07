@@ -1,8 +1,5 @@
 package com.auth.service.system.admin.service.admin.impl;
 
-import java.util.List;
-import java.util.Objects;
-
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.convert.admin.user.UserDeptConverter;
@@ -26,9 +23,12 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Objects;
 
 /**
  * 用户部门关联服务实现
@@ -36,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Bunny
  */
 @RequiredArgsConstructor
+@Slf4j
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class SysUserDeptServiceImpl extends ServiceImpl<UserDeptMapper, UserDeptEntity> implements SysUserDeptService {
@@ -76,7 +77,8 @@ public class SysUserDeptServiceImpl extends ServiceImpl<UserDeptMapper, UserDept
 		deptReferenceChecker.getExistingActive(deptId);
 
 		if (baseMapper.countByUserIdAndDeptId(userId, deptId) > 0) {
-			throw new SystemBusinessException(SystemAdminResultCode.USER_DEPT_DUPLICATE, deptId);
+			log.warn("create user department relation duplicate: userId={}, deptId={}", userId, deptId);
+			throw new SystemBusinessException(SystemAdminResultCode.USER_DEPT_DUPLICATE);
 		}
 
 		applyPrimaryDeptRules(userId, form);
@@ -98,14 +100,16 @@ public class SysUserDeptServiceImpl extends ServiceImpl<UserDeptMapper, UserDept
 
 		UserDeptEntity existing = baseMapper.selectByIdAndUserId(id, userId);
 		if (existing == null) {
-			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST, id);
+			log.warn("update user department relation not found: id={}", id);
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST);
 		}
 
 		if (!Objects.equals(existing.getDeptId(), form.getDeptId())) {
 			deptReferenceChecker.getExistingActive(form.getDeptId());
 			UserDeptEntity conflict = baseMapper.selectByUserIdAndDeptId(userId, form.getDeptId());
 			if (conflict != null && !Objects.equals(conflict.getId(), id)) {
-				throw new SystemBusinessException(SystemAdminResultCode.USER_DEPT_DUPLICATE, form.getDeptId());
+				log.warn("update user department relation duplicate: userId={}, deptId={}", userId, form.getDeptId());
+				throw new SystemBusinessException(SystemAdminResultCode.USER_DEPT_DUPLICATE);
 			}
 		}
 
