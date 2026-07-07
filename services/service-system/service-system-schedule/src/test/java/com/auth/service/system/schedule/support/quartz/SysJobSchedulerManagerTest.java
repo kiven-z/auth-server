@@ -1,6 +1,6 @@
 package com.auth.service.system.schedule.support.quartz;
 
-import com.auth.service.system.schedule.model.entity.SysJobEntity;
+import com.auth.service.system.schedule.model.entity.JobEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,8 +42,8 @@ class SysJobSchedulerManagerTest {
 	@InjectMocks
 	private SysJobSchedulerManager sysJobSchedulerManager;
 
-	private static SysJobEntity enabledJob() {
-		SysJobEntity job = new SysJobEntity();
+	private static JobEntity enabledJob() {
+		JobEntity job = new JobEntity();
 		job.setId(1L);
 		job.setJobName("demo");
 		job.setJobGroup("G");
@@ -77,7 +77,7 @@ class SysJobSchedulerManagerTest {
 	@Test
 	@DisplayName("scheduleOrReplace：暂停且 Quartz 无任务时不注册调度")
 	void scheduleOrReplace_whenPausedAndMissing_doesNotSchedule() throws SchedulerException {
-		SysJobEntity job = new SysJobEntity();
+		JobEntity job = new JobEntity();
 		job.setJobName("demo");
 		job.setJobGroup("G");
 		job.setStatus(false);
@@ -93,7 +93,7 @@ class SysJobSchedulerManagerTest {
 	@Test
 	@DisplayName("scheduleOrReplace：暂停且 Quartz 仍有任务时应 pauseJob")
 	void scheduleOrReplace_whenPausedAndExists_pausesJob() throws SchedulerException {
-		SysJobEntity job = new SysJobEntity();
+		JobEntity job = new JobEntity();
 		job.setJobName("demo");
 		job.setJobGroup("G");
 		job.setStatus(false);
@@ -121,7 +121,7 @@ class SysJobSchedulerManagerTest {
 	@Test
 	@DisplayName("scheduleOrReplace：启用时应删后建并注册调度")
 	void scheduleOrReplace_whenEnabled_schedulesJob() throws SchedulerException {
-		SysJobEntity job = enabledJob();
+		JobEntity job = enabledJob();
 		JobKey jobKey = JobKey.jobKey("demo", "G");
 		JobDetail jobDetail = mock(JobDetail.class);
 		CronTrigger trigger = mock(CronTrigger.class);

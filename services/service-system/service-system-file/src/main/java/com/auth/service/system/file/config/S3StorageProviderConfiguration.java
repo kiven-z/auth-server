@@ -2,8 +2,8 @@ package com.auth.service.system.file.config;
 
 import com.auth.module.file.api.enums.StoragePlatformEnum;
 import com.auth.service.system.file.storage.core.classifier.StorageExceptionClassifier;
-import com.auth.service.system.file.storage.core.provider.S3ClientManager;
-import com.auth.service.system.file.storage.core.provider.S3CompatibleFileStorageProvider;
+import com.auth.service.system.file.storage.core.s3.S3ClientManager;
+import com.auth.service.system.file.storage.core.s3.S3CompatibleFileStorageProvider;
 import com.auth.service.system.file.storage.core.s3.S3PlatformProfileResolver;
 import com.auth.service.system.file.storage.platform.aliyun.AliyunOssConfigValidator;
 import com.auth.service.system.file.storage.platform.minio.MinioConfigValidator;

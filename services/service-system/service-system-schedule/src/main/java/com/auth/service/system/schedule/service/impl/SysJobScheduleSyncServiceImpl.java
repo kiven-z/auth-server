@@ -5,8 +5,8 @@ import java.util.List;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.system.schedule.exception.SysJobException;
-import com.auth.service.system.schedule.mapper.SysJobMapper;
-import com.auth.service.system.schedule.model.entity.SysJobEntity;
+import com.auth.service.system.schedule.mapper.JobMapper;
+import com.auth.service.system.schedule.model.entity.JobEntity;
 import com.auth.service.system.schedule.model.form.SysJobStatusForm;
 import com.auth.service.system.schedule.service.SysJobScheduleSyncService;
 import com.auth.service.system.schedule.support.quartz.SysJobScheduleReconciler;
@@ -32,7 +32,7 @@ import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_
 @RequiredArgsConstructor
 @Slf4j
 @Service
-public class SysJobScheduleSyncServiceImpl extends ServiceImpl<SysJobMapper, SysJobEntity>
+public class SysJobScheduleSyncServiceImpl extends ServiceImpl<JobMapper, JobEntity>
 		implements SysJobScheduleSyncService {
 
 	private final SysJobSchedulerManager sysJobSchedulerManager;
@@ -52,13 +52,13 @@ public class SysJobScheduleSyncServiceImpl extends ServiceImpl<SysJobMapper, Sys
 		Boolean targetStatus = form.getStatus();
 
 		// 获取需要注册的 Quartz 任务
-		List<SysJobEntity> jobsToSchedule = BooleanUtil.isTrue(targetStatus) ? list(
-				Wrappers.<SysJobEntity>lambdaQuery().in(SysJobEntity::getId, ids).eq(SysJobEntity::getStatus, false))
+		List<JobEntity> jobsToSchedule = BooleanUtil.isTrue(targetStatus)
+				? list(Wrappers.<JobEntity>lambdaQuery().in(JobEntity::getId, ids).eq(JobEntity::getStatus, false))
 				: List.of();
 
 		// 更新任务状态
-		List<SysJobEntity> updates = ids.stream().map(id -> {
-			SysJobEntity entity = new SysJobEntity();
+		List<JobEntity> updates = ids.stream().map(id -> {
+			JobEntity entity = new JobEntity();
 			entity.setId(id);
 			entity.setStatus(targetStatus);
 			return entity;
@@ -68,11 +68,11 @@ public class SysJobScheduleSyncServiceImpl extends ServiceImpl<SysJobMapper, Sys
 		try {
 			// 如果目标状态为 false，则暂停 Quartz 任务
 			if (BooleanUtil.isFalse(targetStatus)) {
-				List<SysJobEntity> jobs = list(Wrappers.<SysJobEntity>lambdaQuery().in(SysJobEntity::getId, ids));
+				List<JobEntity> jobs = list(Wrappers.<JobEntity>lambdaQuery().in(JobEntity::getId, ids));
 				if (CollUtil.isEmpty(jobs)) {
 					return;
 				}
-				for (SysJobEntity job : jobs) {
+				for (JobEntity job : jobs) {
 					sysJobSchedulerManager.pauseJob(job.getJobName(), job.getJobGroup());
 				}
 				return;
@@ -84,7 +84,7 @@ public class SysJobScheduleSyncServiceImpl extends ServiceImpl<SysJobMapper, Sys
 			}
 
 			// 注册 Quartz 任务
-			for (SysJobEntity job : jobsToSchedule) {
+			for (JobEntity job : jobsToSchedule) {
 				job.setStatus(true);
 				sysJobSchedulerManager.scheduleOrReplace(job);
 			}
@@ -103,12 +103,12 @@ public class SysJobScheduleSyncServiceImpl extends ServiceImpl<SysJobMapper, Sys
 	@Transactional(rollbackFor = Exception.class)
 	public void batchUpdateStatusByGroupCode(String groupCode, Boolean status) {
 		// 获取分组内的任务
-		List<SysJobEntity> jobs = list(Wrappers.<SysJobEntity>lambdaQuery().eq(SysJobEntity::getJobGroup, groupCode));
+		List<JobEntity> jobs = list(Wrappers.<JobEntity>lambdaQuery().eq(JobEntity::getJobGroup, groupCode));
 
 		// 更新任务状态
 		if (CollUtil.isNotEmpty(jobs)) {
-			List<SysJobEntity> updates = jobs.stream().map(job -> {
-				SysJobEntity entity = new SysJobEntity();
+			List<JobEntity> updates = jobs.stream().map(job -> {
+				JobEntity entity = new JobEntity();
 				entity.setId(job.getId());
 				entity.setStatus(status);
 				return entity;
@@ -124,7 +124,7 @@ public class SysJobScheduleSyncServiceImpl extends ServiceImpl<SysJobMapper, Sys
 			}
 
 			// 注册 Quartz 任务
-			for (SysJobEntity job : jobs) {
+			for (JobEntity job : jobs) {
 				job.setStatus(true);
 				sysJobSchedulerManager.scheduleOrReplace(job);
 			}

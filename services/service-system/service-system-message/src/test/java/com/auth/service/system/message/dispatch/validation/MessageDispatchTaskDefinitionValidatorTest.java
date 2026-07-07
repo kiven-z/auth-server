@@ -2,7 +2,7 @@ package com.auth.service.system.message.dispatch.validation;
 
 import com.auth.service.system.message.dispatch.support.MessageDispatchCommandParser;
 import com.auth.service.system.schedule.exception.SysJobException;
-import com.auth.service.system.schedule.model.entity.SysJobEntity;
+import com.auth.service.system.schedule.model.entity.JobEntity;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Validation;
@@ -59,7 +59,7 @@ class MessageDispatchTaskDefinitionValidatorTest {
 				  }
 				}
 				""";
-		SysJobEntity job = new SysJobEntity();
+		JobEntity job = new JobEntity();
 		job.setPayloadJson(payloadJson);
 
 		validator.validate(job);
@@ -74,7 +74,7 @@ class MessageDispatchTaskDefinitionValidatorTest {
 		when(messageDispatchCommandParser.parseAndValidate(payloadJson))
 			.thenThrow(new SysJobException(JOB_CONFIG_INVALID, "payload_json", "bad"));
 
-		SysJobEntity job = new SysJobEntity();
+		JobEntity job = new JobEntity();
 		job.setPayloadJson(payloadJson);
 
 		assertThatThrownBy(() -> validator.validate(job)).isInstanceOf(SysJobException.class);
@@ -88,7 +88,7 @@ class MessageDispatchTaskDefinitionValidatorTest {
 		MessageDispatchTaskDefinitionValidator integrationValidator = new MessageDispatchTaskDefinitionValidator(
 				parser);
 
-		SysJobEntity job = new SysJobEntity();
+		JobEntity job = new JobEntity();
 		job.setPayloadJson("""
 				{
 				  "version": 1,
@@ -111,7 +111,7 @@ class MessageDispatchTaskDefinitionValidatorTest {
 		MessageDispatchTaskDefinitionValidator integrationValidator = new MessageDispatchTaskDefinitionValidator(
 				parser);
 
-		SysJobEntity job = new SysJobEntity();
+		JobEntity job = new JobEntity();
 		job.setPayloadJson("{\"version\":1}");
 
 		assertThatThrownBy(() -> integrationValidator.validate(job)).isInstanceOf(SysJobException.class);

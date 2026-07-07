@@ -1,4 +1,4 @@
-package com.auth.service.system.file.storage;
+package com.auth.service.system.file.storage.core;
 
 import com.auth.module.file.api.enums.StoragePlatformEnum;
 import com.auth.service.system.file.config.properties.FileUploadProperties;

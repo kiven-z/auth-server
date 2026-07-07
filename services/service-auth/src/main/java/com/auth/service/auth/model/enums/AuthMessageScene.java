@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 /**
- * 认证模块消息场景（与 sys_message_template.scene_code、发送 channel 约定一致）。
+ * 认证模块消息场景（与 message_template.scene_code、发送 channel 约定一致）。
  *
  * @author Bunny
  */

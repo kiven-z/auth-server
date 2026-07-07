@@ -1,7 +1,7 @@
 package com.auth.service.system.schedule.service;
 
 import com.auth.common.data.model.PageResponse;
-import com.auth.service.system.schedule.model.entity.SysJobEntity;
+import com.auth.service.system.schedule.model.entity.JobEntity;
 import com.auth.service.system.schedule.model.form.SysJobCreateForm;
 import com.auth.service.system.schedule.model.form.SysJobUpdateForm;
 import com.auth.service.system.schedule.model.query.SysJobQuery;
@@ -15,7 +15,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  *
  * @author Bunny
  */
-public interface SysJobDefinitionService extends IService<SysJobEntity> {
+public interface SysJobDefinitionService extends IService<JobEntity> {
 
 	/**
 	 * 分页查询
@@ -23,7 +23,7 @@ public interface SysJobDefinitionService extends IService<SysJobEntity> {
 	 * @param query 查询参数
 	 * @return 分页结果
 	 */
-	PageResponse<SysJobPageResponse> getPage(Page<SysJobEntity> pageParams, SysJobQuery query);
+	PageResponse<SysJobPageResponse> getPage(Page<JobEntity> pageParams, SysJobQuery query);
 
 	/**
 	 * 详情查询

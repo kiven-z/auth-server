@@ -6,11 +6,11 @@ import java.util.List;
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.schedule.exception.SysJobException;
-import com.auth.service.system.schedule.mapper.SysJobGroupMapper;
-import com.auth.service.system.schedule.mapper.SysJobMapper;
-import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
+import com.auth.service.system.schedule.mapper.JobGroupMapper;
+import com.auth.service.system.schedule.mapper.JobMapper;
+import com.auth.service.system.schedule.model.entity.JobGroupEntity;
 import com.auth.service.system.schedule.model.form.SysJobGroupForm;
-import com.auth.service.system.schedule.model.po.SysJobGroupPageRowPO;
+import com.auth.service.system.schedule.model.po.JobGroupPageRowPO;
 import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
 import com.auth.service.system.schedule.model.vo.SysJobGroupDetailVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -45,10 +45,10 @@ import static org.mockito.Mockito.when;
 class SysJobGroupServiceImplTest {
 
 	@Mock
-	private SysJobGroupMapper sysJobGroupMapper;
+	private JobGroupMapper jobGroupMapper;
 
 	@Mock
-	private SysJobMapper sysJobMapper;
+	private JobMapper jobMapper;
 
 	@Mock
 	private AuditUserDisplayService auditUserDisplayService;
@@ -68,20 +68,20 @@ class SysJobGroupServiceImplTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		sysJobGroupService = new SysJobGroupServiceImpl(sysJobMapper, auditUserDisplayService);
+		sysJobGroupService = new SysJobGroupServiceImpl(jobMapper, auditUserDisplayService);
 		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
-		baseMapperField.set(sysJobGroupService, sysJobGroupMapper);
+		baseMapperField.set(sysJobGroupService, jobGroupMapper);
 	}
 
 	@Test
 	@DisplayName("分页查询：补全审计展示名")
 	void getPageEnrichesUsernames() {
-		Page<SysJobGroupEntity> pageParams = new Page<>(1, 10);
+		Page<JobGroupEntity> pageParams = new Page<>(1, 10);
 		SysJobGroupQuery query = new SysJobGroupQuery();
-		Page<SysJobGroupPageRowPO> poPage = new Page<>(1, 10);
-		poPage.setRecords(List.of(new SysJobGroupPageRowPO()));
-		when(sysJobGroupMapper.selectListByPage(pageParams, query)).thenReturn(poPage);
+		Page<JobGroupPageRowPO> poPage = new Page<>(1, 10);
+		poPage.setRecords(List.of(new JobGroupPageRowPO()));
+		when(jobGroupMapper.selectListByPage(pageParams, query)).thenReturn(poPage);
 
 		sysJobGroupService.getPage(pageParams, query);
 
@@ -91,37 +91,37 @@ class SysJobGroupServiceImplTest {
 	@Test
 	@DisplayName("启用下拉：keyword 原样透传，并补全展示名")
 	void listEnabledOptionsPassesKeywordThrough() {
-		List<SysJobGroupPageRowPO> rows = List.of(new SysJobGroupPageRowPO());
-		when(sysJobGroupMapper.selectEnabledOptions("  kw  ", 999)).thenReturn(rows);
+		List<JobGroupPageRowPO> rows = List.of(new JobGroupPageRowPO());
+		when(jobGroupMapper.selectEnabledOptions("  kw  ", 999)).thenReturn(rows);
 
 		List<?> result = sysJobGroupService.listEnabledOptions("  kw  ", 999);
 
 		assertThat(result).hasSize(1);
-		verify(sysJobGroupMapper).selectEnabledOptions("  kw  ", 999);
+		verify(jobGroupMapper).selectEnabledOptions("  kw  ", 999);
 		verify(auditUserDisplayService).enrichAuditUsernames(any(List.class), isNull(), isNull());
 	}
 
 	@Test
 	@DisplayName("启用下拉：limit 为 0 按原值传入")
 	void listEnabledOptionsWithZeroLimit() {
-		when(sysJobGroupMapper.selectEnabledOptions(null, 0)).thenReturn(List.of());
+		when(jobGroupMapper.selectEnabledOptions(null, 0)).thenReturn(List.of());
 
 		sysJobGroupService.listEnabledOptions(null, 0);
 
-		verify(sysJobGroupMapper).selectEnabledOptions(null, 0);
+		verify(jobGroupMapper).selectEnabledOptions(null, 0);
 	}
 
 	@Test
 	@DisplayName("详情：存在时返回 VO 并补全审计展示名")
 	void getDetailReturnsVoWhenExists() {
-		SysJobGroupEntity entity = new SysJobGroupEntity();
+		JobGroupEntity entity = new JobGroupEntity();
 		entity.setId(1L);
 		entity.setGroupCode("G1");
 		entity.setGroupName("分组一");
 		entity.setStatus(true);
 		entity.setIsSystem(false);
 		entity.setOrderNum(0);
-		when(sysJobGroupMapper.selectById(1L)).thenReturn(entity);
+		when(jobGroupMapper.selectById(1L)).thenReturn(entity);
 
 		SysJobGroupDetailVO detail = sysJobGroupService.getDetail(1L);
 
@@ -133,7 +133,7 @@ class SysJobGroupServiceImplTest {
 	@Test
 	@DisplayName("详情：分组不存在时抛出 DATA_NOT_EXIST")
 	void getDetailThrowsWhenMissing() {
-		when(sysJobGroupMapper.selectById(99L)).thenReturn(null);
+		when(jobGroupMapper.selectById(99L)).thenReturn(null);
 
 		assertThatThrownBy(() -> sysJobGroupService.getDetail(99L)).isInstanceOf(SysJobException.class)
 			.extracting(ex -> ((SysJobException) ex).getResultCode())
@@ -143,7 +143,7 @@ class SysJobGroupServiceImplTest {
 	@Test
 	@DisplayName("新增：分组编码重复时抛出 DATA_CODE_DUPLICATE")
 	void createRejectsDuplicateGroupCode() {
-		when(sysJobGroupMapper.selectCount(any())).thenReturn(1L);
+		when(jobGroupMapper.selectCount(any())).thenReturn(1L);
 		SysJobGroupForm form = minimalForm("DUP", "重复");
 
 		assertThatThrownBy(() -> sysJobGroupService.create(form)).isInstanceOf(SysJobException.class)
@@ -154,20 +154,20 @@ class SysJobGroupServiceImplTest {
 	@Test
 	@DisplayName("新增：校验通过则 insert")
 	void createInsertsWhenCodeUnique() {
-		when(sysJobGroupMapper.selectCount(any())).thenReturn(0L);
-		when(sysJobGroupMapper.insert(org.mockito.ArgumentMatchers.<SysJobGroupEntity>any())).thenReturn(1);
+		when(jobGroupMapper.selectCount(any())).thenReturn(0L);
+		when(jobGroupMapper.insert(org.mockito.ArgumentMatchers.<JobGroupEntity>any())).thenReturn(1);
 		SysJobGroupForm form = minimalForm("UNIQ_GROUP", "唯一分组");
 
 		sysJobGroupService.create(form);
 
-		verify(sysJobGroupMapper).insert(argThat(
-				(SysJobGroupEntity e) -> "UNIQ_GROUP".equals(e.getGroupCode()) && BooleanUtil.isTrue(e.getStatus())));
+		verify(jobGroupMapper).insert(argThat(
+				(JobGroupEntity e) -> "UNIQ_GROUP".equals(e.getGroupCode()) && BooleanUtil.isTrue(e.getStatus())));
 	}
 
 	@Test
 	@DisplayName("删除：分组不存在时抛出 DATA_NOT_EXIST")
 	void deleteByIdRejectsWhenMissing() {
-		when(sysJobGroupMapper.selectById(9L)).thenReturn(null);
+		when(jobGroupMapper.selectById(9L)).thenReturn(null);
 
 		assertThatThrownBy(() -> sysJobGroupService.deleteById(9L)).isInstanceOf(SysJobException.class)
 			.extracting(ex -> ((SysJobException) ex).getResultCode())
@@ -177,11 +177,11 @@ class SysJobGroupServiceImplTest {
 	@Test
 	@DisplayName("删除：系统内置分组不可删")
 	void deleteByIdRejectsSystemGroup() {
-		SysJobGroupEntity entity = new SysJobGroupEntity();
+		JobGroupEntity entity = new JobGroupEntity();
 		entity.setId(1L);
 		entity.setGroupCode("SYS");
 		entity.setIsSystem(true);
-		when(sysJobGroupMapper.selectById(1L)).thenReturn(entity);
+		when(jobGroupMapper.selectById(1L)).thenReturn(entity);
 
 		assertThatThrownBy(() -> sysJobGroupService.deleteById(1L)).isInstanceOf(SysJobException.class)
 			.extracting(ex -> ((SysJobException) ex).getResultCode())
@@ -191,12 +191,12 @@ class SysJobGroupServiceImplTest {
 	@Test
 	@DisplayName("删除：存在关联任务时抛出 JOB_GROUP_HAS_ACTIVE_JOBS")
 	void deleteByIdRejectsWhenJobsExist() {
-		SysJobGroupEntity entity = new SysJobGroupEntity();
+		JobGroupEntity entity = new JobGroupEntity();
 		entity.setId(2L);
 		entity.setGroupCode("G1");
 		entity.setIsSystem(false);
-		when(sysJobGroupMapper.selectById(2L)).thenReturn(entity);
-		when(sysJobMapper.selectCount(any())).thenReturn(3L);
+		when(jobGroupMapper.selectById(2L)).thenReturn(entity);
+		when(jobMapper.selectCount(any())).thenReturn(3L);
 
 		assertThatThrownBy(() -> sysJobGroupService.deleteById(2L)).isInstanceOf(SysJobException.class)
 			.extracting(ex -> ((SysJobException) ex).getResultCode())
@@ -206,17 +206,17 @@ class SysJobGroupServiceImplTest {
 	@Test
 	@DisplayName("删除：非内置且无关联任务时 removeById")
 	void deleteByIdRemovesWhenAllowed() {
-		SysJobGroupEntity entity = new SysJobGroupEntity();
+		JobGroupEntity entity = new JobGroupEntity();
 		entity.setId(3L);
 		entity.setGroupCode("G2");
 		entity.setIsSystem(false);
-		when(sysJobGroupMapper.selectById(3L)).thenReturn(entity);
-		when(sysJobMapper.selectCount(any())).thenReturn(0L);
-		when(sysJobGroupMapper.deleteById(3L)).thenReturn(1);
+		when(jobGroupMapper.selectById(3L)).thenReturn(entity);
+		when(jobMapper.selectCount(any())).thenReturn(0L);
+		when(jobGroupMapper.deleteById(3L)).thenReturn(1);
 
 		sysJobGroupService.deleteById(3L);
 
-		verify(sysJobGroupMapper).deleteById(3L);
+		verify(jobGroupMapper).deleteById(3L);
 	}
 
 }

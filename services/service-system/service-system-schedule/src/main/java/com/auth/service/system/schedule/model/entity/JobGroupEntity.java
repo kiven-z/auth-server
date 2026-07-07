@@ -12,12 +12,12 @@ import lombok.experimental.Accessors;
  *
  * @author Bunny
  */
-@TableName("sys_job_group")
-@Schema(name = "SysJobGroupEntity", title = "定时任务分组")
+@TableName("job_group")
+@Schema(name = "JobGroupEntity", title = "定时任务分组")
 @Getter
 @Setter
 @Accessors(chain = true)
-public class SysJobGroupEntity extends BaseEntity {
+public class JobGroupEntity extends BaseEntity {
 
 	@Schema(title = "分组编码(大写)")
 	private String groupCode;

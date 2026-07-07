@@ -1,4 +1,4 @@
-package com.auth.service.system.file.support;
+package com.auth.service.system.file.utils;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.UUID;

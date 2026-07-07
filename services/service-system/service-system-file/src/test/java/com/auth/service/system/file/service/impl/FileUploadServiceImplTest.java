@@ -4,14 +4,14 @@ import com.auth.module.file.api.enums.StoragePlatformEnum;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.file.config.properties.FileUploadProperties;
-import com.auth.service.system.file.mapper.SysFileRecordMapper;
-import com.auth.service.system.file.model.entity.SysFileRecordEntity;
+import com.auth.service.system.file.mapper.FileRecordMapper;
+import com.auth.service.system.file.model.entity.FileRecordEntity;
 import com.auth.service.system.file.model.form.FileUploadForm;
 import com.auth.service.system.file.model.value.FileUploadCommand;
 import com.auth.service.system.file.model.value.StoredFile;
 import com.auth.service.system.file.model.vo.FileUploadResponseVO;
-import com.auth.service.system.file.storage.StoragePlatformFacade;
-import com.auth.service.system.file.storage.StoragePlatformFacadeRegistry;
+import com.auth.service.system.file.storage.core.StoragePlatformFacade;
+import com.auth.service.system.file.storage.core.StoragePlatformFacadeRegistry;
 import com.auth.service.system.file.storage.core.provider.FileStorageProvider;
 import com.baomidou.mybatisplus.extension.repository.CrudRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,7 +49,7 @@ class FileUploadServiceImplTest {
 	private FileStorageProvider fileStorageProvider;
 
 	@Mock
-	private SysFileRecordMapper sysFileRecordMapper;
+	private FileRecordMapper fileRecordMapper;
 
 	private FileUploadServiceImpl fileUploadService;
 
@@ -60,7 +60,7 @@ class FileUploadServiceImplTest {
 		fileUploadService = spy(new FileUploadServiceImpl(fileUploadProperties, facadeRegistry));
 		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
-		baseMapperField.set(fileUploadService, sysFileRecordMapper);
+		baseMapperField.set(fileUploadService, fileRecordMapper);
 	}
 
 	@Test
@@ -74,16 +74,16 @@ class FileUploadServiceImplTest {
 		when(storagePlatformFacade.provider()).thenReturn(fileStorageProvider);
 		when(fileStorageProvider.upload(any(FileUploadCommand.class))).thenReturn(storedFile);
 		doAnswer(invocation -> {
-			SysFileRecordEntity entity = invocation.getArgument(0);
+			FileRecordEntity entity = invocation.getArgument(0);
 			entity.setId(1001L);
 			return true;
-		}).when(fileUploadService).save(any(SysFileRecordEntity.class));
+		}).when(fileUploadService).save(any(FileRecordEntity.class));
 
 		FileUploadResponseVO response = fileUploadService.upload(form);
 
-		ArgumentCaptor<SysFileRecordEntity> entityCaptor = ArgumentCaptor.forClass(SysFileRecordEntity.class);
+		ArgumentCaptor<FileRecordEntity> entityCaptor = ArgumentCaptor.forClass(FileRecordEntity.class);
 		verify(fileUploadService).save(entityCaptor.capture());
-		SysFileRecordEntity savedEntity = entityCaptor.getValue();
+		FileRecordEntity savedEntity = entityCaptor.getValue();
 		assertThat(savedEntity.getStoragePlatform()).isEqualTo(StoragePlatformEnum.MINIO);
 		assertThat(savedEntity.getUploadMode()).isEqualTo("SIMPLE");
 		assertThat(savedEntity.getBizType()).isEqualTo("avatar");
@@ -105,11 +105,11 @@ class FileUploadServiceImplTest {
 		when(facadeRegistry.resolve(StoragePlatformEnum.MINIO)).thenReturn(storagePlatformFacade);
 		when(storagePlatformFacade.provider()).thenReturn(fileStorageProvider);
 		when(fileStorageProvider.upload(any(FileUploadCommand.class))).thenReturn(storedFile);
-		doReturn(true).when(fileUploadService).save(any(SysFileRecordEntity.class));
+		doReturn(true).when(fileUploadService).save(any(FileRecordEntity.class));
 
 		fileUploadService.upload(form);
 
-		ArgumentCaptor<SysFileRecordEntity> entityCaptor = ArgumentCaptor.forClass(SysFileRecordEntity.class);
+		ArgumentCaptor<FileRecordEntity> entityCaptor = ArgumentCaptor.forClass(FileRecordEntity.class);
 		verify(fileUploadService).save(entityCaptor.capture());
 		assertThat(entityCaptor.getValue().getIsPrivate()).isTrue();
 		ArgumentCaptor<FileUploadCommand> commandCaptor = ArgumentCaptor.forClass(FileUploadCommand.class);
@@ -138,7 +138,7 @@ class FileUploadServiceImplTest {
 		when(facadeRegistry.resolve(StoragePlatformEnum.ALIYUN_OSS)).thenReturn(storagePlatformFacade);
 		when(storagePlatformFacade.provider()).thenReturn(fileStorageProvider);
 		when(fileStorageProvider.upload(any(FileUploadCommand.class))).thenReturn(storedFile);
-		doReturn(true).when(fileUploadService).save(any(SysFileRecordEntity.class));
+		doReturn(true).when(fileUploadService).save(any(FileRecordEntity.class));
 
 		fileUploadService.upload(form);
 

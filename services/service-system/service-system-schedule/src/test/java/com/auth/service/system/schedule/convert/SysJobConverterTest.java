@@ -2,7 +2,7 @@ package com.auth.service.system.schedule.convert;
 
 import java.time.LocalDateTime;
 
-import com.auth.service.system.schedule.model.entity.SysJobEntity;
+import com.auth.service.system.schedule.model.entity.JobEntity;
 import com.auth.service.system.schedule.model.form.SysJobCreateForm;
 import com.auth.service.system.schedule.model.form.SysJobUpdateForm;
 import com.auth.service.system.schedule.model.po.SysJobDetailRowPO;
@@ -72,7 +72,7 @@ class SysJobConverterTest {
 		form.setStatus(true);
 		form.setTaskType("BEAN_INVOKE");
 
-		SysJobEntity entity = SysJobConverter.INSTANCE.toEntity(form);
+		JobEntity entity = SysJobConverter.INSTANCE.toEntity(form);
 
 		assertThat(entity.getJobName()).isEqualTo("newJob");
 		assertThat(entity.getId()).isNull();
@@ -91,7 +91,7 @@ class SysJobConverterTest {
 		form.setHandlerCode("h1");
 		form.setInvokeTarget(null);
 
-		SysJobEntity entity = new SysJobEntity();
+		JobEntity entity = new JobEntity();
 		entity.setInvokeTarget("old.target");
 		entity.setCronExpression("0 0 12 * * ?");
 
@@ -116,7 +116,7 @@ class SysJobConverterTest {
 		form.setStartTime(null);
 		form.setEndTime(null);
 
-		SysJobEntity entity = new SysJobEntity();
+		JobEntity entity = new JobEntity();
 		entity.setStartTime(oldStart);
 		entity.setEndTime(oldEnd);
 
@@ -137,7 +137,7 @@ class SysJobConverterTest {
 		form.setTaskType("BEAN_INVOKE");
 		form.setInvokeTarget("new.target");
 
-		SysJobEntity entity = new SysJobEntity();
+		JobEntity entity = new JobEntity();
 		entity.setInvokeTarget("old.target");
 		entity.setJobName("fixedName");
 

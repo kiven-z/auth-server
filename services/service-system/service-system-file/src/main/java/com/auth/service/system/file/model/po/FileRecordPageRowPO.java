@@ -15,11 +15,11 @@ import lombok.ToString;
  *
  * @author Bunny
  */
-@Schema(name = "SysFileRecordPageRowPO", title = "文件记录分页行（PO）")
+@Schema(name = "FileRecordPageRowPO", title = "文件记录分页行（PO）")
 @Getter
 @Setter
 @ToString
-public class SysFileRecordPageRowPO implements Serializable {
+public class FileRecordPageRowPO implements Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 1L;

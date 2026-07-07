@@ -1,7 +1,7 @@
 package com.auth.service.system.file.service;
 
 import com.auth.common.data.model.PageResponse;
-import com.auth.service.system.file.model.entity.SysFileRecordEntity;
+import com.auth.service.system.file.model.entity.FileRecordEntity;
 import com.auth.service.system.file.model.query.FileRecordPageQuery;
 import com.auth.service.system.file.model.vo.FileRecordDetailVO;
 import com.auth.service.system.file.model.vo.FileRecordPageVO;
@@ -15,7 +15,7 @@ import java.util.List;
  *
  * @author Bunny
  */
-public interface SysFileRecordService extends IService<SysFileRecordEntity> {
+public interface FileRecordService extends IService<FileRecordEntity> {
 
 	/**
 	 * 批量下载 ZIP 文件名

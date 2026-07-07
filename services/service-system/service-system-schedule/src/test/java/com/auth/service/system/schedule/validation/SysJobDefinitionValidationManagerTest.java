@@ -2,7 +2,7 @@ package com.auth.service.system.schedule.validation;
 
 import java.util.List;
 
-import com.auth.service.system.schedule.model.entity.SysJobEntity;
+import com.auth.service.system.schedule.model.entity.JobEntity;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import com.auth.service.system.schedule.validation.task.SysJobDefinitionValidationManager;
 import com.auth.service.system.schedule.validation.task.SysJobTaskTypeDefinitionValidator;
@@ -27,7 +27,7 @@ class SysJobDefinitionValidationManagerTest {
 		SysJobDefinitionValidationManager manager = new SysJobDefinitionValidationManager(
 				List.of(beanValidator, customValidator));
 
-		SysJobEntity job = new SysJobEntity();
+		JobEntity job = new JobEntity();
 		job.setTaskType(SysJobTaskType.BEAN_INVOKE.name());
 		job.setInvokeTarget("beanInvokeDemoTask.run()");
 
@@ -45,7 +45,7 @@ class SysJobDefinitionValidationManagerTest {
 		SysJobDefinitionValidationManager manager = new SysJobDefinitionValidationManager(
 				List.of(new RecorderValidator(SysJobTaskType.CUSTOM_CLASS)));
 
-		SysJobEntity job = new SysJobEntity();
+		JobEntity job = new JobEntity();
 		job.setTaskType(SysJobTaskType.BEAN_INVOKE.name());
 		job.setInvokeTarget("beanInvokeDemoTask.run()");
 
@@ -74,7 +74,7 @@ class SysJobDefinitionValidationManagerTest {
 		}
 
 		@Override
-		public void validate(SysJobEntity job) {
+		public void validate(JobEntity job) {
 			this.invoked = true;
 		}
 

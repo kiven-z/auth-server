@@ -7,9 +7,9 @@ import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.system.schedule.config.ScheduleJobProperties;
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.mapper.LogJobMapper;
-import com.auth.service.system.schedule.mapper.SysJobMapper;
+import com.auth.service.system.schedule.mapper.JobMapper;
 import com.auth.service.system.schedule.model.entity.LogJobEntity;
-import com.auth.service.system.schedule.model.entity.SysJobEntity;
+import com.auth.service.system.schedule.model.entity.JobEntity;
 import com.auth.service.system.schedule.support.quartz.SysJobSchedulerManager;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +37,7 @@ public class SysJobCircuitBreaker {
 	/**
 	 * 系统任务Mapper
 	 */
-	private final SysJobMapper sysJobMapper;
+	private final JobMapper jobMapper;
 
 	/**
 	 * 系统任务日志Mapper
@@ -49,10 +49,10 @@ public class SysJobCircuitBreaker {
 	 */
 	private final ScheduleJobProperties scheduleJobProperties;
 
-	public SysJobCircuitBreaker(SysJobSchedulerManager sysJobSchedulerManager, SysJobMapper sysJobMapper,
+	public SysJobCircuitBreaker(SysJobSchedulerManager sysJobSchedulerManager, JobMapper jobMapper,
 			LogJobMapper logJobMapper, ScheduleJobProperties scheduleJobProperties) {
 		this.sysJobSchedulerManager = sysJobSchedulerManager;
-		this.sysJobMapper = sysJobMapper;
+		this.jobMapper = jobMapper;
 		this.logJobMapper = logJobMapper;
 		this.scheduleJobProperties = scheduleJobProperties;
 	}
@@ -71,7 +71,7 @@ public class SysJobCircuitBreaker {
 		}
 
 		// 1. 检查任务是否已暂停
-		SysJobEntity job = sysJobMapper.selectById(jobId);
+		JobEntity job = jobMapper.selectById(jobId);
 		if (job == null) {
 			return;
 		}
@@ -90,11 +90,11 @@ public class SysJobCircuitBreaker {
 		// 3. 检查任务是否已暂停
 		boolean wasActive = BooleanUtil.isTrue(job.getStatus());
 		if (wasActive) {
-			sysJobMapper.update(null,
-					Wrappers.lambdaUpdate(SysJobEntity.class)
-						.set(SysJobEntity::getStatus, false)
-						.set(SysJobEntity::getUpdateTime, LocalDateTime.now())
-						.eq(SysJobEntity::getId, jobId));
+			jobMapper.update(null,
+					Wrappers.lambdaUpdate(JobEntity.class)
+						.set(JobEntity::getStatus, false)
+						.set(JobEntity::getUpdateTime, LocalDateTime.now())
+						.eq(JobEntity::getId, jobId));
 		}
 
 		// 4. 暂停任务

@@ -10,7 +10,7 @@ import com.auth.service.system.file.model.form.FilePrivacyUpdateForm;
 import com.auth.service.system.file.model.query.FileRecordPageQuery;
 import com.auth.service.system.file.model.vo.FileRecordDetailVO;
 import com.auth.service.system.file.model.vo.FileRecordPageVO;
-import com.auth.service.system.file.service.SysFileRecordService;
+import com.auth.service.system.file.service.FileRecordService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -34,17 +34,17 @@ import static com.auth.service.system.common.model.SystemAuditBizModule.SYS_FILE
 @RestController
 public class FileRecordController {
 
-	private final SysFileRecordService sysFileRecordService;
+	private final FileRecordService fileRecordService;
 
-	public FileRecordController(SysFileRecordService sysFileRecordService) {
-		this.sysFileRecordService = sysFileRecordService;
+	public FileRecordController(FileRecordService fileRecordService) {
+		this.fileRecordService = fileRecordService;
 	}
 
 	@Operation(summary = "文件分页查询")
 	@PreAuthorize("@auth.decide('sys:file:query')")
 	@GetMapping("/page")
 	public Result<PageResponse<FileRecordPageVO>> page(@Valid FileRecordPageQuery query) {
-		PageResponse<FileRecordPageVO> pageResult = sysFileRecordService.getPage(query);
+		PageResponse<FileRecordPageVO> pageResult = fileRecordService.getPage(query);
 		return Result.success(pageResult);
 	}
 
@@ -52,7 +52,7 @@ public class FileRecordController {
 	@PreAuthorize("@auth.decide('sys:file:query')")
 	@GetMapping("/{id}")
 	public Result<FileRecordDetailVO> detail(@PathVariable("id") Long id) {
-		FileRecordDetailVO detail = sysFileRecordService.getDetail(id, null);
+		FileRecordDetailVO detail = fileRecordService.getDetail(id, null);
 		return Result.success(detail);
 	}
 
@@ -62,9 +62,9 @@ public class FileRecordController {
 	@PreAuthorize("@auth.decide('sys:file:download')")
 	@PostMapping("/download")
 	public ResponseEntity<StreamingResponseBody> batchDownload(@RequestBody List<Long> ids) {
-		StreamingResponseBody body = sysFileRecordService.batchDownload(ids, null);
-		return FileDelivery.deliver(body, SysFileRecordService.BATCH_DOWNLOAD_FILE_NAME,
-				SysFileRecordService.BATCH_DOWNLOAD_CONTENT_TYPE);
+		StreamingResponseBody body = fileRecordService.batchDownload(ids, null);
+		return FileDelivery.deliver(body, FileRecordService.BATCH_DOWNLOAD_FILE_NAME,
+				FileRecordService.BATCH_DOWNLOAD_CONTENT_TYPE);
 	}
 
 	@OperationLog(targetType = "FILE_RECORD", serviceDomain = SYSTEM, bizModule = SYS_FILE,
@@ -74,7 +74,7 @@ public class FileRecordController {
 	@DeleteMapping()
 	public Result<Void> delete(@RequestBody List<Long> ids) {
 		Long operatorUserId = SecurityUserUtils.getUserId();
-		sysFileRecordService.deleteByIds(ids, null, operatorUserId);
+		fileRecordService.deleteByIds(ids, null, operatorUserId);
 		return Result.success();
 	}
 
@@ -85,7 +85,7 @@ public class FileRecordController {
 	@PostMapping("/privacy")
 	public Result<Void> updatePrivacy(@Valid @RequestBody FilePrivacyUpdateForm form) {
 		Long operatorUserId = SecurityUserUtils.getUserId();
-		sysFileRecordService.updatePrivacyByIds(form.getIds(), form.getIsPrivate(), null, operatorUserId);
+		fileRecordService.updatePrivacyByIds(form.getIds(), form.getIsPrivate(), null, operatorUserId);
 		return Result.success();
 	}
 

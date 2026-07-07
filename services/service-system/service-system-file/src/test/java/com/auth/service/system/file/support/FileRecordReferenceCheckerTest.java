@@ -4,8 +4,8 @@ import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.file.exception.FileStorageException;
 import com.auth.service.system.file.exception.FileUploadResultCode;
-import com.auth.service.system.file.mapper.SysFileRecordMapper;
-import com.auth.service.system.file.model.entity.SysFileRecordEntity;
+import com.auth.service.system.file.mapper.FileRecordMapper;
+import com.auth.service.system.file.model.entity.FileRecordEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,7 +28,7 @@ import static org.mockito.Mockito.*;
 class FileRecordReferenceCheckerTest {
 
 	@Mock
-	private SysFileRecordMapper sysFileRecordMapper;
+	private FileRecordMapper fileRecordMapper;
 
 	@InjectMocks
 	private FileRecordReferenceChecker fileRecordReferenceChecker;
@@ -37,15 +37,15 @@ class FileRecordReferenceCheckerTest {
 	@DisplayName("getExistingBatch：按期望删除状态查询并返回记录")
 	void getExistingBatchReturnsWhenDeletedStateMatched() {
 		// 验证查询会透传 expectedDeleted 参数到 Mapper。
-		SysFileRecordEntity deleted = new SysFileRecordEntity();
+		FileRecordEntity deleted = new FileRecordEntity();
 		deleted.setId(1102L);
 		deleted.setIsDeleted(true);
-		when(sysFileRecordMapper.selectIsDeletedByIds(List.of(1102L), true)).thenReturn(List.of(deleted));
+		when(fileRecordMapper.selectIsDeletedByIds(List.of(1102L), true)).thenReturn(List.of(deleted));
 
-		SysFileRecordEntity result = fileRecordReferenceChecker.getExistingBatch(List.of(1102L), true).get(0);
+		FileRecordEntity result = fileRecordReferenceChecker.getExistingBatch(List.of(1102L), true).get(0);
 
 		assertThat(result).isSameAs(deleted);
-		verify(sysFileRecordMapper).selectIsDeletedByIds(List.of(1102L), true);
+		verify(fileRecordMapper).selectIsDeletedByIds(List.of(1102L), true);
 	}
 
 	@Test
@@ -53,7 +53,7 @@ class FileRecordReferenceCheckerTest {
 	void getExistingBatchThrowsWhenDeletedStateMismatch() {
 		// 验证删除状态不匹配会被识别为记录不存在。
 		List<Long> queryIds = List.of(1101L);
-		when(sysFileRecordMapper.selectIsDeletedByIds(queryIds, true)).thenReturn(List.of());
+		when(fileRecordMapper.selectIsDeletedByIds(queryIds, true)).thenReturn(List.of());
 
 		assertThatThrownBy(() -> fileRecordReferenceChecker.getExistingBatch(queryIds, true))
 			.isInstanceOf(FileStorageException.class)
@@ -65,21 +65,21 @@ class FileRecordReferenceCheckerTest {
 	@DisplayName("getExistingBatch：空 ids 直接返回空列表")
 	void getExistingBatchReturnsEmptyWhenIdsEmpty() {
 		// 验证空输入不会访问数据库。
-		List<SysFileRecordEntity> result = fileRecordReferenceChecker.getExistingBatch(List.of(), true);
+		List<FileRecordEntity> result = fileRecordReferenceChecker.getExistingBatch(List.of(), true);
 
 		assertThat(result).isEmpty();
-		verifyNoInteractions(sysFileRecordMapper);
+		verifyNoInteractions(fileRecordMapper);
 	}
 
 	@Test
 	@DisplayName("requireOwnerBatch：用户为空时抛出 JWT_INVALID")
 	void requireOwnerBatchThrowsWhenOwnerUserIdMissing() {
 		// 验证用户上下文缺失时不会放行归属校验。
-		SysFileRecordEntity entity = new SysFileRecordEntity();
+		FileRecordEntity entity = new FileRecordEntity();
 		entity.setId(1003L);
 		entity.setCreateUser(1L);
 
-		List<SysFileRecordEntity> ownerCheckRecords = List.of(entity);
+		List<FileRecordEntity> ownerCheckRecords = List.of(entity);
 		assertThatThrownBy(() -> fileRecordReferenceChecker.requireOwnerBatch(ownerCheckRecords, null))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
@@ -90,11 +90,11 @@ class FileRecordReferenceCheckerTest {
 	@DisplayName("requireOwnerBatch：访问他人记录时抛出 FILE_ACCESS_DENIED")
 	void requireOwnerBatchThrowsWhenOwnerMismatch() {
 		// 验证当前用户与创建人不一致时拒绝访问。
-		SysFileRecordEntity entity = new SysFileRecordEntity();
+		FileRecordEntity entity = new FileRecordEntity();
 		entity.setId(1004L);
 		entity.setCreateUser(2L);
 
-		List<SysFileRecordEntity> mismatchRecords = List.of(entity);
+		List<FileRecordEntity> mismatchRecords = List.of(entity);
 		Long currentUserId = 1L;
 		assertThatThrownBy(() -> fileRecordReferenceChecker.requireOwnerBatch(mismatchRecords, currentUserId))
 			.isInstanceOf(FileStorageException.class)
@@ -106,11 +106,11 @@ class FileRecordReferenceCheckerTest {
 	@DisplayName("requireOwnerBatch：创建人与当前用户一致时通过")
 	void requireOwnerBatchPassesWhenOwnerMatched() {
 		// 验证本人访问本人文件时允许通过校验。
-		SysFileRecordEntity entity = new SysFileRecordEntity();
+		FileRecordEntity entity = new FileRecordEntity();
 		entity.setId(1006L);
 		entity.setCreateUser(9L);
 
-		List<SysFileRecordEntity> matchedRecords = List.of(entity);
+		List<FileRecordEntity> matchedRecords = List.of(entity);
 		Long matchedOwnerUserId = 9L;
 		assertThatCode(() -> fileRecordReferenceChecker.requireOwnerBatch(matchedRecords, matchedOwnerUserId))
 			.doesNotThrowAnyException();

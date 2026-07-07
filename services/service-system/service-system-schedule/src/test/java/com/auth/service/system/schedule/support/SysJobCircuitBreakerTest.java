@@ -5,9 +5,9 @@ import java.util.List;
 import com.auth.service.system.schedule.config.ScheduleJobProperties;
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.mapper.LogJobMapper;
-import com.auth.service.system.schedule.mapper.SysJobMapper;
+import com.auth.service.system.schedule.mapper.JobMapper;
 import com.auth.service.system.schedule.model.entity.LogJobEntity;
-import com.auth.service.system.schedule.model.entity.SysJobEntity;
+import com.auth.service.system.schedule.model.entity.JobEntity;
 import com.auth.service.system.schedule.support.quartz.SysJobSchedulerManager;
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
@@ -41,7 +41,7 @@ class SysJobCircuitBreakerTest {
 	private SysJobSchedulerManager sysJobSchedulerManager;
 
 	@Mock
-	private SysJobMapper sysJobMapper;
+	private JobMapper jobMapper;
 
 	@Mock
 	private LogJobMapper logJobMapper;
@@ -55,7 +55,7 @@ class SysJobCircuitBreakerTest {
 	@BeforeAll
 	static void initMybatisPlusTableInfo() {
 		// LambdaUpdateWrapper 依赖实体元数据缓存，纯 Mockito 单测需预先初始化
-		TableInfoHelper.initTableInfo(new MapperBuilderAssistant(new MybatisConfiguration(), ""), SysJobEntity.class);
+		TableInfoHelper.initTableInfo(new MapperBuilderAssistant(new MybatisConfiguration(), ""), JobEntity.class);
 	}
 
 	private static List<LogJobEntity> failedLogs() {
@@ -67,16 +67,16 @@ class SysJobCircuitBreakerTest {
 	void evaluateAfterFailure_whenActiveAndThresholdReached_pausesJob() throws SchedulerException {
 		when(scheduleJobProperties.getConsecutiveFailureThreshold()).thenReturn(5);
 
-		SysJobEntity job = new SysJobEntity();
+		JobEntity job = new JobEntity();
 		job.setId(1L);
 		job.setStatus(true);
-		when(sysJobMapper.selectById(1L)).thenReturn(job);
+		when(jobMapper.selectById(1L)).thenReturn(job);
 		when(logJobMapper.selectRecentByJobNameAndGroup("demoJob", "DEFAULT", 5)).thenReturn(failedLogs());
 
 		sysJobCircuitBreaker.evaluateAfterFailure(1L, "demoJob", "DEFAULT");
 
-		verify(sysJobMapper).update(isNull(), any());
-		verify(sysJobMapper, never()).updateById(any(SysJobEntity.class));
+		verify(jobMapper).update(isNull(), any());
+		verify(jobMapper, never()).updateById(any(JobEntity.class));
 		verify(sysJobSchedulerManager).pauseJob("demoJob", "DEFAULT");
 	}
 
@@ -85,16 +85,16 @@ class SysJobCircuitBreakerTest {
 	void evaluateAfterFailure_whenDbPausedButThresholdReached_stillPausesQuartz() throws SchedulerException {
 		when(scheduleJobProperties.getConsecutiveFailureThreshold()).thenReturn(5);
 
-		SysJobEntity job = new SysJobEntity();
+		JobEntity job = new JobEntity();
 		job.setId(1L);
 		job.setStatus(false);
-		when(sysJobMapper.selectById(1L)).thenReturn(job);
+		when(jobMapper.selectById(1L)).thenReturn(job);
 		when(logJobMapper.selectRecentByJobNameAndGroup("demoJob", "DEFAULT", 5)).thenReturn(failedLogs());
 
 		sysJobCircuitBreaker.evaluateAfterFailure(1L, "demoJob", "DEFAULT");
 
-		verify(sysJobMapper, never()).update(isNull(), any());
-		verify(sysJobMapper, never()).updateById(any(SysJobEntity.class));
+		verify(jobMapper, never()).update(isNull(), any());
+		verify(jobMapper, never()).updateById(any(JobEntity.class));
 		verify(sysJobSchedulerManager).pauseJob("demoJob", "DEFAULT");
 	}
 
@@ -103,10 +103,10 @@ class SysJobCircuitBreakerTest {
 	void evaluateAfterFailure_whenPauseJobFails_throwsSysJobException() throws SchedulerException {
 		when(scheduleJobProperties.getConsecutiveFailureThreshold()).thenReturn(5);
 
-		SysJobEntity job = new SysJobEntity();
+		JobEntity job = new JobEntity();
 		job.setId(1L);
 		job.setStatus(true);
-		when(sysJobMapper.selectById(1L)).thenReturn(job);
+		when(jobMapper.selectById(1L)).thenReturn(job);
 		when(logJobMapper.selectRecentByJobNameAndGroup("demoJob", "DEFAULT", 5)).thenReturn(failedLogs());
 		doThrow(new SchedulerException("pause failed")).when(sysJobSchedulerManager).pauseJob("demoJob", "DEFAULT");
 

@@ -1,8 +1,8 @@
 package com.auth.service.system.file.convert;
 
 import com.auth.common.mapstruct.config.AuthMapperConfig;
-import com.auth.service.system.file.model.entity.SysFileRecordEntity;
-import com.auth.service.system.file.model.po.SysFileRecordPageRowPO;
+import com.auth.service.system.file.model.entity.FileRecordEntity;
+import com.auth.service.system.file.model.po.FileRecordPageRowPO;
 import com.auth.service.system.file.model.vo.FileRecordDetailVO;
 import com.auth.service.system.file.model.vo.FileRecordPageVO;
 import org.mapstruct.Mapper;
@@ -27,7 +27,7 @@ public interface FileRecordQueryConverter {
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
 	@Mapping(target = "accessUrl", ignore = true)
-	FileRecordPageVO toPageVo(SysFileRecordPageRowPO po);
+	FileRecordPageVO toPageVo(FileRecordPageRowPO po);
 
 	/**
 	 * 文件实体映射为详情
@@ -37,6 +37,6 @@ public interface FileRecordQueryConverter {
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
 	@Mapping(target = "accessUrl", ignore = true)
-	FileRecordDetailVO toDetailVo(SysFileRecordEntity entity);
+	FileRecordDetailVO toDetailVo(FileRecordEntity entity);
 
 }

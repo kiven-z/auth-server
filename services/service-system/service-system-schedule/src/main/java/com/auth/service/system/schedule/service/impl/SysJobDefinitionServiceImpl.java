@@ -13,12 +13,12 @@ import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.schedule.convert.SysJobConverter;
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.mapper.LogJobMapper;
-import com.auth.service.system.schedule.mapper.SysJobGroupMapper;
-import com.auth.service.system.schedule.mapper.SysJobMapper;
+import com.auth.service.system.schedule.mapper.JobGroupMapper;
+import com.auth.service.system.schedule.mapper.JobMapper;
 import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
 import com.auth.service.system.schedule.model.entity.LogJobEntity;
-import com.auth.service.system.schedule.model.entity.SysJobEntity;
-import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
+import com.auth.service.system.schedule.model.entity.JobEntity;
+import com.auth.service.system.schedule.model.entity.JobGroupEntity;
 import com.auth.service.system.schedule.model.enums.SysJobLastExecutionStatus;
 import com.auth.service.system.schedule.model.enums.SysJobQuartzRuntimeStatus;
 import com.auth.service.system.schedule.model.form.SysJobCreateForm;
@@ -60,14 +60,13 @@ import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_
 @RequiredArgsConstructor
 @Slf4j
 @Service
-public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJobEntity>
-		implements SysJobDefinitionService {
+public class SysJobDefinitionServiceImpl extends ServiceImpl<JobMapper, JobEntity> implements SysJobDefinitionService {
 
 	private final SysJobSchedulerManager sysJobSchedulerManager;
 
 	private final AuditUserDisplayService auditUserDisplayService;
 
-	private final SysJobGroupMapper sysJobGroupMapper;
+	private final JobGroupMapper jobGroupMapper;
 
 	private final LogJobMapper logJobMapper;
 
@@ -79,7 +78,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 	 * {@inheritDoc}
 	 */
 	@Override
-	public PageResponse<SysJobPageResponse> getPage(Page<SysJobEntity> pageParams, SysJobQuery query) {
+	public PageResponse<SysJobPageResponse> getPage(Page<JobEntity> pageParams, SysJobQuery query) {
 		IPage<SysJobPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
 		IPage<SysJobPageResponse> voPage = page.convert(SysJobConverter.INSTANCE::toPageResponse);
 
@@ -128,8 +127,8 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 	@Transactional(rollbackFor = Exception.class)
 	public void create(SysJobCreateForm form) {
 		// 验证分组是否存在
-		SysJobGroupEntity sysJobGroup = sysJobGroupMapper.selectOne(
-				Wrappers.<SysJobGroupEntity>lambdaQuery().eq(SysJobGroupEntity::getGroupCode, form.getJobGroup()));
+		JobGroupEntity sysJobGroup = jobGroupMapper
+			.selectOne(Wrappers.<JobGroupEntity>lambdaQuery().eq(JobGroupEntity::getGroupCode, form.getJobGroup()));
 		if (sysJobGroup == null) {
 			throw new SysJobException(DATA_NOT_EXIST);
 		}
@@ -140,7 +139,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 		}
 
 		// 转换为实体
-		SysJobEntity sysJob = SysJobConverter.INSTANCE.toEntity(form);
+		JobEntity sysJob = SysJobConverter.INSTANCE.toEntity(form);
 		validationManager.normalizeAndValidate(sysJob);
 		save(sysJob);
 
@@ -165,7 +164,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 	@Transactional(rollbackFor = Exception.class)
 	public void update(SysJobUpdateForm form) {
 		// 验证 id 是否存在
-		SysJobEntity dbJob = getDbJob(form.getId());
+		JobEntity dbJob = getDbJob(form.getId());
 
 		// 更新实体
 		SysJobConverter.INSTANCE.updateEntity(form, dbJob);
@@ -183,8 +182,8 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 	}
 
 	@NotNull
-	private SysJobEntity getDbJob(Long id) {
-		SysJobEntity dbJob = getById(id);
+	private JobEntity getDbJob(Long id) {
+		JobEntity dbJob = getById(id);
 		if (dbJob == null) {
 			throw new SysJobException(DATA_NOT_EXIST);
 		}
@@ -197,7 +196,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void deleteById(Long id) {
-		SysJobEntity dbJob = getDbJob(id);
+		JobEntity dbJob = getDbJob(id);
 
 		try {
 			// 删除 Quartz Job
@@ -219,7 +218,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<SysJobMapper, SysJo
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void runOnce(Long id) {
-		SysJobEntity dbJob = getDbJob(id);
+		JobEntity dbJob = getDbJob(id);
 
 		// 验证 Quartz 运行状态
 		String jobName = dbJob.getJobName();

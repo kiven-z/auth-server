@@ -24,12 +24,12 @@
 		create_user,
 		version,
 		remark
-		FROM sys_message_template
+		FROM message_template
 		WHERE scene_code = #{sceneCode}
 		AND channel = #{channel}
 		AND status = 1
 		AND priority = (SELECT MAX(priority)
-		FROM sys_message_template
+		FROM message_template
 		WHERE scene_code = #{sceneCode}
 		AND channel = #{channel}
 		AND status = 1)
@@ -50,7 +50,7 @@
 		update_time,
 		create_user,
 		update_user
-		FROM sys_message_template
+		FROM message_template
 		<where>
 			channel = 'EMAIL'
 			<if test="query.templateCode != null and query.templateCode != ''">

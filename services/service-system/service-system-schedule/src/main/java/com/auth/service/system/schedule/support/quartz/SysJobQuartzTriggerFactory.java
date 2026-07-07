@@ -4,7 +4,7 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.Objects;
 
-import com.auth.service.system.schedule.model.entity.SysJobEntity;
+import com.auth.service.system.schedule.model.entity.JobEntity;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
 import org.quartz.JobKey;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import static com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys.TRIGGER_SUFFIX;
 
 /**
- * 根据 {@link SysJobEntity} 构建 Quartz {@link CronTrigger}
+ * 根据 {@link JobEntity} 构建 Quartz {@link CronTrigger}
  *
  * @author Bunny
  */
@@ -38,7 +38,7 @@ public class SysJobQuartzTriggerFactory {
 	 * @param jobKey 任务键
 	 * @return CronTrigger
 	 */
-	public CronTrigger build(SysJobEntity job, JobKey jobKey) {
+	public CronTrigger build(JobEntity job, JobKey jobKey) {
 		String jobName = job.getJobName();
 		String jobGroup = job.getJobGroup();
 

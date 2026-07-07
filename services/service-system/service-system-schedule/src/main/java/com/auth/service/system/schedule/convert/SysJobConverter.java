@@ -1,7 +1,7 @@
 package com.auth.service.system.schedule.convert;
 
 import com.auth.common.mapstruct.config.AuthMapperConfig;
-import com.auth.service.system.schedule.model.entity.SysJobEntity;
+import com.auth.service.system.schedule.model.entity.JobEntity;
 import com.auth.service.system.schedule.model.form.SysJobCreateForm;
 import com.auth.service.system.schedule.model.form.SysJobUpdateForm;
 import com.auth.service.system.schedule.model.po.SysJobDetailRowPO;
@@ -61,7 +61,7 @@ public interface SysJobConverter {
 	@Mapping(target = "createUser", ignore = true)
 	@Mapping(target = "updateUser", ignore = true)
 	@Mapping(target = "version", ignore = true)
-	SysJobEntity toEntity(SysJobCreateForm form);
+	JobEntity toEntity(SysJobCreateForm form);
 
 	/**
 	 * 更新表单 → 覆盖已有实体（禁止改 JobKey 三要素；invokeTarget 仅非 null 时覆盖）
@@ -79,6 +79,6 @@ public interface SysJobConverter {
 	@Mapping(target = "version", ignore = true)
 	@Mapping(target = "invokeTarget", source = "invokeTarget",
 			nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-	void updateEntity(SysJobUpdateForm form, @MappingTarget SysJobEntity entity);
+	void updateEntity(SysJobUpdateForm form, @MappingTarget JobEntity entity);
 
 }

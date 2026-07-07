@@ -8,13 +8,13 @@ import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.file.exception.FileStorageException;
 import com.auth.service.system.file.exception.FileUploadResultCode;
-import com.auth.service.system.file.mapper.SysFileRecordMapper;
-import com.auth.service.system.file.model.entity.SysFileRecordEntity;
-import com.auth.service.system.file.model.po.SysFileRecordPageRowPO;
+import com.auth.service.system.file.mapper.FileRecordMapper;
+import com.auth.service.system.file.model.entity.FileRecordEntity;
+import com.auth.service.system.file.model.po.FileRecordPageRowPO;
 import com.auth.service.system.file.model.query.FileRecordPageQuery;
 import com.auth.service.system.file.model.vo.FileRecordPageVO;
-import com.auth.service.system.file.storage.StoragePlatformFacade;
-import com.auth.service.system.file.storage.StoragePlatformFacadeRegistry;
+import com.auth.service.system.file.storage.core.StoragePlatformFacade;
+import com.auth.service.system.file.storage.core.StoragePlatformFacadeRegistry;
 import com.auth.service.system.file.storage.core.provider.FileStorageProvider;
 import com.auth.service.system.file.support.FileRecordPageAssembler;
 import com.auth.service.system.file.support.FileRecordReferenceChecker;
@@ -45,7 +45,7 @@ import static org.mockito.Mockito.*;
 class FileRecycleServiceImplTest {
 
 	@Mock
-	private SysFileRecordMapper sysFileRecordMapper;
+	private FileRecordMapper fileRecordMapper;
 
 	@Mock
 	private FileRecordReferenceChecker fileRecordReferenceChecker;
@@ -71,7 +71,7 @@ class FileRecycleServiceImplTest {
 	void setUp() {
 		FileRecordPageAssembler fileRecordPageAssembler = new FileRecordPageAssembler(fileUrlSigner,
 				auditUserDisplayService);
-		fileRecycleService = new FileRecycleServiceImpl(sysFileRecordMapper, fileRecordPageAssembler,
+		fileRecycleService = new FileRecycleServiceImpl(fileRecordMapper, fileRecordPageAssembler,
 				fileRecordReferenceChecker, facadeRegistry);
 	}
 
@@ -83,11 +83,11 @@ class FileRecycleServiceImplTest {
 		query.setPageIndex(1);
 		query.setPageSize(20);
 
-		SysFileRecordPageRowPO recycled = buildPageRow();
+		FileRecordPageRowPO recycled = buildPageRow();
 		recycled.setIsPrivate(true);
-		Page<SysFileRecordPageRowPO> page = new Page<>(1, 20, 1);
+		Page<FileRecordPageRowPO> page = new Page<>(1, 20, 1);
 		page.setRecords(List.of(recycled));
-		when(sysFileRecordMapper.selectRecycleListByPage(any(), any())).thenReturn(page);
+		when(fileRecordMapper.selectRecycleListByPage(any(), any())).thenReturn(page);
 		when(fileUrlSigner.sign(recycled.getBucket(), recycled.getObjectKey(), recycled.getContentType(),
 				recycled.getStoragePlatform()))
 			.thenReturn(recycled.getUrl() + "?expires=210");
@@ -95,9 +95,9 @@ class FileRecycleServiceImplTest {
 		PageResponse<FileRecordPageVO> pageResult = fileRecycleService.getPage(query);
 
 		assertThat(pageResult.getList()).hasSize(1);
-		verify(sysFileRecordMapper).selectRecycleListByPage(any(),
+		verify(fileRecordMapper).selectRecycleListByPage(any(),
 				argThat(param -> Boolean.TRUE.equals(param.getPrivateOnly()) && param.getDeleteSource() == null));
-		verify(sysFileRecordMapper, never()).selectListByPage(any(), any());
+		verify(fileRecordMapper, never()).selectListByPage(any(), any());
 	}
 
 	@Test
@@ -109,13 +109,13 @@ class FileRecycleServiceImplTest {
 		query.setPageSize(20);
 		query.setOwnerUserId(9001L);
 
-		Page<SysFileRecordPageRowPO> page = new Page<>(1, 20, 0);
+		Page<FileRecordPageRowPO> page = new Page<>(1, 20, 0);
 		page.setRecords(List.of());
-		when(sysFileRecordMapper.selectRecycleListByPage(any(), any())).thenReturn(page);
+		when(fileRecordMapper.selectRecycleListByPage(any(), any())).thenReturn(page);
 
 		fileRecycleService.getPage(query);
 
-		verify(sysFileRecordMapper).selectRecycleListByPage(any(),
+		verify(fileRecordMapper).selectRecycleListByPage(any(),
 				argThat(param -> Boolean.TRUE.equals(param.getPrivateOnly())
 						&& FileDeleteSourceConstants.USER_SELF.equals(param.getDeleteSource())
 						&& Long.valueOf(9001L).equals(param.getOwnerUserId())));
@@ -125,26 +125,26 @@ class FileRecycleServiceImplTest {
 	@DisplayName("restoreByIds：批量恢复已删除私有记录")
 	void restoreByIdsRestoresDeletedRecords() {
 		// 验证恢复流程会校验已删除私有记录并调用 Mapper 恢复。
-		SysFileRecordEntity deleted = buildDeletedEntity(8001L);
+		FileRecordEntity deleted = buildDeletedEntity(8001L);
 		when(fileRecordReferenceChecker.getExistingBatch(List.of(8001L), true)).thenReturn(List.of(deleted));
 
 		fileRecycleService.restoreByIds(List.of(8001L), null, 7001L);
 
 		verify(fileRecordReferenceChecker).getExistingBatch(List.of(8001L), true);
-		verify(sysFileRecordMapper).restoreByIds(List.of(8001L), 7001L);
+		verify(fileRecordMapper).restoreByIds(List.of(8001L), 7001L);
 	}
 
 	@Test
 	@DisplayName("restoreByIds：归属校验用户与操作用户分离")
 	void restoreByIdsUsesOperatorUserIdForUpdateUser() {
 		// 验证 update_user 使用操作用户而非归属校验用户。
-		SysFileRecordEntity deleted = buildDeletedEntity(8002L);
+		FileRecordEntity deleted = buildDeletedEntity(8002L);
 		when(fileRecordReferenceChecker.getExistingBatch(List.of(8002L), true)).thenReturn(List.of(deleted));
 
 		fileRecycleService.restoreByIds(List.of(8002L), 9001L, 9002L);
 
 		verify(fileRecordReferenceChecker).requireOwnerBatch(List.of(deleted), 9001L);
-		verify(sysFileRecordMapper).restoreByIds(List.of(8002L), 9002L);
+		verify(fileRecordMapper).restoreByIds(List.of(8002L), 9002L);
 	}
 
 	@Test
@@ -157,7 +157,7 @@ class FileRecycleServiceImplTest {
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.PARAM_REQUIRED);
 		verify(fileRecordReferenceChecker, never()).getExistingBatch(anyList(), anyBoolean());
-		verify(sysFileRecordMapper, never()).restoreByIds(anyList(), any());
+		verify(fileRecordMapper, never()).restoreByIds(anyList(), any());
 	}
 
 	@Test
@@ -173,14 +173,14 @@ class FileRecycleServiceImplTest {
 			.isInstanceOf(FileStorageException.class)
 			.extracting(ex -> ((FileStorageException) ex).getResultCode())
 			.isEqualTo(FileUploadResultCode.FILE_RECORD_NOT_FOUND);
-		verify(sysFileRecordMapper, never()).restoreByIds(anyList(), any());
+		verify(fileRecordMapper, never()).restoreByIds(anyList(), any());
 	}
 
 	@Test
 	@DisplayName("restoreByIds：非私有文件拒绝恢复")
 	void restoreByIdsThrowsWhenFileIsNotPrivate() {
 		// 验证仅允许恢复逻辑删除的私有文件。
-		SysFileRecordEntity deleted = buildDeletedEntity(8501L);
+		FileRecordEntity deleted = buildDeletedEntity(8501L);
 		deleted.setIsPrivate(false);
 		List<Long> restoreIds = List.of(8501L);
 		when(fileRecordReferenceChecker.getExistingBatch(restoreIds, true)).thenReturn(List.of(deleted));
@@ -189,14 +189,14 @@ class FileRecycleServiceImplTest {
 			.isInstanceOf(FileStorageException.class)
 			.extracting(ex -> ((FileStorageException) ex).getResultCode())
 			.isEqualTo(FileUploadResultCode.FILE_ACCESS_DENIED);
-		verify(sysFileRecordMapper, never()).restoreByIds(anyList(), any());
+		verify(fileRecordMapper, never()).restoreByIds(anyList(), any());
 	}
 
 	@Test
 	@DisplayName("restoreByIds：个人恢复 ADMIN_ACTION 记录时拒绝")
 	void restoreByIdsThrowsWhenUserRestoresAdminDeletedFile() {
 		// 验证用户不能恢复管理员删除的私有文件。
-		SysFileRecordEntity deleted = buildDeletedEntity(8601L);
+		FileRecordEntity deleted = buildDeletedEntity(8601L);
 		deleted.setDeleteSource(FileDeleteSourceConstants.ADMIN_ACTION);
 		List<Long> restoreIds = List.of(8601L);
 		when(fileRecordReferenceChecker.getExistingBatch(restoreIds, true)).thenReturn(List.of(deleted));
@@ -205,14 +205,14 @@ class FileRecycleServiceImplTest {
 			.isInstanceOf(FileStorageException.class)
 			.extracting(ex -> ((FileStorageException) ex).getResultCode())
 			.isEqualTo(FileUploadResultCode.FILE_ACCESS_DENIED);
-		verify(sysFileRecordMapper, never()).restoreByIds(anyList(), any());
+		verify(fileRecordMapper, never()).restoreByIds(anyList(), any());
 	}
 
 	@Test
 	@DisplayName("restoreByIds：个人恢复他人记录时拒绝")
 	void restoreByIdsThrowsWhenOwnerMismatch() {
 		// 验证个人恢复会进行归属校验。
-		SysFileRecordEntity deleted = buildDeletedEntity(8201L);
+		FileRecordEntity deleted = buildDeletedEntity(8201L);
 		when(fileRecordReferenceChecker.getExistingBatch(List.of(8201L), true)).thenReturn(List.of(deleted));
 		doThrow(new FileStorageException(FileUploadResultCode.FILE_ACCESS_DENIED)).when(fileRecordReferenceChecker)
 			.requireOwnerBatch(List.of(deleted), 9001L);
@@ -222,14 +222,14 @@ class FileRecycleServiceImplTest {
 			.isInstanceOf(FileStorageException.class)
 			.extracting(ex -> ((FileStorageException) ex).getResultCode())
 			.isEqualTo(FileUploadResultCode.FILE_ACCESS_DENIED);
-		verify(sysFileRecordMapper, never()).restoreByIds(anyList(), any());
+		verify(fileRecordMapper, never()).restoreByIds(anyList(), any());
 	}
 
 	@Test
 	@DisplayName("purgeByIds：彻底删除存储对象与数据库记录")
 	void purgeByIdsDeletesStorageAndDatabaseRows() {
 		// 验证彻底删除会先删存储对象再物理删除数据库行。
-		SysFileRecordEntity deleted = buildDeletedEntity(8301L);
+		FileRecordEntity deleted = buildDeletedEntity(8301L);
 		when(fileRecordReferenceChecker.getExistingBatch(List.of(8301L), true)).thenReturn(List.of(deleted));
 		when(facadeRegistry.resolve(StoragePlatformEnum.MINIO)).thenReturn(storagePlatformFacade);
 		when(storagePlatformFacade.provider()).thenReturn(minioProvider);
@@ -237,7 +237,7 @@ class FileRecycleServiceImplTest {
 		fileRecycleService.purgeByIds(Arrays.asList(8301L, null, 8301L), null);
 
 		verify(minioProvider).delete("public", "a.png");
-		verify(sysFileRecordMapper).deletePhysicallyByIds(List.of(8301L));
+		verify(fileRecordMapper).deletePhysicallyByIds(List.of(8301L));
 	}
 
 	@Test
@@ -250,14 +250,14 @@ class FileRecycleServiceImplTest {
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.PARAM_REQUIRED);
 		verify(fileRecordReferenceChecker, never()).getExistingBatch(anyList(), anyBoolean());
-		verify(sysFileRecordMapper, never()).deletePhysicallyByIds(anyList());
+		verify(fileRecordMapper, never()).deletePhysicallyByIds(anyList());
 	}
 
 	@Test
 	@DisplayName("purgeByIds：个人彻底删除他人记录时拒绝")
 	void purgeByIdsThrowsWhenOwnerMismatch() {
 		// 验证个人彻底删除会进行归属校验。
-		SysFileRecordEntity deleted = buildDeletedEntity(8401L);
+		FileRecordEntity deleted = buildDeletedEntity(8401L);
 		when(fileRecordReferenceChecker.getExistingBatch(List.of(8401L), true)).thenReturn(List.of(deleted));
 		doThrow(new FileStorageException(FileUploadResultCode.FILE_ACCESS_DENIED)).when(fileRecordReferenceChecker)
 			.requireOwnerBatch(List.of(deleted), 9002L);
@@ -268,11 +268,11 @@ class FileRecycleServiceImplTest {
 			.extracting(ex -> ((FileStorageException) ex).getResultCode())
 			.isEqualTo(FileUploadResultCode.FILE_ACCESS_DENIED);
 		verify(facadeRegistry, never()).resolve(any());
-		verify(sysFileRecordMapper, never()).deletePhysicallyByIds(anyList());
+		verify(fileRecordMapper, never()).deletePhysicallyByIds(anyList());
 	}
 
-	private SysFileRecordEntity buildDeletedEntity(Long id) {
-		SysFileRecordEntity entity = new SysFileRecordEntity();
+	private FileRecordEntity buildDeletedEntity(Long id) {
+		FileRecordEntity entity = new FileRecordEntity();
 		entity.setId(id);
 		entity.setStoragePlatform(StoragePlatformEnum.MINIO);
 		entity.setBucket("public");
@@ -284,8 +284,8 @@ class FileRecycleServiceImplTest {
 		return entity;
 	}
 
-	private SysFileRecordPageRowPO buildPageRow() {
-		SysFileRecordPageRowPO row = new SysFileRecordPageRowPO();
+	private FileRecordPageRowPO buildPageRow() {
+		FileRecordPageRowPO row = new FileRecordPageRowPO();
 		row.setId(2101L);
 		row.setStoragePlatform(StoragePlatformEnum.MINIO);
 		row.setContentType("image/png");

@@ -1,7 +1,7 @@
 package com.auth.service.system.schedule.support.quartz;
 
 import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
-import com.auth.service.system.schedule.model.entity.SysJobEntity;
+import com.auth.service.system.schedule.model.entity.JobEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.quartz.JobDataMap;
@@ -22,7 +22,7 @@ class SysJobQuartzJobFactoryTest {
 	@Test
 	@DisplayName("build：应将 job_params 原文与展开键同时写入 JobDataMap")
 	void build_putsRawAndFlattenedJobParams() {
-		SysJobEntity job = new SysJobEntity();
+		JobEntity job = new JobEntity();
 		job.setId(10L);
 		job.setJobName("http-demo");
 		job.setJobGroup("DEFAULT");

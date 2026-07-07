@@ -3,8 +3,8 @@ package com.auth.service.system.file.support;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.file.convert.FileRecordQueryConverter;
-import com.auth.service.system.file.model.entity.SysFileRecordEntity;
-import com.auth.service.system.file.model.po.SysFileRecordPageRowPO;
+import com.auth.service.system.file.model.entity.FileRecordEntity;
+import com.auth.service.system.file.model.po.FileRecordPageRowPO;
 import com.auth.service.system.file.model.query.FileRecordPageQuery;
 import com.auth.service.system.file.model.vo.FileRecordPageVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -35,9 +35,9 @@ public class FileRecordPageAssembler {
 	 * @return 分页结果
 	 */
 	public PageResponse<FileRecordPageVO> assemblePage(FileRecordPageQuery query,
-			BiFunction<Page<SysFileRecordEntity>, FileRecordPageQuery, IPage<SysFileRecordPageRowPO>> pageLoader) {
-		Page<SysFileRecordEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
-		IPage<SysFileRecordPageRowPO> page = pageLoader.apply(pageParams, query);
+			BiFunction<Page<FileRecordEntity>, FileRecordPageQuery, IPage<FileRecordPageRowPO>> pageLoader) {
+		Page<FileRecordEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
+		IPage<FileRecordPageRowPO> page = pageLoader.apply(pageParams, query);
 
 		List<FileRecordPageVO> records = page.getRecords().stream().map(row -> {
 			FileRecordPageVO pageVO = FileRecordQueryConverter.INSTANCE.toPageVo(row);

@@ -45,7 +45,7 @@ class ValidationPatternsTest {
 	@Test
 	@DisplayName("UPPER_ALNUM_UNDERSCORE rejects lowercase or special characters")
 	void upperAlnumUnderscoreRejectsInvalidCodes() {
-		assertFalse(upperAlnumUnderscore.matcher("sys_job").matches());
+		assertFalse(upperAlnumUnderscore.matcher("job").matches());
 		assertFalse(upperAlnumUnderscore.matcher("A-B").matches());
 	}
 

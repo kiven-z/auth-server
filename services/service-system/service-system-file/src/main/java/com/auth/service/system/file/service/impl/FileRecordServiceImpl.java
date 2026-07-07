@@ -9,15 +9,18 @@ import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.file.convert.FileRecordQueryConverter;
-import com.auth.service.system.file.mapper.SysFileRecordMapper;
-import com.auth.service.system.file.model.entity.SysFileRecordEntity;
+import com.auth.service.system.file.mapper.FileRecordMapper;
+import com.auth.service.system.file.model.entity.FileRecordEntity;
 import com.auth.service.system.file.model.query.FileRecordPageQuery;
 import com.auth.service.system.file.model.vo.FileRecordDetailVO;
 import com.auth.service.system.file.model.vo.FileRecordPageVO;
-import com.auth.service.system.file.service.SysFileRecordService;
-import com.auth.service.system.file.storage.StoragePlatformFacadeRegistry;
+import com.auth.service.system.file.service.FileRecordService;
+import com.auth.service.system.file.storage.core.StoragePlatformFacadeRegistry;
 import com.auth.service.system.file.storage.core.provider.FileStorageProvider;
-import com.auth.service.system.file.support.*;
+import com.auth.service.system.file.support.FileRecordPageAssembler;
+import com.auth.service.system.file.support.FileRecordReferenceChecker;
+import com.auth.service.system.file.support.FileUrlSigner;
+import com.auth.service.system.file.utils.FileObjectKeyUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -36,8 +39,8 @@ import java.util.stream.Collectors;
  */
 @RequiredArgsConstructor
 @Service
-public class SysFileRecordServiceImpl extends ServiceImpl<SysFileRecordMapper, SysFileRecordEntity>
-		implements SysFileRecordService {
+public class FileRecordServiceImpl extends ServiceImpl<FileRecordMapper, FileRecordEntity>
+		implements FileRecordService {
 
 	private final FileRecordReferenceChecker fileRecordReferenceChecker;
 
@@ -64,11 +67,11 @@ public class SysFileRecordServiceImpl extends ServiceImpl<SysFileRecordMapper, S
 	@Override
 	@Transactional(readOnly = true)
 	public FileRecordDetailVO getDetail(Long id, Long ownerUserId) {
-		List<SysFileRecordEntity> entities = fileRecordReferenceChecker.getExistingBatch(List.of(id), false);
+		List<FileRecordEntity> entities = fileRecordReferenceChecker.getExistingBatch(List.of(id), false);
 		if (ownerUserId != null) {
 			fileRecordReferenceChecker.requireOwnerBatch(entities, ownerUserId);
 		}
-		SysFileRecordEntity entity = entities.get(0);
+		FileRecordEntity entity = entities.get(0);
 
 		FileRecordDetailVO detail = FileRecordQueryConverter.INSTANCE.toDetailVo(entity);
 		String accessUrl = fileUrlSigner.sign(entity.getBucket(), entity.getObjectKey(), entity.getContentType(),
@@ -91,7 +94,7 @@ public class SysFileRecordServiceImpl extends ServiceImpl<SysFileRecordMapper, S
 
 		List<Long> publicIds = new ArrayList<>();
 		List<Long> privateIds = new ArrayList<>();
-		for (SysFileRecordEntity entity : resolved.entities()) {
+		for (FileRecordEntity entity : resolved.entities()) {
 			if (BooleanUtil.isTrue(entity.getIsPrivate())) {
 				privateIds.add(entity.getId());
 			}
@@ -101,12 +104,12 @@ public class SysFileRecordServiceImpl extends ServiceImpl<SysFileRecordMapper, S
 		}
 
 		if (!publicIds.isEmpty()) {
-			List<SysFileRecordEntity> entities = resolved.entities()
+			List<FileRecordEntity> entities = resolved.entities()
 				.stream()
 				.filter(entity -> publicIds.contains(entity.getId()))
 				.toList();
 
-			for (SysFileRecordEntity entity : entities) {
+			for (FileRecordEntity entity : entities) {
 				FileStorageProvider provider = facadeRegistry.resolve(entity.getStoragePlatform()).provider();
 				provider.delete(entity.getBucket(), entity.getObjectKey());
 			}
@@ -125,10 +128,10 @@ public class SysFileRecordServiceImpl extends ServiceImpl<SysFileRecordMapper, S
 	public StreamingResponseBody batchDownload(List<Long> ids, Long ownerUserId) {
 		var resolved = resolveBatchFileRecords(ids, ownerUserId);
 
-		Map<Long, SysFileRecordEntity> entityById = resolved.entities()
+		Map<Long, FileRecordEntity> entityById = resolved.entities()
 			.stream()
-			.collect(Collectors.toMap(SysFileRecordEntity::getId, Function.identity()));
-		List<SysFileRecordEntity> orderedEntities = resolved.ids().stream().map(entityById::get).toList();
+			.collect(Collectors.toMap(FileRecordEntity::getId, Function.identity()));
+		List<FileRecordEntity> orderedEntities = resolved.ids().stream().map(entityById::get).toList();
 
 		List<ZipEntryPayload> payloads = orderedEntities.stream().map(entity -> {
 			FileStorageProvider provider = facadeRegistry.resolve(entity.getStoragePlatform()).provider();
@@ -162,7 +165,7 @@ public class SysFileRecordServiceImpl extends ServiceImpl<SysFileRecordMapper, S
 	public void updatePrivacyByIds(List<Long> ids, boolean targetPrivate, Long ownerUserId, Long operatorUserId) {
 		var resolved = resolveBatchFileRecords(ids, ownerUserId);
 
-		for (SysFileRecordEntity entity : resolved.entities()) {
+		for (FileRecordEntity entity : resolved.entities()) {
 			boolean currentPrivate = BooleanUtil.isTrue(entity.getIsPrivate());
 			if (currentPrivate == targetPrivate) {
 				continue;
@@ -189,7 +192,7 @@ public class SysFileRecordServiceImpl extends ServiceImpl<SysFileRecordMapper, S
 			throw new SystemBusinessException(SystemCommonResultCode.PARAM_REQUIRED, "ids");
 		}
 
-		List<SysFileRecordEntity> entities = fileRecordReferenceChecker.getExistingBatch(normalizedIds, false);
+		List<FileRecordEntity> entities = fileRecordReferenceChecker.getExistingBatch(normalizedIds, false);
 		if (ownerUserId != null) {
 			fileRecordReferenceChecker.requireOwnerBatch(entities, ownerUserId);
 		}
@@ -202,7 +205,7 @@ public class SysFileRecordServiceImpl extends ServiceImpl<SysFileRecordMapper, S
 	 * @param ids 原始 ID 列表
 	 * @param entities 已校验的活跃文件记录
 	 */
-	private record ResolvedBatchFileRecords(List<Long> ids, List<SysFileRecordEntity> entities) {
+	private record ResolvedBatchFileRecords(List<Long> ids, List<FileRecordEntity> entities) {
 	}
 
 }

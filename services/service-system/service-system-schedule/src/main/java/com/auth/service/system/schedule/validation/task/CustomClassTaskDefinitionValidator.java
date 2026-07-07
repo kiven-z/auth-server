@@ -6,7 +6,7 @@ import java.util.Set;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.schedule.exception.SysJobException;
-import com.auth.service.system.schedule.model.entity.SysJobEntity;
+import com.auth.service.system.schedule.model.entity.JobEntity;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import com.auth.service.system.schedule.model.jobparams.FeignInvokeJobParams;
 import com.auth.service.system.schedule.model.jobparams.HttpInvokeJobParams;
@@ -48,7 +48,7 @@ public class CustomClassTaskDefinitionValidator implements SysJobTaskTypeDefinit
 	}
 
 	@Override
-	public void validate(SysJobEntity job) {
+	public void validate(JobEntity job) {
 		String jobClass = job.getJobClass();
 		if (!quartzTaskRegistry.isAllowed(jobClass)) {
 			throw new SysJobException(JOB_CLASS_INVALID, "not in whitelist");
@@ -68,7 +68,7 @@ public class CustomClassTaskDefinitionValidator implements SysJobTaskTypeDefinit
 	 * 若 {@code job_class} 为已知内置 Job，则校验 {@code job_params}
 	 * @param job 任务定义
 	 */
-	public void validateIfPresent(SysJobEntity job) {
+	public void validateIfPresent(JobEntity job) {
 		String jobClass = job.getJobClass();
 
 		Class<?> paramsType = JOB_CLASS_TO_PARAMS.get(jobClass);

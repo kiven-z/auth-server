@@ -5,8 +5,8 @@ import java.util.List;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.system.schedule.config.ScheduleJobProperties;
-import com.auth.service.system.schedule.mapper.SysJobMapper;
-import com.auth.service.system.schedule.model.entity.SysJobEntity;
+import com.auth.service.system.schedule.mapper.JobMapper;
+import com.auth.service.system.schedule.model.entity.JobEntity;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -17,7 +17,7 @@ import org.quartz.SchedulerException;
 import org.springframework.stereotype.Component;
 
 /**
- * 按 {@code sys_job} 补偿 Quartz 运行态（DB 为单一事实来源）
+ * 按 {@code job} 补偿 Quartz 运行态（DB 为单一事实来源）
  *
  * @author Bunny
  */
@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class SysJobScheduleReconciler {
 
-	private final SysJobMapper sysJobMapper;
+	private final JobMapper jobMapper;
 
 	private final SysJobSchedulerManager sysJobSchedulerManager;
 
@@ -51,8 +51,8 @@ public class SysJobScheduleReconciler {
 		}
 
 		// 查询任务列表
-		List<SysJobEntity> jobs = sysJobMapper.selectByIds(jobIds);
-		for (SysJobEntity job : jobs) {
+		List<JobEntity> jobs = jobMapper.selectByIds(jobIds);
+		for (JobEntity job : jobs) {
 			reconcileSingle(job);
 		}
 	}
@@ -62,11 +62,11 @@ public class SysJobScheduleReconciler {
 	 * @param groupCode 分组编码
 	 */
 	public void reconcileByGroupCode(String groupCode) {
-		List<SysJobEntity> jobs = sysJobMapper
-			.selectList(Wrappers.<SysJobEntity>lambdaQuery().eq(SysJobEntity::getJobGroup, groupCode));
+		List<JobEntity> jobs = jobMapper
+			.selectList(Wrappers.<JobEntity>lambdaQuery().eq(JobEntity::getJobGroup, groupCode));
 
 		// 对账任务
-		for (SysJobEntity job : jobs) {
+		for (JobEntity job : jobs) {
 			reconcileSingle(job);
 		}
 	}
@@ -77,21 +77,21 @@ public class SysJobScheduleReconciler {
 	 * @param batchSize 批量大小
 	 */
 	private void reconcileByStatus(boolean enabled, int batchSize) {
-		var query = Wrappers.lambdaQuery(SysJobEntity.class)
-			.eq(SysJobEntity::getStatus, enabled)
-			.orderByAsc(SysJobEntity::getId);
+		var query = Wrappers.lambdaQuery(JobEntity.class)
+			.eq(JobEntity::getStatus, enabled)
+			.orderByAsc(JobEntity::getId);
 
 		// 查询第一页
-		IPage<SysJobEntity> firstPage = sysJobMapper.selectPage(new Page<>(1, batchSize), query);
+		IPage<JobEntity> firstPage = jobMapper.selectPage(new Page<>(1, batchSize), query);
 		long totalPages = firstPage.getPages();
 
 		// 遍历所有页
 		for (long pageNum = 1; pageNum <= totalPages; pageNum++) {
-			IPage<SysJobEntity> result = pageNum == 1 ? firstPage
-					: sysJobMapper.selectPage(new Page<>(pageNum, batchSize), query);
+			IPage<JobEntity> result = pageNum == 1 ? firstPage
+					: jobMapper.selectPage(new Page<>(pageNum, batchSize), query);
 
 			// 对账任务
-			for (SysJobEntity job : result.getRecords()) {
+			for (JobEntity job : result.getRecords()) {
 				reconcileSingle(job);
 			}
 		}
@@ -101,7 +101,7 @@ public class SysJobScheduleReconciler {
 	 * 单个对账
 	 * @param job 任务实体
 	 */
-	private void reconcileSingle(SysJobEntity job) {
+	private void reconcileSingle(JobEntity job) {
 		try {
 			if (BooleanUtil.isTrue(job.getStatus())) {
 				sysJobSchedulerManager.scheduleOrReplace(job);

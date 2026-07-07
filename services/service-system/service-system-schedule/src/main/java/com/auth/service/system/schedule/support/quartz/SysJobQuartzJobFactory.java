@@ -5,7 +5,7 @@ import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
-import com.auth.service.system.schedule.model.entity.SysJobEntity;
+import com.auth.service.system.schedule.model.entity.JobEntity;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.Job;
@@ -16,7 +16,7 @@ import org.quartz.JobDetail;
 import org.springframework.stereotype.Component;
 
 /**
- * 根据 {@link SysJobEntity} 构建 Quartz {@link JobDetail}
+ * 根据 {@link JobEntity} 构建 Quartz {@link JobDetail}
  *
  * @author Bunny
  */
@@ -48,7 +48,7 @@ public class SysJobQuartzJobFactory {
 	 * @param job 任务实体
 	 * @return JobDetail
 	 */
-	public JobDetail build(SysJobEntity job) {
+	public JobDetail build(JobEntity job) {
 		// 1. 获取任务名称、分组、任务类型、并发标志
 		String jobName = job.getJobName();
 		String jobGroup = job.getJobGroup();

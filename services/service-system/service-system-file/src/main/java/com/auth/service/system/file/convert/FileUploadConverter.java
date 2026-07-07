@@ -1,7 +1,7 @@
 package com.auth.service.system.file.convert;
 
 import com.auth.common.mapstruct.config.AuthMapperConfig;
-import com.auth.service.system.file.model.entity.SysFileRecordEntity;
+import com.auth.service.system.file.model.entity.FileRecordEntity;
 import com.auth.service.system.file.model.vo.FileUploadResponseVO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -24,6 +24,6 @@ public interface FileUploadConverter {
 	 */
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
-	FileUploadResponseVO toUploadResponse(SysFileRecordEntity entity);
+	FileUploadResponseVO toUploadResponse(FileRecordEntity entity);
 
 }

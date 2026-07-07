@@ -1,11 +1,10 @@
-package com.auth.service.system.file.storage.core.provider;
+package com.auth.service.system.file.storage.core.s3;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.file.api.enums.StoragePlatformEnum;
 import com.auth.service.system.file.config.properties.S3PlatformProfile;
 import com.auth.service.system.file.exception.FileStorageException;
 import com.auth.service.system.file.exception.FileUploadResultCode;
-import com.auth.service.system.file.storage.core.s3.S3PlatformProfileResolver;
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,11 +24,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * S3 客户端管理器
- *
- * <p>
- * 按 {@link StoragePlatformEnum} 缓存 {@link S3Client} 与 {@link S3Presigner}，双重检查懒加载；
- * 应用停机时统一关闭
- * </p>
  *
  * @author Bunny
  */
@@ -83,12 +77,16 @@ public class S3ClientManager {
 
 	private S3Client buildClient(StoragePlatformEnum platform) {
 		S3PlatformProfile profile = requireProfile(platform);
+		S3Configuration s3Configuration = S3Configuration.builder()
+			.pathStyleAccessEnabled(profile.isPathStyleAccess())
+			.build();
+
 		return S3Client.builder()
 			.endpointOverride(URI.create(profile.getEndpoint()))
 			.region(Region.of(profile.getRegion()))
 			.credentialsProvider(StaticCredentialsProvider
 				.create(AwsBasicCredentials.create(profile.getAccessKey(), profile.getSecretKey())))
-			.serviceConfiguration(buildServiceConfiguration(profile))
+			.serviceConfiguration(s3Configuration)
 			.requestChecksumCalculation(RequestChecksumCalculation.WHEN_REQUIRED)
 			.responseChecksumValidation(ResponseChecksumValidation.WHEN_REQUIRED)
 			.build();
@@ -96,17 +94,17 @@ public class S3ClientManager {
 
 	private S3Presigner buildPresigner(StoragePlatformEnum platform) {
 		S3PlatformProfile profile = requireProfile(platform);
+		S3Configuration s3Configuration = S3Configuration.builder()
+			.pathStyleAccessEnabled(profile.isPathStyleAccess())
+			.build();
+
 		return S3Presigner.builder()
 			.endpointOverride(URI.create(profile.getEndpoint()))
 			.region(Region.of(profile.getRegion()))
 			.credentialsProvider(StaticCredentialsProvider
 				.create(AwsBasicCredentials.create(profile.getAccessKey(), profile.getSecretKey())))
-			.serviceConfiguration(buildServiceConfiguration(profile))
+			.serviceConfiguration(s3Configuration)
 			.build();
-	}
-
-	private S3Configuration buildServiceConfiguration(S3PlatformProfile profile) {
-		return S3Configuration.builder().pathStyleAccessEnabled(profile.isPathStyleAccess()).build();
 	}
 
 	private S3PlatformProfile requireProfile(StoragePlatformEnum platform) {

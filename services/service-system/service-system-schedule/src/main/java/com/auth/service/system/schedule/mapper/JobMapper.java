@@ -1,6 +1,6 @@
 package com.auth.service.system.schedule.mapper;
 
-import com.auth.service.system.schedule.model.entity.SysJobEntity;
+import com.auth.service.system.schedule.model.entity.JobEntity;
 import com.auth.service.system.schedule.model.po.SysJobDetailRowPO;
 import com.auth.service.system.schedule.model.po.SysJobPageRowPO;
 import com.auth.service.system.schedule.model.query.SysJobQuery;
@@ -16,7 +16,7 @@ import org.apache.ibatis.annotations.Param;
  * @author Bunny
  */
 @Mapper
-public interface SysJobMapper extends BaseMapper<SysJobEntity> {
+public interface JobMapper extends BaseMapper<JobEntity> {
 
 	/**
 	 * 分页查询任务
@@ -24,7 +24,7 @@ public interface SysJobMapper extends BaseMapper<SysJobEntity> {
 	 * @param query 条件
 	 * @return 分页结果
 	 */
-	IPage<SysJobPageRowPO> selectListByPage(@Param("page") Page<SysJobEntity> page, @Param("query") SysJobQuery query);
+	IPage<SysJobPageRowPO> selectListByPage(@Param("page") Page<JobEntity> page, @Param("query") SysJobQuery query);
 
 	/**
 	 * 根据主键查询详情

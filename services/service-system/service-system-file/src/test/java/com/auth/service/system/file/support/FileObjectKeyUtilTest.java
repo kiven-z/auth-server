@@ -1,6 +1,7 @@
 package com.auth.service.system.file.support;
 
 import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.file.utils.FileObjectKeyUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

@@ -9,11 +9,11 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 /**
- * 统一消息模板（sys_message_template）
+ * 统一消息模板（message_template）
  *
  * @author Bunny
  */
-@TableName("sys_message_template")
+@TableName("message_template")
 @Schema(name = "MessageTemplateEntity", title = "统一消息模板")
 @Getter
 @Setter

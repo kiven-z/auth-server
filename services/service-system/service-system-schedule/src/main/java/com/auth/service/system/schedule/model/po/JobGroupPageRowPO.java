@@ -14,11 +14,11 @@ import lombok.ToString;
  *
  * @author Bunny
  */
-@Schema(name = "SysJobGroupPageRowPO", title = "任务分组分页行（PO）")
+@Schema(name = "JobGroupPageRowPO", title = "任务分组分页行（PO）")
 @Getter
 @Setter
 @ToString
-public class SysJobGroupPageRowPO implements Serializable {
+public class JobGroupPageRowPO implements Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 1L;

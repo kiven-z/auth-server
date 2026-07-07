@@ -4,7 +4,7 @@ import com.auth.module.file.api.enums.StoragePlatformEnum;
 import com.auth.service.system.file.config.properties.FileUploadProperties;
 import com.auth.service.system.file.exception.FileStorageException;
 import com.auth.service.system.file.storage.S3PlatformProfileResolverFixtures;
-import com.auth.service.system.file.storage.core.provider.S3ClientManager;
+import com.auth.service.system.file.storage.core.s3.S3ClientManager;
 import com.auth.service.system.file.storage.core.s3.S3ExceptionClassifier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

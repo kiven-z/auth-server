@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
@@ -19,6 +20,7 @@ import org.springframework.validation.annotation.Validated;
 @Getter
 @Setter
 @ConfigurationProperties(prefix = "auth.gateway.security")
+@RefreshScope
 @Component
 @Validated
 public class GatewaySecurityProperties {

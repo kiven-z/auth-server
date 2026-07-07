@@ -3,7 +3,7 @@ package com.auth.service.system.schedule.support.quartz;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
-import com.auth.service.system.schedule.model.entity.SysJobEntity;
+import com.auth.service.system.schedule.model.entity.JobEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.CronTrigger;
 import org.quartz.JobDataMap;
@@ -52,7 +52,7 @@ public class SysJobSchedulerManager {
 	 * 按当前实体状态同步调度：启用时先删后建；停用时仅暂停 Quartz，不重建 Trigger
 	 * @param job 任务实体
 	 */
-	public void scheduleOrReplace(SysJobEntity job) throws SchedulerException {
+	public void scheduleOrReplace(JobEntity job) throws SchedulerException {
 		String jobName = job.getJobName();
 		String jobGroup = job.getJobGroup();
 		JobKey jobKey = JobKey.jobKey(jobName, jobGroup);
@@ -114,7 +114,7 @@ public class SysJobSchedulerManager {
 	 * 确保 JobDetail 存在（不创建 Trigger），用于立即执行等场景
 	 * @param job 任务实体
 	 */
-	public void ensureJobDetail(SysJobEntity job) throws SchedulerException {
+	public void ensureJobDetail(JobEntity job) throws SchedulerException {
 		JobKey jobKey = JobKey.jobKey(job.getJobName(), job.getJobGroup());
 		if (scheduler.checkExists(jobKey)) {
 			return;

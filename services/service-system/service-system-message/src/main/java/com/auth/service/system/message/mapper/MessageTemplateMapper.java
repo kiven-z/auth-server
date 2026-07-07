@@ -10,7 +10,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 /**
- * 统一消息模板表 Mapper（sys_message_template）。
+ * 统一消息模板表 Mapper（message_template）。
  *
  * @author Bunny
  */

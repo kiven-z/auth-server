@@ -3,7 +3,7 @@ package com.auth.service.system.schedule.service;
 import java.util.List;
 
 import com.auth.common.data.model.PageResponse;
-import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
+import com.auth.service.system.schedule.model.entity.JobGroupEntity;
 import com.auth.service.system.schedule.model.form.SysJobGroupForm;
 import com.auth.service.system.schedule.model.form.SysJobGroupUpdateForm;
 import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
@@ -24,7 +24,7 @@ public interface SysJobGroupService {
 	 * @param query 查询参数
 	 * @return 分页数据
 	 */
-	PageResponse<SysJobGroupPageResponse> getPage(Page<SysJobGroupEntity> pageParams, SysJobGroupQuery query);
+	PageResponse<SysJobGroupPageResponse> getPage(Page<JobGroupEntity> pageParams, SysJobGroupQuery query);
 
 	/**
 	 * 启用状态分组下拉/远程搜索（仅分组已启用 {@code status == true}）

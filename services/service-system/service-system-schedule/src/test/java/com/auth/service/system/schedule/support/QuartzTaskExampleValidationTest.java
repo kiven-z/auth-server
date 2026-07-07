@@ -4,7 +4,7 @@ import java.util.stream.Stream;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.schedule.annotation.QuartzTask;
-import com.auth.service.system.schedule.model.entity.SysJobEntity;
+import com.auth.service.system.schedule.model.entity.JobEntity;
 import com.auth.service.system.schedule.support.catalog.QuartzTaskRegistry;
 import com.auth.service.system.schedule.task.support.BuiltinJobParamsParser;
 import com.auth.service.system.schedule.validation.task.CustomClassTaskDefinitionValidator;
@@ -53,7 +53,7 @@ class QuartzTaskExampleValidationTest {
 		Assertions.assertNotNull(ann);
 		String example = CharSequenceUtil.trim(ann.example());
 
-		SysJobEntity job = new SysJobEntity();
+		JobEntity job = new JobEntity();
 		job.setJobClass(jobClass.getName());
 		job.setJobParams(example);
 

@@ -3,11 +3,6 @@ package com.auth.service.system.file.storage.core.capability;
 /**
  * 图片样式 URL 能力
  *
- * <p>
- * 支持在原图 URL 上追加平台私有的样式参数（如阿里云的 {@code x-oss-process=style/xxx}） 未实现该能力的平台由 Facade 返回
- * {@code Optional.empty()}
- * </p>
- *
  * @author Bunny
  */
 public interface ImageStyleUrlCapability extends StoragePlatformCapability {

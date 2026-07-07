@@ -84,7 +84,7 @@ public class SysJobDetailVO extends BaseResponse implements SysJobLastExecutionV
 	@Schema(title = "下次触发")
 	private Date nextFireTime;
 
-	@Schema(title = "运行态", description = "Quartz 实时状态，与 sys_job.status 启停无关")
+	@Schema(title = "运行态", description = "Quartz 实时状态，与 job.status 启停无关")
 	private SysJobQuartzRuntimeStatus quartzRuntimeStatus;
 
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")

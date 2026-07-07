@@ -7,12 +7,12 @@ import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.file.exception.FileStorageException;
 import com.auth.service.system.file.exception.FileUploadResultCode;
-import com.auth.service.system.file.mapper.SysFileRecordMapper;
-import com.auth.service.system.file.model.entity.SysFileRecordEntity;
+import com.auth.service.system.file.mapper.FileRecordMapper;
+import com.auth.service.system.file.model.entity.FileRecordEntity;
 import com.auth.service.system.file.model.query.FileRecordPageQuery;
 import com.auth.service.system.file.model.vo.FileRecordPageVO;
 import com.auth.service.system.file.service.FileRecycleService;
-import com.auth.service.system.file.storage.StoragePlatformFacadeRegistry;
+import com.auth.service.system.file.storage.core.StoragePlatformFacadeRegistry;
 import com.auth.service.system.file.storage.core.provider.FileStorageProvider;
 import com.auth.service.system.file.support.FileRecordPageAssembler;
 import com.auth.service.system.file.support.FileRecordReferenceChecker;
@@ -32,7 +32,7 @@ import java.util.Objects;
 @Service
 public class FileRecycleServiceImpl implements FileRecycleService {
 
-	private final SysFileRecordMapper sysFileRecordMapper;
+	private final FileRecordMapper fileRecordMapper;
 
 	private final FileRecordPageAssembler fileRecordPageAssembler;
 
@@ -52,7 +52,7 @@ public class FileRecycleServiceImpl implements FileRecycleService {
 			query.setDeleteSource(FileDeleteSourceConstants.USER_SELF);
 		}
 
-		return fileRecordPageAssembler.assemblePage(query, sysFileRecordMapper::selectRecycleListByPage);
+		return fileRecordPageAssembler.assemblePage(query, fileRecordMapper::selectRecycleListByPage);
 	}
 
 	/**
@@ -61,10 +61,10 @@ public class FileRecycleServiceImpl implements FileRecycleService {
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void restoreByIds(List<Long> ids, Long ownerUserId, Long operatorUserId) {
-		List<SysFileRecordEntity> entities = resolveDeletedEntities(ids, ownerUserId);
+		List<FileRecordEntity> entities = resolveDeletedEntities(ids, ownerUserId);
 		requireRestorablePrivateFiles(entities, ownerUserId);
-		List<Long> normalizedIds = entities.stream().map(SysFileRecordEntity::getId).toList();
-		sysFileRecordMapper.restoreByIds(normalizedIds, operatorUserId);
+		List<Long> normalizedIds = entities.stream().map(FileRecordEntity::getId).toList();
+		fileRecordMapper.restoreByIds(normalizedIds, operatorUserId);
 	}
 
 	/**
@@ -73,16 +73,16 @@ public class FileRecycleServiceImpl implements FileRecycleService {
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void purgeByIds(List<Long> ids, Long ownerUserId) {
-		List<SysFileRecordEntity> entities = resolveDeletedEntities(ids, ownerUserId);
+		List<FileRecordEntity> entities = resolveDeletedEntities(ids, ownerUserId);
 		requireRestorablePrivateFiles(entities, ownerUserId);
-		for (SysFileRecordEntity entity : entities) {
+		for (FileRecordEntity entity : entities) {
 			StoragePlatformEnum platform = entity.getStoragePlatform();
 			FileStorageProvider provider = facadeRegistry.resolve(platform).provider();
 			provider.delete(entity.getBucket(), entity.getObjectKey());
 		}
 
-		List<Long> normalizedIds = entities.stream().map(SysFileRecordEntity::getId).toList();
-		sysFileRecordMapper.deletePhysicallyByIds(normalizedIds);
+		List<Long> normalizedIds = entities.stream().map(FileRecordEntity::getId).toList();
+		fileRecordMapper.deletePhysicallyByIds(normalizedIds);
 	}
 
 	/**
@@ -90,7 +90,7 @@ public class FileRecycleServiceImpl implements FileRecycleService {
 	 * @param entities 已删除文件记录
 	 * @param ownerUserId 归属用户 ID，非空时仅允许 USER_SELF 来源
 	 */
-	private void requireRestorablePrivateFiles(List<SysFileRecordEntity> entities, Long ownerUserId) {
+	private void requireRestorablePrivateFiles(List<FileRecordEntity> entities, Long ownerUserId) {
 		boolean hasInvalidRecord = entities.stream().anyMatch(entity -> {
 			if (!Boolean.TRUE.equals(entity.getIsPrivate())) {
 				return true;
@@ -108,13 +108,13 @@ public class FileRecycleServiceImpl implements FileRecycleService {
 	 * @param ownerUserId 归属用户 ID，为 {@code null} 时跳过归属校验
 	 * @return 已校验的已删除文件记录
 	 */
-	private List<SysFileRecordEntity> resolveDeletedEntities(List<Long> ids, Long ownerUserId) {
+	private List<FileRecordEntity> resolveDeletedEntities(List<Long> ids, Long ownerUserId) {
 		List<Long> normalizedIds = ids == null ? List.of() : ids.stream().filter(Objects::nonNull).distinct().toList();
 		if (normalizedIds.isEmpty()) {
 			throw new SystemBusinessException(SystemCommonResultCode.PARAM_REQUIRED, "ids");
 		}
 
-		List<SysFileRecordEntity> entities = fileRecordReferenceChecker.getExistingBatch(normalizedIds, true);
+		List<FileRecordEntity> entities = fileRecordReferenceChecker.getExistingBatch(normalizedIds, true);
 		if (ownerUserId != null) {
 			fileRecordReferenceChecker.requireOwnerBatch(entities, ownerUserId);
 		}

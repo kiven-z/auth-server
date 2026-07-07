@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.auth.service.system.file.mapper.SysFileRecordMapper">
+<mapper namespace="com.auth.service.system.file.mapper.FileRecordMapper">
 
     <!-- 文件分页查询返回列 -->
     <sql id="fileRecordPageColumns">
@@ -53,11 +53,11 @@
     </sql>
 
     <!-- 有效文件记录分页查询 -->
-    <select id="selectListByPage" resultType="com.auth.service.system.file.model.po.SysFileRecordPageRowPO">
+    <select id="selectListByPage" resultType="com.auth.service.system.file.model.po.FileRecordPageRowPO">
         SELECT
         <include refid="fileRecordPageColumns"/>
         FROM
-            sys_file_record
+            file_record
         <where>
             is_deleted = 0
             <include refid="fileRecordPageCommonFilter"/>
@@ -67,11 +67,11 @@
     </select>
 
     <!-- 回收站文件记录分页查询 -->
-    <select id="selectRecycleListByPage" resultType="com.auth.service.system.file.model.po.SysFileRecordPageRowPO">
+    <select id="selectRecycleListByPage" resultType="com.auth.service.system.file.model.po.FileRecordPageRowPO">
         SELECT
         <include refid="fileRecordPageColumns"/>
         FROM
-            sys_file_record
+            file_record
         <where>
             is_deleted = 1
             <if test="query.privateOnly != null and query.privateOnly">
@@ -87,7 +87,7 @@
     </select>
 
     <!-- 按主键批量查询已逻辑删除的文件记录 -->
-    <select id="selectIsDeletedByIds" resultType="com.auth.service.system.file.model.entity.SysFileRecordEntity">
+    <select id="selectIsDeletedByIds" resultType="com.auth.service.system.file.model.entity.FileRecordEntity">
         SELECT
             id,
             storage_platform,
@@ -114,7 +114,7 @@
             version,
             is_deleted
         FROM
-            sys_file_record
+            file_record
         WHERE
             is_deleted = #{expectedDeleted}
             AND id IN
@@ -125,7 +125,7 @@
 
     <!-- 恢复已逻辑删除的文件记录 -->
     <update id="restoreByIds">
-        UPDATE sys_file_record
+        UPDATE file_record
         SET
             is_deleted = 0,
             delete_source = NULL,
@@ -148,7 +148,7 @@
 
     <!-- 逻辑删除文件记录并补全删除审计字段 -->
     <update id="markDeletedByIds">
-        UPDATE sys_file_record
+        UPDATE file_record
         SET
             is_deleted = 1,
             delete_source = #{deleteSource},
@@ -175,7 +175,7 @@
 
     <!-- 物理删除已逻辑删除的文件记录 -->
     <delete id="deletePhysicallyByIds">
-        DELETE FROM sys_file_record
+        DELETE FROM file_record
         WHERE
             is_deleted = 1
             AND id IN
@@ -186,7 +186,7 @@
 
     <!-- 物理删除未逻辑删除的文件记录 -->
     <delete id="deletePhysicallyActiveByIds">
-        DELETE FROM sys_file_record
+        DELETE FROM file_record
         WHERE
             is_deleted = 0
             AND id IN
@@ -197,7 +197,7 @@
 
     <!-- 按主键更新文件隐私属性 -->
     <update id="updatePrivacyById">
-        UPDATE sys_file_record
+        UPDATE file_record
         SET
             object_key = #{objectKey},
             is_private = #{isPrivate},

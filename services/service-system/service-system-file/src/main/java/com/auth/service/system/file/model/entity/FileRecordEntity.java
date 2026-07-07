@@ -12,15 +12,15 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 /**
- * 文件元数据实体，对应 {@code sys_file_record}
+ * 文件元数据实体，对应 {@code file_record}
  *
  * @author Bunny
  */
-@TableName("sys_file_record")
-@Schema(name = "SysFileRecordEntity", title = "文件元数据")
+@TableName("file_record")
+@Schema(name = "FileRecordEntity", title = "文件元数据")
 @Getter
 @Setter
-public class SysFileRecordEntity extends BaseEntity {
+public class FileRecordEntity extends BaseEntity {
 
 	@Schema(title = "存储平台")
 	private StoragePlatformEnum storagePlatform;

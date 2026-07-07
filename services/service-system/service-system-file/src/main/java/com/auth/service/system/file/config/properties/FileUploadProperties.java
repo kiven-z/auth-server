@@ -28,7 +28,7 @@ import java.util.Map;
 public class FileUploadProperties {
 
 	/**
-	 * 默认上传平台（请求未指定时生效）
+	 * 默认上传平台
 	 */
 	@NotNull(message = "默认上传平台不能为空")
 	private StoragePlatformEnum defaultPlatform = StoragePlatformEnum.MINIO;
@@ -43,7 +43,7 @@ public class FileUploadProperties {
 	private Map<StoragePlatformEnum, S3PlatformProfile> platforms = new EnumMap<>(StoragePlatformEnum.class);
 
 	/**
-	 * 临时访问地址过期秒数，默认值
+	 * 临时访问地址过期秒数
 	 */
 	@Min(value = 1, message = "临时访问时间不合法")
 	@NotNull(message = "临时访问地址过期秒数不能为空")

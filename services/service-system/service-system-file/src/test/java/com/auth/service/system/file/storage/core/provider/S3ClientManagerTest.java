@@ -5,6 +5,7 @@ import com.auth.service.system.file.config.properties.FileUploadProperties;
 import com.auth.service.system.file.exception.FileStorageException;
 import com.auth.service.system.file.exception.FileUploadResultCode;
 import com.auth.service.system.file.storage.S3PlatformProfileResolverFixtures;
+import com.auth.service.system.file.storage.core.s3.S3ClientManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.services.s3.S3Client;

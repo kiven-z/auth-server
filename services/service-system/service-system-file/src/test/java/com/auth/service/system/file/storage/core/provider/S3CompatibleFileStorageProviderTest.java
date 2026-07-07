@@ -7,6 +7,8 @@ import com.auth.service.system.file.model.value.FileUploadCommand;
 import com.auth.service.system.file.model.value.StoredFile;
 import com.auth.service.system.file.storage.S3PlatformProfileResolverFixtures;
 import com.auth.service.system.file.storage.core.classifier.StorageExceptionClassifier;
+import com.auth.service.system.file.storage.core.s3.S3ClientManager;
+import com.auth.service.system.file.storage.core.s3.S3CompatibleFileStorageProvider;
 import com.auth.service.system.file.storage.core.s3.S3PlatformProfileResolver;
 import com.auth.service.system.file.storage.core.validator.StoragePlatformConfigValidator;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,6 +54,8 @@ class S3CompatibleFileStorageProviderTest {
 
 	private static final StoragePlatformEnum PLATFORM = StoragePlatformEnum.MINIO;
 
+	private final Map<String, Boolean> headObjectExistence = new LinkedHashMap<>();
+
 	@Mock
 	private S3Client s3Client;
 
@@ -70,8 +74,6 @@ class S3CompatibleFileStorageProviderTest {
 	private S3PlatformProfileResolver profileResolver;
 
 	private S3CompatibleFileStorageProvider provider;
-
-	private final Map<String, Boolean> headObjectExistence = new LinkedHashMap<>();
 
 	private boolean headObjectStubRegistered;
 
@@ -348,7 +350,7 @@ class S3CompatibleFileStorageProviderTest {
 			return;
 		}
 		headObjectStubRegistered = true;
-		NoSuchKeyException notFound = (NoSuchKeyException) NoSuchKeyException.builder()
+		NoSuchKeyException notFound = NoSuchKeyException.builder()
 			.statusCode(404)
 			.awsErrorDetails(AwsErrorDetails.builder().errorCode("NoSuchKey").build())
 			.build();

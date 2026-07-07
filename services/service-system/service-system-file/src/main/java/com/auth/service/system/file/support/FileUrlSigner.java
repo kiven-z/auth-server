@@ -8,7 +8,7 @@ import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.file.config.properties.FileUploadProperties;
 import com.auth.service.system.file.exception.FileStorageException;
 import com.auth.service.system.file.exception.FileUploadResultCode;
-import com.auth.service.system.file.storage.StoragePlatformFacadeRegistry;
+import com.auth.service.system.file.storage.core.StoragePlatformFacadeRegistry;
 import com.auth.service.system.file.storage.core.provider.FileStorageProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

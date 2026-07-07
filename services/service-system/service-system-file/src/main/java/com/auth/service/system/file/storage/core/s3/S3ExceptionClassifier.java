@@ -8,12 +8,6 @@ import software.amazon.awssdk.services.s3.model.S3Exception;
 /**
  * S3 兼容异常分类器
  *
- * <p>
- * 统一识别所有走 S3 协议的存储平台（MinIO / 阿里云 OSS / AWS S3 / 腾讯 COS / 华为 OBS / 七牛 / R2）的「不存在」语义： 优先看
- * {@link S3Exception#statusCode()} == 404，其次看 errorCode（NoSuchBucket / NoSuchKey），
- * 最后按消息片段兜底
- * </p>
- *
  * @author Bunny
  */
 @Component

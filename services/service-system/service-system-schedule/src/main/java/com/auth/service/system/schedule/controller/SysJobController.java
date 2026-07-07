@@ -8,7 +8,7 @@ import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.common.model.SystemAuditBizModule;
-import com.auth.service.system.schedule.model.entity.SysJobEntity;
+import com.auth.service.system.schedule.model.entity.JobEntity;
 import com.auth.service.system.schedule.model.form.SysJobCreateForm;
 import com.auth.service.system.schedule.model.form.SysJobStatusForm;
 import com.auth.service.system.schedule.model.form.SysJobUpdateForm;
@@ -39,7 +39,7 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
  *
  * @author Bunny
  */
-@Tag(name = "定时任务-任务", description = "sys_job + Quartz")
+@Tag(name = "定时任务-任务", description = "job + Quartz")
 @RequestMapping("/api/system/job")
 @RestController
 public class SysJobController {
@@ -58,7 +58,7 @@ public class SysJobController {
 	@PreAuthorize("@auth.decide('schedule:job:query')")
 	@GetMapping
 	public Result<PageResponse<SysJobPageResponse>> page(SysJobQuery query) {
-		Page<SysJobEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
+		Page<JobEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
 		PageResponse<SysJobPageResponse> response = sysJobDefinitionService.getPage(pageParams, query);
 
 		return Result.success(response);

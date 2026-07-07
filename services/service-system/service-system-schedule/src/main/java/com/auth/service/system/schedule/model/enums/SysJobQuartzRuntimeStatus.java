@@ -1,7 +1,7 @@
 package com.auth.service.system.schedule.model.enums;
 
 /**
- * Quartz 任务运行时状态（与 {@code sys_job.status} 调度启停无关）
+ * Quartz 任务运行时状态（与 {@code job.status} 调度启停无关）
  *
  * @author Bunny
  */

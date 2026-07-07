@@ -2,9 +2,9 @@ package com.auth.service.system.file.storage.bucket;
 
 import com.auth.module.file.api.enums.StoragePlatformEnum;
 import com.auth.service.system.file.config.properties.FileUploadProperties;
-import com.auth.service.system.file.storage.StorageBucketBootstrapRunner;
-import com.auth.service.system.file.storage.StoragePlatformFacade;
-import com.auth.service.system.file.storage.StoragePlatformFacadeRegistry;
+import com.auth.service.system.file.storage.core.StorageBucketBootstrapRunner;
+import com.auth.service.system.file.storage.core.StoragePlatformFacade;
+import com.auth.service.system.file.storage.core.StoragePlatformFacadeRegistry;
 import com.auth.service.system.file.storage.core.bucket.StorageBucketInitializer;
 import com.auth.service.system.file.storage.core.validator.StoragePlatformConfigValidator;
 import org.junit.jupiter.api.DisplayName;

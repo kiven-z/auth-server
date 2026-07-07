@@ -8,7 +8,7 @@ import com.auth.service.system.file.exception.FileStorageException;
 import com.auth.service.system.file.exception.FileUploadResultCode;
 import com.auth.service.system.file.storage.core.bucket.StorageBucketInitializer;
 import com.auth.service.system.file.storage.core.classifier.StorageExceptionClassifier;
-import com.auth.service.system.file.storage.core.provider.S3ClientManager;
+import com.auth.service.system.file.storage.core.s3.S3ClientManager;
 import com.auth.service.system.file.storage.core.s3.S3PlatformProfileResolver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

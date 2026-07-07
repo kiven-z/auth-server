@@ -11,17 +11,17 @@ import lombok.experimental.UtilityClass;
 public class SysJobQuartzDataKeys {
 
 	/**
-	 * 业务表 {@code sys_job.id}，用于日志与熔断关联
+	 * 业务表 {@code job.id}，用于日志与熔断关联
 	 */
 	public static final String SYS_JOB_ID = "sysJobId";
 
 	/**
-	 * 调用目标字符串（Bean 方法），与 {@code sys_job.invoke_target} 一致
+	 * 调用目标字符串（Bean 方法），与 {@code job.invoke_target} 一致
 	 */
 	public static final String INVOKE_TARGET = "invokeTarget";
 
 	/**
-	 * 白名单任务类全限定名，与 {@code sys_job.job_class} 一致
+	 * 白名单任务类全限定名，与 {@code job.job_class} 一致
 	 */
 	public static final String JOB_CLASS = "jobClass";
 
@@ -36,7 +36,7 @@ public class SysJobQuartzDataKeys {
 	public static final String HANDLER_CODE = "handlerCode";
 
 	/**
-	 * 执行参数 JSON 原文（与 {@code sys_job.job_params} 一致，供内置 Job 解析嵌套结构）
+	 * 执行参数 JSON 原文（与 {@code job.job_params} 一致，供内置 Job 解析嵌套结构）
 	 */
 	public static final String JOB_PARAMS = "jobParams";
 

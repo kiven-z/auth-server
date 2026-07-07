@@ -15,11 +15,11 @@ import lombok.Setter;
  *
  * @author Bunny
  */
-@TableName("sys_job")
-@Schema(name = "SysJobEntity", title = "定时任务")
+@TableName("job")
+@Schema(name = "JobEntity", title = "定时任务")
 @Getter
 @Setter
-public class SysJobEntity extends BaseEntity {
+public class JobEntity extends BaseEntity {
 
 	@Schema(title = "任务名称")
 	private String jobName;

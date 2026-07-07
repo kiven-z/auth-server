@@ -2,7 +2,7 @@ package com.auth.service.system.file.storage.platform;
 
 import com.auth.service.system.file.storage.core.capability.ImageStyleUrlCapability;
 import com.auth.service.system.file.storage.core.classifier.StorageExceptionClassifier;
-import com.auth.service.system.file.storage.core.provider.S3CompatibleFileStorageProvider;
+import com.auth.service.system.file.storage.core.s3.S3CompatibleFileStorageProvider;
 import com.auth.service.system.file.storage.platform.aliyun.AliyunImageStyleUrlCapability;
 import com.auth.service.system.file.storage.platform.aliyun.AliyunOssBucketInitializer;
 import com.auth.service.system.file.storage.platform.aliyun.AliyunOssConfigValidator;

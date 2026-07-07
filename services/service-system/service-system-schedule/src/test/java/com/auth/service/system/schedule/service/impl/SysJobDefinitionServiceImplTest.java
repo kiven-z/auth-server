@@ -7,12 +7,12 @@ import java.util.List;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.mapper.LogJobMapper;
-import com.auth.service.system.schedule.mapper.SysJobGroupMapper;
-import com.auth.service.system.schedule.mapper.SysJobMapper;
+import com.auth.service.system.schedule.mapper.JobGroupMapper;
+import com.auth.service.system.schedule.mapper.JobMapper;
 import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
 import com.auth.service.system.schedule.model.entity.LogJobEntity;
-import com.auth.service.system.schedule.model.entity.SysJobEntity;
-import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
+import com.auth.service.system.schedule.model.entity.JobEntity;
+import com.auth.service.system.schedule.model.entity.JobGroupEntity;
 import com.auth.service.system.schedule.model.enums.SysJobLastExecutionStatus;
 import com.auth.service.system.schedule.model.enums.SysJobQuartzRuntimeStatus;
 import com.auth.service.system.schedule.model.form.SysJobCreateForm;
@@ -69,7 +69,7 @@ import static org.mockito.Mockito.when;
 class SysJobDefinitionServiceImplTest {
 
 	@Mock
-	private SysJobMapper sysJobMapper;
+	private JobMapper jobMapper;
 
 	@Mock
 	private SysJobSchedulerManager sysJobSchedulerManager;
@@ -78,7 +78,7 @@ class SysJobDefinitionServiceImplTest {
 	private AuditUserDisplayService auditUserDisplayService;
 
 	@Mock
-	private SysJobGroupMapper sysJobGroupMapper;
+	private JobGroupMapper jobGroupMapper;
 
 	@Mock
 	private LogJobMapper logJobMapper;
@@ -93,7 +93,7 @@ class SysJobDefinitionServiceImplTest {
 
 	@BeforeAll
 	static void initMybatisPlusTableInfo() {
-		TableInfoHelper.initTableInfo(new MapperBuilderAssistant(new MybatisConfiguration(), ""), SysJobEntity.class);
+		TableInfoHelper.initTableInfo(new MapperBuilderAssistant(new MybatisConfiguration(), ""), JobEntity.class);
 	}
 
 	private static SysJobCreateForm minimalCreateForm(String jobGroup, boolean status) {
@@ -109,8 +109,8 @@ class SysJobDefinitionServiceImplTest {
 		return form;
 	}
 
-	private static SysJobGroupEntity enabledGroup(String groupCode) {
-		SysJobGroupEntity group = new SysJobGroupEntity();
+	private static JobGroupEntity enabledGroup(String groupCode) {
+		JobGroupEntity group = new JobGroupEntity();
 		group.setGroupCode(groupCode);
 		group.setStatus(true);
 		return group;
@@ -119,64 +119,64 @@ class SysJobDefinitionServiceImplTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		sysJobDefinitionService = spy(new SysJobDefinitionServiceImpl(sysJobSchedulerManager, auditUserDisplayService,
-				sysJobGroupMapper, logJobMapper, validationManager, sysJobQuartzRuntimeReader));
+				jobGroupMapper, logJobMapper, validationManager, sysJobQuartzRuntimeReader));
 		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
-		baseMapperField.set(sysJobDefinitionService, sysJobMapper);
+		baseMapperField.set(sysJobDefinitionService, jobMapper);
 		lenient().doReturn(true).when(sysJobDefinitionService).updateBatchById(anyList());
 	}
 
 	@Test
 	@DisplayName("新增：分组不存在时抛出 DATA_NOT_EXIST")
 	void createThrowsWhenJobGroupMissing() {
-		when(sysJobGroupMapper.selectOne(any())).thenReturn(null);
+		when(jobGroupMapper.selectOne(any())).thenReturn(null);
 		SysJobCreateForm form = minimalCreateForm("MISSING", true);
 
 		assertThatThrownBy(() -> sysJobDefinitionService.create(form)).isInstanceOf(SysJobException.class)
 			.extracting(ex -> ((SysJobException) ex).getResultCode())
 			.isEqualTo(DATA_NOT_EXIST);
-		verify(sysJobMapper, never()).insert(org.mockito.ArgumentMatchers.<SysJobEntity>any());
+		verify(jobMapper, never()).insert(org.mockito.ArgumentMatchers.<JobEntity>any());
 	}
 
 	@Test
 	@DisplayName("新增：分组已禁用时抛出 JOB_GROUP_NOT_AVAILABLE")
 	void createThrowsWhenJobGroupDisabled() {
-		SysJobGroupEntity disabledGroup = enabledGroup("DISABLED");
+		JobGroupEntity disabledGroup = enabledGroup("DISABLED");
 		disabledGroup.setStatus(false);
-		when(sysJobGroupMapper.selectOne(any())).thenReturn(disabledGroup);
+		when(jobGroupMapper.selectOne(any())).thenReturn(disabledGroup);
 		SysJobCreateForm form = minimalCreateForm("DISABLED", true);
 
 		assertThatThrownBy(() -> sysJobDefinitionService.create(form)).isInstanceOf(SysJobException.class)
 			.extracting(ex -> ((SysJobException) ex).getResultCode())
 			.isEqualTo(JOB_GROUP_NOT_AVAILABLE);
-		verify(sysJobMapper, never()).insert(org.mockito.ArgumentMatchers.<SysJobEntity>any());
+		verify(jobMapper, never()).insert(org.mockito.ArgumentMatchers.<JobEntity>any());
 	}
 
 	@Test
 	@DisplayName("新增：启用任务落库并注册 Quartz")
 	void createEnabledJobPersistsAndRegistersQuartz() throws SchedulerException {
-		when(sysJobGroupMapper.selectOne(any())).thenReturn(enabledGroup("DEFAULT"));
-		when(sysJobMapper.insert(any(SysJobEntity.class))).thenReturn(1);
+		when(jobGroupMapper.selectOne(any())).thenReturn(enabledGroup("DEFAULT"));
+		when(jobMapper.insert(any(JobEntity.class))).thenReturn(1);
 
 		sysJobDefinitionService.create(minimalCreateForm("DEFAULT", true));
 
-		ArgumentCaptor<SysJobEntity> entityCaptor = ArgumentCaptor.forClass(SysJobEntity.class);
-		verify(sysJobMapper).insert(entityCaptor.capture());
+		ArgumentCaptor<JobEntity> entityCaptor = ArgumentCaptor.forClass(JobEntity.class);
+		verify(jobMapper).insert(entityCaptor.capture());
 		assertThat(entityCaptor.getValue().getJobName()).isEqualTo("demoJob");
 		assertThat(entityCaptor.getValue().getStatus()).isTrue();
-		verify(sysJobSchedulerManager).scheduleOrReplace(any(SysJobEntity.class));
+		verify(sysJobSchedulerManager).scheduleOrReplace(any(JobEntity.class));
 	}
 
 	@Test
 	@DisplayName("新增：暂停任务仅落库，不注册 Quartz")
 	void createPausedJobPersistsWithoutQuartzRegister() {
-		when(sysJobGroupMapper.selectOne(any())).thenReturn(enabledGroup("DEFAULT"));
-		when(sysJobMapper.insert(any(SysJobEntity.class))).thenReturn(1);
+		when(jobGroupMapper.selectOne(any())).thenReturn(enabledGroup("DEFAULT"));
+		when(jobMapper.insert(any(JobEntity.class))).thenReturn(1);
 
 		sysJobDefinitionService.create(minimalCreateForm("DEFAULT", false));
 
-		ArgumentCaptor<SysJobEntity> entityCaptor = ArgumentCaptor.forClass(SysJobEntity.class);
-		verify(sysJobMapper).insert(entityCaptor.capture());
+		ArgumentCaptor<JobEntity> entityCaptor = ArgumentCaptor.forClass(JobEntity.class);
+		verify(jobMapper).insert(entityCaptor.capture());
 		assertThat(entityCaptor.getValue().getStatus()).isFalse();
 		verifyNoInteractions(sysJobSchedulerManager);
 	}
@@ -190,7 +190,7 @@ class SysJobDefinitionServiceImplTest {
 		detailRow.setJobGroup("DEFAULT");
 		detailRow.setJobGroupName("默认分组");
 		detailRow.setTaskType("BEAN_INVOKE");
-		when(sysJobMapper.selectDetailById(1L)).thenReturn(detailRow);
+		when(jobMapper.selectDetailById(1L)).thenReturn(detailRow);
 		when(sysJobQuartzRuntimeReader.getFireTimes("demoJob", "DEFAULT"))
 			.thenReturn(SysJobQuartzRuntimeReader.FireTimes.empty());
 		when(sysJobQuartzRuntimeReader.resolveRuntimeSnapshot("demoJob", "DEFAULT"))
@@ -209,7 +209,7 @@ class SysJobDefinitionServiceImplTest {
 	@Test
 	@DisplayName("详情：不存在时抛出 DATA_NOT_EXIST")
 	void getDetailThrowsWhenMissing() {
-		when(sysJobMapper.selectDetailById(99L)).thenReturn(null);
+		when(jobMapper.selectDetailById(99L)).thenReturn(null);
 
 		assertThatThrownBy(() -> sysJobDefinitionService.getDetail(99L)).isInstanceOf(SysJobException.class)
 			.extracting(ex -> ((SysJobException) ex).getResultCode())
@@ -223,7 +223,7 @@ class SysJobDefinitionServiceImplTest {
 		rowPo.setId(1L);
 		rowPo.setJobName("demoJob");
 		IPage<SysJobPageRowPO> page = new Page<SysJobPageRowPO>().setRecords(List.of(rowPo));
-		when(sysJobMapper.selectListByPage(any(), any(SysJobQuery.class))).thenReturn(page);
+		when(jobMapper.selectListByPage(any(), any(SysJobQuery.class))).thenReturn(page);
 		LogJobEntity failedLog = new LogJobEntity();
 		failedLog.setJobId(1L);
 		failedLog.setStatus(false);
@@ -242,7 +242,7 @@ class SysJobDefinitionServiceImplTest {
 	void updateClearsScheduleWindowWhenFormTimesAreNull() throws Exception {
 		LocalDateTime oldStart = LocalDateTime.of(2026, 6, 1, 8, 0);
 		LocalDateTime oldEnd = LocalDateTime.of(2026, 12, 31, 18, 0);
-		SysJobEntity dbJob = new SysJobEntity();
+		JobEntity dbJob = new JobEntity();
 		dbJob.setId(10L);
 		dbJob.setJobName("demoJob");
 		dbJob.setJobGroup("DEFAULT");
@@ -253,12 +253,12 @@ class SysJobDefinitionServiceImplTest {
 		dbJob.setStatus(true);
 		dbJob.setStartTime(oldStart);
 		dbJob.setEndTime(oldEnd);
-		when(sysJobMapper.selectById(10L)).thenReturn(dbJob);
+		when(jobMapper.selectById(10L)).thenReturn(dbJob);
 		doAnswer(invocation -> {
-			SysJobEntity entity = invocation.getArgument(0);
+			JobEntity entity = invocation.getArgument(0);
 			entity.setVersion(1L);
 			return 1;
-		}).when(sysJobMapper).updateById(any(SysJobEntity.class));
+		}).when(jobMapper).updateById(any(JobEntity.class));
 
 		SysJobUpdateForm form = new SysJobUpdateForm();
 		form.setId(10L);
@@ -272,9 +272,9 @@ class SysJobDefinitionServiceImplTest {
 
 		sysJobDefinitionService.update(form);
 
-		ArgumentCaptor<SysJobEntity> entityCaptor = ArgumentCaptor.forClass(SysJobEntity.class);
-		verify(sysJobMapper).updateById(entityCaptor.capture());
-		SysJobEntity persisted = entityCaptor.getValue();
+		ArgumentCaptor<JobEntity> entityCaptor = ArgumentCaptor.forClass(JobEntity.class);
+		verify(jobMapper).updateById(entityCaptor.capture());
+		JobEntity persisted = entityCaptor.getValue();
 		assertThat(persisted.getStartTime()).isNull();
 		assertThat(persisted.getEndTime()).isNull();
 		verify(sysJobSchedulerManager).scheduleOrReplace(persisted);
@@ -283,7 +283,7 @@ class SysJobDefinitionServiceImplTest {
 	@Test
 	@DisplayName("立即执行：任务不存在时抛出 DATA_NOT_EXIST")
 	void runOnceThrowsWhenMissing() {
-		when(sysJobMapper.selectById(99L)).thenReturn(null);
+		when(jobMapper.selectById(99L)).thenReturn(null);
 
 		assertThatThrownBy(() -> sysJobDefinitionService.runOnce(99L)).isInstanceOf(SysJobException.class)
 			.extracting(ex -> ((SysJobException) ex).getResultCode())
@@ -293,11 +293,11 @@ class SysJobDefinitionServiceImplTest {
 	@Test
 	@DisplayName("立即执行：存在时 ensureJobDetail 并 trigger")
 	void runOnceTriggersWhenExists() throws SchedulerException {
-		SysJobEntity entity = new SysJobEntity();
+		JobEntity entity = new JobEntity();
 		entity.setId(5L);
 		entity.setJobName("demoJob");
 		entity.setJobGroup("DEFAULT");
-		when(sysJobMapper.selectById(5L)).thenReturn(entity);
+		when(jobMapper.selectById(5L)).thenReturn(entity);
 		when(sysJobQuartzRuntimeReader.resolveRuntimeSnapshot("demoJob", "DEFAULT"))
 			.thenReturn(SysJobQuartzRuntimeSnapshot.of(SysJobQuartzRuntimeStatus.IDLE, null));
 
@@ -310,11 +310,11 @@ class SysJobDefinitionServiceImplTest {
 	@Test
 	@DisplayName("立即执行：任务 busy 时抛出 JOB_BUSY")
 	void runOnceThrowsWhenBusy() {
-		SysJobEntity entity = new SysJobEntity();
+		JobEntity entity = new JobEntity();
 		entity.setId(5L);
 		entity.setJobName("demoJob");
 		entity.setJobGroup("DEFAULT");
-		when(sysJobMapper.selectById(5L)).thenReturn(entity);
+		when(jobMapper.selectById(5L)).thenReturn(entity);
 		when(sysJobQuartzRuntimeReader.resolveRuntimeSnapshot("demoJob", "DEFAULT"))
 			.thenReturn(SysJobQuartzRuntimeSnapshot.of(SysJobQuartzRuntimeStatus.RUNNING, null));
 
@@ -326,11 +326,11 @@ class SysJobDefinitionServiceImplTest {
 	@Test
 	@DisplayName("删除：移除 Quartz 与任务定义，保留执行日志")
 	void deleteByIdRemovesQuartzAndJobDefinition() throws SchedulerException {
-		SysJobEntity dbJob = new SysJobEntity();
+		JobEntity dbJob = new JobEntity();
 		dbJob.setId(3L);
 		dbJob.setJobName("demoJob");
 		dbJob.setJobGroup("DEFAULT");
-		when(sysJobMapper.selectById(3L)).thenReturn(dbJob);
+		when(jobMapper.selectById(3L)).thenReturn(dbJob);
 		doReturn(true).when(sysJobDefinitionService).removeById(3L);
 
 		sysJobDefinitionService.deleteById(3L);

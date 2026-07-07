@@ -7,16 +7,16 @@ import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.file.config.properties.FileUploadProperties;
 import com.auth.service.system.file.convert.FileUploadConverter;
-import com.auth.service.system.file.mapper.SysFileRecordMapper;
-import com.auth.service.system.file.model.entity.SysFileRecordEntity;
+import com.auth.service.system.file.mapper.FileRecordMapper;
+import com.auth.service.system.file.model.entity.FileRecordEntity;
 import com.auth.service.system.file.model.form.FileUploadForm;
 import com.auth.service.system.file.model.value.FileUploadCommand;
 import com.auth.service.system.file.model.value.StoredFile;
 import com.auth.service.system.file.model.vo.FileUploadResponseVO;
 import com.auth.service.system.file.service.FileUploadService;
-import com.auth.service.system.file.storage.StoragePlatformFacadeRegistry;
-import com.auth.service.system.file.support.FileObjectKeyUtil;
+import com.auth.service.system.file.storage.core.StoragePlatformFacadeRegistry;
 import com.auth.service.system.file.storage.core.provider.FileStorageProvider;
+import com.auth.service.system.file.utils.FileObjectKeyUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,7 +31,7 @@ import java.util.Objects;
  */
 @RequiredArgsConstructor
 @Service
-public class FileUploadServiceImpl extends ServiceImpl<SysFileRecordMapper, SysFileRecordEntity>
+public class FileUploadServiceImpl extends ServiceImpl<FileRecordMapper, FileRecordEntity>
 		implements FileUploadService {
 
 	private final FileUploadProperties fileUploadProperties;
@@ -46,9 +46,9 @@ public class FileUploadServiceImpl extends ServiceImpl<SysFileRecordMapper, SysF
 	 * @param resolvedIsPrivate 最终私有性
 	 * @return 文件记录实体
 	 */
-	public static SysFileRecordEntity toEntity(StoredFile storedFile, FileUploadForm form, String resolvedBizTypeCode,
+	public static FileRecordEntity toEntity(StoredFile storedFile, FileUploadForm form, String resolvedBizTypeCode,
 			boolean resolvedIsPrivate) {
-		SysFileRecordEntity entity = new SysFileRecordEntity();
+		FileRecordEntity entity = new FileRecordEntity();
 		entity.setStoragePlatform(storedFile.getStoragePlatform());
 		entity.setBucket(storedFile.getBucket());
 		entity.setObjectKey(storedFile.getObjectKey());
@@ -96,7 +96,7 @@ public class FileUploadServiceImpl extends ServiceImpl<SysFileRecordMapper, SysF
 			.build();
 
 		StoredFile storedFile = provider.upload(command);
-		SysFileRecordEntity entity = toEntity(storedFile, form, bizTypeCode, isPrivate);
+		FileRecordEntity entity = toEntity(storedFile, form, bizTypeCode, isPrivate);
 		save(entity);
 
 		return FileUploadConverter.INSTANCE.toUploadResponse(entity);

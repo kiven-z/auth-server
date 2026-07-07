@@ -1,10 +1,10 @@
 package com.auth.service.system.schedule.convert;
 
 import com.auth.common.mapstruct.config.AuthMapperConfig;
-import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
+import com.auth.service.system.schedule.model.entity.JobGroupEntity;
 import com.auth.service.system.schedule.model.form.SysJobGroupForm;
 import com.auth.service.system.schedule.model.form.SysJobGroupUpdateForm;
-import com.auth.service.system.schedule.model.po.SysJobGroupPageRowPO;
+import com.auth.service.system.schedule.model.po.JobGroupPageRowPO;
 import com.auth.service.system.schedule.model.vo.SysJobGroupDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobGroupPageResponse;
 import org.mapstruct.Mapper;
@@ -35,7 +35,7 @@ public interface SysJobGroupConverter {
 	@Mapping(target = "version", ignore = true)
 	@Mapping(target = "remark", ignore = true)
 	@Mapping(target = "isSystem", ignore = true)
-	SysJobGroupEntity toEntity(SysJobGroupForm form);
+	JobGroupEntity toEntity(SysJobGroupForm form);
 
 	/**
 	 * 更新表单 → 覆盖已有实体（仅覆盖允许更新的字段）
@@ -51,7 +51,7 @@ public interface SysJobGroupConverter {
 	@Mapping(target = "updateUser", ignore = true)
 	@Mapping(target = "remark", ignore = true)
 	@Mapping(target = "version", ignore = true)
-	void updateEntity(SysJobGroupUpdateForm form, @MappingTarget SysJobGroupEntity entity);
+	void updateEntity(SysJobGroupUpdateForm form, @MappingTarget JobGroupEntity entity);
 
 	/**
 	 * 任务分组分页行 PO → 分页返回 VO
@@ -60,7 +60,7 @@ public interface SysJobGroupConverter {
 	 */
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
-	SysJobGroupPageResponse toPageResponse(SysJobGroupPageRowPO po);
+	SysJobGroupPageResponse toPageResponse(JobGroupPageRowPO po);
 
 	/**
 	 * 任务分组实体 → 详情 VO
@@ -69,6 +69,6 @@ public interface SysJobGroupConverter {
 	 */
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
-	SysJobGroupDetailVO toDetailVo(SysJobGroupEntity entity);
+	SysJobGroupDetailVO toDetailVo(JobGroupEntity entity);
 
 }

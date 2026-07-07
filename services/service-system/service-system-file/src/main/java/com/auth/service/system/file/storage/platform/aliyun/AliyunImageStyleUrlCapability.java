@@ -7,10 +7,6 @@ import org.springframework.stereotype.Component;
 /**
  * 阿里云 OSS 图片样式 URL 能力
  *
- * <p>
- * 拼接 {@code x-oss-process=style/{style}}；已有查询串时用 {@code &} 追加 保持纯 URL 拼接以避免依赖 OSS SDK
- * </p>
- *
  * @author Bunny
  */
 @Component

@@ -1,5 +1,6 @@
 package com.auth.service.system.file.storage.core.provider;
 
+import com.auth.service.system.file.storage.core.s3.S3CompatibleFileStorageProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

@@ -39,7 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 
 /**
- * 邮件模板服务（数据落库于 sys_message_template，channel=EMAIL）
+ * 邮件模板服务（数据落库于 message_template，channel=EMAIL）
  *
  * @author Bunny
  */

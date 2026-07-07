@@ -5,8 +5,8 @@ import java.util.List;
 
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.system.schedule.exception.SysJobException;
-import com.auth.service.system.schedule.mapper.SysJobMapper;
-import com.auth.service.system.schedule.model.entity.SysJobEntity;
+import com.auth.service.system.schedule.mapper.JobMapper;
+import com.auth.service.system.schedule.model.entity.JobEntity;
 import com.auth.service.system.schedule.model.form.SysJobStatusForm;
 import com.auth.service.system.schedule.support.quartz.SysJobScheduleReconciler;
 import com.auth.service.system.schedule.support.quartz.SysJobSchedulerManager;
@@ -46,7 +46,7 @@ import static org.mockito.Mockito.when;
 class SysJobScheduleSyncServiceImplTest {
 
 	@Mock
-	private SysJobMapper sysJobMapper;
+	private JobMapper jobMapper;
 
 	@Mock
 	private SysJobSchedulerManager sysJobSchedulerManager;
@@ -58,7 +58,7 @@ class SysJobScheduleSyncServiceImplTest {
 
 	@BeforeAll
 	static void initMybatisPlusTableInfo() {
-		TableInfoHelper.initTableInfo(new MapperBuilderAssistant(new MybatisConfiguration(), ""), SysJobEntity.class);
+		TableInfoHelper.initTableInfo(new MapperBuilderAssistant(new MybatisConfiguration(), ""), JobEntity.class);
 	}
 
 	@BeforeEach
@@ -67,19 +67,19 @@ class SysJobScheduleSyncServiceImplTest {
 				new SysJobScheduleSyncServiceImpl(sysJobSchedulerManager, sysJobScheduleReconciler));
 		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
-		baseMapperField.set(sysJobScheduleSyncService, sysJobMapper);
+		baseMapperField.set(sysJobScheduleSyncService, jobMapper);
 		lenient().doReturn(true).when(sysJobScheduleSyncService).updateBatchById(anyList());
 	}
 
 	@Test
 	@DisplayName("批量停用：批量落库并 pauseJob")
 	void batchUpdateStatusSkipsMissingAndPausesQuartz() throws SchedulerException {
-		SysJobEntity entity = new SysJobEntity();
+		JobEntity entity = new JobEntity();
 		entity.setId(1L);
 		entity.setJobName("demoJob");
 		entity.setJobGroup("DEFAULT");
 		entity.setStatus(true);
-		when(sysJobMapper.selectList(any())).thenReturn(List.of(entity));
+		when(jobMapper.selectList(any())).thenReturn(List.of(entity));
 
 		SysJobStatusForm form = new SysJobStatusForm();
 		form.setIds(List.of(1L, 2L));
@@ -95,12 +95,12 @@ class SysJobScheduleSyncServiceImplTest {
 	@Test
 	@DisplayName("批量启用：仅对原暂停任务注册 Quartz")
 	void batchUpdateStatusEnableOnlySchedulesPreviouslyPausedJobs() throws SchedulerException {
-		SysJobEntity paused = new SysJobEntity();
+		JobEntity paused = new JobEntity();
 		paused.setId(2L);
 		paused.setJobName("jobB");
 		paused.setJobGroup("DEFAULT");
 		paused.setStatus(false);
-		when(sysJobMapper.selectList(any())).thenReturn(List.of(paused));
+		when(jobMapper.selectList(any())).thenReturn(List.of(paused));
 
 		SysJobStatusForm form = new SysJobStatusForm();
 		form.setIds(List.of(1L, 2L));
@@ -116,7 +116,7 @@ class SysJobScheduleSyncServiceImplTest {
 	@Test
 	@DisplayName("分组批量停用：无任务时仍 pauseGroup")
 	void batchUpdateStatusByGroupCodePauseEmptyGroupStillPausesQuartz() throws SchedulerException {
-		when(sysJobMapper.selectList(any())).thenReturn(List.of());
+		when(jobMapper.selectList(any())).thenReturn(List.of());
 
 		sysJobScheduleSyncService.batchUpdateStatusByGroupCode("G1", false);
 
@@ -127,12 +127,12 @@ class SysJobScheduleSyncServiceImplTest {
 	@Test
 	@DisplayName("分组批量启用：落库并 scheduleOrReplace 分组内全部任务")
 	void batchUpdateStatusByGroupCodeEnableSchedulesAllJobsInGroup() throws SchedulerException {
-		SysJobEntity job = new SysJobEntity();
+		JobEntity job = new JobEntity();
 		job.setId(1L);
 		job.setJobName("demoJob");
 		job.setJobGroup("G1");
 		job.setStatus(false);
-		when(sysJobMapper.selectList(any())).thenReturn(List.of(job));
+		when(jobMapper.selectList(any())).thenReturn(List.of(job));
 
 		sysJobScheduleSyncService.batchUpdateStatusByGroupCode("G1", true);
 
@@ -144,7 +144,7 @@ class SysJobScheduleSyncServiceImplTest {
 	@Test
 	@DisplayName("分组批量启停：Quartz 同步失败时抛出 JOB_QUARTZ_OPERATION_FAILED")
 	void batchUpdateStatusByGroupCodeThrowsWhenQuartzSyncFails() throws SchedulerException {
-		when(sysJobMapper.selectList(any())).thenReturn(List.of());
+		when(jobMapper.selectList(any())).thenReturn(List.of());
 		doThrow(new SchedulerException("pause failed")).when(sysJobSchedulerManager).pauseGroup("G1");
 
 		assertThatThrownBy(() -> sysJobScheduleSyncService.batchUpdateStatusByGroupCode("G1", false))

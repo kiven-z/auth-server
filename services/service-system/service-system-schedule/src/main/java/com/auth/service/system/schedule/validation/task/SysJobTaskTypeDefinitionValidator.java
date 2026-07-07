@@ -1,6 +1,6 @@
 package com.auth.service.system.schedule.validation.task;
 
-import com.auth.service.system.schedule.model.entity.SysJobEntity;
+import com.auth.service.system.schedule.model.entity.JobEntity;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 
 /**
@@ -24,6 +24,6 @@ public interface SysJobTaskTypeDefinitionValidator {
 	 * 校验任务定义
 	 * @param job 任务定义
 	 */
-	void validate(SysJobEntity job);
+	void validate(JobEntity job);
 
 }

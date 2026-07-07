@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import com.auth.service.system.schedule.model.entity.SysJobEntity;
+import com.auth.service.system.schedule.model.entity.JobEntity;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 
 import org.springframework.stereotype.Component;
@@ -31,7 +31,7 @@ public class SysJobDefinitionValidationManager {
 	 * 归一化并执行任务定义校验
 	 * @param job 任务定义
 	 */
-	public void normalizeAndValidate(SysJobEntity job) {
+	public void normalizeAndValidate(JobEntity job) {
 		// 归一化 taskType 枚举名
 		String taskType = job.getTaskType();
 		SysJobTaskType resolvedTaskType = SysJobTaskType.resolve(taskType);

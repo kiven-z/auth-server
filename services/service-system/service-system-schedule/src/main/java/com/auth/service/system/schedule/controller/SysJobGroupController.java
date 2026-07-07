@@ -10,7 +10,7 @@ import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.common.model.SystemAuditBizModule;
-import com.auth.service.system.schedule.model.entity.SysJobGroupEntity;
+import com.auth.service.system.schedule.model.entity.JobGroupEntity;
 import com.auth.service.system.schedule.model.form.SysJobGroupForm;
 import com.auth.service.system.schedule.model.form.SysJobGroupUpdateForm;
 import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
@@ -43,7 +43,7 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
  *
  * @author Bunny
  */
-@Tag(name = "定时任务-分组", description = "sys_job_group")
+@Tag(name = "定时任务-分组", description = "job_group")
 @RequestMapping("/api/system/job-group")
 @RestController
 public class SysJobGroupController {
@@ -62,7 +62,7 @@ public class SysJobGroupController {
 	@PreAuthorize("@auth.decide('schedule:jobgroup:query')")
 	@GetMapping
 	public Result<PageResponse<SysJobGroupPageResponse>> page(SysJobGroupQuery query) {
-		Page<SysJobGroupEntity> page = new Page<>(query.getPageIndex(), query.getPageSize());
+		Page<JobGroupEntity> page = new Page<>(query.getPageIndex(), query.getPageSize());
 		PageResponse<SysJobGroupPageResponse> response = sysJobGroupService.getPage(page, query);
 
 		return Result.success(response);

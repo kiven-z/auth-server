@@ -1,13 +1,13 @@
 package com.auth.service.system.file.storage.platform.aliyun;
 
 import com.auth.module.file.api.enums.StoragePlatformEnum;
-import com.auth.service.system.file.storage.StoragePlatformFacade;
+import com.auth.service.system.file.storage.core.StoragePlatformFacade;
 import com.auth.service.system.file.storage.core.bucket.StorageBucketInitializer;
 import com.auth.service.system.file.storage.core.capability.ImageStyleUrlCapability;
 import com.auth.service.system.file.storage.core.capability.StoragePlatformCapability;
 import com.auth.service.system.file.storage.core.classifier.StorageExceptionClassifier;
 import com.auth.service.system.file.storage.core.provider.FileStorageProvider;
-import com.auth.service.system.file.storage.core.provider.S3CompatibleFileStorageProvider;
+import com.auth.service.system.file.storage.core.s3.S3CompatibleFileStorageProvider;
 import com.auth.service.system.file.storage.core.validator.StoragePlatformConfigValidator;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;

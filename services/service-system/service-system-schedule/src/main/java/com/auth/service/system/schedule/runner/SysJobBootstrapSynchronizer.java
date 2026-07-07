@@ -11,7 +11,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 /**
- * 应用就绪后同步将 {@code sys_job} 对账至 Quartz，再启动调度器（业务表为单一事实来源）
+ * 应用就绪后同步将 {@code job} 对账至 Quartz，再启动调度器（业务表为单一事实来源）
  *
  * @author Bunny
  */
@@ -35,9 +35,9 @@ public class SysJobBootstrapSynchronizer {
 	@EventListener(ApplicationReadyEvent.class)
 	public void onApplicationReady(ApplicationReadyEvent event) {
 		try {
-			log.info("Syncing Quartz from sys_job before scheduler start");
+			log.info("Syncing Quartz from job before scheduler start");
 			sysJobScheduleReconciler.reconcileAll();
-			log.info("sys_job reconciled to Quartz");
+			log.info("job reconciled to Quartz");
 		}
 		finally {
 			startSchedulerIfNeeded();
@@ -48,7 +48,7 @@ public class SysJobBootstrapSynchronizer {
 		try {
 			if (!scheduler.isStarted()) {
 				scheduler.start();
-				log.info("Quartz scheduler started after sys_job bootstrap sync");
+				log.info("Quartz scheduler started after job bootstrap sync");
 			}
 		}
 		catch (SchedulerException exception) {
