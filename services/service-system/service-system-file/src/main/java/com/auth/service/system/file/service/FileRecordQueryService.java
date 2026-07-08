@@ -8,11 +8,11 @@ import com.auth.service.system.file.model.vo.FileRecordPageVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
- * 文件记录通用服务
+ * 文件记录查询服务
  *
  * @author Bunny
  */
-public interface FileRecordCommonService extends IService<FileRecordEntity> {
+public interface FileRecordQueryService extends IService<FileRecordEntity> {
 
 	/**
 	 * 分页查询文件记录

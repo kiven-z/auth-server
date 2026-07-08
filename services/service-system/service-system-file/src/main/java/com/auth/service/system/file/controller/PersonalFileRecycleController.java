@@ -10,7 +10,7 @@ import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.file.model.query.FileRecordPageQuery;
 import com.auth.service.system.file.model.vo.FileRecordDetailVO;
 import com.auth.service.system.file.model.vo.FileRecordPageVO;
-import com.auth.service.system.file.service.FileRecordCommonService;
+import com.auth.service.system.file.service.FileRecordQueryService;
 import com.auth.service.system.file.service.FileRecycleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,13 +33,13 @@ import static com.auth.service.system.common.model.SystemAuditBizModule.SYS_FILE
 @RestController
 public class PersonalFileRecycleController {
 
-	private final FileRecordCommonService fileRecordCommonService;
+	private final FileRecordQueryService fileRecordQueryService;
 
 	private final FileRecycleService fileRecycleService;
 
-	public PersonalFileRecycleController(FileRecordCommonService fileRecordCommonService,
+	public PersonalFileRecycleController(FileRecordQueryService fileRecordQueryService,
 			FileRecycleService fileRecycleService) {
-		this.fileRecordCommonService = fileRecordCommonService;
+		this.fileRecordQueryService = fileRecordQueryService;
 		this.fileRecycleService = fileRecycleService;
 	}
 
@@ -53,7 +53,7 @@ public class PersonalFileRecycleController {
 		// 能被删除的都是私有文件
 		query.setIsPrivate(true);
 
-		PageResponse<FileRecordPageVO> pageResult = fileRecordCommonService.getPage(query, true);
+		PageResponse<FileRecordPageVO> pageResult = fileRecordQueryService.getPage(query, true);
 		return Result.success(pageResult);
 	}
 
@@ -62,7 +62,7 @@ public class PersonalFileRecycleController {
 	public Result<FileRecordDetailVO> detail(@PathVariable("id") Long id) {
 		Long ownerUserId = SecurityUserUtils.getUserId();
 		// 能被删除的都是私有文件
-		FileRecordDetailVO detail = fileRecordCommonService.getDetail(id, ownerUserId, true, true,
+		FileRecordDetailVO detail = fileRecordQueryService.getDetail(id, ownerUserId, true, true,
 				FileDeleteSourceConstants.USER_SELF);
 		return Result.success(detail);
 	}
@@ -73,7 +73,7 @@ public class PersonalFileRecycleController {
 	@PostMapping("/restore")
 	public Result<Void> restore(@RequestBody List<Long> ids) {
 		Long ownerUserId = SecurityUserUtils.getUserId();
-		fileRecycleService.restoreByIds(ids, ownerUserId, ownerUserId);
+		fileRecycleService.restoreByIds(ids, ownerUserId, FileDeleteSourceConstants.USER_SELF);
 		return Result.success();
 	}
 
@@ -83,7 +83,7 @@ public class PersonalFileRecycleController {
 	@DeleteMapping("/purge")
 	public Result<Void> purge(@RequestBody List<Long> ids) {
 		Long ownerUserId = SecurityUserUtils.getUserId();
-		fileRecycleService.purgeByIds(ids, ownerUserId);
+		fileRecycleService.purgeByIds(ids, ownerUserId, FileDeleteSourceConstants.USER_SELF);
 		return Result.success();
 	}
 

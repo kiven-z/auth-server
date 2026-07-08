@@ -29,17 +29,16 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
- * {@link FileRecordCommonServiceImpl} 单元测试。
+ * {@link FileRecordQueryServiceImpl} 单元测试。
  *
  * @author Bunny
  */
-@DisplayName("FileRecordCommonServiceImpl 公共查询")
+@DisplayName("FileRecordQueryServiceImpl 查询")
 @ExtendWith(MockitoExtension.class)
-class FileRecordCommonServiceImplTest {
+class FileRecordQueryServiceImplTest {
 
 	@Mock
 	private FileRecordMapper fileRecordMapper;
@@ -50,14 +49,14 @@ class FileRecordCommonServiceImplTest {
 	@Mock
 	private FileUrlSigner fileUrlSigner;
 
-	private FileRecordCommonServiceImpl fileRecordCommonService;
+	private FileRecordQueryServiceImpl fileRecordQueryService;
 
 	@BeforeEach
 	void setUp() throws Exception {
-		fileRecordCommonService = new FileRecordCommonServiceImpl(auditUserDisplayService, fileUrlSigner);
+		fileRecordQueryService = new FileRecordQueryServiceImpl(auditUserDisplayService, fileUrlSigner);
 		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
-		baseMapperField.set(fileRecordCommonService, fileRecordMapper);
+		baseMapperField.set(fileRecordQueryService, fileRecordMapper);
 	}
 
 	@Test
@@ -67,7 +66,7 @@ class FileRecordCommonServiceImplTest {
 		FileRecordPageQuery query = buildBaseQuery();
 		mockPageResult(query, false);
 
-		PageResponse<FileRecordPageVO> pageResult = fileRecordCommonService.getPage(query, false);
+		PageResponse<FileRecordPageVO> pageResult = fileRecordQueryService.getPage(query, false);
 
 		assertThat(pageResult.getList()).hasSize(1);
 		verify(fileRecordMapper).selectListByPage(any(), eq(query), eq(false));
@@ -82,7 +81,7 @@ class FileRecordCommonServiceImplTest {
 		query.setOwnerUserId(9001L);
 		mockPageResult(query, false);
 
-		fileRecordCommonService.getPage(query, false);
+		fileRecordQueryService.getPage(query, false);
 
 		verify(fileRecordMapper).selectListByPage(any(),
 				argThat(param -> Long.valueOf(9001L).equals(param.getOwnerUserId())), eq(false));
@@ -97,7 +96,7 @@ class FileRecordCommonServiceImplTest {
 		query.setDeleteSource(FileDeleteSourceConstants.USER_SELF);
 		mockPageResult(query, true);
 
-		fileRecordCommonService.getPage(query, true);
+		fileRecordQueryService.getPage(query, true);
 
 		verify(fileRecordMapper).selectListByPage(any(),
 				argThat(param -> FileDeleteSourceConstants.USER_SELF.equals(param.getDeleteSource())
@@ -116,7 +115,7 @@ class FileRecordCommonServiceImplTest {
 		query.setEndTime(endTime);
 		mockPageResult(query, false);
 
-		fileRecordCommonService.getPage(query, false);
+		fileRecordQueryService.getPage(query, false);
 
 		verify(fileRecordMapper).selectListByPage(any(),
 				argThat(param -> startTime.equals(param.getStartTime()) && endTime.equals(param.getEndTime())),
@@ -133,7 +132,7 @@ class FileRecordCommonServiceImplTest {
 				entity.getStoragePlatform()))
 			.thenReturn("https://minio.example.com/public/a.png?X-Amz-Signature=demo");
 
-		FileRecordDetailVO detail = fileRecordCommonService.getDetail(1001L, null, null, false, null);
+		FileRecordDetailVO detail = fileRecordQueryService.getDetail(1001L, null, null, false, null);
 
 		assertThat(detail.getId()).isEqualTo(1001L);
 		assertThat(detail.getAccessUrl()).isEqualTo("https://minio.example.com/public/a.png?X-Amz-Signature=demo");
@@ -147,7 +146,7 @@ class FileRecordCommonServiceImplTest {
 		// 验证详情查询未命中记录时统一返回 404 语义。
 		when(fileRecordMapper.selectDetailById(2001L, 9001L, null, false, null)).thenReturn(null);
 
-		assertThatThrownBy(() -> fileRecordCommonService.getDetail(2001L, 9001L, null, false, null))
+		assertThatThrownBy(() -> fileRecordQueryService.getDetail(2001L, 9001L, null, false, null))
 			.isInstanceOf(FileStorageException.class)
 			.satisfies(exception -> {
 				FileStorageException fileException = (FileStorageException) exception;
@@ -162,7 +161,7 @@ class FileRecordCommonServiceImplTest {
 		// 验证个人详情通过 SQL 归属过滤，越权时不会暴露记录存在性。
 		when(fileRecordMapper.selectDetailById(3001L, 9002L, null, false, null)).thenReturn(null);
 
-		assertThatThrownBy(() -> fileRecordCommonService.getDetail(3001L, 9002L, null, false, null))
+		assertThatThrownBy(() -> fileRecordQueryService.getDetail(3001L, 9002L, null, false, null))
 			.isInstanceOf(FileStorageException.class)
 			.extracting(ex -> ((FileStorageException) ex).getResultCode())
 			.isEqualTo(FileUploadResultCode.FILE_RECORD_NOT_FOUND);
@@ -181,7 +180,7 @@ class FileRecordCommonServiceImplTest {
 		when(fileUrlSigner.sign(anyString(), anyString(), anyString(), any()))
 			.thenReturn("https://signed.example/a.png");
 
-		fileRecordCommonService.getDetail(4001L, 9001L, true, true, FileDeleteSourceConstants.USER_SELF);
+		fileRecordQueryService.getDetail(4001L, 9001L, true, true, FileDeleteSourceConstants.USER_SELF);
 
 		verify(fileRecordMapper).selectDetailById(4001L, 9001L, true, true, FileDeleteSourceConstants.USER_SELF);
 	}

@@ -1,26 +1,33 @@
 package com.auth.service.system.file.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.BooleanUtil;
-import com.auth.module.file.api.constants.FileDeleteSourceConstants;
 import com.auth.module.file.export.writer.ZipStreamWriter;
 import com.auth.module.file.export.writer.ZipStreamWriter.ZipEntryPayload;
+import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
+import com.auth.service.system.file.exception.FileStorageException;
+import com.auth.service.system.file.exception.FileUploadResultCode;
 import com.auth.service.system.file.mapper.FileRecordMapper;
 import com.auth.service.system.file.model.entity.FileRecordEntity;
 import com.auth.service.system.file.service.FileRecordService;
 import com.auth.service.system.file.storage.core.StoragePlatformFacadeRegistry;
 import com.auth.service.system.file.storage.core.provider.FileStorageProvider;
-import com.auth.service.system.file.support.FileRecordReferenceChecker;
 import com.auth.service.system.file.utils.FileObjectKeyUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.io.IOException;
-import java.util.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -30,11 +37,10 @@ import java.util.stream.Collectors;
  * @author Bunny
  */
 @RequiredArgsConstructor
+@Slf4j
 @Service
 public class FileRecordServiceImpl extends ServiceImpl<FileRecordMapper, FileRecordEntity>
 		implements FileRecordService {
-
-	private final FileRecordReferenceChecker fileRecordReferenceChecker;
 
 	private final StoragePlatformFacadeRegistry facadeRegistry;
 
@@ -43,37 +49,47 @@ public class FileRecordServiceImpl extends ServiceImpl<FileRecordMapper, FileRec
 	 */
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public void deleteByIds(List<Long> ids, Long ownerUserId, Long operatorUserId) {
-		var resolved = resolveBatchFileRecords(ids, ownerUserId);
-		String deleteSource = ownerUserId != null ? FileDeleteSourceConstants.USER_SELF
-				: FileDeleteSourceConstants.ADMIN_ACTION;
-
-		List<Long> publicIds = new ArrayList<>();
-		List<Long> privateIds = new ArrayList<>();
-		for (FileRecordEntity entity : resolved.entities()) {
-			if (BooleanUtil.isTrue(entity.getIsPrivate())) {
-				privateIds.add(entity.getId());
-			}
-			else {
-				publicIds.add(entity.getId());
-			}
+	public void deleteByIds(List<Long> ids, Long ownerUserId, String deleteSource) {
+		List<Long> normalizedIds = CollUtil.emptyIfNull(ids).stream().filter(Objects::nonNull).distinct().toList();
+		if (normalizedIds.isEmpty()) {
+			throw new SystemBusinessException(SystemCommonResultCode.PARAM_REQUIRED, "ids");
 		}
 
-		if (!publicIds.isEmpty()) {
-			List<FileRecordEntity> entities = resolved.entities()
-				.stream()
-				.filter(entity -> publicIds.contains(entity.getId()))
-				.toList();
+		List<FileRecordEntity> entities = baseMapper.selectIsDeletedByIds(normalizedIds, ownerUserId, null, false,
+				null);
+		if (CollUtil.isEmpty(entities) || entities.size() != normalizedIds.size()) {
+			log.warn("File record not found or unavailable(deleteByIds): ids={}", normalizedIds);
+			throw new FileStorageException(FileUploadResultCode.FILE_RECORD_NOT_FOUND);
+		}
 
-			for (FileRecordEntity entity : entities) {
-				FileStorageProvider provider = facadeRegistry.resolve(entity.getStoragePlatform()).provider();
-				provider.delete(entity.getBucket(), entity.getObjectKey());
-			}
-			baseMapper.deletePhysicallyActiveByIds(publicIds);
+		// 文件私有逻辑删除
+		Long userId = SecurityUserUtils.getUserId();
+		List<FileRecordEntity> privateEntities = entities.stream()
+			.filter(entity -> BooleanUtil.isTrue(entity.getIsPrivate()))
+			.toList();
+		for (FileRecordEntity entity : privateEntities) {
+			entity.setDeletedAt(LocalDateTime.now());
+			entity.setDeletedBy(userId);
+			entity.setDeleteSource(deleteSource);
+			entity.setIsDeleted(true);
 		}
-		if (!privateIds.isEmpty()) {
-			baseMapper.markDeletedByIds(privateIds, operatorUserId, operatorUserId, deleteSource);
+		if (CollUtil.isNotEmpty(privateEntities)) {
+			super.updateBatchById(privateEntities);
 		}
+
+		// 文件公开物理删除
+		List<FileRecordEntity> publicEntities = entities.stream()
+			.filter(entity -> BooleanUtil.isFalse(entity.getIsPrivate()))
+			.toList();
+		if (publicEntities.isEmpty()) {
+			return;
+		}
+		// 先删存储再删DB
+		for (FileRecordEntity entity : publicEntities) {
+			FileStorageProvider provider = facadeRegistry.resolve(entity.getStoragePlatform()).provider();
+			provider.delete(entity.getBucket(), entity.getObjectKey());
+		}
+		baseMapper.deletePhysicallyByIds(publicEntities.stream().map(FileRecordEntity::getId).toList(), false);
 	}
 
 	/**
@@ -82,27 +98,33 @@ public class FileRecordServiceImpl extends ServiceImpl<FileRecordMapper, FileRec
 	@Override
 	@Transactional(readOnly = true)
 	public StreamingResponseBody batchDownload(List<Long> ids, Long ownerUserId) {
-		var resolved = resolveBatchFileRecords(ids, ownerUserId);
+		// 1. 为空返回
+		ids = CollUtil.emptyIfNull(ids).stream().filter(Objects::nonNull).distinct().toList();
+		if (ids.isEmpty()) {
+			throw new SystemBusinessException(SystemCommonResultCode.PARAM_REQUIRED, "ids");
+		}
 
-		Map<Long, FileRecordEntity> entityById = resolved.entities()
-			.stream()
+		// 2. 一次 SQL 完成存在性 + 归属 + 未删除校验（同 deleteByIds）
+		List<FileRecordEntity> entities = baseMapper.selectIsDeletedByIds(ids, ownerUserId, null, false, null);
+		if (CollUtil.isEmpty(entities) || entities.size() != ids.size()) {
+			log.warn("File record not found or unavailable(batchDownload): ids={}", ids);
+			throw new FileStorageException(FileUploadResultCode.FILE_RECORD_NOT_FOUND);
+		}
+
+		// 3. 按请求 ID 顺序排列（Mapper 不保证顺序）
+		Map<Long, FileRecordEntity> entityById = entities.stream()
 			.collect(Collectors.toMap(FileRecordEntity::getId, Function.identity()));
-		List<FileRecordEntity> orderedEntities = resolved.ids().stream().map(entityById::get).toList();
+		List<FileRecordEntity> orderedEntities = ids.stream().map(entityById::get).toList();
 
+		// 4. 构建 ZIP 条目（懒加载 InputStream，真正写流时才下载）
 		List<ZipEntryPayload> payloads = orderedEntities.stream().map(entity -> {
 			FileStorageProvider provider = facadeRegistry.resolve(entity.getStoragePlatform()).provider();
-			Long id = entity.getId();
-			String originalName = entity.getOriginalName();
-			String extension = entity.getExtension();
-			String entryName = ZipStreamWriter.resolveEntryName(originalName, extension, "file-" + id);
-			return new ZipEntryPayload(entryName, () -> {
-				String bucket = entity.getBucket();
-				String objectKey = entity.getObjectKey();
-
-				return provider.download(bucket, objectKey);
-			});
+			String entryName = ZipStreamWriter.resolveEntryName(entity.getOriginalName(), entity.getExtension(),
+					"file-" + entity.getId());
+			return new ZipEntryPayload(entryName, () -> provider.download(entity.getBucket(), entity.getObjectKey()));
 		}).toList();
 
+		// 5. 返回 StreamingResponseBody（延迟写 ZIP）
 		return outputStream -> {
 			try {
 				ZipStreamWriter.write(outputStream, payloads);
@@ -118,12 +140,22 @@ public class FileRecordServiceImpl extends ServiceImpl<FileRecordMapper, FileRec
 	 */
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public void updatePrivacyByIds(List<Long> ids, boolean targetPrivate, Long ownerUserId, Long operatorUserId) {
-		var resolved = resolveBatchFileRecords(ids, ownerUserId);
+	public void updatePrivacyByIds(List<Long> ids, boolean targetPrivate, Long ownerUserId) {
+		ids = CollUtil.emptyIfNull(ids).stream().filter(Objects::nonNull).distinct().toList();
+		if (ids.isEmpty()) {
+			throw new SystemBusinessException(SystemCommonResultCode.PARAM_REQUIRED, "ids");
+		}
 
-		for (FileRecordEntity entity : resolved.entities()) {
-			boolean currentPrivate = BooleanUtil.isTrue(entity.getIsPrivate());
-			if (currentPrivate == targetPrivate) {
+		// 与 deleteByIds / batchDownload 相同：活跃文件 + 可选归属过滤
+		List<FileRecordEntity> entities = baseMapper.selectIsDeletedByIds(ids, ownerUserId, null, false, null);
+		if (CollUtil.isEmpty(entities) || entities.size() != ids.size()) {
+			log.warn("File record not found or unavailable(updatePrivacyByIds): ids={}", ids);
+			throw new FileStorageException(FileUploadResultCode.FILE_RECORD_NOT_FOUND);
+		}
+
+		List<FileRecordEntity> changedEntities = new ArrayList<>();
+		for (FileRecordEntity entity : entities) {
+			if (BooleanUtil.isTrue(entity.getIsPrivate()) == targetPrivate) {
 				continue;
 			}
 
@@ -132,36 +164,15 @@ public class FileRecordServiceImpl extends ServiceImpl<FileRecordMapper, FileRec
 			provider.move(entity.getBucket(), entity.getObjectKey(), newObjectKey);
 
 			String newUrl = provider.resolvePublicUrl(entity.getBucket(), newObjectKey);
-			baseMapper.updatePrivacyById(entity.getId(), newObjectKey, targetPrivate, newUrl, operatorUserId);
-		}
-	}
-
-	/**
-	 * 归一化批量 ID，加载活跃记录并在需要时校验归属
-	 * @param ids 原始 ID 列表
-	 * @param ownerUserId 归属用户 ID，为 {@code null} 时跳过归属校验
-	 * @return 归一化后的 ID 与对应实体
-	 */
-	private ResolvedBatchFileRecords resolveBatchFileRecords(List<Long> ids, Long ownerUserId) {
-		List<Long> normalizedIds = ids == null ? List.of() : ids.stream().filter(Objects::nonNull).distinct().toList();
-		if (normalizedIds.isEmpty()) {
-			throw new SystemBusinessException(SystemCommonResultCode.PARAM_REQUIRED, "ids");
+			entity.setUrl(newUrl);
+			entity.setIsPrivate(targetPrivate);
+			entity.setObjectKey(newObjectKey);
+			changedEntities.add(entity);
 		}
 
-		List<FileRecordEntity> entities = fileRecordReferenceChecker.getExistingBatch(normalizedIds, false);
-		if (ownerUserId != null) {
-			fileRecordReferenceChecker.requireOwnerBatch(entities, ownerUserId);
+		if (CollUtil.isNotEmpty(changedEntities)) {
+			super.updateBatchById(changedEntities);
 		}
-		return new ResolvedBatchFileRecords(normalizedIds, entities);
-	}
-
-	/**
-	 * 批量操作共用的 ID 归一化、存在性校验与归属校验结果
-	 *
-	 * @param ids 原始 ID 列表
-	 * @param entities 已校验的活跃文件记录
-	 */
-	private record ResolvedBatchFileRecords(List<Long> ids, List<FileRecordEntity> entities) {
 	}
 
 }

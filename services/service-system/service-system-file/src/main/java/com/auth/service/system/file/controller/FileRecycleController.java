@@ -2,13 +2,12 @@ package com.auth.service.system.file.controller;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
-import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.file.model.query.FileRecordPageQuery;
 import com.auth.service.system.file.model.vo.FileRecordDetailVO;
 import com.auth.service.system.file.model.vo.FileRecordPageVO;
-import com.auth.service.system.file.service.FileRecordCommonService;
+import com.auth.service.system.file.service.FileRecordQueryService;
 import com.auth.service.system.file.service.FileRecycleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -31,13 +30,12 @@ import static com.auth.service.system.common.model.SystemAuditBizModule.SYS_FILE
 @RestController
 public class FileRecycleController {
 
-	private final FileRecordCommonService fileRecordCommonService;
+	private final FileRecordQueryService fileRecordQueryService;
 
 	private final FileRecycleService fileRecycleService;
 
-	public FileRecycleController(FileRecordCommonService fileRecordCommonService,
-			FileRecycleService fileRecycleService) {
-		this.fileRecordCommonService = fileRecordCommonService;
+	public FileRecycleController(FileRecordQueryService fileRecordQueryService, FileRecycleService fileRecycleService) {
+		this.fileRecordQueryService = fileRecordQueryService;
 		this.fileRecycleService = fileRecycleService;
 	}
 
@@ -48,7 +46,7 @@ public class FileRecycleController {
 		// 能被删除的都是私有文件
 		query.setIsPrivate(true);
 
-		PageResponse<FileRecordPageVO> pageResult = fileRecordCommonService.getPage(query, true);
+		PageResponse<FileRecordPageVO> pageResult = fileRecordQueryService.getPage(query, true);
 		return Result.success(pageResult);
 	}
 
@@ -57,7 +55,7 @@ public class FileRecycleController {
 	@GetMapping("/{id}")
 	public Result<FileRecordDetailVO> detail(@PathVariable("id") Long id) {
 		// 能被删除的都是私有文件
-		FileRecordDetailVO detail = fileRecordCommonService.getDetail(id, null, true, true, null);
+		FileRecordDetailVO detail = fileRecordQueryService.getDetail(id, null, true, true, null);
 		return Result.success(detail);
 	}
 
@@ -67,8 +65,7 @@ public class FileRecycleController {
 	@PreAuthorize("@auth.decide('sys:file:recycle:restore')")
 	@PostMapping("/restore")
 	public Result<Void> restore(@RequestBody List<Long> ids) {
-		Long operatorUserId = SecurityUserUtils.getUserId();
-		fileRecycleService.restoreByIds(ids, null, operatorUserId);
+		fileRecycleService.restoreByIds(ids, null, null);
 		return Result.success();
 	}
 
@@ -78,7 +75,7 @@ public class FileRecycleController {
 	@PreAuthorize("@auth.decide('sys:file:recycle:purge')")
 	@DeleteMapping("/purge")
 	public Result<Void> purge(@RequestBody List<Long> ids) {
-		fileRecycleService.purgeByIds(ids, null);
+		fileRecycleService.purgeByIds(ids, null, null);
 		return Result.success();
 	}
 

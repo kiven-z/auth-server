@@ -24,14 +24,6 @@ public interface FileRecordService extends IService<FileRecordEntity> {
 	String BATCH_DOWNLOAD_CONTENT_TYPE = "application/zip";
 
 	/**
-	 * 按主键集合删除文件记录：公开文件物理删除，私有文件逻辑删除
-	 * @param ids 文件记录主键集合
-	 * @param ownerUserId 归属用户ID，非空表示用户自行删除
-	 * @param operatorUserId 操作用户ID
-	 */
-	void deleteByIds(List<Long> ids, Long ownerUserId, Long operatorUserId);
-
-	/**
 	 * 批量下载文件记录并输出 ZIP 流
 	 * @param ids 文件记录主键集合
 	 * @param ownerUserId 归属用户ID
@@ -43,9 +35,16 @@ public interface FileRecordService extends IService<FileRecordEntity> {
 	 * 批量切换文件隐私属性（公开 ↔ 私有），并迁移存储对象前缀
 	 * @param ids 文件记录主键集合
 	 * @param targetPrivate 目标是否私有
-	 * @param ownerUserId 归属用户ID，非空表示用户自行操作
-	 * @param operatorUserId 操作用户ID
+	 * @param ownerUserId 归属用户 ID，管理端传 {@code null}
 	 */
-	void updatePrivacyByIds(List<Long> ids, boolean targetPrivate, Long ownerUserId, Long operatorUserId);
+	void updatePrivacyByIds(List<Long> ids, boolean targetPrivate, Long ownerUserId);
+
+	/**
+	 * 按主键集合删除文件记录：公开文件物理删除，私有文件逻辑删除；仅处理当前可见且未删除的记录，其余 ID 忽略。
+	 * @param ids 文件记录主键集合
+	 * @param ownerUserId 归属用户 ID，非空时仅删除该用户文件
+	 * @param deleteSource 逻辑删除时写入的删除来源
+	 */
+	void deleteByIds(List<Long> ids, Long ownerUserId, String deleteSource);
 
 }

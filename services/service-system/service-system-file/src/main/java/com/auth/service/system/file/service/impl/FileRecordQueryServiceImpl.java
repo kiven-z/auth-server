@@ -12,7 +12,7 @@ import com.auth.service.system.file.model.po.FileRecordPageRowPO;
 import com.auth.service.system.file.model.query.FileRecordPageQuery;
 import com.auth.service.system.file.model.vo.FileRecordDetailVO;
 import com.auth.service.system.file.model.vo.FileRecordPageVO;
-import com.auth.service.system.file.service.FileRecordCommonService;
+import com.auth.service.system.file.service.FileRecordQueryService;
 import com.auth.service.system.file.support.FileUrlSigner;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -20,19 +20,20 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 
 /**
- * 文件记录公共服务实现
+ * 文件记录查询服务实现
  *
  * @author Bunny
  */
 @RequiredArgsConstructor
 @Slf4j
 @Service
-public class FileRecordCommonServiceImpl extends ServiceImpl<FileRecordMapper, FileRecordEntity>
-		implements FileRecordCommonService {
+public class FileRecordQueryServiceImpl extends ServiceImpl<FileRecordMapper, FileRecordEntity>
+		implements FileRecordQueryService {
 
 	private final AuditUserDisplayService auditUserDisplayService;
 
@@ -42,6 +43,7 @@ public class FileRecordCommonServiceImpl extends ServiceImpl<FileRecordMapper, F
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(readOnly = true)
 	public PageResponse<FileRecordPageVO> getPage(FileRecordPageQuery query, Boolean isDeleted) {
 		Page<FileRecordEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
 
@@ -56,6 +58,7 @@ public class FileRecordCommonServiceImpl extends ServiceImpl<FileRecordMapper, F
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(readOnly = true)
 	public FileRecordDetailVO getDetail(Long id, Long ownerUserId, Boolean isPrivate, boolean expectedDeleted,
 			String deleteSource) {
 		FileRecordEntity entity = baseMapper.selectDetailById(id, ownerUserId, isPrivate, expectedDeleted,

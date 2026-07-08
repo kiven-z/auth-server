@@ -1,5 +1,6 @@
 package com.auth.service.system.file.controller;
 
+import com.auth.module.file.api.constants.FileDeleteSourceConstants;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.service.system.file.service.FileRecycleService;
 import org.junit.jupiter.api.DisplayName;
@@ -27,9 +28,9 @@ class PersonalFileRecycleControllerTest {
 	private FileRecycleService fileRecycleService;
 
 	@Test
-	@DisplayName("restore：个人端归属用户与操作用户相同")
-	void restorePassesSameOwnerAndOperatorUser() {
-		// 验证个人端恢复会同时传递归属用户和操作用户。
+	@DisplayName("restore：个人端透传归属用户与 USER_SELF 来源")
+	void restorePassesOwnerUserIdAndUserSelfDeleteSource() {
+		// 验证个人端恢复会限制归属用户与删除来源。
 		PersonalFileRecycleController controller = new PersonalFileRecycleController(null, fileRecycleService);
 		List<Long> ids = List.of(9201L);
 		try (MockedStatic<SecurityUserUtils> securityUser = mockStatic(SecurityUserUtils.class)) {
@@ -38,7 +39,22 @@ class PersonalFileRecycleControllerTest {
 			controller.restore(ids);
 		}
 
-		verify(fileRecycleService).restoreByIds(ids, 8001L, 8001L);
+		verify(fileRecycleService).restoreByIds(ids, 8001L, FileDeleteSourceConstants.USER_SELF);
+	}
+
+	@Test
+	@DisplayName("purge：个人端透传归属用户与 USER_SELF 来源")
+	void purgePassesOwnerUserIdAndUserSelfDeleteSource() {
+		// 验证个人端彻底删除会限制归属用户与删除来源。
+		PersonalFileRecycleController controller = new PersonalFileRecycleController(null, fileRecycleService);
+		List<Long> ids = List.of(9202L);
+		try (MockedStatic<SecurityUserUtils> securityUser = mockStatic(SecurityUserUtils.class)) {
+			securityUser.when(SecurityUserUtils::getUserId).thenReturn(8001L);
+
+			controller.purge(ids);
+		}
+
+		verify(fileRecycleService).purgeByIds(ids, 8001L, FileDeleteSourceConstants.USER_SELF);
 	}
 
 }

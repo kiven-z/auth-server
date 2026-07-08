@@ -1,7 +1,7 @@
 package com.auth.service.system.file.service.impl;
 
-import com.auth.module.file.api.constants.FileDeleteSourceConstants;
-import com.auth.module.file.api.enums.StoragePlatformEnum;
+import cn.hutool.core.collection.CollUtil;
+import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.file.exception.FileStorageException;
@@ -11,7 +11,7 @@ import com.auth.service.system.file.model.entity.FileRecordEntity;
 import com.auth.service.system.file.service.FileRecycleService;
 import com.auth.service.system.file.storage.core.StoragePlatformFacadeRegistry;
 import com.auth.service.system.file.storage.core.provider.FileStorageProvider;
-import com.auth.service.system.file.support.FileRecordReferenceChecker;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,11 +28,8 @@ import java.util.Objects;
 @RequiredArgsConstructor
 @Slf4j
 @Service
-public class FileRecycleServiceImpl implements FileRecycleService {
-
-	private final FileRecordMapper fileRecordMapper;
-
-	private final FileRecordReferenceChecker fileRecordReferenceChecker;
+public class FileRecycleServiceImpl extends ServiceImpl<FileRecordMapper, FileRecordEntity>
+		implements FileRecycleService {
 
 	private final StoragePlatformFacadeRegistry facadeRegistry;
 
@@ -41,11 +38,21 @@ public class FileRecycleServiceImpl implements FileRecycleService {
 	 */
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public void restoreByIds(List<Long> ids, Long ownerUserId, Long operatorUserId) {
-		List<FileRecordEntity> entities = resolveDeletedEntities(ids, ownerUserId);
-		requireRestorablePrivateFiles(entities, ownerUserId);
-		List<Long> normalizedIds = entities.stream().map(FileRecordEntity::getId).toList();
-		fileRecordMapper.restoreByIds(normalizedIds, operatorUserId);
+	public void restoreByIds(List<Long> ids, Long ownerUserId, String deleteSource) {
+		ids = CollUtil.emptyIfNull(ids).stream().filter(Objects::nonNull).distinct().toList();
+		if (ids.isEmpty()) {
+			throw new SystemBusinessException(SystemCommonResultCode.PARAM_REQUIRED, "ids");
+		}
+
+		// 私有文件才可以被回收
+		List<FileRecordEntity> entities = baseMapper.selectIsDeletedByIds(ids, ownerUserId, true, true, deleteSource);
+		if (CollUtil.isEmpty(entities) || entities.size() != ids.size()) {
+			log.warn("File record not found or unavailable: ids={}", ids);
+			throw new FileStorageException(FileUploadResultCode.FILE_RECORD_NOT_FOUND);
+		}
+
+		Long userId = SecurityUserUtils.getUserId();
+		baseMapper.restoreByIds(ids, userId);
 	}
 
 	/**
@@ -53,53 +60,23 @@ public class FileRecycleServiceImpl implements FileRecycleService {
 	 */
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public void purgeByIds(List<Long> ids, Long ownerUserId) {
-		List<FileRecordEntity> entities = resolveDeletedEntities(ids, ownerUserId);
-		requireRestorablePrivateFiles(entities, ownerUserId);
-		for (FileRecordEntity entity : entities) {
-			StoragePlatformEnum platform = entity.getStoragePlatform();
-			FileStorageProvider provider = facadeRegistry.resolve(platform).provider();
-			provider.delete(entity.getBucket(), entity.getObjectKey());
-		}
-
-		List<Long> normalizedIds = entities.stream().map(FileRecordEntity::getId).toList();
-		fileRecordMapper.deletePhysicallyByIds(normalizedIds);
-	}
-
-	/**
-	 * 校验仅允许恢复/彻底删除逻辑删除的私有文件
-	 * @param entities 已删除文件记录
-	 * @param ownerUserId 归属用户 ID，非空时仅允许 USER_SELF 来源
-	 */
-	private void requireRestorablePrivateFiles(List<FileRecordEntity> entities, Long ownerUserId) {
-		List<Long> invalidIds = entities.stream()
-			.filter(entity -> !Boolean.TRUE.equals(entity.getIsPrivate())
-					|| (ownerUserId != null && !FileDeleteSourceConstants.USER_SELF.equals(entity.getDeleteSource())))
-			.map(FileRecordEntity::getId)
-			.toList();
-		if (!invalidIds.isEmpty()) {
-			log.warn("File record not found or unavailable: fileIds={}", invalidIds);
-			throw new FileStorageException(FileUploadResultCode.FILE_RECORD_NOT_FOUND);
-		}
-	}
-
-	/**
-	 * 归一化批量 ID，加载已删除记录并在需要时校验归属
-	 * @param ids 原始 ID 列表
-	 * @param ownerUserId 归属用户 ID，为 {@code null} 时跳过归属校验
-	 * @return 已校验的已删除文件记录
-	 */
-	private List<FileRecordEntity> resolveDeletedEntities(List<Long> ids, Long ownerUserId) {
-		List<Long> normalizedIds = ids == null ? List.of() : ids.stream().filter(Objects::nonNull).distinct().toList();
-		if (normalizedIds.isEmpty()) {
+	public void purgeByIds(List<Long> ids, Long ownerUserId, String deleteSource) {
+		ids = CollUtil.emptyIfNull(ids).stream().filter(Objects::nonNull).distinct().toList();
+		if (ids.isEmpty()) {
 			throw new SystemBusinessException(SystemCommonResultCode.PARAM_REQUIRED, "ids");
 		}
-
-		List<FileRecordEntity> entities = fileRecordReferenceChecker.getExistingBatch(normalizedIds, true);
-		if (ownerUserId != null) {
-			fileRecordReferenceChecker.requireOwnerBatch(entities, ownerUserId);
+		List<FileRecordEntity> entities = baseMapper.selectIsDeletedByIds(ids, ownerUserId, true, true, deleteSource);
+		if (CollUtil.isEmpty(entities) || entities.size() != ids.size()) {
+			log.warn("File record not found or unavailable(purgeByIds): ids={}", ids);
+			throw new FileStorageException(FileUploadResultCode.FILE_RECORD_NOT_FOUND);
 		}
-		return entities;
+
+		// 先删存储再删DB
+		for (FileRecordEntity entity : entities) {
+			FileStorageProvider provider = facadeRegistry.resolve(entity.getStoragePlatform()).provider();
+			provider.delete(entity.getBucket(), entity.getObjectKey());
+		}
+		baseMapper.deletePhysicallyByIds(entities.stream().map(FileRecordEntity::getId).toList(), true);
 	}
 
 }
