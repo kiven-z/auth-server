@@ -1,7 +1,7 @@
 package com.auth.service.system.file.model.entity;
 
 import com.auth.common.data.model.BaseEntity;
-import com.auth.module.file.api.enums.StoragePlatformEnum;
+import com.auth.module.file.api.model.enums.StoragePlatformEnum;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;

@@ -14,6 +14,7 @@ import com.auth.service.system.file.model.entity.FileRecordEntity;
 import com.auth.service.system.file.service.FileRecordService;
 import com.auth.service.system.file.storage.core.StoragePlatformFacadeRegistry;
 import com.auth.service.system.file.storage.core.provider.FileStorageProvider;
+import com.auth.service.system.file.support.FileRecordDeletionSupport;
 import com.auth.service.system.file.utils.FileObjectKeyUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +44,8 @@ public class FileRecordServiceImpl extends ServiceImpl<FileRecordMapper, FileRec
 
 	private final StoragePlatformFacadeRegistry facadeRegistry;
 
+	private final FileRecordDeletionSupport fileRecordDeletionSupport;
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -62,34 +64,8 @@ public class FileRecordServiceImpl extends ServiceImpl<FileRecordMapper, FileRec
 			throw new FileStorageException(FileUploadResultCode.FILE_RECORD_NOT_FOUND);
 		}
 
-		// 文件私有逻辑删除
-		Long userId = SecurityUserUtils.getUserId();
-		List<FileRecordEntity> privateEntities = entities.stream()
-			.filter(entity -> BooleanUtil.isTrue(entity.getIsPrivate()))
-			.toList();
-		for (FileRecordEntity entity : privateEntities) {
-			entity.setDeletedAt(LocalDateTime.now());
-			entity.setDeletedBy(userId);
-			entity.setDeleteSource(deleteSource);
-			entity.setIsDeleted(true);
-		}
-		if (CollUtil.isNotEmpty(privateEntities)) {
-			super.updateBatchById(privateEntities);
-		}
-
-		// 文件公开物理删除
-		List<FileRecordEntity> publicEntities = entities.stream()
-			.filter(entity -> BooleanUtil.isFalse(entity.getIsPrivate()))
-			.toList();
-		if (publicEntities.isEmpty()) {
-			return;
-		}
-		// 先删存储再删DB
-		for (FileRecordEntity entity : publicEntities) {
-			FileStorageProvider provider = facadeRegistry.resolve(entity.getStoragePlatform()).provider();
-			provider.delete(entity.getBucket(), entity.getObjectKey());
-		}
-		baseMapper.deletePhysicallyByIds(publicEntities.stream().map(FileRecordEntity::getId).toList(), false);
+		Long deletedBy = SecurityUserUtils.getUserId();
+		fileRecordDeletionSupport.applyDeletion(entities, deleteSource, deletedBy);
 	}
 
 	/**

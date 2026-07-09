@@ -1,7 +1,7 @@
 package com.auth.service.system.file.convert;
 
 import com.auth.common.mapstruct.config.AuthMapperConfig;
-import com.auth.module.file.api.dto.FileUploadResultDTO;
+import com.auth.module.file.api.model.dto.FileUploadResultDTO;
 import com.auth.service.system.file.model.entity.FileRecordEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

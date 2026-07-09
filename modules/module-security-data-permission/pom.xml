@@ -21,7 +21,7 @@
 		</dependency>
 		<dependency>
 			<groupId>com.auth</groupId>
-			<artifactId>module-security-web-starter</artifactId>
+			<artifactId>module-security-autoconfigure</artifactId>
 			<version>0.0.2-beta</version>
 			<optional>true</optional>
 		</dependency>

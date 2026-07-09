@@ -1,6 +1,6 @@
 package com.auth.service.system.file.service;
 
-import com.auth.module.file.api.dto.FileUploadResultDTO;
+import com.auth.module.file.api.model.dto.FileUploadResultDTO;
 import com.auth.service.system.file.model.form.FileUploadForm;
 import com.auth.service.system.file.model.form.MultipleFileUploadForm;
 

@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * 文件记录分页查询条件
@@ -48,8 +49,12 @@ public class FileRecordPageQuery extends PageQueryRequest {
 	@Schema(title = "是否私有文件")
 	private Boolean isPrivate;
 
+	@Schema(title = "删除来源")
 	@Size(max = 32, message = "deleteSource 长度不能超过32个字符")
 	private String deleteSource;
+
+	@Schema(title = "删除来源集合")
+	private List<@Size(max = 32, message = "deleteSource 长度不能超过32个字符") String> deleteSources;
 
 	@AssertTrue(message = "startTime 与 endTime 必须成对指定")
 	public boolean isTimeRangePaired() {

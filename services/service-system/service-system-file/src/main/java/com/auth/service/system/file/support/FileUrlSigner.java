@@ -2,7 +2,7 @@ package com.auth.service.system.file.support;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
-import com.auth.module.file.api.enums.StoragePlatformEnum;
+import com.auth.module.file.api.model.enums.StoragePlatformEnum;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.file.config.properties.FileUploadProperties;

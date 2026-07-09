@@ -2,7 +2,7 @@ package com.auth.service.system.file.controller;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
-import com.auth.module.file.api.constants.FileDeleteSourceConstants;
+import com.auth.module.file.api.model.enums.FileDeleteSource;
 import com.auth.module.security.autoconfigure.annotation.AuthenticatedApi;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.module.security.contract.annotation.OperationLog;
@@ -49,7 +49,7 @@ public class PersonalFileRecycleController {
 		// 回收站只能看到自己的和自己删除的
 		Long ownerUserId = SecurityUserUtils.getUserId();
 		query.setOwnerUserId(ownerUserId);
-		query.setDeleteSource(FileDeleteSourceConstants.USER_SELF);
+		query.setDeleteSources(FileDeleteSource.userRecycleSourceCodes());
 		// 能被删除的都是私有文件
 		query.setIsPrivate(true);
 
@@ -62,8 +62,9 @@ public class PersonalFileRecycleController {
 	public Result<FileRecordDetailVO> detail(@PathVariable("id") Long id) {
 		Long ownerUserId = SecurityUserUtils.getUserId();
 		// 能被删除的都是私有文件
-		FileRecordDetailVO detail = fileRecordQueryService.getDetail(id, ownerUserId, true, true,
-				FileDeleteSourceConstants.USER_SELF);
+		List<String> deleteSources = FileDeleteSource.userRecycleSourceCodes();
+
+		FileRecordDetailVO detail = fileRecordQueryService.getDetail(id, ownerUserId, true, true, deleteSources);
 		return Result.success(detail);
 	}
 
@@ -73,7 +74,9 @@ public class PersonalFileRecycleController {
 	@PostMapping("/restore")
 	public Result<Void> restore(@RequestBody List<Long> ids) {
 		Long ownerUserId = SecurityUserUtils.getUserId();
-		fileRecycleService.restoreByIds(ids, ownerUserId, FileDeleteSourceConstants.USER_SELF);
+		List<String> deleteSources = FileDeleteSource.userRecycleSourceCodes();
+
+		fileRecycleService.restoreByIds(ids, ownerUserId, deleteSources);
 		return Result.success();
 	}
 
@@ -83,7 +86,9 @@ public class PersonalFileRecycleController {
 	@DeleteMapping("/purge")
 	public Result<Void> purge(@RequestBody List<Long> ids) {
 		Long ownerUserId = SecurityUserUtils.getUserId();
-		fileRecycleService.purgeByIds(ids, ownerUserId, FileDeleteSourceConstants.USER_SELF);
+		List<String> deleteSources = FileDeleteSource.userRecycleSourceCodes();
+
+		fileRecycleService.purgeByIds(ids, ownerUserId, deleteSources);
 		return Result.success();
 	}
 

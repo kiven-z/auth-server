@@ -10,6 +10,9 @@ import lombok.experimental.UtilityClass;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 文件对象键工具。
@@ -28,6 +31,8 @@ public class FileObjectKeyUtil {
 	 * 私有对象键前缀
 	 */
 	public static final String PRIVATE_PREFIX = "private/";
+
+	private static final Pattern OBJECT_KEY_PATH = Pattern.compile("/(?:public|private)/");
 
 	/**
 	 * 生成对象键，避免同名覆盖。
@@ -63,7 +68,28 @@ public class FileObjectKeyUtil {
 		if (objectKey.startsWith(PRIVATE_PREFIX)) {
 			return targetPrefix + objectKey.substring(PRIVATE_PREFIX.length());
 		}
+		// 历史无前缀：直接补目标可见性前缀
+		if (CharSequenceUtil.isNotBlank(objectKey)) {
+			return targetPrefix + objectKey;
+		}
 		throw new SystemBusinessException(SystemCommonResultCode.OPERATION_FAILED, "objectKey");
+	}
+
+	/**
+	 * 从 URL 路径中提取 object_key
+	 * @param url 文件访问 URL
+	 * @return 对象键；无法解析时返回空
+	 */
+	public static Optional<String> resolveObjectKeyFromUrl(String url) {
+		String normalizedUrl = CharSequenceUtil.trim(url);
+		if (CharSequenceUtil.isBlank(normalizedUrl)) {
+			return Optional.empty();
+		}
+		Matcher matcher = OBJECT_KEY_PATH.matcher(normalizedUrl);
+		if (!matcher.find()) {
+			return Optional.empty();
+		}
+		return Optional.of(normalizedUrl.substring(matcher.start() + 1));
 	}
 
 }

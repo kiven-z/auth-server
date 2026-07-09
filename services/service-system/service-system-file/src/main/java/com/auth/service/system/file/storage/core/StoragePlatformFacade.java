@@ -1,6 +1,6 @@
 package com.auth.service.system.file.storage.core;
 
-import com.auth.module.file.api.enums.StoragePlatformEnum;
+import com.auth.module.file.api.model.enums.StoragePlatformEnum;
 import com.auth.service.system.file.storage.core.bucket.StorageBucketInitializer;
 import com.auth.service.system.file.storage.core.capability.StoragePlatformCapability;
 import com.auth.service.system.file.storage.core.classifier.StorageExceptionClassifier;

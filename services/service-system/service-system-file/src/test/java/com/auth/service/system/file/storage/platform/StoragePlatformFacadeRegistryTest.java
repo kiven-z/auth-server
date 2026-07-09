@@ -1,6 +1,6 @@
 package com.auth.service.system.file.storage.platform;
 
-import com.auth.module.file.api.enums.StoragePlatformEnum;
+import com.auth.module.file.api.model.enums.StoragePlatformEnum;
 import com.auth.service.system.file.exception.FileStorageException;
 import com.auth.service.system.file.exception.FileUploadResultCode;
 import com.auth.service.system.file.storage.core.StoragePlatformFacade;

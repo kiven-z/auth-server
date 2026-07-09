@@ -1,7 +1,7 @@
 package com.auth.service.system.file.service.impl;
 
-import com.auth.module.file.api.constants.FileDeleteSourceConstants;
-import com.auth.module.file.api.enums.StoragePlatformEnum;
+import com.auth.module.file.api.model.enums.FileDeleteSource;
+import com.auth.module.file.api.model.enums.StoragePlatformEnum;
 import com.auth.module.file.export.delivery.FileDelivery;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.service.system.common.exception.SystemBusinessException;
@@ -14,7 +14,9 @@ import com.auth.service.system.file.service.FileRecordService;
 import com.auth.service.system.file.storage.core.StoragePlatformFacade;
 import com.auth.service.system.file.storage.core.StoragePlatformFacadeRegistry;
 import com.auth.service.system.file.storage.core.provider.FileStorageProvider;
+import com.auth.service.system.file.support.FileRecordDeletionSupport;
 import com.baomidou.mybatisplus.extension.repository.CrudRepository;
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -66,11 +68,14 @@ class FileRecordServiceImplTest {
 	@Mock
 	private FileStorageProvider minioProvider;
 
+	@Mock
+	private FileRecordDeletionSupport fileRecordDeletionSupport;
+
 	private FileRecordServiceImpl fileRecordService;
 
 	@BeforeEach
 	void setUp() throws Exception {
-		fileRecordService = spy(new FileRecordServiceImpl(facadeRegistry));
+		fileRecordService = spy(new FileRecordServiceImpl(facadeRegistry, fileRecordDeletionSupport));
 		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(fileRecordService, fileRecordMapper);
@@ -139,8 +144,9 @@ class FileRecordServiceImplTest {
 	void deleteByIdsThrowsWhenIdsEmpty() {
 		// 验证批量删除参数为空时按参数校验规则返回异常。
 		List<Long> emptyIds = List.of();
-		assertThatThrownBy(() -> fileRecordService.deleteByIds(emptyIds, null, FileDeleteSourceConstants.ADMIN_ACTION))
-			.isInstanceOf(SystemBusinessException.class)
+		ThrowingCallable executable = () -> fileRecordService.deleteByIds(emptyIds, null,
+				FileDeleteSource.ADMIN_ACTION.getCode());
+		assertThatThrownBy(executable).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.PARAM_REQUIRED);
 		verify(fileRecordMapper, never()).selectIsDeletedByIds(anyList(), any(), any(), anyBoolean(), any());
@@ -153,8 +159,9 @@ class FileRecordServiceImplTest {
 		when(fileRecordMapper.selectIsDeletedByIds(List.of(4101L), null, null, false, null)).thenReturn(List.of());
 
 		List<Long> ids = List.of(4101L);
-		assertThatThrownBy(() -> fileRecordService.deleteByIds(ids, null, FileDeleteSourceConstants.ADMIN_ACTION))
-			.isInstanceOf(FileStorageException.class)
+		ThrowingCallable executable = () -> fileRecordService.deleteByIds(ids, null,
+				FileDeleteSource.ADMIN_ACTION.getCode());
+		assertThatThrownBy(executable).isInstanceOf(FileStorageException.class)
 			.extracting(ex -> ((FileStorageException) ex).getResultCode())
 			.isEqualTo(FileUploadResultCode.FILE_RECORD_NOT_FOUND);
 
@@ -172,8 +179,9 @@ class FileRecordServiceImplTest {
 			.thenReturn(List.of(entity));
 
 		List<Long> ids = List.of(5001L, 5002L);
-		assertThatThrownBy(() -> fileRecordService.deleteByIds(ids, 9001L, FileDeleteSourceConstants.USER_SELF))
-			.isInstanceOf(FileStorageException.class)
+		ThrowingCallable executable = () -> fileRecordService.deleteByIds(ids, 9001L,
+				FileDeleteSource.USER_SELF.getCode());
+		assertThatThrownBy(executable).isInstanceOf(FileStorageException.class)
 			.extracting(ex -> ((FileStorageException) ex).getResultCode())
 			.isEqualTo(FileUploadResultCode.FILE_RECORD_NOT_FOUND);
 
@@ -191,19 +199,13 @@ class FileRecordServiceImplTest {
 
 		try (MockedStatic<SecurityUserUtils> securityUser = mockStatic(SecurityUserUtils.class)) {
 			securityUser.when(SecurityUserUtils::getUserId).thenReturn(9001L);
-			doReturn(true).when(fileRecordService).updateBatchById(anyList());
-			fileRecordService.deleteByIds(List.of(5001L), 9001L, FileDeleteSourceConstants.USER_SELF);
+			fileRecordService.deleteByIds(List.of(5001L), 9001L, FileDeleteSource.USER_SELF.getCode());
 		}
 
 		verify(fileRecordMapper).selectIsDeletedByIds(List.of(5001L), 9001L, null, false, null);
-		verify(fileRecordService).updateBatchById(argThat(entities -> {
-			if (entities.size() != 1) {
-				return false;
-			}
-			FileRecordEntity first = entities.iterator().next();
-			return Boolean.TRUE.equals(first.getIsDeleted())
-					&& FileDeleteSourceConstants.USER_SELF.equals(first.getDeleteSource());
-		}));
+		verify(fileRecordDeletionSupport).applyDeletion(
+				argThat(entities -> entities.size() == 1 && Long.valueOf(5001L).equals(entities.get(0).getId())),
+				eq(FileDeleteSource.USER_SELF.getCode()), eq(9001L));
 	}
 
 	@Test
@@ -217,18 +219,11 @@ class FileRecordServiceImplTest {
 
 		try (MockedStatic<SecurityUserUtils> securityUser = mockStatic(SecurityUserUtils.class)) {
 			securityUser.when(SecurityUserUtils::getUserId).thenReturn(7002L);
-			doReturn(true).when(fileRecordService).updateBatchById(anyList());
-			fileRecordService.deleteByIds(List.of(5101L), null, FileDeleteSourceConstants.ADMIN_ACTION);
+			fileRecordService.deleteByIds(List.of(5101L), null, FileDeleteSource.ADMIN_ACTION.getCode());
 		}
 
-		verify(fileRecordService).updateBatchById(argThat(entities -> {
-			if (entities.size() != 1) {
-				return false;
-			}
-			FileRecordEntity first = entities.iterator().next();
-			return Long.valueOf(7002L).equals(first.getDeletedBy())
-					&& FileDeleteSourceConstants.ADMIN_ACTION.equals(first.getDeleteSource());
-		}));
+		verify(fileRecordDeletionSupport).applyDeletion(argThat(entities -> entities.size() == 1),
+				eq(FileDeleteSource.ADMIN_ACTION.getCode()), eq(7002L));
 		verify(fileRecordMapper, never()).deletePhysicallyByIds(anyList(), anyBoolean());
 	}
 
@@ -240,14 +235,11 @@ class FileRecordServiceImplTest {
 		publicFile.setIsPrivate(false);
 		when(fileRecordMapper.selectIsDeletedByIds(List.of(5201L), null, null, false, null))
 			.thenReturn(List.of(publicFile));
-		when(facadeRegistry.resolve(StoragePlatformEnum.MINIO)).thenReturn(storagePlatformFacade);
-		when(storagePlatformFacade.provider()).thenReturn(minioProvider);
 
-		fileRecordService.deleteByIds(List.of(5201L), null, FileDeleteSourceConstants.ADMIN_ACTION);
+		fileRecordService.deleteByIds(List.of(5201L), null, FileDeleteSource.ADMIN_ACTION.getCode());
 
-		verify(minioProvider).delete("public", "a.png");
-		verify(fileRecordMapper).deletePhysicallyByIds(List.of(5201L), false);
-		verify(fileRecordService, never()).updateBatchById(anyList());
+		verify(fileRecordDeletionSupport).applyDeletion(argThat(entities -> entities.size() == 1),
+				eq(FileDeleteSource.ADMIN_ACTION.getCode()), any());
 	}
 
 	@Test
@@ -259,11 +251,10 @@ class FileRecordServiceImplTest {
 		when(fileRecordMapper.selectIsDeletedByIds(List.of(5202L), null, null, false, null))
 			.thenReturn(List.of(entity));
 
-		fileRecordService.deleteByIds(List.of(5202L), null, FileDeleteSourceConstants.ADMIN_ACTION);
+		fileRecordService.deleteByIds(List.of(5202L), null, FileDeleteSource.ADMIN_ACTION.getCode());
 
-		verify(fileRecordService, never()).updateBatchById(anyList());
-		verify(fileRecordMapper, never()).deletePhysicallyByIds(anyList(), anyBoolean());
-		verify(facadeRegistry, never()).resolve(any());
+		verify(fileRecordDeletionSupport).applyDeletion(argThat(entities -> entities.size() == 1),
+				eq(FileDeleteSource.ADMIN_ACTION.getCode()), isNull());
 	}
 
 	@Test
@@ -276,25 +267,15 @@ class FileRecordServiceImplTest {
 		privateFile.setIsPrivate(true);
 		when(fileRecordMapper.selectIsDeletedByIds(Arrays.asList(5301L, 5302L), null, null, false, null))
 			.thenReturn(List.of(publicFile, privateFile));
-		when(facadeRegistry.resolve(StoragePlatformEnum.MINIO)).thenReturn(storagePlatformFacade);
-		when(storagePlatformFacade.provider()).thenReturn(minioProvider);
 
 		try (MockedStatic<SecurityUserUtils> securityUser = mockStatic(SecurityUserUtils.class)) {
 			securityUser.when(SecurityUserUtils::getUserId).thenReturn(9001L);
-			doReturn(true).when(fileRecordService).updateBatchById(anyList());
 			fileRecordService.deleteByIds(Arrays.asList(5301L, null, 5302L), null,
-					FileDeleteSourceConstants.ADMIN_ACTION);
+					FileDeleteSource.ADMIN_ACTION.getCode());
 		}
 
-		verify(minioProvider).delete("public", "a.png");
-		verify(fileRecordMapper).deletePhysicallyByIds(List.of(5301L), false);
-		verify(fileRecordService).updateBatchById(argThat(entities -> {
-			if (entities.size() != 1) {
-				return false;
-			}
-			FileRecordEntity first = entities.iterator().next();
-			return Long.valueOf(5302L).equals(first.getId());
-		}));
+		verify(fileRecordDeletionSupport).applyDeletion(argThat(entities -> entities.size() == 2),
+				eq(FileDeleteSource.ADMIN_ACTION.getCode()), eq(9001L));
 	}
 
 	@Test
@@ -366,6 +347,36 @@ class FileRecordServiceImplTest {
 
 		verify(facadeRegistry, never()).resolve(any());
 		verify(fileRecordService, never()).updateBatchById(anyList());
+	}
+
+	@Test
+	@DisplayName("updatePrivacyByIds：历史无前缀私有文件切换为公开时迁移对象并更新记录")
+	void updatePrivacyByIdsMovesLegacyPrivateKeyToPublic() {
+		// 验证历史无前缀 objectKey 在 private → public 时会补 public 前缀并迁移存储。
+		FileRecordEntity entity = buildEntity(8006L);
+		entity.setIsPrivate(true);
+		entity.setObjectKey("avatar/20260704/d58e5f1377e1454180f80a96c90bd7ec.png");
+		when(fileRecordMapper.selectIsDeletedByIds(List.of(8006L), null, null, false, null))
+			.thenReturn(List.of(entity));
+		when(facadeRegistry.resolve(StoragePlatformEnum.MINIO)).thenReturn(storagePlatformFacade);
+		when(storagePlatformFacade.provider()).thenReturn(minioProvider);
+		when(minioProvider.resolvePublicUrl("public", "public/avatar/20260704/d58e5f1377e1454180f80a96c90bd7ec.png"))
+			.thenReturn(
+					"http://192.168.3.4:9000/auth-files-dev/public/avatar/20260704/d58e5f1377e1454180f80a96c90bd7ec.png");
+		doReturn(true).when(fileRecordService).updateBatchById(anyList());
+
+		fileRecordService.updatePrivacyByIds(List.of(8006L), false, null);
+
+		verify(minioProvider).move("public", "avatar/20260704/d58e5f1377e1454180f80a96c90bd7ec.png",
+				"public/avatar/20260704/d58e5f1377e1454180f80a96c90bd7ec.png");
+		verify(fileRecordService).updateBatchById(argThat(entities -> {
+			if (entities.size() != 1) {
+				return false;
+			}
+			FileRecordEntity first = entities.iterator().next();
+			return Boolean.FALSE.equals(first.getIsPrivate())
+					&& "public/avatar/20260704/d58e5f1377e1454180f80a96c90bd7ec.png".equals(first.getObjectKey());
+		}));
 	}
 
 	@Test

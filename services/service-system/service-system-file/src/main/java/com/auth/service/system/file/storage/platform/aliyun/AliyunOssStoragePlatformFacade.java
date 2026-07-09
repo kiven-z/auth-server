@@ -1,14 +1,11 @@
 package com.auth.service.system.file.storage.platform.aliyun;
 
-import com.auth.module.file.api.enums.StoragePlatformEnum;
-import com.auth.service.system.file.storage.core.StoragePlatformFacade;
-import com.auth.service.system.file.storage.core.bucket.StorageBucketInitializer;
+import com.auth.module.file.api.model.enums.StoragePlatformEnum;
+import com.auth.service.system.file.storage.core.AbstractS3CompatibleStoragePlatformFacade;
 import com.auth.service.system.file.storage.core.capability.ImageStyleUrlCapability;
 import com.auth.service.system.file.storage.core.capability.StoragePlatformCapability;
 import com.auth.service.system.file.storage.core.classifier.StorageExceptionClassifier;
-import com.auth.service.system.file.storage.core.provider.FileStorageProvider;
 import com.auth.service.system.file.storage.core.s3.S3CompatibleFileStorageProvider;
-import com.auth.service.system.file.storage.core.validator.StoragePlatformConfigValidator;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -20,26 +17,23 @@ import java.util.Optional;
  * @author Bunny
  */
 @Component
-public class AliyunOssStoragePlatformFacade implements StoragePlatformFacade {
-
-	private final S3CompatibleFileStorageProvider fileStorageProvider;
-
-	private final AliyunOssConfigValidator configValidator;
-
-	private final AliyunOssBucketInitializer bucketInitializer;
-
-	private final StorageExceptionClassifier exceptionClassifier;
+public class AliyunOssStoragePlatformFacade extends AbstractS3CompatibleStoragePlatformFacade {
 
 	private final AliyunImageStyleUrlCapability imageStyleUrlCapability;
 
+	/**
+	 * 构造阿里云 OSS 平台门面
+	 * @param fileStorageProvider 文件存储能力
+	 * @param configValidator 平台配置校验能力
+	 * @param bucketInitializer 存储桶初始化能力
+	 * @param exceptionClassifier 存储异常分类器
+	 * @param imageStyleUrlCapability 图片样式 URL 能力
+	 */
 	public AliyunOssStoragePlatformFacade(
 			@Qualifier("aliyunOssFileStorageProvider") S3CompatibleFileStorageProvider fileStorageProvider,
 			AliyunOssConfigValidator configValidator, AliyunOssBucketInitializer bucketInitializer,
 			StorageExceptionClassifier exceptionClassifier, AliyunImageStyleUrlCapability imageStyleUrlCapability) {
-		this.fileStorageProvider = fileStorageProvider;
-		this.configValidator = configValidator;
-		this.bucketInitializer = bucketInitializer;
-		this.exceptionClassifier = exceptionClassifier;
+		super(fileStorageProvider, bucketInitializer, configValidator, exceptionClassifier);
 		this.imageStyleUrlCapability = imageStyleUrlCapability;
 	}
 
@@ -49,38 +43,6 @@ public class AliyunOssStoragePlatformFacade implements StoragePlatformFacade {
 	@Override
 	public StoragePlatformEnum platform() {
 		return StoragePlatformEnum.ALIYUN_OSS;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public FileStorageProvider provider() {
-		return fileStorageProvider;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public StorageBucketInitializer initializer() {
-		return bucketInitializer;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public StoragePlatformConfigValidator validator() {
-		return configValidator;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public StorageExceptionClassifier exceptionClassifier() {
-		return exceptionClassifier;
 	}
 
 	/**

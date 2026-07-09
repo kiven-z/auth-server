@@ -3,6 +3,8 @@ package com.auth.module.security.autoconfigure.boot.pipeline;
 import com.auth.common.ip.IpAddressService;
 import com.auth.module.security.autoconfigure.audit.operationlog.OperationLogAspect;
 import com.auth.module.security.autoconfigure.audit.operationlog.OperationLogPayloadAssembler;
+import com.auth.module.security.autoconfigure.feign.SystemSecurityIngestFeignClient;
+import com.auth.module.security.autoconfigure.service.FeignRemoteOperationLogHandler;
 import com.auth.module.security.autoconfigure.service.NoopOperationLogHandler;
 import com.auth.module.security.contract.spi.OperationLogHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,6 +28,17 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 @Configuration(proxyBeanMethods = false)
 @EnableAspectJAutoProxy
 public class OperationLogAutoConfiguration {
+
+	/**
+	 * 无本地 log_operation 访问能力时，通过 Feign 投递操作日志。
+	 */
+	@ConditionalOnBean(SystemSecurityIngestFeignClient.class)
+	@ConditionalOnMissingBean(OperationLogHandler.class)
+	@Bean
+	FeignRemoteOperationLogHandler feignRemoteOperationLogHandler(
+			SystemSecurityIngestFeignClient systemSecurityIngestFeignClient) {
+		return new FeignRemoteOperationLogHandler(systemSecurityIngestFeignClient);
+	}
 
 	/**
 	 * 空操作日志处理器

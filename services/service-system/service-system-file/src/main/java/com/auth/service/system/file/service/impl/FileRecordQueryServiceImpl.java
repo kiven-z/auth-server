@@ -1,7 +1,7 @@
 package com.auth.service.system.file.service.impl;
 
 import com.auth.common.data.model.PageResponse;
-import com.auth.module.file.api.enums.StoragePlatformEnum;
+import com.auth.module.file.api.model.enums.StoragePlatformEnum;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.file.convert.FileRecordQueryConverter;
 import com.auth.service.system.file.exception.FileStorageException;
@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
+import java.util.List;
 
 /**
  * 文件记录查询服务实现
@@ -60,9 +61,9 @@ public class FileRecordQueryServiceImpl extends ServiceImpl<FileRecordMapper, Fi
 	@Override
 	@Transactional(readOnly = true)
 	public FileRecordDetailVO getDetail(Long id, Long ownerUserId, Boolean isPrivate, boolean expectedDeleted,
-			String deleteSource) {
+			List<String> deleteSources) {
 		FileRecordEntity entity = baseMapper.selectDetailById(id, ownerUserId, isPrivate, expectedDeleted,
-				deleteSource);
+				deleteSources);
 		if (entity == null) {
 			log.warn("File record not found or unavailable: id={}, ownerUserId={}", id, ownerUserId);
 			throw new FileStorageException(FileUploadResultCode.FILE_RECORD_NOT_FOUND);

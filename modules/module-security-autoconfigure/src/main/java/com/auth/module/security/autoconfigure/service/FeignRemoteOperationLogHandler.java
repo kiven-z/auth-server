@@ -1,30 +1,27 @@
-package com.auth.service.example.listener;
+package com.auth.module.security.autoconfigure.service;
 
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.common.core.model.response.Result;
+import com.auth.module.security.autoconfigure.feign.SystemSecurityIngestFeignClient;
 import com.auth.module.security.contract.dto.OperationLogIngestRequest;
 import com.auth.module.security.contract.event.OperationLogPayloadEvent;
 import com.auth.module.security.contract.spi.OperationLogHandler;
-import com.auth.service.example.feign.SystemSecurityIngestFeignClient;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Component;
 
 import static com.auth.common.web.resttemplate.FeignUtil.isSuccess;
 
 /**
- * 将操作日志负载异步委托给 service-system 通过 Feign 上报（没有本地 {@code log_operation} 访问权限）。
+ * 本地无 {@code log_operation} 访问能力时，通过 Feign 将操作日志投递至 service-system。
  *
  * @author Bunny
  */
 @Slf4j
-@Component
-public class RemoteOperationLogHandler implements OperationLogHandler {
+public class FeignRemoteOperationLogHandler implements OperationLogHandler {
 
 	private final SystemSecurityIngestFeignClient systemSecurityIngestFeignClient;
 
-	public RemoteOperationLogHandler(SystemSecurityIngestFeignClient systemSecurityIngestFeignClient) {
+	public FeignRemoteOperationLogHandler(SystemSecurityIngestFeignClient systemSecurityIngestFeignClient) {
 		this.systemSecurityIngestFeignClient = systemSecurityIngestFeignClient;
 	}
 

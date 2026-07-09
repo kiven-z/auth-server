@@ -1,18 +1,13 @@
 package com.auth.service.system.admin.model.form.me;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDate;
-
-import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.PastOrPresent;
-import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * 当前用户更新个人资料表单
@@ -54,9 +49,5 @@ public class MeProfileUpdateForm implements Serializable {
 
 	@Schema(title = "个人简介")
 	private String introduction;
-
-	@Schema(title = "头像 URL")
-	@Size(max = 512, message = "头像地址长度不能超过512个字符")
-	private String avatar;
 
 }

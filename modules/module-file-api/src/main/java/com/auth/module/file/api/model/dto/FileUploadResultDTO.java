@@ -1,9 +1,10 @@
-package com.auth.module.file.api.dto;
+package com.auth.module.file.api.model.dto;
 
 import com.auth.common.core.model.response.BaseResponse;
-import com.auth.module.file.api.enums.StoragePlatformEnum;
+import com.auth.module.file.api.model.enums.StoragePlatformEnum;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.io.Serial;
 
@@ -14,6 +15,7 @@ import java.io.Serial;
  */
 @Getter
 @Setter
+@ToString
 public class FileUploadResultDTO extends BaseResponse {
 
 	@Serial

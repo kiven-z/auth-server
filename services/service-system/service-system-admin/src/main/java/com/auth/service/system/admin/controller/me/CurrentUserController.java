@@ -1,7 +1,5 @@
 package com.auth.service.system.admin.controller.me;
 
-import java.util.List;
-
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.common.ip.IpAddressService;
@@ -10,6 +8,7 @@ import com.auth.module.security.autoconfigure.annotation.AuthenticatedApi;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
+import com.auth.service.system.admin.model.form.me.MeAvatarUpdateForm;
 import com.auth.service.system.admin.model.form.me.MeProfileUpdateForm;
 import com.auth.service.system.admin.model.form.user.SysUserChangePasswordForm;
 import com.auth.service.system.admin.model.query.me.MeLoginLogPageQuery;
@@ -26,14 +25,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
@@ -65,6 +59,15 @@ public class CurrentUserController {
 	@PutMapping("/profile")
 	public Result<String> updateMyProfile(@Valid @RequestBody MeProfileUpdateForm form) {
 		currentUserProfileService.updateMyProfile(form);
+		return Result.success(null, OPERATION_SUCCESS.getMessage());
+	}
+
+	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
+	@Operation(summary = "当前用户更新头像")
+	@PutMapping("/avatar")
+	public Result<String> updateMyAvatar(@Valid @RequestBody MeAvatarUpdateForm form) {
+		currentUserProfileService.updateMyAvatar(form);
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 

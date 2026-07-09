@@ -1,8 +1,8 @@
 package com.auth.service.system.file.service.impl;
 
 import com.auth.common.data.model.PageResponse;
-import com.auth.module.file.api.constants.FileDeleteSourceConstants;
-import com.auth.module.file.api.enums.StoragePlatformEnum;
+import com.auth.module.file.api.model.enums.FileDeleteSource;
+import com.auth.module.file.api.model.enums.StoragePlatformEnum;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.file.exception.FileStorageException;
 import com.auth.service.system.file.exception.FileUploadResultCode;
@@ -29,7 +29,8 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link FileRecordQueryServiceImpl} 单元测试。
@@ -88,18 +89,18 @@ class FileRecordQueryServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("getPage：个人回收站分页透传 USER_SELF")
+	@DisplayName("getPage：个人回收站分页透传用户可见删除来源")
 	void getPageAppliesPersonalRecycleScope() {
 		// 验证个人回收站会限制删除来源与归属用户。
 		FileRecordPageQuery query = buildBaseQuery();
 		query.setOwnerUserId(9001L);
-		query.setDeleteSource(FileDeleteSourceConstants.USER_SELF);
+		query.setDeleteSources(FileDeleteSource.userRecycleSourceCodes());
 		mockPageResult(query, true);
 
 		fileRecordQueryService.getPage(query, true);
 
 		verify(fileRecordMapper).selectListByPage(any(),
-				argThat(param -> FileDeleteSourceConstants.USER_SELF.equals(param.getDeleteSource())
+				argThat(param -> FileDeleteSource.userRecycleSourceCodes().equals(param.getDeleteSources())
 						&& Long.valueOf(9001L).equals(param.getOwnerUserId())),
 				eq(true));
 	}
@@ -170,19 +171,19 @@ class FileRecordQueryServiceImplTest {
 	@Test
 	@DisplayName("getDetail：个人回收站透传删除范围条件")
 	void getDetailPassesPersonalRecycleScopeToMapper() {
-		// 验证个人回收站详情会限制私有、已删除与 USER_SELF 来源。
+		// 验证个人回收站详情会限制私有、已删除与用户可见删除来源。
 		FileRecordEntity entity = buildDetailEntity(4001L);
 		entity.setIsPrivate(true);
 		entity.setIsDeleted(true);
-		entity.setDeleteSource(FileDeleteSourceConstants.USER_SELF);
-		when(fileRecordMapper.selectDetailById(4001L, 9001L, true, true, FileDeleteSourceConstants.USER_SELF))
+		entity.setDeleteSource(FileDeleteSource.USER_SELF.getCode());
+		when(fileRecordMapper.selectDetailById(4001L, 9001L, true, true, FileDeleteSource.userRecycleSourceCodes()))
 			.thenReturn(entity);
 		when(fileUrlSigner.sign(anyString(), anyString(), anyString(), any()))
 			.thenReturn("https://signed.example/a.png");
 
-		fileRecordQueryService.getDetail(4001L, 9001L, true, true, FileDeleteSourceConstants.USER_SELF);
+		fileRecordQueryService.getDetail(4001L, 9001L, true, true, FileDeleteSource.userRecycleSourceCodes());
 
-		verify(fileRecordMapper).selectDetailById(4001L, 9001L, true, true, FileDeleteSourceConstants.USER_SELF);
+		verify(fileRecordMapper).selectDetailById(4001L, 9001L, true, true, FileDeleteSource.userRecycleSourceCodes());
 	}
 
 	private FileRecordPageQuery buildBaseQuery() {

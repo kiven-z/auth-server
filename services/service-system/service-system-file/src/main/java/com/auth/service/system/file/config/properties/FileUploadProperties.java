@@ -1,6 +1,6 @@
 package com.auth.service.system.file.config.properties;
 
-import com.auth.module.file.api.enums.StoragePlatformEnum;
+import com.auth.module.file.api.model.enums.StoragePlatformEnum;
 import com.auth.service.system.file.config.properties.platform.AliyunOssStorageProperties;
 import com.auth.service.system.file.config.properties.platform.MinioStorageProperties;
 import jakarta.validation.constraints.Min;

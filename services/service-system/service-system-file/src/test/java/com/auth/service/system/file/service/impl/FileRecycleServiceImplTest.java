@@ -1,7 +1,7 @@
 package com.auth.service.system.file.service.impl;
 
-import com.auth.module.file.api.constants.FileDeleteSourceConstants;
-import com.auth.module.file.api.enums.StoragePlatformEnum;
+import com.auth.module.file.api.model.enums.FileDeleteSource;
+import com.auth.module.file.api.model.enums.StoragePlatformEnum;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
@@ -13,6 +13,7 @@ import com.auth.service.system.file.storage.core.StoragePlatformFacade;
 import com.auth.service.system.file.storage.core.StoragePlatformFacadeRegistry;
 import com.auth.service.system.file.storage.core.provider.FileStorageProvider;
 import com.baomidou.mybatisplus.extension.repository.CrudRepository;
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -78,21 +79,21 @@ class FileRecycleServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("restoreByIds：个人恢复透传归属与 USER_SELF 来源")
+	@DisplayName("restoreByIds：个人恢复透传归属与用户可见删除来源")
 	void restoreByIdsPassesPersonalScopeToMapper() {
-		// 验证个人恢复会把 ownerUserId 与 deleteSource 透传给查询。
+		// 验证个人恢复会把 ownerUserId 与 deleteSources 透传给查询。
 		FileRecordEntity deleted = buildDeletedEntity(8002L);
 		when(fileRecordMapper.selectIsDeletedByIds(List.of(8002L), 9001L, true, true,
-				FileDeleteSourceConstants.USER_SELF))
+				FileDeleteSource.userRecycleSourceCodes()))
 			.thenReturn(List.of(deleted));
 
 		try (MockedStatic<SecurityUserUtils> securityUser = mockStatic(SecurityUserUtils.class)) {
 			securityUser.when(SecurityUserUtils::getUserId).thenReturn(9001L);
-			fileRecycleService.restoreByIds(List.of(8002L), 9001L, FileDeleteSourceConstants.USER_SELF);
+			fileRecycleService.restoreByIds(List.of(8002L), 9001L, FileDeleteSource.userRecycleSourceCodes());
 		}
 
 		verify(fileRecordMapper).selectIsDeletedByIds(List.of(8002L), 9001L, true, true,
-				FileDeleteSourceConstants.USER_SELF);
+				FileDeleteSource.userRecycleSourceCodes());
 		verify(fileRecordMapper).restoreByIds(List.of(8002L), 9001L);
 	}
 
@@ -176,12 +177,13 @@ class FileRecycleServiceImplTest {
 	void purgeByIdsThrowsWhenNoRecordsMatched() {
 		// 验证不存在的 ID 会按记录不存在处理。
 		when(fileRecordMapper.selectIsDeletedByIds(List.of(6101L), 9001L, true, true,
-				FileDeleteSourceConstants.USER_SELF))
+				FileDeleteSource.userRecycleSourceCodes()))
 			.thenReturn(List.of());
 
 		List<Long> ids = List.of(6101L);
-		assertThatThrownBy(() -> fileRecycleService.purgeByIds(ids, 9001L, FileDeleteSourceConstants.USER_SELF))
-			.isInstanceOf(FileStorageException.class)
+		ThrowingCallable executable = () -> fileRecycleService.purgeByIds(ids, 9001L,
+				FileDeleteSource.userRecycleSourceCodes());
+		assertThatThrownBy(executable).isInstanceOf(FileStorageException.class)
 			.extracting(ex -> ((FileStorageException) ex).getResultCode())
 			.isEqualTo(FileUploadResultCode.FILE_RECORD_NOT_FOUND);
 
@@ -224,12 +226,13 @@ class FileRecycleServiceImplTest {
 	void purgeByIdsThrowsWhenRecordsMissing() {
 		// 验证个人彻底删除未命中记录时按记录不存在处理。
 		when(fileRecordMapper.selectIsDeletedByIds(List.of(8401L), 9002L, true, true,
-				FileDeleteSourceConstants.USER_SELF))
+				FileDeleteSource.userRecycleSourceCodes()))
 			.thenReturn(List.of());
 
 		List<Long> ids = List.of(8401L);
-		assertThatThrownBy(() -> fileRecycleService.purgeByIds(ids, 9002L, FileDeleteSourceConstants.USER_SELF))
-			.isInstanceOf(FileStorageException.class)
+		ThrowingCallable executable = () -> fileRecycleService.purgeByIds(ids, 9002L,
+				FileDeleteSource.userRecycleSourceCodes());
+		assertThatThrownBy(executable).isInstanceOf(FileStorageException.class)
 			.extracting(ex -> ((FileStorageException) ex).getResultCode())
 			.isEqualTo(FileUploadResultCode.FILE_RECORD_NOT_FOUND);
 		verify(facadeRegistry, never()).resolve(any());
@@ -244,7 +247,7 @@ class FileRecycleServiceImplTest {
 		entity.setObjectKey("a.png");
 		entity.setCreateUser(1L);
 		entity.setIsPrivate(true);
-		entity.setDeleteSource(FileDeleteSourceConstants.USER_SELF);
+		entity.setDeleteSource(FileDeleteSource.USER_SELF.getCode());
 		entity.setIsDeleted(true);
 		return entity;
 	}

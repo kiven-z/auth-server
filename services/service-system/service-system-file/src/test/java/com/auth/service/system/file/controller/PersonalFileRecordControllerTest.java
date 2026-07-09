@@ -1,6 +1,6 @@
 package com.auth.service.system.file.controller;
 
-import com.auth.module.file.api.constants.FileDeleteSourceConstants;
+import com.auth.module.file.api.model.enums.FileDeleteSource;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.service.system.file.service.FileRecordQueryService;
 import com.auth.service.system.file.service.FileRecordService;
@@ -44,7 +44,7 @@ class PersonalFileRecordControllerTest {
 			controller.delete(ids);
 		}
 
-		verify(fileRecordService).deleteByIds(ids, 8001L, FileDeleteSourceConstants.USER_SELF);
+		verify(fileRecordService).deleteByIds(ids, 8001L, FileDeleteSource.USER_SELF.getCode());
 	}
 
 }

@@ -7,6 +7,8 @@ import com.auth.service.system.file.model.vo.FileRecordDetailVO;
 import com.auth.service.system.file.model.vo.FileRecordPageVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.List;
+
 /**
  * 文件记录查询服务
  *
@@ -28,10 +30,10 @@ public interface FileRecordQueryService extends IService<FileRecordEntity> {
 	 * @param ownerUserId 归属用户ID
 	 * @param isPrivate 是否私有文件
 	 * @param expectedDeleted 是否预期删除
-	 * @param deleteSource 删除来源
+	 * @param deleteSources 删除来源集合，非空时按 IN 过滤
 	 * @return 文件记录详情
 	 */
 	FileRecordDetailVO getDetail(Long id, Long ownerUserId, Boolean isPrivate, boolean expectedDeleted,
-			String deleteSource);
+			List<String> deleteSources);
 
 }

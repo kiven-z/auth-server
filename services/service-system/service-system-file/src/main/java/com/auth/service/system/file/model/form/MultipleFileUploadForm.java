@@ -1,6 +1,6 @@
 package com.auth.service.system.file.model.form;
 
-import com.auth.module.file.api.dto.FileUploadMetadata;
+import com.auth.module.file.api.model.dto.FileUploadMetadata;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;

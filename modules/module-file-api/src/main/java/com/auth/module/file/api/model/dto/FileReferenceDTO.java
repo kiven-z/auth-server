@@ -1,13 +1,13 @@
-package com.auth.module.file.api.dto;
+package com.auth.module.file.api.model.dto;
 
-import java.io.Serial;
-import java.io.Serializable;
-
-import com.auth.module.file.api.enums.StoragePlatformEnum;
+import com.auth.module.file.api.model.enums.StoragePlatformEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * 文件引用（跨模块契约）

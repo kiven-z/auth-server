@@ -1,17 +1,20 @@
 package com.auth.service.system.admin.service.me.impl;
 
-import java.time.LocalDate;
-import java.util.List;
-
+import com.auth.common.core.model.response.Result;
+import com.auth.module.file.api.feign.SystemFileGovernanceFeignClient;
+import com.auth.module.file.api.model.request.OwnedFileAssertByUrlRequest;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.system.admin.mapper.user.SysUserMapper;
+import com.auth.service.system.admin.model.form.me.MeAvatarUpdateForm;
 import com.auth.service.system.admin.model.form.me.MeProfileUpdateForm;
+import com.auth.service.system.admin.support.me.OldAvatarCleanupTrigger;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.UserSessionRevocationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.baomidou.mybatisplus.extension.repository.CrudRepository;
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -21,16 +24,16 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.time.LocalDate;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link CurrentUserProfileServiceImpl} 单元测试
@@ -49,6 +52,12 @@ class CurrentUserProfileServiceImplTest {
 
 	@Mock
 	private UserSessionRevocationTrigger userSessionRevocationTrigger;
+
+	@Mock
+	private SystemFileGovernanceFeignClient systemFileGovernanceFeignClient;
+
+	@Mock
+	private OldAvatarCleanupTrigger oldAvatarCleanupTrigger;
 
 	@InjectMocks
 	private CurrentUserProfileServiceImpl currentUserProfileService;
@@ -69,6 +78,12 @@ class CurrentUserProfileServiceImplTest {
 		form.setEmail("old@example.com");
 		form.setPhone("13800000000");
 		form.setGender(1);
+		return form;
+	}
+
+	private static MeAvatarUpdateForm buildAvatarForm(String avatar) {
+		MeAvatarUpdateForm form = new MeAvatarUpdateForm();
+		form.setAvatar(avatar);
 		return form;
 	}
 
@@ -94,7 +109,6 @@ class CurrentUserProfileServiceImplTest {
 		MeProfileUpdateForm form = buildForm();
 		form.setNickname("New Nick");
 		form.setIntroduction("New intro");
-		form.setAvatar("https://cdn.example.com/new.png");
 		form.setBirthday(LocalDate.of(1995, 6, 15));
 
 		when(userReferenceChecker.getExistingActive(USER_ID)).thenReturn(existing);
@@ -112,7 +126,7 @@ class CurrentUserProfileServiceImplTest {
 		assertThat(updated.getGender()).isEqualTo(form.getGender());
 		assertThat(updated.getBirthday()).isEqualTo(form.getBirthday());
 		assertThat(updated.getIntroduction()).isEqualTo("New intro");
-		assertThat(updated.getAvatar()).isEqualTo("https://cdn.example.com/new.png");
+		assertThat(updated.getAvatar()).isNull();
 		assertThat(updated.getAge())
 			.isEqualTo(java.time.Period.between(form.getBirthday(), LocalDate.now()).getYears());
 		verify(userSessionRevocationTrigger, never()).revokeAllSessionsAfterCommit(any());
@@ -186,6 +200,63 @@ class CurrentUserProfileServiceImplTest {
 		currentUserProfileService.updateMyProfile(form);
 
 		verify(userSessionRevocationTrigger, never()).revokeAllSessionsAfterCommit(any());
+	}
+
+	@Test
+	@DisplayName("updateMyAvatar：校验归属后更新头像并触发旧头像清理")
+	void updateMyAvatar_updatesAvatarAndTriggersCleanup() {
+		UserEntity existing = existingUser();
+		String oldAvatar = "https://cdn.example.com/public/avatar/old.png";
+		existing.setAvatar(oldAvatar);
+		String newAvatar = "https://cdn.example.com/public/avatar/new.png";
+
+		when(systemFileGovernanceFeignClient.verifyOwnership(any(OwnedFileAssertByUrlRequest.class)))
+			.thenReturn(Result.success());
+		when(userReferenceChecker.getExistingActive(USER_ID)).thenReturn(existing);
+		when(sysUserMapper.updateById(any(UserEntity.class))).thenReturn(1);
+
+		currentUserProfileService.updateMyAvatar(buildAvatarForm(newAvatar));
+
+		ArgumentCaptor<UserEntity> captor = ArgumentCaptor.forClass(UserEntity.class);
+		verify(sysUserMapper).updateById(captor.capture());
+		assertThat(captor.getValue().getAvatar()).isEqualTo(newAvatar);
+
+		verify(oldAvatarCleanupTrigger).cleanupAfterCommit(USER_ID, oldAvatar);
+	}
+
+	@Test
+	@DisplayName("updateMyAvatar：新旧头像相同时跳过更新")
+	void updateMyAvatar_sameAvatarSkipsUpdate() {
+		String avatar = "https://cdn.example.com/public/avatar/same.png";
+		UserEntity existing = existingUser();
+		existing.setAvatar(avatar);
+
+		when(userReferenceChecker.getExistingActive(USER_ID)).thenReturn(existing);
+
+		currentUserProfileService.updateMyAvatar(buildAvatarForm(avatar));
+
+		verify(sysUserMapper, never()).updateById(any(UserEntity.class));
+		verify(oldAvatarCleanupTrigger, never()).cleanupAfterCommit(any(), any());
+	}
+
+	@Test
+	@DisplayName("updateMyAvatar：归属校验失败时抛出业务异常")
+	void updateMyAvatar_assertFailureThrows() {
+		UserEntity existing = existingUser();
+		existing.setAvatar("https://cdn.example.com/public/avatar/old.png");
+
+		when(userReferenceChecker.getExistingActive(USER_ID)).thenReturn(existing);
+		when(systemFileGovernanceFeignClient.verifyOwnership(any(OwnedFileAssertByUrlRequest.class)))
+			.thenReturn(Result.error("file not owned"));
+
+		ThrowingCallable executable = () -> currentUserProfileService
+			.updateMyAvatar(buildAvatarForm("https://cdn.example.com/public/avatar/new.png"));
+		assertThatThrownBy(executable).isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemCommonResultCode.OPERATION_FAILED);
+
+		verify(sysUserMapper, never()).updateById(any(UserEntity.class));
+		verify(oldAvatarCleanupTrigger, never()).cleanupAfterCommit(any(), any());
 	}
 
 }

@@ -1,6 +1,6 @@
 package com.auth.service.system.file.model.value;
 
-import com.auth.module.file.api.enums.StoragePlatformEnum;
+import com.auth.module.file.api.model.enums.StoragePlatformEnum;
 import lombok.Builder;
 import lombok.Value;
 import org.springframework.web.multipart.MultipartFile;

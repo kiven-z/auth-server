@@ -1,6 +1,6 @@
 package com.auth.service.system.file.config;
 
-import com.auth.module.file.api.enums.StoragePlatformEnum;
+import com.auth.module.file.api.model.enums.StoragePlatformEnum;
 import com.auth.service.system.file.storage.core.classifier.StorageExceptionClassifier;
 import com.auth.service.system.file.storage.core.s3.S3ClientManager;
 import com.auth.service.system.file.storage.core.s3.S3CompatibleFileStorageProvider;

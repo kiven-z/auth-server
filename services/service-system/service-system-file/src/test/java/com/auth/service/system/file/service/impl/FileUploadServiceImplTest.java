@@ -1,8 +1,8 @@
 package com.auth.service.system.file.service.impl;
 
-import com.auth.module.file.api.dto.FileUploadResultDTO;
-import com.auth.module.file.api.enums.FileUploadMode;
-import com.auth.module.file.api.enums.StoragePlatformEnum;
+import com.auth.module.file.api.model.dto.FileUploadResultDTO;
+import com.auth.module.file.api.model.enums.FileUploadMode;
+import com.auth.module.file.api.model.enums.StoragePlatformEnum;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.file.config.properties.FileUploadProperties;
@@ -183,16 +183,22 @@ class FileUploadServiceImplTest {
 		when(facadeRegistry.resolve(StoragePlatformEnum.MINIO)).thenReturn(storagePlatformFacade);
 		when(storagePlatformFacade.provider()).thenReturn(fileStorageProvider);
 		when(fileStorageProvider.upload(any(FileUploadCommand.class))).thenReturn(storedFile);
-		when(fileRecordMapper.insert(any(FileRecordEntity.class))).thenAnswer(invocation -> {
+		doAnswer(invocation -> {
 			FileRecordEntity entity = invocation.getArgument(0);
 			entity.setId(1001L);
-			return 1;
-		});
+			return true;
+		}).doAnswer(invocation -> {
+			FileRecordEntity entity = invocation.getArgument(0);
+			entity.setId(1002L);
+			return true;
+		}).when(fileUploadService).save(any(FileRecordEntity.class));
 
 		List<FileUploadResultDTO> responses = fileUploadService.uploadMultiple(form);
 
-		verify(fileRecordMapper, times(2)).insert(any(FileRecordEntity.class));
+		verify(fileUploadService, times(2)).save(any(FileRecordEntity.class));
 		assertThat(responses).hasSize(2);
+		assertThat(responses.get(0).getId()).isEqualTo(1001L);
+		assertThat(responses.get(1).getId()).isEqualTo(1002L);
 		verify(fileStorageProvider, times(2)).upload(any(FileUploadCommand.class));
 	}
 
@@ -234,7 +240,7 @@ class FileUploadServiceImplTest {
 		when(facadeRegistry.resolve(StoragePlatformEnum.ALIYUN_OSS)).thenReturn(storagePlatformFacade);
 		when(storagePlatformFacade.provider()).thenReturn(fileStorageProvider);
 		when(fileStorageProvider.upload(any(FileUploadCommand.class))).thenReturn(storedFile);
-		when(fileRecordMapper.insert(any(FileRecordEntity.class))).thenReturn(1);
+		doReturn(true).when(fileUploadService).save(any(FileRecordEntity.class));
 
 		fileUploadService.uploadMultiple(form);
 

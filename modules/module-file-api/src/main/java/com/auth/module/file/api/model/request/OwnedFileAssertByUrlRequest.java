@@ -1,0 +1,45 @@
+package com.auth.module.file.api.model.request;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.io.Serial;
+import java.io.Serializable;
+
+/**
+ * 校验 URL 对应文件是否归属指定用户
+ *
+ * @author Bunny
+ */
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class OwnedFileAssertByUrlRequest implements Serializable {
+
+	@Serial
+	private static final long serialVersionUID = 1L;
+
+	/**
+	 * 文件访问 URL
+	 */
+	@NotBlank(message = "url 不能为空")
+	private String url;
+
+	/**
+	 * 归属用户 ID
+	 */
+	@NotNull(message = "ownerUserId 不能为空")
+	private Long ownerUserId;
+
+	/**
+	 * 业务类型
+	 */
+	@NotBlank(message = "bizType 不能为空")
+	private String bizType;
+
+}

@@ -38,14 +38,14 @@ public class FileRecycleServiceImpl extends ServiceImpl<FileRecordMapper, FileRe
 	 */
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public void restoreByIds(List<Long> ids, Long ownerUserId, String deleteSource) {
+	public void restoreByIds(List<Long> ids, Long ownerUserId, List<String> deleteSources) {
 		ids = CollUtil.emptyIfNull(ids).stream().filter(Objects::nonNull).distinct().toList();
 		if (ids.isEmpty()) {
 			throw new SystemBusinessException(SystemCommonResultCode.PARAM_REQUIRED, "ids");
 		}
 
 		// 私有文件才可以被回收
-		List<FileRecordEntity> entities = baseMapper.selectIsDeletedByIds(ids, ownerUserId, true, true, deleteSource);
+		List<FileRecordEntity> entities = baseMapper.selectIsDeletedByIds(ids, ownerUserId, true, true, deleteSources);
 		if (CollUtil.isEmpty(entities) || entities.size() != ids.size()) {
 			log.warn("File record not found or unavailable: ids={}", ids);
 			throw new FileStorageException(FileUploadResultCode.FILE_RECORD_NOT_FOUND);
@@ -60,12 +60,12 @@ public class FileRecycleServiceImpl extends ServiceImpl<FileRecordMapper, FileRe
 	 */
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public void purgeByIds(List<Long> ids, Long ownerUserId, String deleteSource) {
+	public void purgeByIds(List<Long> ids, Long ownerUserId, List<String> deleteSources) {
 		ids = CollUtil.emptyIfNull(ids).stream().filter(Objects::nonNull).distinct().toList();
 		if (ids.isEmpty()) {
 			throw new SystemBusinessException(SystemCommonResultCode.PARAM_REQUIRED, "ids");
 		}
-		List<FileRecordEntity> entities = baseMapper.selectIsDeletedByIds(ids, ownerUserId, true, true, deleteSource);
+		List<FileRecordEntity> entities = baseMapper.selectIsDeletedByIds(ids, ownerUserId, true, true, deleteSources);
 		if (CollUtil.isEmpty(entities) || entities.size() != ids.size()) {
 			log.warn("File record not found or unavailable(purgeByIds): ids={}", ids);
 			throw new FileStorageException(FileUploadResultCode.FILE_RECORD_NOT_FOUND);

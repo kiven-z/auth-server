@@ -1,7 +1,7 @@
 package com.auth.service.system.file.storage.core.s3;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import com.auth.module.file.api.enums.StoragePlatformEnum;
+import com.auth.module.file.api.model.enums.StoragePlatformEnum;
 import com.auth.service.system.file.config.properties.S3PlatformProfile;
 import com.auth.service.system.file.exception.FileStorageException;
 import com.auth.service.system.file.exception.FileUploadResultCode;

@@ -1,11 +1,10 @@
 package com.auth.service.system.file.service.impl;
 
-import com.auth.module.file.api.dto.FileUploadMetadata;
-import com.auth.module.file.api.dto.FileUploadResultDTO;
-import com.auth.module.file.api.enums.FileBizType;
-import com.auth.module.file.api.enums.FileBizType.ResolvedVisibility;
-import com.auth.module.file.api.enums.FileUploadMode;
-import com.auth.module.file.api.enums.StoragePlatformEnum;
+import com.auth.module.file.api.model.dto.FileUploadMetadata;
+import com.auth.module.file.api.model.dto.FileUploadResultDTO;
+import com.auth.module.file.api.model.enums.FileBizType;
+import com.auth.module.file.api.model.enums.FileUploadMode;
+import com.auth.module.file.api.model.enums.StoragePlatformEnum;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.file.config.properties.FileUploadProperties;
@@ -66,7 +65,7 @@ public class FileUploadServiceImpl extends ServiceImpl<FileRecordMapper, FileRec
 			.map(file -> buildUploadedEntity(file, form))
 			.toList();
 
-		persistEntities(entities);
+		entities.forEach(this::save);
 		return entities.stream().map(FileUploadConverter.INSTANCE::toResultDTO).toList();
 	}
 
@@ -86,10 +85,10 @@ public class FileUploadServiceImpl extends ServiceImpl<FileRecordMapper, FileRec
 		StoragePlatformEnum platform = StoragePlatformEnum.fromNullable(storagePlatform);
 		platform = Objects.requireNonNullElse(platform, fileUploadProperties.getDefaultPlatform());
 
-		// 2. 解析业务类型
-		ResolvedVisibility visibility = FileBizType.resolveVisibility(metadata.getBizType(), metadata.getIsPrivate());
-		String bizTypeCode = visibility.bizTypeCode();
-		boolean isPrivate = visibility.isPrivate();
+		// 2. 解析业务类型与可见性
+		FileBizType bizType = FileBizType.require(metadata.getBizType());
+		String bizTypeCode = bizType.getCode();
+		boolean isPrivate = bizType.getVisibilityRule().resolve(metadata.getIsPrivate());
 
 		// 3. 上传文件
 		FileStorageProvider provider = facadeRegistry.resolve(platform).provider();
@@ -118,14 +117,6 @@ public class FileUploadServiceImpl extends ServiceImpl<FileRecordMapper, FileRec
 		entity.setIsPrivate(isPrivate);
 		entity.setUploadMode(FileUploadMode.SIMPLE.getCode());
 		return entity;
-	}
-
-	/**
-	 * 在当前事务内批量插入文件记录，避免通过 {@code this} 调用带 {@link Transactional} 的 {@code saveBatch}。
-	 * @param entities 待落库实体
-	 */
-	private void persistEntities(List<FileRecordEntity> entities) {
-		entities.forEach(getBaseMapper()::insert);
 	}
 
 }

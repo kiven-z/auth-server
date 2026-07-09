@@ -1,5 +1,6 @@
 package com.auth.module.file.api.enums;
 
+import com.auth.module.file.api.model.enums.StoragePlatformEnum;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

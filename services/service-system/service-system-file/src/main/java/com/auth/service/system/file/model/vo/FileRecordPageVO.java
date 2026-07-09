@@ -1,7 +1,7 @@
 package com.auth.service.system.file.model.vo;
 
 import com.auth.common.core.model.response.BaseResponse;
-import com.auth.module.file.api.enums.StoragePlatformEnum;
+import com.auth.module.file.api.model.enums.StoragePlatformEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

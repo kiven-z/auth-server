@@ -1,6 +1,6 @@
 package com.auth.service.system.file.controller;
 
-import com.auth.module.file.api.constants.FileDeleteSourceConstants;
+import com.auth.module.file.api.model.enums.FileDeleteSource;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.service.system.file.service.FileRecycleService;
 import org.junit.jupiter.api.DisplayName;
@@ -28,9 +28,9 @@ class PersonalFileRecycleControllerTest {
 	private FileRecycleService fileRecycleService;
 
 	@Test
-	@DisplayName("restore：个人端透传归属用户与 USER_SELF 来源")
-	void restorePassesOwnerUserIdAndUserSelfDeleteSource() {
-		// 验证个人端恢复会限制归属用户与删除来源。
+	@DisplayName("restore：个人端透传归属用户与用户可见删除来源")
+	void restorePassesOwnerUserIdAndUserRecycleSources() {
+		// 验证个人端恢复会限制归属用户与用户回收站可见来源。
 		PersonalFileRecycleController controller = new PersonalFileRecycleController(null, fileRecycleService);
 		List<Long> ids = List.of(9201L);
 		try (MockedStatic<SecurityUserUtils> securityUser = mockStatic(SecurityUserUtils.class)) {
@@ -39,13 +39,13 @@ class PersonalFileRecycleControllerTest {
 			controller.restore(ids);
 		}
 
-		verify(fileRecycleService).restoreByIds(ids, 8001L, FileDeleteSourceConstants.USER_SELF);
+		verify(fileRecycleService).restoreByIds(ids, 8001L, FileDeleteSource.userRecycleSourceCodes());
 	}
 
 	@Test
-	@DisplayName("purge：个人端透传归属用户与 USER_SELF 来源")
-	void purgePassesOwnerUserIdAndUserSelfDeleteSource() {
-		// 验证个人端彻底删除会限制归属用户与删除来源。
+	@DisplayName("purge：个人端透传归属用户与用户可见删除来源")
+	void purgePassesOwnerUserIdAndUserRecycleSources() {
+		// 验证个人端彻底删除会限制归属用户与用户回收站可见来源。
 		PersonalFileRecycleController controller = new PersonalFileRecycleController(null, fileRecycleService);
 		List<Long> ids = List.of(9202L);
 		try (MockedStatic<SecurityUserUtils> securityUser = mockStatic(SecurityUserUtils.class)) {
@@ -54,7 +54,7 @@ class PersonalFileRecycleControllerTest {
 			controller.purge(ids);
 		}
 
-		verify(fileRecycleService).purgeByIds(ids, 8001L, FileDeleteSourceConstants.USER_SELF);
+		verify(fileRecycleService).purgeByIds(ids, 8001L, FileDeleteSource.userRecycleSourceCodes());
 	}
 
 }

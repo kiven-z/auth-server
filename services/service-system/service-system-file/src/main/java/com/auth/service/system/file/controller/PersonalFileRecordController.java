@@ -2,7 +2,7 @@ package com.auth.service.system.file.controller;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
-import com.auth.module.file.api.constants.FileDeleteSourceConstants;
+import com.auth.module.file.api.model.enums.FileDeleteSource;
 import com.auth.module.file.export.delivery.FileDelivery;
 import com.auth.module.security.autoconfigure.annotation.AuthenticatedApi;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
@@ -82,7 +82,7 @@ public class PersonalFileRecordController {
 	@DeleteMapping()
 	public Result<Void> delete(@RequestBody List<Long> ids) {
 		Long ownerUserId = SecurityUserUtils.getUserId();
-		fileRecordService.deleteByIds(ids, ownerUserId, FileDeleteSourceConstants.USER_SELF);
+		fileRecordService.deleteByIds(ids, ownerUserId, FileDeleteSource.USER_SELF.getCode());
 		return Result.success();
 	}
 

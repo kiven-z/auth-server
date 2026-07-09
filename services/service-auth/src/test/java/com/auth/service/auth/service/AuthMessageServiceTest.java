@@ -5,7 +5,7 @@ import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.message.api.model.email.EmailChannelOptions;
 import com.auth.module.platform.persistence.model.UserEntity;
-import com.auth.service.auth.feign.SystemSecurityIngestFeignClient;
+import com.auth.module.message.api.feign.SystemMessageSendFeignClient;
 import com.auth.service.auth.mapper.UserMapper;
 import com.auth.service.auth.model.enums.AuthMessageScene;
 import com.auth.service.auth.model.enums.CredentialDimension;
@@ -41,7 +41,7 @@ class AuthMessageServiceTest {
 	private LoginLogRepository loginLogRepository;
 
 	@Mock
-	private SystemSecurityIngestFeignClient systemSecurityIngestFeignClient;
+	private SystemMessageSendFeignClient systemMessageSendFeignClient;
 
 	@Mock
 	private LoginVerificationCodeStore loginVerificationCodeStore;
@@ -56,7 +56,7 @@ class AuthMessageServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		authMessageService = new AuthMessageServiceImpl(loginLogRepository, systemSecurityIngestFeignClient, userMapper,
+		authMessageService = new AuthMessageServiceImpl(loginLogRepository, systemMessageSendFeignClient, userMapper,
 				loginVerificationCodeStore);
 	}
 
@@ -82,7 +82,7 @@ class AuthMessageServiceTest {
 				.osType("win")
 				.browserType("chrome")
 				.build());
-			when(systemSecurityIngestFeignClient.sendByTemplate(any(TemplateMessageCommand.class)))
+			when(systemMessageSendFeignClient.sendByTemplate(any(TemplateMessageCommand.class)))
 				.thenReturn(Result.success());
 
 			authMessageService.sendEmailCode(email, request);
@@ -90,7 +90,7 @@ class AuthMessageServiceTest {
 			verify(loginVerificationCodeStore).storeDigest(eq(CredentialDimension.EMAIL), eq(email), any());
 			ArgumentCaptor<TemplateMessageCommand> commandCaptor = ArgumentCaptor
 				.forClass(TemplateMessageCommand.class);
-			verify(systemSecurityIngestFeignClient).sendByTemplate(commandCaptor.capture());
+			verify(systemMessageSendFeignClient).sendByTemplate(commandCaptor.capture());
 			TemplateMessageCommand command = commandCaptor.getValue();
 			assertEquals(MessageChannel.EMAIL, command.getChannel());
 			assertEquals(AuthMessageScene.LOGIN_EMAIL.getTemplateCode(), command.getTemplateCode());
@@ -108,7 +108,7 @@ class AuthMessageServiceTest {
 			authMessageService.sendEmailCode(email, request);
 
 			verify(loginVerificationCodeStore).storeDigest(eq(CredentialDimension.EMAIL), eq(email), any());
-			verify(systemSecurityIngestFeignClient, never()).sendByTemplate(any());
+			verify(systemMessageSendFeignClient, never()).sendByTemplate(any());
 		}
 
 	}
@@ -127,7 +127,7 @@ class AuthMessageServiceTest {
 			userEntity.setStatus(1);
 			userEntity.setPermVersion(1L);
 			when(userMapper.selectByCredential(CredentialDimension.PHONE, phone, true)).thenReturn(userEntity);
-			when(systemSecurityIngestFeignClient.sendByTemplate(any(TemplateMessageCommand.class)))
+			when(systemMessageSendFeignClient.sendByTemplate(any(TemplateMessageCommand.class)))
 				.thenReturn(Result.success());
 
 			authMessageService.sendSmsCode(phone);
@@ -135,7 +135,7 @@ class AuthMessageServiceTest {
 			verify(loginVerificationCodeStore).storeDigest(eq(CredentialDimension.PHONE), eq(phone), any());
 			ArgumentCaptor<TemplateMessageCommand> commandCaptor = ArgumentCaptor
 				.forClass(TemplateMessageCommand.class);
-			verify(systemSecurityIngestFeignClient).sendByTemplate(commandCaptor.capture());
+			verify(systemMessageSendFeignClient).sendByTemplate(commandCaptor.capture());
 			TemplateMessageCommand command = commandCaptor.getValue();
 			assertEquals(MessageChannel.SMS_ALIYUN_DYPNS, command.getChannel());
 			assertEquals(AuthMessageScene.LOGIN_SMS.getTemplateCode(), command.getTemplateCode());
@@ -151,7 +151,7 @@ class AuthMessageServiceTest {
 			authMessageService.sendSmsCode(phone);
 
 			verify(loginVerificationCodeStore).storeDigest(eq(CredentialDimension.PHONE), eq(phone), any());
-			verify(systemSecurityIngestFeignClient, never()).sendByTemplate(any());
+			verify(systemMessageSendFeignClient, never()).sendByTemplate(any());
 		}
 
 	}

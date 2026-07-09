@@ -2,7 +2,7 @@ package com.auth.service.system.file.controller;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
-import com.auth.module.file.api.constants.FileDeleteSourceConstants;
+import com.auth.module.file.api.model.enums.FileDeleteSource;
 import com.auth.module.file.export.delivery.FileDelivery;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
@@ -87,7 +87,7 @@ public class FileRecordController {
 	@PreAuthorize("@auth.decide('sys:file:delete')")
 	@DeleteMapping()
 	public Result<Void> delete(@RequestBody List<Long> ids) {
-		fileRecordService.deleteByIds(ids, null, FileDeleteSourceConstants.ADMIN_ACTION);
+		fileRecordService.deleteByIds(ids, null, FileDeleteSource.SYSTEM_ACTION.getCode());
 		return Result.success();
 	}
 

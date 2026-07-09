@@ -35,12 +35,12 @@ public interface FileRecordMapper extends BaseMapper<FileRecordEntity> {
 	 * @param ownerUserId 归属用户ID
 	 * @param isPrivate 是否私有文件
 	 * @param expectedDeleted 是否预期删除
-	 * @param deleteSource 删除来源
+	 * @param deleteSources 删除来源集合，非空时按 IN 过滤
 	 * @return 文件记录详情
 	 */
 	FileRecordEntity selectDetailById(@Param("id") Long id, @Param("ownerUserId") Long ownerUserId,
 			@Param("isPrivate") Boolean isPrivate, @Param("expectedDeleted") Boolean expectedDeleted,
-			@Param("deleteSource") String deleteSource);
+			@Param("deleteSources") List<String> deleteSources);
 
 	/**
 	 * 按主键批量查询已逻辑删除的文件记录
@@ -48,12 +48,12 @@ public interface FileRecordMapper extends BaseMapper<FileRecordEntity> {
 	 * @param ownerUserId 归属用户ID
 	 * @param isPrivate 是否私有文件
 	 * @param expectedDeleted 期望的逻辑删除状态
-	 * @param deleteSource 删除来源
+	 * @param deleteSources 删除来源集合，非空时按 IN 过滤
 	 * @return 已删除文件记录
 	 */
 	List<FileRecordEntity> selectIsDeletedByIds(@Param("ids") List<Long> ids, @Param("ownerUserId") Long ownerUserId,
 			@Param("isPrivate") Boolean isPrivate, @Param("expectedDeleted") Boolean expectedDeleted,
-			@Param("deleteSource") String deleteSource);
+			@Param("deleteSources") List<String> deleteSources);
 
 	/**
 	 * 恢复已逻辑删除的文件记录
@@ -70,5 +70,16 @@ public interface FileRecordMapper extends BaseMapper<FileRecordEntity> {
 	 * @return 影响行数
 	 */
 	int deletePhysicallyByIds(@Param("ids") List<Long> ids, @Param("expectedDeleted") Boolean expectedDeleted);
+
+	/**
+	 * 按 URL 查询活跃文件记录
+	 * @param url 访问 URL
+	 * @param objectKey 对象键
+	 * @param ownerUserId 归属用户 ID
+	 * @param bizType 业务类型（可选）
+	 * @return 文件记录
+	 */
+	FileRecordEntity selectActiveByUrlAndOwner(@Param("url") String url, @Param("objectKey") String objectKey,
+			@Param("ownerUserId") Long ownerUserId, @Param("bizType") String bizType);
 
 }

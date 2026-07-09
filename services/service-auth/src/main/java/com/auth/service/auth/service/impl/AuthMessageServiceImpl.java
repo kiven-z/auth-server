@@ -9,7 +9,7 @@ import cn.hutool.crypto.digest.MD5;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.message.api.model.email.EmailChannelOptions;
 import com.auth.module.platform.persistence.model.UserEntity;
-import com.auth.service.auth.feign.SystemSecurityIngestFeignClient;
+import com.auth.module.message.api.feign.SystemMessageSendFeignClient;
 import com.auth.service.auth.mapper.UserMapper;
 import com.auth.service.auth.model.enums.AuthMessageScene;
 import com.auth.service.auth.model.enums.CredentialDimension;
@@ -39,7 +39,7 @@ public class AuthMessageServiceImpl implements AuthMessageService {
 
 	private final LoginLogRepository loginLogRepository;
 
-	private final SystemSecurityIngestFeignClient systemSecurityIngestFeignClient;
+	private final SystemMessageSendFeignClient systemMessageSendFeignClient;
 
 	private final UserMapper userMapper;
 
@@ -83,7 +83,7 @@ public class AuthMessageServiceImpl implements AuthMessageService {
 			.options(EmailChannelOptions.builder().hasHtml(Boolean.TRUE).build())
 			.build();
 
-		systemSecurityIngestFeignClient.sendByTemplate(command);
+		systemMessageSendFeignClient.sendByTemplate(command);
 	}
 
 	/**
@@ -114,7 +114,7 @@ public class AuthMessageServiceImpl implements AuthMessageService {
 			.targets(List.of(phone))
 			.variables(variables)
 			.build();
-		systemSecurityIngestFeignClient.sendByTemplate(command);
+		systemMessageSendFeignClient.sendByTemplate(command);
 	}
 
 }

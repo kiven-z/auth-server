@@ -1,4 +1,4 @@
-package com.auth.module.file.api.enums;
+package com.auth.module.file.api.model.enums;
 
 /**
  * 文件可见性规则。

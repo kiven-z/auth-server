@@ -1,12 +1,9 @@
 package com.auth.service.system.file.storage.platform.minio;
 
-import com.auth.module.file.api.enums.StoragePlatformEnum;
-import com.auth.service.system.file.storage.core.StoragePlatformFacade;
-import com.auth.service.system.file.storage.core.bucket.StorageBucketInitializer;
+import com.auth.module.file.api.model.enums.StoragePlatformEnum;
+import com.auth.service.system.file.storage.core.AbstractS3CompatibleStoragePlatformFacade;
 import com.auth.service.system.file.storage.core.classifier.StorageExceptionClassifier;
-import com.auth.service.system.file.storage.core.provider.FileStorageProvider;
 import com.auth.service.system.file.storage.core.s3.S3CompatibleFileStorageProvider;
-import com.auth.service.system.file.storage.core.validator.StoragePlatformConfigValidator;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -16,24 +13,20 @@ import org.springframework.stereotype.Component;
  * @author Bunny
  */
 @Component
-public class MinioStoragePlatformFacade implements StoragePlatformFacade {
+public class MinioStoragePlatformFacade extends AbstractS3CompatibleStoragePlatformFacade {
 
-	private final S3CompatibleFileStorageProvider fileStorageProvider;
-
-	private final MinioConfigValidator configValidator;
-
-	private final MinioBucketInitializer bucketInitializer;
-
-	private final StorageExceptionClassifier exceptionClassifier;
-
+	/**
+	 * 构造 MinIO 平台门面
+	 * @param fileStorageProvider 文件存储能力
+	 * @param configValidator 平台配置校验能力
+	 * @param bucketInitializer 存储桶初始化能力
+	 * @param exceptionClassifier 存储异常分类器
+	 */
 	public MinioStoragePlatformFacade(
 			@Qualifier("minioFileStorageProvider") S3CompatibleFileStorageProvider fileStorageProvider,
 			MinioConfigValidator configValidator, MinioBucketInitializer bucketInitializer,
 			StorageExceptionClassifier exceptionClassifier) {
-		this.fileStorageProvider = fileStorageProvider;
-		this.configValidator = configValidator;
-		this.bucketInitializer = bucketInitializer;
-		this.exceptionClassifier = exceptionClassifier;
+		super(fileStorageProvider, bucketInitializer, configValidator, exceptionClassifier);
 	}
 
 	/**
@@ -42,38 +35,6 @@ public class MinioStoragePlatformFacade implements StoragePlatformFacade {
 	@Override
 	public StoragePlatformEnum platform() {
 		return StoragePlatformEnum.MINIO;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public FileStorageProvider provider() {
-		return fileStorageProvider;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public StorageBucketInitializer initializer() {
-		return bucketInitializer;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public StoragePlatformConfigValidator validator() {
-		return configValidator;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public StorageExceptionClassifier exceptionClassifier() {
-		return exceptionClassifier;
 	}
 
 }

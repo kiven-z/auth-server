@@ -1,6 +1,6 @@
 package com.auth.module.file.api.model;
 
-import com.auth.module.file.api.enums.VisibilityRule;
+import com.auth.module.file.api.model.enums.VisibilityRule;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
