@@ -1,19 +1,14 @@
 package com.auth.service.system.admin.service.me.impl;
 
-import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.core.utils.FieldChangeSupport;
 import com.auth.common.data.support.BusinessKeyAssert;
-import com.auth.common.web.resttemplate.FeignUtil;
-import com.auth.module.file.api.feign.SystemFileGovernanceFeignClient;
-import com.auth.module.file.api.model.enums.FileBizType;
-import com.auth.module.file.api.model.request.OwnedFileAssertByUrlRequest;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.service.system.admin.mapper.user.SysUserMapper;
 import com.auth.service.system.admin.model.form.me.MeAvatarUpdateForm;
 import com.auth.service.system.admin.model.form.me.MeProfileUpdateForm;
 import com.auth.service.system.admin.service.me.CurrentUserProfileService;
-import com.auth.service.system.admin.support.me.OldAvatarCleanupTrigger;
+import com.auth.service.system.admin.support.user.UserAvatarUpdateSupport;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.UserSessionRevocationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
@@ -43,9 +38,7 @@ public class CurrentUserProfileServiceImpl extends ServiceImpl<SysUserMapper, Us
 
 	private final UserSessionRevocationTrigger userSessionRevocationTrigger;
 
-	private final SystemFileGovernanceFeignClient systemFileGovernanceFeignClient;
-
-	private final OldAvatarCleanupTrigger oldAvatarCleanupTrigger;
+	private final UserAvatarUpdateSupport userAvatarUpdateSupport;
 
 	/**
 	 * {@inheritDoc}
@@ -91,28 +84,11 @@ public class CurrentUserProfileServiceImpl extends ServiceImpl<SysUserMapper, Us
 	 */
 	@Override
 	public void updateMyAvatar(MeAvatarUpdateForm form) {
-		Long userId = SecurityUserUtils.getUserId();
-		UserEntity existing = userReferenceChecker.getExistingActive(userId);
-
 		String avatar = form.getAvatar();
-		String oldAvatar = existing.getAvatar();
-		if (CharSequenceUtil.isBlank(avatar) || CharSequenceUtil.equals(oldAvatar, avatar)) {
-			return;
-		}
+		Long userId = SecurityUserUtils.getUserId();
 
-		var assertResult = systemFileGovernanceFeignClient.verifyOwnership(OwnedFileAssertByUrlRequest.builder()
-			.url(avatar)
-			.ownerUserId(userId)
-			.bizType(FileBizType.AVATAR.getCode())
-			.build());
-		if (!FeignUtil.isSuccess(assertResult)) {
-			throw new SystemBusinessException(SystemCommonResultCode.OPERATION_FAILED, assertResult.getMessage());
-		}
-
-		existing.setAvatar(avatar);
-		updateById(existing);
-
-		oldAvatarCleanupTrigger.cleanupAfterCommit(userId, oldAvatar);
+		UserEntity userEntity = userReferenceChecker.getExistingActive(userId);
+		userAvatarUpdateSupport.applyAvatarUpdate(userEntity, avatar, userId);
 	}
 
 }

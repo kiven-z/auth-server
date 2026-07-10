@@ -2,6 +2,9 @@ package com.auth.service.system.file.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.BooleanUtil;
+import com.auth.module.file.api.model.enums.FileDeleteSource;
+import com.auth.module.file.api.model.request.OwnedFileAssertByUrlRequest;
+import com.auth.module.file.api.model.request.OwnedFileDeleteByUrlRequest;
 import com.auth.module.file.export.writer.ZipStreamWriter;
 import com.auth.module.file.export.writer.ZipStreamWriter.ZipEntryPayload;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
@@ -14,7 +17,6 @@ import com.auth.service.system.file.model.entity.FileRecordEntity;
 import com.auth.service.system.file.service.FileRecordService;
 import com.auth.service.system.file.storage.core.StoragePlatformFacadeRegistry;
 import com.auth.service.system.file.storage.core.provider.FileStorageProvider;
-import com.auth.service.system.file.support.FileRecordDeletionSupport;
 import com.auth.service.system.file.utils.FileObjectKeyUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -24,10 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -43,8 +43,6 @@ public class FileRecordServiceImpl extends ServiceImpl<FileRecordMapper, FileRec
 		implements FileRecordService {
 
 	private final StoragePlatformFacadeRegistry facadeRegistry;
-
-	private final FileRecordDeletionSupport fileRecordDeletionSupport;
 
 	/**
 	 * {@inheritDoc}
@@ -65,7 +63,46 @@ public class FileRecordServiceImpl extends ServiceImpl<FileRecordMapper, FileRec
 		}
 
 		Long deletedBy = SecurityUserUtils.getUserId();
-		fileRecordDeletionSupport.applyDeletion(entities, deleteSource, deletedBy);
+		applyDeletion(entities, deleteSource, deletedBy);
+	}
+
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void tryDeleteOwnedByUrl(OwnedFileDeleteByUrlRequest request) {
+		String url = request.getUrl();
+		Long ownerUserId = request.getOwnerUserId();
+		String bizType = request.getBizType();
+		String deleteSource = request.getDeleteSource();
+
+		Optional<String> objectKey = FileObjectKeyUtil.resolveObjectKeyFromUrl(url);
+		if (objectKey.isEmpty()) {
+			return;
+		}
+
+		FileRecordEntity entity = baseMapper.selectActiveByUrlAndOwner(null, objectKey.get(), ownerUserId, bizType);
+		if (entity == null) {
+			log.debug("Skip owned file delete by url: not found, url={}, ownerUserId={}", url, ownerUserId);
+			return;
+		}
+
+		applyDeletion(List.of(entity), deleteSource, ownerUserId);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	@Transactional(readOnly = true)
+	public void assertOwnedFileUrl(OwnedFileAssertByUrlRequest request) {
+		String url = request.getUrl();
+		Long ownerUserId = request.getOwnerUserId();
+		String bizType = request.getBizType();
+
+		FileRecordEntity entity = baseMapper.selectActiveByUrlAndOwner(url, null, ownerUserId, bizType);
+		if (entity == null) {
+			log.warn("Owned file assert failed: url={}, ownerUserId={}, bizType={}", url, ownerUserId, bizType);
+			throw new FileStorageException(FileUploadResultCode.FILE_RECORD_NOT_FOUND);
+		}
 	}
 
 	/**
@@ -149,6 +186,48 @@ public class FileRecordServiceImpl extends ServiceImpl<FileRecordMapper, FileRec
 		if (CollUtil.isNotEmpty(changedEntities)) {
 			super.updateBatchById(changedEntities);
 		}
+	}
+
+	/**
+	 * 对给定记录执行删除
+	 * @param entities 待删除记录
+	 * @param deleteSource 逻辑删除来源
+	 * @param deletedBy 删除人
+	 */
+	private void applyDeletion(List<FileRecordEntity> entities, String deleteSource, Long deletedBy) {
+		if (CollUtil.isEmpty(entities)) {
+			return;
+		}
+
+		if (FileDeleteSource.parse(deleteSource).isEmpty()) {
+			throw new SystemBusinessException(SystemCommonResultCode.PARAM_REQUIRED, "deleteSource");
+		}
+
+		List<FileRecordEntity> privateEntities = entities.stream()
+			.filter(entity -> BooleanUtil.isTrue(entity.getIsPrivate()))
+			.toList();
+		for (FileRecordEntity entity : privateEntities) {
+			entity.setDeletedAt(LocalDateTime.now());
+			entity.setDeletedBy(deletedBy);
+			entity.setDeleteSource(deleteSource);
+			entity.setIsDeleted(true);
+		}
+		if (CollUtil.isNotEmpty(privateEntities)) {
+			super.updateBatchById(privateEntities);
+		}
+
+		List<FileRecordEntity> publicEntities = entities.stream()
+			.filter(entity -> BooleanUtil.isFalse(entity.getIsPrivate()))
+			.toList();
+		if (publicEntities.isEmpty()) {
+			return;
+		}
+
+		for (FileRecordEntity entity : publicEntities) {
+			FileStorageProvider provider = facadeRegistry.resolve(entity.getStoragePlatform()).provider();
+			provider.delete(entity.getBucket(), entity.getObjectKey());
+		}
+		baseMapper.deletePhysicallyByIds(publicEntities.stream().map(FileRecordEntity::getId).toList(), false);
 	}
 
 }

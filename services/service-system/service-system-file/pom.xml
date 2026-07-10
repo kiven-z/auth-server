@@ -21,12 +21,12 @@
 		<dependency>
 			<groupId>com.auth</groupId>
 			<artifactId>module-file-api</artifactId>
-			<version>${project.version}</version>
+            <version>0.0.2-beta</version>
 		</dependency>
 		<dependency>
 			<groupId>com.auth</groupId>
 			<artifactId>module-file</artifactId>
-			<version>${project.version}</version>
+				<version>0.0.2-beta</version>
 		</dependency>
 		<!-- 统一使用 AWS SDK v2 S3 协议客户端覆盖 MinIO / 阿里云 OSS；S3Presigner 已包含在 s3 模块中 -->
 		<dependency>

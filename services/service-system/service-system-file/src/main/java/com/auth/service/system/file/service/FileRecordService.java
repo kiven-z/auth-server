@@ -1,5 +1,7 @@
 package com.auth.service.system.file.service;
 
+import com.auth.module.file.api.model.request.OwnedFileAssertByUrlRequest;
+import com.auth.module.file.api.model.request.OwnedFileDeleteByUrlRequest;
 import com.auth.service.system.file.model.entity.FileRecordEntity;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
@@ -46,5 +48,17 @@ public interface FileRecordService extends IService<FileRecordEntity> {
 	 * @param deleteSource 逻辑删除时写入的删除来源
 	 */
 	void deleteByIds(List<Long> ids, Long ownerUserId, String deleteSource);
+
+	/**
+	 * 尝试按 URL 删除归属用户的活跃文件；未命中时静默跳过
+	 * @param request 请求参数
+	 */
+	void tryDeleteOwnedByUrl(OwnedFileDeleteByUrlRequest request);
+
+	/**
+	 * 校验 URL 对应文件是否归属指定用户且匹配业务类型
+	 * @param request 请求参数
+	 */
+	void assertOwnedFileUrl(OwnedFileAssertByUrlRequest request);
 
 }

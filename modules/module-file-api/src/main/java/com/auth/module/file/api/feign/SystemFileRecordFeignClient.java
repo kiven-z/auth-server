@@ -8,12 +8,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 /**
- * 调用 service-system 文件记录治理内部接口
+ * 调用 service-system 文件记录内部接口
  *
  * @author Bunny
  */
-@FeignClient(name = "service-system", contextId = "systemFileGovernance", path = "/api/system/inner/file-records")
-public interface SystemFileGovernanceFeignClient {
+@FeignClient(name = "service-system", contextId = "systemFileRecord", path = "/api/system/inner/file-records")
+public interface SystemFileRecordFeignClient {
 
 	/**
 	 * 校验 URL 对应文件是否归属指定用户且匹配业务类型

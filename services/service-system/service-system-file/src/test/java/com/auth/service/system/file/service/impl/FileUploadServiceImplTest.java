@@ -33,6 +33,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.*;
 
 /**
@@ -175,7 +176,7 @@ class FileUploadServiceImplTest {
 	@Test
 	@DisplayName("uploadMultiple：多个文件均成功上传并批量落库")
 	void uploadMultipleSucceedsForMultipleFiles() {
-		// 验证多文件上传走统一路径并批量持久化。
+		// 验证多文件上传走统一路径并 saveBatch 批量持久化。
 		MultipleFileUploadForm form = buildMultipleForm(
 				new MockMultipartFile("files", "a.png", "image/png", "a".getBytes()),
 				new MockMultipartFile("files", "b.png", "image/png", "b".getBytes()));
@@ -183,19 +184,14 @@ class FileUploadServiceImplTest {
 		when(facadeRegistry.resolve(StoragePlatformEnum.MINIO)).thenReturn(storagePlatformFacade);
 		when(storagePlatformFacade.provider()).thenReturn(fileStorageProvider);
 		when(fileStorageProvider.upload(any(FileUploadCommand.class))).thenReturn(storedFile);
-		doAnswer(invocation -> {
-			FileRecordEntity entity = invocation.getArgument(0);
-			entity.setId(1001L);
-			return true;
-		}).doAnswer(invocation -> {
-			FileRecordEntity entity = invocation.getArgument(0);
-			entity.setId(1002L);
-			return true;
-		}).when(fileUploadService).save(any(FileRecordEntity.class));
+		stubSaveBatchWithIds(1001L, 1002L);
 
 		List<FileUploadResultDTO> responses = fileUploadService.uploadMultiple(form);
 
-		verify(fileUploadService, times(2)).save(any(FileRecordEntity.class));
+		@SuppressWarnings("unchecked")
+		ArgumentCaptor<List<FileRecordEntity>> batchCaptor = ArgumentCaptor.forClass(List.class);
+		verify(fileUploadService).saveBatch(batchCaptor.capture());
+		assertThat(batchCaptor.getValue()).hasSize(2);
 		assertThat(responses).hasSize(2);
 		assertThat(responses.get(0).getId()).isEqualTo(1001L);
 		assertThat(responses.get(1).getId()).isEqualTo(1002L);
@@ -240,7 +236,7 @@ class FileUploadServiceImplTest {
 		when(facadeRegistry.resolve(StoragePlatformEnum.ALIYUN_OSS)).thenReturn(storagePlatformFacade);
 		when(storagePlatformFacade.provider()).thenReturn(fileStorageProvider);
 		when(fileStorageProvider.upload(any(FileUploadCommand.class))).thenReturn(storedFile);
-		doReturn(true).when(fileUploadService).save(any(FileRecordEntity.class));
+		doReturn(true).when(fileUploadService).saveBatch(anyList());
 
 		fileUploadService.uploadMultiple(form);
 
@@ -281,6 +277,16 @@ class FileUploadServiceImplTest {
 			.size(1024L)
 			.etag("etag-value")
 			.build();
+	}
+
+	private void stubSaveBatchWithIds(Long... ids) {
+		doAnswer(invocation -> {
+			List<FileRecordEntity> batch = invocation.getArgument(0);
+			for (int i = 0; i < ids.length; i++) {
+				batch.get(i).setId(ids[i]);
+			}
+			return true;
+		}).when(fileUploadService).saveBatch(anyList());
 	}
 
 }

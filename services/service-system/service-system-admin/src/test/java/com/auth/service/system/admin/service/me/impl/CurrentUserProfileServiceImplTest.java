@@ -1,20 +1,16 @@
 package com.auth.service.system.admin.service.me.impl;
 
-import com.auth.common.core.model.response.Result;
-import com.auth.module.file.api.feign.SystemFileGovernanceFeignClient;
-import com.auth.module.file.api.model.request.OwnedFileAssertByUrlRequest;
-import com.auth.module.platform.persistence.model.UserEntity;
-import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.system.admin.mapper.user.SysUserMapper;
 import com.auth.service.system.admin.model.form.me.MeAvatarUpdateForm;
 import com.auth.service.system.admin.model.form.me.MeProfileUpdateForm;
-import com.auth.service.system.admin.support.me.OldAvatarCleanupTrigger;
+import com.auth.service.system.admin.support.user.UserAvatarUpdateSupport;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
+import com.auth.module.platform.persistence.model.UserEntity;
+import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.system.authorization.dispatch.trigger.UserSessionRevocationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.baomidou.mybatisplus.extension.repository.CrudRepository;
-import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -54,10 +50,7 @@ class CurrentUserProfileServiceImplTest {
 	private UserSessionRevocationTrigger userSessionRevocationTrigger;
 
 	@Mock
-	private SystemFileGovernanceFeignClient systemFileGovernanceFeignClient;
-
-	@Mock
-	private OldAvatarCleanupTrigger oldAvatarCleanupTrigger;
+	private UserAvatarUpdateSupport userAvatarUpdateSupport;
 
 	@InjectMocks
 	private CurrentUserProfileServiceImpl currentUserProfileService;
@@ -203,60 +196,15 @@ class CurrentUserProfileServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("updateMyAvatar：校验归属后更新头像并触发旧头像清理")
-	void updateMyAvatar_updatesAvatarAndTriggersCleanup() {
+	@DisplayName("updateMyAvatar：委托 applyAvatarUpdate")
+	void updateMyAvatar_delegatesToSupport() {
+		String avatar = "https://cdn.example.com/public/avatar/new.png";
 		UserEntity existing = existingUser();
-		String oldAvatar = "https://cdn.example.com/public/avatar/old.png";
-		existing.setAvatar(oldAvatar);
-		String newAvatar = "https://cdn.example.com/public/avatar/new.png";
-
-		when(systemFileGovernanceFeignClient.verifyOwnership(any(OwnedFileAssertByUrlRequest.class)))
-			.thenReturn(Result.success());
-		when(userReferenceChecker.getExistingActive(USER_ID)).thenReturn(existing);
-		when(sysUserMapper.updateById(any(UserEntity.class))).thenReturn(1);
-
-		currentUserProfileService.updateMyAvatar(buildAvatarForm(newAvatar));
-
-		ArgumentCaptor<UserEntity> captor = ArgumentCaptor.forClass(UserEntity.class);
-		verify(sysUserMapper).updateById(captor.capture());
-		assertThat(captor.getValue().getAvatar()).isEqualTo(newAvatar);
-
-		verify(oldAvatarCleanupTrigger).cleanupAfterCommit(USER_ID, oldAvatar);
-	}
-
-	@Test
-	@DisplayName("updateMyAvatar：新旧头像相同时跳过更新")
-	void updateMyAvatar_sameAvatarSkipsUpdate() {
-		String avatar = "https://cdn.example.com/public/avatar/same.png";
-		UserEntity existing = existingUser();
-		existing.setAvatar(avatar);
-
 		when(userReferenceChecker.getExistingActive(USER_ID)).thenReturn(existing);
 
 		currentUserProfileService.updateMyAvatar(buildAvatarForm(avatar));
 
-		verify(sysUserMapper, never()).updateById(any(UserEntity.class));
-		verify(oldAvatarCleanupTrigger, never()).cleanupAfterCommit(any(), any());
-	}
-
-	@Test
-	@DisplayName("updateMyAvatar：归属校验失败时抛出业务异常")
-	void updateMyAvatar_assertFailureThrows() {
-		UserEntity existing = existingUser();
-		existing.setAvatar("https://cdn.example.com/public/avatar/old.png");
-
-		when(userReferenceChecker.getExistingActive(USER_ID)).thenReturn(existing);
-		when(systemFileGovernanceFeignClient.verifyOwnership(any(OwnedFileAssertByUrlRequest.class)))
-			.thenReturn(Result.error("file not owned"));
-
-		ThrowingCallable executable = () -> currentUserProfileService
-			.updateMyAvatar(buildAvatarForm("https://cdn.example.com/public/avatar/new.png"));
-		assertThatThrownBy(executable).isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemCommonResultCode.OPERATION_FAILED);
-
-		verify(sysUserMapper, never()).updateById(any(UserEntity.class));
-		verify(oldAvatarCleanupTrigger, never()).cleanupAfterCommit(any(), any());
+		verify(userAvatarUpdateSupport).applyAvatarUpdate(existing, avatar, USER_ID);
 	}
 
 }

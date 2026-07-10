@@ -14,6 +14,7 @@ import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.admin.excel.user.SysUserSpreadsheetService;
 import com.auth.service.system.admin.model.form.user.SysUserAdminResetPasswordForm;
+import com.auth.service.system.admin.model.form.user.SysUserAvatarUpdateForm;
 import com.auth.service.system.admin.model.form.user.SysUserBatchStatusForm;
 import com.auth.service.system.admin.model.form.user.SysUserForm;
 import com.auth.service.system.admin.model.query.user.SysUserPageQuery;
@@ -146,6 +147,16 @@ public class SysUserController {
 			@Valid @RequestBody SysUserAdminResetPasswordForm form, HttpServletRequest request) {
 		String changeIp = ipAddressService.resolveIpInfo(request).getIpAddr();
 		userPasswordService.resetPasswordByAdmin(id, form, changeIp);
+		return Result.success(null, OPERATION_SUCCESS.getMessage());
+	}
+
+	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
+	@Operation(summary = "管理员更新用户头像")
+	@PreAuthorize("@auth.decide('sys:user:update')")
+	@PutMapping("/avatar")
+	public Result<String> updateAvatar(@Valid @RequestBody SysUserAvatarUpdateForm form) {
+		sysUserService.updateAvatar(form);
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 

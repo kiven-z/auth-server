@@ -14,7 +14,6 @@ import com.auth.service.system.file.service.FileRecordService;
 import com.auth.service.system.file.storage.core.StoragePlatformFacade;
 import com.auth.service.system.file.storage.core.StoragePlatformFacadeRegistry;
 import com.auth.service.system.file.storage.core.provider.FileStorageProvider;
-import com.auth.service.system.file.support.FileRecordDeletionSupport;
 import com.baomidou.mybatisplus.extension.repository.CrudRepository;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Assertions;
@@ -68,14 +67,11 @@ class FileRecordServiceImplTest {
 	@Mock
 	private FileStorageProvider minioProvider;
 
-	@Mock
-	private FileRecordDeletionSupport fileRecordDeletionSupport;
-
 	private FileRecordServiceImpl fileRecordService;
 
 	@BeforeEach
 	void setUp() throws Exception {
-		fileRecordService = spy(new FileRecordServiceImpl(facadeRegistry, fileRecordDeletionSupport));
+		fileRecordService = spy(new FileRecordServiceImpl(facadeRegistry));
 		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(fileRecordService, fileRecordMapper);
@@ -196,6 +192,7 @@ class FileRecordServiceImplTest {
 		entity.setIsPrivate(true);
 		when(fileRecordMapper.selectIsDeletedByIds(List.of(5001L), 9001L, null, false, null))
 			.thenReturn(List.of(entity));
+		doReturn(true).when(fileRecordService).updateBatchById(anyList());
 
 		try (MockedStatic<SecurityUserUtils> securityUser = mockStatic(SecurityUserUtils.class)) {
 			securityUser.when(SecurityUserUtils::getUserId).thenReturn(9001L);
@@ -203,9 +200,16 @@ class FileRecordServiceImplTest {
 		}
 
 		verify(fileRecordMapper).selectIsDeletedByIds(List.of(5001L), 9001L, null, false, null);
-		verify(fileRecordDeletionSupport).applyDeletion(
-				argThat(entities -> entities.size() == 1 && Long.valueOf(5001L).equals(entities.get(0).getId())),
-				eq(FileDeleteSource.USER_SELF.getCode()), eq(9001L));
+		verify(fileRecordService).updateBatchById(argThat(entities -> {
+			if (entities.size() != 1) {
+				return false;
+			}
+			FileRecordEntity first = entities.iterator().next();
+			return Long.valueOf(5001L).equals(first.getId()) && Boolean.TRUE.equals(first.getIsDeleted())
+					&& FileDeleteSource.USER_SELF.getCode().equals(first.getDeleteSource())
+					&& Long.valueOf(9001L).equals(first.getDeletedBy());
+		}));
+		verify(fileRecordMapper, never()).deletePhysicallyByIds(anyList(), anyBoolean());
 	}
 
 	@Test
@@ -216,14 +220,21 @@ class FileRecordServiceImplTest {
 		entity.setIsPrivate(true);
 		when(fileRecordMapper.selectIsDeletedByIds(List.of(5101L), null, null, false, null))
 			.thenReturn(List.of(entity));
+		doReturn(true).when(fileRecordService).updateBatchById(anyList());
 
 		try (MockedStatic<SecurityUserUtils> securityUser = mockStatic(SecurityUserUtils.class)) {
 			securityUser.when(SecurityUserUtils::getUserId).thenReturn(7002L);
 			fileRecordService.deleteByIds(List.of(5101L), null, FileDeleteSource.ADMIN_ACTION.getCode());
 		}
 
-		verify(fileRecordDeletionSupport).applyDeletion(argThat(entities -> entities.size() == 1),
-				eq(FileDeleteSource.ADMIN_ACTION.getCode()), eq(7002L));
+		verify(fileRecordService).updateBatchById(argThat(entities -> {
+			if (entities.size() != 1) {
+				return false;
+			}
+			FileRecordEntity first = entities.iterator().next();
+			return FileDeleteSource.ADMIN_ACTION.getCode().equals(first.getDeleteSource())
+					&& Long.valueOf(7002L).equals(first.getDeletedBy());
+		}));
 		verify(fileRecordMapper, never()).deletePhysicallyByIds(anyList(), anyBoolean());
 	}
 
@@ -235,11 +246,14 @@ class FileRecordServiceImplTest {
 		publicFile.setIsPrivate(false);
 		when(fileRecordMapper.selectIsDeletedByIds(List.of(5201L), null, null, false, null))
 			.thenReturn(List.of(publicFile));
+		when(facadeRegistry.resolve(StoragePlatformEnum.MINIO)).thenReturn(storagePlatformFacade);
+		when(storagePlatformFacade.provider()).thenReturn(minioProvider);
 
 		fileRecordService.deleteByIds(List.of(5201L), null, FileDeleteSource.ADMIN_ACTION.getCode());
 
-		verify(fileRecordDeletionSupport).applyDeletion(argThat(entities -> entities.size() == 1),
-				eq(FileDeleteSource.ADMIN_ACTION.getCode()), any());
+		verify(minioProvider).delete("public", "a.png");
+		verify(fileRecordMapper).deletePhysicallyByIds(List.of(5201L), false);
+		verify(fileRecordService, never()).updateBatchById(anyList());
 	}
 
 	@Test
@@ -253,8 +267,9 @@ class FileRecordServiceImplTest {
 
 		fileRecordService.deleteByIds(List.of(5202L), null, FileDeleteSource.ADMIN_ACTION.getCode());
 
-		verify(fileRecordDeletionSupport).applyDeletion(argThat(entities -> entities.size() == 1),
-				eq(FileDeleteSource.ADMIN_ACTION.getCode()), isNull());
+		verify(fileRecordService, never()).updateBatchById(anyList());
+		verify(fileRecordMapper, never()).deletePhysicallyByIds(anyList(), anyBoolean());
+		verify(facadeRegistry, never()).resolve(any());
 	}
 
 	@Test
@@ -267,6 +282,9 @@ class FileRecordServiceImplTest {
 		privateFile.setIsPrivate(true);
 		when(fileRecordMapper.selectIsDeletedByIds(Arrays.asList(5301L, 5302L), null, null, false, null))
 			.thenReturn(List.of(publicFile, privateFile));
+		when(facadeRegistry.resolve(StoragePlatformEnum.MINIO)).thenReturn(storagePlatformFacade);
+		when(storagePlatformFacade.provider()).thenReturn(minioProvider);
+		doReturn(true).when(fileRecordService).updateBatchById(anyList());
 
 		try (MockedStatic<SecurityUserUtils> securityUser = mockStatic(SecurityUserUtils.class)) {
 			securityUser.when(SecurityUserUtils::getUserId).thenReturn(9001L);
@@ -274,8 +292,28 @@ class FileRecordServiceImplTest {
 					FileDeleteSource.ADMIN_ACTION.getCode());
 		}
 
-		verify(fileRecordDeletionSupport).applyDeletion(argThat(entities -> entities.size() == 2),
-				eq(FileDeleteSource.ADMIN_ACTION.getCode()), eq(9001L));
+		verify(fileRecordService).updateBatchById(argThat(
+				entities -> entities.size() == 1 && Long.valueOf(5302L).equals(entities.iterator().next().getId())));
+		verify(minioProvider).delete("public", "a.png");
+		verify(fileRecordMapper).deletePhysicallyByIds(List.of(5301L), false);
+	}
+
+	@Test
+	@DisplayName("deleteByIds：未知 deleteSource 时抛出 PARAM_REQUIRED")
+	void deleteByIdsThrowsWhenDeleteSourceUnknown() {
+		// 验证删除来源必须在枚举注册范围内。
+		FileRecordEntity entity = buildEntity(5401L);
+		entity.setIsPrivate(true);
+		when(fileRecordMapper.selectIsDeletedByIds(List.of(5401L), null, null, false, null))
+			.thenReturn(List.of(entity));
+
+		ThrowingCallable executable = () -> fileRecordService.deleteByIds(List.of(5401L), null, "UNKNOWN_SOURCE");
+		assertThatThrownBy(executable).isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemCommonResultCode.PARAM_REQUIRED);
+
+		verify(fileRecordService, never()).updateBatchById(anyList());
+		verify(fileRecordMapper, never()).deletePhysicallyByIds(anyList(), anyBoolean());
 	}
 
 	@Test

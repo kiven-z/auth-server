@@ -1,11 +1,13 @@
 package com.auth.service.system.admin.service.admin;
 
-import java.util.List;
-
 import com.auth.module.platform.persistence.model.UserEntity;
+import com.auth.service.system.admin.model.form.user.SysUserAvatarUpdateForm;
 import com.auth.service.system.admin.model.form.user.SysUserBatchStatusForm;
 import com.auth.service.system.admin.model.form.user.SysUserForm;
 import com.baomidou.mybatisplus.extension.service.IService;
+import jakarta.validation.Valid;
+
+import java.util.List;
 
 /**
  * 系统用户服务
@@ -37,5 +39,11 @@ public interface SysUserService extends IService<UserEntity> {
 	 * @param form 目标状态与用户主键列表
 	 */
 	void batchUpdateStatus(SysUserBatchStatusForm form);
+
+	/**
+	 * 管理员更新用户头像
+	 * @param form 更新表单
+	 */
+	void updateAvatar(@Valid SysUserAvatarUpdateForm form);
 
 }

@@ -9,6 +9,7 @@ import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.mapper.role.GrantTableMapper;
 import com.auth.service.system.admin.mapper.user.SysUserMapper;
 import com.auth.service.system.admin.model.form.user.SysUserForm;
+import com.auth.service.system.admin.support.user.UserAvatarUpdateSupport;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.UserSessionRevocationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
@@ -64,6 +65,9 @@ class SysUserServiceImplTest {
 	@Mock
 	private GrantTableMapper grantTableMapper;
 
+	@Mock
+	private UserAvatarUpdateSupport userAvatarUpdateSupport;
+
 	private SysUserServiceImpl sysUserService;
 
 	private static SysUserForm buildCreateForm() {
@@ -80,8 +84,8 @@ class SysUserServiceImplTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		sysUserService = spy(new SysUserServiceImpl(userReferenceChecker, passwordEncoder, userSessionRevocationTrigger,
-				grantTableMapper));
+		sysUserService = spy(new SysUserServiceImpl(grantTableMapper, userReferenceChecker, userAvatarUpdateSupport,
+				userSessionRevocationTrigger, passwordEncoder));
 		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysUserService, sysUserMapper);

@@ -1,32 +1,35 @@
 package com.auth.service.system.admin.service.admin.impl;
 
-import java.time.LocalDate;
-import java.time.Period;
-import java.util.List;
-import java.util.Objects;
-
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.core.utils.FieldChangeSupport;
 import com.auth.common.data.model.enums.UserStatus;
 import com.auth.module.platform.persistence.model.UserEntity;
+import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.convert.admin.user.SysUserConverter;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.role.GrantTableMapper;
 import com.auth.service.system.admin.mapper.user.SysUserMapper;
+import com.auth.service.system.admin.model.form.user.SysUserAvatarUpdateForm;
 import com.auth.service.system.admin.model.form.user.SysUserBatchStatusForm;
 import com.auth.service.system.admin.model.form.user.SysUserForm;
 import com.auth.service.system.admin.service.admin.SysUserService;
+import com.auth.service.system.admin.support.user.UserAvatarUpdateSupport;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.UserSessionRevocationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.Period;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * 系统用户服务实现
@@ -48,13 +51,15 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 	 */
 	private static final int IMPORT_SAVE_BATCH_SIZE = 500;
 
+	private final GrantTableMapper grantTableMapper;
+
 	private final UserReferenceChecker userReferenceChecker;
 
-	private final PasswordEncoder passwordEncoder;
+	private final UserAvatarUpdateSupport userAvatarUpdateSupport;
 
 	private final UserSessionRevocationTrigger userSessionRevocationTrigger;
 
-	private final GrantTableMapper grantTableMapper;
+	private final PasswordEncoder passwordEncoder;
 
 	/**
 	 * {@inheritDoc}
@@ -164,6 +169,17 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 		super.updateBatchById(updates);
 
 		userSessionRevocationTrigger.revokeAllSessionsAfterCommit(idsToUpdate);
+	}
+
+	@Override
+	public void updateAvatar(@Valid SysUserAvatarUpdateForm form) {
+		Long userId = form.getUserId();
+		userReferenceChecker.requireOperable(List.of(userId));
+
+		String avatar = form.getAvatar();
+		Long operatorUserId = SecurityUserUtils.getUserId();
+		UserEntity userEntity = userReferenceChecker.getExistingActive(userId);
+		userAvatarUpdateSupport.applyAvatarUpdate(userEntity, avatar, operatorUserId);
 	}
 
 }

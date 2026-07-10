@@ -3,7 +3,7 @@ package com.auth.service.system.admin.support.me;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.core.model.response.Result;
 import com.auth.common.web.resttemplate.FeignUtil;
-import com.auth.module.file.api.feign.SystemFileGovernanceFeignClient;
+import com.auth.module.file.api.feign.SystemFileRecordFeignClient;
 import com.auth.module.file.api.model.enums.FileDeleteSource;
 import com.auth.module.file.api.model.enums.FileBizType;
 import com.auth.module.file.api.model.request.OwnedFileDeleteByUrlRequest;
@@ -23,7 +23,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 @Component
 public class OldAvatarCleanupTrigger {
 
-	private final SystemFileGovernanceFeignClient systemFileGovernanceFeignClient;
+	private final SystemFileRecordFeignClient systemFileRecordFeignClient;
 
 	/**
 	 * 在事务提交后尝试撤销旧头像；无活跃事务时立即执行
@@ -53,7 +53,7 @@ public class OldAvatarCleanupTrigger {
 	 */
 	private void doCleanup(Long ownerUserId, String oldAvatarUrl) {
 		try {
-			Result<Void> result = systemFileGovernanceFeignClient.revokeOwnedFile(OwnedFileDeleteByUrlRequest.builder()
+			Result<Void> result = systemFileRecordFeignClient.revokeOwnedFile(OwnedFileDeleteByUrlRequest.builder()
 				.url(oldAvatarUrl)
 				.ownerUserId(ownerUserId)
 				.deleteSource(FileDeleteSource.SYSTEM_ACTION.getCode())

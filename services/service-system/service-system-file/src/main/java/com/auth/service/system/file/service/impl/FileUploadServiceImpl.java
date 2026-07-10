@@ -48,8 +48,8 @@ public class FileUploadServiceImpl extends ServiceImpl<FileRecordMapper, FileRec
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public FileUploadResultDTO upload(FileUploadForm form) {
-		FileRecordEntity entity = buildUploadedEntity(form.getFile(), form);
-		save(entity);
+		FileRecordEntity entity = buildUploadedEntity(form.getFile(), form, FileUploadMode.SIMPLE);
+		super.save(entity);
 
 		return FileUploadConverter.INSTANCE.toResultDTO(entity);
 	}
@@ -62,10 +62,10 @@ public class FileUploadServiceImpl extends ServiceImpl<FileRecordMapper, FileRec
 	public List<FileUploadResultDTO> uploadMultiple(MultipleFileUploadForm form) {
 		List<FileRecordEntity> entities = form.getFiles()
 			.stream()
-			.map(file -> buildUploadedEntity(file, form))
+			.map(file -> buildUploadedEntity(file, form, FileUploadMode.SIMPLE))
 			.toList();
 
-		entities.forEach(this::save);
+		super.saveBatch(entities);
 		return entities.stream().map(FileUploadConverter.INSTANCE::toResultDTO).toList();
 	}
 
@@ -73,9 +73,11 @@ public class FileUploadServiceImpl extends ServiceImpl<FileRecordMapper, FileRec
 	 * 校验文件、解析平台并上传，组装待落库实体
 	 * @param file 上传文件
 	 * @param metadata 上传元数据
+	 * @param uploadMode 上传模式
 	 * @return 文件记录实体
 	 */
-	private FileRecordEntity buildUploadedEntity(MultipartFile file, FileUploadMetadata metadata) {
+	private FileRecordEntity buildUploadedEntity(MultipartFile file, FileUploadMetadata metadata,
+			FileUploadMode uploadMode) {
 		if (file == null || file.isEmpty()) {
 			throw new SystemBusinessException(SystemCommonResultCode.PARAM_REQUIRED, "file");
 		}
@@ -115,7 +117,7 @@ public class FileUploadServiceImpl extends ServiceImpl<FileRecordMapper, FileRec
 		entity.setBizId(metadata.getBizId());
 		entity.setRemark(metadata.getRemark());
 		entity.setIsPrivate(isPrivate);
-		entity.setUploadMode(FileUploadMode.SIMPLE.getCode());
+		entity.setUploadMode(uploadMode.getCode());
 		return entity;
 	}
 

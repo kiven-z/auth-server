@@ -8,30 +8,32 @@ import com.auth.service.system.file.exception.FileStorageException;
 import com.auth.service.system.file.exception.FileUploadResultCode;
 import com.auth.service.system.file.mapper.FileRecordMapper;
 import com.auth.service.system.file.model.entity.FileRecordEntity;
-import com.auth.service.system.file.support.FileRecordDeletionSupport;
+import com.auth.service.system.file.storage.core.StoragePlatformFacade;
+import com.auth.service.system.file.storage.core.StoragePlatformFacadeRegistry;
+import com.auth.service.system.file.storage.core.provider.FileStorageProvider;
+import com.baomidou.mybatisplus.extension.repository.CrudRepository;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.lang.reflect.Field;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 /**
- * {@link FileGovernanceServiceImpl} 单元测试
+ * {@link FileRecordServiceImpl} 内部接口能力单元测试。
  */
-@DisplayName("FileGovernanceServiceImpl 文件治理")
+@DisplayName("FileRecordServiceImpl 内部接口能力")
 @ExtendWith(MockitoExtension.class)
-class FileGovernanceServiceImplTest {
+class InternalFileRecordServiceImplTest {
 
 	private static final Long OWNER_USER_ID = 9001L;
 
@@ -43,10 +45,23 @@ class FileGovernanceServiceImplTest {
 	private FileRecordMapper fileRecordMapper;
 
 	@Mock
-	private FileRecordDeletionSupport fileRecordDeletionSupport;
+	private StoragePlatformFacadeRegistry facadeRegistry;
 
-	@InjectMocks
-	private FileGovernanceServiceImpl fileGovernanceService;
+	@Mock
+	private StoragePlatformFacade storagePlatformFacade;
+
+	@Mock
+	private FileStorageProvider minioProvider;
+
+	private FileRecordServiceImpl fileRecordService;
+
+	@BeforeEach
+	void setUp() throws Exception {
+		fileRecordService = spy(new FileRecordServiceImpl(facadeRegistry));
+		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
+		baseMapperField.setAccessible(true);
+		baseMapperField.set(fileRecordService, fileRecordMapper);
+	}
 
 	private static FileRecordEntity buildEntity() {
 		FileRecordEntity entity = new FileRecordEntity();
@@ -69,7 +84,7 @@ class FileGovernanceServiceImplTest {
 		when(fileRecordMapper.selectActiveByUrlAndOwner(eq(AVATAR_URL), isNull(), eq(OWNER_USER_ID), eq("avatar")))
 			.thenReturn(entity);
 
-		assertThatCode(() -> fileGovernanceService.assertOwnedFileUrl(OwnedFileAssertByUrlRequest.builder()
+		assertThatCode(() -> fileRecordService.assertOwnedFileUrl(OwnedFileAssertByUrlRequest.builder()
 			.url(AVATAR_URL)
 			.ownerUserId(OWNER_USER_ID)
 			.bizType("avatar")
@@ -83,12 +98,11 @@ class FileGovernanceServiceImplTest {
 		when(fileRecordMapper.selectActiveByUrlAndOwner(eq(AVATAR_URL), isNull(), eq(OWNER_USER_ID), eq("avatar")))
 			.thenReturn(null);
 
-		ThrowingCallable executable = () -> fileGovernanceService
-			.assertOwnedFileUrl(OwnedFileAssertByUrlRequest.builder()
-				.url(AVATAR_URL)
-				.ownerUserId(OWNER_USER_ID)
-				.bizType("avatar")
-				.build());
+		ThrowingCallable executable = () -> fileRecordService.assertOwnedFileUrl(OwnedFileAssertByUrlRequest.builder()
+			.url(AVATAR_URL)
+			.ownerUserId(OWNER_USER_ID)
+			.bizType("avatar")
+			.build());
 		assertThatThrownBy(executable).isInstanceOf(FileStorageException.class)
 			.extracting(ex -> ((FileStorageException) ex).getResultCode())
 			.isEqualTo(FileUploadResultCode.FILE_RECORD_NOT_FOUND);
@@ -103,15 +117,16 @@ class FileGovernanceServiceImplTest {
 		when(fileRecordMapper.selectActiveByUrlAndOwner(isNull(), eq(objectKey), eq(OWNER_USER_ID), eq("avatar")))
 			.thenReturn(null);
 
-		fileGovernanceService.tryDeleteOwnedByUrl(OwnedFileDeleteByUrlRequest.builder()
+		fileRecordService.tryDeleteOwnedByUrl(OwnedFileDeleteByUrlRequest.builder()
 			.url(url)
 			.ownerUserId(OWNER_USER_ID)
 			.deleteSource(FileDeleteSource.SYSTEM_ACTION.getCode())
 			.bizType("avatar")
 			.build());
 
-		verify(fileRecordDeletionSupport, never()).applyDeletion(anyList(),
-				eq(FileDeleteSource.SYSTEM_ACTION.getCode()), eq(OWNER_USER_ID));
+		verify(facadeRegistry, never()).resolve(any());
+		verify(fileRecordMapper, never()).deletePhysicallyByIds(anyList(), anyBoolean());
+		verify(fileRecordService, never()).updateBatchById(anyList());
 	}
 
 	@Test
@@ -122,16 +137,19 @@ class FileGovernanceServiceImplTest {
 		when(fileRecordMapper.selectActiveByUrlAndOwner(isNull(), eq(AVATAR_OBJECT_KEY), eq(OWNER_USER_ID),
 				eq("avatar")))
 			.thenReturn(entity);
+		when(facadeRegistry.resolve(StoragePlatformEnum.MINIO)).thenReturn(storagePlatformFacade);
+		when(storagePlatformFacade.provider()).thenReturn(minioProvider);
 
-		fileGovernanceService.tryDeleteOwnedByUrl(OwnedFileDeleteByUrlRequest.builder()
+		fileRecordService.tryDeleteOwnedByUrl(OwnedFileDeleteByUrlRequest.builder()
 			.url(AVATAR_URL)
 			.ownerUserId(OWNER_USER_ID)
 			.deleteSource(FileDeleteSource.SYSTEM_ACTION.getCode())
 			.bizType("avatar")
 			.build());
 
-		verify(fileRecordDeletionSupport).applyDeletion(anyList(), eq(FileDeleteSource.SYSTEM_ACTION.getCode()),
-				eq(OWNER_USER_ID));
+		verify(minioProvider).delete("public", AVATAR_OBJECT_KEY);
+		verify(fileRecordMapper).deletePhysicallyByIds(List.of(100L), false);
+		verify(fileRecordService, never()).updateBatchById(anyList());
 	}
 
 }

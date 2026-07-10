@@ -5,7 +5,9 @@ import java.util.List;
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.common.ip.IpAddressService;
+import com.auth.common.web.context.SpringContextHolder;
 import com.auth.service.system.admin.excel.user.SysUserSpreadsheetService;
+import com.auth.service.system.admin.model.form.user.SysUserAvatarUpdateForm;
 import com.auth.service.system.admin.model.query.user.SysUserPageQuery;
 import com.auth.service.system.admin.model.vo.user.SysUserDetailVO;
 import com.auth.service.system.admin.model.vo.user.SysUserPageVO;
@@ -14,12 +16,17 @@ import com.auth.service.system.admin.service.admin.SysUserQueryService;
 import com.auth.service.system.admin.service.admin.SysUserService;
 import com.auth.service.system.admin.support.user.UserPasswordService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.MessageSource;
+
+import java.util.Locale;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -51,12 +58,23 @@ class SysUserControllerTest {
 	@Mock
 	private IpAddressService ipAddressService;
 
+	@Mock
+	private ApplicationContext applicationContext;
+
+	@Mock
+	private MessageSource messageSource;
+
 	private SysUserController controller;
 
 	@BeforeEach
 	void setUp() {
 		controller = new SysUserController(sysUserService, sysUserQueryService, sysUserSpreadsheetService,
 				userPasswordService, ipAddressService);
+	}
+
+	@AfterEach
+	void tearDown() {
+		SpringContextHolder.registerApplicationContext(null);
 	}
 
 	@Test
@@ -104,6 +122,25 @@ class SysUserControllerTest {
 		assertThat(result.getData().getId()).isEqualTo(7L);
 		assertThat(result.getData().getUsername()).isEqualTo("detail-user");
 		verify(sysUserQueryService).getDetail(7L);
+	}
+
+	@Test
+	@DisplayName("PUT /avatar：委托 SysUserService.updateAvatar")
+	void updateAvatarDelegatesToService() {
+		SysUserAvatarUpdateForm form = new SysUserAvatarUpdateForm();
+		form.setUserId(7L);
+		form.setAvatar("https://cdn.example.com/public/avatar/new.png");
+
+		when(applicationContext.getBean(MessageSource.class)).thenReturn(messageSource);
+		when(messageSource.getMessage(eq("operation.success"), any(Object[].class), any(Locale.class)))
+			.thenReturn("Operation successful");
+		SpringContextHolder.registerApplicationContext(applicationContext);
+
+		Result<String> result = controller.updateAvatar(form);
+
+		assertThat(result.getData()).isNull();
+		assertThat(result.getMessage()).isEqualTo("Operation successful");
+		verify(sysUserService).updateAvatar(form);
 	}
 
 }

@@ -27,7 +27,12 @@ public enum FileBizType {
 	/**
 	 * 通用附件
 	 */
-	ATTACHMENT("attachment", VisibilityRule.DEFAULT_PRIVATE),;
+	ATTACHMENT("attachment", VisibilityRule.DEFAULT_PRIVATE),
+
+	/**
+	 * 内部导出文件
+	 */
+	INTERNAL_EXPORT("internal_export", VisibilityRule.FORCE_PRIVATE),;
 
 	/**
 	 * 已注册业务类型索引
