@@ -1,31 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.auth.service.auth.mapper.AuthorizationGrantForwardFragments">
-	<!--
-		正向片段：userId → USER/DEPT/POST 主体。
-		用于功能权限 grant 展开；修改 grant 展开规则时只维护本文件。
-	-->
+    <!--
+        正向片段：userId → USER/DEPT/POST 主体。
+        用于功能权限 grant 展开；修改 grant 展开规则时只维护本文件。
+    -->
 
-	<!-- 功能权限：单用户主体 CTE（user_subjects）。步骤 4 的 PROJECT 扩展注释为使用说明，请勿删除。 -->
-	<sql id="fwdUserSubjectsForFunctionalGrant">
-		WITH user_subjects AS (SELECT 'USER' AS sub_type, #{userId} AS sub_id
-							   UNION ALL
-							   SELECT 'DEPT' AS sub_type, dc.ancestor_id AS sub_id
-							   FROM user_dept ud
-										JOIN dept_closure dc ON ud.dept_id = dc.descendant_id
-										JOIN sys_dept d ON d.id = ud.dept_id AND d.status = 1
-										JOIN sys_dept da
-											 ON da.id = dc.ancestor_id AND da.status = 1
-							   WHERE ud.user_id = #{userId}
-								 AND ud.status IN (1, 2)
-							   UNION ALL
-							   SELECT 'POST' AS sub_type, up.post_id AS sub_id
-							   FROM user_post up
-										INNER JOIN sys_post sp ON sp.id = up.post_id AND sp.status = 1
-							   WHERE up.user_id = #{userId}
-								 AND up.status IN (1, 2)
-			-- 未来扩展：在此处 UNION ALL 增加 PROJECT 或其他主体即可
-			-- UNION ALL SELECT 'PROJECT', project_id FROM user_project ...
-		)
-	</sql>
+    <!-- 功能权限：多用户主体 CTE（user_subjects），批量画像构建使用 -->
+    <sql id="fwdUserSubjectsForFunctionalGrantByUserIds">
+        WITH input_users AS (
+            SELECT
+                id AS user_id
+            FROM
+                sys_user
+            WHERE
+                id IN
+        <foreach collection="userIds" item="userId" open="(" separator="," close=")">
+        #{userId}
+        </foreach>
+            ),
+            user_subjects AS (
+        SELECT
+            'USER' AS sub_type,
+            u.user_id AS sub_id,
+            u.user_id AS user_id
+        FROM
+            input_users u
+        UNION ALL
+        SELECT
+            'DEPT' AS sub_type,
+            dc.ancestor_id AS sub_id,
+            ud.user_id AS user_id
+        FROM
+            user_dept ud
+            JOIN input_users u ON ud.user_id = u.user_id
+            JOIN dept_closure dc ON ud.dept_id = dc.descendant_id
+            JOIN sys_dept d ON d.id = ud.dept_id
+            AND d.status = 1
+            JOIN sys_dept da ON da.id = dc.ancestor_id
+            AND da.status = 1
+        WHERE
+            ud.status IN (1, 2)
+            -- 未来扩展：在此处 UNION ALL 增加 PROJECT 或其他主体即可
+            -- UNION ALL SELECT 'PROJECT', project_id FROM user_project ...
+        UNION ALL
+        SELECT
+            'POST' AS sub_type,
+            up.post_id AS sub_id,
+            up.user_id AS user_id
+        FROM
+            user_post up
+            JOIN input_users u ON up.user_id = u.user_id
+            INNER JOIN sys_post sp ON sp.id = up.post_id
+            AND sp.status = 1
+        WHERE
+            up.status IN (1, 2)
+            )
+    </sql>
 </mapper>

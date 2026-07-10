@@ -1,11 +1,11 @@
 package com.auth.service.auth.mapper;
 
-import java.util.List;
-
 import com.auth.service.auth.model.po.scope.RoleScopePO;
-import com.auth.service.auth.model.po.scope.UserScopePO;
+import com.auth.service.auth.model.po.scope.UserScopeByUserPO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * 数据范围
@@ -16,11 +16,11 @@ import org.apache.ibatis.annotations.Param;
 public interface DataScopeMapper {
 
 	/**
-	 * 按用户 ID 查询数据范围配置（至多一行）
-	 * @param userId 用户 ID
-	 * @return 配置行；不存在时为 {@code null}
+	 * 按用户 ID 批量查询 user_scope
+	 * @param userIds 用户 ID 列表，非空
+	 * @return 用户范围行
 	 */
-	UserScopePO selectByUserId(@Param("userId") Long userId);
+	List<UserScopeByUserPO> selectByUserIds(@Param("userIds") List<Long> userIds);
 
 	/**
 	 * 按角色码列表查询数据范围（每角色至多一行）

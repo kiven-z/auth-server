@@ -1,12 +1,13 @@
 package com.auth.service.auth.mapper;
 
-import java.util.List;
-
+import com.auth.service.auth.model.po.authorization.UserGrantCodeRowPO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 /**
- * 用户角色权限 Mapper（认证专用） 查询用户角色 查询用户权限 查询用户数据权限范围 查询用户策略
+ * 用户角色权限 Mapper（认证专用）
  *
  * @author Bunny
  */
@@ -14,17 +15,17 @@ import org.apache.ibatis.annotations.Param;
 public interface UserAuthorizationGrantMapper {
 
 	/**
-	 * 查询用户角色码
-	 * @param userId 用户Id
-	 * @return 角色列表
+	 * 批量查询用户角色码行
+	 * @param userIds 用户 ID 列表，非空
+	 * @return 用户角色码行
 	 */
-	List<String> selectRolesByUserId(@Param("userId") Long userId);
+	List<UserGrantCodeRowPO> selectRoleRowsByUserIds(@Param("userIds") List<Long> userIds);
 
 	/**
-	 * 查询用户权限码
-	 * @param userId 用户Id
-	 * @return 权限列表
+	 * 批量查询用户权限码行
+	 * @param userIds 用户 ID 列表，非空
+	 * @return 用户权限码行
 	 */
-	List<String> selectPermissionsByUserId(@Param("userId") Long userId);
+	List<UserGrantCodeRowPO> selectPermissionRowsByUserIds(@Param("userIds") List<Long> userIds);
 
 }

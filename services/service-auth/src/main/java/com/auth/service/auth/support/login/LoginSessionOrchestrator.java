@@ -1,5 +1,6 @@
 package com.auth.service.auth.support.login;
 
+import java.util.List;
 import java.util.UUID;
 
 import com.auth.module.security.contract.api.UserSessionIndex;
@@ -82,7 +83,7 @@ public class LoginSessionOrchestrator {
 			jti = UUID.randomUUID().toString();
 			long permVersion = profile.getPermVersion();
 
-			authProfileRedisCache.cacheProfile(profile);
+			authProfileRedisCache.cacheProfiles(List.of(profile));
 			profileCached = true;
 
 			TokenPair tokenPair = tokenService.buildTokenPair(userId, jti, permVersion);

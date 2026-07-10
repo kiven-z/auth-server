@@ -134,7 +134,7 @@ class LoginSessionOrchestratorTest {
 				authProfileRedisCache, tokenService, refreshTokenCookieWriter, loginFailureRateLimiter,
 				loginAuditService);
 		inOrder.verify(sessionLimitGuard).assertSessionLimit(TestConstants.USER_ID);
-		inOrder.verify(authProfileRedisCache).cacheProfile(profile);
+		inOrder.verify(authProfileRedisCache).cacheProfiles(List.of(profile));
 		inOrder.verify(tokenService).buildTokenPair(eq(TestConstants.USER_ID), anyString(), eq(1L));
 		inOrder.verify(userSessionIndexFactory)
 			.buildSessionIndex(same(httpServletRequest), eq(TestConstants.USER_ID), anyString(),
@@ -188,7 +188,7 @@ class LoginSessionOrchestratorTest {
 		assertThrows(AuthBusinessException.class,
 				() -> orchestrator.issueSession(loginResult, false, httpServletRequest));
 
-		verify(authProfileRedisCache).cacheProfile(profile);
+		verify(authProfileRedisCache).cacheProfiles(List.of(profile));
 		verify(authProfileRedisCache).evictProfile(TestConstants.USER_ID);
 		verify(userSessionRedisStore, never()).registerSession(any());
 		verify(loginAuditService).auditOrchestrationFailure(same(httpServletRequest),

@@ -1,8 +1,5 @@
 package com.auth.service.auth.support.invalidation;
 
-import java.util.Collection;
-import java.util.List;
-
 import cn.hutool.core.collection.CollUtil;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.support.authorization.AuthProfileRepository;
@@ -10,8 +7,10 @@ import com.auth.service.auth.support.redis.AuthProfileRedisCache;
 import com.auth.service.auth.util.BatchPartition;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.stereotype.Service;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * 授权画像物化：分批重建缓存或驱逐 Redis 画像
@@ -34,22 +33,14 @@ public class AuthProfileMaterializationService {
 	 * @return 成功刷新数量
 	 */
 	public int refreshInBatches(Collection<Long> userIds, int batchSize) {
-		// 如果用户ID集合为空或批量大小小于等于0，则返回0
 		if (CollUtil.isEmpty(userIds) || batchSize <= 0) {
 			return 0;
 		}
 
-		// 分批刷新用户授权画像
 		int refreshed = 0;
 		for (List<Long> batch : BatchPartition.partitionIds(userIds, batchSize)) {
-			for (Long userId : batch) {
-				// 刷新单个用户授权画像
-				if (refreshOne(userId)) {
-					refreshed++;
-				}
-			}
+			refreshed += refreshBatch(batch);
 		}
-
 		return refreshed;
 	}
 
@@ -60,65 +51,45 @@ public class AuthProfileMaterializationService {
 	 * @return 成功驱逐数量
 	 */
 	public int evictInBatches(Collection<Long> userIds, int batchSize) {
-		// 如果用户ID集合为空或批量大小小于等于0，则返回0
 		if (CollUtil.isEmpty(userIds) || batchSize <= 0) {
 			return 0;
 		}
 
-		// 驱逐数量
 		int evicted = 0;
-		// 分批驱逐用户授权画像
 		for (List<Long> batch : BatchPartition.partitionIds(userIds, batchSize)) {
-			for (Long userId : batch) {
-				if (evictOne(userId)) {
-					evicted++;
-				}
-			}
+			evicted += evictBatch(batch);
 		}
 		return evicted;
 	}
 
-	/**
-	 * 刷新单个用户授权画像。
-	 * @param userId 用户ID
-	 * @return 是否成功刷新
-	 */
-	private boolean refreshOne(Long userId) {
-		// 如果用户ID为空或小于等于0，则返回false
-		if (userId == null) {
-			return false;
+	private int refreshBatch(List<Long> batch) {
+		if (CollUtil.isEmpty(batch)) {
+			return 0;
 		}
-		// 构建用户授权画像
 		try {
-			AuthProfile profile = authProfileRepository.buildByUserId(userId);
-			authProfileRedisCache.cacheProfile(profile);
-			return true;
+			List<AuthProfile> profiles = authProfileRepository.buildByUserIds(batch);
+			if (CollUtil.isEmpty(profiles)) {
+				return 0;
+			}
+			authProfileRedisCache.cacheProfiles(profiles);
+			return profiles.size();
 		}
 		catch (RuntimeException ex) {
-			log.warn("Failed to refresh auth profile for userId={}: {}", userId, ex.getMessage());
-			return false;
+			log.warn("Failed to refresh auth profiles for userIds={}: {}", batch, ex.getMessage());
+			return 0;
 		}
 	}
 
-	/**
-	 * 驱逐单个用户授权画像。
-	 * @param userId 用户ID
-	 * @return 是否成功驱逐
-	 */
-	private boolean evictOne(Long userId) {
-		// 如果用户ID为空或小于等于0，则返回false
-		if (userId == null) {
-			return false;
+	private int evictBatch(List<Long> batch) {
+		if (CollUtil.isEmpty(batch)) {
+			return 0;
 		}
-
 		try {
-			// 移除用户授权画像缓存
-			authProfileRedisCache.evictProfile(userId);
-			return true;
+			return authProfileRedisCache.evictProfiles(batch);
 		}
 		catch (RuntimeException ex) {
-			log.warn("Failed to evict auth profile for userId={}: {}", userId, ex.getMessage());
-			return false;
+			log.warn("Failed to evict auth profiles for userIds={}: {}", batch, ex.getMessage());
+			return 0;
 		}
 	}
 

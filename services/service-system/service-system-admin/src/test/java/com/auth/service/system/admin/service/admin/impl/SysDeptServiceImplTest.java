@@ -134,7 +134,8 @@ class SysDeptServiceImplTest {
 		verify(deptReferenceChecker).requireAbsentDeptCodes(List.of("RD"));
 		verify(deptReferenceChecker).normalizeAndRequireActiveParent(0L);
 		verify(sysDeptService).saveBatch(anyList(), eq(500));
-		verify(deptClosureMaintainer).insertNode(anyLong(), eq(0L));
+		verify(deptClosureMaintainer)
+			.insertNodes(argThat(nodes -> nodes.size() == 1 && nodes.get(0).getParentId() == 0L));
 	}
 
 	@Test
@@ -151,7 +152,7 @@ class SysDeptServiceImplTest {
 			.isEqualTo(SystemCommonResultCode.DATA_CODE_DUPLICATE);
 
 		verify(sysDeptService, never()).saveBatch(anyList(), anyInt());
-		verify(deptClosureMaintainer, never()).insertNode(anyLong(), anyLong());
+		verify(deptClosureMaintainer, never()).insertNodes(anyList());
 	}
 
 	@Test

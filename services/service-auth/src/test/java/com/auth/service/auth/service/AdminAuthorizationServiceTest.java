@@ -1,14 +1,12 @@
 package com.auth.service.auth.service;
 
-import java.util.Arrays;
-import java.util.List;
-
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.TestConstants;
+import com.auth.service.auth.config.AuthorizationInvalidationProperties;
 import com.auth.service.auth.model.vo.authorization.EffectiveCodesVO;
 import com.auth.service.auth.service.impl.AdminAuthorizationServiceImpl;
 import com.auth.service.auth.support.authorization.AuthProfileRepository;
-import com.auth.service.auth.support.redis.AuthProfileRedisCache;
+import com.auth.service.auth.support.invalidation.AuthProfileMaterializationService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,14 +14,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link AdminAuthorizationService} 单元测试
@@ -36,7 +31,10 @@ class AdminAuthorizationServiceTest {
 	private AuthProfileRepository authProfileRepository;
 
 	@Mock
-	private AuthProfileRedisCache authProfileRedisCache;
+	private AuthProfileMaterializationService authProfileMaterializationService;
+
+	@Mock
+	private AuthorizationInvalidationProperties authorizationInvalidationProperties;
 
 	@InjectMocks
 	private AdminAuthorizationServiceImpl adminAuthorizationService;
@@ -80,19 +78,16 @@ class AdminAuthorizationServiceTest {
 	}
 
 	@Test
-	@DisplayName("刷新缓存：入参为空/含 null 时不抛异常且跳过 null")
-	void refreshUserCache_shouldIgnoreEmptyAndNullAndSwallowExceptions() {
+	@DisplayName("刷新缓存：入参为空/含 null 时委托物化服务分批刷新")
+	void refreshUserCache_shouldDelegateToMaterializationService() {
+		when(authorizationInvalidationProperties.getBatchSize()).thenReturn(500);
+
 		assertDoesNotThrow(() -> adminAuthorizationService.refreshUserCache(List.of()));
-		verifyNoInteractions(authProfileRepository, authProfileRedisCache);
+		verifyNoInteractions(authProfileMaterializationService);
 
-		AuthProfile profile = mock(AuthProfile.class);
-		when(authProfileRepository.buildByUserId(TestConstants.USER_ID)).thenReturn(profile);
-		doThrow(new RuntimeException("boom")).when(authProfileRedisCache).cacheProfile(profile);
+		adminAuthorizationService.refreshUserCache(Arrays.asList(null, TestConstants.USER_ID));
 
-		assertDoesNotThrow(
-				() -> adminAuthorizationService.refreshUserCache(Arrays.asList(null, TestConstants.USER_ID)));
-		verify(authProfileRepository).buildByUserId(TestConstants.USER_ID);
-		verify(authProfileRedisCache).cacheProfile(profile);
+		verify(authProfileMaterializationService).refreshInBatches(List.of(TestConstants.USER_ID), 500);
 	}
 
 }

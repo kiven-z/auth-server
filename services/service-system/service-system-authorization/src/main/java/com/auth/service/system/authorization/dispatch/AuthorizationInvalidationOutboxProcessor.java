@@ -1,8 +1,5 @@
 package com.auth.service.system.authorization.dispatch;
 
-import java.time.LocalDateTime;
-import java.util.Objects;
-
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.core.model.response.Result;
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
@@ -16,8 +13,10 @@ import com.auth.service.system.authorization.model.enums.AuthorizationInvalidati
 import com.auth.service.system.authorization.outbox.InvalidationOutboxPayloadCodec;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Outbox 投递执行：调用 auth {@code /invalidate} 并更新 Outbox 状态。
@@ -66,11 +65,11 @@ public class AuthorizationInvalidationOutboxProcessor {
 		if (claimed == 0) {
 			return false;
 		}
-		SysAuthorizationInvalidationOutboxEntity latest = outboxMapper.selectById(row.getId());
-		if (latest == null) {
-			return false;
-		}
-		return dispatchRow(latest);
+		row.setStatus(AuthorizationInvalidationOutboxStatus.PROCESSING.name());
+		row.setLockedBy(lockedBy);
+		row.setLockedAt(now);
+		row.setVersion(row.getVersion() + 1);
+		return dispatchRow(row);
 	}
 
 	/**

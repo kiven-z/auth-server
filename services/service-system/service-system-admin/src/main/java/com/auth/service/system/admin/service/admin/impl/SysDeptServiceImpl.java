@@ -1,7 +1,5 @@
 package com.auth.service.system.admin.service.admin.impl;
 
-import java.util.List;
-
 import cn.hutool.core.collection.CollUtil;
 import com.auth.common.core.utils.FieldChangeSupport;
 import com.auth.common.core.utils.TreeParentIdUtil;
@@ -12,6 +10,7 @@ import com.auth.service.system.admin.mapper.dept.SysDeptMapper;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.form.dept.SysDeptForm;
 import com.auth.service.system.admin.model.form.dept.SysDeptMoveForm;
+import com.auth.service.system.admin.model.po.dept.DeptClosureNodePO;
 import com.auth.service.system.admin.service.admin.SysDeptService;
 import com.auth.service.system.admin.support.dept.DeptClosureMaintainer;
 import com.auth.service.system.admin.support.dept.DeptReferenceChecker;
@@ -22,9 +21,10 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * 部门写服务实现。
@@ -68,9 +68,10 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 		}).toList();
 		super.saveBatch(entities, IMPORT_SAVE_BATCH_SIZE);
 
-		for (SysDeptEntity entity : entities) {
-			deptClosureMaintainer.insertNode(entity.getId(), entity.getParentId());
-		}
+		List<DeptClosureNodePO> deptClosureNodes = entities.stream()
+			.map(entity -> new DeptClosureNodePO(entity.getId(), entity.getParentId()))
+			.toList();
+		deptClosureMaintainer.insertNodes(deptClosureNodes);
 	}
 
 	/**

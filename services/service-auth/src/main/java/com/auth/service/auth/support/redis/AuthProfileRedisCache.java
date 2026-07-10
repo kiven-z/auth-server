@@ -1,14 +1,18 @@
 package com.auth.service.auth.support.redis;
 
-import java.util.Optional;
-
+import cn.hutool.core.collection.CollUtil;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jetbrains.annotations.NotNull;
-
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.auth.module.security.contract.redis.SecurityRedisKey.USER_PERM;
 
@@ -30,14 +34,23 @@ public class AuthProfileRedisCache {
 	}
 
 	/**
-	 * 写入授权画像缓存
-	 * @param authProfile 授权画像
+	 * 批量写入授权画像缓存
+	 * @param authProfiles 授权画像列表
 	 */
-	public void cacheProfile(@NotNull AuthProfile authProfile) {
-		Long userId = authProfile.getUserId();
-		Assert.notNull(userId, "用户ID不能为空");
+	public void cacheProfiles(@NotNull Collection<AuthProfile> authProfiles) {
+		if (CollUtil.isEmpty(authProfiles)) {
+			return;
+		}
+		for (AuthProfile authProfile : authProfiles) {
+			if (authProfile == null) {
+				continue;
+			}
 
-		redisTemplate.opsForValue().set(USER_PERM.key(userId), authProfile, USER_PERM.getDefaultTtl());
+			Long userId = authProfile.getUserId();
+			Assert.notNull(userId, "用户ID不能为空");
+
+			redisTemplate.opsForValue().set(USER_PERM.key(userId), authProfile, USER_PERM.getDefaultTtl());
+		}
 	}
 
 	/**
@@ -67,6 +80,27 @@ public class AuthProfileRedisCache {
 	public void evictProfile(long userId) {
 		String key = USER_PERM.key(userId);
 		redisTemplate.delete(key);
+	}
+
+	/**
+	 * 批量驱逐授权画像缓存
+	 * @param userIds 用户 ID
+	 * @return 成功驱逐数量
+	 */
+	public int evictProfiles(Collection<Long> userIds) {
+		if (CollUtil.isEmpty(userIds)) {
+			return 0;
+		}
+		List<String> keys = userIds.stream()
+			.filter(Objects::nonNull)
+			.map(USER_PERM::key)
+			.distinct()
+			.collect(Collectors.toList());
+		if (CollUtil.isEmpty(keys)) {
+			return 0;
+		}
+		Long deleted = redisTemplate.delete(keys);
+		return deleted.intValue();
 	}
 
 }

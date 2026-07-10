@@ -2,6 +2,7 @@ package com.auth.service.system.admin.mapper.dept;
 
 import com.auth.service.system.admin.model.po.dept.DeptClosureDepthChainRowPO;
 import com.auth.service.system.admin.model.po.dept.DeptClosureHealthStatsPO;
+import com.auth.service.system.admin.model.po.dept.DeptClosureNodePO;
 import com.auth.service.system.admin.model.po.dept.DeptClosureParentLinkRowPO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -17,11 +18,10 @@ import java.util.List;
 public interface DeptClosureMapper {
 
 	/**
-	 * 新增节点后写入闭包
-	 * @param deptId 新部门主键
-	 * @param parentId 父部门 ID，顶级传
+	 * 批量新增节点后写入闭包
+	 * @param nodes 新增节点列表
 	 */
-	void insertPaths(@Param("deptId") Long deptId, @Param("parentId") Long parentId);
+	void insertPathsBatch(@Param("nodes") List<DeptClosureNodePO> nodes);
 
 	/**
 	 * 物理删除子树在闭包表中的全部路径

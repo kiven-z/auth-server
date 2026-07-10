@@ -1,11 +1,11 @@
 package com.auth.service.auth.model.po.scope;
 
-import java.io.Serial;
-import java.io.Serializable;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * role_scope 只读查询投影
@@ -18,6 +18,9 @@ public class RoleScopePO implements Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
+
+	@Schema(description = "角色码")
+	private String roleCode;
 
 	@Schema(description = "范围类型：ALL/SELF/DEPT/DEPT_AND_CHILD")
 	private String scopeType;

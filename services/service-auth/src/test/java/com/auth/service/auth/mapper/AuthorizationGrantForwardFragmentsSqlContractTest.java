@@ -28,7 +28,7 @@ class AuthorizationGrantForwardFragmentsSqlContractTest {
 	void deptForwardExpansionRequiresEnabledDeptStatus() throws IOException {
 		String xml = readClasspathText();
 
-		assertThat(xml).contains("fwdUserSubjectsForFunctionalGrant")
+		assertThat(xml).contains("fwdUserSubjectsForFunctionalGrantByUserIds")
 			.contains("d.id = ud.dept_id")
 			.contains("d.status = 1")
 			.contains("da.id = dc.ancestor_id")
@@ -40,7 +40,7 @@ class AuthorizationGrantForwardFragmentsSqlContractTest {
 	void postForwardExpansionRequiresEnabledPostStatus() throws IOException {
 		String xml = readClasspathText();
 
-		assertThat(xml).contains("fwdUserSubjectsForFunctionalGrant")
+		assertThat(xml).contains("fwdUserSubjectsForFunctionalGrantByUserIds")
 			.contains("sp.id = up.post_id")
 			.contains("sp.status = 1")
 			.doesNotContain("is_deleted");

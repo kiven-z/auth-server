@@ -1,19 +1,19 @@
 package com.auth.service.auth.service.impl;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-
 import cn.hutool.core.collection.CollUtil;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
+import com.auth.service.auth.config.AuthorizationInvalidationProperties;
 import com.auth.service.auth.model.vo.authorization.EffectiveCodesVO;
 import com.auth.service.auth.service.AdminAuthorizationService;
 import com.auth.service.auth.support.authorization.AuthProfileRepository;
-import com.auth.service.auth.support.redis.AuthProfileRedisCache;
+import com.auth.service.auth.support.invalidation.AuthProfileMaterializationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.stereotype.Service;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * 管理端授权画像运维：按用户重建并写入 Redis
@@ -27,7 +27,9 @@ public class AdminAuthorizationServiceImpl implements AdminAuthorizationService 
 
 	private final AuthProfileRepository authProfileRepository;
 
-	private final AuthProfileRedisCache authProfileRedisCache;
+	private final AuthProfileMaterializationService authProfileMaterializationService;
+
+	private final AuthorizationInvalidationProperties authorizationInvalidationProperties;
 
 	/**
 	 * 按用户 ID 加载授权画像（供内部接口查询生效角色码与权限码）
@@ -71,15 +73,13 @@ public class AdminAuthorizationServiceImpl implements AdminAuthorizationService 
 			return;
 		}
 
-		userIds.stream().filter(Objects::nonNull).forEach(userId -> {
-			try {
-				AuthProfile profile = authProfileRepository.buildByUserId(userId);
-				authProfileRedisCache.cacheProfile(profile);
-			}
-			catch (RuntimeException ex) {
-				log.warn("Failed to refresh auth profile cache for userId={}: {}", userId, ex.getMessage());
-			}
-		});
+		List<Long> normalizedUserIds = userIds.stream().filter(Objects::nonNull).distinct().toList();
+		if (normalizedUserIds.isEmpty()) {
+			return;
+		}
+
+		Integer batchSize = authorizationInvalidationProperties.getBatchSize();
+		authProfileMaterializationService.refreshInBatches(normalizedUserIds, batchSize);
 	}
 
 }
