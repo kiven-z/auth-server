@@ -28,7 +28,7 @@ public class AuthorizationInvalidationOutboxHistoryCleanupJob {
 	/**
 	 * 定时清理 SUCCESS 且已过保留期的 Outbox 记录
 	 */
-	@Scheduled(fixedDelayString = "${auth.authorization.success-cleanup-interval-ms:86400000}")
+	@Scheduled(cron = "${auth.authorization.success-cleanup-cron:0 30 3 * * ?}")
 	public void purgeSuccessHistory() {
 		if (!BooleanUtil.isTrue(properties.getSuccessCleanupEnabled())) {
 			return;

@@ -3,6 +3,8 @@ package com.auth.service.system.file.controller;
 import com.auth.common.core.model.response.Result;
 import com.auth.module.file.api.model.dto.FileUploadResultDTO;
 import com.auth.module.security.autoconfigure.annotation.AuthenticatedApi;
+import com.auth.module.security.contract.annotation.OperationLog;
+import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.file.model.form.FileUploadForm;
 import com.auth.service.system.file.model.form.MultipleFileUploadForm;
 import com.auth.service.system.file.service.FileUploadService;
@@ -17,6 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+import static com.auth.module.security.contract.api.audit.AuditServiceDomain.SYSTEM;
+import static com.auth.service.system.common.model.SystemAuditBizModule.SYS_FILE;
+
 /**
  * 文件上传控制器
  *
@@ -30,6 +35,8 @@ public class FileUploadController {
 
 	private final FileUploadService fileUploadService;
 
+	@OperationLog(targetType = "FILE_UPLOAD", serviceDomain = SYSTEM, bizModule = SYS_FILE,
+			operation = OperationLogKind.CREATE)
 	@AuthenticatedApi
 	@Operation(summary = "单文件上传")
 	@PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -38,6 +45,8 @@ public class FileUploadController {
 		return Result.success(response);
 	}
 
+	@OperationLog(targetType = "FILE_UPLOAD_MULTIPLE", serviceDomain = SYSTEM, bizModule = SYS_FILE,
+			operation = OperationLogKind.CREATE)
 	@AuthenticatedApi
 	@Operation(summary = "多文件上传")
 	@PostMapping(value = "/upload/multiple", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

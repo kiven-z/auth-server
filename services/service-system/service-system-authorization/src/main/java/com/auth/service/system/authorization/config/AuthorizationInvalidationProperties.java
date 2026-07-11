@@ -1,6 +1,7 @@
 package com.auth.service.system.authorization.config;
 
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -68,11 +69,10 @@ public class AuthorizationInvalidationProperties {
 	private Boolean successCleanupEnabled = false;
 
 	/**
-	 * SUCCESS Outbox 清理 Job 扫描间隔（毫秒）
+	 * SUCCESS Outbox 清理 Job Cron（默认每天 03:30）
 	 */
-	@Min(3_600_000)
-	@NotNull
-	private Long successCleanupIntervalMs = 86_400_000L;
+	@NotBlank
+	private String successCleanupCron = "0 30 3 * * ?";
 
 	/**
 	 * 每批删除 SUCCESS Outbox 上限

@@ -1,9 +1,10 @@
 package com.auth.service.auth.config;
 
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
@@ -72,11 +73,10 @@ public class AuthorizationInvalidationProperties {
 	private Boolean successCleanupEnabled = false;
 
 	/**
-	 * 已完成幂等事件清理 Job 扫描间隔（毫秒）
+	 * 已完成幂等事件清理 Job Cron（默认每天 04:00）
 	 */
-	@Min(3_600_000)
-	@NotNull
-	private Long successCleanupIntervalMs = 86_400_000L;
+	@NotBlank
+	private String successCleanupCron = "0 0 4 * * ?";
 
 	/**
 	 * 每批删除已完成幂等事件上限
