@@ -2,6 +2,7 @@ package com.auth.service.auth.support.login;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import cn.hutool.crypto.digest.MD5;
@@ -25,12 +26,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -145,7 +146,7 @@ class RefreshTokenServiceTest {
 	}
 
 	@Test
-	@DisplayName("刷新：校验通过时返回新令牌并旋转 refresh")
+	@DisplayName("刷新：校验通过时返回新令牌、授权画像并旋转 refresh")
 	void refresh_shouldReturnNewTokenPair_whenAllChecksPass() {
 		when(jwtProperties.getRefreshExpired()).thenReturn(120L);
 		when(tokenService.parseRefreshToken(TestConstants.REFRESH_TOKEN)).thenReturn(token());
@@ -156,8 +157,13 @@ class RefreshTokenServiceTest {
 		session.setRefreshTokenHash(MD5.create().digestHex16(TestConstants.REFRESH_TOKEN));
 		when(userSessionRedisStore.loadUserSessionIndex(TestConstants.JTI)).thenReturn(Optional.of(session));
 
-		AuthProfile profile = mock(AuthProfile.class);
-		when(profile.getPermVersion()).thenReturn(9L);
+		AuthProfile profile = AuthProfile.builder()
+			.userId(TestConstants.USER_ID)
+			.username("alice")
+			.roles(List.of("ROLE_USER"))
+			.permissions(List.of("sys:user:query"))
+			.permVersion(9L)
+			.build();
 		when(authProfileRedisCache.loadCachedProfile(TestConstants.USER_ID)).thenReturn(Optional.of(profile));
 
 		LocalDateTime expires = LocalDateTime.now().plusMinutes(5);
@@ -176,6 +182,7 @@ class RefreshTokenServiceTest {
 		assertEquals("new-refresh", result.tokenPair().refreshToken());
 		assertEquals(expires, result.tokenPair().accessExpiresAt());
 		assertFalse(result.rememberMe());
+		assertSame(profile, result.authProfile());
 		verify(userSessionRedisStore).updateRefreshInfo(eq(TestConstants.JTI),
 				eq(MD5.create().digestHex16("new-refresh")), anyLong(), eq(Duration.ofSeconds(120L)));
 		verify(loginAuditService).auditRefreshTokenSuccess(isNull(), eq(TestConstants.USER_ID), eq(TestConstants.JTI));
@@ -194,8 +201,11 @@ class RefreshTokenServiceTest {
 		session.setRefreshTokenHash(MD5.create().digestHex16(TestConstants.REFRESH_TOKEN));
 		when(userSessionRedisStore.loadUserSessionIndex(TestConstants.JTI)).thenReturn(Optional.of(session));
 
-		AuthProfile profile = mock(AuthProfile.class);
-		when(profile.getPermVersion()).thenReturn(9L);
+		AuthProfile profile = AuthProfile.builder()
+			.userId(TestConstants.USER_ID)
+			.username("alice")
+			.permVersion(9L)
+			.build();
 		when(authProfileRedisCache.loadCachedProfile(TestConstants.USER_ID)).thenReturn(Optional.of(profile));
 		when(tokenService.buildTokenPair(TestConstants.USER_ID, TestConstants.JTI, 9L)).thenReturn(TokenPair.builder()
 			.accessToken("new-access")
@@ -206,6 +216,7 @@ class RefreshTokenServiceTest {
 		RefreshSessionResult result = newService().refreshToken(TestConstants.REFRESH_TOKEN, null);
 
 		assertTrue(result.rememberMe());
+		assertSame(profile, result.authProfile());
 	}
 
 }

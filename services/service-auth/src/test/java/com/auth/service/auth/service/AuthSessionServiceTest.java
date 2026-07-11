@@ -1,8 +1,10 @@
 package com.auth.service.auth.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
+import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.TestConstants;
 import com.auth.service.auth.model.response.RefreshTokenResponse;
 import com.auth.service.auth.model.response.UserLoginResponse;
@@ -81,7 +83,7 @@ class AuthSessionServiceTest {
 	}
 
 	@Test
-	@DisplayName("completeRefresh：刷新后按会话 rememberMe 重写 Cookie")
+	@DisplayName("completeRefresh：刷新后按会话 rememberMe 重写 Cookie，并下发授权快照")
 	void completeRefresh_shouldWriteCookieFromSessionRememberMe() {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		HttpServletResponse response = mock(HttpServletResponse.class);
@@ -92,10 +94,17 @@ class AuthSessionServiceTest {
 			.refreshToken("new-refresh")
 			.accessExpiresAt(expires)
 			.build();
+		AuthProfile profile = AuthProfile.builder()
+			.userId(TestConstants.USER_ID)
+			.username("alice")
+			.roles(List.of("ROLE_USER"))
+			.permissions(List.of("sys:user:query", "sys:user:update"))
+			.permVersion(3L)
+			.build();
 
 		when(refreshTokenCookieWriter.readToken(request)).thenReturn("old-refresh");
-		when(refreshTokenService.refreshToken("old-refresh", request))
-			.thenReturn(RefreshSessionResult.builder().tokenPair(tokenPair).rememberMe(false).build());
+		when(refreshTokenService.refreshToken("old-refresh", request)).thenReturn(
+				RefreshSessionResult.builder().tokenPair(tokenPair).rememberMe(false).authProfile(profile).build());
 		when(refreshTokenCookieWriter.resolveReadMeDay()).thenReturn(5L);
 
 		RefreshTokenResponse actual = authSessionService.completeRefresh(request, response);
@@ -104,6 +113,10 @@ class AuthSessionServiceTest {
 		assertEquals("new-refresh", actual.getRefreshToken());
 		assertEquals(expires, actual.getExpires());
 		assertEquals(5L, actual.getReadMeDay());
+		assertEquals(TestConstants.USER_ID, actual.getId());
+		assertEquals("alice", actual.getUsername());
+		assertEquals(List.of("ROLE_USER"), actual.getRoles());
+		assertEquals(List.of("sys:user:query", "sys:user:update"), actual.getPermissions());
 		verify(refreshTokenCookieWriter).resolveReadMeDay();
 		verify(refreshTokenCookieWriter).writeRefreshToken(response, request, "new-refresh", false);
 	}

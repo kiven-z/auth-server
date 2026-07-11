@@ -1,9 +1,5 @@
 package com.auth.service.auth.support.login;
 
-import java.time.Duration;
-import java.util.Objects;
-import java.util.Optional;
-
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.crypto.digest.MD5;
@@ -22,8 +18,11 @@ import com.auth.service.auth.support.token.TokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-
 import org.springframework.stereotype.Service;
+
+import java.time.Duration;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * 刷新令牌应用服务：校验会话、旋转 Refresh Token、撤销会话
@@ -87,15 +86,18 @@ public class RefreshTokenService {
 
 			// 旋转刷新令牌
 			TokenPair tokenPair = tokenService.buildTokenPair(refreshUserId, refreshJti, permVersion);
-			// 旋转刷新令牌
 			rotateRefreshInSession(refreshJti, tokenPair.refreshToken());
 
 			// 获取是否记住我
 			boolean rememberMe = BooleanUtil.isTrue(sessionIndex.getRememberMe());
 			// 记录成功刷新令牌
 			loginAuditService.auditRefreshTokenSuccess(request, refreshUserId, refreshJti);
-			// 返回刷新令牌结果
-			return RefreshSessionResult.builder().tokenPair(tokenPair).rememberMe(rememberMe).build();
+			// 返回刷新令牌结果（携带画像供前端同步角色/权限）
+			return RefreshSessionResult.builder()
+				.tokenPair(tokenPair)
+				.rememberMe(rememberMe)
+				.authProfile(profile)
+				.build();
 		}
 		catch (AuthBusinessException ex) {
 			Long userId = tryResolveUserIdFromRefreshToken(refreshToken);
@@ -157,9 +159,9 @@ public class RefreshTokenService {
 	}
 
 	/**
-	 * 旋转刷新令牌
-	 * @param jti 会话ID
-	 * @param refreshToken 刷新令牌
+	 * 将新的 Refresh Token 哈希与过期时间写入会话索引。
+	 * @param jti 会话 ID
+	 * @param refreshToken 新的刷新令牌明文
 	 */
 	private void rotateRefreshInSession(String jti, String refreshToken) {
 		String refreshTokenHash = MD5.create().digestHex16(refreshToken);
@@ -180,24 +182,19 @@ public class RefreshTokenService {
 		}
 		try {
 			JwtUserToken userToken = tokenService.parseRefreshToken(refreshToken);
-			return Optional.of(revokeServerSession(userToken));
+
+			String jti = userToken.getJti();
+			Long userId = userToken.getUserId();
+			userSessionRedisStore.terminateSession(userId, jti);
+
+			// 删除刷新令牌对应的服务端会话
+			LogoutSessionHint logoutSessionHint = LogoutSessionHint.builder().userId(userId).jti(jti).build();
+			return Optional.of(logoutSessionHint);
 		}
 		catch (RuntimeException ex) {
 			log.error("Failed to revoke session by refresh token", ex);
 			throw ex;
 		}
-	}
-
-	/**
-	 * 删除刷新令牌对应的服务端会话
-	 * @param userToken 刷新令牌解析结果
-	 * @return 登出审计上下文
-	 */
-	private LogoutSessionHint revokeServerSession(JwtUserToken userToken) {
-		String jti = userToken.getJti();
-		Long userId = userToken.getUserId();
-		userSessionRedisStore.terminateSession(userId, jti);
-		return LogoutSessionHint.builder().userId(userId).jti(jti).build();
 	}
 
 }
