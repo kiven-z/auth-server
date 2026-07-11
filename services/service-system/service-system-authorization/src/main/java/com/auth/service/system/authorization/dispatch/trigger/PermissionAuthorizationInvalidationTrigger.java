@@ -1,8 +1,5 @@
 package com.auth.service.system.authorization.dispatch.trigger;
 
-import java.util.Collection;
-import java.util.List;
-
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
@@ -12,8 +9,10 @@ import com.auth.service.system.authorization.dispatch.AuthorizationInvalidationC
 import com.auth.service.system.common.model.SystemAuditBizModule;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.stereotype.Component;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * 权限码或启用状态变更、删除后触发授权失效
@@ -39,10 +38,9 @@ public class PermissionAuthorizationInvalidationTrigger {
 
 		String sourceBizId = CharSequenceUtil.blankToDefault(operation, "invalidate") + ":" + String.join(",", codes);
 		String eventId = AuthorizationChangeKind.PERMISSION.eventIdPrefix() + ":" + IdWorker.getId();
+		var payload = new PermissionInvalidatePayload(codes);
+		var request = new AuthorizationInvalidateRequest(eventId, AuthorizationChangeKind.PERMISSION, payload);
 
-		PermissionInvalidatePayload payload = new PermissionInvalidatePayload(codes);
-		AuthorizationInvalidateRequest request = new AuthorizationInvalidateRequest(eventId,
-				AuthorizationChangeKind.PERMISSION, payload);
 		invalidationCoordinator.submit(request, SystemAuditBizModule.SYS_PERMISSION, sourceBizId);
 	}
 

@@ -37,7 +37,7 @@ public class DeptDataScopeResolver {
 	}
 
 	/**
-	 * 批量解析用户数据权限（调用方预加载 user_scope 与 role_scope）。
+	 * 批量解析用户数据权限（调用方预加载 user_scope 与 role_scope）
 	 * @param userIds 用户 ID
 	 * @param rolesByUser 用户角色码
 	 * @param userScopesByUserId 用户级覆盖范围
@@ -51,8 +51,8 @@ public class DeptDataScopeResolver {
 			return Map.of();
 		}
 
-		Map<Long, List<Long>> descendantsByAncestor = loadDescendantsByAncestor(
-				collectDeptAndChildAnchors(userScopesByUserId, allRoleScopes, rolesByUser, ids));
+		Set<Long> anchorDeptIds = collectDeptAndChildAnchors(userScopesByUserId, allRoleScopes, rolesByUser, ids);
+		Map<Long, List<Long>> descendantsByAncestor = loadDescendantsByAncestor(anchorDeptIds);
 
 		Map<Long, ScopeGrant> grants = new HashMap<>(ids.size());
 		for (Long userId : ids) {
@@ -67,12 +67,12 @@ public class DeptDataScopeResolver {
 
 			List<String> roleCodes = rolesByUser.getOrDefault(userId, List.of());
 			List<RoleScopePO> roleScopes = filterRoleScopes(roleCodes, allRoleScopes);
-			grants.put(userId, resolveFromRoleScopes(userId, roleCodes, roleScopes, descendantsByAncestor));
+			grants.put(userId, resolveFromRoleScopes(userId, roleScopes, descendantsByAncestor));
 		}
 		return Map.copyOf(grants);
 	}
 
-	private ScopeGrant resolveFromRoleScopes(Long userId, List<String> roleCodes, List<RoleScopePO> roleScopes,
+	private ScopeGrant resolveFromRoleScopes(Long userId, List<RoleScopePO> roleScopes,
 			Map<Long, List<Long>> descendantsByAncestor) {
 		if (CollUtil.isEmpty(roleScopes)) {
 			log.debug("无 role_scope: userId={}, 默认 SELF", userId);

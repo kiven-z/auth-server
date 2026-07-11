@@ -12,7 +12,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static com.auth.module.security.contract.redis.SecurityRedisKey.USER_PERM;
 
@@ -91,16 +90,12 @@ public class AuthProfileRedisCache {
 		if (CollUtil.isEmpty(userIds)) {
 			return 0;
 		}
-		List<String> keys = userIds.stream()
-			.filter(Objects::nonNull)
-			.map(USER_PERM::key)
-			.distinct()
-			.collect(Collectors.toList());
+		List<String> keys = userIds.stream().filter(Objects::nonNull).map(USER_PERM::key).distinct().toList();
 		if (CollUtil.isEmpty(keys)) {
 			return 0;
 		}
 		Long deleted = redisTemplate.delete(keys);
-		return deleted.intValue();
+		return deleted == null ? 0 : deleted.intValue();
 	}
 
 }

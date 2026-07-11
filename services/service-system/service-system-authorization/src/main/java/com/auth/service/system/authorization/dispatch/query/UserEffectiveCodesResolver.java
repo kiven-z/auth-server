@@ -1,15 +1,14 @@
 package com.auth.service.system.authorization.dispatch.query;
 
-import java.util.Optional;
-
 import cn.hutool.core.util.BooleanUtil;
 import com.auth.common.core.model.response.Result;
 import com.auth.service.system.authorization.feign.AuthorizationInnerFeignClient;
 import com.auth.service.system.authorization.feign.dto.EffectiveCodesInnerDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 import static com.auth.common.web.resttemplate.FeignUtil.isSuccessWithData;
 
@@ -42,10 +41,11 @@ public class UserEffectiveCodesResolver {
 		}
 
 		EffectiveCodesInnerDTO data = result.getData();
-		return Optional.of(UserEffectiveCodesSnapshot.builder()
+		UserEffectiveCodesSnapshot userEffectiveCodesSnapshot = UserEffectiveCodesSnapshot.builder()
 			.roleCodes(data.getRoleCodes())
 			.permissionCodes(data.getPermissionCodes())
-			.build());
+			.build();
+		return Optional.of(userEffectiveCodesSnapshot);
 	}
 
 }

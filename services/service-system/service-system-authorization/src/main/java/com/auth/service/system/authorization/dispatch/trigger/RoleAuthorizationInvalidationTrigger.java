@@ -1,8 +1,5 @@
 package com.auth.service.system.authorization.dispatch.trigger;
 
-import java.util.Collection;
-import java.util.List;
-
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
@@ -12,8 +9,10 @@ import com.auth.service.system.authorization.dispatch.AuthorizationInvalidationC
 import com.auth.service.system.common.model.SystemAuditBizModule;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.stereotype.Component;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * 角色码或启用状态变更、删除及权限分配后触发授权失效
@@ -39,9 +38,9 @@ public class RoleAuthorizationInvalidationTrigger {
 
 		String sourceBizId = CharSequenceUtil.blankToDefault(operation, "invalidate") + ":" + String.join(",", codes);
 		String eventId = AuthorizationChangeKind.ROLE.eventIdPrefix() + ":" + IdWorker.getId();
-		RoleInvalidatePayload payload = new RoleInvalidatePayload(codes);
-		AuthorizationInvalidateRequest request = new AuthorizationInvalidateRequest(eventId,
-				AuthorizationChangeKind.ROLE, payload);
+		var payload = new RoleInvalidatePayload(codes);
+		var request = new AuthorizationInvalidateRequest(eventId, AuthorizationChangeKind.ROLE, payload);
+
 		invalidationCoordinator.submit(request, SystemAuditBizModule.SYS_ROLE, sourceBizId);
 	}
 

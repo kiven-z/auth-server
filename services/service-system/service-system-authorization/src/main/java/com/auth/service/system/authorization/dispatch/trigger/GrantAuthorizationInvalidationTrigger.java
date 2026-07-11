@@ -1,9 +1,5 @@
 package com.auth.service.system.authorization.dispatch.trigger;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
@@ -14,8 +10,11 @@ import com.auth.service.system.authorization.dispatch.AuthorizationInvalidationC
 import com.auth.service.system.common.model.SystemAuditBizModule;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.stereotype.Component;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * grant_table 授权主体变更后触发用户授权画像失效
@@ -44,9 +43,9 @@ public class GrantAuthorizationInvalidationTrigger {
 					.map(subject -> subject.subjectType().name().toLowerCase() + ":" + subject.subjectId())
 					.collect(Collectors.joining(","));
 		String eventId = AuthorizationChangeKind.GRANT.eventIdPrefix() + ":" + IdWorker.getId();
-		GrantInvalidatePayload payload = new GrantInvalidatePayload(keys);
-		AuthorizationInvalidateRequest request = new AuthorizationInvalidateRequest(eventId,
-				AuthorizationChangeKind.GRANT, payload);
+		var payload = new GrantInvalidatePayload(keys);
+		var request = new AuthorizationInvalidateRequest(eventId, AuthorizationChangeKind.GRANT, payload);
+
 		invalidationCoordinator.submit(request, SystemAuditBizModule.GRANT_TABLE, sourceBizId);
 	}
 

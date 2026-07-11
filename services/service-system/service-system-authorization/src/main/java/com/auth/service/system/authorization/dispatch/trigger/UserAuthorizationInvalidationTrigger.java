@@ -1,10 +1,5 @@
 package com.auth.service.system.authorization.dispatch.trigger;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
@@ -14,8 +9,12 @@ import com.auth.service.system.authorization.dispatch.AuthorizationInvalidationC
 import com.auth.service.system.common.model.SystemAuditBizModule;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.stereotype.Component;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 用户相关变更后按 userId 直连触发授权失效（主档、user_scope 等）
@@ -42,9 +41,9 @@ public class UserAuthorizationInvalidationTrigger {
 		String sourceBizId = CharSequenceUtil.blankToDefault(operation, "invalidate") + ":"
 				+ ids.stream().map(String::valueOf).collect(Collectors.joining(","));
 		String eventId = AuthorizationChangeKind.USER.eventIdPrefix() + ":" + IdWorker.getId();
-		UserInvalidatePayload payload = new UserInvalidatePayload(ids);
-		AuthorizationInvalidateRequest request = new AuthorizationInvalidateRequest(eventId,
-				AuthorizationChangeKind.USER, payload);
+		var payload = new UserInvalidatePayload(ids);
+		var request = new AuthorizationInvalidateRequest(eventId, AuthorizationChangeKind.USER, payload);
+
 		invalidationCoordinator.submit(request, SystemAuditBizModule.SYS_USER, sourceBizId);
 	}
 

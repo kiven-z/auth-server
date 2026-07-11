@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -56,6 +57,17 @@ public interface FileRecordMapper extends BaseMapper<FileRecordEntity> {
 			@Param("deleteSources") List<String> deleteSources);
 
 	/**
+	 * 按 URL 查询活跃文件记录
+	 * @param url 访问 URL
+	 * @param objectKey 对象键
+	 * @param ownerUserId 归属用户 ID
+	 * @param bizType 业务类型（可选）
+	 * @return 文件记录
+	 */
+	FileRecordEntity selectActiveByUrlAndOwner(@Param("url") String url, @Param("objectKey") String objectKey,
+			@Param("ownerUserId") Long ownerUserId, @Param("bizType") String bizType);
+
+	/**
 	 * 恢复已逻辑删除的文件记录
 	 * @param ids 文件记录主键集合
 	 * @param updateUser 更新人
@@ -72,14 +84,11 @@ public interface FileRecordMapper extends BaseMapper<FileRecordEntity> {
 	int deletePhysicallyByIds(@Param("ids") List<Long> ids, @Param("expectedDeleted") Boolean expectedDeleted);
 
 	/**
-	 * 按 URL 查询活跃文件记录
-	 * @param url 访问 URL
-	 * @param objectKey 对象键
-	 * @param ownerUserId 归属用户 ID
-	 * @param bizType 业务类型（可选）
-	 * @return 文件记录
+	 * 查询已过保留期的逻辑删除文件记录
+	 * @param cutoff 删除时间早于此时间的记录可被清理
+	 * @param limit 返回条数上限
+	 * @return 过期已删文件记录
 	 */
-	FileRecordEntity selectActiveByUrlAndOwner(@Param("url") String url, @Param("objectKey") String objectKey,
-			@Param("ownerUserId") Long ownerUserId, @Param("bizType") String bizType);
+	List<FileRecordEntity> selectExpiredDeleted(@Param("cutoff") LocalDateTime cutoff, @Param("limit") int limit);
 
 }

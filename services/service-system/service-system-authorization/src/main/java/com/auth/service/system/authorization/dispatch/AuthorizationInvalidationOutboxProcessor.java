@@ -3,6 +3,7 @@ package com.auth.service.system.authorization.dispatch;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.core.model.response.Result;
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
+import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidatePayload;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateResponse;
 import com.auth.service.system.authorization.config.AuthorizationInvalidationProperties;
@@ -78,9 +79,10 @@ public class AuthorizationInvalidationOutboxProcessor {
 	 * @return 是否处理成功
 	 */
 	private boolean dispatchRow(SysAuthorizationInvalidationOutboxEntity row) {
-		AuthorizationChangeKind kind = AuthorizationChangeKind.valueOf(row.getChangeKind());
-		AuthorizationInvalidateRequest request = new AuthorizationInvalidateRequest(row.getEventId(), kind,
-				payloadCodec.deserialize(kind, row.getPayload()));
+		String changeKind = row.getChangeKind();
+		AuthorizationChangeKind kind = AuthorizationChangeKind.valueOf(changeKind);
+		AuthorizationInvalidatePayload payload = payloadCodec.deserialize(kind, row.getPayload());
+		var request = new AuthorizationInvalidateRequest(row.getEventId(), kind, payload);
 
 		try {
 			Result<AuthorizationInvalidateResponse> result = authorizationInnerFeignClient.invalidate(request);

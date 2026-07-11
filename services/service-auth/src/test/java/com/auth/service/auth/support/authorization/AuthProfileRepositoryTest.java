@@ -40,14 +40,10 @@ class AuthProfileRepositoryTest {
 	@Mock
 	private DeptDataScopeResolver deptDataScopeResolver;
 
-	private static UserGrantCodeRowPO roleRow(Long userId, String code) {
-		UserGrantCodeRowPO row = new UserGrantCodeRowPO();
-		row.setUserId(userId);
-		row.setCode(code);
-		return row;
-	}
-
-	private static UserGrantCodeRowPO permissionRow(Long userId, String code) {
+	/**
+	 * 构造授权码行（角色码与权限码共用同一 PO 结构）
+	 */
+	private static UserGrantCodeRowPO grantCodeRow(Long userId, String code) {
 		UserGrantCodeRowPO row = new UserGrantCodeRowPO();
 		row.setUserId(userId);
 		row.setCode(code);
@@ -60,9 +56,9 @@ class AuthProfileRepositoryTest {
 		UserAccountSnapshot account = UserAccountSnapshot.builder().id(10L).username("u10").permVersion(1L).build();
 		stubBatchUser(10L, "u10");
 		when(userAuthorizationGrantMapper.selectRoleRowsByUserIds(List.of(10L)))
-			.thenReturn(List.of(roleRow(10L, "COMMON")));
+			.thenReturn(List.of(grantCodeRow(10L, "COMMON")));
 		when(userAuthorizationGrantMapper.selectPermissionRowsByUserIds(List.of(10L)))
-			.thenReturn(List.of(permissionRow(10L, "system:user:list")));
+			.thenReturn(List.of(grantCodeRow(10L, "system:user:list")));
 		when(dataScopeMapper.selectByUserIds(List.of(10L))).thenReturn(List.of());
 		when(dataScopeMapper.selectByRoleCodes(List.of("COMMON"))).thenReturn(List.of());
 		ScopeGrant grant = ScopeGrant.builder().scopeType(DataScopeStorageType.DEPT).values(List.of(2L)).build();
@@ -84,9 +80,9 @@ class AuthProfileRepositoryTest {
 		UserAccountSnapshot account = UserAccountSnapshot.builder().id(2L).username("admin").permVersion(1L).build();
 		stubBatchUser(2L, "admin");
 		when(userAuthorizationGrantMapper.selectRoleRowsByUserIds(List.of(2L)))
-			.thenReturn(List.of(roleRow(2L, "ADMIN")));
+			.thenReturn(List.of(grantCodeRow(2L, "ADMIN")));
 		when(userAuthorizationGrantMapper.selectPermissionRowsByUserIds(List.of(2L)))
-			.thenReturn(List.of(permissionRow(2L, "*")));
+			.thenReturn(List.of(grantCodeRow(2L, "*")));
 		when(dataScopeMapper.selectByUserIds(List.of(2L))).thenReturn(List.of());
 
 		AuthProfileRepository repository = new AuthProfileRepository(userAuthorizationGrantMapper,
