@@ -2,7 +2,6 @@ package com.auth.service.system.message.service;
 
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
 import com.auth.service.system.message.model.form.*;
-import com.auth.service.system.message.model.vo.email.EmailTemplateDetailVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -11,13 +10,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @author Bunny
  */
 public interface SysEmailTemplateService extends IService<MessageTemplateEntity> {
-
-	/**
-	 * 邮件模板详情
-	 * @param id 模板ID
-	 * @return 邮件模板详情
-	 */
-	EmailTemplateDetailVO getEmailTemplateById(Long id);
 
 	/**
 	 * 添加邮件模板

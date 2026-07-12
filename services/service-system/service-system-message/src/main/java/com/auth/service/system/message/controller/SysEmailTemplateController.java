@@ -10,7 +10,6 @@ import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.common.model.SystemAuditBizModule;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
 import com.auth.service.system.message.model.form.*;
-import com.auth.service.system.message.model.vo.email.EmailTemplateDetailVO;
 import com.auth.service.system.message.service.SysEmailTemplateService;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.swagger.v3.oas.annotations.Operation;
@@ -54,14 +53,6 @@ public class SysEmailTemplateController {
 		sysEmailTemplateService.testSend(form);
 
 		return Result.success();
-	}
-
-	@Operation(summary = "邮件模板详情", description = "邮件模板详情")
-	@PreAuthorize("@auth.decide('message:template:detail')")
-	@GetMapping("{id}")
-	public Result<EmailTemplateDetailVO> getEmailTemplateById(@PathVariable("id") Long id) {
-		EmailTemplateDetailVO detailVO = sysEmailTemplateService.getEmailTemplateById(id);
-		return Result.success(detailVO);
 	}
 
 	@Operation(summary = "预览邮件模板（FreeMarker 按示例值渲染为 HTML）", description = "预览邮件模板（渲染后 HTML）")

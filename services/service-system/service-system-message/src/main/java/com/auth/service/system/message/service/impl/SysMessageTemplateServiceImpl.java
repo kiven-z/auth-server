@@ -1,19 +1,24 @@
 package com.auth.service.system.message.service.impl;
 
 import com.auth.common.data.model.PageResponse;
+import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.message.convert.MessageTemplateConverter;
 import com.auth.service.system.message.mapper.MessageTemplateMapper;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
 import com.auth.service.system.message.model.po.MessageTemplatePageRowPO;
 import com.auth.service.system.message.model.query.MessageTemplateQuery;
+import com.auth.service.system.message.model.vo.MessageTemplateDetailVO;
 import com.auth.service.system.message.model.vo.MessageTemplatePageResponse;
 import com.auth.service.system.message.service.SysMessageTemplateService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
+
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 
 /**
  * 消息模板读服务实现
@@ -45,6 +50,21 @@ public class SysMessageTemplateServiceImpl implements SysMessageTemplateService 
 
 		auditUserDisplayService.enrichAuditUsernames(voPage, null, null);
 		return PageResponse.of(voPage);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public MessageTemplateDetailVO getMessageTemplateById(Long id, String channel) {
+		MessageTemplateEntity entity = messageTemplateMapper.selectById(id);
+		if (entity == null || !channel.equals(entity.getChannel())) {
+			throw new SystemBusinessException(DATA_NOT_EXIST);
+		}
+
+		MessageTemplateDetailVO vo = MessageTemplateConverter.INSTANCE.toDetailVo(entity);
+		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(vo), null, null);
+		return vo;
 	}
 
 }

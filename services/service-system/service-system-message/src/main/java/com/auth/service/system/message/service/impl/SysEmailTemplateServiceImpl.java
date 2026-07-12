@@ -5,13 +5,11 @@ import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.message.api.model.email.EmailChannelOptions;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.message.convert.EmailTemplateConverter;
 import com.auth.service.system.message.mapper.MessageTemplateMapper;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
 import com.auth.service.system.message.model.form.*;
 import com.auth.service.system.message.model.vo.MessageTemplateRequireFieldRow;
-import com.auth.service.system.message.model.vo.email.EmailTemplateDetailVO;
 import com.auth.service.system.message.service.MessageDispatchService;
 import com.auth.service.system.message.service.SysEmailTemplateService;
 import com.auth.service.system.message.support.template.FreemarkerTemplateRenderer;
@@ -37,29 +35,10 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
 public class SysEmailTemplateServiceImpl extends ServiceImpl<MessageTemplateMapper, MessageTemplateEntity>
 		implements SysEmailTemplateService {
 
-	private final AuditUserDisplayService auditUserDisplayService;
-
 	private final MessageDispatchService messageDispatchService;
 
-	public SysEmailTemplateServiceImpl(AuditUserDisplayService auditUserDisplayService,
-			MessageDispatchService messageDispatchService) {
-		this.auditUserDisplayService = auditUserDisplayService;
+	public SysEmailTemplateServiceImpl(MessageDispatchService messageDispatchService) {
 		this.messageDispatchService = messageDispatchService;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public EmailTemplateDetailVO getEmailTemplateById(Long id) {
-		MessageTemplateEntity entity = getById(id);
-		if (entity == null || !MessageChannel.EMAIL.name().equals(entity.getChannel())) {
-			return null;
-		}
-
-		EmailTemplateDetailVO vo = EmailTemplateConverter.INSTANCE.toDetailVo(entity);
-		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(vo), null, null);
-		return vo;
 	}
 
 	/**

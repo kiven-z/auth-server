@@ -1,31 +1,33 @@
-package com.auth.service.system.message.model.vo.email;
+package com.auth.service.system.message.model.vo;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.List;
 
 import com.auth.common.core.model.response.BaseResponse;
-import com.auth.service.system.message.model.vo.MessageTemplateRequireFieldRow;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.List;
-
 /**
- * 邮件模板详情返回对象（含 require_fields 解析结果）
+ * 消息模板详情（跨渠道公共读模型）
  *
  * @author Bunny
  */
-@Schema(name = "EmailTemplateDetailVO", title = "邮件模板详情返回对象")
+@Schema(name = "MessageTemplateDetailVO", title = "消息模板详情返回对象")
 @Getter
 @Setter
 @ToString
 @EqualsAndHashCode(callSuper = true)
-public class EmailTemplateDetailVO extends BaseResponse implements Serializable {
+public class MessageTemplateDetailVO extends BaseResponse implements Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
+
+	@Schema(name = "channel", title = "消息渠道")
+	private String channel;
 
 	@Schema(name = "templateCode", title = "模板编码")
 	private String templateCode;
@@ -36,14 +38,20 @@ public class EmailTemplateDetailVO extends BaseResponse implements Serializable 
 	@Schema(name = "description", title = "模板描述")
 	private String description;
 
-	@Schema(name = "subject", title = "邮件主题")
+	@Schema(name = "subject", title = "主题/标题")
 	private String subject;
 
-	@Schema(name = "content", title = "邮件内容(支持HTML/FreeMarker)")
+	@Schema(name = "content", title = "正文模板")
 	private String content;
 
 	@Schema(name = "requireFields", title = "变量声明列表")
 	private List<MessageTemplateRequireFieldRow> requireFields;
+
+	@Schema(name = "providerTemplateCode", title = "厂商模板编码")
+	private String providerTemplateCode;
+
+	@Schema(name = "imMessageType", title = "IM 消息类型")
+	private String imMessageType;
 
 	@Schema(name = "priority", title = "发送优先级")
 	private Integer priority;

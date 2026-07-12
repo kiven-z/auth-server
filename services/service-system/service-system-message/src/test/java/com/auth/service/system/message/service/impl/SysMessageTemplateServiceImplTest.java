@@ -5,11 +5,13 @@ import java.util.List;
 
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.message.api.channel.MessageChannel;
+import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.message.mapper.MessageTemplateMapper;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
 import com.auth.service.system.message.model.po.MessageTemplatePageRowPO;
 import com.auth.service.system.message.model.query.MessageTemplateQuery;
+import com.auth.service.system.message.model.vo.MessageTemplateDetailVO;
 import com.auth.service.system.message.model.vo.MessageTemplatePageResponse;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -21,7 +23,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -29,9 +33,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * {@link SysMessageTemplateServiceImpl} 分页查询单元测试
+ * {@link SysMessageTemplateServiceImpl} 分页与详情单元测试
  */
-@DisplayName("SysMessageTemplateServiceImpl 消息模板分页")
+@DisplayName("SysMessageTemplateServiceImpl 消息模板读服务")
 @ExtendWith(MockitoExtension.class)
 class SysMessageTemplateServiceImplTest {
 
@@ -100,6 +104,56 @@ class SysMessageTemplateServiceImplTest {
 		ArgumentCaptor<MessageTemplateQuery> queryCaptor = ArgumentCaptor.forClass(MessageTemplateQuery.class);
 		verify(messageTemplateMapper).selectMessageTemplatePage(any(Page.class), queryCaptor.capture());
 		assertThat(queryCaptor.getValue().getChannel()).isEqualTo("FAX");
+	}
+
+	@Test
+	@DisplayName("详情：渠道匹配时返回 VO 并填充审计用户名")
+	void getMessageTemplateById_shouldReturnDetailWhenChannelMatches() {
+		MessageTemplateEntity entity = new MessageTemplateEntity();
+		entity.setId(10L);
+		entity.setChannel(MessageChannel.EMAIL.name());
+		entity.setSceneCode("login-code");
+		entity.setTemplateName("登录邮件");
+		entity.setSubject("验证码");
+		entity.setBodyContent("<p>${code}</p>");
+		entity.setRequireFields("[]");
+		entity.setPriority(1);
+		entity.setStatus(true);
+
+		when(messageTemplateMapper.selectById(10L)).thenReturn(entity);
+
+		MessageTemplateDetailVO vo = sysMessageTemplateService.getMessageTemplateById(10L, MessageChannel.EMAIL.name());
+
+		assertThat(vo.getTemplateCode()).isEqualTo("login-code");
+		assertThat(vo.getChannel()).isEqualTo(MessageChannel.EMAIL.name());
+		assertThat(vo.getContent()).isEqualTo("<p>${code}</p>");
+		assertThat(vo.getRequireFields()).isEmpty();
+		verify(auditUserDisplayService).enrichAuditUsernames(any(List.class), isNull(), isNull());
+	}
+
+	@Test
+	@DisplayName("详情：渠道不匹配时抛出 DATA_NOT_EXIST")
+	void getMessageTemplateById_shouldThrowWhenChannelMismatch() {
+		MessageTemplateEntity entity = new MessageTemplateEntity();
+		entity.setId(10L);
+		entity.setChannel(MessageChannel.EMAIL.name());
+		when(messageTemplateMapper.selectById(10L)).thenReturn(entity);
+
+		assertThatThrownBy(() -> sysMessageTemplateService.getMessageTemplateById(10L, MessageChannel.IN_APP.name()))
+			.isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(DATA_NOT_EXIST);
+	}
+
+	@Test
+	@DisplayName("详情：记录不存在时抛出 DATA_NOT_EXIST")
+	void getMessageTemplateById_shouldThrowWhenMissing() {
+		when(messageTemplateMapper.selectById(99L)).thenReturn(null);
+
+		assertThatThrownBy(() -> sysMessageTemplateService.getMessageTemplateById(99L, MessageChannel.EMAIL.name()))
+			.isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(DATA_NOT_EXIST);
 	}
 
 }
