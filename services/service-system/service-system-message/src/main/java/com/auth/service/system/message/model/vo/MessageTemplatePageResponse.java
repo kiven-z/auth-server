@@ -10,18 +10,21 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * 邮件模板分页返回对象
+ * 消息模板分页返回对象
  *
  * @author Bunny
  */
-@Schema(name = "EmailTemplatePageResponse", title = "邮件模板分页返回对象", description = "用于邮件模板分页查询返回数据")
+@Schema(name = "MessageTemplatePageResponse", title = "消息模板分页返回对象", description = "用于消息模板分页查询返回数据")
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
-public class EmailTemplatePageResponse extends BaseResponse implements Serializable {
+public class MessageTemplatePageResponse extends BaseResponse implements Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
+
+	@Schema(name = "channel", title = "消息渠道")
+	private String channel;
 
 	@Schema(name = "templateCode", title = "模板编码")
 	private String templateCode;
@@ -29,7 +32,7 @@ public class EmailTemplatePageResponse extends BaseResponse implements Serializa
 	@Schema(name = "templateName", title = "模板名称")
 	private String templateName;
 
-	@Schema(name = "subject", title = "邮件主题")
+	@Schema(name = "subject", title = "主题/标题")
 	private String subject;
 
 	@Schema(name = "priority", title = "发送优先级")

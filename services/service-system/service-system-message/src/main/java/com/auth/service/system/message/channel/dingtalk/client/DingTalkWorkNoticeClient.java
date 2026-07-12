@@ -19,6 +19,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
@@ -68,8 +69,8 @@ public class DingTalkWorkNoticeClient {
 		Long agentId = dingTalkProperties.getAgentId();
 
 		// 解析消息类型
-		DingTalkMessageType resolvedType = messageType != null ? messageType
-				: dingTalkProperties.getDefaultMessageType();
+		DingTalkMessageType resolvedType = Objects.requireNonNullElseGet(messageType,
+				dingTalkProperties::getDefaultMessageType);
 		String accessToken = accessTokenClient.getAccessToken();
 		String useridList = userIds.stream().filter(CharSequenceUtil::isNotBlank).collect(Collectors.joining(","));
 

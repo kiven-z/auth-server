@@ -1,9 +1,6 @@
 package com.auth.service.system.message.controller;
 
-import java.util.List;
-
 import com.auth.common.core.model.response.Result;
-import com.auth.common.data.model.PageResponse;
 import com.auth.common.web.valid.group.CreateGroup;
 import com.auth.common.web.valid.group.UpdateGroup;
 import com.auth.module.message.api.channel.MessageChannel;
@@ -12,31 +9,17 @@ import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.common.model.SystemAuditBizModule;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
-import com.auth.service.system.message.model.form.EmailTemplateContentForm;
-import com.auth.service.system.message.model.form.EmailTemplateForm;
-import com.auth.service.system.message.model.form.EmailTemplateRenderForm;
-import com.auth.service.system.message.model.form.EmailTemplateRequireFieldsForm;
-import com.auth.service.system.message.model.form.EmailTemplateStatusForm;
-import com.auth.service.system.message.model.form.EmailTemplateTestSendForm;
-import com.auth.service.system.message.model.query.EmailTemplateQuery;
-import com.auth.service.system.message.model.vo.EmailTemplateDetailVO;
-import com.auth.service.system.message.model.vo.EmailTemplatePageResponse;
+import com.auth.service.system.message.model.form.*;
+import com.auth.service.system.message.model.vo.email.EmailTemplateDetailVO;
 import com.auth.service.system.message.service.SysEmailTemplateService;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
@@ -54,16 +37,6 @@ public class SysEmailTemplateController {
 
 	public SysEmailTemplateController(SysEmailTemplateService sysEmailTemplateService) {
 		this.sysEmailTemplateService = sysEmailTemplateService;
-	}
-
-	@Operation(summary = "分页查询邮件模板", description = "分页查询邮件模板")
-	@PreAuthorize("@auth.decide('message:template:query')")
-	@GetMapping()
-	public Result<PageResponse<EmailTemplatePageResponse>> getEmailTemplatePage(EmailTemplateQuery query) {
-		Page<MessageTemplateEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
-		PageResponse<EmailTemplatePageResponse> pageResponse = sysEmailTemplateService.getEmailTemplatePage(pageParams,
-				query);
-		return Result.success(pageResponse);
 	}
 
 	@Operation(summary = "离线渲染模板（示例值）", description = "用于编辑态实时预览")

@@ -1,0 +1,100 @@
+package com.auth.service.system.message.support.template;
+
+import java.util.List;
+import java.util.Map;
+
+import com.auth.common.core.utils.JsonSupport;
+import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.message.model.vo.MessageTemplateRequireFieldRow;
+import com.fasterxml.jackson.databind.JsonNode;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_INVALID;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_DUPLICATE;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+/**
+ * {@link MessageTemplateRequireFieldsJsonSupport} 单元测试
+ *
+ * @author Bunny
+ */
+@DisplayName("MessageTemplateRequireFieldsJsonSupport 模板必填变量")
+class MessageTemplateRequireFieldsJsonSupportTest {
+
+	@Test
+	@DisplayName("toJson/parse：往返后保留 key 与 exampleValue")
+	void toJson_parse_roundTrip() {
+		// 序列化后再解析，字段应保持一致
+		MessageTemplateRequireFieldRow row = row("code", JsonSupport.readTree("\"123456\""));
+
+		String json = MessageTemplateRequireFieldsJsonSupport.toJson(List.of(row));
+		List<MessageTemplateRequireFieldRow> parsed = MessageTemplateRequireFieldsJsonSupport.parse(json);
+
+		assertThat(parsed).hasSize(1);
+		assertThat(parsed.get(0).getKey()).isEqualTo("code");
+		assertThat(parsed.get(0).getExampleValue().asText()).isEqualTo("123456");
+	}
+
+	@Test
+	@DisplayName("parse：空白 JSON 返回空列表")
+	void parse_blank_returnsEmpty() {
+		assertThat(MessageTemplateRequireFieldsJsonSupport.parse("")).isEmpty();
+		assertThat(MessageTemplateRequireFieldsJsonSupport.parse(null)).isEmpty();
+	}
+
+	@Test
+	@DisplayName("parse：非法 JSON 抛出 DATA_INVALID")
+	void parse_invalidJson_throws() {
+		assertThatThrownBy(() -> MessageTemplateRequireFieldsJsonSupport.parse("{bad"))
+			.isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(DATA_INVALID);
+	}
+
+	@Test
+	@DisplayName("validate：重复 key 抛出 PARAM_DUPLICATE")
+	void validate_duplicateKey_throws() {
+		List<MessageTemplateRequireFieldRow> rows = List.of(row("code", JsonSupport.readTree("\"1\"")),
+				row("code", JsonSupport.readTree("\"2\"")));
+
+		assertThatThrownBy(() -> MessageTemplateRequireFieldsJsonSupport.validate(rows))
+			.isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(PARAM_DUPLICATE);
+	}
+
+	@Test
+	@DisplayName("findMissingKeys / assertVariablesPresent：缺失与齐全")
+	void missingKeys_andAssert() {
+		List<MessageTemplateRequireFieldRow> requireFields = List.of(row("code", JsonSupport.readTree("\"1\"")),
+				row("name", JsonSupport.readTree("\"n\"")));
+
+		assertThat(MessageTemplateRequireFieldsJsonSupport.findMissingKeys(requireFields, Map.of("code", "ok")))
+			.containsExactly("name");
+
+		assertThatCode(() -> MessageTemplateRequireFieldsJsonSupport.assertVariablesPresent(
+				List.of(row("code", JsonSupport.readTree("\"1\""))), Map.of("code", "123"), PARAM_REQUIRED, "email"))
+			.doesNotThrowAnyException();
+	}
+
+	@Test
+	@DisplayName("toExampleModel：用 exampleValue 组装预览模型")
+	void toExampleModel_buildsModel() {
+		Map<String, Object> model = MessageTemplateRequireFieldsJsonSupport.toExampleModel(
+				List.of(row("code", JsonSupport.readTree("\"123456\"")), row("count", JsonSupport.readTree("3"))));
+
+		assertThat(model).containsEntry("code", "123456").containsEntry("count", 3);
+	}
+
+	private static MessageTemplateRequireFieldRow row(String key, JsonNode exampleValue) {
+		MessageTemplateRequireFieldRow row = new MessageTemplateRequireFieldRow();
+		row.setKey(key);
+		row.setExampleValue(exampleValue);
+		return row;
+	}
+
+}

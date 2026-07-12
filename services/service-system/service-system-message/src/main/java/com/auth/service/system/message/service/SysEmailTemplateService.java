@@ -1,16 +1,8 @@
 package com.auth.service.system.message.service;
 
-import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
-import com.auth.service.system.message.model.form.EmailTemplateContentForm;
-import com.auth.service.system.message.model.form.EmailTemplateForm;
-import com.auth.service.system.message.model.form.EmailTemplateRenderForm;
-import com.auth.service.system.message.model.form.EmailTemplateRequireFieldsForm;
-import com.auth.service.system.message.model.form.EmailTemplateTestSendForm;
-import com.auth.service.system.message.model.query.EmailTemplateQuery;
-import com.auth.service.system.message.model.vo.EmailTemplateDetailVO;
-import com.auth.service.system.message.model.vo.EmailTemplatePageResponse;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.auth.service.system.message.model.form.*;
+import com.auth.service.system.message.model.vo.email.EmailTemplateDetailVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -19,15 +11,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @author Bunny
  */
 public interface SysEmailTemplateService extends IService<MessageTemplateEntity> {
-
-	/**
-	 * 分页查询邮件模板
-	 * @param pageParams 分页参数
-	 * @param query 查询参数
-	 * @return 邮件模板分页数据
-	 */
-	PageResponse<EmailTemplatePageResponse> getEmailTemplatePage(Page<MessageTemplateEntity> pageParams,
-			EmailTemplateQuery query);
 
 	/**
 	 * 邮件模板详情

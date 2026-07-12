@@ -1,20 +1,18 @@
 package com.auth.service.system.message.convert;
 
-import java.util.List;
-
 import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
 import com.auth.service.system.message.model.form.EmailTemplateForm;
-import com.auth.service.system.message.model.po.EmailTemplatePageRowPO;
-import com.auth.service.system.message.model.vo.EmailTemplateDetailVO;
-import com.auth.service.system.message.model.vo.EmailTemplatePageResponse;
 import com.auth.service.system.message.model.vo.MessageTemplateRequireFieldRow;
+import com.auth.service.system.message.model.vo.email.EmailTemplateDetailVO;
 import com.auth.service.system.message.support.template.MessageTemplateRequireFieldsJsonSupport;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
+
+import java.util.List;
 
 /**
  * 邮件模板转换器
@@ -35,15 +33,6 @@ public interface EmailTemplateConverter {
 	default List<MessageTemplateRequireFieldRow> parseRequireFields(String json) {
 		return MessageTemplateRequireFieldsJsonSupport.parse(json);
 	}
-
-	/**
-	 * 邮件模板分页行 PO → 分页返回 VO
-	 * @param po 持久层查询投影
-	 * @return 分页返回对象
-	 */
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
-	EmailTemplatePageResponse toPageResponse(EmailTemplatePageRowPO po);
 
 	/**
 	 * 实体 → 详情 VO（scene_code / body_content 与 API 字段对齐）

@@ -10,15 +10,15 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * 邮件模板分页行（持久层查询投影，非 API 出参）
+ * 消息模板分页行（持久层查询投影，非 API 出参）
  *
  * @author Bunny
  */
-@Schema(name = "EmailTemplatePageRowPO", title = "邮件模板分页行（PO）")
+@Schema(name = "MessageTemplatePageRowPO", title = "消息模板分页行（PO）")
 @Getter
 @Setter
 @ToString
-public class EmailTemplatePageRowPO implements Serializable {
+public class MessageTemplatePageRowPO implements Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
@@ -26,13 +26,16 @@ public class EmailTemplatePageRowPO implements Serializable {
 	@Schema(title = "主键")
 	private Long id;
 
+	@Schema(title = "消息渠道")
+	private String channel;
+
 	@Schema(title = "模板编码")
 	private String templateCode;
 
 	@Schema(title = "模板名称")
 	private String templateName;
 
-	@Schema(title = "邮件主题")
+	@Schema(title = "主题/标题")
 	private String subject;
 
 	@Schema(title = "发送优先级")

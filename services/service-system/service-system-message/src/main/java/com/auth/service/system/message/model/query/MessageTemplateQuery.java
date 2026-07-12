@@ -1,27 +1,33 @@
 package com.auth.service.system.message.model.query;
 
-import java.io.Serial;
-import java.io.Serializable;
-
 import com.auth.common.core.model.query.PageQueryRequest;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 /**
- * 邮件模板查询
+ * 消息模板分页查询
  *
  * @author Bunny
  */
-@Schema(name = "EmailTemplateQuery", title = "邮件模板查询", description = "邮件模板分页查询参数")
+@Schema(name = "MessageTemplateQuery", title = "消息模板查询", description = "消息模板分页查询参数，channel 必填")
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
-public class EmailTemplateQuery extends PageQueryRequest implements Serializable {
+public class MessageTemplateQuery extends PageQueryRequest implements Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
+
+	@Schema(name = "channel", title = "消息渠道", description = "如 EMAIL、IN_APP",
+			requiredMode = Schema.RequiredMode.REQUIRED)
+	@NotBlank(message = "消息渠道不能为空")
+	private String channel;
 
 	@Schema(name = "templateCode", title = "模板编码")
 	private String templateCode;
@@ -29,7 +35,7 @@ public class EmailTemplateQuery extends PageQueryRequest implements Serializable
 	@Schema(name = "templateName", title = "模板名称")
 	private String templateName;
 
-	@Schema(name = "subject", title = "邮件主题")
+	@Schema(name = "subject", title = "主题/标题")
 	private String subject;
 
 	@Schema(name = "status", title = "启用状态(true=启用模板，false=停用)")

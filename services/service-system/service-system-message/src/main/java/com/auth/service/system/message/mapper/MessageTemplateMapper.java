@@ -1,8 +1,8 @@
 package com.auth.service.system.message.mapper;
 
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
-import com.auth.service.system.message.model.po.EmailTemplatePageRowPO;
-import com.auth.service.system.message.model.query.EmailTemplateQuery;
+import com.auth.service.system.message.model.po.MessageTemplatePageRowPO;
+import com.auth.service.system.message.model.query.MessageTemplateQuery;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -27,12 +27,12 @@ public interface MessageTemplateMapper extends BaseMapper<MessageTemplateEntity>
 			@Param("channel") String channel);
 
 	/**
-	 * 邮件模板分页列表（channel 固定为 EMAIL）
+	 * 消息模板分页列表（channel 由查询条件动态传入）
 	 * @param pageParams 分页参数
-	 * @param query 查询条件
+	 * @param query 查询条件（含必填 channel）
 	 * @return 分页结果
 	 */
-	IPage<EmailTemplatePageRowPO> selectEmailTemplatePage(@Param("page") Page<MessageTemplateEntity> pageParams,
-			@Param("query") EmailTemplateQuery query);
+	IPage<MessageTemplatePageRowPO> selectMessageTemplatePage(@Param("page") Page<MessageTemplateEntity> pageParams,
+			@Param("query") MessageTemplateQuery query);
 
 }

@@ -1,11 +1,6 @@
 package com.auth.service.system.message.service.impl;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
 import cn.hutool.core.text.CharSequenceUtil;
-import com.auth.common.data.model.PageResponse;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.message.api.model.email.EmailChannelOptions;
@@ -14,27 +9,21 @@ import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.message.convert.EmailTemplateConverter;
 import com.auth.service.system.message.mapper.MessageTemplateMapper;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
-import com.auth.service.system.message.model.form.EmailTemplateContentForm;
-import com.auth.service.system.message.model.form.EmailTemplateForm;
-import com.auth.service.system.message.model.form.EmailTemplateRenderForm;
-import com.auth.service.system.message.model.form.EmailTemplateRequireFieldsForm;
-import com.auth.service.system.message.model.form.EmailTemplateTestSendForm;
-import com.auth.service.system.message.model.po.EmailTemplatePageRowPO;
-import com.auth.service.system.message.model.query.EmailTemplateQuery;
-import com.auth.service.system.message.model.vo.EmailTemplateDetailVO;
-import com.auth.service.system.message.model.vo.EmailTemplatePageResponse;
+import com.auth.service.system.message.model.form.*;
 import com.auth.service.system.message.model.vo.MessageTemplateRequireFieldRow;
+import com.auth.service.system.message.model.vo.email.EmailTemplateDetailVO;
 import com.auth.service.system.message.service.MessageDispatchService;
 import com.auth.service.system.message.service.SysEmailTemplateService;
 import com.auth.service.system.message.support.template.FreemarkerTemplateRenderer;
 import com.auth.service.system.message.support.template.MessageTemplateRequireFieldsJsonSupport;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 
@@ -56,19 +45,6 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<MessageTemplateMapp
 			MessageDispatchService messageDispatchService) {
 		this.auditUserDisplayService = auditUserDisplayService;
 		this.messageDispatchService = messageDispatchService;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public PageResponse<EmailTemplatePageResponse> getEmailTemplatePage(Page<MessageTemplateEntity> pageParams,
-			EmailTemplateQuery query) {
-		IPage<EmailTemplatePageRowPO> page = baseMapper.selectEmailTemplatePage(pageParams, query);
-		IPage<EmailTemplatePageResponse> voPage = page.convert(EmailTemplateConverter.INSTANCE::toPageResponse);
-
-		auditUserDisplayService.enrichAuditUsernames(voPage, null, null);
-		return PageResponse.of(voPage);
 	}
 
 	/**
