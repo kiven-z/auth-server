@@ -2,6 +2,10 @@ package com.auth.service.system.message.controller;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
+import com.auth.module.security.contract.annotation.OperationLog;
+import com.auth.module.security.contract.api.audit.AuditServiceDomain;
+import com.auth.module.security.contract.api.audit.OperationLogKind;
+import com.auth.service.system.common.model.SystemAuditBizModule;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
 import com.auth.service.system.message.model.query.MessageTemplateQuery;
 import com.auth.service.system.message.model.vo.MessageTemplateDetailVO;
@@ -12,24 +16,24 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-
+import jakarta.validation.constraints.NotEmpty;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
 /**
- * 消息模板公共读接口（跨渠道分页、详情）
+ * 消息模板公共接口（跨渠道分页、详情、删除）
  *
  * @author Bunny
  */
-@Tag(name = "消息模板相关", description = "消息模板跨渠道公共查询")
+@Tag(name = "消息模板相关", description = "消息模板跨渠道公共查询与删除")
+@Validated
 @RequestMapping("/api/system/message-template")
 @RestController
-@Validated
 public class SysMessageTemplateController {
 
 	private final SysMessageTemplateService sysMessageTemplateService;
@@ -55,6 +59,17 @@ public class SysMessageTemplateController {
 			@RequestParam @NotBlank(message = "消息渠道不能为空") String channel) {
 		MessageTemplateDetailVO detailVO = sysMessageTemplateService.getMessageTemplateById(id, channel);
 		return Result.success(detailVO);
+	}
+
+	@OperationLog(targetType = "MESSAGE_TEMPLATE_DELETE", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_MESSAGE_TEMPLATE, operation = OperationLogKind.DELETE)
+	@Operation(summary = "批量删除消息模板", description = "按 ids 删除；channel 限定渠道，避免跨渠道误删")
+	@PreAuthorize("@auth.decide('message:template:delete')")
+	@DeleteMapping()
+	public Result<String> batchDelete(@RequestBody @NotEmpty(message = "模板ID列表不能为空") List<Long> ids,
+			@RequestParam @NotBlank(message = "消息渠道不能为空") String channel) {
+		sysMessageTemplateService.batchDelete(ids, channel);
+		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
 }

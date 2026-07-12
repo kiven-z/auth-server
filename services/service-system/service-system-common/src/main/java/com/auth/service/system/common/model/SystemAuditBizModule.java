@@ -66,6 +66,11 @@ public class SystemAuditBizModule {
 	public static final String SYS_EMAIL_TEMPLATE = "SYS_EMAIL_TEMPLATE";
 
 	/**
+	 * 消息模板（跨渠道公共操作）
+	 */
+	public static final String SYS_MESSAGE_TEMPLATE = "SYS_MESSAGE_TEMPLATE";
+
+	/**
 	 * 定时任务
 	 */
 	public static final String SYS_JOB = "SYS_JOB";

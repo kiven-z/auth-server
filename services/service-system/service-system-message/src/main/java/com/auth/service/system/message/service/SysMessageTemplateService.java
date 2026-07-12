@@ -6,13 +6,16 @@ import com.auth.service.system.message.model.query.MessageTemplateQuery;
 import com.auth.service.system.message.model.vo.MessageTemplateDetailVO;
 import com.auth.service.system.message.model.vo.MessageTemplatePageResponse;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.IService;
+
+import java.util.List;
 
 /**
- * 消息模板读服务（分页、详情等跨渠道公共查询）
+ * 消息模板公共服务（跨渠道分页、详情、删除）
  *
  * @author Bunny
  */
-public interface SysMessageTemplateService {
+public interface SysMessageTemplateService extends IService<MessageTemplateEntity> {
 
 	/**
 	 * 按渠道分页查询消息模板
@@ -30,5 +33,12 @@ public interface SysMessageTemplateService {
 	 * @return 模板详情
 	 */
 	MessageTemplateDetailVO getMessageTemplateById(Long id, String channel);
+
+	/**
+	 * 按主键列表与渠道批量删除模板
+	 * @param ids 模板主键列表
+	 * @param channel 消息渠道（仅删除该渠道下的行）
+	 */
+	void batchDelete(List<Long> ids, String channel);
 
 }

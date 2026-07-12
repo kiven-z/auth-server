@@ -1,5 +1,6 @@
 package com.auth.service.system.message.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
@@ -12,22 +13,26 @@ import com.auth.service.system.message.model.vo.MessageTemplateDetailVO;
 import com.auth.service.system.message.model.vo.MessageTemplatePageResponse;
 import com.auth.service.system.message.service.SysMessageTemplateService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
+import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 
 /**
- * 消息模板读服务实现
+ * 消息模板公共服务实现
  *
  * @author Bunny
  */
 @Service
 @Transactional(readOnly = true)
-public class SysMessageTemplateServiceImpl implements SysMessageTemplateService {
+public class SysMessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMapper, MessageTemplateEntity>
+		implements SysMessageTemplateService {
 
 	private final MessageTemplateMapper messageTemplateMapper;
 
@@ -65,6 +70,21 @@ public class SysMessageTemplateServiceImpl implements SysMessageTemplateService 
 		MessageTemplateDetailVO vo = MessageTemplateConverter.INSTANCE.toDetailVo(entity);
 		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(vo), null, null);
 		return vo;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void batchDelete(List<Long> ids, String channel) {
+		if (CollUtil.isEmpty(ids)) {
+			return;
+		}
+
+		remove(Wrappers.<MessageTemplateEntity>lambdaQuery()
+			.in(MessageTemplateEntity::getId, ids)
+			.eq(MessageTemplateEntity::getChannel, channel));
 	}
 
 }

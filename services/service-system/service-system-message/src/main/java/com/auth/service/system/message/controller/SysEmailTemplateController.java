@@ -18,8 +18,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
 /**
@@ -103,17 +101,6 @@ public class SysEmailTemplateController {
 	public Result<String> updateRequireFields(@PathVariable("id") Long id,
 			@Validated @RequestBody EmailTemplateRequireFieldsForm form) {
 		sysEmailTemplateService.updateRequireFields(id, form);
-
-		return Result.success(null, OPERATION_SUCCESS.getMessage());
-	}
-
-	@OperationLog(targetType = "EMAIL_TEMPLATE_DELETE", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_EMAIL_TEMPLATE, operation = OperationLogKind.DELETE)
-	@Operation(summary = "删除邮件模板", description = "删除邮件模板")
-	@PreAuthorize("@auth.decide('message:template:delete')")
-	@DeleteMapping()
-	public Result<String> batchDelete(@RequestBody List<Long> ids) {
-		sysEmailTemplateService.removeBatchByIds(ids);
 
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}

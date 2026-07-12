@@ -18,6 +18,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -29,13 +30,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * {@link SysMessageTemplateServiceImpl} 分页与详情单元测试
+ * {@link SysMessageTemplateServiceImpl} 分页、详情与删除单元测试
  */
-@DisplayName("SysMessageTemplateServiceImpl 消息模板读服务")
+@DisplayName("SysMessageTemplateServiceImpl 消息模板公共服务")
 @ExtendWith(MockitoExtension.class)
 class SysMessageTemplateServiceImplTest {
 
@@ -154,6 +156,28 @@ class SysMessageTemplateServiceImplTest {
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(DATA_NOT_EXIST);
+	}
+
+	@Test
+	@DisplayName("批量删除：按 ids 与 channel 条件删除")
+	void batchDelete_shouldDeleteByIdsAndChannel() {
+		// 仅删除指定渠道下行，避免跨渠道误删
+		List<Long> ids = List.of(1L, 2L);
+		when(messageTemplateMapper.delete(any())).thenReturn(2);
+
+		sysMessageTemplateService.batchDelete(ids, MessageChannel.EMAIL.name());
+
+		ArgumentCaptor<Wrapper> wrapperCaptor = ArgumentCaptor.forClass(Wrapper.class);
+		verify(messageTemplateMapper).delete(wrapperCaptor.capture());
+		assertThat(wrapperCaptor.getValue()).isNotNull();
+	}
+
+	@Test
+	@DisplayName("批量删除：ids 为空时不调用 Mapper")
+	void batchDelete_shouldSkipWhenIdsEmpty() {
+		sysMessageTemplateService.batchDelete(Collections.emptyList(), MessageChannel.EMAIL.name());
+
+		verify(messageTemplateMapper, never()).delete(any());
 	}
 
 }
