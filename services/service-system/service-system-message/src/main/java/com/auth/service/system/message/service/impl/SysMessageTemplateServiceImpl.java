@@ -41,6 +41,7 @@ public class SysMessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMa
 	public SysMessageTemplateServiceImpl(MessageTemplateMapper messageTemplateMapper,
 			AuditUserDisplayService auditUserDisplayService) {
 		this.messageTemplateMapper = messageTemplateMapper;
+		this.baseMapper = messageTemplateMapper;
 		this.auditUserDisplayService = auditUserDisplayService;
 	}
 
@@ -82,9 +83,25 @@ public class SysMessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMa
 			return;
 		}
 
-		remove(Wrappers.<MessageTemplateEntity>lambdaQuery()
+		super.remove(Wrappers.<MessageTemplateEntity>lambdaQuery()
 			.in(MessageTemplateEntity::getId, ids)
 			.eq(MessageTemplateEntity::getChannel, channel));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void batchUpdateStatus(List<Long> ids, Boolean status, String channel) {
+		if (CollUtil.isEmpty(ids)) {
+			return;
+		}
+
+		super.update(Wrappers.<MessageTemplateEntity>lambdaUpdate()
+			.in(MessageTemplateEntity::getId, ids)
+			.eq(MessageTemplateEntity::getChannel, channel)
+			.set(MessageTemplateEntity::getStatus, status));
 	}
 
 }

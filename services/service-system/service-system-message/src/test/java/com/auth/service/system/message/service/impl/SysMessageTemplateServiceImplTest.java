@@ -1,8 +1,5 @@
 package com.auth.service.system.message.service.impl;
 
-import java.util.Collections;
-import java.util.List;
-
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.service.system.common.exception.SystemBusinessException;
@@ -13,29 +10,32 @@ import com.auth.service.system.message.model.po.MessageTemplatePageRowPO;
 import com.auth.service.system.message.model.query.MessageTemplateQuery;
 import com.auth.service.system.message.model.vo.MessageTemplateDetailVO;
 import com.auth.service.system.message.model.vo.MessageTemplatePageResponse;
+import com.baomidou.mybatisplus.core.MybatisConfiguration;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.apache.ibatis.builder.MapperBuilderAssistant;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
+import java.util.List;
+
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 /**
- * {@link SysMessageTemplateServiceImpl} 分页、详情与删除单元测试
+ * {@link SysMessageTemplateServiceImpl} 分页、详情、删除与启停单元测试
  */
 @DisplayName("SysMessageTemplateServiceImpl 消息模板公共服务")
 @ExtendWith(MockitoExtension.class)
@@ -49,6 +49,13 @@ class SysMessageTemplateServiceImplTest {
 
 	@InjectMocks
 	private SysMessageTemplateServiceImpl sysMessageTemplateService;
+
+	@BeforeAll
+	static void initMybatisPlusTableInfo() {
+		// LambdaUpdateWrapper / LambdaQueryWrapper 需要实体表元数据
+		TableInfoHelper.initTableInfo(new MapperBuilderAssistant(new MybatisConfiguration(), ""),
+				MessageTemplateEntity.class);
+	}
 
 	@Test
 	@DisplayName("按传入 channel 分页并填充审计用户名")
@@ -161,7 +168,7 @@ class SysMessageTemplateServiceImplTest {
 	@Test
 	@DisplayName("批量删除：按 ids 与 channel 条件删除")
 	void batchDelete_shouldDeleteByIdsAndChannel() {
-		// 仅删除指定渠道下行，避免跨渠道误删
+		// IService.remove 最终仍走 baseMapper.delete，仅删除指定渠道下行
 		List<Long> ids = List.of(1L, 2L);
 		when(messageTemplateMapper.delete(any())).thenReturn(2);
 
@@ -173,11 +180,33 @@ class SysMessageTemplateServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("批量删除：ids 为空时不调用 Mapper")
+	@DisplayName("批量删除：ids 为空时不调用删除")
 	void batchDelete_shouldSkipWhenIdsEmpty() {
 		sysMessageTemplateService.batchDelete(Collections.emptyList(), MessageChannel.EMAIL.name());
 
 		verify(messageTemplateMapper, never()).delete(any());
+	}
+
+	@Test
+	@DisplayName("批量启停：按 ids 与 channel 更新 status")
+	void batchUpdateStatus_shouldUpdateByIdsAndChannel() {
+		// IService.update 最终仍走 baseMapper.update，仅更新指定渠道下行
+		List<Long> ids = List.of(1L, 2L);
+		when(messageTemplateMapper.update(any(), any())).thenReturn(2);
+
+		sysMessageTemplateService.batchUpdateStatus(ids, true, MessageChannel.EMAIL.name());
+
+		ArgumentCaptor<Wrapper> wrapperCaptor = ArgumentCaptor.forClass(Wrapper.class);
+		verify(messageTemplateMapper).update(isNull(), wrapperCaptor.capture());
+		assertThat(wrapperCaptor.getValue()).isNotNull();
+	}
+
+	@Test
+	@DisplayName("批量启停：ids 为空时不调用更新")
+	void batchUpdateStatus_shouldSkipWhenIdsEmpty() {
+		sysMessageTemplateService.batchUpdateStatus(Collections.emptyList(), false, MessageChannel.EMAIL.name());
+
+		verify(messageTemplateMapper, never()).update(any(), any());
 	}
 
 }

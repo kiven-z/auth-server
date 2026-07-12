@@ -11,7 +11,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import java.util.List;
 
 /**
- * 消息模板公共服务（跨渠道分页、详情、删除）
+ * 消息模板公共服务（跨渠道分页、详情、删除、启停）
  *
  * @author Bunny
  */
@@ -40,5 +40,13 @@ public interface SysMessageTemplateService extends IService<MessageTemplateEntit
 	 * @param channel 消息渠道（仅删除该渠道下的行）
 	 */
 	void batchDelete(List<Long> ids, String channel);
+
+	/**
+	 * 按主键列表与渠道批量启用/禁用模板
+	 * @param ids 模板主键列表
+	 * @param status 目标启用状态
+	 * @param channel 消息渠道（仅更新该渠道下的行）
+	 */
+	void batchUpdateStatus(List<Long> ids, Boolean status, String channel);
 
 }

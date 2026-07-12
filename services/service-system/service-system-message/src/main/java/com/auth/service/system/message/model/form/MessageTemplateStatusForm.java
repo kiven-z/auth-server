@@ -1,24 +1,25 @@
 package com.auth.service.system.message.model.form;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.List;
-
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.List;
+
 /**
- * 邮件模板批量启用/禁用表单
+ * 消息模板批量启用/禁用表单（跨渠道；须带 channel）
  *
  * @author Bunny
  */
-@Schema(name = "EmailTemplateStatusForm", title = "邮件模板批量启用/禁用表单", description = "用于邮件模板批量启用/禁用")
+@Schema(name = "MessageTemplateStatusForm", title = "消息模板批量启用/禁用表单", description = "按 ids 与 channel 批量启停，避免跨渠道误改")
 @Getter
 @Setter
-public class EmailTemplateStatusForm implements Serializable {
+public class MessageTemplateStatusForm implements Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
@@ -30,5 +31,9 @@ public class EmailTemplateStatusForm implements Serializable {
 	@Schema(name = "status", title = "启用状态(true=启用模板，false=停用)")
 	@NotNull(message = "状态不能为空")
 	private Boolean status;
+
+	@Schema(name = "channel", title = "消息渠道")
+	@NotBlank(message = "消息渠道不能为空")
+	private String channel;
 
 }

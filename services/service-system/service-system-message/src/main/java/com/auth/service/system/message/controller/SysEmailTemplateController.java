@@ -3,15 +3,12 @@ package com.auth.service.system.message.controller;
 import com.auth.common.core.model.response.Result;
 import com.auth.common.web.valid.group.CreateGroup;
 import com.auth.common.web.valid.group.UpdateGroup;
-import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.common.model.SystemAuditBizModule;
-import com.auth.service.system.message.model.entity.MessageTemplateEntity;
 import com.auth.service.system.message.model.form.*;
 import com.auth.service.system.message.service.SysEmailTemplateService;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -101,20 +98,6 @@ public class SysEmailTemplateController {
 	public Result<String> updateRequireFields(@PathVariable("id") Long id,
 			@Validated @RequestBody EmailTemplateRequireFieldsForm form) {
 		sysEmailTemplateService.updateRequireFields(id, form);
-
-		return Result.success(null, OPERATION_SUCCESS.getMessage());
-	}
-
-	@OperationLog(targetType = "EMAIL_TEMPLATE", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_EMAIL_TEMPLATE, operation = OperationLogKind.UPDATE)
-	@Operation(summary = "批量启用/禁用邮件模板", description = "批量启用/禁用邮件模板")
-	@PreAuthorize("@auth.decide('message:template:update')")
-	@PutMapping("status")
-	public Result<String> batchUpdateStatus(@Validated @RequestBody EmailTemplateStatusForm form) {
-		sysEmailTemplateService.update(Wrappers.<MessageTemplateEntity>lambdaUpdate()
-			.in(MessageTemplateEntity::getId, form.getIds())
-			.eq(MessageTemplateEntity::getChannel, MessageChannel.EMAIL.name())
-			.set(MessageTemplateEntity::getStatus, form.getStatus()));
 
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}

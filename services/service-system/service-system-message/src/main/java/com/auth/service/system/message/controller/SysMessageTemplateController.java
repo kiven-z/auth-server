@@ -7,6 +7,7 @@ import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.common.model.SystemAuditBizModule;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
+import com.auth.service.system.message.model.form.MessageTemplateStatusForm;
 import com.auth.service.system.message.model.query.MessageTemplateQuery;
 import com.auth.service.system.message.model.vo.MessageTemplateDetailVO;
 import com.auth.service.system.message.model.vo.MessageTemplatePageResponse;
@@ -26,11 +27,11 @@ import java.util.List;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
 /**
- * 消息模板公共接口（跨渠道分页、详情、删除）
+ * 消息模板公共接口（跨渠道分页、详情、删除、启停）
  *
  * @author Bunny
  */
-@Tag(name = "消息模板相关", description = "消息模板跨渠道公共查询与删除")
+@Tag(name = "消息模板相关", description = "消息模板跨渠道公共查询、删除与启停")
 @Validated
 @RequestMapping("/api/system/message-template")
 @RestController
@@ -69,6 +70,16 @@ public class SysMessageTemplateController {
 	public Result<String> batchDelete(@RequestBody @NotEmpty(message = "模板ID列表不能为空") List<Long> ids,
 			@RequestParam @NotBlank(message = "消息渠道不能为空") String channel) {
 		sysMessageTemplateService.batchDelete(ids, channel);
+		return Result.success(null, OPERATION_SUCCESS.getMessage());
+	}
+
+	@OperationLog(targetType = "MESSAGE_TEMPLATE", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_MESSAGE_TEMPLATE, operation = OperationLogKind.UPDATE)
+	@Operation(summary = "批量启用/禁用消息模板", description = "按 ids 与 channel 启停，避免跨渠道误改")
+	@PreAuthorize("@auth.decide('message:template:update')")
+	@PutMapping("status")
+	public Result<String> batchUpdateStatus(@Validated @RequestBody MessageTemplateStatusForm form) {
+		sysMessageTemplateService.batchUpdateStatus(form.getIds(), form.getStatus(), form.getChannel());
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
