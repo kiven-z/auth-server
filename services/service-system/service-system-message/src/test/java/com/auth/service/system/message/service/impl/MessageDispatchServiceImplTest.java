@@ -86,9 +86,9 @@ class MessageDispatchServiceImplTest {
 	@DisplayName("渠道禁用：抛出 MESSAGE_CHANNEL_DISABLED")
 	void sendByTemplate_shouldThrowWhenChannelDisabled() {
 		// 禁用短信渠道，验证分发层统一拦截
-		messageChannelProperties.setSmsAliyunDypnsEnabled(false);
+		messageChannelProperties.setSmsEnabled(false);
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
-			.channel(MessageChannel.SMS_ALIYUN_DYPNS)
+			.channel(MessageChannel.SMS)
 			.templateCode("100001")
 			.targets(List.of("13800000000"))
 			.build();
@@ -105,9 +105,9 @@ class MessageDispatchServiceImplTest {
 	@DisplayName("启用但无 sender：抛出 MESSAGE_CHANNEL_UNSUPPORTED")
 	void sendByTemplate_shouldThrowWhenChannelUnsupported() {
 		// 保持渠道启用，验证 sender 缺失仍然是“不支持/未实现”
-		messageChannelProperties.setSmsAliyunDypnsEnabled(true);
+		messageChannelProperties.setSmsEnabled(true);
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
-			.channel(MessageChannel.SMS_ALIYUN_DYPNS)
+			.channel(MessageChannel.SMS)
 			.templateCode("100001")
 			.targets(List.of("13800000000"))
 			.build();

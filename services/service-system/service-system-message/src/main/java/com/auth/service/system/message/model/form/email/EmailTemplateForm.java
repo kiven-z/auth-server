@@ -1,7 +1,4 @@
-package com.auth.service.system.message.model.form;
-
-import java.io.Serial;
-import java.io.Serializable;
+package com.auth.service.system.message.model.form.email;
 
 import com.auth.common.web.valid.group.CreateGroup;
 import com.auth.common.web.valid.group.UpdateGroup;
@@ -12,10 +9,13 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 import static com.auth.common.web.validation.ValidationPatterns.LETTER_UNDERSCORE_HYPHEN_REQUIRE_LETTER;
 
 /**
- * 邮件模板表单（创建与更新共用；变量列表在独立接口维护）
+ * 邮件模板表单
  *
  * @author Bunny
  */

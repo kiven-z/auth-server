@@ -125,10 +125,10 @@ class TemplateMessageCommandValidationTest {
 	}
 
 	@Test
-	@DisplayName("SMS_ALIYUN_DYPNS 渠道：带 options 时抛出 MESSAGE_COMMAND_INVALID")
-	void validate_shouldThrowForDypnsWithAnyOptions() {
+	@DisplayName("SMS 渠道：带 options 时抛出 MESSAGE_COMMAND_INVALID")
+	void validate_shouldThrowForSmsWithAnyOptions() {
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
-			.channel(MessageChannel.SMS_ALIYUN_DYPNS)
+			.channel(MessageChannel.SMS)
 			.templateCode("100001")
 			.targets(List.of("13800000000"))
 			.options(EmailChannelOptions.builder().build())
@@ -143,7 +143,7 @@ class TemplateMessageCommandValidationTest {
 	@DisplayName("options 为空时校验通过")
 	void validate_shouldPassWhenOptionsNull() {
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
-			.channel(MessageChannel.SMS_ALIYUN_DYPNS)
+			.channel(MessageChannel.SMS)
 			.templateCode("100001")
 			.targets(List.of("13800000000"))
 			.build();

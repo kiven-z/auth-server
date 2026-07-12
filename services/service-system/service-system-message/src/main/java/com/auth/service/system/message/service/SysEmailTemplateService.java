@@ -1,7 +1,9 @@
 package com.auth.service.system.message.service;
 
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
-import com.auth.service.system.message.model.form.*;
+import com.auth.service.system.message.model.form.email.EmailTemplateContentForm;
+import com.auth.service.system.message.model.form.email.EmailTemplateForm;
+import com.auth.service.system.message.model.form.email.EmailTemplateRenderForm;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -31,13 +33,6 @@ public interface SysEmailTemplateService extends IService<MessageTemplateEntity>
 	void updateContent(Long id, EmailTemplateContentForm form);
 
 	/**
-	 * 仅更新 require_fields
-	 * @param id 模板ID
-	 * @param form 变量列表表单
-	 */
-	void updateRequireFields(Long id, EmailTemplateRequireFieldsForm form);
-
-	/**
 	 * 预览：将数据库模板按 exampleValue 渲染为 HTML
 	 * @param id 模板ID
 	 * @return 渲染后的 HTML
@@ -45,16 +40,10 @@ public interface SysEmailTemplateService extends IService<MessageTemplateEntity>
 	String previewRenderedHtml(Long id);
 
 	/**
-	 * 离线渲染（用于编辑态实时预览）
+	 * 离线渲染
 	 * @param form 内容与变量声明
 	 * @return 渲染后的 HTML
 	 */
 	String render(EmailTemplateRenderForm form);
-
-	/**
-	 * 测试发送（使用 require_fields 中 exampleValue 构建模型）
-	 * @param form 模板ID与收件邮箱
-	 */
-	void testSend(EmailTemplateTestSendForm form);
 
 }

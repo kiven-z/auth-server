@@ -24,7 +24,7 @@ public class MessageTemplateQuery extends PageQueryRequest implements Serializab
 	@Serial
 	private static final long serialVersionUID = 1L;
 
-	@Schema(name = "channel", title = "消息渠道", description = "如 EMAIL、IN_APP",
+	@Schema(name = "channel", title = "消息渠道", description = "如 EMAIL、SMS、DING_TALK、IN_APP",
 			requiredMode = Schema.RequiredMode.REQUIRED)
 	@NotBlank(message = "消息渠道不能为空")
 	private String channel;

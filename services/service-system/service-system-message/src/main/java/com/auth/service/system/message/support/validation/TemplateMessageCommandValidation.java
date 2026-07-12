@@ -69,7 +69,7 @@ public class TemplateMessageCommandValidation {
 		return switch (channel) {
 			case EMAIL -> options instanceof EmailChannelOptions;
 			case DING_TALK -> options instanceof DingTalkChannelOptions;
-			case SMS_ALIYUN_DYPNS, IN_APP -> false;
+			case SMS, IN_APP -> false;
 		};
 	}
 

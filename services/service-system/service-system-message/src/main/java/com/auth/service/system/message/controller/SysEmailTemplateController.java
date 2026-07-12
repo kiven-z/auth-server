@@ -7,7 +7,9 @@ import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.common.model.SystemAuditBizModule;
-import com.auth.service.system.message.model.form.*;
+import com.auth.service.system.message.model.form.email.EmailTemplateContentForm;
+import com.auth.service.system.message.model.form.email.EmailTemplateForm;
+import com.auth.service.system.message.model.form.email.EmailTemplateRenderForm;
 import com.auth.service.system.message.service.SysEmailTemplateService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -39,15 +41,6 @@ public class SysEmailTemplateController {
 	public Result<String> render(@Validated @RequestBody EmailTemplateRenderForm form) {
 		String html = sysEmailTemplateService.render(form);
 		return Result.success(html);
-	}
-
-	@Operation(summary = "测试发送邮件", description = "使用模板与 require_fields 示例值渲染后发送")
-	@PreAuthorize("@auth.decide('message:template:update')")
-	@PostMapping("test-send")
-	public Result<String> testSend(@Validated @RequestBody EmailTemplateTestSendForm form) {
-		sysEmailTemplateService.testSend(form);
-
-		return Result.success();
 	}
 
 	@Operation(summary = "预览邮件模板（FreeMarker 按示例值渲染为 HTML）", description = "预览邮件模板（渲染后 HTML）")
@@ -86,18 +79,6 @@ public class SysEmailTemplateController {
 	public Result<String> updateContent(@PathVariable("id") Long id,
 			@Validated @RequestBody EmailTemplateContentForm dto) {
 		sysEmailTemplateService.updateContent(id, dto);
-
-		return Result.success(null, OPERATION_SUCCESS.getMessage());
-	}
-
-	@OperationLog(targetType = "EMAIL_TEMPLATE", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_EMAIL_TEMPLATE, operation = OperationLogKind.UPDATE)
-	@Operation(summary = "仅更新变量列表 require_fields", description = "仅更新变量列表 require_fields")
-	@PreAuthorize("@auth.decide('message:template:update')")
-	@PutMapping("{id}/require-fields")
-	public Result<String> updateRequireFields(@PathVariable("id") Long id,
-			@Validated @RequestBody EmailTemplateRequireFieldsForm form) {
-		sysEmailTemplateService.updateRequireFields(id, form);
 
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}

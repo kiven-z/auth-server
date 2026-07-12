@@ -19,9 +19,9 @@ public enum AuthMessageScene {
 	LOGIN_EMAIL(MessageChannel.EMAIL, "login-email-code"),
 
 	/**
-	 * 登录短信验证码（阿里云 Dypns）
+	 * 登录短信验证码
 	 */
-	LOGIN_SMS(MessageChannel.SMS_ALIYUN_DYPNS, "login-sms-code"),
+	LOGIN_SMS(MessageChannel.SMS, "login-sms-code"),
 
 	/**
 	 * 忘记密码 / 重置密码（预留）

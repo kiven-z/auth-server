@@ -13,7 +13,7 @@ import java.util.*;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.*;
 
 /**
- * 消息模板必填变量声明：序列化、解析与发送前完整性校验（多渠道共用）
+ * 消息模板必填变量声明：序列化、解析与发送前完整性校验
  *
  * @author Bunny
  */
@@ -21,7 +21,7 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
 public class MessageTemplateRequireFieldsJsonSupport {
 
 	/**
-	 * 将变量列表序列化为 JSON 字符串（写入数据库）
+	 * 将变量列表序列化为 JSON 字符串（写入数据库；先跑写入级校验）
 	 * @param rows 变量列表
 	 * @return JSON 字符串
 	 */
@@ -39,7 +39,7 @@ public class MessageTemplateRequireFieldsJsonSupport {
 	}
 
 	/**
-	 * 解析必填变量声明 JSON，校验结构与 key 唯一性
+	 * 解析必填变量声明 JSON
 	 * @param json 必填变量声明 JSON
 	 * @return 必填变量声明列表
 	 */
@@ -48,10 +48,7 @@ public class MessageTemplateRequireFieldsJsonSupport {
 			return Collections.emptyList();
 		}
 		try {
-			List<MessageTemplateRequireFieldRow> rows = Arrays
-				.asList(JsonSupport.fromJson(json, MessageTemplateRequireFieldRow[].class));
-			validate(rows);
-			return rows;
+			return Arrays.asList(JsonSupport.fromJson(json, MessageTemplateRequireFieldRow[].class));
 		}
 		catch (IllegalArgumentException e) {
 			throw new SystemBusinessException(DATA_INVALID, e.getMessage());
@@ -59,7 +56,7 @@ public class MessageTemplateRequireFieldsJsonSupport {
 	}
 
 	/**
-	 * 业务校验：key 非空且唯一、exampleValue 非空
+	 * 写入级业务校验：key 非空且唯一、exampleValue 非空
 	 * @param rows 变量列表
 	 */
 	public static void validate(List<MessageTemplateRequireFieldRow> rows) {
@@ -81,7 +78,7 @@ public class MessageTemplateRequireFieldsJsonSupport {
 	}
 
 	/**
-	 * 找出 variables 中缺失的必填 key（仅校验 key 是否存在）
+	 * 找出 variables 中缺失的必填 key
 	 * @param requireFields 必填变量声明
 	 * @param variables 实际变量
 	 * @return 缺失的 key 列表

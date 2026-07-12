@@ -1,9 +1,5 @@
 package com.auth.service.system.message.model.form;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.List;
-
 import com.auth.service.system.message.model.vo.MessageTemplateRequireFieldRow;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
@@ -11,15 +7,19 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.List;
+
 /**
- * 仅更新邮件模板 require_fields
+ * 仅更新消息模板 require_fields
  *
  * @author Bunny
  */
-@Schema(name = "EmailTemplateRequireFieldsForm", title = "邮件模板变量列表表单")
+@Schema(name = "MessageTemplateRequireFieldsForm", title = "消息模板变量列表表单")
 @Getter
 @Setter
-public class EmailTemplateRequireFieldsForm implements Serializable {
+public class MessageTemplateRequireFieldsForm implements Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 1L;

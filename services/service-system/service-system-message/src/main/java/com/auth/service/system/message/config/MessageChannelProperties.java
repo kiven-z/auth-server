@@ -25,9 +25,9 @@ public class MessageChannelProperties {
 	private boolean emailEnabled = true;
 
 	/**
-	 * 阿里云 Dypns 短信渠道开关
+	 * 短信渠道开关
 	 */
-	private boolean smsAliyunDypnsEnabled = true;
+	private boolean smsEnabled = true;
 
 	/**
 	 * 钉钉渠道开关
@@ -45,7 +45,7 @@ public class MessageChannelProperties {
 		}
 		return switch (channel) {
 			case EMAIL -> emailEnabled;
-			case SMS_ALIYUN_DYPNS -> smsAliyunDypnsEnabled;
+			case SMS -> smsEnabled;
 			case DING_TALK -> dingTalkEnabled;
 			default -> true;
 		};

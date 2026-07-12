@@ -56,6 +56,30 @@ class MessageTemplateRequireFieldsJsonSupportTest {
 	}
 
 	@Test
+	@DisplayName("parse：缺少 exampleValue 仍可解析（读路径不强制写入校验）")
+	void parse_missingExampleValue_returnsRows() {
+		// 历史/半成品数据应能被详情读出，不应在 parse 阶段抛 PARAM_REQUIRED
+		List<MessageTemplateRequireFieldRow> parsed = MessageTemplateRequireFieldsJsonSupport
+			.parse("[{\"key\":\"code\",\"description\":\"验证码\"}]");
+
+		assertThat(parsed).hasSize(1);
+		assertThat(parsed.get(0).getKey()).isEqualTo("code");
+		assertThat(parsed.get(0).getExampleValue()).isNull();
+	}
+
+	@Test
+	@DisplayName("validate：缺少 exampleValue 抛出 PARAM_REQUIRED")
+	void validate_missingExampleValue_throws() {
+		MessageTemplateRequireFieldRow row = new MessageTemplateRequireFieldRow();
+		row.setKey("code");
+
+		assertThatThrownBy(() -> MessageTemplateRequireFieldsJsonSupport.validate(List.of(row)))
+			.isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(PARAM_REQUIRED);
+	}
+
+	@Test
 	@DisplayName("validate：重复 key 抛出 PARAM_DUPLICATE")
 	void validate_duplicateKey_throws() {
 		List<MessageTemplateRequireFieldRow> rows = List.of(row("code", JsonSupport.readTree("\"1\"")),

@@ -7,7 +7,9 @@ import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.common.model.SystemAuditBizModule;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
+import com.auth.service.system.message.model.form.MessageTemplateRequireFieldsForm;
 import com.auth.service.system.message.model.form.MessageTemplateStatusForm;
+import com.auth.service.system.message.model.form.MessageTemplateTestSendForm;
 import com.auth.service.system.message.model.query.MessageTemplateQuery;
 import com.auth.service.system.message.model.vo.MessageTemplateDetailVO;
 import com.auth.service.system.message.model.vo.MessageTemplatePageResponse;
@@ -27,11 +29,11 @@ import java.util.List;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
 /**
- * 消息模板公共接口（跨渠道分页、详情、删除、启停）
+ * 消息模板公共接口
  *
  * @author Bunny
  */
-@Tag(name = "消息模板相关", description = "消息模板跨渠道公共查询、删除与启停")
+@Tag(name = "消息模板相关", description = "消息模板跨渠道公共查询、删除、启停等")
 @Validated
 @RequestMapping("/api/system/message-template")
 @RestController
@@ -81,6 +83,26 @@ public class SysMessageTemplateController {
 	public Result<String> batchUpdateStatus(@Validated @RequestBody MessageTemplateStatusForm form) {
 		sysMessageTemplateService.batchUpdateStatus(form.getIds(), form.getStatus(), form.getChannel());
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
+	}
+
+	@OperationLog(targetType = "MESSAGE_TEMPLATE", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = SystemAuditBizModule.SYS_MESSAGE_TEMPLATE, operation = OperationLogKind.UPDATE)
+	@Operation(summary = "仅更新变量列表 require_fields", description = "按主键与 channel 更新，避免跨渠道误改")
+	@PreAuthorize("@auth.decide('message:template:update')")
+	@PutMapping("{id}/require-fields")
+	public Result<String> updateRequireFields(@PathVariable("id") Long id,
+			@RequestParam @NotBlank(message = "消息渠道不能为空") String channel,
+			@Validated @RequestBody MessageTemplateRequireFieldsForm form) {
+		sysMessageTemplateService.updateRequireFields(id, channel, form);
+		return Result.success(null, OPERATION_SUCCESS.getMessage());
+	}
+
+	@Operation(summary = "测试发送", description = "按模板 require_fields 示例值组装变量并发送；target 语义由 channel 解释")
+	@PreAuthorize("@auth.decide('message:template:update')")
+	@PostMapping("test-send")
+	public Result<String> testSend(@Validated @RequestBody MessageTemplateTestSendForm form) {
+		sysMessageTemplateService.testSend(form);
+		return Result.success();
 	}
 
 }

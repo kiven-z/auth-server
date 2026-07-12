@@ -4,7 +4,7 @@ import com.auth.service.system.common.exception.code.SystemResultCode;
 import lombok.Getter;
 
 /**
- * 消息发送、模板渲染与渠道（Dypns、钉钉）相关结果码
+ * 消息发送、模板渲染与渠道相关结果码
  *
  * @author Bunny
  */
@@ -42,7 +42,7 @@ public enum MessageResultCode implements SystemResultCode {
 	DING_TALK_RENDER_FAILED(500, 295, "DING_TALK_RENDER_FAILED", "system.dingtalk.render.failed"),
 
 	/**
-	 * SMS_ALIYUN_DYPNS 只走模板（templateCode + variables），不支持自定义正文
+	 * SMS 只走模板（templateCode + variables），不支持自定义正文
 	 */
 	SMS_CUSTOM_BODY_NOT_SUPPORTED(400, 296, "SMS_CUSTOM_BODY_NOT_SUPPORTED", "system.sms.custom_body.not_supported"),
 

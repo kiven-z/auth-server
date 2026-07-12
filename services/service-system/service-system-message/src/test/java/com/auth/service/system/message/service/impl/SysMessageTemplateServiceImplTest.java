@@ -1,15 +1,22 @@
 package com.auth.service.system.message.service.impl;
 
+import com.auth.common.core.utils.JsonSupport;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.message.api.channel.MessageChannel;
+import com.auth.module.message.api.command.TemplateMessageCommand;
+import com.auth.module.message.api.model.email.EmailChannelOptions;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.message.mapper.MessageTemplateMapper;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
+import com.auth.service.system.message.model.form.MessageTemplateRequireFieldsForm;
+import com.auth.service.system.message.model.form.MessageTemplateTestSendForm;
 import com.auth.service.system.message.model.po.MessageTemplatePageRowPO;
 import com.auth.service.system.message.model.query.MessageTemplateQuery;
 import com.auth.service.system.message.model.vo.MessageTemplateDetailVO;
 import com.auth.service.system.message.model.vo.MessageTemplatePageResponse;
+import com.auth.service.system.message.model.vo.MessageTemplateRequireFieldRow;
+import com.auth.service.system.message.service.MessageDispatchService;
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -28,14 +35,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Collections;
 import java.util.List;
 
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_INVALID;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
+import static com.auth.service.system.message.exception.MessageResultCode.MESSAGE_CHANNEL_UNSUPPORTED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**
- * {@link SysMessageTemplateServiceImpl} 分页、详情、删除与启停单元测试
+ * {@link SysMessageTemplateServiceImpl} 分页、详情、删除、启停、变量列表与测试发送单元测试
  */
 @DisplayName("SysMessageTemplateServiceImpl 消息模板公共服务")
 @ExtendWith(MockitoExtension.class)
@@ -46,6 +55,9 @@ class SysMessageTemplateServiceImplTest {
 
 	@Mock
 	private AuditUserDisplayService auditUserDisplayService;
+
+	@Mock
+	private MessageDispatchService messageDispatchService;
 
 	@InjectMocks
 	private SysMessageTemplateServiceImpl sysMessageTemplateService;
@@ -207,6 +219,172 @@ class SysMessageTemplateServiceImplTest {
 		sysMessageTemplateService.batchUpdateStatus(Collections.emptyList(), false, MessageChannel.EMAIL.name());
 
 		verify(messageTemplateMapper, never()).update(any(), any());
+	}
+
+	@Test
+	@DisplayName("更新 require_fields：渠道匹配时序列化并 updateById")
+	void updateRequireFields_shouldPersistWhenChannelMatches() {
+		MessageTemplateEntity entity = new MessageTemplateEntity();
+		entity.setId(10L);
+		entity.setChannel(MessageChannel.EMAIL.name());
+		entity.setRequireFields("[]");
+		when(messageTemplateMapper.selectById(10L)).thenReturn(entity);
+		when(messageTemplateMapper.updateById(any(MessageTemplateEntity.class))).thenReturn(1);
+
+		MessageTemplateRequireFieldRow row = new MessageTemplateRequireFieldRow();
+		row.setKey("code");
+		row.setDescription("验证码");
+		row.setExampleValue(JsonSupport.readTree("\"123456\""));
+
+		MessageTemplateRequireFieldsForm form = new MessageTemplateRequireFieldsForm();
+		form.setRequireFields(List.of(row));
+
+		sysMessageTemplateService.updateRequireFields(10L, MessageChannel.EMAIL.name(), form);
+
+		ArgumentCaptor<MessageTemplateEntity> entityCaptor = ArgumentCaptor.forClass(MessageTemplateEntity.class);
+		verify(messageTemplateMapper).updateById(entityCaptor.capture());
+		assertThat(entityCaptor.getValue().getRequireFields()).contains("code");
+	}
+
+	@Test
+	@DisplayName("更新 require_fields：渠道不匹配时抛出 DATA_NOT_EXIST")
+	void updateRequireFields_shouldThrowWhenChannelMismatch() {
+		MessageTemplateEntity entity = new MessageTemplateEntity();
+		entity.setId(10L);
+		entity.setChannel(MessageChannel.EMAIL.name());
+		when(messageTemplateMapper.selectById(10L)).thenReturn(entity);
+
+		MessageTemplateRequireFieldsForm form = new MessageTemplateRequireFieldsForm();
+		form.setRequireFields(Collections.emptyList());
+
+		assertThatThrownBy(() -> sysMessageTemplateService.updateRequireFields(10L, MessageChannel.IN_APP.name(), form))
+			.isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(DATA_NOT_EXIST);
+
+		verify(messageTemplateMapper, never()).updateById(any(MessageTemplateEntity.class));
+	}
+
+	@Test
+	@DisplayName("更新 require_fields：记录不存在时抛出 DATA_NOT_EXIST")
+	void updateRequireFields_shouldThrowWhenMissing() {
+		when(messageTemplateMapper.selectById(99L)).thenReturn(null);
+
+		MessageTemplateRequireFieldsForm form = new MessageTemplateRequireFieldsForm();
+		form.setRequireFields(Collections.emptyList());
+
+		assertThatThrownBy(() -> sysMessageTemplateService.updateRequireFields(99L, MessageChannel.EMAIL.name(), form))
+			.isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(DATA_NOT_EXIST);
+
+		verify(messageTemplateMapper, never()).updateById(any(MessageTemplateEntity.class));
+	}
+
+	@Test
+	@DisplayName("测试发送：EMAIL 渠道用示例变量组装命令并带 HTML options")
+	void testSend_shouldDispatchEmailCommandWithExampleVariables() {
+		// 模板存在且渠道匹配，变量取 require_fields 示例值
+		MessageTemplateEntity entity = new MessageTemplateEntity();
+		entity.setId(10L);
+		entity.setChannel(MessageChannel.EMAIL.name());
+		entity.setSceneCode("login-code");
+		entity.setRequireFields("[{\"key\":\"code\",\"description\":\"验证码\",\"exampleValue\":\"123456\"}]");
+		when(messageTemplateMapper.selectById(10L)).thenReturn(entity);
+
+		MessageTemplateTestSendForm form = new MessageTemplateTestSendForm();
+		form.setId(10L);
+		form.setChannel(MessageChannel.EMAIL.name());
+		form.setTarget("demo@example.com");
+
+		sysMessageTemplateService.testSend(form);
+
+		ArgumentCaptor<TemplateMessageCommand> commandCaptor = ArgumentCaptor.forClass(TemplateMessageCommand.class);
+		verify(messageDispatchService).sendByTemplate(commandCaptor.capture());
+		TemplateMessageCommand command = commandCaptor.getValue();
+		assertThat(command.getChannel()).isEqualTo(MessageChannel.EMAIL);
+		assertThat(command.getTemplateCode()).isEqualTo("login-code");
+		assertThat(command.getTargets()).containsExactly("demo@example.com");
+		assertThat(command.getVariables()).containsEntry("code", "123456");
+		assertThat(command.getOptions()).isInstanceOf(EmailChannelOptions.class);
+		assertThat(((EmailChannelOptions) command.getOptions()).getHasHtml()).isTrue();
+	}
+
+	@Test
+	@DisplayName("测试发送：SMS 渠道不带 options，目标为手机号")
+	void testSend_shouldDispatchSmsCommandWithoutOptions() {
+		MessageTemplateEntity entity = new MessageTemplateEntity();
+		entity.setId(11L);
+		entity.setChannel(MessageChannel.SMS.name());
+		entity.setSceneCode("sms-login");
+		entity.setRequireFields("[]");
+		when(messageTemplateMapper.selectById(11L)).thenReturn(entity);
+
+		MessageTemplateTestSendForm form = new MessageTemplateTestSendForm();
+		form.setId(11L);
+		form.setChannel(MessageChannel.SMS.name());
+		form.setTarget("13800138000");
+
+		sysMessageTemplateService.testSend(form);
+
+		ArgumentCaptor<TemplateMessageCommand> commandCaptor = ArgumentCaptor.forClass(TemplateMessageCommand.class);
+		verify(messageDispatchService).sendByTemplate(commandCaptor.capture());
+		TemplateMessageCommand command = commandCaptor.getValue();
+		assertThat(command.getChannel()).isEqualTo(MessageChannel.SMS);
+		assertThat(command.getTargets()).containsExactly("13800138000");
+		assertThat(command.getOptions()).isNull();
+	}
+
+	@Test
+	@DisplayName("测试发送：渠道不匹配时抛出 DATA_NOT_EXIST")
+	void testSend_shouldThrowWhenChannelMismatch() {
+		MessageTemplateEntity entity = new MessageTemplateEntity();
+		entity.setId(10L);
+		entity.setChannel(MessageChannel.EMAIL.name());
+		when(messageTemplateMapper.selectById(10L)).thenReturn(entity);
+
+		MessageTemplateTestSendForm form = new MessageTemplateTestSendForm();
+		form.setId(10L);
+		form.setChannel(MessageChannel.SMS.name());
+		form.setTarget("13800138000");
+
+		assertThatThrownBy(() -> sysMessageTemplateService.testSend(form)).isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(DATA_NOT_EXIST);
+
+		verify(messageDispatchService, never()).sendByTemplate(any());
+	}
+
+	@Test
+	@DisplayName("测试发送：未知渠道名抛出 MESSAGE_CHANNEL_UNSUPPORTED")
+	void testSend_shouldThrowWhenChannelUnsupported() {
+		MessageTemplateTestSendForm form = new MessageTemplateTestSendForm();
+		form.setId(10L);
+		form.setChannel("FAX");
+		form.setTarget("x");
+
+		assertThatThrownBy(() -> sysMessageTemplateService.testSend(form)).isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(MESSAGE_CHANNEL_UNSUPPORTED);
+
+		verify(messageDispatchService, never()).sendByTemplate(any());
+	}
+
+	@Test
+	@DisplayName("测试发送：EMAIL 目标非邮箱时抛出 DATA_INVALID")
+	void testSend_shouldThrowWhenEmailTargetInvalid() {
+		// 邮箱格式校验在加载模板之前，无需 stub selectById
+		MessageTemplateTestSendForm form = new MessageTemplateTestSendForm();
+		form.setId(10L);
+		form.setChannel(MessageChannel.EMAIL.name());
+		form.setTarget("not-an-email");
+
+		assertThatThrownBy(() -> sysMessageTemplateService.testSend(form)).isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(DATA_INVALID);
+
+		verify(messageDispatchService, never()).sendByTemplate(any());
+		verify(messageTemplateMapper, never()).selectById(any());
 	}
 
 }

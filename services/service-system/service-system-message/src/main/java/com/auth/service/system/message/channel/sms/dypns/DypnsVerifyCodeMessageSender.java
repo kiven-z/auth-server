@@ -7,13 +7,12 @@ import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.message.channel.sms.dypns.transport.AliyunDypnsTransport;
 import com.auth.service.system.message.model.channel.sms.dypns.DypnsVerifyCodeSendPayload;
-
 import org.springframework.stereotype.Component;
 
 import static com.auth.service.system.message.exception.MessageResultCode.SMS_CUSTOM_BODY_NOT_SUPPORTED;
 
 /**
- * 阿里云 Dypns 验证码短信渠道发送实现
+ * 阿里云 Dypns 验证码短信发送实现
  *
  * @author Bunny
  */
@@ -35,7 +34,7 @@ public class DypnsVerifyCodeMessageSender implements MessageSender {
 	 */
 	@Override
 	public MessageChannel channel() {
-		return MessageChannel.SMS_ALIYUN_DYPNS;
+		return MessageChannel.SMS;
 	}
 
 	/**

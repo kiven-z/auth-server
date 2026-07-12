@@ -2,6 +2,8 @@ package com.auth.service.system.message.service;
 
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
+import com.auth.service.system.message.model.form.MessageTemplateRequireFieldsForm;
+import com.auth.service.system.message.model.form.MessageTemplateTestSendForm;
 import com.auth.service.system.message.model.query.MessageTemplateQuery;
 import com.auth.service.system.message.model.vo.MessageTemplateDetailVO;
 import com.auth.service.system.message.model.vo.MessageTemplatePageResponse;
@@ -11,7 +13,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import java.util.List;
 
 /**
- * 消息模板公共服务（跨渠道分页、详情、删除、启停）
+ * 消息模板公共服务
  *
  * @author Bunny
  */
@@ -48,5 +50,19 @@ public interface SysMessageTemplateService extends IService<MessageTemplateEntit
 	 * @param channel 消息渠道（仅更新该渠道下的行）
 	 */
 	void batchUpdateStatus(List<Long> ids, Boolean status, String channel);
+
+	/**
+	 * 仅更新 require_fields（须与 channel 匹配）
+	 * @param id 模板主键
+	 * @param channel 消息渠道（须与库中一致）
+	 * @param form 变量列表表单
+	 */
+	void updateRequireFields(Long id, String channel, MessageTemplateRequireFieldsForm form);
+
+	/**
+	 * 测试发送：按模板 require_fields 示例值渲染并投递到指定目标
+	 * @param form 模板 ID、渠道与接收目标
+	 */
+	void testSend(MessageTemplateTestSendForm form);
 
 }

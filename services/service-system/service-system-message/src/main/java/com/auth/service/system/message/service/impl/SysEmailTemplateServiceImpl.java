@@ -2,20 +2,17 @@ package com.auth.service.system.message.service.impl;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.message.api.channel.MessageChannel;
-import com.auth.module.message.api.command.TemplateMessageCommand;
-import com.auth.module.message.api.model.email.EmailChannelOptions;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.message.convert.EmailTemplateConverter;
 import com.auth.service.system.message.mapper.MessageTemplateMapper;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
-import com.auth.service.system.message.model.form.*;
+import com.auth.service.system.message.model.form.email.EmailTemplateContentForm;
+import com.auth.service.system.message.model.form.email.EmailTemplateForm;
+import com.auth.service.system.message.model.form.email.EmailTemplateRenderForm;
 import com.auth.service.system.message.model.vo.MessageTemplateRequireFieldRow;
-import com.auth.service.system.message.service.MessageDispatchService;
 import com.auth.service.system.message.service.SysEmailTemplateService;
 import com.auth.service.system.message.support.template.FreemarkerTemplateRenderer;
 import com.auth.service.system.message.support.template.MessageTemplateRequireFieldsJsonSupport;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,7 +23,7 @@ import java.util.Map;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 
 /**
- * 邮件模板服务（数据落库于 message_template，channel=EMAIL）
+ * 邮件模板服务
  *
  * @author Bunny
  */
@@ -35,20 +32,20 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
 public class SysEmailTemplateServiceImpl extends ServiceImpl<MessageTemplateMapper, MessageTemplateEntity>
 		implements SysEmailTemplateService {
 
-	private final MessageDispatchService messageDispatchService;
-
-	public SysEmailTemplateServiceImpl(MessageDispatchService messageDispatchService) {
-		this.messageDispatchService = messageDispatchService;
-	}
-
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public void create(EmailTemplateForm form) {
-		MessageTemplateEntity entity = EmailTemplateConverter.INSTANCE.toEntity(form);
+		MessageTemplateEntity entity = new MessageTemplateEntity();
 		entity.setChannel(MessageChannel.EMAIL.name());
-		entity.setBodyContent(CharSequenceUtil.nullToDefault(entity.getBodyContent(), "Template content is empty"));
+		entity.setSceneCode(form.getTemplateCode());
+		entity.setTemplateName(form.getTemplateName());
+		entity.setSubject(form.getSubject());
+		entity.setDescription(form.getDescription());
+		entity.setStatus(form.getStatus());
+		entity.setPriority(form.getPriority());
+		entity.setBodyContent(CharSequenceUtil.nullToDefault(form.getContent(), "Template content is empty"));
 		entity.setRequireFields(MessageTemplateRequireFieldsJsonSupport.toJson(Collections.emptyList()));
 
 		save(entity);
@@ -64,7 +61,12 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<MessageTemplateMapp
 			throw new SystemBusinessException(DATA_NOT_EXIST);
 		}
 
-		EmailTemplateConverter.INSTANCE.updateEntity(form, exists);
+		exists.setSceneCode(form.getTemplateCode());
+		exists.setTemplateName(form.getTemplateName());
+		exists.setSubject(form.getSubject());
+		exists.setDescription(form.getDescription());
+		exists.setStatus(form.getStatus());
+		exists.setPriority(form.getPriority());
 		exists.setBodyContent(CharSequenceUtil.nullToDefault(form.getContent(), exists.getBodyContent()));
 		updateById(exists);
 	}
@@ -81,21 +83,6 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<MessageTemplateMapp
 
 		exists.setBodyContent(form.getContent());
 		updateById(exists);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void updateRequireFields(Long id, EmailTemplateRequireFieldsForm form) {
-		MessageTemplateEntity entity = getById(id);
-		if (entity == null || !MessageChannel.EMAIL.name().equals(entity.getChannel())) {
-			throw new SystemBusinessException(DATA_NOT_EXIST);
-		}
-
-		String json = MessageTemplateRequireFieldsJsonSupport.toJson(form.getRequireFields());
-		entity.setRequireFields(json);
-		updateById(entity);
 	}
 
 	/**
@@ -126,32 +113,6 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<MessageTemplateMapp
 		catch (Exception e) {
 			return "预览渲染失败，请检查变量声明与正文语法";
 		}
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	@Async
-	public void testSend(EmailTemplateTestSendForm form) {
-		Long id = form.getId();
-		MessageTemplateEntity entity = getById(id);
-		if (entity == null || !MessageChannel.EMAIL.name().equals(entity.getChannel())) {
-			throw new SystemBusinessException(DATA_NOT_EXIST);
-		}
-
-		List<MessageTemplateRequireFieldRow> rows = MessageTemplateRequireFieldsJsonSupport
-			.parse(entity.getRequireFields());
-		Map<String, Object> model = MessageTemplateRequireFieldsJsonSupport.toExampleModel(rows);
-
-		TemplateMessageCommand command = TemplateMessageCommand.builder()
-			.channel(MessageChannel.EMAIL)
-			.templateCode(entity.getSceneCode())
-			.targets(List.of(form.getEmail()))
-			.variables(model)
-			.options(EmailChannelOptions.builder().hasHtml(Boolean.TRUE).build())
-			.build();
-		messageDispatchService.sendByTemplate(command);
 	}
 
 }

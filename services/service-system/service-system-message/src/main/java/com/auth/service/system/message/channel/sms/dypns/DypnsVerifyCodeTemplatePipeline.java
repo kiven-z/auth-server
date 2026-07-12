@@ -67,7 +67,7 @@ public class DypnsVerifyCodeTemplatePipeline {
 		String sceneCode = command.getTemplateCode();
 
 		// 加载模板
-		MessageTemplateEntity template = messageTemplateLoader.loadEnabled(MessageChannel.SMS_ALIYUN_DYPNS, sceneCode);
+		MessageTemplateEntity template = messageTemplateLoader.loadEnabled(MessageChannel.SMS, sceneCode);
 
 		// 获取变量
 		Map<String, Object> variables = Optional.ofNullable(command.getVariables()).orElseGet(LinkedHashMap::new);
@@ -76,7 +76,7 @@ public class DypnsVerifyCodeTemplatePipeline {
 		List<MessageTemplateRequireFieldRow> requireFields = MessageTemplateRequireFieldsJsonSupport
 			.parse(template.getRequireFields());
 		MessageTemplateRequireFieldsJsonSupport.assertVariablesPresent(requireFields, variables, TEMPLATE_VARS_MISSING,
-				MessageChannel.SMS_ALIYUN_DYPNS.name());
+				MessageChannel.SMS.name());
 
 		// 构建模板参数
 		String templateParam = buildTemplateParam(requireFields, variables);
