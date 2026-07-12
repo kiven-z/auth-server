@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 import static com.auth.module.security.contract.api.audit.AuditServiceDomain.SYSTEM;
-import static com.auth.service.system.common.model.SystemAuditBizModule.SYS_FILE;
+import static com.auth.service.system.file.model.constants.FileAuditBizModule.SYS_FILE;
 
 /**
  * 当前用户文件回收站控制器

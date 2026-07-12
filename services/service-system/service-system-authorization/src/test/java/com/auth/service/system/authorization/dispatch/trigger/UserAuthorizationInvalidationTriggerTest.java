@@ -8,7 +8,7 @@ import com.auth.module.security.contract.api.authorization.AuthorizationChangeKi
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest;
 import com.auth.module.security.contract.dto.invalidation.UserInvalidatePayload;
 import com.auth.service.system.authorization.dispatch.AuthorizationInvalidationCoordinator;
-import com.auth.service.system.common.model.SystemAuditBizModule;
+import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,7 +53,7 @@ class UserAuthorizationInvalidationTriggerTest {
 		ArgumentCaptor<AuthorizationInvalidateRequest> requestCaptor = ArgumentCaptor
 			.forClass(AuthorizationInvalidateRequest.class);
 		verify(invalidationCoordinator).submit(requestCaptor.capture(),
-				org.mockito.ArgumentMatchers.eq(SystemAuditBizModule.SYS_USER),
+				org.mockito.ArgumentMatchers.eq(AuthorizationAuditBizModule.SYS_USER),
 				org.mockito.ArgumentMatchers.eq("update:10,20"));
 
 		AuthorizationInvalidateRequest request = requestCaptor.getValue();

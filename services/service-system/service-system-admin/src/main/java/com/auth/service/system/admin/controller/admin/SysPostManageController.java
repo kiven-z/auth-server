@@ -10,7 +10,7 @@ import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
 import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
 import com.auth.service.system.admin.service.admin.GrantTableService;
-import com.auth.service.system.common.model.SystemAuditBizModule;
+import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -50,7 +50,7 @@ public class SysPostManageController {
 	}
 
 	@OperationLog(targetType = "POST_ROLE", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.GRANT_TABLE, operation = OperationLogKind.UPDATE)
+			bizModule = AuthorizationAuditBizModule.GRANT_TABLE, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "全量覆盖岗位角色授权")
 	@PreAuthorize("@auth.decide('sys:post:update')")
 	@PutMapping("/{postId}/roles")

@@ -9,7 +9,7 @@ import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.admin.model.form.role.SysRolePermissionAssignForm;
 import com.auth.service.system.admin.model.vo.reference.PermissionReferenceVO;
 import com.auth.service.system.admin.service.admin.SysRolePermissionService;
-import com.auth.service.system.common.model.SystemAuditBizModule;
+import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -49,7 +49,7 @@ public class SysRolePermissionController {
 	}
 
 	@OperationLog(targetType = "ROLE_PERMISSION", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_ROLE_PERMISSION, operation = OperationLogKind.UPDATE)
+			bizModule = AuthorizationAuditBizModule.SYS_ROLE_PERMISSION, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "全量分配角色权限码（触发 perm_version 失效）")
 	@PreAuthorize("@auth.decide('sys:role:update')")
 	@PostMapping

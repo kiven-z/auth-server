@@ -7,7 +7,7 @@ import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidat
 import com.auth.module.security.contract.dto.invalidation.GrantInvalidatePayload;
 import com.auth.module.security.contract.dto.invalidation.GrantSubjectKey;
 import com.auth.service.system.authorization.dispatch.AuthorizationInvalidationCoordinator;
-import com.auth.service.system.common.model.SystemAuditBizModule;
+import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -46,7 +46,7 @@ public class GrantAuthorizationInvalidationTrigger {
 		var payload = new GrantInvalidatePayload(keys);
 		var request = new AuthorizationInvalidateRequest(eventId, AuthorizationChangeKind.GRANT, payload);
 
-		invalidationCoordinator.submit(request, SystemAuditBizModule.GRANT_TABLE, sourceBizId);
+		invalidationCoordinator.submit(request, AuthorizationAuditBizModule.GRANT_TABLE, sourceBizId);
 	}
 
 }

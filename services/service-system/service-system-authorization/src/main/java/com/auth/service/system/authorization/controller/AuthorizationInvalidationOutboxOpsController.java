@@ -14,7 +14,7 @@ import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationO
 import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationOutboxRetryResultVO;
 import com.auth.service.system.authorization.ops.AuthorizationInvalidationOutboxManualRetryService;
 import com.auth.service.system.authorization.service.AuthorizationInvalidationOutboxQueryService;
-import com.auth.service.system.common.model.SystemAuditBizModule;
+import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -64,7 +64,7 @@ public class AuthorizationInvalidationOutboxOpsController {
 	}
 
 	@OperationLog(targetType = "AUTH_INVALIDATION_OUTBOX", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.AUTH_INVALIDATION_OUTBOX, operation = OperationLogKind.UPDATE)
+			bizModule = AuthorizationAuditBizModule.AUTH_INVALIDATION_OUTBOX, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "人工重试授权失效 Outbox 投递")
 	@PreAuthorize("@auth.decide('ops:invalidationoutbox:retry')")
 	@PostMapping("{id}/retry")

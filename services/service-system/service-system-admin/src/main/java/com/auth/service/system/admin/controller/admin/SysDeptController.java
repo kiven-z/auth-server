@@ -22,7 +22,7 @@ import com.auth.service.system.admin.model.vo.dept.SysDeptDetailVO;
 import com.auth.service.system.admin.model.vo.dept.SysDeptListVO;
 import com.auth.service.system.admin.service.admin.SysDeptQueryService;
 import com.auth.service.system.admin.service.admin.SysDeptService;
-import com.auth.service.system.common.model.SystemAuditBizModule;
+import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -85,7 +85,7 @@ public class SysDeptController {
 	}
 
 	@OperationLog(targetType = "DEPT_LIST", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_DEPT, operation = OperationLogKind.QUERY)
+			bizModule = AuthorizationAuditBizModule.SYS_DEPT, operation = OperationLogKind.QUERY)
 	@Operation(summary = "部门扁平列表（全量或关键词过滤，前端建树）")
 	@PreAuthorize("@auth.decide('sys:dept:query')")
 	@GetMapping("/list")
@@ -112,7 +112,7 @@ public class SysDeptController {
 	}
 
 	@OperationLog(targetType = "DEPT", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_DEPT, operation = OperationLogKind.CREATE)
+			bizModule = AuthorizationAuditBizModule.SYS_DEPT, operation = OperationLogKind.CREATE)
 	@Operation(summary = "新增部门")
 	@PreAuthorize("@auth.decide('sys:dept:create')")
 	@PostMapping
@@ -122,7 +122,7 @@ public class SysDeptController {
 	}
 
 	@OperationLog(targetType = "DEPT", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_DEPT, operation = OperationLogKind.UPDATE)
+			bizModule = AuthorizationAuditBizModule.SYS_DEPT, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "更新部门")
 	@PreAuthorize("@auth.decide('sys:dept:update')")
 	@PutMapping
@@ -132,7 +132,7 @@ public class SysDeptController {
 	}
 
 	@OperationLog(targetType = "DEPT", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_DEPT, operation = OperationLogKind.UPDATE)
+			bizModule = AuthorizationAuditBizModule.SYS_DEPT, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "移动部门（变更父部门）")
 	@PreAuthorize("@auth.decide('sys:dept:update')")
 	@PutMapping("/{id}/move")
@@ -142,7 +142,7 @@ public class SysDeptController {
 	}
 
 	@OperationLog(targetType = "DEPT", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_DEPT, operation = OperationLogKind.DELETE)
+			bizModule = AuthorizationAuditBizModule.SYS_DEPT, operation = OperationLogKind.DELETE)
 	@Operation(summary = "删除部门（逻辑删除）")
 	@PreAuthorize("@auth.decide('sys:dept:delete')")
 	@DeleteMapping("/{id}")

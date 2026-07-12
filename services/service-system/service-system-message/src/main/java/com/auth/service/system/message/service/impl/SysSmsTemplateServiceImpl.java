@@ -1,7 +1,7 @@
 package com.auth.service.system.message.service.impl;
 
-import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.message.api.channel.MessageChannel;
+import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.message.mapper.MessageTemplateMapper;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
 import com.auth.service.system.message.model.form.sms.SmsTemplateForm;
@@ -13,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
+
 /**
  * 短信模板服务。
  *
@@ -23,8 +25,14 @@ import java.util.Collections;
 public class SysSmsTemplateServiceImpl extends ServiceImpl<MessageTemplateMapper, MessageTemplateEntity>
 		implements SysSmsTemplateService {
 
-	public SysSmsTemplateServiceImpl(MessageTemplateMapper messageTemplateMapper) {
-		this.baseMapper = messageTemplateMapper;
+	private static void applyEntity(SmsTemplateForm form, MessageTemplateEntity exists) {
+		exists.setSceneCode(form.getTemplateCode());
+		exists.setTemplateName(form.getTemplateName());
+		exists.setProviderTemplateCode(form.getProviderTemplateCode());
+		exists.setDescription(form.getDescription());
+		exists.setStatus(form.getStatus());
+		exists.setPriority(form.getPriority());
+		exists.setBodyContent(form.getContent());
 	}
 
 	/**
@@ -34,16 +42,24 @@ public class SysSmsTemplateServiceImpl extends ServiceImpl<MessageTemplateMapper
 	public void create(SmsTemplateForm form) {
 		MessageTemplateEntity entity = new MessageTemplateEntity();
 		entity.setChannel(MessageChannel.SMS.name());
-		entity.setSceneCode(form.getTemplateCode());
-		entity.setTemplateName(form.getTemplateName());
-		entity.setProviderTemplateCode(form.getProviderTemplateCode());
-		entity.setDescription(form.getDescription());
-		entity.setStatus(form.getStatus());
-		entity.setPriority(form.getPriority());
-		entity.setBodyContent(CharSequenceUtil.nullToDefault(form.getContent(), ""));
+		applyEntity(form, entity);
 		entity.setRequireFields(MessageTemplateRequireFieldsJsonSupport.toJson(Collections.emptyList()));
 
 		save(entity);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void update(SmsTemplateForm form) {
+		MessageTemplateEntity exists = getById(form.getId());
+		if (exists == null) {
+			throw new SystemBusinessException(DATA_NOT_EXIST);
+		}
+
+		applyEntity(form, exists);
+		updateById(exists);
 	}
 
 }

@@ -12,7 +12,7 @@ import com.auth.service.system.admin.model.vo.dept.DeptClosureHealthVO;
 import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
 import com.auth.service.system.admin.service.admin.DeptClosureHealthQueryService;
 import com.auth.service.system.admin.service.admin.GrantTableService;
-import com.auth.service.system.common.model.SystemAuditBizModule;
+import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -48,7 +48,7 @@ public class SysDeptManageController {
 	}
 
 	@OperationLog(targetType = "DEPT_CLOSURE_HEALTH", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.DEPT_CLOSURE, operation = OperationLogKind.QUERY)
+			bizModule = AuthorizationAuditBizModule.DEPT_CLOSURE, operation = OperationLogKind.QUERY)
 	@Operation(summary = "部门闭包表健康检查（只读运维）")
 	@PreAuthorize("@auth.decide('sys:dept:diagnose')")
 	@GetMapping("/closure/health")
@@ -66,7 +66,7 @@ public class SysDeptManageController {
 	}
 
 	@OperationLog(targetType = "DEPT_ROLE", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.GRANT_TABLE, operation = OperationLogKind.UPDATE)
+			bizModule = AuthorizationAuditBizModule.GRANT_TABLE, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "全量覆盖部门角色授权")
 	@PreAuthorize("@auth.decide('sys:dept:update')")
 	@PutMapping("/{deptId}/roles")

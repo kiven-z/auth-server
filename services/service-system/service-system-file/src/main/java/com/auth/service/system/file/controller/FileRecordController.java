@@ -23,7 +23,7 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 import java.util.List;
 
 import static com.auth.module.security.contract.api.audit.AuditServiceDomain.SYSTEM;
-import static com.auth.service.system.common.model.SystemAuditBizModule.SYS_FILE;
+import static com.auth.service.system.file.model.constants.FileAuditBizModule.SYS_FILE;
 
 /**
  * 文件查询与治理控制器

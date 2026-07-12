@@ -21,7 +21,7 @@ import com.auth.service.system.admin.model.vo.post.SysPostPageVO;
 import com.auth.service.system.admin.model.vo.post.SysPostSearchItemVO;
 import com.auth.service.system.admin.service.admin.SysPostQueryService;
 import com.auth.service.system.admin.service.admin.SysPostService;
-import com.auth.service.system.common.model.SystemAuditBizModule;
+import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -124,7 +124,7 @@ public class SysPostController {
 	}
 
 	@OperationLog(targetType = "POST", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_POST, operation = OperationLogKind.UPDATE)
+			bizModule = AuthorizationAuditBizModule.SYS_POST, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "更新岗位")
 	@PreAuthorize("@auth.decide('sys:post:update')")
 	@PutMapping
@@ -134,7 +134,7 @@ public class SysPostController {
 	}
 
 	@OperationLog(targetType = "POST", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_POST, operation = OperationLogKind.DELETE)
+			bizModule = AuthorizationAuditBizModule.SYS_POST, operation = OperationLogKind.DELETE)
 	@Operation(summary = "删除岗位")
 	@PreAuthorize("@auth.decide('sys:post:delete')")
 	@DeleteMapping("/{id}")

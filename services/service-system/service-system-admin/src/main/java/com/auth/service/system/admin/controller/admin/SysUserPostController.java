@@ -12,7 +12,7 @@ import com.auth.service.system.admin.model.form.user.UserPostRelationUpdateForm;
 import com.auth.service.system.admin.model.query.user.UserPostPageQuery;
 import com.auth.service.system.admin.model.vo.user.UserPostPageVO;
 import com.auth.service.system.admin.service.admin.SysUserPostService;
-import com.auth.service.system.common.model.SystemAuditBizModule;
+import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -51,7 +51,7 @@ public class SysUserPostController {
 	}
 
 	@OperationLog(targetType = "USER_POST", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.CREATE)
+			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.CREATE)
 	@Operation(summary = "新增用户岗位关联")
 	@PreAuthorize("@auth.decide('sys:userpost:create')")
 	@PostMapping("/{userId}")
@@ -61,7 +61,7 @@ public class SysUserPostController {
 	}
 
 	@OperationLog(targetType = "USER_POST", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
+			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "更新用户岗位关联")
 	@PreAuthorize("@auth.decide('sys:userpost:update')")
 	@PutMapping("/{userId}/{id}")
@@ -72,7 +72,7 @@ public class SysUserPostController {
 	}
 
 	@OperationLog(targetType = "USER_POST", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.DELETE)
+			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.DELETE)
 	@Operation(summary = "批量删除用户岗位关联")
 	@PreAuthorize("@auth.decide('sys:userpost:delete')")
 	@DeleteMapping("/{userId}")
@@ -82,7 +82,7 @@ public class SysUserPostController {
 	}
 
 	@OperationLog(targetType = "USER_POST", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.DELETE)
+			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.DELETE)
 	@Operation(summary = "清空用户全部岗位关联")
 	@PreAuthorize("@auth.decide('sys:userpost:delete')")
 	@DeleteMapping("/{userId}/all")

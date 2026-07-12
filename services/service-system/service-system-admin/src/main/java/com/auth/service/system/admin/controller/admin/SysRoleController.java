@@ -21,7 +21,7 @@ import com.auth.service.system.admin.model.vo.role.SysRoleOptionVO;
 import com.auth.service.system.admin.model.vo.role.SysRolePageVO;
 import com.auth.service.system.admin.service.admin.SysRoleQueryService;
 import com.auth.service.system.admin.service.admin.SysRoleService;
-import com.auth.service.system.common.model.SystemAuditBizModule;
+import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -111,7 +111,7 @@ public class SysRoleController {
 	}
 
 	@OperationLog(targetType = "ROLE", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_ROLE, operation = OperationLogKind.UPDATE)
+			bizModule = AuthorizationAuditBizModule.SYS_ROLE, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "更新角色")
 	@PreAuthorize("@auth.decide('sys:role:update')")
 	@PutMapping
@@ -121,7 +121,7 @@ public class SysRoleController {
 	}
 
 	@OperationLog(targetType = "ROLE", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_ROLE, operation = OperationLogKind.DELETE)
+			bizModule = AuthorizationAuditBizModule.SYS_ROLE, operation = OperationLogKind.DELETE)
 	@Operation(summary = "删除角色")
 	@PreAuthorize("@auth.decide('sys:role:delete')")
 	@DeleteMapping("/{id}")

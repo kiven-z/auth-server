@@ -6,7 +6,7 @@ import com.auth.module.security.contract.api.authorization.AuthorizationChangeKi
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest;
 import com.auth.module.security.contract.dto.invalidation.PermissionInvalidatePayload;
 import com.auth.service.system.authorization.dispatch.AuthorizationInvalidationCoordinator;
-import com.auth.service.system.common.model.SystemAuditBizModule;
+import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -41,7 +41,7 @@ public class PermissionAuthorizationInvalidationTrigger {
 		var payload = new PermissionInvalidatePayload(codes);
 		var request = new AuthorizationInvalidateRequest(eventId, AuthorizationChangeKind.PERMISSION, payload);
 
-		invalidationCoordinator.submit(request, SystemAuditBizModule.SYS_PERMISSION, sourceBizId);
+		invalidationCoordinator.submit(request, AuthorizationAuditBizModule.SYS_PERMISSION, sourceBizId);
 	}
 
 }

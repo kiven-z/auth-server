@@ -6,7 +6,7 @@ import com.auth.common.web.valid.group.UpdateGroup;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
-import com.auth.service.system.common.model.SystemAuditBizModule;
+import com.auth.service.system.message.model.constants.MessageAuditBizModule;
 import com.auth.service.system.message.model.form.email.EmailTemplateContentForm;
 import com.auth.service.system.message.model.form.email.EmailTemplateForm;
 import com.auth.service.system.message.model.form.email.EmailTemplateRenderForm;
@@ -61,7 +61,7 @@ public class SysEmailTemplateController {
 	}
 
 	@OperationLog(targetType = "EMAIL_TEMPLATE", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_EMAIL_TEMPLATE, operation = OperationLogKind.UPDATE)
+			bizModule = MessageAuditBizModule.SYS_MESSAGE_TEMPLATE, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "更新邮件模板", description = "更新邮件模板")
 	@PreAuthorize("@auth.decide('message:template:update')")
 	@PutMapping()
@@ -72,7 +72,7 @@ public class SysEmailTemplateController {
 	}
 
 	@OperationLog(targetType = "EMAIL_TEMPLATE", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_EMAIL_TEMPLATE, operation = OperationLogKind.UPDATE)
+			bizModule = MessageAuditBizModule.SYS_MESSAGE_TEMPLATE, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "仅更新邮件模板正文", description = "仅更新 content 字段")
 	@PreAuthorize("@auth.decide('message:template:update')")
 	@PutMapping("{id}/content")

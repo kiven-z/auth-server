@@ -9,7 +9,7 @@ import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.admin.model.form.menu.SysMenuAssignRoleForm;
 import com.auth.service.system.admin.model.vo.reference.ext.MenuAssignedRoleReferenceVO;
 import com.auth.service.system.admin.service.admin.SysMenuManageService;
-import com.auth.service.system.common.model.SystemAuditBizModule;
+import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -51,7 +51,7 @@ public class SysMenuManageController {
 	}
 
 	@OperationLog(targetType = "MENU_ROLE", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_MENU_ROLE, operation = OperationLogKind.UPDATE)
+			bizModule = AuthorizationAuditBizModule.SYS_MENU_ROLE, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "覆盖分配菜单角色（写入 sys_menu_role）")
 	@PreAuthorize("@auth.decide('sys:menu:update')")
 	@PutMapping("/{id}/roles")

@@ -5,7 +5,7 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
-import com.auth.service.system.common.model.SystemAuditBizModule;
+import com.auth.service.system.message.model.constants.MessageAuditBizModule;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
 import com.auth.service.system.message.model.form.MessageTemplateRequireFieldsForm;
 import com.auth.service.system.message.model.form.MessageTemplateStatusForm;
@@ -65,7 +65,7 @@ public class SysMessageTemplateController {
 	}
 
 	@OperationLog(targetType = "MESSAGE_TEMPLATE_DELETE", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_MESSAGE_TEMPLATE, operation = OperationLogKind.DELETE)
+			bizModule = MessageAuditBizModule.SYS_MESSAGE_TEMPLATE, operation = OperationLogKind.DELETE)
 	@Operation(summary = "批量删除消息模板", description = "按 ids 删除；channel 限定渠道，避免跨渠道误删")
 	@PreAuthorize("@auth.decide('message:template:delete')")
 	@DeleteMapping()
@@ -76,7 +76,7 @@ public class SysMessageTemplateController {
 	}
 
 	@OperationLog(targetType = "MESSAGE_TEMPLATE", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_MESSAGE_TEMPLATE, operation = OperationLogKind.UPDATE)
+			bizModule = MessageAuditBizModule.SYS_MESSAGE_TEMPLATE, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "批量启用/禁用消息模板", description = "按 ids 与 channel 启停，避免跨渠道误改")
 	@PreAuthorize("@auth.decide('message:template:update')")
 	@PutMapping("status")
@@ -86,7 +86,7 @@ public class SysMessageTemplateController {
 	}
 
 	@OperationLog(targetType = "MESSAGE_TEMPLATE", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_MESSAGE_TEMPLATE, operation = OperationLogKind.UPDATE)
+			bizModule = MessageAuditBizModule.SYS_MESSAGE_TEMPLATE, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "仅更新变量列表 require_fields", description = "按主键与 channel 更新，避免跨渠道误改")
 	@PreAuthorize("@auth.decide('message:template:update')")
 	@PutMapping("{id}/require-fields")

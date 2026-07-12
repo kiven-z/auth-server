@@ -17,4 +17,10 @@ public interface SysSmsTemplateService extends IService<MessageTemplateEntity> {
 	 */
 	void create(SmsTemplateForm form);
 
+	/**
+	 * 更新短信模板（不修改 channel、require_fields）
+	 * @param form 短信模板表单
+	 */
+	void update(SmsTemplateForm form);
+
 }

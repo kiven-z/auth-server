@@ -6,7 +6,7 @@ import com.auth.module.security.contract.api.authorization.AuthorizationChangeKi
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest;
 import com.auth.module.security.contract.dto.invalidation.UserInvalidatePayload;
 import com.auth.service.system.authorization.dispatch.AuthorizationInvalidationCoordinator;
-import com.auth.service.system.common.model.SystemAuditBizModule;
+import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -44,7 +44,7 @@ public class UserAuthorizationInvalidationTrigger {
 		var payload = new UserInvalidatePayload(ids);
 		var request = new AuthorizationInvalidateRequest(eventId, AuthorizationChangeKind.USER, payload);
 
-		invalidationCoordinator.submit(request, SystemAuditBizModule.SYS_USER, sourceBizId);
+		invalidationCoordinator.submit(request, AuthorizationAuditBizModule.SYS_USER, sourceBizId);
 	}
 
 }

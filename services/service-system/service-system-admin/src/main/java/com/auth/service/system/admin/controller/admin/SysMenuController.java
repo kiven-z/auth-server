@@ -20,7 +20,7 @@ import com.auth.service.system.admin.model.vo.menu.SysMenuDetailVO;
 import com.auth.service.system.admin.model.vo.menu.SysMenuListVO;
 import com.auth.service.system.admin.service.admin.SysMenuQueryService;
 import com.auth.service.system.admin.service.admin.SysMenuService;
-import com.auth.service.system.common.model.SystemAuditBizModule;
+import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -93,7 +93,7 @@ public class SysMenuController {
 	}
 
 	@OperationLog(targetType = "MENU", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_MENU, operation = OperationLogKind.CREATE)
+			bizModule = AuthorizationAuditBizModule.SYS_MENU, operation = OperationLogKind.CREATE)
 	@Operation(summary = "新增菜单")
 	@PreAuthorize("@auth.decide('sys:menu:create')")
 	@PostMapping
@@ -103,7 +103,7 @@ public class SysMenuController {
 	}
 
 	@OperationLog(targetType = "MENU", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_MENU, operation = OperationLogKind.UPDATE)
+			bizModule = AuthorizationAuditBizModule.SYS_MENU, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "更新菜单")
 	@PreAuthorize("@auth.decide('sys:menu:update')")
 	@PutMapping
@@ -113,7 +113,7 @@ public class SysMenuController {
 	}
 
 	@OperationLog(targetType = "MENU", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_MENU, operation = OperationLogKind.DELETE)
+			bizModule = AuthorizationAuditBizModule.SYS_MENU, operation = OperationLogKind.DELETE)
 	@Operation(summary = "批量删除菜单")
 	@PreAuthorize("@auth.decide('sys:menu:delete')")
 	@DeleteMapping
@@ -123,7 +123,7 @@ public class SysMenuController {
 	}
 
 	@OperationLog(targetType = "MENU", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_MENU, operation = OperationLogKind.UPDATE)
+			bizModule = AuthorizationAuditBizModule.SYS_MENU, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "移动菜单")
 	@PreAuthorize("@auth.decide('sys:menu:update')")
 	@PutMapping("/{id}/move")
@@ -133,7 +133,7 @@ public class SysMenuController {
 	}
 
 	@OperationLog(targetType = "MENU", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_MENU, operation = OperationLogKind.UPDATE)
+			bizModule = AuthorizationAuditBizModule.SYS_MENU, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "批量更新菜单状态")
 	@PreAuthorize("@auth.decide('sys:menu:update')")
 	@PutMapping("/status")

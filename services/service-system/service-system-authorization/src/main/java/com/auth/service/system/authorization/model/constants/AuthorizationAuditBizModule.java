@@ -1,14 +1,16 @@
-package com.auth.service.system.common.model;
+package com.auth.service.system.authorization.model.constants;
 
 import lombok.experimental.UtilityClass;
 
 /**
- * system 服务操作审计「小模块」编码常量
+ * authorization / admin 域操作审计「小模块」编码常量。
+ * <p>
+ * admin 侧组织与权限相关编码放此模块，避免 authorization 反向依赖 admin。
  *
  * @author Bunny
  */
 @UtilityClass
-public class SystemAuditBizModule {
+public class AuthorizationAuditBizModule {
 
 	/**
 	 * 部门
@@ -54,31 +56,6 @@ public class SystemAuditBizModule {
 	 * 部门闭包
 	 */
 	public static final String DEPT_CLOSURE = "DEPT_CLOSURE";
-
-	/**
-	 * 文件
-	 */
-	public static final String SYS_FILE = "SYS_FILE";
-
-	/**
-	 * 邮件模板
-	 */
-	public static final String SYS_EMAIL_TEMPLATE = "SYS_EMAIL_TEMPLATE";
-
-	/**
-	 * 消息模板（跨渠道公共操作）
-	 */
-	public static final String SYS_MESSAGE_TEMPLATE = "SYS_MESSAGE_TEMPLATE";
-
-	/**
-	 * 定时任务
-	 */
-	public static final String SYS_JOB = "SYS_JOB";
-
-	/**
-	 * 定时任务分组
-	 */
-	public static final String SYS_JOB_GROUP = "SYS_JOB_GROUP";
 
 	/**
 	 * 授权主体

@@ -20,7 +20,7 @@ import com.auth.service.system.admin.model.vo.permission.SysPermissionDetailVO;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionPageVO;
 import com.auth.service.system.admin.service.admin.SysPermissionQueryService;
 import com.auth.service.system.admin.service.admin.SysPermissionService;
-import com.auth.service.system.common.model.SystemAuditBizModule;
+import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -108,7 +108,7 @@ public class SysPermissionController {
 	}
 
 	@OperationLog(targetType = "PERMISSION", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_PERMISSION, operation = OperationLogKind.UPDATE)
+			bizModule = AuthorizationAuditBizModule.SYS_PERMISSION, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "更新权限")
 	@PreAuthorize("@auth.decide('sys:permission:update')")
 	@PutMapping
@@ -118,7 +118,7 @@ public class SysPermissionController {
 	}
 
 	@OperationLog(targetType = "PERMISSION", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_PERMISSION, operation = OperationLogKind.DELETE)
+			bizModule = AuthorizationAuditBizModule.SYS_PERMISSION, operation = OperationLogKind.DELETE)
 	@Operation(summary = "删除权限")
 	@PreAuthorize("@auth.decide('sys:permission:delete')")
 	@DeleteMapping("/{id}")

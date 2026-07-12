@@ -25,7 +25,7 @@ import com.auth.service.system.admin.model.vo.user.SysUserSearchItemVO;
 import com.auth.service.system.admin.service.admin.SysUserQueryService;
 import com.auth.service.system.admin.service.admin.SysUserService;
 import com.auth.service.system.admin.support.user.UserPasswordService;
-import com.auth.service.system.common.model.SystemAuditBizModule;
+import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -67,7 +67,7 @@ public class SysUserController {
 	private final IpAddressService ipAddressService;
 
 	@OperationLog(targetType = "USER_LIST", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.QUERY)
+			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.QUERY)
 	@Operation(summary = "用户分页查询")
 	@PreAuthorize("@auth.decide('sys:user:query')")
 	@GetMapping("/page")
@@ -129,7 +129,7 @@ public class SysUserController {
 	}
 
 	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.CREATE)
+			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.CREATE)
 	@Operation(summary = "新增用户")
 	@PreAuthorize("@auth.decide('sys:user:create')")
 	@PostMapping
@@ -139,7 +139,7 @@ public class SysUserController {
 	}
 
 	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
+			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "管理员重置用户密码")
 	@PreAuthorize("@auth.decide('sys:user:update')")
 	@PutMapping("/{id}/password")
@@ -151,7 +151,7 @@ public class SysUserController {
 	}
 
 	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
+			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "管理员更新用户头像")
 	@PreAuthorize("@auth.decide('sys:user:update')")
 	@PutMapping("/avatar")
@@ -161,7 +161,7 @@ public class SysUserController {
 	}
 
 	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
+			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "更新用户基础资料")
 	@PreAuthorize("@auth.decide('sys:user:update')")
 	@PutMapping
@@ -171,7 +171,7 @@ public class SysUserController {
 	}
 
 	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
+			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "批量更新用户状态")
 	@PreAuthorize("@auth.decide('sys:user:update')")
 	@PutMapping("/status")
@@ -181,7 +181,7 @@ public class SysUserController {
 	}
 
 	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.DELETE)
+			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.DELETE)
 	@Operation(summary = "批量删除用户")
 	@PreAuthorize("@auth.decide('sys:user:delete')")
 	@DeleteMapping

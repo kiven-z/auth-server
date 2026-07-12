@@ -7,7 +7,7 @@ import com.auth.common.web.valid.group.UpdateGroup;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
-import com.auth.service.system.common.model.SystemAuditBizModule;
+import com.auth.service.system.schedule.model.constants.ScheduleAuditBizModule;
 import com.auth.service.system.schedule.model.entity.JobEntity;
 import com.auth.service.system.schedule.model.form.SysJobCreateForm;
 import com.auth.service.system.schedule.model.form.SysJobStatusForm;
@@ -83,7 +83,7 @@ public class SysJobController {
 	}
 
 	@OperationLog(targetType = "JOB", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_JOB, operation = OperationLogKind.UPDATE)
+			bizModule = ScheduleAuditBizModule.SYS_JOB, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "修改定时任务")
 	@PreAuthorize("@auth.decide('schedule:job:update')")
 	@PutMapping
@@ -94,7 +94,7 @@ public class SysJobController {
 	}
 
 	@OperationLog(targetType = "JOB", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_JOB, operation = OperationLogKind.DELETE)
+			bizModule = ScheduleAuditBizModule.SYS_JOB, operation = OperationLogKind.DELETE)
 	@Operation(summary = "删除定时任务")
 	@PreAuthorize("@auth.decide('schedule:job:delete')")
 	@DeleteMapping("{id}")
@@ -105,7 +105,7 @@ public class SysJobController {
 	}
 
 	@OperationLog(targetType = "JOB", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_JOB, operation = OperationLogKind.UPDATE)
+			bizModule = ScheduleAuditBizModule.SYS_JOB, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "批量启停任务")
 	@PreAuthorize("@auth.decide('schedule:job:update')")
 	@PutMapping("status")

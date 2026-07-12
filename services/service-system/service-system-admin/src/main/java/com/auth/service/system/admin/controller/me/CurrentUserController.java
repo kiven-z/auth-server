@@ -18,7 +18,7 @@ import com.auth.service.system.admin.service.me.CurrentUserLoginLogService;
 import com.auth.service.system.admin.service.me.CurrentUserProfileService;
 import com.auth.service.system.admin.service.me.CurrentUserSessionService;
 import com.auth.service.system.admin.support.user.UserPasswordService;
-import com.auth.service.system.common.model.SystemAuditBizModule;
+import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -54,7 +54,7 @@ public class CurrentUserController {
 	private final CurrentUserProfileService currentUserProfileService;
 
 	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
+			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "当前用户更新个人资料")
 	@PutMapping("/profile")
 	public Result<String> updateMyProfile(@Valid @RequestBody MeProfileUpdateForm form) {
@@ -63,7 +63,7 @@ public class CurrentUserController {
 	}
 
 	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
+			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "当前用户更新头像")
 	@PutMapping("/avatar")
 	public Result<String> updateMyAvatar(@Valid @RequestBody MeAvatarUpdateForm form) {
@@ -72,7 +72,7 @@ public class CurrentUserController {
 	}
 
 	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
+			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "当前用户修改密码")
 	@PutMapping("/password")
 	public Result<String> changeOwnPassword(@Valid @RequestBody SysUserChangePasswordForm form,
@@ -83,7 +83,7 @@ public class CurrentUserController {
 	}
 
 	@OperationLog(targetType = "USER_SESSION", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.QUERY)
+			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.QUERY)
 	@Operation(summary = "查询当前用户活跃会话")
 	@GetMapping("/sessions")
 	public Result<List<MeUserSessionVO>> listMySessions() {
@@ -92,7 +92,7 @@ public class CurrentUserController {
 	}
 
 	@OperationLog(targetType = "USER_SESSION", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.DELETE)
+			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.DELETE)
 	@Operation(summary = "踢出当前用户指定会话")
 	@PostMapping("/sessions/{sessionId}/kick")
 	public Result<Void> kickMySession(@PathVariable("sessionId") String sessionId) {
@@ -101,7 +101,7 @@ public class CurrentUserController {
 	}
 
 	@OperationLog(targetType = "LOGIN_LOG", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.SYS_USER, operation = OperationLogKind.QUERY)
+			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.QUERY)
 	@Operation(summary = "分页查询当前用户登录日志（最近180天）")
 	@GetMapping("/login-logs/page")
 	public Result<PageResponse<MeLoginLogPageVO>> loginLogPage(MeLoginLogPageQuery query) {

@@ -11,7 +11,7 @@ import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationE
 import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationEventPageVO;
 import com.auth.service.system.authorization.service.AuthorizationInvalidationEventOpsService;
 import com.auth.service.system.authorization.service.AuthorizationInvalidationEventQueryService;
-import com.auth.service.system.common.model.SystemAuditBizModule;
+import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -58,7 +58,7 @@ public class AuthorizationInvalidationEventOpsController {
 	}
 
 	@OperationLog(targetType = "AUTH_INVALIDATION_EVENT", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = SystemAuditBizModule.AUTH_INVALIDATION_EVENT, operation = OperationLogKind.UPDATE)
+			bizModule = AuthorizationAuditBizModule.AUTH_INVALIDATION_EVENT, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "释放授权失效幂等事件 processing 占位")
 	@PreAuthorize("@auth.decide('ops:invalidationevent:releaseclaim')")
 	@PostMapping("{id}/release-claim")
