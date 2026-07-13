@@ -38,6 +38,9 @@ public class MessageTemplatePageRowPO implements Serializable {
 	@Schema(title = "主题/标题")
 	private String subject;
 
+	@Schema(title = "IM/站内信正文类型")
+	private String imMessageType;
+
 	@Schema(title = "发送优先级")
 	private Integer priority;
 

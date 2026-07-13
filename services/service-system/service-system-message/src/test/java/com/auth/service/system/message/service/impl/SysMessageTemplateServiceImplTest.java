@@ -37,6 +37,7 @@ import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_INVALID;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
 import static com.auth.service.system.message.exception.MessageResultCode.MESSAGE_CHANNEL_UNSUPPORTED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -83,6 +84,7 @@ class SysMessageTemplateServiceImplTest {
 		row.setChannel(MessageChannel.EMAIL.name());
 		row.setTemplateCode("login-code");
 		row.setTemplateName("登录邮件");
+		row.setImMessageType("HTML");
 
 		Page<MessageTemplatePageRowPO> mapperPage = new Page<>(1, 10);
 		mapperPage.setRecords(List.of(row));
@@ -97,6 +99,7 @@ class SysMessageTemplateServiceImplTest {
 		assertThat(result.getList()).hasSize(1);
 		assertThat(result.getList().get(0).getChannel()).isEqualTo(MessageChannel.EMAIL.name());
 		assertThat(result.getList().get(0).getTemplateCode()).isEqualTo("login-code");
+		assertThat(result.getList().get(0).getImMessageType()).isEqualTo("HTML");
 		verify(auditUserDisplayService).enrichAuditUsernames(any(IPage.class), isNull(), isNull());
 
 		ArgumentCaptor<MessageTemplateQuery> queryCaptor = ArgumentCaptor.forClass(MessageTemplateQuery.class);
@@ -148,8 +151,37 @@ class SysMessageTemplateServiceImplTest {
 		assertThat(vo.getTemplateCode()).isEqualTo("login-code");
 		assertThat(vo.getChannel()).isEqualTo(MessageChannel.EMAIL.name());
 		assertThat(vo.getContent()).isEqualTo("<p>${code}</p>");
+		assertThat(vo.getContentType()).isEqualTo("HTML");
+		assertThat(vo.getPreviewContent()).isEqualTo("<p></p>");
 		assertThat(vo.getRequireFields()).isEmpty();
 		verify(auditUserDisplayService).enrichAuditUsernames(any(List.class), isNull(), isNull());
+	}
+
+	@Test
+	@DisplayName("详情：IN_APP HTML 正文读出时按白名单消毒，并补齐类型默认值")
+	void getMessageTemplateById_shouldSanitizeInAppHtmlContent() {
+		// 脏 HTML + 空类型 → 消毒后返回且类型为 HTML
+		MessageTemplateEntity entity = new MessageTemplateEntity();
+		entity.setId(11L);
+		entity.setChannel(MessageChannel.IN_APP.name());
+		entity.setSceneCode("notice");
+		entity.setTemplateName("公告");
+		entity.setImMessageType("HTML");
+		entity.setBodyContent("<p>ok</p><script>alert(1)</script>");
+		entity.setRequireFields("[]");
+		entity.setPriority(1);
+		entity.setStatus(true);
+		when(messageTemplateMapper.selectById(11L)).thenReturn(entity);
+
+		MessageTemplateDetailVO vo = sysMessageTemplateService.getMessageTemplateById(11L,
+				MessageChannel.IN_APP.name());
+
+		assertThat(vo.getImMessageType()).isEqualTo("HTML");
+		assertThat(vo.getContentType()).isEqualTo("HTML");
+		assertThat(vo.getContent()).contains("<p>ok</p>");
+		assertThat(vo.getContent()).doesNotContain("<script");
+		assertThat(vo.getPreviewContent()).contains("<p>ok</p>");
+		assertThat(vo.getPreviewContent()).doesNotContain("<script");
 	}
 
 	@Test
@@ -371,6 +403,63 @@ class SysMessageTemplateServiceImplTest {
 	}
 
 	@Test
+	@DisplayName("详情：EMAIL 含示例值时填充 previewContent 与 HTML contentType")
+	void getMessageTemplateById_shouldFillPreviewForEmail() {
+		MessageTemplateEntity entity = new MessageTemplateEntity();
+		entity.setId(20L);
+		entity.setChannel(MessageChannel.EMAIL.name());
+		entity.setTemplateName("login-mail");
+		entity.setBodyContent("<p>code=${code}</p>");
+		entity.setRequireFields("[{\"key\":\"code\",\"description\":\"验证码\",\"exampleValue\":\"123456\"}]");
+		when(messageTemplateMapper.selectById(20L)).thenReturn(entity);
+
+		MessageTemplateDetailVO vo = sysMessageTemplateService.getMessageTemplateById(20L, MessageChannel.EMAIL.name());
+
+		assertThat(vo.getContent()).isEqualTo("<p>code=${code}</p>");
+		assertThat(vo.getContentType()).isEqualTo("HTML");
+		assertThat(vo.getPreviewContent()).contains("123456");
+	}
+
+	@Test
+	@DisplayName("详情：IN_APP Markdown 预览类型为 MARKDOWN 且原文保留占位符")
+	void getMessageTemplateById_shouldFillMarkdownPreviewForInApp() {
+		MessageTemplateEntity entity = new MessageTemplateEntity();
+		entity.setId(21L);
+		entity.setChannel(MessageChannel.IN_APP.name());
+		entity.setImMessageType("MARKDOWN");
+		entity.setTemplateName("alert");
+		entity.setBodyContent("**${alertName}**");
+		entity.setRequireFields("[{\"key\":\"alertName\",\"exampleValue\":\"CPU\"}]");
+		when(messageTemplateMapper.selectById(21L)).thenReturn(entity);
+
+		MessageTemplateDetailVO vo = sysMessageTemplateService.getMessageTemplateById(21L,
+				MessageChannel.IN_APP.name());
+
+		assertThat(vo.getContent()).isEqualTo("**${alertName}**");
+		assertThat(vo.getImMessageType()).isEqualTo("MARKDOWN");
+		assertThat(vo.getContentType()).isEqualTo("MARKDOWN");
+		assertThat(vo.getPreviewContent()).contains("CPU");
+	}
+
+	@Test
+	@DisplayName("详情：SMS 预览固定 TEXT 并按示例值渲染")
+	void getMessageTemplateById_shouldFillTextPreviewForSms() {
+		MessageTemplateEntity entity = new MessageTemplateEntity();
+		entity.setId(22L);
+		entity.setChannel(MessageChannel.SMS.name());
+		entity.setTemplateName("sms-note");
+		entity.setBodyContent("验证码 ${code}");
+		entity.setRequireFields("[{\"key\":\"code\",\"exampleValue\":\"888888\"}]");
+		when(messageTemplateMapper.selectById(22L)).thenReturn(entity);
+
+		MessageTemplateDetailVO vo = sysMessageTemplateService.getMessageTemplateById(22L, MessageChannel.SMS.name());
+
+		assertThat(vo.getContent()).isEqualTo("验证码 ${code}");
+		assertThat(vo.getContentType()).isEqualTo("TEXT");
+		assertThat(vo.getPreviewContent()).isEqualTo("验证码 888888");
+	}
+
+	@Test
 	@DisplayName("测试发送：EMAIL 目标非邮箱时抛出 DATA_INVALID")
 	void testSend_shouldThrowWhenEmailTargetInvalid() {
 		// 邮箱格式校验在加载模板之前，无需 stub selectById
@@ -385,6 +474,29 @@ class SysMessageTemplateServiceImplTest {
 
 		verify(messageDispatchService, never()).sendByTemplate(any());
 		verify(messageTemplateMapper, never()).selectById(any());
+	}
+
+	@Test
+	@DisplayName("测试发送：require_fields 缺少 exampleValue 时同步抛出 PARAM_REQUIRED")
+	void testSend_shouldThrowWhenExampleValueMissing() {
+		// 历史半成品数据：parse 可通过，toExampleModel 校验失败须回传到调用方
+		MessageTemplateEntity entity = new MessageTemplateEntity();
+		entity.setId(12L);
+		entity.setChannel(MessageChannel.SMS.name());
+		entity.setSceneCode("sms-login");
+		entity.setRequireFields("[{\"key\":\"code\",\"description\":\"验证码\"}]");
+		when(messageTemplateMapper.selectById(12L)).thenReturn(entity);
+
+		MessageTemplateTestSendForm form = new MessageTemplateTestSendForm();
+		form.setId(12L);
+		form.setChannel(MessageChannel.SMS.name());
+		form.setTarget("13800138000");
+
+		assertThatThrownBy(() -> sysMessageTemplateService.testSend(form)).isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(PARAM_REQUIRED);
+
+		verify(messageDispatchService, never()).sendByTemplate(any());
 	}
 
 }

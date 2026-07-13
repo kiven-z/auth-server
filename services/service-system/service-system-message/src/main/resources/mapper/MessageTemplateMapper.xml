@@ -55,6 +55,7 @@
 		    template_name,
 		    description,
 		    subject,
+		    im_message_type AS imMessageType,
 		    priority,
 		    status,
 		    create_time,
@@ -73,6 +74,9 @@
 		    </if>
 		    <if test="query.subject != null and query.subject != ''">
 		        AND subject LIKE CONCAT('%', #{query.subject}, '%')
+		    </if>
+		    <if test="query.imMessageType != null and query.imMessageType != ''">
+		        AND im_message_type = #{query.imMessageType}
 		    </if>
 		    <if test="query.status != null">
 		        AND status = #{query.status}

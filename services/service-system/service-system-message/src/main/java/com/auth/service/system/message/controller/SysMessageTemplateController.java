@@ -55,7 +55,7 @@ public class SysMessageTemplateController {
 		return Result.success(pageResponse);
 	}
 
-	@Operation(summary = "消息模板详情", description = "按主键查询；channel 须与库中渠道一致")
+	@Operation(summary = "消息模板详情", description = "按主键查询；channel 须与库中渠道一致；返回原文 content 与示例渲染 previewContent/contentType")
 	@PreAuthorize("@auth.decide('message:template:detail')")
 	@GetMapping("{id}")
 	public Result<MessageTemplateDetailVO> getMessageTemplateById(@PathVariable("id") Long id,

@@ -3,7 +3,6 @@ package com.auth.service.system.message.service.impl;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
@@ -16,7 +15,6 @@ import com.auth.service.system.message.model.entity.MessageTemplateEntity;
 import com.auth.service.system.message.model.form.email.EmailTemplateContentForm;
 import com.auth.service.system.message.model.form.email.EmailTemplateForm;
 import com.auth.service.system.message.model.form.email.EmailTemplateRenderForm;
-import com.auth.service.system.message.model.vo.MessageTemplateRequireFieldRow;
 import com.auth.service.system.message.service.SysEmailTemplateService;
 import com.auth.service.system.message.support.template.FreemarkerTemplateRenderer;
 import com.auth.service.system.message.support.template.MessageTemplateRequireFieldsJsonSupport;
@@ -85,22 +83,6 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<MessageTemplateMapp
 
 		exists.setBodyContent(form.getContent());
 		updateById(exists);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public String previewRenderedHtml(Long id) {
-		MessageTemplateEntity entity = getById(id);
-		if (entity == null || !MessageChannel.EMAIL.name().equals(entity.getChannel())) {
-			return null;
-		}
-
-		List<MessageTemplateRequireFieldRow> rows = MessageTemplateRequireFieldsJsonSupport
-			.parse(entity.getRequireFields());
-		Map<String, Object> model = MessageTemplateRequireFieldsJsonSupport.toExampleModel(rows);
-		return FreemarkerTemplateRenderer.processTemplate(entity.getTemplateName(), entity.getBodyContent(), model);
 	}
 
 	/**

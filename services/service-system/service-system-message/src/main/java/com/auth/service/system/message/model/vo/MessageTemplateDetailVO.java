@@ -1,15 +1,15 @@
 package com.auth.service.system.message.model.vo;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.List;
-
 import com.auth.common.core.model.response.BaseResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * 消息模板详情（跨渠道公共读模型）
@@ -43,6 +43,12 @@ public class MessageTemplateDetailVO extends BaseResponse implements Serializabl
 
 	@Schema(name = "content", title = "正文模板")
 	private String content;
+
+	@Schema(name = "previewContent", title = "按 require_fields 示例值渲染后的正文")
+	private String previewContent;
+
+	@Schema(name = "contentType", title = "正文展示类型", description = "TEXT、MARKDOWN、HTML；用于预览区渲染")
+	private String contentType;
 
 	@Schema(name = "requireFields", title = "变量声明列表")
 	private List<MessageTemplateRequireFieldRow> requireFields;

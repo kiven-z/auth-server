@@ -33,13 +33,6 @@ public interface SysEmailTemplateService extends IService<MessageTemplateEntity>
 	void updateContent(Long id, EmailTemplateContentForm form);
 
 	/**
-	 * 预览：将数据库模板按 exampleValue 渲染为 HTML
-	 * @param id 模板ID
-	 * @return 渲染后的 HTML
-	 */
-	String previewRenderedHtml(Long id);
-
-	/**
 	 * 离线渲染
 	 * @param form 内容与变量声明
 	 * @return 渲染后的 HTML

@@ -25,6 +25,11 @@ public enum FileBizType {
 	AVATAR("avatar", VisibilityRule.FORCE_PUBLIC),
 
 	/**
+	 * 消息模板正文配图（Markdown / 富文本公开访问）
+	 */
+	MESSAGE_IMAGE("message-image", VisibilityRule.FORCE_PUBLIC),
+
+	/**
 	 * 通用附件
 	 */
 	ATTACHMENT("attachment", VisibilityRule.DEFAULT_PRIVATE),

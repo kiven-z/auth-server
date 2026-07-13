@@ -2,6 +2,7 @@ package com.auth.service.system.message.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Validator;
+import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
@@ -9,7 +10,9 @@ import com.auth.module.message.api.model.email.EmailChannelOptions;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.message.convert.MessageTemplateConverter;
+import com.auth.service.system.message.exception.TemplateRenderException;
 import com.auth.service.system.message.mapper.MessageTemplateMapper;
+import com.auth.service.system.message.model.constants.InAppContentType;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
 import com.auth.service.system.message.model.form.MessageTemplateRequireFieldsForm;
 import com.auth.service.system.message.model.form.MessageTemplateTestSendForm;
@@ -20,12 +23,13 @@ import com.auth.service.system.message.model.vo.MessageTemplatePageResponse;
 import com.auth.service.system.message.model.vo.MessageTemplateRequireFieldRow;
 import com.auth.service.system.message.service.MessageDispatchService;
 import com.auth.service.system.message.service.SysMessageTemplateService;
+import com.auth.service.system.message.support.sanitize.InAppHtmlSanitizer;
+import com.auth.service.system.message.support.template.FreemarkerTemplateRenderer;
 import com.auth.service.system.message.support.template.MessageTemplateRequireFieldsJsonSupport;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,8 +37,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_INVALID;
-import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.*;
 import static com.auth.service.system.message.exception.MessageResultCode.MESSAGE_CHANNEL_UNSUPPORTED;
 
 /**
@@ -82,6 +85,24 @@ public class SysMessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMa
 		MessageTemplateEntity entity = requireTemplate(id, channel);
 		MessageTemplateDetailVO vo = MessageTemplateConverter.INSTANCE.toDetailVo(entity);
 
+		// 邮件固定 HTML，站内信读 imMessageType，其余 TEXT
+		String contentType = switch (MessageChannel.valueOf(entity.getChannel())) {
+			case EMAIL -> InAppContentType.HTML.name();
+			case IN_APP -> InAppContentType.from(entity.getImMessageType()).name();
+			default -> InAppContentType.TEXT.name();
+		};
+		vo.setContentType(contentType);
+
+		// 站内信：补齐正文类型默认值；HTML 原文读出时再消毒
+		if (MessageChannel.IN_APP.name().equals(channel)) {
+			vo.setImMessageType(contentType);
+			if (InAppContentType.HTML.name().equals(contentType)) {
+				vo.setContent(InAppHtmlSanitizer.sanitize(vo.getContent()));
+			}
+		}
+
+		String previewContent = renderPreviewContent(entity, contentType, channel);
+		vo.setPreviewContent(previewContent);
 		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(vo), null, null);
 		return vo;
 	}
@@ -132,7 +153,6 @@ public class SysMessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMa
 	 * {@inheritDoc}
 	 */
 	@Override
-	@Async
 	public void testSend(MessageTemplateTestSendForm form) {
 		// 解析渠道枚举；非法名称视为不支持
 		String formChannel = form.getChannel();
@@ -185,6 +205,31 @@ public class SysMessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMa
 			throw new SystemBusinessException(DATA_NOT_EXIST);
 		}
 		return entity;
+	}
+
+	/**
+	 * 按 require_fields 示例值 FreeMarker 渲染预览正文
+	 * @param entity 模板实体
+	 * @param contentType 正文展示类型
+	 * @param channel 渠道编码
+	 * @return 渲染后正文；站内信 HTML 会再消毒
+	 */
+	private String renderPreviewContent(MessageTemplateEntity entity, String contentType, String channel) {
+		Map<String, Object> model = MessageTemplateRequireFieldsJsonSupport
+			.toExampleModel(MessageTemplateRequireFieldsJsonSupport.parse(entity.getRequireFields()));
+		String templateName = CharSequenceUtil.blankToDefault(entity.getTemplateName(), "preview");
+		String rendered;
+		try {
+			rendered = FreemarkerTemplateRenderer.processTemplate(templateName,
+					CharSequenceUtil.nullToEmpty(entity.getBodyContent()), model);
+		}
+		catch (TemplateRenderException e) {
+			throw new SystemBusinessException(OPERATION_FAILED, "preview", e.getMessage());
+		}
+		if (InAppContentType.HTML.name().equals(contentType) && MessageChannel.IN_APP.name().equals(channel)) {
+			return InAppHtmlSanitizer.sanitize(rendered);
+		}
+		return rendered;
 	}
 
 }

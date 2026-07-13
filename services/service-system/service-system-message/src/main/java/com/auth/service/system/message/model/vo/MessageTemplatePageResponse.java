@@ -1,8 +1,5 @@
 package com.auth.service.system.message.model.vo;
 
-import java.io.Serial;
-import java.io.Serializable;
-
 import com.auth.common.core.model.response.BaseResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
@@ -18,10 +15,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
-public class MessageTemplatePageResponse extends BaseResponse implements Serializable {
-
-	@Serial
-	private static final long serialVersionUID = 1L;
+public class MessageTemplatePageResponse extends BaseResponse {
 
 	@Schema(name = "channel", title = "消息渠道")
 	private String channel;
@@ -34,6 +28,9 @@ public class MessageTemplatePageResponse extends BaseResponse implements Seriali
 
 	@Schema(name = "subject", title = "主题/标题")
 	private String subject;
+
+	@Schema(name = "imMessageType", title = "IM/站内信正文类型")
+	private String imMessageType;
 
 	@Schema(name = "priority", title = "发送优先级")
 	private Integer priority;

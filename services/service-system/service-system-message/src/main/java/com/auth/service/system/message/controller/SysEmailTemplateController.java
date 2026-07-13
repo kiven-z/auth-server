@@ -43,14 +43,6 @@ public class SysEmailTemplateController {
 		return Result.success(html);
 	}
 
-	@Operation(summary = "预览邮件模板（FreeMarker 按示例值渲染为 HTML）", description = "预览邮件模板（渲染后 HTML）")
-	@PreAuthorize("@auth.decide('message:template:detail')")
-	@GetMapping("{id}/preview")
-	public Result<String> preview(@PathVariable("id") Long id) {
-		String html = sysEmailTemplateService.previewRenderedHtml(id);
-		return Result.success(html);
-	}
-
 	@Operation(summary = "添加邮件模板", description = "添加邮件模板")
 	@PreAuthorize("@auth.decide('message:template:create')")
 	@PostMapping()

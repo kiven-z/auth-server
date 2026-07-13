@@ -78,24 +78,6 @@ public class MessageTemplateRequireFieldsJsonSupport {
 	}
 
 	/**
-	 * 找出 variables 中缺失的必填 key
-	 * @param requireFields 必填变量声明
-	 * @param variables 实际变量
-	 * @return 缺失的 key 列表
-	 */
-	public static List<String> findMissingKeys(List<MessageTemplateRequireFieldRow> requireFields,
-			Map<String, Object> variables) {
-		if (CollUtil.isEmpty(requireFields)) {
-			return List.of();
-		}
-		Map<String, Object> safeVariables = Objects.requireNonNullElse(variables, Map.of());
-		return requireFields.stream()
-			.map(MessageTemplateRequireFieldRow::getKey)
-			.filter(key -> !safeVariables.containsKey(key))
-			.toList();
-	}
-
-	/**
 	 * 校验发送变量是否齐全
 	 * @param requireFields 已解析的必填变量声明
 	 * @param variables 发送变量
@@ -104,7 +86,14 @@ public class MessageTemplateRequireFieldsJsonSupport {
 	 */
 	public static void assertVariablesPresent(List<MessageTemplateRequireFieldRow> requireFields,
 			Map<String, Object> variables, SystemResultCode missingCode, String channel) {
-		List<String> missingKeys = findMissingKeys(requireFields, variables);
+		if (CollUtil.isEmpty(requireFields)) {
+			return;
+		}
+		Map<String, Object> safeVariables = Objects.requireNonNullElse(variables, Map.of());
+		List<String> missingKeys = requireFields.stream()
+			.map(MessageTemplateRequireFieldRow::getKey)
+			.filter(key -> !safeVariables.containsKey(key))
+			.toList();
 		if (CollUtil.isNotEmpty(missingKeys)) {
 			throw new SystemBusinessException(missingCode, channel, String.join(", ", missingKeys));
 		}

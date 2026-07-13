@@ -92,14 +92,19 @@ class MessageTemplateRequireFieldsJsonSupportTest {
 	}
 
 	@Test
-	@DisplayName("findMissingKeys / assertVariablesPresent：缺失与齐全")
-	void missingKeys_andAssert() {
+	@DisplayName("assertVariablesPresent：缺失抛异常，齐全则通过")
+	void assertVariablesPresent_missingAndComplete() {
 		List<MessageTemplateRequireFieldRow> requireFields = List.of(row("code", JsonSupport.readTree("\"1\"")),
 				row("name", JsonSupport.readTree("\"n\"")));
 
-		assertThat(MessageTemplateRequireFieldsJsonSupport.findMissingKeys(requireFields, Map.of("code", "ok")))
-			.containsExactly("name");
+		// 缺少 name 时应抛出业务异常
+		assertThatThrownBy(() -> MessageTemplateRequireFieldsJsonSupport.assertVariablesPresent(requireFields,
+				Map.of("code", "ok"), PARAM_REQUIRED, "email"))
+			.isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(PARAM_REQUIRED);
 
+		// 变量齐全时不应抛异常
 		assertThatCode(() -> MessageTemplateRequireFieldsJsonSupport.assertVariablesPresent(
 				List.of(row("code", JsonSupport.readTree("\"1\""))), Map.of("code", "123"), PARAM_REQUIRED, "email"))
 			.doesNotThrowAnyException();

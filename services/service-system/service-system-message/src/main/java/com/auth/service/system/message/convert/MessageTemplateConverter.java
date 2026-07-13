@@ -50,6 +50,8 @@ public interface MessageTemplateConverter {
 	 */
 	@Mapping(target = "templateCode", source = "sceneCode")
 	@Mapping(target = "content", source = "bodyContent")
+	@Mapping(target = "previewContent", ignore = true)
+	@Mapping(target = "contentType", ignore = true)
 	@Mapping(target = "requireFields", source = "requireFields", qualifiedByName = "parseRequireFields")
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
