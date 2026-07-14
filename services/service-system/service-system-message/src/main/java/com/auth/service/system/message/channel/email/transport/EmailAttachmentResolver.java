@@ -46,19 +46,23 @@ public class EmailAttachmentResolver {
 
 		List<MultipartFile> files = new ArrayList<>(attachments.size());
 		for (AttachmentDTO attachment : attachments) {
-			if (attachment != null && CharSequenceUtil.isNotBlank(attachment.getFilename())) {
-				String filename = attachment.getFilename();
-				String contentType = attachment.getContentType();
-				byte[] content = resolveBytes(attachment);
-				if (PrimitiveArrayUtil.isNotEmpty(content)) {
-					files.add(InMemoryMultipartFile.builder()
-						.name(filename)
-						.originalFilename(filename)
-						.contentType(contentType)
-						.content(content)
-						.build());
-				}
+			if (attachment == null || CharSequenceUtil.isBlank(attachment.getFilename())) {
+				continue;
 			}
+
+			String filename = attachment.getFilename();
+			String contentType = attachment.getContentType();
+			byte[] content = resolveBytes(attachment);
+			if (PrimitiveArrayUtil.isEmpty(content)) {
+				continue;
+			}
+
+			files.add(InMemoryMultipartFile.builder()
+				.name(filename)
+				.originalFilename(filename)
+				.contentType(contentType)
+				.content(content)
+				.build());
 		}
 		return files;
 	}
@@ -70,9 +74,10 @@ public class EmailAttachmentResolver {
 	 */
 	private byte[] resolveBytes(AttachmentDTO attachment) {
 		// 有Base64编码，解析为二进制内容
-		if (CharSequenceUtil.isNotBlank(attachment.getBase64())) {
+		String attachmentBase64 = attachment.getBase64();
+		if (CharSequenceUtil.isNotBlank(attachmentBase64)) {
 			try {
-				return Base64.decode(attachment.getBase64());
+				return Base64.decode(attachmentBase64);
 			}
 			catch (IllegalArgumentException e) {
 				throw new SystemBusinessException(OPERATION_FAILED, "Attachment Base64 decode", e.getMessage());
@@ -80,17 +85,19 @@ public class EmailAttachmentResolver {
 		}
 
 		// 有字节数组，直接返回
-		if (attachment.getBytes() != null && attachment.getBytes().length > 0) {
-			return attachment.getBytes();
+		byte[] attachmentBytes = attachment.getBytes();
+		if (attachmentBytes != null && attachmentBytes.length > 0) {
+			return attachmentBytes;
 		}
 
-		if (CharSequenceUtil.isBlank(attachment.getUrl())) {
+		String attachmentUrl = attachment.getUrl();
+		if (CharSequenceUtil.isBlank(attachmentUrl)) {
 			return new byte[0];
 		}
 
 		// 有URL，下载为二进制内容
 		try {
-			ResponseEntity<byte[]> response = restTemplate.getForEntity(attachment.getUrl(), byte[].class);
+			ResponseEntity<byte[]> response = restTemplate.getForEntity(attachmentUrl, byte[].class);
 			if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
 				return response.getBody();
 			}

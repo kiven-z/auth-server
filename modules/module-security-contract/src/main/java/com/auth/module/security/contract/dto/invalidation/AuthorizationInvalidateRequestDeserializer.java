@@ -28,7 +28,6 @@ public class AuthorizationInvalidateRequestDeserializer extends JsonDeserializer
 		return switch (kind) {
 			case ROLE -> context.readTreeAsValue(payloadNode, RoleInvalidatePayload.class);
 			case PERMISSION -> context.readTreeAsValue(payloadNode, PermissionInvalidatePayload.class);
-			case POLICY -> context.readTreeAsValue(payloadNode, PolicyInvalidatePayload.class);
 			case GRANT -> context.readTreeAsValue(payloadNode, GrantInvalidatePayload.class);
 			case USER_DEPT -> context.readTreeAsValue(payloadNode, UserDeptInvalidatePayload.class);
 			case USER_POST -> context.readTreeAsValue(payloadNode, UserPostInvalidatePayload.class);

@@ -44,7 +44,8 @@ public class MessageTemplateDetailVO extends BaseResponse implements Serializabl
 	@Schema(name = "content", title = "正文模板")
 	private String content;
 
-	@Schema(name = "previewContent", title = "按 require_fields 示例值渲染后的正文")
+	@Schema(name = "previewContent", title = "按 require_fields 示例值渲染后的正文",
+			description = "缺 exampleValue 或渲染失败时为 null，详情接口仍正常返回")
 	private String previewContent;
 
 	@Schema(name = "contentType", title = "正文展示类型", description = "TEXT、MARKDOWN、HTML；用于预览区渲染")

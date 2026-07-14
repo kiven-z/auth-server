@@ -17,9 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyList;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -93,31 +91,6 @@ class AuthorizationImpactQuerySupportTest {
 		assertEquals(Set.of(5L), userIds);
 		verify(authorizationImpactMapper).selectRoleCodesByPermissionCodes(List.of("P_A"));
 		verify(authorizationImpactMapper).selectUserIdsByRoleCodes(List.of("R_A"));
-	}
-
-	@Test
-	@DisplayName("策略码：桥接关闭时仅查询直连绑定")
-	void findUserIdsByPolicyCodes_bridgeDisabled_shouldOnlyQueryBinding() {
-		invalidationProperties.setPolicyRoleBridgeEnabled(false);
-		when(authorizationImpactMapper.selectUserIdsByPolicyBinding(List.of("POL_A"))).thenReturn(List.of(2L));
-
-		Set<Long> userIds = impactQuery.findUserIdsByPolicyCodes(List.of("POL_A"));
-
-		assertEquals(Set.of(2L), userIds);
-		verify(authorizationImpactMapper, never()).selectRoleCodesByPolicyCodes(any());
-	}
-
-	@Test
-	@DisplayName("策略码：桥接开启时合并角色与直连用户")
-	void findUserIdsByPolicyCodes_bridgeEnabled_shouldUnionRoleAndDirectUsers() {
-		invalidationProperties.setPolicyRoleBridgeEnabled(true);
-		when(authorizationImpactMapper.selectRoleCodesByPolicyCodes(List.of("POL_A"))).thenReturn(List.of("R_A"));
-		when(authorizationImpactMapper.selectUserIdsByRoleCodes(List.of("R_A"))).thenReturn(List.of(1L));
-		when(authorizationImpactMapper.selectUserIdsByPolicyBinding(List.of("POL_A"))).thenReturn(List.of(2L));
-
-		Set<Long> userIds = impactQuery.findUserIdsByPolicyCodes(List.of("POL_A"));
-
-		assertEquals(Set.of(1L, 2L), userIds);
 	}
 
 	@Test

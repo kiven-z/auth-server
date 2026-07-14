@@ -1,10 +1,12 @@
 package com.auth.service.system.message.config;
 
+import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.model.dingtalk.DingTalkMessageType;
 import jakarta.annotation.Nullable;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Configuration;
 
 import static com.auth.service.system.message.utils.MessageConfigAssertions.assertNotBlank;
@@ -18,8 +20,14 @@ import static com.auth.service.system.message.utils.MessageConfigAssertions.asse
 @Getter
 @Setter
 @ConfigurationProperties(prefix = "auth.message.ding-talk")
+@RefreshScope
 @Configuration
-public class DingTalkProperties {
+public class DingTalkProperties implements MessageChannelCapability {
+
+	/**
+	 * 钉钉渠道开关
+	 */
+	private boolean enabled = true;
 
 	@Nullable
 	private String appId;
@@ -37,6 +45,14 @@ public class DingTalkProperties {
 	 * 未指定消息类型时的默认值
 	 */
 	private DingTalkMessageType defaultMessageType = DingTalkMessageType.TEXT;
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public MessageChannel channel() {
+		return MessageChannel.DING_TALK;
+	}
 
 	/**
 	 * 断言发送钉钉消息所需配置齐全

@@ -27,10 +27,9 @@ public interface SysEmailTemplateService extends IService<MessageTemplateEntity>
 
 	/**
 	 * 仅更新邮件正文 content
-	 * @param id 模板主键
-	 * @param form 正文表单
+	 * @param form 含 id 与 content
 	 */
-	void updateContent(Long id, EmailTemplateContentForm form);
+	void updateContent(EmailTemplateContentForm form);
 
 	/**
 	 * 离线渲染

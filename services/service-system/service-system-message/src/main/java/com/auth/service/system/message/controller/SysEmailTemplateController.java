@@ -46,9 +46,8 @@ public class SysEmailTemplateController {
 	@Operation(summary = "添加邮件模板", description = "添加邮件模板")
 	@PreAuthorize("@auth.decide('message:template:create')")
 	@PostMapping()
-	public Result<String> create(@Validated(CreateGroup.class) @RequestBody EmailTemplateForm dto) {
-		sysEmailTemplateService.create(dto);
-
+	public Result<String> create(@Validated(CreateGroup.class) @RequestBody EmailTemplateForm form) {
+		sysEmailTemplateService.create(form);
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
@@ -57,21 +56,18 @@ public class SysEmailTemplateController {
 	@Operation(summary = "更新邮件模板", description = "更新邮件模板")
 	@PreAuthorize("@auth.decide('message:template:update')")
 	@PutMapping()
-	public Result<String> update(@Validated(UpdateGroup.class) @RequestBody EmailTemplateForm dto) {
-		sysEmailTemplateService.update(dto);
-
+	public Result<String> update(@Validated(UpdateGroup.class) @RequestBody EmailTemplateForm form) {
+		sysEmailTemplateService.update(form);
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
 	@OperationLog(targetType = "EMAIL_TEMPLATE", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = MessageAuditBizModule.SYS_MESSAGE_TEMPLATE, operation = OperationLogKind.UPDATE)
-	@Operation(summary = "仅更新邮件模板正文", description = "仅更新 content 字段")
+	@Operation(summary = "仅更新邮件模板正文", description = "body 含 id 与 content")
 	@PreAuthorize("@auth.decide('message:template:update')")
-	@PutMapping("{id}/content")
-	public Result<String> updateContent(@PathVariable("id") Long id,
-			@Validated @RequestBody EmailTemplateContentForm dto) {
-		sysEmailTemplateService.updateContent(id, dto);
-
+	@PutMapping("content")
+	public Result<String> updateContent(@Validated @RequestBody EmailTemplateContentForm form) {
+		sysEmailTemplateService.updateContent(form);
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 

@@ -1,9 +1,5 @@
 package com.auth.service.system.message.channel.email;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.message.exception.TemplateRenderException;
@@ -12,8 +8,11 @@ import com.auth.service.system.message.model.entity.MessageTemplateEntity;
 import com.auth.service.system.message.support.template.FreemarkerTemplateRenderer;
 import com.auth.service.system.message.support.template.MessageTemplateLoader;
 import com.auth.service.system.message.support.template.MessageTemplateRequireFieldsJsonSupport;
-
 import org.springframework.stereotype.Component;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_FAILED;
 import static com.auth.service.system.message.exception.MessageResultCode.TEMPLATE_VARS_MISSING;
@@ -41,9 +40,11 @@ public class EmailTemplatePipeline {
 	public RenderedEmail render(String templateCode, Map<String, Object> variables) {
 		MessageTemplateEntity template = messageTemplateLoader.loadEnabled(MessageChannel.EMAIL, templateCode);
 		Map<String, Object> safeVariables = Optional.ofNullable(variables).orElseGet(HashMap::new);
+
 		MessageTemplateRequireFieldsJsonSupport.assertVariablesPresent(
 				MessageTemplateRequireFieldsJsonSupport.parse(template.getRequireFields()), safeVariables,
 				TEMPLATE_VARS_MISSING, MessageChannel.EMAIL.name());
+
 		String subject = renderSubject(template, safeVariables);
 		String body = renderContent(template, safeVariables);
 		return RenderedEmail.builder().subject(subject).body(body).build();

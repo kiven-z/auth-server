@@ -28,11 +28,6 @@ public class AuthorizationInvalidationProperties {
 	private Integer batchSize = 500;
 
 	/**
-	 * 是否启用策略码
-	 */
-	private boolean policyRoleBridgeEnabled = false;
-
-	/**
 	 * processing 占位超时阈值（分钟），超过后由清理 Job 删除占位行
 	 */
 	@Min(1)

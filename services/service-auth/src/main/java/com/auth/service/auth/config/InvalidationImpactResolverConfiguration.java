@@ -5,7 +5,6 @@ import java.util.Set;
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 import com.auth.module.security.contract.dto.invalidation.GrantInvalidatePayload;
 import com.auth.module.security.contract.dto.invalidation.PermissionInvalidatePayload;
-import com.auth.module.security.contract.dto.invalidation.PolicyInvalidatePayload;
 import com.auth.module.security.contract.dto.invalidation.RoleInvalidatePayload;
 import com.auth.module.security.contract.dto.invalidation.UserDeptInvalidatePayload;
 import com.auth.module.security.contract.dto.invalidation.UserInvalidatePayload;
@@ -46,17 +45,6 @@ public class InvalidationImpactResolverConfiguration {
 	ImpactResolver<PermissionInvalidatePayload> permissionImpactResolver(AuthorizationImpactQuerySupport impactQuery) {
 		return new PortBackedImpactResolver<>(AuthorizationChangeKind.PERMISSION, PermissionInvalidatePayload.class,
 				payload -> impactQuery.findUserIdsByPermissionCodes(payload.permissionCodes()));
-	}
-
-	/**
-	 * 按策略码反查受影响用户 ID（用户直连绑定 + 可选角色桥接）。
-	 * @param impactQuery 授权影响面查询
-	 * @return 策略码影响面解析器
-	 */
-	@Bean
-	ImpactResolver<PolicyInvalidatePayload> policyImpactResolver(AuthorizationImpactQuerySupport impactQuery) {
-		return new PortBackedImpactResolver<>(AuthorizationChangeKind.POLICY, PolicyInvalidatePayload.class,
-				payload -> impactQuery.findUserIdsByPolicyCodes(payload.policyCodes()));
 	}
 
 	/**

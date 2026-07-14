@@ -16,7 +16,6 @@ class AuthorizationChangeKindTest {
 	void eventIdPrefix_shouldMatchContract() {
 		assertEquals("role", AuthorizationChangeKind.ROLE.eventIdPrefix());
 		assertEquals("perm", AuthorizationChangeKind.PERMISSION.eventIdPrefix());
-		assertEquals("policy", AuthorizationChangeKind.POLICY.eventIdPrefix());
 		assertEquals("grant", AuthorizationChangeKind.GRANT.eventIdPrefix());
 		assertEquals("dept", AuthorizationChangeKind.USER_DEPT.eventIdPrefix());
 		assertEquals("post", AuthorizationChangeKind.USER_POST.eventIdPrefix());

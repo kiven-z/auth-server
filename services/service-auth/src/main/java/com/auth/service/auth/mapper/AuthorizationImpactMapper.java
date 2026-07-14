@@ -62,18 +62,4 @@ public interface AuthorizationImpactMapper {
 	 */
 	List<String> selectRoleCodesByPermissionCodes(@Param("permissionCodes") List<String> permissionCodes);
 
-	/**
-	 * 按策略码桥接查询关联角色码。
-	 * @param policyCodes 策略码列表，非空
-	 * @return 角色码列表
-	 */
-	List<String> selectRoleCodesByPolicyCodes(@Param("policyCodes") List<String> policyCodes);
-
-	/**
-	 * 按策略码查询直连绑定的用户 ID。
-	 * @param policyCodes 策略码列表，非空
-	 * @return 用户 ID 列表
-	 */
-	List<Long> selectUserIdsByPolicyBinding(@Param("policyCodes") List<String> policyCodes);
-
 }

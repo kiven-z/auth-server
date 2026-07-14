@@ -13,11 +13,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
@@ -40,9 +36,8 @@ public class SysSmsTemplateController {
 	@Operation(summary = "添加短信模板", description = "channel 固定为 SMS；厂商模板码写入 providerTemplateCode；变量列表创建后单独维护")
 	@PreAuthorize("@auth.decide('message:template:create')")
 	@PostMapping()
-	public Result<String> create(@Validated(CreateGroup.class) @RequestBody SmsTemplateForm dto) {
-		sysSmsTemplateService.create(dto);
-
+	public Result<String> create(@Validated(CreateGroup.class) @RequestBody SmsTemplateForm form) {
+		sysSmsTemplateService.create(form);
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
@@ -51,9 +46,8 @@ public class SysSmsTemplateController {
 	@Operation(summary = "更新短信模板", description = "更新短信模板元数据与厂商模板码；不修改 channel、require_fields")
 	@PreAuthorize("@auth.decide('message:template:update')")
 	@PutMapping()
-	public Result<String> update(@Validated(UpdateGroup.class) @RequestBody SmsTemplateForm dto) {
-		sysSmsTemplateService.update(dto);
-
+	public Result<String> update(@Validated(UpdateGroup.class) @RequestBody SmsTemplateForm form) {
+		sysSmsTemplateService.update(form);
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 

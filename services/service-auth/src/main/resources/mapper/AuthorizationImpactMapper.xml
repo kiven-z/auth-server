@@ -155,33 +155,4 @@
 		</foreach>
 	</select>
 
-	<!-- 策略码桥接：policy_code → role_policy.policy_id → sys_role.role_code -->
-	<select id="selectRoleCodesByPolicyCodes" resultType="java.lang.String">
-		SELECT DISTINCT
-		    r.role_code
-		FROM
-		    role_policy rp
-		    INNER JOIN sys_role r ON r.id = rp.role_id
-		    INNER JOIN user_access_policy_definition d ON d.id = rp.policy_id
-		WHERE
-		    d.policy_code IN
-		<foreach collection="policyCodes" item="policyCode" open="(" separator="," close=")">
-		    #{policyCode}
-		</foreach>
-	</select>
-
-	<!-- 策略码桥接：policy_code → user_access_policy_binding.policy_id -->
-	<select id="selectUserIdsByPolicyBinding" resultType="java.lang.Long">
-		SELECT DISTINCT
-		    b.user_id
-		FROM
-		    user_access_policy_binding b
-		    INNER JOIN user_access_policy_definition d ON d.id = b.policy_id
-		WHERE
-		    d.policy_code IN
-		<foreach collection="policyCodes" item="policyCode" open="(" separator="," close=")">
-		    #{policyCode}
-		</foreach>
-	</select>
-
 </mapper>

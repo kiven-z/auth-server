@@ -1,8 +1,10 @@
 package com.auth.service.system.message.config;
 
+import com.auth.module.message.api.channel.MessageChannel;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Configuration;
 
 import static com.auth.service.system.message.utils.MessageConfigAssertions.assertNotBlank;
@@ -15,8 +17,14 @@ import static com.auth.service.system.message.utils.MessageConfigAssertions.asse
 @Getter
 @Setter
 @ConfigurationProperties(prefix = "auth.message.sms")
+@RefreshScope
 @Configuration
-public class SmsProperties {
+public class SmsProperties implements MessageChannelCapability {
+
+	/**
+	 * 短信渠道开关
+	 */
+	private boolean enabled = true;
 
 	private String region;
 
@@ -32,7 +40,15 @@ public class SmsProperties {
 	private String signName;
 
 	/**
-	 * 断言发送短信所需配置齐全 发送时进行校验，防止发送未配置的短信
+	 * {@inheritDoc}
+	 */
+	@Override
+	public MessageChannel channel() {
+		return MessageChannel.SMS;
+	}
+
+	/**
+	 * 断言发送短信所需配置齐全；发送时校验，防止未配置仍发起调用
 	 */
 	public void assertSendRequiredConfigured() {
 		assertNotBlank(region, "短信区域");

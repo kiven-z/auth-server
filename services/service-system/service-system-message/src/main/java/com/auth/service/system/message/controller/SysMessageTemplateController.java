@@ -6,15 +6,14 @@ import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.message.model.constants.MessageAuditBizModule;
-import com.auth.service.system.message.model.entity.MessageTemplateEntity;
 import com.auth.service.system.message.model.form.MessageTemplateRequireFieldsForm;
 import com.auth.service.system.message.model.form.MessageTemplateStatusForm;
 import com.auth.service.system.message.model.form.MessageTemplateTestSendForm;
 import com.auth.service.system.message.model.query.MessageTemplateQuery;
 import com.auth.service.system.message.model.vo.MessageTemplateDetailVO;
 import com.auth.service.system.message.model.vo.MessageTemplatePageResponse;
+import com.auth.service.system.message.model.vo.MessageTemplateRequireFieldRow;
 import com.auth.service.system.message.service.SysMessageTemplateService;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -49,19 +48,27 @@ public class SysMessageTemplateController {
 	@PreAuthorize("@auth.decide('message:template:query')")
 	@GetMapping()
 	public Result<PageResponse<MessageTemplatePageResponse>> getMessageTemplatePage(@Valid MessageTemplateQuery query) {
-		Page<MessageTemplateEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
 		PageResponse<MessageTemplatePageResponse> pageResponse = sysMessageTemplateService
-			.getMessageTemplatePage(pageParams, query);
+			.getMessageTemplatePage(query);
 		return Result.success(pageResponse);
 	}
 
-	@Operation(summary = "消息模板详情", description = "按主键查询；channel 须与库中渠道一致；返回原文 content 与示例渲染 previewContent/contentType")
+	@Operation(summary = "消息模板详情", description = "按主键查询返回原文 content、previewContent")
 	@PreAuthorize("@auth.decide('message:template:detail')")
 	@GetMapping("{id}")
 	public Result<MessageTemplateDetailVO> getMessageTemplateById(@PathVariable("id") Long id,
 			@RequestParam @NotBlank(message = "消息渠道不能为空") String channel) {
 		MessageTemplateDetailVO detailVO = sysMessageTemplateService.getMessageTemplateById(id, channel);
 		return Result.success(detailVO);
+	}
+
+	@Operation(summary = "查询模板变量声明", description = "只解析返回 require_fields")
+	@PreAuthorize("@auth.decide('message:template:detail')")
+	@GetMapping("{id}/require-fields")
+	public Result<List<MessageTemplateRequireFieldRow>> getRequireFields(@PathVariable("id") Long id,
+			@RequestParam @NotBlank(message = "消息渠道不能为空") String channel) {
+		List<MessageTemplateRequireFieldRow> requireFields = sysMessageTemplateService.getRequireFields(id, channel);
+		return Result.success(requireFields);
 	}
 
 	@OperationLog(targetType = "MESSAGE_TEMPLATE_DELETE", serviceDomain = AuditServiceDomain.SYSTEM,
@@ -81,19 +88,17 @@ public class SysMessageTemplateController {
 	@PreAuthorize("@auth.decide('message:template:update')")
 	@PutMapping("status")
 	public Result<String> batchUpdateStatus(@Validated @RequestBody MessageTemplateStatusForm form) {
-		sysMessageTemplateService.batchUpdateStatus(form.getIds(), form.getStatus(), form.getChannel());
+		sysMessageTemplateService.batchUpdateStatus(form);
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
 	@OperationLog(targetType = "MESSAGE_TEMPLATE", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = MessageAuditBizModule.SYS_MESSAGE_TEMPLATE, operation = OperationLogKind.UPDATE)
-	@Operation(summary = "仅更新变量列表 require_fields", description = "按主键与 channel 更新，避免跨渠道误改")
+	@Operation(summary = "仅更新变量列表 require_fields", description = "body 含 id、channel、requireFields")
 	@PreAuthorize("@auth.decide('message:template:update')")
-	@PutMapping("{id}/require-fields")
-	public Result<String> updateRequireFields(@PathVariable("id") Long id,
-			@RequestParam @NotBlank(message = "消息渠道不能为空") String channel,
-			@Validated @RequestBody MessageTemplateRequireFieldsForm form) {
-		sysMessageTemplateService.updateRequireFields(id, channel, form);
+	@PutMapping("require-fields")
+	public Result<String> updateRequireFields(@Validated @RequestBody MessageTemplateRequireFieldsForm form) {
+		sysMessageTemplateService.updateRequireFields(form);
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 

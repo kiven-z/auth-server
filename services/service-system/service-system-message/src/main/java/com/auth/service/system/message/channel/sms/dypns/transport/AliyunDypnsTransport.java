@@ -45,33 +45,21 @@ public class AliyunDypnsTransport implements AutoCloseable {
 	 */
 	private static AsyncClient createAsyncClient(SmsProperties smsProperties) {
 		// 创建凭证提供者
-		StaticCredentialProvider credentialProvider = StaticCredentialProvider.create(Credential.builder()
+		Credential credentials = Credential.builder()
 			.accessKeyId(smsProperties.getAccessKeyId())
 			.accessKeySecret(smsProperties.getAccessKeySecret())
-			.build());
+			.build();
+		StaticCredentialProvider credentialProvider = StaticCredentialProvider.create(credentials);
 
 		// 创建异步客户端
+		String endpoint = smsProperties.getEndpoint();
+		ClientOverrideConfiguration overrideConfiguration = ClientOverrideConfiguration.create()
+			.setEndpointOverride(endpoint);
 		return AsyncClient.builder()
 			.region(smsProperties.getRegion())
 			.credentialsProvider(credentialProvider)
-			.overrideConfiguration(
-					ClientOverrideConfiguration.create().setEndpointOverride(smsProperties.getEndpoint()))
+			.overrideConfiguration(overrideConfiguration)
 			.build();
-	}
-
-	/**
-	 * 解析失败详情
-	 * @param response 响应
-	 * @return 失败详情
-	 */
-	private static String resolveFailureDetail(SendSmsVerifyCodeResponse response) {
-		if (response == null) {
-			return "null response";
-		}
-		if (response.getBody() == null) {
-			return "null body";
-		}
-		return String.valueOf(response.getBody());
 	}
 
 	/**
@@ -83,6 +71,7 @@ public class AliyunDypnsTransport implements AutoCloseable {
 		if (currentClient != null) {
 			return currentClient;
 		}
+
 		synchronized (this) {
 			currentClient = asyncClientRef.get();
 			if (currentClient == null) {
@@ -121,8 +110,13 @@ public class AliyunDypnsTransport implements AutoCloseable {
 
 		try {
 			// 发送请求
-			SendSmsVerifyCodeResponse response = send(request);
-			assertSendSuccess(response, phone, providerTemplateCode);
+			CompletableFuture<SendSmsVerifyCodeResponse> future = getOrCreateAsyncClient().sendSmsVerifyCode(request);
+			SendSmsVerifyCodeResponse response = future.get();
+
+			var body = response == null ? null : response.getBody();
+			if (body == null || !"OK".equalsIgnoreCase(String.valueOf(body.getCode()))) {
+				throw new SystemBusinessException(SMS_DYPNS_SEND_FAILED, String.valueOf(body));
+			}
 		}
 		catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
@@ -145,41 +139,6 @@ public class AliyunDypnsTransport implements AutoCloseable {
 				log.warn("Failed to close Dypns client", e);
 			}
 		}
-	}
-
-	/**
-	 * 发送请求
-	 * @param request 请求
-	 * @return 响应
-	 * @throws ExecutionException 执行异常
-	 * @throws InterruptedException 中断异常
-	 */
-	private SendSmsVerifyCodeResponse send(SendSmsVerifyCodeRequest request)
-			throws ExecutionException, InterruptedException {
-		CompletableFuture<SendSmsVerifyCodeResponse> future = getOrCreateAsyncClient().sendSmsVerifyCode(request);
-		return future.get();
-	}
-
-	/**
-	 * 断言发送成功
-	 * @param response 响应
-	 * @param phone 手机号
-	 * @param providerTemplateCode 厂商模板编码
-	 */
-	private void assertSendSuccess(SendSmsVerifyCodeResponse response, String phone, String providerTemplateCode) {
-		// 判断响应是否成功
-		if (response != null && response.getBody() != null
-				&& "OK".equalsIgnoreCase(String.valueOf(response.getBody().getCode()))) {
-			log.debug("Aliyun Dypns send ok, phone={}, templateCode={}", phone, providerTemplateCode);
-			return;
-		}
-
-		// 解析失败详情
-		String detail = resolveFailureDetail(response);
-		log.error("Aliyun Dypns send failed, phone={}, templateCode={}, detail={}", phone, providerTemplateCode,
-				detail);
-
-		throw new SystemBusinessException(SMS_DYPNS_SEND_FAILED, detail);
 	}
 
 }

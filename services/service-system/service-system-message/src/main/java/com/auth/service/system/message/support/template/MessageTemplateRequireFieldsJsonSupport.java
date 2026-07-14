@@ -48,7 +48,9 @@ public class MessageTemplateRequireFieldsJsonSupport {
 			return Collections.emptyList();
 		}
 		try {
-			return Arrays.asList(JsonSupport.fromJson(json, MessageTemplateRequireFieldRow[].class));
+			MessageTemplateRequireFieldRow[] fieldRows = JsonSupport.fromJson(json,
+					MessageTemplateRequireFieldRow[].class);
+			return Arrays.asList(fieldRows);
 		}
 		catch (IllegalArgumentException e) {
 			throw new SystemBusinessException(DATA_INVALID, e.getMessage());

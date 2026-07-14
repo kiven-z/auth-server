@@ -4,7 +4,6 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
-import com.auth.module.security.contract.api.authorization.PolicyBundle;
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
 import com.auth.module.security.contract.api.datascope.DataScopeStorageType;
 import com.auth.module.security.contract.constants.PermissionConstant;
@@ -163,7 +162,6 @@ public class AuthProfileRepository {
 			.roles(resolvedRoles)
 			.permissions(resolvedPermissions)
 			.deptScope(resolvedDeptScope)
-			.policies(PolicyBundle.empty())
 			.permVersion(account.permVersion())
 			.build();
 	}

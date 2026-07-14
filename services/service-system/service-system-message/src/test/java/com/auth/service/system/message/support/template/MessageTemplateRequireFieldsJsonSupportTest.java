@@ -1,8 +1,5 @@
 package com.auth.service.system.message.support.template;
 
-import java.util.List;
-import java.util.Map;
-
 import com.auth.common.core.utils.JsonSupport;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.message.model.vo.MessageTemplateRequireFieldRow;
@@ -10,12 +7,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_INVALID;
-import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_DUPLICATE;
-import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import java.util.List;
+import java.util.Map;
+
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.*;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * {@link MessageTemplateRequireFieldsJsonSupport} 单元测试
@@ -24,6 +20,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 @DisplayName("MessageTemplateRequireFieldsJsonSupport 模板必填变量")
 class MessageTemplateRequireFieldsJsonSupportTest {
+
+	private static MessageTemplateRequireFieldRow row(String key, JsonNode exampleValue) {
+		MessageTemplateRequireFieldRow row = new MessageTemplateRequireFieldRow();
+		row.setKey(key);
+		row.setExampleValue(exampleValue);
+		return row;
+	}
 
 	@Test
 	@DisplayName("toJson/parse：往返后保留 key 与 exampleValue")
@@ -72,8 +75,9 @@ class MessageTemplateRequireFieldsJsonSupportTest {
 	void validate_missingExampleValue_throws() {
 		MessageTemplateRequireFieldRow row = new MessageTemplateRequireFieldRow();
 		row.setKey("code");
+		List<MessageTemplateRequireFieldRow> rows = List.of(row);
 
-		assertThatThrownBy(() -> MessageTemplateRequireFieldsJsonSupport.validate(List.of(row)))
+		assertThatThrownBy(() -> MessageTemplateRequireFieldsJsonSupport.validate(rows))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(PARAM_REQUIRED);
@@ -96,17 +100,20 @@ class MessageTemplateRequireFieldsJsonSupportTest {
 	void assertVariablesPresent_missingAndComplete() {
 		List<MessageTemplateRequireFieldRow> requireFields = List.of(row("code", JsonSupport.readTree("\"1\"")),
 				row("name", JsonSupport.readTree("\"n\"")));
+		Map<String, Object> incomplete = Map.of("code", "ok");
+		List<MessageTemplateRequireFieldRow> completeFields = List.of(row("code", JsonSupport.readTree("\"1\"")));
+		Map<String, Object> complete = Map.of("code", "123");
 
 		// 缺少 name 时应抛出业务异常
 		assertThatThrownBy(() -> MessageTemplateRequireFieldsJsonSupport.assertVariablesPresent(requireFields,
-				Map.of("code", "ok"), PARAM_REQUIRED, "email"))
+				incomplete, PARAM_REQUIRED, "email"))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(PARAM_REQUIRED);
 
 		// 变量齐全时不应抛异常
-		assertThatCode(() -> MessageTemplateRequireFieldsJsonSupport.assertVariablesPresent(
-				List.of(row("code", JsonSupport.readTree("\"1\""))), Map.of("code", "123"), PARAM_REQUIRED, "email"))
+		assertThatCode(() -> MessageTemplateRequireFieldsJsonSupport.assertVariablesPresent(completeFields, complete,
+				PARAM_REQUIRED, "email"))
 			.doesNotThrowAnyException();
 	}
 
@@ -117,13 +124,6 @@ class MessageTemplateRequireFieldsJsonSupportTest {
 				List.of(row("code", JsonSupport.readTree("\"123456\"")), row("count", JsonSupport.readTree("3"))));
 
 		assertThat(model).containsEntry("code", "123456").containsEntry("count", 3);
-	}
-
-	private static MessageTemplateRequireFieldRow row(String key, JsonNode exampleValue) {
-		MessageTemplateRequireFieldRow row = new MessageTemplateRequireFieldRow();
-		row.setKey(key);
-		row.setExampleValue(exampleValue);
-		return row;
 	}
 
 }

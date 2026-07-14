@@ -4,7 +4,7 @@ import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.channel.MessageSender;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.message.config.MessageChannelProperties;
+import com.auth.service.system.message.config.MessageChannelCapability;
 import com.auth.service.system.message.service.MessageDispatchService;
 import com.auth.service.system.message.support.validation.TemplateMessageCommandValidation;
 import org.springframework.stereotype.Service;
@@ -26,18 +26,46 @@ public class MessageDispatchServiceImpl implements MessageDispatchService {
 
 	private final Map<MessageChannel, MessageSender> senderByChannel;
 
+	private final Map<MessageChannel, MessageChannelCapability> capabilityByChannel;
+
 	private final TemplateMessageCommandValidation commandValidation;
 
-	private final MessageChannelProperties messageChannelProperties;
-
-	public MessageDispatchServiceImpl(List<MessageSender> senders, TemplateMessageCommandValidation commandValidation,
-			MessageChannelProperties messageChannelProperties) {
-		this.senderByChannel = new EnumMap<>(MessageChannel.class);
-		for (MessageSender sender : senders) {
-			this.senderByChannel.put(sender.channel(), sender);
-		}
+	public MessageDispatchServiceImpl(List<MessageSender> senders, List<MessageChannelCapability> capabilities,
+			TemplateMessageCommandValidation commandValidation) {
+		this.senderByChannel = indexSenders(senders);
+		this.capabilityByChannel = indexCapabilities(capabilities);
 		this.commandValidation = commandValidation;
-		this.messageChannelProperties = messageChannelProperties;
+	}
+
+	/**
+	 * 索引发送器
+	 * @param senders 发送器列表
+	 * @return 发送器映射
+	 */
+	private static Map<MessageChannel, MessageSender> indexSenders(List<MessageSender> senders) {
+		Map<MessageChannel, MessageSender> indexed = new EnumMap<>(MessageChannel.class);
+		for (MessageSender sender : senders) {
+			indexed.put(sender.channel(), sender);
+		}
+		return indexed;
+	}
+
+	/**
+	 * 索引渠道能力
+	 * @param capabilities 渠道能力列表
+	 * @return 渠道能力映射
+	 */
+	private static Map<MessageChannel, MessageChannelCapability> indexCapabilities(
+			List<MessageChannelCapability> capabilities) {
+		Map<MessageChannel, MessageChannelCapability> indexed = new EnumMap<>(MessageChannel.class);
+		for (MessageChannelCapability capability : capabilities) {
+			MessageChannel channel = capability.channel();
+			MessageChannelCapability previous = indexed.put(channel, capability);
+			if (previous != null) {
+				throw new IllegalStateException("Duplicate MessageChannelCapability for channel: " + channel);
+			}
+		}
+		return indexed;
 	}
 
 	/**
@@ -46,9 +74,8 @@ public class MessageDispatchServiceImpl implements MessageDispatchService {
 	@Override
 	public void sendByTemplate(TemplateMessageCommand command) {
 		commandValidation.validate(command);
-		// 校验渠道是否启用，防止发送未启用的渠道消息
 		MessageChannel channel = command.getChannel();
-		if (!messageChannelProperties.isEnabled(channel)) {
+		if (!isChannelEnabled(channel)) {
 			throw new SystemBusinessException(MESSAGE_CHANNEL_DISABLED, channel.name());
 		}
 
@@ -57,6 +84,19 @@ public class MessageDispatchServiceImpl implements MessageDispatchService {
 			throw new SystemBusinessException(MESSAGE_CHANNEL_UNSUPPORTED, channel.name());
 		}
 		sender.sendByTemplate(command);
+	}
+
+	/**
+	 * 未注册 capability 的渠道视为启用
+	 * @param channel 渠道
+	 * @return true-启用，false-禁用
+	 */
+	private boolean isChannelEnabled(MessageChannel channel) {
+		if (channel == null) {
+			return false;
+		}
+		MessageChannelCapability capability = capabilityByChannel.get(channel);
+		return capability == null || capability.isEnabled();
 	}
 
 }

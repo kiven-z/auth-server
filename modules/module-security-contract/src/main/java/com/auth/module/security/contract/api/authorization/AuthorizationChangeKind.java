@@ -5,7 +5,6 @@ package com.auth.module.security.contract.api.authorization;
  * <ul>
  * <li>{@link #ROLE} — sys_role、role_scope、批量 roleCode</li>
  * <li>{@link #PERMISSION} — sys_permission、sys_role_permission、permissionCodes</li>
- * <li>{@link #POLICY} — role_policy、policy_definition、policyCodes</li>
  * <li>{@link #GRANT} — grant_table、GrantSubject 列表</li>
  * <li>{@link #USER_DEPT} — user_dept、部门成员 deptIds</li>
  * <li>{@link #USER_POST} — user_post、岗位人员 postIds</li>
@@ -25,11 +24,6 @@ public enum AuthorizationChangeKind {
 	 * 权限码相关
 	 */
 	PERMISSION("perm"),
-
-	/**
-	 * 策略相关
-	 */
-	POLICY("policy"),
 
 	/**
 	 * grant_table 授权边

@@ -4,7 +4,6 @@ import com.auth.module.security.contract.api.authorization.AuthorizationChangeKi
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidatePayload;
 import com.auth.module.security.contract.dto.invalidation.GrantInvalidatePayload;
 import com.auth.module.security.contract.dto.invalidation.PermissionInvalidatePayload;
-import com.auth.module.security.contract.dto.invalidation.PolicyInvalidatePayload;
 import com.auth.module.security.contract.dto.invalidation.RoleInvalidatePayload;
 import com.auth.module.security.contract.dto.invalidation.UserDeptInvalidatePayload;
 import com.auth.module.security.contract.dto.invalidation.UserInvalidatePayload;
@@ -53,7 +52,6 @@ public class InvalidationOutboxPayloadCodec {
 			return switch (kind) {
 				case ROLE -> objectMapper.readValue(json, RoleInvalidatePayload.class);
 				case PERMISSION -> objectMapper.readValue(json, PermissionInvalidatePayload.class);
-				case POLICY -> objectMapper.readValue(json, PolicyInvalidatePayload.class);
 				case GRANT -> objectMapper.readValue(json, GrantInvalidatePayload.class);
 				case USER_DEPT -> objectMapper.readValue(json, UserDeptInvalidatePayload.class);
 				case USER_POST -> objectMapper.readValue(json, UserPostInvalidatePayload.class);

@@ -42,12 +42,6 @@ public class AuthProfile implements Serializable {
 	private final ScopeGrant deptScope;
 
 	/**
-	 * 轻量策略
-	 */
-	@Builder.Default
-	private final PolicyBundle policies = PolicyBundle.empty();
-
-	/**
 	 * 权限/画像版本号（用于与 Redis 中的 permVersion 对比）
 	 */
 	private final Long permVersion;

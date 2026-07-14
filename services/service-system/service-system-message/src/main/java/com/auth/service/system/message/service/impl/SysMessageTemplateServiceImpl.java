@@ -15,6 +15,7 @@ import com.auth.service.system.message.mapper.MessageTemplateMapper;
 import com.auth.service.system.message.model.constants.InAppContentType;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
 import com.auth.service.system.message.model.form.MessageTemplateRequireFieldsForm;
+import com.auth.service.system.message.model.form.MessageTemplateStatusForm;
 import com.auth.service.system.message.model.form.MessageTemplateTestSendForm;
 import com.auth.service.system.message.model.po.MessageTemplatePageRowPO;
 import com.auth.service.system.message.model.query.MessageTemplateQuery;
@@ -30,6 +31,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,6 +47,7 @@ import static com.auth.service.system.message.exception.MessageResultCode.MESSAG
  *
  * @author Bunny
  */
+@RequiredArgsConstructor
 @Service
 @Transactional(readOnly = true)
 public class SysMessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMapper, MessageTemplateEntity>
@@ -56,20 +59,12 @@ public class SysMessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMa
 
 	private final MessageDispatchService messageDispatchService;
 
-	public SysMessageTemplateServiceImpl(MessageTemplateMapper messageTemplateMapper,
-			AuditUserDisplayService auditUserDisplayService, MessageDispatchService messageDispatchService) {
-		this.messageTemplateMapper = messageTemplateMapper;
-		this.baseMapper = messageTemplateMapper;
-		this.auditUserDisplayService = auditUserDisplayService;
-		this.messageDispatchService = messageDispatchService;
-	}
-
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public PageResponse<MessageTemplatePageResponse> getMessageTemplatePage(Page<MessageTemplateEntity> pageParams,
-			MessageTemplateQuery query) {
+	public PageResponse<MessageTemplatePageResponse> getMessageTemplatePage(MessageTemplateQuery query) {
+		Page<MessageTemplateEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
 		IPage<MessageTemplatePageRowPO> page = messageTemplateMapper.selectMessageTemplatePage(pageParams, query);
 		IPage<MessageTemplatePageResponse> voPage = page.convert(MessageTemplateConverter.INSTANCE::toPageResponse);
 
@@ -85,12 +80,7 @@ public class SysMessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMa
 		MessageTemplateEntity entity = requireTemplate(id, channel);
 		MessageTemplateDetailVO vo = MessageTemplateConverter.INSTANCE.toDetailVo(entity);
 
-		// 邮件固定 HTML，站内信读 imMessageType，其余 TEXT
-		String contentType = switch (MessageChannel.valueOf(entity.getChannel())) {
-			case EMAIL -> InAppContentType.HTML.name();
-			case IN_APP -> InAppContentType.from(entity.getImMessageType()).name();
-			default -> InAppContentType.TEXT.name();
-		};
+		String contentType = resolveContentType(entity);
 		vo.setContentType(contentType);
 
 		// 站内信：补齐正文类型默认值；HTML 原文读出时再消毒
@@ -101,10 +91,28 @@ public class SysMessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMa
 			}
 		}
 
-		String previewContent = renderPreviewContent(entity, contentType, channel);
-		vo.setPreviewContent(previewContent);
+		try {
+			// 详情仍填充 preview；缺 exampleValue / 渲染失败时软降级为空，不拖垮详情
+			String previewContent = renderPreviewContent(entity, contentType, channel);
+			vo.setPreviewContent(previewContent);
+		}
+		catch (SystemBusinessException ignored) {
+			vo.setPreviewContent(null);
+		}
+
 		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(vo), null, null);
 		return vo;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public List<MessageTemplateRequireFieldRow> getRequireFields(Long id, String channel) {
+		MessageTemplateEntity entity = requireTemplate(id, channel);
+		String requireFields = entity.getRequireFields();
+
+		return MessageTemplateRequireFieldsJsonSupport.parse(requireFields);
 	}
 
 	/**
@@ -117,7 +125,7 @@ public class SysMessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMa
 			return;
 		}
 
-		super.remove(Wrappers.<MessageTemplateEntity>lambdaQuery()
+		super.remove(Wrappers.lambdaQuery(MessageTemplateEntity.class)
 			.in(MessageTemplateEntity::getId, ids)
 			.eq(MessageTemplateEntity::getChannel, channel));
 	}
@@ -127,15 +135,16 @@ public class SysMessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMa
 	 */
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public void batchUpdateStatus(List<Long> ids, Boolean status, String channel) {
+	public void batchUpdateStatus(MessageTemplateStatusForm form) {
+		List<Long> ids = form.getIds();
 		if (CollUtil.isEmpty(ids)) {
 			return;
 		}
 
-		super.update(Wrappers.<MessageTemplateEntity>lambdaUpdate()
+		super.update(Wrappers.lambdaUpdate(MessageTemplateEntity.class)
 			.in(MessageTemplateEntity::getId, ids)
-			.eq(MessageTemplateEntity::getChannel, channel)
-			.set(MessageTemplateEntity::getStatus, status));
+			.eq(MessageTemplateEntity::getChannel, form.getChannel())
+			.set(MessageTemplateEntity::getStatus, form.getStatus()));
 	}
 
 	/**
@@ -143,9 +152,12 @@ public class SysMessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMa
 	 */
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public void updateRequireFields(Long id, String channel, MessageTemplateRequireFieldsForm form) {
-		MessageTemplateEntity entity = requireTemplate(id, channel);
-		entity.setRequireFields(MessageTemplateRequireFieldsJsonSupport.toJson(form.getRequireFields()));
+	public void updateRequireFields(MessageTemplateRequireFieldsForm form) {
+		List<MessageTemplateRequireFieldRow> requireFields = form.getRequireFields();
+		String json = MessageTemplateRequireFieldsJsonSupport.toJson(requireFields);
+
+		MessageTemplateEntity entity = requireTemplate(form.getId(), form.getChannel());
+		entity.setRequireFields(json);
 		super.updateById(entity);
 	}
 
@@ -172,12 +184,12 @@ public class SysMessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMa
 			case DING_TALK, IN_APP -> true;
 		};
 		if (!valid) {
-			throw new SystemBusinessException(DATA_INVALID, "test-send target");
+			throw new SystemBusinessException(DATA_INVALID, "send target is invalid");
 		}
 
 		MessageTemplateEntity entity = requireTemplate(form.getId(), channel.name());
-		List<MessageTemplateRequireFieldRow> rows = MessageTemplateRequireFieldsJsonSupport
-			.parse(entity.getRequireFields());
+		String requireFields = entity.getRequireFields();
+		List<MessageTemplateRequireFieldRow> rows = MessageTemplateRequireFieldsJsonSupport.parse(requireFields);
 		Map<String, Object> variables = MessageTemplateRequireFieldsJsonSupport.toExampleModel(rows);
 
 		// 组装渠道默认扩展参数
@@ -208,6 +220,19 @@ public class SysMessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMa
 	}
 
 	/**
+	 * 邮件，站内信读、TEXT
+	 * @param entity 模板实体
+	 * @return 正文展示类型
+	 */
+	private String resolveContentType(MessageTemplateEntity entity) {
+		return switch (MessageChannel.valueOf(entity.getChannel())) {
+			case EMAIL -> InAppContentType.HTML.name();
+			case IN_APP -> InAppContentType.from(entity.getImMessageType()).name();
+			default -> InAppContentType.TEXT.name();
+		};
+	}
+
+	/**
 	 * 按 require_fields 示例值 FreeMarker 渲染预览正文
 	 * @param entity 模板实体
 	 * @param contentType 正文展示类型
@@ -215,17 +240,21 @@ public class SysMessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMa
 	 * @return 渲染后正文；站内信 HTML 会再消毒
 	 */
 	private String renderPreviewContent(MessageTemplateEntity entity, String contentType, String channel) {
-		Map<String, Object> model = MessageTemplateRequireFieldsJsonSupport
-			.toExampleModel(MessageTemplateRequireFieldsJsonSupport.parse(entity.getRequireFields()));
+		String requireFields = entity.getRequireFields();
+		List<MessageTemplateRequireFieldRow> rows = MessageTemplateRequireFieldsJsonSupport.parse(requireFields);
+		Map<String, Object> model = MessageTemplateRequireFieldsJsonSupport.toExampleModel(rows);
+
 		String templateName = CharSequenceUtil.blankToDefault(entity.getTemplateName(), "preview");
 		String rendered;
 		try {
+			String bodyContent = entity.getBodyContent();
 			rendered = FreemarkerTemplateRenderer.processTemplate(templateName,
-					CharSequenceUtil.nullToEmpty(entity.getBodyContent()), model);
+					CharSequenceUtil.nullToEmpty(bodyContent), model);
 		}
 		catch (TemplateRenderException e) {
 			throw new SystemBusinessException(OPERATION_FAILED, "preview", e.getMessage());
 		}
+
 		if (InAppContentType.HTML.name().equals(contentType) && MessageChannel.IN_APP.name().equals(channel)) {
 			return InAppHtmlSanitizer.sanitize(rendered);
 		}

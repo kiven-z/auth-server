@@ -1,9 +1,5 @@
 package com.auth.service.system.message.channel.dingtalk;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.model.dingtalk.DingTalkMessageType;
@@ -16,8 +12,11 @@ import com.auth.service.system.message.support.template.FreemarkerTemplateRender
 import com.auth.service.system.message.support.template.MessageTemplateLoader;
 import com.auth.service.system.message.support.template.MessageTemplateRequireFieldsJsonSupport;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.stereotype.Component;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
 import static com.auth.service.system.message.exception.MessageResultCode.DING_TALK_RENDER_FAILED;
@@ -52,13 +51,17 @@ public class DingTalkTemplatePipeline {
 		MessageTemplateEntity template = messageTemplateLoader.loadEnabled(MessageChannel.DING_TALK, sceneCode);
 
 		Map<String, Object> safeVariables = Optional.ofNullable(variables).orElseGet(HashMap::new);
+		String requireFields = template.getRequireFields();
 		MessageTemplateRequireFieldsJsonSupport.assertVariablesPresent(
-				MessageTemplateRequireFieldsJsonSupport.parse(template.getRequireFields()), safeVariables,
-				TEMPLATE_VARS_MISSING, MessageChannel.DING_TALK.name());
+				MessageTemplateRequireFieldsJsonSupport.parse(requireFields), safeVariables, TEMPLATE_VARS_MISSING,
+				MessageChannel.DING_TALK.name());
 
 		DingTalkMessageType messageType = resolveMessageType(template);
-		String title = renderOptionalField(template.getTemplateName() + "_title", template.getSubject(), safeVariables);
-		String content = renderBody(template, safeVariables);
+		String title = renderField(template.getTemplateName() + "_title", template.getSubject(), safeVariables);
+		if (CharSequenceUtil.isBlank(template.getBodyContent())) {
+			throw new SystemBusinessException(PARAM_REQUIRED, "钉钉消息正文");
+		}
+		String content = renderField(template.getTemplateName(), template.getBodyContent(), safeVariables);
 		return RenderedDingTalkNotice.builder().messageType(messageType).title(title).content(content).build();
 	}
 
@@ -68,16 +71,19 @@ public class DingTalkTemplatePipeline {
 	 * @return 消息类型
 	 */
 	private DingTalkMessageType resolveMessageType(MessageTemplateEntity template) {
-		if (CharSequenceUtil.isNotBlank(template.getImMessageType())) {
-			try {
-				return DingTalkMessageType.valueOf(template.getImMessageType().trim().toUpperCase());
-			}
-			catch (IllegalArgumentException ex) {
-				log.warn("Invalid DingTalk message type [{}] on template [{}], using channel default.",
-						template.getImMessageType(), template.getTemplateName(), ex);
-			}
+		String type = template.getImMessageType();
+		if (CharSequenceUtil.isBlank(type)) {
+			return dingTalkProperties.getDefaultMessageType();
 		}
-		return dingTalkProperties.getDefaultMessageType();
+
+		try {
+			return DingTalkMessageType.valueOf(type.trim().toUpperCase());
+		}
+		catch (IllegalArgumentException ex) {
+			log.warn("Invalid DingTalk message type [{}] on template [{}], using channel default.",
+					template.getImMessageType(), template.getTemplateName(), ex);
+			return dingTalkProperties.getDefaultMessageType();
+		}
 	}
 
 	/**
@@ -87,33 +93,12 @@ public class DingTalkTemplatePipeline {
 	 * @param variables 变量
 	 * @return 渲染后的字段
 	 */
-	private String renderOptionalField(String templateKey, String templateContent, Map<String, Object> variables) {
+	private String renderField(String templateKey, String templateContent, Map<String, Object> variables) {
+		if (CharSequenceUtil.isBlank(templateContent)) {
+			return null;
+		}
 		try {
-			if (CharSequenceUtil.isBlank(templateContent)) {
-				return null;
-			}
-
 			return FreemarkerTemplateRenderer.processTemplate(templateKey, templateContent, variables);
-		}
-		catch (TemplateRenderException e) {
-			throw new SystemBusinessException(DING_TALK_RENDER_FAILED, e.getMessage());
-		}
-	}
-
-	/**
-	 * 渲染正文
-	 * @param template 模板
-	 * @param variables 变量
-	 * @return 渲染后的正文
-	 */
-	private String renderBody(MessageTemplateEntity template, Map<String, Object> variables) {
-		try {
-			if (CharSequenceUtil.isBlank(template.getBodyContent())) {
-				throw new SystemBusinessException(PARAM_REQUIRED, "钉钉消息正文");
-			}
-
-			return FreemarkerTemplateRenderer.processTemplate(template.getTemplateName(), template.getBodyContent(),
-					variables);
 		}
 		catch (TemplateRenderException e) {
 			throw new SystemBusinessException(DING_TALK_RENDER_FAILED, e.getMessage());

@@ -1,25 +1,18 @@
 package com.auth.service.auth.support.invalidation.impact;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.function.UnaryOperator;
-
 import cn.hutool.core.collection.CollUtil;
 import com.auth.module.security.contract.dto.invalidation.GrantSubjectKey;
 import com.auth.service.auth.config.AuthorizationInvalidationProperties;
 import com.auth.service.auth.mapper.AuthorizationImpactMapper;
 import com.auth.service.auth.util.BatchPartition;
-
 import org.springframework.stereotype.Repository;
 
+import java.util.*;
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
+
 /**
- * 授权影响面查询：按角色、权限、策略等维度反查受影响用户 ID。
+ * 授权影响面查询：按角色、权限、grant、部门、岗位等
  *
  * @author Bunny
  */
@@ -99,31 +92,6 @@ public class AuthorizationImpactQuerySupport {
 		}
 
 		return findUserIdsByRoleCodes(roleCodes);
-	}
-
-	/**
-	 * 按策略码反查受影响用户 ID。
-	 * @param policyCodes 策略码
-	 * @return 去重后的用户 ID 集合
-	 */
-	public Set<Long> findUserIdsByPolicyCodes(Collection<String> policyCodes) {
-		Set<Long> userIds = new HashSet<>();
-		List<String> codes = policyCodes.stream().filter(Objects::nonNull).distinct().toList();
-		if (codes.isEmpty()) {
-			return Set.of();
-		}
-
-		if (authorizationInvalidationProperties.isPolicyRoleBridgeEnabled()) {
-			Set<String> roleCodes = new LinkedHashSet<>();
-			accumulateBridgedStringsInBatches(codes, authorizationImpactMapper::selectRoleCodesByPolicyCodes,
-					roleCodes);
-			if (CollUtil.isNotEmpty(roleCodes)) {
-				userIds.addAll(findUserIdsByRoleCodes(roleCodes));
-			}
-		}
-
-		queryStringKeysInBatches(codes, authorizationImpactMapper::selectUserIdsByPolicyBinding, userIds);
-		return Set.copyOf(userIds);
 	}
 
 	/**

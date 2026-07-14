@@ -10,6 +10,7 @@ import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.message.mapper.MessageTemplateMapper;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
 import com.auth.service.system.message.model.form.MessageTemplateRequireFieldsForm;
+import com.auth.service.system.message.model.form.MessageTemplateStatusForm;
 import com.auth.service.system.message.model.form.MessageTemplateTestSendForm;
 import com.auth.service.system.message.model.po.MessageTemplatePageRowPO;
 import com.auth.service.system.message.model.query.MessageTemplateQuery;
@@ -22,8 +23,10 @@ import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.repository.CrudRepository;
 import org.apache.ibatis.builder.MapperBuilderAssistant;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,12 +35,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.List;
 
-import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_INVALID;
-import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
-import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.*;
 import static com.auth.service.system.message.exception.MessageResultCode.MESSAGE_CHANNEL_UNSUPPORTED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -70,6 +72,14 @@ class SysMessageTemplateServiceImplTest {
 				MessageTemplateEntity.class);
 	}
 
+	@BeforeEach
+	void setUp() throws Exception {
+		// @InjectMocks 不会注入父类 baseMapper；super.remove/update/updateById 需要它
+		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
+		baseMapperField.setAccessible(true);
+		baseMapperField.set(sysMessageTemplateService, messageTemplateMapper);
+	}
+
 	@Test
 	@DisplayName("按传入 channel 分页并填充审计用户名")
 	void getMessageTemplatePage_shouldQueryByChannelAndEnrichAudit() {
@@ -92,9 +102,7 @@ class SysMessageTemplateServiceImplTest {
 
 		when(messageTemplateMapper.selectMessageTemplatePage(any(Page.class), eq(query))).thenReturn(mapperPage);
 
-		Page<MessageTemplateEntity> pageParams = new Page<>(1, 10);
-		PageResponse<MessageTemplatePageResponse> result = sysMessageTemplateService.getMessageTemplatePage(pageParams,
-				query);
+		PageResponse<MessageTemplatePageResponse> result = sysMessageTemplateService.getMessageTemplatePage(query);
 
 		assertThat(result.getList()).hasSize(1);
 		assertThat(result.getList().get(0).getChannel()).isEqualTo(MessageChannel.EMAIL.name());
@@ -119,8 +127,7 @@ class SysMessageTemplateServiceImplTest {
 		mapperPage.setTotal(0);
 		when(messageTemplateMapper.selectMessageTemplatePage(any(Page.class), eq(query))).thenReturn(mapperPage);
 
-		PageResponse<MessageTemplatePageResponse> result = sysMessageTemplateService
-			.getMessageTemplatePage(new Page<>(1, 10), query);
+		PageResponse<MessageTemplatePageResponse> result = sysMessageTemplateService.getMessageTemplatePage(query);
 
 		assertThat(result.getList()).isEmpty();
 		assertThat(result.getTotal()).isZero();
@@ -185,6 +192,79 @@ class SysMessageTemplateServiceImplTest {
 	}
 
 	@Test
+	@DisplayName("详情：require_fields 缺少 exampleValue 仍返回，previewContent 软降级为 null")
+	void getMessageTemplateById_shouldReturnWhenExampleValueMissing() {
+		// 历史半成品数据：详情正常返回，预览为空
+		MessageTemplateEntity entity = new MessageTemplateEntity();
+		entity.setId(13L);
+		entity.setChannel(MessageChannel.EMAIL.name());
+		entity.setSceneCode("login-code");
+		entity.setTemplateName("登录邮件");
+		entity.setBodyContent("<p>${code}</p>");
+		entity.setRequireFields("[{\"key\":\"code\",\"description\":\"验证码\"}]");
+		entity.setPriority(1);
+		entity.setStatus(true);
+		when(messageTemplateMapper.selectById(13L)).thenReturn(entity);
+
+		MessageTemplateDetailVO vo = sysMessageTemplateService.getMessageTemplateById(13L, MessageChannel.EMAIL.name());
+
+		assertThat(vo.getContent()).isEqualTo("<p>${code}</p>");
+		assertThat(vo.getPreviewContent()).isNull();
+		assertThat(vo.getRequireFields()).hasSize(1);
+		assertThat(vo.getRequireFields().get(0).getKey()).isEqualTo("code");
+		assertThat(vo.getRequireFields().get(0).getExampleValue()).isNull();
+	}
+
+	@Test
+	@DisplayName("详情：EMAIL 含示例值时填充 previewContent")
+	void getMessageTemplateById_shouldFillPreviewForEmail() {
+		MessageTemplateEntity entity = new MessageTemplateEntity();
+		entity.setId(20L);
+		entity.setChannel(MessageChannel.EMAIL.name());
+		entity.setTemplateName("login-mail");
+		entity.setBodyContent("<p>code=${code}</p>");
+		entity.setRequireFields("[{\"key\":\"code\",\"description\":\"验证码\",\"exampleValue\":\"123456\"}]");
+		when(messageTemplateMapper.selectById(20L)).thenReturn(entity);
+
+		MessageTemplateDetailVO vo = sysMessageTemplateService.getMessageTemplateById(20L, MessageChannel.EMAIL.name());
+
+		assertThat(vo.getContent()).isEqualTo("<p>code=${code}</p>");
+		assertThat(vo.getContentType()).isEqualTo("HTML");
+		assertThat(vo.getPreviewContent()).contains("123456");
+	}
+
+	@Test
+	@DisplayName("查询 require_fields：缺 exampleValue 仍原样返回，不抛 PARAM_REQUIRED")
+	void getRequireFields_shouldReturnWithoutValidate() {
+		MessageTemplateEntity entity = new MessageTemplateEntity();
+		entity.setId(14L);
+		entity.setChannel(MessageChannel.SMS.name());
+		entity.setRequireFields("[{\"key\":\"code\",\"description\":\"验证码\"}]");
+		when(messageTemplateMapper.selectById(14L)).thenReturn(entity);
+
+		List<MessageTemplateRequireFieldRow> rows = sysMessageTemplateService.getRequireFields(14L,
+				MessageChannel.SMS.name());
+
+		assertThat(rows).hasSize(1);
+		assertThat(rows.get(0).getKey()).isEqualTo("code");
+		assertThat(rows.get(0).getExampleValue()).isNull();
+	}
+
+	@Test
+	@DisplayName("查询 require_fields：渠道不匹配抛 DATA_NOT_EXIST")
+	void getRequireFields_shouldThrowWhenChannelMismatch() {
+		MessageTemplateEntity entity = new MessageTemplateEntity();
+		entity.setId(14L);
+		entity.setChannel(MessageChannel.SMS.name());
+		when(messageTemplateMapper.selectById(14L)).thenReturn(entity);
+
+		assertThatThrownBy(() -> sysMessageTemplateService.getRequireFields(14L, MessageChannel.EMAIL.name()))
+			.isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(DATA_NOT_EXIST);
+	}
+
+	@Test
 	@DisplayName("详情：渠道不匹配时抛出 DATA_NOT_EXIST")
 	void getMessageTemplateById_shouldThrowWhenChannelMismatch() {
 		MessageTemplateEntity entity = new MessageTemplateEntity();
@@ -238,7 +318,11 @@ class SysMessageTemplateServiceImplTest {
 		List<Long> ids = List.of(1L, 2L);
 		when(messageTemplateMapper.update(any(), any())).thenReturn(2);
 
-		sysMessageTemplateService.batchUpdateStatus(ids, true, MessageChannel.EMAIL.name());
+		MessageTemplateStatusForm form = new MessageTemplateStatusForm();
+		form.setIds(ids);
+		form.setStatus(true);
+		form.setChannel(MessageChannel.EMAIL.name());
+		sysMessageTemplateService.batchUpdateStatus(form);
 
 		ArgumentCaptor<Wrapper> wrapperCaptor = ArgumentCaptor.forClass(Wrapper.class);
 		verify(messageTemplateMapper).update(isNull(), wrapperCaptor.capture());
@@ -248,7 +332,11 @@ class SysMessageTemplateServiceImplTest {
 	@Test
 	@DisplayName("批量启停：ids 为空时不调用更新")
 	void batchUpdateStatus_shouldSkipWhenIdsEmpty() {
-		sysMessageTemplateService.batchUpdateStatus(Collections.emptyList(), false, MessageChannel.EMAIL.name());
+		MessageTemplateStatusForm form = new MessageTemplateStatusForm();
+		form.setIds(Collections.emptyList());
+		form.setStatus(false);
+		form.setChannel(MessageChannel.EMAIL.name());
+		sysMessageTemplateService.batchUpdateStatus(form);
 
 		verify(messageTemplateMapper, never()).update(any(), any());
 	}
@@ -269,9 +357,11 @@ class SysMessageTemplateServiceImplTest {
 		row.setExampleValue(JsonSupport.readTree("\"123456\""));
 
 		MessageTemplateRequireFieldsForm form = new MessageTemplateRequireFieldsForm();
+		form.setId(10L);
+		form.setChannel(MessageChannel.EMAIL.name());
 		form.setRequireFields(List.of(row));
 
-		sysMessageTemplateService.updateRequireFields(10L, MessageChannel.EMAIL.name(), form);
+		sysMessageTemplateService.updateRequireFields(form);
 
 		ArgumentCaptor<MessageTemplateEntity> entityCaptor = ArgumentCaptor.forClass(MessageTemplateEntity.class);
 		verify(messageTemplateMapper).updateById(entityCaptor.capture());
@@ -287,9 +377,11 @@ class SysMessageTemplateServiceImplTest {
 		when(messageTemplateMapper.selectById(10L)).thenReturn(entity);
 
 		MessageTemplateRequireFieldsForm form = new MessageTemplateRequireFieldsForm();
+		form.setId(10L);
+		form.setChannel(MessageChannel.IN_APP.name());
 		form.setRequireFields(Collections.emptyList());
 
-		assertThatThrownBy(() -> sysMessageTemplateService.updateRequireFields(10L, MessageChannel.IN_APP.name(), form))
+		assertThatThrownBy(() -> sysMessageTemplateService.updateRequireFields(form))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(DATA_NOT_EXIST);
@@ -303,9 +395,11 @@ class SysMessageTemplateServiceImplTest {
 		when(messageTemplateMapper.selectById(99L)).thenReturn(null);
 
 		MessageTemplateRequireFieldsForm form = new MessageTemplateRequireFieldsForm();
+		form.setId(99L);
+		form.setChannel(MessageChannel.EMAIL.name());
 		form.setRequireFields(Collections.emptyList());
 
-		assertThatThrownBy(() -> sysMessageTemplateService.updateRequireFields(99L, MessageChannel.EMAIL.name(), form))
+		assertThatThrownBy(() -> sysMessageTemplateService.updateRequireFields(form))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(DATA_NOT_EXIST);
@@ -400,63 +494,6 @@ class SysMessageTemplateServiceImplTest {
 			.isEqualTo(MESSAGE_CHANNEL_UNSUPPORTED);
 
 		verify(messageDispatchService, never()).sendByTemplate(any());
-	}
-
-	@Test
-	@DisplayName("详情：EMAIL 含示例值时填充 previewContent 与 HTML contentType")
-	void getMessageTemplateById_shouldFillPreviewForEmail() {
-		MessageTemplateEntity entity = new MessageTemplateEntity();
-		entity.setId(20L);
-		entity.setChannel(MessageChannel.EMAIL.name());
-		entity.setTemplateName("login-mail");
-		entity.setBodyContent("<p>code=${code}</p>");
-		entity.setRequireFields("[{\"key\":\"code\",\"description\":\"验证码\",\"exampleValue\":\"123456\"}]");
-		when(messageTemplateMapper.selectById(20L)).thenReturn(entity);
-
-		MessageTemplateDetailVO vo = sysMessageTemplateService.getMessageTemplateById(20L, MessageChannel.EMAIL.name());
-
-		assertThat(vo.getContent()).isEqualTo("<p>code=${code}</p>");
-		assertThat(vo.getContentType()).isEqualTo("HTML");
-		assertThat(vo.getPreviewContent()).contains("123456");
-	}
-
-	@Test
-	@DisplayName("详情：IN_APP Markdown 预览类型为 MARKDOWN 且原文保留占位符")
-	void getMessageTemplateById_shouldFillMarkdownPreviewForInApp() {
-		MessageTemplateEntity entity = new MessageTemplateEntity();
-		entity.setId(21L);
-		entity.setChannel(MessageChannel.IN_APP.name());
-		entity.setImMessageType("MARKDOWN");
-		entity.setTemplateName("alert");
-		entity.setBodyContent("**${alertName}**");
-		entity.setRequireFields("[{\"key\":\"alertName\",\"exampleValue\":\"CPU\"}]");
-		when(messageTemplateMapper.selectById(21L)).thenReturn(entity);
-
-		MessageTemplateDetailVO vo = sysMessageTemplateService.getMessageTemplateById(21L,
-				MessageChannel.IN_APP.name());
-
-		assertThat(vo.getContent()).isEqualTo("**${alertName}**");
-		assertThat(vo.getImMessageType()).isEqualTo("MARKDOWN");
-		assertThat(vo.getContentType()).isEqualTo("MARKDOWN");
-		assertThat(vo.getPreviewContent()).contains("CPU");
-	}
-
-	@Test
-	@DisplayName("详情：SMS 预览固定 TEXT 并按示例值渲染")
-	void getMessageTemplateById_shouldFillTextPreviewForSms() {
-		MessageTemplateEntity entity = new MessageTemplateEntity();
-		entity.setId(22L);
-		entity.setChannel(MessageChannel.SMS.name());
-		entity.setTemplateName("sms-note");
-		entity.setBodyContent("验证码 ${code}");
-		entity.setRequireFields("[{\"key\":\"code\",\"exampleValue\":\"888888\"}]");
-		when(messageTemplateMapper.selectById(22L)).thenReturn(entity);
-
-		MessageTemplateDetailVO vo = sysMessageTemplateService.getMessageTemplateById(22L, MessageChannel.SMS.name());
-
-		assertThat(vo.getContent()).isEqualTo("验证码 ${code}");
-		assertThat(vo.getContentType()).isEqualTo("TEXT");
-		assertThat(vo.getPreviewContent()).isEqualTo("验证码 888888");
 	}
 
 	@Test

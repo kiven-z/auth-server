@@ -1,13 +1,6 @@
 package com.auth.service.system.message.service.impl;
 
-import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
-
-import java.util.Collections;
-import java.util.Map;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
+import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.message.mapper.MessageTemplateMapper;
@@ -19,8 +12,13 @@ import com.auth.service.system.message.service.SysEmailTemplateService;
 import com.auth.service.system.message.support.template.FreemarkerTemplateRenderer;
 import com.auth.service.system.message.support.template.MessageTemplateRequireFieldsJsonSupport;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import cn.hutool.core.text.CharSequenceUtil;
+import java.util.Collections;
+import java.util.Map;
+
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 
 /**
  * 邮件模板服务
@@ -75,8 +73,8 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<MessageTemplateMapp
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void updateContent(Long id, EmailTemplateContentForm form) {
-		MessageTemplateEntity exists = getById(id);
+	public void updateContent(EmailTemplateContentForm form) {
+		MessageTemplateEntity exists = getById(form.getId());
 		if (exists == null || !MessageChannel.EMAIL.name().equals(exists.getChannel())) {
 			throw new SystemBusinessException(DATA_NOT_EXIST);
 		}

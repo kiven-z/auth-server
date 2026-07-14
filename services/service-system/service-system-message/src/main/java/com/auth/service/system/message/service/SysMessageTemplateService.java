@@ -3,11 +3,12 @@ package com.auth.service.system.message.service;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
 import com.auth.service.system.message.model.form.MessageTemplateRequireFieldsForm;
+import com.auth.service.system.message.model.form.MessageTemplateStatusForm;
 import com.auth.service.system.message.model.form.MessageTemplateTestSendForm;
 import com.auth.service.system.message.model.query.MessageTemplateQuery;
 import com.auth.service.system.message.model.vo.MessageTemplateDetailVO;
 import com.auth.service.system.message.model.vo.MessageTemplatePageResponse;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.auth.service.system.message.model.vo.MessageTemplateRequireFieldRow;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
@@ -21,20 +22,26 @@ public interface SysMessageTemplateService extends IService<MessageTemplateEntit
 
 	/**
 	 * 按渠道分页查询消息模板
-	 * @param pageParams 分页参数
 	 * @param query 查询条件（channel 必填）
 	 * @return 消息模板分页数据
 	 */
-	PageResponse<MessageTemplatePageResponse> getMessageTemplatePage(Page<MessageTemplateEntity> pageParams,
-			MessageTemplateQuery query);
+	PageResponse<MessageTemplatePageResponse> getMessageTemplatePage(MessageTemplateQuery query);
 
 	/**
-	 * 按主键与渠道查询消息模板详情
+	 * 按主键与渠道查询消息模板详情（含示例值预览；缺 exampleValue 时 previewContent 为空）
 	 * @param id 模板主键
-	 * @param channel 消息渠道（须与库中一致）
+	 * @param channel 消息渠道
 	 * @return 模板详情
 	 */
 	MessageTemplateDetailVO getMessageTemplateById(Long id, String channel);
+
+	/**
+	 * 查询模板变量声明列表（只解析不校验）
+	 * @param id 模板主键
+	 * @param channel 消息渠道（须与库中一致）
+	 * @return 变量声明列表；库中为空则返回空列表
+	 */
+	List<MessageTemplateRequireFieldRow> getRequireFields(Long id, String channel);
 
 	/**
 	 * 按主键列表与渠道批量删除模板
@@ -44,20 +51,16 @@ public interface SysMessageTemplateService extends IService<MessageTemplateEntit
 	void batchDelete(List<Long> ids, String channel);
 
 	/**
-	 * 按主键列表与渠道批量启用/禁用模板
-	 * @param ids 模板主键列表
-	 * @param status 目标启用状态
-	 * @param channel 消息渠道（仅更新该渠道下的行）
+	 * 按表单批量启用/禁用模板
+	 * @param form 含 ids、status、channel
 	 */
-	void batchUpdateStatus(List<Long> ids, Boolean status, String channel);
+	void batchUpdateStatus(MessageTemplateStatusForm form);
 
 	/**
-	 * 仅更新 require_fields（须与 channel 匹配）
-	 * @param id 模板主键
-	 * @param channel 消息渠道（须与库中一致）
-	 * @param form 变量列表表单
+	 * 仅更新 require_fields（须与 form.channel 匹配）
+	 * @param form 含 id、channel、requireFields
 	 */
-	void updateRequireFields(Long id, String channel, MessageTemplateRequireFieldsForm form);
+	void updateRequireFields(MessageTemplateRequireFieldsForm form);
 
 	/**
 	 * 测试发送：按模板 require_fields 示例值渲染并投递到指定目标

@@ -4,7 +4,7 @@ import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.channel.MessageSender;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.message.config.MessageChannelProperties;
+import com.auth.service.system.message.config.SmsProperties;
 import com.auth.service.system.message.support.validation.TemplateMessageCommandValidation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -37,7 +37,12 @@ class MessageDispatchServiceImplTest {
 	@Mock
 	private MessageSender dingTalkSender;
 
-	private MessageChannelProperties messageChannelProperties;
+	@Mock
+	private MessageSender inAppSender;
+
+	private SmsProperties smsProperties;
+
+	private TemplateMessageCommandValidation commandValidation;
 
 	private MessageDispatchServiceImpl dispatchService;
 
@@ -46,10 +51,10 @@ class MessageDispatchServiceImplTest {
 		when(emailSender.channel()).thenReturn(MessageChannel.EMAIL);
 		when(dingTalkSender.channel()).thenReturn(MessageChannel.DING_TALK);
 		Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
-		TemplateMessageCommandValidation commandValidation = new TemplateMessageCommandValidation(validator);
-		messageChannelProperties = new MessageChannelProperties();
-		dispatchService = new MessageDispatchServiceImpl(List.of(emailSender, dingTalkSender), commandValidation,
-				messageChannelProperties);
+		commandValidation = new TemplateMessageCommandValidation(validator);
+		smsProperties = new SmsProperties();
+		dispatchService = new MessageDispatchServiceImpl(List.of(emailSender, dingTalkSender), List.of(smsProperties),
+				commandValidation);
 	}
 
 	@Test
@@ -86,7 +91,7 @@ class MessageDispatchServiceImplTest {
 	@DisplayName("渠道禁用：抛出 MESSAGE_CHANNEL_DISABLED")
 	void sendByTemplate_shouldThrowWhenChannelDisabled() {
 		// 禁用短信渠道，验证分发层统一拦截
-		messageChannelProperties.setSmsEnabled(false);
+		smsProperties.setEnabled(false);
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
 			.channel(MessageChannel.SMS)
 			.templateCode("100001")
@@ -105,7 +110,7 @@ class MessageDispatchServiceImplTest {
 	@DisplayName("启用但无 sender：抛出 MESSAGE_CHANNEL_UNSUPPORTED")
 	void sendByTemplate_shouldThrowWhenChannelUnsupported() {
 		// 保持渠道启用，验证 sender 缺失仍然是“不支持/未实现”
-		messageChannelProperties.setSmsEnabled(true);
+		smsProperties.setEnabled(true);
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
 			.channel(MessageChannel.SMS)
 			.templateCode("100001")
@@ -118,6 +123,36 @@ class MessageDispatchServiceImplTest {
 
 		verify(emailSender, never()).sendByTemplate(any());
 		verify(dingTalkSender, never()).sendByTemplate(any());
+	}
+
+	@Test
+	@DisplayName("未注册 capability 的渠道：视为启用并委托 sender")
+	void sendByTemplate_shouldTreatMissingCapabilityAsEnabled() {
+		// 站内信等无凭证渠道可不声明开关；有 sender 时应正常发出
+		when(inAppSender.channel()).thenReturn(MessageChannel.IN_APP);
+		MessageDispatchServiceImpl service = new MessageDispatchServiceImpl(List.of(inAppSender), List.of(),
+				commandValidation);
+		TemplateMessageCommand command = TemplateMessageCommand.builder()
+			.channel(MessageChannel.IN_APP)
+			.templateCode("notice")
+			.targets(List.of("user-1"))
+			.build();
+
+		service.sendByTemplate(command);
+
+		verify(inAppSender).sendByTemplate(command);
+	}
+
+	@Test
+	@DisplayName("重复注册同一渠道 capability：构造失败")
+	void constructor_shouldRejectDuplicateCapability() {
+		SmsProperties first = new SmsProperties();
+		SmsProperties second = new SmsProperties();
+
+		assertThatThrownBy(
+				() -> new MessageDispatchServiceImpl(List.of(emailSender), List.of(first, second), commandValidation))
+			.isInstanceOf(IllegalStateException.class)
+			.hasMessageContaining("SMS");
 	}
 
 	@Test

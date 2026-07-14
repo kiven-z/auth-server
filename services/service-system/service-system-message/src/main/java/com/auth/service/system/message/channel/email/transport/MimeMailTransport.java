@@ -50,51 +50,42 @@ public class MimeMailTransport {
 	 */
 	public void send(EmailSendDTO emailSendDTO, RenderedEmail rendered) {
 		try {
-			sendMime(emailSendDTO, rendered.subject(), rendered.body());
+			String subject = rendered.subject();
+			String body = rendered.body();
+			// 验证发送请求
+			validate(emailSendDTO, subject, body);
+
+			// 创建 MIME 消息
+			MimeMessage message = mailSender.createMimeMessage();
+
+			MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+			helper.setFrom(defaultFrom);
+			helper.setTo(emailSendDTO.getTo().toArray(String[]::new));
+			helper.setSubject(subject);
+			helper.setText(body, BooleanUtil.isTrue(emailSendDTO.getHasHtml()));
+
+			if (CharSequenceUtil.isNotBlank(emailSendDTO.getReplyTo())) {
+				helper.setReplyTo(emailSendDTO.getReplyTo());
+			}
+			if (CollUtil.isNotEmpty(emailSendDTO.getCc())) {
+				helper.setCc(emailSendDTO.getCc().toArray(String[]::new));
+			}
+			if (CollUtil.isNotEmpty(emailSendDTO.getBcc())) {
+				helper.setBcc(emailSendDTO.getBcc().toArray(String[]::new));
+			}
+			helper.setSentDate(new Date());
+
+			// 解析附件
+			List<MultipartFile> attachmentFiles = attachmentResolver.resolve(emailSendDTO.getAttachments());
+			addAttachments(helper, attachmentFiles);
+
+			mailSender.send(message);
 		}
 		catch (MessagingException e) {
 			log.error("Failed to send email, templateCode={}, reason={}", emailSendDTO.getTemplateCode(),
 					e.getMessage(), e);
 			throw new SystemBusinessException(OPERATION_FAILED, "Email send", e.getMessage());
 		}
-	}
-
-	/**
-	 * 发送 MIME 邮件
-	 * @param emailSendDTO 发送请求
-	 * @param subject 主题
-	 * @param body 内容
-	 * @throws MessagingException 邮件发送异常
-	 */
-	private void sendMime(EmailSendDTO emailSendDTO, String subject, String body) throws MessagingException {
-		// 验证发送请求
-		validate(emailSendDTO, subject, body);
-
-		// 创建 MIME 消息
-		MimeMessage message = mailSender.createMimeMessage();
-
-		MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-		helper.setFrom(defaultFrom);
-		helper.setTo(emailSendDTO.getTo().toArray(String[]::new));
-		helper.setSubject(subject);
-		helper.setText(body, BooleanUtil.isTrue(emailSendDTO.getHasHtml()));
-
-		if (CharSequenceUtil.isNotBlank(emailSendDTO.getReplyTo())) {
-			helper.setReplyTo(emailSendDTO.getReplyTo());
-		}
-		if (CollUtil.isNotEmpty(emailSendDTO.getCc())) {
-			helper.setCc(emailSendDTO.getCc().toArray(String[]::new));
-		}
-		if (CollUtil.isNotEmpty(emailSendDTO.getBcc())) {
-			helper.setBcc(emailSendDTO.getBcc().toArray(String[]::new));
-		}
-		helper.setSentDate(new Date());
-
-		// 解析附件
-		List<MultipartFile> attachmentFiles = attachmentResolver.resolve(emailSendDTO.getAttachments());
-		addAttachments(helper, attachmentFiles);
-
-		mailSender.send(message);
 	}
 
 	/**

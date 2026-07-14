@@ -30,17 +30,46 @@ class InAppHtmlSanitizerTest {
 
 		String cleaned = InAppHtmlSanitizer.sanitize(html);
 
-		assertThat(cleaned).contains("<p>", "<strong>", "<em>", "<ul>", "<ol>", "<li>", "<br>", "<a ", "<img ");
-		assertThat(cleaned).contains("href=\"https://example.com\"");
-		assertThat(cleaned).contains("href=\"mailto:a@b.com\"");
-		assertThat(cleaned).contains("src=\"https://cdn.example.com/a.png\"");
-		assertThat(cleaned).contains("alt=\"pic\"");
+		assertThat(cleaned).contains("<p>", "<strong>", "<em>", "<ul>", "<ol>", "<li>", "<br>", "<a ", "<img ")
+			.contains("href=\"https://example.com\"")
+			.contains("href=\"mailto:a@b.com\"")
+			.contains("src=\"https://cdn.example.com/a.png\"")
+			.contains("alt=\"pic\"");
+	}
+
+	@Test
+	@DisplayName("保留 h1-h6 标题标签")
+	void sanitize_shouldKeepHeadingTags() {
+		// 标题层级全文保留
+		String html = "<h1>t1</h1><h2>t2</h2><h3>t3</h3><h4>t4</h4><h5>t5</h5><h6>t6</h6>";
+
+		String cleaned = InAppHtmlSanitizer.sanitize(html);
+
+		assertThat(cleaned).contains("<h1>t1</h1>", "<h2>t2</h2>", "<h3>t3</h3>", "<h4>t4</h4>", "<h5>t5</h5>",
+				"<h6>t6</h6>");
+	}
+
+	@Test
+	@DisplayName("保留 span 上安全的文字颜色与背景色")
+	void sanitize_shouldKeepSafeSpanColorStyles() {
+		// wangEditor 输出的 color / background-color
+		String html = "<p><span style=\"color: rgb(225, 60, 57);\">red</span>"
+				+ "<span style=\"background-color: #ffff00; color: blue\">hl</span></p>";
+
+		String cleaned = InAppHtmlSanitizer.sanitize(html);
+
+		assertThat(cleaned).contains("<span")
+			.contains("color: rgb(225, 60, 57)")
+			.contains("background-color: #ffff00")
+			.contains("color: blue")
+			.contains("red")
+			.contains("hl");
 	}
 
 	@Test
 	@DisplayName("剥离脚本、事件属性与非法协议")
 	void sanitize_shouldStripScriptEventAndUnsafeProtocols() {
-		// XSS：script、onclick、javascript:、data:
+		// XSS：script、onclick、javascript:、data:；div 上的 style 随标签剥离
 		String dirty = "<p onclick=\"alert(1)\">x</p>" + "<script>alert(1)</script>"
 				+ "<a href=\"javascript:alert(1)\">bad</a>"
 				+ "<img src=\"data:text/html;base64,xxx\" onerror=\"alert(1)\">"
@@ -48,16 +77,32 @@ class InAppHtmlSanitizerTest {
 
 		String cleaned = InAppHtmlSanitizer.sanitize(dirty);
 
-		assertThat(cleaned).doesNotContain("<script");
-		assertThat(cleaned).doesNotContain("onclick");
-		assertThat(cleaned).doesNotContain("javascript:");
-		assertThat(cleaned).doesNotContain("onerror");
-		assertThat(cleaned).doesNotContain("data:");
-		assertThat(cleaned).doesNotContain("<div");
-		assertThat(cleaned).doesNotContain("style=");
-		assertThat(cleaned).doesNotContain("class=");
-		assertThat(cleaned).contains("<strong>ok</strong>");
-		assertThat(cleaned).contains("x");
+		assertThat(cleaned).doesNotContain("<script")
+			.doesNotContain("onclick")
+			.doesNotContain("javascript:")
+			.doesNotContain("onerror")
+			.doesNotContain("data:")
+			.doesNotContain("<div")
+			.doesNotContain("class=")
+			.contains("<strong>ok</strong>")
+			.contains("x");
+	}
+
+	@Test
+	@DisplayName("剥离 span 上的危险或不允许的 style")
+	void sanitize_shouldStripUnsafeSpanStyles() {
+		// expression / url / 非法属性不得保留
+		String dirty = "<p><span style=\"color:red; expression(alert(1)); background:url(javascript:alert(1));"
+				+ " font-size:20px\">t</span></p>";
+
+		String cleaned = InAppHtmlSanitizer.sanitize(dirty);
+
+		assertThat(cleaned).contains("color: red")
+			.doesNotContain("expression")
+			.doesNotContain("javascript")
+			.doesNotContain("font-size")
+			.doesNotContain("url(")
+			.contains("t");
 	}
 
 	@Test
@@ -69,11 +114,11 @@ class InAppHtmlSanitizerTest {
 
 		String cleaned = InAppHtmlSanitizer.sanitize(dirty);
 
-		assertThat(cleaned).doesNotContain("<iframe");
-		assertThat(cleaned).doesNotContain("<svg");
-		assertThat(cleaned).doesNotContain("<form");
-		assertThat(cleaned).doesNotContain("<input");
-		assertThat(cleaned).isEqualTo("<p>keep</p>");
+		assertThat(cleaned).doesNotContain("<iframe")
+			.doesNotContain("<svg")
+			.doesNotContain("<form")
+			.doesNotContain("<input")
+			.isEqualTo("<p>keep</p>");
 	}
 
 }
