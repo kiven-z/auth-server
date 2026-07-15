@@ -26,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -203,17 +202,13 @@ public class FileRecordServiceImpl extends ServiceImpl<FileRecordMapper, FileRec
 			throw new SystemBusinessException(SystemCommonResultCode.PARAM_REQUIRED, "deleteSource");
 		}
 
-		List<FileRecordEntity> privateEntities = entities.stream()
+		// @TableLogic 会拦截 updateById/updateBatchById 对 is_deleted 的写入，私有文件走自定义 SQL
+		List<Long> privateIds = entities.stream()
 			.filter(entity -> BooleanUtil.isTrue(entity.getIsPrivate()))
+			.map(FileRecordEntity::getId)
 			.toList();
-		for (FileRecordEntity entity : privateEntities) {
-			entity.setDeletedAt(LocalDateTime.now());
-			entity.setDeletedBy(deletedBy);
-			entity.setDeleteSource(deleteSource);
-			entity.setIsDeleted(true);
-		}
-		if (CollUtil.isNotEmpty(privateEntities)) {
-			super.updateBatchById(privateEntities);
+		if (CollUtil.isNotEmpty(privateIds)) {
+			baseMapper.softDeleteByIds(privateIds, deleteSource, deletedBy);
 		}
 
 		List<FileRecordEntity> publicEntities = entities.stream()

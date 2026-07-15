@@ -33,8 +33,7 @@ public class SysInAppTemplateController {
 		this.sysInAppTemplateService = sysInAppTemplateService;
 	}
 
-	@Operation(summary = "添加站内信模板",
-			description = "channel 固定为 IN_APP；contentType 写入 im_message_type；HTML 落库前白名单消毒；变量列表创建后单独维护")
+	@Operation(summary = "添加站内信模板", description = "channel 固定为 IN_APP；contentType 写入 im_message_type；变量列表创建后单独维护")
 	@PreAuthorize("@auth.decide('message:template:create')")
 	@PostMapping()
 	public Result<String> create(@Validated(CreateGroup.class) @RequestBody InAppTemplateForm form) {
@@ -45,7 +44,7 @@ public class SysInAppTemplateController {
 
 	@OperationLog(targetType = "IN_APP_TEMPLATE", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = MessageAuditBizModule.SYS_MESSAGE_TEMPLATE, operation = OperationLogKind.UPDATE)
-	@Operation(summary = "更新站内信模板", description = "更新元数据与正文；HTML 落库前白名单消毒；不修改 channel、require_fields")
+	@Operation(summary = "更新站内信模板", description = "更新元数据与正文；不修改 channel、require_fields")
 	@PreAuthorize("@auth.decide('message:template:update')")
 	@PutMapping()
 	public Result<String> update(@Validated(UpdateGroup.class) @RequestBody InAppTemplateForm form) {

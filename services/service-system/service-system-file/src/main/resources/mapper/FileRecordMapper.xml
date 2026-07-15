@@ -12,21 +12,21 @@
     <!-- 文件记录分页查询 -->
     <select id="selectListByPage" resultType="com.auth.service.system.file.model.po.FileRecordPageRowPO">
         SELECT
-        id,
-        storage_platform,
-        upload_mode,
-        original_name,
-        content_type,
-        size,
-        is_private,
-        biz_type,
-        biz_id,
-        create_time,
-        update_time,
-        create_user,
-        update_user
+            id,
+            storage_platform,
+            upload_mode,
+            original_name,
+            content_type,
+            size,
+            is_private,
+            biz_type,
+            biz_id,
+            create_time,
+            update_time,
+            create_user,
+            update_user
         FROM
-        file_record
+            file_record
         <where>
             <if test="isDeleted != null">
                 is_deleted = #{isDeleted}
@@ -64,7 +64,7 @@
             </if>
         </where>
         ORDER BY
-        create_time DESC
+            create_time DESC
     </select>
 
     <!-- 按主键查询文件记录详情 -->
@@ -72,7 +72,7 @@
         SELECT
         <include refid="fileRecordColumns"/>
         FROM
-        file_record
+            file_record
         <where>
             id = #{id}
             <if test="expectedDeleted != null">
@@ -98,7 +98,7 @@
         SELECT
         <include refid="fileRecordColumns"/>
         FROM
-        file_record
+            file_record
         <where>
             <if test="expectedDeleted != null">
                 AND is_deleted = #{expectedDeleted}
@@ -127,9 +127,9 @@
         SELECT
         <include refid="fileRecordColumns"/>
         FROM
-        file_record
+            file_record
         WHERE
-        is_deleted = 0
+            is_deleted = 0
         <if test="url != null and url != ''">
             AND url = #{url}
         </if>
@@ -143,23 +143,42 @@
             AND biz_type = #{bizType}
         </if>
         LIMIT
-        1
+            1
     </select>
+
+    <!-- 批量逻辑删除文件记录（显式写 is_deleted，避开 @TableLogic 对 updateById 的拦截） -->
+    <update id="softDeleteByIds">
+        UPDATE file_record
+        SET
+            is_deleted = 1,
+            delete_source = #{deleteSource},
+            deleted_by = #{deletedBy},
+            deleted_at = NOW(),
+            version = version + 1,
+            update_user = #{deletedBy},
+            update_time = NOW()
+        WHERE
+            is_deleted = 0
+            AND id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
 
     <!-- 恢复已逻辑删除的文件记录 -->
     <update id="restoreByIds">
         UPDATE file_record
         SET
-        is_deleted = 0,
-        delete_source = NULL,
-        deleted_by = NULL,
-        deleted_at = NULL,
-        version = version + 1,
-        update_user = #{updateUser},
-        update_time = NOW()
+            is_deleted = 0,
+            delete_source = NULL,
+            deleted_by = NULL,
+            deleted_at = NULL,
+            version = version + 1,
+            update_user = #{updateUser},
+            update_time = NOW()
         WHERE
-        is_deleted = 1
-        AND id IN
+            is_deleted = 1
+            AND id IN
         <foreach collection="ids" item="id" open="(" separator="," close=")">
             #{id}
         </foreach>
@@ -169,8 +188,8 @@
     <delete id="deletePhysicallyByIds">
         DELETE FROM file_record
         WHERE
-        is_deleted = #{expectedDeleted}
-        AND id IN
+            is_deleted = #{expectedDeleted}
+            AND id IN
         <foreach collection="ids" item="id" open="(" separator="," close=")">
             #{id}
         </foreach>
@@ -181,16 +200,16 @@
         SELECT
         <include refid="fileRecordColumns"/>
         FROM
-        file_record
+            file_record
         WHERE
-        is_deleted = 1
-        AND deleted_at IS NOT NULL
-        AND deleted_at <![CDATA[ < ]]> #{cutoff}
+            is_deleted = 1
+            AND deleted_at IS NOT NULL
+            AND deleted_at <![CDATA[ < ]]> #{cutoff}
         ORDER BY
-        deleted_at ASC,
-        id ASC
+            deleted_at ASC,
+            id ASC
         LIMIT
-        #{limit}
+            #{limit}
     </select>
 
 </mapper>

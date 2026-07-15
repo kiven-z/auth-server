@@ -14,6 +14,13 @@ import com.baomidou.mybatisplus.extension.service.IService;
 public interface SysEmailTemplateService extends IService<MessageTemplateEntity> {
 
 	/**
+	 * 离线渲染
+	 * @param form 内容与变量声明
+	 * @return 渲染后的 HTML
+	 */
+	String render(EmailTemplateRenderForm form);
+
+	/**
 	 * 添加邮件模板
 	 * @param form 邮件模板表单
 	 */
@@ -30,12 +37,5 @@ public interface SysEmailTemplateService extends IService<MessageTemplateEntity>
 	 * @param form 含 id 与 content
 	 */
 	void updateContent(EmailTemplateContentForm form);
-
-	/**
-	 * 离线渲染
-	 * @param form 内容与变量声明
-	 * @return 渲染后的 HTML
-	 */
-	String render(EmailTemplateRenderForm form);
 
 }

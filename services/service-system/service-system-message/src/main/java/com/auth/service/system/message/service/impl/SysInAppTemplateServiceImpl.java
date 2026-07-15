@@ -3,11 +3,10 @@ package com.auth.service.system.message.service.impl;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.message.mapper.MessageTemplateMapper;
-import com.auth.service.system.message.model.constants.InAppContentType;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
+import com.auth.service.system.message.model.enums.InAppContentType;
 import com.auth.service.system.message.model.form.inapp.InAppTemplateForm;
 import com.auth.service.system.message.service.SysInAppTemplateService;
-import com.auth.service.system.message.support.sanitize.InAppHtmlSanitizer;
 import com.auth.service.system.message.support.template.MessageTemplateRequireFieldsJsonSupport;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
@@ -34,14 +33,12 @@ public class SysInAppTemplateServiceImpl extends ServiceImpl<MessageTemplateMapp
 	 */
 	private static void applyForm(InAppTemplateForm form, MessageTemplateEntity entity) {
 		InAppContentType contentType = InAppContentType.from(form.getContentType());
-		String content = form.getContent();
-		String bodyContent = contentType == InAppContentType.HTML ? InAppHtmlSanitizer.sanitize(content) : content;
 
 		entity.setSceneCode(form.getTemplateCode());
 		entity.setTemplateName(form.getTemplateName());
 		entity.setSubject(form.getSubject());
 		entity.setImMessageType(contentType.name());
-		entity.setBodyContent(bodyContent);
+		entity.setBodyContent(form.getContent());
 		entity.setDescription(form.getDescription());
 		entity.setStatus(form.getStatus());
 		entity.setPriority(form.getPriority());

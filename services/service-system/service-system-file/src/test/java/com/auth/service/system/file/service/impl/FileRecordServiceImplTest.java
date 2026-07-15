@@ -192,7 +192,8 @@ class FileRecordServiceImplTest {
 		entity.setIsPrivate(true);
 		when(fileRecordMapper.selectIsDeletedByIds(List.of(5001L), 9001L, null, false, null))
 			.thenReturn(List.of(entity));
-		doReturn(true).when(fileRecordService).updateBatchById(anyList());
+		when(fileRecordMapper.softDeleteByIds(List.of(5001L), FileDeleteSource.USER_SELF.getCode(), 9001L))
+			.thenReturn(1);
 
 		try (MockedStatic<SecurityUserUtils> securityUser = mockStatic(SecurityUserUtils.class)) {
 			securityUser.when(SecurityUserUtils::getUserId).thenReturn(9001L);
@@ -200,41 +201,29 @@ class FileRecordServiceImplTest {
 		}
 
 		verify(fileRecordMapper).selectIsDeletedByIds(List.of(5001L), 9001L, null, false, null);
-		verify(fileRecordService).updateBatchById(argThat(entities -> {
-			if (entities.size() != 1) {
-				return false;
-			}
-			FileRecordEntity first = entities.iterator().next();
-			return Long.valueOf(5001L).equals(first.getId()) && Boolean.TRUE.equals(first.getIsDeleted())
-					&& FileDeleteSource.USER_SELF.getCode().equals(first.getDeleteSource())
-					&& Long.valueOf(9001L).equals(first.getDeletedBy());
-		}));
+		verify(fileRecordMapper).softDeleteByIds(List.of(5001L), FileDeleteSource.USER_SELF.getCode(), 9001L);
+		verify(fileRecordService, never()).updateBatchById(anyList());
 		verify(fileRecordMapper, never()).deletePhysicallyByIds(anyList(), anyBoolean());
 	}
 
 	@Test
 	@DisplayName("deleteByIds：管理端删除私有文件逻辑删除并写入 ADMIN_ACTION")
 	void deleteByIdsMarksPrivateFilesDeletedWithAdminActionSource() {
-		// 验证管理端删除私有文件时走逻辑删除并标记 ADMIN_ACTION。
+		// 验证管理端删除私有文件时走自定义 softDelete，并标记 ADMIN_ACTION。
 		FileRecordEntity entity = buildEntity(5101L);
 		entity.setIsPrivate(true);
 		when(fileRecordMapper.selectIsDeletedByIds(List.of(5101L), null, null, false, null))
 			.thenReturn(List.of(entity));
-		doReturn(true).when(fileRecordService).updateBatchById(anyList());
+		when(fileRecordMapper.softDeleteByIds(List.of(5101L), FileDeleteSource.ADMIN_ACTION.getCode(), 7002L))
+			.thenReturn(1);
 
 		try (MockedStatic<SecurityUserUtils> securityUser = mockStatic(SecurityUserUtils.class)) {
 			securityUser.when(SecurityUserUtils::getUserId).thenReturn(7002L);
 			fileRecordService.deleteByIds(List.of(5101L), null, FileDeleteSource.ADMIN_ACTION.getCode());
 		}
 
-		verify(fileRecordService).updateBatchById(argThat(entities -> {
-			if (entities.size() != 1) {
-				return false;
-			}
-			FileRecordEntity first = entities.iterator().next();
-			return FileDeleteSource.ADMIN_ACTION.getCode().equals(first.getDeleteSource())
-					&& Long.valueOf(7002L).equals(first.getDeletedBy());
-		}));
+		verify(fileRecordMapper).softDeleteByIds(List.of(5101L), FileDeleteSource.ADMIN_ACTION.getCode(), 7002L);
+		verify(fileRecordService, never()).updateBatchById(anyList());
 		verify(fileRecordMapper, never()).deletePhysicallyByIds(anyList(), anyBoolean());
 	}
 
@@ -253,6 +242,7 @@ class FileRecordServiceImplTest {
 
 		verify(minioProvider).delete("public", "a.png");
 		verify(fileRecordMapper).deletePhysicallyByIds(List.of(5201L), false);
+		verify(fileRecordMapper, never()).softDeleteByIds(anyList(), anyString(), any());
 		verify(fileRecordService, never()).updateBatchById(anyList());
 	}
 
@@ -267,6 +257,7 @@ class FileRecordServiceImplTest {
 
 		fileRecordService.deleteByIds(List.of(5202L), null, FileDeleteSource.ADMIN_ACTION.getCode());
 
+		verify(fileRecordMapper, never()).softDeleteByIds(anyList(), anyString(), any());
 		verify(fileRecordService, never()).updateBatchById(anyList());
 		verify(fileRecordMapper, never()).deletePhysicallyByIds(anyList(), anyBoolean());
 		verify(facadeRegistry, never()).resolve(any());
@@ -284,7 +275,8 @@ class FileRecordServiceImplTest {
 			.thenReturn(List.of(publicFile, privateFile));
 		when(facadeRegistry.resolve(StoragePlatformEnum.MINIO)).thenReturn(storagePlatformFacade);
 		when(storagePlatformFacade.provider()).thenReturn(minioProvider);
-		doReturn(true).when(fileRecordService).updateBatchById(anyList());
+		when(fileRecordMapper.softDeleteByIds(List.of(5302L), FileDeleteSource.ADMIN_ACTION.getCode(), 9001L))
+			.thenReturn(1);
 
 		try (MockedStatic<SecurityUserUtils> securityUser = mockStatic(SecurityUserUtils.class)) {
 			securityUser.when(SecurityUserUtils::getUserId).thenReturn(9001L);
@@ -292,8 +284,8 @@ class FileRecordServiceImplTest {
 					FileDeleteSource.ADMIN_ACTION.getCode());
 		}
 
-		verify(fileRecordService).updateBatchById(argThat(
-				entities -> entities.size() == 1 && Long.valueOf(5302L).equals(entities.iterator().next().getId())));
+		verify(fileRecordMapper).softDeleteByIds(List.of(5302L), FileDeleteSource.ADMIN_ACTION.getCode(), 9001L);
+		verify(fileRecordService, never()).updateBatchById(anyList());
 		verify(minioProvider).delete("public", "a.png");
 		verify(fileRecordMapper).deletePhysicallyByIds(List.of(5301L), false);
 	}
@@ -312,6 +304,7 @@ class FileRecordServiceImplTest {
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.PARAM_REQUIRED);
 
+		verify(fileRecordMapper, never()).softDeleteByIds(anyList(), anyString(), any());
 		verify(fileRecordService, never()).updateBatchById(anyList());
 		verify(fileRecordMapper, never()).deletePhysicallyByIds(anyList(), anyBoolean());
 	}

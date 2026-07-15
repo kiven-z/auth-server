@@ -45,7 +45,7 @@ public class InAppTemplateForm implements Serializable {
 	@NotBlank(message = "标题不能为空", groups = { CreateGroup.class, UpdateGroup.class })
 	private String subject;
 
-	@Schema(name = "contentType", title = "正文类型", description = "TEXT、MARKDOWN、HTML，写入 im_message_type")
+	@Schema(name = "contentType", title = "正文类型", description = "写入 im_message_type")
 	@NotBlank(message = "正文类型不能为空", groups = { CreateGroup.class, UpdateGroup.class })
 	private String contentType;
 

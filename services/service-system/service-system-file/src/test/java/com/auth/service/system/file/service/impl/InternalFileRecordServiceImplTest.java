@@ -126,6 +126,7 @@ class InternalFileRecordServiceImplTest {
 
 		verify(facadeRegistry, never()).resolve(any());
 		verify(fileRecordMapper, never()).deletePhysicallyByIds(anyList(), anyBoolean());
+		verify(fileRecordMapper, never()).softDeleteByIds(anyList(), anyString(), any());
 		verify(fileRecordService, never()).updateBatchById(anyList());
 	}
 
@@ -149,6 +150,7 @@ class InternalFileRecordServiceImplTest {
 
 		verify(minioProvider).delete("public", AVATAR_OBJECT_KEY);
 		verify(fileRecordMapper).deletePhysicallyByIds(List.of(100L), false);
+		verify(fileRecordMapper, never()).softDeleteByIds(anyList(), anyString(), any());
 		verify(fileRecordService, never()).updateBatchById(anyList());
 	}
 

@@ -45,7 +45,7 @@ public class MessageTemplateEntity extends BaseEntity {
 	@Schema(title = "厂商模板编码")
 	private String providerTemplateCode;
 
-	@Schema(title = "IM/站内信正文类型：TEXT、MARKDOWN、HTML（IN_APP 使用；HTML 须白名单消毒）")
+	@Schema(title = "站内信正文类型")
 	private String imMessageType;
 
 	@TableField("channel_defaults_json")

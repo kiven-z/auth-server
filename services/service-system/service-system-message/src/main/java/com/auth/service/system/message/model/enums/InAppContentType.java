@@ -1,9 +1,9 @@
-package com.auth.service.system.message.model.constants;
+package com.auth.service.system.message.model.enums;
 
 import cn.hutool.core.text.CharSequenceUtil;
 
 /**
- * 站内信正文类型（写入 message_template.im_message_type / 发送 content_type）
+ * 站内信正文类型
  *
  * @author Bunny
  */
@@ -17,12 +17,7 @@ public enum InAppContentType {
 	/**
 	 * Markdown
 	 */
-	MARKDOWN,
-
-	/**
-	 * 受限 HTML（须经白名单消毒）
-	 */
-	HTML;
+	MARKDOWN,;
 
 	/**
 	 * 解析正文类型；空或未知时按 TEXT

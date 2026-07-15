@@ -111,32 +111,7 @@ class SysInAppTemplateServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("创建：HTML 正文落库前白名单消毒")
-	void create_shouldSanitizeHtmlBody() {
-		when(messageTemplateMapper.insert(any(MessageTemplateEntity.class))).thenReturn(1);
-
-		InAppTemplateForm form = new InAppTemplateForm();
-		form.setTemplateCode("in_app_html");
-		form.setTemplateName("HTML 通知");
-		form.setSubject("HTML 标题");
-		form.setContentType("HTML");
-		form.setContent("<p>安全</p><script>alert(1)</script>");
-		form.setStatus(true);
-		form.setPriority(4);
-
-		sysInAppTemplateService.create(form);
-
-		ArgumentCaptor<MessageTemplateEntity> entityCaptor = ArgumentCaptor.forClass(MessageTemplateEntity.class);
-		verify(messageTemplateMapper).insert(entityCaptor.capture());
-		MessageTemplateEntity saved = entityCaptor.getValue();
-
-		assertThat(saved.getImMessageType()).isEqualTo("HTML");
-		assertThat(saved.getBodyContent()).isEqualTo("<p>安全</p>");
-		assertThat(saved.getBodyContent()).doesNotContain("script");
-	}
-
-	@Test
-	@DisplayName("创建：未知 contentType 按 TEXT 处理且正文不消毒")
+	@DisplayName("创建：未知 contentType 按 TEXT，正文原样落库")
 	void create_shouldFallbackUnknownContentTypeToText() {
 		when(messageTemplateMapper.insert(any(MessageTemplateEntity.class))).thenReturn(1);
 
@@ -145,7 +120,7 @@ class SysInAppTemplateServiceImplTest {
 		form.setTemplateName("未知类型");
 		form.setSubject("标题");
 		form.setContentType("UNKNOWN");
-		form.setContent("<b>keep</b>");
+		form.setContent("正文");
 		form.setStatus(false);
 		form.setPriority(1);
 
@@ -156,7 +131,7 @@ class SysInAppTemplateServiceImplTest {
 		MessageTemplateEntity saved = entityCaptor.getValue();
 
 		assertThat(saved.getImMessageType()).isEqualTo("TEXT");
-		assertThat(saved.getBodyContent()).isEqualTo("<b>keep</b>");
+		assertThat(saved.getBodyContent()).isEqualTo("正文");
 	}
 
 	@Test
@@ -205,39 +180,6 @@ class SysInAppTemplateServiceImplTest {
 		assertThat(updated.getStatus()).isTrue();
 		assertThat(updated.getPriority()).isEqualTo(8);
 		assertThat(updated.getRequireFields()).isEqualTo("[{\"key\":\"userName\",\"exampleValue\":\"张三\"}]");
-	}
-
-	@Test
-	@DisplayName("更新：HTML 正文落库前白名单消毒")
-	void update_shouldSanitizeHtmlBody() {
-		MessageTemplateEntity exists = new MessageTemplateEntity();
-		exists.setId(21L);
-		exists.setChannel(MessageChannel.IN_APP.name());
-		exists.setImMessageType("TEXT");
-		exists.setBodyContent("旧正文");
-		exists.setRequireFields("[]");
-		when(messageTemplateMapper.selectById(21L)).thenReturn(exists);
-		when(messageTemplateMapper.updateById(any(MessageTemplateEntity.class))).thenReturn(1);
-
-		InAppTemplateForm form = new InAppTemplateForm();
-		form.setId(21L);
-		form.setTemplateCode("in_app_html");
-		form.setTemplateName("HTML 通知");
-		form.setSubject("HTML 标题");
-		form.setContentType("HTML");
-		form.setContent("<p>安全</p><script>alert(1)</script>");
-		form.setStatus(true);
-		form.setPriority(4);
-
-		sysInAppTemplateService.update(form);
-
-		ArgumentCaptor<MessageTemplateEntity> entityCaptor = ArgumentCaptor.forClass(MessageTemplateEntity.class);
-		verify(messageTemplateMapper).updateById(entityCaptor.capture());
-		MessageTemplateEntity updated = entityCaptor.getValue();
-
-		assertThat(updated.getImMessageType()).isEqualTo("HTML");
-		assertThat(updated.getBodyContent()).isEqualTo("<p>安全</p>");
-		assertThat(updated.getBodyContent()).doesNotContain("script");
 	}
 
 	@Test

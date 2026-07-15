@@ -7,8 +7,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.io.Serial;
-import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -21,10 +19,7 @@ import java.util.List;
 @Setter
 @ToString
 @EqualsAndHashCode(callSuper = true)
-public class MessageTemplateDetailVO extends BaseResponse implements Serializable {
-
-	@Serial
-	private static final long serialVersionUID = 1L;
+public class MessageTemplateDetailVO extends BaseResponse {
 
 	@Schema(name = "channel", title = "消息渠道")
 	private String channel;
@@ -44,11 +39,10 @@ public class MessageTemplateDetailVO extends BaseResponse implements Serializabl
 	@Schema(name = "content", title = "正文模板")
 	private String content;
 
-	@Schema(name = "previewContent", title = "按 require_fields 示例值渲染后的正文",
-			description = "缺 exampleValue 或渲染失败时为 null，详情接口仍正常返回")
+	@Schema(name = "previewContent", title = "按 require_fields 示例值渲染后的正文")
 	private String previewContent;
 
-	@Schema(name = "contentType", title = "正文展示类型", description = "TEXT、MARKDOWN、HTML；用于预览区渲染")
+	@Schema(name = "contentType", title = "正文展示类型", description = "用于预览区渲染")
 	private String contentType;
 
 	@Schema(name = "requireFields", title = "变量声明列表")

@@ -38,7 +38,7 @@ public class MessageTemplateQuery extends PageQueryRequest implements Serializab
 	@Schema(name = "subject", title = "主题/标题")
 	private String subject;
 
-	@Schema(name = "imMessageType", title = "IM/站内信正文类型", description = "TEXT、MARKDOWN、HTML；主要用于 IN_APP")
+	@Schema(name = "imMessageType", title = "站内信正文类型")
 	private String imMessageType;
 
 	@Schema(name = "status", title = "启用状态(true=启用模板，false=停用)")

@@ -18,7 +18,7 @@ public interface SysInAppTemplateService extends IService<MessageTemplateEntity>
 	void create(InAppTemplateForm form);
 
 	/**
-	 * 更新站内信模板（不修改 channel、require_fields；HTML 正文落库前消毒）
+	 * 更新站内信模板
 	 * @param form 站内信模板表单
 	 */
 	void update(InAppTemplateForm form);

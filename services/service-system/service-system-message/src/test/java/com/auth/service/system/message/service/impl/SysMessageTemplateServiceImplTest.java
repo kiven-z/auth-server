@@ -94,7 +94,7 @@ class SysMessageTemplateServiceImplTest {
 		row.setChannel(MessageChannel.EMAIL.name());
 		row.setTemplateCode("login-code");
 		row.setTemplateName("登录邮件");
-		row.setImMessageType("HTML");
+		row.setImMessageType(null);
 
 		Page<MessageTemplatePageRowPO> mapperPage = new Page<>(1, 10);
 		mapperPage.setRecords(List.of(row));
@@ -107,7 +107,7 @@ class SysMessageTemplateServiceImplTest {
 		assertThat(result.getList()).hasSize(1);
 		assertThat(result.getList().get(0).getChannel()).isEqualTo(MessageChannel.EMAIL.name());
 		assertThat(result.getList().get(0).getTemplateCode()).isEqualTo("login-code");
-		assertThat(result.getList().get(0).getImMessageType()).isEqualTo("HTML");
+		assertThat(result.getList().get(0).getImMessageType()).isNull();
 		verify(auditUserDisplayService).enrichAuditUsernames(any(IPage.class), isNull(), isNull());
 
 		ArgumentCaptor<MessageTemplateQuery> queryCaptor = ArgumentCaptor.forClass(MessageTemplateQuery.class);
@@ -162,33 +162,6 @@ class SysMessageTemplateServiceImplTest {
 		assertThat(vo.getPreviewContent()).isEqualTo("<p></p>");
 		assertThat(vo.getRequireFields()).isEmpty();
 		verify(auditUserDisplayService).enrichAuditUsernames(any(List.class), isNull(), isNull());
-	}
-
-	@Test
-	@DisplayName("详情：IN_APP HTML 正文读出时按白名单消毒，并补齐类型默认值")
-	void getMessageTemplateById_shouldSanitizeInAppHtmlContent() {
-		// 脏 HTML + 空类型 → 消毒后返回且类型为 HTML
-		MessageTemplateEntity entity = new MessageTemplateEntity();
-		entity.setId(11L);
-		entity.setChannel(MessageChannel.IN_APP.name());
-		entity.setSceneCode("notice");
-		entity.setTemplateName("公告");
-		entity.setImMessageType("HTML");
-		entity.setBodyContent("<p>ok</p><script>alert(1)</script>");
-		entity.setRequireFields("[]");
-		entity.setPriority(1);
-		entity.setStatus(true);
-		when(messageTemplateMapper.selectById(11L)).thenReturn(entity);
-
-		MessageTemplateDetailVO vo = sysMessageTemplateService.getMessageTemplateById(11L,
-				MessageChannel.IN_APP.name());
-
-		assertThat(vo.getImMessageType()).isEqualTo("HTML");
-		assertThat(vo.getContentType()).isEqualTo("HTML");
-		assertThat(vo.getContent()).contains("<p>ok</p>");
-		assertThat(vo.getContent()).doesNotContain("<script");
-		assertThat(vo.getPreviewContent()).contains("<p>ok</p>");
-		assertThat(vo.getPreviewContent()).doesNotContain("<script");
 	}
 
 	@Test

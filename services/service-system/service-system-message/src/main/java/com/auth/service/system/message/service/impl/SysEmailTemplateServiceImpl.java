@@ -34,6 +34,20 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<MessageTemplateMapp
 	 * {@inheritDoc}
 	 */
 	@Override
+	public String render(EmailTemplateRenderForm form) {
+		try {
+			Map<String, Object> model = MessageTemplateRequireFieldsJsonSupport.toExampleModel(form.getRequireFields());
+			return FreemarkerTemplateRenderer.processTemplate("inline-preview", form.getContent(), model);
+		}
+		catch (Exception e) {
+			return "预览渲染失败，请检查变量声明与正文语法";
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public void create(EmailTemplateForm form) {
 		MessageTemplateEntity entity = new MessageTemplateEntity();
 		entity.setChannel(MessageChannel.EMAIL.name());
@@ -81,20 +95,6 @@ public class SysEmailTemplateServiceImpl extends ServiceImpl<MessageTemplateMapp
 
 		exists.setBodyContent(form.getContent());
 		updateById(exists);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public String render(EmailTemplateRenderForm form) {
-		try {
-			Map<String, Object> model = MessageTemplateRequireFieldsJsonSupport.toExampleModel(form.getRequireFields());
-			return FreemarkerTemplateRenderer.processTemplate("inline-preview", form.getContent(), model);
-		}
-		catch (Exception e) {
-			return "预览渲染失败，请检查变量声明与正文语法";
-		}
 	}
 
 }
