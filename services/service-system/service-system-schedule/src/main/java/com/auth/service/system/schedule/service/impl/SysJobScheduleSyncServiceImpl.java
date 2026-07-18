@@ -1,9 +1,6 @@
 package com.auth.service.system.schedule.service.impl;
 
-import java.util.List;
-
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.mapper.JobMapper;
 import com.auth.service.system.schedule.model.entity.JobEntity;
@@ -16,11 +13,12 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.SchedulerException;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+
+import java.util.List;
 
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_QUARTZ_OPERATION_FAILED;
 
@@ -52,7 +50,7 @@ public class SysJobScheduleSyncServiceImpl extends ServiceImpl<JobMapper, JobEnt
 		Boolean targetStatus = form.getStatus();
 
 		// 获取需要注册的 Quartz 任务
-		List<JobEntity> jobsToSchedule = BooleanUtil.isTrue(targetStatus)
+		List<JobEntity> jobsToSchedule = targetStatus != null && targetStatus
 				? list(Wrappers.<JobEntity>lambdaQuery().in(JobEntity::getId, ids).eq(JobEntity::getStatus, false))
 				: List.of();
 
@@ -67,7 +65,7 @@ public class SysJobScheduleSyncServiceImpl extends ServiceImpl<JobMapper, JobEnt
 
 		try {
 			// 如果目标状态为 false，则暂停 Quartz 任务
-			if (BooleanUtil.isFalse(targetStatus)) {
+			if (targetStatus != null && !targetStatus) {
 				List<JobEntity> jobs = list(Wrappers.<JobEntity>lambdaQuery().in(JobEntity::getId, ids));
 				if (CollUtil.isEmpty(jobs)) {
 					return;
@@ -118,7 +116,7 @@ public class SysJobScheduleSyncServiceImpl extends ServiceImpl<JobMapper, JobEnt
 
 		try {
 			// 如果目标状态为 false，则暂停 Quartz 任务
-			if (BooleanUtil.isFalse(status)) {
+			if (status != null && !status) {
 				sysJobSchedulerManager.pauseGroup(groupCode);
 				return;
 			}

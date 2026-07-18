@@ -1,8 +1,5 @@
 package com.auth.service.system.schedule.service.impl;
 
-import java.util.List;
-
-import cn.hutool.core.util.BooleanUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.schedule.convert.SysJobGroupConverter;
@@ -23,9 +20,10 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_CODE_DUPLICATE;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
@@ -129,7 +127,7 @@ public class SysJobGroupServiceImpl extends ServiceImpl<JobGroupMapper, JobGroup
 		}
 
 		// 系统内置的不能删除
-		if (BooleanUtil.isTrue(jobGroup.getIsSystem())) {
+		if (jobGroup.getIsSystem() != null && jobGroup.getIsSystem()) {
 			throw new SysJobException(JOB_GROUP_SYSTEM_PROTECTED);
 		}
 

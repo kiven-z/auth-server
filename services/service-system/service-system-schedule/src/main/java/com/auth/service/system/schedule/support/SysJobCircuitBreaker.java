@@ -1,22 +1,20 @@
 package com.auth.service.system.schedule.support;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
-import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.system.schedule.config.ScheduleJobProperties;
 import com.auth.service.system.schedule.exception.SysJobException;
-import com.auth.service.system.schedule.mapper.LogJobMapper;
 import com.auth.service.system.schedule.mapper.JobMapper;
-import com.auth.service.system.schedule.model.entity.LogJobEntity;
+import com.auth.service.system.schedule.mapper.LogJobMapper;
 import com.auth.service.system.schedule.model.entity.JobEntity;
+import com.auth.service.system.schedule.model.entity.LogJobEntity;
 import com.auth.service.system.schedule.support.quartz.SysJobSchedulerManager;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.SchedulerException;
-
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CIRCUIT_BREAKER_PAUSE_FAILED;
 
@@ -82,13 +80,13 @@ public class SysJobCircuitBreaker {
 			return;
 		}
 		// 失败日志约定：status=false 表示失败（log_job.status=0）
-		boolean allFailed = recent.stream().allMatch(log -> BooleanUtil.isFalse(log.getStatus()));
+		boolean allFailed = recent.stream().allMatch(log -> log.getStatus() != null && !log.getStatus());
 		if (!allFailed) {
 			return;
 		}
 
 		// 3. 检查任务是否已暂停
-		boolean wasActive = BooleanUtil.isTrue(job.getStatus());
+		boolean wasActive = job.getStatus() != null && job.getStatus();
 		if (wasActive) {
 			jobMapper.update(null,
 					Wrappers.lambdaUpdate(JobEntity.class)

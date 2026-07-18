@@ -1,7 +1,6 @@
 package com.auth.service.system.schedule.support.quartz;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
@@ -12,7 +11,6 @@ import org.quartz.Job;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
-
 import org.springframework.stereotype.Component;
 
 /**
@@ -53,7 +51,7 @@ public class SysJobQuartzJobFactory {
 		String jobName = job.getJobName();
 		String jobGroup = job.getJobGroup();
 		SysJobTaskType resolvedTaskType = SysJobTaskType.resolve(job.getTaskType());
-		boolean concurrent = BooleanUtil.isTrue(job.getConcurrent());
+		boolean concurrent = job.getConcurrent() != null && job.getConcurrent();
 		Class<? extends Job> jobClass = resolvedTaskType.resolveEntryJobClass(concurrent);
 
 		// 2. 构建 JobDataMap

@@ -1,11 +1,10 @@
 package com.auth.service.system.admin.excel;
 
-import java.util.Map;
-
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.util.BooleanUtil;
 import lombok.experimental.UtilityClass;
 import org.apache.poi.ss.usermodel.IndexedColors;
+
+import java.util.Map;
 
 /**
  * 布尔启用状态在 Excel 中的统一文案（角色、权限、岗位、部门等）。
@@ -51,7 +50,7 @@ public class EnableStatusLabels {
 	 * @return 启用/禁用
 	 */
 	public static String exportLabel(Boolean status) {
-		return BooleanUtil.isTrue(status) ? EXPORT_BY_STATUS.get(true) : EXPORT_BY_STATUS.get(false);
+		return status != null && status ? EXPORT_BY_STATUS.get(true) : EXPORT_BY_STATUS.get(false);
 	}
 
 	/**

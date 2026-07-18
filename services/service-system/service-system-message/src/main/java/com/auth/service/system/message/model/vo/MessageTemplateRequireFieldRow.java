@@ -1,14 +1,14 @@
 package com.auth.service.system.message.model.vo;
 
-import java.io.Serial;
-import java.io.Serializable;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * 消息模板变量声明（与 require_fields JSON 数组中单条结构一致）

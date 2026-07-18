@@ -6,16 +6,17 @@ import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.PrimitiveArrayUtil;
 import com.auth.common.web.multipart.InMemoryMultipartFile;
 import com.auth.module.message.api.model.email.AttachmentDTO;
-import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.message.exception.MessageException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_FAILED;
 
@@ -44,27 +45,26 @@ public class EmailAttachmentResolver {
 			return Collections.emptyList();
 		}
 
-		List<MultipartFile> files = new ArrayList<>(attachments.size());
-		for (AttachmentDTO attachment : attachments) {
-			if (attachment == null || CharSequenceUtil.isBlank(attachment.getFilename())) {
-				continue;
-			}
-
-			String filename = attachment.getFilename();
-			String contentType = attachment.getContentType();
-			byte[] content = resolveBytes(attachment);
-			if (PrimitiveArrayUtil.isEmpty(content)) {
-				continue;
-			}
-
-			files.add(InMemoryMultipartFile.builder()
-				.name(filename)
-				.originalFilename(filename)
-				.contentType(contentType)
-				.content(content)
-				.build());
-		}
-		return files;
+		return attachments.stream()
+			// 1. 过滤掉空对象以及文件名为空的无效附件
+			.filter(attachment -> attachment != null && CharSequenceUtil.isNotBlank(attachment.getFilename()))
+			// 2. 映射为包含字节数组的临时包装对象（或直接转换，这里用流式转换）
+			.map(attachment -> {
+				byte[] content = resolveBytes(attachment);
+				if (PrimitiveArrayUtil.isEmpty(content)) {
+					return null; // 先标记为 null，后面统一过滤
+				}
+				return InMemoryMultipartFile.builder()
+					.name(attachment.getFilename())
+					.originalFilename(attachment.getFilename())
+					.contentType(attachment.getContentType())
+					.content(content)
+					.build();
+			})
+			// 3. 过滤掉解析内容失败（返回 null）的项
+			.filter(Objects::nonNull)
+			// 4. 收集成 List
+			.collect(Collectors.toList());
 	}
 
 	/**
@@ -80,7 +80,7 @@ public class EmailAttachmentResolver {
 				return Base64.decode(attachmentBase64);
 			}
 			catch (IllegalArgumentException e) {
-				throw new SystemBusinessException(OPERATION_FAILED, "Attachment Base64 decode", e.getMessage());
+				throw new MessageException(OPERATION_FAILED, "Attachment Base64 decode", e.getMessage());
 			}
 		}
 
@@ -101,15 +101,15 @@ public class EmailAttachmentResolver {
 			if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
 				return response.getBody();
 			}
-			throw new SystemBusinessException(OPERATION_FAILED, "Attachment download",
+			throw new MessageException(OPERATION_FAILED, "Attachment download",
 					"HTTP " + response.getStatusCode().value());
 		}
-		catch (SystemBusinessException e) {
+		catch (MessageException e) {
 			throw e;
 		}
 		catch (Exception e) {
 			log.error("Failed to download attachment from URL", e);
-			throw new SystemBusinessException(OPERATION_FAILED, "Attachment download", e.getMessage());
+			throw new MessageException(OPERATION_FAILED, "Attachment download", e.getMessage());
 		}
 	}
 

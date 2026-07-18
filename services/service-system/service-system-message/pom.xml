@@ -20,10 +20,6 @@
         </dependency>
         <dependency>
             <groupId>com.auth</groupId>
-            <artifactId>service-system-schedule</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.auth</groupId>
             <artifactId>module-message-api</artifactId>
             <version>0.0.2-beta</version>
         </dependency>

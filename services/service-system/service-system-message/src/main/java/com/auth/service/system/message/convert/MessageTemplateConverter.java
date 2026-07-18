@@ -1,7 +1,5 @@
 package com.auth.service.system.message.convert;
 
-import java.util.List;
-
 import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
 import com.auth.service.system.message.model.po.MessageTemplatePageRowPO;
@@ -13,6 +11,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
+
+import java.util.List;
 
 /**
  * 消息模板转换器（读模型）

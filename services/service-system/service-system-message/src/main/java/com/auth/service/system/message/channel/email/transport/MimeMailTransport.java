@@ -2,10 +2,9 @@ package com.auth.service.system.message.channel.email.transport;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.util.BooleanUtil;
-import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.message.model.channel.email.EmailSendDTO;
-import com.auth.service.system.message.model.channel.email.RenderedEmail;
+import com.auth.service.system.message.exception.MessageException;
+import com.auth.service.system.message.model.dto.EmailSendDTO;
+import com.auth.service.system.message.model.value.email.RenderedEmail;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +20,8 @@ import java.util.Objects;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_FAILED;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
+import static com.auth.service.system.message.support.template.MessageConfigAssertions.assertNotBlank;
+import static com.auth.service.system.message.support.template.MessageConfigAssertions.assertNotNull;
 
 /**
  * JavaMail MIME 邮件传输
@@ -62,7 +63,7 @@ public class MimeMailTransport {
 			helper.setFrom(defaultFrom);
 			helper.setTo(emailSendDTO.getTo().toArray(String[]::new));
 			helper.setSubject(subject);
-			helper.setText(body, BooleanUtil.isTrue(emailSendDTO.getHasHtml()));
+			helper.setText(body, emailSendDTO.getHasHtml() != null && emailSendDTO.getHasHtml());
 
 			if (CharSequenceUtil.isNotBlank(emailSendDTO.getReplyTo())) {
 				helper.setReplyTo(emailSendDTO.getReplyTo());
@@ -84,7 +85,7 @@ public class MimeMailTransport {
 		catch (MessagingException e) {
 			log.error("Failed to send email, templateCode={}, reason={}", emailSendDTO.getTemplateCode(),
 					e.getMessage(), e);
-			throw new SystemBusinessException(OPERATION_FAILED, "Email send", e.getMessage());
+			throw new MessageException(OPERATION_FAILED, "Email send", e.getMessage());
 		}
 	}
 
@@ -95,18 +96,12 @@ public class MimeMailTransport {
 	 * @param body 内容
 	 */
 	private void validate(EmailSendDTO emailSendDTO, String subject, String body) {
-		if (emailSendDTO == null) {
-			throw new SystemBusinessException(PARAM_REQUIRED, "Email request");
-		}
+		assertNotNull(emailSendDTO, "Email request");
 		if (CollUtil.isEmpty(emailSendDTO.getTo())) {
-			throw new SystemBusinessException(PARAM_REQUIRED, "Recipients");
+			throw new MessageException(PARAM_REQUIRED, "Recipients");
 		}
-		if (CharSequenceUtil.isBlank(subject)) {
-			throw new SystemBusinessException(PARAM_REQUIRED, "Email subject");
-		}
-		if (CharSequenceUtil.isBlank(body)) {
-			throw new SystemBusinessException(PARAM_REQUIRED, "Email body");
-		}
+		assertNotBlank(subject, "Email subject");
+		assertNotBlank(body, "Email body");
 	}
 
 	/**
@@ -126,7 +121,7 @@ public class MimeMailTransport {
 
 			String filename = file.getOriginalFilename();
 			if (CharSequenceUtil.isBlank(filename)) {
-				throw new SystemBusinessException(PARAM_REQUIRED, "Attachment filename");
+				throw new MessageException(PARAM_REQUIRED, "Attachment filename");
 			}
 			helper.addAttachment(Objects.requireNonNull(filename), Objects.requireNonNull(file));
 		}

@@ -1,10 +1,5 @@
 package com.auth.service.system.admin.service.admin.impl;
 
-import java.lang.reflect.Field;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.admin.mapper.permission.SysPermissionMapper;
@@ -21,7 +16,6 @@ import com.auth.service.system.admin.model.vo.user.SysUserDetailVO;
 import com.auth.service.system.admin.model.vo.user.SysUserPageVO;
 import com.auth.service.system.admin.model.vo.user.SysUserProfileVO;
 import com.auth.service.system.admin.model.vo.user.SysUserSearchItemVO;
-import com.auth.service.system.admin.service.admin.SysUserService;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import com.auth.service.system.authorization.dispatch.query.UserEffectiveCodesResolver;
 import com.auth.service.system.authorization.dispatch.query.UserEffectiveCodesSnapshot;
@@ -39,18 +33,15 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.lang.reflect.Field;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link SysUserQueryServiceImpl} 单元测试。
@@ -63,9 +54,6 @@ class SysUserQueryServiceImplTest {
 
 	@Mock
 	private SysUserMapper sysUserMapper;
-
-	@Mock
-	private SysUserService sysUserService;
 
 	@Mock
 	private AuditUserDisplayService auditUserDisplayService;

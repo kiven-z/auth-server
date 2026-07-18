@@ -1,8 +1,7 @@
 package com.auth.service.system.admin.support.user;
 
-import com.auth.common.core.model.response.Result;
-import com.auth.module.file.api.feign.SystemFileRecordFeignClient;
 import com.auth.module.file.api.model.request.OwnedFileAssertByUrlRequest;
+import com.auth.module.file.api.port.OwnedFileOperations;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.admin.mapper.user.SysUserMapper;
 import com.auth.service.system.admin.support.me.OldAvatarCleanupTrigger;
@@ -37,7 +36,7 @@ class UserAvatarUpdateSupportTest {
 	private SysUserMapper sysUserMapper;
 
 	@Mock
-	private SystemFileRecordFeignClient systemFileRecordFeignClient;
+	private OwnedFileOperations ownedFileOperations;
 
 	@Mock
 	private OldAvatarCleanupTrigger oldAvatarCleanupTrigger;
@@ -60,8 +59,7 @@ class UserAvatarUpdateSupportTest {
 		existing.setAvatar(oldAvatar);
 		String newAvatar = "https://cdn.example.com/public/avatar/new.png";
 
-		when(systemFileRecordFeignClient.verifyOwnership(any(OwnedFileAssertByUrlRequest.class)))
-			.thenReturn(Result.success());
+		doNothing().when(ownedFileOperations).assertOwnedFileUrl(any(OwnedFileAssertByUrlRequest.class));
 		when(sysUserMapper.updateById(any(UserEntity.class))).thenReturn(1);
 
 		userAvatarUpdateSupport.applyAvatarUpdate(existing, newAvatar, USER_ID);
@@ -72,7 +70,7 @@ class UserAvatarUpdateSupportTest {
 
 		ArgumentCaptor<OwnedFileAssertByUrlRequest> assertCaptor = ArgumentCaptor
 			.forClass(OwnedFileAssertByUrlRequest.class);
-		verify(systemFileRecordFeignClient).verifyOwnership(assertCaptor.capture());
+		verify(ownedFileOperations).assertOwnedFileUrl(assertCaptor.capture());
 		assertThat(assertCaptor.getValue().getOwnerUserId()).isEqualTo(USER_ID);
 
 		verify(oldAvatarCleanupTrigger).cleanupAfterCommit(USER_ID, oldAvatar);
@@ -84,15 +82,14 @@ class UserAvatarUpdateSupportTest {
 		UserEntity existing = existingUser();
 		String newAvatar = "https://cdn.example.com/public/avatar/new.png";
 
-		when(systemFileRecordFeignClient.verifyOwnership(any(OwnedFileAssertByUrlRequest.class)))
-			.thenReturn(Result.success());
+		doNothing().when(ownedFileOperations).assertOwnedFileUrl(any(OwnedFileAssertByUrlRequest.class));
 		when(sysUserMapper.updateById(any(UserEntity.class))).thenReturn(1);
 
 		userAvatarUpdateSupport.applyAvatarUpdate(existing, newAvatar, OPERATOR_USER_ID);
 
 		ArgumentCaptor<OwnedFileAssertByUrlRequest> assertCaptor = ArgumentCaptor
 			.forClass(OwnedFileAssertByUrlRequest.class);
-		verify(systemFileRecordFeignClient).verifyOwnership(assertCaptor.capture());
+		verify(ownedFileOperations).assertOwnedFileUrl(assertCaptor.capture());
 		assertThat(assertCaptor.getValue().getOwnerUserId()).isEqualTo(OPERATOR_USER_ID);
 	}
 
@@ -115,8 +112,8 @@ class UserAvatarUpdateSupportTest {
 		UserEntity existing = existingUser();
 		existing.setAvatar("https://cdn.example.com/public/avatar/old.png");
 
-		when(systemFileRecordFeignClient.verifyOwnership(any(OwnedFileAssertByUrlRequest.class)))
-			.thenReturn(Result.error("file not owned"));
+		doThrow(new RuntimeException("file not owned")).when(ownedFileOperations)
+			.assertOwnedFileUrl(any(OwnedFileAssertByUrlRequest.class));
 
 		ThrowingCallable executable = () -> userAvatarUpdateSupport.applyAvatarUpdate(existing,
 				"https://cdn.example.com/public/avatar/new.png", USER_ID);

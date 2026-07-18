@@ -1,12 +1,10 @@
 package com.auth.service.system.authorization.ops;
 
-import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.system.authorization.model.dto.AuthorizationInvalidationOutboxManualRetryOutcome;
 import com.auth.service.system.authorization.model.form.AuthorizationInvalidationOutboxRetryForm;
 import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationOutboxRetryResultVO;
 import com.auth.service.system.authorization.service.AuthorizationInvalidationOutboxOpsService;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.stereotype.Service;
 
 /**
@@ -28,7 +26,7 @@ public class AuthorizationInvalidationOutboxManualRetryService {
 	 */
 	public AuthorizationInvalidationOutboxRetryResultVO retryById(Long outboxId,
 			AuthorizationInvalidationOutboxRetryForm form) {
-		boolean force = form != null && BooleanUtil.isTrue(form.getForce());
+		boolean force = form != null && form.getForce() != null && form.getForce();
 
 		AuthorizationInvalidationOutboxManualRetryOutcome outcome = authorizationInvalidationOutboxOpsService
 			.retryManual(outboxId, force);

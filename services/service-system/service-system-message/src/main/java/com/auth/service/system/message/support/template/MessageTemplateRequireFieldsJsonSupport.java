@@ -3,8 +3,8 @@ package com.auth.service.system.message.support.template;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.core.utils.JsonSupport;
-import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemResultCode;
+import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.model.vo.MessageTemplateRequireFieldRow;
 import lombok.experimental.UtilityClass;
 
@@ -27,14 +27,14 @@ public class MessageTemplateRequireFieldsJsonSupport {
 	 */
 	public static String toJson(List<MessageTemplateRequireFieldRow> rows) {
 		if (rows == null) {
-			throw new SystemBusinessException(DATA_INVALID, "require_fields");
+			throw new MessageException(DATA_INVALID, "require_fields");
 		}
 		validate(rows);
 		try {
 			return JsonSupport.toJson(rows);
 		}
 		catch (IllegalArgumentException e) {
-			throw new SystemBusinessException(DATA_INVALID, e.getMessage());
+			throw new MessageException(DATA_INVALID, e.getMessage());
 		}
 	}
 
@@ -53,7 +53,7 @@ public class MessageTemplateRequireFieldsJsonSupport {
 			return Arrays.asList(fieldRows);
 		}
 		catch (IllegalArgumentException e) {
-			throw new SystemBusinessException(DATA_INVALID, e.getMessage());
+			throw new MessageException(DATA_INVALID, e.getMessage());
 		}
 	}
 
@@ -68,13 +68,13 @@ public class MessageTemplateRequireFieldsJsonSupport {
 		Set<String> keys = new HashSet<>();
 		for (MessageTemplateRequireFieldRow row : rows) {
 			if (row == null || CharSequenceUtil.isBlank(row.getKey())) {
-				throw new SystemBusinessException(PARAM_REQUIRED, "Variable key");
+				throw new MessageException(PARAM_REQUIRED, "Variable key");
 			}
 			if (row.getExampleValue() == null || row.getExampleValue().isNull()) {
-				throw new SystemBusinessException(PARAM_REQUIRED, row.getKey() + " exampleValue");
+				throw new MessageException(PARAM_REQUIRED, row.getKey() + " exampleValue");
 			}
 			if (!keys.add(row.getKey())) {
-				throw new SystemBusinessException(PARAM_DUPLICATE, "Variable key", row.getKey());
+				throw new MessageException(PARAM_DUPLICATE, "Variable key", row.getKey());
 			}
 		}
 	}
@@ -97,7 +97,7 @@ public class MessageTemplateRequireFieldsJsonSupport {
 			.filter(key -> !safeVariables.containsKey(key))
 			.toList();
 		if (CollUtil.isNotEmpty(missingKeys)) {
-			throw new SystemBusinessException(missingCode, channel, String.join(", ", missingKeys));
+			throw new MessageException(missingCode, channel, String.join(", ", missingKeys));
 		}
 	}
 
@@ -108,7 +108,7 @@ public class MessageTemplateRequireFieldsJsonSupport {
 	 */
 	public static Map<String, Object> toExampleModel(List<MessageTemplateRequireFieldRow> rows) {
 		if (rows == null) {
-			throw new SystemBusinessException(DATA_INVALID, "require_fields");
+			throw new MessageException(DATA_INVALID, "require_fields");
 		}
 		validate(rows);
 		Map<String, Object> model = new LinkedHashMap<>();

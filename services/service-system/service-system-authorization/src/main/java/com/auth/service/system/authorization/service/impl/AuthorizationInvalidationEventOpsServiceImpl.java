@@ -1,6 +1,5 @@
 package com.auth.service.system.authorization.service.impl;
 
-import cn.hutool.core.util.BooleanUtil;
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.common.web.resttemplate.FeignUtil;
@@ -16,7 +15,6 @@ import com.auth.service.system.authorization.service.AuthorizationInvalidationEv
 import com.auth.service.system.common.exception.SystemBusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -89,7 +87,7 @@ public class AuthorizationInvalidationEventOpsServiceImpl implements Authorizati
 	@Transactional(rollbackFor = Exception.class)
 	public boolean releaseProcessingClaim(Long id) {
 		AuthorizationInvalidationEventDetailInnerDTO detail = getDetail(id);
-		if (BooleanUtil.isFalse(detail.getProcessing())) {
+		if (detail.getProcessing() != null && !detail.getProcessing()) {
 			throw new SystemBusinessException(EVENT_RELEASE_NOT_PROCESSING);
 		}
 
@@ -98,7 +96,7 @@ public class AuthorizationInvalidationEventOpsServiceImpl implements Authorizati
 			log.warn("Authorization invalidation event release claim unavailable, id={}", id);
 			throw new SystemBusinessException(SERVICE_UNAVAILABLE);
 		}
-		return BooleanUtil.isTrue(result.getData());
+		return result.getData() != null && result.getData();
 	}
 
 }

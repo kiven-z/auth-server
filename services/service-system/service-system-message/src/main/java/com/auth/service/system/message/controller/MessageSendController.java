@@ -6,7 +6,6 @@ import com.auth.module.security.autoconfigure.annotation.InternalApi;
 import com.auth.service.system.message.service.MessageDispatchService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Bunny
  */
 @Tag(name = "统一消息发送", description = "按 channel 路由至邮件、短信、钉钉等渠道")
-@RequestMapping("/api/system/message/")
+@RequestMapping("/api/system/message")
 @RestController
 public class MessageSendController {
 

@@ -7,10 +7,9 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.message.api.model.email.EmailChannelOptions;
-import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.message.convert.MessageTemplateConverter;
-import com.auth.service.system.message.exception.TemplateRenderException;
+import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.mapper.MessageTemplateMapper;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
 import com.auth.service.system.message.model.enums.InAppContentType;
@@ -38,7 +37,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static com.auth.service.system.common.exception.code.SystemCommonResultCode.*;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_INVALID;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 import static com.auth.service.system.message.exception.MessageResultCode.MESSAGE_CHANNEL_UNSUPPORTED;
 
 /**
@@ -91,7 +91,7 @@ public class SysMessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMa
 			String previewContent = renderPreviewContent(entity);
 			vo.setPreviewContent(previewContent);
 		}
-		catch (SystemBusinessException ignored) {
+		catch (MessageException ignored) {
 			vo.setPreviewContent(null);
 		}
 
@@ -168,7 +168,7 @@ public class SysMessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMa
 			channel = MessageChannel.valueOf(formChannel);
 		}
 		catch (IllegalArgumentException ex) {
-			throw new SystemBusinessException(MESSAGE_CHANNEL_UNSUPPORTED, formChannel);
+			throw new MessageException(MESSAGE_CHANNEL_UNSUPPORTED, formChannel);
 		}
 
 		// 按渠道校验接收目标格式
@@ -179,7 +179,7 @@ public class SysMessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMa
 			case DING_TALK, IN_APP -> true;
 		};
 		if (!valid) {
-			throw new SystemBusinessException(DATA_INVALID, "send target is invalid");
+			throw new MessageException(DATA_INVALID, "send target is invalid");
 		}
 
 		MessageTemplateEntity entity = requireTemplate(form.getId(), channel.name());
@@ -209,7 +209,7 @@ public class SysMessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMa
 	private MessageTemplateEntity requireTemplate(Long id, String channel) {
 		MessageTemplateEntity entity = messageTemplateMapper.selectById(id);
 		if (entity == null || !channel.equals(entity.getChannel())) {
-			throw new SystemBusinessException(DATA_NOT_EXIST);
+			throw new MessageException(DATA_NOT_EXIST);
 		}
 		return entity;
 	}
@@ -225,14 +225,8 @@ public class SysMessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMa
 		Map<String, Object> model = MessageTemplateRequireFieldsJsonSupport.toExampleModel(rows);
 
 		String templateName = CharSequenceUtil.blankToDefault(entity.getTemplateName(), "preview");
-		try {
-			String bodyContent = entity.getBodyContent();
-			return FreemarkerTemplateRenderer.processTemplate(templateName, CharSequenceUtil.nullToEmpty(bodyContent),
-					model);
-		}
-		catch (TemplateRenderException e) {
-			throw new SystemBusinessException(OPERATION_FAILED, "preview", e.getMessage());
-		}
+		String templateContent = CharSequenceUtil.nullToEmpty(entity.getBodyContent());
+		return FreemarkerTemplateRenderer.processTemplate(templateName, templateContent, model);
 	}
 
 }

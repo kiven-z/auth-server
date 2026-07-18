@@ -1,24 +1,17 @@
 package com.auth.service.system.schedule.service.impl;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.BooleanUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.schedule.convert.SysJobConverter;
 import com.auth.service.system.schedule.exception.SysJobException;
-import com.auth.service.system.schedule.mapper.LogJobMapper;
 import com.auth.service.system.schedule.mapper.JobGroupMapper;
 import com.auth.service.system.schedule.mapper.JobMapper;
+import com.auth.service.system.schedule.mapper.LogJobMapper;
 import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
-import com.auth.service.system.schedule.model.entity.LogJobEntity;
 import com.auth.service.system.schedule.model.entity.JobEntity;
 import com.auth.service.system.schedule.model.entity.JobGroupEntity;
+import com.auth.service.system.schedule.model.entity.LogJobEntity;
 import com.auth.service.system.schedule.model.enums.SysJobLastExecutionStatus;
 import com.auth.service.system.schedule.model.enums.SysJobQuartzRuntimeStatus;
 import com.auth.service.system.schedule.model.form.SysJobCreateForm;
@@ -43,14 +36,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.quartz.JobKey;
 import org.quartz.SchedulerException;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_BUSY;
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_GROUP_NOT_AVAILABLE;
-import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_QUARTZ_OPERATION_FAILED;
+import static com.auth.service.system.schedule.exception.ScheduleResultCode.*;
 
 /**
  * 定时任务定义服务实现
@@ -134,7 +130,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<JobMapper, JobEntit
 		}
 
 		// 验证分组是否启用
-		if (BooleanUtil.isFalse(sysJobGroup.getStatus())) {
+		if (sysJobGroup.getStatus() != null && !sysJobGroup.getStatus()) {
 			throw new SysJobException(JOB_GROUP_NOT_AVAILABLE);
 		}
 
@@ -144,7 +140,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<JobMapper, JobEntit
 		save(sysJob);
 
 		// 如果任务禁用，则直接返回
-		if (BooleanUtil.isFalse(sysJob.getStatus())) {
+		if (sysJob.getStatus() != null && !sysJob.getStatus()) {
 			return;
 		}
 
@@ -268,8 +264,8 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<JobMapper, JobEntit
 				continue;
 			}
 			view.setLastExecutionTime(latestLog.getCreateTime());
-			view.setLastExecutionStatus(BooleanUtil.isTrue(latestLog.getStatus()) ? SysJobLastExecutionStatus.SUCCESS
-					: SysJobLastExecutionStatus.FAILED);
+			view.setLastExecutionStatus(latestLog.getStatus() != null && latestLog.getStatus()
+					? SysJobLastExecutionStatus.SUCCESS : SysJobLastExecutionStatus.FAILED);
 		}
 	}
 

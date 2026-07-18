@@ -3,15 +3,16 @@ package com.auth.service.system.message.service.impl;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.channel.MessageSender;
 import com.auth.module.message.api.command.TemplateMessageCommand;
-import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.message.config.MessageChannelCapability;
+import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.service.MessageDispatchService;
-import com.auth.service.system.message.support.validation.TemplateMessageCommandValidation;
+import com.auth.service.system.message.support.template.TemplateMessageCommandValidation;
 import org.springframework.stereotype.Service;
 
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.auth.service.system.message.exception.MessageResultCode.MESSAGE_CHANNEL_DISABLED;
 import static com.auth.service.system.message.exception.MessageResultCode.MESSAGE_CHANNEL_UNSUPPORTED;
@@ -74,29 +75,18 @@ public class MessageDispatchServiceImpl implements MessageDispatchService {
 	@Override
 	public void sendByTemplate(TemplateMessageCommand command) {
 		commandValidation.validate(command);
-		MessageChannel channel = command.getChannel();
-		if (!isChannelEnabled(channel)) {
-			throw new SystemBusinessException(MESSAGE_CHANNEL_DISABLED, channel.name());
+		MessageChannel channel = Objects.requireNonNull(command.getChannel(), "channel");
+		MessageChannelCapability capability = capabilityByChannel.get(channel);
+		// 未注册 capability 的渠道视为启用
+		if (capability != null && !capability.isEnabled()) {
+			throw new MessageException(MESSAGE_CHANNEL_DISABLED, channel.name());
 		}
 
 		MessageSender sender = senderByChannel.get(channel);
 		if (sender == null) {
-			throw new SystemBusinessException(MESSAGE_CHANNEL_UNSUPPORTED, channel.name());
+			throw new MessageException(MESSAGE_CHANNEL_UNSUPPORTED, channel.name());
 		}
 		sender.sendByTemplate(command);
-	}
-
-	/**
-	 * 未注册 capability 的渠道视为启用
-	 * @param channel 渠道
-	 * @return true-启用，false-禁用
-	 */
-	private boolean isChannelEnabled(MessageChannel channel) {
-		if (channel == null) {
-			return false;
-		}
-		MessageChannelCapability capability = capabilityByChannel.get(channel);
-		return capability == null || capability.isEnabled();
 	}
 
 }

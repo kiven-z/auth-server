@@ -1,10 +1,6 @@
 package com.auth.module.security.autoconfigure.service;
 
-import java.util.List;
-import java.util.Optional;
-
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.util.BooleanUtil;
 import com.auth.module.security.autoconfigure.config.security.AuditPolicy;
 import com.auth.module.security.autoconfigure.config.security.SecurityConfigProperties;
 import com.auth.module.security.autoconfigure.pipeline.resolver.HandlerMethodResolver;
@@ -16,12 +12,14 @@ import com.auth.module.security.contract.event.SecurityEventType;
 import com.auth.module.security.contract.spi.AuthorizationAuditHandler;
 import com.auth.module.security.core.matcher.PermissionMatcher;
 import jakarta.servlet.http.HttpServletRequest;
-
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+
+import java.util.List;
+import java.util.Optional;
 
 import static com.auth.module.security.autoconfigure.web.SecurityUserUtils.currentAuthProfile;
 import static com.auth.module.security.contract.constants.PermissionConstant.isAdmin;
@@ -127,7 +125,7 @@ public class PermissionService {
 	 * 按审计策略判断是否需要发布事件，然后 publish + 委托给 SPI 处理器
 	 */
 	private void publishIfNeeded(SecurityEventType type, Long userId, String username, String required, String reason) {
-		if (BooleanUtil.isFalse(shouldAudit())) {
+		if (!shouldAudit()) {
 			return;
 		}
 		SecurityAuthorizationAuditPayloadEvent.SecurityAuthorizationAuditPayloadEventBuilder builder = SecurityAuthorizationAuditPayloadEvent

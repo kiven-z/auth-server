@@ -1,6 +1,5 @@
 package com.auth.service.auth.service.impl;
 
-import cn.hutool.core.util.BooleanUtil;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.convert.LoginSessionConverter;
 import com.auth.service.auth.model.response.RefreshTokenResponse;
@@ -55,7 +54,7 @@ public class AuthSessionServiceImpl implements AuthSessionService {
 			HttpServletResponse response) {
 		CompletedLoginSession session = loginService.login(command, request);
 		String refreshToken = session.getRefreshToken();
-		boolean rememberMe = BooleanUtil.isTrue(command.getRememberMe());
+		boolean rememberMe = command.getRememberMe() != null && command.getRememberMe();
 
 		refreshTokenCookieWriter.writeRefreshToken(response, request, refreshToken, rememberMe);
 		return LoginSessionConverter.INSTANCE.toUserLoginResponse(session);

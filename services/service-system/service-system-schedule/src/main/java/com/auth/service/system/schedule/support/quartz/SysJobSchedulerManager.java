@@ -1,18 +1,11 @@
 package com.auth.service.system.schedule.support.quartz;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
 import com.auth.service.system.schedule.model.entity.JobEntity;
 import lombok.extern.slf4j.Slf4j;
-import org.quartz.CronTrigger;
-import org.quartz.JobDataMap;
-import org.quartz.JobDetail;
-import org.quartz.JobKey;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
+import org.quartz.*;
 import org.quartz.impl.matchers.GroupMatcher;
-
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
@@ -57,7 +50,7 @@ public class SysJobSchedulerManager {
 		String jobGroup = job.getJobGroup();
 		JobKey jobKey = JobKey.jobKey(jobName, jobGroup);
 
-		if (BooleanUtil.isFalse(job.getStatus())) {
+		if (job.getStatus() != null && !job.getStatus()) {
 			if (scheduler.checkExists(jobKey)) {
 				pauseJob(jobName, jobGroup);
 			}

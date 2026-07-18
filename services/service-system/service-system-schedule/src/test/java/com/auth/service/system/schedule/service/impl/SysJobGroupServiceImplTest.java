@@ -1,9 +1,5 @@
 package com.auth.service.system.schedule.service.impl;
 
-import java.lang.reflect.Field;
-import java.util.List;
-
-import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.mapper.JobGroupMapper;
@@ -23,15 +19,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.lang.reflect.Field;
+import java.util.List;
+
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_CODE_DUPLICATE;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_GROUP_HAS_ACTIVE_JOBS;
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_GROUP_SYSTEM_PROTECTED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -161,7 +158,7 @@ class SysJobGroupServiceImplTest {
 		sysJobGroupService.create(form);
 
 		verify(jobGroupMapper).insert(argThat(
-				(JobGroupEntity e) -> "UNIQ_GROUP".equals(e.getGroupCode()) && BooleanUtil.isTrue(e.getStatus())));
+				(JobGroupEntity e) -> "UNIQ_GROUP".equals(e.getGroupCode()) && e.getStatus() != null && e.getStatus()));
 	}
 
 	@Test

@@ -65,19 +65,6 @@ class SysJobFormConsistencyValidationTest {
 	}
 
 	@Test
-	@DisplayName("CreateForm：消息模式缺少 payloadJson 时校验失败")
-	void createFormRejectsMessageModeWithoutPayload() {
-		SysJobCreateForm form = validCreateForm();
-		form.setTaskType("MESSAGE_DISPATCH");
-		form.setInvokeTarget(null);
-		form.setPayloadJson(null);
-
-		Set<ConstraintViolation<SysJobCreateForm>> violations = validator.validate(form, CreateGroup.class);
-
-		assertThat(violations).anyMatch(v -> "payloadJson".equals(v.getPropertyPath().toString()));
-	}
-
-	@Test
 	@DisplayName("UpdateForm：指定 Bean 模式但 invokeTarget 为空时校验失败")
 	void updateFormRejectsBeanModeWithoutInvokeTarget() {
 		SysJobUpdateForm form = validUpdateForm();

@@ -1,17 +1,15 @@
 package com.auth.module.security.autoconfigure.pipeline.authenticate;
 
-import java.util.Objects;
-
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.util.BooleanUtil;
 import com.auth.module.security.autoconfigure.config.user.UserConfigProperties;
 import com.auth.module.security.contract.exception.SecurityResultCodeEnum;
 import com.auth.module.security.contract.exception.SecurityTokenException;
 import com.auth.module.security.contract.redis.SecurityRedisKey;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
+
+import java.util.Objects;
 
 import static com.auth.module.security.contract.redis.SecurityRedisKey.USER_SESSIONS;
 
@@ -49,7 +47,7 @@ public final class SessionCountChecker {
 		}
 		String sessionKey = SecurityRedisKey.USER_SESSION.key(sessionId);
 		Boolean exists = sessionRedisTemplate.hasKey(sessionKey);
-		if (BooleanUtil.isFalse(exists)) {
+		if (!Boolean.TRUE.equals(exists)) {
 			throw new SecurityTokenException(SecurityResultCodeEnum.SESSION_MISSING, "Session is missing.");
 		}
 	}
@@ -65,7 +63,7 @@ public final class SessionCountChecker {
 		}
 		String indexKey = USER_SESSIONS.key(userId);
 		Boolean indexExists = sessionRedisTemplate.hasKey(indexKey);
-		if (BooleanUtil.isFalse(indexExists)) {
+		if (!Boolean.TRUE.equals(indexExists)) {
 			return;
 		}
 		Long size = sessionRedisTemplate.opsForSet().size(indexKey);
@@ -74,7 +72,7 @@ public final class SessionCountChecker {
 					"Session set is empty - data inconsistent.");
 		}
 		Boolean member = sessionRedisTemplate.opsForSet().isMember(indexKey, sessionId);
-		if (!BooleanUtil.isTrue(member)) {
+		if (member == null || !member) {
 			throw new SecurityTokenException(SecurityResultCodeEnum.SESSION_MISSING, "Session is not active.");
 		}
 		int max = Objects.requireNonNullElse(userConfigProperties.getMaxSessionCount(), 3);

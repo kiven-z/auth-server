@@ -20,8 +20,7 @@ public class SysJobCreateFormConsistencyValidator
 			return true;
 		}
 		SysJobTaskType taskType = SysJobTaskType.resolve(form.getTaskType());
-		return SysJobTaskTypeFieldRules
-			.detect(taskType, form.getJobClass(), form.getInvokeTarget(), form.getPayloadJson(), true)
+		return SysJobTaskTypeFieldRules.detect(taskType, form.getJobClass(), form.getInvokeTarget(), true)
 			.map(violation -> SysJobTaskTypeFieldRules.applyFormViolation(violation, context))
 			.orElse(true);
 	}

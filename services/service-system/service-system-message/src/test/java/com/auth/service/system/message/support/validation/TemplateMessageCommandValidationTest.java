@@ -1,18 +1,20 @@
 package com.auth.service.system.message.support.validation;
 
-import java.util.Collections;
-import java.util.List;
-
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.message.api.model.dingtalk.DingTalkChannelOptions;
 import com.auth.module.message.api.model.email.EmailChannelOptions;
-import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.module.message.api.model.inapp.InAppChannelOptions;
+import com.auth.service.system.message.exception.MessageException;
+import com.auth.service.system.message.support.template.TemplateMessageCommandValidation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.Collections;
+import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
 import static com.auth.service.system.message.exception.MessageResultCode.MESSAGE_COMMAND_INVALID;
@@ -36,8 +38,8 @@ class TemplateMessageCommandValidationTest {
 	@Test
 	@DisplayName("command 为 null 时抛出 PARAM_REQUIRED")
 	void validate_shouldThrowWhenCommandNull() {
-		assertThatThrownBy(() -> commandValidation.validate(null)).isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+		assertThatThrownBy(() -> commandValidation.validate(null)).isInstanceOf(MessageException.class)
+			.extracting(ex -> ((MessageException) ex).getResultCode())
 			.isEqualTo(PARAM_REQUIRED);
 	}
 
@@ -50,8 +52,8 @@ class TemplateMessageCommandValidationTest {
 			.targets(Collections.emptyList())
 			.build();
 
-		assertThatThrownBy(() -> commandValidation.validate(command)).isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+		assertThatThrownBy(() -> commandValidation.validate(command)).isInstanceOf(MessageException.class)
+			.extracting(ex -> ((MessageException) ex).getResultCode())
 			.isEqualTo(MESSAGE_COMMAND_INVALID);
 	}
 
@@ -63,8 +65,8 @@ class TemplateMessageCommandValidationTest {
 			.templateCode("LOGIN_NOTICE")
 			.build();
 
-		assertThatThrownBy(() -> commandValidation.validate(command)).isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+		assertThatThrownBy(() -> commandValidation.validate(command)).isInstanceOf(MessageException.class)
+			.extracting(ex -> ((MessageException) ex).getResultCode())
 			.isEqualTo(MESSAGE_COMMAND_INVALID);
 	}
 
@@ -77,8 +79,8 @@ class TemplateMessageCommandValidationTest {
 			.customBody(Boolean.FALSE)
 			.build();
 
-		assertThatThrownBy(() -> commandValidation.validate(command)).isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+		assertThatThrownBy(() -> commandValidation.validate(command)).isInstanceOf(MessageException.class)
+			.extracting(ex -> ((MessageException) ex).getResultCode())
 			.isEqualTo(MESSAGE_COMMAND_INVALID);
 	}
 
@@ -91,8 +93,8 @@ class TemplateMessageCommandValidationTest {
 			.customBody(Boolean.TRUE)
 			.build();
 
-		assertThatThrownBy(() -> commandValidation.validate(command)).isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+		assertThatThrownBy(() -> commandValidation.validate(command)).isInstanceOf(MessageException.class)
+			.extracting(ex -> ((MessageException) ex).getResultCode())
 			.isEqualTo(MESSAGE_COMMAND_INVALID);
 	}
 
@@ -119,8 +121,8 @@ class TemplateMessageCommandValidationTest {
 			.options(DingTalkChannelOptions.builder().build())
 			.build();
 
-		assertThatThrownBy(() -> commandValidation.validate(command)).isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+		assertThatThrownBy(() -> commandValidation.validate(command)).isInstanceOf(MessageException.class)
+			.extracting(ex -> ((MessageException) ex).getResultCode())
 			.isEqualTo(MESSAGE_COMMAND_INVALID);
 	}
 
@@ -134,8 +136,36 @@ class TemplateMessageCommandValidationTest {
 			.options(EmailChannelOptions.builder().build())
 			.build();
 
-		assertThatThrownBy(() -> commandValidation.validate(command)).isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+		assertThatThrownBy(() -> commandValidation.validate(command)).isInstanceOf(MessageException.class)
+			.extracting(ex -> ((MessageException) ex).getResultCode())
+			.isEqualTo(MESSAGE_COMMAND_INVALID);
+	}
+
+	@Test
+	@DisplayName("IN_APP 渠道：匹配 InAppChannelOptions 时校验通过")
+	void validate_shouldPassForInAppWithInAppOptions() {
+		TemplateMessageCommand command = TemplateMessageCommand.builder()
+			.channel(MessageChannel.IN_APP)
+			.templateCode("notice")
+			.targets(List.of("1001"))
+			.options(InAppChannelOptions.builder().bizType("NOTICE").build())
+			.build();
+
+		assertThatCode(() -> commandValidation.validate(command)).doesNotThrowAnyException();
+	}
+
+	@Test
+	@DisplayName("IN_APP 渠道：options 类型不匹配时抛出 MESSAGE_COMMAND_INVALID")
+	void validate_shouldThrowForInAppWithEmailOptions() {
+		TemplateMessageCommand command = TemplateMessageCommand.builder()
+			.channel(MessageChannel.IN_APP)
+			.templateCode("notice")
+			.targets(List.of("1001"))
+			.options(EmailChannelOptions.builder().build())
+			.build();
+
+		assertThatThrownBy(() -> commandValidation.validate(command)).isInstanceOf(MessageException.class)
+			.extracting(ex -> ((MessageException) ex).getResultCode())
 			.isEqualTo(MESSAGE_COMMAND_INVALID);
 	}
 

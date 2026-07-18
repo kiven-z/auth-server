@@ -13,6 +13,7 @@ import com.tngtech.archunit.lang.ConditionEvents;
 import com.tngtech.archunit.lang.SimpleConditionEvent;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.RestTemplate;
 
@@ -197,5 +198,44 @@ class SystemArchitectureTest {
 		.should()
 		.dependOnClassesThat()
 		.resideInAPackage(AUTHORIZATION_FEIGN);
+
+	private static final DescribedPredicate<JavaClass> SERVICE_SYSTEM_FEIGN_CLIENT = new DescribedPredicate<>(
+			"FeignClient targeting service-system") {
+		@Override
+		public boolean test(JavaClass javaClass) {
+			if (!javaClass.isAnnotatedWith(FeignClient.class)) {
+				return false;
+			}
+			FeignClient feignClient = javaClass.getAnnotationOfType(FeignClient.class);
+			return "service-system".equals(feignClient.name());
+		}
+	};
+
+	/**
+	 * service-system 进程内不得通过 Feign 回调自身（应使用 *-api Port 本地实现）。
+	 */
+	@ArchTest
+	static final ArchRule system_modules_must_not_use_self_feign = noClasses().that()
+		.resideInAPackage("com.auth.service.system..")
+		.should()
+		.dependOnClassesThat(SERVICE_SYSTEM_FEIGN_CLIENT);
+
+	private static final String MODULE_FILE_FEIGN = "com.auth.module.file.api.feign..";
+
+	@ArchTest
+	static final ArchRule admin_must_not_depend_on_module_file_feign = noClasses().that()
+		.resideInAPackage(ADMIN)
+		.should()
+		.dependOnClassesThat()
+		.resideInAPackage(MODULE_FILE_FEIGN);
+
+	private static final String ADMIN_FEIGN = ADMIN + "feign..";
+
+	@ArchTest
+	static final ArchRule admin_must_not_depend_on_admin_feign = noClasses().that()
+		.resideInAPackage(ADMIN)
+		.should()
+		.dependOnClassesThat()
+		.resideInAPackage(ADMIN_FEIGN);
 
 }

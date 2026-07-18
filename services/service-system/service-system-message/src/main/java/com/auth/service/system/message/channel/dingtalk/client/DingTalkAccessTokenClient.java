@@ -3,8 +3,8 @@ package com.auth.service.system.message.channel.dingtalk.client;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.message.config.DingTalkProperties;
+import com.auth.service.system.message.config.properties.DingTalkProperties;
+import com.auth.service.system.message.exception.MessageException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -87,14 +87,14 @@ public class DingTalkAccessTokenClient {
 			ResponseEntity<String> response = restTemplate.postForEntity(OAUTH_TOKEN_URL, entity, String.class);
 			String responseBody = response.getBody();
 			if (CharSequenceUtil.isBlank(responseBody)) {
-				throw new SystemBusinessException(PARAM_REQUIRED, "OAuth 响应体");
+				throw new MessageException(PARAM_REQUIRED, "OAuth 响应体");
 			}
 
 			// 解析响应体
 			JSONObject json = JSONUtil.parseObj(responseBody);
 			String accessToken = json.getStr("accessToken");
 			if (CharSequenceUtil.isBlank(accessToken)) {
-				throw new SystemBusinessException(PARAM_REQUIRED, "accessToken");
+				throw new MessageException(PARAM_REQUIRED, "accessToken");
 			}
 
 			// 计算过期时间
@@ -109,7 +109,7 @@ public class DingTalkAccessTokenClient {
 		}
 		catch (RestClientException ex) {
 			log.error("DingTalk OAuth token request failed", ex);
-			throw new SystemBusinessException(DING_TALK_OAUTH_TOKEN_REQUEST_FAILED, ex.getMessage());
+			throw new MessageException(DING_TALK_OAUTH_TOKEN_REQUEST_FAILED, ex.getMessage());
 		}
 	}
 

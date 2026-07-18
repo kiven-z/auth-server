@@ -26,7 +26,7 @@ public class SysJobQuartzDataKeys {
 	public static final String JOB_CLASS = "jobClass";
 
 	/**
-	 * 任务类型（BEAN_INVOKE/CUSTOM_CLASS/MESSAGE_DISPATCH）
+	 * 任务类型（BEAN_INVOKE/CUSTOM_CLASS）
 	 */
 	public static final String TASK_TYPE = "taskType";
 

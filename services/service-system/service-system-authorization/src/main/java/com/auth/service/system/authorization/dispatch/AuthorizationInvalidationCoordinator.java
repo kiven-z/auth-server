@@ -1,11 +1,9 @@
 package com.auth.service.system.authorization.dispatch;
 
-import cn.hutool.core.util.BooleanUtil;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest;
 import com.auth.service.system.authorization.config.AuthorizationInvalidationProperties;
 import com.auth.service.system.authorization.outbox.AuthorizationInvalidationPublisher;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +35,7 @@ public class AuthorizationInvalidationCoordinator {
 
 		// 事务提交后是否同步
 		Boolean enabled = properties.getSyncDispatchEnabled();
-		if (BooleanUtil.isTrue(enabled)) {
+		if (enabled != null && enabled) {
 			AuthorizationInvalidationDispatchEvent event = AuthorizationInvalidationDispatchEvent.builder()
 				.outboxId(outboxId)
 				.build();

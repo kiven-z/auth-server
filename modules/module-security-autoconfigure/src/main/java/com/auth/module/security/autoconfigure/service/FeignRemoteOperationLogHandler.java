@@ -1,6 +1,5 @@
 package com.auth.module.security.autoconfigure.service;
 
-import cn.hutool.core.util.BooleanUtil;
 import com.auth.common.core.model.response.Result;
 import com.auth.module.security.autoconfigure.feign.SystemSecurityIngestFeignClient;
 import com.auth.module.security.contract.dto.OperationLogIngestRequest;
@@ -34,7 +33,7 @@ public class FeignRemoteOperationLogHandler implements OperationLogHandler {
 		OperationLogIngestRequest body = OperationLogIngestRequest.fromPayload(payload);
 		try {
 			Result<Void> result = systemSecurityIngestFeignClient.appendOperationLog(body);
-			if (BooleanUtil.isFalse(isSuccess(result))) {
+			if (!isSuccess(result)) {
 				log.error("Operation log Feign returned non-success: code={}, message={}, requestUri={}, module={}",
 						result != null ? result.getCode() : null, result != null ? result.getMessage() : null,
 						payload.getRequestUri(), payload.getModule());

@@ -5,8 +5,8 @@ import com.auth.module.message.api.channel.MessageSender;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.message.api.model.email.EmailChannelOptions;
 import com.auth.service.system.message.channel.email.transport.MimeMailTransport;
-import com.auth.service.system.message.model.channel.email.EmailSendDTO;
-import com.auth.service.system.message.model.channel.email.RenderedEmail;
+import com.auth.service.system.message.model.dto.EmailSendDTO;
+import com.auth.service.system.message.model.value.email.RenderedEmail;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -38,22 +38,19 @@ public class EmailMessageSender implements MessageSender {
 	 * @return 邮件发送请求
 	 */
 	private static EmailSendDTO toEmailDto(TemplateMessageCommand command) {
-		// 转为邮件扩展参数
-		EmailChannelOptions options = command.getOptions() instanceof EmailChannelOptions email ? email : null;
+		EmailChannelOptions options = command.getOptions() instanceof EmailChannelOptions email ? email
+				: new EmailChannelOptions();
 
-		EmailSendDTO.EmailSendDTOBuilder builder = EmailSendDTO.builder()
+		return EmailSendDTO.builder()
 			.templateCode(command.getTemplateCode())
 			.to(command.getTargets())
-			.variables(command.getVariables());
-
-		if (options != null) {
-			builder.cc(options.getCc())
-				.bcc(options.getBcc())
-				.replyTo(options.getReplyTo())
-				.hasHtml(options.getHasHtml())
-				.attachments(options.getAttachments());
-		}
-		return builder.build();
+			.variables(command.getVariables())
+			.cc(options.getCc())
+			.bcc(options.getBcc())
+			.replyTo(options.getReplyTo())
+			.hasHtml(options.getHasHtml())
+			.attachments(options.getAttachments())
+			.build();
 	}
 
 	/**

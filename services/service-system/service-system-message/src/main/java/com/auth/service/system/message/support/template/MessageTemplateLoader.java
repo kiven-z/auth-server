@@ -1,10 +1,9 @@
 package com.auth.service.system.message.support.template;
 
 import com.auth.module.message.api.channel.MessageChannel;
-import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.mapper.MessageTemplateMapper;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
-
 import org.springframework.stereotype.Component;
 
 import static com.auth.service.system.message.exception.MessageResultCode.TEMPLATE_NOT_FOUND;
@@ -33,7 +32,7 @@ public class MessageTemplateLoader {
 		MessageTemplateEntity template = messageTemplateMapper.selectEnabledBySceneCodeAndChannel(sceneCode,
 				channel.name());
 		if (template == null) {
-			throw new SystemBusinessException(TEMPLATE_NOT_FOUND, channel.name(), sceneCode);
+			throw new MessageException(TEMPLATE_NOT_FOUND, channel.name(), sceneCode);
 		}
 		return template;
 	}

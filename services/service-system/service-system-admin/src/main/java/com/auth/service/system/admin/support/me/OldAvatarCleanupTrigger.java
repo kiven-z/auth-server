@@ -1,12 +1,10 @@
 package com.auth.service.system.admin.support.me;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import com.auth.common.core.model.response.Result;
-import com.auth.common.web.resttemplate.FeignUtil;
-import com.auth.module.file.api.feign.SystemFileRecordFeignClient;
 import com.auth.module.file.api.model.enums.FileDeleteSource;
 import com.auth.module.file.api.model.enums.FileBizType;
 import com.auth.module.file.api.model.request.OwnedFileDeleteByUrlRequest;
+import com.auth.module.file.api.port.OwnedFileOperations;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -23,7 +21,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 @Component
 public class OldAvatarCleanupTrigger {
 
-	private final SystemFileRecordFeignClient systemFileRecordFeignClient;
+	private final OwnedFileOperations ownedFileOperations;
 
 	/**
 	 * 在事务提交后尝试撤销旧头像；无活跃事务时立即执行
@@ -53,16 +51,12 @@ public class OldAvatarCleanupTrigger {
 	 */
 	private void doCleanup(Long ownerUserId, String oldAvatarUrl) {
 		try {
-			Result<Void> result = systemFileRecordFeignClient.revokeOwnedFile(OwnedFileDeleteByUrlRequest.builder()
+			ownedFileOperations.tryDeleteOwnedByUrl(OwnedFileDeleteByUrlRequest.builder()
 				.url(oldAvatarUrl)
 				.ownerUserId(ownerUserId)
 				.deleteSource(FileDeleteSource.SYSTEM_ACTION.getCode())
 				.bizType(FileBizType.AVATAR.getCode())
 				.build());
-			if (!FeignUtil.isSuccess(result)) {
-				log.warn("Failed to cleanup old avatar: ownerUserId={}, url={}, message={}", ownerUserId, oldAvatarUrl,
-						result.getMessage());
-			}
 		}
 		catch (RuntimeException ex) {
 			log.warn("Failed to cleanup old avatar: ownerUserId={}, url={}, error={}", ownerUserId, oldAvatarUrl,

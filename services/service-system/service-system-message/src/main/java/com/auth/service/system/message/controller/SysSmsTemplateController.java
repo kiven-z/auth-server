@@ -23,7 +23,7 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
  * @author Bunny
  */
 @Tag(name = "短信模板相关", description = "短信模板相关接口")
-@RequestMapping("/api/system/sms-template")
+@RequestMapping("/api/system/message/sms-template")
 @RestController
 public class SysSmsTemplateController {
 

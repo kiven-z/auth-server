@@ -1,12 +1,11 @@
 package com.auth.service.system.message.channel.sms.dypns;
 
-import cn.hutool.core.util.BooleanUtil;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.channel.MessageSender;
 import com.auth.module.message.api.command.TemplateMessageCommand;
-import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.message.channel.sms.dypns.transport.AliyunDypnsTransport;
-import com.auth.service.system.message.model.channel.sms.dypns.DypnsVerifyCodeSendPayload;
+import com.auth.service.system.message.exception.MessageException;
+import com.auth.service.system.message.model.value.sms.dypns.DypnsVerifyCodeSendPayload;
 import org.springframework.stereotype.Component;
 
 import static com.auth.service.system.message.exception.MessageResultCode.SMS_CUSTOM_BODY_NOT_SUPPORTED;
@@ -42,8 +41,8 @@ public class DypnsVerifyCodeMessageSender implements MessageSender {
 	 */
 	@Override
 	public void sendByTemplate(TemplateMessageCommand command) {
-		if (BooleanUtil.isTrue(command.getCustomBody())) {
-			throw new SystemBusinessException(SMS_CUSTOM_BODY_NOT_SUPPORTED);
+		if (command.getCustomBody() != null && command.getCustomBody()) {
+			throw new MessageException(SMS_CUSTOM_BODY_NOT_SUPPORTED);
 		}
 
 		DypnsVerifyCodeSendPayload prepared = dypnsVerifyCodeTemplatePipeline.prepare(command);

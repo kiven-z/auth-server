@@ -1,7 +1,6 @@
 package com.auth.service.auth.support.login;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.util.BooleanUtil;
 import cn.hutool.crypto.digest.MD5;
 import com.auth.common.jwt.autoconfigure.JwtProperties;
 import com.auth.common.jwt.model.JwtUserToken;
@@ -89,7 +88,7 @@ public class RefreshTokenService {
 			rotateRefreshInSession(refreshJti, tokenPair.refreshToken());
 
 			// 获取是否记住我
-			boolean rememberMe = BooleanUtil.isTrue(sessionIndex.getRememberMe());
+			boolean rememberMe = sessionIndex.getRememberMe() != null && sessionIndex.getRememberMe();
 			// 记录成功刷新令牌
 			loginAuditService.auditRefreshTokenSuccess(request, refreshUserId, refreshJti);
 			// 返回刷新令牌结果（携带画像供前端同步角色/权限）
@@ -145,14 +144,14 @@ public class RefreshTokenService {
 		if (expiresAt == null || expiresAt <= now) {
 			throw new AuthBusinessException(AuthResultCode.REFRESH_TOKEN_EXPIRED);
 		}
-		if (BooleanUtil.isFalse(Objects.equals(userId, sessionUserId))) {
+		if (!Objects.equals(userId, sessionUserId)) {
 			long indexUserId = Objects.requireNonNullElse(sessionUserId, userId);
 			userSessionRedisStore.terminateSession(indexUserId, jti);
 			throw new AuthBusinessException(AuthResultCode.REFRESH_TOKEN_EXPIRED);
 		}
 
 		boolean hashMatches = CharSequenceUtil.isNotBlank(redisHash) && Objects.equals(redisHash, requestHash);
-		if (BooleanUtil.isFalse(hashMatches)) {
+		if (!hashMatches) {
 			userSessionRedisStore.terminateSession(userId, jti);
 			throw new AuthBusinessException(AuthResultCode.REFRESH_TOKEN_EXPIRED);
 		}

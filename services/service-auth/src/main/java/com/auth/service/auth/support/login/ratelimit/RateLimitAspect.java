@@ -1,17 +1,12 @@
 package com.auth.service.auth.support.login.ratelimit;
 
-import java.lang.reflect.Method;
-import java.util.Objects;
-
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.auth.exception.AuthBusinessException;
 import com.auth.service.auth.exception.AuthResultCode;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.reflect.MethodSignature;
-
 import org.springframework.aop.support.AopUtils;
 import org.springframework.context.expression.MethodBasedEvaluationContext;
 import org.springframework.core.BridgeMethodResolver;
@@ -22,6 +17,9 @@ import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.stereotype.Component;
+
+import java.lang.reflect.Method;
+import java.util.Objects;
 
 import static com.auth.module.security.contract.redis.SecurityRedisKey.LOGIN_CODE_LIMIT;
 
@@ -91,7 +89,7 @@ public class RateLimitAspect {
 		// 窗口从第一次计数开始
 		if (Long.valueOf(1L).equals(count)) {
 			Boolean expireResult = redisTemplate.expire(redisKey, LOGIN_CODE_LIMIT.getDefaultTtl());
-			if (BooleanUtil.isFalse(expireResult)) {
+			if (expireResult == null || !expireResult) {
 				throw new AuthBusinessException(AuthResultCode.TOO_MANY_REQUESTS);
 			}
 		}

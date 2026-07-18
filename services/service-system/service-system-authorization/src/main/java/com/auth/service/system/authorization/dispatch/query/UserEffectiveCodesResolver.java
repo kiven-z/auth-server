@@ -1,6 +1,5 @@
 package com.auth.service.system.authorization.dispatch.query;
 
-import cn.hutool.core.util.BooleanUtil;
 import com.auth.common.core.model.response.Result;
 import com.auth.service.system.authorization.feign.AuthorizationInnerFeignClient;
 import com.auth.service.system.authorization.feign.dto.EffectiveCodesInnerDTO;
@@ -35,7 +34,7 @@ public class UserEffectiveCodesResolver {
 		}
 
 		Result<EffectiveCodesInnerDTO> result = authorizationInnerFeignClient.getEffectiveCodes(userId);
-		if (BooleanUtil.isFalse(isSuccessWithData(result))) {
+		if (!isSuccessWithData(result)) {
 			log.warn("Effective codes unavailable: userId={}", userId);
 			return Optional.empty();
 		}

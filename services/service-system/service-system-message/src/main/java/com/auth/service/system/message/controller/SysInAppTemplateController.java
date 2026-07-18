@@ -23,7 +23,7 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
  * @author Bunny
  */
 @Tag(name = "站内信模板相关", description = "站内信模板相关接口")
-@RequestMapping("/api/system/in-app-template")
+@RequestMapping("/api/system/message/in-app-template")
 @RestController
 public class SysInAppTemplateController {
 

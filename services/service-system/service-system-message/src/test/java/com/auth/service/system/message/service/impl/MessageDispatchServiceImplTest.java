@@ -3,9 +3,10 @@ package com.auth.service.system.message.service.impl;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.channel.MessageSender;
 import com.auth.module.message.api.command.TemplateMessageCommand;
-import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.message.config.SmsProperties;
-import com.auth.service.system.message.support.validation.TemplateMessageCommandValidation;
+import com.auth.service.system.message.config.MessageChannelCapability;
+import com.auth.service.system.message.config.properties.SmsProperties;
+import com.auth.service.system.message.exception.MessageException;
+import com.auth.service.system.message.support.template.TemplateMessageCommandValidation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
@@ -98,8 +99,8 @@ class MessageDispatchServiceImplTest {
 			.targets(List.of("13800000000"))
 			.build();
 
-		assertThatThrownBy(() -> dispatchService.sendByTemplate(command)).isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+		assertThatThrownBy(() -> dispatchService.sendByTemplate(command)).isInstanceOf(MessageException.class)
+			.extracting(ex -> ((MessageException) ex).getResultCode())
 			.isEqualTo(MESSAGE_CHANNEL_DISABLED);
 
 		verify(emailSender, never()).sendByTemplate(any());
@@ -117,8 +118,8 @@ class MessageDispatchServiceImplTest {
 			.targets(List.of("13800000000"))
 			.build();
 
-		assertThatThrownBy(() -> dispatchService.sendByTemplate(command)).isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+		assertThatThrownBy(() -> dispatchService.sendByTemplate(command)).isInstanceOf(MessageException.class)
+			.extracting(ex -> ((MessageException) ex).getResultCode())
 			.isEqualTo(MESSAGE_CHANNEL_UNSUPPORTED);
 
 		verify(emailSender, never()).sendByTemplate(any());
@@ -148,18 +149,19 @@ class MessageDispatchServiceImplTest {
 	void constructor_shouldRejectDuplicateCapability() {
 		SmsProperties first = new SmsProperties();
 		SmsProperties second = new SmsProperties();
+		List<MessageSender> senders = List.of(emailSender);
+		List<MessageChannelCapability> capabilities = List.of(first, second);
 
-		assertThatThrownBy(
-				() -> new MessageDispatchServiceImpl(List.of(emailSender), List.of(first, second), commandValidation))
+		assertThatThrownBy(() -> new MessageDispatchServiceImpl(senders, capabilities, commandValidation))
 			.isInstanceOf(IllegalStateException.class)
 			.hasMessageContaining("SMS");
 	}
 
 	@Test
-	@DisplayName("command 为 null：抛出 SystemBusinessException")
+	@DisplayName("command 为 null：抛出 MessageException")
 	void sendByTemplate_shouldThrowWhenCommandNull() {
-		assertThatThrownBy(() -> dispatchService.sendByTemplate(null)).isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+		assertThatThrownBy(() -> dispatchService.sendByTemplate(null)).isInstanceOf(MessageException.class)
+			.extracting(ex -> ((MessageException) ex).getResultCode())
 			.isEqualTo(PARAM_REQUIRED);
 	}
 
@@ -172,8 +174,8 @@ class MessageDispatchServiceImplTest {
 			.targets(Collections.emptyList())
 			.build();
 
-		assertThatThrownBy(() -> dispatchService.sendByTemplate(command)).isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+		assertThatThrownBy(() -> dispatchService.sendByTemplate(command)).isInstanceOf(MessageException.class)
+			.extracting(ex -> ((MessageException) ex).getResultCode())
 			.isEqualTo(MESSAGE_COMMAND_INVALID);
 
 		verify(emailSender, never()).sendByTemplate(any());

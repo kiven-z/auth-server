@@ -1,7 +1,7 @@
 package com.auth.service.system.message.service.impl;
 
 import com.auth.module.message.api.channel.MessageChannel;
-import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.mapper.MessageTemplateMapper;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
 import com.auth.service.system.message.model.form.sms.SmsTemplateForm;
@@ -55,7 +55,7 @@ public class SysSmsTemplateServiceImpl extends ServiceImpl<MessageTemplateMapper
 	public void update(SmsTemplateForm form) {
 		MessageTemplateEntity exists = getById(form.getId());
 		if (exists == null) {
-			throw new SystemBusinessException(DATA_NOT_EXIST);
+			throw new MessageException(DATA_NOT_EXIST);
 		}
 
 		applyEntity(form, exists);

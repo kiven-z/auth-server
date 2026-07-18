@@ -1,9 +1,5 @@
 package com.auth.service.system.schedule.service.impl;
 
-import java.lang.reflect.Field;
-import java.util.List;
-
-import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.mapper.JobMapper;
 import com.auth.service.system.schedule.model.entity.JobEntity;
@@ -23,18 +19,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.SchedulerException;
 
+import java.lang.reflect.Field;
+import java.util.List;
+
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_QUARTZ_OPERATION_FAILED;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link SysJobScheduleSyncServiceImpl} 单元测试。
@@ -110,7 +101,7 @@ class SysJobScheduleSyncServiceImplTest {
 
 		verify(sysJobSchedulerManager, times(1)).scheduleOrReplace(any());
 		verify(sysJobSchedulerManager)
-			.scheduleOrReplace(argThat(job -> job.getId().equals(2L) && BooleanUtil.isTrue(job.getStatus())));
+			.scheduleOrReplace(argThat(job -> job.getId().equals(2L) && job.getStatus() != null && job.getStatus()));
 	}
 
 	@Test
@@ -137,8 +128,8 @@ class SysJobScheduleSyncServiceImplTest {
 		sysJobScheduleSyncService.batchUpdateStatusByGroupCode("G1", true);
 
 		verify(sysJobScheduleSyncService).updateBatchById(anyList());
-		verify(sysJobSchedulerManager)
-			.scheduleOrReplace(argThat(entity -> entity.getId().equals(1L) && BooleanUtil.isTrue(entity.getStatus())));
+		verify(sysJobSchedulerManager).scheduleOrReplace(
+				argThat(entity -> entity.getId().equals(1L) && entity.getStatus() != null && entity.getStatus()));
 	}
 
 	@Test

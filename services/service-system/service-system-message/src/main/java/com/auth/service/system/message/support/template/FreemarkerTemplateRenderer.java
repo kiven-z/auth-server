@@ -1,13 +1,15 @@
 package com.auth.service.system.message.support.template;
 
-import java.io.StringWriter;
-
-import com.auth.service.system.message.exception.TemplateRenderException;
+import com.auth.service.system.message.exception.MessageException;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateExceptionHandler;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+
+import java.io.StringWriter;
+
+import static com.auth.service.system.message.exception.MessageResultCode.TEMPLATE_RENDER_FAILED;
 
 /**
  * 字符串模板渲染（多渠道共用）
@@ -30,6 +32,7 @@ public class FreemarkerTemplateRenderer {
 	public static String processTemplate(String templateName, String templateContent, Object dataModel) {
 		try {
 			Template template = new Template(templateName, templateContent, CONFIGURATION);
+
 			try (StringWriter writer = new StringWriter()) {
 				template.process(dataModel, writer);
 				return writer.toString();
@@ -37,7 +40,8 @@ public class FreemarkerTemplateRenderer {
 		}
 		catch (Exception e) {
 			log.error("Template render failed, templateName={}", templateName, e);
-			throw new TemplateRenderException("Template render failed: " + e.getMessage(), e);
+			throw new MessageException(TEMPLATE_RENDER_FAILED, templateName,
+					"Template render failed: " + e.getMessage());
 		}
 	}
 
@@ -62,7 +66,7 @@ public class FreemarkerTemplateRenderer {
 		}
 		catch (Exception e) {
 			log.error("Failed to initialize FreeMarker configuration", e);
-			throw new TemplateRenderException("Failed to initialize FreeMarker configuration", e);
+			throw new IllegalStateException("Failed to initialize FreeMarker configuration", e);
 		}
 	}
 

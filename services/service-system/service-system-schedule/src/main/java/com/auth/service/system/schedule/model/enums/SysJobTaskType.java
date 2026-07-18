@@ -21,12 +21,7 @@ public enum SysJobTaskType {
 	/**
 	 * 自定义类模式：执行 job_class（需实现 Quartz Job）
 	 */
-	CUSTOM_CLASS,
-
-	/**
-	 * 统一消息派发模式：执行 payload_json 中的 TemplateMessageCommand
-	 */
-	MESSAGE_DISPATCH;
+	CUSTOM_CLASS;
 
 	/**
 	 * 解析任务类型
@@ -50,7 +45,6 @@ public enum SysJobTaskType {
 		return switch (this) {
 			case BEAN_INVOKE -> "beanInvokeHandler";
 			case CUSTOM_CLASS -> "customClassHandler";
-			case MESSAGE_DISPATCH -> "messageDispatchHandler";
 		};
 	}
 

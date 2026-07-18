@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.auth.service.system.message.mapper.InAppMessageRecipientMapper">
+
+    <!-- 批量写入收件箱：撞 uk(message_id,user_id) 时忽略，返回实际插入行数 -->
+    <insert id="insertIgnoreBatch">
+        INSERT IGNORE INTO in_app_message_recipient (
+        id,
+        message_id,
+        user_id,
+        is_read,
+        is_deleted,
+        create_user,
+        update_user,
+        version
+        ) VALUES
+        <foreach collection="rows" item="row" separator=",">
+            (
+            #{row.id},
+            #{row.messageId},
+            #{row.userId},
+            #{row.isRead},
+            #{row.isDeleted},
+            #{row.createUser},
+            #{row.updateUser},
+            #{row.version}
+            )
+        </foreach>
+    </insert>
+
+</mapper>

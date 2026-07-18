@@ -1,7 +1,7 @@
 package com.auth.service.system.message.service.impl;
 
 import com.auth.module.message.api.channel.MessageChannel;
-import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.mapper.MessageTemplateMapper;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
 import com.auth.service.system.message.model.form.sms.SmsTemplateForm;
@@ -191,8 +191,8 @@ class SysSmsTemplateServiceImplTest {
 		form.setStatus(true);
 		form.setPriority(1);
 
-		assertThatThrownBy(() -> sysSmsTemplateService.update(form)).isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+		assertThatThrownBy(() -> sysSmsTemplateService.update(form)).isInstanceOf(MessageException.class)
+			.extracting(ex -> ((MessageException) ex).getResultCode())
 			.isEqualTo(DATA_NOT_EXIST);
 		verify(messageTemplateMapper, never()).updateById(any(MessageTemplateEntity.class));
 	}

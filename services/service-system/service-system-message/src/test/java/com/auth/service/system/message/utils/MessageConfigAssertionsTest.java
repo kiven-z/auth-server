@@ -1,6 +1,7 @@
 package com.auth.service.system.message.utils;
 
 import com.auth.service.system.message.exception.MessageException;
+import com.auth.service.system.message.support.template.MessageConfigAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

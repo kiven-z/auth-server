@@ -5,8 +5,8 @@ import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.auth.module.message.api.model.dingtalk.DingTalkMessageType;
-import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.message.config.DingTalkProperties;
+import com.auth.service.system.message.config.properties.DingTalkProperties;
+import com.auth.service.system.message.exception.MessageException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -59,10 +59,10 @@ public class DingTalkWorkNoticeClient {
 	 */
 	public void sendWorkNotice(List<String> userIds, DingTalkMessageType messageType, String title, String content) {
 		if (CollUtil.isEmpty(userIds)) {
-			throw new SystemBusinessException(PARAM_REQUIRED, "接收人");
+			throw new MessageException(PARAM_REQUIRED, "接收人");
 		}
 		if (CharSequenceUtil.isBlank(content)) {
-			throw new SystemBusinessException(PARAM_REQUIRED, "正文");
+			throw new MessageException(PARAM_REQUIRED, "正文");
 		}
 		dingTalkProperties.assertSendRequiredConfigured();
 
@@ -96,7 +96,7 @@ public class DingTalkWorkNoticeClient {
 		}
 		catch (RestClientException ex) {
 			log.error("DingTalk work notice HTTP error, agentId={}, userIds={}", agentId, useridList, ex);
-			throw new SystemBusinessException(DING_TALK_WORK_NOTICE_HTTP_ERROR, ex.getMessage());
+			throw new MessageException(DING_TALK_WORK_NOTICE_HTTP_ERROR, ex.getMessage());
 		}
 	}
 
@@ -138,7 +138,7 @@ public class DingTalkWorkNoticeClient {
 	 */
 	private void assertSendSuccess(String responseBody, Long agentId, String useridList) {
 		if (CharSequenceUtil.isBlank(responseBody)) {
-			throw new SystemBusinessException(PARAM_REQUIRED, "响应体");
+			throw new MessageException(PARAM_REQUIRED, "响应体");
 		}
 
 		JSONObject json = JSONUtil.parseObj(responseBody);
@@ -149,7 +149,7 @@ public class DingTalkWorkNoticeClient {
 
 		String detail = json.getStr("errmsg", responseBody);
 		log.error("DingTalk work notice failed, agentId={}, userIds={}, detail={}", agentId, useridList, detail);
-		throw new SystemBusinessException(DING_TALK_WORK_NOTICE_FAILED, detail);
+		throw new MessageException(DING_TALK_WORK_NOTICE_FAILED, detail);
 	}
 
 }

@@ -1,10 +1,5 @@
 package com.auth.service.system.admin.service.admin.impl;
 
-import java.lang.reflect.Field;
-import java.util.Collections;
-import java.util.List;
-
-import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.system.admin.mapper.dept.SysDeptMapper;
 import com.auth.service.system.admin.mapper.role.GrantTableMapper;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
@@ -26,21 +21,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.lang.reflect.Field;
+import java.util.Collections;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * {@link SysDeptServiceImpl} 单元测试
@@ -209,7 +198,7 @@ class SysDeptServiceImplTest {
 		SysDeptForm form = minimalForm(deptId, 0L, "D002", "原部门", false);
 		sysDeptService.updateMeta(form);
 
-		verify(sysDeptMapper).updateById(argThat((SysDeptEntity e) -> BooleanUtil.isFalse(e.getStatus())));
+		verify(sysDeptMapper).updateById(argThat((SysDeptEntity e) -> e.getStatus() != null && !e.getStatus()));
 		verify(deptInvalidationTrigger).submitByDeptIds(List.of(deptId), "update");
 		verify(deptClosureMaintainer, never()).moveNode(anyLong(), anyLong());
 	}

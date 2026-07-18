@@ -1,12 +1,12 @@
 package com.auth.service.system.authorization.controller;
 
-import cn.hutool.core.util.BooleanUtil;
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.module.security.contract.context.OperationLogContext;
+import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
 import com.auth.service.system.authorization.model.form.AuthorizationInvalidationOutboxRetryForm;
 import com.auth.service.system.authorization.model.query.AuthorizationInvalidationOutboxQuery;
 import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationOutboxDetailVO;
@@ -14,18 +14,11 @@ import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationO
 import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationOutboxRetryResultVO;
 import com.auth.service.system.authorization.ops.AuthorizationInvalidationOutboxManualRetryService;
 import com.auth.service.system.authorization.service.AuthorizationInvalidationOutboxQueryService;
-import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import static com.auth.service.system.authorization.exception.AuthorizationInvalidationOpsResultCode.RETRY_FAILED;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
@@ -74,7 +67,7 @@ public class AuthorizationInvalidationOutboxOpsController {
 
 		AuthorizationInvalidationOutboxRetryResultVO resultVO = authorizationInvalidationOutboxManualRetryService
 			.retryById(id, form);
-		if (BooleanUtil.isTrue(resultVO.getDispatched())) {
+		if (resultVO.getDispatched() != null && resultVO.getDispatched()) {
 			return Result.success(resultVO, OPERATION_SUCCESS.getMessage());
 		}
 		return Result.success(resultVO, RETRY_FAILED.getMessage());

@@ -6,8 +6,8 @@ import com.aliyun.auth.credentials.provider.StaticCredentialProvider;
 import com.aliyun.sdk.service.dypnsapi20170525.AsyncClient;
 import com.aliyun.sdk.service.dypnsapi20170525.models.SendSmsVerifyCodeRequest;
 import com.aliyun.sdk.service.dypnsapi20170525.models.SendSmsVerifyCodeResponse;
-import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.message.config.SmsProperties;
+import com.auth.service.system.message.config.properties.SmsProperties;
+import com.auth.service.system.message.exception.MessageException;
 import darabonba.core.client.ClientOverrideConfiguration;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
@@ -93,11 +93,11 @@ public class AliyunDypnsTransport implements AutoCloseable {
 
 		// 验证手机号
 		if (CharSequenceUtil.isBlank(phone)) {
-			throw new SystemBusinessException(PARAM_REQUIRED, "手机号");
+			throw new MessageException(PARAM_REQUIRED, "手机号");
 		}
 		// 验证厂商模板编码
 		if (CharSequenceUtil.isBlank(providerTemplateCode)) {
-			throw new SystemBusinessException(PARAM_REQUIRED, "厂商模板编码");
+			throw new MessageException(PARAM_REQUIRED, "厂商模板编码");
 		}
 
 		// 构建请求
@@ -114,16 +114,16 @@ public class AliyunDypnsTransport implements AutoCloseable {
 			SendSmsVerifyCodeResponse response = future.get();
 
 			var body = response == null ? null : response.getBody();
-			if (body == null || !"OK".equalsIgnoreCase(String.valueOf(body.getCode()))) {
-				throw new SystemBusinessException(SMS_DYPNS_SEND_FAILED, String.valueOf(body));
+			if (body == null || !"OK".equalsIgnoreCase(body.getCode())) {
+				throw new MessageException(SMS_DYPNS_SEND_FAILED, String.valueOf(body));
 			}
 		}
 		catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-			throw new SystemBusinessException(SMS_DYPNS_SEND_INTERRUPTED);
+			throw new MessageException(SMS_DYPNS_SEND_INTERRUPTED);
 		}
 		catch (ExecutionException e) {
-			throw new SystemBusinessException(SMS_DYPNS_SEND_FAILED, e.getMessage());
+			throw new MessageException(SMS_DYPNS_SEND_FAILED, e.getMessage());
 		}
 	}
 

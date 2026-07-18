@@ -5,8 +5,8 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.message.api.model.email.EmailChannelOptions;
-import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.service.AuditUserDisplayService;
+import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.mapper.MessageTemplateMapper;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
 import com.auth.service.system.message.model.form.MessageTemplateRequireFieldsForm;
@@ -232,8 +232,8 @@ class SysMessageTemplateServiceImplTest {
 		when(messageTemplateMapper.selectById(14L)).thenReturn(entity);
 
 		assertThatThrownBy(() -> sysMessageTemplateService.getRequireFields(14L, MessageChannel.EMAIL.name()))
-			.isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isInstanceOf(MessageException.class)
+			.extracting(ex -> ((MessageException) ex).getResultCode())
 			.isEqualTo(DATA_NOT_EXIST);
 	}
 
@@ -246,8 +246,8 @@ class SysMessageTemplateServiceImplTest {
 		when(messageTemplateMapper.selectById(10L)).thenReturn(entity);
 
 		assertThatThrownBy(() -> sysMessageTemplateService.getMessageTemplateById(10L, MessageChannel.IN_APP.name()))
-			.isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isInstanceOf(MessageException.class)
+			.extracting(ex -> ((MessageException) ex).getResultCode())
 			.isEqualTo(DATA_NOT_EXIST);
 	}
 
@@ -257,8 +257,8 @@ class SysMessageTemplateServiceImplTest {
 		when(messageTemplateMapper.selectById(99L)).thenReturn(null);
 
 		assertThatThrownBy(() -> sysMessageTemplateService.getMessageTemplateById(99L, MessageChannel.EMAIL.name()))
-			.isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isInstanceOf(MessageException.class)
+			.extracting(ex -> ((MessageException) ex).getResultCode())
 			.isEqualTo(DATA_NOT_EXIST);
 	}
 
@@ -355,8 +355,8 @@ class SysMessageTemplateServiceImplTest {
 		form.setRequireFields(Collections.emptyList());
 
 		assertThatThrownBy(() -> sysMessageTemplateService.updateRequireFields(form))
-			.isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isInstanceOf(MessageException.class)
+			.extracting(ex -> ((MessageException) ex).getResultCode())
 			.isEqualTo(DATA_NOT_EXIST);
 
 		verify(messageTemplateMapper, never()).updateById(any(MessageTemplateEntity.class));
@@ -373,8 +373,8 @@ class SysMessageTemplateServiceImplTest {
 		form.setRequireFields(Collections.emptyList());
 
 		assertThatThrownBy(() -> sysMessageTemplateService.updateRequireFields(form))
-			.isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isInstanceOf(MessageException.class)
+			.extracting(ex -> ((MessageException) ex).getResultCode())
 			.isEqualTo(DATA_NOT_EXIST);
 
 		verify(messageTemplateMapper, never()).updateById(any(MessageTemplateEntity.class));
@@ -447,8 +447,8 @@ class SysMessageTemplateServiceImplTest {
 		form.setChannel(MessageChannel.SMS.name());
 		form.setTarget("13800138000");
 
-		assertThatThrownBy(() -> sysMessageTemplateService.testSend(form)).isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+		assertThatThrownBy(() -> sysMessageTemplateService.testSend(form)).isInstanceOf(MessageException.class)
+			.extracting(ex -> ((MessageException) ex).getResultCode())
 			.isEqualTo(DATA_NOT_EXIST);
 
 		verify(messageDispatchService, never()).sendByTemplate(any());
@@ -462,8 +462,8 @@ class SysMessageTemplateServiceImplTest {
 		form.setChannel("FAX");
 		form.setTarget("x");
 
-		assertThatThrownBy(() -> sysMessageTemplateService.testSend(form)).isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+		assertThatThrownBy(() -> sysMessageTemplateService.testSend(form)).isInstanceOf(MessageException.class)
+			.extracting(ex -> ((MessageException) ex).getResultCode())
 			.isEqualTo(MESSAGE_CHANNEL_UNSUPPORTED);
 
 		verify(messageDispatchService, never()).sendByTemplate(any());
@@ -478,8 +478,8 @@ class SysMessageTemplateServiceImplTest {
 		form.setChannel(MessageChannel.EMAIL.name());
 		form.setTarget("not-an-email");
 
-		assertThatThrownBy(() -> sysMessageTemplateService.testSend(form)).isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+		assertThatThrownBy(() -> sysMessageTemplateService.testSend(form)).isInstanceOf(MessageException.class)
+			.extracting(ex -> ((MessageException) ex).getResultCode())
 			.isEqualTo(DATA_INVALID);
 
 		verify(messageDispatchService, never()).sendByTemplate(any());
@@ -502,8 +502,8 @@ class SysMessageTemplateServiceImplTest {
 		form.setChannel(MessageChannel.SMS.name());
 		form.setTarget("13800138000");
 
-		assertThatThrownBy(() -> sysMessageTemplateService.testSend(form)).isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+		assertThatThrownBy(() -> sysMessageTemplateService.testSend(form)).isInstanceOf(MessageException.class)
+			.extracting(ex -> ((MessageException) ex).getResultCode())
 			.isEqualTo(PARAM_REQUIRED);
 
 		verify(messageDispatchService, never()).sendByTemplate(any());

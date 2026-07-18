@@ -1,10 +1,9 @@
 package com.auth.service.system.admin.support.user;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import com.auth.common.web.resttemplate.FeignUtil;
-import com.auth.module.file.api.feign.SystemFileRecordFeignClient;
 import com.auth.module.file.api.model.enums.FileBizType;
 import com.auth.module.file.api.model.request.OwnedFileAssertByUrlRequest;
+import com.auth.module.file.api.port.OwnedFileOperations;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.admin.mapper.user.SysUserMapper;
 import com.auth.service.system.admin.support.me.OldAvatarCleanupTrigger;
@@ -26,7 +25,7 @@ public class UserAvatarUpdateSupport {
 
 	private final SysUserMapper sysUserMapper;
 
-	private final SystemFileRecordFeignClient systemFileRecordFeignClient;
+	private final OwnedFileOperations ownedFileOperations;
 
 	private final OldAvatarCleanupTrigger oldAvatarCleanupTrigger;
 
@@ -42,13 +41,15 @@ public class UserAvatarUpdateSupport {
 			return;
 		}
 
-		var assertResult = systemFileRecordFeignClient.verifyOwnership(OwnedFileAssertByUrlRequest.builder()
-			.url(avatar)
-			.ownerUserId(fileOwnerUserId)
-			.bizType(FileBizType.AVATAR.getCode())
-			.build());
-		if (!FeignUtil.isSuccess(assertResult)) {
-			throw new SystemBusinessException(SystemCommonResultCode.OPERATION_FAILED, assertResult.getMessage());
+		try {
+			ownedFileOperations.assertOwnedFileUrl(OwnedFileAssertByUrlRequest.builder()
+				.url(avatar)
+				.ownerUserId(fileOwnerUserId)
+				.bizType(FileBizType.AVATAR.getCode())
+				.build());
+		}
+		catch (RuntimeException ex) {
+			throw new SystemBusinessException(SystemCommonResultCode.OPERATION_FAILED, ex.getMessage());
 		}
 
 		targetUser.setAvatar(avatar);

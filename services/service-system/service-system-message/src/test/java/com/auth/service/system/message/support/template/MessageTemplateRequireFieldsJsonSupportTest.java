@@ -1,7 +1,7 @@
 package com.auth.service.system.message.support.template;
 
 import com.auth.common.core.utils.JsonSupport;
-import com.auth.service.system.common.exception.SystemBusinessException;
+import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.model.vo.MessageTemplateRequireFieldRow;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.DisplayName;
@@ -53,8 +53,8 @@ class MessageTemplateRequireFieldsJsonSupportTest {
 	@DisplayName("parse：非法 JSON 抛出 DATA_INVALID")
 	void parse_invalidJson_throws() {
 		assertThatThrownBy(() -> MessageTemplateRequireFieldsJsonSupport.parse("{bad"))
-			.isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isInstanceOf(MessageException.class)
+			.extracting(ex -> ((MessageException) ex).getResultCode())
 			.isEqualTo(DATA_INVALID);
 	}
 
@@ -78,8 +78,8 @@ class MessageTemplateRequireFieldsJsonSupportTest {
 		List<MessageTemplateRequireFieldRow> rows = List.of(row);
 
 		assertThatThrownBy(() -> MessageTemplateRequireFieldsJsonSupport.validate(rows))
-			.isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isInstanceOf(MessageException.class)
+			.extracting(ex -> ((MessageException) ex).getResultCode())
 			.isEqualTo(PARAM_REQUIRED);
 	}
 
@@ -90,8 +90,8 @@ class MessageTemplateRequireFieldsJsonSupportTest {
 				row("code", JsonSupport.readTree("\"2\"")));
 
 		assertThatThrownBy(() -> MessageTemplateRequireFieldsJsonSupport.validate(rows))
-			.isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isInstanceOf(MessageException.class)
+			.extracting(ex -> ((MessageException) ex).getResultCode())
 			.isEqualTo(PARAM_DUPLICATE);
 	}
 
@@ -107,8 +107,8 @@ class MessageTemplateRequireFieldsJsonSupportTest {
 		// 缺少 name 时应抛出业务异常
 		assertThatThrownBy(() -> MessageTemplateRequireFieldsJsonSupport.assertVariablesPresent(requireFields,
 				incomplete, PARAM_REQUIRED, "email"))
-			.isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isInstanceOf(MessageException.class)
+			.extracting(ex -> ((MessageException) ex).getResultCode())
 			.isEqualTo(PARAM_REQUIRED);
 
 		// 变量齐全时不应抛异常

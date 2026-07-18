@@ -21,12 +21,11 @@ public class SysJobTaskTypeFieldRules {
 	 * @param taskType 任务类型
 	 * @param jobClass 自定义类
 	 * @param invokeTarget 调用目标
-	 * @param payloadJson 消息载荷
 	 * @param requireJobClass 是否要求 jobClass 非空（新增表单为 true）
 	 * @return 违反类型；无违反则为 empty
 	 */
 	public static Optional<Violation> detect(SysJobTaskType taskType, String jobClass, String invokeTarget,
-			String payloadJson, boolean requireJobClass) {
+			boolean requireJobClass) {
 		return switch (taskType) {
 			// Bean 调用模式必须填写 invokeTarget
 			case BEAN_INVOKE -> CharSequenceUtil.isBlank(invokeTarget)
@@ -41,9 +40,6 @@ public class SysJobTaskTypeFieldRules {
 				}
 				yield Optional.empty();
 			}
-			// 消息派发模式必须填写 payloadJson
-			case MESSAGE_DISPATCH -> CharSequenceUtil.isBlank(payloadJson)
-					? Optional.of(Violation.MESSAGE_MISSING_PAYLOAD) : Optional.empty();
 		};
 	}
 
@@ -80,12 +76,7 @@ public class SysJobTaskTypeFieldRules {
 		/**
 		 * 自定义类模式不允许填写 invokeTarget
 		 */
-		CUSTOM_FORBIDS_INVOKE_TARGET("invokeTarget", "自定义类模式不允许填写 invokeTarget"),
-
-		/**
-		 * 消息派发模式必须填写 payloadJson
-		 */
-		MESSAGE_MISSING_PAYLOAD("payloadJson", "消息派发模式必须填写 payloadJson");
+		CUSTOM_FORBIDS_INVOKE_TARGET("invokeTarget", "自定义类模式不允许填写 invokeTarget");
 
 		private final String property;
 

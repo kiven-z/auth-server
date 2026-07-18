@@ -1,11 +1,11 @@
 package com.auth.service.system.authorization.dispatch.query;
 
-import java.util.List;
-import java.util.Objects;
-
 import lombok.Builder;
 import lombok.Value;
 import lombok.experimental.Accessors;
+
+import java.util.List;
+import java.util.Objects;
 
 /**
  * 用户生效角色码与权限码快照（供 admin 动态菜单等只读场景）

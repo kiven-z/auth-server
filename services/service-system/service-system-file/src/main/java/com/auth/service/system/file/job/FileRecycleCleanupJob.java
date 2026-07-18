@@ -1,7 +1,6 @@
 package com.auth.service.system.file.job;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.BooleanUtil;
 import com.auth.module.file.api.model.enums.StoragePlatformEnum;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
@@ -42,7 +41,7 @@ public class FileRecycleCleanupJob {
 	@Scheduled(cron = "${auth.file.recycle-cleanup.cron:0 0 3 * * ?}")
 	public void purgeExpired() {
 		Boolean enabled = properties.getEnabled();
-		if (!BooleanUtil.isTrue(enabled)) {
+		if (enabled == null || !enabled) {
 			return;
 		}
 

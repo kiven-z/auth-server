@@ -1,7 +1,6 @@
 package com.auth.service.system.admin.convert.admin.menu;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.admin.model.vo.menu.RouteMetaVO;
 import com.auth.service.system.admin.model.vo.menu.RouteTransitionVO;
@@ -33,7 +32,7 @@ public class MenuRouteMetaConverter {
 		meta.setIcon(menu.getIcon());
 		meta.setShowLink(menu.getShowLink());
 		// null 视为 false，默认按角色校验
-		meta.setPublicAccess(BooleanUtil.isTrue(menu.getPublicAccess()));
+		meta.setPublicAccess(menu.getPublicAccess() != null && menu.getPublicAccess());
 		meta.setRank(menu.getMenuRank());
 		meta.setExtraIcon(menu.getExtraIcon());
 		meta.setShowParent(menu.getShowParent());

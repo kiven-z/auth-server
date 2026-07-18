@@ -1,10 +1,8 @@
 package com.auth.service.system.message.channel.email;
 
 import com.auth.module.message.api.channel.MessageChannel;
-import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.message.exception.TemplateRenderException;
-import com.auth.service.system.message.model.channel.email.RenderedEmail;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
+import com.auth.service.system.message.model.value.email.RenderedEmail;
 import com.auth.service.system.message.support.template.FreemarkerTemplateRenderer;
 import com.auth.service.system.message.support.template.MessageTemplateLoader;
 import com.auth.service.system.message.support.template.MessageTemplateRequireFieldsJsonSupport;
@@ -14,7 +12,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_FAILED;
 import static com.auth.service.system.message.exception.MessageResultCode.TEMPLATE_VARS_MISSING;
 
 /**
@@ -45,41 +42,14 @@ public class EmailTemplatePipeline {
 				MessageTemplateRequireFieldsJsonSupport.parse(template.getRequireFields()), safeVariables,
 				TEMPLATE_VARS_MISSING, MessageChannel.EMAIL.name());
 
-		String subject = renderSubject(template, safeVariables);
-		String body = renderContent(template, safeVariables);
-		return RenderedEmail.builder().subject(subject).body(body).build();
-	}
+		String templateName = template.getTemplateName() + "_subject";
+		String processTemplate = FreemarkerTemplateRenderer.processTemplate(templateName, template.getSubject(),
+				safeVariables);
 
-	/**
-	 * 渲染主题
-	 * @param template 模板
-	 * @param variables 变量
-	 * @return 渲染后的主题
-	 */
-	private String renderSubject(MessageTemplateEntity template, Map<String, Object> variables) {
-		try {
-			return FreemarkerTemplateRenderer.processTemplate(template.getTemplateName() + "_subject",
-					template.getSubject(), variables);
-		}
-		catch (TemplateRenderException e) {
-			throw new SystemBusinessException(OPERATION_FAILED, "subject", e.getMessage());
-		}
-	}
-
-	/**
-	 * 渲染正文
-	 * @param template 模板
-	 * @param variables 变量
-	 * @return 渲染后的正文
-	 */
-	private String renderContent(MessageTemplateEntity template, Map<String, Object> variables) {
-		try {
-			return FreemarkerTemplateRenderer.processTemplate(template.getTemplateName(), template.getBodyContent(),
-					variables);
-		}
-		catch (TemplateRenderException e) {
-			throw new SystemBusinessException(OPERATION_FAILED, "body", e.getMessage());
-		}
+		String bodyContent = template.getBodyContent();
+		String body = FreemarkerTemplateRenderer.processTemplate(template.getTemplateName(), bodyContent,
+				safeVariables);
+		return RenderedEmail.builder().subject(processTemplate).body(body).build();
 	}
 
 }

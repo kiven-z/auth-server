@@ -1,17 +1,13 @@
 package com.auth.service.system.admin.service.admin.impl;
 
-import java.lang.reflect.Field;
-import java.util.List;
-
-import cn.hutool.core.util.BooleanUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.post.SysPostMapper;
 import com.auth.service.system.admin.mapper.role.GrantTableMapper;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
-import com.auth.service.system.admin.model.po.post.PostDeptCodePairPO;
 import com.auth.service.system.admin.model.form.post.SysPostForm;
+import com.auth.service.system.admin.model.po.post.PostDeptCodePairPO;
 import com.auth.service.system.admin.model.po.post.SysPostBoundUserPO;
 import com.auth.service.system.admin.model.po.post.SysPostPageRowPO;
 import com.auth.service.system.admin.model.po.post.SysPostSearchItemPO;
@@ -38,22 +34,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.lang.reflect.Field;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link SysPostServiceImpl} 单元测试
@@ -322,10 +309,12 @@ class SysPostServiceImplTest {
 
 		verify(sysPostMapper).selectReferenceByDeptPostPairs(anyList());
 		verify(sysPostMapper, never()).selectList(any());
-		verify(sysPostService).saveBatch(argThat((List<SysPostEntity> entities) -> entities.size() == 1
-				&& Long.valueOf(2L).equals(entities.get(0).getDeptId())
-				&& "NEW_CODE".equals(entities.get(0).getPostCode()) && BooleanUtil.isTrue(entities.get(0).getStatus())
-				&& Integer.valueOf(0).equals(entities.get(0).getOrderNum())), eq(500));
+		verify(sysPostService).saveBatch(
+				argThat((List<SysPostEntity> entities) -> entities.size() == 1
+						&& Long.valueOf(2L).equals(entities.get(0).getDeptId())
+						&& "NEW_CODE".equals(entities.get(0).getPostCode()) && entities.get(0).getStatus() != null
+						&& entities.get(0).getStatus() && Integer.valueOf(0).equals(entities.get(0).getOrderNum())),
+				eq(500));
 	}
 
 	@Test
@@ -393,8 +382,8 @@ class SysPostServiceImplTest {
 
 		sysPostService.update(form);
 
-		verify(sysPostMapper).updateById(argThat(
-				(SysPostEntity e) -> Long.valueOf(2L).equals(e.getDeptId()) && BooleanUtil.isFalse(e.getStatus())));
+		verify(sysPostMapper).updateById(argThat((SysPostEntity e) -> Long.valueOf(2L).equals(e.getDeptId())
+				&& e.getStatus() != null && !e.getStatus()));
 		verify(postInvalidationTrigger).submitByPostIds(List.of(postId), "update");
 	}
 

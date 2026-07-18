@@ -1,9 +1,6 @@
 package com.auth.service.system.schedule.support.quartz;
 
-import java.util.List;
-
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.BooleanUtil;
 import com.auth.service.system.schedule.config.ScheduleJobProperties;
 import com.auth.service.system.schedule.mapper.JobMapper;
 import com.auth.service.system.schedule.model.entity.JobEntity;
@@ -13,8 +10,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.SchedulerException;
-
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * 按 {@code job} 补偿 Quartz 运行态（DB 为单一事实来源）
@@ -103,7 +101,7 @@ public class SysJobScheduleReconciler {
 	 */
 	private void reconcileSingle(JobEntity job) {
 		try {
-			if (BooleanUtil.isTrue(job.getStatus())) {
+			if (job.getStatus() != null && job.getStatus()) {
 				sysJobSchedulerManager.scheduleOrReplace(job);
 				return;
 			}

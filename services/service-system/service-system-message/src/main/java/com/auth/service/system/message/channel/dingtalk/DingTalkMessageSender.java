@@ -1,20 +1,19 @@
 package com.auth.service.system.message.channel.dingtalk;
 
 import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.util.BooleanUtil;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.channel.MessageSender;
-import com.auth.module.message.api.command.ChannelOptions;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.message.api.model.dingtalk.DingTalkChannelOptions;
 import com.auth.module.message.api.model.dingtalk.DingTalkMessageType;
-import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.message.channel.dingtalk.client.DingTalkWorkNoticeClient;
-import com.auth.service.system.message.model.channel.dingtalk.RenderedDingTalkNotice;
+import com.auth.service.system.message.exception.MessageException;
+import com.auth.service.system.message.model.value.dingtalk.RenderedDingTalkNotice;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
@@ -37,18 +36,6 @@ public class DingTalkMessageSender implements MessageSender {
 		this.workNoticeClient = workNoticeClient;
 	}
 
-	/**
-	 * 转为钉钉扩展参数
-	 * @param options 渠道扩展参数
-	 * @return 钉钉参数，类型不匹配时返回 {@code null}
-	 */
-	public static DingTalkChannelOptions asDingTalk(ChannelOptions options) {
-		if (options instanceof DingTalkChannelOptions dingTalk) {
-			return dingTalk;
-		}
-		return null;
-	}
-
 	@Override
 	public MessageChannel channel() {
 		return MessageChannel.DING_TALK;
@@ -57,15 +44,9 @@ public class DingTalkMessageSender implements MessageSender {
 	@Override
 	public void sendByTemplate(TemplateMessageCommand command) {
 		RenderedDingTalkNotice rendered = resolveContent(command);
-		DingTalkChannelOptions options = asDingTalk(command.getOptions());
-		// 解析消息类型：options 覆盖模板结果
-		DingTalkMessageType messageType = options != null && options.getMessageType() != null ? options.getMessageType()
-				: rendered.messageType();
-		// 解析 Markdown 标题：options 覆盖模板结果
-		String title = options != null && CharSequenceUtil.isNotBlank(options.getTitle()) ? options.getTitle()
-				: rendered.title();
 
-		workNoticeClient.sendWorkNotice(command.getTargets(), messageType, title, rendered.content());
+		workNoticeClient.sendWorkNotice(command.getTargets(), rendered.messageType(), rendered.title(),
+				rendered.content());
 	}
 
 	/**
@@ -74,25 +55,24 @@ public class DingTalkMessageSender implements MessageSender {
 	 * @return 渲染结果
 	 */
 	private RenderedDingTalkNotice resolveContent(TemplateMessageCommand command) {
-		// 有自定义消息体，解析自定义正文
 		Boolean customBody = command.getCustomBody();
-		if (BooleanUtil.isTrue(customBody)) {
-			String body = command.getBody();
-			if (CharSequenceUtil.isBlank(body)) {
-				throw new SystemBusinessException(PARAM_REQUIRED, "钉钉消息正文");
-			}
-
-			// 解析渠道扩展参数
-			DingTalkChannelOptions options = asDingTalk(command.getOptions());
-			DingTalkMessageType type = options != null && options.getMessageType() != null ? options.getMessageType()
-					: DingTalkMessageType.TEXT;
-			String title = options != null ? options.getTitle() : null;
-			return RenderedDingTalkNotice.builder().messageType(type).title(title).content(command.getBody()).build();
+		if (customBody == null || !customBody) {
+			Map<String, Object> variables = Optional.ofNullable(command.getVariables()).orElseGet(HashMap::new);
+			return dingTalkTemplatePipeline.render(command.getTemplateCode(), variables);
 		}
 
-		// 没有自定义消息体，解析模板渲染
-		Map<String, Object> variables = Optional.ofNullable(command.getVariables()).orElseGet(HashMap::new);
-		return dingTalkTemplatePipeline.render(command.getTemplateCode(), variables);
+		if (CharSequenceUtil.isBlank(command.getBody())) {
+			throw new MessageException(PARAM_REQUIRED, "钉钉消息正文");
+		}
+
+		DingTalkChannelOptions options = command.getOptions() instanceof DingTalkChannelOptions dingTalk ? dingTalk
+				: new DingTalkChannelOptions();
+		DingTalkMessageType type = Objects.requireNonNullElse(options.getMessageType(), DingTalkMessageType.TEXT);
+		return RenderedDingTalkNotice.builder()
+			.messageType(type)
+			.title(options.getTitle())
+			.content(command.getBody())
+			.build();
 	}
 
 }

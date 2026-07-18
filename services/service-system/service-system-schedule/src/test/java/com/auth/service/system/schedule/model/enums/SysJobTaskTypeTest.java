@@ -19,7 +19,6 @@ class SysJobTaskTypeTest {
 	void defaultHandlerCodeReturnsExpectedCodes() {
 		assertThat(SysJobTaskType.BEAN_INVOKE.defaultHandlerCode()).isEqualTo("beanInvokeHandler");
 		assertThat(SysJobTaskType.CUSTOM_CLASS.defaultHandlerCode()).isEqualTo("customClassHandler");
-		assertThat(SysJobTaskType.MESSAGE_DISPATCH.defaultHandlerCode()).isEqualTo("messageDispatchHandler");
 	}
 
 	@Test

@@ -37,9 +37,9 @@ public enum MessageResultCode implements SystemResultCode {
 	TEMPLATE_VARS_MISSING(422, 317, "TEMPLATE_VARS_MISSING", "system.message.template.vars_missing"),
 
 	/**
-	 * 钉钉模板渲染失败
+	 * 模板渲染失败（{0}=模板名，{1}=详情）
 	 */
-	DING_TALK_RENDER_FAILED(500, 295, "DING_TALK_RENDER_FAILED", "system.dingtalk.render.failed"),
+	TEMPLATE_RENDER_FAILED(500, 295, "TEMPLATE_RENDER_FAILED", "system.message.template.render_failed"),
 
 	/**
 	 * SMS 只走模板（templateCode + variables），不支持自定义正文
@@ -71,7 +71,28 @@ public enum MessageResultCode implements SystemResultCode {
 	/**
 	 * 钉钉工作通知发送失败（{0}=详情）
 	 */
-	DING_TALK_WORK_NOTICE_FAILED(502, 308, "DING_TALK_WORK_NOTICE_FAILED", "system.dingtalk.work_notice.failed");
+	DING_TALK_WORK_NOTICE_FAILED(502, 308, "DING_TALK_WORK_NOTICE_FAILED", "system.dingtalk.work_notice.failed"),
+
+	/**
+	 * 站内信接收目标非法（须为系统用户 ID）（{0}=详情）
+	 */
+	IN_APP_TARGET_INVALID(400, 319, "IN_APP_TARGET_INVALID", "system.in_app.target.invalid"),
+
+	/**
+	 * 站内信接收范围不合法（{0}=详情）
+	 */
+	IN_APP_RECIPIENT_SCOPE_INVALID(400, 320, "IN_APP_RECIPIENT_SCOPE_INVALID", "system.in_app.recipient_scope.invalid"),
+
+	/**
+	 * 站内信发送任务不存在（{0}=taskId）
+	 */
+	IN_APP_SEND_TASK_NOT_FOUND(404, 322, "IN_APP_SEND_TASK_NOT_FOUND", "system.in_app.send_task.not_found"),
+
+	/**
+	 * 站内信发送任务当前状态不可补发（{0}=taskId，{1}=status）
+	 */
+	IN_APP_SEND_TASK_RETRY_NOT_ALLOWED(409, 323, "IN_APP_SEND_TASK_RETRY_NOT_ALLOWED",
+			"system.in_app.send_task.retry_not_allowed");
 
 	private final int httpStatus;
 

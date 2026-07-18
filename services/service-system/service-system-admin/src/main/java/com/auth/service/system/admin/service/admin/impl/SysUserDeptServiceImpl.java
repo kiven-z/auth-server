@@ -1,6 +1,5 @@
 package com.auth.service.system.admin.service.admin.impl;
 
-import cn.hutool.core.util.BooleanUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.convert.admin.user.UserDeptConverter;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
@@ -146,7 +145,7 @@ public class SysUserDeptServiceImpl extends ServiceImpl<UserDeptMapper, UserDept
 	 * @param form 关联表单
 	 */
 	private void applyPrimaryDeptRules(Long userId, UserDeptAssignForm form) {
-		boolean isPrimary = BooleanUtil.isTrue(form.getIsPrimary());
+		boolean isPrimary = form.getIsPrimary() != null && form.getIsPrimary();
 		if (isPrimary && !UserOrgRelationStatusEnum.canBePrimary(form.getStatus())) {
 			throw new SystemBusinessException(SystemAdminResultCode.USER_DEPT_PRIMARY_NOT_ELIGIBLE);
 		}

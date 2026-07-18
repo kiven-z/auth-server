@@ -1,7 +1,6 @@
 package com.auth.service.system.file.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.BooleanUtil;
 import com.auth.module.file.api.model.enums.FileDeleteSource;
 import com.auth.module.file.api.model.request.OwnedFileAssertByUrlRequest;
 import com.auth.module.file.api.model.request.OwnedFileDeleteByUrlRequest;
@@ -167,7 +166,7 @@ public class FileRecordServiceImpl extends ServiceImpl<FileRecordMapper, FileRec
 
 		List<FileRecordEntity> changedEntities = new ArrayList<>();
 		for (FileRecordEntity entity : entities) {
-			if (BooleanUtil.isTrue(entity.getIsPrivate()) == targetPrivate) {
+			if ((entity.getIsPrivate() != null && entity.getIsPrivate()) == targetPrivate) {
 				continue;
 			}
 
@@ -204,7 +203,7 @@ public class FileRecordServiceImpl extends ServiceImpl<FileRecordMapper, FileRec
 
 		// @TableLogic 会拦截 updateById/updateBatchById 对 is_deleted 的写入，私有文件走自定义 SQL
 		List<Long> privateIds = entities.stream()
-			.filter(entity -> BooleanUtil.isTrue(entity.getIsPrivate()))
+			.filter(entity -> entity.getIsPrivate() != null && entity.getIsPrivate())
 			.map(FileRecordEntity::getId)
 			.toList();
 		if (CollUtil.isNotEmpty(privateIds)) {
@@ -212,7 +211,7 @@ public class FileRecordServiceImpl extends ServiceImpl<FileRecordMapper, FileRec
 		}
 
 		List<FileRecordEntity> publicEntities = entities.stream()
-			.filter(entity -> BooleanUtil.isFalse(entity.getIsPrivate()))
+			.filter(entity -> entity.getIsPrivate() != null && !entity.getIsPrivate())
 			.toList();
 		if (publicEntities.isEmpty()) {
 			return;

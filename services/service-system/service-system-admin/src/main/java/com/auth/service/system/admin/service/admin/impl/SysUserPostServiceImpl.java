@@ -1,8 +1,5 @@
 package com.auth.service.system.admin.service.admin.impl;
 
-import java.util.List;
-
-import cn.hutool.core.util.BooleanUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.convert.admin.user.UserPostConverter;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
@@ -28,9 +25,10 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * 用户岗位关联服务实现
@@ -78,7 +76,7 @@ public class SysUserPostServiceImpl extends ServiceImpl<UserPostMapper, UserPost
 		userReferenceChecker.requireOperable(List.of(userId));
 
 		SysPostEntity post = postReferenceChecker.getExistingActive(form.getPostId());
-		if (BooleanUtil.isFalse(post.getStatus())) {
+		if (post.getStatus() != null && !post.getStatus()) {
 			log.warn("post unavailable: id={}", form.getPostId());
 			throw new SystemBusinessException(SystemCommonResultCode.DATA_UNAVAILABLE);
 		}
@@ -146,7 +144,7 @@ public class SysUserPostServiceImpl extends ServiceImpl<UserPostMapper, UserPost
 	 * @param isPrimary 是否主岗位
 	 */
 	private void applyPrimaryPostRules(Long userId, Integer status, Boolean isPrimary) {
-		boolean primary = BooleanUtil.isTrue(isPrimary);
+		boolean primary = isPrimary != null && isPrimary;
 
 		if (primary && !UserOrgRelationStatusEnum.canBePrimary(status)) {
 			throw new SystemBusinessException(SystemAdminResultCode.USER_POST_PRIMARY_NOT_ELIGIBLE);

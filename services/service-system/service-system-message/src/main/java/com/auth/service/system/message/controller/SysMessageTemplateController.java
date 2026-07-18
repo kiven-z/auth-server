@@ -34,7 +34,7 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
  */
 @Tag(name = "消息模板相关", description = "消息模板跨渠道公共查询、删除、启停等")
 @Validated
-@RequestMapping("/api/system/message-template")
+@RequestMapping("/api/system/message/template")
 @RestController
 public class SysMessageTemplateController {
 

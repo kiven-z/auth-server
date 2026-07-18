@@ -25,7 +25,7 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
  * @author Bunny
  */
 @Tag(name = "邮件模板相关", description = "邮件模板相关接口")
-@RequestMapping("/api/system/email-template")
+@RequestMapping("/api/system/message/email-template")
 @RestController
 public class SysEmailTemplateController {
 
