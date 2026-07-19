@@ -14,9 +14,13 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -54,6 +58,18 @@ class ChannelDeliveryRecorderTest {
 	void setUp() {
 		recorder = new ChannelDeliveryRecorder();
 		ReflectionTestUtils.setField(recorder, "baseMapper", deliveryMapper);
+	}
+
+	@Test
+	@DisplayName("写库方法使用 REQUIRES_NEW，避免外层事务回滚抹掉外部发送回执")
+	void writeMethods_shouldUseRequiresNewPropagation() throws NoSuchMethodException {
+		// 锁定事务边界：pending / outcomes / failed 均独立短事务提交
+		assertRequiresNew(ChannelDeliveryRecorder.class.getMethod("recordPending", Long.class, MessageChannel.class,
+				Collection.class));
+		assertRequiresNew(ChannelDeliveryRecorder.class.getMethod("recordOutcomes", Long.class, MessageChannel.class,
+				List.class));
+		assertRequiresNew(ChannelDeliveryRecorder.class.getMethod("recordFailed", Long.class, MessageChannel.class,
+				Collection.class, String.class, String.class, LocalDateTime.class));
 	}
 
 	@Test
@@ -135,6 +151,17 @@ class ChannelDeliveryRecorderTest {
 			assertThat(update.getErrorMessage()).isEqualTo("send failed");
 			assertThat(update.getSentAt()).isEqualTo(SENT_AT);
 		});
+	}
+
+	/**
+	 * 断言方法声明为独立短事务
+	 * @param method 待检查方法
+	 */
+	private static void assertRequiresNew(Method method) {
+		Transactional transactional = method.getAnnotation(Transactional.class);
+		assertThat(transactional).isNotNull();
+		assertThat(transactional.propagation()).isEqualTo(Propagation.REQUIRES_NEW);
+		assertThat(transactional.rollbackFor()).contains(Exception.class);
 	}
 
 }

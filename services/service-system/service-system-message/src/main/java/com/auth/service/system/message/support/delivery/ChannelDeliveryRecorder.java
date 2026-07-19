@@ -10,6 +10,8 @@ import com.auth.service.system.message.model.value.delivery.ChannelDeliveryResul
 import com.auth.service.system.message.model.value.delivery.TargetSendOutcome;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -35,6 +37,7 @@ public class ChannelDeliveryRecorder extends ServiceImpl<MessageChannelDeliveryM
 	 * @param channel 逻辑渠道
 	 * @param targets 投递目标
 	 */
+	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
 	public void recordPending(Long taskId, MessageChannel channel, Collection<String> targets) {
 		if (taskId == null || channel == null || CollUtil.isEmpty(targets)) {
 			return;
@@ -61,6 +64,7 @@ public class ChannelDeliveryRecorder extends ServiceImpl<MessageChannelDeliveryM
 	 * @param channel 逻辑渠道
 	 * @param outcomes 目标级结果
 	 */
+	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
 	public void recordOutcomes(Long taskId, MessageChannel channel, List<TargetSendOutcome> outcomes) {
 		if (taskId == null || channel == null || CollUtil.isEmpty(outcomes)) {
 			return;
@@ -88,6 +92,7 @@ public class ChannelDeliveryRecorder extends ServiceImpl<MessageChannelDeliveryM
 	 * @param errorMessage 错误信息
 	 * @param sentAt 实际发送时间
 	 */
+	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
 	public void recordFailed(Long taskId, MessageChannel channel, Collection<String> targets, String errorCode,
 			String errorMessage, LocalDateTime sentAt) {
 		if (taskId == null || channel == null || CollUtil.isEmpty(targets)) {

@@ -34,8 +34,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 
@@ -378,6 +380,14 @@ class SysMessageTemplateServiceImplTest {
 			.isEqualTo(DATA_NOT_EXIST);
 
 		verify(messageTemplateMapper, never()).updateById(any(MessageTemplateEntity.class));
+	}
+
+	@Test
+	@DisplayName("测试发送：不声明事务，避免外发 I/O 并进长事务")
+	void testSend_shouldNotDeclareTransactional() throws NoSuchMethodException {
+		// 发送含外部渠道副作用，方法级事务会拖住连接且无法与渠道侧对齐回滚
+		Method method = SysMessageTemplateServiceImpl.class.getMethod("testSend", MessageTemplateTestSendForm.class);
+		assertThat(method.getAnnotation(Transactional.class)).isNull();
 	}
 
 	@Test

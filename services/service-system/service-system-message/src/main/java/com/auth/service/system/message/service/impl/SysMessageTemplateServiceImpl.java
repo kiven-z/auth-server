@@ -162,7 +162,6 @@ public class SysMessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMa
 	 * {@inheritDoc}
 	 */
 	@Override
-	@Transactional(rollbackFor = Exception.class)
 	public void testSend(MessageTemplateTestSendForm form) {
 		// 解析渠道枚举；非法名称视为不支持
 		String formChannel = form.getChannel();
