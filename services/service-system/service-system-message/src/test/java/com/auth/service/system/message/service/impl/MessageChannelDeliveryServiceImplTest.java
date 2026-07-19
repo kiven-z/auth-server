@@ -29,13 +29,12 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
- * {@link MessageChannelDeliveryServiceImpl} 查询单元测试
+ * {@link MessageChannelDeliveryServiceImpl} 单元测试
  */
-@DisplayName("MessageChannelDeliveryServiceImpl 渠道投递记录查询")
+@DisplayName("MessageChannelDeliveryServiceImpl 渠道投递记录")
 @ExtendWith(MockitoExtension.class)
 class MessageChannelDeliveryServiceImplTest {
 
@@ -168,6 +167,27 @@ class MessageChannelDeliveryServiceImplTest {
 			.isInstanceOf(MessageException.class)
 			.extracting(ex -> ((MessageException) ex).getResultCode())
 			.isEqualTo(DATA_NOT_EXIST);
+	}
+
+	@Test
+	@DisplayName("批量删除：按 ids 物理删除")
+	void batchDelete_shouldDeleteByIds() {
+		// 前端传入主键数组，Mapper 按 ids 物理删除
+		List<Long> ids = List.of(1L, 2L);
+		when(messageChannelDeliveryMapper.deleteByIds(ids)).thenReturn(2);
+
+		messageChannelDeliveryService.batchDelete(ids);
+
+		verify(messageChannelDeliveryMapper).deleteByIds(ids);
+	}
+
+	@Test
+	@DisplayName("批量删除：ids 为空时不调用删除")
+	void batchDelete_shouldSkipWhenIdsEmpty() {
+		// 空列表短路，避免无意义 delete
+		messageChannelDeliveryService.batchDelete(Collections.emptyList());
+
+		verify(messageChannelDeliveryMapper, never()).deleteByIds(any());
 	}
 
 }

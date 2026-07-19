@@ -5,8 +5,10 @@ import com.auth.service.system.message.model.query.MessageChannelDeliveryQuery;
 import com.auth.service.system.message.model.vo.delivery.MessageChannelDeliveryDetailVO;
 import com.auth.service.system.message.model.vo.delivery.MessageChannelDeliveryPageResponse;
 
+import java.util.List;
+
 /**
- * 渠道投递记录查询服务
+ * 渠道投递记录服务
  *
  * @author Bunny
  */
@@ -25,5 +27,11 @@ public interface MessageChannelDeliveryService {
 	 * @return 投递记录详情
 	 */
 	MessageChannelDeliveryDetailVO getChannelDeliveryById(Long id);
+
+	/**
+	 * 按主键批量删除渠道投递记录
+	 * @param ids 投递记录主键列表
+	 */
+	void batchDelete(List<Long> ids);
 
 }

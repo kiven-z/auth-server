@@ -1,5 +1,6 @@
 package com.auth.service.system.message.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.message.convert.MessageChannelDeliveryConverter;
@@ -18,11 +19,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
+import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 
 /**
- * 渠道投递记录查询服务实现
+ * 渠道投递记录服务实现
  *
  * @author Bunny
  */
@@ -63,6 +65,18 @@ public class MessageChannelDeliveryServiceImpl implements MessageChannelDelivery
 		MessageChannelDeliveryDetailVO vo = MessageChannelDeliveryConverter.INSTANCE.toDetailVo(entity);
 		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(vo), null, null);
 		return vo;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void batchDelete(List<Long> ids) {
+		if (CollUtil.isEmpty(ids)) {
+			return;
+		}
+		messageChannelDeliveryMapper.deleteByIds(ids);
 	}
 
 }

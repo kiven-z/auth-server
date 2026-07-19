@@ -20,4 +20,9 @@ public class MessageAuditBizModule {
 	 */
 	public static final String SYS_IN_APP_MESSAGE = "SYS_IN_APP_MESSAGE";
 
+	/**
+	 * 渠道投递记录
+	 */
+	public static final String SYS_MESSAGE_CHANNEL_DELIVERY = "SYS_MESSAGE_CHANNEL_DELIVERY";
+
 }
