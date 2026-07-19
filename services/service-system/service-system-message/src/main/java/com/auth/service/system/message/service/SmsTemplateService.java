@@ -9,7 +9,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  *
  * @author Bunny
  */
-public interface SysSmsTemplateService extends IService<MessageTemplateEntity> {
+public interface SmsTemplateService extends IService<MessageTemplateEntity> {
 
 	/**
 	 * 添加短信模板

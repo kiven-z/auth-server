@@ -8,7 +8,7 @@ import com.auth.service.system.message.model.entity.MessageTemplateEntity;
 import com.auth.service.system.message.model.form.email.EmailTemplateContentForm;
 import com.auth.service.system.message.model.form.email.EmailTemplateForm;
 import com.auth.service.system.message.model.form.email.EmailTemplateRenderForm;
-import com.auth.service.system.message.service.SysEmailTemplateService;
+import com.auth.service.system.message.service.EmailTemplateService;
 import com.auth.service.system.message.support.template.FreemarkerTemplateRenderer;
 import com.auth.service.system.message.support.template.MessageTemplateRequireFieldsJsonSupport;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -27,8 +27,8 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-public class SysEmailTemplateServiceImpl extends ServiceImpl<MessageTemplateMapper, MessageTemplateEntity>
-		implements SysEmailTemplateService {
+public class EmailTemplateServiceImpl extends ServiceImpl<MessageTemplateMapper, MessageTemplateEntity>
+		implements EmailTemplateService {
 
 	/**
 	 * {@inheritDoc}

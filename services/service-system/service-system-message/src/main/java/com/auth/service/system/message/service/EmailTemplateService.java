@@ -11,7 +11,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  *
  * @author Bunny
  */
-public interface SysEmailTemplateService extends IService<MessageTemplateEntity> {
+public interface EmailTemplateService extends IService<MessageTemplateEntity> {
 
 	/**
 	 * 离线渲染

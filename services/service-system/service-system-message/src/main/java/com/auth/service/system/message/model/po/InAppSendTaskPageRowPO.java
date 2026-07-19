@@ -1,0 +1,80 @@
+package com.auth.service.system.message.model.po;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
+/**
+ * 站内信发送任务分页行（持久层查询投影，非 API 出参）
+ *
+ * @author Bunny
+ */
+@Schema(name = "InAppSendTaskPageRowPO", title = "站内信发送任务分页行（PO）")
+@Getter
+@Setter
+@ToString
+public class InAppSendTaskPageRowPO implements Serializable {
+
+	@Serial
+	private static final long serialVersionUID = 1L;
+
+	@Schema(title = "主键")
+	private Long id;
+
+	@Schema(title = "来源")
+	private String sourceType;
+
+	@Schema(title = "场景编码")
+	private String sceneCode;
+
+	@Schema(title = "标题")
+	private String title;
+
+	@Schema(title = "正文类型")
+	private String contentType;
+
+	@Schema(title = "业务分类")
+	private String bizType;
+
+	@Schema(title = "发起人用户 ID")
+	private Long senderUserId;
+
+	@Schema(title = "接收范围类型")
+	private String recipientScopeType;
+
+	@Schema(title = "投递模式")
+	private String deliveryMode;
+
+	@Schema(title = "展开后目标总数")
+	private Integer totalCount;
+
+	@Schema(title = "投递成功数")
+	private Integer successCount;
+
+	@Schema(title = "投递失败数")
+	private Integer failCount;
+
+	@Schema(title = "任务状态")
+	private String status;
+
+	@Schema(title = "撤回时间")
+	private LocalDateTime recalledAt;
+
+	@Schema(title = "创建时间")
+	private LocalDateTime createTime;
+
+	@Schema(title = "更新时间")
+	private LocalDateTime updateTime;
+
+	@Schema(title = "创建用户")
+	private Long createUser;
+
+	@Schema(title = "更新用户")
+	private Long updateUser;
+
+}

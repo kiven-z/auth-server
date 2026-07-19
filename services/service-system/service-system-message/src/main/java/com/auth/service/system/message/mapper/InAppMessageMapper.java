@@ -1,10 +1,16 @@
 package com.auth.service.system.message.mapper;
 
 import com.auth.service.system.message.model.entity.InAppMessageEntity;
+import com.auth.service.system.message.model.po.InAppSendTaskPageRowPO;
+import com.auth.service.system.message.model.query.InAppSendTaskQuery;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Update;
+
+import java.time.LocalDateTime;
 
 /**
  * 消息发送任务 Mapper
@@ -13,6 +19,15 @@ import org.apache.ibatis.annotations.Update;
  */
 @Mapper
 public interface InAppMessageMapper extends BaseMapper<InAppMessageEntity> {
+
+	/**
+	 * 分页查询站内信发送任务
+	 * @param pageParams 分页参数
+	 * @param query 查询条件
+	 * @return 分页行
+	 */
+	IPage<InAppSendTaskPageRowPO> selectSendTaskPage(@Param("page") Page<InAppMessageEntity> pageParams,
+			@Param("query") InAppSendTaskQuery query);
 
 	/**
 	 * 状态 CAS 更新（仅当当前状态等于 expected 时切换）
@@ -40,5 +55,15 @@ public interface InAppMessageMapper extends BaseMapper<InAppMessageEntity> {
 	 * @return 影响行数
 	 */
 	int resetForRetry(@Param("id") Long id);
+
+	/**
+	 * 将已投递/无接收人任务撤回
+	 * @param id 任务 ID
+	 * @param recalledAt 撤回时间
+	 * @param recallUserId 撤回操作人
+	 * @return 影响行数
+	 */
+	int recallTask(@Param("id") Long id, @Param("recalledAt") LocalDateTime recalledAt,
+			@Param("recallUserId") Long recallUserId);
 
 }

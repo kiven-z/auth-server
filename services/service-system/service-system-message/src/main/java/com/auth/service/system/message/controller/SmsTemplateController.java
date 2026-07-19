@@ -8,7 +8,7 @@ import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.message.model.constants.MessageAuditBizModule;
 import com.auth.service.system.message.model.form.sms.SmsTemplateForm;
-import com.auth.service.system.message.service.SysSmsTemplateService;
+import com.auth.service.system.message.service.SmsTemplateService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,19 +25,19 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
 @Tag(name = "短信模板相关", description = "短信模板相关接口")
 @RequestMapping("/api/system/message/sms-template")
 @RestController
-public class SysSmsTemplateController {
+public class SmsTemplateController {
 
-	private final SysSmsTemplateService sysSmsTemplateService;
+	private final SmsTemplateService smsTemplateService;
 
-	public SysSmsTemplateController(SysSmsTemplateService sysSmsTemplateService) {
-		this.sysSmsTemplateService = sysSmsTemplateService;
+	public SmsTemplateController(SmsTemplateService smsTemplateService) {
+		this.smsTemplateService = smsTemplateService;
 	}
 
 	@Operation(summary = "添加短信模板", description = "channel 固定为 SMS；厂商模板码写入 providerTemplateCode；变量列表创建后单独维护")
 	@PreAuthorize("@auth.decide('message:template:create')")
 	@PostMapping()
 	public Result<String> create(@Validated(CreateGroup.class) @RequestBody SmsTemplateForm form) {
-		sysSmsTemplateService.create(form);
+		smsTemplateService.create(form);
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
@@ -47,7 +47,7 @@ public class SysSmsTemplateController {
 	@PreAuthorize("@auth.decide('message:template:update')")
 	@PutMapping()
 	public Result<String> update(@Validated(UpdateGroup.class) @RequestBody SmsTemplateForm form) {
-		sysSmsTemplateService.update(form);
+		smsTemplateService.update(form);
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 

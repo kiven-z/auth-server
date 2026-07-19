@@ -1,13 +1,21 @@
 package com.auth.service.system.message.service.impl;
 
+import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
+import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.mapper.InAppMessageMapper;
 import com.auth.service.system.message.model.entity.InAppMessageEntity;
 import com.auth.service.system.message.model.enums.*;
 import com.auth.service.system.message.model.form.inapp.InAppComposeForm;
+import com.auth.service.system.message.model.po.InAppSendTaskPageRowPO;
+import com.auth.service.system.message.model.query.InAppSendTaskQuery;
 import com.auth.service.system.message.model.vo.inapp.InAppComposeResultVO;
+import com.auth.service.system.message.model.vo.inapp.InAppSendTaskDetailVO;
+import com.auth.service.system.message.model.vo.inapp.InAppSendTaskPageResponse;
 import com.auth.service.system.message.support.inapp.InAppComposeDispatchTrigger;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,12 +26,14 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 import static com.auth.service.system.message.exception.MessageResultCode.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**
@@ -40,6 +50,9 @@ class InAppSendTaskServiceImplTest {
 
 	@Mock
 	private InAppComposeDispatchTrigger dispatchTrigger;
+
+	@Mock
+	private AuditUserDisplayService auditUserDisplayService;
 
 	private InAppSendTaskServiceImpl service;
 
@@ -59,8 +72,175 @@ class InAppSendTaskServiceImplTest {
 	@BeforeEach
 	void setUp() {
 		// ServiceImpl.baseMapper 由 Spring 字段注入；单测手动挂上
-		service = new InAppSendTaskServiceImpl(dispatchTrigger);
+		service = new InAppSendTaskServiceImpl(dispatchTrigger, auditUserDisplayService);
 		ReflectionTestUtils.setField(service, "baseMapper", inAppMessageMapper);
+	}
+
+	@Test
+	@DisplayName("分页：映射业务字段并填充审计用户名")
+	void getSendTaskPage_shouldMapFieldsAndEnrichAudit() {
+		// 准备筛选条件与 Mapper 投影行，校验列表 VO 映射与审计填充
+		InAppSendTaskQuery query = new InAppSendTaskQuery();
+		query.setStatus(InAppMessageStatus.SUCCESS.name());
+		query.setSourceType(MessageSendSourceType.ADMIN_COMPOSE.name());
+		query.setRecipientScopeType(RecipientScopeType.DEPT.name());
+		query.setDeliveryMode(DeliveryMode.PUSH.name());
+		query.setBizType("NOTICE");
+		query.setTitle("公告");
+		query.setPageIndex(1);
+		query.setPageSize(10);
+
+		LocalDateTime now = LocalDateTime.of(2026, 7, 19, 12, 0, 0);
+		InAppSendTaskPageRowPO row = new InAppSendTaskPageRowPO();
+		row.setId(1L);
+		row.setSourceType(MessageSendSourceType.ADMIN_COMPOSE.name());
+		row.setSceneCode("notice");
+		row.setTitle("系统公告");
+		row.setContentType(InAppContentType.MARKDOWN.name());
+		row.setBizType("NOTICE");
+		row.setSenderUserId(7L);
+		row.setRecipientScopeType(RecipientScopeType.DEPT.name());
+		row.setDeliveryMode(DeliveryMode.PUSH.name());
+		row.setTotalCount(10);
+		row.setSuccessCount(9);
+		row.setFailCount(1);
+		row.setStatus(InAppMessageStatus.PARTIAL.name());
+		row.setRecalledAt(null);
+		row.setCreateTime(now);
+		row.setUpdateTime(now);
+		row.setCreateUser(1L);
+		row.setUpdateUser(1L);
+
+		Page<InAppSendTaskPageRowPO> mapperPage = new Page<>(1, 10);
+		mapperPage.setRecords(List.of(row));
+		mapperPage.setTotal(1);
+		when(inAppMessageMapper.selectSendTaskPage(any(Page.class), eq(query))).thenReturn(mapperPage);
+
+		PageResponse<InAppSendTaskPageResponse> result = service.getSendTaskPage(query);
+
+		assertThat(result.getList()).hasSize(1);
+		InAppSendTaskPageResponse vo = result.getList().get(0);
+		assertThat(vo.getId()).isEqualTo(1L);
+		assertThat(vo.getSourceType()).isEqualTo(MessageSendSourceType.ADMIN_COMPOSE.name());
+		assertThat(vo.getSceneCode()).isEqualTo("notice");
+		assertThat(vo.getTitle()).isEqualTo("系统公告");
+		assertThat(vo.getContentType()).isEqualTo(InAppContentType.MARKDOWN.name());
+		assertThat(vo.getBizType()).isEqualTo("NOTICE");
+		assertThat(vo.getSenderUserId()).isEqualTo(7L);
+		assertThat(vo.getRecipientScopeType()).isEqualTo(RecipientScopeType.DEPT.name());
+		assertThat(vo.getDeliveryMode()).isEqualTo(DeliveryMode.PUSH.name());
+		assertThat(vo.getTotalCount()).isEqualTo(10);
+		assertThat(vo.getSuccessCount()).isEqualTo(9);
+		assertThat(vo.getFailCount()).isEqualTo(1);
+		assertThat(vo.getStatus()).isEqualTo(InAppMessageStatus.PARTIAL.name());
+		assertThat(vo.getRecalledAt()).isNull();
+		verify(auditUserDisplayService).enrichAuditUsernames(any(IPage.class), isNull(), isNull());
+
+		ArgumentCaptor<InAppSendTaskQuery> queryCaptor = ArgumentCaptor.forClass(InAppSendTaskQuery.class);
+		verify(inAppMessageMapper).selectSendTaskPage(any(Page.class), queryCaptor.capture());
+		assertThat(queryCaptor.getValue().getStatus()).isEqualTo(InAppMessageStatus.SUCCESS.name());
+		assertThat(queryCaptor.getValue().getTitle()).isEqualTo("公告");
+	}
+
+	@Test
+	@DisplayName("详情：按主键返回正文与范围解析并填充审计用户名")
+	void getSendTaskById_shouldReturnDetailAndEnrichAudit() {
+		// 准备含部门范围快照的任务，校验详情含列表未暴露的正文/链接/撤回人，并解析 ids
+		LocalDateTime now = LocalDateTime.of(2026, 7, 19, 12, 30, 0);
+		InAppMessageEntity task = new InAppMessageEntity();
+		task.setId(11L);
+		task.setSourceType(MessageSendSourceType.ADMIN_COMPOSE.name());
+		task.setSceneCode("notice");
+		task.setTitle("系统公告");
+		task.setContentType(InAppContentType.MARKDOWN.name());
+		task.setContent("## hello");
+		task.setBizType("NOTICE");
+		task.setLinkUrl("/dashboard");
+		task.setSenderUserId(7L);
+		task.setRecipientScopeType(RecipientScopeType.DEPT.name());
+		task.setRecipientScopeJson("{\"ids\":[3,4],\"includeChildren\":false}");
+		task.setDeliveryMode(DeliveryMode.PUSH.name());
+		task.setTotalCount(2);
+		task.setSuccessCount(2);
+		task.setFailCount(0);
+		task.setStatus(InAppMessageStatus.SUCCESS.name());
+		task.setRecalledAt(null);
+		task.setRecallUserId(null);
+		task.setRemark("detail-check");
+		task.setCreateTime(now);
+		task.setUpdateTime(now);
+		task.setCreateUser(1L);
+		task.setUpdateUser(1L);
+		when(inAppMessageMapper.selectById(11L)).thenReturn(task);
+
+		InAppSendTaskDetailVO vo = service.getSendTaskById(11L);
+
+		assertThat(vo.getId()).isEqualTo(11L);
+		assertThat(vo.getTitle()).isEqualTo("系统公告");
+		assertThat(vo.getContent()).isEqualTo("## hello");
+		assertThat(vo.getLinkUrl()).isEqualTo("/dashboard");
+		assertThat(vo.getRecipientScopeType()).isEqualTo(RecipientScopeType.DEPT.name());
+		assertThat(vo.getRecipientScopeJson()).isEqualTo("{\"ids\":[3,4],\"includeChildren\":false}");
+		assertThat(vo.getRecipientScopeIds()).containsExactly(3L, 4L);
+		assertThat(vo.getIncludeChildren()).isFalse();
+		assertThat(vo.getDeliveryMode()).isEqualTo(DeliveryMode.PUSH.name());
+		assertThat(vo.getStatus()).isEqualTo(InAppMessageStatus.SUCCESS.name());
+		assertThat(vo.getRemark()).isEqualTo("detail-check");
+		verify(auditUserDisplayService).enrichAuditUsernames(any(List.class), isNull(), isNull());
+	}
+
+	@Test
+	@DisplayName("详情：ALL 任务范围 ID 为空且无 includeChildren")
+	void getSendTaskById_shouldParseAllScopeWithoutIds() {
+		// 全员读扩散无范围快照，解析结果为空列表
+		InAppMessageEntity task = new InAppMessageEntity();
+		task.setId(12L);
+		task.setSourceType(MessageSendSourceType.ADMIN_COMPOSE.name());
+		task.setTitle("全员公告");
+		task.setContentType(InAppContentType.TEXT.name());
+		task.setContent("all users");
+		task.setRecipientScopeType(RecipientScopeType.ALL.name());
+		task.setRecipientScopeJson(null);
+		task.setDeliveryMode(DeliveryMode.PULL.name());
+		task.setStatus(InAppMessageStatus.SUCCESS.name());
+		when(inAppMessageMapper.selectById(12L)).thenReturn(task);
+
+		InAppSendTaskDetailVO vo = service.getSendTaskById(12L);
+
+		assertThat(vo.getRecipientScopeType()).isEqualTo(RecipientScopeType.ALL.name());
+		assertThat(vo.getRecipientScopeIds()).isEmpty();
+		assertThat(vo.getIncludeChildren()).isNull();
+		assertThat(vo.getDeliveryMode()).isEqualTo(DeliveryMode.PULL.name());
+	}
+
+	@Test
+	@DisplayName("详情：任务不存在时抛出 IN_APP_SEND_TASK_NOT_FOUND")
+	void getSendTaskById_shouldThrowWhenMissing() {
+		// 主键无对应行时抛业务异常
+		when(inAppMessageMapper.selectById(999L)).thenReturn(null);
+
+		assertThatThrownBy(() -> service.getSendTaskById(999L)).isInstanceOf(MessageException.class)
+			.extracting(ex -> ((MessageException) ex).getResultCode())
+			.isEqualTo(IN_APP_SEND_TASK_NOT_FOUND);
+	}
+
+	@Test
+	@DisplayName("分页：无匹配数据时返回空列表")
+	void getSendTaskPage_shouldReturnEmptyWhenNoMatch() {
+		// 无筛选命中时交由 SQL 返回空页
+		InAppSendTaskQuery query = new InAppSendTaskQuery();
+		query.setStatus("UNKNOWN");
+
+		Page<InAppSendTaskPageRowPO> mapperPage = new Page<>(1, 30);
+		mapperPage.setRecords(Collections.emptyList());
+		mapperPage.setTotal(0);
+		when(inAppMessageMapper.selectSendTaskPage(any(Page.class), eq(query))).thenReturn(mapperPage);
+
+		PageResponse<InAppSendTaskPageResponse> result = service.getSendTaskPage(query);
+
+		assertThat(result.getList()).isEmpty();
+		assertThat(result.getTotal()).isZero();
+		verify(auditUserDisplayService).enrichAuditUsernames(any(IPage.class), isNull(), isNull());
 	}
 
 	@Test
@@ -202,12 +382,24 @@ class InAppSendTaskServiceImplTest {
 		when(inAppMessageMapper.selectById(20L)).thenReturn(task);
 		when(inAppMessageMapper.resetForRetry(20L)).thenReturn(1);
 
-		InAppComposeResultVO result = service.retry(20L);
+		service.retry(20L);
 
-		assertThat(result.getTaskId()).isEqualTo(20L);
-		assertThat(result.getStatus()).isEqualTo(InAppMessageStatus.PENDING.name());
 		verify(inAppMessageMapper).resetForRetry(20L);
 		verify(dispatchTrigger).dispatchAfterCommit(20L);
+	}
+
+	@Test
+	@DisplayName("补发：NO_RECIPIENTS 可重置并派发")
+	void retry_shouldAllowNoRecipients() {
+		// 无人接收后可按原范围再展开
+		InAppMessageEntity task = adminComposePushTask(27L, InAppMessageStatus.NO_RECIPIENTS);
+		when(inAppMessageMapper.selectById(27L)).thenReturn(task);
+		when(inAppMessageMapper.resetForRetry(27L)).thenReturn(1);
+
+		service.retry(27L);
+
+		verify(inAppMessageMapper).resetForRetry(27L);
+		verify(dispatchTrigger).dispatchAfterCommit(27L);
 	}
 
 	@Test
@@ -283,16 +475,215 @@ class InAppSendTaskServiceImplTest {
 	@Test
 	@DisplayName("补发：reset 影响 0 行时拒绝（状态已变）")
 	void retry_shouldRejectWhenResetAffectsZeroRows() {
-		// CAS/并发下 reset 失败：用最新状态抛不可补发
+		// CAS/并发下 reset 失败：直接按校验时快照拒绝，不再二次查询
 		InAppMessageEntity task = adminComposePushTask(25L, InAppMessageStatus.FAILED);
-		InAppMessageEntity latest = adminComposePushTask(25L, InAppMessageStatus.SUCCESS);
-		when(inAppMessageMapper.selectById(25L)).thenReturn(task, latest);
+		when(inAppMessageMapper.selectById(25L)).thenReturn(task);
 		when(inAppMessageMapper.resetForRetry(25L)).thenReturn(0);
 
 		assertThatThrownBy(() -> service.retry(25L)).isInstanceOf(MessageException.class)
 			.extracting(ex -> ((MessageException) ex).getResultCode())
 			.isEqualTo(IN_APP_SEND_TASK_RETRY_NOT_ALLOWED);
 		verify(dispatchTrigger, never()).dispatchAfterCommit(any());
+		verify(inAppMessageMapper, times(1)).selectById(25L);
+	}
+
+	@Test
+	@DisplayName("撤回：SUCCESS 写入 RECALLED 与操作人")
+	void recall_shouldMarkSuccessAsRecalled() {
+		// 可撤回态走 recallTask，不触碰收件箱与派发
+		when(inAppMessageMapper.selectById(30L)).thenReturn(adminComposePushTask(30L, InAppMessageStatus.SUCCESS));
+		when(inAppMessageMapper.recallTask(eq(30L), any(LocalDateTime.class), eq(7L))).thenReturn(1);
+
+		try (MockedStatic<SecurityUserUtils> security = mockStatic(SecurityUserUtils.class)) {
+			security.when(SecurityUserUtils::getUserId).thenReturn(7L);
+			service.recall(30L);
+		}
+
+		verify(inAppMessageMapper).recallTask(eq(30L), any(LocalDateTime.class), eq(7L));
+		verify(dispatchTrigger, never()).dispatchAfterCommit(any());
+	}
+
+	@Test
+	@DisplayName("撤回：PARTIAL 可撤回")
+	void recall_shouldAllowPartial() {
+		when(inAppMessageMapper.selectById(31L)).thenReturn(adminComposePushTask(31L, InAppMessageStatus.PARTIAL));
+		when(inAppMessageMapper.recallTask(eq(31L), any(LocalDateTime.class), eq(1L))).thenReturn(1);
+
+		try (MockedStatic<SecurityUserUtils> security = mockStatic(SecurityUserUtils.class)) {
+			security.when(SecurityUserUtils::getUserId).thenReturn(1L);
+			service.recall(31L);
+		}
+
+		verify(inAppMessageMapper).recallTask(eq(31L), any(LocalDateTime.class), eq(1L));
+	}
+
+	@Test
+	@DisplayName("撤回：NO_RECIPIENTS 可撤回")
+	void recall_shouldAllowNoRecipients() {
+		// 无人接收仍可作废为 RECALLED
+		when(inAppMessageMapper.selectById(37L))
+			.thenReturn(adminComposePushTask(37L, InAppMessageStatus.NO_RECIPIENTS));
+		when(inAppMessageMapper.recallTask(eq(37L), any(LocalDateTime.class), eq(3L))).thenReturn(1);
+
+		try (MockedStatic<SecurityUserUtils> security = mockStatic(SecurityUserUtils.class)) {
+			security.when(SecurityUserUtils::getUserId).thenReturn(3L);
+			service.recall(37L);
+		}
+
+		verify(inAppMessageMapper).recallTask(eq(37L), any(LocalDateTime.class), eq(3L));
+	}
+
+	@Test
+	@DisplayName("撤回：全员 PULL SUCCESS 可撤回")
+	void recall_shouldAllowPullSuccess() {
+		// 读扩散无收件箱行，仍只改主表状态
+		InAppMessageEntity task = new InAppMessageEntity();
+		task.setId(32L);
+		task.setSourceType(MessageSendSourceType.ADMIN_COMPOSE.name());
+		task.setDeliveryMode(DeliveryMode.PULL.name());
+		task.setRecipientScopeType(RecipientScopeType.ALL.name());
+		task.setStatus(InAppMessageStatus.SUCCESS.name());
+		when(inAppMessageMapper.selectById(32L)).thenReturn(task);
+		when(inAppMessageMapper.recallTask(eq(32L), any(LocalDateTime.class), eq(2L))).thenReturn(1);
+
+		try (MockedStatic<SecurityUserUtils> security = mockStatic(SecurityUserUtils.class)) {
+			security.when(SecurityUserUtils::getUserId).thenReturn(2L);
+			service.recall(32L);
+		}
+
+		verify(inAppMessageMapper).recallTask(eq(32L), any(LocalDateTime.class), eq(2L));
+	}
+
+	@Test
+	@DisplayName("撤回：任务不存在")
+	void recall_shouldRejectWhenTaskMissing() {
+		when(inAppMessageMapper.selectById(98L)).thenReturn(null);
+
+		assertThatThrownBy(() -> service.recall(98L)).isInstanceOf(MessageException.class)
+			.extracting(ex -> ((MessageException) ex).getResultCode())
+			.isEqualTo(IN_APP_SEND_TASK_NOT_FOUND);
+		verify(inAppMessageMapper, never()).recallTask(any(), any(), any());
+	}
+
+	@Test
+	@DisplayName("撤回：SENDING 拒绝")
+	void recall_shouldRejectSending() {
+		when(inAppMessageMapper.selectById(33L)).thenReturn(adminComposePushTask(33L, InAppMessageStatus.SENDING));
+
+		assertThatThrownBy(() -> service.recall(33L)).isInstanceOf(MessageException.class)
+			.extracting(ex -> ((MessageException) ex).getResultCode())
+			.isEqualTo(IN_APP_SEND_TASK_RECALL_NOT_ALLOWED);
+		verify(inAppMessageMapper, never()).recallTask(any(), any(), any());
+	}
+
+	@Test
+	@DisplayName("撤回：RECALLED 拒绝")
+	void recall_shouldRejectAlreadyRecalled() {
+		when(inAppMessageMapper.selectById(34L)).thenReturn(adminComposePushTask(34L, InAppMessageStatus.RECALLED));
+
+		assertThatThrownBy(() -> service.recall(34L)).isInstanceOf(MessageException.class)
+			.extracting(ex -> ((MessageException) ex).getResultCode())
+			.isEqualTo(IN_APP_SEND_TASK_RECALL_NOT_ALLOWED);
+		verify(inAppMessageMapper, never()).recallTask(any(), any(), any());
+	}
+
+	@Test
+	@DisplayName("撤回：FAILED 拒绝")
+	void recall_shouldRejectFailed() {
+		when(inAppMessageMapper.selectById(35L)).thenReturn(adminComposePushTask(35L, InAppMessageStatus.FAILED));
+
+		assertThatThrownBy(() -> service.recall(35L)).isInstanceOf(MessageException.class)
+			.extracting(ex -> ((MessageException) ex).getResultCode())
+			.isEqualTo(IN_APP_SEND_TASK_RECALL_NOT_ALLOWED);
+		verify(inAppMessageMapper, never()).recallTask(any(), any(), any());
+	}
+
+	@Test
+	@DisplayName("撤回：CAS 影响 0 行时拒绝（状态已变）")
+	void recall_shouldRejectWhenCasAffectsZeroRows() {
+		InAppMessageEntity task = adminComposePushTask(36L, InAppMessageStatus.SUCCESS);
+		when(inAppMessageMapper.selectById(36L)).thenReturn(task);
+		when(inAppMessageMapper.recallTask(eq(36L), any(LocalDateTime.class), eq(9L))).thenReturn(0);
+
+		try (MockedStatic<SecurityUserUtils> security = mockStatic(SecurityUserUtils.class)) {
+			security.when(SecurityUserUtils::getUserId).thenReturn(9L);
+
+			assertThatThrownBy(() -> service.recall(36L)).isInstanceOf(MessageException.class)
+				.extracting(ex -> ((MessageException) ex).getResultCode())
+				.isEqualTo(IN_APP_SEND_TASK_RECALL_NOT_ALLOWED);
+		}
+
+		verify(inAppMessageMapper, times(1)).selectById(36L);
+	}
+
+	@Test
+	@DisplayName("批量删除：终态任务按 ids 物理删除")
+	void batchDelete_shouldDeleteTerminalTasks() {
+		// SUCCESS / RECALLED / ALL 读扩散均可删；收件箱由外键 CASCADE
+		List<Long> ids = List.of(40L, 41L);
+		InAppMessageEntity pushSuccess = adminComposePushTask(40L, InAppMessageStatus.SUCCESS);
+		InAppMessageEntity pullRecalled = new InAppMessageEntity();
+		pullRecalled.setId(41L);
+		pullRecalled.setDeliveryMode(DeliveryMode.PULL.name());
+		pullRecalled.setRecipientScopeType(RecipientScopeType.ALL.name());
+		pullRecalled.setStatus(InAppMessageStatus.RECALLED.name());
+		when(inAppMessageMapper.selectByIds(ids)).thenReturn(List.of(pushSuccess, pullRecalled));
+		when(inAppMessageMapper.deleteByIds(ids)).thenReturn(2);
+
+		service.batchDelete(ids);
+
+		verify(inAppMessageMapper).selectByIds(ids);
+		verify(inAppMessageMapper).deleteByIds(ids);
+	}
+
+	@Test
+	@DisplayName("批量删除：ids 为空时跳过")
+	void batchDelete_shouldSkipWhenIdsEmpty() {
+		service.batchDelete(Collections.emptyList());
+
+		verify(inAppMessageMapper, never()).selectByIds(any());
+		verify(inAppMessageMapper, never()).deleteByIds(any());
+	}
+
+	@Test
+	@DisplayName("批量删除：SENDING 拒绝且不删")
+	void batchDelete_shouldRejectSending() {
+		List<Long> ids = List.of(42L);
+		when(inAppMessageMapper.selectByIds(ids))
+			.thenReturn(List.of(adminComposePushTask(42L, InAppMessageStatus.SENDING)));
+
+		assertThatThrownBy(() -> service.batchDelete(ids)).isInstanceOf(MessageException.class)
+			.extracting(ex -> ((MessageException) ex).getResultCode())
+			.isEqualTo(IN_APP_SEND_TASK_DELETE_NOT_ALLOWED);
+		verify(inAppMessageMapper, never()).deleteByIds(any());
+	}
+
+	@Test
+	@DisplayName("批量删除：PENDING 拒绝且不删")
+	void batchDelete_shouldRejectPending() {
+		List<Long> ids = List.of(43L);
+		when(inAppMessageMapper.selectByIds(ids))
+			.thenReturn(List.of(adminComposePushTask(43L, InAppMessageStatus.PENDING)));
+
+		assertThatThrownBy(() -> service.batchDelete(ids)).isInstanceOf(MessageException.class)
+			.extracting(ex -> ((MessageException) ex).getResultCode())
+			.isEqualTo(IN_APP_SEND_TASK_DELETE_NOT_ALLOWED);
+		verify(inAppMessageMapper, never()).deleteByIds(any());
+	}
+
+	@Test
+	@DisplayName("批量删除：存在不可删时整批中止")
+	void batchDelete_shouldAbortWhenAnyNotDeletable() {
+		// 混入 SENDING 时整批失败，避免部分删除
+		List<Long> ids = List.of(44L, 45L);
+		when(inAppMessageMapper.selectByIds(ids))
+			.thenReturn(List.of(adminComposePushTask(44L, InAppMessageStatus.SUCCESS),
+					adminComposePushTask(45L, InAppMessageStatus.SENDING)));
+
+		assertThatThrownBy(() -> service.batchDelete(ids)).isInstanceOf(MessageException.class)
+			.extracting(ex -> ((MessageException) ex).getResultCode())
+			.isEqualTo(IN_APP_SEND_TASK_DELETE_NOT_ALLOWED);
+		verify(inAppMessageMapper, never()).deleteByIds(any());
 	}
 
 }

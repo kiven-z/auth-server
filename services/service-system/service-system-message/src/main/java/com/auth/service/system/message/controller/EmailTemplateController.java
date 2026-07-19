@@ -10,7 +10,7 @@ import com.auth.service.system.message.model.constants.MessageAuditBizModule;
 import com.auth.service.system.message.model.form.email.EmailTemplateContentForm;
 import com.auth.service.system.message.model.form.email.EmailTemplateForm;
 import com.auth.service.system.message.model.form.email.EmailTemplateRenderForm;
-import com.auth.service.system.message.service.SysEmailTemplateService;
+import com.auth.service.system.message.service.EmailTemplateService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,19 +27,19 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
 @Tag(name = "邮件模板相关", description = "邮件模板相关接口")
 @RequestMapping("/api/system/message/email-template")
 @RestController
-public class SysEmailTemplateController {
+public class EmailTemplateController {
 
-	private final SysEmailTemplateService sysEmailTemplateService;
+	private final EmailTemplateService emailTemplateService;
 
-	public SysEmailTemplateController(SysEmailTemplateService sysEmailTemplateService) {
-		this.sysEmailTemplateService = sysEmailTemplateService;
+	public EmailTemplateController(EmailTemplateService emailTemplateService) {
+		this.emailTemplateService = emailTemplateService;
 	}
 
 	@Operation(summary = "离线渲染模板（示例值）", description = "用于编辑态实时预览")
 	@PreAuthorize("@auth.decide('message:template:detail')")
 	@PostMapping("render")
 	public Result<String> render(@Validated @RequestBody EmailTemplateRenderForm form) {
-		String html = sysEmailTemplateService.render(form);
+		String html = emailTemplateService.render(form);
 		return Result.success(html);
 	}
 
@@ -47,7 +47,7 @@ public class SysEmailTemplateController {
 	@PreAuthorize("@auth.decide('message:template:create')")
 	@PostMapping()
 	public Result<String> create(@Validated(CreateGroup.class) @RequestBody EmailTemplateForm form) {
-		sysEmailTemplateService.create(form);
+		emailTemplateService.create(form);
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
@@ -57,7 +57,7 @@ public class SysEmailTemplateController {
 	@PreAuthorize("@auth.decide('message:template:update')")
 	@PutMapping()
 	public Result<String> update(@Validated(UpdateGroup.class) @RequestBody EmailTemplateForm form) {
-		sysEmailTemplateService.update(form);
+		emailTemplateService.update(form);
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
@@ -67,7 +67,7 @@ public class SysEmailTemplateController {
 	@PreAuthorize("@auth.decide('message:template:update')")
 	@PutMapping("content")
 	public Result<String> updateContent(@Validated @RequestBody EmailTemplateContentForm form) {
-		sysEmailTemplateService.updateContent(form);
+		emailTemplateService.updateContent(form);
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 

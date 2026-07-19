@@ -1,24 +1,38 @@
 package com.auth.service.system.message.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
+import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
+import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.message.convert.InAppEntityAssembler;
+import com.auth.service.system.message.convert.InAppSendTaskConverter;
 import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.mapper.InAppMessageMapper;
 import com.auth.service.system.message.model.entity.InAppMessageEntity;
 import com.auth.service.system.message.model.enums.*;
 import com.auth.service.system.message.model.form.inapp.InAppComposeForm;
+import com.auth.service.system.message.model.po.InAppSendTaskPageRowPO;
+import com.auth.service.system.message.model.query.InAppSendTaskQuery;
 import com.auth.service.system.message.model.value.recipient.RecipientScope;
 import com.auth.service.system.message.model.vo.inapp.InAppComposeResultVO;
+import com.auth.service.system.message.model.vo.inapp.InAppSendTaskDetailVO;
+import com.auth.service.system.message.model.vo.inapp.InAppSendTaskPageResponse;
 import com.auth.service.system.message.service.InAppSendTaskService;
 import com.auth.service.system.message.support.inapp.InAppComposeDispatchTrigger;
 import com.auth.service.system.message.support.inapp.InAppComposeFormValidation;
+import com.auth.service.system.message.support.recipient.RecipientScopeJsonSupport;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.auth.service.system.message.exception.MessageResultCode.IN_APP_SEND_TASK_NOT_FOUND;
-import static com.auth.service.system.message.exception.MessageResultCode.IN_APP_SEND_TASK_RETRY_NOT_ALLOWED;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+
+import static com.auth.service.system.message.exception.MessageResultCode.*;
 
 /**
  * 管理端站内信按范围发送
@@ -31,6 +45,8 @@ public class InAppSendTaskServiceImpl extends ServiceImpl<InAppMessageMapper, In
 		implements InAppSendTaskService {
 
 	private final InAppComposeDispatchTrigger dispatchTrigger;
+
+	private final AuditUserDisplayService auditUserDisplayService;
 
 	/**
 	 * 是否读扩散任务
@@ -47,21 +63,36 @@ public class InAppSendTaskServiceImpl extends ServiceImpl<InAppMessageMapper, In
 	}
 
 	/**
-	 * 校验任务可补发：存在、管理端编排、写扩散、状态可恢复
-	 * @param taskId 任务 ID（任务不存在时用于异常参数）
+	 * {@inheritDoc}
 	 */
-	private void requireRetryable(Long taskId) {
+	@Override
+	@Transactional(readOnly = true)
+	public PageResponse<InAppSendTaskPageResponse> getSendTaskPage(InAppSendTaskQuery query) {
+		Page<InAppMessageEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
+		IPage<InAppSendTaskPageRowPO> page = baseMapper.selectSendTaskPage(pageParams, query);
+		IPage<InAppSendTaskPageResponse> voPage = page.convert(InAppSendTaskConverter.INSTANCE::toPageResponse);
+
+		auditUserDisplayService.enrichAuditUsernames(voPage, null, null);
+		return PageResponse.of(voPage);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	@Transactional(readOnly = true)
+	public InAppSendTaskDetailVO getSendTaskById(Long taskId) {
 		InAppMessageEntity task = super.getById(taskId);
 		if (task == null) {
 			throw new MessageException(IN_APP_SEND_TASK_NOT_FOUND, taskId);
 		}
 
-		InAppMessageStatus status = InAppMessageStatus.from(task.getStatus());
-		boolean retryAllowed = MessageSendSourceType.ADMIN_COMPOSE.name().equals(task.getSourceType())
-				&& !isPullDelivery(task) && status != null && status.isRetryable();
-		if (!retryAllowed) {
-			throw new MessageException(IN_APP_SEND_TASK_RETRY_NOT_ALLOWED, task.getId(), task.getStatus());
-		}
+		InAppSendTaskDetailVO vo = InAppSendTaskConverter.INSTANCE.toDetailVo(task);
+		String scopeJson = task.getRecipientScopeJson();
+		vo.setRecipientScopeIds(RecipientScopeJsonSupport.parseIds(scopeJson));
+		vo.setIncludeChildren(RecipientScopeJsonSupport.parseIncludeChildren(scopeJson));
+		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(vo), null, null);
+		return vo;
 	}
 
 	/**
@@ -107,25 +138,70 @@ public class InAppSendTaskServiceImpl extends ServiceImpl<InAppMessageMapper, In
 	 */
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public InAppComposeResultVO retry(Long taskId) {
-		requireRetryable(taskId);
+	public void retry(Long taskId) {
+		InAppMessageEntity task = super.getById(taskId);
+		if (task == null) {
+			throw new MessageException(IN_APP_SEND_TASK_NOT_FOUND, taskId);
+		}
+
+		InAppMessageStatus status = InAppMessageStatus.from(task.getStatus());
+		boolean retryAllowed = MessageSendSourceType.ADMIN_COMPOSE.name().equals(task.getSourceType())
+				&& !isPullDelivery(task) && status != null && status.isRetryable();
+		if (!retryAllowed) {
+			throw new MessageException(IN_APP_SEND_TASK_RETRY_NOT_ALLOWED);
+		}
 
 		if (baseMapper.resetForRetry(taskId) <= 0) {
-			InAppMessageEntity latest = super.getById(taskId);
-			if (latest == null) {
-				throw new MessageException(IN_APP_SEND_TASK_NOT_FOUND, taskId);
-			}
-			// CAS 失败：即使状态仍“看起来可重试”，也按最新快照拒绝，避免并发双发
-			throw new MessageException(IN_APP_SEND_TASK_RETRY_NOT_ALLOWED, taskId, latest.getStatus());
+			// CAS 失败：并发下状态已变，避免双发
+			throw new MessageException(IN_APP_SEND_TASK_RETRY_NOT_ALLOWED);
 		}
 
 		dispatchTrigger.dispatchAfterCommit(taskId);
-		return InAppComposeResultVO.builder()
-			.taskId(taskId)
-			.totalCount(0)
-			.successCount(0)
-			.status(InAppMessageStatus.PENDING.name())
-			.build();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void recall(Long taskId) {
+		InAppMessageEntity task = super.getById(taskId);
+		if (task == null) {
+			throw new MessageException(IN_APP_SEND_TASK_NOT_FOUND, taskId);
+		}
+
+		InAppMessageStatus status = InAppMessageStatus.from(task.getStatus());
+		if (status == null || !status.isRecallable()) {
+			throw new MessageException(IN_APP_SEND_TASK_RECALL_NOT_ALLOWED);
+		}
+
+		Long recallUserId = SecurityUserUtils.getUserId();
+		if (baseMapper.recallTask(taskId, LocalDateTime.now(), recallUserId) <= 0) {
+			// CAS 失败：并发下状态已变
+			throw new MessageException(IN_APP_SEND_TASK_RECALL_NOT_ALLOWED);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void batchDelete(List<Long> ids) {
+		if (CollUtil.isEmpty(ids)) {
+			return;
+		}
+
+		List<InAppMessageEntity> tasks = baseMapper.selectByIds(ids);
+		boolean blocked = tasks.stream().anyMatch(task -> {
+			InAppMessageStatus status = InAppMessageStatus.from(task.getStatus());
+			return status == null || !status.isDeletable();
+		});
+		if (blocked) {
+			throw new MessageException(IN_APP_SEND_TASK_DELETE_NOT_ALLOWED);
+		}
+
+		baseMapper.deleteByIds(ids);
 	}
 
 }

@@ -64,7 +64,23 @@ public enum InAppMessageStatus {
 	 * @return true=可重置为 PENDING
 	 */
 	public boolean isRetryable() {
-		return this == PENDING || this == SENDING || this == PARTIAL || this == FAILED;
+		return this == PENDING || this == SENDING || this == PARTIAL || this == FAILED || this == NO_RECIPIENTS;
+	}
+
+	/**
+	 * 是否允许撤回（与 {@code recallTask} 可撤回状态一致）
+	 * @return true=可置为 RECALLED
+	 */
+	public boolean isRecallable() {
+		return this == SUCCESS || this == PARTIAL || this == NO_RECIPIENTS;
+	}
+
+	/**
+	 * 是否允许物理删除（排除进行中，避免与异步派发竞态）
+	 * @return true=可删除
+	 */
+	public boolean isDeletable() {
+		return this != PENDING && this != SENDING;
 	}
 
 }

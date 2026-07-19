@@ -22,7 +22,7 @@ import com.auth.service.system.message.model.vo.template.MessageTemplateDetailVO
 import com.auth.service.system.message.model.vo.template.MessageTemplatePageResponse;
 import com.auth.service.system.message.model.vo.template.MessageTemplateRequireFieldRow;
 import com.auth.service.system.message.service.MessageDispatchService;
-import com.auth.service.system.message.service.SysMessageTemplateService;
+import com.auth.service.system.message.service.MessageTemplateService;
 import com.auth.service.system.message.support.template.FreemarkerTemplateRenderer;
 import com.auth.service.system.message.support.template.MessageTemplateRequireFieldsJsonSupport;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -48,8 +48,8 @@ import static com.auth.service.system.message.exception.MessageResultCode.MESSAG
  */
 @RequiredArgsConstructor
 @Service
-public class SysMessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMapper, MessageTemplateEntity>
-		implements SysMessageTemplateService {
+public class MessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMapper, MessageTemplateEntity>
+		implements MessageTemplateService {
 
 	private final MessageTemplateMapper messageTemplateMapper;
 

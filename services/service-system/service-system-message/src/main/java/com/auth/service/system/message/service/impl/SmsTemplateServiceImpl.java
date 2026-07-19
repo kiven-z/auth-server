@@ -4,9 +4,8 @@ import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.mapper.MessageTemplateMapper;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
-import com.auth.service.system.message.model.enums.InAppContentType;
-import com.auth.service.system.message.model.form.inapp.InAppTemplateForm;
-import com.auth.service.system.message.service.SysInAppTemplateService;
+import com.auth.service.system.message.model.form.sms.SmsTemplateForm;
+import com.auth.service.system.message.service.SmsTemplateService;
 import com.auth.service.system.message.support.template.MessageTemplateRequireFieldsJsonSupport;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
@@ -17,41 +16,33 @@ import java.util.Collections;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 
 /**
- * 站内信模板服务
+ * 短信模板服务。
  *
  * @author Bunny
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-public class SysInAppTemplateServiceImpl extends ServiceImpl<MessageTemplateMapper, MessageTemplateEntity>
-		implements SysInAppTemplateService {
+public class SmsTemplateServiceImpl extends ServiceImpl<MessageTemplateMapper, MessageTemplateEntity>
+		implements SmsTemplateService {
 
-	/**
-	 * 将表单字段写入实体
-	 * @param form 站内信模板表单
-	 * @param entity 目标实体
-	 */
-	private static void applyForm(InAppTemplateForm form, MessageTemplateEntity entity) {
-		InAppContentType contentType = InAppContentType.from(form.getContentType());
-
-		entity.setSceneCode(form.getTemplateCode());
-		entity.setTemplateName(form.getTemplateName());
-		entity.setSubject(form.getSubject());
-		entity.setImMessageType(contentType.name());
-		entity.setBodyContent(form.getContent());
-		entity.setDescription(form.getDescription());
-		entity.setStatus(form.getStatus());
-		entity.setPriority(form.getPriority());
+	private static void applyEntity(SmsTemplateForm form, MessageTemplateEntity exists) {
+		exists.setSceneCode(form.getTemplateCode());
+		exists.setTemplateName(form.getTemplateName());
+		exists.setProviderTemplateCode(form.getProviderTemplateCode());
+		exists.setDescription(form.getDescription());
+		exists.setStatus(form.getStatus());
+		exists.setPriority(form.getPriority());
+		exists.setBodyContent(form.getContent());
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void create(InAppTemplateForm form) {
+	public void create(SmsTemplateForm form) {
 		MessageTemplateEntity entity = new MessageTemplateEntity();
-		entity.setChannel(MessageChannel.IN_APP.name());
-		applyForm(form, entity);
+		entity.setChannel(MessageChannel.SMS.name());
+		applyEntity(form, entity);
 		entity.setRequireFields(MessageTemplateRequireFieldsJsonSupport.toJson(Collections.emptyList()));
 
 		save(entity);
@@ -61,13 +52,13 @@ public class SysInAppTemplateServiceImpl extends ServiceImpl<MessageTemplateMapp
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void update(InAppTemplateForm form) {
+	public void update(SmsTemplateForm form) {
 		MessageTemplateEntity exists = getById(form.getId());
 		if (exists == null) {
 			throw new MessageException(DATA_NOT_EXIST);
 		}
 
-		applyForm(form, exists);
+		applyEntity(form, exists);
 		updateById(exists);
 	}
 

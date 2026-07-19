@@ -4,6 +4,7 @@ import com.auth.common.core.utils.JsonSupport;
 import com.auth.service.system.message.model.enums.RecipientScopeType;
 import com.auth.service.system.message.model.value.recipient.RecipientScope;
 import com.fasterxml.jackson.databind.JsonNode;
+import jakarta.annotation.Nullable;
 import lombok.experimental.UtilityClass;
 
 import java.util.Collections;
@@ -78,17 +79,18 @@ public class RecipientScopeJsonSupport {
 	}
 
 	/**
-	 * 解析部门是否含子树；缺省为 true
+	 * 解析部门是否含子树；字段缺失或不合法时返回 null
 	 * @param json JSON 字符串
-	 * @return includeChildren
+	 * @return includeChildren；无有效字段时为 null
 	 */
-	private static Boolean parseIncludeChildren(String json) {
+	@Nullable
+	public static Boolean parseIncludeChildren(String json) {
 		if (json == null || json.isBlank()) {
-			return true;
+			return null;
 		}
 		JsonNode node = JsonSupport.readObjectTree(json).get(KEY_INCLUDE_CHILDREN);
 		if (node == null || node.isNull() || !node.isBoolean()) {
-			return true;
+			return null;
 		}
 		return node.asBoolean();
 	}

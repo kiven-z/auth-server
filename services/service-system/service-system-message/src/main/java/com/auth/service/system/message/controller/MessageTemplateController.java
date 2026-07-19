@@ -13,7 +13,7 @@ import com.auth.service.system.message.model.query.MessageTemplateQuery;
 import com.auth.service.system.message.model.vo.template.MessageTemplateDetailVO;
 import com.auth.service.system.message.model.vo.template.MessageTemplatePageResponse;
 import com.auth.service.system.message.model.vo.template.MessageTemplateRequireFieldRow;
-import com.auth.service.system.message.service.SysMessageTemplateService;
+import com.auth.service.system.message.service.MessageTemplateService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -36,20 +36,19 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
 @Validated
 @RequestMapping("/api/system/message/template")
 @RestController
-public class SysMessageTemplateController {
+public class MessageTemplateController {
 
-	private final SysMessageTemplateService sysMessageTemplateService;
+	private final MessageTemplateService messageTemplateService;
 
-	public SysMessageTemplateController(SysMessageTemplateService sysMessageTemplateService) {
-		this.sysMessageTemplateService = sysMessageTemplateService;
+	public MessageTemplateController(MessageTemplateService messageTemplateService) {
+		this.messageTemplateService = messageTemplateService;
 	}
 
 	@Operation(summary = "分页查询消息模板", description = "按 channel 过滤；前端传入固定渠道参数即可复用本接口")
 	@PreAuthorize("@auth.decide('message:template:query')")
 	@GetMapping()
 	public Result<PageResponse<MessageTemplatePageResponse>> getMessageTemplatePage(@Valid MessageTemplateQuery query) {
-		PageResponse<MessageTemplatePageResponse> pageResponse = sysMessageTemplateService
-			.getMessageTemplatePage(query);
+		PageResponse<MessageTemplatePageResponse> pageResponse = messageTemplateService.getMessageTemplatePage(query);
 		return Result.success(pageResponse);
 	}
 
@@ -58,7 +57,7 @@ public class SysMessageTemplateController {
 	@GetMapping("{id}")
 	public Result<MessageTemplateDetailVO> getMessageTemplateById(@PathVariable("id") Long id,
 			@RequestParam @NotBlank(message = "消息渠道不能为空") String channel) {
-		MessageTemplateDetailVO detailVO = sysMessageTemplateService.getMessageTemplateById(id, channel);
+		MessageTemplateDetailVO detailVO = messageTemplateService.getMessageTemplateById(id, channel);
 		return Result.success(detailVO);
 	}
 
@@ -67,7 +66,7 @@ public class SysMessageTemplateController {
 	@GetMapping("{id}/require-fields")
 	public Result<List<MessageTemplateRequireFieldRow>> getRequireFields(@PathVariable("id") Long id,
 			@RequestParam @NotBlank(message = "消息渠道不能为空") String channel) {
-		List<MessageTemplateRequireFieldRow> requireFields = sysMessageTemplateService.getRequireFields(id, channel);
+		List<MessageTemplateRequireFieldRow> requireFields = messageTemplateService.getRequireFields(id, channel);
 		return Result.success(requireFields);
 	}
 
@@ -78,7 +77,7 @@ public class SysMessageTemplateController {
 	@DeleteMapping()
 	public Result<String> batchDelete(@RequestBody @NotEmpty(message = "模板ID列表不能为空") List<Long> ids,
 			@RequestParam @NotBlank(message = "消息渠道不能为空") String channel) {
-		sysMessageTemplateService.batchDelete(ids, channel);
+		messageTemplateService.batchDelete(ids, channel);
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
@@ -88,7 +87,7 @@ public class SysMessageTemplateController {
 	@PreAuthorize("@auth.decide('message:template:update')")
 	@PutMapping("status")
 	public Result<String> batchUpdateStatus(@Validated @RequestBody MessageTemplateStatusForm form) {
-		sysMessageTemplateService.batchUpdateStatus(form);
+		messageTemplateService.batchUpdateStatus(form);
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
@@ -98,7 +97,7 @@ public class SysMessageTemplateController {
 	@PreAuthorize("@auth.decide('message:template:update')")
 	@PutMapping("require-fields")
 	public Result<String> updateRequireFields(@Validated @RequestBody MessageTemplateRequireFieldsForm form) {
-		sysMessageTemplateService.updateRequireFields(form);
+		messageTemplateService.updateRequireFields(form);
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
@@ -106,7 +105,7 @@ public class SysMessageTemplateController {
 	@PreAuthorize("@auth.decide('message:template:update')")
 	@PostMapping("test-send")
 	public Result<String> testSend(@Validated @RequestBody MessageTemplateTestSendForm form) {
-		sysMessageTemplateService.testSend(form);
+		messageTemplateService.testSend(form);
 		return Result.success();
 	}
 

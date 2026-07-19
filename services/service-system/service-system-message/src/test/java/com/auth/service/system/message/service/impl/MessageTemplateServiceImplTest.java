@@ -49,11 +49,11 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**
- * {@link SysMessageTemplateServiceImpl} 分页、详情、删除、启停、变量列表与测试发送单元测试
+ * {@link MessageTemplateServiceImpl} 分页、详情、删除、启停、变量列表与测试发送单元测试
  */
 @DisplayName("SysMessageTemplateServiceImpl 消息模板公共服务")
 @ExtendWith(MockitoExtension.class)
-class SysMessageTemplateServiceImplTest {
+class MessageTemplateServiceImplTest {
 
 	@Mock
 	private MessageTemplateMapper messageTemplateMapper;
@@ -65,7 +65,7 @@ class SysMessageTemplateServiceImplTest {
 	private MessageDispatchService messageDispatchService;
 
 	@InjectMocks
-	private SysMessageTemplateServiceImpl sysMessageTemplateService;
+	private MessageTemplateServiceImpl sysMessageTemplateService;
 
 	@BeforeAll
 	static void initMybatisPlusTableInfo() {
@@ -386,7 +386,7 @@ class SysMessageTemplateServiceImplTest {
 	@DisplayName("测试发送：不声明事务，避免外发 I/O 并进长事务")
 	void testSend_shouldNotDeclareTransactional() throws NoSuchMethodException {
 		// 发送含外部渠道副作用，方法级事务会拖住连接且无法与渠道侧对齐回滚
-		Method method = SysMessageTemplateServiceImpl.class.getMethod("testSend", MessageTemplateTestSendForm.class);
+		Method method = MessageTemplateServiceImpl.class.getMethod("testSend", MessageTemplateTestSendForm.class);
 		assertThat(method.getAnnotation(Transactional.class)).isNull();
 	}
 

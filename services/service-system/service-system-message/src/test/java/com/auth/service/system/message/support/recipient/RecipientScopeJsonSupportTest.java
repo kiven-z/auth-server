@@ -67,4 +67,27 @@ class RecipientScopeJsonSupportTest {
 		assertThat(scope.includeChildrenOrDefault()).isFalse();
 	}
 
+	@Test
+	@DisplayName("parseIncludeChildren：空 JSON 返回 null")
+	void parseIncludeChildren_blank_shouldBeNull() {
+		// 无快照时前端详情不展示 includeChildren
+		assertThat(RecipientScopeJsonSupport.parseIncludeChildren(null)).isNull();
+		assertThat(RecipientScopeJsonSupport.parseIncludeChildren("  ")).isNull();
+	}
+
+	@Test
+	@DisplayName("parseIncludeChildren：字段缺失或非布尔返回 null")
+	void parseIncludeChildren_invalid_shouldBeNull() {
+		// 仅 ids 的 USER 快照、非法类型均视为未指定
+		assertThat(RecipientScopeJsonSupport.parseIncludeChildren("{\"ids\":[1]}")).isNull();
+		assertThat(RecipientScopeJsonSupport.parseIncludeChildren("{\"includeChildren\":\"yes\"}")).isNull();
+	}
+
+	@Test
+	@DisplayName("parseIncludeChildren：合法布尔按值返回")
+	void parseIncludeChildren_boolean_shouldReturnValue() {
+		assertThat(RecipientScopeJsonSupport.parseIncludeChildren("{\"includeChildren\":true}")).isTrue();
+		assertThat(RecipientScopeJsonSupport.parseIncludeChildren("{\"includeChildren\":false}")).isFalse();
+	}
+
 }

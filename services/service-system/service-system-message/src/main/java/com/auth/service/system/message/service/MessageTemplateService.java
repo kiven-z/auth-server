@@ -18,7 +18,7 @@ import java.util.List;
  *
  * @author Bunny
  */
-public interface SysMessageTemplateService extends IService<MessageTemplateEntity> {
+public interface MessageTemplateService extends IService<MessageTemplateEntity> {
 
 	/**
 	 * 按渠道分页查询消息模板

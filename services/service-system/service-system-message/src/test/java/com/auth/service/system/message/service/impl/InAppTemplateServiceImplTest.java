@@ -28,17 +28,17 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 /**
- * {@link SysInAppTemplateServiceImpl} 站内信模板创建与更新单元测试
+ * {@link InAppTemplateServiceImpl} 站内信模板创建与更新单元测试
  */
 @DisplayName("SysInAppTemplateServiceImpl 站内信模板服务")
 @ExtendWith(MockitoExtension.class)
-class SysInAppTemplateServiceImplTest {
+class InAppTemplateServiceImplTest {
 
 	@Mock
 	private MessageTemplateMapper messageTemplateMapper;
 
 	@InjectMocks
-	private SysInAppTemplateServiceImpl sysInAppTemplateService;
+	private InAppTemplateServiceImpl sysInAppTemplateService;
 
 	@BeforeAll
 	static void initMybatisPlusTableInfo() {
