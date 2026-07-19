@@ -1,7 +1,8 @@
-package com.auth.module.file.api.enums;
+package com.auth.module.file.api.enums.policy;
 
-import com.auth.module.file.api.model.enums.FileBizType;
 import com.auth.module.file.api.model.enums.VisibilityRule;
+import com.auth.module.file.api.policy.AllowedMimeTypes;
+import com.auth.module.file.api.policy.FileBizType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -44,15 +45,32 @@ class FileBizTypeTest {
 	}
 
 	@Test
-	@DisplayName("策略字段：枚举项暴露可见性规则")
+	@DisplayName("策略字段：枚举项暴露可见性、大小与 MIME 白名单")
 	void exposesPolicyMetadataOnEnumConstants() {
-		// 验证策略元数据已内聚到枚举，避免布尔组合歧义
+		// 验证上传策略元数据已内聚到枚举，且复用 AllowedMimeTypes 常量组
 		assertThat(FileBizType.AVATAR.getCode()).isEqualTo("avatar");
 		assertThat(FileBizType.AVATAR.getVisibilityRule()).isEqualTo(VisibilityRule.FORCE_PUBLIC);
-		assertThat(FileBizType.MESSAGE_IMAGE.getCode()).isEqualTo("message-image");
-		assertThat(FileBizType.MESSAGE_IMAGE.getVisibilityRule()).isEqualTo(VisibilityRule.FORCE_PUBLIC);
-		assertThat(FileBizType.ATTACHMENT.getCode()).isEqualTo("attachment");
-		assertThat(FileBizType.ATTACHMENT.getVisibilityRule()).isEqualTo(VisibilityRule.DEFAULT_PRIVATE);
+		assertThat(FileBizType.AVATAR.getMaxSizeMb()).isEqualTo(2);
+		assertThat(FileBizType.AVATAR.getAllowedMimeTypes()).isEqualTo(AllowedMimeTypes.RASTER_IMAGE);
+		assertThat(FileBizType.AVATAR.allowsMimeType("image/png")).isTrue();
+		assertThat(FileBizType.AVATAR.allowsMimeType("image/gif")).isFalse();
+		assertThat(FileBizType.MESSAGE_IMAGE.getAllowedMimeTypes()).isEqualTo(AllowedMimeTypes.RASTER_IMAGE_WITH_GIF);
+		assertThat(FileBizType.MESSAGE_IMAGE.allowsMimeType("image/gif")).isTrue();
+		assertThat(FileBizType.ATTACHMENT.getAllowedMimeTypes()).containsAll(AllowedMimeTypes.RASTER_IMAGE_WITH_GIF)
+			.containsAll(AllowedMimeTypes.OFFICE_DOCUMENTS);
+		assertThat(FileBizType.ATTACHMENT.allowsMimeType("application/pdf")).isTrue();
+		assertThat(FileBizType.INTERNAL_EXPORT.getAllowedMimeTypes()).isEqualTo(AllowedMimeTypes.EXPORT_DOCUMENTS);
+		assertThat(FileBizType.AVATAR.maxSizeBytes()).isEqualTo(2L * 1024 * 1024);
+	}
+
+	@Test
+	@DisplayName("allowsMimeType：忽略 charset 参数并大小写不敏感")
+	void allowsMimeTypeIgnoresCharsetAndCase() {
+		// 验证 MIME 参数剥离与大小写归一化
+		assertThat(FileBizType.ATTACHMENT.allowsMimeType("TEXT/PLAIN; charset=UTF-8")).isTrue();
+		assertThat(FileBizType.AVATAR.allowsMimeType("Image/JPEG")).isTrue();
+		assertThat(FileBizType.AVATAR.allowsMimeType("")).isFalse();
+		assertThat(FileBizType.AVATAR.allowsMimeType(null)).isFalse();
 	}
 
 	@Test

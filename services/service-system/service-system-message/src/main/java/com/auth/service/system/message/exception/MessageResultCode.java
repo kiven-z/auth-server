@@ -89,27 +89,15 @@ public enum MessageResultCode implements SystemResultCode {
 	IN_APP_SEND_TASK_NOT_FOUND(404, 322, "IN_APP_SEND_TASK_NOT_FOUND", "system.in_app.send_task.not_found"),
 
 	/**
-	 * 站内信发送任务当前状态不可补发
+	 * 站内信发送任务当前状态不允许该操作（补发 / 撤回 / 删除等）
 	 */
-	IN_APP_SEND_TASK_RETRY_NOT_ALLOWED(409, 323, "IN_APP_SEND_TASK_RETRY_NOT_ALLOWED",
+	IN_APP_SEND_TASK_OPERATION_NOT_ALLOWED(409, 323, "IN_APP_SEND_TASK_OPERATION_NOT_ALLOWED",
 			"system.in_app.send_task.operation_not_allowed"),
 
 	/**
 	 * 渠道投递存在失败目标（{0}=失败数，{1}=总数）；成功目标的回执已落库
 	 */
-	MESSAGE_DELIVERY_FAILED(502, 324, "MESSAGE_DELIVERY_FAILED", "system.message.delivery.failed"),
-
-	/**
-	 * 站内信发送任务当前状态不可撤回
-	 */
-	IN_APP_SEND_TASK_RECALL_NOT_ALLOWED(409, 327, "IN_APP_SEND_TASK_RECALL_NOT_ALLOWED",
-			"system.in_app.send_task.operation_not_allowed"),
-
-	/**
-	 * 站内信发送任务当前状态不可删除
-	 */
-	IN_APP_SEND_TASK_DELETE_NOT_ALLOWED(409, 328, "IN_APP_SEND_TASK_DELETE_NOT_ALLOWED",
-			"system.in_app.send_task.operation_not_allowed");
+	MESSAGE_DELIVERY_FAILED(502, 324, "MESSAGE_DELIVERY_FAILED", "system.message.delivery.failed");
 
 	private final int httpStatus;
 

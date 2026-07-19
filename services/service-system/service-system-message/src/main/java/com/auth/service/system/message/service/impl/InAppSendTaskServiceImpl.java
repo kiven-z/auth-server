@@ -32,7 +32,8 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
-import static com.auth.service.system.message.exception.MessageResultCode.*;
+import static com.auth.service.system.message.exception.MessageResultCode.IN_APP_SEND_TASK_NOT_FOUND;
+import static com.auth.service.system.message.exception.MessageResultCode.IN_APP_SEND_TASK_OPERATION_NOT_ALLOWED;
 
 /**
  * 管理端站内信按范围发送
@@ -148,12 +149,12 @@ public class InAppSendTaskServiceImpl extends ServiceImpl<InAppMessageMapper, In
 		boolean retryAllowed = MessageSendSourceType.ADMIN_COMPOSE.name().equals(task.getSourceType())
 				&& !isPullDelivery(task) && status != null && status.isRetryable();
 		if (!retryAllowed) {
-			throw new MessageException(IN_APP_SEND_TASK_RETRY_NOT_ALLOWED);
+			throw new MessageException(IN_APP_SEND_TASK_OPERATION_NOT_ALLOWED);
 		}
 
 		if (baseMapper.resetForRetry(taskId) <= 0) {
 			// CAS 失败：并发下状态已变，避免双发
-			throw new MessageException(IN_APP_SEND_TASK_RETRY_NOT_ALLOWED);
+			throw new MessageException(IN_APP_SEND_TASK_OPERATION_NOT_ALLOWED);
 		}
 
 		dispatchTrigger.dispatchAfterCommit(taskId);
@@ -172,13 +173,13 @@ public class InAppSendTaskServiceImpl extends ServiceImpl<InAppMessageMapper, In
 
 		InAppMessageStatus status = InAppMessageStatus.from(task.getStatus());
 		if (status == null || !status.isRecallable()) {
-			throw new MessageException(IN_APP_SEND_TASK_RECALL_NOT_ALLOWED);
+			throw new MessageException(IN_APP_SEND_TASK_OPERATION_NOT_ALLOWED);
 		}
 
 		Long recallUserId = SecurityUserUtils.getUserId();
 		if (baseMapper.recallTask(taskId, LocalDateTime.now(), recallUserId) <= 0) {
 			// CAS 失败：并发下状态已变
-			throw new MessageException(IN_APP_SEND_TASK_RECALL_NOT_ALLOWED);
+			throw new MessageException(IN_APP_SEND_TASK_OPERATION_NOT_ALLOWED);
 		}
 	}
 
@@ -198,7 +199,7 @@ public class InAppSendTaskServiceImpl extends ServiceImpl<InAppMessageMapper, In
 			return status == null || !status.isDeletable();
 		});
 		if (blocked) {
-			throw new MessageException(IN_APP_SEND_TASK_DELETE_NOT_ALLOWED);
+			throw new MessageException(IN_APP_SEND_TASK_OPERATION_NOT_ALLOWED);
 		}
 
 		baseMapper.deleteByIds(ids);

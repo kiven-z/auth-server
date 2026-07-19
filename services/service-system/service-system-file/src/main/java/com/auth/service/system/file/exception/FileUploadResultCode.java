@@ -1,7 +1,6 @@
 package com.auth.service.system.file.exception;
 
 import com.auth.service.system.common.exception.code.SystemResultCode;
-
 import lombok.Getter;
 
 /**
@@ -43,7 +42,27 @@ public enum FileUploadResultCode implements SystemResultCode {
 	 * 文件类型不支持预览
 	 */
 	FILE_PREVIEW_CONTENT_TYPE_NOT_ALLOWED(422, 348, "FILE_PREVIEW_CONTENT_TYPE_NOT_ALLOWED",
-			"system.file.preview.content_type_not_allowed");
+			"system.file.preview.content_type_not_allowed"),
+
+	/**
+	 * 文件后缀在全局黑名单中
+	 */
+	FILE_EXTENSION_BLOCKED(400, 349, "FILE_EXTENSION_BLOCKED", "system.file.upload.extension_blocked"),
+
+	/**
+	 * 文件大小超过业务类型上限
+	 */
+	FILE_SIZE_EXCEEDED(400, 350, "FILE_SIZE_EXCEEDED", "system.file.upload.size_exceeded"),
+
+	/**
+	 * 文件真实类型不在业务白名单中
+	 */
+	FILE_TYPE_NOT_ALLOWED(400, 351, "FILE_TYPE_NOT_ALLOWED", "system.file.upload.type_not_allowed"),
+
+	/**
+	 * 无法检测文件内容类型
+	 */
+	FILE_CONTENT_DETECT_FAILED(400, 352, "FILE_CONTENT_DETECT_FAILED", "system.file.upload.content_detect_failed");
 
 	private final int httpStatus;
 

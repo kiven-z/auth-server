@@ -421,7 +421,7 @@ class InAppSendTaskServiceImplTest {
 
 		assertThatThrownBy(() -> service.retry(21L)).isInstanceOf(MessageException.class)
 			.extracting(ex -> ((MessageException) ex).getResultCode())
-			.isEqualTo(IN_APP_SEND_TASK_RETRY_NOT_ALLOWED);
+			.isEqualTo(IN_APP_SEND_TASK_OPERATION_NOT_ALLOWED);
 		verify(inAppMessageMapper, never()).resetForRetry(any());
 		verify(dispatchTrigger, never()).dispatchAfterCommit(any());
 	}
@@ -433,7 +433,7 @@ class InAppSendTaskServiceImplTest {
 
 		assertThatThrownBy(() -> service.retry(23L)).isInstanceOf(MessageException.class)
 			.extracting(ex -> ((MessageException) ex).getResultCode())
-			.isEqualTo(IN_APP_SEND_TASK_RETRY_NOT_ALLOWED);
+			.isEqualTo(IN_APP_SEND_TASK_OPERATION_NOT_ALLOWED);
 		verify(inAppMessageMapper, never()).resetForRetry(any());
 	}
 
@@ -451,7 +451,7 @@ class InAppSendTaskServiceImplTest {
 
 		assertThatThrownBy(() -> service.retry(26L)).isInstanceOf(MessageException.class)
 			.extracting(ex -> ((MessageException) ex).getResultCode())
-			.isEqualTo(IN_APP_SEND_TASK_RETRY_NOT_ALLOWED);
+			.isEqualTo(IN_APP_SEND_TASK_OPERATION_NOT_ALLOWED);
 		verify(inAppMessageMapper, never()).resetForRetry(any());
 		verify(dispatchTrigger, never()).dispatchAfterCommit(any());
 	}
@@ -468,7 +468,7 @@ class InAppSendTaskServiceImplTest {
 
 		assertThatThrownBy(() -> service.retry(22L)).isInstanceOf(MessageException.class)
 			.extracting(ex -> ((MessageException) ex).getResultCode())
-			.isEqualTo(IN_APP_SEND_TASK_RETRY_NOT_ALLOWED);
+			.isEqualTo(IN_APP_SEND_TASK_OPERATION_NOT_ALLOWED);
 		verify(inAppMessageMapper, never()).resetForRetry(any());
 	}
 
@@ -482,7 +482,7 @@ class InAppSendTaskServiceImplTest {
 
 		assertThatThrownBy(() -> service.retry(25L)).isInstanceOf(MessageException.class)
 			.extracting(ex -> ((MessageException) ex).getResultCode())
-			.isEqualTo(IN_APP_SEND_TASK_RETRY_NOT_ALLOWED);
+			.isEqualTo(IN_APP_SEND_TASK_OPERATION_NOT_ALLOWED);
 		verify(dispatchTrigger, never()).dispatchAfterCommit(any());
 		verify(inAppMessageMapper, times(1)).selectById(25L);
 	}
@@ -572,7 +572,7 @@ class InAppSendTaskServiceImplTest {
 
 		assertThatThrownBy(() -> service.recall(33L)).isInstanceOf(MessageException.class)
 			.extracting(ex -> ((MessageException) ex).getResultCode())
-			.isEqualTo(IN_APP_SEND_TASK_RECALL_NOT_ALLOWED);
+			.isEqualTo(IN_APP_SEND_TASK_OPERATION_NOT_ALLOWED);
 		verify(inAppMessageMapper, never()).recallTask(any(), any(), any());
 	}
 
@@ -583,7 +583,7 @@ class InAppSendTaskServiceImplTest {
 
 		assertThatThrownBy(() -> service.recall(34L)).isInstanceOf(MessageException.class)
 			.extracting(ex -> ((MessageException) ex).getResultCode())
-			.isEqualTo(IN_APP_SEND_TASK_RECALL_NOT_ALLOWED);
+			.isEqualTo(IN_APP_SEND_TASK_OPERATION_NOT_ALLOWED);
 		verify(inAppMessageMapper, never()).recallTask(any(), any(), any());
 	}
 
@@ -594,7 +594,7 @@ class InAppSendTaskServiceImplTest {
 
 		assertThatThrownBy(() -> service.recall(35L)).isInstanceOf(MessageException.class)
 			.extracting(ex -> ((MessageException) ex).getResultCode())
-			.isEqualTo(IN_APP_SEND_TASK_RECALL_NOT_ALLOWED);
+			.isEqualTo(IN_APP_SEND_TASK_OPERATION_NOT_ALLOWED);
 		verify(inAppMessageMapper, never()).recallTask(any(), any(), any());
 	}
 
@@ -610,7 +610,7 @@ class InAppSendTaskServiceImplTest {
 
 			assertThatThrownBy(() -> service.recall(36L)).isInstanceOf(MessageException.class)
 				.extracting(ex -> ((MessageException) ex).getResultCode())
-				.isEqualTo(IN_APP_SEND_TASK_RECALL_NOT_ALLOWED);
+				.isEqualTo(IN_APP_SEND_TASK_OPERATION_NOT_ALLOWED);
 		}
 
 		verify(inAppMessageMapper, times(1)).selectById(36L);
@@ -654,7 +654,7 @@ class InAppSendTaskServiceImplTest {
 
 		assertThatThrownBy(() -> service.batchDelete(ids)).isInstanceOf(MessageException.class)
 			.extracting(ex -> ((MessageException) ex).getResultCode())
-			.isEqualTo(IN_APP_SEND_TASK_DELETE_NOT_ALLOWED);
+			.isEqualTo(IN_APP_SEND_TASK_OPERATION_NOT_ALLOWED);
 		verify(inAppMessageMapper, never()).deleteByIds(any());
 	}
 
@@ -667,7 +667,7 @@ class InAppSendTaskServiceImplTest {
 
 		assertThatThrownBy(() -> service.batchDelete(ids)).isInstanceOf(MessageException.class)
 			.extracting(ex -> ((MessageException) ex).getResultCode())
-			.isEqualTo(IN_APP_SEND_TASK_DELETE_NOT_ALLOWED);
+			.isEqualTo(IN_APP_SEND_TASK_OPERATION_NOT_ALLOWED);
 		verify(inAppMessageMapper, never()).deleteByIds(any());
 	}
 
@@ -682,7 +682,7 @@ class InAppSendTaskServiceImplTest {
 
 		assertThatThrownBy(() -> service.batchDelete(ids)).isInstanceOf(MessageException.class)
 			.extracting(ex -> ((MessageException) ex).getResultCode())
-			.isEqualTo(IN_APP_SEND_TASK_DELETE_NOT_ALLOWED);
+			.isEqualTo(IN_APP_SEND_TASK_OPERATION_NOT_ALLOWED);
 		verify(inAppMessageMapper, never()).deleteByIds(any());
 	}
 

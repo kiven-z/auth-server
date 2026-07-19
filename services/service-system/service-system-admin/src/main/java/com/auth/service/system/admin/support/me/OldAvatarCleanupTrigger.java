@@ -2,8 +2,8 @@ package com.auth.service.system.admin.support.me;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.file.api.model.enums.FileDeleteSource;
-import com.auth.module.file.api.model.enums.FileBizType;
 import com.auth.module.file.api.model.request.OwnedFileDeleteByUrlRequest;
+import com.auth.module.file.api.policy.FileBizType;
 import com.auth.module.file.api.port.OwnedFileOperations;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

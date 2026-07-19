@@ -2,9 +2,9 @@ package com.auth.service.system.file.service.impl;
 
 import com.auth.module.file.api.model.dto.FileUploadMetadata;
 import com.auth.module.file.api.model.dto.FileUploadResultDTO;
-import com.auth.module.file.api.model.enums.FileBizType;
 import com.auth.module.file.api.model.enums.FileUploadMode;
 import com.auth.module.file.api.model.enums.StoragePlatformEnum;
+import com.auth.module.file.api.policy.FileBizType;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.file.config.properties.FileUploadProperties;
@@ -18,6 +18,7 @@ import com.auth.service.system.file.model.value.StoredFile;
 import com.auth.service.system.file.service.FileUploadService;
 import com.auth.service.system.file.storage.core.StoragePlatformFacadeRegistry;
 import com.auth.service.system.file.storage.core.provider.FileStorageProvider;
+import com.auth.service.system.file.support.FileUploadContentValidator;
 import com.auth.service.system.file.utils.FileObjectKeyUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -87,8 +88,9 @@ public class FileUploadServiceImpl extends ServiceImpl<FileRecordMapper, FileRec
 		StoragePlatformEnum platform = StoragePlatformEnum.fromNullable(storagePlatform);
 		platform = Objects.requireNonNullElse(platform, fileUploadProperties.getDefaultPlatform());
 
-		// 2. 解析业务类型与可见性
+		// 2. 解析业务类型与可见性，并按策略校验内容
 		FileBizType bizType = FileBizType.require(metadata.getBizType());
+		FileUploadContentValidator.validate(file, bizType);
 		String bizTypeCode = bizType.getCode();
 		boolean isPrivate = bizType.getVisibilityRule().resolve(metadata.getIsPrivate());
 
