@@ -1,4 +1,4 @@
-package com.auth.service.system.message.model.vo;
+package com.auth.service.system.message.model.vo.template;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.media.Schema;

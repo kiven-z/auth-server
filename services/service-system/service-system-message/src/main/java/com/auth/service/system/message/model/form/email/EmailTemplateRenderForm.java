@@ -1,6 +1,6 @@
 package com.auth.service.system.message.model.form.email;
 
-import com.auth.service.system.message.model.vo.MessageTemplateRequireFieldRow;
+import com.auth.service.system.message.model.vo.template.MessageTemplateRequireFieldRow;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;

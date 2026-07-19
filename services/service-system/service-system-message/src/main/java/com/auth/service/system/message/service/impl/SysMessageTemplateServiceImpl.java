@@ -18,9 +18,9 @@ import com.auth.service.system.message.model.form.MessageTemplateStatusForm;
 import com.auth.service.system.message.model.form.MessageTemplateTestSendForm;
 import com.auth.service.system.message.model.po.MessageTemplatePageRowPO;
 import com.auth.service.system.message.model.query.MessageTemplateQuery;
-import com.auth.service.system.message.model.vo.MessageTemplateDetailVO;
-import com.auth.service.system.message.model.vo.MessageTemplatePageResponse;
-import com.auth.service.system.message.model.vo.MessageTemplateRequireFieldRow;
+import com.auth.service.system.message.model.vo.template.MessageTemplateDetailVO;
+import com.auth.service.system.message.model.vo.template.MessageTemplatePageResponse;
+import com.auth.service.system.message.model.vo.template.MessageTemplateRequireFieldRow;
 import com.auth.service.system.message.service.MessageDispatchService;
 import com.auth.service.system.message.service.SysMessageTemplateService;
 import com.auth.service.system.message.support.template.FreemarkerTemplateRenderer;
@@ -48,7 +48,6 @@ import static com.auth.service.system.message.exception.MessageResultCode.MESSAG
  */
 @RequiredArgsConstructor
 @Service
-@Transactional(readOnly = true)
 public class SysMessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMapper, MessageTemplateEntity>
 		implements SysMessageTemplateService {
 
@@ -62,6 +61,7 @@ public class SysMessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMa
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(readOnly = true)
 	public PageResponse<MessageTemplatePageResponse> getMessageTemplatePage(MessageTemplateQuery query) {
 		Page<MessageTemplateEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
 		IPage<MessageTemplatePageRowPO> page = messageTemplateMapper.selectMessageTemplatePage(pageParams, query);
@@ -75,6 +75,7 @@ public class SysMessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMa
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(readOnly = true)
 	public MessageTemplateDetailVO getMessageTemplateById(Long id, String channel) {
 		MessageTemplateEntity entity = requireTemplate(id, channel);
 		MessageTemplateDetailVO vo = MessageTemplateConverter.INSTANCE.toDetailVo(entity);
@@ -103,6 +104,7 @@ public class SysMessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMa
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(readOnly = true)
 	public List<MessageTemplateRequireFieldRow> getRequireFields(Long id, String channel) {
 		MessageTemplateEntity entity = requireTemplate(id, channel);
 		String requireFields = entity.getRequireFields();
@@ -160,6 +162,7 @@ public class SysMessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMa
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(rollbackFor = Exception.class)
 	public void testSend(MessageTemplateTestSendForm form) {
 		// 解析渠道枚举；非法名称视为不支持
 		String formChannel = form.getChannel();

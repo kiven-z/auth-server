@@ -56,8 +56,9 @@ public class DingTalkWorkNoticeClient {
 	 * @param messageType 消息类型
 	 * @param title Markdown 标题（TEXT 可空）
 	 * @param content 正文
+	 * @return 钉钉异步任务 ID（task_id）
 	 */
-	public void sendWorkNotice(List<String> userIds, DingTalkMessageType messageType, String title, String content) {
+	public String sendWorkNotice(List<String> userIds, DingTalkMessageType messageType, String title, String content) {
 		if (CollUtil.isEmpty(userIds)) {
 			throw new MessageException(PARAM_REQUIRED, "接收人");
 		}
@@ -91,8 +92,9 @@ public class DingTalkWorkNoticeClient {
 		try {
 			// 发起请求
 			ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
-			assertSendSuccess(response.getBody(), agentId, useridList);
-			log.debug("DingTalk work notice sent, agentId={}, userIds={}", agentId, useridList);
+			String taskId = assertSendSuccess(response.getBody(), agentId, useridList);
+			log.debug("DingTalk work notice sent, agentId={}, userIds={}, taskId={}", agentId, useridList, taskId);
+			return taskId;
 		}
 		catch (RestClientException ex) {
 			log.error("DingTalk work notice HTTP error, agentId={}, userIds={}", agentId, useridList, ex);
@@ -131,12 +133,13 @@ public class DingTalkWorkNoticeClient {
 	}
 
 	/**
-	 * 断言发送成功
+	 * 断言发送成功并解析 task_id
 	 * @param responseBody 响应体
 	 * @param agentId 代理ID
 	 * @param useridList 用户ID列表
+	 * @return 钉钉异步任务 ID
 	 */
-	private void assertSendSuccess(String responseBody, Long agentId, String useridList) {
+	private String assertSendSuccess(String responseBody, Long agentId, String useridList) {
 		if (CharSequenceUtil.isBlank(responseBody)) {
 			throw new MessageException(PARAM_REQUIRED, "响应体");
 		}
@@ -144,7 +147,8 @@ public class DingTalkWorkNoticeClient {
 		JSONObject json = JSONUtil.parseObj(responseBody);
 		Integer errcode = json.getInt("errcode");
 		if (errcode != null && errcode == 0) {
-			return;
+			Object taskId = json.get("task_id");
+			return taskId == null ? null : String.valueOf(taskId);
 		}
 
 		String detail = json.getStr("errmsg", responseBody);

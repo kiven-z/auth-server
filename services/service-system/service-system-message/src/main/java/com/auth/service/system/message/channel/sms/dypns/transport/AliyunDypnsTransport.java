@@ -87,8 +87,9 @@ public class AliyunDypnsTransport implements AutoCloseable {
 	 * @param phone 手机号
 	 * @param providerTemplateCode 厂商侧模板编码
 	 * @param templateParamJson 模板变量 JSON
+	 * @return 厂商回执 ID（优先 BizId，其次 RequestId）
 	 */
-	public void sendVerifyCode(String phone, String providerTemplateCode, String templateParamJson) {
+	public String sendVerifyCode(String phone, String providerTemplateCode, String templateParamJson) {
 		smsProperties.assertSendRequiredConfigured();
 
 		// 验证手机号
@@ -117,6 +118,10 @@ public class AliyunDypnsTransport implements AutoCloseable {
 			if (body == null || !"OK".equalsIgnoreCase(body.getCode())) {
 				throw new MessageException(SMS_DYPNS_SEND_FAILED, String.valueOf(body));
 			}
+
+			var model = body.getModel();
+			return model != null && CharSequenceUtil.isNotBlank(model.getBizId()) ? model.getBizId()
+					: CharSequenceUtil.blankToDefault(body.getRequestId(), null);
 		}
 		catch (InterruptedException e) {
 			Thread.currentThread().interrupt();

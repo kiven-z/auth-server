@@ -2,7 +2,7 @@ package com.auth.service.system.message.support.template;
 
 import com.auth.common.core.utils.JsonSupport;
 import com.auth.service.system.message.exception.MessageException;
-import com.auth.service.system.message.model.vo.MessageTemplateRequireFieldRow;
+import com.auth.service.system.message.model.vo.template.MessageTemplateRequireFieldRow;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

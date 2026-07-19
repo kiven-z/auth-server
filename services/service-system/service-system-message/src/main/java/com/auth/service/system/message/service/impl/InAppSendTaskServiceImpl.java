@@ -8,7 +8,7 @@ import com.auth.service.system.message.model.entity.InAppMessageEntity;
 import com.auth.service.system.message.model.enums.*;
 import com.auth.service.system.message.model.form.inapp.InAppComposeForm;
 import com.auth.service.system.message.model.value.recipient.RecipientScope;
-import com.auth.service.system.message.model.vo.InAppComposeResultVO;
+import com.auth.service.system.message.model.vo.inapp.InAppComposeResultVO;
 import com.auth.service.system.message.service.InAppSendTaskService;
 import com.auth.service.system.message.support.inapp.InAppComposeDispatchTrigger;
 import com.auth.service.system.message.support.inapp.InAppComposeFormValidation;
@@ -47,18 +47,21 @@ public class InAppSendTaskServiceImpl extends ServiceImpl<InAppMessageMapper, In
 	}
 
 	/**
-	 * 统一受理结果
-	 * @param taskId 任务 ID
-	 * @param status 任务状态
-	 * @return 受理结果
+	 * 校验任务可补发：存在、管理端编排、写扩散、状态可恢复
+	 * @param taskId 任务 ID（任务不存在时用于异常参数）
 	 */
-	private static InAppComposeResultVO accepted(Long taskId, InAppMessageStatus status) {
-		return InAppComposeResultVO.builder()
-			.taskId(taskId)
-			.totalCount(0)
-			.successCount(0)
-			.status(status.name())
-			.build();
+	private void requireRetryable(Long taskId) {
+		InAppMessageEntity task = super.getById(taskId);
+		if (task == null) {
+			throw new MessageException(IN_APP_SEND_TASK_NOT_FOUND, taskId);
+		}
+
+		InAppMessageStatus status = InAppMessageStatus.from(task.getStatus());
+		boolean retryAllowed = MessageSendSourceType.ADMIN_COMPOSE.name().equals(task.getSourceType())
+				&& !isPullDelivery(task) && status != null && status.isRetryable();
+		if (!retryAllowed) {
+			throw new MessageException(IN_APP_SEND_TASK_RETRY_NOT_ALLOWED, task.getId(), task.getStatus());
+		}
 	}
 
 	/**
@@ -81,12 +84,22 @@ public class InAppSendTaskServiceImpl extends ServiceImpl<InAppMessageMapper, In
 
 		// 公开直接做读扩散，不写用户收件表
 		if (type.deliveryMode().isPull()) {
-			return accepted(task.getId(), InAppMessageStatus.SUCCESS);
+			return InAppComposeResultVO.builder()
+				.taskId(task.getId())
+				.totalCount(0)
+				.successCount(0)
+				.status(InAppMessageStatus.SUCCESS.name())
+				.build();
 		}
 
 		// 非公开写入用户收件表
 		dispatchTrigger.dispatchAfterCommit(task.getId());
-		return accepted(task.getId(), InAppMessageStatus.PENDING);
+		return InAppComposeResultVO.builder()
+			.taskId(task.getId())
+			.totalCount(0)
+			.successCount(0)
+			.status(InAppMessageStatus.PENDING.name())
+			.build();
 	}
 
 	/**
@@ -95,32 +108,24 @@ public class InAppSendTaskServiceImpl extends ServiceImpl<InAppMessageMapper, In
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public InAppComposeResultVO retry(Long taskId) {
-		InAppMessageEntity task = super.getById(taskId);
-		if (task == null) {
-			throw new MessageException(IN_APP_SEND_TASK_NOT_FOUND, taskId);
-		}
-		if (!MessageSendSourceType.ADMIN_COMPOSE.name().equals(task.getSourceType())) {
-			throw new MessageException(IN_APP_SEND_TASK_RETRY_NOT_ALLOWED, task.getId(), task.getStatus());
-		}
-		if (isPullDelivery(task)) {
-			throw new MessageException(IN_APP_SEND_TASK_RETRY_NOT_ALLOWED, task.getId(), task.getStatus());
-		}
-		String status = task.getStatus();
-		if (InAppMessageStatus.SUCCESS.name().equals(status) || InAppMessageStatus.RECALLED.name().equals(status)) {
-			throw new MessageException(IN_APP_SEND_TASK_RETRY_NOT_ALLOWED, task.getId(), status);
-		}
+		requireRetryable(taskId);
 
-		boolean reset = baseMapper.resetForRetry(taskId) > 0;
-		if (!reset) {
+		if (baseMapper.resetForRetry(taskId) <= 0) {
 			InAppMessageEntity latest = super.getById(taskId);
 			if (latest == null) {
 				throw new MessageException(IN_APP_SEND_TASK_NOT_FOUND, taskId);
 			}
+			// CAS 失败：即使状态仍“看起来可重试”，也按最新快照拒绝，避免并发双发
 			throw new MessageException(IN_APP_SEND_TASK_RETRY_NOT_ALLOWED, taskId, latest.getStatus());
 		}
 
 		dispatchTrigger.dispatchAfterCommit(taskId);
-		return accepted(taskId, InAppMessageStatus.PENDING);
+		return InAppComposeResultVO.builder()
+			.taskId(taskId)
+			.totalCount(0)
+			.successCount(0)
+			.status(InAppMessageStatus.PENDING.name())
+			.build();
 	}
 
 }

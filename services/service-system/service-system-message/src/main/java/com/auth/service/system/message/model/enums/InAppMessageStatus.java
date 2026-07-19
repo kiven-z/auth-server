@@ -40,6 +40,31 @@ public enum InAppMessageStatus {
 	/**
 	 * 已撤回
 	 */
-	RECALLED
+	RECALLED;
+
+	/**
+	 * 解析任务状态（大小写不敏感）
+	 * @param raw 原始字符串
+	 * @return 枚举；无法识别时返回 {@code null}
+	 */
+	public static InAppMessageStatus from(String raw) {
+		if (raw == null || raw.isBlank()) {
+			return null;
+		}
+		try {
+			return InAppMessageStatus.valueOf(raw.trim().toUpperCase());
+		}
+		catch (IllegalArgumentException ex) {
+			return null;
+		}
+	}
+
+	/**
+	 * 是否允许补发重置（与 {@code resetForRetry} 可重置状态一致）
+	 * @return true=可重置为 PENDING
+	 */
+	public boolean isRetryable() {
+		return this == PENDING || this == SENDING || this == PARTIAL || this == FAILED;
+	}
 
 }

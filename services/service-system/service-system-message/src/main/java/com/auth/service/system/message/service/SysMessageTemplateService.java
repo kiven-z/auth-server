@@ -6,9 +6,9 @@ import com.auth.service.system.message.model.form.MessageTemplateRequireFieldsFo
 import com.auth.service.system.message.model.form.MessageTemplateStatusForm;
 import com.auth.service.system.message.model.form.MessageTemplateTestSendForm;
 import com.auth.service.system.message.model.query.MessageTemplateQuery;
-import com.auth.service.system.message.model.vo.MessageTemplateDetailVO;
-import com.auth.service.system.message.model.vo.MessageTemplatePageResponse;
-import com.auth.service.system.message.model.vo.MessageTemplateRequireFieldRow;
+import com.auth.service.system.message.model.vo.template.MessageTemplateDetailVO;
+import com.auth.service.system.message.model.vo.template.MessageTemplatePageResponse;
+import com.auth.service.system.message.model.vo.template.MessageTemplateRequireFieldRow;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;

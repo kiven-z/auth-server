@@ -2,7 +2,7 @@ package com.auth.service.system.message.service;
 
 import com.auth.service.system.message.model.entity.InAppMessageEntity;
 import com.auth.service.system.message.model.form.inapp.InAppComposeForm;
-import com.auth.service.system.message.model.vo.InAppComposeResultVO;
+import com.auth.service.system.message.model.vo.inapp.InAppComposeResultVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**

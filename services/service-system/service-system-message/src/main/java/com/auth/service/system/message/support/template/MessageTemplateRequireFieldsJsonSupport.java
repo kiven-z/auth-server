@@ -5,7 +5,7 @@ import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.core.utils.JsonSupport;
 import com.auth.service.system.common.exception.code.SystemResultCode;
 import com.auth.service.system.message.exception.MessageException;
-import com.auth.service.system.message.model.vo.MessageTemplateRequireFieldRow;
+import com.auth.service.system.message.model.vo.template.MessageTemplateRequireFieldRow;
 import lombok.experimental.UtilityClass;
 
 import java.util.*;

@@ -48,8 +48,9 @@ public class MimeMailTransport {
 	 * 同步发送邮件
 	 * @param emailSendDTO 发送请求
 	 * @param rendered 渲染后的主题和内容
+	 * @return 邮件 Message-ID（厂商回执）
 	 */
-	public void send(EmailSendDTO emailSendDTO, RenderedEmail rendered) {
+	public String send(EmailSendDTO emailSendDTO, RenderedEmail rendered) {
 		try {
 			String subject = rendered.subject();
 			String body = rendered.body();
@@ -81,6 +82,7 @@ public class MimeMailTransport {
 			addAttachments(helper, attachmentFiles);
 
 			mailSender.send(message);
+			return message.getMessageID();
 		}
 		catch (MessagingException e) {
 			log.error("Failed to send email, templateCode={}, reason={}", emailSendDTO.getTemplateCode(),

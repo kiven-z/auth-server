@@ -1,15 +1,18 @@
 package com.auth.service.system.message.channel.email;
 
 import com.auth.module.message.api.channel.MessageChannel;
-import com.auth.module.message.api.channel.MessageSender;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.message.api.model.email.EmailChannelOptions;
+import com.auth.service.system.message.channel.AbstractRecordingMessageSender;
 import com.auth.service.system.message.channel.email.transport.MimeMailTransport;
 import com.auth.service.system.message.model.dto.EmailSendDTO;
+import com.auth.service.system.message.model.value.delivery.ChannelSendResult;
 import com.auth.service.system.message.model.value.email.RenderedEmail;
+import com.auth.service.system.message.support.delivery.ChannelDeliveryRecorder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -21,13 +24,15 @@ import java.util.Optional;
  */
 @Slf4j
 @Component
-public class EmailMessageSender implements MessageSender {
+public class EmailMessageSender extends AbstractRecordingMessageSender {
 
 	private final EmailTemplatePipeline emailTemplatePipeline;
 
 	private final MimeMailTransport mimeMailTransport;
 
-	public EmailMessageSender(EmailTemplatePipeline emailTemplatePipeline, MimeMailTransport mimeMailTransport) {
+	public EmailMessageSender(EmailTemplatePipeline emailTemplatePipeline, MimeMailTransport mimeMailTransport,
+			ChannelDeliveryRecorder deliveryRecorder) {
+		super(deliveryRecorder);
 		this.emailTemplatePipeline = emailTemplatePipeline;
 		this.mimeMailTransport = mimeMailTransport;
 	}
@@ -65,12 +70,13 @@ public class EmailMessageSender implements MessageSender {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void sendByTemplate(TemplateMessageCommand command) {
+	protected ChannelSendResult doSend(TemplateMessageCommand command) {
 		EmailSendDTO emailSendDTO = toEmailDto(command);
 		Map<String, Object> variables = Optional.ofNullable(command.getVariables()).orElseGet(HashMap::new);
 		RenderedEmail rendered = emailTemplatePipeline.render(command.getTemplateCode(), variables);
 
-		mimeMailTransport.send(emailSendDTO, rendered);
+		String providerMsgId = mimeMailTransport.send(emailSendDTO, rendered);
+		return ChannelSendResult.sharedSuccess(command.getTargets(), providerMsgId, LocalDateTime.now());
 	}
 
 }

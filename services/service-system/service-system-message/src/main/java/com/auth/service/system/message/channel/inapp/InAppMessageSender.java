@@ -18,6 +18,7 @@ import com.auth.service.system.message.model.enums.MessageSendSourceType;
 import com.auth.service.system.message.model.value.inapp.RenderedInAppMessage;
 import com.auth.service.system.message.service.InAppMessageRecipientWriteService;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -57,6 +58,7 @@ public class InAppMessageSender implements MessageSender {
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(rollbackFor = Exception.class)
 	public void sendByTemplate(TemplateMessageCommand command) {
 		List<Long> userIds = CollUtil.emptyIfNull(command.getTargets())
 			.stream()

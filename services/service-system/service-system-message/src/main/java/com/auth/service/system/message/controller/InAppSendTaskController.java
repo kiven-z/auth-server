@@ -6,7 +6,7 @@ import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.message.model.constants.MessageAuditBizModule;
 import com.auth.service.system.message.model.form.inapp.InAppComposeForm;
-import com.auth.service.system.message.model.vo.InAppComposeResultVO;
+import com.auth.service.system.message.model.vo.inapp.InAppComposeResultVO;
 import com.auth.service.system.message.service.InAppSendTaskService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

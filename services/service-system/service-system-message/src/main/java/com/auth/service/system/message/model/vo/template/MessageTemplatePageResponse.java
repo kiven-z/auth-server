@@ -1,4 +1,4 @@
-package com.auth.service.system.message.model.vo;
+package com.auth.service.system.message.model.vo.template;
 
 import com.auth.common.core.model.response.BaseResponse;
 import io.swagger.v3.oas.annotations.media.Schema;

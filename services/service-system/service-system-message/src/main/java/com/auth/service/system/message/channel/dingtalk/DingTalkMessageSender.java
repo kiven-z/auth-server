@@ -2,15 +2,18 @@ package com.auth.service.system.message.channel.dingtalk;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.message.api.channel.MessageChannel;
-import com.auth.module.message.api.channel.MessageSender;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.message.api.model.dingtalk.DingTalkChannelOptions;
 import com.auth.module.message.api.model.dingtalk.DingTalkMessageType;
+import com.auth.service.system.message.channel.AbstractRecordingMessageSender;
 import com.auth.service.system.message.channel.dingtalk.client.DingTalkWorkNoticeClient;
 import com.auth.service.system.message.exception.MessageException;
+import com.auth.service.system.message.model.value.delivery.ChannelSendResult;
 import com.auth.service.system.message.model.value.dingtalk.RenderedDingTalkNotice;
+import com.auth.service.system.message.support.delivery.ChannelDeliveryRecorder;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -24,14 +27,15 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
  * @author Bunny
  */
 @Component
-public class DingTalkMessageSender implements MessageSender {
+public class DingTalkMessageSender extends AbstractRecordingMessageSender {
 
 	private final DingTalkTemplatePipeline dingTalkTemplatePipeline;
 
 	private final DingTalkWorkNoticeClient workNoticeClient;
 
 	public DingTalkMessageSender(DingTalkTemplatePipeline dingTalkTemplatePipeline,
-			DingTalkWorkNoticeClient workNoticeClient) {
+			DingTalkWorkNoticeClient workNoticeClient, ChannelDeliveryRecorder deliveryRecorder) {
+		super(deliveryRecorder);
 		this.dingTalkTemplatePipeline = dingTalkTemplatePipeline;
 		this.workNoticeClient = workNoticeClient;
 	}
@@ -42,11 +46,12 @@ public class DingTalkMessageSender implements MessageSender {
 	}
 
 	@Override
-	public void sendByTemplate(TemplateMessageCommand command) {
+	protected ChannelSendResult doSend(TemplateMessageCommand command) {
 		RenderedDingTalkNotice rendered = resolveContent(command);
 
-		workNoticeClient.sendWorkNotice(command.getTargets(), rendered.messageType(), rendered.title(),
-				rendered.content());
+		String providerMsgId = workNoticeClient.sendWorkNotice(command.getTargets(), rendered.messageType(),
+				rendered.title(), rendered.content());
+		return ChannelSendResult.sharedSuccess(command.getTargets(), providerMsgId, LocalDateTime.now());
 	}
 
 	/**

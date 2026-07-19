@@ -92,7 +92,12 @@ public enum MessageResultCode implements SystemResultCode {
 	 * 站内信发送任务当前状态不可补发（{0}=taskId，{1}=status）
 	 */
 	IN_APP_SEND_TASK_RETRY_NOT_ALLOWED(409, 323, "IN_APP_SEND_TASK_RETRY_NOT_ALLOWED",
-			"system.in_app.send_task.retry_not_allowed");
+			"system.in_app.send_task.retry_not_allowed"),
+
+	/**
+	 * 渠道投递存在失败目标（{0}=失败数，{1}=总数）；成功目标的回执已落库
+	 */
+	MESSAGE_DELIVERY_FAILED(502, 324, "MESSAGE_DELIVERY_FAILED", "system.message.delivery.failed");
 
 	private final int httpStatus;
 

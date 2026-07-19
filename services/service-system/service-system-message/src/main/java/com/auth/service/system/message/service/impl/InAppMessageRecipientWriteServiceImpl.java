@@ -33,7 +33,7 @@ public class InAppMessageRecipientWriteServiceImpl
 	 * {@inheritDoc}
 	 */
 	@Override
-	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
+	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
 	public int insertBatch(List<InAppMessageRecipientEntity> rows) {
 		if (CollUtil.isEmpty(rows)) {
 			return 0;

@@ -6,7 +6,7 @@ import com.auth.service.system.message.mapper.InAppMessageMapper;
 import com.auth.service.system.message.model.entity.InAppMessageEntity;
 import com.auth.service.system.message.model.enums.*;
 import com.auth.service.system.message.model.form.inapp.InAppComposeForm;
-import com.auth.service.system.message.model.vo.InAppComposeResultVO;
+import com.auth.service.system.message.model.vo.inapp.InAppComposeResultVO;
 import com.auth.service.system.message.support.inapp.InAppComposeDispatchTrigger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

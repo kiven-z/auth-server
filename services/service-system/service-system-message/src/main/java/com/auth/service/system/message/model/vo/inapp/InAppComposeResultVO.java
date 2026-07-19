@@ -1,4 +1,4 @@
-package com.auth.service.system.message.model.vo;
+package com.auth.service.system.message.model.vo.inapp;
 
 import com.auth.common.core.annotation.JsonStringFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
