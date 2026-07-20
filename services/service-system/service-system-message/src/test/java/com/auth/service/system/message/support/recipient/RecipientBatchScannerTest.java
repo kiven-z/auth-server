@@ -19,12 +19,8 @@ import java.util.stream.LongStream;
 import static com.auth.service.system.message.exception.MessageResultCode.IN_APP_RECIPIENT_SCOPE_INVALID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.anyCollection;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link RecipientBatchScanner} 单元测试
@@ -42,20 +38,6 @@ class RecipientBatchScannerTest {
 	private RecipientBatchScanner scanner;
 
 	@Test
-	@DisplayName("ALL：多批游标扫描")
-	void scan_all_shouldConsumeMultipleBatches() {
-		// 全员分两批返回，验证 consumer 被调用两次
-		when(recipientUserMapper.selectAllEnabledUserIdsAfter(0L, 2)).thenReturn(List.of(1L, 2L));
-		when(recipientUserMapper.selectAllEnabledUserIdsAfter(2L, 2)).thenReturn(List.of(3L));
-		when(recipientUserMapper.selectAllEnabledUserIdsAfter(3L, 2)).thenReturn(List.of());
-
-		List<List<Long>> batches = new ArrayList<>();
-		scanner.scan(RecipientScope.builder().type(RecipientScopeType.ALL).build(), 2, batches::add);
-
-		assertThat(batches).containsExactly(List.of(1L, 2L), List.of(3L));
-	}
-
-	@Test
 	@DisplayName("USER：按候选 ID 游标过滤")
 	void scan_user_shouldQueryEnabledAfter() {
 		when(recipientUserMapper.selectEnabledUserIdsAfter(List.of(1L, 2L), 0L, 100)).thenReturn(List.of(1L));
@@ -66,6 +48,20 @@ class RecipientBatchScannerTest {
 				collected::addAll);
 
 		assertThat(collected).containsExactly(1L);
+	}
+
+	@Test
+	@DisplayName("USER：多批游标扫描")
+	void scan_user_shouldConsumeMultipleBatches() {
+		when(recipientUserMapper.selectEnabledUserIdsAfter(List.of(1L, 2L, 3L), 0L, 2)).thenReturn(List.of(1L, 2L));
+		when(recipientUserMapper.selectEnabledUserIdsAfter(List.of(1L, 2L, 3L), 2L, 2)).thenReturn(List.of(3L));
+		when(recipientUserMapper.selectEnabledUserIdsAfter(List.of(1L, 2L, 3L), 3L, 2)).thenReturn(List.of());
+
+		List<List<Long>> batches = new ArrayList<>();
+		scanner.scan(RecipientScope.builder().type(RecipientScopeType.USER).ids(List.of(1L, 2L, 3L)).build(), 2,
+				batches::add);
+
+		assertThat(batches).containsExactly(List.of(1L, 2L), List.of(3L));
 	}
 
 	@Test
@@ -135,10 +131,10 @@ class RecipientBatchScannerTest {
 	@Test
 	@DisplayName("首批为空：consumer 不被调用")
 	void scan_emptyFirstBatch_shouldNotInvokeConsumer() {
-		when(recipientUserMapper.selectAllEnabledUserIdsAfter(0L, 10)).thenReturn(List.of());
+		when(recipientUserMapper.selectEnabledUserIdsAfter(List.of(1L), 0L, 10)).thenReturn(List.of());
 
 		AtomicInteger calls = new AtomicInteger();
-		scanner.scan(RecipientScope.builder().type(RecipientScopeType.ALL).build(), 10,
+		scanner.scan(RecipientScope.builder().type(RecipientScopeType.USER).ids(List.of(1L)).build(), 10,
 				batch -> calls.incrementAndGet());
 
 		assertThat(calls.get()).isZero();
@@ -146,30 +142,34 @@ class RecipientBatchScannerTest {
 
 	@Test
 	@DisplayName("2500 用户按 1000 分批：共 3 批且游标递增")
-	void scan_all_shouldFetchInThreeBatchesWithAdvancingCursor() {
+	void scan_user_shouldFetchInThreeBatchesWithAdvancingCursor() {
 		// 模拟 2500 个启用用户，验证游标按 lastUserId 推进
-		List<Long> allUserIds = LongStream.rangeClosed(1, 2500).boxed().toList();
-		when(recipientUserMapper.selectAllEnabledUserIdsAfter(0L, 1000)).thenReturn(allUserIds.subList(0, 1000));
-		when(recipientUserMapper.selectAllEnabledUserIdsAfter(1000L, 1000)).thenReturn(allUserIds.subList(1000, 2000));
-		when(recipientUserMapper.selectAllEnabledUserIdsAfter(2000L, 1000)).thenReturn(allUserIds.subList(2000, 2500));
-		when(recipientUserMapper.selectAllEnabledUserIdsAfter(2500L, 1000)).thenReturn(List.of());
+		List<Long> candidateIds = LongStream.rangeClosed(1, 2500).boxed().toList();
+		when(recipientUserMapper.selectEnabledUserIdsAfter(candidateIds, 0L, 1000))
+			.thenReturn(candidateIds.subList(0, 1000));
+		when(recipientUserMapper.selectEnabledUserIdsAfter(candidateIds, 1000L, 1000))
+			.thenReturn(candidateIds.subList(1000, 2000));
+		when(recipientUserMapper.selectEnabledUserIdsAfter(candidateIds, 2000L, 1000))
+			.thenReturn(candidateIds.subList(2000, 2500));
+		when(recipientUserMapper.selectEnabledUserIdsAfter(candidateIds, 2500L, 1000)).thenReturn(List.of());
 
 		List<Long> collected = new ArrayList<>();
-		scanner.scan(RecipientScope.builder().type(RecipientScopeType.ALL).build(), 1000, collected::addAll);
+		scanner.scan(RecipientScope.builder().type(RecipientScopeType.USER).ids(candidateIds).build(), 1000,
+				collected::addAll);
 
 		assertThat(collected).hasSize(2500);
 		assertThat(collected.get(0)).isEqualTo(1L);
 		assertThat(collected.get(2499)).isEqualTo(2500L);
-		verify(recipientUserMapper).selectAllEnabledUserIdsAfter(0L, 1000);
-		verify(recipientUserMapper).selectAllEnabledUserIdsAfter(1000L, 1000);
-		verify(recipientUserMapper).selectAllEnabledUserIdsAfter(2000L, 1000);
-		verify(recipientUserMapper).selectAllEnabledUserIdsAfter(2500L, 1000);
+		verify(recipientUserMapper).selectEnabledUserIdsAfter(candidateIds, 0L, 1000);
+		verify(recipientUserMapper).selectEnabledUserIdsAfter(candidateIds, 1000L, 1000);
+		verify(recipientUserMapper).selectEnabledUserIdsAfter(candidateIds, 2000L, 1000);
+		verify(recipientUserMapper).selectEnabledUserIdsAfter(candidateIds, 2500L, 1000);
 	}
 
 	@Test
 	@DisplayName("batchSize 非法：抛 IllegalArgumentException")
 	void scan_shouldRejectNonPositiveBatchSize() {
-		RecipientScope scope = RecipientScope.builder().type(RecipientScopeType.ALL).build();
+		RecipientScope scope = RecipientScope.builder().type(RecipientScopeType.USER).ids(List.of(1L)).build();
 		assertThatThrownBy(() -> scanner.scan(scope, 0, batch -> {
 		})).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("batchSize must be positive");
 	}

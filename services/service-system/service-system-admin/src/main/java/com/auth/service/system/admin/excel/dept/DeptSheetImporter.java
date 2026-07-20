@@ -1,11 +1,5 @@
 package com.auth.service.system.admin.excel.dept;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.file.importer.AbstractSheetImporter;
 import com.auth.module.file.importer.model.ImportRowError;
@@ -22,8 +16,13 @@ import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.experimental.Accessors;
-
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.auth.common.core.utils.TreeParentIdUtil.ROOT_PARENT_ID;
 

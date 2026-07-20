@@ -1,8 +1,8 @@
 package com.auth.service.system.admin.support.grant;
 
-import java.util.function.LongConsumer;
-
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
+
+import java.util.function.LongConsumer;
 
 /**
  * 按主体类型委托 {@link LongConsumer} 完成 grant_table 授权前存在性校验。

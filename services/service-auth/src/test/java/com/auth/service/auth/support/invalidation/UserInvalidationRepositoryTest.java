@@ -1,8 +1,5 @@
 package com.auth.service.auth.support.invalidation;
 
-import java.util.List;
-import java.util.stream.IntStream;
-
 import com.auth.service.auth.config.AuthorizationInvalidationProperties;
 import com.auth.service.auth.mapper.UserMapper;
 import com.auth.service.auth.model.po.user.UserInvalidationStatePO;
@@ -13,11 +10,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+import java.util.stream.IntStream;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link UserInvalidationRepository} 单元测试

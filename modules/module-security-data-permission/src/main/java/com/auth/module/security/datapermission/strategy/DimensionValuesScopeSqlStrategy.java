@@ -1,11 +1,11 @@
 package com.auth.module.security.datapermission.strategy;
 
+import cn.hutool.core.collection.CollUtil;
+import com.auth.module.security.contract.api.datascope.DataScopeStorageType;
+
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import cn.hutool.core.collection.CollUtil;
-import com.auth.module.security.contract.api.datascope.DataScopeStorageType;
 
 /**
  * 部门 ID 集合范围策略

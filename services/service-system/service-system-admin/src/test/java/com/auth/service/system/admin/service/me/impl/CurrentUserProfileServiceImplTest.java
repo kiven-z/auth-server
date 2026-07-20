@@ -1,12 +1,12 @@
 package com.auth.service.system.admin.service.me.impl;
 
+import com.auth.module.platform.persistence.model.UserEntity;
+import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.system.admin.mapper.user.SysUserMapper;
 import com.auth.service.system.admin.model.form.me.MeAvatarUpdateForm;
 import com.auth.service.system.admin.model.form.me.MeProfileUpdateForm;
 import com.auth.service.system.admin.support.user.UserAvatarUpdateSupport;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
-import com.auth.module.platform.persistence.model.UserEntity;
-import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.system.authorization.dispatch.trigger.UserSessionRevocationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;

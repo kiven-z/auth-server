@@ -63,9 +63,9 @@
         </foreach>
         END
         WHERE
-            task_id = #{taskId}
-            AND channel = #{channel}
-            AND target_value IN
+        task_id = #{taskId}
+        AND channel = #{channel}
+        AND target_value IN
         <foreach collection="list" item="item" open="(" separator="," close=")">
             #{item.targetValue}
         </foreach>

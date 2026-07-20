@@ -1,16 +1,12 @@
 package com.auth.common.data.model;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import lombok.*;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
-
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 /**
  * 分页返回结果

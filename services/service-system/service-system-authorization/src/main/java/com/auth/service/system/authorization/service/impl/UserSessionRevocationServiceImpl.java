@@ -1,7 +1,5 @@
 package com.auth.service.system.authorization.service.impl;
 
-import java.util.List;
-
 import cn.hutool.core.collection.CollUtil;
 import com.auth.common.core.model.response.Result;
 import com.auth.common.web.resttemplate.FeignUtil;
@@ -9,8 +7,9 @@ import com.auth.service.system.authorization.feign.SessionRevocationInnerFeignCl
 import com.auth.service.system.authorization.service.UserSessionRevocationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * 经 auth 内部接口撤销用户会话

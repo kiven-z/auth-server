@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
 /**
- * 站内信模板 前端控制器
+ * 站内信模板
  *
  * @author Bunny
  */
@@ -33,7 +33,7 @@ public class InAppTemplateController {
 		this.inAppTemplateService = inAppTemplateService;
 	}
 
-	@Operation(summary = "添加站内信模板", description = "channel 固定为 IN_APP；contentType 写入 im_message_type；变量列表创建后单独维护")
+	@Operation(summary = "添加站内信模板")
 	@PreAuthorize("@auth.decide('message:template:create')")
 	@PostMapping()
 	public Result<String> create(@Validated(CreateGroup.class) @RequestBody InAppTemplateForm form) {
@@ -44,7 +44,7 @@ public class InAppTemplateController {
 
 	@OperationLog(targetType = "IN_APP_TEMPLATE", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = MessageAuditBizModule.SYS_MESSAGE_TEMPLATE, operation = OperationLogKind.UPDATE)
-	@Operation(summary = "更新站内信模板", description = "更新元数据与正文；不修改 channel、require_fields")
+	@Operation(summary = "更新站内信模板")
 	@PreAuthorize("@auth.decide('message:template:update')")
 	@PutMapping()
 	public Result<String> update(@Validated(UpdateGroup.class) @RequestBody InAppTemplateForm form) {

@@ -1,11 +1,11 @@
 package com.auth.service.system.admin.excel.user;
 
-import java.util.List;
-
 import com.auth.module.file.importer.model.ImportRowError;
 import com.auth.module.file.importer.rule.RowRule;
 import com.auth.module.file.importer.rule.RowRules;
 import lombok.experimental.UtilityClass;
+
+import java.util.List;
 
 /**
  * 用户导入 Validate 阶段：唯一性、长度等规则。

@@ -1,8 +1,5 @@
 package com.auth.service.system.admin.model.vo.permission;
 
-import java.io.Serial;
-import java.util.List;
-
 import com.auth.common.core.model.response.BaseResponse;
 import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -10,6 +7,9 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
+import java.io.Serial;
+import java.util.List;
 
 /**
  * 权限详情 VO

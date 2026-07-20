@@ -1,7 +1,5 @@
 package com.auth.service.system.admin.convert.ingest;
 
-import java.util.Map;
-
 import com.auth.module.security.contract.event.OperationLogPayloadEvent;
 import com.auth.module.security.contract.event.SecurityAuthorizationAuditPayloadEvent;
 import com.auth.module.security.contract.event.SecurityEventType;
@@ -9,6 +7,8 @@ import com.auth.service.system.admin.model.entity.LogAuthorizationAuditEntity;
 import com.auth.service.system.admin.model.entity.LogOperationEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

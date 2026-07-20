@@ -12,7 +12,6 @@ import com.auth.service.auth.model.value.login.command.UsernamePasswordCommand;
 import com.auth.service.auth.support.authorization.AuthProfileRepository;
 import com.auth.service.auth.support.login.LoginAuditService;
 import com.auth.service.auth.support.token.LoginFailureRateLimiter;
-
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 

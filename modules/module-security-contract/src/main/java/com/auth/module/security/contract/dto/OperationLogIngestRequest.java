@@ -1,15 +1,15 @@
 package com.auth.module.security.contract.dto;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.Instant;
-import java.util.Objects;
-
 import com.auth.module.security.contract.event.OperationLogPayloadEvent;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.Instant;
+import java.util.Objects;
 
 /**
  * 操作日志入库请求

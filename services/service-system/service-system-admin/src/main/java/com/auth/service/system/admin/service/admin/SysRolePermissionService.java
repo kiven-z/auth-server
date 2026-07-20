@@ -1,10 +1,10 @@
 package com.auth.service.system.admin.service.admin;
 
-import java.util.List;
-
 import com.auth.service.system.admin.model.entity.SysRolePermissionEntity;
 import com.auth.service.system.admin.model.vo.reference.PermissionReferenceVO;
 import com.baomidou.mybatisplus.extension.service.IService;
+
+import java.util.List;
 
 /**
  * 角色权限分配服务。

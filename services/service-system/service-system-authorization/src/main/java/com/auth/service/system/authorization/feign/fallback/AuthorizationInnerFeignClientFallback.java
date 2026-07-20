@@ -5,13 +5,8 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateResponse;
 import com.auth.service.system.authorization.feign.AuthorizationInnerFeignClient;
-import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidationEventDetailInnerDTO;
-import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidationEventInnerQuery;
-import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidationEventPageInnerDTO;
-import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidationEventStatsInnerDTO;
-import com.auth.service.system.authorization.feign.dto.EffectiveCodesInnerDTO;
+import com.auth.service.system.authorization.feign.dto.*;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.stereotype.Component;
 
 /**

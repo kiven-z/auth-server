@@ -1,7 +1,6 @@
 package com.auth.module.security.starter;
 
 import com.auth.module.security.starter.fixture.ProbeMvcFixtureController;
-
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**

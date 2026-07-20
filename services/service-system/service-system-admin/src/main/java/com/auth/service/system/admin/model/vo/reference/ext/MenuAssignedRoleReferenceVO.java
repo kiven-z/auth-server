@@ -1,13 +1,13 @@
 package com.auth.service.system.admin.model.vo.reference.ext;
 
-import java.io.Serial;
-
 import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
+import java.io.Serial;
 
 /**
  * 菜单角色分配回显（在角色基础字段上扩展是否已分配）

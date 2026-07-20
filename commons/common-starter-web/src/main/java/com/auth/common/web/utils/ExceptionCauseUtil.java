@@ -1,8 +1,8 @@
 package com.auth.common.web.utils;
 
-import java.sql.SQLException;
-
 import lombok.experimental.UtilityClass;
+
+import java.sql.SQLException;
 
 /**
  * 异常原因工具类 用于提取异常原因链中的有用信息

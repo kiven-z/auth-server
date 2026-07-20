@@ -1,15 +1,10 @@
 package com.auth.common.web.exception;
 
-import java.sql.SQLException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.core.model.response.Result;
 import com.auth.common.web.utils.ExceptionCauseUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.exceptions.PersistenceException;
-
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataAccessException;
@@ -17,6 +12,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.sql.SQLException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * MyBatis 特定持久化异常处理 此建议条件加载以避免与 MyBatis 的硬依赖

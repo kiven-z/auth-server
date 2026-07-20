@@ -1,9 +1,5 @@
 package com.auth.service.system.authorization.service.impl;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
-
 import com.auth.service.system.authorization.mapper.AuthorizationInvalidationOutboxOpsMapper;
 import com.auth.service.system.authorization.model.enums.AuthorizationInvalidationFailureRateTrendGranularity;
 import com.auth.service.system.authorization.model.po.AuthorizationInvalidationEventStatsPO;
@@ -22,10 +18,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.SERVICE_UNAVAILABLE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;

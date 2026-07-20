@@ -1,11 +1,11 @@
 package com.auth.common.jwt.testsupport;
 
-import javax.crypto.SecretKey;
-
 import com.auth.common.jwt.autoconfigure.JwtProperties;
 import com.auth.common.jwt.key.HmacSecretKeys;
 import com.auth.common.jwt.provider.HmacJwtTokenProvider;
 import lombok.experimental.UtilityClass;
+
+import javax.crypto.SecretKey;
 
 import static com.auth.common.jwt.model.SignatureAlgorithm.HS256;
 

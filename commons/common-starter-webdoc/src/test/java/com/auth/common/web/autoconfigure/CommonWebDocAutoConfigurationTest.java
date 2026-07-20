@@ -1,16 +1,15 @@
 package com.auth.common.web.autoconfigure;
 
-import java.util.List;
-
 import com.auth.common.web.config.OpenApiDocConfig;
 import com.auth.common.web.config.properties.WebDocProperties;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -1,13 +1,13 @@
 package com.auth.service.auth.model.vo;
 
-import java.io.Serial;
-import java.io.Serializable;
-
 import com.auth.common.core.annotation.JsonStringFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * 在线用户分页行（一人一行）

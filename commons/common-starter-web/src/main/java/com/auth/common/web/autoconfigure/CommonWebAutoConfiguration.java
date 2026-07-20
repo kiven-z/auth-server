@@ -7,7 +7,6 @@ import com.auth.common.web.exception.FallbackExceptionHandler;
 import com.auth.common.web.exception.MyBatisDatabaseExceptionHandler;
 import com.auth.common.web.exception.ValidationExceptionHandler;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.AutoConfiguration;

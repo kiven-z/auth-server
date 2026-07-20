@@ -1,11 +1,11 @@
 package com.auth.service.system.admin.model.po.post;
 
-import java.io.Serial;
-import java.io.Serializable;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * 岗位详情-关联用户查询投影（对齐

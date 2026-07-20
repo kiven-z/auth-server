@@ -1,31 +1,31 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>com.auth</groupId>
-		<artifactId>commons</artifactId>
-		<version>0.0.2-beta</version>
-	</parent>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.auth</groupId>
+        <artifactId>commons</artifactId>
+        <version>0.0.2-beta</version>
+    </parent>
 
-	<artifactId>common-starter-resttemplate</artifactId>
-	<packaging>jar</packaging>
-	<name>common-resttemplate</name>
+    <artifactId>common-starter-resttemplate</artifactId>
+    <packaging>jar</packaging>
+    <name>common-resttemplate</name>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 
-	<dependencies>
-		<dependency>
-			<groupId>com.auth</groupId>
-			<artifactId>common-starter-web</artifactId>
-			<version>0.0.2-beta</version>
-		</dependency>
+    <dependencies>
+        <dependency>
+            <groupId>com.auth</groupId>
+            <artifactId>common-starter-web</artifactId>
+            <version>0.0.2-beta</version>
+        </dependency>
 
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-loadbalancer</artifactId>
-		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-loadbalancer</artifactId>
+        </dependency>
+    </dependencies>
 </project>
 

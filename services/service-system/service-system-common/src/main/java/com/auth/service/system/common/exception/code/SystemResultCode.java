@@ -1,10 +1,9 @@
 package com.auth.service.system.common.exception.code;
 
-import java.util.Locale;
-
 import com.auth.common.web.context.SpringContextHolder;
-
 import org.springframework.context.i18n.LocaleContextHolder;
+
+import java.util.Locale;
 
 /**
  * 系统服务结果码契约（模块 {@code 10}）

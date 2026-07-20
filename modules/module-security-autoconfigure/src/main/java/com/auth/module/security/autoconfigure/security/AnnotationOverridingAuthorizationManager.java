@@ -1,14 +1,9 @@
 package com.auth.module.security.autoconfigure.security;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.function.Supplier;
-
 import cn.hutool.core.collection.CollUtil;
 import com.auth.module.security.autoconfigure.config.security.SecurityConfigProperties;
 import com.auth.module.security.autoconfigure.pipeline.filter.TokenAuthenticationFilter;
 import jakarta.servlet.http.HttpServletRequest;
-
 import org.springframework.lang.Nullable;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
@@ -16,6 +11,10 @@ import org.springframework.security.authorization.AuthorizationResult;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Supplier;
 
 import static com.auth.module.security.autoconfigure.security.AnnotationOverridingAuthorizationSupport.isNonAnonymousAuthenticated;
 import static com.auth.module.security.autoconfigure.security.AnnotationOverridingAuthorizationSupport.toPathMatchers;

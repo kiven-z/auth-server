@@ -1,10 +1,10 @@
 package com.auth.service.auth.model.value.login;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
 import lombok.Getter;
 import lombok.Setter;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * 登录会话签发完成后的应用读模型（含令牌与用户展示字段）。

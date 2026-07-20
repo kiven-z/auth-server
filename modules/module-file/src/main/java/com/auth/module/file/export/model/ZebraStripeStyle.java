@@ -1,13 +1,13 @@
 package com.auth.module.file.export.model;
 
-import java.io.Serial;
-import java.io.Serializable;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.poi.ss.usermodel.IndexedColors;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * 斑马线样式配置

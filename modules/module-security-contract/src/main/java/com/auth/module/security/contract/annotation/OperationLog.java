@@ -1,13 +1,9 @@
 package com.auth.module.security.contract.annotation;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
+
+import java.lang.annotation.*;
 
 /**
  * 标记需要写入操作日志的 Web 控制器方法（或类上默认，方法可覆盖）。

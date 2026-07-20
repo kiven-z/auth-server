@@ -4,6 +4,7 @@ import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.mapper.InAppMessageMapper;
 import com.auth.service.system.message.model.entity.InAppMessageEntity;
 import com.auth.service.system.message.model.entity.InAppMessageRecipientEntity;
+import com.auth.service.system.message.model.enums.DeliveryMode;
 import com.auth.service.system.message.model.enums.InAppMessageStatus;
 import com.auth.service.system.message.model.enums.RecipientScopeType;
 import com.auth.service.system.message.model.value.recipient.RecipientScope;
@@ -47,14 +48,16 @@ class InAppComposeDispatcherTest {
 	private InAppComposeDispatcher dispatcher;
 
 	/**
-	 * 构造待派发任务快照（正文停留在 task 主表，inbox 不冗余）
+	 * 构造待派发写扩散任务快照
 	 * @param id 任务 ID
 	 * @return 任务实体
 	 */
 	private static InAppMessageEntity pendingTask(Long id) {
 		InAppMessageEntity task = new InAppMessageEntity();
 		task.setId(id);
-		task.setRecipientScopeType(RecipientScopeType.ALL.name());
+		task.setRecipientScopeType(RecipientScopeType.DEPT.name());
+		task.setRecipientScopeJson("{\"ids\":[1],\"includeChildren\":true}");
+		task.setDeliveryMode(DeliveryMode.PUSH.name());
 		task.setStatus(InAppMessageStatus.PENDING.name());
 		return task;
 	}

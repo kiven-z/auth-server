@@ -1,7 +1,5 @@
 package com.auth.service.system.admin.service.admin.impl;
 
-import java.lang.reflect.Field;
-
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.platform.persistence.model.LoginLogEntity;
 import com.auth.service.system.admin.mapper.log.LogLoginLogMapper;
@@ -20,6 +18,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.lang.reflect.Field;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 import static org.assertj.core.api.Assertions.assertThat;

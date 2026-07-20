@@ -1,10 +1,10 @@
 package com.auth.service.system.admin.model.constants;
 
-import java.util.Set;
-
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.experimental.UtilityClass;
+
+import java.util.Set;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_INVALID;
 

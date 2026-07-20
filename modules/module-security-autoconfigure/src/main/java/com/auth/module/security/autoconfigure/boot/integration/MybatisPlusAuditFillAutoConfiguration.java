@@ -1,15 +1,14 @@
 package com.auth.module.security.autoconfigure.boot.integration;
 
-import java.time.LocalDateTime;
-
 import com.auth.common.data.config.BaseMybatisPlusConfig;
 import com.auth.common.data.model.enums.DatabaseAuditMetaFieldEnum;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import org.apache.ibatis.reflection.MetaObject;
-
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+import java.time.LocalDateTime;
 
 /**
  * MyBatisPlus 配置自动填充字段

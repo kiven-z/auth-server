@@ -2,7 +2,6 @@ package com.auth.gateway.config;
 
 import com.auth.gateway.ua.YauaaUserAgentFields;
 import nl.basjes.parse.useragent.UserAgentAnalyzer;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

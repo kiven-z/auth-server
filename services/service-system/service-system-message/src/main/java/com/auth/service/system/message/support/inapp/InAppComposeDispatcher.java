@@ -58,7 +58,7 @@ public class InAppComposeDispatcher {
 			throw new MessageException(IN_APP_SEND_TASK_NOT_FOUND, taskId);
 		}
 
-		// 从任务快照还原接收范围
+		// 从任务快照还原接收范围（PULL/ALL 在 send 侧已收口，不会进入派发）
 		String recipientScopeType = task.getRecipientScopeType();
 		RecipientScopeType type = RecipientScopeType.from(recipientScopeType);
 		if (type == null) {

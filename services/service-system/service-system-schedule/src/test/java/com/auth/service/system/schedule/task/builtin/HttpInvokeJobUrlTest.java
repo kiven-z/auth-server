@@ -1,11 +1,11 @@
 package com.auth.service.system.schedule.task.builtin;
 
-import java.util.Map;
-
 import com.auth.service.system.schedule.task.support.BuiltinRemoteHttpParamsSupport;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

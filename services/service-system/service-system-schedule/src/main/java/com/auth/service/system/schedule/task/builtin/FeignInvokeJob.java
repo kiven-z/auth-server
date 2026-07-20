@@ -1,7 +1,5 @@
 package com.auth.service.system.schedule.task.builtin;
 
-import java.util.Map;
-
 import cn.hutool.core.net.url.UrlBuilder;
 import com.auth.common.web.resttemplate.RestTemplateUtil;
 import com.auth.service.system.schedule.annotation.QuartzTask;
@@ -14,12 +12,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.Map;
 
 /**
  * 通用微服务远程调用内置任务：通过负载均衡 {@link RestTemplate} 访问 {@code http://{serviceName}{path}}。 出站

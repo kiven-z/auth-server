@@ -1,10 +1,5 @@
 package com.auth.module.security.core.token.provider;
 
-import java.util.Date;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.jwt.api.JwtTokenProvider;
 import com.auth.common.jwt.autoconfigure.JwtProperties;
@@ -15,13 +10,13 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 
+import java.util.Date;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
 import static com.auth.module.security.contract.constants.SecurityExternalTokenConstants.TOKEN_TYPE;
-import static com.auth.module.security.contract.constants.SecurityInternalTokenConstants.INTERNAL_MAX_TTL_SECONDS;
-import static com.auth.module.security.contract.constants.SecurityInternalTokenConstants.PRINCIPAL_TYPE;
-import static com.auth.module.security.contract.constants.SecurityInternalTokenConstants.PRINCIPAL_TYPE_SERVICE;
-import static com.auth.module.security.contract.constants.SecurityInternalTokenConstants.PRINCIPAL_TYPE_USER;
-import static com.auth.module.security.contract.constants.SecurityInternalTokenConstants.SERVICE_ID;
-import static com.auth.module.security.contract.constants.SecurityInternalTokenConstants.SERVICE_SUB_PLACEHOLDER;
+import static com.auth.module.security.contract.constants.SecurityInternalTokenConstants.*;
 
 /**
  * 内部令牌：双模签发——「用户身份」与「服务身份」共用一种令牌种类，由 {@code principal_type} claim 区分

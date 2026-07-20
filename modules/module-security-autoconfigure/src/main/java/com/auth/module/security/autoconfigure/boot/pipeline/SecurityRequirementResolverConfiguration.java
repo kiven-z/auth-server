@@ -1,17 +1,16 @@
 package com.auth.module.security.autoconfigure.boot.pipeline;
 
-import java.util.List;
-
 import com.auth.module.security.autoconfigure.pipeline.resolver.HandlerMethodResolver;
 import com.auth.module.security.autoconfigure.pipeline.resolver.SecurityRequirementResolver;
 import com.auth.module.security.autoconfigure.pipeline.resolver.SecurityRequirementRule;
 import com.auth.module.security.autoconfigure.pipeline.rule.AuthenticatedApiRule;
 import com.auth.module.security.autoconfigure.pipeline.rule.InternalApiRule;
 import com.auth.module.security.autoconfigure.pipeline.rule.PublicApiRule;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+
+import java.util.List;
 
 /**
  * 安全需求解析：将 HandlerMethod 解析为 SecurityRequirement

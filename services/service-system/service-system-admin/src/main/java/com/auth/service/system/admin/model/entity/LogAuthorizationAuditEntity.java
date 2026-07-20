@@ -1,13 +1,13 @@
 package com.auth.service.system.admin.model.entity;
 
-import java.io.Serial;
-
 import com.auth.common.data.model.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+
+import java.io.Serial;
 
 /**
  * 权限决策审计日志

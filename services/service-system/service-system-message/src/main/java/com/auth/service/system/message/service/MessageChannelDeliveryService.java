@@ -1,9 +1,11 @@
 package com.auth.service.system.message.service;
 
 import com.auth.common.data.model.PageResponse;
+import com.auth.service.system.message.model.entity.MessageChannelDeliveryEntity;
 import com.auth.service.system.message.model.query.MessageChannelDeliveryQuery;
 import com.auth.service.system.message.model.vo.delivery.MessageChannelDeliveryDetailVO;
 import com.auth.service.system.message.model.vo.delivery.MessageChannelDeliveryPageResponse;
+import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
 
@@ -12,7 +14,7 @@ import java.util.List;
  *
  * @author Bunny
  */
-public interface MessageChannelDeliveryService {
+public interface MessageChannelDeliveryService extends IService<MessageChannelDeliveryEntity> {
 
 	/**
 	 * 分页查询渠道投递记录

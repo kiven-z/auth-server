@@ -1,9 +1,5 @@
 package com.auth.service.system.schedule.model.vo;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.LocalDateTime;
-
 import com.auth.common.core.model.response.BaseResponse;
 import com.auth.service.system.schedule.model.enums.SysJobLastExecutionStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -11,6 +7,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * 定时任务分页行（含最近一次执行结果补充字段）

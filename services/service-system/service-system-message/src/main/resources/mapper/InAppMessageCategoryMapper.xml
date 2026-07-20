@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.auth.service.system.message.mapper.InAppMessageCategoryMapper">
+
+    <!-- 启用中的大类 -->
+    <select id="selectEnabledMajors"
+            resultType="com.auth.service.system.message.model.entity.InAppMessageCategoryEntity">
+        SELECT id,
+               parent_id,
+               code,
+               name,
+               sort_order,
+               status,
+               create_time,
+               update_time,
+               create_user,
+               update_user,
+               version,
+               remark
+        FROM in_app_message_category
+        WHERE parent_id IS NULL
+          AND status = 1
+        ORDER BY sort_order ASC,
+                 id ASC
+    </select>
+
+    <!-- 按 code 查启用中的大类 -->
+    <select id="selectEnabledMajorByCode"
+            resultType="com.auth.service.system.message.model.entity.InAppMessageCategoryEntity">
+        SELECT id,
+               parent_id,
+               code,
+               name,
+               sort_order,
+               status,
+               create_time,
+               update_time,
+               create_user,
+               update_user,
+               version,
+               remark
+        FROM in_app_message_category
+        WHERE code = #{code}
+          AND parent_id IS NULL
+          AND status = 1
+        LIMIT 1
+    </select>
+
+    <!-- 指定大类下启用中的小类 -->
+    <select id="selectEnabledChildrenByParentId"
+            resultType="com.auth.service.system.message.model.entity.InAppMessageCategoryEntity">
+        SELECT id,
+               parent_id,
+               code,
+               name,
+               sort_order,
+               status,
+               create_time,
+               update_time,
+               create_user,
+               update_user,
+               version,
+               remark
+        FROM in_app_message_category
+        WHERE parent_id = #{parentId}
+          AND status = 1
+        ORDER BY sort_order ASC,
+                 id ASC
+    </select>
+
+</mapper>

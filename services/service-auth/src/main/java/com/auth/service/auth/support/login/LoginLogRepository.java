@@ -1,7 +1,5 @@
 package com.auth.service.auth.support.login;
 
-import java.time.LocalDateTime;
-
 import com.auth.common.ip.IpAddressService;
 import com.auth.common.ip.IpInfo;
 import com.auth.common.web.model.entity.UserAgent;
@@ -13,9 +11,10 @@ import com.auth.service.auth.model.value.login.LoginAuditSnapshot;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Repository;
+
+import java.time.LocalDateTime;
 
 /**
  * 登录审计仓储：解析请求快照并异步写入 {@code log_login}。

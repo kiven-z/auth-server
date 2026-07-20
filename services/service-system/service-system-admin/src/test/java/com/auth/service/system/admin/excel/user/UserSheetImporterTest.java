@@ -1,9 +1,5 @@
 package com.auth.service.system.admin.excel.user;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Set;
-
 import com.auth.module.file.export.writer.ExcelExportWriter;
 import com.auth.module.file.importer.model.SpreadsheetImportResult;
 import com.auth.service.system.admin.model.form.user.SysUserForm;
@@ -17,17 +13,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import org.springframework.mock.web.MockMultipartFile;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Set;
+
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link UserSheetImporter} 单元测试

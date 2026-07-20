@@ -1,16 +1,15 @@
 package com.auth.service.system.schedule.support.quartz;
 
-import java.time.ZoneId;
-import java.util.Date;
-import java.util.Objects;
-
 import com.auth.service.system.schedule.model.entity.JobEntity;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
 import org.quartz.JobKey;
 import org.quartz.TriggerBuilder;
-
 import org.springframework.stereotype.Component;
+
+import java.time.ZoneId;
+import java.util.Date;
+import java.util.Objects;
 
 import static com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys.TRIGGER_SUFFIX;
 

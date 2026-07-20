@@ -51,7 +51,9 @@ public class SysMenuListVO extends BaseResponse {
 	@Schema(title = "是否在菜单中显示")
 	private Boolean showLink;
 
-	/** 登录可见：true=所有登录用户可见，不校验角色；false=按角色 */
+	/**
+	 * 登录可见：true=所有登录用户可见，不校验角色；false=按角色
+	 */
 	@Schema(title = "登录可见（不校验角色）")
 	private Boolean publicAccess;
 

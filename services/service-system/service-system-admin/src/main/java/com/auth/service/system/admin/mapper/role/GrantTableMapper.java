@@ -1,7 +1,5 @@
 package com.auth.service.system.admin.mapper.role;
 
-import java.util.List;
-
 import com.auth.service.system.admin.model.entity.GrantTableEntity;
 import com.auth.service.system.admin.model.po.reference.DeptReferencePO;
 import com.auth.service.system.admin.model.po.reference.PostReferencePO;
@@ -11,6 +9,8 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
 
 /**
  * grant_table 读写

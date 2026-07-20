@@ -1,7 +1,5 @@
 package com.auth.service.system.schedule.service;
 
-import java.util.List;
-
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.schedule.model.entity.JobGroupEntity;
 import com.auth.service.system.schedule.model.form.SysJobGroupForm;
@@ -10,6 +8,8 @@ import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
 import com.auth.service.system.schedule.model.vo.SysJobGroupDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobGroupPageResponse;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+
+import java.util.List;
 
 /**
  * 任务分组维护

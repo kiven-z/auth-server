@@ -1,13 +1,12 @@
 package com.auth.module.security.autoconfigure.pipeline.rule;
 
-import java.util.Optional;
-
 import com.auth.module.security.autoconfigure.annotation.InternalApi;
 import com.auth.module.security.autoconfigure.pipeline.resolver.SecurityRequirementRule;
 import com.auth.module.security.autoconfigure.security.SecurityRequirement;
-
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.web.method.HandlerMethod;
+
+import java.util.Optional;
 
 /**
  * 内部注解规则

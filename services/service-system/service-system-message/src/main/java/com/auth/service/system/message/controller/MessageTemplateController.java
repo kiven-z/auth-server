@@ -101,7 +101,7 @@ public class MessageTemplateController {
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
-	@Operation(summary = "测试发送", description = "按模板 require_fields 示例值组装变量并发送；target 语义由 channel 解释")
+	@Operation(summary = "测试发送", description = "按模板 require_fields 示例值组装变量并发送")
 	@PreAuthorize("@auth.decide('message:template:update')")
 	@PostMapping("test-send")
 	public Result<String> testSend(@Validated @RequestBody MessageTemplateTestSendForm form) {

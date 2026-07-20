@@ -8,7 +8,6 @@ import com.auth.module.security.autoconfigure.service.FeignRemoteOperationLogHan
 import com.auth.module.security.autoconfigure.service.NoopOperationLogHandler;
 import com.auth.module.security.contract.spi.OperationLogHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;

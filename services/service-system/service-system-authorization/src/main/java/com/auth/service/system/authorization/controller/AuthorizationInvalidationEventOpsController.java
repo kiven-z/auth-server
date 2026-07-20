@@ -6,22 +6,17 @@ import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.module.security.contract.context.OperationLogContext;
+import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
 import com.auth.service.system.authorization.model.query.AuthorizationInvalidationEventQuery;
 import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationEventDetailVO;
 import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationEventPageVO;
 import com.auth.service.system.authorization.service.AuthorizationInvalidationEventOpsService;
 import com.auth.service.system.authorization.service.AuthorizationInvalidationEventQueryService;
-import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 

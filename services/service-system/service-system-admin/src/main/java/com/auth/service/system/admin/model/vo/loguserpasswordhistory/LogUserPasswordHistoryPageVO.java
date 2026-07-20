@@ -1,8 +1,5 @@
 package com.auth.service.system.admin.model.vo.loguserpasswordhistory;
 
-import java.io.Serial;
-import java.time.LocalDateTime;
-
 import com.auth.common.core.annotation.Desensitized;
 import com.auth.common.core.annotation.JsonStringFormat;
 import com.auth.common.core.desensitize.DesensitizedType;
@@ -13,6 +10,9 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
+import java.io.Serial;
+import java.time.LocalDateTime;
 
 /**
  * 密码历史日志分页行

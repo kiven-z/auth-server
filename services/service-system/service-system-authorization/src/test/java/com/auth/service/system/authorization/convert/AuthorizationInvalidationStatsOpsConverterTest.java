@@ -1,7 +1,5 @@
 package com.auth.service.system.authorization.convert;
 
-import java.math.BigDecimal;
-
 import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidationEventStatsInnerDTO;
 import com.auth.service.system.authorization.model.po.AuthorizationInvalidationEventStatsPO;
 import com.auth.service.system.authorization.model.po.AuthorizationInvalidationFailureRateTrendBucketPO;
@@ -11,6 +9,8 @@ import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationF
 import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationOutboxStatsVO;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -43,7 +43,7 @@
                 AND biz_type = #{query.bizType}
             </if>
             <if test="query.title != null and query.title != ''">
-                AND title LIKE CONCAT('%', #{query.title}, '%')
+                AND title LIKE CONCAT(#{query.title}, '%')
             </if>
         </where>
         ORDER BY
@@ -67,7 +67,13 @@
             fail_count    = 0,
             total_count   = 0
         WHERE id = #{id}
-          AND status IN ('PENDING', 'PARTIAL', 'FAILED', 'SENDING', 'NO_RECIPIENTS')
+          AND status IN (
+                         'PENDING',
+                         'PARTIAL',
+                         'FAILED',
+                         'SENDING',
+                         'NO_RECIPIENTS'
+            )
     </update>
 
     <!-- 撤回已投递/无接收人任务 -->

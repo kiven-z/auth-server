@@ -1,16 +1,9 @@
 package com.auth.service.system.authorization.outbox;
 
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
-import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidatePayload;
-import com.auth.module.security.contract.dto.invalidation.GrantInvalidatePayload;
-import com.auth.module.security.contract.dto.invalidation.PermissionInvalidatePayload;
-import com.auth.module.security.contract.dto.invalidation.RoleInvalidatePayload;
-import com.auth.module.security.contract.dto.invalidation.UserDeptInvalidatePayload;
-import com.auth.module.security.contract.dto.invalidation.UserInvalidatePayload;
-import com.auth.module.security.contract.dto.invalidation.UserPostInvalidatePayload;
+import com.auth.module.security.contract.dto.invalidation.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.springframework.stereotype.Component;
 
 /**

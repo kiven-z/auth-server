@@ -1,12 +1,12 @@
 package com.auth.module.file.importer.model;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 
 import static com.auth.module.file.importer.model.ImportErrorCode.INVALID_FORMAT;
 import static org.assertj.core.api.Assertions.assertThat;

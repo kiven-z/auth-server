@@ -1,13 +1,13 @@
 package com.auth.service.system.schedule.task.support;
 
-import java.util.Map;
-
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.net.url.UrlBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.experimental.UtilityClass;
+
+import java.util.Map;
 
 /**
  * 内置远程 HTTP 任务 {@code query}/{@code body} 解析与 URL 拼接

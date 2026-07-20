@@ -1,15 +1,14 @@
 package com.auth.module.security.autoconfigure.annotation.processor;
 
+import lombok.Getter;
+import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.util.Assert;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import lombok.Getter;
-
-import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.util.Assert;
 
 /**
  * 通用「互斥注解组」规则：给定一组注解类型（含 Spring 元数据合并）命中多于一个，则启动失败

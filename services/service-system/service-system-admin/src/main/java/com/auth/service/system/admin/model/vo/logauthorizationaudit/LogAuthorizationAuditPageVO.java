@@ -1,13 +1,13 @@
 package com.auth.service.system.admin.model.vo.logauthorizationaudit;
 
-import java.io.Serial;
-
 import com.auth.common.core.model.response.BaseResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
+import java.io.Serial;
 
 /**
  * 权限决策审计分页行

@@ -1,11 +1,11 @@
 package com.auth.service.system.admin.model.po.menu;
 
-import java.io.Serial;
-import java.io.Serializable;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * 菜单与角色编码关联行（持久层查询投影，供动态路由批量加载）

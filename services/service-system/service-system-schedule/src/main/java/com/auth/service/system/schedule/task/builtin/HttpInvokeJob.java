@@ -1,7 +1,5 @@
 package com.auth.service.system.schedule.task.builtin;
 
-import java.util.Map;
-
 import com.auth.common.web.resttemplate.RestTemplateUtil;
 import com.auth.service.system.schedule.annotation.QuartzTask;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
@@ -14,11 +12,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.Map;
 
 /**
  * 通用 HTTP 内置任务：从 {@code job_params} 读取 method、url 与可选 headers/query/body 并发起调用

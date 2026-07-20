@@ -1,7 +1,5 @@
 package com.auth.service.system.admin.mapper.post;
 
-import java.util.List;
-
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.po.post.PostDeptCodePairPO;
 import com.auth.service.system.admin.model.po.post.SysPostBoundUserPO;
@@ -15,6 +13,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
 
 /**
  * 系统岗位 Mapper

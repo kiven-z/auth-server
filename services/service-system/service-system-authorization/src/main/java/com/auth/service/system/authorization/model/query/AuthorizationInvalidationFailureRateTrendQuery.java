@@ -1,9 +1,5 @@
 package com.auth.service.system.authorization.model.query;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.LocalDateTime;
-
 import com.auth.service.system.authorization.model.enums.AuthorizationInvalidationFailureRateTrendGranularity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.AssertTrue;
@@ -12,6 +8,10 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * 授权失效失败率趋势查询条件

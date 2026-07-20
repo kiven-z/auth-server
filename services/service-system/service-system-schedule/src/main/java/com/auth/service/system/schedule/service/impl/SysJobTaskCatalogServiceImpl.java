@@ -1,9 +1,5 @@
 package com.auth.service.system.schedule.service.impl;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.model.vo.QuartzTaskClassVO;
@@ -11,8 +7,11 @@ import com.auth.service.system.schedule.model.vo.QuartzTaskMethodVO;
 import com.auth.service.system.schedule.service.SysJobTaskCatalogService;
 import com.auth.service.system.schedule.support.catalog.QuartzTaskRegistry;
 import com.auth.service.system.schedule.task.support.InvokeTargetSupport;
-
 import org.springframework.stereotype.Service;
+
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CLASS_INVALID;

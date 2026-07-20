@@ -1,8 +1,8 @@
 package com.auth.module.security.contract.redis;
 
-import java.time.Duration;
-
 import lombok.Getter;
+
+import java.time.Duration;
 
 /**
  * Security 模块 Redis Key 枚举定义（跨服务约定）

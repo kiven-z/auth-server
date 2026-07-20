@@ -1,13 +1,13 @@
 package com.auth.module.message.api.model.email;
 
-import java.io.Serial;
-import java.util.List;
-
 import com.auth.module.message.api.command.ChannelOptions;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.io.Serial;
+import java.util.List;
 
 /**
  * 邮件渠道扩展参数

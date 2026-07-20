@@ -1,12 +1,5 @@
 package com.auth.service.system.admin.support.post;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.data.support.BusinessKeyAssert;
@@ -21,6 +14,9 @@ import lombok.Builder;
 import lombok.Value;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 岗位写入复合键校验：部门可挂载性与 (deptId, postCode) 唯一性。

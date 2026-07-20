@@ -1,12 +1,11 @@
 package com.auth.module.security.autoconfigure.pipeline.resolver;
 
-import java.util.List;
-import java.util.Optional;
-
 import com.auth.module.security.autoconfigure.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
-
 import org.springframework.web.method.HandlerMethod;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * 注解优先解析当前请求的安全要求

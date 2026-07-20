@@ -1,7 +1,5 @@
 package com.auth.module.security.autoconfigure.pipeline.authenticate;
 
-import java.util.List;
-
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.security.autoconfigure.service.AuthProfileCacheService;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
@@ -11,6 +9,8 @@ import com.auth.module.security.contract.exception.SecurityTokenException;
 import com.auth.module.security.core.token.model.SecurityTokenResult;
 import com.auth.module.security.core.token.provider.InternalTokenProvider;
 import jakarta.servlet.http.HttpServletRequest;
+
+import java.util.List;
 
 /**
  * 内部JWT认证：支持用户身份和服务身份两种内部令牌

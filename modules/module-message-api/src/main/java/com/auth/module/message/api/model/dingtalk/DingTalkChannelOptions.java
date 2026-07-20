@@ -1,12 +1,12 @@
 package com.auth.module.message.api.model.dingtalk;
 
-import java.io.Serial;
-
 import com.auth.module.message.api.command.ChannelOptions;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.io.Serial;
 
 /**
  * 钉钉渠道扩展参数

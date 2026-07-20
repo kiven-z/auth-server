@@ -1,27 +1,22 @@
 package com.auth.module.security.starter.outbound;
 
-import java.io.IOException;
-
 import com.auth.module.security.autoconfigure.outbound.InternalJwtClientHttpRequestInterceptor;
 import com.auth.module.security.autoconfigure.outbound.OutboundInternalJwtIssuer;
 import com.auth.module.security.contract.constants.SecurityInternalTokenConstants;
 import com.auth.module.security.core.token.provider.InternalTokenProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpResponse;
 
+import java.io.IOException;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link InternalJwtClientHttpRequestInterceptor} 单元测试。

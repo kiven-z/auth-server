@@ -1,15 +1,15 @@
 package com.auth.service.system.schedule.model.jobparams;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.Map;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.Map;
 
 /**
  * 微服务远程调用内置任务 {@code job_params} 载荷

@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
 /**
- * 邮件模板 前端控制器
+ * 邮件模板
  *
  * @author Bunny
  */

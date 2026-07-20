@@ -4,7 +4,6 @@ import com.auth.module.security.datapermission.context.LoginUserProvider;
 import com.auth.module.security.datapermission.context.SecurityContextLoginUserProvider;
 import com.auth.module.security.datapermission.interceptor.DataScopeInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
-
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;

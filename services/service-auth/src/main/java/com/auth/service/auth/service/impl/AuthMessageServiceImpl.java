@@ -1,15 +1,11 @@
 package com.auth.service.auth.service.impl;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.crypto.digest.MD5;
 import com.auth.module.message.api.command.TemplateMessageCommand;
+import com.auth.module.message.api.feign.SystemMessageSendFeignClient;
 import com.auth.module.message.api.model.email.EmailChannelOptions;
 import com.auth.module.platform.persistence.model.UserEntity;
-import com.auth.module.message.api.feign.SystemMessageSendFeignClient;
 import com.auth.service.auth.mapper.UserMapper;
 import com.auth.service.auth.model.enums.AuthMessageScene;
 import com.auth.service.auth.model.enums.CredentialDimension;
@@ -21,8 +17,11 @@ import com.auth.service.auth.support.redis.store.LoginVerificationCodeStore;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 import static com.auth.module.security.contract.redis.SecurityRedisKey.EMAIL_CODE;
 import static com.auth.module.security.contract.redis.SecurityRedisKey.SMS_CODE;

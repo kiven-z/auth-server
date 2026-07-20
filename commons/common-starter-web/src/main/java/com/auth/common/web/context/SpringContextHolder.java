@@ -1,10 +1,10 @@
 package com.auth.common.web.context;
 
-import java.util.Locale;
-import java.util.Objects;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.MessageSource;
+
+import java.util.Locale;
+import java.util.Objects;
 
 /**
  * Spring上下文持有者 用于在非Spring管理的类中获取Spring容器中的Bean实例， 提供静态方法访问Spring

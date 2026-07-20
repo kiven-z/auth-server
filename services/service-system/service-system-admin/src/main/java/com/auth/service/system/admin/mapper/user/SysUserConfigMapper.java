@@ -1,13 +1,13 @@
 package com.auth.service.system.admin.mapper.user;
 
-import java.util.Collection;
-import java.util.List;
-
 import com.auth.service.system.admin.model.entity.SysUserConfigEntity;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * 用户配置项 Mapper

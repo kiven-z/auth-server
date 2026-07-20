@@ -1,7 +1,5 @@
 package com.auth.service.auth.support.login;
 
-import java.lang.reflect.Field;
-
 import com.auth.module.platform.persistence.model.LoginLogEntity;
 import com.auth.service.auth.mapper.LoginLogMapper;
 import com.auth.service.auth.model.enums.AuthLoginLogResult;
@@ -16,9 +14,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import java.lang.reflect.Field;
+
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;

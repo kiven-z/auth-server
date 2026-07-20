@@ -14,6 +14,7 @@ import com.auth.service.system.message.model.vo.delivery.MessageChannelDeliveryP
 import com.auth.service.system.message.service.MessageChannelDeliveryService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,9 +31,9 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
  */
 @RequiredArgsConstructor
 @Service
-public class MessageChannelDeliveryServiceImpl implements MessageChannelDeliveryService {
-
-	private final MessageChannelDeliveryMapper messageChannelDeliveryMapper;
+public class MessageChannelDeliveryServiceImpl
+		extends ServiceImpl<MessageChannelDeliveryMapper, MessageChannelDeliveryEntity>
+		implements MessageChannelDeliveryService {
 
 	private final AuditUserDisplayService auditUserDisplayService;
 
@@ -43,8 +44,7 @@ public class MessageChannelDeliveryServiceImpl implements MessageChannelDelivery
 	@Transactional(readOnly = true)
 	public PageResponse<MessageChannelDeliveryPageResponse> getChannelDeliveryPage(MessageChannelDeliveryQuery query) {
 		Page<MessageChannelDeliveryEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
-		IPage<MessageChannelDeliveryPageRowPO> page = messageChannelDeliveryMapper.selectChannelDeliveryPage(pageParams,
-				query);
+		IPage<MessageChannelDeliveryPageRowPO> page = baseMapper.selectChannelDeliveryPage(pageParams, query);
 		IPage<MessageChannelDeliveryPageResponse> voPage = page
 			.convert(MessageChannelDeliveryConverter.INSTANCE::toPageResponse);
 
@@ -58,7 +58,7 @@ public class MessageChannelDeliveryServiceImpl implements MessageChannelDelivery
 	@Override
 	@Transactional(readOnly = true)
 	public MessageChannelDeliveryDetailVO getChannelDeliveryById(Long id) {
-		MessageChannelDeliveryEntity entity = messageChannelDeliveryMapper.selectById(id);
+		MessageChannelDeliveryEntity entity = super.getById(id);
 		if (entity == null) {
 			throw new MessageException(DATA_NOT_EXIST);
 		}
@@ -76,7 +76,7 @@ public class MessageChannelDeliveryServiceImpl implements MessageChannelDelivery
 		if (CollUtil.isEmpty(ids)) {
 			return;
 		}
-		messageChannelDeliveryMapper.deleteByIds(ids);
+		baseMapper.deleteByIds(ids);
 	}
 
 }

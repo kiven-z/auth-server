@@ -1,7 +1,5 @@
 package com.auth.common.core.desensitize;
 
-import java.io.IOException;
-
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.DesensitizedUtil;
@@ -12,6 +10,8 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.ContextualSerializer;
+
+import java.io.IOException;
 
 /**
  * 将 {@link String} 按 {@link Desensitized} 策略在 JSON 输出时脱敏

@@ -1,7 +1,5 @@
 package com.auth.service.system.admin.support.dept;
 
-import java.util.List;
-
 import cn.hutool.core.collection.CollUtil;
 import com.auth.common.core.utils.TreeParentIdUtil;
 import com.auth.common.data.support.BusinessKeyAssert;
@@ -11,8 +9,9 @@ import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * 部门写操作前的存在性与引用校验

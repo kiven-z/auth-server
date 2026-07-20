@@ -32,6 +32,25 @@ class FeignRemoteOperationLogHandlerTest {
 	@InjectMocks
 	private FeignRemoteOperationLogHandler handler;
 
+	private static OperationLogPayloadEvent samplePayload() {
+		return OperationLogPayloadEvent.builder()
+			.userId(1L)
+			.operationType("QUERY")
+			.module("M")
+			.targetType("")
+			.requestMethod("GET")
+			.requestUri("/api/demo")
+			.requestParams(null)
+			.responseStatus(200)
+			.responseMessage(null)
+			.executionTimeMs(1)
+			.ipAddress("127.0.0.1")
+			.userAgent(null)
+			.className("A")
+			.methodName("b")
+			.build();
+	}
+
 	@Test
 	@DisplayName("handle should submit operation log via Feign without throwing")
 	void handle_shouldSubmitViaFeign() {
@@ -65,25 +84,6 @@ class FeignRemoteOperationLogHandlerTest {
 			.thenReturn(Result.error("upstream error"));
 
 		assertDoesNotThrow(() -> handler.handle(samplePayload()));
-	}
-
-	private static OperationLogPayloadEvent samplePayload() {
-		return OperationLogPayloadEvent.builder()
-			.userId(1L)
-			.operationType("QUERY")
-			.module("M")
-			.targetType("")
-			.requestMethod("GET")
-			.requestUri("/api/demo")
-			.requestParams(null)
-			.responseStatus(200)
-			.responseMessage(null)
-			.executionTimeMs(1)
-			.ipAddress("127.0.0.1")
-			.userAgent(null)
-			.className("A")
-			.methodName("b")
-			.build();
 	}
 
 }

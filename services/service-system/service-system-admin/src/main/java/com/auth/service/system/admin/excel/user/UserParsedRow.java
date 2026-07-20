@@ -1,10 +1,10 @@
 package com.auth.service.system.admin.excel.user;
 
-import java.time.LocalDate;
-
 import lombok.Builder;
 import lombok.Value;
 import lombok.experimental.Accessors;
+
+import java.time.LocalDate;
 
 /**
  * 用户导入行解析结果（Extract 阶段产物）。

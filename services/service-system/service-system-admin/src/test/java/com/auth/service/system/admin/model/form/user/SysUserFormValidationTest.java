@@ -1,7 +1,5 @@
 package com.auth.service.system.admin.model.form.user;
 
-import java.util.Set;
-
 import com.auth.common.web.valid.group.CreateGroup;
 import com.auth.common.web.valid.group.UpdateGroup;
 import jakarta.validation.ConstraintViolation;
@@ -9,6 +7,8 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

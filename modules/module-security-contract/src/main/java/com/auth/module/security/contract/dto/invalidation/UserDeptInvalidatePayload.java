@@ -1,10 +1,10 @@
 package com.auth.module.security.contract.dto.invalidation;
 
+import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
-
-import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 
 /**
  * 按部门 ID 失效的业务键（含部门成员及继承关系反查）。

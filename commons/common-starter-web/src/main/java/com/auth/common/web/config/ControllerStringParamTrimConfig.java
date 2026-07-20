@@ -1,7 +1,6 @@
 package com.auth.common.web.config;
 
 import com.auth.common.web.jackson.TrimmingStringDeserializer;
-
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;

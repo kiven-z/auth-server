@@ -1,7 +1,5 @@
 package com.auth.service.system.authorization.mapper;
 
-import java.util.List;
-
 import com.auth.service.system.authorization.model.po.AuthorizationInvalidationFailureRateTrendBucketPO;
 import com.auth.service.system.authorization.model.po.AuthorizationInvalidationOutboxDetailRowPO;
 import com.auth.service.system.authorization.model.po.AuthorizationInvalidationOutboxPageRowPO;
@@ -12,6 +10,8 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * 授权失效 Outbox 运维只读 Mapper

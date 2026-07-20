@@ -1,7 +1,5 @@
 package com.auth.service.system.admin.model.vo.logoperation;
 
-import java.io.Serial;
-
 import com.auth.common.core.annotation.Desensitized;
 import com.auth.common.core.annotation.JsonStringFormat;
 import com.auth.common.core.desensitize.DesensitizedType;
@@ -11,6 +9,8 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
+import java.io.Serial;
 
 /**
  * 操作日志分页行

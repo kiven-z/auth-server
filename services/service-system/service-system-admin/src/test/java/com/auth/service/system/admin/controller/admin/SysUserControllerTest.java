@@ -1,7 +1,5 @@
 package com.auth.service.system.admin.controller.admin;
 
-import java.util.List;
-
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.common.ip.IpAddressService;
@@ -26,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.MessageSource;
 
+import java.util.List;
 import java.util.Locale;
 
 import static org.assertj.core.api.Assertions.assertThat;

@@ -1,12 +1,12 @@
 package com.auth.module.file.importer.model;
 
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import lombok.experimental.Accessors;
+
+import java.util.List;
 
 /**
  * 单行导入失败信息。

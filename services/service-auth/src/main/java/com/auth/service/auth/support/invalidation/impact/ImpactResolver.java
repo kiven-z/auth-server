@@ -1,9 +1,9 @@
 package com.auth.service.auth.support.invalidation.impact;
 
-import java.util.Set;
-
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidatePayload;
+
+import java.util.Set;
 
 /**
  * 影响面解析策略：仅负责将类型化业务键解析为受影响用户 ID

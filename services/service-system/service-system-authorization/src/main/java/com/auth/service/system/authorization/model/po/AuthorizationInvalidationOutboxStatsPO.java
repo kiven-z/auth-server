@@ -1,11 +1,11 @@
 package com.auth.service.system.authorization.model.po;
 
-import java.io.Serial;
-import java.io.Serializable;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * 授权失效 Outbox 状态统计 PO

@@ -1,11 +1,11 @@
 package com.auth.service.auth.support.login.ratelimit;
 
+import org.intellij.lang.annotations.Language;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import org.intellij.lang.annotations.Language;
 
 /**
  * 限流注解

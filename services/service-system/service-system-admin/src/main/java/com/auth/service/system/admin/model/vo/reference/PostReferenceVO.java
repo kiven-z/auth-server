@@ -1,13 +1,13 @@
 package com.auth.service.system.admin.model.vo.reference;
 
-import java.io.Serial;
-import java.io.Serializable;
-
 import com.auth.common.core.annotation.JsonStringFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * 岗位关联回显基础字段

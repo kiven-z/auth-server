@@ -1,7 +1,5 @@
 package com.auth.service.system.admin.service.admin;
 
-import java.util.List;
-
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.admin.model.query.user.SysUserPageQuery;
@@ -11,6 +9,8 @@ import com.auth.service.system.admin.model.vo.user.SysUserProfileVO;
 import com.auth.service.system.admin.model.vo.user.SysUserSearchItemVO;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+
+import java.util.List;
 
 /**
  * 系统用户只读查询（档案聚合、关键词搜索等）。

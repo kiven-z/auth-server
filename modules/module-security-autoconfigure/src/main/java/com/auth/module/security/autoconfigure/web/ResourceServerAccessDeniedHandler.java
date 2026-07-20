@@ -3,7 +3,6 @@ package com.auth.module.security.autoconfigure.web;
 import com.auth.module.security.autoconfigure.web.error.SecurityErrorResponseSupport;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
 

@@ -1,7 +1,5 @@
 package com.auth.service.system.admin.service.admin.impl;
 
-import java.util.List;
-
 import com.auth.service.system.admin.mapper.dept.DeptClosureMapper;
 import com.auth.service.system.admin.model.po.dept.DeptClosureDepthChainRowPO;
 import com.auth.service.system.admin.model.po.dept.DeptClosureHealthStatsPO;
@@ -13,6 +11,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyInt;

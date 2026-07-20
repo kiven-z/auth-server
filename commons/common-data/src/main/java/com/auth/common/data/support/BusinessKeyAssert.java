@@ -1,14 +1,14 @@
 package com.auth.common.data.support;
 
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import lombok.experimental.UtilityClass;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import lombok.experimental.UtilityClass;
 
 /**
  * 业务键（编码等）在单次请求内及库内的唯一性断言

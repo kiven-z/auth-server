@@ -1,7 +1,5 @@
 package com.auth.service.system.admin.convert.admin;
 
-import java.util.List;
-
 import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.form.post.SysPostForm;
@@ -13,6 +11,8 @@ import com.auth.service.system.admin.model.vo.post.SysPostSearchItemVO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+
+import java.util.List;
 
 /**
  * 岗位转换器

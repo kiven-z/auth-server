@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
 
 /**
  * 站内信收件箱写入实现
@@ -38,15 +37,13 @@ public class InAppMessageRecipientWriteServiceImpl
 		if (CollUtil.isEmpty(rows)) {
 			return 0;
 		}
+		for (InAppMessageRecipientEntity row : rows) {
+			row.setId(IdWorker.getId());
+			row.setVersion(0L);
+		}
+
 		int inserted = 0;
-
-		List<List<InAppMessageRecipientEntity>> partitions = CollUtil.split(rows, BATCH_SIZE);
-		for (List<InAppMessageRecipientEntity> partition : partitions) {
-			partition.forEach(row -> {
-				row.setId(Objects.requireNonNullElseGet(row.getId(), IdWorker::getId));
-				row.setVersion(Objects.requireNonNullElse(row.getVersion(), 0L));
-			});
-
+		for (List<InAppMessageRecipientEntity> partition : CollUtil.split(rows, BATCH_SIZE)) {
 			inserted += baseMapper.insertIgnoreBatch(partition);
 		}
 		return inserted;

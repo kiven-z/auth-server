@@ -1,7 +1,5 @@
 package com.auth.module.security.core.token.provider;
 
-import java.util.Date;
-
 import com.auth.common.jwt.autoconfigure.JwtProperties;
 import com.auth.common.jwt.key.HmacSecretKeys;
 import com.auth.common.jwt.model.SignatureAlgorithm;
@@ -12,12 +10,12 @@ import com.auth.module.security.core.token.model.SecurityTokenResult;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.Date;
+
 import static com.auth.module.security.contract.constants.SecurityExternalTokenConstants.TOKEN_TYPE;
 import static com.auth.module.security.contract.constants.SecurityInternalTokenConstants.PRINCIPAL_TYPE;
 import static com.auth.module.security.contract.constants.SecurityInternalTokenConstants.PRINCIPAL_TYPE_USER;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class InternalTokenProviderTest {
 

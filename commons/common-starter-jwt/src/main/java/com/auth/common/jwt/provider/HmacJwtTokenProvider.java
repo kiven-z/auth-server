@@ -1,13 +1,13 @@
 package com.auth.common.jwt.provider;
 
-import javax.crypto.SecretKey;
-
 import com.auth.common.jwt.autoconfigure.JwtProperties;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.Jwts.SIG;
 import org.jetbrains.annotations.NotNull;
+
+import javax.crypto.SecretKey;
 
 /**
  * HS256 实现

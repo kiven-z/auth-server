@@ -5,7 +5,6 @@ import com.auth.service.system.admin.support.dept.DeptReferenceChecker;
 import com.auth.service.system.admin.support.grant.GrantTableActiveSubjectChecker;
 import com.auth.service.system.admin.support.grant.TypedGrantTableActiveSubjectChecker;
 import com.auth.service.system.admin.support.post.PostReferenceChecker;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

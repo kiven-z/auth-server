@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.auth.service.system.message.mapper.InAppMessageUserStatusMapper">
+
+    <!-- 公开消息已读状态懒写入：撞 uk 时补已读，已读时间不回写 -->
+    <insert id="upsertReadBatch">
+        INSERT INTO
+        in_app_message_user_status (
+        id,
+        message_id,
+        user_id,
+        is_read,
+        read_time,
+        is_deleted,
+        create_user,
+        update_user,
+        version
+        )
+        VALUES
+        <foreach collection="rows" item="row" separator=",">
+            (
+            #{row.id},
+            #{row.messageId},
+            #{row.userId},
+            #{row.isRead},
+            #{row.readTime},
+            #{row.isDeleted},
+            #{row.createUser},
+            #{row.updateUser},
+            #{row.version}
+            )
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+        is_read = 1,
+        read_time = IF(
+        in_app_message_user_status.is_read = 1,
+        in_app_message_user_status.read_time,
+        VALUES
+        (read_time)
+        ),
+        update_user = VALUES(update_user)
+    </insert>
+
+</mapper>

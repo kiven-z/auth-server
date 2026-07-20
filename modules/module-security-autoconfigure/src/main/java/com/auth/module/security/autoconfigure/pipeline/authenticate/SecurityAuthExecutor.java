@@ -1,11 +1,11 @@
 package com.auth.module.security.autoconfigure.pipeline.authenticate;
 
-import java.util.List;
-
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.module.security.contract.exception.SecurityResultCodeEnum;
 import com.auth.module.security.contract.exception.SecurityTokenException;
 import jakarta.servlet.http.HttpServletRequest;
+
+import java.util.List;
 
 /**
  * 按 RequestAuthenticator 链执行认证并填充上下文

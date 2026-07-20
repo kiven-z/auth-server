@@ -1,12 +1,12 @@
 package com.auth.service.auth.service;
 
-import java.util.Collection;
-import java.util.List;
-
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.auth.model.query.OnlineUserPageQuery;
 import com.auth.service.auth.model.vo.OnlineUserPageVO;
 import com.auth.service.auth.model.vo.UserSessionVO;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * 会话管理：踢人、活跃会话与在线用户查询

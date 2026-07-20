@@ -1,18 +1,17 @@
 package com.auth.module.security.starter.security.resolve;
 
-import java.util.Optional;
-
 import com.auth.module.security.autoconfigure.pipeline.resolver.HandlerMethodResolver;
 import com.auth.module.security.starter.fixture.ProbeMvcFixtureController;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.util.ServletRequestPathUtils;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;

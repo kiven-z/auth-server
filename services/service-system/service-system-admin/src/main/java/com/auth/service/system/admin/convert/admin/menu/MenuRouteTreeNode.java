@@ -1,13 +1,13 @@
 package com.auth.service.system.admin.convert.admin.menu;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.Objects;
-
 import com.auth.common.core.model.entity.TreeNode;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * 建树中间节点 TreeNodeProcessorUtil 使用

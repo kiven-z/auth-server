@@ -1,17 +1,15 @@
 package com.auth.common.jwt.key;
 
-import java.nio.file.Path;
-
 import com.auth.common.jwt.autoconfigure.JwtProperties;
 import com.auth.common.jwt.exception.JwtKeyLoadException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import java.nio.file.Path;
+
 import static com.auth.common.jwt.model.SignatureAlgorithm.RS256;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 class RsaKeyStoreLoaderTest {
 

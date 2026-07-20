@@ -3,9 +3,7 @@ package com.auth.common.jwt.autoconfigure;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * {@link JwtProperties} 配置校验单元测试
@@ -14,6 +12,15 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class JwtPropertiesTest {
 
 	private static final String TEST_SECRET = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789ab";
+
+	private static JwtProperties hmacProperties(long accessExpired, long refreshExpired) {
+		JwtProperties properties = new JwtProperties();
+		properties.setIssuer("test-issuer");
+		properties.setSecret(TEST_SECRET);
+		properties.setAccessExpired(accessExpired);
+		properties.setRefreshExpired(refreshExpired);
+		return properties;
+	}
 
 	@Test
 	@DisplayName("refresh-expired 大于 access-expired 时校验通过")
@@ -46,15 +53,6 @@ class JwtPropertiesTest {
 
 		IllegalStateException ex = assertThrows(IllegalStateException.class, properties::validate);
 		assertEquals("auth.common.jwt.secret is required for HS256.", ex.getMessage());
-	}
-
-	private static JwtProperties hmacProperties(long accessExpired, long refreshExpired) {
-		JwtProperties properties = new JwtProperties();
-		properties.setIssuer("test-issuer");
-		properties.setSecret(TEST_SECRET);
-		properties.setAccessExpired(accessExpired);
-		properties.setRefreshExpired(refreshExpired);
-		return properties;
 	}
 
 }

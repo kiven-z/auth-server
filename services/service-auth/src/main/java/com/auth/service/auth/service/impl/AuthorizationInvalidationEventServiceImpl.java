@@ -1,8 +1,5 @@
 package com.auth.service.auth.service.impl;
 
-import java.time.LocalDateTime;
-import java.util.Objects;
-
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateResponse;
@@ -24,10 +21,12 @@ import com.auth.service.auth.support.invalidation.InvalidationProcessingMarker;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * 授权失效幂等事件：运维门禁与查询

@@ -1,11 +1,11 @@
 package com.auth.service.system.admin.model.po.user;
 
-import java.io.Serial;
-import java.io.Serializable;
-
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * 用户业务键查询行（username / email / phone / employeeNo）

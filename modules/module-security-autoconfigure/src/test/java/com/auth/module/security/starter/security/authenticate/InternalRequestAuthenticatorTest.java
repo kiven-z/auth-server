@@ -1,7 +1,5 @@
 package com.auth.module.security.starter.security.authenticate;
 
-import java.util.List;
-
 import com.auth.common.jwt.model.JwtUserToken;
 import com.auth.module.security.autoconfigure.pipeline.authenticate.InternalRequestAuthenticator;
 import com.auth.module.security.autoconfigure.service.AuthProfileCacheService;
@@ -16,13 +14,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import org.springframework.mock.web.MockHttpServletRequest;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 

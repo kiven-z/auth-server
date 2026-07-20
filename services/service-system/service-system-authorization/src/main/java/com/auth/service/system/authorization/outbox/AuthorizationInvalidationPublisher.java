@@ -1,16 +1,15 @@
 package com.auth.service.system.authorization.outbox;
 
-import java.time.LocalDateTime;
-
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest;
 import com.auth.service.system.authorization.mapper.SysAuthorizationInvalidationOutboxMapper;
 import com.auth.service.system.authorization.model.entity.SysAuthorizationInvalidationOutboxEntity;
 import com.auth.service.system.authorization.model.enums.AuthorizationInvalidationOutboxStatus;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 /**
  * 授权失效 Outbox 写入

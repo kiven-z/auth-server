@@ -56,22 +56,6 @@ public class MinioBucketInitializer extends AbstractS3CompatibleBucketInitialize
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected void logBucketAlreadyExists(String bucket) {
-		log.info("MinIO bucket already exists, keep current policy: bucket={}", bucket);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void logBucketCreated(String bucket) {
-		log.info("Created MinIO bucket: bucket={}", bucket);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
 	protected void afterBucketCreated(S3Client client, String bucket) {
 		String template = ResourceUtil.readUtf8Str(POLICY_TEMPLATE_PATH);
 		String policyJson = CharSequenceUtil.replace(template, BUCKET_PLACEHOLDER, bucket);

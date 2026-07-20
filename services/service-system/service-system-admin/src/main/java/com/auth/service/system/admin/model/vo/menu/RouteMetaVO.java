@@ -1,13 +1,13 @@
 package com.auth.service.system.admin.model.vo.menu;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.List;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * 动态路由 meta，供前端菜单展示；roles 来自 sys_menu_role 聚合
@@ -32,7 +32,9 @@ public class RouteMetaVO implements Serializable {
 	@Schema(title = "是否在菜单展示")
 	private Boolean showLink;
 
-	/** 登录可见：true=所有登录用户可见，不校验角色；false=按角色 */
+	/**
+	 * 登录可见：true=所有登录用户可见，不校验角色；false=按角色
+	 */
 	@Schema(title = "登录可见（不校验角色）")
 	private Boolean publicAccess;
 

@@ -1,9 +1,5 @@
 package com.auth.service.system.schedule.support.quartz;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-
 import com.auth.service.system.schedule.model.enums.SysJobQuartzRuntimeStatus;
 import com.auth.service.system.schedule.support.SysJobQuartzRuntimeSnapshot;
 import org.junit.jupiter.api.DisplayName;
@@ -12,13 +8,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.quartz.JobDetail;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobKey;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
-import org.quartz.Trigger;
-import org.quartz.TriggerKey;
+import org.quartz.*;
+
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;

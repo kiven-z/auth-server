@@ -1,7 +1,5 @@
 package com.auth.service.system.admin.excel.post;
 
-import java.util.List;
-
 import com.auth.module.file.importer.model.ImportErrors;
 import com.auth.module.file.importer.model.ImportRowError;
 import com.auth.module.file.importer.rule.RowRule;
@@ -10,6 +8,8 @@ import com.auth.service.system.admin.excel.EnableStatus;
 import com.auth.service.system.admin.excel.EnableStatusLabels;
 import com.auth.service.system.admin.support.post.PostWriteGuard;
 import lombok.experimental.UtilityClass;
+
+import java.util.List;
 
 /**
  * 岗位导入 Validate 阶段。

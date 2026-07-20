@@ -8,6 +8,7 @@ import com.auth.service.system.file.storage.core.classifier.StorageExceptionClas
 import com.auth.service.system.file.storage.core.s3.S3ClientManager;
 import com.auth.service.system.file.storage.core.s3.S3PlatformProfileResolver;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 import software.amazon.awssdk.services.s3.model.HeadBucketRequest;
@@ -18,6 +19,7 @@ import software.amazon.awssdk.services.s3.model.HeadBucketRequest;
  * @author Bunny
  */
 @RequiredArgsConstructor
+@Slf4j
 public abstract class AbstractS3CompatibleBucketInitializer implements StorageBucketInitializer {
 
 	private final S3PlatformProfileResolver profileResolver;
@@ -36,13 +38,17 @@ public abstract class AbstractS3CompatibleBucketInitializer implements StorageBu
 	 * 存储桶已存在时的日志输出
 	 * @param bucket 存储桶名称
 	 */
-	protected abstract void logBucketAlreadyExists(String bucket);
+	protected void logBucketAlreadyExists(String bucket) {
+		log.info("{} bucket already exists: bucket={}", platform().name(), bucket);
+	}
 
 	/**
 	 * 存储桶创建成功后的日志输出
 	 * @param bucket 存储桶名称
 	 */
-	protected abstract void logBucketCreated(String bucket);
+	protected void logBucketCreated(String bucket) {
+		log.info("Created {} bucket: bucket={}", platform().name(), bucket);
+	}
 
 	/**
 	 * {@inheritDoc}

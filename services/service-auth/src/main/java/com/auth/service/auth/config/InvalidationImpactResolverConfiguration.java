@@ -1,21 +1,15 @@
 package com.auth.service.auth.config;
 
-import java.util.Set;
-
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
-import com.auth.module.security.contract.dto.invalidation.GrantInvalidatePayload;
-import com.auth.module.security.contract.dto.invalidation.PermissionInvalidatePayload;
-import com.auth.module.security.contract.dto.invalidation.RoleInvalidatePayload;
-import com.auth.module.security.contract.dto.invalidation.UserDeptInvalidatePayload;
-import com.auth.module.security.contract.dto.invalidation.UserInvalidatePayload;
-import com.auth.module.security.contract.dto.invalidation.UserPostInvalidatePayload;
+import com.auth.module.security.contract.dto.invalidation.*;
 import com.auth.service.auth.mapper.AuthorizationImpactMapper;
 import com.auth.service.auth.support.invalidation.impact.AuthorizationImpactQuerySupport;
 import com.auth.service.auth.support.invalidation.impact.ImpactResolver;
 import com.auth.service.auth.support.invalidation.impact.PortBackedImpactResolver;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.Set;
 
 /**
  * 影响面解析器装配：按 {@link AuthorizationChangeKind} 注册 {@link ImpactResolver} Bean。

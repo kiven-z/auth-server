@@ -1,17 +1,16 @@
 package com.auth.service.auth.support.invalidation;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-
 import cn.hutool.core.collection.CollUtil;
 import com.auth.service.auth.config.AuthorizationInvalidationProperties;
 import com.auth.service.auth.mapper.UserMapper;
 import com.auth.service.auth.model.po.user.UserInvalidationStatePO;
 import com.auth.service.auth.util.BatchPartition;
-
 import org.springframework.stereotype.Repository;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * 用户失效状态读写：分桶前加载状态、分批递增 perm_version。

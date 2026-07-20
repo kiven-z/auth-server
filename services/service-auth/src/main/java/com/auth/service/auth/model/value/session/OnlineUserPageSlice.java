@@ -1,10 +1,10 @@
 package com.auth.service.auth.model.value.session;
 
-import java.util.List;
-
 import lombok.Builder;
 import lombok.Value;
 import lombok.experimental.Accessors;
+
+import java.util.List;
 
 /**
  * 在线用户分页切片（Port 读模型）

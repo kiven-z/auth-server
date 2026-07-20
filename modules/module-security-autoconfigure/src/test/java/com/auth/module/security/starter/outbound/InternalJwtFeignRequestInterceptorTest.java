@@ -1,7 +1,5 @@
 package com.auth.module.security.starter.outbound;
 
-import java.util.Collection;
-
 import com.auth.module.security.autoconfigure.outbound.InternalJwtFeignRequestInterceptor;
 import com.auth.module.security.autoconfigure.outbound.OutboundInternalJwtIssuer;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
@@ -11,21 +9,17 @@ import feign.RequestTemplate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.util.Collection;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 class InternalJwtFeignRequestInterceptorTest {
 

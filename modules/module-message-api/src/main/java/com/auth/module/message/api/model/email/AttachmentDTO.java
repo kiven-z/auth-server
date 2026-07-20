@@ -1,12 +1,12 @@
 package com.auth.module.message.api.model.email;
 
-import java.io.Serial;
-import java.io.Serializable;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * 邮件附件（跨服务契约）

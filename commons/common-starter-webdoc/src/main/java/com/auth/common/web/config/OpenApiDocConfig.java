@@ -1,8 +1,5 @@
 package com.auth.common.web.config;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.auth.common.web.config.properties.WebDocProperties;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.ExternalDocumentation;
@@ -14,12 +11,14 @@ import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import lombok.extern.slf4j.Slf4j;
 import org.springdoc.core.models.GroupedOpenApi;
-
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * SpringDoc OpenAPI 默认配置；如需自定义，可自行声明 {@link OpenApiDocConfig} Bean。

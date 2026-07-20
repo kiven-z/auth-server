@@ -18,11 +18,11 @@ import com.auth.module.security.contract.event.SecurityAuthorizationAuditPayload
  * &#64;Component
  * public class MyAuditHandler implements AuthorizationAuditHandler {
  *
-
+ *
  *     &#64;Async
  *
  *
-&#64;Override
+ * &#64;Override
  *     public void handle(SecurityAuthorizationAuditPayloadEvent event) {
  *         // 持久化逻辑
  *     }

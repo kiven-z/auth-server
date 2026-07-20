@@ -1,8 +1,5 @@
 package com.auth.service.system.admin.model.form.permission;
 
-import java.io.Serial;
-import java.io.Serializable;
-
 import com.auth.common.web.valid.group.CreateGroup;
 import com.auth.common.web.valid.group.UpdateGroup;
 import com.auth.module.security.contract.convention.AuthCodeConvention;
@@ -13,6 +10,9 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * 权限新增/更新表单

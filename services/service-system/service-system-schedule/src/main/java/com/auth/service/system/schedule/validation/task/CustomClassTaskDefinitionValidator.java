@@ -1,8 +1,5 @@
 package com.auth.service.system.schedule.validation.task;
 
-import java.util.Map;
-import java.util.Set;
-
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.schedule.exception.SysJobException;
@@ -17,8 +14,10 @@ import com.auth.service.system.schedule.task.support.BuiltinJobParamsParser;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
+import java.util.Set;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CLASS_INVALID;

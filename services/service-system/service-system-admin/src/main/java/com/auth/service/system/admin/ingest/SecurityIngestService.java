@@ -7,7 +7,6 @@ import com.auth.service.system.admin.mapper.log.LogAuthorizationAuditMapper;
 import com.auth.service.system.admin.mapper.log.LogOperationMapper;
 import com.auth.service.system.admin.model.entity.LogAuthorizationAuditEntity;
 import com.auth.service.system.admin.model.entity.LogOperationEntity;
-
 import org.springframework.stereotype.Service;
 
 /**

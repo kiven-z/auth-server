@@ -1,12 +1,12 @@
 package com.auth.service.auth.model.request;
 
-import java.io.Serial;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.io.Serial;
 
 /**
  * 短信验证码登录请求（HTTP 入站 DTO）。

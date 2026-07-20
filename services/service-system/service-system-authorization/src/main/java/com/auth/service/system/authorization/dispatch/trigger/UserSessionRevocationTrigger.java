@@ -1,14 +1,13 @@
 package com.auth.service.system.authorization.dispatch.trigger;
 
-import java.util.List;
-
 import cn.hutool.core.collection.CollUtil;
 import com.auth.service.system.authorization.service.UserSessionRevocationService;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+
+import java.util.List;
 
 /**
  * 用户会话撤销触发：事务提交后调用 auth 踢出全部会话

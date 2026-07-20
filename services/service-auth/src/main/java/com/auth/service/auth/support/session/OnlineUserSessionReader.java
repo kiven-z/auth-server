@@ -1,11 +1,5 @@
 package com.auth.service.auth.support.session;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.LongPredicate;
-
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.auth.model.value.session.OnlineUserPageSlice;
@@ -14,8 +8,13 @@ import lombok.Builder;
 import lombok.Value;
 import lombok.experimental.Accessors;
 import org.jetbrains.annotations.NotNull;
-
 import org.springframework.stereotype.Repository;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.LongPredicate;
 
 /**
  * 在线用户 ZSet 只读查询

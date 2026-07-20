@@ -6,11 +6,11 @@
     <select id="selectDescendantRowsByAncestorIds"
             resultType="com.auth.service.auth.model.po.scope.DeptClosureDescendantRowPO">
         SELECT
-            dc.ancestor_id AS ancestorId,
-            dc.descendant_id AS descendantId
+        dc.ancestor_id AS ancestorId,
+        dc.descendant_id AS descendantId
         FROM
-            dept_closure dc
-            INNER JOIN sys_dept d ON d.id = dc.descendant_id
+        dept_closure dc
+        INNER JOIN sys_dept d ON d.id = dc.descendant_id
         <where>
             <choose>
                 <when test="ancestorDeptIds != null and ancestorDeptIds.size() > 0">
@@ -25,8 +25,8 @@
             </choose>
         </where>
         ORDER BY
-            dc.ancestor_id,
-            dc.descendant_id
+        dc.ancestor_id,
+        dc.descendant_id
     </select>
 
 </mapper>

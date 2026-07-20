@@ -4,7 +4,6 @@ import com.auth.common.core.model.response.Result;
 import com.auth.module.security.autoconfigure.web.error.SecurityErrorResponseSupport;
 import com.auth.module.security.contract.exception.SecurityResultCodeEnum;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;

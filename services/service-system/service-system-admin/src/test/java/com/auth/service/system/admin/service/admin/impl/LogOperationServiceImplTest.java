@@ -1,10 +1,5 @@
 package com.auth.service.system.admin.service.admin.impl;
 
-import java.lang.reflect.Field;
-import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.ToLongFunction;
-
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.mapper.log.LogOperationMapper;
 import com.auth.service.system.admin.model.entity.LogOperationEntity;
@@ -24,14 +19,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.lang.reflect.Field;
+import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.ToLongFunction;
+
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link LogOperationQueryServiceImpl} 单元测试。

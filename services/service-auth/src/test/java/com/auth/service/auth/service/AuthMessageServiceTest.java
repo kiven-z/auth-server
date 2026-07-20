@@ -3,9 +3,9 @@ package com.auth.service.auth.service;
 import com.auth.common.core.model.response.Result;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
+import com.auth.module.message.api.feign.SystemMessageSendFeignClient;
 import com.auth.module.message.api.model.email.EmailChannelOptions;
 import com.auth.module.platform.persistence.model.UserEntity;
-import com.auth.module.message.api.feign.SystemMessageSendFeignClient;
 import com.auth.service.auth.mapper.UserMapper;
 import com.auth.service.auth.model.enums.AuthMessageScene;
 import com.auth.service.auth.model.enums.CredentialDimension;
@@ -26,9 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link AuthMessageService} 单元测试

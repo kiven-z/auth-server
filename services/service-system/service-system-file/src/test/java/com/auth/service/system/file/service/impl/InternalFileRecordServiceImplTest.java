@@ -55,14 +55,6 @@ class InternalFileRecordServiceImplTest {
 
 	private FileRecordServiceImpl fileRecordService;
 
-	@BeforeEach
-	void setUp() throws Exception {
-		fileRecordService = spy(new FileRecordServiceImpl(facadeRegistry));
-		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
-		baseMapperField.setAccessible(true);
-		baseMapperField.set(fileRecordService, fileRecordMapper);
-	}
-
 	private static FileRecordEntity buildEntity() {
 		FileRecordEntity entity = new FileRecordEntity();
 		entity.setId(100L);
@@ -74,6 +66,14 @@ class InternalFileRecordServiceImplTest {
 		entity.setBizType("avatar");
 		entity.setCreateUser(OWNER_USER_ID);
 		return entity;
+	}
+
+	@BeforeEach
+	void setUp() throws Exception {
+		fileRecordService = spy(new FileRecordServiceImpl(facadeRegistry));
+		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
+		baseMapperField.setAccessible(true);
+		baseMapperField.set(fileRecordService, fileRecordMapper);
 	}
 
 	@Test

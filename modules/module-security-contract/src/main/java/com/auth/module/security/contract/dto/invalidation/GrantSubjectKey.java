@@ -1,9 +1,9 @@
 package com.auth.module.security.contract.dto.invalidation;
 
+import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
+
 import java.io.Serial;
 import java.io.Serializable;
-
-import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 
 /**
  * grant_table 授权主体键（USER / DEPT / POST + 主键）。

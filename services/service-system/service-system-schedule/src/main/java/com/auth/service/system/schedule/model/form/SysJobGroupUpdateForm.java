@@ -1,8 +1,5 @@
 package com.auth.service.system.schedule.model.form;
 
-import java.io.Serial;
-import java.io.Serializable;
-
 import com.auth.common.web.valid.group.UpdateGroup;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -10,6 +7,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * 修改任务分组

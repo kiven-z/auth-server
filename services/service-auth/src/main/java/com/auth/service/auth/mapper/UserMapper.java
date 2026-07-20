@@ -1,13 +1,13 @@
 package com.auth.service.auth.mapper;
 
-import java.util.List;
-
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.auth.model.enums.CredentialDimension;
 import com.auth.service.auth.model.po.user.UserInvalidationStatePO;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * 用户 Mapper（auth 服务共用）

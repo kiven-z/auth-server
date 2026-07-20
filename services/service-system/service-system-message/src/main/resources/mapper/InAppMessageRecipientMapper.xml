@@ -4,7 +4,8 @@
 
     <!-- 批量写入收件箱：撞 uk(message_id,user_id) 时忽略，返回实际插入行数 -->
     <insert id="insertIgnoreBatch">
-        INSERT IGNORE INTO in_app_message_recipient (
+        INSERT IGNORE INTO
+        in_app_message_recipient (
         id,
         message_id,
         user_id,
@@ -13,7 +14,8 @@
         create_user,
         update_user,
         version
-        ) VALUES
+        )
+        VALUES
         <foreach collection="rows" item="row" separator=",">
             (
             #{row.id},
@@ -27,5 +29,24 @@
             )
         </foreach>
     </insert>
+
+    <!-- 当前用户收件箱：可见未读行标已读 -->
+    <update id="markRead">
+        UPDATE in_app_message_recipient r
+        INNER JOIN in_app_message m ON m.id = r.message_id
+        SET
+        r.is_read = 1,
+        r.read_time = #{readTime},
+        r.update_user = #{userId}
+        WHERE
+        r.user_id = #{userId}
+        AND r.is_deleted = 0
+        AND r.is_read = 0
+        AND m.status IN ('SUCCESS', 'PARTIAL')
+        AND r.message_id IN
+        <foreach collection="messageIds" item="messageId" open="(" separator="," close=")">
+            #{messageId}
+        </foreach>
+    </update>
 
 </mapper>

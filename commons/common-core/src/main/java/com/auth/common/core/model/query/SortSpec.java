@@ -1,9 +1,9 @@
 package com.auth.common.core.model.query;
 
-import java.io.Serializable;
-
 import lombok.Getter;
 import lombok.Setter;
+
+import java.io.Serializable;
 
 /**
  * 排序规则

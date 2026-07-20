@@ -1,14 +1,10 @@
 package com.auth.service.system.admin.excel.post;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-
 import com.auth.module.file.export.writer.ExcelExportWriter;
 import com.auth.module.file.importer.model.SpreadsheetImportResult;
 import com.auth.service.system.admin.mapper.post.SysPostMapper;
-import com.auth.service.system.admin.model.po.post.PostDeptCodePairPO;
 import com.auth.service.system.admin.model.form.post.SysPostForm;
+import com.auth.service.system.admin.model.po.post.PostDeptCodePairPO;
 import com.auth.service.system.admin.service.admin.SysPostService;
 import com.auth.service.system.admin.support.dept.DeptLookupSupport;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,15 +14,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import org.springframework.mock.web.MockMultipartFile;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link PostSheetImporter} 单元测试

@@ -13,13 +13,14 @@ import com.auth.service.system.message.model.vo.delivery.MessageChannelDeliveryD
 import com.auth.service.system.message.model.vo.delivery.MessageChannelDeliveryPageResponse;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -44,8 +45,14 @@ class MessageChannelDeliveryServiceImplTest {
 	@Mock
 	private AuditUserDisplayService auditUserDisplayService;
 
-	@InjectMocks
 	private MessageChannelDeliveryServiceImpl messageChannelDeliveryService;
+
+	@BeforeEach
+	void setUp() {
+		// ServiceImpl.baseMapper 由 Spring 字段注入；单测手动挂上
+		messageChannelDeliveryService = new MessageChannelDeliveryServiceImpl(auditUserDisplayService);
+		ReflectionTestUtils.setField(messageChannelDeliveryService, "baseMapper", messageChannelDeliveryMapper);
+	}
 
 	@Test
 	@DisplayName("分页：映射业务字段并填充审计用户名")

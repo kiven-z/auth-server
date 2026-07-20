@@ -1,14 +1,14 @@
 package com.auth.service.system.admin.model.vo.menu;
 
-import java.io.Serial;
-import java.util.List;
-
 import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
+import java.io.Serial;
+import java.util.List;
 
 /**
  * 菜单详情（在列表行基础上扩展路由元数据字段，与前端 {@code SysMenuDetailVO} 对齐）

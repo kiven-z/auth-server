@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.auth.service.system.message.mapper.InAppInboxMapper">
+
+    <!-- 分页查询当前用户 PUSH 收件箱（按未读优先） -->
+    <select id="selectPushInboxPage"
+            resultType="com.auth.service.system.message.model.po.InAppInboxPageRowPO">
+        SELECT
+        m.id,
+        m.scene_code,
+        m.title,
+        m.content_type,
+        m.biz_type,
+        m.link_url,
+        m.sender_user_id,
+        m.delivery_mode,
+        r.is_read,
+        r.read_time,
+        m.create_time,
+        m.update_time,
+        m.create_user,
+        m.update_user
+        FROM
+        in_app_message_recipient r
+        INNER JOIN in_app_message m ON m.id = r.message_id
+        WHERE
+        r.user_id = #{userId}
+        AND r.is_deleted = 0
+        AND m.status IN ('SUCCESS', 'PARTIAL')
+        <if test="query.isRead != null">
+            AND r.is_read = #{query.isRead}
+        </if>
+        <if test="query.bizType != null and query.bizType != ''">
+            AND m.biz_type LIKE CONCAT(#{query.bizType}, '%')
+        </if>
+        <if test="query.title != null and query.title != ''">
+            AND m.title LIKE CONCAT(#{query.title}, '%')
+        </if>
+        ORDER BY
+        r.is_read ASC,
+        m.create_time DESC
+    </select>
+
+    <!-- 分页查询当前用户 PULL 收件箱（按未读优先） -->
+    <select id="selectPullInboxPage"
+            resultType="com.auth.service.system.message.model.po.InAppInboxPageRowPO">
+        SELECT
+        m.id,
+        m.scene_code,
+        m.title,
+        m.content_type,
+        m.biz_type,
+        m.link_url,
+        m.sender_user_id,
+        m.delivery_mode,
+        COALESCE(s.is_read, 0) AS is_read,
+        s.read_time,
+        m.create_time,
+        m.update_time,
+        m.create_user,
+        m.update_user
+        FROM
+        in_app_message m
+        LEFT JOIN in_app_message_user_status s ON s.message_id = m.id
+        AND s.user_id = #{userId}
+        WHERE
+        m.delivery_mode = 'PULL'
+        AND m.status = 'SUCCESS'
+        AND (
+        s.id IS NULL
+        OR s.is_deleted = 0
+        )
+        <if test="query.isRead != null and query.isRead">
+            AND s.is_read = 1
+        </if>
+        <if test="query.isRead != null and !query.isRead">
+            AND (
+            s.id IS NULL
+            OR s.is_read = 0
+            )
+        </if>
+        <if test="query.bizType != null and query.bizType != ''">
+            AND m.biz_type LIKE CONCAT(#{query.bizType}, '%')
+        </if>
+        <if test="query.title != null and query.title != ''">
+            AND m.title LIKE CONCAT(#{query.title}, '%')
+        </if>
+        ORDER BY
+        COALESCE(s.is_read, 0),
+        m.create_time DESC
+    </select>
+
+    <!-- 统计当前用户 PUSH 未读（与列表可见性一致） -->
+    <select id="countPushUnread" resultType="long">
+        SELECT COUNT(1)
+        FROM in_app_message_recipient r
+                 INNER JOIN in_app_message m ON m.id = r.message_id
+        WHERE r.user_id = #{userId}
+          AND r.is_deleted = 0
+          AND r.is_read = 0
+          AND m.status IN ('SUCCESS', 'PARTIAL')
+    </select>
+
+    <!-- 统计当前用户 PULL 未读：无状态行视为未读 -->
+    <select id="countPullUnread" resultType="long">
+        SELECT COUNT(1)
+        FROM in_app_message m
+                 LEFT JOIN in_app_message_user_status s ON s.message_id = m.id
+            AND s.user_id = #{userId}
+        WHERE m.delivery_mode = 'PULL'
+          AND m.status = 'SUCCESS'
+          AND (
+            s.id IS NULL
+                OR s.is_deleted = 0
+            )
+          AND (
+            s.id IS NULL
+                OR s.is_read = 0
+            )
+    </select>
+
+</mapper>

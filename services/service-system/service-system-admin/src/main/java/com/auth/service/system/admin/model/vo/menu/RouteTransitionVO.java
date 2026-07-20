@@ -1,12 +1,12 @@
 package com.auth.service.system.admin.model.vo.menu;
 
-import java.io.Serial;
-import java.io.Serializable;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * 路由过渡动画（Vue Transition / animate.css），对应前端 meta.transition

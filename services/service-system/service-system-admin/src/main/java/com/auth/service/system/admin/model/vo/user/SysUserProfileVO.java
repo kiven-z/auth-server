@@ -1,9 +1,5 @@
 package com.auth.service.system.admin.model.vo.user;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.auth.common.core.model.response.BaseResponse;
 import com.auth.service.system.admin.model.vo.reference.ext.UserDeptReferenceVO;
 import com.auth.service.system.admin.model.vo.reference.ext.UserPostReferenceVO;
@@ -13,6 +9,10 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 用户档案聚合（基本信息 + 部门 + 岗位）

@@ -1,14 +1,13 @@
 package com.auth.service.system.schedule.task;
 
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
 import com.auth.service.system.schedule.task.executor.SysJobTaskExecutor;
-
 import org.springframework.stereotype.Component;
+
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_TASK_TYPE_UNSUPPORTED;
 

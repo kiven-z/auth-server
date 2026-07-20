@@ -1,7 +1,5 @@
 package com.auth.service.system.admin.convert.spreadsheet;
 
-import java.util.List;
-
 import com.auth.common.data.model.enums.UserStatus;
 import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.common.mapstruct.qualifier.MapStructExportQualifiers;
@@ -11,6 +9,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
+
+import java.util.List;
 
 /**
  * 用户表格行转换器

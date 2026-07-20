@@ -1,12 +1,12 @@
 package com.auth.service.system.admin.model.vo.dept;
 
-import java.io.Serial;
-import java.io.Serializable;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * 闭包健康度统计（活跃部门维度）

@@ -1,11 +1,11 @@
 package com.auth.service.system.common.exception;
 
-import java.util.Arrays;
-import java.util.Objects;
-
 import com.auth.common.core.i18n.I18nMessageProvider;
 import com.auth.service.system.common.exception.code.SystemResultCode;
 import lombok.Getter;
+
+import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * 系统业务异常，语义以 {@link SystemResultCode} 为来源，可携带 i18n 占位参数

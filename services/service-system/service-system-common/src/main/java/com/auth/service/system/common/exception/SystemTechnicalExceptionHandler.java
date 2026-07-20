@@ -1,13 +1,10 @@
 package com.auth.service.system.common.exception;
 
-import java.util.Objects;
-
 import com.auth.common.core.model.response.Result;
 import com.auth.common.jwt.exception.JwtExpiredException;
 import com.auth.common.jwt.exception.JwtParseException;
 import com.auth.common.web.exception.BaseExceptionResponseBuilder;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.context.MessageSource;
 import org.springframework.core.annotation.Order;
 import org.springframework.data.redis.RedisSystemException;
@@ -15,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.Objects;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.JWT_INVALID;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.REDIS_SYSTEM_ERROR;

@@ -1,10 +1,10 @@
 package com.auth.service.system.admin.model.po.user;
 
-import java.util.Set;
-
 import lombok.Builder;
 import lombok.Value;
 import lombok.experimental.Accessors;
+
+import java.util.Set;
 
 /**
  * 库内已占用的用户业务键集合

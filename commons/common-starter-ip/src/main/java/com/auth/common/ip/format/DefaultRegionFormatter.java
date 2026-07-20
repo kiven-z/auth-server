@@ -1,9 +1,9 @@
 package com.auth.common.ip.format;
 
+import cn.hutool.core.text.CharSequenceUtil;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import cn.hutool.core.text.CharSequenceUtil;
 
 /**
  * 默认的区域格式化器用于ip2region输出

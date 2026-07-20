@@ -1,12 +1,12 @@
 package com.auth.module.file.export;
 
-import java.util.Objects;
-
 import com.auth.module.file.exception.ExportException;
 import com.auth.module.file.export.model.ExportPageRange;
 import com.auth.module.file.export.model.enums.ExportScope;
 import com.auth.module.file.export.validation.ExportPageValidator;
 import lombok.experimental.UtilityClass;
+
+import java.util.Objects;
 
 /**
  * 解析实际导出的页码区间

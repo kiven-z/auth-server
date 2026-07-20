@@ -1,8 +1,8 @@
 package com.auth.module.security.contract.convention;
 
-import java.util.regex.Pattern;
-
 import lombok.experimental.UtilityClass;
+
+import java.util.regex.Pattern;
 
 /**
  * 权限码、角色码等安全侧编码格式约定（供 system 等模块在写入前校验；不包含业务状态判断）。

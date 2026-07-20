@@ -38,20 +38,4 @@ public class AliyunOssBucketInitializer extends AbstractS3CompatibleBucketInitia
 		return STORAGE_PLATFORM;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void logBucketAlreadyExists(String bucket) {
-		log.info("OSS bucket already exists: bucket={}", bucket);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void logBucketCreated(String bucket) {
-		log.info("Created OSS bucket: bucket={}", bucket);
-	}
-
 }

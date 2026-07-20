@@ -1,17 +1,16 @@
 package com.auth.module.security.autoconfigure.annotation.processor;
 
-import java.lang.reflect.AnnotatedElement;
-import java.util.Arrays;
-import java.util.List;
-
 import cn.hutool.core.util.ArrayUtil;
 import org.jetbrains.annotations.NotNull;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.lang.reflect.AnnotatedElement;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * 在 Bean 初始化完成后扫描 RestController 依次执行所有 SecurityAnnotationConflictRule 在启动期发现非法注解组合时立即失败

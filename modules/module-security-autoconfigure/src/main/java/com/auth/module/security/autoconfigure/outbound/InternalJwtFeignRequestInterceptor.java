@@ -2,7 +2,6 @@ package com.auth.module.security.autoconfigure.outbound;
 
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
-
 import org.springframework.http.HttpHeaders;
 
 import static com.auth.module.security.contract.constants.SecurityInternalTokenConstants.INTERNAL_HEADER;

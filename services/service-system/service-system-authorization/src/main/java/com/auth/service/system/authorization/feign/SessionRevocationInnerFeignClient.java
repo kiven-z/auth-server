@@ -1,13 +1,12 @@
 package com.auth.service.system.authorization.feign;
 
-import java.util.List;
-
 import com.auth.common.core.model.response.Result;
 import com.auth.service.system.authorization.feign.fallback.SessionRevocationInnerFeignClientFallback;
-
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+
+import java.util.List;
 
 /**
  * 会话撤销内部 Feign 客户端（IAM 批量踢下线）

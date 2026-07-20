@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
 /**
- * 短信模板 前端控制器
+ * 短信模板
  *
  * @author Bunny
  */

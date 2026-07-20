@@ -27,7 +27,7 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
  *
  * @author Bunny
  */
-@Tag(name = "渠道投递记录", description = "EMAIL/SMS/DING_TALK 等渠道投递结果查询与删除")
+@Tag(name = "渠道投递记录")
 @Validated
 @RequestMapping("/api/system/message/channel-delivery")
 @RestController
@@ -39,7 +39,7 @@ public class MessageChannelDeliveryController {
 		this.messageChannelDeliveryService = messageChannelDeliveryService;
 	}
 
-	@Operation(summary = "分页查询渠道投递记录", description = "可按 taskId、channel、status 过滤")
+	@Operation(summary = "分页查询渠道投递记录")
 	@PreAuthorize("@auth.decide('message:delivery:query')")
 	@GetMapping()
 	public Result<PageResponse<MessageChannelDeliveryPageResponse>> getChannelDeliveryPage(
@@ -49,7 +49,7 @@ public class MessageChannelDeliveryController {
 		return Result.success(pageResponse);
 	}
 
-	@Operation(summary = "渠道投递记录详情", description = "按主键返回完整投递字段")
+	@Operation(summary = "渠道投递记录详情")
 	@PreAuthorize("@auth.decide('message:delivery:detail')")
 	@GetMapping("{id}")
 	public Result<MessageChannelDeliveryDetailVO> getChannelDeliveryById(@PathVariable("id") Long id) {
@@ -59,7 +59,7 @@ public class MessageChannelDeliveryController {
 
 	@OperationLog(targetType = "MESSAGE_CHANNEL_DELIVERY_DELETE", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = MessageAuditBizModule.SYS_MESSAGE_CHANNEL_DELIVERY, operation = OperationLogKind.DELETE)
-	@Operation(summary = "批量删除渠道投递记录", description = "按 ids 物理删除投递记录")
+	@Operation(summary = "批量删除渠道投递记录")
 	@PreAuthorize("@auth.decide('message:delivery:delete')")
 	@DeleteMapping()
 	public Result<String> batchDelete(@RequestBody @NotEmpty(message = "投递记录ID列表不能为空") List<Long> ids) {

@@ -1,9 +1,5 @@
 package com.auth.service.system.schedule.model.form;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.LocalDateTime;
-
 import com.auth.common.web.valid.group.CreateGroup;
 import com.auth.service.system.schedule.validation.form.ValidSysJobCreateForm;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -12,6 +8,10 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * 新增定时任务（JobKey 创建后不可改）

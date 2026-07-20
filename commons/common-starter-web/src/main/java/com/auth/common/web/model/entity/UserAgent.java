@@ -1,14 +1,14 @@
 package com.auth.common.web.model.entity;
 
-import java.io.Serial;
-import java.io.Serializable;
-
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * 用户代理过滤器信息

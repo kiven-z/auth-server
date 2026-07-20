@@ -1,7 +1,5 @@
 package com.auth.service.system.admin.service.admin.impl;
 
-import java.util.List;
-
 import com.auth.service.system.admin.mapper.menu.SysMenuRoleMapper;
 import com.auth.service.system.admin.model.form.menu.SysMenuAssignRoleForm;
 import com.auth.service.system.admin.support.grant.RbacReferenceChecker;
@@ -14,11 +12,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link SysMenuManageServiceImpl} 单元测试。

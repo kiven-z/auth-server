@@ -35,9 +35,9 @@ public class FileUploadController {
 
 	private final FileUploadService fileUploadService;
 
+	@AuthenticatedApi
 	@OperationLog(targetType = "FILE_UPLOAD", serviceDomain = SYSTEM, bizModule = SYS_FILE,
 			operation = OperationLogKind.CREATE)
-	@AuthenticatedApi
 	@Operation(summary = "单文件上传")
 	@PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public Result<FileUploadResultDTO> upload(@Valid FileUploadForm form) {
@@ -45,9 +45,9 @@ public class FileUploadController {
 		return Result.success(response);
 	}
 
+	@AuthenticatedApi
 	@OperationLog(targetType = "FILE_UPLOAD_MULTIPLE", serviceDomain = SYSTEM, bizModule = SYS_FILE,
 			operation = OperationLogKind.CREATE)
-	@AuthenticatedApi
 	@Operation(summary = "多文件上传")
 	@PostMapping(value = "/upload/multiple", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public Result<List<FileUploadResultDTO>> uploadMultiple(@Valid MultipleFileUploadForm form) {

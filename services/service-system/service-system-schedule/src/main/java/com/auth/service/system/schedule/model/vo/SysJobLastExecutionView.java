@@ -1,8 +1,8 @@
 package com.auth.service.system.schedule.model.vo;
 
-import java.time.LocalDateTime;
-
 import com.auth.service.system.schedule.model.enums.SysJobLastExecutionStatus;
+
+import java.time.LocalDateTime;
 
 /**
  * 可补充最近一次执行结果的视图（分页行 / 详情共用）

@@ -1,7 +1,5 @@
 package com.auth.service.system.admin.service.admin;
 
-import java.util.List;
-
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.admin.model.query.menu.SysMenuQuery;
@@ -10,6 +8,8 @@ import com.auth.service.system.admin.model.vo.menu.SysMenuDetailVO;
 import com.auth.service.system.admin.model.vo.menu.SysMenuListVO;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+
+import java.util.List;
 
 /**
  * 菜单只读查询。

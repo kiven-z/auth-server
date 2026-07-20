@@ -1,9 +1,6 @@
 package com.auth.common.web.resttemplate;
 
-import java.util.Map;
-
 import lombok.experimental.UtilityClass;
-
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -11,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.Map;
 
 /**
  * {@link RestTemplate} 调用辅助

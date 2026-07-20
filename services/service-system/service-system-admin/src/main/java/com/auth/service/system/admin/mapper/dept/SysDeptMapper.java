@@ -1,7 +1,5 @@
 package com.auth.service.system.admin.mapper.dept;
 
-import java.util.List;
-
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.po.dept.SysDeptBoundUserPO;
 import com.auth.service.system.admin.model.po.dept.SysDeptPageRowPO;
@@ -15,6 +13,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
 
 /**
  * 系统部门 Mapper

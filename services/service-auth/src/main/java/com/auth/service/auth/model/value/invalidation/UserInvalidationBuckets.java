@@ -1,12 +1,12 @@
 package com.auth.service.auth.model.value.invalidation;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-
 import lombok.Builder;
 import lombok.Value;
 import lombok.experimental.Accessors;
+
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * 用户失效分桶：正常用户递增版本并刷新画像；其余仅驱逐缓存

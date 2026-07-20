@@ -4,7 +4,6 @@ import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.module.security.contract.exception.SecurityResultCodeEnum;
 import com.auth.module.security.contract.exception.SecurityTokenException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 

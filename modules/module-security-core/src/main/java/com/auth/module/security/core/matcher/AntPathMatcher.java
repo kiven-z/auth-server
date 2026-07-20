@@ -1,12 +1,11 @@
 package com.auth.module.security.core.matcher;
 
-import java.util.List;
-
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.ArrayUtil;
 import lombok.experimental.UtilityClass;
-
 import org.springframework.util.StringUtils;
+
+import java.util.List;
 
 /**
  * Ant 路径匹配工具类

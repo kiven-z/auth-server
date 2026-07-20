@@ -58,13 +58,13 @@
         <where>
             channel = #{query.channel}
             <if test="query.templateCode != null and query.templateCode != ''">
-                AND scene_code LIKE CONCAT('%', #{query.templateCode}, '%')
+                AND scene_code LIKE CONCAT(#{query.templateCode}, '%')
             </if>
             <if test="query.templateName != null and query.templateName != ''">
-                AND template_name LIKE CONCAT('%', #{query.templateName}, '%')
+                AND template_name LIKE CONCAT(#{query.templateName}, '%')
             </if>
             <if test="query.subject != null and query.subject != ''">
-                AND subject LIKE CONCAT('%', #{query.subject}, '%')
+                AND subject LIKE CONCAT(#{query.subject}, '%')
             </if>
             <if test="query.imMessageType != null and query.imMessageType != ''">
                 AND im_message_type = #{query.imMessageType}

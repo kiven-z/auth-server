@@ -1,7 +1,5 @@
 package com.auth.service.system.schedule.runner;
 
-import java.time.Duration;
-
 import com.auth.service.system.schedule.support.quartz.SysJobScheduleReconciler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -11,17 +9,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ConfigurableApplicationContext;
 
+import java.time.Duration;
+
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link SysJobBootstrapSynchronizer} 单元测试。

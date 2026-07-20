@@ -1,8 +1,8 @@
 package com.auth.module.file.importer.rule;
 
-import java.util.List;
-
 import com.auth.module.file.importer.model.ImportRowError;
+
+import java.util.List;
 
 /**
  * 单行校验规则：无状态，返回 0..n 条错误。

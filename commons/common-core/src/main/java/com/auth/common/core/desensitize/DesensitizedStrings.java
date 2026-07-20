@@ -1,9 +1,9 @@
 package com.auth.common.core.desensitize;
 
-import java.util.Collections;
-
 import cn.hutool.core.text.CharSequenceUtil;
 import lombok.experimental.UtilityClass;
+
+import java.util.Collections;
 
 /**
  * 字符串脱敏工具，供 JSON 序列化与单测复用

@@ -1,10 +1,6 @@
 package com.auth.service.system.admin.service.admin.impl;
 
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
+import cn.hutool.core.collection.CollUtil;
 import com.auth.common.core.utils.FieldChangeSupport;
 import com.auth.service.system.admin.convert.admin.SysPostConverter;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
@@ -17,11 +13,14 @@ import com.auth.service.system.admin.support.post.PostWriteGuard;
 import com.auth.service.system.authorization.dispatch.trigger.PostAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
-import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * 系统岗位写服务实现。

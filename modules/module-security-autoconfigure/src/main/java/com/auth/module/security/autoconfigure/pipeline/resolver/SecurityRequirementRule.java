@@ -1,10 +1,9 @@
 package com.auth.module.security.autoconfigure.pipeline.resolver;
 
-import java.util.Optional;
-
 import com.auth.module.security.autoconfigure.security.SecurityRequirement;
-
 import org.springframework.web.method.HandlerMethod;
+
+import java.util.Optional;
 
 /**
  * 将处理器上的安全注解映射为 {@link SecurityRequirement}

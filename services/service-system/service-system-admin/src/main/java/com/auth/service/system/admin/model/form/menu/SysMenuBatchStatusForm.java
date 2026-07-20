@@ -1,14 +1,14 @@
 package com.auth.service.system.admin.model.form.menu;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.List;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * 菜单批量状态

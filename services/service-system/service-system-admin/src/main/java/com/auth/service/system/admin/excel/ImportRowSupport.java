@@ -1,10 +1,5 @@
 package com.auth.service.system.admin.excel;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Function;
-
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.file.importer.model.ImportErrors;
 import com.auth.module.file.importer.model.ImportRowValidator;
@@ -12,6 +7,11 @@ import lombok.Builder;
 import lombok.Value;
 import lombok.experimental.Accessors;
 import lombok.experimental.UtilityClass;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Function;
 
 /**
  * Excel 导入批量预检工具（行级校验已迁移至

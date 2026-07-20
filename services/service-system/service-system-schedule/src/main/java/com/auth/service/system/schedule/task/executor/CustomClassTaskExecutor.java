@@ -9,7 +9,6 @@ import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 

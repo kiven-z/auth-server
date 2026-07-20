@@ -1,15 +1,15 @@
 package com.auth.module.file.export.writer;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.alibaba.excel.EasyExcelFactory;
 import com.alibaba.excel.write.builder.ExcelWriterBuilder;
 import com.alibaba.excel.write.handler.CellWriteHandler;
 import com.alibaba.excel.write.style.column.LongestMatchColumnWidthStyleStrategy;
 import com.auth.module.file.export.model.enums.ZebraStripeStyleType;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Excel 文件写入器：将行数据序列化为 xlsx 字节

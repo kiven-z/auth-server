@@ -1,13 +1,12 @@
 package com.auth.common.web.exception;
 
-import java.util.Objects;
-
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.core.model.response.Result;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import java.util.Objects;
 
 /**
  * 异常响应构建器基类 用于构建异常响应

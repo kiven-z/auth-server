@@ -1,15 +1,15 @@
 package com.auth.module.file.importer.rule;
 
+import com.auth.module.file.importer.model.ImportErrorCode;
+import com.auth.module.file.importer.model.ImportErrors;
+import com.auth.module.file.importer.model.ImportRowError;
+import lombok.experimental.UtilityClass;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
-
-import com.auth.module.file.importer.model.ImportErrorCode;
-import com.auth.module.file.importer.model.ImportErrors;
-import com.auth.module.file.importer.model.ImportRowError;
-import lombok.experimental.UtilityClass;
 
 /**
  * {@link RowRule} 组合与常用规则工厂。

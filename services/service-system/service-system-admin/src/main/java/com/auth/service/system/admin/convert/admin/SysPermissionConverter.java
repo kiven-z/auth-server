@@ -1,7 +1,5 @@
 package com.auth.service.system.admin.convert.admin;
 
-import java.util.List;
-
 import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.form.permission.SysPermissionForm;
@@ -13,6 +11,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.factory.Mappers;
+
+import java.util.List;
 
 /**
  * 权限转换器

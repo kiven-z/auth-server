@@ -21,16 +21,6 @@
         #{limit}
     </select>
 
-    <!-- 全员展开：正常/锁定用户均可收信，仅排除禁用（游标分页） -->
-    <select id="selectAllEnabledUserIdsAfter" resultType="java.lang.Long">
-        SELECT u.id
-        FROM sys_user u
-        WHERE u.status IN (1, 2)
-          AND u.id &gt; #{lastUserId}
-        ORDER BY u.id
-        LIMIT #{limit}
-    </select>
-
     <!-- 按岗位展开：正常/锁定用户均可收信，仅排除禁用（游标分页） -->
     <select id="selectUserIdsByPostIdsAfter" resultType="java.lang.Long">
         SELECT DISTINCT

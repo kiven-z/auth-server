@@ -1,14 +1,13 @@
 package com.auth.service.auth.support.session;
 
-import java.util.Optional;
-
 import com.auth.module.security.autoconfigure.config.user.SessionLimitStrategy;
 import com.auth.module.security.autoconfigure.config.user.UserConfigProperties;
 import com.auth.service.auth.exception.AuthBusinessException;
 import com.auth.service.auth.exception.AuthResultCode;
-
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
+
+import java.util.Optional;
 
 /**
  * 登录前会话数量上限校验与淘汰策略。

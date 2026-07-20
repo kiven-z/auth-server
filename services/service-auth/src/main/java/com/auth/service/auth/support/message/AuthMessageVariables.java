@@ -1,11 +1,11 @@
 package com.auth.service.auth.support.message;
 
+import lombok.experimental.UtilityClass;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
-
-import lombok.experimental.UtilityClass;
 
 /**
  * 认证消息模板变量组装。

@@ -1,9 +1,5 @@
 package com.auth.service.system.authorization.convert;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.Objects;
-
 import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidationEventStatsInnerDTO;
 import com.auth.service.system.authorization.model.po.AuthorizationInvalidationEventStatsPO;
 import com.auth.service.system.authorization.model.po.AuthorizationInvalidationFailureRateTrendBucketPO;
@@ -12,6 +8,10 @@ import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationE
 import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationFailureRateTrendPointVO;
 import com.auth.service.system.authorization.model.vo.AuthorizationInvalidationOutboxStatsVO;
 import lombok.experimental.UtilityClass;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.Objects;
 
 /**
  * 授权失效运维统计转换器；含 null 默认值与失败率计算，不使用 MapStruct。

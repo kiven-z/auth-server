@@ -1,9 +1,5 @@
 package com.auth.service.system.admin.support.grant;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import cn.hutool.core.collection.CollUtil;
 import com.auth.service.system.admin.mapper.permission.SysPermissionMapper;
 import com.auth.service.system.admin.mapper.role.SysRoleMapper;
@@ -13,8 +9,11 @@ import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.common.exception.code.SystemResultCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.stereotype.Component;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * RBAC 授权写入前的关联引用存在性与启用状态校验

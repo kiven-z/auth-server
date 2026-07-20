@@ -1,9 +1,5 @@
 package com.auth.service.system.admin.service.admin.impl;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-
 import com.auth.service.system.admin.mapper.dept.DeptClosureMapper;
 import com.auth.service.system.admin.model.po.dept.DeptClosureDepthChainRowPO;
 import com.auth.service.system.admin.model.po.dept.DeptClosureHealthStatsPO;
@@ -15,9 +11,12 @@ import com.auth.service.system.admin.model.vo.dept.DeptClosureParentLinkAnomalyV
 import com.auth.service.system.admin.service.admin.DeptClosureHealthQueryService;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * 部门闭包表健康检查只读查询实现

@@ -1,7 +1,5 @@
 package com.auth.common.jwt.provider;
 
-import java.util.Date;
-
 import cn.hutool.core.util.IdUtil;
 import com.auth.common.jwt.autoconfigure.JwtProperties;
 import com.auth.common.jwt.key.HmacSecretKeys;
@@ -10,10 +8,10 @@ import io.jsonwebtoken.Jwts;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.Date;
+
 import static com.auth.common.jwt.model.SignatureAlgorithm.HS256;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class HmacJwtTokenProviderTest {
 

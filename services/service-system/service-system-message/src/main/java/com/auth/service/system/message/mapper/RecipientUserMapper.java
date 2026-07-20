@@ -25,14 +25,6 @@ public interface RecipientUserMapper {
 			@Param("lastUserId") long lastUserId, @Param("limit") int limit);
 
 	/**
-	 * 全员启用用户
-	 * @param lastUserId 上一批最大 userId，首批传 0
-	 * @param limit 本批上限
-	 * @return 本批 userId
-	 */
-	List<Long> selectAllEnabledUserIdsAfter(@Param("lastUserId") long lastUserId, @Param("limit") int limit);
-
-	/**
 	 * 按岗位展开启用用户
 	 * @param postIds 岗位 ID
 	 * @param lastUserId 上一批最大 userId，首批传 0

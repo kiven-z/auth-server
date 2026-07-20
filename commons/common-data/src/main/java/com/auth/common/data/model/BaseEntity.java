@@ -1,17 +1,13 @@
 package com.auth.common.data.model;
 
+import com.auth.common.core.annotation.JsonStringFormat;
+import com.baomidou.mybatisplus.annotation.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
-
-import com.auth.common.core.annotation.JsonStringFormat;
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.Version;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * 基础信息字段,基础信息字段

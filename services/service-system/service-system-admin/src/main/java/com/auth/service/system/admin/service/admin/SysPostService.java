@@ -1,10 +1,10 @@
 package com.auth.service.system.admin.service.admin;
 
-import java.util.List;
-
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.form.post.SysPostForm;
 import com.baomidou.mybatisplus.extension.service.IService;
+
+import java.util.List;
 
 /**
  * 系统岗位写服务。

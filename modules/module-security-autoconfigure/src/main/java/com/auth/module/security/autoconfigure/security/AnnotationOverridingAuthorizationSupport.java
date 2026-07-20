@@ -1,15 +1,14 @@
 package com.auth.module.security.autoconfigure.security;
 
-import java.util.List;
-
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import lombok.experimental.UtilityClass;
-
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+
+import java.util.List;
 
 /**
  * AnnotationOverridingAuthorizationManager 工具类

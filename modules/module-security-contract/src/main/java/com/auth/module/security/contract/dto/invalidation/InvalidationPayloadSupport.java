@@ -1,8 +1,8 @@
 package com.auth.module.security.contract.dto.invalidation;
 
-import java.util.List;
-
 import lombok.experimental.UtilityClass;
+
+import java.util.List;
 
 /**
  * 失效契约 Payload 共用校验（包内可见，不对外暴露）。

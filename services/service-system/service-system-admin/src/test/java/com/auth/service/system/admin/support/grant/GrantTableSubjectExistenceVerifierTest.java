@@ -1,7 +1,5 @@
 package com.auth.service.system.admin.support.grant;
 
-import java.util.List;
-
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.mapper.post.SysPostMapper;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
@@ -14,6 +12,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

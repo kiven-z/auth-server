@@ -1,10 +1,10 @@
 package com.auth.service.system.admin.service.admin;
 
-import java.util.List;
-
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
 import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
+
+import java.util.List;
 
 /**
  * grant_table 读写与主体角色授权编排

@@ -1,8 +1,8 @@
 package com.auth.module.file.importer.model;
 
-import java.util.List;
-
 import lombok.experimental.UtilityClass;
+
+import java.util.List;
 
 /**
  * {@link ImportRowError} 工厂：按错误类型生成与历史行为一致的英文 message。

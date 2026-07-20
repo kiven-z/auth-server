@@ -4,7 +4,6 @@ import com.auth.module.platform.persistence.model.LoginLogEntity;
 import com.auth.service.system.admin.mapper.log.LogLoginLogMapper;
 import com.auth.service.system.admin.service.admin.LogLoginService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

@@ -1,9 +1,5 @@
 package com.auth.service.system.admin.service.me.impl;
 
-import java.lang.reflect.Field;
-import java.util.List;
-import java.util.Set;
-
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.system.admin.mapper.user.SysUserConfigMapper;
 import com.auth.service.system.admin.model.constants.UserPreferenceKeys;
@@ -25,16 +21,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.lang.reflect.Field;
+import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link CurrentUserPreferenceServiceImpl} 单元测试

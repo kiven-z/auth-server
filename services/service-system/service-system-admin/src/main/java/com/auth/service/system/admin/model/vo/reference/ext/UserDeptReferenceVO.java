@@ -1,13 +1,13 @@
 package com.auth.service.system.admin.model.vo.reference.ext;
 
-import java.io.Serial;
-
 import com.auth.service.system.admin.model.vo.reference.DeptReferenceVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
+import java.io.Serial;
 
 /**
  * 用户-部门关联回显（在部门基础字段上扩展主部门与关联状态）

@@ -1,13 +1,12 @@
 package com.auth.service.system.admin.support.grant;
 
+import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
+import org.springframework.stereotype.Component;
+
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.LongConsumer;
-
-import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
-
-import org.springframework.stereotype.Component;
 
 /**
  * grant_table 授权前校验主体存在且启用；新增主体类型时注册对应 {@link GrantTableActiveSubjectChecker} 即可。

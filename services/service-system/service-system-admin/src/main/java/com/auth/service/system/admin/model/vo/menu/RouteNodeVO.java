@@ -1,13 +1,13 @@
 package com.auth.service.system.admin.model.vo.menu;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.List;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * 前端动态路由节点（单层一级路由及其 children），与 vue-router 异步路由结构对齐

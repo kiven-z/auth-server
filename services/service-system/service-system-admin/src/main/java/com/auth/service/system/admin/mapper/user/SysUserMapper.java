@@ -1,20 +1,16 @@
 package com.auth.service.system.admin.mapper.user;
 
-import java.util.Collection;
-import java.util.List;
-
 import com.auth.module.platform.persistence.model.UserEntity;
-import com.auth.service.system.admin.model.po.user.SysUserPageRowPO;
-import com.auth.service.system.admin.model.po.user.UserBusinessKeyRowPO;
-import com.auth.service.system.admin.model.po.user.UserDeptProfilePO;
-import com.auth.service.system.admin.model.po.user.UserPostProfilePO;
-import com.auth.service.system.admin.model.po.user.UserSearchItemPO;
+import com.auth.service.system.admin.model.po.user.*;
 import com.auth.service.system.admin.model.query.user.SysUserPageQuery;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * 系统用户 Mapper

@@ -10,7 +10,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 /**
- * 统一消息模板表 Mapper（message_template）。
+ * 统一消息模板表 Mapper（message_template）
  *
  * @author Bunny
  */
@@ -18,7 +18,7 @@ import org.apache.ibatis.annotations.Param;
 public interface MessageTemplateMapper extends BaseMapper<MessageTemplateEntity> {
 
 	/**
-	 * 按场景编码与渠道查询当前启用的最高优先级模板行。
+	 * 按场景编码与渠道查询当前启用的最高优先级模板行
 	 * @param sceneCode 场景编码（发送命令 templateCode）
 	 * @param channel 渠道名
 	 * @return 模板行，未找到时为 null

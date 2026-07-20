@@ -1,7 +1,5 @@
 package com.auth.service.system.admin.service.admin;
 
-import java.util.List;
-
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.query.role.SysRoleQuery;
@@ -10,6 +8,8 @@ import com.auth.service.system.admin.model.vo.role.SysRoleOptionVO;
 import com.auth.service.system.admin.model.vo.role.SysRolePageVO;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+
+import java.util.List;
 
 /**
  * 系统角色只读查询。

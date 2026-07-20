@@ -1,13 +1,12 @@
 package com.auth.module.file.importer.reader;
 
+import com.alibaba.excel.EasyExcelFactory;
+import com.alibaba.excel.read.listener.PageReadListener;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.alibaba.excel.EasyExcelFactory;
-import com.alibaba.excel.read.listener.PageReadListener;
-
-import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 通用 Excel 导入读取器：将上传文件的第一个 Sheet 解析为行对象列表。

@@ -25,13 +25,8 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link ChannelDeliveryRecorder} 单元测试
@@ -53,6 +48,17 @@ class ChannelDeliveryRecorderTest {
 	private ArgumentCaptor<List<ChannelDeliveryResultUpdate>> updateCaptor;
 
 	private ChannelDeliveryRecorder recorder;
+
+	/**
+	 * 断言方法声明为独立短事务
+	 * @param method 待检查方法
+	 */
+	private static void assertRequiresNew(Method method) {
+		Transactional transactional = method.getAnnotation(Transactional.class);
+		assertThat(transactional).isNotNull();
+		assertThat(transactional.propagation()).isEqualTo(Propagation.REQUIRES_NEW);
+		assertThat(transactional.rollbackFor()).contains(Exception.class);
+	}
 
 	@BeforeEach
 	void setUp() {
@@ -151,17 +157,6 @@ class ChannelDeliveryRecorderTest {
 			assertThat(update.getErrorMessage()).isEqualTo("send failed");
 			assertThat(update.getSentAt()).isEqualTo(SENT_AT);
 		});
-	}
-
-	/**
-	 * 断言方法声明为独立短事务
-	 * @param method 待检查方法
-	 */
-	private static void assertRequiresNew(Method method) {
-		Transactional transactional = method.getAnnotation(Transactional.class);
-		assertThat(transactional).isNotNull();
-		assertThat(transactional.propagation()).isEqualTo(Propagation.REQUIRES_NEW);
-		assertThat(transactional.rollbackFor()).contains(Exception.class);
 	}
 
 }

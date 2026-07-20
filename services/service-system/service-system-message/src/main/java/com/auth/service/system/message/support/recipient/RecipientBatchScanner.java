@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 import static com.auth.service.system.message.exception.MessageResultCode.IN_APP_RECIPIENT_SCOPE_INVALID;
 
 /**
- * 接收人分批扫描：按范围游标推进，避免一次性加载全量用户 ID
+ * 接收人分批扫描：写扩散（USER/POST/DEPT）按范围游标推进
  *
  * @author Bunny
  */
@@ -51,32 +51,20 @@ public class RecipientBatchScanner {
 	}
 
 	/**
-	 * USER/POST/DEPT 必须带范围 ID
-	 * @param scope 接收范围
-	 */
-	private static void requireScopeIds(RecipientScope scope) {
-		if (scope.getType() == RecipientScopeType.ALL) {
-			return;
-		}
-		if (CollUtil.isEmpty(scope.safeIds())) {
-			throw new MessageException(IN_APP_RECIPIENT_SCOPE_INVALID, scope.getType().name());
-		}
-	}
-
-	/**
 	 * 按范围分批扫描启用用户 ID
 	 * @param scope 接收范围
 	 * @param batchSize 每批上限
 	 * @param consumer 每批 userId（非空、升序）
 	 */
 	public void scan(RecipientScope scope, int batchSize, Consumer<List<Long>> consumer) {
-		// 校验 scope 非空
 		if (scope == null || scope.getType() == null) {
 			throw new MessageException(IN_APP_RECIPIENT_SCOPE_INVALID, "scope");
 		}
+		if (CollUtil.isEmpty(scope.safeIds())) {
+			throw new MessageException(IN_APP_RECIPIENT_SCOPE_INVALID, scope.getType().name());
+		}
 
 		RecipientScopeType type = scope.getType();
-		requireScopeIds(scope);
 		BiFunction<Long, Integer, List<Long>> queryAfter = resolveQuery(scope, type);
 		scanByCursor(batchSize, queryAfter, consumer);
 	}
@@ -101,8 +89,8 @@ public class RecipientBatchScanner {
 									.selectUserIdsByDeptIdsWithChildrenAfter(ids, lastUserId, limit), List.of())
 						: (lastUserId, limit) -> Objects.requireNonNullElse(
 								recipientUserMapper.selectUserIdsByDeptIdsAfter(ids, lastUserId, limit), List.of());
-			case ALL -> (lastUserId, limit) -> Objects
-				.requireNonNullElse(recipientUserMapper.selectAllEnabledUserIdsAfter(lastUserId, limit), List.of());
+			// ALL 为读扩散，send 侧已收口；此处仅为枚举穷尽
+			case ALL -> throw new IllegalStateException("ALL scope must not be write-scanned");
 		};
 	}
 

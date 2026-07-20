@@ -1,11 +1,11 @@
 package com.auth.service.system.admin.convert.admin.menu;
 
-import java.util.List;
-import java.util.Map;
-
 import lombok.Builder;
 import lombok.Value;
 import lombok.experimental.Accessors;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * MapStruct 转换上下文：承载角色 Map，避免 {@code @Context} 同类型冲突

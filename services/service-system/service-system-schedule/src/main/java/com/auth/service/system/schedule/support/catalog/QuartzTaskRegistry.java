@@ -1,19 +1,18 @@
 package com.auth.service.system.schedule.support.catalog;
 
+import cn.hutool.core.text.CharSequenceUtil;
+import com.auth.service.system.schedule.annotation.QuartzTask;
+import com.auth.service.system.schedule.model.vo.QuartzTaskClassVO;
+import jakarta.annotation.PostConstruct;
+import org.springframework.context.ApplicationContext;
+import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.stereotype.Component;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
-
-import cn.hutool.core.text.CharSequenceUtil;
-import com.auth.service.system.schedule.annotation.QuartzTask;
-import com.auth.service.system.schedule.model.vo.QuartzTaskClassVO;
-import jakarta.annotation.PostConstruct;
-
-import org.springframework.context.ApplicationContext;
-import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.stereotype.Component;
 
 /**
  * 扫描容器中带 {@link QuartzTask} 的 Bean 类型，维护反射调用白名单

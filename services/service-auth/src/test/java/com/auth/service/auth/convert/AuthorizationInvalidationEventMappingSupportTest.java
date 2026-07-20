@@ -7,9 +7,7 @@ import com.auth.service.auth.support.invalidation.InvalidationProcessingMarker;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * {@link AuthorizationInvalidationEventMappingSupport} 写侧投影组装单元测试

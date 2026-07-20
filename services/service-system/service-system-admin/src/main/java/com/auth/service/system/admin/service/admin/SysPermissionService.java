@@ -1,10 +1,10 @@
 package com.auth.service.system.admin.service.admin;
 
-import java.util.List;
-
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.form.permission.SysPermissionForm;
 import com.baomidou.mybatisplus.extension.service.IService;
+
+import java.util.List;
 
 /**
  * 系统权限写服务

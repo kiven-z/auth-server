@@ -1,12 +1,11 @@
 package com.auth.service.system.authorization.feign.fallback;
 
-import java.util.List;
-
 import com.auth.common.core.model.response.Result;
 import com.auth.service.system.authorization.feign.SessionRevocationInnerFeignClient;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * 会话撤销内部 Feign 降级

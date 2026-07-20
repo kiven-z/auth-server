@@ -1,7 +1,6 @@
 package com.auth.module.message.api.boot;
 
 import com.auth.module.message.api.feign.SystemMessageSendFeignClient;
-
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.cloud.openfeign.EnableFeignClients;
@@ -11,8 +10,8 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
  *
  * @author Bunny
  */
-@ConditionalOnClass(name = "org.springframework.cloud.openfeign.FeignClient")
 @AutoConfiguration
+@ConditionalOnClass(name = "org.springframework.cloud.openfeign.FeignClient")
 @EnableFeignClients(clients = SystemMessageSendFeignClient.class)
 public class MessageFeignAutoConfiguration {
 

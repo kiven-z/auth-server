@@ -1,9 +1,5 @@
 package com.auth.service.system.schedule.model.vo;
 
-import java.io.Serial;
-import java.time.LocalDateTime;
-import java.util.Date;
-
 import com.auth.common.core.model.response.BaseResponse;
 import com.auth.service.system.schedule.model.enums.SysJobLastExecutionStatus;
 import com.auth.service.system.schedule.model.enums.SysJobQuartzRuntimeStatus;
@@ -13,6 +9,10 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
+import java.io.Serial;
+import java.time.LocalDateTime;
+import java.util.Date;
 
 /**
  * 定时任务详情

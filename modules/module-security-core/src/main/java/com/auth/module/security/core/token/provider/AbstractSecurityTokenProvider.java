@@ -1,7 +1,5 @@
 package com.auth.module.security.core.token.provider;
 
-import java.util.Date;
-
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.jwt.api.JwtTokenProvider;
 import com.auth.common.jwt.exception.JwtExpiredException;
@@ -11,6 +9,8 @@ import com.auth.module.security.contract.exception.SecurityResultCodeEnum;
 import com.auth.module.security.contract.exception.SecurityTokenException;
 import com.auth.module.security.core.token.model.SecurityTokenResult;
 import io.jsonwebtoken.Claims;
+
+import java.util.Date;
 
 import static com.auth.common.jwt.provider.AbstractJwtTokenProvider.BEARER_PREFIX;
 import static com.auth.module.security.contract.constants.SecurityExternalTokenConstants.TOKEN_TYPE;

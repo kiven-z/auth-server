@@ -1,15 +1,14 @@
 package com.auth.service.auth.exception;
 
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-
 import com.auth.common.core.model.response.Result;
 import lombok.experimental.UtilityClass;
-
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
+
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * 将 {@link AuthBusinessException} 转为统一 {@link Result}（稳定子码 + MessageSource 文案 + ext i18n

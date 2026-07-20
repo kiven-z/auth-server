@@ -1,10 +1,10 @@
 package com.auth.service.auth.model.po.invalidation;
 
-import java.time.LocalDateTime;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.time.LocalDateTime;
 
 /**
  * 授权失效幂等事件投影

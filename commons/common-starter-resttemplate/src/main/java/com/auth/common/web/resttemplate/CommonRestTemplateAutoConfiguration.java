@@ -1,7 +1,6 @@
 package com.auth.common.web.resttemplate;
 
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;

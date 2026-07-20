@@ -1,12 +1,11 @@
 package com.auth.module.security.autoconfigure.config.security;
 
-import java.util.List;
-
 import lombok.Getter;
 import lombok.Setter;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
+
+import java.util.List;
 
 /**
  * 安全配置属性（路径匹配与审计策略） 说明：此处的“路径”通常用于 Spring Security 的 request matcher（如 Ant 风格路径），

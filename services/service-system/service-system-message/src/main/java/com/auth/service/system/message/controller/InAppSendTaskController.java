@@ -25,11 +25,11 @@ import java.util.List;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
 /**
- * 站内信发送任务（管理端按范围群发）
+ * 站内信发送任务
  *
  * @author Bunny
  */
-@Tag(name = "站内信发送任务", description = "管理端按用户/岗位/部门/全员发送站内信；提交后异步分批写入收件箱")
+@Tag(name = "站内信发送任务", description = "管理端发送站内信；提交后异步分批写入收件箱")
 @Validated
 @RequestMapping("/api/system/message/in-app")
 @RestController
@@ -41,7 +41,7 @@ public class InAppSendTaskController {
 		this.inAppSendTaskService = inAppSendTaskService;
 	}
 
-	@Operation(summary = "分页查询站内信发送任务", description = "可按 status、sourceType、范围类型、投递模式、业务分类、标题过滤")
+	@Operation(summary = "分页查询站内信发送任务")
 	@PreAuthorize("@auth.decide('message:inapp:query')")
 	@GetMapping("/tasks")
 	public Result<PageResponse<InAppSendTaskPageResponse>> getSendTaskPage(@Valid InAppSendTaskQuery query) {

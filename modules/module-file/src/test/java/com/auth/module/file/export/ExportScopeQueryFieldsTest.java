@@ -1,13 +1,13 @@
 package com.auth.module.file.export;
 
-import java.util.Set;
-
 import com.auth.module.file.export.model.enums.ExportScope;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

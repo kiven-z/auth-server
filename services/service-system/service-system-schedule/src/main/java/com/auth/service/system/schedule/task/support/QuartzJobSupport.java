@@ -4,7 +4,6 @@ import com.auth.service.system.schedule.config.ScheduleQuartzConfiguration;
 import lombok.experimental.UtilityClass;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-
 import org.springframework.context.ApplicationContext;
 
 /**

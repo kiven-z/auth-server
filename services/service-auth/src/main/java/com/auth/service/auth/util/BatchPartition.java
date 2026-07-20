@@ -1,12 +1,12 @@
 package com.auth.service.auth.util;
 
+import cn.hutool.core.collection.CollUtil;
+import lombok.experimental.UtilityClass;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-
-import cn.hutool.core.collection.CollUtil;
-import lombok.experimental.UtilityClass;
 
 /**
  * 集合分批切片工具，用于规避 SQL {@code IN} 子句过长。

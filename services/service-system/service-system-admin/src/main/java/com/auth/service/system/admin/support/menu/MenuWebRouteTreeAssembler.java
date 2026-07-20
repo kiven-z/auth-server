@@ -1,11 +1,5 @@
 package com.auth.service.system.admin.support.menu;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import cn.hutool.core.collection.CollUtil;
 import com.auth.common.core.utils.TreeNodeProcessorUtil;
 import com.auth.module.security.contract.constants.PermissionConstant;
@@ -18,8 +12,13 @@ import com.auth.service.system.admin.model.po.menu.SysMenuRoleLinkRowPO;
 import com.auth.service.system.admin.model.vo.menu.RouteMetaVO;
 import com.auth.service.system.admin.model.vo.menu.RouteNodeVO;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.stereotype.Component;
+
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 动态菜单路由树组装（启用菜单、角色过滤、祖先补全、排序、VO 映射）

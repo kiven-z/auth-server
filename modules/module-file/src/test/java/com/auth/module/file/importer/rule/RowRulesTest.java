@@ -1,12 +1,12 @@
 package com.auth.module.file.importer.rule;
 
-import java.util.List;
-import java.util.Set;
-
 import com.auth.module.file.importer.model.ImportRowError;
 import lombok.Value;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
+import java.util.Set;
 
 import static com.auth.module.file.importer.model.ImportErrorCode.INVALID_FORMAT;
 import static org.assertj.core.api.Assertions.assertThat;

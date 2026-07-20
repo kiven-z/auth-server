@@ -1,8 +1,5 @@
 package com.auth.service.auth.support.login;
 
-import java.util.Map;
-import java.util.Optional;
-
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.exception.AuthBusinessException;
@@ -15,8 +12,10 @@ import com.auth.service.auth.support.authorization.AuthProfileRepository;
 import com.auth.service.auth.support.redis.AuthProfileRedisCache;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * 登录审计应用服务

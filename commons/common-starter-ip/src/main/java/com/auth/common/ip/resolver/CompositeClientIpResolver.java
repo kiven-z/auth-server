@@ -1,9 +1,9 @@
 package com.auth.common.ip.resolver;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 import java.util.List;
 import java.util.Optional;
-
-import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * 复合客户端IP解析器

@@ -1,11 +1,11 @@
 package com.auth.module.file.importer.model;
 
+import com.auth.module.file.importer.parse.ImportTextParsers;
+
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-
-import com.auth.module.file.importer.parse.ImportTextParsers;
 
 /**
  * 单行导入校验流水线（fail-fast）；内部以 {@link RowOutcome} 表达行状态。

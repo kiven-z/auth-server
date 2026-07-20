@@ -1,7 +1,5 @@
 package com.auth.service.system.admin.convert.admin;
 
-import java.util.List;
-
 import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.form.dept.SysDeptForm;
@@ -12,6 +10,8 @@ import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+
+import java.util.List;
 
 /**
  * 部门实体与列表 VO 转换。

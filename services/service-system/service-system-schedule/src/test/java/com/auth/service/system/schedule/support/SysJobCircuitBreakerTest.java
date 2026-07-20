@@ -1,13 +1,11 @@
 package com.auth.service.system.schedule.support;
 
-import java.util.List;
-
 import com.auth.service.system.schedule.config.ScheduleJobProperties;
 import com.auth.service.system.schedule.exception.SysJobException;
-import com.auth.service.system.schedule.mapper.LogJobMapper;
 import com.auth.service.system.schedule.mapper.JobMapper;
-import com.auth.service.system.schedule.model.entity.LogJobEntity;
+import com.auth.service.system.schedule.mapper.LogJobMapper;
 import com.auth.service.system.schedule.model.entity.JobEntity;
+import com.auth.service.system.schedule.model.entity.LogJobEntity;
 import com.auth.service.system.schedule.support.quartz.SysJobSchedulerManager;
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
@@ -21,14 +19,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.SchedulerException;
 
+import java.util.List;
+
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CIRCUIT_BREAKER_PAUSE_FAILED;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link SysJobCircuitBreaker} 单元测试。

@@ -1,8 +1,5 @@
 package com.auth.service.system.admin.support.user;
 
-import java.util.List;
-import java.util.Objects;
-
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
@@ -13,10 +10,12 @@ import com.auth.service.system.admin.service.admin.LogUserPasswordHistoryService
 import com.auth.service.system.authorization.dispatch.trigger.UserSessionRevocationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Objects;
 
 /**
  * 用户密码变更（自改与管理员重置）

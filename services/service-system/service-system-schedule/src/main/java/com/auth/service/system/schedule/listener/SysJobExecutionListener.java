@@ -5,12 +5,7 @@ import com.auth.service.system.schedule.config.ScheduleJobProperties;
 import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
 import com.auth.service.system.schedule.service.LogJobService;
 import com.auth.service.system.schedule.support.SysJobCircuitBreaker;
-import org.quartz.JobDataMap;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
-import org.quartz.JobKey;
-import org.quartz.JobListener;
-
+import org.quartz.*;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
