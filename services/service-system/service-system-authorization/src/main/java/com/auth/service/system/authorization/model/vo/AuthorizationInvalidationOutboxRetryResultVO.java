@@ -1,5 +1,6 @@
 package com.auth.service.system.authorization.model.vo;
 
+import com.auth.common.core.annotation.JsonStringFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,6 +23,7 @@ public class AuthorizationInvalidationOutboxRetryResultVO implements Serializabl
 	@Serial
 	private static final long serialVersionUID = 1L;
 
+	@JsonStringFormat
 	@Schema(title = "Outbox 主键")
 	private Long outboxId;
 

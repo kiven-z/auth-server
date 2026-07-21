@@ -6,9 +6,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.Serial;
-import java.io.Serializable;
-
 /**
  * 权限分页查询条件
  *
@@ -18,15 +15,12 @@ import java.io.Serializable;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
-public class SysPermissionQuery extends PageQueryRequest implements Serializable {
+public class SysPermissionQuery extends PageQueryRequest {
 
-	@Serial
-	private static final long serialVersionUID = 1L;
-
-	@Schema(title = "权限编码（模糊）")
+	@Schema(title = "权限编码")
 	private String permissionCode;
 
-	@Schema(title = "权限名称（模糊）")
+	@Schema(title = "权限名称")
 	private String permissionName;
 
 	@Schema(title = "启用状态(true=正常启用，false=停用)")

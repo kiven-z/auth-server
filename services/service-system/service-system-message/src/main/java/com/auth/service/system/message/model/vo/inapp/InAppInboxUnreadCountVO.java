@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 
+import java.util.List;
+
 /**
  * 用户侧站内信未读角标
  *
@@ -16,13 +18,10 @@ import lombok.ToString;
 @ToString
 public class InAppInboxUnreadCountVO {
 
-	@Schema(title = "公开消息未读数（PULL）")
-	private long pullUnreadCount;
-
-	@Schema(title = "定向消息未读数（PUSH）")
-	private long pushUnreadCount;
-
 	@Schema(title = "未读总数")
 	private long totalUnreadCount;
+
+	@Schema(title = "启用大类列表")
+	private List<InAppInboxMajorUnreadVO> majors;
 
 }

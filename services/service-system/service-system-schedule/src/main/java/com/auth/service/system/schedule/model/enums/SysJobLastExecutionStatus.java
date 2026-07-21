@@ -1,7 +1,7 @@
 package com.auth.service.system.schedule.model.enums;
 
 /**
- * 定时任务最近一次执行结果（来自 log_job，与 Quartz 运行态无关）
+ * 定时任务最近一次执行结果
  *
  * @author Bunny
  */

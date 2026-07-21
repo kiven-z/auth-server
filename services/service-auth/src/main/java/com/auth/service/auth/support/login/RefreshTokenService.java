@@ -24,7 +24,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * 刷新令牌应用服务：校验会话、旋转 Refresh Token、撤销会话
+ * 刷新令牌应用服务
  *
  * @author Bunny
  */
@@ -91,7 +91,7 @@ public class RefreshTokenService {
 			boolean rememberMe = sessionIndex.getRememberMe() != null && sessionIndex.getRememberMe();
 			// 记录成功刷新令牌
 			loginAuditService.auditRefreshTokenSuccess(request, refreshUserId, refreshJti);
-			// 返回刷新令牌结果（携带画像供前端同步角色/权限）
+			// 返回刷新令牌结果
 			return RefreshSessionResult.builder()
 				.tokenPair(tokenPair)
 				.rememberMe(rememberMe)
@@ -125,9 +125,6 @@ public class RefreshTokenService {
 
 	/**
 	 * 断言刷新令牌与会话中存储的哈希及过期时间一致
-	 * <p>
-	 * 过期仅抛错；哈希为空或与请求令牌摘要不一致时视为脏会话，先撤销服务端会话再抛错
-	 * </p>
 	 * @param userId 令牌声明的用户 ID（用于活跃集合移除）
 	 * @param jti 会话 ID
 	 * @param sessionIndex 会话索引

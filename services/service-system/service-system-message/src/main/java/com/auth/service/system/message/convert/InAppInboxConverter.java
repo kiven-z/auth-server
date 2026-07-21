@@ -2,13 +2,13 @@ package com.auth.service.system.message.convert;
 
 import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.service.system.message.model.po.InAppInboxPageRowPO;
-import com.auth.service.system.message.model.vo.inapp.InAppInboxPageResponse;
+import com.auth.service.system.message.model.vo.inapp.InAppInboxPageVO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 /**
- * 用户侧站内信收件箱转换器（读模型）
+ * 用户侧站内信收件箱转换器
  *
  * @author Bunny
  */
@@ -24,6 +24,6 @@ public interface InAppInboxConverter {
 	 */
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
-	InAppInboxPageResponse toPageResponse(InAppInboxPageRowPO po);
+	InAppInboxPageVO toPageVO(InAppInboxPageRowPO po);
 
 }

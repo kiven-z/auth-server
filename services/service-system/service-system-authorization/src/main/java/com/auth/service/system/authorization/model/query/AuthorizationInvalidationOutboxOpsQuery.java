@@ -26,7 +26,7 @@ public class AuthorizationInvalidationOutboxOpsQuery implements Serializable {
 	@Schema(title = "每页条数")
 	private long pageSize;
 
-	@Schema(title = "业务事件 ID（前缀匹配）")
+	@Schema(title = "业务事件 ID")
 	private String eventId;
 
 	@Schema(title = "变更维度（AuthorizationChangeKind）")
@@ -38,7 +38,7 @@ public class AuthorizationInvalidationOutboxOpsQuery implements Serializable {
 	@Schema(title = "触发模块")
 	private String sourceModule;
 
-	@Schema(title = "业务主键（前缀匹配）")
+	@Schema(title = "业务主键")
 	private String sourceBizId;
 
 	@Schema(title = "创建时间（开始）")

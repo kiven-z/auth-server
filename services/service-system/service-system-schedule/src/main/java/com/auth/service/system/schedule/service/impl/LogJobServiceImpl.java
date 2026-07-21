@@ -10,7 +10,7 @@ import com.auth.service.system.schedule.model.entity.LogJobEntity;
 import com.auth.service.system.schedule.model.po.LogJobPageRowPO;
 import com.auth.service.system.schedule.model.query.LogJobQuery;
 import com.auth.service.system.schedule.model.vo.LogJobDetailVO;
-import com.auth.service.system.schedule.model.vo.LogJobPageResponse;
+import com.auth.service.system.schedule.model.vo.LogJobPageVO;
 import com.auth.service.system.schedule.service.LogJobService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -65,9 +65,9 @@ public class LogJobServiceImpl extends ServiceImpl<LogJobMapper, LogJobEntity> i
 	 * {@inheritDoc}
 	 */
 	@Override
-	public PageResponse<LogJobPageResponse> getPage(Page<LogJobEntity> pageParams, LogJobQuery query) {
+	public PageResponse<LogJobPageVO> getPage(Page<LogJobEntity> pageParams, LogJobQuery query) {
 		IPage<LogJobPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
-		IPage<LogJobPageResponse> voPage = page.convert(LogJobConverter.INSTANCE::toPageResponse);
+		IPage<LogJobPageVO> voPage = page.convert(LogJobConverter.INSTANCE::toPageVO);
 
 		auditUserDisplayService.enrichAuditUsernames(voPage, null, null);
 		return PageResponse.of(voPage);

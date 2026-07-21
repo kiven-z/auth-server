@@ -42,8 +42,9 @@ public class LogAuthorizationAuditController {
 	@PreAuthorize("@auth.decide('log:authaudit:query')")
 	@GetMapping("page")
 	public Result<PageResponse<LogAuthorizationAuditPageVO>> page(LogAuthorizationAuditQuery query) {
-		Page<LogAuthorizationAuditEntity> page = new Page<>(query.getPageIndex(), query.getPageSize());
-		PageResponse<LogAuthorizationAuditPageVO> response = logAuthorizationAuditQueryService.getPage(page, query);
+		Page<LogAuthorizationAuditEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
+		PageResponse<LogAuthorizationAuditPageVO> response = logAuthorizationAuditQueryService.getPage(pageParams,
+				query);
 		return Result.success(response);
 	}
 
@@ -55,7 +56,7 @@ public class LogAuthorizationAuditController {
 		return Result.success(detail);
 	}
 
-	@Operation(summary = "批量删除权限决策审计（仅接收 ID 列表）")
+	@Operation(summary = "批量删除权限决策审计")
 	@PreAuthorize("@auth.decide('log:authaudit:delete')")
 	@DeleteMapping
 	public Result<String> batchDelete(@RequestBody List<Long> ids) {

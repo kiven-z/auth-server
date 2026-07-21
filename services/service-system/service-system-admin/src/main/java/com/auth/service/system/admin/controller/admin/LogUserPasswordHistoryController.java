@@ -42,8 +42,9 @@ public class LogUserPasswordHistoryController {
 	@PreAuthorize("@auth.decide('log:passwordhistory:query')")
 	@GetMapping("page")
 	public Result<PageResponse<LogUserPasswordHistoryPageVO>> page(LogUserPasswordHistoryQuery query) {
-		Page<LogUserPasswordHistoryEntity> page = new Page<>(query.getPageIndex(), query.getPageSize());
-		PageResponse<LogUserPasswordHistoryPageVO> response = logUserPasswordHistoryQueryService.getPage(page, query);
+		Page<LogUserPasswordHistoryEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
+		PageResponse<LogUserPasswordHistoryPageVO> response = logUserPasswordHistoryQueryService.getPage(pageParams,
+				query);
 		return Result.success(response);
 	}
 

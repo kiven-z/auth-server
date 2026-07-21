@@ -8,8 +8,7 @@ import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * 用户档案-岗位关联查询行（对齐
- * {@link com.auth.service.system.admin.model.vo.reference.PostReferenceVO} 基础字段 + 关联扩展）
+ * 用户档案-岗位关联查询行
  *
  * @author Bunny
  */

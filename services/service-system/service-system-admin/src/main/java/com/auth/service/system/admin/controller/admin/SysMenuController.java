@@ -89,9 +89,9 @@ public class SysMenuController {
 	@Operation(summary = "新增菜单")
 	@PreAuthorize("@auth.decide('sys:menu:create')")
 	@PostMapping
-	public Result<Long> create(@Valid @RequestBody SysMenuSaveForm form) {
+	public Result<String> create(@Valid @RequestBody SysMenuSaveForm form) {
 		Long id = sysMenuService.create(form);
-		return Result.success(id, OPERATION_SUCCESS.getMessage());
+		return Result.success(String.valueOf(id), OPERATION_SUCCESS.getMessage());
 	}
 
 	@OperationLog(targetType = "MENU", serviceDomain = AuditServiceDomain.SYSTEM,

@@ -38,7 +38,7 @@ public enum SysJobTaskType {
 	}
 
 	/**
-	 * 默认处理器编码（与 {@code job.handler_code} 一致）
+	 * 默认处理器编码
 	 * @return 处理器编码
 	 */
 	public String defaultHandlerCode() {

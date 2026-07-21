@@ -12,7 +12,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.io.Serial;
 import java.util.List;
 
 /**
@@ -26,9 +25,6 @@ import java.util.List;
 @ToString
 @EqualsAndHashCode(callSuper = true)
 public class SysRoleDetailVO extends BaseResponse {
-
-	@Serial
-	private static final long serialVersionUID = 1L;
 
 	@Schema(title = "角色编码")
 	private String roleCode;

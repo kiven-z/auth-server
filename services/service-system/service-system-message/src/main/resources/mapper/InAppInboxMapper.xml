@@ -2,18 +2,30 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.auth.service.system.message.mapper.InAppInboxMapper">
 
-    <!-- 分页查询当前用户 PUSH 收件箱（按未读优先） -->
-    <select id="selectPushInboxPage"
-            resultType="com.auth.service.system.message.model.po.InAppInboxPageRowPO">
+    <!-- 大类 / 小类 / 标题筛选（两路 UNION 共用） -->
+    <sql id="inboxCategoryAndTitleFilters">
+        <if test="query.majorCategoryId != null">
+            AND c.parent_id = #{query.majorCategoryId}
+        </if>
+        <if test="query.categoryId != null">
+            AND m.category_id = #{query.categoryId}
+        </if>
+        <if test="query.title != null and query.title != ''">
+            AND m.title LIKE CONCAT(#{query.title}, '%')
+        </if>
+    </sql>
+
+    <!-- 定向写扩散分支：已读筛选用 recipient -->
+    <sql id="pushInboxBranch">
         SELECT
         m.id,
         m.scene_code,
         m.title,
         m.content_type,
-        m.biz_type,
+        m.category_id,
+        c.name AS category_name,
         m.link_url,
         m.sender_user_id,
-        m.delivery_mode,
         r.is_read,
         r.read_time,
         m.create_time,
@@ -23,6 +35,7 @@
         FROM
         in_app_message_recipient r
         INNER JOIN in_app_message m ON m.id = r.message_id
+        LEFT JOIN in_app_message_category c ON c.id = m.category_id
         WHERE
         r.user_id = #{userId}
         AND r.is_deleted = 0
@@ -30,29 +43,20 @@
         <if test="query.isRead != null">
             AND r.is_read = #{query.isRead}
         </if>
-        <if test="query.bizType != null and query.bizType != ''">
-            AND m.biz_type LIKE CONCAT(#{query.bizType}, '%')
-        </if>
-        <if test="query.title != null and query.title != ''">
-            AND m.title LIKE CONCAT(#{query.title}, '%')
-        </if>
-        ORDER BY
-        r.is_read ASC,
-        m.create_time DESC
-    </select>
+        <include refid="inboxCategoryAndTitleFilters"/>
+    </sql>
 
-    <!-- 分页查询当前用户 PULL 收件箱（按未读优先） -->
-    <select id="selectPullInboxPage"
-            resultType="com.auth.service.system.message.model.po.InAppInboxPageRowPO">
+    <!-- 全员读扩散分支：无状态行视为未读 -->
+    <sql id="pullInboxBranch">
         SELECT
         m.id,
         m.scene_code,
         m.title,
         m.content_type,
-        m.biz_type,
+        m.category_id,
+        c.name AS category_name,
         m.link_url,
         m.sender_user_id,
-        m.delivery_mode,
         COALESCE(s.is_read, 0) AS is_read,
         s.read_time,
         m.create_time,
@@ -63,8 +67,9 @@
         in_app_message m
         LEFT JOIN in_app_message_user_status s ON s.message_id = m.id
         AND s.user_id = #{userId}
+        LEFT JOIN in_app_message_category c ON c.id = m.category_id
         WHERE
-        m.delivery_mode = 'PULL'
+        m.recipient_scope_type = 'ALL'
         AND m.status = 'SUCCESS'
         AND (
         s.id IS NULL
@@ -79,44 +84,101 @@
             OR s.is_read = 0
             )
         </if>
-        <if test="query.bizType != null and query.bizType != ''">
-            AND m.biz_type LIKE CONCAT(#{query.bizType}, '%')
-        </if>
-        <if test="query.title != null and query.title != ''">
-            AND m.title LIKE CONCAT(#{query.title}, '%')
-        </if>
+        <include refid="inboxCategoryAndTitleFilters"/>
+    </sql>
+
+    <!-- 分页查询当前用户收件箱（写扩散 ∪ 读扩散，未读优先） -->
+    <select id="selectInboxPage"
+            resultType="com.auth.service.system.message.model.po.InAppInboxPageRowPO">
+        SELECT
+        id,
+        scene_code,
+        title,
+        content_type,
+        category_id,
+        category_name,
+        link_url,
+        sender_user_id,
+        is_read,
+        read_time,
+        create_time,
+        update_time,
+        create_user,
+        update_user
+        FROM (
+        <include refid="pushInboxBranch"/>
+        UNION ALL
+        <include refid="pullInboxBranch"/>
+        ) inbox
         ORDER BY
-        COALESCE(s.is_read, 0),
-        m.create_time DESC
+        is_read ASC,
+        create_time DESC
     </select>
 
-    <!-- 统计当前用户 PUSH 未读（与列表可见性一致） -->
-    <select id="countPushUnread" resultType="long">
-        SELECT COUNT(1)
-        FROM in_app_message_recipient r
-                 INNER JOIN in_app_message m ON m.id = r.message_id
-        WHERE r.user_id = #{userId}
-          AND r.is_deleted = 0
-          AND r.is_read = 0
-          AND m.status IN ('SUCCESS', 'PARTIAL')
-    </select>
-
-    <!-- 统计当前用户 PULL 未读：无状态行视为未读 -->
-    <select id="countPullUnread" resultType="long">
-        SELECT COUNT(1)
-        FROM in_app_message m
-                 LEFT JOIN in_app_message_user_status s ON s.message_id = m.id
-            AND s.user_id = #{userId}
-        WHERE m.delivery_mode = 'PULL'
-          AND m.status = 'SUCCESS'
-          AND (
-            s.id IS NULL
-                OR s.is_deleted = 0
-            )
-          AND (
-            s.id IS NULL
-                OR s.is_read = 0
-            )
+    <!-- 启用大类全量 + 未读数 -->
+    <select id="selectUnreadCountByMajor"
+            resultType="com.auth.service.system.message.model.po.InAppInboxMajorUnreadRowPO">
+        SELECT
+            major.id AS majorCategoryId,
+            major.name AS majorCategoryName,
+            major.code AS majorCategoryCode,
+            COALESCE(unread.unread_count, 0) AS unreadCount
+        FROM
+            in_app_message_category major
+            LEFT JOIN (
+                SELECT
+                    major_category_id,
+                    SUM(cnt) AS unread_count
+                FROM
+                    (
+                        SELECT
+                            c.parent_id AS major_category_id,
+                            COUNT(1) AS cnt
+                        FROM
+                            in_app_message_recipient r
+                            INNER JOIN in_app_message m ON m.id = r.message_id
+                            INNER JOIN in_app_message_category c ON c.id = m.category_id
+                        WHERE
+                            r.user_id = #{userId}
+                            AND r.is_deleted = 0
+                            AND r.is_read = 0
+                            AND m.status IN ('SUCCESS', 'PARTIAL')
+                            AND c.parent_id &gt; 0
+                        GROUP BY
+                            c.parent_id
+                        UNION ALL
+                        SELECT
+                            c.parent_id AS major_category_id,
+                            COUNT(1) AS cnt
+                        FROM
+                            in_app_message m
+                            INNER JOIN in_app_message_category c ON c.id = m.category_id
+                            LEFT JOIN in_app_message_user_status s ON s.message_id = m.id
+                            AND s.user_id = #{userId}
+                        WHERE
+                            m.recipient_scope_type = 'ALL'
+                            AND m.status = 'SUCCESS'
+                            AND c.parent_id &gt; 0
+                            AND (
+                                s.id IS NULL
+                                OR s.is_deleted = 0
+                            )
+                            AND (
+                                s.id IS NULL
+                                OR s.is_read = 0
+                            )
+                        GROUP BY
+                            c.parent_id
+                    ) unread_by_major
+                GROUP BY
+                    major_category_id
+            ) unread ON unread.major_category_id = major.id
+        WHERE
+            major.parent_id = 0
+            AND major.status = 1
+        ORDER BY
+            major.sort_order,
+            major.id
     </select>
 
 </mapper>

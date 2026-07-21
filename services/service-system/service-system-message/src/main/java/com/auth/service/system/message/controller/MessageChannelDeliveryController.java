@@ -8,7 +8,7 @@ import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.message.model.constants.MessageAuditBizModule;
 import com.auth.service.system.message.model.query.MessageChannelDeliveryQuery;
 import com.auth.service.system.message.model.vo.delivery.MessageChannelDeliveryDetailVO;
-import com.auth.service.system.message.model.vo.delivery.MessageChannelDeliveryPageResponse;
+import com.auth.service.system.message.model.vo.delivery.MessageChannelDeliveryPageVO;
 import com.auth.service.system.message.service.MessageChannelDeliveryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -42,9 +42,9 @@ public class MessageChannelDeliveryController {
 	@Operation(summary = "分页查询渠道投递记录")
 	@PreAuthorize("@auth.decide('message:delivery:query')")
 	@GetMapping()
-	public Result<PageResponse<MessageChannelDeliveryPageResponse>> getChannelDeliveryPage(
+	public Result<PageResponse<MessageChannelDeliveryPageVO>> getChannelDeliveryPage(
 			@Valid MessageChannelDeliveryQuery query) {
-		PageResponse<MessageChannelDeliveryPageResponse> pageResponse = messageChannelDeliveryService
+		PageResponse<MessageChannelDeliveryPageVO> pageResponse = messageChannelDeliveryService
 			.getChannelDeliveryPage(query);
 		return Result.success(pageResponse);
 	}

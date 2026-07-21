@@ -10,7 +10,7 @@ import lombok.experimental.Accessors;
 import java.time.LocalDateTime;
 
 /**
- * 站内信发送任务（一次发送动作）
+ * 站内信发送任务
  *
  * @author Bunny
  */
@@ -36,8 +36,8 @@ public class InAppMessageEntity extends BaseEntity {
 	@Schema(title = "正文")
 	private String content;
 
-	@Schema(title = "业务分类")
-	private String bizType;
+	@Schema(title = "业务小类 ID")
+	private Long categoryId;
 
 	@Schema(title = "跳转链接")
 	private String linkUrl;
@@ -50,9 +50,6 @@ public class InAppMessageEntity extends BaseEntity {
 
 	@Schema(title = "接收范围快照 JSON")
 	private String recipientScopeJson;
-
-	@Schema(title = "投递模式", description = "PULL=公开读扩散，PUSH=定向写扩散；由范围类型推导")
-	private String deliveryMode;
 
 	@Schema(title = "展开后目标总数")
 	private Integer totalCount;

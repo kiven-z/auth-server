@@ -6,11 +6,8 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.Serial;
-import java.io.Serializable;
-
 /**
- * 个人中心登录日志分页查询（仅 loginType、loginResult 与分页）
+ * 个人中心登录日志分页查询
  *
  * @author Bunny
  */
@@ -18,10 +15,7 @@ import java.io.Serializable;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
-public class MeLoginLogPageQuery extends PageQueryRequest implements Serializable {
-
-	@Serial
-	private static final long serialVersionUID = 1L;
+public class MeLoginLogPageQuery extends PageQueryRequest {
 
 	@Schema(title = "登录结果")
 	private Integer loginResult;

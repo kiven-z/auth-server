@@ -8,16 +8,16 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import java.util.List;
 
 /**
- * 菜单管理（列表 / 分页 / CRUD / 分配角色）
+ * 菜单管理
  *
  * @author Bunny
  */
 public interface SysMenuManageService extends IService<SysMenuEntity> {
 
 	/**
-	 * 当前菜单已分配角色（供前端与角色分页合并展示） 不包含禁用
+	 * 当前菜单已分配角色
 	 * @param menuId 菜单主键
-	 * @return 已分配行，{@code assigned} 恒为 true
+	 * @return 已分配行
 	 */
 	List<MenuAssignedRoleReferenceVO> listAssignedRoles(Long menuId);
 

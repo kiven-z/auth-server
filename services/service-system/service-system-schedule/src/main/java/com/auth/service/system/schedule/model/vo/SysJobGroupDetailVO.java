@@ -7,9 +7,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.io.Serial;
-import java.io.Serializable;
-
 /**
  * 任务分组详情
  *
@@ -20,10 +17,7 @@ import java.io.Serializable;
 @Setter
 @ToString
 @EqualsAndHashCode(callSuper = true)
-public class SysJobGroupDetailVO extends BaseResponse implements Serializable {
-
-	@Serial
-	private static final long serialVersionUID = 1L;
+public class SysJobGroupDetailVO extends BaseResponse {
 
 	@Schema(title = "分组编码")
 	private String groupCode;

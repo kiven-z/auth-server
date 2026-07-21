@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
  *
  * @author Bunny
  */
-@Schema(name = "LogUserPasswordHistoryDetailRowPO", title = "密码历史日志详情（PO）")
+@Schema(name = "LogUserPasswordHistoryDetailRowPO", title = "密码历史日志详情")
 @Getter
 @Setter
 @ToString

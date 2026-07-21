@@ -4,7 +4,7 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.message.model.entity.MessageChannelDeliveryEntity;
 import com.auth.service.system.message.model.query.MessageChannelDeliveryQuery;
 import com.auth.service.system.message.model.vo.delivery.MessageChannelDeliveryDetailVO;
-import com.auth.service.system.message.model.vo.delivery.MessageChannelDeliveryPageResponse;
+import com.auth.service.system.message.model.vo.delivery.MessageChannelDeliveryPageVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
@@ -21,7 +21,7 @@ public interface MessageChannelDeliveryService extends IService<MessageChannelDe
 	 * @param query 查询条件
 	 * @return 投递记录分页数据
 	 */
-	PageResponse<MessageChannelDeliveryPageResponse> getChannelDeliveryPage(MessageChannelDeliveryQuery query);
+	PageResponse<MessageChannelDeliveryPageVO> getChannelDeliveryPage(MessageChannelDeliveryQuery query);
 
 	/**
 	 * 按主键查询渠道投递记录详情

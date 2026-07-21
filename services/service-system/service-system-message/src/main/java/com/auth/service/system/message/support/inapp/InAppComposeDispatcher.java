@@ -43,7 +43,7 @@ public class InAppComposeDispatcher {
 	private final InAppMessageRecipientWriteService inAppMessageRecipientWriteService;
 
 	/**
-	 * 认领 PENDING 任务并投递；抢占失败则直接返回
+	 * 执行站内信群发任务
 	 * @param taskId 任务 ID
 	 */
 	public void execute(Long taskId) {
@@ -58,7 +58,6 @@ public class InAppComposeDispatcher {
 			throw new MessageException(IN_APP_SEND_TASK_NOT_FOUND, taskId);
 		}
 
-		// 从任务快照还原接收范围（PULL/ALL 在 send 侧已收口，不会进入派发）
 		String recipientScopeType = task.getRecipientScopeType();
 		RecipientScopeType type = RecipientScopeType.from(recipientScopeType);
 		if (type == null) {

@@ -6,9 +6,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.Serial;
-import java.io.Serializable;
-
 /**
  * 任务分组分页查询
  *
@@ -18,10 +15,7 @@ import java.io.Serializable;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
-public class SysJobGroupQuery extends PageQueryRequest implements Serializable {
-
-	@Serial
-	private static final long serialVersionUID = 1L;
+public class SysJobGroupQuery extends PageQueryRequest {
 
 	@Schema(title = "分组编码")
 	private String groupCode;

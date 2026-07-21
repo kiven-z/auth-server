@@ -9,7 +9,7 @@ import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * 路由过渡动画（Vue Transition / animate.css），对应前端 meta.transition
+ * 路由过渡动画
  *
  * @author Bunny
  */

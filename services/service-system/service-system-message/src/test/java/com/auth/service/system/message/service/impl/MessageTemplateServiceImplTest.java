@@ -15,7 +15,7 @@ import com.auth.service.system.message.model.form.MessageTemplateTestSendForm;
 import com.auth.service.system.message.model.po.MessageTemplatePageRowPO;
 import com.auth.service.system.message.model.query.MessageTemplateQuery;
 import com.auth.service.system.message.model.vo.template.MessageTemplateDetailVO;
-import com.auth.service.system.message.model.vo.template.MessageTemplatePageResponse;
+import com.auth.service.system.message.model.vo.template.MessageTemplatePageVO;
 import com.auth.service.system.message.model.vo.template.MessageTemplateRequireFieldRow;
 import com.auth.service.system.message.service.MessageDispatchService;
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
@@ -104,7 +104,7 @@ class MessageTemplateServiceImplTest {
 
 		when(messageTemplateMapper.selectMessageTemplatePage(any(Page.class), eq(query))).thenReturn(mapperPage);
 
-		PageResponse<MessageTemplatePageResponse> result = sysMessageTemplateService.getMessageTemplatePage(query);
+		PageResponse<MessageTemplatePageVO> result = sysMessageTemplateService.getMessageTemplatePage(query);
 
 		assertThat(result.getList()).hasSize(1);
 		assertThat(result.getList().get(0).getChannel()).isEqualTo(MessageChannel.EMAIL.name());
@@ -129,7 +129,7 @@ class MessageTemplateServiceImplTest {
 		mapperPage.setTotal(0);
 		when(messageTemplateMapper.selectMessageTemplatePage(any(Page.class), eq(query))).thenReturn(mapperPage);
 
-		PageResponse<MessageTemplatePageResponse> result = sysMessageTemplateService.getMessageTemplatePage(query);
+		PageResponse<MessageTemplatePageVO> result = sysMessageTemplateService.getMessageTemplatePage(query);
 
 		assertThat(result.getList()).isEmpty();
 		assertThat(result.getTotal()).isZero();
@@ -161,13 +161,14 @@ class MessageTemplateServiceImplTest {
 		assertThat(vo.getChannel()).isEqualTo(MessageChannel.EMAIL.name());
 		assertThat(vo.getContent()).isEqualTo("<p>${code}</p>");
 		assertThat(vo.getContentType()).isEqualTo("HTML");
+		assertThat(vo.getPreviewSubject()).isEqualTo("验证码");
 		assertThat(vo.getPreviewContent()).isEqualTo("<p></p>");
 		assertThat(vo.getRequireFields()).isEmpty();
 		verify(auditUserDisplayService).enrichAuditUsernames(any(List.class), isNull(), isNull());
 	}
 
 	@Test
-	@DisplayName("详情：require_fields 缺少 exampleValue 仍返回，previewContent 软降级为 null")
+	@DisplayName("详情：require_fields 缺少 exampleValue 仍返回，preview 软降级为 null")
 	void getMessageTemplateById_shouldReturnWhenExampleValueMissing() {
 		// 历史半成品数据：详情正常返回，预览为空
 		MessageTemplateEntity entity = new MessageTemplateEntity();
@@ -175,6 +176,7 @@ class MessageTemplateServiceImplTest {
 		entity.setChannel(MessageChannel.EMAIL.name());
 		entity.setSceneCode("login-code");
 		entity.setTemplateName("登录邮件");
+		entity.setSubject("验证码 ${code}");
 		entity.setBodyContent("<p>${code}</p>");
 		entity.setRequireFields("[{\"key\":\"code\",\"description\":\"验证码\"}]");
 		entity.setPriority(1);
@@ -184,6 +186,7 @@ class MessageTemplateServiceImplTest {
 		MessageTemplateDetailVO vo = sysMessageTemplateService.getMessageTemplateById(13L, MessageChannel.EMAIL.name());
 
 		assertThat(vo.getContent()).isEqualTo("<p>${code}</p>");
+		assertThat(vo.getPreviewSubject()).isNull();
 		assertThat(vo.getPreviewContent()).isNull();
 		assertThat(vo.getRequireFields()).hasSize(1);
 		assertThat(vo.getRequireFields().get(0).getKey()).isEqualTo("code");
@@ -191,20 +194,23 @@ class MessageTemplateServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("详情：EMAIL 含示例值时填充 previewContent")
+	@DisplayName("详情：EMAIL 含示例值时填充 previewSubject 与 previewContent")
 	void getMessageTemplateById_shouldFillPreviewForEmail() {
 		MessageTemplateEntity entity = new MessageTemplateEntity();
 		entity.setId(20L);
 		entity.setChannel(MessageChannel.EMAIL.name());
 		entity.setTemplateName("login-mail");
+		entity.setSubject("验证码 ${code}");
 		entity.setBodyContent("<p>code=${code}</p>");
 		entity.setRequireFields("[{\"key\":\"code\",\"description\":\"验证码\",\"exampleValue\":\"123456\"}]");
 		when(messageTemplateMapper.selectById(20L)).thenReturn(entity);
 
 		MessageTemplateDetailVO vo = sysMessageTemplateService.getMessageTemplateById(20L, MessageChannel.EMAIL.name());
 
+		assertThat(vo.getSubject()).isEqualTo("验证码 ${code}");
 		assertThat(vo.getContent()).isEqualTo("<p>code=${code}</p>");
 		assertThat(vo.getContentType()).isEqualTo("HTML");
+		assertThat(vo.getPreviewSubject()).isEqualTo("验证码 123456");
 		assertThat(vo.getPreviewContent()).contains("123456");
 	}
 
@@ -385,7 +391,7 @@ class MessageTemplateServiceImplTest {
 	@Test
 	@DisplayName("测试发送：不声明事务，避免外发 I/O 并进长事务")
 	void testSend_shouldNotDeclareTransactional() throws NoSuchMethodException {
-		// 发送含外部渠道副作用，方法级事务会拖住连接且无法与渠道侧对齐回滚
+		// 发送含外部渠道副作用，方法级事务会拖住连接且无法与渠道侧一并回滚
 		Method method = MessageTemplateServiceImpl.class.getMethod("testSend", MessageTemplateTestSendForm.class);
 		assertThat(method.getAnnotation(Transactional.class)).isNull();
 	}

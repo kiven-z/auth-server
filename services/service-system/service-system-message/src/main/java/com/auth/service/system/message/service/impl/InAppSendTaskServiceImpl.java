@@ -9,17 +9,22 @@ import com.auth.service.system.message.convert.InAppSendTaskConverter;
 import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.mapper.InAppMessageMapper;
 import com.auth.service.system.message.model.entity.InAppMessageEntity;
-import com.auth.service.system.message.model.enums.*;
+import com.auth.service.system.message.model.enums.InAppContentType;
+import com.auth.service.system.message.model.enums.InAppMessageStatus;
+import com.auth.service.system.message.model.enums.MessageSendSourceType;
+import com.auth.service.system.message.model.enums.RecipientScopeType;
 import com.auth.service.system.message.model.form.inapp.InAppComposeForm;
 import com.auth.service.system.message.model.po.InAppSendTaskPageRowPO;
 import com.auth.service.system.message.model.query.InAppSendTaskQuery;
 import com.auth.service.system.message.model.value.recipient.RecipientScope;
 import com.auth.service.system.message.model.vo.inapp.InAppComposeResultVO;
 import com.auth.service.system.message.model.vo.inapp.InAppSendTaskDetailVO;
-import com.auth.service.system.message.model.vo.inapp.InAppSendTaskPageResponse;
+import com.auth.service.system.message.model.vo.inapp.InAppSendTaskPageVO;
+import com.auth.service.system.message.service.InAppMessageCategoryService;
 import com.auth.service.system.message.service.InAppSendTaskService;
 import com.auth.service.system.message.support.inapp.InAppComposeDispatchTrigger;
 import com.auth.service.system.message.support.inapp.InAppComposeFormValidation;
+import com.auth.service.system.message.support.inapp.InAppMessageCategorySupport;
 import com.auth.service.system.message.support.recipient.RecipientScopeJsonSupport;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -49,29 +54,19 @@ public class InAppSendTaskServiceImpl extends ServiceImpl<InAppMessageMapper, In
 
 	private final AuditUserDisplayService auditUserDisplayService;
 
-	/**
-	 * 是否读扩散任务
-	 * @param task 任务实体
-	 * @return 是否读扩散任务
-	 */
-	private static boolean isPullDelivery(InAppMessageEntity task) {
-		DeliveryMode mode = DeliveryMode.from(task.getDeliveryMode());
-		if (mode != null) {
-			return mode.isPull();
-		}
-		RecipientScopeType scopeType = RecipientScopeType.from(task.getRecipientScopeType());
-		return scopeType != null && scopeType.deliveryMode().isPull();
-	}
+	private final InAppMessageCategoryService inAppMessageCategoryService;
+
+	private final InAppMessageCategorySupport categorySupport;
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	@Transactional(readOnly = true)
-	public PageResponse<InAppSendTaskPageResponse> getSendTaskPage(InAppSendTaskQuery query) {
+	public PageResponse<InAppSendTaskPageVO> getSendTaskPage(InAppSendTaskQuery query) {
 		Page<InAppMessageEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
 		IPage<InAppSendTaskPageRowPO> page = baseMapper.selectSendTaskPage(pageParams, query);
-		IPage<InAppSendTaskPageResponse> voPage = page.convert(InAppSendTaskConverter.INSTANCE::toPageResponse);
+		IPage<InAppSendTaskPageVO> voPage = page.convert(InAppSendTaskConverter.INSTANCE::toPageVO);
 
 		auditUserDisplayService.enrichAuditUsernames(voPage, null, null);
 		return PageResponse.of(voPage);
@@ -92,6 +87,12 @@ public class InAppSendTaskServiceImpl extends ServiceImpl<InAppMessageMapper, In
 		String scopeJson = task.getRecipientScopeJson();
 		vo.setRecipientScopeIds(RecipientScopeJsonSupport.parseIds(scopeJson));
 		vo.setIncludeChildren(RecipientScopeJsonSupport.parseIncludeChildren(scopeJson));
+		if (task.getCategoryId() != null) {
+			var category = inAppMessageCategoryService.getById(task.getCategoryId());
+			if (category != null) {
+				vo.setCategoryName(category.getName());
+			}
+		}
 		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(vo), null, null);
 		return vo;
 	}
@@ -103,6 +104,7 @@ public class InAppSendTaskServiceImpl extends ServiceImpl<InAppMessageMapper, In
 	@Transactional(rollbackFor = Exception.class)
 	public InAppComposeResultVO send(InAppComposeForm form) {
 		RecipientScopeType type = InAppComposeFormValidation.validate(form);
+		categorySupport.requireEnabledMinor(form.getCategoryId());
 		RecipientScope scope = RecipientScope.builder()
 			.type(type)
 			.ids(form.getRecipientScopeIds())
@@ -114,8 +116,7 @@ public class InAppSendTaskServiceImpl extends ServiceImpl<InAppMessageMapper, In
 		InAppMessageEntity task = InAppEntityAssembler.toAdminComposeTask(form, scope, contentType, senderUserId);
 		super.save(task);
 
-		// 公开直接做读扩散，不写用户收件表
-		if (type.deliveryMode().isPull()) {
+		if (type.isPull()) {
 			return InAppComposeResultVO.builder()
 				.taskId(task.getId())
 				.totalCount(0)
@@ -124,7 +125,6 @@ public class InAppSendTaskServiceImpl extends ServiceImpl<InAppMessageMapper, In
 				.build();
 		}
 
-		// 非公开写入用户收件表
 		dispatchTrigger.dispatchAfterCommit(task.getId());
 		return InAppComposeResultVO.builder()
 			.taskId(task.getId())
@@ -147,7 +147,8 @@ public class InAppSendTaskServiceImpl extends ServiceImpl<InAppMessageMapper, In
 
 		InAppMessageStatus status = InAppMessageStatus.from(task.getStatus());
 		boolean retryAllowed = MessageSendSourceType.ADMIN_COMPOSE.name().equals(task.getSourceType())
-				&& !isPullDelivery(task) && status != null && status.isRetryable();
+				&& RecipientScopeType.from(task.getRecipientScopeType()) != RecipientScopeType.ALL && status != null
+				&& status.isRetryable();
 		if (!retryAllowed) {
 			throw new MessageException(IN_APP_SEND_TASK_OPERATION_NOT_ALLOWED);
 		}

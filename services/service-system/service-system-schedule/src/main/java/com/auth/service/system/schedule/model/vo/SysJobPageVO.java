@@ -8,22 +8,17 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.Serial;
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 定时任务分页行（含最近一次执行结果补充字段）
+ * 定时任务分页行
  *
  * @author Bunny
  */
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
-public class SysJobPageResponse extends BaseResponse implements Serializable, SysJobLastExecutionView {
-
-	@Serial
-	private static final long serialVersionUID = 1L;
+public class SysJobPageVO extends BaseResponse implements SysJobLastExecutionView {
 
 	@Schema(title = "任务名称")
 	private String jobName;
@@ -34,7 +29,7 @@ public class SysJobPageResponse extends BaseResponse implements Serializable, Sy
 	@Schema(title = "任务类")
 	private String jobClass;
 
-	@Schema(title = "任务类型", description = "BEAN_INVOKE/CUSTOM_CLASS")
+	@Schema(title = "任务类型")
 	private String taskType;
 
 	@Schema(title = "执行处理器")
@@ -49,7 +44,7 @@ public class SysJobPageResponse extends BaseResponse implements Serializable, Sy
 	@Schema(title = "错失策略")
 	private Integer misfirePolicy;
 
-	@Schema(title = "是否并发", description = "true=允许并发执行，false=禁止")
+	@Schema(title = "是否并发")
 	private Boolean concurrent;
 
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -60,10 +55,10 @@ public class SysJobPageResponse extends BaseResponse implements Serializable, Sy
 	@Schema(title = "结束时间")
 	private LocalDateTime endTime;
 
-	@Schema(title = "运行状态", description = "true=正常调度，false=暂停")
+	@Schema(title = "运行状态")
 	private Boolean status;
 
-	@Schema(title = "执行参数 JSON", description = "写入 JobDataMap")
+	@Schema(title = "执行参数 JSON")
 	private String jobParams;
 
 	@Schema(title = "扩展载荷 JSON")
@@ -72,7 +67,7 @@ public class SysJobPageResponse extends BaseResponse implements Serializable, Sy
 	@Schema(title = "备注")
 	private String remark;
 
-	@Schema(title = "最近结果", description = "SUCCESS/FAILED/UNKNOWN")
+	@Schema(title = "最近结果")
 	private SysJobLastExecutionStatus lastExecutionStatus;
 
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")

@@ -18,7 +18,7 @@ public interface SysMenuService extends IService<SysMenuEntity> {
 	/**
 	 * 新增菜单
 	 * @param form 表单
-	 * @return 新菜单主键字符串（与前端约定）
+	 * @return 新菜单主键字符串
 	 */
 	Long create(SysMenuSaveForm form);
 

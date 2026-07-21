@@ -4,7 +4,6 @@ import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.mapper.InAppMessageMapper;
 import com.auth.service.system.message.model.entity.InAppMessageEntity;
 import com.auth.service.system.message.model.entity.InAppMessageRecipientEntity;
-import com.auth.service.system.message.model.enums.DeliveryMode;
 import com.auth.service.system.message.model.enums.InAppMessageStatus;
 import com.auth.service.system.message.model.enums.RecipientScopeType;
 import com.auth.service.system.message.model.value.recipient.RecipientScope;
@@ -57,7 +56,7 @@ class InAppComposeDispatcherTest {
 		task.setId(id);
 		task.setRecipientScopeType(RecipientScopeType.DEPT.name());
 		task.setRecipientScopeJson("{\"ids\":[1],\"includeChildren\":true}");
-		task.setDeliveryMode(DeliveryMode.PUSH.name());
+		task.setRecipientScopeType(RecipientScopeType.USER.name());
 		task.setStatus(InAppMessageStatus.PENDING.name());
 		return task;
 	}

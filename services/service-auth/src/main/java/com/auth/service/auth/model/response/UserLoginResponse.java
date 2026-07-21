@@ -13,10 +13,10 @@ import lombok.Setter;
 @Setter
 public class UserLoginResponse extends RefreshTokenResponse {
 
-	@Schema(description = "昵称")
+	@Schema(title = "昵称")
 	private String nickname;
 
-	@Schema(description = "头像")
+	@Schema(title = "头像")
 	private String avatar;
 
 }

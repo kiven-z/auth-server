@@ -15,8 +15,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * 授权审计负载的传输 DTO（HTTP / Feign / 未来 MQ 消息体），与
- * {@link SecurityAuthorizationAuditPayloadEvent} 字段对齐。
+ * 授权审计负载的传输
  *
  * @author Bunny
  */
@@ -57,7 +56,7 @@ public class AuthorizationAuditIngestRequest implements Serializable {
 	private Instant timestamp;
 
 	/**
-	 * 由 SPI 事件构造传输体（供 auth 侧 Feign 发送）。
+	 * 由 SPI 事件构造传输体（供 auth 侧 Feign 发送
 	 * @param event 授权审计负载
 	 * @return 传输 DTO
 	 */
@@ -80,7 +79,7 @@ public class AuthorizationAuditIngestRequest implements Serializable {
 	}
 
 	/**
-	 * 转为契约事件（供 system 落库）。
+	 * 转为契约事件（供 system 落库
 	 * @return 与持久化逻辑一致的事件对象
 	 */
 	public SecurityAuthorizationAuditPayloadEvent toPayloadEvent() {

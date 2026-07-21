@@ -19,7 +19,7 @@ import java.util.List;
 public interface SysDeptQueryService extends IService<SysDeptEntity> {
 
 	/**
-	 * 条件查询全部部门（扁平，供前端建树）
+	 * 条件查询全部部门
 	 * @param query 筛选条件
 	 * @return 部门行
 	 */

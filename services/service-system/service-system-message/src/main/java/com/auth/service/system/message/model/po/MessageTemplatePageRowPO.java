@@ -10,11 +10,11 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 消息模板分页行（持久层查询投影，非 API 出参）
+ * 消息模板分页行
  *
  * @author Bunny
  */
-@Schema(name = "MessageTemplatePageRowPO", title = "消息模板分页行（PO）")
+@Schema(name = "MessageTemplatePageRowPO", title = "消息模板分页行")
 @Getter
 @Setter
 @ToString

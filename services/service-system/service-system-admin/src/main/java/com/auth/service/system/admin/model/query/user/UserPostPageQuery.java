@@ -6,9 +6,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.Serial;
-import java.io.Serializable;
-
 /**
  * 用户岗位关联分页查询
  *
@@ -18,10 +15,7 @@ import java.io.Serializable;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
-public class UserPostPageQuery extends PageQueryRequest implements Serializable {
-
-	@Serial
-	private static final long serialVersionUID = 1L;
+public class UserPostPageQuery extends PageQueryRequest {
 
 	@Schema(title = "岗位编码")
 	private String postCode;

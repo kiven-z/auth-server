@@ -22,22 +22,22 @@ import java.util.List;
 public class ImportRowError {
 
 	/**
-	 * 行号（1-based，不含表头；行数超限为 0）
+	 * 行号（行数超限为 0）
 	 */
 	int rowIndex;
 
 	/**
-	 * 失败原因（供前端直接展示，保持历史格式）
+	 * 失败原因（保持历史格式）
 	 */
 	String message;
 
 	/**
-	 * 错误类型；仅 message 构造时为 null
+	 * 错误类型
 	 */
 	ImportErrorCode code;
 
 	/**
-	 * 错误参数；仅 message 构造时为 null
+	 * 错误参数
 	 */
 	List<Object> args;
 

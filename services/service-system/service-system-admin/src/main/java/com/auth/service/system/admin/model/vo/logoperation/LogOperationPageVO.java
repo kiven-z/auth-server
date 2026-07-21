@@ -10,8 +10,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.io.Serial;
-
 /**
  * 操作日志分页行
  *
@@ -23,9 +21,6 @@ import java.io.Serial;
 @ToString
 @EqualsAndHashCode(callSuper = true)
 public class LogOperationPageVO extends BaseResponse {
-
-	@Serial
-	private static final long serialVersionUID = 1L;
 
 	@JsonStringFormat
 	@Schema(title = "操作用户 ID")

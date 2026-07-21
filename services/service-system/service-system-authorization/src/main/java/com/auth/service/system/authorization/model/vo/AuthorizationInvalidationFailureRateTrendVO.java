@@ -1,5 +1,6 @@
 package com.auth.service.system.authorization.model.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,9 +28,11 @@ public class AuthorizationInvalidationFailureRateTrendVO implements Serializable
 	@Schema(title = "聚合粒度（DAY|WEEK）")
 	private String granularity;
 
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "统计开始时间")
 	private LocalDateTime startTime;
 
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "统计结束时间")
 	private LocalDateTime endTime;
 

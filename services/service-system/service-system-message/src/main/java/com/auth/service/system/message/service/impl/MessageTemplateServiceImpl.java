@@ -19,7 +19,7 @@ import com.auth.service.system.message.model.form.MessageTemplateTestSendForm;
 import com.auth.service.system.message.model.po.MessageTemplatePageRowPO;
 import com.auth.service.system.message.model.query.MessageTemplateQuery;
 import com.auth.service.system.message.model.vo.template.MessageTemplateDetailVO;
-import com.auth.service.system.message.model.vo.template.MessageTemplatePageResponse;
+import com.auth.service.system.message.model.vo.template.MessageTemplatePageVO;
 import com.auth.service.system.message.model.vo.template.MessageTemplateRequireFieldRow;
 import com.auth.service.system.message.service.MessageDispatchService;
 import com.auth.service.system.message.service.MessageTemplateService;
@@ -62,10 +62,10 @@ public class MessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMappe
 	 */
 	@Override
 	@Transactional(readOnly = true)
-	public PageResponse<MessageTemplatePageResponse> getMessageTemplatePage(MessageTemplateQuery query) {
+	public PageResponse<MessageTemplatePageVO> getMessageTemplatePage(MessageTemplateQuery query) {
 		Page<MessageTemplateEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
 		IPage<MessageTemplatePageRowPO> page = messageTemplateMapper.selectMessageTemplatePage(pageParams, query);
-		IPage<MessageTemplatePageResponse> voPage = page.convert(MessageTemplateConverter.INSTANCE::toPageResponse);
+		IPage<MessageTemplatePageVO> voPage = page.convert(MessageTemplateConverter.INSTANCE::toPageVO);
 
 		auditUserDisplayService.enrichAuditUsernames(voPage, null, null);
 		return PageResponse.of(voPage);
@@ -88,11 +88,23 @@ public class MessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMappe
 		vo.setContentType(contentType);
 
 		try {
-			// 详情仍填充 preview；缺 exampleValue / 渲染失败时软降级为空，不拖垮详情
-			String previewContent = renderPreviewContent(entity);
+			String requireFields = entity.getRequireFields();
+			List<MessageTemplateRequireFieldRow> rows = MessageTemplateRequireFieldsJsonSupport.parse(requireFields);
+			Map<String, Object> model = MessageTemplateRequireFieldsJsonSupport.toExampleModel(rows);
+
+			String templateName = CharSequenceUtil.blankToDefault(entity.getTemplateName(), "preview");
+
+			String subject = CharSequenceUtil.nullToEmpty(entity.getSubject());
+			String previewSubject = FreemarkerTemplateRenderer.processTemplate(templateName + "_subject", subject,
+					model);
+			vo.setPreviewSubject(previewSubject);
+
+			String body = CharSequenceUtil.nullToEmpty(entity.getBodyContent());
+			String previewContent = FreemarkerTemplateRenderer.processTemplate(templateName, body, model);
 			vo.setPreviewContent(previewContent);
 		}
 		catch (MessageException ignored) {
+			vo.setPreviewSubject(null);
 			vo.setPreviewContent(null);
 		}
 
@@ -214,21 +226,6 @@ public class MessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMappe
 			throw new MessageException(DATA_NOT_EXIST);
 		}
 		return entity;
-	}
-
-	/**
-	 * 按 require_fields 示例值 FreeMarker 渲染预览正文
-	 * @param entity 模板实体
-	 * @return 渲染后正文
-	 */
-	private String renderPreviewContent(MessageTemplateEntity entity) {
-		String requireFields = entity.getRequireFields();
-		List<MessageTemplateRequireFieldRow> rows = MessageTemplateRequireFieldsJsonSupport.parse(requireFields);
-		Map<String, Object> model = MessageTemplateRequireFieldsJsonSupport.toExampleModel(rows);
-
-		String templateName = CharSequenceUtil.blankToDefault(entity.getTemplateName(), "preview");
-		String templateContent = CharSequenceUtil.nullToEmpty(entity.getBodyContent());
-		return FreemarkerTemplateRenderer.processTemplate(templateName, templateContent, model);
 	}
 
 }

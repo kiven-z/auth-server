@@ -43,10 +43,7 @@ public @interface Desensitized {
 	String symbol() default "*";
 
 	/**
-	 * 仅 {@link DesensitizedType#ADDRESS} 生效：掩码末尾敏感字符长度，与 Hutool
-	 * {@link cn.hutool.core.util.DesensitizedUtil#address(String, int)} 一致；默认 8 与
-	 * {@code DesensitizedUtil.desensitized(s, DesensitizedUtil.DesensitizedType.ADDRESS)}
-	 * 行为对齐
+	 * 仅 {@link DesensitizedType#ADDRESS} 生效：掩码末尾敏感字符长度；默认 8
 	 */
 	int addressSensitiveSize() default 8;
 

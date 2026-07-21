@@ -1,13 +1,12 @@
 package com.auth.service.system.schedule.model.vo;
 
+import com.auth.common.core.annotation.JsonStringFormat;
 import com.auth.common.core.model.response.BaseResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-
-import java.io.Serial;
 
 /**
  * 任务日志详情
@@ -21,12 +20,10 @@ import java.io.Serial;
 @EqualsAndHashCode(callSuper = true)
 public class LogJobDetailVO extends BaseResponse {
 
-	@Serial
-	private static final long serialVersionUID = 1L;
-
 	@Schema(title = "任务名称")
 	private String jobName;
 
+	@JsonStringFormat
 	@Schema(title = "任务ID")
 	private Long jobId;
 

@@ -22,7 +22,7 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
  *
  * @author Bunny
  */
-@Tag(name = "短信模板相关", description = "短信模板相关接口")
+@Tag(name = "短信模板相关")
 @RequestMapping("/api/system/message/sms-template")
 @RestController
 public class SmsTemplateController {
@@ -33,7 +33,7 @@ public class SmsTemplateController {
 		this.smsTemplateService = smsTemplateService;
 	}
 
-	@Operation(summary = "添加短信模板", description = "channel 固定为 SMS；厂商模板码写入 providerTemplateCode；变量列表创建后单独维护")
+	@Operation(summary = "添加短信模板")
 	@PreAuthorize("@auth.decide('message:template:create')")
 	@PostMapping()
 	public Result<String> create(@Validated(CreateGroup.class) @RequestBody SmsTemplateForm form) {
@@ -43,7 +43,7 @@ public class SmsTemplateController {
 
 	@OperationLog(targetType = "SMS_TEMPLATE", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = MessageAuditBizModule.SYS_MESSAGE_TEMPLATE, operation = OperationLogKind.UPDATE)
-	@Operation(summary = "更新短信模板", description = "更新短信模板元数据与厂商模板码；不修改 channel、require_fields")
+	@Operation(summary = "更新短信模板")
 	@PreAuthorize("@auth.decide('message:template:update')")
 	@PutMapping()
 	public Result<String> update(@Validated(UpdateGroup.class) @RequestBody SmsTemplateForm form) {

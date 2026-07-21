@@ -10,7 +10,7 @@ import lombok.experimental.Accessors;
 import java.time.LocalDateTime;
 
 /**
- * 站内信收件箱：仅存关联与用户级状态，正文查 in_app_message
+ * 站内信收件箱
  *
  * @author Bunny
  */
@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 @Accessors(chain = true)
 public class InAppMessageRecipientEntity extends BaseEntity {
 
-	@Schema(title = "站内信 ID", description = "对应 in_app_message.id")
+	@Schema(title = "站内信 ID")
 	private Long messageId;
 
 	@Schema(title = "接收人用户 ID")

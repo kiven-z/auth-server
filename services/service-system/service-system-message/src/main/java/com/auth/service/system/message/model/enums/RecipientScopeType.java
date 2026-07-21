@@ -1,39 +1,31 @@
 package com.auth.service.system.message.model.enums;
 
-import lombok.AllArgsConstructor;
-
 /**
  * 站内信接收范围类型
  *
  * @author Bunny
  */
-@AllArgsConstructor
 public enum RecipientScopeType {
 
 	/**
 	 * 指定用户
 	 */
-	USER(DeliveryMode.PUSH),
+	USER,
 
 	/**
 	 * 指定岗位
 	 */
-	POST(DeliveryMode.PUSH),
+	POST,
 
 	/**
 	 * 指定部门
 	 */
-	DEPT(DeliveryMode.PUSH),
+	DEPT,
 
 	/**
 	 * 全员
 	 */
-	ALL(DeliveryMode.PULL);
-
-	/**
-	 * 该范围对应的投递模式
-	 */
-	private final DeliveryMode deliveryMode;
+	ALL;
 
 	/**
 	 * 解析范围类型（大小写不敏感）
@@ -53,11 +45,11 @@ public enum RecipientScopeType {
 	}
 
 	/**
-	 * 该范围使用的投递模式
-	 * @return 站内信投递模式
+	 * 是否读扩散（全员公开）
+	 * @return true=ALL
 	 */
-	public DeliveryMode deliveryMode() {
-		return deliveryMode;
+	public boolean isPull() {
+		return this == ALL;
 	}
 
 }

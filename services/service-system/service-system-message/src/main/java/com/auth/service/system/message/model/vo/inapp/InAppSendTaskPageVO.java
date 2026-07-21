@@ -15,11 +15,11 @@ import java.time.LocalDateTime;
  *
  * @author Bunny
  */
-@Schema(name = "InAppSendTaskPageResponse", title = "站内信发送任务分页返回对象")
+@Schema(name = "InAppSendTaskPageVO", title = "站内信发送任务分页返回对象")
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
-public class InAppSendTaskPageResponse extends BaseResponse {
+public class InAppSendTaskPageVO extends BaseResponse {
 
 	@Schema(name = "sourceType", title = "来源")
 	private String sourceType;
@@ -33,8 +33,12 @@ public class InAppSendTaskPageResponse extends BaseResponse {
 	@Schema(name = "contentType", title = "正文类型")
 	private String contentType;
 
-	@Schema(name = "bizType", title = "业务分类")
-	private String bizType;
+	@JsonStringFormat
+	@Schema(name = "categoryId", title = "业务小类 ID")
+	private Long categoryId;
+
+	@Schema(name = "categoryName", title = "业务小类名称")
+	private String categoryName;
 
 	@JsonStringFormat
 	@Schema(name = "senderUserId", title = "发起人用户 ID")
@@ -42,9 +46,6 @@ public class InAppSendTaskPageResponse extends BaseResponse {
 
 	@Schema(name = "recipientScopeType", title = "接收范围类型")
 	private String recipientScopeType;
-
-	@Schema(name = "deliveryMode", title = "投递模式")
-	private String deliveryMode;
 
 	@Schema(name = "totalCount", title = "展开后目标总数")
 	private Integer totalCount;

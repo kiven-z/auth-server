@@ -19,10 +19,10 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class InAppMessageCategoryEntity extends BaseEntity {
 
-	@Schema(title = "父分类 ID")
+	@Schema(title = "父分类 ID", description = "0=大类；非 0=小类，指向大类 id")
 	private Long parentId;
 
-	@Schema(title = "分类码", description = "全局唯一")
+	@Schema(title = "分类码")
 	private String code;
 
 	@Schema(title = "展示名")
@@ -31,7 +31,7 @@ public class InAppMessageCategoryEntity extends BaseEntity {
 	@Schema(title = "同级排序")
 	private Integer sortOrder;
 
-	@Schema(title = "启用状态", description = "true=启用，false=停用")
+	@Schema(title = "启用状态")
 	private Boolean status;
 
 }

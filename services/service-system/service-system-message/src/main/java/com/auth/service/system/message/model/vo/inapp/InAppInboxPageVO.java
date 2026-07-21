@@ -15,11 +15,11 @@ import java.time.LocalDateTime;
  *
  * @author Bunny
  */
-@Schema(name = "InAppInboxPageResponse", title = "站内信收件箱分页返回对象")
+@Schema(name = "InAppInboxPageVO", title = "站内信收件箱分页返回对象")
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
-public class InAppInboxPageResponse extends BaseResponse {
+public class InAppInboxPageVO extends BaseResponse {
 
 	@Schema(name = "sceneCode", title = "场景编码")
 	private String sceneCode;
@@ -30,8 +30,12 @@ public class InAppInboxPageResponse extends BaseResponse {
 	@Schema(name = "contentType", title = "正文类型")
 	private String contentType;
 
-	@Schema(name = "bizType", title = "业务分类")
-	private String bizType;
+	@JsonStringFormat
+	@Schema(name = "categoryId", title = "业务小类 ID")
+	private Long categoryId;
+
+	@Schema(name = "categoryName", title = "业务小类名称")
+	private String categoryName;
 
 	@Schema(name = "linkUrl", title = "跳转链接")
 	private String linkUrl;
@@ -39,9 +43,6 @@ public class InAppInboxPageResponse extends BaseResponse {
 	@JsonStringFormat
 	@Schema(name = "senderUserId", title = "发起人用户 ID")
 	private Long senderUserId;
-
-	@Schema(name = "deliveryMode", title = "投递模式")
-	private String deliveryMode;
 
 	@Schema(name = "isRead", title = "是否已读")
 	private Boolean isRead;

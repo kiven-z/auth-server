@@ -23,14 +23,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 class InAppEntityAssemblerTest {
 
 	@Test
-	@DisplayName("管理端定向：PUSH + PENDING")
+	@DisplayName("管理端定向：写扩散 + PENDING")
 	void toAdminComposeTask_pushScope_shouldMapPending() {
 		// 校验发送任务字段与 PENDING/计数默认值
 		InAppComposeForm form = new InAppComposeForm();
 		form.setTemplateCode("notice");
 		form.setTitle("Hello");
 		form.setBody("body text");
-		form.setBizType("NOTICE");
+		form.setCategoryId(1907200100000000401L);
 		form.setLinkUrl("/home");
 
 		RecipientScope scope = RecipientScope.builder()
@@ -46,11 +46,10 @@ class InAppEntityAssemblerTest {
 		assertThat(task.getTitle()).isEqualTo("Hello");
 		assertThat(task.getContent()).isEqualTo("body text");
 		assertThat(task.getContentType()).isEqualTo(InAppContentType.MARKDOWN.name());
-		assertThat(task.getBizType()).isEqualTo("NOTICE");
+		assertThat(task.getCategoryId()).isEqualTo(1907200100000000401L);
 		assertThat(task.getLinkUrl()).isEqualTo("/home");
 		assertThat(task.getSenderUserId()).isEqualTo(7L);
 		assertThat(task.getRecipientScopeType()).isEqualTo(RecipientScopeType.DEPT.name());
-		assertThat(task.getDeliveryMode()).isEqualTo(DeliveryMode.PUSH.name());
 		assertThat(task.getRecipientScopeJson()).contains("\"includeChildren\":true");
 		assertThat(task.getStatus()).isEqualTo(InAppMessageStatus.PENDING.name());
 		assertThat(task.getTotalCount()).isZero();
@@ -59,7 +58,7 @@ class InAppEntityAssemblerTest {
 	}
 
 	@Test
-	@DisplayName("管理端全员：PULL + SUCCESS")
+	@DisplayName("管理端全员：读扩散 + SUCCESS")
 	void toAdminComposeTask_allScope_shouldMapPublished() {
 		// 公开读扩散发布即成功，不进入 PENDING
 		InAppComposeForm form = new InAppComposeForm();
@@ -69,7 +68,6 @@ class InAppEntityAssemblerTest {
 		RecipientScope scope = RecipientScope.builder().type(RecipientScopeType.ALL).build();
 		InAppMessageEntity task = InAppEntityAssembler.toAdminComposeTask(form, scope, InAppContentType.TEXT, 1L);
 
-		assertThat(task.getDeliveryMode()).isEqualTo(DeliveryMode.PULL.name());
 		assertThat(task.getRecipientScopeType()).isEqualTo(RecipientScopeType.ALL.name());
 		assertThat(task.getStatus()).isEqualTo(InAppMessageStatus.SUCCESS.name());
 	}
@@ -84,7 +82,7 @@ class InAppEntityAssemblerTest {
 			.title("Hello")
 			.content("body")
 			.contentType(InAppContentType.MARKDOWN)
-			.bizType("NOTICE")
+			.categoryId(1907200100000000401L)
 			.linkUrl("/home")
 			.build();
 		InAppMessageEntity task = InAppEntityAssembler.toDirectTask(rendered, List.of(1001L, 1002L));
@@ -94,10 +92,9 @@ class InAppEntityAssemblerTest {
 		assertThat(task.getTitle()).isEqualTo("Hello");
 		assertThat(task.getContent()).isEqualTo("body");
 		assertThat(task.getContentType()).isEqualTo(InAppContentType.MARKDOWN.name());
-		assertThat(task.getBizType()).isEqualTo("NOTICE");
+		assertThat(task.getCategoryId()).isEqualTo(1907200100000000401L);
 		assertThat(task.getLinkUrl()).isEqualTo("/home");
 		assertThat(task.getRecipientScopeType()).isEqualTo(RecipientScopeType.USER.name());
-		assertThat(task.getDeliveryMode()).isEqualTo(DeliveryMode.PUSH.name());
 		assertThat(task.getRecipientScopeJson()).contains("1001").contains("1002");
 		assertThat(task.getTotalCount()).isEqualTo(2);
 		assertThat(task.getStatus()).isEqualTo(InAppMessageStatus.SENDING.name());

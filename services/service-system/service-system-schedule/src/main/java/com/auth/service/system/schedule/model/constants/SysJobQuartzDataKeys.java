@@ -16,12 +16,12 @@ public class SysJobQuartzDataKeys {
 	public static final String SYS_JOB_ID = "sysJobId";
 
 	/**
-	 * 调用目标字符串（Bean 方法），与 {@code job.invoke_target} 一致
+	 * 调用目标字符串（Bean 方法）
 	 */
 	public static final String INVOKE_TARGET = "invokeTarget";
 
 	/**
-	 * 白名单任务类全限定名，与 {@code job.job_class} 一致
+	 * 白名单任务类全限定名
 	 */
 	public static final String JOB_CLASS = "jobClass";
 
@@ -36,7 +36,7 @@ public class SysJobQuartzDataKeys {
 	public static final String HANDLER_CODE = "handlerCode";
 
 	/**
-	 * 执行参数 JSON 原文（与 {@code job.job_params} 一致，供内置 Job 解析嵌套结构）
+	 * 执行参数 JSON 原文（供内置 Job 解析嵌套结构）
 	 */
 	public static final String JOB_PARAMS = "jobParams";
 

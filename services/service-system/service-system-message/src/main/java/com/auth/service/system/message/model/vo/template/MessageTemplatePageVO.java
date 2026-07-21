@@ -11,11 +11,11 @@ import lombok.Setter;
  *
  * @author Bunny
  */
-@Schema(name = "MessageTemplatePageResponse", title = "消息模板分页返回对象", description = "用于消息模板分页查询返回数据")
+@Schema(name = "MessageTemplatePageVO", title = "消息模板分页返回对象")
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
-public class MessageTemplatePageResponse extends BaseResponse {
+public class MessageTemplatePageVO extends BaseResponse {
 
 	@Schema(name = "channel", title = "消息渠道")
 	private String channel;

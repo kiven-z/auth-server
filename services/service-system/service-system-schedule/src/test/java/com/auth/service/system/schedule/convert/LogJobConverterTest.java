@@ -3,7 +3,7 @@ package com.auth.service.system.schedule.convert;
 import com.auth.service.system.schedule.model.entity.LogJobEntity;
 import com.auth.service.system.schedule.model.po.LogJobPageRowPO;
 import com.auth.service.system.schedule.model.vo.LogJobDetailVO;
-import com.auth.service.system.schedule.model.vo.LogJobPageResponse;
+import com.auth.service.system.schedule.model.vo.LogJobPageVO;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -19,7 +19,7 @@ class LogJobConverterTest {
 
 	@Test
 	@DisplayName("分页 PO status=1 映射为 true（成功）")
-	void toPageResponse_mapsSuccessStatus() {
+	void toPageVO_mapsSuccessStatus() {
 		LocalDateTime now = LocalDateTime.of(2026, 1, 1, 12, 0, 0);
 		LogJobPageRowPO po = new LogJobPageRowPO();
 		po.setId(10L);
@@ -34,7 +34,7 @@ class LogJobConverterTest {
 		po.setCreateUser(1L);
 		po.setUpdateUser(2L);
 
-		LogJobPageResponse vo = LogJobConverter.INSTANCE.toPageResponse(po);
+		LogJobPageVO vo = LogJobConverter.INSTANCE.toPageVO(po);
 
 		assertThat(vo.getId()).isEqualTo(10L);
 		assertThat(vo.getJobName()).isEqualTo("demoJob");
@@ -45,11 +45,11 @@ class LogJobConverterTest {
 
 	@Test
 	@DisplayName("分页 PO status=0 映射为 false（失败）")
-	void toPageResponse_mapsFailureStatus() {
+	void toPageVO_mapsFailureStatus() {
 		LogJobPageRowPO po = new LogJobPageRowPO();
 		po.setStatus(false);
 
-		LogJobPageResponse vo = LogJobConverter.INSTANCE.toPageResponse(po);
+		LogJobPageVO vo = LogJobConverter.INSTANCE.toPageVO(po);
 
 		assertThat(vo.getStatus()).isFalse();
 	}

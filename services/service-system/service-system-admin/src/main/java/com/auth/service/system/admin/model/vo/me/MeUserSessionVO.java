@@ -15,34 +15,34 @@ import lombok.ToString;
 @ToString
 public class MeUserSessionVO {
 
-	@Schema(description = "会话 ID（jti）")
+	@Schema(title = "会话 ID（jti）")
 	private String sessionId;
 
-	@Schema(description = "请求 IP")
+	@Schema(title = "请求 IP")
 	private String ipAddress;
 
-	@Schema(description = "IP 归属地")
+	@Schema(title = "IP 归属地")
 	private String ipRegion;
 
-	@Schema(description = "设备类型")
+	@Schema(title = "设备类型")
 	private String deviceType;
 
-	@Schema(description = "浏览器类型")
+	@Schema(title = "浏览器类型")
 	private String browserType;
 
-	@Schema(description = "操作系统类型")
+	@Schema(title = "操作系统类型")
 	private String osType;
 
-	@Schema(description = "是否记住我")
+	@Schema(title = "是否记住我")
 	private Boolean rememberMe;
 
-	@Schema(description = "Refresh Token 过期时间戳（毫秒）")
+	@Schema(title = "Refresh Token 过期时间戳（毫秒）")
 	private Long refreshTokenExpiresAt;
 
-	@Schema(description = "登录时间戳（毫秒）")
+	@Schema(title = "登录时间戳（毫秒）")
 	private Long loginAt;
 
-	@Schema(description = "是否为当前请求所在会话")
+	@Schema(title = "是否为当前请求所在会话")
 	private Boolean current;
 
 }

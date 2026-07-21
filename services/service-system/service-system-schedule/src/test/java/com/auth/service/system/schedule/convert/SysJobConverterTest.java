@@ -6,7 +6,7 @@ import com.auth.service.system.schedule.model.form.SysJobUpdateForm;
 import com.auth.service.system.schedule.model.po.SysJobDetailRowPO;
 import com.auth.service.system.schedule.model.po.SysJobPageRowPO;
 import com.auth.service.system.schedule.model.vo.SysJobDetailVO;
-import com.auth.service.system.schedule.model.vo.SysJobPageResponse;
+import com.auth.service.system.schedule.model.vo.SysJobPageVO;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -21,7 +21,7 @@ class SysJobConverterTest {
 
 	@Test
 	@DisplayName("分页 PO 映射为分页 VO，最近执行结果由 Service 补充")
-	void toPageResponse_mapsPoFields() {
+	void toPageVO_mapsPoFields() {
 		LocalDateTime now = LocalDateTime.of(2026, 5, 23, 10, 0);
 		SysJobPageRowPO po = new SysJobPageRowPO();
 		po.setId(1L);
@@ -32,7 +32,7 @@ class SysJobConverterTest {
 		po.setCreateTime(now);
 		po.setCreateUser(100L);
 
-		SysJobPageResponse vo = SysJobConverter.INSTANCE.toPageResponse(po);
+		SysJobPageVO vo = SysJobConverter.INSTANCE.toPageVO(po);
 
 		assertThat(vo.getId()).isEqualTo(1L);
 		assertThat(vo.getJobName()).isEqualTo("demo");

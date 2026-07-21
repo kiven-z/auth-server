@@ -6,22 +6,16 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.Serial;
-import java.io.Serializable;
-
 /**
  * 任务分组分页行
  *
  * @author Bunny
  */
-@Schema(name = "SysJobGroupPageResponse", title = "任务分组分页行")
+@Schema(name = "SysJobGroupPageVO", title = "任务分组分页行")
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
-public class SysJobGroupPageResponse extends BaseResponse implements Serializable {
-
-	@Serial
-	private static final long serialVersionUID = 1L;
+public class SysJobGroupPageVO extends BaseResponse {
 
 	@Schema(title = "分组编码")
 	private String groupCode;

@@ -8,7 +8,7 @@ import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * 部门扁平列表查询（无分页，供前端建树）
+ * 部门扁平列表查询
  *
  * @author Bunny
  */
@@ -20,7 +20,7 @@ public class SysDeptListQuery implements Serializable {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
-	@Schema(title = "关键词（部门名称或编码，模糊；含命中节点的祖先）")
+	@Schema(title = "关键词")
 	private String keyword;
 
 	@Schema(title = "状态(true=正常，false=禁用)")

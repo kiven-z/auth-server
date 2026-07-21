@@ -1,7 +1,6 @@
 package com.auth.service.system.admin.model.po.loglogin;
 
 import com.auth.common.core.annotation.JsonStringFormat;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,7 +15,7 @@ import java.time.LocalDateTime;
  *
  * @author Bunny
  */
-@Schema(name = "LogLoginLogPageRowPO", title = "登录日志分页行（PO）")
+@Schema(name = "LogLoginLogPageRowPO", title = "登录日志分页行")
 @Getter
 @Setter
 @ToString
@@ -39,7 +38,6 @@ public class LogLoginLogPageRowPO implements Serializable {
 	@Schema(title = "登录结果")
 	private Integer loginResult;
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "登录时间")
 	private LocalDateTime loginTime;
 
@@ -49,11 +47,9 @@ public class LogLoginLogPageRowPO implements Serializable {
 	@Schema(title = "登录方式")
 	private String loginType;
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "创建时间")
 	private LocalDateTime createTime;
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "更新时间")
 	private LocalDateTime updateTime;
 

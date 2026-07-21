@@ -10,11 +10,11 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 站内信发送任务分页行（持久层查询投影，非 API 出参）
+ * 站内信发送任务分页行
  *
  * @author Bunny
  */
-@Schema(name = "InAppSendTaskPageRowPO", title = "站内信发送任务分页行（PO）")
+@Schema(name = "InAppSendTaskPageRowPO", title = "站内信发送任务分页行")
 @Getter
 @Setter
 @ToString
@@ -38,17 +38,17 @@ public class InAppSendTaskPageRowPO implements Serializable {
 	@Schema(title = "正文类型")
 	private String contentType;
 
-	@Schema(title = "业务分类")
-	private String bizType;
+	@Schema(title = "业务小类 ID")
+	private Long categoryId;
+
+	@Schema(title = "业务小类名称")
+	private String categoryName;
 
 	@Schema(title = "发起人用户 ID")
 	private Long senderUserId;
 
 	@Schema(title = "接收范围类型")
 	private String recipientScopeType;
-
-	@Schema(title = "投递模式")
-	private String deliveryMode;
 
 	@Schema(title = "展开后目标总数")
 	private Integer totalCount;

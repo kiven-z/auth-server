@@ -5,14 +5,16 @@ import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.message.api.model.inapp.InAppChannelOptions;
 import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.mapper.InAppMessageMapper;
+import com.auth.service.system.message.model.entity.InAppMessageCategoryEntity;
 import com.auth.service.system.message.model.entity.InAppMessageEntity;
 import com.auth.service.system.message.model.entity.InAppMessageRecipientEntity;
-import com.auth.service.system.message.model.enums.DeliveryMode;
+import com.auth.service.system.message.model.enums.RecipientScopeType;
 import com.auth.service.system.message.model.enums.InAppContentType;
 import com.auth.service.system.message.model.enums.InAppMessageStatus;
 import com.auth.service.system.message.model.enums.MessageSendSourceType;
 import com.auth.service.system.message.model.value.inapp.RenderedInAppMessage;
 import com.auth.service.system.message.service.InAppMessageRecipientWriteService;
+import com.auth.service.system.message.support.inapp.InAppMessageCategorySupport;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
+import static com.auth.service.system.message.exception.MessageResultCode.IN_APP_MESSAGE_CATEGORY_NOT_FOUND;
 import static com.auth.service.system.message.exception.MessageResultCode.IN_APP_TARGET_INVALID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -40,6 +43,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class InAppMessageSenderTest {
 
+	private static final long MINOR_CATEGORY_ID = 1907200100000000401L;
+
 	@Mock
 	private InAppTemplatePipeline inAppTemplatePipeline;
 
@@ -48,6 +53,9 @@ class InAppMessageSenderTest {
 
 	@Mock
 	private InAppMessageRecipientWriteService inAppMessageRecipientWriteService;
+
+	@Mock
+	private InAppMessageCategorySupport categorySupport;
 
 	@InjectMocks
 	private InAppMessageSender sender;
@@ -63,6 +71,17 @@ class InAppMessageSenderTest {
 		}).when(inAppMessageMapper).insert(any(InAppMessageEntity.class));
 	}
 
+	/**
+	 * 模拟启用小类校验通过
+	 */
+	private void stubEnabledMinor() {
+		InAppMessageCategoryEntity minor = new InAppMessageCategoryEntity();
+		minor.setId(MINOR_CATEGORY_ID);
+		minor.setParentId(1907200100000000007L);
+		minor.setStatus(Boolean.TRUE);
+		when(categorySupport.requireEnabledMinor(MINOR_CATEGORY_ID)).thenReturn(minor);
+	}
+
 	@Test
 	@DisplayName("渠道标识为 IN_APP")
 	void channel_shouldBeInApp() {
@@ -72,6 +91,7 @@ class InAppMessageSenderTest {
 	@Test
 	@DisplayName("模板模式：先写 task 主表，再展开去重 userId 写 inbox，收尾标记 SUCCESS")
 	void sendByTemplate_shouldPersistTaskAndExpandInbox() {
+		stubEnabledMinor();
 		when(inAppTemplatePipeline.render("notice", Map.of("name", "Bunny"))).thenReturn(RenderedInAppMessage.builder()
 			.title("Hello Bunny")
 			.content("Body Bunny")
@@ -89,7 +109,7 @@ class InAppMessageSenderTest {
 			.templateCode("notice")
 			.targets(List.of("1001", "1002", "1001"))
 			.variables(Map.of("name", "Bunny"))
-			.options(InAppChannelOptions.builder().bizType("NOTICE").linkUrl("/home").build())
+			.options(InAppChannelOptions.builder().categoryId(MINOR_CATEGORY_ID).linkUrl("/home").build())
 			.build();
 
 		sender.sendByTemplate(command);
@@ -98,12 +118,12 @@ class InAppMessageSenderTest {
 		verify(inAppMessageMapper).insert(taskCaptor.capture());
 		InAppMessageEntity task = taskCaptor.getValue();
 		assertThat(task.getSourceType()).isEqualTo(MessageSendSourceType.TEMPLATE.name());
-		assertThat(task.getDeliveryMode()).isEqualTo(DeliveryMode.PUSH.name());
+		assertThat(task.getRecipientScopeType()).isEqualTo(RecipientScopeType.USER.name());
 		assertThat(task.getTitle()).isEqualTo("Hello Bunny");
 		assertThat(task.getContent()).isEqualTo("Body Bunny");
 		assertThat(task.getContentType()).isEqualTo(InAppContentType.TEXT.name());
 		assertThat(task.getSceneCode()).isEqualTo("notice");
-		assertThat(task.getBizType()).isEqualTo("NOTICE");
+		assertThat(task.getCategoryId()).isEqualTo(MINOR_CATEGORY_ID);
 		assertThat(task.getLinkUrl()).isEqualTo("/home");
 		assertThat(task.getTotalCount()).isEqualTo(2);
 
@@ -123,6 +143,7 @@ class InAppMessageSenderTest {
 	@Test
 	@DisplayName("自定义正文：源类型 SYSTEM，正文/标题走 options")
 	void sendByTemplate_shouldSupportCustomBody() {
+		stubEnabledMinor();
 		stubInsertTaskId(88L);
 		when(inAppMessageRecipientWriteService.insertBatch(any())).thenReturn(1);
 
@@ -131,7 +152,11 @@ class InAppMessageSenderTest {
 			.targets(List.of("88"))
 			.customBody(Boolean.TRUE)
 			.body("manual body")
-			.options(InAppChannelOptions.builder().title("manual title").contentType("MARKDOWN").build())
+			.options(InAppChannelOptions.builder()
+				.title("manual title")
+				.contentType("MARKDOWN")
+				.categoryId(MINOR_CATEGORY_ID)
+				.build())
 			.build();
 
 		sender.sendByTemplate(command);
@@ -143,21 +168,42 @@ class InAppMessageSenderTest {
 		assertThat(task.getTitle()).isEqualTo("manual title");
 		assertThat(task.getContent()).isEqualTo("manual body");
 		assertThat(task.getContentType()).isEqualTo(InAppContentType.MARKDOWN.name());
+		assertThat(task.getCategoryId()).isEqualTo(MINOR_CATEGORY_ID);
 	}
 
 	@Test
 	@DisplayName("自定义正文缺标题：抛出 PARAM_REQUIRED")
 	void sendByTemplate_shouldThrowWhenCustomBodyWithoutTitle() {
+		stubEnabledMinor();
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
 			.channel(MessageChannel.IN_APP)
 			.targets(List.of("88"))
 			.customBody(Boolean.TRUE)
 			.body("manual body")
+			.options(InAppChannelOptions.builder().categoryId(MINOR_CATEGORY_ID).build())
 			.build();
 
 		assertThatThrownBy(() -> sender.sendByTemplate(command)).isInstanceOf(MessageException.class)
 			.extracting(ex -> ((MessageException) ex).getResultCode())
 			.isEqualTo(PARAM_REQUIRED);
+	}
+
+	@Test
+	@DisplayName("小类无效：抛出 IN_APP_MESSAGE_CATEGORY_NOT_FOUND")
+	void sendByTemplate_shouldThrowWhenCategoryInvalid() {
+		when(categorySupport.requireEnabledMinor(null))
+			.thenThrow(new MessageException(IN_APP_MESSAGE_CATEGORY_NOT_FOUND));
+
+		TemplateMessageCommand command = TemplateMessageCommand.builder()
+			.channel(MessageChannel.IN_APP)
+			.templateCode("notice")
+			.targets(List.of("1001"))
+			.variables(Map.of())
+			.build();
+
+		assertThatThrownBy(() -> sender.sendByTemplate(command)).isInstanceOf(MessageException.class)
+			.extracting(ex -> ((MessageException) ex).getResultCode())
+			.isEqualTo(IN_APP_MESSAGE_CATEGORY_NOT_FOUND);
 	}
 
 	@Test
@@ -178,6 +224,7 @@ class InAppMessageSenderTest {
 	@Test
 	@DisplayName("targets 含空白：跳过空白后写入有效用户")
 	void sendByTemplate_shouldSkipBlankTargets() {
+		stubEnabledMinor();
 		when(inAppTemplatePipeline.render("notice", Map.of())).thenReturn(RenderedInAppMessage.builder()
 			.title("t")
 			.content("c")
@@ -195,6 +242,7 @@ class InAppMessageSenderTest {
 			.templateCode("notice")
 			.targets(List.of("1001", " ", "", "1002"))
 			.variables(Map.of())
+			.options(InAppChannelOptions.builder().categoryId(MINOR_CATEGORY_ID).build())
 			.build();
 
 		sender.sendByTemplate(command);

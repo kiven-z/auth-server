@@ -6,7 +6,7 @@ import com.auth.module.security.contract.api.audit.OperationLogKind;
 import java.lang.annotation.*;
 
 /**
- * 标记需要写入操作日志的 Web 控制器方法（或类上默认，方法可覆盖）。
+ * 标记需要写入操作日志的 Web 控制器方法（或类上默认，方法可覆盖）
  *
  * @author Bunny
  */
@@ -16,17 +16,16 @@ import java.lang.annotation.*;
 public @interface OperationLog {
 
 	/**
-	 * 大模块：与微服务（如 system、auth、example）对齐。
+	 * 大模块（如 system、auth、example）
 	 * @return 审计服务域
 	 */
 	AuditServiceDomain serviceDomain();
 
 	/**
-	 * 小模块编码：由各微服务在本服务内定义常量（如 {@code public static final String}），平台不维护业务清单。
+	 * 小模块编码：由各微服务在本服务内定义常量（如 {@code public static final String}），平台不维护业务清单
 	 * <p>
 	 * 建议使用 {@code UPPER_SNAKE}，与
-	 * {@link com.auth.module.security.contract.api.audit.AuditOperationModuleKeys}
-	 * 落库后缀一致。
+	 * {@link com.auth.module.security.contract.api.audit.AuditOperationModuleKeys} 落库后缀一致
 	 * </p>
 	 * @return 业务模块码，如 {@code "SYS_DEPT"}
 	 */

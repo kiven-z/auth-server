@@ -1,31 +1,27 @@
 package com.auth.service.system.schedule.model.vo;
 
+import com.auth.common.core.annotation.JsonStringFormat;
 import com.auth.common.core.model.response.BaseResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.Serial;
-import java.io.Serializable;
-
 /**
  * 任务日志分页行
  *
  * @author Bunny
  */
-@Schema(name = "LogJobPageResponse", title = "任务日志分页行")
+@Schema(name = "LogJobPageVO", title = "任务日志分页行")
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
-public class LogJobPageResponse extends BaseResponse implements Serializable {
-
-	@Serial
-	private static final long serialVersionUID = 1L;
+public class LogJobPageVO extends BaseResponse {
 
 	@Schema(title = "任务名称")
 	private String jobName;
 
+	@JsonStringFormat
 	@Schema(title = "任务ID")
 	private Long jobId;
 

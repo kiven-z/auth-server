@@ -1,6 +1,9 @@
 package com.auth.service.system.message.mapper;
 
 import com.auth.service.system.message.model.entity.InAppMessageCategoryEntity;
+import com.auth.service.system.message.model.po.InAppMessageCategoryDetailRowPO;
+import com.auth.service.system.message.model.po.InAppMessageCategoryPageRowPO;
+import com.auth.service.system.message.model.query.InAppMessageCategoryQuery;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -16,23 +19,26 @@ import java.util.List;
 public interface InAppMessageCategoryMapper extends BaseMapper<InAppMessageCategoryEntity> {
 
 	/**
-	 * 启用中的大类
-	 * @return 大类列表
+	 * 管理端扁平全量列表
+	 * @param query 筛选条件
+	 * @return 扁平行
 	 */
-	List<InAppMessageCategoryEntity> selectEnabledMajors();
+	List<InAppMessageCategoryPageRowPO> selectCategoryList(@Param("query") InAppMessageCategoryQuery query);
 
 	/**
-	 * 按 code 查启用中的大类
-	 * @param code 大类编码
-	 * @return 不存在或非大类时为 null
+	 * 按主键查详情
+	 * @param id 分类主键
+	 * @return 详情行；不存在为 null
 	 */
-	InAppMessageCategoryEntity selectEnabledMajorByCode(@Param("code") String code);
+	InAppMessageCategoryDetailRowPO selectDetailById(@Param("id") Long id);
 
 	/**
-	 * 指定大类下启用中的小类
-	 * @param parentId 大类主键
-	 * @return 小类列表
+	 * 按父级列出分类（parentId=0 为大类）
+	 * @param parentId 父级主键；0=大类
+	 * @param status 启停等值；null=不限
+	 * @return 分类列表
 	 */
-	List<InAppMessageCategoryEntity> selectEnabledChildrenByParentId(@Param("parentId") Long parentId);
+	List<InAppMessageCategoryEntity> selectByParentId(@Param("parentId") Long parentId,
+			@Param("status") Boolean status);
 
 }

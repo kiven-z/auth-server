@@ -42,8 +42,8 @@ public class LogOperationController {
 	@PreAuthorize("@auth.decide('log:operation:query')")
 	@GetMapping("page")
 	public Result<PageResponse<LogOperationPageVO>> page(LogOperationQuery query) {
-		Page<LogOperationEntity> page = new Page<>(query.getPageIndex(), query.getPageSize());
-		PageResponse<LogOperationPageVO> response = logOperationQueryService.getPage(page, query);
+		Page<LogOperationEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
+		PageResponse<LogOperationPageVO> response = logOperationQueryService.getPage(pageParams, query);
 		return Result.success(response);
 	}
 

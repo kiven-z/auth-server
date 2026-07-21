@@ -1,7 +1,7 @@
 package com.auth.service.system.schedule.model.enums;
 
 /**
- * Quartz 任务运行时状态（与 {@code job.status} 调度启停无关）
+ * Quartz 任务运行时状态
  *
  * @author Bunny
  */
@@ -23,7 +23,7 @@ public enum SysJobQuartzRuntimeStatus {
 	RUNNING,
 
 	/**
-	 * 已触发但等待执行（如禁止并发时的 BLOCKED）
+	 * 已触发但等待执行
 	 */
 	PENDING,
 

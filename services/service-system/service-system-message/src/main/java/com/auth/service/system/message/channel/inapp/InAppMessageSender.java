@@ -10,6 +10,7 @@ import com.auth.module.message.api.model.inapp.InAppChannelOptions;
 import com.auth.service.system.message.convert.InAppEntityAssembler;
 import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.mapper.InAppMessageMapper;
+import com.auth.service.system.message.model.entity.InAppMessageCategoryEntity;
 import com.auth.service.system.message.model.entity.InAppMessageEntity;
 import com.auth.service.system.message.model.entity.InAppMessageRecipientEntity;
 import com.auth.service.system.message.model.enums.InAppContentType;
@@ -17,6 +18,8 @@ import com.auth.service.system.message.model.enums.InAppMessageStatus;
 import com.auth.service.system.message.model.enums.MessageSendSourceType;
 import com.auth.service.system.message.model.value.inapp.RenderedInAppMessage;
 import com.auth.service.system.message.service.InAppMessageRecipientWriteService;
+import com.auth.service.system.message.support.inapp.InAppMessageCategorySupport;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +33,7 @@ import static com.auth.service.system.message.exception.MessageResultCode.IN_APP
  *
  * @author Bunny
  */
+@RequiredArgsConstructor
 @Component
 public class InAppMessageSender implements MessageSender {
 
@@ -39,12 +43,7 @@ public class InAppMessageSender implements MessageSender {
 
 	private final InAppMessageRecipientWriteService inAppMessageRecipientWriteService;
 
-	public InAppMessageSender(InAppTemplatePipeline inAppTemplatePipeline, InAppMessageMapper inAppMessageMapper,
-			InAppMessageRecipientWriteService inAppMessageRecipientWriteService) {
-		this.inAppTemplatePipeline = inAppTemplatePipeline;
-		this.inAppMessageMapper = inAppMessageMapper;
-		this.inAppMessageRecipientWriteService = inAppMessageRecipientWriteService;
-	}
+	private final InAppMessageCategorySupport categorySupport;
 
 	/**
 	 * {@inheritDoc}
@@ -94,11 +93,13 @@ public class InAppMessageSender implements MessageSender {
 	private RenderedInAppMessage resolveContent(TemplateMessageCommand command) {
 		InAppChannelOptions options = command.getOptions() instanceof InAppChannelOptions inApp ? inApp
 				: new InAppChannelOptions();
+		InAppMessageCategoryEntity categoryEntity = categorySupport.requireEnabledMinor(options.getCategoryId());
+		Long categoryId = categoryEntity.getId();
 
 		if (!Boolean.TRUE.equals(command.getCustomBody())) {
 			return inAppTemplatePipeline.render(command.getTemplateCode(), command.getVariables())
 				.toBuilder()
-				.bizType(options.getBizType())
+				.categoryId(categoryId)
 				.linkUrl(options.getLinkUrl())
 				.sourceType(MessageSendSourceType.TEMPLATE)
 				.build();
@@ -114,7 +115,7 @@ public class InAppMessageSender implements MessageSender {
 			.content(command.getBody())
 			.contentType(InAppContentType.from(options.getContentType()))
 			.sceneCode(command.getTemplateCode())
-			.bizType(options.getBizType())
+			.categoryId(categoryId)
 			.linkUrl(options.getLinkUrl())
 			.sourceType(MessageSendSourceType.SYSTEM)
 			.build();

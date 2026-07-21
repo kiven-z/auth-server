@@ -6,39 +6,30 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.Serial;
-import java.io.Serializable;
-
 /**
  * 站内信发送任务分页查询
  *
  * @author Bunny
  */
-@Schema(name = "InAppSendTaskQuery", title = "站内信发送任务查询", description = "站内信发送任务分页查询参数")
+@Schema(name = "InAppSendTaskQuery", title = "站内信发送任务查询")
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
-public class InAppSendTaskQuery extends PageQueryRequest implements Serializable {
+public class InAppSendTaskQuery extends PageQueryRequest {
 
-	@Serial
-	private static final long serialVersionUID = 1L;
-
-	@Schema(name = "status", title = "任务状态", description = "如 PENDING、SENDING、SUCCESS、PARTIAL、FAILED、RECALLED")
+	@Schema(name = "status", title = "任务状态")
 	private String status;
 
-	@Schema(name = "sourceType", title = "来源", description = "如 ADMIN_COMPOSE、TEMPLATE、SYSTEM")
+	@Schema(name = "sourceType", title = "来源")
 	private String sourceType;
 
-	@Schema(name = "recipientScopeType", title = "接收范围类型", description = "USER / POST / DEPT / ALL")
+	@Schema(name = "recipientScopeType", title = "接收范围类型")
 	private String recipientScopeType;
 
-	@Schema(name = "deliveryMode", title = "投递模式", description = "PULL / PUSH")
-	private String deliveryMode;
+	@Schema(name = "categoryId", title = "业务小类 ID")
+	private Long categoryId;
 
-	@Schema(name = "bizType", title = "业务分类")
-	private String bizType;
-
-	@Schema(name = "title", title = "标题关键字", description = "模糊匹配")
+	@Schema(name = "title", title = "标题关键字")
 	private String title;
 
 }

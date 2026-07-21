@@ -4,7 +4,7 @@ import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.service.system.schedule.model.entity.LogJobEntity;
 import com.auth.service.system.schedule.model.po.LogJobPageRowPO;
 import com.auth.service.system.schedule.model.vo.LogJobDetailVO;
-import com.auth.service.system.schedule.model.vo.LogJobPageResponse;
+import com.auth.service.system.schedule.model.vo.LogJobPageVO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
@@ -26,7 +26,7 @@ public interface LogJobConverter {
 	 */
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
-	LogJobPageResponse toPageResponse(LogJobPageRowPO po);
+	LogJobPageVO toPageVO(LogJobPageRowPO po);
 
 	/**
 	 * 实体 → 详情 VO（实体 Boolean 与 API 语义一致，直接映射）

@@ -35,7 +35,7 @@ public class EmailTemplateController {
 		this.emailTemplateService = emailTemplateService;
 	}
 
-	@Operation(summary = "离线渲染模板（示例值）", description = "用于编辑态实时预览")
+	@Operation(summary = "预览邮件模板")
 	@PreAuthorize("@auth.decide('message:template:detail')")
 	@PostMapping("render")
 	public Result<String> render(@Validated @RequestBody EmailTemplateRenderForm form) {
@@ -43,7 +43,7 @@ public class EmailTemplateController {
 		return Result.success(html);
 	}
 
-	@Operation(summary = "添加邮件模板", description = "添加邮件模板")
+	@Operation(summary = "添加邮件模板")
 	@PreAuthorize("@auth.decide('message:template:create')")
 	@PostMapping()
 	public Result<String> create(@Validated(CreateGroup.class) @RequestBody EmailTemplateForm form) {
@@ -53,7 +53,7 @@ public class EmailTemplateController {
 
 	@OperationLog(targetType = "EMAIL_TEMPLATE", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = MessageAuditBizModule.SYS_MESSAGE_TEMPLATE, operation = OperationLogKind.UPDATE)
-	@Operation(summary = "更新邮件模板", description = "更新邮件模板")
+	@Operation(summary = "更新邮件模板")
 	@PreAuthorize("@auth.decide('message:template:update')")
 	@PutMapping()
 	public Result<String> update(@Validated(UpdateGroup.class) @RequestBody EmailTemplateForm form) {
@@ -63,7 +63,7 @@ public class EmailTemplateController {
 
 	@OperationLog(targetType = "EMAIL_TEMPLATE", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = MessageAuditBizModule.SYS_MESSAGE_TEMPLATE, operation = OperationLogKind.UPDATE)
-	@Operation(summary = "仅更新邮件模板正文", description = "body 含 id 与 content")
+	@Operation(summary = "更新邮件模板正文")
 	@PreAuthorize("@auth.decide('message:template:update')")
 	@PutMapping("content")
 	public Result<String> updateContent(@Validated @RequestBody EmailTemplateContentForm form) {

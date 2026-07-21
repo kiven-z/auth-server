@@ -6,51 +6,49 @@
     <select id="selectSendTaskPage"
             resultType="com.auth.service.system.message.model.po.InAppSendTaskPageRowPO">
         SELECT
-        id,
-        source_type,
-        scene_code,
-        title,
-        content_type,
-        biz_type,
-        sender_user_id,
-        recipient_scope_type,
-        delivery_mode,
-        total_count,
-        success_count,
-        fail_count,
-        status,
-        recalled_at,
-        create_time,
-        update_time,
-        create_user,
-        update_user
+        m.id,
+        m.source_type,
+        m.scene_code,
+        m.title,
+        m.content_type,
+        m.category_id,
+        c.name AS category_name,
+        m.sender_user_id,
+        m.recipient_scope_type,
+        m.total_count,
+        m.success_count,
+        m.fail_count,
+        m.status,
+        m.recalled_at,
+        m.create_time,
+        m.update_time,
+        m.create_user,
+        m.update_user
         FROM
-        in_app_message
+        in_app_message m
+        LEFT JOIN in_app_message_category c ON c.id = m.category_id
         <where>
             <if test="query.status != null and query.status != ''">
-                AND status = #{query.status}
+                AND m.status = #{query.status}
             </if>
             <if test="query.sourceType != null and query.sourceType != ''">
-                AND source_type = #{query.sourceType}
+                AND m.source_type = #{query.sourceType}
             </if>
             <if test="query.recipientScopeType != null and query.recipientScopeType != ''">
-                AND recipient_scope_type = #{query.recipientScopeType}
+                AND m.recipient_scope_type = #{query.recipientScopeType}
             </if>
-            <if test="query.deliveryMode != null and query.deliveryMode != ''">
-                AND delivery_mode = #{query.deliveryMode}
-            </if>
-            <if test="query.bizType != null and query.bizType != ''">
-                AND biz_type = #{query.bizType}
+            <if test="query.categoryId != null">
+                AND m.category_id = #{query.categoryId}
             </if>
             <if test="query.title != null and query.title != ''">
-                AND title LIKE CONCAT(#{query.title}, '%')
+                AND m.title LIKE CONCAT(#{query.title}, '%')
             </if>
         </where>
         ORDER BY
-        create_time DESC
+        m.create_time DESC
     </select>
 
-    <!-- 写入终态并同步成功数/总数（以收件箱实投为准） -->
+    <!-- 写入终态并同步成功数/总数 -->
     <update id="finishTask">
         UPDATE in_app_message
         SET status        = #{status},
@@ -59,7 +57,7 @@
         WHERE id = #{id}
     </update>
 
-    <!-- 将可恢复任务重置为 PENDING，供补发重新抢占 -->
+    <!-- 重置任务状态以便补发 -->
     <update id="resetForRetry">
         UPDATE in_app_message
         SET status        = 'PENDING',

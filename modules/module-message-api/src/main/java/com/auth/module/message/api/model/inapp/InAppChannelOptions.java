@@ -38,9 +38,9 @@ public class InAppChannelOptions implements ChannelOptions {
 	private String contentType;
 
 	/**
-	 * 业务分类（如 NOTICE、ALERT）
+	 * 业务小类 ID
 	 */
-	private String bizType;
+	private Long categoryId;
 
 	/**
 	 * 跳转链接

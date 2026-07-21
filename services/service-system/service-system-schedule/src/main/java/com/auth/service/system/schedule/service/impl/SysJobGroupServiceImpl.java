@@ -13,7 +13,7 @@ import com.auth.service.system.schedule.model.form.SysJobGroupUpdateForm;
 import com.auth.service.system.schedule.model.po.JobGroupPageRowPO;
 import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
 import com.auth.service.system.schedule.model.vo.SysJobGroupDetailVO;
-import com.auth.service.system.schedule.model.vo.SysJobGroupPageResponse;
+import com.auth.service.system.schedule.model.vo.SysJobGroupPageVO;
 import com.auth.service.system.schedule.service.SysJobGroupService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -47,9 +47,9 @@ public class SysJobGroupServiceImpl extends ServiceImpl<JobGroupMapper, JobGroup
 	 * {@inheritDoc}
 	 */
 	@Override
-	public PageResponse<SysJobGroupPageResponse> getPage(Page<JobGroupEntity> pageParams, SysJobGroupQuery query) {
+	public PageResponse<SysJobGroupPageVO> getPage(Page<JobGroupEntity> pageParams, SysJobGroupQuery query) {
 		IPage<JobGroupPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
-		IPage<SysJobGroupPageResponse> voPage = page.convert(SysJobGroupConverter.INSTANCE::toPageResponse);
+		IPage<SysJobGroupPageVO> voPage = page.convert(SysJobGroupConverter.INSTANCE::toPageVO);
 
 		auditUserDisplayService.enrichAuditUsernames(voPage, null, null);
 		return PageResponse.of(voPage);
@@ -59,11 +59,9 @@ public class SysJobGroupServiceImpl extends ServiceImpl<JobGroupMapper, JobGroup
 	 * {@inheritDoc}
 	 */
 	@Override
-	public List<SysJobGroupPageResponse> listEnabledOptions(String keyword, int limit) {
+	public List<SysJobGroupPageVO> listEnabledOptions(String keyword, int limit) {
 		List<JobGroupPageRowPO> list = baseMapper.selectEnabledOptions(keyword, limit);
-		List<SysJobGroupPageResponse> voList = list.stream()
-			.map(SysJobGroupConverter.INSTANCE::toPageResponse)
-			.toList();
+		List<SysJobGroupPageVO> voList = list.stream().map(SysJobGroupConverter.INSTANCE::toPageVO).toList();
 
 		auditUserDisplayService.enrichAuditUsernames(voList, null, null);
 		return voList;
@@ -97,7 +95,7 @@ public class SysJobGroupServiceImpl extends ServiceImpl<JobGroupMapper, JobGroup
 		}
 
 		JobGroupEntity jobGroup = SysJobGroupConverter.INSTANCE.toEntity(form);
-		save(jobGroup);
+		super.save(jobGroup);
 	}
 
 	/**
@@ -112,7 +110,7 @@ public class SysJobGroupServiceImpl extends ServiceImpl<JobGroupMapper, JobGroup
 		}
 
 		SysJobGroupConverter.INSTANCE.updateEntity(form, jobGroup);
-		updateById(jobGroup);
+		super.updateById(jobGroup);
 	}
 
 	/**
@@ -138,7 +136,7 @@ public class SysJobGroupServiceImpl extends ServiceImpl<JobGroupMapper, JobGroup
 			throw new SysJobException(JOB_GROUP_HAS_ACTIVE_JOBS, cnt);
 		}
 
-		removeById(id);
+		super.removeById(id);
 	}
 
 }

@@ -6,7 +6,7 @@ import com.auth.service.system.schedule.model.form.SysJobGroupForm;
 import com.auth.service.system.schedule.model.form.SysJobGroupUpdateForm;
 import com.auth.service.system.schedule.model.po.JobGroupPageRowPO;
 import com.auth.service.system.schedule.model.vo.SysJobGroupDetailVO;
-import com.auth.service.system.schedule.model.vo.SysJobGroupPageResponse;
+import com.auth.service.system.schedule.model.vo.SysJobGroupPageVO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -60,7 +60,7 @@ public interface SysJobGroupConverter {
 	 */
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
-	SysJobGroupPageResponse toPageResponse(JobGroupPageRowPO po);
+	SysJobGroupPageVO toPageVO(JobGroupPageRowPO po);
 
 	/**
 	 * 任务分组实体 → 详情 VO

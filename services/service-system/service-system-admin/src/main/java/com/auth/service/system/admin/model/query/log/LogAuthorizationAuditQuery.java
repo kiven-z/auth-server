@@ -6,9 +6,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.Serial;
-import java.io.Serializable;
-
 /**
  * 权限决策审计日志分页查询
  *
@@ -18,10 +15,7 @@ import java.io.Serializable;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
-public class LogAuthorizationAuditQuery extends PageQueryRequest implements Serializable {
-
-	@Serial
-	private static final long serialVersionUID = 1L;
+public class LogAuthorizationAuditQuery extends PageQueryRequest {
 
 	@Schema(title = "事件类型：GRANTED / DENIED")
 	private String eventType;
@@ -29,7 +23,7 @@ public class LogAuthorizationAuditQuery extends PageQueryRequest implements Seri
 	@Schema(title = "决策原因枚举")
 	private String decisionReason;
 
-	@Schema(title = "Controller 类名（模糊）")
+	@Schema(title = "Controller 类名")
 	private String className;
 
 	@Schema(title = "操作人用户 ID（对应 create_user）")

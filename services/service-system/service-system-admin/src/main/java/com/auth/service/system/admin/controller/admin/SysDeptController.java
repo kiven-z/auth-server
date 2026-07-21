@@ -77,7 +77,7 @@ public class SysDeptController {
 
 	@OperationLog(targetType = "DEPT_LIST", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = AuthorizationAuditBizModule.SYS_DEPT, operation = OperationLogKind.QUERY)
-	@Operation(summary = "部门扁平列表（全量或关键词过滤，前端建树）")
+	@Operation(summary = "部门扁平列表")
 	@PreAuthorize("@auth.decide('sys:dept:query')")
 	@GetMapping("/list")
 	public Result<List<SysDeptListVO>> list(SysDeptListQuery query) {
@@ -85,7 +85,7 @@ public class SysDeptController {
 		return Result.success(data);
 	}
 
-	@Operation(summary = "部门分页查询（表格视图）")
+	@Operation(summary = "部门分页查询")
 	@PreAuthorize("@auth.decide('sys:dept:query')")
 	@GetMapping("/page")
 	public Result<PageResponse<SysDeptListVO>> page(SysDeptPageQuery query) {
@@ -124,17 +124,17 @@ public class SysDeptController {
 
 	@OperationLog(targetType = "DEPT", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = AuthorizationAuditBizModule.SYS_DEPT, operation = OperationLogKind.UPDATE)
-	@Operation(summary = "移动部门（变更父部门）")
+	@Operation(summary = "移动部门")
 	@PreAuthorize("@auth.decide('sys:dept:update')")
-	@PutMapping("/{id}/move")
-	public Result<Void> move(@PathVariable("id") Long id, @Valid @RequestBody SysDeptMoveForm form) {
-		sysDeptService.move(id, form);
+	@PutMapping("/move")
+	public Result<Void> move(@Valid @RequestBody SysDeptMoveForm form) {
+		sysDeptService.move(form);
 		return Result.success();
 	}
 
 	@OperationLog(targetType = "DEPT", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = AuthorizationAuditBizModule.SYS_DEPT, operation = OperationLogKind.DELETE)
-	@Operation(summary = "删除部门（逻辑删除）")
+	@Operation(summary = "删除部门")
 	@PreAuthorize("@auth.decide('sys:dept:delete')")
 	@DeleteMapping("/{id}")
 	public Result<Void> delete(@PathVariable("id") Long id) {

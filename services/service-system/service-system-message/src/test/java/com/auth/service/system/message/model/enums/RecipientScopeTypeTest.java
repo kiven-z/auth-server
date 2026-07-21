@@ -10,17 +10,16 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Bunny
  */
-@DisplayName("RecipientScopeType 范围与投递模式")
+@DisplayName("RecipientScopeType 范围与读扩散")
 class RecipientScopeTypeTest {
 
 	@Test
-	@DisplayName("ALL 为读扩散，其余为写扩散")
-	void deliveryMode_shouldMapPullOnlyForAll() {
-		// 扩展新范围时在此声明投递模式即可
-		assertThat(RecipientScopeType.ALL.deliveryMode()).isEqualTo(DeliveryMode.PULL);
-		assertThat(RecipientScopeType.USER.deliveryMode()).isEqualTo(DeliveryMode.PUSH);
-		assertThat(RecipientScopeType.POST.deliveryMode()).isEqualTo(DeliveryMode.PUSH);
-		assertThat(RecipientScopeType.DEPT.deliveryMode()).isEqualTo(DeliveryMode.PUSH);
+	@DisplayName("仅 ALL 为读扩散")
+	void isPull_shouldBeTrueOnlyForAll() {
+		assertThat(RecipientScopeType.ALL.isPull()).isTrue();
+		assertThat(RecipientScopeType.USER.isPull()).isFalse();
+		assertThat(RecipientScopeType.POST.isPull()).isFalse();
+		assertThat(RecipientScopeType.DEPT.isPull()).isFalse();
 	}
 
 	@Test

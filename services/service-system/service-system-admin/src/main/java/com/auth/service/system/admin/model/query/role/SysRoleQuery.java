@@ -6,9 +6,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.Serial;
-import java.io.Serializable;
-
 /**
  * 角色分页查询条件
  *
@@ -18,15 +15,12 @@ import java.io.Serializable;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
-public class SysRoleQuery extends PageQueryRequest implements Serializable {
+public class SysRoleQuery extends PageQueryRequest {
 
-	@Serial
-	private static final long serialVersionUID = 1L;
-
-	@Schema(title = "角色编码（模糊）")
+	@Schema(title = "角色编码")
 	private String roleCode;
 
-	@Schema(title = "角色名称（模糊）")
+	@Schema(title = "角色名称")
 	private String roleName;
 
 	@Schema(title = "启用状态(true=正常启用，false=停用)")

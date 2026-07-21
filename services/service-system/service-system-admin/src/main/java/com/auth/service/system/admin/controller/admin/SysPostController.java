@@ -89,7 +89,7 @@ public class SysPostController {
 	@PreAuthorize("@auth.decide('sys:post:query')")
 	@GetMapping("/search")
 	public Result<List<SysPostSearchItemVO>> search(
-			@Parameter(description = "搜索关键字（前缀匹配岗位编码或名称）") @RequestParam(required = false) String keyword,
+			@Parameter(description = "搜索关键字") @RequestParam(required = false) String keyword,
 			@Parameter(description = "启用状态(true=启用，false=停用)") @RequestParam(required = false) Boolean status,
 			@Parameter(description = "返回条数上限，默认 20，最大 50") @RequestParam(required = false,
 					defaultValue = "20") Integer limit) {

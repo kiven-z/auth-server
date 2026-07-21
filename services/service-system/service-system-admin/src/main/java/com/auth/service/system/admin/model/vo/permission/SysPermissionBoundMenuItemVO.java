@@ -1,5 +1,6 @@
 package com.auth.service.system.admin.model.vo.permission;
 
+import com.auth.common.core.annotation.JsonStringFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,6 +23,7 @@ public class SysPermissionBoundMenuItemVO implements Serializable {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
+	@JsonStringFormat
 	@Schema(title = "菜单ID")
 	private Long id;
 

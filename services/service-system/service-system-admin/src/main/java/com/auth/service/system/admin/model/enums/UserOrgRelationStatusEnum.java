@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * 用户组织关系状态，与 {@code user_dept.status}、{@code user_post.status} 一致
+ * 用户组织关系状态
  *
  * @author Bunny
  */
@@ -37,7 +37,7 @@ public enum UserOrgRelationStatusEnum {
 	 * @return 仅正常状态允许
 	 */
 	public static boolean canBePrimary(Integer status) {
-		return status != null && status == NORMAL.code;
+		return status == null || status != NORMAL.code;
 	}
 
 }

@@ -11,7 +11,7 @@ import com.auth.service.system.message.model.form.MessageTemplateStatusForm;
 import com.auth.service.system.message.model.form.MessageTemplateTestSendForm;
 import com.auth.service.system.message.model.query.MessageTemplateQuery;
 import com.auth.service.system.message.model.vo.template.MessageTemplateDetailVO;
-import com.auth.service.system.message.model.vo.template.MessageTemplatePageResponse;
+import com.auth.service.system.message.model.vo.template.MessageTemplatePageVO;
 import com.auth.service.system.message.model.vo.template.MessageTemplateRequireFieldRow;
 import com.auth.service.system.message.service.MessageTemplateService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -44,15 +44,15 @@ public class MessageTemplateController {
 		this.messageTemplateService = messageTemplateService;
 	}
 
-	@Operation(summary = "分页查询消息模板", description = "按 channel 过滤；前端传入固定渠道参数即可复用本接口")
+	@Operation(summary = "分页查询消息模板")
 	@PreAuthorize("@auth.decide('message:template:query')")
 	@GetMapping()
-	public Result<PageResponse<MessageTemplatePageResponse>> getMessageTemplatePage(@Valid MessageTemplateQuery query) {
-		PageResponse<MessageTemplatePageResponse> pageResponse = messageTemplateService.getMessageTemplatePage(query);
+	public Result<PageResponse<MessageTemplatePageVO>> getMessageTemplatePage(@Valid MessageTemplateQuery query) {
+		PageResponse<MessageTemplatePageVO> pageResponse = messageTemplateService.getMessageTemplatePage(query);
 		return Result.success(pageResponse);
 	}
 
-	@Operation(summary = "消息模板详情", description = "按主键查询返回原文 content、previewContent")
+	@Operation(summary = "消息模板详情")
 	@PreAuthorize("@auth.decide('message:template:detail')")
 	@GetMapping("{id}")
 	public Result<MessageTemplateDetailVO> getMessageTemplateById(@PathVariable("id") Long id,
@@ -61,7 +61,7 @@ public class MessageTemplateController {
 		return Result.success(detailVO);
 	}
 
-	@Operation(summary = "查询模板变量声明", description = "只解析返回 require_fields")
+	@Operation(summary = "查询模板变量声明")
 	@PreAuthorize("@auth.decide('message:template:detail')")
 	@GetMapping("{id}/require-fields")
 	public Result<List<MessageTemplateRequireFieldRow>> getRequireFields(@PathVariable("id") Long id,
@@ -72,7 +72,7 @@ public class MessageTemplateController {
 
 	@OperationLog(targetType = "MESSAGE_TEMPLATE_DELETE", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = MessageAuditBizModule.SYS_MESSAGE_TEMPLATE, operation = OperationLogKind.DELETE)
-	@Operation(summary = "批量删除消息模板", description = "按 ids 删除；channel 限定渠道，避免跨渠道误删")
+	@Operation(summary = "批量删除消息模板")
 	@PreAuthorize("@auth.decide('message:template:delete')")
 	@DeleteMapping()
 	public Result<String> batchDelete(@RequestBody @NotEmpty(message = "模板ID列表不能为空") List<Long> ids,
@@ -83,7 +83,7 @@ public class MessageTemplateController {
 
 	@OperationLog(targetType = "MESSAGE_TEMPLATE", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = MessageAuditBizModule.SYS_MESSAGE_TEMPLATE, operation = OperationLogKind.UPDATE)
-	@Operation(summary = "批量启用/禁用消息模板", description = "按 ids 与 channel 启停，避免跨渠道误改")
+	@Operation(summary = "批量启用/禁用消息模板")
 	@PreAuthorize("@auth.decide('message:template:update')")
 	@PutMapping("status")
 	public Result<String> batchUpdateStatus(@Validated @RequestBody MessageTemplateStatusForm form) {
@@ -93,7 +93,7 @@ public class MessageTemplateController {
 
 	@OperationLog(targetType = "MESSAGE_TEMPLATE", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = MessageAuditBizModule.SYS_MESSAGE_TEMPLATE, operation = OperationLogKind.UPDATE)
-	@Operation(summary = "仅更新变量列表 require_fields", description = "body 含 id、channel、requireFields")
+	@Operation(summary = "更新模板变量列表")
 	@PreAuthorize("@auth.decide('message:template:update')")
 	@PutMapping("require-fields")
 	public Result<String> updateRequireFields(@Validated @RequestBody MessageTemplateRequireFieldsForm form) {
@@ -101,7 +101,7 @@ public class MessageTemplateController {
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
-	@Operation(summary = "测试发送", description = "按模板 require_fields 示例值组装变量并发送")
+	@Operation(summary = "测试发送")
 	@PreAuthorize("@auth.decide('message:template:update')")
 	@PostMapping("test-send")
 	public Result<String> testSend(@Validated @RequestBody MessageTemplateTestSendForm form) {

@@ -11,7 +11,7 @@ import java.io.Serial;
 import java.util.List;
 
 /**
- * 菜单详情（在列表行基础上扩展路由元数据字段，与前端 {@code SysMenuDetailVO} 对齐）
+ * 菜单详情
  *
  * @author Bunny
  */

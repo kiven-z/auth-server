@@ -7,7 +7,7 @@ import com.auth.service.system.message.model.form.MessageTemplateStatusForm;
 import com.auth.service.system.message.model.form.MessageTemplateTestSendForm;
 import com.auth.service.system.message.model.query.MessageTemplateQuery;
 import com.auth.service.system.message.model.vo.template.MessageTemplateDetailVO;
-import com.auth.service.system.message.model.vo.template.MessageTemplatePageResponse;
+import com.auth.service.system.message.model.vo.template.MessageTemplatePageVO;
 import com.auth.service.system.message.model.vo.template.MessageTemplateRequireFieldRow;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -25,10 +25,10 @@ public interface MessageTemplateService extends IService<MessageTemplateEntity> 
 	 * @param query 查询条件（channel 必填）
 	 * @return 消息模板分页数据
 	 */
-	PageResponse<MessageTemplatePageResponse> getMessageTemplatePage(MessageTemplateQuery query);
+	PageResponse<MessageTemplatePageVO> getMessageTemplatePage(MessageTemplateQuery query);
 
 	/**
-	 * 按主键与渠道查询消息模板详情（含示例值预览；缺 exampleValue 时 previewContent 为空）
+	 * 按主键与渠道查询消息模板详情
 	 * @param id 模板主键
 	 * @param channel 消息渠道
 	 * @return 模板详情

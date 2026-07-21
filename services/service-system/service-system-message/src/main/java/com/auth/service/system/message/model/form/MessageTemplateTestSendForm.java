@@ -10,7 +10,7 @@ import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * 消息模板测试发送参数（跨渠道：target 语义由 channel 解释）
+ * 消息模板测试发送参数
  *
  * @author Bunny
  */
@@ -26,11 +26,11 @@ public class MessageTemplateTestSendForm implements Serializable {
 	@NotNull(message = "模板ID不能为空")
 	private Long id;
 
-	@Schema(name = "channel", title = "消息渠道", description = "须与库中 channel 一致，如 EMAIL、SMS、DING_TALK、IN_APP")
+	@Schema(name = "channel", title = "消息渠道")
 	@NotBlank(message = "消息渠道不能为空")
 	private String channel;
 
-	@Schema(name = "target", title = "接收目标", description = "邮箱 / 手机号 / 用户ID 等，由渠道解释")
+	@Schema(name = "target", title = "接收目标")
 	@NotBlank(message = "接收目标不能为空")
 	private String target;
 

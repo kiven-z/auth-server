@@ -19,7 +19,7 @@ import static com.auth.common.web.validation.ValidationPatterns.LETTER_UNDERSCOR
  *
  * @author Bunny
  */
-@Schema(name = "EmailTemplateForm", title = "邮件模板表单", description = "用于邮件模板信息的创建与更新")
+@Schema(name = "EmailTemplateForm", title = "邮件模板表单")
 @Getter
 @Setter
 public class EmailTemplateForm implements Serializable {
@@ -27,7 +27,7 @@ public class EmailTemplateForm implements Serializable {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
-	@Schema(name = "id", title = "主键ID", description = "创建时不传，更新时必填")
+	@Schema(name = "id", title = "主键ID")
 	@NotNull(groups = UpdateGroup.class, message = "更新时ID不能为空")
 	private Long id;
 

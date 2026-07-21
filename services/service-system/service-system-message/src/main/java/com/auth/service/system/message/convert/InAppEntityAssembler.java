@@ -2,7 +2,10 @@ package com.auth.service.system.message.convert;
 
 import com.auth.service.system.message.model.entity.InAppMessageEntity;
 import com.auth.service.system.message.model.entity.InAppMessageRecipientEntity;
-import com.auth.service.system.message.model.enums.*;
+import com.auth.service.system.message.model.enums.InAppContentType;
+import com.auth.service.system.message.model.enums.InAppMessageStatus;
+import com.auth.service.system.message.model.enums.MessageSendSourceType;
+import com.auth.service.system.message.model.enums.RecipientScopeType;
 import com.auth.service.system.message.model.form.inapp.InAppComposeForm;
 import com.auth.service.system.message.model.value.inapp.RenderedInAppMessage;
 import com.auth.service.system.message.model.value.recipient.RecipientScope;
@@ -20,7 +23,7 @@ import java.util.List;
 public class InAppEntityAssembler {
 
 	/**
-	 * 管理端起草任务：投递模式由范围推导
+	 * 管理端起草任务
 	 * @param form 表单
 	 * @param scope 范围
 	 * @param contentType 正文类型
@@ -29,23 +32,22 @@ public class InAppEntityAssembler {
 	 */
 	public static InAppMessageEntity toAdminComposeTask(InAppComposeForm form, RecipientScope scope,
 			InAppContentType contentType, Long senderUserId) {
-		DeliveryMode deliveryMode = scope.getType().deliveryMode();
+		boolean pull = scope.getType().isPull();
 		InAppMessageEntity task = new InAppMessageEntity();
 		task.setSourceType(MessageSendSourceType.ADMIN_COMPOSE.name());
 		task.setSceneCode(form.getTemplateCode());
 		task.setTitle(form.getTitle());
 		task.setContentType(contentType.name());
 		task.setContent(form.getBody());
-		task.setBizType(form.getBizType());
+		task.setCategoryId(form.getCategoryId());
 		task.setLinkUrl(form.getLinkUrl());
 		task.setSenderUserId(senderUserId);
 		task.setRecipientScopeType(scope.getType().name());
 		task.setRecipientScopeJson(RecipientScopeJsonSupport.toJson(scope));
-		task.setDeliveryMode(deliveryMode.name());
 		task.setTotalCount(0);
 		task.setSuccessCount(0);
 		task.setFailCount(0);
-		task.setStatus(deliveryMode.isPull() ? InAppMessageStatus.SUCCESS.name() : InAppMessageStatus.PENDING.name());
+		task.setStatus(pull ? InAppMessageStatus.SUCCESS.name() : InAppMessageStatus.PENDING.name());
 		return task;
 	}
 
@@ -63,11 +65,10 @@ public class InAppEntityAssembler {
 		task.setTitle(rendered.title());
 		task.setContentType(rendered.contentType().name());
 		task.setContent(rendered.content());
-		task.setBizType(rendered.bizType());
+		task.setCategoryId(rendered.categoryId());
 		task.setLinkUrl(rendered.linkUrl());
 		task.setRecipientScopeType(scope.getType().name());
 		task.setRecipientScopeJson(RecipientScopeJsonSupport.toJson(scope));
-		task.setDeliveryMode(scope.getType().deliveryMode().name());
 		task.setTotalCount(userIds.size());
 		task.setSuccessCount(0);
 		task.setFailCount(0);

@@ -7,8 +7,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.io.Serial;
-
 /**
  * 权限决策审计详情
  *
@@ -20,9 +18,6 @@ import java.io.Serial;
 @ToString
 @EqualsAndHashCode(callSuper = true)
 public class LogAuthorizationAuditDetailVO extends BaseResponse {
-
-	@Serial
-	private static final long serialVersionUID = 1L;
 
 	@Schema(title = "事件类型")
 	private String eventType;

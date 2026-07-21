@@ -4,7 +4,7 @@ import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.service.system.message.model.entity.MessageChannelDeliveryEntity;
 import com.auth.service.system.message.model.po.MessageChannelDeliveryPageRowPO;
 import com.auth.service.system.message.model.vo.delivery.MessageChannelDeliveryDetailVO;
-import com.auth.service.system.message.model.vo.delivery.MessageChannelDeliveryPageResponse;
+import com.auth.service.system.message.model.vo.delivery.MessageChannelDeliveryPageVO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
@@ -26,7 +26,7 @@ public interface MessageChannelDeliveryConverter {
 	 */
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
-	MessageChannelDeliveryPageResponse toPageResponse(MessageChannelDeliveryPageRowPO po);
+	MessageChannelDeliveryPageVO toPageVO(MessageChannelDeliveryPageRowPO po);
 
 	/**
 	 * 实体 → 详情 VO

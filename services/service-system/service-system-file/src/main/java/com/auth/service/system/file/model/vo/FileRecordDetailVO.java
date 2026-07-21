@@ -1,14 +1,15 @@
 package com.auth.service.system.file.model.vo;
 
+import com.auth.common.core.annotation.JsonStringFormat;
 import com.auth.common.core.model.response.BaseResponse;
 import com.auth.module.file.api.model.enums.StoragePlatformEnum;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.io.Serial;
 import java.time.LocalDateTime;
 
 /**
@@ -22,9 +23,6 @@ import java.time.LocalDateTime;
 @ToString
 @EqualsAndHashCode(callSuper = true)
 public class FileRecordDetailVO extends BaseResponse {
-
-	@Serial
-	private static final long serialVersionUID = 1L;
 
 	@Schema(title = "存储平台")
 	private StoragePlatformEnum storagePlatform;
@@ -74,9 +72,11 @@ public class FileRecordDetailVO extends BaseResponse {
 	@Schema(title = "删除来源")
 	private String deleteSource;
 
+	@JsonStringFormat
 	@Schema(title = "删除人")
 	private Long deletedBy;
 
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "删除时间")
 	private LocalDateTime deletedAt;
 

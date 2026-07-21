@@ -4,7 +4,7 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.schedule.model.entity.LogJobEntity;
 import com.auth.service.system.schedule.model.query.LogJobQuery;
 import com.auth.service.system.schedule.model.vo.LogJobDetailVO;
-import com.auth.service.system.schedule.model.vo.LogJobPageResponse;
+import com.auth.service.system.schedule.model.vo.LogJobPageVO;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.quartz.JobExecutionException;
@@ -22,7 +22,7 @@ public interface LogJobService extends IService<LogJobEntity> {
 	 * @param query 条件
 	 * @return 分页数据
 	 */
-	PageResponse<LogJobPageResponse> getPage(Page<LogJobEntity> pageParams, LogJobQuery query);
+	PageResponse<LogJobPageVO> getPage(Page<LogJobEntity> pageParams, LogJobQuery query);
 
 	/**
 	 * 详情（含异常堆栈）

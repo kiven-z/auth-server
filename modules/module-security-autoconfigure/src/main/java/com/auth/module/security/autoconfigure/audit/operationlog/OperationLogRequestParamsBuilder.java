@@ -21,10 +21,10 @@ import java.util.*;
 import java.util.function.Function;
 
 /**
- * 操作日志请求参数摘要构建（长度与表字段对齐）。
+ * 操作日志请求参数摘要构建
  * <p>
- * Servlet 侧：GET 使用 query string；其它方法使用 {@link HttpServletRequest#getParameterMap()}。
- * Spring MVC 侧：对控制器方法实参做摘要（含 {@code @RequestBody} 解析后的对象），上传文件仅记元数据。
+ * Servlet 侧：GET 使用 query string；其它方法使用 {@link HttpServletRequest#getParameterMap()}
+ * Spring MVC 侧：对控制器方法实参做摘要（含 {@code @RequestBody} 解析后的对象），上传文件仅记元数据
  * </p>
  *
  * @author Bunny
@@ -33,7 +33,7 @@ import java.util.function.Function;
 public class OperationLogRequestParamsBuilder {
 
 	/**
-	 * 请求文本最大长度（与表字段设计对齐，约 4KB）。
+	 * 请求文本最大长度（约 4KB）
 	 */
 	public static final int MAX_REQUEST_TEXT = 4096;
 
@@ -50,8 +50,7 @@ public class OperationLogRequestParamsBuilder {
 	private static final String GET = "GET";
 
 	/**
-	 * 组装请求参数摘要：GET 使用 query string；其它方法序列化 parameterMap；并合并可记录的 控制器方法实参（与
-	 * {@link org.aspectj.lang.JoinPoint#getArgs()} 一致，如 {@code @RequestBody} 绑定结果）。
+	 * 组装请求参数摘要
 	 * @param request HTTP 请求
 	 * @param hasRecord 是否记录
 	 * @param objectMapper JSON 序列化
@@ -71,7 +70,7 @@ public class OperationLogRequestParamsBuilder {
 	}
 
 	/**
-	 * 与历史实现一致：仅 Servlet 层 query / parameterMap。
+	 * 与历史实现一致：仅 Servlet 层 query / parameterMap
 	 * @param request 请求
 	 * @param objectMapper JSON 序列化
 	 * @return 摘要或 {@code null}
@@ -84,7 +83,7 @@ public class OperationLogRequestParamsBuilder {
 	}
 
 	/**
-	 * 合并 Servlet 摘要与 Spring 绑定的方法实参。
+	 * 合并 Servlet 摘要与 Spring 绑定的方法实参
 	 * @param request 请求
 	 * @param objectMapper JSON 序列化
 	 * @param methodSummaries 方法实参摘要
@@ -116,7 +115,7 @@ public class OperationLogRequestParamsBuilder {
 	}
 
 	/**
-	 * 合并形态下仅在 query 非空白时写入 {@link #KEY_QUERY_STRING}。
+	 * 合并形态下仅在 query 非空白时写入 {@link #KEY_QUERY_STRING}
 	 * @param root 根
 	 * @param request 请求
 	 */
@@ -128,7 +127,7 @@ public class OperationLogRequestParamsBuilder {
 	}
 
 	/**
-	 * 将非空 parameterMap 序列化为 JSON 并截断；否则 {@code null}。
+	 * 将非空 parameterMap 序列化为 JSON 并截断；否则 {@code null}
 	 * @param map 参数映射
 	 * @param objectMapper JSON 序列化
 	 * @return 摘要或 {@code null}
@@ -156,7 +155,7 @@ public class OperationLogRequestParamsBuilder {
 	}
 
 	/**
-	 * 将方法实参转为可 JSON 化的摘要列表（跳过 Web 框架占位参数）。
+	 * 将方法实参转为可 JSON 化的摘要列表（跳过 Web 框架占位参数）
 	 * @param methodArgs 方法实参
 	 * @param objectMapper JSON 序列化
 	 * @return 摘要列表
@@ -180,7 +179,7 @@ public class OperationLogRequestParamsBuilder {
 	}
 
 	/**
-	 * 判断是否属于 Web 层框架注入参数（不参与业务入参摘要）。
+	 * 判断是否属于 Web 层框架注入参数（不参与业务入参摘要）
 	 * @param arg 方法实参
 	 * @return 是否跳过
 	 */
@@ -192,7 +191,7 @@ public class OperationLogRequestParamsBuilder {
 	}
 
 	/**
-	 * 单个实参的日志摘要：上传文件仅元数据；字节数组只记长度；其余尽量转为 {@link JsonNode}。
+	 * 单个实参的日志摘要：上传文件仅元数据；字节数组只记长度；其余尽量转为 {@link JsonNode}
 	 * @param arg 方法实参
 	 * @param objectMapper JSON 序列化
 	 * @return 摘要或 {@code null}
@@ -238,7 +237,7 @@ public class OperationLogRequestParamsBuilder {
 	}
 
 	/**
-	 * 将 {@link MultipartFile} 转为元数据映射（不落库文件字节）。
+	 * 将 {@link MultipartFile} 转为元数据映射（不落库文件字节）
 	 * @param file 文件
 	 * @return 元数据映射
 	 */
@@ -252,7 +251,7 @@ public class OperationLogRequestParamsBuilder {
 	}
 
 	/**
-	 * 将 {@link Part} 转为元数据映射。
+	 * 将 {@link Part} 转为元数据映射
 	 * @param part 部分
 	 * @return 元数据映射
 	 */

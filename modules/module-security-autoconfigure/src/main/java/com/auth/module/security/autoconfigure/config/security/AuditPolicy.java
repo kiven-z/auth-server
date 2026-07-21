@@ -3,10 +3,6 @@ package com.auth.module.security.autoconfigure.config.security;
 /**
  * 审计策略
  *
- * <p>
- * 说明：这里的“公开接口”建议与安全配置中的 {@code permitPaths} 或公开接口标记保持一致， 避免“public”的定义在不同模块中出现歧义
- * </p>
- *
  * @author Bunny
  */
 public enum AuditPolicy {

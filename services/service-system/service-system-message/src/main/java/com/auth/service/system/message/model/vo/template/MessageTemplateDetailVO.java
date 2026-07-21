@@ -10,7 +10,7 @@ import lombok.ToString;
 import java.util.List;
 
 /**
- * 消息模板详情（跨渠道公共读模型）
+ * 消息模板详情
  *
  * @author Bunny
  */
@@ -33,16 +33,19 @@ public class MessageTemplateDetailVO extends BaseResponse {
 	@Schema(name = "description", title = "模板描述")
 	private String description;
 
-	@Schema(name = "subject", title = "主题/标题")
+	@Schema(name = "subject", title = "标题")
 	private String subject;
 
 	@Schema(name = "content", title = "正文模板")
 	private String content;
 
+	@Schema(name = "previewSubject", title = "预览标题")
+	private String previewSubject;
+
 	@Schema(name = "previewContent", title = "按 require_fields 示例值渲染后的正文")
 	private String previewContent;
 
-	@Schema(name = "contentType", title = "正文展示类型", description = "用于预览区渲染")
+	@Schema(name = "contentType", title = "正文展示类型")
 	private String contentType;
 
 	@Schema(name = "requireFields", title = "变量声明列表")

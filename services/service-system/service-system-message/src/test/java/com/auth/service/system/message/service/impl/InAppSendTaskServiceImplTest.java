@@ -12,8 +12,10 @@ import com.auth.service.system.message.model.po.InAppSendTaskPageRowPO;
 import com.auth.service.system.message.model.query.InAppSendTaskQuery;
 import com.auth.service.system.message.model.vo.inapp.InAppComposeResultVO;
 import com.auth.service.system.message.model.vo.inapp.InAppSendTaskDetailVO;
-import com.auth.service.system.message.model.vo.inapp.InAppSendTaskPageResponse;
+import com.auth.service.system.message.model.vo.inapp.InAppSendTaskPageVO;
+import com.auth.service.system.message.service.InAppMessageCategoryService;
 import com.auth.service.system.message.support.inapp.InAppComposeDispatchTrigger;
+import com.auth.service.system.message.support.inapp.InAppMessageCategorySupport;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,6 +47,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class InAppSendTaskServiceImplTest {
 
+	private static final long MINOR_CATEGORY_ID = 1907200100000000401L;
+
 	@Mock
 	private InAppMessageMapper inAppMessageMapper;
 
@@ -53,6 +57,12 @@ class InAppSendTaskServiceImplTest {
 
 	@Mock
 	private AuditUserDisplayService auditUserDisplayService;
+
+	@Mock
+	private InAppMessageCategoryService inAppMessageCategoryService;
+
+	@Mock
+	private InAppMessageCategorySupport categorySupport;
 
 	private InAppSendTaskServiceImpl service;
 
@@ -63,7 +73,6 @@ class InAppSendTaskServiceImplTest {
 		InAppMessageEntity task = new InAppMessageEntity();
 		task.setId(id);
 		task.setSourceType(MessageSendSourceType.ADMIN_COMPOSE.name());
-		task.setDeliveryMode(DeliveryMode.PUSH.name());
 		task.setRecipientScopeType(RecipientScopeType.DEPT.name());
 		task.setStatus(status.name());
 		return task;
@@ -72,7 +81,8 @@ class InAppSendTaskServiceImplTest {
 	@BeforeEach
 	void setUp() {
 		// ServiceImpl.baseMapper 由 Spring 字段注入；单测手动挂上
-		service = new InAppSendTaskServiceImpl(dispatchTrigger, auditUserDisplayService);
+		service = new InAppSendTaskServiceImpl(dispatchTrigger, auditUserDisplayService, inAppMessageCategoryService,
+				categorySupport);
 		ReflectionTestUtils.setField(service, "baseMapper", inAppMessageMapper);
 	}
 
@@ -84,8 +94,8 @@ class InAppSendTaskServiceImplTest {
 		query.setStatus(InAppMessageStatus.SUCCESS.name());
 		query.setSourceType(MessageSendSourceType.ADMIN_COMPOSE.name());
 		query.setRecipientScopeType(RecipientScopeType.DEPT.name());
-		query.setDeliveryMode(DeliveryMode.PUSH.name());
-		query.setBizType("NOTICE");
+
+		query.setCategoryId(MINOR_CATEGORY_ID);
 		query.setTitle("公告");
 		query.setPageIndex(1);
 		query.setPageSize(10);
@@ -97,10 +107,11 @@ class InAppSendTaskServiceImplTest {
 		row.setSceneCode("notice");
 		row.setTitle("系统公告");
 		row.setContentType(InAppContentType.MARKDOWN.name());
-		row.setBizType("NOTICE");
+		row.setCategoryId(MINOR_CATEGORY_ID);
+		row.setCategoryName("一般通知");
 		row.setSenderUserId(7L);
 		row.setRecipientScopeType(RecipientScopeType.DEPT.name());
-		row.setDeliveryMode(DeliveryMode.PUSH.name());
+
 		row.setTotalCount(10);
 		row.setSuccessCount(9);
 		row.setFailCount(1);
@@ -116,19 +127,20 @@ class InAppSendTaskServiceImplTest {
 		mapperPage.setTotal(1);
 		when(inAppMessageMapper.selectSendTaskPage(any(Page.class), eq(query))).thenReturn(mapperPage);
 
-		PageResponse<InAppSendTaskPageResponse> result = service.getSendTaskPage(query);
+		PageResponse<InAppSendTaskPageVO> result = service.getSendTaskPage(query);
 
 		assertThat(result.getList()).hasSize(1);
-		InAppSendTaskPageResponse vo = result.getList().get(0);
+		InAppSendTaskPageVO vo = result.getList().get(0);
 		assertThat(vo.getId()).isEqualTo(1L);
 		assertThat(vo.getSourceType()).isEqualTo(MessageSendSourceType.ADMIN_COMPOSE.name());
 		assertThat(vo.getSceneCode()).isEqualTo("notice");
 		assertThat(vo.getTitle()).isEqualTo("系统公告");
 		assertThat(vo.getContentType()).isEqualTo(InAppContentType.MARKDOWN.name());
-		assertThat(vo.getBizType()).isEqualTo("NOTICE");
+		assertThat(vo.getCategoryId()).isEqualTo(MINOR_CATEGORY_ID);
+		assertThat(vo.getCategoryName()).isEqualTo("一般通知");
 		assertThat(vo.getSenderUserId()).isEqualTo(7L);
 		assertThat(vo.getRecipientScopeType()).isEqualTo(RecipientScopeType.DEPT.name());
-		assertThat(vo.getDeliveryMode()).isEqualTo(DeliveryMode.PUSH.name());
+
 		assertThat(vo.getTotalCount()).isEqualTo(10);
 		assertThat(vo.getSuccessCount()).isEqualTo(9);
 		assertThat(vo.getFailCount()).isEqualTo(1);
@@ -154,12 +166,11 @@ class InAppSendTaskServiceImplTest {
 		task.setTitle("系统公告");
 		task.setContentType(InAppContentType.MARKDOWN.name());
 		task.setContent("## hello");
-		task.setBizType("NOTICE");
+		task.setCategoryId(MINOR_CATEGORY_ID);
 		task.setLinkUrl("/dashboard");
 		task.setSenderUserId(7L);
 		task.setRecipientScopeType(RecipientScopeType.DEPT.name());
 		task.setRecipientScopeJson("{\"ids\":[3,4],\"includeChildren\":false}");
-		task.setDeliveryMode(DeliveryMode.PUSH.name());
 		task.setTotalCount(2);
 		task.setSuccessCount(2);
 		task.setFailCount(0);
@@ -172,18 +183,23 @@ class InAppSendTaskServiceImplTest {
 		task.setCreateUser(1L);
 		task.setUpdateUser(1L);
 		when(inAppMessageMapper.selectById(11L)).thenReturn(task);
+		com.auth.service.system.message.model.entity.InAppMessageCategoryEntity category = new com.auth.service.system.message.model.entity.InAppMessageCategoryEntity();
+		category.setId(MINOR_CATEGORY_ID);
+		category.setName("一般通知");
+		when(inAppMessageCategoryService.getById(MINOR_CATEGORY_ID)).thenReturn(category);
 
 		InAppSendTaskDetailVO vo = service.getSendTaskById(11L);
 
 		assertThat(vo.getId()).isEqualTo(11L);
 		assertThat(vo.getTitle()).isEqualTo("系统公告");
 		assertThat(vo.getContent()).isEqualTo("## hello");
+		assertThat(vo.getCategoryId()).isEqualTo(MINOR_CATEGORY_ID);
+		assertThat(vo.getCategoryName()).isEqualTo("一般通知");
 		assertThat(vo.getLinkUrl()).isEqualTo("/dashboard");
 		assertThat(vo.getRecipientScopeType()).isEqualTo(RecipientScopeType.DEPT.name());
 		assertThat(vo.getRecipientScopeJson()).isEqualTo("{\"ids\":[3,4],\"includeChildren\":false}");
 		assertThat(vo.getRecipientScopeIds()).containsExactly(3L, 4L);
 		assertThat(vo.getIncludeChildren()).isFalse();
-		assertThat(vo.getDeliveryMode()).isEqualTo(DeliveryMode.PUSH.name());
 		assertThat(vo.getStatus()).isEqualTo(InAppMessageStatus.SUCCESS.name());
 		assertThat(vo.getRemark()).isEqualTo("detail-check");
 		verify(auditUserDisplayService).enrichAuditUsernames(any(List.class), isNull(), isNull());
@@ -201,7 +217,7 @@ class InAppSendTaskServiceImplTest {
 		task.setContent("all users");
 		task.setRecipientScopeType(RecipientScopeType.ALL.name());
 		task.setRecipientScopeJson(null);
-		task.setDeliveryMode(DeliveryMode.PULL.name());
+		task.setRecipientScopeType(RecipientScopeType.ALL.name());
 		task.setStatus(InAppMessageStatus.SUCCESS.name());
 		when(inAppMessageMapper.selectById(12L)).thenReturn(task);
 
@@ -210,7 +226,7 @@ class InAppSendTaskServiceImplTest {
 		assertThat(vo.getRecipientScopeType()).isEqualTo(RecipientScopeType.ALL.name());
 		assertThat(vo.getRecipientScopeIds()).isEmpty();
 		assertThat(vo.getIncludeChildren()).isNull();
-		assertThat(vo.getDeliveryMode()).isEqualTo(DeliveryMode.PULL.name());
+
 	}
 
 	@Test
@@ -236,7 +252,7 @@ class InAppSendTaskServiceImplTest {
 		mapperPage.setTotal(0);
 		when(inAppMessageMapper.selectSendTaskPage(any(Page.class), eq(query))).thenReturn(mapperPage);
 
-		PageResponse<InAppSendTaskPageResponse> result = service.getSendTaskPage(query);
+		PageResponse<InAppSendTaskPageVO> result = service.getSendTaskPage(query);
 
 		assertThat(result.getList()).isEmpty();
 		assertThat(result.getTotal()).isZero();
@@ -244,7 +260,7 @@ class InAppSendTaskServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("定向 PUSH：写 PENDING 任务并 afterCommit 派发")
+	@DisplayName("定向写扩散：写 PENDING 任务并 afterCommit 派发")
 	void send_pushScope_shouldCreatePendingTaskAndDispatch() {
 		// 校验落库字段与派发时机：定向受理即 PENDING，实投由异步回写
 		InAppComposeForm form = new InAppComposeForm();
@@ -255,7 +271,7 @@ class InAppSendTaskServiceImplTest {
 		form.setTitle("Hello");
 		form.setBody("body text");
 		form.setContentType("MARKDOWN");
-		form.setBizType("NOTICE");
+		form.setCategoryId(MINOR_CATEGORY_ID);
 		form.setLinkUrl("/home");
 
 		doAnswer(invocation -> {
@@ -263,6 +279,8 @@ class InAppSendTaskServiceImplTest {
 			task.setId(9001L);
 			return 1;
 		}).when(inAppMessageMapper).insert(any(InAppMessageEntity.class));
+		when(categorySupport.requireEnabledMinor(MINOR_CATEGORY_ID))
+			.thenReturn(new com.auth.service.system.message.model.entity.InAppMessageCategoryEntity());
 
 		try (MockedStatic<SecurityUserUtils> security = mockStatic(SecurityUserUtils.class)) {
 			security.when(SecurityUserUtils::getUserId).thenReturn(7L);
@@ -284,9 +302,8 @@ class InAppSendTaskServiceImplTest {
 		assertThat(task.getContent()).isEqualTo("body text");
 		assertThat(task.getContentType()).isEqualTo(InAppContentType.MARKDOWN.name());
 		assertThat(task.getRecipientScopeType()).isEqualTo(RecipientScopeType.DEPT.name());
-		assertThat(task.getDeliveryMode()).isEqualTo(DeliveryMode.PUSH.name());
 		assertThat(task.getRecipientScopeJson()).contains("\"includeChildren\":true");
-		assertThat(task.getBizType()).isEqualTo("NOTICE");
+		assertThat(task.getCategoryId()).isEqualTo(MINOR_CATEGORY_ID);
 		assertThat(task.getLinkUrl()).isEqualTo("/home");
 		assertThat(task.getSenderUserId()).isEqualTo(7L);
 		assertThat(task.getStatus()).isEqualTo(InAppMessageStatus.PENDING.name());
@@ -297,7 +314,7 @@ class InAppSendTaskServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("全员 PULL：直接 SUCCESS，不异步派发")
+	@DisplayName("全员读扩散：直接 SUCCESS，不异步派发")
 	void send_allScope_shouldPublishWithoutDispatch() {
 		// 公开读扩散只落任务，不写收件箱、不走 dispatch
 		InAppComposeForm form = new InAppComposeForm();
@@ -305,11 +322,14 @@ class InAppSendTaskServiceImplTest {
 		form.setTitle("Broadcast");
 		form.setBody("all users");
 		form.setContentType("TEXT");
+		form.setCategoryId(MINOR_CATEGORY_ID);
 
 		doAnswer(invocation -> {
 			invocation.getArgument(0, InAppMessageEntity.class).setId(8001L);
 			return 1;
 		}).when(inAppMessageMapper).insert(any(InAppMessageEntity.class));
+		when(categorySupport.requireEnabledMinor(MINOR_CATEGORY_ID))
+			.thenReturn(new com.auth.service.system.message.model.entity.InAppMessageCategoryEntity());
 
 		try (MockedStatic<SecurityUserUtils> security = mockStatic(SecurityUserUtils.class)) {
 			security.when(SecurityUserUtils::getUserId).thenReturn(1L);
@@ -324,7 +344,6 @@ class InAppSendTaskServiceImplTest {
 		verify(inAppMessageMapper).insert(taskCaptor.capture());
 		InAppMessageEntity task = taskCaptor.getValue();
 		assertThat(task.getRecipientScopeType()).isEqualTo(RecipientScopeType.ALL.name());
-		assertThat(task.getDeliveryMode()).isEqualTo(DeliveryMode.PULL.name());
 		assertThat(task.getStatus()).isEqualTo(InAppMessageStatus.SUCCESS.name());
 		verify(dispatchTrigger, never()).dispatchAfterCommit(any());
 	}
@@ -340,11 +359,14 @@ class InAppSendTaskServiceImplTest {
 		form.setTitle("t");
 		form.setBody("b");
 		form.setContentType("TEXT");
+		form.setCategoryId(MINOR_CATEGORY_ID);
 
 		doAnswer(invocation -> {
 			invocation.getArgument(0, InAppMessageEntity.class).setId(2L);
 			return 1;
 		}).when(inAppMessageMapper).insert(any(InAppMessageEntity.class));
+		when(categorySupport.requireEnabledMinor(MINOR_CATEGORY_ID))
+			.thenReturn(new com.auth.service.system.message.model.entity.InAppMessageCategoryEntity());
 
 		try (MockedStatic<SecurityUserUtils> security = mockStatic(SecurityUserUtils.class)) {
 			security.when(SecurityUserUtils::getUserId).thenReturn(1L);
@@ -438,13 +460,12 @@ class InAppSendTaskServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("补发：公开 PULL 拒绝")
+	@DisplayName("补发：全员读扩散拒绝")
 	void retry_shouldRejectPullDelivery() {
 		// 读扩散发布即成功，补发无意义
 		InAppMessageEntity task = new InAppMessageEntity();
 		task.setId(26L);
 		task.setSourceType(MessageSendSourceType.ADMIN_COMPOSE.name());
-		task.setDeliveryMode(DeliveryMode.PULL.name());
 		task.setRecipientScopeType(RecipientScopeType.ALL.name());
 		task.setStatus(InAppMessageStatus.SUCCESS.name());
 		when(inAppMessageMapper.selectById(26L)).thenReturn(task);
@@ -462,7 +483,7 @@ class InAppSendTaskServiceImplTest {
 		InAppMessageEntity task = new InAppMessageEntity();
 		task.setId(22L);
 		task.setSourceType("TEMPLATE");
-		task.setDeliveryMode(DeliveryMode.PUSH.name());
+		task.setRecipientScopeType(RecipientScopeType.USER.name());
 		task.setStatus(InAppMessageStatus.FAILED.name());
 		when(inAppMessageMapper.selectById(22L)).thenReturn(task);
 
@@ -534,13 +555,12 @@ class InAppSendTaskServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("撤回：全员 PULL SUCCESS 可撤回")
+	@DisplayName("撤回：全员读扩散 SUCCESS 可撤回")
 	void recall_shouldAllowPullSuccess() {
 		// 读扩散无收件箱行，仍只改主表状态
 		InAppMessageEntity task = new InAppMessageEntity();
 		task.setId(32L);
 		task.setSourceType(MessageSendSourceType.ADMIN_COMPOSE.name());
-		task.setDeliveryMode(DeliveryMode.PULL.name());
 		task.setRecipientScopeType(RecipientScopeType.ALL.name());
 		task.setStatus(InAppMessageStatus.SUCCESS.name());
 		when(inAppMessageMapper.selectById(32L)).thenReturn(task);
@@ -624,7 +644,6 @@ class InAppSendTaskServiceImplTest {
 		InAppMessageEntity pushSuccess = adminComposePushTask(40L, InAppMessageStatus.SUCCESS);
 		InAppMessageEntity pullRecalled = new InAppMessageEntity();
 		pullRecalled.setId(41L);
-		pullRecalled.setDeliveryMode(DeliveryMode.PULL.name());
 		pullRecalled.setRecipientScopeType(RecipientScopeType.ALL.name());
 		pullRecalled.setStatus(InAppMessageStatus.RECALLED.name());
 		when(inAppMessageMapper.selectByIds(ids)).thenReturn(List.of(pushSuccess, pullRecalled));

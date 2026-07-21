@@ -28,7 +28,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class SysRolePermissionServiceImpl extends ServiceImpl<SysRolePermissionMapper, SysRolePermissionEntity>
 		implements SysRolePermissionService {
 
@@ -51,6 +50,7 @@ public class SysRolePermissionServiceImpl extends ServiceImpl<SysRolePermissionM
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(rollbackFor = Exception.class)
 	public void assignPermissions(Long roleId, List<Long> permissionIds) {
 		SysRoleEntity role = rbacReferenceChecker.getExisting(roleId);
 

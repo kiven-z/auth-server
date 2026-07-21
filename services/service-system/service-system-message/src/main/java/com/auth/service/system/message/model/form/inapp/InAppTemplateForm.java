@@ -15,11 +15,11 @@ import java.io.Serializable;
 import static com.auth.common.web.validation.ValidationPatterns.LETTER_UNDERSCORE_HYPHEN_REQUIRE_LETTER;
 
 /**
- * 站内信模板表单（创建与更新共用；变量列表在独立接口维护）
+ * 站内信模板表单
  *
  * @author Bunny
  */
-@Schema(name = "InAppTemplateForm", title = "站内信模板表单", description = "用于站内信模板信息的创建与更新")
+@Schema(name = "InAppTemplateForm", title = "站内信模板表单")
 @Getter
 @Setter
 public class InAppTemplateForm implements Serializable {
@@ -27,7 +27,7 @@ public class InAppTemplateForm implements Serializable {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
-	@Schema(name = "id", title = "主键ID", description = "创建时不传，更新时必填")
+	@Schema(name = "id", title = "主键ID")
 	@NotNull(groups = UpdateGroup.class, message = "更新时ID不能为空")
 	private Long id;
 
@@ -45,7 +45,7 @@ public class InAppTemplateForm implements Serializable {
 	@NotBlank(message = "标题不能为空", groups = { CreateGroup.class, UpdateGroup.class })
 	private String subject;
 
-	@Schema(name = "contentType", title = "正文类型", description = "写入 im_message_type")
+	@Schema(name = "contentType", title = "正文类型")
 	@NotBlank(message = "正文类型不能为空", groups = { CreateGroup.class, UpdateGroup.class })
 	private String contentType;
 

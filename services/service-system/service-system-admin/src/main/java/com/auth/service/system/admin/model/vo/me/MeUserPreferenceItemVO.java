@@ -16,10 +16,10 @@ import lombok.ToString;
 @ToString
 public class MeUserPreferenceItemVO {
 
-	@Schema(description = "配置键")
+	@Schema(title = "配置键")
 	private String configKey;
 
-	@Schema(description = "配置值")
+	@Schema(title = "配置值")
 	private JsonNode configValue;
 
 }

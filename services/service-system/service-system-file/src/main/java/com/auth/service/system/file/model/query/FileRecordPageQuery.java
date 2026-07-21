@@ -36,7 +36,7 @@ public class FileRecordPageQuery extends PageQueryRequest {
 	@Schema(title = "MIME 类型")
 	private String contentType;
 
-	@Schema(title = "原始文件名（模糊匹配）")
+	@Schema(title = "原始文件名")
 	@Size(max = 255, message = "originalName 长度不能超过255个字符")
 	private String originalName;
 

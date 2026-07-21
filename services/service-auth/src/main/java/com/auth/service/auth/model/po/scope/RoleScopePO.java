@@ -19,13 +19,13 @@ public class RoleScopePO implements Serializable {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
-	@Schema(description = "角色码")
+	@Schema(title = "角色码")
 	private String roleCode;
 
-	@Schema(description = "范围类型：ALL/SELF/DEPT/DEPT_AND_CHILD")
+	@Schema(title = "范围类型：ALL/SELF/DEPT/DEPT_AND_CHILD")
 	private String scopeType;
 
-	@Schema(description = "scope_dept_ids JSON 字符串")
+	@Schema(title = "scope_dept_ids JSON 字符串")
 	private String scopeDeptIds;
 
 }

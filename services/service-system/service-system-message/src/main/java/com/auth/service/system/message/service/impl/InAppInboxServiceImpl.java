@@ -5,18 +5,19 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.message.convert.InAppInboxConverter;
-import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.mapper.InAppInboxMapper;
 import com.auth.service.system.message.mapper.InAppMessageMapper;
 import com.auth.service.system.message.mapper.InAppMessageRecipientMapper;
 import com.auth.service.system.message.mapper.InAppMessageUserStatusMapper;
 import com.auth.service.system.message.model.entity.InAppMessageEntity;
 import com.auth.service.system.message.model.entity.InAppMessageUserStatusEntity;
-import com.auth.service.system.message.model.enums.DeliveryMode;
 import com.auth.service.system.message.model.enums.InAppMessageStatus;
+import com.auth.service.system.message.model.enums.RecipientScopeType;
+import com.auth.service.system.message.model.po.InAppInboxMajorUnreadRowPO;
 import com.auth.service.system.message.model.po.InAppInboxPageRowPO;
 import com.auth.service.system.message.model.query.InAppInboxQuery;
-import com.auth.service.system.message.model.vo.inapp.InAppInboxPageResponse;
+import com.auth.service.system.message.model.vo.inapp.InAppInboxMajorUnreadVO;
+import com.auth.service.system.message.model.vo.inapp.InAppInboxPageVO;
 import com.auth.service.system.message.model.vo.inapp.InAppInboxUnreadCountVO;
 import com.auth.service.system.message.service.InAppInboxService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -28,11 +29,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.JWT_INVALID;
-import static com.auth.service.system.message.exception.MessageResultCode.IN_APP_INBOX_DELIVERY_MODE_INVALID;
 
 /**
  * 用户侧站内信收件箱
@@ -64,7 +65,7 @@ public class InAppInboxServiceImpl implements InAppInboxService {
 	}
 
 	/**
-	 * 组装公开消息已读状态行（懒写入）
+	 * 组装公开消息已读状态行
 	 * @param userId 当前用户
 	 * @param messageId 公开消息 ID
 	 * @param readTime 已读时间
@@ -89,22 +90,13 @@ public class InAppInboxServiceImpl implements InAppInboxService {
 	 */
 	@Override
 	@Transactional(readOnly = true)
-	public PageResponse<InAppInboxPageResponse> getInboxPage(InAppInboxQuery query) {
+	public PageResponse<InAppInboxPageVO> getInboxPage(InAppInboxQuery query) {
 		Long userId = requireCurrentUserId();
 
-		DeliveryMode deliveryMode = DeliveryMode.from(query.getDeliveryMode());
-		if (deliveryMode == null) {
-			throw new MessageException(IN_APP_INBOX_DELIVERY_MODE_INVALID, query.getDeliveryMode());
-		}
-
 		Page<InAppInboxPageRowPO> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
-		IPage<InAppInboxPageRowPO> page = switch (deliveryMode) {
-			case PUSH -> inAppInboxMapper.selectPushInboxPage(pageParams, userId, query);
-			case PULL -> inAppInboxMapper.selectPullInboxPage(pageParams, userId, query);
-			default -> throw new MessageException(IN_APP_INBOX_DELIVERY_MODE_INVALID, query.getDeliveryMode());
-		};
+		IPage<InAppInboxPageRowPO> page = inAppInboxMapper.selectInboxPage(pageParams, userId, query);
 
-		IPage<InAppInboxPageResponse> voPage = page.convert(InAppInboxConverter.INSTANCE::toPageResponse);
+		IPage<InAppInboxPageVO> voPage = page.convert(InAppInboxConverter.INSTANCE::toPageVO);
 		return PageResponse.of(voPage);
 	}
 
@@ -116,13 +108,21 @@ public class InAppInboxServiceImpl implements InAppInboxService {
 	public InAppInboxUnreadCountVO getUnreadCount() {
 		Long userId = requireCurrentUserId();
 
-		long pullUnreadCount = inAppInboxMapper.countPullUnread(userId);
-		long pushUnreadCount = inAppInboxMapper.countPushUnread(userId);
-		return InAppInboxUnreadCountVO.builder()
-			.pullUnreadCount(pullUnreadCount)
-			.pushUnreadCount(pushUnreadCount)
-			.totalUnreadCount(pullUnreadCount + pushUnreadCount)
-			.build();
+		List<InAppInboxMajorUnreadRowPO> rows = inAppInboxMapper.selectUnreadCountByMajor(userId);
+		if (CollUtil.isEmpty(rows)) {
+			return InAppInboxUnreadCountVO.builder().totalUnreadCount(0L).majors(Collections.emptyList()).build();
+		}
+
+		List<InAppInboxMajorUnreadVO> majors = rows.stream()
+			.map(row -> InAppInboxMajorUnreadVO.builder()
+				.majorCategoryId(row.getMajorCategoryId())
+				.majorCategoryName(row.getMajorCategoryName())
+				.majorCategoryCode(row.getMajorCategoryCode())
+				.unreadCount(row.getUnreadCount())
+				.build())
+			.toList();
+		long total = majors.stream().mapToLong(InAppInboxMajorUnreadVO::getUnreadCount).sum();
+		return InAppInboxUnreadCountVO.builder().totalUnreadCount(total).majors(majors).build();
 	}
 
 	/**
@@ -142,33 +142,32 @@ public class InAppInboxServiceImpl implements InAppInboxService {
 		}
 
 		List<InAppMessageEntity> messages = inAppMessageMapper.selectList(Wrappers.<InAppMessageEntity>lambdaQuery()
-			.select(InAppMessageEntity::getId, InAppMessageEntity::getDeliveryMode, InAppMessageEntity::getStatus)
+			.select(InAppMessageEntity::getId, InAppMessageEntity::getRecipientScopeType, InAppMessageEntity::getStatus)
 			.in(InAppMessageEntity::getId, ids));
 		if (CollUtil.isEmpty(messages)) {
 			return;
 		}
 
-		List<Long> pushIds = messages.stream()
-			.filter(entity -> DeliveryMode.from(entity.getDeliveryMode()) == DeliveryMode.PUSH)
-			.filter(entity -> {
-				InAppMessageStatus status = InAppMessageStatus.from(entity.getStatus());
-				return status == InAppMessageStatus.SUCCESS || status == InAppMessageStatus.PARTIAL;
-			})
-			.map(InAppMessageEntity::getId)
-			.toList();
+		List<Long> pushIds = messages.stream().filter(entity -> {
+			RecipientScopeType scopeType = RecipientScopeType.from(entity.getRecipientScopeType());
+			return scopeType != null && !scopeType.isPull();
+		}).filter(entity -> {
+			InAppMessageStatus status = InAppMessageStatus.from(entity.getStatus());
+			return status == InAppMessageStatus.SUCCESS || status == InAppMessageStatus.PARTIAL;
+		}).map(InAppMessageEntity::getId).toList();
 
-		List<Long> pullIds = messages.stream()
-			.filter(entity -> DeliveryMode.from(entity.getDeliveryMode()) == DeliveryMode.PULL)
+		List<Long> pullIds = messages.stream().filter(entity -> {
+			RecipientScopeType scopeType = RecipientScopeType.from(entity.getRecipientScopeType());
+			return scopeType != null && scopeType.isPull();
+		})
 			.filter(entity -> InAppMessageStatus.from(entity.getStatus()) == InAppMessageStatus.SUCCESS)
 			.map(InAppMessageEntity::getId)
 			.toList();
 
 		LocalDateTime readTime = LocalDateTime.now();
-		// PUSH：收件行已存在，只改已读状态
 		if (CollUtil.isNotEmpty(pushIds)) {
 			inAppMessageRecipientMapper.markRead(userId, pushIds, readTime);
 		}
-		// PULL：公开读扩散，用户状态懒写入
 		if (CollUtil.isNotEmpty(pullIds)) {
 			List<InAppMessageUserStatusEntity> rows = pullIds.stream()
 				.map(messageId -> toPullReadRow(userId, messageId, readTime))

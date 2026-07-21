@@ -23,7 +23,7 @@ public class SysMenuBatchStatusForm implements Serializable {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
-	@Schema(title = "菜单主键列表（字符串 Long，与前端一致）", requiredMode = Schema.RequiredMode.REQUIRED)
+	@Schema(title = "菜单主键列表", requiredMode = Schema.RequiredMode.REQUIRED)
 	@NotEmpty(message = "ids must not be empty")
 	private List<Long> ids;
 

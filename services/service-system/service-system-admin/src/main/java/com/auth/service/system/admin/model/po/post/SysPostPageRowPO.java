@@ -10,11 +10,11 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 岗位分页行（持久层查询投影，非 API 出参）
+ * 岗位分页行
  *
  * @author Bunny
  */
-@Schema(name = "SysPostPageRowPO", title = "岗位分页行（PO）")
+@Schema(name = "SysPostPageRowPO", title = "岗位分页行")
 @Getter
 @Setter
 @ToString

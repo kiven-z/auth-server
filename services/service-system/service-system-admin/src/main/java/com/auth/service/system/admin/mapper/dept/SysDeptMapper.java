@@ -25,14 +25,14 @@ import java.util.List;
 public interface SysDeptMapper extends BaseMapper<SysDeptEntity> {
 
 	/**
-	 * 条件查询全部部门（扁平，供前端建树）
+	 * 条件查询全部部门（扁平）
 	 * @param query 查询条件
 	 * @return 部门列表
 	 */
 	List<SysDeptEntity> selectListByQuery(@Param("query") SysDeptListQuery query);
 
 	/**
-	 * 分页查询部门（含父部门信息；表格视图与 Excel 导出共用）
+	 * 分页查询部门
 	 * @param page 分页参数
 	 * @param query 查询条件
 	 * @return 分页部门列表
@@ -71,28 +71,28 @@ public interface SysDeptMapper extends BaseMapper<SysDeptEntity> {
 	List<SysDeptEntity> selectActiveByDeptCodes(@Param("deptCodes") List<String> deptCodes);
 
 	/**
-	 * 查询直接挂靠本部门的有效用户-部门关联（不含子部门）
+	 * 查询直接挂靠本部门的有效用户-部门关联
 	 * @param deptId 部门 ID
 	 * @return 关联用户列表
 	 */
 	List<SysDeptBoundUserPO> selectBoundUsersByDeptId(@Param("deptId") Long deptId);
 
 	/**
-	 * 查询本部门下未删除岗位（不含子部门）
+	 * 查询本部门下未删除岗位
 	 * @param deptId 部门 ID
 	 * @return 岗位列表
 	 */
 	List<PostReferencePO> selectBoundPostsByDeptId(@Param("deptId") Long deptId);
 
 	/**
-	 * 子树内是否存在用户-部门关联、grant DEPT 主体或未删除岗位（任一即视为占用）
+	 * 子树内是否存在用户-部门关联、grant DEPT 主体或未删除岗位
 	 * @param deptId 子树根部门 ID
 	 * @return {@code true} 表示子树仍被引用，不可删除
 	 */
 	boolean existsSubtreeReference(@Param("deptId") Long deptId);
 
 	/**
-	 * {@code descendantId} 是否位于 {@code ancestorId} 的子树中（含自身）
+	 * {@code descendantId} 是否位于 {@code ancestorId} 的子树中
 	 * @param ancestorId 祖先部门 ID
 	 * @param descendantId 候选后代部门 ID
 	 * @return 匹配行数，大于 0 表示是后代

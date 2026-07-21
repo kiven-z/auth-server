@@ -10,7 +10,7 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * 前端动态路由节点（单层一级路由及其 children），与 vue-router 异步路由结构对齐
+ * 动态路由节点
  *
  * @author Bunny
  */

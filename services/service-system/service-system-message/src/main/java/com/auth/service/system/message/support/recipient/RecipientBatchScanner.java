@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 import static com.auth.service.system.message.exception.MessageResultCode.IN_APP_RECIPIENT_SCOPE_INVALID;
 
 /**
- * 接收人分批扫描：写扩散（USER/POST/DEPT）按范围游标推进
+ * 按接收范围分批扫描目标用户
  *
  * @author Bunny
  */
@@ -29,9 +29,9 @@ public class RecipientBatchScanner {
 	}
 
 	/**
-	 * 基于 {@code user_id > lastUserId} 分批查询并消费
+	 * 分批查询并消费
 	 * @param batchSize 每批上限
-	 * @param queryAfter 查询函数：(lastUserId, limit) → 本批 userId（升序）
+	 * @param queryAfter 查询函数
 	 * @param consumer 每批消费
 	 */
 	private static void scanByCursor(int batchSize, BiFunction<Long, Integer, List<Long>> queryAfter,
@@ -54,7 +54,7 @@ public class RecipientBatchScanner {
 	 * 按范围分批扫描启用用户 ID
 	 * @param scope 接收范围
 	 * @param batchSize 每批上限
-	 * @param consumer 每批 userId（非空、升序）
+	 * @param consumer 每批 userId
 	 */
 	public void scan(RecipientScope scope, int batchSize, Consumer<List<Long>> consumer) {
 		if (scope == null || scope.getType() == null) {
@@ -89,7 +89,6 @@ public class RecipientBatchScanner {
 									.selectUserIdsByDeptIdsWithChildrenAfter(ids, lastUserId, limit), List.of())
 						: (lastUserId, limit) -> Objects.requireNonNullElse(
 								recipientUserMapper.selectUserIdsByDeptIdsAfter(ids, lastUserId, limit), List.of());
-			// ALL 为读扩散，send 侧已收口；此处仅为枚举穷尽
 			case ALL -> throw new IllegalStateException("ALL scope must not be write-scanned");
 		};
 	}

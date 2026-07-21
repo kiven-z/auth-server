@@ -146,7 +146,7 @@ public class SysUserDeptServiceImpl extends ServiceImpl<UserDeptMapper, UserDept
 	 */
 	private void applyPrimaryDeptRules(Long userId, UserDeptAssignForm form) {
 		boolean isPrimary = form.getIsPrimary() != null && form.getIsPrimary();
-		if (isPrimary && !UserOrgRelationStatusEnum.canBePrimary(form.getStatus())) {
+		if (isPrimary && UserOrgRelationStatusEnum.canBePrimary(form.getStatus())) {
 			throw new SystemBusinessException(SystemAdminResultCode.USER_DEPT_PRIMARY_NOT_ELIGIBLE);
 		}
 		if (isPrimary) {

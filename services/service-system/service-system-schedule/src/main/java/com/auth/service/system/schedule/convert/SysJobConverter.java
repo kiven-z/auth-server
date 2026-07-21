@@ -7,7 +7,7 @@ import com.auth.service.system.schedule.model.form.SysJobUpdateForm;
 import com.auth.service.system.schedule.model.po.SysJobDetailRowPO;
 import com.auth.service.system.schedule.model.po.SysJobPageRowPO;
 import com.auth.service.system.schedule.model.vo.SysJobDetailVO;
-import com.auth.service.system.schedule.model.vo.SysJobPageResponse;
+import com.auth.service.system.schedule.model.vo.SysJobPageVO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -33,7 +33,7 @@ public interface SysJobConverter {
 	@Mapping(target = "updateUsername", ignore = true)
 	@Mapping(target = "lastExecutionStatus", ignore = true)
 	@Mapping(target = "lastExecutionTime", ignore = true)
-	SysJobPageResponse toPageResponse(SysJobPageRowPO po);
+	SysJobPageVO toPageVO(SysJobPageRowPO po);
 
 	/**
 	 * 详情行 PO → 详情 VO（运行时字段在 Service 层补充）

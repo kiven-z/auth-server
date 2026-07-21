@@ -42,9 +42,9 @@ public class RenderedInAppMessage {
 	String sceneCode;
 
 	/**
-	 * 业务分类（来自渠道选项，可空）
+	 * 业务小类
 	 */
-	String bizType;
+	Long categoryId;
 
 	/**
 	 * 跳转链接（来自渠道选项，可空）

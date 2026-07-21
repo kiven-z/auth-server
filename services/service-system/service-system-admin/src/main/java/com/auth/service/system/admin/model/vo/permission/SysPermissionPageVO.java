@@ -7,9 +7,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.io.Serial;
-import java.io.Serializable;
-
 /**
  * 权限分页行
  *
@@ -20,10 +17,7 @@ import java.io.Serializable;
 @Setter
 @ToString
 @EqualsAndHashCode(callSuper = true)
-public class SysPermissionPageVO extends BaseResponse implements Serializable {
-
-	@Serial
-	private static final long serialVersionUID = 1L;
+public class SysPermissionPageVO extends BaseResponse {
 
 	@Schema(title = "权限编码")
 	private String permissionCode;

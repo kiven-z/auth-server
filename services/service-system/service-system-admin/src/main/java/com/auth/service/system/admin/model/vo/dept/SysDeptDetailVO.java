@@ -11,7 +11,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.io.Serial;
 import java.util.List;
 
 /**
@@ -25,9 +24,6 @@ import java.util.List;
 @ToString
 @EqualsAndHashCode(callSuper = true)
 public class SysDeptDetailVO extends BaseResponse {
-
-	@Serial
-	private static final long serialVersionUID = 1L;
 
 	@JsonStringFormat
 	@Schema(title = "父部门ID，0 表示顶级")

@@ -11,7 +11,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 授权失效幂等事件分页查询（Feign 传输）
+ * 授权失效幂等事件分页查询
  *
  * @author Bunny
  */
@@ -24,7 +24,7 @@ public class AuthorizationInvalidationEventInnerQuery extends PageQueryRequest i
 	@Serial
 	private static final long serialVersionUID = 1L;
 
-	@Schema(title = "业务事件 ID（精确匹配）")
+	@Schema(title = "业务事件 ID")
 	private String eventId;
 
 	@Schema(title = "变更维度（AuthorizationChangeKind）")

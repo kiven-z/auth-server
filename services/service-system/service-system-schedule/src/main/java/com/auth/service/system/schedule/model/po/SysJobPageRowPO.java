@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
  *
  * @author Bunny
  */
-@Schema(name = "SysJobPageRowPO", title = "定时任务分页行（PO）")
+@Schema(name = "SysJobPageRowPO", title = "定时任务分页行")
 @Getter
 @Setter
 @ToString

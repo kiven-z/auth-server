@@ -30,7 +30,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity> implements SysRoleService {
 
 	/**
@@ -46,6 +45,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(rollbackFor = Exception.class)
 	public void createBatchFromImport(List<SysRoleForm> forms) {
 		if (CollUtil.isEmpty(forms)) {
 			return;
@@ -69,6 +69,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(rollbackFor = Exception.class)
 	public void update(SysRoleForm form) {
 		Long id = form.getId();
 		SysRoleEntity existing = baseMapper.selectById(id);
@@ -102,6 +103,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(rollbackFor = Exception.class)
 	public void deleteById(Long id) {
 		SysRoleEntity existing = baseMapper.selectById(id);
 		if (existing == null) {

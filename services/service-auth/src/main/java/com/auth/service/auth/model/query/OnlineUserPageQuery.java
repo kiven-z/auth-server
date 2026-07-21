@@ -6,9 +6,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.Serial;
-import java.io.Serializable;
-
 /**
  * 在线用户分页查询条件
  *
@@ -18,10 +15,7 @@ import java.io.Serializable;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
-public class OnlineUserPageQuery extends PageQueryRequest implements Serializable {
-
-	@Serial
-	private static final long serialVersionUID = 1L;
+public class OnlineUserPageQuery extends PageQueryRequest {
 
 	@Schema(title = "用户 ID")
 	private Long userId;

@@ -8,9 +8,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.io.Serial;
-import java.io.Serializable;
-
 /**
  * 用户岗位关联分页行
  *
@@ -21,10 +18,7 @@ import java.io.Serializable;
 @Setter
 @ToString
 @EqualsAndHashCode(callSuper = true)
-public class UserPostPageVO extends BaseResponse implements Serializable {
-
-	@Serial
-	private static final long serialVersionUID = 1L;
+public class UserPostPageVO extends BaseResponse {
 
 	@JsonStringFormat
 	@Schema(title = "用户 ID")

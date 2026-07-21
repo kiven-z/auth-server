@@ -10,11 +10,11 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 部门分页行（持久层查询投影，含父部门信息）
+ * 部门分页行
  *
  * @author Bunny
  */
-@Schema(name = "SysDeptPageRowPO", title = "部门分页行（PO）")
+@Schema(name = "SysDeptPageRowPO", title = "部门分页行")
 @Getter
 @Setter
 @ToString

@@ -148,7 +148,7 @@ class TemplateMessageCommandValidationTest {
 			.channel(MessageChannel.IN_APP)
 			.templateCode("notice")
 			.targets(List.of("1001"))
-			.options(InAppChannelOptions.builder().bizType("NOTICE").build())
+			.options(InAppChannelOptions.builder().categoryId(1907200100000000401L).build())
 			.build();
 
 		assertThatCode(() -> commandValidation.validate(command)).doesNotThrowAnyException();

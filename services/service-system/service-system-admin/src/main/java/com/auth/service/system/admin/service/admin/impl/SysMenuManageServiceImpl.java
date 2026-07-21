@@ -48,6 +48,7 @@ public class SysMenuManageServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(rollbackFor = Exception.class)
 	public void replaceMenuRoles(Long menuId, SysMenuAssignRoleForm form) {
 		List<Long> roleIds = CollUtil.emptyIfNull(form.getRoleIds()).stream().distinct().toList();
 		rbacReferenceChecker.requireExistingEnabledRoleIds(roleIds, SystemCommonResultCode.GRANT_REFERENCE_INVALID);

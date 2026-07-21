@@ -12,7 +12,7 @@ import java.io.Serial;
  *
  * @author Bunny
  */
-@Schema(name = "SysJobDetailRowPO", title = "定时任务详情行（PO）")
+@Schema(name = "SysJobDetailRowPO", title = "定时任务详情行")
 @Getter
 @Setter
 @ToString(callSuper = true)

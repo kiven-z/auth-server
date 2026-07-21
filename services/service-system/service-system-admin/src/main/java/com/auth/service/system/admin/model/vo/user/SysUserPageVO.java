@@ -7,9 +7,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.io.Serial;
-import java.io.Serializable;
-
 /**
  * 用户分页行
  *
@@ -20,10 +17,7 @@ import java.io.Serializable;
 @Setter
 @ToString
 @EqualsAndHashCode(callSuper = true)
-public class SysUserPageVO extends BaseResponse implements Serializable {
-
-	@Serial
-	private static final long serialVersionUID = 1L;
+public class SysUserPageVO extends BaseResponse {
 
 	@Schema(title = "用户名")
 	private String username;

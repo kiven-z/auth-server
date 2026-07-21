@@ -1,7 +1,7 @@
 package com.auth.module.security.contract.api.audit;
 
 /**
- * 操作日志类型，与 {@code log_operation.operation_type} 取值一致。
+ * 操作日志类型。
  *
  * @author Bunny
  */

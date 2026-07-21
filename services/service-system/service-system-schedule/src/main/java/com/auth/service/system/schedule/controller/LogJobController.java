@@ -5,7 +5,7 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.schedule.model.entity.LogJobEntity;
 import com.auth.service.system.schedule.model.query.LogJobQuery;
 import com.auth.service.system.schedule.model.vo.LogJobDetailVO;
-import com.auth.service.system.schedule.model.vo.LogJobPageResponse;
+import com.auth.service.system.schedule.model.vo.LogJobPageVO;
 import com.auth.service.system.schedule.service.LogJobService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,9 +36,9 @@ public class LogJobController {
 	@Operation(summary = "分页查询任务日志")
 	@PreAuthorize("@auth.decide('schedule:joblog:query')")
 	@GetMapping("page")
-	public Result<PageResponse<LogJobPageResponse>> page(LogJobQuery query) {
+	public Result<PageResponse<LogJobPageVO>> page(LogJobQuery query) {
 		Page<LogJobEntity> page = new Page<>(query.getPageIndex(), query.getPageSize());
-		PageResponse<LogJobPageResponse> response = logJobService.getPage(page, query);
+		PageResponse<LogJobPageVO> response = logJobService.getPage(page, query);
 
 		return Result.success(response);
 	}

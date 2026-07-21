@@ -17,7 +17,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 
 /**
- * 登录审计仓储：解析请求快照并异步写入 {@code log_login}。
+ * 登录审计仓储
  *
  * @author Bunny
  */
@@ -53,13 +53,13 @@ public class LoginLogRepository extends ServiceImpl<LoginLogMapper, LoginLogEnti
 	}
 
 	/**
-	 * 记录一条认证相关审计（登录、登出、刷新令牌等）；以 {@code @Async} 落库。
+	 * 记录一条认证相关审计
 	 * @param snapshot 请求快照，不可为 null；无请求信息时使用 {@link LoginAuditSnapshot#empty()}
 	 * @param eventType 事件类型
-	 * @param result 结果码（与 {@code log_login.login_result} 一致）
+	 * @param result 结果码
 	 * @param userId 用户 ID，未识别可为 null
 	 * @param principal 用户名或邮箱等冗余检索字段
-	 * @param failureReason 失败原因（messageKey 或简短说明）；成功时可为 null
+	 * @param failureReason 失败原因（messageKey 或简短说明）
 	 * @param sessionId 会话 ID（如 jti）；无可为空
 	 */
 	@Async

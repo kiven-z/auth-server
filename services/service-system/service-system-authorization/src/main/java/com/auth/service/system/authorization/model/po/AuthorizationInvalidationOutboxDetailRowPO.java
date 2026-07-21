@@ -9,7 +9,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 授权失效 Outbox 详情行（PO）
+ * 授权失效 Outbox 详情行
  *
  * @author Bunny
  */

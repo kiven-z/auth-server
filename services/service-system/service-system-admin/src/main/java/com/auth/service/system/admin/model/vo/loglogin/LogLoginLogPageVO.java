@@ -9,7 +9,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.io.Serial;
 import java.time.LocalDateTime;
 
 /**
@@ -23,9 +22,6 @@ import java.time.LocalDateTime;
 @ToString
 @EqualsAndHashCode(callSuper = true)
 public class LogLoginLogPageVO extends BaseResponse {
-
-	@Serial
-	private static final long serialVersionUID = 1L;
 
 	@JsonStringFormat
 	@Schema(title = "用户ID")

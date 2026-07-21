@@ -22,7 +22,7 @@ import static com.auth.service.system.message.exception.MessageResultCode.MESSAG
 public abstract class AbstractRecordingMessageSender implements MessageSender {
 
 	/**
-	 * 错误信息最大长度，对齐投递记录表字段上限
+	 * 错误信息最大长度
 	 */
 	protected static final int ERROR_MESSAGE_MAX_LENGTH = 1000;
 

@@ -10,7 +10,7 @@ import com.auth.service.system.message.model.form.inapp.InAppComposeForm;
 import com.auth.service.system.message.model.query.InAppSendTaskQuery;
 import com.auth.service.system.message.model.vo.inapp.InAppComposeResultVO;
 import com.auth.service.system.message.model.vo.inapp.InAppSendTaskDetailVO;
-import com.auth.service.system.message.model.vo.inapp.InAppSendTaskPageResponse;
+import com.auth.service.system.message.model.vo.inapp.InAppSendTaskPageVO;
 import com.auth.service.system.message.service.InAppSendTaskService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,7 +29,7 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
  *
  * @author Bunny
  */
-@Tag(name = "站内信发送任务", description = "管理端发送站内信；提交后异步分批写入收件箱")
+@Tag(name = "站内信发送任务", description = "管理端站内信发送任务")
 @Validated
 @RequestMapping("/api/system/message/in-app")
 @RestController
@@ -44,12 +44,12 @@ public class InAppSendTaskController {
 	@Operation(summary = "分页查询站内信发送任务")
 	@PreAuthorize("@auth.decide('message:inapp:query')")
 	@GetMapping("/tasks")
-	public Result<PageResponse<InAppSendTaskPageResponse>> getSendTaskPage(@Valid InAppSendTaskQuery query) {
-		PageResponse<InAppSendTaskPageResponse> pageResponse = inAppSendTaskService.getSendTaskPage(query);
+	public Result<PageResponse<InAppSendTaskPageVO>> getSendTaskPage(@Valid InAppSendTaskQuery query) {
+		PageResponse<InAppSendTaskPageVO> pageResponse = inAppSendTaskService.getSendTaskPage(query);
 		return Result.success(pageResponse);
 	}
 
-	@Operation(summary = "站内信发送任务详情", description = "按任务 ID 返回正文、范围快照及投递计数")
+	@Operation(summary = "站内信发送任务详情")
 	@PreAuthorize("@auth.decide('message:inapp:detail')")
 	@GetMapping("/tasks/{taskId}")
 	public Result<InAppSendTaskDetailVO> getSendTaskById(@PathVariable Long taskId) {
@@ -89,7 +89,7 @@ public class InAppSendTaskController {
 
 	@OperationLog(targetType = "IN_APP_MESSAGE", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = MessageAuditBizModule.SYS_IN_APP_MESSAGE, operation = OperationLogKind.DELETE)
-	@Operation(summary = "批量删除站内信发送任务", description = "仅终态可删；收件箱随外键 CASCADE 清理")
+	@Operation(summary = "批量删除站内信发送任务")
 	@PreAuthorize("@auth.decide('message:inapp:delete')")
 	@DeleteMapping("/tasks")
 	public Result<String> batchDelete(@RequestBody @NotEmpty(message = "任务ID列表不能为空") List<Long> ids) {

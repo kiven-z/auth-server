@@ -10,7 +10,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.io.Serial;
 import java.time.LocalDateTime;
 import java.util.Date;
 
@@ -25,9 +24,6 @@ import java.util.Date;
 @EqualsAndHashCode(callSuper = true)
 public class SysJobDetailVO extends BaseResponse implements SysJobLastExecutionView {
 
-	@Serial
-	private static final long serialVersionUID = 1L;
-
 	@Schema(title = "任务名称")
 	private String jobName;
 
@@ -40,7 +36,7 @@ public class SysJobDetailVO extends BaseResponse implements SysJobLastExecutionV
 	@Schema(title = "任务类")
 	private String jobClass;
 
-	@Schema(title = "任务类型", description = "BEAN_INVOKE/CUSTOM_CLASS")
+	@Schema(title = "任务类型")
 	private String taskType;
 
 	@Schema(title = "执行处理器")
@@ -55,16 +51,18 @@ public class SysJobDetailVO extends BaseResponse implements SysJobLastExecutionV
 	@Schema(title = "错失策略")
 	private Integer misfirePolicy;
 
-	@Schema(title = "是否并发", description = "true=允许并发执行，false=禁止")
+	@Schema(title = "是否并发")
 	private Boolean concurrent;
 
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "开始时间")
 	private LocalDateTime startTime;
 
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "结束时间")
 	private LocalDateTime endTime;
 
-	@Schema(title = "运行状态", description = "true=正常调度，false=暂停")
+	@Schema(title = "运行状态")
 	private Boolean status;
 
 	@Schema(title = "执行参数 JSON")
@@ -84,14 +82,14 @@ public class SysJobDetailVO extends BaseResponse implements SysJobLastExecutionV
 	@Schema(title = "下次触发")
 	private Date nextFireTime;
 
-	@Schema(title = "运行态", description = "Quartz 实时状态，与 job.status 启停无关")
+	@Schema(title = "运行态")
 	private SysJobQuartzRuntimeStatus quartzRuntimeStatus;
 
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	@Schema(title = "本次开始执行时间", description = "RUNNING 时本次触发的开始时间")
+	@Schema(title = "本次开始执行时间")
 	private Date quartzFireTime;
 
-	@Schema(title = "最近结果", description = "SUCCESS/FAILED/UNKNOWN")
+	@Schema(title = "最近结果")
 	private SysJobLastExecutionStatus lastExecutionStatus;
 
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")

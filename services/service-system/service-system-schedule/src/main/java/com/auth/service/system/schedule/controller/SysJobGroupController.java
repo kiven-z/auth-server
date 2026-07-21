@@ -13,7 +13,7 @@ import com.auth.service.system.schedule.model.form.SysJobGroupForm;
 import com.auth.service.system.schedule.model.form.SysJobGroupUpdateForm;
 import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
 import com.auth.service.system.schedule.model.vo.SysJobGroupDetailVO;
-import com.auth.service.system.schedule.model.vo.SysJobGroupPageResponse;
+import com.auth.service.system.schedule.model.vo.SysJobGroupPageVO;
 import com.auth.service.system.schedule.service.SysJobGroupService;
 import com.auth.service.system.schedule.service.SysJobScheduleSyncService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -52,9 +52,9 @@ public class SysJobGroupController {
 	@Operation(summary = "分页查询任务分组")
 	@PreAuthorize("@auth.decide('schedule:jobgroup:query')")
 	@GetMapping
-	public Result<PageResponse<SysJobGroupPageResponse>> page(SysJobGroupQuery query) {
+	public Result<PageResponse<SysJobGroupPageVO>> page(SysJobGroupQuery query) {
 		Page<JobGroupEntity> page = new Page<>(query.getPageIndex(), query.getPageSize());
-		PageResponse<SysJobGroupPageResponse> response = sysJobGroupService.getPage(page, query);
+		PageResponse<SysJobGroupPageVO> response = sysJobGroupService.getPage(page, query);
 
 		return Result.success(response);
 	}
@@ -62,12 +62,11 @@ public class SysJobGroupController {
 	@Operation(summary = "启用分组下拉/远程搜索")
 	@PreAuthorize("@auth.decide('schedule:jobgroup:query')")
 	@GetMapping("options")
-	public Result<List<SysJobGroupPageResponse>> options(
-			@RequestParam(value = "keyword", required = false) String keyword,
+	public Result<List<SysJobGroupPageVO>> options(@RequestParam(value = "keyword", required = false) String keyword,
 			@RequestParam(value = "limit", defaultValue = "20") int limit) {
 		int max = Math.max(limit, 1);
 		limit = Math.min(max, 60);
-		List<SysJobGroupPageResponse> responses = sysJobGroupService.listEnabledOptions(keyword, limit);
+		List<SysJobGroupPageVO> responses = sysJobGroupService.listEnabledOptions(keyword, limit);
 
 		return Result.success(responses);
 	}

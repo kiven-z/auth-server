@@ -30,7 +30,7 @@ public class InternalAuditUserDisplayController {
 	}
 
 	@InternalApi
-	@Operation(summary = "批量解析用户名", description = "根据用户主键列表返回 id → username 映射；缺失的用户不出现在结果中")
+	@Operation(summary = "批量解析用户名")
 	@PostMapping("/usernames")
 	public Result<Map<Long, String>> mapUsernames(@RequestBody List<Long> userIds) {
 		Map<Long, String> map = auditUserDisplayService.mapUsernamesByIds(userIds);

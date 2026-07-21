@@ -28,10 +28,9 @@ public interface SysDeptService extends IService<SysDeptEntity> {
 
 	/**
 	 * 变更父部门并重算闭包
-	 * @param deptId 部门 ID
 	 * @param form 移动表单
 	 */
-	void move(Long deptId, SysDeptMoveForm form);
+	void move(SysDeptMoveForm form);
 
 	/**
 	 * 逻辑删除部门

@@ -1,7 +1,7 @@
 package com.auth.module.security.contract.api.audit;
 
 /**
- * 操作审计大模块：与微服务边界对齐，用于
+ * 操作审计大模块，用于
  * {@link com.auth.module.security.contract.annotation.OperationLog#serviceDomain()}。
  *
  * @author Bunny

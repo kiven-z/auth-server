@@ -3,7 +3,6 @@ package com.auth.service.system.admin.model.po.loguserpasswordhistory;
 import com.auth.common.core.annotation.Desensitized;
 import com.auth.common.core.annotation.JsonStringFormat;
 import com.auth.common.core.desensitize.DesensitizedType;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,7 +17,7 @@ import java.time.LocalDateTime;
  *
  * @author Bunny
  */
-@Schema(name = "LogUserPasswordHistoryPageRowPO", title = "密码历史日志分页行（PO）")
+@Schema(name = "LogUserPasswordHistoryPageRowPO", title = "密码历史日志分页行")
 @Getter
 @Setter
 @ToString
@@ -42,15 +41,12 @@ public class LogUserPasswordHistoryPageRowPO implements Serializable {
 	@Schema(title = "修改IP地址")
 	private String changeIp;
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "修改时间")
 	private LocalDateTime changeTime;
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "创建时间")
 	private LocalDateTime createTime;
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "更新时间")
 	private LocalDateTime updateTime;
 

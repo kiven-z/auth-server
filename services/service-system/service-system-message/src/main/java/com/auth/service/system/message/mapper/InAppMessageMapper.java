@@ -30,7 +30,7 @@ public interface InAppMessageMapper extends BaseMapper<InAppMessageEntity> {
 			@Param("query") InAppSendTaskQuery query);
 
 	/**
-	 * 状态 CAS 更新（仅当当前状态等于 expected 时切换）
+	 * 状态 CAS 更新
 	 * @param id 任务 ID
 	 * @param expectedStatus 期望当前状态
 	 * @param newStatus 目标状态
@@ -41,7 +41,7 @@ public interface InAppMessageMapper extends BaseMapper<InAppMessageEntity> {
 			@Param("newStatus") String newStatus);
 
 	/**
-	 * 写入终态并同步成功数/总数（以收件箱实投为准）
+	 * 写入终态并同步成功数/总数
 	 * @param id 任务 ID
 	 * @param status 终态
 	 * @param deliveredCount 已投递数
@@ -50,7 +50,7 @@ public interface InAppMessageMapper extends BaseMapper<InAppMessageEntity> {
 	int finishTask(@Param("id") Long id, @Param("status") String status, @Param("deliveredCount") int deliveredCount);
 
 	/**
-	 * 将可恢复任务重置为 PENDING，供补发重新抢占
+	 * 重置任务状态以便补发
 	 * @param id 任务 ID
 	 * @return 影响行数
 	 */

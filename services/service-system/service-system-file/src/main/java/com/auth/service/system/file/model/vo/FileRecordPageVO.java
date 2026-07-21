@@ -8,8 +8,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.io.Serial;
-
 /**
  * 文件记录分页行
  *
@@ -21,9 +19,6 @@ import java.io.Serial;
 @ToString
 @EqualsAndHashCode(callSuper = true)
 public class FileRecordPageVO extends BaseResponse {
-
-	@Serial
-	private static final long serialVersionUID = 1L;
 
 	@Schema(title = "存储平台")
 	private StoragePlatformEnum storagePlatform;

@@ -7,25 +7,18 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.Serial;
-import java.io.Serializable;
-
 /**
  * 消息模板分页查询
  *
  * @author Bunny
  */
-@Schema(name = "MessageTemplateQuery", title = "消息模板查询", description = "消息模板分页查询参数，channel 必填")
+@Schema(name = "MessageTemplateQuery", title = "消息模板查询")
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
-public class MessageTemplateQuery extends PageQueryRequest implements Serializable {
+public class MessageTemplateQuery extends PageQueryRequest {
 
-	@Serial
-	private static final long serialVersionUID = 1L;
-
-	@Schema(name = "channel", title = "消息渠道", description = "如 EMAIL、SMS、DING_TALK、IN_APP",
-			requiredMode = Schema.RequiredMode.REQUIRED)
+	@Schema(name = "channel", title = "消息渠道", requiredMode = Schema.RequiredMode.REQUIRED)
 	@NotBlank(message = "消息渠道不能为空")
 	private String channel;
 

@@ -3,19 +3,20 @@ package com.auth.service.system.message.service.impl;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.mapper.InAppInboxMapper;
 import com.auth.service.system.message.mapper.InAppMessageMapper;
 import com.auth.service.system.message.mapper.InAppMessageRecipientMapper;
 import com.auth.service.system.message.mapper.InAppMessageUserStatusMapper;
 import com.auth.service.system.message.model.entity.InAppMessageEntity;
 import com.auth.service.system.message.model.entity.InAppMessageUserStatusEntity;
-import com.auth.service.system.message.model.enums.DeliveryMode;
 import com.auth.service.system.message.model.enums.InAppContentType;
+import com.auth.service.system.message.model.enums.RecipientScopeType;
 import com.auth.service.system.message.model.enums.InAppMessageStatus;
+import com.auth.service.system.message.model.po.InAppInboxMajorUnreadRowPO;
 import com.auth.service.system.message.model.po.InAppInboxPageRowPO;
 import com.auth.service.system.message.model.query.InAppInboxQuery;
-import com.auth.service.system.message.model.vo.inapp.InAppInboxPageResponse;
+import com.auth.service.system.message.model.vo.inapp.InAppInboxMajorUnreadVO;
+import com.auth.service.system.message.model.vo.inapp.InAppInboxPageVO;
 import com.auth.service.system.message.model.vo.inapp.InAppInboxUnreadCountVO;
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
@@ -36,7 +37,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.JWT_INVALID;
-import static com.auth.service.system.message.exception.MessageResultCode.IN_APP_INBOX_DELIVERY_MODE_INVALID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
@@ -75,13 +75,13 @@ class InAppInboxServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("分页：按当前用户与投递模式查询并映射已读状态")
+	@DisplayName("分页：统一列表按当前用户查询并映射字段")
 	void getInboxPage_shouldPassUserIdAndMapFields() {
-		// 登录用户查 PUSH 收件箱：未读优先结果映射到列表 VO
+		// 登录用户查统一收件箱：未读优先结果映射到列表 VO
 		InAppInboxQuery query = new InAppInboxQuery();
-		query.setDeliveryMode("push");
+		query.setMajorCategoryId(1907200100000000007L);
 		query.setIsRead(false);
-		query.setBizType("NOTICE");
+		query.setCategoryId(1907200100000000401L);
 		query.setTitle("公告");
 		query.setPageIndex(1);
 		query.setPageSize(10);
@@ -92,10 +92,10 @@ class InAppInboxServiceImplTest {
 		row.setSceneCode("notice");
 		row.setTitle("系统公告");
 		row.setContentType(InAppContentType.MARKDOWN.name());
-		row.setBizType("NOTICE");
+		row.setCategoryId(1907200100000000401L);
+		row.setCategoryName("一般通知");
 		row.setLinkUrl("/notice/11");
 		row.setSenderUserId(7L);
-		row.setDeliveryMode(DeliveryMode.PUSH.name());
 		row.setIsRead(false);
 		row.setReadTime(null);
 		row.setCreateTime(now);
@@ -106,31 +106,32 @@ class InAppInboxServiceImplTest {
 		Page<InAppInboxPageRowPO> mapperPage = new Page<>(1, 10);
 		mapperPage.setRecords(List.of(row));
 		mapperPage.setTotal(1);
-		when(inAppInboxMapper.selectPushInboxPage(any(Page.class), eq(100L), any(InAppInboxQuery.class)))
+		when(inAppInboxMapper.selectInboxPage(any(Page.class), eq(100L), any(InAppInboxQuery.class)))
 			.thenReturn(mapperPage);
 
 		try (MockedStatic<SecurityUserUtils> security = mockStatic(SecurityUserUtils.class)) {
 			security.when(SecurityUserUtils::getUserId).thenReturn(100L);
 
-			PageResponse<InAppInboxPageResponse> result = service.getInboxPage(query);
+			PageResponse<InAppInboxPageVO> result = service.getInboxPage(query);
 
 			assertThat(result.getList()).hasSize(1);
-			InAppInboxPageResponse vo = result.getList().get(0);
+			InAppInboxPageVO vo = result.getList().get(0);
 			assertThat(vo.getId()).isEqualTo(11L);
 			assertThat(vo.getSceneCode()).isEqualTo("notice");
 			assertThat(vo.getTitle()).isEqualTo("系统公告");
 			assertThat(vo.getContentType()).isEqualTo(InAppContentType.MARKDOWN.name());
-			assertThat(vo.getBizType()).isEqualTo("NOTICE");
+			assertThat(vo.getCategoryId()).isEqualTo(1907200100000000401L);
+			assertThat(vo.getCategoryName()).isEqualTo("一般通知");
 			assertThat(vo.getLinkUrl()).isEqualTo("/notice/11");
 			assertThat(vo.getSenderUserId()).isEqualTo(7L);
-			assertThat(vo.getDeliveryMode()).isEqualTo(DeliveryMode.PUSH.name());
 			assertThat(vo.getIsRead()).isFalse();
 			assertThat(vo.getReadTime()).isNull();
 		}
 
 		ArgumentCaptor<InAppInboxQuery> queryCaptor = ArgumentCaptor.forClass(InAppInboxQuery.class);
-		verify(inAppInboxMapper).selectPushInboxPage(any(Page.class), eq(100L), queryCaptor.capture());
-		assertThat(queryCaptor.getValue().getDeliveryMode()).isEqualTo("push");
+		verify(inAppInboxMapper).selectInboxPage(any(Page.class), eq(100L), queryCaptor.capture());
+		assertThat(queryCaptor.getValue().getMajorCategoryId()).isEqualTo(1907200100000000007L);
+		assertThat(queryCaptor.getValue().getCategoryId()).isEqualTo(1907200100000000401L);
 		assertThat(queryCaptor.getValue().getIsRead()).isFalse();
 		assertThat(queryCaptor.getValue().getTitle()).isEqualTo("公告");
 	}
@@ -140,7 +141,6 @@ class InAppInboxServiceImplTest {
 	void getInboxPage_shouldRejectWhenUserMissing() {
 		// 无登录用户时拒绝查询
 		InAppInboxQuery query = new InAppInboxQuery();
-		query.setDeliveryMode(DeliveryMode.PULL.name());
 
 		try (MockedStatic<SecurityUserUtils> security = mockStatic(SecurityUserUtils.class)) {
 			security.when(SecurityUserUtils::getUserId).thenReturn(null);
@@ -152,40 +152,54 @@ class InAppInboxServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("分页：投递模式非法时拒绝")
-	void getInboxPage_shouldRejectInvalidDeliveryMode() {
-		// deliveryMode 必须是 PULL / PUSH
-		InAppInboxQuery query = new InAppInboxQuery();
-		query.setDeliveryMode("BROADCAST");
-
-		try (MockedStatic<SecurityUserUtils> security = mockStatic(SecurityUserUtils.class)) {
-			security.when(SecurityUserUtils::getUserId).thenReturn(100L);
-
-			assertThatThrownBy(() -> service.getInboxPage(query)).isInstanceOf(MessageException.class)
-				.extracting(ex -> ((MessageException) ex).getResultCode())
-				.isEqualTo(IN_APP_INBOX_DELIVERY_MODE_INVALID);
-		}
-	}
-
-	@Test
-	@DisplayName("未读角标：汇总 PULL/PUSH 未读并计算总数")
-	void getUnreadCount_shouldAggregatePullAndPush() {
-		// 分别统计公开与定向未读，total = pull + push
-		when(inAppInboxMapper.countPullUnread(100L)).thenReturn(3L);
-		when(inAppInboxMapper.countPushUnread(100L)).thenReturn(5L);
+	@DisplayName("未读角标：按大类汇总名称编码并计算总数")
+	void getUnreadCount_shouldAggregateByMajor() {
+		// Mapper 返回启用大类（含名称/编码），Service 映射并汇总 total
+		InAppInboxMajorUnreadRowPO notice = new InAppInboxMajorUnreadRowPO();
+		notice.setMajorCategoryId(1907200100000000007L);
+		notice.setMajorCategoryName("通知消息");
+		notice.setMajorCategoryCode("NOTICE");
+		notice.setUnreadCount(3L);
+		InAppInboxMajorUnreadRowPO activity = new InAppInboxMajorUnreadRowPO();
+		activity.setMajorCategoryId(1907200100000000006L);
+		activity.setMajorCategoryName("活动消息");
+		activity.setMajorCategoryCode("ACTIVITY");
+		activity.setUnreadCount(5L);
+		when(inAppInboxMapper.selectUnreadCountByMajor(100L)).thenReturn(List.of(notice, activity));
 
 		try (MockedStatic<SecurityUserUtils> security = mockStatic(SecurityUserUtils.class)) {
 			security.when(SecurityUserUtils::getUserId).thenReturn(100L);
 
 			InAppInboxUnreadCountVO result = service.getUnreadCount();
 
-			assertThat(result.getPullUnreadCount()).isEqualTo(3L);
-			assertThat(result.getPushUnreadCount()).isEqualTo(5L);
 			assertThat(result.getTotalUnreadCount()).isEqualTo(8L);
+			assertThat(result.getMajors()).hasSize(2);
+			InAppInboxMajorUnreadVO first = result.getMajors().get(0);
+			assertThat(first.getMajorCategoryId()).isEqualTo(1907200100000000007L);
+			assertThat(first.getMajorCategoryName()).isEqualTo("通知消息");
+			assertThat(first.getMajorCategoryCode()).isEqualTo("NOTICE");
+			assertThat(first.getUnreadCount()).isEqualTo(3L);
+			assertThat(result.getMajors().get(1).getMajorCategoryId()).isEqualTo(1907200100000000006L);
+			assertThat(result.getMajors().get(1).getUnreadCount()).isEqualTo(5L);
 		}
 
-		verify(inAppInboxMapper).countPullUnread(100L);
-		verify(inAppInboxMapper).countPushUnread(100L);
+		verify(inAppInboxMapper).selectUnreadCountByMajor(100L);
+	}
+
+	@Test
+	@DisplayName("未读角标：无启用大类时返回空列表与 0 总数")
+	void getUnreadCount_shouldReturnEmptyWhenNoUnread() {
+		// 无启用大类时 majors 为空、total=0
+		when(inAppInboxMapper.selectUnreadCountByMajor(100L)).thenReturn(List.of());
+
+		try (MockedStatic<SecurityUserUtils> security = mockStatic(SecurityUserUtils.class)) {
+			security.when(SecurityUserUtils::getUserId).thenReturn(100L);
+
+			InAppInboxUnreadCountVO result = service.getUnreadCount();
+
+			assertThat(result.getTotalUnreadCount()).isZero();
+			assertThat(result.getMajors()).isEmpty();
+		}
 	}
 
 	@Test
@@ -202,22 +216,22 @@ class InAppInboxServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("标已读：按投递模式分流，PUSH 改收件行、PULL 懒写状态")
+	@DisplayName("标已读：按范围分流，写扩散改收件行、读扩散懒写状态")
 	void markRead_shouldSplitPushUpdateAndPullUpsert() {
-		// 先查主表分组：PUSH 只更新 recipient，PULL 只 upsert user_status
+		// 先查主表分组：写扩散只更新 recipient，读扩散只 upsert user_status
 		InAppMessageEntity pushMessage = new InAppMessageEntity();
 		pushMessage.setId(11L);
-		pushMessage.setDeliveryMode(DeliveryMode.PUSH.name());
+		pushMessage.setRecipientScopeType(RecipientScopeType.USER.name());
 		pushMessage.setStatus(InAppMessageStatus.SUCCESS.name());
 
 		InAppMessageEntity pushPartial = new InAppMessageEntity();
 		pushPartial.setId(12L);
-		pushPartial.setDeliveryMode(DeliveryMode.PUSH.name());
+		pushPartial.setRecipientScopeType(RecipientScopeType.USER.name());
 		pushPartial.setStatus(InAppMessageStatus.PARTIAL.name());
 
 		InAppMessageEntity pullMessage = new InAppMessageEntity();
 		pullMessage.setId(13L);
-		pullMessage.setDeliveryMode(DeliveryMode.PULL.name());
+		pullMessage.setRecipientScopeType(RecipientScopeType.ALL.name());
 		pullMessage.setStatus(InAppMessageStatus.SUCCESS.name());
 
 		when(inAppMessageMapper.selectList(any(Wrapper.class)))
@@ -249,17 +263,17 @@ class InAppInboxServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("标已读：去重后仅 PUSH 可读时只更新收件行")
+	@DisplayName("标已读：去重后仅写扩散可读时只更新收件行")
 	void markRead_shouldOnlyUpdateRecipientWhenNoPull() {
 		// 重复 ID 去重；只有定向可读消息时不写 user_status
 		InAppMessageEntity pushMessage = new InAppMessageEntity();
 		pushMessage.setId(21L);
-		pushMessage.setDeliveryMode(DeliveryMode.PUSH.name());
+		pushMessage.setRecipientScopeType(RecipientScopeType.USER.name());
 		pushMessage.setStatus(InAppMessageStatus.SUCCESS.name());
 
 		InAppMessageEntity recalledPull = new InAppMessageEntity();
 		recalledPull.setId(22L);
-		recalledPull.setDeliveryMode(DeliveryMode.PULL.name());
+		recalledPull.setRecipientScopeType(RecipientScopeType.ALL.name());
 		recalledPull.setStatus(InAppMessageStatus.RECALLED.name());
 
 		when(inAppMessageMapper.selectList(any(Wrapper.class))).thenReturn(List.of(pushMessage, recalledPull));
@@ -275,12 +289,12 @@ class InAppInboxServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("标已读：仅 PULL 可读时不更新收件行")
+	@DisplayName("标已读：仅读扩散可读时不更新收件行")
 	void markRead_shouldOnlyUpsertUserStatusWhenNoPush() {
 		// 只有公开可读消息时跳过 recipient 更新
 		InAppMessageEntity pullMessage = new InAppMessageEntity();
 		pullMessage.setId(31L);
-		pullMessage.setDeliveryMode(DeliveryMode.PULL.name());
+		pullMessage.setRecipientScopeType(RecipientScopeType.ALL.name());
 		pullMessage.setStatus(InAppMessageStatus.SUCCESS.name());
 		when(inAppMessageMapper.selectList(any(Wrapper.class))).thenReturn(List.of(pullMessage));
 
@@ -311,10 +325,11 @@ class InAppInboxServiceImplTest {
 	@DisplayName("标已读：未登录抛 JWT_INVALID")
 	void markRead_shouldRejectWhenUserMissing() {
 		// 无登录用户时拒绝标已读
+		List<Long> messageIds = List.of(1L);
 		try (MockedStatic<SecurityUserUtils> security = mockStatic(SecurityUserUtils.class)) {
 			security.when(SecurityUserUtils::getUserId).thenReturn(null);
 
-			assertThatThrownBy(() -> service.markRead(List.of(1L))).isInstanceOf(SystemBusinessException.class)
+			assertThatThrownBy(() -> service.markRead(messageIds)).isInstanceOf(SystemBusinessException.class)
 				.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 				.isEqualTo(JWT_INVALID);
 		}

@@ -11,7 +11,7 @@ import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * 菜单新增/更新表单（字段与前端 {@code MenuSaveRequest} camelCase 对齐）
+ * 菜单新增/更新表单
  *
  * @author Bunny
  */

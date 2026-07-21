@@ -10,7 +10,7 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 /**
- * 系统菜单 Mapper
+ * 系统菜单
  *
  * @author Bunny
  */
@@ -18,7 +18,7 @@ import java.util.List;
 public interface SysMenuMapper extends BaseMapper<SysMenuEntity> {
 
 	/**
-	 * 条件查询全部菜单（扁平，供前端建树）
+	 * 条件查询全部菜单
 	 * @param query 查询条件
 	 * @return 菜单列表
 	 */
@@ -33,9 +33,9 @@ public interface SysMenuMapper extends BaseMapper<SysMenuEntity> {
 	IPage<SysMenuEntity> selectPageByQuery(IPage<SysMenuEntity> page, @Param("query") SysMenuQuery query);
 
 	/**
-	 * 查找待删节点中，仍存在「未纳入本次删除」子菜单的父节点 ID（至多一条）。
+	 * 查找待删节点中，仍存在
 	 * @param ids 待删除菜单 ID 列表
-	 * @return 阻塞删除的父菜单 ID；无冲突时 {@code null}
+	 * @return 阻塞删除的父菜单 ID
 	 */
 	Long selectFirstBlockedParentId(@Param("ids") List<Long> ids);
 

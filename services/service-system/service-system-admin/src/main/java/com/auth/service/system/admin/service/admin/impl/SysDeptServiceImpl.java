@@ -119,7 +119,8 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void move(Long deptId, SysDeptMoveForm form) {
+	public void move(SysDeptMoveForm form) {
+		Long deptId = form.getId();
 		SysDeptEntity existing = deptReferenceChecker.getExistingActive(deptId);
 		long newParentId = deptReferenceChecker.normalizeAndRequireActiveParent(form.getParentId());
 

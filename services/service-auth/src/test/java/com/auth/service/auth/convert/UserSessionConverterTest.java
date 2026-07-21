@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class UserSessionConverterTest {
 
 	@Test
-	@DisplayName("会话索引转 VO：对齐字段且不含 refreshTokenHash")
+	@DisplayName("会话索引转 VO：字段完整且不含 refreshTokenHash")
 	void toVo_shouldMapFieldsWithoutRefreshTokenHash() {
 		UserSessionIndex index = new UserSessionIndex();
 		index.setUserId(TestConstants.USER_ID);

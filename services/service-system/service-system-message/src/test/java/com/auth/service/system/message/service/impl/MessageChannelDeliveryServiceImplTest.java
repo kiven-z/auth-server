@@ -10,7 +10,7 @@ import com.auth.service.system.message.model.enums.MessageDeliveryStatus;
 import com.auth.service.system.message.model.po.MessageChannelDeliveryPageRowPO;
 import com.auth.service.system.message.model.query.MessageChannelDeliveryQuery;
 import com.auth.service.system.message.model.vo.delivery.MessageChannelDeliveryDetailVO;
-import com.auth.service.system.message.model.vo.delivery.MessageChannelDeliveryPageResponse;
+import com.auth.service.system.message.model.vo.delivery.MessageChannelDeliveryPageVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.junit.jupiter.api.BeforeEach;
@@ -84,11 +84,10 @@ class MessageChannelDeliveryServiceImplTest {
 		mapperPage.setTotal(1);
 		when(messageChannelDeliveryMapper.selectChannelDeliveryPage(any(Page.class), eq(query))).thenReturn(mapperPage);
 
-		PageResponse<MessageChannelDeliveryPageResponse> result = messageChannelDeliveryService
-			.getChannelDeliveryPage(query);
+		PageResponse<MessageChannelDeliveryPageVO> result = messageChannelDeliveryService.getChannelDeliveryPage(query);
 
 		assertThat(result.getList()).hasSize(1);
-		MessageChannelDeliveryPageResponse vo = result.getList().get(0);
+		MessageChannelDeliveryPageVO vo = result.getList().get(0);
 		assertThat(vo.getId()).isEqualTo(1L);
 		assertThat(vo.getTaskId()).isEqualTo(100L);
 		assertThat(vo.getChannel()).isEqualTo(MessageChannel.EMAIL.name());
@@ -118,8 +117,7 @@ class MessageChannelDeliveryServiceImplTest {
 		mapperPage.setTotal(0);
 		when(messageChannelDeliveryMapper.selectChannelDeliveryPage(any(Page.class), eq(query))).thenReturn(mapperPage);
 
-		PageResponse<MessageChannelDeliveryPageResponse> result = messageChannelDeliveryService
-			.getChannelDeliveryPage(query);
+		PageResponse<MessageChannelDeliveryPageVO> result = messageChannelDeliveryService.getChannelDeliveryPage(query);
 
 		assertThat(result.getList()).isEmpty();
 		assertThat(result.getTotal()).isZero();

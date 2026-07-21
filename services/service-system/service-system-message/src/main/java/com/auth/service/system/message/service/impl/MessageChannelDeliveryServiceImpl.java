@@ -10,7 +10,7 @@ import com.auth.service.system.message.model.entity.MessageChannelDeliveryEntity
 import com.auth.service.system.message.model.po.MessageChannelDeliveryPageRowPO;
 import com.auth.service.system.message.model.query.MessageChannelDeliveryQuery;
 import com.auth.service.system.message.model.vo.delivery.MessageChannelDeliveryDetailVO;
-import com.auth.service.system.message.model.vo.delivery.MessageChannelDeliveryPageResponse;
+import com.auth.service.system.message.model.vo.delivery.MessageChannelDeliveryPageVO;
 import com.auth.service.system.message.service.MessageChannelDeliveryService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -42,11 +42,10 @@ public class MessageChannelDeliveryServiceImpl
 	 */
 	@Override
 	@Transactional(readOnly = true)
-	public PageResponse<MessageChannelDeliveryPageResponse> getChannelDeliveryPage(MessageChannelDeliveryQuery query) {
+	public PageResponse<MessageChannelDeliveryPageVO> getChannelDeliveryPage(MessageChannelDeliveryQuery query) {
 		Page<MessageChannelDeliveryEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
 		IPage<MessageChannelDeliveryPageRowPO> page = baseMapper.selectChannelDeliveryPage(pageParams, query);
-		IPage<MessageChannelDeliveryPageResponse> voPage = page
-			.convert(MessageChannelDeliveryConverter.INSTANCE::toPageResponse);
+		IPage<MessageChannelDeliveryPageVO> voPage = page.convert(MessageChannelDeliveryConverter.INSTANCE::toPageVO);
 
 		auditUserDisplayService.enrichAuditUsernames(voPage, null, null);
 		return PageResponse.of(voPage);

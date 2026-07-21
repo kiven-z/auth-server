@@ -102,7 +102,7 @@ public class CurrentUserController {
 
 	@OperationLog(targetType = "LOGIN_LOG", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.QUERY)
-	@Operation(summary = "分页查询当前用户登录日志（最近180天）")
+	@Operation(summary = "分页查询当前用户登录日志")
 	@GetMapping("/login-logs/page")
 	public Result<PageResponse<MeLoginLogPageVO>> loginLogPage(MeLoginLogPageQuery query) {
 		Page<LoginLogEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());

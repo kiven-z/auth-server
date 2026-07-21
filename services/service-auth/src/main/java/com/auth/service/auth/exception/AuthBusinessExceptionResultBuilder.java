@@ -11,8 +11,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * 将 {@link AuthBusinessException} 转为统一 {@link Result}（稳定子码 + MessageSource 文案 + ext i18n
- * 元数据）
+ * 将 {@link AuthBusinessException} 转为统一 {@link Result}
  *
  * @author Bunny
  */
@@ -32,7 +31,6 @@ public class AuthBusinessExceptionResultBuilder {
 
 		Locale locale = LocaleContextHolder.getLocale();
 		Object[] args = Objects.requireNonNullElse(exception.getMessageArgs(), new Object[0]);
-		// 与枚举单一事实来源对齐，避免 I18nMessageProvider 与 resultCode 漂移
 		String messageKey = Objects.requireNonNull(resultCode.getMessageKey(), "messageKey");
 		// 英文兜底：仅用 MessageSource，避免依赖 SpringContextHolder（便于单测与无上下文场景）
 		String defaultEnglish = messageSource.getMessage(messageKey, args, messageKey, Locale.ENGLISH);

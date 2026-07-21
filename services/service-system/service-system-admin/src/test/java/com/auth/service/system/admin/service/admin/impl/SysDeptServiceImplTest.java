@@ -4,6 +4,7 @@ import com.auth.service.system.admin.mapper.dept.SysDeptMapper;
 import com.auth.service.system.admin.mapper.role.GrantTableMapper;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.form.dept.SysDeptForm;
+import com.auth.service.system.admin.model.form.dept.SysDeptMoveForm;
 import com.auth.service.system.admin.model.query.dept.SysDeptListQuery;
 import com.auth.service.system.admin.model.vo.dept.SysDeptListVO;
 import com.auth.service.system.admin.support.dept.DeptClosureMaintainer;
@@ -217,6 +218,46 @@ class SysDeptServiceImplTest {
 		sysDeptService.updateMeta(form);
 
 		verify(deptClosureMaintainer).moveNode(deptId, 10L);
+		verify(deptInvalidationTrigger).submitByDeptIds(List.of(deptId), "move");
+	}
+
+	@Test
+	@DisplayName("移动部门：父级未变时跳过更新")
+	void moveSkipsUpdateWhenParentUnchanged() {
+		// 父级相同则不写库、不维护闭包
+		Long deptId = 6L;
+		SysDeptEntity existing = activeDept(deptId, "D006");
+		when(deptReferenceChecker.getExistingActive(deptId)).thenReturn(existing);
+		when(deptReferenceChecker.normalizeAndRequireActiveParent(0L)).thenReturn(0L);
+
+		SysDeptMoveForm form = new SysDeptMoveForm();
+		form.setId(deptId);
+		form.setParentId(0L);
+		sysDeptService.move(form);
+
+		verify(sysDeptMapper, never()).updateById(any(SysDeptEntity.class));
+		verify(deptClosureMaintainer, never()).moveNode(anyLong(), anyLong());
+		verify(deptInvalidationTrigger, never()).submitByDeptIds(any(), any());
+	}
+
+	@Test
+	@DisplayName("移动部门：父级变更时更新 parentId、维护闭包并提交失效")
+	void moveUpdatesParentWhenChanged() {
+		// 变更父级后写库并触发授权失效
+		Long deptId = 7L;
+		SysDeptEntity existing = activeDept(deptId, "D007");
+		when(deptReferenceChecker.getExistingActive(deptId)).thenReturn(existing);
+		when(deptReferenceChecker.normalizeAndRequireActiveParent(12L)).thenReturn(12L);
+		when(sysDeptMapper.countDescendantRelation(deptId, 12L)).thenReturn(0L);
+		when(sysDeptMapper.updateById(any(SysDeptEntity.class))).thenReturn(1);
+
+		SysDeptMoveForm form = new SysDeptMoveForm();
+		form.setId(deptId);
+		form.setParentId(12L);
+		sysDeptService.move(form);
+
+		verify(sysDeptMapper).updateById(argThat((SysDeptEntity e) -> Long.valueOf(12L).equals(e.getParentId())));
+		verify(deptClosureMaintainer).moveNode(deptId, 12L);
 		verify(deptInvalidationTrigger).submitByDeptIds(List.of(deptId), "move");
 	}
 

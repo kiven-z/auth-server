@@ -45,7 +45,7 @@ public class InAppComposeDispatchTrigger {
 	}
 
 	/**
-	 * 提交到专用线程池异步派发
+	 * 异步派发站内信任务
 	 * @param taskId 任务 ID
 	 */
 	private void dispatch(Long taskId) {

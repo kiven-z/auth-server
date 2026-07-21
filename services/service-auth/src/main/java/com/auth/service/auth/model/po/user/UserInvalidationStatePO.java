@@ -13,10 +13,10 @@ import lombok.Setter;
 @Setter
 public class UserInvalidationStatePO {
 
-	@Schema(description = "用户ID")
+	@Schema(title = "用户ID")
 	private Long userId;
 
-	@Schema(description = "用户状态（0=禁用,1=正常,2=锁定）")
+	@Schema(title = "用户状态（0=禁用,1=正常,2=锁定）")
 	private Integer status;
 
 }

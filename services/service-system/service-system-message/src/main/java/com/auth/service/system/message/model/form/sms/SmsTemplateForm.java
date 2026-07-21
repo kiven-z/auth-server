@@ -15,11 +15,11 @@ import java.io.Serializable;
 import static com.auth.common.web.validation.ValidationPatterns.LETTER_UNDERSCORE_HYPHEN_REQUIRE_LETTER;
 
 /**
- * 短信模板表单（创建与更新共用；变量列表在独立接口维护）
+ * 短信模板表单
  *
  * @author Bunny
  */
-@Schema(name = "SmsTemplateForm", title = "短信模板表单", description = "用于短信模板信息的创建与更新")
+@Schema(name = "SmsTemplateForm", title = "短信模板表单")
 @Getter
 @Setter
 public class SmsTemplateForm implements Serializable {
@@ -27,7 +27,7 @@ public class SmsTemplateForm implements Serializable {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
-	@Schema(name = "id", title = "主键ID", description = "创建时不传，更新时必填")
+	@Schema(name = "id", title = "主键ID")
 	@NotNull(groups = UpdateGroup.class, message = "更新时ID不能为空")
 	private Long id;
 

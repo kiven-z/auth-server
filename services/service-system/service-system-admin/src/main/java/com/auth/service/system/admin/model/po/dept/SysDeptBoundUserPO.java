@@ -8,8 +8,7 @@ import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * 部门详情-关联用户查询投影（对齐
- * {@link com.auth.service.system.admin.model.vo.reference.UserReferenceVO} + 部门关联扩展）
+ * 部门详情
  *
  * @author bunny
  */

@@ -10,7 +10,7 @@ import lombok.experimental.Accessors;
 import java.time.LocalDateTime;
 
 /**
- * 站内信公开消息用户状态：读扩散懒写入已读/软删
+ * 站内信公开消息用户状态
  *
  * @author Bunny
  */
@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 @Accessors(chain = true)
 public class InAppMessageUserStatusEntity extends BaseEntity {
 
-	@Schema(title = "站内信 ID", description = "对应 in_app_message.id")
+	@Schema(title = "站内信 ID")
 	private Long messageId;
 
 	@Schema(title = "用户 ID")

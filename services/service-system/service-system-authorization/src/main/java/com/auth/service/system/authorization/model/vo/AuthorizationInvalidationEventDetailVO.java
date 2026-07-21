@@ -8,7 +8,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.io.Serial;
 import java.time.LocalDateTime;
 
 /**
@@ -22,9 +21,6 @@ import java.time.LocalDateTime;
 @ToString
 @EqualsAndHashCode(callSuper = true)
 public class AuthorizationInvalidationEventDetailVO extends BaseResponse {
-
-	@Serial
-	private static final long serialVersionUID = 1L;
 
 	@Schema(title = "业务事件 ID")
 	private String eventId;

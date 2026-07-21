@@ -28,7 +28,7 @@ public class MessageSendController {
 	}
 
 	@InternalApi
-	@Operation(summary = "发送消息", description = "按 channel 路由")
+	@Operation(summary = "发送消息")
 	@PostMapping("send")
 	public Result<String> sendByTemplate(@RequestBody TemplateMessageCommand command) {
 		messageDispatchService.sendByTemplate(command);

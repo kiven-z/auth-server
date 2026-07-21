@@ -100,13 +100,7 @@ public enum MessageResultCode implements SystemResultCode {
 	MESSAGE_DELIVERY_FAILED(502, 324, "MESSAGE_DELIVERY_FAILED", "system.message.delivery.failed"),
 
 	/**
-	 * 用户侧收件箱投递模式不支持（{0}=详情）
-	 */
-	IN_APP_INBOX_DELIVERY_MODE_INVALID(400, 325, "IN_APP_INBOX_DELIVERY_MODE_INVALID",
-			"system.in_app.inbox.delivery_mode_invalid"),
-
-	/**
-	 * 站内信业务分类不存在或不可用（{0}=code）
+	 * 站内信业务分类不存在或不可用
 	 */
 	IN_APP_MESSAGE_CATEGORY_NOT_FOUND(404, 326, "IN_APP_MESSAGE_CATEGORY_NOT_FOUND",
 			"system.in_app.message_category.not_found");

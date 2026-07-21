@@ -17,7 +17,7 @@ import com.auth.service.system.schedule.model.po.SysJobDetailRowPO;
 import com.auth.service.system.schedule.model.po.SysJobPageRowPO;
 import com.auth.service.system.schedule.model.query.SysJobQuery;
 import com.auth.service.system.schedule.model.vo.SysJobDetailVO;
-import com.auth.service.system.schedule.model.vo.SysJobPageResponse;
+import com.auth.service.system.schedule.model.vo.SysJobPageVO;
 import com.auth.service.system.schedule.support.SysJobQuartzRuntimeSnapshot;
 import com.auth.service.system.schedule.support.quartz.SysJobQuartzRuntimeReader;
 import com.auth.service.system.schedule.support.quartz.SysJobSchedulerManager;
@@ -223,7 +223,7 @@ class SysJobDefinitionServiceImplTest {
 
 		var response = sysJobDefinitionService.getPage(new Page<>(1, 10), new SysJobQuery());
 
-		SysJobPageResponse row = response.getList().get(0);
+		SysJobPageVO row = response.getList().get(0);
 		assertThat(row.getLastExecutionStatus()).isEqualTo(SysJobLastExecutionStatus.FAILED);
 		assertThat(row.getLastExecutionTime()).isEqualTo(failedLog.getCreateTime());
 	}

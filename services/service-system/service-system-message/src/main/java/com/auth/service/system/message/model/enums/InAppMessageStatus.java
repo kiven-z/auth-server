@@ -45,7 +45,7 @@ public enum InAppMessageStatus {
 	/**
 	 * 解析任务状态（大小写不敏感）
 	 * @param raw 原始字符串
-	 * @return 枚举；无法识别时返回 {@code null}
+	 * @return 枚举；无法识别时返回 NULL
 	 */
 	public static InAppMessageStatus from(String raw) {
 		if (raw == null || raw.isBlank()) {
@@ -60,7 +60,7 @@ public enum InAppMessageStatus {
 	}
 
 	/**
-	 * 是否允许补发重置（与 {@code resetForRetry} 可重置状态一致）
+	 * 是否允许补发重置
 	 * @return true=可重置为 PENDING
 	 */
 	public boolean isRetryable() {
@@ -68,7 +68,7 @@ public enum InAppMessageStatus {
 	}
 
 	/**
-	 * 是否允许撤回（与 {@code recallTask} 可撤回状态一致）
+	 * 是否允许撤回
 	 * @return true=可置为 RECALLED
 	 */
 	public boolean isRecallable() {
@@ -76,7 +76,7 @@ public enum InAppMessageStatus {
 	}
 
 	/**
-	 * 是否允许物理删除（排除进行中，避免与异步派发竞态）
+	 * 是否允许物理删除
 	 * @return true=可删除
 	 */
 	public boolean isDeletable() {

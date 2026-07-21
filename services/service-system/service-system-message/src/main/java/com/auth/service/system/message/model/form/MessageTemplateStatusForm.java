@@ -12,11 +12,11 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * 消息模板批量启用/禁用表单（跨渠道；须带 channel）
+ * 消息模板批量启用/禁用表单
  *
  * @author Bunny
  */
-@Schema(name = "MessageTemplateStatusForm", title = "消息模板批量启用/禁用表单", description = "按 ids 与 channel 批量启停，避免跨渠道误改")
+@Schema(name = "MessageTemplateStatusForm", title = "消息模板批量启用/禁用表单")
 @Getter
 @Setter
 public class MessageTemplateStatusForm implements Serializable {

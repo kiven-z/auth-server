@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * grant_table 授权主体存在性校验器装配：按 {@link GrantTableSubjectType} 注册
- * {@link GrantTableActiveSubjectChecker} Bean。
+ * {@link GrantTableActiveSubjectChecker} Bean
  *
  * @author Bunny
  */
@@ -18,7 +18,7 @@ import org.springframework.context.annotation.Configuration;
 public class GrantTableSubjectCheckerConfiguration {
 
 	/**
-	 * 部门主体在 grant_table 授权前的存在性校验。
+	 * 部门主体在 grant_table 授权前的存在性校验
 	 * @param dept 部门引用校验
 	 * @return 部门主体校验器
 	 */
@@ -28,7 +28,7 @@ public class GrantTableSubjectCheckerConfiguration {
 	}
 
 	/**
-	 * 岗位主体在 grant_table 授权前的存在性校验。
+	 * 岗位主体在 grant_table 授权前的存在性校验
 	 * @param post 岗位引用校验
 	 * @return 岗位主体校验器
 	 */

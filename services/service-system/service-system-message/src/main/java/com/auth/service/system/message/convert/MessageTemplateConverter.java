@@ -4,7 +4,7 @@ import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
 import com.auth.service.system.message.model.po.MessageTemplatePageRowPO;
 import com.auth.service.system.message.model.vo.template.MessageTemplateDetailVO;
-import com.auth.service.system.message.model.vo.template.MessageTemplatePageResponse;
+import com.auth.service.system.message.model.vo.template.MessageTemplatePageVO;
 import com.auth.service.system.message.model.vo.template.MessageTemplateRequireFieldRow;
 import com.auth.service.system.message.support.template.MessageTemplateRequireFieldsJsonSupport;
 import org.mapstruct.Mapper;
@@ -41,15 +41,16 @@ public interface MessageTemplateConverter {
 	 */
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
-	MessageTemplatePageResponse toPageResponse(MessageTemplatePageRowPO po);
+	MessageTemplatePageVO toPageVO(MessageTemplatePageRowPO po);
 
 	/**
-	 * 实体 → 详情 VO（scene_code / body_content 与 API 字段对齐）
+	 * 实体 → 详情 VO
 	 * @param entity 模板实体
 	 * @return 详情 VO
 	 */
 	@Mapping(target = "templateCode", source = "sceneCode")
 	@Mapping(target = "content", source = "bodyContent")
+	@Mapping(target = "previewSubject", ignore = true)
 	@Mapping(target = "previewContent", ignore = true)
 	@Mapping(target = "contentType", ignore = true)
 	@Mapping(target = "requireFields", source = "requireFields", qualifiedByName = "parseRequireFields")

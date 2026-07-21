@@ -30,7 +30,6 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
  */
 @RequiredArgsConstructor
 @Service
-@Transactional(readOnly = true)
 public class LogAuthorizationAuditQueryServiceImpl
 		extends ServiceImpl<LogAuthorizationAuditMapper, LogAuthorizationAuditEntity>
 		implements LogAuthorizationAuditQueryService {
@@ -41,6 +40,7 @@ public class LogAuthorizationAuditQueryServiceImpl
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(readOnly = true)
 	public PageResponse<LogAuthorizationAuditPageVO> getPage(Page<LogAuthorizationAuditEntity> pageParams,
 			LogAuthorizationAuditQuery query) {
 		IPage<LogAuthorizationAuditPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
@@ -54,6 +54,7 @@ public class LogAuthorizationAuditQueryServiceImpl
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(readOnly = true)
 	public LogAuthorizationAuditDetailVO getDetail(Long id) {
 		LogAuthorizationAuditDetailRowPO po = baseMapper.selectDetailById(id);
 		if (po == null) {

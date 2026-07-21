@@ -43,6 +43,7 @@ public class LogOperationQueryServiceImpl extends ServiceImpl<LogOperationMapper
 	public PageResponse<LogOperationPageVO> getPage(Page<LogOperationEntity> pageParams, LogOperationQuery query) {
 		IPage<LogOperationPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
 		IPage<LogOperationPageVO> voPage = page.convert(LogOperationConverter.INSTANCE::toPageVO);
+
 		auditUserDisplayService.enrichAuditUsernames(voPage, vo -> Objects.requireNonNullElse(vo.getUserId(), 0L),
 				LogOperationPageVO::setUsername);
 		return PageResponse.of(voPage);

@@ -21,7 +21,7 @@ import com.auth.service.system.schedule.model.po.SysJobPageRowPO;
 import com.auth.service.system.schedule.model.query.SysJobQuery;
 import com.auth.service.system.schedule.model.vo.SysJobDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobLastExecutionView;
-import com.auth.service.system.schedule.model.vo.SysJobPageResponse;
+import com.auth.service.system.schedule.model.vo.SysJobPageVO;
 import com.auth.service.system.schedule.service.SysJobDefinitionService;
 import com.auth.service.system.schedule.support.SysJobQuartzRuntimeSnapshot;
 import com.auth.service.system.schedule.support.quartz.SysJobQuartzRuntimeReader;
@@ -74,9 +74,9 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<JobMapper, JobEntit
 	 * {@inheritDoc}
 	 */
 	@Override
-	public PageResponse<SysJobPageResponse> getPage(Page<JobEntity> pageParams, SysJobQuery query) {
+	public PageResponse<SysJobPageVO> getPage(Page<JobEntity> pageParams, SysJobQuery query) {
 		IPage<SysJobPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
-		IPage<SysJobPageResponse> voPage = page.convert(SysJobConverter.INSTANCE::toPageResponse);
+		IPage<SysJobPageVO> voPage = page.convert(SysJobConverter.INSTANCE::toPageVO);
 
 		// 丰富最近一次执行
 		enrichLastExecution(voPage.getRecords());

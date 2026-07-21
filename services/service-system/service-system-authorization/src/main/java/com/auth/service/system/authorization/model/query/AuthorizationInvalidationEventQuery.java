@@ -6,8 +6,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.io.Serial;
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
@@ -19,12 +17,9 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
-public class AuthorizationInvalidationEventQuery extends PageQueryRequest implements Serializable {
+public class AuthorizationInvalidationEventQuery extends PageQueryRequest {
 
-	@Serial
-	private static final long serialVersionUID = 1L;
-
-	@Schema(title = "业务事件 ID（前缀匹配）")
+	@Schema(title = "业务事件 ID")
 	private String eventId;
 
 	@Schema(title = "变更维度（AuthorizationChangeKind）")

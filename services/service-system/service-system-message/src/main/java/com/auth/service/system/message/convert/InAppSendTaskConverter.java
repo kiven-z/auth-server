@@ -4,7 +4,7 @@ import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.service.system.message.model.entity.InAppMessageEntity;
 import com.auth.service.system.message.model.po.InAppSendTaskPageRowPO;
 import com.auth.service.system.message.model.vo.inapp.InAppSendTaskDetailVO;
-import com.auth.service.system.message.model.vo.inapp.InAppSendTaskPageResponse;
+import com.auth.service.system.message.model.vo.inapp.InAppSendTaskPageVO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
@@ -26,7 +26,7 @@ public interface InAppSendTaskConverter {
 	 */
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
-	InAppSendTaskPageResponse toPageResponse(InAppSendTaskPageRowPO po);
+	InAppSendTaskPageVO toPageVO(InAppSendTaskPageRowPO po);
 
 	/**
 	 * 实体 → 详情 VO（recipientScopeIds / includeChildren 由调用方按需回填）
@@ -37,6 +37,7 @@ public interface InAppSendTaskConverter {
 	@Mapping(target = "updateUsername", ignore = true)
 	@Mapping(target = "recipientScopeIds", ignore = true)
 	@Mapping(target = "includeChildren", ignore = true)
+	@Mapping(target = "categoryName", ignore = true)
 	InAppSendTaskDetailVO toDetailVo(InAppMessageEntity entity);
 
 }

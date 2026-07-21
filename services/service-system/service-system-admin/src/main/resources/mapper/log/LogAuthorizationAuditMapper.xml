@@ -19,22 +19,16 @@
         log_authorization_audit laa
         <where>
             <if test="query.eventType != null and query.eventType != ''">
-                AND laa.event_type =
-                #{query.eventType}
+                AND laa.event_type = #{query.eventType}
             </if>
             <if test="query.decisionReason != null and query.decisionReason != ''">
-                AND laa.decision_reason =
-                #{query.decisionReason}
+                AND laa.decision_reason = #{query.decisionReason}
             </if>
             <if test="query.className != null and query.className != ''">
-                AND laa.class_name LIKE CONCAT('%',
-                #{query.className},
-                '%'
-                )
+                AND laa.class_name LIKE CONCAT('%', #{query.className}, '%')
             </if>
             <if test="query.createUserId != null">
-                AND laa.create_user =
-                #{query.createUserId}
+                AND laa.create_user = #{query.createUserId}
             </if>
         </where>
         ORDER BY

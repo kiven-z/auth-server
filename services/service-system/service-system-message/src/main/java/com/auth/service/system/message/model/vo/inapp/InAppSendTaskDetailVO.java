@@ -3,6 +3,8 @@ package com.auth.service.system.message.model.vo.inapp;
 import com.auth.common.core.annotation.JsonStringFormat;
 import com.auth.common.core.model.response.BaseResponse;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -39,8 +41,12 @@ public class InAppSendTaskDetailVO extends BaseResponse {
 	@Schema(name = "content", title = "正文")
 	private String content;
 
-	@Schema(name = "bizType", title = "业务分类")
-	private String bizType;
+	@JsonStringFormat
+	@Schema(name = "categoryId", title = "业务小类 ID")
+	private Long categoryId;
+
+	@Schema(name = "categoryName", title = "业务小类名称")
+	private String categoryName;
 
 	@Schema(name = "linkUrl", title = "跳转链接")
 	private String linkUrl;
@@ -55,14 +61,12 @@ public class InAppSendTaskDetailVO extends BaseResponse {
 	@Schema(name = "recipientScopeJson", title = "接收范围快照 JSON")
 	private String recipientScopeJson;
 
-	@Schema(name = "recipientScopeIds", title = "范围 ID 列表", description = "由 recipientScopeJson 解析；ALL 为空列表")
+	@JsonSerialize(contentUsing = ToStringSerializer.class)
+	@Schema(name = "recipientScopeIds", title = "范围 ID 列表")
 	private List<Long> recipientScopeIds;
 
-	@Schema(name = "includeChildren", title = "部门是否包含子部门", description = "仅 DEPT 有值")
+	@Schema(name = "includeChildren", title = "部门是否包含子部门")
 	private Boolean includeChildren;
-
-	@Schema(name = "deliveryMode", title = "投递模式")
-	private String deliveryMode;
 
 	@Schema(name = "totalCount", title = "展开后目标总数")
 	private Integer totalCount;

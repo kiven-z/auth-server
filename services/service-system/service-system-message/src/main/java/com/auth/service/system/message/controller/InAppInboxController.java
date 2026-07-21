@@ -4,7 +4,7 @@ import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.autoconfigure.annotation.AuthenticatedApi;
 import com.auth.service.system.message.model.query.InAppInboxQuery;
-import com.auth.service.system.message.model.vo.inapp.InAppInboxPageResponse;
+import com.auth.service.system.message.model.vo.inapp.InAppInboxPageVO;
 import com.auth.service.system.message.model.vo.inapp.InAppInboxUnreadCountVO;
 import com.auth.service.system.message.service.InAppInboxService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,7 +24,7 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
  * @author Bunny
  */
 @AuthenticatedApi
-@Tag(name = "站内信收件箱", description = "当前用户公开/定向消息分页、未读角标与已读；登录即可访问")
+@Tag(name = "站内信收件箱")
 @Validated
 @RequestMapping("/api/system/me/message/in-app")
 @RestController
@@ -38,8 +38,8 @@ public class InAppInboxController {
 
 	@Operation(summary = "分页查询我的站内信")
 	@GetMapping("/inbox")
-	public Result<PageResponse<InAppInboxPageResponse>> getInboxPage(@Valid InAppInboxQuery query) {
-		PageResponse<InAppInboxPageResponse> pageResponse = inAppInboxService.getInboxPage(query);
+	public Result<PageResponse<InAppInboxPageVO>> getInboxPage(@Valid InAppInboxQuery query) {
+		PageResponse<InAppInboxPageVO> pageResponse = inAppInboxService.getInboxPage(query);
 		return Result.success(pageResponse);
 	}
 

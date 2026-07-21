@@ -33,7 +33,7 @@ public class AnnotationOverridingAuthorizationSupport {
 	}
 
 	/**
-	 * 与 authenticated() 语义对齐：匿名主体不算已认证
+	 * 匿名主体不算已认证
 	 * @param authentication 认证
 	 * @return 是否认证
 	 */

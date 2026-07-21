@@ -43,7 +43,7 @@ public class SysDeptManageController {
 
 	@OperationLog(targetType = "DEPT_CLOSURE_HEALTH", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = AuthorizationAuditBizModule.DEPT_CLOSURE, operation = OperationLogKind.QUERY)
-	@Operation(summary = "部门闭包表健康检查（只读运维）")
+	@Operation(summary = "部门闭包表健康检查")
 	@PreAuthorize("@auth.decide('sys:dept:diagnose')")
 	@GetMapping("/closure/health")
 	public Result<DeptClosureHealthVO> closureHealth() {

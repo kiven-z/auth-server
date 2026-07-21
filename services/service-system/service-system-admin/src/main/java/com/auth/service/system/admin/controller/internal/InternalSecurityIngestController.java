@@ -30,7 +30,7 @@ public class InternalSecurityIngestController {
 	}
 
 	@InternalApi
-	@Operation(summary = "追加授权审计记录", description = "供鉴权等服务内部上报授权决策审计")
+	@Operation(summary = "追加授权审计记录")
 	@PostMapping("/authorization-audit/records")
 	public Result<Void> appendAuthorizationAudit(@RequestBody AuthorizationAuditIngestRequest body) {
 		SecurityAuthorizationAuditPayloadEvent event = body.toPayloadEvent();
@@ -39,7 +39,7 @@ public class InternalSecurityIngestController {
 	}
 
 	@InternalApi
-	@Operation(summary = "追加操作日志", description = "供鉴权等服务内部上报操作日志")
+	@Operation(summary = "追加操作日志")
 	@PostMapping("/operation-log/records")
 	public Result<Void> appendOperationLog(@RequestBody OperationLogIngestRequest body) {
 		securityIngestService.append(body.toPayload());

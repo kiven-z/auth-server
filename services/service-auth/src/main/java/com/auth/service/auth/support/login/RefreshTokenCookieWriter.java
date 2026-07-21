@@ -15,7 +15,7 @@ import java.util.Arrays;
 import java.util.Optional;
 
 /**
- * 刷新令牌 Cookie 读写及「记住我」策略。
+ * 刷新令牌 Cookie 读写及「记住我」策略
  *
  * @author Bunny
  */
@@ -41,7 +41,7 @@ public class RefreshTokenCookieWriter {
 	private final JwtProperties jwtProperties;
 
 	/**
-	 * 按「记住我」策略写入 Refresh Cookie。
+	 * 按「记住我」策略写入 Refresh Cookie
 	 * @param response HTTP 响应
 	 * @param request HTTP 请求
 	 * @param refreshToken 刷新令牌
@@ -54,7 +54,7 @@ public class RefreshTokenCookieWriter {
 	}
 
 	/**
-	 * 解析响应中的「阅读/记住」天数（与前端 multiple-tabs expires 对齐）。
+	 * 解析响应中的「阅读/记住」天数
 	 * @return 天数（不足一天按 1 天计）
 	 */
 	public long resolveReadMeDay() {
@@ -66,7 +66,7 @@ public class RefreshTokenCookieWriter {
 	}
 
 	/**
-	 * 从 Cookie 中读取刷新令牌，不存在时返回空字符串交由业务层统一抛错。
+	 * 从 Cookie 中读取刷新令牌，不存在时返回空字符串交由业务层统一抛错
 	 * @param request HTTP 请求
 	 * @return 刷新令牌
 	 */
@@ -82,7 +82,7 @@ public class RefreshTokenCookieWriter {
 	}
 
 	/**
-	 * 下发 HttpOnly 刷新令牌 Cookie。
+	 * 下发 HttpOnly 刷新令牌 Cookie
 	 * @param response HTTP 响应
 	 * @param request HTTP 请求
 	 * @param refreshToken 刷新令牌
@@ -104,7 +104,7 @@ public class RefreshTokenCookieWriter {
 	}
 
 	/**
-	 * 清除 HttpOnly 刷新令牌 Cookie。
+	 * 清除 HttpOnly 刷新令牌 Cookie
 	 * @param response HTTP 响应
 	 * @param request HTTP 请求
 	 */
@@ -120,7 +120,7 @@ public class RefreshTokenCookieWriter {
 	}
 
 	/**
-	 * 在 HTTPS 或网关透传 HTTPS 协议头时启用 Secure。
+	 * 在 HTTPS 或网关透传 HTTPS 协议头时启用 Secure
 	 * @param request HTTP 请求
 	 * @return 是否开启 Secure
 	 */

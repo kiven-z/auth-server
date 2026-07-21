@@ -15,11 +15,11 @@ import java.time.LocalDateTime;
  *
  * @author Bunny
  */
-@Schema(name = "MessageChannelDeliveryPageResponse", title = "渠道投递记录分页返回对象")
+@Schema(name = "MessageChannelDeliveryPageVO", title = "渠道投递记录分页返回对象")
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
-public class MessageChannelDeliveryPageResponse extends BaseResponse {
+public class MessageChannelDeliveryPageVO extends BaseResponse {
 
 	@JsonStringFormat
 	@Schema(name = "taskId", title = "任务/批次 ID")

@@ -14,7 +14,7 @@ import com.auth.service.system.schedule.model.form.SysJobStatusForm;
 import com.auth.service.system.schedule.model.form.SysJobUpdateForm;
 import com.auth.service.system.schedule.model.query.SysJobQuery;
 import com.auth.service.system.schedule.model.vo.SysJobDetailVO;
-import com.auth.service.system.schedule.model.vo.SysJobPageResponse;
+import com.auth.service.system.schedule.model.vo.SysJobPageVO;
 import com.auth.service.system.schedule.service.SysJobDefinitionService;
 import com.auth.service.system.schedule.service.SysJobScheduleSyncService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -49,9 +49,9 @@ public class SysJobController {
 	@Operation(summary = "分页查询定时任务")
 	@PreAuthorize("@auth.decide('schedule:job:query')")
 	@GetMapping
-	public Result<PageResponse<SysJobPageResponse>> page(SysJobQuery query) {
+	public Result<PageResponse<SysJobPageVO>> page(SysJobQuery query) {
 		Page<JobEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
-		PageResponse<SysJobPageResponse> response = sysJobDefinitionService.getPage(pageParams, query);
+		PageResponse<SysJobPageVO> response = sysJobDefinitionService.getPage(pageParams, query);
 
 		return Result.success(response);
 	}
@@ -61,7 +61,6 @@ public class SysJobController {
 	@GetMapping("{id}")
 	public Result<SysJobDetailVO> detail(@PathVariable("id") Long id) {
 		SysJobDetailVO detail = sysJobDefinitionService.getDetail(id);
-
 		return Result.success(detail);
 	}
 
@@ -70,7 +69,6 @@ public class SysJobController {
 	@PostMapping
 	public Result<String> create(@Validated(CreateGroup.class) @RequestBody SysJobCreateForm form) {
 		sysJobDefinitionService.create(form);
-
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
@@ -81,7 +79,6 @@ public class SysJobController {
 	@PutMapping
 	public Result<String> update(@Validated(UpdateGroup.class) @RequestBody SysJobUpdateForm form) {
 		sysJobDefinitionService.update(form);
-
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
@@ -92,7 +89,6 @@ public class SysJobController {
 	@DeleteMapping("{id}")
 	public Result<String> delete(@PathVariable("id") Long id) {
 		sysJobDefinitionService.deleteById(id);
-
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 

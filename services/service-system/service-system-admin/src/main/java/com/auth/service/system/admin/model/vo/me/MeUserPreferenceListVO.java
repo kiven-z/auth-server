@@ -17,7 +17,7 @@ import java.util.List;
 @ToString
 public class MeUserPreferenceListVO {
 
-	@Schema(description = "偏好配置项列表")
+	@Schema(title = "偏好配置项列表")
 	private List<MeUserPreferenceItemVO> items;
 
 }
