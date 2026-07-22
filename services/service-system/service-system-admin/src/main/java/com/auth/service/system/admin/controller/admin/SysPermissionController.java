@@ -1,5 +1,6 @@
 package com.auth.service.system.admin.controller.admin;
 
+import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.common.web.valid.group.CreateGroup;
@@ -10,17 +11,15 @@ import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.admin.excel.permission.SysPermissionSpreadsheetService;
-import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.form.permission.SysPermissionForm;
 import com.auth.service.system.admin.model.query.permission.SysPermissionQuery;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionDetailVO;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionPageVO;
-import com.auth.service.system.admin.service.admin.SysPermissionQueryService;
 import com.auth.service.system.admin.service.admin.SysPermissionService;
 import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -44,8 +43,6 @@ import java.util.List;
 @RequestMapping("/api/system/permission")
 @RestController
 public class SysPermissionController {
-
-	private final SysPermissionQueryService sysPermissionQueryService;
 
 	private final SysPermissionService sysPermissionService;
 
@@ -77,16 +74,15 @@ public class SysPermissionController {
 	@PreAuthorize("@auth.decide('sys:permission:query')")
 	@GetMapping("/page")
 	public Result<PageResponse<SysPermissionPageVO>> page(SysPermissionQuery query) {
-		Page<SysPermissionEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
-		PageResponse<SysPermissionPageVO> result = sysPermissionQueryService.getPage(pageParams, query);
-		return Result.success(result);
+		PageResponse<SysPermissionPageVO> response = sysPermissionService.getPage(query);
+		return Result.success(response);
 	}
 
 	@Operation(summary = "权限详情")
 	@PreAuthorize("@auth.decide('sys:permission:detail')")
 	@GetMapping("/{id}")
 	public Result<SysPermissionDetailVO> detail(@PathVariable("id") Long id) {
-		SysPermissionDetailVO vo = sysPermissionQueryService.getDetail(id);
+		SysPermissionDetailVO vo = sysPermissionService.getDetail(id);
 		return Result.success(vo);
 	}
 
@@ -105,6 +101,16 @@ public class SysPermissionController {
 	@PutMapping
 	public Result<Void> update(@Validated(UpdateGroup.class) @RequestBody SysPermissionForm form) {
 		sysPermissionService.update(form);
+		return Result.success();
+	}
+
+	@OperationLog(targetType = "PERMISSION", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = AuthorizationAuditBizModule.SYS_PERMISSION, operation = OperationLogKind.UPDATE)
+	@Operation(summary = "批量启停权限")
+	@PreAuthorize("@auth.decide('sys:permission:update')")
+	@PutMapping("/status")
+	public Result<Void> batchUpdateStatus(@Valid @RequestBody IdsEnableStatusForm form) {
+		sysPermissionService.batchUpdateStatus(form);
 		return Result.success();
 	}
 

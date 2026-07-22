@@ -6,7 +6,6 @@ import com.auth.service.system.admin.model.query.dept.SysDeptListQuery;
 import com.auth.service.system.admin.model.query.dept.SysDeptPageQuery;
 import com.auth.service.system.admin.model.vo.dept.SysDeptDetailVO;
 import com.auth.service.system.admin.model.vo.dept.SysDeptListVO;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
@@ -27,11 +26,10 @@ public interface SysDeptQueryService extends IService<SysDeptEntity> {
 
 	/**
 	 * 分页查询部门（表格视图）
-	 * @param pageParams 分页参数
 	 * @param query 筛选与分页
 	 * @return 分页结果
 	 */
-	PageResponse<SysDeptListVO> pageFlat(Page<SysDeptEntity> pageParams, SysDeptPageQuery query);
+	PageResponse<SysDeptListVO> pageFlat(SysDeptPageQuery query);
 
 	/**
 	 * 部门详情

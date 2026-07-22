@@ -7,7 +7,6 @@ import com.auth.service.system.schedule.model.form.SysJobUpdateForm;
 import com.auth.service.system.schedule.model.query.SysJobQuery;
 import com.auth.service.system.schedule.model.vo.SysJobDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobPageVO;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -19,11 +18,10 @@ public interface SysJobDefinitionService extends IService<JobEntity> {
 
 	/**
 	 * 分页查询
-	 * @param pageParams 分页
 	 * @param query 查询参数
 	 * @return 分页结果
 	 */
-	PageResponse<SysJobPageVO> getPage(Page<JobEntity> pageParams, SysJobQuery query);
+	PageResponse<SysJobPageVO> getPage(SysJobQuery query);
 
 	/**
 	 * 详情查询

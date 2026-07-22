@@ -1,24 +1,30 @@
 package com.auth.service.system.admin.support.user;
 
 import cn.hutool.core.text.CharSequenceUtil;
+import com.auth.module.file.api.model.enums.FileDeleteSource;
 import com.auth.module.file.api.model.request.OwnedFileAssertByUrlRequest;
+import com.auth.module.file.api.model.request.OwnedFileDeleteByUrlRequest;
 import com.auth.module.file.api.policy.FileBizType;
 import com.auth.module.file.api.port.OwnedFileOperations;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.admin.mapper.user.SysUserMapper;
-import com.auth.service.system.admin.support.me.OldAvatarCleanupTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+
+import java.util.concurrent.Executor;
 
 /**
  * 用户头像写入与旧图清理
  *
  * @author Bunny
  */
-@RequiredArgsConstructor
+@Slf4j
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class UserAvatarUpdateSupport {
@@ -27,13 +33,20 @@ public class UserAvatarUpdateSupport {
 
 	private final OwnedFileOperations ownedFileOperations;
 
-	private final OldAvatarCleanupTrigger oldAvatarCleanupTrigger;
+	private final Executor adminAsyncExecutor;
+
+	public UserAvatarUpdateSupport(SysUserMapper sysUserMapper, OwnedFileOperations ownedFileOperations,
+			@Qualifier("adminAsyncExecutor") Executor adminAsyncExecutor) {
+		this.sysUserMapper = sysUserMapper;
+		this.ownedFileOperations = ownedFileOperations;
+		this.adminAsyncExecutor = adminAsyncExecutor;
+	}
 
 	/**
-	 * 写入头像并触发旧图清理
+	 * 写入头像并在事务提交后异步清理旧图
 	 * @param targetUser 目标用户
 	 * @param avatar 新头像 URL
-	 * @param fileOwnerUserId 文件归属校验用的用户 ID（自助为本人，管理员为操作者）
+	 * @param fileOwnerUserId 文件归属校验用的用户 ID
 	 */
 	public void applyAvatarUpdate(UserEntity targetUser, String avatar, Long fileOwnerUserId) {
 		String oldAvatar = targetUser.getAvatar();
@@ -55,7 +68,50 @@ public class UserAvatarUpdateSupport {
 		targetUser.setAvatar(avatar);
 		sysUserMapper.updateById(targetUser);
 
-		oldAvatarCleanupTrigger.cleanupAfterCommit(targetUser.getId(), oldAvatar);
+		cleanupOldAvatarAfterCommit(targetUser.getId(), oldAvatar);
+	}
+
+	/**
+	 * 事务提交后再异步清理旧头像
+	 * @param ownerUserId 文件归属用户 ID
+	 * @param oldAvatarUrl 待清理的旧头像 URL
+	 */
+	private void cleanupOldAvatarAfterCommit(Long ownerUserId, String oldAvatarUrl) {
+		if (ownerUserId == null || CharSequenceUtil.isBlank(oldAvatarUrl)) {
+			return;
+		}
+		if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+			submitCleanupOldAvatar(ownerUserId, oldAvatarUrl);
+			return;
+		}
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+			@Override
+			public void afterCommit() {
+				submitCleanupOldAvatar(ownerUserId, oldAvatarUrl);
+			}
+		});
+	}
+
+	/**
+	 * 将旧头像清理提交到执行器
+	 * @param ownerUserId 文件归属用户 ID
+	 * @param oldAvatarUrl 待清理的旧头像 URL
+	 */
+	private void submitCleanupOldAvatar(Long ownerUserId, String oldAvatarUrl) {
+		adminAsyncExecutor.execute(() -> {
+			try {
+				ownedFileOperations.tryDeleteOwnedByUrl(OwnedFileDeleteByUrlRequest.builder()
+					.url(oldAvatarUrl)
+					.ownerUserId(ownerUserId)
+					.deleteSource(FileDeleteSource.SYSTEM_ACTION.getCode())
+					.bizType(FileBizType.AVATAR.getCode())
+					.build());
+			}
+			catch (RuntimeException ex) {
+				log.warn("Failed to cleanup old avatar: ownerUserId={}, url={}, error={}", ownerUserId, oldAvatarUrl,
+						ex.getMessage());
+			}
+		});
 	}
 
 }

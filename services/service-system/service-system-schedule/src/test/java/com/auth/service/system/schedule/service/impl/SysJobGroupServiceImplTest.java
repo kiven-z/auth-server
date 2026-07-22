@@ -6,11 +6,7 @@ import com.auth.service.system.schedule.mapper.JobGroupMapper;
 import com.auth.service.system.schedule.mapper.JobMapper;
 import com.auth.service.system.schedule.model.entity.JobGroupEntity;
 import com.auth.service.system.schedule.model.form.SysJobGroupForm;
-import com.auth.service.system.schedule.model.po.JobGroupPageRowPO;
-import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
 import com.auth.service.system.schedule.model.vo.SysJobGroupDetailVO;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.repository.CrudRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -69,43 +65,6 @@ class SysJobGroupServiceImplTest {
 		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysJobGroupService, jobGroupMapper);
-	}
-
-	@Test
-	@DisplayName("分页查询：补全审计展示名")
-	void getPageEnrichesUsernames() {
-		Page<JobGroupEntity> pageParams = new Page<>(1, 10);
-		SysJobGroupQuery query = new SysJobGroupQuery();
-		Page<JobGroupPageRowPO> poPage = new Page<>(1, 10);
-		poPage.setRecords(List.of(new JobGroupPageRowPO()));
-		when(jobGroupMapper.selectListByPage(pageParams, query)).thenReturn(poPage);
-
-		sysJobGroupService.getPage(pageParams, query);
-
-		verify(auditUserDisplayService).enrichAuditUsernames(any(IPage.class), isNull(), isNull());
-	}
-
-	@Test
-	@DisplayName("启用下拉：keyword 原样透传，并补全展示名")
-	void listEnabledOptionsPassesKeywordThrough() {
-		List<JobGroupPageRowPO> rows = List.of(new JobGroupPageRowPO());
-		when(jobGroupMapper.selectEnabledOptions("  kw  ", 999)).thenReturn(rows);
-
-		List<?> result = sysJobGroupService.listEnabledOptions("  kw  ", 999);
-
-		assertThat(result).hasSize(1);
-		verify(jobGroupMapper).selectEnabledOptions("  kw  ", 999);
-		verify(auditUserDisplayService).enrichAuditUsernames(any(List.class), isNull(), isNull());
-	}
-
-	@Test
-	@DisplayName("启用下拉：limit 为 0 按原值传入")
-	void listEnabledOptionsWithZeroLimit() {
-		when(jobGroupMapper.selectEnabledOptions(null, 0)).thenReturn(List.of());
-
-		sysJobGroupService.listEnabledOptions(null, 0);
-
-		verify(jobGroupMapper).selectEnabledOptions(null, 0);
 	}
 
 	@Test

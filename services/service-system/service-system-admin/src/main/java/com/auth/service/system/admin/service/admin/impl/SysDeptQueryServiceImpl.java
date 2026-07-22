@@ -60,7 +60,8 @@ public class SysDeptQueryServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptE
 	 * {@inheritDoc}
 	 */
 	@Override
-	public PageResponse<SysDeptListVO> pageFlat(Page<SysDeptEntity> pageParams, SysDeptPageQuery query) {
+	public PageResponse<SysDeptListVO> pageFlat(SysDeptPageQuery query) {
+		Page<SysDeptEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
 		IPage<SysDeptPageRowPO> poPage = baseMapper.selectListByPage(pageParams, query);
 		IPage<SysDeptListVO> result = poPage.convert(SysDeptConverter.INSTANCE::toListVoFromPageRow);
 

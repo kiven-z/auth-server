@@ -19,6 +19,7 @@ class OperationLogIngestRequestTest {
 	void roundTrip_shouldPreserveTargetId() {
 		OperationLogPayloadEvent original = OperationLogPayloadEvent.builder()
 			.userId(1L)
+			.username("alice")
 			.operationType("QUERY")
 			.module("SYSTEM:X")
 			.targetType("Dept")
@@ -37,9 +38,11 @@ class OperationLogIngestRequestTest {
 
 		OperationLogIngestRequest req = OperationLogIngestRequest.fromPayload(original);
 		assertEquals(55L, req.getTargetId());
+		assertEquals("alice", req.getUsername());
 
 		OperationLogPayloadEvent back = req.toPayload();
 		assertEquals(55L, back.getTargetId());
+		assertEquals("alice", back.getUsername());
 	}
 
 	@Test

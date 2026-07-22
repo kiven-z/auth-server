@@ -1,11 +1,11 @@
 package com.auth.service.system.authorization.dispatch.trigger;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest;
 import com.auth.module.security.contract.dto.invalidation.RoleInvalidatePayload;
 import com.auth.service.system.authorization.dispatch.AuthorizationInvalidationCoordinator;
+import com.auth.service.system.authorization.dispatch.support.AuthorizationInvalidationSourceBizIds;
 import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +36,7 @@ public class RoleAuthorizationInvalidationTrigger {
 			return;
 		}
 
-		String sourceBizId = CharSequenceUtil.blankToDefault(operation, "invalidate") + ":" + String.join(",", codes);
+		String sourceBizId = AuthorizationInvalidationSourceBizIds.of(operation);
 		String eventId = AuthorizationChangeKind.ROLE.eventIdPrefix() + ":" + IdWorker.getId();
 		var payload = new RoleInvalidatePayload(codes);
 		var request = new AuthorizationInvalidateRequest(eventId, AuthorizationChangeKind.ROLE, payload);

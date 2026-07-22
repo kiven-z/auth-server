@@ -46,6 +46,7 @@ public class SecurityIngestEntityAssembler {
 	public static LogOperationEntity toEntity(OperationLogPayloadEvent payload, Long principalUserId) {
 		LogOperationEntity entity = new LogOperationEntity();
 		entity.setUserId(principalUserId);
+		entity.setUsername(payload.getUsername());
 		entity.setCreateUser(principalUserId);
 		entity.setUpdateUser(principalUserId);
 		entity.setOperationType(payload.getOperationType());

@@ -1,20 +1,23 @@
 package com.auth.service.system.admin.support.user;
 
 import com.auth.module.file.api.model.request.OwnedFileAssertByUrlRequest;
+import com.auth.module.file.api.model.request.OwnedFileDeleteByUrlRequest;
 import com.auth.module.file.api.port.OwnedFileOperations;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.admin.mapper.user.SysUserMapper;
-import com.auth.service.system.admin.support.me.OldAvatarCleanupTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -38,10 +41,8 @@ class UserAvatarUpdateSupportTest {
 	@Mock
 	private OwnedFileOperations ownedFileOperations;
 
-	@Mock
-	private OldAvatarCleanupTrigger oldAvatarCleanupTrigger;
+	private AtomicBoolean submittedToExecutor;
 
-	@InjectMocks
 	private UserAvatarUpdateSupport userAvatarUpdateSupport;
 
 	private static UserEntity existingUser() {
@@ -51,8 +52,18 @@ class UserAvatarUpdateSupportTest {
 		return entity;
 	}
 
+	@BeforeEach
+	void setUp() {
+		submittedToExecutor = new AtomicBoolean(false);
+		Executor executor = runnable -> {
+			submittedToExecutor.set(true);
+			runnable.run();
+		};
+		userAvatarUpdateSupport = new UserAvatarUpdateSupport(sysUserMapper, ownedFileOperations, executor);
+	}
+
 	@Test
-	@DisplayName("applyAvatarUpdate：校验归属后更新头像并触发旧头像清理")
+	@DisplayName("applyAvatarUpdate：校验归属后更新头像并异步清理旧头像")
 	void applyAvatarUpdate_updatesAvatarAndTriggersCleanup() {
 		UserEntity existing = existingUser();
 		String oldAvatar = "https://cdn.example.com/public/avatar/old.png";
@@ -73,7 +84,12 @@ class UserAvatarUpdateSupportTest {
 		verify(ownedFileOperations).assertOwnedFileUrl(assertCaptor.capture());
 		assertThat(assertCaptor.getValue().getOwnerUserId()).isEqualTo(USER_ID);
 
-		verify(oldAvatarCleanupTrigger).cleanupAfterCommit(USER_ID, oldAvatar);
+		assertThat(submittedToExecutor).isTrue();
+		ArgumentCaptor<OwnedFileDeleteByUrlRequest> deleteCaptor = ArgumentCaptor
+			.forClass(OwnedFileDeleteByUrlRequest.class);
+		verify(ownedFileOperations).tryDeleteOwnedByUrl(deleteCaptor.capture());
+		assertThat(deleteCaptor.getValue().getUrl()).isEqualTo(oldAvatar);
+		assertThat(deleteCaptor.getValue().getOwnerUserId()).isEqualTo(USER_ID);
 	}
 
 	@Test
@@ -103,7 +119,8 @@ class UserAvatarUpdateSupportTest {
 		userAvatarUpdateSupport.applyAvatarUpdate(existing, avatar, USER_ID);
 
 		verify(sysUserMapper, never()).updateById(any(UserEntity.class));
-		verify(oldAvatarCleanupTrigger, never()).cleanupAfterCommit(any(), any());
+		verify(ownedFileOperations, never()).tryDeleteOwnedByUrl(any());
+		assertThat(submittedToExecutor).isFalse();
 	}
 
 	@Test
@@ -122,7 +139,27 @@ class UserAvatarUpdateSupportTest {
 			.isEqualTo(SystemCommonResultCode.OPERATION_FAILED);
 
 		verify(sysUserMapper, never()).updateById(any(UserEntity.class));
-		verify(oldAvatarCleanupTrigger, never()).cleanupAfterCommit(any(), any());
+		verify(ownedFileOperations, never()).tryDeleteOwnedByUrl(any());
+		assertThat(submittedToExecutor).isFalse();
+	}
+
+	@Test
+	@DisplayName("doCleanup：清理失败只记日志不影响调用方")
+	void applyAvatarUpdate_cleanupFailureIsSwallowed() {
+		UserEntity existing = existingUser();
+		existing.setAvatar("https://cdn.example.com/public/avatar/old.png");
+		String newAvatar = "https://cdn.example.com/public/avatar/new.png";
+
+		doNothing().when(ownedFileOperations).assertOwnedFileUrl(any(OwnedFileAssertByUrlRequest.class));
+		when(sysUserMapper.updateById(any(UserEntity.class))).thenReturn(1);
+		doThrow(new RuntimeException("delete failed")).when(ownedFileOperations)
+			.tryDeleteOwnedByUrl(any(OwnedFileDeleteByUrlRequest.class));
+
+		userAvatarUpdateSupport.applyAvatarUpdate(existing, newAvatar, USER_ID);
+
+		assertThat(submittedToExecutor).isTrue();
+		verify(sysUserMapper).updateById(any(UserEntity.class));
+		verify(ownedFileOperations).tryDeleteOwnedByUrl(any(OwnedFileDeleteByUrlRequest.class));
 	}
 
 }

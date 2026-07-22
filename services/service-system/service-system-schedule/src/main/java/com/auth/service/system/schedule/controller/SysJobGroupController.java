@@ -8,7 +8,6 @@ import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.schedule.model.constants.ScheduleAuditBizModule;
-import com.auth.service.system.schedule.model.entity.JobGroupEntity;
 import com.auth.service.system.schedule.model.form.SysJobGroupForm;
 import com.auth.service.system.schedule.model.form.SysJobGroupUpdateForm;
 import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
@@ -16,7 +15,6 @@ import com.auth.service.system.schedule.model.vo.SysJobGroupDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobGroupPageVO;
 import com.auth.service.system.schedule.service.SysJobGroupService;
 import com.auth.service.system.schedule.service.SysJobScheduleSyncService;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -53,9 +51,7 @@ public class SysJobGroupController {
 	@PreAuthorize("@auth.decide('schedule:jobgroup:query')")
 	@GetMapping
 	public Result<PageResponse<SysJobGroupPageVO>> page(SysJobGroupQuery query) {
-		Page<JobGroupEntity> page = new Page<>(query.getPageIndex(), query.getPageSize());
-		PageResponse<SysJobGroupPageVO> response = sysJobGroupService.getPage(page, query);
-
+		PageResponse<SysJobGroupPageVO> response = sysJobGroupService.getPage(query);
 		return Result.success(response);
 	}
 

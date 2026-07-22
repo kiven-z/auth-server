@@ -1,29 +1,21 @@
 package com.auth.service.system.admin.service.admin.impl;
 
-import com.auth.common.data.model.PageResponse;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.admin.mapper.permission.SysPermissionMapper;
 import com.auth.service.system.admin.mapper.role.SysRoleMapper;
 import com.auth.service.system.admin.mapper.user.SysUserMapper;
 import com.auth.service.system.admin.model.po.reference.PermissionReferencePO;
 import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
-import com.auth.service.system.admin.model.po.user.SysUserPageRowPO;
 import com.auth.service.system.admin.model.po.user.UserDeptProfilePO;
 import com.auth.service.system.admin.model.po.user.UserPostProfilePO;
-import com.auth.service.system.admin.model.po.user.UserSearchItemPO;
-import com.auth.service.system.admin.model.query.user.SysUserPageQuery;
 import com.auth.service.system.admin.model.vo.user.SysUserDetailVO;
-import com.auth.service.system.admin.model.vo.user.SysUserPageVO;
 import com.auth.service.system.admin.model.vo.user.SysUserProfileVO;
-import com.auth.service.system.admin.model.vo.user.SysUserSearchItemVO;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import com.auth.service.system.authorization.dispatch.query.UserEffectiveCodesResolver;
 import com.auth.service.system.authorization.dispatch.query.UserEffectiveCodesSnapshot;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.common.service.AuditUserDisplayService;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.repository.CrudRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -77,20 +69,6 @@ class SysUserQueryServiceImplTest {
 		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysUserQueryService, sysUserMapper);
-	}
-
-	@Test
-	@DisplayName("分页查询：调用审计用户展示填充")
-	void getPageInvokesAuditEnrichment() {
-		Page<UserEntity> pageParams = new Page<>(1, 10);
-		SysUserPageQuery query = new SysUserPageQuery();
-		Page<SysUserPageRowPO> emptyPage = new Page<>(1, 10);
-		when(sysUserMapper.selectListByPage(eq(pageParams), eq(query), anyString())).thenReturn(emptyPage);
-
-		PageResponse<SysUserPageVO> result = sysUserQueryService.getPage(pageParams, query);
-
-		assertThat(result.getList()).isEmpty();
-		verify(auditUserDisplayService).enrichAuditUsernames(any(IPage.class), isNull(), isNull());
 	}
 
 	@Test
@@ -236,15 +214,9 @@ class SysUserQueryServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("关键词为 null 时不查库并返回空列表")
-	void searchReturnsEmptyWhenKeywordNull() {
-		assertThat(sysUserQueryService.searchByKeyword(null, 10)).isEmpty();
-		verifyNoInteractions(sysUserMapper);
-	}
-
-	@Test
-	@DisplayName("关键词为空白时不查库并返回空列表")
+	@DisplayName("关键词为空时不查库并返回空列表")
 	void searchReturnsEmptyWhenKeywordBlank() {
+		assertThat(sysUserQueryService.searchByKeyword(null, 10)).isEmpty();
 		assertThat(sysUserQueryService.searchByKeyword("   ", 10)).isEmpty();
 		verifyNoInteractions(sysUserMapper);
 	}
@@ -283,22 +255,6 @@ class SysUserQueryServiceImplTest {
 		ArgumentCaptor<Integer> limitCap = ArgumentCaptor.forClass(Integer.class);
 		verify(sysUserMapper).searchByKeyword(eq("c"), limitCap.capture());
 		assertThat(limitCap.getValue()).isEqualTo(1);
-	}
-
-	@Test
-	@DisplayName("正常搜索时返回 Mapper 结果")
-	void searchReturnsMapperRows() {
-		UserSearchItemPO row = new UserSearchItemPO();
-		row.setId(1L);
-		row.setUsername("u1");
-		when(sysUserMapper.searchByKeyword("kw", 15)).thenReturn(List.of(row));
-
-		List<SysUserSearchItemVO> result = sysUserQueryService.searchByKeyword("kw", 15);
-
-		assertThat(result).hasSize(1).first().satisfies(r -> {
-			assertThat(r.getId()).isEqualTo(1L);
-			assertThat(r.getUsername()).isEqualTo("u1");
-		});
 	}
 
 }

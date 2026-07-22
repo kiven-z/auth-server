@@ -1,9 +1,11 @@
 package com.auth.service.system.admin.service.admin.impl;
 
+import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.service.system.admin.mapper.menu.SysMenuRoleMapper;
 import com.auth.service.system.admin.mapper.role.GrantTableMapper;
 import com.auth.service.system.admin.mapper.role.SysRoleMapper;
 import com.auth.service.system.admin.mapper.role.SysRolePermissionMapper;
+import com.auth.service.system.admin.model.constants.AdminBatchSizes;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.form.role.SysRoleForm;
 import com.auth.service.system.admin.model.po.permission.SysPermissionBoundMenuPO;
@@ -59,8 +61,6 @@ class SysRoleServiceImplTest {
 
 	private SysRoleServiceImpl sysRoleService;
 
-	private SysRoleQueryServiceImpl sysRoleQueryService;
-
 	private static SysRoleForm updateForm(Long id, String roleCode, boolean status) {
 		SysRoleForm form = new SysRoleForm();
 		form.setId(id);
@@ -82,13 +82,11 @@ class SysRoleServiceImplTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		sysRoleService = spy(new SysRoleServiceImpl(roleInvalidationTrigger, grantTableMapper));
-		sysRoleQueryService = new SysRoleQueryServiceImpl(auditUserDisplayService, grantTableMapper,
-				sysRolePermissionMapper, sysMenuRoleMapper);
+		sysRoleService = spy(new SysRoleServiceImpl(auditUserDisplayService, roleInvalidationTrigger, grantTableMapper,
+				sysRolePermissionMapper, sysMenuRoleMapper));
 		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysRoleService, sysRoleMapper);
-		baseMapperField.set(sysRoleQueryService, sysRoleMapper);
 		lenient().doReturn(true).when(sysRoleService).saveBatch(anyList(), anyInt());
 	}
 
@@ -113,7 +111,7 @@ class SysRoleServiceImplTest {
 		sysRoleService.createBatchFromImport(List.of(form));
 
 		verify(sysRoleMapper).selectReferenceByRoleCodes(List.of("AUDITOR"));
-		verify(sysRoleService).saveBatch(anyList(), eq(500));
+		verify(sysRoleService).saveBatch(anyList(), eq(AdminBatchSizes.IMPORT_SAVE));
 	}
 
 	@Test
@@ -158,7 +156,7 @@ class SysRoleServiceImplTest {
 	void getDetailThrowsWhenNotFound() {
 		when(sysRoleMapper.selectById(9L)).thenReturn(null);
 
-		assertThatThrownBy(() -> sysRoleQueryService.getDetail(9L)).isInstanceOf(SystemBusinessException.class)
+		assertThatThrownBy(() -> sysRoleService.getDetail(9L)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
 
@@ -181,7 +179,7 @@ class SysRoleServiceImplTest {
 		when(grantTableMapper.selectBoundDeptsByRoleId(1L)).thenReturn(List.of());
 		when(grantTableMapper.selectBoundPostsByRoleId(1L)).thenReturn(List.of());
 
-		SysRoleDetailVO detail = sysRoleQueryService.getDetail(1L);
+		SysRoleDetailVO detail = sysRoleService.getDetail(1L);
 
 		assertThat(detail.getRoleCode()).isEqualTo("ADMIN");
 		assertThat(detail.getBoundPermissions()).hasSize(1);
@@ -233,7 +231,7 @@ class SysRoleServiceImplTest {
 
 		when(sysRolePermissionMapper.selectAssignedPermissionsByRoleId(2L)).thenReturn(List.of());
 
-		SysRoleDetailVO detail = sysRoleQueryService.getDetail(2L);
+		SysRoleDetailVO detail = sysRoleService.getDetail(2L);
 
 		assertThat(detail.getBoundMenus()).hasSize(1);
 		assertThat(detail.getBoundMenus().get(0).getTitle()).isEqualTo("用户管理");
@@ -329,6 +327,34 @@ class SysRoleServiceImplTest {
 
 		verify(sysRoleMapper).deleteById(3L);
 		verify(roleInvalidationTrigger).submitByRoleCodes(List.of("EMPTY_ROLE"), "delete");
+	}
+
+	@Test
+	@DisplayName("批量启停：按存在角色更新并按编码失效")
+	void batchUpdateStatusUpdatesAndInvalidatesByRoleCodes() {
+		doReturn(List.of(roleEntity(1L, "R1"), roleEntity(2L, "R2"))).when(sysRoleService).listByIds(any());
+		doReturn(true).when(sysRoleService).updateBatchById(anyList());
+
+		IdsEnableStatusForm form = new IdsEnableStatusForm();
+		form.setIds(List.of(1L, 2L));
+		form.setStatus(false);
+		sysRoleService.batchUpdateStatus(form);
+
+		verify(sysRoleService).updateBatchById(anyList());
+		verify(roleInvalidationTrigger).submitByRoleCodes(List.of("R1", "R2"), "update");
+	}
+
+	@Test
+	@DisplayName("批量启停：ids 为空时不写库")
+	void batchUpdateStatusSkipsWhenIdsEmpty() {
+		IdsEnableStatusForm form = new IdsEnableStatusForm();
+		form.setIds(List.of());
+		form.setStatus(true);
+		sysRoleService.batchUpdateStatus(form);
+
+		verify(sysRoleService, never()).listByIds(any());
+		verify(sysRoleService, never()).updateBatchById(anyList());
+		verifyNoInteractions(roleInvalidationTrigger);
 	}
 
 }

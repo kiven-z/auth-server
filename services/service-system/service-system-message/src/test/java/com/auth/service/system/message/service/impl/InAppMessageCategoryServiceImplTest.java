@@ -1,12 +1,11 @@
 package com.auth.service.system.message.service.impl;
 
-import com.auth.common.core.model.query.EnableStatusScope;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.mapper.InAppMessageCategoryMapper;
 import com.auth.service.system.message.model.entity.InAppMessageCategoryEntity;
 import com.auth.service.system.message.model.form.inapp.InAppMessageCategoryForm;
-import com.auth.service.system.message.model.form.inapp.InAppMessageCategoryStatusForm;
+import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.service.system.message.model.po.InAppMessageCategoryDetailRowPO;
 import com.auth.service.system.message.model.po.InAppMessageCategoryPageRowPO;
 import com.auth.service.system.message.model.query.InAppMessageCategoryQuery;
@@ -408,7 +407,7 @@ class InAppMessageCategoryServiceImplTest {
 		List<Long> ids = List.of(1L, 2L);
 		when(inAppMessageCategoryMapper.update(any(), any())).thenReturn(2);
 
-		InAppMessageCategoryStatusForm form = new InAppMessageCategoryStatusForm();
+		IdsEnableStatusForm form = new IdsEnableStatusForm();
 		form.setIds(ids);
 		form.setStatus(Boolean.FALSE);
 		service.batchUpdateStatus(form);
@@ -423,7 +422,7 @@ class InAppMessageCategoryServiceImplTest {
 	@DisplayName("批量启停：ids 为空时不调用更新")
 	void batchUpdateStatus_shouldSkipWhenIdsEmpty() {
 		// 空列表直接返回，避免无意义 UPDATE
-		InAppMessageCategoryStatusForm form = new InAppMessageCategoryStatusForm();
+		IdsEnableStatusForm form = new IdsEnableStatusForm();
 		form.setIds(Collections.emptyList());
 		form.setStatus(Boolean.TRUE);
 		service.batchUpdateStatus(form);
@@ -432,15 +431,14 @@ class InAppMessageCategoryServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("listMajors：ENABLED 时按 status=true 过滤并映射扁平 VO")
+	@DisplayName("listMajors：status=true 时按启用过滤并映射扁平 VO")
 	void listMajors_shouldReturnEnabledMajorsThenMapVo() {
-		// ENABLED：仅启用大类
 		InAppMessageCategoryEntity serviceCat = major(1L, "SERVICE", "服务消息", 10);
 		InAppMessageCategoryEntity activityCat = major(2L, "ACTIVITY", "活动消息", 20);
 		when(inAppMessageCategoryMapper.selectByParentId(ROOT_PARENT_ID, Boolean.TRUE))
 			.thenReturn(List.of(serviceCat, activityCat));
 
-		List<InAppMessageCategoryVO> result = service.listMajors(EnableStatusScope.ENABLED);
+		List<InAppMessageCategoryVO> result = service.listMajors(Boolean.TRUE);
 
 		assertThat(result).extracting(InAppMessageCategoryVO::getCode).containsExactly("SERVICE", "ACTIVITY");
 		assertThat(result.get(0).getId()).isEqualTo(1L);
@@ -450,17 +448,13 @@ class InAppMessageCategoryServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("listMajors：ALL 时不限启停；null 按 ENABLED")
-	void listMajors_shouldResolveStatusScope() {
+	@DisplayName("listMajors：status 为 null 时不限启停")
+	void listMajors_shouldPassNullStatusWhenUnfiltered() {
 		when(inAppMessageCategoryMapper.selectByParentId(ROOT_PARENT_ID, null)).thenReturn(Collections.emptyList());
-		when(inAppMessageCategoryMapper.selectByParentId(ROOT_PARENT_ID, Boolean.TRUE))
-			.thenReturn(Collections.emptyList());
 
-		service.listMajors(EnableStatusScope.ALL);
 		service.listMajors(null);
 
 		verify(inAppMessageCategoryMapper).selectByParentId(ROOT_PARENT_ID, null);
-		verify(inAppMessageCategoryMapper).selectByParentId(ROOT_PARENT_ID, Boolean.TRUE);
 	}
 
 	@Test
@@ -471,7 +465,7 @@ class InAppMessageCategoryServiceImplTest {
 		when(inAppMessageCategoryMapper.selectById(1L)).thenReturn(parent);
 		when(inAppMessageCategoryMapper.selectByParentId(1L, Boolean.TRUE)).thenReturn(List.of(child));
 
-		List<InAppMessageCategoryVO> result = service.listChildren(1L, EnableStatusScope.ENABLED);
+		List<InAppMessageCategoryVO> result = service.listChildren(1L, Boolean.TRUE);
 
 		assertThat(result).hasSize(1);
 		assertThat(result.get(0).getId()).isEqualTo(11L);
@@ -485,7 +479,7 @@ class InAppMessageCategoryServiceImplTest {
 	void listChildren_shouldThrowWhenParentMissing() {
 		when(inAppMessageCategoryMapper.selectById(99L)).thenReturn(null);
 
-		assertThatThrownBy(() -> service.listChildren(99L, EnableStatusScope.ALL)).isInstanceOf(MessageException.class)
+		assertThatThrownBy(() -> service.listChildren(99L, null)).isInstanceOf(MessageException.class)
 			.extracting(ex -> ((MessageException) ex).getResultCode())
 			.isEqualTo(IN_APP_MESSAGE_CATEGORY_NOT_FOUND);
 		verify(inAppMessageCategoryMapper, never()).selectByParentId(any(), any());
@@ -496,8 +490,7 @@ class InAppMessageCategoryServiceImplTest {
 	void listChildren_shouldThrowWhenParentIsNotMajor() {
 		when(inAppMessageCategoryMapper.selectById(11L)).thenReturn(child());
 
-		assertThatThrownBy(() -> service.listChildren(11L, EnableStatusScope.ENABLED))
-			.isInstanceOf(MessageException.class)
+		assertThatThrownBy(() -> service.listChildren(11L, Boolean.TRUE)).isInstanceOf(MessageException.class)
 			.extracting(ex -> ((MessageException) ex).getResultCode())
 			.isEqualTo(IN_APP_MESSAGE_CATEGORY_NOT_FOUND);
 		verify(inAppMessageCategoryMapper, never()).selectByParentId(any(), any());

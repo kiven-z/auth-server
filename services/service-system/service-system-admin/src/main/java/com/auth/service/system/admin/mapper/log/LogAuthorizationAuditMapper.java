@@ -1,7 +1,6 @@
 package com.auth.service.system.admin.mapper.log;
 
 import com.auth.service.system.admin.model.entity.LogAuthorizationAuditEntity;
-import com.auth.service.system.admin.model.po.logauthorizationaudit.LogAuthorizationAuditDetailRowPO;
 import com.auth.service.system.admin.model.po.logauthorizationaudit.LogAuthorizationAuditPageRowPO;
 import com.auth.service.system.admin.model.query.log.LogAuthorizationAuditQuery;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -26,12 +25,5 @@ public interface LogAuthorizationAuditMapper extends BaseMapper<LogAuthorization
 	 */
 	IPage<LogAuthorizationAuditPageRowPO> selectListByPage(@Param("page") Page<LogAuthorizationAuditEntity> page,
 			@Param("query") LogAuthorizationAuditQuery query);
-
-	/**
-	 * 详情
-	 * @param id 主键
-	 * @return 详情投影
-	 */
-	LogAuthorizationAuditDetailRowPO selectDetailById(@Param("id") Long id);
 
 }

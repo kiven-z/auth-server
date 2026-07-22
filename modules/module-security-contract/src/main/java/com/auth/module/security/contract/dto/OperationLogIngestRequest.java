@@ -27,6 +27,8 @@ public class OperationLogIngestRequest implements Serializable {
 
 	private Long userId;
 
+	private String username;
+
 	private String operationType;
 
 	private String module;
@@ -65,6 +67,7 @@ public class OperationLogIngestRequest implements Serializable {
 	public static OperationLogIngestRequest fromPayload(OperationLogPayloadEvent payload) {
 		return OperationLogIngestRequest.builder()
 			.userId(payload.getUserId())
+			.username(payload.getUsername())
 			.operationType(payload.getOperationType())
 			.module(payload.getModule())
 			.targetType(payload.getTargetType())
@@ -91,6 +94,7 @@ public class OperationLogIngestRequest implements Serializable {
 		Instant ts = Objects.requireNonNullElseGet(this.timestamp, Instant::now);
 		return OperationLogPayloadEvent.builder()
 			.userId(this.userId)
+			.username(this.username)
 			.operationType(this.operationType)
 			.module(this.module)
 			.targetType(this.targetType)

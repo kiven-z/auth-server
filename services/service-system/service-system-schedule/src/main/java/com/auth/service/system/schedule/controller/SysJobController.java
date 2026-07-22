@@ -8,16 +8,14 @@ import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.schedule.model.constants.ScheduleAuditBizModule;
-import com.auth.service.system.schedule.model.entity.JobEntity;
 import com.auth.service.system.schedule.model.form.SysJobCreateForm;
-import com.auth.service.system.schedule.model.form.SysJobStatusForm;
+import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.service.system.schedule.model.form.SysJobUpdateForm;
 import com.auth.service.system.schedule.model.query.SysJobQuery;
 import com.auth.service.system.schedule.model.vo.SysJobDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobPageVO;
 import com.auth.service.system.schedule.service.SysJobDefinitionService;
 import com.auth.service.system.schedule.service.SysJobScheduleSyncService;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -50,9 +48,7 @@ public class SysJobController {
 	@PreAuthorize("@auth.decide('schedule:job:query')")
 	@GetMapping
 	public Result<PageResponse<SysJobPageVO>> page(SysJobQuery query) {
-		Page<JobEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
-		PageResponse<SysJobPageVO> response = sysJobDefinitionService.getPage(pageParams, query);
-
+		PageResponse<SysJobPageVO> response = sysJobDefinitionService.getPage(query);
 		return Result.success(response);
 	}
 
@@ -97,7 +93,7 @@ public class SysJobController {
 	@Operation(summary = "批量启停任务")
 	@PreAuthorize("@auth.decide('schedule:job:update')")
 	@PutMapping("status")
-	public Result<String> batchStatus(@Validated @RequestBody SysJobStatusForm form) {
+	public Result<String> batchStatus(@Validated @RequestBody IdsEnableStatusForm form) {
 		sysJobScheduleSyncService.batchUpdateStatus(form);
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}

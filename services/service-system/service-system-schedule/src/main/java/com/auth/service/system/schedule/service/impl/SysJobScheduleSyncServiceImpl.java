@@ -4,7 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.mapper.JobMapper;
 import com.auth.service.system.schedule.model.entity.JobEntity;
-import com.auth.service.system.schedule.model.form.SysJobStatusForm;
+import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.service.system.schedule.service.SysJobScheduleSyncService;
 import com.auth.service.system.schedule.support.quartz.SysJobScheduleReconciler;
 import com.auth.service.system.schedule.support.quartz.SysJobSchedulerManager;
@@ -42,7 +42,7 @@ public class SysJobScheduleSyncServiceImpl extends ServiceImpl<JobMapper, JobEnt
 	 */
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public void batchUpdateStatus(SysJobStatusForm form) {
+	public void batchUpdateStatus(IdsEnableStatusForm form) {
 		List<Long> ids = form.getIds();
 		if (CollUtil.isEmpty(ids)) {
 			return;

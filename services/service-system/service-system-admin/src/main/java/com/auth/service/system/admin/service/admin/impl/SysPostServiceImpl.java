@@ -1,70 +1,139 @@
 package com.auth.service.system.admin.service.admin.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.common.core.utils.FieldChangeSupport;
+import com.auth.common.data.model.PageResponse;
+import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
+import com.auth.service.system.admin.convert.admin.ReferenceConverter;
 import com.auth.service.system.admin.convert.admin.SysPostConverter;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.post.SysPostMapper;
+import com.auth.service.system.admin.mapper.role.GrantTableMapper;
+import com.auth.service.system.admin.model.constants.AdminBatchSizes;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.form.post.SysPostForm;
+import com.auth.service.system.admin.model.po.post.SysPostBoundUserPO;
+import com.auth.service.system.admin.model.po.post.SysPostPageRowPO;
+import com.auth.service.system.admin.model.po.post.SysPostSearchItemPO;
+import com.auth.service.system.admin.model.po.reference.DeptReferencePO;
+import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
+import com.auth.service.system.admin.model.query.post.SysPostQuery;
+import com.auth.service.system.admin.model.vo.post.SysPostDetailVO;
+import com.auth.service.system.admin.model.vo.post.SysPostPageVO;
+import com.auth.service.system.admin.model.vo.post.SysPostSearchItemVO;
 import com.auth.service.system.admin.service.admin.SysPostService;
 import com.auth.service.system.admin.support.post.PostReferenceChecker;
 import com.auth.service.system.admin.support.post.PostWriteGuard;
+import com.auth.service.system.admin.support.sqlbuild.SysPostPageOrderSqlBuilder;
 import com.auth.service.system.authorization.dispatch.trigger.PostAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
+import com.auth.service.system.common.service.AuditUserDisplayService;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
- * 系统岗位写服务实现。
+ * 系统岗位服务实现。
  *
  * @author Bunny
  */
 @RequiredArgsConstructor
 @Slf4j
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity> implements SysPostService {
 
-	/**
-	 * Excel 导入与批量新增时的持久化批次大小
-	 */
-	private static final int IMPORT_SAVE_BATCH_SIZE = 500;
+	private final AuditUserDisplayService auditUserDisplayService;
 
 	private final PostAuthorizationInvalidationTrigger postInvalidationTrigger;
 
 	private final PostReferenceChecker postReferenceChecker;
 
+	private final GrantTableMapper grantTableMapper;
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void createBatchFromImport(List<SysPostForm> forms) {
-		PostWriteGuard.requireBatchCreatable(baseMapper, forms);
-		if (CollUtil.isEmpty(forms)) {
-			return;
-		}
-		List<SysPostEntity> entities = forms.stream().map(SysPostConverter.INSTANCE::toEntity).toList();
-		super.saveBatch(entities, IMPORT_SAVE_BATCH_SIZE);
+	@Transactional(readOnly = true)
+	public PageResponse<SysPostPageVO> getPage(SysPostQuery query) {
+		Page<SysPostEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
+		String orderBySql = SysPostPageOrderSqlBuilder.buildOrderBySql(query.getSort());
+		IPage<SysPostPageRowPO> page = baseMapper.selectListByPage(pageParams, query, orderBySql);
+		IPage<SysPostPageVO> voPage = page.convert(SysPostConverter.INSTANCE::toPageVo);
+
+		auditUserDisplayService.enrichAuditUsernames(voPage, null, null);
+		return PageResponse.of(voPage);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(readOnly = true)
+	public List<SysPostSearchItemVO> search(String keyword, Boolean status, Integer limit) {
+		int cappedLimit = limit == null ? 20 : Math.max(1, Math.min(limit, 50));
+
+		List<SysPostSearchItemPO> poList = baseMapper.search(keyword, status, cappedLimit);
+		return SysPostConverter.INSTANCE.toSearchItemVoList(poList);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	@Transactional(readOnly = true)
+	public SysPostDetailVO getDetail(Long id) {
+		SysPostEntity entity = postReferenceChecker.getExistingActive(id);
+
+		SysPostDetailVO detail = SysPostConverter.INSTANCE.toDetailVo(entity);
+		DeptReferencePO deptList = baseMapper.selectBoundDeptByPostId(id);
+		detail.setBoundDept(ReferenceConverter.INSTANCE.toDeptReference(deptList));
+
+		List<SysPostBoundUserPO> userList = baseMapper.selectBoundUsersByPostId(id);
+		detail.setBoundUsers(ReferenceConverter.INSTANCE.toPostBoundUserReferenceList(userList));
+
+		List<RoleReferencePO> roleList = grantTableMapper.selectBoundRolesBySubject(GrantTableSubjectType.POST.name(),
+				id);
+		detail.setBoundRoles(ReferenceConverter.INSTANCE.toRoleReferenceList(roleList));
+
+		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail), null, null);
+		return detail;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void createBatchFromImport(List<SysPostForm> forms) {
+		PostWriteGuard.requireBatchCreatable(baseMapper, forms);
+		if (CollUtil.isEmpty(forms)) {
+			return;
+		}
+		List<SysPostEntity> entities = forms.stream().map(SysPostConverter.INSTANCE::toEntity).toList();
+		super.saveBatch(entities, AdminBatchSizes.IMPORT_SAVE);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	@Transactional(rollbackFor = Exception.class)
 	public void update(SysPostForm form) {
-		// 1. 检查当前岗位是否存在
 		Long id = form.getId();
 		SysPostEntity existing = postReferenceChecker.getExistingActive(id);
 
-		// 2. 检查目标部门是否可挂载
 		Long deptId = form.getDeptId();
 		List<Long> assignableDeptIds = baseMapper.selectAssignableDeptIds(List.of(deptId));
 		if (assignableDeptIds.isEmpty()) {
@@ -72,7 +141,6 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity
 			throw new SystemBusinessException(SystemCommonResultCode.DATA_UNAVAILABLE);
 		}
 
-		// 3. 检查变更后的复合键是否与其它岗位冲突（排除自己所在岗位，是自己放过）
 		String postCode = form.getPostCode();
 		long otherCount = baseMapper.selectCount(Wrappers.<SysPostEntity>lambdaQuery()
 			.eq(SysPostEntity::getDeptId, deptId)
@@ -83,10 +151,9 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity
 			throw new SystemBusinessException(SystemAdminResultCode.POST_CODE_DUPLICATE_IN_DEPT, postCode);
 		}
 
-		// 4. 更新岗位
 		boolean statusChanged = FieldChangeSupport.valueChanged(existing.getStatus(), form.getStatus());
 		SysPostConverter.INSTANCE.applyUpdateForm(form, existing);
-		updateById(existing);
+		super.updateById(existing);
 
 		if (statusChanged) {
 			postInvalidationTrigger.submitByPostIds(List.of(id), "update");
@@ -97,6 +164,29 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity
 	 * {@inheritDoc}
 	 */
 	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void batchUpdateStatus(IdsEnableStatusForm form) {
+		List<Long> ids = form.getIds().stream().filter(Objects::nonNull).distinct().toList();
+		if (CollUtil.isEmpty(ids)) {
+			return;
+		}
+
+		Boolean status = form.getStatus();
+		List<SysPostEntity> updates = ids.stream().map(id -> {
+			SysPostEntity entity = new SysPostEntity();
+			entity.setId(id);
+			entity.setStatus(status);
+			return entity;
+		}).toList();
+		super.updateBatchById(updates);
+		postInvalidationTrigger.submitByPostIds(ids, "update");
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	@Transactional(rollbackFor = Exception.class)
 	public void deleteById(Long id) {
 		postReferenceChecker.getExistingActive(id);
 
@@ -108,7 +198,7 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity
 		}
 
 		postInvalidationTrigger.submitByPostIds(List.of(id), "delete");
-		removeById(id);
+		super.removeById(id);
 	}
 
 }

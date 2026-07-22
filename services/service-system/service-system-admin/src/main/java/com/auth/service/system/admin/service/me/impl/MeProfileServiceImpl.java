@@ -7,7 +7,7 @@ import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.service.system.admin.mapper.user.SysUserMapper;
 import com.auth.service.system.admin.model.form.me.MeAvatarUpdateForm;
 import com.auth.service.system.admin.model.form.me.MeProfileUpdateForm;
-import com.auth.service.system.admin.service.me.CurrentUserProfileService;
+import com.auth.service.system.admin.service.me.MeProfileService;
 import com.auth.service.system.admin.support.user.UserAvatarUpdateSupport;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.UserSessionRevocationTrigger;
@@ -31,8 +31,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Service
 @Transactional(rollbackFor = Exception.class)
-public class CurrentUserProfileServiceImpl extends ServiceImpl<SysUserMapper, UserEntity>
-		implements CurrentUserProfileService {
+public class MeProfileServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> implements MeProfileService {
 
 	private final UserReferenceChecker userReferenceChecker;
 

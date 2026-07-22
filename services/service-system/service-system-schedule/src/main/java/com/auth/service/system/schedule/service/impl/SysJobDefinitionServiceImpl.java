@@ -74,7 +74,8 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<JobMapper, JobEntit
 	 * {@inheritDoc}
 	 */
 	@Override
-	public PageResponse<SysJobPageVO> getPage(Page<JobEntity> pageParams, SysJobQuery query) {
+	public PageResponse<SysJobPageVO> getPage(SysJobQuery query) {
+		Page<JobEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
 		IPage<SysJobPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
 		IPage<SysJobPageVO> voPage = page.convert(SysJobConverter.INSTANCE::toPageVO);
 
@@ -137,7 +138,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<JobMapper, JobEntit
 		// 转换为实体
 		JobEntity sysJob = SysJobConverter.INSTANCE.toEntity(form);
 		validationManager.normalizeAndValidate(sysJob);
-		save(sysJob);
+		super.save(sysJob);
 
 		// 如果任务禁用，则直接返回
 		if (sysJob.getStatus() != null && !sysJob.getStatus()) {
@@ -165,7 +166,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<JobMapper, JobEntit
 		// 更新实体
 		SysJobConverter.INSTANCE.updateEntity(form, dbJob);
 		validationManager.normalizeAndValidate(dbJob);
-		updateById(dbJob);
+		super.updateById(dbJob);
 
 		try {
 			// 注册 Quartz
@@ -179,7 +180,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<JobMapper, JobEntit
 
 	@NotNull
 	private JobEntity getDbJob(Long id) {
-		JobEntity dbJob = getById(id);
+		JobEntity dbJob = super.getById(id);
 		if (dbJob == null) {
 			throw new SysJobException(DATA_NOT_EXIST);
 		}
@@ -205,7 +206,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<JobMapper, JobEntit
 			throw new SysJobException(JOB_QUARTZ_OPERATION_FAILED, "delete", ex.getMessage());
 		}
 
-		removeById(id);
+		super.removeById(id);
 	}
 
 	/**

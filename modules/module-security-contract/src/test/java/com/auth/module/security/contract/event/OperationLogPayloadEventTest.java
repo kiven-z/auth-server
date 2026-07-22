@@ -19,6 +19,7 @@ class OperationLogPayloadEventTest {
 		// 校验契约负载与表字段一一对应的 builder 路径
 		OperationLogPayloadEvent p = OperationLogPayloadEvent.builder()
 			.userId(9L)
+			.username("alice")
 			.operationType("QUERY")
 			.module("USER_ROLE")
 			.targetType("User")
@@ -36,6 +37,7 @@ class OperationLogPayloadEventTest {
 			.build();
 
 		assertEquals(9L, p.getUserId());
+		assertEquals("alice", p.getUsername());
 		assertEquals("QUERY", p.getOperationType());
 		assertEquals("USER_ROLE", p.getModule());
 		assertEquals("User", p.getTargetType());

@@ -1,7 +1,9 @@
 package com.auth.service.system.admin.service.admin.impl;
 
+import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.service.system.admin.mapper.permission.SysPermissionMapper;
 import com.auth.service.system.admin.mapper.role.SysRolePermissionMapper;
+import com.auth.service.system.admin.model.constants.AdminBatchSizes;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.form.permission.SysPermissionForm;
 import com.auth.service.system.admin.model.po.reference.PermissionReferencePO;
@@ -58,8 +60,6 @@ class SysPermissionServiceImplTest {
 
 	private SysPermissionServiceImpl sysPermissionService;
 
-	private SysPermissionQueryServiceImpl sysPermissionQueryService;
-
 	private static SysPermissionEntity permissionEntity(Long id) {
 		SysPermissionEntity entity = new SysPermissionEntity();
 		entity.setId(id);
@@ -82,13 +82,11 @@ class SysPermissionServiceImplTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		sysPermissionService = spy(new SysPermissionServiceImpl(permissionInvalidationTrigger, roleInvalidationTrigger,
-				sysRolePermissionMapper));
-		sysPermissionQueryService = new SysPermissionQueryServiceImpl(auditUserDisplayService, sysRolePermissionMapper);
+		sysPermissionService = spy(new SysPermissionServiceImpl(auditUserDisplayService, permissionInvalidationTrigger,
+				roleInvalidationTrigger, sysRolePermissionMapper));
 		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysPermissionService, sysPermissionMapper);
-		baseMapperField.set(sysPermissionQueryService, sysPermissionMapper);
 		lenient().doReturn(true).when(sysPermissionService).saveBatch(anyList(), anyInt());
 	}
 
@@ -113,7 +111,7 @@ class SysPermissionServiceImplTest {
 		sysPermissionService.createBatchFromImport(List.of(form));
 
 		verify(sysPermissionMapper).selectReferenceByPermissionCodes(List.of("sys:user:list"));
-		verify(sysPermissionService).saveBatch(anyList(), eq(500));
+		verify(sysPermissionService).saveBatch(anyList(), eq(AdminBatchSizes.IMPORT_SAVE));
 	}
 
 	@Test
@@ -222,7 +220,7 @@ class SysPermissionServiceImplTest {
 	void getDetailThrowsWhenNotFound() {
 		when(sysPermissionMapper.selectById(9L)).thenReturn(null);
 
-		assertThatThrownBy(() -> sysPermissionQueryService.getDetail(9L)).isInstanceOf(SystemBusinessException.class)
+		assertThatThrownBy(() -> sysPermissionService.getDetail(9L)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
 	}
@@ -238,7 +236,7 @@ class SysPermissionServiceImplTest {
 		when(sysPermissionMapper.selectById(3L)).thenReturn(entity);
 		when(sysRolePermissionMapper.selectBoundRolesByPermissionId(3L)).thenReturn(List.of());
 
-		SysPermissionDetailVO detail = sysPermissionQueryService.getDetail(3L);
+		SysPermissionDetailVO detail = sysPermissionService.getDetail(3L);
 
 		assertThat(detail.getPermissionCode()).isEqualTo("sys:dept:query");
 		assertThat(detail.getBoundRoles()).isEmpty();
@@ -263,7 +261,7 @@ class SysPermissionServiceImplTest {
 		boundRole.setStatus(true);
 		when(sysRolePermissionMapper.selectBoundRolesByPermissionId(7L)).thenReturn(List.of(boundRole));
 
-		SysPermissionDetailVO detail = sysPermissionQueryService.getDetail(7L);
+		SysPermissionDetailVO detail = sysPermissionService.getDetail(7L);
 
 		assertThat(detail.getBoundRoles()).hasSize(1);
 		assertThat(detail.getBoundRoles().get(0).getId()).isEqualTo(10L);
@@ -315,6 +313,38 @@ class SysPermissionServiceImplTest {
 		verify(permissionInvalidationTrigger).submitByPermissionCodes(List.of("sys:orphan:perm"), "delete");
 		verify(roleInvalidationTrigger, never()).submitByRoleCodes(any(), any());
 		verify(sysPermissionMapper).deleteById(6L);
+	}
+
+	@Test
+	@DisplayName("批量启停：按存在权限更新并按编码失效")
+	void batchUpdateStatusUpdatesAndInvalidatesByPermissionCodes() {
+		SysPermissionEntity p1 = permissionEntity(1L);
+		p1.setPermissionCode("sys:a");
+		SysPermissionEntity p2 = permissionEntity(2L);
+		p2.setPermissionCode("sys:b");
+		doReturn(List.of(p1, p2)).when(sysPermissionService).listByIds(any());
+		doReturn(true).when(sysPermissionService).updateBatchById(anyList());
+
+		IdsEnableStatusForm form = new IdsEnableStatusForm();
+		form.setIds(List.of(1L, 2L));
+		form.setStatus(false);
+		sysPermissionService.batchUpdateStatus(form);
+
+		verify(sysPermissionService).updateBatchById(anyList());
+		verify(permissionInvalidationTrigger).submitByPermissionCodes(List.of("sys:a", "sys:b"), "update");
+	}
+
+	@Test
+	@DisplayName("批量启停：ids 为空时不写库")
+	void batchUpdateStatusSkipsWhenIdsEmpty() {
+		IdsEnableStatusForm form = new IdsEnableStatusForm();
+		form.setIds(List.of());
+		form.setStatus(true);
+		sysPermissionService.batchUpdateStatus(form);
+
+		verify(sysPermissionService, never()).listByIds(any());
+		verify(sysPermissionService, never()).updateBatchById(anyList());
+		verifyNoInteractions(permissionInvalidationTrigger);
 	}
 
 }

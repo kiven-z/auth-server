@@ -65,7 +65,8 @@ public class LogJobServiceImpl extends ServiceImpl<LogJobMapper, LogJobEntity> i
 	 * {@inheritDoc}
 	 */
 	@Override
-	public PageResponse<LogJobPageVO> getPage(Page<LogJobEntity> pageParams, LogJobQuery query) {
+	public PageResponse<LogJobPageVO> getPage(LogJobQuery query) {
+		Page<LogJobEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
 		IPage<LogJobPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
 		IPage<LogJobPageVO> voPage = page.convert(LogJobConverter.INSTANCE::toPageVO);
 
@@ -78,7 +79,7 @@ public class LogJobServiceImpl extends ServiceImpl<LogJobMapper, LogJobEntity> i
 	 */
 	@Override
 	public LogJobDetailVO getDetail(Long id) {
-		LogJobEntity jobLog = getById(id);
+		LogJobEntity jobLog = super.getById(id);
 		if (jobLog == null) {
 			throw new SysJobException(DATA_NOT_EXIST);
 		}
@@ -98,7 +99,7 @@ public class LogJobServiceImpl extends ServiceImpl<LogJobMapper, LogJobEntity> i
 		LogJobEntity entity = buildBaseLog(jobId, jobName, jobGroup, invokeTarget, triggerType, elapsedMs);
 		entity.setJobMessage(message);
 		entity.setStatus(true);
-		save(entity);
+		super.save(entity);
 	}
 
 	/**
@@ -107,14 +108,14 @@ public class LogJobServiceImpl extends ServiceImpl<LogJobMapper, LogJobEntity> i
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void recordFailure(Long jobId, String jobName, String jobGroup, String invokeTarget, String triggerType,
-			long elapsedMs, JobExecutionException ex) {
+			long elapsedMs, JobExecutionException exception) {
 		LogJobEntity entity = buildBaseLog(jobId, jobName, jobGroup, invokeTarget, triggerType, elapsedMs);
 		entity.setJobMessage("FAILED");
 		entity.setStatus(false);
-		if (ex != null) {
-			entity.setExceptionInfo(ExceptionUtil.stacktraceToString(ex, 8000));
+		if (exception != null) {
+			entity.setExceptionInfo(ExceptionUtil.stacktraceToString(exception, 8000));
 		}
-		save(entity);
+		super.save(entity);
 	}
 
 }

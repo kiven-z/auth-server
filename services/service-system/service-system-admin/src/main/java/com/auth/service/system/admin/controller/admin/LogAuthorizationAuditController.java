@@ -2,15 +2,13 @@ package com.auth.service.system.admin.controller.admin;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
-import com.auth.service.system.admin.model.entity.LogAuthorizationAuditEntity;
 import com.auth.service.system.admin.model.query.log.LogAuthorizationAuditQuery;
 import com.auth.service.system.admin.model.vo.logauthorizationaudit.LogAuthorizationAuditDetailVO;
 import com.auth.service.system.admin.model.vo.logauthorizationaudit.LogAuthorizationAuditPageVO;
-import com.auth.service.system.admin.service.admin.LogAuthorizationAuditQueryService;
 import com.auth.service.system.admin.service.admin.LogAuthorizationAuditService;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,27 +22,18 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
  * @author Bunny
  */
 @Tag(name = "权限决策审计日志", description = "log_authorization_audit")
+@RequiredArgsConstructor
 @RequestMapping("/api/system/log/authorization-audit")
 @RestController
 public class LogAuthorizationAuditController {
 
-	private final LogAuthorizationAuditQueryService logAuthorizationAuditQueryService;
-
 	private final LogAuthorizationAuditService logAuthorizationAuditService;
-
-	public LogAuthorizationAuditController(LogAuthorizationAuditQueryService logAuthorizationAuditQueryService,
-			LogAuthorizationAuditService logAuthorizationAuditService) {
-		this.logAuthorizationAuditQueryService = logAuthorizationAuditQueryService;
-		this.logAuthorizationAuditService = logAuthorizationAuditService;
-	}
 
 	@Operation(summary = "分页查询权限决策审计")
 	@PreAuthorize("@auth.decide('log:authaudit:query')")
 	@GetMapping("page")
 	public Result<PageResponse<LogAuthorizationAuditPageVO>> page(LogAuthorizationAuditQuery query) {
-		Page<LogAuthorizationAuditEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
-		PageResponse<LogAuthorizationAuditPageVO> response = logAuthorizationAuditQueryService.getPage(pageParams,
-				query);
+		PageResponse<LogAuthorizationAuditPageVO> response = logAuthorizationAuditService.getPage(query);
 		return Result.success(response);
 	}
 
@@ -52,7 +41,7 @@ public class LogAuthorizationAuditController {
 	@PreAuthorize("@auth.decide('log:authaudit:detail')")
 	@GetMapping("{id}")
 	public Result<LogAuthorizationAuditDetailVO> detail(@PathVariable("id") Long id) {
-		LogAuthorizationAuditDetailVO detail = logAuthorizationAuditQueryService.getDetail(id);
+		LogAuthorizationAuditDetailVO detail = logAuthorizationAuditService.getDetail(id);
 		return Result.success(detail);
 	}
 

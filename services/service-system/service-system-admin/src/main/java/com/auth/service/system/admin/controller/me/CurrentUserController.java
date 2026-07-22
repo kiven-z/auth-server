@@ -3,7 +3,6 @@ package com.auth.service.system.admin.controller.me;
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.common.ip.IpAddressService;
-import com.auth.module.platform.persistence.model.LoginLogEntity;
 import com.auth.module.security.autoconfigure.annotation.AuthenticatedApi;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
@@ -14,12 +13,10 @@ import com.auth.service.system.admin.model.form.user.SysUserChangePasswordForm;
 import com.auth.service.system.admin.model.query.me.MeLoginLogPageQuery;
 import com.auth.service.system.admin.model.vo.me.MeLoginLogPageVO;
 import com.auth.service.system.admin.model.vo.me.MeUserSessionVO;
-import com.auth.service.system.admin.service.me.CurrentUserLoginLogService;
-import com.auth.service.system.admin.service.me.CurrentUserProfileService;
-import com.auth.service.system.admin.service.me.CurrentUserSessionService;
+import com.auth.service.system.admin.service.me.MeProfileService;
+import com.auth.service.system.admin.service.me.MeSecurityService;
 import com.auth.service.system.admin.support.user.UserPasswordService;
 import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -47,18 +44,16 @@ public class CurrentUserController {
 
 	private final UserPasswordService userPasswordService;
 
-	private final CurrentUserSessionService currentUserSessionService;
+	private final MeSecurityService meSecurityService;
 
-	private final CurrentUserLoginLogService currentUserLoginLogService;
-
-	private final CurrentUserProfileService currentUserProfileService;
+	private final MeProfileService meProfileService;
 
 	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "当前用户更新个人资料")
 	@PutMapping("/profile")
 	public Result<String> updateMyProfile(@Valid @RequestBody MeProfileUpdateForm form) {
-		currentUserProfileService.updateMyProfile(form);
+		meProfileService.updateMyProfile(form);
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
@@ -67,7 +62,7 @@ public class CurrentUserController {
 	@Operation(summary = "当前用户更新头像")
 	@PutMapping("/avatar")
 	public Result<String> updateMyAvatar(@Valid @RequestBody MeAvatarUpdateForm form) {
-		currentUserProfileService.updateMyAvatar(form);
+		meProfileService.updateMyAvatar(form);
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
@@ -87,7 +82,7 @@ public class CurrentUserController {
 	@Operation(summary = "查询当前用户活跃会话")
 	@GetMapping("/sessions")
 	public Result<List<MeUserSessionVO>> listMySessions() {
-		List<MeUserSessionVO> data = currentUserSessionService.listMySessions();
+		List<MeUserSessionVO> data = meSecurityService.listMySessions();
 		return Result.success(data);
 	}
 
@@ -96,7 +91,7 @@ public class CurrentUserController {
 	@Operation(summary = "踢出当前用户指定会话")
 	@PostMapping("/sessions/{sessionId}/kick")
 	public Result<Void> kickMySession(@PathVariable("sessionId") String sessionId) {
-		currentUserSessionService.kickSession(sessionId);
+		meSecurityService.kickSession(sessionId);
 		return Result.success();
 	}
 
@@ -105,8 +100,7 @@ public class CurrentUserController {
 	@Operation(summary = "分页查询当前用户登录日志")
 	@GetMapping("/login-logs/page")
 	public Result<PageResponse<MeLoginLogPageVO>> loginLogPage(MeLoginLogPageQuery query) {
-		Page<LoginLogEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
-		PageResponse<MeLoginLogPageVO> response = currentUserLoginLogService.getPage(pageParams, query);
+		PageResponse<MeLoginLogPageVO> response = meSecurityService.getLoginLogPage(query);
 		return Result.success(response);
 	}
 

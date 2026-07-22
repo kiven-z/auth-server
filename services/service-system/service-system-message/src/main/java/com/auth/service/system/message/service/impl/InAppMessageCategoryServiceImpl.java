@@ -1,7 +1,6 @@
 package com.auth.service.system.message.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
-import com.auth.common.core.model.query.EnableStatusScope;
 import com.auth.common.core.utils.TreeParentIdUtil;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.message.convert.InAppMessageCategoryConverter;
@@ -9,7 +8,7 @@ import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.mapper.InAppMessageCategoryMapper;
 import com.auth.service.system.message.model.entity.InAppMessageCategoryEntity;
 import com.auth.service.system.message.model.form.inapp.InAppMessageCategoryForm;
-import com.auth.service.system.message.model.form.inapp.InAppMessageCategoryStatusForm;
+import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.service.system.message.model.po.InAppMessageCategoryDetailRowPO;
 import com.auth.service.system.message.model.po.InAppMessageCategoryPageRowPO;
 import com.auth.service.system.message.model.query.InAppMessageCategoryQuery;
@@ -123,7 +122,7 @@ public class InAppMessageCategoryServiceImpl extends ServiceImpl<InAppMessageCat
 	 */
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public void batchUpdateStatus(InAppMessageCategoryStatusForm form) {
+	public void batchUpdateStatus(IdsEnableStatusForm form) {
 		List<Long> ids = form.getIds();
 		if (CollUtil.isEmpty(ids)) {
 			return;
@@ -163,10 +162,7 @@ public class InAppMessageCategoryServiceImpl extends ServiceImpl<InAppMessageCat
 	 */
 	@Override
 	@Transactional(readOnly = true)
-	public List<InAppMessageCategoryVO> listMajors(EnableStatusScope statusScope) {
-		EnableStatusScope scope = statusScope == null ? EnableStatusScope.ENABLED : statusScope;
-		Boolean status = scope.toStatusEquals();
-
+	public List<InAppMessageCategoryVO> listMajors(Boolean status) {
 		List<InAppMessageCategoryEntity> list = baseMapper.selectByParentId(ROOT_PARENT_ID, status);
 		return list.stream().map(InAppMessageCategoryConverter.INSTANCE::toFlatVo).toList();
 	}
@@ -176,14 +172,11 @@ public class InAppMessageCategoryServiceImpl extends ServiceImpl<InAppMessageCat
 	 */
 	@Override
 	@Transactional(readOnly = true)
-	public List<InAppMessageCategoryVO> listChildren(Long parentId, EnableStatusScope statusScope) {
+	public List<InAppMessageCategoryVO> listChildren(Long parentId, Boolean status) {
 		InAppMessageCategoryEntity parent = super.getById(parentId);
 		if (parent == null || TreeParentIdUtil.normalize(parent.getParentId()) != ROOT_PARENT_ID) {
 			throw new MessageException(IN_APP_MESSAGE_CATEGORY_NOT_FOUND, parentId);
 		}
-
-		EnableStatusScope scope = statusScope == null ? EnableStatusScope.ENABLED : statusScope;
-		Boolean status = scope.toStatusEquals();
 
 		List<InAppMessageCategoryEntity> list = baseMapper.selectByParentId(parentId, status);
 		return list.stream().map(InAppMessageCategoryConverter.INSTANCE::toFlatVo).toList();

@@ -16,7 +16,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * 部门只读批量查询：全路径解析与编码→主键映射，供导入导出复用。
+ * 部门只读批量查询：全路径解析与编码→主键映射，供导入导出复用
  *
  * @author bunny
  */
@@ -27,7 +27,7 @@ public class DeptLookupSupport {
 	private final SysDeptMapper sysDeptMapper;
 
 	/**
-	 * 批量解析部门全路径。
+	 * 批量解析部门全路径
 	 * @param ids 部门主键列表
 	 * @return 部门 ID → 全路径（如 {@code 总部/研发/后端}）
 	 */
@@ -42,7 +42,7 @@ public class DeptLookupSupport {
 	}
 
 	/**
-	 * 从行集合中提取部门编码并批量解析为主键映射。
+	 * 从行集合中提取部门编码并批量解析为主键映射
 	 * @param rows 行数据集合
 	 * @param deptCodeGetter 部门编码提取函数
 	 * @param <R> 行数据类型

@@ -1,13 +1,11 @@
 package com.auth.service.system.schedule.service;
 
 import com.auth.common.data.model.PageResponse;
-import com.auth.service.system.schedule.model.entity.JobGroupEntity;
 import com.auth.service.system.schedule.model.form.SysJobGroupForm;
 import com.auth.service.system.schedule.model.form.SysJobGroupUpdateForm;
 import com.auth.service.system.schedule.model.query.SysJobGroupQuery;
 import com.auth.service.system.schedule.model.vo.SysJobGroupDetailVO;
 import com.auth.service.system.schedule.model.vo.SysJobGroupPageVO;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 import java.util.List;
 
@@ -20,11 +18,10 @@ public interface SysJobGroupService {
 
 	/**
 	 * 分页查询
-	 * @param pageParams 分页参数
 	 * @param query 查询参数
 	 * @return 分页数据
 	 */
-	PageResponse<SysJobGroupPageVO> getPage(Page<JobGroupEntity> pageParams, SysJobGroupQuery query);
+	PageResponse<SysJobGroupPageVO> getPage(SysJobGroupQuery query);
 
 	/**
 	 * 启用状态分组下拉/远程搜索（仅分组已启用 {@code status == true}）

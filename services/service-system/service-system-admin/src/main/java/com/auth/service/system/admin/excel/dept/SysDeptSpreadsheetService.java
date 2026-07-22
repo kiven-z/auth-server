@@ -80,7 +80,8 @@ public class SysDeptSpreadsheetService
 
 		return rows.stream().map(row -> {
 			SysDeptSpreadsheetRow exportRow = SysDeptSpreadsheetConverter.INSTANCE.toSpreadsheetRow(row);
-			exportRow.setDeptPath(deptPathById.getOrDefault(row.getId(), row.getDeptName()));
+			String deptPath = deptPathById.getOrDefault(row.getId(), row.getDeptName());
+			exportRow.setDeptPath(deptPath);
 			return exportRow;
 		}).toList();
 	}

@@ -99,6 +99,7 @@ class SecurityIngestServiceTest {
 	void appendOperationLogUsesEventUserId() {
 		OperationLogPayloadEvent payload = OperationLogPayloadEvent.builder()
 			.userId(9L)
+			.username("bob")
 			.operationType("CREATE")
 			.module("SYSTEM:SYS_USER")
 			.requestMethod("POST")
@@ -112,6 +113,7 @@ class SecurityIngestServiceTest {
 		verify(logOperationMapper).insert(captor.capture());
 		LogOperationEntity saved = captor.getValue();
 		assertThat(saved.getUserId()).isEqualTo(9L);
+		assertThat(saved.getUsername()).isEqualTo("bob");
 		assertThat(saved.getCreateUser()).isEqualTo(9L);
 		assertThat(saved.getUpdateUser()).isEqualTo(9L);
 	}

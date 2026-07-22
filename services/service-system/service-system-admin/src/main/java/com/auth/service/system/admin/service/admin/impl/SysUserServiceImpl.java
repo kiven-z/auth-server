@@ -11,6 +11,7 @@ import com.auth.service.system.admin.convert.admin.user.SysUserConverter;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.role.GrantTableMapper;
 import com.auth.service.system.admin.mapper.user.SysUserMapper;
+import com.auth.service.system.admin.model.constants.AdminBatchSizes;
 import com.auth.service.system.admin.model.form.user.SysUserAvatarUpdateForm;
 import com.auth.service.system.admin.model.form.user.SysUserBatchStatusForm;
 import com.auth.service.system.admin.model.form.user.SysUserForm;
@@ -45,11 +46,6 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 	 * 新建用户默认权限版本号
 	 */
 	private static final Long DEFAULT_PERM_VERSION = 0L;
-
-	/**
-	 * Excel 导入与批量新增时的持久化批次大小
-	 */
-	private static final int IMPORT_SAVE_BATCH_SIZE = 500;
 
 	private final GrantTableMapper grantTableMapper;
 
@@ -86,7 +82,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 			return entity;
 		}).toList();
 
-		super.saveBatch(entities, IMPORT_SAVE_BATCH_SIZE);
+		super.saveBatch(entities, AdminBatchSizes.IMPORT_SAVE);
 	}
 
 	/**
@@ -121,7 +117,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 			existing.setAge(Period.between(form.getBirthday(), LocalDate.now()).getYears());
 		}
 
-		updateById(existing);
+		super.updateById(existing);
 	}
 
 	/**

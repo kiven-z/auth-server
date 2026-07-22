@@ -1,12 +1,14 @@
 package com.auth.service.system.admin.service.admin.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.common.core.utils.FieldChangeSupport;
 import com.auth.common.core.utils.TreeParentIdUtil;
 import com.auth.common.core.utils.TreeRelationUtil;
 import com.auth.common.data.support.BusinessKeyAssert;
 import com.auth.service.system.admin.convert.admin.SysDeptConverter;
 import com.auth.service.system.admin.mapper.dept.SysDeptMapper;
+import com.auth.service.system.admin.model.constants.AdminBatchSizes;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.form.dept.SysDeptForm;
 import com.auth.service.system.admin.model.form.dept.SysDeptMoveForm;
@@ -25,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 部门写服务实现。
@@ -36,11 +39,6 @@ import java.util.List;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity> implements SysDeptService {
-
-	/**
-	 * Excel 导入与批量新增时的持久化批次大小
-	 */
-	private static final int IMPORT_SAVE_BATCH_SIZE = 500;
 
 	private final DeptReferenceChecker deptReferenceChecker;
 
@@ -66,7 +64,7 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 			entity.setParentId(parentId);
 			return entity;
 		}).toList();
-		super.saveBatch(entities, IMPORT_SAVE_BATCH_SIZE);
+		super.saveBatch(entities, AdminBatchSizes.IMPORT_SAVE);
 
 		List<DeptClosureNodePO> deptClosureNodes = entities.stream()
 			.map(entity -> new DeptClosureNodePO(entity.getId(), entity.getParentId()))
@@ -113,6 +111,27 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 			String invalidationOp = parentChanged ? "move" : "update";
 			deptInvalidationTrigger.submitByDeptIds(List.of(id), invalidationOp);
 		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void batchUpdateStatus(IdsEnableStatusForm form) {
+		List<Long> ids = form.getIds().stream().filter(Objects::nonNull).distinct().toList();
+		if (CollUtil.isEmpty(ids)) {
+			return;
+		}
+
+		Boolean status = form.getStatus();
+		List<SysDeptEntity> updates = ids.stream().map(id -> {
+			SysDeptEntity entity = new SysDeptEntity();
+			entity.setId(id);
+			entity.setStatus(status);
+			return entity;
+		}).toList();
+		super.updateBatchById(updates);
+		deptInvalidationTrigger.submitByDeptIds(ids, "update");
 	}
 
 	/**

@@ -7,7 +7,6 @@ import com.auth.common.web.valid.group.CreateGroup;
 import com.auth.common.web.valid.group.UpdateGroup;
 import com.auth.module.file.export.ExportScopeQueryFields;
 import com.auth.module.file.importer.model.SpreadsheetImportResult;
-import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.autoconfigure.annotation.AuthenticatedApi;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
@@ -26,7 +25,6 @@ import com.auth.service.system.admin.service.admin.SysUserQueryService;
 import com.auth.service.system.admin.service.admin.SysUserService;
 import com.auth.service.system.admin.support.user.UserPasswordService;
 import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -72,9 +70,8 @@ public class SysUserController {
 	@PreAuthorize("@auth.decide('sys:user:query')")
 	@GetMapping("/page")
 	public Result<PageResponse<SysUserPageVO>> page(SysUserPageQuery query) {
-		Page<UserEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
-		PageResponse<SysUserPageVO> result = sysUserQueryService.getPage(pageParams, query);
-		return Result.success(result);
+		PageResponse<SysUserPageVO> response = sysUserQueryService.getPage(query);
+		return Result.success(response);
 	}
 
 	@AuthenticatedApi

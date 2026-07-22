@@ -1,12 +1,12 @@
 package com.auth.service.system.authorization.dispatch.trigger;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest;
 import com.auth.module.security.contract.dto.invalidation.GrantInvalidatePayload;
 import com.auth.module.security.contract.dto.invalidation.GrantSubjectKey;
 import com.auth.service.system.authorization.dispatch.AuthorizationInvalidationCoordinator;
+import com.auth.service.system.authorization.dispatch.support.AuthorizationInvalidationSourceBizIds;
 import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * grant_table 授权主体变更后触发用户授权画像失效
@@ -38,10 +37,7 @@ public class GrantAuthorizationInvalidationTrigger {
 			return;
 		}
 
-		String sourceBizId = CharSequenceUtil.blankToDefault(operation, "invalidate") + ":"
-				+ keys.stream()
-					.map(subject -> subject.subjectType().name().toLowerCase() + ":" + subject.subjectId())
-					.collect(Collectors.joining(","));
+		String sourceBizId = AuthorizationInvalidationSourceBizIds.of(operation);
 		String eventId = AuthorizationChangeKind.GRANT.eventIdPrefix() + ":" + IdWorker.getId();
 		var payload = new GrantInvalidatePayload(keys);
 		var request = new AuthorizationInvalidateRequest(eventId, AuthorizationChangeKind.GRANT, payload);

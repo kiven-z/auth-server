@@ -19,6 +19,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -52,10 +53,11 @@ class UserAuthorizationInvalidationTriggerTest {
 
 		ArgumentCaptor<AuthorizationInvalidateRequest> requestCaptor = ArgumentCaptor
 			.forClass(AuthorizationInvalidateRequest.class);
+		ArgumentCaptor<String> sourceBizIdCaptor = ArgumentCaptor.forClass(String.class);
 		verify(invalidationCoordinator).submit(requestCaptor.capture(),
-				org.mockito.ArgumentMatchers.eq(AuthorizationAuditBizModule.SYS_USER),
-				org.mockito.ArgumentMatchers.eq("update:10,20"));
+				org.mockito.ArgumentMatchers.eq(AuthorizationAuditBizModule.SYS_USER), sourceBizIdCaptor.capture());
 
+		assertTrue(sourceBizIdCaptor.getValue().matches("update:[0-9a-f]{8}"));
 		AuthorizationInvalidateRequest request = requestCaptor.getValue();
 		assertEquals(AuthorizationChangeKind.USER, request.kind());
 		assertInstanceOf(UserInvalidatePayload.class, request.payload());

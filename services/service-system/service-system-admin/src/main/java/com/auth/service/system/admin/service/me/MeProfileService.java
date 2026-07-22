@@ -10,7 +10,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  *
  * @author Bunny
  */
-public interface CurrentUserProfileService extends IService<UserEntity> {
+public interface MeProfileService extends IService<UserEntity> {
 
 	/**
 	 * 更新当前登录用户可编辑的个人资料字段

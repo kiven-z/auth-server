@@ -28,6 +28,9 @@ public class LogOperationPageRowPO implements Serializable {
 	@Schema(title = "操作用户 ID")
 	private Long userId;
 
+	@Schema(title = "操作用户名快照")
+	private String username;
+
 	@Schema(title = "操作模块")
 	private String module;
 

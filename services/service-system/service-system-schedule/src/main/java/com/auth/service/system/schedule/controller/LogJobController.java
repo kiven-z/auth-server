@@ -2,12 +2,10 @@ package com.auth.service.system.schedule.controller;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
-import com.auth.service.system.schedule.model.entity.LogJobEntity;
 import com.auth.service.system.schedule.model.query.LogJobQuery;
 import com.auth.service.system.schedule.model.vo.LogJobDetailVO;
 import com.auth.service.system.schedule.model.vo.LogJobPageVO;
 import com.auth.service.system.schedule.service.LogJobService;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -37,9 +35,7 @@ public class LogJobController {
 	@PreAuthorize("@auth.decide('schedule:joblog:query')")
 	@GetMapping("page")
 	public Result<PageResponse<LogJobPageVO>> page(LogJobQuery query) {
-		Page<LogJobEntity> page = new Page<>(query.getPageIndex(), query.getPageSize());
-		PageResponse<LogJobPageVO> response = logJobService.getPage(page, query);
-
+		PageResponse<LogJobPageVO> response = logJobService.getPage(query);
 		return Result.success(response);
 	}
 

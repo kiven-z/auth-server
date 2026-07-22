@@ -3,7 +3,7 @@ package com.auth.service.system.schedule.service.impl;
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.mapper.JobMapper;
 import com.auth.service.system.schedule.model.entity.JobEntity;
-import com.auth.service.system.schedule.model.form.SysJobStatusForm;
+import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.service.system.schedule.support.quartz.SysJobScheduleReconciler;
 import com.auth.service.system.schedule.support.quartz.SysJobSchedulerManager;
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
@@ -72,7 +72,7 @@ class SysJobScheduleSyncServiceImplTest {
 		entity.setStatus(true);
 		when(jobMapper.selectList(any())).thenReturn(List.of(entity));
 
-		SysJobStatusForm form = new SysJobStatusForm();
+		IdsEnableStatusForm form = new IdsEnableStatusForm();
 		form.setIds(List.of(1L, 2L));
 		form.setStatus(false);
 
@@ -93,7 +93,7 @@ class SysJobScheduleSyncServiceImplTest {
 		paused.setStatus(false);
 		when(jobMapper.selectList(any())).thenReturn(List.of(paused));
 
-		SysJobStatusForm form = new SysJobStatusForm();
+		IdsEnableStatusForm form = new IdsEnableStatusForm();
 		form.setIds(List.of(1L, 2L));
 		form.setStatus(true);
 

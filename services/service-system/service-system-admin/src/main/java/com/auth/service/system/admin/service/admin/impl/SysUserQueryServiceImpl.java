@@ -63,7 +63,8 @@ public class SysUserQueryServiceImpl extends ServiceImpl<SysUserMapper, UserEnti
 	 * {@inheritDoc}
 	 */
 	@Override
-	public PageResponse<SysUserPageVO> getPage(Page<UserEntity> pageParams, SysUserPageQuery query) {
+	public PageResponse<SysUserPageVO> getPage(SysUserPageQuery query) {
+		Page<UserEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
 		String orderBySql = SysUserPageOrderSqlBuilder.buildOrderBySql(query.getSort());
 		IPage<SysUserPageRowPO> page = baseMapper.selectListByPage(pageParams, query, orderBySql);
 		IPage<SysUserPageVO> voPage = page.convert(SysUserConverter.INSTANCE::toPageVo);

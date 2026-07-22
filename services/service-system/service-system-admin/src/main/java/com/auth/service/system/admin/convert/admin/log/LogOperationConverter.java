@@ -20,21 +20,19 @@ public interface LogOperationConverter {
 	LogOperationConverter INSTANCE = Mappers.getMapper(LogOperationConverter.class);
 
 	/**
-	 * 分页行 PO → VO（操作用户名、审计展示名由 Service 填充；列表 IP 由 {@code @Desensitized} 在 JSON 输出时脱敏）
+	 * 分页行 PO → VO
 	 * @param po 查询投影
 	 * @return 分页 VO
 	 */
-	@Mapping(target = "username", ignore = true)
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
 	LogOperationPageVO toPageVO(LogOperationPageRowPO po);
 
 	/**
-	 * 实体 → 详情 VO（操作用户展示名由 Service enrich）
+	 * 实体 → 详情 VO
 	 * @param entity 操作日志实体
 	 * @return 详情 VO
 	 */
-	@Mapping(target = "username", ignore = true)
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
 	LogOperationDetailVO toDetailVo(LogOperationEntity entity);

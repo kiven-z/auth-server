@@ -1,7 +1,9 @@
 package com.auth.service.system.admin.service.admin.impl;
 
+import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.service.system.admin.mapper.dept.SysDeptMapper;
 import com.auth.service.system.admin.mapper.role.GrantTableMapper;
+import com.auth.service.system.admin.model.constants.AdminBatchSizes;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.form.dept.SysDeptForm;
 import com.auth.service.system.admin.model.form.dept.SysDeptMoveForm;
@@ -123,7 +125,7 @@ class SysDeptServiceImplTest {
 
 		verify(deptReferenceChecker).requireAbsentDeptCodes(List.of("RD"));
 		verify(deptReferenceChecker).normalizeAndRequireActiveParent(0L);
-		verify(sysDeptService).saveBatch(anyList(), eq(500));
+		verify(sysDeptService).saveBatch(anyList(), eq(AdminBatchSizes.IMPORT_SAVE));
 		verify(deptClosureMaintainer)
 			.insertNodes(argThat(nodes -> nodes.size() == 1 && nodes.get(0).getParentId() == 0L));
 	}
@@ -259,6 +261,34 @@ class SysDeptServiceImplTest {
 		verify(sysDeptMapper).updateById(argThat((SysDeptEntity e) -> Long.valueOf(12L).equals(e.getParentId())));
 		verify(deptClosureMaintainer).moveNode(deptId, 12L);
 		verify(deptInvalidationTrigger).submitByDeptIds(List.of(deptId), "move");
+	}
+
+	@Test
+	@DisplayName("批量启停：仅更新入参 ids，不级联子部门")
+	void batchUpdateStatusUpdatesOnlyGivenIds() {
+		doReturn(true).when(sysDeptService).updateBatchById(anyList());
+
+		IdsEnableStatusForm form = new IdsEnableStatusForm();
+		form.setIds(List.of(1L, 2L));
+		form.setStatus(false);
+		sysDeptService.batchUpdateStatus(form);
+
+		verify(sysDeptService).updateBatchById(argThat((List<SysDeptEntity> list) -> list.size() == 2
+				&& list.stream().allMatch(e -> Boolean.FALSE.equals(e.getStatus()))));
+		verify(deptInvalidationTrigger).submitByDeptIds(List.of(1L, 2L), "update");
+		verify(deptClosureMaintainer, never()).moveNode(anyLong(), anyLong());
+	}
+
+	@Test
+	@DisplayName("批量启停：ids 为空时不写库")
+	void batchUpdateStatusSkipsWhenIdsEmpty() {
+		IdsEnableStatusForm form = new IdsEnableStatusForm();
+		form.setIds(List.of());
+		form.setStatus(true);
+		sysDeptService.batchUpdateStatus(form);
+
+		verify(sysDeptService, never()).updateBatchById(anyList());
+		verify(deptInvalidationTrigger, never()).submitByDeptIds(any(), any());
 	}
 
 }

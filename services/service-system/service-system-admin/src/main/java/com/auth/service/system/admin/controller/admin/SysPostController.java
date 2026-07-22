@@ -1,5 +1,6 @@
 package com.auth.service.system.admin.controller.admin;
 
+import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.common.web.valid.group.CreateGroup;
@@ -10,19 +11,17 @@ import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.admin.excel.post.SysPostSpreadsheetService;
-import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.form.post.SysPostForm;
 import com.auth.service.system.admin.model.query.post.SysPostQuery;
 import com.auth.service.system.admin.model.vo.post.SysPostDetailVO;
 import com.auth.service.system.admin.model.vo.post.SysPostPageVO;
 import com.auth.service.system.admin.model.vo.post.SysPostSearchItemVO;
-import com.auth.service.system.admin.service.admin.SysPostQueryService;
 import com.auth.service.system.admin.service.admin.SysPostService;
 import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -46,8 +45,6 @@ import java.util.List;
 @RequestMapping("/api/system/post")
 @RestController
 public class SysPostController {
-
-	private final SysPostQueryService sysPostQueryService;
 
 	private final SysPostService sysPostService;
 
@@ -80,9 +77,8 @@ public class SysPostController {
 	@PreAuthorize("@auth.decide('sys:post:query')")
 	@GetMapping("/page")
 	public Result<PageResponse<SysPostPageVO>> page(SysPostQuery query) {
-		Page<SysPostEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
-		PageResponse<SysPostPageVO> result = sysPostQueryService.getPage(pageParams, query);
-		return Result.success(result);
+		PageResponse<SysPostPageVO> response = sysPostService.getPage(query);
+		return Result.success(response);
 	}
 
 	@Operation(summary = "岗位关键词搜索")
@@ -93,7 +89,7 @@ public class SysPostController {
 			@Parameter(description = "启用状态(true=启用，false=停用)") @RequestParam(required = false) Boolean status,
 			@Parameter(description = "返回条数上限，默认 20，最大 50") @RequestParam(required = false,
 					defaultValue = "20") Integer limit) {
-		List<SysPostSearchItemVO> search = sysPostQueryService.search(keyword, status, limit);
+		List<SysPostSearchItemVO> search = sysPostService.search(keyword, status, limit);
 		return Result.success(search);
 	}
 
@@ -101,7 +97,7 @@ public class SysPostController {
 	@PreAuthorize("@auth.decide('sys:post:query')")
 	@GetMapping("/{id}")
 	public Result<SysPostDetailVO> detail(@PathVariable("id") Long id) {
-		SysPostDetailVO detail = sysPostQueryService.getDetail(id);
+		SysPostDetailVO detail = sysPostService.getDetail(id);
 		return Result.success(detail);
 	}
 
@@ -120,6 +116,16 @@ public class SysPostController {
 	@PutMapping
 	public Result<Void> update(@Validated(UpdateGroup.class) @RequestBody SysPostForm form) {
 		sysPostService.update(form);
+		return Result.success();
+	}
+
+	@OperationLog(targetType = "POST", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = AuthorizationAuditBizModule.SYS_POST, operation = OperationLogKind.UPDATE)
+	@Operation(summary = "批量启停岗位")
+	@PreAuthorize("@auth.decide('sys:post:update')")
+	@PutMapping("/status")
+	public Result<Void> batchUpdateStatus(@Valid @RequestBody IdsEnableStatusForm form) {
+		sysPostService.batchUpdateStatus(form);
 		return Result.success();
 	}
 

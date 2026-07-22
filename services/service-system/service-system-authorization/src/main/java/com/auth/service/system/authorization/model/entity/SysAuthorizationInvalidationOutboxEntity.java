@@ -58,7 +58,7 @@ public class SysAuthorizationInvalidationOutboxEntity extends BaseEntity {
 	@Schema(title = "触发模块，如 SYS_ROLE。")
 	private String sourceModule;
 
-	@Schema(title = "业务主键，如 roleCode。")
+	@Schema(title = "追踪号，如 update:a3f2c1b0；完整业务键在 payload")
 	private String sourceBizId;
 
 }

@@ -28,7 +28,7 @@ public class AuthorizationInvalidationPublisher {
 	 * 在调用方事务内写入 Outbox（status=PENDING）
 	 * @param request 失效请求
 	 * @param sourceModule 触发模块，如 SYS_ROLE
-	 * @param sourceBizId 业务主键，如 roleCode
+	 * @param sourceBizId 追踪号，如 update:a3f2c1b0
 	 * @return 新 Outbox 主键
 	 */
 	@Transactional(rollbackFor = Exception.class)

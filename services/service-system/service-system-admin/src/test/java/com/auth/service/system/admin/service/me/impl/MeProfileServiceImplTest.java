@@ -32,11 +32,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 /**
- * {@link CurrentUserProfileServiceImpl} 单元测试
+ * {@link MeProfileServiceImpl} 单元测试
  */
-@DisplayName("CurrentUserProfileServiceImpl 个人资料更新")
+@DisplayName("MeProfileServiceImpl 个人资料更新")
 @ExtendWith(MockitoExtension.class)
-class CurrentUserProfileServiceImplTest {
+class MeProfileServiceImplTest {
 
 	private static final Long USER_ID = 100L;
 
@@ -53,7 +53,7 @@ class CurrentUserProfileServiceImplTest {
 	private UserAvatarUpdateSupport userAvatarUpdateSupport;
 
 	@InjectMocks
-	private CurrentUserProfileServiceImpl currentUserProfileService;
+	private MeProfileServiceImpl meProfileService;
 
 	private static UserEntity existingUser() {
 		UserEntity entity = new UserEntity();
@@ -87,7 +87,7 @@ class CurrentUserProfileServiceImplTest {
 
 		var baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
-		baseMapperField.set(currentUserProfileService, sysUserMapper);
+		baseMapperField.set(meProfileService, sysUserMapper);
 	}
 
 	@AfterEach
@@ -108,7 +108,7 @@ class CurrentUserProfileServiceImplTest {
 		when(sysUserMapper.selectCount(any())).thenReturn(0L);
 		when(sysUserMapper.updateById(any(UserEntity.class))).thenReturn(1);
 
-		currentUserProfileService.updateMyProfile(form);
+		meProfileService.updateMyProfile(form);
 
 		ArgumentCaptor<UserEntity> captor = ArgumentCaptor.forClass(UserEntity.class);
 		verify(sysUserMapper).updateById(captor.capture());
@@ -135,8 +135,7 @@ class CurrentUserProfileServiceImplTest {
 		when(userReferenceChecker.getExistingActive(USER_ID)).thenReturn(existing);
 		when(sysUserMapper.selectCount(any())).thenReturn(1L);
 
-		assertThatThrownBy(() -> currentUserProfileService.updateMyProfile(form))
-			.isInstanceOf(SystemBusinessException.class)
+		assertThatThrownBy(() -> meProfileService.updateMyProfile(form)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.PARAM_DUPLICATE);
 
@@ -154,8 +153,7 @@ class CurrentUserProfileServiceImplTest {
 		when(userReferenceChecker.getExistingActive(USER_ID)).thenReturn(existing);
 		when(sysUserMapper.selectCount(any())).thenReturn(0L).thenReturn(1L);
 
-		assertThatThrownBy(() -> currentUserProfileService.updateMyProfile(form))
-			.isInstanceOf(SystemBusinessException.class)
+		assertThatThrownBy(() -> meProfileService.updateMyProfile(form)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.PARAM_DUPLICATE);
 
@@ -174,7 +172,7 @@ class CurrentUserProfileServiceImplTest {
 		when(sysUserMapper.selectCount(any())).thenReturn(0L);
 		when(sysUserMapper.updateById(any(UserEntity.class))).thenReturn(1);
 
-		currentUserProfileService.updateMyProfile(form);
+		meProfileService.updateMyProfile(form);
 
 		verify(userSessionRevocationTrigger).revokeAllSessionsAfterCommit(List.of(USER_ID));
 	}
@@ -190,7 +188,7 @@ class CurrentUserProfileServiceImplTest {
 		when(sysUserMapper.selectCount(any())).thenReturn(0L);
 		when(sysUserMapper.updateById(any(UserEntity.class))).thenReturn(1);
 
-		currentUserProfileService.updateMyProfile(form);
+		meProfileService.updateMyProfile(form);
 
 		verify(userSessionRevocationTrigger, never()).revokeAllSessionsAfterCommit(any());
 	}
@@ -202,7 +200,7 @@ class CurrentUserProfileServiceImplTest {
 		UserEntity existing = existingUser();
 		when(userReferenceChecker.getExistingActive(USER_ID)).thenReturn(existing);
 
-		currentUserProfileService.updateMyAvatar(buildAvatarForm(avatar));
+		meProfileService.updateMyAvatar(buildAvatarForm(avatar));
 
 		verify(userAvatarUpdateSupport).applyAvatarUpdate(existing, avatar, USER_ID);
 	}

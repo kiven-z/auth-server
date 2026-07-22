@@ -8,6 +8,7 @@
         SELECT
         lo.id,
         lo.user_id,
+        lo.username,
         lo.module,
         lo.operation_type,
         lo.target_type,

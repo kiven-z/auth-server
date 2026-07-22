@@ -127,6 +127,8 @@ public class OperationLogPayloadAssembler {
 		String responseMessage = OperationLogResponseMessageComposer.compose(ctx.meta(), ctx.result(), ctx.failure());
 		// 解析用户ID
 		Long userId = SecurityUserUtils.getUserId();
+		// 解析用户名快照
+		String username = SecurityUserUtils.getUsername();
 		// 解析用户代理
 		String userAgent = CharSequenceUtil.subPre(CharSequenceUtil.nullToEmpty(ctx.request().getHeader("User-Agent")),
 				255);
@@ -136,6 +138,7 @@ public class OperationLogPayloadAssembler {
 		// 构建操作日志负载
 		return OperationLogPayloadEvent.builder()
 			.userId(userId)
+			.username(username)
 			.operationType(ctx.meta().operation().name())
 			// 解析模块
 			.module(AuditOperationModuleKeys.toPersistedModuleKey(ctx.meta().serviceDomain(), ctx.meta().bizModule()))

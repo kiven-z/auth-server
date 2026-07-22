@@ -43,6 +43,7 @@ class SecurityIngestEntityAssemblerTest {
 	@DisplayName("操作日志：已登录时操作用户与审计列使用 principalUserId")
 	void toEntity_operationLog_withPrincipal() {
 		OperationLogPayloadEvent payload = OperationLogPayloadEvent.builder()
+			.username("alice")
 			.operationType("UPDATE")
 			.module("SYSTEM:SYS_DEPT")
 			.requestMethod("PUT")
@@ -53,6 +54,7 @@ class SecurityIngestEntityAssemblerTest {
 		LogOperationEntity entity = SecurityIngestEntityAssembler.toEntity(payload, 100L);
 
 		assertThat(entity.getUserId()).isEqualTo(100L);
+		assertThat(entity.getUsername()).isEqualTo("alice");
 		assertThat(entity.getCreateUser()).isEqualTo(100L);
 		assertThat(entity.getUpdateUser()).isEqualTo(100L);
 	}

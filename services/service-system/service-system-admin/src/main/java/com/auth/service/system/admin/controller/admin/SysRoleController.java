@@ -1,5 +1,6 @@
 package com.auth.service.system.admin.controller.admin;
 
+import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.common.web.valid.group.CreateGroup;
@@ -10,18 +11,16 @@ import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.admin.excel.role.SysRoleSpreadsheetService;
-import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.form.role.SysRoleForm;
 import com.auth.service.system.admin.model.query.role.SysRoleQuery;
 import com.auth.service.system.admin.model.vo.role.SysRoleDetailVO;
 import com.auth.service.system.admin.model.vo.role.SysRoleOptionVO;
 import com.auth.service.system.admin.model.vo.role.SysRolePageVO;
-import com.auth.service.system.admin.service.admin.SysRoleQueryService;
 import com.auth.service.system.admin.service.admin.SysRoleService;
 import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -45,8 +44,6 @@ import java.util.List;
 @RequestMapping("/api/system/role")
 @RestController
 public class SysRoleController {
-
-	private final SysRoleQueryService sysRoleQueryService;
 
 	private final SysRoleService sysRoleService;
 
@@ -79,16 +76,15 @@ public class SysRoleController {
 	@PreAuthorize("@auth.decide('sys:role:query')")
 	@GetMapping("/page")
 	public Result<PageResponse<SysRolePageVO>> page(SysRoleQuery query) {
-		Page<SysRoleEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
-		PageResponse<SysRolePageVO> result = sysRoleQueryService.getPage(pageParams, query);
-		return Result.success(result);
+		PageResponse<SysRolePageVO> response = sysRoleService.getPage(query);
+		return Result.success(response);
 	}
 
 	@Operation(summary = "角色详情")
 	@PreAuthorize("@auth.decide('sys:role:detail')")
 	@GetMapping("/{id}")
 	public Result<SysRoleDetailVO> detail(@PathVariable("id") Long id) {
-		SysRoleDetailVO vo = sysRoleQueryService.getDetail(id);
+		SysRoleDetailVO vo = sysRoleService.getDetail(id);
 		return Result.success(vo);
 	}
 
@@ -111,6 +107,16 @@ public class SysRoleController {
 	}
 
 	@OperationLog(targetType = "ROLE", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = AuthorizationAuditBizModule.SYS_ROLE, operation = OperationLogKind.UPDATE)
+	@Operation(summary = "批量启停角色")
+	@PreAuthorize("@auth.decide('sys:role:update')")
+	@PutMapping("/status")
+	public Result<Void> batchUpdateStatus(@Valid @RequestBody IdsEnableStatusForm form) {
+		sysRoleService.batchUpdateStatus(form);
+		return Result.success();
+	}
+
+	@OperationLog(targetType = "ROLE", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = AuthorizationAuditBizModule.SYS_ROLE, operation = OperationLogKind.DELETE)
 	@Operation(summary = "删除角色")
 	@PreAuthorize("@auth.decide('sys:role:delete')")
@@ -125,7 +131,7 @@ public class SysRoleController {
 	@GetMapping("/options")
 	public Result<List<SysRoleOptionVO>> options(@RequestParam(value = "roleName", required = false) String roleName,
 			@RequestParam(value = "roleCode", required = false) String roleCode) {
-		List<SysRoleOptionVO> list = sysRoleQueryService.listOptions(roleName, roleCode);
+		List<SysRoleOptionVO> list = sysRoleService.listOptions(roleName, roleCode);
 		return Result.success(list);
 	}
 

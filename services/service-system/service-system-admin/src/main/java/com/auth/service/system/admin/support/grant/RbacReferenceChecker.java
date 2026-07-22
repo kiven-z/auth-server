@@ -31,7 +31,7 @@ public class RbacReferenceChecker {
 
 	/**
 	 * 权限 ID 均存在且已启用
-	 * @param permissionIds 待写入权限 ID（内部会去重）
+	 * @param permissionIds 待写入权限 ID
 	 */
 	public void requireActivePermissionIds(List<Long> permissionIds) {
 		if (CollUtil.isEmpty(permissionIds)) {
@@ -51,7 +51,7 @@ public class RbacReferenceChecker {
 	}
 
 	/**
-	 * 读取已存在角色，不存在时抛出业务异常；不校验启用状态
+	 * 读取已存在角色，不存在时抛出业务异常
 	 * @param roleId 角色 ID
 	 * @return 角色实体
 	 */
@@ -66,7 +66,7 @@ public class RbacReferenceChecker {
 
 	/**
 	 * 写入前：角色 ID 均存在且已启用
-	 * @param roleIds 待写入角色 ID（内部会去重）
+	 * @param roleIds 待写入角色 ID
 	 * @param invalidCode 校验失败时抛出的结果码
 	 */
 	public void requireExistingEnabledRoleIds(List<Long> roleIds, SystemResultCode invalidCode) {

@@ -47,7 +47,8 @@ public class SysJobGroupServiceImpl extends ServiceImpl<JobGroupMapper, JobGroup
 	 * {@inheritDoc}
 	 */
 	@Override
-	public PageResponse<SysJobGroupPageVO> getPage(Page<JobGroupEntity> pageParams, SysJobGroupQuery query) {
+	public PageResponse<SysJobGroupPageVO> getPage(SysJobGroupQuery query) {
+		Page<JobGroupEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
 		IPage<JobGroupPageRowPO> page = baseMapper.selectListByPage(pageParams, query);
 		IPage<SysJobGroupPageVO> voPage = page.convert(SysJobGroupConverter.INSTANCE::toPageVO);
 
@@ -72,7 +73,7 @@ public class SysJobGroupServiceImpl extends ServiceImpl<JobGroupMapper, JobGroup
 	 */
 	@Override
 	public SysJobGroupDetailVO getDetail(Long id) {
-		JobGroupEntity entity = getById(id);
+		JobGroupEntity entity = super.getById(id);
 		if (entity == null) {
 			throw new SysJobException(DATA_NOT_EXIST);
 		}
@@ -104,7 +105,7 @@ public class SysJobGroupServiceImpl extends ServiceImpl<JobGroupMapper, JobGroup
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void update(SysJobGroupUpdateForm form) {
-		JobGroupEntity jobGroup = getById(form.getId());
+		JobGroupEntity jobGroup = super.getById(form.getId());
 		if (jobGroup == null) {
 			throw new SysJobException(DATA_NOT_EXIST);
 		}
@@ -119,7 +120,7 @@ public class SysJobGroupServiceImpl extends ServiceImpl<JobGroupMapper, JobGroup
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public void deleteById(Long id) {
-		JobGroupEntity jobGroup = getById(id);
+		JobGroupEntity jobGroup = super.getById(id);
 		if (jobGroup == null) {
 			throw new SysJobException(DATA_NOT_EXIST);
 		}
@@ -130,10 +131,10 @@ public class SysJobGroupServiceImpl extends ServiceImpl<JobGroupMapper, JobGroup
 		}
 
 		// 分组下还有绑定任务不能删
-		long cnt = jobMapper
+		long count = jobMapper
 			.selectCount(Wrappers.<JobEntity>lambdaQuery().eq(JobEntity::getJobGroup, jobGroup.getGroupCode()));
-		if (cnt > 0) {
-			throw new SysJobException(JOB_GROUP_HAS_ACTIVE_JOBS, cnt);
+		if (count > 0) {
+			throw new SysJobException(JOB_GROUP_HAS_ACTIVE_JOBS, count);
 		}
 
 		super.removeById(id);

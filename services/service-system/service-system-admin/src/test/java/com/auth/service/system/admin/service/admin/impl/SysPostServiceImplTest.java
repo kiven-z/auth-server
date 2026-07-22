@@ -1,29 +1,23 @@
 package com.auth.service.system.admin.service.admin.impl;
 
-import com.auth.common.data.model.PageResponse;
+import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.post.SysPostMapper;
 import com.auth.service.system.admin.mapper.role.GrantTableMapper;
+import com.auth.service.system.admin.model.constants.AdminBatchSizes;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.form.post.SysPostForm;
 import com.auth.service.system.admin.model.po.post.PostDeptCodePairPO;
 import com.auth.service.system.admin.model.po.post.SysPostBoundUserPO;
-import com.auth.service.system.admin.model.po.post.SysPostPageRowPO;
-import com.auth.service.system.admin.model.po.post.SysPostSearchItemPO;
 import com.auth.service.system.admin.model.po.reference.DeptReferencePO;
 import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
-import com.auth.service.system.admin.model.query.post.SysPostQuery;
 import com.auth.service.system.admin.model.vo.post.SysPostDetailVO;
-import com.auth.service.system.admin.model.vo.post.SysPostPageVO;
-import com.auth.service.system.admin.model.vo.post.SysPostSearchItemVO;
 import com.auth.service.system.admin.support.post.PostReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.PostAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.common.service.AuditUserDisplayService;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.repository.CrudRepository;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.BeforeEach;
@@ -65,8 +59,6 @@ class SysPostServiceImplTest {
 
 	private SysPostServiceImpl sysPostService;
 
-	private SysPostQueryServiceImpl sysPostQueryService;
-
 	private static SysPostForm minimalForm(Long deptId, String postCode, String postName) {
 		return minimalForm(null, deptId, postCode, postName);
 	}
@@ -95,24 +87,12 @@ class SysPostServiceImplTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		PostReferenceChecker postReferenceChecker = new PostReferenceChecker(sysPostMapper);
-		sysPostService = spy(new SysPostServiceImpl(postInvalidationTrigger, postReferenceChecker));
-		sysPostQueryService = new SysPostQueryServiceImpl(auditUserDisplayService, postReferenceChecker,
-				grantTableMapper);
+		sysPostService = spy(new SysPostServiceImpl(auditUserDisplayService, postInvalidationTrigger,
+				postReferenceChecker, grantTableMapper));
 		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysPostService, sysPostMapper);
-		baseMapperField.set(sysPostQueryService, sysPostMapper);
 		lenient().doReturn(true).when(sysPostService).saveBatch(anyList(), anyInt());
-	}
-
-	@Test
-	@DisplayName("搜索：关键字原样传入 Mapper")
-	void searchPassesKeywordThrough() {
-		when(sysPostMapper.search("", true, 10)).thenReturn(List.of());
-
-		sysPostQueryService.search("", true, 10);
-
-		verify(sysPostMapper).search("", true, 10);
 	}
 
 	@Test
@@ -120,7 +100,7 @@ class SysPostServiceImplTest {
 	void searchUsesDefaultLimitWhenNull() {
 		when(sysPostMapper.search(any(), any(), anyInt())).thenReturn(List.of());
 
-		sysPostQueryService.search("dev", true, null);
+		sysPostService.search("dev", true, null);
 
 		ArgumentCaptor<Integer> limitCap = ArgumentCaptor.forClass(Integer.class);
 		verify(sysPostMapper).search(eq("dev"), eq(true), limitCap.capture());
@@ -132,7 +112,7 @@ class SysPostServiceImplTest {
 	void searchCapsLimitAtFifty() {
 		when(sysPostMapper.search(any(), any(), anyInt())).thenReturn(List.of());
 
-		sysPostQueryService.search("研发", null, 200);
+		sysPostService.search("研发", null, 200);
 
 		ArgumentCaptor<Integer> limitCap = ArgumentCaptor.forClass(Integer.class);
 		verify(sysPostMapper).search(eq("研发"), isNull(), limitCap.capture());
@@ -144,7 +124,7 @@ class SysPostServiceImplTest {
 	void searchRaisesTinyLimitToOne() {
 		when(sysPostMapper.search(any(), any(), anyInt())).thenReturn(List.of());
 
-		sysPostQueryService.search("p1", false, 0);
+		sysPostService.search("p1", false, 0);
 
 		ArgumentCaptor<Integer> limitCap = ArgumentCaptor.forClass(Integer.class);
 		verify(sysPostMapper).search(eq("p1"), eq(false), limitCap.capture());
@@ -152,43 +132,11 @@ class SysPostServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("搜索：正常返回 Mapper 结果")
-	void searchReturnsMapperRows() {
-		SysPostSearchItemPO row = new SysPostSearchItemPO();
-		row.setId(5L);
-		row.setPostCode("OPS");
-		row.setPostName("运维");
-		when(sysPostMapper.search("ops", true, 15)).thenReturn(List.of(row));
-
-		List<SysPostSearchItemVO> result = sysPostQueryService.search("ops", true, 15);
-
-		assertThat(result).hasSize(1).first().satisfies(r -> {
-			assertThat(r.getId()).isEqualTo(5L);
-			assertThat(r.getPostCode()).isEqualTo("OPS");
-		});
-	}
-
-	@Test
-	@DisplayName("分页查询：委托审计用户名补全")
-	void getPageDelegatesEnrichToAuditUserDisplayService() {
-		Page<SysPostEntity> pageParams = new Page<>(1, 10);
-		SysPostQuery query = new SysPostQuery();
-		Page<SysPostPageRowPO> poPage = new Page<>(1, 10);
-		poPage.setRecords(List.of(new SysPostPageRowPO()));
-		when(sysPostMapper.selectListByPage(eq(pageParams), eq(query), anyString())).thenReturn(poPage);
-
-		PageResponse<SysPostPageVO> result = sysPostQueryService.getPage(pageParams, query);
-
-		assertThat(result.getList()).hasSize(1);
-		verify(auditUserDisplayService).enrichAuditUsernames(any(IPage.class), isNull(), isNull());
-	}
-
-	@Test
 	@DisplayName("详情：岗位不存在时 POST_NOT_FOUND")
 	void getDetailThrowsWhenPostNotFound() {
 		when(sysPostMapper.selectById(9L)).thenReturn(null);
 
-		assertThatThrownBy(() -> sysPostQueryService.getDetail(9L)).isInstanceOf(SystemBusinessException.class)
+		assertThatThrownBy(() -> sysPostService.getDetail(9L)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
 
@@ -225,7 +173,7 @@ class SysPostServiceImplTest {
 		when(grantTableMapper.selectBoundRolesBySubject(GrantTableSubjectType.POST.name(), postId))
 			.thenReturn(List.of(boundRole));
 
-		SysPostDetailVO detail = sysPostQueryService.getDetail(postId);
+		SysPostDetailVO detail = sysPostService.getDetail(postId);
 
 		assertThat(detail.getPostCode()).isEqualTo("DEV");
 		assertThat(detail.getPostName()).isEqualTo("研发");
@@ -314,7 +262,7 @@ class SysPostServiceImplTest {
 						&& Long.valueOf(2L).equals(entities.get(0).getDeptId())
 						&& "NEW_CODE".equals(entities.get(0).getPostCode()) && entities.get(0).getStatus() != null
 						&& entities.get(0).getStatus() && Integer.valueOf(0).equals(entities.get(0).getOrderNum())),
-				eq(500));
+				eq(AdminBatchSizes.IMPORT_SAVE));
 	}
 
 	@Test
@@ -443,6 +391,33 @@ class SysPostServiceImplTest {
 
 		verify(postInvalidationTrigger).submitByPostIds(List.of(postId), "delete");
 		verify(sysPostMapper).deleteById(postId);
+	}
+
+	@Test
+	@DisplayName("批量启停：按 ids 更新并触发授权失效")
+	void batchUpdateStatusUpdatesAndInvalidates() {
+		doReturn(true).when(sysPostService).updateBatchById(anyList());
+
+		IdsEnableStatusForm form = new IdsEnableStatusForm();
+		form.setIds(List.of(1L, 2L));
+		form.setStatus(false);
+		sysPostService.batchUpdateStatus(form);
+
+		verify(sysPostService).updateBatchById(argThat((List<SysPostEntity> list) -> list.size() == 2
+				&& list.stream().allMatch(e -> Boolean.FALSE.equals(e.getStatus()))));
+		verify(postInvalidationTrigger).submitByPostIds(List.of(1L, 2L), "update");
+	}
+
+	@Test
+	@DisplayName("批量启停：ids 为空时不写库")
+	void batchUpdateStatusSkipsWhenIdsEmpty() {
+		IdsEnableStatusForm form = new IdsEnableStatusForm();
+		form.setIds(List.of());
+		form.setStatus(true);
+		sysPostService.batchUpdateStatus(form);
+
+		verify(sysPostService, never()).updateBatchById(anyList());
+		verifyNoInteractions(postInvalidationTrigger);
 	}
 
 }

@@ -1,29 +1,47 @@
 package com.auth.service.system.admin.service.admin.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.common.core.utils.FieldChangeSupport;
+import com.auth.common.data.model.PageResponse;
 import com.auth.common.data.support.BusinessKeyAssert;
+import com.auth.service.system.admin.convert.admin.ReferenceConverter;
+import com.auth.service.system.admin.convert.admin.SysPermissionConverter;
 import com.auth.service.system.admin.convert.admin.SysRoleConverter;
+import com.auth.service.system.admin.mapper.menu.SysMenuRoleMapper;
 import com.auth.service.system.admin.mapper.role.GrantTableMapper;
 import com.auth.service.system.admin.mapper.role.SysRoleMapper;
+import com.auth.service.system.admin.mapper.role.SysRolePermissionMapper;
+import com.auth.service.system.admin.model.constants.AdminBatchSizes;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.form.role.SysRoleForm;
-import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
+import com.auth.service.system.admin.model.po.permission.SysPermissionBoundMenuPO;
+import com.auth.service.system.admin.model.po.reference.*;
+import com.auth.service.system.admin.model.query.role.SysRoleQuery;
+import com.auth.service.system.admin.model.vo.role.SysRoleDetailVO;
+import com.auth.service.system.admin.model.vo.role.SysRoleOptionVO;
+import com.auth.service.system.admin.model.vo.role.SysRolePageVO;
 import com.auth.service.system.admin.service.admin.SysRoleService;
+import com.auth.service.system.admin.support.sqlbuild.SysRolePageOrderSqlBuilder;
 import com.auth.service.system.authorization.dispatch.trigger.RoleAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
+import com.auth.service.system.common.service.AuditUserDisplayService;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
- * 系统角色写服务实现。
+ * 系统角色服务实现。
  *
  * @author Bunny
  */
@@ -32,14 +50,73 @@ import java.util.List;
 @Service
 public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity> implements SysRoleService {
 
-	/**
-	 * Excel 导入与批量新增时的持久化批次大小
-	 */
-	private static final int IMPORT_SAVE_BATCH_SIZE = 500;
+	private final AuditUserDisplayService auditUserDisplayService;
 
 	private final RoleAuthorizationInvalidationTrigger roleInvalidationTrigger;
 
 	private final GrantTableMapper grantTableMapper;
+
+	private final SysRolePermissionMapper sysRolePermissionMapper;
+
+	private final SysMenuRoleMapper sysMenuRoleMapper;
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	@Transactional(readOnly = true)
+	public PageResponse<SysRolePageVO> getPage(SysRoleQuery query) {
+		Page<SysRoleEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
+		String orderBySql = SysRolePageOrderSqlBuilder.buildOrderBySql(query.getSort());
+		IPage<SysRoleEntity> entityPage = baseMapper.selectListByPage(pageParams, query, orderBySql);
+		IPage<SysRolePageVO> page = entityPage.convert(SysRoleConverter.INSTANCE::toPageVo);
+
+		auditUserDisplayService.enrichAuditUsernames(page, null, null);
+		return PageResponse.of(page);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	@Transactional(readOnly = true)
+	public SysRoleDetailVO getDetail(Long id) {
+		SysRoleEntity entity = baseMapper.selectById(id);
+		if (entity == null) {
+			log.warn("role not found: id={}", id);
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST);
+		}
+
+		SysRoleDetailVO detail = SysRoleConverter.INSTANCE.toDetailVo(entity);
+
+		List<PermissionReferencePO> permissions = sysRolePermissionMapper.selectAssignedPermissionsByRoleId(id);
+		detail.setBoundPermissions(ReferenceConverter.INSTANCE.toPermissionReferenceList(permissions));
+
+		List<SysPermissionBoundMenuPO> permissionBoundMenus = sysMenuRoleMapper.selectBoundMenusByRoleId(id);
+		detail.setBoundMenus(SysPermissionConverter.INSTANCE.toBoundMenuItemList(permissionBoundMenus));
+
+		List<UserReferencePO> grantTableBoundUsers = grantTableMapper.selectBoundUsersByRoleId(id);
+		detail.setBoundUsers(ReferenceConverter.INSTANCE.toUserReferenceList(grantTableBoundUsers));
+
+		List<DeptReferencePO> grantTableBoundDeptList = grantTableMapper.selectBoundDeptsByRoleId(id);
+		detail.setBoundDepts(ReferenceConverter.INSTANCE.toDeptReferenceList(grantTableBoundDeptList));
+
+		List<PostReferencePO> grantTableBoundPosts = grantTableMapper.selectBoundPostsByRoleId(id);
+		detail.setBoundPosts(ReferenceConverter.INSTANCE.toPostReferenceList(grantTableBoundPosts));
+
+		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail), null, null);
+		return detail;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	@Transactional(readOnly = true)
+	public List<SysRoleOptionVO> listOptions(String roleName, String roleCode) {
+		List<SysRoleEntity> entities = baseMapper.selectRoleOptions(roleName, roleCode);
+		return SysRoleConverter.INSTANCE.toOptionVoList(entities);
+	}
 
 	/**
 	 * {@inheritDoc}
@@ -62,7 +139,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 		}
 
 		List<SysRoleEntity> entities = forms.stream().map(SysRoleConverter.INSTANCE::toEntity).toList();
-		super.saveBatch(entities, IMPORT_SAVE_BATCH_SIZE);
+		super.saveBatch(entities, AdminBatchSizes.IMPORT_SAVE);
 	}
 
 	/**
@@ -91,12 +168,42 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 		}
 
 		SysRoleConverter.INSTANCE.applyUpdateForm(form, existing);
-		updateById(existing);
+		super.updateById(existing);
 
 		if (FieldChangeSupport.anyChanged(roleCodeChanged, statusChanged)) {
 			List<String> roleCodes = FieldChangeSupport.renameCodes(oldRoleCode, newRoleCode);
 			roleInvalidationTrigger.submitByRoleCodes(roleCodes, "update");
 		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void batchUpdateStatus(IdsEnableStatusForm form) {
+		List<Long> ids = form.getIds().stream().filter(Objects::nonNull).distinct().toList();
+		if (CollUtil.isEmpty(ids)) {
+			return;
+		}
+
+		// 失效按角色编码，先查出存在行（不存在的 id 忽略）
+		List<SysRoleEntity> existing = listByIds(ids);
+		if (CollUtil.isEmpty(existing)) {
+			return;
+		}
+
+		Boolean status = form.getStatus();
+		List<SysRoleEntity> updates = existing.stream().map(row -> {
+			SysRoleEntity entity = new SysRoleEntity();
+			entity.setId(row.getId());
+			entity.setStatus(status);
+			return entity;
+		}).toList();
+		super.updateBatchById(updates);
+
+		List<String> roleCodes = existing.stream().map(SysRoleEntity::getRoleCode).toList();
+		roleInvalidationTrigger.submitByRoleCodes(roleCodes, "update");
 	}
 
 	/**
@@ -116,7 +223,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 			throw new SystemBusinessException(SystemCommonResultCode.DATA_IN_USE, roleCode);
 		}
 
-		removeById(id);
+		super.removeById(id);
 
 		roleInvalidationTrigger.submitByRoleCodes(List.of(roleCode), "delete");
 	}

@@ -3,9 +3,11 @@ package com.auth.service.system.admin.service.admin.impl;
 import com.auth.service.system.admin.mapper.menu.SysMenuMapper;
 import com.auth.service.system.admin.mapper.menu.SysMenuRoleMapper;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
+import com.auth.service.system.admin.model.form.menu.SysMenuAssignRoleForm;
 import com.auth.service.system.admin.model.form.menu.SysMenuMoveForm;
 import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.auth.service.system.admin.model.vo.menu.SysMenuDetailVO;
+import com.auth.service.system.admin.support.grant.RbacReferenceChecker;
 import com.auth.service.system.admin.support.menu.MenuReferenceChecker;
 import com.auth.service.system.admin.support.menu.MenuWebRouteTreeAssembler;
 import com.auth.service.system.authorization.dispatch.query.UserEffectiveCodesResolver;
@@ -56,9 +58,10 @@ class SysMenuServiceImplTest {
 	@Mock
 	private SysMenuRoleMapper sysMenuRoleMapper;
 
-	private SysMenuServiceImpl sysMenuService;
+	@Mock
+	private RbacReferenceChecker rbacReferenceChecker;
 
-	private SysMenuQueryServiceImpl sysMenuQueryService;
+	private SysMenuServiceImpl sysMenuService;
 
 	private static SysMenuEntity menuEntity(Long id) {
 		SysMenuEntity entity = new SysMenuEntity();
@@ -69,13 +72,11 @@ class SysMenuServiceImplTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		sysMenuService = new SysMenuServiceImpl(menuReferenceChecker);
-		sysMenuQueryService = new SysMenuQueryServiceImpl(auditUserDisplayService, userEffectiveCodesResolver,
-				menuWebRouteTreeAssembler, menuReferenceChecker, sysMenuRoleMapper);
+		sysMenuService = new SysMenuServiceImpl(auditUserDisplayService, userEffectiveCodesResolver,
+				menuWebRouteTreeAssembler, menuReferenceChecker, sysMenuRoleMapper, rbacReferenceChecker);
 		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysMenuService, sysMenuMapper);
-		baseMapperField.set(sysMenuQueryService, sysMenuMapper);
 	}
 
 	@Test
@@ -149,7 +150,7 @@ class SysMenuServiceImplTest {
 		when(menuReferenceChecker.getExisting(9L))
 			.thenThrow(new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST));
 
-		assertThatThrownBy(() -> sysMenuQueryService.getDetail(9L)).isInstanceOf(SystemBusinessException.class)
+		assertThatThrownBy(() -> sysMenuService.getDetail(9L)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
 	}
@@ -169,7 +170,7 @@ class SysMenuServiceImplTest {
 		boundRole.setStatus(true);
 		when(sysMenuRoleMapper.selectBoundRolesByMenuId(5L)).thenReturn(List.of(boundRole));
 
-		SysMenuDetailVO detail = sysMenuQueryService.getDetail(5L);
+		SysMenuDetailVO detail = sysMenuService.getDetail(5L);
 
 		assertThat(detail.getName()).isEqualTo("SystemUser");
 		assertThat(detail.getBoundRoles()).hasSize(1);
@@ -177,6 +178,55 @@ class SysMenuServiceImplTest {
 		assertThat(detail.getBoundRoles().get(0).getRoleCode()).isEqualTo("MENU_ADMIN");
 		verify(sysMenuRoleMapper).selectBoundRolesByMenuId(5L);
 		verify(auditUserDisplayService).enrichAuditUsernames(anyList(), isNull(), isNull());
+	}
+
+	@Test
+	@DisplayName("覆盖分配：校验通过后删除旧关联并批量插入")
+	void replaceMenuRolesReplacesAssociationsWhenEligible() {
+		Long menuId = 5L;
+		SysMenuAssignRoleForm form = new SysMenuAssignRoleForm();
+		form.setRoleIds(List.of(1L, 2L));
+
+		sysMenuService.replaceMenuRoles(menuId, form);
+
+		verify(rbacReferenceChecker).requireExistingEnabledRoleIds(List.of(1L, 2L),
+				SystemCommonResultCode.GRANT_REFERENCE_INVALID);
+		verify(sysMenuRoleMapper).deleteByMenuId(menuId);
+		verify(sysMenuRoleMapper).batchInsertMenuRoles(menuId, List.of(1L, 2L));
+	}
+
+	@Test
+	@DisplayName("覆盖分配：空列表仅删除关联不插入")
+	void replaceMenuRolesWithEmptyListDeletesOnly() {
+		Long menuId = 5L;
+		SysMenuAssignRoleForm form = new SysMenuAssignRoleForm();
+		form.setRoleIds(List.of());
+
+		sysMenuService.replaceMenuRoles(menuId, form);
+
+		verify(rbacReferenceChecker).requireExistingEnabledRoleIds(List.of(),
+				SystemCommonResultCode.GRANT_REFERENCE_INVALID);
+		verify(sysMenuRoleMapper).deleteByMenuId(menuId);
+		verify(sysMenuRoleMapper, never()).batchInsertMenuRoles(any(), any());
+	}
+
+	@Test
+	@DisplayName("覆盖分配：角色校验失败时不写 sys_menu_role")
+	void replaceMenuRolesThrowsWhenRoleInvalid() {
+		Long menuId = 5L;
+		SysMenuAssignRoleForm form = new SysMenuAssignRoleForm();
+		form.setRoleIds(List.of(99L));
+
+		doThrow(new SystemBusinessException(SystemCommonResultCode.GRANT_REFERENCE_INVALID)).when(rbacReferenceChecker)
+			.requireExistingEnabledRoleIds(List.of(99L), SystemCommonResultCode.GRANT_REFERENCE_INVALID);
+
+		assertThatThrownBy(() -> sysMenuService.replaceMenuRoles(menuId, form))
+			.isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemCommonResultCode.GRANT_REFERENCE_INVALID);
+
+		verify(sysMenuRoleMapper, never()).deleteByMenuId(any());
+		verify(sysMenuRoleMapper, never()).batchInsertMenuRoles(any(), any());
 	}
 
 }

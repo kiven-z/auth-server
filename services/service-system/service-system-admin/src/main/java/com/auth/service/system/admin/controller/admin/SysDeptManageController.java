@@ -8,8 +8,8 @@ import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
 import com.auth.service.system.admin.model.vo.dept.DeptClosureHealthVO;
 import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
-import com.auth.service.system.admin.service.admin.DeptClosureHealthQueryService;
 import com.auth.service.system.admin.service.admin.GrantTableService;
+import com.auth.service.system.admin.support.dept.DeptClosureHealthInspector;
 import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,12 +33,12 @@ public class SysDeptManageController {
 
 	private final GrantTableService grantTableService;
 
-	private final DeptClosureHealthQueryService deptClosureHealthQueryService;
+	private final DeptClosureHealthInspector deptClosureHealthInspector;
 
 	public SysDeptManageController(GrantTableService grantTableService,
-			DeptClosureHealthQueryService deptClosureHealthQueryService) {
+			DeptClosureHealthInspector deptClosureHealthInspector) {
 		this.grantTableService = grantTableService;
-		this.deptClosureHealthQueryService = deptClosureHealthQueryService;
+		this.deptClosureHealthInspector = deptClosureHealthInspector;
 	}
 
 	@OperationLog(targetType = "DEPT_CLOSURE_HEALTH", serviceDomain = AuditServiceDomain.SYSTEM,
@@ -47,7 +47,7 @@ public class SysDeptManageController {
 	@PreAuthorize("@auth.decide('sys:dept:diagnose')")
 	@GetMapping("/closure/health")
 	public Result<DeptClosureHealthVO> closureHealth() {
-		DeptClosureHealthVO healthVO = deptClosureHealthQueryService.inspect();
+		DeptClosureHealthVO healthVO = deptClosureHealthInspector.inspect();
 		return Result.success(healthVO);
 	}
 

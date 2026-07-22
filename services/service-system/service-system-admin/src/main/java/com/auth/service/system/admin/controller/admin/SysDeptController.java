@@ -1,5 +1,6 @@
 package com.auth.service.system.admin.controller.admin;
 
+import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.common.web.valid.group.CreateGroup;
@@ -10,7 +11,6 @@ import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.admin.excel.dept.SysDeptSpreadsheetService;
-import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.form.dept.SysDeptForm;
 import com.auth.service.system.admin.model.form.dept.SysDeptMoveForm;
 import com.auth.service.system.admin.model.query.dept.SysDeptListQuery;
@@ -20,7 +20,6 @@ import com.auth.service.system.admin.model.vo.dept.SysDeptListVO;
 import com.auth.service.system.admin.service.admin.SysDeptQueryService;
 import com.auth.service.system.admin.service.admin.SysDeptService;
 import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -89,9 +88,8 @@ public class SysDeptController {
 	@PreAuthorize("@auth.decide('sys:dept:query')")
 	@GetMapping("/page")
 	public Result<PageResponse<SysDeptListVO>> page(SysDeptPageQuery query) {
-		Page<SysDeptEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
-		PageResponse<SysDeptListVO> result = sysDeptQueryService.pageFlat(pageParams, query);
-		return Result.success(result);
+		PageResponse<SysDeptListVO> response = sysDeptQueryService.pageFlat(query);
+		return Result.success(response);
 	}
 
 	@Operation(summary = "部门详情")
@@ -119,6 +117,16 @@ public class SysDeptController {
 	@PutMapping
 	public Result<Void> update(@Validated(UpdateGroup.class) @RequestBody SysDeptForm form) {
 		sysDeptService.updateMeta(form);
+		return Result.success();
+	}
+
+	@OperationLog(targetType = "DEPT", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = AuthorizationAuditBizModule.SYS_DEPT, operation = OperationLogKind.UPDATE)
+	@Operation(summary = "批量启停部门")
+	@PreAuthorize("@auth.decide('sys:dept:update')")
+	@PutMapping("/status")
+	public Result<Void> batchUpdateStatus(@Valid @RequestBody IdsEnableStatusForm form) {
+		sysDeptService.batchUpdateStatus(form);
 		return Result.success();
 	}
 

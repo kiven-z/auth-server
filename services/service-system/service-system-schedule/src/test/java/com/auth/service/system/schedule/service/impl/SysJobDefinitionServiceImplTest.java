@@ -221,7 +221,10 @@ class SysJobDefinitionServiceImplTest {
 		failedLog.setCreateTime(LocalDateTime.of(2026, 6, 13, 9, 0));
 		when(logJobMapper.selectLatestByJobIds(any())).thenReturn(List.of(failedLog));
 
-		var response = sysJobDefinitionService.getPage(new Page<>(1, 10), new SysJobQuery());
+		SysJobQuery query = new SysJobQuery();
+		query.setPageIndex(1);
+		query.setPageSize(10);
+		var response = sysJobDefinitionService.getPage(query);
 
 		SysJobPageVO row = response.getList().get(0);
 		assertThat(row.getLastExecutionStatus()).isEqualTo(SysJobLastExecutionStatus.FAILED);

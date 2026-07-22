@@ -1,4 +1,4 @@
-package com.auth.service.system.admin.service.admin.impl;
+package com.auth.service.system.admin.support.dept;
 
 import com.auth.service.system.admin.mapper.dept.DeptClosureMapper;
 import com.auth.service.system.admin.model.po.dept.DeptClosureDepthChainRowPO;
@@ -8,10 +8,9 @@ import com.auth.service.system.admin.model.vo.dept.DeptClosureDepthChainAnomalyV
 import com.auth.service.system.admin.model.vo.dept.DeptClosureHealthStatsVO;
 import com.auth.service.system.admin.model.vo.dept.DeptClosureHealthVO;
 import com.auth.service.system.admin.model.vo.dept.DeptClosureParentLinkAnomalyVO;
-import com.auth.service.system.admin.service.admin.DeptClosureHealthQueryService;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -19,21 +18,21 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * 部门闭包表健康检查只读查询实现
+ * 部门闭包表一致性诊断（只读）。
  *
  * @author bunny
  */
 @RequiredArgsConstructor
-@Service
+@Component
 @Transactional(readOnly = true)
-public class DeptClosureHealthQueryServiceImpl implements DeptClosureHealthQueryService {
+public class DeptClosureHealthInspector {
 
 	private final DeptClosureMapper deptClosureMapper;
 
 	/**
-	 * {@inheritDoc}
+	 * 执行闭包表一致性诊断
+	 * @return 健康检查结果
 	 */
-	@Override
 	public DeptClosureHealthVO inspect() {
 		int sampleLimit = 500;
 

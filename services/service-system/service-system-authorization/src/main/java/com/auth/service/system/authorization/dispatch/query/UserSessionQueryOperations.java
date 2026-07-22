@@ -36,7 +36,20 @@ public class UserSessionQueryOperations {
 			throw new SystemBusinessException(SERVICE_UNAVAILABLE);
 		}
 
-		return CollUtil.emptyIfNull(result.getData()).stream().map(this::toSnapshot).toList();
+		return CollUtil.emptyIfNull(result.getData())
+			.stream()
+			.map(session -> UserSessionSnapshot.builder()
+				.sessionId(session.getSessionId())
+				.ipAddress(session.getIpAddress())
+				.ipRegion(session.getIpRegion())
+				.deviceType(session.getDeviceType())
+				.browserType(session.getBrowserType())
+				.osType(session.getOsType())
+				.rememberMe(session.getRememberMe())
+				.refreshTokenExpiresAt(session.getRefreshTokenExpiresAt())
+				.loginAt(session.getLoginAt())
+				.build())
+			.toList();
 	}
 
 	/**
@@ -49,20 +62,6 @@ public class UserSessionQueryOperations {
 		if (!FeignUtil.isSuccess(result)) {
 			throw new SystemBusinessException(OPERATION_FAILED);
 		}
-	}
-
-	private UserSessionSnapshot toSnapshot(UserSessionRemoteDTO session) {
-		return UserSessionSnapshot.builder()
-			.sessionId(session.getSessionId())
-			.ipAddress(session.getIpAddress())
-			.ipRegion(session.getIpRegion())
-			.deviceType(session.getDeviceType())
-			.browserType(session.getBrowserType())
-			.osType(session.getOsType())
-			.rememberMe(session.getRememberMe())
-			.refreshTokenExpiresAt(session.getRefreshTokenExpiresAt())
-			.loginAt(session.getLoginAt())
-			.build();
 	}
 
 }

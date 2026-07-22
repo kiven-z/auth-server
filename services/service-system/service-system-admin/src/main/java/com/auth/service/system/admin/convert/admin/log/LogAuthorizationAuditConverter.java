@@ -1,7 +1,7 @@
 package com.auth.service.system.admin.convert.admin.log;
 
 import com.auth.common.mapstruct.config.AuthMapperConfig;
-import com.auth.service.system.admin.model.po.logauthorizationaudit.LogAuthorizationAuditDetailRowPO;
+import com.auth.service.system.admin.model.entity.LogAuthorizationAuditEntity;
 import com.auth.service.system.admin.model.po.logauthorizationaudit.LogAuthorizationAuditPageRowPO;
 import com.auth.service.system.admin.model.vo.logauthorizationaudit.LogAuthorizationAuditDetailVO;
 import com.auth.service.system.admin.model.vo.logauthorizationaudit.LogAuthorizationAuditPageVO;
@@ -29,12 +29,12 @@ public interface LogAuthorizationAuditConverter {
 	LogAuthorizationAuditPageVO toPageVO(LogAuthorizationAuditPageRowPO po);
 
 	/**
-	 * 详情 PO → 详情 VO
-	 * @param po 持久层详情投影
+	 * 实体 → 详情 VO
+	 * @param entity 权限决策审计实体
 	 * @return 详情 VO
 	 */
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
-	LogAuthorizationAuditDetailVO toDetailVo(LogAuthorizationAuditDetailRowPO po);
+	LogAuthorizationAuditDetailVO toDetailVo(LogAuthorizationAuditEntity entity);
 
 }

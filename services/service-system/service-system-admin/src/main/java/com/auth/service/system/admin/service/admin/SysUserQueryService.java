@@ -7,7 +7,6 @@ import com.auth.service.system.admin.model.vo.user.SysUserDetailVO;
 import com.auth.service.system.admin.model.vo.user.SysUserPageVO;
 import com.auth.service.system.admin.model.vo.user.SysUserProfileVO;
 import com.auth.service.system.admin.model.vo.user.SysUserSearchItemVO;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
@@ -21,11 +20,10 @@ public interface SysUserQueryService extends IService<UserEntity> {
 
 	/**
 	 * 用户分页查询
-	 * @param pageParams 分页参数
 	 * @param query 筛选条件
 	 * @return 分页结果
 	 */
-	PageResponse<SysUserPageVO> getPage(Page<UserEntity> pageParams, SysUserPageQuery query);
+	PageResponse<SysUserPageVO> getPage(SysUserPageQuery query);
 
 	/**
 	 * 查询用户档案（基本信息、部门、岗位），含已禁用用户

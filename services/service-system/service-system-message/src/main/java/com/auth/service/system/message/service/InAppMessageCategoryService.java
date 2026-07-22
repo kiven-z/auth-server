@@ -1,9 +1,8 @@
 package com.auth.service.system.message.service;
 
-import com.auth.common.core.model.query.EnableStatusScope;
 import com.auth.service.system.message.model.entity.InAppMessageCategoryEntity;
 import com.auth.service.system.message.model.form.inapp.InAppMessageCategoryForm;
-import com.auth.service.system.message.model.form.inapp.InAppMessageCategoryStatusForm;
+import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.service.system.message.model.query.InAppMessageCategoryQuery;
 import com.auth.service.system.message.model.vo.inapp.InAppMessageCategoryDetailVO;
 import com.auth.service.system.message.model.vo.inapp.InAppMessageCategoryPageVO;
@@ -49,7 +48,7 @@ public interface InAppMessageCategoryService extends IService<InAppMessageCatego
 	 * 批量启用/禁用分类
 	 * @param form 主键列表与目标状态
 	 */
-	void batchUpdateStatus(InAppMessageCategoryStatusForm form);
+	void batchUpdateStatus(IdsEnableStatusForm form);
 
 	/**
 	 * 批量物理删除分类
@@ -59,17 +58,17 @@ public interface InAppMessageCategoryService extends IService<InAppMessageCatego
 
 	/**
 	 * 大类列表
-	 * @param statusScope 启停范围
+	 * @param status 启停状态；null 表示不限
 	 * @return 大类 VO；children 为 null
 	 */
-	List<InAppMessageCategoryVO> listMajors(EnableStatusScope statusScope);
+	List<InAppMessageCategoryVO> listMajors(Boolean status);
 
 	/**
 	 * 指定大类下小类列表
 	 * @param parentId 大类主键
-	 * @param statusScope 启停范围
+	 * @param status 启停状态；null 表示不限
 	 * @return 小类 VO；children 为 null
 	 */
-	List<InAppMessageCategoryVO> listChildren(Long parentId, EnableStatusScope statusScope);
+	List<InAppMessageCategoryVO> listChildren(Long parentId, Boolean status);
 
 }

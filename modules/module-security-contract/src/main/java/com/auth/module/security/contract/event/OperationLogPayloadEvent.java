@@ -20,6 +20,11 @@ public class OperationLogPayloadEvent {
 	Long userId;
 
 	/**
+	 * 操作用户名快照；未登录可为 {@code null}。
+	 */
+	String username;
+
+	/**
 	 * 操作类型枚举名
 	 */
 	String operationType;

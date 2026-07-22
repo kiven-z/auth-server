@@ -2,15 +2,13 @@ package com.auth.service.system.admin.controller.admin;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
-import com.auth.service.system.admin.model.entity.LogOperationEntity;
 import com.auth.service.system.admin.model.query.log.LogOperationQuery;
 import com.auth.service.system.admin.model.vo.logoperation.LogOperationDetailVO;
 import com.auth.service.system.admin.model.vo.logoperation.LogOperationPageVO;
-import com.auth.service.system.admin.service.admin.LogOperationQueryService;
 import com.auth.service.system.admin.service.admin.LogOperationService;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,26 +22,18 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
  * @author Bunny
  */
 @Tag(name = "操作日志", description = "log_operation")
+@RequiredArgsConstructor
 @RequestMapping("/api/system/log/operation")
 @RestController
 public class LogOperationController {
 
-	private final LogOperationQueryService logOperationQueryService;
-
 	private final LogOperationService logOperationService;
-
-	public LogOperationController(LogOperationQueryService logOperationQueryService,
-			LogOperationService logOperationService) {
-		this.logOperationQueryService = logOperationQueryService;
-		this.logOperationService = logOperationService;
-	}
 
 	@Operation(summary = "分页查询操作日志")
 	@PreAuthorize("@auth.decide('log:operation:query')")
 	@GetMapping("page")
 	public Result<PageResponse<LogOperationPageVO>> page(LogOperationQuery query) {
-		Page<LogOperationEntity> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
-		PageResponse<LogOperationPageVO> response = logOperationQueryService.getPage(pageParams, query);
+		PageResponse<LogOperationPageVO> response = logOperationService.getPage(query);
 		return Result.success(response);
 	}
 
@@ -51,7 +41,7 @@ public class LogOperationController {
 	@PreAuthorize("@auth.decide('log:operation:detail')")
 	@GetMapping("{id}")
 	public Result<LogOperationDetailVO> detail(@PathVariable("id") Long id) {
-		LogOperationDetailVO detail = logOperationQueryService.getDetail(id);
+		LogOperationDetailVO detail = logOperationService.getDetail(id);
 		return Result.success(detail);
 	}
 
