@@ -1,7 +1,7 @@
 package com.auth.service.auth.support.invalidation;
 
-import com.auth.service.auth.config.AuthorizationInvalidationProperties;
 import com.auth.service.auth.mapper.UserMapper;
+import com.auth.service.auth.model.constants.AuthBatchSizes;
 import com.auth.service.auth.model.po.user.UserInvalidationStatePO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -31,15 +31,15 @@ class UserInvalidationRepositoryTest {
 
 	@BeforeEach
 	void setUp() {
-		AuthorizationInvalidationProperties invalidationProperties = new AuthorizationInvalidationProperties();
-		invalidationProperties.setBatchSize(500);
-		repository = new UserInvalidationRepository(userMapper, invalidationProperties);
+		repository = new UserInvalidationRepository(userMapper);
 	}
 
 	@Test
 	@DisplayName("用户 ID 超过分片大小时应分批加载失效状态")
 	void loadByUserIds_largeInput_shouldQueryInChunks() {
-		List<Long> userIds = IntStream.rangeClosed(1, 1200).mapToObj(Long::valueOf).toList();
+		List<Long> userIds = IntStream.rangeClosed(1, AuthBatchSizes.INVALIDATION * 2 + 200)
+			.mapToObj(Long::valueOf)
+			.toList();
 		when(userMapper.selectInvalidationStatesByUserIds(anyList())).thenAnswer(invocation -> {
 			List<Long> chunk = invocation.getArgument(0);
 			UserInvalidationStatePO projection = new UserInvalidationStatePO();

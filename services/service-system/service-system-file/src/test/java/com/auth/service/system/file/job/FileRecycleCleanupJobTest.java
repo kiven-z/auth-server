@@ -4,6 +4,7 @@ import com.auth.module.file.api.model.enums.FileDeleteSource;
 import com.auth.module.file.api.model.enums.StoragePlatformEnum;
 import com.auth.service.system.file.config.properties.FileRecycleCleanupProperties;
 import com.auth.service.system.file.mapper.FileRecordMapper;
+import com.auth.service.system.file.model.constants.FileBatchSizes;
 import com.auth.service.system.file.model.entity.FileRecordEntity;
 import com.auth.service.system.file.storage.core.StoragePlatformFacade;
 import com.auth.service.system.file.storage.core.StoragePlatformFacadeRegistry;
@@ -17,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -29,6 +31,8 @@ import static org.mockito.Mockito.*;
 @DisplayName("FileRecycleCleanupJob 回收站过期清理")
 @ExtendWith(MockitoExtension.class)
 class FileRecycleCleanupJobTest {
+
+	private static final int BATCH_SIZE = FileBatchSizes.RECYCLE_CLEANUP;
 
 	@Mock
 	private FileRecycleCleanupProperties properties;
@@ -66,23 +70,21 @@ class FileRecycleCleanupJobTest {
 		// 验证启用后按 maxRounds 与 batchSize 分批清理，满批继续、不足一批结束。
 		when(properties.getEnabled()).thenReturn(true);
 		when(properties.getRetentionDays()).thenReturn(90);
-		when(properties.getBatchSize()).thenReturn(2);
 		when(properties.getMaxRounds()).thenReturn(20);
 
-		FileRecordEntity a = buildDeletedEntity(8501L);
-		FileRecordEntity b = buildDeletedEntity(8502L);
-		FileRecordEntity c = buildDeletedEntity(8503L);
-		when(fileRecordMapper.selectExpiredDeleted(any(LocalDateTime.class), eq(2))).thenReturn(List.of(a, b),
-				List.of(c));
+		List<FileRecordEntity> fullBatch = buildDeletedEntities(8501L);
+		FileRecordEntity remainder = buildDeletedEntity(8501L + BATCH_SIZE);
+		when(fileRecordMapper.selectExpiredDeleted(any(LocalDateTime.class), eq(BATCH_SIZE))).thenReturn(fullBatch,
+				List.of(remainder));
 		when(facadeRegistry.resolve(StoragePlatformEnum.MINIO)).thenReturn(storagePlatformFacade);
 		when(storagePlatformFacade.provider()).thenReturn(minioProvider);
 
 		cleanupJob.purgeExpired();
 
-		verify(fileRecordMapper, times(2)).selectExpiredDeleted(any(LocalDateTime.class), eq(2));
-		verify(minioProvider, times(3)).delete("public", "a.png");
-		verify(fileRecordMapper).deletePhysicallyByIds(List.of(8501L, 8502L), true);
-		verify(fileRecordMapper).deletePhysicallyByIds(List.of(8503L), true);
+		verify(fileRecordMapper, times(2)).selectExpiredDeleted(any(LocalDateTime.class), eq(BATCH_SIZE));
+		verify(minioProvider, times(BATCH_SIZE + 1)).delete("public", "a.png");
+		verify(fileRecordMapper).deletePhysicallyByIds(fullBatch.stream().map(FileRecordEntity::getId).toList(), true);
+		verify(fileRecordMapper).deletePhysicallyByIds(List.of(remainder.getId()), true);
 	}
 
 	@Test
@@ -91,19 +93,18 @@ class FileRecycleCleanupJobTest {
 		// 验证积压场景下不会超过配置的最大批次数。
 		when(properties.getEnabled()).thenReturn(true);
 		when(properties.getRetentionDays()).thenReturn(90);
-		when(properties.getBatchSize()).thenReturn(2);
 		when(properties.getMaxRounds()).thenReturn(2);
 
-		FileRecordEntity a = buildDeletedEntity(8601L);
-		FileRecordEntity b = buildDeletedEntity(8602L);
-		when(fileRecordMapper.selectExpiredDeleted(any(LocalDateTime.class), eq(2))).thenReturn(List.of(a, b));
+		List<FileRecordEntity> fullBatch = buildDeletedEntities(8601L);
+		when(fileRecordMapper.selectExpiredDeleted(any(LocalDateTime.class), eq(BATCH_SIZE))).thenReturn(fullBatch);
 		when(facadeRegistry.resolve(StoragePlatformEnum.MINIO)).thenReturn(storagePlatformFacade);
 		when(storagePlatformFacade.provider()).thenReturn(minioProvider);
 
 		cleanupJob.purgeExpired();
 
-		verify(fileRecordMapper, times(2)).selectExpiredDeleted(any(LocalDateTime.class), eq(2));
-		verify(fileRecordMapper, times(2)).deletePhysicallyByIds(List.of(8601L, 8602L), true);
+		verify(fileRecordMapper, times(2)).selectExpiredDeleted(any(LocalDateTime.class), eq(BATCH_SIZE));
+		verify(fileRecordMapper, times(2))
+			.deletePhysicallyByIds(fullBatch.stream().map(FileRecordEntity::getId).toList(), true);
 	}
 
 	@Test
@@ -112,14 +113,17 @@ class FileRecycleCleanupJobTest {
 		// 验证没有可清理记录时不访问对象存储。
 		when(properties.getEnabled()).thenReturn(true);
 		when(properties.getRetentionDays()).thenReturn(90);
-		when(properties.getBatchSize()).thenReturn(500);
 		when(properties.getMaxRounds()).thenReturn(20);
-		when(fileRecordMapper.selectExpiredDeleted(any(LocalDateTime.class), eq(500))).thenReturn(List.of());
+		when(fileRecordMapper.selectExpiredDeleted(any(LocalDateTime.class), eq(BATCH_SIZE))).thenReturn(List.of());
 
 		cleanupJob.purgeExpired();
 
 		verify(facadeRegistry, never()).resolve(any());
 		verify(fileRecordMapper, never()).deletePhysicallyByIds(anyList(), anyBoolean());
+	}
+
+	private List<FileRecordEntity> buildDeletedEntities(long startId) {
+		return IntStream.range(0, BATCH_SIZE).mapToObj(i -> buildDeletedEntity(startId + i)).toList();
 	}
 
 	private FileRecordEntity buildDeletedEntity(Long id) {

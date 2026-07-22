@@ -6,6 +6,7 @@ import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.file.config.properties.FileRecycleCleanupProperties;
 import com.auth.service.system.file.mapper.FileRecordMapper;
+import com.auth.service.system.file.model.constants.FileBatchSizes;
 import com.auth.service.system.file.model.entity.FileRecordEntity;
 import com.auth.service.system.file.storage.core.StoragePlatformFacadeRegistry;
 import com.auth.service.system.file.storage.core.provider.FileStorageProvider;
@@ -47,11 +48,12 @@ public class FileRecycleCleanupJob {
 
 		Integer retentionDays = properties.getRetentionDays();
 		LocalDateTime cutoff = LocalDateTime.now().minusDays(retentionDays);
+		int batchSize = FileBatchSizes.RECYCLE_CLEANUP;
 		int total = 0;
 		for (int round = 0; round < properties.getMaxRounds(); round++) {
-			int purged = purgeExpiredBefore(cutoff, properties.getBatchSize());
+			int purged = purgeExpiredBefore(cutoff, batchSize);
 			total += purged;
-			if (purged < properties.getBatchSize()) {
+			if (purged < batchSize) {
 				break;
 			}
 		}

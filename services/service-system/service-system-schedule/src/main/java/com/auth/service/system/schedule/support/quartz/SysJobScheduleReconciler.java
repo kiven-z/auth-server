@@ -1,8 +1,8 @@
 package com.auth.service.system.schedule.support.quartz;
 
 import cn.hutool.core.collection.CollUtil;
-import com.auth.service.system.schedule.config.ScheduleJobProperties;
 import com.auth.service.system.schedule.mapper.JobMapper;
+import com.auth.service.system.schedule.model.constants.ScheduleBatchSizes;
 import com.auth.service.system.schedule.model.entity.JobEntity;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -28,15 +28,12 @@ public class SysJobScheduleReconciler {
 
 	private final SysJobSchedulerManager sysJobSchedulerManager;
 
-	private final ScheduleJobProperties scheduleJobProperties;
-
 	/**
 	 * 全量对账：启用与暂停任务分别分页同步
 	 */
 	public void reconcileAll() {
-		int batchSize = scheduleJobProperties.getBootstrapBatchSize();
-		reconcileByStatus(true, batchSize);
-		reconcileByStatus(false, batchSize);
+		reconcileByStatus(true);
+		reconcileByStatus(false);
 	}
 
 	/**
@@ -72,21 +69,20 @@ public class SysJobScheduleReconciler {
 	/**
 	 * 按状态对账
 	 * @param enabled 是否启用
-	 * @param batchSize 批量大小
 	 */
-	private void reconcileByStatus(boolean enabled, int batchSize) {
+	private void reconcileByStatus(boolean enabled) {
 		var query = Wrappers.lambdaQuery(JobEntity.class)
 			.eq(JobEntity::getStatus, enabled)
 			.orderByAsc(JobEntity::getId);
 
 		// 查询第一页
-		IPage<JobEntity> firstPage = jobMapper.selectPage(new Page<>(1, batchSize), query);
+		IPage<JobEntity> firstPage = jobMapper.selectPage(new Page<>(1, ScheduleBatchSizes.RECONCILE_PAGE), query);
 		long totalPages = firstPage.getPages();
 
 		// 遍历所有页
 		for (long pageNum = 1; pageNum <= totalPages; pageNum++) {
 			IPage<JobEntity> result = pageNum == 1 ? firstPage
-					: jobMapper.selectPage(new Page<>(pageNum, batchSize), query);
+					: jobMapper.selectPage(new Page<>(pageNum, ScheduleBatchSizes.RECONCILE_PAGE), query);
 
 			// 对账任务
 			for (JobEntity job : result.getRecords()) {

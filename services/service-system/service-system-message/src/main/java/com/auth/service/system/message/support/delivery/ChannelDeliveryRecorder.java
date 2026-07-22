@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.service.system.message.mapper.MessageChannelDeliveryMapper;
+import com.auth.service.system.message.model.constants.MessageBatchSizes;
 import com.auth.service.system.message.model.entity.MessageChannelDeliveryEntity;
 import com.auth.service.system.message.model.enums.MessageDeliveryStatus;
 import com.auth.service.system.message.model.value.delivery.ChannelDeliveryResultUpdate;
@@ -25,11 +26,6 @@ import java.util.Objects;
  */
 @Service
 public class ChannelDeliveryRecorder extends ServiceImpl<MessageChannelDeliveryMapper, MessageChannelDeliveryEntity> {
-
-	/**
-	 * 批量写入批次大小
-	 */
-	private static final int BATCH_SIZE = 500;
 
 	/**
 	 * 写入待发送记录
@@ -55,7 +51,7 @@ public class ChannelDeliveryRecorder extends ServiceImpl<MessageChannelDeliveryM
 		if (rows.isEmpty()) {
 			return;
 		}
-		super.saveBatch(rows, BATCH_SIZE);
+		super.saveBatch(rows, MessageBatchSizes.DELIVERY_WRITE);
 	}
 
 	/**
@@ -119,7 +115,7 @@ public class ChannelDeliveryRecorder extends ServiceImpl<MessageChannelDeliveryM
 		if (CollUtil.isEmpty(updates)) {
 			return;
 		}
-		CollUtil.split(updates, BATCH_SIZE)
+		CollUtil.split(updates, MessageBatchSizes.DELIVERY_WRITE)
 			.forEach(chunk -> baseMapper.batchUpdateResult(taskId, channel.name(), chunk));
 	}
 

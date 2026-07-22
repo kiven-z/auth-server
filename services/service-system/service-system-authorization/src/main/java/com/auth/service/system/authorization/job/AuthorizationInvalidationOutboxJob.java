@@ -1,9 +1,9 @@
 package com.auth.service.system.authorization.job;
 
 import cn.hutool.core.collection.CollUtil;
-import com.auth.service.system.authorization.config.AuthorizationInvalidationProperties;
 import com.auth.service.system.authorization.dispatch.AuthorizationInvalidationOutboxProcessor;
 import com.auth.service.system.authorization.mapper.SysAuthorizationInvalidationOutboxMapper;
+import com.auth.service.system.authorization.model.constants.AuthorizationBatchSizes;
 import com.auth.service.system.authorization.model.entity.SysAuthorizationInvalidationOutboxEntity;
 import com.auth.service.system.authorization.model.enums.AuthorizationInvalidationOutboxStatus;
 import lombok.RequiredArgsConstructor;
@@ -32,8 +32,6 @@ public class AuthorizationInvalidationOutboxJob {
 
 	private final AuthorizationInvalidationOutboxProcessor outboxProcessor;
 
-	private final AuthorizationInvalidationProperties properties;
-
 	private final String instanceSuffix = Long.toHexString(System.nanoTime());
 
 	@Value("${spring.application.name:service-system}")
@@ -45,10 +43,9 @@ public class AuthorizationInvalidationOutboxJob {
 	@Scheduled(fixedDelayString = "${auth.authorization.poll-interval-ms:30000}")
 	public void pollAndDispatch() {
 		LocalDateTime now = LocalDateTime.now();
-		Integer pollBatchSize = properties.getPollBatchSize();
 
 		List<SysAuthorizationInvalidationOutboxEntity> rows = outboxMapper.selectClaimable(CLAIMABLE_STATUSES, now,
-				pollBatchSize);
+				AuthorizationBatchSizes.OUTBOX_POLL);
 		if (CollUtil.isEmpty(rows)) {
 			return;
 		}

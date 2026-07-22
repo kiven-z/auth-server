@@ -2,8 +2,8 @@ package com.auth.service.auth.support.invalidation.impact;
 
 import cn.hutool.core.collection.CollUtil;
 import com.auth.module.security.contract.dto.invalidation.GrantSubjectKey;
-import com.auth.service.auth.config.AuthorizationInvalidationProperties;
 import com.auth.service.auth.mapper.AuthorizationImpactMapper;
+import com.auth.service.auth.model.constants.AuthBatchSizes;
 import com.auth.service.auth.util.BatchPartition;
 import org.springframework.stereotype.Repository;
 
@@ -21,12 +21,8 @@ public class AuthorizationImpactQuerySupport {
 
 	private final AuthorizationImpactMapper authorizationImpactMapper;
 
-	private final AuthorizationInvalidationProperties authorizationInvalidationProperties;
-
-	public AuthorizationImpactQuerySupport(AuthorizationImpactMapper authorizationImpactMapper,
-			AuthorizationInvalidationProperties authorizationInvalidationProperties) {
+	public AuthorizationImpactQuerySupport(AuthorizationImpactMapper authorizationImpactMapper) {
 		this.authorizationImpactMapper = authorizationImpactMapper;
-		this.authorizationInvalidationProperties = authorizationInvalidationProperties;
 	}
 
 	/**
@@ -112,27 +108,21 @@ public class AuthorizationImpactQuerySupport {
 	}
 
 	private void queryLongKeysInBatches(List<Long> keys, UnaryOperator<List<Long>> queryFn, Set<Long> accumulator) {
-		int batchSize = authorizationInvalidationProperties.getBatchSize();
-
-		for (List<Long> chunk : BatchPartition.partitionIds(keys, batchSize)) {
+		for (List<Long> chunk : BatchPartition.partitionIds(keys, AuthBatchSizes.INVALIDATION)) {
 			accumulator.addAll(queryFn.apply(chunk));
 		}
 	}
 
 	private void queryStringKeysInBatches(List<String> keys, Function<List<String>, List<Long>> queryFn,
 			Set<Long> accumulator) {
-		int batchSize = authorizationInvalidationProperties.getBatchSize();
-
-		for (List<String> chunk : BatchPartition.partitionStrings(keys, batchSize)) {
+		for (List<String> chunk : BatchPartition.partitionStrings(keys, AuthBatchSizes.INVALIDATION)) {
 			accumulator.addAll(queryFn.apply(chunk));
 		}
 	}
 
 	private void accumulateBridgedStringsInBatches(List<String> keys, UnaryOperator<List<String>> queryFn,
 			Set<String> accumulator) {
-		int batchSize = authorizationInvalidationProperties.getBatchSize();
-
-		for (List<String> chunk : BatchPartition.partitionStrings(keys, batchSize)) {
+		for (List<String> chunk : BatchPartition.partitionStrings(keys, AuthBatchSizes.INVALIDATION)) {
 			accumulator.addAll(queryFn.apply(chunk));
 		}
 	}

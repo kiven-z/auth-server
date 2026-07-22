@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import com.auth.service.system.message.convert.InAppEntityAssembler;
 import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.mapper.InAppMessageMapper;
+import com.auth.service.system.message.model.constants.MessageBatchSizes;
 import com.auth.service.system.message.model.entity.InAppMessageEntity;
 import com.auth.service.system.message.model.entity.InAppMessageRecipientEntity;
 import com.auth.service.system.message.model.enums.InAppMessageStatus;
@@ -30,11 +31,6 @@ import static com.auth.service.system.message.exception.MessageResultCode.IN_APP
 @Slf4j
 @Component
 public class InAppComposeDispatcher {
-
-	/**
-	 * 接收人游标扫描每批大小
-	 */
-	private static final int SCAN_BATCH_SIZE = 1000;
 
 	private final InAppMessageMapper inAppMessageMapper;
 
@@ -67,7 +63,7 @@ public class InAppComposeDispatcher {
 
 		try {
 			// 投递单批接收人
-			recipientBatchScanner.scan(scope, SCAN_BATCH_SIZE, userIds -> {
+			recipientBatchScanner.scan(scope, MessageBatchSizes.RECIPIENT_SCAN, userIds -> {
 				if (CollUtil.isEmpty(userIds)) {
 					return;
 				}

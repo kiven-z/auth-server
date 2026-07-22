@@ -44,7 +44,6 @@ class AuthorizationInvalidationEventHistoryCleanupJobTest {
 	void purgeCompletedHistory_shouldPurgeInBatchesWhenEnabled() {
 		when(properties.getSuccessCleanupEnabled()).thenReturn(true);
 		when(properties.getSuccessRetentionDays()).thenReturn(90);
-		when(properties.getSuccessCleanupBatchSize()).thenReturn(500);
 		when(authorizationInvalidationEventService.purgeCompletedBefore(any(), anyInt())).thenReturn(500, 120);
 
 		historyCleanupJob.purgeCompletedHistory();

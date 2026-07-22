@@ -1,6 +1,7 @@
 package com.auth.service.auth.job;
 
 import com.auth.service.auth.config.AuthorizationInvalidationProperties;
+import com.auth.service.auth.model.constants.AuthBatchSizes;
 import com.auth.service.auth.service.AuthorizationInvalidationEventService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,8 +34,8 @@ public class AuthorizationInvalidationProcessingClaimCleanupJob {
 		}
 
 		LocalDateTime cutoff = LocalDateTime.now().minusMinutes(properties.getProcessingClaimTimeoutMinutes());
-		int batchSize = properties.getProcessingClaimCleanupBatchSize();
-		int deleted = authorizationInvalidationEventService.cleanupStaleProcessingClaims(cutoff, batchSize);
+		int deleted = authorizationInvalidationEventService.cleanupStaleProcessingClaims(cutoff,
+				AuthBatchSizes.PROCESSING_CLAIM_CLEANUP);
 		if (deleted > 0) {
 			log.warn("Released stale invalidation processing claims: count={}, cutoff={}", deleted, cutoff);
 		}

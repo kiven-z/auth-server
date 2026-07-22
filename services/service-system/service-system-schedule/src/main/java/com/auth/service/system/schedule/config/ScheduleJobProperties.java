@@ -20,7 +20,7 @@ import org.springframework.validation.annotation.Validated;
 public class ScheduleJobProperties {
 
 	/**
-	 * 连续失败次数达到该值后，自动将任务置为暂停并调用 pauseJob；0 表示关闭熔断
+	 * 连续失败次数达到该值后，自动将任务置为暂停；0 表示关闭熔断
 	 */
 	@Min(0)
 	private int consecutiveFailureThreshold = 5;
@@ -31,9 +31,9 @@ public class ScheduleJobProperties {
 	private boolean successEnabled = false;
 
 	/**
-	 * 启动时从 job 同步至 Quartz 的分页大小
+	 * 应用就绪后延迟多少秒再全量对账并启动 Quartz；0 表示立即执行
 	 */
-	@Min(10)
-	private int bootstrapBatchSize = 100;
+	@Min(0)
+	private int bootstrapDelaySeconds = 30;
 
 }

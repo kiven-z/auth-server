@@ -35,13 +35,6 @@ public class AuthorizationInvalidationProperties {
 	private Long pollIntervalMs = 30_000L;
 
 	/**
-	 * 每批抢占 Outbox 条数上限
-	 */
-	@Min(1)
-	@NotNull
-	private Integer pollBatchSize = 50;
-
-	/**
 	 * 失败后重试间隔基数（秒），实际为 base * 2^retryCount
 	 */
 	@Min(1)
@@ -73,12 +66,5 @@ public class AuthorizationInvalidationProperties {
 	 */
 	@NotBlank
 	private String successCleanupCron = "0 30 3 * * ?";
-
-	/**
-	 * 每批删除 SUCCESS Outbox 上限
-	 */
-	@Min(1)
-	@NotNull
-	private Integer successCleanupBatchSize = 500;
 
 }

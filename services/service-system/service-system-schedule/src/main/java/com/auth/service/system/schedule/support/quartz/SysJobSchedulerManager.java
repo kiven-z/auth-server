@@ -3,20 +3,27 @@ package com.auth.service.system.schedule.support.quartz;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
 import com.auth.service.system.schedule.model.entity.JobEntity;
-import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
+import java.util.Objects;
+
 /**
- * Quartz 调度写门面：注册、暂停、触发（不含运行时查询）
+ * Quartz 调度写门面：按业务意图注册、暂停、删除、立即触发
  *
  * @author Bunny
  */
-@Slf4j
 @Component
 public class SysJobSchedulerManager {
+
+	private static final String[] JOB_DATA_COMPARE_KEYS = { SysJobQuartzDataKeys.SYS_JOB_ID,
+			SysJobQuartzDataKeys.INVOKE_TARGET, SysJobQuartzDataKeys.JOB_CLASS, SysJobQuartzDataKeys.TASK_TYPE,
+			SysJobQuartzDataKeys.HANDLER_CODE, SysJobQuartzDataKeys.PAYLOAD_JSON, SysJobQuartzDataKeys.JOB_PARAMS };
 
 	private final Scheduler scheduler;
 
@@ -32,17 +39,7 @@ public class SysJobSchedulerManager {
 	}
 
 	/**
-	 * 删除 Quartz 中的 Job（若存在）
-	 * @param jobKey 任务键
-	 */
-	public void deleteJobIfExists(JobKey jobKey) throws SchedulerException {
-		if (scheduler.checkExists(jobKey)) {
-			scheduler.deleteJob(jobKey);
-		}
-	}
-
-	/**
-	 * 按当前实体状态同步调度：启用时先删后建；停用时仅暂停 Quartz，不重建 Trigger
+	 * 按当前实体状态同步调度：启用时差量注册（未变更则跳过删建）；停用时仅暂停 Quartz
 	 * @param job 任务实体
 	 */
 	public void scheduleOrReplace(JobEntity job) throws SchedulerException {
@@ -51,20 +48,24 @@ public class SysJobSchedulerManager {
 		JobKey jobKey = JobKey.jobKey(jobName, jobGroup);
 
 		if (job.getStatus() != null && !job.getStatus()) {
-			if (scheduler.checkExists(jobKey)) {
-				pauseJob(jobName, jobGroup);
-			}
+			pauseJob(jobName, jobGroup);
 			return;
 		}
 
-		deleteJobIfExists(jobKey);
+		if (matchesExisting(job, jobKey)) {
+			return;
+		}
+
+		if (scheduler.checkExists(jobKey)) {
+			scheduler.deleteJob(jobKey);
+		}
 		JobDetail detail = sysJobQuartzJobFactory.build(job);
 		CronTrigger trigger = sysJobQuartzTriggerFactory.build(job, jobKey);
 		scheduler.scheduleJob(detail, trigger);
 	}
 
 	/**
-	 * 暂停调度
+	 * 暂停单个任务（不存在则忽略）
 	 * @param jobName 任务名
 	 * @param jobGroup 分组
 	 */
@@ -87,34 +88,96 @@ public class SysJobSchedulerManager {
 	}
 
 	/**
-	 * 立即触发一次（不影响 Cron）
+	 * 删除 Quartz 中的任务（不存在则忽略）
 	 * @param jobName 任务名
 	 * @param jobGroup 分组
-	 * @param triggerType 触发类型
 	 */
-	public void triggerJob(String jobName, String jobGroup, String triggerType) throws SchedulerException {
+	public void deleteJob(String jobName, String jobGroup) throws SchedulerException {
 		JobKey jobKey = JobKey.jobKey(jobName, jobGroup);
+		if (scheduler.checkExists(jobKey)) {
+			scheduler.deleteJob(jobKey);
+		}
+	}
+
+	/**
+	 * 立即触发一次：若尚无 JobDetail 则先补建（不建 Cron），再按手动类型触发
+	 * @param job 任务实体
+	 */
+	public void triggerOnce(JobEntity job) throws SchedulerException {
+		JobKey jobKey = JobKey.jobKey(job.getJobName(), job.getJobGroup());
 		if (!scheduler.checkExists(jobKey)) {
-			throw new SchedulerException("Job 不存在: " + jobKey);
+			scheduler.addJob(sysJobQuartzJobFactory.build(job), false);
 		}
 
 		JobDataMap onceMap = new JobDataMap();
-		onceMap.put(SysJobQuartzDataKeys.TRIGGER_TYPE, triggerType);
+		onceMap.put(SysJobQuartzDataKeys.TRIGGER_TYPE, SysJobQuartzDataKeys.TRIGGER_TYPE_MANUAL);
 		scheduler.triggerJob(jobKey, onceMap);
 	}
 
 	/**
-	 * 确保 JobDetail 存在（不创建 Trigger），用于立即执行等场景
+	 * 判断 Quartz 现态是否已与业务实体一致（启用态、未暂停、Job/Trigger 关键字段相同）
 	 * @param job 任务实体
+	 * @param jobKey 任务关键字
+	 * @return 是否匹配
 	 */
-	public void ensureJobDetail(JobEntity job) throws SchedulerException {
-		JobKey jobKey = JobKey.jobKey(job.getJobName(), job.getJobGroup());
-		if (scheduler.checkExists(jobKey)) {
-			return;
+	private boolean matchesExisting(JobEntity job, JobKey jobKey) throws SchedulerException {
+		if (!scheduler.checkExists(jobKey)) {
+			return false;
 		}
 
-		JobDetail detail = sysJobQuartzJobFactory.build(job);
-		scheduler.addJob(detail, false);
+		TriggerKey triggerKey = TriggerKey.triggerKey(job.getJobName() + SysJobQuartzDataKeys.TRIGGER_SUFFIX,
+				job.getJobGroup());
+		Trigger existingTrigger = scheduler.getTrigger(triggerKey);
+		if (!(existingTrigger instanceof CronTrigger existingCron)) {
+			return false;
+		}
+
+		Trigger.TriggerState triggerState = scheduler.getTriggerState(triggerKey);
+		if (triggerState == Trigger.TriggerState.PAUSED || triggerState == Trigger.TriggerState.ERROR) {
+			return false;
+		}
+
+		JobDetail expectedDetail = sysJobQuartzJobFactory.build(job);
+		JobDetail existingDetail = scheduler.getJobDetail(jobKey);
+		if (existingDetail == null || !Objects.equals(expectedDetail.getJobClass(), existingDetail.getJobClass())) {
+			return false;
+		}
+
+		JobDataMap expectedMap = expectedDetail.getJobDataMap();
+		JobDataMap existingMap = existingDetail.getJobDataMap();
+		for (String key : JOB_DATA_COMPARE_KEYS) {
+			Object expectedValue = expectedMap.get(key);
+			Object existingValue = existingMap.get(key);
+			if (!Objects.equals(expectedValue == null ? null : String.valueOf(expectedValue),
+					existingValue == null ? null : String.valueOf(existingValue))) {
+				return false;
+			}
+		}
+
+		CronTrigger expectedTrigger = sysJobQuartzTriggerFactory.build(job, jobKey);
+		if (!Objects.equals(expectedTrigger.getCronExpression(), existingCron.getCronExpression())
+				|| expectedTrigger.getMisfireInstruction() != existingCron.getMisfireInstruction()) {
+			return false;
+		}
+
+		// start 未配置时忽略 Quartz 默认 startAt(now)
+		LocalDateTime expectedStart = job.getStartTime();
+		if (expectedStart != null) {
+			Date existingStart = existingCron.getStartTime();
+			if (existingStart == null || Date.from(expectedStart.atZone(ZoneId.systemDefault()).toInstant())
+				.getTime() != existingStart.getTime()) {
+				return false;
+			}
+		}
+
+		// end 未配置时要求 Quartz 也无结束时间，避免清空 endTime 后仍跳过重建
+		LocalDateTime expectedEnd = job.getEndTime();
+		Date existingEnd = existingCron.getEndTime();
+		if (expectedEnd == null) {
+			return existingEnd == null;
+		}
+		return existingEnd != null
+				&& Date.from(expectedEnd.atZone(ZoneId.systemDefault()).toInstant()).getTime() == existingEnd.getTime();
 	}
 
 }

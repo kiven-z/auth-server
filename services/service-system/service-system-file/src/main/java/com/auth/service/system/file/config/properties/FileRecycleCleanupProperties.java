@@ -35,13 +35,6 @@ public class FileRecycleCleanupProperties {
 	private Integer retentionDays = 90;
 
 	/**
-	 * 每批处理条数
-	 */
-	@Min(1)
-	@NotNull
-	private Integer batchSize = 500;
-
-	/**
 	 * 清理任务 Cron（默认每天凌晨 3 点）
 	 */
 	@NotBlank

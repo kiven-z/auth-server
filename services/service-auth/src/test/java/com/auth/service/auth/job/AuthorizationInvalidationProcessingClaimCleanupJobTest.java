@@ -44,7 +44,6 @@ class AuthorizationInvalidationProcessingClaimCleanupJobTest {
 	void cleanupStaleProcessingClaims_shouldInvokeOpsServiceWhenEnabled() {
 		when(properties.getProcessingClaimCleanupEnabled()).thenReturn(true);
 		when(properties.getProcessingClaimTimeoutMinutes()).thenReturn(30);
-		when(properties.getProcessingClaimCleanupBatchSize()).thenReturn(100);
 		when(authorizationInvalidationEventService.cleanupStaleProcessingClaims(any(), anyInt())).thenReturn(2);
 
 		cleanupJob.cleanupStaleProcessingClaims();

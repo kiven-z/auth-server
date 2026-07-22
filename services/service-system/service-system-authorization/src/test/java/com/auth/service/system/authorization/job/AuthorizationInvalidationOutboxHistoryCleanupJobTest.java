@@ -44,7 +44,6 @@ class AuthorizationInvalidationOutboxHistoryCleanupJobTest {
 	void purgeSuccessHistory_shouldPurgeInBatchesWhenEnabled() {
 		when(properties.getSuccessCleanupEnabled()).thenReturn(true);
 		when(properties.getSuccessRetentionDays()).thenReturn(90);
-		when(properties.getSuccessCleanupBatchSize()).thenReturn(500);
 		when(outboxMapper.deleteSuccessBefore(any(), anyInt())).thenReturn(500, 80);
 
 		historyCleanupJob.purgeSuccessHistory();

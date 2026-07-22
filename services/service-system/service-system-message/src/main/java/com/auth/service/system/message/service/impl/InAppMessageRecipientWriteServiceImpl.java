@@ -2,6 +2,7 @@ package com.auth.service.system.message.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import com.auth.service.system.message.mapper.InAppMessageRecipientMapper;
+import com.auth.service.system.message.model.constants.MessageBatchSizes;
 import com.auth.service.system.message.model.entity.InAppMessageRecipientEntity;
 import com.auth.service.system.message.service.InAppMessageRecipientWriteService;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
@@ -24,11 +25,6 @@ public class InAppMessageRecipientWriteServiceImpl
 		implements InAppMessageRecipientWriteService {
 
 	/**
-	 * 批量写入批次大小
-	 */
-	private static final int BATCH_SIZE = 500;
-
-	/**
 	 * {@inheritDoc}
 	 */
 	@Override
@@ -43,7 +39,7 @@ public class InAppMessageRecipientWriteServiceImpl
 		}
 
 		int inserted = 0;
-		for (List<InAppMessageRecipientEntity> partition : CollUtil.split(rows, BATCH_SIZE)) {
+		for (List<InAppMessageRecipientEntity> partition : CollUtil.split(rows, MessageBatchSizes.RECIPIENT_INSERT)) {
 			inserted += baseMapper.insertIgnoreBatch(partition);
 		}
 		return inserted;

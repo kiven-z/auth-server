@@ -5,7 +5,6 @@ import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.mapper.JobGroupMapper;
 import com.auth.service.system.schedule.mapper.JobMapper;
 import com.auth.service.system.schedule.mapper.LogJobMapper;
-import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
 import com.auth.service.system.schedule.model.entity.JobEntity;
 import com.auth.service.system.schedule.model.entity.JobGroupEntity;
 import com.auth.service.system.schedule.model.entity.LogJobEntity;
@@ -285,7 +284,7 @@ class SysJobDefinitionServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("立即执行：存在时 ensureJobDetail 并 trigger")
+	@DisplayName("立即执行：存在时 triggerOnce")
 	void runOnceTriggersWhenExists() throws SchedulerException {
 		JobEntity entity = new JobEntity();
 		entity.setId(5L);
@@ -297,8 +296,7 @@ class SysJobDefinitionServiceImplTest {
 
 		sysJobDefinitionService.runOnce(5L);
 
-		verify(sysJobSchedulerManager).ensureJobDetail(entity);
-		verify(sysJobSchedulerManager).triggerJob("demoJob", "DEFAULT", SysJobQuartzDataKeys.TRIGGER_TYPE_MANUAL);
+		verify(sysJobSchedulerManager).triggerOnce(entity);
 	}
 
 	@Test
@@ -329,7 +327,7 @@ class SysJobDefinitionServiceImplTest {
 
 		sysJobDefinitionService.deleteById(3L);
 
-		verify(sysJobSchedulerManager).deleteJobIfExists(org.quartz.JobKey.jobKey("demoJob", "DEFAULT"));
+		verify(sysJobSchedulerManager).deleteJob("demoJob", "DEFAULT");
 		verify(sysJobDefinitionService).removeById(3L);
 	}
 

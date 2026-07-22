@@ -8,7 +8,6 @@ import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.mapper.JobGroupMapper;
 import com.auth.service.system.schedule.mapper.JobMapper;
 import com.auth.service.system.schedule.mapper.LogJobMapper;
-import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
 import com.auth.service.system.schedule.model.entity.JobEntity;
 import com.auth.service.system.schedule.model.entity.JobGroupEntity;
 import com.auth.service.system.schedule.model.entity.LogJobEntity;
@@ -34,7 +33,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.quartz.JobKey;
 import org.quartz.SchedulerException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -197,9 +195,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<JobMapper, JobEntit
 
 		try {
 			// 删除 Quartz Job
-			String jobName = dbJob.getJobName();
-			String jobGroup = dbJob.getJobGroup();
-			sysJobSchedulerManager.deleteJobIfExists(JobKey.jobKey(jobName, jobGroup));
+			sysJobSchedulerManager.deleteJob(dbJob.getJobName(), dbJob.getJobGroup());
 		}
 		catch (SchedulerException ex) {
 			log.error("删除 Quartz Job 失败", ex);
@@ -227,11 +223,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<JobMapper, JobEntit
 		}
 
 		try {
-			// 确保 JobDetail 存在
-			sysJobSchedulerManager.ensureJobDetail(dbJob);
-
-			// 触发 Job
-			sysJobSchedulerManager.triggerJob(jobName, jobGroup, SysJobQuartzDataKeys.TRIGGER_TYPE_MANUAL);
+			sysJobSchedulerManager.triggerOnce(dbJob);
 		}
 		catch (SchedulerException ex) {
 			log.error("立即执行失败", ex);

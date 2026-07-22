@@ -2,7 +2,7 @@ package com.auth.service.auth.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
-import com.auth.service.auth.config.AuthorizationInvalidationProperties;
+import com.auth.service.auth.model.constants.AuthBatchSizes;
 import com.auth.service.auth.model.vo.authorization.EffectiveCodesVO;
 import com.auth.service.auth.service.AdminAuthorizationService;
 import com.auth.service.auth.support.authorization.AuthProfileRepository;
@@ -28,8 +28,6 @@ public class AdminAuthorizationServiceImpl implements AdminAuthorizationService 
 	private final AuthProfileRepository authProfileRepository;
 
 	private final AuthProfileMaterializationService authProfileMaterializationService;
-
-	private final AuthorizationInvalidationProperties authorizationInvalidationProperties;
 
 	/**
 	 * 按用户 ID 加载授权画像（供内部接口查询生效角色码与权限码）
@@ -78,8 +76,7 @@ public class AdminAuthorizationServiceImpl implements AdminAuthorizationService 
 			return;
 		}
 
-		Integer batchSize = authorizationInvalidationProperties.getBatchSize();
-		authProfileMaterializationService.refreshInBatches(normalizedUserIds, batchSize);
+		authProfileMaterializationService.refreshInBatches(normalizedUserIds, AuthBatchSizes.INVALIDATION);
 	}
 
 }

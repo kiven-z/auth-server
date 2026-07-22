@@ -22,12 +22,6 @@ import org.springframework.validation.annotation.Validated;
 public class AuthorizationInvalidationProperties {
 
 	/**
-	 * 递增与画像刷新/驱逐的每批大小
-	 */
-	@NotNull
-	private Integer batchSize = 500;
-
-	/**
 	 * processing 占位超时阈值（分钟），超过后由清理 Job 删除占位行
 	 */
 	@Min(1)
@@ -48,13 +42,6 @@ public class AuthorizationInvalidationProperties {
 	private Long processingClaimCleanupIntervalMs = 300_000L;
 
 	/**
-	 * 每批释放 processing 占位上限
-	 */
-	@Min(1)
-	@NotNull
-	private Integer processingClaimCleanupBatchSize = 100;
-
-	/**
 	 * 已完成幂等事件保留天数，超出后由清理 Job 物理删除
 	 */
 	@Min(1)
@@ -72,12 +59,5 @@ public class AuthorizationInvalidationProperties {
 	 */
 	@NotBlank
 	private String successCleanupCron = "0 0 4 * * ?";
-
-	/**
-	 * 每批删除已完成幂等事件上限
-	 */
-	@Min(1)
-	@NotNull
-	private Integer successCleanupBatchSize = 500;
 
 }

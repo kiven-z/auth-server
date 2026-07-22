@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
+import static com.auth.service.system.authorization.model.constants.AuthorizationBatchSizes.SUCCESS_CLEANUP;
+
 /**
  * 授权失效 Outbox SUCCESS 历史清理：删除已完成且超过保留期的投递记录
  *
@@ -33,8 +35,7 @@ public class AuthorizationInvalidationOutboxHistoryCleanupJob {
 		}
 
 		LocalDateTime cutoff = LocalDateTime.now().minusDays(properties.getSuccessRetentionDays());
-		int batchSize = properties.getSuccessCleanupBatchSize();
-		int totalDeleted = purgeInBatches(cutoff, batchSize);
+		int totalDeleted = purgeInBatches(cutoff);
 		if (totalDeleted > 0) {
 			log.info("Purged SUCCESS invalidation outbox rows: count={}, cutoff={}", totalDeleted, cutoff);
 		}
@@ -43,15 +44,14 @@ public class AuthorizationInvalidationOutboxHistoryCleanupJob {
 	/**
 	 * 分批删除，避免单次锁表过大
 	 * @param cutoff processed_at 早于此时间可被删除
-	 * @param batchSize 每批上限
 	 * @return 累计删除行数
 	 */
-	private int purgeInBatches(LocalDateTime cutoff, int batchSize) {
+	private int purgeInBatches(LocalDateTime cutoff) {
 		int totalDeleted = 0;
 		while (true) {
-			int deleted = outboxMapper.deleteSuccessBefore(cutoff, batchSize);
+			int deleted = outboxMapper.deleteSuccessBefore(cutoff, SUCCESS_CLEANUP);
 			totalDeleted += deleted;
-			if (deleted < batchSize) {
+			if (deleted < SUCCESS_CLEANUP) {
 				break;
 			}
 		}

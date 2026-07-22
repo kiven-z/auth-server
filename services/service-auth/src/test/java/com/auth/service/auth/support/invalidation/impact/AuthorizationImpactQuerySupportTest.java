@@ -2,8 +2,8 @@ package com.auth.service.auth.support.invalidation.impact;
 
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.module.security.contract.dto.invalidation.GrantSubjectKey;
-import com.auth.service.auth.config.AuthorizationInvalidationProperties;
 import com.auth.service.auth.mapper.AuthorizationImpactMapper;
+import com.auth.service.auth.model.constants.AuthBatchSizes;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,14 +29,11 @@ class AuthorizationImpactQuerySupportTest {
 	@Mock
 	private AuthorizationImpactMapper authorizationImpactMapper;
 
-	private AuthorizationInvalidationProperties invalidationProperties;
-
 	private AuthorizationImpactQuerySupport impactQuery;
 
 	@BeforeEach
 	void setUp() {
-		invalidationProperties = new AuthorizationInvalidationProperties();
-		impactQuery = new AuthorizationImpactQuerySupport(authorizationImpactMapper, invalidationProperties);
+		impactQuery = new AuthorizationImpactQuerySupport(authorizationImpactMapper);
 	}
 
 	@Test
@@ -92,8 +89,9 @@ class AuthorizationImpactQuerySupportTest {
 	@Test
 	@DisplayName("部门 ID 超过分片大小时应分批查询并合并去重")
 	void findUserIdsByDeptIds_largeInput_shouldQueryInChunks() {
-		invalidationProperties.setBatchSize(500);
-		List<Long> deptIds = IntStream.rangeClosed(1, 1200).mapToObj(Long::valueOf).toList();
+		List<Long> deptIds = IntStream.rangeClosed(1, AuthBatchSizes.INVALIDATION * 2 + 200)
+			.mapToObj(Long::valueOf)
+			.toList();
 
 		when(authorizationImpactMapper.selectUserIdsByDeptIds(anyList())).thenAnswer(invocation -> {
 			List<Long> chunk = invocation.getArgument(0);
@@ -110,8 +108,9 @@ class AuthorizationImpactQuerySupportTest {
 	@Test
 	@DisplayName("角色码超过分片大小时应分批查询")
 	void findUserIdsByRoleCodes_largeInput_shouldQueryInChunks() {
-		invalidationProperties.setBatchSize(2);
-		List<String> roleCodes = List.of("R_1", "R_2", "R_3", "R_4", "R_5");
+		List<String> roleCodes = IntStream.rangeClosed(1, AuthBatchSizes.INVALIDATION * 2 + 1)
+			.mapToObj(i -> "R_" + i)
+			.toList();
 
 		when(authorizationImpactMapper.selectUserIdsByRoleCodes(anyList())).thenAnswer(invocation -> {
 			List<String> chunk = invocation.getArgument(0);
@@ -120,7 +119,7 @@ class AuthorizationImpactQuerySupportTest {
 
 		Set<Long> userIds = impactQuery.findUserIdsByRoleCodes(roleCodes);
 
-		assertEquals(Set.of(1L, 2L), userIds);
+		assertEquals(Set.of((long) AuthBatchSizes.INVALIDATION, 1L), userIds);
 		verify(authorizationImpactMapper, times(3)).selectUserIdsByRoleCodes(anyList());
 	}
 

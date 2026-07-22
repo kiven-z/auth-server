@@ -2,7 +2,7 @@ package com.auth.service.auth.service;
 
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.TestConstants;
-import com.auth.service.auth.config.AuthorizationInvalidationProperties;
+import com.auth.service.auth.model.constants.AuthBatchSizes;
 import com.auth.service.auth.model.vo.authorization.EffectiveCodesVO;
 import com.auth.service.auth.service.impl.AdminAuthorizationServiceImpl;
 import com.auth.service.auth.support.authorization.AuthProfileRepository;
@@ -32,9 +32,6 @@ class AdminAuthorizationServiceTest {
 
 	@Mock
 	private AuthProfileMaterializationService authProfileMaterializationService;
-
-	@Mock
-	private AuthorizationInvalidationProperties authorizationInvalidationProperties;
 
 	@InjectMocks
 	private AdminAuthorizationServiceImpl adminAuthorizationService;
@@ -80,14 +77,13 @@ class AdminAuthorizationServiceTest {
 	@Test
 	@DisplayName("刷新缓存：入参为空/含 null 时委托物化服务分批刷新")
 	void refreshUserCache_shouldDelegateToMaterializationService() {
-		when(authorizationInvalidationProperties.getBatchSize()).thenReturn(500);
-
 		assertDoesNotThrow(() -> adminAuthorizationService.refreshUserCache(List.of()));
 		verifyNoInteractions(authProfileMaterializationService);
 
 		adminAuthorizationService.refreshUserCache(Arrays.asList(null, TestConstants.USER_ID));
 
-		verify(authProfileMaterializationService).refreshInBatches(List.of(TestConstants.USER_ID), 500);
+		verify(authProfileMaterializationService).refreshInBatches(List.of(TestConstants.USER_ID),
+				AuthBatchSizes.INVALIDATION);
 	}
 
 }
