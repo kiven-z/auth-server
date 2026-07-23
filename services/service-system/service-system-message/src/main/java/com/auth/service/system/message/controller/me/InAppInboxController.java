@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -65,10 +66,24 @@ public class InAppInboxController {
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
+	@Operation(summary = "当前大类全部已读", description = "仅处理该大类下当前用户可见的未读消息")
+	@PostMapping("/inbox/read-all")
+	public Result<String> markAllRead(@RequestParam @NotNull(message = "业务大类ID不能为空") Long majorCategoryId) {
+		inAppInboxService.markAllRead(majorCategoryId);
+		return Result.success(null, OPERATION_SUCCESS.getMessage());
+	}
+
 	@Operation(summary = "批量删除我的站内信", description = "用户侧逻辑删除；入参为站内信 messageId 数组")
 	@DeleteMapping("/inbox")
 	public Result<String> batchDelete(@RequestBody @NotEmpty(message = "消息ID列表不能为空") List<Long> messageIds) {
 		inAppInboxService.batchDelete(messageIds);
+		return Result.success(null, OPERATION_SUCCESS.getMessage());
+	}
+
+	@Operation(summary = "当前大类全部删除", description = "仅软删除该大类下当前用户可见消息")
+	@DeleteMapping("/inbox/all")
+	public Result<String> deleteAll(@RequestParam @NotNull(message = "业务大类ID不能为空") Long majorCategoryId) {
+		inAppInboxService.deleteAll(majorCategoryId);
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 

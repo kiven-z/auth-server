@@ -6,6 +6,7 @@ import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.service.system.message.convert.InAppInboxConverter;
 import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.mapper.*;
+import com.auth.service.system.message.model.constants.MessageBatchSizes;
 import com.auth.service.system.message.model.entity.InAppMessageCategoryEntity;
 import com.auth.service.system.message.model.entity.InAppMessageEntity;
 import com.auth.service.system.message.model.entity.InAppMessageUserStatusEntity;
@@ -96,6 +97,75 @@ public class InAppInboxServiceImpl implements InAppInboxService {
 	}
 
 	/**
+	 * 应用标记已读
+	 * @param messageIds 消息 ID 列表
+	 */
+	private void applyMarkRead(List<Long> messageIds) {
+		ActionableInboxIds actionable = resolveActionableIds(messageIds);
+		if (actionable.isEmpty()) {
+			return;
+		}
+
+		Long userId = actionable.userId();
+		List<Long> pushIds = actionable.pushIds();
+		List<Long> pullIds = actionable.pullIds();
+		LocalDateTime readTime = LocalDateTime.now();
+		if (CollUtil.isNotEmpty(pushIds)) {
+			inAppMessageRecipientMapper.markRead(userId, pushIds, readTime);
+		}
+		if (CollUtil.isNotEmpty(pullIds)) {
+			List<InAppMessageUserStatusEntity> rows = pullIds.stream().map(messageId -> {
+				InAppMessageUserStatusEntity row = new InAppMessageUserStatusEntity();
+				row.setId(IdWorker.getId());
+				row.setMessageId(messageId);
+				row.setUserId(userId);
+				row.setIsRead(Boolean.TRUE);
+				row.setReadTime(readTime);
+				row.setIsDeleted(Boolean.FALSE);
+				row.setCreateUser(userId);
+				row.setUpdateUser(userId);
+				row.setVersion(0L);
+				return row;
+			}).toList();
+			inAppMessageUserStatusMapper.upsertReadBatch(rows);
+		}
+	}
+
+	/**
+	 * 应用批量删除
+	 * @param messageIds 消息 ID 列表
+	 */
+	private void applyBatchDelete(List<Long> messageIds) {
+		ActionableInboxIds actionable = resolveActionableIds(messageIds);
+		if (actionable.isEmpty()) {
+			return;
+		}
+
+		Long userId = actionable.userId();
+		List<Long> pushIds = actionable.pushIds();
+		List<Long> pullIds = actionable.pullIds();
+		if (CollUtil.isNotEmpty(pushIds)) {
+			inAppMessageRecipientMapper.markDeleted(userId, pushIds);
+		}
+		if (CollUtil.isNotEmpty(pullIds)) {
+			List<InAppMessageUserStatusEntity> rows = pullIds.stream().map(messageId -> {
+				InAppMessageUserStatusEntity row = new InAppMessageUserStatusEntity();
+				row.setId(IdWorker.getId());
+				row.setMessageId(messageId);
+				row.setUserId(userId);
+				row.setIsRead(Boolean.FALSE);
+				row.setReadTime(null);
+				row.setIsDeleted(Boolean.TRUE);
+				row.setCreateUser(userId);
+				row.setUpdateUser(userId);
+				row.setVersion(0L);
+				return row;
+			}).toList();
+			inAppMessageUserStatusMapper.upsertDeletedBatch(rows);
+		}
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	@Override
@@ -161,41 +231,6 @@ public class InAppInboxServiceImpl implements InAppInboxService {
 	}
 
 	/**
-	 * 应用标记已读
-	 * @param messageIds 消息 ID 列表
-	 */
-	private void applyMarkRead(List<Long> messageIds) {
-		ActionableInboxIds actionable = resolveActionableIds(messageIds);
-		if (actionable.isEmpty()) {
-			return;
-		}
-
-		Long userId = actionable.userId();
-		List<Long> pushIds = actionable.pushIds();
-		List<Long> pullIds = actionable.pullIds();
-		LocalDateTime readTime = LocalDateTime.now();
-		if (CollUtil.isNotEmpty(pushIds)) {
-			inAppMessageRecipientMapper.markRead(userId, pushIds, readTime);
-		}
-		if (CollUtil.isNotEmpty(pullIds)) {
-			List<InAppMessageUserStatusEntity> rows = pullIds.stream().map(messageId -> {
-				InAppMessageUserStatusEntity row = new InAppMessageUserStatusEntity();
-				row.setId(IdWorker.getId());
-				row.setMessageId(messageId);
-				row.setUserId(userId);
-				row.setIsRead(Boolean.TRUE);
-				row.setReadTime(readTime);
-				row.setIsDeleted(Boolean.FALSE);
-				row.setCreateUser(userId);
-				row.setUpdateUser(userId);
-				row.setVersion(0L);
-				return row;
-			}).toList();
-			inAppMessageUserStatusMapper.upsertReadBatch(rows);
-		}
-	}
-
-	/**
 	 * {@inheritDoc}
 	 */
 	@Override
@@ -209,33 +244,39 @@ public class InAppInboxServiceImpl implements InAppInboxService {
 	 */
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public void batchDelete(List<Long> messageIds) {
-		ActionableInboxIds actionable = resolveActionableIds(messageIds);
-		if (actionable.isEmpty()) {
+	public void markAllRead(Long majorCategoryId) {
+		Long userId = SecurityUserUtils.getUserId();
+		List<Long> messageIds = inAppInboxMapper.selectUnreadMessageIdsByMajor(userId, majorCategoryId);
+		if (CollUtil.isEmpty(messageIds)) {
 			return;
 		}
-
-		Long userId = actionable.userId();
-		List<Long> pushIds = actionable.pushIds();
-		List<Long> pullIds = actionable.pullIds();
-		if (CollUtil.isNotEmpty(pushIds)) {
-			inAppMessageRecipientMapper.markDeleted(userId, pushIds);
+		for (List<Long> batch : CollUtil.split(messageIds, MessageBatchSizes.INBOX_MARK_READ)) {
+			applyMarkRead(batch);
 		}
-		if (CollUtil.isNotEmpty(pullIds)) {
-			List<InAppMessageUserStatusEntity> rows = pullIds.stream().map(messageId -> {
-				InAppMessageUserStatusEntity row = new InAppMessageUserStatusEntity();
-				row.setId(IdWorker.getId());
-				row.setMessageId(messageId);
-				row.setUserId(userId);
-				row.setIsRead(Boolean.FALSE);
-				row.setReadTime(null);
-				row.setIsDeleted(Boolean.TRUE);
-				row.setCreateUser(userId);
-				row.setUpdateUser(userId);
-				row.setVersion(0L);
-				return row;
-			}).toList();
-			inAppMessageUserStatusMapper.upsertDeletedBatch(rows);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void batchDelete(List<Long> messageIds) {
+		applyBatchDelete(messageIds);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	@Transactional(rollbackFor = Exception.class)
+	public void deleteAll(Long majorCategoryId) {
+		Long userId = SecurityUserUtils.getUserId();
+		List<Long> messageIds = inAppInboxMapper.selectVisibleMessageIdsByMajor(userId, majorCategoryId);
+		if (CollUtil.isEmpty(messageIds)) {
+			return;
+		}
+		for (List<Long> batch : CollUtil.split(messageIds, MessageBatchSizes.INBOX_DELETE)) {
+			applyBatchDelete(batch);
 		}
 	}
 

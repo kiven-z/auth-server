@@ -119,68 +119,106 @@
     <!-- 启用大类全量 + 未读数 -->
     <select id="selectUnreadCountByMajor"
             resultType="com.auth.service.system.message.model.po.InAppInboxMajorUnreadRowPO">
-        SELECT
-            major.id AS majorCategoryId,
-            major.name AS majorCategoryName,
-            major.code AS majorCategoryCode,
-            COALESCE(unread.unread_count, 0) AS unreadCount
-        FROM
-            in_app_message_category major
-            LEFT JOIN (
-                SELECT
-                    major_category_id,
-                    SUM(cnt) AS unread_count
-                FROM
-                    (
-                        SELECT
-                            c.parent_id AS major_category_id,
-                            COUNT(1) AS cnt
-                        FROM
-                            in_app_message_recipient r
-                            INNER JOIN in_app_message m ON m.id = r.message_id
-                            INNER JOIN in_app_message_category c ON c.id = m.category_id
-                        WHERE
-                            r.user_id = #{userId}
-                            AND r.is_deleted = 0
-                            AND r.is_read = 0
-                            AND m.recipient_scope_type &lt;&gt; 'ALL'
-                            AND m.status IN ('SUCCESS', 'PARTIAL')
-                            AND c.parent_id &gt; 0
-                        GROUP BY
-                            c.parent_id
-                        UNION ALL
-                        SELECT
-                            c.parent_id AS major_category_id,
-                            COUNT(1) AS cnt
-                        FROM
-                            in_app_message m
-                            INNER JOIN in_app_message_category c ON c.id = m.category_id
-                            LEFT JOIN in_app_message_user_status s ON s.message_id = m.id
-                            AND s.user_id = #{userId}
-                        WHERE
-                            m.recipient_scope_type = 'ALL'
-                            AND m.status = 'SUCCESS'
-                            AND c.parent_id &gt; 0
-                            AND (
-                                s.id IS NULL
-                                OR s.is_deleted = 0
-                            )
-                            AND (
-                                s.id IS NULL
-                                OR s.is_read = 0
-                            )
-                        GROUP BY
-                            c.parent_id
-                    ) unread_by_major
-                GROUP BY
-                    major_category_id
-            ) unread ON unread.major_category_id = major.id
-        WHERE
-            major.parent_id = 0
-            AND major.status = 1
-        ORDER BY
-            major.sort_order,
-            major.id
+        SELECT major.id                         AS majorCategoryId,
+               major.name                       AS majorCategoryName,
+               major.code                       AS majorCategoryCode,
+               COALESCE(unread.unread_count, 0) AS unreadCount
+        FROM in_app_message_category major
+                 LEFT JOIN (SELECT major_category_id,
+                                   SUM(cnt) AS unread_count
+                            FROM (SELECT c.parent_id AS major_category_id,
+                                         COUNT(1)    AS cnt
+                                  FROM in_app_message_recipient r
+                                           INNER JOIN in_app_message m ON m.id = r.message_id
+                                           INNER JOIN in_app_message_category c ON c.id = m.category_id
+                                  WHERE r.user_id = #{userId}
+                                    AND r.is_deleted = 0
+                                    AND r.is_read = 0
+                                    AND m.recipient_scope_type &lt;&gt; 'ALL'
+                                    AND m.status IN ('SUCCESS', 'PARTIAL')
+                                    AND c.parent_id &gt; 0
+                                  GROUP BY c.parent_id
+                                  UNION ALL
+                                  SELECT c.parent_id AS major_category_id,
+                                         COUNT(1)    AS cnt
+                                  FROM in_app_message m
+                                           INNER JOIN in_app_message_category c ON c.id = m.category_id
+                                           LEFT JOIN in_app_message_user_status s ON s.message_id = m.id
+                                      AND s.user_id = #{userId}
+                                  WHERE m.recipient_scope_type = 'ALL'
+                                    AND m.status = 'SUCCESS'
+                                    AND c.parent_id &gt; 0
+                                    AND (
+                                      s.id IS NULL
+                                          OR s.is_deleted = 0
+                                      )
+                                    AND (
+                                      s.id IS NULL
+                                          OR s.is_read = 0
+                                      )
+                                  GROUP BY c.parent_id) unread_by_major
+                            GROUP BY major_category_id) unread ON unread.major_category_id = major.id
+        WHERE major.parent_id = 0
+          AND major.status = 1
+        ORDER BY major.sort_order,
+                 major.id
+    </select>
+
+    <!-- 当前大类未读 messageId：写扩散收件行 ∪ 读扩散无状态/未读 -->
+    <select id="selectUnreadMessageIdsByMajor" resultType="java.lang.Long">
+        SELECT r.message_id
+        FROM in_app_message_recipient r
+                 INNER JOIN in_app_message m ON m.id = r.message_id
+                 INNER JOIN in_app_message_category c ON c.id = m.category_id
+        WHERE r.user_id = #{userId}
+          AND r.is_deleted = 0
+          AND r.is_read = 0
+          AND m.recipient_scope_type &lt;&gt; 'ALL'
+          AND m.status IN ('SUCCESS', 'PARTIAL')
+          AND c.parent_id = #{majorCategoryId}
+        UNION ALL
+        SELECT m.id
+        FROM in_app_message m
+                 INNER JOIN in_app_message_category c ON c.id = m.category_id
+                 LEFT JOIN in_app_message_user_status s ON s.message_id = m.id
+            AND s.user_id = #{userId}
+        WHERE m.recipient_scope_type = 'ALL'
+          AND m.status = 'SUCCESS'
+          AND c.parent_id = #{majorCategoryId}
+          AND (
+            s.id IS NULL
+                OR s.is_deleted = 0
+            )
+          AND (
+            s.id IS NULL
+                OR s.is_read = 0
+            )
+    </select>
+
+    <!-- 当前大类可见 messageId：写扩散未软删 ∪ 读扩散无状态/未软删 -->
+    <select id="selectVisibleMessageIdsByMajor" resultType="java.lang.Long">
+        SELECT r.message_id
+        FROM in_app_message_recipient r
+                 INNER JOIN in_app_message m ON m.id = r.message_id
+                 INNER JOIN in_app_message_category c ON c.id = m.category_id
+        WHERE r.user_id = #{userId}
+          AND r.is_deleted = 0
+          AND m.recipient_scope_type &lt;&gt; 'ALL'
+          AND m.status IN ('SUCCESS', 'PARTIAL')
+          AND c.parent_id = #{majorCategoryId}
+        UNION ALL
+        SELECT m.id
+        FROM in_app_message m
+                 INNER JOIN in_app_message_category c ON c.id = m.category_id
+                 LEFT JOIN in_app_message_user_status s ON s.message_id = m.id
+            AND s.user_id = #{userId}
+        WHERE m.recipient_scope_type = 'ALL'
+          AND m.status = 'SUCCESS'
+          AND c.parent_id = #{majorCategoryId}
+          AND (
+            s.id IS NULL
+                OR s.is_deleted = 0
+            )
     </select>
 
 </mapper>

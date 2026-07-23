@@ -42,9 +42,21 @@ public interface InAppInboxService {
 	void markRead(List<Long> messageIds);
 
 	/**
+	 * 将当前大类下可见未读全部标为已读
+	 * @param majorCategoryId 业务大类 ID
+	 */
+	void markAllRead(Long majorCategoryId);
+
+	/**
 	 * 用户侧批量软删除站内信
 	 * @param messageIds 站内信 ID 列表
 	 */
 	void batchDelete(List<Long> messageIds);
+
+	/**
+	 * 将当前大类下可见消息全部软删除
+	 * @param majorCategoryId 业务大类 ID
+	 */
+	void deleteAll(Long majorCategoryId);
 
 }

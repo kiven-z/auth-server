@@ -25,4 +25,14 @@ public class MessageBatchSizes {
 	 */
 	public static final int RECIPIENT_SCAN = 1000;
 
+	/**
+	 * 收件箱全部已读：未读 ID 分片后再走标已读
+	 */
+	public static final int INBOX_MARK_READ = 500;
+
+	/**
+	 * 收件箱全部删除：可见 ID 分片后再走软删除
+	 */
+	public static final int INBOX_DELETE = 500;
+
 }

@@ -296,6 +296,76 @@ class InAppInboxServiceImplTest {
 	}
 
 	@Test
+	@DisplayName("当前大类全部已读：查出未读 ID 后按范围分流标已读")
+	void markAllRead_shouldLoadUnreadIdsThenMarkRead() {
+		// 大类未读 ID 由 Mapper 圈定，再走与批量已读相同的写扩散/读扩散分流
+		Long majorCategoryId = 1907200100000000007L;
+		when(inAppInboxMapper.selectUnreadMessageIdsByMajor(100L, majorCategoryId)).thenReturn(List.of(11L, 13L));
+
+		InAppMessageEntity pushMessage = new InAppMessageEntity();
+		pushMessage.setId(11L);
+		pushMessage.setRecipientScopeType(RecipientScopeType.USER.name());
+		pushMessage.setStatus(InAppMessageStatus.SUCCESS.name());
+
+		InAppMessageEntity pullMessage = new InAppMessageEntity();
+		pullMessage.setId(13L);
+		pullMessage.setRecipientScopeType(RecipientScopeType.ALL.name());
+		pullMessage.setStatus(InAppMessageStatus.SUCCESS.name());
+
+		when(inAppMessageMapper.selectList(any(Wrapper.class))).thenReturn(List.of(pushMessage, pullMessage));
+
+		try (MockedStatic<SecurityUserUtils> security = mockStatic(SecurityUserUtils.class)) {
+			security.when(SecurityUserUtils::getUserId).thenReturn(100L);
+
+			service.markAllRead(majorCategoryId);
+		}
+
+		verify(inAppInboxMapper).selectUnreadMessageIdsByMajor(100L, majorCategoryId);
+		verify(inAppMessageRecipientMapper).markRead(eq(100L), eq(List.of(11L)), any(LocalDateTime.class));
+		verify(inAppMessageUserStatusMapper).upsertReadBatch(anyList());
+	}
+
+	@Test
+	@DisplayName("当前大类全部已读：无未读时不写库")
+	void markAllRead_shouldNoOpWhenNoUnread() {
+		// 大类下无未读时不访问主表与写 Mapper
+		Long majorCategoryId = 1907200100000000007L;
+		when(inAppInboxMapper.selectUnreadMessageIdsByMajor(100L, majorCategoryId)).thenReturn(List.of());
+
+		try (MockedStatic<SecurityUserUtils> security = mockStatic(SecurityUserUtils.class)) {
+			security.when(SecurityUserUtils::getUserId).thenReturn(100L);
+
+			service.markAllRead(majorCategoryId);
+		}
+
+		verify(inAppInboxMapper).selectUnreadMessageIdsByMajor(100L, majorCategoryId);
+		verifyNoInteractions(inAppMessageRecipientMapper, inAppMessageMapper, inAppMessageUserStatusMapper);
+	}
+
+	@Test
+	@DisplayName("当前大类全部已读：未读 ID 超过批次时分片调用标已读")
+	void markAllRead_shouldSplitBatchesWhenUnreadExceedsBatchSize() {
+		// 501 条按 INBOX_MARK_READ=500 拆成 2 批，每批都会走 resolveActionableIds
+		Long majorCategoryId = 1907200100000000007L;
+		List<Long> unreadIds = new java.util.ArrayList<>(501);
+		for (long id = 1L; id <= 501L; id++) {
+			unreadIds.add(id);
+		}
+		when(inAppInboxMapper.selectUnreadMessageIdsByMajor(100L, majorCategoryId)).thenReturn(unreadIds);
+		when(inAppMessageMapper.selectList(any(Wrapper.class))).thenReturn(List.of());
+
+		try (MockedStatic<SecurityUserUtils> security = mockStatic(SecurityUserUtils.class)) {
+			security.when(SecurityUserUtils::getUserId).thenReturn(100L);
+
+			service.markAllRead(majorCategoryId);
+		}
+
+		verify(inAppInboxMapper).selectUnreadMessageIdsByMajor(100L, majorCategoryId);
+		verify(inAppMessageMapper, times(2)).selectList(any(Wrapper.class));
+		verifyNoInteractions(inAppMessageRecipientMapper, inAppMessageUserStatusMapper);
+	}
+
+	@Test
 	@DisplayName("批量删除：按范围分流，写扩散软删收件行、读扩散懒写状态")
 	void batchDelete_shouldSplitPushUpdateAndPullUpsert() {
 		// 先查主表分组：写扩散只更新 recipient，读扩散只 upsert user_status
@@ -399,6 +469,76 @@ class InAppInboxServiceImplTest {
 		}
 
 		verifyNoInteractions(inAppMessageRecipientMapper, inAppMessageMapper, inAppMessageUserStatusMapper);
+	}
+
+	@Test
+	@DisplayName("当前大类全部删除：查出可见 ID 后按范围分流软删")
+	void deleteAll_shouldLoadVisibleIdsThenBatchDelete() {
+		// 大类可见 ID 由 Mapper 圈定，再走与批量删除相同的写扩散/读扩散分流
+		Long majorCategoryId = 1907200100000000007L;
+		when(inAppInboxMapper.selectVisibleMessageIdsByMajor(100L, majorCategoryId)).thenReturn(List.of(11L, 13L));
+
+		InAppMessageEntity pushMessage = new InAppMessageEntity();
+		pushMessage.setId(11L);
+		pushMessage.setRecipientScopeType(RecipientScopeType.USER.name());
+		pushMessage.setStatus(InAppMessageStatus.SUCCESS.name());
+
+		InAppMessageEntity pullMessage = new InAppMessageEntity();
+		pullMessage.setId(13L);
+		pullMessage.setRecipientScopeType(RecipientScopeType.ALL.name());
+		pullMessage.setStatus(InAppMessageStatus.SUCCESS.name());
+
+		when(inAppMessageMapper.selectList(any(Wrapper.class))).thenReturn(List.of(pushMessage, pullMessage));
+
+		try (MockedStatic<SecurityUserUtils> security = mockStatic(SecurityUserUtils.class)) {
+			security.when(SecurityUserUtils::getUserId).thenReturn(100L);
+
+			service.deleteAll(majorCategoryId);
+		}
+
+		verify(inAppInboxMapper).selectVisibleMessageIdsByMajor(100L, majorCategoryId);
+		verify(inAppMessageRecipientMapper).markDeleted(100L, List.of(11L));
+		verify(inAppMessageUserStatusMapper).upsertDeletedBatch(anyList());
+	}
+
+	@Test
+	@DisplayName("当前大类全部删除：无可见消息时不写库")
+	void deleteAll_shouldNoOpWhenNoVisible() {
+		// 大类下无可删消息时不访问主表与写 Mapper
+		Long majorCategoryId = 1907200100000000007L;
+		when(inAppInboxMapper.selectVisibleMessageIdsByMajor(100L, majorCategoryId)).thenReturn(List.of());
+
+		try (MockedStatic<SecurityUserUtils> security = mockStatic(SecurityUserUtils.class)) {
+			security.when(SecurityUserUtils::getUserId).thenReturn(100L);
+
+			service.deleteAll(majorCategoryId);
+		}
+
+		verify(inAppInboxMapper).selectVisibleMessageIdsByMajor(100L, majorCategoryId);
+		verifyNoInteractions(inAppMessageRecipientMapper, inAppMessageMapper, inAppMessageUserStatusMapper);
+	}
+
+	@Test
+	@DisplayName("当前大类全部删除：可见 ID 超过批次时分片调用批量删除")
+	void deleteAll_shouldSplitBatchesWhenVisibleExceedsBatchSize() {
+		// 501 条按 INBOX_DELETE=500 拆成 2 批，每批都会走 resolveActionableIds
+		Long majorCategoryId = 1907200100000000007L;
+		List<Long> visibleIds = new java.util.ArrayList<>(501);
+		for (long id = 1L; id <= 501L; id++) {
+			visibleIds.add(id);
+		}
+		when(inAppInboxMapper.selectVisibleMessageIdsByMajor(100L, majorCategoryId)).thenReturn(visibleIds);
+		when(inAppMessageMapper.selectList(any(Wrapper.class))).thenReturn(List.of());
+
+		try (MockedStatic<SecurityUserUtils> security = mockStatic(SecurityUserUtils.class)) {
+			security.when(SecurityUserUtils::getUserId).thenReturn(100L);
+
+			service.deleteAll(majorCategoryId);
+		}
+
+		verify(inAppInboxMapper).selectVisibleMessageIdsByMajor(100L, majorCategoryId);
+		verify(inAppMessageMapper, times(2)).selectList(any(Wrapper.class));
+		verifyNoInteractions(inAppMessageRecipientMapper, inAppMessageUserStatusMapper);
 	}
 
 	@Test

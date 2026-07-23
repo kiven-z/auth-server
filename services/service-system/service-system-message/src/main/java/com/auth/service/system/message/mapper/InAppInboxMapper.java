@@ -35,4 +35,22 @@ public interface InAppInboxMapper {
 	 */
 	List<InAppInboxMajorUnreadRowPO> selectUnreadCountByMajor(@Param("userId") Long userId);
 
+	/**
+	 * 当前大类下对当前用户可见的未读站内信 ID（写扩散 ∪ 读扩散）
+	 * @param userId 当前用户 ID
+	 * @param majorCategoryId 业务大类 ID
+	 * @return 未读消息 ID
+	 */
+	List<Long> selectUnreadMessageIdsByMajor(@Param("userId") Long userId,
+			@Param("majorCategoryId") Long majorCategoryId);
+
+	/**
+	 * 当前大类下对当前用户可见且未软删的站内信 ID（写扩散 ∪ 读扩散）
+	 * @param userId 当前用户 ID
+	 * @param majorCategoryId 业务大类 ID
+	 * @return 可见消息 ID
+	 */
+	List<Long> selectVisibleMessageIdsByMajor(@Param("userId") Long userId,
+			@Param("majorCategoryId") Long majorCategoryId);
+
 }
