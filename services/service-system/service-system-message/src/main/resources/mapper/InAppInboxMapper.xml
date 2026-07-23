@@ -39,6 +39,7 @@
         WHERE
         r.user_id = #{userId}
         AND r.is_deleted = 0
+        AND m.recipient_scope_type != 'ALL'
         AND m.status IN ('SUCCESS', 'PARTIAL')
         <if test="query.isRead != null">
             AND r.is_read = #{query.isRead}
@@ -142,6 +143,7 @@
                             r.user_id = #{userId}
                             AND r.is_deleted = 0
                             AND r.is_read = 0
+                            AND m.recipient_scope_type &lt;&gt; 'ALL'
                             AND m.status IN ('SUCCESS', 'PARTIAL')
                             AND c.parent_id &gt; 0
                         GROUP BY

@@ -17,7 +17,7 @@ import com.auth.service.system.message.model.enums.InAppContentType;
 import com.auth.service.system.message.model.enums.InAppMessageStatus;
 import com.auth.service.system.message.model.enums.MessageSendSourceType;
 import com.auth.service.system.message.model.value.inapp.RenderedInAppMessage;
-import com.auth.service.system.message.service.InAppMessageRecipientWriteService;
+import com.auth.service.system.message.service.admin.InAppMessageRecipientWriteService;
 import com.auth.service.system.message.support.inapp.InAppMessageCategorySupport;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

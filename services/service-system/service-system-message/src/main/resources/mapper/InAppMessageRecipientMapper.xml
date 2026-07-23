@@ -49,4 +49,21 @@
         </foreach>
     </update>
 
+    <!-- 当前用户收件箱：可见未删行软删除 -->
+    <update id="markDeleted">
+        UPDATE in_app_message_recipient r
+        INNER JOIN in_app_message m ON m.id = r.message_id
+        SET
+        r.is_deleted = 1,
+        r.update_user = #{userId}
+        WHERE
+        r.user_id = #{userId}
+        AND r.is_deleted = 0
+        AND m.status IN ('SUCCESS', 'PARTIAL')
+        AND r.message_id IN
+        <foreach collection="messageIds" item="messageId" open="(" separator="," close=")">
+            #{messageId}
+        </foreach>
+    </update>
+
 </mapper>

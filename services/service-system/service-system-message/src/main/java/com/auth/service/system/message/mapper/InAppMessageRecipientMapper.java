@@ -33,4 +33,12 @@ public interface InAppMessageRecipientMapper extends BaseMapper<InAppMessageReci
 	int markRead(@Param("userId") Long userId, @Param("messageIds") List<Long> messageIds,
 			@Param("readTime") LocalDateTime readTime);
 
+	/**
+	 * 将当前用户可见且未删的收件行软删除
+	 * @param userId 当前用户 ID
+	 * @param messageIds 站内信 ID 列表
+	 * @return 影响行数
+	 */
+	int markDeleted(@Param("userId") Long userId, @Param("messageIds") List<Long> messageIds);
+
 }

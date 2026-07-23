@@ -22,4 +22,11 @@ public interface InAppMessageUserStatusMapper extends BaseMapper<InAppMessageUse
 	 */
 	int upsertReadBatch(@Param("rows") List<InAppMessageUserStatusEntity> rows);
 
+	/**
+	 * 批量 upsert 软删除状态（撞 uk 时仅补删除字段，不改已读）
+	 * @param rows 待写入状态行
+	 * @return 影响行数
+	 */
+	int upsertDeletedBatch(@Param("rows") List<InAppMessageUserStatusEntity> rows);
+
 }

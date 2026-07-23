@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Quartz 调度写门面：按业务意图注册、暂停、删除、立即触发
@@ -24,6 +25,12 @@ public class SysJobSchedulerManager {
 	private static final String[] JOB_DATA_COMPARE_KEYS = { SysJobQuartzDataKeys.SYS_JOB_ID,
 			SysJobQuartzDataKeys.INVOKE_TARGET, SysJobQuartzDataKeys.JOB_CLASS, SysJobQuartzDataKeys.TASK_TYPE,
 			SysJobQuartzDataKeys.HANDLER_CODE, SysJobQuartzDataKeys.PAYLOAD_JSON, SysJobQuartzDataKeys.JOB_PARAMS };
+
+	/**
+	 * 启用任务不应处于的 Trigger 状态
+	 */
+	private static final Set<Trigger.TriggerState> NON_MATCHING_TRIGGER_STATES = Set.of(Trigger.TriggerState.PAUSED,
+			Trigger.TriggerState.ERROR);
 
 	private final Scheduler scheduler;
 
@@ -133,7 +140,7 @@ public class SysJobSchedulerManager {
 		}
 
 		Trigger.TriggerState triggerState = scheduler.getTriggerState(triggerKey);
-		if (triggerState == Trigger.TriggerState.PAUSED || triggerState == Trigger.TriggerState.ERROR) {
+		if (NON_MATCHING_TRIGGER_STATES.contains(triggerState)) {
 			return false;
 		}
 
@@ -146,10 +153,8 @@ public class SysJobSchedulerManager {
 		JobDataMap expectedMap = expectedDetail.getJobDataMap();
 		JobDataMap existingMap = existingDetail.getJobDataMap();
 		for (String key : JOB_DATA_COMPARE_KEYS) {
-			Object expectedValue = expectedMap.get(key);
-			Object existingValue = existingMap.get(key);
-			if (!Objects.equals(expectedValue == null ? null : String.valueOf(expectedValue),
-					existingValue == null ? null : String.valueOf(existingValue))) {
+			if (!Objects.equals(Objects.toString(expectedMap.get(key), null),
+					Objects.toString(existingMap.get(key), null))) {
 				return false;
 			}
 		}
@@ -162,12 +167,11 @@ public class SysJobSchedulerManager {
 
 		// start 未配置时忽略 Quartz 默认 startAt(now)
 		LocalDateTime expectedStart = job.getStartTime();
-		if (expectedStart != null) {
-			Date existingStart = existingCron.getStartTime();
-			if (existingStart == null || Date.from(expectedStart.atZone(ZoneId.systemDefault()).toInstant())
-				.getTime() != existingStart.getTime()) {
-				return false;
-			}
+		Date existingStart = existingCron.getStartTime();
+		if (expectedStart != null
+				&& (existingStart == null || Date.from(expectedStart.atZone(ZoneId.systemDefault()).toInstant())
+					.getTime() != existingStart.getTime())) {
+			return false;
 		}
 
 		// end 未配置时要求 Quartz 也无结束时间，避免清空 endTime 后仍跳过重建

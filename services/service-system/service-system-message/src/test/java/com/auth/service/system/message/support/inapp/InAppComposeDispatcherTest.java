@@ -8,7 +8,7 @@ import com.auth.service.system.message.model.entity.InAppMessageRecipientEntity;
 import com.auth.service.system.message.model.enums.InAppMessageStatus;
 import com.auth.service.system.message.model.enums.RecipientScopeType;
 import com.auth.service.system.message.model.value.recipient.RecipientScope;
-import com.auth.service.system.message.service.InAppMessageRecipientWriteService;
+import com.auth.service.system.message.service.admin.InAppMessageRecipientWriteService;
 import com.auth.service.system.message.support.recipient.RecipientBatchScanner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

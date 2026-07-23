@@ -41,4 +41,37 @@
         update_user = VALUES(update_user)
     </insert>
 
+    <!-- 公开消息软删懒写入：撞 uk 时仅补删除，不回写已读 -->
+    <insert id="upsertDeletedBatch">
+        INSERT INTO
+        in_app_message_user_status (
+        id,
+        message_id,
+        user_id,
+        is_read,
+        read_time,
+        is_deleted,
+        create_user,
+        update_user,
+        version
+        )
+        VALUES
+        <foreach collection="rows" item="row" separator=",">
+            (
+            #{row.id},
+            #{row.messageId},
+            #{row.userId},
+            #{row.isRead},
+            #{row.readTime},
+            #{row.isDeleted},
+            #{row.createUser},
+            #{row.updateUser},
+            #{row.version}
+            )
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+        is_deleted = 1,
+        update_user = VALUES(update_user)
+    </insert>
+
 </mapper>
