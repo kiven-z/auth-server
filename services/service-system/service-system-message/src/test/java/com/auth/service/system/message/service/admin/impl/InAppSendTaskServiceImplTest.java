@@ -5,14 +5,22 @@ import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.mapper.InAppMessageMapper;
+import com.auth.service.system.message.mapper.InAppMessageRecipientMapper;
+import com.auth.service.system.message.mapper.InAppMessageUserStatusMapper;
 import com.auth.service.system.message.model.entity.InAppMessageEntity;
-import com.auth.service.system.message.model.enums.*;
+import com.auth.service.system.message.model.enums.InAppContentType;
+import com.auth.service.system.message.model.enums.InAppMessageStatus;
+import com.auth.service.system.message.model.enums.MessageSendSourceType;
+import com.auth.service.system.message.model.enums.RecipientScopeType;
 import com.auth.service.system.message.model.form.inapp.InAppComposeForm;
 import com.auth.service.system.message.model.po.InAppSendTaskPageRowPO;
+import com.auth.service.system.message.model.po.InAppSendTaskRecipientPageRowPO;
 import com.auth.service.system.message.model.query.InAppSendTaskQuery;
+import com.auth.service.system.message.model.query.InAppSendTaskRecipientQuery;
 import com.auth.service.system.message.model.vo.inapp.InAppComposeResultVO;
 import com.auth.service.system.message.model.vo.inapp.InAppSendTaskDetailVO;
 import com.auth.service.system.message.model.vo.inapp.InAppSendTaskPageVO;
+import com.auth.service.system.message.model.vo.inapp.InAppSendTaskRecipientPageVO;
 import com.auth.service.system.message.service.admin.InAppMessageCategoryService;
 import com.auth.service.system.message.support.inapp.InAppComposeDispatchTrigger;
 import com.auth.service.system.message.support.inapp.InAppMessageCategorySupport;
@@ -64,6 +72,12 @@ class InAppSendTaskServiceImplTest {
 	@Mock
 	private InAppMessageCategorySupport categorySupport;
 
+	@Mock
+	private InAppMessageRecipientMapper inAppMessageRecipientMapper;
+
+	@Mock
+	private InAppMessageUserStatusMapper inAppMessageUserStatusMapper;
+
 	private InAppSendTaskServiceImpl service;
 
 	/**
@@ -82,7 +96,7 @@ class InAppSendTaskServiceImplTest {
 	void setUp() {
 		// ServiceImpl.baseMapper 由 Spring 字段注入；单测手动挂上
 		service = new InAppSendTaskServiceImpl(dispatchTrigger, auditUserDisplayService, inAppMessageCategoryService,
-				categorySupport);
+				categorySupport, inAppMessageRecipientMapper, inAppMessageUserStatusMapper);
 		ReflectionTestUtils.setField(service, "baseMapper", inAppMessageMapper);
 	}
 
@@ -238,6 +252,121 @@ class InAppSendTaskServiceImplTest {
 		assertThatThrownBy(() -> service.getSendTaskById(999L)).isInstanceOf(MessageException.class)
 			.extracting(ex -> ((MessageException) ex).getResultCode())
 			.isEqualTo(IN_APP_SEND_TASK_NOT_FOUND);
+	}
+
+	@Test
+	@DisplayName("收件人分页：写扩散查 recipient 并填充用户名")
+	void getRecipientPage_shouldQueryPushRecipientsAndEnrichUsername() {
+		InAppMessageEntity task = adminComposePushTask(50L, InAppMessageStatus.SUCCESS);
+		when(inAppMessageMapper.selectById(50L)).thenReturn(task);
+
+		InAppSendTaskRecipientPageRowPO row = new InAppSendTaskRecipientPageRowPO();
+		row.setId(501L);
+		row.setMessageId(50L);
+		row.setUserId(88L);
+		row.setIsRead(true);
+		row.setReadTime(LocalDateTime.of(2026, 7, 23, 10, 0, 0));
+		row.setIsDeleted(false);
+		row.setCreateTime(LocalDateTime.of(2026, 7, 23, 9, 0, 0));
+		row.setUpdateTime(LocalDateTime.of(2026, 7, 23, 10, 0, 0));
+		row.setCreateUser(1L);
+		row.setUpdateUser(88L);
+
+		Page<InAppSendTaskRecipientPageRowPO> mapperPage = new Page<>(1, 10);
+		mapperPage.setRecords(List.of(row));
+		mapperPage.setTotal(1);
+		when(inAppMessageRecipientMapper.selectRecipientPage(any(Page.class), eq(50L),
+				any(InAppSendTaskRecipientQuery.class)))
+			.thenReturn(mapperPage);
+
+		InAppSendTaskRecipientQuery query = new InAppSendTaskRecipientQuery();
+		query.setPageIndex(1);
+		query.setPageSize(10);
+		query.setUserId(88L);
+		query.setIsRead(true);
+
+		PageResponse<InAppSendTaskRecipientPageVO> result = service.getRecipientPage(50L, query);
+
+		assertThat(result.getList()).hasSize(1);
+		InAppSendTaskRecipientPageVO vo = result.getList().get(0);
+		assertThat(vo.getId()).isEqualTo(501L);
+		assertThat(vo.getMessageId()).isEqualTo(50L);
+		assertThat(vo.getUserId()).isEqualTo(88L);
+		assertThat(vo.getIsRead()).isTrue();
+		assertThat(vo.getIsDeleted()).isFalse();
+		verify(inAppMessageRecipientMapper).selectRecipientPage(any(Page.class), eq(50L),
+				any(InAppSendTaskRecipientQuery.class));
+		verify(inAppMessageUserStatusMapper, never()).selectUserStatusPage(any(Page.class), anyLong(),
+				any(InAppSendTaskRecipientQuery.class));
+		verify(auditUserDisplayService).enrichAuditUsernames(any(IPage.class), any(), any());
+	}
+
+	@Test
+	@DisplayName("收件人分页：读扩散查 user_status")
+	void getRecipientPage_shouldQueryPullUserStatus() {
+		InAppMessageEntity task = new InAppMessageEntity();
+		task.setId(51L);
+		task.setRecipientScopeType(RecipientScopeType.ALL.name());
+		task.setStatus(InAppMessageStatus.SUCCESS.name());
+		when(inAppMessageMapper.selectById(51L)).thenReturn(task);
+
+		InAppSendTaskRecipientPageRowPO row = new InAppSendTaskRecipientPageRowPO();
+		row.setId(601L);
+		row.setMessageId(51L);
+		row.setUserId(99L);
+		row.setIsRead(true);
+		row.setIsDeleted(false);
+
+		Page<InAppSendTaskRecipientPageRowPO> mapperPage = new Page<>(1, 10);
+		mapperPage.setRecords(List.of(row));
+		mapperPage.setTotal(1);
+		when(inAppMessageUserStatusMapper.selectUserStatusPage(any(Page.class), eq(51L),
+				any(InAppSendTaskRecipientQuery.class)))
+			.thenReturn(mapperPage);
+
+		InAppSendTaskRecipientQuery query = new InAppSendTaskRecipientQuery();
+		query.setPageIndex(1);
+		query.setPageSize(10);
+
+		PageResponse<InAppSendTaskRecipientPageVO> result = service.getRecipientPage(51L, query);
+
+		assertThat(result.getList()).hasSize(1);
+		assertThat(result.getList().get(0).getUserId()).isEqualTo(99L);
+		verify(inAppMessageUserStatusMapper).selectUserStatusPage(any(Page.class), eq(51L),
+				any(InAppSendTaskRecipientQuery.class));
+		verify(inAppMessageRecipientMapper, never()).selectRecipientPage(any(Page.class), anyLong(),
+				any(InAppSendTaskRecipientQuery.class));
+	}
+
+	@Test
+	@DisplayName("收件人分页：任务不存在时抛出 IN_APP_SEND_TASK_NOT_FOUND")
+	void getRecipientPage_shouldThrowWhenTaskMissing() {
+		when(inAppMessageMapper.selectById(404L)).thenReturn(null);
+		InAppSendTaskRecipientQuery query = new InAppSendTaskRecipientQuery();
+		query.setPageIndex(1);
+		query.setPageSize(10);
+
+		assertThatThrownBy(() -> service.getRecipientPage(404L, query)).isInstanceOf(MessageException.class)
+			.extracting(ex -> ((MessageException) ex).getResultCode())
+			.isEqualTo(IN_APP_SEND_TASK_NOT_FOUND);
+		verifyNoInteractions(inAppMessageRecipientMapper, inAppMessageUserStatusMapper);
+	}
+
+	@Test
+	@DisplayName("收件人分页：范围类型非法时抛出 IN_APP_RECIPIENT_SCOPE_INVALID")
+	void getRecipientPage_shouldThrowWhenScopeInvalid() {
+		InAppMessageEntity task = new InAppMessageEntity();
+		task.setId(52L);
+		task.setRecipientScopeType("UNKNOWN");
+		when(inAppMessageMapper.selectById(52L)).thenReturn(task);
+		InAppSendTaskRecipientQuery query = new InAppSendTaskRecipientQuery();
+		query.setPageIndex(1);
+		query.setPageSize(10);
+
+		assertThatThrownBy(() -> service.getRecipientPage(52L, query)).isInstanceOf(MessageException.class)
+			.extracting(ex -> ((MessageException) ex).getResultCode())
+			.isEqualTo(IN_APP_RECIPIENT_SCOPE_INVALID);
+		verifyNoInteractions(inAppMessageRecipientMapper, inAppMessageUserStatusMapper);
 	}
 
 	@Test

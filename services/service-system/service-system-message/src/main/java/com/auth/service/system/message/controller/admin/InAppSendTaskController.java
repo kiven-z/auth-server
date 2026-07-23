@@ -8,9 +8,11 @@ import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.message.model.constants.MessageAuditBizModule;
 import com.auth.service.system.message.model.form.inapp.InAppComposeForm;
 import com.auth.service.system.message.model.query.InAppSendTaskQuery;
+import com.auth.service.system.message.model.query.InAppSendTaskRecipientQuery;
 import com.auth.service.system.message.model.vo.inapp.InAppComposeResultVO;
 import com.auth.service.system.message.model.vo.inapp.InAppSendTaskDetailVO;
 import com.auth.service.system.message.model.vo.inapp.InAppSendTaskPageVO;
+import com.auth.service.system.message.model.vo.inapp.InAppSendTaskRecipientPageVO;
 import com.auth.service.system.message.service.admin.InAppSendTaskService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -55,6 +57,15 @@ public class InAppSendTaskController {
 	public Result<InAppSendTaskDetailVO> getSendTaskById(@PathVariable Long taskId) {
 		InAppSendTaskDetailVO detailVO = inAppSendTaskService.getSendTaskById(taskId);
 		return Result.success(detailVO);
+	}
+
+	@Operation(summary = "分页查询站内信任务收件人", description = "写扩散返回收件箱投递行；读扩散（ALL）返回用户状态互动行")
+	@PreAuthorize("@auth.decide('message:inapp:detail')")
+	@GetMapping("/tasks/{taskId}/recipients")
+	public Result<PageResponse<InAppSendTaskRecipientPageVO>> getRecipientPage(@PathVariable Long taskId,
+			@Valid InAppSendTaskRecipientQuery query) {
+		PageResponse<InAppSendTaskRecipientPageVO> pageResponse = inAppSendTaskService.getRecipientPage(taskId, query);
+		return Result.success(pageResponse);
 	}
 
 	@OperationLog(targetType = "IN_APP_MESSAGE", serviceDomain = AuditServiceDomain.SYSTEM,

@@ -8,6 +8,8 @@ import com.auth.service.system.message.convert.InAppEntityAssembler;
 import com.auth.service.system.message.convert.InAppSendTaskConverter;
 import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.mapper.InAppMessageMapper;
+import com.auth.service.system.message.mapper.InAppMessageRecipientMapper;
+import com.auth.service.system.message.mapper.InAppMessageUserStatusMapper;
 import com.auth.service.system.message.model.entity.InAppMessageEntity;
 import com.auth.service.system.message.model.enums.InAppContentType;
 import com.auth.service.system.message.model.enums.InAppMessageStatus;
@@ -15,11 +17,14 @@ import com.auth.service.system.message.model.enums.MessageSendSourceType;
 import com.auth.service.system.message.model.enums.RecipientScopeType;
 import com.auth.service.system.message.model.form.inapp.InAppComposeForm;
 import com.auth.service.system.message.model.po.InAppSendTaskPageRowPO;
+import com.auth.service.system.message.model.po.InAppSendTaskRecipientPageRowPO;
 import com.auth.service.system.message.model.query.InAppSendTaskQuery;
+import com.auth.service.system.message.model.query.InAppSendTaskRecipientQuery;
 import com.auth.service.system.message.model.value.recipient.RecipientScope;
 import com.auth.service.system.message.model.vo.inapp.InAppComposeResultVO;
 import com.auth.service.system.message.model.vo.inapp.InAppSendTaskDetailVO;
 import com.auth.service.system.message.model.vo.inapp.InAppSendTaskPageVO;
+import com.auth.service.system.message.model.vo.inapp.InAppSendTaskRecipientPageVO;
 import com.auth.service.system.message.service.admin.InAppMessageCategoryService;
 import com.auth.service.system.message.service.admin.InAppSendTaskService;
 import com.auth.service.system.message.support.inapp.InAppComposeDispatchTrigger;
@@ -36,9 +41,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
-import static com.auth.service.system.message.exception.MessageResultCode.IN_APP_SEND_TASK_NOT_FOUND;
-import static com.auth.service.system.message.exception.MessageResultCode.IN_APP_SEND_TASK_OPERATION_NOT_ALLOWED;
+import static com.auth.service.system.message.exception.MessageResultCode.*;
 
 /**
  * 管理端站内信按范围发送
@@ -57,6 +62,10 @@ public class InAppSendTaskServiceImpl extends ServiceImpl<InAppMessageMapper, In
 	private final InAppMessageCategoryService inAppMessageCategoryService;
 
 	private final InAppMessageCategorySupport categorySupport;
+
+	private final InAppMessageRecipientMapper inAppMessageRecipientMapper;
+
+	private final InAppMessageUserStatusMapper inAppMessageUserStatusMapper;
 
 	/**
 	 * {@inheritDoc}
@@ -93,6 +102,32 @@ public class InAppSendTaskServiceImpl extends ServiceImpl<InAppMessageMapper, In
 		}
 		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(vo), null, null);
 		return vo;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	@Transactional(readOnly = true)
+	public PageResponse<InAppSendTaskRecipientPageVO> getRecipientPage(Long taskId, InAppSendTaskRecipientQuery query) {
+		InAppMessageEntity task = super.getById(taskId);
+		if (task == null) {
+			throw new MessageException(IN_APP_SEND_TASK_NOT_FOUND, taskId);
+		}
+
+		RecipientScopeType scopeType = RecipientScopeType.from(task.getRecipientScopeType());
+		if (scopeType == null) {
+			throw new MessageException(IN_APP_RECIPIENT_SCOPE_INVALID, task.getRecipientScopeType());
+		}
+
+		Page<InAppSendTaskRecipientPageRowPO> pageParams = new Page<>(query.getPageIndex(), query.getPageSize());
+		IPage<InAppSendTaskRecipientPageRowPO> page = scopeType.isPull()
+				? inAppMessageUserStatusMapper.selectUserStatusPage(pageParams, taskId, query)
+				: inAppMessageRecipientMapper.selectRecipientPage(pageParams, taskId, query);
+		IPage<InAppSendTaskRecipientPageVO> voPage = page.convert(InAppSendTaskConverter.INSTANCE::toRecipientPageVO);
+		auditUserDisplayService.enrichAuditUsernames(voPage, row -> Objects.requireNonNullElse(row.getUserId(), 0L),
+				InAppSendTaskRecipientPageVO::setUsername);
+		return PageResponse.of(voPage);
 	}
 
 	/**

@@ -4,9 +4,11 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.message.model.entity.InAppMessageEntity;
 import com.auth.service.system.message.model.form.inapp.InAppComposeForm;
 import com.auth.service.system.message.model.query.InAppSendTaskQuery;
+import com.auth.service.system.message.model.query.InAppSendTaskRecipientQuery;
 import com.auth.service.system.message.model.vo.inapp.InAppComposeResultVO;
 import com.auth.service.system.message.model.vo.inapp.InAppSendTaskDetailVO;
 import com.auth.service.system.message.model.vo.inapp.InAppSendTaskPageVO;
+import com.auth.service.system.message.model.vo.inapp.InAppSendTaskRecipientPageVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
@@ -31,6 +33,17 @@ public interface InAppSendTaskService extends IService<InAppMessageEntity> {
 	 * @return 详情
 	 */
 	InAppSendTaskDetailVO getSendTaskById(Long taskId);
+
+	/**
+	 * 分页查询任务下收件人/互动用户
+	 * <p>
+	 * 写扩散查收件箱行；读扩散（ALL）查用户状态行（仅产生过已读/删除的用户）
+	 * </p>
+	 * @param taskId 任务 ID
+	 * @param query 筛选条件
+	 * @return 收件人分页数据
+	 */
+	PageResponse<InAppSendTaskRecipientPageVO> getRecipientPage(Long taskId, InAppSendTaskRecipientQuery query);
 
 	/**
 	 * 提交站内信发送任务

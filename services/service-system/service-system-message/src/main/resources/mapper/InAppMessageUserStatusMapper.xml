@@ -5,73 +5,105 @@
     <!-- 公开消息已读状态懒写入：撞 uk 时补已读，已读时间不回写 -->
     <insert id="upsertReadBatch">
         INSERT INTO
-            in_app_message_user_status (
-                id,
-                message_id,
-                user_id,
-                is_read,
-                read_time,
-                is_deleted,
-                create_user,
-                update_user,
-                version
-            )
+        in_app_message_user_status (
+        id,
+        message_id,
+        user_id,
+        is_read,
+        read_time,
+        is_deleted,
+        create_user,
+        update_user,
+        version
+        )
         VALUES
         <foreach collection="rows" item="row" separator=",">
             (
-                #{row.id},
-                #{row.messageId},
-                #{row.userId},
-                #{row.isRead},
-                #{row.readTime},
-                #{row.isDeleted},
-                #{row.createUser},
-                #{row.updateUser},
-                #{row.version}
+            #{row.id},
+            #{row.messageId},
+            #{row.userId},
+            #{row.isRead},
+            #{row.readTime},
+            #{row.isDeleted},
+            #{row.createUser},
+            #{row.updateUser},
+            #{row.version}
             )
         </foreach>
         ON DUPLICATE KEY UPDATE
-            is_read = 1,
-            read_time = IF(
-                in_app_message_user_status.is_read = 1,
-                in_app_message_user_status.read_time,
-                VALUES
-                    (read_time)
-            ),
-            update_user = VALUES(update_user)
+        is_read = 1,
+        read_time = IF(
+        in_app_message_user_status.is_read = 1,
+        in_app_message_user_status.read_time,
+        VALUES
+        (read_time)
+        ),
+        update_user = VALUES(update_user)
     </insert>
 
     <!-- 公开消息软删懒写入：撞 uk 时仅补删除，不回写已读 -->
     <insert id="upsertDeletedBatch">
         INSERT INTO
-            in_app_message_user_status (
-                id,
-                message_id,
-                user_id,
-                is_read,
-                read_time,
-                is_deleted,
-                create_user,
-                update_user,
-                version
-            )
+        in_app_message_user_status (
+        id,
+        message_id,
+        user_id,
+        is_read,
+        read_time,
+        is_deleted,
+        create_user,
+        update_user,
+        version
+        )
         VALUES
         <foreach collection="rows" item="row" separator=",">
             (
-                #{row.id},
-                #{row.messageId},
-                #{row.userId},
-                #{row.isRead},
-                #{row.readTime},
-                #{row.isDeleted},
-                #{row.createUser},
-                #{row.updateUser},
-                #{row.version}
+            #{row.id},
+            #{row.messageId},
+            #{row.userId},
+            #{row.isRead},
+            #{row.readTime},
+            #{row.isDeleted},
+            #{row.createUser},
+            #{row.updateUser},
+            #{row.version}
             )
         </foreach>
         ON DUPLICATE KEY UPDATE
-            is_deleted = 1,
-            update_user = VALUES(update_user)
+        is_deleted = 1,
+        update_user = VALUES(update_user)
     </insert>
+
+    <!-- 管理端：按任务分页查询读扩散互动用户 -->
+    <select id="selectUserStatusPage"
+            resultType="com.auth.service.system.message.model.po.InAppSendTaskRecipientPageRowPO">
+        SELECT
+        id,
+        message_id,
+        user_id,
+        is_read,
+        read_time,
+        is_deleted,
+        create_time,
+        update_time,
+        create_user,
+        update_user
+        FROM
+        in_app_message_user_status
+        <where>
+            message_id = #{messageId}
+            <if test="query.userId != null">
+                AND user_id = #{query.userId}
+            </if>
+            <if test="query.isRead != null">
+                AND is_read = #{query.isRead}
+            </if>
+            <if test="query.isDeleted != null">
+                AND is_deleted = #{query.isDeleted}
+            </if>
+        </where>
+        ORDER BY
+        id DESC
+    </select>
 
 </mapper>

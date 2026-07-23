@@ -3,8 +3,10 @@ package com.auth.service.system.message.convert;
 import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.service.system.message.model.entity.InAppMessageEntity;
 import com.auth.service.system.message.model.po.InAppSendTaskPageRowPO;
+import com.auth.service.system.message.model.po.InAppSendTaskRecipientPageRowPO;
 import com.auth.service.system.message.model.vo.inapp.InAppSendTaskDetailVO;
 import com.auth.service.system.message.model.vo.inapp.InAppSendTaskPageVO;
+import com.auth.service.system.message.model.vo.inapp.InAppSendTaskRecipientPageVO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
@@ -39,5 +41,15 @@ public interface InAppSendTaskConverter {
 	@Mapping(target = "includeChildren", ignore = true)
 	@Mapping(target = "categoryName", ignore = true)
 	InAppSendTaskDetailVO toDetailVo(InAppMessageEntity entity);
+
+	/**
+	 * 收件人分页行 PO → VO
+	 * @param po 持久层投影
+	 * @return 分页返回对象
+	 */
+	@Mapping(target = "createUsername", ignore = true)
+	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "username", ignore = true)
+	InAppSendTaskRecipientPageVO toRecipientPageVO(InAppSendTaskRecipientPageRowPO po);
 
 }
