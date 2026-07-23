@@ -2,6 +2,7 @@ package com.auth.service.system.admin.mapper.user;
 
 import com.auth.service.system.admin.model.entity.UserDeptEntity;
 import com.auth.service.system.admin.model.po.user.UserDeptPageRowPO;
+import com.auth.service.system.admin.model.po.user.UserPrimaryDeptPO;
 import com.auth.service.system.admin.model.query.user.UserDeptPageQuery;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -65,5 +66,12 @@ public interface UserDeptMapper extends BaseMapper<UserDeptEntity> {
 	 */
 	@Delete("DELETE FROM user_dept WHERE user_id = #{userId}")
 	int deleteByUserId(@Param("userId") Long userId);
+
+	/**
+	 * 查询用户主部门（正常关联且 is_primary）
+	 * @param userId 用户 ID
+	 * @return 主部门投影，不存在时为 null
+	 */
+	UserPrimaryDeptPO selectPrimaryDeptByUserId(@Param("userId") Long userId);
 
 }

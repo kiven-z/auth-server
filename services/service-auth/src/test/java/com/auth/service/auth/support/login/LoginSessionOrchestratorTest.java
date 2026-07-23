@@ -67,12 +67,7 @@ class LoginSessionOrchestratorTest {
 	private HttpServletRequest httpServletRequest;
 
 	private static LoginResult toLoginResult(AuthProfile profile) {
-		AuthenticatedUser user = AuthenticatedUser.builder()
-			.id(TestConstants.USER_ID)
-			.username("user")
-			.nickname("nick")
-			.avatar("avatar")
-			.build();
+		AuthenticatedUser user = AuthenticatedUser.builder().id(TestConstants.USER_ID).username("user").build();
 		return LoginResult.builder()
 			.authenticatedUser(user)
 			.authProfile(profile)
@@ -118,6 +113,8 @@ class LoginSessionOrchestratorTest {
 		assertEquals(7L, actual.getReadMeDay());
 		assertEquals(TestConstants.USER_ID, actual.getId());
 		assertEquals("user", actual.getUsername());
+		assertEquals(List.of("COMMON"), actual.getRoles());
+		assertEquals(List.of("system:user:list"), actual.getPermissions());
 
 		InOrder inOrder = inOrder(sessionLimitGuard, userSessionIndexFactory, userSessionRedisStore,
 				authProfileRedisCache, tokenService, refreshTokenCookieWriter, loginFailureRateLimiter,

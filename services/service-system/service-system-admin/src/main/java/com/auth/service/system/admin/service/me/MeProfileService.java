@@ -3,6 +3,7 @@ package com.auth.service.system.admin.service.me;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.admin.model.form.me.MeAvatarUpdateForm;
 import com.auth.service.system.admin.model.form.me.MeProfileUpdateForm;
+import com.auth.service.system.admin.model.vo.me.MeProfileVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -11,6 +12,12 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @author Bunny
  */
 public interface MeProfileService extends IService<UserEntity> {
+
+	/**
+	 * 查询当前登录用户展示资料（含主部门）
+	 * @return 展示资料
+	 */
+	MeProfileVO getMyProfile();
 
 	/**
 	 * 更新当前登录用户可编辑的个人资料字段

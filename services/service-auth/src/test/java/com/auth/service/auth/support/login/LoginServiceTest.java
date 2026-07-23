@@ -53,12 +53,7 @@ class LoginServiceTest {
 	private HttpServletRequest httpServletRequest;
 
 	private static LoginResult toLoginResult(AuthProfile profile) {
-		AuthenticatedUser user = AuthenticatedUser.builder()
-			.id(TestConstants.USER_ID)
-			.username("user")
-			.nickname("nick")
-			.avatar("avatar")
-			.build();
+		AuthenticatedUser user = AuthenticatedUser.builder().id(TestConstants.USER_ID).username("user").build();
 		return LoginResult.builder()
 			.authenticatedUser(user)
 			.authProfile(profile)

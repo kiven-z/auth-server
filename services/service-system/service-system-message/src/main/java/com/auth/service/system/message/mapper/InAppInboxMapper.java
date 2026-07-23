@@ -1,5 +1,6 @@
 package com.auth.service.system.message.mapper;
 
+import com.auth.service.system.message.model.po.InAppInboxDetailRowPO;
 import com.auth.service.system.message.model.po.InAppInboxMajorUnreadRowPO;
 import com.auth.service.system.message.model.po.InAppInboxPageRowPO;
 import com.auth.service.system.message.model.query.InAppInboxQuery;
@@ -52,5 +53,13 @@ public interface InAppInboxMapper {
 	 */
 	List<Long> selectVisibleMessageIdsByMajor(@Param("userId") Long userId,
 			@Param("majorCategoryId") Long majorCategoryId);
+
+	/**
+	 * 按当前用户可见性查询收件箱详情（写扩散 ∪ 读扩散）
+	 * @param userId 当前用户 ID
+	 * @param messageId 站内信 ID
+	 * @return 可见时返回详情行，否则 null
+	 */
+	InAppInboxDetailRowPO selectInboxDetail(@Param("userId") Long userId, @Param("messageId") Long messageId);
 
 }

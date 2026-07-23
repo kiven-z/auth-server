@@ -1,7 +1,7 @@
 package com.auth.service.system.message.convert;
 
 import com.auth.common.mapstruct.config.AuthMapperConfig;
-import com.auth.service.system.message.model.entity.InAppMessageEntity;
+import com.auth.service.system.message.model.po.InAppInboxDetailRowPO;
 import com.auth.service.system.message.model.po.InAppInboxPageRowPO;
 import com.auth.service.system.message.model.vo.inapp.InAppInboxDetailVO;
 import com.auth.service.system.message.model.vo.inapp.InAppInboxPageVO;
@@ -29,15 +29,12 @@ public interface InAppInboxConverter {
 	InAppInboxPageVO toPageVO(InAppInboxPageRowPO po);
 
 	/**
-	 * 主表实体 → 详情 VO（categoryName / isRead / readTime 由调用方回填）
-	 * @param entity 站内信主表
+	 * 详情行 PO → 详情 VO（isRead / readTime）
+	 * @param po 当前用户可见的详情投影
 	 * @return 详情 VO
 	 */
 	@Mapping(target = "createUsername", ignore = true)
 	@Mapping(target = "updateUsername", ignore = true)
-	@Mapping(target = "categoryName", ignore = true)
-	@Mapping(target = "isRead", ignore = true)
-	@Mapping(target = "readTime", ignore = true)
-	InAppInboxDetailVO toDetailVO(InAppMessageEntity entity);
+	InAppInboxDetailVO toDetailVO(InAppInboxDetailRowPO po);
 
 }

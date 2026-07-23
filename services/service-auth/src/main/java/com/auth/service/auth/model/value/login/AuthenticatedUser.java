@@ -5,7 +5,7 @@ import lombok.Value;
 import lombok.experimental.Accessors;
 
 /**
- * 登录成功后的用户展示信息（领域层，与 API Response 解耦）。
+ * 登录成功后的用户身份快照
  *
  * @author Bunny
  */
@@ -25,27 +25,12 @@ public class AuthenticatedUser {
 	String username;
 
 	/**
-	 * 昵称
-	 */
-	String nickname;
-
-	/**
-	 * 头像
-	 */
-	String avatar;
-
-	/**
-	 * 从登录账户快照构建。
+	 * 从登录账户构建身份快照
 	 * @param account 登录账户
 	 * @return 认证用户快照
 	 */
 	public static AuthenticatedUser from(LoginAccount account) {
-		return AuthenticatedUser.builder()
-			.id(account.id())
-			.username(account.username())
-			.nickname(account.nickname())
-			.avatar(account.avatar())
-			.build();
+		return AuthenticatedUser.builder().id(account.id()).username(account.username()).build();
 	}
 
 }

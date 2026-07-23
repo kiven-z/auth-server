@@ -6,7 +6,7 @@ import lombok.Value;
 import lombok.experimental.Accessors;
 
 /**
- * 登录流程中的用户快照（领域层，与持久化实体解耦）。
+ * 登录流程中的用户快照
  *
  * @author Bunny
  */
@@ -36,16 +36,6 @@ public class LoginAccount {
 	String encodedPassword;
 
 	/**
-	 * 昵称
-	 */
-	String nickname;
-
-	/**
-	 * 头像
-	 */
-	String avatar;
-
-	/**
 	 * 权限版本
 	 */
 	Long permVersion;
@@ -61,8 +51,6 @@ public class LoginAccount {
 			.username(user.getUsername())
 			.status(user.getStatus())
 			.encodedPassword(user.getPassword())
-			.nickname(user.getNickname())
-			.avatar(user.getAvatar())
 			.permVersion(user.getPermVersion())
 			.build();
 	}

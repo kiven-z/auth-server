@@ -68,8 +68,6 @@ public class LoginSessionOrchestrator {
 		CompletedLoginSession session = new CompletedLoginSession();
 		session.setId(user.id());
 		session.setUsername(user.username());
-		session.setNickname(user.nickname());
-		session.setAvatar(user.avatar());
 		session.setRoles(profile.getRoles());
 		session.setPermissions(profile.getPermissions());
 

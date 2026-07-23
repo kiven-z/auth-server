@@ -49,15 +49,13 @@ class AbstractLoginStrategyTemplateTest {
 	private HttpServletRequest httpServletRequest;
 
 	@Test
-	@DisplayName("模板策略：成功路径会前置检查锁定并构建 profile + response")
+	@DisplayName("模板策略：成功路径会前置检查锁定并构建身份与 profile")
 	void authenticate_shouldBuildProfileAndResponse_whenSuccess() {
 		LoginAccount account = LoginAccount.builder()
 			.id(TestConstants.USER_ID)
 			.username("u")
 			.status(1)
 			.encodedPassword("encoded")
-			.nickname("nick")
-			.avatar("avatar")
 			.permVersion(1L)
 			.build();
 
@@ -79,6 +77,7 @@ class AbstractLoginStrategyTemplateTest {
 		assertNotNull(result);
 		assertEquals(TestConstants.USER_ID, result.authProfile().getUserId());
 		assertEquals(TestConstants.USER_ID, result.authenticatedUser().id());
+		assertEquals("u", result.authenticatedUser().username());
 		assertEquals(List.of("R1"), result.authProfile().getRoles());
 		assertEquals(List.of("P1"), result.authProfile().getPermissions());
 	}

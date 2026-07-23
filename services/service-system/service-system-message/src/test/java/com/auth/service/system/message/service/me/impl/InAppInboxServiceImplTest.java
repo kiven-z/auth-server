@@ -3,13 +3,16 @@ package com.auth.service.system.message.service.me.impl;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.service.system.message.exception.MessageException;
-import com.auth.service.system.message.mapper.*;
-import com.auth.service.system.message.model.entity.InAppMessageCategoryEntity;
+import com.auth.service.system.message.mapper.InAppInboxMapper;
+import com.auth.service.system.message.mapper.InAppMessageMapper;
+import com.auth.service.system.message.mapper.InAppMessageRecipientMapper;
+import com.auth.service.system.message.mapper.InAppMessageUserStatusMapper;
 import com.auth.service.system.message.model.entity.InAppMessageEntity;
 import com.auth.service.system.message.model.entity.InAppMessageUserStatusEntity;
 import com.auth.service.system.message.model.enums.InAppContentType;
 import com.auth.service.system.message.model.enums.InAppMessageStatus;
 import com.auth.service.system.message.model.enums.RecipientScopeType;
+import com.auth.service.system.message.model.po.InAppInboxDetailRowPO;
 import com.auth.service.system.message.model.po.InAppInboxMajorUnreadRowPO;
 import com.auth.service.system.message.model.po.InAppInboxPageRowPO;
 import com.auth.service.system.message.model.query.InAppInboxQuery;
@@ -62,9 +65,6 @@ class InAppInboxServiceImplTest {
 	@Mock
 	private InAppMessageUserStatusMapper inAppMessageUserStatusMapper;
 
-	@Mock
-	private InAppMessageCategoryMapper inAppMessageCategoryMapper;
-
 	private InAppInboxServiceImpl service;
 
 	@BeforeEach
@@ -73,7 +73,7 @@ class InAppInboxServiceImplTest {
 		TableInfoHelper.initTableInfo(new MapperBuilderAssistant(new MybatisConfiguration(), ""),
 				InAppMessageEntity.class);
 		service = new InAppInboxServiceImpl(inAppInboxMapper, inAppMessageMapper, inAppMessageRecipientMapper,
-				inAppMessageUserStatusMapper, inAppMessageCategoryMapper);
+				inAppMessageUserStatusMapper);
 	}
 
 	@Test
@@ -542,24 +542,24 @@ class InAppInboxServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("详情：查询主表后返回正文并调用 markRead")
+	@DisplayName("详情：当前用户可见时返回正文并调用 markRead")
 	void getInboxDetail_shouldReturnContentAndMarkRead() {
+		InAppInboxDetailRowPO row = new InAppInboxDetailRowPO();
+		row.setId(11L);
+		row.setTitle("定向通知");
+		row.setContent("push-body");
+		row.setContentType(InAppContentType.MARKDOWN.name());
+		row.setCategoryId(1907200100000000401L);
+		row.setCategoryName("一般通知");
+		row.setIsRead(false);
+
 		InAppMessageEntity message = new InAppMessageEntity();
 		message.setId(11L);
-		message.setTitle("定向通知");
-		message.setContent("push-body");
-		message.setContentType(InAppContentType.MARKDOWN.name());
-		message.setCategoryId(1907200100000000401L);
 		message.setRecipientScopeType(RecipientScopeType.USER.name());
 		message.setStatus(InAppMessageStatus.SUCCESS.name());
 
-		when(inAppMessageMapper.selectById(11L)).thenReturn(message);
+		when(inAppInboxMapper.selectInboxDetail(100L, 11L)).thenReturn(row);
 		when(inAppMessageMapper.selectList(any(Wrapper.class))).thenReturn(List.of(message));
-
-		InAppMessageCategoryEntity category = new InAppMessageCategoryEntity();
-		category.setId(1907200100000000401L);
-		category.setName("一般通知");
-		when(inAppMessageCategoryMapper.selectById(1907200100000000401L)).thenReturn(category);
 
 		try (MockedStatic<SecurityUserUtils> security = mockStatic(SecurityUserUtils.class)) {
 			security.when(SecurityUserUtils::getUserId).thenReturn(100L);
@@ -579,15 +579,19 @@ class InAppInboxServiceImplTest {
 	@Test
 	@DisplayName("详情：读扩散消息返回正文并懒写已读")
 	void getInboxDetail_shouldMarkPullRead() {
+		InAppInboxDetailRowPO row = new InAppInboxDetailRowPO();
+		row.setId(13L);
+		row.setTitle("公开公告");
+		row.setContent("pull-body");
+		row.setContentType(InAppContentType.TEXT.name());
+		row.setIsRead(false);
+
 		InAppMessageEntity message = new InAppMessageEntity();
 		message.setId(13L);
-		message.setTitle("公开公告");
-		message.setContent("pull-body");
-		message.setContentType(InAppContentType.TEXT.name());
 		message.setRecipientScopeType(RecipientScopeType.ALL.name());
 		message.setStatus(InAppMessageStatus.SUCCESS.name());
 
-		when(inAppMessageMapper.selectById(13L)).thenReturn(message);
+		when(inAppInboxMapper.selectInboxDetail(100L, 13L)).thenReturn(row);
 		when(inAppMessageMapper.selectList(any(Wrapper.class))).thenReturn(List.of(message));
 
 		try (MockedStatic<SecurityUserUtils> security = mockStatic(SecurityUserUtils.class)) {
@@ -603,13 +607,17 @@ class InAppInboxServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("详情：主表不存在时抛出 DATA_NOT_EXIST")
-	void getInboxDetail_shouldRejectWhenMessageMissing() {
-		when(inAppMessageMapper.selectById(999L)).thenReturn(null);
+	@DisplayName("详情：对当前用户不可见时抛出 DATA_NOT_EXIST")
+	void getInboxDetail_shouldRejectWhenNotVisible() {
+		when(inAppInboxMapper.selectInboxDetail(100L, 999L)).thenReturn(null);
 
-		assertThatThrownBy(() -> service.getInboxDetail(999L)).isInstanceOf(MessageException.class)
-			.extracting(ex -> ((MessageException) ex).getResultCode())
-			.isEqualTo(DATA_NOT_EXIST);
+		try (MockedStatic<SecurityUserUtils> security = mockStatic(SecurityUserUtils.class)) {
+			security.when(SecurityUserUtils::getUserId).thenReturn(100L);
+
+			assertThatThrownBy(() -> service.getInboxDetail(999L)).isInstanceOf(MessageException.class)
+				.extracting(ex -> ((MessageException) ex).getResultCode())
+				.isEqualTo(DATA_NOT_EXIST);
+		}
 
 		verify(inAppMessageRecipientMapper, never()).markRead(any(), anyList(), any(LocalDateTime.class));
 		verify(inAppMessageUserStatusMapper, never()).upsertReadBatch(anyList());

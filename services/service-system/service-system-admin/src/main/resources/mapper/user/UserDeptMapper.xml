@@ -81,4 +81,17 @@
           AND dept_id = #{deptId}
         LIMIT 1
     </select>
+
+    <!-- 用户主部门（关联状态正常） -->
+    <select id="selectPrimaryDeptByUserId"
+            resultType="com.auth.service.system.admin.model.po.user.UserPrimaryDeptPO">
+        SELECT ud.dept_id AS deptId,
+               d.dept_name AS deptName
+        FROM user_dept ud
+                 INNER JOIN sys_dept d ON d.id = ud.dept_id
+        WHERE ud.user_id = #{userId}
+          AND ud.is_primary = 1
+          AND ud.status = 1
+        LIMIT 1
+    </select>
 </mapper>

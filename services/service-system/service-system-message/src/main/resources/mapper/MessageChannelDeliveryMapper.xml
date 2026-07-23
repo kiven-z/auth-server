@@ -6,19 +6,19 @@
     <select id="selectChannelDeliveryPage"
             resultType="com.auth.service.system.message.model.po.MessageChannelDeliveryPageRowPO">
         SELECT
-        id,
-        task_id,
-        channel,
-        status,
-        provider_msg_id,
-        error_code,
-        sent_at,
-        create_time,
-        update_time,
-        create_user,
-        update_user
+            id,
+            task_id,
+            channel,
+            status,
+            provider_msg_id,
+            error_code,
+            sent_at,
+            create_time,
+            update_time,
+            create_user,
+            update_user
         FROM
-        message_channel_delivery
+            message_channel_delivery
         <where>
             <if test="query.taskId != null">
                 AND task_id = #{query.taskId}
@@ -31,8 +31,8 @@
             </if>
         </where>
         ORDER BY
-        create_time DESC
-    </select>
+            create_time DESC
+    </select> 
 
     <!-- 按任务+渠道+目标逐条回写投递结果（每个目标独立 SET） -->
     <update id="batchUpdateResult">
@@ -63,9 +63,9 @@
         </foreach>
         END
         WHERE
-        task_id = #{taskId}
-        AND channel = #{channel}
-        AND target_value IN
+            task_id = #{taskId}
+            AND channel = #{channel}
+            AND target_value IN
         <foreach collection="list" item="item" open="(" separator="," close=")">
             #{item.targetValue}
         </foreach>

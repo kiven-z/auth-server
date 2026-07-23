@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * 登录会话签发完成后的应用读模型（含令牌与用户展示字段）。
+ * 登录会话签发完成后的应用读模型
  *
  * @author Bunny
  */
@@ -18,10 +18,6 @@ public class CompletedLoginSession {
 	private Long id;
 
 	private String username;
-
-	private String nickname;
-
-	private String avatar;
 
 	private List<String> roles;
 

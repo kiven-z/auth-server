@@ -5,13 +5,16 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.service.system.message.convert.InAppInboxConverter;
 import com.auth.service.system.message.exception.MessageException;
-import com.auth.service.system.message.mapper.*;
+import com.auth.service.system.message.mapper.InAppInboxMapper;
+import com.auth.service.system.message.mapper.InAppMessageMapper;
+import com.auth.service.system.message.mapper.InAppMessageRecipientMapper;
+import com.auth.service.system.message.mapper.InAppMessageUserStatusMapper;
 import com.auth.service.system.message.model.constants.MessageBatchSizes;
-import com.auth.service.system.message.model.entity.InAppMessageCategoryEntity;
 import com.auth.service.system.message.model.entity.InAppMessageEntity;
 import com.auth.service.system.message.model.entity.InAppMessageUserStatusEntity;
 import com.auth.service.system.message.model.enums.InAppMessageStatus;
 import com.auth.service.system.message.model.enums.RecipientScopeType;
+import com.auth.service.system.message.model.po.InAppInboxDetailRowPO;
 import com.auth.service.system.message.model.po.InAppInboxMajorUnreadRowPO;
 import com.auth.service.system.message.model.po.InAppInboxPageRowPO;
 import com.auth.service.system.message.model.query.InAppInboxQuery;
@@ -51,8 +54,6 @@ public class InAppInboxServiceImpl implements InAppInboxService {
 	private final InAppMessageRecipientMapper inAppMessageRecipientMapper;
 
 	private final InAppMessageUserStatusMapper inAppMessageUserStatusMapper;
-
-	private final InAppMessageCategoryMapper inAppMessageCategoryMapper;
 
 	/**
 	 * 解析当前用户，去重后查主表，按投递模式拆成可操作的写扩散 / 读扩散 ID
@@ -211,18 +212,13 @@ public class InAppInboxServiceImpl implements InAppInboxService {
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public InAppInboxDetailVO getInboxDetail(Long messageId) {
-		InAppMessageEntity message = inAppMessageMapper.selectById(messageId);
-		if (message == null) {
+		Long userId = SecurityUserUtils.getUserId();
+		InAppInboxDetailRowPO row = inAppInboxMapper.selectInboxDetail(userId, messageId);
+		if (row == null) {
 			throw new MessageException(DATA_NOT_EXIST);
 		}
 
-		InAppInboxDetailVO vo = InAppInboxConverter.INSTANCE.toDetailVO(message);
-		Long categoryId = message.getCategoryId();
-		if (categoryId != null) {
-			InAppMessageCategoryEntity category = inAppMessageCategoryMapper.selectById(categoryId);
-			vo.setCategoryName(category == null ? null : category.getName());
-		}
-
+		InAppInboxDetailVO vo = InAppInboxConverter.INSTANCE.toDetailVO(row);
 		LocalDateTime readTime = LocalDateTime.now();
 		applyMarkRead(List.of(messageId));
 		vo.setIsRead(Boolean.TRUE);

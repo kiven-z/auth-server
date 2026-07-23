@@ -5,8 +5,11 @@ import com.auth.common.data.support.BusinessKeyAssert;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.service.system.admin.mapper.user.SysUserMapper;
+import com.auth.service.system.admin.mapper.user.UserDeptMapper;
 import com.auth.service.system.admin.model.form.me.MeAvatarUpdateForm;
 import com.auth.service.system.admin.model.form.me.MeProfileUpdateForm;
+import com.auth.service.system.admin.model.po.user.UserPrimaryDeptPO;
+import com.auth.service.system.admin.model.vo.me.MeProfileVO;
 import com.auth.service.system.admin.service.me.MeProfileService;
 import com.auth.service.system.admin.support.user.UserAvatarUpdateSupport;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
@@ -22,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 当前登录用户个人资料维护实现
@@ -38,6 +42,29 @@ public class MeProfileServiceImpl extends ServiceImpl<SysUserMapper, UserEntity>
 	private final UserSessionRevocationTrigger userSessionRevocationTrigger;
 
 	private final UserAvatarUpdateSupport userAvatarUpdateSupport;
+
+	private final UserDeptMapper userDeptMapper;
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	@Transactional(readOnly = true)
+	public MeProfileVO getMyProfile() {
+		Long userId = SecurityUserUtils.getUserId();
+		UserEntity user = userReferenceChecker.getExistingActive(userId);
+		UserPrimaryDeptPO primaryDept = userDeptMapper.selectPrimaryDeptByUserId(userId);
+
+		MeProfileVO profile = new MeProfileVO();
+		profile.setUsername(user.getUsername());
+		profile.setNickname(user.getNickname());
+		profile.setAvatar(user.getAvatar());
+
+		primaryDept = Objects.requireNonNullElse(primaryDept, new UserPrimaryDeptPO());
+		profile.setPrimaryDeptId(primaryDept.getDeptId());
+		profile.setPrimaryDeptName(primaryDept.getDeptName());
+		return profile;
+	}
 
 	/**
 	 * {@inheritDoc}
