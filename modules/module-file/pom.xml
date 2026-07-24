@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.auth</groupId>
         <artifactId>modules</artifactId>
-        <version>0.0.2-beta</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>module-file</artifactId>
@@ -20,17 +20,17 @@
         <dependency>
             <groupId>com.auth</groupId>
             <artifactId>module-file-api</artifactId>
-            <version>0.0.2-beta</version>
+            <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>com.auth</groupId>
             <artifactId>common-starter-web</artifactId>
-            <version>0.0.2-beta</version>
+            <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>com.auth</groupId>
             <artifactId>common-starter-webdoc</artifactId>
-            <version>0.0.2-beta</version>
+            <version>${revision}</version>
         </dependency>
 
         <!-- Excel表操作 -->

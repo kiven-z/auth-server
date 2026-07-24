@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.auth</groupId>
         <artifactId>service-system</artifactId>
-        <version>0.0.2-beta</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>service-system-file</artifactId>
@@ -21,12 +21,12 @@
         <dependency>
             <groupId>com.auth</groupId>
             <artifactId>module-file-api</artifactId>
-            <version>0.0.2-beta</version>
+            <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>com.auth</groupId>
             <artifactId>module-file</artifactId>
-            <version>0.0.2-beta</version>
+            <version>${revision}</version>
         </dependency>
         <!-- 统一使用 AWS SDK v2 S3 协议客户端覆盖 MinIO / 阿里云 OSS；S3Presigner 已包含在 s3 模块中 -->
         <dependency>

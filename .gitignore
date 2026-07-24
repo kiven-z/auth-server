@@ -5,6 +5,8 @@ target/
 !**/src/test/**/target/
 .cursor/
 db
+.flattened-pom.xml
+**/.flattened-pom.xml
 
 ### STS ###
 .apt_generated

@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.auth</groupId>
         <artifactId>commons</artifactId>
-        <version>0.0.2-beta</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>common-starter-jwt</artifactId>

@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.auth</groupId>
         <artifactId>auth-server</artifactId>
-        <version>0.0.2-beta</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>auth-gateway</artifactId>
@@ -21,17 +21,17 @@
         <dependency>
             <groupId>com.auth</groupId>
             <artifactId>common-starter-web</artifactId>
-            <version>0.0.2-beta</version>
+            <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>com.auth</groupId>
             <artifactId>common-starter-webdoc</artifactId>
-            <version>0.0.2-beta</version>
+            <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>com.auth</groupId>
             <artifactId>module-security-core</artifactId>
-            <version>0.0.2-beta</version>
+            <version>${revision}</version>
         </dependency>
 
         <!-- 单元测试 -->

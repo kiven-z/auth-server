@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.auth</groupId>
         <artifactId>modules</artifactId>
-        <version>0.0.2-beta</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>module-security-web-starter</artifactId>
@@ -19,7 +19,7 @@
         <dependency>
             <groupId>com.auth</groupId>
             <artifactId>module-security-autoconfigure</artifactId>
-            <version>0.0.2-beta</version>
+            <version>${revision}</version>
         </dependency>
     </dependencies>
 </project>

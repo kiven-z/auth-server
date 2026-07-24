@@ -3,7 +3,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-COMPOSE_FILE="${SCRIPT_DIR}/compose/docker-compose.yml"
+COMPOSE_FILE="${SCRIPT_DIR}/compose.yml"
+COMPOSE_OVERRIDE="${SCRIPT_DIR}/compose.override.yml"
 SUPPORTED_ENVS=(dev test prod)
 
 show_help() {
@@ -12,30 +13,37 @@ show_help() {
   ./dockerctl.sh <env> <action> [extra args...]
 
 说明:
-  共用一份 compose；<env> 决定 Spring profile 与 docker/env/<env>/ 密钥文件。
-  宿主机仅暴露网关 8080。
+  compose.yml          运行时（无 build）— 本地与服务器同一份
+  compose.override.yml 仅本地构建 — build / build-up 时叠加
+  <env> 决定 Spring profile 与 env/<env>/service-system.env
+  宿主机仅暴露网关 8080
 
 支持环境:
   dev | test | prod
 
 支持动作:
-  build      构建镜像
-  up         后台启动容器
-  build-up   构建并后台启动（build + up -d）
+  pull       拉取镜像（ACR / 仓库，不构建）
+  build      本地构建镜像（需源码 + override）
+  up         拉取并启动（--pull missing --no-build，适合服务器 / ACR）
+  build-up   本地构建并启动
   down       停止并清理容器
-  restart    重启服务（down + up -d）
-  logs       查看并跟踪日志
-  ps         查看容器状态
-  config     校验并输出 compose 配置
+  restart    重启（down + up）
+  logs       跟踪日志
+  ps         容器状态
+  config     打印合并后的 compose 配置
 
 示例:
-  ./dockerctl.sh dev up
-  ./dockerctl.sh prod build-up
-  ./dockerctl.sh prod logs -f auth-gateway
+  # 本地构建启动
+  ./dockerctl.sh dev build-up
 
-说明:
-  compose 已默认 pull: false，优先使用本机已有基础镜像。
-  推 ACR 时可预先 export AUTH_IMAGE_PREFIX / AUTH_IMAGE_TAG。
+  # 服务器 / ACR（先 docker login）
+  export AUTH_IMAGE_PREFIX=registry.cn-hangzhou.aliyuncs.com/bunny-company
+  export AUTH_IMAGE_TAG=prod-latest
+  ./dockerctl.sh prod up
+
+  # 扁平部署（compose 旁只有 service-system.env）
+  export AUTH_ENV_FILE=./service-system.env
+  ./dockerctl.sh prod up
 EOF
 }
 
@@ -60,25 +68,60 @@ default_image_tag() {
 
 prepare_env() {
   local target_env="$1"
-  local env_file="${SCRIPT_DIR}/env/${target_env}/service-system.env"
+  local default_env_file="${SCRIPT_DIR}/env/${target_env}/service-system.env"
 
   if [[ ! -f "${COMPOSE_FILE}" ]]; then
     echo "错误: compose 文件不存在: ${COMPOSE_FILE}"
     exit 1
   fi
-  if [[ ! -f "${env_file}" ]]; then
-    echo "错误: 缺少环境文件: ${env_file}"
-    echo "请复制 ${env_file}.example 为 service-system.env 后填写。"
-    exit 1
-  fi
 
   export AUTH_ENV="${target_env}"
+  export AUTH_ENV_FILE="${AUTH_ENV_FILE:-${default_env_file}}"
   export AUTH_IMAGE_TAG="${AUTH_IMAGE_TAG:-$(default_image_tag "${target_env}")}"
   export SPRING_CLOUD_NACOS_SERVER_ADDR="${SPRING_CLOUD_NACOS_SERVER_ADDR:-nacos:8848}"
+
+  if [[ ! -f "${AUTH_ENV_FILE}" ]]; then
+    echo "错误: 缺少环境文件: ${AUTH_ENV_FILE}"
+    if [[ "${AUTH_ENV_FILE}" == "${default_env_file}" ]]; then
+      echo "请复制 ${default_env_file}.example 为 service-system.env 后填写。"
+    fi
+    exit 1
+  fi
 }
 
+# 仅运行时（服务器 / ACR）
 dc() {
   docker compose -f "${COMPOSE_FILE}" "$@"
+}
+
+# 运行时 + 本地 build 覆盖
+dc_build() {
+  if [[ ! -f "${COMPOSE_OVERRIDE}" ]]; then
+    echo "错误: 缺少构建覆盖文件: ${COMPOSE_OVERRIDE}"
+    exit 1
+  fi
+  docker compose -f "${COMPOSE_FILE}" -f "${COMPOSE_OVERRIDE}" "$@"
+}
+
+filter_up_args_after_build() {
+  up_args=()
+  skip_next=0
+  for arg in "$@"; do
+    if [[ "${skip_next}" -eq 1 ]]; then
+      skip_next=0
+      continue
+    fi
+    case "${arg}" in
+      --no-cache|--pull|--pull=*|--quiet|-q|--parallel|--with-dependencies|--builder|--builder=*|--progress|--progress=*|--build-arg=*|--ssh|--ssh=*|--memory|--memory=*)
+        continue
+        ;;
+      --build-arg|--progress|--builder|--ssh|--memory)
+        skip_next=1
+        continue
+        ;;
+    esac
+    up_args+=("${arg}")
+  done
 }
 
 if [[ "${1:-}" == "help" || "${1:-}" == "-h" || "${1:-}" == "--help" || $# -lt 2 ]]; then
@@ -98,41 +141,27 @@ fi
 prepare_env "${TARGET_ENV}"
 
 case "${ACTION}" in
+  pull)
+    dc pull "$@"
+    ;;
   build)
-    dc build "$@"
+    dc_build build "$@"
     ;;
   up)
-    dc up -d "$@"
+    # 不构建：缺镜像则 pull；已有则用本地（可先 pull 刷新）
+    dc up -d --pull missing --no-build "$@"
     ;;
   build-up)
-    dc build "$@"
-    # build-only flags must not be forwarded to up (e.g. --pull=false, --no-cache)
-    up_args=()
-    skip_next=0
-    for arg in "$@"; do
-      if [[ "${skip_next}" -eq 1 ]]; then
-        skip_next=0
-        continue
-      fi
-      case "${arg}" in
-        --no-cache|--pull|--pull=*|--quiet|-q|--parallel|--with-dependencies|--builder|--builder=*|--progress|--progress=*|--build-arg=*|--ssh|--ssh=*|--memory|--memory=*)
-          continue
-          ;;
-        --build-arg|--progress|--builder|--ssh|--memory)
-          skip_next=1
-          continue
-          ;;
-      esac
-      up_args+=("${arg}")
-    done
-    dc up -d "${up_args[@]}"
+    dc_build build "$@"
+    filter_up_args_after_build "$@"
+    dc_build up -d --build "${up_args[@]}"
     ;;
   down)
     dc down "$@"
     ;;
   restart)
     dc down "$@"
-    dc up -d "$@"
+    dc up -d --pull missing --no-build "$@"
     ;;
   logs)
     dc logs -f "$@"
@@ -141,7 +170,11 @@ case "${ACTION}" in
     dc ps "$@"
     ;;
   config)
-    dc config "$@"
+    if [[ -f "${COMPOSE_OVERRIDE}" ]]; then
+      dc_build config "$@"
+    else
+      dc config "$@"
+    fi
     ;;
   help|-h|--help)
     show_help

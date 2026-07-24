@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.auth</groupId>
         <artifactId>auth-server</artifactId>
-        <version>0.0.2-beta</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>services</artifactId>
@@ -27,32 +27,32 @@
         <dependency>
             <groupId>com.auth</groupId>
             <artifactId>common-starter-ip</artifactId>
-            <version>0.0.2-beta</version>
+            <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>com.auth</groupId>
             <artifactId>common-starter-resttemplate</artifactId>
-            <version>0.0.2-beta</version>
+            <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>com.auth</groupId>
             <artifactId>common-starter-webdoc</artifactId>
-            <version>0.0.2-beta</version>
+            <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>com.auth</groupId>
             <artifactId>module-platform-persistence</artifactId>
-            <version>0.0.2-beta</version>
+            <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>com.auth</groupId>
             <artifactId>common-mapstruct</artifactId>
-            <version>0.0.2-beta</version>
+            <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>com.auth</groupId>
             <artifactId>module-security-web-starter</artifactId>
-            <version>0.0.2-beta</version>
+            <version>${revision}</version>
         </dependency>
 
         <!-- 单元测试 -->

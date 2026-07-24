@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.auth</groupId>
         <artifactId>services</artifactId>
-        <version>0.0.2-beta</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>service-auth</artifactId>
@@ -22,12 +22,12 @@
         <dependency>
             <groupId>com.auth</groupId>
             <artifactId>common-starter-jwt</artifactId>
-            <version>0.0.2-beta</version>
+            <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>com.auth</groupId>
             <artifactId>module-message-api</artifactId>
-            <version>0.0.2-beta</version>
+            <version>${revision}</version>
         </dependency>
 
         <!-- mysql -->

@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.auth</groupId>
         <artifactId>modules</artifactId>
-        <version>0.0.2-beta</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>module-security-autoconfigure</artifactId>
@@ -17,28 +17,28 @@
         <dependency>
             <groupId>com.auth</groupId>
             <artifactId>common-data</artifactId>
-            <version>0.0.2-beta</version>
+            <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>com.auth</groupId>
             <artifactId>common-starter-cache</artifactId>
-            <version>0.0.2-beta</version>
+            <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>com.auth</groupId>
             <artifactId>common-starter-web</artifactId>
-            <version>0.0.2-beta</version>
+            <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>com.auth</groupId>
             <artifactId>module-security-core</artifactId>
-            <version>0.0.2-beta</version>
+            <version>${revision}</version>
         </dependency>
 
         <dependency>
             <groupId>com.auth</groupId>
             <artifactId>common-starter-resttemplate</artifactId>
-            <version>0.0.2-beta</version>
+            <version>${revision}</version>
             <optional>true</optional>
         </dependency>
         <dependency>

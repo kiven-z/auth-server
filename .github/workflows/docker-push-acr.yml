@@ -5,6 +5,8 @@
 #   ACR_USERNAME   镜像仓库登录名
 #   ACR_PASSWORD   镜像仓库登录密码 / 临时令牌
 #
+# 流程：Maven 只编一次 → 三个轻量 runtime 镜像并行推送（避免矩阵内重复编译）
+#
 # 推送结果示例：
 #   registry.cn-hangzhou.aliyuncs.com/bunny-auth/service-auth:prod-<sha>
 #   registry.cn-hangzhou.aliyuncs.com/bunny-auth/service-auth:prod-latest
@@ -19,23 +21,68 @@ on:
 
 env:
   IMAGE_TAG_PREFIX: prod
+  JAVA_VERSION: "17"
 
 jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: maven
+
+      - name: Package all services (once)
+        run: |
+          mvn -B -s docker/maven/settings.xml \
+            -pl services/service-auth,services/service-system/service-system-bootstrap,auth-gateway \
+            -am package -Pdocker -DskipTests
+
+      - name: Stage jars
+        run: |
+          mkdir -p build/jars
+          cp services/service-auth/target/service-auth-*.jar build/jars/service-auth.jar
+          cp services/service-system/service-system-bootstrap/target/service-system.jar build/jars/service-system.jar
+          cp auth-gateway/target/auth-gateway-*.jar build/jars/auth-gateway.jar
+          ls -lh build/jars
+
+      - name: Upload jars
+        uses: actions/upload-artifact@v4
+        with:
+          name: service-jars
+          path: build/jars
+          retention-days: 1
+
   build-push:
+    needs: package
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         include:
           - name: service-auth
-            dockerfile: docker/service-auth/Dockerfile
+            jar: service-auth.jar
+            port: "20001"
           - name: service-system
-            dockerfile: docker/service-system/Dockerfile
+            jar: service-system.jar
+            port: "20002"
           - name: auth-gateway
-            dockerfile: docker/auth-gateway/Dockerfile
+            jar: auth-gateway.jar
+            port: "8080"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Download jars
+        uses: actions/download-artifact@v4
+        with:
+          name: service-jars
+          path: build/jars
 
       - name: Log in to ACR
         uses: docker/login-action@v3
@@ -43,6 +90,9 @@ jobs:
           registry: ${{ secrets.ACR_REGISTRY }}
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Set image tags
         id: meta
@@ -56,10 +106,14 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ${{ matrix.dockerfile }}
+          file: docker/runtime/Dockerfile
           push: true
+          pull: false
+          build-args: |
+            APP_JAR=build/jars/${{ matrix.jar }}
+            SERVER_PORT=${{ matrix.port }}
           tags: |
             ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.tag_sha }}
             ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.tag_latest }}
-          # 基础镜像若在国内拉不动，请在 ACR 建镜像缓存或改用国内镜像源
-          pull: false
+          cache-from: type=gha,scope=runtime-${{ matrix.name }}
+          cache-to: type=gha,mode=max,scope=runtime-${{ matrix.name }}

@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.auth</groupId>
         <artifactId>commons</artifactId>
-        <version>0.0.2-beta</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>common-mapstruct</artifactId>
@@ -22,7 +22,7 @@
         <dependency>
             <groupId>com.auth</groupId>
             <artifactId>common-core</artifactId>
-            <version>0.0.2-beta</version>
+            <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>org.mapstruct</groupId>

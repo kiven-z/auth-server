@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.auth</groupId>
         <artifactId>auth-server</artifactId>
-        <version>0.0.2-beta</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>modules</artifactId>
@@ -32,7 +32,7 @@
         <dependency>
             <groupId>com.auth</groupId>
             <artifactId>common-core</artifactId>
-            <version>0.0.2-beta</version>
+            <version>${revision}</version>
         </dependency>
 
         <!-- 单元测试 -->
