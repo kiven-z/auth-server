@@ -1,5 +1,4 @@
 server:
-  port: 21001
   tomcat:
     threads:
       max: 100

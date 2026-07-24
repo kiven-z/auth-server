@@ -14,22 +14,7 @@ spring:
 
   cloud:
     nacos:
-      server-addr: 192.168.3.4:8848
-
-  data:
-    redis:
-      host: 192.168.3.4
-      port: 6379
-      database: 0
-      password: ${REDIS_PASSWORD:changeme}
-      timeout: 3000ms
-      lettuce:
-        pool:
-          enabled: true
-          max-active: 32
-          max-wait: 2000ms
-          max-idle: 16
-          min-idle: 4
+      server-addr: nacos:8848
 
 logging:
   level:

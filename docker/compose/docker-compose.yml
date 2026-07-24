@@ -1,0 +1,74 @@
+name: auth-app
+
+# 单一 Compose：dev / test / prod 仅靠 AUTH_ENV（Spring profile + env 目录）区分。
+# 宿主机只暴露网关 8080；业务服务仅在 compose 网络内互通。
+#
+# 常用变量：
+#   AUTH_ENV=dev|test|prod
+#   AUTH_IMAGE_PREFIX / AUTH_IMAGE_TAG（推 ACR 时覆盖）
+#   SPRING_CLOUD_NACOS_SERVER_ADDR（默认 nacos:8848，对应 assets/docker 服务名）
+
+services:
+  service-auth:
+    build:
+      context: ../..
+      dockerfile: docker/service-auth/Dockerfile
+      pull: false
+    image: ${AUTH_IMAGE_PREFIX:-auth}/service-auth:${AUTH_IMAGE_TAG:-local}
+    container_name: service-auth
+    env_file:
+      - ../env/${AUTH_ENV:-dev}/service-system.env
+    environment:
+      SPRING_PROFILES_ACTIVE: ${AUTH_ENV:-dev}
+      SPRING_CLOUD_NACOS_SERVER_ADDR: ${SPRING_CLOUD_NACOS_SERVER_ADDR:-nacos:8848}
+      JAVA_TOOL_OPTIONS: ${JAVA_TOOL_OPTIONS:--XX:MaxRAMPercentage=70.0 -XX:InitialRAMPercentage=40.0 -XX:+UseG1GC -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/urandom}
+    mem_limit: ${AUTH_MEM_LIMIT_AUTH:-512m}
+    mem_reservation: ${AUTH_MEM_RESERVATION_AUTH:-256m}
+    restart: unless-stopped
+    networks:
+      - auth-network
+
+  service-system:
+    build:
+      context: ../..
+      dockerfile: docker/service-system/Dockerfile
+      pull: false
+    image: ${AUTH_IMAGE_PREFIX:-auth}/service-system:${AUTH_IMAGE_TAG:-local}
+    container_name: service-system
+    env_file:
+      - ../env/${AUTH_ENV:-dev}/service-system.env
+    environment:
+      SPRING_PROFILES_ACTIVE: ${AUTH_ENV:-dev}
+      SPRING_CLOUD_NACOS_SERVER_ADDR: ${SPRING_CLOUD_NACOS_SERVER_ADDR:-nacos:8848}
+      JAVA_TOOL_OPTIONS: ${JAVA_TOOL_OPTIONS:--XX:MaxRAMPercentage=70.0 -XX:InitialRAMPercentage=40.0 -XX:+UseG1GC -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/urandom}
+    mem_limit: ${AUTH_MEM_LIMIT_SYSTEM:-768m}
+    mem_reservation: ${AUTH_MEM_RESERVATION_SYSTEM:-384m}
+    restart: unless-stopped
+    networks:
+      - auth-network
+
+  auth-gateway:
+    build:
+      context: ../..
+      dockerfile: docker/auth-gateway/Dockerfile
+      pull: false
+    image: ${AUTH_IMAGE_PREFIX:-auth}/auth-gateway:${AUTH_IMAGE_TAG:-local}
+    container_name: auth-gateway
+    env_file:
+      - ../env/${AUTH_ENV:-dev}/service-system.env
+    environment:
+      SPRING_PROFILES_ACTIVE: ${AUTH_ENV:-dev}
+      SPRING_CLOUD_NACOS_SERVER_ADDR: ${SPRING_CLOUD_NACOS_SERVER_ADDR:-nacos:8848}
+      SERVER_PORT: 8080
+      JAVA_TOOL_OPTIONS: ${JAVA_TOOL_OPTIONS:--XX:MaxRAMPercentage=70.0 -XX:InitialRAMPercentage=40.0 -XX:+UseG1GC -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/urandom}
+    mem_limit: ${AUTH_MEM_LIMIT_GATEWAY:-384m}
+    mem_reservation: ${AUTH_MEM_RESERVATION_GATEWAY:-192m}
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    networks:
+      - auth-network
+
+networks:
+  auth-network:
+    external: true
