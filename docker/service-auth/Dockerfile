@@ -19,7 +19,8 @@ RUN apt-get update \
 WORKDIR /app
 COPY --from=build /workspace/services/service-auth/target/service-auth-*.jar /app/app.jar
 
-ENV SPRING_PROFILES_ACTIVE=docker
+ENV TZ=Asia/Shanghai \
+    SPRING_PROFILES_ACTIVE=docker
 EXPOSE 20001
 
 HEALTHCHECK --interval=30s --timeout=10s --retries=5 --start-period=120s \

@@ -11,7 +11,8 @@ RUN apt-get update \
 WORKDIR /app
 COPY ${APP_JAR} /app/app.jar
 
-ENV SPRING_PROFILES_ACTIVE=docker \
+ENV TZ=Asia/Shanghai \
+    SPRING_PROFILES_ACTIVE=docker \
     SERVER_PORT=${SERVER_PORT}
 
 EXPOSE ${SERVER_PORT}
