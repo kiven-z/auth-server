@@ -39,7 +39,7 @@ jobs:
 
       - name: Package all services (once)
         run: |
-          mvn -B -s docker/maven/settings.xml \
+           mvn -B \
             -pl services/service-auth,services/service-system/service-system-bootstrap,auth-gateway \
             -am package -Pdocker -DskipTests
 
