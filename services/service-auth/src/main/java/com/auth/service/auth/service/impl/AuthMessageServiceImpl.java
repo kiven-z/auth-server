@@ -19,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -73,7 +73,7 @@ public class AuthMessageServiceImpl implements AuthMessageService {
 		// 拼装发送对象
 		String username = userEntity.getUsername();
 		Map<String, Object> variables = AuthMessageVariables.buildLoginEmail(username, code, expireMinutes,
-				LocalDateTime.now(), snapshot.loginIp(), snapshot.loginRegion());
+				Instant.now(), snapshot.loginIp(), snapshot.loginRegion());
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
 			.channel(AuthMessageScene.LOGIN_EMAIL.getChannel())
 			.templateCode(AuthMessageScene.LOGIN_EMAIL.getTemplateCode())

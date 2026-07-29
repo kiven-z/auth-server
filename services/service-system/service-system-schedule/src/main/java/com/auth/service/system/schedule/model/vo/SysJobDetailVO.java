@@ -10,8 +10,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 /**
  * 定时任务详情
@@ -48,6 +48,9 @@ public class SysJobDetailVO extends BaseResponse implements SysJobLastExecutionV
 	@Schema(title = "Cron 表达式")
 	private String cronExpression;
 
+	@Schema(title = "调度时区(IANA ZoneId)")
+	private String timeZone;
+
 	@Schema(title = "错失策略")
 	private Integer misfirePolicy;
 
@@ -74,26 +77,22 @@ public class SysJobDetailVO extends BaseResponse implements SysJobLastExecutionV
 	@Schema(title = "备注")
 	private String remark;
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "上次触发")
-	private Date previousFireTime;
+	private Instant previousFireTime;
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "下次触发")
-	private Date nextFireTime;
+	private Instant nextFireTime;
 
 	@Schema(title = "运行态")
 	private SysJobQuartzRuntimeStatus quartzRuntimeStatus;
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "本次开始执行时间")
-	private Date quartzFireTime;
+	private Instant quartzFireTime;
 
 	@Schema(title = "最近结果")
 	private SysJobLastExecutionStatus lastExecutionStatus;
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "最近执行时间")
-	private LocalDateTime lastExecutionTime;
+	private Instant lastExecutionTime;
 
 }

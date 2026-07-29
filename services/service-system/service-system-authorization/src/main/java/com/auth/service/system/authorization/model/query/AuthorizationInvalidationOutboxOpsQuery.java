@@ -6,7 +6,7 @@ import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * 授权失效 Outbox 运维查询条件
@@ -42,15 +42,15 @@ public class AuthorizationInvalidationOutboxOpsQuery implements Serializable {
 	private String sourceBizId;
 
 	@Schema(title = "创建时间（开始）")
-	private LocalDateTime createTimeStart;
+	private Instant createTimeStart;
 
 	@Schema(title = "创建时间（结束）")
-	private LocalDateTime createTimeEnd;
+	private Instant createTimeEnd;
 
 	@Schema(title = "处理完成时间（开始）")
-	private LocalDateTime processedAtStart;
+	private Instant processedAtStart;
 
 	@Schema(title = "处理完成时间（结束）")
-	private LocalDateTime processedAtEnd;
+	private Instant processedAtEnd;
 
 }

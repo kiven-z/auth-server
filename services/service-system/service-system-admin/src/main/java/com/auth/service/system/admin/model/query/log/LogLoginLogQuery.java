@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * 登录日志分页查询
@@ -26,10 +26,10 @@ public class LogLoginLogQuery extends PageQueryRequest {
 	private Integer loginResult;
 
 	@Schema(title = "登录时间(开始)")
-	private LocalDateTime loginTimeStart;
+	private Instant loginTimeStart;
 
 	@Schema(title = "登录时间(结束)")
-	private LocalDateTime loginTimeEnd;
+	private Instant loginTimeEnd;
 
 	@Schema(title = "登录方式")
 	private String loginType;

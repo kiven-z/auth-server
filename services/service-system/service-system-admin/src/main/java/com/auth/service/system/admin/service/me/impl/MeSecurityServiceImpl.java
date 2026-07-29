@@ -18,7 +18,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 
@@ -97,8 +98,8 @@ public class MeSecurityServiceImpl implements MeSecurityService {
 		internalQuery.setLoginResult(query.getLoginResult());
 		internalQuery.setUserId(userId);
 
-		LocalDateTime now = LocalDateTime.now();
-		internalQuery.setLoginTimeStart(now.minusDays(ME_LOGIN_LOG_MAX_DAYS));
+		Instant now = Instant.now();
+		internalQuery.setLoginTimeStart(now.minus(ME_LOGIN_LOG_MAX_DAYS, ChronoUnit.DAYS));
 		internalQuery.setLoginTimeEnd(now);
 		PageResponse<LogLoginLogPageVO> adminPage = logLoginService.getPage(internalQuery);
 

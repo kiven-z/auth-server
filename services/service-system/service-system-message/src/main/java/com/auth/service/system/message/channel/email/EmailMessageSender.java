@@ -12,7 +12,7 @@ import com.auth.service.system.message.support.delivery.ChannelDeliveryRecorder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -76,7 +76,7 @@ public class EmailMessageSender extends AbstractRecordingMessageSender {
 		RenderedEmail rendered = emailTemplatePipeline.render(command.getTemplateCode(), variables);
 
 		String providerMsgId = mimeMailTransport.send(emailSendDTO, rendered);
-		return ChannelSendResult.sharedSuccess(command.getTargets(), providerMsgId, LocalDateTime.now());
+		return ChannelSendResult.sharedSuccess(command.getTargets(), providerMsgId, Instant.now());
 	}
 
 }

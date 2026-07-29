@@ -11,6 +11,7 @@ import org.quartz.*;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.util.*;
 
 /**
@@ -26,6 +27,15 @@ public class SysJobQuartzRuntimeReader {
 
 	public SysJobQuartzRuntimeReader(@Lazy Scheduler scheduler) {
 		this.scheduler = scheduler;
+	}
+
+	/**
+	 * Quartz {@link Date} → {@link Instant}
+	 * @param date Quartz 时间
+	 * @return Instant，空则 null
+	 */
+	private static Instant toInstant(Date date) {
+		return date == null ? null : date.toInstant();
 	}
 
 	/**
@@ -68,8 +78,8 @@ public class SysJobQuartzRuntimeReader {
 			// 获取触发器的触发时间
 			Trigger trigger = triggers.get(0);
 			return FireTimes.builder()
-				.previousFireTime(trigger.getPreviousFireTime())
-				.nextFireTime(trigger.getNextFireTime())
+				.previousFireTime(toInstant(trigger.getPreviousFireTime()))
+				.nextFireTime(toInstant(trigger.getNextFireTime()))
 				.build();
 		}
 		catch (Exception exception) {
@@ -108,7 +118,7 @@ public class SysJobQuartzRuntimeReader {
 
 		// 验证任务是否正在运行
 		if (runningJobKeys.contains(jobKey)) {
-			Date fireTime = resolveRunningFireTime(jobKey);
+			Instant fireTime = resolveRunningFireTime(jobKey);
 			return SysJobQuartzRuntimeSnapshot.of(SysJobQuartzRuntimeStatus.RUNNING, fireTime);
 		}
 
@@ -124,11 +134,11 @@ public class SysJobQuartzRuntimeReader {
 	 * @return 触发时间
 	 * @throws SchedulerException SchedulerException
 	 */
-	private Date resolveRunningFireTime(JobKey jobKey) throws SchedulerException {
+	private Instant resolveRunningFireTime(JobKey jobKey) throws SchedulerException {
 		// 解析正在运行的任务的触发时间
 		for (JobExecutionContext context : scheduler.getCurrentlyExecutingJobs()) {
 			if (jobKey.equals(context.getJobDetail().getKey())) {
-				return context.getFireTime();
+				return toInstant(context.getFireTime());
 			}
 		}
 		return null;
@@ -182,12 +192,12 @@ public class SysJobQuartzRuntimeReader {
 		/**
 		 * 上次触发时间
 		 */
-		Date previousFireTime;
+		Instant previousFireTime;
 
 		/**
 		 * 下次触发时间
 		 */
-		Date nextFireTime;
+		Instant nextFireTime;
 
 		/**
 		 * 空触发时间

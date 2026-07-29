@@ -98,7 +98,7 @@ class MeSecurityServiceImplTest {
 		query.setLoginResult(1);
 
 		LogLoginLogPageVO adminVo = new LogLoginLogPageVO();
-		adminVo.setLoginTime(LocalDateTime.of(2026, 1, 1, 10, 0));
+		adminVo.setLoginTime(LocalDateTime.of(2026, 1, 1, 10, 0).toInstant(java.time.ZoneOffset.UTC));
 		adminVo.setLoginRegion("Shanghai");
 		adminVo.setLoginResult(1);
 		adminVo.setLoginType("PASSWORD");

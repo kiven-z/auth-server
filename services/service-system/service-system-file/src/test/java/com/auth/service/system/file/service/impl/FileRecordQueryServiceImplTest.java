@@ -23,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Field;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -109,8 +110,8 @@ class FileRecordQueryServiceImplTest {
 	@DisplayName("getPage：时间范围参数按原样透传到 Mapper")
 	void getPagePassesTimeRangeParamsToMapper() {
 		// 验证时间范围筛选参数会传递到分页查询条件。
-		LocalDateTime startTime = LocalDateTime.of(2026, 7, 1, 0, 0, 0);
-		LocalDateTime endTime = LocalDateTime.of(2026, 7, 3, 23, 59, 59);
+		Instant startTime = LocalDateTime.of(2026, 7, 1, 0, 0, 0).toInstant(java.time.ZoneOffset.UTC);
+		Instant endTime = LocalDateTime.of(2026, 7, 3, 23, 59, 59).toInstant(java.time.ZoneOffset.UTC);
 		FileRecordPageQuery query = buildBaseQuery();
 		query.setStartTime(startTime);
 		query.setEndTime(endTime);

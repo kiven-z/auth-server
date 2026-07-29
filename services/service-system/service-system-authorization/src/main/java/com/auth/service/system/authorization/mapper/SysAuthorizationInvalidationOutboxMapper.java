@@ -4,7 +4,7 @@ import com.auth.service.system.authorization.model.entity.SysAuthorizationInvali
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 /**
@@ -37,7 +37,7 @@ public interface SysAuthorizationInvalidationOutboxMapper {
 	 * @return 记录列表
 	 */
 	List<SysAuthorizationInvalidationOutboxEntity> selectClaimable(@Param("statuses") List<String> statuses,
-			@Param("now") LocalDateTime now, @Param("limit") int limit);
+			@Param("now") Instant now, @Param("limit") int limit);
 
 	/**
 	 * 抢占记录（乐观锁 version）
@@ -48,7 +48,7 @@ public interface SysAuthorizationInvalidationOutboxMapper {
 	 * @return 更新行数
 	 */
 	int claimForProcessing(@Param("id") Long id, @Param("lockedBy") String lockedBy,
-			@Param("lockedAt") LocalDateTime lockedAt, @Param("expectedVersion") Long expectedVersion);
+			@Param("lockedAt") Instant lockedAt, @Param("expectedVersion") Long expectedVersion);
 
 	/**
 	 * 标记投递成功
@@ -56,7 +56,7 @@ public interface SysAuthorizationInvalidationOutboxMapper {
 	 * @param processedAt 处理完成时间
 	 * @return 影响行数
 	 */
-	int markSuccess(@Param("id") Long id, @Param("processedAt") LocalDateTime processedAt);
+	int markSuccess(@Param("id") Long id, @Param("processedAt") Instant processedAt);
 
 	/**
 	 * 标记投递失败并安排下次重试
@@ -68,7 +68,7 @@ public interface SysAuthorizationInvalidationOutboxMapper {
 	 * @return 影响行数
 	 */
 	int markFailure(@Param("id") Long id, @Param("status") String status, @Param("retryCount") int retryCount,
-			@Param("nextRetryAt") LocalDateTime nextRetryAt, @Param("lastError") String lastError);
+			@Param("nextRetryAt") Instant nextRetryAt, @Param("lastError") String lastError);
 
 	/**
 	 * 同步投递失败时记录错误（保持 PENDING，供 Job 重试）
@@ -92,6 +92,6 @@ public interface SysAuthorizationInvalidationOutboxMapper {
 	 * @param batchSize 本批删除上限
 	 * @return 实际删除行数
 	 */
-	int deleteSuccessBefore(@Param("cutoffTime") LocalDateTime cutoffTime, @Param("batchSize") int batchSize);
+	int deleteSuccessBefore(@Param("cutoffTime") Instant cutoffTime, @Param("batchSize") int batchSize);
 
 }

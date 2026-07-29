@@ -1,6 +1,5 @@
 package com.auth.service.system.authorization.feign.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,7 +7,7 @@ import lombok.ToString;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * 授权失效幂等事件分页行（Feign 传输）
@@ -47,17 +46,14 @@ public class AuthorizationInvalidationEventPageInnerDTO implements Serializable 
 	@Schema(title = "驱逐画像用户数")
 	private Integer profileEvictedCount;
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "处理完成时间")
-	private LocalDateTime processedAt;
+	private Instant processedAt;
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "创建时间")
-	private LocalDateTime createTime;
+	private Instant createTime;
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "更新时间")
-	private LocalDateTime updateTime;
+	private Instant updateTime;
 
 	@Schema(title = "创建用户")
 	private Long createUser;

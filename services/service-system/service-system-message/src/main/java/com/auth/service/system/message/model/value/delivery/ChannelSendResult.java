@@ -2,7 +2,7 @@ package com.auth.service.system.message.model.value.delivery;
 
 import cn.hutool.core.collection.CollUtil;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -35,12 +35,11 @@ public record ChannelSendResult(List<TargetSendOutcome> outcomes) {
 	 * @param sentAt 发送时间
 	 * @return 渠道发送结果
 	 */
-	public static ChannelSendResult sharedSuccess(Collection<String> targets, String providerMsgId,
-			LocalDateTime sentAt) {
+	public static ChannelSendResult sharedSuccess(Collection<String> targets, String providerMsgId, Instant sentAt) {
 		if (CollUtil.isEmpty(targets)) {
 			return of(List.of());
 		}
-		LocalDateTime at = Objects.requireNonNullElseGet(sentAt, LocalDateTime::now);
+		Instant at = Objects.requireNonNullElseGet(sentAt, Instant::now);
 		List<TargetSendOutcome> list = targets.stream()
 			.filter(Objects::nonNull)
 			.map(target -> TargetSendOutcome.success(target, providerMsgId, at))

@@ -7,7 +7,7 @@ import lombok.ToString;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * 用户侧站内信收件箱分页行
@@ -51,13 +51,13 @@ public class InAppInboxPageRowPO implements Serializable {
 	private Boolean isRead;
 
 	@Schema(title = "已读时间")
-	private LocalDateTime readTime;
+	private Instant readTime;
 
 	@Schema(title = "创建时间")
-	private LocalDateTime createTime;
+	private Instant createTime;
 
 	@Schema(title = "更新时间")
-	private LocalDateTime updateTime;
+	private Instant updateTime;
 
 	@Schema(title = "创建用户")
 	private Long createUser;

@@ -10,7 +10,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Update;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * 消息发送任务 Mapper
@@ -63,7 +63,7 @@ public interface InAppMessageMapper extends BaseMapper<InAppMessageEntity> {
 	 * @param recallUserId 撤回操作人
 	 * @return 影响行数
 	 */
-	int recallTask(@Param("id") Long id, @Param("recalledAt") LocalDateTime recalledAt,
+	int recallTask(@Param("id") Long id, @Param("recalledAt") Instant recalledAt,
 			@Param("recallUserId") Long recallUserId);
 
 }

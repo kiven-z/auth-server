@@ -26,6 +26,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DuplicateKeyException;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -53,7 +54,7 @@ class AuthorizationInvalidationEventServiceTest {
 		row.setEventId(eventId);
 		row.setChangeKind("ROLE");
 		row.setImpactedUserCount(impactedUserCount);
-		row.setProcessedAt(LocalDateTime.now());
+		row.setProcessedAt(Instant.now());
 		return row;
 	}
 
@@ -108,7 +109,7 @@ class AuthorizationInvalidationEventServiceTest {
 		row.setEventId("evt-detail");
 		row.setChangeKind("ROLE");
 		row.setImpactedUserCount(5);
-		row.setProcessedAt(LocalDateTime.now());
+		row.setProcessedAt(Instant.now());
 		when(invalidationEventMapper.selectDetailById(10L)).thenReturn(row);
 
 		AuthorizationInvalidationEventDetailVO result = eventService.getDetail(10L);
@@ -270,7 +271,7 @@ class AuthorizationInvalidationEventServiceTest {
 	@Test
 	@DisplayName("批量释放超时 processing 占位")
 	void cleanupStaleProcessingClaims_shouldDelegateToMapper() {
-		LocalDateTime cutoff = LocalDateTime.of(2026, 1, 1, 0, 0);
+		Instant cutoff = LocalDateTime.of(2026, 1, 1, 0, 0).toInstant(java.time.ZoneOffset.UTC);
 		when(invalidationEventMapper.deleteStaleProcessingClaims(cutoff, 50)).thenReturn(3);
 
 		int deleted = eventService.cleanupStaleProcessingClaims(cutoff, 50);
@@ -282,7 +283,7 @@ class AuthorizationInvalidationEventServiceTest {
 	@Test
 	@DisplayName("批量删除已完成过期幂等事件")
 	void purgeCompletedBefore_shouldDelegateToMapper() {
-		LocalDateTime cutoff = LocalDateTime.of(2025, 6, 1, 0, 0);
+		Instant cutoff = LocalDateTime.of(2025, 6, 1, 0, 0).toInstant(java.time.ZoneOffset.UTC);
 		when(invalidationEventMapper.deleteCompletedBefore(cutoff, 200)).thenReturn(10);
 
 		int deleted = eventService.purgeCompletedBefore(cutoff, 200);

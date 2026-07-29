@@ -4,7 +4,7 @@ name: auth-app
 #
 # 变量：
 #   AUTH_ENV                  Spring profile（dockerctl 会设置）
-#   AUTH_ENV_FILE             密钥文件路径（默认 ./env/${AUTH_ENV}/service-system.env）
+#   AUTH_ENV_FILE             密钥文件（默认 ./env/service-system.env，仅 service-system 注入）
 #   AUTH_IMAGE_PREFIX         例：registry.cn-hangzhou.aliyuncs.com/bunny-company
 #   AUTH_IMAGE_TAG            例：prod-latest（ACR）或 local（本地构建）
 #   SPRING_CLOUD_NACOS_SERVER_ADDR  默认 nacos:8848
@@ -20,13 +20,10 @@ services:
   service-auth:
     image: ${AUTH_IMAGE_PREFIX:-auth}/service-auth:${AUTH_IMAGE_TAG:-local}
     container_name: service-auth
-    env_file:
-      - ${AUTH_ENV_FILE:-./env/dev/service-system.env}
     environment:
-      TZ: Asia/Shanghai
       SPRING_PROFILES_ACTIVE: ${AUTH_ENV:-dev}
       SPRING_CLOUD_NACOS_SERVER_ADDR: ${SPRING_CLOUD_NACOS_SERVER_ADDR:-nacos:8848}
-      JAVA_TOOL_OPTIONS: ${JAVA_TOOL_OPTIONS:--XX:MaxRAMPercentage=70.0 -XX:InitialRAMPercentage=40.0 -XX:+UseG1GC -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/urandom -Duser.timezone=Asia/Shanghai}
+      JAVA_TOOL_OPTIONS: ${JAVA_TOOL_OPTIONS:--XX:MaxRAMPercentage=70.0 -XX:InitialRAMPercentage=40.0 -XX:+UseG1GC -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/urandom -Duser.timezone=UTC}
     mem_limit: ${AUTH_MEM_LIMIT_AUTH:-1536m}
     mem_reservation: ${AUTH_MEM_RESERVATION_AUTH:-384m}
     volumes:
@@ -41,12 +38,11 @@ services:
     image: ${AUTH_IMAGE_PREFIX:-auth}/service-system:${AUTH_IMAGE_TAG:-local}
     container_name: service-system
     env_file:
-      - ${AUTH_ENV_FILE:-./env/dev/service-system.env}
+      - ${AUTH_ENV_FILE:-./env/service-system.env}
     environment:
-      TZ: Asia/Shanghai
       SPRING_PROFILES_ACTIVE: ${AUTH_ENV:-dev}
       SPRING_CLOUD_NACOS_SERVER_ADDR: ${SPRING_CLOUD_NACOS_SERVER_ADDR:-nacos:8848}
-      JAVA_TOOL_OPTIONS: ${JAVA_TOOL_OPTIONS:--XX:MaxRAMPercentage=70.0 -XX:InitialRAMPercentage=40.0 -XX:+UseG1GC -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/urandom -Duser.timezone=Asia/Shanghai}
+      JAVA_TOOL_OPTIONS: ${JAVA_TOOL_OPTIONS:--XX:MaxRAMPercentage=70.0 -XX:InitialRAMPercentage=40.0 -XX:+UseG1GC -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/urandom -Duser.timezone=UTC}
     mem_limit: ${AUTH_MEM_LIMIT_SYSTEM:-1536m}
     mem_reservation: ${AUTH_MEM_RESERVATION_SYSTEM:-384m}
     volumes:
@@ -60,14 +56,11 @@ services:
   auth-gateway:
     image: ${AUTH_IMAGE_PREFIX:-auth}/auth-gateway:${AUTH_IMAGE_TAG:-local}
     container_name: auth-gateway
-    env_file:
-      - ${AUTH_ENV_FILE:-./env/dev/service-system.env}
     environment:
-      TZ: Asia/Shanghai
       SPRING_PROFILES_ACTIVE: ${AUTH_ENV:-dev}
       SPRING_CLOUD_NACOS_SERVER_ADDR: ${SPRING_CLOUD_NACOS_SERVER_ADDR:-nacos:8848}
       SERVER_PORT: 8080
-      JAVA_TOOL_OPTIONS: ${JAVA_TOOL_OPTIONS:--XX:MaxRAMPercentage=70.0 -XX:InitialRAMPercentage=40.0 -XX:+UseG1GC -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/urandom -Duser.timezone=Asia/Shanghai}
+      JAVA_TOOL_OPTIONS: ${JAVA_TOOL_OPTIONS:--XX:MaxRAMPercentage=70.0 -XX:InitialRAMPercentage=40.0 -XX:+UseG1GC -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/urandom -Duser.timezone=UTC}
     mem_limit: ${AUTH_MEM_LIMIT_GATEWAY:-1536m}
     mem_reservation: ${AUTH_MEM_RESERVATION_GATEWAY:-384m}
     volumes:

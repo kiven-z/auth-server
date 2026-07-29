@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Method;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,7 +40,7 @@ class ChannelDeliveryRecorderTest {
 
 	private static final Long TASK_ID = 1001L;
 
-	private static final LocalDateTime SENT_AT = LocalDateTime.of(2026, 7, 18, 12, 0);
+	private static final Instant SENT_AT = LocalDateTime.of(2026, 7, 18, 12, 0).toInstant(java.time.ZoneOffset.UTC);
 
 	@Mock
 	private MessageChannelDeliveryMapper deliveryMapper;
@@ -75,7 +76,7 @@ class ChannelDeliveryRecorderTest {
 		assertRequiresNew(ChannelDeliveryRecorder.class.getMethod("recordOutcomes", Long.class, MessageChannel.class,
 				List.class));
 		assertRequiresNew(ChannelDeliveryRecorder.class.getMethod("recordFailed", Long.class, MessageChannel.class,
-				Collection.class, String.class, String.class, LocalDateTime.class));
+				Collection.class, String.class, String.class, Instant.class));
 	}
 
 	@Test

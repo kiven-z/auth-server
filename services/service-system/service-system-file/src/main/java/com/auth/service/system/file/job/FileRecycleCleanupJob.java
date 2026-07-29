@@ -16,7 +16,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 /**
@@ -47,7 +48,7 @@ public class FileRecycleCleanupJob {
 		}
 
 		Integer retentionDays = properties.getRetentionDays();
-		LocalDateTime cutoff = LocalDateTime.now().minusDays(retentionDays);
+		Instant cutoff = Instant.now().minus(retentionDays, ChronoUnit.DAYS);
 		int batchSize = FileBatchSizes.RECYCLE_CLEANUP;
 		int total = 0;
 		for (int round = 0; round < properties.getMaxRounds(); round++) {
@@ -68,7 +69,7 @@ public class FileRecycleCleanupJob {
 	 * @param batchSize 批量大小
 	 * @return 清理数量
 	 */
-	private int purgeExpiredBefore(LocalDateTime cutoff, int batchSize) {
+	private int purgeExpiredBefore(Instant cutoff, int batchSize) {
 		if (cutoff == null || batchSize < 1) {
 			throw new SystemBusinessException(SystemCommonResultCode.PARAM_REQUIRED, "cutoff/batchSize");
 		}

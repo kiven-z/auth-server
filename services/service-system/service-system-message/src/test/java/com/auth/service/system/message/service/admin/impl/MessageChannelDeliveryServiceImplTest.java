@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -65,7 +66,8 @@ class MessageChannelDeliveryServiceImplTest {
 		query.setPageIndex(1);
 		query.setPageSize(10);
 
-		LocalDateTime sentAt = LocalDateTime.of(2026, 7, 18, 12, 0, 0);
+		Instant sentAt = LocalDateTime.of(2026, 7, 18, 12, 0, 0).toInstant(java.time.ZoneOffset.UTC);
+		Instant auditAt = sentAt;
 		MessageChannelDeliveryPageRowPO row = new MessageChannelDeliveryPageRowPO();
 		row.setId(1L);
 		row.setTaskId(100L);
@@ -74,8 +76,8 @@ class MessageChannelDeliveryServiceImplTest {
 		row.setProviderMsgId("prov-1");
 		row.setErrorCode(null);
 		row.setSentAt(sentAt);
-		row.setCreateTime(sentAt);
-		row.setUpdateTime(sentAt);
+		row.setCreateTime(auditAt);
+		row.setUpdateTime(auditAt);
 		row.setCreateUser(1L);
 		row.setUpdateUser(1L);
 
@@ -128,7 +130,8 @@ class MessageChannelDeliveryServiceImplTest {
 	@DisplayName("详情：按主键返回全量字段并填充审计用户名")
 	void getChannelDeliveryById_shouldReturnDetailAndEnrichAudit() {
 		// 准备落库实体，校验详情映射含目标与错误信息等列表未暴露字段
-		LocalDateTime sentAt = LocalDateTime.of(2026, 7, 18, 12, 30, 0);
+		Instant sentAt = LocalDateTime.of(2026, 7, 18, 12, 30, 0).toInstant(java.time.ZoneOffset.UTC);
+		Instant auditAt = sentAt;
 		MessageChannelDeliveryEntity entity = new MessageChannelDeliveryEntity();
 		entity.setId(11L);
 		entity.setTaskId(200L);
@@ -141,8 +144,8 @@ class MessageChannelDeliveryServiceImplTest {
 		entity.setSentAt(sentAt);
 		entity.setRetryCount(0);
 		entity.setRemark("retry later");
-		entity.setCreateTime(sentAt);
-		entity.setUpdateTime(sentAt);
+		entity.setCreateTime(auditAt);
+		entity.setUpdateTime(auditAt);
 		entity.setCreateUser(2L);
 		entity.setUpdateUser(2L);
 		when(messageChannelDeliveryMapper.selectById(11L)).thenReturn(entity);

@@ -9,7 +9,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 /**
@@ -35,7 +35,7 @@ public interface InAppMessageRecipientMapper extends BaseMapper<InAppMessageReci
 	 * @return 影响行数
 	 */
 	int markRead(@Param("userId") Long userId, @Param("messageIds") List<Long> messageIds,
-			@Param("readTime") LocalDateTime readTime);
+			@Param("readTime") Instant readTime);
 
 	/**
 	 * 将当前用户可见且未删的收件行软删除

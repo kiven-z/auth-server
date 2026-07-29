@@ -12,7 +12,7 @@ import com.auth.service.system.message.model.value.sms.dypns.DypnsVerifyCodeSend
 import com.auth.service.system.message.support.delivery.ChannelDeliveryRecorder;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 import static com.auth.service.system.message.exception.MessageResultCode.SMS_CUSTOM_BODY_NOT_SUPPORTED;
@@ -54,7 +54,7 @@ public class DypnsVerifyCodeMessageSender extends AbstractRecordingMessageSender
 		}
 
 		DypnsVerifyCodeSendPayload prepared = dypnsVerifyCodeTemplatePipeline.prepare(command);
-		LocalDateTime sentAt = LocalDateTime.now();
+		Instant sentAt = Instant.now();
 		List<TargetSendOutcome> outcomes = command.getTargets()
 			.stream()
 			.map(phone -> sendOne(phone, prepared, sentAt))
@@ -69,7 +69,7 @@ public class DypnsVerifyCodeMessageSender extends AbstractRecordingMessageSender
 	 * @param sentAt 发送时间
 	 * @return 该号码的发送结果
 	 */
-	private TargetSendOutcome sendOne(String phone, DypnsVerifyCodeSendPayload prepared, LocalDateTime sentAt) {
+	private TargetSendOutcome sendOne(String phone, DypnsVerifyCodeSendPayload prepared, Instant sentAt) {
 		try {
 			String providerTemplateCode = prepared.providerTemplateCode();
 			String templateParamJson = prepared.templateParam();

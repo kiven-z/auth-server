@@ -8,7 +8,7 @@ import lombok.ToString;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * 文件记录分页行（持久层查询投影，非 API 出参）
@@ -52,10 +52,10 @@ public class FileRecordPageRowPO implements Serializable {
 	private String bizId;
 
 	@Schema(title = "创建时间")
-	private LocalDateTime createTime;
+	private Instant createTime;
 
 	@Schema(title = "更新时间")
-	private LocalDateTime updateTime;
+	private Instant updateTime;
 
 	@Schema(title = "创建用户")
 	private Long createUser;

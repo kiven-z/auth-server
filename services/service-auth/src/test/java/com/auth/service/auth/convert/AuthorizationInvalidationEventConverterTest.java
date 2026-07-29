@@ -5,7 +5,7 @@ import com.auth.service.auth.support.invalidation.InvalidationProcessingMarker;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -23,7 +23,7 @@ class AuthorizationInvalidationEventConverterTest {
 		row.setEventId("evt-1");
 		row.setChangeKind("ROLE");
 		row.setImpactedUserCount(3);
-		row.setProcessedAt(LocalDateTime.now());
+		row.setProcessedAt(Instant.now());
 
 		var pageVo = AuthorizationInvalidationEventConverter.INSTANCE.toPageVO(row);
 

@@ -36,6 +36,10 @@ public class SysJobUpdateForm implements Serializable {
 	@NotBlank(groups = UpdateGroup.class)
 	private String cronExpression;
 
+	@Schema(title = "调度时区(IANA ZoneId，默认 Asia/Shanghai)")
+	@Size(max = 64)
+	private String timeZone;
+
 	@Schema(title = "错失策略(1/2/3)")
 	@NotNull(groups = UpdateGroup.class)
 	private Integer misfirePolicy;

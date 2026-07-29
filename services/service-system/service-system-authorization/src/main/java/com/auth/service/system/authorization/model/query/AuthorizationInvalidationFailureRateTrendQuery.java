@@ -11,7 +11,7 @@ import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * 授权失效失败率趋势查询条件
@@ -30,10 +30,10 @@ public class AuthorizationInvalidationFailureRateTrendQuery implements Serializa
 	private AuthorizationInvalidationFailureRateTrendGranularity granularity = AuthorizationInvalidationFailureRateTrendGranularity.DAY;
 
 	@Schema(title = "统计开始时间（与 endTime 成对使用）")
-	private LocalDateTime startTime;
+	private Instant startTime;
 
 	@Schema(title = "统计结束时间（与 startTime 成对使用）")
-	private LocalDateTime endTime;
+	private Instant endTime;
 
 	@Schema(title = "最近天数（未指定起止时间时生效）", defaultValue = "30")
 	@Max(366)

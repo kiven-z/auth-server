@@ -1,11 +1,11 @@
 package com.auth.service.system.message.service.admin.impl;
 
+import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.mapper.InAppMessageCategoryMapper;
 import com.auth.service.system.message.model.entity.InAppMessageCategoryEntity;
 import com.auth.service.system.message.model.form.inapp.InAppMessageCategoryForm;
-import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.service.system.message.model.po.InAppMessageCategoryDetailRowPO;
 import com.auth.service.system.message.model.po.InAppMessageCategoryPageRowPO;
 import com.auth.service.system.message.model.query.InAppMessageCategoryQuery;
@@ -27,6 +27,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -176,7 +177,7 @@ class InAppMessageCategoryServiceImplTest {
 		InAppMessageCategoryQuery query = new InAppMessageCategoryQuery();
 		query.setStatus(Boolean.TRUE);
 
-		LocalDateTime now = LocalDateTime.of(2026, 7, 20, 12, 0, 0);
+		Instant now = LocalDateTime.of(2026, 7, 20, 12, 0, 0).toInstant(java.time.ZoneOffset.UTC);
 		InAppMessageCategoryPageRowPO major = new InAppMessageCategoryPageRowPO();
 		major.setId(1L);
 		major.setParentId(0L);

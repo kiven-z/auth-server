@@ -8,7 +8,7 @@ import lombok.ToString;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * 登录日志分页行
@@ -39,7 +39,7 @@ public class LogLoginLogPageRowPO implements Serializable {
 	private Integer loginResult;
 
 	@Schema(title = "登录时间")
-	private LocalDateTime loginTime;
+	private Instant loginTime;
 
 	@Schema(title = "登录地区")
 	private String loginRegion;
@@ -48,10 +48,10 @@ public class LogLoginLogPageRowPO implements Serializable {
 	private String loginType;
 
 	@Schema(title = "创建时间")
-	private LocalDateTime createTime;
+	private Instant createTime;
 
 	@Schema(title = "更新时间")
-	private LocalDateTime updateTime;
+	private Instant updateTime;
 
 	@JsonStringFormat
 	@Schema(title = "创建用户")

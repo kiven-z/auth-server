@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * 渠道消息投递记录（message_channel_delivery）
@@ -43,7 +43,7 @@ public class MessageChannelDeliveryEntity extends BaseEntity {
 	private String errorMessage;
 
 	@Schema(title = "实际发送时间")
-	private LocalDateTime sentAt;
+	private Instant sentAt;
 
 	@Schema(title = "重试次数")
 	private Integer retryCount;

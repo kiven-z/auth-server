@@ -38,7 +38,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -211,7 +211,7 @@ public class InAppSendTaskServiceImpl extends ServiceImpl<InAppMessageMapper, In
 		}
 
 		Long recallUserId = SecurityUserUtils.getUserId();
-		if (baseMapper.recallTask(taskId, LocalDateTime.now(), recallUserId) <= 0) {
+		if (baseMapper.recallTask(taskId, Instant.now(), recallUserId) <= 0) {
 			// CAS 失败：并发下状态已变
 			throw new MessageException(IN_APP_SEND_TASK_OPERATION_NOT_ALLOWED);
 		}

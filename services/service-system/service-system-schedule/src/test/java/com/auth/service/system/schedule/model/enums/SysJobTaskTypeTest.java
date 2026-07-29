@@ -15,13 +15,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 class SysJobTaskTypeTest {
 
 	@Test
-	@DisplayName("defaultHandlerCode：各类型返回约定编码")
-	void defaultHandlerCodeReturnsExpectedCodes() {
-		assertThat(SysJobTaskType.BEAN_INVOKE.defaultHandlerCode()).isEqualTo("beanInvokeHandler");
-		assertThat(SysJobTaskType.CUSTOM_CLASS.defaultHandlerCode()).isEqualTo("customClassHandler");
-	}
-
-	@Test
 	@DisplayName("resolveEntryJobClass：所有类型共用统一入口 Job")
 	void resolveEntryJobClassReturnsUnifiedEntryJobs() {
 		for (SysJobTaskType taskType : SysJobTaskType.values()) {

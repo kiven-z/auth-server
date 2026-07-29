@@ -34,6 +34,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Field;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -126,7 +127,7 @@ class SysUserPostServiceImplTest {
 		UserPostPageQuery query = new UserPostPageQuery();
 		query.setPageIndex(1);
 		query.setPageSize(10);
-		LocalDateTime now = LocalDateTime.of(2026, 6, 11, 10, 0, 0);
+		Instant now = LocalDateTime.of(2026, 6, 11, 10, 0, 0).toInstant(java.time.ZoneOffset.UTC);
 		UserPostPageRowPO row = new UserPostPageRowPO();
 		row.setId(RELATION_ID);
 		row.setUserId(USER_ID);

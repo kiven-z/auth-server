@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * 渠道投递结果回写参数
@@ -44,6 +44,6 @@ public class ChannelDeliveryResultUpdate {
 	/**
 	 * 实际发送时间
 	 */
-	private LocalDateTime sentAt;
+	private Instant sentAt;
 
 }

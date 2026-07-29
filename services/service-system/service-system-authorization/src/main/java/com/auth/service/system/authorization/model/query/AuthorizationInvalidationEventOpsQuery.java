@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * 授权失效幂等事件运维查询条件
@@ -28,9 +28,9 @@ public class AuthorizationInvalidationEventOpsQuery extends PageQueryRequest {
 	private Boolean processing;
 
 	@Schema(title = "处理完成时间（开始）")
-	private LocalDateTime processedAtStart;
+	private Instant processedAtStart;
 
 	@Schema(title = "处理完成时间（结束）")
-	private LocalDateTime processedAtEnd;
+	private Instant processedAtEnd;
 
 }

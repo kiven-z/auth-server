@@ -24,7 +24,7 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -101,7 +101,7 @@ class LoginSessionOrchestratorTest {
 		when(tokenService.buildTokenPair(anyLong(), anyString(), anyLong())).thenReturn(TokenPair.builder()
 			.accessToken(TestConstants.ACCESS_TOKEN)
 			.refreshToken(TestConstants.REFRESH_TOKEN)
-			.accessExpiresAt(LocalDateTime.now().plusMinutes(1))
+			.accessExpiresAt(Instant.now().plus(1, java.time.temporal.ChronoUnit.MINUTES))
 			.build());
 		when(refreshTokenCookieWriter.resolveReadMeDay()).thenReturn(7L);
 
@@ -149,7 +149,7 @@ class LoginSessionOrchestratorTest {
 		when(tokenService.buildTokenPair(anyLong(), anyString(), anyLong())).thenReturn(TokenPair.builder()
 			.accessToken(TestConstants.ACCESS_TOKEN)
 			.refreshToken(TestConstants.REFRESH_TOKEN)
-			.accessExpiresAt(LocalDateTime.now().plusMinutes(1))
+			.accessExpiresAt(Instant.now().plus(1, java.time.temporal.ChronoUnit.MINUTES))
 			.build());
 
 		newOrchestrator().issueSession(loginResult, true, httpServletRequest);

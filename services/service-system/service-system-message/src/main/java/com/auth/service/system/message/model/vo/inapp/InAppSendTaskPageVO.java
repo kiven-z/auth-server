@@ -2,13 +2,12 @@ package com.auth.service.system.message.model.vo.inapp;
 
 import com.auth.common.core.annotation.JsonStringFormat;
 import com.auth.common.core.model.response.BaseResponse;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * 站内信发送任务分页返回对象
@@ -59,8 +58,7 @@ public class InAppSendTaskPageVO extends BaseResponse {
 	@Schema(name = "status", title = "任务状态")
 	private String status;
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(name = "recalledAt", title = "撤回时间")
-	private LocalDateTime recalledAt;
+	private Instant recalledAt;
 
 }

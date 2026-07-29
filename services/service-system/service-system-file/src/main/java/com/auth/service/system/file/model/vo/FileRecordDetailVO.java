@@ -3,14 +3,13 @@ package com.auth.service.system.file.model.vo;
 import com.auth.common.core.annotation.JsonStringFormat;
 import com.auth.common.core.model.response.BaseResponse;
 import com.auth.module.file.api.model.enums.StoragePlatformEnum;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * 文件记录详情
@@ -76,8 +75,7 @@ public class FileRecordDetailVO extends BaseResponse {
 	@Schema(title = "删除人")
 	private Long deletedBy;
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "删除时间")
-	private LocalDateTime deletedAt;
+	private Instant deletedAt;
 
 }

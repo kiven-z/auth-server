@@ -31,7 +31,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -110,7 +110,7 @@ public class InAppInboxServiceImpl implements InAppInboxService {
 		Long userId = actionable.userId();
 		List<Long> pushIds = actionable.pushIds();
 		List<Long> pullIds = actionable.pullIds();
-		LocalDateTime readTime = LocalDateTime.now();
+		Instant readTime = Instant.now();
 		if (CollUtil.isNotEmpty(pushIds)) {
 			inAppMessageRecipientMapper.markRead(userId, pushIds, readTime);
 		}
@@ -219,7 +219,7 @@ public class InAppInboxServiceImpl implements InAppInboxService {
 		}
 
 		InAppInboxDetailVO vo = InAppInboxConverter.INSTANCE.toDetailVO(row);
-		LocalDateTime readTime = LocalDateTime.now();
+		Instant readTime = Instant.now();
 		applyMarkRead(List.of(messageId));
 		vo.setIsRead(Boolean.TRUE);
 		vo.setReadTime(readTime);

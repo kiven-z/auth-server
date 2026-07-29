@@ -9,7 +9,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * 授权失效幂等事件 Mapper
@@ -76,7 +76,7 @@ public interface AuthorizationInvalidationEventMapper {
 	 * @param batchSize 本批删除上限
 	 * @return 实际删除行数
 	 */
-	int deleteStaleProcessingClaims(@Param("cutoffTime") LocalDateTime cutoffTime, @Param("batchSize") int batchSize);
+	int deleteStaleProcessingClaims(@Param("cutoffTime") Instant cutoffTime, @Param("batchSize") int batchSize);
 
 	/**
 	 * 批量删除已完成的过期幂等事件
@@ -84,6 +84,6 @@ public interface AuthorizationInvalidationEventMapper {
 	 * @param batchSize 本批删除上限
 	 * @return 实际删除行数
 	 */
-	int deleteCompletedBefore(@Param("cutoffTime") LocalDateTime cutoffTime, @Param("batchSize") int batchSize);
+	int deleteCompletedBefore(@Param("cutoffTime") Instant cutoffTime, @Param("batchSize") int batchSize);
 
 }

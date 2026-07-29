@@ -6,7 +6,7 @@ import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * 授权失效幂等事件分页行投影
@@ -43,13 +43,13 @@ public class AuthorizationInvalidationEventPageRowPO implements Serializable {
 	private Integer profileEvictedCount;
 
 	@Schema(title = "处理完成时间")
-	private LocalDateTime processedAt;
+	private Instant processedAt;
 
 	@Schema(title = "创建时间")
-	private LocalDateTime createTime;
+	private Instant createTime;
 
 	@Schema(title = "更新时间")
-	private LocalDateTime updateTime;
+	private Instant updateTime;
 
 	@Schema(title = "创建用户")
 	private Long createUser;

@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * 文件元数据实体，对应 {@code file_record}
@@ -74,6 +74,6 @@ public class FileRecordEntity extends BaseEntity {
 	private Long deletedBy;
 
 	@Schema(title = "删除时间")
-	private LocalDateTime deletedAt;
+	private Instant deletedAt;
 
 }

@@ -16,7 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -74,14 +74,14 @@ class FileRecycleCleanupJobTest {
 
 		List<FileRecordEntity> fullBatch = buildDeletedEntities(8501L);
 		FileRecordEntity remainder = buildDeletedEntity(8501L + BATCH_SIZE);
-		when(fileRecordMapper.selectExpiredDeleted(any(LocalDateTime.class), eq(BATCH_SIZE))).thenReturn(fullBatch,
+		when(fileRecordMapper.selectExpiredDeleted(any(Instant.class), eq(BATCH_SIZE))).thenReturn(fullBatch,
 				List.of(remainder));
 		when(facadeRegistry.resolve(StoragePlatformEnum.MINIO)).thenReturn(storagePlatformFacade);
 		when(storagePlatformFacade.provider()).thenReturn(minioProvider);
 
 		cleanupJob.purgeExpired();
 
-		verify(fileRecordMapper, times(2)).selectExpiredDeleted(any(LocalDateTime.class), eq(BATCH_SIZE));
+		verify(fileRecordMapper, times(2)).selectExpiredDeleted(any(Instant.class), eq(BATCH_SIZE));
 		verify(minioProvider, times(BATCH_SIZE + 1)).delete("public", "a.png");
 		verify(fileRecordMapper).deletePhysicallyByIds(fullBatch.stream().map(FileRecordEntity::getId).toList(), true);
 		verify(fileRecordMapper).deletePhysicallyByIds(List.of(remainder.getId()), true);
@@ -96,13 +96,13 @@ class FileRecycleCleanupJobTest {
 		when(properties.getMaxRounds()).thenReturn(2);
 
 		List<FileRecordEntity> fullBatch = buildDeletedEntities(8601L);
-		when(fileRecordMapper.selectExpiredDeleted(any(LocalDateTime.class), eq(BATCH_SIZE))).thenReturn(fullBatch);
+		when(fileRecordMapper.selectExpiredDeleted(any(Instant.class), eq(BATCH_SIZE))).thenReturn(fullBatch);
 		when(facadeRegistry.resolve(StoragePlatformEnum.MINIO)).thenReturn(storagePlatformFacade);
 		when(storagePlatformFacade.provider()).thenReturn(minioProvider);
 
 		cleanupJob.purgeExpired();
 
-		verify(fileRecordMapper, times(2)).selectExpiredDeleted(any(LocalDateTime.class), eq(BATCH_SIZE));
+		verify(fileRecordMapper, times(2)).selectExpiredDeleted(any(Instant.class), eq(BATCH_SIZE));
 		verify(fileRecordMapper, times(2))
 			.deletePhysicallyByIds(fullBatch.stream().map(FileRecordEntity::getId).toList(), true);
 	}
@@ -114,7 +114,7 @@ class FileRecycleCleanupJobTest {
 		when(properties.getEnabled()).thenReturn(true);
 		when(properties.getRetentionDays()).thenReturn(90);
 		when(properties.getMaxRounds()).thenReturn(20);
-		when(fileRecordMapper.selectExpiredDeleted(any(LocalDateTime.class), eq(BATCH_SIZE))).thenReturn(List.of());
+		when(fileRecordMapper.selectExpiredDeleted(any(Instant.class), eq(BATCH_SIZE))).thenReturn(List.of());
 
 		cleanupJob.purgeExpired();
 

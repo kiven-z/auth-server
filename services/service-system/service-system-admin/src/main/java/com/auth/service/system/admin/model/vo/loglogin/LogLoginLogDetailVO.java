@@ -2,14 +2,13 @@ package com.auth.service.system.admin.model.vo.loglogin;
 
 import com.auth.common.core.annotation.JsonStringFormat;
 import com.auth.common.core.model.response.BaseResponse;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * 登录日志详情
@@ -36,9 +35,8 @@ public class LogLoginLogDetailVO extends BaseResponse {
 	@Schema(title = "失败原因详情")
 	private String failureReason;
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "登录时间")
-	private LocalDateTime loginTime;
+	private Instant loginTime;
 
 	@Schema(title = "登录IP")
 	private String loginIp;

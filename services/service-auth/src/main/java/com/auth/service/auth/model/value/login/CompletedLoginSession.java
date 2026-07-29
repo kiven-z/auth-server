@@ -3,7 +3,7 @@ package com.auth.service.auth.model.value.login;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 /**
@@ -27,7 +27,7 @@ public class CompletedLoginSession {
 
 	private String refreshToken;
 
-	private LocalDateTime expires;
+	private Instant expires;
 
 	private Long readMeDay;
 

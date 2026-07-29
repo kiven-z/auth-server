@@ -22,13 +22,4 @@ class RecipientScopeTypeTest {
 		assertThat(RecipientScopeType.DEPT.isPull()).isFalse();
 	}
 
-	@Test
-	@DisplayName("from 解析大小写不敏感，非法返回 null")
-	void from_shouldParseIgnoreCase() {
-		assertThat(RecipientScopeType.from("all")).isEqualTo(RecipientScopeType.ALL);
-		assertThat(RecipientScopeType.from("DEPT")).isEqualTo(RecipientScopeType.DEPT);
-		assertThat(RecipientScopeType.from(" ")).isNull();
-		assertThat(RecipientScopeType.from("FOO")).isNull();
-	}
-
 }

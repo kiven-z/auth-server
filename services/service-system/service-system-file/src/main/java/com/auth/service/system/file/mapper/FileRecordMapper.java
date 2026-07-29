@@ -9,7 +9,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 /**
@@ -99,6 +99,6 @@ public interface FileRecordMapper extends BaseMapper<FileRecordEntity> {
 	 * @param limit 返回条数上限
 	 * @return 过期已删文件记录
 	 */
-	List<FileRecordEntity> selectExpiredDeleted(@Param("cutoff") LocalDateTime cutoff, @Param("limit") int limit);
+	List<FileRecordEntity> selectExpiredDeleted(@Param("cutoff") Instant cutoff, @Param("limit") int limit);
 
 }

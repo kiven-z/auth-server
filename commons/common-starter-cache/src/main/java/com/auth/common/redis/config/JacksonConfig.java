@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.TimeZone;
 
@@ -54,17 +54,15 @@ public class JacksonConfig {
 		timeModule.addSerializer(LocalDate.class, new LocalDateSerializer(DATE_FORMATTER));
 		timeModule.addDeserializer(LocalDate.class, new LocalDateDeserializer(DATE_FORMATTER));
 
-		// 注册JavaTimeModule模块以支持Java 8时间类型
 		objectMapper.registerModule(timeModule);
 
 		// 禁用时间戳序列化，使用标准格式输出日期
 		objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-		// 配置反序列化时忽略未知属性，避免解析失败
 		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-		// 设置时区为系统默认时区
-		objectMapper.setTimeZone(TimeZone.getTimeZone(ZoneId.systemDefault()));
+		// 设置时区
+		objectMapper.setTimeZone(TimeZone.getTimeZone(ZoneOffset.UTC));
 
 		return objectMapper;
 	}

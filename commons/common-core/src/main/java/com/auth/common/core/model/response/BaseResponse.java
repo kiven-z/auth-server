@@ -1,13 +1,12 @@
 package com.auth.common.core.model.response;
 
 import com.auth.common.core.annotation.JsonStringFormat;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * 基础返回数据
@@ -30,14 +29,12 @@ public class BaseResponse implements Serializable {
 	/**
 	 * 创建时间
 	 */
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	private LocalDateTime createTime;
+	private Instant createTime;
 
 	/**
 	 * 更新时间
 	 */
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	private LocalDateTime updateTime;
+	private Instant updateTime;
 
 	/**
 	 * 创建用户ID

@@ -6,7 +6,7 @@ import lombok.Getter;
 /**
  * 定时任务 / Quartz / Job 配置结果码
  * <p>
- * 号段：216、220、226、228、239–241、243、246、248（217–219、224–225、235、244–245、249 已释放）
+ * 号段：216、220、226、228、239–241、243、246、248–249（217–219、224–225、235、244–245 已释放）
  * </p>
  *
  * @author Bunny
@@ -48,6 +48,11 @@ public enum ScheduleResultCode implements SystemResultCode {
 	 * 任务类型不支持
 	 */
 	JOB_TASK_TYPE_UNSUPPORTED(422, 241, "JOB_TASK_TYPE_UNSUPPORTED", "system.job.task_type.unsupported"),
+
+	/**
+	 * 调度时区不支持（{0}=ZoneId）
+	 */
+	JOB_TIME_ZONE_UNSUPPORTED(422, 249, "JOB_TIME_ZONE_UNSUPPORTED", "system.job.time_zone.unsupported"),
 
 	/**
 	 * 任务配置 JSON 非法（{0}=字段名，{1}=原因）

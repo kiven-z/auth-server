@@ -2,7 +2,8 @@ package com.auth.service.auth.support.message;
 
 import lombok.experimental.UtilityClass;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,9 +17,10 @@ import java.util.Map;
 public class AuthMessageVariables {
 
 	/**
-	 * 登录时间展示格式
+	 * 登录时间展示格式（UTC）
 	 */
-	private static final DateTimeFormatter LOGIN_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+	private static final DateTimeFormatter LOGIN_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+		.withZone(ZoneOffset.UTC);
 
 	/**
 	 * 构建登录邮箱验证码模板变量（template_code = login-email-code）。
@@ -28,15 +30,16 @@ public class AuthMessageVariables {
 	 * @param loginTime 登录时间
 	 * @param ipAddr 登录 IP
 	 * @param ipRegion 登录归属地
-	 * @return 变量 Map
+	 * @return 变量 Map；{@code loginTime} 为带 UTC 标注的展示文案
 	 */
 	public static Map<String, Object> buildLoginEmail(String username, String verificationCode, long expireMinutes,
-			LocalDateTime loginTime, String ipAddr, String ipRegion) {
+			Instant loginTime, String ipAddr, String ipRegion) {
+		String formatLoginTime = loginTime == null ? "" : LOGIN_TIME_FORMAT.format(loginTime) + " UTC";
 		Map<String, Object> variables = new HashMap<>(6);
 		variables.put("username", username);
 		variables.put("verificationCode", verificationCode);
 		variables.put("expireTime", expireMinutes);
-		variables.put("loginTime", loginTime.format(LOGIN_TIME_FORMAT));
+		variables.put("loginTime", formatLoginTime);
 		variables.put("ipAddr", ipAddr);
 		variables.put("ipRegion", ipRegion);
 		return variables;

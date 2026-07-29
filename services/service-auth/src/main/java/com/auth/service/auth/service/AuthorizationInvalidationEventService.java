@@ -9,7 +9,7 @@ import com.auth.service.auth.model.vo.authorization.AuthorizationInvalidationEve
 import com.auth.service.auth.model.vo.authorization.AuthorizationInvalidationEventPageVO;
 import com.auth.service.auth.model.vo.authorization.AuthorizationInvalidationEventStatsVO;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * 授权失效幂等事件：运维门禁与查询
@@ -75,7 +75,7 @@ public interface AuthorizationInvalidationEventService {
 	 * @param batchSize 本批删除上限
 	 * @return 实际删除行数
 	 */
-	int cleanupStaleProcessingClaims(LocalDateTime cutoffTime, int batchSize);
+	int cleanupStaleProcessingClaims(Instant cutoffTime, int batchSize);
 
 	/**
 	 * 批量删除已完成的过期幂等事件
@@ -83,6 +83,6 @@ public interface AuthorizationInvalidationEventService {
 	 * @param batchSize 本批删除上限
 	 * @return 实际删除行数
 	 */
-	int purgeCompletedBefore(LocalDateTime cutoffTime, int batchSize);
+	int purgeCompletedBefore(Instant cutoffTime, int batchSize);
 
 }

@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * 站内信发送任务
@@ -64,7 +64,7 @@ public class InAppMessageEntity extends BaseEntity {
 	private String status;
 
 	@Schema(title = "撤回时间")
-	private LocalDateTime recalledAt;
+	private Instant recalledAt;
 
 	@Schema(title = "撤回操作人")
 	private Long recallUserId;

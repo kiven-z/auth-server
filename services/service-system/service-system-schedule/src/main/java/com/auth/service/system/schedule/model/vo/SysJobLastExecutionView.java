@@ -2,7 +2,7 @@ package com.auth.service.system.schedule.model.vo;
 
 import com.auth.service.system.schedule.model.enums.SysJobLastExecutionStatus;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * 可补充最近一次执行结果的视图（分页行 / 详情共用）
@@ -27,6 +27,6 @@ public interface SysJobLastExecutionView {
 	 * 写入最近一次执行时间
 	 * @param time 执行时间
 	 */
-	void setLastExecutionTime(LocalDateTime time);
+	void setLastExecutionTime(Instant time);
 
 }

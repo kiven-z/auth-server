@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * 登录审计仓储
@@ -79,7 +79,7 @@ public class LoginLogRepository extends ServiceImpl<LoginLogMapper, LoginLogEnti
 			entity.setLoginType(eventType.name());
 			entity.setLoginResult(result.getCode());
 			entity.setFailureReason(failureReason);
-			entity.setLoginTime(LocalDateTime.now());
+			entity.setLoginTime(Instant.now());
 			entity.setSessionId(sessionId);
 
 			if (userId != null) {

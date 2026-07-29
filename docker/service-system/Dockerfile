@@ -19,7 +19,7 @@ RUN apt-get update \
 WORKDIR /app
 COPY --from=build /workspace/services/service-system/service-system-bootstrap/target/service-system.jar /app/app.jar
 
-ENV TZ=Asia/Shanghai \
+ENV TZ=UTC \
     SPRING_PROFILES_ACTIVE=docker
 EXPOSE 20002
 

@@ -2,7 +2,6 @@ package com.auth.service.system.message.model.vo.inapp;
 
 import com.auth.common.core.annotation.JsonStringFormat;
 import com.auth.common.core.model.response.BaseResponse;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -11,7 +10,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 /**
@@ -80,9 +79,8 @@ public class InAppSendTaskDetailVO extends BaseResponse {
 	@Schema(name = "status", title = "任务状态")
 	private String status;
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(name = "recalledAt", title = "撤回时间")
-	private LocalDateTime recalledAt;
+	private Instant recalledAt;
 
 	@JsonStringFormat
 	@Schema(name = "recallUserId", title = "撤回操作人用户 ID")

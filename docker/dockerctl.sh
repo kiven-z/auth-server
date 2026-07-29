@@ -15,7 +15,7 @@ show_help() {
 说明:
   compose.yml          运行时（无 build）— 本地与服务器同一份
   compose.override.yml 仅本地构建 — build / build-up 时叠加
-  <env> 决定 Spring profile 与 env/<env>/service-system.env
+  <env> 决定 Spring profile（Nacos DataId）；密钥默认 env/service-system.env
   宿主机仅暴露网关 8080
 
 支持环境:
@@ -41,7 +41,7 @@ show_help() {
   export AUTH_IMAGE_TAG=prod-latest
   ./dockerctl.sh prod up
 
-  # 扁平部署（compose 旁只有 service-system.env）
+  # 自定义密钥文件路径
   export AUTH_ENV_FILE=./service-system.env
   ./dockerctl.sh prod up
 EOF
@@ -68,7 +68,7 @@ default_image_tag() {
 
 prepare_env() {
   local target_env="$1"
-  local default_env_file="${SCRIPT_DIR}/env/${target_env}/service-system.env"
+  local default_env_file="${SCRIPT_DIR}/env/service-system.env"
 
   if [[ ! -f "${COMPOSE_FILE}" ]]; then
     echo "错误: compose 文件不存在: ${COMPOSE_FILE}"
@@ -83,7 +83,7 @@ prepare_env() {
   if [[ ! -f "${AUTH_ENV_FILE}" ]]; then
     echo "错误: 缺少环境文件: ${AUTH_ENV_FILE}"
     if [[ "${AUTH_ENV_FILE}" == "${default_env_file}" ]]; then
-      echo "请复制 ${default_env_file}.example 为 service-system.env 后填写。"
+      echo "请复制 ${SCRIPT_DIR}/env/service-system.env.example 为 service-system.env 后填写。"
     fi
     exit 1
   fi

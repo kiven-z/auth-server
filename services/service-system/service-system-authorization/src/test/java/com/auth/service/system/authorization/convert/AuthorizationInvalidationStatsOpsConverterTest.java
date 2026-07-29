@@ -1,6 +1,5 @@
 package com.auth.service.system.authorization.convert;
 
-import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidationEventStatsInnerDTO;
 import com.auth.service.system.authorization.model.po.AuthorizationInvalidationEventStatsPO;
 import com.auth.service.system.authorization.model.po.AuthorizationInvalidationFailureRateTrendBucketPO;
 import com.auth.service.system.authorization.model.po.AuthorizationInvalidationOutboxStatsPO;
@@ -102,38 +101,6 @@ class AuthorizationInvalidationStatsOpsConverterTest {
 		assertThat(statsVo.getTotalCount()).isZero();
 		assertThat(statsVo.getProcessingCount()).isZero();
 		assertThat(statsVo.getCompletedCount()).isZero();
-	}
-
-	@Test
-	@DisplayName("Feign 统计摘要应映射为统计 PO")
-	void toEventStatsPo_shouldMapCounts() {
-		AuthorizationInvalidationEventStatsInnerDTO statsDto = new AuthorizationInvalidationEventStatsInnerDTO();
-		statsDto.setTotalCount(8L);
-		statsDto.setProcessingCount(1L);
-		statsDto.setCompletedCount(7L);
-
-		AuthorizationInvalidationEventStatsPO statsPo = AuthorizationInvalidationStatsOpsConverter
-			.toEventStatsPo(statsDto);
-
-		assertThat(statsPo.getTotalCount()).isEqualTo(8L);
-		assertThat(statsPo.getProcessingCount()).isEqualTo(1L);
-		assertThat(statsPo.getCompletedCount()).isEqualTo(7L);
-	}
-
-	@Test
-	@DisplayName("幂等事件统计：应映射计数字段")
-	void toEventStatsVo_shouldMapCounts() {
-		AuthorizationInvalidationEventStatsPO statsPo = new AuthorizationInvalidationEventStatsPO();
-		statsPo.setTotalCount(8L);
-		statsPo.setProcessingCount(1L);
-		statsPo.setCompletedCount(7L);
-
-		AuthorizationInvalidationEventStatsVO statsVo = AuthorizationInvalidationStatsOpsConverter
-			.toEventStatsVo(statsPo);
-
-		assertThat(statsVo.getTotalCount()).isEqualTo(8L);
-		assertThat(statsVo.getProcessingCount()).isEqualTo(1L);
-		assertThat(statsVo.getCompletedCount()).isEqualTo(7L);
 	}
 
 	@Test

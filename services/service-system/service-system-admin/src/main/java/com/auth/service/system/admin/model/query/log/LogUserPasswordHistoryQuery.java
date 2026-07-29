@@ -6,7 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * 密码历史日志分页查询
@@ -23,10 +23,10 @@ public class LogUserPasswordHistoryQuery extends PageQueryRequest {
 	private Long userId;
 
 	@Schema(title = "修改时间(开始)")
-	private LocalDateTime changeTimeStart;
+	private Instant changeTimeStart;
 
 	@Schema(title = "修改时间(结束)")
-	private LocalDateTime changeTimeEnd;
+	private Instant changeTimeEnd;
 
 	@Schema(title = "修改IP地址")
 	private String changeIp;

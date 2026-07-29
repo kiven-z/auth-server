@@ -94,8 +94,8 @@ class AuthorizationInvalidationStatsQueryServiceImplTest {
 	void getFailureRateTrend_shouldQueryBucketsAndCalculateFailureRate() {
 		AuthorizationInvalidationFailureRateTrendQuery query = new AuthorizationInvalidationFailureRateTrendQuery();
 		query.setGranularity(AuthorizationInvalidationFailureRateTrendGranularity.DAY);
-		query.setStartTime(LocalDateTime.of(2026, 6, 1, 0, 0));
-		query.setEndTime(LocalDateTime.of(2026, 6, 7, 23, 59, 59));
+		query.setStartTime(LocalDateTime.of(2026, 6, 1, 0, 0).toInstant(java.time.ZoneOffset.UTC));
+		query.setEndTime(LocalDateTime.of(2026, 6, 7, 23, 59, 59).toInstant(java.time.ZoneOffset.UTC));
 
 		AuthorizationInvalidationFailureRateTrendBucketPO bucketPo = new AuthorizationInvalidationFailureRateTrendBucketPO();
 		bucketPo.setBucket("2026-06-01");

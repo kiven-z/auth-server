@@ -9,7 +9,7 @@ import com.auth.service.system.message.model.value.delivery.TargetSendOutcome;
 import com.auth.service.system.message.support.delivery.ChannelDeliveryRecorder;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 import static com.auth.service.system.message.exception.MessageResultCode.MESSAGE_DELIVERY_FAILED;
@@ -55,7 +55,7 @@ public abstract class AbstractRecordingMessageSender implements MessageSender {
 				errorCode = me.getResultCode().getError();
 			}
 			String errorMessage = CharSequenceUtil.subPre(ex.getMessage(), ERROR_MESSAGE_MAX_LENGTH);
-			deliveryRecorder.recordFailed(taskId, channel(), targets, errorCode, errorMessage, LocalDateTime.now());
+			deliveryRecorder.recordFailed(taskId, channel(), targets, errorCode, errorMessage, Instant.now());
 			throw ex;
 		}
 

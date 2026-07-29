@@ -1,7 +1,6 @@
 package com.auth.service.auth.model.response;
 
 import com.auth.common.core.annotation.JsonStringFormat;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
@@ -9,7 +8,7 @@ import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 /**
@@ -47,8 +46,7 @@ public class RefreshTokenResponse implements Serializable {
 	@Schema(title = "阅读过期天数")
 	private Long readMeDay;
 
-	@JsonFormat(pattern = "yyyy/MM/dd HH:mm:ss")
 	@Schema(title = "过期时间")
-	private LocalDateTime expires;
+	private Instant expires;
 
 }

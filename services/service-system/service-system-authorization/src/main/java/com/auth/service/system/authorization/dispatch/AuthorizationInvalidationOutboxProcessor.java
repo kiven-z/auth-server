@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Objects;
 
 /**
@@ -61,7 +61,7 @@ public class AuthorizationInvalidationOutboxProcessor {
 	 * @return 是否处理成功
 	 */
 	public boolean processClaimedRow(SysAuthorizationInvalidationOutboxEntity row, String lockedBy) {
-		LocalDateTime now = LocalDateTime.now();
+		Instant now = Instant.now();
 		int claimed = outboxMapper.claimForProcessing(row.getId(), lockedBy, now, row.getVersion());
 		if (claimed == 0) {
 			return false;
@@ -87,7 +87,7 @@ public class AuthorizationInvalidationOutboxProcessor {
 		try {
 			Result<AuthorizationInvalidateResponse> result = authorizationInnerFeignClient.invalidate(request);
 			if (result != null && Integer.valueOf(Result.SUCCESS_CODE).equals(result.getCode())) {
-				outboxMapper.markSuccess(row.getId(), LocalDateTime.now());
+				outboxMapper.markSuccess(row.getId(), Instant.now());
 				log.info("Authorization invalidation dispatched: eventId={}, outboxId={}", row.getEventId(),
 						row.getId());
 				return true;
@@ -124,7 +124,7 @@ public class AuthorizationInvalidationOutboxProcessor {
 			return;
 		}
 		long backoffSeconds = (long) properties.getRetryBackoffSeconds() * (1L << Math.min(nextRetry, 10));
-		LocalDateTime nextRetryAt = LocalDateTime.now().plusSeconds(backoffSeconds);
+		Instant nextRetryAt = Instant.now().plusSeconds(backoffSeconds);
 		outboxMapper.markFailure(row.getId(), AuthorizationInvalidationOutboxStatus.FAILED.name(), nextRetry,
 				nextRetryAt, truncated);
 	}

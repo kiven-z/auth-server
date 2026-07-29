@@ -7,7 +7,7 @@ import lombok.ToString;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * 操作日志分页行
@@ -56,10 +56,10 @@ public class LogOperationPageRowPO implements Serializable {
 	private String ipAddress;
 
 	@Schema(title = "创建时间")
-	private LocalDateTime createTime;
+	private Instant createTime;
 
 	@Schema(title = "更新时间")
-	private LocalDateTime updateTime;
+	private Instant updateTime;
 
 	@Schema(title = "创建人")
 	private Long createUser;

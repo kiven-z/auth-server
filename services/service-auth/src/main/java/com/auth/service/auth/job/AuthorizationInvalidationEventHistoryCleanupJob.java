@@ -7,7 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 import static com.auth.service.auth.model.constants.AuthBatchSizes.SUCCESS_CLEANUP;
 
@@ -34,7 +35,7 @@ public class AuthorizationInvalidationEventHistoryCleanupJob {
 			return;
 		}
 
-		LocalDateTime cutoff = LocalDateTime.now().minusDays(properties.getSuccessRetentionDays());
+		Instant cutoff = Instant.now().minus(properties.getSuccessRetentionDays(), ChronoUnit.DAYS);
 		int totalDeleted = purgeInBatches(cutoff);
 		if (totalDeleted > 0) {
 			log.info("Purged completed invalidation events: count={}, cutoff={}", totalDeleted, cutoff);
@@ -46,7 +47,7 @@ public class AuthorizationInvalidationEventHistoryCleanupJob {
 	 * @param cutoff processed_at 早于此时间的已完成行可被删除
 	 * @return 累计删除行数
 	 */
-	private int purgeInBatches(LocalDateTime cutoff) {
+	private int purgeInBatches(Instant cutoff) {
 		int totalDeleted = 0;
 		int deleted;
 		do {

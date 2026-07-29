@@ -15,7 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Set;
 
 import static com.auth.service.system.authorization.exception.AuthorizationInvalidationOpsResultCode.*;
@@ -107,12 +108,12 @@ public class AuthorizationInvalidationOutboxManualRetryApplicationService {
 	 * @param lockedAt 锁定时间
 	 * @return 是否可解锁
 	 */
-	private boolean isProcessingUnlockAllowed(LocalDateTime lockedAt) {
+	private boolean isProcessingUnlockAllowed(Instant lockedAt) {
 		if (lockedAt == null) {
 			return true;
 		}
 		long timeoutMinutes = properties.getManualProcessingUnlockTimeoutMinutes();
-		return !lockedAt.plusMinutes(timeoutMinutes).isAfter(LocalDateTime.now());
+		return !lockedAt.plus(timeoutMinutes, ChronoUnit.MINUTES).isAfter(Instant.now());
 	}
 
 	/**

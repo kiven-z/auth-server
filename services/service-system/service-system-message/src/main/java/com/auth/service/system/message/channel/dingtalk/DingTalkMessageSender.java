@@ -13,7 +13,7 @@ import com.auth.service.system.message.model.value.dingtalk.RenderedDingTalkNoti
 import com.auth.service.system.message.support.delivery.ChannelDeliveryRecorder;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -51,7 +51,7 @@ public class DingTalkMessageSender extends AbstractRecordingMessageSender {
 
 		String providerMsgId = workNoticeClient.sendWorkNotice(command.getTargets(), rendered.messageType(),
 				rendered.title(), rendered.content());
-		return ChannelSendResult.sharedSuccess(command.getTargets(), providerMsgId, LocalDateTime.now());
+		return ChannelSendResult.sharedSuccess(command.getTargets(), providerMsgId, Instant.now());
 	}
 
 	/**

@@ -2,7 +2,7 @@ package com.auth.service.system.message.model.value.delivery;
 
 import lombok.Getter;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Objects;
 
 /**
@@ -41,7 +41,7 @@ public class TargetSendOutcome {
 	/**
 	 * 实际发送时间
 	 */
-	private final LocalDateTime sentAt;
+	private final Instant sentAt;
 
 	/**
 	 * @param target 投递目标
@@ -52,13 +52,13 @@ public class TargetSendOutcome {
 	 * @param sentAt 发送时间
 	 */
 	private TargetSendOutcome(String target, boolean success, String providerMsgId, String errorCode,
-			String errorMessage, LocalDateTime sentAt) {
+			String errorMessage, Instant sentAt) {
 		this.target = Objects.requireNonNull(target, "target");
 		this.success = success;
 		this.providerMsgId = providerMsgId;
 		this.errorCode = errorCode;
 		this.errorMessage = errorMessage;
-		this.sentAt = Objects.requireNonNullElseGet(sentAt, LocalDateTime::now);
+		this.sentAt = Objects.requireNonNullElseGet(sentAt, Instant::now);
 	}
 
 	/**
@@ -68,7 +68,7 @@ public class TargetSendOutcome {
 	 * @param sentAt 发送时间
 	 * @return 成功结果
 	 */
-	public static TargetSendOutcome success(String target, String providerMsgId, LocalDateTime sentAt) {
+	public static TargetSendOutcome success(String target, String providerMsgId, Instant sentAt) {
 		return new TargetSendOutcome(target, true, providerMsgId, null, null, sentAt);
 	}
 
@@ -80,8 +80,7 @@ public class TargetSendOutcome {
 	 * @param sentAt 发送时间
 	 * @return 失败结果
 	 */
-	public static TargetSendOutcome failure(String target, String errorCode, String errorMessage,
-			LocalDateTime sentAt) {
+	public static TargetSendOutcome failure(String target, String errorCode, String errorMessage, Instant sentAt) {
 		return new TargetSendOutcome(target, false, null, errorCode, errorMessage, sentAt);
 	}
 

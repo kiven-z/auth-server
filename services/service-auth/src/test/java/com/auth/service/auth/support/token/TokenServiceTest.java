@@ -13,7 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -81,8 +81,8 @@ class TokenServiceTest {
 		when(jwtProperties.getAccessExpired()).thenReturn(30L);
 		TokenService service = new TokenService(accessTokenProvider, refreshTokenProvider, jwtProperties);
 
-		LocalDateTime now = LocalDateTime.now();
-		LocalDateTime expiresAt = service.getAccessExpiresAt();
+		Instant now = Instant.now();
+		Instant expiresAt = service.getAccessExpiresAt();
 
 		assertTrue(expiresAt.isAfter(now));
 	}

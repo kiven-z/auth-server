@@ -13,7 +13,7 @@ import org.quartz.SchedulerException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CIRCUIT_BREAKER_PAUSE_FAILED;
@@ -91,7 +91,7 @@ public class SysJobCircuitBreaker {
 			jobMapper.update(null,
 					Wrappers.lambdaUpdate(JobEntity.class)
 						.set(JobEntity::getStatus, false)
-						.set(JobEntity::getUpdateTime, LocalDateTime.now())
+						.set(JobEntity::getUpdateTime, Instant.now())
 						.eq(JobEntity::getId, jobId));
 		}
 

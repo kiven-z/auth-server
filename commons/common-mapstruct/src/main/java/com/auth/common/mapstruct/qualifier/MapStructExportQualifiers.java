@@ -3,7 +3,8 @@ package com.auth.common.mapstruct.qualifier;
 import lombok.experimental.UtilityClass;
 import org.mapstruct.Named;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
 /**
@@ -17,7 +18,8 @@ public class MapStructExportQualifiers {
 	/**
 	 * 导出时间列默认格式
 	 */
-	public static final DateTimeFormatter EXPORT_DATE_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+	public static final DateTimeFormatter EXPORT_DATE_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+		.withZone(ZoneOffset.UTC);
 
 	/**
 	 * 启用状态 → 导出文案
@@ -31,12 +33,12 @@ public class MapStructExportQualifiers {
 
 	/**
 	 * 时间 → 导出文本
-	 * @param dateTime 时间
+	 * @param instant 时间
 	 * @return 格式化文本，空则返回空串
 	 */
 	@Named("dateTimeText")
-	public String dateTimeText(LocalDateTime dateTime) {
-		return dateTime == null ? "" : dateTime.format(EXPORT_DATE_TIME);
+	public String dateTimeText(Instant instant) {
+		return instant == null ? "" : EXPORT_DATE_TIME.format(instant);
 	}
 
 }

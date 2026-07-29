@@ -45,7 +45,9 @@ spring:
         file-extension: yaml
 
   jackson:
-    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: UTC
+    serialization:
+      write-dates-as-timestamps: false
 
 springdoc:
   api-docs:

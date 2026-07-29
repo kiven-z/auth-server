@@ -34,6 +34,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -88,7 +89,7 @@ class InAppInboxServiceImplTest {
 		query.setPageIndex(1);
 		query.setPageSize(10);
 
-		LocalDateTime now = LocalDateTime.of(2026, 7, 19, 17, 0, 0);
+		Instant now = LocalDateTime.of(2026, 7, 19, 17, 0, 0).toInstant(java.time.ZoneOffset.UTC);
 		InAppInboxPageRowPO row = new InAppInboxPageRowPO();
 		row.setId(11L);
 		row.setSceneCode("notice");
@@ -217,7 +218,7 @@ class InAppInboxServiceImplTest {
 			service.markRead(List.of(11L, 12L, 13L));
 		}
 
-		verify(inAppMessageRecipientMapper).markRead(eq(100L), eq(List.of(11L, 12L)), any(LocalDateTime.class));
+		verify(inAppMessageRecipientMapper).markRead(eq(100L), eq(List.of(11L, 12L)), any(Instant.class));
 
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<List<InAppMessageUserStatusEntity>> rowsCaptor = ArgumentCaptor.forClass(List.class);
@@ -258,7 +259,7 @@ class InAppInboxServiceImplTest {
 			service.markRead(Arrays.asList(21L, null, 21L, 22L));
 		}
 
-		verify(inAppMessageRecipientMapper).markRead(eq(100L), eq(List.of(21L)), any(LocalDateTime.class));
+		verify(inAppMessageRecipientMapper).markRead(eq(100L), eq(List.of(21L)), any(Instant.class));
 		verify(inAppMessageUserStatusMapper, never()).upsertReadBatch(anyList());
 	}
 
@@ -278,7 +279,7 @@ class InAppInboxServiceImplTest {
 			service.markRead(List.of(31L));
 		}
 
-		verify(inAppMessageRecipientMapper, never()).markRead(any(), anyList(), any(LocalDateTime.class));
+		verify(inAppMessageRecipientMapper, never()).markRead(any(), anyList(), any(Instant.class));
 		verify(inAppMessageUserStatusMapper).upsertReadBatch(anyList());
 	}
 
@@ -321,7 +322,7 @@ class InAppInboxServiceImplTest {
 		}
 
 		verify(inAppInboxMapper).selectUnreadMessageIdsByMajor(100L, majorCategoryId);
-		verify(inAppMessageRecipientMapper).markRead(eq(100L), eq(List.of(11L)), any(LocalDateTime.class));
+		verify(inAppMessageRecipientMapper).markRead(eq(100L), eq(List.of(11L)), any(Instant.class));
 		verify(inAppMessageUserStatusMapper).upsertReadBatch(anyList());
 	}
 
@@ -573,7 +574,7 @@ class InAppInboxServiceImplTest {
 			assertThat(vo.getReadTime()).isNotNull();
 		}
 
-		verify(inAppMessageRecipientMapper).markRead(eq(100L), eq(List.of(11L)), any(LocalDateTime.class));
+		verify(inAppMessageRecipientMapper).markRead(eq(100L), eq(List.of(11L)), any(Instant.class));
 	}
 
 	@Test
@@ -619,7 +620,7 @@ class InAppInboxServiceImplTest {
 				.isEqualTo(DATA_NOT_EXIST);
 		}
 
-		verify(inAppMessageRecipientMapper, never()).markRead(any(), anyList(), any(LocalDateTime.class));
+		verify(inAppMessageRecipientMapper, never()).markRead(any(), anyList(), any(Instant.class));
 		verify(inAppMessageUserStatusMapper, never()).upsertReadBatch(anyList());
 	}
 

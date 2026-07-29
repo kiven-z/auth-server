@@ -20,7 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -160,7 +160,7 @@ class RefreshTokenServiceTest {
 			.build();
 		when(authProfileRedisCache.loadCachedProfile(TestConstants.USER_ID)).thenReturn(Optional.of(profile));
 
-		LocalDateTime expires = LocalDateTime.now().plusMinutes(5);
+		Instant expires = Instant.now().plus(5, java.time.temporal.ChronoUnit.MINUTES);
 		TokenPair tokenPair = TokenPair.builder()
 			.accessToken("new-access")
 			.refreshToken("new-refresh")
@@ -204,7 +204,7 @@ class RefreshTokenServiceTest {
 		when(tokenService.buildTokenPair(TestConstants.USER_ID, TestConstants.JTI, 9L)).thenReturn(TokenPair.builder()
 			.accessToken("new-access")
 			.refreshToken("new-refresh")
-			.accessExpiresAt(LocalDateTime.now().plusMinutes(5))
+			.accessExpiresAt(Instant.now().plus(5, java.time.temporal.ChronoUnit.MINUTES))
 			.build());
 
 		RefreshSessionResult result = newService().refreshToken(TestConstants.REFRESH_TOKEN, null);

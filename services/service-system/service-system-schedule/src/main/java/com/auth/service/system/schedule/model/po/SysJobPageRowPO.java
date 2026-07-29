@@ -7,6 +7,7 @@ import lombok.ToString;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 /**
@@ -47,6 +48,9 @@ public class SysJobPageRowPO implements Serializable {
 	@Schema(title = "Cron")
 	private String cronExpression;
 
+	@Schema(title = "调度时区(IANA ZoneId)")
+	private String timeZone;
+
 	@Schema(title = "错失策略")
 	private Integer misfirePolicy;
 
@@ -72,10 +76,10 @@ public class SysJobPageRowPO implements Serializable {
 	private String remark;
 
 	@Schema(title = "创建时间")
-	private LocalDateTime createTime;
+	private Instant createTime;
 
 	@Schema(title = "更新时间")
-	private LocalDateTime updateTime;
+	private Instant updateTime;
 
 	@Schema(title = "创建用户")
 	private Long createUser;

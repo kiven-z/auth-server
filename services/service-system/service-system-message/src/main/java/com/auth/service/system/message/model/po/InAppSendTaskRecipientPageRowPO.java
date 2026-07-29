@@ -7,7 +7,7 @@ import lombok.ToString;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * 站内信发送任务收件人/互动用户分页行
@@ -36,16 +36,16 @@ public class InAppSendTaskRecipientPageRowPO implements Serializable {
 	private Boolean isRead;
 
 	@Schema(title = "已读时间")
-	private LocalDateTime readTime;
+	private Instant readTime;
 
 	@Schema(title = "用户侧是否软删除")
 	private Boolean isDeleted;
 
 	@Schema(title = "创建时间")
-	private LocalDateTime createTime;
+	private Instant createTime;
 
 	@Schema(title = "更新时间")
-	private LocalDateTime updateTime;
+	private Instant updateTime;
 
 	@Schema(title = "创建用户")
 	private Long createUser;

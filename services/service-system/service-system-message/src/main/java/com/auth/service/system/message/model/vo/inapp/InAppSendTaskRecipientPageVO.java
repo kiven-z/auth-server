@@ -2,13 +2,12 @@ package com.auth.service.system.message.model.vo.inapp;
 
 import com.auth.common.core.annotation.JsonStringFormat;
 import com.auth.common.core.model.response.BaseResponse;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * 站内信发送任务收件人/互动用户分页行
@@ -35,9 +34,8 @@ public class InAppSendTaskRecipientPageVO extends BaseResponse {
 	@Schema(name = "isRead", title = "是否已读")
 	private Boolean isRead;
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(name = "readTime", title = "已读时间")
-	private LocalDateTime readTime;
+	private Instant readTime;
 
 	@Schema(name = "isDeleted", title = "用户侧是否软删除")
 	private Boolean isDeleted;

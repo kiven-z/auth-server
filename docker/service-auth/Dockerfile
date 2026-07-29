@@ -19,7 +19,7 @@ RUN apt-get update \
 WORKDIR /app
 COPY --from=build /workspace/services/service-auth/target/service-auth-*.jar /app/app.jar
 
-ENV TZ=Asia/Shanghai \
+ENV TZ=UTC \
     SPRING_PROFILES_ACTIVE=docker
 EXPOSE 20001
 

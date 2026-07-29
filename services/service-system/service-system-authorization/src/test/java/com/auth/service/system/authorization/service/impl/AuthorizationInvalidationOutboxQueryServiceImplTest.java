@@ -18,7 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
@@ -52,7 +52,7 @@ class AuthorizationInvalidationOutboxQueryServiceImplTest {
 		row.setStatus("PENDING");
 		row.setRetryCount(0);
 		row.setMaxRetry(5);
-		row.setCreateTime(LocalDateTime.now());
+		row.setCreateTime(Instant.now());
 		return row;
 	}
 

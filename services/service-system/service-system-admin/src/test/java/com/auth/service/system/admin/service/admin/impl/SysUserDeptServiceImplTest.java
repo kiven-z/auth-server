@@ -13,7 +13,6 @@ import com.auth.service.system.admin.model.form.user.UserDeptAssignForm;
 import com.auth.service.system.admin.model.po.user.UserDeptPageRowPO;
 import com.auth.service.system.admin.model.query.user.UserDeptPageQuery;
 import com.auth.service.system.admin.model.vo.user.UserDeptPageVO;
-import com.auth.service.system.admin.service.admin.SysUserService;
 import com.auth.service.system.admin.support.dept.DeptReferenceChecker;
 import com.auth.service.system.admin.support.user.UserOrgRelationBatchRemoveSupport;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
@@ -34,6 +33,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Field;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -59,9 +59,6 @@ class SysUserDeptServiceImplTest {
 
 	@Mock
 	private SysUserMapper sysUserMapper;
-
-	@Mock
-	private SysUserService sysUserService;
 
 	@Mock
 	private SysDeptMapper sysDeptMapper;
@@ -136,7 +133,7 @@ class SysUserDeptServiceImplTest {
 		UserDeptPageQuery query = new UserDeptPageQuery();
 		query.setPageIndex(1);
 		query.setPageSize(10);
-		LocalDateTime now = LocalDateTime.of(2026, 6, 11, 10, 0, 0);
+		Instant now = LocalDateTime.of(2026, 6, 11, 10, 0, 0).toInstant(java.time.ZoneOffset.UTC);
 		UserDeptPageRowPO row = new UserDeptPageRowPO();
 		row.setId(RELATION_ID);
 		row.setUserId(USER_ID);

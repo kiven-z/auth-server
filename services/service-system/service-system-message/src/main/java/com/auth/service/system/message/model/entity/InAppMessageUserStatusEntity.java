@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * 站内信公开消息用户状态
@@ -31,7 +31,7 @@ public class InAppMessageUserStatusEntity extends BaseEntity {
 	private Boolean isRead;
 
 	@Schema(title = "已读时间")
-	private LocalDateTime readTime;
+	private Instant readTime;
 
 	@Schema(title = "用户软删除标记")
 	private Boolean isDeleted;

@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 /**
@@ -41,10 +41,10 @@ public class FileRecordPageQuery extends PageQueryRequest {
 	private String originalName;
 
 	@Schema(title = "创建开始时间（与 endTime 成对使用）")
-	private LocalDateTime startTime;
+	private Instant startTime;
 
 	@Schema(title = "创建结束时间（与 startTime 成对使用）")
-	private LocalDateTime endTime;
+	private Instant endTime;
 
 	@Schema(title = "是否私有文件")
 	private Boolean isPrivate;

@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -90,7 +90,7 @@ public class ChannelDeliveryRecorder extends ServiceImpl<MessageChannelDeliveryM
 	 */
 	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
 	public void recordFailed(Long taskId, MessageChannel channel, Collection<String> targets, String errorCode,
-			String errorMessage, LocalDateTime sentAt) {
+			String errorMessage, Instant sentAt) {
 		if (taskId == null || channel == null || CollUtil.isEmpty(targets)) {
 			return;
 		}

@@ -1,14 +1,13 @@
 package com.auth.service.auth.model.vo.authorization;
 
 import com.auth.common.core.model.response.BaseResponse;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * 授权失效幂等事件分页行
@@ -43,8 +42,7 @@ public class AuthorizationInvalidationEventPageVO extends BaseResponse {
 	@Schema(title = "驱逐画像用户数")
 	private Integer profileEvictedCount;
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "处理完成时间")
-	private LocalDateTime processedAt;
+	private Instant processedAt;
 
 }

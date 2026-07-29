@@ -2,13 +2,12 @@ package com.auth.service.system.message.model.vo.delivery;
 
 import com.auth.common.core.annotation.JsonStringFormat;
 import com.auth.common.core.model.response.BaseResponse;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * 渠道投递记录分页返回对象
@@ -37,8 +36,7 @@ public class MessageChannelDeliveryPageVO extends BaseResponse {
 	@Schema(name = "errorCode", title = "失败错误码")
 	private String errorCode;
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(name = "sentAt", title = "实际发送时间")
-	private LocalDateTime sentAt;
+	private Instant sentAt;
 
 }

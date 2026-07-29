@@ -8,6 +8,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 /**
@@ -41,6 +42,9 @@ public class SysJobPageVO extends BaseResponse implements SysJobLastExecutionVie
 	@Schema(title = "Cron 表达式")
 	private String cronExpression;
 
+	@Schema(title = "调度时区(IANA ZoneId)")
+	private String timeZone;
+
 	@Schema(title = "错失策略")
 	private Integer misfirePolicy;
 
@@ -70,8 +74,7 @@ public class SysJobPageVO extends BaseResponse implements SysJobLastExecutionVie
 	@Schema(title = "最近结果")
 	private SysJobLastExecutionStatus lastExecutionStatus;
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "最近执行时间")
-	private LocalDateTime lastExecutionTime;
+	private Instant lastExecutionTime;
 
 }

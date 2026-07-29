@@ -3,6 +3,7 @@ package com.auth.service.system.schedule.support.quartz;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys;
 import com.auth.service.system.schedule.model.entity.JobEntity;
+import com.auth.service.system.schedule.model.enums.SysJobTimeZone;
 import org.quartz.*;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.springframework.context.annotation.Lazy;
@@ -161,16 +162,18 @@ public class SysJobSchedulerManager {
 
 		CronTrigger expectedTrigger = sysJobQuartzTriggerFactory.build(job, jobKey);
 		if (!Objects.equals(expectedTrigger.getCronExpression(), existingCron.getCronExpression())
-				|| expectedTrigger.getMisfireInstruction() != existingCron.getMisfireInstruction()) {
+				|| expectedTrigger.getMisfireInstruction() != existingCron.getMisfireInstruction()
+				|| !Objects.equals(expectedTrigger.getTimeZone(), existingCron.getTimeZone())) {
 			return false;
 		}
+
+		ZoneId zoneId = ZoneId.of(SysJobTimeZone.normalize(job.getTimeZone()));
 
 		// start 未配置时忽略 Quartz 默认 startAt(now)
 		LocalDateTime expectedStart = job.getStartTime();
 		Date existingStart = existingCron.getStartTime();
-		if (expectedStart != null
-				&& (existingStart == null || Date.from(expectedStart.atZone(ZoneId.systemDefault()).toInstant())
-					.getTime() != existingStart.getTime())) {
+		if (expectedStart != null && (existingStart == null
+				|| Date.from(expectedStart.atZone(zoneId).toInstant()).getTime() != existingStart.getTime())) {
 			return false;
 		}
 
@@ -181,7 +184,7 @@ public class SysJobSchedulerManager {
 			return existingEnd == null;
 		}
 		return existingEnd != null
-				&& Date.from(expectedEnd.atZone(ZoneId.systemDefault()).toInstant()).getTime() == existingEnd.getTime();
+				&& Date.from(expectedEnd.atZone(zoneId).toInstant()).getTime() == existingEnd.getTime();
 	}
 
 }

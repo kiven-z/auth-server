@@ -6,7 +6,7 @@ import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * 授权失效 Outbox 详情行
@@ -43,7 +43,7 @@ public class AuthorizationInvalidationOutboxDetailRowPO implements Serializable 
 	private Integer maxRetry;
 
 	@Schema(title = "下次重试时间")
-	private LocalDateTime nextRetryAt;
+	private Instant nextRetryAt;
 
 	@Schema(title = "最近失败原因")
 	private String lastError;
@@ -52,10 +52,10 @@ public class AuthorizationInvalidationOutboxDetailRowPO implements Serializable 
 	private String lockedBy;
 
 	@Schema(title = "抢占时间")
-	private LocalDateTime lockedAt;
+	private Instant lockedAt;
 
 	@Schema(title = "处理完成时间")
-	private LocalDateTime processedAt;
+	private Instant processedAt;
 
 	@Schema(title = "触发模块")
 	private String sourceModule;
@@ -64,10 +64,10 @@ public class AuthorizationInvalidationOutboxDetailRowPO implements Serializable 
 	private String sourceBizId;
 
 	@Schema(title = "创建时间")
-	private LocalDateTime createTime;
+	private Instant createTime;
 
 	@Schema(title = "更新时间")
-	private LocalDateTime updateTime;
+	private Instant updateTime;
 
 	@Schema(title = "创建用户")
 	private Long createUser;

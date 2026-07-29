@@ -1,14 +1,13 @@
 package com.auth.service.system.authorization.model.vo;
 
 import com.auth.common.core.model.response.BaseResponse;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * 授权失效 Outbox 分页行
@@ -37,9 +36,8 @@ public class AuthorizationInvalidationOutboxPageVO extends BaseResponse {
 	@Schema(title = "最大重试次数")
 	private Integer maxRetry;
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "下次重试时间")
-	private LocalDateTime nextRetryAt;
+	private Instant nextRetryAt;
 
 	@Schema(title = "最近失败原因")
 	private String lastError;
@@ -47,13 +45,11 @@ public class AuthorizationInvalidationOutboxPageVO extends BaseResponse {
 	@Schema(title = "抢占实例标识")
 	private String lockedBy;
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "抢占时间")
-	private LocalDateTime lockedAt;
+	private Instant lockedAt;
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "处理完成时间")
-	private LocalDateTime processedAt;
+	private Instant processedAt;
 
 	@Schema(title = "触发模块")
 	private String sourceModule;

@@ -25,7 +25,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Objects;
 
 /**
@@ -178,7 +178,7 @@ public class AuthorizationInvalidationEventServiceImpl implements AuthorizationI
 	 */
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public int cleanupStaleProcessingClaims(LocalDateTime cutoffTime, int batchSize) {
+	public int cleanupStaleProcessingClaims(Instant cutoffTime, int batchSize) {
 		return invalidationEventMapper.deleteStaleProcessingClaims(cutoffTime, batchSize);
 	}
 
@@ -190,7 +190,7 @@ public class AuthorizationInvalidationEventServiceImpl implements AuthorizationI
 	 */
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public int purgeCompletedBefore(LocalDateTime cutoffTime, int batchSize) {
+	public int purgeCompletedBefore(Instant cutoffTime, int batchSize) {
 		return invalidationEventMapper.deleteCompletedBefore(cutoffTime, batchSize);
 	}
 

@@ -8,7 +8,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * MyBatisPlus 配置自动填充字段
@@ -34,8 +34,9 @@ public class MybatisPlusAuditFillAutoConfiguration implements BaseMybatisPlusCon
 	@Override
 	public void insertFill(MetaObject metaObject) {
 		this.strictInsertFill(metaObject, "version", Long.class, 0L);
-		this.setFieldValByName(CREATE_TIME, LocalDateTime.now(), metaObject);
-		this.setFieldValByName(UPDATE_TIME, LocalDateTime.now(), metaObject);
+		Instant now = Instant.now();
+		this.setFieldValByName(CREATE_TIME, now, metaObject);
+		this.setFieldValByName(UPDATE_TIME, now, metaObject);
 
 		Long userId = SecurityUserUtils.getUserId();
 		if (userId != null) {
@@ -49,7 +50,7 @@ public class MybatisPlusAuditFillAutoConfiguration implements BaseMybatisPlusCon
 	 */
 	@Override
 	public void updateFill(MetaObject metaObject) {
-		this.setFieldValByName(UPDATE_TIME, LocalDateTime.now(), metaObject);
+		this.setFieldValByName(UPDATE_TIME, Instant.now(), metaObject);
 
 		Long userId = SecurityUserUtils.getUserId();
 		if (userId != null) {

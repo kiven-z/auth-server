@@ -3,6 +3,7 @@ package com.auth.service.system.schedule.validation.task;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.service.system.schedule.model.entity.JobEntity;
 import com.auth.service.system.schedule.model.enums.SysJobTaskType;
+import com.auth.service.system.schedule.model.enums.SysJobTimeZone;
 import org.springframework.stereotype.Component;
 
 import java.util.EnumMap;
@@ -35,6 +36,8 @@ public class SysJobDefinitionValidationManager {
 		String taskType = job.getTaskType();
 		SysJobTaskType resolvedTaskType = SysJobTaskType.resolve(taskType);
 		job.setTaskType(resolvedTaskType.name());
+		// 归一化调度时区（空白默认东八区）
+		job.setTimeZone(SysJobTimeZone.normalize(job.getTimeZone()));
 
 		// 补全默认 handlerCode
 		if (CharSequenceUtil.isBlank(job.getHandlerCode())) {

@@ -4,7 +4,7 @@ import lombok.Builder;
 import lombok.Value;
 import lombok.experimental.Accessors;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * 访问令牌与刷新令牌值对象
@@ -29,6 +29,6 @@ public class TokenPair {
 	/**
 	 * 访问令牌过期时间
 	 */
-	LocalDateTime accessExpiresAt;
+	Instant accessExpiresAt;
 
 }

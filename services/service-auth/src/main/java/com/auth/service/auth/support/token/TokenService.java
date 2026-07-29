@@ -11,7 +11,7 @@ import com.auth.service.auth.model.value.login.TokenPair;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Optional;
 
 /**
@@ -102,9 +102,9 @@ public class TokenService {
 	 * 获取访问令牌过期时间
 	 * @return 过期时间
 	 */
-	public LocalDateTime getAccessExpiresAt() {
+	public Instant getAccessExpiresAt() {
 		long accessExpired = properties.getAccessExpired();
-		return LocalDateTime.now().plusSeconds(accessExpired);
+		return Instant.now().plusSeconds(accessExpired);
 	}
 
 	private JwtUserToken requireUserToken(JwtUserToken userToken, AuthResultCode code) {

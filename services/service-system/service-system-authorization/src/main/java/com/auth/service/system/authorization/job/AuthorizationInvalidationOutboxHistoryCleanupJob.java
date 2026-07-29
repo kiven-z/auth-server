@@ -7,7 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 import static com.auth.service.system.authorization.model.constants.AuthorizationBatchSizes.SUCCESS_CLEANUP;
 
@@ -34,7 +35,7 @@ public class AuthorizationInvalidationOutboxHistoryCleanupJob {
 			return;
 		}
 
-		LocalDateTime cutoff = LocalDateTime.now().minusDays(properties.getSuccessRetentionDays());
+		Instant cutoff = Instant.now().minus(properties.getSuccessRetentionDays(), ChronoUnit.DAYS);
 		int totalDeleted = purgeInBatches(cutoff);
 		if (totalDeleted > 0) {
 			log.info("Purged SUCCESS invalidation outbox rows: count={}, cutoff={}", totalDeleted, cutoff);
@@ -46,7 +47,7 @@ public class AuthorizationInvalidationOutboxHistoryCleanupJob {
 	 * @param cutoff processed_at 早于此时间可被删除
 	 * @return 累计删除行数
 	 */
-	private int purgeInBatches(LocalDateTime cutoff) {
+	private int purgeInBatches(Instant cutoff) {
 		int totalDeleted = 0;
 		while (true) {
 			int deleted = outboxMapper.deleteSuccessBefore(cutoff, SUCCESS_CLEANUP);

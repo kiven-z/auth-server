@@ -1,6 +1,5 @@
 package com.auth.service.system.admin.model.vo.dept;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,7 +7,7 @@ import lombok.ToString;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 /**
@@ -28,9 +27,8 @@ public class DeptClosureHealthVO implements Serializable {
 	@Schema(title = "是否通过（无父子直连缺失且无深度链条异常）")
 	private Boolean passed;
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "检查时间")
-	private LocalDateTime checkedAt;
+	private Instant checkedAt;
 
 	@Schema(title = "健康度统计")
 	private DeptClosureHealthStatsVO healthStats;

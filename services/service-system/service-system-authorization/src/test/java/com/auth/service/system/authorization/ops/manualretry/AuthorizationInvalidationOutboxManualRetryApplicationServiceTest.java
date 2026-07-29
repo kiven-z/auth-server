@@ -17,7 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -100,7 +100,7 @@ class AuthorizationInvalidationOutboxManualRetryApplicationServiceTest {
 		// PROCESSING 占位未超时且未 force 时不允许重试
 		SysAuthorizationInvalidationOutboxEntity processingRow = buildRow(3L,
 				AuthorizationInvalidationOutboxStatus.PROCESSING.name());
-		processingRow.setLockedAt(LocalDateTime.now().plusMinutes(1));
+		processingRow.setLockedAt(Instant.now().plus(1, java.time.temporal.ChronoUnit.MINUTES));
 		when(outboxMapper.selectById(3L)).thenReturn(processingRow);
 
 		SystemBusinessException exception = assertThrows(SystemBusinessException.class,
@@ -115,7 +115,7 @@ class AuthorizationInvalidationOutboxManualRetryApplicationServiceTest {
 		// force=true 时允许重置 PROCESSING 并再次投递
 		SysAuthorizationInvalidationOutboxEntity processingRow = buildRow(4L,
 				AuthorizationInvalidationOutboxStatus.PROCESSING.name());
-		processingRow.setLockedAt(LocalDateTime.now());
+		processingRow.setLockedAt(Instant.now());
 		SysAuthorizationInvalidationOutboxEntity pendingRow = buildRow(4L,
 				AuthorizationInvalidationOutboxStatus.PENDING.name());
 		when(outboxMapper.selectById(4L)).thenReturn(processingRow, pendingRow);

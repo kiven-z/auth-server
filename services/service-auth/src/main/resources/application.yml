@@ -58,7 +58,9 @@ spring:
     fallback-to-system-locale: false
 
   jackson:
-    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: UTC
+    serialization:
+      write-dates-as-timestamps: false
 
 mybatis-plus:
   mapper-locations:

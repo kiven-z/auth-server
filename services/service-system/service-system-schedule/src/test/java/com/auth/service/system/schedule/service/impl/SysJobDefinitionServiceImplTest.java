@@ -217,7 +217,7 @@ class SysJobDefinitionServiceImplTest {
 		LogJobEntity failedLog = new LogJobEntity();
 		failedLog.setJobId(1L);
 		failedLog.setStatus(false);
-		failedLog.setCreateTime(LocalDateTime.of(2026, 6, 13, 9, 0));
+		failedLog.setCreateTime(LocalDateTime.of(2026, 6, 13, 9, 0).toInstant(java.time.ZoneOffset.UTC));
 		when(logJobMapper.selectLatestByJobIds(any())).thenReturn(List.of(failedLog));
 
 		SysJobQuery query = new SysJobQuery();

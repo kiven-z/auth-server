@@ -36,6 +36,7 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -114,7 +115,7 @@ class InAppSendTaskServiceImplTest {
 		query.setPageIndex(1);
 		query.setPageSize(10);
 
-		LocalDateTime now = LocalDateTime.of(2026, 7, 19, 12, 0, 0);
+		Instant now = LocalDateTime.of(2026, 7, 19, 12, 0, 0).toInstant(java.time.ZoneOffset.UTC);
 		InAppSendTaskPageRowPO row = new InAppSendTaskPageRowPO();
 		row.setId(1L);
 		row.setSourceType(MessageSendSourceType.ADMIN_COMPOSE.name());
@@ -172,7 +173,7 @@ class InAppSendTaskServiceImplTest {
 	@DisplayName("详情：按主键返回正文与范围解析并填充审计用户名")
 	void getSendTaskById_shouldReturnDetailAndEnrichAudit() {
 		// 准备含部门范围快照的任务，校验详情含列表未暴露的正文/链接/撤回人，并解析 ids
-		LocalDateTime now = LocalDateTime.of(2026, 7, 19, 12, 30, 0);
+		Instant now = LocalDateTime.of(2026, 7, 19, 12, 30, 0).toInstant(java.time.ZoneOffset.UTC);
 		InAppMessageEntity task = new InAppMessageEntity();
 		task.setId(11L);
 		task.setSourceType(MessageSendSourceType.ADMIN_COMPOSE.name());
@@ -265,10 +266,10 @@ class InAppSendTaskServiceImplTest {
 		row.setMessageId(50L);
 		row.setUserId(88L);
 		row.setIsRead(true);
-		row.setReadTime(LocalDateTime.of(2026, 7, 23, 10, 0, 0));
+		row.setReadTime(LocalDateTime.of(2026, 7, 23, 10, 0, 0).toInstant(java.time.ZoneOffset.UTC));
 		row.setIsDeleted(false);
-		row.setCreateTime(LocalDateTime.of(2026, 7, 23, 9, 0, 0));
-		row.setUpdateTime(LocalDateTime.of(2026, 7, 23, 10, 0, 0));
+		row.setCreateTime(LocalDateTime.of(2026, 7, 23, 9, 0, 0).toInstant(java.time.ZoneOffset.UTC));
+		row.setUpdateTime(LocalDateTime.of(2026, 7, 23, 10, 0, 0).toInstant(java.time.ZoneOffset.UTC));
 		row.setCreateUser(1L);
 		row.setUpdateUser(88L);
 
@@ -642,14 +643,14 @@ class InAppSendTaskServiceImplTest {
 	void recall_shouldMarkSuccessAsRecalled() {
 		// 可撤回态走 recallTask，不触碰收件箱与派发
 		when(inAppMessageMapper.selectById(30L)).thenReturn(adminComposePushTask(30L, InAppMessageStatus.SUCCESS));
-		when(inAppMessageMapper.recallTask(eq(30L), any(LocalDateTime.class), eq(7L))).thenReturn(1);
+		when(inAppMessageMapper.recallTask(eq(30L), any(Instant.class), eq(7L))).thenReturn(1);
 
 		try (MockedStatic<SecurityUserUtils> security = mockStatic(SecurityUserUtils.class)) {
 			security.when(SecurityUserUtils::getUserId).thenReturn(7L);
 			service.recall(30L);
 		}
 
-		verify(inAppMessageMapper).recallTask(eq(30L), any(LocalDateTime.class), eq(7L));
+		verify(inAppMessageMapper).recallTask(eq(30L), any(Instant.class), eq(7L));
 		verify(dispatchTrigger, never()).dispatchAfterCommit(any());
 	}
 
@@ -657,14 +658,14 @@ class InAppSendTaskServiceImplTest {
 	@DisplayName("撤回：PARTIAL 可撤回")
 	void recall_shouldAllowPartial() {
 		when(inAppMessageMapper.selectById(31L)).thenReturn(adminComposePushTask(31L, InAppMessageStatus.PARTIAL));
-		when(inAppMessageMapper.recallTask(eq(31L), any(LocalDateTime.class), eq(1L))).thenReturn(1);
+		when(inAppMessageMapper.recallTask(eq(31L), any(Instant.class), eq(1L))).thenReturn(1);
 
 		try (MockedStatic<SecurityUserUtils> security = mockStatic(SecurityUserUtils.class)) {
 			security.when(SecurityUserUtils::getUserId).thenReturn(1L);
 			service.recall(31L);
 		}
 
-		verify(inAppMessageMapper).recallTask(eq(31L), any(LocalDateTime.class), eq(1L));
+		verify(inAppMessageMapper).recallTask(eq(31L), any(Instant.class), eq(1L));
 	}
 
 	@Test
@@ -673,14 +674,14 @@ class InAppSendTaskServiceImplTest {
 		// 无人接收仍可作废为 RECALLED
 		when(inAppMessageMapper.selectById(37L))
 			.thenReturn(adminComposePushTask(37L, InAppMessageStatus.NO_RECIPIENTS));
-		when(inAppMessageMapper.recallTask(eq(37L), any(LocalDateTime.class), eq(3L))).thenReturn(1);
+		when(inAppMessageMapper.recallTask(eq(37L), any(Instant.class), eq(3L))).thenReturn(1);
 
 		try (MockedStatic<SecurityUserUtils> security = mockStatic(SecurityUserUtils.class)) {
 			security.when(SecurityUserUtils::getUserId).thenReturn(3L);
 			service.recall(37L);
 		}
 
-		verify(inAppMessageMapper).recallTask(eq(37L), any(LocalDateTime.class), eq(3L));
+		verify(inAppMessageMapper).recallTask(eq(37L), any(Instant.class), eq(3L));
 	}
 
 	@Test
@@ -693,14 +694,14 @@ class InAppSendTaskServiceImplTest {
 		task.setRecipientScopeType(RecipientScopeType.ALL.name());
 		task.setStatus(InAppMessageStatus.SUCCESS.name());
 		when(inAppMessageMapper.selectById(32L)).thenReturn(task);
-		when(inAppMessageMapper.recallTask(eq(32L), any(LocalDateTime.class), eq(2L))).thenReturn(1);
+		when(inAppMessageMapper.recallTask(eq(32L), any(Instant.class), eq(2L))).thenReturn(1);
 
 		try (MockedStatic<SecurityUserUtils> security = mockStatic(SecurityUserUtils.class)) {
 			security.when(SecurityUserUtils::getUserId).thenReturn(2L);
 			service.recall(32L);
 		}
 
-		verify(inAppMessageMapper).recallTask(eq(32L), any(LocalDateTime.class), eq(2L));
+		verify(inAppMessageMapper).recallTask(eq(32L), any(Instant.class), eq(2L));
 	}
 
 	@Test
@@ -752,7 +753,7 @@ class InAppSendTaskServiceImplTest {
 	void recall_shouldRejectWhenCasAffectsZeroRows() {
 		InAppMessageEntity task = adminComposePushTask(36L, InAppMessageStatus.SUCCESS);
 		when(inAppMessageMapper.selectById(36L)).thenReturn(task);
-		when(inAppMessageMapper.recallTask(eq(36L), any(LocalDateTime.class), eq(9L))).thenReturn(0);
+		when(inAppMessageMapper.recallTask(eq(36L), any(Instant.class), eq(9L))).thenReturn(0);
 
 		try (MockedStatic<SecurityUserUtils> security = mockStatic(SecurityUserUtils.class)) {
 			security.when(SecurityUserUtils::getUserId).thenReturn(9L);

@@ -4,14 +4,13 @@ import com.auth.common.core.annotation.Desensitized;
 import com.auth.common.core.annotation.JsonStringFormat;
 import com.auth.common.core.desensitize.DesensitizedType;
 import com.auth.common.core.model.response.BaseResponse;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * 密码历史日志分页行
@@ -36,8 +35,7 @@ public class LogUserPasswordHistoryPageVO extends BaseResponse {
 	@Schema(title = "修改IP地址")
 	private String changeIp;
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(title = "修改时间")
-	private LocalDateTime changeTime;
+	private Instant changeTime;
 
 }

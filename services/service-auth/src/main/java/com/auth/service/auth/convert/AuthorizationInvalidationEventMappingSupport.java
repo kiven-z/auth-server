@@ -8,7 +8,7 @@ import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import lombok.experimental.UtilityClass;
 import org.mapstruct.Named;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Objects;
 
 /**
@@ -29,7 +29,7 @@ public class AuthorizationInvalidationEventMappingSupport {
 	 * @return 待插入的占位投影
 	 */
 	public static AuthorizationInvalidationEventPO buildProcessingClaim(String eventId, AuthorizationChangeKind kind) {
-		LocalDateTime now = LocalDateTime.now();
+		Instant now = Instant.now();
 		AuthorizationInvalidationEventPO projection = new AuthorizationInvalidationEventPO();
 		projection.setId(IdWorker.getId());
 		projection.setEventId(eventId);
@@ -76,7 +76,7 @@ public class AuthorizationInvalidationEventMappingSupport {
 		projection.setVersionBumpedCount(response.versionBumpedCount());
 		projection.setProfileRefreshedCount(response.profileRefreshedCount());
 		projection.setProfileEvictedCount(response.profileEvictedCount());
-		projection.setProcessedAt(LocalDateTime.now());
+		projection.setProcessedAt(Instant.now());
 		return projection;
 	}
 

@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 
@@ -43,7 +43,7 @@ public class DeptClosureHealthInspector {
 		List<DeptClosureDepthChainRowPO> depthChainSamples = deptClosureMapper.selectDepthChainAnomalies(sampleLimit);
 
 		DeptClosureHealthVO result = new DeptClosureHealthVO();
-		result.setCheckedAt(LocalDateTime.now());
+		result.setCheckedAt(Instant.now());
 		result.setMissingParentLinkCount(missingParentLinkCount);
 		result.setParentLinkSampleTruncated(missingParentLinkCount > parentLinkSamples.size());
 		result.setParentLinkAnomalies(parentLinkSamples.stream().map(row -> {

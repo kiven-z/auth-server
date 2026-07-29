@@ -2,14 +2,13 @@ package com.auth.service.system.message.model.vo.delivery;
 
 import com.auth.common.core.annotation.JsonStringFormat;
 import com.auth.common.core.model.response.BaseResponse;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * 渠道投递记录详情返回对象
@@ -45,9 +44,8 @@ public class MessageChannelDeliveryDetailVO extends BaseResponse {
 	@Schema(name = "errorMessage", title = "失败原因")
 	private String errorMessage;
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Schema(name = "sentAt", title = "实际发送时间")
-	private LocalDateTime sentAt;
+	private Instant sentAt;
 
 	@Schema(name = "retryCount", title = "重试次数")
 	private Integer retryCount;

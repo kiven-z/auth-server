@@ -24,7 +24,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -82,7 +82,7 @@ class AuthSessionServiceTest {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		HttpServletResponse response = mock(HttpServletResponse.class);
 
-		LocalDateTime expires = LocalDateTime.now().plusHours(1);
+		Instant expires = Instant.now().plus(1, java.time.temporal.ChronoUnit.HOURS);
 		TokenPair tokenPair = TokenPair.builder()
 			.accessToken("new-access")
 			.refreshToken("new-refresh")

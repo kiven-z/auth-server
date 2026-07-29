@@ -40,5 +40,7 @@ build/
 logs/
 ipdb/
 assets/
+docker/env/*.env
 docker/env/**/*.env
+!docker/env/*.env.example
 !docker/env/**/*.env.example

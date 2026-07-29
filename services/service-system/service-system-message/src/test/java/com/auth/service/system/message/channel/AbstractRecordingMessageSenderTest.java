@@ -14,7 +14,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -77,7 +77,7 @@ class AbstractRecordingMessageSenderTest {
 		ArgumentCaptor<Long> taskIdCaptor = ArgumentCaptor.forClass(Long.class);
 		verify(recorder).recordPending(taskIdCaptor.capture(), eq(MessageChannel.EMAIL), eq(command.getTargets()));
 		verify(recorder).recordFailed(eq(taskIdCaptor.getValue()), eq(MessageChannel.EMAIL), eq(command.getTargets()),
-				any(), any(), any(LocalDateTime.class));
+				any(), any(), any(Instant.class));
 		verify(recorder, never()).recordOutcomes(any(), any(), any());
 		assertThat(taskIdCaptor.getValue()).isNotNull();
 	}
@@ -143,7 +143,7 @@ class AbstractRecordingMessageSenderTest {
 			if (sendMode == SendMode.THROW) {
 				throw new IllegalStateException("send failed");
 			}
-			LocalDateTime now = LocalDateTime.now();
+			Instant now = Instant.now();
 			if (sendMode == SendMode.PARTIAL) {
 				return ChannelSendResult.of(List.of(TargetSendOutcome.success("ok@example.com", "provider-ok", now),
 						TargetSendOutcome.failure("bad@example.com", "ERR", "boom", now)));

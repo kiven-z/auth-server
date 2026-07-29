@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 /**
@@ -42,7 +42,7 @@ public class AuthorizationInvalidationOutboxJob {
 	 */
 	@Scheduled(fixedDelayString = "${auth.authorization.poll-interval-ms:30000}")
 	public void pollAndDispatch() {
-		LocalDateTime now = LocalDateTime.now();
+		Instant now = Instant.now();
 
 		List<SysAuthorizationInvalidationOutboxEntity> rows = outboxMapper.selectClaimable(CLAIMABLE_STATUSES, now,
 				AuthorizationBatchSizes.OUTBOX_POLL);

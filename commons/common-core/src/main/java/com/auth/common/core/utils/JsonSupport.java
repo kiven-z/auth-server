@@ -8,6 +8,9 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.experimental.UtilityClass;
 
+import java.time.ZoneOffset;
+import java.util.TimeZone;
+
 /**
  * 基于 {@link ObjectMapper} 的 JSON 辅助工具。
  *
@@ -30,6 +33,7 @@ public class JsonSupport {
 		mapper.registerModule(new JavaTimeModule());
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+		mapper.setTimeZone(TimeZone.getTimeZone(ZoneOffset.UTC));
 		return mapper;
 	}
 

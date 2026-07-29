@@ -7,7 +7,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import java.io.Serial;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * 登录日志
@@ -46,7 +46,7 @@ public class LoginLogEntity extends BaseEntity {
 	/**
 	 * 登录时间
 	 */
-	private LocalDateTime loginTime;
+	private Instant loginTime;
 
 	/**
 	 * 登录 IP

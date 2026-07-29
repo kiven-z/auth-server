@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * 授权失效 Outbox 写入
@@ -33,7 +33,7 @@ public class AuthorizationInvalidationPublisher {
 	 */
 	@Transactional(rollbackFor = Exception.class)
 	public Long enqueue(AuthorizationInvalidateRequest request, String sourceModule, String sourceBizId) {
-		LocalDateTime now = LocalDateTime.now();
+		Instant now = Instant.now();
 		SysAuthorizationInvalidationOutboxEntity outboxEntity = new SysAuthorizationInvalidationOutboxEntity();
 		outboxEntity.setId(IdWorker.getId());
 		outboxEntity.setEventId(request.eventId());

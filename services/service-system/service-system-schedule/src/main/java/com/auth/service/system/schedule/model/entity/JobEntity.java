@@ -42,6 +42,9 @@ public class JobEntity extends BaseEntity {
 	@Schema(title = "Cron 表达式")
 	private String cronExpression;
 
+	@Schema(title = "调度时区(IANA ZoneId)")
+	private String timeZone;
+
 	@Schema(title = "错失策略(1/2/3)")
 	private Integer misfirePolicy;
 

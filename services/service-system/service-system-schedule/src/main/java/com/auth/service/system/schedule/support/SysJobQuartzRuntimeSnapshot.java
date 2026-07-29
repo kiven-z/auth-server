@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Value;
 import lombok.experimental.Accessors;
 
-import java.util.Date;
+import java.time.Instant;
 
 /**
  * Quartz 运行时状态快照（不含失败日志补充）
@@ -25,7 +25,7 @@ public class SysJobQuartzRuntimeSnapshot {
 	/**
 	 * 开始执行时间
 	 */
-	Date fireTime;
+	Instant fireTime;
 
 	/**
 	 * 构建快照
@@ -33,7 +33,7 @@ public class SysJobQuartzRuntimeSnapshot {
 	 * @param fireTime 开始执行时间
 	 * @return 快照
 	 */
-	public static SysJobQuartzRuntimeSnapshot of(SysJobQuartzRuntimeStatus status, Date fireTime) {
+	public static SysJobQuartzRuntimeSnapshot of(SysJobQuartzRuntimeStatus status, Instant fireTime) {
 		return SysJobQuartzRuntimeSnapshot.builder().status(status).fireTime(fireTime).build();
 	}
 

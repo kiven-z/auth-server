@@ -8,7 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 /**
  * 授权失效幂等事件 processing 占位超时清理：删除孤儿占位行，允许 Outbox 重新投递
@@ -33,7 +34,7 @@ public class AuthorizationInvalidationProcessingClaimCleanupJob {
 			return;
 		}
 
-		LocalDateTime cutoff = LocalDateTime.now().minusMinutes(properties.getProcessingClaimTimeoutMinutes());
+		Instant cutoff = Instant.now().minus(properties.getProcessingClaimTimeoutMinutes(), ChronoUnit.MINUTES);
 		int deleted = authorizationInvalidationEventService.cleanupStaleProcessingClaims(cutoff,
 				AuthBatchSizes.PROCESSING_CLAIM_CLEANUP);
 		if (deleted > 0) {

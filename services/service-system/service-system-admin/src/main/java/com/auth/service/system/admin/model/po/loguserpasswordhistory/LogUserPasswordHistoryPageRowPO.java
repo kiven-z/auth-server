@@ -10,7 +10,7 @@ import lombok.ToString;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * 密码历史日志分页行
@@ -42,13 +42,13 @@ public class LogUserPasswordHistoryPageRowPO implements Serializable {
 	private String changeIp;
 
 	@Schema(title = "修改时间")
-	private LocalDateTime changeTime;
+	private Instant changeTime;
 
 	@Schema(title = "创建时间")
-	private LocalDateTime createTime;
+	private Instant createTime;
 
 	@Schema(title = "更新时间")
-	private LocalDateTime updateTime;
+	private Instant updateTime;
 
 	@JsonStringFormat
 	@Schema(title = "创建用户")

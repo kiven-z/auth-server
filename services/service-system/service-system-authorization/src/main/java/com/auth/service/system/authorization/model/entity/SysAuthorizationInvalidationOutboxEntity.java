@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serial;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * 授权失效 Outbox
@@ -41,7 +41,7 @@ public class SysAuthorizationInvalidationOutboxEntity extends BaseEntity {
 	private Integer maxRetry;
 
 	@Schema(title = "下次重试时间")
-	private LocalDateTime nextRetryAt;
+	private Instant nextRetryAt;
 
 	@Schema(title = "最近失败原因")
 	private String lastError;
@@ -50,10 +50,10 @@ public class SysAuthorizationInvalidationOutboxEntity extends BaseEntity {
 	private String lockedBy;
 
 	@Schema(title = "抢占时间")
-	private LocalDateTime lockedAt;
+	private Instant lockedAt;
 
 	@Schema(title = "处理完成时间")
-	private LocalDateTime processedAt;
+	private Instant processedAt;
 
 	@Schema(title = "触发模块，如 SYS_ROLE。")
 	private String sourceModule;

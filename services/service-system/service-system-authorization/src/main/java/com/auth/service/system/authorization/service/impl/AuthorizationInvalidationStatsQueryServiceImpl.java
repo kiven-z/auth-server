@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 /**
@@ -55,10 +56,10 @@ public class AuthorizationInvalidationStatsQueryServiceImpl implements Authoriza
 	public AuthorizationInvalidationFailureRateTrendVO getFailureRateTrend(
 			@NotNull AuthorizationInvalidationFailureRateTrendQuery query) {
 		if (query.getStartTime() == null && query.getEndTime() == null) {
-			LocalDate endDate = LocalDate.now();
+			LocalDate endDate = LocalDate.now(ZoneOffset.UTC);
 			LocalDate startDate = endDate.minusDays(query.getDays() - 1L);
-			query.setStartTime(startDate.atStartOfDay());
-			query.setEndTime(endDate.atTime(LocalTime.MAX));
+			query.setStartTime(startDate.atStartOfDay(ZoneOffset.UTC).toInstant());
+			query.setEndTime(endDate.atTime(LocalTime.MAX).toInstant(ZoneOffset.UTC));
 		}
 
 		AuthorizationInvalidationFailureRateTrendVO trendVo = new AuthorizationInvalidationFailureRateTrendVO();
