@@ -61,6 +61,43 @@ class S3PlatformProfileResolverTest {
 	}
 
 	@Test
+	@DisplayName("resolve：无协议 endpoint 补全为 https 绝对地址")
+	void resolveNormalizesSchemelessEndpoint() {
+		// 控制台复制的 OSS endpoint 常无协议，解析出口必须兑现绝对 URL 契约。
+		FileUploadProperties properties = new FileUploadProperties();
+		properties.getAliyunOss().setEndpoint("oss-cn-shanghai.aliyuncs.com");
+		properties.getAliyunOss().setAccessKeyId("ak-id");
+		properties.getAliyunOss().setAccessKeySecret("ak-secret");
+		properties.getAliyunOss().setBucket("bunny-auth");
+		S3PlatformProfileResolver resolver = S3PlatformProfileResolverFixtures.defaultResolver(properties);
+
+		S3PlatformProfile profile = resolver.resolve(StoragePlatformEnum.ALIYUN_OSS);
+
+		assertThat(profile.getEndpoint()).isEqualTo("https://oss-cn-shanghai.aliyuncs.com");
+		assertThat(profile.getRegion()).isEqualTo("oss-cn-shanghai");
+	}
+
+	@Test
+	@DisplayName("resolve：返回副本，不改写 platforms 绑定实例")
+	void resolveReturnsCopyWithoutMutatingBoundProfile() {
+		FileUploadProperties properties = new FileUploadProperties();
+		S3PlatformProfile bound = new S3PlatformProfile();
+		bound.setEndpoint("oss-cn-shanghai.aliyuncs.com");
+		bound.setRegion("oss-cn-shanghai");
+		bound.setAccessKey("ak");
+		bound.setSecretKey("sk");
+		bound.setBucket("bunny-auth");
+		properties.getPlatforms().put(StoragePlatformEnum.ALIYUN_OSS, bound);
+		S3PlatformProfileResolver resolver = S3PlatformProfileResolverFixtures.defaultResolver(properties);
+
+		S3PlatformProfile resolved = resolver.resolve(StoragePlatformEnum.ALIYUN_OSS);
+
+		assertThat(resolved.getEndpoint()).isEqualTo("https://oss-cn-shanghai.aliyuncs.com");
+		assertThat(bound.getEndpoint()).isEqualTo("oss-cn-shanghai.aliyuncs.com");
+		assertThat(resolved).isNotSameAs(bound);
+	}
+
+	@Test
 	@DisplayName("resolve：平台未注册时抛出业务异常")
 	void resolveThrowsWhenPlatformUnsupported() {
 		// 验证未注册平台会抛统一业务异常码。

@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.EnumMap;
@@ -51,6 +52,9 @@ public class FileUploadProperties {
 
 	/**
 	 * 允许预览的内容类型白名单
+	 * <p>
+	 * List<{@link MediaType}>
+	 * </p>
 	 */
 	private List<String> allowedContentTypes = List.of("image/*", "application/pdf");
 

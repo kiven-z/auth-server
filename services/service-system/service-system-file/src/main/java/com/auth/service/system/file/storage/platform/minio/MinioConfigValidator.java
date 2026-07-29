@@ -1,15 +1,14 @@
 package com.auth.service.system.file.storage.platform.minio;
 
-import com.auth.service.system.file.config.properties.FileUploadProperties;
-import com.auth.service.system.file.config.properties.platform.MinioStorageProperties;
+import com.auth.module.file.api.model.enums.StoragePlatformEnum;
+import com.auth.service.system.file.config.properties.S3PlatformProfile;
+import com.auth.service.system.file.storage.core.s3.S3PlatformProfileResolver;
 import com.auth.service.system.file.storage.core.validator.StoragePlatformConfigValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.Objects;
-
 /**
- * MinIO 平台配置校验器
+ * MinIO 平台配置校验器（校验 resolve 后的统一 profile，兼容 platforms 与 legacy 配置）
  *
  * @author Bunny
  */
@@ -17,19 +16,20 @@ import java.util.Objects;
 @Component
 public class MinioConfigValidator implements StoragePlatformConfigValidator {
 
-	private final FileUploadProperties properties;
+	private static final String CONFIG_PREFIX = "auth.file.platforms.MINIO";
+
+	private final S3PlatformProfileResolver profileResolver;
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public void validateOrThrow() {
-		MinioStorageProperties minio = Objects.requireNonNullElseGet(properties.getMinio(),
-				MinioStorageProperties::new);
-		assertNotBlank(minio.getEndpoint(), "minio.endpoint");
-		assertNotBlank(minio.getAccessKey(), "minio.access-key");
-		assertNotBlank(minio.getSecretKey(), "minio.secret-key");
-		assertNotBlank(minio.getBucket(), "minio.bucket");
+		S3PlatformProfile profile = profileResolver.resolve(StoragePlatformEnum.MINIO);
+		assertNotBlank(profile.getEndpoint(), CONFIG_PREFIX + ".endpoint");
+		assertNotBlank(profile.getAccessKey(), CONFIG_PREFIX + ".access-key");
+		assertNotBlank(profile.getSecretKey(), CONFIG_PREFIX + ".secret-key");
+		assertNotBlank(profile.getBucket(), CONFIG_PREFIX + ".bucket");
 	}
 
 }

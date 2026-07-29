@@ -310,6 +310,23 @@ class S3CompatibleFileStorageProviderTest {
 	}
 
 	@Test
+	@DisplayName("resolvePublicUrl：阿里云 virtual-hosted 回退拼 bucket.endpoint")
+	void resolvePublicUrl_aliyunVirtualHostedFallback() {
+		FileUploadProperties properties = new FileUploadProperties();
+		properties.getAliyunOss().setEndpoint("oss-cn-shanghai.aliyuncs.com");
+		properties.getAliyunOss().setAccessKeyId("ak");
+		properties.getAliyunOss().setAccessKeySecret("sk");
+		properties.getAliyunOss().setBucket("bunny-auth");
+		profileResolver = S3PlatformProfileResolverFixtures.defaultResolver(properties);
+		provider = new S3CompatibleFileStorageProvider(StoragePlatformEnum.ALIYUN_OSS, profileResolver, clientManager,
+				configValidator, classifier);
+
+		String url = provider.resolvePublicUrl("bunny-auth", OBJECT_KEY);
+
+		assertThat(url).isEqualTo("https://bunny-auth.oss-cn-shanghai.aliyuncs.com/" + OBJECT_KEY);
+	}
+
+	@Test
 	@DisplayName("resolvePublicUrl：使用请求侧 bucket 覆盖配置侧 bucket")
 	void resolvePublicUrl_prefersRequestBucket() {
 		// 验证同一 endpoint 下多桶场景仍能拼出正确 URL。

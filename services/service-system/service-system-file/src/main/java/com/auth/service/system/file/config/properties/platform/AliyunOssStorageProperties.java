@@ -21,7 +21,7 @@ public class AliyunOssStorageProperties {
 	private String bucket;
 
 	/**
-	 * 访问域名（可选，不配置时按 endpoint 生成）
+	 * 配置后优先生效（CDN/CNAME）；未配置时按 virtual-hosted 从 endpoint + bucket 推导
 	 */
 	private String publicUrl;
 

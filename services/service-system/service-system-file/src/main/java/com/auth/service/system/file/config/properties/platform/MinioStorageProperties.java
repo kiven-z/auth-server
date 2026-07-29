@@ -21,7 +21,7 @@ public class MinioStorageProperties {
 	private String bucket;
 
 	/**
-	 * 对外访问域名（可选，不配置时回退 endpoint 拼接）
+	 * 对外访问域名（可选）。配置后优先生效；未配置时按 path-style 从 endpoint + bucket 推导
 	 */
 	private String publicUrl;
 

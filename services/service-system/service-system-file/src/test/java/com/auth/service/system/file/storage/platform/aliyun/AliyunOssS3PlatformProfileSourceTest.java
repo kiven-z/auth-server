@@ -35,7 +35,7 @@ class AliyunOssS3PlatformProfileSourceTest {
 		assertThat(profile.getAccessKey()).isEqualTo("ak-id");
 		assertThat(profile.getSecretKey()).isEqualTo("ak-secret");
 		assertThat(profile.getBucket()).isEqualTo("bucket-b");
-		assertThat(profile.isPathStyleAccess()).isTrue();
+		assertThat(profile.isPathStyleAccess()).isFalse();
 	}
 
 	@Test

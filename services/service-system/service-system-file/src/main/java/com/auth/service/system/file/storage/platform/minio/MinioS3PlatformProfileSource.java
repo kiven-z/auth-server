@@ -39,7 +39,6 @@ public class MinioS3PlatformProfileSource implements S3PlatformProfileSource {
 		profile.setSecretKey(minio.getSecretKey());
 		profile.setBucket(minio.getBucket());
 		profile.setPublicUrl(minio.getPublicUrl());
-		profile.setPathStyleAccess(true);
 		return profile;
 	}
 

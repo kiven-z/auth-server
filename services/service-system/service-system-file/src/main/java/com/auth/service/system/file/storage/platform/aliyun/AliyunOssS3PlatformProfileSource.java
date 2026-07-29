@@ -58,7 +58,8 @@ public class AliyunOssS3PlatformProfileSource implements S3PlatformProfileSource
 		profile.setSecretKey(aliyunOss.getAccessKeySecret());
 		profile.setBucket(aliyunOss.getBucket());
 		profile.setPublicUrl(aliyunOss.getPublicUrl());
-		profile.setPathStyleAccess(true);
+		// 阿里云 OSS 仅支持 virtual-hosted；path-style 会 403
+		profile.setPathStyleAccess(false);
 		return profile;
 	}
 

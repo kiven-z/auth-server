@@ -1,15 +1,14 @@
 package com.auth.service.system.file.storage.platform.aliyun;
 
-import com.auth.service.system.file.config.properties.FileUploadProperties;
-import com.auth.service.system.file.config.properties.platform.AliyunOssStorageProperties;
+import com.auth.module.file.api.model.enums.StoragePlatformEnum;
+import com.auth.service.system.file.config.properties.S3PlatformProfile;
+import com.auth.service.system.file.storage.core.s3.S3PlatformProfileResolver;
 import com.auth.service.system.file.storage.core.validator.StoragePlatformConfigValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.Objects;
-
 /**
- * 阿里云 OSS 平台配置校验器
+ * 阿里云 OSS 平台配置校验器（校验 resolve 后的统一 profile，兼容 platforms 与 legacy 配置）
  *
  * @author Bunny
  */
@@ -17,19 +16,20 @@ import java.util.Objects;
 @Component
 public class AliyunOssConfigValidator implements StoragePlatformConfigValidator {
 
-	private final FileUploadProperties properties;
+	private static final String CONFIG_PREFIX = "auth.file.platforms.ALIYUN_OSS";
+
+	private final S3PlatformProfileResolver profileResolver;
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public void validateOrThrow() {
-		AliyunOssStorageProperties aliyunOss = Objects.requireNonNullElseGet(properties.getAliyunOss(),
-				AliyunOssStorageProperties::new);
-		assertNotBlank(aliyunOss.getEndpoint(), "aliyun-oss.endpoint");
-		assertNotBlank(aliyunOss.getAccessKeyId(), "aliyun-oss.access-key-id");
-		assertNotBlank(aliyunOss.getAccessKeySecret(), "aliyun-oss.access-key-secret");
-		assertNotBlank(aliyunOss.getBucket(), "aliyun-oss.bucket");
+		S3PlatformProfile profile = profileResolver.resolve(StoragePlatformEnum.ALIYUN_OSS);
+		assertNotBlank(profile.getEndpoint(), CONFIG_PREFIX + ".endpoint");
+		assertNotBlank(profile.getAccessKey(), CONFIG_PREFIX + ".access-key");
+		assertNotBlank(profile.getSecretKey(), CONFIG_PREFIX + ".secret-key");
+		assertNotBlank(profile.getBucket(), CONFIG_PREFIX + ".bucket");
 	}
 
 }

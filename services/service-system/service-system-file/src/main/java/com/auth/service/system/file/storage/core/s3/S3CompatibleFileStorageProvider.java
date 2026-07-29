@@ -121,13 +121,7 @@ public class S3CompatibleFileStorageProvider implements FileStorageProvider {
 	public String resolvePublicUrl(String bucket, String objectKey) {
 		configValidator.validateOrThrow();
 		S3PlatformProfile profile = profileResolver.resolve(platform);
-		String objectPath = StorageUrlUtil.trimLeadingSlash(objectKey);
-		if (CharSequenceUtil.isNotBlank(profile.getPublicUrl())) {
-			return StorageUrlUtil.concatPublicUrl(profile.getPublicUrl(), objectPath);
-		}
-		String endpointBaseUrl = StorageUrlUtil.normalizeHttpBaseUrl(profile.getEndpoint());
-		String resolvedBucket = CharSequenceUtil.blankToDefault(bucket, profile.getBucket());
-		return StorageUrlUtil.concatPublicUrl(endpointBaseUrl + "/" + resolvedBucket, objectPath);
+		return StorageUrlUtil.resolveObjectUrl(profile, bucket, objectKey);
 	}
 
 	/**
