@@ -121,6 +121,7 @@ alwaysApply: true
 - 禁止出现 SonarQube 定义的 Common Bug（如：未处理的 NullPointerException、未关闭的资源流）。
 - 禁止使用 `System.out.println`，必须使用 Log 框架打印日志。
 - 编写测试时必须加上 `@DisplayName` 写明用途；复杂场景在方法内用简短注释说明意图。
+- 注释中全文严禁出现‘为了兼容’、‘与…对齐’、‘综上所述’、‘具有重要意义’等这几类短语。
 
 ### 数据库与持久层规范
 
@@ -134,6 +135,7 @@ alwaysApply: true
 - 必须使用 MyBatis-Plus 进行数据库操作。
 - 优先使用 `LambdaQueryWrapper` 以确保类型安全，严禁在 Service 层直接拼接原生 SQL 字符串。
 - 生成 XML 时，需在标签头部加上注释，例如：
+
   ```xml
   <!-- 分页查询日志 -->
   <select id="selectListByPage" resultType="...">

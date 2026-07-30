@@ -29,7 +29,7 @@ public class SecurityConfigProperties {
 	private AuditPolicy auditPolicy = AuditPolicy.ALL_RECORD;
 
 	/**
-	 * 是否开启全量审计 兼容历史实现中以 {@code fullAudit} 作为开关的写法
+	 * 当前策略是否为全量审计（{@link AuditPolicy#ALL_RECORD}）
 	 */
 	public boolean isFullAudit() {
 		return AuditPolicy.ALL_RECORD.equals(this.auditPolicy);

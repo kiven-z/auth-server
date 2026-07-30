@@ -26,7 +26,7 @@ public class SecurityInternalTokenConstants {
 	public static final String SERVICE_ID = "service_id";
 
 	/**
-	 * 服务身份令牌的 sub 占位值（满足 {@code requireNumericUserIdSubject} 兼容，无业务含义）
+	 * 服务身份令牌的 sub 占位值（数值型 subject 要求下的占位，无业务含义）
 	 */
 	public static final Long SERVICE_SUB_PLACEHOLDER = 0L;
 

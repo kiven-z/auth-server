@@ -1,7 +1,7 @@
 package com.auth.common.jwt.exception;
 
 /**
- * 与历史全局异常处理器兼容的解析失败类型
+ * JWT 解析失败异常（错误码 {@code JWT_PARSE_ERROR}）
  *
  * @author Bunny
  */

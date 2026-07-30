@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 /**
- * MinIO 平台配置校验器（校验 resolve 后的统一 profile，兼容 platforms 与 legacy 配置）
+ * MinIO 平台配置校验器
  *
  * @author Bunny
  */

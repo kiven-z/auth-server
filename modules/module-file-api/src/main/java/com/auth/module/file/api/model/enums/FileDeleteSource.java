@@ -27,7 +27,7 @@ public enum FileDeleteSource {
 	ADMIN_ACTION("ADMIN_ACTION", RecycleVisibility.ADMIN_ONLY),
 
 	/**
-	 * 历史遗留来源，保留以兼容存量数据
+	 * 系统侧删除（存量数据可能仍带此来源码）
 	 */
 	SYSTEM_ACTION("SYSTEM_ACTION", RecycleVisibility.HIDDEN);
 

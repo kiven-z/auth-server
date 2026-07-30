@@ -70,7 +70,7 @@ public class OperationLogRequestParamsBuilder {
 	}
 
 	/**
-	 * 与历史实现一致：仅 Servlet 层 query / parameterMap
+	 * 仅从 Servlet 层 query / parameterMap 生成摘要
 	 * @param request 请求
 	 * @param objectMapper JSON 序列化
 	 * @return 摘要或 {@code null}
@@ -106,7 +106,7 @@ public class OperationLogRequestParamsBuilder {
 	}
 
 	/**
-	 * GET 历史行为：始终返回截断后的 query 字符串（含空白 query 场景）
+	 * GET：返回截断后的 query 字符串（空白 query 也返回空串而非 {@code null}）
 	 * @param request 请求
 	 * @return 截断后的 query 字符串
 	 */

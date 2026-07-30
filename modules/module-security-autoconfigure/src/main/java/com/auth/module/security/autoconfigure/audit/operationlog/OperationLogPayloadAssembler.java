@@ -40,7 +40,7 @@ public class OperationLogPayloadAssembler {
 	private final IpAddressService ipAddressService;
 
 	/**
-	 * @param operationLogHandler 可为 {@code null}（与切面原行为一致：跳过发布）
+	 * @param operationLogHandler 可为 null 为 null 时跳过发布）
 	 * @param objectMapper JSON 序列化
 	 * @param ipAddressService IP 解析
 	 */
