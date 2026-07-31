@@ -25,8 +25,13 @@ class DefaultDataScopeHandlerTest {
 		// fixture: annotation carrier only; never invoked
 	}
 
-	@DataScope(ignoreSuperAdmin = true)
-	void annotatedIgnoreAdmin() {
+	@DataScope(scope = DataScopeStorageType.DEPT)
+	void annotatedForceDept() {
+		// fixture: annotation carrier only; never invoked
+	}
+
+	@DataScope(scope = DataScopeStorageType.SELF)
+	void annotatedForceSelf() {
 		// fixture: annotation carrier only; never invoked
 	}
 
@@ -89,8 +94,8 @@ class DefaultDataScopeHandlerTest {
 	}
 
 	@Test
-	@DisplayName("管理员且忽略开关关闭时直接放行")
-	void superAdmin_shouldBypassWhenIgnoreFlagIsFalse() throws Exception {
+	@DisplayName("超级管理员直接放行")
+	void superAdmin_shouldBypass() throws Exception {
 		AuthProfile profile = AuthProfile.builder()
 			.userId(1L)
 			.deptScope(ScopeGrant.builder().scopeType(DataScopeStorageType.SELF).values(List.of()).build())
@@ -100,23 +105,47 @@ class DefaultDataScopeHandlerTest {
 	}
 
 	@Test
-	@DisplayName("管理员忽略开关开启时按普通用户计算")
-	void superAdmin_shouldApplyConditionWhenIgnoreFlagIsTrue() throws Exception {
-		Method method = DefaultDataScopeHandlerTest.class.getDeclaredMethod("annotatedIgnoreAdmin");
-		DataScope ann = method.getAnnotation(DataScope.class);
-		AuthProfile profile = AuthProfile.builder()
-			.userId(1L)
-			.deptScope(ScopeGrant.builder().scopeType(DataScopeStorageType.SELF).values(List.of()).build())
-			.build();
-		String cond = new DefaultDataScopeHandler().buildCondition(profile, ann);
-		assertEquals("d.create_user = 1", cond);
-	}
-
-	@Test
 	@DisplayName("deptScope 为空时默认 SELF")
 	void nullDeptScope_shouldDefaultToSelf() throws Exception {
 		AuthProfile profile = AuthProfile.builder().userId(10L).build();
 		String cond = new DefaultDataScopeHandler().buildCondition(profile, defaultAnn());
+		assertEquals("d.create_user = 10", cond);
+	}
+
+	@Test
+	@DisplayName("FROM_PROFILE 默认按画像范围裁决")
+	void fromProfile_shouldUseProfileDeptScope() throws Exception {
+		AuthProfile profile = AuthProfile.builder()
+			.userId(10L)
+			.deptScope(ScopeGrant.builder().scopeType(DataScopeStorageType.DEPT).values(List.of(7L, 8L)).build())
+			.build();
+		String cond = new DefaultDataScopeHandler().buildCondition(profile, defaultAnn());
+		assertEquals("d.dept_id IN (7,8)", cond);
+	}
+
+	@Test
+	@DisplayName("注解强制 DEPT 且画像无部门值时 fail-close")
+	void forceDept_withoutValues_shouldFailClosed() throws Exception {
+		Method method = DefaultDataScopeHandlerTest.class.getDeclaredMethod("annotatedForceDept");
+		DataScope annotation = method.getAnnotation(DataScope.class);
+		AuthProfile profile = AuthProfile.builder()
+			.userId(10L)
+			.deptScope(ScopeGrant.builder().scopeType(DataScopeStorageType.SELF).build())
+			.build();
+		String cond = new DefaultDataScopeHandler().buildCondition(profile, annotation);
+		assertEquals("1 = 0", cond);
+	}
+
+	@Test
+	@DisplayName("注解强制 SELF 覆盖画像部门范围")
+	void forceSelf_shouldOverrideProfileScopeType() throws Exception {
+		Method method = DefaultDataScopeHandlerTest.class.getDeclaredMethod("annotatedForceSelf");
+		DataScope annotation = method.getAnnotation(DataScope.class);
+		AuthProfile profile = AuthProfile.builder()
+			.userId(10L)
+			.deptScope(ScopeGrant.builder().scopeType(DataScopeStorageType.DEPT).values(List.of(7L, 8L)).build())
+			.build();
+		String cond = new DefaultDataScopeHandler().buildCondition(profile, annotation);
 		assertEquals("d.create_user = 10", cond);
 	}
 

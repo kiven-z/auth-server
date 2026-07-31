@@ -28,15 +28,15 @@ public class WebDocProperties {
 
 	private String summary = "Bunny RBAC backend management system";
 
-	private String version = "v1.0.0";
+	private String version = "v1.0.0-alpha.3";
 
 	private String contactName = "Bunny";
 
 	private String contactEmail = "1319900154@qq.com";
 
-	private String licenseName = "MIT";
+	private String licenseName = "PolyForm Noncommercial 1.0.0";
 
-	private String licenseUrl = "https://mit-license.org";
+	private String licenseUrl = "https://polyformproject.org/licenses/noncommercial/1.0.0";
 
 	/**
 	 * OpenAPI groups.

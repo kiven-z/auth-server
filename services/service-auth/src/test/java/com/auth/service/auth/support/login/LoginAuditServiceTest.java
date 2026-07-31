@@ -1,11 +1,12 @@
 package com.auth.service.auth.support.login;
 
+import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.TestConstants;
+import com.auth.service.auth.mapper.UserMapper;
 import com.auth.service.auth.model.enums.AuthLoginLogResult;
 import com.auth.service.auth.model.enums.AuthLoginLogType;
 import com.auth.service.auth.model.value.login.LoginAuditSnapshot;
-import com.auth.service.auth.support.authorization.AuthProfileRepository;
 import com.auth.service.auth.support.redis.AuthProfileRedisCache;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -35,13 +36,13 @@ class LoginAuditServiceTest {
 	private AuthProfileRedisCache authProfileRedisCache;
 
 	@Mock
-	private AuthProfileRepository authProfileRepository;
+	private UserMapper userMapper;
 
 	private LoginAuditService loginAuditService;
 
 	@BeforeEach
 	void setUp() {
-		loginAuditService = new LoginAuditService(loginLogRepository, authProfileRedisCache, authProfileRepository);
+		loginAuditService = new LoginAuditService(loginLogRepository, authProfileRedisCache, userMapper);
 	}
 
 	@Test
@@ -71,7 +72,7 @@ class LoginAuditServiceTest {
 		verify(loginLogRepository).recordLoginLog(any(), eq(AuthLoginLogType.LOGIN_PASSWORD),
 				eq(AuthLoginLogResult.PASSWORD_OR_CREDENTIAL_ERROR), isNull(), eq("13800138000"), eq("user.not.found"),
 				isNull());
-		verifyNoInteractions(authProfileRedisCache, authProfileRepository);
+		verifyNoInteractions(authProfileRedisCache, userMapper);
 	}
 
 	@Test
@@ -86,7 +87,7 @@ class LoginAuditServiceTest {
 		verify(loginLogRepository).recordLoginLog(same(snapshot), eq(AuthLoginLogType.LOGIN_PASSWORD),
 				eq(AuthLoginLogResult.SUCCESS), eq(TestConstants.USER_ID), eq("Administrator"), isNull(),
 				eq(TestConstants.JTI));
-		verifyNoInteractions(authProfileRedisCache, authProfileRepository);
+		verifyNoInteractions(authProfileRedisCache, userMapper);
 	}
 
 	@Test
@@ -103,17 +104,19 @@ class LoginAuditServiceTest {
 		verify(loginLogRepository).recordLoginLog(same(snapshot), eq(AuthLoginLogType.LOGIN_PASSWORD),
 				eq(AuthLoginLogResult.SUCCESS), eq(TestConstants.USER_ID), eq("Administrator"), isNull(),
 				eq(TestConstants.JTI));
-		verifyNoInteractions(authProfileRepository);
+		verifyNoInteractions(userMapper);
 	}
 
 	@Test
-	@DisplayName("有 userId 且缓存未命中：从 AuthProfileRepository 解析登录名")
+	@DisplayName("有 userId 且缓存未命中：从 UserMapper 解析登录名")
 	void normalizePrincipal_shouldResolveFromDb_whenCacheMiss() {
 		LoginAuditSnapshot snapshot = LoginAuditSnapshot.empty();
 		when(loginLogRepository.buildSnapshot(null)).thenReturn(snapshot);
 		when(authProfileRedisCache.loadCachedProfile(TestConstants.USER_ID)).thenReturn(Optional.empty());
-		when(authProfileRepository.findUsernameByUserId(TestConstants.USER_ID))
-			.thenReturn(Optional.of("Administrator"));
+		UserEntity user = new UserEntity();
+		user.setId(TestConstants.USER_ID);
+		user.setUsername("Administrator");
+		when(userMapper.selectById(TestConstants.USER_ID)).thenReturn(user);
 
 		loginAuditService.auditLoginSuccess(null, AuthLoginLogType.LOGIN_PASSWORD, TestConstants.USER_ID, null,
 				TestConstants.JTI);

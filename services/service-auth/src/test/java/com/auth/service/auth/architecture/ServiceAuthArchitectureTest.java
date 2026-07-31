@@ -71,4 +71,18 @@ class ServiceAuthArchitectureTest {
 		.dependOnClassesThat()
 		.resideInAnyPackage(SYSTEM_IMPLEMENTATION);
 
+	private static final String DATA_SCOPE_ANNOTATION = "com.auth.module.security.datapermission.annotation.DataScope";
+
+	/**
+	 * {@code @DataScope} 按 MappedStatement ID 解析，仅 Mapper 方法生效。
+	 */
+	@ArchTest
+	static final ArchRule data_scope_only_on_mapper_methods = methods().that()
+		.areAnnotatedWith(DATA_SCOPE_ANNOTATION)
+		.should()
+		.beDeclaredInClassesThat()
+		.haveSimpleNameEndingWith("Mapper")
+		.because("@DataScope is resolved via MappedStatement ID and only takes effect on Mapper methods")
+		.allowEmptyShould(true);
+
 }

@@ -7,7 +7,6 @@ import com.auth.service.auth.mapper.DataScopeMapper;
 import com.auth.service.auth.mapper.UserAuthorizationGrantMapper;
 import com.auth.service.auth.mapper.UserMapper;
 import com.auth.service.auth.model.po.authorization.UserGrantCodeRowPO;
-import com.auth.service.auth.model.value.authorization.UserAccountSnapshot;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,8 +51,7 @@ class AuthProfileRepositoryTest {
 
 	@Test
 	@DisplayName("构建画像时注入生效数据权限")
-	void buildByAccount_shouldContainResolvedDeptScope() {
-		UserAccountSnapshot account = UserAccountSnapshot.builder().id(10L).username("u10").permVersion(1L).build();
+	void buildByUserId_shouldContainResolvedDeptScope() {
 		stubBatchUser(10L, "u10");
 		when(userAuthorizationGrantMapper.selectRoleRowsByUserIds(List.of(10L)))
 			.thenReturn(List.of(grantCodeRow(10L, "COMMON")));
@@ -69,27 +67,32 @@ class AuthProfileRepositoryTest {
 		AuthProfileRepository repository = new AuthProfileRepository(userAuthorizationGrantMapper,
 				deptDataScopeResolver, userMapper, dataScopeMapper);
 
-		assertEquals(grant, repository.buildByAccount(account).getDeptScope());
+		assertEquals(grant, repository.buildByUserId(10L).getDeptScope());
 		verify(deptDataScopeResolver).resolveEffectiveGrants(List.of(10L), Map.of(10L, List.of("COMMON")), Map.of(),
 				List.of());
 	}
 
 	@Test
-	@DisplayName("管理员写入 ALL 数据范围且不调用 resolver")
-	void admin_shouldReceiveAllDeptScope() {
-		UserAccountSnapshot account = UserAccountSnapshot.builder().id(2L).username("admin").permVersion(1L).build();
+	@DisplayName("管理员角色使用通配权限但数据范围仍走 resolver")
+	void adminRole_shouldResolveDeptScopeFromResolver() {
 		stubBatchUser(2L, "admin");
 		when(userAuthorizationGrantMapper.selectRoleRowsByUserIds(List.of(2L)))
 			.thenReturn(List.of(grantCodeRow(2L, "ADMIN")));
 		when(userAuthorizationGrantMapper.selectPermissionRowsByUserIds(List.of(2L)))
 			.thenReturn(List.of(grantCodeRow(2L, "*")));
 		when(dataScopeMapper.selectByUserIds(List.of(2L))).thenReturn(List.of());
+		when(dataScopeMapper.selectByRoleCodes(List.of("ADMIN"))).thenReturn(List.of());
+		ScopeGrant grant = ScopeGrant.builder().scopeType(DataScopeStorageType.DEPT).values(List.of(9L)).build();
+		when(deptDataScopeResolver.resolveEffectiveGrants(List.of(2L), Map.of(2L, List.of("ADMIN")), Map.of(),
+				List.of()))
+			.thenReturn(Map.of(2L, grant));
 
 		AuthProfileRepository repository = new AuthProfileRepository(userAuthorizationGrantMapper,
 				deptDataScopeResolver, userMapper, dataScopeMapper);
 
-		assertEquals(DataScopeStorageType.ALL, repository.buildByAccount(account).getDeptScope().getScopeType());
-		verifyNoInteractions(deptDataScopeResolver);
+		assertEquals(grant, repository.buildByUserId(2L).getDeptScope());
+		verify(deptDataScopeResolver).resolveEffectiveGrants(List.of(2L), Map.of(2L, List.of("ADMIN")), Map.of(),
+				List.of());
 	}
 
 	@Test
@@ -111,8 +114,28 @@ class AuthProfileRepositoryTest {
 		verify(dataScopeMapper).selectByUserIds(List.of(10L, 11L));
 	}
 
+	@Test
+	@DisplayName("超级管理员写入 ALL 数据范围；resolver 仅收到空用户列表")
+	void superAdmin_shouldReceiveAllDeptScope() {
+		stubBatchUser(1L, "root");
+		when(userAuthorizationGrantMapper.selectRoleRowsByUserIds(List.of(1L)))
+			.thenReturn(List.of(grantCodeRow(1L, "ADMIN")));
+		when(userAuthorizationGrantMapper.selectPermissionRowsByUserIds(List.of(1L)))
+			.thenReturn(List.of(grantCodeRow(1L, "*")));
+		when(dataScopeMapper.selectByUserIds(List.of(1L))).thenReturn(List.of());
+		when(deptDataScopeResolver.resolveEffectiveGrants(List.of(), Map.of(1L, List.of("ADMIN")), Map.of(), List.of()))
+			.thenReturn(Map.of());
+
+		AuthProfileRepository repository = new AuthProfileRepository(userAuthorizationGrantMapper,
+				deptDataScopeResolver, userMapper, dataScopeMapper);
+
+		assertEquals(DataScopeStorageType.ALL, repository.buildByUserId(1L).getDeptScope().getScopeType());
+		verify(deptDataScopeResolver).resolveEffectiveGrants(List.of(), Map.of(1L, List.of("ADMIN")), Map.of(),
+				List.of());
+		verify(dataScopeMapper, never()).selectByRoleCodes(anyList());
+	}
+
 	private void stubBatchUser(Long userId, String username) {
-		stubBatchUsers(List.of(userId));
 		UserEntity user = new UserEntity();
 		user.setId(userId);
 		user.setUsername(username);

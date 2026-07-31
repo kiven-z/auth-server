@@ -76,34 +76,30 @@ public class AuthProfileRepository {
 			return List.of();
 		}
 
-		Map<Long, List<String>> rolesByUser = groupCodesByUser(
-				userAuthorizationGrantMapper.selectRoleRowsByUserIds(existingUserIds));
-		Map<Long, List<String>> permissionsByUser = groupCodesByUser(
-				userAuthorizationGrantMapper.selectPermissionRowsByUserIds(existingUserIds));
+		List<UserGrantCodeRowPO> roleRows = userAuthorizationGrantMapper.selectRoleRowsByUserIds(existingUserIds);
+		Map<Long, List<String>> rolesByUser = groupCodesByUser(roleRows);
+		List<UserGrantCodeRowPO> permissionRows = userAuthorizationGrantMapper
+			.selectPermissionRowsByUserIds(existingUserIds);
+		Map<Long, List<String>> permissionsByUser = groupCodesByUser(permissionRows);
 
 		Map<Long, UserScopePO> userScopesByUserId = dataScopeMapper.selectByUserIds(existingUserIds)
 			.stream()
 			.collect(Collectors.toMap(UserScopeByUserPO::getUserId, this::toUserScope, (left, right) -> left));
 
+		// 超管跳过；已有 user_scope 的不需要再查 role_scope
 		Set<String> roleCodesForScope = existingUserIds.stream()
-			.filter(userId -> !PermissionConstant.isAdmin(userId, rolesByUser.getOrDefault(userId, List.of())))
+			.filter(userId -> !PermissionConstant.isSuperAdmin(userId))
 			.filter(userId -> !userScopesByUserId.containsKey(userId))
 			.flatMap(userId -> rolesByUser.getOrDefault(userId, List.of()).stream())
 			.collect(Collectors.toCollection(LinkedHashSet::new));
 		List<RoleScopePO> roleScopes = CollUtil.isEmpty(roleCodesForScope) ? List.of()
 				: dataScopeMapper.selectByRoleCodes(new ArrayList<>(roleCodesForScope));
 
-		final Map<Long, ScopeGrant> deptScopeByUser;
-		List<Long> nonAdminUserIds = existingUserIds.stream()
-			.filter(userId -> !PermissionConstant.isAdmin(userId, rolesByUser.getOrDefault(userId, List.of())))
+		List<Long> nonSuperAdminUserIds = existingUserIds.stream()
+			.filter(userId -> !PermissionConstant.isSuperAdmin(userId))
 			.toList();
-		if (CollUtil.isNotEmpty(nonAdminUserIds)) {
-			deptScopeByUser = deptDataScopeResolver.resolveEffectiveGrants(nonAdminUserIds, rolesByUser,
-					userScopesByUserId, roleScopes);
-		}
-		else {
-			deptScopeByUser = Map.of();
-		}
+		Map<Long, ScopeGrant> deptScopeByUser = deptDataScopeResolver.resolveEffectiveGrants(nonSuperAdminUserIds,
+				rolesByUser, userScopesByUserId, roleScopes);
 
 		return existingUserIds.stream()
 			.map(userId -> assembleProfile(accounts.get(userId), rolesByUser.getOrDefault(userId, List.of()),
@@ -112,47 +108,27 @@ public class AuthProfileRepository {
 	}
 
 	/**
-	 * 按用户 ID 查询登录名（轻量读，供审计等场景缓存未命中时使用）。
-	 * @param userId 用户 ID
-	 * @return 登录名，用户不存在或用户名为空时为空
+	 * 套用超管/管理员特权后组装画像。
 	 */
-	public Optional<String> findUsernameByUserId(Long userId) {
-		if (userId == null) {
-			return Optional.empty();
-		}
-		return Optional.ofNullable(userMapper.selectById(userId))
-			.map(UserEntity::getUsername)
-			.filter(CharSequenceUtil::isNotBlank);
-	}
-
-	/**
-	 * 根据用户快照构建授权画像（避免重复查询用户）。
-	 * @param account 用户快照
-	 * @return 授权画像
-	 */
-	public AuthProfile buildByAccount(UserAccountSnapshot account) {
-		if (account == null || account.id() == null) {
-			throw new AuthBusinessException(AuthResultCode.USER_NOT_FOUND);
-		}
-		return buildByUserIds(List.of(account.id())).stream()
-			.findFirst()
-			.orElseThrow(() -> new AuthBusinessException(AuthResultCode.USER_NOT_FOUND));
-	}
-
 	private AuthProfile assembleProfile(UserAccountSnapshot account, List<String> roles, List<String> permissions,
 			ScopeGrant deptScope) {
 		long userId = account.id();
-		boolean admin = PermissionConstant.isAdmin(userId, roles);
+		boolean superAdmin = PermissionConstant.isSuperAdmin(userId);
+		boolean adminRole = PermissionConstant.isAdminRole(roles);
 
 		List<String> resolvedRoles = roles;
 		List<String> resolvedPermissions = permissions;
 		ScopeGrant resolvedDeptScope = deptScope;
-		if (admin) {
+		if (superAdmin) {
 			resolvedRoles = PermissionConstant.ADMIN_ROLES;
 			resolvedPermissions = PermissionConstant.ADMIN_WILDCARD_PERMISSIONS;
 			resolvedDeptScope = ScopeGrant.builder().scopeType(DataScopeStorageType.ALL).values(List.of()).build();
 		}
-		else if (resolvedDeptScope == null) {
+		else if (adminRole) {
+			resolvedRoles = PermissionConstant.ADMIN_ROLES;
+			resolvedPermissions = PermissionConstant.ADMIN_WILDCARD_PERMISSIONS;
+		}
+		if (!superAdmin && resolvedDeptScope == null) {
 			resolvedDeptScope = ScopeGrant.builder().scopeType(DataScopeStorageType.SELF).build();
 		}
 

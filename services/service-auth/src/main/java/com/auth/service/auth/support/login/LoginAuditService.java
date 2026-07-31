@@ -1,14 +1,15 @@
 package com.auth.service.auth.support.login;
 
 import cn.hutool.core.text.CharSequenceUtil;
+import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.exception.AuthBusinessException;
 import com.auth.service.auth.exception.AuthResultCode;
+import com.auth.service.auth.mapper.UserMapper;
 import com.auth.service.auth.model.enums.AuthLoginLogResult;
 import com.auth.service.auth.model.enums.AuthLoginLogType;
 import com.auth.service.auth.model.value.login.LoginAuditSnapshot;
 import com.auth.service.auth.model.value.login.command.BaseLoginCommand;
-import com.auth.service.auth.support.authorization.AuthProfileRepository;
 import com.auth.service.auth.support.redis.AuthProfileRedisCache;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -44,7 +45,7 @@ public class LoginAuditService {
 
 	private final AuthProfileRedisCache authProfileRedisCache;
 
-	private final AuthProfileRepository authProfileRepository;
+	private final UserMapper userMapper;
 
 	/**
 	 * 将业务结果码映射为审计结果枚举（编排阶段失败等）。
@@ -256,7 +257,12 @@ public class LoginAuditService {
 		return authProfileRedisCache.loadCachedProfile(userId)
 			.map(AuthProfile::getUsername)
 			.filter(CharSequenceUtil::isNotBlank)
-			.or(() -> authProfileRepository.findUsernameByUserId(userId))
+			.or(() -> {
+				UserEntity userEntity = userMapper.selectById(userId);
+				return Optional.ofNullable(userEntity)
+					.map(UserEntity::getUsername)
+					.filter(CharSequenceUtil::isNotBlank);
+			})
 			.orElse(null);
 	}
 

@@ -27,10 +27,15 @@ public enum DataScopeStorageType {
 	/**
 	 * 指定部门及全部后代（登录解析时需展开为部门 ID 列表）
 	 */
-	DEPT_AND_CHILD;
+	DEPT_AND_CHILD,
 
 	/**
-	 * 解析库表 scope_type 或 JSON 字符串
+	 * 注解占位：表示运行期按用户画像裁决，不作为库表存储值。
+	 */
+	FROM_PROFILE;
+
+	/**
+	 * 解析库表 scope_type 或 JSON 字符串（仅存储层类型）
 	 * @param raw 原始值
 	 * @return 枚举；无法识别时为 {@code null}
 	 */
@@ -39,7 +44,8 @@ public enum DataScopeStorageType {
 			return null;
 		}
 		try {
-			return valueOf(raw.strip().toUpperCase(Locale.ROOT));
+			DataScopeStorageType parsed = valueOf(raw.strip().toUpperCase(Locale.ROOT));
+			return parsed == FROM_PROFILE ? null : parsed;
 		}
 		catch (IllegalArgumentException ex) {
 			return null;

@@ -72,7 +72,7 @@ public class PermissionConstant {
 	}
 
 	/**
-	 * 是否是管理员
+	 * 是否是管理员（功能权限语义）
 	 * @param userId 用户ID
 	 * @param roles 角色列表
 	 * @return 是否是管理员
