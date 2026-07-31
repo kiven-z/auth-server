@@ -33,8 +33,8 @@ public interface SysRoleSpreadsheetConverter {
 	 * @return 表格行
 	 */
 	@Mapping(target = "statusLabel", source = "status", qualifiedByName = "statusLabel")
-	@Mapping(target = "createTimeText", source = "createTime", qualifiedByName = "dateTimeText")
-	@Mapping(target = "updateTimeText", source = "updateTime", qualifiedByName = "dateTimeText")
+	@Mapping(target = "createdAtText", source = "createdAt", qualifiedByName = "dateTimeText")
+	@Mapping(target = "updatedAtText", source = "updatedAt", qualifiedByName = "dateTimeText")
 	SysRoleSpreadsheetRow toSpreadsheetRow(SysRoleEntity entity);
 
 }

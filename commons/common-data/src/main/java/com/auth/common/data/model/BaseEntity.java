@@ -31,27 +31,27 @@ public class BaseEntity implements Serializable {
 	 * 创建时间
 	 */
 	@TableField(fill = FieldFill.INSERT)
-	private Instant createTime;
+	private Instant createdAt;
 
 	/**
 	 * 更新时间
 	 */
 	@TableField(fill = FieldFill.INSERT_UPDATE)
-	private Instant updateTime;
+	private Instant updatedAt;
 
 	/**
 	 * 创建用户
 	 */
 	@JsonStringFormat
 	@TableField(fill = FieldFill.INSERT)
-	private Long createUser;
+	private Long createdBy;
 
 	/**
 	 * 操作用户
 	 */
 	@JsonStringFormat
 	@TableField(fill = FieldFill.INSERT_UPDATE)
-	private Long updateUser;
+	private Long updatedBy;
 
 	/**
 	 * 乐观锁版本号

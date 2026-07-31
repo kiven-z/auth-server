@@ -24,8 +24,8 @@ public interface LogJobConverter {
 	 * @param po 持久层查询投影
 	 * @return 分页返回对象
 	 */
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "createdByName", ignore = true)
+	@Mapping(target = "updatedByName", ignore = true)
 	LogJobPageVO toPageVO(LogJobPageRowPO po);
 
 	/**
@@ -33,8 +33,8 @@ public interface LogJobConverter {
 	 * @param entity 任务日志实体
 	 * @return 详情 VO
 	 */
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "createdByName", ignore = true)
+	@Mapping(target = "updatedByName", ignore = true)
 	LogJobDetailVO toDetailVo(LogJobEntity entity);
 
 }

@@ -71,7 +71,7 @@ public interface AuthorizationInvalidationEventService {
 
 	/**
 	 * 批量释放超时的 processing 占位行
-	 * @param cutoffTime 占位 update_time 早于此时间视为超时
+	 * @param cutoffTime 占位 updated_at 早于此时间视为超时
 	 * @param batchSize 本批删除上限
 	 * @return 实际删除行数
 	 */

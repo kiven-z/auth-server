@@ -13,10 +13,10 @@
         ll.login_time,
         ll.login_region,
         ll.login_type,
-        ll.create_time,
-        ll.update_time,
-        ll.create_user,
-        ll.update_user
+        ll.created_at,
+        ll.updated_at,
+        ll.created_by,
+        ll.updated_by
         FROM
         log_login ll
         <where>
@@ -43,7 +43,7 @@
         </where>
         ORDER BY
         ll.login_time DESC,
-        ll.create_time DESC
+        ll.created_at DESC
     </select>
 
 </mapper>

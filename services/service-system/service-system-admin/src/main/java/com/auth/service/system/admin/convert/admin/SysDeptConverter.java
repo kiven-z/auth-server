@@ -28,8 +28,8 @@ public interface SysDeptConverter {
 	 * @param entity 部门实体
 	 * @return 列表 VO
 	 */
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "createdByName", ignore = true)
+	@Mapping(target = "updatedByName", ignore = true)
 	SysDeptListVO toListVo(SysDeptEntity entity);
 
 	/**
@@ -44,8 +44,8 @@ public interface SysDeptConverter {
 	 * @param row 分页持久层投影
 	 * @return 列表 VO
 	 */
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "createdByName", ignore = true)
+	@Mapping(target = "updatedByName", ignore = true)
 	@BeanMapping(ignoreUnmappedSourceProperties = { "parentDeptCode", "parentDeptName" })
 	SysDeptListVO toListVoFromPageRow(SysDeptPageRowPO row);
 
@@ -55,10 +55,10 @@ public interface SysDeptConverter {
 	 * @return 待持久化实体
 	 */
 	@Mapping(target = "id", ignore = true)
-	@Mapping(target = "createTime", ignore = true)
-	@Mapping(target = "updateTime", ignore = true)
-	@Mapping(target = "createUser", ignore = true)
-	@Mapping(target = "updateUser", ignore = true)
+	@Mapping(target = "createdAt", ignore = true)
+	@Mapping(target = "updatedAt", ignore = true)
+	@Mapping(target = "createdBy", ignore = true)
+	@Mapping(target = "updatedBy", ignore = true)
 	@Mapping(target = "version", ignore = true)
 	SysDeptEntity toEntity(SysDeptForm form);
 
@@ -69,10 +69,10 @@ public interface SysDeptConverter {
 	 */
 	@Mapping(target = "id", ignore = true)
 	@Mapping(target = "parentId", ignore = true)
-	@Mapping(target = "createTime", ignore = true)
-	@Mapping(target = "updateTime", ignore = true)
-	@Mapping(target = "createUser", ignore = true)
-	@Mapping(target = "updateUser", ignore = true)
+	@Mapping(target = "createdAt", ignore = true)
+	@Mapping(target = "updatedAt", ignore = true)
+	@Mapping(target = "createdBy", ignore = true)
+	@Mapping(target = "updatedBy", ignore = true)
 	@Mapping(target = "version", ignore = true)
 	void applyUpdateForm(SysDeptForm form, @org.mapstruct.MappingTarget SysDeptEntity entity);
 
@@ -81,8 +81,8 @@ public interface SysDeptConverter {
 	 * @param entity 部门实体
 	 * @return 详情 VO
 	 */
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "createdByName", ignore = true)
+	@Mapping(target = "updatedByName", ignore = true)
 	@Mapping(target = "boundUsers", ignore = true)
 	@Mapping(target = "boundPosts", ignore = true)
 	@Mapping(target = "boundRoles", ignore = true)

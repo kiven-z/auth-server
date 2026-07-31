@@ -32,8 +32,8 @@ public interface SysUserConverter {
 	 * @param po 持久层投影
 	 * @return 分页行
 	 */
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "createdByName", ignore = true)
+	@Mapping(target = "updatedByName", ignore = true)
 	SysUserPageVO toPageVo(SysUserPageRowPO po);
 
 	/**
@@ -46,10 +46,10 @@ public interface SysUserConverter {
 	@Mapping(target = "avatar", ignore = true)
 	@Mapping(target = "age", ignore = true)
 	@Mapping(target = "permVersion", ignore = true)
-	@Mapping(target = "createTime", ignore = true)
-	@Mapping(target = "updateTime", ignore = true)
-	@Mapping(target = "createUser", ignore = true)
-	@Mapping(target = "updateUser", ignore = true)
+	@Mapping(target = "createdAt", ignore = true)
+	@Mapping(target = "updatedAt", ignore = true)
+	@Mapping(target = "createdBy", ignore = true)
+	@Mapping(target = "updatedBy", ignore = true)
 	@Mapping(target = "version", ignore = true)
 	UserEntity toEntity(SysUserForm form);
 
@@ -63,10 +63,10 @@ public interface SysUserConverter {
 	@Mapping(target = "avatar", ignore = true)
 	@Mapping(target = "age", ignore = true)
 	@Mapping(target = "permVersion", ignore = true)
-	@Mapping(target = "createTime", ignore = true)
-	@Mapping(target = "updateTime", ignore = true)
-	@Mapping(target = "createUser", ignore = true)
-	@Mapping(target = "updateUser", ignore = true)
+	@Mapping(target = "createdAt", ignore = true)
+	@Mapping(target = "updatedAt", ignore = true)
+	@Mapping(target = "createdBy", ignore = true)
+	@Mapping(target = "updatedBy", ignore = true)
 	@Mapping(target = "version", ignore = true)
 	@BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 	void applyUpdateForm(SysUserForm form, @org.mapstruct.MappingTarget UserEntity entity);
@@ -78,8 +78,8 @@ public interface SysUserConverter {
 	 */
 	@Mapping(target = "deptList", ignore = true)
 	@Mapping(target = "postList", ignore = true)
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "createdByName", ignore = true)
+	@Mapping(target = "updatedByName", ignore = true)
 	SysUserProfileVO toProfileVo(UserEntity user);
 
 	/**

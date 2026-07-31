@@ -14,10 +14,10 @@
         p.status,
         p.order_num,
         p.remark,
-        p.create_time,
-        p.update_time,
-        p.create_user,
-        p.update_user
+        p.created_at,
+        p.updated_at,
+        p.created_by,
+        p.updated_by
         FROM
         sys_post p
         INNER JOIN sys_dept d ON p.dept_id = d.id
@@ -139,7 +139,7 @@
         WHERE up.post_id = #{postId}
           AND up.status IN (1, 2)
         ORDER BY up.is_primary DESC,
-                 up.create_time DESC,
+                 up.created_at DESC,
                  u.username
     </select>
 

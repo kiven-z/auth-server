@@ -11,10 +11,10 @@
         laa.decision_reason,
         laa.class_name,
         laa.method_name,
-        laa.create_time,
-        laa.update_time,
-        laa.create_user,
-        laa.update_user
+        laa.created_at,
+        laa.updated_at,
+        laa.created_by,
+        laa.updated_by
         FROM
         log_authorization_audit laa
         <where>
@@ -27,12 +27,12 @@
             <if test="query.className != null and query.className != ''">
                 AND laa.class_name LIKE CONCAT('%', #{query.className}, '%')
             </if>
-            <if test="query.createUserId != null">
-                AND laa.create_user = #{query.createUserId}
+            <if test="query.createdById != null">
+                AND laa.created_by = #{query.createdById}
             </if>
         </where>
         ORDER BY
-        laa.create_time DESC
+        laa.created_at DESC
     </select>
 
 </mapper>

@@ -123,8 +123,8 @@ public class InAppInboxServiceImpl implements InAppInboxService {
 				row.setIsRead(Boolean.TRUE);
 				row.setReadTime(readTime);
 				row.setIsDeleted(Boolean.FALSE);
-				row.setCreateUser(userId);
-				row.setUpdateUser(userId);
+				row.setCreatedBy(userId);
+				row.setUpdatedBy(userId);
 				row.setVersion(0L);
 				return row;
 			}).toList();
@@ -157,8 +157,8 @@ public class InAppInboxServiceImpl implements InAppInboxService {
 				row.setIsRead(Boolean.FALSE);
 				row.setReadTime(null);
 				row.setIsDeleted(Boolean.TRUE);
-				row.setCreateUser(userId);
-				row.setUpdateUser(userId);
+				row.setCreatedBy(userId);
+				row.setUpdatedBy(userId);
 				row.setVersion(0L);
 				return row;
 			}).toList();

@@ -13,22 +13,22 @@ public enum DatabaseAuditMetaFieldEnum {
 	/**
 	 * 创建用户
 	 */
-	CREATE_USER("createUser"),
+	CREATED_BY("createdBy"),
 
 	/**
 	 * 修改用户
 	 */
-	UPDATE_USER("updateUser"),
+	UPDATED_BY("updatedBy"),
 
 	/**
 	 * 创建时间
 	 */
-	CREATE_TIME("createTime"),
+	CREATED_AT("createdAt"),
 
 	/**
 	 * 修改时间
 	 */
-	UPDATE_TIME("updateTime");
+	UPDATED_AT("updatedAt");
 
 	private final String columnName;
 

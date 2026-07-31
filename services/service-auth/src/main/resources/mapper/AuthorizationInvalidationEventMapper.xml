@@ -28,8 +28,8 @@
                                                            profile_refreshed_count,
                                                            profile_evicted_count,
                                                            processed_at,
-                                                           create_time,
-                                                           update_time,
+                                                           created_at,
+                                                           updated_at,
                                                            version)
         VALUES (#{id},
                 #{eventId},
@@ -52,7 +52,7 @@
             profile_refreshed_count = #{profileRefreshedCount},
             profile_evicted_count   = #{profileEvictedCount},
             processed_at            = #{processedAt},
-            update_time             = #{processedAt}
+            updated_at              = #{processedAt}
         WHERE event_id = #{eventId}
           AND impacted_user_count = -1
     </update>
@@ -77,10 +77,10 @@
         aie.profile_refreshed_count,
         aie.profile_evicted_count,
         aie.processed_at,
-        aie.create_time,
-        aie.update_time,
-        aie.create_user,
-        aie.update_user
+        aie.created_at,
+        aie.updated_at,
+        aie.created_by,
+        aie.updated_by
         FROM
         auth_authorization_invalidation_event aie
         <where>
@@ -105,7 +105,7 @@
         </where>
         ORDER BY
         aie.processed_at DESC,
-        aie.create_time DESC
+        aie.created_at DESC
     </select>
 
     <!-- 按主键查询幂等事件详情 -->
@@ -119,10 +119,10 @@
                aie.profile_refreshed_count,
                aie.profile_evicted_count,
                aie.processed_at,
-               aie.create_time,
-               aie.update_time,
-               aie.create_user,
-               aie.update_user,
+               aie.created_at,
+               aie.updated_at,
+               aie.created_by,
+               aie.updated_by,
                aie.remark
         FROM auth_authorization_invalidation_event aie
         WHERE aie.id = #{id}
@@ -142,7 +142,7 @@
         DELETE
         FROM auth_authorization_invalidation_event
         WHERE impacted_user_count = -1
-          AND update_time &lt; #{cutoffTime}
+          AND updated_at &lt; #{cutoffTime}
         LIMIT #{batchSize}
     </delete>
 

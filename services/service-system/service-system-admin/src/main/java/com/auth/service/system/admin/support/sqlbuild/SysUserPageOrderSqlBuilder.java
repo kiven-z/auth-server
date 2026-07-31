@@ -21,12 +21,12 @@ public class SysUserPageOrderSqlBuilder extends AbstractOrderSqlBuilder {
 	/**
 	 * 默认排序：创建时间降序。
 	 */
-	public static final String DEFAULT_ORDER_BY_SQL = "u.create_time DESC";
+	public static final String DEFAULT_ORDER_BY_SQL = "u.created_at DESC";
 
 	private static final Map<String, String> FIELD_TO_COLUMN = Map.ofEntries(Map.entry("username", "u.username"),
 			Map.entry("nickname", "u.nickname"), Map.entry("phone", "u.phone"), Map.entry("email", "u.email"),
 			Map.entry("employeeNo", "u.employee_no"), Map.entry("status", "u.status"),
-			Map.entry("createTime", "u.create_time"), Map.entry("updateTime", "u.update_time"));
+			Map.entry("createdAt", "u.created_at"), Map.entry("updatedAt", "u.updated_at"));
 
 	/**
 	 * 根据前端传入的排序规则生成 ORDER BY 子句（不含 ORDER BY 关键字）。

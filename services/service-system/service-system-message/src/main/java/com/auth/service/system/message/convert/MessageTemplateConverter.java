@@ -39,8 +39,8 @@ public interface MessageTemplateConverter {
 	 * @param po 持久层查询投影
 	 * @return 分页返回对象
 	 */
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "createdByName", ignore = true)
+	@Mapping(target = "updatedByName", ignore = true)
 	MessageTemplatePageVO toPageVO(MessageTemplatePageRowPO po);
 
 	/**
@@ -54,8 +54,8 @@ public interface MessageTemplateConverter {
 	@Mapping(target = "previewContent", ignore = true)
 	@Mapping(target = "contentType", ignore = true)
 	@Mapping(target = "requireFields", source = "requireFields", qualifiedByName = "parseRequireFields")
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "createdByName", ignore = true)
+	@Mapping(target = "updatedByName", ignore = true)
 	MessageTemplateDetailVO toDetailVo(MessageTemplateEntity entity);
 
 }

@@ -132,10 +132,10 @@ class InAppSendTaskServiceImplTest {
 		row.setFailCount(1);
 		row.setStatus(InAppMessageStatus.PARTIAL.name());
 		row.setRecalledAt(null);
-		row.setCreateTime(now);
-		row.setUpdateTime(now);
-		row.setCreateUser(1L);
-		row.setUpdateUser(1L);
+		row.setCreatedAt(now);
+		row.setUpdatedAt(now);
+		row.setCreatedBy(1L);
+		row.setUpdatedBy(1L);
 
 		Page<InAppSendTaskPageRowPO> mapperPage = new Page<>(1, 10);
 		mapperPage.setRecords(List.of(row));
@@ -193,10 +193,10 @@ class InAppSendTaskServiceImplTest {
 		task.setRecalledAt(null);
 		task.setRecallUserId(null);
 		task.setRemark("detail-check");
-		task.setCreateTime(now);
-		task.setUpdateTime(now);
-		task.setCreateUser(1L);
-		task.setUpdateUser(1L);
+		task.setCreatedAt(now);
+		task.setUpdatedAt(now);
+		task.setCreatedBy(1L);
+		task.setUpdatedBy(1L);
 		when(inAppMessageMapper.selectById(11L)).thenReturn(task);
 		com.auth.service.system.message.model.entity.InAppMessageCategoryEntity category = new com.auth.service.system.message.model.entity.InAppMessageCategoryEntity();
 		category.setId(MINOR_CATEGORY_ID);
@@ -268,10 +268,10 @@ class InAppSendTaskServiceImplTest {
 		row.setIsRead(true);
 		row.setReadTime(LocalDateTime.of(2026, 7, 23, 10, 0, 0).toInstant(java.time.ZoneOffset.UTC));
 		row.setIsDeleted(false);
-		row.setCreateTime(LocalDateTime.of(2026, 7, 23, 9, 0, 0).toInstant(java.time.ZoneOffset.UTC));
-		row.setUpdateTime(LocalDateTime.of(2026, 7, 23, 10, 0, 0).toInstant(java.time.ZoneOffset.UTC));
-		row.setCreateUser(1L);
-		row.setUpdateUser(88L);
+		row.setCreatedAt(LocalDateTime.of(2026, 7, 23, 9, 0, 0).toInstant(java.time.ZoneOffset.UTC));
+		row.setUpdatedAt(LocalDateTime.of(2026, 7, 23, 10, 0, 0).toInstant(java.time.ZoneOffset.UTC));
+		row.setCreatedBy(1L);
+		row.setUpdatedBy(88L);
 
 		Page<InAppSendTaskRecipientPageRowPO> mapperPage = new Page<>(1, 10);
 		mapperPage.setRecords(List.of(row));

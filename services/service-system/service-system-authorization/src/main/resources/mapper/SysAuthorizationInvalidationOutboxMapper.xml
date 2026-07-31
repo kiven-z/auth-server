@@ -14,8 +14,8 @@
                                                            next_retry_at,
                                                            source_module,
                                                            source_biz_id,
-                                                           create_time,
-                                                           update_time,
+                                                           created_at,
+                                                           updated_at,
                                                            version)
         VALUES (#{id},
                 #{eventId},
@@ -27,8 +27,8 @@
                 #{nextRetryAt},
                 #{sourceModule},
                 #{sourceBizId},
-                #{createTime},
-                #{updateTime},
+                #{createdAt},
+                #{updatedAt},
                 #{version})
     </insert>
 
@@ -49,8 +49,8 @@
                processed_at,
                source_module,
                source_biz_id,
-               create_time,
-               update_time,
+               created_at,
+               updated_at,
                version
         FROM sys_authorization_invalidation_outbox
         WHERE id = #{id}
@@ -73,8 +73,8 @@
         processed_at,
         source_module,
         source_biz_id,
-        create_time,
-        update_time,
+        created_at,
+        updated_at,
         version
         FROM sys_authorization_invalidation_outbox
         WHERE status IN
@@ -82,18 +82,18 @@
             #{status}
         </foreach>
         AND (next_retry_at IS NULL OR next_retry_at &lt;= #{now})
-        ORDER BY create_time ASC
+        ORDER BY created_at ASC
         LIMIT #{limit}
     </select>
 
     <!-- 抢占 Outbox 记录 -->
     <update id="claimForProcessing">
         UPDATE sys_authorization_invalidation_outbox
-        SET status      = 'PROCESSING',
-            locked_by   = #{lockedBy},
-            locked_at   = #{lockedAt},
-            update_time = #{lockedAt},
-            version     = version + 1
+        SET status     = 'PROCESSING',
+            locked_by  = #{lockedBy},
+            locked_at  = #{lockedAt},
+            updated_at = #{lockedAt},
+            version    = version + 1
         WHERE id = #{id}
           AND version = #{expectedVersion}
           AND status IN ('PENDING', 'FAILED')
@@ -104,7 +104,7 @@
         UPDATE sys_authorization_invalidation_outbox
         SET status       = 'SUCCESS',
             processed_at = #{processedAt},
-            update_time  = #{processedAt},
+            updated_at   = #{processedAt},
             last_error   = NULL,
             version      = version + 1
         WHERE id = #{id}
@@ -119,7 +119,7 @@
             last_error    = #{lastError},
             locked_by     = NULL,
             locked_at     = NULL,
-            update_time   = NOW(3),
+            updated_at    = NOW(3),
             version       = version + 1
         WHERE id = #{id}
     </update>
@@ -127,9 +127,9 @@
     <!-- 同步投递失败：保持 PENDING，记录 last_error -->
     <update id="recordSyncFailure">
         UPDATE sys_authorization_invalidation_outbox
-        SET last_error  = #{lastError},
-            update_time = NOW(3),
-            version     = version + 1
+        SET last_error = #{lastError},
+            updated_at = NOW(3),
+            version    = version + 1
         WHERE id = #{id}
           AND status = 'PENDING'
     </update>
@@ -143,7 +143,7 @@
             last_error    = NULL,
             locked_by     = NULL,
             locked_at     = NULL,
-            update_time   = NOW(3),
+            updated_at    = NOW(3),
             version       = version + 1
         WHERE id = #{id}
           AND version = #{expectedVersion}

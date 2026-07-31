@@ -64,7 +64,7 @@ class InternalFileRecordServiceImplTest {
 		entity.setUrl(AVATAR_URL);
 		entity.setIsPrivate(false);
 		entity.setBizType("avatar");
-		entity.setCreateUser(OWNER_USER_ID);
+		entity.setCreatedBy(OWNER_USER_ID);
 		return entity;
 	}
 

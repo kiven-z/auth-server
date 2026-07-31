@@ -185,10 +185,10 @@ class InAppMessageCategoryServiceImplTest {
 		major.setName("服务消息");
 		major.setSortOrder(10);
 		major.setStatus(Boolean.TRUE);
-		major.setCreateTime(now);
-		major.setUpdateTime(now);
-		major.setCreateUser(1L);
-		major.setUpdateUser(1L);
+		major.setCreatedAt(now);
+		major.setUpdatedAt(now);
+		major.setCreatedBy(1L);
+		major.setUpdatedBy(1L);
 
 		InAppMessageCategoryPageRowPO child = new InAppMessageCategoryPageRowPO();
 		child.setId(11L);
@@ -199,10 +199,10 @@ class InAppMessageCategoryServiceImplTest {
 		child.setName("巡检报告");
 		child.setSortOrder(20);
 		child.setStatus(Boolean.TRUE);
-		child.setCreateTime(now);
-		child.setUpdateTime(now);
-		child.setCreateUser(1L);
-		child.setUpdateUser(1L);
+		child.setCreatedAt(now);
+		child.setUpdatedAt(now);
+		child.setCreatedBy(1L);
+		child.setUpdatedBy(1L);
 
 		when(inAppMessageCategoryMapper.selectCategoryList(query)).thenReturn(List.of(major, child));
 

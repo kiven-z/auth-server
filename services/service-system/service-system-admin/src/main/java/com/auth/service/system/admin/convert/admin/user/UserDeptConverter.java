@@ -27,8 +27,8 @@ public interface UserDeptConverter {
 	 * @param row 分页行
 	 * @return VO
 	 */
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "createdByName", ignore = true)
+	@Mapping(target = "updatedByName", ignore = true)
 	UserDeptPageVO toPageVo(UserDeptPageRowPO row);
 
 	/**
@@ -38,10 +38,10 @@ public interface UserDeptConverter {
 	 */
 	@Mapping(target = "id", ignore = true)
 	@Mapping(target = "userId", ignore = true)
-	@Mapping(target = "createTime", ignore = true)
-	@Mapping(target = "updateTime", ignore = true)
-	@Mapping(target = "createUser", ignore = true)
-	@Mapping(target = "updateUser", ignore = true)
+	@Mapping(target = "createdAt", ignore = true)
+	@Mapping(target = "updatedAt", ignore = true)
+	@Mapping(target = "createdBy", ignore = true)
+	@Mapping(target = "updatedBy", ignore = true)
 	@Mapping(target = "version", ignore = true)
 	UserDeptEntity toEntity(UserDeptAssignForm form);
 
@@ -52,10 +52,10 @@ public interface UserDeptConverter {
 	 */
 	@Mapping(target = "id", ignore = true)
 	@Mapping(target = "userId", ignore = true)
-	@Mapping(target = "createTime", ignore = true)
-	@Mapping(target = "updateTime", ignore = true)
-	@Mapping(target = "createUser", ignore = true)
-	@Mapping(target = "updateUser", ignore = true)
+	@Mapping(target = "createdAt", ignore = true)
+	@Mapping(target = "updatedAt", ignore = true)
+	@Mapping(target = "createdBy", ignore = true)
+	@Mapping(target = "updatedBy", ignore = true)
 	@Mapping(target = "version", ignore = true)
 	void applyUpdateForm(UserDeptAssignForm form, @org.mapstruct.MappingTarget UserDeptEntity entity);
 

@@ -18,10 +18,10 @@
         employee_no,
         introduction,
         perm_version,
-        create_time,
-        update_time,
-        create_user,
-        update_user,
+        created_at,
+        updated_at,
+        created_by,
+        updated_by,
         version,
         remark
         FROM

@@ -30,10 +30,10 @@ public class SysPermissionSpreadsheetRow {
 	private String remark;
 
 	@ExcelProperty(value = "创建时间", index = 5)
-	private String createTimeText;
+	private String createdAtText;
 
 	@ExcelProperty(value = "更新时间", index = 6)
-	private String updateTimeText;
+	private String updatedAtText;
 
 	@ExcelProperty(value = "主键ID", index = 7, converter = LongIdExcelConverter.class)
 	private Long id;

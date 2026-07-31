@@ -143,10 +143,10 @@ class SysUserDeptServiceImplTest {
 		row.setIsPrimary(true);
 		row.setStatus(UserOrgRelationStatusEnum.NORMAL.getCode());
 		row.setRemark("负责人");
-		row.setCreateTime(now);
-		row.setUpdateTime(now);
-		row.setCreateUser(1L);
-		row.setUpdateUser(1L);
+		row.setCreatedAt(now);
+		row.setUpdatedAt(now);
+		row.setCreatedBy(1L);
+		row.setUpdatedBy(1L);
 		Page<UserDeptPageRowPO> poPage = new Page<>(1, 10);
 		poPage.setRecords(List.of(row));
 		poPage.setTotal(1);
@@ -164,8 +164,8 @@ class SysUserDeptServiceImplTest {
 		assertThat(vo.getIsPrimary()).isTrue();
 		assertThat(vo.getStatus()).isEqualTo(UserOrgRelationStatusEnum.NORMAL.getCode());
 		assertThat(vo.getRemark()).isEqualTo("负责人");
-		assertThat(vo.getCreateTime()).isEqualTo(now);
-		assertThat(vo.getUpdateTime()).isEqualTo(now);
+		assertThat(vo.getCreatedAt()).isEqualTo(now);
+		assertThat(vo.getUpdatedAt()).isEqualTo(now);
 		verify(auditUserDisplayService).enrichAuditUsernames(any(IPage.class), isNull(), isNull());
 	}
 

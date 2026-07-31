@@ -42,10 +42,10 @@ public class AuthorizationInvalidationOutboxOpsQuery implements Serializable {
 	private String sourceBizId;
 
 	@Schema(title = "创建时间（开始）")
-	private Instant createTimeStart;
+	private Instant createdAtStart;
 
 	@Schema(title = "创建时间（结束）")
-	private Instant createTimeEnd;
+	private Instant createdAtEnd;
 
 	@Schema(title = "处理完成时间（开始）")
 	private Instant processedAtStart;

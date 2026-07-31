@@ -91,7 +91,7 @@ public class SysJobCircuitBreaker {
 			jobMapper.update(null,
 					Wrappers.lambdaUpdate(JobEntity.class)
 						.set(JobEntity::getStatus, false)
-						.set(JobEntity::getUpdateTime, Instant.now())
+						.set(JobEntity::getUpdatedAt, Instant.now())
 						.eq(JobEntity::getId, jobId));
 		}
 

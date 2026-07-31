@@ -21,10 +21,10 @@ public class SysPostPageOrderSqlBuilder extends AbstractOrderSqlBuilder {
 	/**
 	 * 默认排序：显示顺序升序，创建时间降序。
 	 */
-	public static final String DEFAULT_ORDER_BY_SQL = "p.order_num ASC, p.create_time DESC";
+	public static final String DEFAULT_ORDER_BY_SQL = "p.order_num ASC, p.created_at DESC";
 
 	private static final Map<String, String> FIELD_TO_COLUMN = Map.ofEntries(Map.entry("orderNum", "p.order_num"),
-			Map.entry("createTime", "p.create_time"), Map.entry("updateTime", "p.update_time"),
+			Map.entry("createdAt", "p.created_at"), Map.entry("updatedAt", "p.updated_at"),
 			Map.entry("postCode", "p.post_code"), Map.entry("postName", "p.post_name"), Map.entry("status", "p.status"),
 			Map.entry("deptName", "d.dept_name"));
 

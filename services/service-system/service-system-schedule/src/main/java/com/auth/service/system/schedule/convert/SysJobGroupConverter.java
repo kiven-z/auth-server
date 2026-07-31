@@ -28,10 +28,10 @@ public interface SysJobGroupConverter {
 	 * @return 任务分组实体
 	 */
 	@Mapping(target = "id", ignore = true)
-	@Mapping(target = "createTime", ignore = true)
-	@Mapping(target = "updateTime", ignore = true)
-	@Mapping(target = "createUser", ignore = true)
-	@Mapping(target = "updateUser", ignore = true)
+	@Mapping(target = "createdAt", ignore = true)
+	@Mapping(target = "updatedAt", ignore = true)
+	@Mapping(target = "createdBy", ignore = true)
+	@Mapping(target = "updatedBy", ignore = true)
 	@Mapping(target = "version", ignore = true)
 	@Mapping(target = "remark", ignore = true)
 	@Mapping(target = "isSystem", ignore = true)
@@ -45,10 +45,10 @@ public interface SysJobGroupConverter {
 	@Mapping(target = "id", ignore = true)
 	@Mapping(target = "groupCode", ignore = true)
 	@Mapping(target = "isSystem", ignore = true)
-	@Mapping(target = "createTime", ignore = true)
-	@Mapping(target = "updateTime", ignore = true)
-	@Mapping(target = "createUser", ignore = true)
-	@Mapping(target = "updateUser", ignore = true)
+	@Mapping(target = "createdAt", ignore = true)
+	@Mapping(target = "updatedAt", ignore = true)
+	@Mapping(target = "createdBy", ignore = true)
+	@Mapping(target = "updatedBy", ignore = true)
 	@Mapping(target = "remark", ignore = true)
 	@Mapping(target = "version", ignore = true)
 	void updateEntity(SysJobGroupUpdateForm form, @MappingTarget JobGroupEntity entity);
@@ -58,8 +58,8 @@ public interface SysJobGroupConverter {
 	 * @param po 持久层查询投影
 	 * @return 分页返回对象
 	 */
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "createdByName", ignore = true)
+	@Mapping(target = "updatedByName", ignore = true)
 	SysJobGroupPageVO toPageVO(JobGroupPageRowPO po);
 
 	/**
@@ -67,8 +67,8 @@ public interface SysJobGroupConverter {
 	 * @param entity 任务分组实体
 	 * @return 详情返回对象
 	 */
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "createdByName", ignore = true)
+	@Mapping(target = "updatedByName", ignore = true)
 	SysJobGroupDetailVO toDetailVo(JobGroupEntity entity);
 
 }

@@ -11,8 +11,8 @@
         user_id,
         is_read,
         is_deleted,
-        create_user,
-        update_user,
+        created_by,
+        updated_by,
         version
         )
         VALUES
@@ -23,8 +23,8 @@
             #{row.userId},
             #{row.isRead},
             #{row.isDeleted},
-            #{row.createUser},
-            #{row.updateUser},
+            #{row.createdBy},
+            #{row.updatedBy},
             #{row.version}
             )
         </foreach>
@@ -37,7 +37,7 @@
         SET
         r.is_read = 1,
         r.read_time = #{readTime},
-        r.update_user = #{userId}
+        r.updated_by = #{userId}
         WHERE
         r.user_id = #{userId}
         AND r.is_deleted = 0
@@ -55,7 +55,7 @@
         INNER JOIN in_app_message m ON m.id = r.message_id
         SET
         r.is_deleted = 1,
-        r.update_user = #{userId}
+        r.updated_by = #{userId}
         WHERE
         r.user_id = #{userId}
         AND r.is_deleted = 0
@@ -76,10 +76,10 @@
         is_read,
         read_time,
         is_deleted,
-        create_time,
-        update_time,
-        create_user,
-        update_user
+        created_at,
+        updated_at,
+        created_by,
+        updated_by
         FROM
         in_app_message_recipient
         <where>

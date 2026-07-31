@@ -34,8 +34,8 @@ class SecurityIngestEntityAssemblerTest {
 		LogOperationEntity entity = SecurityIngestEntityAssembler.toEntity(payload, null);
 
 		assertThat(entity.getUserId()).isNull();
-		assertThat(entity.getCreateUser()).isNull();
-		assertThat(entity.getUpdateUser()).isNull();
+		assertThat(entity.getCreatedBy()).isNull();
+		assertThat(entity.getUpdatedBy()).isNull();
 		assertThat(entity.getOperationType()).isEqualTo("QUERY");
 	}
 
@@ -55,8 +55,8 @@ class SecurityIngestEntityAssemblerTest {
 
 		assertThat(entity.getUserId()).isEqualTo(100L);
 		assertThat(entity.getUsername()).isEqualTo("alice");
-		assertThat(entity.getCreateUser()).isEqualTo(100L);
-		assertThat(entity.getUpdateUser()).isEqualTo(100L);
+		assertThat(entity.getCreatedBy()).isEqualTo(100L);
+		assertThat(entity.getUpdatedBy()).isEqualTo(100L);
 	}
 
 	@Test
@@ -80,7 +80,7 @@ class SecurityIngestEntityAssemblerTest {
 		LogAuthorizationAuditEntity entity = SecurityIngestEntityAssembler.toEntity(event);
 
 		assertThat(entity.getEventType()).isEqualTo("DENIED");
-		assertThat(entity.getCreateUser()).isEqualTo(42L);
+		assertThat(entity.getCreatedBy()).isEqualTo(42L);
 		assertThat(entity.getRequiredPermission()).isEqualTo("system:role:add");
 		assertThat(entity.getRequestIp()).isEqualTo("192.168.1.1");
 		assertThat(entity.getDecisionReason()).isEqualTo("missing permission");
@@ -100,7 +100,7 @@ class SecurityIngestEntityAssemblerTest {
 		LogAuthorizationAuditEntity entity = SecurityIngestEntityAssembler.toEntity(event);
 
 		assertThat(entity.getEventType()).isEqualTo("DENIED");
-		assertThat(entity.getCreateUser()).isZero();
+		assertThat(entity.getCreatedBy()).isZero();
 	}
 
 }

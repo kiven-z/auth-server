@@ -80,10 +80,10 @@ public interface FileRecordMapper extends BaseMapper<FileRecordEntity> {
 	/**
 	 * 恢复已逻辑删除的文件记录
 	 * @param ids 文件记录主键集合
-	 * @param updateUser 更新人
+	 * @param updatedBy 更新人
 	 * @return 影响行数
 	 */
-	int restoreByIds(@Param("ids") List<Long> ids, @Param("updateUser") Long updateUser);
+	int restoreByIds(@Param("ids") List<Long> ids, @Param("updatedBy") Long updatedBy);
 
 	/**
 	 * 按逻辑删除状态物理删除文件记录

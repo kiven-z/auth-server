@@ -44,10 +44,10 @@ public interface SysRolePermissionMapper extends BaseMapper<SysRolePermissionEnt
 	 * @param roleId 角色 ID
 	 * @param permissionIds 权限 ID 列表
 	 * @param grantorId 授权人 ID
-	 * @param createUser 创建人 ID
+	 * @param createdBy 创建人 ID
 	 * @return 插入行数
 	 */
 	int batchInsertRolePermissions(@Param("roleId") Long roleId, @Param("permissionIds") List<Long> permissionIds,
-			@Param("grantorId") Long grantorId, @Param("createUser") Long createUser);
+			@Param("grantorId") Long grantorId, @Param("createdBy") Long createdBy);
 
 }

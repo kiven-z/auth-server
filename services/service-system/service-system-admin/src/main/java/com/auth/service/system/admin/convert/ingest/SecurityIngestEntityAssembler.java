@@ -47,8 +47,8 @@ public class SecurityIngestEntityAssembler {
 		LogOperationEntity entity = new LogOperationEntity();
 		entity.setUserId(principalUserId);
 		entity.setUsername(payload.getUsername());
-		entity.setCreateUser(principalUserId);
-		entity.setUpdateUser(principalUserId);
+		entity.setCreatedBy(principalUserId);
+		entity.setUpdatedBy(principalUserId);
 		entity.setOperationType(payload.getOperationType());
 		entity.setModule(payload.getModule());
 		entity.setTargetType((payload.getTargetType()));
@@ -92,7 +92,7 @@ public class SecurityIngestEntityAssembler {
 			}
 		}
 
-		entity.setCreateUser(Objects.requireNonNullElse(event.getUserId(), 0L));
+		entity.setCreatedBy(Objects.requireNonNullElse(event.getUserId(), 0L));
 		return entity;
 	}
 

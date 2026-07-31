@@ -31,10 +31,10 @@ public interface InAppMessageCategoryConverter {
 	 * @return 分类实体
 	 */
 	@Mapping(target = "id", ignore = true)
-	@Mapping(target = "createTime", ignore = true)
-	@Mapping(target = "updateTime", ignore = true)
-	@Mapping(target = "createUser", ignore = true)
-	@Mapping(target = "updateUser", ignore = true)
+	@Mapping(target = "createdAt", ignore = true)
+	@Mapping(target = "updatedAt", ignore = true)
+	@Mapping(target = "createdBy", ignore = true)
+	@Mapping(target = "updatedBy", ignore = true)
 	@Mapping(target = "version", ignore = true)
 	@Mapping(target = "sortOrder", source = "sortOrder", defaultValue = "0")
 	InAppMessageCategoryEntity toEntity(InAppMessageCategoryForm form);
@@ -46,10 +46,10 @@ public interface InAppMessageCategoryConverter {
 	 */
 	@Mapping(target = "id", ignore = true)
 	@Mapping(target = "parentId", ignore = true)
-	@Mapping(target = "createTime", ignore = true)
-	@Mapping(target = "updateTime", ignore = true)
-	@Mapping(target = "createUser", ignore = true)
-	@Mapping(target = "updateUser", ignore = true)
+	@Mapping(target = "createdAt", ignore = true)
+	@Mapping(target = "updatedAt", ignore = true)
+	@Mapping(target = "createdBy", ignore = true)
+	@Mapping(target = "updatedBy", ignore = true)
 	@Mapping(target = "version", ignore = true)
 	@Mapping(target = "sortOrder", source = "sortOrder", defaultValue = "0")
 	void applyUpdateForm(InAppMessageCategoryForm form, @MappingTarget InAppMessageCategoryEntity entity);
@@ -59,8 +59,8 @@ public interface InAppMessageCategoryConverter {
 	 * @param po 详情投影
 	 * @return 详情 VO
 	 */
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "createdByName", ignore = true)
+	@Mapping(target = "updatedByName", ignore = true)
 	InAppMessageCategoryDetailVO toDetailVo(InAppMessageCategoryDetailRowPO po);
 
 	/**
@@ -68,8 +68,8 @@ public interface InAppMessageCategoryConverter {
 	 * @param po 持久层查询投影
 	 * @return 返回对象
 	 */
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "createdByName", ignore = true)
+	@Mapping(target = "updatedByName", ignore = true)
 	InAppMessageCategoryPageVO toPageVO(InAppMessageCategoryPageRowPO po);
 
 	/**

@@ -33,10 +33,10 @@ public class SysUserSpreadsheetRow {
 	private String statusLabel;
 
 	@ExcelProperty(value = "创建时间", index = 6)
-	private String createTimeText;
+	private String createdAtText;
 
 	@ExcelProperty(value = "更新时间", index = 7)
-	private String updateTimeText;
+	private String updatedAtText;
 
 	@ExcelProperty(value = "主键ID", index = 8, converter = LongIdExcelConverter.class)
 	private Long id;

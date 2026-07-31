@@ -256,7 +256,7 @@ public class SysJobDefinitionServiceImpl extends ServiceImpl<JobMapper, JobEntit
 				view.setLastExecutionStatus(SysJobLastExecutionStatus.UNKNOWN);
 				continue;
 			}
-			view.setLastExecutionTime(latestLog.getCreateTime());
+			view.setLastExecutionTime(latestLog.getCreatedAt());
 			view.setLastExecutionStatus(latestLog.getStatus() != null && latestLog.getStatus()
 					? SysJobLastExecutionStatus.SUCCESS : SysJobLastExecutionStatus.FAILED);
 		}

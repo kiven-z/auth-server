@@ -81,8 +81,8 @@ class AuditUserDisplayServiceImplTest {
 	@DisplayName("enrichAuditUsernames：为分页行填充创建人、更新人用户名")
 	void enrichAuditUsernamesSetsUsernamesOnRecords() {
 		BaseResponse row = new BaseResponse();
-		row.setCreateUser(1L);
-		row.setUpdateUser(2L);
+		row.setCreatedBy(1L);
+		row.setUpdatedBy(2L);
 		Page<BaseResponse> page = new Page<>();
 		page.setRecords(List.of(row));
 
@@ -96,16 +96,16 @@ class AuditUserDisplayServiceImplTest {
 
 		auditUserDisplayService.enrichAuditUsernames(page, null, null);
 
-		assertThat(row.getCreateUsername()).isEqualTo("alice");
-		assertThat(row.getUpdateUsername()).isEqualTo("bob");
+		assertThat(row.getCreatedByName()).isEqualTo("alice");
+		assertThat(row.getUpdatedByName()).isEqualTo("bob");
 	}
 
 	@Test
 	@DisplayName("enrichAuditUsernames(List)：非分页列表同样填充用户名")
 	void enrichAuditUsernamesListSetsUsernamesOnRecords() {
 		BaseResponse row = new BaseResponse();
-		row.setCreateUser(1L);
-		row.setUpdateUser(2L);
+		row.setCreatedBy(1L);
+		row.setUpdatedBy(2L);
 		List<BaseResponse> list = List.of(row);
 
 		UserEntity u1 = new UserEntity();
@@ -118,8 +118,8 @@ class AuditUserDisplayServiceImplTest {
 
 		auditUserDisplayService.enrichAuditUsernames(list, null, null);
 
-		assertThat(row.getCreateUsername()).isEqualTo("alice");
-		assertThat(row.getUpdateUsername()).isEqualTo("bob");
+		assertThat(row.getCreatedByName()).isEqualTo("alice");
+		assertThat(row.getUpdatedByName()).isEqualTo("bob");
 	}
 
 	@Test
@@ -144,8 +144,8 @@ class AuditUserDisplayServiceImplTest {
 	@DisplayName("enrichAuditUsernames：审计与额外用户 ID 合并为一次批量查询")
 	void enrichAuditUsernamesMergesAuditAndExtraIdsIntoSingleDbCall() {
 		RowWithOperator row = new RowWithOperator();
-		row.setCreateUser(1L);
-		row.setUpdateUser(2L);
+		row.setCreatedBy(1L);
+		row.setUpdatedBy(2L);
 		row.setOperatorId(3L);
 
 		UserEntity u1 = userEntity(1L, "alice");
@@ -156,18 +156,18 @@ class AuditUserDisplayServiceImplTest {
 		auditUserDisplayService.enrichAuditUsernames(List.of(row),
 				r -> Objects.requireNonNullElse(r.getOperatorId(), 0L), RowWithOperator::setOperatorUsername);
 
-		assertThat(row.getCreateUsername()).isEqualTo("alice");
-		assertThat(row.getUpdateUsername()).isEqualTo("bob");
+		assertThat(row.getCreatedByName()).isEqualTo("alice");
+		assertThat(row.getUpdatedByName()).isEqualTo("bob");
 		assertThat(row.getOperatorUsername()).isEqualTo("carol");
 		verify(auditUserDisplayMapper).selectByIds(List.of(1L, 2L, 3L));
 	}
 
 	@Test
-	@DisplayName("enrichAuditUsernames：额外用户 ID 与 createUser 相同时只查询一次该 ID")
-	void enrichAuditUsernamesDedupesWhenExtraUserIdEqualsCreateUser() {
+	@DisplayName("enrichAuditUsernames：额外用户 ID 与 createdBy 相同时只查询一次该 ID")
+	void enrichAuditUsernamesDedupesWhenExtraUserIdEqualsCreatedBy() {
 		RowWithOperator row = new RowWithOperator();
-		row.setCreateUser(1L);
-		row.setUpdateUser(2L);
+		row.setCreatedBy(1L);
+		row.setUpdatedBy(2L);
 		row.setOperatorId(1L);
 
 		UserEntity u1 = userEntity(1L, "alice");
@@ -177,8 +177,8 @@ class AuditUserDisplayServiceImplTest {
 		auditUserDisplayService.enrichAuditUsernames(List.of(row),
 				r -> Objects.requireNonNullElse(r.getOperatorId(), 0L), RowWithOperator::setOperatorUsername);
 
-		assertThat(row.getCreateUsername()).isEqualTo("alice");
-		assertThat(row.getUpdateUsername()).isEqualTo("bob");
+		assertThat(row.getCreatedByName()).isEqualTo("alice");
+		assertThat(row.getUpdatedByName()).isEqualTo("bob");
 		assertThat(row.getOperatorUsername()).isEqualTo("alice");
 		verify(auditUserDisplayMapper).selectByIds(List.of(1L, 2L));
 	}

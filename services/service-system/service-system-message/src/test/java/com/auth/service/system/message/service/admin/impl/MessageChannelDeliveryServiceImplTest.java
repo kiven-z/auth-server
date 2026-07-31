@@ -76,10 +76,10 @@ class MessageChannelDeliveryServiceImplTest {
 		row.setProviderMsgId("prov-1");
 		row.setErrorCode(null);
 		row.setSentAt(sentAt);
-		row.setCreateTime(auditAt);
-		row.setUpdateTime(auditAt);
-		row.setCreateUser(1L);
-		row.setUpdateUser(1L);
+		row.setCreatedAt(auditAt);
+		row.setUpdatedAt(auditAt);
+		row.setCreatedBy(1L);
+		row.setUpdatedBy(1L);
 
 		Page<MessageChannelDeliveryPageRowPO> mapperPage = new Page<>(1, 10);
 		mapperPage.setRecords(List.of(row));
@@ -144,10 +144,10 @@ class MessageChannelDeliveryServiceImplTest {
 		entity.setSentAt(sentAt);
 		entity.setRetryCount(0);
 		entity.setRemark("retry later");
-		entity.setCreateTime(auditAt);
-		entity.setUpdateTime(auditAt);
-		entity.setCreateUser(2L);
-		entity.setUpdateUser(2L);
+		entity.setCreatedAt(auditAt);
+		entity.setUpdatedAt(auditAt);
+		entity.setCreatedBy(2L);
+		entity.setUpdatedBy(2L);
 		when(messageChannelDeliveryMapper.selectById(11L)).thenReturn(entity);
 
 		MessageChannelDeliveryDetailVO vo = messageChannelDeliveryService.getChannelDeliveryById(11L);

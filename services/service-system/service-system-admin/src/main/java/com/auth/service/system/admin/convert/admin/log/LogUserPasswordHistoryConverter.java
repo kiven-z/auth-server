@@ -24,9 +24,9 @@ public interface LogUserPasswordHistoryConverter {
 	 * @param po 持久层查询投影
 	 * @return 分页返回对象
 	 */
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
-	@Mapping(target = "changeTime", source = "createTime")
+	@Mapping(target = "createdByName", ignore = true)
+	@Mapping(target = "updatedByName", ignore = true)
+	@Mapping(target = "changeTime", source = "createdAt")
 	LogUserPasswordHistoryPageVO toPageVO(LogUserPasswordHistoryPageRowPO po);
 
 	/**
@@ -34,8 +34,8 @@ public interface LogUserPasswordHistoryConverter {
 	 * @param po 持久层详情投影
 	 * @return 详情 VO
 	 */
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "createdByName", ignore = true)
+	@Mapping(target = "updatedByName", ignore = true)
 	LogUserPasswordHistoryDetailVO toDetailVo(LogUserPasswordHistoryDetailRowPO po);
 
 }

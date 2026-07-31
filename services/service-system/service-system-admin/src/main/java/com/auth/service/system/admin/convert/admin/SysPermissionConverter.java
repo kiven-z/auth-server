@@ -30,10 +30,10 @@ public interface SysPermissionConverter {
 	 * @return 实体
 	 */
 	@Mapping(target = "id", ignore = true)
-	@Mapping(target = "createTime", ignore = true)
-	@Mapping(target = "updateTime", ignore = true)
-	@Mapping(target = "createUser", ignore = true)
-	@Mapping(target = "updateUser", ignore = true)
+	@Mapping(target = "createdAt", ignore = true)
+	@Mapping(target = "updatedAt", ignore = true)
+	@Mapping(target = "createdBy", ignore = true)
+	@Mapping(target = "updatedBy", ignore = true)
 	@Mapping(target = "version", ignore = true)
 	SysPermissionEntity toEntity(SysPermissionForm form);
 
@@ -50,10 +50,10 @@ public interface SysPermissionConverter {
 	 * @param entity 已有实体
 	 */
 	@Mapping(target = "id", ignore = true)
-	@Mapping(target = "createTime", ignore = true)
-	@Mapping(target = "updateTime", ignore = true)
-	@Mapping(target = "createUser", ignore = true)
-	@Mapping(target = "updateUser", ignore = true)
+	@Mapping(target = "createdAt", ignore = true)
+	@Mapping(target = "updatedAt", ignore = true)
+	@Mapping(target = "createdBy", ignore = true)
+	@Mapping(target = "updatedBy", ignore = true)
 	@Mapping(target = "version", ignore = true)
 	void applyUpdateForm(SysPermissionForm form, @MappingTarget SysPermissionEntity entity);
 
@@ -62,8 +62,8 @@ public interface SysPermissionConverter {
 	 * @param entity 权限实体
 	 * @return 详情 VO
 	 */
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "createdByName", ignore = true)
+	@Mapping(target = "updatedByName", ignore = true)
 	@Mapping(target = "boundRoles", ignore = true)
 	SysPermissionDetailVO toDetailVo(SysPermissionEntity entity);
 
@@ -79,8 +79,8 @@ public interface SysPermissionConverter {
 	 * @param entity 权限实体
 	 * @return 分页行 VO
 	 */
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "createdByName", ignore = true)
+	@Mapping(target = "updatedByName", ignore = true)
 	SysPermissionPageVO toPageVo(SysPermissionEntity entity);
 
 }

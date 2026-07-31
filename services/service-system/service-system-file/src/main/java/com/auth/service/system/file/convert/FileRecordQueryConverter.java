@@ -24,8 +24,8 @@ public interface FileRecordQueryConverter {
 	 * @param po 持久层投影
 	 * @return 分页行
 	 */
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "createdByName", ignore = true)
+	@Mapping(target = "updatedByName", ignore = true)
 	FileRecordPageVO toPageVo(FileRecordPageRowPO po);
 
 	/**
@@ -33,8 +33,8 @@ public interface FileRecordQueryConverter {
 	 * @param entity 文件实体
 	 * @return 详情
 	 */
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "createdByName", ignore = true)
+	@Mapping(target = "updatedByName", ignore = true)
 	@Mapping(target = "accessUrl", ignore = true)
 	FileRecordDetailVO toDetailVo(FileRecordEntity entity);
 

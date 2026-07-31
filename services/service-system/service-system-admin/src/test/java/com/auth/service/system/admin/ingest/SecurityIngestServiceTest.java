@@ -41,7 +41,7 @@ class SecurityIngestServiceTest {
 	}
 
 	@Test
-	@DisplayName("append(授权审计)：未认证主体时 create_user 落库为 0")
+	@DisplayName("append(授权审计)：未认证主体时 created_by 落库为 0")
 	void appendAuthorizationAuditUsesZeroWhenUserIdNull() {
 		SecurityAuthorizationAuditPayloadEvent event = SecurityAuthorizationAuditPayloadEvent.builder()
 			.eventType(SecurityEventType.GRANTED)
@@ -53,11 +53,11 @@ class SecurityIngestServiceTest {
 
 		ArgumentCaptor<LogAuthorizationAuditEntity> captor = ArgumentCaptor.forClass(LogAuthorizationAuditEntity.class);
 		verify(logAuthorizationAuditMapper).insert(captor.capture());
-		assertThat(captor.getValue().getCreateUser()).isZero();
+		assertThat(captor.getValue().getCreatedBy()).isZero();
 	}
 
 	@Test
-	@DisplayName("append(授权审计)：已认证主体时 create_user 为事件中的 userId")
+	@DisplayName("append(授权审计)：已认证主体时 created_by 为事件中的 userId")
 	void appendAuthorizationAuditUsesEventUserId() {
 		SecurityAuthorizationAuditPayloadEvent event = SecurityAuthorizationAuditPayloadEvent.builder()
 			.eventType(SecurityEventType.DENIED)
@@ -69,7 +69,7 @@ class SecurityIngestServiceTest {
 
 		ArgumentCaptor<LogAuthorizationAuditEntity> captor = ArgumentCaptor.forClass(LogAuthorizationAuditEntity.class);
 		verify(logAuthorizationAuditMapper).insert(captor.capture());
-		assertThat(captor.getValue().getCreateUser()).isEqualTo(42L);
+		assertThat(captor.getValue().getCreatedBy()).isEqualTo(42L);
 	}
 
 	@Test
@@ -90,8 +90,8 @@ class SecurityIngestServiceTest {
 		verify(logOperationMapper).insert(captor.capture());
 		LogOperationEntity saved = captor.getValue();
 		assertThat(saved.getUserId()).isNull();
-		assertThat(saved.getCreateUser()).isNull();
-		assertThat(saved.getUpdateUser()).isNull();
+		assertThat(saved.getCreatedBy()).isNull();
+		assertThat(saved.getUpdatedBy()).isNull();
 	}
 
 	@Test
@@ -114,8 +114,8 @@ class SecurityIngestServiceTest {
 		LogOperationEntity saved = captor.getValue();
 		assertThat(saved.getUserId()).isEqualTo(9L);
 		assertThat(saved.getUsername()).isEqualTo("bob");
-		assertThat(saved.getCreateUser()).isEqualTo(9L);
-		assertThat(saved.getUpdateUser()).isEqualTo(9L);
+		assertThat(saved.getCreatedBy()).isEqualTo(9L);
+		assertThat(saved.getUpdatedBy()).isEqualTo(9L);
 	}
 
 }

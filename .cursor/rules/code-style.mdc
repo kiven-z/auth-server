@@ -19,9 +19,9 @@ alwaysApply: true
 1. **技术栈**：JDK 17, Spring Boot 3.2, Gradle, Mybatis-Plus。
 2. **单一事实来源**：除验证码、接口限流外，用户信息与权限变更必须实时操作数据库，严禁随意引入冗余的 Redis 缓存。
 3. **数据库与持久层**：符合阿里泰山版。
-4. **数据库字段**：生成的表必须包含 `create_time`、`update_time`、`create_user`、`update_user`、`version`、`remark`；如需逻辑删除则加上
+4. **数据库字段**：生成的表必须包含 `created_at`、`updated_at`、`created_by`、`updated_by`、`version`、`remark`；如需逻辑删除则加上
    `is_deleted`。
-5. **分页查询返回字段**：必须包含 `create_time`、`update_time`、`create_user`、`update_user`（除非明确说明不需要）。
+5. **分页查询返回字段**：必须包含 `created_at`、`updated_at`、`created_by`、`updated_by`（除非明确说明不需要）。
 6. **注释规范**：所有代码（包括常量、实现类、方法）必须有文档注释；常量必须使用 `static final` 修饰。
 7. **工具类**：优先使用 hutool；与「对象映射」冲突时以 §对象映射 为准（基础设施层 `Map↔Bean` 例外见该节）。
 8. **对象映射**：Service 层遵循 §对象映射（见下文）。

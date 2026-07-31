@@ -20,10 +20,10 @@
         m.keep_alive,
         m.fixed_tag,
         m.remark,
-        m.create_time,
-        m.update_time,
-        m.create_user,
-        m.update_user
+        m.created_at,
+        m.updated_at,
+        m.created_by,
+        m.updated_by
         FROM
         sys_menu m
         <where>

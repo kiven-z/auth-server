@@ -59,7 +59,7 @@ class DataScopePermissionHandlerTest {
 		handler = new DataScopePermissionHandler(loginUserProvider, new DataScopeAnnotationResolver());
 	}
 
-	@DataScope
+	@DataScope(alias = "d")
 	void annotatedDefault() {
 		// fixture: annotation carrier only; never invoked
 	}
@@ -107,7 +107,7 @@ class DataScopePermissionHandlerTest {
 	void self_withoutWhere_shouldReturnScope() {
 		when(loginUserProvider.currentUser()).thenReturn(selfUser(10L));
 		Expression merged = handler.getSqlSegment(null, statementId("annotatedDefault"));
-		assertEquals("(d.create_user = 10)", normalize(merged));
+		assertEquals("(d.created_by = 10)", normalize(merged));
 	}
 
 	@Test
@@ -117,7 +117,7 @@ class DataScopePermissionHandlerTest {
 		Expression where = CCJSqlParserUtil.parseCondExpression("d.status = 1");
 		Expression merged = handler.getSqlSegment(where, statementId("annotatedDefault"));
 		assertInstanceOf(AndExpression.class, merged);
-		assertEquals("d.status = 1 AND (d.create_user = 10)", normalize(merged));
+		assertEquals("d.status = 1 AND (d.created_by = 10)", normalize(merged));
 	}
 
 	@Test
@@ -136,7 +136,7 @@ class DataScopePermissionHandlerTest {
 	void invalidAlias_shouldFallbackToUnqualifiedColumn() {
 		when(loginUserProvider.currentUser()).thenReturn(selfUser(10L));
 		Expression merged = handler.getSqlSegment(null, statementId("annotatedUnsafeAlias"));
-		assertEquals("(create_user = 10)", normalize(merged));
+		assertEquals("(created_by = 10)", normalize(merged));
 	}
 
 }

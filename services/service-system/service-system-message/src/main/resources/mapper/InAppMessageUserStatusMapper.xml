@@ -12,8 +12,8 @@
         is_read,
         read_time,
         is_deleted,
-        create_user,
-        update_user,
+        created_by,
+        updated_by,
         version
         )
         VALUES
@@ -25,8 +25,8 @@
             #{row.isRead},
             #{row.readTime},
             #{row.isDeleted},
-            #{row.createUser},
-            #{row.updateUser},
+            #{row.createdBy},
+            #{row.updatedBy},
             #{row.version}
             )
         </foreach>
@@ -38,7 +38,7 @@
         VALUES
         (read_time)
         ),
-        update_user = VALUES(update_user)
+        updated_by = VALUES(updated_by)
     </insert>
 
     <!-- 公开消息软删懒写入：撞 uk 时仅补删除，不回写已读 -->
@@ -51,8 +51,8 @@
         is_read,
         read_time,
         is_deleted,
-        create_user,
-        update_user,
+        created_by,
+        updated_by,
         version
         )
         VALUES
@@ -64,14 +64,14 @@
             #{row.isRead},
             #{row.readTime},
             #{row.isDeleted},
-            #{row.createUser},
-            #{row.updateUser},
+            #{row.createdBy},
+            #{row.updatedBy},
             #{row.version}
             )
         </foreach>
         ON DUPLICATE KEY UPDATE
         is_deleted = 1,
-        update_user = VALUES(update_user)
+        updated_by = VALUES(updated_by)
     </insert>
 
     <!-- 管理端：按任务分页查询读扩散互动用户 -->
@@ -84,10 +84,10 @@
         is_read,
         read_time,
         is_deleted,
-        create_time,
-        update_time,
-        create_user,
-        update_user
+        created_at,
+        updated_at,
+        created_by,
+        updated_by
         FROM
         in_app_message_user_status
         <where>

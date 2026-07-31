@@ -26,7 +26,7 @@ public class LogAuthorizationAuditQuery extends PageQueryRequest {
 	@Schema(title = "Controller 类名")
 	private String className;
 
-	@Schema(title = "操作人用户 ID（对应 create_user）")
-	private Long createUserId;
+	@Schema(title = "操作人用户 ID（对应 created_by）")
+	private Long createdById;
 
 }

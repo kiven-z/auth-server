@@ -9,10 +9,29 @@
             INNER JOIN in_app_message m ON m.id = r.message_id
             LEFT JOIN in_app_message_category c ON c.id = m.category_id
         WHERE
-            r.user_id = #{userId}
-            AND r.is_deleted = 0
-            AND m.recipient_scope_type &lt;&gt; 'ALL'
-            AND m.status IN ('SUCCESS', 'PARTIAL')
+            r.user_id =
+        #{userId}
+        AND
+        r
+        .
+        is_deleted
+        =
+        0
+        AND
+        m
+        .
+        recipient_scope_type
+        &lt;&gt;
+        'ALL'
+        AND
+        m
+        .
+        status
+        IN
+        (
+        'SUCCESS',
+        'PARTIAL'
+        )
     </sql>
 
     <!-- 读扩散可见基座：message ⋈ user_status ⋈ category + 可见条件 -->
@@ -20,34 +39,65 @@
         FROM
             in_app_message m
             LEFT JOIN in_app_message_user_status s ON s.message_id = m.id
-            AND s.user_id = #{userId}
-            LEFT JOIN in_app_message_category c ON c.id = m.category_id
+            AND s.user_id =
+        #{userId}
+        LEFT
+        JOIN
+        in_app_message_category
+        c
+        ON
+        c
+        .
+        id
+        =
+        m
+        .
+        category_id
         WHERE
-            m.recipient_scope_type = 'ALL'
-            AND m.status = 'SUCCESS'
-            AND (
-                s.id IS NULL
-                OR s.is_deleted = 0
-            )
+        m
+        .
+        recipient_scope_type
+        =
+        'ALL'
+        AND
+        m
+        .
+        status
+        =
+        'SUCCESS'
+        AND
+        (
+        s
+        .
+        id
+        IS
+        NULL
+        OR
+        s
+        .
+        is_deleted
+        =
+        0
+        )
     </sql>
 
     <!-- 定向写扩散分支：已读筛选用 recipient -->
     <sql id="pushInboxBranch">
         SELECT
-            m.id,
-            m.scene_code,
-            m.title,
-            m.content_type,
-            m.category_id,
-            c.name AS category_name,
-            m.link_url,
-            m.sender_user_id,
-            r.is_read,
-            r.read_time,
-            m.create_time,
-            m.update_time,
-            m.create_user,
-            m.update_user
+        m.id,
+        m.scene_code,
+        m.title,
+        m.content_type,
+        m.category_id,
+        c.name AS category_name,
+        m.link_url,
+        m.sender_user_id,
+        r.is_read,
+        r.read_time,
+        m.created_at,
+        m.updated_at,
+        m.created_by,
+        m.updated_by
         <include refid="pushVisibleJoinWhere"/>
         <if test="query.isRead != null">
             AND r.is_read = #{query.isRead}
@@ -66,28 +116,28 @@
     <!-- 全员读扩散分支：无状态行视为未读 -->
     <sql id="pullInboxBranch">
         SELECT
-            m.id,
-            m.scene_code,
-            m.title,
-            m.content_type,
-            m.category_id,
-            c.name AS category_name,
-            m.link_url,
-            m.sender_user_id,
-            COALESCE(s.is_read, 0) AS is_read,
-            s.read_time,
-            m.create_time,
-            m.update_time,
-            m.create_user,
-            m.update_user
+        m.id,
+        m.scene_code,
+        m.title,
+        m.content_type,
+        m.category_id,
+        c.name AS category_name,
+        m.link_url,
+        m.sender_user_id,
+        COALESCE(s.is_read, 0) AS is_read,
+        s.read_time,
+        m.created_at,
+        m.updated_at,
+        m.created_by,
+        m.updated_by
         <include refid="pullVisibleJoinWhere"/>
         <if test="query.isRead != null and query.isRead">
             AND s.is_read = 1
         </if>
         <if test="query.isRead != null and !query.isRead">
             AND (
-                s.id IS NULL
-                OR s.is_read = 0
+            s.id IS NULL
+            OR s.is_read = 0
             )
         </if>
         <if test="query.majorCategoryId != null">
@@ -115,10 +165,10 @@
         sender_user_id,
         is_read,
         read_time,
-        create_time,
-        update_time,
-        create_user,
-        update_user
+        created_at,
+        updated_at,
+        created_by,
+        updated_by
         FROM (
         <include refid="pushInboxBranch"/>
         UNION ALL
@@ -126,7 +176,7 @@
         ) inbox
         ORDER BY
         is_read ASC,
-        create_time DESC
+        created_at DESC
     </select>
 
     <!-- 启用大类全量 + 未读数 -->
@@ -152,11 +202,11 @@
         AND r.is_read = 0
         AND c.parent_id &gt; 0
         GROUP BY
-            c.parent_id
+        c.parent_id
         UNION ALL
         SELECT
-            c.parent_id AS major_category_id,
-            COUNT(1) AS cnt
+        c.parent_id AS major_category_id,
+        COUNT(1) AS cnt
         <include refid="pullVisibleJoinWhere"/>
         AND c.parent_id &gt; 0
         AND (
@@ -180,30 +230,30 @@
     <!-- 当前大类未读 messageId：写扩散收件行 ∪ 读扩散无状态/未读 -->
     <select id="selectUnreadMessageIdsByMajor" resultType="java.lang.Long">
         SELECT
-            r.message_id
+        r.message_id
         <include refid="pushVisibleJoinWhere"/>
         AND r.is_read = 0
         AND c.parent_id = #{majorCategoryId}
         UNION ALL
         SELECT
-            m.id
+        m.id
         <include refid="pullVisibleJoinWhere"/>
         AND c.parent_id = #{majorCategoryId}
         AND (
-            s.id IS NULL
-            OR s.is_read = 0
+        s.id IS NULL
+        OR s.is_read = 0
         )
     </select>
 
     <!-- 当前大类可见 messageId：写扩散未软删 ∪ 读扩散无状态/未软删 -->
     <select id="selectVisibleMessageIdsByMajor" resultType="java.lang.Long">
         SELECT
-            r.message_id
+        r.message_id
         <include refid="pushVisibleJoinWhere"/>
         AND c.parent_id = #{majorCategoryId}
         UNION ALL
         SELECT
-            m.id
+        m.id
         <include refid="pullVisibleJoinWhere"/>
         AND c.parent_id = #{majorCategoryId}
     </select>
@@ -223,10 +273,10 @@
         sender_user_id,
         is_read,
         read_time,
-        create_time,
-        update_time,
-        create_user,
-        update_user
+        created_at,
+        updated_at,
+        created_by,
+        updated_by
         FROM (
         SELECT
         m.id,
@@ -240,29 +290,29 @@
         m.sender_user_id,
         r.is_read,
         r.read_time,
-        m.create_time,
-        m.update_time,
-        m.create_user,
-        m.update_user
+        m.created_at,
+        m.updated_at,
+        m.created_by,
+        m.updated_by
         <include refid="pushVisibleJoinWhere"/>
         AND r.message_id = #{messageId}
         UNION ALL
         SELECT
-            m.id,
-            m.scene_code,
-            m.title,
-            m.content_type,
-            m.content,
-            m.category_id,
-            c.name AS category_name,
-            m.link_url,
-            m.sender_user_id,
-            COALESCE(s.is_read, 0) AS is_read,
-            s.read_time,
-            m.create_time,
-            m.update_time,
-            m.create_user,
-            m.update_user
+        m.id,
+        m.scene_code,
+        m.title,
+        m.content_type,
+        m.content,
+        m.category_id,
+        c.name AS category_name,
+        m.link_url,
+        m.sender_user_id,
+        COALESCE(s.is_read, 0) AS is_read,
+        s.read_time,
+        m.created_at,
+        m.updated_at,
+        m.created_by,
+        m.updated_by
         <include refid="pullVisibleJoinWhere"/>
         AND m.id = #{messageId}
         ) inbox

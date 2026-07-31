@@ -6,7 +6,7 @@
         id, storage_platform, upload_mode, bucket, object_key, url,
         original_name, extension, content_type, size, etag,
         is_private, biz_type, biz_id, delete_source, deleted_by, deleted_at,
-        remark, create_time, update_time, create_user, update_user, version, is_deleted
+        remark, created_at, updated_at, created_by, updated_by, version, is_deleted
     </sql>
 
     <!-- 文件记录分页查询 -->
@@ -21,10 +21,10 @@
         is_private,
         biz_type,
         biz_id,
-        create_time,
-        update_time,
-        create_user,
-        update_user
+        created_at,
+        updated_at,
+        created_by,
+        updated_by
         FROM
         file_record
         <where>
@@ -44,7 +44,7 @@
                 AND delete_source = #{query.deleteSource}
             </if>
             <if test="query.ownerUserId != null">
-                AND create_user = #{query.ownerUserId}
+                AND created_by = #{query.ownerUserId}
             </if>
             <if test="query.bizType != null and query.bizType != ''">
                 AND biz_type = #{query.bizType}
@@ -59,12 +59,12 @@
                 AND original_name LIKE CONCAT('%', #{query.originalName}, '%')
             </if>
             <if test="query.startTime != null and query.endTime != null">
-                AND create_time <![CDATA[ >= ]]> #{query.startTime}
-                AND create_time <![CDATA[ <= ]]> #{query.endTime}
+                AND created_at <![CDATA[ >= ]]> #{query.startTime}
+                AND created_at <![CDATA[ <= ]]> #{query.endTime}
             </if>
         </where>
         ORDER BY
-        create_time DESC
+        created_at DESC
     </select>
 
     <!-- 按主键查询文件记录详情 -->
@@ -88,7 +88,7 @@
                 </foreach>
             </if>
             <if test="ownerUserId != null">
-                AND create_user = #{ownerUserId}
+                AND created_by = #{ownerUserId}
             </if>
         </where>
     </select>
@@ -113,7 +113,7 @@
                 </foreach>
             </if>
             <if test="ownerUserId != null">
-                AND create_user = #{ownerUserId}
+                AND created_by = #{ownerUserId}
             </if>
             AND id IN
             <foreach collection="ids" item="id" open="(" separator="," close=")">
@@ -137,7 +137,7 @@
             AND object_key = #{objectKey}
         </if>
         <if test="ownerUserId != null">
-            AND create_user = #{ownerUserId}
+            AND created_by = #{ownerUserId}
         </if>
         <if test="bizType != null and bizType != ''">
             AND biz_type = #{bizType}
@@ -155,8 +155,8 @@
         deleted_by = #{deletedBy},
         deleted_at = NOW(),
         version = version + 1,
-        update_user = #{deletedBy},
-        update_time = NOW()
+        updated_by = #{deletedBy},
+        updated_at = NOW()
         WHERE
         is_deleted = 0
         AND id IN
@@ -174,8 +174,8 @@
         deleted_by = NULL,
         deleted_at = NULL,
         version = version + 1,
-        update_user = #{updateUser},
-        update_time = NOW()
+        updated_by = #{updatedBy},
+        updated_at = NOW()
         WHERE
         is_deleted = 1
         AND id IN

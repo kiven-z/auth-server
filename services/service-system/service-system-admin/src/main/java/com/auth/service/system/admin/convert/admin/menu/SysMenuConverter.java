@@ -26,8 +26,8 @@ public interface SysMenuConverter {
 	 * @param entity 菜单实体
 	 * @return 详情 VO
 	 */
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "createdByName", ignore = true)
+	@Mapping(target = "updatedByName", ignore = true)
 	@Mapping(target = "boundRoles", ignore = true)
 	SysMenuDetailVO toDetailVo(SysMenuEntity entity);
 
@@ -36,8 +36,8 @@ public interface SysMenuConverter {
 	 * @param entity 菜单实体
 	 * @return 列表 VO
 	 */
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "createdByName", ignore = true)
+	@Mapping(target = "updatedByName", ignore = true)
 	SysMenuListVO toListVo(SysMenuEntity entity);
 
 	/**
@@ -52,10 +52,10 @@ public interface SysMenuConverter {
 	 * @param form 菜单保存表单
 	 * @return 菜单实体
 	 */
-	@Mapping(target = "createTime", ignore = true)
-	@Mapping(target = "updateTime", ignore = true)
-	@Mapping(target = "createUser", ignore = true)
-	@Mapping(target = "updateUser", ignore = true)
+	@Mapping(target = "createdAt", ignore = true)
+	@Mapping(target = "updatedAt", ignore = true)
+	@Mapping(target = "createdBy", ignore = true)
+	@Mapping(target = "updatedBy", ignore = true)
 	@Mapping(target = "version", ignore = true)
 	@Mapping(target = "extraMeta", ignore = true)
 	SysMenuEntity toMenuEntity(SysMenuSaveForm form);

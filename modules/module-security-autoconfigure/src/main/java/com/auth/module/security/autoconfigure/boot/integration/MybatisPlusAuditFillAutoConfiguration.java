@@ -20,13 +20,13 @@ import java.time.Instant;
 @EnableTransactionManagement
 public class MybatisPlusAuditFillAutoConfiguration implements BaseMybatisPlusConfig {
 
-	private static final String CREATE_TIME = DatabaseAuditMetaFieldEnum.CREATE_TIME.getColumnName();
+	private static final String CREATED_AT = DatabaseAuditMetaFieldEnum.CREATED_AT.getColumnName();
 
-	private static final String UPDATE_TIME = DatabaseAuditMetaFieldEnum.UPDATE_TIME.getColumnName();
+	private static final String UPDATED_AT = DatabaseAuditMetaFieldEnum.UPDATED_AT.getColumnName();
 
-	private static final String CREATE_USER = DatabaseAuditMetaFieldEnum.CREATE_USER.getColumnName();
+	private static final String CREATED_BY = DatabaseAuditMetaFieldEnum.CREATED_BY.getColumnName();
 
-	private static final String UPDATE_USER = DatabaseAuditMetaFieldEnum.UPDATE_USER.getColumnName();
+	private static final String UPDATED_BY = DatabaseAuditMetaFieldEnum.UPDATED_BY.getColumnName();
 
 	/**
 	 * 使用mp做添加操作时候，这个方法执行
@@ -35,13 +35,13 @@ public class MybatisPlusAuditFillAutoConfiguration implements BaseMybatisPlusCon
 	public void insertFill(MetaObject metaObject) {
 		this.strictInsertFill(metaObject, "version", Long.class, 0L);
 		Instant now = Instant.now();
-		this.setFieldValByName(CREATE_TIME, now, metaObject);
-		this.setFieldValByName(UPDATE_TIME, now, metaObject);
+		this.setFieldValByName(CREATED_AT, now, metaObject);
+		this.setFieldValByName(UPDATED_AT, now, metaObject);
 
 		Long userId = SecurityUserUtils.getUserId();
 		if (userId != null) {
-			this.strictInsertFill(metaObject, CREATE_USER, Long.class, userId);
-			this.strictInsertFill(metaObject, UPDATE_USER, Long.class, userId);
+			this.strictInsertFill(metaObject, CREATED_BY, Long.class, userId);
+			this.strictInsertFill(metaObject, UPDATED_BY, Long.class, userId);
 		}
 	}
 
@@ -50,11 +50,11 @@ public class MybatisPlusAuditFillAutoConfiguration implements BaseMybatisPlusCon
 	 */
 	@Override
 	public void updateFill(MetaObject metaObject) {
-		this.setFieldValByName(UPDATE_TIME, Instant.now(), metaObject);
+		this.setFieldValByName(UPDATED_AT, Instant.now(), metaObject);
 
 		Long userId = SecurityUserUtils.getUserId();
 		if (userId != null) {
-			this.setFieldValByName(UPDATE_USER, userId, metaObject);
+			this.setFieldValByName(UPDATED_BY, userId, metaObject);
 		}
 	}
 

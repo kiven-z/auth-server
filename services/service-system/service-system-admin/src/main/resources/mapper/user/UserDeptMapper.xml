@@ -12,10 +12,10 @@
         d.dept_code,
         ud.is_primary,
         ud.status,
-        ud.create_time,
-        ud.update_time,
-        ud.create_user,
-        ud.update_user,
+        ud.created_at,
+        ud.updated_at,
+        ud.created_by,
+        ud.updated_by,
         ud.version,
         ud.remark
         FROM
@@ -41,7 +41,7 @@
         </if>
         ORDER BY
         ud.is_primary DESC,
-        ud.create_time DESC,
+        ud.created_at DESC,
         ud.id DESC
     </select>
 
@@ -52,10 +52,10 @@
                dept_id,
                is_primary,
                status,
-               create_time,
-               update_time,
-               create_user,
-               update_user,
+               created_at,
+               updated_at,
+               created_by,
+               updated_by,
                version,
                remark
         FROM user_dept
@@ -70,10 +70,10 @@
                dept_id,
                is_primary,
                status,
-               create_time,
-               update_time,
-               create_user,
-               update_user,
+               created_at,
+               updated_at,
+               created_by,
+               updated_by,
                version,
                remark
         FROM user_dept
@@ -85,7 +85,7 @@
     <!-- 用户主部门（关联状态正常） -->
     <select id="selectPrimaryDeptByUserId"
             resultType="com.auth.service.system.admin.model.po.user.UserPrimaryDeptPO">
-        SELECT ud.dept_id AS deptId,
+        SELECT ud.dept_id  AS deptId,
                d.dept_name AS deptName
         FROM user_dept ud
                  INNER JOIN sys_dept d ON d.id = ud.dept_id

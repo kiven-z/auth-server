@@ -13,10 +13,10 @@
         d.status,
         d.order_num,
         d.remark,
-        d.create_time,
-        d.update_time,
-        d.create_user,
-        d.update_user
+        d.created_at,
+        d.updated_at,
+        d.created_by,
+        d.updated_by
         FROM
         sys_dept d
         <where>
@@ -57,10 +57,10 @@
         d.status,
         d.order_num,
         d.remark,
-        d.create_time,
-        d.update_time,
-        d.create_user,
-        d.update_user
+        d.created_at,
+        d.updated_at,
+        d.created_by,
+        d.updated_by
         FROM
         sys_dept d
         LEFT JOIN sys_dept p ON d.parent_id = p.id
@@ -119,10 +119,10 @@
         d.status,
         d.order_num,
         d.remark,
-        d.create_time,
-        d.update_time,
-        d.create_user,
-        d.update_user
+        d.created_at,
+        d.updated_at,
+        d.created_by,
+        d.updated_by
         FROM
         sys_dept d
         WHERE
@@ -149,7 +149,7 @@
         WHERE ud.dept_id = #{deptId}
           AND ud.status IN (1, 2)
         ORDER BY ud.is_primary DESC,
-                 ud.create_time DESC,
+                 ud.created_at DESC,
                  u.username
     </select>
 

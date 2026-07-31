@@ -28,20 +28,20 @@ class MybatisPlusAuditFillAutoConfigurationTest {
 	}
 
 	@Test
-	@DisplayName("updateFill：无登录用户时仍填充 updateTime，updateUser 保持为空")
-	void updateFill_withoutAuthenticatedUser_fillsUpdateTimeOnly() {
+	@DisplayName("updateFill：无登录用户时仍填充 updatedAt，updatedBy 保持为空")
+	void updateFill_withoutAuthenticatedUser_fillsUpdatedAtOnly() {
 		BaseEntity entity = new BaseEntity();
 		MetaObject metaObject = SystemMetaObject.forObject(entity);
 
 		configuration.updateFill(metaObject);
 
-		assertThat(entity.getUpdateTime()).isNotNull();
-		assertThat(entity.getUpdateUser()).isNull();
+		assertThat(entity.getUpdatedAt()).isNotNull();
+		assertThat(entity.getUpdatedBy()).isNull();
 	}
 
 	@Test
-	@DisplayName("updateFill：有登录用户时同时填充 updateTime 与 updateUser")
-	void updateFill_withAuthenticatedUser_fillsUpdateTimeAndUser() {
+	@DisplayName("updateFill：有登录用户时同时填充 updatedAt 与 updatedBy")
+	void updateFill_withAuthenticatedUser_fillsUpdatedAtAndUser() {
 		AuthProfile profile = mock(AuthProfile.class);
 		when(profile.getUserId()).thenReturn(42L);
 		SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(profile, null));
@@ -51,8 +51,8 @@ class MybatisPlusAuditFillAutoConfigurationTest {
 
 		configuration.updateFill(metaObject);
 
-		assertThat(entity.getUpdateTime()).isNotNull();
-		assertThat(entity.getUpdateUser()).isEqualTo(42L);
+		assertThat(entity.getUpdatedAt()).isNotNull();
+		assertThat(entity.getUpdatedBy()).isEqualTo(42L);
 	}
 
 }

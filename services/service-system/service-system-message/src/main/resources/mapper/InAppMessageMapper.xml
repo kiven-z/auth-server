@@ -6,27 +6,27 @@
     <select id="selectSendTaskPage"
             resultType="com.auth.service.system.message.model.po.InAppSendTaskPageRowPO">
         SELECT
-            m.id,
-            m.source_type,
-            m.scene_code,
-            m.title,
-            m.content_type,
-            m.category_id,
-            c.name AS category_name,
-            m.sender_user_id,
-            m.recipient_scope_type,
-            m.total_count,
-            m.success_count,
-            m.fail_count,
-            m.status,
-            m.recalled_at,
-            m.create_time,
-            m.update_time,
-            m.create_user,
-            m.update_user
+        m.id,
+        m.source_type,
+        m.scene_code,
+        m.title,
+        m.content_type,
+        m.category_id,
+        c.name AS category_name,
+        m.sender_user_id,
+        m.recipient_scope_type,
+        m.total_count,
+        m.success_count,
+        m.fail_count,
+        m.status,
+        m.recalled_at,
+        m.created_at,
+        m.updated_at,
+        m.created_by,
+        m.updated_by
         FROM
-            in_app_message m
-            LEFT JOIN in_app_message_category c ON c.id = m.category_id
+        in_app_message m
+        LEFT JOIN in_app_message_category c ON c.id = m.category_id
         <where>
             <if test="query.status != null and query.status != ''">
                 AND m.status = #{query.status}
@@ -45,49 +45,43 @@
             </if>
         </where>
         ORDER BY
-            m.create_time DESC
+        m.created_at DESC
     </select>
 
     <!-- 写入终态并同步成功数/总数 -->
     <update id="finishTask">
         UPDATE in_app_message
-        SET
-            status = #{status},
+        SET status        = #{status},
             success_count = #{deliveredCount},
-            total_count = #{deliveredCount}
-        WHERE
-            id = #{id}
+            total_count   = #{deliveredCount}
+        WHERE id = #{id}
     </update>
 
     <!-- 重置任务状态以便补发 -->
     <update id="resetForRetry">
         UPDATE in_app_message
-        SET
-            status = 'PENDING',
+        SET status        = 'PENDING',
             success_count = 0,
-            fail_count = 0,
-            total_count = 0
-        WHERE
-            id = #{id}
-            AND status IN (
-                'PENDING',
-                'PARTIAL',
-                'FAILED',
-                'SENDING',
-                'NO_RECIPIENTS'
+            fail_count    = 0,
+            total_count   = 0
+        WHERE id = #{id}
+          AND status IN (
+                         'PENDING',
+                         'PARTIAL',
+                         'FAILED',
+                         'SENDING',
+                         'NO_RECIPIENTS'
             )
     </update>
 
     <!-- 撤回已投递/无接收人任务 -->
     <update id="recallTask">
         UPDATE in_app_message
-        SET
-            status = 'RECALLED',
-            recalled_at = #{recalledAt},
+        SET status         = 'RECALLED',
+            recalled_at    = #{recalledAt},
             recall_user_id = #{recallUserId}
-        WHERE
-            id = #{id}
-            AND status IN ('SUCCESS', 'PARTIAL', 'NO_RECIPIENTS')
+        WHERE id = #{id}
+          AND status IN ('SUCCESS', 'PARTIAL', 'NO_RECIPIENTS')
     </update>
 
 </mapper>

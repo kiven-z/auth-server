@@ -20,17 +20,17 @@ class DefaultDataScopeHandlerTest {
 		return method.getAnnotation(DataScope.class);
 	}
 
-	@DataScope
+	@DataScope(alias = "d")
 	void annotatedDefault() {
 		// fixture: annotation carrier only; never invoked
 	}
 
-	@DataScope(scope = DataScopeStorageType.DEPT)
+	@DataScope(alias = "d", scope = DataScopeStorageType.DEPT)
 	void annotatedForceDept() {
 		// fixture: annotation carrier only; never invoked
 	}
 
-	@DataScope(scope = DataScopeStorageType.SELF)
+	@DataScope(alias = "d", scope = DataScopeStorageType.SELF)
 	void annotatedForceSelf() {
 		// fixture: annotation carrier only; never invoked
 	}
@@ -43,7 +43,7 @@ class DefaultDataScopeHandlerTest {
 			.deptScope(ScopeGrant.builder().scopeType(DataScopeStorageType.SELF).values(List.of()).build())
 			.build();
 		String cond = new DefaultDataScopeHandler().buildCondition(user, defaultAnn());
-		assertEquals("d.create_user = 10", cond);
+		assertEquals("d.created_by = 10", cond);
 	}
 
 	@Test
@@ -109,7 +109,7 @@ class DefaultDataScopeHandlerTest {
 	void nullDeptScope_shouldDefaultToSelf() throws Exception {
 		AuthProfile profile = AuthProfile.builder().userId(10L).build();
 		String cond = new DefaultDataScopeHandler().buildCondition(profile, defaultAnn());
-		assertEquals("d.create_user = 10", cond);
+		assertEquals("d.created_by = 10", cond);
 	}
 
 	@Test
@@ -146,7 +146,7 @@ class DefaultDataScopeHandlerTest {
 			.deptScope(ScopeGrant.builder().scopeType(DataScopeStorageType.DEPT).values(List.of(7L, 8L)).build())
 			.build();
 		String cond = new DefaultDataScopeHandler().buildCondition(profile, annotation);
-		assertEquals("d.create_user = 10", cond);
+		assertEquals("d.created_by = 10", cond);
 	}
 
 }

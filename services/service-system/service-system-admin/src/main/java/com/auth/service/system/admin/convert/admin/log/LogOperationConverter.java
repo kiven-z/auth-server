@@ -24,8 +24,8 @@ public interface LogOperationConverter {
 	 * @param po 查询投影
 	 * @return 分页 VO
 	 */
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "createdByName", ignore = true)
+	@Mapping(target = "updatedByName", ignore = true)
 	LogOperationPageVO toPageVO(LogOperationPageRowPO po);
 
 	/**
@@ -33,8 +33,8 @@ public interface LogOperationConverter {
 	 * @param entity 操作日志实体
 	 * @return 详情 VO
 	 */
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "createdByName", ignore = true)
+	@Mapping(target = "updatedByName", ignore = true)
 	LogOperationDetailVO toDetailVo(LogOperationEntity entity);
 
 }

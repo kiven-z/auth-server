@@ -101,10 +101,10 @@ class InAppInboxServiceImplTest {
 		row.setSenderUserId(7L);
 		row.setIsRead(false);
 		row.setReadTime(null);
-		row.setCreateTime(now);
-		row.setUpdateTime(now);
-		row.setCreateUser(1L);
-		row.setUpdateUser(1L);
+		row.setCreatedAt(now);
+		row.setUpdatedAt(now);
+		row.setCreatedBy(1L);
+		row.setUpdatedBy(1L);
 
 		Page<InAppInboxPageRowPO> mapperPage = new Page<>(1, 10);
 		mapperPage.setRecords(List.of(row));
@@ -232,8 +232,8 @@ class InAppInboxServiceImplTest {
 		assertThat(row.getIsRead()).isTrue();
 		assertThat(row.getReadTime()).isNotNull();
 		assertThat(row.getIsDeleted()).isFalse();
-		assertThat(row.getCreateUser()).isEqualTo(100L);
-		assertThat(row.getUpdateUser()).isEqualTo(100L);
+		assertThat(row.getCreatedBy()).isEqualTo(100L);
+		assertThat(row.getUpdatedBy()).isEqualTo(100L);
 		assertThat(row.getVersion()).isZero();
 	}
 
@@ -408,8 +408,8 @@ class InAppInboxServiceImplTest {
 		assertThat(row.getIsRead()).isFalse();
 		assertThat(row.getReadTime()).isNull();
 		assertThat(row.getIsDeleted()).isTrue();
-		assertThat(row.getCreateUser()).isEqualTo(100L);
-		assertThat(row.getUpdateUser()).isEqualTo(100L);
+		assertThat(row.getCreatedBy()).isEqualTo(100L);
+		assertThat(row.getUpdatedBy()).isEqualTo(100L);
 		assertThat(row.getVersion()).isZero();
 	}
 

@@ -52,7 +52,7 @@ class AuthorizationInvalidationOutboxQueryServiceImplTest {
 		row.setStatus("PENDING");
 		row.setRetryCount(0);
 		row.setMaxRetry(5);
-		row.setCreateTime(Instant.now());
+		row.setCreatedAt(Instant.now());
 		return row;
 	}
 

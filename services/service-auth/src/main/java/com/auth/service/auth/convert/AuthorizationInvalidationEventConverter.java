@@ -24,8 +24,8 @@ public interface AuthorizationInvalidationEventConverter {
 	 * @return 分页 VO
 	 */
 	@Mapping(target = "processing", source = "impactedUserCount", qualifiedByName = "toProcessingFlag")
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "createdByName", ignore = true)
+	@Mapping(target = "updatedByName", ignore = true)
 	AuthorizationInvalidationEventPageVO toPageVO(AuthorizationInvalidationEventPageRowPO row);
 
 	/**
@@ -34,8 +34,8 @@ public interface AuthorizationInvalidationEventConverter {
 	 * @return 详情 VO
 	 */
 	@Mapping(target = "processing", source = "impactedUserCount", qualifiedByName = "toProcessingFlag")
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "createdByName", ignore = true)
+	@Mapping(target = "updatedByName", ignore = true)
 	AuthorizationInvalidationEventDetailVO toDetailVo(AuthorizationInvalidationEventPageRowPO row);
 
 }

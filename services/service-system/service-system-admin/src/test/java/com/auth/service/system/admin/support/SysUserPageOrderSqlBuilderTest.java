@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class SysUserPageOrderSqlBuilderTest {
 
 	@Test
-	@DisplayName("空排序：回退默认 create_time DESC")
+	@DisplayName("空排序：回退默认 created_at DESC")
 	void buildOrderBySqlFallsBackToDefaultWhenSortEmpty() {
 		assertThat(SysUserPageOrderSqlBuilder.buildOrderBySql(null))
 			.isEqualTo(SysUserPageOrderSqlBuilder.DEFAULT_ORDER_BY_SQL);

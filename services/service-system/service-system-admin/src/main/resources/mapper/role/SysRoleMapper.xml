@@ -10,10 +10,10 @@
         r.role_name,
         r.status,
         r.order_num,
-        r.create_time,
-        r.update_time,
-        r.create_user,
-        r.update_user
+        r.created_at,
+        r.updated_at,
+        r.created_by,
+        r.updated_by
         FROM
         sys_role r
         <where>

@@ -24,8 +24,8 @@ public interface LogAuthorizationAuditConverter {
 	 * @param po 持久层投影
 	 * @return 分页 VO
 	 */
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "createdByName", ignore = true)
+	@Mapping(target = "updatedByName", ignore = true)
 	LogAuthorizationAuditPageVO toPageVO(LogAuthorizationAuditPageRowPO po);
 
 	/**
@@ -33,8 +33,8 @@ public interface LogAuthorizationAuditConverter {
 	 * @param entity 权限决策审计实体
 	 * @return 详情 VO
 	 */
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "createdByName", ignore = true)
+	@Mapping(target = "updatedByName", ignore = true)
 	LogAuthorizationAuditDetailVO toDetailVo(LogAuthorizationAuditEntity entity);
 
 }

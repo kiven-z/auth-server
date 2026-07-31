@@ -480,7 +480,7 @@ class FileRecordServiceImplTest {
 		entity.setOriginalName("a.png");
 		entity.setBucket("public");
 		entity.setObjectKey("a.png");
-		entity.setCreateUser(1L);
+		entity.setCreatedBy(1L);
 		return entity;
 	}
 

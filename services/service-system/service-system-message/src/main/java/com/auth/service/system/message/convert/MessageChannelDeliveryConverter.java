@@ -24,8 +24,8 @@ public interface MessageChannelDeliveryConverter {
 	 * @param po 持久层查询投影
 	 * @return 分页返回对象
 	 */
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "createdByName", ignore = true)
+	@Mapping(target = "updatedByName", ignore = true)
 	MessageChannelDeliveryPageVO toPageVO(MessageChannelDeliveryPageRowPO po);
 
 	/**
@@ -33,8 +33,8 @@ public interface MessageChannelDeliveryConverter {
 	 * @param entity 投递记录实体
 	 * @return 详情 VO
 	 */
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "createdByName", ignore = true)
+	@Mapping(target = "updatedByName", ignore = true)
 	MessageChannelDeliveryDetailVO toDetailVo(MessageChannelDeliveryEntity entity);
 
 }

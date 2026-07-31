@@ -45,8 +45,8 @@ public class AuthorizationInvalidationPublisher {
 		outboxEntity.setNextRetryAt(now);
 		outboxEntity.setSourceModule(sourceModule);
 		outboxEntity.setSourceBizId(sourceBizId);
-		outboxEntity.setCreateTime(now);
-		outboxEntity.setUpdateTime(now);
+		outboxEntity.setCreatedAt(now);
+		outboxEntity.setUpdatedAt(now);
 		outboxEntity.setVersion(0L);
 		outboxMapper.insertPending(outboxEntity);
 		return outboxEntity.getId();

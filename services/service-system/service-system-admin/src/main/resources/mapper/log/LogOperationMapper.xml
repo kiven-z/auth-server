@@ -17,10 +17,10 @@
         lo.response_status,
         lo.execution_time_ms,
         lo.ip_address,
-        lo.create_time,
-        lo.update_time,
-        lo.create_user,
-        lo.update_user
+        lo.created_at,
+        lo.updated_at,
+        lo.created_by,
+        lo.updated_by
         FROM
         log_operation lo
         <where>
@@ -50,7 +50,7 @@
             </if>
         </where>
         ORDER BY
-        lo.create_time DESC
+        lo.created_at DESC
     </select>
 
 </mapper>

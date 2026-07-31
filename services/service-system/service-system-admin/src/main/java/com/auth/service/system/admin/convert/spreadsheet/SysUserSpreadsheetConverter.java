@@ -46,8 +46,8 @@ public interface SysUserSpreadsheetConverter {
 	 * @return 表格行
 	 */
 	@Mapping(target = "statusLabel", source = "status", qualifiedByName = "userStatusLabel")
-	@Mapping(target = "createTimeText", source = "createTime", qualifiedByName = "dateTimeText")
-	@Mapping(target = "updateTimeText", source = "updateTime", qualifiedByName = "dateTimeText")
+	@Mapping(target = "createdAtText", source = "createdAt", qualifiedByName = "dateTimeText")
+	@Mapping(target = "updatedAtText", source = "updatedAt", qualifiedByName = "dateTimeText")
 	SysUserSpreadsheetRow toSpreadsheetRow(SysUserPageRowPO po);
 
 }

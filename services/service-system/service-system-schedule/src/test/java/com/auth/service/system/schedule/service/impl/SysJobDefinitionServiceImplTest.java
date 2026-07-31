@@ -217,7 +217,7 @@ class SysJobDefinitionServiceImplTest {
 		LogJobEntity failedLog = new LogJobEntity();
 		failedLog.setJobId(1L);
 		failedLog.setStatus(false);
-		failedLog.setCreateTime(LocalDateTime.of(2026, 6, 13, 9, 0).toInstant(java.time.ZoneOffset.UTC));
+		failedLog.setCreatedAt(LocalDateTime.of(2026, 6, 13, 9, 0).toInstant(java.time.ZoneOffset.UTC));
 		when(logJobMapper.selectLatestByJobIds(any())).thenReturn(List.of(failedLog));
 
 		SysJobQuery query = new SysJobQuery();
@@ -227,7 +227,7 @@ class SysJobDefinitionServiceImplTest {
 
 		SysJobPageVO row = response.getList().get(0);
 		assertThat(row.getLastExecutionStatus()).isEqualTo(SysJobLastExecutionStatus.FAILED);
-		assertThat(row.getLastExecutionTime()).isEqualTo(failedLog.getCreateTime());
+		assertThat(row.getLastExecutionTime()).isEqualTo(failedLog.getCreatedAt());
 	}
 
 	@Test

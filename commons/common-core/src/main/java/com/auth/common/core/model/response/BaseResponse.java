@@ -29,33 +29,33 @@ public class BaseResponse implements Serializable {
 	/**
 	 * 创建时间
 	 */
-	private Instant createTime;
+	private Instant createdAt;
 
 	/**
 	 * 更新时间
 	 */
-	private Instant updateTime;
+	private Instant updatedAt;
 
 	/**
 	 * 创建用户ID
 	 */
 	@JsonStringFormat
-	private Long createUser;
+	private Long createdBy;
 
 	/**
 	 * 更新用户ID
 	 */
 	@JsonStringFormat
-	private Long updateUser;
+	private Long updatedBy;
 
 	/**
 	 * 创建用户名
 	 */
-	private String createUsername;
+	private String createdByName;
 
 	/**
 	 * 更新用户名
 	 */
-	private String updateUsername;
+	private String updatedByName;
 
 }

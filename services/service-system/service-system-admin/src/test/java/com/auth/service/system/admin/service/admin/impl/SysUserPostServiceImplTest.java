@@ -137,10 +137,10 @@ class SysUserPostServiceImplTest {
 		row.setIsPrimary(true);
 		row.setStatus(UserOrgRelationStatusEnum.NORMAL.getCode());
 		row.setRemark("核心岗位");
-		row.setCreateTime(now);
-		row.setUpdateTime(now);
-		row.setCreateUser(1L);
-		row.setUpdateUser(1L);
+		row.setCreatedAt(now);
+		row.setUpdatedAt(now);
+		row.setCreatedBy(1L);
+		row.setUpdatedBy(1L);
 		Page<UserPostPageRowPO> poPage = new Page<>(1, 10);
 		poPage.setRecords(List.of(row));
 		poPage.setTotal(1);

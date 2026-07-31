@@ -35,8 +35,8 @@
         role_id,
         permission_id,
         grantor_id,
-        create_user,
-        update_user,
+        created_by,
+        updated_by,
         version
         )
         VALUES
@@ -45,8 +45,8 @@
             #{roleId},
             #{permissionId},
             #{grantorId},
-            #{createUser},
-            #{createUser},
+            #{createdBy},
+            #{createdBy},
             0
             )
         </foreach>

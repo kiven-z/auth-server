@@ -11,10 +11,10 @@
         status,
         is_system,
         order_num,
-        create_time,
-        update_time,
-        create_user,
-        update_user
+        created_at,
+        updated_at,
+        created_by,
+        updated_by
         FROM job_group
         <where>
             <if test="query.groupCode != null and query.groupCode != ''">
@@ -46,10 +46,10 @@
         status,
         is_system,
         order_num,
-        create_time,
-        update_time,
-        create_user,
-        update_user
+        created_at,
+        updated_at,
+        created_by,
+        updated_by
         FROM job_group
         WHERE status = 1
         <if test="keyword != null and keyword != ''">

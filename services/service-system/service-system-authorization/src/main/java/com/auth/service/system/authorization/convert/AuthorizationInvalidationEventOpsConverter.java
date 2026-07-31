@@ -42,8 +42,8 @@ public interface AuthorizationInvalidationEventOpsConverter {
 	 * @param dto Feign 分页行
 	 * @return 分页 VO
 	 */
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "createdByName", ignore = true)
+	@Mapping(target = "updatedByName", ignore = true)
 	AuthorizationInvalidationEventPageVO toPageVO(AuthorizationInvalidationEventPageInnerDTO dto);
 
 	/**
@@ -51,8 +51,8 @@ public interface AuthorizationInvalidationEventOpsConverter {
 	 * @param dto Feign 详情
 	 * @return 详情 VO
 	 */
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "createdByName", ignore = true)
+	@Mapping(target = "updatedByName", ignore = true)
 	AuthorizationInvalidationEventDetailVO toDetailVO(AuthorizationInvalidationEventDetailInnerDTO dto);
 
 }

@@ -15,7 +15,7 @@ import java.io.Serializable;
 public class SortSpec implements Serializable {
 
 	/**
-	 * 业务字段 key，如 createTime
+	 * 业务字段 key，如 createdAt
 	 */
 	private String field;
 

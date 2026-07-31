@@ -14,10 +14,10 @@
         u.email,
         u.employee_no,
         u.status,
-        u.create_time,
-        u.update_time,
-        u.create_user,
-        u.update_user
+        u.created_at,
+        u.updated_at,
+        u.created_by,
+        u.updated_by
         FROM
         sys_user u
         <where>
@@ -118,7 +118,7 @@
             AND d.status = 1
         WHERE ud.user_id = #{userId}
         ORDER BY ud.is_primary DESC,
-                 ud.create_time DESC
+                 ud.created_at DESC
     </select>
 
     <!-- 用户档案：岗位列表（user_post JOIN sys_post） -->
@@ -135,7 +135,7 @@
             AND sp.status = 1
         WHERE up.user_id = #{userId}
         ORDER BY up.is_primary DESC,
-                 up.create_time DESC
+                 up.created_at DESC
     </select>
 
     <!-- 管理端用户远程搜索：未删除且状态正常，关键词模糊匹配多字段 -->

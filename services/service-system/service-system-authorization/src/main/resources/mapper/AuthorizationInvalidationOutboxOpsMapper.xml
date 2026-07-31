@@ -19,10 +19,10 @@
         aio.processed_at,
         aio.source_module,
         aio.source_biz_id,
-        aio.create_time,
-        aio.update_time,
-        aio.create_user,
-        aio.update_user
+        aio.created_at,
+        aio.updated_at,
+        aio.created_by,
+        aio.updated_by
         FROM
         sys_authorization_invalidation_outbox aio
         <where>
@@ -50,13 +50,13 @@
                 '%'
                 )
             </if>
-            <if test="query.createTimeStart != null">
-                AND aio.create_time &gt;=
-                #{query.createTimeStart}
+            <if test="query.createdAtStart != null">
+                AND aio.created_at &gt;=
+                #{query.createdAtStart}
             </if>
-            <if test="query.createTimeEnd != null">
-                AND aio.create_time &lt;=
-                #{query.createTimeEnd}
+            <if test="query.createdAtEnd != null">
+                AND aio.created_at &lt;=
+                #{query.createdAtEnd}
             </if>
             <if test="query.processedAtStart != null">
                 AND aio.processed_at &gt;=
@@ -68,7 +68,7 @@
             </if>
         </where>
         ORDER BY
-        aio.create_time DESC
+        aio.created_at DESC
     </select>
 
     <!-- 按主键查询 Outbox 详情 -->
@@ -88,10 +88,10 @@
                aio.processed_at,
                aio.source_module,
                aio.source_biz_id,
-               aio.create_time,
-               aio.update_time,
-               aio.create_user,
-               aio.update_user,
+               aio.created_at,
+               aio.updated_at,
+               aio.created_by,
+               aio.updated_by,
                aio.remark
         FROM sys_authorization_invalidation_outbox aio
         WHERE aio.id = #{id}
@@ -134,19 +134,19 @@
         FROM sys_authorization_invalidation_outbox aio
     </select>
 
-    <!-- 失败率趋势分桶统计（按 create_time） -->
+    <!-- 失败率趋势分桶统计（按 created_at） -->
     <select id="selectFailureRateTrendBuckets"
             resultType="com.auth.service.system.authorization.model.po.AuthorizationInvalidationFailureRateTrendBucketPO">
         SELECT
         <choose>
             <when test="query.granularity.name() == 'DAY'">
-                DATE_FORMAT(aio.create_time, '%Y-%m-%d') AS bucket,
+                DATE_FORMAT(aio.created_at, '%Y-%m-%d') AS bucket,
             </when>
             <otherwise>
                 DATE_FORMAT(
                 DATE_SUB(
-                aio.create_time,
-                INTERVAL WEEKDAY(aio.create_time) DAY
+                aio.created_at,
+                INTERVAL WEEKDAY(aio.created_at) DAY
                 ),
                 '%Y-%m-%d'
                 ) AS bucket,
@@ -168,8 +168,8 @@
         FROM
         sys_authorization_invalidation_outbox aio
         WHERE
-        aio.create_time &gt;= #{query.startTime}
-        AND aio.create_time &lt;= #{query.endTime}
+        aio.created_at &gt;= #{query.startTime}
+        AND aio.created_at &lt;= #{query.endTime}
         GROUP BY
         bucket
         ORDER BY

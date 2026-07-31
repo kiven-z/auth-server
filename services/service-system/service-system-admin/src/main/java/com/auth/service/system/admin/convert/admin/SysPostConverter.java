@@ -30,10 +30,10 @@ public interface SysPostConverter {
 	 * @return 实体
 	 */
 	@Mapping(target = "id", ignore = true)
-	@Mapping(target = "createTime", ignore = true)
-	@Mapping(target = "updateTime", ignore = true)
-	@Mapping(target = "createUser", ignore = true)
-	@Mapping(target = "updateUser", ignore = true)
+	@Mapping(target = "createdAt", ignore = true)
+	@Mapping(target = "updatedAt", ignore = true)
+	@Mapping(target = "createdBy", ignore = true)
+	@Mapping(target = "updatedBy", ignore = true)
 	@Mapping(target = "version", ignore = true)
 	SysPostEntity toEntity(SysPostForm form);
 
@@ -43,10 +43,10 @@ public interface SysPostConverter {
 	 * @param entity 已有实体
 	 */
 	@Mapping(target = "id", ignore = true)
-	@Mapping(target = "createTime", ignore = true)
-	@Mapping(target = "updateTime", ignore = true)
-	@Mapping(target = "createUser", ignore = true)
-	@Mapping(target = "updateUser", ignore = true)
+	@Mapping(target = "createdAt", ignore = true)
+	@Mapping(target = "updatedAt", ignore = true)
+	@Mapping(target = "createdBy", ignore = true)
+	@Mapping(target = "updatedBy", ignore = true)
 	@Mapping(target = "version", ignore = true)
 	void applyUpdateForm(SysPostForm form, @org.mapstruct.MappingTarget SysPostEntity entity);
 
@@ -55,8 +55,8 @@ public interface SysPostConverter {
 	 * @param po 持久层投影
 	 * @return 分页行
 	 */
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "createdByName", ignore = true)
+	@Mapping(target = "updatedByName", ignore = true)
 	SysPostPageVO toPageVo(SysPostPageRowPO po);
 
 	/**
@@ -64,8 +64,8 @@ public interface SysPostConverter {
 	 * @param entity 岗位实体
 	 * @return 详情 VO
 	 */
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "createdByName", ignore = true)
+	@Mapping(target = "updatedByName", ignore = true)
 	@Mapping(target = "boundDept", ignore = true)
 	@Mapping(target = "boundUsers", ignore = true)
 	@Mapping(target = "boundRoles", ignore = true)

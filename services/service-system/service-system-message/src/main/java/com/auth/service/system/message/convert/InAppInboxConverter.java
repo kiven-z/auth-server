@@ -24,8 +24,8 @@ public interface InAppInboxConverter {
 	 * @param po 持久层查询投影
 	 * @return 分页返回对象
 	 */
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "createdByName", ignore = true)
+	@Mapping(target = "updatedByName", ignore = true)
 	InAppInboxPageVO toPageVO(InAppInboxPageRowPO po);
 
 	/**
@@ -33,8 +33,8 @@ public interface InAppInboxConverter {
 	 * @param po 当前用户可见的详情投影
 	 * @return 详情 VO
 	 */
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "createdByName", ignore = true)
+	@Mapping(target = "updatedByName", ignore = true)
 	InAppInboxDetailVO toDetailVO(InAppInboxDetailRowPO po);
 
 }

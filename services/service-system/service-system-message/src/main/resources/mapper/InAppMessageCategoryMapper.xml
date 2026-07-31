@@ -6,21 +6,21 @@
     <select id="selectCategoryList"
             resultType="com.auth.service.system.message.model.po.InAppMessageCategoryPageRowPO">
         SELECT
-            c.id,
-            c.parent_id,
-            p.code AS parent_code,
-            p.name AS parent_name,
-            c.code,
-            c.name,
-            c.sort_order,
-            c.status,
-            c.create_time,
-            c.update_time,
-            c.create_user,
-            c.update_user
+        c.id,
+        c.parent_id,
+        p.code AS parent_code,
+        p.name AS parent_name,
+        c.code,
+        c.name,
+        c.sort_order,
+        c.status,
+        c.created_at,
+        c.updated_at,
+        c.created_by,
+        c.updated_by
         FROM
-            in_app_message_category c
-            LEFT JOIN in_app_message_category p ON c.parent_id = p.id
+        in_app_message_category c
+        LEFT JOIN in_app_message_category p ON c.parent_id = p.id
         <where>
             <if test="query.code != null and query.code != ''">
                 AND c.code LIKE CONCAT(#{query.code}, '%')
@@ -43,60 +43,57 @@
             </if>
         </where>
         ORDER BY
-            c.sort_order,
-            c.id
+        c.sort_order,
+        c.id
     </select>
 
     <!-- 管理端详情（左联父级；无父级则 parent_code/name 为空） -->
     <select id="selectDetailById"
             resultType="com.auth.service.system.message.model.po.InAppMessageCategoryDetailRowPO">
-        SELECT
-            c.id,
-            c.parent_id,
-            p.code AS parent_code,
-            p.name AS parent_name,
-            c.code,
-            c.name,
-            c.sort_order,
-            c.status,
-            c.remark,
-            c.create_time,
-            c.update_time,
-            c.create_user,
-            c.update_user
-        FROM
-            in_app_message_category c
-            LEFT JOIN in_app_message_category p ON c.parent_id = p.id
-        WHERE
-            c.id = #{id}
+        SELECT c.id,
+               c.parent_id,
+               p.code AS parent_code,
+               p.name AS parent_name,
+               c.code,
+               c.name,
+               c.sort_order,
+               c.status,
+               c.remark,
+               c.created_at,
+               c.updated_at,
+               c.created_by,
+               c.updated_by
+        FROM in_app_message_category c
+                 LEFT JOIN in_app_message_category p ON c.parent_id = p.id
+        WHERE c.id = #{id}
     </select>
 
     <!-- 按父级列出；parent_id=0 为大类；status 为空则不限启停 -->
     <select id="selectByParentId"
             resultType="com.auth.service.system.message.model.entity.InAppMessageCategoryEntity">
         SELECT
-            id,
-            parent_id,
-            code,
-            name,
-            sort_order,
-            status,
-            create_time,
-            update_time,
-            create_user,
-            update_user,
-            version,
-            remark
+        id,
+        parent_id,
+        code,
+        name,
+        sort_order,
+        status,
+        created_at,
+        updated_at,
+        created_by,
+        updated_by,
+        version,
+        remark
         FROM
-            in_app_message_category
+        in_app_message_category
         WHERE
-            parent_id = #{parentId}
+        parent_id = #{parentId}
         <if test="status != null">
             AND status = #{status}
         </if>
         ORDER BY
-            sort_order,
-            id
+        sort_order,
+        id
     </select>
 
 </mapper>

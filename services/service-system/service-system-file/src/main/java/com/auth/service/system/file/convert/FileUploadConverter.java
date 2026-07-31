@@ -22,8 +22,8 @@ public interface FileUploadConverter {
 	 * @param entity 文件实体
 	 * @return 上传结果 DTO
 	 */
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "createdByName", ignore = true)
+	@Mapping(target = "updatedByName", ignore = true)
 	FileUploadResultDTO toResultDTO(FileRecordEntity entity);
 
 }

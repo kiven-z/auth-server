@@ -200,7 +200,7 @@ class FileRecordQueryServiceImplTest {
 		row.setStoragePlatform(StoragePlatformEnum.MINIO);
 		row.setOriginalName("demo.png");
 		row.setContentType("image/png");
-		row.setCreateUser(1L);
+		row.setCreatedBy(1L);
 		Page<FileRecordPageRowPO> page = new Page<>(1, 20, 1);
 		page.setRecords(List.of(row));
 		when(fileRecordMapper.selectListByPage(any(), eq(query), eq(deleted))).thenReturn(page);
@@ -213,7 +213,7 @@ class FileRecordQueryServiceImplTest {
 		entity.setContentType("image/png");
 		entity.setBucket("public");
 		entity.setObjectKey("a.png");
-		entity.setCreateUser(1L);
+		entity.setCreatedBy(1L);
 		return entity;
 	}
 

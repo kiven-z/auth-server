@@ -28,10 +28,10 @@ public interface SysRoleConverter {
 	 * @return 待持久化实体
 	 */
 	@Mapping(target = "id", ignore = true)
-	@Mapping(target = "createTime", ignore = true)
-	@Mapping(target = "updateTime", ignore = true)
-	@Mapping(target = "createUser", ignore = true)
-	@Mapping(target = "updateUser", ignore = true)
+	@Mapping(target = "createdAt", ignore = true)
+	@Mapping(target = "updatedAt", ignore = true)
+	@Mapping(target = "createdBy", ignore = true)
+	@Mapping(target = "updatedBy", ignore = true)
 	@Mapping(target = "version", ignore = true)
 	SysRoleEntity toEntity(SysRoleForm form);
 
@@ -41,10 +41,10 @@ public interface SysRoleConverter {
 	 * @param entity 已有实体
 	 */
 	@Mapping(target = "id", ignore = true)
-	@Mapping(target = "createTime", ignore = true)
-	@Mapping(target = "updateTime", ignore = true)
-	@Mapping(target = "createUser", ignore = true)
-	@Mapping(target = "updateUser", ignore = true)
+	@Mapping(target = "createdAt", ignore = true)
+	@Mapping(target = "updatedAt", ignore = true)
+	@Mapping(target = "createdBy", ignore = true)
+	@Mapping(target = "updatedBy", ignore = true)
 	@Mapping(target = "version", ignore = true)
 	void applyUpdateForm(SysRoleForm form, @org.mapstruct.MappingTarget SysRoleEntity entity);
 
@@ -58,8 +58,8 @@ public interface SysRoleConverter {
 	@Mapping(target = "boundUsers", ignore = true)
 	@Mapping(target = "boundDepts", ignore = true)
 	@Mapping(target = "boundPosts", ignore = true)
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "createdByName", ignore = true)
+	@Mapping(target = "updatedByName", ignore = true)
 	SysRoleDetailVO toDetailVo(SysRoleEntity entity);
 
 	/**
@@ -67,8 +67,8 @@ public interface SysRoleConverter {
 	 * @param entity 角色实体
 	 * @return 分页行
 	 */
-	@Mapping(target = "createUsername", ignore = true)
-	@Mapping(target = "updateUsername", ignore = true)
+	@Mapping(target = "createdByName", ignore = true)
+	@Mapping(target = "updatedByName", ignore = true)
 	SysRolePageVO toPageVo(SysRoleEntity entity);
 
 	/**

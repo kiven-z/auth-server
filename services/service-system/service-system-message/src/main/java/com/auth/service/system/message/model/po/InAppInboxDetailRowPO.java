@@ -57,15 +57,15 @@ public class InAppInboxDetailRowPO implements Serializable {
 	private Instant readTime;
 
 	@Schema(title = "创建时间")
-	private Instant createTime;
+	private Instant createdAt;
 
 	@Schema(title = "更新时间")
-	private Instant updateTime;
+	private Instant updatedAt;
 
 	@Schema(title = "创建用户")
-	private Long createUser;
+	private Long createdBy;
 
 	@Schema(title = "更新用户")
-	private Long updateUser;
+	private Long updatedBy;
 
 }

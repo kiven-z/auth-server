@@ -1,14 +1,10 @@
 package com.auth.module.security.datapermission.annotation;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 import com.auth.module.security.contract.api.datascope.DataScopeStorageType;
 import com.auth.module.security.datapermission.handler.DataScopeHandler;
 import com.auth.module.security.datapermission.handler.DefaultDataScopeHandler;
+
+import java.lang.annotation.*;
 
 /**
  * 申明一个 mapper 方法需要数据范围过滤
@@ -21,9 +17,9 @@ import com.auth.module.security.datapermission.handler.DefaultDataScopeHandler;
 public @interface DataScope {
 
 	/**
-	 * 用户所有者列，用于 SELF 范围过滤，默认 create_user
+	 * 用户所有者列，用于 SELF 范围过滤，默认 created_by
 	 */
-	String userColumn() default "create_user";
+	String userColumn() default "created_by";
 
 	/**
 	 * 维度列名，例如 dept_id、post_id

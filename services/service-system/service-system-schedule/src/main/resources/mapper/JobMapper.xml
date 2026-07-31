@@ -21,10 +21,10 @@
         end_time,
         status,
         remark,
-        create_time,
-        update_time,
-        create_user,
-        update_user FROM job
+        created_at,
+        updated_at,
+        created_by,
+        updated_by FROM job
         <where>
             <if test="query.jobName != null and query.jobName != ''">
                 AND job_name LIKE CONCAT('%',
@@ -43,7 +43,7 @@
                 #{query.status}
             </if>
         </where>
-        ORDER BY create_time DESC
+        ORDER BY created_at DESC
     </select>
 
     <!-- 根据主键查询详情 -->
@@ -67,10 +67,10 @@
                j.end_time,
                j.status,
                j.remark,
-               j.create_time,
-               j.update_time,
-               j.create_user,
-               j.update_user
+               j.created_at,
+               j.updated_at,
+               j.created_by,
+               j.updated_by
         FROM job j
                  LEFT JOIN job_group g ON g.group_code = j.job_group
         WHERE j.id = #{id}

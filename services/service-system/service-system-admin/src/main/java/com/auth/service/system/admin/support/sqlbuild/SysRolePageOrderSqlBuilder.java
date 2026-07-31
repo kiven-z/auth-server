@@ -21,10 +21,10 @@ public class SysRolePageOrderSqlBuilder extends AbstractOrderSqlBuilder {
 	/**
 	 * 默认排序：显示顺序升序，创建时间降序。
 	 */
-	public static final String DEFAULT_ORDER_BY_SQL = "r.order_num ASC, r.create_time DESC";
+	public static final String DEFAULT_ORDER_BY_SQL = "r.order_num ASC, r.created_at DESC";
 
 	private static final Map<String, String> FIELD_TO_COLUMN = Map.ofEntries(Map.entry("orderNum", "r.order_num"),
-			Map.entry("createTime", "r.create_time"), Map.entry("updateTime", "r.update_time"),
+			Map.entry("createdAt", "r.created_at"), Map.entry("updatedAt", "r.updated_at"),
 			Map.entry("roleCode", "r.role_code"), Map.entry("roleName", "r.role_name"),
 			Map.entry("status", "r.status"));
 

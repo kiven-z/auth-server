@@ -10,10 +10,10 @@
         p.permission_name,
         p.order_num,
         p.status,
-        p.create_time,
-        p.update_time,
-        p.create_user,
-        p.update_user
+        p.created_at,
+        p.updated_at,
+        p.created_by,
+        p.updated_by
         FROM
         sys_permission p
         <where>

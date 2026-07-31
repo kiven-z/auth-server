@@ -12,10 +12,10 @@
         sp.post_name,
         up.is_primary,
         up.status,
-        up.create_time,
-        up.update_time,
-        up.create_user,
-        up.update_user,
+        up.created_at,
+        up.updated_at,
+        up.created_by,
+        up.updated_by,
         up.version,
         up.remark
         FROM
@@ -41,7 +41,7 @@
         </if>
         ORDER BY
         up.is_primary DESC,
-        up.create_time DESC,
+        up.created_at DESC,
         up.id DESC
     </select>
 
@@ -52,10 +52,10 @@
                post_id,
                is_primary,
                status,
-               create_time,
-               update_time,
-               create_user,
-               update_user,
+               created_at,
+               updated_at,
+               created_by,
+               updated_by,
                version,
                remark
         FROM user_post

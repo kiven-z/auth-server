@@ -42,10 +42,10 @@ public class SysDeptSpreadsheetRow {
 	private String remark;
 
 	@ExcelProperty(value = "创建时间", index = 9)
-	private String createTimeText;
+	private String createdAtText;
 
 	@ExcelProperty(value = "更新时间", index = 10)
-	private String updateTimeText;
+	private String updatedAtText;
 
 	@ExcelProperty(value = "主键ID", index = 11, converter = LongIdExcelConverter.class)
 	private Long id;

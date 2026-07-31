@@ -245,7 +245,7 @@ class FileRecycleServiceImplTest {
 		entity.setStoragePlatform(StoragePlatformEnum.MINIO);
 		entity.setBucket("public");
 		entity.setObjectKey("a.png");
-		entity.setCreateUser(1L);
+		entity.setCreatedBy(1L);
 		entity.setIsPrivate(true);
 		entity.setDeleteSource(FileDeleteSource.USER_SELF.getCode());
 		entity.setIsDeleted(true);

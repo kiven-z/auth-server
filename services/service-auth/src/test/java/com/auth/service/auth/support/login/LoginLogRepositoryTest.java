@@ -55,8 +55,8 @@ class LoginLogRepositoryTest {
 		assertEquals(AuthLoginLogType.LOGIN_PASSWORD.name(), saved.getLoginType());
 		assertEquals("user", saved.getUsername());
 		assertEquals("jti-1", saved.getSessionId());
-		assertEquals(1L, saved.getCreateUser());
-		assertEquals(1L, saved.getUpdateUser());
+		assertEquals(1L, saved.getCreatedBy());
+		assertEquals(1L, saved.getUpdatedBy());
 	}
 
 	@Test
@@ -69,8 +69,8 @@ class LoginLogRepositoryTest {
 		verify(loginLogMapper).insert(captor.capture());
 		LoginLogEntity saved = captor.getValue();
 		assertNull(saved.getUserId());
-		assertNull(saved.getCreateUser());
-		assertNull(saved.getUpdateUser());
+		assertNull(saved.getCreatedBy());
+		assertNull(saved.getUpdatedBy());
 		assertEquals("13800138000", saved.getUsername());
 	}
 

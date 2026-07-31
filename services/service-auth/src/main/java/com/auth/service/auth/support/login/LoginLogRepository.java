@@ -83,8 +83,8 @@ public class LoginLogRepository extends ServiceImpl<LoginLogMapper, LoginLogEnti
 			entity.setSessionId(sessionId);
 
 			if (userId != null) {
-				entity.setCreateUser(userId);
-				entity.setUpdateUser(userId);
+				entity.setCreatedBy(userId);
+				entity.setUpdatedBy(userId);
 			}
 
 			baseMapper.insert(entity);

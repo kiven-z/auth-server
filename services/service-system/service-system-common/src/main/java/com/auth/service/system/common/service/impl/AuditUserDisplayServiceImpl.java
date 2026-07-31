@@ -87,8 +87,8 @@ public class AuditUserDisplayServiceImpl implements AuditUserDisplayService {
 		Map<Long, String> usernameMap = mapUsernamesByIds(userIds);
 
 		for (T vo : records) {
-			vo.setCreateUsername(usernameMap.get(vo.getCreateUser()));
-			vo.setUpdateUsername(usernameMap.get(vo.getUpdateUser()));
+			vo.setCreatedByName(usernameMap.get(vo.getCreatedBy()));
+			vo.setUpdatedByName(usernameMap.get(vo.getUpdatedBy()));
 			if (extraUserIdGetter != null && extraUsernameSetter != null) {
 				long extraUserId = extraUserIdGetter.applyAsLong(vo);
 				if (extraUserId != 0L) {
@@ -107,8 +107,8 @@ public class AuditUserDisplayServiceImpl implements AuditUserDisplayService {
 	 */
 	private <T extends BaseResponse> Stream<Long> collectUserIds(T vo, ToLongFunction<T> extraUserIdGetter) {
 		Stream.Builder<Long> builder = Stream.builder();
-		builder.add(vo.getCreateUser());
-		builder.add(vo.getUpdateUser());
+		builder.add(vo.getCreatedBy());
+		builder.add(vo.getUpdatedBy());
 		if (extraUserIdGetter != null) {
 			long extraUserId = extraUserIdGetter.applyAsLong(vo);
 			if (extraUserId != 0L) {
