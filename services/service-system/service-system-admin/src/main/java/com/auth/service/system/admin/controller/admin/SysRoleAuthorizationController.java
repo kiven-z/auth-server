@@ -5,7 +5,7 @@ import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.admin.model.form.role.SysRolePermissionAssignForm;
-import com.auth.service.system.admin.model.form.role.SysRoleScopeForm;
+import com.auth.service.system.admin.model.form.scope.SysDataScopeForm;
 import com.auth.service.system.admin.model.vo.reference.PermissionReferenceVO;
 import com.auth.service.system.admin.model.vo.role.SysRoleScopeVO;
 import com.auth.service.system.admin.service.admin.SysRolePermissionService;
@@ -71,7 +71,7 @@ public class SysRoleAuthorizationController {
 	@Operation(summary = "保存角色数据范围（有则改、无则插；触发授权失效）")
 	@PreAuthorize("@auth.decide('sys:role:update')")
 	@PutMapping("/{roleId}/scope")
-	public Result<Void> upsertScope(@PathVariable("roleId") Long roleId, @Valid @RequestBody SysRoleScopeForm form) {
+	public Result<Void> upsertScope(@PathVariable("roleId") Long roleId, @Valid @RequestBody SysDataScopeForm form) {
 		sysRoleScopeService.upsert(roleId, form);
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}

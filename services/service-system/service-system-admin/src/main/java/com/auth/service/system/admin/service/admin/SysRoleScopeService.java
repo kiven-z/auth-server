@@ -1,7 +1,7 @@
 package com.auth.service.system.admin.service.admin;
 
 import com.auth.service.system.admin.model.entity.RoleScopeEntity;
-import com.auth.service.system.admin.model.form.role.SysRoleScopeForm;
+import com.auth.service.system.admin.model.form.scope.SysDataScopeForm;
 import com.auth.service.system.admin.model.vo.role.SysRoleScopeVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -24,6 +24,6 @@ public interface SysRoleScopeService extends IService<RoleScopeEntity> {
 	 * @param roleId 角色 ID
 	 * @param form 范围表单
 	 */
-	void upsert(Long roleId, SysRoleScopeForm form);
+	void upsert(Long roleId, SysDataScopeForm form);
 
 }

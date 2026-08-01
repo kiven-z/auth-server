@@ -4,7 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONUtil;
 import com.auth.service.system.admin.model.entity.RoleScopeEntity;
-import com.auth.service.system.admin.model.form.role.SysRoleScopeForm;
+import com.auth.service.system.admin.model.form.scope.SysDataScopeForm;
 import com.auth.service.system.admin.model.vo.role.SysRoleScopeVO;
 import lombok.experimental.UtilityClass;
 
@@ -48,7 +48,7 @@ public class SysRoleScopeConverter {
 	 * @param scopeType 已规范化的范围类型
 	 * @param scopeDeptIds 已规范化的部门 ID（ALL/SELF 为空）
 	 */
-	public static void applyForm(RoleScopeEntity entity, SysRoleScopeForm form, String scopeType,
+	public static void applyForm(RoleScopeEntity entity, SysDataScopeForm form, String scopeType,
 			List<Long> scopeDeptIds) {
 		String deptIds = CollUtil.isEmpty(scopeDeptIds) ? null : JSONUtil.toJsonStr(scopeDeptIds);
 

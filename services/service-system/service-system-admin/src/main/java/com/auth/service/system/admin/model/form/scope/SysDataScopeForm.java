@@ -1,4 +1,4 @@
-package com.auth.service.system.admin.model.form.role;
+package com.auth.service.system.admin.model.form.scope;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -11,14 +11,14 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * 角色数据范围保存表单
+ * 数据范围保存表单
  *
  * @author Bunny
  */
-@Schema(name = "SysRoleScopeForm", title = "角色数据范围表单")
+@Schema(name = "SysDataScopeForm", title = "数据范围表单")
 @Getter
 @Setter
-public class SysRoleScopeForm implements Serializable {
+public class SysDataScopeForm implements Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 1L;

@@ -3,10 +3,11 @@ package com.auth.service.system.admin.service.admin.impl;
 import com.auth.service.system.admin.mapper.role.RoleScopeMapper;
 import com.auth.service.system.admin.model.entity.RoleScopeEntity;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
-import com.auth.service.system.admin.model.form.role.SysRoleScopeForm;
+import com.auth.service.system.admin.model.form.scope.SysDataScopeForm;
 import com.auth.service.system.admin.model.vo.role.SysRoleScopeVO;
 import com.auth.service.system.admin.support.dept.DeptReferenceChecker;
 import com.auth.service.system.admin.support.grant.RbacReferenceChecker;
+import com.auth.service.system.admin.support.scope.DataScopeFormSupport;
 import com.auth.service.system.authorization.dispatch.trigger.RoleAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
@@ -57,8 +58,8 @@ class SysRoleScopeServiceImplTest {
 		return role;
 	}
 
-	private static SysRoleScopeForm form(String scopeType, List<Long> deptIds, String remark) {
-		SysRoleScopeForm form = new SysRoleScopeForm();
+	private static SysDataScopeForm form(String scopeType, List<Long> deptIds, String remark) {
+		SysDataScopeForm form = new SysDataScopeForm();
 		form.setScopeType(scopeType);
 		form.setScopeDeptIds(deptIds);
 		form.setRemark(remark);
@@ -67,8 +68,9 @@ class SysRoleScopeServiceImplTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
+		DataScopeFormSupport dataScopeFormSupport = new DataScopeFormSupport(deptReferenceChecker);
 		sysRoleScopeService = spy(
-				new SysRoleScopeServiceImpl(rbacReferenceChecker, deptReferenceChecker, roleInvalidationTrigger));
+				new SysRoleScopeServiceImpl(rbacReferenceChecker, dataScopeFormSupport, roleInvalidationTrigger));
 		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysRoleScopeService, roleScopeMapper);
@@ -149,7 +151,7 @@ class SysRoleScopeServiceImplTest {
 		when(roleScopeMapper.selectOne(any(Wrapper.class), anyBoolean())).thenReturn(null);
 		doReturn(true).when(sysRoleScopeService).saveOrUpdate(any(RoleScopeEntity.class));
 
-		SysRoleScopeForm form = form("ALL", null, "全量");
+		SysDataScopeForm form = form("ALL", null, "全量");
 		sysRoleScopeService.upsert(1L, form);
 
 		ArgumentCaptor<RoleScopeEntity> captor = ArgumentCaptor.forClass(RoleScopeEntity.class);
@@ -175,7 +177,7 @@ class SysRoleScopeServiceImplTest {
 		when(roleScopeMapper.selectOne(any(Wrapper.class), anyBoolean())).thenReturn(existing);
 		doReturn(true).when(sysRoleScopeService).saveOrUpdate(any(RoleScopeEntity.class));
 
-		SysRoleScopeForm form = form("DEPT_AND_CHILD", List.of(110L, 110L, 120L), "华北");
+		SysDataScopeForm form = form("DEPT_AND_CHILD", List.of(110L, 110L, 120L), "华北");
 		sysRoleScopeService.upsert(3L, form);
 
 		verify(deptReferenceChecker).requireExistingDeptIds(List.of(110L, 120L));
@@ -192,7 +194,7 @@ class SysRoleScopeServiceImplTest {
 	void upsertWhenScopeTypeInvalidShouldThrow() {
 		when(rbacReferenceChecker.getExisting(1L)).thenReturn(role(1L, "ADMIN"));
 
-		SysRoleScopeForm form = form("FROM_PROFILE", null, null);
+		SysDataScopeForm form = form("FROM_PROFILE", null, null);
 		assertThatThrownBy(() -> sysRoleScopeService.upsert(1L, form)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.DATA_INVALID);
@@ -204,7 +206,7 @@ class SysRoleScopeServiceImplTest {
 	void upsertWhenDeptScopeMissingDeptIdsShouldThrow() {
 		when(rbacReferenceChecker.getExisting(1L)).thenReturn(role(1L, "ADMIN"));
 
-		SysRoleScopeForm form = form("DEPT", List.of(), null);
+		SysDataScopeForm form = form("DEPT", List.of(), null);
 		assertThatThrownBy(() -> sysRoleScopeService.upsert(1L, form)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.PARAM_REQUIRED);
@@ -218,7 +220,7 @@ class SysRoleScopeServiceImplTest {
 		doThrow(new SystemBusinessException(SystemCommonResultCode.GRANT_REFERENCE_INVALID)).when(deptReferenceChecker)
 			.requireExistingDeptIds(List.of(99L));
 
-		SysRoleScopeForm form = form("DEPT", List.of(99L), null);
+		SysDataScopeForm form = form("DEPT", List.of(99L), null);
 		assertThatThrownBy(() -> sysRoleScopeService.upsert(1L, form)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.GRANT_REFERENCE_INVALID);
@@ -233,7 +235,7 @@ class SysRoleScopeServiceImplTest {
 		when(roleScopeMapper.selectOne(any(Wrapper.class), anyBoolean())).thenReturn(null);
 		doReturn(true).when(sysRoleScopeService).saveOrUpdate(any(RoleScopeEntity.class));
 
-		SysRoleScopeForm form = form("SELF", List.of(110L), null);
+		SysDataScopeForm form = form("SELF", List.of(110L), null);
 		sysRoleScopeService.upsert(6L, form);
 
 		ArgumentCaptor<RoleScopeEntity> captor = ArgumentCaptor.forClass(RoleScopeEntity.class);

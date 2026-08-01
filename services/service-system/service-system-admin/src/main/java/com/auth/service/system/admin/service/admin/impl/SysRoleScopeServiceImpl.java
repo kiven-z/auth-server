@@ -1,19 +1,15 @@
 package com.auth.service.system.admin.service.admin.impl;
 
-import cn.hutool.core.collection.CollUtil;
-import com.auth.module.security.contract.api.datascope.DataScopeStorageType;
 import com.auth.service.system.admin.convert.admin.role.SysRoleScopeConverter;
 import com.auth.service.system.admin.mapper.role.RoleScopeMapper;
 import com.auth.service.system.admin.model.entity.RoleScopeEntity;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
-import com.auth.service.system.admin.model.form.role.SysRoleScopeForm;
+import com.auth.service.system.admin.model.form.scope.SysDataScopeForm;
 import com.auth.service.system.admin.model.vo.role.SysRoleScopeVO;
 import com.auth.service.system.admin.service.admin.SysRoleScopeService;
-import com.auth.service.system.admin.support.dept.DeptReferenceChecker;
 import com.auth.service.system.admin.support.grant.RbacReferenceChecker;
+import com.auth.service.system.admin.support.scope.DataScopeFormSupport;
 import com.auth.service.system.authorization.dispatch.trigger.RoleAuthorizationInvalidationTrigger;
-import com.auth.service.system.common.exception.SystemBusinessException;
-import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +32,7 @@ public class SysRoleScopeServiceImpl extends ServiceImpl<RoleScopeMapper, RoleSc
 
 	private final RbacReferenceChecker rbacReferenceChecker;
 
-	private final DeptReferenceChecker deptReferenceChecker;
+	private final DataScopeFormSupport dataScopeFormSupport;
 
 	private final RoleAuthorizationInvalidationTrigger roleInvalidationTrigger;
 
@@ -56,13 +52,9 @@ public class SysRoleScopeServiceImpl extends ServiceImpl<RoleScopeMapper, RoleSc
 	 */
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public void upsert(Long roleId, SysRoleScopeForm form) {
+	public void upsert(Long roleId, SysDataScopeForm form) {
 		SysRoleEntity role = rbacReferenceChecker.getExisting(roleId);
-		DataScopeStorageType scopeType = DataScopeStorageType.parse(form.getScopeType());
-		if (scopeType == null) {
-			throw new SystemBusinessException(SystemCommonResultCode.DATA_INVALID);
-		}
-		List<Long> scopeDeptIds = normalizeDeptIds(scopeType, form.getScopeDeptIds());
+		DataScopeFormSupport.ResolvedDataScope resolved = dataScopeFormSupport.resolve(form);
 
 		RoleScopeEntity existing = super.getOne(
 				Wrappers.<RoleScopeEntity>lambdaQuery().eq(RoleScopeEntity::getRoleId, roleId));
@@ -70,28 +62,10 @@ public class SysRoleScopeServiceImpl extends ServiceImpl<RoleScopeMapper, RoleSc
 		if (existing == null) {
 			entity.setRoleId(roleId);
 		}
-		SysRoleScopeConverter.applyForm(entity, form, scopeType.name(), scopeDeptIds);
+		SysRoleScopeConverter.applyForm(entity, form, resolved.scopeType().name(), resolved.scopeDeptIds());
 		super.saveOrUpdate(entity);
 
 		roleInvalidationTrigger.submitByRoleCodes(List.of(role.getRoleCode()), "upsert-role-scope");
-	}
-
-	/**
-	 * 规范化部门 ID：DEPT* 必填且须存在；ALL/SELF 清空
-	 * @param scopeType 范围类型
-	 * @param rawDeptIds 表单部门 ID
-	 * @return 去重后的部门 ID；非部门维为空列表
-	 */
-	private List<Long> normalizeDeptIds(DataScopeStorageType scopeType, List<Long> rawDeptIds) {
-		if (scopeType != DataScopeStorageType.DEPT && scopeType != DataScopeStorageType.DEPT_AND_CHILD) {
-			return List.of();
-		}
-		if (CollUtil.isEmpty(rawDeptIds)) {
-			throw new SystemBusinessException(SystemCommonResultCode.PARAM_REQUIRED);
-		}
-		List<Long> distinctIds = rawDeptIds.stream().distinct().toList();
-		deptReferenceChecker.requireExistingDeptIds(distinctIds);
-		return distinctIds;
 	}
 
 }

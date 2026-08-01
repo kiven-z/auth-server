@@ -58,6 +58,11 @@ public class AuthorizationAuditBizModule {
 	public static final String SYS_ROLE_SCOPE = "SYS_ROLE_SCOPE";
 
 	/**
+	 * 用户数据范围
+	 */
+	public static final String SYS_USER_SCOPE = "SYS_USER_SCOPE";
+
+	/**
 	 * 部门闭包
 	 */
 	public static final String DEPT_CLOSURE = "DEPT_CLOSURE";
