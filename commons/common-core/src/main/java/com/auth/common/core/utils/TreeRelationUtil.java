@@ -5,7 +5,7 @@ import lombok.experimental.UtilityClass;
 /**
  * 树节点父子关系判定与移动目标校验。
  *
- * @author bunny
+ * @author Bunny
  */
 @UtilityClass
 public class TreeRelationUtil {

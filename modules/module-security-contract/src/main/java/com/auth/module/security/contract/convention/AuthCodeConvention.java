@@ -8,13 +8,12 @@ import java.util.regex.Pattern;
  * 权限码、角色码等安全侧编码格式约定（供 system 等模块在写入前校验；不包含业务状态判断）。
  *
  * <p>
- * 权限码：全小写语义段；结构为 1～4 段，以 {@code :} 分隔。每段为通配 {@code *} 或小写标识
- * {@code [a-z][a-z0-9]*}。合法示例：{@code *}、{@code *:*}、{@code *:*:*}、{@code *:*:*:*}、
- * {@code sys}、{@code sys:dept}、{@code sys:dept:query}、{@code sys:file:recycle:query}。
+ * 权限码：全小写语义段；结构为 1～4 段，以 : 分隔。每段为通配 * 或小写标识 [a-z][a-z0-9]*。合法示例：*、*:*、*:*:*、*:*:*:*、
+ * sys、sys:dept、sys:dept:query、sys:file:recycle:query。
  * </p>
  *
  * <p>
- * 角色码：全大写；仅允许大写字母与下划线；首字符须为字母。合法示例：{@code ADMIN}、{@code SYS_ADMIN}。
+ * 角色码：全大写；仅允许大写字母与下划线；首字符须为字母。合法示例：ADMIN、SYS_ADMIN。
  * </p>
  *
  * @author Bunny
@@ -23,12 +22,12 @@ import java.util.regex.Pattern;
 public class AuthCodeConvention {
 
 	/**
-	 * 权限码单段：通配 {@code *} 或小写段 {@code [a-z][a-z0-9]*}
+	 * 权限码单段：通配 * 或小写段 [a-z][a-z0-9]*
 	 */
 	public static final String PERMISSION_CODE_SEGMENT_REGEX = "(?:\\*|[a-z][a-z0-9]*)";
 
 	/**
-	 * 权限码整体：1～4 段，段间 {@code :}，与 {@link #PERMISSION_CODE_SEGMENT_REGEX} 一致
+	 * 权限码整体：1～4 段，段间 :，与 {@link #PERMISSION_CODE_SEGMENT_REGEX} 一致
 	 */
 	public static final String PERMISSION_CODE_REGEX = "^" + PERMISSION_CODE_SEGMENT_REGEX + "(?::"
 			+ PERMISSION_CODE_SEGMENT_REGEX + "){0,3}$";

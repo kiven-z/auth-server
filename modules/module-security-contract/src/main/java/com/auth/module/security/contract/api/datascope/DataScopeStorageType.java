@@ -37,7 +37,7 @@ public enum DataScopeStorageType {
 	/**
 	 * 解析库表 scope_type 或 JSON 字符串（仅存储层类型）
 	 * @param raw 原始值
-	 * @return 枚举；无法识别时为 {@code null}
+	 * @return 枚举；无法识别时为 null
 	 */
 	public static DataScopeStorageType parse(String raw) {
 		if (raw == null || raw.isBlank()) {

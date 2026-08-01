@@ -72,7 +72,7 @@ public enum FileDeleteSource {
 
 	/**
 	 * 是否对用户个人回收站可见
-	 * @return 用户回收站可见时返回 {@code true}
+	 * @return 用户回收站可见时返回 true
 	 */
 	public boolean isUserRecycleVisible() {
 		return recycleVisibility == RecycleVisibility.USER;

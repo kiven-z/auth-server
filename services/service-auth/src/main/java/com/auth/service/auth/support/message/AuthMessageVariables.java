@@ -30,7 +30,7 @@ public class AuthMessageVariables {
 	 * @param loginTime 登录时间
 	 * @param ipAddr 登录 IP
 	 * @param ipRegion 登录归属地
-	 * @return 变量 Map；{@code loginTime} 为带 UTC 标注的展示文案
+	 * @return 变量 Map；loginTime 为带 UTC 标注的展示文案
 	 */
 	public static Map<String, Object> buildLoginEmail(String username, String verificationCode, long expireMinutes,
 			Instant loginTime, String ipAddr, String ipRegion) {

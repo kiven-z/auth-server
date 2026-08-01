@@ -6,7 +6,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import java.util.Locale;
 
 /**
- * 系统服务结果码契约（模块 {@code 10}）
+ * 系统服务结果码契约（模块 10）
  *
  * @author Bunny
  */
@@ -25,7 +25,7 @@ public interface SystemResultCode {
 	int getCode();
 
 	/**
-	 * 稳定错误标识（写入 {@code Result.error}）
+	 * 稳定错误标识（写入 Result.error）
 	 * @return error 字符串
 	 */
 	String getError();
@@ -38,7 +38,7 @@ public interface SystemResultCode {
 
 	/**
 	 * 对外业务码
-	 * @return {@code 100_000 + getCode()}
+	 * @return 100_000 + getCode()
 	 */
 	default int getBizCode() {
 		return 100_000 + getCode();

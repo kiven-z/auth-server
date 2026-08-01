@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 /**
  * 部门只读批量查询：全路径解析与编码→主键映射，供导入导出复用
  *
- * @author bunny
+ * @author Bunny
  */
 @RequiredArgsConstructor
 @Component
@@ -29,7 +29,7 @@ public class DeptLookupSupport {
 	/**
 	 * 批量解析部门全路径
 	 * @param ids 部门主键列表
-	 * @return 部门 ID → 全路径（如 {@code 总部/研发/后端}）
+	 * @return 部门 ID → 全路径（如 总部/研发/后端）
 	 */
 	public Map<Long, String> resolvePaths(List<Long> ids) {
 		if (CollUtil.isEmpty(ids)) {

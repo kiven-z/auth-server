@@ -7,7 +7,7 @@ import lombok.experimental.UtilityClass;
 import java.util.Collection;
 
 /**
- * {@code aud} 声明读取：从 Claims 读取 aud（字符串或数组），返回第一个值
+ * aud 声明读取：从 Claims 读取 aud（字符串或数组），返回第一个值
  *
  * @author Bunny
  */

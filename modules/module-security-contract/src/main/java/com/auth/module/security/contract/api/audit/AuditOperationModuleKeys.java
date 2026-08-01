@@ -5,7 +5,7 @@ import lombok.experimental.UtilityClass;
 import java.util.Objects;
 
 /**
- * 将 {@link AuditServiceDomain} 与小模块编码组合为写入 {@code log_operation.module} 的稳定键。
+ * 将 {@link AuditServiceDomain} 与小模块编码组合为写入 log_operation.module 的稳定键。
  * <p>
  * 小模块编码由各微服务自行定义常量，平台仅负责拼接规则。
  * </p>
@@ -21,7 +21,7 @@ public class AuditOperationModuleKeys {
 	public static final char SEPARATOR = ':';
 
 	/**
-	 * 生成持久化用模块键，形如 {@code SYSTEM:SYS_DEPT}。
+	 * 生成持久化用模块键，形如 SYSTEM:SYS_DEPT。
 	 * @param domain 大模块（微服务域）
 	 * @param bizModuleCode 小模块编码，非空白（由各服务常量类提供）
 	 * @return 非空复合键

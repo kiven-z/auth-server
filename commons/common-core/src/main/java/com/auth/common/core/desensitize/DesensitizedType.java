@@ -46,7 +46,7 @@ public enum DesensitizedType {
 	/**
 	 * 地址（保留前缀、掩码末尾敏感长度），使用 Hutool
 	 * {@link cn.hutool.core.util.DesensitizedUtil#address(String, int)}， 敏感长度由注解
-	 * {@code addressSensitiveSize} 配置，默认 8 与 Hutool {@code desensitized(..., ADDRESS)} 一致
+	 * addressSensitiveSize 配置，默认 8 与 Hutool desensitized(..., ADDRESS) 一致
 	 */
 	ADDRESS,
 
@@ -61,7 +61,7 @@ public enum DesensitizedType {
 	CREDIT_CODE,
 
 	/**
-	 * 金额展示字符串：保留整数部分（含千分位逗号），仅将小数点后的数字替换为 {@code *}
+	 * 金额展示字符串：保留整数部分（含千分位逗号），仅将小数点后的数字替换为 *
 	 */
 	MONEY_DECIMAL,
 

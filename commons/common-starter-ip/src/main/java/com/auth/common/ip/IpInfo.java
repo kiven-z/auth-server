@@ -12,10 +12,9 @@ import java.io.Serializable;
  * <p>
  * Contract:
  * <ul>
- * <li>{@code ipAddr}: the raw IP string resolved from request headers / remote
- * address.</li>
- * <li>{@code ipRegion}: the IP region text. For internal/private IPs, it is the fixed
- * text {@code 内网IP}.</li>
+ * <li>ipAddr: the raw IP string resolved from request headers / remote address.</li>
+ * <li>ipRegion: the IP region text. For internal/private IPs, it is the fixed text
+ * 内网IP.</li>
  * </ul>
  * </p>
  *
@@ -35,7 +34,7 @@ public class IpInfo implements Serializable {
 	private String ipAddr;
 
 	/**
-	 * IP region text. Internal IPs are always {@code 内网IP}.
+	 * IP region text. Internal IPs are always 内网IP.
 	 */
 	private String ipRegion;
 

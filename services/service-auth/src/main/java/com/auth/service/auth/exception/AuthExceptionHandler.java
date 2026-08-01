@@ -43,7 +43,7 @@ public class AuthExceptionHandler {
 	}
 
 	/**
-	 * 将 {@link AuthBusinessException} 转为 HTTP 响应；{@code resultCode} 为空时降级为
+	 * 将 {@link AuthBusinessException} 转为 HTTP 响应；resultCode 为空时降级为
 	 * {@link AuthResultCode#SERVER_ERROR}
 	 * @param exception 业务异常
 	 * @return 响应实体

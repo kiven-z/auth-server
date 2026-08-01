@@ -10,7 +10,7 @@ import lombok.experimental.UtilityClass;
 import java.util.Map;
 
 /**
- * 内置远程 HTTP 任务 {@code query}/{@code body} 解析与 URL 拼接
+ * 内置远程 HTTP 任务 query/body 解析与 URL 拼接
  *
  * @author Bunny
  */
@@ -36,7 +36,7 @@ public class BuiltinRemoteHttpParamsSupport {
 	 * 将 JSON 请求体序列化为 HTTP 原始文本
 	 * @param body JSON 节点
 	 * @param objectMapper JSON 序列化器
-	 * @return 序列化后的文本；{@code null} 或 JSON null 时返回 {@code null}
+	 * @return 序列化后的文本；null 或 JSON null 时返回 null
 	 */
 	public static String serializeBody(JsonNode body, ObjectMapper objectMapper) throws JsonProcessingException {
 		if (body == null || body.isNull()) {

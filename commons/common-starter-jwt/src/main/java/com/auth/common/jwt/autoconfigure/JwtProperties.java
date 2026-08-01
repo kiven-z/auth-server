@@ -13,7 +13,7 @@ import static com.auth.common.jwt.model.SignatureAlgorithm.HS256;
 import static com.auth.common.jwt.model.SignatureAlgorithm.RS256;
 
 /**
- * {@code auth.common.jwt.*} 配置
+ * auth.common.jwt.* 配置
  *
  * @author Bunny
  */
@@ -52,7 +52,7 @@ public class JwtProperties {
 	private long clockSkewSeconds = 30L;
 
 	/**
-	 * PKCS12 路径，支持 {@code classpath:} 与 {@code file:} 或绝对路径
+	 * PKCS12 路径，支持 classpath: 与 file: 或绝对路径
 	 */
 	private String keystorePath;
 

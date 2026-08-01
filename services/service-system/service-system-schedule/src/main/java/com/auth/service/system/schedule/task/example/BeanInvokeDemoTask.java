@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * Bean 调用模式示例：通过 {@code invoke_target} 反射调用无参或单 String 参数方法
+ * Bean 调用模式示例：通过 invoke_target 反射调用无参或单 String 参数方法
  *
  * @author Bunny
  */

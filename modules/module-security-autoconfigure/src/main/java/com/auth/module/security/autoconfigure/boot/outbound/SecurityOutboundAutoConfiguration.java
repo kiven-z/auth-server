@@ -65,7 +65,7 @@ public class SecurityOutboundAutoConfiguration {
 	}
 
 	/**
-	 * 在 {@code loadBalancedRestTemplate} 创建时挂载内部 JWT 拦截器
+	 * 在 loadBalancedRestTemplate 创建时挂载内部 JWT 拦截器
 	 * @param interceptor 内部 JWT 拦截器
 	 * @return 负载均衡 RestTemplate 定制器
 	 */

@@ -11,12 +11,12 @@ import lombok.experimental.UtilityClass;
 public class SecurityExternalTokenConstants {
 
 	/**
-	 * JWT 中声明的令牌种类（值为 {@code SecurityTokenKind} 枚举的 {@code name()}）
+	 * JWT 中声明的令牌种类（值为 SecurityTokenKind 枚举的 name()）
 	 */
 	public static final String TOKEN_TYPE = "token_type";
 
 	/**
-	 * 权限版本快照 claim，用于与 Redis {@code AuthProfile.permVersion} 等当前版本比对
+	 * 权限版本快照 claim，用于与 Redis AuthProfile.permVersion 等当前版本比对
 	 */
 	public static final String PERM_VERSION = "perm_version";
 

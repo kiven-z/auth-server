@@ -16,10 +16,10 @@ public class OperationLogResponseMessageComposer {
 	private static final int MAX_RESPONSE_MESSAGE = 255;
 
 	/**
-	 * @param meta 操作日志注解；可为 {@code null}（仅影响是否读取 Result 文案）
+	 * @param meta 操作日志注解；可为 null（仅影响是否读取 Result 文案）
 	 * @param result 控制器返回值
 	 * @param failure 未捕获异常，非空表示失败
-	 * @return 写入 {@code response_message} 的摘要，可为 {@code null}
+	 * @return 写入 response_message 的摘要，可为 null
 	 */
 	public static String compose(OperationLog meta, Object result, Throwable failure) {
 		if (failure != null) {

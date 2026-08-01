@@ -133,7 +133,7 @@ public abstract class AbstractSecurityTokenProvider implements SecurityTokenProv
 	}
 
 	/**
-	 * 子类在解析完成后补充 {@link SecurityTokenResult} 字段（例如外部 Access Token 的 {@code perm_version}）
+	 * 子类在解析完成后补充 {@link SecurityTokenResult} 字段（例如外部 Access Token 的 perm_version）
 	 * @param builder 构建器
 	 * @param token 令牌
 	 * @param jwtUserToken JWT用户令牌

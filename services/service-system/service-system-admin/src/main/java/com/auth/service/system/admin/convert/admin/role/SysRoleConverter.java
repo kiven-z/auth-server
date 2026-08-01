@@ -1,4 +1,4 @@
-package com.auth.service.system.admin.convert.admin;
+package com.auth.service.system.admin.convert.admin.role;
 
 import com.auth.common.mapstruct.config.AuthMapperConfig;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;

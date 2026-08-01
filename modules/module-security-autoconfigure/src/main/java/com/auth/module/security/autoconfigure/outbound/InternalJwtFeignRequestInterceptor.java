@@ -7,7 +7,7 @@ import org.springframework.http.HttpHeaders;
 import static com.auth.module.security.contract.constants.SecurityInternalTokenConstants.INTERNAL_HEADER;
 
 /**
- * Feign 拦截器：出站为服务间调用签发短生命周期内部 JWT，并清除外部 {@code Authorization}，避免误传播
+ * Feign 拦截器：出站为服务间调用签发短生命周期内部 JWT，并清除外部 Authorization，避免误传播
  *
  * <p>
  * 智能签发策略由 {@link OutboundInternalJwtIssuer} 统一处理：
@@ -31,7 +31,7 @@ public final class InternalJwtFeignRequestInterceptor implements RequestIntercep
 	}
 
 	/**
-	 * 应用拦截器：剥离外部 {@code Authorization}，并根据当前上下文智能签发内部令牌
+	 * 应用拦截器：剥离外部 Authorization，并根据当前上下文智能签发内部令牌
 	 * @param template 请求模板
 	 */
 	@Override

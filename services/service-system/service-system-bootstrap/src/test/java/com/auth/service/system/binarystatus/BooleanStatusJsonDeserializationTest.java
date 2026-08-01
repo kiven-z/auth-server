@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * 校验分页/表单查询对象中二元 status 的 JSON {@code true}/{@code false} 反序列化。
+ * 校验分页/表单查询对象中二元 status 的 JSON true/false 反序列化。
  */
 @DisplayName("二元 Boolean status JSON 绑定")
 class BooleanStatusJsonDeserializationTest {

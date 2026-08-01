@@ -13,7 +13,7 @@ import java.io.Serializable;
 import java.util.Map;
 
 /**
- * HTTP 内置任务 {@code job_params} 载荷
+ * HTTP 内置任务 job_params 载荷
  *
  * @author Bunny
  */

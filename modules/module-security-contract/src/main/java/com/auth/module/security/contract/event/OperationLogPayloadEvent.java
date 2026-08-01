@@ -15,12 +15,12 @@ import java.time.Instant;
 public class OperationLogPayloadEvent {
 
 	/**
-	 * 操作用户 ID，未登录可为 {@code null}，持久化层应规范为 0。
+	 * 操作用户 ID，未登录可为 null，持久化层应规范为 0。
 	 */
 	Long userId;
 
 	/**
-	 * 操作用户名快照；未登录可为 {@code null}。
+	 * 操作用户名快照；未登录可为 null。
 	 */
 	String username;
 
@@ -31,7 +31,7 @@ public class OperationLogPayloadEvent {
 
 	/**
 	 * 模块键：由 {@link com.auth.module.security.contract.api.audit.AuditOperationModuleKeys}
-	 * 将大模块与小模块组合， 形如 {@code SYSTEM:SYS_DEPT}，写入 {@code log_operation.module}。
+	 * 将大模块与小模块组合， 形如 SYSTEM:SYS_DEPT，写入 log_operation.module。
 	 */
 	String module;
 
@@ -42,7 +42,7 @@ public class OperationLogPayloadEvent {
 
 	/**
 	 * 业务目标主键；未通过 {@link com.auth.module.security.contract.context.OperationLogContext}
-	 * 设置时为 {@code null}
+	 * 设置时为 null
 	 */
 	Long targetId;
 

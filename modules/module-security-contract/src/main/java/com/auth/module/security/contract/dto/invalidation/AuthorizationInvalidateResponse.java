@@ -7,7 +7,7 @@ import java.io.Serializable;
  * 授权失效统一响应（HTTP / Feign 共用）。
  *
  * @param impactedUserCount 影响面反查得到的去重用户数
- * @param versionBumpedCount 实际递增 {@code perm_version} 的用户数
+ * @param versionBumpedCount 实际递增 perm_version 的用户数
  * @param profileRefreshedCount 成功重建并写入 Redis 画像的用户数
  * @param profileEvictedCount 成功驱逐 Redis 画像的用户数
  * @author Bunny

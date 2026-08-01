@@ -11,7 +11,7 @@ import java.io.Serializable;
 /**
  * 部门移动
  *
- * @author bunny
+ * @author Bunny
  */
 @Schema(name = "SysDeptMoveForm", title = "部门移动表单")
 @Getter

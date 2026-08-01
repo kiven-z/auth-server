@@ -20,7 +20,7 @@ import org.springframework.context.annotation.Primary;
 import javax.crypto.SecretKey;
 
 /**
- * JWT 自动配置：按 {@code auth.common.jwt.algorithm} 选择 HS256 / RS256
+ * JWT 自动配置：按 auth.common.jwt.algorithm 选择 HS256 / RS256
  *
  * @author Bunny
  */

@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * {@code classpath:} PKCS12 流打开（与 Spring Boot 资源解析一致） 从 classpath 资源打开 PKCS12 输入流
+ * classpath: PKCS12 流打开（与 Spring Boot 资源解析一致） 从 classpath 资源打开 PKCS12 输入流
  *
  * @author Bunny
  */

@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * grant_table 授权主体变更后触发用户授权画像失效
  *
- * @author bunny
+ * @author Bunny
  */
 @RequiredArgsConstructor
 @Component

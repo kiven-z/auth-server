@@ -20,7 +20,7 @@ public class OperationLogAnnotationResolver {
 	/**
 	 * 解析 {@link OperationLog}：先取目标方法（含 CGLIB 场景），再回退到目标类上的类级别注解。
 	 * @param joinPoint 当前连接点
-	 * @return 注解实例；无法解析时 {@code null}
+	 * @return 注解实例；无法解析时 null
 	 */
 	public static OperationLog resolve(ProceedingJoinPoint joinPoint) {
 		MethodSignature signature = (MethodSignature) joinPoint.getSignature();

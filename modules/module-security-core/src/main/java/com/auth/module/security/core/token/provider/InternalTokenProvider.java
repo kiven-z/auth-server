@@ -19,7 +19,7 @@ import static com.auth.module.security.contract.constants.SecurityExternalTokenC
 import static com.auth.module.security.contract.constants.SecurityInternalTokenConstants.*;
 
 /**
- * 内部令牌：双模签发——「用户身份」与「服务身份」共用一种令牌种类，由 {@code principal_type} claim 区分
+ * 内部令牌：双模签发——「用户身份」与「服务身份」共用一种令牌种类，由 principal_type claim 区分
  *
  * @author Bunny
  */
@@ -48,7 +48,7 @@ public class InternalTokenProvider extends AbstractSecurityTokenProvider {
 	}
 
 	/**
-	 * 构建用户身份内部令牌：sub = userId，{@code principal_type=USER}
+	 * 构建用户身份内部令牌：sub = userId，principal_type=USER
 	 * @param userId 用户ID
 	 * @param jti 令牌ID
 	 * @return 内部令牌
@@ -64,7 +64,7 @@ public class InternalTokenProvider extends AbstractSecurityTokenProvider {
 	}
 
 	/**
-	 * 构建服务身份内部令牌：sub 占位为 真实服务名写入 {@code service_id} claim，{@code principal_type=SERVICE}
+	 * 构建服务身份内部令牌：sub 占位为 真实服务名写入 service_id claim，principal_type=SERVICE
 	 * @param serviceId 服务名（一般为 spring.application.name）
 	 * @param jti 令牌ID
 	 * @return 内部令牌
@@ -78,8 +78,7 @@ public class InternalTokenProvider extends AbstractSecurityTokenProvider {
 	}
 
 	/**
-	 * 解析后从原始 claims 补齐 {@link SecurityTokenResult} 的 {@code principalType} /
-	 * {@code serviceId}
+	 * 解析后从原始 claims 补齐 {@link SecurityTokenResult} 的 principalType / serviceId
 	 */
 	@Override
 	protected void enrichTokenResult(SecurityTokenResult.SecurityTokenResultBuilder builder, String token,

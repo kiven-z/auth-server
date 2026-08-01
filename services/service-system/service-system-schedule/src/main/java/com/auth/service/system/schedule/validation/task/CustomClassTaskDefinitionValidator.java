@@ -64,7 +64,7 @@ public class CustomClassTaskDefinitionValidator implements SysJobTaskTypeDefinit
 	}
 
 	/**
-	 * 若 {@code job_class} 为已知内置 Job，则校验 {@code job_params}
+	 * 若 job_class 为已知内置 Job，则校验 job_params
 	 * @param job 任务定义
 	 */
 	public void validateIfPresent(JobEntity job) {

@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 /**
  * 菜单写操作前的存在性与移动目标校验。
  *
- * @author bunny
+ * @author Bunny
  */
 @Slf4j
 @Component

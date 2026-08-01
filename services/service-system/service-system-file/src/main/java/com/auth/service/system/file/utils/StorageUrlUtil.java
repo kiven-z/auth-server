@@ -51,8 +51,8 @@ public class StorageUrlUtil {
 	 * 按平台配置解析对象公开访问地址
 	 * <ul>
 	 * <li>有 publicUrl：CDN/CNAME 等对外域名优先</li>
-	 * <li>path-style：{@code {endpoint}/{bucket}/{key}}</li>
-	 * <li>virtual-hosted：{@code {scheme}://{bucket}.{host}/{key}}</li>
+	 * <li>path-style：{endpoint/{bucket}/{key}}</li>
+	 * <li>virtual-hosted：{scheme://{bucket}.{host}/{key}}</li>
 	 * </ul>
 	 * @param profile 已规范化的 S3 协议配置
 	 * @param bucket 存储桶（可空，空则用 profile.bucket）

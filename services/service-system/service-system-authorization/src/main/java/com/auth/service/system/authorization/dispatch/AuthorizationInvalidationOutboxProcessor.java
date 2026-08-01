@@ -20,7 +20,7 @@ import java.time.Instant;
 import java.util.Objects;
 
 /**
- * Outbox 投递执行：调用 auth {@code /invalidate} 并更新 Outbox 状态。
+ * Outbox 投递执行：调用 auth /invalidate 并更新 Outbox 状态。
  *
  * @author Bunny
  */

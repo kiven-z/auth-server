@@ -13,7 +13,7 @@ import java.util.Optional;
  * 从当前请求解析 MVC {@link HandlerMethod}（用于注解决策）
  *
  * <p>
- * 在 Spring Security 过滤器链中执行时，请求通常尚未经过 {@code DispatcherServlet}，因此可能尚未缓存
+ * 在 Spring Security 过滤器链中执行时，请求通常尚未经过 DispatcherServlet，因此可能尚未缓存
  * {@link org.springframework.http.server.RequestPath}{@link RequestMappingHandlerMapping#getHandler}
  * 在 PathPattern 模式下依赖该缓存，故此处在解析前按需 {@link ServletRequestPathUtils#parseAndCache}，并在本方法结束时
  * 若由本方法创建缓存则 {@link ServletRequestPathUtils#clearParsedRequestPath}，避免干扰后续 Servlet 正常解析

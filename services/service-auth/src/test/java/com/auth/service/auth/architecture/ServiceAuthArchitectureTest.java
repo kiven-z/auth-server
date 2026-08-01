@@ -74,7 +74,7 @@ class ServiceAuthArchitectureTest {
 	private static final String DATA_SCOPE_ANNOTATION = "com.auth.module.security.datapermission.annotation.DataScope";
 
 	/**
-	 * {@code @DataScope} 按 MappedStatement ID 解析，仅 Mapper 方法生效。
+	 * @DataScope 按 MappedStatement ID 解析，仅 Mapper 方法生效。
 	 */
 	@ArchTest
 	static final ArchRule data_scope_only_on_mapper_methods = methods().that()

@@ -7,7 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * 将配置中的路径解析（支持 {@code file:}）
+ * 将配置中的路径解析（支持 file:）
  *
  * @author Bunny
  */

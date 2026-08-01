@@ -3,8 +3,8 @@ package com.auth.service.auth.exception;
 import lombok.Getter;
 
 /**
- * 统一返回结果状态信息类HTTP 语义以本枚举 {@link #httpStatus} 为唯一事实来源；构造参数顺序为
- * {@code (httpStatus, code, error, messageKey)}，与 system 模块结果枚举风格一致
+ * 统一返回结果状态信息类HTTP 语义以本枚举 {@link #httpStatus} 为唯一事实来源；构造参数顺序为 (httpStatus, code, error,
+ * messageKey)，与 system 模块结果枚举风格一致
  *
  * @author Bunny
  */

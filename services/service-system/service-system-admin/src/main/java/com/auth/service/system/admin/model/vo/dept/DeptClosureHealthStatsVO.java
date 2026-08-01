@@ -11,7 +11,7 @@ import java.io.Serializable;
 /**
  * 闭包健康度统计（活跃部门维度）
  *
- * @author bunny
+ * @author Bunny
  */
 @Schema(name = "DeptClosureHealthStatsVO", title = "闭包健康度统计")
 @Getter

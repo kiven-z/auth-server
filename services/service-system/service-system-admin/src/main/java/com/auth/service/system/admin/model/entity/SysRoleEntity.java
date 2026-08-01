@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * 系统角色主表，对应 {@code sys_role}（物理删除）。
+ * 系统角色主表，对应 sys_role（物理删除）。
  *
  * @author Bunny
  */

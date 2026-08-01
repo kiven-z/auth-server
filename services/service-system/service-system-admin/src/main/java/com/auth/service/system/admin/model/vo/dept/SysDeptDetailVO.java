@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * 部门详情
  *
- * @author bunny
+ * @author Bunny
  */
 @Schema(name = "SysDeptDetailVO", title = "部门详情")
 @Getter

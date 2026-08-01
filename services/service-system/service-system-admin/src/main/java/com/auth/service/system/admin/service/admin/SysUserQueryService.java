@@ -42,7 +42,7 @@ public interface SysUserQueryService extends IService<UserEntity> {
 	/**
 	 * 按关键字搜索用户；仅返回未删除且状态为「正常」的用户。
 	 * @param keyword 关键字；空或仅空白时返回空列表，不访问数据库
-	 * @param limit 最大条数；{@code null} 时使用默认上限，超过绝对上限时截断
+	 * @param limit 最大条数；null 时使用默认上限，超过绝对上限时截断
 	 * @return 搜索结果，不含密码
 	 */
 	List<SysUserSearchItemVO> searchByKeyword(String keyword, Integer limit);

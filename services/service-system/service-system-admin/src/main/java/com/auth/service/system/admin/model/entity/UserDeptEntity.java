@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * 用户部门关联，对应 {@code user_dept}
+ * 用户部门关联，对应 user_dept
  *
  * @author Bunny
  */

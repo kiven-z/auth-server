@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * 应用就绪后延迟将 {@code job} 对账至 Quartz，再启动调度器（业务表为单一事实来源）
+ * 应用就绪后延迟将 job 对账至 Quartz，再启动调度器（业务表为单一事实来源）
  *
  * @author Bunny
  */

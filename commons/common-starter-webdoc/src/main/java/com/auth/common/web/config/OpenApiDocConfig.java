@@ -46,7 +46,7 @@ public class OpenApiDocConfig {
 	}
 
 	/**
-	 * 默认 OpenAPI 文档元信息；如需覆盖，可自行声明 {@code defaultOpenApi} Bean。
+	 * 默认 OpenAPI 文档元信息；如需覆盖，可自行声明 defaultOpenApi Bean。
 	 * @return OpenAPI
 	 */
 	@Bean

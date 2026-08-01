@@ -22,7 +22,7 @@ public class DataScopeAnnotationResolver {
 	/**
 	 * 解析语句上的数据范围注解
 	 * @param mappedStatementId Mapper 方法全限定名
-	 * @return 注解；未标注时返回 {@code null}
+	 * @return 注解；未标注时返回 null
 	 */
 	public DataScope resolve(String mappedStatementId) {
 		if (CharSequenceUtil.isBlank(mappedStatementId)) {

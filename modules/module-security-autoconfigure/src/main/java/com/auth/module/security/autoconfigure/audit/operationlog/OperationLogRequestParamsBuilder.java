@@ -24,7 +24,7 @@ import java.util.function.Function;
  * 操作日志请求参数摘要构建
  * <p>
  * Servlet 侧：GET 使用 query string；其它方法使用 {@link HttpServletRequest#getParameterMap()}
- * Spring MVC 侧：对控制器方法实参做摘要（含 {@code @RequestBody} 解析后的对象），上传文件仅记元数据
+ * Spring MVC 侧：对控制器方法实参做摘要（含 @RequestBody 解析后的对象），上传文件仅记元数据
  * </p>
  *
  * @author Bunny
@@ -54,8 +54,8 @@ public class OperationLogRequestParamsBuilder {
 	 * @param request HTTP 请求
 	 * @param hasRecord 是否记录
 	 * @param objectMapper JSON 序列化
-	 * @param methodArgs 控制器方法实参，可为 {@code null} 或空列表
-	 * @return 摘要或 {@code null}
+	 * @param methodArgs 控制器方法实参，可为 null 或空列表
+	 * @return 摘要或 null
 	 */
 	public static String build(HttpServletRequest request, boolean hasRecord, ObjectMapper objectMapper,
 			List<Object> methodArgs) {
@@ -73,7 +73,7 @@ public class OperationLogRequestParamsBuilder {
 	 * 仅从 Servlet 层 query / parameterMap 生成摘要
 	 * @param request 请求
 	 * @param objectMapper JSON 序列化
-	 * @return 摘要或 {@code null}
+	 * @return 摘要或 null
 	 */
 	private static String buildServletDerivedOnly(HttpServletRequest request, ObjectMapper objectMapper) {
 		if (GET.equalsIgnoreCase(request.getMethod())) {
@@ -87,7 +87,7 @@ public class OperationLogRequestParamsBuilder {
 	 * @param request 请求
 	 * @param objectMapper JSON 序列化
 	 * @param methodSummaries 方法实参摘要
-	 * @return 摘要或 {@code null}
+	 * @return 摘要或 null
 	 */
 	private static String buildCombinedWithMethodArgs(HttpServletRequest request, ObjectMapper objectMapper,
 			List<Object> methodSummaries) {
@@ -106,7 +106,7 @@ public class OperationLogRequestParamsBuilder {
 	}
 
 	/**
-	 * GET：返回截断后的 query 字符串（空白 query 也返回空串而非 {@code null}）
+	 * GET：返回截断后的 query 字符串（空白 query 也返回空串而非 null）
 	 * @param request 请求
 	 * @return 截断后的 query 字符串
 	 */
@@ -127,10 +127,10 @@ public class OperationLogRequestParamsBuilder {
 	}
 
 	/**
-	 * 将非空 parameterMap 序列化为 JSON 并截断；否则 {@code null}
+	 * 将非空 parameterMap 序列化为 JSON 并截断；否则 null
 	 * @param map 参数映射
 	 * @param objectMapper JSON 序列化
-	 * @return 摘要或 {@code null}
+	 * @return 摘要或 null
 	 */
 	private static String serializeParameterMapOrNull(Map<String, String[]> map, ObjectMapper objectMapper) {
 		if (MapUtil.isEmpty(map)) {
@@ -140,10 +140,10 @@ public class OperationLogRequestParamsBuilder {
 	}
 
 	/**
-	 * JSON 序列化后按 {@link #MAX_REQUEST_TEXT} 截断；失败返回 {@code null}
+	 * JSON 序列化后按 {@link #MAX_REQUEST_TEXT} 截断；失败返回 null
 	 * @param objectMapper JSON 序列化
 	 * @param value 值
-	 * @return 摘要或 {@code null}
+	 * @return 摘要或 null
 	 */
 	private static String writeJsonTruncated(ObjectMapper objectMapper, Object value) {
 		try {
@@ -194,7 +194,7 @@ public class OperationLogRequestParamsBuilder {
 	 * 单个实参的日志摘要：上传文件仅元数据；字节数组只记长度；其余尽量转为 {@link JsonNode}
 	 * @param arg 方法实参
 	 * @param objectMapper JSON 序列化
-	 * @return 摘要或 {@code null}
+	 * @return 摘要或 null
 	 */
 	private static Object toLoggableArgumentSummary(Object arg, ObjectMapper objectMapper) {
 		if (arg instanceof MultipartFile file) {

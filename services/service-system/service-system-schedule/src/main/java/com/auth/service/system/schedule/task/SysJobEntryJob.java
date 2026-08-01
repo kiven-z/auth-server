@@ -9,7 +9,7 @@ import org.quartz.*;
 import org.springframework.context.ApplicationContext;
 
 /**
- * 统一定时任务 Quartz 入口：按 {@code taskType} 委派 {@link SysJobTaskExecutor}
+ * 统一定时任务 Quartz 入口：按 taskType 委派 {@link SysJobTaskExecutor}
  *
  * @author Bunny
  */

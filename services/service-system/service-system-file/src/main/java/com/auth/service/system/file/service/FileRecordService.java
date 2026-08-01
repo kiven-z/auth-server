@@ -37,7 +37,7 @@ public interface FileRecordService extends IService<FileRecordEntity> {
 	 * 批量切换文件隐私属性（公开 ↔ 私有），并迁移存储对象前缀
 	 * @param ids 文件记录主键集合
 	 * @param targetPrivate 目标是否私有
-	 * @param ownerUserId 归属用户 ID，管理端传 {@code null}
+	 * @param ownerUserId 归属用户 ID，管理端传 null
 	 */
 	void updatePrivacyByIds(List<Long> ids, boolean targetPrivate, Long ownerUserId);
 

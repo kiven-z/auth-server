@@ -8,7 +8,7 @@ package com.auth.common.core.i18n;
 public interface I18nMessageProvider {
 
 	/**
-	 * i18n消息键，例如{@code "user.not.found"}
+	 * i18n消息键，例如"user.not.found"
 	 * @return i18n消息键
 	 */
 	String getMessageKey();

@@ -21,8 +21,7 @@ public class OperationLogAspect {
 	}
 
 	/**
-	 * 使用全限定名绑定，避免 {@code @annotation(x)||@within(x)} 对同一形参绑定在 Spring AOP 下出现
-	 * {@code null}。
+	 * 使用全限定名绑定，避免 @annotation(x)||@within(x) 对同一形参绑定在 Spring AOP 下出现 null。
 	 */
 	@Around("@annotation(com.auth.module.security.contract.annotation.OperationLog) "
 			+ "|| @within(com.auth.module.security.contract.annotation.OperationLog)")

@@ -7,14 +7,15 @@ import com.auth.module.security.contract.event.SecurityAuthorizationAuditPayload
  *
  * <p>
  * 业务服务如需将授权审计事件持久化（DB / ES / 日志），实现此接口并注册为 Spring Bean autoconfigure 层提供
- * {@code @ConditionalOnMissingBean} 空实现，确保不接入时不会 NPE
+ *
+ * @ConditionalOnMissingBean 空实现，确保不接入时不会 NPE
  * </p>
  *
  * <p>
- * 建议实现方使用 {@code @Async} 异步执行，避免阻塞主请求链路
+ * 建议实现方使用 @Async 异步执行，避免阻塞主请求链路
  * </p>
  *
- * <pre>{@code
+ * <pre>
  * &#64;Component
  * public class MyAuditHandler implements AuthorizationAuditHandler {
  *
@@ -27,8 +28,7 @@ import com.auth.module.security.contract.event.SecurityAuthorizationAuditPayload
  *         // 持久化逻辑
  *     }
  * }
- * }</pre>
- *
+ * </pre>
  * @author Bunny
  */
 @FunctionalInterface

@@ -24,7 +24,7 @@ public interface SysJobGroupService {
 	PageResponse<SysJobGroupPageVO> getPage(SysJobGroupQuery query);
 
 	/**
-	 * 启用状态分组下拉/远程搜索（仅分组已启用 {@code status == true}）
+	 * 启用状态分组下拉/远程搜索（仅分组已启用 status == true）
 	 * @param keyword 关键字（可空）
 	 * @param limit 最大条数
 	 * @return 列表

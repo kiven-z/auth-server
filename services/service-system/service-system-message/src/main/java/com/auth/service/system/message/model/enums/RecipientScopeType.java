@@ -30,7 +30,7 @@ public enum RecipientScopeType {
 	/**
 	 * 解析范围类型（大小写不敏感）
 	 * @param raw 原始字符串
-	 * @return 枚举；无法识别时返回 {@code null}
+	 * @return 枚举；无法识别时返回 null
 	 */
 	public static RecipientScopeType from(String raw) {
 		if (raw == null || raw.isBlank()) {

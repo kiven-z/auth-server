@@ -26,8 +26,8 @@ public final class ExceptionCauseUtil {
 	}
 
 	/**
-	 * 获取第一个 {@link SQLException} 异常，或 {@code null} 最佳实践：第一个 SQL
-	 * 异常通常包含最可操作的供应商信息（SQLState, errorCode）
+	 * 获取第一个 {@link SQLException} 异常，或 null 最佳实践：第一个 SQL 异常通常包含最可操作的供应商信息（SQLState,
+	 * errorCode）
 	 * @param throwable 异常
 	 * @return 第一个 SQL 异常
 	 */

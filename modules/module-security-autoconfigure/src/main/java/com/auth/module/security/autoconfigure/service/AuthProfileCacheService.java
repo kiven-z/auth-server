@@ -34,7 +34,7 @@ public class AuthProfileCacheService {
 	/**
 	 * 加载授权画像
 	 * @param userId 用户 ID
-	 * @return 授权画像；缓存未命中时返回 {@code null}
+	 * @return 授权画像；缓存未命中时返回 null
 	 */
 	public AuthProfile load(long userId) {
 		String key = USER_PERM.key(userId);

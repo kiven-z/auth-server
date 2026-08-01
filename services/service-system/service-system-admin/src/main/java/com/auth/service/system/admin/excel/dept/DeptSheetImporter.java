@@ -29,7 +29,7 @@ import static com.auth.common.core.utils.TreeParentIdUtil.ROOT_PARENT_ID;
 /**
  * 部门导入器：封装行级校验与批量写入逻辑。
  *
- * @author bunny
+ * @author Bunny
  */
 @RequiredArgsConstructor
 @Component

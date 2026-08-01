@@ -85,8 +85,8 @@ public class AnnotationOverridingAuthorizationManager implements AuthorizationMa
 
 	/**
 	 * 委托 {@link #authorize(Supplier, RequestAuthorizationContext)}；保留以满足当前
-	 * {@link AuthorizationManager} 对抽象 {@code check} 的编译要求 NOSONAR S1133 — Spring
-	 * Security 6.5 仍声明抽象 check，需保留桥接
+	 * {@link AuthorizationManager} 对抽象 check 的编译要求 NOSONAR S1133 — Spring Security 6.5
+	 * 仍声明抽象 check，需保留桥接
 	 */
 	@Override
 	public AuthorizationDecision check(Supplier<Authentication> authentication, RequestAuthorizationContext context) {

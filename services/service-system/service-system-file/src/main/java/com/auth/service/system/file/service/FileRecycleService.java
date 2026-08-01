@@ -15,7 +15,7 @@ public interface FileRecycleService extends IService<FileRecordEntity> {
 	/**
 	 * 按主键集合恢复软删除的文件记录
 	 * @param ids 文件记录主键集合
-	 * @param ownerUserId 归属用户 ID，为 {@code null} 时跳过归属校验
+	 * @param ownerUserId 归属用户 ID，为 null 时跳过归属校验
 	 * @param deleteSources 删除来源集合
 	 */
 	void restoreByIds(List<Long> ids, Long ownerUserId, List<String> deleteSources);

@@ -25,8 +25,8 @@ import static org.mockito.Mockito.when;
  * {@link DataScopePermissionHandler} 表达式合并测试
  *
  * <p>
- * 全量 SQL 改写由官方 {@code DataPermissionInterceptor} 负责；其依赖的 {@code CCJSqlParserTokenManager}
- * 在 JaCoCo 仪器化时会 MethodTooLarge，故不在此调用 {@code beforeQuery}。
+ * 全量 SQL 改写由官方 DataPermissionInterceptor 负责；其依赖的 CCJSqlParserTokenManager 在 JaCoCo 仪器化时会
+ * MethodTooLarge，故不在此调用 beforeQuery。
  * </p>
  *
  * @author Bunny

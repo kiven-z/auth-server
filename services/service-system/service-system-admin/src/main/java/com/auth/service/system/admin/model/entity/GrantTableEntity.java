@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * 统一授权表行，对应 {@code grant_table}。
+ * 统一授权表行，对应 grant_table。
  *
  * @author Bunny
  */

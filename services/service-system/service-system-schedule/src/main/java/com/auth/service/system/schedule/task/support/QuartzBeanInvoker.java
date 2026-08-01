@@ -19,7 +19,7 @@ import static com.auth.service.system.schedule.model.constants.SysJobQuartzDataK
 import static com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys.METHOD_NAME;
 
 /**
- * 解析 {@code invoke_target}（首个 {@code .} 前为 Spring Bean 名，后为方法及可选参数）并反射调用
+ * 解析 invoke_target（首个 . 前为 Spring Bean 名，后为方法及可选参数）并反射调用
  *
  * @author Bunny
  */
@@ -31,7 +31,7 @@ public class QuartzBeanInvoker {
 
 	/**
 	 * 解析调用目标字符串
-	 * @param invokeTarget 如 {@code beanInvokeDemoTask.run()}
+	 * @param invokeTarget 如 beanInvokeDemoTask.run()
 	 * @return 调用规范
 	 */
 	private static @NonNull InvocationSpec parseSpec(@Nullable String invokeTarget) {
@@ -103,7 +103,7 @@ public class QuartzBeanInvoker {
 
 	/**
 	 * 执行调用目标字符串
-	 * @param invokeTarget 如 {@code beanInvokeDemoTask.run()}
+	 * @param invokeTarget 如 beanInvokeDemoTask.run()
 	 * @return 方法返回值转字符串（无返回则为空串）
 	 */
 	public String invoke(@Nullable String invokeTarget) {

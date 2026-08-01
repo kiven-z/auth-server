@@ -12,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 部门写操作前的存在性与引用校验
@@ -37,6 +39,30 @@ public class DeptReferenceChecker {
 			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST);
 		}
 		return existing;
+	}
+
+	/**
+	 * 批量校验部门 ID 均存在（含停用节点）；空列表直接返回
+	 * <p>
+	 * 调用方需保证 ID 已去重
+	 * </p>
+	 * @param deptIds 部门 ID 列表（已去重）
+	 */
+	public void requireExistingDeptIds(List<Long> deptIds) {
+		if (CollUtil.isEmpty(deptIds)) {
+			return;
+		}
+
+		List<SysDeptEntity> found = sysDeptMapper.selectByIds(deptIds);
+		Set<Long> foundIds = found.stream().map(SysDeptEntity::getId).collect(Collectors.toSet());
+		if (foundIds.size() != deptIds.size()) {
+			Long invalidId = deptIds.stream()
+				.filter(id -> !foundIds.contains(id))
+				.findFirst()
+				.orElseThrow(() -> new IllegalStateException("dept id mismatch without invalid id"));
+			log.warn("Scope dept reference invalid: id={}", invalidId);
+			throw new SystemBusinessException(SystemCommonResultCode.GRANT_REFERENCE_INVALID);
+		}
 	}
 
 	/**

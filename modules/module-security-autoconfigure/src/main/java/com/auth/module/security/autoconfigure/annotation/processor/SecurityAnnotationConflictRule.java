@@ -11,7 +11,7 @@ import java.lang.reflect.AnnotatedElement;
 public interface SecurityAnnotationConflictRule {
 
 	/**
-	 * 校验 {@code element} 上的注解是否与当前规则冲突
+	 * 校验 element 上的注解是否与当前规则冲突
 	 * @param element 被校验的类或方法
 	 * @param target 类全名或方法
 	 * @throws IllegalStateException 存在冲突时抛出，阻止应用启动

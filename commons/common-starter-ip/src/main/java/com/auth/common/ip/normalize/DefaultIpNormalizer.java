@@ -9,9 +9,9 @@ import java.util.Optional;
  *
  * <ul>
  * <li>删除空格</li>
- * <li>删除IPv6 zone id后缀 (e.g. {@code %eth0})</li>
- * <li>删除括号和端口 for bracketed IPv6 (e.g. {@code [::1]:443})</li>
- * <li>删除IPv4端口 (e.g. {@code 1.2.3.4:8080})</li>
+ * <li>删除IPv6 zone id后缀 (e.g. %eth0)</li>
+ * <li>删除括号和端口 for bracketed IPv6 (e.g. [::1]:443)</li>
+ * <li>删除IPv4端口 (e.g. 1.2.3.4:8080)</li>
  * </ul>
  *
  * @author Bunny

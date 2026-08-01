@@ -10,8 +10,8 @@ import java.util.Objects;
  *
  * <ul>
  * <li>HTTP 状态码保持语义性 (401/403/503...)</li>
- * <li>{@code Result.code} 使用稳定的业务代码</li>
- * <li>{@code Result.error/subCode} 使用本枚举 {@link #getError()} 的稳定字符串</li>
+ * <li>Result.code 使用稳定的业务代码</li>
+ * <li>Result.error/subCode 使用本枚举 {@link #getError()} 的稳定字符串</li>
  * <li>Security 契约层不进行 i18n 翻译，仅提供英文 {@link #defaultMessage} 与 {@link #i18nKey}
  * 供集成层/前端</li>
  * </ul>
@@ -113,7 +113,7 @@ public enum SecurityResultCodeEnum {
 	}
 
 	/**
-	 * 从稳定 {@code error} 子码解析为枚举；无法识别时返回 {@link #UNKNOWN}。
+	 * 从稳定 error 子码解析为枚举；无法识别时返回 {@link #UNKNOWN}。
 	 * @param error 错误子码（与 {@link #getError()} 一致）
 	 * @return 对应枚举
 	 */

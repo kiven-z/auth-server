@@ -6,7 +6,7 @@ import lombok.Value;
 import lombok.experimental.Accessors;
 
 /**
- * {@code eventId} 幂等门禁结果：一次调用表达「直接返回 / 等待 / 继续执行」
+ * eventId 幂等门禁结果：一次调用表达「直接返回 / 等待 / 继续执行」
  *
  * @author Bunny
  */

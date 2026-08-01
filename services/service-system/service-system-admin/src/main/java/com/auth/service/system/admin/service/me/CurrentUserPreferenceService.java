@@ -14,7 +14,7 @@ public interface CurrentUserPreferenceService extends IService<SysUserConfigEnti
 
 	/**
 	 * 查询当前用户已保存的 UI 偏好配置（仅白名单键）
-	 * @return 配置列表；无记录时 {@code items} 为空数组
+	 * @return 配置列表；无记录时 items 为空数组
 	 */
 	MeUserPreferenceListVO listMyPreferences();
 

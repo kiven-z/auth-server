@@ -12,7 +12,7 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_CONFIG_INVALID;
 
 /**
- * 内置任务 {@code job_params} JSON 反序列化（运行时）
+ * 内置任务 job_params JSON 反序列化（运行时）
  *
  * @author Bunny
  */
@@ -26,7 +26,7 @@ public class BuiltinJobParamsParser {
 	}
 
 	/**
-	 * 从 {@link JobExecutionContext} 读取并解析 {@code job_params}
+	 * 从 {@link JobExecutionContext} 读取并解析 job_params
 	 * @param context Quartz 执行上下文
 	 * @param paramsType 载荷类型
 	 * @param <T> 载荷类型
@@ -42,7 +42,7 @@ public class BuiltinJobParamsParser {
 	}
 
 	/**
-	 * 反序列化 {@code job_params} JSON，不进行空值检查（调用方需保证传入非空）
+	 * 反序列化 job_params JSON，不进行空值检查（调用方需保证传入非空）
 	 * @param jobParamsJson 原始 JSON
 	 * @param paramsType 载荷类型
 	 * @param <T> 载荷类型

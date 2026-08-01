@@ -68,7 +68,7 @@ public interface FileRecordMapper extends BaseMapper<FileRecordEntity> {
 			@Param("ownerUserId") Long ownerUserId, @Param("bizType") String bizType);
 
 	/**
-	 * 按主键批量逻辑删除文件记录（绕过 {@code @TableLogic}，显式写入删除元数据）
+	 * 按主键批量逻辑删除文件记录（绕过 @TableLogic，显式写入删除元数据）
 	 * @param ids 文件记录主键集合
 	 * @param deleteSource 删除来源
 	 * @param deletedBy 删除人

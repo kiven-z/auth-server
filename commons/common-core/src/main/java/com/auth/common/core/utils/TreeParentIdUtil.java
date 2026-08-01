@@ -5,7 +5,7 @@ import lombok.experimental.UtilityClass;
 /**
  * 树节点 parent_id 约定与规范化。
  *
- * @author bunny
+ * @author Bunny
  */
 @UtilityClass
 public class TreeParentIdUtil {

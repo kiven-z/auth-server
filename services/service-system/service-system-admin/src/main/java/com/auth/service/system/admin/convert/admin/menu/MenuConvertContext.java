@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * MapStruct 转换上下文：承载角色 Map，避免 {@code @Context} 同类型冲突
+ * MapStruct 转换上下文：承载角色 Map，避免 @Context 同类型冲突
  *
  * @author Bunny
  */

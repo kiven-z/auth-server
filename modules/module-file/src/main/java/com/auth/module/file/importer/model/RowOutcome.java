@@ -48,7 +48,7 @@ public sealed interface RowOutcome<T> permits RowOutcome.Ok, RowOutcome.Err {
 	boolean ok();
 
 	/**
-	 * 成功时的值；失败时为 {@code null}
+	 * 成功时的值；失败时为 null
 	 * @return 值
 	 */
 	T value();

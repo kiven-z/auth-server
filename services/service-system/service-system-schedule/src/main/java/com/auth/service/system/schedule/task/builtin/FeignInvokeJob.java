@@ -21,8 +21,8 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Map;
 
 /**
- * 通用微服务远程调用内置任务：通过负载均衡 {@link RestTemplate} 访问 {@code http://{serviceName}{path}}。 出站
- * {@code X-Internal-JWT} 由 security 模块自动附加，无需在 job_params 中配置。
+ * 通用微服务远程调用内置任务：通过负载均衡 {@link RestTemplate} 访问 http://{serviceName{path}}。 出站
+ * X-Internal-JWT 由 security 模块自动附加，无需在 job_params 中配置。
  *
  * @author Bunny
  */

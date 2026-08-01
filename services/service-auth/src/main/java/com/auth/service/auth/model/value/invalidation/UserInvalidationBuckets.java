@@ -18,7 +18,7 @@ import java.util.Set;
 public class UserInvalidationBuckets {
 
 	/**
-	 * 需要 {@code perm_version + 1} 并刷新画像的用户 ID
+	 * 需要 perm_version + 1 并刷新画像的用户 ID
 	 */
 	Set<Long> versionBumpUserIds;
 

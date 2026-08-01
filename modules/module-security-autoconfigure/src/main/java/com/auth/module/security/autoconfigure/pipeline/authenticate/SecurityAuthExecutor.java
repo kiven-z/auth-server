@@ -15,7 +15,7 @@ import java.util.List;
 public final class SecurityAuthExecutor {
 
 	/**
-	 * 内部认证器（仅 {@code X-Internal-JWT}）
+	 * 内部认证器（仅 X-Internal-JWT）
 	 */
 	private final InternalRequestAuthenticator internalRequestAuthenticator;
 
@@ -50,7 +50,7 @@ public final class SecurityAuthExecutor {
 	}
 
 	/**
-	 * 必须内部认证：一刀切仅允许 {@code X-Internal-JWT}，禁止外部 Bearer
+	 * 必须内部认证：一刀切仅允许 X-Internal-JWT，禁止外部 Bearer
 	 * @param request HTTP 请求
 	 */
 	public void requireInternal(HttpServletRequest request) {

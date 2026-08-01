@@ -9,7 +9,7 @@ import java.io.IOException;
 /**
  * 修剪JSON字符串值的前后Unicode空白字符，使用{@link String#strip()}
  * <p>
- * JSON{@code null}保持为{@code null}（不修剪）注意：换行符（{@code U+00A0}）不被{@link String#strip()}视为空白（与{@link Character#isWhitespace(int)}相同）
+ * JSONnull保持为null（不修剪）注意：换行符（U+00A0）不被{@link String#strip()}视为空白（与{@link Character#isWhitespace(int)}相同）
  * </p>
  *
  * @author Bunny

@@ -16,7 +16,7 @@ import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_
 import static com.auth.service.system.schedule.model.constants.SysJobQuartzDataKeys.METHOD_NAME;
 
 /**
- * Bean 调用模式 {@code invoke_target} 的共享规则：可调用方法判定、签名与示例格式化。
+ * Bean 调用模式 invoke_target 的共享规则：可调用方法判定、签名与示例格式化。
  *
  * @author Bunny
  */
@@ -24,7 +24,7 @@ import static com.auth.service.system.schedule.model.constants.SysJobQuartzDataK
 public class InvokeTargetSupport {
 
 	/**
-	 * 是否可被 {@code invoke_target} 反射调用
+	 * 是否可被 invoke_target 反射调用
 	 * @param method 候选方法
 	 * @return 是否可调用
 	 */
@@ -45,7 +45,7 @@ public class InvokeTargetSupport {
 	}
 
 	/**
-	 * 生成 {@code invoke_target} 示例；按参数类型生成占位符供用户填写
+	 * 生成 invoke_target 示例；按参数类型生成占位符供用户填写
 	 * @param beanName Spring Bean 名
 	 * @param method 已判定为可调用的方法
 	 * @return 示例字符串
@@ -111,7 +111,7 @@ public class InvokeTargetSupport {
 	/**
 	 * 将参数类型格式化为展示用括号段
 	 * @param parameterTypes 参数类型数组
-	 * @return 如 {@code ()} 或 {@code (String, int)}
+	 * @return 如 () 或 (String, int)
 	 */
 	public static @NonNull String formatParameterList(@NonNull Class<?>[] parameterTypes) {
 		if (parameterTypes.length == 0) {

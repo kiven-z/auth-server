@@ -26,7 +26,7 @@ public class LoginAccount {
 	String username;
 
 	/**
-	 * 账户状态（与平台 {@code sys_user.status} 一致）
+	 * 账户状态（与平台 sys_user.status 一致）
 	 */
 	Integer status;
 

@@ -38,7 +38,7 @@ public @interface Desensitized {
 	int suffixLen() default 0;
 
 	/**
-	 * 自定义脱敏时中间替换字符，默认 {@code *}
+	 * 自定义脱敏时中间替换字符，默认 *
 	 */
 	String symbol() default "*";
 

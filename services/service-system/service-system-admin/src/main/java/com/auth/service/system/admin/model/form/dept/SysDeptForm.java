@@ -14,7 +14,7 @@ import java.io.Serializable;
 /**
  * 部门新增/更新表单
  *
- * @author bunny
+ * @author Bunny
  */
 @Schema(name = "SysDeptSaveForm", title = "部门保存表单")
 @Getter

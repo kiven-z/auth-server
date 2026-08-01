@@ -26,7 +26,7 @@ public enum AuthAction {
 	REQUIRE(SecurityAuthExecutor::require),
 
 	/**
-	 * 需要内部认证：仅允许 {@code X-Internal-JWT}
+	 * 需要内部认证：仅允许 X-Internal-JWT
 	 */
 	REQUIRE_INTERNAL(SecurityAuthExecutor::requireInternal),
 

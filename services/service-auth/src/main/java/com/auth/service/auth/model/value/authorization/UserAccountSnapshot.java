@@ -6,7 +6,7 @@ import lombok.Value;
 import lombok.experimental.Accessors;
 
 /**
- * 授权上下文用户只读快照（与持久化实体、登录域 {@code LoginAccount} 解耦）
+ * 授权上下文用户只读快照（与持久化实体、登录域 LoginAccount 解耦）
  *
  * @author Bunny
  */

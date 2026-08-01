@@ -21,7 +21,7 @@ public class SecurityInternalTokenConstants {
 	public static final long INTERNAL_MAX_TTL_SECONDS = 60L;
 
 	/**
-	 * 服务身份令牌中携带的服务名 claim（一般取 {@code spring.application.name}）
+	 * 服务身份令牌中携带的服务名 claim（一般取 spring.application.name）
 	 */
 	public static final String SERVICE_ID = "service_id";
 
@@ -31,7 +31,7 @@ public class SecurityInternalTokenConstants {
 	public static final Long SERVICE_SUB_PLACEHOLDER = 0L;
 
 	/**
-	 * 服务身份令牌写入 SecurityContext 时使用的角色（不带 {@code ROLE_} 前缀，由权限填充器拼接）
+	 * 服务身份令牌写入 SecurityContext 时使用的角色（不带 ROLE_ 前缀，由权限填充器拼接）
 	 */
 	public static final String ROLE_INTERNAL_SERVICE = "INTERNAL_SERVICE";
 
@@ -46,7 +46,7 @@ public class SecurityInternalTokenConstants {
 	public static final String PRINCIPAL_TYPE_SERVICE = "SERVICE";
 
 	/**
-	 * 内部令牌主体类型 claim：{@code USER}（用户身份）/ {@code SERVICE}（服务身份）
+	 * 内部令牌主体类型 claim：USER（用户身份）/ SERVICE（服务身份）
 	 */
 	public static final String PRINCIPAL_TYPE = "principal_type";
 

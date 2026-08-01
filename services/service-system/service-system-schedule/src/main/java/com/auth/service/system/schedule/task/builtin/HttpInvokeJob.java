@@ -20,7 +20,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Map;
 
 /**
- * 通用 HTTP 内置任务：从 {@code job_params} 读取 method、url 与可选 headers/query/body 并发起调用
+ * 通用 HTTP 内置任务：从 job_params 读取 method、url 与可选 headers/query/body 并发起调用
  *
  * @author Bunny
  */

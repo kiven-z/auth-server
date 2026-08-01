@@ -10,7 +10,7 @@ import java.io.Serializable;
 /**
  * 闭包深度链条异常行
  *
- * @author bunny
+ * @author Bunny
  */
 @Getter
 @Setter

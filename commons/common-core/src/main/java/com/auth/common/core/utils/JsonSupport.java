@@ -15,8 +15,8 @@ import java.util.TimeZone;
  * 基于 {@link ObjectMapper} 的 JSON 辅助工具。
  *
  * <p>
- * 类内维护默认 {@code ObjectMapper} 供无参重载使用，其配置与 Spring HTTP 层的 ObjectMapper 并不完全一致；Spring
- * 服务应优先传入注入的 ObjectMapper。
+ * 类内维护默认 ObjectMapper 供无参重载使用，其配置与 Spring HTTP 层的 ObjectMapper 并不完全一致；Spring 服务应优先传入注入的
+ * ObjectMapper。
  *
  * @author Bunny
  */

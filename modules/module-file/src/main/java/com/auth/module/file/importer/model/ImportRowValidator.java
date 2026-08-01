@@ -197,7 +197,7 @@ public final class ImportRowValidator {
 	}
 
 	/**
-	 * 校验通过时构建结果；已失败时返回 {@code null}，不再执行 builder
+	 * 校验通过时构建结果；已失败时返回 null，不再执行 builder
 	 * @param builder 构建器
 	 * @param <F> 构建结果类型
 	 * @return 构建结果

@@ -12,7 +12,7 @@ import lombok.Setter;
 import java.time.Instant;
 
 /**
- * 文件元数据实体，对应 {@code file_record}
+ * 文件元数据实体，对应 file_record
  *
  * @author Bunny
  */

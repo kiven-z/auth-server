@@ -87,12 +87,12 @@ public interface SysDeptMapper extends BaseMapper<SysDeptEntity> {
 	/**
 	 * 子树内是否存在用户-部门关联、grant DEPT 主体或未删除岗位
 	 * @param deptId 子树根部门 ID
-	 * @return {@code true} 表示子树仍被引用，不可删除
+	 * @return true 表示子树仍被引用，不可删除
 	 */
 	boolean existsSubtreeReference(@Param("deptId") Long deptId);
 
 	/**
-	 * {@code descendantId} 是否位于 {@code ancestorId} 的子树中
+	 * descendantId 是否位于 ancestorId 的子树中
 	 * @param ancestorId 祖先部门 ID
 	 * @param descendantId 候选后代部门 ID
 	 * @return 匹配行数，大于 0 表示是后代

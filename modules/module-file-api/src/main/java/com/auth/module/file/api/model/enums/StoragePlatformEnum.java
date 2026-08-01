@@ -22,7 +22,7 @@ public enum StoragePlatformEnum {
 	/**
 	 * 解析请求中的平台参数
 	 * @param platform 平台字符串
-	 * @return 平台枚举；当入参为空时返回 {@code null}
+	 * @return 平台枚举；当入参为空时返回 null
 	 * @throws IllegalArgumentException 平台值无法识别时
 	 */
 	public static StoragePlatformEnum fromNullable(String platform) {

@@ -68,7 +68,7 @@ public interface SysPermissionConverter {
 	SysPermissionDetailVO toDetailVo(SysPermissionEntity entity);
 
 	/**
-	 * 角色已绑定菜单 PO 列表 → 详情项 VO 列表（数据来自 sys_menu_role，供 {@code SysRoleDetailVO.boundMenus}）
+	 * 角色已绑定菜单 PO 列表 → 详情项 VO 列表（数据来自 sys_menu_role，供 SysRoleDetailVO.boundMenus）
 	 * @param poList 持久层投影列表
 	 * @return 详情项 VO 列表
 	 */

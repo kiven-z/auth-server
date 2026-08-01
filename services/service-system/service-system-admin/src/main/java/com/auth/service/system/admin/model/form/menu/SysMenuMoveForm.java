@@ -11,7 +11,7 @@ import java.io.Serializable;
 /**
  * 菜单移动
  *
- * @author bunny
+ * @author Bunny
  */
 @Schema(name = "SysMenuMoveForm", title = "菜单移动表单")
 @Getter

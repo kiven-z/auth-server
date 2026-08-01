@@ -10,7 +10,7 @@ import java.io.Serializable;
 /**
  * 闭包父子直连异常行（Mapper 结果）
  *
- * @author bunny
+ * @author Bunny
  */
 @Getter
 @Setter

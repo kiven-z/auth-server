@@ -11,10 +11,10 @@ import java.util.Optional;
 /**
  * IPv6内部/私有IP检查器 Rules:
  * <ul>
- * <li>Loopback: {@code ::1}</li>
- * <li>Link-local: {@code fe80::/10}</li>
- * <li>ULA: {@code fc00::/7}</li>
- * <li>IPv4-mapped IPv6: {@code ::ffff:x.x.x.x} is delegated to IPv4 checker</li>
+ * <li>Loopback: ::1</li>
+ * <li>Link-local: fe80::/10</li>
+ * <li>ULA: fc00::/7</li>
+ * <li>IPv4-mapped IPv6: ::ffff:x.x.x.x is delegated to IPv4 checker</li>
  * </ul>
  *
  * @author Bunny

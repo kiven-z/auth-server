@@ -46,7 +46,7 @@ public enum AuthorizationChangeKind {
 	USER("user");
 
 	/**
-	 * 失效事件 ID 短前缀（格式 {@code prefix:snowflakeId}）
+	 * 失效事件 ID 短前缀（格式 prefix:snowflakeId）
 	 */
 	private final String eventIdPrefix;
 

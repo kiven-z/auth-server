@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * 按 {@code job} 补偿 Quartz 运行态（DB 为单一事实来源）
+ * 按 job 补偿 Quartz 运行态（DB 为单一事实来源）
  *
  * @author Bunny
  */

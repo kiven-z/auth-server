@@ -10,7 +10,7 @@ import java.io.Serializable;
 /**
  * 部门详情
  *
- * @author bunny
+ * @author Bunny
  */
 @Schema(name = "SysDeptBoundUserPO", title = "部门已关联用户 PO")
 @Getter

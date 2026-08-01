@@ -70,7 +70,7 @@ public class RefreshTokenProvider extends AbstractSecurityTokenProvider {
 	}
 
 	/**
-	 * 子类在解析完成后补充 {@link SecurityTokenResult} 字段（例如外部 Access Token 的 {@code perm_version}）
+	 * 子类在解析完成后补充 {@link SecurityTokenResult} 字段（例如外部 Access Token 的 perm_version）
 	 */
 	@Override
 	protected void enrichTokenResult(SecurityTokenResultBuilder builder, String token, JwtUserToken jwtUserToken,

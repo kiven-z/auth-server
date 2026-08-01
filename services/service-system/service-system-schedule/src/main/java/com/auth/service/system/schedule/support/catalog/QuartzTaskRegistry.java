@@ -69,7 +69,7 @@ public class QuartzTaskRegistry {
 	/**
 	 * 解析白名单类对应的 Spring Bean 名
 	 * @param className 类全限定名
-	 * @return Bean 名；不在白名单时返回 {@code null}
+	 * @return Bean 名；不在白名单时返回 null
 	 */
 	public String resolveBeanName(String className) {
 		return classNameToBeanName.get(className);

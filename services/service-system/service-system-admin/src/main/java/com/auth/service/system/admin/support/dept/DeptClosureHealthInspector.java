@@ -20,7 +20,7 @@ import java.util.Objects;
 /**
  * 部门闭包表一致性诊断（只读）。
  *
- * @author bunny
+ * @author Bunny
  */
 @RequiredArgsConstructor
 @Component

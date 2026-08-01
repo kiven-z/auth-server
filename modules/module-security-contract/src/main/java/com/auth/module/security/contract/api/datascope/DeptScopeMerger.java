@@ -19,7 +19,7 @@ public class DeptScopeMerger {
 	/**
 	 * 宽松合并：ALL 优先；存在部门 ID 时取并集，若含任一条 DEPT_AND_CHILD 则结果为 DEPT_AND_CHILD，否则为 DEPT；否则 SELF。
 	 * @param grants 授权片段集合
-	 * @return 合并结果；无可合并项时返回 {@code null}
+	 * @return 合并结果；无可合并项时返回 null
 	 */
 	public static ScopeGrant mergeLoose(Collection<ScopeGrant> grants) {
 		if (CollUtil.isEmpty(grants)) {

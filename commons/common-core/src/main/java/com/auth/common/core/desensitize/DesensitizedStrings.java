@@ -18,7 +18,7 @@ public class DesensitizedStrings {
 	 * @param value 原始值
 	 * @param prefixLen 前缀保留长度
 	 * @param suffixLen 后缀保留长度
-	 * @param symbol 中间替换字符（通常一位，如 {@code *}）
+	 * @param symbol 中间替换字符（通常一位，如 *）
 	 * @return 脱敏后的字符串；空白输入返回空串；长度不足时返回原文
 	 */
 	public static String custom(String value, int prefixLen, int suffixLen, String symbol) {
@@ -37,9 +37,9 @@ public class DesensitizedStrings {
 	}
 
 	/**
-	 * 金额类展示字符串：以最后一个 {@code .} 为小数点，左侧原样保留，右侧将十进制数字替换为 {@code *}
+	 * 金额类展示字符串：以最后一个 . 为小数点，左侧原样保留，右侧将十进制数字替换为 *
 	 * <p>
-	 * 适用于 {@code 1,234.56} → {@code 1,234.**}；无小数点时返回原文
+	 * 适用于 1,234.56 → 1,234.**；无小数点时返回原文
 	 * </p>
 	 * @param value 已格式化的金额字符串（如含千分位逗号）
 	 * @return 脱敏后的字符串

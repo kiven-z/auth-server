@@ -27,12 +27,12 @@ public class JwtUserToken {
 	private String sub;
 
 	/**
-	 * Jwt Id JWT {@code jti}（JWT ID）用于将 access token 与服务端会话（sessionId）绑定
+	 * Jwt Id JWT jti（JWT ID）用于将 access token 与服务端会话（sessionId）绑定
 	 */
 	private String jti;
 
 	/**
-	 * 预期接收者 对应 JWT {@code aud}（单值场景下写入一个 audience 字符串）
+	 * 预期接收者 对应 JWT aud（单值场景下写入一个 audience 字符串）
 	 */
 	private String audience;
 

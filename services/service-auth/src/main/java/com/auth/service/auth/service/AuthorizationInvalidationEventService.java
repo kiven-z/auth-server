@@ -39,7 +39,7 @@ public interface AuthorizationInvalidationEventService {
 	AuthorizationInvalidationEventStatsVO getStats();
 
 	/**
-	 * 查询已处理结果或抢占 {@code eventId} 处理权（INSERT 占位行，依赖 {@code uk_event_id}）
+	 * 查询已处理结果或抢占 eventId 处理权（INSERT 占位行，依赖 uk_event_id）
 	 * @param eventId 业务事件 ID
 	 * @param kind 变更维度
 	 * @return 幂等门禁结果

@@ -5,7 +5,7 @@ import com.auth.module.security.contract.api.authorization.AuthProfile;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 反射式提供者，当 Spring SecurityContext 存在时，从其中读取 {@code AuthProfile}
+ * 反射式提供者，当 Spring SecurityContext 存在时，从其中读取 AuthProfile
  *
  * @author Bunny
  */

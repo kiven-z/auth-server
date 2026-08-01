@@ -12,7 +12,7 @@ import java.io.Serializable;
 /**
  * 闭包深度链条异常行
  *
- * @author bunny
+ * @author Bunny
  */
 @Schema(name = "DeptClosureDepthChainAnomalyVO", title = "闭包深度链条异常")
 @Getter

@@ -11,7 +11,7 @@ import lombok.experimental.UtilityClass;
 public class SysJobQuartzDataKeys {
 
 	/**
-	 * 业务表 {@code job.id}，用于日志与熔断关联
+	 * 业务表 job.id，用于日志与熔断关联
 	 */
 	public static final String SYS_JOB_ID = "sysJobId";
 
@@ -61,7 +61,7 @@ public class SysJobQuartzDataKeys {
 	public static final String TRIGGER_TYPE_MANUAL = "MANUAL";
 
 	/**
-	 * Trigger 名称规则：{@code jobName + "_TRIGGER"}
+	 * Trigger 名称规则：jobName + "_TRIGGER"
 	 */
 	public static final String TRIGGER_SUFFIX = "_TRIGGER";
 

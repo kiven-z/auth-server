@@ -28,7 +28,7 @@ public class ImportTextParsers {
 	}
 
 	/**
-	 * 可选文本：blank 时返回 {@code null}，否则 trim
+	 * 可选文本：blank 时返回 null，否则 trim
 	 * @param raw 原始值
 	 * @return trim 后的值或 null
 	 */

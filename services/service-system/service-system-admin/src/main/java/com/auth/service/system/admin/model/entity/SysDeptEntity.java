@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * 系统部门主表，对应 {@code sys_dept}（物理删除；禁用见 {@link #status}）。
+ * 系统部门主表，对应 sys_dept（物理删除；禁用见 {@link #status}）。
  *
  * @author Bunny
  */

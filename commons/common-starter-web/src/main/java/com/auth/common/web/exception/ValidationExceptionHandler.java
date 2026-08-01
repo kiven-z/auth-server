@@ -37,7 +37,7 @@ public class ValidationExceptionHandler extends BaseExceptionResponseBuilder {
 	private static final String INVALID_VALUE_FORMAT = "invalid value format";
 
 	/**
-	 * 处理模型绑定与 {@code @Valid} 校验异常（含 GET 查询对象、请求体）
+	 * 处理模型绑定与 @Valid 校验异常（含 GET 查询对象、请求体）
 	 * @param exception 异常
 	 * @return 响应实体
 	 */
@@ -69,7 +69,7 @@ public class ValidationExceptionHandler extends BaseExceptionResponseBuilder {
 	}
 
 	/**
-	 * 处理单个请求参数类型不匹配（如 {@code @RequestParam Long id}）
+	 * 处理单个请求参数类型不匹配（如 @RequestParam Long id）
 	 * @param exception 异常
 	 * @return 响应实体
 	 */
@@ -80,7 +80,7 @@ public class ValidationExceptionHandler extends BaseExceptionResponseBuilder {
 	}
 
 	/**
-	 * 处理请求参数绑定异常（如必填 {@code @RequestParam} 缺失）
+	 * 处理请求参数绑定异常（如必填 @RequestParam 缺失）
 	 * @param exception 异常
 	 * @return 响应实体
 	 */

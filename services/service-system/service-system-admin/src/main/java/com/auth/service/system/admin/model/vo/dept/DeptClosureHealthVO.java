@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * 部门闭包表健康检查结果。
  *
- * @author bunny
+ * @author Bunny
  */
 @Schema(name = "DeptClosureHealthVO", title = "部门闭包表健康检查")
 @Getter

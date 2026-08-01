@@ -3,7 +3,7 @@ package com.auth.gateway.exception;
 import lombok.Getter;
 
 /**
- * 网关基础设施错误码，模块前缀为 {@code 00}
+ * 网关基础设施错误码，模块前缀为 00
  *
  * <p>
  * 鉴权/会话/权限语义由下游 auth-service 返回，网关仅保留自身故障与轻量鉴权拒绝类错误码
@@ -52,9 +52,9 @@ public enum GatewayResultCodeEnum {
 	}
 
 	/**
-	 * 完整的5位业务代码：{@code 00}模块前缀 + {@code bizCode}，其中{@code bizCode}是{@code CAT*100+SEQ}
+	 * 完整的5位业务代码：00模块前缀 + bizCode，其中bizCode是CAT*100+SEQ
 	 * <p>
-	 * 示例：{@code bizCode=201} -> {@code 00201}
+	 * 示例：bizCode=201 -> 00201
 	 * </p>
 	 * @return 完整的5位业务代码
 	 */

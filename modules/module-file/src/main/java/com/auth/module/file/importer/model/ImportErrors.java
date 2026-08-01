@@ -16,7 +16,7 @@ public class ImportErrors {
 	 * 按错误类型与参数构建行级错误。
 	 * @param rowNum 行号（1-based，不含表头；行数超限为 0）
 	 * @param code 错误类型
-	 * @param args 类型相关参数，见各 {@code *} 工厂方法
+	 * @param args 类型相关参数，见各 * 工厂方法
 	 * @return 行级错误
 	 */
 	public static ImportRowError of(int rowNum, ImportErrorCode code, Object... args) {

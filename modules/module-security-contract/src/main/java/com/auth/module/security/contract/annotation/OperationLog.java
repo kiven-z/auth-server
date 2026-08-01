@@ -22,12 +22,12 @@ public @interface OperationLog {
 	AuditServiceDomain serviceDomain();
 
 	/**
-	 * 小模块编码：由各微服务在本服务内定义常量（如 {@code public static final String}），平台不维护业务清单
+	 * 小模块编码：由各微服务在本服务内定义常量（如 public static final String），平台不维护业务清单
 	 * <p>
-	 * 建议使用 {@code UPPER_SNAKE}，与
+	 * 建议使用 UPPER_SNAKE，与
 	 * {@link com.auth.module.security.contract.api.audit.AuditOperationModuleKeys} 落库后缀一致
 	 * </p>
-	 * @return 业务模块码，如 {@code "SYS_DEPT"}
+	 * @return 业务模块码，如 "SYS_DEPT"
 	 */
 	String bizModule();
 
@@ -50,7 +50,7 @@ public @interface OperationLog {
 	boolean recordParams() default true;
 
 	/**
-	 * 当返回值为统一 {@code Result} 包装类型时是否写入其 {@code message} 至 {@code response_message}
+	 * 当返回值为统一 Result 包装类型时是否写入其 message 至 response_message
 	 * @return 默认写入
 	 */
 	boolean recordResultMessage() default true;

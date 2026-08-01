@@ -38,9 +38,9 @@ public class DataScopePermissionHandler implements DataPermissionHandler {
 
 	/**
 	 * 合并原 WHERE 与数据范围条件
-	 * @param where 原 WHERE 表达式，可为 {@code null}
+	 * @param where 原 WHERE 表达式，可为 null
 	 * @param mappedStatementId Mapper 方法全限定名
-	 * @return 合并后的 WHERE；无需过滤时返回原 {@code where}
+	 * @return 合并后的 WHERE；无需过滤时返回原 where
 	 */
 	@Override
 	public Expression getSqlSegment(Expression where, String mappedStatementId) {

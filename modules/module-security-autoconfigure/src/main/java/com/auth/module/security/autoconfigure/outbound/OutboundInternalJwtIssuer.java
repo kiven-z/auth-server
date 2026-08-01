@@ -19,7 +19,7 @@ public final class OutboundInternalJwtIssuer {
 
 	/**
 	 * @param internalTokenProvider 内部令牌签发器
-	 * @param serviceId 当前服务名（一般为 {@code spring.application.name}）
+	 * @param serviceId 当前服务名（一般为 spring.application.name）
 	 */
 	public OutboundInternalJwtIssuer(InternalTokenProvider internalTokenProvider, String serviceId) {
 		this.internalTokenProvider = internalTokenProvider;

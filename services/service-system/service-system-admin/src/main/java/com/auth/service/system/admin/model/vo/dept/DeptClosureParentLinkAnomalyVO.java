@@ -12,7 +12,7 @@ import java.io.Serializable;
 /**
  * 父子直连缺失异常行
  *
- * @author bunny
+ * @author Bunny
  */
 @Schema(name = "DeptClosureParentLinkAnomalyVO", title = "闭包父子直连异常")
 @Getter

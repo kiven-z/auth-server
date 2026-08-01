@@ -32,17 +32,17 @@ public class SecurityTokenResult {
 	private final JwtUserToken userToken;
 
 	/**
-	 * 访问令牌中的权限版本快照（JWT {@code perm_version}）；非外部 Access 或未携带时为 {@code null}
+	 * 访问令牌中的权限版本快照（JWT perm_version）；非外部 Access 或未携带时为 null
 	 */
 	private final Long permVersion;
 
 	/**
-	 * 内部令牌主体类型（{@code USER} / {@code SERVICE}）；非内部令牌为 {@code null}
+	 * 内部令牌主体类型（USER / SERVICE）；非内部令牌为 null
 	 */
 	private final String principalType;
 
 	/**
-	 * 服务身份令牌携带的服务名（一般为 {@code spring.application.name}）；非服务令牌为 {@code null}
+	 * 服务身份令牌携带的服务名（一般为 spring.application.name）；非服务令牌为 null
 	 */
 	private final String serviceId;
 

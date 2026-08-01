@@ -10,7 +10,7 @@ import java.io.Serializable;
  * 授权失效统一请求（HTTP / Feign / Outbox 共用）。
  *
  * @param eventId 业务事件 ID（幂等键）
- * @param kind 变更维度，与 {@code payload} 类型必须一致
+ * @param kind 变更维度，与 payload 类型必须一致
  * @param payload 类型化业务键
  * @author Bunny
  */

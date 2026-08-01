@@ -53,6 +53,11 @@ public class AuthorizationAuditBizModule {
 	public static final String SYS_ROLE_PERMISSION = "SYS_ROLE_PERMISSION";
 
 	/**
+	 * 角色数据范围
+	 */
+	public static final String SYS_ROLE_SCOPE = "SYS_ROLE_SCOPE";
+
+	/**
 	 * 部门闭包
 	 */
 	public static final String DEPT_CLOSURE = "DEPT_CLOSURE";
