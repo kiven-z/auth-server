@@ -24,14 +24,14 @@ public class MessageTemplateRequireFieldRow implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Schema(name = "key", title = "字段名")
-	@NotBlank(message = "变量 key 不能为空")
+	@NotBlank(message = "变量名不能为空")
 	private String key;
 
 	@Schema(name = "description", title = "字段含义")
 	private String description;
 
 	@Schema(name = "exampleValue", title = "示例数据（可为字符串/数字/数组/对象）")
-	@NotNull(message = "示例值 exampleValue 不能为空")
+	@NotNull(message = "示例数据不能为空")
 	private transient JsonNode exampleValue;
 
 }

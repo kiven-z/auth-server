@@ -1,11 +1,11 @@
 package com.auth.service.system.message.controller.admin;
 
+import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.common.core.model.response.Result;
 import com.auth.common.web.valid.group.CreateGroup;
 import com.auth.common.web.valid.group.UpdateGroup;
 import com.auth.module.security.autoconfigure.annotation.AuthenticatedApi;
 import com.auth.service.system.message.model.form.inapp.InAppMessageCategoryForm;
-import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.service.system.message.model.query.InAppMessageCategoryQuery;
 import com.auth.service.system.message.model.vo.inapp.InAppMessageCategoryDetailVO;
 import com.auth.service.system.message.model.vo.inapp.InAppMessageCategoryPageVO;
@@ -28,7 +28,7 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
  *
  * @author Bunny
  */
-@Tag(name = "站内信业务分类")
+@Tag(name = "站内信业务分类", description = "分类 CRUD 与启停")
 @Validated
 @RequestMapping("/api/system/message/in-app/categories")
 @RestController
@@ -40,7 +40,7 @@ public class InAppMessageCategoryController {
 		this.inAppMessageCategoryService = inAppMessageCategoryService;
 	}
 
-	@Operation(summary = "扁平全量列表")
+	@Operation(summary = "查询业务分类扁平列表")
 	@PreAuthorize("@auth.decide('message:category:query')")
 	@GetMapping("/list")
 	public Result<List<InAppMessageCategoryPageVO>> listCategories(@Valid InAppMessageCategoryQuery query) {
@@ -48,7 +48,7 @@ public class InAppMessageCategoryController {
 		return Result.success(data);
 	}
 
-	@Operation(summary = "业务分类详情")
+	@Operation(summary = "查询业务分类详情")
 	@PreAuthorize("@auth.decide('message:category:detail')")
 	@GetMapping("{id}")
 	public Result<InAppMessageCategoryDetailVO> getCategoryById(@PathVariable("id") Long id) {
@@ -72,7 +72,7 @@ public class InAppMessageCategoryController {
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
-	@Operation(summary = "批量启用/禁用业务分类")
+	@Operation(summary = "批量启停业务分类")
 	@PreAuthorize("@auth.decide('message:category:update')")
 	@PutMapping("status")
 	public Result<String> batchUpdateStatus(@Validated @RequestBody IdsEnableStatusForm form) {
@@ -89,7 +89,7 @@ public class InAppMessageCategoryController {
 	}
 
 	@AuthenticatedApi
-	@Operation(summary = "大类列表")
+	@Operation(summary = "查询业务大类列表")
 	@GetMapping("/majors")
 	public Result<List<InAppMessageCategoryVO>> listMajors(@RequestParam(required = false) Boolean status) {
 		List<InAppMessageCategoryVO> data = inAppMessageCategoryService.listMajors(status);
@@ -97,7 +97,7 @@ public class InAppMessageCategoryController {
 	}
 
 	@AuthenticatedApi
-	@Operation(summary = "指定大类下小类列表")
+	@Operation(summary = "查询业务小类列表")
 	@GetMapping("/children")
 	public Result<List<InAppMessageCategoryVO>> listChildren(@RequestParam Long parentId,
 			@RequestParam(required = false) Boolean status) {

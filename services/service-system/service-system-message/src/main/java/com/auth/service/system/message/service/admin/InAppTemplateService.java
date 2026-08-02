@@ -12,7 +12,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 public interface InAppTemplateService extends IService<MessageTemplateEntity> {
 
 	/**
-	 * 添加站内信模板
+	 * 新增站内信模板
 	 * @param form 站内信模板表单
 	 */
 	void create(InAppTemplateForm form);

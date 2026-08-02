@@ -15,11 +15,11 @@ import java.time.Instant;
 import java.util.Optional;
 
 /**
- * 令牌服务：负责访问令牌与刷新令牌的签发、过期时间计算及后续解析。
+ * 令牌服务：访问令牌与刷新令牌的签发、过期计算与解析
  *
  * <p>
  * 本类不依赖 {@link jakarta.servlet.http.HttpServletRequest} 等 HTTP 上下文，适合在登录、 Token
- * 刷新、退出登录等不同场景下复用。
+ * 刷新、退出登录等不同场景下复用
  * </p>
  *
  * @author Bunny
@@ -42,7 +42,7 @@ public class TokenService {
 	}
 
 	/**
-	 * 签发访问令牌与刷新令牌。
+	 * 签发访问令牌与刷新令牌
 	 * @param userId 用户 ID
 	 * @param jti 会话唯一标识
 	 * @param permVersion 权限版本快照
@@ -59,7 +59,7 @@ public class TokenService {
 	}
 
 	/**
-	 * 容错解析访问令牌（永不抛出异常）。
+	 * 容错解析访问令牌（永不抛出异常）
 	 * @param token 访问令牌原始字符串
 	 * @return 用户载荷
 	 */
@@ -81,7 +81,7 @@ public class TokenService {
 	}
 
 	/**
-	 * 解析刷新令牌。
+	 * 解析刷新令牌
 	 * @param token 刷新令牌原始字符串
 	 * @return 用户载荷
 	 */

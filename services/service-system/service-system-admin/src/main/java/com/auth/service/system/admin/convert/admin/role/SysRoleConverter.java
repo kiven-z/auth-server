@@ -55,9 +55,6 @@ public interface SysRoleConverter {
 	 */
 	@Mapping(target = "boundPermissions", ignore = true)
 	@Mapping(target = "boundMenus", ignore = true)
-	@Mapping(target = "boundUsers", ignore = true)
-	@Mapping(target = "boundDepts", ignore = true)
-	@Mapping(target = "boundPosts", ignore = true)
 	@Mapping(target = "createdByName", ignore = true)
 	@Mapping(target = "updatedByName", ignore = true)
 	SysRoleDetailVO toDetailVo(SysRoleEntity entity);

@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * 系统角色主表，对应 sys_role（物理删除）。
+ * 系统角色主表（物理删除）
  *
  * @author Bunny
  */
@@ -23,7 +23,7 @@ public class SysRoleEntity extends BaseEntity {
 	@Schema(title = "角色名称")
 	private String roleName;
 
-	@Schema(title = "启用状态(true=正常启用，false=停用)")
+	@Schema(title = "启用状态（true=启用，false=停用）")
 	private Boolean status;
 
 	@Schema(title = "显示顺序")

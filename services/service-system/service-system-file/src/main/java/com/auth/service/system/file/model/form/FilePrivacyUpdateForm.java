@@ -24,11 +24,11 @@ public class FilePrivacyUpdateForm implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Schema(title = "文件记录主键集合", requiredMode = Schema.RequiredMode.REQUIRED)
-	@NotEmpty(message = "ids 不能为空")
+	@NotEmpty(message = "文件记录主键集合不能为空")
 	private List<Long> ids;
 
 	@Schema(title = "目标是否私有", requiredMode = Schema.RequiredMode.REQUIRED)
-	@NotNull(message = "isPrivate 不能为空")
+	@NotNull(message = "目标是否私有不能为空")
 	private Boolean isPrivate;
 
 }

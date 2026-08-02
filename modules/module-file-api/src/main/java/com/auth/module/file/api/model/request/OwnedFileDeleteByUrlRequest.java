@@ -27,19 +27,19 @@ public class OwnedFileDeleteByUrlRequest implements Serializable {
 	/**
 	 * 文件访问 URL
 	 */
-	@NotBlank(message = "url 不能为空")
+	@NotBlank(message = "文件访问 URL 不能为空")
 	private String url;
 
 	/**
 	 * 归属用户 ID
 	 */
-	@NotNull(message = "ownerUserId 不能为空")
+	@NotNull(message = "归属用户 ID 不能为空")
 	private Long ownerUserId;
 
 	/**
 	 * 删除来源
 	 */
-	@NotBlank(message = "deleteSource 不能为空")
+	@NotBlank(message = "删除来源不能为空")
 	private String deleteSource;
 
 	/**

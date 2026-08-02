@@ -14,7 +14,7 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * 定时任务表单一致性校验测试。
+ * 定时任务表单一致性校验测试
  *
  * @author Bunny
  */

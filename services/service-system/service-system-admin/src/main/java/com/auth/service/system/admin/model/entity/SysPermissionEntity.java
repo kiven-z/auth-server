@@ -26,7 +26,7 @@ public class SysPermissionEntity extends BaseEntity {
 	@Schema(title = "显示顺序")
 	private Integer orderNum;
 
-	@Schema(title = "启用状态(true=启用)")
+	@Schema(title = "启用状态（true=启用）")
 	private Boolean status;
 
 }

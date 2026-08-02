@@ -7,12 +7,12 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * 统一授权表行，对应 grant_table。
+ * 统一授权表行
  *
  * @author Bunny
  */
 @TableName("grant_table")
-@Schema(name = "GrantTableEntity", title = "grant_table 授权边")
+@Schema(name = "GrantTableEntity", title = "统一授权边")
 @Getter
 @Setter
 public class GrantTableEntity extends BaseEntity {

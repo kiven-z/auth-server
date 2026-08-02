@@ -10,21 +10,21 @@ import com.auth.service.system.schedule.model.vo.SysJobGroupPageVO;
 import java.util.List;
 
 /**
- * 任务分组维护
+ * 任务分组服务
  *
  * @author Bunny
  */
 public interface SysJobGroupService {
 
 	/**
-	 * 分页查询
+	 * 分页查询任务分组
 	 * @param query 查询参数
 	 * @return 分页数据
 	 */
 	PageResponse<SysJobGroupPageVO> getPage(SysJobGroupQuery query);
 
 	/**
-	 * 启用状态分组下拉/远程搜索（仅分组已启用 status == true）
+	 * 查询启用状态任务分组选项
 	 * @param keyword 关键字（可空）
 	 * @param limit 最大条数
 	 * @return 列表
@@ -32,26 +32,26 @@ public interface SysJobGroupService {
 	List<SysJobGroupPageVO> listEnabledOptions(String keyword, int limit);
 
 	/**
-	 * 分组详情
+	 * 获取任务分组详情
 	 * @param id 主键
 	 * @return 详情
 	 */
 	SysJobGroupDetailVO getDetail(Long id);
 
 	/**
-	 * 新增分组
+	 * 新增任务分组
 	 * @param form 表单
 	 */
 	void create(SysJobGroupForm form);
 
 	/**
-	 * 修改分组（不含 group_code）
+	 * 更新任务分组（不含分组编码）
 	 * @param form 表单
 	 */
 	void update(SysJobGroupUpdateForm form);
 
 	/**
-	 * 删除分组（非内置、且无关联任务）
+	 * 删除任务分组（非内置且无关联任务）
 	 * @param id 主键
 	 */
 	void deleteById(Long id);

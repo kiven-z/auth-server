@@ -43,7 +43,7 @@ public class SysPostForm implements Serializable {
 	@NotBlank(message = "岗位名称不能为空", groups = { CreateGroup.class, UpdateGroup.class })
 	private String postName;
 
-	@Schema(title = "启用状态(true=启用，false=停用)", requiredMode = Schema.RequiredMode.REQUIRED)
+	@Schema(title = "启用状态（true=启用，false=停用）", requiredMode = Schema.RequiredMode.REQUIRED)
 	@NotNull(message = "状态不能为空", groups = { CreateGroup.class, UpdateGroup.class })
 	private Boolean status;
 

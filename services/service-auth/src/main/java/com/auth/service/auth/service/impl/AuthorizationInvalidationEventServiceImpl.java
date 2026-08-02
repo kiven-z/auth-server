@@ -29,7 +29,7 @@ import java.time.Instant;
 import java.util.Objects;
 
 /**
- * 授权失效幂等事件：运维门禁与查询
+ * 授权失效幂等事件实现：运维门禁与查询
  *
  * @author Bunny
  */

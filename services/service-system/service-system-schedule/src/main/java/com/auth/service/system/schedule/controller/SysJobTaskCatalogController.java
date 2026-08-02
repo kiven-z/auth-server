@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * 任务目录接口（前端任务配置辅助）
+ * 定时任务-目录
  *
  * @author Bunny
  */
@@ -30,7 +30,7 @@ public class SysJobTaskCatalogController {
 		this.sysJobTaskCatalogService = sysJobTaskCatalogService;
 	}
 
-	@Operation(summary = "白名单类列表")
+	@Operation(summary = "查询任务白名单类列表")
 	@PreAuthorize("@auth.decide('schedule:job:query')")
 	@GetMapping("classes")
 	public Result<List<QuartzTaskClassVO>> classes() {
@@ -38,7 +38,7 @@ public class SysJobTaskCatalogController {
 		return Result.success(data);
 	}
 
-	@Operation(summary = "白名单类可调用方法列表")
+	@Operation(summary = "查询任务白名单方法列表")
 	@PreAuthorize("@auth.decide('schedule:job:query')")
 	@GetMapping("methods")
 	public Result<List<QuartzTaskMethodVO>> methods(@RequestParam("className") String className) {

@@ -9,21 +9,21 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import org.quartz.JobExecutionException;
 
 /**
- * 定时任务执行日志
+ * 定时任务执行日志服务
  *
  * @author Bunny
  */
 public interface LogJobService extends IService<LogJobEntity> {
 
 	/**
-	 * 分页查询
+	 * 分页查询任务执行日志
 	 * @param query 条件
 	 * @return 分页数据
 	 */
 	PageResponse<LogJobPageVO> getPage(LogJobQuery query);
 
 	/**
-	 * 详情（含异常堆栈）
+	 * 获取任务执行日志详情（含异常堆栈）
 	 * @param id 主键
 	 * @return 详情
 	 */

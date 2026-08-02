@@ -14,7 +14,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import java.util.List;
 
 /**
- * 消息模板公共服务
+ * 消息模板服务
  *
  * @author Bunny
  */
@@ -51,19 +51,19 @@ public interface MessageTemplateService extends IService<MessageTemplateEntity> 
 	void batchDelete(List<Long> ids, String channel);
 
 	/**
-	 * 按表单批量启用/禁用模板
+	 * 批量启停模板
 	 * @param form 含 ids、status、channel
 	 */
 	void batchUpdateStatus(MessageTemplateStatusForm form);
 
 	/**
-	 * 仅更新 require_fields（须与 form.channel 匹配）
+	 * 更新模板变量声明（须与渠道匹配）
 	 * @param form 含 id、channel、requireFields
 	 */
 	void updateRequireFields(MessageTemplateRequireFieldsForm form);
 
 	/**
-	 * 测试发送：按模板 require_fields 示例值渲染并投递到指定目标
+	 * 测试发送模板（按变量示例值渲染并投递）
 	 * @param form 模板 ID、渠道与接收目标
 	 */
 	void testSend(MessageTemplateTestSendForm form);

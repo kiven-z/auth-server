@@ -17,11 +17,11 @@ import java.util.List;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
 /**
- * 操作日志接口
+ * 操作日志
  *
  * @author Bunny
  */
-@Tag(name = "操作日志", description = "log_operation")
+@Tag(name = "操作日志", description = "操作审计查询与清理")
 @RequiredArgsConstructor
 @RequestMapping("/api/system/log/operation")
 @RestController
@@ -37,7 +37,7 @@ public class LogOperationController {
 		return Result.success(response);
 	}
 
-	@Operation(summary = "操作日志详情")
+	@Operation(summary = "查询操作日志详情")
 	@PreAuthorize("@auth.decide('log:operation:detail')")
 	@GetMapping("{id}")
 	public Result<LogOperationDetailVO> detail(@PathVariable("id") Long id) {

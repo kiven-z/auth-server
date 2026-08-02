@@ -7,7 +7,7 @@ import lombok.Value;
 import lombok.experimental.Accessors;
 
 /**
- * 刷新令牌业务结果：新令牌对 + 会话级「记住我」标记 + 当前授权画像。
+ * 刷新令牌业务结果：新令牌对 + 会话级「记住我」标记 + 当前授权画像
  *
  * @author Bunny
  */

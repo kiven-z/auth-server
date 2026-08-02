@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * 个人中心安全活动实现（会话与登录日志）
+ * 个人中心安全活动服务实现
  *
  * @author Bunny
  */

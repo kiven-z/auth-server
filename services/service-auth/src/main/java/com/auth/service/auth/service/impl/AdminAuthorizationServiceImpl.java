@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * 管理端授权画像运维：按用户重建并写入 Redis
+ * 管理端授权画像运维实现：按用户重建并写入 Redis
  *
  * @author Bunny
  */

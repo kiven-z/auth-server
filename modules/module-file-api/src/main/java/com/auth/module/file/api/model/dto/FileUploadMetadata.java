@@ -23,26 +23,26 @@ public class FileUploadMetadata implements Serializable {
 	/**
 	 * 存储平台
 	 */
-	@Size(max = 32, message = "storagePlatform 长度不能超过32个字符")
+	@Size(max = 32, message = "存储平台长度不能超过32个字符")
 	private String storagePlatform;
 
 	/**
 	 * 业务类型，如 avatar、attachment
 	 */
-	@Size(max = 64, message = "bizType 长度不能超过64个字符")
-	@NotBlank(message = "bizType 不能为空")
+	@Size(max = 64, message = "业务类型长度不能超过64个字符")
+	@NotBlank(message = "业务类型不能为空")
 	private String bizType;
 
 	/**
-	 * 业务主键ID
+	 * 业务主键 ID
 	 */
-	@Size(max = 64, message = "bizId 长度不能超过64个字符")
+	@Size(max = 64, message = "业务主键 ID 长度不能超过64个字符")
 	private String bizId;
 
 	/**
 	 * 备注
 	 */
-	@Size(max = 500, message = "remark 长度不能超过500个字符")
+	@Size(max = 500, message = "备注长度不能超过500个字符")
 	private String remark;
 
 	/**

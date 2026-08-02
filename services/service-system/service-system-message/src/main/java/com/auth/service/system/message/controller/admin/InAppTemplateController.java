@@ -22,7 +22,7 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
  *
  * @author Bunny
  */
-@Tag(name = "站内信模板相关", description = "站内信模板相关接口")
+@Tag(name = "站内信模板", description = "CRUD、内容编辑、预览渲染")
 @RequestMapping("/api/system/message/in-app-template")
 @RestController
 public class InAppTemplateController {
@@ -33,7 +33,7 @@ public class InAppTemplateController {
 		this.inAppTemplateService = inAppTemplateService;
 	}
 
-	@Operation(summary = "添加站内信模板")
+	@Operation(summary = "新增站内信模板")
 	@PreAuthorize("@auth.decide('message:template:create')")
 	@PostMapping()
 	public Result<String> create(@Validated(CreateGroup.class) @RequestBody InAppTemplateForm form) {

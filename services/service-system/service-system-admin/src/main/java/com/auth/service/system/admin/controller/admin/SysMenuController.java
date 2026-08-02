@@ -1,5 +1,6 @@
 package com.auth.service.system.admin.controller.admin;
 
+import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.common.web.valid.group.UpdateGroup;
@@ -9,7 +10,6 @@ import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.admin.model.form.menu.SysMenuAssignRoleForm;
-import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.service.system.admin.model.form.menu.SysMenuMoveForm;
 import com.auth.service.system.admin.model.form.menu.SysMenuSaveForm;
 import com.auth.service.system.admin.model.query.menu.SysMenuQuery;
@@ -31,7 +31,7 @@ import java.util.List;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
 /**
- * 系统菜单接口
+ * 系统菜单
  *
  * @author Bunny
  */
@@ -47,7 +47,7 @@ public class SysMenuController {
 	}
 
 	@AuthenticatedApi
-	@Operation(summary = "动态路由列表")
+	@Operation(summary = "查询动态路由列表")
 	@GetMapping("/web-routes")
 	public Result<List<RouteNodeVO>> getWebRoutes() {
 		Long userId = SecurityUserUtils.getUserId();
@@ -55,7 +55,7 @@ public class SysMenuController {
 		return Result.success(menuList);
 	}
 
-	@Operation(summary = "菜单扁平列表（全量，前端建树）")
+	@Operation(summary = "查询菜单扁平列表", description = "全量返回，由前端建树")
 	@PreAuthorize("@auth.decide('sys:menu:query')")
 	@GetMapping("/list")
 	public Result<List<SysMenuListVO>> list(SysMenuQuery query) {
@@ -63,7 +63,7 @@ public class SysMenuController {
 		return Result.success(data);
 	}
 
-	@Operation(summary = "菜单分页查询（表格视图）")
+	@Operation(summary = "分页查询菜单", description = "表格视图")
 	@PreAuthorize("@auth.decide('sys:menu:query')")
 	@GetMapping("/page")
 	public Result<PageResponse<SysMenuListVO>> page(SysMenuQuery query) {
@@ -71,7 +71,7 @@ public class SysMenuController {
 		return Result.success(response);
 	}
 
-	@Operation(summary = "菜单详情")
+	@Operation(summary = "查询菜单详情")
 	@PreAuthorize("@auth.decide('sys:menu:query')")
 	@GetMapping("/{id}")
 	public Result<SysMenuDetailVO> detail(@PathVariable("id") Long id) {
@@ -129,7 +129,7 @@ public class SysMenuController {
 
 	@OperationLog(targetType = "MENU", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = AuthorizationAuditBizModule.SYS_MENU, operation = OperationLogKind.UPDATE)
-	@Operation(summary = "批量更新菜单状态")
+	@Operation(summary = "批量启停菜单")
 	@PreAuthorize("@auth.decide('sys:menu:update')")
 	@PutMapping("/status")
 	public Result<String> batchUpdateStatus(@Valid @RequestBody IdsEnableStatusForm form) {

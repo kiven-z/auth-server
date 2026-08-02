@@ -1,5 +1,6 @@
 package com.auth.service.system.schedule.controller;
 
+import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.common.web.valid.group.CreateGroup;
@@ -9,7 +10,6 @@ import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.schedule.model.constants.ScheduleAuditBizModule;
 import com.auth.service.system.schedule.model.form.SysJobCreateForm;
-import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.service.system.schedule.model.form.SysJobUpdateForm;
 import com.auth.service.system.schedule.model.query.SysJobQuery;
 import com.auth.service.system.schedule.model.vo.SysJobDetailVO;
@@ -25,11 +25,11 @@ import org.springframework.web.bind.annotation.*;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
 /**
- * 定时任务接口（定义 CRUD + 启停与立即执行）
+ * 定时任务
  *
  * @author Bunny
  */
-@Tag(name = "定时任务-任务", description = "job + Quartz")
+@Tag(name = "定时任务", description = "定义 CRUD、启停与立即执行")
 @RequestMapping("/api/system/job")
 @RestController
 public class SysJobController {
@@ -52,7 +52,7 @@ public class SysJobController {
 		return Result.success(response);
 	}
 
-	@Operation(summary = "任务详情")
+	@Operation(summary = "查询定时任务详情")
 	@PreAuthorize("@auth.decide('schedule:job:detail')")
 	@GetMapping("{id}")
 	public Result<SysJobDetailVO> detail(@PathVariable("id") Long id) {
@@ -70,7 +70,7 @@ public class SysJobController {
 
 	@OperationLog(targetType = "JOB", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = ScheduleAuditBizModule.SYS_JOB, operation = OperationLogKind.UPDATE)
-	@Operation(summary = "修改定时任务")
+	@Operation(summary = "更新定时任务")
 	@PreAuthorize("@auth.decide('schedule:job:update')")
 	@PutMapping
 	public Result<String> update(@Validated(UpdateGroup.class) @RequestBody SysJobUpdateForm form) {
@@ -90,7 +90,7 @@ public class SysJobController {
 
 	@OperationLog(targetType = "JOB", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = ScheduleAuditBizModule.SYS_JOB, operation = OperationLogKind.UPDATE)
-	@Operation(summary = "批量启停任务")
+	@Operation(summary = "批量启停定时任务")
 	@PreAuthorize("@auth.decide('schedule:job:update')")
 	@PutMapping("status")
 	public Result<String> batchStatus(@Validated @RequestBody IdsEnableStatusForm form) {
@@ -98,7 +98,7 @@ public class SysJobController {
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
-	@Operation(summary = "立即执行一次")
+	@Operation(summary = "立即执行定时任务")
 	@PreAuthorize("@auth.decide('schedule:job:update')")
 	@PostMapping("{id}/run")
 	public Result<String> runOnce(@PathVariable("id") Long id) {

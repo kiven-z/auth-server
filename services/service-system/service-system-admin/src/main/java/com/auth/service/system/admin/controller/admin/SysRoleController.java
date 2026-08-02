@@ -34,11 +34,11 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * 系统角色管理 Controller
+ * 系统角色管理
  *
  * @author Bunny
  */
-@Tag(name = "系统角色管理")
+@Tag(name = "系统角色管理", description = "角色 CRUD 与启停")
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping("/api/system/role")
@@ -49,7 +49,7 @@ public class SysRoleController {
 
 	private final SysRoleSpreadsheetService sysRoleSpreadsheetService;
 
-	@Operation(summary = "角色 Excel 导出")
+	@Operation(summary = "导出角色 Excel")
 	@PreAuthorize("@auth.decide('sys:role:export')")
 	@GetMapping("/export")
 	public ResponseEntity<byte[]> export(@Validated SysRoleQuery filter, @Validated ExportScopeQueryFields scope)
@@ -57,14 +57,14 @@ public class SysRoleController {
 		return sysRoleSpreadsheetService.export(filter, scope);
 	}
 
-	@Operation(summary = "角色导入模板下载")
+	@Operation(summary = "下载角色导入模板")
 	@PreAuthorize("@auth.decide('sys:role:import')")
 	@GetMapping("/import/template")
 	public ResponseEntity<byte[]> importTemplate() throws IOException {
 		return sysRoleSpreadsheetService.downloadImportTemplate();
 	}
 
-	@Operation(summary = "角色 Excel 导入")
+	@Operation(summary = "导入角色 Excel")
 	@PreAuthorize("@auth.decide('sys:role:import')")
 	@PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public Result<SpreadsheetImportResult> importExcel(@RequestPart("file") MultipartFile file) throws IOException {
@@ -72,7 +72,7 @@ public class SysRoleController {
 		return Result.success(data);
 	}
 
-	@Operation(summary = "角色分页查询")
+	@Operation(summary = "分页查询角色")
 	@PreAuthorize("@auth.decide('sys:role:query')")
 	@GetMapping("/page")
 	public Result<PageResponse<SysRolePageVO>> page(SysRoleQuery query) {
@@ -80,7 +80,7 @@ public class SysRoleController {
 		return Result.success(response);
 	}
 
-	@Operation(summary = "角色详情")
+	@Operation(summary = "查询角色详情")
 	@PreAuthorize("@auth.decide('sys:role:detail')")
 	@GetMapping("/{id}")
 	public Result<SysRoleDetailVO> detail(@PathVariable("id") Long id) {
@@ -126,7 +126,7 @@ public class SysRoleController {
 		return Result.success();
 	}
 
-	@Operation(summary = "角色下拉选项")
+	@Operation(summary = "查询角色下拉选项")
 	@PreAuthorize("@auth.decide('sys:role:query')")
 	@GetMapping("/options")
 	public Result<List<SysRoleOptionVO>> options(@RequestParam(value = "roleName", required = false) String roleName,

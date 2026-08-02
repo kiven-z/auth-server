@@ -36,7 +36,7 @@ public class SysJobPageRowPO implements Serializable {
 	@Schema(title = "白名单任务类")
 	private String jobClass;
 
-	@Schema(title = "任务类型(BEAN_INVOKE/CUSTOM_CLASS)")
+	@Schema(title = "任务类型（BEAN_INVOKE/CUSTOM_CLASS）")
 	private String taskType;
 
 	@Schema(title = "执行处理器编码")
@@ -48,13 +48,13 @@ public class SysJobPageRowPO implements Serializable {
 	@Schema(title = "Cron")
 	private String cronExpression;
 
-	@Schema(title = "调度时区(IANA ZoneId)")
+	@Schema(title = "调度时区（IANA ZoneId）")
 	private String timeZone;
 
 	@Schema(title = "错失策略")
 	private Integer misfirePolicy;
 
-	@Schema(title = "是否并发(true=允许并发执行，false=禁止)")
+	@Schema(title = "是否并发（true=允许并发执行，false=禁止）")
 	private Boolean concurrent;
 
 	@Schema(title = "开始时间")
@@ -63,7 +63,7 @@ public class SysJobPageRowPO implements Serializable {
 	@Schema(title = "结束时间")
 	private LocalDateTime endTime;
 
-	@Schema(title = "运行状态(true=正常调度，false=暂停)")
+	@Schema(title = "运行状态（true=正常调度，false=暂停）")
 	private Boolean status;
 
 	@Schema(title = "执行参数 JSON，写入 JobDataMap")

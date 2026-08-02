@@ -23,7 +23,7 @@ public class InAppMessageCategoryQuery {
 	@Schema(title = "父分类 ID")
 	private Long parentId;
 
-	@Schema(title = "根节点筛选", description = "true=仅大类(parent_id=0)；false=仅小类(parent_id>0)；空=全部")
+	@Schema(title = "根节点筛选", description = "true=仅大类（parent_id=0）；false=仅小类(parent_id>0)；空=全部")
 	private Boolean rootOnly;
 
 	@Schema(title = "启用状态")

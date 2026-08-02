@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 统一消息发送 HTTP 入口
+ * 统一消息发送
  *
  * @author Bunny
  */

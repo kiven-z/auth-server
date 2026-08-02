@@ -24,7 +24,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * 会话管理：踢人、活跃会话与在线用户查询
+ * 会话管理实现：踢人、活跃会话与在线用户查询
  *
  * @author Bunny
  */

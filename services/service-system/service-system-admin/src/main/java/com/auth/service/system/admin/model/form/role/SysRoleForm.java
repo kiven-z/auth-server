@@ -18,7 +18,7 @@ import java.io.Serializable;
  *
  * @author Bunny
  */
-@Schema(name = "SysRoleSaveForm", title = "角色保存表单")
+@Schema(name = "SysRoleForm", title = "角色保存表单")
 @Getter
 @Setter
 public class SysRoleForm implements Serializable {
@@ -41,7 +41,7 @@ public class SysRoleForm implements Serializable {
 	@NotBlank(message = "角色名称不能为空")
 	private String roleName;
 
-	@Schema(title = "启用状态(true=正常启用，false=停用)", requiredMode = Schema.RequiredMode.REQUIRED)
+	@Schema(title = "启用状态（true=启用，false=停用）", requiredMode = Schema.RequiredMode.REQUIRED)
 	@NotNull(message = "状态不能为空")
 	private Boolean status;
 

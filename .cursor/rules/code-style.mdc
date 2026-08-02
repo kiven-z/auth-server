@@ -22,7 +22,9 @@ alwaysApply: true
 4. **数据库字段**：生成的表必须包含 `created_at`、`updated_at`、`created_by`、`updated_by`、`version`、`remark`；如需逻辑删除则加上
    `is_deleted`。
 5. **分页查询返回字段**：必须包含 `created_at`、`updated_at`、`created_by`、`updated_by`（除非明确说明不需要）。
-6. **注释规范**：所有代码（包括常量、实现类、方法）必须有文档注释；常量必须使用 `static final` 修饰。
+6. **注释规范**：所有代码（包括常量、实现类、方法）必须有文档注释；常量必须使用 `static final` 修饰。`Service` /
+   `ServiceImpl` 的类/方法 Javadoc 另见 `service-javadoc.mdc`（摘要末尾禁止句号；契约在接口，实现用
+   `{@inheritDoc}`）。
 7. **工具类**：优先使用 hutool；与「对象映射」冲突时以 §对象映射 为准（基础设施层 `Map↔Bean` 例外见该节）。
 8. **对象映射**：Service 层遵循 §对象映射（见下文）。
 9. **表单校验**：使用 `jakarta.validation.constraints` 相关注解。
@@ -169,6 +171,7 @@ alwaysApply: true
 ### 接口相关约束
 
 - **删除、批量删除**：前端传入数组，后端接收数组。
+- **`@Operation`**：summary 动词在前、不加括号塞副作用；细则见 `openapi-operation.mdc`。
 
 ### 多语言 (i18n) 开发规范
 

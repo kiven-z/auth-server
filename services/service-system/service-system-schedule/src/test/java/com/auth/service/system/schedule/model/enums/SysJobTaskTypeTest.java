@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * {@link SysJobTaskType} 单元测试。
+ * {@link SysJobTaskType} 单元测试
  *
  * @author Bunny
  */

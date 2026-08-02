@@ -13,14 +13,14 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import java.util.List;
 
 /**
- * 系统角色服务。
+ * 系统角色服务
  *
  * @author Bunny
  */
 public interface SysRoleService extends IService<SysRoleEntity> {
 
 	/**
-	 * 分页查询角色列表
+	 * 分页查询角色
 	 * @param query 查询条件
 	 * @return 分页数据
 	 */
@@ -60,7 +60,7 @@ public interface SysRoleService extends IService<SysRoleEntity> {
 	void batchUpdateStatus(IdsEnableStatusForm form);
 
 	/**
-	 * 按主键删除角色
+	 * 删除角色
 	 * @param id 角色主键
 	 */
 	void deleteById(Long id);

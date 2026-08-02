@@ -39,7 +39,7 @@ import java.util.Objects;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 
 /**
- * 用户侧站内信收件箱
+ * 用户侧站内信收件箱服务实现
  *
  * @author Bunny
  */

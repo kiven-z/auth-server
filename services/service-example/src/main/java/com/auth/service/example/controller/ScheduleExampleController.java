@@ -23,35 +23,35 @@ public class ScheduleExampleController {
 	private static final String INNER_PATH = "/api/example/inner/schedule";
 
 	@InternalApi
-	@Operation(summary = "定时任务联调：内部 GET（FeignInvoke 推荐路径）")
+	@Operation(summary = "联调：定时任务内部 GET", description = "FeignInvoke 推荐路径")
 	@GetMapping(INNER_PATH)
 	public Result<String> innerGet() {
 		return Result.success("ok-schedule-inner-get");
 	}
 
 	@InternalApi
-	@Operation(summary = "定时任务联调：内部 POST（回显请求体）")
+	@Operation(summary = "联调：定时任务内部 POST", description = "回显请求体")
 	@PostMapping(INNER_PATH)
 	public Result<Map<String, Object>> innerPost(@RequestBody(required = false) Map<String, Object> body) {
 		return echoBody("schedule-inner-post", body);
 	}
 
 	@InternalApi
-	@Operation(summary = "定时任务联调：内部 PUT（回显请求体）")
+	@Operation(summary = "联调：定时任务内部 PUT", description = "回显请求体")
 	@PutMapping(INNER_PATH)
 	public Result<Map<String, Object>> innerPut(@RequestBody(required = false) Map<String, Object> body) {
 		return echoBody("schedule-inner-put", body);
 	}
 
 	@InternalApi
-	@Operation(summary = "定时任务联调：内部 DELETE（回显请求体）")
+	@Operation(summary = "联调：定时任务内部 DELETE", description = "回显请求体")
 	@DeleteMapping(INNER_PATH)
 	public Result<Map<String, Object>> innerDelete(@RequestBody(required = false) Map<String, Object> body) {
 		return echoBody("schedule-inner-delete", body);
 	}
 
 	@InternalApi
-	@Operation(summary = "定时任务联调：内部 GET，回显调用方服务身份")
+	@Operation(summary = "联调：查询定时任务调用方身份", description = "内部 GET，回显调用方服务身份")
 	@GetMapping(INNER_PATH + "/caller")
 	public Result<Map<String, Object>> innerCaller() {
 		AuthProfile profile = SecurityUserUtils.currentAuthProfile();

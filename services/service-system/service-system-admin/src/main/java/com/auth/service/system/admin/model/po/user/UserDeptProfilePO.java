@@ -28,13 +28,13 @@ public class UserDeptProfilePO implements Serializable {
 	@Schema(title = "部门编码")
 	private String deptCode;
 
-	@Schema(title = "启用状态(true=正常，false=禁用)")
+	@Schema(title = "启用状态（true=正常，false=禁用）")
 	private Boolean status;
 
 	@Schema(title = "是否主部门")
 	private Boolean isPrimary;
 
-	@Schema(title = "关联状态(0=已调离,1=正常,2=兼职)")
+	@Schema(title = "关联状态（0=已调离，1=正常，2=兼职）")
 	private Integer relationStatus;
 
 }

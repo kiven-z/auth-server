@@ -21,11 +21,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 用户岗位关联管理
+ * 用户岗位关联
  *
  * @author Bunny
  */
-@Tag(name = "用户岗位关联")
+@Tag(name = "用户岗位关联", description = "用户与岗位绑定查询与维护")
 @RequiredArgsConstructor
 @RequestMapping("/api/system/user-post")
 @RestController

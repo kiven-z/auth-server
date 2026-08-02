@@ -1,7 +1,7 @@
 package com.auth.service.auth.model.enums;
 
 /**
- * 用户账户是否允许进入登录凭证校验（仅看账户状态位，不含登录失败锁定计数）。
+ * 用户账户是否允许进入登录凭证校验（仅看账户状态位，不含登录失败锁定计数）
  *
  * @author Bunny
  */

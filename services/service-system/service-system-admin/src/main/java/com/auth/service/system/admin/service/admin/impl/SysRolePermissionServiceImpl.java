@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * 角色权限分配服务实现。
+ * 角色权限分配服务实现
  *
  * @author Bunny
  */

@@ -24,7 +24,7 @@ import java.util.Set;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_INVALID;
 
 /**
- * 当前登录用户 UI 偏好配置实现
+ * 当前登录用户 UI 偏好配置服务实现
  *
  * @author Bunny
  */

@@ -16,7 +16,8 @@ import com.auth.service.system.admin.model.constants.AdminBatchSizes;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.form.role.SysRoleForm;
 import com.auth.service.system.admin.model.po.permission.SysPermissionBoundMenuPO;
-import com.auth.service.system.admin.model.po.reference.*;
+import com.auth.service.system.admin.model.po.reference.PermissionReferencePO;
+import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.auth.service.system.admin.model.query.role.SysRoleQuery;
 import com.auth.service.system.admin.model.vo.role.SysRoleDetailVO;
 import com.auth.service.system.admin.model.vo.role.SysRoleOptionVO;
@@ -41,7 +42,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * 系统角色服务实现。
+ * 系统角色服务实现
  *
  * @author Bunny
  */
@@ -94,15 +95,6 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 
 		List<SysPermissionBoundMenuPO> permissionBoundMenus = sysMenuRoleMapper.selectBoundMenusByRoleId(id);
 		detail.setBoundMenus(SysPermissionConverter.INSTANCE.toBoundMenuItemList(permissionBoundMenus));
-
-		List<UserReferencePO> grantTableBoundUsers = grantTableMapper.selectBoundUsersByRoleId(id);
-		detail.setBoundUsers(ReferenceConverter.INSTANCE.toUserReferenceList(grantTableBoundUsers));
-
-		List<DeptReferencePO> grantTableBoundDeptList = grantTableMapper.selectBoundDeptsByRoleId(id);
-		detail.setBoundDepts(ReferenceConverter.INSTANCE.toDeptReferenceList(grantTableBoundDeptList));
-
-		List<PostReferencePO> grantTableBoundPosts = grantTableMapper.selectBoundPostsByRoleId(id);
-		detail.setBoundPosts(ReferenceConverter.INSTANCE.toPostReferenceList(grantTableBoundPosts));
 
 		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail), null, null);
 		return detail;

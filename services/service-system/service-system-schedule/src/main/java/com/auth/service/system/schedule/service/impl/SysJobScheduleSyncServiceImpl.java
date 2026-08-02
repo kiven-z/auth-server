@@ -1,10 +1,10 @@
 package com.auth.service.system.schedule.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.service.system.schedule.exception.SysJobException;
 import com.auth.service.system.schedule.mapper.JobMapper;
 import com.auth.service.system.schedule.model.entity.JobEntity;
-import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.service.system.schedule.service.SysJobScheduleSyncService;
 import com.auth.service.system.schedule.support.quartz.SysJobScheduleReconciler;
 import com.auth.service.system.schedule.support.quartz.SysJobSchedulerManager;
@@ -23,7 +23,7 @@ import java.util.List;
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_QUARTZ_OPERATION_FAILED;
 
 /**
- * 定时任务运行态同步实现
+ * 定时任务运行态同步服务实现
  *
  * @author Bunny
  */

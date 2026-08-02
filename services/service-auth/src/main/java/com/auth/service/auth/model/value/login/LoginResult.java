@@ -8,7 +8,7 @@ import lombok.Value;
 import lombok.experimental.Accessors;
 
 /**
- * 登录结果（领域层）：认证用户快照 + 授权画像，供应用层组装 API 响应与签发令牌。
+ * 登录结果（领域层）：认证用户快照 + 授权画像，供应用层组装 API 响应与签发令牌
  *
  * @author Bunny
  */

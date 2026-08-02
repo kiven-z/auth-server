@@ -16,7 +16,7 @@ import java.io.Serializable;
  *
  * @author Bunny
  */
-@Schema(name = "SysDeptSaveForm", title = "部门保存表单")
+@Schema(name = "SysDeptForm", title = "部门保存表单")
 @Getter
 @Setter
 public class SysDeptForm implements Serializable {
@@ -28,7 +28,7 @@ public class SysDeptForm implements Serializable {
 	@NotNull(groups = UpdateGroup.class, message = "部门ID不能为空")
 	private Long id;
 
-	@Schema(title = "父部门ID，0 表示顶级", requiredMode = Schema.RequiredMode.REQUIRED)
+	@Schema(title = "父部门 ID（0 表示顶级）", requiredMode = Schema.RequiredMode.REQUIRED)
 	@NotNull(message = "父部门不能为空")
 	private Long parentId;
 
@@ -42,7 +42,7 @@ public class SysDeptForm implements Serializable {
 	@NotBlank(message = "部门编码不能为空")
 	private String deptCode;
 
-	@Schema(title = "启用状态(true=正常，false=停用)", requiredMode = Schema.RequiredMode.REQUIRED)
+	@Schema(title = "启用状态（true=正常，false=停用）", requiredMode = Schema.RequiredMode.REQUIRED)
 	@NotNull(message = "状态不能为空")
 	private Boolean status;
 

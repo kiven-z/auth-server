@@ -24,7 +24,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * 刷新令牌应用服务
+ * 刷新令牌服务
  *
  * @author Bunny
  */
@@ -155,7 +155,7 @@ public class RefreshTokenService {
 	}
 
 	/**
-	 * 将新的 Refresh Token 哈希与过期时间写入会话索引。
+	 * 将新的 Refresh Token 哈希与过期时间写入会话索引
 	 * @param jti 会话 ID
 	 * @param refreshToken 新的刷新令牌明文
 	 */

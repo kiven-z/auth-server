@@ -1,7 +1,7 @@
 package com.auth.module.file.importer.model;
 
 /**
- * 导入校验错误类型（按校验语义统一编码，不按业务域拆分）。
+ * 导入校验错误类型（按校验语义统一编码，不按业务域拆分）
  *
  * @author Bunny
  */

@@ -5,7 +5,7 @@ import lombok.experimental.UtilityClass;
 import java.util.List;
 
 /**
- * {@link ImportRowError} 工厂：按错误类型生成英文 message。
+ * {@link ImportRowError} 工厂：按错误类型生成英文 message
  *
  * @author Bunny
  */

@@ -30,7 +30,7 @@ public class UserReferenceVO implements Serializable {
 	@Schema(title = "用户名")
 	private String username;
 
-	@Schema(title = "用户状态(0=禁用,1=正常,2=锁定)")
+	@Schema(title = "用户状态（0=禁用，1=正常，2=锁定）")
 	private Integer status;
 
 	@Schema(title = "昵称")
@@ -39,7 +39,7 @@ public class UserReferenceVO implements Serializable {
 	@Schema(title = "头像")
 	private String avatar;
 
-	@Schema(title = "性别(0=未知,1=男,2=女)")
+	@Schema(title = "性别（0=未知，1=男，2=女）")
 	private Integer gender;
 
 	@Schema(title = "工号")

@@ -20,11 +20,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 用户部门关联管理
+ * 用户部门关联
  *
  * @author Bunny
  */
-@Tag(name = "用户部门关联")
+@Tag(name = "用户部门关联", description = "用户与部门绑定查询与维护")
 @RequiredArgsConstructor
 @RequestMapping("/api/system/user-dept")
 @RestController

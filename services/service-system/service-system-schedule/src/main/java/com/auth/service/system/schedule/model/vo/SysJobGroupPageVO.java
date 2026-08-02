@@ -26,7 +26,7 @@ public class SysJobGroupPageVO extends BaseResponse {
 	@Schema(title = "描述")
 	private String description;
 
-	@Schema(title = "启用状态(true=启用，false=停用)")
+	@Schema(title = "启用状态（true=启用，false=停用）")
 	private Boolean status;
 
 	@Schema(title = "是否系统内置")

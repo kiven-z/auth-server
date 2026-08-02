@@ -3,7 +3,7 @@ package com.auth.service.system.authorization.service;
 import java.util.List;
 
 /**
- * 用户会话撤销：账户状态变更或删除后踢出全部在线会话
+ * 用户会话撤销服务：账户状态变更或删除后踢出全部在线会话
  *
  * @author Bunny
  */

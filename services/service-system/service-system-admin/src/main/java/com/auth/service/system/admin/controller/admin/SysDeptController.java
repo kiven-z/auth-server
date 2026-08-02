@@ -35,11 +35,11 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * 系统部门管理 Controller
+ * 系统部门管理
  *
  * @author Bunny
  */
-@Tag(name = "系统部门管理")
+@Tag(name = "系统部门管理", description = "部门树 CRUD 与启停")
 @RequiredArgsConstructor
 @RequestMapping("/api/system/dept")
 @RestController
@@ -51,7 +51,7 @@ public class SysDeptController {
 
 	private final SysDeptSpreadsheetService sysDeptSpreadsheetService;
 
-	@Operation(summary = "部门 Excel 导出")
+	@Operation(summary = "导出部门 Excel")
 	@PreAuthorize("@auth.decide('sys:dept:export')")
 	@GetMapping("/export")
 	public ResponseEntity<byte[]> export(@Validated SysDeptPageQuery query, @Validated ExportScopeQueryFields scope)
@@ -59,14 +59,14 @@ public class SysDeptController {
 		return sysDeptSpreadsheetService.export(query, scope);
 	}
 
-	@Operation(summary = "部门导入模板下载")
+	@Operation(summary = "下载部门导入模板")
 	@PreAuthorize("@auth.decide('sys:dept:import')")
 	@GetMapping("/import/template")
 	public ResponseEntity<byte[]> importTemplate() throws IOException {
 		return sysDeptSpreadsheetService.downloadImportTemplate();
 	}
 
-	@Operation(summary = "部门 Excel 导入")
+	@Operation(summary = "导入部门 Excel")
 	@PreAuthorize("@auth.decide('sys:dept:import')")
 	@PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public Result<SpreadsheetImportResult> importExcel(@RequestPart("file") MultipartFile file) throws IOException {
@@ -76,7 +76,7 @@ public class SysDeptController {
 
 	@OperationLog(targetType = "DEPT_LIST", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = AuthorizationAuditBizModule.SYS_DEPT, operation = OperationLogKind.QUERY)
-	@Operation(summary = "部门扁平列表")
+	@Operation(summary = "查询部门扁平列表")
 	@PreAuthorize("@auth.decide('sys:dept:query')")
 	@GetMapping("/list")
 	public Result<List<SysDeptListVO>> list(SysDeptListQuery query) {
@@ -84,7 +84,7 @@ public class SysDeptController {
 		return Result.success(data);
 	}
 
-	@Operation(summary = "部门分页查询")
+	@Operation(summary = "分页查询部门")
 	@PreAuthorize("@auth.decide('sys:dept:query')")
 	@GetMapping("/page")
 	public Result<PageResponse<SysDeptListVO>> page(SysDeptPageQuery query) {
@@ -92,7 +92,7 @@ public class SysDeptController {
 		return Result.success(response);
 	}
 
-	@Operation(summary = "部门详情")
+	@Operation(summary = "查询部门详情")
 	@PreAuthorize("@auth.decide('sys:dept:query')")
 	@GetMapping("/{id}")
 	public Result<SysDeptDetailVO> detail(@PathVariable("id") Long id) {

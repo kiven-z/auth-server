@@ -27,7 +27,7 @@ public class PostBoundUserReferenceVO extends UserReferenceVO {
 	@Schema(title = "是否主岗位")
 	private Boolean isPrimary;
 
-	@Schema(title = "用户-岗位关联状态(0=已调离,1=正常,2=兼职)")
+	@Schema(title = "用户-岗位关联状态（0=已调离，1=正常，2=兼职）")
 	private Integer relationStatus;
 
 }

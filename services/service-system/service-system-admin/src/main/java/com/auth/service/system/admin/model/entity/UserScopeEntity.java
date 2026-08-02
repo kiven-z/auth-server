@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * 用户数据范围配置（部门维），对应 user_scope；有行则覆盖 role_scope
+ * 用户数据范围配置（部门维；有行则覆盖 role_scope）
  *
  * @author Bunny
  */

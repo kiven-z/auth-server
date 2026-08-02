@@ -23,7 +23,7 @@ public class SysJobQuery extends PageQueryRequest {
 	@Schema(title = "任务分组")
 	private String jobGroup;
 
-	@Schema(title = "运行状态(true=正常调度，false=暂停)")
+	@Schema(title = "运行状态（true=正常调度，false=暂停）")
 	private Boolean status;
 
 }

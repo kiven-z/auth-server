@@ -42,7 +42,7 @@ public class SysJobGroupForm implements Serializable {
 	@Size(max = 255)
 	private String description;
 
-	@Schema(title = "启用状态(true=启用分组，false=停用)")
+	@Schema(title = "启用状态（true=启用分组，false=停用）")
 	@NotNull(groups = CreateGroup.class)
 	private Boolean status;
 

@@ -23,12 +23,12 @@ import static com.auth.module.security.contract.api.audit.AuditServiceDomain.SYS
 import static com.auth.service.system.file.model.constants.FileAuditBizModule.SYS_FILE;
 
 /**
- * 当前用户文件回收站控制器
+ * 个人文件回收站
  *
  * @author Bunny
  */
+@Tag(name = "个人文件回收站", description = "当前用户回收站查询、恢复与彻底删除")
 @AuthenticatedApi
-@Tag(name = "个人文件回收站")
 @RequestMapping("/api/system/me/file/recycle")
 @RestController
 public class PersonalFileRecycleController {
@@ -43,7 +43,7 @@ public class PersonalFileRecycleController {
 		this.fileRecycleService = fileRecycleService;
 	}
 
-	@Operation(summary = "回收站分页查询")
+	@Operation(summary = "分页查询回收站文件")
 	@GetMapping("/page")
 	public Result<PageResponse<FileRecordPageVO>> page(@Valid FileRecordPageQuery query) {
 		// 回收站只能看到自己的和自己删除的
@@ -57,7 +57,7 @@ public class PersonalFileRecycleController {
 		return Result.success(pageResult);
 	}
 
-	@Operation(summary = "回收站文件详情")
+	@Operation(summary = "查询回收站文件详情")
 	@GetMapping("/{id}")
 	public Result<FileRecordDetailVO> detail(@PathVariable("id") Long id) {
 		Long ownerUserId = SecurityUserUtils.getUserId();
@@ -70,7 +70,7 @@ public class PersonalFileRecycleController {
 
 	@OperationLog(targetType = "FILE_RECYCLE_RESTORE", serviceDomain = SYSTEM, bizModule = SYS_FILE,
 			operation = OperationLogKind.UPDATE)
-	@Operation(summary = "回收站批量恢复")
+	@Operation(summary = "批量恢复回收站文件")
 	@PostMapping("/restore")
 	public Result<Void> restore(@RequestBody List<Long> ids) {
 		Long ownerUserId = SecurityUserUtils.getUserId();
@@ -82,7 +82,7 @@ public class PersonalFileRecycleController {
 
 	@OperationLog(targetType = "FILE_RECYCLE_PURGE", serviceDomain = SYSTEM, bizModule = SYS_FILE,
 			operation = OperationLogKind.DELETE)
-	@Operation(summary = "回收站批量彻底删除")
+	@Operation(summary = "批量彻底删除回收站文件")
 	@DeleteMapping("/purge")
 	public Result<Void> purge(@RequestBody List<Long> ids) {
 		Long ownerUserId = SecurityUserUtils.getUserId();

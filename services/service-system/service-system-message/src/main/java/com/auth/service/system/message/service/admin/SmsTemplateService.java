@@ -12,13 +12,13 @@ import com.baomidou.mybatisplus.extension.service.IService;
 public interface SmsTemplateService extends IService<MessageTemplateEntity> {
 
 	/**
-	 * 添加短信模板
+	 * 新增短信模板
 	 * @param form 短信模板表单
 	 */
 	void create(SmsTemplateForm form);
 
 	/**
-	 * 更新短信模板（不修改 channel、require_fields）
+	 * 更新短信模板（不修改渠道与变量声明）
 	 * @param form 短信模板表单
 	 */
 	void update(SmsTemplateForm form);

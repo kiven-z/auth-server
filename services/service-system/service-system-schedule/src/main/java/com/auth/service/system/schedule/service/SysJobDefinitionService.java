@@ -10,21 +10,21 @@ import com.auth.service.system.schedule.model.vo.SysJobPageVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
- * 定时任务服务
+ * 定时任务定义服务
  *
  * @author Bunny
  */
 public interface SysJobDefinitionService extends IService<JobEntity> {
 
 	/**
-	 * 分页查询
+	 * 分页查询任务定义
 	 * @param query 查询参数
 	 * @return 分页结果
 	 */
 	PageResponse<SysJobPageVO> getPage(SysJobQuery query);
 
 	/**
-	 * 详情查询
+	 * 获取任务定义详情
 	 * @param id 主键
 	 * @return 详情
 	 */

@@ -8,21 +8,21 @@ import com.auth.service.system.admin.model.vo.logauthorizationaudit.LogAuthoriza
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
- * 权限决策审计日志服务。
+ * 权限决策审计日志服务
  *
  * @author Bunny
  */
 public interface LogAuthorizationAuditService extends IService<LogAuthorizationAuditEntity> {
 
 	/**
-	 * 分页查询
+	 * 分页查询权限决策审计日志
 	 * @param query 条件
 	 * @return 分页数据
 	 */
 	PageResponse<LogAuthorizationAuditPageVO> getPage(LogAuthorizationAuditQuery query);
 
 	/**
-	 * 详情
+	 * 获取权限决策审计日志详情
 	 * @param id 主键
 	 * @return 详情
 	 */

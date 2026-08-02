@@ -3,7 +3,7 @@ package com.auth.service.system.authorization.model.constants;
 import lombok.experimental.UtilityClass;
 
 /**
- * authorization / admin 域操作审计「小模块」编码常量。
+ * authorization / admin 域操作审计「小模块」编码常量
  * <p>
  * admin 侧组织与权限相关编码放此模块，避免 authorization 反向依赖 admin。
  *

@@ -17,11 +17,11 @@ import java.util.List;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
 /**
- * 权限决策审计日志接口
+ * 权限决策审计日志
  *
  * @author Bunny
  */
-@Tag(name = "权限决策审计日志", description = "log_authorization_audit")
+@Tag(name = "权限决策审计日志", description = "授权决策审计查询与清理")
 @RequiredArgsConstructor
 @RequestMapping("/api/system/log/authorization-audit")
 @RestController
@@ -37,7 +37,7 @@ public class LogAuthorizationAuditController {
 		return Result.success(response);
 	}
 
-	@Operation(summary = "权限决策审计详情")
+	@Operation(summary = "查询权限决策审计详情")
 	@PreAuthorize("@auth.decide('log:authaudit:detail')")
 	@GetMapping("{id}")
 	public Result<LogAuthorizationAuditDetailVO> detail(@PathVariable("id") Long id) {

@@ -7,12 +7,16 @@ import com.auth.service.system.admin.mapper.role.GrantTableMapper;
 import com.auth.service.system.admin.model.entity.GrantTableEntity;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
+import com.auth.service.system.admin.model.form.role.SysRoleGrantSubjectsForm;
 import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
+import com.auth.service.system.admin.model.po.reference.UserReferencePO;
 import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
+import com.auth.service.system.admin.model.vo.role.SysRoleGrantSubjectsVO;
 import com.auth.service.system.admin.support.grant.GrantTableSubjectExistenceVerifier;
 import com.auth.service.system.admin.support.grant.RbacReferenceChecker;
 import com.auth.service.system.admin.support.grant.TypedGrantTableActiveSubjectChecker;
 import com.auth.service.system.admin.support.post.PostReferenceChecker;
+import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.GrantAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
@@ -44,11 +48,16 @@ class GrantTableServiceImplTest {
 
 	private static final Long SUBJECT_ID = 10L;
 
+	private static final Long ROLE_ID = 1L;
+
 	@Mock
 	private SysPostMapper sysPostMapper;
 
 	@Mock
 	private GrantTableMapper grantTableMapper;
+
+	@Mock
+	private UserReferenceChecker userReferenceChecker;
 
 	@Mock
 	private RbacReferenceChecker rbacReferenceChecker;
@@ -68,6 +77,13 @@ class GrantTableServiceImplTest {
 		return entity;
 	}
 
+	private static SysRoleGrantSubjectsForm subjectsForm(GrantTableSubjectType subjectType, List<Long> subjectIds) {
+		SysRoleGrantSubjectsForm form = new SysRoleGrantSubjectsForm();
+		form.setSubjectType(subjectType);
+		form.setSubjectIds(subjectIds);
+		return form;
+	}
+
 	@BeforeEach
 	void setUp() throws Exception {
 		PostReferenceChecker postReferenceChecker = new PostReferenceChecker(sysPostMapper);
@@ -75,8 +91,8 @@ class GrantTableServiceImplTest {
 				GrantTableSubjectType.POST, postReferenceChecker::getExistingActive);
 		GrantTableSubjectExistenceVerifier subjectExistenceVerifier = new GrantTableSubjectExistenceVerifier(
 				List.of(postSubjectChecker));
-		grantTableService = spy(
-				new GrantTableServiceImpl(subjectExistenceVerifier, rbacReferenceChecker, grantInvalidationTrigger));
+		grantTableService = spy(new GrantTableServiceImpl(subjectExistenceVerifier, userReferenceChecker,
+				rbacReferenceChecker, grantInvalidationTrigger));
 		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(grantTableService, grantTableMapper);
@@ -131,6 +147,123 @@ class GrantTableServiceImplTest {
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
+	}
+
+	@Test
+	@DisplayName("角色视角按类型查询授权对象：组装 USER 种子项")
+	void listGrantSubjectsByRoleIdReturnsUsersWhenSubjectTypeUser() {
+		when(rbacReferenceChecker.getExisting(ROLE_ID)).thenReturn(null);
+
+		UserReferencePO user = new UserReferencePO();
+		user.setId(11L);
+		user.setUsername("alice");
+		user.setNickname("Alice");
+		user.setStatus(1);
+		when(grantTableMapper.selectBoundUsersByRoleId(ROLE_ID)).thenReturn(List.of(user));
+
+		SysRoleGrantSubjectsVO vo = grantTableService.listGrantSubjectsByRoleId(ROLE_ID, GrantTableSubjectType.USER);
+
+		assertThat(vo.getSubjectType()).isEqualTo(GrantTableSubjectType.USER);
+		assertThat(vo.getSubjects()).hasSize(1);
+		assertThat(vo.getSubjects().get(0).getId()).isEqualTo(11L);
+		assertThat(vo.getSubjects().get(0).getLabel()).isEqualTo("Alice");
+		verify(rbacReferenceChecker).getExisting(ROLE_ID);
+		verify(grantTableMapper, never()).selectBoundDeptsByRoleId(any());
+		verify(grantTableMapper, never()).selectBoundPostsByRoleId(any());
+	}
+
+	@Test
+	@DisplayName("角色视角按类型查询授权对象：无授权时 subjects 为空")
+	void listGrantSubjectsByRoleIdReturnsEmptyListWhenNoGrants() {
+		when(rbacReferenceChecker.getExisting(ROLE_ID)).thenReturn(null);
+		when(grantTableMapper.selectBoundDeptsByRoleId(ROLE_ID)).thenReturn(List.of());
+
+		SysRoleGrantSubjectsVO vo = grantTableService.listGrantSubjectsByRoleId(ROLE_ID, GrantTableSubjectType.DEPT);
+
+		assertThat(vo.getSubjectType()).isEqualTo(GrantTableSubjectType.DEPT);
+		assertThat(vo.getSubjects()).isEmpty();
+		verify(grantTableMapper, never()).selectBoundUsersByRoleId(any());
+		verify(grantTableMapper, never()).selectBoundPostsByRoleId(any());
+	}
+
+	@Test
+	@DisplayName("角色视角按类型查询授权对象：角色不存在时抛出 DATA_NOT_EXIST")
+	void listGrantSubjectsByRoleIdThrowsWhenRoleMissing() {
+		when(rbacReferenceChecker.getExisting(ROLE_ID))
+			.thenThrow(new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST));
+
+		assertThatThrownBy(() -> grantTableService.listGrantSubjectsByRoleId(ROLE_ID, GrantTableSubjectType.POST))
+			.isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
+		verify(grantTableMapper, never()).selectBoundPostsByRoleId(any());
+	}
+
+	@Test
+	@DisplayName("角色视角按类型覆盖：删插并失效旧∪新主体，不影响其它类型")
+	void replaceGrantSubjectsByRoleIdReplacesAndInvalidatesUnion() {
+		when(rbacReferenceChecker.getExisting(ROLE_ID)).thenReturn(null);
+		when(grantTableMapper.selectSubjectIdsByRoleIdAndSubjectType(ROLE_ID, "USER")).thenReturn(List.of(11L));
+
+		GrantTableSubjectExistenceVerifier verifierWithUserDeptPost = buildVerifierWithMocks();
+		grantTableService = spy(new GrantTableServiceImpl(verifierWithUserDeptPost, userReferenceChecker,
+				rbacReferenceChecker, grantInvalidationTrigger));
+		injectBaseMapper(grantTableService, grantTableMapper);
+		doReturn(true).when(grantTableService).saveBatch(any(Collection.class));
+
+		grantTableService.replaceGrantSubjectsByRoleId(ROLE_ID, subjectsForm(GrantTableSubjectType.USER, List.of(12L)));
+
+		verify(userReferenceChecker).requireOperable(List.of(12L));
+		verify(grantTableMapper).deleteByRoleIdAndSubjectType(ROLE_ID, "USER");
+		verify(grantTableMapper, never()).deleteByRoleIdAndSubjectType(ROLE_ID, "DEPT");
+		verify(grantTableMapper, never()).deleteByRoleIdAndSubjectType(ROLE_ID, "POST");
+
+		@SuppressWarnings("unchecked")
+		ArgumentCaptor<List<GrantSubjectKey>> subjectsCaptor = ArgumentCaptor.forClass(List.class);
+		verify(grantInvalidationTrigger).submitByGrantSubjects(subjectsCaptor.capture(), eq("replace-grant-subjects"));
+		assertThat(subjectsCaptor.getValue()).containsExactlyInAnyOrder(
+				new GrantSubjectKey(GrantTableSubjectType.USER, 11L),
+				new GrantSubjectKey(GrantTableSubjectType.USER, 12L));
+	}
+
+	@Test
+	@DisplayName("角色视角按类型覆盖：空列表仅清空该类型并失效旧主体")
+	void replaceGrantSubjectsByRoleIdClearsWhenListsEmpty() {
+		when(rbacReferenceChecker.getExisting(ROLE_ID)).thenReturn(null);
+		when(grantTableMapper.selectSubjectIdsByRoleIdAndSubjectType(ROLE_ID, "DEPT")).thenReturn(List.of(21L));
+
+		GrantTableSubjectExistenceVerifier verifierWithUserDeptPost = buildVerifierWithMocks();
+		grantTableService = spy(new GrantTableServiceImpl(verifierWithUserDeptPost, userReferenceChecker,
+				rbacReferenceChecker, grantInvalidationTrigger));
+		injectBaseMapper(grantTableService, grantTableMapper);
+
+		grantTableService.replaceGrantSubjectsByRoleId(ROLE_ID, subjectsForm(GrantTableSubjectType.DEPT, List.of()));
+
+		verify(userReferenceChecker, never()).requireOperable(any());
+		verify(grantTableService, never()).saveBatch(any(Collection.class));
+		verify(grantTableMapper).deleteByRoleIdAndSubjectType(ROLE_ID, "DEPT");
+		verify(grantTableMapper, never()).deleteByRoleIdAndSubjectType(ROLE_ID, "USER");
+		verify(grantTableMapper, never()).deleteByRoleIdAndSubjectType(ROLE_ID, "POST");
+
+		@SuppressWarnings("unchecked")
+		ArgumentCaptor<List<GrantSubjectKey>> subjectsCaptor = ArgumentCaptor.forClass(List.class);
+		verify(grantInvalidationTrigger).submitByGrantSubjects(subjectsCaptor.capture(), eq("replace-grant-subjects"));
+		assertThat(subjectsCaptor.getValue()).containsExactly(new GrantSubjectKey(GrantTableSubjectType.DEPT, 21L));
+	}
+
+	@Test
+	@DisplayName("角色视角按类型覆盖：角色不存在时不写库")
+	void replaceGrantSubjectsByRoleIdThrowsWhenRoleMissing() {
+		when(rbacReferenceChecker.getExisting(ROLE_ID))
+			.thenThrow(new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST));
+
+		assertThatThrownBy(() -> grantTableService.replaceGrantSubjectsByRoleId(ROLE_ID,
+				subjectsForm(GrantTableSubjectType.USER, List.of())))
+			.isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
+		verify(grantTableMapper, never()).deleteByRoleIdAndSubjectType(any(), any());
+		verifyNoInteractions(grantInvalidationTrigger);
 	}
 
 	@Test
@@ -193,6 +326,29 @@ class GrantTableServiceImplTest {
 
 		verify(grantTableMapper).deleteBySubjectIds(GrantTableSubjectType.DEPT.name(), List.of(SUBJECT_ID));
 		verify(grantTableService, never()).saveBatch(any(Collection.class));
+	}
+
+	/**
+	 * 构造含 USER/DEPT/POST 校验的 Verifier（测试用；校验回调为空操作）
+	 * @return 主体存在性校验器
+	 */
+	private static GrantTableSubjectExistenceVerifier buildVerifierWithMocks() {
+		return new GrantTableSubjectExistenceVerifier(
+				List.of(new TypedGrantTableActiveSubjectChecker(GrantTableSubjectType.USER, subjectId -> {
+				}), new TypedGrantTableActiveSubjectChecker(GrantTableSubjectType.DEPT, subjectId -> {
+				}), new TypedGrantTableActiveSubjectChecker(GrantTableSubjectType.POST, subjectId -> {
+				})));
+	}
+
+	private static void injectBaseMapper(GrantTableServiceImpl service, GrantTableMapper mapper) {
+		try {
+			Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
+			baseMapperField.setAccessible(true);
+			baseMapperField.set(service, mapper);
+		}
+		catch (ReflectiveOperationException ex) {
+			throw new IllegalStateException(ex);
+		}
 	}
 
 }

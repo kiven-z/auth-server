@@ -8,7 +8,7 @@ import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * 登录请求基类（HTTP 入站 DTO）。
+ * 登录请求基类（HTTP 入站 DTO）
  *
  * @author Bunny
  */

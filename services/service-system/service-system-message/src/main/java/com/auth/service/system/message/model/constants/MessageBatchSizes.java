@@ -3,7 +3,7 @@ package com.auth.service.system.message.model.constants;
 import lombok.experimental.UtilityClass;
 
 /**
- * message 模块批量处理批次大小。
+ * message 模块批量处理批次大小
  *
  * @author Bunny
  */

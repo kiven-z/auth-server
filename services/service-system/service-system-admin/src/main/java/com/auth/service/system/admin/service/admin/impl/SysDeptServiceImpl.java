@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * 部门写服务实现。
+ * 部门写服务实现
  *
  * @author Bunny
  */

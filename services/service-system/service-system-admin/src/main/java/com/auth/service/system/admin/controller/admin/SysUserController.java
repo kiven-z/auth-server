@@ -44,11 +44,11 @@ import java.util.List;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
 /**
- * 系统用户管理 Controller
+ * 系统用户管理
  *
  * @author Bunny
  */
-@Tag(name = "系统用户管理")
+@Tag(name = "系统用户管理", description = "用户 CRUD、启停、密码与导入导出")
 @RequiredArgsConstructor
 @RequestMapping("/api/system/user")
 @RestController
@@ -66,7 +66,7 @@ public class SysUserController {
 
 	@OperationLog(targetType = "USER_LIST", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.QUERY)
-	@Operation(summary = "用户分页查询")
+	@Operation(summary = "分页查询用户")
 	@PreAuthorize("@auth.decide('sys:user:query')")
 	@GetMapping("/page")
 	public Result<PageResponse<SysUserPageVO>> page(SysUserPageQuery query) {
@@ -75,14 +75,14 @@ public class SysUserController {
 	}
 
 	@AuthenticatedApi
-	@Operation(summary = "用户档案")
+	@Operation(summary = "查询用户档案")
 	@GetMapping("/{userId}/profile")
 	public Result<SysUserProfileVO> profile(@PathVariable("userId") Long userId) {
 		SysUserProfileVO profile = sysUserQueryService.getProfile(userId);
 		return Result.success(profile);
 	}
 
-	@Operation(summary = "用户详情")
+	@Operation(summary = "查询用户详情")
 	@PreAuthorize("@auth.decide('sys:user:query')")
 	@GetMapping("/{userId}/detail")
 	public Result<SysUserDetailVO> detail(@PathVariable("userId") Long userId) {
@@ -91,7 +91,7 @@ public class SysUserController {
 	}
 
 	@AuthenticatedApi
-	@Operation(summary = "用户关键词搜索")
+	@Operation(summary = "搜索用户")
 	@GetMapping("/search")
 	public Result<List<SysUserSearchItemVO>> search(
 			@Parameter(description = "搜索关键字") @RequestParam(required = false) String keyword,
@@ -102,7 +102,7 @@ public class SysUserController {
 		return Result.success(data);
 	}
 
-	@Operation(summary = "用户 Excel 导出")
+	@Operation(summary = "导出用户 Excel")
 	@PreAuthorize("@auth.decide('sys:user:export')")
 	@GetMapping("/export")
 	public ResponseEntity<byte[]> export(@Validated SysUserPageQuery filter, @Validated ExportScopeQueryFields scope)
@@ -110,14 +110,14 @@ public class SysUserController {
 		return sysUserSpreadsheetService.export(filter, scope);
 	}
 
-	@Operation(summary = "用户导入模板下载")
+	@Operation(summary = "下载用户导入模板")
 	@PreAuthorize("@auth.decide('sys:user:import')")
 	@GetMapping("/import/template")
 	public ResponseEntity<byte[]> importTemplate() throws IOException {
 		return sysUserSpreadsheetService.downloadImportTemplate();
 	}
 
-	@Operation(summary = "用户 Excel 导入")
+	@Operation(summary = "导入用户 Excel")
 	@PreAuthorize("@auth.decide('sys:user:import')")
 	@PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public Result<SpreadsheetImportResult> importExcel(@RequestPart("file") MultipartFile file) throws IOException {
@@ -137,7 +137,7 @@ public class SysUserController {
 
 	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
-	@Operation(summary = "管理员重置用户密码")
+	@Operation(summary = "重置用户密码")
 	@PreAuthorize("@auth.decide('sys:user:update')")
 	@PutMapping("/{id}/password")
 	public Result<String> resetPassword(@PathVariable("id") Long id,
@@ -149,7 +149,7 @@ public class SysUserController {
 
 	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
-	@Operation(summary = "管理员更新用户头像")
+	@Operation(summary = "更新用户头像")
 	@PreAuthorize("@auth.decide('sys:user:update')")
 	@PutMapping("/avatar")
 	public Result<String> updateAvatar(@Valid @RequestBody SysUserAvatarUpdateForm form) {
@@ -169,7 +169,7 @@ public class SysUserController {
 
 	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
-	@Operation(summary = "批量更新用户状态")
+	@Operation(summary = "批量启停用户")
 	@PreAuthorize("@auth.decide('sys:user:update')")
 	@PutMapping("/status")
 	public Result<String> batchUpdateStatus(@Valid @RequestBody SysUserBatchStatusForm form) {

@@ -3,7 +3,7 @@ package com.auth.service.system.admin.model.constants;
 import lombok.experimental.UtilityClass;
 
 /**
- * admin 模块批量持久化批次大小。
+ * admin 模块批量持久化批次大小
  *
  * @author Bunny
  */

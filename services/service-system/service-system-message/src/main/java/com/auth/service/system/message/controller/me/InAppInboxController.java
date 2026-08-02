@@ -21,12 +21,12 @@ import java.util.List;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
 /**
- * 用户侧站内信收件箱
+ * 站内信收件箱
  *
  * @author Bunny
  */
+@Tag(name = "站内信收件箱", description = "用户侧收件、已读与删除")
 @AuthenticatedApi
-@Tag(name = "站内信收件箱")
 @Validated
 @RequestMapping("/api/system/me/message/in-app")
 @RestController
@@ -52,21 +52,21 @@ public class InAppInboxController {
 		return Result.success(unreadCount);
 	}
 
-	@Operation(summary = "站内信详情", description = "当前用户可见时返回正文；打开即标已读")
+	@Operation(summary = "查询站内信详情", description = "当前用户可见时返回正文；打开即标已读")
 	@GetMapping("/inbox/{messageId}")
 	public Result<InAppInboxDetailVO> getInboxDetail(@PathVariable Long messageId) {
 		InAppInboxDetailVO detail = inAppInboxService.getInboxDetail(messageId);
 		return Result.success(detail);
 	}
 
-	@Operation(summary = "批量标已读")
+	@Operation(summary = "批量标记站内信已读")
 	@PostMapping("/inbox/read")
 	public Result<String> markRead(@RequestBody @NotEmpty(message = "消息ID列表不能为空") List<Long> messageIds) {
 		inAppInboxService.markRead(messageIds);
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
-	@Operation(summary = "当前大类全部已读", description = "仅处理该大类下当前用户可见的未读消息")
+	@Operation(summary = "标记当前大类全部已读", description = "仅处理该大类下当前用户可见的未读消息")
 	@PostMapping("/inbox/read-all")
 	public Result<String> markAllRead(@RequestParam @NotNull(message = "业务大类ID不能为空") Long majorCategoryId) {
 		inAppInboxService.markAllRead(majorCategoryId);
@@ -80,7 +80,7 @@ public class InAppInboxController {
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
-	@Operation(summary = "当前大类全部删除", description = "仅软删除该大类下当前用户可见消息")
+	@Operation(summary = "删除当前大类全部站内信", description = "仅软删除该大类下当前用户可见消息")
 	@DeleteMapping("/inbox/all")
 	public Result<String> deleteAll(@RequestParam @NotNull(message = "业务大类ID不能为空") Long majorCategoryId) {
 		inAppInboxService.deleteAll(majorCategoryId);

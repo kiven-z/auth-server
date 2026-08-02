@@ -17,11 +17,11 @@ import java.util.List;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
 /**
- * 密码历史日志接口
+ * 密码历史日志
  *
  * @author Bunny
  */
-@Tag(name = "密码历史日志")
+@Tag(name = "密码历史日志", description = "用户密码变更历史查询")
 @RequiredArgsConstructor
 @RequestMapping("/api/system/log/password-history")
 @RestController
@@ -37,7 +37,7 @@ public class LogUserPasswordHistoryController {
 		return Result.success(response);
 	}
 
-	@Operation(summary = "密码历史日志详情")
+	@Operation(summary = "查询密码历史日志详情")
 	@PreAuthorize("@auth.decide('log:passwordhistory:detail')")
 	@GetMapping("{id}")
 	public Result<LogUserPasswordHistoryDetailVO> detail(@PathVariable("id") Long id) {

@@ -30,7 +30,7 @@ public class JobEntity extends BaseEntity {
 	@Schema(title = "白名单任务类全限定名")
 	private String jobClass;
 
-	@Schema(title = "任务类型(BEAN_INVOKE/CUSTOM_CLASS)")
+	@Schema(title = "任务类型（BEAN_INVOKE/CUSTOM_CLASS）")
 	private String taskType;
 
 	@Schema(title = "执行处理器编码")
@@ -42,13 +42,13 @@ public class JobEntity extends BaseEntity {
 	@Schema(title = "Cron 表达式")
 	private String cronExpression;
 
-	@Schema(title = "调度时区(IANA ZoneId)")
+	@Schema(title = "调度时区（IANA ZoneId）")
 	private String timeZone;
 
-	@Schema(title = "错失策略(1/2/3)")
+	@Schema(title = "错失策略（1/2/3）")
 	private Integer misfirePolicy;
 
-	@Schema(title = "是否并发(0否 1是)")
+	@Schema(title = "是否并发（0否 1是）")
 	private Boolean concurrent;
 
 	@TableField(updateStrategy = FieldStrategy.ALWAYS)
@@ -59,7 +59,7 @@ public class JobEntity extends BaseEntity {
 	@Schema(title = "结束时间")
 	private LocalDateTime endTime;
 
-	@Schema(title = "运行状态(true=正常调度，false=暂停)")
+	@Schema(title = "运行状态（true=正常调度，false=暂停）")
 	private Boolean status;
 
 	@Schema(title = "执行参数 JSON")

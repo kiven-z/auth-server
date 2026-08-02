@@ -35,7 +35,7 @@ public class MessageTemplatePageVO extends BaseResponse {
 	@Schema(name = "priority", title = "发送优先级")
 	private Integer priority;
 
-	@Schema(title = "启用状态(true=启用模板，false=停用)")
+	@Schema(title = "启用状态（true=启用模板，false=停用）")
 	private Boolean status;
 
 	@Schema(name = "description", title = "模板描述")

@@ -24,7 +24,7 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
  *
  * @author Bunny
  */
-@Tag(name = "邮件模板相关", description = "邮件模板相关接口")
+@Tag(name = "邮件模板", description = "CRUD、内容编辑、预览渲染")
 @RequestMapping("/api/system/message/email-template")
 @RestController
 public class EmailTemplateController {
@@ -43,7 +43,7 @@ public class EmailTemplateController {
 		return Result.success(html);
 	}
 
-	@Operation(summary = "添加邮件模板")
+	@Operation(summary = "新增邮件模板")
 	@PreAuthorize("@auth.decide('message:template:create')")
 	@PostMapping()
 	public Result<String> create(@Validated(CreateGroup.class) @RequestBody EmailTemplateForm form) {

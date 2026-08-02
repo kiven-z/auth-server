@@ -24,7 +24,7 @@ public class OperationLogExampleController {
 	@PublicApi
 	@OperationLog(serviceDomain = AuditServiceDomain.EXAMPLE, bizModule = ExampleAuditBizModule.EXAMPLE_DEMO,
 			operation = OperationLogKind.QUERY)
-	@Operation(summary = "操作日志示例，设置目标ID")
+	@Operation(summary = "示例：操作日志设置目标ID")
 	@DeleteMapping("/set-target-id/{id}")
 	public Result<String> example(@PathVariable Long id) {
 		OperationLogContext.setTargetId(id);
@@ -34,7 +34,7 @@ public class OperationLogExampleController {
 	@PublicApi
 	@OperationLog(serviceDomain = AuditServiceDomain.EXAMPLE, bizModule = ExampleAuditBizModule.EXAMPLE_DEMO,
 			operation = OperationLogKind.QUERY)
-	@Operation(summary = "操作日志示例，携带请求参数")
+	@Operation(summary = "示例：操作日志携带请求参数")
 	@PostMapping("request-params")
 	public Result<Map<String, Object>> requestParams(@RequestBody Map<String, Object> data) {
 		return Result.success(data, "操作日志示例");

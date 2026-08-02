@@ -11,7 +11,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import java.util.List;
 
 /**
- * 用户岗位关联管理
+ * 用户岗位关联服务
  *
  * @author Bunny
  */

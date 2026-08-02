@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * 管理端授权画像运维
+ * 管理端授权
  *
  * @author Bunny
  */
@@ -32,7 +32,7 @@ public class AdminAuthorizationController {
 
 	@OperationLog(targetType = "AUTH_PROFILE", serviceDomain = AuditServiceDomain.AUTH,
 			bizModule = AuthAuditBizModule.AUTH_PROFILE, operation = OperationLogKind.UPDATE)
-	@Operation(summary = "批量刷新用户授权画像缓存（AuthProfile）")
+	@Operation(summary = "批量刷新用户授权画像", description = "刷新 AuthProfile 缓存")
 	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/authorization/refresh")
 	public Result<Void> refreshAuthorization(@RequestBody(required = false) List<Long> userIds) {

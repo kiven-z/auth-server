@@ -10,7 +10,7 @@ import com.auth.service.system.admin.model.entity.LogOperationEntity;
 import org.springframework.stereotype.Service;
 
 /**
- * 安全类内部上报数据落库实现
+ * 安全类内部上报数据落库服务
  *
  * @author Bunny
  */

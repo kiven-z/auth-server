@@ -46,7 +46,7 @@ import java.util.Objects;
 import static com.auth.service.system.message.exception.MessageResultCode.*;
 
 /**
- * 管理端站内信按范围发送
+ * 管理端站内信发送任务服务实现
  *
  * @author Bunny
  */

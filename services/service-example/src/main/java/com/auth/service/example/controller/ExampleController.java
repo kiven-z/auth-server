@@ -47,21 +47,21 @@ public class ExampleController {
 
 	@OperationLog(targetType = "Example", serviceDomain = AuditServiceDomain.EXAMPLE,
 			bizModule = ExampleAuditBizModule.EXAMPLE_DEMO, operation = OperationLogKind.QUERY)
-	@Operation(summary = "1-公开路径接口")
+	@Operation(summary = "示例：公开路径")
 	@GetMapping("/public")
 	public Result<String> publicEndpoint() {
 		return Result.success("ok-public");
 	}
 
 	@AuthenticatedApi
-	@Operation(summary = "2-需要认证路径接口")
+	@Operation(summary = "示例：需认证路径")
 	@GetMapping("/authenticated")
 	public Result<String> authenticatedEndpoint() {
 		return Result.success("ok-authenticated");
 	}
 
 	@AuthenticatedApi
-	@Operation(summary = "3-配置了放行路径，但是使用了认证注解")
+	@Operation(summary = "示例：放行路径叠加认证注解")
 	@GetMapping("/conflict/permit-path-but-authenticated")
 	public Result<String> conflictPermitButAuthenticated() {
 		try {
@@ -74,14 +74,14 @@ public class ExampleController {
 	}
 
 	@PublicApi
-	@Operation(summary = "4-配置了认证路径，但是使用了公开注解")
+	@Operation(summary = "示例：认证路径叠加公开注解")
 	@GetMapping("/conflict/secured-path-but-public")
 	public Result<String> conflictSecuredButPublic() {
 		return Result.success("ok-conflict-secured-public");
 	}
 
 	@AuthenticatedApi
-	@Operation(summary = "5-个人信息")
+	@Operation(summary = "示例：查询个人信息")
 	@GetMapping("/me")
 	public Result<AuthProfile> me() {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -92,14 +92,14 @@ public class ExampleController {
 		return Result.success(profile);
 	}
 
-	@Operation(summary = "6-判断权限")
+	@Operation(summary = "示例：判断权限")
 	@PreAuthorize("@auth.decide('sys:xxx')")
 	@GetMapping("/pre-authorize-1")
 	public Result<String> preAuthorize1() {
 		return Result.success("ok-pre-authorize");
 	}
 
-	@Operation(summary = "7-判断权限")
+	@Operation(summary = "示例：判断权限二")
 	@PreAuthorize("@auth.decide('sys:user:add')")
 	@GetMapping("/pre-authorize-2")
 	public Result<String> preAuthorize2() {
@@ -107,7 +107,7 @@ public class ExampleController {
 	}
 
 	@AuthenticatedApi
-	@Operation(summary = "8-刷新Token")
+	@Operation(summary = "示例：刷新令牌")
 	@PostMapping("/trigger-feign")
 	public Result<Object> triggerFeign() {
 		return exampleAuthInnerFeignClient.refreshToken();

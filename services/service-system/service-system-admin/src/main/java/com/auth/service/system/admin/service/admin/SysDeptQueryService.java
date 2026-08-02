@@ -11,28 +11,28 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import java.util.List;
 
 /**
- * 部门只读查询。
+ * 部门只读查询服务
  *
  * @author Bunny
  */
 public interface SysDeptQueryService extends IService<SysDeptEntity> {
 
 	/**
-	 * 条件查询全部部门
+	 * 查询部门列表
 	 * @param query 筛选条件
 	 * @return 部门行
 	 */
 	List<SysDeptListVO> listFlat(SysDeptListQuery query);
 
 	/**
-	 * 分页查询部门（表格视图）
+	 * 分页查询部门
 	 * @param query 筛选与分页
 	 * @return 分页结果
 	 */
 	PageResponse<SysDeptListVO> pageFlat(SysDeptPageQuery query);
 
 	/**
-	 * 部门详情
+	 * 获取部门详情
 	 * @param id 部门主键
 	 * @return 详情 VO
 	 */

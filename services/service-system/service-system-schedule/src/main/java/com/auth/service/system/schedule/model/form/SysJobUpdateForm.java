@@ -36,15 +36,15 @@ public class SysJobUpdateForm implements Serializable {
 	@NotBlank(groups = UpdateGroup.class)
 	private String cronExpression;
 
-	@Schema(title = "调度时区(IANA ZoneId，默认 Asia/Shanghai)")
+	@Schema(title = "调度时区（IANA ZoneId，默认 Asia/Shanghai）")
 	@Size(max = 64)
 	private String timeZone;
 
-	@Schema(title = "错失策略(1/2/3)")
+	@Schema(title = "错失策略（1/2/3）")
 	@NotNull(groups = UpdateGroup.class)
 	private Integer misfirePolicy;
 
-	@Schema(title = "是否并发(0否 1是)")
+	@Schema(title = "是否并发（0否 1是）")
 	@NotNull(groups = UpdateGroup.class)
 	private Boolean concurrent;
 
@@ -54,7 +54,7 @@ public class SysJobUpdateForm implements Serializable {
 	@Schema(title = "结束时间")
 	private LocalDateTime endTime;
 
-	@Schema(title = "运行状态(true=正常调度，false=暂停)")
+	@Schema(title = "运行状态（true=正常调度，false=暂停）")
 	@NotNull(groups = UpdateGroup.class)
 	private Boolean status;
 

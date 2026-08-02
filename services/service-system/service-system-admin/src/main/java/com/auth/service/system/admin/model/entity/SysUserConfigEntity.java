@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * 用户级配置项，对应 sys_user_config（物理删除；删用户级联删除）
+ * 用户级配置项（物理删除；删用户级联删除）
  *
  * @author Bunny
  */

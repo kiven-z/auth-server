@@ -44,7 +44,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * 系统岗位服务实现。
+ * 系统岗位服务实现
  *
  * @author Bunny
  */

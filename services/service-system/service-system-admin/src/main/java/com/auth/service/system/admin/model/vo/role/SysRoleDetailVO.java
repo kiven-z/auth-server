@@ -2,10 +2,7 @@ package com.auth.service.system.admin.model.vo.role;
 
 import com.auth.common.core.model.response.BaseResponse;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionBoundMenuItemVO;
-import com.auth.service.system.admin.model.vo.reference.DeptReferenceVO;
 import com.auth.service.system.admin.model.vo.reference.PermissionReferenceVO;
-import com.auth.service.system.admin.model.vo.reference.PostReferenceVO;
-import com.auth.service.system.admin.model.vo.reference.UserReferenceVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -32,7 +29,7 @@ public class SysRoleDetailVO extends BaseResponse {
 	@Schema(title = "角色名称")
 	private String roleName;
 
-	@Schema(title = "启用状态(true=正常启用，false=停用)")
+	@Schema(title = "启用状态（true=正常启用，false=停用）")
 	private Boolean status;
 
 	@Schema(title = "显示顺序")
@@ -46,14 +43,5 @@ public class SysRoleDetailVO extends BaseResponse {
 
 	@Schema(title = "已绑定菜单列表（sys_menu_role 反查）")
 	private List<SysPermissionBoundMenuItemVO> boundMenus;
-
-	@Schema(title = "已授权用户列表（grant_table 反查）")
-	private List<UserReferenceVO> boundUsers;
-
-	@Schema(title = "已授权部门列表（grant_table 反查）")
-	private List<DeptReferenceVO> boundDepts;
-
-	@Schema(title = "已授权岗位列表（grant_table 反查）")
-	private List<PostReferenceVO> boundPosts;
 
 }

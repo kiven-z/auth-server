@@ -16,11 +16,11 @@ import java.util.List;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
 /**
- * 定时任务执行日志接口
+ * 定时任务-日志
  *
  * @author Bunny
  */
-@Tag(name = "定时任务-日志", description = "log_job")
+@Tag(name = "定时任务-日志", description = "任务执行日志查询与清理")
 @RequestMapping("/api/system/log/job")
 @RestController
 public class LogJobController {
@@ -39,7 +39,7 @@ public class LogJobController {
 		return Result.success(response);
 	}
 
-	@Operation(summary = "日志详情")
+	@Operation(summary = "查询任务日志详情")
 	@PreAuthorize("@auth.decide('schedule:joblog:detail')")
 	@GetMapping("{id}")
 	public Result<LogJobDetailVO> detail(@PathVariable("id") Long id) {
@@ -48,7 +48,7 @@ public class LogJobController {
 		return Result.success(detailVO);
 	}
 
-	@Operation(summary = "批量删除日志")
+	@Operation(summary = "批量删除任务日志")
 	@PreAuthorize("@auth.decide('schedule:joblog:delete')")
 	@DeleteMapping
 	public Result<String> batchDelete(@RequestBody List<Long> ids) {

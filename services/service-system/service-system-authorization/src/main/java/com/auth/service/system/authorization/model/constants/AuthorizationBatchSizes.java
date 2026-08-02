@@ -3,7 +3,7 @@ package com.auth.service.system.authorization.model.constants;
 import lombok.experimental.UtilityClass;
 
 /**
- * authorization 模块批量处理批次大小。
+ * authorization 模块批量处理批次大小
  *
  * @author Bunny
  */

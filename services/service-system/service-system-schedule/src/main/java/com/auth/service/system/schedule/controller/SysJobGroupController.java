@@ -28,11 +28,11 @@ import java.util.List;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
 /**
- * 定时任务分组接口
+ * 定时任务-分组
  *
  * @author Bunny
  */
-@Tag(name = "定时任务-分组", description = "job_group")
+@Tag(name = "定时任务-分组", description = "任务分组 CRUD 与启停")
 @RequestMapping("/api/system/job-group")
 @RestController
 public class SysJobGroupController {
@@ -55,7 +55,7 @@ public class SysJobGroupController {
 		return Result.success(response);
 	}
 
-	@Operation(summary = "启用分组下拉/远程搜索")
+	@Operation(summary = "搜索启用任务分组")
 	@PreAuthorize("@auth.decide('schedule:jobgroup:query')")
 	@GetMapping("options")
 	public Result<List<SysJobGroupPageVO>> options(@RequestParam(value = "keyword", required = false) String keyword,
@@ -67,7 +67,7 @@ public class SysJobGroupController {
 		return Result.success(responses);
 	}
 
-	@Operation(summary = "任务分组详情")
+	@Operation(summary = "查询任务分组详情")
 	@PreAuthorize("@auth.decide('schedule:jobgroup:query')")
 	@GetMapping("{id}")
 	public Result<SysJobGroupDetailVO> detail(@PathVariable("id") Long id) {
@@ -86,7 +86,7 @@ public class SysJobGroupController {
 
 	@OperationLog(targetType = "JOB_GROUP", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = ScheduleAuditBizModule.SYS_JOB_GROUP, operation = OperationLogKind.UPDATE)
-	@Operation(summary = "修改任务分组")
+	@Operation(summary = "更新任务分组")
 	@PreAuthorize("@auth.decide('schedule:jobgroup:update')")
 	@PutMapping
 	public Result<String> update(@Validated(UpdateGroup.class) @RequestBody SysJobGroupUpdateForm form) {

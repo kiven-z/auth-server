@@ -1,6 +1,7 @@
 package com.auth.service.system.admin.service.admin.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.common.core.utils.TreeParentIdUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.constants.PermissionConstant;
@@ -10,7 +11,6 @@ import com.auth.service.system.admin.mapper.menu.SysMenuMapper;
 import com.auth.service.system.admin.mapper.menu.SysMenuRoleMapper;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.admin.model.form.menu.SysMenuAssignRoleForm;
-import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.service.system.admin.model.form.menu.SysMenuMoveForm;
 import com.auth.service.system.admin.model.form.menu.SysMenuSaveForm;
 import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
@@ -42,7 +42,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * 系统菜单服务实现。
+ * 系统菜单服务实现
  *
  * @author Bunny
  */

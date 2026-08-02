@@ -21,11 +21,11 @@ import static com.auth.module.security.contract.api.audit.AuditServiceDomain.SYS
 import static com.auth.service.system.file.model.constants.FileAuditBizModule.SYS_FILE;
 
 /**
- * 文件回收站控制器
+ * 文件回收站
  *
  * @author Bunny
  */
-@Tag(name = "文件回收站")
+@Tag(name = "文件回收站", description = "管理端回收站查询、恢复与彻底删除")
 @RequestMapping("/api/system/file/recycle")
 @RestController
 public class FileRecycleController {
@@ -39,7 +39,7 @@ public class FileRecycleController {
 		this.fileRecycleService = fileRecycleService;
 	}
 
-	@Operation(summary = "回收站分页查询")
+	@Operation(summary = "分页查询回收站文件")
 	@PreAuthorize("@auth.decide('sys:file:recycle:query')")
 	@GetMapping("/page")
 	public Result<PageResponse<FileRecordPageVO>> page(@Valid FileRecordPageQuery query) {
@@ -50,7 +50,7 @@ public class FileRecycleController {
 		return Result.success(pageResult);
 	}
 
-	@Operation(summary = "回收站文件详情")
+	@Operation(summary = "查询回收站文件详情")
 	@PreAuthorize("@auth.decide('sys:file:query')")
 	@GetMapping("/{id}")
 	public Result<FileRecordDetailVO> detail(@PathVariable("id") Long id) {
@@ -61,7 +61,7 @@ public class FileRecycleController {
 
 	@OperationLog(targetType = "FILE_RECYCLE_RESTORE", serviceDomain = SYSTEM, bizModule = SYS_FILE,
 			operation = OperationLogKind.UPDATE)
-	@Operation(summary = "回收站批量恢复")
+	@Operation(summary = "批量恢复回收站文件")
 	@PreAuthorize("@auth.decide('sys:file:recycle:restore')")
 	@PostMapping("/restore")
 	public Result<Void> restore(@RequestBody List<Long> ids) {
@@ -71,7 +71,7 @@ public class FileRecycleController {
 
 	@OperationLog(targetType = "FILE_RECYCLE_PURGE", serviceDomain = SYSTEM, bizModule = SYS_FILE,
 			operation = OperationLogKind.DELETE)
-	@Operation(summary = "回收站批量彻底删除")
+	@Operation(summary = "批量彻底删除回收站文件")
 	@PreAuthorize("@auth.decide('sys:file:recycle:purge')")
 	@DeleteMapping("/purge")
 	public Result<Void> purge(@RequestBody List<Long> ids) {

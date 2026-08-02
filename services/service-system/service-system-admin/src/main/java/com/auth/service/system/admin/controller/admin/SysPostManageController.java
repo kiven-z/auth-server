@@ -24,7 +24,7 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
  *
  * @author Bunny
  */
-@Tag(name = "岗位扩展管理")
+@Tag(name = "岗位扩展管理", description = "岗位角色分配")
 @RequestMapping("/api/system/post")
 @RestController
 public class SysPostManageController {
@@ -45,7 +45,7 @@ public class SysPostManageController {
 
 	@OperationLog(targetType = "POST_ROLE", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = AuthorizationAuditBizModule.GRANT_TABLE, operation = OperationLogKind.UPDATE)
-	@Operation(summary = "全量覆盖岗位角色授权")
+	@Operation(summary = "覆盖分配岗位角色")
 	@PreAuthorize("@auth.decide('sys:post:update')")
 	@PutMapping("/{postId}/roles")
 	public Result<Void> replaceRoles(@PathVariable("postId") Long postId,

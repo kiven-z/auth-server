@@ -29,13 +29,13 @@ public class LogJobQuery extends PageQueryRequest {
 	@Schema(title = "调用目标")
 	private String invokeTarget;
 
-	@Schema(title = "触发类型(SCHEDULE/MANUAL)")
+	@Schema(title = "触发类型（SCHEDULE/MANUAL）")
 	private String triggerType;
 
-	@Schema(title = "耗时(ms)")
+	@Schema(title = "耗时（ms）")
 	private Long elapsedTime;
 
-	@Schema(title = "执行是否成功(1=仅成功，0=仅失败)")
+	@Schema(title = "执行是否成功（1=仅成功，0=仅失败）")
 	private Boolean status;
 
 }

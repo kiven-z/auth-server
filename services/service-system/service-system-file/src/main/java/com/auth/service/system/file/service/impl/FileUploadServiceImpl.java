@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * 文件上传服务实现类
+ * 文件上传服务实现
  *
  * @author Bunny
  */

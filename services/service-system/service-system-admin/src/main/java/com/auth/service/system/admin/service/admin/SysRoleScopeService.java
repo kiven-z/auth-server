@@ -20,7 +20,7 @@ public interface SysRoleScopeService extends IService<RoleScopeEntity> {
 	SysRoleScopeVO getByRoleId(Long roleId);
 
 	/**
-	 * 保存角色数据范围：有则更新，无则插入；写后触发角色授权失效
+	 * 保存角色数据范围（写后触发授权失效）
 	 * @param roleId 角色 ID
 	 * @param form 范围表单
 	 */

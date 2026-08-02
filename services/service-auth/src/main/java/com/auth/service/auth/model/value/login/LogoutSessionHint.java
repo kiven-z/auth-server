@@ -5,7 +5,7 @@ import lombok.Value;
 import lombok.experimental.Accessors;
 
 /**
- * 登出审计上下文：撤销会话后供编排层写入单条登出日志。
+ * 登出审计上下文：撤销会话后供编排层写入单条登出日志
  *
  * @author Bunny
  */

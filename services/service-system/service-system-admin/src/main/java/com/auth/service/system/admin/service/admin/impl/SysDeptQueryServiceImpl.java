@@ -29,7 +29,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * 部门只读查询实现。
+ * 部门只读查询服务实现
  *
  * @author Bunny
  */

@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * 审计用户展示名
+ * 审计用户展示名服务实现
  *
  * @author Bunny
  */
@@ -67,7 +67,7 @@ public class AuditUserDisplayServiceImpl implements AuditUserDisplayService {
 	}
 
 	/**
-	 * 填充审计用户名，并可选填充额外用户字段。
+	 * 填充审计用户名，并可选填充额外用户字段
 	 * @param records 行列表
 	 * @param extraUserIdGetter 额外用户 ID 读取
 	 * @param extraUsernameSetter 额外用户名写入
@@ -99,7 +99,7 @@ public class AuditUserDisplayServiceImpl implements AuditUserDisplayService {
 	}
 
 	/**
-	 * 收集单条记录涉及的用户 ID（审计列 + 可选额外列）。
+	 * 收集单条记录涉及的用户 ID（审计列 + 可选额外列）
 	 * @param vo 行对象
 	 * @param extraUserIdGetter 额外用户 ID 读取
 	 * @param <T> 行类型

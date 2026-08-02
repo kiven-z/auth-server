@@ -38,7 +38,7 @@ public class LogJobEntity extends BaseEntity {
 	@Schema(title = "执行报告")
 	private String jobMessage;
 
-	@Schema(title = "触发类型(SCHEDULE/MANUAL)")
+	@Schema(title = "触发类型（SCHEDULE/MANUAL）")
 	private String triggerType;
 
 	@Schema(title = "执行是否成功")

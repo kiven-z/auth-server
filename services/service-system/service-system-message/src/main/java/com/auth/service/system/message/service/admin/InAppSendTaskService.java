@@ -14,7 +14,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import java.util.List;
 
 /**
- * 管理端站内信发送任务
+ * 管理端站内信发送任务服务
  *
  * @author Bunny
  */

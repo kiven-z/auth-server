@@ -10,7 +10,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import java.util.List;
 
 /**
- * 用户部门关联管理
+ * 用户部门关联服务
  *
  * @author Bunny
  */

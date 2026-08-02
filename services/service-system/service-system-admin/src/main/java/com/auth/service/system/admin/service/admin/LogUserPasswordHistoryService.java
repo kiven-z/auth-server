@@ -8,7 +8,7 @@ import com.auth.service.system.admin.model.vo.loguserpasswordhistory.LogUserPass
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
- * 密码历史日志服务。
+ * 密码历史日志服务
  *
  * @author Bunny
  */
@@ -22,7 +22,7 @@ public interface LogUserPasswordHistoryService extends IService<LogUserPasswordH
 	PageResponse<LogUserPasswordHistoryPageVO> getPage(LogUserPasswordHistoryQuery query);
 
 	/**
-	 * 详情
+	 * 获取密码历史详情
 	 * @param id 主键
 	 * @return 详情
 	 */

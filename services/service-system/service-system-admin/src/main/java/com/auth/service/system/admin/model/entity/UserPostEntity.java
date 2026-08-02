@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * 用户岗位关联，对应 user_post
+ * 用户岗位关联
  *
  * @author Bunny
  */

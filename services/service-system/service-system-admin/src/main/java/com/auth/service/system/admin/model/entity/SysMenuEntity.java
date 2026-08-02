@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * 系统菜单（路由）主表，对应 sys_menu
+ * 系统菜单（路由）主表
  *
  * @author Bunny
  */
@@ -17,10 +17,10 @@ import lombok.Setter;
 @Setter
 public class SysMenuEntity extends BaseEntity {
 
-	@Schema(title = "父菜单ID，0 表示顶级")
+	@Schema(title = "父菜单 ID（0 表示顶级）")
 	private Long parentId;
 
-	@Schema(title = "菜单类型：0 菜单 1 iframe 2 外链")
+	@Schema(title = "菜单类型（0=菜单，1=iframe，2=外链）")
 	private Integer menuType;
 
 	@Schema(title = "路由路径")
@@ -44,13 +44,10 @@ public class SysMenuEntity extends BaseEntity {
 	@Schema(title = "是否在菜单中显示")
 	private Boolean showLink;
 
-	/**
-	 * 登录可见：true=所有登录用户可见，不校验角色；false=按角色
-	 */
 	@Schema(title = "登录可见（不校验角色）")
 	private Boolean publicAccess;
 
-	@Schema(title = "排序，越大越靠后")
+	@Schema(title = "排序（越大越靠后）")
 	private Integer menuRank;
 
 	@Schema(title = "额外图标")
@@ -89,7 +86,7 @@ public class SysMenuEntity extends BaseEntity {
 	@Schema(title = "固定标签")
 	private Boolean fixedTag;
 
-	@Schema(title = "启用状态(true=启用菜单，false=停用)")
+	@Schema(title = "启用状态（true=启用，false=停用）")
 	private Boolean status;
 
 	@Schema(title = "扩展 meta JSON")

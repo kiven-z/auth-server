@@ -24,11 +24,11 @@ import static com.auth.service.system.authorization.exception.AuthorizationInval
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
 /**
- * 授权失效 Outbox 运维接口
+ * 授权失效 Outbox
  *
  * @author Bunny
  */
-@Tag(name = "授权失效 Outbox", description = "sys_authorization_invalidation_outbox")
+@Tag(name = "授权失效 Outbox", description = "Outbox 分页、详情与重试")
 @RequiredArgsConstructor
 @RequestMapping("/api/system/ops/authorization-invalidation/outbox")
 @RestController
@@ -38,7 +38,7 @@ public class AuthorizationInvalidationOutboxOpsController {
 
 	private final AuthorizationInvalidationOutboxManualRetryService authorizationInvalidationOutboxManualRetryService;
 
-	@Operation(summary = "分页查询授权失效 Outbox")
+	@Operation(summary = "分页查询授权失效投递")
 	@PreAuthorize("@auth.decide('ops:invalidationoutbox:query')")
 	@GetMapping("page")
 	public Result<PageResponse<AuthorizationInvalidationOutboxPageVO>> page(
@@ -48,7 +48,7 @@ public class AuthorizationInvalidationOutboxOpsController {
 		return Result.success(page);
 	}
 
-	@Operation(summary = "授权失效 Outbox 详情")
+	@Operation(summary = "查询授权失效投递详情")
 	@PreAuthorize("@auth.decide('ops:invalidationoutbox:detail')")
 	@GetMapping("{id}")
 	public Result<AuthorizationInvalidationOutboxDetailVO> detail(@PathVariable("id") Long id) {
@@ -58,7 +58,7 @@ public class AuthorizationInvalidationOutboxOpsController {
 
 	@OperationLog(targetType = "AUTH_INVALIDATION_OUTBOX", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = AuthorizationAuditBizModule.AUTH_INVALIDATION_OUTBOX, operation = OperationLogKind.UPDATE)
-	@Operation(summary = "人工重试授权失效 Outbox 投递")
+	@Operation(summary = "重试授权失效投递")
 	@PreAuthorize("@auth.decide('ops:invalidationoutbox:retry')")
 	@PostMapping("{id}/retry")
 	public Result<AuthorizationInvalidationOutboxRetryResultVO> retry(@PathVariable("id") Long id,

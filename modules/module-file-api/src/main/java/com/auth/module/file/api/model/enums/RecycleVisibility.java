@@ -1,7 +1,7 @@
 package com.auth.module.file.api.model.enums;
 
 /**
- * 文件删除后在回收站的可见性策略。
+ * 文件删除后在回收站的可见性策略
  *
  * @author Bunny
  */

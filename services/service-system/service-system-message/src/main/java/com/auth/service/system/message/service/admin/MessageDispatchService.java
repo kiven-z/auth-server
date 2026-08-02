@@ -3,7 +3,7 @@ package com.auth.service.system.message.service.admin;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 
 /**
- * 消息发送编排 SPI
+ * 消息发送编排服务
  *
  * @author Bunny
  */

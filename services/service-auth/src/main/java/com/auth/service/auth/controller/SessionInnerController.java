@@ -12,11 +12,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 会话域内部接口：服务间批量踢下线与用户会话查询
+ * 内部会话
  *
  * @author Bunny
  */
-@Tag(name = "内部会话", description = "服务间会话撤销")
+@Tag(name = "内部会话", description = "服务间会话撤销与查询")
 @RequiredArgsConstructor
 @RequestMapping("/api/auth/inner/sessions")
 @RestController

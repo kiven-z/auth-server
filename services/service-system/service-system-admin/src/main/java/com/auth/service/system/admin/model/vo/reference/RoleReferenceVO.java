@@ -33,7 +33,7 @@ public class RoleReferenceVO implements Serializable {
 	@Schema(title = "角色名称")
 	private String roleName;
 
-	@Schema(title = "启用状态(true=正常启用，false=停用)")
+	@Schema(title = "启用状态（true=正常启用，false=停用）")
 	private Boolean status;
 
 }

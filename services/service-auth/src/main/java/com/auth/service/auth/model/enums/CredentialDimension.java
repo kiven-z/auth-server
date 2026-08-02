@@ -6,7 +6,7 @@ import static com.auth.module.security.contract.redis.SecurityRedisKey.EMAIL_COD
 import static com.auth.module.security.contract.redis.SecurityRedisKey.SMS_CODE;
 
 /**
- * 登录凭证查询维度。
+ * 登录凭证查询维度
  *
  * @author Bunny
  */

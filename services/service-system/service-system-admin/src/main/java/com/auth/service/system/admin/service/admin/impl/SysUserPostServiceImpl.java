@@ -138,7 +138,7 @@ public class SysUserPostServiceImpl extends ServiceImpl<UserPostMapper, UserPost
 	}
 
 	/**
-	 * 主岗位规则：非正常状态不可设为主岗位；设为主岗位时降级该用户其他主岗位。
+	 * 主岗位规则：非正常状态不可设为主岗位；设为主岗位时降级该用户其他主岗位
 	 * @param userId 用户 ID
 	 * @param status 关联状态
 	 * @param isPrimary 是否主岗位

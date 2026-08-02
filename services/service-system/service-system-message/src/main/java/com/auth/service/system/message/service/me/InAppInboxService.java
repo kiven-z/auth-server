@@ -9,7 +9,7 @@ import com.auth.service.system.message.model.vo.inapp.InAppInboxUnreadCountVO;
 import java.util.List;
 
 /**
- * 用户侧站内信收件箱
+ * 用户侧站内信收件箱服务
  *
  * @author Bunny
  */
@@ -48,13 +48,13 @@ public interface InAppInboxService {
 	void markAllRead(Long majorCategoryId);
 
 	/**
-	 * 用户侧批量软删除站内信
+	 * 批量删除站内信（软删除）
 	 * @param messageIds 站内信 ID 列表
 	 */
 	void batchDelete(List<Long> messageIds);
 
 	/**
-	 * 将当前大类下可见消息全部软删除
+	 * 清空当前大类可见站内信（软删除）
 	 * @param majorCategoryId 业务大类 ID
 	 */
 	void deleteAll(Long majorCategoryId);

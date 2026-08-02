@@ -6,6 +6,7 @@ import com.auth.service.system.admin.model.po.reference.PostReferencePO;
 import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.auth.service.system.admin.model.po.reference.UserReferencePO;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -65,5 +66,24 @@ public interface GrantTableMapper extends BaseMapper<GrantTableEntity> {
 	 * @return 已授权岗位投影列表
 	 */
 	List<PostReferencePO> selectBoundPostsByRoleId(@Param("roleId") Long roleId);
+
+	/**
+	 * 按角色与主体类型查询已绑定主体 ID
+	 * @param roleId 角色 ID
+	 * @param subjectType 主体类型
+	 * @return 主体 ID 列表
+	 */
+	@Select("SELECT gt.subject_id FROM grant_table gt WHERE gt.role_id = #{roleId} AND gt.subject_type = #{subjectType}")
+	List<Long> selectSubjectIdsByRoleIdAndSubjectType(@Param("roleId") Long roleId,
+			@Param("subjectType") String subjectType);
+
+	/**
+	 * 按角色与主体类型删除 grant 行（不影响该主体对其它角色的授权）
+	 * @param roleId 角色 ID
+	 * @param subjectType 主体类型
+	 * @return 删除行数
+	 */
+	@Delete("DELETE FROM grant_table WHERE role_id = #{roleId} AND subject_type = #{subjectType}")
+	int deleteByRoleIdAndSubjectType(@Param("roleId") Long roleId, @Param("subjectType") String subjectType);
 
 }

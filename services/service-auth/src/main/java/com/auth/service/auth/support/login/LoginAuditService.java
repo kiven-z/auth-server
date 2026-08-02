@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * 登录审计应用服务
+ * 登录审计服务
  *
  * @author Bunny
  */
@@ -48,7 +48,7 @@ public class LoginAuditService {
 	private final UserMapper userMapper;
 
 	/**
-	 * 将业务结果码映射为审计结果枚举（编排阶段失败等）。
+	 * 将业务结果码映射为审计结果枚举（编排阶段失败等）
 	 * @param code 业务结果码
 	 * @return 审计结果
 	 */
@@ -65,7 +65,7 @@ public class LoginAuditService {
 	}
 
 	/**
-	 * 从登录命令解析审计主体（手机号/邮箱/输入用户名等）。
+	 * 从登录命令解析审计主体（手机号/邮箱/输入用户名等）
 	 * @param command 登录命令
 	 * @return 主体字符串，无法解析时返回 null
 	 */
@@ -78,7 +78,7 @@ public class LoginAuditService {
 	}
 
 	/**
-	 * 不支持的登录命令类型（策略表未命中）。
+	 * 不支持的登录命令类型（策略表未命中）
 	 * @param request HTTP 请求
 	 * @param command 登录命令
 	 * @param messageKey 失败原因 messageKey
@@ -89,7 +89,7 @@ public class LoginAuditService {
 	}
 
 	/**
-	 * 解析用户失败且为「用户名或密码错误」类（不暴露用户是否存在）。
+	 * 解析用户失败且为「用户名或密码错误」类（不暴露用户是否存在）
 	 * @param request HTTP 请求
 	 * @param logType 登录日志类型
 	 * @param principal 审计主体
@@ -102,7 +102,7 @@ public class LoginAuditService {
 	}
 
 	/**
-	 * 账户禁用（状态位）。
+	 * 账户禁用（状态位）
 	 * @param request HTTP 请求
 	 * @param logType 登录日志类型
 	 * @param userId 用户 ID
@@ -115,7 +115,7 @@ public class LoginAuditService {
 	}
 
 	/**
-	 * 账户状态为锁定（状态位）。
+	 * 账户状态为锁定（状态位）
 	 * @param request HTTP 请求
 	 * @param logType 登录日志类型
 	 * @param userId 用户 ID
@@ -128,7 +128,7 @@ public class LoginAuditService {
 	}
 
 	/**
-	 * 凭证错误且带剩余尝试次数说明。
+	 * 凭证错误且带剩余尝试次数说明
 	 * @param request HTTP 请求
 	 * @param logType 登录日志类型
 	 * @param userId 用户 ID
@@ -142,7 +142,7 @@ public class LoginAuditService {
 	}
 
 	/**
-	 * 按业务码映射发布「凭证类」失败审计（可选映射）。
+	 * 按业务码映射发布「凭证类」失败审计（可选映射）
 	 * @param request HTTP 请求
 	 * @param logType 登录日志类型
 	 * @param userId 用户 ID
@@ -157,7 +157,7 @@ public class LoginAuditService {
 	}
 
 	/**
-	 * 按业务码映射发布「锁定类」失败审计（可选映射）。
+	 * 按业务码映射发布「锁定类」失败审计（可选映射）
 	 * @param request HTTP 请求
 	 * @param logType 登录日志类型
 	 * @param userId 用户 ID
@@ -172,7 +172,7 @@ public class LoginAuditService {
 	}
 
 	/**
-	 * 登录编排成功（已签发令牌并建立会话后）。
+	 * 登录编排成功（已签发令牌并建立会话后）
 	 * @param request HTTP 请求
 	 * @param logType 登录日志类型
 	 * @param userId 用户 ID
@@ -185,7 +185,7 @@ public class LoginAuditService {
 	}
 
 	/**
-	 * 登录编排阶段失败（令牌/会话写入失败等）。
+	 * 登录编排阶段失败（令牌/会话写入失败等）
 	 * @param request HTTP 请求
 	 * @param logType 登录日志类型
 	 * @param userId 用户 ID
@@ -199,7 +199,7 @@ public class LoginAuditService {
 	}
 
 	/**
-	 * 登出成功审计（编排层在撤销会话后单点调用）。
+	 * 登出成功审计（编排层在撤销会话后单点调用）
 	 * @param request HTTP 请求
 	 * @param userId 用户 ID
 	 * @param jti 会话 ID
@@ -209,7 +209,7 @@ public class LoginAuditService {
 	}
 
 	/**
-	 * 刷新令牌失败审计。
+	 * 刷新令牌失败审计
 	 * @param request HTTP 请求
 	 * @param userId 用户 ID（可能为 null）
 	 * @param ex 业务异常
@@ -220,7 +220,7 @@ public class LoginAuditService {
 	}
 
 	/**
-	 * 刷新令牌成功审计。
+	 * 刷新令牌成功审计
 	 * @param request HTTP 请求
 	 * @param userId 用户 ID
 	 * @param jti 会话 ID
@@ -238,7 +238,7 @@ public class LoginAuditService {
 	}
 
 	/**
-	 * 规范化审计主体：有 userId 时优先落库系统登录名，无 userId 时保留登录尝试主体。
+	 * 规范化审计主体：有 userId 时优先落库系统登录名，无 userId 时保留登录尝试主体
 	 * @param userId 用户 ID
 	 * @param incomingPrincipal 调用方传入的主体
 	 * @return 规范化后的主体

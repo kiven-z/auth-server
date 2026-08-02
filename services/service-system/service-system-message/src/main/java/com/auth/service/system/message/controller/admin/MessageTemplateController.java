@@ -28,11 +28,11 @@ import java.util.List;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
 /**
- * 消息模板公共接口
+ * 消息模板
  *
  * @author Bunny
  */
-@Tag(name = "消息模板相关", description = "消息模板跨渠道公共查询、删除、启停等")
+@Tag(name = "消息模板", description = "跨渠道公共查询、删除、启停")
 @Validated
 @RequestMapping("/api/system/message/template")
 @RestController
@@ -52,7 +52,7 @@ public class MessageTemplateController {
 		return Result.success(pageResponse);
 	}
 
-	@Operation(summary = "消息模板详情")
+	@Operation(summary = "查询消息模板详情")
 	@PreAuthorize("@auth.decide('message:template:detail')")
 	@GetMapping("{id}")
 	public Result<MessageTemplateDetailVO> getMessageTemplateById(@PathVariable("id") Long id,
@@ -61,7 +61,7 @@ public class MessageTemplateController {
 		return Result.success(detailVO);
 	}
 
-	@Operation(summary = "查询模板变量声明")
+	@Operation(summary = "查询消息模板变量声明")
 	@PreAuthorize("@auth.decide('message:template:detail')")
 	@GetMapping("{id}/require-fields")
 	public Result<List<MessageTemplateRequireFieldRow>> getRequireFields(@PathVariable("id") Long id,
@@ -83,7 +83,7 @@ public class MessageTemplateController {
 
 	@OperationLog(targetType = "MESSAGE_TEMPLATE", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = MessageAuditBizModule.SYS_MESSAGE_TEMPLATE, operation = OperationLogKind.UPDATE)
-	@Operation(summary = "批量启用/禁用消息模板")
+	@Operation(summary = "批量启停消息模板")
 	@PreAuthorize("@auth.decide('message:template:update')")
 	@PutMapping("status")
 	public Result<String> batchUpdateStatus(@Validated @RequestBody MessageTemplateStatusForm form) {
@@ -93,7 +93,7 @@ public class MessageTemplateController {
 
 	@OperationLog(targetType = "MESSAGE_TEMPLATE", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = MessageAuditBizModule.SYS_MESSAGE_TEMPLATE, operation = OperationLogKind.UPDATE)
-	@Operation(summary = "更新模板变量列表")
+	@Operation(summary = "更新消息模板变量列表")
 	@PreAuthorize("@auth.decide('message:template:update')")
 	@PutMapping("require-fields")
 	public Result<String> updateRequireFields(@Validated @RequestBody MessageTemplateRequireFieldsForm form) {
@@ -101,7 +101,7 @@ public class MessageTemplateController {
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
-	@Operation(summary = "测试发送")
+	@Operation(summary = "测试发送消息模板")
 	@PreAuthorize("@auth.decide('message:template:update')")
 	@PostMapping("test-send")
 	public Result<String> testSend(@Validated @RequestBody MessageTemplateTestSendForm form) {

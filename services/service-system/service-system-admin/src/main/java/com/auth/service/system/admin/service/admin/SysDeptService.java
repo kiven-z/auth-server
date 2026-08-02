@@ -9,7 +9,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import java.util.List;
 
 /**
- * 部门写服务。
+ * 部门写服务
  *
  * @author Bunny
  */
@@ -40,7 +40,7 @@ public interface SysDeptService extends IService<SysDeptEntity> {
 	void move(SysDeptMoveForm form);
 
 	/**
-	 * 逻辑删除部门
+	 * 删除部门（逻辑删除）
 	 * @param deptId 部门 ID
 	 */
 	void deleteById(Long deptId);

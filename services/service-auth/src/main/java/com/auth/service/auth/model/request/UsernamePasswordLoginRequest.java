@@ -8,7 +8,7 @@ import lombok.Setter;
 import java.io.Serial;
 
 /**
- * 用户名密码登录请求（HTTP 入站 DTO）。
+ * 用户名密码登录请求（HTTP 入站 DTO）
  *
  * @author Bunny
  */

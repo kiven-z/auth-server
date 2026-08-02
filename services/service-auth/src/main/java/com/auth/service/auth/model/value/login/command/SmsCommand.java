@@ -7,7 +7,7 @@ import lombok.Setter;
 import java.io.Serial;
 
 /**
- * 短信验证码登录命令。
+ * 短信验证码登录命令
  *
  * @author Bunny
  */

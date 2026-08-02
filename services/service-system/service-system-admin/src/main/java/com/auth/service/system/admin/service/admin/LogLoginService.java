@@ -8,7 +8,7 @@ import com.auth.service.system.admin.model.vo.loglogin.LogLoginLogPageVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
- * 登录日志服务。
+ * 登录日志服务
  *
  * @author Bunny
  */
@@ -22,7 +22,7 @@ public interface LogLoginService extends IService<LoginLogEntity> {
 	PageResponse<LogLoginLogPageVO> getPage(LogLoginLogQuery query);
 
 	/**
-	 * 登录日志详情
+	 * 获取登录日志详情
 	 * @param id 主键
 	 * @return 详情
 	 */

@@ -27,7 +27,7 @@ public class AuthProfileMaterializationService {
 	private final AuthProfileRedisCache authProfileRedisCache;
 
 	/**
-	 * 分批重建并写入 Redis 画像。
+	 * 分批重建并写入 Redis 画像
 	 * @param userIds 用户 ID
 	 * @param batchSize 每批大小
 	 * @return 成功刷新数量
@@ -45,7 +45,7 @@ public class AuthProfileMaterializationService {
 	}
 
 	/**
-	 * 分批驱逐 Redis 画像。
+	 * 分批驱逐 Redis 画像
 	 * @param userIds 用户 ID
 	 * @param batchSize 每批大小
 	 * @return 成功驱逐数量

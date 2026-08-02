@@ -5,7 +5,7 @@ import lombok.Value;
 import lombok.experimental.Accessors;
 
 /**
- * 登录审计请求侧快照：在发布线程从 HTTP 请求解析后固化，供事件监听器持久化。
+ * 登录审计请求侧快照：在发布线程从 HTTP 请求解析后固化，供事件监听器持久化
  *
  * @author Bunny
  */

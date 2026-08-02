@@ -26,11 +26,11 @@ import static com.auth.module.security.contract.api.audit.AuditServiceDomain.SYS
 import static com.auth.service.system.file.model.constants.FileAuditBizModule.SYS_FILE;
 
 /**
- * 文件查询与治理控制器
+ * 文件查询与治理
  *
  * @author Bunny
  */
-@Tag(name = "文件查询与治理")
+@Tag(name = "文件查询与治理", description = "管理端文件分页、详情与删除")
 @RequestMapping("/api/system/file")
 @RestController
 public class FileRecordController {
@@ -44,7 +44,7 @@ public class FileRecordController {
 		this.fileRecordService = fileRecordService;
 	}
 
-	@Operation(summary = "文件分页查询")
+	@Operation(summary = "分页查询文件")
 	@PreAuthorize("@auth.decide('sys:file:query')")
 	@GetMapping("/page")
 	public Result<PageResponse<FileRecordPageVO>> page(@Valid FileRecordPageQuery query) {
@@ -52,7 +52,7 @@ public class FileRecordController {
 		return Result.success(pageResult);
 	}
 
-	@Operation(summary = "文件详情")
+	@Operation(summary = "查询文件详情")
 	@PreAuthorize("@auth.decide('sys:file:query')")
 	@GetMapping("/{id}")
 	public Result<FileRecordDetailVO> detail(@PathVariable("id") Long id) {
@@ -62,7 +62,7 @@ public class FileRecordController {
 
 	@OperationLog(targetType = "FILE_RECORD_DOWNLOAD", serviceDomain = SYSTEM, bizModule = SYS_FILE,
 			operation = OperationLogKind.EXPORT)
-	@Operation(summary = "文件批量下载")
+	@Operation(summary = "批量下载文件")
 	@PreAuthorize("@auth.decide('sys:file:download')")
 	@PostMapping("/download")
 	public ResponseEntity<StreamingResponseBody> batchDownload(@RequestBody List<Long> ids) {
@@ -73,7 +73,7 @@ public class FileRecordController {
 
 	@OperationLog(targetType = "FILE_RECORD_PRIVACY", serviceDomain = SYSTEM, bizModule = SYS_FILE,
 			operation = OperationLogKind.UPDATE)
-	@Operation(summary = "文件私有切换")
+	@Operation(summary = "切换文件公私有")
 	@PreAuthorize("@auth.decide('sys:file:privacy')")
 	@PostMapping("/privacy")
 	public Result<Void> updatePrivacy(@Valid @RequestBody FilePrivacyUpdateForm form) {
@@ -83,7 +83,7 @@ public class FileRecordController {
 
 	@OperationLog(targetType = "FILE_RECORD", serviceDomain = SYSTEM, bizModule = SYS_FILE,
 			operation = OperationLogKind.DELETE)
-	@Operation(summary = "文件批量删除")
+	@Operation(summary = "批量删除文件")
 	@PreAuthorize("@auth.decide('sys:file:delete')")
 	@DeleteMapping()
 	public Result<Void> delete(@RequestBody List<Long> ids) {

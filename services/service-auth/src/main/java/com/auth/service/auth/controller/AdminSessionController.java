@@ -20,11 +20,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 管理端会话管理（踢人、在线用户查询等）
+ * 管理端会话
  *
  * @author Bunny
  */
-@Tag(name = "管理端会话", description = "管理员踢人/会话管理/在线用户查询")
+@Tag(name = "管理端会话", description = "踢人、会话管理、在线用户查询")
 @RequiredArgsConstructor
 @RequestMapping("/api/auth/admin/users")
 @RestController
@@ -44,7 +44,7 @@ public class AdminSessionController {
 
 	@OperationLog(targetType = "USER_SESSION", serviceDomain = AuditServiceDomain.AUTH,
 			bizModule = AuthAuditBizModule.AUTH_SESSION, operation = OperationLogKind.DELETE)
-	@Operation(summary = "管理员踢下线（按 sessionId/jti）")
+	@Operation(summary = "踢出指定会话", description = "按 sessionId 或 jti")
 	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("{userId}/sessions/{sessionId}/kick")
 	public Result<Void> kick(@PathVariable("userId") long userId, @PathVariable("sessionId") String sessionId) {
@@ -56,7 +56,7 @@ public class AdminSessionController {
 
 	@OperationLog(targetType = "USER_SESSION", serviceDomain = AuditServiceDomain.AUTH,
 			bizModule = AuthAuditBizModule.AUTH_SESSION, operation = OperationLogKind.DELETE)
-	@Operation(summary = "踢出全部会话")
+	@Operation(summary = "踢出用户全部会话")
 	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("{userId}/sessions/kick-all")
 	public Result<Void> kickAll(@PathVariable("userId") long userId) {

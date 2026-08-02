@@ -33,11 +33,11 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * 系统权限管理 Controller
+ * 系统权限管理
  *
  * @author Bunny
  */
-@Tag(name = "系统权限管理")
+@Tag(name = "系统权限管理", description = "权限码 CRUD 与启停")
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping("/api/system/permission")
@@ -48,7 +48,7 @@ public class SysPermissionController {
 
 	private final SysPermissionSpreadsheetService sysPermissionSpreadsheetService;
 
-	@Operation(summary = "权限 Excel 导出")
+	@Operation(summary = "导出权限 Excel")
 	@PreAuthorize("@auth.decide('sys:permission:export')")
 	@GetMapping("/export")
 	public ResponseEntity<byte[]> export(@Validated SysPermissionQuery filter, @Validated ExportScopeQueryFields scope)
@@ -56,21 +56,21 @@ public class SysPermissionController {
 		return sysPermissionSpreadsheetService.export(filter, scope);
 	}
 
-	@Operation(summary = "权限导入模板下载")
+	@Operation(summary = "下载权限导入模板")
 	@PreAuthorize("@auth.decide('sys:permission:import')")
 	@GetMapping("/import/template")
 	public ResponseEntity<byte[]> importTemplate() throws IOException {
 		return sysPermissionSpreadsheetService.downloadImportTemplate();
 	}
 
-	@Operation(summary = "权限 Excel 导入")
+	@Operation(summary = "导入权限 Excel")
 	@PreAuthorize("@auth.decide('sys:permission:import')")
 	@PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public Result<SpreadsheetImportResult> importExcel(@RequestPart("file") MultipartFile file) throws IOException {
 		return Result.success(sysPermissionSpreadsheetService.importExcel(file));
 	}
 
-	@Operation(summary = "权限分页查询")
+	@Operation(summary = "分页查询权限")
 	@PreAuthorize("@auth.decide('sys:permission:query')")
 	@GetMapping("/page")
 	public Result<PageResponse<SysPermissionPageVO>> page(SysPermissionQuery query) {
@@ -78,7 +78,7 @@ public class SysPermissionController {
 		return Result.success(response);
 	}
 
-	@Operation(summary = "权限详情")
+	@Operation(summary = "查询权限详情")
 	@PreAuthorize("@auth.decide('sys:permission:detail')")
 	@GetMapping("/{id}")
 	public Result<SysPermissionDetailVO> detail(@PathVariable("id") Long id) {

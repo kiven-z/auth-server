@@ -31,7 +31,7 @@ import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_
 import static com.auth.service.system.schedule.exception.ScheduleResultCode.JOB_GROUP_SYSTEM_PROTECTED;
 
 /**
- * 任务分组实现
+ * 任务分组服务实现
  *
  * @author Bunny
  */

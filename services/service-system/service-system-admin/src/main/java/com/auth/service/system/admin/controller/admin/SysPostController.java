@@ -35,11 +35,11 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * 系统岗位管理 Controller
+ * 系统岗位管理
  *
  * @author Bunny
  */
-@Tag(name = "系统岗位管理")
+@Tag(name = "系统岗位管理", description = "岗位 CRUD 与启停")
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping("/api/system/post")
@@ -50,7 +50,7 @@ public class SysPostController {
 
 	private final SysPostSpreadsheetService sysPostSpreadsheetService;
 
-	@Operation(summary = "岗位 Excel 导出")
+	@Operation(summary = "导出岗位 Excel")
 	@PreAuthorize("@auth.decide('sys:post:export')")
 	@GetMapping("/export")
 	public ResponseEntity<byte[]> export(@Validated SysPostQuery filter, @Validated ExportScopeQueryFields scope)
@@ -58,14 +58,14 @@ public class SysPostController {
 		return sysPostSpreadsheetService.export(filter, scope);
 	}
 
-	@Operation(summary = "岗位导入模板下载")
+	@Operation(summary = "下载岗位导入模板")
 	@PreAuthorize("@auth.decide('sys:post:import')")
 	@GetMapping("/import/template")
 	public ResponseEntity<byte[]> importTemplate() throws IOException {
 		return sysPostSpreadsheetService.downloadImportTemplate();
 	}
 
-	@Operation(summary = "岗位 Excel 导入")
+	@Operation(summary = "导入岗位 Excel")
 	@PreAuthorize("@auth.decide('sys:post:import')")
 	@PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public Result<SpreadsheetImportResult> importExcel(@RequestPart("file") MultipartFile file) throws IOException {
@@ -73,7 +73,7 @@ public class SysPostController {
 		return Result.success(data);
 	}
 
-	@Operation(summary = "岗位分页查询")
+	@Operation(summary = "分页查询岗位")
 	@PreAuthorize("@auth.decide('sys:post:query')")
 	@GetMapping("/page")
 	public Result<PageResponse<SysPostPageVO>> page(SysPostQuery query) {
@@ -81,7 +81,7 @@ public class SysPostController {
 		return Result.success(response);
 	}
 
-	@Operation(summary = "岗位关键词搜索")
+	@Operation(summary = "搜索岗位")
 	@PreAuthorize("@auth.decide('sys:post:query')")
 	@GetMapping("/search")
 	public Result<List<SysPostSearchItemVO>> search(
@@ -93,7 +93,7 @@ public class SysPostController {
 		return Result.success(search);
 	}
 
-	@Operation(summary = "岗位详情")
+	@Operation(summary = "查询岗位详情")
 	@PreAuthorize("@auth.decide('sys:post:query')")
 	@GetMapping("/{id}")
 	public Result<SysPostDetailVO> detail(@PathVariable("id") Long id) {

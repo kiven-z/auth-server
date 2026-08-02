@@ -9,7 +9,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 /**
- * 统一消息模板（message_template）
+ * 统一消息模板
  *
  * @author Bunny
  */

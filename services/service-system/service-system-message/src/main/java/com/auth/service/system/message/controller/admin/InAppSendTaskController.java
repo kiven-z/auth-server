@@ -51,7 +51,7 @@ public class InAppSendTaskController {
 		return Result.success(pageResponse);
 	}
 
-	@Operation(summary = "站内信发送任务详情")
+	@Operation(summary = "查询站内信发送任务详情")
 	@PreAuthorize("@auth.decide('message:inapp:detail')")
 	@GetMapping("/tasks/{taskId}")
 	public Result<InAppSendTaskDetailVO> getSendTaskById(@PathVariable Long taskId) {
@@ -59,7 +59,7 @@ public class InAppSendTaskController {
 		return Result.success(detailVO);
 	}
 
-	@Operation(summary = "分页查询站内信任务收件人", description = "写扩散返回收件箱投递行；读扩散（ALL）返回用户状态互动行")
+	@Operation(summary = "分页查询站内信任务收件人", description = "写扩散返回收件箱投递行；读扩散返回用户状态互动行")
 	@PreAuthorize("@auth.decide('message:inapp:detail')")
 	@GetMapping("/tasks/{taskId}/recipients")
 	public Result<PageResponse<InAppSendTaskRecipientPageVO>> getRecipientPage(@PathVariable Long taskId,

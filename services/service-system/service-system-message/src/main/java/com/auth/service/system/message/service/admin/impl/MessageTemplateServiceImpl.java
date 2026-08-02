@@ -42,7 +42,7 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
 import static com.auth.service.system.message.exception.MessageResultCode.MESSAGE_CHANNEL_UNSUPPORTED;
 
 /**
- * 消息模板公共服务实现
+ * 消息模板服务实现
  *
  * @author Bunny
  */

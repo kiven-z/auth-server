@@ -21,7 +21,7 @@ import java.util.Map;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 
 /**
- * 邮件模板服务
+ * 邮件模板服务实现
  *
  * @author Bunny
  */

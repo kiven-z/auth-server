@@ -48,7 +48,7 @@ public class SysJobDetailVO extends BaseResponse implements SysJobLastExecutionV
 	@Schema(title = "Cron 表达式")
 	private String cronExpression;
 
-	@Schema(title = "调度时区(IANA ZoneId)")
+	@Schema(title = "调度时区（IANA ZoneId）")
 	private String timeZone;
 
 	@Schema(title = "错失策略")

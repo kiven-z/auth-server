@@ -14,11 +14,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 对内接口：接收其他微服务上报的安全审计类数据（授权决策审计、操作日志）并落库。
+ * 内部-安全审计上报
  *
  * @author Bunny
  */
-@Tag(name = "系统服务-内部-安全审计上报")
+@Tag(name = "内部-安全审计上报", description = "接收授权决策审计与操作日志并落库")
 @RequestMapping("/api/system/inner")
 @RestController
 public class InternalSecurityIngestController {

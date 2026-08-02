@@ -9,7 +9,7 @@ import lombok.experimental.Accessors;
 import java.util.List;
 
 /**
- * 单行导入失败信息。
+ * 单行导入失败信息
  *
  * @author Bunny
  */

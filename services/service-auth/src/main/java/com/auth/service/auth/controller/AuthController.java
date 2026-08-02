@@ -23,11 +23,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 登录接口
+ * 登录
  *
  * @author Bunny
  */
-@Tag(name = "登录接口", description = "用户登录、退出、刷新Token接口")
+@Tag(name = "登录", description = "用户名密码、邮箱、短信登录与令牌刷新、退出")
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
 @RestController

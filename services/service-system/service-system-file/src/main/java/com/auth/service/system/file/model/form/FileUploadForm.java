@@ -18,7 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class FileUploadForm extends FileUploadMetadata {
 
 	@Schema(title = "上传文件", requiredMode = Schema.RequiredMode.REQUIRED)
-	@NotNull(message = "file 不能为空")
+	@NotNull(message = "文件不能为空")
 	private transient MultipartFile file;
 
 }

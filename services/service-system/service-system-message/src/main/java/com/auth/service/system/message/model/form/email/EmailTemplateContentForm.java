@@ -26,7 +26,7 @@ public class EmailTemplateContentForm implements Serializable {
 	@NotNull(message = "模板ID不能为空")
 	private Long id;
 
-	@Schema(name = "content", title = "邮件内容(HTML/FreeMarker)", requiredMode = Schema.RequiredMode.REQUIRED)
+	@Schema(name = "content", title = "邮件内容（HTML/FreeMarker）", requiredMode = Schema.RequiredMode.REQUIRED)
 	@NotBlank(message = "邮件内容不能为空")
 	private String content;
 

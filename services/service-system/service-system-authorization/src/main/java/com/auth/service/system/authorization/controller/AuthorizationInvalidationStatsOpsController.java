@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 授权失效运维统计接口
+ * 授权失效运维统计
  *
  * @author Bunny
  */
@@ -27,7 +27,7 @@ public class AuthorizationInvalidationStatsOpsController {
 
 	private final AuthorizationInvalidationStatsQueryService statsQueryService;
 
-	@Operation(summary = "授权失效运维统计摘要")
+	@Operation(summary = "查询授权失效运维统计")
 	@PreAuthorize("@auth.decide('ops:invalidationoutbox:query')")
 	@GetMapping("summary")
 	public Result<AuthorizationInvalidationSummaryVO> summary() {
@@ -35,7 +35,7 @@ public class AuthorizationInvalidationStatsOpsController {
 		return Result.success(summary);
 	}
 
-	@Operation(summary = "授权失效失败率趋势")
+	@Operation(summary = "查询授权失效失败率趋势")
 	@PreAuthorize("@auth.decide('ops:invalidationoutbox:query')")
 	@GetMapping("stats/failure-rate/trend")
 	public Result<AuthorizationInvalidationFailureRateTrendVO> failureRateTrend(

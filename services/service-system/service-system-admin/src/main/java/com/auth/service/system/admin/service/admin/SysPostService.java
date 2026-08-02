@@ -13,7 +13,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import java.util.List;
 
 /**
- * 系统岗位服务。
+ * 系统岗位服务
  *
  * @author Bunny
  */
@@ -27,7 +27,7 @@ public interface SysPostService extends IService<SysPostEntity> {
 	PageResponse<SysPostPageVO> getPage(SysPostQuery query);
 
 	/**
-	 * 岗位关键词搜索（编码/名称前缀匹配）
+	 * 按关键词搜索岗位（编码/名称前缀）
 	 * @param keyword 搜索关键字（前缀匹配，可选）
 	 * @param status 启用状态（可选）
 	 * @param limit 返回条数上限，默认 20，最大 50
@@ -36,7 +36,7 @@ public interface SysPostService extends IService<SysPostEntity> {
 	List<SysPostSearchItemVO> search(String keyword, Boolean status, Integer limit);
 
 	/**
-	 * 岗位详情（含所属部门、关联用户、已授权角色）
+	 * 获取岗位详情（含所属部门、关联用户、已授权角色）
 	 * @param id 岗位主键
 	 * @return 详情
 	 */
@@ -61,7 +61,7 @@ public interface SysPostService extends IService<SysPostEntity> {
 	void batchUpdateStatus(IdsEnableStatusForm form);
 
 	/**
-	 * 按主键物理删除岗位；user_post 或 grant_table 仍有引用时拒绝删除，成功后触发授权失效。
+	 * 删除岗位（存在引用时拒绝，成功后触发授权失效）
 	 * @param id 岗位主键
 	 */
 	void deleteById(Long id);

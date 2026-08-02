@@ -40,7 +40,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * 系统用户只读查询实现
+ * 系统用户只读查询服务实现
  *
  * @author Bunny
  */

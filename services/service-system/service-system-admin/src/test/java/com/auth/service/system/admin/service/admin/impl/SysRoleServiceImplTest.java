@@ -9,7 +9,8 @@ import com.auth.service.system.admin.model.constants.AdminBatchSizes;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.form.role.SysRoleForm;
 import com.auth.service.system.admin.model.po.permission.SysPermissionBoundMenuPO;
-import com.auth.service.system.admin.model.po.reference.*;
+import com.auth.service.system.admin.model.po.reference.PermissionReferencePO;
+import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.auth.service.system.admin.model.vo.role.SysRoleDetailVO;
 import com.auth.service.system.authorization.dispatch.trigger.RoleAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
@@ -175,9 +176,6 @@ class SysRoleServiceImplTest {
 		permission.setStatus(true);
 		when(sysRolePermissionMapper.selectAssignedPermissionsByRoleId(1L)).thenReturn(List.of(permission));
 		when(sysMenuRoleMapper.selectBoundMenusByRoleId(1L)).thenReturn(List.of());
-		when(grantTableMapper.selectBoundUsersByRoleId(1L)).thenReturn(List.of());
-		when(grantTableMapper.selectBoundDeptsByRoleId(1L)).thenReturn(List.of());
-		when(grantTableMapper.selectBoundPostsByRoleId(1L)).thenReturn(List.of());
 
 		SysRoleDetailVO detail = sysRoleService.getDetail(1L);
 
@@ -187,15 +185,13 @@ class SysRoleServiceImplTest {
 		assertThat(detail.getBoundPermissions().get(0).getPermissionCode()).isEqualTo("sys:user:query");
 		verify(sysRolePermissionMapper).selectAssignedPermissionsByRoleId(1L);
 		verify(sysMenuRoleMapper).selectBoundMenusByRoleId(1L);
-		verify(grantTableMapper).selectBoundUsersByRoleId(1L);
-		verify(grantTableMapper).selectBoundDeptsByRoleId(1L);
-		verify(grantTableMapper).selectBoundPostsByRoleId(1L);
+		verifyNoInteractions(grantTableMapper);
 		verify(auditUserDisplayService).enrichAuditUsernames(anyList(), isNull(), isNull());
 	}
 
 	@Test
-	@DisplayName("角色详情：反查并填充已绑定菜单与 grant 授权主体")
-	void getDetailShouldIncludeBoundMenusAndGrantSubjects() {
+	@DisplayName("角色详情：反查并填充已绑定菜单")
+	void getDetailShouldIncludeBoundMenus() {
 		when(sysRoleMapper.selectById(2L)).thenReturn(roleEntity(2L, "EDITOR"));
 
 		SysPermissionBoundMenuPO boundMenu = new SysPermissionBoundMenuPO();
@@ -206,49 +202,15 @@ class SysRoleServiceImplTest {
 		boundMenu.setMenuType(0);
 		boundMenu.setStatus(true);
 		when(sysMenuRoleMapper.selectBoundMenusByRoleId(2L)).thenReturn(List.of(boundMenu));
-
-		UserReferencePO boundUser = new UserReferencePO();
-		boundUser.setId(100L);
-		boundUser.setUsername("alice");
-		boundUser.setNickname("Alice");
-		boundUser.setEmployeeNo("E001");
-		boundUser.setStatus(1);
-		when(grantTableMapper.selectBoundUsersByRoleId(2L)).thenReturn(List.of(boundUser));
-
-		DeptReferencePO boundDept = new DeptReferencePO();
-		boundDept.setId(20L);
-		boundDept.setDeptCode("RD");
-		boundDept.setDeptName("研发部");
-		boundDept.setStatus(true);
-		when(grantTableMapper.selectBoundDeptsByRoleId(2L)).thenReturn(List.of(boundDept));
-
-		PostReferencePO boundPost = new PostReferencePO();
-		boundPost.setId(30L);
-		boundPost.setPostCode("DEV");
-		boundPost.setPostName("开发岗");
-		boundPost.setStatus(true);
-		when(grantTableMapper.selectBoundPostsByRoleId(2L)).thenReturn(List.of(boundPost));
-
 		when(sysRolePermissionMapper.selectAssignedPermissionsByRoleId(2L)).thenReturn(List.of());
 
 		SysRoleDetailVO detail = sysRoleService.getDetail(2L);
 
 		assertThat(detail.getBoundMenus()).hasSize(1);
 		assertThat(detail.getBoundMenus().get(0).getTitle()).isEqualTo("用户管理");
-		assertThat(detail.getBoundUsers()).hasSize(1);
-		assertThat(detail.getBoundUsers().get(0).getId()).isEqualTo(100L);
-		assertThat(detail.getBoundUsers().get(0).getUsername()).isEqualTo("alice");
-		assertThat(detail.getBoundDepts()).hasSize(1);
-		assertThat(detail.getBoundDepts().get(0).getId()).isEqualTo(20L);
-		assertThat(detail.getBoundDepts().get(0).getDeptCode()).isEqualTo("RD");
-		assertThat(detail.getBoundPosts()).hasSize(1);
-		assertThat(detail.getBoundPosts().get(0).getId()).isEqualTo(30L);
-		assertThat(detail.getBoundPosts().get(0).getPostCode()).isEqualTo("DEV");
 
 		verify(sysMenuRoleMapper).selectBoundMenusByRoleId(2L);
-		verify(grantTableMapper).selectBoundUsersByRoleId(2L);
-		verify(grantTableMapper).selectBoundDeptsByRoleId(2L);
-		verify(grantTableMapper).selectBoundPostsByRoleId(2L);
+		verifyNoInteractions(grantTableMapper);
 	}
 
 	@Test

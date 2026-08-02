@@ -25,7 +25,7 @@ public class SysRolePageVO extends BaseResponse {
 	@Schema(title = "角色名称")
 	private String roleName;
 
-	@Schema(title = "启用状态(true=正常启用，false=停用)")
+	@Schema(title = "启用状态（true=正常启用，false=停用）")
 	private Boolean status;
 
 	@Schema(title = "显示顺序")

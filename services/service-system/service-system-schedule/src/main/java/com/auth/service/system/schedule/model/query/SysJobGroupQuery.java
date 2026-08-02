@@ -23,7 +23,7 @@ public class SysJobGroupQuery extends PageQueryRequest {
 	@Schema(title = "显示名称")
 	private String groupName;
 
-	@Schema(title = "启用状态(true=启用，false=停用)")
+	@Schema(title = "启用状态（true=启用，false=停用）")
 	private Boolean status;
 
 }

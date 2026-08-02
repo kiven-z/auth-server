@@ -17,7 +17,7 @@ import java.util.Collections;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_NOT_EXIST;
 
 /**
- * 站内信模板服务
+ * 站内信模板服务实现
  *
  * @author Bunny
  */

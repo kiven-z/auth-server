@@ -26,7 +26,7 @@ public class SysMenuQuery extends PageQueryRequest {
 	@Schema(title = "菜单类型：0 菜单 1 iframe 2 外链")
 	private Integer menuType;
 
-	@Schema(title = "启用状态(true=启用菜单，false=停用)")
+	@Schema(title = "启用状态（true=启用菜单，false=停用）")
 	private Boolean status;
 
 	@Schema(title = "组件路径")

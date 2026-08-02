@@ -44,7 +44,7 @@ public class SysUserPageRowPO implements Serializable {
 	@Schema(title = "工号")
 	private String employeeNo;
 
-	@Schema(title = "账号状态(0=禁用,1=正常,2=锁定)")
+	@Schema(title = "账号状态（0=禁用，1=正常，2=锁定）")
 	private Integer status;
 
 	@Schema(title = "创建时间")

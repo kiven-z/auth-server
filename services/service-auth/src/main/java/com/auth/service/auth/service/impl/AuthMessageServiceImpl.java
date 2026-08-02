@@ -27,7 +27,7 @@ import static com.auth.module.security.contract.redis.SecurityRedisKey.EMAIL_COD
 import static com.auth.module.security.contract.redis.SecurityRedisKey.SMS_CODE;
 
 /**
- * 认证消息应用服务：登录邮箱/短信验证码发送。
+ * 认证消息服务实现：登录邮箱/短信验证码发送
  *
  * @author Bunny
  */

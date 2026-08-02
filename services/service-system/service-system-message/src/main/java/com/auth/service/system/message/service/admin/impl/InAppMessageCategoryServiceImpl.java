@@ -1,6 +1,7 @@
 package com.auth.service.system.message.service.admin.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.common.core.utils.TreeParentIdUtil;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.message.convert.InAppMessageCategoryConverter;
@@ -8,7 +9,6 @@ import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.mapper.InAppMessageCategoryMapper;
 import com.auth.service.system.message.model.entity.InAppMessageCategoryEntity;
 import com.auth.service.system.message.model.form.inapp.InAppMessageCategoryForm;
-import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.service.system.message.model.po.InAppMessageCategoryDetailRowPO;
 import com.auth.service.system.message.model.po.InAppMessageCategoryPageRowPO;
 import com.auth.service.system.message.model.query.InAppMessageCategoryQuery;
@@ -32,7 +32,7 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
 import static com.auth.service.system.message.exception.MessageResultCode.IN_APP_MESSAGE_CATEGORY_NOT_FOUND;
 
 /**
- * 站内信业务分类服务
+ * 站内信业务分类服务实现
  *
  * @author Bunny
  */

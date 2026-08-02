@@ -8,7 +8,7 @@ import com.auth.service.system.admin.model.vo.logoperation.LogOperationPageVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
- * 操作日志服务。
+ * 操作日志服务
  *
  * @author Bunny
  */
@@ -22,7 +22,7 @@ public interface LogOperationService extends IService<LogOperationEntity> {
 	PageResponse<LogOperationPageVO> getPage(LogOperationQuery query);
 
 	/**
-	 * 操作日志详情
+	 * 获取操作日志详情
 	 * @param id 主键
 	 * @return 详情
 	 */

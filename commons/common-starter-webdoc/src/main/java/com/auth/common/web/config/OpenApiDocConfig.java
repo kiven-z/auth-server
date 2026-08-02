@@ -59,7 +59,7 @@ public class OpenApiDocConfig {
 			.email(webDocProperties.getContactEmail())
 			.url(url);
 		License license = new License().name(webDocProperties.getLicenseName()).url(webDocProperties.getLicenseUrl());
-		Info info = new Info().title(webDocProperties.getTitle() + "-" + serviceName)
+		Info info = new Info().title(resolveDocTitle(serviceName))
 			.contact(contact)
 			.license(license)
 			.description(webDocProperties.getDescription())
@@ -76,6 +76,19 @@ public class OpenApiDocConfig {
 			.externalDocs(new ExternalDocumentation())
 			.components(components)
 			.addSecurityItem(new SecurityRequirement().addList(BEARER_AUTH_SCHEME));
+	}
+
+	/**
+	 * 组装文档标题；未配置 title 时仅用服务名，避免出现 {@code null-} 前缀
+	 * @param serviceName 应用名
+	 * @return 文档标题
+	 */
+	private String resolveDocTitle(String serviceName) {
+		String title = webDocProperties.getTitle();
+		if (title == null || title.isBlank()) {
+			return serviceName;
+		}
+		return title + "-" + serviceName;
 	}
 
 	/**

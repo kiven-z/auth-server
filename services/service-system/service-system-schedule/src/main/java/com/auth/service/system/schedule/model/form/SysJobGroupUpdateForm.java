@@ -41,7 +41,7 @@ public class SysJobGroupUpdateForm implements Serializable {
 	@NotNull(groups = UpdateGroup.class)
 	private Integer orderNum;
 
-	@Schema(title = "启用状态(true=启用分组，false=停用)")
+	@Schema(title = "启用状态（true=启用分组，false=停用）")
 	@NotNull(groups = UpdateGroup.class)
 	private Boolean status;
 

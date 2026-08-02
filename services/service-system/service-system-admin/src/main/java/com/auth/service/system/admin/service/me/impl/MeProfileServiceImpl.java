@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * 当前登录用户个人资料维护实现
+ * 当前登录用户个人资料服务实现
  *
  * @author Bunny
  */

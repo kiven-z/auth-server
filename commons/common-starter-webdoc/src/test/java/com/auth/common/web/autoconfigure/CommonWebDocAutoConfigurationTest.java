@@ -19,12 +19,17 @@ class CommonWebDocAutoConfigurationTest {
 		.withConfiguration(AutoConfigurations.of(CommonWebDocAutoConfiguration.class));
 
 	@Test
+	@DisplayName("默认启用：无 Nacos 元数据时标题退化为服务名")
 	void testAutoConfiguration_WithDefaultSettings() {
 		contextRunner.run(context -> {
 			assertThat(context).hasSingleBean(WebDocProperties.class);
 			assertThat(context).hasSingleBean(OpenApiDocConfig.class);
 			assertThat(context).hasSingleBean(OpenAPI.class);
 			assertThat(context).getBean("groupedOpenApis").isInstanceOf(List.class);
+
+			OpenAPI openAPI = context.getBean(OpenAPI.class);
+			assertThat(openAPI.getInfo().getTitle()).isEqualTo("service");
+			assertThat(openAPI.getInfo().getVersion()).isNull();
 		});
 	}
 

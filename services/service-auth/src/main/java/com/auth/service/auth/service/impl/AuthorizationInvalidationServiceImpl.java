@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * 授权失效编排唯一入口
+ * 授权失效编排唯一入口实现
  *
  * @author Bunny
  */

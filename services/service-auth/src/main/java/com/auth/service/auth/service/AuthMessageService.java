@@ -3,7 +3,7 @@ package com.auth.service.auth.service;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
- * 认证消息应用服务：登录邮箱/短信验证码发送。
+ * 认证消息服务：登录邮箱/短信验证码发送
  *
  * @author Bunny
  */

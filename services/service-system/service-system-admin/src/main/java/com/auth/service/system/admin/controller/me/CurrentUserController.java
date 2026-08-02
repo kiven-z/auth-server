@@ -30,12 +30,12 @@ import java.util.List;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
 /**
- * 当前登录用户自助接口
+ * 当前用户
  *
  * @author Bunny
  */
-@AuthenticatedApi
 @Tag(name = "当前用户", description = "登录用户自助操作")
+@AuthenticatedApi
 @RequiredArgsConstructor
 @RequestMapping("/api/system/me")
 @RestController
@@ -60,7 +60,7 @@ public class CurrentUserController {
 
 	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
-	@Operation(summary = "当前用户更新个人资料")
+	@Operation(summary = "更新当前用户个人资料")
 	@PutMapping("/profile")
 	public Result<String> updateMyProfile(@Valid @RequestBody MeProfileUpdateForm form) {
 		meProfileService.updateMyProfile(form);
@@ -69,7 +69,7 @@ public class CurrentUserController {
 
 	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
-	@Operation(summary = "当前用户更新头像")
+	@Operation(summary = "更新当前用户头像")
 	@PutMapping("/avatar")
 	public Result<String> updateMyAvatar(@Valid @RequestBody MeAvatarUpdateForm form) {
 		meProfileService.updateMyAvatar(form);
@@ -78,7 +78,7 @@ public class CurrentUserController {
 
 	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
-	@Operation(summary = "当前用户修改密码")
+	@Operation(summary = "更新当前用户密码")
 	@PutMapping("/password")
 	public Result<String> changeOwnPassword(@Valid @RequestBody SysUserChangePasswordForm form,
 			HttpServletRequest request) {

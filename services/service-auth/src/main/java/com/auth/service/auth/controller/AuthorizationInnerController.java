@@ -14,16 +14,18 @@ import com.auth.service.auth.service.AdminAuthorizationService;
 import com.auth.service.auth.service.AuthorizationInvalidationEventService;
 import com.auth.service.auth.service.AuthorizationInvalidationService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * 授权域内部接口
+ * 授权内部
  *
  * @author Bunny
  */
+@Tag(name = "授权内部", description = "生效码查询、授权失效执行与事件")
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping("/api/auth/inner/authorization")
@@ -37,14 +39,14 @@ public class AuthorizationInnerController {
 	private final AuthorizationInvalidationEventService authorizationInvalidationEventService;
 
 	@InternalApi
-	@Operation(summary = "查询用户生效角色码与权限码（供 system 动态菜单等内部调用）")
+	@Operation(summary = "查询用户生效角色码与权限码", description = "供内部服务组装动态菜单等")
 	@GetMapping("/principal/{userId}/effective-codes")
 	public Result<EffectiveCodesVO> effectiveCodes(@PathVariable("userId") Long userId) {
 		return Result.success(adminAuthorizationService.getEffectiveCodes(userId));
 	}
 
 	@InternalApi
-	@Operation(summary = "授权失效（反查用户 → 递增 perm_version → 刷新/驱逐画像）")
+	@Operation(summary = "执行授权失效", description = "反查受影响用户，递增权限版本并刷新或驱逐授权画像")
 	@PostMapping("/invalidate")
 	public Result<AuthorizationInvalidateResponse> invalidate(
 			@Valid @RequestBody AuthorizationInvalidateRequest request) {
@@ -62,7 +64,7 @@ public class AuthorizationInnerController {
 	}
 
 	@InternalApi
-	@Operation(summary = "授权失效幂等事件详情")
+	@Operation(summary = "查询授权失效幂等事件详情")
 	@GetMapping("/invalidation/event/{id}")
 	public Result<AuthorizationInvalidationEventDetailVO> invalidationEventDetail(@PathVariable("id") Long id) {
 		AuthorizationInvalidationEventDetailVO detailVO = authorizationInvalidationEventService.getDetail(id);
@@ -70,7 +72,7 @@ public class AuthorizationInnerController {
 	}
 
 	@InternalApi
-	@Operation(summary = "授权失效幂等事件统计")
+	@Operation(summary = "查询授权失效幂等事件统计")
 	@GetMapping("/invalidation/event/summary")
 	public Result<AuthorizationInvalidationEventStatsVO> invalidationEventSummary() {
 		AuthorizationInvalidationEventStatsVO statsVO = authorizationInvalidationEventService.getStats();
@@ -78,7 +80,7 @@ public class AuthorizationInnerController {
 	}
 
 	@InternalApi
-	@Operation(summary = "释放授权失效幂等事件 processing 占位")
+	@Operation(summary = "释放授权失效幂等事件占位", description = "释放 processing 状态占位")
 	@PostMapping("/invalidation/event/{eventId}/release-claim")
 	public Result<Boolean> releaseInvalidationEventClaim(@PathVariable("eventId") String eventId) {
 		boolean released = authorizationInvalidationEventService.releaseProcessingClaim(eventId);

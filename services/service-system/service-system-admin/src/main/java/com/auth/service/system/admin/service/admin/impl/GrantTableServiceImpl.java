@@ -1,17 +1,22 @@
 package com.auth.service.system.admin.service.admin.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.module.security.contract.dto.invalidation.GrantSubjectKey;
 import com.auth.service.system.admin.convert.admin.ReferenceConverter;
 import com.auth.service.system.admin.mapper.role.GrantTableMapper;
 import com.auth.service.system.admin.model.entity.GrantTableEntity;
 import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
+import com.auth.service.system.admin.model.form.role.SysRoleGrantSubjectsForm;
 import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
+import com.auth.service.system.admin.model.vo.role.GrantSubjectItemVO;
+import com.auth.service.system.admin.model.vo.role.SysRoleGrantSubjectsVO;
 import com.auth.service.system.admin.service.admin.GrantTableService;
 import com.auth.service.system.admin.support.grant.GrantTableSubjectExistenceVerifier;
 import com.auth.service.system.admin.support.grant.RbacReferenceChecker;
+import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.GrantAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -20,9 +25,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 /**
- * grant_table 读写与主体角色授权编排实现。
+ * grant_table 读写与主体角色授权编排实现
  *
  * @author Bunny
  */
@@ -33,6 +40,8 @@ public class GrantTableServiceImpl extends ServiceImpl<GrantTableMapper, GrantTa
 		implements GrantTableService {
 
 	private final GrantTableSubjectExistenceVerifier subjectExistenceVerifier;
+
+	private final UserReferenceChecker userReferenceChecker;
 
 	private final RbacReferenceChecker rbacReferenceChecker;
 
@@ -56,6 +65,83 @@ public class GrantTableServiceImpl extends ServiceImpl<GrantTableMapper, GrantTa
 		List<RoleReferencePO> poList = baseMapper.selectBoundRolesBySubject(subjectType.name(), subjectId);
 
 		return ReferenceConverter.INSTANCE.toRoleReferenceList(poList);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	@Transactional(readOnly = true)
+	public SysRoleGrantSubjectsVO listGrantSubjectsByRoleId(Long roleId, GrantTableSubjectType subjectType) {
+		rbacReferenceChecker.getExisting(roleId);
+
+		SysRoleGrantSubjectsVO vo = new SysRoleGrantSubjectsVO();
+		vo.setSubjectType(subjectType);
+		vo.setSubjects(switch (subjectType) {
+			case USER -> CollUtil.emptyIfNull(baseMapper.selectBoundUsersByRoleId(roleId)).stream().map(user -> {
+				GrantSubjectItemVO item = new GrantSubjectItemVO();
+				item.setId(user.getId());
+				item.setLabel(StrUtil.blankToDefault(StrUtil.trim(user.getNickname()), user.getUsername()));
+				return item;
+			}).toList();
+			case DEPT -> CollUtil.emptyIfNull(baseMapper.selectBoundDeptsByRoleId(roleId)).stream().map(dept -> {
+				GrantSubjectItemVO item = new GrantSubjectItemVO();
+				item.setId(dept.getId());
+				item.setLabel(dept.getDeptName());
+				return item;
+			}).toList();
+			case POST -> CollUtil.emptyIfNull(baseMapper.selectBoundPostsByRoleId(roleId)).stream().map(post -> {
+				GrantSubjectItemVO item = new GrantSubjectItemVO();
+				item.setId(post.getId());
+				item.setLabel(post.getPostName());
+				return item;
+			}).toList();
+		});
+		return vo;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void replaceGrantSubjectsByRoleId(Long roleId, SysRoleGrantSubjectsForm form) {
+		rbacReferenceChecker.getExisting(roleId);
+
+		GrantTableSubjectType subjectType = form.getSubjectType();
+		List<Long> subjectIds = CollUtil.emptyIfNull(form.getSubjectIds())
+			.stream()
+			.filter(Objects::nonNull)
+			.distinct()
+			.toList();
+
+		if (subjectType == GrantTableSubjectType.USER && CollUtil.isNotEmpty(subjectIds)) {
+			userReferenceChecker.requireOperable(subjectIds);
+		}
+		for (Long subjectId : subjectIds) {
+			subjectExistenceVerifier.requireExistingActive(subjectType, subjectId);
+		}
+
+		List<Long> oldIds = CollUtil
+			.emptyIfNull(baseMapper.selectSubjectIdsByRoleIdAndSubjectType(roleId, subjectType.name()));
+		baseMapper.deleteByRoleIdAndSubjectType(roleId, subjectType.name());
+		if (CollUtil.isNotEmpty(subjectIds)) {
+			List<GrantTableEntity> entities = subjectIds.stream().map(subjectId -> {
+				GrantTableEntity entity = new GrantTableEntity();
+				entity.setSubjectType(subjectType.name());
+				entity.setSubjectId(subjectId);
+				entity.setRoleId(roleId);
+				return entity;
+			}).toList();
+			super.saveBatch(entities);
+		}
+
+		List<GrantSubjectKey> impacted = Stream.concat(oldIds.stream(), subjectIds.stream())
+			.distinct()
+			.map(subjectId -> new GrantSubjectKey(subjectType, subjectId))
+			.toList();
+		if (CollUtil.isNotEmpty(impacted)) {
+			grantInvalidationTrigger.submitByGrantSubjects(impacted, "replace-grant-subjects");
+		}
 	}
 
 	/**

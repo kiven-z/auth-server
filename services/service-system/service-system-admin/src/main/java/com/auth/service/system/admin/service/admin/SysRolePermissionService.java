@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import java.util.List;
 
 /**
- * 角色权限分配服务。
+ * 角色权限分配服务
  *
  * @author Bunny
  */
@@ -21,7 +21,7 @@ public interface SysRolePermissionService extends IService<SysRolePermissionEnti
 	List<PermissionReferenceVO> listAssignedPermissions(Long roleId);
 
 	/**
-	 * 全量替换角色权限并触发授权失效。
+	 * 全量覆盖角色权限（写后触发授权失效）
 	 * @param roleId 角色 ID
 	 * @param permissionIds 权限 ID 列表（可为空表示清空）
 	 */

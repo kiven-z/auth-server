@@ -31,7 +31,7 @@ public class EmailTemplateRenderForm implements Serializable {
 
 	@Schema(name = "requireFields", title = "变量声明列表")
 	@Valid
-	@NotNull(message = "requireFields 不能为空")
+	@NotNull(message = "变量声明列表不能为空")
 	private List<MessageTemplateRequireFieldRow> requireFields;
 
 }

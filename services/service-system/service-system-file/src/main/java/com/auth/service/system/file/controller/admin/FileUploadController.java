@@ -23,11 +23,11 @@ import static com.auth.module.security.contract.api.audit.AuditServiceDomain.SYS
 import static com.auth.service.system.file.model.constants.FileAuditBizModule.SYS_FILE;
 
 /**
- * 文件上传控制器
+ * 文件上传
  *
  * @author Bunny
  */
-@Tag(name = "文件上传")
+@Tag(name = "文件上传", description = "管理端文件上传")
 @RequiredArgsConstructor
 @RequestMapping("/api/system/file")
 @RestController
@@ -38,7 +38,7 @@ public class FileUploadController {
 	@AuthenticatedApi
 	@OperationLog(targetType = "FILE_UPLOAD", serviceDomain = SYSTEM, bizModule = SYS_FILE,
 			operation = OperationLogKind.CREATE)
-	@Operation(summary = "单文件上传")
+	@Operation(summary = "上传单个文件")
 	@PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public Result<FileUploadResultDTO> upload(@Valid FileUploadForm form) {
 		FileUploadResultDTO response = fileUploadService.upload(form);
@@ -48,7 +48,7 @@ public class FileUploadController {
 	@AuthenticatedApi
 	@OperationLog(targetType = "FILE_UPLOAD_MULTIPLE", serviceDomain = SYSTEM, bizModule = SYS_FILE,
 			operation = OperationLogKind.CREATE)
-	@Operation(summary = "多文件上传")
+	@Operation(summary = "上传多个文件")
 	@PostMapping(value = "/upload/multiple", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public Result<List<FileUploadResultDTO>> uploadMultiple(@Valid MultipleFileUploadForm form) {
 		List<FileUploadResultDTO> responses = fileUploadService.uploadMultiple(form);

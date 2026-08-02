@@ -4,10 +4,14 @@ import com.auth.common.core.model.response.Result;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
+import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
+import com.auth.service.system.admin.model.form.role.SysRoleGrantSubjectsForm;
 import com.auth.service.system.admin.model.form.role.SysRolePermissionAssignForm;
 import com.auth.service.system.admin.model.form.scope.SysDataScopeForm;
 import com.auth.service.system.admin.model.vo.reference.PermissionReferenceVO;
+import com.auth.service.system.admin.model.vo.role.SysRoleGrantSubjectsVO;
 import com.auth.service.system.admin.model.vo.role.SysRoleScopeVO;
+import com.auth.service.system.admin.service.admin.GrantTableService;
 import com.auth.service.system.admin.service.admin.SysRolePermissionService;
 import com.auth.service.system.admin.service.admin.SysRoleScopeService;
 import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
@@ -24,11 +28,11 @@ import java.util.List;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
 /**
- * 角色授权 Controller（功能权限 + 数据范围）。
+ * 角色授权
  *
  * @author Bunny
  */
-@Tag(name = "角色授权")
+@Tag(name = "角色授权", description = "功能权限、数据范围、授权对象")
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping("/api/system/role")
@@ -38,6 +42,8 @@ public class SysRoleAuthorizationController {
 	private final SysRolePermissionService sysRolePermissionService;
 
 	private final SysRoleScopeService sysRoleScopeService;
+
+	private final GrantTableService grantTableService;
 
 	@Operation(summary = "查询角色已分配权限码")
 	@PreAuthorize("@auth.decide('sys:role:query')")
@@ -49,7 +55,7 @@ public class SysRoleAuthorizationController {
 
 	@OperationLog(targetType = "ROLE_PERMISSION", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = AuthorizationAuditBizModule.SYS_ROLE_PERMISSION, operation = OperationLogKind.UPDATE)
-	@Operation(summary = "全量分配角色权限码（触发 perm_version 失效）")
+	@Operation(summary = "全量分配角色权限码", description = "覆盖写；变更后触发授权失效")
 	@PreAuthorize("@auth.decide('sys:role:update')")
 	@PostMapping("/{roleId}/permissions")
 	public Result<Void> assignPermissions(@PathVariable("roleId") Long roleId,
@@ -58,7 +64,7 @@ public class SysRoleAuthorizationController {
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
-	@Operation(summary = "查询角色数据范围配置（未配置返回 data=null）")
+	@Operation(summary = "查询角色数据范围", description = "未配置时 data=null")
 	@PreAuthorize("@auth.decide('sys:role:query')")
 	@GetMapping("/{roleId}/scope")
 	public Result<SysRoleScopeVO> getScope(@PathVariable("roleId") Long roleId) {
@@ -66,9 +72,29 @@ public class SysRoleAuthorizationController {
 		return Result.success(roleScopeVO);
 	}
 
+	@Operation(summary = "查询角色授权对象", description = "按 subjectType 返回 subjects 种子列表；无授权时 subjects 为空数组")
+	@PreAuthorize("@auth.decide('sys:role:query')")
+	@GetMapping("/{roleId}/grant-subjects")
+	public Result<SysRoleGrantSubjectsVO> listGrantSubjects(@PathVariable("roleId") Long roleId,
+			@RequestParam("subjectType") GrantTableSubjectType subjectType) {
+		SysRoleGrantSubjectsVO data = grantTableService.listGrantSubjectsByRoleId(roleId, subjectType);
+		return Result.success(data);
+	}
+
+	@OperationLog(targetType = "ROLE_GRANT_SUBJECTS", serviceDomain = AuditServiceDomain.SYSTEM,
+			bizModule = AuthorizationAuditBizModule.GRANT_TABLE, operation = OperationLogKind.UPDATE)
+	@Operation(summary = "覆盖分配角色授权对象", description = "仅替换 body.subjectType 指定类型（USER/DEPT/POST...）；空数组清空该类型；变更后触发授权失效")
+	@PreAuthorize("@auth.decide('sys:role:update')")
+	@PutMapping("/{roleId}/grant-subjects")
+	public Result<Void> replaceGrantSubjects(@PathVariable("roleId") Long roleId,
+			@Valid @RequestBody SysRoleGrantSubjectsForm form) {
+		grantTableService.replaceGrantSubjectsByRoleId(roleId, form);
+		return Result.success(null, OPERATION_SUCCESS.getMessage());
+	}
+
 	@OperationLog(targetType = "ROLE_SCOPE", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = AuthorizationAuditBizModule.SYS_ROLE_SCOPE, operation = OperationLogKind.UPDATE)
-	@Operation(summary = "保存角色数据范围（有则改、无则插；触发授权失效）")
+	@Operation(summary = "保存角色数据范围", description = "有则改无则插；变更后触发授权失效")
 	@PreAuthorize("@auth.decide('sys:role:update')")
 	@PutMapping("/{roleId}/scope")
 	public Result<Void> upsertScope(@PathVariable("roleId") Long roleId, @Valid @RequestBody SysDataScopeForm form) {

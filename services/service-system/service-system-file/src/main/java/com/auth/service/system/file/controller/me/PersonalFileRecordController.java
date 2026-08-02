@@ -14,6 +14,7 @@ import com.auth.service.system.file.model.vo.FileRecordPageVO;
 import com.auth.service.system.file.service.FileRecordQueryService;
 import com.auth.service.system.file.service.FileRecordService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,10 +26,11 @@ import static com.auth.module.security.contract.api.audit.AuditServiceDomain.SYS
 import static com.auth.service.system.file.model.constants.FileAuditBizModule.SYS_FILE;
 
 /**
- * 当前用户文件查询与治理控制器
+ * 个人文件
  *
  * @author Bunny
  */
+@Tag(name = "个人文件", description = "当前用户文件查询、下载与删除")
 @AuthenticatedApi
 @RequestMapping("/api/system/me/file")
 @RestController
@@ -44,7 +46,7 @@ public class PersonalFileRecordController {
 		this.fileRecordService = fileRecordService;
 	}
 
-	@Operation(summary = "文件分页查询")
+	@Operation(summary = "分页查询文件")
 	@GetMapping("/page")
 	public Result<PageResponse<FileRecordPageVO>> page(@Valid FileRecordPageQuery query) {
 		// 固定查询人
@@ -56,7 +58,7 @@ public class PersonalFileRecordController {
 		return Result.success(pageResult);
 	}
 
-	@Operation(summary = "文件详情")
+	@Operation(summary = "查询文件详情")
 	@GetMapping("/{id}")
 	public Result<FileRecordDetailVO> detail(@PathVariable("id") Long id) {
 		Long ownerUserId = SecurityUserUtils.getUserId();
@@ -66,7 +68,7 @@ public class PersonalFileRecordController {
 
 	@OperationLog(targetType = "FILE_RECORD_DOWNLOAD", serviceDomain = SYSTEM, bizModule = SYS_FILE,
 			operation = OperationLogKind.EXPORT)
-	@Operation(summary = "文件批量下载")
+	@Operation(summary = "批量下载文件")
 	@PostMapping("/download")
 	public ResponseEntity<StreamingResponseBody> batchDownload(@RequestBody List<Long> ids) {
 		Long ownerUserId = SecurityUserUtils.getUserId();
@@ -78,7 +80,7 @@ public class PersonalFileRecordController {
 
 	@OperationLog(targetType = "FILE_RECORD", serviceDomain = SYSTEM, bizModule = SYS_FILE,
 			operation = OperationLogKind.DELETE)
-	@Operation(summary = "文件批量删除")
+	@Operation(summary = "批量删除文件")
 	@DeleteMapping()
 	public Result<Void> delete(@RequestBody List<Long> ids) {
 		Long ownerUserId = SecurityUserUtils.getUserId();

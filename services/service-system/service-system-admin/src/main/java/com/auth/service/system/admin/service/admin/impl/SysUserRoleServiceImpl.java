@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * 用户直连角色授权实现
+ * 用户直连角色授权服务实现
  *
  * @author Bunny
  */

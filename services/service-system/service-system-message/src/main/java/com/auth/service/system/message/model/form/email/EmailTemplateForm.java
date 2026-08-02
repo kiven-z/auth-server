@@ -31,13 +31,13 @@ public class EmailTemplateForm implements Serializable {
 	@NotNull(groups = UpdateGroup.class, message = "更新时ID不能为空")
 	private Long id;
 
-	@Schema(name = "templateCode", title = "模板编码(唯一)")
+	@Schema(name = "templateCode", title = "模板编码（唯一）")
 	@Pattern(regexp = LETTER_UNDERSCORE_HYPHEN_REQUIRE_LETTER, message = "模板编码只能是字母",
 			groups = { CreateGroup.class, UpdateGroup.class })
 	@NotBlank(message = "模板编码不能为空", groups = { CreateGroup.class, UpdateGroup.class })
 	private String templateCode;
 
-	@Schema(name = "templateName", title = "模板名称(唯一)")
+	@Schema(name = "templateName", title = "模板名称（唯一）")
 	@NotBlank(message = "模板名称不能为空", groups = { CreateGroup.class, UpdateGroup.class })
 	private String templateName;
 
@@ -48,15 +48,15 @@ public class EmailTemplateForm implements Serializable {
 	@Schema(name = "description", title = "模板描述")
 	private String description;
 
-	@Schema(name = "status", title = "启用状态(true=启用模板，false=停用)")
+	@Schema(name = "status", title = "启用状态（true=启用模板，false=停用）")
 	@NotNull(message = "状态不能为空", groups = { CreateGroup.class, UpdateGroup.class })
 	private Boolean status;
 
-	@Schema(name = "priority", title = "发送优先级(1-10,数字越大优先级越高)")
+	@Schema(name = "priority", title = "发送优先级（1-10,数字越大优先级越高）")
 	@NotNull(message = "发送优先级不能为空", groups = { CreateGroup.class, UpdateGroup.class })
 	private Integer priority;
 
-	@Schema(name = "content", title = "邮件内容(支持HTML)，可空串")
+	@Schema(name = "content", title = "邮件内容（支持HTML），可空串")
 	private String content;
 
 }

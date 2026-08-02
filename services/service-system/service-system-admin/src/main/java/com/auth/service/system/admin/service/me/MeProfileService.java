@@ -7,26 +7,26 @@ import com.auth.service.system.admin.model.vo.me.MeProfileVO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
- * 当前登录用户个人资料维护
+ * 当前登录用户个人资料服务
  *
  * @author Bunny
  */
 public interface MeProfileService extends IService<UserEntity> {
 
 	/**
-	 * 查询当前登录用户展示资料（含主部门）
+	 * 获取当前用户个人资料（含主部门）
 	 * @return 展示资料
 	 */
 	MeProfileVO getMyProfile();
 
 	/**
-	 * 更新当前登录用户可编辑的个人资料字段
+	 * 更新当前用户个人资料
 	 * @param form 资料表单
 	 */
 	void updateMyProfile(MeProfileUpdateForm form);
 
 	/**
-	 * 更新当前登录用户头像
+	 * 更新当前用户头像
 	 * @param form 头像
 	 */
 	void updateMyAvatar(MeAvatarUpdateForm form);

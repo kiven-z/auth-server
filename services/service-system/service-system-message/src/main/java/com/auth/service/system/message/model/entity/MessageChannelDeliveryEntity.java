@@ -10,7 +10,7 @@ import lombok.experimental.Accessors;
 import java.time.Instant;
 
 /**
- * 渠道消息投递记录（message_channel_delivery）
+ * 渠道消息投递记录
  *
  * @author Bunny
  */

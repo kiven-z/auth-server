@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * WebDoc / SpringDoc configuration properties.
+ * WebDoc / SpringDoc 配置；品牌与版本由 Nacos {@code AUTH_COMMON/common-config.yaml} 注入
  *
  * @author Bunny
  */
@@ -22,27 +22,55 @@ public class WebDocProperties {
 	 */
 	private Boolean enabled = Boolean.TRUE;
 
-	private String title = "Bunny-Admin";
+	/**
+	 * OpenAPI title prefix；拼成 {@code title-serviceName}
+	 */
+	private String title;
 
-	private String description = "BunnyRBAC backend management system";
+	/**
+	 * OpenAPI description.
+	 */
+	private String description;
 
-	private String summary = "Bunny RBAC backend management system";
+	/**
+	 * OpenAPI summary.
+	 */
+	private String summary;
 
-	private String version = "v1.0.0-alpha.3";
+	/**
+	 * OpenAPI version（与发版 tag 对齐，在 Nacos 维护）.
+	 */
+	private String version;
 
-	private String contactName = "Bunny";
+	/**
+	 * Contact name.
+	 */
+	private String contactName;
 
-	private String contactEmail = "1319900154@qq.com";
+	/**
+	 * Contact email.
+	 */
+	private String contactEmail;
 
-	private String licenseName = "PolyForm Noncommercial 1.0.0";
+	/**
+	 * License name.
+	 */
+	private String licenseName;
 
-	private String licenseUrl = "https://polyformproject.org/licenses/noncommercial/1.0.0";
+	/**
+	 * License URL.
+	 */
+	private String licenseUrl;
 
 	/**
 	 * OpenAPI groups.
 	 */
 	private List<ApiGroup> groups = defaultGroups();
 
+	/**
+	 * 默认 web / inner 分组
+	 * @return 分组列表
+	 */
 	public static List<ApiGroup> defaultGroups() {
 		ApiGroup web = new ApiGroup();
 		web.setGroup("web");

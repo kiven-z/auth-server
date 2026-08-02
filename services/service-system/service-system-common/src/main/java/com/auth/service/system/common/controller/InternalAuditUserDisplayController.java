@@ -14,11 +14,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 对内接口-按用户 ID 批量解析用户名
+ * 内部-审计展示名
  *
  * @author Bunny
  */
-@Tag(name = "系统服务-内部-审计展示名")
+@Tag(name = "内部-审计展示名", description = "按用户 ID 批量解析用户名")
 @RequestMapping("/api/system/inner/audit-user")
 @RestController
 public class InternalAuditUserDisplayController {

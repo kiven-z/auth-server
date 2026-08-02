@@ -28,13 +28,13 @@ public class UserPostProfilePO implements Serializable {
 	@Schema(title = "岗位名称")
 	private String postName;
 
-	@Schema(title = "启用状态(true=启用，false=停用)")
+	@Schema(title = "启用状态（true=启用，false=停用）")
 	private Boolean status;
 
 	@Schema(title = "是否主岗位")
 	private Boolean isPrimary;
 
-	@Schema(title = "关联状态(0=已调离,1=正常,2=兼职)")
+	@Schema(title = "关联状态（0=已调离，1=正常，2=兼职）")
 	private Integer relationStatus;
 
 }

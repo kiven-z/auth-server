@@ -7,7 +7,7 @@ import com.auth.service.system.file.model.form.MultipleFileUploadForm;
 import java.util.List;
 
 /**
- * 文件上传服务。
+ * 文件上传服务
  *
  * @author Bunny
  */

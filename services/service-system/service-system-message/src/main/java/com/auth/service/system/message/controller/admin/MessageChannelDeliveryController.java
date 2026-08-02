@@ -23,11 +23,11 @@ import java.util.List;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
 /**
- * 渠道投递记录接口
+ * 渠道投递记录
  *
  * @author Bunny
  */
-@Tag(name = "渠道投递记录")
+@Tag(name = "渠道投递记录", description = "跨渠道投递记录查询")
 @Validated
 @RequestMapping("/api/system/message/channel-delivery")
 @RestController
@@ -49,7 +49,7 @@ public class MessageChannelDeliveryController {
 		return Result.success(pageResponse);
 	}
 
-	@Operation(summary = "渠道投递记录详情")
+	@Operation(summary = "查询渠道投递记录详情")
 	@PreAuthorize("@auth.decide('message:delivery:detail')")
 	@GetMapping("{id}")
 	public Result<MessageChannelDeliveryDetailVO> getChannelDeliveryById(@PathVariable("id") Long id) {

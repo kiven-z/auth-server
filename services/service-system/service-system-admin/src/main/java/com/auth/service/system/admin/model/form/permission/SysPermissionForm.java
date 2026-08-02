@@ -47,7 +47,7 @@ public class SysPermissionForm implements Serializable {
 	@Schema(title = "显示顺序")
 	private Integer orderNum;
 
-	@Schema(title = "启用状态(true=启用，false=停用)；创建时不传默认启用，更新时必填")
+	@Schema(title = "启用状态（true=启用，false=停用）；创建时不传默认启用，更新时必填")
 	@NotNull(message = "状态不能为空", groups = UpdateGroup.class)
 	private Boolean status;
 

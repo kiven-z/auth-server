@@ -6,7 +6,7 @@ import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
 import java.util.List;
 
 /**
- * 用户直连角色授权（grant_table）
+ * 用户直连角色授权服务
  *
  * @author Bunny
  */
@@ -20,7 +20,7 @@ public interface SysUserRoleService {
 	List<RoleReferenceVO> listAssignedRoles(Long userId);
 
 	/**
-	 * 全量覆盖用户在 grant_table 中的直连角色授权
+	 * 全量覆盖用户直连角色授权
 	 * @param userId 用户 ID
 	 * @param form 角色编码列表
 	 */

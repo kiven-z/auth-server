@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * 经 auth 内部接口撤销用户会话
+ * 用户会话撤销服务实现：账户状态变更或删除后踢出全部在线会话
  *
  * @author Bunny
  */

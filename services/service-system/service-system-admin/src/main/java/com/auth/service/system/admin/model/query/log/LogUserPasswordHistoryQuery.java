@@ -22,10 +22,10 @@ public class LogUserPasswordHistoryQuery extends PageQueryRequest {
 	@Schema(title = "用户ID")
 	private Long userId;
 
-	@Schema(title = "修改时间(开始)")
+	@Schema(title = "修改时间（开始）")
 	private Instant changeTimeStart;
 
-	@Schema(title = "修改时间(结束)")
+	@Schema(title = "修改时间（结束）")
 	private Instant changeTimeEnd;
 
 	@Schema(title = "修改IP地址")

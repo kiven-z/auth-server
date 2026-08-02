@@ -17,11 +17,11 @@ import java.util.List;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
 /**
- * 登录日志接口
+ * 登录日志
  *
  * @author Bunny
  */
-@Tag(name = "登录日志", description = "log_login")
+@Tag(name = "登录日志", description = "登录成功失败记录查询与清理")
 @RequiredArgsConstructor
 @RequestMapping("/api/system/log/login")
 @RestController
@@ -37,7 +37,7 @@ public class LogLoginController {
 		return Result.success(response);
 	}
 
-	@Operation(summary = "登录日志详情")
+	@Operation(summary = "查询登录日志详情")
 	@PreAuthorize("@auth.decide('log:login:detail')")
 	@GetMapping("{id}")
 	public Result<LogLoginLogDetailVO> detail(@PathVariable("id") Long id) {

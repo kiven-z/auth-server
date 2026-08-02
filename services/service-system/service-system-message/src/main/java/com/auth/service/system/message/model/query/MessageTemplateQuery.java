@@ -34,7 +34,7 @@ public class MessageTemplateQuery extends PageQueryRequest {
 	@Schema(name = "imMessageType", title = "站内信正文类型")
 	private String imMessageType;
 
-	@Schema(name = "status", title = "启用状态(true=启用模板，false=停用)")
+	@Schema(name = "status", title = "启用状态（true=启用模板，false=停用）")
 	private Boolean status;
 
 }

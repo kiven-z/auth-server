@@ -15,12 +15,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 文件记录内部接口
+ * 文件记录内部
  *
  * @author Bunny
  */
+@Tag(name = "文件记录内部", description = "跨模块文件归属校验与撤销")
 @InternalApi
-@Tag(name = "文件记录内部接口", description = "跨模块文件归属校验与撤销")
 @RequiredArgsConstructor
 @RequestMapping("/api/system/inner/file-records")
 @RestController
@@ -28,14 +28,14 @@ public class InternalFileRecordController {
 
 	private final FileRecordService fileRecordService;
 
-	@Operation(summary = "校验文件 URL 归属")
+	@Operation(summary = "校验文件地址归属")
 	@PostMapping("/ownership/verify")
 	public Result<Void> verifyOwnership(@Valid @RequestBody OwnedFileAssertByUrlRequest request) {
 		fileRecordService.assertOwnedFileUrl(request);
 		return Result.success();
 	}
 
-	@Operation(summary = "撤销归属用户的活跃文件")
+	@Operation(summary = "撤销用户活跃文件")
 	@PostMapping("/revoke")
 	public Result<Void> revokeOwnedFile(@Valid @RequestBody OwnedFileDeleteByUrlRequest request) {
 		fileRecordService.tryDeleteOwnedByUrl(request);

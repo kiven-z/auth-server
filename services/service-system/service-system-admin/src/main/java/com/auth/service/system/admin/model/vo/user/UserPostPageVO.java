@@ -37,7 +37,7 @@ public class UserPostPageVO extends BaseResponse {
 	@Schema(title = "是否主岗位")
 	private Boolean isPrimary;
 
-	@Schema(title = "关联状态(0=已调离,1=正常,2=兼职)")
+	@Schema(title = "关联状态（0=已调离，1=正常，2=兼职）")
 	private Integer status;
 
 	@Schema(title = "备注")

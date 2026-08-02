@@ -140,7 +140,7 @@ public class SysUserDeptServiceImpl extends ServiceImpl<UserDeptMapper, UserDept
 	}
 
 	/**
-	 * 主部门规则：非正常状态不可设为主部门；设为主部门时降级该用户其他主部门。
+	 * 主部门规则：非正常状态不可设为主部门；设为主部门时降级该用户其他主部门
 	 * @param userId 用户 ID
 	 * @param form 关联表单
 	 */

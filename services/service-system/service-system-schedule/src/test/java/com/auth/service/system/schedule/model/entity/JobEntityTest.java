@@ -10,7 +10,7 @@ import java.lang.reflect.Field;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * {@link JobEntity} 持久化元数据校验。
+ * {@link JobEntity} 持久化元数据校验
  */
 @DisplayName("JobEntity 持久化元数据")
 class JobEntityTest {

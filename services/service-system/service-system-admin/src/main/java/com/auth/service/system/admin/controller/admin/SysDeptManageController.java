@@ -26,7 +26,7 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
  *
  * @author Bunny
  */
-@Tag(name = "部门扩展管理")
+@Tag(name = "部门扩展管理", description = "闭包健康检查、部门角色分配")
 @RequestMapping("/api/system/dept")
 @RestController
 public class SysDeptManageController {
@@ -43,7 +43,7 @@ public class SysDeptManageController {
 
 	@OperationLog(targetType = "DEPT_CLOSURE_HEALTH", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = AuthorizationAuditBizModule.DEPT_CLOSURE, operation = OperationLogKind.QUERY)
-	@Operation(summary = "部门闭包表健康检查")
+	@Operation(summary = "检查部门闭包表健康状态")
 	@PreAuthorize("@auth.decide('sys:dept:diagnose')")
 	@GetMapping("/closure/health")
 	public Result<DeptClosureHealthVO> closureHealth() {
@@ -61,7 +61,7 @@ public class SysDeptManageController {
 
 	@OperationLog(targetType = "DEPT_ROLE", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = AuthorizationAuditBizModule.GRANT_TABLE, operation = OperationLogKind.UPDATE)
-	@Operation(summary = "全量覆盖部门角色授权")
+	@Operation(summary = "覆盖分配部门角色")
 	@PreAuthorize("@auth.decide('sys:dept:update')")
 	@PutMapping("/{deptId}/roles")
 	public Result<Void> replaceRoles(@PathVariable("deptId") Long deptId,

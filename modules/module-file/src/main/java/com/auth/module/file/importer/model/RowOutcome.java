@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
- * 单行处理结果：成功携带值，失败携带错误列表。
+ * 单行处理结果：成功携带值，失败携带错误列表
  *
  * @param <T> 成功时的值类型
  * @author Bunny

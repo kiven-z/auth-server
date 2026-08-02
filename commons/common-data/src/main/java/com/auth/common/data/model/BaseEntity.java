@@ -10,7 +10,7 @@ import java.io.Serializable;
 import java.time.Instant;
 
 /**
- * 基础信息字段,基础信息字段
+ * 基础信息字段
  *
  * @author Bunny
  */

@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * 站内信收件箱写入实现
+ * 站内信收件箱写入服务实现
  *
  * @author Bunny
  */

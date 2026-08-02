@@ -18,7 +18,7 @@ import static com.auth.service.system.message.exception.MessageResultCode.MESSAG
 import static com.auth.service.system.message.exception.MessageResultCode.MESSAGE_CHANNEL_UNSUPPORTED;
 
 /**
- * 消息发送编排实现
+ * 消息发送编排服务实现
  *
  * @author Bunny
  */

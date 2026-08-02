@@ -20,11 +20,11 @@ import java.util.List;
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
 /**
- * 用户直连角色授权
+ * 用户角色授权
  *
  * @author Bunny
  */
-@Tag(name = "用户角色授权")
+@Tag(name = "用户角色授权", description = "用户直连角色分配")
 @RequiredArgsConstructor
 @RequestMapping("/api/system/user-role")
 @RestController
@@ -42,7 +42,7 @@ public class SysUserRoleController {
 
 	@OperationLog(targetType = "USER_ROLE", serviceDomain = AuditServiceDomain.SYSTEM,
 			bizModule = AuthorizationAuditBizModule.GRANT_TABLE, operation = OperationLogKind.UPDATE)
-	@Operation(summary = "全量覆盖用户直连角色授权")
+	@Operation(summary = "覆盖分配用户角色")
 	@PreAuthorize("@auth.decide('sys:userrole:update')")
 	@PutMapping("/{userId}")
 	public Result<Void> replaceRoles(@PathVariable("userId") Long userId,

@@ -1,7 +1,7 @@
 package com.auth.module.file.api.model.enums;
 
 /**
- * 文件可见性规则。
+ * 文件可见性规则
  *
  * <p>
  * 该规则用于将业务策略与客户端请求合并为最终可见性，避免布尔字段组合产生歧义。

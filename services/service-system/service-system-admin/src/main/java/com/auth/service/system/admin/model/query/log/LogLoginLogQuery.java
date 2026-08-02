@@ -25,10 +25,10 @@ public class LogLoginLogQuery extends PageQueryRequest {
 	@Schema(title = "登录结果")
 	private Integer loginResult;
 
-	@Schema(title = "登录时间(开始)")
+	@Schema(title = "登录时间（开始）")
 	private Instant loginTimeStart;
 
-	@Schema(title = "登录时间(结束)")
+	@Schema(title = "登录时间（结束）")
 	private Instant loginTimeEnd;
 
 	@Schema(title = "登录方式")

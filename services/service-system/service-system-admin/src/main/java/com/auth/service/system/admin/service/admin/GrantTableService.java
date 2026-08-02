@@ -2,7 +2,9 @@ package com.auth.service.system.admin.service.admin;
 
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
+import com.auth.service.system.admin.model.form.role.SysRoleGrantSubjectsForm;
 import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
+import com.auth.service.system.admin.model.vo.role.SysRoleGrantSubjectsVO;
 
 import java.util.List;
 
@@ -30,7 +32,22 @@ public interface GrantTableService {
 	List<RoleReferenceVO> listBoundRoles(GrantTableSubjectType subjectType, Long subjectId);
 
 	/**
-	 * 组织类主体全量覆盖角色授权
+	 * 按角色与主体类型查询授权对象
+	 * @param roleId 角色 ID
+	 * @param subjectType 主体类型（USER / DEPT / POST）
+	 * @return 仅含该类型种子项；无授权时 subjects 为空列表
+	 */
+	SysRoleGrantSubjectsVO listGrantSubjectsByRoleId(Long roleId, GrantTableSubjectType subjectType);
+
+	/**
+	 * 按角色与主体类型全量覆盖授权对象（仅替换 form 指定类型）
+	 * @param roleId 角色 ID
+	 * @param form 主体类型与主体 ID 列表
+	 */
+	void replaceGrantSubjectsByRoleId(Long roleId, SysRoleGrantSubjectsForm form);
+
+	/**
+	 * 全量覆盖组织主体角色授权
 	 * @param subjectType 主体类型（DEPT/POST）
 	 * @param subjectId 主体 ID
 	 * @param form 角色 ID 列表
@@ -38,7 +55,7 @@ public interface GrantTableService {
 	void replaceOrgSubjectRoles(GrantTableSubjectType subjectType, Long subjectId, GrantTableAssignRoleForm form);
 
 	/**
-	 * 全量覆盖主体角色 grant 行
+	 * 全量覆盖主体角色授权
 	 * @param subjectType 主体类型字符串
 	 * @param subjectId 主体 ID
 	 * @param roleIds 角色 ID 列表

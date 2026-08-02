@@ -11,7 +11,7 @@ import java.time.Instant;
 import java.util.List;
 
 /**
- * 部门闭包表健康检查结果。
+ * 部门闭包表健康检查结果
  *
  * @author Bunny
  */

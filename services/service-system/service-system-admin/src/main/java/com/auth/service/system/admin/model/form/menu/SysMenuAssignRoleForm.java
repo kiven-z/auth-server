@@ -23,7 +23,7 @@ public class SysMenuAssignRoleForm implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Schema(title = "角色 ID 列表（全量覆盖）", requiredMode = Schema.RequiredMode.REQUIRED)
-	@NotNull(message = "roleIds is required")
+	@NotNull(message = "角色 ID 列表不能为空")
 	private List<Long> roleIds;
 
 }

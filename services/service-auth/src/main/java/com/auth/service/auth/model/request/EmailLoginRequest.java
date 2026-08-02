@@ -9,7 +9,7 @@ import lombok.Setter;
 import java.io.Serial;
 
 /**
- * 邮箱验证码登录请求（HTTP 入站 DTO）。
+ * 邮箱验证码登录请求（HTTP 入站 DTO）
  *
  * @author Bunny
  */

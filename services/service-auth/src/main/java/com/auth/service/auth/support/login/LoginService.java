@@ -19,7 +19,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * 登录应用服务：策略路由、凭证校验，会话签发委托 {@link LoginSessionOrchestrator}。
+ * 登录服务：策略路由、凭证校验，会话签发委托 {@link LoginSessionOrchestrator}
  *
  * @author Bunny
  */
@@ -48,7 +48,7 @@ public class LoginService {
 	}
 
 	/**
-	 * 执行登录并返回已填充访问/刷新令牌的会话读模型。
+	 * 执行登录并返回已填充访问/刷新令牌的会话读模型
 	 * @param command 登录命令
 	 * @param request HTTP 请求
 	 * @return 登录会话读模型
@@ -62,7 +62,7 @@ public class LoginService {
 	}
 
 	/**
-	 * 查找登录策略并记录审计日志。
+	 * 查找登录策略并记录审计日志
 	 * @param command 登录命令
 	 * @param request HTTP 请求
 	 * @return 登录策略
@@ -87,7 +87,7 @@ public class LoginService {
 	}
 
 	/**
-	 * 登出当前会话（永远不抛出异常）。幂等：会话不存在/索引不存在都视为成功。
+	 * 登出当前会话（永不抛出；会话或索引不存在视为成功）
 	 * @param accessToken Access Token（不含 Bearer 前缀）
 	 */
 	public Optional<LogoutSessionHint> logout(String accessToken) {

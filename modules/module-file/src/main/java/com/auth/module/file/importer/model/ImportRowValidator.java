@@ -8,7 +8,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- * 单行导入校验流水线（fail-fast）；内部以 {@link RowOutcome} 表达行状态。
+ * 单行导入校验流水线（fail-fast）；内部以 {@link RowOutcome} 表达行状态
  *
  * @author Bunny
  */

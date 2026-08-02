@@ -9,14 +9,14 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 import java.util.List;
 
 /**
- * 文件记录查询与治理服务。
+ * 文件记录查询与治理服务
  *
  * @author Bunny
  */
 public interface FileRecordService extends IService<FileRecordEntity> {
 
 	/**
-	 * 批量下载 ZIP 文件名
+	 * 批量下载文件为 ZIP
 	 */
 	String BATCH_DOWNLOAD_FILE_NAME = "file-records.zip";
 
@@ -34,7 +34,7 @@ public interface FileRecordService extends IService<FileRecordEntity> {
 	StreamingResponseBody batchDownload(List<Long> ids, Long ownerUserId);
 
 	/**
-	 * 批量切换文件隐私属性（公开 ↔ 私有），并迁移存储对象前缀
+	 * 批量切换文件隐私属性（公开与私有互转）
 	 * @param ids 文件记录主键集合
 	 * @param targetPrivate 目标是否私有
 	 * @param ownerUserId 归属用户 ID，管理端传 null
@@ -42,7 +42,7 @@ public interface FileRecordService extends IService<FileRecordEntity> {
 	void updatePrivacyByIds(List<Long> ids, boolean targetPrivate, Long ownerUserId);
 
 	/**
-	 * 按主键集合删除文件记录：公开文件物理删除，私有文件逻辑删除；仅处理当前可见且未删除的记录，其余 ID 忽略。
+	 * 按主键删除文件记录（公开物理删除、私有逻辑删除；不可见或已删 ID 忽略）
 	 * @param ids 文件记录主键集合
 	 * @param ownerUserId 归属用户 ID，非空时仅删除该用户文件
 	 * @param deleteSource 逻辑删除时写入的删除来源

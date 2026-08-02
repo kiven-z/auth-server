@@ -24,7 +24,7 @@ public interface AuditUserDisplayService {
 	Map<Long, String> mapUsernamesByIds(Collection<Long> userIds);
 
 	/**
-	 * 为分页结果填充审计用户名，并可选填充额外用户字段（一次批量查询）。
+	 * 为分页结果填充审计用户名，并可选填充额外用户字段（一次批量查询）
 	 * @param page MyBatis-Plus 分页结果
 	 * @param extraUserIdGetter 额外用户 ID 读取；为 null 时仅填充审计列
 	 * @param extraUsernameSetter 额外用户名写入；为 null 时仅填充审计列
@@ -34,7 +34,7 @@ public interface AuditUserDisplayService {
 			BiConsumer<T, String> extraUsernameSetter);
 
 	/**
-	 * 为列表填充审计用户名，并可选填充额外用户字段（一次批量查询）。
+	 * 为列表填充审计用户名，并可选填充额外用户字段（一次批量查询）
 	 * @param records 行列表
 	 * @param extraUserIdGetter 额外用户 ID 读取；为 null 时仅填充审计列
 	 * @param extraUsernameSetter 额外用户名写入；为 null 时仅填充审计列

@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import java.util.List;
 
 /**
- * 站内信收件箱写入
+ * 站内信收件箱写入服务
  *
  * @author Bunny
  */

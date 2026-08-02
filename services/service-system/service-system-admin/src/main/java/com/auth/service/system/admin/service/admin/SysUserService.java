@@ -29,7 +29,7 @@ public interface SysUserService extends IService<UserEntity> {
 	void update(SysUserForm form);
 
 	/**
-	 * 批量逻辑删除用户
+	 * 批量删除用户（逻辑删除）
 	 * @param ids 用户主键列表
 	 */
 	void deleteByIds(List<Long> ids);

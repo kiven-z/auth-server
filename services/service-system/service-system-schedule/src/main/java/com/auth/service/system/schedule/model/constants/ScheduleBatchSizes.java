@@ -3,7 +3,7 @@ package com.auth.service.system.schedule.model.constants;
 import lombok.experimental.UtilityClass;
 
 /**
- * schedule 模块批量处理批次大小。
+ * schedule 模块批量处理批次大小
  *
  * @author Bunny
  */

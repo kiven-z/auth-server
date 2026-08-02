@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * 系统部门主表，对应 sys_dept（物理删除；禁用见 {@link #status}）。
+ * 系统部门主表（物理删除；禁用见 {@link #status}）
  *
  * @author Bunny
  */
@@ -17,7 +17,7 @@ import lombok.Setter;
 @Setter
 public class SysDeptEntity extends BaseEntity {
 
-	@Schema(title = "父部门ID，0 表示顶级")
+	@Schema(title = "父部门 ID（0 表示顶级）")
 	private Long parentId;
 
 	@Schema(title = "部门名称")
@@ -26,7 +26,7 @@ public class SysDeptEntity extends BaseEntity {
 	@Schema(title = "部门编码（唯一标识）")
 	private String deptCode;
 
-	@Schema(title = "启用状态(true=正常，false=禁用)")
+	@Schema(title = "启用状态（true=正常，false=禁用）")
 	private Boolean status;
 
 	@Schema(title = "显示顺序")

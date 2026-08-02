@@ -26,7 +26,7 @@ import java.util.Optional;
 import static com.auth.common.jwt.provider.AbstractJwtTokenProvider.BEARER_PREFIX;
 
 /**
- * HTTP 会话编排：登录/刷新/登出的业务调用与 Refresh Cookie 写入
+ * HTTP 会话编排实现：登录/刷新/登出与 Refresh Cookie 写入
  *
  * @author Bunny
  */
