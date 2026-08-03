@@ -76,8 +76,8 @@ public interface SysUserConverter {
 	 * @param user 用户实体
 	 * @return 档案 VO
 	 */
-	@Mapping(target = "deptList", ignore = true)
-	@Mapping(target = "postList", ignore = true)
+	@Mapping(target = "deptCount", ignore = true)
+	@Mapping(target = "postCount", ignore = true)
 	@Mapping(target = "createdByName", ignore = true)
 	@Mapping(target = "updatedByName", ignore = true)
 	SysUserProfileVO toProfileVo(UserEntity user);
@@ -90,12 +90,13 @@ public interface SysUserConverter {
 	List<SysUserSearchItemVO> toSearchItemVoList(List<UserSearchItemPO> list);
 
 	/**
-	 * 档案 VO → 详情 VO（生效授权由 Service 层补全）
+	 * 档案 VO → 详情 VO（授权计数由 Service 层补全）
 	 * @param profile 用户档案
 	 * @return 详情 VO
 	 */
-	@Mapping(target = "effectiveRoles", ignore = true)
-	@Mapping(target = "effectivePermissions", ignore = true)
+	@Mapping(target = "directRoleCount", ignore = true)
+	@Mapping(target = "effectiveRoleCount", ignore = true)
+	@Mapping(target = "effectivePermissionCount", ignore = true)
 	SysUserDetailVO fromProfile(SysUserProfileVO profile);
 
 }

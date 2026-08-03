@@ -1,12 +1,15 @@
 package com.auth.service.system.admin.controller.admin;
 
 import com.auth.common.core.model.response.Result;
+import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
+import com.auth.service.system.admin.model.query.authorization.SubjectRolePageQuery;
 import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
 import com.auth.service.system.admin.service.admin.SysUserRoleService;
+import com.auth.service.system.admin.service.authorization.query.UserAuthorizationSurfaceService;
 import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -14,8 +17,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
@@ -32,12 +33,15 @@ public class SysUserRoleController {
 
 	private final SysUserRoleService sysUserRoleService;
 
-	@Operation(summary = "查询用户已分配角色")
+	private final UserAuthorizationSurfaceService userAuthorizationSurfaceService;
+
+	@Operation(summary = "分页查询用户直连角色")
 	@PreAuthorize("@auth.decide('sys:userrole:query')")
-	@GetMapping("/{userId}")
-	public Result<List<RoleReferenceVO>> listRoles(@PathVariable("userId") Long userId) {
-		List<RoleReferenceVO> rows = sysUserRoleService.listAssignedRoles(userId);
-		return Result.success(rows);
+	@GetMapping("/{userId}/page")
+	public Result<PageResponse<RoleReferenceVO>> pageRoles(@PathVariable("userId") Long userId,
+			SubjectRolePageQuery query) {
+		PageResponse<RoleReferenceVO> response = userAuthorizationSurfaceService.pageDirectRoles(userId, query);
+		return Result.success(response);
 	}
 
 	@OperationLog(targetType = "USER_ROLE", serviceDomain = AuditServiceDomain.SYSTEM,

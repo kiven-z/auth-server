@@ -2,16 +2,14 @@ package com.auth.service.system.admin.service.admin.impl;
 
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.module.security.contract.dto.invalidation.GrantSubjectKey;
-import com.auth.service.system.admin.mapper.post.SysPostMapper;
-import com.auth.service.system.admin.mapper.role.GrantTableMapper;
+import com.auth.service.system.admin.mapper.admin.post.SysPostMapper;
+import com.auth.service.system.admin.mapper.admin.role.GrantTableMapper;
 import com.auth.service.system.admin.model.entity.GrantTableEntity;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
 import com.auth.service.system.admin.model.form.role.SysRoleGrantSubjectsForm;
 import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
-import com.auth.service.system.admin.model.po.reference.UserReferencePO;
 import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
-import com.auth.service.system.admin.model.vo.role.SysRoleGrantSubjectsVO;
 import com.auth.service.system.admin.support.grant.GrantTableSubjectExistenceVerifier;
 import com.auth.service.system.admin.support.grant.RbacReferenceChecker;
 import com.auth.service.system.admin.support.grant.TypedGrantTableActiveSubjectChecker;
@@ -84,6 +82,29 @@ class GrantTableServiceImplTest {
 		return form;
 	}
 
+	/**
+	 * 构造含 USER/DEPT/POST 校验的 Verifier（测试用；校验回调为空操作）
+	 * @return 主体存在性校验器
+	 */
+	private static GrantTableSubjectExistenceVerifier buildVerifierWithMocks() {
+		return new GrantTableSubjectExistenceVerifier(
+				List.of(new TypedGrantTableActiveSubjectChecker(GrantTableSubjectType.USER, subjectId -> {
+				}), new TypedGrantTableActiveSubjectChecker(GrantTableSubjectType.DEPT, subjectId -> {
+				}), new TypedGrantTableActiveSubjectChecker(GrantTableSubjectType.POST, subjectId -> {
+				})));
+	}
+
+	private static void injectBaseMapper(GrantTableServiceImpl service, GrantTableMapper mapper) {
+		try {
+			Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
+			baseMapperField.setAccessible(true);
+			baseMapperField.set(service, mapper);
+		}
+		catch (ReflectiveOperationException ex) {
+			throw new IllegalStateException(ex);
+		}
+	}
+
 	@BeforeEach
 	void setUp() throws Exception {
 		PostReferenceChecker postReferenceChecker = new PostReferenceChecker(sysPostMapper);
@@ -108,7 +129,7 @@ class GrantTableServiceImplTest {
 		boundRole.setRoleCode("CUSTOM_A");
 		boundRole.setRoleName("业务角色A");
 		boundRole.setStatus(true);
-		when(grantTableMapper.selectBoundRolesBySubject(GrantTableSubjectType.POST.name(), SUBJECT_ID))
+		when(grantTableMapper.selectAssignedRolesBySubject(GrantTableSubjectType.POST.name(), SUBJECT_ID))
 			.thenReturn(List.of(boundRole));
 
 		List<RoleReferenceVO> rows = grantTableService.listAssignedRoles(GrantTableSubjectType.POST, SUBJECT_ID);
@@ -128,7 +149,7 @@ class GrantTableServiceImplTest {
 		menuRole.setRoleCode("MENU_ADMIN");
 		menuRole.setRoleName("菜单管理员");
 		menuRole.setStatus(true);
-		when(grantTableMapper.selectBoundRolesBySubject(GrantTableSubjectType.POST.name(), SUBJECT_ID))
+		when(grantTableMapper.selectAssignedRolesBySubject(GrantTableSubjectType.POST.name(), SUBJECT_ID))
 			.thenReturn(List.of(menuRole));
 
 		List<RoleReferenceVO> rows = grantTableService.listAssignedRoles(GrantTableSubjectType.POST, SUBJECT_ID);
@@ -147,56 +168,6 @@ class GrantTableServiceImplTest {
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
-	}
-
-	@Test
-	@DisplayName("角色视角按类型查询授权对象：组装 USER 种子项")
-	void listGrantSubjectsByRoleIdReturnsUsersWhenSubjectTypeUser() {
-		when(rbacReferenceChecker.getExisting(ROLE_ID)).thenReturn(null);
-
-		UserReferencePO user = new UserReferencePO();
-		user.setId(11L);
-		user.setUsername("alice");
-		user.setNickname("Alice");
-		user.setStatus(1);
-		when(grantTableMapper.selectBoundUsersByRoleId(ROLE_ID)).thenReturn(List.of(user));
-
-		SysRoleGrantSubjectsVO vo = grantTableService.listGrantSubjectsByRoleId(ROLE_ID, GrantTableSubjectType.USER);
-
-		assertThat(vo.getSubjectType()).isEqualTo(GrantTableSubjectType.USER);
-		assertThat(vo.getSubjects()).hasSize(1);
-		assertThat(vo.getSubjects().get(0).getId()).isEqualTo(11L);
-		assertThat(vo.getSubjects().get(0).getLabel()).isEqualTo("Alice");
-		verify(rbacReferenceChecker).getExisting(ROLE_ID);
-		verify(grantTableMapper, never()).selectBoundDeptsByRoleId(any());
-		verify(grantTableMapper, never()).selectBoundPostsByRoleId(any());
-	}
-
-	@Test
-	@DisplayName("角色视角按类型查询授权对象：无授权时 subjects 为空")
-	void listGrantSubjectsByRoleIdReturnsEmptyListWhenNoGrants() {
-		when(rbacReferenceChecker.getExisting(ROLE_ID)).thenReturn(null);
-		when(grantTableMapper.selectBoundDeptsByRoleId(ROLE_ID)).thenReturn(List.of());
-
-		SysRoleGrantSubjectsVO vo = grantTableService.listGrantSubjectsByRoleId(ROLE_ID, GrantTableSubjectType.DEPT);
-
-		assertThat(vo.getSubjectType()).isEqualTo(GrantTableSubjectType.DEPT);
-		assertThat(vo.getSubjects()).isEmpty();
-		verify(grantTableMapper, never()).selectBoundUsersByRoleId(any());
-		verify(grantTableMapper, never()).selectBoundPostsByRoleId(any());
-	}
-
-	@Test
-	@DisplayName("角色视角按类型查询授权对象：角色不存在时抛出 DATA_NOT_EXIST")
-	void listGrantSubjectsByRoleIdThrowsWhenRoleMissing() {
-		when(rbacReferenceChecker.getExisting(ROLE_ID))
-			.thenThrow(new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST));
-
-		assertThatThrownBy(() -> grantTableService.listGrantSubjectsByRoleId(ROLE_ID, GrantTableSubjectType.POST))
-			.isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
-		verify(grantTableMapper, never()).selectBoundPostsByRoleId(any());
 	}
 
 	@Test
@@ -256,9 +227,9 @@ class GrantTableServiceImplTest {
 	void replaceGrantSubjectsByRoleIdThrowsWhenRoleMissing() {
 		when(rbacReferenceChecker.getExisting(ROLE_ID))
 			.thenThrow(new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST));
+		SysRoleGrantSubjectsForm form = subjectsForm(GrantTableSubjectType.USER, List.of());
 
-		assertThatThrownBy(() -> grantTableService.replaceGrantSubjectsByRoleId(ROLE_ID,
-				subjectsForm(GrantTableSubjectType.USER, List.of())))
+		assertThatThrownBy(() -> grantTableService.replaceGrantSubjectsByRoleId(ROLE_ID, form))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
@@ -326,29 +297,6 @@ class GrantTableServiceImplTest {
 
 		verify(grantTableMapper).deleteBySubjectIds(GrantTableSubjectType.DEPT.name(), List.of(SUBJECT_ID));
 		verify(grantTableService, never()).saveBatch(any(Collection.class));
-	}
-
-	/**
-	 * 构造含 USER/DEPT/POST 校验的 Verifier（测试用；校验回调为空操作）
-	 * @return 主体存在性校验器
-	 */
-	private static GrantTableSubjectExistenceVerifier buildVerifierWithMocks() {
-		return new GrantTableSubjectExistenceVerifier(
-				List.of(new TypedGrantTableActiveSubjectChecker(GrantTableSubjectType.USER, subjectId -> {
-				}), new TypedGrantTableActiveSubjectChecker(GrantTableSubjectType.DEPT, subjectId -> {
-				}), new TypedGrantTableActiveSubjectChecker(GrantTableSubjectType.POST, subjectId -> {
-				})));
-	}
-
-	private static void injectBaseMapper(GrantTableServiceImpl service, GrantTableMapper mapper) {
-		try {
-			Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
-			baseMapperField.setAccessible(true);
-			baseMapperField.set(service, mapper);
-		}
-		catch (ReflectiveOperationException ex) {
-			throw new IllegalStateException(ex);
-		}
 	}
 
 }

@@ -6,7 +6,7 @@ import com.auth.module.security.contract.constants.PermissionConstant;
 import com.auth.service.system.admin.convert.admin.menu.MenuConvertContext;
 import com.auth.service.system.admin.convert.admin.menu.MenuRouteMetaConverter;
 import com.auth.service.system.admin.convert.admin.menu.MenuRouteTreeNode;
-import com.auth.service.system.admin.mapper.menu.SysMenuRoleMapper;
+import com.auth.service.system.admin.mapper.admin.menu.SysMenuRoleMapper;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.admin.model.po.menu.SysMenuRoleLinkRowPO;
 import com.auth.service.system.admin.model.vo.menu.RouteMetaVO;

@@ -1,8 +1,8 @@
 package com.auth.service.system.admin.support.grant;
 
 import cn.hutool.core.collection.CollUtil;
-import com.auth.service.system.admin.mapper.permission.SysPermissionMapper;
-import com.auth.service.system.admin.mapper.role.SysRoleMapper;
+import com.auth.service.system.admin.mapper.admin.permission.SysPermissionMapper;
+import com.auth.service.system.admin.mapper.admin.role.SysRoleMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;

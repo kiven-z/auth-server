@@ -4,7 +4,6 @@ import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
 import com.auth.service.system.admin.model.form.role.SysRoleGrantSubjectsForm;
 import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
-import com.auth.service.system.admin.model.vo.role.SysRoleGrantSubjectsVO;
 
 import java.util.List;
 
@@ -30,14 +29,6 @@ public interface GrantTableService {
 	 * @return 已绑定角色回显列表
 	 */
 	List<RoleReferenceVO> listBoundRoles(GrantTableSubjectType subjectType, Long subjectId);
-
-	/**
-	 * 按角色与主体类型查询授权对象
-	 * @param roleId 角色 ID
-	 * @param subjectType 主体类型（USER / DEPT / POST）
-	 * @return 仅含该类型种子项；无授权时 subjects 为空列表
-	 */
-	SysRoleGrantSubjectsVO listGrantSubjectsByRoleId(Long roleId, GrantTableSubjectType subjectType);
 
 	/**
 	 * 按角色与主体类型全量覆盖授权对象（仅替换 form 指定类型）

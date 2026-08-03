@@ -1,7 +1,7 @@
 package com.auth.service.system.admin.support.grant;
 
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
-import com.auth.service.system.admin.mapper.post.SysPostMapper;
+import com.auth.service.system.admin.mapper.admin.post.SysPostMapper;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.support.post.PostReferenceChecker;
 import com.auth.service.system.common.exception.SystemBusinessException;

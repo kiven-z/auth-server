@@ -1,8 +1,9 @@
 package com.auth.service.system.admin.service.admin.impl;
 
 import com.auth.common.core.model.form.IdsEnableStatusForm;
-import com.auth.service.system.admin.mapper.dept.SysDeptMapper;
-import com.auth.service.system.admin.mapper.role.GrantTableMapper;
+import com.auth.service.system.admin.mapper.admin.dept.SysDeptMapper;
+import com.auth.service.system.admin.mapper.authorization.DeptRelationQueryMapper;
+import com.auth.service.system.admin.mapper.authorization.GrantBindingQueryMapper;
 import com.auth.service.system.admin.model.constants.AdminBatchSizes;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.form.dept.SysDeptForm;
@@ -59,7 +60,10 @@ class SysDeptServiceImplTest {
 	private DeptAuthorizationInvalidationTrigger deptInvalidationTrigger;
 
 	@Mock
-	private GrantTableMapper grantTableMapper;
+	private DeptRelationQueryMapper deptRelationQueryMapper;
+
+	@Mock
+	private GrantBindingQueryMapper grantBindingQueryMapper;
 
 	private SysDeptServiceImpl sysDeptService;
 
@@ -91,7 +95,7 @@ class SysDeptServiceImplTest {
 		sysDeptService = spy(
 				new SysDeptServiceImpl(deptReferenceChecker, deptClosureMaintainer, deptInvalidationTrigger));
 		sysDeptQueryService = new SysDeptQueryServiceImpl(auditUserDisplayService, deptReferenceChecker,
-				grantTableMapper);
+				deptRelationQueryMapper, grantBindingQueryMapper);
 		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysDeptService, sysDeptMapper);

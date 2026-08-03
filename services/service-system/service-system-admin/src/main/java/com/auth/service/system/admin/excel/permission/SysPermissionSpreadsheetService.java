@@ -7,7 +7,7 @@ import com.auth.module.file.export.writer.ExcelExportWriter;
 import com.auth.module.file.importer.model.SpreadsheetImportResult;
 import com.auth.service.system.admin.convert.spreadsheet.SysPermissionSpreadsheetConverter;
 import com.auth.service.system.admin.excel.StatusColorCellWriteHandler;
-import com.auth.service.system.admin.mapper.permission.SysPermissionMapper;
+import com.auth.service.system.admin.mapper.admin.permission.SysPermissionMapper;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.query.permission.SysPermissionQuery;
 import com.auth.service.system.admin.support.sqlbuild.SysPermissionPageOrderSqlBuilder;

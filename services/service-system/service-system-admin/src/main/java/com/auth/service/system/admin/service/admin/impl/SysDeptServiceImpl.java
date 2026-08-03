@@ -7,7 +7,7 @@ import com.auth.common.core.utils.TreeParentIdUtil;
 import com.auth.common.core.utils.TreeRelationUtil;
 import com.auth.common.data.support.BusinessKeyAssert;
 import com.auth.service.system.admin.convert.admin.SysDeptConverter;
-import com.auth.service.system.admin.mapper.dept.SysDeptMapper;
+import com.auth.service.system.admin.mapper.admin.dept.SysDeptMapper;
 import com.auth.service.system.admin.model.constants.AdminBatchSizes;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.form.dept.SysDeptForm;

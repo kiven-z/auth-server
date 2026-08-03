@@ -1,7 +1,16 @@
 package com.auth.module.security.autoconfigure.audit.operationlog;
 
-import cn.hutool.core.text.CharSequenceUtil;
-import cn.hutool.core.util.ArrayUtil;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
 import com.auth.common.ip.IpAddressService;
 import com.auth.common.ip.IpInfo;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
@@ -11,18 +20,12 @@ import com.auth.module.security.contract.context.OperationLogContext;
 import com.auth.module.security.contract.event.OperationLogPayloadEvent;
 import com.auth.module.security.contract.spi.OperationLogHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.core.util.ArrayUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 将 Web 请求上下文、控制器方法实参与 {@link OperationLog} 元数据组装为 {@link OperationLogPayloadEvent} 并委托
@@ -107,7 +110,8 @@ public class OperationLogPayloadAssembler {
 		Method method = signature.getMethod();
 
 		Object[] args = joinPoint.getArgs();
-		List<Object> methodArgs = ArrayUtil.isEmpty(args) ? List.of() : List.copyOf(Arrays.asList(args));
+		// 可选 @RequestBody 可能为 null，不能用 List.copyOf
+		List<Object> methodArgs = ArrayUtil.isEmpty(args) ? List.of() : new ArrayList<>(Arrays.asList(args));
 		OperationLogPayloadEvent payload = buildPayload(
 				new BuildPayloadContext(meta, result, failure, startNs, request, response, method, methodArgs));
 		dispatch(payload);

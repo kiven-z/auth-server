@@ -15,7 +15,6 @@ name: Build and push to ACR
 
 on:
   push:
-    branches: [main, master]
     tags: ["v*"]
   workflow_dispatch:
 
@@ -35,7 +34,6 @@ jobs:
         with:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
-          cache: maven
 
       - name: Package all services (once)
         run: |
@@ -115,5 +113,3 @@ jobs:
           tags: |
             ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.tag_sha }}
             ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.tag_latest }}
-          cache-from: type=gha,scope=runtime-${{ matrix.name }}
-          cache-to: type=gha,mode=max,scope=runtime-${{ matrix.name }}

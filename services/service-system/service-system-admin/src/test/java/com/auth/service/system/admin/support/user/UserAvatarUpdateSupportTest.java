@@ -4,7 +4,7 @@ import com.auth.module.file.api.model.request.OwnedFileAssertByUrlRequest;
 import com.auth.module.file.api.model.request.OwnedFileDeleteByUrlRequest;
 import com.auth.module.file.api.port.OwnedFileOperations;
 import com.auth.module.platform.persistence.model.UserEntity;
-import com.auth.service.system.admin.mapper.user.SysUserMapper;
+import com.auth.service.system.admin.mapper.admin.user.SysUserMapper;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;

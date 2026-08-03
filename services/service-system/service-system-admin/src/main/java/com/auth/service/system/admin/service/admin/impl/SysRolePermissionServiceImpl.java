@@ -3,7 +3,7 @@ package com.auth.service.system.admin.service.admin.impl;
 import cn.hutool.core.collection.CollUtil;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.service.system.admin.convert.admin.ReferenceConverter;
-import com.auth.service.system.admin.mapper.role.SysRolePermissionMapper;
+import com.auth.service.system.admin.mapper.admin.role.SysRolePermissionMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.entity.SysRolePermissionEntity;
 import com.auth.service.system.admin.model.po.reference.PermissionReferencePO;

@@ -3,7 +3,7 @@ package com.auth.service.system.admin.service.admin.impl;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.platform.persistence.model.LoginLogEntity;
 import com.auth.service.system.admin.convert.admin.log.LogLoginLogConverter;
-import com.auth.service.system.admin.mapper.log.LogLoginLogMapper;
+import com.auth.service.system.admin.mapper.admin.log.LogLoginLogMapper;
 import com.auth.service.system.admin.model.po.loglogin.LogLoginLogPageRowPO;
 import com.auth.service.system.admin.model.query.log.LogLoginLogQuery;
 import com.auth.service.system.admin.model.vo.loglogin.LogLoginLogDetailVO;

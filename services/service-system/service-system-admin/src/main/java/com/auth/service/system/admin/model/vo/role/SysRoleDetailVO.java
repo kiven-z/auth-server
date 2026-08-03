@@ -1,18 +1,14 @@
 package com.auth.service.system.admin.model.vo.role;
 
 import com.auth.common.core.model.response.BaseResponse;
-import com.auth.service.system.admin.model.vo.permission.SysPermissionBoundMenuItemVO;
-import com.auth.service.system.admin.model.vo.reference.PermissionReferenceVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.util.List;
-
 /**
- * 角色详情 VO
+ * 角色详情 VO（标量 + 授权关系计数）
  *
  * @author Bunny
  */
@@ -38,10 +34,19 @@ public class SysRoleDetailVO extends BaseResponse {
 	@Schema(title = "备注")
 	private String remark;
 
-	@Schema(title = "已分配权限列表（sys_role_permission 正查）")
-	private List<PermissionReferenceVO> boundPermissions;
+	@Schema(title = "绑定权限数")
+	private Long permissionCount;
 
-	@Schema(title = "已绑定菜单列表（sys_menu_role 反查）")
-	private List<SysPermissionBoundMenuItemVO> boundMenus;
+	@Schema(title = "绑定菜单数")
+	private Long menuCount;
+
+	@Schema(title = "授权对象用户数")
+	private Long grantUserCount;
+
+	@Schema(title = "授权对象部门数")
+	private Long grantDeptCount;
+
+	@Schema(title = "授权对象岗位数")
+	private Long grantPostCount;
 
 }

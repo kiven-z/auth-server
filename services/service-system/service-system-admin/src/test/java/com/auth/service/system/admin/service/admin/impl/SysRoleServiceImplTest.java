@@ -1,17 +1,15 @@
 package com.auth.service.system.admin.service.admin.impl;
 
 import com.auth.common.core.model.form.IdsEnableStatusForm;
-import com.auth.service.system.admin.mapper.menu.SysMenuRoleMapper;
-import com.auth.service.system.admin.mapper.role.GrantTableMapper;
-import com.auth.service.system.admin.mapper.role.SysRoleMapper;
-import com.auth.service.system.admin.mapper.role.SysRolePermissionMapper;
+import com.auth.service.system.admin.mapper.admin.role.GrantTableMapper;
+import com.auth.service.system.admin.mapper.admin.role.SysRoleMapper;
 import com.auth.service.system.admin.model.constants.AdminBatchSizes;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.form.role.SysRoleForm;
-import com.auth.service.system.admin.model.po.permission.SysPermissionBoundMenuPO;
-import com.auth.service.system.admin.model.po.reference.PermissionReferencePO;
 import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
+import com.auth.service.system.admin.model.vo.authorization.RoleAuthorizationSummaryVO;
 import com.auth.service.system.admin.model.vo.role.SysRoleDetailVO;
+import com.auth.service.system.admin.service.authorization.query.RoleAuthorizationSurfaceService;
 import com.auth.service.system.authorization.dispatch.trigger.RoleAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
@@ -55,10 +53,7 @@ class SysRoleServiceImplTest {
 	private GrantTableMapper grantTableMapper;
 
 	@Mock
-	private SysRolePermissionMapper sysRolePermissionMapper;
-
-	@Mock
-	private SysMenuRoleMapper sysMenuRoleMapper;
+	private RoleAuthorizationSurfaceService roleAuthorizationSurfaceService;
 
 	private SysRoleServiceImpl sysRoleService;
 
@@ -81,10 +76,21 @@ class SysRoleServiceImplTest {
 		return entity;
 	}
 
+	private static RoleAuthorizationSummaryVO summary(long permissionCount, long menuCount, long grantUserCount,
+			long grantDeptCount, long grantPostCount) {
+		RoleAuthorizationSummaryVO value = new RoleAuthorizationSummaryVO();
+		value.setPermissionCount(permissionCount);
+		value.setMenuCount(menuCount);
+		value.setGrantUserCount(grantUserCount);
+		value.setGrantDeptCount(grantDeptCount);
+		value.setGrantPostCount(grantPostCount);
+		return value;
+	}
+
 	@BeforeEach
 	void setUp() throws Exception {
 		sysRoleService = spy(new SysRoleServiceImpl(auditUserDisplayService, roleInvalidationTrigger, grantTableMapper,
-				sysRolePermissionMapper, sysMenuRoleMapper));
+				roleAuthorizationSurfaceService));
 		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysRoleService, sysRoleMapper);
@@ -161,56 +167,26 @@ class SysRoleServiceImplTest {
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
 
-		verifyNoInteractions(sysRolePermissionMapper, sysMenuRoleMapper);
+		verifyNoInteractions(roleAuthorizationSurfaceService);
 	}
 
 	@Test
-	@DisplayName("角色详情：返回已分配权限列表")
-	void getDetailShouldIncludeBoundPermissions() {
+	@DisplayName("角色详情：复用授权面摘要填充计数")
+	void getDetailShouldIncludeAuthorizationCounts() {
 		when(sysRoleMapper.selectById(1L)).thenReturn(roleEntity(1L, "ADMIN"));
-
-		PermissionReferencePO permission = new PermissionReferencePO();
-		permission.setId(100L);
-		permission.setPermissionCode("sys:user:query");
-		permission.setPermissionName("用户查询");
-		permission.setStatus(true);
-		when(sysRolePermissionMapper.selectAssignedPermissionsByRoleId(1L)).thenReturn(List.of(permission));
-		when(sysMenuRoleMapper.selectBoundMenusByRoleId(1L)).thenReturn(List.of());
+		when(roleAuthorizationSurfaceService.getAuthorizationSummary(1L)).thenReturn(summary(3L, 2L, 5L, 1L, 0L));
 
 		SysRoleDetailVO detail = sysRoleService.getDetail(1L);
 
 		assertThat(detail.getRoleCode()).isEqualTo("ADMIN");
-		assertThat(detail.getBoundPermissions()).hasSize(1);
-		assertThat(detail.getBoundPermissions().get(0).getId()).isEqualTo(100L);
-		assertThat(detail.getBoundPermissions().get(0).getPermissionCode()).isEqualTo("sys:user:query");
-		verify(sysRolePermissionMapper).selectAssignedPermissionsByRoleId(1L);
-		verify(sysMenuRoleMapper).selectBoundMenusByRoleId(1L);
+		assertThat(detail.getPermissionCount()).isEqualTo(3L);
+		assertThat(detail.getMenuCount()).isEqualTo(2L);
+		assertThat(detail.getGrantUserCount()).isEqualTo(5L);
+		assertThat(detail.getGrantDeptCount()).isEqualTo(1L);
+		assertThat(detail.getGrantPostCount()).isZero();
+		verify(roleAuthorizationSurfaceService).getAuthorizationSummary(1L);
 		verifyNoInteractions(grantTableMapper);
 		verify(auditUserDisplayService).enrichAuditUsernames(anyList(), isNull(), isNull());
-	}
-
-	@Test
-	@DisplayName("角色详情：反查并填充已绑定菜单")
-	void getDetailShouldIncludeBoundMenus() {
-		when(sysRoleMapper.selectById(2L)).thenReturn(roleEntity(2L, "EDITOR"));
-
-		SysPermissionBoundMenuPO boundMenu = new SysPermissionBoundMenuPO();
-		boundMenu.setId(10L);
-		boundMenu.setTitle("用户管理");
-		boundMenu.setName("SystemUser");
-		boundMenu.setPath("/system/user");
-		boundMenu.setMenuType(0);
-		boundMenu.setStatus(true);
-		when(sysMenuRoleMapper.selectBoundMenusByRoleId(2L)).thenReturn(List.of(boundMenu));
-		when(sysRolePermissionMapper.selectAssignedPermissionsByRoleId(2L)).thenReturn(List.of());
-
-		SysRoleDetailVO detail = sysRoleService.getDetail(2L);
-
-		assertThat(detail.getBoundMenus()).hasSize(1);
-		assertThat(detail.getBoundMenus().get(0).getTitle()).isEqualTo("用户管理");
-
-		verify(sysMenuRoleMapper).selectBoundMenusByRoleId(2L);
-		verifyNoInteractions(grantTableMapper);
 	}
 
 	@Test

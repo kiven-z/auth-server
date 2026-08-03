@@ -7,7 +7,7 @@ import com.auth.module.file.export.writer.ExcelExportWriter;
 import com.auth.module.file.importer.model.SpreadsheetImportResult;
 import com.auth.service.system.admin.convert.spreadsheet.SysPostSpreadsheetConverter;
 import com.auth.service.system.admin.excel.StatusColorCellWriteHandler;
-import com.auth.service.system.admin.mapper.post.SysPostMapper;
+import com.auth.service.system.admin.mapper.admin.post.SysPostMapper;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.po.post.SysPostPageRowPO;
 import com.auth.service.system.admin.model.query.post.SysPostQuery;

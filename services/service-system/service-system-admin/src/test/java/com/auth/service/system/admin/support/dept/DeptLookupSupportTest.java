@@ -1,6 +1,6 @@
 package com.auth.service.system.admin.support.dept;
 
-import com.auth.service.system.admin.mapper.dept.SysDeptMapper;
+import com.auth.service.system.admin.mapper.admin.dept.SysDeptMapper;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.po.dept.SysDeptPathRowPO;
 import org.junit.jupiter.api.DisplayName;
@@ -64,8 +64,7 @@ class DeptLookupSupportTest {
 		record ImportRow(String deptCode) {
 		}
 
-		Map<String, Long> result = deptLookupSupport.resolveIdsByCodes(Collections.<ImportRow>emptyList(),
-				ImportRow::deptCode);
+		Map<String, Long> result = deptLookupSupport.resolveIdsByCodes(Collections.emptyList(), ImportRow::deptCode);
 
 		assertThat(result).isEmpty();
 		verifyNoInteractions(sysDeptMapper);

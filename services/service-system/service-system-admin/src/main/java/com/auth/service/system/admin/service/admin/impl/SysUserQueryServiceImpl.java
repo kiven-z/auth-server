@@ -1,19 +1,14 @@
 package com.auth.service.system.admin.service.admin.impl;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.platform.persistence.model.UserEntity;
-import com.auth.service.system.admin.convert.admin.ReferenceConverter;
+import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.convert.admin.user.SysUserConverter;
-import com.auth.service.system.admin.mapper.permission.SysPermissionMapper;
-import com.auth.service.system.admin.mapper.role.SysRoleMapper;
-import com.auth.service.system.admin.mapper.user.SysUserMapper;
-import com.auth.service.system.admin.model.po.reference.PermissionReferencePO;
-import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
+import com.auth.service.system.admin.mapper.admin.user.SysUserMapper;
+import com.auth.service.system.admin.mapper.authorization.GrantBindingQueryMapper;
+import com.auth.service.system.admin.mapper.authorization.UserEffectiveAuthorizationQueryMapper;
 import com.auth.service.system.admin.model.po.user.SysUserPageRowPO;
-import com.auth.service.system.admin.model.po.user.UserDeptProfilePO;
-import com.auth.service.system.admin.model.po.user.UserPostProfilePO;
 import com.auth.service.system.admin.model.po.user.UserSearchItemPO;
 import com.auth.service.system.admin.model.query.user.SysUserPageQuery;
 import com.auth.service.system.admin.model.vo.user.SysUserDetailVO;
@@ -23,8 +18,6 @@ import com.auth.service.system.admin.model.vo.user.SysUserSearchItemVO;
 import com.auth.service.system.admin.service.admin.SysUserQueryService;
 import com.auth.service.system.admin.support.sqlbuild.SysUserPageOrderSqlBuilder;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
-import com.auth.service.system.authorization.dispatch.query.UserEffectiveCodesResolver;
-import com.auth.service.system.authorization.dispatch.query.UserEffectiveCodesSnapshot;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.common.service.AuditUserDisplayService;
@@ -51,13 +44,11 @@ public class SysUserQueryServiceImpl extends ServiceImpl<SysUserMapper, UserEnti
 
 	private final AuditUserDisplayService auditUserDisplayService;
 
-	private final SysRoleMapper sysRoleMapper;
-
-	private final SysPermissionMapper sysPermissionMapper;
-
 	private final UserReferenceChecker userReferenceChecker;
 
-	private final UserEffectiveCodesResolver userEffectiveCodesResolver;
+	private final UserEffectiveAuthorizationQueryMapper userEffectiveAuthorizationQueryMapper;
+
+	private final GrantBindingQueryMapper grantBindingQueryMapper;
 
 	/**
 	 * {@inheritDoc}
@@ -83,12 +74,8 @@ public class SysUserQueryServiceImpl extends ServiceImpl<SysUserMapper, UserEnti
 		}
 		UserEntity user = userReferenceChecker.getExistingActive(userId);
 		SysUserProfileVO response = SysUserConverter.INSTANCE.toProfileVo(user);
-
-		List<UserDeptProfilePO> deptProfileList = baseMapper.selectDeptProfileByUserId(userId);
-		response.setDeptList(ReferenceConverter.INSTANCE.toUserDeptReferenceList(deptProfileList));
-
-		List<UserPostProfilePO> postProfileList = baseMapper.selectPostProfileByUserId(userId);
-		response.setPostList(ReferenceConverter.INSTANCE.toUserPostReferenceList(postProfileList));
+		response.setDeptCount(userEffectiveAuthorizationQueryMapper.countDeptsByUserId(userId));
+		response.setPostCount(userEffectiveAuthorizationQueryMapper.countPostsByUserId(userId));
 		return response;
 	}
 
@@ -99,26 +86,11 @@ public class SysUserQueryServiceImpl extends ServiceImpl<SysUserMapper, UserEnti
 	public SysUserDetailVO getDetail(Long userId) {
 		SysUserProfileVO profile = getProfile(userId);
 		SysUserDetailVO detail = SysUserConverter.INSTANCE.fromProfile(profile);
-
-		UserEffectiveCodesSnapshot effectiveCodesSnapshot = UserEffectiveCodesSnapshot.builder()
-			.permissionCodes(List.of())
-			.roleCodes(List.of())
-			.build();
-		UserEffectiveCodesSnapshot codes = userEffectiveCodesResolver.resolve(userId).orElse(effectiveCodesSnapshot);
-
-		List<String> roledCodes = codes.roleCodes();
-		if (CollUtil.isNotEmpty(roledCodes)) {
-			List<RoleReferencePO> roleReferenceList = sysRoleMapper.selectReferenceByRoleCodes(roledCodes);
-			detail.setEffectiveRoles(ReferenceConverter.INSTANCE.toRoleReferenceList(roleReferenceList));
-		}
-
-		List<String> permissionCodes = codes.permissionCodes();
-		if (CollUtil.isNotEmpty(permissionCodes)) {
-			List<PermissionReferencePO> permissionReferenceList = sysPermissionMapper
-				.selectReferenceByPermissionCodes(permissionCodes);
-			detail.setEffectivePermissions(
-					ReferenceConverter.INSTANCE.toPermissionReferenceList(permissionReferenceList));
-		}
+		detail.setDirectRoleCount(
+				grantBindingQueryMapper.countBoundRolesBySubject(GrantTableSubjectType.USER.name(), userId, null));
+		detail.setEffectiveRoleCount(userEffectiveAuthorizationQueryMapper.countEffectiveRolesByUserId(userId, null));
+		detail.setEffectivePermissionCount(
+				userEffectiveAuthorizationQueryMapper.countEffectivePermissionsByUserId(userId, null));
 
 		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail), null, null);
 		return detail;

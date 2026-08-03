@@ -20,6 +20,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * 授权内部
  *
@@ -43,6 +45,14 @@ public class AuthorizationInnerController {
 	@GetMapping("/principal/{userId}/effective-codes")
 	public Result<EffectiveCodesVO> effectiveCodes(@PathVariable("userId") Long userId) {
 		return Result.success(adminAuthorizationService.getEffectiveCodes(userId));
+	}
+
+	@InternalApi
+	@Operation(summary = "批量刷新用户授权画像", description = "按用户 ID 重建并写入 AuthProfile 缓存")
+	@PostMapping("/profiles/refresh")
+	public Result<Void> refreshProfiles(@RequestBody(required = false) List<Long> userIds) {
+		adminAuthorizationService.refreshUserCache(userIds);
+		return Result.success();
 	}
 
 	@InternalApi

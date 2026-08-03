@@ -2,7 +2,7 @@ package com.auth.service.system.admin.excel.permission;
 
 import com.auth.module.file.export.writer.ExcelExportWriter;
 import com.auth.module.file.importer.model.SpreadsheetImportResult;
-import com.auth.service.system.admin.mapper.permission.SysPermissionMapper;
+import com.auth.service.system.admin.mapper.admin.permission.SysPermissionMapper;
 import com.auth.service.system.admin.model.form.permission.SysPermissionForm;
 import com.auth.service.system.admin.model.po.reference.PermissionReferencePO;
 import com.auth.service.system.admin.service.admin.SysPermissionService;

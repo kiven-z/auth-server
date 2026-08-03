@@ -2,7 +2,7 @@ package com.auth.service.system.admin.excel.post;
 
 import com.auth.module.file.export.ExportScopeQueryFields;
 import com.auth.module.file.export.model.enums.ExportScope;
-import com.auth.service.system.admin.mapper.post.SysPostMapper;
+import com.auth.service.system.admin.mapper.admin.post.SysPostMapper;
 import com.auth.service.system.admin.model.po.post.SysPostPageRowPO;
 import com.auth.service.system.admin.model.query.post.SysPostQuery;
 import com.auth.service.system.admin.service.admin.SysPostService;

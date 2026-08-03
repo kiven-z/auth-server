@@ -1,11 +1,11 @@
 package com.auth.service.system.admin.service.admin.impl;
 
-import com.auth.service.system.admin.mapper.menu.SysMenuMapper;
-import com.auth.service.system.admin.mapper.menu.SysMenuRoleMapper;
+import com.auth.service.system.admin.mapper.admin.menu.SysMenuMapper;
+import com.auth.service.system.admin.mapper.admin.menu.SysMenuRoleMapper;
+import com.auth.service.system.admin.mapper.authorization.MenuRoleBindingQueryMapper;
 import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.admin.model.form.menu.SysMenuAssignRoleForm;
 import com.auth.service.system.admin.model.form.menu.SysMenuMoveForm;
-import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.auth.service.system.admin.model.vo.menu.SysMenuDetailVO;
 import com.auth.service.system.admin.support.grant.RbacReferenceChecker;
 import com.auth.service.system.admin.support.menu.MenuReferenceChecker;
@@ -59,6 +59,9 @@ class SysMenuServiceImplTest {
 	private SysMenuRoleMapper sysMenuRoleMapper;
 
 	@Mock
+	private MenuRoleBindingQueryMapper menuRoleBindingQueryMapper;
+
+	@Mock
 	private RbacReferenceChecker rbacReferenceChecker;
 
 	private SysMenuServiceImpl sysMenuService;
@@ -73,7 +76,8 @@ class SysMenuServiceImplTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		sysMenuService = new SysMenuServiceImpl(auditUserDisplayService, userEffectiveCodesResolver,
-				menuWebRouteTreeAssembler, menuReferenceChecker, sysMenuRoleMapper, rbacReferenceChecker);
+				menuWebRouteTreeAssembler, menuReferenceChecker, sysMenuRoleMapper, menuRoleBindingQueryMapper,
+				rbacReferenceChecker);
 		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysMenuService, sysMenuMapper);
@@ -156,27 +160,19 @@ class SysMenuServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("菜单详情：反查并填充已绑定角色")
+	@DisplayName("菜单详情：填充已绑定角色计数")
 	void getDetailShouldIncludeBoundRoles() {
 		SysMenuEntity entity = menuEntity(5L);
 		entity.setName("SystemUser");
 		entity.setTitle("用户管理");
 		when(menuReferenceChecker.getExisting(5L)).thenReturn(entity);
-
-		RoleReferencePO boundRole = new RoleReferencePO();
-		boundRole.setId(20L);
-		boundRole.setRoleCode("MENU_ADMIN");
-		boundRole.setRoleName("菜单管理员");
-		boundRole.setStatus(true);
-		when(sysMenuRoleMapper.selectBoundRolesByMenuId(5L)).thenReturn(List.of(boundRole));
+		when(menuRoleBindingQueryMapper.countRolesByMenuId(5L, null)).thenReturn(1L);
 
 		SysMenuDetailVO detail = sysMenuService.getDetail(5L);
 
 		assertThat(detail.getName()).isEqualTo("SystemUser");
-		assertThat(detail.getBoundRoles()).hasSize(1);
-		assertThat(detail.getBoundRoles().get(0).getId()).isEqualTo(20L);
-		assertThat(detail.getBoundRoles().get(0).getRoleCode()).isEqualTo("MENU_ADMIN");
-		verify(sysMenuRoleMapper).selectBoundRolesByMenuId(5L);
+		assertThat(detail.getBoundRoleCount()).isEqualTo(1L);
+		verify(menuRoleBindingQueryMapper).countRolesByMenuId(5L, null);
 		verify(auditUserDisplayService).enrichAuditUsernames(anyList(), isNull(), isNull());
 	}
 

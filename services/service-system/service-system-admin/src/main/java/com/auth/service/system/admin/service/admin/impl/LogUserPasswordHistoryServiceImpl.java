@@ -2,7 +2,7 @@ package com.auth.service.system.admin.service.admin.impl;
 
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.convert.admin.log.LogUserPasswordHistoryConverter;
-import com.auth.service.system.admin.mapper.log.LogUserPasswordHistoryMapper;
+import com.auth.service.system.admin.mapper.admin.log.LogUserPasswordHistoryMapper;
 import com.auth.service.system.admin.model.entity.LogUserPasswordHistoryEntity;
 import com.auth.service.system.admin.model.po.loguserpasswordhistory.LogUserPasswordHistoryDetailRowPO;
 import com.auth.service.system.admin.model.po.loguserpasswordhistory.LogUserPasswordHistoryPageRowPO;

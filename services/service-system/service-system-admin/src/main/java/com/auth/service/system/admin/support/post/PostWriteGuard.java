@@ -5,7 +5,7 @@ import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.data.support.BusinessKeyAssert;
 import com.auth.service.system.admin.excel.post.SysPostImportRow;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
-import com.auth.service.system.admin.mapper.post.SysPostMapper;
+import com.auth.service.system.admin.mapper.admin.post.SysPostMapper;
 import com.auth.service.system.admin.model.form.post.SysPostForm;
 import com.auth.service.system.admin.model.po.post.PostDeptCodePairPO;
 import com.auth.service.system.common.exception.SystemBusinessException;

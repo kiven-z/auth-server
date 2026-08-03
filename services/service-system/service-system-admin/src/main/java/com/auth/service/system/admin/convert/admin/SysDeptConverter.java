@@ -83,9 +83,9 @@ public interface SysDeptConverter {
 	 */
 	@Mapping(target = "createdByName", ignore = true)
 	@Mapping(target = "updatedByName", ignore = true)
-	@Mapping(target = "boundUsers", ignore = true)
-	@Mapping(target = "boundPosts", ignore = true)
-	@Mapping(target = "boundRoles", ignore = true)
+	@Mapping(target = "boundUserCount", ignore = true)
+	@Mapping(target = "boundPostCount", ignore = true)
+	@Mapping(target = "boundRoleCount", ignore = true)
 	SysDeptDetailVO toDetailVo(SysDeptEntity entity);
 
 }

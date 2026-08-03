@@ -7,7 +7,7 @@ import com.auth.module.file.export.writer.ExcelExportWriter;
 import com.auth.module.file.importer.model.SpreadsheetImportResult;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.system.admin.convert.spreadsheet.SysUserSpreadsheetConverter;
-import com.auth.service.system.admin.mapper.user.SysUserMapper;
+import com.auth.service.system.admin.mapper.admin.user.SysUserMapper;
 import com.auth.service.system.admin.model.po.user.SysUserPageRowPO;
 import com.auth.service.system.admin.model.query.user.SysUserPageQuery;
 import com.auth.service.system.admin.support.sqlbuild.SysUserPageOrderSqlBuilder;

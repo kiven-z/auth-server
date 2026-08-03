@@ -1,7 +1,7 @@
 package com.auth.service.system.admin.service.admin.impl;
 
 import com.auth.service.system.admin.convert.admin.user.SysUserScopeConverter;
-import com.auth.service.system.admin.mapper.user.UserScopeMapper;
+import com.auth.service.system.admin.mapper.admin.user.UserScopeMapper;
 import com.auth.service.system.admin.model.entity.UserScopeEntity;
 import com.auth.service.system.admin.model.form.scope.SysDataScopeForm;
 import com.auth.service.system.admin.model.vo.user.SysUserScopeVO;

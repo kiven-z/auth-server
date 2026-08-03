@@ -1,13 +1,13 @@
 package com.auth.service.system.admin.service.admin.impl;
 
 import com.auth.common.core.model.form.IdsEnableStatusForm;
-import com.auth.service.system.admin.mapper.permission.SysPermissionMapper;
-import com.auth.service.system.admin.mapper.role.SysRolePermissionMapper;
+import com.auth.service.system.admin.mapper.admin.permission.SysPermissionMapper;
+import com.auth.service.system.admin.mapper.admin.role.SysRolePermissionMapper;
+import com.auth.service.system.admin.mapper.authorization.RolePermissionBindingQueryMapper;
 import com.auth.service.system.admin.model.constants.AdminBatchSizes;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.form.permission.SysPermissionForm;
 import com.auth.service.system.admin.model.po.reference.PermissionReferencePO;
-import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionDetailVO;
 import com.auth.service.system.authorization.dispatch.trigger.PermissionAuthorizationInvalidationTrigger;
 import com.auth.service.system.authorization.dispatch.trigger.RoleAuthorizationInvalidationTrigger;
@@ -58,6 +58,9 @@ class SysPermissionServiceImplTest {
 	@Mock
 	private SysRolePermissionMapper sysRolePermissionMapper;
 
+	@Mock
+	private RolePermissionBindingQueryMapper rolePermissionBindingQueryMapper;
+
 	private SysPermissionServiceImpl sysPermissionService;
 
 	private static SysPermissionEntity permissionEntity(Long id) {
@@ -83,7 +86,7 @@ class SysPermissionServiceImplTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		sysPermissionService = spy(new SysPermissionServiceImpl(auditUserDisplayService, permissionInvalidationTrigger,
-				roleInvalidationTrigger, sysRolePermissionMapper));
+				roleInvalidationTrigger, sysRolePermissionMapper, rolePermissionBindingQueryMapper));
 		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysPermissionService, sysPermissionMapper);
@@ -234,18 +237,18 @@ class SysPermissionServiceImplTest {
 		entity.setPermissionName("部门查询");
 		entity.setStatus(true);
 		when(sysPermissionMapper.selectById(3L)).thenReturn(entity);
-		when(sysRolePermissionMapper.selectBoundRolesByPermissionId(3L)).thenReturn(List.of());
+		when(rolePermissionBindingQueryMapper.countRolesByPermissionId(3L, null)).thenReturn(0L);
 
 		SysPermissionDetailVO detail = sysPermissionService.getDetail(3L);
 
 		assertThat(detail.getPermissionCode()).isEqualTo("sys:dept:query");
-		assertThat(detail.getBoundRoles()).isEmpty();
-		verify(sysRolePermissionMapper).selectBoundRolesByPermissionId(3L);
+		assertThat(detail.getBoundRoleCount()).isZero();
+		verify(rolePermissionBindingQueryMapper).countRolesByPermissionId(3L, null);
 		verify(auditUserDisplayService).enrichAuditUsernames(anyList(), isNull(), isNull());
 	}
 
 	@Test
-	@DisplayName("权限详情：按钮权限填充角色引用")
+	@DisplayName("权限详情：按钮权限填充绑定角色计数")
 	void getDetailShouldIncludeBoundRolesForButtonPermission() {
 		SysPermissionEntity entity = new SysPermissionEntity();
 		entity.setId(7L);
@@ -253,19 +256,12 @@ class SysPermissionServiceImplTest {
 		entity.setPermissionName("新增用户");
 		entity.setStatus(true);
 		when(sysPermissionMapper.selectById(7L)).thenReturn(entity);
-
-		RoleReferencePO boundRole = new RoleReferencePO();
-		boundRole.setId(10L);
-		boundRole.setRoleCode("ADMIN");
-		boundRole.setRoleName("管理员");
-		boundRole.setStatus(true);
-		when(sysRolePermissionMapper.selectBoundRolesByPermissionId(7L)).thenReturn(List.of(boundRole));
+		when(rolePermissionBindingQueryMapper.countRolesByPermissionId(7L, null)).thenReturn(1L);
 
 		SysPermissionDetailVO detail = sysPermissionService.getDetail(7L);
 
-		assertThat(detail.getBoundRoles()).hasSize(1);
-		assertThat(detail.getBoundRoles().get(0).getId()).isEqualTo(10L);
-		assertThat(detail.getBoundRoles().get(0).getRoleCode()).isEqualTo("ADMIN");
+		assertThat(detail.getBoundRoleCount()).isEqualTo(1L);
+		verify(rolePermissionBindingQueryMapper).countRolesByPermissionId(7L, null);
 	}
 
 	@Test
@@ -287,9 +283,7 @@ class SysPermissionServiceImplTest {
 		entity.setId(5L);
 		entity.setPermissionCode("sys:role:delete");
 		when(sysPermissionMapper.selectById(5L)).thenReturn(entity);
-		RoleReferencePO boundRole = new RoleReferencePO();
-		boundRole.setRoleCode("TEST");
-		when(sysRolePermissionMapper.selectBoundRolesByPermissionId(5L)).thenReturn(List.of(boundRole));
+		when(sysRolePermissionMapper.selectRoleCodesByPermissionId(5L)).thenReturn(List.of("TEST"));
 
 		sysPermissionService.deleteById(5L);
 
@@ -306,7 +300,7 @@ class SysPermissionServiceImplTest {
 		entity.setId(6L);
 		entity.setPermissionCode("sys:orphan:perm");
 		when(sysPermissionMapper.selectById(6L)).thenReturn(entity);
-		when(sysRolePermissionMapper.selectBoundRolesByPermissionId(6L)).thenReturn(List.of());
+		when(sysRolePermissionMapper.selectRoleCodesByPermissionId(6L)).thenReturn(List.of());
 
 		sysPermissionService.deleteById(6L);
 

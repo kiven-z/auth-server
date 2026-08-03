@@ -1,7 +1,7 @@
 package com.auth.service.system.admin.excel.role;
 
 import com.auth.module.file.export.ExportScopeQueryFields;
-import com.auth.service.system.admin.mapper.role.SysRoleMapper;
+import com.auth.service.system.admin.mapper.admin.role.SysRoleMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.query.role.SysRoleQuery;
 import com.auth.service.system.admin.service.admin.SysRoleService;

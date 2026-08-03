@@ -3,18 +3,14 @@ package com.auth.service.system.admin.model.vo.post;
 import com.auth.common.core.annotation.JsonStringFormat;
 import com.auth.common.core.model.response.BaseResponse;
 import com.auth.service.system.admin.model.vo.reference.DeptReferenceVO;
-import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
-import com.auth.service.system.admin.model.vo.reference.ext.PostBoundUserReferenceVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.util.List;
-
 /**
- * 岗位详情 VO
+ * 岗位详情 VO（标量 + 所属部门快照 + 授权关系计数）
  *
  * @author Bunny
  */
@@ -47,10 +43,10 @@ public class SysPostDetailVO extends BaseResponse {
 	@Schema(title = "所属部门快照")
 	private DeptReferenceVO boundDept;
 
-	@Schema(title = "关联用户列表（user_post 反查）")
-	private List<PostBoundUserReferenceVO> boundUsers;
+	@Schema(title = "关联用户数")
+	private Long boundUserCount;
 
-	@Schema(title = "已授权角色列表（grant_table POST 主体反查）")
-	private List<RoleReferenceVO> boundRoles;
+	@Schema(title = "已授角色数")
+	private Long boundRoleCount;
 
 }

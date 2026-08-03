@@ -3,7 +3,7 @@ package com.auth.service.system.admin.service.admin.impl;
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.convert.admin.user.UserPostConverter;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
-import com.auth.service.system.admin.mapper.user.UserPostMapper;
+import com.auth.service.system.admin.mapper.admin.user.UserPostMapper;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.entity.UserPostEntity;
 import com.auth.service.system.admin.model.enums.UserOrgRelationStatusEnum;

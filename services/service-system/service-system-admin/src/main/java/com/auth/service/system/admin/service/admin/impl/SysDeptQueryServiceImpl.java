@@ -2,15 +2,12 @@ package com.auth.service.system.admin.service.admin.impl;
 
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
-import com.auth.service.system.admin.convert.admin.ReferenceConverter;
 import com.auth.service.system.admin.convert.admin.SysDeptConverter;
-import com.auth.service.system.admin.mapper.dept.SysDeptMapper;
-import com.auth.service.system.admin.mapper.role.GrantTableMapper;
+import com.auth.service.system.admin.mapper.admin.dept.SysDeptMapper;
+import com.auth.service.system.admin.mapper.authorization.DeptRelationQueryMapper;
+import com.auth.service.system.admin.mapper.authorization.GrantBindingQueryMapper;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
-import com.auth.service.system.admin.model.po.dept.SysDeptBoundUserPO;
 import com.auth.service.system.admin.model.po.dept.SysDeptPageRowPO;
-import com.auth.service.system.admin.model.po.reference.PostReferencePO;
-import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.auth.service.system.admin.model.query.dept.SysDeptListQuery;
 import com.auth.service.system.admin.model.query.dept.SysDeptPageQuery;
 import com.auth.service.system.admin.model.vo.dept.SysDeptDetailVO;
@@ -42,7 +39,9 @@ public class SysDeptQueryServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptE
 
 	private final DeptReferenceChecker deptReferenceChecker;
 
-	private final GrantTableMapper grantTableMapper;
+	private final DeptRelationQueryMapper deptRelationQueryMapper;
+
+	private final GrantBindingQueryMapper grantBindingQueryMapper;
 
 	/**
 	 * {@inheritDoc}
@@ -77,15 +76,10 @@ public class SysDeptQueryServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptE
 		SysDeptEntity entity = deptReferenceChecker.getExistingActive(id);
 
 		SysDeptDetailVO detail = SysDeptConverter.INSTANCE.toDetailVo(entity);
-		List<SysDeptBoundUserPO> boundUsers = baseMapper.selectBoundUsersByDeptId(id);
-		detail.setBoundUsers(ReferenceConverter.INSTANCE.toDeptBoundUserReferenceList(boundUsers));
-
-		List<PostReferencePO> boundPosts = baseMapper.selectBoundPostsByDeptId(id);
-		detail.setBoundPosts(ReferenceConverter.INSTANCE.toPostReferenceList(boundPosts));
-
-		List<RoleReferencePO> poList = grantTableMapper.selectBoundRolesBySubject(GrantTableSubjectType.DEPT.name(),
-				id);
-		detail.setBoundRoles(ReferenceConverter.INSTANCE.toRoleReferenceList(poList));
+		detail.setBoundUserCount(deptRelationQueryMapper.countUsersByDeptId(id, null));
+		detail.setBoundPostCount(deptRelationQueryMapper.countPostsByDeptId(id, null));
+		detail.setBoundRoleCount(
+				grantBindingQueryMapper.countBoundRolesBySubject(GrantTableSubjectType.DEPT.name(), id, null));
 
 		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail), null, null);
 		return detail;

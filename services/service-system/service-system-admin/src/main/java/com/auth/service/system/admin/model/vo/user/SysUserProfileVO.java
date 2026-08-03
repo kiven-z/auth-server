@@ -1,8 +1,6 @@
 package com.auth.service.system.admin.model.vo.user;
 
 import com.auth.common.core.model.response.BaseResponse;
-import com.auth.service.system.admin.model.vo.reference.ext.UserDeptReferenceVO;
-import com.auth.service.system.admin.model.vo.reference.ext.UserPostReferenceVO;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
@@ -11,11 +9,9 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
- * 用户档案聚合（基本信息 + 部门 + 岗位）
+ * 用户档案（标量 + 组织关联数）
  *
  * @author Bunny
  */
@@ -60,10 +56,10 @@ public class SysUserProfileVO extends BaseResponse {
 	@Schema(title = "备注")
 	private String remark;
 
-	@Schema(title = "所属部门列表")
-	private List<UserDeptReferenceVO> deptList = new ArrayList<>();
+	@Schema(title = "部门关联数")
+	private Long deptCount;
 
-	@Schema(title = "岗位列表")
-	private List<UserPostReferenceVO> postList = new ArrayList<>();
+	@Schema(title = "岗位关联数")
+	private Long postCount;
 
 }

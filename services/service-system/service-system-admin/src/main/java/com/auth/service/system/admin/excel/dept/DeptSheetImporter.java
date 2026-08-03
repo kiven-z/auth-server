@@ -7,7 +7,7 @@ import com.auth.module.file.importer.model.ImportRowValidator;
 import com.auth.service.system.admin.excel.EnableStatus;
 import com.auth.service.system.admin.excel.EnableStatusLabels;
 import com.auth.service.system.admin.excel.ImportRowSupport;
-import com.auth.service.system.admin.mapper.dept.SysDeptMapper;
+import com.auth.service.system.admin.mapper.admin.dept.SysDeptMapper;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.form.dept.SysDeptForm;
 import com.auth.service.system.admin.service.admin.SysDeptService;

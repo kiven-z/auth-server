@@ -4,12 +4,10 @@ import com.auth.common.core.model.response.Result;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
-import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.model.form.role.SysRoleGrantSubjectsForm;
 import com.auth.service.system.admin.model.form.role.SysRolePermissionAssignForm;
 import com.auth.service.system.admin.model.form.scope.SysDataScopeForm;
 import com.auth.service.system.admin.model.vo.reference.PermissionReferenceVO;
-import com.auth.service.system.admin.model.vo.role.SysRoleGrantSubjectsVO;
 import com.auth.service.system.admin.model.vo.role.SysRoleScopeVO;
 import com.auth.service.system.admin.service.admin.GrantTableService;
 import com.auth.service.system.admin.service.admin.SysRolePermissionService;
@@ -70,15 +68,6 @@ public class SysRoleAuthorizationController {
 	public Result<SysRoleScopeVO> getScope(@PathVariable("roleId") Long roleId) {
 		SysRoleScopeVO roleScopeVO = sysRoleScopeService.getByRoleId(roleId);
 		return Result.success(roleScopeVO);
-	}
-
-	@Operation(summary = "查询角色授权对象", description = "按 subjectType 返回 subjects 种子列表；无授权时 subjects 为空数组")
-	@PreAuthorize("@auth.decide('sys:role:query')")
-	@GetMapping("/{roleId}/grant-subjects")
-	public Result<SysRoleGrantSubjectsVO> listGrantSubjects(@PathVariable("roleId") Long roleId,
-			@RequestParam("subjectType") GrantTableSubjectType subjectType) {
-		SysRoleGrantSubjectsVO data = grantTableService.listGrantSubjectsByRoleId(roleId, subjectType);
-		return Result.success(data);
 	}
 
 	@OperationLog(targetType = "ROLE_GRANT_SUBJECTS", serviceDomain = AuditServiceDomain.SYSTEM,

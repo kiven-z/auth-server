@@ -3,15 +3,14 @@ package com.auth.service.system.admin.service.admin.impl;
 import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
-import com.auth.service.system.admin.mapper.post.SysPostMapper;
-import com.auth.service.system.admin.mapper.role.GrantTableMapper;
+import com.auth.service.system.admin.mapper.admin.post.SysPostMapper;
+import com.auth.service.system.admin.mapper.authorization.GrantBindingQueryMapper;
+import com.auth.service.system.admin.mapper.authorization.PostRelationQueryMapper;
 import com.auth.service.system.admin.model.constants.AdminBatchSizes;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.form.post.SysPostForm;
 import com.auth.service.system.admin.model.po.post.PostDeptCodePairPO;
-import com.auth.service.system.admin.model.po.post.SysPostBoundUserPO;
 import com.auth.service.system.admin.model.po.reference.DeptReferencePO;
-import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.auth.service.system.admin.model.vo.post.SysPostDetailVO;
 import com.auth.service.system.admin.support.post.PostReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.PostAuthorizationInvalidationTrigger;
@@ -55,7 +54,10 @@ class SysPostServiceImplTest {
 	private PostAuthorizationInvalidationTrigger postInvalidationTrigger;
 
 	@Mock
-	private GrantTableMapper grantTableMapper;
+	private PostRelationQueryMapper postRelationQueryMapper;
+
+	@Mock
+	private GrantBindingQueryMapper grantBindingQueryMapper;
 
 	private SysPostServiceImpl sysPostService;
 
@@ -88,7 +90,7 @@ class SysPostServiceImplTest {
 	void setUp() throws Exception {
 		PostReferenceChecker postReferenceChecker = new PostReferenceChecker(sysPostMapper);
 		sysPostService = spy(new SysPostServiceImpl(auditUserDisplayService, postInvalidationTrigger,
-				postReferenceChecker, grantTableMapper));
+				postReferenceChecker, postRelationQueryMapper, grantBindingQueryMapper));
 		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysPostService, sysPostMapper);
@@ -140,12 +142,12 @@ class SysPostServiceImplTest {
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.DATA_NOT_EXIST);
 
-		verifyNoInteractions(grantTableMapper);
+		verifyNoInteractions(grantBindingQueryMapper);
 		verify(auditUserDisplayService, never()).enrichAuditUsernames(anyList(), isNull(), isNull());
 	}
 
 	@Test
-	@DisplayName("详情：组装主表、部门快照、用户与角色并补全审计用户名")
+	@DisplayName("详情：组装主表、部门快照与关系计数并补全审计用户名")
 	void getDetailAssemblesBoundDataAndEnrichesAudit() {
 		Long postId = 30L;
 		SysPostEntity entity = activePost(postId, 2L, "DEV");
@@ -159,19 +161,11 @@ class SysPostServiceImplTest {
 		boundDept.setDeptName("研发部");
 		boundDept.setStatus(true);
 
-		SysPostBoundUserPO boundUser = new SysPostBoundUserPO();
-		boundUser.setId(100L);
-		boundUser.setUsername("alice");
-
-		RoleReferencePO boundRole = new RoleReferencePO();
-		boundRole.setRoleCode("CUSTOM_A");
-		boundRole.setRoleName("业务角色A");
-
 		when(sysPostMapper.selectById(postId)).thenReturn(entity);
 		when(sysPostMapper.selectBoundDeptByPostId(postId)).thenReturn(boundDept);
-		when(sysPostMapper.selectBoundUsersByPostId(postId)).thenReturn(List.of(boundUser));
-		when(grantTableMapper.selectBoundRolesBySubject(GrantTableSubjectType.POST.name(), postId))
-			.thenReturn(List.of(boundRole));
+		when(postRelationQueryMapper.countUsersByPostId(postId, null)).thenReturn(1L);
+		when(grantBindingQueryMapper.countBoundRolesBySubject(GrantTableSubjectType.POST.name(), postId, null))
+			.thenReturn(1L);
 
 		SysPostDetailVO detail = sysPostService.getDetail(postId);
 
@@ -180,13 +174,11 @@ class SysPostServiceImplTest {
 		assertThat(detail.getDeptId()).isEqualTo(2L);
 		assertThat(detail.getBoundDept()).isNotNull();
 		assertThat(detail.getBoundDept().getDeptName()).isEqualTo("研发部");
-		assertThat(detail.getBoundUsers()).hasSize(1);
-		assertThat(detail.getBoundUsers().get(0).getUsername()).isEqualTo("alice");
-		assertThat(detail.getBoundRoles()).hasSize(1);
-		assertThat(detail.getBoundRoles().get(0).getRoleCode()).isEqualTo("CUSTOM_A");
+		assertThat(detail.getBoundUserCount()).isEqualTo(1L);
+		assertThat(detail.getBoundRoleCount()).isEqualTo(1L);
 		verify(sysPostMapper).selectBoundDeptByPostId(postId);
-		verify(sysPostMapper).selectBoundUsersByPostId(postId);
-		verify(grantTableMapper).selectBoundRolesBySubject(GrantTableSubjectType.POST.name(), postId);
+		verify(postRelationQueryMapper).countUsersByPostId(postId, null);
+		verify(grantBindingQueryMapper).countBoundRolesBySubject(GrantTableSubjectType.POST.name(), postId, null);
 		verify(auditUserDisplayService).enrichAuditUsernames(anyList(), isNull(), isNull());
 	}
 

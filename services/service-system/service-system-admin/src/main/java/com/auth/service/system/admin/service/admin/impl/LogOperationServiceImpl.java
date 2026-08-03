@@ -2,7 +2,7 @@ package com.auth.service.system.admin.service.admin.impl;
 
 import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.convert.admin.log.LogOperationConverter;
-import com.auth.service.system.admin.mapper.log.LogOperationMapper;
+import com.auth.service.system.admin.mapper.admin.log.LogOperationMapper;
 import com.auth.service.system.admin.model.entity.LogOperationEntity;
 import com.auth.service.system.admin.model.po.logoperation.LogOperationPageRowPO;
 import com.auth.service.system.admin.model.query.log.LogOperationQuery;

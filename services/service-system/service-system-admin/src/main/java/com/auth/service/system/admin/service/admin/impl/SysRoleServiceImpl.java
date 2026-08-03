@@ -5,24 +5,20 @@ import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.common.core.utils.FieldChangeSupport;
 import com.auth.common.data.model.PageResponse;
 import com.auth.common.data.support.BusinessKeyAssert;
-import com.auth.service.system.admin.convert.admin.ReferenceConverter;
-import com.auth.service.system.admin.convert.admin.SysPermissionConverter;
 import com.auth.service.system.admin.convert.admin.role.SysRoleConverter;
-import com.auth.service.system.admin.mapper.menu.SysMenuRoleMapper;
-import com.auth.service.system.admin.mapper.role.GrantTableMapper;
-import com.auth.service.system.admin.mapper.role.SysRoleMapper;
-import com.auth.service.system.admin.mapper.role.SysRolePermissionMapper;
+import com.auth.service.system.admin.mapper.admin.role.GrantTableMapper;
+import com.auth.service.system.admin.mapper.admin.role.SysRoleMapper;
 import com.auth.service.system.admin.model.constants.AdminBatchSizes;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.form.role.SysRoleForm;
-import com.auth.service.system.admin.model.po.permission.SysPermissionBoundMenuPO;
-import com.auth.service.system.admin.model.po.reference.PermissionReferencePO;
 import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.auth.service.system.admin.model.query.role.SysRoleQuery;
+import com.auth.service.system.admin.model.vo.authorization.RoleAuthorizationSummaryVO;
 import com.auth.service.system.admin.model.vo.role.SysRoleDetailVO;
 import com.auth.service.system.admin.model.vo.role.SysRoleOptionVO;
 import com.auth.service.system.admin.model.vo.role.SysRolePageVO;
 import com.auth.service.system.admin.service.admin.SysRoleService;
+import com.auth.service.system.admin.service.authorization.query.RoleAuthorizationSurfaceService;
 import com.auth.service.system.admin.support.sqlbuild.SysRolePageOrderSqlBuilder;
 import com.auth.service.system.authorization.dispatch.trigger.RoleAuthorizationInvalidationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
@@ -57,9 +53,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 
 	private final GrantTableMapper grantTableMapper;
 
-	private final SysRolePermissionMapper sysRolePermissionMapper;
-
-	private final SysMenuRoleMapper sysMenuRoleMapper;
+	private final RoleAuthorizationSurfaceService roleAuthorizationSurfaceService;
 
 	/**
 	 * {@inheritDoc}
@@ -89,12 +83,12 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 		}
 
 		SysRoleDetailVO detail = SysRoleConverter.INSTANCE.toDetailVo(entity);
-
-		List<PermissionReferencePO> permissions = sysRolePermissionMapper.selectAssignedPermissionsByRoleId(id);
-		detail.setBoundPermissions(ReferenceConverter.INSTANCE.toPermissionReferenceList(permissions));
-
-		List<SysPermissionBoundMenuPO> permissionBoundMenus = sysMenuRoleMapper.selectBoundMenusByRoleId(id);
-		detail.setBoundMenus(SysPermissionConverter.INSTANCE.toBoundMenuItemList(permissionBoundMenus));
+		RoleAuthorizationSummaryVO summary = roleAuthorizationSurfaceService.getAuthorizationSummary(id);
+		detail.setPermissionCount(summary.getPermissionCount());
+		detail.setMenuCount(summary.getMenuCount());
+		detail.setGrantUserCount(summary.getGrantUserCount());
+		detail.setGrantDeptCount(summary.getGrantDeptCount());
+		detail.setGrantPostCount(summary.getGrantPostCount());
 
 		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail), null, null);
 		return detail;

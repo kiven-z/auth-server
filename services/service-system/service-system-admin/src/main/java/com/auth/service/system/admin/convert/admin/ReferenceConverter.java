@@ -1,13 +1,13 @@
 package com.auth.service.system.admin.convert.admin;
 
 import com.auth.common.mapstruct.config.AuthMapperConfig;
-import com.auth.service.system.admin.model.po.dept.SysDeptBoundUserPO;
-import com.auth.service.system.admin.model.po.post.SysPostBoundUserPO;
 import com.auth.service.system.admin.model.po.reference.*;
 import com.auth.service.system.admin.model.po.user.UserDeptProfilePO;
 import com.auth.service.system.admin.model.po.user.UserPostProfilePO;
 import com.auth.service.system.admin.model.vo.reference.*;
-import com.auth.service.system.admin.model.vo.reference.ext.*;
+import com.auth.service.system.admin.model.vo.reference.ext.MenuAssignedRoleReferenceVO;
+import com.auth.service.system.admin.model.vo.reference.ext.UserDeptReferenceVO;
+import com.auth.service.system.admin.model.vo.reference.ext.UserPostReferenceVO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
@@ -136,33 +136,5 @@ public interface ReferenceConverter {
 	 * @return 用户岗位关联回显列表
 	 */
 	List<UserPostReferenceVO> toUserPostReferenceList(List<UserPostProfilePO> poList);
-
-	/**
-	 * 部门详情-关联用户 PO → 部门关联用户回显
-	 * @param po 持久层投影
-	 * @return 部门关联用户回显
-	 */
-	DeptBoundUserReferenceVO toDeptBoundUserReference(SysDeptBoundUserPO po);
-
-	/**
-	 * 部门详情-关联用户 PO 列表 → 部门关联用户回显列表
-	 * @param poList 持久层投影列表
-	 * @return 部门关联用户回显列表
-	 */
-	List<DeptBoundUserReferenceVO> toDeptBoundUserReferenceList(List<SysDeptBoundUserPO> poList);
-
-	/**
-	 * 岗位详情-关联用户 PO → 岗位关联用户回显
-	 * @param po 持久层投影
-	 * @return 岗位关联用户回显
-	 */
-	PostBoundUserReferenceVO toPostBoundUserReference(SysPostBoundUserPO po);
-
-	/**
-	 * 岗位详情-关联用户 PO 列表 → 岗位关联用户回显列表
-	 * @param poList 持久层投影列表
-	 * @return 岗位关联用户回显列表
-	 */
-	List<PostBoundUserReferenceVO> toPostBoundUserReferenceList(List<SysPostBoundUserPO> poList);
 
 }

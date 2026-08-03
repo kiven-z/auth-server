@@ -9,6 +9,8 @@ import com.auth.service.system.authorization.feign.dto.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * 授权域内部 Feign 降级
  *
@@ -25,6 +27,16 @@ public class AuthorizationInnerFeignClientFallback implements AuthorizationInner
 	public Result<EffectiveCodesInnerDTO> getEffectiveCodes(Long userId) {
 		log.error("AuthorizationInnerFeignClientFallback: getEffectiveCodes failed, userId={}", userId);
 		return Result.success(new EffectiveCodesInnerDTO());
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Result<Void> refreshProfiles(List<Long> userIds) {
+		int size = userIds == null ? 0 : userIds.size();
+		log.error("AuthorizationInnerFeignClientFallback: refreshProfiles failed, size={}", size);
+		return Result.error("Authorization profile refresh is unavailable");
 	}
 
 	/**

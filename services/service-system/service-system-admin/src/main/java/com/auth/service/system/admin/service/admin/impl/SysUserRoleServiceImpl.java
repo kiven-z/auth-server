@@ -3,7 +3,6 @@ package com.auth.service.system.admin.service.admin.impl;
 import cn.hutool.core.collection.CollUtil;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
-import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
 import com.auth.service.system.admin.service.admin.GrantTableService;
 import com.auth.service.system.admin.service.admin.SysUserRoleService;
 import com.auth.service.system.admin.support.grant.RbacReferenceChecker;
@@ -40,26 +39,14 @@ public class SysUserRoleServiceImpl implements SysUserRoleService {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public List<RoleReferenceVO> listAssignedRoles(Long userId) {
-		userReferenceChecker.getExistingActive(userId);
-		return grantTableService.listBoundRoles(GrantTableSubjectType.USER, userId);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
 	public void replaceUserRoles(Long userId, GrantTableAssignRoleForm form) {
-		// 校验用户是否存在
 		userReferenceChecker.getExistingActive(userId);
-		// 校验用户是否可操作
 		userReferenceChecker.requireOperable(List.of(userId));
 
 		List<Long> roleIds = CollUtil.emptyIfNull(form.getRoleIds()).stream().distinct().toList();
 		rbacReferenceChecker.requireExistingEnabledRoleIds(roleIds, SystemCommonResultCode.GRANT_REFERENCE_INVALID);
 		grantTableService.replaceSubjectRoleGrants(GrantTableSubjectType.USER.name(), userId, roleIds);
 
-		// 提交用户授权失效
 		userAuthorizationInvalidationTrigger.submitByUserIds(List.of(userId), "replace-roles");
 	}
 

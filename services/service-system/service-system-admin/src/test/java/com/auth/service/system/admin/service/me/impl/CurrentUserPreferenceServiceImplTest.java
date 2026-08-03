@@ -1,7 +1,7 @@
 package com.auth.service.system.admin.service.me.impl;
 
 import com.auth.module.security.contract.api.authorization.AuthProfile;
-import com.auth.service.system.admin.mapper.user.SysUserConfigMapper;
+import com.auth.service.system.admin.mapper.admin.user.SysUserConfigMapper;
 import com.auth.service.system.admin.model.constants.UserPreferenceKeys;
 import com.auth.service.system.admin.model.entity.SysUserConfigEntity;
 import com.auth.service.system.admin.model.form.me.MeUserPreferenceUpsertForm;

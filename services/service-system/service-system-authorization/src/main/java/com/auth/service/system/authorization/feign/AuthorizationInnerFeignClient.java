@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.List;
+
 /**
  * 授权域内部 Feign 客户端
  *
@@ -29,6 +31,14 @@ public interface AuthorizationInnerFeignClient {
 	 */
 	@GetMapping("/principal/{userId}/effective-codes")
 	Result<EffectiveCodesInnerDTO> getEffectiveCodes(@PathVariable("userId") Long userId);
+
+	/**
+	 * 批量刷新用户授权画像
+	 * @param userIds 用户 ID 列表
+	 * @return 统一响应体
+	 */
+	@PostMapping("/profiles/refresh")
+	Result<Void> refreshProfiles(@RequestBody List<Long> userIds);
 
 	/**
 	 * 触发授权失效与主体画像更新

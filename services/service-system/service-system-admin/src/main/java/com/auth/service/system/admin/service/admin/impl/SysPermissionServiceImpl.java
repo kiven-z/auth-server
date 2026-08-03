@@ -6,15 +6,14 @@ import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.common.core.utils.FieldChangeSupport;
 import com.auth.common.data.model.PageResponse;
 import com.auth.common.data.support.BusinessKeyAssert;
-import com.auth.service.system.admin.convert.admin.ReferenceConverter;
 import com.auth.service.system.admin.convert.admin.SysPermissionConverter;
-import com.auth.service.system.admin.mapper.permission.SysPermissionMapper;
-import com.auth.service.system.admin.mapper.role.SysRolePermissionMapper;
+import com.auth.service.system.admin.mapper.admin.permission.SysPermissionMapper;
+import com.auth.service.system.admin.mapper.admin.role.SysRolePermissionMapper;
+import com.auth.service.system.admin.mapper.authorization.RolePermissionBindingQueryMapper;
 import com.auth.service.system.admin.model.constants.AdminBatchSizes;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.form.permission.SysPermissionForm;
 import com.auth.service.system.admin.model.po.reference.PermissionReferencePO;
-import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.auth.service.system.admin.model.query.permission.SysPermissionQuery;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionDetailVO;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionPageVO;
@@ -57,6 +56,8 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 
 	private final SysRolePermissionMapper sysRolePermissionMapper;
 
+	private final RolePermissionBindingQueryMapper rolePermissionBindingQueryMapper;
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -85,8 +86,7 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 		}
 
 		SysPermissionDetailVO detail = SysPermissionConverter.INSTANCE.toDetailVo(entity);
-		List<RoleReferencePO> boundRoles = sysRolePermissionMapper.selectBoundRolesByPermissionId(id);
-		detail.setBoundRoles(ReferenceConverter.INSTANCE.toRoleReferenceList(boundRoles));
+		detail.setBoundRoleCount(rolePermissionBindingQueryMapper.countRolesByPermissionId(id, null));
 
 		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail), null, null);
 		return detail;
@@ -195,9 +195,8 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 		String permissionCode = existing.getPermissionCode();
 		permissionInvalidationTrigger.submitByPermissionCodes(List.of(permissionCode), "delete");
 
-		List<String> boundRoleCodes = sysRolePermissionMapper.selectBoundRolesByPermissionId(id)
+		List<String> boundRoleCodes = CollUtil.emptyIfNull(sysRolePermissionMapper.selectRoleCodesByPermissionId(id))
 			.stream()
-			.map(RoleReferencePO::getRoleCode)
 			.filter(CharSequenceUtil::isNotBlank)
 			.distinct()
 			.toList();

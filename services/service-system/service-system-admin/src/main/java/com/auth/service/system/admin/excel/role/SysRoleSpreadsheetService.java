@@ -7,7 +7,7 @@ import com.auth.module.file.export.writer.ExcelExportWriter;
 import com.auth.module.file.importer.model.SpreadsheetImportResult;
 import com.auth.service.system.admin.convert.spreadsheet.SysRoleSpreadsheetConverter;
 import com.auth.service.system.admin.excel.StatusColorCellWriteHandler;
-import com.auth.service.system.admin.mapper.role.SysRoleMapper;
+import com.auth.service.system.admin.mapper.admin.role.SysRoleMapper;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.query.role.SysRoleQuery;
 import com.auth.service.system.admin.support.sqlbuild.SysRolePageOrderSqlBuilder;

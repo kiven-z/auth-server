@@ -67,8 +67,8 @@ public interface SysPostConverter {
 	@Mapping(target = "createdByName", ignore = true)
 	@Mapping(target = "updatedByName", ignore = true)
 	@Mapping(target = "boundDept", ignore = true)
-	@Mapping(target = "boundUsers", ignore = true)
-	@Mapping(target = "boundRoles", ignore = true)
+	@Mapping(target = "boundUserCount", ignore = true)
+	@Mapping(target = "boundRoleCount", ignore = true)
 	SysPostDetailVO toDetailVo(SysPostEntity entity);
 
 	/**

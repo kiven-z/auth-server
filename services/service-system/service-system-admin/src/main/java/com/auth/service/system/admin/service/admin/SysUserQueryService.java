@@ -26,14 +26,14 @@ public interface SysUserQueryService extends IService<UserEntity> {
 	PageResponse<SysUserPageVO> getPage(SysUserPageQuery query);
 
 	/**
-	 * 获取用户档案（含已禁用）
+	 * 获取用户档案（标量 + 部门/岗位关联数）
 	 * @param userId 用户ID
 	 * @return 用户档案
 	 */
 	SysUserProfileVO getProfile(Long userId);
 
 	/**
-	 * 获取用户详情（含组织绑定与生效授权）
+	 * 获取用户详情（档案 + 授权关系计数）
 	 * @param userId 用户ID
 	 * @return 用户详情
 	 */

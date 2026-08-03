@@ -2,8 +2,8 @@ package com.auth.service.system.admin.service.admin.impl;
 
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
-import com.auth.service.system.admin.mapper.role.GrantTableMapper;
-import com.auth.service.system.admin.mapper.user.SysUserMapper;
+import com.auth.service.system.admin.mapper.admin.role.GrantTableMapper;
+import com.auth.service.system.admin.mapper.admin.user.SysUserMapper;
 import com.auth.service.system.admin.model.constants.AdminBatchSizes;
 import com.auth.service.system.admin.model.form.user.SysUserForm;
 import com.auth.service.system.admin.support.user.UserAvatarUpdateSupport;

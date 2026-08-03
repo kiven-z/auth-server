@@ -7,7 +7,7 @@ import com.auth.module.security.contract.convention.AuthCodeConvention;
 import com.auth.service.system.admin.excel.EnableStatus;
 import com.auth.service.system.admin.excel.EnableStatusLabels;
 import com.auth.service.system.admin.excel.ImportRowSupport;
-import com.auth.service.system.admin.mapper.permission.SysPermissionMapper;
+import com.auth.service.system.admin.mapper.admin.permission.SysPermissionMapper;
 import com.auth.service.system.admin.model.form.permission.SysPermissionForm;
 import com.auth.service.system.admin.model.po.reference.PermissionReferencePO;
 import com.auth.service.system.admin.service.admin.SysPermissionService;

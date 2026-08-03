@@ -8,16 +8,15 @@ import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.convert.admin.ReferenceConverter;
 import com.auth.service.system.admin.convert.admin.SysPostConverter;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
-import com.auth.service.system.admin.mapper.post.SysPostMapper;
-import com.auth.service.system.admin.mapper.role.GrantTableMapper;
+import com.auth.service.system.admin.mapper.admin.post.SysPostMapper;
+import com.auth.service.system.admin.mapper.authorization.GrantBindingQueryMapper;
+import com.auth.service.system.admin.mapper.authorization.PostRelationQueryMapper;
 import com.auth.service.system.admin.model.constants.AdminBatchSizes;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.form.post.SysPostForm;
-import com.auth.service.system.admin.model.po.post.SysPostBoundUserPO;
 import com.auth.service.system.admin.model.po.post.SysPostPageRowPO;
 import com.auth.service.system.admin.model.po.post.SysPostSearchItemPO;
 import com.auth.service.system.admin.model.po.reference.DeptReferencePO;
-import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
 import com.auth.service.system.admin.model.query.post.SysPostQuery;
 import com.auth.service.system.admin.model.vo.post.SysPostDetailVO;
 import com.auth.service.system.admin.model.vo.post.SysPostPageVO;
@@ -59,7 +58,9 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity
 
 	private final PostReferenceChecker postReferenceChecker;
 
-	private final GrantTableMapper grantTableMapper;
+	private final PostRelationQueryMapper postRelationQueryMapper;
+
+	private final GrantBindingQueryMapper grantBindingQueryMapper;
 
 	/**
 	 * {@inheritDoc}
@@ -97,15 +98,11 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity
 		SysPostEntity entity = postReferenceChecker.getExistingActive(id);
 
 		SysPostDetailVO detail = SysPostConverter.INSTANCE.toDetailVo(entity);
-		DeptReferencePO deptList = baseMapper.selectBoundDeptByPostId(id);
-		detail.setBoundDept(ReferenceConverter.INSTANCE.toDeptReference(deptList));
-
-		List<SysPostBoundUserPO> userList = baseMapper.selectBoundUsersByPostId(id);
-		detail.setBoundUsers(ReferenceConverter.INSTANCE.toPostBoundUserReferenceList(userList));
-
-		List<RoleReferencePO> roleList = grantTableMapper.selectBoundRolesBySubject(GrantTableSubjectType.POST.name(),
-				id);
-		detail.setBoundRoles(ReferenceConverter.INSTANCE.toRoleReferenceList(roleList));
+		DeptReferencePO boundDept = baseMapper.selectBoundDeptByPostId(id);
+		detail.setBoundDept(ReferenceConverter.INSTANCE.toDeptReference(boundDept));
+		detail.setBoundUserCount(postRelationQueryMapper.countUsersByPostId(id, null));
+		detail.setBoundRoleCount(
+				grantBindingQueryMapper.countBoundRolesBySubject(GrantTableSubjectType.POST.name(), id, null));
 
 		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detail), null, null);
 		return detail;

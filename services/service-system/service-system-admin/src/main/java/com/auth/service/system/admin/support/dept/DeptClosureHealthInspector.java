@@ -1,6 +1,6 @@
 package com.auth.service.system.admin.support.dept;
 
-import com.auth.service.system.admin.mapper.dept.DeptClosureMapper;
+import com.auth.service.system.admin.mapper.admin.dept.DeptClosureMapper;
 import com.auth.service.system.admin.model.po.dept.DeptClosureDepthChainRowPO;
 import com.auth.service.system.admin.model.po.dept.DeptClosureHealthStatsPO;
 import com.auth.service.system.admin.model.po.dept.DeptClosureParentLinkRowPO;

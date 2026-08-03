@@ -1,7 +1,7 @@
 package com.auth.service.system.admin.excel.permission;
 
 import com.auth.module.file.export.ExportScopeQueryFields;
-import com.auth.service.system.admin.mapper.permission.SysPermissionMapper;
+import com.auth.service.system.admin.mapper.admin.permission.SysPermissionMapper;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.query.permission.SysPermissionQuery;
 import com.auth.service.system.admin.service.admin.SysPermissionService;

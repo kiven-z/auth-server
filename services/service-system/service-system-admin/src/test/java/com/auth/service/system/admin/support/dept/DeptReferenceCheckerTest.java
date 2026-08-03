@@ -1,6 +1,6 @@
 package com.auth.service.system.admin.support.dept;
 
-import com.auth.service.system.admin.mapper.dept.SysDeptMapper;
+import com.auth.service.system.admin.mapper.admin.dept.SysDeptMapper;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;

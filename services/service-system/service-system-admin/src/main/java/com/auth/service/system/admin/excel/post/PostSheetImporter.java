@@ -6,7 +6,7 @@ import com.auth.module.file.importer.model.RowOutcome;
 import com.auth.module.file.importer.parse.ImportTextParsers;
 import com.auth.service.system.admin.excel.EnableStatus;
 import com.auth.service.system.admin.excel.EnableStatusLabels;
-import com.auth.service.system.admin.mapper.post.SysPostMapper;
+import com.auth.service.system.admin.mapper.admin.post.SysPostMapper;
 import com.auth.service.system.admin.model.form.post.SysPostForm;
 import com.auth.service.system.admin.service.admin.SysPostService;
 import com.auth.service.system.admin.support.dept.DeptLookupSupport;

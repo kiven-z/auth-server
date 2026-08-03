@@ -82,4 +82,9 @@ public class AuthorizationAuditBizModule {
 	 */
 	public static final String AUTH_INVALIDATION_EVENT = "AUTH_INVALIDATION_EVENT";
 
+	/**
+	 * 授权画像（跨服务刷新编排）
+	 */
+	public static final String AUTH_PROFILE = "AUTH_PROFILE";
+
 }

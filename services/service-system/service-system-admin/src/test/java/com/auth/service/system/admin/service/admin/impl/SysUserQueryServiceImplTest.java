@@ -1,18 +1,13 @@
 package com.auth.service.system.admin.service.admin.impl;
 
 import com.auth.module.platform.persistence.model.UserEntity;
-import com.auth.service.system.admin.mapper.permission.SysPermissionMapper;
-import com.auth.service.system.admin.mapper.role.SysRoleMapper;
-import com.auth.service.system.admin.mapper.user.SysUserMapper;
-import com.auth.service.system.admin.model.po.reference.PermissionReferencePO;
-import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
-import com.auth.service.system.admin.model.po.user.UserDeptProfilePO;
-import com.auth.service.system.admin.model.po.user.UserPostProfilePO;
+import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
+import com.auth.service.system.admin.mapper.admin.user.SysUserMapper;
+import com.auth.service.system.admin.mapper.authorization.GrantBindingQueryMapper;
+import com.auth.service.system.admin.mapper.authorization.UserEffectiveAuthorizationQueryMapper;
 import com.auth.service.system.admin.model.vo.user.SysUserDetailVO;
 import com.auth.service.system.admin.model.vo.user.SysUserProfileVO;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
-import com.auth.service.system.authorization.dispatch.query.UserEffectiveCodesResolver;
-import com.auth.service.system.authorization.dispatch.query.UserEffectiveCodesSnapshot;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.common.service.AuditUserDisplayService;
@@ -28,7 +23,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -36,7 +30,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**
- * {@link SysUserQueryServiceImpl} 单元测试。
+ * {@link SysUserQueryServiceImpl} 单元测试
  *
  * @author Bunny
  */
@@ -51,21 +45,18 @@ class SysUserQueryServiceImplTest {
 	private AuditUserDisplayService auditUserDisplayService;
 
 	@Mock
-	private SysRoleMapper sysRoleMapper;
+	private UserEffectiveAuthorizationQueryMapper userEffectiveAuthorizationQueryMapper;
 
 	@Mock
-	private SysPermissionMapper sysPermissionMapper;
-
-	@Mock
-	private UserEffectiveCodesResolver userEffectiveCodesResolver;
+	private GrantBindingQueryMapper grantBindingQueryMapper;
 
 	private SysUserQueryServiceImpl sysUserQueryService;
 
 	@BeforeEach
 	void setUp() throws Exception {
 		UserReferenceChecker userReferenceChecker = new UserReferenceChecker(sysUserMapper);
-		sysUserQueryService = new SysUserQueryServiceImpl(auditUserDisplayService, sysRoleMapper, sysPermissionMapper,
-				userReferenceChecker, userEffectiveCodesResolver);
+		sysUserQueryService = new SysUserQueryServiceImpl(auditUserDisplayService, userReferenceChecker,
+				userEffectiveAuthorizationQueryMapper, grantBindingQueryMapper);
 		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysUserQueryService, sysUserMapper);
@@ -90,7 +81,7 @@ class SysUserQueryServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("正常查询时聚合用户、部门与岗位档案")
+	@DisplayName("正常查询时返回档案标量与部门岗位计数")
 	void getProfileReturnsAggregatedData() {
 		UserEntity user = new UserEntity();
 		user.setId(1L);
@@ -105,31 +96,21 @@ class SysUserQueryServiceImplTest {
 		user.setIntroduction("bio");
 
 		when(sysUserMapper.selectById(1L)).thenReturn(user);
-
-		UserDeptProfilePO deptRow = new UserDeptProfilePO();
-		deptRow.setId(10L);
-		deptRow.setDeptName("研发部");
-		when(sysUserMapper.selectDeptProfileByUserId(1L)).thenReturn(List.of(deptRow));
-
-		UserPostProfilePO postRow = new UserPostProfilePO();
-		postRow.setId(20L);
-		postRow.setPostName("工程师");
-		when(sysUserMapper.selectPostProfileByUserId(1L)).thenReturn(List.of(postRow));
+		when(userEffectiveAuthorizationQueryMapper.countDeptsByUserId(1L)).thenReturn(2L);
+		when(userEffectiveAuthorizationQueryMapper.countPostsByUserId(1L)).thenReturn(1L);
 
 		SysUserProfileVO profile = sysUserQueryService.getProfile(1L);
 
 		assertThat(profile.getUsername()).isEqualTo("alice");
-		assertThat(profile.getDeptList()).hasSize(1);
-		assertThat(profile.getDeptList().get(0).getDeptName()).isEqualTo("研发部");
-		assertThat(profile.getPostList()).hasSize(1);
-		assertThat(profile.getPostList().get(0).getPostName()).isEqualTo("工程师");
-		verify(sysUserMapper).selectDeptProfileByUserId(1L);
-		verify(sysUserMapper).selectPostProfileByUserId(1L);
+		assertThat(profile.getDeptCount()).isEqualTo(2L);
+		assertThat(profile.getPostCount()).isEqualTo(1L);
+		verify(userEffectiveAuthorizationQueryMapper).countDeptsByUserId(1L);
+		verify(userEffectiveAuthorizationQueryMapper).countPostsByUserId(1L);
 	}
 
 	@Test
-	@DisplayName("用户详情：聚合档案、组织绑定与生效授权")
-	void getDetailReturnsAggregatedData() {
+	@DisplayName("用户详情：档案计数外补齐直连与生效授权计数")
+	void getDetailReturnsAggregatedCounts() {
 		UserEntity user = new UserEntity();
 		user.setId(1L);
 		user.setUsername("alice");
@@ -145,72 +126,24 @@ class SysUserQueryServiceImplTest {
 		user.setRemark("note");
 
 		when(sysUserMapper.selectById(1L)).thenReturn(user);
-
-		UserDeptProfilePO deptRow = new UserDeptProfilePO();
-		deptRow.setId(10L);
-		deptRow.setDeptName("研发部");
-		when(sysUserMapper.selectDeptProfileByUserId(1L)).thenReturn(List.of(deptRow));
-
-		UserPostProfilePO postRow = new UserPostProfilePO();
-		postRow.setId(20L);
-		postRow.setPostName("工程师");
-		when(sysUserMapper.selectPostProfileByUserId(1L)).thenReturn(List.of(postRow));
-
-		UserEffectiveCodesSnapshot codes = UserEffectiveCodesSnapshot.builder()
-			.roleCodes(List.of("ADMIN"))
-			.permissionCodes(List.of("sys:user:query"))
-			.build();
-		when(userEffectiveCodesResolver.resolve(1L)).thenReturn(Optional.of(codes));
-
-		RoleReferencePO roleRow = new RoleReferencePO();
-		roleRow.setId(100L);
-		roleRow.setRoleCode("ADMIN");
-		roleRow.setRoleName("管理员");
-		when(sysRoleMapper.selectReferenceByRoleCodes(List.of("ADMIN"))).thenReturn(List.of(roleRow));
-
-		PermissionReferencePO permissionRow = new PermissionReferencePO();
-		permissionRow.setId(200L);
-		permissionRow.setPermissionCode("sys:user:query");
-		permissionRow.setPermissionName("用户查询");
-		when(sysPermissionMapper.selectReferenceByPermissionCodes(List.of("sys:user:query")))
-			.thenReturn(List.of(permissionRow));
+		when(userEffectiveAuthorizationQueryMapper.countDeptsByUserId(1L)).thenReturn(1L);
+		when(userEffectiveAuthorizationQueryMapper.countPostsByUserId(1L)).thenReturn(1L);
+		when(grantBindingQueryMapper.countBoundRolesBySubject(GrantTableSubjectType.USER.name(), 1L, null))
+			.thenReturn(3L);
+		when(userEffectiveAuthorizationQueryMapper.countEffectiveRolesByUserId(1L, null)).thenReturn(5L);
+		when(userEffectiveAuthorizationQueryMapper.countEffectivePermissionsByUserId(1L, null)).thenReturn(12L);
 
 		SysUserDetailVO detail = sysUserQueryService.getDetail(1L);
 
 		assertThat(detail.getUsername()).isEqualTo("alice");
 		assertThat(detail.getEmployeeNo()).isEqualTo("E001");
 		assertThat(detail.getRemark()).isEqualTo("note");
-		assertThat(detail.getDeptList()).hasSize(1);
-		assertThat(detail.getDeptList().get(0).getDeptName()).isEqualTo("研发部");
-		assertThat(detail.getPostList()).hasSize(1);
-		assertThat(detail.getPostList().get(0).getPostName()).isEqualTo("工程师");
-		assertThat(detail.getEffectiveRoles()).hasSize(1);
-		assertThat(detail.getEffectiveRoles().get(0).getRoleCode()).isEqualTo("ADMIN");
-		assertThat(detail.getEffectivePermissions()).hasSize(1);
-		assertThat(detail.getEffectivePermissions().get(0).getPermissionCode()).isEqualTo("sys:user:query");
+		assertThat(detail.getDeptCount()).isEqualTo(1L);
+		assertThat(detail.getPostCount()).isEqualTo(1L);
+		assertThat(detail.getDirectRoleCount()).isEqualTo(3L);
+		assertThat(detail.getEffectiveRoleCount()).isEqualTo(5L);
+		assertThat(detail.getEffectivePermissionCount()).isEqualTo(12L);
 		verify(auditUserDisplayService).enrichAuditUsernames(anyList(), isNull(), isNull());
-	}
-
-	@Test
-	@DisplayName("用户详情：授权服务不可用时返回空生效列表")
-	void getDetailReturnsEmptyEffectiveWhenAuthUnavailable() {
-		UserEntity user = new UserEntity();
-		user.setId(2L);
-		user.setUsername("bob");
-		when(sysUserMapper.selectById(2L)).thenReturn(user);
-		when(sysUserMapper.selectDeptProfileByUserId(2L)).thenReturn(List.of());
-		when(sysUserMapper.selectPostProfileByUserId(2L)).thenReturn(List.of());
-		when(userEffectiveCodesResolver.resolve(2L)).thenReturn(Optional.empty());
-
-		SysUserDetailVO detail = sysUserQueryService.getDetail(2L);
-
-		assertThat(detail.getUsername()).isEqualTo("bob");
-		assertThat(detail.getDeptList()).isEmpty();
-		assertThat(detail.getPostList()).isEmpty();
-		assertThat(detail.getEffectiveRoles()).isEmpty();
-		assertThat(detail.getEffectivePermissions()).isEmpty();
-		verify(sysRoleMapper, never()).selectReferenceByRoleCodes(any());
-		verify(sysPermissionMapper, never()).selectReferenceByPermissionCodes(any());
 	}
 
 	@Test

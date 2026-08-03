@@ -1,6 +1,5 @@
 package com.auth.service.system.admin.model.vo.menu;
 
-import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -8,10 +7,9 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.io.Serial;
-import java.util.List;
 
 /**
- * 菜单详情
+ * 菜单详情（列表字段 + 绑定角色计数）
  *
  * @author Bunny
  */
@@ -61,7 +59,7 @@ public class SysMenuDetailVO extends SysMenuListVO {
 	@Schema(title = "激活路径")
 	private String activePath;
 
-	@Schema(title = "已绑定角色列表（sys_menu_role 反查）")
-	private List<RoleReferenceVO> boundRoles;
+	@Schema(title = "已绑定角色数")
+	private Long boundRoleCount;
 
 }

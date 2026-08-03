@@ -4,7 +4,6 @@ import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
-import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
 import com.auth.service.system.admin.service.admin.GrantTableService;
 import com.auth.service.system.admin.support.grant.RbacReferenceChecker;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
@@ -20,7 +19,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -59,35 +57,6 @@ class SysUserRoleServiceImplTest {
 	void setUp() {
 		sysUserRoleService = new SysUserRoleServiceImpl(userReferenceChecker, rbacReferenceChecker, grantTableService,
 				userAuthorizationInvalidationTrigger);
-	}
-
-	@Test
-	@DisplayName("查询已分配角色：用户存在时返回转换结果")
-	void listAssignedRolesReturnsRowsWhenUserExists() {
-		UserEntity user = activeUser();
-		when(userReferenceChecker.getExistingActive(USER_ID)).thenReturn(user);
-		RoleReferenceVO row = new RoleReferenceVO();
-		row.setRoleCode("CUSTOM_A");
-		row.setRoleName("业务角色A");
-		when(grantTableService.listBoundRoles(GrantTableSubjectType.USER, USER_ID)).thenReturn(List.of(row));
-
-		List<RoleReferenceVO> rows = sysUserRoleService.listAssignedRoles(USER_ID);
-
-		assertThat(rows).hasSize(1);
-		assertThat(rows.get(0).getRoleCode()).isEqualTo("CUSTOM_A");
-		assertThat(rows.get(0).getRoleName()).isEqualTo("业务角色A");
-	}
-
-	@Test
-	@DisplayName("查询已分配角色：用户不存在时抛出 USER_NOT_FOUND")
-	void listAssignedRolesThrowsWhenUserMissing() {
-		when(userReferenceChecker.getExistingActive(USER_ID))
-			.thenThrow(new SystemBusinessException(SystemCommonResultCode.USER_NOT_FOUND));
-
-		assertThatThrownBy(() -> sysUserRoleService.listAssignedRoles(USER_ID))
-			.isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemCommonResultCode.USER_NOT_FOUND);
 	}
 
 	@Test

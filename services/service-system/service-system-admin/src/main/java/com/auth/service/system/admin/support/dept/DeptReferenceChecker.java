@@ -3,7 +3,7 @@ package com.auth.service.system.admin.support.dept;
 import cn.hutool.core.collection.CollUtil;
 import com.auth.common.core.utils.TreeParentIdUtil;
 import com.auth.common.data.support.BusinessKeyAssert;
-import com.auth.service.system.admin.mapper.dept.SysDeptMapper;
+import com.auth.service.system.admin.mapper.admin.dept.SysDeptMapper;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
