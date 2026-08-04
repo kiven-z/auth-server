@@ -51,7 +51,7 @@ public class MenuRouteMetaConverter {
 	}
 
 	/**
-	 * 由菜单实体生成 meta.transition（与 pure-admin animate.css 前缀约定一致）。
+	 * 由菜单实体生成 meta.transition（animate.css 使用 animate__ 前缀）。
 	 * @param entity 菜单
 	 * @return 过渡 VO，字段均可为空
 	 */
