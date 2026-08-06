@@ -1,9 +1,9 @@
 package com.auth.module.security.contract.api.authorization;
 
 import com.auth.module.security.contract.api.datascope.DataScopeStorageType;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.extern.jackson.Jacksonized;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -15,9 +15,9 @@ import java.util.List;
  *
  * @author Bunny
  */
-@JsonDeserialize(builder = ScopeGrant.ScopeGrantBuilder.class)
 @Getter
 @Builder
+@Jacksonized
 public class ScopeGrant implements Serializable {
 
 	@Serial

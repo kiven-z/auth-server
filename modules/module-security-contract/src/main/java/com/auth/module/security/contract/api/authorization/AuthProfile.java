@@ -2,7 +2,7 @@ package com.auth.module.security.contract.api.authorization;
 
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.extern.jackson.Jacksonized;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -19,8 +19,8 @@ import java.util.List;
  * @author Bunny
  */
 @Getter
-@Setter
 @Builder
+@Jacksonized
 public class AuthProfile implements Serializable {
 
 	@Serial
