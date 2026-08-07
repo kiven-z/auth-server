@@ -9,6 +9,7 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
@@ -84,7 +85,7 @@ public class MimeMailTransport {
 			mailSender.send(message);
 			return message.getMessageID();
 		}
-		catch (MessagingException e) {
+		catch (MessagingException | MailException e) {
 			log.error("Failed to send email, templateCode={}, reason={}", emailSendDTO.getTemplateCode(),
 					e.getMessage(), e);
 			throw new MessageException(OPERATION_FAILED, "Email send", e.getMessage());

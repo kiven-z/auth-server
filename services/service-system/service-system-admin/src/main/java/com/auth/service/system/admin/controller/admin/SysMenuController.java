@@ -47,7 +47,7 @@ public class SysMenuController {
 	}
 
 	@AuthenticatedApi
-	@Operation(summary = "查询动态路由列表")
+	@Operation(summary = "查询动态路由列表", description = "返回当前用户可见路由树；子级有角色即可，祖先无绑定时由后端补壳")
 	@GetMapping("/web-routes")
 	public Result<List<RouteNodeVO>> getWebRoutes() {
 		Long userId = SecurityUserUtils.getUserId();

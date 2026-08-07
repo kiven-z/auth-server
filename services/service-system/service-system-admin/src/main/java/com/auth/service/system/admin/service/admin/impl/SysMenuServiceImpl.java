@@ -88,7 +88,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenuEntity
 		List<String> roleCodes = codes.roleCodes();
 		boolean isAdmin = PermissionConstant.isAdmin(userId, roleCodes);
 		return isAdmin ? menuWebRouteTreeAssembler.buildAdminRoutes(menuList)
-				: menuWebRouteTreeAssembler.buildRoutes(menuList);
+				: menuWebRouteTreeAssembler.buildRoutes(menuList, roleCodes);
 	}
 
 	/**

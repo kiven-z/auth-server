@@ -7,6 +7,8 @@ import com.auth.service.system.admin.model.vo.menu.RouteTransitionVO;
 import lombok.experimental.UtilityClass;
 
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 路由 meta VO 构建（菜单实体 + 角色上下文）。
@@ -31,8 +33,11 @@ public class MenuRouteMetaConverter {
 		meta.setTitle(menu.getTitle());
 		meta.setIcon(menu.getIcon());
 		meta.setShowLink(menu.getShowLink());
-		// null 视为 false，默认按角色校验
-		meta.setPublicAccess(menu.getPublicAccess() != null && menu.getPublicAccess());
+		Long menuId = menu.getId();
+		// null 视为 false；祖先壳可由上下文强制为登录可见
+		boolean publicAccess = Boolean.TRUE.equals(menu.getPublicAccess())
+				|| (context.forcePublicAccessIds() != null && context.forcePublicAccessIds().contains(menuId));
+		meta.setPublicAccess(publicAccess);
 		meta.setRank(menu.getMenuRank());
 		meta.setExtraIcon(menu.getExtraIcon());
 		meta.setShowParent(menu.getShowParent());
@@ -44,8 +49,8 @@ public class MenuRouteMetaConverter {
 		meta.setActivePath(menu.getActivePath());
 		meta.setFixedTag(menu.getFixedTag());
 
-		Long menuId = menu.getId();
-		meta.setRoles(context.roleMap().getOrDefault(menuId, Collections.emptyList()));
+		Map<Long, List<String>> roleMap = context.roleMap() == null ? Collections.emptyMap() : context.roleMap();
+		meta.setRoles(roleMap.getOrDefault(menuId, Collections.emptyList()));
 		meta.setTransition(transitionFromMenuEntity(menu));
 		return meta;
 	}

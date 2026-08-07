@@ -11,21 +11,16 @@ import com.auth.service.system.admin.model.entity.SysMenuEntity;
 import com.auth.service.system.admin.model.po.menu.SysMenuRoleLinkRowPO;
 import com.auth.service.system.admin.model.vo.menu.RouteMetaVO;
 import com.auth.service.system.admin.model.vo.menu.RouteNodeVO;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * 动态菜单路由树组装（启用菜单、角色过滤、祖先补全、排序、VO 映射）
+ * 动态菜单路由树组装（用户可见裁剪、祖先补全、展示角色冒泡、排序、VO 映射）
  *
  * @author Bunny
  */
-@Slf4j
 @Component
 public class MenuWebRouteTreeAssembler {
 
@@ -36,8 +31,8 @@ public class MenuWebRouteTreeAssembler {
 	}
 
 	/**
-	 * 构建管理员可见的动态路由（顶级节点列表）
-	 * @param menuList 菜单列表
+	 * 构建管理员可见的动态路由（全量启用菜单）
+	 * @param menuList 启用菜单列表
 	 * @return 路由树根列表
 	 */
 	public List<RouteNodeVO> buildAdminRoutes(List<SysMenuEntity> menuList) {
@@ -52,25 +47,39 @@ public class MenuWebRouteTreeAssembler {
 	}
 
 	/**
-	 * 构建当前用户可见的动态路由（顶级节点列表）
-	 * @param menuList 菜单列表
+	 * 构建当前用户可见的动态路由（直接可见 ∪ 祖先壳）
+	 * @param menuList 启用菜单列表
+	 * @param userRoleCodes 用户生效角色编码
 	 * @return 路由树根列表
 	 */
-	public List<RouteNodeVO> buildRoutes(List<SysMenuEntity> menuList) {
+	public List<RouteNodeVO> buildRoutes(List<SysMenuEntity> menuList, Collection<String> userRoleCodes) {
 		if (CollUtil.isEmpty(menuList)) {
 			return Collections.emptyList();
 		}
 
 		List<Long> menuIds = menuList.stream().map(SysMenuEntity::getId).toList();
-		Map<Long, List<String>> roleMap = queryRoleMap(menuIds);
-		MenuConvertContext context = MenuConvertContext.builder().roleMap(roleMap).build();
+		Map<Long, List<String>> boundRoleMap = queryRoleMap(menuIds);
+		MenuRouteVisibility visibility = MenuRouteVisibilityResolver.resolve(menuList, boundRoleMap, userRoleCodes);
+		if (CollUtil.isEmpty(visibility.keepIds())) {
+			return Collections.emptyList();
+		}
 
-		return buildRouteTree(menuList, context);
+		MenuRouteDisplayMeta displayMeta = MenuRouteDisplayRoleResolver.resolve(menuList, visibility, boundRoleMap,
+				userRoleCodes);
+		List<SysMenuEntity> visibleMenus = menuList.stream()
+			.filter(menu -> visibility.keepIds().contains(menu.getId()))
+			.toList();
+		MenuConvertContext context = MenuConvertContext.builder()
+			.roleMap(displayMeta.roleMap())
+			.forcePublicAccessIds(displayMeta.forcePublicAccessIds())
+			.build();
+		return buildRouteTree(visibleMenus, context);
 	}
 
 	/**
-	 * 核心建树方法：批量查询角色关联，建树，转为 VO
-	 * @param menuList 启用菜单列表
+	 * 建树并转为 VO
+	 * @param menuList 待建树菜单
+	 * @param context 转换上下文
 	 * @return 路由树根列表
 	 */
 	private List<RouteNodeVO> buildRouteTree(List<SysMenuEntity> menuList, MenuConvertContext context) {
@@ -102,7 +111,7 @@ public class MenuWebRouteTreeAssembler {
 	/**
 	 * 递归将树节点列表转为 VO 列表
 	 * @param nodes 树节点列表
-	 * @param context 转换上下文（角色 Map）
+	 * @param context 转换上下文
 	 * @return 路由 VO 列表
 	 */
 	private List<RouteNodeVO> convertTreeToVO(List<MenuRouteTreeNode> nodes, MenuConvertContext context) {

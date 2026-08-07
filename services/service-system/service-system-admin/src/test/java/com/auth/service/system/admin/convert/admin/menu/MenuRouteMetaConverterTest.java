@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -95,6 +96,22 @@ class MenuRouteMetaConverterTest {
 		RouteMetaVO meta = MenuRouteMetaConverter.fromMenuEntity(menu, context);
 
 		assertThat(meta.getPublicAccess()).isFalse();
+	}
+
+	@Test
+	@DisplayName("祖先壳 forcePublicAccessIds 强制 publicAccess")
+	void fromMenuEntity_forcesPublicAccessFromContext() {
+		SysMenuEntity menu = new SysMenuEntity();
+		menu.setId(5L);
+		menu.setPublicAccess(Boolean.FALSE);
+		MenuConvertContext context = MenuConvertContext.builder()
+			.roleMap(Map.of())
+			.forcePublicAccessIds(Set.of(5L))
+			.build();
+
+		RouteMetaVO meta = MenuRouteMetaConverter.fromMenuEntity(menu, context);
+
+		assertThat(meta.getPublicAccess()).isTrue();
 	}
 
 }

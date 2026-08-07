@@ -36,9 +36,9 @@ show_help() {
   # 本地构建启动
   ./dockerctl.sh dev build-up
 
-  # 服务器 / ACR（先 docker login）
-  export AUTH_IMAGE_PREFIX=registry.cn-hangzhou.aliyuncs.com/bunny-company
-  export AUTH_IMAGE_TAG=prod-latest
+  # 服务器 / ACR
+  export IMAGE_PREFIX=registry.cn-hangzhou.aliyuncs.com/bunny-company
+  export IMAGE_TAG=prod-latest
   ./dockerctl.sh prod up
 
   # 自定义密钥文件路径
@@ -60,9 +60,9 @@ is_supported_env() {
 
 default_image_tag() {
   case "$1" in
-    prod) printf 'local-prod\n' ;;
-    test) printf 'local-test\n' ;;
-    *) printf 'local\n' ;;
+  prod) printf 'local-prod\n' ;;
+  test) printf 'local-test\n' ;;
+  *) printf 'local\n' ;;
   esac
 }
 
@@ -77,7 +77,7 @@ prepare_env() {
 
   export AUTH_ENV="${target_env}"
   export AUTH_ENV_FILE="${AUTH_ENV_FILE:-${default_env_file}}"
-  export AUTH_IMAGE_TAG="${AUTH_IMAGE_TAG:-$(default_image_tag "${target_env}")}"
+  export IMAGE_TAG="${IMAGE_TAG:-$(default_image_tag "${target_env}")}"
   export SPRING_CLOUD_NACOS_SERVER_ADDR="${SPRING_CLOUD_NACOS_SERVER_ADDR:-nacos:8848}"
 
   if [[ ! -f "${AUTH_ENV_FILE}" ]]; then
@@ -112,13 +112,13 @@ filter_up_args_after_build() {
       continue
     fi
     case "${arg}" in
-      --no-cache|--pull|--pull=*|--quiet|-q|--parallel|--with-dependencies|--builder|--builder=*|--progress|--progress=*|--build-arg=*|--ssh|--ssh=*|--memory|--memory=*)
-        continue
-        ;;
-      --build-arg|--progress|--builder|--ssh|--memory)
-        skip_next=1
-        continue
-        ;;
+    --no-cache | --pull | --pull=* | --quiet | -q | --parallel | --with-dependencies | --builder | --builder=* | --progress | --progress=* | --build-arg=* | --ssh | --ssh=* | --memory | --memory=*)
+      continue
+      ;;
+    --build-arg | --progress | --builder | --ssh | --memory)
+      skip_next=1
+      continue
+      ;;
     esac
     up_args+=("${arg}")
   done
@@ -141,47 +141,47 @@ fi
 prepare_env "${TARGET_ENV}"
 
 case "${ACTION}" in
-  pull)
-    dc pull "$@"
-    ;;
-  build)
-    dc_build build "$@"
-    ;;
-  up)
-    # 不构建：缺镜像则 pull；已有则用本地（可先 pull 刷新）
-    dc up -d --pull missing --no-build "$@"
-    ;;
-  build-up)
-    dc_build build "$@"
-    filter_up_args_after_build "$@"
-    dc_build up -d --build "${up_args[@]}"
-    ;;
-  down)
-    dc down "$@"
-    ;;
-  restart)
-    dc down "$@"
-    dc up -d --pull missing --no-build "$@"
-    ;;
-  logs)
-    dc logs -f "$@"
-    ;;
-  ps)
-    dc ps "$@"
-    ;;
-  config)
-    if [[ -f "${COMPOSE_OVERRIDE}" ]]; then
-      dc_build config "$@"
-    else
-      dc config "$@"
-    fi
-    ;;
-  help|-h|--help)
-    show_help
-    ;;
-  *)
-    echo "错误: 不支持的动作 '${ACTION}'"
-    show_help
-    exit 1
-    ;;
+pull)
+  dc pull "$@"
+  ;;
+build)
+  dc_build build "$@"
+  ;;
+up)
+  # 不构建：缺镜像则 pull；已有则用本地（可先 pull 刷新）
+  dc up -d --pull missing --no-build "$@"
+  ;;
+build-up)
+  dc_build build "$@"
+  filter_up_args_after_build "$@"
+  dc_build up -d --build "${up_args[@]}"
+  ;;
+down)
+  dc down "$@"
+  ;;
+restart)
+  dc down "$@"
+  dc up -d --pull missing --no-build "$@"
+  ;;
+logs)
+  dc logs -f "$@"
+  ;;
+ps)
+  dc ps "$@"
+  ;;
+config)
+  if [[ -f "${COMPOSE_OVERRIDE}" ]]; then
+    dc_build config "$@"
+  else
+    dc config "$@"
+  fi
+  ;;
+help | -h | --help)
+  show_help
+  ;;
+*)
+  echo "错误: 不支持的动作 '${ACTION}'"
+  show_help
+  exit 1
+  ;;
 esac

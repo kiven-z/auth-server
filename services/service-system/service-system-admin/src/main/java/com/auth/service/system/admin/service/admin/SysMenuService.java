@@ -23,7 +23,7 @@ import java.util.List;
 public interface SysMenuService extends IService<SysMenuEntity> {
 
 	/**
-	 * 查询指定用户可见的 Web 动态路由列表
+	 * 查询指定用户可见的 Web 动态路由列表（含子级授权时的祖先壳）
 	 * @param userId 当前用户 ID，null 时返回空列表
 	 * @return 顶级路由节点，可能为空
 	 */

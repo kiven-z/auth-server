@@ -38,7 +38,7 @@ public class RouteMetaVO implements Serializable {
 	@Schema(title = "排序，越大越靠后（顶级路由）")
 	private Integer rank;
 
-	@Schema(title = "页面可见角色编码（来自 sys_menu_role）")
+	@Schema(title = "页面可见角色编码（绑定角色或祖先壳冒泡）")
 	private List<String> roles;
 
 	@Schema(title = "额外图标")
