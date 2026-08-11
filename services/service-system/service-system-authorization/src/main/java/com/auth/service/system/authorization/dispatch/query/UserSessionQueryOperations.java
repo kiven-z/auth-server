@@ -3,7 +3,7 @@ package com.auth.service.system.authorization.dispatch.query;
 import cn.hutool.core.collection.CollUtil;
 import com.auth.common.core.model.response.Result;
 import com.auth.common.web.resttemplate.FeignUtil;
-import com.auth.service.system.authorization.feign.MeSessionInnerFeignClient;
+import com.auth.service.system.authorization.feign.MeSessionInternalFeignClient;
 import com.auth.service.system.authorization.feign.dto.UserSessionRemoteDTO;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
 @Component
 public class UserSessionQueryOperations {
 
-	private final MeSessionInnerFeignClient meSessionInnerFeignClient;
+	private final MeSessionInternalFeignClient meSessionInternalFeignClient;
 
 	/**
 	 * 查询用户活跃会话列表。
@@ -31,7 +31,7 @@ public class UserSessionQueryOperations {
 	 * @return 活跃会话快照列表
 	 */
 	public List<UserSessionSnapshot> listActiveSessions(Long userId) {
-		Result<List<UserSessionRemoteDTO>> result = meSessionInnerFeignClient.listUserSessions(userId);
+		Result<List<UserSessionRemoteDTO>> result = meSessionInternalFeignClient.listUserSessions(userId);
 		if (!FeignUtil.isSuccess(result)) {
 			throw new SystemBusinessException(SERVICE_UNAVAILABLE);
 		}
@@ -58,7 +58,7 @@ public class UserSessionQueryOperations {
 	 * @param sessionId 会话 ID（jti）
 	 */
 	public void kickSession(Long userId, String sessionId) {
-		Result<Void> result = meSessionInnerFeignClient.kickUserSession(userId, sessionId);
+		Result<Void> result = meSessionInternalFeignClient.kickUserSession(userId, sessionId);
 		if (!FeignUtil.isSuccess(result)) {
 			throw new SystemBusinessException(OPERATION_FAILED);
 		}

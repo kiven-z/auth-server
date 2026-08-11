@@ -1,9 +1,6 @@
 package com.auth.service.system.admin.export;
 
-import java.util.Map;
-
-import org.springframework.stereotype.Service;
-
+import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.core.model.query.PageQueryRequest;
 import com.auth.common.core.utils.JsonSupport;
 import com.auth.module.file.api.model.dto.ExportPageDataDTO;
@@ -12,14 +9,15 @@ import com.auth.module.security.autoconfigure.pipeline.authenticate.AuthProfileS
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.system.admin.export.fetcher.ExportPageFetcher;
 import com.auth.service.system.admin.export.fetcher.ExportPageFetcherRegistry;
-import com.auth.service.system.admin.model.request.InnerExportPageRequest;
+import com.auth.service.system.admin.model.request.InternalExportPageRequest;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-
-import cn.hutool.core.text.CharSequenceUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 /**
  * 导出分页取数编排：按业务类型分发并恢复权限快照
@@ -40,7 +38,7 @@ public class ExportPageDispatchService {
 	 * @param request 内部分页取数请求
 	 * @return 分页数据
 	 */
-	public ExportPageDataDTO fetchPage(InnerExportPageRequest request) {
+	public ExportPageDataDTO fetchPage(InternalExportPageRequest request) {
 		String bizType = CharSequenceUtil.trimToNull(request.getBizType());
 		if (bizType == null) {
 			throw new SystemBusinessException(SystemCommonResultCode.PARAM_REQUIRED, "bizType");

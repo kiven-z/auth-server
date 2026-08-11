@@ -4,7 +4,7 @@ import com.auth.common.core.model.response.Result;
 import com.auth.common.web.resttemplate.FeignUtil;
 import com.auth.service.system.authorization.config.AuthorizationInvalidationProperties;
 import com.auth.service.system.authorization.dispatch.AuthorizationInvalidationOutboxProcessor;
-import com.auth.service.system.authorization.feign.AuthorizationInnerFeignClient;
+import com.auth.service.system.authorization.feign.AuthorizationInternalFeignClient;
 import com.auth.service.system.authorization.mapper.SysAuthorizationInvalidationOutboxMapper;
 import com.auth.service.system.authorization.model.dto.AuthorizationInvalidationOutboxManualRetryOutcome;
 import com.auth.service.system.authorization.model.entity.SysAuthorizationInvalidationOutboxEntity;
@@ -41,7 +41,7 @@ public class AuthorizationInvalidationOutboxManualRetryApplicationService {
 
 	private final AuthorizationInvalidationOutboxProcessor outboxProcessor;
 
-	private final AuthorizationInnerFeignClient authorizationInnerFeignClient;
+	private final AuthorizationInternalFeignClient authorizationInternalFeignClient;
 
 	private final AuthorizationInvalidationProperties properties;
 
@@ -133,7 +133,7 @@ public class AuthorizationInvalidationOutboxManualRetryApplicationService {
 	 * @return 是否释放成功
 	 */
 	private boolean releaseEventClaimIfPresent(String eventId) {
-		Result<Boolean> result = authorizationInnerFeignClient.releaseInvalidationEventClaim(eventId);
+		Result<Boolean> result = authorizationInternalFeignClient.releaseInvalidationEventClaim(eventId);
 		if (!FeignUtil.isSuccessWithData(result)) {
 			log.warn("Release invalidation event claim unavailable, eventId={}", eventId);
 			return false;

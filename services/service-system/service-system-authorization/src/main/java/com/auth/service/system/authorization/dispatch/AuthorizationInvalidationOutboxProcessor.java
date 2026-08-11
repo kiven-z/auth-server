@@ -7,7 +7,7 @@ import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidat
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateResponse;
 import com.auth.service.system.authorization.config.AuthorizationInvalidationProperties;
-import com.auth.service.system.authorization.feign.AuthorizationInnerFeignClient;
+import com.auth.service.system.authorization.feign.AuthorizationInternalFeignClient;
 import com.auth.service.system.authorization.mapper.SysAuthorizationInvalidationOutboxMapper;
 import com.auth.service.system.authorization.model.entity.SysAuthorizationInvalidationOutboxEntity;
 import com.auth.service.system.authorization.model.enums.AuthorizationInvalidationOutboxStatus;
@@ -33,7 +33,7 @@ public class AuthorizationInvalidationOutboxProcessor {
 
 	private final InvalidationOutboxPayloadCodec payloadCodec;
 
-	private final AuthorizationInnerFeignClient authorizationInnerFeignClient;
+	private final AuthorizationInternalFeignClient authorizationInternalFeignClient;
 
 	private final AuthorizationInvalidationProperties properties;
 
@@ -85,7 +85,7 @@ public class AuthorizationInvalidationOutboxProcessor {
 		var request = new AuthorizationInvalidateRequest(row.getEventId(), kind, payload);
 
 		try {
-			Result<AuthorizationInvalidateResponse> result = authorizationInnerFeignClient.invalidate(request);
+			Result<AuthorizationInvalidateResponse> result = authorizationInternalFeignClient.invalidate(request);
 			if (result != null && Integer.valueOf(Result.SUCCESS_CODE).equals(result.getCode())) {
 				outboxMapper.markSuccess(row.getId(), Instant.now());
 				log.info("Authorization invalidation dispatched: eventId={}, outboxId={}", row.getEventId(),

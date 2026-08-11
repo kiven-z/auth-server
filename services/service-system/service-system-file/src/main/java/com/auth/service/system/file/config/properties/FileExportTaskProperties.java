@@ -35,7 +35,7 @@ public class FileExportTaskProperties {
 	private Integer leaseSeconds = 60;
 
 	/**
-	 * 每用户进行中任务上限（PENDING + RUNNING）
+	 * 每用户进行中任务上限（PENDING + RUNNING + CANCELLING）
 	 */
 	@Min(1)
 	@NotNull

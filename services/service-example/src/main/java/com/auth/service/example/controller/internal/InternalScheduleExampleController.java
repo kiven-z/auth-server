@@ -1,4 +1,4 @@
-package com.auth.service.example.controller;
+package com.auth.service.example.controller.internal;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.module.security.autoconfigure.annotation.InternalApi;
@@ -18,7 +18,7 @@ import java.util.Map;
  */
 @Slf4j
 @RestController
-public class ScheduleExampleController {
+public class InternalScheduleExampleController {
 
 	private static final String INNER_PATH = "/api/example/inner/schedule";
 

@@ -1,7 +1,7 @@
 package com.auth.service.system.authorization.dispatch.query;
 
 import com.auth.common.core.model.response.Result;
-import com.auth.service.system.authorization.feign.MeSessionInnerFeignClient;
+import com.auth.service.system.authorization.feign.MeSessionInternalFeignClient;
 import com.auth.service.system.authorization.feign.dto.UserSessionRemoteDTO;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
@@ -27,7 +27,7 @@ import static org.mockito.Mockito.when;
 class UserSessionQueryOperationsTest {
 
 	@Mock
-	private MeSessionInnerFeignClient meSessionInnerFeignClient;
+	private MeSessionInternalFeignClient meSessionInternalFeignClient;
 
 	@InjectMocks
 	private UserSessionQueryOperations userSessionQueryOperations;
@@ -38,7 +38,7 @@ class UserSessionQueryOperationsTest {
 		UserSessionRemoteDTO remote = new UserSessionRemoteDTO();
 		remote.setSessionId("jti-1");
 		remote.setIpAddress("127.0.0.1");
-		when(meSessionInnerFeignClient.listUserSessions(1L)).thenReturn(Result.success(List.of(remote)));
+		when(meSessionInternalFeignClient.listUserSessions(1L)).thenReturn(Result.success(List.of(remote)));
 
 		List<UserSessionSnapshot> snapshots = userSessionQueryOperations.listActiveSessions(1L);
 
@@ -50,7 +50,7 @@ class UserSessionQueryOperationsTest {
 	@Test
 	@DisplayName("listActiveSessions：Feign 失败时抛出 SERVICE_UNAVAILABLE")
 	void listActiveSessions_whenFeignFails_throwsServiceUnavailable() {
-		when(meSessionInnerFeignClient.listUserSessions(2L)).thenReturn(Result.error("unavailable"));
+		when(meSessionInternalFeignClient.listUserSessions(2L)).thenReturn(Result.error("unavailable"));
 
 		assertThatThrownBy(() -> userSessionQueryOperations.listActiveSessions(2L))
 			.isInstanceOf(SystemBusinessException.class)
@@ -61,17 +61,17 @@ class UserSessionQueryOperationsTest {
 	@Test
 	@DisplayName("kickSession：委托 Feign 踢出会话")
 	void kickSession_delegatesToFeign() {
-		when(meSessionInnerFeignClient.kickUserSession(3L, "jti-2")).thenReturn(Result.success());
+		when(meSessionInternalFeignClient.kickUserSession(3L, "jti-2")).thenReturn(Result.success());
 
 		userSessionQueryOperations.kickSession(3L, "jti-2");
 
-		verify(meSessionInnerFeignClient).kickUserSession(3L, "jti-2");
+		verify(meSessionInternalFeignClient).kickUserSession(3L, "jti-2");
 	}
 
 	@Test
 	@DisplayName("kickSession：Feign 失败时抛出 OPERATION_FAILED")
 	void kickSession_whenFeignFails_throwsOperationFailed() {
-		when(meSessionInnerFeignClient.kickUserSession(4L, "jti-3")).thenReturn(Result.error("failed"));
+		when(meSessionInternalFeignClient.kickUserSession(4L, "jti-3")).thenReturn(Result.error("failed"));
 
 		assertThatThrownBy(() -> userSessionQueryOperations.kickSession(4L, "jti-3"))
 			.isInstanceOf(SystemBusinessException.class)

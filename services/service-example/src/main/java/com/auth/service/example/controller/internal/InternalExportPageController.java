@@ -1,4 +1,4 @@
-package com.auth.service.example.controller.inner;
+package com.auth.service.example.controller.internal;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.module.file.api.model.dto.ExportPageDataDTO;
@@ -6,7 +6,7 @@ import com.auth.module.file.export.scope.FileExportScopeSnapshots;
 import com.auth.module.security.autoconfigure.annotation.InternalApi;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.example.export.ExampleOrderExportPageFetcher;
-import com.auth.service.example.model.request.ExampleInnerExportPageRequest;
+import com.auth.service.example.model.request.InternalExportPageRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -29,7 +29,7 @@ import java.util.Collections;
 @RequiredArgsConstructor
 @RequestMapping("/api/example/inner/export")
 @RestController
-public class ExampleInnerExportPageController {
+public class InternalExportPageController {
 
 	private final ExampleOrderExportPageFetcher exportPageFetcher;
 
@@ -39,7 +39,7 @@ public class ExampleInnerExportPageController {
 	 * @return 分页数据
 	 */
 	@PostMapping(value = "/page", produces = MediaType.APPLICATION_JSON_VALUE)
-	public Result<ExportPageDataDTO> page(@Valid @RequestBody ExampleInnerExportPageRequest request) {
+	public Result<ExportPageDataDTO> page(@Valid @RequestBody InternalExportPageRequest request) {
 		AuthProfile profile = FileExportScopeSnapshots.requireAuthProfile(request.getScopeSnapshotJson());
 		ExportPageDataDTO data = executeWithScope(profile, () -> exportPageFetcher.fetchPage(request.getBizType(),
 				request.getQuerySnapshotJson(), request.getPageNum(), request.getPageSize()));

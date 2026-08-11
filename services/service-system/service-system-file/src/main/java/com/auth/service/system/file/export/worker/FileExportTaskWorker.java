@@ -84,8 +84,16 @@ public class FileExportTaskWorker {
 		finally {
 			deleteArtifactQuietly(artifact);
 			int attemptNo = Objects.requireNonNullElse(task.getRetryCount(), 0) + 1;
-			attemptRecorder.append(taskId, attemptNo, startedAt, Instant.now(), attemptResult, processedRows, errorCode,
-					errorMessage);
+			attemptRecorder.append(FileExportAttemptAppendCommand.builder()
+				.taskId(taskId)
+				.attemptNo(attemptNo)
+				.startedAt(startedAt)
+				.finishedAt(Instant.now())
+				.result(attemptResult)
+				.processedRows(processedRows)
+				.errorCode(errorCode)
+				.errorMessage(errorMessage)
+				.build());
 		}
 	}
 

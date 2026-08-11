@@ -5,7 +5,7 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.common.web.resttemplate.FeignUtil;
 import com.auth.service.system.authorization.convert.AuthorizationInvalidationEventOpsConverter;
 import com.auth.service.system.authorization.convert.AuthorizationInvalidationStatsOpsConverter;
-import com.auth.service.system.authorization.feign.AuthorizationInnerFeignClient;
+import com.auth.service.system.authorization.feign.AuthorizationInternalFeignClient;
 import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidationEventDetailInnerDTO;
 import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidationEventInnerQuery;
 import com.auth.service.system.authorization.feign.dto.AuthorizationInvalidationEventPageInnerDTO;
@@ -33,7 +33,7 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
 @Transactional(readOnly = true)
 public class AuthorizationInvalidationEventOpsServiceImpl implements AuthorizationInvalidationEventOpsService {
 
-	private final AuthorizationInnerFeignClient authorizationInnerFeignClient;
+	private final AuthorizationInternalFeignClient authorizationInternalFeignClient;
 
 	/**
 	 * {@inheritDoc}
@@ -43,7 +43,7 @@ public class AuthorizationInvalidationEventOpsServiceImpl implements Authorizati
 			AuthorizationInvalidationEventOpsQuery query) {
 		AuthorizationInvalidationEventInnerQuery innerQuery = AuthorizationInvalidationEventOpsConverter.INSTANCE
 			.toInnerQuery(query);
-		var result = authorizationInnerFeignClient.getInvalidationEventPage(innerQuery);
+		var result = authorizationInternalFeignClient.getInvalidationEventPage(innerQuery);
 
 		if (!FeignUtil.isSuccessWithData(result)) {
 			log.warn("Authorization invalidation event page unavailable");
@@ -57,7 +57,7 @@ public class AuthorizationInvalidationEventOpsServiceImpl implements Authorizati
 	 */
 	@Override
 	public AuthorizationInvalidationEventDetailInnerDTO getDetail(Long id) {
-		var result = authorizationInnerFeignClient.getInvalidationEventDetail(id);
+		var result = authorizationInternalFeignClient.getInvalidationEventDetail(id);
 
 		if (!FeignUtil.isSuccessWithData(result)) {
 			log.warn("Authorization invalidation event detail unavailable, id={}", id);
@@ -71,7 +71,7 @@ public class AuthorizationInvalidationEventOpsServiceImpl implements Authorizati
 	 */
 	@Override
 	public AuthorizationInvalidationEventStatsPO getEventStats() {
-		var result = authorizationInnerFeignClient.getInvalidationEventSummary();
+		var result = authorizationInternalFeignClient.getInvalidationEventSummary();
 		if (!FeignUtil.isSuccessWithData(result)) {
 			log.warn("Authorization invalidation event summary unavailable");
 			throw new SystemBusinessException(SERVICE_UNAVAILABLE);
@@ -91,7 +91,7 @@ public class AuthorizationInvalidationEventOpsServiceImpl implements Authorizati
 			throw new SystemBusinessException(EVENT_RELEASE_NOT_PROCESSING);
 		}
 
-		Result<Boolean> result = authorizationInnerFeignClient.releaseInvalidationEventClaim(detail.getEventId());
+		Result<Boolean> result = authorizationInternalFeignClient.releaseInvalidationEventClaim(detail.getEventId());
 		if (!FeignUtil.isSuccessWithData(result)) {
 			log.warn("Authorization invalidation event release claim unavailable, id={}", id);
 			throw new SystemBusinessException(SERVICE_UNAVAILABLE);

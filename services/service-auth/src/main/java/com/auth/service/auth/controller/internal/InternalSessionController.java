@@ -1,4 +1,4 @@
-package com.auth.service.auth.controller;
+package com.auth.service.auth.controller.internal;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.module.security.autoconfigure.annotation.InternalApi;
@@ -20,7 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/api/auth/inner/sessions")
 @RestController
-public class SessionInnerController {
+public class InternalSessionController {
 
 	private final SessionManagementService sessionManagementService;
 

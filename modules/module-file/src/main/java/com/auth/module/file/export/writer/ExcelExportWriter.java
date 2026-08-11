@@ -4,7 +4,6 @@ import com.alibaba.excel.EasyExcelFactory;
 import com.alibaba.excel.write.builder.ExcelWriterBuilder;
 import com.alibaba.excel.write.handler.CellWriteHandler;
 import com.alibaba.excel.write.style.column.LongestMatchColumnWidthStyleStrategy;
-import com.auth.module.file.export.model.enums.ZebraStripeStyleType;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -33,20 +32,6 @@ public class ExcelExportWriter<T> {
 		this.clazz = clazz;
 		this.sheetName = sheetName;
 		this.writeHandlers = new ArrayList<>();
-	}
-
-	/**
-	 * 标准导出 writer 工厂
-	 * @param clazz 行类型
-	 * @param sheetName Sheet 名称
-	 * @param statusHandler 状态列单元格处理器（由调用方传入，支持不同颜色策略）
-	 * @return 预配置好的 writer
-	 */
-	public static <T> ExcelExportWriter<T> withStatusStyle(Class<T> clazz, String sheetName,
-			CellWriteHandler statusHandler) {
-		return new ExcelExportWriter<>(clazz, sheetName)
-			.registerWriteHandler(ZebraStripeStyleType.getHandler(ZebraStripeStyleType.BLUE_GREY_TECH))
-			.registerWriteHandler(statusHandler);
 	}
 
 	/**

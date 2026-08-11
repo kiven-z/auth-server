@@ -14,11 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 @InternalApi
 @RequestMapping("/api/system/file/inner/file-export-tasks")
 @RestController
-public class InnerFileExportTaskController {
+public class InternalFileExportTaskController {
 
 	private final FileExportTaskWriteService writeService;
 
-	public InnerFileExportTaskController(FileExportTaskWriteService writeService) {
+	public InternalFileExportTaskController(FileExportTaskWriteService writeService) {
 		this.writeService = writeService;
 	}
 

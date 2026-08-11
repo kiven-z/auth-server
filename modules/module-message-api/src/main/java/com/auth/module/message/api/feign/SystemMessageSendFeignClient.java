@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
  *
  * @author Bunny
  */
-@FeignClient(name = "service-system", contextId = "systemMessageSend", path = "/api/system/message")
+@FeignClient(name = "service-system", contextId = "systemMessageSend", path = "/api/system/inner/message")
 public interface SystemMessageSendFeignClient {
 
 	/**

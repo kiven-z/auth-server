@@ -24,7 +24,7 @@ public class ExampleFileExportTaskCreateRequests {
 	 * 内部分页取数路径
 	 */
 	@SuppressWarnings("java:S1075")
-	public static final String INNER_EXPORT_PAGE_PATH = "/api/example/inner/export/page";
+	public static final String INTERNAL_EXPORT_PAGE_PATH = "/api/example/inner/export/page";
 
 	/**
 	 * 由业务筛选条件组装 XLSX 异步导出创建请求
@@ -38,7 +38,7 @@ public class ExampleFileExportTaskCreateRequests {
 	public static FileExportTaskCreateRequest xlsx(String bizType, Object query, String requestId, Long createdBy,
 			List<ExportColumn> columns) {
 		return FileExportTaskCreateRequests.xlsx(bizType, query, requestId, createdBy, SERVICE_EXAMPLE,
-				INNER_EXPORT_PAGE_PATH, columns);
+				INTERNAL_EXPORT_PAGE_PATH, columns);
 	}
 
 }

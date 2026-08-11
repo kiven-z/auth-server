@@ -8,7 +8,7 @@ import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.example.audit.ExampleAuditBizModule;
-import com.auth.service.example.feign.ExampleAuthInnerFeignClient;
+import com.auth.service.example.feign.ExampleAuthInternalFeignClient;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,15 +32,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ExampleController {
 
-	private final ExampleAuthInnerFeignClient exampleAuthInnerFeignClient;
+	private final ExampleAuthInternalFeignClient exampleAuthInternalFeignClient;
 
 	private final SecurityProperties securityProperties;
 
 	private final ObjectMapper objectMapper;
 
-	public ExampleController(ExampleAuthInnerFeignClient exampleAuthInnerFeignClient,
+	public ExampleController(ExampleAuthInternalFeignClient exampleAuthInternalFeignClient,
 			SecurityProperties securityProperties, ObjectMapper objectMapper) {
-		this.exampleAuthInnerFeignClient = exampleAuthInnerFeignClient;
+		this.exampleAuthInternalFeignClient = exampleAuthInternalFeignClient;
 		this.securityProperties = securityProperties;
 		this.objectMapper = objectMapper;
 	}
@@ -110,7 +110,7 @@ public class ExampleController {
 	@Operation(summary = "示例：刷新令牌")
 	@PostMapping("/trigger-feign")
 	public Result<Object> triggerFeign() {
-		return exampleAuthInnerFeignClient.refreshToken();
+		return exampleAuthInternalFeignClient.refreshToken();
 	}
 
 }

@@ -1,7 +1,7 @@
 package com.auth.service.system.authorization.feign.fallback;
 
 import com.auth.common.core.model.response.Result;
-import com.auth.service.system.authorization.feign.MeSessionInnerFeignClient;
+import com.auth.service.system.authorization.feign.MeSessionInternalFeignClient;
 import com.auth.service.system.authorization.feign.dto.UserSessionRemoteDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -15,14 +15,14 @@ import java.util.List;
  */
 @Slf4j
 @Component
-public class MeSessionInnerFeignClientFallback implements MeSessionInnerFeignClient {
+public class MeSessionInternalFeignClientFallback implements MeSessionInternalFeignClient {
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public Result<List<UserSessionRemoteDTO>> listUserSessions(Long userId) {
-		log.error("MeSessionInnerFeignClientFallback: listUserSessions failed, userId={}", userId);
+		log.error("MeSessionInternalFeignClientFallback: listUserSessions failed, userId={}", userId);
 		return Result.error("Session query service is unavailable");
 	}
 
@@ -31,7 +31,7 @@ public class MeSessionInnerFeignClientFallback implements MeSessionInnerFeignCli
 	 */
 	@Override
 	public Result<Void> kickUserSession(Long userId, String sessionId) {
-		log.error("MeSessionInnerFeignClientFallback: kickUserSession failed, userId={}, sessionId={}", userId,
+		log.error("MeSessionInternalFeignClientFallback: kickUserSession failed, userId={}, sessionId={}", userId,
 				sessionId);
 		return Result.error("Session kick service is unavailable");
 	}

@@ -5,7 +5,7 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateResponse;
 import com.auth.service.system.authorization.feign.dto.*;
-import com.auth.service.system.authorization.feign.fallback.AuthorizationInnerFeignClientFallback;
+import com.auth.service.system.authorization.feign.fallback.AuthorizationInternalFeignClientFallback;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,9 +20,9 @@ import java.util.List;
  *
  * @author Bunny
  */
-@FeignClient(name = "service-auth", contextId = "authorizationInnerFeignClient", path = "/api/auth/inner/authorization",
-		fallback = AuthorizationInnerFeignClientFallback.class)
-public interface AuthorizationInnerFeignClient {
+@FeignClient(name = "service-auth", contextId = "authorizationInternalFeignClient",
+		path = "/api/auth/inner/authorization", fallback = AuthorizationInternalFeignClientFallback.class)
+public interface AuthorizationInternalFeignClient {
 
 	/**
 	 * 查询用户生效角色码与权限码

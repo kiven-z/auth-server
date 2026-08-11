@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
  * @author Bunny
  */
 @FeignClient(name = "service-auth", path = "/api/auth/")
-public interface ExampleAuthInnerFeignClient {
+public interface ExampleAuthInternalFeignClient {
 
 	/**
 	 * 刷新令牌（refreshToken 由 HttpOnly Cookie 读取）

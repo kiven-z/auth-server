@@ -1,4 +1,4 @@
-package com.auth.service.system.common.controller;
+package com.auth.service.system.common.controller.internal;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.module.security.autoconfigure.annotation.InternalApi;

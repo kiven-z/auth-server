@@ -3,7 +3,7 @@ package com.auth.service.system.authorization.dispatch.trigger;
 import cn.hutool.core.collection.CollUtil;
 import com.auth.common.core.model.response.Result;
 import com.auth.common.web.resttemplate.FeignUtil;
-import com.auth.service.system.authorization.feign.AuthorizationInnerFeignClient;
+import com.auth.service.system.authorization.feign.AuthorizationInternalFeignClient;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ import java.util.Objects;
 @Component
 public class UserProfileRefreshTrigger {
 
-	private final AuthorizationInnerFeignClient authorizationInnerFeignClient;
+	private final AuthorizationInternalFeignClient authorizationInternalFeignClient;
 
 	/**
 	 * 批量刷新用户授权画像（去重、忽略空）
@@ -35,7 +35,7 @@ public class UserProfileRefreshTrigger {
 			return;
 		}
 
-		Result<Void> result = authorizationInnerFeignClient.refreshProfiles(ids);
+		Result<Void> result = authorizationInternalFeignClient.refreshProfiles(ids);
 		if (!FeignUtil.isSuccess(result)) {
 			log.warn("User profile refresh unavailable: size={}", ids.size());
 			throw new SystemBusinessException(SystemCommonResultCode.SERVICE_UNAVAILABLE);

@@ -1,4 +1,4 @@
-package com.auth.service.auth.controller;
+package com.auth.service.auth.controller.internal;
 
 import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
@@ -32,7 +32,7 @@ import java.util.List;
 @Slf4j
 @RequestMapping("/api/auth/inner/authorization")
 @RestController
-public class AuthorizationInnerController {
+public class InternalAuthorizationController {
 
 	private final AdminAuthorizationService adminAuthorizationService;
 

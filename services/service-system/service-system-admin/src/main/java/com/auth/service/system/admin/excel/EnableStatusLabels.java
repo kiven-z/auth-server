@@ -2,7 +2,6 @@ package com.auth.service.system.admin.excel;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import lombok.experimental.UtilityClass;
-import org.apache.poi.ss.usermodel.IndexedColors;
 
 import java.util.Map;
 
@@ -29,9 +28,6 @@ public class EnableStatusLabels {
 
 	private static final Map<Boolean, String> EXPORT_BY_STATUS = Map.of(true, ENABLED, false, DISABLED);
 
-	private static final Map<String, IndexedColors> COLOR_BY_LABEL = Map.of(ENABLED, IndexedColors.GREEN, DISABLED,
-			IndexedColors.RED);
-
 	/**
 	 * 导入文案 → 启用状态（严格匹配 {@link #ENABLED} / {@link #DISABLED}）。
 	 * @param label Excel 中填写的状态文案
@@ -51,18 +47,6 @@ public class EnableStatusLabels {
 	 */
 	public static String exportLabel(Boolean status) {
 		return status != null && status ? EXPORT_BY_STATUS.get(true) : EXPORT_BY_STATUS.get(false);
-	}
-
-	/**
-	 * 导出/着色用：按状态文案返回 POI 颜色。
-	 * @param label 单元格文案
-	 * @return 已知文案对应颜色，未知为灰色
-	 */
-	public static IndexedColors colorForLabel(String label) {
-		if (CharSequenceUtil.isBlank(label)) {
-			return IndexedColors.GREY_50_PERCENT;
-		}
-		return COLOR_BY_LABEL.getOrDefault(label.trim(), IndexedColors.GREY_50_PERCENT);
 	}
 
 }

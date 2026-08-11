@@ -1,6 +1,5 @@
 package com.auth.service.system.admin.excel;
 
-import org.apache.poi.ss.usermodel.IndexedColors;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -45,15 +44,6 @@ class EnableStatusLabelsTest {
 		assertThat(EnableStatusLabels.exportLabel(true)).isEqualTo(EnableStatusLabels.ENABLED);
 		assertThat(EnableStatusLabels.exportLabel(false)).isEqualTo(EnableStatusLabels.DISABLED);
 		assertThat(EnableStatusLabels.exportLabel(null)).isEqualTo(EnableStatusLabels.DISABLED);
-	}
-
-	@Test
-	@DisplayName("colorForLabel：按 canonical 文案着色")
-	void colorForLabel_mapsCanonicalLabels() {
-		assertThat(EnableStatusLabels.colorForLabel(EnableStatusLabels.ENABLED)).isEqualTo(IndexedColors.GREEN);
-		assertThat(EnableStatusLabels.colorForLabel(EnableStatusLabels.DISABLED)).isEqualTo(IndexedColors.RED);
-		assertThat(EnableStatusLabels.colorForLabel("未知")).isEqualTo(IndexedColors.GREY_50_PERCENT);
-		assertThat(EnableStatusLabels.colorForLabel(null)).isEqualTo(IndexedColors.GREY_50_PERCENT);
 	}
 
 }
