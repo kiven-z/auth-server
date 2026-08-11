@@ -5,6 +5,7 @@ import com.auth.module.file.exception.ExportValidationException;
 import com.auth.module.file.export.scope.FileExportScopeSnapshots;
 import com.auth.module.file.export.task.FileExportTaskArtifact;
 import com.auth.module.file.export.task.FileExportTaskContext;
+import com.auth.module.security.autoconfigure.pipeline.authenticate.AuthProfileSecurityContextPopulator;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
@@ -23,7 +24,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.nio.file.Files;
@@ -85,7 +85,6 @@ class FileExportTaskWorkerTest {
 				.rowCount(12)
 				.build();
 		});
-		when(fileExportAttemptMapper.selectOne(any())).thenReturn(null);
 		FileUploadResultDTO uploadResult = new FileUploadResultDTO();
 		uploadResult.setId(7001L);
 		when(fileUploadService.upload(any())).thenReturn(uploadResult);
@@ -129,7 +128,6 @@ class FileExportTaskWorkerTest {
 		when(fileExportTaskMapper.markRetryPending(eq(102L), eq("file-export-worker"), eq("IllegalStateException"),
 				eq("boom"), any(), any()))
 			.thenReturn(1);
-		when(fileExportAttemptMapper.selectOne(any())).thenReturn(null);
 
 		worker.executeRound();
 
@@ -158,7 +156,6 @@ class FileExportTaskWorkerTest {
 		when(fileExportTaskMapper.selectById(106L)).thenReturn(task);
 		when(fileExportTaskExecutor.executeTask(any(FileExportTaskContext.class), any()))
 			.thenThrow(ExportValidationException.rowLimitExceeded(100L, 101L));
-		when(fileExportAttemptMapper.selectOne(any())).thenReturn(null);
 
 		worker.executeRound();
 
@@ -182,7 +179,6 @@ class FileExportTaskWorkerTest {
 		when(fileExportTaskMapper.selectClaimCandidateIds(any(), eq(5))).thenReturn(List.of(104L));
 		when(fileExportTaskMapper.claimTask(eq(104L), eq("file-export-worker"), any(), any())).thenReturn(1);
 		when(fileExportTaskMapper.selectById(104L)).thenReturn(task);
-		when(fileExportAttemptMapper.selectOne(any())).thenReturn(null);
 
 		worker.executeRound();
 
@@ -206,7 +202,6 @@ class FileExportTaskWorkerTest {
 		when(fileExportTaskMapper.selectClaimCandidateIds(any(), eq(5))).thenReturn(List.of(103L));
 		when(fileExportTaskMapper.claimTask(eq(103L), eq("file-export-worker"), any(), any())).thenReturn(1);
 		when(fileExportTaskMapper.selectById(103L)).thenReturn(runningTask, cancelledTask);
-		when(fileExportAttemptMapper.selectOne(any())).thenReturn(null);
 
 		worker.executeRound();
 
@@ -220,12 +215,13 @@ class FileExportTaskWorkerTest {
 	}
 
 	@Test
-	@DisplayName("executeRound：attempt 唯一键冲突时重试写入")
-	void executeRoundRetriesAttemptInsertWhenDuplicate() {
+	@DisplayName("executeRound：attemptNo 由 retryCount+1 推导")
+	void executeRoundUsesRetryCountPlusOneAsAttemptNo() {
 		FileExportTaskProperties properties = newProperties();
 		FileExportTaskWorker worker = newWorker(properties);
 
 		FileExportTaskEntity task = newTask(105L);
+		task.setRetryCount(2);
 		when(fileExportTaskMapper.selectClaimCandidateIds(any(), eq(5))).thenReturn(List.of(105L));
 		when(fileExportTaskMapper.claimTask(eq(105L), eq("file-export-worker"), any(), any())).thenReturn(1);
 		when(fileExportTaskMapper.selectById(105L)).thenReturn(task);
@@ -240,24 +236,22 @@ class FileExportTaskWorkerTest {
 		uploadResult.setId(7002L);
 		when(fileUploadService.upload(any())).thenReturn(uploadResult);
 
-		FileExportAttemptEntity latest = new FileExportAttemptEntity();
-		latest.setAttemptNo(1);
-		when(fileExportAttemptMapper.selectOne(any())).thenReturn(null, latest);
-		doThrow(new DuplicateKeyException("duplicate")).doReturn(1)
-			.when(fileExportAttemptMapper)
-			.insert(any(FileExportAttemptEntity.class));
-
 		worker.executeRound();
 
 		ArgumentCaptor<FileExportAttemptEntity> captor = ArgumentCaptor.forClass(FileExportAttemptEntity.class);
-		verify(fileExportAttemptMapper, times(2)).insert(captor.capture());
-		assertThat(captor.getAllValues().get(0).getAttemptNo()).isEqualTo(1);
-		assertThat(captor.getAllValues().get(1).getAttemptNo()).isEqualTo(2);
+		verify(fileExportAttemptMapper).insert(captor.capture());
+		assertThat(captor.getValue().getAttemptNo()).isEqualTo(3);
+		assertThat(captor.getValue().getResult()).isEqualTo("SUCCESS");
 	}
 
 	private FileExportTaskWorker newWorker(FileExportTaskProperties properties) {
-		return new FileExportTaskWorker(fileExportTaskMapper, fileExportAttemptMapper, fileUploadService,
-				fileExportTaskExecutor, properties);
+		AuthProfileSecurityContextPopulator populator = new AuthProfileSecurityContextPopulator();
+		FileExportTaskRunner runner = new FileExportTaskRunner(fileExportTaskMapper, fileUploadService,
+				fileExportTaskExecutor, properties, populator);
+		FileExportTaskFailureHandler failureHandler = new FileExportTaskFailureHandler(fileExportTaskMapper,
+				properties);
+		FileExportAttemptRecorder attemptRecorder = new FileExportAttemptRecorder(fileExportAttemptMapper);
+		return new FileExportTaskWorker(fileExportTaskMapper, properties, runner, failureHandler, attemptRecorder);
 	}
 
 	private FileExportTaskProperties newProperties() {

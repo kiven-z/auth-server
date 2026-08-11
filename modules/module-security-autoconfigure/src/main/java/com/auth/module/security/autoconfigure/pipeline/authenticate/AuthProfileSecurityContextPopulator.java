@@ -6,6 +6,7 @@ import com.auth.module.security.contract.api.authorization.AuthProfile;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.List;
@@ -52,6 +53,42 @@ public final class AuthProfileSecurityContextPopulator {
 		UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(profile, null,
 				authorities);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
+	}
+
+	/**
+	 * 在指定画像上下文中执行（结束后恢复原 SecurityContext）
+	 * @param profile 授权画像
+	 * @param action 业务动作
+	 * @param <T> 返回类型
+	 * @return 业务结果
+	 */
+	public <T> T runWithProfile(AuthProfile profile, ScopedAction<T> action) {
+		SecurityContext originalContext = SecurityContextHolder.getContext();
+		SecurityContext scopedContext = SecurityContextHolder.createEmptyContext();
+		SecurityContextHolder.setContext(scopedContext);
+		try {
+			populate(profile);
+			return action.execute();
+		}
+		finally {
+			SecurityContextHolder.setContext(originalContext);
+		}
+	}
+
+	/**
+	 * 带 AuthProfile 作用域的动作
+	 *
+	 * @param <T> 返回类型
+	 */
+	@FunctionalInterface
+	public interface ScopedAction<T> {
+
+		/**
+		 * 执行动作
+		 * @return 结果
+		 */
+		T execute();
+
 	}
 
 }

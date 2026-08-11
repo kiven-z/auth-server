@@ -85,4 +85,24 @@ class AuthProfileSecurityContextPopulatorTest {
 		assertEquals(2L, principal.getUserId());
 	}
 
+	@Test
+	@DisplayName("runWithProfile：执行期间使用目标画像，结束后恢复原上下文")
+	void runWithProfile_restoresOriginalContext() {
+		AuthProfile original = AuthProfile.builder().userId(1L).username("original").build();
+		AuthProfile scoped = AuthProfile.builder().userId(2L).username("scoped").build();
+		populator.populate(original);
+
+		Long result = populator.runWithProfile(scoped, () -> {
+			Authentication during = SecurityContextHolder.getContext().getAuthentication();
+			assertNotNull(during);
+			assertEquals(2L, ((AuthProfile) during.getPrincipal()).getUserId());
+			return 42L;
+		});
+
+		assertEquals(42L, result);
+		Authentication after = SecurityContextHolder.getContext().getAuthentication();
+		assertNotNull(after);
+		assertEquals(1L, ((AuthProfile) after.getPrincipal()).getUserId());
+	}
+
 }
