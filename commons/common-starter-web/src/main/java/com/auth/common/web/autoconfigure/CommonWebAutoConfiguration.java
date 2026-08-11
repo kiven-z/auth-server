@@ -5,6 +5,7 @@ import com.auth.common.web.config.WebConfig;
 import com.auth.common.web.context.SpringContextHolder;
 import com.auth.common.web.exception.FallbackExceptionHandler;
 import com.auth.common.web.exception.MyBatisDatabaseExceptionHandler;
+import com.auth.common.web.exception.RemoteServiceExceptionHandler;
 import com.auth.common.web.exception.ValidationExceptionHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
@@ -29,7 +30,8 @@ import org.springframework.context.annotation.Import;
 @EnableConfigurationProperties()
 @Import({ ControllerStringParamTrimConfig.class, WebConfig.class,
 		// 导入异常处理器
-		ValidationExceptionHandler.class, FallbackExceptionHandler.class, MyBatisDatabaseExceptionHandler.class })
+		ValidationExceptionHandler.class, RemoteServiceExceptionHandler.class, FallbackExceptionHandler.class,
+		MyBatisDatabaseExceptionHandler.class })
 public class CommonWebAutoConfiguration implements ApplicationRunner {
 
 	/**

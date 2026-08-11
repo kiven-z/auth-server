@@ -54,3 +54,7 @@ springdoc:
     enabled: false
   swagger-ui:
     enabled: false
+
+mybatis-plus:
+  mapper-locations:
+    - "classpath*:/mapper/**/*.xml"

@@ -1,10 +1,10 @@
 package com.auth.service.system.file.job;
 
+import com.auth.common.core.constants.BatchSizes;
 import com.auth.module.file.api.model.enums.FileDeleteSource;
 import com.auth.module.file.api.model.enums.StoragePlatformEnum;
 import com.auth.service.system.file.config.properties.FileRecycleCleanupProperties;
 import com.auth.service.system.file.mapper.FileRecordMapper;
-import com.auth.service.system.file.model.constants.FileBatchSizes;
 import com.auth.service.system.file.model.entity.FileRecordEntity;
 import com.auth.service.system.file.storage.core.StoragePlatformFacade;
 import com.auth.service.system.file.storage.core.StoragePlatformFacadeRegistry;
@@ -32,7 +32,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class FileRecycleCleanupJobTest {
 
-	private static final int BATCH_SIZE = FileBatchSizes.RECYCLE_CLEANUP;
+	private static final int BATCH_SIZE = BatchSizes.SIZE_500;
 
 	@Mock
 	private FileRecycleCleanupProperties properties;

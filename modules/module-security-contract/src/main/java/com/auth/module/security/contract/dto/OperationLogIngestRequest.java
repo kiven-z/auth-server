@@ -1,10 +1,8 @@
 package com.auth.module.security.contract.dto;
 
 import com.auth.module.security.contract.event.OperationLogPayloadEvent;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -16,10 +14,8 @@ import java.util.Objects;
  *
  * @author Bunny
  */
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter
+@Setter
 public class OperationLogIngestRequest implements Serializable {
 
 	@Serial
@@ -65,25 +61,25 @@ public class OperationLogIngestRequest implements Serializable {
 	 * @return 入库请求
 	 */
 	public static OperationLogIngestRequest fromPayload(OperationLogPayloadEvent payload) {
-		return OperationLogIngestRequest.builder()
-			.userId(payload.getUserId())
-			.username(payload.getUsername())
-			.operationType(payload.getOperationType())
-			.module(payload.getModule())
-			.targetType(payload.getTargetType())
-			.targetId(payload.getTargetId())
-			.requestMethod(payload.getRequestMethod())
-			.requestUri(payload.getRequestUri())
-			.requestParams(payload.getRequestParams())
-			.responseStatus(payload.getResponseStatus())
-			.responseMessage(payload.getResponseMessage())
-			.executionTimeMs(payload.getExecutionTimeMs())
-			.ipAddress(payload.getIpAddress())
-			.userAgent(payload.getUserAgent())
-			.className(payload.getClassName())
-			.methodName(payload.getMethodName())
-			.timestamp(payload.getTimestamp())
-			.build();
+		OperationLogIngestRequest request = new OperationLogIngestRequest();
+		request.setUserId(payload.getUserId());
+		request.setUsername(payload.getUsername());
+		request.setOperationType(payload.getOperationType());
+		request.setModule(payload.getModule());
+		request.setTargetType(payload.getTargetType());
+		request.setTargetId(payload.getTargetId());
+		request.setRequestMethod(payload.getRequestMethod());
+		request.setRequestUri(payload.getRequestUri());
+		request.setRequestParams(payload.getRequestParams());
+		request.setResponseStatus(payload.getResponseStatus());
+		request.setResponseMessage(payload.getResponseMessage());
+		request.setExecutionTimeMs(payload.getExecutionTimeMs());
+		request.setIpAddress(payload.getIpAddress());
+		request.setUserAgent(payload.getUserAgent());
+		request.setClassName(payload.getClassName());
+		request.setMethodName(payload.getMethodName());
+		request.setTimestamp(payload.getTimestamp());
+		return request;
 	}
 
 	/**

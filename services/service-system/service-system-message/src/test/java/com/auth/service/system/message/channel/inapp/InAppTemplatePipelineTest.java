@@ -1,9 +1,9 @@
 package com.auth.service.system.message.channel.inapp;
 
 import com.auth.module.message.api.channel.MessageChannel;
+import com.auth.module.message.api.model.enums.MessageContentType;
 import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
-import com.auth.service.system.message.model.enums.InAppContentType;
 import com.auth.service.system.message.model.value.inapp.RenderedInAppMessage;
 import com.auth.service.system.message.support.template.MessageTemplateLoader;
 import org.junit.jupiter.api.DisplayName;
@@ -54,7 +54,7 @@ class InAppTemplatePipelineTest {
 
 		assertThat(rendered.title()).isEqualTo("Hello Bunny");
 		assertThat(rendered.content()).isEqualTo("Body Bunny");
-		assertThat(rendered.contentType()).isEqualTo(InAppContentType.MARKDOWN);
+		assertThat(rendered.contentType()).isEqualTo(MessageContentType.MARKDOWN);
 		assertThat(rendered.sceneCode()).isEqualTo("notice");
 		assertThat(rendered.templateId()).isEqualTo(55L);
 	}

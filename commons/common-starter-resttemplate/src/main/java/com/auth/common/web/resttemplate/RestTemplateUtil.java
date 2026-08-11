@@ -1,14 +1,12 @@
 package com.auth.common.web.resttemplate;
 
 import lombok.experimental.UtilityClass;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,6 +19,10 @@ public class RestTemplateUtil {
 
 	/**
 	 * 按 HTTP 方法发起调用，响应体按字符串解析
+	 *
+	 * <p>
+	 * 未显式指定 Accept 时默认 application/json，避免内容协商落到 XML。
+	 * </p>
 	 * @param restTemplate HTTP 客户端
 	 * @param url 请求 URL
 	 * @param method HTTP 方法
@@ -33,6 +35,9 @@ public class RestTemplateUtil {
 		HttpHeaders httpHeaders = new HttpHeaders();
 		if (headers != null) {
 			headers.forEach(httpHeaders::set);
+		}
+		if (!httpHeaders.containsKey(HttpHeaders.ACCEPT)) {
+			httpHeaders.setAccept(List.of(MediaType.APPLICATION_JSON));
 		}
 		return restTemplate.exchange(url, method, new HttpEntity<>(body, httpHeaders), String.class);
 	}

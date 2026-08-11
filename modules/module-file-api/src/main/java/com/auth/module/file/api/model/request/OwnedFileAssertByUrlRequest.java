@@ -2,10 +2,8 @@ package com.auth.module.file.api.model.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -15,10 +13,8 @@ import java.io.Serializable;
  *
  * @author Bunny
  */
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter
+@Setter
 public class OwnedFileAssertByUrlRequest implements Serializable {
 
 	@Serial

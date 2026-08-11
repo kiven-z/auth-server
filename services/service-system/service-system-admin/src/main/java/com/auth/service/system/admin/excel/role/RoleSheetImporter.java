@@ -2,8 +2,7 @@ package com.auth.service.system.admin.excel.role;
 
 import com.auth.module.file.importer.AbstractSheetImporter;
 import com.auth.module.file.importer.model.ImportRowError;
-import com.auth.module.file.importer.model.ImportRowValidator;
-import com.auth.module.security.contract.convention.AuthCodeConvention;
+import com.auth.module.file.importer.model.RowOutcome;
 import com.auth.service.system.admin.excel.EnableStatus;
 import com.auth.service.system.admin.excel.EnableStatusLabels;
 import com.auth.service.system.admin.excel.ImportRowSupport;
@@ -21,26 +20,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.auth.module.file.importer.model.ImportErrorCode.INVALID_FORMAT;
-
 /**
- * 角色导入器：封装行级校验与批量写入逻辑。
+ * 角色导入器：Extract → Validate → Map 三阶段编排。
  *
  * @author Bunny
  */
 @RequiredArgsConstructor
 @Component
 public class RoleSheetImporter extends AbstractSheetImporter<SysRoleImportRow, SysRoleForm, RoleSheetImporter.Context> {
-
-	/**
-	 * 导入校验字段名：roleCode
-	 */
-	private static final String FIELD_ROLE_CODE = "roleCode";
-
-	/**
-	 * 导入校验字段名：roleName
-	 */
-	private static final String FIELD_ROLE_NAME = "roleName";
 
 	private final SysRoleMapper sysRoleMapper;
 
@@ -67,23 +54,26 @@ public class RoleSheetImporter extends AbstractSheetImporter<SysRoleImportRow, S
 
 	@Override
 	protected SysRoleForm convertRow(SysRoleImportRow row, int rowNum, List<ImportRowError> errors, Context context) {
-		ImportRowValidator v = ImportRowValidator.of(rowNum, errors);
-		String roleCode = v.require(row.getRoleCode(), FIELD_ROLE_CODE);
-		String roleName = v.require(row.getRoleName(), FIELD_ROLE_NAME);
-		v.unique(roleCode, context.duplicateRoleCodesInFile(), context.existingRoleCodes(), FIELD_ROLE_CODE);
-		v.assertThat(AuthCodeConvention.isWellFormedRoleCode(roleCode), INVALID_FORMAT, FIELD_ROLE_CODE, roleCode);
+		RowOutcome<RoleParsedRow> extracted = RoleRowExtractor.extract(row, rowNum);
+		if (!extracted.ok()) {
+			errors.addAll(extracted.errors());
+			return null;
+		}
 
-		ImportRowSupport.requireEnableStatus(v, row.getStatusLabel());
+		RoleParsedRow parsed = extracted.value();
+		List<ImportRowError> violations = RoleRowValidator.validate(parsed, rowNum, context);
+		if (!violations.isEmpty()) {
+			errors.addAll(violations);
+			return null;
+		}
 
-		return v.mapOrNull(() -> {
-			SysRoleForm form = new SysRoleForm();
-			form.setRoleCode(roleCode);
-			form.setRoleName(roleName);
-			form.setStatus(EnableStatusLabels.parseImport(row.getStatusLabel()) == EnableStatus.ENABLED);
-			form.setOrderNum(row.getOrderNum());
-			form.setRemark(row.getRemark());
-			return form;
-		});
+		SysRoleForm form = new SysRoleForm();
+		form.setRoleCode(parsed.roleCode());
+		form.setRoleName(parsed.roleName());
+		form.setStatus(EnableStatusLabels.parseImport(parsed.statusLabel()) == EnableStatus.ENABLED);
+		form.setOrderNum(parsed.orderNum());
+		form.setRemark(parsed.remark());
+		return form;
 	}
 
 	@Override

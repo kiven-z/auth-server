@@ -2,6 +2,7 @@ package com.auth.service.system.message.service.admin.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import com.auth.common.data.model.PageResponse;
+import com.auth.module.message.api.model.enums.MessageContentType;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.message.convert.InAppEntityAssembler;
@@ -11,7 +12,6 @@ import com.auth.service.system.message.mapper.InAppMessageMapper;
 import com.auth.service.system.message.mapper.InAppMessageRecipientMapper;
 import com.auth.service.system.message.mapper.InAppMessageUserStatusMapper;
 import com.auth.service.system.message.model.entity.InAppMessageEntity;
-import com.auth.service.system.message.model.enums.InAppContentType;
 import com.auth.service.system.message.model.enums.InAppMessageStatus;
 import com.auth.service.system.message.model.enums.MessageSendSourceType;
 import com.auth.service.system.message.model.enums.RecipientScopeType;
@@ -143,7 +143,7 @@ public class InAppSendTaskServiceImpl extends ServiceImpl<InAppMessageMapper, In
 			.ids(form.getRecipientScopeIds())
 			.includeChildren(form.getIncludeChildren())
 			.build();
-		InAppContentType contentType = InAppContentType.from(form.getContentType());
+		MessageContentType contentType = MessageContentType.from(form.getContentType());
 
 		Long senderUserId = SecurityUserUtils.getUserId();
 		InAppMessageEntity task = InAppEntityAssembler.toAdminComposeTask(form, scope, contentType, senderUserId);

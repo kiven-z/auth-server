@@ -1,6 +1,7 @@
 package com.auth.service.system.admin.service.admin.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import com.auth.common.core.constants.BatchSizes;
 import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.common.core.utils.FieldChangeSupport;
 import com.auth.common.core.utils.TreeParentIdUtil;
@@ -8,7 +9,6 @@ import com.auth.common.core.utils.TreeRelationUtil;
 import com.auth.common.data.support.BusinessKeyAssert;
 import com.auth.service.system.admin.convert.admin.SysDeptConverter;
 import com.auth.service.system.admin.mapper.admin.dept.SysDeptMapper;
-import com.auth.service.system.admin.model.constants.AdminBatchSizes;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.form.dept.SysDeptForm;
 import com.auth.service.system.admin.model.form.dept.SysDeptMoveForm;
@@ -64,7 +64,7 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 			entity.setParentId(parentId);
 			return entity;
 		}).toList();
-		super.saveBatch(entities, AdminBatchSizes.IMPORT_SAVE);
+		super.saveBatch(entities, BatchSizes.SIZE_500);
 
 		List<DeptClosureNodePO> deptClosureNodes = entities.stream()
 			.map(entity -> new DeptClosureNodePO(entity.getId(), entity.getParentId()))

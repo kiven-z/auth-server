@@ -1,9 +1,9 @@
 package com.auth.service.system.admin.service.admin.impl;
 
+import com.auth.common.core.constants.BatchSizes;
 import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.service.system.admin.mapper.admin.role.GrantTableMapper;
 import com.auth.service.system.admin.mapper.admin.role.SysRoleMapper;
-import com.auth.service.system.admin.model.constants.AdminBatchSizes;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.form.role.SysRoleForm;
 import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
@@ -76,14 +76,13 @@ class SysRoleServiceImplTest {
 		return entity;
 	}
 
-	private static RoleAuthorizationSummaryVO summary(long permissionCount, long menuCount, long grantUserCount,
-			long grantDeptCount, long grantPostCount) {
+	private static RoleAuthorizationSummaryVO summary() {
 		RoleAuthorizationSummaryVO value = new RoleAuthorizationSummaryVO();
-		value.setPermissionCount(permissionCount);
-		value.setMenuCount(menuCount);
-		value.setGrantUserCount(grantUserCount);
-		value.setGrantDeptCount(grantDeptCount);
-		value.setGrantPostCount(grantPostCount);
+		value.setPermissionCount(3L);
+		value.setMenuCount(2L);
+		value.setGrantUserCount(5L);
+		value.setGrantDeptCount(1L);
+		value.setGrantPostCount(0L);
 		return value;
 	}
 
@@ -118,7 +117,7 @@ class SysRoleServiceImplTest {
 		sysRoleService.createBatchFromImport(List.of(form));
 
 		verify(sysRoleMapper).selectReferenceByRoleCodes(List.of("AUDITOR"));
-		verify(sysRoleService).saveBatch(anyList(), eq(AdminBatchSizes.IMPORT_SAVE));
+		verify(sysRoleService).saveBatch(anyList(), eq(BatchSizes.SIZE_500));
 	}
 
 	@Test
@@ -174,7 +173,7 @@ class SysRoleServiceImplTest {
 	@DisplayName("角色详情：复用授权面摘要填充计数")
 	void getDetailShouldIncludeAuthorizationCounts() {
 		when(sysRoleMapper.selectById(1L)).thenReturn(roleEntity(1L, "ADMIN"));
-		when(roleAuthorizationSurfaceService.getAuthorizationSummary(1L)).thenReturn(summary(3L, 2L, 5L, 1L, 0L));
+		when(roleAuthorizationSurfaceService.getAuthorizationSummary(1L)).thenReturn(summary());
 
 		SysRoleDetailVO detail = sysRoleService.getDetail(1L);
 

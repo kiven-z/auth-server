@@ -1,8 +1,8 @@
 package com.auth.service.system.message.support.inapp;
 
+import com.auth.common.core.constants.BatchSizes;
 import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.mapper.InAppMessageMapper;
-import com.auth.service.system.message.model.constants.MessageBatchSizes;
 import com.auth.service.system.message.model.entity.InAppMessageEntity;
 import com.auth.service.system.message.model.entity.InAppMessageRecipientEntity;
 import com.auth.service.system.message.model.enums.InAppMessageStatus;
@@ -115,7 +115,7 @@ class InAppComposeDispatcherTest {
 			consumer.accept(List.of(1001L, 1002L));
 			consumer.accept(List.of(1003L));
 			return null;
-		}).when(recipientBatchScanner).scan(any(RecipientScope.class), eq(MessageBatchSizes.RECIPIENT_SCAN), any());
+		}).when(recipientBatchScanner).scan(any(RecipientScope.class), eq(BatchSizes.SIZE_1000), any());
 		when(inAppMessageRecipientWriteService.insertBatch(any())).thenAnswer(invocation -> {
 			List<?> rows = invocation.getArgument(0);
 			return rows.size();
@@ -209,7 +209,7 @@ class InAppComposeDispatcherTest {
 		dispatcher.execute(13L);
 
 		ArgumentCaptor<RecipientScope> scopeCaptor = ArgumentCaptor.forClass(RecipientScope.class);
-		verify(recipientBatchScanner).scan(scopeCaptor.capture(), eq(MessageBatchSizes.RECIPIENT_SCAN), any());
+		verify(recipientBatchScanner).scan(scopeCaptor.capture(), eq(BatchSizes.SIZE_1000), any());
 		assertThat(scopeCaptor.getValue().getType()).isEqualTo(RecipientScopeType.DEPT);
 		assertThat(scopeCaptor.getValue().safeIds()).containsExactly(3L);
 		assertThat(scopeCaptor.getValue().includeChildrenOrDefault()).isFalse();

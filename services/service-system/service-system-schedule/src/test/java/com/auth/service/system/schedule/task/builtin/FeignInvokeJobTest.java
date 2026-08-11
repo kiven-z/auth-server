@@ -92,7 +92,30 @@ class FeignInvokeJobTest {
 				entityCaptor.capture(), eq(String.class));
 		HttpEntity<String> request = entityCaptor.getValue();
 		assertThat(request.getHeaders().getFirst("Content-Type")).isEqualTo("application/json");
+		assertThat(request.getHeaders().getFirst("Accept")).isEqualTo("application/json");
 		assertThat(request.getBody()).isEqualTo("{\"id\":1}");
+	}
+
+	@Test
+	@DisplayName("execute：未配置 headers 时 RestTemplateUtil 应默认 Accept application/json")
+	void execute_whenHeadersMissing_defaultsAcceptJson() throws Exception {
+		JobExecutionContext context = mock(JobExecutionContext.class);
+
+		FeignInvokeJobParams params = new FeignInvokeJobParams();
+		params.setServiceName("order-service");
+		params.setPath("/api/internal/ping");
+		params.setMethod(BuiltinRemoteHttpMethod.GET);
+		stubJobParams(context, params);
+		when(loadBalancedRestTemplate.exchange(eq("http://order-service/api/internal/ping"), eq(HttpMethod.GET),
+				ArgumentMatchers.any(), eq(String.class)))
+			.thenReturn(ResponseEntity.ok("ok"));
+
+		feignInvokeJob.execute(context);
+
+		ArgumentCaptor<HttpEntity<String>> entityCaptor = ArgumentCaptor.forClass(HttpEntity.class);
+		verify(loadBalancedRestTemplate).exchange(eq("http://order-service/api/internal/ping"), eq(HttpMethod.GET),
+				entityCaptor.capture(), eq(String.class));
+		assertThat(entityCaptor.getValue().getHeaders().getFirst("Accept")).isEqualTo("application/json");
 	}
 
 	@Test

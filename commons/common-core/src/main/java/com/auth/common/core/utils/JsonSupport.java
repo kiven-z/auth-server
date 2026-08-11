@@ -1,10 +1,7 @@
 package com.auth.common.core.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.experimental.UtilityClass;
 
@@ -104,6 +101,25 @@ public class JsonSupport {
 		}
 		catch (JsonProcessingException ex) {
 			throw new IllegalArgumentException("Failed to deserialize JSON to " + type.getSimpleName(), ex);
+		}
+	}
+
+	/**
+	 * 将 JSON 字符串反序列化为带单类型参数的泛型。
+	 * @param json JSON 字符串
+	 * @param rawType 原始类型
+	 * @param typeParameter 类型参数
+	 * @param <T> 目标类型
+	 * @return 反序列化后的对象
+	 */
+	public static <T> T fromJson(String json, Class<?> rawType, Class<?> typeParameter) {
+		JavaType javaType = DEFAULT_MAPPER.getTypeFactory().constructParametricType(rawType, typeParameter);
+		try {
+			return DEFAULT_MAPPER.readValue(json, javaType);
+		}
+		catch (JsonProcessingException ex) {
+			throw new IllegalArgumentException("Failed to deserialize JSON to " + rawType.getSimpleName() + "<"
+					+ typeParameter.getSimpleName() + ">", ex);
 		}
 	}
 

@@ -1,10 +1,10 @@
 package com.auth.service.system.admin.service.admin.impl;
 
+import com.auth.common.core.constants.BatchSizes;
 import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.service.system.admin.mapper.admin.dept.SysDeptMapper;
 import com.auth.service.system.admin.mapper.authorization.DeptRelationQueryMapper;
 import com.auth.service.system.admin.mapper.authorization.GrantBindingQueryMapper;
-import com.auth.service.system.admin.model.constants.AdminBatchSizes;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.form.dept.SysDeptForm;
 import com.auth.service.system.admin.model.form.dept.SysDeptMoveForm;
@@ -129,7 +129,7 @@ class SysDeptServiceImplTest {
 
 		verify(deptReferenceChecker).requireAbsentDeptCodes(List.of("RD"));
 		verify(deptReferenceChecker).normalizeAndRequireActiveParent(0L);
-		verify(sysDeptService).saveBatch(anyList(), eq(AdminBatchSizes.IMPORT_SAVE));
+		verify(sysDeptService).saveBatch(anyList(), eq(BatchSizes.SIZE_500));
 		verify(deptClosureMaintainer)
 			.insertNodes(argThat(nodes -> nodes.size() == 1 && nodes.get(0).getParentId() == 0L));
 	}

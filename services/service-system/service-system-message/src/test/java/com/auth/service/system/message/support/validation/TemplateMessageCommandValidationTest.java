@@ -118,7 +118,7 @@ class TemplateMessageCommandValidationTest {
 			.channel(MessageChannel.EMAIL)
 			.templateCode("login-email-code")
 			.targets(List.of("a@example.com"))
-			.options(DingTalkChannelOptions.builder().build())
+			.options(new DingTalkChannelOptions())
 			.build();
 
 		assertThatThrownBy(() -> commandValidation.validate(command)).isInstanceOf(MessageException.class)
@@ -133,7 +133,7 @@ class TemplateMessageCommandValidationTest {
 			.channel(MessageChannel.SMS)
 			.templateCode("100001")
 			.targets(List.of("13800000000"))
-			.options(EmailChannelOptions.builder().build())
+			.options(new EmailChannelOptions())
 			.build();
 
 		assertThatThrownBy(() -> commandValidation.validate(command)).isInstanceOf(MessageException.class)
@@ -144,11 +144,13 @@ class TemplateMessageCommandValidationTest {
 	@Test
 	@DisplayName("IN_APP 渠道：匹配 InAppChannelOptions 时校验通过")
 	void validate_shouldPassForInAppWithInAppOptions() {
+		InAppChannelOptions options = new InAppChannelOptions();
+		options.setCategoryId(104L);
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
 			.channel(MessageChannel.IN_APP)
 			.templateCode("notice")
 			.targets(List.of("1001"))
-			.options(InAppChannelOptions.builder().categoryId(1907200100000000401L).build())
+			.options(options)
 			.build();
 
 		assertThatCode(() -> commandValidation.validate(command)).doesNotThrowAnyException();
@@ -161,7 +163,7 @@ class TemplateMessageCommandValidationTest {
 			.channel(MessageChannel.IN_APP)
 			.templateCode("notice")
 			.targets(List.of("1001"))
-			.options(EmailChannelOptions.builder().build())
+			.options(new EmailChannelOptions())
 			.build();
 
 		assertThatThrownBy(() -> commandValidation.validate(command)).isInstanceOf(MessageException.class)
@@ -184,11 +186,13 @@ class TemplateMessageCommandValidationTest {
 	@Test
 	@DisplayName("合法命令校验通过")
 	void validate_shouldPassWhenCommandValid() {
+		EmailChannelOptions options = new EmailChannelOptions();
+		options.setHasHtml(Boolean.TRUE);
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
 			.channel(MessageChannel.EMAIL)
 			.templateCode("login-email-code")
 			.targets(List.of("a@example.com"))
-			.options(EmailChannelOptions.builder().hasHtml(Boolean.TRUE).build())
+			.options(options)
 			.build();
 
 		assertThatCode(() -> commandValidation.validate(command)).doesNotThrowAnyException();

@@ -1,19 +1,18 @@
 package com.auth.service.auth.model.constants;
 
+import com.auth.module.security.contract.api.audit.PlatformBizCodes;
 import lombok.experimental.UtilityClass;
 
 /**
- * auth 服务操作审计「小模块」编码常量
+ * auth 服务域专有操作审计「小模块」编码。
+ * <p>
+ * 跨能力共享资源码见 {@link PlatformBizCodes}。
+ * </p>
  *
  * @author Bunny
  */
 @UtilityClass
 public class AuthAuditBizModule {
-
-	/**
-	 * 授权画像缓存
-	 */
-	public static final String AUTH_PROFILE = "AUTH_PROFILE";
 
 	/**
 	 * 用户会话

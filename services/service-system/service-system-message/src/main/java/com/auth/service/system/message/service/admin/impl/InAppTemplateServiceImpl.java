@@ -1,10 +1,10 @@
 package com.auth.service.system.message.service.admin.impl;
 
 import com.auth.module.message.api.channel.MessageChannel;
+import com.auth.module.message.api.model.enums.MessageContentType;
 import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.mapper.MessageTemplateMapper;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
-import com.auth.service.system.message.model.enums.InAppContentType;
 import com.auth.service.system.message.model.form.inapp.InAppTemplateForm;
 import com.auth.service.system.message.service.admin.InAppTemplateService;
 import com.auth.service.system.message.support.template.MessageTemplateRequireFieldsJsonSupport;
@@ -32,7 +32,7 @@ public class InAppTemplateServiceImpl extends ServiceImpl<MessageTemplateMapper,
 	 * @param entity 目标实体
 	 */
 	private static void applyForm(InAppTemplateForm form, MessageTemplateEntity entity) {
-		InAppContentType contentType = InAppContentType.from(form.getContentType());
+		MessageContentType contentType = MessageContentType.from(form.getContentType());
 
 		entity.setSceneCode(form.getTemplateCode());
 		entity.setTemplateName(form.getTemplateName());

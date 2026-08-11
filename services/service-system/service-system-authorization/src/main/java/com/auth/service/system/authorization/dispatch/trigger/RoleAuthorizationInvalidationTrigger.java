@@ -1,12 +1,12 @@
 package com.auth.service.system.authorization.dispatch.trigger;
 
 import cn.hutool.core.collection.CollUtil;
+import com.auth.module.security.contract.api.audit.PlatformBizCodes;
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest;
 import com.auth.module.security.contract.dto.invalidation.RoleInvalidatePayload;
 import com.auth.service.system.authorization.dispatch.AuthorizationInvalidationCoordinator;
 import com.auth.service.system.authorization.dispatch.support.AuthorizationInvalidationSourceBizIds;
-import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -41,7 +41,7 @@ public class RoleAuthorizationInvalidationTrigger {
 		var payload = new RoleInvalidatePayload(codes);
 		var request = new AuthorizationInvalidateRequest(eventId, AuthorizationChangeKind.ROLE, payload);
 
-		invalidationCoordinator.submit(request, AuthorizationAuditBizModule.SYS_ROLE, sourceBizId);
+		invalidationCoordinator.submit(request, PlatformBizCodes.SYS_ROLE, sourceBizId);
 	}
 
 }

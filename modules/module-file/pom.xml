@@ -24,6 +24,11 @@
         </dependency>
         <dependency>
             <groupId>com.auth</groupId>
+            <artifactId>module-security-contract</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.auth</groupId>
             <artifactId>common-starter-web</artifactId>
             <version>${revision}</version>
         </dependency>
@@ -38,5 +43,21 @@
             <groupId>com.alibaba</groupId>
             <artifactId>easyexcel</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-extension</artifactId>
+            <scope>provided</scope>
+            <version>${mybatis-plus.version}</version>
+        </dependency>
+
+        <!-- Hutool (provided，仅编译时需要) -->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-core</artifactId>
+            <scope>provided</scope>
+            <version>${hutool.version}</version>
+        </dependency>
+
     </dependencies>
 </project>

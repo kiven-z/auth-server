@@ -1,8 +1,8 @@
 package com.auth.service.auth.support.invalidation;
 
 import cn.hutool.core.collection.CollUtil;
+import com.auth.common.core.constants.BatchSizes;
 import com.auth.service.auth.mapper.UserMapper;
-import com.auth.service.auth.model.constants.AuthBatchSizes;
 import com.auth.service.auth.model.po.user.UserInvalidationStatePO;
 import com.auth.service.auth.util.BatchPartition;
 import org.springframework.stereotype.Repository;
@@ -38,7 +38,7 @@ public class UserInvalidationRepository {
 		}
 
 		List<UserInvalidationStatePO> projections = new ArrayList<>();
-		for (List<Long> batch : BatchPartition.partitionIds(ids, AuthBatchSizes.INVALIDATION)) {
+		for (List<Long> batch : BatchPartition.partitionIds(ids, BatchSizes.SIZE_500)) {
 			List<UserInvalidationStatePO> batchProjections = userMapper.selectInvalidationStatesByUserIds(batch);
 			if (CollUtil.isNotEmpty(batchProjections)) {
 				projections.addAll(batchProjections);

@@ -3,10 +3,8 @@ package com.auth.service.system.message.model.dto;
 import com.auth.module.message.api.model.email.AttachmentDTO;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -18,10 +16,8 @@ import java.util.Map;
  *
  * @author Bunny
  */
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter
+@Setter
 public class EmailSendDTO implements Serializable {
 
 	@Serial

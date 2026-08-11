@@ -7,6 +7,7 @@ import com.auth.module.security.autoconfigure.annotation.AuthenticatedApi;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
+import com.auth.module.security.contract.api.audit.PlatformBizCodes;
 import com.auth.service.system.admin.model.form.me.MeAvatarUpdateForm;
 import com.auth.service.system.admin.model.form.me.MeProfileUpdateForm;
 import com.auth.service.system.admin.model.form.user.SysUserChangePasswordForm;
@@ -17,7 +18,6 @@ import com.auth.service.system.admin.model.vo.me.MeUserSessionVO;
 import com.auth.service.system.admin.service.me.MeProfileService;
 import com.auth.service.system.admin.service.me.MeSecurityService;
 import com.auth.service.system.admin.support.user.UserPasswordService;
-import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,8 +34,8 @@ import static com.auth.service.system.common.exception.code.SystemCommonResultCo
  *
  * @author Bunny
  */
-@Tag(name = "当前用户", description = "登录用户自助操作")
 @AuthenticatedApi
+@Tag(name = "当前用户", description = "登录用户自助操作")
 @RequiredArgsConstructor
 @RequestMapping("/api/system/me")
 @RestController
@@ -49,8 +49,8 @@ public class CurrentUserController {
 
 	private final MeProfileService meProfileService;
 
-	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.QUERY)
+	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM, bizModule = PlatformBizCodes.SYS_USER,
+			operation = OperationLogKind.QUERY)
 	@Operation(summary = "查询当前用户展示资料")
 	@GetMapping("/profile")
 	public Result<MeProfileVO> getMyProfile() {
@@ -58,8 +58,8 @@ public class CurrentUserController {
 		return Result.success(data);
 	}
 
-	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
+	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM, bizModule = PlatformBizCodes.SYS_USER,
+			operation = OperationLogKind.UPDATE)
 	@Operation(summary = "更新当前用户个人资料")
 	@PutMapping("/profile")
 	public Result<String> updateMyProfile(@Valid @RequestBody MeProfileUpdateForm form) {
@@ -67,8 +67,8 @@ public class CurrentUserController {
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
-	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
+	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM, bizModule = PlatformBizCodes.SYS_USER,
+			operation = OperationLogKind.UPDATE)
 	@Operation(summary = "更新当前用户头像")
 	@PutMapping("/avatar")
 	public Result<String> updateMyAvatar(@Valid @RequestBody MeAvatarUpdateForm form) {
@@ -76,8 +76,8 @@ public class CurrentUserController {
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
-	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
+	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM, bizModule = PlatformBizCodes.SYS_USER,
+			operation = OperationLogKind.UPDATE)
 	@Operation(summary = "更新当前用户密码")
 	@PutMapping("/password")
 	public Result<String> changeOwnPassword(@Valid @RequestBody SysUserChangePasswordForm form,
@@ -88,7 +88,7 @@ public class CurrentUserController {
 	}
 
 	@OperationLog(targetType = "USER_SESSION", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.QUERY)
+			bizModule = PlatformBizCodes.SYS_USER, operation = OperationLogKind.QUERY)
 	@Operation(summary = "查询当前用户活跃会话")
 	@GetMapping("/sessions")
 	public Result<List<MeUserSessionVO>> listMySessions() {
@@ -97,7 +97,7 @@ public class CurrentUserController {
 	}
 
 	@OperationLog(targetType = "USER_SESSION", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.DELETE)
+			bizModule = PlatformBizCodes.SYS_USER, operation = OperationLogKind.DELETE)
 	@Operation(summary = "踢出当前用户指定会话")
 	@PostMapping("/sessions/{sessionId}/kick")
 	public Result<Void> kickMySession(@PathVariable("sessionId") String sessionId) {
@@ -106,7 +106,7 @@ public class CurrentUserController {
 	}
 
 	@OperationLog(targetType = "LOGIN_LOG", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.QUERY)
+			bizModule = PlatformBizCodes.SYS_USER, operation = OperationLogKind.QUERY)
 	@Operation(summary = "分页查询当前用户登录日志")
 	@GetMapping("/login-logs/page")
 	public Result<PageResponse<MeLoginLogPageVO>> loginLogPage(MeLoginLogPageQuery query) {

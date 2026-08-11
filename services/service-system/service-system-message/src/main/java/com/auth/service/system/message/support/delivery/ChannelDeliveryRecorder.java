@@ -2,9 +2,9 @@ package com.auth.service.system.message.support.delivery;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
+import com.auth.common.core.constants.BatchSizes;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.service.system.message.mapper.MessageChannelDeliveryMapper;
-import com.auth.service.system.message.model.constants.MessageBatchSizes;
 import com.auth.service.system.message.model.entity.MessageChannelDeliveryEntity;
 import com.auth.service.system.message.model.enums.MessageDeliveryStatus;
 import com.auth.service.system.message.model.value.delivery.ChannelDeliveryResultUpdate;
@@ -51,7 +51,7 @@ public class ChannelDeliveryRecorder extends ServiceImpl<MessageChannelDeliveryM
 		if (rows.isEmpty()) {
 			return;
 		}
-		super.saveBatch(rows, MessageBatchSizes.DELIVERY_WRITE);
+		super.saveBatch(rows, BatchSizes.SIZE_500);
 	}
 
 	/**
@@ -115,7 +115,7 @@ public class ChannelDeliveryRecorder extends ServiceImpl<MessageChannelDeliveryM
 		if (CollUtil.isEmpty(updates)) {
 			return;
 		}
-		CollUtil.split(updates, MessageBatchSizes.DELIVERY_WRITE)
+		CollUtil.split(updates, BatchSizes.SIZE_500)
 			.forEach(chunk -> baseMapper.batchUpdateResult(taskId, channel.name(), chunk));
 	}
 

@@ -2,16 +2,16 @@ package com.auth.service.system.message.channel.inapp;
 
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
+import com.auth.module.message.api.model.enums.MessageContentType;
 import com.auth.module.message.api.model.inapp.InAppChannelOptions;
 import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.mapper.InAppMessageMapper;
 import com.auth.service.system.message.model.entity.InAppMessageCategoryEntity;
 import com.auth.service.system.message.model.entity.InAppMessageEntity;
 import com.auth.service.system.message.model.entity.InAppMessageRecipientEntity;
-import com.auth.service.system.message.model.enums.RecipientScopeType;
-import com.auth.service.system.message.model.enums.InAppContentType;
 import com.auth.service.system.message.model.enums.InAppMessageStatus;
 import com.auth.service.system.message.model.enums.MessageSendSourceType;
+import com.auth.service.system.message.model.enums.RecipientScopeType;
 import com.auth.service.system.message.model.value.inapp.RenderedInAppMessage;
 import com.auth.service.system.message.service.admin.InAppMessageRecipientWriteService;
 import com.auth.service.system.message.support.inapp.InAppMessageCategorySupport;
@@ -43,7 +43,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class InAppMessageSenderTest {
 
-	private static final long MINOR_CATEGORY_ID = 1907200100000000401L;
+	private static final long MINOR_CATEGORY_ID = 104L;
 
 	@Mock
 	private InAppTemplatePipeline inAppTemplatePipeline;
@@ -77,7 +77,7 @@ class InAppMessageSenderTest {
 	private void stubEnabledMinor() {
 		InAppMessageCategoryEntity minor = new InAppMessageCategoryEntity();
 		minor.setId(MINOR_CATEGORY_ID);
-		minor.setParentId(1907200100000000007L);
+		minor.setParentId(1L);
 		minor.setStatus(Boolean.TRUE);
 		when(categorySupport.requireEnabledMinor(MINOR_CATEGORY_ID)).thenReturn(minor);
 	}
@@ -95,7 +95,7 @@ class InAppMessageSenderTest {
 		when(inAppTemplatePipeline.render("notice", Map.of("name", "Bunny"))).thenReturn(RenderedInAppMessage.builder()
 			.title("Hello Bunny")
 			.content("Body Bunny")
-			.contentType(InAppContentType.TEXT)
+			.contentType(MessageContentType.TEXT)
 			.sceneCode("notice")
 			.build());
 		stubInsertTaskId(9001L);
@@ -104,12 +104,15 @@ class InAppMessageSenderTest {
 			return rows.size();
 		});
 
+		InAppChannelOptions options = new InAppChannelOptions();
+		options.setCategoryId(MINOR_CATEGORY_ID);
+		options.setLinkUrl("/home");
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
 			.channel(MessageChannel.IN_APP)
 			.templateCode("notice")
 			.targets(List.of("1001", "1002", "1001"))
 			.variables(Map.of("name", "Bunny"))
-			.options(InAppChannelOptions.builder().categoryId(MINOR_CATEGORY_ID).linkUrl("/home").build())
+			.options(options)
 			.build();
 
 		sender.sendByTemplate(command);
@@ -121,7 +124,7 @@ class InAppMessageSenderTest {
 		assertThat(task.getRecipientScopeType()).isEqualTo(RecipientScopeType.USER.name());
 		assertThat(task.getTitle()).isEqualTo("Hello Bunny");
 		assertThat(task.getContent()).isEqualTo("Body Bunny");
-		assertThat(task.getContentType()).isEqualTo(InAppContentType.TEXT.name());
+		assertThat(task.getContentType()).isEqualTo(MessageContentType.TEXT.name());
 		assertThat(task.getSceneCode()).isEqualTo("notice");
 		assertThat(task.getCategoryId()).isEqualTo(MINOR_CATEGORY_ID);
 		assertThat(task.getLinkUrl()).isEqualTo("/home");
@@ -147,16 +150,16 @@ class InAppMessageSenderTest {
 		stubInsertTaskId(88L);
 		when(inAppMessageRecipientWriteService.insertBatch(any())).thenReturn(1);
 
+		InAppChannelOptions options = new InAppChannelOptions();
+		options.setTitle("manual title");
+		options.setContentType(MessageContentType.MARKDOWN);
+		options.setCategoryId(MINOR_CATEGORY_ID);
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
 			.channel(MessageChannel.IN_APP)
 			.targets(List.of("88"))
 			.customBody(Boolean.TRUE)
 			.body("manual body")
-			.options(InAppChannelOptions.builder()
-				.title("manual title")
-				.contentType("MARKDOWN")
-				.categoryId(MINOR_CATEGORY_ID)
-				.build())
+			.options(options)
 			.build();
 
 		sender.sendByTemplate(command);
@@ -167,7 +170,7 @@ class InAppMessageSenderTest {
 		assertThat(task.getSourceType()).isEqualTo(MessageSendSourceType.SYSTEM.name());
 		assertThat(task.getTitle()).isEqualTo("manual title");
 		assertThat(task.getContent()).isEqualTo("manual body");
-		assertThat(task.getContentType()).isEqualTo(InAppContentType.MARKDOWN.name());
+		assertThat(task.getContentType()).isEqualTo(MessageContentType.MARKDOWN.name());
 		assertThat(task.getCategoryId()).isEqualTo(MINOR_CATEGORY_ID);
 	}
 
@@ -175,12 +178,14 @@ class InAppMessageSenderTest {
 	@DisplayName("自定义正文缺标题：抛出 PARAM_REQUIRED")
 	void sendByTemplate_shouldThrowWhenCustomBodyWithoutTitle() {
 		stubEnabledMinor();
+		InAppChannelOptions options = new InAppChannelOptions();
+		options.setCategoryId(MINOR_CATEGORY_ID);
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
 			.channel(MessageChannel.IN_APP)
 			.targets(List.of("88"))
 			.customBody(Boolean.TRUE)
 			.body("manual body")
-			.options(InAppChannelOptions.builder().categoryId(MINOR_CATEGORY_ID).build())
+			.options(options)
 			.build();
 
 		assertThatThrownBy(() -> sender.sendByTemplate(command)).isInstanceOf(MessageException.class)
@@ -228,7 +233,7 @@ class InAppMessageSenderTest {
 		when(inAppTemplatePipeline.render("notice", Map.of())).thenReturn(RenderedInAppMessage.builder()
 			.title("t")
 			.content("c")
-			.contentType(InAppContentType.TEXT)
+			.contentType(MessageContentType.TEXT)
 			.sceneCode("notice")
 			.build());
 		stubInsertTaskId(500L);
@@ -237,12 +242,14 @@ class InAppMessageSenderTest {
 			return rows.size();
 		});
 
+		InAppChannelOptions options = new InAppChannelOptions();
+		options.setCategoryId(MINOR_CATEGORY_ID);
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
 			.channel(MessageChannel.IN_APP)
 			.templateCode("notice")
 			.targets(List.of("1001", " ", "", "1002"))
 			.variables(Map.of())
-			.options(InAppChannelOptions.builder().categoryId(MINOR_CATEGORY_ID).build())
+			.options(options)
 			.build();
 
 		sender.sendByTemplate(command);

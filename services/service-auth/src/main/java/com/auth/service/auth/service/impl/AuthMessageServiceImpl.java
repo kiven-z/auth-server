@@ -5,9 +5,10 @@ import cn.hutool.crypto.digest.MD5;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.message.api.feign.SystemMessageSendFeignClient;
 import com.auth.module.message.api.model.email.EmailChannelOptions;
+import com.auth.module.message.api.model.enums.scene.EmailMessageScene;
+import com.auth.module.message.api.model.enums.scene.SmsMessageScene;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.auth.mapper.UserMapper;
-import com.auth.service.auth.model.enums.AuthMessageScene;
 import com.auth.service.auth.model.enums.CredentialDimension;
 import com.auth.service.auth.model.value.login.LoginAuditSnapshot;
 import com.auth.service.auth.service.AuthMessageService;
@@ -74,12 +75,14 @@ public class AuthMessageServiceImpl implements AuthMessageService {
 		String username = userEntity.getUsername();
 		Map<String, Object> variables = AuthMessageVariables.buildLoginEmail(username, code, expireMinutes,
 				Instant.now(), snapshot.loginIp(), snapshot.loginRegion());
+		EmailChannelOptions options = new EmailChannelOptions();
+		options.setHasHtml(Boolean.TRUE);
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
-			.channel(AuthMessageScene.LOGIN_EMAIL.getChannel())
-			.templateCode(AuthMessageScene.LOGIN_EMAIL.getTemplateCode())
+			.channel(EmailMessageScene.LOGIN_EMAIL.getChannel())
+			.templateCode(EmailMessageScene.LOGIN_EMAIL.getTemplateCode())
 			.targets(List.of(email))
 			.variables(variables)
-			.options(EmailChannelOptions.builder().hasHtml(Boolean.TRUE).build())
+			.options(options)
 			.build();
 
 		systemMessageSendFeignClient.sendByTemplate(command);
@@ -108,8 +111,8 @@ public class AuthMessageServiceImpl implements AuthMessageService {
 		// 拼装发送对象
 		Map<String, Object> variables = AuthMessageVariables.buildLoginSms(code, expireMinutes);
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
-			.channel(AuthMessageScene.LOGIN_SMS.getChannel())
-			.templateCode(AuthMessageScene.LOGIN_SMS.getTemplateCode())
+			.channel(SmsMessageScene.LOGIN_SMS.getChannel())
+			.templateCode(SmsMessageScene.LOGIN_SMS.getTemplateCode())
 			.targets(List.of(phone))
 			.variables(variables)
 			.build();

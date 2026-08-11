@@ -5,9 +5,10 @@ import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.message.api.feign.SystemMessageSendFeignClient;
 import com.auth.module.message.api.model.email.EmailChannelOptions;
+import com.auth.module.message.api.model.enums.scene.EmailMessageScene;
+import com.auth.module.message.api.model.enums.scene.SmsMessageScene;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.auth.mapper.UserMapper;
-import com.auth.service.auth.model.enums.AuthMessageScene;
 import com.auth.service.auth.model.enums.CredentialDimension;
 import com.auth.service.auth.model.value.login.LoginAuditSnapshot;
 import com.auth.service.auth.service.impl.AuthMessageServiceImpl;
@@ -91,7 +92,7 @@ class AuthMessageServiceTest {
 			verify(systemMessageSendFeignClient).sendByTemplate(commandCaptor.capture());
 			TemplateMessageCommand command = commandCaptor.getValue();
 			assertEquals(MessageChannel.EMAIL, command.getChannel());
-			assertEquals(AuthMessageScene.LOGIN_EMAIL.getTemplateCode(), command.getTemplateCode());
+			assertEquals(EmailMessageScene.LOGIN_EMAIL.getTemplateCode(), command.getTemplateCode());
 			assertEquals(email, command.getTargets().get(0));
 			EmailChannelOptions emailOptions = (EmailChannelOptions) command.getOptions();
 			assertEquals(Boolean.TRUE, emailOptions.getHasHtml());
@@ -136,7 +137,7 @@ class AuthMessageServiceTest {
 			verify(systemMessageSendFeignClient).sendByTemplate(commandCaptor.capture());
 			TemplateMessageCommand command = commandCaptor.getValue();
 			assertEquals(MessageChannel.SMS, command.getChannel());
-			assertEquals(AuthMessageScene.LOGIN_SMS.getTemplateCode(), command.getTemplateCode());
+			assertEquals(SmsMessageScene.LOGIN_SMS.getTemplateCode(), command.getTemplateCode());
 			assertEquals(phone, command.getTargets().get(0));
 		}
 

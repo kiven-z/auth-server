@@ -19,6 +19,11 @@
             <artifactId>service-system-common</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.auth</groupId>
+            <artifactId>module-message-api</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-quartz</artifactId>
         </dependency>

@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
  *
  * @author Bunny
  */
-@FeignClient(name = "service-system", contextId = "systemFileRecord", path = "/api/system/inner/file-records")
+@FeignClient(name = "service-system", contextId = "systemFileRecord", path = "/api/system/file/inner")
 public interface SystemFileRecordFeignClient {
 
 	/**
@@ -20,7 +20,7 @@ public interface SystemFileRecordFeignClient {
 	 * @param request 归属校验请求
 	 * @return 统一响应
 	 */
-	@PostMapping("/ownership/verify")
+	@PostMapping("/file-records/ownership/verify")
 	Result<Void> verifyOwnership(@RequestBody OwnedFileAssertByUrlRequest request);
 
 	/**
@@ -28,7 +28,7 @@ public interface SystemFileRecordFeignClient {
 	 * @param request 撤销请求
 	 * @return 统一响应
 	 */
-	@PostMapping("/revoke")
+	@PostMapping("/file-records/revoke")
 	Result<Void> revokeOwnedFile(@RequestBody OwnedFileDeleteByUrlRequest request);
 
 }

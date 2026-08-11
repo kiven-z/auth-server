@@ -1,7 +1,7 @@
 package com.auth.service.system.message.config.properties;
 
 import com.auth.module.message.api.channel.MessageChannel;
-import com.auth.module.message.api.model.dingtalk.DingTalkMessageType;
+import com.auth.module.message.api.model.enums.MessageContentType;
 import com.auth.service.system.message.config.MessageChannelCapability;
 import jakarta.annotation.Nullable;
 import lombok.Getter;
@@ -43,9 +43,9 @@ public class DingTalkProperties implements MessageChannelCapability {
 	private String clientSecret;
 
 	/**
-	 * 未指定消息类型时的默认值
+	 * 未指定正文格式时的默认值
 	 */
-	private DingTalkMessageType defaultMessageType = DingTalkMessageType.TEXT;
+	private MessageContentType defaultMessageType = MessageContentType.TEXT;
 
 	/**
 	 * {@inheritDoc}

@@ -1,6 +1,7 @@
 package com.auth.service.system.admin.service.admin.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import com.auth.common.core.constants.BatchSizes;
 import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.common.core.utils.FieldChangeSupport;
 import com.auth.common.data.model.PageResponse;
@@ -8,7 +9,6 @@ import com.auth.common.data.support.BusinessKeyAssert;
 import com.auth.service.system.admin.convert.admin.role.SysRoleConverter;
 import com.auth.service.system.admin.mapper.admin.role.GrantTableMapper;
 import com.auth.service.system.admin.mapper.admin.role.SysRoleMapper;
-import com.auth.service.system.admin.model.constants.AdminBatchSizes;
 import com.auth.service.system.admin.model.entity.SysRoleEntity;
 import com.auth.service.system.admin.model.form.role.SysRoleForm;
 import com.auth.service.system.admin.model.po.reference.RoleReferencePO;
@@ -125,7 +125,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRoleEntity
 		}
 
 		List<SysRoleEntity> entities = forms.stream().map(SysRoleConverter.INSTANCE::toEntity).toList();
-		super.saveBatch(entities, AdminBatchSizes.IMPORT_SAVE);
+		super.saveBatch(entities, BatchSizes.SIZE_500);
 	}
 
 	/**

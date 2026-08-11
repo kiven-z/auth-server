@@ -46,16 +46,16 @@ public class EmailMessageSender extends AbstractRecordingMessageSender {
 		EmailChannelOptions options = command.getOptions() instanceof EmailChannelOptions email ? email
 				: new EmailChannelOptions();
 
-		return EmailSendDTO.builder()
-			.templateCode(command.getTemplateCode())
-			.to(command.getTargets())
-			.variables(command.getVariables())
-			.cc(options.getCc())
-			.bcc(options.getBcc())
-			.replyTo(options.getReplyTo())
-			.hasHtml(options.getHasHtml())
-			.attachments(options.getAttachments())
-			.build();
+		EmailSendDTO emailSendDTO = new EmailSendDTO();
+		emailSendDTO.setTemplateCode(command.getTemplateCode());
+		emailSendDTO.setTo(command.getTargets());
+		emailSendDTO.setVariables(command.getVariables());
+		emailSendDTO.setCc(options.getCc());
+		emailSendDTO.setBcc(options.getBcc());
+		emailSendDTO.setReplyTo(options.getReplyTo());
+		emailSendDTO.setHasHtml(options.getHasHtml());
+		emailSendDTO.setAttachments(options.getAttachments());
+		return emailSendDTO;
 	}
 
 	/**

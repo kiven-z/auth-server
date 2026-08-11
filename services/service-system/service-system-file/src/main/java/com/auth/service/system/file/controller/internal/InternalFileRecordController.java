@@ -19,10 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * @author Bunny
  */
-@Tag(name = "文件记录内部", description = "跨模块文件归属校验与撤销")
 @InternalApi
+@Tag(name = "文件记录内部", description = "跨模块文件归属校验与撤销")
 @RequiredArgsConstructor
-@RequestMapping("/api/system/inner/file-records")
+@RequestMapping("/api/system/file/inner/file-records")
 @RestController
 public class InternalFileRecordController {
 

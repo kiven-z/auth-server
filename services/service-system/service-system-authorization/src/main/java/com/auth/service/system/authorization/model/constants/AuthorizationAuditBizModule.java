@@ -1,36 +1,18 @@
 package com.auth.service.system.authorization.model.constants;
 
+import com.auth.module.security.contract.api.audit.PlatformBizCodes;
 import lombok.experimental.UtilityClass;
 
 /**
- * authorization / admin 域操作审计「小模块」编码常量
+ * authorization / admin 域专有操作审计「小模块」编码。
  * <p>
- * admin 侧组织与权限相关编码放此模块，避免 authorization 反向依赖 admin。
+ * 跨能力共享资源码见 {@link PlatformBizCodes}。
+ * </p>
  *
  * @author Bunny
  */
 @UtilityClass
 public class AuthorizationAuditBizModule {
-
-	/**
-	 * 部门
-	 */
-	public static final String SYS_DEPT = "SYS_DEPT";
-
-	/**
-	 * 岗位
-	 */
-	public static final String SYS_POST = "SYS_POST";
-
-	/**
-	 * 用户
-	 */
-	public static final String SYS_USER = "SYS_USER";
-
-	/**
-	 * 角色
-	 */
-	public static final String SYS_ROLE = "SYS_ROLE";
 
 	/**
 	 * 菜单
@@ -41,11 +23,6 @@ public class AuthorizationAuditBizModule {
 	 * 菜单角色
 	 */
 	public static final String SYS_MENU_ROLE = "SYS_MENU_ROLE";
-
-	/**
-	 * 权限
-	 */
-	public static final String SYS_PERMISSION = "SYS_PERMISSION";
 
 	/**
 	 * 角色权限
@@ -81,10 +58,5 @@ public class AuthorizationAuditBizModule {
 	 * 授权失效幂等事件
 	 */
 	public static final String AUTH_INVALIDATION_EVENT = "AUTH_INVALIDATION_EVENT";
-
-	/**
-	 * 授权画像（跨服务刷新编排）
-	 */
-	public static final String AUTH_PROFILE = "AUTH_PROFILE";
 
 }

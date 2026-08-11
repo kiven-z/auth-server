@@ -3,7 +3,6 @@ package com.auth.service.system.authorization.job;
 import cn.hutool.core.collection.CollUtil;
 import com.auth.service.system.authorization.dispatch.AuthorizationInvalidationOutboxProcessor;
 import com.auth.service.system.authorization.mapper.SysAuthorizationInvalidationOutboxMapper;
-import com.auth.service.system.authorization.model.constants.AuthorizationBatchSizes;
 import com.auth.service.system.authorization.model.entity.SysAuthorizationInvalidationOutboxEntity;
 import com.auth.service.system.authorization.model.enums.AuthorizationInvalidationOutboxStatus;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +24,11 @@ import java.util.List;
 @Component
 public class AuthorizationInvalidationOutboxJob {
 
+	/**
+	 * Outbox 补偿扫描每批抢占条数（小于常规批处理档，降低锁竞争）
+	 */
+	private static final int OUTBOX_POLL_BATCH = 50;
+
 	private static final List<String> CLAIMABLE_STATUSES = List.of(AuthorizationInvalidationOutboxStatus.PENDING.name(),
 			AuthorizationInvalidationOutboxStatus.FAILED.name());
 
@@ -45,7 +49,7 @@ public class AuthorizationInvalidationOutboxJob {
 		Instant now = Instant.now();
 
 		List<SysAuthorizationInvalidationOutboxEntity> rows = outboxMapper.selectClaimable(CLAIMABLE_STATUSES, now,
-				AuthorizationBatchSizes.OUTBOX_POLL);
+				OUTBOX_POLL_BATCH);
 		if (CollUtil.isEmpty(rows)) {
 			return;
 		}

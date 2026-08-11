@@ -2,6 +2,7 @@ package com.auth.service.system.admin.service.admin.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
+import com.auth.common.core.constants.BatchSizes;
 import com.auth.common.core.utils.FieldChangeSupport;
 import com.auth.common.data.model.enums.UserStatus;
 import com.auth.module.platform.persistence.model.UserEntity;
@@ -11,7 +12,6 @@ import com.auth.service.system.admin.convert.admin.user.SysUserConverter;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.admin.role.GrantTableMapper;
 import com.auth.service.system.admin.mapper.admin.user.SysUserMapper;
-import com.auth.service.system.admin.model.constants.AdminBatchSizes;
 import com.auth.service.system.admin.model.form.user.SysUserAvatarUpdateForm;
 import com.auth.service.system.admin.model.form.user.SysUserBatchStatusForm;
 import com.auth.service.system.admin.model.form.user.SysUserForm;
@@ -82,7 +82,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 			return entity;
 		}).toList();
 
-		super.saveBatch(entities, AdminBatchSizes.IMPORT_SAVE);
+		super.saveBatch(entities, BatchSizes.SIZE_500);
 	}
 
 	/**

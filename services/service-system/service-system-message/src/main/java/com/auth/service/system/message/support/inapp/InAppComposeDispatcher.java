@@ -1,10 +1,10 @@
 package com.auth.service.system.message.support.inapp;
 
 import cn.hutool.core.collection.CollUtil;
+import com.auth.common.core.constants.BatchSizes;
 import com.auth.service.system.message.convert.InAppEntityAssembler;
 import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.mapper.InAppMessageMapper;
-import com.auth.service.system.message.model.constants.MessageBatchSizes;
 import com.auth.service.system.message.model.entity.InAppMessageEntity;
 import com.auth.service.system.message.model.entity.InAppMessageRecipientEntity;
 import com.auth.service.system.message.model.enums.InAppMessageStatus;
@@ -63,7 +63,7 @@ public class InAppComposeDispatcher {
 
 		try {
 			// 投递单批接收人
-			recipientBatchScanner.scan(scope, MessageBatchSizes.RECIPIENT_SCAN, userIds -> {
+			recipientBatchScanner.scan(scope, BatchSizes.SIZE_1000, userIds -> {
 				if (CollUtil.isEmpty(userIds)) {
 					return;
 				}

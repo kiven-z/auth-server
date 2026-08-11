@@ -1,5 +1,6 @@
 package com.auth.service.auth.service;
 
+import com.auth.common.core.constants.BatchSizes;
 import com.auth.module.security.contract.api.authorization.AuthorizationChangeKind;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateResponse;
@@ -7,7 +8,6 @@ import com.auth.module.security.contract.dto.invalidation.RoleInvalidatePayload;
 import com.auth.service.auth.model.po.user.UserInvalidationStatePO;
 import com.auth.service.auth.model.value.invalidation.InvalidationIdempotencyGate;
 import com.auth.service.auth.model.value.invalidation.UserInvalidationBuckets;
-import com.auth.service.auth.model.constants.AuthBatchSizes;
 import com.auth.service.auth.service.impl.AuthorizationInvalidationServiceImpl;
 import com.auth.service.auth.support.invalidation.AuthProfileMaterializationService;
 import com.auth.service.auth.support.invalidation.UserInvalidationRepository;
@@ -101,10 +101,9 @@ class AuthorizationInvalidationServiceTest {
 		when(userInvalidationRepository.loadByUserIds(Set.of(1L))).thenReturn(List.of(activeState()));
 		when(userInvalidationPolicy.partition(anyCollection())).thenReturn(
 				UserInvalidationBuckets.builder().versionBumpUserIds(Set.of(1L)).evictOnlyUserIds(Set.of()).build());
-		when(userInvalidationRepository.incrementPermVersionInBatches(Set.of(1L), AuthBatchSizes.INVALIDATION))
-			.thenReturn(1);
-		when(authProfileMaterializationService.refreshInBatches(Set.of(1L), AuthBatchSizes.INVALIDATION)).thenReturn(1);
-		when(authProfileMaterializationService.evictInBatches(Set.of(), AuthBatchSizes.INVALIDATION)).thenReturn(0);
+		when(userInvalidationRepository.incrementPermVersionInBatches(Set.of(1L), BatchSizes.SIZE_500)).thenReturn(1);
+		when(authProfileMaterializationService.refreshInBatches(Set.of(1L), BatchSizes.SIZE_500)).thenReturn(1);
+		when(authProfileMaterializationService.evictInBatches(Set.of(), BatchSizes.SIZE_500)).thenReturn(0);
 
 		AuthorizationInvalidateRequest request = new AuthorizationInvalidateRequest("evt-3",
 				AuthorizationChangeKind.ROLE, new RoleInvalidatePayload(List.of("ADMIN")));
@@ -113,8 +112,8 @@ class AuthorizationInvalidationServiceTest {
 		assertEquals(new AuthorizationInvalidateResponse(1, 1, 1, 0), response);
 
 		InOrder order = inOrder(userInvalidationRepository, authProfileMaterializationService);
-		order.verify(userInvalidationRepository).incrementPermVersionInBatches(Set.of(1L), AuthBatchSizes.INVALIDATION);
-		order.verify(authProfileMaterializationService).refreshInBatches(Set.of(1L), AuthBatchSizes.INVALIDATION);
+		order.verify(userInvalidationRepository).incrementPermVersionInBatches(Set.of(1L), BatchSizes.SIZE_500);
+		order.verify(authProfileMaterializationService).refreshInBatches(Set.of(1L), BatchSizes.SIZE_500);
 		verify(authorizationInvalidationEventService).completeProcessedOutcome("evt-3", AuthorizationChangeKind.ROLE,
 				new AuthorizationInvalidateResponse(1, 1, 1, 0));
 	}

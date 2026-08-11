@@ -1,12 +1,12 @@
 package com.auth.service.system.file.job;
 
 import cn.hutool.core.collection.CollUtil;
+import com.auth.common.core.constants.BatchSizes;
 import com.auth.module.file.api.model.enums.StoragePlatformEnum;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.file.config.properties.FileRecycleCleanupProperties;
 import com.auth.service.system.file.mapper.FileRecordMapper;
-import com.auth.service.system.file.model.constants.FileBatchSizes;
 import com.auth.service.system.file.model.entity.FileRecordEntity;
 import com.auth.service.system.file.storage.core.StoragePlatformFacadeRegistry;
 import com.auth.service.system.file.storage.core.provider.FileStorageProvider;
@@ -49,7 +49,7 @@ public class FileRecycleCleanupJob {
 
 		Integer retentionDays = properties.getRetentionDays();
 		Instant cutoff = Instant.now().minus(retentionDays, ChronoUnit.DAYS);
-		int batchSize = FileBatchSizes.RECYCLE_CLEANUP;
+		int batchSize = BatchSizes.SIZE_500;
 		int total = 0;
 		for (int round = 0; round < properties.getMaxRounds(); round++) {
 			int purged = purgeExpiredBefore(cutoff, batchSize);

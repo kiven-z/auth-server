@@ -1,10 +1,10 @@
 package com.auth.service.auth.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import com.auth.common.core.constants.BatchSizes;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateRequest;
 import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidateResponse;
 import com.auth.service.auth.model.command.invalidation.InvalidationCommand;
-import com.auth.service.auth.model.constants.AuthBatchSizes;
 import com.auth.service.auth.model.po.user.UserInvalidationStatePO;
 import com.auth.service.auth.model.value.invalidation.InvalidationIdempotencyGate;
 import com.auth.service.auth.model.value.invalidation.UserInvalidationBuckets;
@@ -89,7 +89,7 @@ public class AuthorizationInvalidationServiceImpl implements AuthorizationInvali
 			Set<Long> evictOnlyUserIds = buckets.evictOnlyUserIds();
 			Set<Long> versionBumpUserIds = buckets.versionBumpUserIds();
 
-			int batchSize = AuthBatchSizes.INVALIDATION;
+			int batchSize = BatchSizes.SIZE_500;
 
 			// 分批递增版本
 			int versionBumpedCount = userInvalidationRepository.incrementPermVersionInBatches(versionBumpUserIds,

@@ -1,9 +1,8 @@
 package com.auth.service.system.admin.excel.dept;
 
-import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.file.importer.AbstractSheetImporter;
 import com.auth.module.file.importer.model.ImportRowError;
-import com.auth.module.file.importer.model.ImportRowValidator;
+import com.auth.module.file.importer.model.RowOutcome;
 import com.auth.service.system.admin.excel.EnableStatus;
 import com.auth.service.system.admin.excel.EnableStatusLabels;
 import com.auth.service.system.admin.excel.ImportRowSupport;
@@ -27,28 +26,13 @@ import java.util.stream.Collectors;
 import static com.auth.common.core.utils.TreeParentIdUtil.ROOT_PARENT_ID;
 
 /**
- * 部门导入器：封装行级校验与批量写入逻辑。
+ * 部门导入器：Extract → Validate → Map 三阶段编排。
  *
  * @author Bunny
  */
 @RequiredArgsConstructor
 @Component
 public class DeptSheetImporter extends AbstractSheetImporter<SysDeptImportRow, SysDeptForm, DeptSheetImporter.Context> {
-
-	/**
-	 * 导入校验字段名：deptCode
-	 */
-	private static final String FIELD_DEPT_CODE = "deptCode";
-
-	/**
-	 * 导入校验字段名：deptName
-	 */
-	private static final String FIELD_DEPT_NAME = "deptName";
-
-	/**
-	 * 导入校验字段名：parentDeptCode
-	 */
-	private static final String FIELD_PARENT_DEPT_CODE = "parentDeptCode";
 
 	private final SysDeptMapper sysDeptMapper;
 
@@ -80,24 +64,28 @@ public class DeptSheetImporter extends AbstractSheetImporter<SysDeptImportRow, S
 
 	@Override
 	protected SysDeptForm convertRow(SysDeptImportRow row, int rowNum, List<ImportRowError> errors, Context context) {
-		ImportRowValidator v = ImportRowValidator.of(rowNum, errors);
-		String deptCode = v.require(row.getDeptCode(), FIELD_DEPT_CODE);
-		String deptName = v.require(row.getDeptName(), FIELD_DEPT_NAME);
-		Long parentId = resolveParentId(row.getParentDeptCode(), v, context);
+		RowOutcome<DeptParsedRow> extracted = DeptRowExtractor.extract(row, rowNum);
+		if (!extracted.ok()) {
+			errors.addAll(extracted.errors());
+			return null;
+		}
 
-		v.unique(deptCode, context.duplicateDeptCodesInFile(), context.existingDeptCodes(), FIELD_DEPT_CODE);
-		ImportRowSupport.requireEnableStatus(v, row.getStatusLabel());
+		DeptParsedRow parsed = extracted.value();
+		List<ImportRowError> violations = DeptRowValidator.validate(parsed, rowNum, context);
+		if (!violations.isEmpty()) {
+			errors.addAll(violations);
+			return null;
+		}
 
-		return v.mapOrNull(() -> {
-			SysDeptForm form = new SysDeptForm();
-			form.setParentId(Objects.requireNonNullElse(parentId, ROOT_PARENT_ID));
-			form.setDeptCode(deptCode);
-			form.setDeptName(deptName);
-			form.setStatus(EnableStatusLabels.parseImport(row.getStatusLabel()) == EnableStatus.ENABLED);
-			form.setOrderNum(row.getOrderNum());
-			form.setRemark(row.getRemark());
-			return form;
-		});
+		Long parentId = resolveParentId(parsed.parentDeptCode(), context);
+		SysDeptForm form = new SysDeptForm();
+		form.setParentId(Objects.requireNonNullElse(parentId, ROOT_PARENT_ID));
+		form.setDeptCode(parsed.deptCode());
+		form.setDeptName(parsed.deptName());
+		form.setStatus(EnableStatusLabels.parseImport(parsed.statusLabel()) == EnableStatus.ENABLED);
+		form.setOrderNum(parsed.orderNum());
+		form.setRemark(parsed.remark());
+		return form;
 	}
 
 	@Override
@@ -105,21 +93,11 @@ public class DeptSheetImporter extends AbstractSheetImporter<SysDeptImportRow, S
 		sysDeptService.createBatchFromImport(forms);
 	}
 
-	/**
-	 * 解析父部门ID
-	 * @param parentDeptCode 父部门编码
-	 * @param v 校验器
-	 * @param context 上下文
-	 * @return 父部门ID
-	 */
-	private Long resolveParentId(String parentDeptCode, ImportRowValidator v, Context context) {
-		if (CharSequenceUtil.isBlank(parentDeptCode)) {
+	private Long resolveParentId(String parentDeptCode, Context context) {
+		if (parentDeptCode == null) {
 			return ROOT_PARENT_ID;
 		}
-		String parentDeptCodeTrimmed = parentDeptCode.trim();
-		Long parentId = context.parentIdByCode().get(parentDeptCodeTrimmed);
-		v.refExists(parentId, FIELD_PARENT_DEPT_CODE, parentDeptCode);
-		return parentId;
+		return context.parentIdByCode().get(parentDeptCode);
 	}
 
 	@Value

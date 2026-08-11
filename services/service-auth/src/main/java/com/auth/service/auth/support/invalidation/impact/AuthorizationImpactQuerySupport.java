@@ -1,9 +1,9 @@
 package com.auth.service.auth.support.invalidation.impact;
 
 import cn.hutool.core.collection.CollUtil;
+import com.auth.common.core.constants.BatchSizes;
 import com.auth.module.security.contract.dto.invalidation.GrantSubjectKey;
 import com.auth.service.auth.mapper.AuthorizationImpactMapper;
-import com.auth.service.auth.model.constants.AuthBatchSizes;
 import com.auth.service.auth.util.BatchPartition;
 import org.springframework.stereotype.Repository;
 
@@ -108,21 +108,21 @@ public class AuthorizationImpactQuerySupport {
 	}
 
 	private void queryLongKeysInBatches(List<Long> keys, UnaryOperator<List<Long>> queryFn, Set<Long> accumulator) {
-		for (List<Long> chunk : BatchPartition.partitionIds(keys, AuthBatchSizes.INVALIDATION)) {
+		for (List<Long> chunk : BatchPartition.partitionIds(keys, BatchSizes.SIZE_500)) {
 			accumulator.addAll(queryFn.apply(chunk));
 		}
 	}
 
 	private void queryStringKeysInBatches(List<String> keys, Function<List<String>, List<Long>> queryFn,
 			Set<Long> accumulator) {
-		for (List<String> chunk : BatchPartition.partitionStrings(keys, AuthBatchSizes.INVALIDATION)) {
+		for (List<String> chunk : BatchPartition.partitionStrings(keys, BatchSizes.SIZE_500)) {
 			accumulator.addAll(queryFn.apply(chunk));
 		}
 	}
 
 	private void accumulateBridgedStringsInBatches(List<String> keys, UnaryOperator<List<String>> queryFn,
 			Set<String> accumulator) {
-		for (List<String> chunk : BatchPartition.partitionStrings(keys, AuthBatchSizes.INVALIDATION)) {
+		for (List<String> chunk : BatchPartition.partitionStrings(keys, BatchSizes.SIZE_500)) {
 			accumulator.addAll(queryFn.apply(chunk));
 		}
 	}

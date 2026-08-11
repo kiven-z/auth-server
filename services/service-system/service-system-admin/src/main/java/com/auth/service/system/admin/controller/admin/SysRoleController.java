@@ -5,11 +5,17 @@ import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.common.web.valid.group.CreateGroup;
 import com.auth.common.web.valid.group.UpdateGroup;
-import com.auth.module.file.export.ExportScopeQueryFields;
+import com.auth.module.file.api.model.dto.FileExportTaskCreateResult;
+import com.auth.module.file.api.model.request.FileExportTaskCreateRequest;
+import com.auth.module.file.api.port.FileExportTaskOperations;
+import com.auth.module.file.export.definition.ExportColumns;
 import com.auth.module.file.importer.model.SpreadsheetImportResult;
+import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
+import com.auth.module.security.contract.api.audit.PlatformBizCodes;
+import com.auth.service.system.admin.excel.role.SysRoleSpreadsheetRow;
 import com.auth.service.system.admin.excel.role.SysRoleSpreadsheetService;
 import com.auth.service.system.admin.model.form.role.SysRoleForm;
 import com.auth.service.system.admin.model.query.role.SysRoleQuery;
@@ -17,8 +23,9 @@ import com.auth.service.system.admin.model.vo.role.SysRoleDetailVO;
 import com.auth.service.system.admin.model.vo.role.SysRoleOptionVO;
 import com.auth.service.system.admin.model.vo.role.SysRolePageVO;
 import com.auth.service.system.admin.service.admin.SysRoleService;
-import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
+import com.auth.service.system.admin.support.export.AdminFileExportTaskCreateRequests;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -49,12 +56,19 @@ public class SysRoleController {
 
 	private final SysRoleSpreadsheetService sysRoleSpreadsheetService;
 
-	@Operation(summary = "导出角色 Excel")
+	private final FileExportTaskOperations fileExportTaskOperations;
+
+	@Operation(summary = "导出角色 Excel", description = "按筛选条件提交异步导出任务")
 	@PreAuthorize("@auth.decide('sys:role:export')")
-	@GetMapping("/export")
-	public ResponseEntity<byte[]> export(@Validated SysRoleQuery filter, @Validated ExportScopeQueryFields scope)
-			throws IOException {
-		return sysRoleSpreadsheetService.export(filter, scope);
+	@PostMapping("/export/async")
+	public Result<FileExportTaskCreateResult> exportAsync(@Validated @RequestBody SysRoleQuery filter,
+			@Parameter(description = "幂等请求ID") @RequestParam(required = false) String requestId) {
+		FileExportTaskCreateRequest xlsx = AdminFileExportTaskCreateRequests.xlsx(PlatformBizCodes.SYS_ROLE, filter,
+				requestId, SecurityUserUtils.getUserId(),
+				ExportColumns.fromExcelProperties(SysRoleSpreadsheetRow.class));
+
+		FileExportTaskCreateResult result = fileExportTaskOperations.createTask(xlsx);
+		return Result.success(result);
 	}
 
 	@Operation(summary = "下载角色导入模板")
@@ -96,8 +110,8 @@ public class SysRoleController {
 		return Result.success();
 	}
 
-	@OperationLog(targetType = "ROLE", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = AuthorizationAuditBizModule.SYS_ROLE, operation = OperationLogKind.UPDATE)
+	@OperationLog(targetType = "ROLE", serviceDomain = AuditServiceDomain.SYSTEM, bizModule = PlatformBizCodes.SYS_ROLE,
+			operation = OperationLogKind.UPDATE)
 	@Operation(summary = "更新角色")
 	@PreAuthorize("@auth.decide('sys:role:update')")
 	@PutMapping
@@ -106,8 +120,8 @@ public class SysRoleController {
 		return Result.success();
 	}
 
-	@OperationLog(targetType = "ROLE", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = AuthorizationAuditBizModule.SYS_ROLE, operation = OperationLogKind.UPDATE)
+	@OperationLog(targetType = "ROLE", serviceDomain = AuditServiceDomain.SYSTEM, bizModule = PlatformBizCodes.SYS_ROLE,
+			operation = OperationLogKind.UPDATE)
 	@Operation(summary = "批量启停角色")
 	@PreAuthorize("@auth.decide('sys:role:update')")
 	@PutMapping("/status")
@@ -116,8 +130,8 @@ public class SysRoleController {
 		return Result.success();
 	}
 
-	@OperationLog(targetType = "ROLE", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = AuthorizationAuditBizModule.SYS_ROLE, operation = OperationLogKind.DELETE)
+	@OperationLog(targetType = "ROLE", serviceDomain = AuditServiceDomain.SYSTEM, bizModule = PlatformBizCodes.SYS_ROLE,
+			operation = OperationLogKind.DELETE)
 	@Operation(summary = "删除角色")
 	@PreAuthorize("@auth.decide('sys:role:delete')")
 	@DeleteMapping("/{id}")

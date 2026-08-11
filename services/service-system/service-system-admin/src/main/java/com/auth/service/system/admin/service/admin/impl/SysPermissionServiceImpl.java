@@ -2,6 +2,7 @@ package com.auth.service.system.admin.service.admin.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
+import com.auth.common.core.constants.BatchSizes;
 import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.common.core.utils.FieldChangeSupport;
 import com.auth.common.data.model.PageResponse;
@@ -10,7 +11,6 @@ import com.auth.service.system.admin.convert.admin.SysPermissionConverter;
 import com.auth.service.system.admin.mapper.admin.permission.SysPermissionMapper;
 import com.auth.service.system.admin.mapper.admin.role.SysRolePermissionMapper;
 import com.auth.service.system.admin.mapper.authorization.RolePermissionBindingQueryMapper;
-import com.auth.service.system.admin.model.constants.AdminBatchSizes;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.form.permission.SysPermissionForm;
 import com.auth.service.system.admin.model.po.reference.PermissionReferencePO;
@@ -112,7 +112,7 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 		}
 
 		List<SysPermissionEntity> entities = SysPermissionConverter.INSTANCE.toEntityList(forms);
-		super.saveBatch(entities, AdminBatchSizes.IMPORT_SAVE);
+		super.saveBatch(entities, BatchSizes.SIZE_500);
 	}
 
 	/**

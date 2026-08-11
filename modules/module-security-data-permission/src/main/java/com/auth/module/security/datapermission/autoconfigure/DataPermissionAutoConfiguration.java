@@ -4,28 +4,26 @@ import com.auth.module.security.datapermission.context.LoginUserProvider;
 import com.auth.module.security.datapermission.context.SecurityContextLoginUserProvider;
 import com.auth.module.security.datapermission.handler.DataScopePermissionHandler;
 import com.auth.module.security.datapermission.support.DataScopeAnnotationResolver;
-import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.DataPermissionInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.InnerInterceptor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.springframework.core.annotation.Order;
 
 /**
  * 数据权限模块自动配置
  *
  * <p>
- * 将 {@link DataPermissionInterceptor} 插到分页插件之前，保证 count/page SQL 都带上范围条件。
+ * 只注册 {@link InnerInterceptor}，由 {@code BaseMybatisPlusConfig} 收敛进唯一的
+ * {@code MybatisPlusInterceptor}（须排在分页插件之前）。
  * </p>
  *
  * @author Bunny
  */
 @AutoConfiguration
-@ConditionalOnClass({ MybatisPlusInterceptor.class, DataPermissionInterceptor.class })
+@ConditionalOnClass(DataPermissionInterceptor.class)
 public class DataPermissionAutoConfiguration {
 
 	/**
@@ -39,24 +37,17 @@ public class DataPermissionAutoConfiguration {
 	}
 
 	/**
-	 * 将数据权限拦截器插入插件链最前（位于分页之前）
-	 * @param interceptor MyBatis-Plus 拦截器
+	 * 数据权限 Inner 插件
 	 * @param loginUserProvider 登录用户提供者
-	 * @return 同一拦截器实例
+	 * @return Inner 拦截器
 	 */
 	@Bean
-	MybatisPlusInterceptor mybatisPlusInterceptorWithDataScope(MybatisPlusInterceptor interceptor,
-			LoginUserProvider loginUserProvider) {
+	@Order(0)
+	InnerInterceptor dataPermissionInnerInterceptor(LoginUserProvider loginUserProvider) {
 		DataScopeAnnotationResolver annotationResolver = new DataScopeAnnotationResolver();
 		DataScopePermissionHandler dataPermissionHandler = new DataScopePermissionHandler(loginUserProvider,
 				annotationResolver);
-		DataPermissionInterceptor dataPermission = new DataPermissionInterceptor(dataPermissionHandler);
-
-		List<InnerInterceptor> ordered = new ArrayList<>(interceptor.getInterceptors().size() + 1);
-		ordered.add(dataPermission);
-		ordered.addAll(interceptor.getInterceptors());
-		interceptor.setInterceptors(ordered);
-		return interceptor;
+		return new DataPermissionInterceptor(dataPermissionHandler);
 	}
 
 }

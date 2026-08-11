@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.auth.service.system.file.mapper.FileExportTaskMapper">
+
+    <!-- 按创建人分页查询导出任务 -->
+    <select id="selectPageByCreator" resultType="com.auth.service.system.file.model.po.FileExportTaskPageRowPO">
+        SELECT
+        id,
+        biz_type,
+        export_format,
+        status,
+        progress_percent,
+        processed_rows,
+        total_rows,
+        file_record_id,
+        error_code,
+        retry_count,
+        max_retry,
+        started_at,
+        finished_at,
+        expire_at,
+        created_at,
+        updated_at,
+        created_by,
+        updated_by
+        FROM
+        file_export_task
+        <where>
+            created_by = #{createdBy}
+            <if test="query.bizType != null and query.bizType != ''">
+                AND biz_type = #{query.bizType}
+            </if>
+            <if test="query.status != null and query.status != ''">
+                AND status = #{query.status}
+            </if>
+            <if test="query.exportFormat != null and query.exportFormat != ''">
+                AND export_format = #{query.exportFormat}
+            </if>
+            <if test="query.startTime != null and query.endTime != null">
+                AND created_at <![CDATA[ >= ]]> #{query.startTime}
+                AND created_at <![CDATA[ <= ]]> #{query.endTime}
+            </if>
+        </where>
+        ORDER BY
+        created_at DESC,
+        id DESC
+    </select>
+
+    <!-- 管理端跨用户分页查询导出任务 -->
+    <select id="selectPageAdmin" resultType="com.auth.service.system.file.model.po.FileExportTaskAdminPageRowPO">
+        SELECT
+        id,
+        biz_type,
+        export_format,
+        status,
+        progress_percent,
+        processed_rows,
+        total_rows,
+        file_record_id,
+        error_code,
+        error_message,
+        retry_count,
+        max_retry,
+        locked_by,
+        lease_until,
+        started_at,
+        finished_at,
+        expire_at,
+        created_at,
+        updated_at,
+        created_by,
+        updated_by
+        FROM
+        file_export_task
+        <where>
+            <if test="query.createdBy != null">
+                AND created_by = #{query.createdBy}
+            </if>
+            <if test="query.bizType != null and query.bizType != ''">
+                AND biz_type = #{query.bizType}
+            </if>
+            <if test="query.status != null and query.status != ''">
+                AND status = #{query.status}
+            </if>
+            <if test="query.exportFormat != null and query.exportFormat != ''">
+                AND export_format = #{query.exportFormat}
+            </if>
+            <if test="query.errorCode != null and query.errorCode != ''">
+                AND error_code = #{query.errorCode}
+            </if>
+            <if test="query.startTime != null and query.endTime != null">
+                AND created_at <![CDATA[ >= ]]> #{query.startTime}
+                AND created_at <![CDATA[ <= ]]> #{query.endTime}
+            </if>
+        </where>
+        ORDER BY
+        created_at DESC,
+        id DESC
+    </select>
+
+    <!-- 查询待领取任务ID -->
+    <select id="selectClaimCandidateIds" resultType="long">
+        SELECT id
+        FROM file_export_task
+        WHERE (
+            status = 'PENDING'
+                AND (
+                next_retry_at IS NULL
+                    OR next_retry_at <![CDATA[ <= ]]> #{now}
+                )
+            )
+           OR (
+            status IN ('RUNNING', 'CANCELLING')
+                AND lease_until IS NOT NULL
+                AND lease_until <![CDATA[ < ]]> #{now}
+            )
+        ORDER BY created_at
+        LIMIT #{limit}
+    </select>
+
+    <!-- 抢占任务租约 -->
+    <update id="claimTask">
+        UPDATE file_export_task
+        SET status      = 'RUNNING',
+            locked_by   = #{workerId},
+            lease_until = #{leaseUntil},
+            started_at  = IFNULL(started_at, #{now}),
+            updated_at  = #{now}
+        WHERE id = #{id}
+          AND (
+            (
+                status = 'PENDING'
+                    AND (
+                    next_retry_at IS NULL
+                        OR next_retry_at <![CDATA[ <= ]]> #{now}
+                    )
+                )
+                OR (
+                status IN ('RUNNING', 'CANCELLING')
+                    AND lease_until IS NOT NULL
+                    AND lease_until <![CDATA[ < ]]> #{now}
+                )
+            )
+    </update>
+
+    <!-- 续约任务租约 -->
+    <update id="renewLease">
+        UPDATE file_export_task
+        SET lease_until = #{leaseUntil},
+            updated_at  = NOW(3)
+        WHERE id = #{id}
+          AND status IN ('RUNNING', 'CANCELLING')
+          AND locked_by = #{workerId}
+    </update>
+
+    <!-- 将待处理任务取消（createdBy 为空时不校验所有权） -->
+    <update id="cancelPendingTask">
+        UPDATE file_export_task
+        SET
+        status = 'CANCELLED',
+        finished_at = #{now},
+        locked_by = NULL,
+        lease_until = NULL,
+        updated_at = #{now}
+        WHERE
+        id = #{id}
+        <if test="createdBy != null">
+            AND created_by = #{createdBy}
+        </if>
+        AND status = 'PENDING'
+    </update>
+
+    <!-- 标记运行中任务为取消中（createdBy 为空时不校验所有权） -->
+    <update id="requestCancelRunningTask">
+        UPDATE file_export_task
+        SET
+        status = 'CANCELLING',
+        updated_at = NOW(3)
+        WHERE
+        id = #{id}
+        <if test="createdBy != null">
+            AND created_by = #{createdBy}
+        </if>
+        AND status = 'RUNNING'
+    </update>
+
+    <!-- 重置失败任务为待处理（createdBy 为空时不校验所有权；沿用原快照；受 max_retry 约束） -->
+    <update id="retryTask">
+        UPDATE file_export_task
+        SET
+        status = 'PENDING',
+        retry_count = retry_count + 1,
+        next_retry_at = NULL,
+        error_code = NULL,
+        error_message = NULL,
+        progress_percent = 0,
+        processed_rows = 0,
+        total_rows = NULL,
+        file_record_id = NULL,
+        started_at = NULL,
+        finished_at = NULL,
+        locked_by = NULL,
+        lease_until = NULL,
+        updated_at = #{now}
+        WHERE
+        id = #{id}
+        <if test="createdBy != null">
+            AND created_by = #{createdBy}
+        </if>
+        AND status IN ('FAILED', 'CANCELLED')
+        AND retry_count <![CDATA[ < ]]> max_retry
+    </update>
+
+    <!-- 管理端强制重置失败任务为待处理（不受 max_retry 约束；createdBy 为空时不校验所有权） -->
+    <update id="forceRetryTask">
+        UPDATE file_export_task
+        SET
+        status = 'PENDING',
+        retry_count = retry_count + 1,
+        next_retry_at = NULL,
+        error_code = NULL,
+        error_message = NULL,
+        progress_percent = 0,
+        processed_rows = 0,
+        total_rows = NULL,
+        file_record_id = NULL,
+        started_at = NULL,
+        finished_at = NULL,
+        locked_by = NULL,
+        lease_until = NULL,
+        updated_at = #{now}
+        WHERE
+        id = #{id}
+        <if test="createdBy != null">
+            AND created_by = #{createdBy}
+        </if>
+        AND status IN ('FAILED', 'CANCELLED')
+    </update>
+
+    <!-- 更新导出进度 -->
+    <update id="updateProgress">
+        UPDATE file_export_task
+        SET progress_percent = #{progressPercent},
+            processed_rows   = #{processedRows},
+            total_rows       = #{totalRows},
+            updated_at       = NOW(3)
+        WHERE id = #{id}
+          AND status IN ('RUNNING', 'CANCELLING')
+          AND locked_by = #{workerId}
+    </update>
+
+    <!-- 标记任务成功 -->
+    <update id="markSuccess">
+        UPDATE file_export_task
+        SET status           = 'SUCCESS',
+            progress_percent = 100,
+            file_record_id   = #{fileRecordId},
+            expire_at        = #{expireAt},
+            finished_at      = #{now},
+            locked_by        = NULL,
+            lease_until      = NULL,
+            updated_at       = #{now}
+        WHERE id = #{id}
+          AND status = 'RUNNING'
+          AND locked_by = #{workerId}
+    </update>
+
+    <!-- 标记任务失败 -->
+    <update id="markFailed">
+        UPDATE file_export_task
+        SET status        = 'FAILED',
+            error_code    = #{errorCode},
+            error_message = #{errorMessage},
+            next_retry_at = NULL,
+            finished_at   = #{now},
+            locked_by     = NULL,
+            lease_until   = NULL,
+            updated_at    = #{now}
+        WHERE id = #{id}
+          AND status = 'RUNNING'
+          AND locked_by = #{workerId}
+    </update>
+
+    <!-- 标记任务失败并按退避策略回到待处理 -->
+    <update id="markRetryPending">
+        UPDATE file_export_task
+        SET status           = 'PENDING',
+            retry_count      = retry_count + 1,
+            next_retry_at    = #{nextRetryAt},
+            error_code       = #{errorCode},
+            error_message    = #{errorMessage},
+            progress_percent = 0,
+            processed_rows   = 0,
+            total_rows       = NULL,
+            file_record_id   = NULL,
+            started_at       = NULL,
+            finished_at      = NULL,
+            locked_by        = NULL,
+            lease_until      = NULL,
+            updated_at       = #{now}
+        WHERE id = #{id}
+          AND status = 'RUNNING'
+          AND locked_by = #{workerId}
+          AND retry_count <![CDATA[ < ]]> max_retry
+    </update>
+
+    <!-- 标记任务取消 -->
+    <update id="markCancelled">
+        UPDATE file_export_task
+        SET status        = 'CANCELLED',
+            next_retry_at = NULL,
+            finished_at   = #{now},
+            locked_by     = NULL,
+            lease_until   = NULL,
+            updated_at    = #{now}
+        WHERE id = #{id}
+          AND status IN ('RUNNING', 'CANCELLING')
+          AND locked_by = #{workerId}
+    </update>
+
+    <!-- 查询已过期且成功的任务 -->
+    <select id="selectExpiredSuccessTasks" resultType="com.auth.service.system.file.model.po.FileExportTaskExpireRowPO">
+        SELECT id,
+               file_record_id
+        FROM file_export_task
+        WHERE status = 'SUCCESS'
+          AND file_record_id IS NOT NULL
+          AND expire_at IS NOT NULL
+          AND expire_at <![CDATA[ < ]]> #{now}
+        ORDER BY expire_at,
+                 id
+        LIMIT #{limit}
+    </select>
+
+    <!-- 批量标记任务为已过期 -->
+    <update id="markExpiredTasks">
+        UPDATE file_export_task
+        SET
+        status = 'EXPIRED',
+        file_record_id = NULL,
+        next_retry_at = NULL,
+        updated_at = #{now}
+        WHERE
+        status = 'SUCCESS'
+        AND (
+        <foreach collection="tasks" item="task" separator=" OR ">
+            (id = #{task.id} AND file_record_id = #{task.fileRecordId})
+        </foreach>
+        )
+    </update>
+
+</mapper>

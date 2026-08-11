@@ -1,5 +1,6 @@
 package com.auth.service.auth.job;
 
+import com.auth.common.core.constants.BatchSizes;
 import com.auth.service.auth.config.AuthorizationInvalidationProperties;
 import com.auth.service.auth.service.AuthorizationInvalidationEventService;
 import lombok.RequiredArgsConstructor;
@@ -9,8 +10,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-
-import static com.auth.service.auth.model.constants.AuthBatchSizes.SUCCESS_CLEANUP;
 
 /**
  * 授权失效幂等事件 SUCCESS 历史清理：删除已完成且超过保留期的记录
@@ -51,10 +50,10 @@ public class AuthorizationInvalidationEventHistoryCleanupJob {
 		int totalDeleted = 0;
 		int deleted;
 		do {
-			deleted = authorizationInvalidationEventService.purgeCompletedBefore(cutoff, SUCCESS_CLEANUP);
+			deleted = authorizationInvalidationEventService.purgeCompletedBefore(cutoff, BatchSizes.SIZE_500);
 			totalDeleted += deleted;
 		}
-		while (deleted >= SUCCESS_CLEANUP);
+		while (deleted >= BatchSizes.SIZE_500);
 		return totalDeleted;
 	}
 

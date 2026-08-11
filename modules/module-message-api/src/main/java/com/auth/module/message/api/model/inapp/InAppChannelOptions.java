@@ -1,10 +1,9 @@
 package com.auth.module.message.api.model.inapp;
 
 import com.auth.module.message.api.command.ChannelOptions;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.auth.module.message.api.model.enums.MessageContentType;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 
@@ -13,10 +12,8 @@ import java.io.Serial;
  *
  * @author Bunny
  */
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter
+@Setter
 public class InAppChannelOptions implements ChannelOptions {
 
 	/**
@@ -33,9 +30,9 @@ public class InAppChannelOptions implements ChannelOptions {
 	private String title;
 
 	/**
-	 * 正文类型覆盖：TEXT / MARKDOWN
+	 * 正文格式覆盖
 	 */
-	private String contentType;
+	private MessageContentType contentType;
 
 	/**
 	 * 业务小类 ID

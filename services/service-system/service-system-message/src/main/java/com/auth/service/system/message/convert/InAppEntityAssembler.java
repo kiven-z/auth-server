@@ -1,8 +1,8 @@
 package com.auth.service.system.message.convert;
 
+import com.auth.module.message.api.model.enums.MessageContentType;
 import com.auth.service.system.message.model.entity.InAppMessageEntity;
 import com.auth.service.system.message.model.entity.InAppMessageRecipientEntity;
-import com.auth.service.system.message.model.enums.InAppContentType;
 import com.auth.service.system.message.model.enums.InAppMessageStatus;
 import com.auth.service.system.message.model.enums.MessageSendSourceType;
 import com.auth.service.system.message.model.enums.RecipientScopeType;
@@ -31,7 +31,7 @@ public class InAppEntityAssembler {
 	 * @return 待插入任务
 	 */
 	public static InAppMessageEntity toAdminComposeTask(InAppComposeForm form, RecipientScope scope,
-			InAppContentType contentType, Long senderUserId) {
+			MessageContentType contentType, Long senderUserId) {
 		boolean pull = scope.getType().isPull();
 		InAppMessageEntity task = new InAppMessageEntity();
 		task.setSourceType(MessageSendSourceType.ADMIN_COMPOSE.name());

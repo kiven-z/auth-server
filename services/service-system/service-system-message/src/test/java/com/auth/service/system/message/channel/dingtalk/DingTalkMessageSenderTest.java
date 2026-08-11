@@ -2,7 +2,7 @@ package com.auth.service.system.message.channel.dingtalk;
 
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
-import com.auth.module.message.api.model.dingtalk.DingTalkMessageType;
+import com.auth.module.message.api.model.enums.MessageContentType;
 import com.auth.service.system.message.channel.dingtalk.client.DingTalkWorkNoticeClient;
 import com.auth.service.system.message.model.value.delivery.TargetSendOutcome;
 import com.auth.service.system.message.model.value.dingtalk.RenderedDingTalkNotice;
@@ -51,11 +51,11 @@ class DingTalkMessageSenderTest {
 		// 钉钉一次 API 共享 task_id，按目标写入 outcomes
 		when(dingTalkTemplatePipeline.render("notice", Map.of("user", "Bunny")))
 			.thenReturn(RenderedDingTalkNotice.builder()
-				.messageType(DingTalkMessageType.TEXT)
+				.messageType(MessageContentType.TEXT)
 				.title("t")
 				.content("body")
 				.build());
-		when(workNoticeClient.sendWorkNotice(List.of("u1"), DingTalkMessageType.TEXT, "t", "body"))
+		when(workNoticeClient.sendWorkNotice(List.of("u1"), MessageContentType.TEXT, "t", "body"))
 			.thenReturn("1234567890");
 
 		TemplateMessageCommand command = TemplateMessageCommand.builder()

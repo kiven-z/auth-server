@@ -72,6 +72,19 @@ class FileUrlSignerTest {
 	}
 
 	@Test
+	@DisplayName("isPreviewContentTypeAllowed：image/* 与 pdf 命中白名单")
+	void isPreviewContentTypeAllowedMatchesWhitelist() {
+		FileUploadProperties properties = new FileUploadProperties();
+		FileUrlSigner signer = new FileUrlSigner(properties, facadeRegistry);
+
+		assertThat(signer.isPreviewContentTypeAllowed("image/png")).isTrue();
+		assertThat(signer.isPreviewContentTypeAllowed("application/pdf")).isTrue();
+		assertThat(
+				signer.isPreviewContentTypeAllowed("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+			.isFalse();
+	}
+
+	@Test
 	@DisplayName("sign：bucket 为空时抛出 DATA_UNAVAILABLE")
 	void signThrowsWhenBucketBlank() {
 		// 验证缺少 bucket 时会阻断签名流程，避免生成无效访问地址。

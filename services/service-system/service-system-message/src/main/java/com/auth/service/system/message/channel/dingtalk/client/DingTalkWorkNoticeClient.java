@@ -4,7 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.auth.module.message.api.model.dingtalk.DingTalkMessageType;
+import com.auth.module.message.api.model.enums.MessageContentType;
 import com.auth.service.system.message.config.properties.DingTalkProperties;
 import com.auth.service.system.message.exception.MessageException;
 import lombok.extern.slf4j.Slf4j;
@@ -58,7 +58,7 @@ public class DingTalkWorkNoticeClient {
 	 * @param content 正文
 	 * @return 钉钉异步任务 ID（task_id）
 	 */
-	public String sendWorkNotice(List<String> userIds, DingTalkMessageType messageType, String title, String content) {
+	public String sendWorkNotice(List<String> userIds, MessageContentType messageType, String title, String content) {
 		if (CollUtil.isEmpty(userIds)) {
 			throw new MessageException(PARAM_REQUIRED, "接收人");
 		}
@@ -70,7 +70,7 @@ public class DingTalkWorkNoticeClient {
 		Long agentId = dingTalkProperties.getAgentId();
 
 		// 解析消息类型
-		DingTalkMessageType resolvedType = Objects.requireNonNullElseGet(messageType,
+		MessageContentType resolvedType = Objects.requireNonNullElseGet(messageType,
 				dingTalkProperties::getDefaultMessageType);
 		String accessToken = accessTokenClient.getAccessToken();
 		String useridList = userIds.stream().filter(CharSequenceUtil::isNotBlank).collect(Collectors.joining(","));
@@ -109,12 +109,12 @@ public class DingTalkWorkNoticeClient {
 	 * @param content 内容
 	 * @return 消息JSON
 	 */
-	private JSONObject buildMsgJson(DingTalkMessageType messageType, String title, String content) {
+	private JSONObject buildMsgJson(MessageContentType messageType, String title, String content) {
 		JSONObject payload = new JSONObject();
 		String msgType;
 		String payloadKey;
 
-		if (messageType == DingTalkMessageType.MARKDOWN) {
+		if (messageType == MessageContentType.MARKDOWN) {
 			msgType = "markdown";
 			payloadKey = "markdown";
 			payload.set("title", CharSequenceUtil.blankToDefault(title, "通知"));

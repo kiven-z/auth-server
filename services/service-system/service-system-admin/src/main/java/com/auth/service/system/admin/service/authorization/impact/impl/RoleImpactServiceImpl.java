@@ -1,6 +1,7 @@
 package com.auth.service.system.admin.service.authorization.impact.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import com.auth.common.core.constants.BatchSizes;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.convert.admin.ReferenceConverter;
@@ -33,11 +34,6 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Service
 public class RoleImpactServiceImpl implements RoleImpactService {
-
-	/**
-	 * 画像刷新单批上限
-	 */
-	private static final int REFRESH_BATCH_SIZE = 500;
 
 	private final RbacReferenceChecker rbacReferenceChecker;
 
@@ -96,7 +92,7 @@ public class RoleImpactServiceImpl implements RoleImpactService {
 			return empty;
 		}
 
-		for (List<Long> chunk : CollUtil.split(targets, REFRESH_BATCH_SIZE)) {
+		for (List<Long> chunk : CollUtil.split(targets, BatchSizes.SIZE_500)) {
 			userProfileRefreshTrigger.refreshByUserIds(chunk);
 		}
 

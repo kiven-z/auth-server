@@ -1,10 +1,10 @@
 package com.auth.service.system.admin.service.admin.impl;
 
+import com.auth.common.core.constants.BatchSizes;
 import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.service.system.admin.mapper.admin.permission.SysPermissionMapper;
 import com.auth.service.system.admin.mapper.admin.role.SysRolePermissionMapper;
 import com.auth.service.system.admin.mapper.authorization.RolePermissionBindingQueryMapper;
-import com.auth.service.system.admin.model.constants.AdminBatchSizes;
 import com.auth.service.system.admin.model.entity.SysPermissionEntity;
 import com.auth.service.system.admin.model.form.permission.SysPermissionForm;
 import com.auth.service.system.admin.model.po.reference.PermissionReferencePO;
@@ -114,7 +114,7 @@ class SysPermissionServiceImplTest {
 		sysPermissionService.createBatchFromImport(List.of(form));
 
 		verify(sysPermissionMapper).selectReferenceByPermissionCodes(List.of("sys:user:list"));
-		verify(sysPermissionService).saveBatch(anyList(), eq(AdminBatchSizes.IMPORT_SAVE));
+		verify(sysPermissionService).saveBatch(anyList(), eq(BatchSizes.SIZE_500));
 	}
 
 	@Test

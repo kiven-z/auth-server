@@ -5,19 +5,26 @@ import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.common.web.valid.group.CreateGroup;
 import com.auth.common.web.valid.group.UpdateGroup;
-import com.auth.module.file.export.ExportScopeQueryFields;
+import com.auth.module.file.api.model.dto.FileExportTaskCreateResult;
+import com.auth.module.file.api.model.request.FileExportTaskCreateRequest;
+import com.auth.module.file.api.port.FileExportTaskOperations;
+import com.auth.module.file.export.definition.ExportColumns;
 import com.auth.module.file.importer.model.SpreadsheetImportResult;
+import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
+import com.auth.module.security.contract.api.audit.PlatformBizCodes;
+import com.auth.service.system.admin.excel.permission.SysPermissionSpreadsheetRow;
 import com.auth.service.system.admin.excel.permission.SysPermissionSpreadsheetService;
 import com.auth.service.system.admin.model.form.permission.SysPermissionForm;
 import com.auth.service.system.admin.model.query.permission.SysPermissionQuery;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionDetailVO;
 import com.auth.service.system.admin.model.vo.permission.SysPermissionPageVO;
 import com.auth.service.system.admin.service.admin.SysPermissionService;
-import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
+import com.auth.service.system.admin.support.export.AdminFileExportTaskCreateRequests;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -48,12 +55,19 @@ public class SysPermissionController {
 
 	private final SysPermissionSpreadsheetService sysPermissionSpreadsheetService;
 
-	@Operation(summary = "导出权限 Excel")
+	private final FileExportTaskOperations fileExportTaskOperations;
+
+	@Operation(summary = "导出权限 Excel", description = "按筛选条件提交异步导出任务")
 	@PreAuthorize("@auth.decide('sys:permission:export')")
-	@GetMapping("/export")
-	public ResponseEntity<byte[]> export(@Validated SysPermissionQuery filter, @Validated ExportScopeQueryFields scope)
-			throws IOException {
-		return sysPermissionSpreadsheetService.export(filter, scope);
+	@PostMapping("/export/async")
+	public Result<FileExportTaskCreateResult> exportAsync(@Validated @RequestBody SysPermissionQuery filter,
+			@Parameter(description = "幂等请求ID") @RequestParam(required = false) String requestId) {
+		FileExportTaskCreateRequest xlsx = AdminFileExportTaskCreateRequests.xlsx(PlatformBizCodes.SYS_PERMISSION,
+				filter, requestId, SecurityUserUtils.getUserId(),
+				ExportColumns.fromExcelProperties(SysPermissionSpreadsheetRow.class));
+
+		FileExportTaskCreateResult result = fileExportTaskOperations.createTask(xlsx);
+		return Result.success(result);
 	}
 
 	@Operation(summary = "下载权限导入模板")
@@ -95,7 +109,7 @@ public class SysPermissionController {
 	}
 
 	@OperationLog(targetType = "PERMISSION", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = AuthorizationAuditBizModule.SYS_PERMISSION, operation = OperationLogKind.UPDATE)
+			bizModule = PlatformBizCodes.SYS_PERMISSION, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "更新权限")
 	@PreAuthorize("@auth.decide('sys:permission:update')")
 	@PutMapping
@@ -105,7 +119,7 @@ public class SysPermissionController {
 	}
 
 	@OperationLog(targetType = "PERMISSION", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = AuthorizationAuditBizModule.SYS_PERMISSION, operation = OperationLogKind.UPDATE)
+			bizModule = PlatformBizCodes.SYS_PERMISSION, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "批量启停权限")
 	@PreAuthorize("@auth.decide('sys:permission:update')")
 	@PutMapping("/status")
@@ -115,7 +129,7 @@ public class SysPermissionController {
 	}
 
 	@OperationLog(targetType = "PERMISSION", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = AuthorizationAuditBizModule.SYS_PERMISSION, operation = OperationLogKind.DELETE)
+			bizModule = PlatformBizCodes.SYS_PERMISSION, operation = OperationLogKind.DELETE)
 	@Operation(summary = "删除权限")
 	@PreAuthorize("@auth.decide('sys:permission:delete')")
 	@DeleteMapping("/{id}")

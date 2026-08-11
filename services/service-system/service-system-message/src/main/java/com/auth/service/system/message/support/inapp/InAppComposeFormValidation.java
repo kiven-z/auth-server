@@ -1,8 +1,8 @@
 package com.auth.service.system.message.support.inapp;
 
 import cn.hutool.core.collection.CollUtil;
+import com.auth.module.message.api.model.enums.MessageContentType;
 import com.auth.service.system.message.exception.MessageException;
-import com.auth.service.system.message.model.enums.InAppContentType;
 import com.auth.service.system.message.model.enums.RecipientScopeType;
 import com.auth.service.system.message.model.form.inapp.InAppComposeForm;
 import lombok.experimental.UtilityClass;
@@ -48,12 +48,9 @@ public class InAppComposeFormValidation {
 		}
 		requireScopeIds(type, form);
 
-		// 正文类型必须为已声明枚举
+		// 正文格式必须为已声明枚举
 		String contentType = form.getContentType();
-		try {
-			InAppContentType.valueOf(contentType.toUpperCase());
-		}
-		catch (IllegalArgumentException ex) {
+		if (MessageContentType.parseOrNull(contentType) == null) {
 			throw new MessageException(MESSAGE_COMMAND_INVALID, contentType);
 		}
 		return type;

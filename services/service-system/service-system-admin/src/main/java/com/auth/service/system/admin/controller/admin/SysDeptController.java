@@ -5,11 +5,17 @@ import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.common.web.valid.group.CreateGroup;
 import com.auth.common.web.valid.group.UpdateGroup;
-import com.auth.module.file.export.ExportScopeQueryFields;
+import com.auth.module.file.api.model.dto.FileExportTaskCreateResult;
+import com.auth.module.file.api.model.request.FileExportTaskCreateRequest;
+import com.auth.module.file.api.port.FileExportTaskOperations;
+import com.auth.module.file.export.definition.ExportColumns;
 import com.auth.module.file.importer.model.SpreadsheetImportResult;
+import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
+import com.auth.module.security.contract.api.audit.PlatformBizCodes;
+import com.auth.service.system.admin.excel.dept.SysDeptSpreadsheetRow;
 import com.auth.service.system.admin.excel.dept.SysDeptSpreadsheetService;
 import com.auth.service.system.admin.model.form.dept.SysDeptForm;
 import com.auth.service.system.admin.model.form.dept.SysDeptMoveForm;
@@ -19,8 +25,9 @@ import com.auth.service.system.admin.model.vo.dept.SysDeptDetailVO;
 import com.auth.service.system.admin.model.vo.dept.SysDeptListVO;
 import com.auth.service.system.admin.service.admin.SysDeptQueryService;
 import com.auth.service.system.admin.service.admin.SysDeptService;
-import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
+import com.auth.service.system.admin.support.export.AdminFileExportTaskCreateRequests;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -51,12 +58,19 @@ public class SysDeptController {
 
 	private final SysDeptSpreadsheetService sysDeptSpreadsheetService;
 
-	@Operation(summary = "导出部门 Excel")
+	private final FileExportTaskOperations fileExportTaskOperations;
+
+	@Operation(summary = "导出部门 Excel", description = "按筛选条件提交异步导出任务")
 	@PreAuthorize("@auth.decide('sys:dept:export')")
-	@GetMapping("/export")
-	public ResponseEntity<byte[]> export(@Validated SysDeptPageQuery query, @Validated ExportScopeQueryFields scope)
-			throws IOException {
-		return sysDeptSpreadsheetService.export(query, scope);
+	@PostMapping("/export/async")
+	public Result<FileExportTaskCreateResult> exportAsync(@Validated @RequestBody SysDeptPageQuery query,
+			@Parameter(description = "幂等请求ID") @RequestParam(required = false) String requestId) {
+		FileExportTaskCreateRequest xlsx = AdminFileExportTaskCreateRequests.xlsx(PlatformBizCodes.SYS_DEPT, query,
+				requestId, SecurityUserUtils.getUserId(),
+				ExportColumns.fromExcelProperties(SysDeptSpreadsheetRow.class));
+
+		FileExportTaskCreateResult result = fileExportTaskOperations.createTask(xlsx);
+		return Result.success(result);
 	}
 
 	@Operation(summary = "下载部门导入模板")
@@ -75,7 +89,7 @@ public class SysDeptController {
 	}
 
 	@OperationLog(targetType = "DEPT_LIST", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = AuthorizationAuditBizModule.SYS_DEPT, operation = OperationLogKind.QUERY)
+			bizModule = PlatformBizCodes.SYS_DEPT, operation = OperationLogKind.QUERY)
 	@Operation(summary = "查询部门扁平列表")
 	@PreAuthorize("@auth.decide('sys:dept:query')")
 	@GetMapping("/list")
@@ -100,8 +114,8 @@ public class SysDeptController {
 		return Result.success(detail);
 	}
 
-	@OperationLog(targetType = "DEPT", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = AuthorizationAuditBizModule.SYS_DEPT, operation = OperationLogKind.CREATE)
+	@OperationLog(targetType = "DEPT", serviceDomain = AuditServiceDomain.SYSTEM, bizModule = PlatformBizCodes.SYS_DEPT,
+			operation = OperationLogKind.CREATE)
 	@Operation(summary = "新增部门")
 	@PreAuthorize("@auth.decide('sys:dept:create')")
 	@PostMapping
@@ -110,8 +124,8 @@ public class SysDeptController {
 		return Result.success();
 	}
 
-	@OperationLog(targetType = "DEPT", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = AuthorizationAuditBizModule.SYS_DEPT, operation = OperationLogKind.UPDATE)
+	@OperationLog(targetType = "DEPT", serviceDomain = AuditServiceDomain.SYSTEM, bizModule = PlatformBizCodes.SYS_DEPT,
+			operation = OperationLogKind.UPDATE)
 	@Operation(summary = "更新部门")
 	@PreAuthorize("@auth.decide('sys:dept:update')")
 	@PutMapping
@@ -120,8 +134,8 @@ public class SysDeptController {
 		return Result.success();
 	}
 
-	@OperationLog(targetType = "DEPT", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = AuthorizationAuditBizModule.SYS_DEPT, operation = OperationLogKind.UPDATE)
+	@OperationLog(targetType = "DEPT", serviceDomain = AuditServiceDomain.SYSTEM, bizModule = PlatformBizCodes.SYS_DEPT,
+			operation = OperationLogKind.UPDATE)
 	@Operation(summary = "批量启停部门")
 	@PreAuthorize("@auth.decide('sys:dept:update')")
 	@PutMapping("/status")
@@ -130,8 +144,8 @@ public class SysDeptController {
 		return Result.success();
 	}
 
-	@OperationLog(targetType = "DEPT", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = AuthorizationAuditBizModule.SYS_DEPT, operation = OperationLogKind.UPDATE)
+	@OperationLog(targetType = "DEPT", serviceDomain = AuditServiceDomain.SYSTEM, bizModule = PlatformBizCodes.SYS_DEPT,
+			operation = OperationLogKind.UPDATE)
 	@Operation(summary = "移动部门")
 	@PreAuthorize("@auth.decide('sys:dept:update')")
 	@PutMapping("/move")
@@ -140,8 +154,8 @@ public class SysDeptController {
 		return Result.success();
 	}
 
-	@OperationLog(targetType = "DEPT", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = AuthorizationAuditBizModule.SYS_DEPT, operation = OperationLogKind.DELETE)
+	@OperationLog(targetType = "DEPT", serviceDomain = AuditServiceDomain.SYSTEM, bizModule = PlatformBizCodes.SYS_DEPT,
+			operation = OperationLogKind.DELETE)
 	@Operation(summary = "删除部门")
 	@PreAuthorize("@auth.decide('sys:dept:delete')")
 	@DeleteMapping("/{id}")

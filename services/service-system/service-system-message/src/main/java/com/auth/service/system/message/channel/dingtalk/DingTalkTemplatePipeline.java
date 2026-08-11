@@ -2,7 +2,7 @@ package com.auth.service.system.message.channel.dingtalk;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.message.api.channel.MessageChannel;
-import com.auth.module.message.api.model.dingtalk.DingTalkMessageType;
+import com.auth.module.message.api.model.enums.MessageContentType;
 import com.auth.service.system.message.config.properties.DingTalkProperties;
 import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
@@ -53,7 +53,7 @@ public class DingTalkTemplatePipeline {
 		MessageTemplateRequireFieldsJsonSupport.assertVariablesPresent(requireFields, safeVariables,
 				TEMPLATE_VARS_MISSING, MessageChannel.DING_TALK.name());
 
-		DingTalkMessageType messageType = resolveMessageType(template);
+		MessageContentType messageType = resolveMessageType(template);
 		String subject = template.getSubject();
 		String templateName = template.getTemplateName();
 		String bodyContent = template.getBodyContent();
@@ -69,24 +69,21 @@ public class DingTalkTemplatePipeline {
 	}
 
 	/**
-	 * 模板上的消息类型优先，无效或缺失时用渠道默认
+	 * 模板上的正文格式优先，无效或缺失时用渠道默认
 	 * @param template 模板
-	 * @return 消息类型
+	 * @return 正文格式
 	 */
-	private DingTalkMessageType resolveMessageType(MessageTemplateEntity template) {
+	private MessageContentType resolveMessageType(MessageTemplateEntity template) {
 		String type = template.getImMessageType();
-		if (CharSequenceUtil.isBlank(type)) {
-			return dingTalkProperties.getDefaultMessageType();
+		MessageContentType parsed = MessageContentType.parseOrNull(type);
+		if (parsed != null) {
+			return parsed;
 		}
-
-		try {
-			return DingTalkMessageType.valueOf(type.trim().toUpperCase());
+		if (CharSequenceUtil.isNotBlank(type)) {
+			log.warn("Invalid message content type [{}] on template [{}], using channel default.",
+					template.getImMessageType(), template.getTemplateName());
 		}
-		catch (IllegalArgumentException ex) {
-			log.warn("Invalid DingTalk message type [{}] on template [{}], using channel default.",
-					template.getImMessageType(), template.getTemplateName(), ex);
-			return dingTalkProperties.getDefaultMessageType();
-		}
+		return dingTalkProperties.getDefaultMessageType();
 	}
 
 }

@@ -1,6 +1,6 @@
 package com.auth.service.system.message.model.value.inapp;
 
-import com.auth.service.system.message.model.enums.InAppContentType;
+import com.auth.module.message.api.model.enums.MessageContentType;
 import com.auth.service.system.message.model.enums.MessageSendSourceType;
 import lombok.Builder;
 import lombok.Value;
@@ -34,7 +34,7 @@ public class RenderedInAppMessage {
 	/**
 	 * 正文类型
 	 */
-	InAppContentType contentType;
+	MessageContentType contentType;
 
 	/**
 	 * 场景编码（模板发送时有值）

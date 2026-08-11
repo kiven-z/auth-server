@@ -5,11 +5,11 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
+import com.auth.module.security.contract.api.audit.PlatformBizCodes;
 import com.auth.service.system.admin.model.form.user.UserDeptAssignForm;
 import com.auth.service.system.admin.model.query.user.UserDeptPageQuery;
 import com.auth.service.system.admin.model.vo.user.UserDeptPageVO;
 import com.auth.service.system.admin.service.admin.SysUserDeptService;
-import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -42,7 +42,7 @@ public class SysUserDeptController {
 	}
 
 	@OperationLog(targetType = "USER_DEPT", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.CREATE)
+			bizModule = PlatformBizCodes.SYS_USER, operation = OperationLogKind.CREATE)
 	@Operation(summary = "新增用户部门关联")
 	@PreAuthorize("@auth.decide('sys:userdept:create')")
 	@PostMapping("/{userId}")
@@ -52,7 +52,7 @@ public class SysUserDeptController {
 	}
 
 	@OperationLog(targetType = "USER_DEPT", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
+			bizModule = PlatformBizCodes.SYS_USER, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "更新用户部门关联")
 	@PreAuthorize("@auth.decide('sys:userdept:update')")
 	@PutMapping("/{userId}/{id}")
@@ -63,7 +63,7 @@ public class SysUserDeptController {
 	}
 
 	@OperationLog(targetType = "USER_DEPT", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.DELETE)
+			bizModule = PlatformBizCodes.SYS_USER, operation = OperationLogKind.DELETE)
 	@Operation(summary = "批量删除用户部门关联")
 	@PreAuthorize("@auth.decide('sys:userdept:delete')")
 	@DeleteMapping("/{userId}")
@@ -73,7 +73,7 @@ public class SysUserDeptController {
 	}
 
 	@OperationLog(targetType = "USER_DEPT", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.DELETE)
+			bizModule = PlatformBizCodes.SYS_USER, operation = OperationLogKind.DELETE)
 	@Operation(summary = "清空用户全部部门关联")
 	@PreAuthorize("@auth.decide('sys:userdept:delete')")
 	@DeleteMapping("/{userId}/all")

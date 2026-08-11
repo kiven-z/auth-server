@@ -1,9 +1,12 @@
 package com.auth.service.system.message.convert.inapp;
 
+import com.auth.module.message.api.model.enums.MessageContentType;
 import com.auth.service.system.message.convert.InAppEntityAssembler;
 import com.auth.service.system.message.model.entity.InAppMessageEntity;
 import com.auth.service.system.message.model.entity.InAppMessageRecipientEntity;
-import com.auth.service.system.message.model.enums.*;
+import com.auth.service.system.message.model.enums.InAppMessageStatus;
+import com.auth.service.system.message.model.enums.MessageSendSourceType;
+import com.auth.service.system.message.model.enums.RecipientScopeType;
 import com.auth.service.system.message.model.form.inapp.InAppComposeForm;
 import com.auth.service.system.message.model.value.inapp.RenderedInAppMessage;
 import com.auth.service.system.message.model.value.recipient.RecipientScope;
@@ -30,7 +33,7 @@ class InAppEntityAssemblerTest {
 		form.setTemplateCode("notice");
 		form.setTitle("Hello");
 		form.setBody("body text");
-		form.setCategoryId(1907200100000000401L);
+		form.setCategoryId(104L);
 		form.setLinkUrl("/home");
 
 		RecipientScope scope = RecipientScope.builder()
@@ -39,14 +42,14 @@ class InAppEntityAssemblerTest {
 			.includeChildren(true)
 			.build();
 
-		InAppMessageEntity task = InAppEntityAssembler.toAdminComposeTask(form, scope, InAppContentType.MARKDOWN, 7L);
+		InAppMessageEntity task = InAppEntityAssembler.toAdminComposeTask(form, scope, MessageContentType.MARKDOWN, 7L);
 
 		assertThat(task.getSourceType()).isEqualTo(MessageSendSourceType.ADMIN_COMPOSE.name());
 		assertThat(task.getSceneCode()).isEqualTo("notice");
 		assertThat(task.getTitle()).isEqualTo("Hello");
 		assertThat(task.getContent()).isEqualTo("body text");
-		assertThat(task.getContentType()).isEqualTo(InAppContentType.MARKDOWN.name());
-		assertThat(task.getCategoryId()).isEqualTo(1907200100000000401L);
+		assertThat(task.getContentType()).isEqualTo(MessageContentType.MARKDOWN.name());
+		assertThat(task.getCategoryId()).isEqualTo(104L);
 		assertThat(task.getLinkUrl()).isEqualTo("/home");
 		assertThat(task.getSenderUserId()).isEqualTo(7L);
 		assertThat(task.getRecipientScopeType()).isEqualTo(RecipientScopeType.DEPT.name());
@@ -66,7 +69,7 @@ class InAppEntityAssemblerTest {
 		form.setBody("hello all");
 
 		RecipientScope scope = RecipientScope.builder().type(RecipientScopeType.ALL).build();
-		InAppMessageEntity task = InAppEntityAssembler.toAdminComposeTask(form, scope, InAppContentType.TEXT, 1L);
+		InAppMessageEntity task = InAppEntityAssembler.toAdminComposeTask(form, scope, MessageContentType.TEXT, 1L);
 
 		assertThat(task.getRecipientScopeType()).isEqualTo(RecipientScopeType.ALL.name());
 		assertThat(task.getStatus()).isEqualTo(InAppMessageStatus.SUCCESS.name());
@@ -81,8 +84,8 @@ class InAppEntityAssemblerTest {
 			.sceneCode("notice")
 			.title("Hello")
 			.content("body")
-			.contentType(InAppContentType.MARKDOWN)
-			.categoryId(1907200100000000401L)
+			.contentType(MessageContentType.MARKDOWN)
+			.categoryId(104L)
 			.linkUrl("/home")
 			.build();
 		InAppMessageEntity task = InAppEntityAssembler.toDirectTask(rendered, List.of(1001L, 1002L));
@@ -91,8 +94,8 @@ class InAppEntityAssemblerTest {
 		assertThat(task.getSceneCode()).isEqualTo("notice");
 		assertThat(task.getTitle()).isEqualTo("Hello");
 		assertThat(task.getContent()).isEqualTo("body");
-		assertThat(task.getContentType()).isEqualTo(InAppContentType.MARKDOWN.name());
-		assertThat(task.getCategoryId()).isEqualTo(1907200100000000401L);
+		assertThat(task.getContentType()).isEqualTo(MessageContentType.MARKDOWN.name());
+		assertThat(task.getCategoryId()).isEqualTo(104L);
 		assertThat(task.getLinkUrl()).isEqualTo("/home");
 		assertThat(task.getRecipientScopeType()).isEqualTo(RecipientScopeType.USER.name());
 		assertThat(task.getRecipientScopeJson()).contains("1001").contains("1002");

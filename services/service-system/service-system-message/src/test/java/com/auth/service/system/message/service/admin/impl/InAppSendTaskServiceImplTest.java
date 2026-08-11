@@ -1,6 +1,7 @@
 package com.auth.service.system.message.service.admin.impl;
 
 import com.auth.common.data.model.PageResponse;
+import com.auth.module.message.api.model.enums.MessageContentType;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.message.exception.MessageException;
@@ -8,7 +9,6 @@ import com.auth.service.system.message.mapper.InAppMessageMapper;
 import com.auth.service.system.message.mapper.InAppMessageRecipientMapper;
 import com.auth.service.system.message.mapper.InAppMessageUserStatusMapper;
 import com.auth.service.system.message.model.entity.InAppMessageEntity;
-import com.auth.service.system.message.model.enums.InAppContentType;
 import com.auth.service.system.message.model.enums.InAppMessageStatus;
 import com.auth.service.system.message.model.enums.MessageSendSourceType;
 import com.auth.service.system.message.model.enums.RecipientScopeType;
@@ -56,7 +56,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class InAppSendTaskServiceImplTest {
 
-	private static final long MINOR_CATEGORY_ID = 1907200100000000401L;
+	private static final long MINOR_CATEGORY_ID = 104L;
 
 	@Mock
 	private InAppMessageMapper inAppMessageMapper;
@@ -121,7 +121,7 @@ class InAppSendTaskServiceImplTest {
 		row.setSourceType(MessageSendSourceType.ADMIN_COMPOSE.name());
 		row.setSceneCode("notice");
 		row.setTitle("系统公告");
-		row.setContentType(InAppContentType.MARKDOWN.name());
+		row.setContentType(MessageContentType.MARKDOWN.name());
 		row.setCategoryId(MINOR_CATEGORY_ID);
 		row.setCategoryName("一般通知");
 		row.setSenderUserId(7L);
@@ -150,7 +150,7 @@ class InAppSendTaskServiceImplTest {
 		assertThat(vo.getSourceType()).isEqualTo(MessageSendSourceType.ADMIN_COMPOSE.name());
 		assertThat(vo.getSceneCode()).isEqualTo("notice");
 		assertThat(vo.getTitle()).isEqualTo("系统公告");
-		assertThat(vo.getContentType()).isEqualTo(InAppContentType.MARKDOWN.name());
+		assertThat(vo.getContentType()).isEqualTo(MessageContentType.MARKDOWN.name());
 		assertThat(vo.getCategoryId()).isEqualTo(MINOR_CATEGORY_ID);
 		assertThat(vo.getCategoryName()).isEqualTo("一般通知");
 		assertThat(vo.getSenderUserId()).isEqualTo(7L);
@@ -179,7 +179,7 @@ class InAppSendTaskServiceImplTest {
 		task.setSourceType(MessageSendSourceType.ADMIN_COMPOSE.name());
 		task.setSceneCode("notice");
 		task.setTitle("系统公告");
-		task.setContentType(InAppContentType.MARKDOWN.name());
+		task.setContentType(MessageContentType.MARKDOWN.name());
 		task.setContent("## hello");
 		task.setCategoryId(MINOR_CATEGORY_ID);
 		task.setLinkUrl("/dashboard");
@@ -228,7 +228,7 @@ class InAppSendTaskServiceImplTest {
 		task.setId(12L);
 		task.setSourceType(MessageSendSourceType.ADMIN_COMPOSE.name());
 		task.setTitle("全员公告");
-		task.setContentType(InAppContentType.TEXT.name());
+		task.setContentType(MessageContentType.TEXT.name());
 		task.setContent("all users");
 		task.setRecipientScopeType(RecipientScopeType.ALL.name());
 		task.setRecipientScopeJson(null);
@@ -430,7 +430,7 @@ class InAppSendTaskServiceImplTest {
 		assertThat(task.getSceneCode()).isEqualTo("notice");
 		assertThat(task.getTitle()).isEqualTo("Hello");
 		assertThat(task.getContent()).isEqualTo("body text");
-		assertThat(task.getContentType()).isEqualTo(InAppContentType.MARKDOWN.name());
+		assertThat(task.getContentType()).isEqualTo(MessageContentType.MARKDOWN.name());
 		assertThat(task.getRecipientScopeType()).isEqualTo(RecipientScopeType.DEPT.name());
 		assertThat(task.getRecipientScopeJson()).contains("\"includeChildren\":true");
 		assertThat(task.getCategoryId()).isEqualTo(MINOR_CATEGORY_ID);

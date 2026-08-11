@@ -1,10 +1,8 @@
 package com.auth.module.message.api.model.email;
 
 import com.auth.module.message.api.command.ChannelOptions;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.util.List;
@@ -14,10 +12,8 @@ import java.util.List;
  *
  * @author Bunny
  */
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter
+@Setter
 public class EmailChannelOptions implements ChannelOptions {
 
 	/**

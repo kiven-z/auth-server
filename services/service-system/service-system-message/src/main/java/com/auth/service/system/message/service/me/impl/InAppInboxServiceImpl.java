@@ -1,6 +1,7 @@
 package com.auth.service.system.message.service.me.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import com.auth.common.core.constants.BatchSizes;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.service.system.message.convert.InAppInboxConverter;
@@ -9,7 +10,6 @@ import com.auth.service.system.message.mapper.InAppInboxMapper;
 import com.auth.service.system.message.mapper.InAppMessageMapper;
 import com.auth.service.system.message.mapper.InAppMessageRecipientMapper;
 import com.auth.service.system.message.mapper.InAppMessageUserStatusMapper;
-import com.auth.service.system.message.model.constants.MessageBatchSizes;
 import com.auth.service.system.message.model.entity.InAppMessageEntity;
 import com.auth.service.system.message.model.entity.InAppMessageUserStatusEntity;
 import com.auth.service.system.message.model.enums.InAppMessageStatus;
@@ -246,7 +246,7 @@ public class InAppInboxServiceImpl implements InAppInboxService {
 		if (CollUtil.isEmpty(messageIds)) {
 			return;
 		}
-		for (List<Long> batch : CollUtil.split(messageIds, MessageBatchSizes.INBOX_MARK_READ)) {
+		for (List<Long> batch : CollUtil.split(messageIds, BatchSizes.SIZE_500)) {
 			applyMarkRead(batch);
 		}
 	}
@@ -271,7 +271,7 @@ public class InAppInboxServiceImpl implements InAppInboxService {
 		if (CollUtil.isEmpty(messageIds)) {
 			return;
 		}
-		for (List<Long> batch : CollUtil.split(messageIds, MessageBatchSizes.INBOX_DELETE)) {
+		for (List<Long> batch : CollUtil.split(messageIds, BatchSizes.SIZE_500)) {
 			applyBatchDelete(batch);
 		}
 	}

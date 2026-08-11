@@ -27,8 +27,8 @@ import static com.auth.service.system.file.model.constants.FileAuditBizModule.SY
  *
  * @author Bunny
  */
-@Tag(name = "个人文件回收站", description = "当前用户回收站查询、恢复与彻底删除")
 @AuthenticatedApi
+@Tag(name = "个人文件回收站", description = "当前用户回收站查询、恢复与彻底删除")
 @RequestMapping("/api/system/me/file/recycle")
 @RestController
 public class PersonalFileRecycleController {

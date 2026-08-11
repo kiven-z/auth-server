@@ -72,14 +72,17 @@ public class ZebraStripeStyleHandler implements CellWriteHandler {
 		// 默认常规格式
 		short dataFormat = 0;
 		if (cellDataList != null && !cellDataList.isEmpty()) {
-			DataFormatData dfd = cellDataList.get(0).getWriteCellStyle().getDataFormatData();
-			if (dfd != null) {
-				if (dfd.getIndex() != null) {
-					dataFormat = dfd.getIndex();
-				}
-				else if (dfd.getFormat() != null) {
-					String format = dfd.getFormat();
-					dataFormat = workbook.createDataFormat().getFormat(format);
+			WriteCellData<?> cellData = cellDataList.get(0);
+			if (cellData.getWriteCellStyle() != null) {
+				DataFormatData dfd = cellData.getWriteCellStyle().getDataFormatData();
+				if (dfd != null) {
+					if (dfd.getIndex() != null) {
+						dataFormat = dfd.getIndex();
+					}
+					else if (dfd.getFormat() != null) {
+						String format = dfd.getFormat();
+						dataFormat = workbook.createDataFormat().getFormat(format);
+					}
 				}
 			}
 		}

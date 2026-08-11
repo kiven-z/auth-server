@@ -5,11 +5,17 @@ import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.common.web.valid.group.CreateGroup;
 import com.auth.common.web.valid.group.UpdateGroup;
-import com.auth.module.file.export.ExportScopeQueryFields;
+import com.auth.module.file.api.model.dto.FileExportTaskCreateResult;
+import com.auth.module.file.api.model.request.FileExportTaskCreateRequest;
+import com.auth.module.file.api.port.FileExportTaskOperations;
+import com.auth.module.file.export.definition.ExportColumns;
 import com.auth.module.file.importer.model.SpreadsheetImportResult;
+import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
+import com.auth.module.security.contract.api.audit.PlatformBizCodes;
+import com.auth.service.system.admin.excel.post.SysPostSpreadsheetRow;
 import com.auth.service.system.admin.excel.post.SysPostSpreadsheetService;
 import com.auth.service.system.admin.model.form.post.SysPostForm;
 import com.auth.service.system.admin.model.query.post.SysPostQuery;
@@ -17,7 +23,7 @@ import com.auth.service.system.admin.model.vo.post.SysPostDetailVO;
 import com.auth.service.system.admin.model.vo.post.SysPostPageVO;
 import com.auth.service.system.admin.model.vo.post.SysPostSearchItemVO;
 import com.auth.service.system.admin.service.admin.SysPostService;
-import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
+import com.auth.service.system.admin.support.export.AdminFileExportTaskCreateRequests;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -50,12 +56,19 @@ public class SysPostController {
 
 	private final SysPostSpreadsheetService sysPostSpreadsheetService;
 
-	@Operation(summary = "导出岗位 Excel")
+	private final FileExportTaskOperations fileExportTaskOperations;
+
+	@Operation(summary = "导出岗位 Excel", description = "按筛选条件提交异步导出任务")
 	@PreAuthorize("@auth.decide('sys:post:export')")
-	@GetMapping("/export")
-	public ResponseEntity<byte[]> export(@Validated SysPostQuery filter, @Validated ExportScopeQueryFields scope)
-			throws IOException {
-		return sysPostSpreadsheetService.export(filter, scope);
+	@PostMapping("/export/async")
+	public Result<FileExportTaskCreateResult> exportAsync(@Validated @RequestBody SysPostQuery filter,
+			@Parameter(description = "幂等请求ID") @RequestParam(required = false) String requestId) {
+		FileExportTaskCreateRequest xlsx = AdminFileExportTaskCreateRequests.xlsx(PlatformBizCodes.SYS_POST, filter,
+				requestId, SecurityUserUtils.getUserId(),
+				ExportColumns.fromExcelProperties(SysPostSpreadsheetRow.class));
+
+		FileExportTaskCreateResult result = fileExportTaskOperations.createTask(xlsx);
+		return Result.success(result);
 	}
 
 	@Operation(summary = "下载岗位导入模板")
@@ -109,8 +122,8 @@ public class SysPostController {
 		return Result.success();
 	}
 
-	@OperationLog(targetType = "POST", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = AuthorizationAuditBizModule.SYS_POST, operation = OperationLogKind.UPDATE)
+	@OperationLog(targetType = "POST", serviceDomain = AuditServiceDomain.SYSTEM, bizModule = PlatformBizCodes.SYS_POST,
+			operation = OperationLogKind.UPDATE)
 	@Operation(summary = "更新岗位")
 	@PreAuthorize("@auth.decide('sys:post:update')")
 	@PutMapping
@@ -119,8 +132,8 @@ public class SysPostController {
 		return Result.success();
 	}
 
-	@OperationLog(targetType = "POST", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = AuthorizationAuditBizModule.SYS_POST, operation = OperationLogKind.UPDATE)
+	@OperationLog(targetType = "POST", serviceDomain = AuditServiceDomain.SYSTEM, bizModule = PlatformBizCodes.SYS_POST,
+			operation = OperationLogKind.UPDATE)
 	@Operation(summary = "批量启停岗位")
 	@PreAuthorize("@auth.decide('sys:post:update')")
 	@PutMapping("/status")
@@ -129,8 +142,8 @@ public class SysPostController {
 		return Result.success();
 	}
 
-	@OperationLog(targetType = "POST", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = AuthorizationAuditBizModule.SYS_POST, operation = OperationLogKind.DELETE)
+	@OperationLog(targetType = "POST", serviceDomain = AuditServiceDomain.SYSTEM, bizModule = PlatformBizCodes.SYS_POST,
+			operation = OperationLogKind.DELETE)
 	@Operation(summary = "删除岗位")
 	@PreAuthorize("@auth.decide('sys:post:delete')")
 	@DeleteMapping("/{id}")

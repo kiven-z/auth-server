@@ -1,18 +1,9 @@
 package com.auth.service.system.admin.excel.user;
 
-import com.auth.module.file.export.AbstractSyncPagedExportService;
-import com.auth.module.file.export.ExportScopeQueryFields;
 import com.auth.module.file.export.delivery.FileDelivery;
 import com.auth.module.file.export.writer.ExcelExportWriter;
 import com.auth.module.file.importer.model.SpreadsheetImportResult;
-import com.auth.module.platform.persistence.model.UserEntity;
-import com.auth.service.system.admin.convert.spreadsheet.SysUserSpreadsheetConverter;
-import com.auth.service.system.admin.mapper.admin.user.SysUserMapper;
-import com.auth.service.system.admin.model.po.user.SysUserPageRowPO;
-import com.auth.service.system.admin.model.query.user.SysUserPageQuery;
-import com.auth.service.system.admin.support.sqlbuild.SysUserPageOrderSqlBuilder;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,56 +13,15 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * 用户 Excel 导出
+ * 用户 Excel 导入
  *
  * @author Bunny
  */
+@RequiredArgsConstructor
 @Service
-public class SysUserSpreadsheetService
-		extends AbstractSyncPagedExportService<SysUserPageQuery, SysUserPageRowPO, SysUserSpreadsheetRow> {
-
-	private static final String SHEET_NAME = "用户";
-
-	private static final String FILENAME_PREFIX = "用户";
-
-	private static final int STATUS_COLUMN_INDEX = 5;
-
-	private final SysUserMapper sysUserMapper;
+public class SysUserSpreadsheetService {
 
 	private final UserSheetImporter userSheetImporter;
-
-	public SysUserSpreadsheetService(SysUserMapper sysUserMapper, UserSheetImporter userSheetImporter) {
-		super(ExcelExportWriter.withStatusStyle(SysUserSpreadsheetRow.class, SHEET_NAME,
-				new UserStatusColorCellWriteHandler(STATUS_COLUMN_INDEX)), FILENAME_PREFIX);
-		this.sysUserMapper = sysUserMapper;
-		this.userSheetImporter = userSheetImporter;
-	}
-
-	/**
-	 * 按筛选条件与页码区间导出用户 Excel
-	 * @param filter 列表筛选
-	 * @param scope 导出范围
-	 * @return 文件字节响应
-	 * @throws IOException 写入失败
-	 */
-	@Override
-	@Transactional(readOnly = true)
-	public ResponseEntity<byte[]> export(SysUserPageQuery filter, ExportScopeQueryFields scope) throws IOException {
-		return super.export(filter, scope);
-	}
-
-	@Override
-	protected List<SysUserPageRowPO> fetchPage(SysUserPageQuery filter, int pageIndex, int pageSize) {
-		String orderBySql = SysUserPageOrderSqlBuilder.buildOrderBySql(filter.getSort());
-		Page<UserEntity> pageParams = new Page<>(pageIndex, pageSize);
-		IPage<SysUserPageRowPO> page = sysUserMapper.selectListByPage(pageParams, filter, orderBySql);
-		return page.getRecords();
-	}
-
-	@Override
-	protected List<SysUserSpreadsheetRow> toExportRows(List<SysUserPageRowPO> rows) {
-		return SysUserSpreadsheetConverter.INSTANCE.toSpreadsheetRows(rows);
-	}
 
 	/**
 	 * 从上传文件批量导入用户（解析 → 校验 → 写入，全部通过才落库）

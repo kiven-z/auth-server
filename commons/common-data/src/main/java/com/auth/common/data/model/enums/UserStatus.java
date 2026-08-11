@@ -37,6 +37,7 @@ public enum UserStatus {
 
 	/**
 	 * 根据 code 解析枚举
+	 * @param code 状态码
 	 * @return 匹配的枚举，不存在则返回 null
 	 */
 	public static UserStatus of(int code) {
@@ -46,6 +47,26 @@ public enum UserStatus {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * 根据可空 code 解析枚举
+	 * @param code 状态码，可能为 null
+	 * @return 匹配的枚举；code 为 null 或不存在则返回 null
+	 */
+	public static UserStatus ofNullable(Integer code) {
+		if (code == null) {
+			return null;
+		}
+		return of(code);
+	}
+
+	/**
+	 * 是否允许进入登录凭证校验（不含登录失败锁定计数）
+	 * @return true 仅当状态为启用
+	 */
+	public boolean allowsLogin() {
+		return this == NORMAL;
 	}
 
 }

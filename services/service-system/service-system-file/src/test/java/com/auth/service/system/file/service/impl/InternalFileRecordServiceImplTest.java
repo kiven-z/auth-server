@@ -84,11 +84,11 @@ class InternalFileRecordServiceImplTest {
 		when(fileRecordMapper.selectActiveByUrlAndOwner(eq(AVATAR_URL), isNull(), eq(OWNER_USER_ID), eq("avatar")))
 			.thenReturn(entity);
 
-		assertThatCode(() -> fileRecordService.assertOwnedFileUrl(OwnedFileAssertByUrlRequest.builder()
-			.url(AVATAR_URL)
-			.ownerUserId(OWNER_USER_ID)
-			.bizType("avatar")
-			.build())).doesNotThrowAnyException();
+		OwnedFileAssertByUrlRequest assertRequest = new OwnedFileAssertByUrlRequest();
+		assertRequest.setUrl(AVATAR_URL);
+		assertRequest.setOwnerUserId(OWNER_USER_ID);
+		assertRequest.setBizType("avatar");
+		assertThatCode(() -> fileRecordService.assertOwnedFileUrl(assertRequest)).doesNotThrowAnyException();
 	}
 
 	@Test
@@ -98,11 +98,11 @@ class InternalFileRecordServiceImplTest {
 		when(fileRecordMapper.selectActiveByUrlAndOwner(eq(AVATAR_URL), isNull(), eq(OWNER_USER_ID), eq("avatar")))
 			.thenReturn(null);
 
-		ThrowingCallable executable = () -> fileRecordService.assertOwnedFileUrl(OwnedFileAssertByUrlRequest.builder()
-			.url(AVATAR_URL)
-			.ownerUserId(OWNER_USER_ID)
-			.bizType("avatar")
-			.build());
+		OwnedFileAssertByUrlRequest assertRequest = new OwnedFileAssertByUrlRequest();
+		assertRequest.setUrl(AVATAR_URL);
+		assertRequest.setOwnerUserId(OWNER_USER_ID);
+		assertRequest.setBizType("avatar");
+		ThrowingCallable executable = () -> fileRecordService.assertOwnedFileUrl(assertRequest);
 		assertThatThrownBy(executable).isInstanceOf(FileStorageException.class)
 			.extracting(ex -> ((FileStorageException) ex).getResultCode())
 			.isEqualTo(FileUploadResultCode.FILE_RECORD_NOT_FOUND);
@@ -117,12 +117,12 @@ class InternalFileRecordServiceImplTest {
 		when(fileRecordMapper.selectActiveByUrlAndOwner(isNull(), eq(objectKey), eq(OWNER_USER_ID), eq("avatar")))
 			.thenReturn(null);
 
-		fileRecordService.tryDeleteOwnedByUrl(OwnedFileDeleteByUrlRequest.builder()
-			.url(url)
-			.ownerUserId(OWNER_USER_ID)
-			.deleteSource(FileDeleteSource.SYSTEM_ACTION.getCode())
-			.bizType("avatar")
-			.build());
+		OwnedFileDeleteByUrlRequest deleteRequest = new OwnedFileDeleteByUrlRequest();
+		deleteRequest.setUrl(url);
+		deleteRequest.setOwnerUserId(OWNER_USER_ID);
+		deleteRequest.setDeleteSource(FileDeleteSource.SYSTEM_ACTION.getCode());
+		deleteRequest.setBizType("avatar");
+		fileRecordService.tryDeleteOwnedByUrl(deleteRequest);
 
 		verify(facadeRegistry, never()).resolve(any());
 		verify(fileRecordMapper, never()).deletePhysicallyByIds(anyList(), anyBoolean());
@@ -141,12 +141,12 @@ class InternalFileRecordServiceImplTest {
 		when(facadeRegistry.resolve(StoragePlatformEnum.MINIO)).thenReturn(storagePlatformFacade);
 		when(storagePlatformFacade.provider()).thenReturn(minioProvider);
 
-		fileRecordService.tryDeleteOwnedByUrl(OwnedFileDeleteByUrlRequest.builder()
-			.url(AVATAR_URL)
-			.ownerUserId(OWNER_USER_ID)
-			.deleteSource(FileDeleteSource.SYSTEM_ACTION.getCode())
-			.bizType("avatar")
-			.build());
+		OwnedFileDeleteByUrlRequest deleteRequest = new OwnedFileDeleteByUrlRequest();
+		deleteRequest.setUrl(AVATAR_URL);
+		deleteRequest.setOwnerUserId(OWNER_USER_ID);
+		deleteRequest.setDeleteSource(FileDeleteSource.SYSTEM_ACTION.getCode());
+		deleteRequest.setBizType("avatar");
+		fileRecordService.tryDeleteOwnedByUrl(deleteRequest);
 
 		verify(minioProvider).delete("public", AVATAR_OBJECT_KEY);
 		verify(fileRecordMapper).deletePhysicallyByIds(List.of(100L), false);

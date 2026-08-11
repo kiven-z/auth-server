@@ -1,11 +1,11 @@
 package com.auth.service.auth.support.login.strategy;
 
+import com.auth.common.data.model.enums.UserStatus;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.auth.exception.AuthBadCredentialsException;
 import com.auth.service.auth.exception.AuthBusinessException;
 import com.auth.service.auth.exception.AuthResultCode;
 import com.auth.service.auth.model.enums.AuthLoginLogType;
-import com.auth.service.auth.model.enums.UserAccountLoginEligibility;
 import com.auth.service.auth.model.value.login.AuthenticatedUser;
 import com.auth.service.auth.model.value.login.LoginAccount;
 import com.auth.service.auth.model.value.login.LoginResult;
@@ -96,21 +96,15 @@ public abstract class AbstractLoginStrategyTemplate<T extends BaseLoginCommand> 
 	private void assertNotLockedOrAuditAndRethrow(HttpServletRequest request, LoginAccount account) {
 		Long userId = account.id();
 		try {
-			UserAccountLoginEligibility eligibility = UserAccountLoginEligibility.fromStatus(account.status());
-			switch (eligibility) {
-				case DISABLED -> {
-					loginAuditService.auditAccountDisabled(request, loginLogType(), userId, account.username(),
-							AuthResultCode.USER_DISABLED.getMessageKey());
-					throw new AuthBusinessException(AuthResultCode.USER_DISABLED);
-				}
-				case STATUS_LOCKED -> {
-					loginAuditService.auditAccountLockedByStatus(request, loginLogType(), userId, account.username());
-					throw new AuthBusinessException(AuthResultCode.USER_LOCKED);
-				}
-				case ALLOWED -> {
-					// 继续检查登录失败锁定计数
-				}
-				default -> throw new AuthBusinessException(AuthResultCode.AUTH_REQUEST_TYPE_UNSUPPORTED);
+			UserStatus status = UserStatus.ofNullable(account.status());
+			if (status == null || status == UserStatus.DISABLED) {
+				loginAuditService.auditAccountDisabled(request, loginLogType(), userId, account.username(),
+						AuthResultCode.USER_DISABLED.getMessageKey());
+				throw new AuthBusinessException(AuthResultCode.USER_DISABLED);
+			}
+			if (status == UserStatus.LOCKED) {
+				loginAuditService.auditAccountLockedByStatus(request, loginLogType(), userId, account.username());
+				throw new AuthBusinessException(AuthResultCode.USER_LOCKED);
 			}
 
 			loginFailureRateLimiter.assertNotLocked(userId);

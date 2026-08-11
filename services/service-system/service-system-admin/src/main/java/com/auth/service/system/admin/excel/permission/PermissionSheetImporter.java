@@ -2,8 +2,7 @@ package com.auth.service.system.admin.excel.permission;
 
 import com.auth.module.file.importer.AbstractSheetImporter;
 import com.auth.module.file.importer.model.ImportRowError;
-import com.auth.module.file.importer.model.ImportRowValidator;
-import com.auth.module.security.contract.convention.AuthCodeConvention;
+import com.auth.module.file.importer.model.RowOutcome;
 import com.auth.service.system.admin.excel.EnableStatus;
 import com.auth.service.system.admin.excel.EnableStatusLabels;
 import com.auth.service.system.admin.excel.ImportRowSupport;
@@ -21,10 +20,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.auth.module.file.importer.model.ImportErrorCode.INVALID_FORMAT;
-
 /**
- * 权限导入器：封装行级校验与批量写入逻辑。
+ * 权限导入器：Extract → Validate → Map 三阶段编排。
  *
  * @author Bunny
  */
@@ -32,16 +29,6 @@ import static com.auth.module.file.importer.model.ImportErrorCode.INVALID_FORMAT
 @Component
 public class PermissionSheetImporter
 		extends AbstractSheetImporter<SysPermissionImportRow, SysPermissionForm, PermissionSheetImporter.Context> {
-
-	/**
-	 * 导入校验字段名：permissionCode
-	 */
-	private static final String FIELD_PERMISSION_CODE = "permissionCode";
-
-	/**
-	 * 导入校验字段：permissionName
-	 */
-	private static final String FIELD_PERMISSION_NAME = "permissionName";
 
 	private final SysPermissionMapper sysPermissionMapper;
 
@@ -70,26 +57,26 @@ public class PermissionSheetImporter
 	@Override
 	protected SysPermissionForm convertRow(SysPermissionImportRow row, int rowNum, List<ImportRowError> errors,
 			Context context) {
-		ImportRowValidator v = ImportRowValidator.of(rowNum, errors);
-		String permissionCode = v.require(row.getPermissionCode(), FIELD_PERMISSION_CODE);
-		String permissionName = v.require(row.getPermissionName(), FIELD_PERMISSION_NAME);
+		RowOutcome<PermissionParsedRow> extracted = PermissionRowExtractor.extract(row, rowNum);
+		if (!extracted.ok()) {
+			errors.addAll(extracted.errors());
+			return null;
+		}
 
-		return ImportRowSupport
-			.requireEnableStatus(v
-				.unique(permissionCode, context.duplicatePermissionCodesInFile(), context.existingPermissionCodes(),
-						FIELD_PERMISSION_CODE)
-				.assertThat(AuthCodeConvention.isWellFormedPermissionCode(permissionCode), INVALID_FORMAT,
-						FIELD_PERMISSION_CODE, permissionCode),
-					row.getStatusLabel())
-			.mapOrNull(() -> {
-				SysPermissionForm form = new SysPermissionForm();
-				form.setPermissionCode(permissionCode);
-				form.setPermissionName(permissionName);
-				form.setStatus(EnableStatusLabels.parseImport(row.getStatusLabel()) == EnableStatus.ENABLED);
-				form.setOrderNum(row.getOrderNum());
-				form.setRemark(row.getRemark());
-				return form;
-			});
+		PermissionParsedRow parsed = extracted.value();
+		List<ImportRowError> violations = PermissionRowValidator.validate(parsed, rowNum, context);
+		if (!violations.isEmpty()) {
+			errors.addAll(violations);
+			return null;
+		}
+
+		SysPermissionForm form = new SysPermissionForm();
+		form.setPermissionCode(parsed.permissionCode());
+		form.setPermissionName(parsed.permissionName());
+		form.setStatus(EnableStatusLabels.parseImport(parsed.statusLabel()) == EnableStatus.ENABLED);
+		form.setOrderNum(parsed.orderNum());
+		form.setRemark(parsed.remark());
+		return form;
 	}
 
 	@Override

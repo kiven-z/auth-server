@@ -1,19 +1,18 @@
 package com.auth.module.security.datapermission.handler;
 
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
 import com.auth.module.security.contract.api.datascope.DataScopeStorageType;
 import com.auth.module.security.contract.constants.PermissionConstant;
 import com.auth.module.security.datapermission.annotation.DataScope;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.text.CharSequenceUtil;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * 默认处理器：按部门/自身范围生成 SQL 条件
@@ -46,7 +45,7 @@ public class DefaultDataScopeHandler implements DataScopeHandler {
 		DataScopeStorageType scopeType = resolveEffectiveScopeType(dataScope.scope(), grant);
 		return switch (scopeType) {
 			case ALL -> null;
-			case SELF -> safeUserColumn + " = " + profile.getUserId();
+			case SELF, FROM_PROFILE -> safeUserColumn + " = " + profile.getUserId();
 			case DEPT, DEPT_AND_CHILD -> {
 				List<Long> grantValues = grant == null ? List.of() : grant.getValues();
 				List<Long> normalizeValues = Objects.requireNonNullElse(grantValues, List.<Long>of())
@@ -56,7 +55,6 @@ public class DefaultDataScopeHandler implements DataScopeHandler {
 
 				yield buildDimensionInCondition(safeDimensionColumn, normalizeValues);
 			}
-			case FROM_PROFILE -> safeUserColumn + " = " + profile.getUserId();
 		};
 	}
 

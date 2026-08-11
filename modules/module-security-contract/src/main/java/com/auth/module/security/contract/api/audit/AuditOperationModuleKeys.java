@@ -7,7 +7,7 @@ import java.util.Objects;
 /**
  * 将 {@link AuditServiceDomain} 与小模块编码组合为写入 log_operation.module 的稳定键。
  * <p>
- * 小模块编码由各微服务自行定义常量，平台仅负责拼接规则。
+ * 跨能力共享资源码见 {@link PlatformBizCodes}；服务域专有编码由各微服务本地常量维护。平台仅负责拼接规则。
  * </p>
  *
  * @author Bunny

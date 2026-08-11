@@ -22,6 +22,16 @@
     <dependencies>
         <dependency>
             <groupId>com.auth</groupId>
+            <artifactId>module-file-api</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.auth</groupId>
+            <artifactId>module-file</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.auth</groupId>
             <artifactId>module-security-data-permission</artifactId>
             <version>${revision}</version>
         </dependency>

@@ -15,6 +15,7 @@ import com.auth.service.system.file.service.FileRecordService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -31,6 +32,7 @@ import static com.auth.service.system.file.model.constants.FileAuditBizModule.SY
  * @author Bunny
  */
 @Tag(name = "文件查询与治理", description = "管理端文件分页、详情与删除")
+@RequiredArgsConstructor
 @RequestMapping("/api/system/file")
 @RestController
 public class FileRecordController {
@@ -38,11 +40,6 @@ public class FileRecordController {
 	private final FileRecordQueryService fileRecordQueryService;
 
 	private final FileRecordService fileRecordService;
-
-	public FileRecordController(FileRecordQueryService fileRecordQueryService, FileRecordService fileRecordService) {
-		this.fileRecordQueryService = fileRecordQueryService;
-		this.fileRecordService = fileRecordService;
-	}
 
 	@Operation(summary = "分页查询文件")
 	@PreAuthorize("@auth.decide('sys:file:query')")

@@ -55,11 +55,11 @@ public class UserAvatarUpdateSupport {
 		}
 
 		try {
-			ownedFileOperations.assertOwnedFileUrl(OwnedFileAssertByUrlRequest.builder()
-				.url(avatar)
-				.ownerUserId(fileOwnerUserId)
-				.bizType(FileBizType.AVATAR.getCode())
-				.build());
+			OwnedFileAssertByUrlRequest assertRequest = new OwnedFileAssertByUrlRequest();
+			assertRequest.setUrl(avatar);
+			assertRequest.setOwnerUserId(fileOwnerUserId);
+			assertRequest.setBizType(FileBizType.AVATAR.getCode());
+			ownedFileOperations.assertOwnedFileUrl(assertRequest);
 		}
 		catch (RuntimeException ex) {
 			throw new SystemBusinessException(SystemCommonResultCode.OPERATION_FAILED, ex.getMessage());
@@ -100,12 +100,12 @@ public class UserAvatarUpdateSupport {
 	private void submitCleanupOldAvatar(Long ownerUserId, String oldAvatarUrl) {
 		adminAsyncExecutor.execute(() -> {
 			try {
-				ownedFileOperations.tryDeleteOwnedByUrl(OwnedFileDeleteByUrlRequest.builder()
-					.url(oldAvatarUrl)
-					.ownerUserId(ownerUserId)
-					.deleteSource(FileDeleteSource.SYSTEM_ACTION.getCode())
-					.bizType(FileBizType.AVATAR.getCode())
-					.build());
+				OwnedFileDeleteByUrlRequest deleteRequest = new OwnedFileDeleteByUrlRequest();
+				deleteRequest.setUrl(oldAvatarUrl);
+				deleteRequest.setOwnerUserId(ownerUserId);
+				deleteRequest.setDeleteSource(FileDeleteSource.SYSTEM_ACTION.getCode());
+				deleteRequest.setBizType(FileBizType.AVATAR.getCode());
+				ownedFileOperations.tryDeleteOwnedByUrl(deleteRequest);
 			}
 			catch (RuntimeException ex) {
 				log.warn("Failed to cleanup old avatar: ownerUserId={}, url={}, error={}", ownerUserId, oldAvatarUrl,

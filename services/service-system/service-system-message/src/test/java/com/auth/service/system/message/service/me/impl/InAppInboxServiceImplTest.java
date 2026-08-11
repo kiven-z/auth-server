@@ -1,6 +1,7 @@
 package com.auth.service.system.message.service.me.impl;
 
 import com.auth.common.data.model.PageResponse;
+import com.auth.module.message.api.model.enums.MessageContentType;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.mapper.InAppInboxMapper;
@@ -9,7 +10,6 @@ import com.auth.service.system.message.mapper.InAppMessageRecipientMapper;
 import com.auth.service.system.message.mapper.InAppMessageUserStatusMapper;
 import com.auth.service.system.message.model.entity.InAppMessageEntity;
 import com.auth.service.system.message.model.entity.InAppMessageUserStatusEntity;
-import com.auth.service.system.message.model.enums.InAppContentType;
 import com.auth.service.system.message.model.enums.InAppMessageStatus;
 import com.auth.service.system.message.model.enums.RecipientScopeType;
 import com.auth.service.system.message.model.po.InAppInboxDetailRowPO;
@@ -82,9 +82,9 @@ class InAppInboxServiceImplTest {
 	void getInboxPage_shouldPassUserIdAndMapFields() {
 		// 登录用户查统一收件箱：未读优先结果映射到列表 VO
 		InAppInboxQuery query = new InAppInboxQuery();
-		query.setMajorCategoryId(1907200100000000007L);
+		query.setMajorCategoryId(1L);
 		query.setIsRead(false);
-		query.setCategoryId(1907200100000000401L);
+		query.setCategoryId(104L);
 		query.setTitle("公告");
 		query.setPageIndex(1);
 		query.setPageSize(10);
@@ -94,8 +94,8 @@ class InAppInboxServiceImplTest {
 		row.setId(11L);
 		row.setSceneCode("notice");
 		row.setTitle("系统公告");
-		row.setContentType(InAppContentType.MARKDOWN.name());
-		row.setCategoryId(1907200100000000401L);
+		row.setContentType(MessageContentType.MARKDOWN.name());
+		row.setCategoryId(104L);
 		row.setCategoryName("一般通知");
 		row.setLinkUrl("/notice/11");
 		row.setSenderUserId(7L);
@@ -122,8 +122,8 @@ class InAppInboxServiceImplTest {
 			assertThat(vo.getId()).isEqualTo(11L);
 			assertThat(vo.getSceneCode()).isEqualTo("notice");
 			assertThat(vo.getTitle()).isEqualTo("系统公告");
-			assertThat(vo.getContentType()).isEqualTo(InAppContentType.MARKDOWN.name());
-			assertThat(vo.getCategoryId()).isEqualTo(1907200100000000401L);
+			assertThat(vo.getContentType()).isEqualTo(MessageContentType.MARKDOWN.name());
+			assertThat(vo.getCategoryId()).isEqualTo(104L);
 			assertThat(vo.getCategoryName()).isEqualTo("一般通知");
 			assertThat(vo.getLinkUrl()).isEqualTo("/notice/11");
 			assertThat(vo.getSenderUserId()).isEqualTo(7L);
@@ -133,8 +133,8 @@ class InAppInboxServiceImplTest {
 
 		ArgumentCaptor<InAppInboxQuery> queryCaptor = ArgumentCaptor.forClass(InAppInboxQuery.class);
 		verify(inAppInboxMapper).selectInboxPage(any(Page.class), eq(100L), queryCaptor.capture());
-		assertThat(queryCaptor.getValue().getMajorCategoryId()).isEqualTo(1907200100000000007L);
-		assertThat(queryCaptor.getValue().getCategoryId()).isEqualTo(1907200100000000401L);
+		assertThat(queryCaptor.getValue().getMajorCategoryId()).isEqualTo(1L);
+		assertThat(queryCaptor.getValue().getCategoryId()).isEqualTo(104L);
 		assertThat(queryCaptor.getValue().getIsRead()).isFalse();
 		assertThat(queryCaptor.getValue().getTitle()).isEqualTo("公告");
 	}
@@ -144,16 +144,16 @@ class InAppInboxServiceImplTest {
 	void getUnreadCount_shouldAggregateByMajor() {
 		// Mapper 返回启用大类（含名称/编码），Service 映射并汇总 total
 		InAppInboxMajorUnreadRowPO notice = new InAppInboxMajorUnreadRowPO();
-		notice.setMajorCategoryId(1907200100000000007L);
+		notice.setMajorCategoryId(1L);
 		notice.setMajorCategoryName("通知消息");
 		notice.setMajorCategoryCode("NOTICE");
 		notice.setUnreadCount(3L);
-		InAppInboxMajorUnreadRowPO activity = new InAppInboxMajorUnreadRowPO();
-		activity.setMajorCategoryId(1907200100000000006L);
-		activity.setMajorCategoryName("活动消息");
-		activity.setMajorCategoryCode("ACTIVITY");
-		activity.setUnreadCount(5L);
-		when(inAppInboxMapper.selectUnreadCountByMajor(100L)).thenReturn(List.of(notice, activity));
+		InAppInboxMajorUnreadRowPO securityMajor = new InAppInboxMajorUnreadRowPO();
+		securityMajor.setMajorCategoryId(2L);
+		securityMajor.setMajorCategoryName("安全消息");
+		securityMajor.setMajorCategoryCode("SECURITY");
+		securityMajor.setUnreadCount(5L);
+		when(inAppInboxMapper.selectUnreadCountByMajor(100L)).thenReturn(List.of(notice, securityMajor));
 
 		try (MockedStatic<SecurityUserUtils> security = mockStatic(SecurityUserUtils.class)) {
 			security.when(SecurityUserUtils::getUserId).thenReturn(100L);
@@ -163,11 +163,11 @@ class InAppInboxServiceImplTest {
 			assertThat(result.getTotalUnreadCount()).isEqualTo(8L);
 			assertThat(result.getMajors()).hasSize(2);
 			InAppInboxMajorUnreadVO first = result.getMajors().get(0);
-			assertThat(first.getMajorCategoryId()).isEqualTo(1907200100000000007L);
+			assertThat(first.getMajorCategoryId()).isEqualTo(1L);
 			assertThat(first.getMajorCategoryName()).isEqualTo("通知消息");
 			assertThat(first.getMajorCategoryCode()).isEqualTo("NOTICE");
 			assertThat(first.getUnreadCount()).isEqualTo(3L);
-			assertThat(result.getMajors().get(1).getMajorCategoryId()).isEqualTo(1907200100000000006L);
+			assertThat(result.getMajors().get(1).getMajorCategoryId()).isEqualTo(2L);
 			assertThat(result.getMajors().get(1).getUnreadCount()).isEqualTo(5L);
 		}
 
@@ -300,7 +300,7 @@ class InAppInboxServiceImplTest {
 	@DisplayName("当前大类全部已读：查出未读 ID 后按范围分流标已读")
 	void markAllRead_shouldLoadUnreadIdsThenMarkRead() {
 		// 大类未读 ID 由 Mapper 圈定，再走与批量已读相同的写扩散/读扩散分流
-		Long majorCategoryId = 1907200100000000007L;
+		Long majorCategoryId = 1L;
 		when(inAppInboxMapper.selectUnreadMessageIdsByMajor(100L, majorCategoryId)).thenReturn(List.of(11L, 13L));
 
 		InAppMessageEntity pushMessage = new InAppMessageEntity();
@@ -330,7 +330,7 @@ class InAppInboxServiceImplTest {
 	@DisplayName("当前大类全部已读：无未读时不写库")
 	void markAllRead_shouldNoOpWhenNoUnread() {
 		// 大类下无未读时不访问主表与写 Mapper
-		Long majorCategoryId = 1907200100000000007L;
+		Long majorCategoryId = 1L;
 		when(inAppInboxMapper.selectUnreadMessageIdsByMajor(100L, majorCategoryId)).thenReturn(List.of());
 
 		try (MockedStatic<SecurityUserUtils> security = mockStatic(SecurityUserUtils.class)) {
@@ -347,7 +347,7 @@ class InAppInboxServiceImplTest {
 	@DisplayName("当前大类全部已读：未读 ID 超过批次时分片调用标已读")
 	void markAllRead_shouldSplitBatchesWhenUnreadExceedsBatchSize() {
 		// 501 条按 INBOX_MARK_READ=500 拆成 2 批，每批都会走 resolveActionableIds
-		Long majorCategoryId = 1907200100000000007L;
+		Long majorCategoryId = 1L;
 		List<Long> unreadIds = new java.util.ArrayList<>(501);
 		for (long id = 1L; id <= 501L; id++) {
 			unreadIds.add(id);
@@ -476,7 +476,7 @@ class InAppInboxServiceImplTest {
 	@DisplayName("当前大类全部删除：查出可见 ID 后按范围分流软删")
 	void deleteAll_shouldLoadVisibleIdsThenBatchDelete() {
 		// 大类可见 ID 由 Mapper 圈定，再走与批量删除相同的写扩散/读扩散分流
-		Long majorCategoryId = 1907200100000000007L;
+		Long majorCategoryId = 1L;
 		when(inAppInboxMapper.selectVisibleMessageIdsByMajor(100L, majorCategoryId)).thenReturn(List.of(11L, 13L));
 
 		InAppMessageEntity pushMessage = new InAppMessageEntity();
@@ -506,7 +506,7 @@ class InAppInboxServiceImplTest {
 	@DisplayName("当前大类全部删除：无可见消息时不写库")
 	void deleteAll_shouldNoOpWhenNoVisible() {
 		// 大类下无可删消息时不访问主表与写 Mapper
-		Long majorCategoryId = 1907200100000000007L;
+		Long majorCategoryId = 1L;
 		when(inAppInboxMapper.selectVisibleMessageIdsByMajor(100L, majorCategoryId)).thenReturn(List.of());
 
 		try (MockedStatic<SecurityUserUtils> security = mockStatic(SecurityUserUtils.class)) {
@@ -523,7 +523,7 @@ class InAppInboxServiceImplTest {
 	@DisplayName("当前大类全部删除：可见 ID 超过批次时分片调用批量删除")
 	void deleteAll_shouldSplitBatchesWhenVisibleExceedsBatchSize() {
 		// 501 条按 INBOX_DELETE=500 拆成 2 批，每批都会走 resolveActionableIds
-		Long majorCategoryId = 1907200100000000007L;
+		Long majorCategoryId = 1L;
 		List<Long> visibleIds = new java.util.ArrayList<>(501);
 		for (long id = 1L; id <= 501L; id++) {
 			visibleIds.add(id);
@@ -549,8 +549,8 @@ class InAppInboxServiceImplTest {
 		row.setId(11L);
 		row.setTitle("定向通知");
 		row.setContent("push-body");
-		row.setContentType(InAppContentType.MARKDOWN.name());
-		row.setCategoryId(1907200100000000401L);
+		row.setContentType(MessageContentType.MARKDOWN.name());
+		row.setCategoryId(104L);
 		row.setCategoryName("一般通知");
 		row.setIsRead(false);
 
@@ -584,7 +584,7 @@ class InAppInboxServiceImplTest {
 		row.setId(13L);
 		row.setTitle("公开公告");
 		row.setContent("pull-body");
-		row.setContentType(InAppContentType.TEXT.name());
+		row.setContentType(MessageContentType.TEXT.name());
 		row.setIsRead(false);
 
 		InAppMessageEntity message = new InAppMessageEntity();

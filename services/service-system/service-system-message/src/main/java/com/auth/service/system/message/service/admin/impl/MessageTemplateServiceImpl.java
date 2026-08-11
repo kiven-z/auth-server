@@ -7,12 +7,12 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.message.api.model.email.EmailChannelOptions;
+import com.auth.module.message.api.model.enums.MessageContentType;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.message.convert.MessageTemplateConverter;
 import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.mapper.MessageTemplateMapper;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
-import com.auth.service.system.message.model.enums.InAppContentType;
 import com.auth.service.system.message.model.form.MessageTemplateRequireFieldsForm;
 import com.auth.service.system.message.model.form.MessageTemplateStatusForm;
 import com.auth.service.system.message.model.form.MessageTemplateTestSendForm;
@@ -82,8 +82,8 @@ public class MessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMappe
 
 		String contentType = switch (MessageChannel.valueOf(entity.getChannel())) {
 			case EMAIL -> "HTML";
-			case IN_APP -> InAppContentType.from(entity.getImMessageType()).name();
-			default -> InAppContentType.TEXT.name();
+			case IN_APP -> MessageContentType.from(entity.getImMessageType()).name();
+			default -> MessageContentType.TEXT.name();
 		};
 		vo.setContentType(contentType);
 
@@ -193,7 +193,7 @@ public class MessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMappe
 			case DING_TALK, IN_APP -> true;
 		};
 		if (!valid) {
-			throw new MessageException(DATA_INVALID, "send target is invalid");
+			throw new MessageException(DATA_INVALID, "目标发送类型不正确");
 		}
 
 		MessageTemplateEntity entity = requireTemplate(form.getId(), channel.name());
@@ -202,8 +202,11 @@ public class MessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMappe
 		Map<String, Object> variables = MessageTemplateRequireFieldsJsonSupport.toExampleModel(rows);
 
 		// 组装渠道默认扩展参数
-		EmailChannelOptions options = channel == MessageChannel.EMAIL
-				? EmailChannelOptions.builder().hasHtml(Boolean.TRUE).build() : null;
+		EmailChannelOptions options = null;
+		if (channel == MessageChannel.EMAIL) {
+			options = new EmailChannelOptions();
+			options.setHasHtml(Boolean.TRUE);
+		}
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
 			.channel(channel)
 			.templateCode(entity.getSceneCode())

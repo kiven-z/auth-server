@@ -1,8 +1,8 @@
 package com.auth.service.auth.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import com.auth.common.core.constants.BatchSizes;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
-import com.auth.service.auth.model.constants.AuthBatchSizes;
 import com.auth.service.auth.model.vo.authorization.EffectiveCodesVO;
 import com.auth.service.auth.service.AdminAuthorizationService;
 import com.auth.service.auth.support.authorization.AuthProfileRepository;
@@ -76,7 +76,7 @@ public class AdminAuthorizationServiceImpl implements AdminAuthorizationService 
 			return;
 		}
 
-		authProfileMaterializationService.refreshInBatches(normalizedUserIds, AuthBatchSizes.INVALIDATION);
+		authProfileMaterializationService.refreshInBatches(normalizedUserIds, BatchSizes.SIZE_500);
 	}
 
 }

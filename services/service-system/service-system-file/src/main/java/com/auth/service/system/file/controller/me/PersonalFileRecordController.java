@@ -30,8 +30,8 @@ import static com.auth.service.system.file.model.constants.FileAuditBizModule.SY
  *
  * @author Bunny
  */
-@Tag(name = "个人文件", description = "当前用户文件查询、下载与删除")
 @AuthenticatedApi
+@Tag(name = "个人文件", description = "当前用户文件查询、下载与删除")
 @RequestMapping("/api/system/me/file")
 @RestController
 public class PersonalFileRecordController {

@@ -30,8 +30,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * {@link FileRecordQueryServiceImpl} 单元测试。
@@ -125,11 +124,12 @@ class FileRecordQueryServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("getDetail：返回详情并填充 accessUrl")
+	@DisplayName("getDetail：可预览类型返回详情并填充 accessUrl")
 	void getDetailReturnsDetailWithSignedAccessUrl() {
 		// 验证详情查询会映射实体、签名临时访问地址并补充审计用户名。
 		FileRecordEntity entity = buildDetailEntity(1001L);
 		when(fileRecordMapper.selectDetailById(1001L, null, null, false, null)).thenReturn(entity);
+		when(fileUrlSigner.isPreviewContentTypeAllowed(entity.getContentType())).thenReturn(true);
 		when(fileUrlSigner.sign(entity.getBucket(), entity.getObjectKey(), entity.getContentType(),
 				entity.getStoragePlatform()))
 			.thenReturn("https://minio.example.com/public/a.png?X-Amz-Signature=demo");
@@ -140,6 +140,28 @@ class FileRecordQueryServiceImplTest {
 		assertThat(detail.getAccessUrl()).isEqualTo("https://minio.example.com/public/a.png?X-Amz-Signature=demo");
 		verify(auditUserDisplayService)
 			.enrichAuditUsernames(org.mockito.ArgumentMatchers.<List<FileRecordDetailVO>>any(), isNull(), isNull());
+	}
+
+	@Test
+	@DisplayName("getDetail：不可预览类型仍返回详情并用 signDownload 填充 accessUrl")
+	void getDetailUsesSignDownloadWhenContentTypeNotPreviewable() {
+		// 验证不可预览类型也签发临时访问地址，便于分享；仅跳过预览 MIME 白名单。
+		FileRecordEntity entity = buildDetailEntity(1002L);
+		entity.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+		entity.setObjectKey("export/a.xlsx");
+		when(fileRecordMapper.selectDetailById(1002L, 9001L, null, false, null)).thenReturn(entity);
+		when(fileUrlSigner.isPreviewContentTypeAllowed(entity.getContentType())).thenReturn(false);
+		when(fileUrlSigner.signDownload(entity.getBucket(), entity.getObjectKey(), entity.getStoragePlatform()))
+			.thenReturn("https://minio.example.com/private/export/a.xlsx?X-Amz-Signature=demo");
+
+		FileRecordDetailVO detail = fileRecordQueryService.getDetail(1002L, 9001L, null, false, null);
+
+		assertThat(detail.getId()).isEqualTo(1002L);
+		assertThat(detail.getAccessUrl())
+			.isEqualTo("https://minio.example.com/private/export/a.xlsx?X-Amz-Signature=demo");
+		verify(fileUrlSigner).isPreviewContentTypeAllowed(entity.getContentType());
+		verify(fileUrlSigner, never()).sign(anyString(), anyString(), anyString(), any());
+		verify(fileUrlSigner).signDownload(entity.getBucket(), entity.getObjectKey(), entity.getStoragePlatform());
 	}
 
 	@Test
@@ -179,6 +201,7 @@ class FileRecordQueryServiceImplTest {
 		entity.setDeleteSource(FileDeleteSource.USER_SELF.getCode());
 		when(fileRecordMapper.selectDetailById(4001L, 9001L, true, true, FileDeleteSource.userRecycleSourceCodes()))
 			.thenReturn(entity);
+		when(fileUrlSigner.isPreviewContentTypeAllowed(entity.getContentType())).thenReturn(true);
 		when(fileUrlSigner.sign(anyString(), anyString(), anyString(), any()))
 			.thenReturn("https://signed.example/a.png");
 

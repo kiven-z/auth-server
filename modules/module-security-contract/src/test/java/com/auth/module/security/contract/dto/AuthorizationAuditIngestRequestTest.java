@@ -58,10 +58,9 @@ class AuthorizationAuditIngestRequestTest {
 	@Test
 	@DisplayName("toPayloadEvent 在 eventType 为空时应回落为 DENIED")
 	void toPayloadEvent_whenEventTypeNull_shouldDefaultDenied() {
-		AuthorizationAuditIngestRequest dto = AuthorizationAuditIngestRequest.builder()
-			.eventType(null)
-			.userId(1L)
-			.build();
+		AuthorizationAuditIngestRequest dto = new AuthorizationAuditIngestRequest();
+		dto.setEventType(null);
+		dto.setUserId(1L);
 
 		SecurityAuthorizationAuditPayloadEvent event = dto.toPayloadEvent();
 

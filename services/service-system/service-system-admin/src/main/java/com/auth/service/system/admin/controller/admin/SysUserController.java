@@ -5,12 +5,18 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.common.ip.IpAddressService;
 import com.auth.common.web.valid.group.CreateGroup;
 import com.auth.common.web.valid.group.UpdateGroup;
-import com.auth.module.file.export.ExportScopeQueryFields;
+import com.auth.module.file.api.model.dto.FileExportTaskCreateResult;
+import com.auth.module.file.api.model.request.FileExportTaskCreateRequest;
+import com.auth.module.file.api.port.FileExportTaskOperations;
+import com.auth.module.file.export.definition.ExportColumns;
 import com.auth.module.file.importer.model.SpreadsheetImportResult;
 import com.auth.module.security.autoconfigure.annotation.AuthenticatedApi;
+import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
+import com.auth.module.security.contract.api.audit.PlatformBizCodes;
+import com.auth.service.system.admin.excel.user.SysUserSpreadsheetRow;
 import com.auth.service.system.admin.excel.user.SysUserSpreadsheetService;
 import com.auth.service.system.admin.model.form.user.SysUserAdminResetPasswordForm;
 import com.auth.service.system.admin.model.form.user.SysUserAvatarUpdateForm;
@@ -23,8 +29,8 @@ import com.auth.service.system.admin.model.vo.user.SysUserProfileVO;
 import com.auth.service.system.admin.model.vo.user.SysUserSearchItemVO;
 import com.auth.service.system.admin.service.admin.SysUserQueryService;
 import com.auth.service.system.admin.service.admin.SysUserService;
+import com.auth.service.system.admin.support.export.AdminFileExportTaskCreateRequests;
 import com.auth.service.system.admin.support.user.UserPasswordService;
-import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -64,8 +70,10 @@ public class SysUserController {
 
 	private final IpAddressService ipAddressService;
 
+	private final FileExportTaskOperations fileExportTaskOperations;
+
 	@OperationLog(targetType = "USER_LIST", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.QUERY)
+			bizModule = PlatformBizCodes.SYS_USER, operation = OperationLogKind.QUERY)
 	@Operation(summary = "分页查询用户")
 	@PreAuthorize("@auth.decide('sys:user:query')")
 	@GetMapping("/page")
@@ -102,12 +110,17 @@ public class SysUserController {
 		return Result.success(data);
 	}
 
-	@Operation(summary = "导出用户 Excel")
+	@Operation(summary = "导出用户 Excel", description = "按筛选条件提交异步导出任务")
 	@PreAuthorize("@auth.decide('sys:user:export')")
-	@GetMapping("/export")
-	public ResponseEntity<byte[]> export(@Validated SysUserPageQuery filter, @Validated ExportScopeQueryFields scope)
-			throws IOException {
-		return sysUserSpreadsheetService.export(filter, scope);
+	@PostMapping("/export/async")
+	public Result<FileExportTaskCreateResult> exportAsync(@Validated @RequestBody SysUserPageQuery filter,
+			@Parameter(description = "幂等请求ID") @RequestParam(required = false) String requestId) {
+		FileExportTaskCreateRequest xlsx = AdminFileExportTaskCreateRequests.xlsx(PlatformBizCodes.SYS_USER, filter,
+				requestId, SecurityUserUtils.getUserId(),
+				ExportColumns.fromExcelProperties(SysUserSpreadsheetRow.class));
+
+		FileExportTaskCreateResult result = fileExportTaskOperations.createTask(xlsx);
+		return Result.success(result);
 	}
 
 	@Operation(summary = "下载用户导入模板")
@@ -125,8 +138,8 @@ public class SysUserController {
 		return Result.success(data);
 	}
 
-	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.CREATE)
+	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM, bizModule = PlatformBizCodes.SYS_USER,
+			operation = OperationLogKind.CREATE)
 	@Operation(summary = "新增用户")
 	@PreAuthorize("@auth.decide('sys:user:create')")
 	@PostMapping
@@ -135,8 +148,8 @@ public class SysUserController {
 		return Result.success();
 	}
 
-	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
+	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM, bizModule = PlatformBizCodes.SYS_USER,
+			operation = OperationLogKind.UPDATE)
 	@Operation(summary = "重置用户密码")
 	@PreAuthorize("@auth.decide('sys:user:update')")
 	@PutMapping("/{id}/password")
@@ -147,8 +160,8 @@ public class SysUserController {
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
-	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
+	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM, bizModule = PlatformBizCodes.SYS_USER,
+			operation = OperationLogKind.UPDATE)
 	@Operation(summary = "更新用户头像")
 	@PreAuthorize("@auth.decide('sys:user:update')")
 	@PutMapping("/avatar")
@@ -157,8 +170,8 @@ public class SysUserController {
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
-	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
+	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM, bizModule = PlatformBizCodes.SYS_USER,
+			operation = OperationLogKind.UPDATE)
 	@Operation(summary = "更新用户基础资料")
 	@PreAuthorize("@auth.decide('sys:user:update')")
 	@PutMapping
@@ -167,8 +180,8 @@ public class SysUserController {
 		return Result.success();
 	}
 
-	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.UPDATE)
+	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM, bizModule = PlatformBizCodes.SYS_USER,
+			operation = OperationLogKind.UPDATE)
 	@Operation(summary = "批量启停用户")
 	@PreAuthorize("@auth.decide('sys:user:update')")
 	@PutMapping("/status")
@@ -177,8 +190,8 @@ public class SysUserController {
 		return Result.success(null, OPERATION_SUCCESS.getMessage());
 	}
 
-	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = AuthorizationAuditBizModule.SYS_USER, operation = OperationLogKind.DELETE)
+	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM, bizModule = PlatformBizCodes.SYS_USER,
+			operation = OperationLogKind.DELETE)
 	@Operation(summary = "批量删除用户")
 	@PreAuthorize("@auth.decide('sys:user:delete')")
 	@DeleteMapping

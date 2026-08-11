@@ -1,5 +1,6 @@
 package com.auth.service.system.authorization.job;
 
+import com.auth.common.core.constants.BatchSizes;
 import com.auth.service.system.authorization.config.AuthorizationInvalidationProperties;
 import com.auth.service.system.authorization.mapper.SysAuthorizationInvalidationOutboxMapper;
 import lombok.RequiredArgsConstructor;
@@ -9,8 +10,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-
-import static com.auth.service.system.authorization.model.constants.AuthorizationBatchSizes.SUCCESS_CLEANUP;
 
 /**
  * 授权失效 Outbox SUCCESS 历史清理：删除已完成且超过保留期的投递记录
@@ -50,9 +49,9 @@ public class AuthorizationInvalidationOutboxHistoryCleanupJob {
 	private int purgeInBatches(Instant cutoff) {
 		int totalDeleted = 0;
 		while (true) {
-			int deleted = outboxMapper.deleteSuccessBefore(cutoff, SUCCESS_CLEANUP);
+			int deleted = outboxMapper.deleteSuccessBefore(cutoff, BatchSizes.SIZE_500);
 			totalDeleted += deleted;
-			if (deleted < SUCCESS_CLEANUP) {
+			if (deleted < BatchSizes.SIZE_500) {
 				break;
 			}
 		}

@@ -20,6 +20,11 @@
         </dependency>
         <dependency>
             <groupId>com.auth</groupId>
+            <artifactId>module-message-api</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.auth</groupId>
             <artifactId>service-system-authorization</artifactId>
         </dependency>
         <dependency>

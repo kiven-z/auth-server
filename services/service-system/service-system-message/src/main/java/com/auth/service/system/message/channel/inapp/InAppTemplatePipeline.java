@@ -2,9 +2,9 @@ package com.auth.service.system.message.channel.inapp;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.message.api.channel.MessageChannel;
+import com.auth.module.message.api.model.enums.MessageContentType;
 import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
-import com.auth.service.system.message.model.enums.InAppContentType;
 import com.auth.service.system.message.model.value.inapp.RenderedInAppMessage;
 import com.auth.service.system.message.model.vo.template.MessageTemplateRequireFieldRow;
 import com.auth.service.system.message.support.template.FreemarkerTemplateRenderer;
@@ -61,7 +61,7 @@ public class InAppTemplatePipeline {
 		String templateName = template.getTemplateName();
 		String title = FreemarkerTemplateRenderer.processTemplate(templateName + "_title", subject, safeVariables);
 		String content = FreemarkerTemplateRenderer.processTemplate(templateName, bodyContent, safeVariables);
-		InAppContentType contentType = InAppContentType.from(template.getImMessageType());
+		MessageContentType contentType = MessageContentType.from(template.getImMessageType());
 
 		return RenderedInAppMessage.builder()
 			.title(title)

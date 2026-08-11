@@ -22,7 +22,9 @@ public @interface OperationLog {
 	AuditServiceDomain serviceDomain();
 
 	/**
-	 * 小模块编码：由各微服务在本服务内定义常量（如 public static final String），平台不维护业务清单
+	 * 小模块编码：跨能力共享资源用
+	 * {@link com.auth.module.security.contract.api.audit.PlatformBizCodes}，
+	 * 服务域专有编码用本服务本地常量
 	 * <p>
 	 * 建议使用 UPPER_SNAKE，与
 	 * {@link com.auth.module.security.contract.api.audit.AuditOperationModuleKeys} 落库后缀一致

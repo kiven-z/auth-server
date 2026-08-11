@@ -4,7 +4,7 @@ import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.module.message.api.model.dingtalk.DingTalkChannelOptions;
-import com.auth.module.message.api.model.dingtalk.DingTalkMessageType;
+import com.auth.module.message.api.model.enums.MessageContentType;
 import com.auth.service.system.message.channel.AbstractRecordingMessageSender;
 import com.auth.service.system.message.channel.dingtalk.client.DingTalkWorkNoticeClient;
 import com.auth.service.system.message.exception.MessageException;
@@ -72,7 +72,7 @@ public class DingTalkMessageSender extends AbstractRecordingMessageSender {
 
 		DingTalkChannelOptions options = command.getOptions() instanceof DingTalkChannelOptions dingTalk ? dingTalk
 				: new DingTalkChannelOptions();
-		DingTalkMessageType type = Objects.requireNonNullElse(options.getMessageType(), DingTalkMessageType.TEXT);
+		MessageContentType type = Objects.requireNonNullElse(options.getMessageType(), MessageContentType.TEXT);
 		return RenderedDingTalkNotice.builder()
 			.messageType(type)
 			.title(options.getTitle())

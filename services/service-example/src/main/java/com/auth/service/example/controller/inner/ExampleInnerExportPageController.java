@@ -1,0 +1,70 @@
+package com.auth.service.example.controller.inner;
+
+import com.auth.common.core.model.response.Result;
+import com.auth.module.file.api.model.dto.ExportPageDataDTO;
+import com.auth.module.file.export.scope.FileExportScopeSnapshots;
+import com.auth.module.security.autoconfigure.annotation.InternalApi;
+import com.auth.module.security.contract.api.authorization.AuthProfile;
+import com.auth.service.example.export.ExampleOrderExportPageFetcher;
+import com.auth.service.example.model.request.ExampleInnerExportPageRequest;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Collections;
+
+/**
+ * 内部导出分页取数（供 file Worker 回调）
+ *
+ * @author Bunny
+ */
+@InternalApi
+@RequiredArgsConstructor
+@RequestMapping("/api/example/inner/export")
+@RestController
+public class ExampleInnerExportPageController {
+
+	private final ExampleOrderExportPageFetcher exportPageFetcher;
+
+	/**
+	 * 统一内部分页取数（恢复权限快照后按业务类型路由）
+	 * @param request 取数请求
+	 * @return 分页数据
+	 */
+	@PostMapping(value = "/page", produces = MediaType.APPLICATION_JSON_VALUE)
+	public Result<ExportPageDataDTO> page(@Valid @RequestBody ExampleInnerExportPageRequest request) {
+		AuthProfile profile = FileExportScopeSnapshots.requireAuthProfile(request.getScopeSnapshotJson());
+		ExportPageDataDTO data = executeWithScope(profile, () -> exportPageFetcher.fetchPage(request.getBizType(),
+				request.getQuerySnapshotJson(), request.getPageNum(), request.getPageSize()));
+		return Result.success(data);
+	}
+
+	private <T> T executeWithScope(AuthProfile profile, ScopedOperation<T> operation) {
+		SecurityContext originalContext = SecurityContextHolder.getContext();
+		SecurityContext scopedContext = SecurityContextHolder.createEmptyContext();
+		scopedContext
+			.setAuthentication(new UsernamePasswordAuthenticationToken(profile, null, Collections.emptyList()));
+		SecurityContextHolder.setContext(scopedContext);
+		try {
+			return operation.execute();
+		}
+		finally {
+			SecurityContextHolder.setContext(originalContext);
+		}
+	}
+
+	@FunctionalInterface
+	private interface ScopedOperation<T> {
+
+		T execute();
+
+	}
+
+}

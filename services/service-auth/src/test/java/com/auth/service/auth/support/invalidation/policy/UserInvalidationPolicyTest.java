@@ -1,5 +1,6 @@
 package com.auth.service.auth.support.invalidation.policy;
 
+import com.auth.common.data.model.enums.UserStatus;
 import com.auth.service.auth.model.po.user.UserInvalidationStatePO;
 import com.auth.service.auth.model.value.invalidation.UserInvalidationBuckets;
 import org.junit.jupiter.api.DisplayName;
@@ -29,7 +30,7 @@ class UserInvalidationPolicyTest {
 	@Test
 	@DisplayName("正常用户进入 versionBump 桶")
 	void partition_activeUser_shouldVersionBump() {
-		UserInvalidationBuckets buckets = policy.partition(List.of(state(1L, 1)));
+		UserInvalidationBuckets buckets = policy.partition(List.of(state(1L, UserStatus.NORMAL.getCode())));
 
 		assertEquals(Set.of(1L), buckets.versionBumpUserIds());
 		assertTrue(buckets.evictOnlyUserIds().isEmpty());
@@ -38,7 +39,7 @@ class UserInvalidationPolicyTest {
 	@Test
 	@DisplayName("禁用用户仅驱逐缓存")
 	void partition_disabledUser_shouldEvictOnly() {
-		UserInvalidationBuckets buckets = policy.partition(List.of(state(2L, 0)));
+		UserInvalidationBuckets buckets = policy.partition(List.of(state(2L, UserStatus.DISABLED.getCode())));
 
 		assertTrue(buckets.versionBumpUserIds().isEmpty());
 		assertEquals(Set.of(2L), buckets.evictOnlyUserIds());
@@ -47,7 +48,7 @@ class UserInvalidationPolicyTest {
 	@Test
 	@DisplayName("锁定用户仅驱逐缓存")
 	void partition_lockedUser_shouldEvictOnly() {
-		UserInvalidationBuckets buckets = policy.partition(List.of(state(3L, 2)));
+		UserInvalidationBuckets buckets = policy.partition(List.of(state(3L, UserStatus.LOCKED.getCode())));
 
 		assertTrue(buckets.versionBumpUserIds().isEmpty());
 		assertEquals(Set.of(3L), buckets.evictOnlyUserIds());

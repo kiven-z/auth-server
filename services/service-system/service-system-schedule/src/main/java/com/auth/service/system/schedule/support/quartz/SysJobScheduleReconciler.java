@@ -1,8 +1,8 @@
 package com.auth.service.system.schedule.support.quartz;
 
 import cn.hutool.core.collection.CollUtil;
+import com.auth.common.core.constants.BatchSizes;
 import com.auth.service.system.schedule.mapper.JobMapper;
-import com.auth.service.system.schedule.model.constants.ScheduleBatchSizes;
 import com.auth.service.system.schedule.model.entity.JobEntity;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -76,13 +76,13 @@ public class SysJobScheduleReconciler {
 			.orderByAsc(JobEntity::getId);
 
 		// 查询第一页
-		IPage<JobEntity> firstPage = jobMapper.selectPage(new Page<>(1, ScheduleBatchSizes.RECONCILE_PAGE), query);
+		IPage<JobEntity> firstPage = jobMapper.selectPage(new Page<>(1, BatchSizes.SIZE_500), query);
 		long totalPages = firstPage.getPages();
 
 		// 遍历所有页
 		for (long pageNum = 1; pageNum <= totalPages; pageNum++) {
 			IPage<JobEntity> result = pageNum == 1 ? firstPage
-					: jobMapper.selectPage(new Page<>(pageNum, ScheduleBatchSizes.RECONCILE_PAGE), query);
+					: jobMapper.selectPage(new Page<>(pageNum, BatchSizes.SIZE_500), query);
 
 			// 对账任务
 			for (JobEntity job : result.getRecords()) {

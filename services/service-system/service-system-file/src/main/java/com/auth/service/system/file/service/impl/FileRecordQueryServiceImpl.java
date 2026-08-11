@@ -1,7 +1,6 @@
 package com.auth.service.system.file.service.impl;
 
 import com.auth.common.data.model.PageResponse;
-import com.auth.module.file.api.model.enums.StoragePlatformEnum;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.file.convert.FileRecordQueryConverter;
 import com.auth.service.system.file.exception.FileStorageException;
@@ -73,10 +72,11 @@ public class FileRecordQueryServiceImpl extends ServiceImpl<FileRecordMapper, Fi
 		String bucket = entity.getBucket();
 		String objectKey = entity.getObjectKey();
 		String contentType = entity.getContentType();
-		StoragePlatformEnum storagePlatform = entity.getStoragePlatform();
-		String accessUrl = fileUrlSigner.sign(bucket, objectKey, contentType, storagePlatform);
-
+		String accessUrl = fileUrlSigner.isPreviewContentTypeAllowed(contentType)
+				? fileUrlSigner.sign(bucket, objectKey, contentType, entity.getStoragePlatform())
+				: fileUrlSigner.signDownload(bucket, objectKey, entity.getStoragePlatform());
 		detailVo.setAccessUrl(accessUrl);
+
 		auditUserDisplayService.enrichAuditUsernames(Collections.singletonList(detailVo), null, null);
 
 		return detailVo;

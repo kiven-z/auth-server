@@ -1,10 +1,9 @@
 package com.auth.module.message.api.model.dingtalk;
 
 import com.auth.module.message.api.command.ChannelOptions;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.auth.module.message.api.model.enums.MessageContentType;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 
@@ -13,10 +12,8 @@ import java.io.Serial;
  *
  * @author Bunny
  */
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter
+@Setter
 public class DingTalkChannelOptions implements ChannelOptions {
 
 	/**
@@ -33,8 +30,8 @@ public class DingTalkChannelOptions implements ChannelOptions {
 	private String title;
 
 	/**
-	 * 覆盖模板或默认的消息类型
+	 * 覆盖模板或默认的正文格式
 	 */
-	private DingTalkMessageType messageType;
+	private MessageContentType messageType;
 
 }

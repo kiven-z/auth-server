@@ -5,12 +5,12 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.AuditServiceDomain;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
+import com.auth.module.security.contract.api.audit.PlatformBizCodes;
 import com.auth.service.system.admin.model.query.authorization.RoleImpactUserPageQuery;
 import com.auth.service.system.admin.model.vo.authorization.RoleImpactRefreshResultVO;
 import com.auth.service.system.admin.model.vo.authorization.RoleImpactSummaryVO;
 import com.auth.service.system.admin.model.vo.reference.UserReferenceVO;
 import com.auth.service.system.admin.service.authorization.impact.RoleImpactService;
-import com.auth.service.system.authorization.model.constants.AuthorizationAuditBizModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -52,7 +52,7 @@ public class RoleImpactController {
 	}
 
 	@OperationLog(targetType = "AUTH_PROFILE", serviceDomain = AuditServiceDomain.SYSTEM,
-			bizModule = AuthorizationAuditBizModule.AUTH_PROFILE, operation = OperationLogKind.UPDATE)
+			bizModule = PlatformBizCodes.AUTH_PROFILE, operation = OperationLogKind.UPDATE)
 	@Operation(summary = "刷新角色受影响用户授权画像", description = "body 为空刷新全部影响用户；指定 ID 时与影响面取交集")
 	@PreAuthorize("@auth.decide('sys:role:update')")
 	@PostMapping("/{roleId}/impact/refresh")

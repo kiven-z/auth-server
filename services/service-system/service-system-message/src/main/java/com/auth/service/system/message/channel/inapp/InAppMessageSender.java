@@ -6,6 +6,7 @@ import cn.hutool.core.util.NumberUtil;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.channel.MessageSender;
 import com.auth.module.message.api.command.TemplateMessageCommand;
+import com.auth.module.message.api.model.enums.MessageContentType;
 import com.auth.module.message.api.model.inapp.InAppChannelOptions;
 import com.auth.service.system.message.convert.InAppEntityAssembler;
 import com.auth.service.system.message.exception.MessageException;
@@ -13,7 +14,6 @@ import com.auth.service.system.message.mapper.InAppMessageMapper;
 import com.auth.service.system.message.model.entity.InAppMessageCategoryEntity;
 import com.auth.service.system.message.model.entity.InAppMessageEntity;
 import com.auth.service.system.message.model.entity.InAppMessageRecipientEntity;
-import com.auth.service.system.message.model.enums.InAppContentType;
 import com.auth.service.system.message.model.enums.InAppMessageStatus;
 import com.auth.service.system.message.model.enums.MessageSendSourceType;
 import com.auth.service.system.message.model.value.inapp.RenderedInAppMessage;
@@ -24,6 +24,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
 import static com.auth.service.system.message.exception.MessageResultCode.IN_APP_TARGET_INVALID;
@@ -113,7 +114,7 @@ public class InAppMessageSender implements MessageSender {
 		return RenderedInAppMessage.builder()
 			.title(options.getTitle())
 			.content(command.getBody())
-			.contentType(InAppContentType.from(options.getContentType()))
+			.contentType(Objects.requireNonNullElse(options.getContentType(), MessageContentType.TEXT))
 			.sceneCode(command.getTemplateCode())
 			.categoryId(categoryId)
 			.linkUrl(options.getLinkUrl())

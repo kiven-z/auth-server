@@ -1,12 +1,12 @@
 package com.auth.service.system.admin.service.admin.impl;
 
+import com.auth.common.core.constants.BatchSizes;
 import com.auth.common.core.model.form.IdsEnableStatusForm;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.admin.post.SysPostMapper;
 import com.auth.service.system.admin.mapper.authorization.GrantBindingQueryMapper;
 import com.auth.service.system.admin.mapper.authorization.PostRelationQueryMapper;
-import com.auth.service.system.admin.model.constants.AdminBatchSizes;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.form.post.SysPostForm;
 import com.auth.service.system.admin.model.po.post.PostDeptCodePairPO;
@@ -254,7 +254,7 @@ class SysPostServiceImplTest {
 						&& Long.valueOf(2L).equals(entities.get(0).getDeptId())
 						&& "NEW_CODE".equals(entities.get(0).getPostCode()) && entities.get(0).getStatus() != null
 						&& entities.get(0).getStatus() && Integer.valueOf(0).equals(entities.get(0).getOrderNum())),
-				eq(AdminBatchSizes.IMPORT_SAVE));
+				eq(BatchSizes.SIZE_500));
 	}
 
 	@Test

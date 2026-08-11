@@ -2,10 +2,8 @@ package com.auth.module.security.contract.dto;
 
 import com.auth.module.security.contract.event.SecurityAuthorizationAuditPayloadEvent;
 import com.auth.module.security.contract.event.SecurityEventType;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -19,10 +17,8 @@ import java.util.Objects;
  *
  * @author Bunny
  */
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter
+@Setter
 public class AuthorizationAuditIngestRequest implements Serializable {
 
 	@Serial
@@ -50,7 +46,6 @@ public class AuthorizationAuditIngestRequest implements Serializable {
 
 	private String methodName;
 
-	@Builder.Default
 	private transient Map<String, Object> methodParams = Collections.emptyMap();
 
 	private Instant timestamp;
@@ -61,21 +56,21 @@ public class AuthorizationAuditIngestRequest implements Serializable {
 	 * @return 传输 DTO
 	 */
 	public static AuthorizationAuditIngestRequest fromEvent(SecurityAuthorizationAuditPayloadEvent event) {
-		return AuthorizationAuditIngestRequest.builder()
-			.eventType(event.getEventType())
-			.userId(event.getUserId())
-			.username(event.getUsername())
-			.requestIp(event.getRequestIp())
-			.requestMethod(event.getRequestMethod())
-			.requestUri(event.getRequestUri())
-			.requiredAuthority(event.getRequiredAuthority())
-			.decisionReason(event.getDecisionReason())
-			.exceptionMessage(event.getExceptionMessage())
-			.className(event.getClassName())
-			.methodName(event.getMethodName())
-			.methodParams(event.getMethodParams())
-			.timestamp(event.getTimestamp())
-			.build();
+		AuthorizationAuditIngestRequest request = new AuthorizationAuditIngestRequest();
+		request.setEventType(event.getEventType());
+		request.setUserId(event.getUserId());
+		request.setUsername(event.getUsername());
+		request.setRequestIp(event.getRequestIp());
+		request.setRequestMethod(event.getRequestMethod());
+		request.setRequestUri(event.getRequestUri());
+		request.setRequiredAuthority(event.getRequiredAuthority());
+		request.setDecisionReason(event.getDecisionReason());
+		request.setExceptionMessage(event.getExceptionMessage());
+		request.setClassName(event.getClassName());
+		request.setMethodName(event.getMethodName());
+		request.setMethodParams(event.getMethodParams());
+		request.setTimestamp(event.getTimestamp());
+		return request;
 	}
 
 	/**

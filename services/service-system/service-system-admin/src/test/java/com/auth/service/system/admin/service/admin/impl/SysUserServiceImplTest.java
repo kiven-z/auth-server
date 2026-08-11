@@ -1,10 +1,10 @@
 package com.auth.service.system.admin.service.admin.impl;
 
+import com.auth.common.core.constants.BatchSizes;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.mapper.admin.role.GrantTableMapper;
 import com.auth.service.system.admin.mapper.admin.user.SysUserMapper;
-import com.auth.service.system.admin.model.constants.AdminBatchSizes;
 import com.auth.service.system.admin.model.form.user.SysUserForm;
 import com.auth.service.system.admin.support.user.UserAvatarUpdateSupport;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
@@ -105,7 +105,7 @@ class SysUserServiceImplTest {
 		verify(userReferenceChecker).requireAbsentUserBusinessKeys(eq(List.of("alice")),
 				eq(List.of("alice@example.com")), eq(List.of("13800000000")), anyList(), eq(null));
 		ArgumentCaptor<List<UserEntity>> captor = ArgumentCaptor.forClass(List.class);
-		verify(sysUserService).saveBatch(captor.capture(), eq(AdminBatchSizes.IMPORT_SAVE));
+		verify(sysUserService).saveBatch(captor.capture(), eq(BatchSizes.SIZE_500));
 		UserEntity entity = captor.getValue().get(0);
 		assertThat(entity.getPassword()).isEqualTo("$2a$encoded");
 		assertThat(entity.getPermVersion()).isZero();

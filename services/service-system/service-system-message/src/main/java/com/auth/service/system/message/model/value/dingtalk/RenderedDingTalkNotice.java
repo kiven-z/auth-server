@@ -1,6 +1,6 @@
 package com.auth.service.system.message.model.value.dingtalk;
 
-import com.auth.module.message.api.model.dingtalk.DingTalkMessageType;
+import com.auth.module.message.api.model.enums.MessageContentType;
 import lombok.Builder;
 import lombok.Value;
 import lombok.experimental.Accessors;
@@ -18,7 +18,7 @@ public class RenderedDingTalkNotice {
 	/**
 	 * 消息类型
 	 */
-	DingTalkMessageType messageType;
+	MessageContentType messageType;
 
 	/**
 	 * Markdown 标题（可选用于TEXT）
