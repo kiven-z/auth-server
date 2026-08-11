@@ -3,6 +3,7 @@ package com.auth.service.system.file.export.worker;
 import com.auth.module.file.api.model.dto.FileUploadResultDTO;
 import com.auth.module.file.exception.ExportValidationException;
 import com.auth.module.file.export.scope.FileExportScopeSnapshots;
+import com.auth.module.file.export.executor.AsyncPagedExportExecutor;
 import com.auth.module.file.export.task.FileExportTaskArtifact;
 import com.auth.module.file.export.task.FileExportTaskContext;
 import com.auth.module.security.autoconfigure.pipeline.authenticate.AuthProfileSecurityContextPopulator;
@@ -11,7 +12,7 @@ import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
 import com.auth.module.security.contract.api.datascope.DataScopeStorageType;
 import com.auth.service.system.file.config.properties.FileExportTaskProperties;
-import com.auth.service.system.file.export.executor.FileExportTaskExecutor;
+import com.auth.service.system.file.export.remote.RemotePageFetcher;
 import com.auth.service.system.file.mapper.FileExportAttemptMapper;
 import com.auth.service.system.file.mapper.FileExportTaskMapper;
 import com.auth.service.system.file.model.entity.FileExportAttemptEntity;
@@ -55,7 +56,10 @@ class FileExportTaskWorkerTest {
 	private FileUploadService fileUploadService;
 
 	@Mock
-	private FileExportTaskExecutor fileExportTaskExecutor;
+	private RemotePageFetcher remotePageFetcher;
+
+	@Mock
+	private AsyncPagedExportExecutor asyncPagedExportExecutor;
 
 	@AfterEach
 	void clearSecurityContext() {
@@ -74,7 +78,7 @@ class FileExportTaskWorkerTest {
 		when(fileExportTaskMapper.selectById(101L)).thenReturn(task);
 		AtomicReference<AuthProfile> profileDuringExport = new AtomicReference<>();
 		AtomicReference<Path> artifactPath = new AtomicReference<>();
-		when(fileExportTaskExecutor.executeTask(any(FileExportTaskContext.class), any())).thenAnswer(invocation -> {
+		when(asyncPagedExportExecutor.export(any(FileExportTaskContext.class), any(), any())).thenAnswer(invocation -> {
 			profileDuringExport.set(SecurityUserUtils.currentAuthProfile());
 			Path tempPath = writeArtifactFile();
 			artifactPath.set(tempPath);
@@ -123,7 +127,7 @@ class FileExportTaskWorkerTest {
 		when(fileExportTaskMapper.selectClaimCandidateIds(any(), eq(5))).thenReturn(List.of(102L));
 		when(fileExportTaskMapper.claimTask(eq(102L), eq("file-export-worker"), any(), any())).thenReturn(1);
 		when(fileExportTaskMapper.selectById(102L)).thenReturn(task);
-		when(fileExportTaskExecutor.executeTask(any(FileExportTaskContext.class), any()))
+		when(asyncPagedExportExecutor.export(any(FileExportTaskContext.class), any(), any()))
 			.thenThrow(new IllegalStateException("boom"));
 		when(fileExportTaskMapper.markRetryPending(eq(102L), eq("file-export-worker"), eq("IllegalStateException"),
 				eq("boom"), any(), any()))
@@ -154,7 +158,7 @@ class FileExportTaskWorkerTest {
 		when(fileExportTaskMapper.selectClaimCandidateIds(any(), eq(5))).thenReturn(List.of(106L));
 		when(fileExportTaskMapper.claimTask(eq(106L), eq("file-export-worker"), any(), any())).thenReturn(1);
 		when(fileExportTaskMapper.selectById(106L)).thenReturn(task);
-		when(fileExportTaskExecutor.executeTask(any(FileExportTaskContext.class), any()))
+		when(asyncPagedExportExecutor.export(any(FileExportTaskContext.class), any(), any()))
 			.thenThrow(ExportValidationException.rowLimitExceeded(100L, 101L));
 
 		worker.executeRound();
@@ -182,7 +186,7 @@ class FileExportTaskWorkerTest {
 
 		worker.executeRound();
 
-		verify(fileExportTaskExecutor, never()).executeTask(any(), any());
+		verify(asyncPagedExportExecutor, never()).export(any(), any(), any());
 		verify(fileExportTaskMapper).markFailed(eq(104L), eq("file-export-worker"), eq("IllegalArgumentException"),
 				eq("scopeSnapshotJson must contain valid userId"), any());
 		verify(fileExportTaskMapper, never()).markRetryPending(anyLong(), anyString(), anyString(), anyString(), any(),
@@ -206,7 +210,7 @@ class FileExportTaskWorkerTest {
 		worker.executeRound();
 
 		verify(fileExportTaskMapper).markCancelled(eq(103L), eq("file-export-worker"), any());
-		verify(fileExportTaskExecutor, never()).executeTask(any(), any());
+		verify(asyncPagedExportExecutor, never()).export(any(), any(), any());
 		verify(fileUploadService, never()).upload(any());
 
 		ArgumentCaptor<FileExportAttemptEntity> captor = ArgumentCaptor.forClass(FileExportAttemptEntity.class);
@@ -225,7 +229,7 @@ class FileExportTaskWorkerTest {
 		when(fileExportTaskMapper.selectClaimCandidateIds(any(), eq(5))).thenReturn(List.of(105L));
 		when(fileExportTaskMapper.claimTask(eq(105L), eq("file-export-worker"), any(), any())).thenReturn(1);
 		when(fileExportTaskMapper.selectById(105L)).thenReturn(task);
-		when(fileExportTaskExecutor.executeTask(any(FileExportTaskContext.class), any()))
+		when(asyncPagedExportExecutor.export(any(FileExportTaskContext.class), any(), any()))
 			.thenReturn(FileExportTaskArtifact.builder()
 				.fileName("file_export.xlsx")
 				.contentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
@@ -247,7 +251,7 @@ class FileExportTaskWorkerTest {
 	private FileExportTaskWorker newWorker(FileExportTaskProperties properties) {
 		AuthProfileSecurityContextPopulator populator = new AuthProfileSecurityContextPopulator();
 		FileExportTaskRunner runner = new FileExportTaskRunner(fileExportTaskMapper, fileUploadService,
-				fileExportTaskExecutor, properties, populator);
+				remotePageFetcher, asyncPagedExportExecutor, properties, populator);
 		FileExportTaskFailureHandler failureHandler = new FileExportTaskFailureHandler(fileExportTaskMapper,
 				properties);
 		FileExportAttemptRecorder attemptRecorder = new FileExportAttemptRecorder(fileExportAttemptMapper);

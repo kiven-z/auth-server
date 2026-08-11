@@ -10,16 +10,20 @@ import org.springframework.stereotype.Component;
 import com.auth.common.core.constants.BatchSizes;
 import com.auth.module.file.api.model.dto.FileUploadResultDTO;
 import com.auth.module.file.api.policy.FileBizType;
+import com.auth.module.file.export.datasource.PageDataSource;
+import com.auth.module.file.export.executor.AsyncPagedExportExecutor;
 import com.auth.module.file.export.scope.FileExportScopeSnapshots;
 import com.auth.module.file.export.task.FileExportTaskArtifact;
 import com.auth.module.file.export.task.FileExportTaskContext;
+import com.auth.module.file.export.task.FileExportTaskProgressListener;
 import com.auth.module.security.autoconfigure.pipeline.authenticate.AuthProfileSecurityContextPopulator;
 import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.file.config.properties.FileExportTaskProperties;
-import com.auth.service.system.file.export.executor.FileExportTaskExecutor;
+import com.auth.service.system.file.export.datasource.FileRemotePageDataSource;
 import com.auth.service.system.file.export.listener.DatabaseProgressListener;
+import com.auth.service.system.file.export.remote.RemotePageFetcher;
 import com.auth.service.system.file.mapper.FileExportTaskMapper;
 import com.auth.service.system.file.model.entity.FileExportTaskEntity;
 import com.auth.service.system.file.model.enums.FileExportAttemptResult;
@@ -42,7 +46,9 @@ public class FileExportTaskRunner {
 
 	private final FileUploadService fileUploadService;
 
-	private final FileExportTaskExecutor fileExportTaskExecutor;
+	private final RemotePageFetcher remotePageFetcher;
+
+	private final AsyncPagedExportExecutor asyncPagedExportExecutor;
 
 	private final FileExportTaskProperties properties;
 
@@ -88,22 +94,8 @@ public class FileExportTaskRunner {
 	private FileExportTaskRunResult exportAndUpload(FileExportTaskEntity task,
 			DatabaseProgressListener progressListener) {
 		Long taskId = task.getId();
-		FileExportTaskContext context = FileExportTaskContext.builder()
-			.taskId(task.getId())
-			.bizType(task.getBizType())
-			.exportFormat(task.getExportFormat())
-			.querySnapshotJson(task.getQuerySnapshotJson())
-			.columnSnapshotJson(task.getColumnSnapshotJson())
-			.scopeSnapshotJson(task.getScopeSnapshotJson())
-			.fetchService(task.getFetchService())
-			.fetchPath(task.getFetchPath())
-			.createdBy(task.getCreatedBy())
-			.createdAt(task.getCreatedAt())
-			.fetchPageSize(BatchSizes.SIZE_1000)
-			.maxRows(properties.getMaxRows())
-			.build();
-
-		FileExportTaskArtifact artifact = fileExportTaskExecutor.executeTask(context, progressListener);
+		FileExportTaskContext context = buildContext(task);
+		FileExportTaskArtifact artifact = exportArtifact(context, progressListener);
 		long processedRows = artifact.getRowCount();
 		if (progressListener.isCancelRequested()) {
 			fileExportTaskMapper.markCancelled(taskId, FileExportWorkerConstants.WORKER_ID, Instant.now());
@@ -123,6 +115,42 @@ public class FileExportTaskRunner {
 			.processedRows(processedRows)
 			.artifact(artifact)
 			.build();
+	}
+
+	/**
+	 * 组装导出上下文
+	 * @param task 任务实体
+	 * @return 导出上下文
+	 */
+	private FileExportTaskContext buildContext(FileExportTaskEntity task) {
+		return FileExportTaskContext.builder()
+			.taskId(task.getId())
+			.bizType(task.getBizType())
+			.exportFormat(task.getExportFormat())
+			.querySnapshotJson(task.getQuerySnapshotJson())
+			.columnSnapshotJson(task.getColumnSnapshotJson())
+			.scopeSnapshotJson(task.getScopeSnapshotJson())
+			.fetchService(task.getFetchService())
+			.fetchPath(task.getFetchPath())
+			.createdBy(task.getCreatedBy())
+			.createdAt(task.getCreatedAt())
+			.fetchPageSize(BatchSizes.SIZE_1000)
+			.maxRows(properties.getMaxRows())
+			.build();
+	}
+
+	/**
+	 * 按任务上下文分页写出产物
+	 * @param context 导出上下文
+	 * @param progressListener 进度监听器
+	 * @return 导出产物
+	 */
+	private FileExportTaskArtifact exportArtifact(FileExportTaskContext context,
+			FileExportTaskProgressListener progressListener) {
+		PageDataSource dataSource = new FileRemotePageDataSource(remotePageFetcher, context.getFetchService(),
+				context.getFetchPath(), context.getBizType(), context.getQuerySnapshotJson(),
+				context.getColumnSnapshotJson(), context.getScopeSnapshotJson());
+		return asyncPagedExportExecutor.export(context, dataSource, progressListener);
 	}
 
 	/**
