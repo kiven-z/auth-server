@@ -1,6 +1,6 @@
 package com.auth.module.file.export.writer;
 
-import com.auth.module.file.exception.ExportValidationException;
+import com.auth.module.file.exception.ExportColumnsRequiredException;
 import com.auth.module.file.export.definition.ExportColumn;
 import lombok.experimental.UtilityClass;
 
@@ -26,7 +26,7 @@ public class MapExcelRowSupport {
 	 */
 	public static List<ExportColumn> resolveColumns(List<ExportColumn> configuredColumns) {
 		if (configuredColumns == null || configuredColumns.isEmpty()) {
-			throw ExportValidationException.columnsRequired();
+			throw new ExportColumnsRequiredException();
 		}
 
 		return List.copyOf(configuredColumns);

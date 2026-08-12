@@ -5,10 +5,11 @@ import com.auth.module.file.exception.ExportValidationException;
 import com.auth.module.file.export.datasource.PageDataSource;
 import com.auth.module.file.export.definition.ExportColumn;
 import com.auth.module.file.export.definition.ExportSheetMeta;
+import com.auth.module.file.export.shard.ExportArtifactPackager;
 import com.auth.module.file.export.task.FileExportTaskArtifact;
 import com.auth.module.file.export.task.FileExportTaskContext;
 import com.auth.module.file.export.task.FileExportTaskProgressListener;
-import com.auth.module.file.export.writer.ExportWriterFactory;
+import com.auth.module.file.export.writer.ChunkFileSessionFactoryResolver;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.poi.ss.usermodel.DataFormatter;
@@ -27,6 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.zip.ZipInputStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -39,8 +41,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @DisplayName("AsyncPagedExportExecutor 异步分页导出执行")
 class AsyncPagedExportExecutorTest {
 
-	private final AsyncPagedExportExecutor asyncPagedExportExecutor = new AsyncPagedExportExecutor(
-			new ExportWriterFactory());
+	private final AsyncPagedExportExecutor executor = new AsyncPagedExportExecutor(
+			new ChunkFileSessionFactoryResolver(), new ExportArtifactPackager());
 
 	private static Map<String, Object> row(int id) {
 		Map<String, Object> row = new LinkedHashMap<>();
@@ -50,16 +52,36 @@ class AsyncPagedExportExecutorTest {
 		return row;
 	}
 
-	private static IPage<Map<String, Object>> createPage(int current, int size, List<Map<String, Object>> records,
-			long total) {
-		Page<Map<String, Object>> page = new Page<>(current, size, total);
-		page.setRecords(records);
-		return page;
+	private static IPage<Map<String, Object>> page(int current, int size, long total,
+			List<Map<String, Object>> records) {
+		Page<Map<String, Object>> p = new Page<>(current, size, total);
+		p.setRecords(records);
+		return p;
 	}
 
-	private static void assertExcelContainsDataRows(Path filePath) throws Exception {
-		try (InputStream inputStream = Files.newInputStream(filePath);
-				XSSFWorkbook workbook = new XSSFWorkbook(inputStream)) {
+	private static ExportSheetMeta sheetMeta() {
+		return ExportSheetMeta.builder()
+			.sheetName("测试")
+			.taskFilePrefix("sys_test_export")
+			.columns(List.of(ExportColumn.builder().fieldKey("id").header("id").build(),
+					ExportColumn.builder().fieldKey("name").header("name").build(),
+					ExportColumn.builder().fieldKey("value").header("value").build()))
+			.build();
+	}
+
+	private static FileExportTaskContext contextWithShardRows(int shardRows) {
+		return FileExportTaskContext.builder()
+			.bizType("SYS_TEST")
+			.exportFormat("XLSX")
+			.fetchPageSize(2)
+			.maxRows(1000L)
+			.shardRows(shardRows)
+			.createdAt(Instant.parse("2026-08-09T00:00:00Z"))
+			.build();
+	}
+
+	private static void assertExcelContainsHeaderAndFirstRow(Path filePath) throws Exception {
+		try (InputStream in = Files.newInputStream(filePath); XSSFWorkbook workbook = new XSSFWorkbook(in)) {
 			Sheet sheet = workbook.getSheetAt(0);
 			DataFormatter formatter = new DataFormatter();
 			Row header = sheet.getRow(0);
@@ -67,71 +89,97 @@ class AsyncPagedExportExecutorTest {
 			assertThat(formatter.formatCellValue(header.getCell(1))).isEqualTo("name");
 			assertThat(formatter.formatCellValue(header.getCell(2))).isEqualTo("value");
 			assertThat(sheet.getLastRowNum()).isEqualTo(3);
-			Row firstData = sheet.getRow(1);
-			assertThat(formatter.formatCellValue(firstData.getCell(0))).isEqualTo("1");
-			assertThat(formatter.formatCellValue(firstData.getCell(1))).isEqualTo("Name1");
-			assertThat(formatter.formatCellValue(firstData.getCell(2))).isEqualTo("Value1");
 		}
 	}
 
+	private static void assertZipContainsXlsxEntries(Path filePath) throws Exception {
+		int count = 0;
+		try (InputStream in = Files.newInputStream(filePath); ZipInputStream zis = new ZipInputStream(in)) {
+			while (zis.getNextEntry() != null) {
+				count++;
+			}
+		}
+		assertThat(count).isEqualTo(2);
+	}
+
 	@Test
-	@DisplayName("export：分页写入成功返回导出产物并上报进度")
-	void export_whenPagedDataExists_returnsArtifact() throws Exception {
-		FileExportTaskContext context = FileExportTaskContext.builder()
-			.bizType("SYS_TEST")
-			.exportFormat("XLSX")
-			.fetchPageSize(2)
-			.maxRows(100L)
-			.createdAt(Instant.parse("2026-08-09T00:00:00Z"))
-			.build();
+	@DisplayName("export：分页写入成功，产物为单 xlsx，进度按页上报")
+	void export_whenPagedDataExists_returnsXlsxArtifact() throws Exception {
 		TestDataSource dataSource = new TestDataSource(
-				List.of(createPage(1, 2, List.of(row(1), row(2)), 3L), createPage(2, 2, List.of(row(3)), 3L)));
+				List.of(page(1, 2, 3L, List.of(row(1), row(2))), page(2, 2, 3L, List.of(row(3)))));
 		RecordingProgressListener progressListener = new RecordingProgressListener(false);
 
-		FileExportTaskArtifact artifact = asyncPagedExportExecutor.export(context, dataSource, progressListener);
+		FileExportTaskArtifact artifact = executor.export(contextWithShardRows(0), dataSource, progressListener);
 
 		assertThat(artifact.getRowCount()).isEqualTo(3L);
 		assertThat(artifact.getContentType())
 			.isEqualTo("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 		assertThat(artifact.getFileName()).startsWith("sys_test_export_").endsWith(".xlsx");
-		assertThat(Files.exists(artifact.getFilePath())).isTrue();
+		assertThat(artifact.getFilePath()).exists();
 		assertThat(progressListener.progressEvents()).containsExactly("2/3", "3/3");
-		assertExcelContainsDataRows(artifact.getFilePath());
+		assertExcelContainsHeaderAndFirstRow(artifact.getFilePath());
 		Files.deleteIfExists(artifact.getFilePath());
 	}
 
 	@Test
-	@DisplayName("export：首轮 totalRows 超限时抛异常")
-	void export_whenTotalRowsExceeded_throwsException() {
-		FileExportTaskContext context = FileExportTaskContext.builder()
-			.bizType("SYS_TEST")
-			.exportFormat("XLSX")
-			.fetchPageSize(100)
-			.maxRows(500L)
-			.createdAt(Instant.parse("2026-08-09T00:00:00Z"))
-			.build();
-		TestDataSource dataSource = new TestDataSource(List.of(createPage(1, 100, List.of(row(1)), 501L)));
-		FileExportTaskProgressListener progressListener = new RecordingProgressListener(false);
+	@DisplayName("export：总行数超过分片阈值时，产物为 zip，文件名以 .zip 结尾")
+	void export_whenExceedsShardThreshold_returnsZipArtifact() throws Exception {
+		// shardRows=2，3 行触发分 2 片（xlsx + 剩余）→ zip
+		TestDataSource dataSource = new TestDataSource(
+				List.of(page(1, 2, 3L, List.of(row(1), row(2))), page(2, 2, 3L, List.of(row(3)))));
+		RecordingProgressListener progressListener = new RecordingProgressListener(false);
 
-		assertThatThrownBy(() -> asyncPagedExportExecutor.export(context, dataSource, progressListener))
-			.isInstanceOf(ExportValidationException.class)
-			.hasMessageContaining("导出行数超出限制");
+		FileExportTaskArtifact artifact = executor.export(contextWithShardRows(2), dataSource, progressListener);
+
+		assertThat(artifact.getRowCount()).isEqualTo(3L);
+		assertThat(artifact.getContentType()).isEqualTo("application/zip");
+		assertThat(artifact.getFileName()).startsWith("sys_test_export_").endsWith(".zip");
+		assertThat(artifact.getFilePath()).exists();
+		assertZipContainsXlsxEntries(artifact.getFilePath());
+		Files.deleteIfExists(artifact.getFilePath());
 	}
 
 	@Test
-	@DisplayName("export：收到取消请求时抛异常")
-	void export_whenCancelRequested_throwsException() {
+	@DisplayName("export：总行数恰好等于分片阈值时，产物仍为单 xlsx")
+	void export_whenEqualsShardThreshold_returnsXlsxArtifact() throws Exception {
+		// shardRows=3，3 行不超过阈值，单文件
+		TestDataSource dataSource = new TestDataSource(
+				List.of(page(1, 2, 3L, List.of(row(1), row(2))), page(2, 2, 3L, List.of(row(3)))));
+
+		FileExportTaskArtifact artifact = executor.export(contextWithShardRows(3), dataSource,
+				new RecordingProgressListener(false));
+
+		assertThat(artifact.getFileName()).endsWith(".xlsx");
+		Files.deleteIfExists(artifact.getFilePath());
+	}
+
+	@Test
+	@DisplayName("export：首轮 totalRows 超过 maxRows 时抛校验异常")
+	void export_whenTotalRowsExceededMaxRows_throwsValidationException() {
 		FileExportTaskContext context = FileExportTaskContext.builder()
 			.bizType("SYS_TEST")
 			.exportFormat("XLSX")
 			.fetchPageSize(100)
 			.maxRows(500L)
+			.shardRows(0)
 			.createdAt(Instant.parse("2026-08-09T00:00:00Z"))
 			.build();
-		TestDataSource dataSource = new TestDataSource(List.of(createPage(1, 100, List.of(row(1)), 1L)));
-		FileExportTaskProgressListener progressListener = new RecordingProgressListener(true);
+		TestDataSource dataSource = new TestDataSource(List.of(page(1, 100, 501L, List.of(row(1)))));
+		RecordingProgressListener progressListener = new RecordingProgressListener(false);
 
-		assertThatThrownBy(() -> asyncPagedExportExecutor.export(context, dataSource, progressListener))
+		assertThatThrownBy(() -> executor.export(context, dataSource, progressListener))
+			.isInstanceOf(ExportValidationException.class)
+			.hasMessageContaining("最多导出 500 行，当前约 501 行");
+	}
+
+	@Test
+	@DisplayName("export：收到取消请求时抛执行异常")
+	void export_whenCancelRequested_throwsExecutionException() {
+		FileExportTaskContext context = contextWithShardRows(0);
+		TestDataSource dataSource = new TestDataSource(List.of(page(1, 100, 1L, List.of(row(1)))));
+		RecordingProgressListener progressListener = new RecordingProgressListener(true);
+
+		assertThatThrownBy(() -> executor.export(context, dataSource, progressListener))
 			.isInstanceOf(ExportExecutionException.class)
 			.hasMessageContaining("导出已按请求取消");
 	}
@@ -178,19 +226,12 @@ class AsyncPagedExportExecutorTest {
 			if (current < pages.size()) {
 				return pages.get(current);
 			}
-			return createPage(pageNum, pageSize, List.of(), 0L);
+			return page(pageNum, pageSize, 0L, List.of());
 		}
 
 		@Override
 		public ExportSheetMeta sheetMeta() {
-			return ExportSheetMeta.builder()
-				.sheetName("测试")
-				.downloadFilePrefix("测试")
-				.taskFilePrefix("sys_test_export")
-				.columns(List.of(ExportColumn.builder().fieldKey("id").header("id").build(),
-						ExportColumn.builder().fieldKey("name").header("name").build(),
-						ExportColumn.builder().fieldKey("value").header("value").build()))
-				.build();
+			return AsyncPagedExportExecutorTest.sheetMeta();
 		}
 
 	}

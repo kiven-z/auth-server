@@ -4,6 +4,7 @@ import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.file.api.model.enums.FileDeleteSource;
 import com.auth.module.file.export.delivery.FileDelivery;
+import com.auth.module.file.export.delivery.FileDownloadNames;
 import com.auth.module.security.autoconfigure.annotation.AuthenticatedApi;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.module.security.contract.annotation.OperationLog;
@@ -74,8 +75,8 @@ public class PersonalFileRecordController {
 		Long ownerUserId = SecurityUserUtils.getUserId();
 
 		StreamingResponseBody body = fileRecordService.batchDownload(ids, ownerUserId);
-		return FileDelivery.deliver(body, FileRecordService.BATCH_DOWNLOAD_FILE_NAME,
-				FileRecordService.BATCH_DOWNLOAD_CONTENT_TYPE);
+		String filename = FileDownloadNames.batchZip("file-records");
+		return FileDelivery.deliver(body, filename, FileDelivery.APPLICATION_ZIP);
 	}
 
 	@OperationLog(targetType = "FILE_RECORD", serviceDomain = SYSTEM, bizModule = SYS_FILE,

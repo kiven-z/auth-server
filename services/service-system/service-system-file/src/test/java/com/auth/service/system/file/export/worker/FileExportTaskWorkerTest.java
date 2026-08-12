@@ -1,9 +1,9 @@
 package com.auth.service.system.file.export.worker;
 
 import com.auth.module.file.api.model.dto.FileUploadResultDTO;
-import com.auth.module.file.exception.ExportValidationException;
-import com.auth.module.file.export.scope.FileExportScopeSnapshots;
+import com.auth.module.file.exception.ExportRowLimitExceededException;
 import com.auth.module.file.export.executor.AsyncPagedExportExecutor;
+import com.auth.module.file.export.scope.FileExportScopeSnapshots;
 import com.auth.module.file.export.task.FileExportTaskArtifact;
 import com.auth.module.file.export.task.FileExportTaskContext;
 import com.auth.module.security.autoconfigure.pipeline.authenticate.AuthProfileSecurityContextPopulator;
@@ -159,12 +159,12 @@ class FileExportTaskWorkerTest {
 		when(fileExportTaskMapper.claimTask(eq(106L), eq("file-export-worker"), any(), any())).thenReturn(1);
 		when(fileExportTaskMapper.selectById(106L)).thenReturn(task);
 		when(asyncPagedExportExecutor.export(any(FileExportTaskContext.class), any(), any()))
-			.thenThrow(ExportValidationException.rowLimitExceeded(100L, 101L));
+			.thenThrow(new ExportRowLimitExceededException(100L, 101L));
 
 		worker.executeRound();
 
-		verify(fileExportTaskMapper).markFailed(eq(106L), eq("file-export-worker"), eq("ExportValidationException"),
-				anyString(), any());
+		verify(fileExportTaskMapper).markFailed(eq(106L), eq("file-export-worker"),
+				eq("ExportRowLimitExceededException"), anyString(), any());
 		verify(fileExportTaskMapper, never()).markRetryPending(anyLong(), anyString(), anyString(), anyString(), any(),
 				any());
 		assertThat(SecurityUserUtils.currentAuthProfile()).isNull();

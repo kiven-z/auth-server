@@ -1,7 +1,9 @@
 package com.auth.service.example.controller;
 
 import com.auth.common.core.model.response.Result;
+import com.auth.module.file.api.model.dto.ExportPreCheckResult;
 import com.auth.module.file.api.model.dto.FileExportTaskCreateResult;
+import com.auth.module.file.api.model.request.ExportPreCheckRequest;
 import com.auth.module.file.api.port.FileExportTaskOperations;
 import com.auth.module.file.export.definition.ExportColumn;
 import com.auth.module.file.export.definition.ExportColumns;
@@ -41,6 +43,16 @@ public class ExampleOrderController {
 	public Result<List<ExampleOrderVO>> listScoped() {
 		List<ExampleOrderVO> data = exampleOrderService.listScoped();
 		return Result.success(data);
+	}
+
+	@AuthenticatedApi
+	@Operation(summary = "异步导出演示单前置检查", description = "按筛选条件估算行数并返回导出方式")
+	@PostMapping("/export/pre-check")
+	public Result<ExportPreCheckResult> exportPreCheck(@Validated @RequestBody ExampleOrderQuery filter) {
+		ExportPreCheckRequest request = ExampleFileExportTaskCreateRequests.preCheck(ExampleBizCodes.EXAMPLE_ORDER,
+				filter);
+		ExportPreCheckResult result = fileExportTaskOperations.preCheck(request);
+		return Result.success(result);
 	}
 
 	@AuthenticatedApi

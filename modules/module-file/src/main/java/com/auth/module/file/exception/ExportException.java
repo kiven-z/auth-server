@@ -1,7 +1,7 @@
 package com.auth.module.file.exception;
 
 /**
- * 导出异常基类（校验失败与执行失败的公共父类）
+ * 导出执行异常基类
  *
  * @author Bunny
  */

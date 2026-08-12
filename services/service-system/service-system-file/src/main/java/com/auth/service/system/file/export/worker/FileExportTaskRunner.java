@@ -1,12 +1,5 @@
 package com.auth.service.system.file.export.worker;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-
-import org.springframework.stereotype.Component;
-
 import com.auth.common.core.constants.BatchSizes;
 import com.auth.module.file.api.model.dto.FileUploadResultDTO;
 import com.auth.module.file.api.policy.FileBizType;
@@ -30,8 +23,13 @@ import com.auth.service.system.file.model.enums.FileExportAttemptResult;
 import com.auth.service.system.file.model.form.FileUploadForm;
 import com.auth.service.system.file.model.value.PathMultipartFile;
 import com.auth.service.system.file.service.FileUploadService;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 /**
  * 导出任务执行：恢复权限快照、分页写出、上传产物
@@ -136,6 +134,7 @@ public class FileExportTaskRunner {
 			.createdAt(task.getCreatedAt())
 			.fetchPageSize(BatchSizes.SIZE_1000)
 			.maxRows(properties.getMaxRows())
+			.shardRows(properties.getShardRows())
 			.build();
 	}
 

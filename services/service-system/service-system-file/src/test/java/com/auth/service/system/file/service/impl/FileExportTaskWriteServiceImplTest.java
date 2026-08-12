@@ -7,6 +7,7 @@ import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import com.auth.service.system.file.config.properties.FileExportTaskProperties;
 import com.auth.service.system.file.config.properties.FileUploadProperties;
+import com.auth.service.system.file.export.precheck.FileExportPreCheckService;
 import com.auth.service.system.file.mapper.FileExportTaskMapper;
 import com.auth.service.system.file.mapper.FileRecordMapper;
 import com.auth.service.system.file.model.entity.FileExportTaskEntity;
@@ -52,6 +53,9 @@ class FileExportTaskWriteServiceImplTest {
 
 	@Mock
 	private FileUrlSigner fileUrlSigner;
+
+	@Mock
+	private FileExportPreCheckService preCheckService;
 
 	@BeforeAll
 	static void initMybatisPlusTableInfo() {
@@ -463,7 +467,7 @@ class FileExportTaskWriteServiceImplTest {
 	private FileExportTaskWriteServiceImpl newService(FileUploadProperties uploadProperties,
 			FileExportTaskProperties taskProperties) {
 		FileExportTaskWriteServiceImpl service = new FileExportTaskWriteServiceImpl(fileRecordMapper, fileUrlSigner,
-				uploadProperties, taskProperties);
+				uploadProperties, taskProperties, preCheckService);
 		ReflectionTestUtils.setField(service, "baseMapper", fileExportTaskMapper);
 		ReflectionTestUtils.setField(service, "entityClass", FileExportTaskEntity.class);
 		return service;

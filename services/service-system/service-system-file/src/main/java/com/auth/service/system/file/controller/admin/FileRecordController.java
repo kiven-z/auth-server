@@ -4,6 +4,7 @@ import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.file.api.model.enums.FileDeleteSource;
 import com.auth.module.file.export.delivery.FileDelivery;
+import com.auth.module.file.export.delivery.FileDownloadNames;
 import com.auth.module.security.contract.annotation.OperationLog;
 import com.auth.module.security.contract.api.audit.OperationLogKind;
 import com.auth.service.system.file.model.form.FilePrivacyUpdateForm;
@@ -64,8 +65,8 @@ public class FileRecordController {
 	@PostMapping("/download")
 	public ResponseEntity<StreamingResponseBody> batchDownload(@RequestBody List<Long> ids) {
 		StreamingResponseBody body = fileRecordService.batchDownload(ids, null);
-		return FileDelivery.deliver(body, FileRecordService.BATCH_DOWNLOAD_FILE_NAME,
-				FileRecordService.BATCH_DOWNLOAD_CONTENT_TYPE);
+		String filename = FileDownloadNames.batchZip("file-records");
+		return FileDelivery.deliver(body, filename, FileDelivery.APPLICATION_ZIP);
 	}
 
 	@OperationLog(targetType = "FILE_RECORD_PRIVACY", serviceDomain = SYSTEM, bizModule = SYS_FILE,

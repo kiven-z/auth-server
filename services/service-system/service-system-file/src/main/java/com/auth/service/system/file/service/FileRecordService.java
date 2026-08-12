@@ -16,16 +16,6 @@ import java.util.List;
 public interface FileRecordService extends IService<FileRecordEntity> {
 
 	/**
-	 * 批量下载文件为 ZIP
-	 */
-	String BATCH_DOWNLOAD_FILE_NAME = "file-records.zip";
-
-	/**
-	 * 批量下载 ZIP MIME 类型
-	 */
-	String BATCH_DOWNLOAD_CONTENT_TYPE = "application/zip";
-
-	/**
 	 * 批量下载文件记录并输出 ZIP 流
 	 * @param ids 文件记录主键集合
 	 * @param ownerUserId 归属用户ID

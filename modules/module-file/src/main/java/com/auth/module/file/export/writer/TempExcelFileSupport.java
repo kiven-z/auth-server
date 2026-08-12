@@ -7,8 +7,6 @@ import com.auth.module.file.export.model.enums.ZebraStripeStyleType;
 import lombok.experimental.UtilityClass;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -20,26 +18,16 @@ import java.util.List;
 @UtilityClass
 public class TempExcelFileSupport {
 
+	private static final String XLSX_SUFFIX = ".xlsx";
+
 	/**
 	 * 创建临时 xlsx 并写入；失败时删除临时文件
 	 * @param action 写入动作
 	 * @return 临时文件路径
 	 * @throws IOException 写入失败
 	 */
-	@SuppressWarnings("java:S5443")
-	public static Path writeToTempFile(OutputStreamAction action) throws IOException {
-		Path tempFile = Files.createTempFile("file-export-task-", ".xlsx");
-		boolean success = false;
-		try (OutputStream outputStream = Files.newOutputStream(tempFile)) {
-			action.write(outputStream);
-			success = true;
-			return tempFile;
-		}
-		finally {
-			if (!success) {
-				Files.deleteIfExists(tempFile);
-			}
-		}
+	public static Path writeToTempFile(TempFileSupport.OutputStreamAction action) throws IOException {
+		return TempFileSupport.writeToTempFile(XLSX_SUFFIX, action);
 	}
 
 	/**
@@ -57,21 +45,6 @@ public class TempExcelFileSupport {
 		for (CellWriteHandler handler : writeHandlers) {
 			builder.registerWriteHandler(handler);
 		}
-	}
-
-	/**
-	 * 临时文件输出流写入动作
-	 */
-	@FunctionalInterface
-	public interface OutputStreamAction {
-
-		/**
-		 * 向输出流写入
-		 * @param outputStream 输出流
-		 * @throws IOException 写入失败
-		 */
-		void write(OutputStream outputStream) throws IOException;
-
 	}
 
 }

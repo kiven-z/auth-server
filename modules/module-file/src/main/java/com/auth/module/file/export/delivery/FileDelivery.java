@@ -18,6 +18,11 @@ import java.nio.charset.StandardCharsets;
 public class FileDelivery {
 
 	/**
+	 * ZIP 附件 MIME 类型
+	 */
+	public static final String APPLICATION_ZIP = "application/zip";
+
+	/**
 	 * 构建流式附件下载响应
 	 * @param body 流式响应体
 	 * @param filename 下载文件名

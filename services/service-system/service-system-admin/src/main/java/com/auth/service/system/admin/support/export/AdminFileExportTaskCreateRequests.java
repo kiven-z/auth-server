@@ -1,8 +1,10 @@
 package com.auth.service.system.admin.support.export;
 
+import com.auth.module.file.api.model.request.ExportPreCheckRequest;
 import com.auth.module.file.api.model.request.FileExportTaskCreateRequest;
 import com.auth.module.file.export.definition.ExportColumn;
 import com.auth.module.file.export.task.FileExportTaskCreateRequests;
+import com.auth.module.file.export.task.FileExportTaskPreCheckRequests;
 import lombok.experimental.UtilityClass;
 
 import java.util.List;
@@ -20,6 +22,16 @@ public class AdminFileExportTaskCreateRequests {
 	 */
 	@SuppressWarnings("java:S1075")
 	public static final String INTERNAL_EXPORT_PAGE_PATH = "/api/system/inner/export/page";
+
+	/**
+	 * 由业务筛选条件组装前置检查请求
+	 * @param bizType 业务类型
+	 * @param query 列表筛选（序列化为 querySnapshotJson）
+	 * @return 前置检查请求
+	 */
+	public static ExportPreCheckRequest preCheck(String bizType, Object query) {
+		return FileExportTaskPreCheckRequests.of(bizType, query, SERVICE_SYSTEM, INTERNAL_EXPORT_PAGE_PATH);
+	}
 
 	/**
 	 * 由业务筛选条件组装创建请求

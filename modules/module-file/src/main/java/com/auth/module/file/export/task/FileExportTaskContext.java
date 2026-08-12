@@ -74,4 +74,9 @@ public class FileExportTaskContext {
 	 */
 	long maxRows;
 
+	/**
+	 * 分片阈值（≤ 0 表示不分片，单文件输出）
+	 */
+	int shardRows;
+
 }

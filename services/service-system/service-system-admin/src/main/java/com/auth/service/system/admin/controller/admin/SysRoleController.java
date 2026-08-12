@@ -5,7 +5,9 @@ import com.auth.common.core.model.response.Result;
 import com.auth.common.data.model.PageResponse;
 import com.auth.common.web.valid.group.CreateGroup;
 import com.auth.common.web.valid.group.UpdateGroup;
+import com.auth.module.file.api.model.dto.ExportPreCheckResult;
 import com.auth.module.file.api.model.dto.FileExportTaskCreateResult;
+import com.auth.module.file.api.model.request.ExportPreCheckRequest;
 import com.auth.module.file.api.model.request.FileExportTaskCreateRequest;
 import com.auth.module.file.api.port.FileExportTaskOperations;
 import com.auth.module.file.export.definition.ExportColumns;
@@ -57,6 +59,15 @@ public class SysRoleController {
 	private final SysRoleSpreadsheetService sysRoleSpreadsheetService;
 
 	private final FileExportTaskOperations fileExportTaskOperations;
+
+	@Operation(summary = "导出角色前置检查", description = "按筛选条件估算行数并返回导出方式")
+	@PreAuthorize("@auth.decide('sys:role:export')")
+	@PostMapping("/export/pre-check")
+	public Result<ExportPreCheckResult> exportPreCheck(@Validated @RequestBody SysRoleQuery filter) {
+		ExportPreCheckRequest request = AdminFileExportTaskCreateRequests.preCheck(PlatformBizCodes.SYS_ROLE, filter);
+		ExportPreCheckResult result = fileExportTaskOperations.preCheck(request);
+		return Result.success(result);
+	}
 
 	@Operation(summary = "导出角色 Excel", description = "按筛选条件提交异步导出任务")
 	@PreAuthorize("@auth.decide('sys:role:export')")

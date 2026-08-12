@@ -1,7 +1,9 @@
 package com.auth.service.system.file.service.impl;
 
+import com.auth.module.file.api.model.dto.ExportPreCheckResult;
 import com.auth.module.file.api.model.dto.FileExportTaskCreateResult;
 import com.auth.module.file.api.model.enums.StoragePlatformEnum;
+import com.auth.module.file.api.model.request.ExportPreCheckRequest;
 import com.auth.module.file.api.model.request.FileExportTaskCreateRequest;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
@@ -9,6 +11,7 @@ import com.auth.service.system.file.config.properties.FileExportTaskProperties;
 import com.auth.service.system.file.config.properties.FileUploadProperties;
 import com.auth.service.system.file.exception.FileStorageException;
 import com.auth.service.system.file.exception.FileUploadResultCode;
+import com.auth.service.system.file.export.precheck.FileExportPreCheckService;
 import com.auth.service.system.file.export.task.FileExportTaskAssembler;
 import com.auth.service.system.file.export.task.FileExportTaskNormalizedCreateContext;
 import com.auth.service.system.file.mapper.FileExportTaskMapper;
@@ -46,6 +49,8 @@ public class FileExportTaskWriteServiceImpl extends ServiceImpl<FileExportTaskMa
 
 	private final FileExportTaskProperties fileExportTaskProperties;
 
+	private final FileExportPreCheckService preCheckService;
+
 	private static boolean isRetryableStatus(String status) {
 		return FileExportTaskStatus.FAILED.name().equals(status)
 				|| FileExportTaskStatus.CANCELLED.name().equals(status);
@@ -58,6 +63,14 @@ public class FileExportTaskWriteServiceImpl extends ServiceImpl<FileExportTaskMa
 			return false;
 		}
 		return retryCount >= maxRetry;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public ExportPreCheckResult preCheck(ExportPreCheckRequest request) {
+		return preCheckService.preCheck(request);
 	}
 
 	/**

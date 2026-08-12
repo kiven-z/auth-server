@@ -46,7 +46,14 @@ public class FileExportTaskProperties {
 	 */
 	@Min(1)
 	@NotNull
-	private Integer maxRows = 100000;
+	private Integer maxRows = 260_000;
+
+	/**
+	 * 分片阈值：超过此行数时拆分为多个 xlsx 并打包为 zip（≤ 0 表示不分片）
+	 */
+	@Min(0)
+	@NotNull
+	private Integer shardRows = 50_000;
 
 	/**
 	 * 导出产物保留天数

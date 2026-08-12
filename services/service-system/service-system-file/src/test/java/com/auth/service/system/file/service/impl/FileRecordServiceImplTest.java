@@ -3,6 +3,7 @@ package com.auth.service.system.file.service.impl;
 import com.auth.module.file.api.model.enums.FileDeleteSource;
 import com.auth.module.file.api.model.enums.StoragePlatformEnum;
 import com.auth.module.file.export.delivery.FileDelivery;
+import com.auth.module.file.export.delivery.FileDownloadNames;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
@@ -10,7 +11,6 @@ import com.auth.service.system.file.exception.FileStorageException;
 import com.auth.service.system.file.exception.FileUploadResultCode;
 import com.auth.service.system.file.mapper.FileRecordMapper;
 import com.auth.service.system.file.model.entity.FileRecordEntity;
-import com.auth.service.system.file.service.FileRecordService;
 import com.auth.service.system.file.storage.core.StoragePlatformFacade;
 import com.auth.service.system.file.storage.core.StoragePlatformFacadeRegistry;
 import com.auth.service.system.file.storage.core.provider.FileStorageProvider;
@@ -446,7 +446,7 @@ class FileRecordServiceImplTest {
 	private MockHttpServletResponse writeBatchDownloadToResponse(List<Long> ids, Long ownerUserId) throws IOException {
 		StreamingResponseBody body = fileRecordService.batchDownload(ids, ownerUserId);
 		ResponseEntity<StreamingResponseBody> downloadResponse = FileDelivery.deliver(body,
-				FileRecordService.BATCH_DOWNLOAD_FILE_NAME, FileRecordService.BATCH_DOWNLOAD_CONTENT_TYPE);
+				FileDownloadNames.batchZip("file-records"), FileDelivery.APPLICATION_ZIP);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		HttpHeaders headers = downloadResponse.getHeaders();
 		if (headers.getContentType() != null) {

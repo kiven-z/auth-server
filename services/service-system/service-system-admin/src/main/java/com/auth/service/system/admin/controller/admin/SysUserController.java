@@ -5,7 +5,9 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.common.ip.IpAddressService;
 import com.auth.common.web.valid.group.CreateGroup;
 import com.auth.common.web.valid.group.UpdateGroup;
+import com.auth.module.file.api.model.dto.ExportPreCheckResult;
 import com.auth.module.file.api.model.dto.FileExportTaskCreateResult;
+import com.auth.module.file.api.model.request.ExportPreCheckRequest;
 import com.auth.module.file.api.model.request.FileExportTaskCreateRequest;
 import com.auth.module.file.api.port.FileExportTaskOperations;
 import com.auth.module.file.export.definition.ExportColumns;
@@ -108,6 +110,15 @@ public class SysUserController {
 
 		List<SysUserSearchItemVO> data = sysUserQueryService.searchByKeyword(keyword, limit);
 		return Result.success(data);
+	}
+
+	@Operation(summary = "导出用户前置检查", description = "按筛选条件估算行数并返回导出方式")
+	@PreAuthorize("@auth.decide('sys:user:export')")
+	@PostMapping("/export/pre-check")
+	public Result<ExportPreCheckResult> exportPreCheck(@Validated @RequestBody SysUserPageQuery filter) {
+		ExportPreCheckRequest request = AdminFileExportTaskCreateRequests.preCheck(PlatformBizCodes.SYS_USER, filter);
+		ExportPreCheckResult result = fileExportTaskOperations.preCheck(request);
+		return Result.success(result);
 	}
 
 	@Operation(summary = "导出用户 Excel", description = "按筛选条件提交异步导出任务")

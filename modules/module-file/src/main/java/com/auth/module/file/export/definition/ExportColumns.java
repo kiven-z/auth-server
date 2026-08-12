@@ -2,7 +2,8 @@ package com.auth.module.file.export.definition;
 
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.auth.common.core.utils.JsonSupport;
-import com.auth.module.file.exception.ExportValidationException;
+import com.auth.module.file.exception.ExportColumnSnapshotInvalidException;
+import com.auth.module.file.exception.ExportColumnsRequiredException;
 import lombok.experimental.UtilityClass;
 
 import java.lang.reflect.Field;
@@ -41,7 +42,7 @@ public class ExportColumns {
 			declarationOrder++;
 		}
 		if (indexed.isEmpty()) {
-			throw ExportValidationException.columnsRequired();
+			throw new ExportColumnsRequiredException();
 		}
 		indexed.sort(Comparator.comparingInt(IndexedColumn::index));
 		List<ExportColumn> columns = new ArrayList<>(indexed.size());
@@ -58,7 +59,7 @@ public class ExportColumns {
 	 */
 	public static String toSnapshotJson(List<ExportColumn> columns) {
 		if (columns == null || columns.isEmpty()) {
-			throw ExportValidationException.columnsRequired();
+			throw new ExportColumnsRequiredException();
 		}
 
 		return JsonSupport.toJson(columns);
@@ -71,23 +72,23 @@ public class ExportColumns {
 	 */
 	public static List<ExportColumn> fromSnapshotJson(String columnSnapshotJson) {
 		if (columnSnapshotJson == null || columnSnapshotJson.isBlank()) {
-			throw ExportValidationException.columnsRequired();
+			throw new ExportColumnsRequiredException();
 		}
 		List<ExportColumn> columns;
 		try {
 			columns = JsonSupport.fromJson(columnSnapshotJson, List.class, ExportColumn.class);
 		}
 		catch (IllegalArgumentException exception) {
-			throw ExportValidationException.columnSnapshotInvalid();
+			throw new ExportColumnSnapshotInvalidException();
 		}
 
 		if (columns == null || columns.isEmpty()) {
-			throw ExportValidationException.columnsRequired();
+			throw new ExportColumnsRequiredException();
 		}
 
 		for (ExportColumn column : columns) {
 			if (column == null || column.getFieldKey() == null || column.getFieldKey().isBlank()) {
-				throw ExportValidationException.columnSnapshotInvalid();
+				throw new ExportColumnSnapshotInvalidException();
 			}
 		}
 		return List.copyOf(columns);
