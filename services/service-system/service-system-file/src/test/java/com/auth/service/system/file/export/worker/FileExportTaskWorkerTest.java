@@ -117,7 +117,7 @@ class FileExportTaskWorkerTest {
 		assertThat(SecurityUserUtils.currentAuthProfile()).isNull();
 		assertThat(artifactPath.get()).isNotNull();
 		assertThat(Files.exists(artifactPath.get())).isFalse();
-		verify(taskNotifier).notifySuccess(eq(task), eq("file_export.xlsx"));
+		verify(taskNotifier).notifySuccess(task, "file_export.xlsx");
 		verify(taskNotifier, never()).notifyTerminalFailure(any(), any());
 	}
 

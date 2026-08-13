@@ -4,6 +4,7 @@ import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
+import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
 import com.auth.service.system.admin.service.admin.GrantTableService;
 import com.auth.service.system.admin.support.grant.RbacReferenceChecker;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
@@ -19,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -57,6 +59,29 @@ class SysUserRoleServiceImplTest {
 	void setUp() {
 		sysUserRoleService = new SysUserRoleServiceImpl(userReferenceChecker, rbacReferenceChecker, grantTableService,
 				userAuthorizationInvalidationTrigger);
+	}
+
+	@Test
+	@DisplayName("查询已分配角色：按 USER 主体委托 grant_table")
+	void listAssignedRolesDelegatesToGrantTableAsUserSubject() {
+		RoleReferenceVO boundRole = new RoleReferenceVO();
+		boundRole.setId(101L);
+		boundRole.setRoleName("业务角色A");
+		when(grantTableService.listAssignedRoles(GrantTableSubjectType.USER, USER_ID)).thenReturn(List.of(boundRole));
+
+		List<RoleReferenceVO> rows = sysUserRoleService.listAssignedRoles(USER_ID);
+
+		assertThat(rows).containsExactly(boundRole);
+		verify(grantTableService).listAssignedRoles(GrantTableSubjectType.USER, USER_ID);
+		verify(grantTableService, never()).replaceSubjectRoleGrants(any(), any(), any());
+	}
+
+	@Test
+	@DisplayName("查询已分配角色：无授权时返回空列表")
+	void listAssignedRolesReturnsEmptyWhenNoneBound() {
+		when(grantTableService.listAssignedRoles(GrantTableSubjectType.USER, USER_ID)).thenReturn(List.of());
+
+		assertThat(sysUserRoleService.listAssignedRoles(USER_ID)).isEmpty();
 	}
 
 	@Test

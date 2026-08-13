@@ -50,10 +50,10 @@ class FileExportTaskNotifierTest {
 		assertThat(command.getTargets()).containsExactly("9001");
 		assertThat(command.getOptions()).isNull();
 		Map<String, Object> variables = command.getVariables();
-		assertThat(variables.get("taskId")).isEqualTo("101");
-		assertThat(variables.get("taskName")).isEqualTo("SYS_USER");
-		assertThat(variables.get("fileName")).isEqualTo("user-list.xlsx");
-		assertThat(variables.get("finishedAt")).isEqualTo("2026-08-08 15:30:00 UTC");
+		assertThat(variables).containsEntry("taskId", "101")
+			.containsEntry("taskName", "SYS_USER")
+			.containsEntry("fileName", "user-list.xlsx")
+			.containsEntry("finishedAt", "2026-08-08 15:30:00 UTC");
 	}
 
 	@Test
@@ -73,10 +73,10 @@ class FileExportTaskNotifierTest {
 		assertThat(command.getTargets()).containsExactly("9001");
 		assertThat(command.getOptions()).isNull();
 		Map<String, Object> variables = command.getVariables();
-		assertThat(variables.get("taskId")).isEqualTo("101");
-		assertThat(variables.get("taskName")).isEqualTo("SYS_USER");
-		assertThat(variables.get("failedAt")).isEqualTo("2026-08-08 15:31:00 UTC");
-		assertThat(variables.get("errorSummary")).isEqualTo("导出数据源超时");
+		assertThat(variables).containsEntry("taskId", "101")
+			.containsEntry("taskName", "SYS_USER")
+			.containsEntry("failedAt", "2026-08-08 15:31:00 UTC")
+			.containsEntry("errorSummary", "导出数据源超时");
 	}
 
 	@Test

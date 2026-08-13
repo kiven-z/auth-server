@@ -18,6 +18,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.OPERATION_SUCCESS;
 
 /**
@@ -42,6 +44,14 @@ public class SysUserRoleController {
 			SubjectRolePageQuery query) {
 		PageResponse<RoleReferenceVO> response = userAuthorizationSurfaceService.pageDirectRoles(userId, query);
 		return Result.success(response);
+	}
+
+	@Operation(summary = "查询用户已分配角色", description = "Assign 灌种专用：全量返回；无授权为空数组")
+	@PreAuthorize("@auth.decide('sys:userrole:query')")
+	@GetMapping("/{userId}/roles")
+	public Result<List<RoleReferenceVO>> listRoles(@PathVariable("userId") Long userId) {
+		List<RoleReferenceVO> rows = sysUserRoleService.listAssignedRoles(userId);
+		return Result.success(rows);
 	}
 
 	@OperationLog(targetType = "USER_ROLE", serviceDomain = AuditServiceDomain.SYSTEM,
