@@ -4,7 +4,6 @@ import com.auth.common.core.utils.JsonSupport;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
-import com.auth.module.message.api.model.email.EmailChannelOptions;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.mapper.MessageTemplateMapper;
@@ -165,6 +164,31 @@ class MessageTemplateServiceImplTest {
 		assertThat(vo.getPreviewContent()).isEqualTo("<p></p>");
 		assertThat(vo.getRequireFields()).isEmpty();
 		verify(auditUserDisplayService).enrichAuditUsernames(any(List.class), isNull(), isNull());
+	}
+
+	@Test
+	@DisplayName("详情：IN_APP 解析 channel_defaults_json 为默认小类与跳转")
+	void getMessageTemplateById_shouldFillInAppChannelDefaults() {
+		MessageTemplateEntity entity = new MessageTemplateEntity();
+		entity.setId(30L);
+		entity.setChannel(MessageChannel.IN_APP.name());
+		entity.setSceneCode("file-export-success");
+		entity.setTemplateName("导出成功");
+		entity.setSubject("完成");
+		entity.setBodyContent("ok");
+		entity.setImMessageType("MARKDOWN");
+		entity.setRequireFields("[]");
+		entity.setChannelDefaultsJson("{\"linkUrl\":\"/personal/export-task\",\"categoryId\":104}");
+		entity.setPriority(5);
+		entity.setStatus(true);
+		when(messageTemplateMapper.selectById(30L)).thenReturn(entity);
+
+		MessageTemplateDetailVO vo = sysMessageTemplateService.getMessageTemplateById(30L,
+				MessageChannel.IN_APP.name());
+
+		assertThat(vo.getCategoryId()).isEqualTo(104L);
+		assertThat(vo.getLinkUrl()).isEqualTo("/personal/export-task");
+		assertThat(vo.getContentType()).isEqualTo("MARKDOWN");
 	}
 
 	@Test
@@ -397,9 +421,9 @@ class MessageTemplateServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("测试发送：EMAIL 渠道用示例变量组装命令并带 HTML options")
+	@DisplayName("测试发送：EMAIL 渠道用示例变量组装命令，不手写 options")
 	void testSend_shouldDispatchEmailCommandWithExampleVariables() {
-		// 模板存在且渠道匹配，变量取 require_fields 示例值
+		// 模板存在且渠道匹配，变量取 require_fields 示例值；渠道默认由 Dispatch Enricher 合并
 		MessageTemplateEntity entity = new MessageTemplateEntity();
 		entity.setId(10L);
 		entity.setChannel(MessageChannel.EMAIL.name());
@@ -421,8 +445,7 @@ class MessageTemplateServiceImplTest {
 		assertThat(command.getTemplateCode()).isEqualTo("login-code");
 		assertThat(command.getTargets()).containsExactly("demo@example.com");
 		assertThat(command.getVariables()).containsEntry("code", "123456");
-		assertThat(command.getOptions()).isInstanceOf(EmailChannelOptions.class);
-		assertThat(((EmailChannelOptions) command.getOptions()).getHasHtml()).isTrue();
+		assertThat(command.getOptions()).isNull();
 	}
 
 	@Test

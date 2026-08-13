@@ -6,6 +6,7 @@ import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.service.system.message.config.MessageChannelCapability;
 import com.auth.service.system.message.config.properties.SmsProperties;
 import com.auth.service.system.message.exception.MessageException;
+import com.auth.service.system.message.support.template.ChannelDefaultsEnricher;
 import com.auth.service.system.message.support.template.TemplateMessageCommandValidation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -45,6 +46,9 @@ class MessageDispatchServiceImplTest {
 
 	private TemplateMessageCommandValidation commandValidation;
 
+	@Mock
+	private ChannelDefaultsEnricher channelDefaultsEnricher;
+
 	private MessageDispatchServiceImpl dispatchService;
 
 	@BeforeEach
@@ -54,8 +58,9 @@ class MessageDispatchServiceImplTest {
 		Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 		commandValidation = new TemplateMessageCommandValidation(validator);
 		smsProperties = new SmsProperties();
+		lenient().when(channelDefaultsEnricher.enrich(any())).thenAnswer(invocation -> invocation.getArgument(0));
 		dispatchService = new MessageDispatchServiceImpl(List.of(emailSender, dingTalkSender), List.of(smsProperties),
-				commandValidation);
+				commandValidation, channelDefaultsEnricher);
 	}
 
 	@Test
@@ -69,6 +74,7 @@ class MessageDispatchServiceImplTest {
 
 		dispatchService.sendByTemplate(command);
 
+		verify(channelDefaultsEnricher).enrich(command);
 		verify(emailSender).sendByTemplate(command);
 		verify(dingTalkSender, never()).sendByTemplate(any());
 	}
@@ -132,7 +138,7 @@ class MessageDispatchServiceImplTest {
 		// 站内信等无凭证渠道可不声明开关；有 sender 时应正常发出
 		when(inAppSender.channel()).thenReturn(MessageChannel.IN_APP);
 		MessageDispatchServiceImpl service = new MessageDispatchServiceImpl(List.of(inAppSender), List.of(),
-				commandValidation);
+				commandValidation, channelDefaultsEnricher);
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
 			.channel(MessageChannel.IN_APP)
 			.templateCode("notice")
@@ -152,7 +158,8 @@ class MessageDispatchServiceImplTest {
 		List<MessageSender> senders = List.of(emailSender);
 		List<MessageChannelCapability> capabilities = List.of(first, second);
 
-		assertThatThrownBy(() -> new MessageDispatchServiceImpl(senders, capabilities, commandValidation))
+		assertThatThrownBy(
+				() -> new MessageDispatchServiceImpl(senders, capabilities, commandValidation, channelDefaultsEnricher))
 			.isInstanceOf(IllegalStateException.class)
 			.hasMessageContaining("SMS");
 	}

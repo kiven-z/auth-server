@@ -1,19 +1,11 @@
 package com.auth.service.system.file.service.impl;
 
-import com.auth.module.file.api.model.dto.ExportPreCheckResult;
-import com.auth.module.file.api.model.dto.FileExportTaskCreateResult;
 import com.auth.module.file.api.model.enums.StoragePlatformEnum;
-import com.auth.module.file.api.model.request.ExportPreCheckRequest;
-import com.auth.module.file.api.model.request.FileExportTaskCreateRequest;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
-import com.auth.service.system.file.config.properties.FileExportTaskProperties;
 import com.auth.service.system.file.config.properties.FileUploadProperties;
 import com.auth.service.system.file.exception.FileStorageException;
 import com.auth.service.system.file.exception.FileUploadResultCode;
-import com.auth.service.system.file.export.precheck.FileExportPreCheckService;
-import com.auth.service.system.file.export.task.FileExportTaskAssembler;
-import com.auth.service.system.file.export.task.FileExportTaskNormalizedCreateContext;
 import com.auth.service.system.file.mapper.FileExportTaskMapper;
 import com.auth.service.system.file.mapper.FileRecordMapper;
 import com.auth.service.system.file.model.entity.FileExportTaskEntity;
@@ -47,10 +39,6 @@ public class FileExportTaskWriteServiceImpl extends ServiceImpl<FileExportTaskMa
 
 	private final FileUploadProperties fileUploadProperties;
 
-	private final FileExportTaskProperties fileExportTaskProperties;
-
-	private final FileExportPreCheckService preCheckService;
-
 	private static boolean isRetryableStatus(String status) {
 		return FileExportTaskStatus.FAILED.name().equals(status)
 				|| FileExportTaskStatus.CANCELLED.name().equals(status);
@@ -63,54 +51,6 @@ public class FileExportTaskWriteServiceImpl extends ServiceImpl<FileExportTaskMa
 			return false;
 		}
 		return retryCount >= maxRetry;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public ExportPreCheckResult preCheck(ExportPreCheckRequest request) {
-		return preCheckService.preCheck(request);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	@Transactional(rollbackFor = Exception.class)
-	public FileExportTaskCreateResult createTask(FileExportTaskCreateRequest request) {
-		FileExportTaskNormalizedCreateContext createContext = FileExportTaskNormalizedCreateContext.from(request);
-		Long createdBy = request.getCreatedBy();
-		String requestId = createContext.getRequestId();
-
-		if (requestId != null) {
-			// 查询幂等重复任务
-			FileExportTaskEntity duplicated = this.lambdaQuery()
-				.eq(FileExportTaskEntity::getCreatedBy, createdBy)
-				.eq(FileExportTaskEntity::getRequestId, requestId)
-				.last("LIMIT 1")
-				.one();
-			if (duplicated != null) {
-				FileExportTaskCreateResult result = new FileExportTaskCreateResult();
-				result.setTaskId(duplicated.getId());
-				return result;
-			}
-		}
-
-		long inProgressCount = this.lambdaQuery()
-			.eq(FileExportTaskEntity::getCreatedBy, createdBy)
-			.in(FileExportTaskEntity::getStatus, FileExportTaskStatus.PENDING.name(),
-					FileExportTaskStatus.RUNNING.name(), FileExportTaskStatus.CANCELLING.name())
-			.count();
-		if (inProgressCount >= fileExportTaskProperties.getMaxInProgressPerUser()) {
-			throw new SystemBusinessException(SystemCommonResultCode.DATA_INVALID, "inProgressLimit");
-		}
-
-		FileExportTaskEntity entity = FileExportTaskAssembler.fromCreateRequest(request, createContext);
-		super.save(entity);
-		FileExportTaskCreateResult result = new FileExportTaskCreateResult();
-		result.setTaskId(entity.getId());
-		return result;
 	}
 
 	/**

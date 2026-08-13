@@ -91,6 +91,7 @@
         <archunit.version>1.4.0</archunit.version>
         <!-- flatten：解析 ${revision} 后再 install/deploy -->
         <flatten-maven-plugin.version>1.6.0</flatten-maven-plugin.version>
+        <git-commit-id-maven-plugin.version>9.0.1</git-commit-id-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -308,6 +309,33 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>build-info</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>io.github.git-commit-id</groupId>
+                <artifactId>git-commit-id-maven-plugin</artifactId>
+                <version>${git-commit-id-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>get-the-git-infos</id>
+                        <goals>
+                            <goal>revision</goal>
+                        </goals>
+                        <phase>initialize</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <generateGitPropertiesFile>true</generateGitPropertiesFile>
+                    <commitIdGenerationMode>full</commitIdGenerationMode>
+                    <failOnNoGitDirectory>false</failOnNoGitDirectory>
+                </configuration>
             </plugin>
 
             <plugin>

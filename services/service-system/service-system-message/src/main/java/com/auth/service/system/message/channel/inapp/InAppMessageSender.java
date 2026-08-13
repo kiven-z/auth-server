@@ -11,7 +11,6 @@ import com.auth.module.message.api.model.inapp.InAppChannelOptions;
 import com.auth.service.system.message.convert.InAppEntityAssembler;
 import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.mapper.InAppMessageMapper;
-import com.auth.service.system.message.model.entity.InAppMessageCategoryEntity;
 import com.auth.service.system.message.model.entity.InAppMessageEntity;
 import com.auth.service.system.message.model.entity.InAppMessageRecipientEntity;
 import com.auth.service.system.message.model.enums.InAppMessageStatus;
@@ -94,8 +93,7 @@ public class InAppMessageSender implements MessageSender {
 	private RenderedInAppMessage resolveContent(TemplateMessageCommand command) {
 		InAppChannelOptions options = command.getOptions() instanceof InAppChannelOptions inApp ? inApp
 				: new InAppChannelOptions();
-		InAppMessageCategoryEntity categoryEntity = categorySupport.requireEnabledMinor(options.getCategoryId());
-		Long categoryId = categoryEntity.getId();
+		Long categoryId = categorySupport.requireEnabledMinor(options.getCategoryId()).getId();
 
 		if (!Boolean.TRUE.equals(command.getCustomBody())) {
 			return inAppTemplatePipeline.render(command.getTemplateCode(), command.getVariables())

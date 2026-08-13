@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -53,7 +54,7 @@ public class EmailMessageSender extends AbstractRecordingMessageSender {
 		emailSendDTO.setCc(options.getCc());
 		emailSendDTO.setBcc(options.getBcc());
 		emailSendDTO.setReplyTo(options.getReplyTo());
-		emailSendDTO.setHasHtml(options.getHasHtml());
+		emailSendDTO.setHasHtml(Objects.requireNonNullElse(options.getHasHtml(), Boolean.TRUE));
 		emailSendDTO.setAttachments(options.getAttachments());
 		return emailSendDTO;
 	}

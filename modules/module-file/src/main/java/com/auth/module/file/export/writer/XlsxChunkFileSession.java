@@ -5,7 +5,9 @@ import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.write.builder.ExcelWriterBuilder;
 import com.alibaba.excel.write.handler.CellWriteHandler;
 import com.alibaba.excel.write.metadata.WriteSheet;
+import com.alibaba.excel.write.style.column.LongestMatchColumnWidthStyleStrategy;
 import com.auth.module.file.export.definition.ExportColumn;
+import com.auth.module.file.export.model.enums.ZebraStripeStyleType;
 import com.auth.module.file.export.shard.ChunkFileSession;
 
 import java.io.IOException;
@@ -102,7 +104,7 @@ final class XlsxChunkFileSession implements ChunkFileSession<Map<String, Object>
 			return;
 		}
 		ExcelWriterBuilder builder = EasyExcelFactory.write(outputStream).head(MapExcelRowSupport.buildHead(columns));
-		TempExcelFileSupport.applyDefaultHandlers(builder, writeHandlers);
+		applyDefaultHandlers(builder);
 		excelWriter = builder.build();
 		writeSheet = EasyExcelFactory.writerSheet(sheetName).build();
 	}
@@ -121,13 +123,25 @@ final class XlsxChunkFileSession implements ChunkFileSession<Map<String, Object>
 	 */
 	private void writeHeaderOnlyWorkbook() {
 		ExcelWriterBuilder builder = EasyExcelFactory.write(outputStream).head(MapExcelRowSupport.buildHead(columns));
-		TempExcelFileSupport.applyDefaultHandlers(builder, writeHandlers);
+		applyDefaultHandlers(builder);
 		ExcelWriter headerWriter = builder.build();
 		try {
 			headerWriter.write(List.of(), EasyExcelFactory.writerSheet(sheetName).build());
 		}
 		finally {
 			headerWriter.finish();
+		}
+	}
+
+	private void applyDefaultHandlers(ExcelWriterBuilder builder) {
+		builder.registerWriteHandler(new LongestMatchColumnWidthStyleStrategy());
+		if (writeHandlers == null || writeHandlers.isEmpty()) {
+			CellWriteHandler cellWriteHandler = ZebraStripeStyleType.getHandler(ZebraStripeStyleType.BLUE_GREY_TECH);
+			builder.registerWriteHandler(cellWriteHandler);
+			return;
+		}
+		for (CellWriteHandler handler : writeHandlers) {
+			builder.registerWriteHandler(handler);
 		}
 	}
 

@@ -20,6 +20,8 @@ server:
 spring:
   application:
     name: service-system
+  freemarker:
+    check-template-location: false
   config:
     import:
       - nacos:common-config.yaml?group=AUTH_COMMON

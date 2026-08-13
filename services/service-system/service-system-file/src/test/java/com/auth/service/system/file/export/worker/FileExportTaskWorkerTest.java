@@ -12,6 +12,7 @@ import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.module.security.contract.api.authorization.ScopeGrant;
 import com.auth.module.security.contract.api.datascope.DataScopeStorageType;
 import com.auth.service.system.file.config.properties.FileExportTaskProperties;
+import com.auth.service.system.file.export.notify.FileExportTaskNotifier;
 import com.auth.service.system.file.export.remote.RemotePageFetcher;
 import com.auth.service.system.file.mapper.FileExportAttemptMapper;
 import com.auth.service.system.file.mapper.FileExportTaskMapper;
@@ -61,6 +62,9 @@ class FileExportTaskWorkerTest {
 	@Mock
 	private AsyncPagedExportExecutor asyncPagedExportExecutor;
 
+	@Mock
+	private FileExportTaskNotifier taskNotifier;
+
 	@AfterEach
 	void clearSecurityContext() {
 		SecurityContextHolder.clearContext();
@@ -75,7 +79,7 @@ class FileExportTaskWorkerTest {
 		FileExportTaskEntity task = newTask(101L);
 		when(fileExportTaskMapper.selectClaimCandidateIds(any(), eq(5))).thenReturn(List.of(101L));
 		when(fileExportTaskMapper.claimTask(eq(101L), eq("file-export-worker"), any(), any())).thenReturn(1);
-		when(fileExportTaskMapper.selectById(101L)).thenReturn(task);
+		when(fileExportTaskMapper.selectById(101L)).thenReturn(task, task);
 		AtomicReference<AuthProfile> profileDuringExport = new AtomicReference<>();
 		AtomicReference<Path> artifactPath = new AtomicReference<>();
 		when(asyncPagedExportExecutor.export(any(FileExportTaskContext.class), any(), any())).thenAnswer(invocation -> {
@@ -113,6 +117,8 @@ class FileExportTaskWorkerTest {
 		assertThat(SecurityUserUtils.currentAuthProfile()).isNull();
 		assertThat(artifactPath.get()).isNotNull();
 		assertThat(Files.exists(artifactPath.get())).isFalse();
+		verify(taskNotifier).notifySuccess(eq(task), eq("file_export.xlsx"));
+		verify(taskNotifier, never()).notifyTerminalFailure(any(), any());
 	}
 
 	@Test
@@ -126,7 +132,7 @@ class FileExportTaskWorkerTest {
 		task.setMaxRetry(3);
 		when(fileExportTaskMapper.selectClaimCandidateIds(any(), eq(5))).thenReturn(List.of(102L));
 		when(fileExportTaskMapper.claimTask(eq(102L), eq("file-export-worker"), any(), any())).thenReturn(1);
-		when(fileExportTaskMapper.selectById(102L)).thenReturn(task);
+		when(fileExportTaskMapper.selectById(102L)).thenReturn(task, task);
 		when(asyncPagedExportExecutor.export(any(FileExportTaskContext.class), any(), any()))
 			.thenThrow(new IllegalStateException("boom"));
 		when(fileExportTaskMapper.markRetryPending(eq(102L), eq("file-export-worker"), eq("IllegalStateException"),
@@ -144,6 +150,8 @@ class FileExportTaskWorkerTest {
 		ArgumentCaptor<FileExportAttemptEntity> captor = ArgumentCaptor.forClass(FileExportAttemptEntity.class);
 		verify(fileExportAttemptMapper).insert(captor.capture());
 		assertThat(captor.getValue().getResult()).isEqualTo("FAILED");
+		verify(taskNotifier, never()).notifySuccess(any(), any());
+		verify(taskNotifier, never()).notifyTerminalFailure(any(), any());
 	}
 
 	@Test
@@ -152,12 +160,16 @@ class FileExportTaskWorkerTest {
 		FileExportTaskProperties properties = newProperties();
 		FileExportTaskWorker worker = newWorker(properties);
 
-		FileExportTaskEntity task = newTask(106L);
-		task.setRetryCount(0);
-		task.setMaxRetry(3);
+		FileExportTaskEntity runningTask = newTask(106L);
+		runningTask.setRetryCount(0);
+		runningTask.setMaxRetry(3);
+		FileExportTaskEntity failedTask = newTask(106L);
+		failedTask.setRetryCount(0);
+		failedTask.setMaxRetry(3);
+		failedTask.setStatus("FAILED");
 		when(fileExportTaskMapper.selectClaimCandidateIds(any(), eq(5))).thenReturn(List.of(106L));
 		when(fileExportTaskMapper.claimTask(eq(106L), eq("file-export-worker"), any(), any())).thenReturn(1);
-		when(fileExportTaskMapper.selectById(106L)).thenReturn(task);
+		when(fileExportTaskMapper.selectById(106L)).thenReturn(runningTask, failedTask);
 		when(asyncPagedExportExecutor.export(any(FileExportTaskContext.class), any(), any()))
 			.thenThrow(new ExportRowLimitExceededException(100L, 101L));
 
@@ -168,6 +180,8 @@ class FileExportTaskWorkerTest {
 		verify(fileExportTaskMapper, never()).markRetryPending(anyLong(), anyString(), anyString(), anyString(), any(),
 				any());
 		assertThat(SecurityUserUtils.currentAuthProfile()).isNull();
+		verify(taskNotifier).notifyTerminalFailure(eq(failedTask), anyString());
+		verify(taskNotifier, never()).notifySuccess(any(), any());
 	}
 
 	@Test
@@ -176,13 +190,18 @@ class FileExportTaskWorkerTest {
 		FileExportTaskProperties properties = newProperties();
 		FileExportTaskWorker worker = newWorker(properties);
 
-		FileExportTaskEntity task = newTask(104L);
-		task.setScopeSnapshotJson("{\"permVersion\":1}");
-		task.setRetryCount(3);
-		task.setMaxRetry(3);
+		FileExportTaskEntity runningTask = newTask(104L);
+		runningTask.setScopeSnapshotJson("{\"permVersion\":1}");
+		runningTask.setRetryCount(3);
+		runningTask.setMaxRetry(3);
+		FileExportTaskEntity failedTask = newTask(104L);
+		failedTask.setScopeSnapshotJson("{\"permVersion\":1}");
+		failedTask.setRetryCount(3);
+		failedTask.setMaxRetry(3);
+		failedTask.setStatus("FAILED");
 		when(fileExportTaskMapper.selectClaimCandidateIds(any(), eq(5))).thenReturn(List.of(104L));
 		when(fileExportTaskMapper.claimTask(eq(104L), eq("file-export-worker"), any(), any())).thenReturn(1);
-		when(fileExportTaskMapper.selectById(104L)).thenReturn(task);
+		when(fileExportTaskMapper.selectById(104L)).thenReturn(runningTask, failedTask);
 
 		worker.executeRound();
 
@@ -192,6 +211,7 @@ class FileExportTaskWorkerTest {
 		verify(fileExportTaskMapper, never()).markRetryPending(anyLong(), anyString(), anyString(), anyString(), any(),
 				any());
 		assertThat(SecurityUserUtils.currentAuthProfile()).isNull();
+		verify(taskNotifier).notifyTerminalFailure(eq(failedTask), anyString());
 	}
 
 	@Test
@@ -205,7 +225,7 @@ class FileExportTaskWorkerTest {
 		cancelledTask.setStatus("CANCELLING");
 		when(fileExportTaskMapper.selectClaimCandidateIds(any(), eq(5))).thenReturn(List.of(103L));
 		when(fileExportTaskMapper.claimTask(eq(103L), eq("file-export-worker"), any(), any())).thenReturn(1);
-		when(fileExportTaskMapper.selectById(103L)).thenReturn(runningTask, cancelledTask);
+		when(fileExportTaskMapper.selectById(103L)).thenReturn(runningTask, cancelledTask, cancelledTask);
 
 		worker.executeRound();
 
@@ -216,6 +236,8 @@ class FileExportTaskWorkerTest {
 		ArgumentCaptor<FileExportAttemptEntity> captor = ArgumentCaptor.forClass(FileExportAttemptEntity.class);
 		verify(fileExportAttemptMapper).insert(captor.capture());
 		assertThat(captor.getValue().getResult()).isEqualTo("CANCELLED");
+		verify(taskNotifier, never()).notifySuccess(any(), any());
+		verify(taskNotifier, never()).notifyTerminalFailure(any(), any());
 	}
 
 	@Test
@@ -228,7 +250,7 @@ class FileExportTaskWorkerTest {
 		task.setRetryCount(2);
 		when(fileExportTaskMapper.selectClaimCandidateIds(any(), eq(5))).thenReturn(List.of(105L));
 		when(fileExportTaskMapper.claimTask(eq(105L), eq("file-export-worker"), any(), any())).thenReturn(1);
-		when(fileExportTaskMapper.selectById(105L)).thenReturn(task);
+		when(fileExportTaskMapper.selectById(105L)).thenReturn(task, task);
 		when(asyncPagedExportExecutor.export(any(FileExportTaskContext.class), any(), any()))
 			.thenReturn(FileExportTaskArtifact.builder()
 				.fileName("file_export.xlsx")
@@ -255,7 +277,8 @@ class FileExportTaskWorkerTest {
 		FileExportTaskFailureHandler failureHandler = new FileExportTaskFailureHandler(fileExportTaskMapper,
 				properties);
 		FileExportAttemptRecorder attemptRecorder = new FileExportAttemptRecorder(fileExportAttemptMapper);
-		return new FileExportTaskWorker(fileExportTaskMapper, properties, runner, failureHandler, attemptRecorder);
+		return new FileExportTaskWorker(fileExportTaskMapper, properties, runner, failureHandler, attemptRecorder,
+				taskNotifier);
 	}
 
 	private FileExportTaskProperties newProperties() {

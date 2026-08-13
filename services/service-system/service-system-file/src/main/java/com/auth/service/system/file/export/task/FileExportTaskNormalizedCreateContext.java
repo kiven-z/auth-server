@@ -68,8 +68,23 @@ public class FileExportTaskNormalizedCreateContext {
 		if (request == null) {
 			throw new IllegalArgumentException("request");
 		}
-		requireFormatSupported(request.getExportFormat());
-		AuthProfile profile = resolveCurrentProfile(request.getCreatedBy());
+
+		try {
+			String exportFormat = request.getExportFormat();
+			FileExportFormat.valueOf(exportFormat.trim().toUpperCase(Locale.ROOT));
+		}
+		catch (IllegalArgumentException exception) {
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_INVALID, "exportFormat");
+		}
+
+		Long createdBy = request.getCreatedBy();
+		AuthProfile profile = SecurityUserUtils.currentAuthProfile();
+		if (profile == null || profile.getUserId() == null) {
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_INVALID, "authProfile");
+		}
+		if (!profile.getUserId().equals(createdBy)) {
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_INVALID, "createdBy");
+		}
 		return FileExportTaskNormalizedCreateContext.builder()
 			.requestId(CharSequenceUtil.trimToNull(request.getRequestId()))
 			.bizType(request.getBizType().trim().toUpperCase(Locale.ROOT))
@@ -79,15 +94,6 @@ public class FileExportTaskNormalizedCreateContext {
 			.fetchService(request.getFetchService().trim())
 			.fetchPath(normalizeFetchPath(request.getFetchPath()))
 			.build();
-	}
-
-	private static void requireFormatSupported(String exportFormat) {
-		try {
-			FileExportFormat.valueOf(exportFormat.trim().toUpperCase(Locale.ROOT));
-		}
-		catch (IllegalArgumentException exception) {
-			throw new SystemBusinessException(SystemCommonResultCode.DATA_INVALID, "exportFormat");
-		}
 	}
 
 	private static String normalizeQuerySnapshotJson(String querySnapshotJson) {
@@ -114,17 +120,6 @@ public class FileExportTaskNormalizedCreateContext {
 			throw new SystemBusinessException(SystemCommonResultCode.DATA_INVALID, "fetchPath");
 		}
 		return trimmed;
-	}
-
-	private static AuthProfile resolveCurrentProfile(Long createdBy) {
-		AuthProfile profile = SecurityUserUtils.currentAuthProfile();
-		if (profile == null || profile.getUserId() == null) {
-			throw new SystemBusinessException(SystemCommonResultCode.DATA_INVALID, "authProfile");
-		}
-		if (!profile.getUserId().equals(createdBy)) {
-			throw new SystemBusinessException(SystemCommonResultCode.DATA_INVALID, "createdBy");
-		}
-		return profile;
 	}
 
 }

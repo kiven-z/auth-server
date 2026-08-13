@@ -6,6 +6,7 @@ import com.auth.module.message.api.command.TemplateMessageCommand;
 import com.auth.service.system.message.config.MessageChannelCapability;
 import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.service.admin.MessageDispatchService;
+import com.auth.service.system.message.support.template.ChannelDefaultsEnricher;
 import com.auth.service.system.message.support.template.TemplateMessageCommandValidation;
 import org.springframework.stereotype.Service;
 
@@ -31,11 +32,14 @@ public class MessageDispatchServiceImpl implements MessageDispatchService {
 
 	private final TemplateMessageCommandValidation commandValidation;
 
+	private final ChannelDefaultsEnricher channelDefaultsEnricher;
+
 	public MessageDispatchServiceImpl(List<MessageSender> senders, List<MessageChannelCapability> capabilities,
-			TemplateMessageCommandValidation commandValidation) {
+			TemplateMessageCommandValidation commandValidation, ChannelDefaultsEnricher channelDefaultsEnricher) {
 		this.senderByChannel = indexSenders(senders);
 		this.capabilityByChannel = indexCapabilities(capabilities);
 		this.commandValidation = commandValidation;
+		this.channelDefaultsEnricher = channelDefaultsEnricher;
 	}
 
 	/**
@@ -75,6 +79,7 @@ public class MessageDispatchServiceImpl implements MessageDispatchService {
 	@Override
 	public void sendByTemplate(TemplateMessageCommand command) {
 		commandValidation.validate(command);
+		channelDefaultsEnricher.enrich(command);
 		MessageChannel channel = Objects.requireNonNull(command.getChannel(), "channel");
 		MessageChannelCapability capability = capabilityByChannel.get(channel);
 		// 未注册 capability 的渠道视为启用

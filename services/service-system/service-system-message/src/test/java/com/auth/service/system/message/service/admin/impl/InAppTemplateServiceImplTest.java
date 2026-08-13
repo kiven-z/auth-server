@@ -3,8 +3,12 @@ package com.auth.service.system.message.service.admin.impl;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.mapper.MessageTemplateMapper;
+import com.auth.service.system.message.model.entity.InAppMessageCategoryEntity;
 import com.auth.service.system.message.model.entity.MessageTemplateEntity;
 import com.auth.service.system.message.model.form.inapp.InAppTemplateForm;
+import com.auth.service.system.message.support.inapp.InAppMessageCategorySupport;
+import com.auth.service.system.message.support.template.ChannelDefaultsJsonSupport;
+import com.auth.service.system.message.support.template.ChannelDefaultsJsonSupport.InAppChannelDefaults;
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import com.baomidou.mybatisplus.extension.repository.CrudRepository;
@@ -34,8 +38,15 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class InAppTemplateServiceImplTest {
 
+	private static final long MINOR_CATEGORY_ID = 104L;
+
+	private static final String MINOR_CATEGORY_CODE = "NOTICE_GENERAL";
+
 	@Mock
 	private MessageTemplateMapper messageTemplateMapper;
+
+	@Mock
+	private InAppMessageCategorySupport categorySupport;
 
 	@InjectMocks
 	private InAppTemplateServiceImpl sysInAppTemplateService;
@@ -46,6 +57,12 @@ class InAppTemplateServiceImplTest {
 				MessageTemplateEntity.class);
 	}
 
+	private static InAppTemplateForm baseForm() {
+		InAppTemplateForm form = new InAppTemplateForm();
+		form.setCategoryId(MINOR_CATEGORY_ID);
+		return form;
+	}
+
 	@BeforeEach
 	void setUp() throws Exception {
 		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
@@ -53,12 +70,22 @@ class InAppTemplateServiceImplTest {
 		baseMapperField.set(sysInAppTemplateService, messageTemplateMapper);
 	}
 
+	private void stubEnabledMinor() {
+		InAppMessageCategoryEntity minor = new InAppMessageCategoryEntity();
+		minor.setId(MINOR_CATEGORY_ID);
+		minor.setCode(MINOR_CATEGORY_CODE);
+		minor.setParentId(1L);
+		minor.setStatus(Boolean.TRUE);
+		when(categorySupport.requireEnabledMinor(MINOR_CATEGORY_ID)).thenReturn(minor);
+	}
+
 	@Test
-	@DisplayName("创建：写入 IN_APP 渠道、标题与 TEXT 正文，并初始化空 require_fields")
+	@DisplayName("创建：写入 IN_APP 渠道、标题与 TEXT 正文，并初始化空 require_fields 与渠道默认")
 	void create_shouldPersistInAppChannelAndTextBody() {
+		stubEnabledMinor();
 		when(messageTemplateMapper.insert(any(MessageTemplateEntity.class))).thenReturn(1);
 
-		InAppTemplateForm form = new InAppTemplateForm();
+		InAppTemplateForm form = baseForm();
 		form.setTemplateCode("in_app_notice");
 		form.setTemplateName("系统通知");
 		form.setSubject("通知：${title}");
@@ -67,6 +94,7 @@ class InAppTemplateServiceImplTest {
 		form.setDescription("站内通知模板");
 		form.setStatus(true);
 		form.setPriority(5);
+		form.setLinkUrl("/personal/export-task");
 
 		sysInAppTemplateService.create(form);
 
@@ -84,14 +112,18 @@ class InAppTemplateServiceImplTest {
 		assertThat(saved.getStatus()).isTrue();
 		assertThat(saved.getPriority()).isEqualTo(5);
 		assertThat(saved.getRequireFields()).isEqualTo("[]");
+		InAppChannelDefaults defaults = ChannelDefaultsJsonSupport.parseInApp(saved.getChannelDefaultsJson());
+		assertThat(defaults.getCategoryId()).isEqualTo(MINOR_CATEGORY_ID);
+		assertThat(defaults.getLinkUrl()).isEqualTo("/personal/export-task");
 	}
 
 	@Test
 	@DisplayName("创建：MARKDOWN 正文原样落库")
 	void create_shouldPersistMarkdownBodyAsIs() {
+		stubEnabledMinor();
 		when(messageTemplateMapper.insert(any(MessageTemplateEntity.class))).thenReturn(1);
 
-		InAppTemplateForm form = new InAppTemplateForm();
+		InAppTemplateForm form = baseForm();
 		form.setTemplateCode("in_app_md");
 		form.setTemplateName("Markdown 通知");
 		form.setSubject("MD 标题");
@@ -113,9 +145,10 @@ class InAppTemplateServiceImplTest {
 	@Test
 	@DisplayName("创建：未知 contentType 按 TEXT，正文原样落库")
 	void create_shouldFallbackUnknownContentTypeToText() {
+		stubEnabledMinor();
 		when(messageTemplateMapper.insert(any(MessageTemplateEntity.class))).thenReturn(1);
 
-		InAppTemplateForm form = new InAppTemplateForm();
+		InAppTemplateForm form = baseForm();
 		form.setTemplateCode("in_app_unknown");
 		form.setTemplateName("未知类型");
 		form.setSubject("标题");
@@ -137,6 +170,7 @@ class InAppTemplateServiceImplTest {
 	@Test
 	@DisplayName("更新：覆盖元数据与正文类型，保留 require_fields 与 channel")
 	void update_shouldOverwriteFieldsAndKeepRequireFields() {
+		stubEnabledMinor();
 		// 已有站内信模板，含变量声明
 		MessageTemplateEntity exists = new MessageTemplateEntity();
 		exists.setId(20L);
@@ -153,7 +187,7 @@ class InAppTemplateServiceImplTest {
 		when(messageTemplateMapper.selectById(20L)).thenReturn(exists);
 		when(messageTemplateMapper.updateById(any(MessageTemplateEntity.class))).thenReturn(1);
 
-		InAppTemplateForm form = new InAppTemplateForm();
+		InAppTemplateForm form = baseForm();
 		form.setId(20L);
 		form.setTemplateCode("in_app_notice");
 		form.setTemplateName("系统通知");
@@ -180,6 +214,8 @@ class InAppTemplateServiceImplTest {
 		assertThat(updated.getStatus()).isTrue();
 		assertThat(updated.getPriority()).isEqualTo(8);
 		assertThat(updated.getRequireFields()).isEqualTo("[{\"key\":\"userName\",\"exampleValue\":\"张三\"}]");
+		InAppChannelDefaults defaults = ChannelDefaultsJsonSupport.parseInApp(updated.getChannelDefaultsJson());
+		assertThat(defaults.getCategoryId()).isEqualTo(MINOR_CATEGORY_ID);
 	}
 
 	@Test
@@ -187,7 +223,7 @@ class InAppTemplateServiceImplTest {
 	void update_shouldThrowWhenMissing() {
 		when(messageTemplateMapper.selectById(99L)).thenReturn(null);
 
-		InAppTemplateForm form = new InAppTemplateForm();
+		InAppTemplateForm form = baseForm();
 		form.setId(99L);
 		form.setTemplateCode("in_app_missing");
 		form.setTemplateName("不存在");
@@ -206,6 +242,7 @@ class InAppTemplateServiceImplTest {
 	@Test
 	@DisplayName("更新：不校验渠道，仅按 id 更新且不改写 channel")
 	void update_shouldNotValidateChannel() {
+		stubEnabledMinor();
 		MessageTemplateEntity exists = new MessageTemplateEntity();
 		exists.setId(22L);
 		exists.setChannel(MessageChannel.EMAIL.name());
@@ -213,7 +250,7 @@ class InAppTemplateServiceImplTest {
 		when(messageTemplateMapper.selectById(22L)).thenReturn(exists);
 		when(messageTemplateMapper.updateById(any(MessageTemplateEntity.class))).thenReturn(1);
 
-		InAppTemplateForm form = new InAppTemplateForm();
+		InAppTemplateForm form = baseForm();
 		form.setId(22L);
 		form.setTemplateCode("in_app_any_channel");
 		form.setTemplateName("不校验渠道");

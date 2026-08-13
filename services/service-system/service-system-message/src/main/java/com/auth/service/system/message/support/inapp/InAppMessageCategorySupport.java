@@ -1,5 +1,6 @@
 package com.auth.service.system.message.support.inapp;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.core.utils.TreeParentIdUtil;
 import com.auth.service.system.message.exception.MessageException;
 import com.auth.service.system.message.mapper.InAppMessageCategoryMapper;
@@ -9,8 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import static com.auth.common.core.utils.TreeParentIdUtil.ROOT_PARENT_ID;
-import static com.auth.service.system.common.exception.code.SystemCommonResultCode.DATA_CODE_DUPLICATE;
-import static com.auth.service.system.common.exception.code.SystemCommonResultCode.TREE_PARENT_UNAVAILABLE;
+import static com.auth.service.system.common.exception.code.SystemCommonResultCode.*;
 import static com.auth.service.system.message.exception.MessageResultCode.IN_APP_MESSAGE_CATEGORY_NOT_FOUND;
 
 /**
@@ -31,14 +31,33 @@ public class InAppMessageCategorySupport {
 	 */
 	public InAppMessageCategoryEntity requireEnabledMinor(Long categoryId) {
 		if (categoryId == null) {
-			throw new MessageException(IN_APP_MESSAGE_CATEGORY_NOT_FOUND);
+			throw new MessageException(PARAM_REQUIRED, "业务小类");
 		}
 		InAppMessageCategoryEntity entity = categoryMapper.selectOne(Wrappers.<InAppMessageCategoryEntity>lambdaQuery()
-			.eq(InAppMessageCategoryEntity::getId, categoryId)
 			.eq(InAppMessageCategoryEntity::getStatus, Boolean.TRUE)
-			.gt(InAppMessageCategoryEntity::getParentId, ROOT_PARENT_ID));
+			.gt(InAppMessageCategoryEntity::getParentId, ROOT_PARENT_ID)
+			.eq(InAppMessageCategoryEntity::getId, categoryId));
 		if (entity == null) {
 			throw new MessageException(IN_APP_MESSAGE_CATEGORY_NOT_FOUND, categoryId);
+		}
+		return entity;
+	}
+
+	/**
+	 * 校验并返回启用中的小类（按分类码）
+	 * @param code 分类码
+	 * @return 启用小类实体
+	 */
+	public InAppMessageCategoryEntity requireEnabledMinorByCode(String code) {
+		if (CharSequenceUtil.isBlank(code)) {
+			throw new MessageException(PARAM_REQUIRED, "业务小类");
+		}
+		InAppMessageCategoryEntity entity = categoryMapper.selectOne(Wrappers.<InAppMessageCategoryEntity>lambdaQuery()
+			.eq(InAppMessageCategoryEntity::getStatus, Boolean.TRUE)
+			.gt(InAppMessageCategoryEntity::getParentId, ROOT_PARENT_ID)
+			.eq(InAppMessageCategoryEntity::getCode, code));
+		if (entity == null) {
+			throw new MessageException(IN_APP_MESSAGE_CATEGORY_NOT_FOUND, code);
 		}
 		return entity;
 	}

@@ -6,10 +6,10 @@ import com.auth.service.system.message.model.po.MessageTemplatePageRowPO;
 import com.auth.service.system.message.model.vo.template.MessageTemplateDetailVO;
 import com.auth.service.system.message.model.vo.template.MessageTemplatePageVO;
 import com.auth.service.system.message.model.vo.template.MessageTemplateRequireFieldRow;
+import com.auth.service.system.message.support.template.ChannelDefaultsJsonSupport;
+import com.auth.service.system.message.support.template.ChannelDefaultsJsonSupport.InAppChannelDefaults;
 import com.auth.service.system.message.support.template.MessageTemplateRequireFieldsJsonSupport;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Named;
+import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
 import java.util.List;
@@ -54,8 +54,25 @@ public interface MessageTemplateConverter {
 	@Mapping(target = "previewContent", ignore = true)
 	@Mapping(target = "contentType", ignore = true)
 	@Mapping(target = "requireFields", source = "requireFields", qualifiedByName = "parseRequireFields")
+	@Mapping(target = "categoryId", ignore = true)
+	@Mapping(target = "linkUrl", ignore = true)
 	@Mapping(target = "createdByName", ignore = true)
 	@Mapping(target = "updatedByName", ignore = true)
 	MessageTemplateDetailVO toDetailVo(MessageTemplateEntity entity);
+
+	/**
+	 * 从 channel_defaults_json 回填站内信默认小类与跳转
+	 * @param entity 模板实体
+	 * @param vo 详情 VO
+	 */
+	@AfterMapping
+	default void fillInAppChannelDefaults(MessageTemplateEntity entity, @MappingTarget MessageTemplateDetailVO vo) {
+		InAppChannelDefaults defaults = ChannelDefaultsJsonSupport.parseInApp(entity.getChannelDefaultsJson());
+		if (defaults == null) {
+			return;
+		}
+		vo.setCategoryId(defaults.getCategoryId());
+		vo.setLinkUrl(defaults.getLinkUrl());
+	}
 
 }

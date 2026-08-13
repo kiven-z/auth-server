@@ -27,11 +27,11 @@ import java.util.List;
 import java.util.Map;
 
 import static com.auth.service.system.common.exception.code.SystemCommonResultCode.PARAM_REQUIRED;
-import static com.auth.service.system.message.exception.MessageResultCode.IN_APP_MESSAGE_CATEGORY_NOT_FOUND;
 import static com.auth.service.system.message.exception.MessageResultCode.IN_APP_TARGET_INVALID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
 /**
@@ -194,11 +194,9 @@ class InAppMessageSenderTest {
 	}
 
 	@Test
-	@DisplayName("小类无效：抛出 IN_APP_MESSAGE_CATEGORY_NOT_FOUND")
-	void sendByTemplate_shouldThrowWhenCategoryInvalid() {
-		when(categorySupport.requireEnabledMinor(null))
-			.thenThrow(new MessageException(IN_APP_MESSAGE_CATEGORY_NOT_FOUND));
-
+	@DisplayName("小类缺失：抛出 PARAM_REQUIRED")
+	void sendByTemplate_shouldThrowWhenCategoryMissing() {
+		when(categorySupport.requireEnabledMinor(isNull())).thenThrow(new MessageException(PARAM_REQUIRED, "业务小类"));
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
 			.channel(MessageChannel.IN_APP)
 			.templateCode("notice")
@@ -208,7 +206,7 @@ class InAppMessageSenderTest {
 
 		assertThatThrownBy(() -> sender.sendByTemplate(command)).isInstanceOf(MessageException.class)
 			.extracting(ex -> ((MessageException) ex).getResultCode())
-			.isEqualTo(IN_APP_MESSAGE_CATEGORY_NOT_FOUND);
+			.isEqualTo(PARAM_REQUIRED);
 	}
 
 	@Test

@@ -2,9 +2,11 @@ package com.auth.service.system.file.export.worker;
 
 import com.auth.module.file.export.task.FileExportTaskArtifact;
 import com.auth.service.system.file.config.properties.FileExportTaskProperties;
+import com.auth.service.system.file.export.notify.FileExportTaskNotifier;
 import com.auth.service.system.file.mapper.FileExportTaskMapper;
 import com.auth.service.system.file.model.entity.FileExportTaskEntity;
 import com.auth.service.system.file.model.enums.FileExportAttemptResult;
+import com.auth.service.system.file.model.enums.FileExportTaskStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -34,6 +36,8 @@ public class FileExportTaskWorker {
 	private final FileExportTaskFailureHandler failureHandler;
 
 	private final FileExportAttemptRecorder attemptRecorder;
+
+	private final FileExportTaskNotifier taskNotifier;
 
 	/**
 	 * 执行一轮任务拉取与处理
@@ -68,11 +72,15 @@ public class FileExportTaskWorker {
 		String errorMessage = null;
 		long processedRows = 0L;
 		FileExportTaskArtifact artifact = null;
+		String artifactFileName = null;
 		try {
 			FileExportTaskRunResult runResult = taskRunner.run(task);
 			attemptResult = runResult.getAttemptResult();
 			processedRows = runResult.getProcessedRows();
 			artifact = runResult.getArtifact();
+			if (artifact != null) {
+				artifactFileName = artifact.getFileName();
+			}
 		}
 		catch (Exception exception) {
 			attemptResult = failureHandler.handle(task, exception);
@@ -94,6 +102,30 @@ public class FileExportTaskWorker {
 				.errorCode(errorCode)
 				.errorMessage(errorMessage)
 				.build());
+			dispatchTerminalNotification(taskId, attemptResult, artifactFileName, errorMessage);
+		}
+	}
+
+	/**
+	 * 终态通知：成功或不可重试失败；跳过重试中与取消
+	 * @param taskId 任务ID
+	 * @param attemptResult 本次尝试结果
+	 * @param artifactFileName 产物文件名
+	 * @param errorMessage 失败摘要
+	 */
+	private void dispatchTerminalNotification(Long taskId, FileExportAttemptResult attemptResult,
+			String artifactFileName, String errorMessage) {
+		FileExportTaskEntity latest = fileExportTaskMapper.selectById(taskId);
+		if (latest == null) {
+			return;
+		}
+		if (attemptResult == FileExportAttemptResult.SUCCESS) {
+			taskNotifier.notifySuccess(latest, artifactFileName);
+			return;
+		}
+		if (attemptResult == FileExportAttemptResult.FAILED
+				&& FileExportTaskStatus.FAILED.name().equals(latest.getStatus())) {
+			taskNotifier.notifyTerminalFailure(latest, errorMessage);
 		}
 	}
 

@@ -1,6 +1,5 @@
 package com.auth.service.system.file.service;
 
-import com.auth.module.file.api.port.FileExportTaskOperations;
 import com.auth.service.system.file.model.entity.FileExportTaskEntity;
 import com.auth.service.system.file.model.vo.FileExportTaskDownloadLinkVO;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -10,7 +9,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  *
  * @author Bunny
  */
-public interface FileExportTaskWriteService extends IService<FileExportTaskEntity>, FileExportTaskOperations {
+public interface FileExportTaskWriteService extends IService<FileExportTaskEntity> {
 
 	/**
 	 * 取消异步导出任务

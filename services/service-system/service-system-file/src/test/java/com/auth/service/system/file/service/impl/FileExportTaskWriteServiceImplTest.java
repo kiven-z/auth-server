@@ -1,13 +1,9 @@
 package com.auth.service.system.file.service.impl;
 
 import com.auth.module.file.api.model.enums.StoragePlatformEnum;
-import com.auth.module.file.api.model.request.FileExportTaskCreateRequest;
-import com.auth.module.security.contract.api.authorization.AuthProfile;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
-import com.auth.service.system.file.config.properties.FileExportTaskProperties;
 import com.auth.service.system.file.config.properties.FileUploadProperties;
-import com.auth.service.system.file.export.precheck.FileExportPreCheckService;
 import com.auth.service.system.file.mapper.FileExportTaskMapper;
 import com.auth.service.system.file.mapper.FileRecordMapper;
 import com.auth.service.system.file.model.entity.FileExportTaskEntity;
@@ -25,11 +21,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.lang.reflect.Field;
 import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.*;
@@ -54,9 +48,6 @@ class FileExportTaskWriteServiceImplTest {
 	@Mock
 	private FileUrlSigner fileUrlSigner;
 
-	@Mock
-	private FileExportPreCheckService preCheckService;
-
 	@BeforeAll
 	static void initMybatisPlusTableInfo() {
 		TableInfoHelper.initTableInfo(new MapperBuilderAssistant(new MybatisConfiguration(), ""),
@@ -69,34 +60,9 @@ class FileExportTaskWriteServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("createTask：命中幂等请求返回已存在任务ID")
-	void createTaskReturnsDuplicatedTaskByRequestId() {
-		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties(), new FileExportTaskProperties());
-
-		FileExportTaskCreateRequest request = new FileExportTaskCreateRequest();
-		request.setBizType("FILE_RECORD");
-		request.setExportFormat("XLSX");
-		request.setQuerySnapshotJson("{\"ownerUserId\":1}");
-		request.setColumnSnapshotJson("[{\"fieldKey\":\"id\",\"header\":\"主键ID\"}]");
-		request.setFetchService("service-system");
-		request.setFetchPath("/api/system/inner/export/page");
-		request.setRequestId("r-1");
-		request.setCreatedBy(1L);
-		AuthProfile profile = AuthProfile.builder().userId(1L).username("u1").build();
-		SecurityContextHolder.getContext()
-			.setAuthentication(new UsernamePasswordAuthenticationToken(profile, null, null));
-
-		FileExportTaskEntity duplicatedResult = new FileExportTaskEntity();
-		setBaseId(duplicatedResult);
-		when(fileExportTaskMapper.selectOne(any())).thenReturn(duplicatedResult);
-		Long taskId = service.createTask(request).getTaskId();
-		assertThat(taskId).isEqualTo(9001L);
-	}
-
-	@Test
 	@DisplayName("cancelTask：待处理任务优先直接取消")
 	void cancelTaskCancelsPendingTask() {
-		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties(), new FileExportTaskProperties());
+		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties());
 
 		when(fileExportTaskMapper.cancelPendingTask(eq(1001L), eq(2001L), any())).thenReturn(1);
 
@@ -109,7 +75,7 @@ class FileExportTaskWriteServiceImplTest {
 	@Test
 	@DisplayName("cancelTask：运行中任务标记为 CANCELLING")
 	void cancelTaskRequestsCancelWhenRunning() {
-		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties(), new FileExportTaskProperties());
+		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties());
 
 		when(fileExportTaskMapper.cancelPendingTask(eq(1010L), eq(2010L), any())).thenReturn(0);
 		when(fileExportTaskMapper.requestCancelRunningTask(1010L, 2010L)).thenReturn(1);
@@ -122,7 +88,7 @@ class FileExportTaskWriteServiceImplTest {
 	@Test
 	@DisplayName("cancelTask：CANCELLING 状态幂等成功")
 	void cancelTaskIsIdempotentWhenCancelling() {
-		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties(), new FileExportTaskProperties());
+		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties());
 
 		FileExportTaskEntity task = new FileExportTaskEntity();
 		task.setStatus(FileExportTaskStatus.CANCELLING.name());
@@ -136,7 +102,7 @@ class FileExportTaskWriteServiceImplTest {
 	@Test
 	@DisplayName("cancelTask：CANCELLED 状态幂等成功")
 	void cancelTaskIsIdempotentWhenCancelled() {
-		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties(), new FileExportTaskProperties());
+		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties());
 
 		FileExportTaskEntity task = new FileExportTaskEntity();
 		task.setStatus(FileExportTaskStatus.CANCELLED.name());
@@ -150,7 +116,7 @@ class FileExportTaskWriteServiceImplTest {
 	@Test
 	@DisplayName("cancelTask：SUCCESS 状态拒绝取消")
 	void cancelTaskThrowsWhenStatusNotCancellable() {
-		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties(), new FileExportTaskProperties());
+		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties());
 
 		FileExportTaskEntity task = new FileExportTaskEntity();
 		task.setStatus(FileExportTaskStatus.SUCCESS.name());
@@ -166,7 +132,7 @@ class FileExportTaskWriteServiceImplTest {
 	@Test
 	@DisplayName("cancelTask：任务不存在时抛出 DATA_UNAVAILABLE")
 	void cancelTaskThrowsWhenTaskMissing() {
-		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties(), new FileExportTaskProperties());
+		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties());
 
 		when(fileExportTaskMapper.cancelPendingTask(eq(1003L), eq(2003L), any())).thenReturn(0);
 		when(fileExportTaskMapper.requestCancelRunningTask(1003L, 2003L)).thenReturn(0);
@@ -180,7 +146,7 @@ class FileExportTaskWriteServiceImplTest {
 	@Test
 	@DisplayName("retryTask：失败任务可重试")
 	void retryTaskSucceedsWhenFailed() {
-		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties(), new FileExportTaskProperties());
+		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties());
 
 		when(fileExportTaskMapper.retryTask(eq(1020L), eq(2020L), any())).thenReturn(1);
 
@@ -192,7 +158,7 @@ class FileExportTaskWriteServiceImplTest {
 	@Test
 	@DisplayName("retryTask：状态不允许重试时抛出 DATA_INVALID")
 	void retryTaskThrowsWhenStatusNotRetryable() {
-		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties(), new FileExportTaskProperties());
+		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties());
 
 		FileExportTaskEntity task = new FileExportTaskEntity();
 		task.setStatus(FileExportTaskStatus.RUNNING.name());
@@ -207,7 +173,7 @@ class FileExportTaskWriteServiceImplTest {
 	@Test
 	@DisplayName("retryTask：CANCELLING 状态不可重试")
 	void retryTaskThrowsWhenCancelling() {
-		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties(), new FileExportTaskProperties());
+		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties());
 
 		FileExportTaskEntity task = new FileExportTaskEntity();
 		task.setStatus(FileExportTaskStatus.CANCELLING.name());
@@ -222,7 +188,7 @@ class FileExportTaskWriteServiceImplTest {
 	@Test
 	@DisplayName("retryTask：SUCCESS 状态不可重试")
 	void retryTaskThrowsWhenSuccess() {
-		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties(), new FileExportTaskProperties());
+		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties());
 
 		FileExportTaskEntity task = new FileExportTaskEntity();
 		task.setStatus(FileExportTaskStatus.SUCCESS.name());
@@ -237,7 +203,7 @@ class FileExportTaskWriteServiceImplTest {
 	@Test
 	@DisplayName("retryTask：EXPIRED 状态不可重试")
 	void retryTaskThrowsWhenExpired() {
-		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties(), new FileExportTaskProperties());
+		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties());
 
 		FileExportTaskEntity task = new FileExportTaskEntity();
 		task.setStatus(FileExportTaskStatus.EXPIRED.name());
@@ -252,7 +218,7 @@ class FileExportTaskWriteServiceImplTest {
 	@Test
 	@DisplayName("retryTask：任务不存在时抛出 DATA_UNAVAILABLE")
 	void retryTaskThrowsWhenTaskMissing() {
-		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties(), new FileExportTaskProperties());
+		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties());
 
 		when(fileExportTaskMapper.retryTask(eq(1004L), eq(2004L), any())).thenReturn(0);
 		when(fileExportTaskMapper.selectOne(any())).thenReturn(null);
@@ -267,7 +233,7 @@ class FileExportTaskWriteServiceImplTest {
 	void getDownloadLinkReturnsSignedUrl() {
 		FileUploadProperties uploadProperties = new FileUploadProperties();
 		uploadProperties.setExpireSeconds(600);
-		FileExportTaskWriteServiceImpl service = newService(uploadProperties, new FileExportTaskProperties());
+		FileExportTaskWriteServiceImpl service = newService(uploadProperties);
 
 		FileExportTaskEntity task = new FileExportTaskEntity();
 		task.setStatus(FileExportTaskStatus.SUCCESS.name());
@@ -294,7 +260,7 @@ class FileExportTaskWriteServiceImplTest {
 	@Test
 	@DisplayName("getDownloadLink：非 SUCCESS 状态拒绝下载")
 	void getDownloadLinkThrowsWhenStatusNotSuccess() {
-		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties(), new FileExportTaskProperties());
+		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties());
 
 		FileExportTaskEntity task = new FileExportTaskEntity();
 		task.setStatus(FileExportTaskStatus.FAILED.name());
@@ -308,7 +274,7 @@ class FileExportTaskWriteServiceImplTest {
 	@Test
 	@DisplayName("getDownloadLink：产物已过期拒绝下载")
 	void getDownloadLinkThrowsWhenArtifactExpired() {
-		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties(), new FileExportTaskProperties());
+		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties());
 
 		FileExportTaskEntity task = new FileExportTaskEntity();
 		task.setStatus(FileExportTaskStatus.SUCCESS.name());
@@ -324,7 +290,7 @@ class FileExportTaskWriteServiceImplTest {
 	@Test
 	@DisplayName("forceCancelTask：不校验创建人即可取消待处理任务")
 	void forceCancelTaskCancelsPendingWithoutOwnerCheck() {
-		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties(), new FileExportTaskProperties());
+		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties());
 
 		when(fileExportTaskMapper.cancelPendingTask(eq(1101L), isNull(), any())).thenReturn(1);
 
@@ -337,7 +303,7 @@ class FileExportTaskWriteServiceImplTest {
 	@Test
 	@DisplayName("forceCancelTask：运行中任务标记为 CANCELLING")
 	void forceCancelTaskRequestsCancelWhenRunning() {
-		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties(), new FileExportTaskProperties());
+		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties());
 
 		when(fileExportTaskMapper.cancelPendingTask(eq(1102L), isNull(), any())).thenReturn(0);
 		when(fileExportTaskMapper.requestCancelRunningTask(eq(1102L), isNull())).thenReturn(1);
@@ -350,7 +316,7 @@ class FileExportTaskWriteServiceImplTest {
 	@Test
 	@DisplayName("forceCancelTask：CANCELLING 状态幂等成功")
 	void forceCancelTaskIsIdempotentWhenCancelling() {
-		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties(), new FileExportTaskProperties());
+		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties());
 
 		FileExportTaskEntity task = new FileExportTaskEntity();
 		task.setStatus(FileExportTaskStatus.CANCELLING.name());
@@ -364,7 +330,7 @@ class FileExportTaskWriteServiceImplTest {
 	@Test
 	@DisplayName("forceCancelTask：SUCCESS 状态拒绝取消")
 	void forceCancelTaskThrowsWhenStatusNotCancellable() {
-		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties(), new FileExportTaskProperties());
+		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties());
 
 		FileExportTaskEntity task = new FileExportTaskEntity();
 		task.setStatus(FileExportTaskStatus.SUCCESS.name());
@@ -380,7 +346,7 @@ class FileExportTaskWriteServiceImplTest {
 	@Test
 	@DisplayName("forceCancelTask：任务不存在时抛出 DATA_UNAVAILABLE")
 	void forceCancelTaskThrowsWhenTaskMissing() {
-		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties(), new FileExportTaskProperties());
+		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties());
 
 		when(fileExportTaskMapper.cancelPendingTask(eq(1105L), isNull(), any())).thenReturn(0);
 		when(fileExportTaskMapper.requestCancelRunningTask(eq(1105L), isNull())).thenReturn(0);
@@ -394,7 +360,7 @@ class FileExportTaskWriteServiceImplTest {
 	@Test
 	@DisplayName("forceRetryTask：不校验创建人即可重试失败任务")
 	void forceRetryTaskSucceedsWithoutOwnerCheck() {
-		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties(), new FileExportTaskProperties());
+		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties());
 
 		when(fileExportTaskMapper.forceRetryTask(eq(1201L), isNull(), any())).thenReturn(1);
 
@@ -407,7 +373,7 @@ class FileExportTaskWriteServiceImplTest {
 	@Test
 	@DisplayName("forceRetryTask：已达 max_retry 仍可强制重试")
 	void forceRetryTaskSucceedsWhenRetryExhausted() {
-		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties(), new FileExportTaskProperties());
+		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties());
 
 		when(fileExportTaskMapper.forceRetryTask(eq(1204L), isNull(), any())).thenReturn(1);
 
@@ -419,7 +385,7 @@ class FileExportTaskWriteServiceImplTest {
 	@Test
 	@DisplayName("forceRetryTask：状态不允许重试时抛出 DATA_INVALID")
 	void forceRetryTaskThrowsWhenStatusNotRetryable() {
-		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties(), new FileExportTaskProperties());
+		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties());
 
 		FileExportTaskEntity task = new FileExportTaskEntity();
 		task.setStatus(FileExportTaskStatus.RUNNING.name());
@@ -434,7 +400,7 @@ class FileExportTaskWriteServiceImplTest {
 	@Test
 	@DisplayName("forceRetryTask：任务不存在时抛出 DATA_UNAVAILABLE")
 	void forceRetryTaskThrowsWhenTaskMissing() {
-		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties(), new FileExportTaskProperties());
+		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties());
 
 		when(fileExportTaskMapper.forceRetryTask(eq(1203L), isNull(), any())).thenReturn(0);
 		when(fileExportTaskMapper.selectById(1203L)).thenReturn(null);
@@ -447,7 +413,7 @@ class FileExportTaskWriteServiceImplTest {
 	@Test
 	@DisplayName("retryTask：已达 max_retry 时抛出 DATA_INVALID(retryLimit)")
 	void retryTaskThrowsWhenRetryExhausted() {
-		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties(), new FileExportTaskProperties());
+		FileExportTaskWriteServiceImpl service = newService(new FileUploadProperties());
 
 		FileExportTaskEntity task = new FileExportTaskEntity();
 		task.setStatus(FileExportTaskStatus.FAILED.name());
@@ -464,24 +430,12 @@ class FileExportTaskWriteServiceImplTest {
 			});
 	}
 
-	private FileExportTaskWriteServiceImpl newService(FileUploadProperties uploadProperties,
-			FileExportTaskProperties taskProperties) {
+	private FileExportTaskWriteServiceImpl newService(FileUploadProperties uploadProperties) {
 		FileExportTaskWriteServiceImpl service = new FileExportTaskWriteServiceImpl(fileRecordMapper, fileUrlSigner,
-				uploadProperties, taskProperties, preCheckService);
+				uploadProperties);
 		ReflectionTestUtils.setField(service, "baseMapper", fileExportTaskMapper);
 		ReflectionTestUtils.setField(service, "entityClass", FileExportTaskEntity.class);
 		return service;
-	}
-
-	private void setBaseId(FileExportTaskEntity entity) {
-		try {
-			Field idField = entity.getClass().getSuperclass().getDeclaredField("id");
-			idField.setAccessible(true);
-			idField.set(entity, (Long) 9001L);
-		}
-		catch (ReflectiveOperationException exception) {
-			throw new IllegalStateException(exception);
-		}
 	}
 
 }

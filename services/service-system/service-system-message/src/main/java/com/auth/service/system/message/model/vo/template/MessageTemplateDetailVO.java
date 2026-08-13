@@ -1,5 +1,6 @@
 package com.auth.service.system.message.model.vo.template;
 
+import com.auth.common.core.annotation.JsonStringFormat;
 import com.auth.common.core.model.response.BaseResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
@@ -62,5 +63,12 @@ public class MessageTemplateDetailVO extends BaseResponse {
 
 	@Schema(name = "status", title = "启用状态（true=启用模板，false=停用）")
 	private Boolean status;
+
+	@JsonStringFormat
+	@Schema(name = "categoryId", title = "默认业务小类 ID")
+	private Long categoryId;
+
+	@Schema(name = "linkUrl", title = "默认跳转链接")
+	private String linkUrl;
 
 }

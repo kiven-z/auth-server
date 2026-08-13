@@ -63,6 +63,10 @@ class EmailMessageSenderTest {
 
 		emailMessageSender.sendByTemplate(command);
 
+		ArgumentCaptor<EmailSendDTO> dtoCaptor = ArgumentCaptor.forClass(EmailSendDTO.class);
+		verify(mimeMailTransport).send(dtoCaptor.capture(), any(RenderedEmail.class));
+		assertThat(dtoCaptor.getValue().getHasHtml()).isTrue();
+
 		@SuppressWarnings("unchecked")
 		ArgumentCaptor<List<TargetSendOutcome>> outcomesCaptor = ArgumentCaptor.forClass(List.class);
 		verify(deliveryRecorder).recordPending(any(), eq(MessageChannel.EMAIL), eq(command.getTargets()));

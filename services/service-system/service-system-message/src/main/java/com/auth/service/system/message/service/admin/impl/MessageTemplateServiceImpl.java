@@ -6,7 +6,6 @@ import cn.hutool.core.text.CharSequenceUtil;
 import com.auth.common.data.model.PageResponse;
 import com.auth.module.message.api.channel.MessageChannel;
 import com.auth.module.message.api.command.TemplateMessageCommand;
-import com.auth.module.message.api.model.email.EmailChannelOptions;
 import com.auth.module.message.api.model.enums.MessageContentType;
 import com.auth.service.system.common.service.AuditUserDisplayService;
 import com.auth.service.system.message.convert.MessageTemplateConverter;
@@ -201,18 +200,11 @@ public class MessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMappe
 		List<MessageTemplateRequireFieldRow> rows = MessageTemplateRequireFieldsJsonSupport.parse(requireFields);
 		Map<String, Object> variables = MessageTemplateRequireFieldsJsonSupport.toExampleModel(rows);
 
-		// 组装渠道默认扩展参数
-		EmailChannelOptions options = null;
-		if (channel == MessageChannel.EMAIL) {
-			options = new EmailChannelOptions();
-			options.setHasHtml(Boolean.TRUE);
-		}
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
 			.channel(channel)
 			.templateCode(entity.getSceneCode())
 			.targets(List.of(target))
 			.variables(variables)
-			.options(options)
 			.build();
 		messageDispatchService.sendByTemplate(command);
 	}
