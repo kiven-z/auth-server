@@ -3,6 +3,7 @@ package com.auth.service.system.admin.service.admin.impl;
 import cn.hutool.core.collection.CollUtil;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.model.form.granttable.GrantTableAssignRoleForm;
+import com.auth.service.system.admin.model.vo.reference.RoleReferenceVO;
 import com.auth.service.system.admin.service.admin.GrantTableService;
 import com.auth.service.system.admin.service.admin.SysUserRoleService;
 import com.auth.service.system.admin.support.grant.RbacReferenceChecker;
@@ -34,6 +35,14 @@ public class SysUserRoleServiceImpl implements SysUserRoleService {
 	private final GrantTableService grantTableService;
 
 	private final UserAuthorizationInvalidationTrigger userAuthorizationInvalidationTrigger;
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public List<RoleReferenceVO> listAssignedRoles(Long userId) {
+		return grantTableService.listAssignedRoles(GrantTableSubjectType.USER, userId);
+	}
 
 	/**
 	 * {@inheritDoc}
