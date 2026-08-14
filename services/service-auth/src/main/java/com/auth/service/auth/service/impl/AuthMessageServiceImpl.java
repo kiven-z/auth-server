@@ -10,17 +10,12 @@ import com.auth.module.message.api.model.enums.scene.SmsMessageScene;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.auth.mapper.UserMapper;
 import com.auth.service.auth.model.enums.CredentialDimension;
-import com.auth.service.auth.model.value.login.LoginAuditSnapshot;
 import com.auth.service.auth.service.AuthMessageService;
-import com.auth.service.auth.support.login.LoginLogRepository;
-import com.auth.service.auth.support.message.AuthMessageVariables;
 import com.auth.service.auth.support.redis.store.LoginVerificationCodeStore;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -37,8 +32,6 @@ import static com.auth.module.security.contract.redis.SecurityRedisKey.SMS_CODE;
 @Service
 public class AuthMessageServiceImpl implements AuthMessageService {
 
-	private final LoginLogRepository loginLogRepository;
-
 	private final SystemMessageSendFeignClient systemMessageSendFeignClient;
 
 	private final UserMapper userMapper;
@@ -48,10 +41,9 @@ public class AuthMessageServiceImpl implements AuthMessageService {
 	/**
 	 * 发送登录邮箱验证码
 	 * @param email 邮箱
-	 * @param request 当前 HTTP 请求（用于解析登录 IP 等信息）
 	 */
 	@Override
-	public void sendEmailCode(String email, HttpServletRequest request) {
+	public void sendEmailCode(String email) {
 		String code = RandomUtil.randomNumbers(6);
 		String digest = MD5.create().digestHex16(code);
 
@@ -60,9 +52,6 @@ public class AuthMessageServiceImpl implements AuthMessageService {
 
 		// 过期时间转成分钟
 		long expireMinutes = EMAIL_CODE.getDefaultTtl().toMinutes();
-
-		// IP地址等信息
-		LoginAuditSnapshot snapshot = loginLogRepository.buildSnapshot(request);
 
 		// 未找到活跃用户时静默返回，不暴露账号不存在
 		UserEntity userEntity = userMapper.selectByCredential(CredentialDimension.EMAIL, email, true);
@@ -73,8 +62,7 @@ public class AuthMessageServiceImpl implements AuthMessageService {
 
 		// 拼装发送对象
 		String username = userEntity.getUsername();
-		Map<String, Object> variables = AuthMessageVariables.buildLoginEmail(username, code, expireMinutes,
-				Instant.now(), snapshot.loginIp(), snapshot.loginRegion());
+		Map<String, Object> variables = Map.of("username", username, "code", code, "min", expireMinutes);
 		EmailChannelOptions options = new EmailChannelOptions();
 		options.setHasHtml(Boolean.TRUE);
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
@@ -109,7 +97,7 @@ public class AuthMessageServiceImpl implements AuthMessageService {
 		}
 
 		// 拼装发送对象
-		Map<String, Object> variables = AuthMessageVariables.buildLoginSms(code, expireMinutes);
+		Map<String, Object> variables = Map.of("code", code, "min", expireMinutes);
 		TemplateMessageCommand command = TemplateMessageCommand.builder()
 			.channel(SmsMessageScene.LOGIN_SMS.getChannel())
 			.templateCode(SmsMessageScene.LOGIN_SMS.getTemplateCode())

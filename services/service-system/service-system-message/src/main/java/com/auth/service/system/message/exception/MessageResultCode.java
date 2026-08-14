@@ -95,7 +95,7 @@ public enum MessageResultCode implements SystemResultCode {
 			"system.in_app.send_task.operation_not_allowed"),
 
 	/**
-	 * 渠道投递存在失败目标（{0}=失败数，{1}=总数）；成功目标的回执已落库
+	 * 渠道投递存在失败目标（{0}=失败数，{1}=总数）
 	 */
 	MESSAGE_DELIVERY_FAILED(502, 324, "MESSAGE_DELIVERY_FAILED", "system.message.delivery.failed"),
 

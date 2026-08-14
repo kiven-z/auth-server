@@ -6,7 +6,6 @@ import com.auth.service.auth.service.AuthMessageService;
 import com.auth.service.auth.support.login.ratelimit.RateLimit;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,8 +29,8 @@ public class AuthMessageController {
 	@RateLimit(principal = "#email")
 	@Operation(summary = "发送邮箱验证码")
 	@PostMapping("login/email/send-code")
-	public Result<String> sendEmailCode(@RequestParam("email") String email, HttpServletRequest request) {
-		messageService.sendEmailCode(email, request);
+	public Result<String> sendEmailCode(@RequestParam("email") String email) {
+		messageService.sendEmailCode(email);
 		return Result.success();
 	}
 

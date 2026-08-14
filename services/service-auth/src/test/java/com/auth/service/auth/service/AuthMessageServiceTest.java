@@ -10,11 +10,8 @@ import com.auth.module.message.api.model.enums.scene.SmsMessageScene;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.service.auth.mapper.UserMapper;
 import com.auth.service.auth.model.enums.CredentialDimension;
-import com.auth.service.auth.model.value.login.LoginAuditSnapshot;
 import com.auth.service.auth.service.impl.AuthMessageServiceImpl;
-import com.auth.service.auth.support.login.LoginLogRepository;
 import com.auth.service.auth.support.redis.store.LoginVerificationCodeStore;
-import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -24,7 +21,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static com.auth.module.security.contract.redis.SecurityRedisKey.EMAIL_CODE;
+import static com.auth.module.security.contract.redis.SecurityRedisKey.SMS_CODE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -37,9 +37,6 @@ import static org.mockito.Mockito.*;
 class AuthMessageServiceTest {
 
 	@Mock
-	private LoginLogRepository loginLogRepository;
-
-	@Mock
 	private SystemMessageSendFeignClient systemMessageSendFeignClient;
 
 	@Mock
@@ -48,14 +45,11 @@ class AuthMessageServiceTest {
 	@Mock
 	private UserMapper userMapper;
 
-	@Mock
-	private HttpServletRequest request;
-
 	private AuthMessageService authMessageService;
 
 	@BeforeEach
 	void setUp() {
-		authMessageService = new AuthMessageServiceImpl(loginLogRepository, systemMessageSendFeignClient, userMapper,
+		authMessageService = new AuthMessageServiceImpl(systemMessageSendFeignClient, userMapper,
 				loginVerificationCodeStore);
 	}
 
@@ -73,18 +67,10 @@ class AuthMessageServiceTest {
 			userEntity.setStatus(1);
 			userEntity.setPermVersion(1L);
 			when(userMapper.selectByCredential(CredentialDimension.EMAIL, email, true)).thenReturn(userEntity);
-			when(loginLogRepository.buildSnapshot(request)).thenReturn(LoginAuditSnapshot.builder()
-				.loginIp("127.0.0.1")
-				.loginRegion("本地")
-				.userAgent("ua")
-				.deviceType("pc")
-				.osType("win")
-				.browserType("chrome")
-				.build());
 			when(systemMessageSendFeignClient.sendByTemplate(any(TemplateMessageCommand.class)))
 				.thenReturn(Result.success());
 
-			authMessageService.sendEmailCode(email, request);
+			authMessageService.sendEmailCode(email);
 
 			verify(loginVerificationCodeStore).storeDigest(eq(CredentialDimension.EMAIL), eq(email), any());
 			ArgumentCaptor<TemplateMessageCommand> commandCaptor = ArgumentCaptor
@@ -94,6 +80,9 @@ class AuthMessageServiceTest {
 			assertEquals(MessageChannel.EMAIL, command.getChannel());
 			assertEquals(EmailMessageScene.LOGIN_EMAIL.getTemplateCode(), command.getTemplateCode());
 			assertEquals(email, command.getTargets().get(0));
+			assertEquals("bunny", command.getVariables().get("username"));
+			assertEquals(EMAIL_CODE.getDefaultTtl().toMinutes(), command.getVariables().get("min"));
+			assertNotNull(command.getVariables().get("code"));
 			EmailChannelOptions emailOptions = (EmailChannelOptions) command.getOptions();
 			assertEquals(Boolean.TRUE, emailOptions.getHasHtml());
 		}
@@ -104,7 +93,7 @@ class AuthMessageServiceTest {
 			String email = "unknown@example.com";
 			when(userMapper.selectByCredential(CredentialDimension.EMAIL, email, true)).thenReturn(null);
 
-			authMessageService.sendEmailCode(email, request);
+			authMessageService.sendEmailCode(email);
 
 			verify(loginVerificationCodeStore).storeDigest(eq(CredentialDimension.EMAIL), eq(email), any());
 			verify(systemMessageSendFeignClient, never()).sendByTemplate(any());
@@ -139,6 +128,8 @@ class AuthMessageServiceTest {
 			assertEquals(MessageChannel.SMS, command.getChannel());
 			assertEquals(SmsMessageScene.LOGIN_SMS.getTemplateCode(), command.getTemplateCode());
 			assertEquals(phone, command.getTargets().get(0));
+			assertEquals(SMS_CODE.getDefaultTtl().toMinutes(), command.getVariables().get("min"));
+			assertNotNull(command.getVariables().get("code"));
 		}
 
 		@Test
