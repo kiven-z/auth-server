@@ -11,42 +11,30 @@
                                SELECT 'DEPT'         AS sub_type,
                                       dc.ancestor_id AS sub_id,
                                       ud.user_id     AS user_id
-                               FROM user_dept ud
+                               FROM v_user_dept_effective ud
                                         JOIN dept_closure dc ON ud.dept_id = dc.descendant_id
-                                        JOIN sys_dept d ON d.id = ud.dept_id AND d.status = 1
                                         JOIN sys_dept da ON da.id = dc.ancestor_id AND da.status = 1
                                WHERE ud.user_id = #{userId}
-                                 AND ud.status IN (1, 2)
                                UNION ALL
                                SELECT 'POST'     AS sub_type,
                                       up.post_id AS sub_id,
                                       up.user_id AS user_id
-                               FROM user_post up
-                                        INNER JOIN sys_post sp ON sp.id = up.post_id AND sp.status = 1
-                               WHERE up.user_id = #{userId}
-                                 AND up.status IN (1, 2))
+                               FROM v_user_post_effective up
+                               WHERE up.user_id = #{userId})
     </sql>
 
-    <!-- 用户部门关联数（与 user-dept 无过滤分页同源） -->
+    <!-- 用户部门关联数（有效任职） -->
     <select id="countDeptsByUserId" resultType="long">
-        SELECT
-            COUNT(1)
-        FROM
-            user_dept ud
-            INNER JOIN sys_dept d ON d.id = ud.dept_id
-        WHERE
-            ud.user_id = #{userId}
+        SELECT COUNT(1)
+        FROM v_user_dept_effective ud
+        WHERE ud.user_id = #{userId}
     </select>
 
-    <!-- 用户岗位关联数（与 user-post 无过滤分页同源） -->
+    <!-- 用户岗位关联数（有效任职） -->
     <select id="countPostsByUserId" resultType="long">
-        SELECT
-            COUNT(1)
-        FROM
-            user_post up
-            INNER JOIN sys_post sp ON sp.id = up.post_id
-        WHERE
-            up.user_id = #{userId}
+        SELECT COUNT(1)
+        FROM v_user_post_effective up
+        WHERE up.user_id = #{userId}
     </select>
 
     <!-- 统计用户生效角色（仅启用） -->
@@ -74,25 +62,25 @@
             resultType="com.auth.service.system.admin.model.po.reference.RoleReferencePO">
         <include refid="userSubjectsForFunctionalGrantByUserId"/>
         SELECT DISTINCT
-            r.id,
-            r.role_code,
-            r.role_name,
-            r.status
+        r.id,
+        r.role_code,
+        r.role_name,
+        r.status
         FROM
-            grant_table gt
-            JOIN user_subjects us ON gt.subject_type = us.sub_type
-            AND gt.subject_id = us.sub_id
-            JOIN sys_role r ON r.id = gt.role_id
+        grant_table gt
+        JOIN user_subjects us ON gt.subject_type = us.sub_type
+        AND gt.subject_id = us.sub_id
+        JOIN sys_role r ON r.id = gt.role_id
         WHERE
-            r.status = 1
-            <if test="query != null and query.roleCode != null and query.roleCode != ''">
-                AND r.role_code LIKE CONCAT('%', #{query.roleCode}, '%')
-            </if>
-            <if test="query != null and query.roleName != null and query.roleName != ''">
-                AND r.role_name LIKE CONCAT('%', #{query.roleName}, '%')
-            </if>
+        r.status = 1
+        <if test="query != null and query.roleCode != null and query.roleCode != ''">
+            AND r.role_code LIKE CONCAT('%', #{query.roleCode}, '%')
+        </if>
+        <if test="query != null and query.roleName != null and query.roleName != ''">
+            AND r.role_name LIKE CONCAT('%', #{query.roleName}, '%')
+        </if>
         ORDER BY
-            r.role_code
+        r.role_code
     </select>
 
     <!-- 统计用户生效权限（仅启用角色 + 启用权限） -->
@@ -127,35 +115,35 @@
             resultType="com.auth.service.system.admin.model.po.reference.PermissionReferencePO">
         <include refid="userSubjectsForFunctionalGrantByUserId"/>,
         all_role_ids AS (
-            SELECT DISTINCT
-                r.id AS role_id
-            FROM
-                grant_table gt
-                JOIN user_subjects us ON gt.subject_type = us.sub_type
-                AND gt.subject_id = us.sub_id
-                JOIN sys_role r ON r.id = gt.role_id
-            WHERE
-                r.status = 1
+        SELECT DISTINCT
+        r.id AS role_id
+        FROM
+        grant_table gt
+        JOIN user_subjects us ON gt.subject_type = us.sub_type
+        AND gt.subject_id = us.sub_id
+        JOIN sys_role r ON r.id = gt.role_id
+        WHERE
+        r.status = 1
         )
         SELECT DISTINCT
-            p.id,
-            p.permission_code,
-            p.permission_name,
-            p.status
+        p.id,
+        p.permission_code,
+        p.permission_name,
+        p.status
         FROM
-            sys_role_permission rp
-            JOIN all_role_ids ar ON rp.role_id = ar.role_id
-            JOIN sys_permission p ON p.id = rp.permission_id
+        sys_role_permission rp
+        JOIN all_role_ids ar ON rp.role_id = ar.role_id
+        JOIN sys_permission p ON p.id = rp.permission_id
         WHERE
-            p.status = 1
-            <if test="query != null and query.permissionCode != null and query.permissionCode != ''">
-                AND p.permission_code LIKE CONCAT('%', #{query.permissionCode}, '%')
-            </if>
-            <if test="query != null and query.permissionName != null and query.permissionName != ''">
-                AND p.permission_name LIKE CONCAT('%', #{query.permissionName}, '%')
-            </if>
+        p.status = 1
+        <if test="query != null and query.permissionCode != null and query.permissionCode != ''">
+            AND p.permission_code LIKE CONCAT('%', #{query.permissionCode}, '%')
+        </if>
+        <if test="query != null and query.permissionName != null and query.permissionName != ''">
+            AND p.permission_name LIKE CONCAT('%', #{query.permissionName}, '%')
+        </if>
         ORDER BY
-            p.permission_code
+        p.permission_code
     </select>
 
 </mapper>

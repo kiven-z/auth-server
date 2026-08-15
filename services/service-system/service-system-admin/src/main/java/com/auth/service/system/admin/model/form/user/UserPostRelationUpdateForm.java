@@ -1,8 +1,6 @@
 package com.auth.service.system.admin.model.form.user;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -23,12 +21,6 @@ public class UserPostRelationUpdateForm implements Serializable {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
-
-	@Schema(title = "关联状态（0=已调离，1=正常，2=兼职）", requiredMode = Schema.RequiredMode.REQUIRED)
-	@Max(value = 2, message = "状态值不能大于2")
-	@Min(value = 0, message = "状态值不能小于0")
-	@NotNull(message = "关联状态不能为空")
-	private Integer status;
 
 	@Schema(title = "是否主岗位", requiredMode = Schema.RequiredMode.REQUIRED)
 	@NotNull(message = "是否主岗位不能为空")

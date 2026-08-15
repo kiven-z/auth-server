@@ -25,7 +25,4 @@ public class UserPostEntity extends BaseEntity {
 	@Schema(title = "是否主岗位")
 	private Boolean isPrimary;
 
-	@Schema(title = "关联状态")
-	private Integer status;
-
 }

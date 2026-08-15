@@ -38,7 +38,8 @@ class DeptReferenceCheckerMapperSqlContractTest {
 			.contains("user_dept")
 			.contains("grant_table")
 			.contains("sys_post")
-			.contains("EXISTS");
+			.contains("EXISTS")
+			.doesNotContain("v_user_dept_effective");
 	}
 
 }

@@ -18,7 +18,7 @@ import org.apache.ibatis.annotations.Param;
 public interface DeptRelationQueryMapper {
 
 	/**
-	 * 统计部门关联用户数（user_dept.status IN 1,2）
+	 * 统计部门有效关联用户数
 	 * @param deptId 部门 ID
 	 * @param query 过滤条件
 	 * @return 用户数

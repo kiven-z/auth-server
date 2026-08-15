@@ -53,10 +53,10 @@ public interface UserDeptMapper extends BaseMapper<UserDeptEntity> {
 	UserDeptEntity selectByUserIdAndDeptId(@Param("userId") Long userId, @Param("deptId") Long deptId);
 
 	/**
-	 * 将用户全部有效关联的 is_primary 置为 false
+	 * 将用户全部主部门的 is_primary 置为 false
 	 * @param userId 用户 ID
 	 */
-	@Update("UPDATE user_dept SET is_primary = 0 WHERE user_id = #{userId} AND status IN (1, 2) AND is_primary = 1")
+	@Update("UPDATE user_dept SET is_primary = 0 WHERE user_id = #{userId} AND is_primary = 1")
 	void demotePrimaryByUserId(@Param("userId") Long userId);
 
 	/**
@@ -68,7 +68,7 @@ public interface UserDeptMapper extends BaseMapper<UserDeptEntity> {
 	int deleteByUserId(@Param("userId") Long userId);
 
 	/**
-	 * 查询用户主部门（正常关联且 is_primary）
+	 * 查询用户主部门（有效任职且 is_primary）
 	 * @param userId 用户 ID
 	 * @return 主部门投影，不存在时为 null
 	 */

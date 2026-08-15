@@ -25,7 +25,4 @@ public class UserDeptEntity extends BaseEntity {
 	@Schema(title = "是否主部门")
 	private Boolean isPrimary;
 
-	@Schema(title = "关联状态")
-	private Integer status;
-
 }

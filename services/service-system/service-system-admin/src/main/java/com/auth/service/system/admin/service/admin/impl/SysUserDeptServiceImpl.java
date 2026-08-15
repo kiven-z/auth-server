@@ -4,8 +4,8 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.convert.admin.user.UserDeptConverter;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.admin.user.UserDeptMapper;
+import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.entity.UserDeptEntity;
-import com.auth.service.system.admin.model.enums.UserOrgRelationStatusEnum;
 import com.auth.service.system.admin.model.form.user.UserDeptAssignForm;
 import com.auth.service.system.admin.model.po.user.UserDeptPageRowPO;
 import com.auth.service.system.admin.model.query.user.UserDeptPageQuery;
@@ -73,14 +73,19 @@ public class SysUserDeptServiceImpl extends ServiceImpl<UserDeptMapper, UserDept
 		Long deptId = form.getDeptId();
 		userReferenceChecker.getExistingActive(userId);
 		userReferenceChecker.requireOperable(List.of(userId));
-		deptReferenceChecker.getExistingActive(deptId);
+		SysDeptEntity dept = deptReferenceChecker.getExistingActive(deptId);
+		if (dept.getStatus() != null && !dept.getStatus()) {
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_UNAVAILABLE);
+		}
 
 		if (baseMapper.countByUserIdAndDeptId(userId, deptId) > 0) {
 			log.warn("create user department relation duplicate: userId={}, deptId={}", userId, deptId);
 			throw new SystemBusinessException(SystemAdminResultCode.USER_DEPT_DUPLICATE);
 		}
 
-		applyPrimaryDeptRules(userId, form);
+		if (form.getIsPrimary() != null && form.getIsPrimary()) {
+			baseMapper.demotePrimaryByUserId(userId);
+		}
 
 		UserDeptEntity entity = UserDeptConverter.INSTANCE.toEntity(form);
 		entity.setUserId(userId);
@@ -104,7 +109,11 @@ public class SysUserDeptServiceImpl extends ServiceImpl<UserDeptMapper, UserDept
 		}
 
 		if (!Objects.equals(existing.getDeptId(), form.getDeptId())) {
-			deptReferenceChecker.getExistingActive(form.getDeptId());
+			SysDeptEntity dept = deptReferenceChecker.getExistingActive(form.getDeptId());
+			if (dept.getStatus() != null && !dept.getStatus()) {
+				throw new SystemBusinessException(SystemCommonResultCode.DATA_UNAVAILABLE);
+			}
+
 			UserDeptEntity conflict = baseMapper.selectByUserIdAndDeptId(userId, form.getDeptId());
 			if (conflict != null && !Objects.equals(conflict.getId(), id)) {
 				log.warn("update user department relation duplicate: userId={}, deptId={}", userId, form.getDeptId());
@@ -112,7 +121,9 @@ public class SysUserDeptServiceImpl extends ServiceImpl<UserDeptMapper, UserDept
 			}
 		}
 
-		applyPrimaryDeptRules(userId, form);
+		if (form.getIsPrimary() != null && form.getIsPrimary()) {
+			baseMapper.demotePrimaryByUserId(userId);
+		}
 		UserDeptConverter.INSTANCE.applyUpdateForm(form, existing);
 		updateById(existing);
 		userAuthorizationInvalidationTrigger.submitByUserIds(List.of(userId), "update-dept");
@@ -136,21 +147,6 @@ public class SysUserDeptServiceImpl extends ServiceImpl<UserDeptMapper, UserDept
 
 		if (baseMapper.deleteByUserId(userId) > 0) {
 			userAuthorizationInvalidationTrigger.submitByUserIds(List.of(userId), "clear-dept");
-		}
-	}
-
-	/**
-	 * 主部门规则：非正常状态不可设为主部门；设为主部门时降级该用户其他主部门
-	 * @param userId 用户 ID
-	 * @param form 关联表单
-	 */
-	private void applyPrimaryDeptRules(Long userId, UserDeptAssignForm form) {
-		boolean isPrimary = form.getIsPrimary() != null && form.getIsPrimary();
-		if (isPrimary && UserOrgRelationStatusEnum.canBePrimary(form.getStatus())) {
-			throw new SystemBusinessException(SystemAdminResultCode.USER_DEPT_PRIMARY_NOT_ELIGIBLE);
-		}
-		if (isPrimary) {
-			baseMapper.demotePrimaryByUserId(userId);
 		}
 	}
 

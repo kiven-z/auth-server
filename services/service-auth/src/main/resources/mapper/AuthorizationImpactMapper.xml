@@ -56,7 +56,6 @@
         INNER JOIN sys_dept d ON d.id = dc.descendant_id
         WHERE
         <include refid="roleCodesInCondition"/>
-        AND ud.status IN (1, 2)
         UNION
         SELECT
         up.user_id
@@ -66,7 +65,6 @@
         AND up.post_id = gt.subject_id
         WHERE
         <include refid="roleCodesInCondition"/>
-        AND up.status IN (1, 2)
         ) impacted
     </select>
 
@@ -93,7 +91,6 @@
         <foreach collection="subjectIds" item="subjectId" open="(" separator="," close=")">
             #{subjectId}
         </foreach>
-        AND ud.status IN (1, 2)
         ) impacted
     </select>
 
@@ -106,7 +103,6 @@
         <foreach collection="subjectIds" item="subjectId" open="(" separator="," close=")">
             #{subjectId}
         </foreach>
-        AND up.status IN (1, 2)
         ) impacted
     </select>
 
@@ -123,7 +119,6 @@
         <foreach collection="deptIds" item="deptId" open="(" separator="," close=")">
             #{deptId}
         </foreach>
-        AND ud.status IN (1, 2)
     </select>
 
     <!-- 按岗位 ID 反查岗位成员 -->
@@ -137,7 +132,6 @@
         <foreach collection="postIds" item="postId" open="(" separator="," close=")">
             #{postId}
         </foreach>
-        AND up.status IN (1, 2)
     </select>
 
     <!-- 权限码桥接：查询关联角色码 -->

@@ -23,9 +23,6 @@ public class DeptUserPageQuery extends PageQueryRequest {
 	@Schema(title = "用户状态（0=禁用，1=正常，2=锁定）")
 	private Integer status;
 
-	@Schema(title = "关联状态（0=已调离，1=正常，2=兼职）")
-	private Integer relationStatus;
-
 	@Schema(title = "是否主部门")
 	private Boolean isPrimary;
 

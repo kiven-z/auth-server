@@ -23,7 +23,4 @@ public class UserPostPageQuery extends PageQueryRequest {
 	@Schema(title = "岗位名称")
 	private String postName;
 
-	@Schema(title = "关联状态")
-	private Integer status;
-
 }

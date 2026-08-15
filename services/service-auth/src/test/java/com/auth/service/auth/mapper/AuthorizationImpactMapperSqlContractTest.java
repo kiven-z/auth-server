@@ -39,7 +39,6 @@ class AuthorizationImpactMapperSqlContractTest {
 			.contains("INNER JOIN sys_permission p ON p.id = rp.permission_id")
 			.contains("INNER JOIN sys_role r ON r.id = rp.role_id")
 			.contains("p.permission_code IN")
-			// 注意：XML 中存在 ud.status / up.status；这里只禁止 sys_permission 的别名 p.status
 			.doesNotContain("p.status")
 			.doesNotContain(" p.status ");
 	}

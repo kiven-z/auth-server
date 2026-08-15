@@ -7,7 +7,7 @@ import lombok.Getter;
  * 系统管理域结果码（岗位、用户部门等 Admin 特有场景）
  *
  * <p>
- * 号段：268、276、315–326、340–341
+ * 号段：268、276、315–325、340–341
  * </p>
  *
  * @author Bunny
@@ -46,21 +46,9 @@ public enum SystemAdminResultCode implements SystemResultCode {
 	USER_DEPT_DUPLICATE(409, 322, "USER_DEPT_DUPLICATE", "system.user.org_relation_duplicate"),
 
 	/**
-	 * 仅正常状态的关联可设为主要关联
-	 */
-	USER_DEPT_PRIMARY_NOT_ELIGIBLE(400, 324, "USER_DEPT_PRIMARY_NOT_ELIGIBLE",
-			"system.user.org_relation_primary_not_eligible"),
-
-	/**
 	 * 用户岗位关联已存在
 	 */
 	USER_POST_DUPLICATE(409, 325, "USER_POST_DUPLICATE", "system.user.org_relation_duplicate"),
-
-	/**
-	 * 仅正常状态的关联可设为主要关联
-	 */
-	USER_POST_PRIMARY_NOT_ELIGIBLE(400, 326, "USER_POST_PRIMARY_NOT_ELIGIBLE",
-			"system.user.org_relation_primary_not_eligible"),
 
 	/**
 	 * Excel 导入文件格式或读取失败

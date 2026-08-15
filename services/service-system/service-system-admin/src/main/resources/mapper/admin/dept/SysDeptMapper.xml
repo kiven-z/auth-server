@@ -139,18 +139,14 @@
                          WHERE dc.ancestor_id = #{deptId})
         SELECT EXISTS (SELECT 1
                        FROM user_dept ud
-                                INNER JOIN subtree s ON ud.dept_id = s.descendant_id
-                       WHERE ud.status IN (1, 2)
-                       LIMIT 1)
+                                INNER JOIN subtree s ON ud.dept_id = s.descendant_id)
                    OR EXISTS (SELECT 1
                               FROM grant_table gt
                                        INNER JOIN subtree s ON gt.subject_id = s.descendant_id
-                              WHERE gt.subject_type = 'DEPT'
-                              LIMIT 1)
+                              WHERE gt.subject_type = 'DEPT')
                    OR EXISTS (SELECT 1
                               FROM sys_post p
-                                       INNER JOIN subtree s ON p.dept_id = s.descendant_id
-                              LIMIT 1)
+                                       INNER JOIN subtree s ON p.dept_id = s.descendant_id)
     </select>
 
     <!-- 引用检查：后代关系（含 depth=0 自身） -->

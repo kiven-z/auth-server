@@ -10,7 +10,7 @@ import lombok.ToString;
 import java.io.Serial;
 
 /**
- * 用户-岗位关联回显（在岗位基础字段上扩展主岗位与关联状态）
+ * 用户-岗位关联回显（在岗位基础字段上扩展主岗位）
  *
  * @author Bunny
  */
@@ -26,8 +26,5 @@ public class UserPostReferenceVO extends PostReferenceVO {
 
 	@Schema(title = "是否主岗位")
 	private Boolean isPrimary;
-
-	@Schema(title = "关联状态（0=已调离，1=正常，2=兼职）")
-	private Integer relationStatus;
 
 }

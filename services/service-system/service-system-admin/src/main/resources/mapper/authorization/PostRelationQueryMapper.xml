@@ -2,71 +2,62 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.auth.service.system.admin.mapper.authorization.PostRelationQueryMapper">
 
-    <!-- 统计岗位关联用户（user_post.status IN 1,2；与详情 count / 删除前引用检查口径一致） -->
+    <!-- 统计岗位有效关联用户 -->
     <select id="countUsersByPostId" resultType="long">
         SELECT
-            COUNT(1)
+        COUNT(1)
         FROM
-            user_post up
-            INNER JOIN sys_user u ON u.id = up.user_id
+        v_user_post_effective up
+        INNER JOIN sys_user u ON u.id = up.user_id
         WHERE
-            up.post_id = #{postId}
-            AND up.status IN (1, 2)
+        up.post_id = #{postId}
         <if test="query != null and query.keyword != null and query.keyword != ''">
             AND (
-                u.username LIKE CONCAT('%', #{query.keyword}, '%')
-                OR u.nickname LIKE CONCAT('%', #{query.keyword}, '%')
+            u.username LIKE CONCAT('%', #{query.keyword}, '%')
+            OR u.nickname LIKE CONCAT('%', #{query.keyword}, '%')
             )
         </if>
         <if test="query != null and query.status != null">
             AND u.status = #{query.status}
-        </if>
-        <if test="query != null and query.relationStatus != null">
-            AND up.status = #{query.relationStatus}
         </if>
         <if test="query != null and query.isPrimary != null">
             AND up.is_primary = #{query.isPrimary}
         </if>
     </select>
 
-    <!-- 分页查询岗位关联用户 -->
+    <!-- 分页查询岗位有效关联用户 -->
     <select id="selectUsersByPostIdPage"
             resultType="com.auth.service.system.admin.model.po.post.SysPostBoundUserPO">
         SELECT
-            u.id,
-            u.username,
-            u.status,
-            u.nickname,
-            u.avatar,
-            u.gender,
-            u.employee_no,
-            up.is_primary,
-            up.status AS relation_status
+        u.id,
+        u.username,
+        u.status,
+        u.nickname,
+        u.avatar,
+        u.gender,
+        u.employee_no,
+        up.is_primary
         FROM
-            user_post up
-            INNER JOIN sys_user u ON u.id = up.user_id
+        v_user_post_effective up
+        INNER JOIN sys_user u ON u.id = up.user_id
         WHERE
-            up.post_id = #{postId}
-            AND up.status IN (1, 2)
+        up.post_id = #{postId}
         <if test="query != null and query.keyword != null and query.keyword != ''">
             AND (
-                u.username LIKE CONCAT('%', #{query.keyword}, '%')
-                OR u.nickname LIKE CONCAT('%', #{query.keyword}, '%')
+            u.username LIKE CONCAT('%', #{query.keyword}, '%')
+            OR u.nickname LIKE CONCAT('%', #{query.keyword}, '%')
             )
         </if>
         <if test="query != null and query.status != null">
             AND u.status = #{query.status}
         </if>
-        <if test="query != null and query.relationStatus != null">
-            AND up.status = #{query.relationStatus}
-        </if>
         <if test="query != null and query.isPrimary != null">
             AND up.is_primary = #{query.isPrimary}
         </if>
         ORDER BY
-            up.is_primary DESC,
-            up.created_at DESC,
-            u.username
+        up.is_primary DESC,
+        up.created_at DESC,
+        u.username
     </select>
 
 </mapper>

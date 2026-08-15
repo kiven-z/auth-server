@@ -34,11 +34,11 @@ public interface SysPostMapper extends BaseMapper<SysPostEntity> {
 			@Param("query") SysPostQuery query, @Param("orderBySql") String orderBySql);
 
 	/**
-	 * 是否存在有效的用户-岗位关联
+	 * 是否存在用户-岗位关联（基表行，含主体已停用）
 	 * @param postId 岗位 ID
 	 * @return 引用行数
 	 */
-	@Select("SELECT COUNT(1) FROM user_post up WHERE up.post_id = #{postId} AND up.status IN (1, 2)")
+	@Select("SELECT COUNT(1) FROM user_post up WHERE up.post_id = #{postId}")
 	long countUserPostByPostId(@Param("postId") Long postId);
 
 	/**

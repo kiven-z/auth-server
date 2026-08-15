@@ -36,7 +36,8 @@ class AuthorizationImpactMapperDeptSqlContractTest {
 		assertThat(selectBlock).contains("selectUserIdsByDeptIds")
 			.doesNotContain("is_deleted")
 			.doesNotContain("d.status =")
-			.contains("ud.status IN (1, 2)");
+			.doesNotContain("v_user_dept_effective")
+			.doesNotContain("ud.status");
 	}
 
 	@Test
@@ -62,7 +63,7 @@ class AuthorizationImpactMapperDeptSqlContractTest {
 			.doesNotContain("d.status =");
 		assertThat(selectBlock).contains("selectUserIdsByGrantDeptSubjectIds")
 			.contains("dc.ancestor_id IN")
-			.contains("ud.status IN (1, 2)")
+			.doesNotContain("ud.status")
 			.doesNotContain("gt.subject_id");
 	}
 
@@ -84,7 +85,8 @@ class AuthorizationImpactMapperDeptSqlContractTest {
 		assertThat(fragmentBlock).contains("user_post up").doesNotContain("grant_table").doesNotContain("is_deleted");
 		assertThat(selectBlock).contains("selectUserIdsByGrantPostSubjectIds")
 			.contains("up.post_id IN")
-			.contains("up.status IN (1, 2)")
+			.doesNotContain("v_user_post_effective")
+			.doesNotContain("up.status")
 			.doesNotContain("gt.subject_id");
 	}
 

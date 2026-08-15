@@ -34,7 +34,4 @@ public class UserPostProfilePO implements Serializable {
 	@Schema(title = "是否主岗位")
 	private Boolean isPrimary;
 
-	@Schema(title = "关联状态（0=已调离，1=正常，2=兼职）")
-	private Integer relationStatus;
-
 }

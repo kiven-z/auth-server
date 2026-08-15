@@ -44,10 +44,10 @@ public interface UserPostMapper extends BaseMapper<UserPostEntity> {
 	int countByUserIdAndPostId(@Param("userId") Long userId, @Param("postId") Long postId);
 
 	/**
-	 * 将用户全部有效关联的 is_primary 置为 false
+	 * 将用户全部主岗位的 is_primary 置为 false
 	 * @param userId 用户 ID
 	 */
-	@Update("UPDATE user_post SET is_primary = 0 WHERE user_id = #{userId} AND status IN (1, 2) AND is_primary = 1")
+	@Update("UPDATE user_post SET is_primary = 0 WHERE user_id = #{userId} AND is_primary = 1")
 	void demotePrimaryByUserId(@Param("userId") Long userId);
 
 	/**

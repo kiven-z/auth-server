@@ -1,8 +1,6 @@
 package com.auth.service.system.admin.model.form.user;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -27,12 +25,6 @@ public class UserDeptAssignForm implements Serializable {
 	@Schema(title = "部门 ID", requiredMode = Schema.RequiredMode.REQUIRED)
 	@NotNull(message = "部门 ID 不能为空")
 	private Long deptId;
-
-	@Schema(title = "关联状态（0=已调离，1=正常，2=兼职）", requiredMode = Schema.RequiredMode.REQUIRED)
-	@Max(value = 2, message = "状态值不能大于2")
-	@Min(value = 0, message = "状态值不能小于0")
-	@NotNull(message = "关联状态不能为空")
-	private Integer status;
 
 	@Schema(title = "是否主部门", requiredMode = Schema.RequiredMode.REQUIRED)
 	@NotNull(message = "是否主部门不能为空")

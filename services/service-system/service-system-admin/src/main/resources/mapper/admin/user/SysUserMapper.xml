@@ -44,13 +44,11 @@
                 SELECT
                 1
                 FROM
-                user_dept ud
+                v_user_dept_effective ud
                 INNER JOIN dept_closure dc ON ud.dept_id = dc.descendant_id
-                INNER JOIN sys_dept d ON d.id = dc.descendant_id
                 WHERE
                 ud.user_id = u.id
                 AND dc.ancestor_id = #{query.deptId}
-                AND ud.status IN (1, 2)
                 )
             </if>
         </where>
@@ -104,35 +102,31 @@
         </where>
     </select>
 
-    <!-- 用户档案：部门列表（user_dept JOIN sys_dept） -->
+    <!-- 用户档案：部门列表（有效任职） -->
     <select id="selectDeptProfileByUserId"
             resultType="com.auth.service.system.admin.model.po.user.UserDeptProfilePO">
         SELECT d.id,
                d.dept_name,
                d.dept_code,
                d.status,
-               ud.is_primary,
-               ud.status AS relation_status
-        FROM user_dept ud
+               ud.is_primary
+        FROM v_user_dept_effective ud
                  INNER JOIN sys_dept d ON ud.dept_id = d.id
-            AND d.status = 1
         WHERE ud.user_id = #{userId}
         ORDER BY ud.is_primary DESC,
                  ud.created_at DESC
     </select>
 
-    <!-- 用户档案：岗位列表（user_post JOIN sys_post） -->
+    <!-- 用户档案：岗位列表（有效任职） -->
     <select id="selectPostProfileByUserId"
             resultType="com.auth.service.system.admin.model.po.user.UserPostProfilePO">
         SELECT sp.id,
                sp.post_code,
                sp.post_name,
                sp.status,
-               up.is_primary,
-               up.status AS relation_status
-        FROM user_post up
+               up.is_primary
+        FROM v_user_post_effective up
                  INNER JOIN sys_post sp ON up.post_id = sp.id
-            AND sp.status = 1
         WHERE up.user_id = #{userId}
         ORDER BY up.is_primary DESC,
                  up.created_at DESC

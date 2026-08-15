@@ -8,7 +8,6 @@ import com.auth.service.system.admin.mapper.admin.user.SysUserMapper;
 import com.auth.service.system.admin.mapper.admin.user.UserDeptMapper;
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.entity.UserDeptEntity;
-import com.auth.service.system.admin.model.enums.UserOrgRelationStatusEnum;
 import com.auth.service.system.admin.model.form.user.UserDeptAssignForm;
 import com.auth.service.system.admin.model.po.user.UserDeptPageRowPO;
 import com.auth.service.system.admin.model.query.user.UserDeptPageQuery;
@@ -89,13 +88,13 @@ class SysUserDeptServiceImplTest {
 		entity.setId(DEPT_ID);
 		entity.setDeptName("研发部");
 		entity.setDeptCode("RD");
+		entity.setStatus(true);
 		return entity;
 	}
 
-	private static UserDeptAssignForm createForm(Integer status, Boolean isPrimary, String remark) {
+	private static UserDeptAssignForm createForm(Boolean isPrimary, String remark) {
 		UserDeptAssignForm form = new UserDeptAssignForm();
 		form.setDeptId(DEPT_ID);
-		form.setStatus(status);
 		form.setIsPrimary(isPrimary);
 		form.setRemark(remark);
 		return form;
@@ -106,7 +105,6 @@ class SysUserDeptServiceImplTest {
 		entity.setId(RELATION_ID);
 		entity.setUserId(USER_ID);
 		entity.setDeptId(DEPT_ID);
-		entity.setStatus(UserOrgRelationStatusEnum.NORMAL.getCode());
 		entity.setIsPrimary(false);
 		entity.setRemark("原备注");
 		entity.setVersion(1L);
@@ -141,7 +139,6 @@ class SysUserDeptServiceImplTest {
 		row.setDeptName("研发部");
 		row.setDeptCode("RD");
 		row.setIsPrimary(true);
-		row.setStatus(UserOrgRelationStatusEnum.NORMAL.getCode());
 		row.setRemark("负责人");
 		row.setCreatedAt(now);
 		row.setUpdatedAt(now);
@@ -162,7 +159,6 @@ class SysUserDeptServiceImplTest {
 		assertThat(vo.getDeptName()).isEqualTo("研发部");
 		assertThat(vo.getDeptCode()).isEqualTo("RD");
 		assertThat(vo.getIsPrimary()).isTrue();
-		assertThat(vo.getStatus()).isEqualTo(UserOrgRelationStatusEnum.NORMAL.getCode());
 		assertThat(vo.getRemark()).isEqualTo("负责人");
 		assertThat(vo.getCreatedAt()).isEqualTo(now);
 		assertThat(vo.getUpdatedAt()).isEqualTo(now);
@@ -176,7 +172,7 @@ class SysUserDeptServiceImplTest {
 		when(userDeptMapper.countByUserIdAndDeptId(USER_ID, DEPT_ID)).thenReturn(0);
 		when(userDeptMapper.insert(any(UserDeptEntity.class))).thenReturn(1);
 
-		sysUserDeptService.create(USER_ID, createForm(UserOrgRelationStatusEnum.NORMAL.getCode(), false, "备注"));
+		sysUserDeptService.create(USER_ID, createForm(false, "备注"));
 
 		verify(userDeptMapper, never()).demotePrimaryByUserId(USER_ID);
 		verify(userDeptMapper).insert(entityCaptor.capture());
@@ -184,19 +180,18 @@ class SysUserDeptServiceImplTest {
 		assertThat(saved.getUserId()).isEqualTo(USER_ID);
 		assertThat(saved.getDeptId()).isEqualTo(DEPT_ID);
 		assertThat(saved.getIsPrimary()).isFalse();
-		assertThat(saved.getStatus()).isEqualTo(UserOrgRelationStatusEnum.NORMAL.getCode());
 		assertThat(saved.getRemark()).isEqualTo("备注");
 		verify(userAuthorizationInvalidationTrigger).submitByUserIds(List.of(USER_ID), "create-dept");
 	}
 
 	@Test
-	@DisplayName("创建关联：主部门时降级其他有效关联")
+	@DisplayName("创建关联：主部门时降级该用户其他主部门")
 	void createPrimaryDemotesExistingPrimary() {
 		stubCreatePrerequisites();
 		when(userDeptMapper.countByUserIdAndDeptId(USER_ID, DEPT_ID)).thenReturn(0);
 		when(userDeptMapper.insert(any(UserDeptEntity.class))).thenReturn(1);
 
-		sysUserDeptService.create(USER_ID, createForm(UserOrgRelationStatusEnum.NORMAL.getCode(), true, null));
+		sysUserDeptService.create(USER_ID, createForm(true, null));
 
 		verify(userDeptMapper).demotePrimaryByUserId(USER_ID);
 		verify(userDeptMapper).insert(entityCaptor.capture());
@@ -209,7 +204,7 @@ class SysUserDeptServiceImplTest {
 	void createRejectsDuplicateDeptRelation() {
 		stubCreatePrerequisites();
 		when(userDeptMapper.countByUserIdAndDeptId(USER_ID, DEPT_ID)).thenReturn(1);
-		UserDeptAssignForm form = createForm(UserOrgRelationStatusEnum.NORMAL.getCode(), false, null);
+		UserDeptAssignForm form = createForm(false, null);
 
 		assertThatThrownBy(() -> sysUserDeptService.create(USER_ID, form)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
@@ -220,15 +215,17 @@ class SysUserDeptServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("创建关联：非正常状态不可设为主部门")
-	void createRejectsPrimaryWhenStatusNotNormal() {
-		stubCreatePrerequisites();
-		when(userDeptMapper.countByUserIdAndDeptId(USER_ID, DEPT_ID)).thenReturn(0);
-		UserDeptAssignForm form = createForm(UserOrgRelationStatusEnum.TRANSFERRED.getCode(), true, null);
+	@DisplayName("创建关联：停用部门不可新增任职")
+	void createRejectsDisabledDept() {
+		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
+		SysDeptEntity disabled = activeDept();
+		disabled.setStatus(false);
+		when(sysDeptMapper.selectById(DEPT_ID)).thenReturn(disabled);
+		UserDeptAssignForm form = createForm(false, null);
 
 		assertThatThrownBy(() -> sysUserDeptService.create(USER_ID, form)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemAdminResultCode.USER_DEPT_PRIMARY_NOT_ELIGIBLE);
+			.isEqualTo(SystemCommonResultCode.DATA_UNAVAILABLE);
 
 		verify(userDeptMapper, never()).insert(any(UserDeptEntity.class));
 		verify(userAuthorizationInvalidationTrigger, never()).submitByUserIds(any(), any());
@@ -247,8 +244,7 @@ class SysUserDeptServiceImplTest {
 		when(userDeptMapper.selectByIdAndUserId(RELATION_ID, USER_ID)).thenReturn(existing);
 		when(userDeptMapper.updateById(any(UserDeptEntity.class))).thenReturn(1);
 
-		sysUserDeptService.update(USER_ID, RELATION_ID,
-				createForm(UserOrgRelationStatusEnum.NORMAL.getCode(), false, "新备注"));
+		sysUserDeptService.update(USER_ID, RELATION_ID, createForm(false, "新备注"));
 
 		verify(userDeptMapper, never()).demotePrimaryByUserId(USER_ID);
 		verify(userDeptMapper).updateById(entityCaptor.capture());
@@ -257,14 +253,13 @@ class SysUserDeptServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("更新关联：设为主部门时降级其他有效关联")
+	@DisplayName("更新关联：设为主部门时降级该用户其他主部门")
 	void updatePrimaryDemotesExistingPrimary() {
 		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
 		when(userDeptMapper.selectByIdAndUserId(RELATION_ID, USER_ID)).thenReturn(existingRelation());
 		when(userDeptMapper.updateById(any(UserDeptEntity.class))).thenReturn(1);
 
-		sysUserDeptService.update(USER_ID, RELATION_ID,
-				createForm(UserOrgRelationStatusEnum.NORMAL.getCode(), true, null));
+		sysUserDeptService.update(USER_ID, RELATION_ID, createForm(true, null));
 
 		verify(userDeptMapper).demotePrimaryByUserId(USER_ID);
 		verify(userDeptMapper).updateById(entityCaptor.capture());
@@ -285,7 +280,7 @@ class SysUserDeptServiceImplTest {
 		conflict.setUserId(USER_ID);
 		conflict.setDeptId(OTHER_DEPT_ID);
 		when(userDeptMapper.selectByUserIdAndDeptId(USER_ID, OTHER_DEPT_ID)).thenReturn(conflict);
-		UserDeptAssignForm form = createForm(UserOrgRelationStatusEnum.NORMAL.getCode(), false, null);
+		UserDeptAssignForm form = createForm(false, null);
 		form.setDeptId(OTHER_DEPT_ID);
 
 		assertThatThrownBy(() -> sysUserDeptService.update(USER_ID, RELATION_ID, form))
@@ -297,16 +292,21 @@ class SysUserDeptServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("更新关联：非正常状态不可设为主部门")
-	void updateRejectsPrimaryWhenStatusNotNormal() {
+	@DisplayName("更新关联：改到停用部门时拒绝")
+	void updateRejectsDisabledDept() {
 		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
 		when(userDeptMapper.selectByIdAndUserId(RELATION_ID, USER_ID)).thenReturn(existingRelation());
-		UserDeptAssignForm form = createForm(UserOrgRelationStatusEnum.TRANSFERRED.getCode(), true, null);
+		SysDeptEntity disabled = activeDept();
+		disabled.setId(OTHER_DEPT_ID);
+		disabled.setStatus(false);
+		when(sysDeptMapper.selectById(OTHER_DEPT_ID)).thenReturn(disabled);
+		UserDeptAssignForm form = createForm(false, null);
+		form.setDeptId(OTHER_DEPT_ID);
 
 		assertThatThrownBy(() -> sysUserDeptService.update(USER_ID, RELATION_ID, form))
 			.isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemAdminResultCode.USER_DEPT_PRIMARY_NOT_ELIGIBLE);
+			.isEqualTo(SystemCommonResultCode.DATA_UNAVAILABLE);
 
 		verify(userDeptMapper, never()).updateById(any(UserDeptEntity.class));
 	}
@@ -316,7 +316,7 @@ class SysUserDeptServiceImplTest {
 	void updateRejectsMissingRelation() {
 		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
 		when(userDeptMapper.selectByIdAndUserId(RELATION_ID, USER_ID)).thenReturn(null);
-		UserDeptAssignForm form = createForm(UserOrgRelationStatusEnum.NORMAL.getCode(), false, null);
+		UserDeptAssignForm form = createForm(false, null);
 
 		assertThatThrownBy(() -> sysUserDeptService.update(USER_ID, RELATION_ID, form))
 			.isInstanceOf(SystemBusinessException.class)

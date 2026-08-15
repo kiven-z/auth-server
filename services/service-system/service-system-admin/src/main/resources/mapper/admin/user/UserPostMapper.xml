@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.auth.service.system.admin.mapper.admin.user.UserPostMapper">
 
-    <!-- 用户岗位关联分页 -->
+    <!-- 用户岗位关联分页（有效任职） -->
     <select id="selectListByPage" resultType="com.auth.service.system.admin.model.po.user.UserPostPageRowPO">
         SELECT
         up.id,
@@ -11,7 +11,6 @@
         sp.post_code,
         sp.post_name,
         up.is_primary,
-        up.status,
         up.created_at,
         up.updated_at,
         up.created_by,
@@ -19,7 +18,7 @@
         up.version,
         up.remark
         FROM
-        user_post up
+        v_user_post_effective up
         INNER JOIN sys_post sp ON sp.id = up.post_id
         WHERE
         up.user_id = #{userId}
@@ -35,23 +34,18 @@
             '%'
             )
         </if>
-        <if test="query.status != null">
-            AND up.status =
-            #{query.status}
-        </if>
         ORDER BY
         up.is_primary DESC,
         up.created_at DESC,
         up.id DESC
     </select>
 
-    <!-- 按用户与关联主键加载 -->
+    <!-- 按用户与关联主键加载（基表，供更新） -->
     <select id="selectByIdAndUserId" resultType="com.auth.service.system.admin.model.entity.UserPostEntity">
         SELECT id,
                user_id,
                post_id,
                is_primary,
-               status,
                created_at,
                updated_at,
                created_by,

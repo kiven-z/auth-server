@@ -6,7 +6,6 @@ import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.admin.user.UserPostMapper;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.entity.UserPostEntity;
-import com.auth.service.system.admin.model.enums.UserOrgRelationStatusEnum;
 import com.auth.service.system.admin.model.form.user.UserPostAssignForm;
 import com.auth.service.system.admin.model.form.user.UserPostRelationUpdateForm;
 import com.auth.service.system.admin.model.po.user.UserPostPageRowPO;
@@ -86,7 +85,10 @@ public class SysUserPostServiceImpl extends ServiceImpl<UserPostMapper, UserPost
 			throw new SystemBusinessException(SystemAdminResultCode.USER_POST_DUPLICATE);
 		}
 
-		applyPrimaryPostRules(userId, form.getStatus(), form.getIsPrimary());
+		Boolean isPrimary = form.getIsPrimary();
+		if (isPrimary != null && isPrimary) {
+			baseMapper.demotePrimaryByUserId(userId);
+		}
 
 		UserPostEntity entity = UserPostConverter.INSTANCE.toEntity(form);
 		entity.setUserId(userId);
@@ -109,7 +111,10 @@ public class SysUserPostServiceImpl extends ServiceImpl<UserPostMapper, UserPost
 			throw new SystemBusinessException(SystemCommonResultCode.DATA_NOT_EXIST);
 		}
 
-		applyPrimaryPostRules(userId, form.getStatus(), form.getIsPrimary());
+		Boolean isPrimary = form.getIsPrimary();
+		if (isPrimary != null && isPrimary) {
+			baseMapper.demotePrimaryByUserId(userId);
+		}
 
 		UserPostConverter.INSTANCE.applyUpdateForm(form, existing);
 		updateById(existing);
@@ -134,24 +139,6 @@ public class SysUserPostServiceImpl extends ServiceImpl<UserPostMapper, UserPost
 
 		if (baseMapper.deleteByUserId(userId) > 0) {
 			userAuthorizationInvalidationTrigger.submitByUserIds(List.of(userId), "clear-post");
-		}
-	}
-
-	/**
-	 * 主岗位规则：非正常状态不可设为主岗位；设为主岗位时降级该用户其他主岗位
-	 * @param userId 用户 ID
-	 * @param status 关联状态
-	 * @param isPrimary 是否主岗位
-	 */
-	private void applyPrimaryPostRules(Long userId, Integer status, Boolean isPrimary) {
-		boolean primary = isPrimary != null && isPrimary;
-
-		if (primary && UserOrgRelationStatusEnum.canBePrimary(status)) {
-			throw new SystemBusinessException(SystemAdminResultCode.USER_POST_PRIMARY_NOT_ELIGIBLE);
-		}
-
-		if (primary) {
-			baseMapper.demotePrimaryByUserId(userId);
 		}
 	}
 

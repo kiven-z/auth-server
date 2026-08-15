@@ -23,7 +23,4 @@ public class UserDeptPageQuery extends PageQueryRequest {
 	@Schema(title = "部门编码")
 	private String deptCode;
 
-	@Schema(title = "关联状态")
-	private Integer status;
-
 }

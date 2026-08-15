@@ -29,20 +29,20 @@ class AuthorizationGrantForwardFragmentsSqlContractTest {
 		String xml = readClasspathText();
 
 		assertThat(xml).contains("fwdUserSubjectsForFunctionalGrantByUserIds")
-			.contains("d.id = ud.dept_id")
-			.contains("d.status = 1")
+			.contains("v_user_dept_effective")
 			.contains("da.id = dc.ancestor_id")
-			.contains("da.status = 1");
+			.contains("da.status = 1")
+			.doesNotContain("ud.status");
 	}
 
 	@Test
-	@DisplayName("POST 正向展开：岗位须 status = 1")
+	@DisplayName("POST 正向展开：走有效任职 view")
 	void postForwardExpansionRequiresEnabledPostStatus() throws IOException {
 		String xml = readClasspathText();
 
 		assertThat(xml).contains("fwdUserSubjectsForFunctionalGrantByUserIds")
-			.contains("sp.id = up.post_id")
-			.contains("sp.status = 1")
+			.contains("v_user_post_effective")
+			.doesNotContain("up.status")
 			.doesNotContain("is_deleted");
 	}
 

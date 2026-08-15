@@ -8,7 +8,6 @@ import com.auth.service.system.admin.mapper.admin.user.SysUserMapper;
 import com.auth.service.system.admin.mapper.admin.user.UserPostMapper;
 import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.entity.UserPostEntity;
-import com.auth.service.system.admin.model.enums.UserOrgRelationStatusEnum;
 import com.auth.service.system.admin.model.form.user.UserPostAssignForm;
 import com.auth.service.system.admin.model.form.user.UserPostRelationUpdateForm;
 import com.auth.service.system.admin.model.po.user.UserPostPageRowPO;
@@ -90,18 +89,16 @@ class SysUserPostServiceImplTest {
 		return entity;
 	}
 
-	private static UserPostAssignForm createForm(Integer status, Boolean isPrimary, String remark) {
+	private static UserPostAssignForm createForm(Boolean isPrimary, String remark) {
 		UserPostAssignForm form = new UserPostAssignForm();
 		form.setPostId(POST_ID);
-		form.setStatus(status);
 		form.setIsPrimary(isPrimary);
 		form.setRemark(remark);
 		return form;
 	}
 
-	private static UserPostRelationUpdateForm updateForm(Integer status, String remark) {
+	private static UserPostRelationUpdateForm updateForm(String remark) {
 		UserPostRelationUpdateForm form = new UserPostRelationUpdateForm();
-		form.setStatus(status);
 		form.setIsPrimary(false);
 		form.setRemark(remark);
 		return form;
@@ -135,7 +132,6 @@ class SysUserPostServiceImplTest {
 		row.setPostCode("DEV");
 		row.setPostName("开发工程师");
 		row.setIsPrimary(true);
-		row.setStatus(UserOrgRelationStatusEnum.NORMAL.getCode());
 		row.setRemark("核心岗位");
 		row.setCreatedAt(now);
 		row.setUpdatedAt(now);
@@ -162,7 +158,7 @@ class SysUserPostServiceImplTest {
 		when(userPostMapper.countByUserIdAndPostId(USER_ID, POST_ID)).thenReturn(0);
 		when(userPostMapper.insert(any(UserPostEntity.class))).thenReturn(1);
 
-		sysUserPostService.create(USER_ID, createForm(UserOrgRelationStatusEnum.NORMAL.getCode(), false, "备注"));
+		sysUserPostService.create(USER_ID, createForm(false, "备注"));
 
 		verify(userPostMapper, never()).demotePrimaryByUserId(USER_ID);
 		verify(userPostMapper).insert(entityCaptor.capture());
@@ -174,13 +170,13 @@ class SysUserPostServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("创建关联：主岗位时降级其他有效关联")
+	@DisplayName("创建关联：主岗位时降级该用户其他主岗位")
 	void createPrimaryDemotesExistingPrimary() {
 		stubCreatePrerequisites();
 		when(userPostMapper.countByUserIdAndPostId(USER_ID, POST_ID)).thenReturn(0);
 		when(userPostMapper.insert(any(UserPostEntity.class))).thenReturn(1);
 
-		sysUserPostService.create(USER_ID, createForm(UserOrgRelationStatusEnum.NORMAL.getCode(), true, null));
+		sysUserPostService.create(USER_ID, createForm(true, null));
 
 		verify(userPostMapper).demotePrimaryByUserId(USER_ID);
 		verify(userPostMapper).insert(entityCaptor.capture());
@@ -192,7 +188,7 @@ class SysUserPostServiceImplTest {
 	void createRejectsDuplicatePostRelation() {
 		stubCreatePrerequisites();
 		when(userPostMapper.countByUserIdAndPostId(USER_ID, POST_ID)).thenReturn(1);
-		UserPostAssignForm form = createForm(UserOrgRelationStatusEnum.NORMAL.getCode(), false, null);
+		UserPostAssignForm form = createForm(false, null);
 
 		assertThatThrownBy(() -> sysUserPostService.create(USER_ID, form)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
@@ -202,19 +198,23 @@ class SysUserPostServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("创建关联：非正常状态不可设为主岗位")
-	void createRejectsPrimaryWhenStatusNotNormal() {
-		stubCreatePrerequisites();
-		when(userPostMapper.countByUserIdAndPostId(USER_ID, POST_ID)).thenReturn(0);
-		UserPostAssignForm form = createForm(UserOrgRelationStatusEnum.TRANSFERRED.getCode(), true, null);
+	@DisplayName("创建关联：停用岗位不可新增任职")
+	void createRejectsDisabledPost() {
+		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
+		SysPostEntity disabled = activePost();
+		disabled.setStatus(false);
+		when(sysPostMapper.selectById(POST_ID)).thenReturn(disabled);
+		UserPostAssignForm form = createForm(false, null);
 
 		assertThatThrownBy(() -> sysUserPostService.create(USER_ID, form)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemAdminResultCode.USER_POST_PRIMARY_NOT_ELIGIBLE);
+			.isEqualTo(SystemCommonResultCode.DATA_UNAVAILABLE);
+
+		verify(userPostMapper, never()).insert(any(UserPostEntity.class));
 	}
 
 	@Test
-	@DisplayName("更新关联：按主键更新状态与备注")
+	@DisplayName("更新关联：按主键更新主岗与备注")
 	void updateAppliesRelationFields() {
 		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
 		UserPostEntity existing = new UserPostEntity();
@@ -224,13 +224,11 @@ class SysUserPostServiceImplTest {
 		when(userPostMapper.selectByIdAndUserId(RELATION_ID, USER_ID)).thenReturn(existing);
 		when(userPostMapper.updateById(any(UserPostEntity.class))).thenReturn(1);
 
-		sysUserPostService.update(USER_ID, RELATION_ID,
-				updateForm(UserOrgRelationStatusEnum.PART_TIME.getCode(), "调整"));
+		sysUserPostService.update(USER_ID, RELATION_ID, updateForm("调整"));
 
 		verify(userPostMapper).updateById(entityCaptor.capture());
 		UserPostEntity updated = entityCaptor.getValue();
 		assertThat(updated.getPostId()).isEqualTo(POST_ID);
-		assertThat(updated.getStatus()).isEqualTo(UserOrgRelationStatusEnum.PART_TIME.getCode());
 		assertThat(updated.getRemark()).isEqualTo("调整");
 		verify(userAuthorizationInvalidationTrigger).submitByUserIds(List.of(USER_ID), "update-post");
 	}
@@ -240,7 +238,7 @@ class SysUserPostServiceImplTest {
 	void updateRejectsMissingRelation() {
 		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
 		when(userPostMapper.selectByIdAndUserId(RELATION_ID, USER_ID)).thenReturn(null);
-		UserPostRelationUpdateForm form = updateForm(UserOrgRelationStatusEnum.NORMAL.getCode(), null);
+		UserPostRelationUpdateForm form = updateForm(null);
 
 		assertThatThrownBy(() -> sysUserPostService.update(USER_ID, RELATION_ID, form))
 			.isInstanceOf(SystemBusinessException.class)

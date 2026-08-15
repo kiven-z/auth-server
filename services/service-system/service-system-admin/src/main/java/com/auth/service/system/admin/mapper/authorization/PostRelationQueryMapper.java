@@ -16,7 +16,7 @@ import org.apache.ibatis.annotations.Param;
 public interface PostRelationQueryMapper {
 
 	/**
-	 * 统计岗位关联用户数（user_post.status IN 1,2）
+	 * 统计岗位有效关联用户数
 	 * @param postId 岗位 ID
 	 * @param query 过滤条件
 	 * @return 用户数

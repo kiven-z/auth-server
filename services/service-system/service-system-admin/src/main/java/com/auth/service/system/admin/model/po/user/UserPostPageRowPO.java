@@ -38,9 +38,6 @@ public class UserPostPageRowPO implements Serializable {
 	@Schema(title = "是否主岗位")
 	private Boolean isPrimary;
 
-	@Schema(title = "关联状态")
-	private Integer status;
-
 	@Schema(title = "创建时间")
 	private Instant createdAt;
 
