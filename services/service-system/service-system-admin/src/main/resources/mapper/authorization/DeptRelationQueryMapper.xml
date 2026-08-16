@@ -2,12 +2,12 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.auth.service.system.admin.mapper.authorization.DeptRelationQueryMapper">
 
-    <!-- 统计部门有效关联用户 -->
+    <!-- 统计部门绑定用户（基表，含用户已停用） -->
     <select id="countUsersByDeptId" resultType="long">
         SELECT
         COUNT(1)
         FROM
-        v_user_dept_effective ud
+        user_dept ud
         INNER JOIN sys_user u ON u.id = ud.user_id
         WHERE
         ud.dept_id = #{deptId}
@@ -25,7 +25,7 @@
         </if>
     </select>
 
-    <!-- 分页查询部门有效关联用户 -->
+    <!-- 分页查询部门绑定用户（基表，含用户已停用） -->
     <select id="selectUsersByDeptIdPage"
             resultType="com.auth.service.system.admin.model.po.dept.SysDeptBoundUserPO">
         SELECT
@@ -38,7 +38,7 @@
         u.employee_no,
         ud.is_primary
         FROM
-        v_user_dept_effective ud
+        user_dept ud
         INNER JOIN sys_user u ON u.id = ud.user_id
         WHERE
         ud.dept_id = #{deptId}

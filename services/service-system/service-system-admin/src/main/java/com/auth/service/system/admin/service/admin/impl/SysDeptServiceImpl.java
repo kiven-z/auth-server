@@ -56,10 +56,10 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 		}
 
 		List<String> deptCodes = forms.stream().map(SysDeptForm::getDeptCode).toList();
-		deptReferenceChecker.requireAbsentDeptCodes(deptCodes);
+		requireAbsentDeptCodes(deptCodes);
 
 		List<SysDeptEntity> entities = forms.stream().map(form -> {
-			Long parentId = deptReferenceChecker.normalizeAndRequireActiveParent(form.getParentId());
+			Long parentId = normalizeAndRequireExistingParent(form.getParentId());
 			SysDeptEntity entity = SysDeptConverter.INSTANCE.toEntity(form);
 			entity.setParentId(parentId);
 			return entity;
@@ -91,7 +91,7 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 					() -> new SystemBusinessException(SystemCommonResultCode.DATA_CODE_DUPLICATE, newDeptCode));
 		}
 
-		long newParentId = deptReferenceChecker.normalizeAndRequireActiveParent(form.getParentId());
+		long newParentId = normalizeAndRequireExistingParent(form.getParentId());
 		boolean parentChanged = TreeParentIdUtil.normalize(existing.getParentId()) != newParentId;
 		boolean statusChanged = FieldChangeSupport.valueChanged(existing.getStatus(), form.getStatus());
 		if (parentChanged) {
@@ -141,7 +141,7 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 	public void move(SysDeptMoveForm form) {
 		Long deptId = form.getId();
 		SysDeptEntity existing = deptReferenceChecker.getExistingActive(deptId);
-		long newParentId = deptReferenceChecker.normalizeAndRequireActiveParent(form.getParentId());
+		long newParentId = normalizeAndRequireExistingParent(form.getParentId());
 
 		if (TreeParentIdUtil.normalize(existing.getParentId()) == newParentId) {
 			return;
@@ -175,6 +175,38 @@ public class SysDeptServiceImpl extends ServiceImpl<SysDeptMapper, SysDeptEntity
 		deptClosureMaintainer.removeClosurePaths(deptId);
 
 		removeById(deptId);
+	}
+
+	/**
+	 * 规范化父部门 ID 并校验父部门存在（顶级跳过校验；含停用节点）
+	 * @param rawParentId 原始父部门 ID
+	 * @return 规范化后的父部门 ID
+	 */
+	private long normalizeAndRequireExistingParent(Long rawParentId) {
+		long parentId = TreeParentIdUtil.normalize(rawParentId);
+		if (parentId > TreeParentIdUtil.ROOT_PARENT_ID && baseMapper.countById(parentId) == 0) {
+			log.warn("Tree parent unavailable: parentId={}", parentId);
+			throw new SystemBusinessException(SystemCommonResultCode.TREE_PARENT_UNAVAILABLE);
+		}
+		return parentId;
+	}
+
+	/**
+	 * 批量写入前校验部门编码在请求内及库内均唯一
+	 * @param deptCodes 待写入部门编码
+	 */
+	private void requireAbsentDeptCodes(List<String> deptCodes) {
+		List<String> distinctCodes = BusinessKeyAssert.requireDistinct(deptCodes,
+				code -> new SystemBusinessException(SystemCommonResultCode.DATA_CODE_DUPLICATE, code));
+		if (CollUtil.isEmpty(distinctCodes)) {
+			return;
+		}
+
+		List<SysDeptEntity> existing = baseMapper.selectActiveByDeptCodes(distinctCodes);
+		if (CollUtil.isNotEmpty(existing)) {
+			throw new SystemBusinessException(SystemCommonResultCode.DATA_CODE_DUPLICATE,
+					existing.get(0).getDeptCode());
+		}
 	}
 
 }

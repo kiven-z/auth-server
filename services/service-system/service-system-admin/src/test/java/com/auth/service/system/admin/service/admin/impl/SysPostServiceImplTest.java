@@ -162,6 +162,7 @@ class SysPostServiceImplTest {
 		boundDept.setStatus(true);
 
 		when(sysPostMapper.selectById(postId)).thenReturn(entity);
+		when(sysPostMapper.countEffectiveById(postId)).thenReturn(1L);
 		when(sysPostMapper.selectBoundDeptByPostId(postId)).thenReturn(boundDept);
 		when(postRelationQueryMapper.countUsersByPostId(postId, null)).thenReturn(1L);
 		when(grantBindingQueryMapper.countBoundRolesBySubject(GrantTableSubjectType.POST.name(), postId, null))
@@ -172,10 +173,12 @@ class SysPostServiceImplTest {
 		assertThat(detail.getPostCode()).isEqualTo("DEV");
 		assertThat(detail.getPostName()).isEqualTo("研发");
 		assertThat(detail.getDeptId()).isEqualTo(2L);
+		assertThat(detail.getEffective()).isTrue();
 		assertThat(detail.getBoundDept()).isNotNull();
 		assertThat(detail.getBoundDept().getDeptName()).isEqualTo("研发部");
 		assertThat(detail.getBoundUserCount()).isEqualTo(1L);
 		assertThat(detail.getBoundRoleCount()).isEqualTo(1L);
+		verify(sysPostMapper).countEffectiveById(postId);
 		verify(sysPostMapper).selectBoundDeptByPostId(postId);
 		verify(postRelationQueryMapper).countUsersByPostId(postId, null);
 		verify(grantBindingQueryMapper).countBoundRolesBySubject(GrantTableSubjectType.POST.name(), postId, null);
@@ -192,7 +195,7 @@ class SysPostServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("新增：部门不可挂载时 POST_DEPT_NOT_FOUND")
+	@DisplayName("新增：部门自身停用或不可挂载时 DATA_UNAVAILABLE")
 	void createThrowsWhenDeptNotAssignable() {
 		when(sysPostMapper.selectAssignableDeptIds(List.of(99L))).thenReturn(List.of());
 		SysPostForm form = minimalForm(99L, "P1", "开发");
@@ -201,22 +204,6 @@ class SysPostServiceImplTest {
 		assertThatThrownBy(executable).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.DATA_UNAVAILABLE);
-	}
-
-	@Test
-	@DisplayName("新增：父级停用导致子级不可挂载时 POST_DEPT_NOT_FOUND")
-	void createThrowsWhenAncestorDeptDisabled() {
-		// 子部门自身可启用，但祖先停用后 selectAssignableDeptIds 为空
-		when(sysPostMapper.selectAssignableDeptIds(List.of(100L))).thenReturn(List.of());
-		SysPostForm form = minimalForm(100L, "P2", "子岗");
-
-		ThrowingCallable executable = () -> sysPostService.createBatchFromImport(List.of(form));
-		assertThatThrownBy(executable).isInstanceOf(SystemBusinessException.class)
-			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
-			.isEqualTo(SystemCommonResultCode.DATA_UNAVAILABLE);
-
-		verify(sysPostMapper, atLeastOnce()).selectAssignableDeptIds(List.of(100L));
-		verify(sysPostService, never()).saveBatch(anyList(), anyInt());
 	}
 
 	@Test
@@ -269,12 +256,11 @@ class SysPostServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("更新：仅改名称时不提交授权失效")
-	void updateWithoutStatusChangeSkipsInvalidation() {
+	@DisplayName("更新：编制部门未变时不校验可挂载性且不提交授权失效")
+	void updateWithoutDeptChangeSkipsAssignableAndInvalidation() {
 		Long postId = 10L;
 		SysPostEntity existing = activePost(postId, 1L, "DEV");
 		when(sysPostMapper.selectById(postId)).thenReturn(existing);
-		when(sysPostMapper.selectAssignableDeptIds(List.of(1L))).thenReturn(List.of(1L));
 		when(sysPostMapper.selectCount(any())).thenReturn(0L);
 		when(sysPostMapper.updateById(any(SysPostEntity.class))).thenReturn(1);
 
@@ -283,12 +269,13 @@ class SysPostServiceImplTest {
 
 		sysPostService.update(form);
 
+		verify(sysPostMapper, never()).selectAssignableDeptIds(any());
 		verify(sysPostMapper).updateById(argThat((SysPostEntity e) -> "研发岗".equals(e.getPostName())));
 		verify(postInvalidationTrigger, never()).submitByPostIds(any(), any());
 	}
 
 	@Test
-	@DisplayName("更新：仅改所属部门时不提交授权失效")
+	@DisplayName("更新：改挂编制部门时校验目标部门可挂载且不提交授权失效")
 	void updateDeptChangeWithoutStatusSkipsInvalidation() {
 		Long postId = 12L;
 		SysPostEntity existing = activePost(postId, 1L, "DEV");
@@ -308,12 +295,30 @@ class SysPostServiceImplTest {
 	}
 
 	@Test
+	@DisplayName("更新：改挂到停用或不可用部门时 DATA_UNAVAILABLE")
+	void updateThrowsWhenNewDeptNotAssignable() {
+		Long postId = 13L;
+		SysPostEntity existing = activePost(postId, 1L, "DEV");
+		when(sysPostMapper.selectById(postId)).thenReturn(existing);
+		when(sysPostMapper.selectAssignableDeptIds(List.of(99L))).thenReturn(List.of());
+
+		SysPostForm form = minimalForm(postId, 99L, "DEV", "原名");
+		form.setStatus(true);
+
+		assertThatThrownBy(() -> sysPostService.update(form)).isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemCommonResultCode.DATA_UNAVAILABLE);
+
+		verify(sysPostMapper, never()).updateById(any(SysPostEntity.class));
+		verify(postInvalidationTrigger, never()).submitByPostIds(any(), any());
+	}
+
+	@Test
 	@DisplayName("更新：状态变更时提交 USER_POST 授权失效")
 	void updateWithStatusChangeSubmitsInvalidation() {
 		Long postId = 11L;
 		SysPostEntity existing = activePost(postId, 2L, "OPS");
 		when(sysPostMapper.selectById(postId)).thenReturn(existing);
-		when(sysPostMapper.selectAssignableDeptIds(List.of(2L))).thenReturn(List.of(2L));
 		when(sysPostMapper.selectCount(any())).thenReturn(0L);
 		when(sysPostMapper.updateById(any(SysPostEntity.class))).thenReturn(1);
 
@@ -322,6 +327,7 @@ class SysPostServiceImplTest {
 
 		sysPostService.update(form);
 
+		verify(sysPostMapper, never()).selectAssignableDeptIds(any());
 		verify(sysPostMapper).updateById(argThat((SysPostEntity e) -> Long.valueOf(2L).equals(e.getDeptId())
 				&& e.getStatus() != null && !e.getStatus()));
 		verify(postInvalidationTrigger).submitByPostIds(List.of(postId), "update");

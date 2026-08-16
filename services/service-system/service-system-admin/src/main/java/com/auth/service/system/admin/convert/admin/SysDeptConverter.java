@@ -30,6 +30,7 @@ public interface SysDeptConverter {
 	 */
 	@Mapping(target = "createdByName", ignore = true)
 	@Mapping(target = "updatedByName", ignore = true)
+	@Mapping(target = "effective", ignore = true)
 	SysDeptListVO toListVo(SysDeptEntity entity);
 
 	/**
@@ -48,6 +49,13 @@ public interface SysDeptConverter {
 	@Mapping(target = "updatedByName", ignore = true)
 	@BeanMapping(ignoreUnmappedSourceProperties = { "parentDeptCode", "parentDeptName" })
 	SysDeptListVO toListVoFromPageRow(SysDeptPageRowPO row);
+
+	/**
+	 * 分页/列表 PO → 列表行 VO 批量
+	 * @param rows 持久层投影列表
+	 * @return 列表 VO
+	 */
+	List<SysDeptListVO> toListVoFromPageRowList(List<SysDeptPageRowPO> rows);
 
 	/**
 	 * 新增表单 → 实体
@@ -83,6 +91,7 @@ public interface SysDeptConverter {
 	 */
 	@Mapping(target = "createdByName", ignore = true)
 	@Mapping(target = "updatedByName", ignore = true)
+	@Mapping(target = "effective", ignore = true)
 	@Mapping(target = "boundUserCount", ignore = true)
 	@Mapping(target = "boundPostCount", ignore = true)
 	@Mapping(target = "boundRoleCount", ignore = true)

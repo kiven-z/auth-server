@@ -10,7 +10,7 @@ import java.nio.charset.StandardCharsets;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * SQL 契约：岗位可挂载部门须校验闭包路径上祖先启用
+ * SQL 契约：岗位可挂载部门须计算有效
  */
 @DisplayName("SysPostMapper selectAssignableDeptIds SQL 契约")
 class SysPostMapperAssignableDeptSqlContractTest {
@@ -24,8 +24,8 @@ class SysPostMapperAssignableDeptSqlContractTest {
 	}
 
 	@Test
-	@DisplayName("可挂载部门：本节点启用且排除路径上停用祖先")
-	void selectAssignableDeptIdsChecksSelfAndAncestors() throws IOException {
+	@DisplayName("可挂载部门：打 v_dept_effective，不按本节点 status 单独过滤")
+	void selectAssignableDeptIdsUsesDeptEffectiveView() throws IOException {
 		String xml = readClasspathText();
 
 		int selectStart = xml.indexOf("<select id=\"selectAssignableDeptIds\"");
@@ -34,13 +34,10 @@ class SysPostMapperAssignableDeptSqlContractTest {
 		String selectBlock = xml.substring(selectStart, selectEnd);
 
 		assertThat(selectBlock).contains("selectAssignableDeptIds")
-			.contains("d.id")
-			.contains("dept_closure")
-			.contains("dc.depth")
-			.contains("dc.descendant_id = d.id")
-			.contains("d.status = 1")
-			.contains("NOT EXISTS")
-			.contains("foreach");
+			.contains("v_dept_effective")
+			.contains("foreach")
+			.doesNotContain("sys_dept")
+			.doesNotContain("d.status = 1");
 	}
 
 }

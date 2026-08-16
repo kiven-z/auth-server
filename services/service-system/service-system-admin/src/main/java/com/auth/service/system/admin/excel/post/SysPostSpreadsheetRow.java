@@ -29,19 +29,22 @@ public class SysPostSpreadsheetRow {
 	@ExcelProperty(value = "状态", index = 4)
 	private String statusLabel;
 
-	@ExcelProperty(value = "显示顺序", index = 5)
+	@ExcelProperty(value = "计算有效", index = 5)
+	private String effectiveLabel;
+
+	@ExcelProperty(value = "显示顺序", index = 6)
 	private Integer orderNum;
 
-	@ExcelProperty(value = "备注", index = 6)
+	@ExcelProperty(value = "备注", index = 7)
 	private String remark;
 
-	@ExcelProperty(value = "创建时间", index = 7)
+	@ExcelProperty(value = "创建时间", index = 8)
 	private String createdAtText;
 
-	@ExcelProperty(value = "更新时间", index = 8)
+	@ExcelProperty(value = "更新时间", index = 9)
 	private String updatedAtText;
 
-	@ExcelProperty(value = "主键ID", index = 9, converter = LongIdExcelConverter.class)
+	@ExcelProperty(value = "主键ID", index = 10, converter = LongIdExcelConverter.class)
 	private Long id;
 
 }

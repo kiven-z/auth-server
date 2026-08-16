@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.auth.service.system.admin.mapper.admin.post.SysPostMapper">
 
-    <!-- 岗位分页列表：关联部门名称 -->
+    <!-- 岗位分页列表：关联部门名称；含计算有效 -->
     <select id="selectListByPage" resultType="com.auth.service.system.admin.model.po.post.SysPostPageRowPO">
         SELECT
         p.id,
@@ -12,6 +12,7 @@
         p.post_code,
         p.post_name,
         p.status,
+        (vpe.id IS NOT NULL) AS effective,
         p.order_num,
         p.remark,
         p.created_at,
@@ -21,6 +22,7 @@
         FROM
         sys_post p
         INNER JOIN sys_dept d ON p.dept_id = d.id
+        LEFT JOIN v_post_effective vpe ON vpe.id = p.id
         <where>
             <if test="query.postCode != null and query.postCode != ''">
                 AND p.post_code LIKE CONCAT('%', #{query.postCode}, '%')
@@ -39,7 +41,7 @@
         ${orderBySql}
     </select>
 
-    <!-- 岗位远程搜索：编码/名称前缀匹配（可走索引），无关键字时返回默认条数 -->
+    <!-- 岗位远程搜索：启用时仅计算有效岗位；停用打基表 -->
     <select id="search" resultType="com.auth.service.system.admin.model.po.post.SysPostSearchItemPO">
         SELECT
         p.id,
@@ -52,7 +54,17 @@
         sys_post p
         INNER JOIN sys_dept d ON p.dept_id = d.id
         <where>
-            <if test="status != null">
+            <if test="status != null and status">
+                AND EXISTS (
+                SELECT
+                1
+                FROM
+                v_post_effective vpe
+                WHERE
+                vpe.id = p.id
+                )
+            </if>
+            <if test="status != null and !status">
                 AND p.status = #{status}
             </if>
             <if test="keyword != null and keyword != ''">
@@ -63,35 +75,23 @@
             </if>
         </where>
         ORDER BY
-        p.order_num ASC,
+        p.order_num,
         p.id DESC
         LIMIT
         #{limit}
     </select>
 
-    <!-- 可挂载岗位（批量）：本部门启用，且 dept_closure 路径上无停用祖先 -->
+    <!-- 可挂载岗位（批量）：目标部门须计算有效 -->
     <select id="selectAssignableDeptIds" resultType="long">
         SELECT
         d.id
         FROM
-        sys_dept d
+        v_dept_effective d
         WHERE
         d.id IN
         <foreach collection="deptIds" item="deptId" open="(" separator="," close=")">
             #{deptId}
         </foreach>
-        AND d.status = 1
-        AND NOT EXISTS (
-        SELECT
-        1
-        FROM
-        dept_closure dc
-        INNER JOIN sys_dept a ON a.id = dc.ancestor_id
-        WHERE
-        dc.descendant_id = d.id
-        AND dc.depth &gt; 0
-        AND a.status = 0
-        )
     </select>
 
     <!-- 按 (部门 ID, 岗位编码) 批量查询已存在的岗位键 -->
@@ -105,7 +105,10 @@
         WHERE
         (
         <foreach collection="pairs" item="pair" separator=" OR ">
-            (p.dept_id = #{pair.deptId} AND p.post_code = #{pair.postCode})
+            (
+            p.dept_id = #{pair.deptId}
+            AND p.post_code = #{pair.postCode}
+            )
         </foreach>
         )
     </select>

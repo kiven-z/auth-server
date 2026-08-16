@@ -8,6 +8,7 @@ import com.auth.service.system.admin.mapper.authorization.GrantBindingQueryMappe
 import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.form.dept.SysDeptForm;
 import com.auth.service.system.admin.model.form.dept.SysDeptMoveForm;
+import com.auth.service.system.admin.model.po.dept.SysDeptPageRowPO;
 import com.auth.service.system.admin.model.query.dept.SysDeptListQuery;
 import com.auth.service.system.admin.model.vo.dept.SysDeptListVO;
 import com.auth.service.system.admin.support.dept.DeptClosureMaintainer;
@@ -115,7 +116,7 @@ class SysDeptServiceImplTest {
 	void createBatchFromImportSkipsWhenEmpty() {
 		sysDeptService.createBatchFromImport(List.of());
 
-		verify(deptReferenceChecker, never()).requireAbsentDeptCodes(anyList());
+		verify(sysDeptMapper, never()).selectActiveByDeptCodes(anyList());
 		verify(sysDeptService, never()).saveBatch(anyList(), anyInt());
 	}
 
@@ -123,12 +124,12 @@ class SysDeptServiceImplTest {
 	@DisplayName("批量新增部门：校验通过后批量落库并维护闭包")
 	void createBatchFromImportPersistsEntitiesAndInsertsClosure() {
 		SysDeptForm form = minimalForm(null, 0L, "RD", "研发部", true);
-		when(deptReferenceChecker.normalizeAndRequireActiveParent(0L)).thenReturn(0L);
+		when(sysDeptMapper.selectActiveByDeptCodes(List.of("RD"))).thenReturn(List.of());
 
 		sysDeptService.createBatchFromImport(List.of(form));
 
-		verify(deptReferenceChecker).requireAbsentDeptCodes(List.of("RD"));
-		verify(deptReferenceChecker).normalizeAndRequireActiveParent(0L);
+		verify(sysDeptMapper).selectActiveByDeptCodes(List.of("RD"));
+		verify(sysDeptMapper, never()).countById(anyLong());
 		verify(sysDeptService).saveBatch(anyList(), eq(BatchSizes.SIZE_500));
 		verify(deptClosureMaintainer)
 			.insertNodes(argThat(nodes -> nodes.size() == 1 && nodes.get(0).getParentId() == 0L));
@@ -138,9 +139,8 @@ class SysDeptServiceImplTest {
 	@DisplayName("批量新增部门：编码已存在时抛出 DATA_CODE_DUPLICATE")
 	void createBatchFromImportThrowsWhenDeptCodeExists() {
 		SysDeptForm form = minimalForm(null, 0L, "RD", "研发部", true);
-		doThrow(new SystemBusinessException(SystemCommonResultCode.DATA_CODE_DUPLICATE, "RD"))
-			.when(deptReferenceChecker)
-			.requireAbsentDeptCodes(List.of("RD"));
+		SysDeptEntity existing = activeDept(1L, "RD");
+		when(sysDeptMapper.selectActiveByDeptCodes(List.of("RD"))).thenReturn(List.of(existing));
 
 		ThrowingCallable executable = () -> sysDeptService.createBatchFromImport(List.of(form));
 		assertThatThrownBy(executable).isInstanceOf(SystemBusinessException.class)
@@ -152,14 +152,35 @@ class SysDeptServiceImplTest {
 	}
 
 	@Test
+	@DisplayName("批量新增部门：请求内编码重复时抛出 DATA_CODE_DUPLICATE")
+	void createBatchFromImportThrowsWhenDeptCodesDuplicatedInRequest() {
+		SysDeptForm first = minimalForm(null, 0L, "RD", "研发部", true);
+		SysDeptForm second = minimalForm(null, 0L, "RD", "另一研发", true);
+
+		ThrowingCallable executable = () -> sysDeptService.createBatchFromImport(List.of(first, second));
+		assertThatThrownBy(executable).isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemCommonResultCode.DATA_CODE_DUPLICATE);
+
+		verify(sysDeptMapper, never()).selectActiveByDeptCodes(any());
+		verify(sysDeptService, never()).saveBatch(anyList(), anyInt());
+	}
+
+	@Test
 	@DisplayName("扁平列表：无关键词时查询全量部门")
 	void listFlatWithoutKeywordQueriesAllActiveDepts() {
-		SysDeptEntity entity = activeDept(1L, "D001");
-		when(sysDeptMapper.selectListByQuery(any(SysDeptListQuery.class))).thenReturn(List.of(entity));
+		SysDeptPageRowPO row = new SysDeptPageRowPO();
+		row.setId(1L);
+		row.setDeptCode("D001");
+		row.setDeptName("研发部");
+		row.setStatus(true);
+		row.setEffective(true);
+		when(sysDeptMapper.selectListByQuery(any(SysDeptListQuery.class))).thenReturn(List.of(row));
 
 		List<SysDeptListVO> result = sysDeptQueryService.listFlat(new SysDeptListQuery());
 
 		assertEquals(1, result.size());
+		assertEquals(Boolean.TRUE, result.get(0).getEffective());
 		verify(sysDeptMapper).selectListByQuery(argThat((SysDeptListQuery q) -> q.getKeyword() == null));
 		verify(auditUserDisplayService).enrichAuditUsernames(anyList(), isNull(), isNull());
 	}
@@ -182,7 +203,6 @@ class SysDeptServiceImplTest {
 		Long deptId = 1L;
 		SysDeptEntity existing = activeDept(deptId, "D001");
 		when(deptReferenceChecker.getExistingActive(deptId)).thenReturn(existing);
-		when(deptReferenceChecker.normalizeAndRequireActiveParent(0L)).thenReturn(0L);
 		when(sysDeptMapper.updateById(any(SysDeptEntity.class))).thenReturn(1);
 
 		SysDeptForm form = minimalForm(deptId, 0L, "D001", "新部门名", true);
@@ -199,7 +219,6 @@ class SysDeptServiceImplTest {
 		Long deptId = 2L;
 		SysDeptEntity existing = activeDept(deptId, "D002");
 		when(deptReferenceChecker.getExistingActive(deptId)).thenReturn(existing);
-		when(deptReferenceChecker.normalizeAndRequireActiveParent(0L)).thenReturn(0L);
 		when(sysDeptMapper.updateById(any(SysDeptEntity.class))).thenReturn(1);
 
 		SysDeptForm form = minimalForm(deptId, 0L, "D002", "原部门", false);
@@ -216,7 +235,7 @@ class SysDeptServiceImplTest {
 		Long deptId = 3L;
 		SysDeptEntity existing = activeDept(deptId, "D003");
 		when(deptReferenceChecker.getExistingActive(deptId)).thenReturn(existing);
-		when(deptReferenceChecker.normalizeAndRequireActiveParent(10L)).thenReturn(10L);
+		when(sysDeptMapper.countById(10L)).thenReturn(1);
 		when(sysDeptMapper.countDescendantRelation(deptId, 10L)).thenReturn(0L);
 		when(sysDeptMapper.updateById(any(SysDeptEntity.class))).thenReturn(1);
 
@@ -234,7 +253,6 @@ class SysDeptServiceImplTest {
 		Long deptId = 6L;
 		SysDeptEntity existing = activeDept(deptId, "D006");
 		when(deptReferenceChecker.getExistingActive(deptId)).thenReturn(existing);
-		when(deptReferenceChecker.normalizeAndRequireActiveParent(0L)).thenReturn(0L);
 
 		SysDeptMoveForm form = new SysDeptMoveForm();
 		form.setId(deptId);
@@ -253,7 +271,7 @@ class SysDeptServiceImplTest {
 		Long deptId = 7L;
 		SysDeptEntity existing = activeDept(deptId, "D007");
 		when(deptReferenceChecker.getExistingActive(deptId)).thenReturn(existing);
-		when(deptReferenceChecker.normalizeAndRequireActiveParent(12L)).thenReturn(12L);
+		when(sysDeptMapper.countById(12L)).thenReturn(1);
 		when(sysDeptMapper.countDescendantRelation(deptId, 12L)).thenReturn(0L);
 		when(sysDeptMapper.updateById(any(SysDeptEntity.class))).thenReturn(1);
 
@@ -265,6 +283,25 @@ class SysDeptServiceImplTest {
 		verify(sysDeptMapper).updateById(argThat((SysDeptEntity e) -> Long.valueOf(12L).equals(e.getParentId())));
 		verify(deptClosureMaintainer).moveNode(deptId, 12L);
 		verify(deptInvalidationTrigger).submitByDeptIds(List.of(deptId), "move");
+	}
+
+	@Test
+	@DisplayName("移动部门：父部门不存在时抛出 TREE_PARENT_UNAVAILABLE")
+	void moveThrowsWhenParentMissing() {
+		Long deptId = 8L;
+		SysDeptEntity existing = activeDept(deptId, "D008");
+		when(deptReferenceChecker.getExistingActive(deptId)).thenReturn(existing);
+		when(sysDeptMapper.countById(99L)).thenReturn(0);
+
+		SysDeptMoveForm form = new SysDeptMoveForm();
+		form.setId(deptId);
+		form.setParentId(99L);
+		assertThatThrownBy(() -> sysDeptService.move(form)).isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemCommonResultCode.TREE_PARENT_UNAVAILABLE);
+
+		verify(sysDeptMapper, never()).updateById(any(SysDeptEntity.class));
+		verify(deptClosureMaintainer, never()).moveNode(anyLong(), anyLong());
 	}
 
 	@Test

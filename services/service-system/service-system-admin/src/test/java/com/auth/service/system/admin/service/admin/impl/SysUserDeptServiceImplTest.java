@@ -215,12 +215,11 @@ class SysUserDeptServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("创建关联：停用部门不可新增任职")
+	@DisplayName("创建关联：停用或传播禁用部门不可新增任职")
 	void createRejectsDisabledDept() {
 		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
-		SysDeptEntity disabled = activeDept();
-		disabled.setStatus(false);
-		when(sysDeptMapper.selectById(DEPT_ID)).thenReturn(disabled);
+		when(sysDeptMapper.selectById(DEPT_ID)).thenReturn(activeDept());
+		when(sysDeptMapper.countEffectiveById(DEPT_ID)).thenReturn(0L);
 		UserDeptAssignForm form = createForm(false, null);
 
 		assertThatThrownBy(() -> sysUserDeptService.create(USER_ID, form)).isInstanceOf(SystemBusinessException.class)
@@ -234,6 +233,7 @@ class SysUserDeptServiceImplTest {
 	private void stubCreatePrerequisites() {
 		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
 		when(sysDeptMapper.selectById(DEPT_ID)).thenReturn(activeDept());
+		when(sysDeptMapper.countEffectiveById(DEPT_ID)).thenReturn(1L);
 	}
 
 	@Test
@@ -275,6 +275,7 @@ class SysUserDeptServiceImplTest {
 		SysDeptEntity otherDept = activeDept();
 		otherDept.setId(OTHER_DEPT_ID);
 		when(sysDeptMapper.selectById(OTHER_DEPT_ID)).thenReturn(otherDept);
+		when(sysDeptMapper.countEffectiveById(OTHER_DEPT_ID)).thenReturn(1L);
 		UserDeptEntity conflict = new UserDeptEntity();
 		conflict.setId(200L);
 		conflict.setUserId(USER_ID);
@@ -292,14 +293,14 @@ class SysUserDeptServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("更新关联：改到停用部门时拒绝")
+	@DisplayName("更新关联：改到停用或传播禁用部门时拒绝")
 	void updateRejectsDisabledDept() {
 		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
 		when(userDeptMapper.selectByIdAndUserId(RELATION_ID, USER_ID)).thenReturn(existingRelation());
-		SysDeptEntity disabled = activeDept();
-		disabled.setId(OTHER_DEPT_ID);
-		disabled.setStatus(false);
-		when(sysDeptMapper.selectById(OTHER_DEPT_ID)).thenReturn(disabled);
+		SysDeptEntity otherDept = activeDept();
+		otherDept.setId(OTHER_DEPT_ID);
+		when(sysDeptMapper.selectById(OTHER_DEPT_ID)).thenReturn(otherDept);
+		when(sysDeptMapper.countEffectiveById(OTHER_DEPT_ID)).thenReturn(0L);
 		UserDeptAssignForm form = createForm(false, null);
 		form.setDeptId(OTHER_DEPT_ID);
 

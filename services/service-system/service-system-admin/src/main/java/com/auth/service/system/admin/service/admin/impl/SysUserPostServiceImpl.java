@@ -4,7 +4,6 @@ import com.auth.common.data.model.PageResponse;
 import com.auth.service.system.admin.convert.admin.user.UserPostConverter;
 import com.auth.service.system.admin.exception.SystemAdminResultCode;
 import com.auth.service.system.admin.mapper.admin.user.UserPostMapper;
-import com.auth.service.system.admin.model.entity.SysPostEntity;
 import com.auth.service.system.admin.model.entity.UserPostEntity;
 import com.auth.service.system.admin.model.form.user.UserPostAssignForm;
 import com.auth.service.system.admin.model.form.user.UserPostRelationUpdateForm;
@@ -73,12 +72,7 @@ public class SysUserPostServiceImpl extends ServiceImpl<UserPostMapper, UserPost
 	public void create(Long userId, UserPostAssignForm form) {
 		userReferenceChecker.getExistingActive(userId);
 		userReferenceChecker.requireOperable(List.of(userId));
-
-		SysPostEntity post = postReferenceChecker.getExistingActive(form.getPostId());
-		if (post.getStatus() != null && !post.getStatus()) {
-			log.warn("post unavailable: id={}", form.getPostId());
-			throw new SystemBusinessException(SystemCommonResultCode.DATA_UNAVAILABLE);
-		}
+		postReferenceChecker.requireEffective(form.getPostId());
 
 		if (baseMapper.countByUserIdAndPostId(userId, form.getPostId()) > 0) {
 			log.warn("User post relation duplicate: userId={}, postId={}", userId, form.getPostId());
@@ -113,6 +107,7 @@ public class SysUserPostServiceImpl extends ServiceImpl<UserPostMapper, UserPost
 
 		Boolean isPrimary = form.getIsPrimary();
 		if (isPrimary != null && isPrimary) {
+			postReferenceChecker.requireEffective(existing.getPostId());
 			baseMapper.demotePrimaryByUserId(userId);
 		}
 

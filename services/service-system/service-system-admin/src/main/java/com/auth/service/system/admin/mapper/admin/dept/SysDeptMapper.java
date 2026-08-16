@@ -23,11 +23,11 @@ import java.util.List;
 public interface SysDeptMapper extends BaseMapper<SysDeptEntity> {
 
 	/**
-	 * 条件查询全部部门（扁平）
+	 * 条件查询全部部门（扁平，含计算有效）
 	 * @param query 查询条件
 	 * @return 部门列表
 	 */
-	List<SysDeptEntity> selectListByQuery(@Param("query") SysDeptListQuery query);
+	List<SysDeptPageRowPO> selectListByQuery(@Param("query") SysDeptListQuery query);
 
 	/**
 	 * 分页查询部门
@@ -39,12 +39,20 @@ public interface SysDeptMapper extends BaseMapper<SysDeptEntity> {
 			@Param("query") SysDeptPageQuery query);
 
 	/**
-	 * 部门是否存在
+	 * 部门是否存在（不按启停过滤）
 	 * @param deptId 部门 ID
 	 * @return 匹配行数
 	 */
 	@Select("SELECT COUNT(1) FROM sys_dept WHERE id = #{deptId}")
-	int countActiveById(@Param("deptId") Long deptId);
+	int countById(@Param("deptId") Long deptId);
+
+	/**
+	 * 部门是否计算有效（本节点及全部祖先均启用）
+	 * @param deptId 部门 ID
+	 * @return 匹配行数
+	 */
+	@Select("SELECT COUNT(1) FROM v_dept_effective WHERE id = #{deptId}")
+	long countEffectiveById(@Param("deptId") Long deptId);
 
 	/**
 	 * 直接子部门数量

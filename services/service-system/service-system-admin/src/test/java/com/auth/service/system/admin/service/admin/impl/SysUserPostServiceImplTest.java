@@ -131,6 +131,8 @@ class SysUserPostServiceImplTest {
 		row.setPostId(POST_ID);
 		row.setPostCode("DEV");
 		row.setPostName("开发工程师");
+		row.setPostStatus(true);
+		row.setPostEffective(false);
 		row.setIsPrimary(true);
 		row.setRemark("核心岗位");
 		row.setCreatedAt(now);
@@ -147,6 +149,8 @@ class SysUserPostServiceImplTest {
 		assertThat(result.getList()).hasSize(1);
 		UserPostPageVO vo = result.getList().get(0);
 		assertThat(vo.getPostCode()).isEqualTo("DEV");
+		assertThat(vo.getPostStatus()).isTrue();
+		assertThat(vo.getPostEffective()).isFalse();
 		assertThat(vo.getIsPrimary()).isTrue();
 		verify(auditUserDisplayService).enrichAuditUsernames(any(IPage.class), isNull(), isNull());
 	}
@@ -198,12 +202,11 @@ class SysUserPostServiceImplTest {
 	}
 
 	@Test
-	@DisplayName("创建关联：停用岗位不可新增任职")
-	void createRejectsDisabledPost() {
+	@DisplayName("创建关联：计算无效岗位不可新增任职")
+	void createRejectsIneffectivePost() {
 		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
-		SysPostEntity disabled = activePost();
-		disabled.setStatus(false);
-		when(sysPostMapper.selectById(POST_ID)).thenReturn(disabled);
+		when(sysPostMapper.selectById(POST_ID)).thenReturn(activePost());
+		when(sysPostMapper.countEffectiveById(POST_ID)).thenReturn(0L);
 		UserPostAssignForm form = createForm(false, null);
 
 		assertThatThrownBy(() -> sysUserPostService.create(USER_ID, form)).isInstanceOf(SystemBusinessException.class)
@@ -231,6 +234,51 @@ class SysUserPostServiceImplTest {
 		assertThat(updated.getPostId()).isEqualTo(POST_ID);
 		assertThat(updated.getRemark()).isEqualTo("调整");
 		verify(userAuthorizationInvalidationTrigger).submitByUserIds(List.of(USER_ID), "update-post");
+		verify(sysPostMapper, never()).countEffectiveById(any());
+	}
+
+	@Test
+	@DisplayName("更新关联：计算无效岗位不可设为主岗")
+	void updateRejectsPrimaryWhenPostNotEffective() {
+		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
+		UserPostEntity existing = new UserPostEntity();
+		existing.setId(RELATION_ID);
+		existing.setUserId(USER_ID);
+		existing.setPostId(POST_ID);
+		when(userPostMapper.selectByIdAndUserId(RELATION_ID, USER_ID)).thenReturn(existing);
+		when(sysPostMapper.selectById(POST_ID)).thenReturn(activePost());
+		when(sysPostMapper.countEffectiveById(POST_ID)).thenReturn(0L);
+		UserPostRelationUpdateForm form = updateForm(null);
+		form.setIsPrimary(true);
+
+		assertThatThrownBy(() -> sysUserPostService.update(USER_ID, RELATION_ID, form))
+			.isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemCommonResultCode.DATA_UNAVAILABLE);
+
+		verify(userPostMapper, never()).demotePrimaryByUserId(USER_ID);
+		verify(userPostMapper, never()).updateById(any(UserPostEntity.class));
+	}
+
+	@Test
+	@DisplayName("更新关联：计算有效岗位可设为主岗")
+	void updatePrimaryDemotesWhenPostEffective() {
+		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
+		UserPostEntity existing = new UserPostEntity();
+		existing.setId(RELATION_ID);
+		existing.setUserId(USER_ID);
+		existing.setPostId(POST_ID);
+		when(userPostMapper.selectByIdAndUserId(RELATION_ID, USER_ID)).thenReturn(existing);
+		when(sysPostMapper.selectById(POST_ID)).thenReturn(activePost());
+		when(sysPostMapper.countEffectiveById(POST_ID)).thenReturn(1L);
+		when(userPostMapper.updateById(any(UserPostEntity.class))).thenReturn(1);
+		UserPostRelationUpdateForm form = updateForm(null);
+		form.setIsPrimary(true);
+
+		sysUserPostService.update(USER_ID, RELATION_ID, form);
+
+		verify(userPostMapper).demotePrimaryByUserId(USER_ID);
+		verify(userPostMapper).updateById(any(UserPostEntity.class));
 	}
 
 	@Test
@@ -284,6 +332,7 @@ class SysUserPostServiceImplTest {
 	private void stubCreatePrerequisites() {
 		when(sysUserMapper.selectById(USER_ID)).thenReturn(activeUser());
 		when(sysPostMapper.selectById(POST_ID)).thenReturn(activePost());
+		when(sysPostMapper.countEffectiveById(POST_ID)).thenReturn(1L);
 	}
 
 }

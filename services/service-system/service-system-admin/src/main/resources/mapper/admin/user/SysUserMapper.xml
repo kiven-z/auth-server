@@ -44,7 +44,7 @@
                 SELECT
                 1
                 FROM
-                v_user_dept_effective ud
+                user_dept ud
                 INNER JOIN dept_closure dc ON ud.dept_id = dc.descendant_id
                 WHERE
                 ud.user_id = u.id

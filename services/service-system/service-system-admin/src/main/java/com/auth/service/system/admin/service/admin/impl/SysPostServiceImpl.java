@@ -98,6 +98,7 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity
 		SysPostEntity entity = postReferenceChecker.getExistingActive(id);
 
 		SysPostDetailVO detail = SysPostConverter.INSTANCE.toDetailVo(entity);
+		detail.setEffective(baseMapper.countEffectiveById(id) > 0);
 		DeptReferencePO boundDept = baseMapper.selectBoundDeptByPostId(id);
 		detail.setBoundDept(ReferenceConverter.INSTANCE.toDeptReference(boundDept));
 		detail.setBoundUserCount(postRelationQueryMapper.countUsersByPostId(id, null));
@@ -132,10 +133,12 @@ public class SysPostServiceImpl extends ServiceImpl<SysPostMapper, SysPostEntity
 		SysPostEntity existing = postReferenceChecker.getExistingActive(id);
 
 		Long deptId = form.getDeptId();
-		List<Long> assignableDeptIds = baseMapper.selectAssignableDeptIds(List.of(deptId));
-		if (assignableDeptIds.isEmpty()) {
-			log.warn("department unavailable: id={}", deptId);
-			throw new SystemBusinessException(SystemCommonResultCode.DATA_UNAVAILABLE);
+		if (!Objects.equals(existing.getDeptId(), deptId)) {
+			List<Long> assignableDeptIds = baseMapper.selectAssignableDeptIds(List.of(deptId));
+			if (assignableDeptIds.isEmpty()) {
+				log.warn("department unavailable: id={}", deptId);
+				throw new SystemBusinessException(SystemCommonResultCode.DATA_UNAVAILABLE);
+			}
 		}
 
 		String postCode = form.getPostCode();

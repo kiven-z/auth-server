@@ -1,11 +1,12 @@
 package com.auth.service.system.admin.service.admin.impl;
 
 import com.auth.module.platform.persistence.model.UserEntity;
+import com.auth.service.system.admin.mapper.admin.dept.SysDeptMapper;
 import com.auth.service.system.admin.mapper.admin.user.UserScopeMapper;
+import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.entity.UserScopeEntity;
 import com.auth.service.system.admin.model.form.scope.SysDataScopeForm;
 import com.auth.service.system.admin.model.vo.user.SysUserScopeVO;
-import com.auth.service.system.admin.support.dept.DeptReferenceChecker;
 import com.auth.service.system.admin.support.scope.DataScopeFormSupport;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
 import com.auth.service.system.authorization.dispatch.trigger.UserAuthorizationInvalidationTrigger;
@@ -41,7 +42,7 @@ class SysUserScopeServiceImplTest {
 	private UserReferenceChecker userReferenceChecker;
 
 	@Mock
-	private DeptReferenceChecker deptReferenceChecker;
+	private SysDeptMapper sysDeptMapper;
 
 	@Mock
 	private UserAuthorizationInvalidationTrigger userInvalidationTrigger;
@@ -59,9 +60,15 @@ class SysUserScopeServiceImplTest {
 		return form;
 	}
 
+	private static SysDeptEntity dept(Long id) {
+		SysDeptEntity entity = new SysDeptEntity();
+		entity.setId(id);
+		return entity;
+	}
+
 	@BeforeEach
 	void setUp() throws Exception {
-		DataScopeFormSupport dataScopeFormSupport = new DataScopeFormSupport(deptReferenceChecker);
+		DataScopeFormSupport dataScopeFormSupport = new DataScopeFormSupport(sysDeptMapper);
 		sysUserScopeService = spy(
 				new SysUserScopeServiceImpl(userReferenceChecker, dataScopeFormSupport, userInvalidationTrigger));
 		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
@@ -163,9 +170,10 @@ class SysUserScopeServiceImplTest {
 		doReturn(true).when(sysUserScopeService).saveOrUpdate(any(UserScopeEntity.class));
 
 		SysDataScopeForm form = form("DEPT_AND_CHILD", List.of(110L, 110L, 120L), "华北");
+		when(sysDeptMapper.selectByIds(List.of(110L, 120L))).thenReturn(List.of(dept(110L), dept(120L)));
 		sysUserScopeService.upsert(3L, form);
 
-		verify(deptReferenceChecker).requireExistingDeptIds(List.of(110L, 120L));
+		verify(sysDeptMapper).selectByIds(List.of(110L, 120L));
 		ArgumentCaptor<UserScopeEntity> captor = ArgumentCaptor.forClass(UserScopeEntity.class);
 		verify(sysUserScopeService).saveOrUpdate(captor.capture());
 		assertThat(captor.getValue().getId()).isEqualTo(100L);
@@ -195,15 +203,14 @@ class SysUserScopeServiceImplTest {
 		assertThatThrownBy(() -> sysUserScopeService.upsert(1L, form)).isInstanceOf(SystemBusinessException.class)
 			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
 			.isEqualTo(SystemCommonResultCode.PARAM_REQUIRED);
-		verify(deptReferenceChecker, never()).requireExistingDeptIds(any());
+		verify(sysDeptMapper, never()).selectByIds(any());
 	}
 
 	@Test
 	@DisplayName("upsert：部门 ID 无效时抛出 GRANT_REFERENCE_INVALID")
 	void upsertWhenDeptInvalidShouldThrow() {
 		when(userReferenceChecker.getExistingActive(1L)).thenReturn(new UserEntity());
-		doThrow(new SystemBusinessException(SystemCommonResultCode.GRANT_REFERENCE_INVALID)).when(deptReferenceChecker)
-			.requireExistingDeptIds(List.of(99L));
+		when(sysDeptMapper.selectByIds(List.of(99L))).thenReturn(List.of());
 
 		SysDataScopeForm form = form("DEPT", List.of(99L), null);
 		assertThatThrownBy(() -> sysUserScopeService.upsert(1L, form)).isInstanceOf(SystemBusinessException.class)
@@ -226,7 +233,7 @@ class SysUserScopeServiceImplTest {
 		verify(sysUserScopeService).saveOrUpdate(captor.capture());
 		assertThat(captor.getValue().getScopeType()).isEqualTo("SELF");
 		assertThat(captor.getValue().getScopeDeptIds()).isNull();
-		verify(deptReferenceChecker, never()).requireExistingDeptIds(any());
+		verify(sysDeptMapper, never()).selectByIds(any());
 	}
 
 	@Test

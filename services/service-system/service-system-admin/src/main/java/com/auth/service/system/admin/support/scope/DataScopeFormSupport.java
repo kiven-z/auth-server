@@ -2,14 +2,18 @@ package com.auth.service.system.admin.support.scope;
 
 import cn.hutool.core.collection.CollUtil;
 import com.auth.module.security.contract.api.datascope.DataScopeStorageType;
+import com.auth.service.system.admin.mapper.admin.dept.SysDeptMapper;
+import com.auth.service.system.admin.model.entity.SysDeptEntity;
 import com.auth.service.system.admin.model.form.scope.SysDataScopeForm;
-import com.auth.service.system.admin.support.dept.DeptReferenceChecker;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 数据范围表单解析
@@ -17,10 +21,11 @@ import java.util.List;
  * @author Bunny
  */
 @RequiredArgsConstructor
+@Slf4j
 @Component
 public class DataScopeFormSupport {
 
-	private final DeptReferenceChecker deptReferenceChecker;
+	private final SysDeptMapper sysDeptMapper;
 
 	/**
 	 * 解析范围类型并规范化部门 ID
@@ -50,8 +55,25 @@ public class DataScopeFormSupport {
 			throw new SystemBusinessException(SystemCommonResultCode.PARAM_REQUIRED);
 		}
 		List<Long> distinctIds = rawDeptIds.stream().distinct().toList();
-		deptReferenceChecker.requireExistingDeptIds(distinctIds);
+		requireExistingDeptIds(distinctIds);
 		return distinctIds;
+	}
+
+	/**
+	 * 批量校验部门 ID 均存在（含停用节点）
+	 * @param deptIds 已去重的部门 ID
+	 */
+	private void requireExistingDeptIds(List<Long> deptIds) {
+		List<SysDeptEntity> found = sysDeptMapper.selectByIds(deptIds);
+		Set<Long> foundIds = found.stream().map(SysDeptEntity::getId).collect(Collectors.toSet());
+		if (foundIds.size() != deptIds.size()) {
+			Long invalidId = deptIds.stream()
+				.filter(id -> !foundIds.contains(id))
+				.findFirst()
+				.orElseThrow(() -> new IllegalStateException("dept id mismatch without invalid id"));
+			log.warn("Scope dept reference invalid: id={}", invalidId);
+			throw new SystemBusinessException(SystemCommonResultCode.GRANT_REFERENCE_INVALID);
+		}
 	}
 
 	/**

@@ -16,10 +16,10 @@ import lombok.ToString;
 @ToString
 public class UserAuthorizationSummaryVO {
 
-	@Schema(title = "部门关联数")
+	@Schema(title = "有效任职部门数")
 	private Long deptCount;
 
-	@Schema(title = "岗位关联数")
+	@Schema(title = "有效任职岗位数")
 	private Long postCount;
 
 	@Schema(title = "直连角色数")

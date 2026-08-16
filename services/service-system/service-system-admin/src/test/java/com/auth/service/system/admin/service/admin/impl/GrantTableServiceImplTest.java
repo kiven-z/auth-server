@@ -109,7 +109,7 @@ class GrantTableServiceImplTest {
 	void setUp() throws Exception {
 		PostReferenceChecker postReferenceChecker = new PostReferenceChecker(sysPostMapper);
 		TypedGrantTableActiveSubjectChecker postSubjectChecker = new TypedGrantTableActiveSubjectChecker(
-				GrantTableSubjectType.POST, postReferenceChecker::getExistingActive);
+				GrantTableSubjectType.POST, postReferenceChecker::requireEffective);
 		GrantTableSubjectExistenceVerifier subjectExistenceVerifier = new GrantTableSubjectExistenceVerifier(
 				List.of(postSubjectChecker));
 		grantTableService = spy(new GrantTableServiceImpl(subjectExistenceVerifier, userReferenceChecker,
@@ -118,6 +118,7 @@ class GrantTableServiceImplTest {
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(grantTableService, grantTableMapper);
 		lenient().doReturn(true).when(grantTableService).saveBatch(any(Collection.class));
+		lenient().when(sysPostMapper.countEffectiveById(SUBJECT_ID)).thenReturn(1L);
 	}
 
 	@Test

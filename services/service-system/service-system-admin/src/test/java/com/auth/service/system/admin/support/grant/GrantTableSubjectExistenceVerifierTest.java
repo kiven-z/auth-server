@@ -36,16 +36,17 @@ class GrantTableSubjectExistenceVerifierTest {
 	@BeforeEach
 	void setUp() {
 		TypedGrantTableActiveSubjectChecker postSubjectChecker = new TypedGrantTableActiveSubjectChecker(
-				GrantTableSubjectType.POST, new PostReferenceChecker(sysPostMapper)::getExistingActive);
+				GrantTableSubjectType.POST, new PostReferenceChecker(sysPostMapper)::requireEffective);
 		verifier = new GrantTableSubjectExistenceVerifier(List.of(postSubjectChecker));
 	}
 
 	@Test
-	@DisplayName("已注册主体类型：存在时通过校验")
-	void requireExistingActivePassesWhenSubjectExists() {
+	@DisplayName("已注册主体类型：计算有效时通过校验")
+	void requireExistingActivePassesWhenSubjectEffective() {
 		SysPostEntity entity = new SysPostEntity();
 		entity.setId(SUBJECT_ID);
 		when(sysPostMapper.selectById(SUBJECT_ID)).thenReturn(entity);
+		when(sysPostMapper.countEffectiveById(SUBJECT_ID)).thenReturn(1L);
 
 		assertThatCode(() -> verifier.requireExistingActive(GrantTableSubjectType.POST, SUBJECT_ID))
 			.doesNotThrowAnyException();
@@ -63,6 +64,20 @@ class GrantTableSubjectExistenceVerifierTest {
 	}
 
 	@Test
+	@DisplayName("已注册主体类型：存在但计算无效时抛 DATA_UNAVAILABLE")
+	void requireExistingActiveThrowsWhenSubjectIneffective() {
+		SysPostEntity entity = new SysPostEntity();
+		entity.setId(SUBJECT_ID);
+		when(sysPostMapper.selectById(SUBJECT_ID)).thenReturn(entity);
+		when(sysPostMapper.countEffectiveById(SUBJECT_ID)).thenReturn(0L);
+
+		assertThatThrownBy(() -> verifier.requireExistingActive(GrantTableSubjectType.POST, SUBJECT_ID))
+			.isInstanceOf(SystemBusinessException.class)
+			.extracting(ex -> ((SystemBusinessException) ex).getResultCode())
+			.isEqualTo(SystemCommonResultCode.DATA_UNAVAILABLE);
+	}
+
+	@Test
 	@DisplayName("未注册主体类型：抛 IllegalArgumentException")
 	void requireExistingActiveThrowsForUnregisteredType() {
 		assertThatThrownBy(() -> verifier.requireExistingActive(GrantTableSubjectType.USER, SUBJECT_ID))
@@ -74,7 +89,7 @@ class GrantTableSubjectExistenceVerifierTest {
 	@DisplayName("重复注册同一主体类型：构造时抛 IllegalStateException")
 	void constructorThrowsOnDuplicateSubjectType() {
 		GrantTableActiveSubjectChecker duplicate = new TypedGrantTableActiveSubjectChecker(GrantTableSubjectType.POST,
-				new PostReferenceChecker(sysPostMapper)::getExistingActive);
+				new PostReferenceChecker(sysPostMapper)::requireEffective);
 
 		List<GrantTableActiveSubjectChecker> duplicateCheckers = List.of(duplicate, duplicate);
 		assertThatThrownBy(() -> new GrantTableSubjectExistenceVerifier(duplicateCheckers))

@@ -5,37 +5,40 @@
     <!-- 批量查询用户角色码 -->
     <select id="selectRoleRowsByUserIds"
             resultType="com.auth.service.auth.model.po.authorization.UserGrantCodeRowPO">
-        <include
-                refid="com.auth.service.auth.mapper.AuthorizationGrantForwardFragments.fwdUserSubjectsForFunctionalGrantByUserIds"/>
         SELECT DISTINCT
-        us.user_id AS userId,
-        r.role_code AS code
+            us.user_id AS userId,
+            r.role_code AS code
         FROM
-        grant_table gt
-        JOIN user_subjects us ON gt.subject_type = us.sub_type
-        AND gt.subject_id = us.sub_id
-        JOIN sys_role r ON r.id = gt.role_id
+            v_user_grant_subjects us
+            JOIN grant_table gt ON gt.subject_type = us.sub_type
+            AND gt.subject_id = us.sub_id
+            JOIN sys_role r ON r.id = gt.role_id
         WHERE
-        r.status = 1
+            us.user_id IN
+        <foreach collection="userIds" item="userId" open="(" separator="," close=")">
+            #{userId}
+        </foreach>
+        AND r.status = 1
     </select>
 
     <!-- 批量查询用户权限码 -->
     <select id="selectPermissionRowsByUserIds"
             resultType="com.auth.service.auth.model.po.authorization.UserGrantCodeRowPO">
-        <include
-                refid="com.auth.service.auth.mapper.AuthorizationGrantForwardFragments.fwdUserSubjectsForFunctionalGrantByUserIds"/>
-        ,
-        all_role_ids AS (
+        WITH all_role_ids AS (
         SELECT DISTINCT
         us.user_id AS user_id,
         r.id AS role_id
         FROM
-        grant_table gt
-        JOIN user_subjects us ON gt.subject_type = us.sub_type
+        v_user_grant_subjects us
+        JOIN grant_table gt ON gt.subject_type = us.sub_type
         AND gt.subject_id = us.sub_id
         JOIN sys_role r ON r.id = gt.role_id
         WHERE
-        r.status = 1
+        us.user_id IN
+        <foreach collection="userIds" item="userId" open="(" separator="," close=")">
+            #{userId}
+        </foreach>
+        AND r.status = 1
         )
         SELECT DISTINCT
         ar.user_id AS userId,

@@ -16,7 +16,7 @@ import lombok.ToString;
 @ToString
 public class DeptAuthorizationSummaryVO {
 
-	@Schema(title = "关联用户数")
+	@Schema(title = "关联用户数", description = "含用户已停用")
 	private Long boundUserCount;
 
 	@Schema(title = "下属岗位数")

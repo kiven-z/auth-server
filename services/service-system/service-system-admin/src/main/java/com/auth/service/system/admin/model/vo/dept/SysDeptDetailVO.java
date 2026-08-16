@@ -33,13 +33,16 @@ public class SysDeptDetailVO extends BaseResponse {
 	@Schema(title = "启用状态")
 	private Boolean status;
 
+	@Schema(title = "计算有效", description = "本节点及全部祖先均启用")
+	private Boolean effective;
+
 	@Schema(title = "显示顺序")
 	private Integer orderNum;
 
 	@Schema(title = "备注")
 	private String remark;
 
-	@Schema(title = "关联用户数")
+	@Schema(title = "关联用户数", description = "含用户已停用")
 	private Long boundUserCount;
 
 	@Schema(title = "下属岗位数")
