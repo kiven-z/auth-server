@@ -32,9 +32,14 @@ public class UserPreferenceKeys {
 	public static final String UI_CONFIGURE = "ui.configure";
 
 	/**
+	 * 多标签页快照（跨浏览器恢复）
+	 */
+	public static final String UI_TAGS = "ui.tags";
+
+	/**
 	 * 允许通过个人中心 API 读写的配置键集合
 	 */
-	public static final Set<String> ALLOWED_KEYS = Set.of(UI_LOCALE, UI_LAYOUT, UI_CONFIGURE);
+	public static final Set<String> ALLOWED_KEYS = Set.of(UI_LOCALE, UI_LAYOUT, UI_CONFIGURE, UI_TAGS);
 
 	/**
 	 * 校验 upsert 配置键在白名单内，且配置值为非空 JSON 对象

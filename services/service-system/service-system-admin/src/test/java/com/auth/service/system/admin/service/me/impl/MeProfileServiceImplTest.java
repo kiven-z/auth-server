@@ -6,7 +6,10 @@ import com.auth.service.system.admin.mapper.admin.user.SysUserMapper;
 import com.auth.service.system.admin.mapper.admin.user.UserDeptMapper;
 import com.auth.service.system.admin.model.form.me.MeAvatarUpdateForm;
 import com.auth.service.system.admin.model.form.me.MeProfileUpdateForm;
+import com.auth.service.system.admin.model.po.user.UserDeptProfilePO;
+import com.auth.service.system.admin.model.po.user.UserPostProfilePO;
 import com.auth.service.system.admin.model.po.user.UserPrimaryDeptPO;
+import com.auth.service.system.admin.model.vo.me.MeOrgBindingsVO;
 import com.auth.service.system.admin.model.vo.me.MeProfileVO;
 import com.auth.service.system.admin.support.user.UserAvatarUpdateSupport;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
@@ -233,6 +236,52 @@ class MeProfileServiceImplTest {
 
 		assertThat(profile.getPrimaryDeptId()).isNull();
 		assertThat(profile.getPrimaryDeptName()).isNull();
+	}
+
+	@Test
+	@DisplayName("getMyOrgBindings：返回有效部门与岗位任职")
+	void getMyOrgBindings_returnsDeptsAndPosts() {
+		UserEntity existing = existingUser();
+		UserDeptProfilePO dept = new UserDeptProfilePO();
+		dept.setId(20L);
+		dept.setDeptName("研发部");
+		dept.setDeptCode("RD");
+		dept.setStatus(true);
+		dept.setIsPrimary(true);
+		UserPostProfilePO post = new UserPostProfilePO();
+		post.setId(30L);
+		post.setPostName("后端工程师");
+		post.setPostCode("BE");
+		post.setStatus(true);
+		post.setIsPrimary(false);
+
+		when(userReferenceChecker.getExistingActive(USER_ID)).thenReturn(existing);
+		when(sysUserMapper.selectDeptProfileByUserId(USER_ID)).thenReturn(List.of(dept));
+		when(sysUserMapper.selectPostProfileByUserId(USER_ID)).thenReturn(List.of(post));
+
+		MeOrgBindingsVO bindings = meProfileService.getMyOrgBindings();
+
+		assertThat(bindings.getDepts()).hasSize(1);
+		assertThat(bindings.getDepts().get(0).getId()).isEqualTo(20L);
+		assertThat(bindings.getDepts().get(0).getDeptName()).isEqualTo("研发部");
+		assertThat(bindings.getDepts().get(0).getIsPrimary()).isTrue();
+		assertThat(bindings.getPosts()).hasSize(1);
+		assertThat(bindings.getPosts().get(0).getId()).isEqualTo(30L);
+		assertThat(bindings.getPosts().get(0).getPostName()).isEqualTo("后端工程师");
+		assertThat(bindings.getPosts().get(0).getIsPrimary()).isFalse();
+	}
+
+	@Test
+	@DisplayName("getMyOrgBindings：无任职时返回空列表")
+	void getMyOrgBindings_returnsEmptyListsWhenAbsent() {
+		when(userReferenceChecker.getExistingActive(USER_ID)).thenReturn(existingUser());
+		when(sysUserMapper.selectDeptProfileByUserId(USER_ID)).thenReturn(null);
+		when(sysUserMapper.selectPostProfileByUserId(USER_ID)).thenReturn(null);
+
+		MeOrgBindingsVO bindings = meProfileService.getMyOrgBindings();
+
+		assertThat(bindings.getDepts()).isEmpty();
+		assertThat(bindings.getPosts()).isEmpty();
 	}
 
 	@Test

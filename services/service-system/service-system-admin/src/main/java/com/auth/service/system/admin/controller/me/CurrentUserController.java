@@ -13,6 +13,7 @@ import com.auth.service.system.admin.model.form.me.MeProfileUpdateForm;
 import com.auth.service.system.admin.model.form.user.SysUserChangePasswordForm;
 import com.auth.service.system.admin.model.query.me.MeLoginLogPageQuery;
 import com.auth.service.system.admin.model.vo.me.MeLoginLogPageVO;
+import com.auth.service.system.admin.model.vo.me.MeOrgBindingsVO;
 import com.auth.service.system.admin.model.vo.me.MeProfileVO;
 import com.auth.service.system.admin.model.vo.me.MeUserSessionVO;
 import com.auth.service.system.admin.service.me.MeProfileService;
@@ -55,6 +56,15 @@ public class CurrentUserController {
 	@GetMapping("/profile")
 	public Result<MeProfileVO> getMyProfile() {
 		MeProfileVO data = meProfileService.getMyProfile();
+		return Result.success(data);
+	}
+
+	@OperationLog(targetType = "USER", serviceDomain = AuditServiceDomain.SYSTEM, bizModule = PlatformBizCodes.SYS_USER,
+			operation = OperationLogKind.QUERY)
+	@Operation(summary = "查询当前用户组织任职")
+	@GetMapping("/org-bindings")
+	public Result<MeOrgBindingsVO> getMyOrgBindings() {
+		MeOrgBindingsVO data = meProfileService.getMyOrgBindings();
 		return Result.success(data);
 	}
 

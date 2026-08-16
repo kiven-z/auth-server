@@ -4,11 +4,15 @@ import com.auth.common.core.utils.FieldChangeSupport;
 import com.auth.common.data.support.BusinessKeyAssert;
 import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.autoconfigure.web.SecurityUserUtils;
+import com.auth.service.system.admin.convert.admin.ReferenceConverter;
 import com.auth.service.system.admin.mapper.admin.user.SysUserMapper;
 import com.auth.service.system.admin.mapper.admin.user.UserDeptMapper;
 import com.auth.service.system.admin.model.form.me.MeAvatarUpdateForm;
 import com.auth.service.system.admin.model.form.me.MeProfileUpdateForm;
+import com.auth.service.system.admin.model.po.user.UserDeptProfilePO;
+import com.auth.service.system.admin.model.po.user.UserPostProfilePO;
 import com.auth.service.system.admin.model.po.user.UserPrimaryDeptPO;
+import com.auth.service.system.admin.model.vo.me.MeOrgBindingsVO;
 import com.auth.service.system.admin.model.vo.me.MeProfileVO;
 import com.auth.service.system.admin.service.me.MeProfileService;
 import com.auth.service.system.admin.support.user.UserAvatarUpdateSupport;
@@ -64,6 +68,26 @@ public class MeProfileServiceImpl extends ServiceImpl<SysUserMapper, UserEntity>
 		profile.setPrimaryDeptId(primaryDept.getDeptId());
 		profile.setPrimaryDeptName(primaryDept.getDeptName());
 		return profile;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	@Transactional(readOnly = true)
+	public MeOrgBindingsVO getMyOrgBindings() {
+		Long userId = SecurityUserUtils.getUserId();
+		userReferenceChecker.getExistingActive(userId);
+
+		List<UserDeptProfilePO> deptList = baseMapper.selectDeptProfileByUserId(userId);
+		List<UserDeptProfilePO> deptRows = Objects.requireNonNullElse(deptList, List.of());
+		List<UserPostProfilePO> postList = baseMapper.selectPostProfileByUserId(userId);
+		List<UserPostProfilePO> postRows = Objects.requireNonNullElse(postList, List.of());
+
+		MeOrgBindingsVO bindings = new MeOrgBindingsVO();
+		bindings.setDepts(ReferenceConverter.INSTANCE.toUserDeptReferenceList(deptRows));
+		bindings.setPosts(ReferenceConverter.INSTANCE.toUserPostReferenceList(postRows));
+		return bindings;
 	}
 
 	/**
