@@ -24,7 +24,7 @@ public class FileExportAttemptRecorder {
 		FileExportAttemptEntity attemptEntity = new FileExportAttemptEntity();
 		attemptEntity.setTaskId(command.getTaskId());
 		attemptEntity.setAttemptNo(command.getAttemptNo());
-		attemptEntity.setWorkerId(FileExportWorkerConstants.WORKER_ID);
+		attemptEntity.setWorkerId(command.getWorkerId());
 		attemptEntity.setResult(command.getResult().name());
 		attemptEntity.setProcessedRows(command.getProcessedRows());
 		attemptEntity.setErrorCode(command.getErrorCode());

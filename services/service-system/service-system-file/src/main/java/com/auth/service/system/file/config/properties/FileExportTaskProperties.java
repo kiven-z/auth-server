@@ -1,12 +1,12 @@
 package com.auth.service.system.file.config.properties;
 
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
+import software.amazon.awssdk.annotations.NotNull;
 
 /**
  * 文件异步导出任务配置
@@ -28,6 +28,13 @@ public class FileExportTaskProperties {
 	private Integer claimBatchSize = 5;
 
 	/**
+	 * 全局同时执行的导出任务上限
+	 */
+	@Min(1)
+	@NotNull
+	private Integer maxConcurrency = 4;
+
+	/**
 	 * 租约时长（秒）
 	 */
 	@Min(10)
@@ -46,14 +53,14 @@ public class FileExportTaskProperties {
 	 */
 	@Min(1)
 	@NotNull
-	private Integer maxRows = 260_000;
+	private Integer maxRows = 30_0000;
 
 	/**
 	 * 分片阈值：超过此行数时拆分为多个 xlsx 并打包为 zip（≤ 0 表示不分片）
 	 */
 	@Min(0)
 	@NotNull
-	private Integer shardRows = 50_000;
+	private Integer shardRows = 5_0000;
 
 	/**
 	 * 导出产物保留天数

@@ -37,22 +37,22 @@ public class FileExportTaskFailureHandler {
 	 * 处理执行异常并回写任务状态
 	 * @param task 任务
 	 * @param exception 执行异常
+	 * @param workerId 本次执行的租约持有者标识
 	 * @return attempt 结果（取消或失败）
 	 */
-	public FileExportAttemptResult handle(FileExportTaskEntity task, Exception exception) {
+	public FileExportAttemptResult handle(FileExportTaskEntity task, Exception exception, String workerId) {
 		Long taskId = task.getId();
 		if (isCancelRequested(taskId)) {
-			fileExportTaskMapper.markCancelled(taskId, FileExportWorkerConstants.WORKER_ID, Instant.now());
+			fileExportTaskMapper.markCancelled(taskId, workerId, Instant.now());
 			return FileExportAttemptResult.CANCELLED;
 		}
 
 		String errorCode = exception.getClass().getSimpleName();
 		String errorMessage = exception.getMessage();
 		boolean errorRetryable = isRetryableException(exception);
-		int retryRows = errorRetryable ? markRetryPending(task, errorCode, errorMessage) : 0;
+		int retryRows = errorRetryable ? markRetryPending(task, errorCode, errorMessage, workerId) : 0;
 		if (retryRows < 1) {
-			fileExportTaskMapper.markFailed(taskId, FileExportWorkerConstants.WORKER_ID, errorCode, errorMessage,
-					Instant.now());
+			fileExportTaskMapper.markFailed(taskId, workerId, errorCode, errorMessage, Instant.now());
 		}
 		log.warn("File export task failed: taskId={}, errorCode={}, errorMessage={}", taskId, errorCode, errorMessage,
 				exception);
@@ -74,17 +74,18 @@ public class FileExportTaskFailureHandler {
 	 * @param task 任务实体
 	 * @param errorCode 错误码
 	 * @param errorMessage 错误信息
+	 * @param workerId 本次执行的租约持有者标识
 	 * @return 重试行数
 	 */
-	private int markRetryPending(FileExportTaskEntity task, String errorCode, String errorMessage) {
+	private int markRetryPending(FileExportTaskEntity task, String errorCode, String errorMessage, String workerId) {
 		Integer retryCount = Objects.requireNonNullElse(task.getRetryCount(), 0);
 		Integer maxRetry = Objects.requireNonNullElse(task.getMaxRetry(), 0);
 		if (retryCount >= maxRetry) {
 			return 0;
 		}
 		Instant nextRetryAt = buildNextRetryAt(retryCount);
-		return fileExportTaskMapper.markRetryPending(task.getId(), FileExportWorkerConstants.WORKER_ID, errorCode,
-				errorMessage, nextRetryAt, Instant.now());
+		return fileExportTaskMapper.markRetryPending(task.getId(), workerId, errorCode, errorMessage, nextRetryAt,
+				Instant.now());
 	}
 
 	/**

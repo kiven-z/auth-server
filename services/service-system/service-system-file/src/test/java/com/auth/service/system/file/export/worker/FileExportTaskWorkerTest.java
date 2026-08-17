@@ -26,12 +26,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -65,9 +70,26 @@ class FileExportTaskWorkerTest {
 	@Mock
 	private FileExportTaskNotifier taskNotifier;
 
+	private ThreadPoolTaskExecutor asyncExecutor;
+
+	private CountDownLatch releaseExports;
+
 	@AfterEach
-	void clearSecurityContext() {
+	void tearDown() {
 		SecurityContextHolder.clearContext();
+		if (releaseExports != null) {
+			releaseExports.countDown();
+		}
+		if (asyncExecutor != null) {
+			asyncExecutor.shutdown();
+			try {
+				asyncExecutor.getThreadPoolExecutor().awaitTermination(5, TimeUnit.SECONDS);
+			}
+			catch (InterruptedException exception) {
+				Thread.currentThread().interrupt();
+			}
+			asyncExecutor = null;
+		}
 	}
 
 	@Test
@@ -77,8 +99,8 @@ class FileExportTaskWorkerTest {
 		FileExportTaskWorker worker = newWorker(properties);
 
 		FileExportTaskEntity task = newTask(101L);
-		when(fileExportTaskMapper.selectClaimCandidateIds(any(), eq(5))).thenReturn(List.of(101L));
-		when(fileExportTaskMapper.claimTask(eq(101L), eq("file-export-worker"), any(), any())).thenReturn(1);
+		when(fileExportTaskMapper.selectClaimCandidateIds(any(), anyInt())).thenReturn(List.of(101L));
+		when(fileExportTaskMapper.claimTask(eq(101L), anyString(), any(), any())).thenReturn(1);
 		when(fileExportTaskMapper.selectById(101L)).thenReturn(task, task);
 		AtomicReference<AuthProfile> profileDuringExport = new AtomicReference<>();
 		AtomicReference<Path> artifactPath = new AtomicReference<>();
@@ -99,7 +121,8 @@ class FileExportTaskWorkerTest {
 
 		worker.executeRound();
 
-		verify(fileExportTaskMapper).markSuccess(eq(101L), eq("file-export-worker"), eq(7001L), any(), any());
+		String workerId = capturedClaimWorkerId();
+		verify(fileExportTaskMapper).markSuccess(eq(101L), eq(workerId), eq(7001L), any(), any());
 		verify(fileExportTaskMapper, never()).markFailed(anyLong(), anyString(), anyString(), anyString(), any());
 		verify(fileExportTaskMapper, never()).markCancelled(anyLong(), anyString(), any());
 		verify(fileExportTaskMapper, never()).markRetryPending(anyLong(), anyString(), anyString(), anyString(), any(),
@@ -108,6 +131,7 @@ class FileExportTaskWorkerTest {
 		ArgumentCaptor<FileExportAttemptEntity> captor = ArgumentCaptor.forClass(FileExportAttemptEntity.class);
 		verify(fileExportAttemptMapper).insert(captor.capture());
 		assertThat(captor.getValue().getResult()).isEqualTo("SUCCESS");
+		assertThat(captor.getValue().getWorkerId()).isEqualTo(workerId);
 		assertThat(captor.getValue().getProcessedRows()).isEqualTo(12L);
 		assertThat(profileDuringExport.get()).isNotNull();
 		assertThat(profileDuringExport.get().getUserId()).isEqualTo(9001L);
@@ -130,19 +154,19 @@ class FileExportTaskWorkerTest {
 		FileExportTaskEntity task = newTask(102L);
 		task.setRetryCount(0);
 		task.setMaxRetry(3);
-		when(fileExportTaskMapper.selectClaimCandidateIds(any(), eq(5))).thenReturn(List.of(102L));
-		when(fileExportTaskMapper.claimTask(eq(102L), eq("file-export-worker"), any(), any())).thenReturn(1);
+		when(fileExportTaskMapper.selectClaimCandidateIds(any(), anyInt())).thenReturn(List.of(102L));
+		when(fileExportTaskMapper.claimTask(eq(102L), anyString(), any(), any())).thenReturn(1);
 		when(fileExportTaskMapper.selectById(102L)).thenReturn(task, task);
 		when(asyncPagedExportExecutor.export(any(FileExportTaskContext.class), any(), any()))
 			.thenThrow(new IllegalStateException("boom"));
-		when(fileExportTaskMapper.markRetryPending(eq(102L), eq("file-export-worker"), eq("IllegalStateException"),
-				eq("boom"), any(), any()))
+		when(fileExportTaskMapper.markRetryPending(eq(102L), anyString(), eq("IllegalStateException"), eq("boom"),
+				any(), any()))
 			.thenReturn(1);
 
 		worker.executeRound();
 
-		verify(fileExportTaskMapper).markRetryPending(eq(102L), eq("file-export-worker"), eq("IllegalStateException"),
-				eq("boom"), any(), any());
+		verify(fileExportTaskMapper).markRetryPending(eq(102L), anyString(), eq("IllegalStateException"), eq("boom"),
+				any(), any());
 		verify(fileExportTaskMapper, never()).markFailed(anyLong(), anyString(), anyString(), anyString(), any());
 		verify(fileExportTaskMapper, never()).markCancelled(anyLong(), anyString(), any());
 		assertThat(SecurityUserUtils.currentAuthProfile()).isNull();
@@ -167,16 +191,16 @@ class FileExportTaskWorkerTest {
 		failedTask.setRetryCount(0);
 		failedTask.setMaxRetry(3);
 		failedTask.setStatus("FAILED");
-		when(fileExportTaskMapper.selectClaimCandidateIds(any(), eq(5))).thenReturn(List.of(106L));
-		when(fileExportTaskMapper.claimTask(eq(106L), eq("file-export-worker"), any(), any())).thenReturn(1);
+		when(fileExportTaskMapper.selectClaimCandidateIds(any(), anyInt())).thenReturn(List.of(106L));
+		when(fileExportTaskMapper.claimTask(eq(106L), anyString(), any(), any())).thenReturn(1);
 		when(fileExportTaskMapper.selectById(106L)).thenReturn(runningTask, failedTask);
 		when(asyncPagedExportExecutor.export(any(FileExportTaskContext.class), any(), any()))
 			.thenThrow(new ExportRowLimitExceededException(100L, 101L));
 
 		worker.executeRound();
 
-		verify(fileExportTaskMapper).markFailed(eq(106L), eq("file-export-worker"),
-				eq("ExportRowLimitExceededException"), anyString(), any());
+		verify(fileExportTaskMapper).markFailed(eq(106L), anyString(), eq("ExportRowLimitExceededException"),
+				anyString(), any());
 		verify(fileExportTaskMapper, never()).markRetryPending(anyLong(), anyString(), anyString(), anyString(), any(),
 				any());
 		assertThat(SecurityUserUtils.currentAuthProfile()).isNull();
@@ -199,14 +223,14 @@ class FileExportTaskWorkerTest {
 		failedTask.setRetryCount(3);
 		failedTask.setMaxRetry(3);
 		failedTask.setStatus("FAILED");
-		when(fileExportTaskMapper.selectClaimCandidateIds(any(), eq(5))).thenReturn(List.of(104L));
-		when(fileExportTaskMapper.claimTask(eq(104L), eq("file-export-worker"), any(), any())).thenReturn(1);
+		when(fileExportTaskMapper.selectClaimCandidateIds(any(), anyInt())).thenReturn(List.of(104L));
+		when(fileExportTaskMapper.claimTask(eq(104L), anyString(), any(), any())).thenReturn(1);
 		when(fileExportTaskMapper.selectById(104L)).thenReturn(runningTask, failedTask);
 
 		worker.executeRound();
 
 		verify(asyncPagedExportExecutor, never()).export(any(), any(), any());
-		verify(fileExportTaskMapper).markFailed(eq(104L), eq("file-export-worker"), eq("IllegalArgumentException"),
+		verify(fileExportTaskMapper).markFailed(eq(104L), anyString(), eq("IllegalArgumentException"),
 				eq("scopeSnapshotJson must contain valid userId"), any());
 		verify(fileExportTaskMapper, never()).markRetryPending(anyLong(), anyString(), anyString(), anyString(), any(),
 				any());
@@ -223,13 +247,13 @@ class FileExportTaskWorkerTest {
 		FileExportTaskEntity runningTask = newTask(103L);
 		FileExportTaskEntity cancelledTask = newTask(103L);
 		cancelledTask.setStatus("CANCELLING");
-		when(fileExportTaskMapper.selectClaimCandidateIds(any(), eq(5))).thenReturn(List.of(103L));
-		when(fileExportTaskMapper.claimTask(eq(103L), eq("file-export-worker"), any(), any())).thenReturn(1);
+		when(fileExportTaskMapper.selectClaimCandidateIds(any(), anyInt())).thenReturn(List.of(103L));
+		when(fileExportTaskMapper.claimTask(eq(103L), anyString(), any(), any())).thenReturn(1);
 		when(fileExportTaskMapper.selectById(103L)).thenReturn(runningTask, cancelledTask, cancelledTask);
 
 		worker.executeRound();
 
-		verify(fileExportTaskMapper).markCancelled(eq(103L), eq("file-export-worker"), any());
+		verify(fileExportTaskMapper).markCancelled(eq(103L), anyString(), any());
 		verify(asyncPagedExportExecutor, never()).export(any(), any(), any());
 		verify(fileUploadService, never()).upload(any());
 
@@ -248,8 +272,8 @@ class FileExportTaskWorkerTest {
 
 		FileExportTaskEntity task = newTask(105L);
 		task.setRetryCount(2);
-		when(fileExportTaskMapper.selectClaimCandidateIds(any(), eq(5))).thenReturn(List.of(105L));
-		when(fileExportTaskMapper.claimTask(eq(105L), eq("file-export-worker"), any(), any())).thenReturn(1);
+		when(fileExportTaskMapper.selectClaimCandidateIds(any(), anyInt())).thenReturn(List.of(105L));
+		when(fileExportTaskMapper.claimTask(eq(105L), anyString(), any(), any())).thenReturn(1);
 		when(fileExportTaskMapper.selectById(105L)).thenReturn(task, task);
 		when(asyncPagedExportExecutor.export(any(FileExportTaskContext.class), any(), any()))
 			.thenReturn(FileExportTaskArtifact.builder()
@@ -270,7 +294,88 @@ class FileExportTaskWorkerTest {
 		assertThat(captor.getValue().getResult()).isEqualTo("SUCCESS");
 	}
 
+	@Test
+	@DisplayName("executeRound：提交后立即返回，导出在线程池内完成")
+	void executeRoundReturnsBeforeExportFinishes() throws InterruptedException {
+		CountDownLatch started = new CountDownLatch(1);
+		releaseExports = new CountDownLatch(1);
+		stubBlockedExport(started);
+		when(fileExportTaskMapper.selectClaimCandidateIds(any(), anyInt())).thenReturn(List.of(201L));
+		when(fileExportTaskMapper.claimTask(eq(201L), anyString(), any(), any())).thenReturn(1);
+		when(fileExportTaskMapper.selectById(201L)).thenReturn(newTask(201L));
+		when(fileUploadService.upload(any())).thenReturn(uploadResult(7201L));
+
+		asyncExecutor = newExportPool(1);
+		FileExportTaskWorker worker = newWorker(newProperties(), asyncExecutor);
+
+		worker.executeRound();
+
+		assertThat(started.await(5, TimeUnit.SECONDS)).isTrue();
+		verify(fileExportTaskMapper, never()).markSuccess(anyLong(), anyString(), anyLong(), any(), any());
+		releaseExports.countDown();
+		verify(fileExportTaskMapper, timeout(5_000)).markSuccess(eq(201L), anyString(), eq(7201L), any(), any());
+	}
+
+	@Test
+	@DisplayName("executeRound：并发上限内两条任务可同时进入写出")
+	void executeRoundRunsTwoTasksOverlap() throws InterruptedException {
+		CountDownLatch entered = new CountDownLatch(2);
+		releaseExports = new CountDownLatch(1);
+		when(asyncPagedExportExecutor.export(any(FileExportTaskContext.class), any(), any())).thenAnswer(invocation -> {
+			entered.countDown();
+			awaitRelease();
+			return artifactFrom(writeArtifactFile(), 3);
+		});
+		when(fileExportTaskMapper.selectClaimCandidateIds(any(), anyInt())).thenReturn(List.of(301L, 302L));
+		when(fileExportTaskMapper.claimTask(anyLong(), anyString(), any(), any())).thenReturn(1);
+		when(fileExportTaskMapper.selectById(301L)).thenReturn(newTask(301L));
+		when(fileExportTaskMapper.selectById(302L)).thenReturn(newTask(302L));
+		when(fileUploadService.upload(any())).thenReturn(uploadResult(7301L));
+
+		FileExportTaskProperties properties = newProperties();
+		properties.setMaxConcurrency(2);
+		asyncExecutor = newExportPool(2);
+		FileExportTaskWorker worker = newWorker(properties, asyncExecutor);
+
+		worker.executeRound();
+
+		assertThat(entered.await(5, TimeUnit.SECONDS)).isTrue();
+		releaseExports.countDown();
+		verify(fileExportTaskMapper, timeout(5_000).times(2)).markSuccess(anyLong(), anyString(), anyLong(), any(),
+				any());
+	}
+
+	@Test
+	@DisplayName("executeRound：并发槽占满时本轮不再领取")
+	void executeRoundSkipsClaimWhenSlotsFull() throws InterruptedException {
+		CountDownLatch started = new CountDownLatch(1);
+		releaseExports = new CountDownLatch(1);
+		stubBlockedExport(started);
+		when(fileExportTaskMapper.selectClaimCandidateIds(any(), anyInt())).thenReturn(List.of(401L));
+		when(fileExportTaskMapper.claimTask(eq(401L), anyString(), any(), any())).thenReturn(1);
+		when(fileExportTaskMapper.selectById(401L)).thenReturn(newTask(401L));
+		when(fileUploadService.upload(any())).thenReturn(uploadResult(7401L));
+
+		FileExportTaskProperties properties = newProperties();
+		properties.setMaxConcurrency(1);
+		asyncExecutor = newExportPool(1);
+		FileExportTaskWorker worker = newWorker(properties, asyncExecutor);
+
+		worker.executeRound();
+		assertThat(started.await(5, TimeUnit.SECONDS)).isTrue();
+		worker.executeRound();
+
+		verify(fileExportTaskMapper, times(1)).selectClaimCandidateIds(any(), anyInt());
+		verify(fileExportTaskMapper, times(1)).claimTask(anyLong(), anyString(), any(), any());
+		releaseExports.countDown();
+		verify(fileExportTaskMapper, timeout(5_000)).markSuccess(eq(401L), anyString(), eq(7401L), any(), any());
+	}
+
 	private FileExportTaskWorker newWorker(FileExportTaskProperties properties) {
+		return newWorker(properties, Runnable::run);
+	}
+
+	private FileExportTaskWorker newWorker(FileExportTaskProperties properties, Executor executor) {
 		AuthProfileSecurityContextPopulator populator = new AuthProfileSecurityContextPopulator();
 		FileExportTaskRunner runner = new FileExportTaskRunner(fileExportTaskMapper, fileUploadService,
 				remotePageFetcher, asyncPagedExportExecutor, properties, populator);
@@ -278,16 +383,68 @@ class FileExportTaskWorkerTest {
 				properties);
 		FileExportAttemptRecorder attemptRecorder = new FileExportAttemptRecorder(fileExportAttemptMapper);
 		return new FileExportTaskWorker(fileExportTaskMapper, properties, runner, failureHandler, attemptRecorder,
-				taskNotifier);
+				taskNotifier, executor);
 	}
 
 	private FileExportTaskProperties newProperties() {
 		FileExportTaskProperties properties = new FileExportTaskProperties();
 		properties.setClaimBatchSize(5);
+		properties.setMaxConcurrency(4);
 		properties.setLeaseSeconds(60);
 		properties.setArtifactExpireDays(7);
 		properties.setRetryBaseDelaySeconds(30);
 		return properties;
+	}
+
+	private String capturedClaimWorkerId() {
+		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+		verify(fileExportTaskMapper).claimTask(eq((Long) 101L), captor.capture(), any(), any());
+		assertThat(captor.getValue()).startsWith("fe-");
+		return captor.getValue();
+	}
+
+	private void stubBlockedExport(CountDownLatch started) {
+		when(asyncPagedExportExecutor.export(any(FileExportTaskContext.class), any(), any())).thenAnswer(invocation -> {
+			started.countDown();
+			awaitRelease();
+			return artifactFrom(writeArtifactFile(), 1);
+		});
+	}
+
+	private void awaitRelease() {
+		try {
+			assertThat(releaseExports.await(5, TimeUnit.SECONDS)).isTrue();
+		}
+		catch (InterruptedException exception) {
+			Thread.currentThread().interrupt();
+			throw new IllegalStateException("Interrupted while holding export", exception);
+		}
+	}
+
+	private ThreadPoolTaskExecutor newExportPool(int size) {
+		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+		executor.setCorePoolSize(size);
+		executor.setMaxPoolSize(size);
+		executor.setQueueCapacity(0);
+		executor.setThreadNamePrefix("file-export-test-");
+		executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
+		executor.initialize();
+		return executor;
+	}
+
+	private FileUploadResultDTO uploadResult(Long fileRecordId) {
+		FileUploadResultDTO uploadResult = new FileUploadResultDTO();
+		uploadResult.setId(fileRecordId);
+		return uploadResult;
+	}
+
+	private FileExportTaskArtifact artifactFrom(Path filePath, long rowCount) {
+		return FileExportTaskArtifact.builder()
+			.fileName("file_export.xlsx")
+			.contentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+			.filePath(filePath)
+			.rowCount(rowCount)
+			.build();
 	}
 
 	private FileExportTaskEntity newTask(Long id) {

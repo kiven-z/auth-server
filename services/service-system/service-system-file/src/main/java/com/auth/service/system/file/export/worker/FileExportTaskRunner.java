@@ -55,19 +55,21 @@ public class FileExportTaskRunner {
 	/**
 	 * 执行已认领任务（含取消短路与成功落库）
 	 * @param task 任务实体
+	 * @param workerId 本次执行的租约持有者标识
 	 * @return 执行结果
 	 */
-	public FileExportTaskRunResult run(FileExportTaskEntity task) {
+	public FileExportTaskRunResult run(FileExportTaskEntity task, String workerId) {
 		Long taskId = task.getId();
 		DatabaseProgressListener progressListener = new DatabaseProgressListener(fileExportTaskMapper, properties,
-				taskId, FileExportWorkerConstants.WORKER_ID);
+				taskId, workerId);
 		if (progressListener.isCancelRequested()) {
-			fileExportTaskMapper.markCancelled(taskId, FileExportWorkerConstants.WORKER_ID, Instant.now());
+			fileExportTaskMapper.markCancelled(taskId, workerId, Instant.now());
 			return FileExportTaskRunResult.builder().attemptResult(FileExportAttemptResult.CANCELLED).build();
 		}
 
 		AuthProfile profile = resolveProfile(task);
-		return securityContextPopulator.runWithProfile(profile, () -> exportAndUpload(task, progressListener));
+		return securityContextPopulator.runWithProfile(profile,
+				() -> exportAndUpload(task, progressListener, workerId));
 	}
 
 	/**
@@ -87,16 +89,17 @@ public class FileExportTaskRunner {
 	 * 导出并上传产物
 	 * @param task 任务实体
 	 * @param progressListener 进度监听器
+	 * @param workerId 本次执行的租约持有者标识
 	 * @return 执行结果
 	 */
 	private FileExportTaskRunResult exportAndUpload(FileExportTaskEntity task,
-			DatabaseProgressListener progressListener) {
+			DatabaseProgressListener progressListener, String workerId) {
 		Long taskId = task.getId();
 		FileExportTaskContext context = buildContext(task);
 		FileExportTaskArtifact artifact = exportArtifact(context, progressListener);
 		long processedRows = artifact.getRowCount();
 		if (progressListener.isCancelRequested()) {
-			fileExportTaskMapper.markCancelled(taskId, FileExportWorkerConstants.WORKER_ID, Instant.now());
+			fileExportTaskMapper.markCancelled(taskId, workerId, Instant.now());
 			return FileExportTaskRunResult.builder()
 				.attemptResult(FileExportAttemptResult.CANCELLED)
 				.processedRows(processedRows)
@@ -106,8 +109,7 @@ public class FileExportTaskRunner {
 
 		Long fileRecordId = uploadArtifact(task, artifact);
 		Instant expireAt = Instant.now().plus(properties.getArtifactExpireDays(), ChronoUnit.DAYS);
-		fileExportTaskMapper.markSuccess(taskId, FileExportWorkerConstants.WORKER_ID, fileRecordId, expireAt,
-				Instant.now());
+		fileExportTaskMapper.markSuccess(taskId, workerId, fileRecordId, expireAt, Instant.now());
 		return FileExportTaskRunResult.builder()
 			.attemptResult(FileExportAttemptResult.SUCCESS)
 			.processedRows(processedRows)

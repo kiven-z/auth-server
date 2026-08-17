@@ -7,8 +7,8 @@ import com.auth.service.system.file.mapper.FileExportTaskMapper;
 import com.auth.service.system.file.model.entity.FileExportTaskEntity;
 import com.auth.service.system.file.model.enums.FileExportAttemptResult;
 import com.auth.service.system.file.model.enums.FileExportTaskStatus;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.nio.file.Files;
@@ -16,13 +16,16 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
+import java.util.concurrent.Executor;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.Semaphore;
 
 /**
- * 文件异步导出任务 Worker：认领候选任务并编排执行
+ * 文件异步导出任务 Worker：认领候选任务并提交执行池
  *
  * @author Bunny
  */
-@RequiredArgsConstructor
 @Slf4j
 @Component
 public class FileExportTaskWorker {
@@ -39,28 +42,87 @@ public class FileExportTaskWorker {
 
 	private final FileExportTaskNotifier taskNotifier;
 
+	private final Executor fileExportTaskExecutor;
+
+	private final Semaphore inFlight;
+
+	public FileExportTaskWorker(FileExportTaskMapper fileExportTaskMapper, FileExportTaskProperties properties,
+			FileExportTaskRunner taskRunner, FileExportTaskFailureHandler failureHandler,
+			FileExportAttemptRecorder attemptRecorder, FileExportTaskNotifier taskNotifier,
+			@Qualifier("fileExportTaskExecutor") Executor fileExportTaskExecutor) {
+		this.fileExportTaskMapper = fileExportTaskMapper;
+		this.properties = properties;
+		this.taskRunner = taskRunner;
+		this.failureHandler = failureHandler;
+		this.attemptRecorder = attemptRecorder;
+		this.taskNotifier = taskNotifier;
+		this.fileExportTaskExecutor = fileExportTaskExecutor;
+		this.inFlight = new Semaphore(properties.getMaxConcurrency());
+	}
+
 	/**
-	 * 执行一轮任务拉取与处理
+	 * 执行一轮任务拉取与提交
 	 */
 	public void executeRound() {
+		int slots = inFlight.availablePermits();
+		if (slots <= 0) {
+			return;
+		}
 		Instant now = Instant.now();
-		List<Long> candidateIds = fileExportTaskMapper.selectClaimCandidateIds(now, properties.getClaimBatchSize());
+		int limit = Math.min(properties.getClaimBatchSize(), slots);
+		List<Long> candidateIds = fileExportTaskMapper.selectClaimCandidateIds(now, limit);
 		for (Long taskId : candidateIds) {
-			Instant leaseUntil = Instant.now().plus(properties.getLeaseSeconds(), ChronoUnit.SECONDS);
-			int claimed = fileExportTaskMapper.claimTask(taskId, FileExportWorkerConstants.WORKER_ID, leaseUntil,
-					Instant.now());
-			if (claimed < 1) {
-				continue;
-			}
-			processTask(taskId);
+			submitClaimed(taskId);
+		}
+	}
+
+	/**
+	 * 抢占租约并提交执行池；无空闲槽或抢占失败则跳过
+	 * @param taskId 任务ID
+	 */
+	private void submitClaimed(Long taskId) {
+		if (!inFlight.tryAcquire()) {
+			return;
+		}
+		String workerId = "fe-" + UUID.randomUUID().toString().replace("-", "");
+		Instant leaseUntil = Instant.now().plus(properties.getLeaseSeconds(), ChronoUnit.SECONDS);
+		int claimed = fileExportTaskMapper.claimTask(taskId, workerId, leaseUntil, Instant.now());
+		if (claimed < 1) {
+			inFlight.release();
+			return;
+		}
+		try {
+			fileExportTaskExecutor.execute(() -> runClaimedTask(taskId, workerId));
+		}
+		catch (RejectedExecutionException exception) {
+			inFlight.release();
+			log.error("File export executor rejected task: taskId={}, workerId={}", taskId, workerId, exception);
+		}
+	}
+
+	/**
+	 * 在工作线程中执行已认领任务并释放并发槽
+	 * @param taskId 任务ID
+	 * @param workerId 本次执行的租约持有者标识
+	 */
+	private void runClaimedTask(Long taskId, String workerId) {
+		try {
+			processTask(taskId, workerId);
+		}
+		catch (RuntimeException exception) {
+			log.error("File export worker crashed: taskId={}, workerId={}", taskId, workerId, exception);
+		}
+		finally {
+			inFlight.release();
 		}
 	}
 
 	/**
 	 * 处理单个已认领任务
 	 * @param taskId 任务ID
+	 * @param workerId 本次执行的租约持有者标识
 	 */
-	private void processTask(Long taskId) {
+	private void processTask(Long taskId, String workerId) {
 		Instant startedAt = Instant.now();
 		FileExportTaskEntity task = fileExportTaskMapper.selectById(taskId);
 		if (task == null) {
@@ -74,7 +136,7 @@ public class FileExportTaskWorker {
 		FileExportTaskArtifact artifact = null;
 		String artifactFileName = null;
 		try {
-			FileExportTaskRunResult runResult = taskRunner.run(task);
+			FileExportTaskRunResult runResult = taskRunner.run(task, workerId);
 			attemptResult = runResult.getAttemptResult();
 			processedRows = runResult.getProcessedRows();
 			artifact = runResult.getArtifact();
@@ -83,7 +145,7 @@ public class FileExportTaskWorker {
 			}
 		}
 		catch (Exception exception) {
-			attemptResult = failureHandler.handle(task, exception);
+			attemptResult = failureHandler.handle(task, exception, workerId);
 			if (attemptResult == FileExportAttemptResult.FAILED) {
 				errorCode = exception.getClass().getSimpleName();
 				errorMessage = exception.getMessage();
@@ -94,6 +156,7 @@ public class FileExportTaskWorker {
 			int attemptNo = Objects.requireNonNullElse(task.getRetryCount(), 0) + 1;
 			attemptRecorder.append(FileExportAttemptAppendCommand.builder()
 				.taskId(taskId)
+				.workerId(workerId)
 				.attemptNo(attemptNo)
 				.startedAt(startedAt)
 				.finishedAt(Instant.now())

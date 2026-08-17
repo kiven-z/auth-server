@@ -19,7 +19,7 @@ public class FileExportTaskWorkerJob {
 	private final FileExportTaskWorker worker;
 
 	/**
-	 * 按固定间隔执行任务拉取
+	 * 按固定间隔拉取候选任务（写出在导出线程池内完成）
 	 */
 	@Scheduled(fixedDelayString = "${auth.file.export-task.poll-interval-ms:5000}")
 	public void run() {

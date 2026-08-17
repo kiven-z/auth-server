@@ -21,6 +21,11 @@ public class FileExportAttemptAppendCommand {
 	Long taskId;
 
 	/**
+	 * 执行实例标识
+	 */
+	String workerId;
+
+	/**
 	 * 尝试次数
 	 */
 	int attemptNo;
