@@ -7,12 +7,10 @@ import com.auth.module.security.contract.dto.invalidation.AuthorizationInvalidat
 import com.auth.module.security.contract.dto.invalidation.RoleInvalidatePayload;
 import com.auth.service.auth.model.po.user.UserInvalidationStatePO;
 import com.auth.service.auth.model.value.invalidation.InvalidationIdempotencyGate;
-import com.auth.service.auth.model.value.invalidation.UserInvalidationBuckets;
 import com.auth.service.auth.service.impl.AuthorizationInvalidationServiceImpl;
 import com.auth.service.auth.support.invalidation.AuthProfileMaterializationService;
 import com.auth.service.auth.support.invalidation.UserInvalidationRepository;
 import com.auth.service.auth.support.invalidation.impact.ImpactResolverRegistry;
-import com.auth.service.auth.support.invalidation.policy.UserInvalidationPolicy;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,7 +23,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 /**
@@ -43,9 +41,6 @@ class AuthorizationInvalidationServiceTest {
 
 	@Mock
 	private UserInvalidationRepository userInvalidationRepository;
-
-	@Mock
-	private UserInvalidationPolicy userInvalidationPolicy;
 
 	@Mock
 	private AuthProfileMaterializationService authProfileMaterializationService;
@@ -98,8 +93,6 @@ class AuthorizationInvalidationServiceTest {
 			.thenReturn(InvalidationIdempotencyGate.Claimed.builder().build());
 		when(impactResolverRegistry.resolve(any())).thenReturn(Set.of(1L));
 		when(userInvalidationRepository.loadByUserIds(Set.of(1L))).thenReturn(List.of(activeState()));
-		when(userInvalidationPolicy.partition(eq(Set.of(1L)), anyCollection())).thenReturn(
-				UserInvalidationBuckets.builder().versionBumpUserIds(Set.of(1L)).evictOnlyUserIds(Set.of()).build());
 		when(userInvalidationRepository.incrementPermVersionInBatches(Set.of(1L), BatchSizes.SIZE_500)).thenReturn(1);
 		when(authProfileMaterializationService.refreshInBatches(Set.of(1L), BatchSizes.SIZE_500)).thenReturn(1);
 		when(authProfileMaterializationService.evictInBatches(Set.of(), BatchSizes.SIZE_500)).thenReturn(0);
@@ -115,6 +108,48 @@ class AuthorizationInvalidationServiceTest {
 		order.verify(authProfileMaterializationService).refreshInBatches(Set.of(1L), BatchSizes.SIZE_500);
 		verify(authorizationInvalidationEventService).completeProcessedOutcome("evt-3", AuthorizationChangeKind.ROLE,
 				new AuthorizationInvalidateResponse(1, 1, 1, 0));
+	}
+
+	@Test
+	@DisplayName("库中无行时仅驱逐画像")
+	void invalidate_missingUserRow_shouldEvictOnly() {
+		when(authorizationInvalidationEventService.acquireGate("evt-4", AuthorizationChangeKind.ROLE))
+			.thenReturn(InvalidationIdempotencyGate.Claimed.builder().build());
+		when(impactResolverRegistry.resolve(any())).thenReturn(Set.of(99L));
+		when(userInvalidationRepository.loadByUserIds(Set.of(99L))).thenReturn(List.of());
+		when(userInvalidationRepository.incrementPermVersionInBatches(Set.of(), BatchSizes.SIZE_500)).thenReturn(0);
+		when(authProfileMaterializationService.refreshInBatches(Set.of(), BatchSizes.SIZE_500)).thenReturn(0);
+		when(authProfileMaterializationService.evictInBatches(Set.of(99L), BatchSizes.SIZE_500)).thenReturn(1);
+
+		AuthorizationInvalidateRequest request = new AuthorizationInvalidateRequest("evt-4",
+				AuthorizationChangeKind.ROLE, new RoleInvalidatePayload(List.of("ADMIN")));
+		AuthorizationInvalidateResponse response = authorizationInvalidationService.invalidate(request);
+
+		assertEquals(new AuthorizationInvalidateResponse(1, 0, 0, 1), response);
+		verify(userInvalidationRepository).incrementPermVersionInBatches(Set.of(), BatchSizes.SIZE_500);
+		verify(authProfileMaterializationService).refreshInBatches(Set.of(), BatchSizes.SIZE_500);
+		verify(authProfileMaterializationService).evictInBatches(Set.of(99L), BatchSizes.SIZE_500);
+	}
+
+	@Test
+	@DisplayName("有行与无行混合时分别升版本与驱逐")
+	void invalidate_mixedImpact_shouldSplitByPresence() {
+		when(authorizationInvalidationEventService.acquireGate("evt-7", AuthorizationChangeKind.ROLE))
+			.thenReturn(InvalidationIdempotencyGate.Claimed.builder().build());
+		when(impactResolverRegistry.resolve(any())).thenReturn(Set.of(1L, 99L));
+		when(userInvalidationRepository.loadByUserIds(Set.of(1L, 99L))).thenReturn(List.of(activeState()));
+		when(userInvalidationRepository.incrementPermVersionInBatches(Set.of(1L), BatchSizes.SIZE_500)).thenReturn(1);
+		when(authProfileMaterializationService.refreshInBatches(Set.of(1L), BatchSizes.SIZE_500)).thenReturn(1);
+		when(authProfileMaterializationService.evictInBatches(Set.of(99L), BatchSizes.SIZE_500)).thenReturn(1);
+
+		AuthorizationInvalidateRequest request = new AuthorizationInvalidateRequest("evt-7",
+				AuthorizationChangeKind.ROLE, new RoleInvalidatePayload(List.of("ADMIN")));
+		AuthorizationInvalidateResponse response = authorizationInvalidationService.invalidate(request);
+
+		assertEquals(new AuthorizationInvalidateResponse(2, 1, 1, 1), response);
+		verify(userInvalidationRepository).incrementPermVersionInBatches(Set.of(1L), BatchSizes.SIZE_500);
+		verify(authProfileMaterializationService).refreshInBatches(Set.of(1L), BatchSizes.SIZE_500);
+		verify(authProfileMaterializationService).evictInBatches(Set.of(99L), BatchSizes.SIZE_500);
 	}
 
 	@Test

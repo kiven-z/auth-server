@@ -52,6 +52,9 @@ class OnlineUserSessionReaderTest {
 	private DefaultRedisScript<Long> terminateOrphanScript;
 
 	@Mock
+	private DefaultRedisScript<Long> rotateRefreshScript;
+
+	@Mock
 	private SetOperations<String, String> setOperations;
 
 	@Mock
@@ -67,6 +70,7 @@ class OnlineUserSessionReaderTest {
 		when(userSessionRedisScripts.registerScript()).thenReturn(registerScript);
 		when(userSessionRedisScripts.terminateScript()).thenReturn(terminateScript);
 		when(userSessionRedisScripts.terminateOrphanScript()).thenReturn(terminateOrphanScript);
+		when(userSessionRedisScripts.rotateRefreshScript()).thenReturn(rotateRefreshScript);
 		when(sessionRedisTemplate.opsForSet()).thenReturn(setOperations);
 		when(sessionRedisTemplate.opsForHash()).thenReturn(hashOperations);
 		when(sessionRedisTemplate.opsForZSet()).thenReturn(zSetOperations);

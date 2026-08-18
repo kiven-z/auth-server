@@ -53,6 +53,9 @@ class UserSessionRedisStoreLifecycleTest {
 	private DefaultRedisScript<Long> terminateOrphanScript;
 
 	@Mock
+	private DefaultRedisScript<Long> rotateRefreshScript;
+
+	@Mock
 	private HashOperations<String, Object, Object> hashOperations;
 
 	@Mock
@@ -68,6 +71,7 @@ class UserSessionRedisStoreLifecycleTest {
 		when(userSessionRedisScripts.registerScript()).thenReturn(registerScript);
 		when(userSessionRedisScripts.terminateScript()).thenReturn(terminateScript);
 		when(userSessionRedisScripts.terminateOrphanScript()).thenReturn(terminateOrphanScript);
+		when(userSessionRedisScripts.rotateRefreshScript()).thenReturn(rotateRefreshScript);
 		when(sessionRedisTemplate.opsForHash()).thenReturn(hashOperations);
 		when(sessionRedisTemplate.opsForSet()).thenReturn(setOperations);
 		when(sessionRedisTemplate.opsForZSet()).thenReturn(zSetOperations);
@@ -160,6 +164,37 @@ class UserSessionRedisStoreLifecycleTest {
 		verifyNoInteractions(sessionRedisTemplate);
 	}
 
+	@Test
+	@DisplayName("rotateRefresh：Lua 返回 ROTATED 时不读 last* 字段")
+	void rotateRefresh_shouldReturnRotated_whenScriptReturnsOne() {
+		when(sessionRedisTemplate.execute(eq(rotateRefreshScript), anyList(), any(), any(), any(), any(), any(), any(),
+				any(), any(), any()))
+			.thenReturn(1L);
+
+		var result = userSessionRedisStore.rotateRefresh(sampleRotateCommand(System.currentTimeMillis() + 3_600_000));
+
+		assertEquals(RefreshRotateOutcome.ROTATED, result.outcome());
+		verify(hashOperations, never()).multiGet(anyString(), anyList());
+	}
+
+	@Test
+	@DisplayName("rotateRefresh：Lua 返回 REUSED 时读取 last* 并组装结果")
+	void rotateRefresh_shouldReturnReusedTokens_whenScriptReturnsTwo() {
+		long accessExpiresAt = System.currentTimeMillis() + 3_600_000;
+		when(sessionRedisTemplate.execute(eq(rotateRefreshScript), anyList(), any(), any(), any(), any(), any(), any(),
+				any(), any(), any()))
+			.thenReturn(2L);
+		when(hashOperations.multiGet(eq(SecurityRedisKey.USER_SESSION.key(TestConstants.JTI)), anyList()))
+			.thenReturn(List.of("cached-access", "cached-refresh", String.valueOf(accessExpiresAt)));
+
+		var result = userSessionRedisStore.rotateRefresh(sampleRotateCommand(accessExpiresAt));
+
+		assertEquals(RefreshRotateOutcome.REUSED, result.outcome());
+		assertEquals("cached-access", result.accessToken());
+		assertEquals("cached-refresh", result.refreshToken());
+		assertEquals(accessExpiresAt, result.accessExpiresAt().toEpochMilli());
+	}
+
 	/**
 	 * 构造带 loginAt 的样例会话索引
 	 * @return 会话索引
@@ -171,6 +206,25 @@ class UserSessionRedisStoreLifecycleTest {
 		index.setLoginAt(1_700_000_000_000L);
 		index.setRefreshTokenExpiresAt(System.currentTimeMillis() + Duration.ofHours(2).toMillis());
 		return index;
+	}
+
+	/**
+	 * 构造旋转入参样例
+	 * @param accessExpiresAtMs access 过期时间
+	 * @return 旋转入参
+	 */
+	private RefreshRotateCommand sampleRotateCommand(long accessExpiresAtMs) {
+		return RefreshRotateCommand.builder()
+			.jti(TestConstants.JTI)
+			.requestRefreshHash("req-hash")
+			.newRefreshHash("new-hash")
+			.newRefreshExpiresAtMs(System.currentTimeMillis() + 60_000)
+			.ttl(Duration.ofSeconds(120))
+			.graceMs(30_000L)
+			.accessToken("access")
+			.refreshToken("refresh")
+			.accessExpiresAtMs(accessExpiresAtMs)
+			.build();
 	}
 
 }

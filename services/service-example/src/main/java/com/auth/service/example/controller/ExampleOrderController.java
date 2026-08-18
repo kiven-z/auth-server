@@ -1,6 +1,7 @@
 package com.auth.service.example.controller;
 
 import com.auth.common.core.model.response.Result;
+import com.auth.common.data.model.PageResponse;
 import com.auth.module.file.api.model.dto.ExportPreCheckResult;
 import com.auth.module.file.api.model.dto.FileExportTaskCreateResult;
 import com.auth.module.file.api.model.request.ExportPreCheckRequest;
@@ -38,11 +39,11 @@ public class ExampleOrderController {
 	private final FileExportTaskOperations fileExportTaskOperations;
 
 	@AuthenticatedApi
-	@Operation(summary = "查询数据权限演示单列表", description = "按登录画像 deptScope 行级过滤")
+	@Operation(summary = "分页查询数据权限演示单", description = "按登录画像 deptScope 行级过滤")
 	@GetMapping
-	public Result<List<ExampleOrderVO>> listScoped() {
-		List<ExampleOrderVO> data = exampleOrderService.listScoped();
-		return Result.success(data);
+	public Result<PageResponse<ExampleOrderVO>> page(@Validated ExampleOrderQuery query) {
+		PageResponse<ExampleOrderVO> response = exampleOrderService.getPage(query);
+		return Result.success(response);
 	}
 
 	@AuthenticatedApi

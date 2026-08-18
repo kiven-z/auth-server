@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
@@ -103,19 +103,55 @@ public class UserSessionRedisStore {
 	}
 
 	/**
-	 * 更新刷新令牌校验信息并刷新会话 TTL
-	 * @param jti 会话唯一标识
-	 * @param refreshTokenHash refreshToken 哈希
-	 * @param refreshTokenExpiresAt refreshToken 过期时间戳（毫秒）
-	 * @param ttl 会话 TTL
+	 * 原子旋转 refresh：命中当前 hash 则写入新令牌；grace 内命中 previous 则返回上一轮签发结果
+	 * @param command 旋转入参
+	 * @return 旋转结果
 	 */
-	public void updateRefreshInfo(@NotNull String jti, @NotNull String refreshTokenHash, long refreshTokenExpiresAt,
-			@NotNull Duration ttl) {
-		String sessionKey = USER_SESSION.key(jti);
-		sessionRedisTemplate.opsForHash().put(sessionKey, "refreshTokenHash", refreshTokenHash);
-		sessionRedisTemplate.opsForHash()
-			.put(sessionKey, "refreshTokenExpiresAt", String.valueOf(refreshTokenExpiresAt));
-		sessionRedisTemplate.expire(sessionKey, ttl);
+	public RefreshRotateResult rotateRefresh(@NotNull RefreshRotateCommand command) {
+		long nowMs = System.currentTimeMillis();
+		Long code = sessionRedisTemplate.execute(userSessionRedisScripts.rotateRefreshScript(),
+				List.of(USER_SESSION.key(command.jti())), command.requestRefreshHash(), command.newRefreshHash(),
+				String.valueOf(command.newRefreshExpiresAtMs()), String.valueOf(command.ttl().getSeconds()),
+				String.valueOf(nowMs), String.valueOf(command.graceMs()), command.accessToken(), command.refreshToken(),
+				String.valueOf(command.accessExpiresAtMs()));
+
+		// 将 Lua 返回码转为旋转结果；REUSED 时读取 last* 字段
+		if (code == null || code == 0L) {
+			return RefreshRotateResult.builder().outcome(RefreshRotateOutcome.EXPIRED).build();
+		}
+		if (code == 1L) {
+			return RefreshRotateResult.builder().outcome(RefreshRotateOutcome.ROTATED).build();
+		}
+		if (code == 2L) {
+			return loadReusedTokens(command.jti());
+		}
+		return RefreshRotateResult.builder().outcome(RefreshRotateOutcome.MISMATCH).build();
+	}
+
+	/**
+	 * 读取 grace 复用所需的上一轮签发令牌
+	 * @param jti 会话唯一标识
+	 * @return REUSED 结果；字段缺失时降为 MISMATCH
+	 */
+	private RefreshRotateResult loadReusedTokens(String jti) {
+		List<Object> values = sessionRedisTemplate.opsForHash()
+			.multiGet(USER_SESSION.key(jti), List.of("lastAccessToken", "lastRefreshToken", "lastAccessExpiresAt"));
+		if (values == null || values.size() < 3) {
+			return RefreshRotateResult.builder().outcome(RefreshRotateOutcome.MISMATCH).build();
+		}
+		String accessToken = values.get(0) == null ? null : String.valueOf(values.get(0));
+		String refreshToken = values.get(1) == null ? null : String.valueOf(values.get(1));
+		String accessExpiresAt = values.get(2) == null ? null : String.valueOf(values.get(2));
+		if (CharSequenceUtil.hasBlank(accessToken, refreshToken, accessExpiresAt)
+				|| !NumberUtil.isLong(accessExpiresAt)) {
+			return RefreshRotateResult.builder().outcome(RefreshRotateOutcome.MISMATCH).build();
+		}
+		return RefreshRotateResult.builder()
+			.outcome(RefreshRotateOutcome.REUSED)
+			.accessToken(accessToken)
+			.refreshToken(refreshToken)
+			.accessExpiresAt(Instant.ofEpochMilli(Long.parseLong(accessExpiresAt)))
+			.build();
 	}
 
 	/**

@@ -1,11 +1,10 @@
 package com.auth.service.example.service;
 
+import com.auth.common.data.model.PageResponse;
 import com.auth.service.example.model.entity.ExampleOrderEntity;
 import com.auth.service.example.model.query.ExampleOrderQuery;
 import com.auth.service.example.model.vo.ExampleOrderVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-
-import java.util.List;
 
 /**
  * 数据权限演示单服务
@@ -15,10 +14,11 @@ import java.util.List;
 public interface ExampleOrderService {
 
 	/**
-	 * 查询当前用户可见的演示单列表
-	 * @return 可见行
+	 * 分页查询当前用户可见的演示单
+	 * @param query 查询条件
+	 * @return 分页数据
 	 */
-	List<ExampleOrderVO> listScoped();
+	PageResponse<ExampleOrderVO> getPage(ExampleOrderQuery query);
 
 	/**
 	 * 分页查询当前用户可见的演示单（供异步导出取数）

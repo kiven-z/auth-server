@@ -18,10 +18,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("DeptRowValidator 部门导入校验")
 class DeptRowValidatorTest {
 
-	private static DeptParsedRow parsedRow(String parentDeptCode, String deptCode, String statusLabel) {
+	private static DeptParsedRow parsedRow(String parentDeptCode, String statusLabel) {
 		return DeptParsedRow.builder()
 			.parentDeptCode(parentDeptCode)
-			.deptCode(deptCode)
+			.deptCode("RD")
 			.deptName("研发部")
 			.statusLabel(statusLabel)
 			.orderNum(1)
@@ -38,7 +38,7 @@ class DeptRowValidatorTest {
 			.existingDeptCodes(Set.of())
 			.build();
 
-		List<ImportRowError> errors = DeptRowValidator.validate(parsedRow(null, "RD", "启用"), 1, context);
+		List<ImportRowError> errors = DeptRowValidator.validate(parsedRow(null, "启用"), 1, context);
 
 		assertThat(errors).hasSize(1);
 		assertThat(errors.get(0).message()).contains("在文件内重复");
@@ -53,7 +53,7 @@ class DeptRowValidatorTest {
 			.existingDeptCodes(Set.of())
 			.build();
 
-		List<ImportRowError> errors = DeptRowValidator.validate(parsedRow("MISSING", "RD", "启用"), 2, context);
+		List<ImportRowError> errors = DeptRowValidator.validate(parsedRow("MISSING", "启用"), 2, context);
 
 		assertThat(errors).hasSize(1);
 		assertThat(errors.get(0).message()).contains("parentDeptCode");
@@ -69,7 +69,7 @@ class DeptRowValidatorTest {
 			.existingDeptCodes(Set.of())
 			.build();
 
-		List<ImportRowError> errors = DeptRowValidator.validate(parsedRow("ROOT", "RD", "未知状态"), 3, context);
+		List<ImportRowError> errors = DeptRowValidator.validate(parsedRow("ROOT", "未知状态"), 3, context);
 
 		assertThat(errors).hasSize(1);
 		assertThat(errors.get(0).message()).contains("status");

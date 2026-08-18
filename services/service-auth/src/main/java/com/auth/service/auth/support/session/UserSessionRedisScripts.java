@@ -18,6 +18,8 @@ public class UserSessionRedisScripts {
 
 	private final DefaultRedisScript<Long> terminateOrphanScript = script("redis/session-terminate-orphan.lua");
 
+	private final DefaultRedisScript<Long> rotateRefreshScript = script("redis/session-rotate-refresh.lua");
+
 	private static DefaultRedisScript<Long> script(String path) {
 		DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>();
 		redisScript.setLocation(new ClassPathResource(path));
@@ -47,6 +49,14 @@ public class UserSessionRedisScripts {
 	 */
 	public DefaultRedisScript<Long> terminateOrphanScript() {
 		return terminateOrphanScript;
+	}
+
+	/**
+	 * 原子旋转 refresh：校验 hash、写入 previous/last 令牌、grace 复用
+	 * @return 旋转脚本
+	 */
+	public DefaultRedisScript<Long> rotateRefreshScript() {
+		return rotateRefreshScript;
 	}
 
 }

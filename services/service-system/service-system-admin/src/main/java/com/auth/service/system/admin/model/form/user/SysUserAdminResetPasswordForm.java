@@ -26,7 +26,7 @@ public class SysUserAdminResetPasswordForm implements Serializable {
 
 	@Schema(title = "新密码")
 	@Size(min = 8, max = 18, message = "新密码长度应为8-18位")
-	@Pattern(regexp = ValidationPatterns.PASSWORD_COMPLEXITY, message = "新密码格式不符合约定（8-18位，数字、字母、符号至少两种）")
+	@Pattern(regexp = ValidationPatterns.TWO_OF_THREE_CHAR_CLASSES_8_18, message = "新密码格式不符合约定（8-18位，数字、字母、符号至少两种）")
 	@NotBlank(message = "新密码不能为空")
 	private String newPassword;
 

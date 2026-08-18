@@ -54,7 +54,7 @@ public class UserRowValidator {
 	private static final int INITIAL_PASSWORD_MAX_LENGTH = 18;
 
 	private static final Pattern INITIAL_PASSWORD_COMPLEXITY_PATTERN = Pattern
-		.compile(ValidationPatterns.PASSWORD_COMPLEXITY);
+		.compile(ValidationPatterns.TWO_OF_THREE_CHAR_CLASSES_8_18);
 
 	/**
 	 * 用户导入校验规则

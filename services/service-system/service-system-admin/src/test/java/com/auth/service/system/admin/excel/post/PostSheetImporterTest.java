@@ -45,9 +45,9 @@ class PostSheetImporterTest {
 
 	private PostSheetImporter postSheetImporter;
 
-	private static SysPostImportRow validRow(String deptCode, String postCode, String postName) {
+	private static SysPostImportRow validRow(String postCode, String postName) {
 		SysPostImportRow row = new SysPostImportRow();
-		row.setDeptCode(deptCode);
+		row.setDeptCode("RD");
 		row.setPostCode(postCode);
 		row.setPostName(postName);
 		row.setStatusLabel("启用");
@@ -71,7 +71,7 @@ class PostSheetImporterTest {
 	@Test
 	@DisplayName("合法行全部导入成功并批量调用 createBatchFromImport")
 	void doImport_whenRowsValid_importsAllRows() throws IOException {
-		MockMultipartFile file = buildImportFile(List.of(validRow("RD", "DEV", "研发岗"), validRow("RD", "OPS", "运维岗")));
+		MockMultipartFile file = buildImportFile(List.of(validRow("DEV", "研发岗"), validRow("OPS", "运维岗")));
 		when(deptLookupSupport.resolveIdsByCodes(anyList(), any())).thenReturn(Map.of("RD", 2L));
 		when(sysPostMapper.selectReferenceByDeptPostPairs(anyList())).thenReturn(List.of());
 
@@ -109,7 +109,7 @@ class PostSheetImporterTest {
 	@Test
 	@DisplayName("文件内 (deptCode, postCode) 重复时返回行级错误")
 	void doImport_whenCompositeKeyDuplicatedInFile_returnsDuplicateError() throws IOException {
-		MockMultipartFile file = buildImportFile(List.of(validRow("RD", "DUP", "岗位A"), validRow("RD", "DUP", "岗位B")));
+		MockMultipartFile file = buildImportFile(List.of(validRow("DUP", "岗位A"), validRow("DUP", "岗位B")));
 		when(deptLookupSupport.resolveIdsByCodes(anyList(), any())).thenReturn(Map.of("RD", 2L));
 		when(sysPostMapper.selectReferenceByDeptPostPairs(anyList())).thenReturn(List.of());
 
@@ -124,7 +124,7 @@ class PostSheetImporterTest {
 	@Test
 	@DisplayName("部门存在但不可分配时返回行级错误且不落库")
 	void doImport_whenDeptExistsButNotAssignable_returnsRowError() throws IOException {
-		MockMultipartFile file = buildImportFile(List.of(validRow("RD", "DEV", "研发岗")));
+		MockMultipartFile file = buildImportFile(List.of(validRow("DEV", "研发岗")));
 		when(deptLookupSupport.resolveIdsByCodes(anyList(), any())).thenReturn(Map.of("RD", 2L));
 		when(sysPostMapper.selectAssignableDeptIds(List.of(2L))).thenReturn(List.of());
 		when(sysPostMapper.selectReferenceByDeptPostPairs(anyList())).thenReturn(List.of());
@@ -141,7 +141,7 @@ class PostSheetImporterTest {
 	@Test
 	@DisplayName("(deptCode, postCode) 在库中已存在时返回行级错误")
 	void doImport_whenCompositeKeyExistsInDb_returnsExistsError() throws IOException {
-		MockMultipartFile file = buildImportFile(List.of(validRow("RD", "DEV", "研发岗")));
+		MockMultipartFile file = buildImportFile(List.of(validRow("DEV", "研发岗")));
 		when(deptLookupSupport.resolveIdsByCodes(anyList(), any())).thenReturn(Map.of("RD", 2L));
 		PostDeptCodePairPO existing = new PostDeptCodePairPO();
 		existing.setDeptId(2L);

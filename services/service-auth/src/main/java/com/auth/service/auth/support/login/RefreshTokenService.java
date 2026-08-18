@@ -12,11 +12,13 @@ import com.auth.service.auth.model.value.login.LogoutSessionHint;
 import com.auth.service.auth.model.value.login.RefreshSessionResult;
 import com.auth.service.auth.model.value.login.TokenPair;
 import com.auth.service.auth.support.redis.AuthProfileRedisCache;
+import com.auth.service.auth.support.session.RefreshRotateCommand;
+import com.auth.service.auth.support.session.RefreshRotateOutcome;
+import com.auth.service.auth.support.session.RefreshRotateResult;
 import com.auth.service.auth.support.session.UserSessionRedisStore;
 import com.auth.service.auth.support.token.TokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -31,6 +33,11 @@ import java.util.Optional;
 @Slf4j
 @Service
 public class RefreshTokenService {
+
+	/**
+	 * 上一轮 refresh 在短窗内可幂等复用（多标签并发）
+	 */
+	private static final long REFRESH_REUSE_GRACE_MS = 30_000L;
 
 	private final AuthProfileRedisCache authProfileRedisCache;
 
@@ -59,39 +66,62 @@ public class RefreshTokenService {
 	 */
 	public RefreshSessionResult refreshToken(String refreshToken, HttpServletRequest request) {
 		try {
-			// 如果刷新令牌为空，则抛出异常
 			if (CharSequenceUtil.isBlank(refreshToken)) {
 				throw new AuthBusinessException(AuthResultCode.REFRESH_TOKEN_MISSING);
 			}
 
-			// 解析刷新令牌
 			JwtUserToken refreshUserToken = tokenService.parseRefreshToken(refreshToken);
-			// 获取用户ID
 			Long refreshUserId = refreshUserToken.getUserId();
-			// 获取会话ID
 			String refreshJti = refreshUserToken.getJti();
 
-			// 加载用户会话索引
 			UserSessionIndex sessionIndex = userSessionRedisStore.loadUserSessionIndex(refreshJti)
 				.orElseThrow(() -> new AuthBusinessException(AuthResultCode.REFRESH_TOKEN_EXPIRED));
-			// 断言刷新令牌与会话中存储的哈希及过期时间一致
-			assertRefreshTokenMatches(refreshUserId, refreshJti, sessionIndex, refreshToken);
+			Long sessionUserId = sessionIndex.getUserId();
+			if (!Objects.equals(refreshUserId, sessionUserId)) {
+				long indexUserId = Objects.requireNonNullElse(sessionUserId, refreshUserId);
+				userSessionRedisStore.terminateSession(indexUserId, refreshJti);
+				throw new AuthBusinessException(AuthResultCode.REFRESH_TOKEN_EXPIRED);
+			}
 
-			// 加载用户画像
 			AuthProfile profile = authProfileRedisCache.loadCachedProfile(refreshUserId)
 				.orElseThrow(() -> new AuthBusinessException(AuthResultCode.REFRESH_TOKEN_EXPIRED));
-			// 获取权限版本
 			Long permVersion = Objects.requireNonNull(profile.getPermVersion(), "permVersion must not be null");
 
-			// 旋转刷新令牌
-			TokenPair tokenPair = tokenService.buildTokenPair(refreshUserId, refreshJti, permVersion);
-			rotateRefreshInSession(refreshJti, tokenPair.refreshToken());
+			TokenPair candidate = tokenService.buildTokenPair(refreshUserId, refreshJti, permVersion);
+			long refreshExpiredSeconds = jwtProperties.getRefreshExpired();
+			RefreshRotateResult rotateResult = userSessionRedisStore.rotateRefresh(RefreshRotateCommand.builder()
+				.jti(refreshJti)
+				.requestRefreshHash(MD5.create().digestHex16(refreshToken))
+				.newRefreshHash(MD5.create().digestHex16(candidate.refreshToken()))
+				.newRefreshExpiresAtMs(System.currentTimeMillis() + refreshExpiredSeconds * 1000L)
+				.ttl(Duration.ofSeconds(refreshExpiredSeconds))
+				.graceMs(REFRESH_REUSE_GRACE_MS)
+				.accessToken(candidate.accessToken())
+				.refreshToken(candidate.refreshToken())
+				.accessExpiresAtMs(candidate.accessExpiresAt().toEpochMilli())
+				.build());
 
-			// 获取是否记住我
+			RefreshRotateOutcome outcome = rotateResult.outcome();
+			TokenPair tokenPair;
+			if (outcome == RefreshRotateOutcome.ROTATED) {
+				tokenPair = candidate;
+			}
+			else if (outcome == RefreshRotateOutcome.REUSED) {
+				tokenPair = TokenPair.builder()
+					.accessToken(rotateResult.accessToken())
+					.refreshToken(rotateResult.refreshToken())
+					.accessExpiresAt(rotateResult.accessExpiresAt())
+					.build();
+			}
+			else {
+				if (outcome == RefreshRotateOutcome.MISMATCH) {
+					userSessionRedisStore.terminateSession(refreshUserId, refreshJti);
+				}
+				throw new AuthBusinessException(AuthResultCode.REFRESH_TOKEN_EXPIRED);
+			}
+
 			boolean rememberMe = sessionIndex.getRememberMe() != null && sessionIndex.getRememberMe();
-			// 记录成功刷新令牌
 			loginAuditService.auditRefreshTokenSuccess(request, refreshUserId, refreshJti);
-			// 返回刷新令牌结果
 			return RefreshSessionResult.builder()
 				.tokenPair(tokenPair)
 				.rememberMe(rememberMe)
@@ -124,51 +154,6 @@ public class RefreshTokenService {
 	}
 
 	/**
-	 * 断言刷新令牌与会话中存储的哈希及过期时间一致
-	 * @param userId 令牌声明的用户 ID（用于活跃集合移除）
-	 * @param jti 会话 ID
-	 * @param sessionIndex 会话索引
-	 * @param refreshToken 刷新令牌
-	 */
-	private void assertRefreshTokenMatches(Long userId, String jti, @NotNull UserSessionIndex sessionIndex,
-			String refreshToken) {
-		Long expiresAt = sessionIndex.getRefreshTokenExpiresAt();
-		Long sessionUserId = sessionIndex.getUserId();
-		String redisHash = sessionIndex.getRefreshTokenHash();
-		String requestHash = MD5.create().digestHex16(refreshToken);
-		long now = System.currentTimeMillis();
-
-		if (expiresAt == null || expiresAt <= now) {
-			throw new AuthBusinessException(AuthResultCode.REFRESH_TOKEN_EXPIRED);
-		}
-		if (!Objects.equals(userId, sessionUserId)) {
-			long indexUserId = Objects.requireNonNullElse(sessionUserId, userId);
-			userSessionRedisStore.terminateSession(indexUserId, jti);
-			throw new AuthBusinessException(AuthResultCode.REFRESH_TOKEN_EXPIRED);
-		}
-
-		boolean hashMatches = CharSequenceUtil.isNotBlank(redisHash) && Objects.equals(redisHash, requestHash);
-		if (!hashMatches) {
-			userSessionRedisStore.terminateSession(userId, jti);
-			throw new AuthBusinessException(AuthResultCode.REFRESH_TOKEN_EXPIRED);
-		}
-	}
-
-	/**
-	 * 将新的 Refresh Token 哈希与过期时间写入会话索引
-	 * @param jti 会话 ID
-	 * @param refreshToken 新的刷新令牌明文
-	 */
-	private void rotateRefreshInSession(String jti, String refreshToken) {
-		String refreshTokenHash = MD5.create().digestHex16(refreshToken);
-		long refreshExpiredSeconds = jwtProperties.getRefreshExpired();
-		long refreshTokenExpiresAt = System.currentTimeMillis() + refreshExpiredSeconds * 1000L;
-		Duration ttl = Duration.ofSeconds(refreshExpiredSeconds);
-
-		userSessionRedisStore.updateRefreshInfo(jti, refreshTokenHash, refreshTokenExpiresAt, ttl);
-	}
-
-	/**
 	 * 按刷新令牌撤销服务端会话（登出等场景；令牌无效时静默跳过）
 	 * @param refreshToken 刷新令牌
 	 */
@@ -183,7 +168,6 @@ public class RefreshTokenService {
 			Long userId = userToken.getUserId();
 			userSessionRedisStore.terminateSession(userId, jti);
 
-			// 删除刷新令牌对应的服务端会话
 			LogoutSessionHint logoutSessionHint = LogoutSessionHint.builder().userId(userId).jti(jti).build();
 			return Optional.of(logoutSessionHint);
 		}

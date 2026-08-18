@@ -13,13 +13,14 @@ import com.auth.service.auth.service.AuthorizationInvalidationService;
 import com.auth.service.auth.support.invalidation.AuthProfileMaterializationService;
 import com.auth.service.auth.support.invalidation.UserInvalidationRepository;
 import com.auth.service.auth.support.invalidation.impact.ImpactResolverRegistry;
-import com.auth.service.auth.support.invalidation.policy.UserInvalidationPolicy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 授权失效编排唯一入口实现
@@ -36,8 +37,6 @@ public class AuthorizationInvalidationServiceImpl implements AuthorizationInvali
 	private final ImpactResolverRegistry impactResolverRegistry;
 
 	private final UserInvalidationRepository userInvalidationRepository;
-
-	private final UserInvalidationPolicy userInvalidationPolicy;
 
 	private final AuthProfileMaterializationService authProfileMaterializationService;
 
@@ -85,7 +84,7 @@ public class AuthorizationInvalidationServiceImpl implements AuthorizationInvali
 			List<UserInvalidationStatePO> invalidationStateList = userInvalidationRepository
 				.loadByUserIds(impactedUserIds);
 			// 有行：升版本并刷画像；无行：仅驱逐
-			UserInvalidationBuckets buckets = userInvalidationPolicy.partition(impactedUserIds, invalidationStateList);
+			UserInvalidationBuckets buckets = partition(impactedUserIds, invalidationStateList);
 			Set<Long> evictOnlyUserIds = buckets.evictOnlyUserIds();
 			Set<Long> versionBumpUserIds = buckets.versionBumpUserIds();
 
@@ -116,6 +115,31 @@ public class AuthorizationInvalidationServiceImpl implements AuthorizationInvali
 			authorizationInvalidationEventService.releaseClaim(eventId);
 			throw ex;
 		}
+	}
+
+	/**
+	 * 按影响面与状态快照分桶：有用户行则递增版本并刷画像；库中已无行则仅驱逐缓存
+	 * @param impactedUserIds 失效影响用户 ID
+	 * @param states 用户状态快照（可与影响面部分重合）
+	 * @return 分桶结果
+	 */
+	private UserInvalidationBuckets partition(Set<Long> impactedUserIds, List<UserInvalidationStatePO> states) {
+		Set<Long> versionBumpUserIds = CollUtil.emptyIfNull(states)
+			.stream()
+			.map(UserInvalidationStatePO::getUserId)
+			.filter(Objects::nonNull)
+			.collect(Collectors.toSet());
+
+		Set<Long> evictOnlyUserIds = CollUtil.emptyIfNull(impactedUserIds)
+			.stream()
+			.filter(Objects::nonNull)
+			.filter(id -> !versionBumpUserIds.contains(id))
+			.collect(Collectors.toSet());
+
+		return UserInvalidationBuckets.builder()
+			.versionBumpUserIds(versionBumpUserIds)
+			.evictOnlyUserIds(evictOnlyUserIds)
+			.build();
 	}
 
 }

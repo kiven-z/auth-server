@@ -8,8 +8,14 @@
         d.created_at, d.updated_at, d.version, d.remark
         FROM example_order d
         <where>
+             <if test="query != null and query.id != null">
+                AND d.id = #{query.id}
+            </if>
             <if test="query != null and query.title != null and query.title != ''">
                 AND d.title LIKE CONCAT('%', #{query.title}, '%')
+            </if>
+            <if test="query != null and query.deptId != null">
+                AND d.dept_id = #{query.deptId}
             </if>
         </where>
         ORDER BY d.id
