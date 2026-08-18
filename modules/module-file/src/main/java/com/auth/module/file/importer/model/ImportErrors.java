@@ -5,7 +5,7 @@ import lombok.experimental.UtilityClass;
 import java.util.List;
 
 /**
- * {@link ImportRowError} 工厂：按错误类型生成英文 message
+ * {@link ImportRowError} 工厂：按错误类型生成中文 message
  *
  * @author Bunny
  */
@@ -39,7 +39,7 @@ public class ImportErrors {
 	 * @return 行级错误
 	 */
 	public static ImportRowError required(int rowNum, String field) {
-		String message = "Row " + rowNum + ": " + field + " is required";
+		String message = "第" + rowNum + "行：" + field + "不能为空";
 		return ImportRowError.builder()
 			.rowIndex(rowNum)
 			.message(message)
@@ -56,7 +56,7 @@ public class ImportErrors {
 	 * @return 行级错误
 	 */
 	public static ImportRowError duplicateInFile(int rowNum, String field, String value) {
-		String message = "Row " + rowNum + ": " + field + " '" + value + "' duplicated in file";
+		String message = "第" + rowNum + "行：" + field + "「" + value + "」在文件内重复";
 		return ImportRowError.builder()
 			.rowIndex(rowNum)
 			.message(message)
@@ -73,8 +73,7 @@ public class ImportErrors {
 	 * @return 行级错误
 	 */
 	public static ImportRowError duplicatePostInFile(int rowNum, String postCode, String deptCode) {
-		String message = "Row " + rowNum + ": postCode '" + postCode + "' duplicated in file for deptCode '" + deptCode
-				+ "'";
+		String message = "第" + rowNum + "行：postCode「" + postCode + "」在文件内重复（deptCode「" + deptCode + "」）";
 		return ImportRowError.builder()
 			.rowIndex(rowNum)
 			.message(message)
@@ -91,7 +90,7 @@ public class ImportErrors {
 	 * @return 行级错误
 	 */
 	public static ImportRowError alreadyExists(int rowNum, String field, String value) {
-		String message = "Row " + rowNum + ": " + field + " '" + value + "' already exists";
+		String message = "第" + rowNum + "行：" + field + "「" + value + "」已存在";
 		return ImportRowError.builder()
 			.rowIndex(rowNum)
 			.message(message)
@@ -108,8 +107,7 @@ public class ImportErrors {
 	 * @return 行级错误
 	 */
 	public static ImportRowError alreadyExistsPost(int rowNum, String postCode, String deptCode) {
-		String message = "Row " + rowNum + ": postCode '" + postCode + "' already exists for deptCode '" + deptCode
-				+ "'";
+		String message = "第" + rowNum + "行：postCode「" + postCode + "」已存在（deptCode「" + deptCode + "」）";
 		return ImportRowError.builder()
 			.rowIndex(rowNum)
 			.message(message)
@@ -126,7 +124,7 @@ public class ImportErrors {
 	 * @return 行级错误
 	 */
 	public static ImportRowError invalidFormat(int rowNum, String field, String value) {
-		String message = "Row " + rowNum + ": " + field + " '" + value + "' does not match required format";
+		String message = "第" + rowNum + "行：" + field + "「" + value + "」格式不符合约定";
 		return ImportRowError.builder()
 			.rowIndex(rowNum)
 			.message(message)
@@ -143,7 +141,7 @@ public class ImportErrors {
 	 * @return 行级错误
 	 */
 	public static ImportRowError referenceNotFound(int rowNum, String field, String value) {
-		String message = "Row " + rowNum + ": " + field + " '" + value + "' not found";
+		String message = "第" + rowNum + "行：" + field + "「" + value + "」不存在";
 		return ImportRowError.builder()
 			.rowIndex(rowNum)
 			.message(message)
@@ -160,7 +158,7 @@ public class ImportErrors {
 	 * @return 行级错误
 	 */
 	public static ImportRowError referenceUnavailable(int rowNum, String field, String value) {
-		String message = "Row " + rowNum + ": " + field + " '" + value + "' does not exist or is unavailable";
+		String message = "第" + rowNum + "行：" + field + "「" + value + "」不存在或不可用";
 		return ImportRowError.builder()
 			.rowIndex(rowNum)
 			.message(message)
@@ -177,7 +175,7 @@ public class ImportErrors {
 	 * @return 行级错误
 	 */
 	public static ImportRowError invalidValue(int rowNum, String field, String value) {
-		String message = "Row " + rowNum + ": " + field + " '" + value + "' is invalid";
+		String message = "第" + rowNum + "行：" + field + "「" + value + "」无效";
 		return ImportRowError.builder()
 			.rowIndex(rowNum)
 			.message(message)
@@ -192,7 +190,7 @@ public class ImportErrors {
 	 * @return 行级错误
 	 */
 	public static ImportRowError statusRequired(int rowNum) {
-		String message = "Row " + rowNum + ": status is required";
+		String message = "第" + rowNum + "行：status不能为空";
 		return ImportRowError.builder()
 			.rowIndex(rowNum)
 			.message(message)
@@ -208,7 +206,7 @@ public class ImportErrors {
 	 * @return 行级错误
 	 */
 	public static ImportRowError birthdayInvalid(int rowNum, String value) {
-		String message = "Row " + rowNum + ": birthday '" + value + "' is invalid, expected yyyy-MM-dd";
+		String message = "第" + rowNum + "行：birthday「" + value + "」无效，应为 yyyy-MM-dd";
 		return ImportRowError.builder()
 			.rowIndex(rowNum)
 			.message(message)
@@ -226,7 +224,7 @@ public class ImportErrors {
 	 * @return 行级错误
 	 */
 	public static ImportRowError lengthOutOfRange(int rowNum, String field, int min, int max) {
-		String message = "Row " + rowNum + ": " + field + " length must be between " + min + " and " + max;
+		String message = "第" + rowNum + "行：" + field + "长度须在 " + min + "～" + max + " 之间";
 		return ImportRowError.builder()
 			.rowIndex(rowNum)
 			.message(message)
@@ -241,7 +239,7 @@ public class ImportErrors {
 	 * @return 行级错误
 	 */
 	public static ImportRowError rowLimitExceeded(int max) {
-		String message = "Import row count exceeds limit: max=" + max;
+		String message = "导入行数超过上限：最多 " + max + " 行";
 		return ImportRowError.builder()
 			.rowIndex(0)
 			.message(message)

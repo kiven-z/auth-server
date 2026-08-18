@@ -5,9 +5,11 @@ import com.auth.module.platform.persistence.model.UserEntity;
 import com.auth.module.security.contract.api.granttable.GrantTableSubjectType;
 import com.auth.service.system.admin.mapper.admin.role.GrantTableMapper;
 import com.auth.service.system.admin.mapper.admin.user.SysUserMapper;
+import com.auth.service.system.admin.model.form.user.SysUserBatchStatusForm;
 import com.auth.service.system.admin.model.form.user.SysUserForm;
 import com.auth.service.system.admin.support.user.UserAvatarUpdateSupport;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
+import com.auth.service.system.authorization.dispatch.trigger.UserAuthorizationInvalidationTrigger;
 import com.auth.service.system.authorization.dispatch.trigger.UserSessionRevocationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.auth.service.system.common.exception.code.SystemCommonResultCode;
@@ -52,6 +54,9 @@ class SysUserServiceImplTest {
 	private PasswordEncoder passwordEncoder;
 
 	@Mock
+	private UserAuthorizationInvalidationTrigger userAuthorizationInvalidationTrigger;
+
+	@Mock
 	private UserSessionRevocationTrigger userSessionRevocationTrigger;
 
 	@Mock
@@ -77,7 +82,7 @@ class SysUserServiceImplTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		sysUserService = spy(new SysUserServiceImpl(grantTableMapper, userReferenceChecker, userAvatarUpdateSupport,
-				userSessionRevocationTrigger, passwordEncoder));
+				userAuthorizationInvalidationTrigger, userSessionRevocationTrigger, passwordEncoder));
 		Field baseMapperField = CrudRepository.class.getDeclaredField("baseMapper");
 		baseMapperField.setAccessible(true);
 		baseMapperField.set(sysUserService, sysUserMapper);
@@ -151,16 +156,61 @@ class SysUserServiceImplTest {
 		verify(userReferenceChecker).requireAbsentUserBusinessKeys(eq(List.of("alice")),
 				eq(List.of("alice@example.com")), eq(List.of("13800000000")), anyList(), eq(USER_ID));
 		verify(sysUserService).updateById(existing);
+		verify(userAuthorizationInvalidationTrigger, never()).submitByUserIds(any(), any());
+		verify(userSessionRevocationTrigger, never()).revokeAllSessionsAfterCommit(any());
 	}
 
 	@Test
-	@DisplayName("批量删除：清理 grant_table 后物理删除并踢出会话")
+	@DisplayName("更新用户：状态变更时提交授权失效并踢出会话")
+	void updateStatusChangeSubmitsInvalidationAndRevokesSessions() {
+		SysUserForm form = buildCreateForm();
+		form.setId(USER_ID);
+		form.setStatus(0);
+		UserEntity existing = new UserEntity();
+		existing.setId(USER_ID);
+		existing.setUsername("alice");
+		existing.setEmail("alice@example.com");
+		existing.setPhone("13800000000");
+		existing.setStatus(1);
+		when(userReferenceChecker.getExistingActive(USER_ID)).thenReturn(existing);
+		lenient().doReturn(true).when(sysUserService).updateById(existing);
+
+		sysUserService.update(form);
+
+		verify(userAuthorizationInvalidationTrigger).submitByUserIds(List.of(USER_ID), "update");
+		verify(userSessionRevocationTrigger).revokeAllSessionsAfterCommit(List.of(USER_ID));
+	}
+
+	@Test
+	@DisplayName("更新用户：身份字段变更时提交授权失效并踢出会话")
+	void updateIdentityChangeSubmitsInvalidationAndRevokesSessions() {
+		SysUserForm form = buildCreateForm();
+		form.setId(USER_ID);
+		form.setEmail("alice-new@example.com");
+		UserEntity existing = new UserEntity();
+		existing.setId(USER_ID);
+		existing.setUsername("alice");
+		existing.setEmail("alice@example.com");
+		existing.setPhone("13800000000");
+		existing.setStatus(1);
+		when(userReferenceChecker.getExistingActive(USER_ID)).thenReturn(existing);
+		lenient().doReturn(true).when(sysUserService).updateById(existing);
+
+		sysUserService.update(form);
+
+		verify(userAuthorizationInvalidationTrigger).submitByUserIds(List.of(USER_ID), "update");
+		verify(userSessionRevocationTrigger).revokeAllSessionsAfterCommit(List.of(USER_ID));
+	}
+
+	@Test
+	@DisplayName("批量删除：提交失效、清理 grant_table 后物理删除并踢出会话")
 	void deleteByIdsPurgesGrantTableAndPhysicallyDeletes() {
 		List<Long> ids = List.of(USER_ID);
 
 		sysUserService.deleteByIds(ids);
 
 		verify(userReferenceChecker).requireOperable(ids);
+		verify(userAuthorizationInvalidationTrigger).submitByUserIds(ids, "delete");
 		verify(grantTableMapper).deleteBySubjectIds(GrantTableSubjectType.USER.name(), ids);
 		verify(sysUserMapper).deleteByIds(ids);
 		verify(userSessionRevocationTrigger).revokeAllSessionsAfterCommit(ids);
@@ -174,9 +224,25 @@ class SysUserServiceImplTest {
 		sysUserService.deleteByIds(ids);
 
 		verify(userReferenceChecker).requireOperable(ids);
+		verify(userAuthorizationInvalidationTrigger).submitByUserIds(ids, "delete");
 		verify(grantTableMapper).deleteBySubjectIds(GrantTableSubjectType.USER.name(), ids);
 		verify(sysUserMapper).deleteByIds(ids);
 		verify(userSessionRevocationTrigger).revokeAllSessionsAfterCommit(ids);
+	}
+
+	@Test
+	@DisplayName("批量启停：提交授权失效并踢出会话")
+	void batchUpdateStatusSubmitsInvalidationAndRevokesSessions() {
+		SysUserBatchStatusForm form = new SysUserBatchStatusForm();
+		form.setIds(List.of(USER_ID));
+		form.setStatus(0);
+		lenient().doReturn(true).when(sysUserService).updateBatchById(anyList());
+
+		sysUserService.batchUpdateStatus(form);
+
+		verify(userReferenceChecker).requireOperable(List.of(USER_ID));
+		verify(userAuthorizationInvalidationTrigger).submitByUserIds(List.of(USER_ID), "update");
+		verify(userSessionRevocationTrigger).revokeAllSessionsAfterCommit(List.of(USER_ID));
 	}
 
 }

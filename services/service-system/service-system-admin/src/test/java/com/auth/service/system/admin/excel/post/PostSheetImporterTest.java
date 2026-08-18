@@ -117,7 +117,7 @@ class PostSheetImporterTest {
 
 		assertThat(result.success()).isFalse();
 		assertThat(result.errors()).hasSize(2);
-		assertThat(result.errors()).allMatch(error -> error.message().contains("duplicated in file"));
+		assertThat(result.errors()).allMatch(error -> error.message().contains("在文件内重复"));
 		verify(sysPostService, never()).createBatchFromImport(any());
 	}
 
@@ -134,7 +134,7 @@ class PostSheetImporterTest {
 		assertThat(result.success()).isFalse();
 		assertThat(result.importedCount()).isZero();
 		assertThat(result.errors()).hasSize(1);
-		assertThat(result.errors().get(0).message()).contains("does not exist or is unavailable");
+		assertThat(result.errors().get(0).message()).contains("不存在或不可用");
 		verify(sysPostService, never()).createBatchFromImport(any());
 	}
 
@@ -152,7 +152,7 @@ class PostSheetImporterTest {
 
 		assertThat(result.success()).isFalse();
 		assertThat(result.errors()).hasSize(1);
-		assertThat(result.errors().get(0).message()).contains("already exists");
+		assertThat(result.errors().get(0).message()).contains("已存在");
 		verify(sysPostService, never()).createBatchFromImport(any());
 	}
 

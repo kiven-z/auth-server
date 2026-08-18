@@ -38,7 +38,7 @@ class RoleRowValidatorTest {
 		List<ImportRowError> errors = RoleRowValidator.validate(parsedRow("ADMIN", "启用"), 1, context);
 
 		assertThat(errors).hasSize(1);
-		assertThat(errors.get(0).message()).contains("duplicated in file");
+		assertThat(errors.get(0).message()).contains("在文件内重复");
 	}
 
 	@Test
@@ -52,7 +52,7 @@ class RoleRowValidatorTest {
 		List<ImportRowError> errors = RoleRowValidator.validate(parsedRow("admin", "启用"), 2, context);
 
 		assertThat(errors).hasSize(1);
-		assertThat(errors.get(0).message()).contains("does not match required format");
+		assertThat(errors.get(0).message()).contains("格式不符合约定");
 	}
 
 	@Test
@@ -67,7 +67,7 @@ class RoleRowValidatorTest {
 
 		assertThat(errors).hasSize(1);
 		assertThat(errors.get(0).message()).contains("status");
-		assertThat(errors.get(0).message()).contains("invalid");
+		assertThat(errors.get(0).message()).contains("无效");
 	}
 
 }

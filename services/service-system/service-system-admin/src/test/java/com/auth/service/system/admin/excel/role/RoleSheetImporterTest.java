@@ -94,8 +94,8 @@ class RoleSheetImporterTest {
 		assertThat(result.success()).isFalse();
 		assertThat(result.importedCount()).isZero();
 		assertThat(result.errors()).hasSize(2);
-		assertThat(result.errors().get(0).message()).contains("roleCode is required");
-		assertThat(result.errors().get(1).message()).contains("roleName is required");
+		assertThat(result.errors().get(0).message()).contains("roleCode不能为空");
+		assertThat(result.errors().get(1).message()).contains("roleName不能为空");
 		verify(sysRoleService, never()).createBatchFromImport(any());
 	}
 
@@ -109,7 +109,7 @@ class RoleSheetImporterTest {
 
 		assertThat(result.success()).isFalse();
 		assertThat(result.errors()).hasSize(1);
-		assertThat(result.errors().get(0).message()).contains("does not match required format");
+		assertThat(result.errors().get(0).message()).contains("格式不符合约定");
 		verify(sysRoleService, never()).createBatchFromImport(any());
 	}
 
@@ -123,7 +123,7 @@ class RoleSheetImporterTest {
 
 		assertThat(result.success()).isFalse();
 		assertThat(result.errors()).hasSize(2);
-		assertThat(result.errors()).allMatch(error -> error.message().contains("duplicated in file"));
+		assertThat(result.errors()).allMatch(error -> error.message().contains("在文件内重复"));
 		verify(sysRoleService, never()).createBatchFromImport(any());
 	}
 
@@ -139,7 +139,7 @@ class RoleSheetImporterTest {
 
 		assertThat(result.success()).isFalse();
 		assertThat(result.errors()).hasSize(1);
-		assertThat(result.errors().get(0).message()).contains("already exists");
+		assertThat(result.errors().get(0).message()).contains("已存在");
 		verify(sysRoleService, never()).createBatchFromImport(any());
 	}
 

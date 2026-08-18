@@ -8,8 +8,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.time.Instant;
-
 /**
  * 密码历史日志详情
  *
@@ -28,9 +26,6 @@ public class LogUserPasswordHistoryDetailVO extends BaseResponse {
 
 	@Schema(title = "用户名")
 	private String username;
-
-	@Schema(title = "修改时间")
-	private Instant changeTime;
 
 	@Schema(title = "修改IP地址")
 	private String changeIp;

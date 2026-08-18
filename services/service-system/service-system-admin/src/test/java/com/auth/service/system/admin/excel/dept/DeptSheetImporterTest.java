@@ -102,8 +102,8 @@ class DeptSheetImporterTest {
 		assertThat(result.success()).isFalse();
 		assertThat(result.importedCount()).isZero();
 		assertThat(result.errors()).hasSize(2);
-		assertThat(result.errors().get(0).message()).contains("deptCode is required");
-		assertThat(result.errors().get(1).message()).contains("deptName is required");
+		assertThat(result.errors().get(0).message()).contains("deptCode不能为空");
+		assertThat(result.errors().get(1).message()).contains("deptName不能为空");
 		verify(sysDeptService, never()).createBatchFromImport(any());
 	}
 
@@ -119,7 +119,7 @@ class DeptSheetImporterTest {
 
 		assertThat(result.success()).isFalse();
 		assertThat(result.errors()).hasSize(2);
-		assertThat(result.errors()).allMatch(error -> error.message().contains("duplicated in file"));
+		assertThat(result.errors()).allMatch(error -> error.message().contains("在文件内重复"));
 		verify(sysDeptService, never()).createBatchFromImport(any());
 	}
 
@@ -136,7 +136,7 @@ class DeptSheetImporterTest {
 
 		assertThat(result.success()).isFalse();
 		assertThat(result.errors()).hasSize(1);
-		assertThat(result.errors().get(0).message()).contains("already exists");
+		assertThat(result.errors().get(0).message()).contains("已存在");
 		verify(sysDeptService, never()).createBatchFromImport(any());
 	}
 

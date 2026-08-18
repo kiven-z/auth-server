@@ -18,6 +18,7 @@ import com.auth.service.system.admin.model.form.user.SysUserForm;
 import com.auth.service.system.admin.service.admin.SysUserService;
 import com.auth.service.system.admin.support.user.UserAvatarUpdateSupport;
 import com.auth.service.system.admin.support.user.UserReferenceChecker;
+import com.auth.service.system.authorization.dispatch.trigger.UserAuthorizationInvalidationTrigger;
 import com.auth.service.system.authorization.dispatch.trigger.UserSessionRevocationTrigger;
 import com.auth.service.system.common.exception.SystemBusinessException;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -52,6 +53,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 	private final UserReferenceChecker userReferenceChecker;
 
 	private final UserAvatarUpdateSupport userAvatarUpdateSupport;
+
+	private final UserAuthorizationInvalidationTrigger userAuthorizationInvalidationTrigger;
 
 	private final UserSessionRevocationTrigger userSessionRevocationTrigger;
 
@@ -103,12 +106,13 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 		userReferenceChecker.requireAbsentUserBusinessKeys(List.of(username), List.of(email), List.of(phone),
 				employeeNos, id);
 
-		// 敏感字段变更时踢出全部会话
-		boolean revoke = FieldChangeSupport.anyChanged(FieldChangeSupport.codeChanged(existing.getUsername(), username),
+		boolean sensitiveChanged = FieldChangeSupport.anyChanged(
+				FieldChangeSupport.valueChanged(existing.getStatus(), form.getStatus()),
+				FieldChangeSupport.codeChanged(existing.getUsername(), username),
 				FieldChangeSupport.codeChanged(existing.getEmail(), email),
-				FieldChangeSupport.codeChanged(existing.getPhone(), phone),
-				FieldChangeSupport.valueChanged(existing.getStatus(), form.getStatus()));
-		if (revoke) {
+				FieldChangeSupport.codeChanged(existing.getPhone(), phone));
+		if (sensitiveChanged) {
+			userAuthorizationInvalidationTrigger.submitByUserIds(userIds, "update");
 			userSessionRevocationTrigger.revokeAllSessionsAfterCommit(userIds);
 		}
 
@@ -135,6 +139,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 		}
 
 		userReferenceChecker.requireOperable(idsToDelete);
+		userAuthorizationInvalidationTrigger.submitByUserIds(idsToDelete, "delete");
 		grantTableMapper.deleteBySubjectIds(GrantTableSubjectType.USER.name(), idsToDelete);
 		removeByIds(idsToDelete);
 		userSessionRevocationTrigger.revokeAllSessionsAfterCommit(idsToDelete);
@@ -164,6 +169,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, UserEntity> i
 		}).toList();
 		super.updateBatchById(updates);
 
+		userAuthorizationInvalidationTrigger.submitByUserIds(idsToUpdate, "update");
 		userSessionRevocationTrigger.revokeAllSessionsAfterCommit(idsToUpdate);
 	}
 

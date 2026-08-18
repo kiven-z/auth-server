@@ -32,7 +32,7 @@ class ImportRowValidatorTest {
 		assertThat(roleName).isNull();
 		assertThat(v.failed()).isTrue();
 		assertThat(errors).hasSize(1);
-		assertThat(errors.get(0).message()).isEqualTo("Row 1: roleCode is required");
+		assertThat(errors.get(0).message()).isEqualTo("第1行：roleCode不能为空");
 	}
 
 	@Test
@@ -44,18 +44,18 @@ class ImportRowValidatorTest {
 		v.unique("admin", Set.of("admin"), Set.of("admin"), "username");
 
 		assertThat(v.failed()).isTrue();
-		assertThat(errors.get(0).message()).isEqualTo("Row 2: username 'admin' duplicated in file");
+		assertThat(errors.get(0).message()).isEqualTo("第2行：username「admin」在文件内重复");
 	}
 
 	@Test
-	@DisplayName("unique 库中已存在时报告 already exists")
+	@DisplayName("unique 库中已存在时报告已存在")
 	void unique_whenExistsInDb_reportsExists() {
 		List<ImportRowError> errors = new ArrayList<>();
 		ImportRowValidator v = ImportRowValidator.of(3, errors);
 
 		v.unique("admin", Set.of(), Set.of("admin"), "username");
 
-		assertThat(errors.get(0).message()).isEqualTo("Row 3: username 'admin' already exists");
+		assertThat(errors.get(0).message()).isEqualTo("第3行：username「admin」已存在");
 	}
 
 	@Test
@@ -66,7 +66,7 @@ class ImportRowValidatorTest {
 
 		v.assertThat(false, INVALID_FORMAT, "roleCode", "bad");
 
-		assertThat(errors.get(0).message()).isEqualTo("Row 4: roleCode 'bad' does not match required format");
+		assertThat(errors.get(0).message()).isEqualTo("第4行：roleCode「bad」格式不符合约定");
 	}
 
 	@Test
@@ -77,18 +77,18 @@ class ImportRowValidatorTest {
 
 		v.lengthBetween("short", 8, 18, "initialPassword");
 
-		assertThat(errors.get(0).message()).isEqualTo("Row 5: initialPassword length must be between 8 and 18");
+		assertThat(errors.get(0).message()).isEqualTo("第5行：initialPassword长度须在 8～18 之间");
 	}
 
 	@Test
-	@DisplayName("refExists 引用不存在时记录 not found")
+	@DisplayName("refExists 引用不存在时记录不存在")
 	void refExists_whenMissing_recordsNotFound() {
 		List<ImportRowError> errors = new ArrayList<>();
 		ImportRowValidator v = ImportRowValidator.of(6, errors);
 
 		v.refExists(null, "deptCode", "D99");
 
-		assertThat(errors.get(0).message()).isEqualTo("Row 6: deptCode 'D99' not found");
+		assertThat(errors.get(0).message()).isEqualTo("第6行：deptCode「D99」不存在");
 	}
 
 	@Test

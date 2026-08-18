@@ -41,7 +41,7 @@ class DeptRowValidatorTest {
 		List<ImportRowError> errors = DeptRowValidator.validate(parsedRow(null, "RD", "启用"), 1, context);
 
 		assertThat(errors).hasSize(1);
-		assertThat(errors.get(0).message()).contains("duplicated in file");
+		assertThat(errors.get(0).message()).contains("在文件内重复");
 	}
 
 	@Test
@@ -57,7 +57,7 @@ class DeptRowValidatorTest {
 
 		assertThat(errors).hasSize(1);
 		assertThat(errors.get(0).message()).contains("parentDeptCode");
-		assertThat(errors.get(0).message()).contains("not found");
+		assertThat(errors.get(0).message()).contains("不存在");
 	}
 
 	@Test
@@ -73,7 +73,7 @@ class DeptRowValidatorTest {
 
 		assertThat(errors).hasSize(1);
 		assertThat(errors.get(0).message()).contains("status");
-		assertThat(errors.get(0).message()).contains("invalid");
+		assertThat(errors.get(0).message()).contains("无效");
 	}
 
 }

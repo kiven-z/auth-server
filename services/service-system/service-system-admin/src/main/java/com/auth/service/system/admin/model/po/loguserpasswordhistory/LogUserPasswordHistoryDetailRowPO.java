@@ -37,9 +37,6 @@ public class LogUserPasswordHistoryDetailRowPO implements Serializable {
 	@Schema(title = "用户名")
 	private String username;
 
-	@Schema(title = "修改时间")
-	private Instant changeTime;
-
 	@Desensitized(DesensitizedType.IP_ADDRESS)
 	@Schema(title = "修改IP地址")
 	private String changeIp;

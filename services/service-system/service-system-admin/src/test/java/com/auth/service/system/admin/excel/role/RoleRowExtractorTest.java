@@ -24,7 +24,7 @@ class RoleRowExtractorTest {
 
 		assertThat(outcome.ok()).isFalse();
 		assertThat(outcome.errors()).hasSize(1);
-		assertThat(outcome.errors().get(0).message()).contains("roleCode is required");
+		assertThat(outcome.errors().get(0).message()).contains("roleCode不能为空");
 	}
 
 	@Test

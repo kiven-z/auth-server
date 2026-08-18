@@ -25,8 +25,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**
@@ -99,7 +98,7 @@ class AuthorizationInvalidationServiceTest {
 			.thenReturn(InvalidationIdempotencyGate.Claimed.builder().build());
 		when(impactResolverRegistry.resolve(any())).thenReturn(Set.of(1L));
 		when(userInvalidationRepository.loadByUserIds(Set.of(1L))).thenReturn(List.of(activeState()));
-		when(userInvalidationPolicy.partition(anyCollection())).thenReturn(
+		when(userInvalidationPolicy.partition(eq(Set.of(1L)), anyCollection())).thenReturn(
 				UserInvalidationBuckets.builder().versionBumpUserIds(Set.of(1L)).evictOnlyUserIds(Set.of()).build());
 		when(userInvalidationRepository.incrementPermVersionInBatches(Set.of(1L), BatchSizes.SIZE_500)).thenReturn(1);
 		when(authProfileMaterializationService.refreshInBatches(Set.of(1L), BatchSizes.SIZE_500)).thenReturn(1);

@@ -2,6 +2,7 @@ package com.auth.service.system.admin.model.form.user;
 
 import com.auth.common.web.valid.group.CreateGroup;
 import com.auth.common.web.valid.group.UpdateGroup;
+import com.auth.common.web.validation.ValidationPatterns;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.Getter;
@@ -35,6 +36,8 @@ public class SysUserForm implements Serializable {
 
 	@Schema(title = "初始密码")
 	@Size(min = 8, max = 18, message = "初始密码长度应为8-18位", groups = CreateGroup.class)
+	@Pattern(regexp = ValidationPatterns.PASSWORD_COMPLEXITY, message = "初始密码格式不符合约定（8-18位，数字、字母、符号至少两种）",
+			groups = CreateGroup.class)
 	@NotBlank(message = "初始密码不能为空", groups = CreateGroup.class)
 	private String initialPassword;
 

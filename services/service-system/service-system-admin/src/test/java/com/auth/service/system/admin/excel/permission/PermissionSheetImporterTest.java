@@ -96,8 +96,8 @@ class PermissionSheetImporterTest {
 		assertThat(result.success()).isFalse();
 		assertThat(result.importedCount()).isZero();
 		assertThat(result.errors()).hasSize(2);
-		assertThat(result.errors().get(0).message()).contains("permissionCode is required");
-		assertThat(result.errors().get(1).message()).contains("permissionName is required");
+		assertThat(result.errors().get(0).message()).contains("permissionCode不能为空");
+		assertThat(result.errors().get(1).message()).contains("permissionName不能为空");
 		verify(sysPermissionService, never()).createBatchFromImport(any());
 	}
 
@@ -111,7 +111,7 @@ class PermissionSheetImporterTest {
 
 		assertThat(result.success()).isFalse();
 		assertThat(result.errors()).hasSize(1);
-		assertThat(result.errors().get(0).message()).contains("does not match required format");
+		assertThat(result.errors().get(0).message()).contains("格式不符合约定");
 		verify(sysPermissionService, never()).createBatchFromImport(any());
 	}
 
@@ -126,7 +126,7 @@ class PermissionSheetImporterTest {
 
 		assertThat(result.success()).isFalse();
 		assertThat(result.errors()).hasSize(2);
-		assertThat(result.errors()).allMatch(error -> error.message().contains("duplicated in file"));
+		assertThat(result.errors()).allMatch(error -> error.message().contains("在文件内重复"));
 		verify(sysPermissionService, never()).createBatchFromImport(any());
 	}
 
@@ -143,7 +143,7 @@ class PermissionSheetImporterTest {
 
 		assertThat(result.success()).isFalse();
 		assertThat(result.errors()).hasSize(1);
-		assertThat(result.errors().get(0).message()).contains("already exists");
+		assertThat(result.errors().get(0).message()).contains("已存在");
 		verify(sysPermissionService, never()).createBatchFromImport(any());
 	}
 

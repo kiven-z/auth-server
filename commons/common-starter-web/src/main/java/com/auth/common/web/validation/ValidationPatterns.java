@@ -23,4 +23,9 @@ public class ValidationPatterns {
 	 */
 	public static final String UPPER_ALNUM_UNDERSCORE = "^[A-Z0-9_]+$";
 
+	/**
+	 * 8-18 位，且数字、字母、符号中至少包含两类
+	 */
+	public static final String PASSWORD_COMPLEXITY = "^(?:(?=.*[0-9])(?=.*[a-zA-Z])|(?=.*[0-9])(?=.*[^a-zA-Z0-9])|(?=.*[a-zA-Z])(?=.*[^a-zA-Z0-9])).{8,18}$";
+
 }

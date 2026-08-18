@@ -47,7 +47,7 @@ class RowRulesTest {
 		List<ImportRowError> errors = rule.check(new Parsed("admin"), ROW_NUM, new Context());
 
 		assertThat(errors).hasSize(1);
-		assertThat(errors.get(0).message()).contains("duplicated in file");
+		assertThat(errors.get(0).message()).contains("在文件内重复");
 	}
 
 	@Test
@@ -58,7 +58,7 @@ class RowRulesTest {
 		List<ImportRowError> errors = rule.check(new Parsed("short"), ROW_NUM, null);
 
 		assertThat(errors).hasSize(1);
-		assertThat(errors.get(0).message()).contains("length must be between");
+		assertThat(errors.get(0).message()).contains("长度须在");
 	}
 
 	@Value

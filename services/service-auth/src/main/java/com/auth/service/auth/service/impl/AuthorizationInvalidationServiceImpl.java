@@ -84,8 +84,8 @@ public class AuthorizationInvalidationServiceImpl implements AuthorizationInvali
 			// 查询用户状态快照
 			List<UserInvalidationStatePO> invalidationStateList = userInvalidationRepository
 				.loadByUserIds(impactedUserIds);
-			// 分区用户状态快照
-			UserInvalidationBuckets buckets = userInvalidationPolicy.partition(invalidationStateList);
+			// 有行：升版本并刷画像；无行：仅驱逐
+			UserInvalidationBuckets buckets = userInvalidationPolicy.partition(impactedUserIds, invalidationStateList);
 			Set<Long> evictOnlyUserIds = buckets.evictOnlyUserIds();
 			Set<Long> versionBumpUserIds = buckets.versionBumpUserIds();
 

@@ -1,11 +1,14 @@
 package com.auth.service.system.admin.excel.user;
 
+import com.auth.common.web.validation.ValidationPatterns;
+import com.auth.module.file.importer.model.ImportErrorCode;
 import com.auth.module.file.importer.model.ImportRowError;
 import com.auth.module.file.importer.rule.RowRule;
 import com.auth.module.file.importer.rule.RowRules;
 import lombok.experimental.UtilityClass;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * 用户导入 Validate 阶段：唯一性、长度等规则。
@@ -50,6 +53,9 @@ public class UserRowValidator {
 	 */
 	private static final int INITIAL_PASSWORD_MAX_LENGTH = 18;
 
+	private static final Pattern INITIAL_PASSWORD_COMPLEXITY_PATTERN = Pattern
+		.compile(ValidationPatterns.PASSWORD_COMPLEXITY);
+
 	/**
 	 * 用户导入校验规则
 	 */
@@ -69,7 +75,12 @@ public class UserRowValidator {
 					UserSheetImporter.Context::existingEmployeeNos),
 			// 初始密码长度范围校验
 			RowRules.lengthBetween(FIELD_INITIAL_PASSWORD, UserParsedRow::initialPassword, INITIAL_PASSWORD_MIN_LENGTH,
-					INITIAL_PASSWORD_MAX_LENGTH));
+					INITIAL_PASSWORD_MAX_LENGTH),
+			// 初始密码复杂度校验
+			RowRules.assertThat(FIELD_INITIAL_PASSWORD, UserParsedRow::initialPassword, row -> {
+				String password = row.initialPassword();
+				return password != null && INITIAL_PASSWORD_COMPLEXITY_PATTERN.matcher(password).matches();
+			}, ImportErrorCode.INVALID_FORMAT));
 
 	/**
 	 * 校验已解析行

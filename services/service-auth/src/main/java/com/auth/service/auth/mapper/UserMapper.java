@@ -35,7 +35,7 @@ public interface UserMapper extends BaseMapper<UserEntity> {
 	List<UserInvalidationStatePO> selectInvalidationStatesByUserIds(@Param("userIds") List<Long> userIds);
 
 	/**
-	 * 批量递增 perm_version（仅正常且未删除用户，防御性条件与分桶策略一致）。
+	 * 批量递增 perm_version
 	 * @param userIds 用户 ID 列表，非空
 	 * @return 更新行数
 	 */

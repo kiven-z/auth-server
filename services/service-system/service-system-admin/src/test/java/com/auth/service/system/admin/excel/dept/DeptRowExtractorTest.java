@@ -24,7 +24,7 @@ class DeptRowExtractorTest {
 
 		assertThat(outcome.ok()).isFalse();
 		assertThat(outcome.errors()).hasSize(1);
-		assertThat(outcome.errors().get(0).message()).contains("deptCode is required");
+		assertThat(outcome.errors().get(0).message()).contains("deptCode不能为空");
 	}
 
 	@Test

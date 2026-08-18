@@ -55,7 +55,7 @@ public class UserInvalidationRepository {
 	}
 
 	/**
-	 * 分批递增 perm_version（仅正常且未删除用户，与 Mapper 防御条件一致）。
+	 * 分批递增 perm_version
 	 * @param userIds 待递增用户 ID
 	 * @param batchSize 每批大小，须 &gt; 0
 	 * @return 实际更新行数合计
