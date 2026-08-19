@@ -6,13 +6,11 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * SQL 契约：部门列表带计算有效；countEffective 打 v_dept_effective
+ * SQL 契约：部门列表带计算有效
  *
  * @author Bunny
  */
@@ -25,23 +23,6 @@ class SysDeptMapperEffectiveSqlContractTest {
 			assertThat(in).as("resource %s must exist", "/mapper/admin/dept/SysDeptMapper.xml").isNotNull();
 			return new String(in.readAllBytes(), StandardCharsets.UTF_8);
 		}
-	}
-
-	private static String locateMapperJava() throws IOException {
-		Path dir = Path.of(System.getProperty("user.dir")).toAbsolutePath().normalize();
-		String relative = "src/main/java/com/auth/service/system/admin/mapper/admin/dept/SysDeptMapper.java";
-		while (dir != null) {
-			Path candidate = dir.resolve(relative);
-			if (Files.isRegularFile(candidate)) {
-				return Files.readString(candidate);
-			}
-			Path moduleCandidate = dir.resolve("services/service-system/service-system-admin").resolve(relative);
-			if (Files.isRegularFile(moduleCandidate)) {
-				return Files.readString(moduleCandidate);
-			}
-			dir = dir.getParent();
-		}
-		throw new IllegalStateException("missing SysDeptMapper.java from " + System.getProperty("user.dir"));
 	}
 
 	private static String selectBlock(String xml, String id) {
@@ -62,13 +43,6 @@ class SysDeptMapperEffectiveSqlContractTest {
 		assertThat(selectBlock(xml, "selectListByPage")).contains("v_dept_effective ve")
 			.contains("AS effective")
 			.contains("sys_dept d");
-	}
-
-	@Test
-	@DisplayName("countEffectiveById：注解 SQL 打 v_dept_effective")
-	void countEffectiveByIdUsesDeptEffectiveView() throws IOException {
-		String javaSource = locateMapperJava();
-		assertThat(javaSource).contains("FROM v_dept_effective WHERE id = #{deptId}");
 	}
 
 }

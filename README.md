@@ -2,7 +2,7 @@
 
 Auth 项目的后端服务集合，基于 Spring Boot 3.5 / Spring Cloud 2025 / Spring Cloud Alibaba 构建，提供鉴权、网关限流与系统业务能力。
 
-> 详细设计、环境搭建、排障记录见姊妹仓库 [auth-docs](https://github.com/BunnyMaster/auth-docs)。
+> 详细设计、环境搭建、排障记录见姊妹仓库 [auth-docs](https://github.com/kiven-z/auth-docs)。
 
 ## 技术栈
 
