@@ -5,6 +5,8 @@ import com.auth.module.file.api.model.dto.ExportPageDataDTO;
 import com.auth.module.security.autoconfigure.annotation.InternalApi;
 import com.auth.service.system.admin.export.ExportPageDispatchService;
 import com.auth.service.system.admin.model.request.InternalExportPageRequest;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author Bunny
  */
 @InternalApi
+@Tag(name = "内部-系统导出分页取数", description = "供异步导出 Worker 回调")
 @RequiredArgsConstructor
 @RequestMapping("/api/system/inner/export")
 @RestController
@@ -25,11 +28,7 @@ public class InternalExportPageController {
 
 	private final ExportPageDispatchService exportPageDispatchService;
 
-	/**
-	 * 统一内部分页取数（恢复权限快照后按业务类型路由）
-	 * @param request 取数请求
-	 * @return 分页数据
-	 */
+	@Operation(summary = "分页查询导出数据", description = "恢复权限快照后按业务类型路由")
 	@PostMapping("/page")
 	public Result<ExportPageDataDTO> page(@Valid @RequestBody InternalExportPageRequest request) {
 		ExportPageDataDTO data = exportPageDispatchService.fetchPage(request);

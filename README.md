@@ -88,6 +88,23 @@ cd docker./dockerctl.sh dev up        # 本地构建并起
 - 代码格式：`./spring-format.sh`（spring-javaformat + Spotless）。
 - 提交信息规范见仓库内 `.cursor/rules/commit-message.mdc`。
 
+## 赞助
+
+如果这个项目对你有帮助，欢迎打赏支持。
+
+<table>
+  <tr>
+    <td align="center">
+      <img src="./donate/WeChatPay.jpg" width="220" alt="微信" /><br/>
+      微信
+    </td>
+    <td align="center">
+      <img src="./donate/AliPay.jpg" width="220" alt="支付宝" /><br/>
+      支付宝
+    </td>
+  </tr>
+</table>
+
 ## 许可证
 
 Copyright 2024-2026 Bunny。
