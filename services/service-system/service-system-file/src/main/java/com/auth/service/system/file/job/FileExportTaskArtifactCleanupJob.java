@@ -44,12 +44,11 @@ public class FileExportTaskArtifactCleanupJob {
 	 */
 	@Scheduled(cron = "${auth.file.export-task.cleanup-cron:0 10 4 * * ?}")
 	public void purgeExpiredArtifacts() {
-		int batchSize = BatchSizes.SIZE_500;
 		int total = 0;
 		for (int round = 0; round < properties.getCleanupMaxRounds(); round++) {
-			int purged = purgeBatch(Instant.now(), batchSize);
+			int purged = purgeBatch(Instant.now());
 			total += purged;
-			if (purged < batchSize) {
+			if (purged < BatchSizes.SIZE_500) {
 				break;
 			}
 		}
@@ -61,11 +60,11 @@ public class FileExportTaskArtifactCleanupJob {
 	/**
 	 * 分批清理过期导出产物
 	 * @param now 当前时间
-	 * @param batchSize 批量大小
 	 * @return 清理数量
 	 */
-	private int purgeBatch(Instant now, int batchSize) {
-		List<FileExportTaskExpireRowPO> tasks = fileExportTaskMapper.selectExpiredSuccessTasks(now, batchSize);
+	private int purgeBatch(Instant now) {
+		List<FileExportTaskExpireRowPO> tasks = fileExportTaskMapper.selectExpiredSuccessTasks(now,
+				BatchSizes.SIZE_500);
 		if (CollUtil.isEmpty(tasks)) {
 			return 0;
 		}

@@ -8,7 +8,6 @@ import com.auth.service.auth.util.BatchPartition;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 /**
@@ -37,7 +36,9 @@ public class AuthorizationImpactQuerySupport {
 		}
 
 		Set<Long> userIds = new HashSet<>();
-		queryStringKeysInBatches(codes, authorizationImpactMapper::selectUserIdsByRoleCodes, userIds);
+		for (List<String> chunk : BatchPartition.partitionStrings(codes, BatchSizes.SIZE_500)) {
+			userIds.addAll(authorizationImpactMapper.selectUserIdsByRoleCodes(chunk));
+		}
 		return Set.copyOf(userIds);
 	}
 
@@ -81,8 +82,9 @@ public class AuthorizationImpactQuerySupport {
 		}
 
 		Set<String> roleCodes = new LinkedHashSet<>();
-		accumulateBridgedStringsInBatches(codes, authorizationImpactMapper::selectRoleCodesByPermissionCodes,
-				roleCodes);
+		for (List<String> chunk : BatchPartition.partitionStrings(codes, BatchSizes.SIZE_500)) {
+			roleCodes.addAll(authorizationImpactMapper.selectRoleCodesByPermissionCodes(chunk));
+		}
 		if (CollUtil.isEmpty(roleCodes)) {
 			return Set.of();
 		}
@@ -109,20 +111,6 @@ public class AuthorizationImpactQuerySupport {
 
 	private void queryLongKeysInBatches(List<Long> keys, UnaryOperator<List<Long>> queryFn, Set<Long> accumulator) {
 		for (List<Long> chunk : BatchPartition.partitionIds(keys, BatchSizes.SIZE_500)) {
-			accumulator.addAll(queryFn.apply(chunk));
-		}
-	}
-
-	private void queryStringKeysInBatches(List<String> keys, Function<List<String>, List<Long>> queryFn,
-			Set<Long> accumulator) {
-		for (List<String> chunk : BatchPartition.partitionStrings(keys, BatchSizes.SIZE_500)) {
-			accumulator.addAll(queryFn.apply(chunk));
-		}
-	}
-
-	private void accumulateBridgedStringsInBatches(List<String> keys, UnaryOperator<List<String>> queryFn,
-			Set<String> accumulator) {
-		for (List<String> chunk : BatchPartition.partitionStrings(keys, BatchSizes.SIZE_500)) {
 			accumulator.addAll(queryFn.apply(chunk));
 		}
 	}

@@ -1,4 +1,4 @@
-# auth-server
+# auth-server-pro
 
 Auth 项目的后端服务集合，基于 Spring Boot 3.5 / Spring Cloud 2025 / Spring Cloud Alibaba 构建，提供鉴权、网关限流与系统业务能力。
 
@@ -23,7 +23,7 @@ Auth 项目的后端服务集合，基于 Spring Boot 3.5 / Spring Cloud 2025 / 
 ## 模块结构
 
 ```  
-auth-server  
+auth-server-pro  
 ├── commons/                 # 公共基础库  
 │   ├── common-core  
 │   ├── common-data  

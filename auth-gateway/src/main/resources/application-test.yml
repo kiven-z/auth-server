@@ -1,9 +1,0 @@
-spring:
-  cloud:
-    nacos:
-      server-addr: 192.168.3.4:8848
-
-logging:
-  level:
-    root: warn
-    com.auth: info

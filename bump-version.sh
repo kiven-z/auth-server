@@ -6,7 +6,7 @@
 #   ./bump-version.sh 1.0.0-beta.5 --push
 #   ./bump-version.sh 1.0.0-beta.5 --dry-run
 #
-# 产品发版请用上一级编排脚本（闭源 Auth/、开源 community/），以保持前后端同号。
+# 产品发版请用上一级编排脚本（闭源 auth-pro/、开源 auth-community/），以保持前后端同号。
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -21,14 +21,14 @@ usage() {
 用法: ./bump-version.sh <semver> [--push] [--dry-run]
 
 本脚本只改本仓版本文件并打 tag，不发布 GitHub Release。
-产品号须前后端一致，日常请用上一级 bump-version.sh。
+产品号须前后端一致，日常请用上一级 bump-pro-version.sh。
 EOF
   exit 1
 }
 
 reject_release_flags() {
   echo "错误: 本脚本不发布 GitHub Release（不支持 $1）。" >&2
-  echo "打包上传请用产品目录下 assets/upload-auth-kit-release.sh" >&2
+  echo "打包上传请用产品目录下 assets/upload-pro-kit-release.sh" >&2
   exit 1
 }
 
