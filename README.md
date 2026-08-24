@@ -4,47 +4,6 @@ Auth 项目的后端服务集合，基于 Spring Boot 3.5 / Spring Cloud 2025 / 
 
 > 详细设计、环境搭建、排障记录见姊妹仓库 [auth-docs](https://github.com/kiven-z/auth-docs)。
 
-## 技术栈
-
-| 类别      | 选型                                                                      |
-|---------|-------------------------------------------------------------------------|
-| 运行时     | JDK 17                                                                  |
-| 框架      | Spring Boot 3.5.x、Spring Cloud 2025.0.0、Spring Cloud Alibaba 2025.0.0.0 |
-| 构建      | Apache Maven 3.9.x（CI-friendly `${revision}`）                           |
-| 持久层     | MyBatis-Plus 3.5、HikariCP、dynamic-datasource                            |
-| 数据库     | MySQL 9.x                                                               |
-| 缓存/会话   | Redis（验证码、限流）                                                           |
-| 注册/配置中心 | Nacos                                                                   |
-| 对象存储    | AWS SDK v2（S3 协议），本地用 MinIO                                             |
-| 鉴权      | JJWT 0.12、自研 Security 二次封装                                              |
-| 文档      | springdoc-openapi 2.8                                                   |
-| 工具      | Hutool、MapStruct、EasyExcel、Quartz、ip2region、yauaa                       |
-
-## 模块结构
-
-```  
-auth-server-pro  
-├── commons/                 # 公共基础库  
-│   ├── common-core  
-│   ├── common-data  
-│   ├── common-mapstruct  
-│   └── common-starter-*     # cache / ip / jwt / restTemplate / web / webdoc  
-├── modules/                 # 业务无关的可复用业务模块  
-│   ├── module-file / module-file-api  
-│   ├── module-message-api  
-│   ├── module-platform-persistence  
-│   └── module-security-*    # core / data-permission / web-starter / contract / autoconfigure  
-├── services/                # 可独立部署的业务服务  
-│   ├── service-auth         # 鉴权 / JWT 签发  
-│   ├── service-system       # 系统业务（用户、部门、消息、文件、调度等）  
-│   └── service-example      # 示例工程  
-└── auth-gateway/            # 网关 / 限流  
-```
-
-`service-system` 内部按 `admin / authorization / bootstrap / common / file / message / schedule`
-
-二级拆分，对应控制器、鉴权、启动、公共、文件、消息、调度域。
-
 ## 快速开始
 
 环境前置与中间件清单见 [`auth-docs/开发环境搭建/1-环境依赖清单`](../auth-docs/开发环境搭建/1-环境依赖清单.md)。
