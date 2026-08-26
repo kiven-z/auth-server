@@ -10,3 +10,17 @@ logging:
   level:
     root: info
     com.auth: debug
+
+# ----- 网关 JWT 校验策略（JwtValidateGlobalFilter）-----
+# 非严格路径：无 Token / Token 过期放行；Token 非法拒绝
+# 严格路径：无 Token / 过期 / 非法一律拒绝
+auth:
+  gateway:
+    security:
+      # 是否启用严格路径校验。false 时 strict-patterns 不生效，全部走轻校验
+      strict-enabled: false
+      # 严格校验路径（Ant 风格）。仅当 strict-enabled=true 时生效
+      strict-patterns: []
+      # strict-patterns:
+      #   - /api/system/admin/**
+      #   - /api/auth/session/**

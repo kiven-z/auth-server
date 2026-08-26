@@ -13,3 +13,13 @@ logging:
     com.auth: info
     org.springframework: warn
     reactor.netty: warn
+
+# ----- 网关 JWT 校验策略（JwtValidateGlobalFilter）-----
+auth:
+  gateway:
+    security:
+      strict-enabled: false
+      strict-patterns: []
+      # strict-patterns:
+      #   - /api/system/admin/**
+      #   - /api/auth/session/**
