@@ -15,7 +15,7 @@ name: Build and push auth-server-pro to ACR
 
 on:
   push:
-    tags: ["v*"]
+    branches: [main]
   workflow_dispatch:
 
 env:
