@@ -24,7 +24,6 @@ public class RemoteServiceExceptionHandler {
 		body.setCode(result.getCode());
 		body.setMessage(result.getMessage());
 		body.setError(result.getError());
-		body.setSubCode(result.getSubCode());
 		body.setData(result.getData());
 		body.setExt(result.getExt());
 		body.setTimestamp(result.getTimestamp());
@@ -46,7 +45,8 @@ public class RemoteServiceExceptionHandler {
 		}
 
 		Result<?> result = exception.getResult();
-		Result<Object> body = result == null ? Result.error(status.value(), "Remote service error")
+		Result<Object> body = result == null
+				? Result.error(status.value(), CommonWebErrorCodes.UPSTREAM_UNAVAILABLE, "Remote service error")
 				: castResult(result);
 		return ResponseEntity.status(status).body(body);
 	}

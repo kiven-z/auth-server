@@ -41,6 +41,7 @@ class ValidationExceptionHandlerTest {
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 		assertNotNull(response.getBody());
 		assertEquals(400, response.getBody().getCode());
+		assertEquals(CommonWebErrorCodes.VALIDATION_FAILED, response.getBody().getError());
 		assertEquals("Validation failed: jobId: invalid value format", response.getBody().getMessage());
 	}
 
@@ -58,6 +59,7 @@ class ValidationExceptionHandlerTest {
 
 		ResponseEntity<Result<Object>> response = handler.handleBindException(exception);
 
+		assertEquals(CommonWebErrorCodes.VALIDATION_FAILED, response.getBody().getError());
 		assertEquals("Validation failed: jobId: invalid value format", response.getBody().getMessage());
 	}
 
@@ -71,6 +73,7 @@ class ValidationExceptionHandlerTest {
 
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 		assertNotNull(response.getBody());
+		assertEquals(CommonWebErrorCodes.VALIDATION_FAILED, response.getBody().getError());
 		assertEquals("Validation failed: jobId: invalid value format", response.getBody().getMessage());
 	}
 
@@ -85,6 +88,7 @@ class ValidationExceptionHandlerTest {
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 		assertNotNull(response.getBody());
 		assertEquals(400, response.getBody().getCode());
+		assertEquals(CommonWebErrorCodes.VALIDATION_FAILED, response.getBody().getError());
 		assertEquals("Validation failed: taskType: required", response.getBody().getMessage());
 	}
 
@@ -99,6 +103,7 @@ class ValidationExceptionHandlerTest {
 
 		ResponseEntity<Result<Object>> response = handler.handleBindException(exception);
 
+		assertEquals(CommonWebErrorCodes.VALIDATION_FAILED, response.getBody().getError());
 		assertEquals("Validation failed: name: must not be blank", response.getBody().getMessage());
 	}
 
