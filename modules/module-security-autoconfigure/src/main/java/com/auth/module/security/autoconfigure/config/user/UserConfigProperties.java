@@ -1,13 +1,14 @@
 package com.auth.module.security.autoconfigure.config.user;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.validation.annotation.Validated;
+
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
-import org.springframework.validation.annotation.Validated;
 
 /**
  * 在 Nacos 中进行配置刷新 文件名：common-user-config.yaml 分组：AUTH_COMMON
