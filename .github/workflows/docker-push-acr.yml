@@ -8,11 +8,11 @@
 # 流程：同一 runner 内 Maven 只编一次 → 串行推四个 runtime 镜像
 #
 # 推送结果示例：
-#   registry.cn-hangzhou.aliyuncs.com/kiven-z-auth/service-auth:pro-<sha>
-#   registry.cn-hangzhou.aliyuncs.com/kiven-z-auth/service-auth:pro-latest
-#   registry.cn-hangzhou.aliyuncs.com/kiven-z-auth/service-example:pro-latest
+#   registry.cn-hangzhou.aliyuncs.com/kiven-z-auth/service-auth:<sha>
+#   registry.cn-hangzhou.aliyuncs.com/kiven-z-auth/service-auth:latest
+#   registry.cn-hangzhou.aliyuncs.com/kiven-z-auth/service-example:latest
 
-name: Build and push auth-server-pro to ACR
+name: Build and push auth-server to ACR
 
 on:
   push:
@@ -20,7 +20,6 @@ on:
   workflow_dispatch:
 
 env:
-  IMAGE_TAG_PREFIX: pro
   JAVA_VERSION: "17"
 
 jobs:
@@ -65,8 +64,8 @@ jobs:
         id: meta
         run: |
           SHA_SHORT="${GITHUB_SHA::7}"
-          echo "tag_sha=${IMAGE_TAG_PREFIX}-${SHA_SHORT}" >> "$GITHUB_OUTPUT"
-          echo "tag_latest=${IMAGE_TAG_PREFIX}-latest" >> "$GITHUB_OUTPUT"
+          echo "tag_sha=${SHA_SHORT}" >> "$GITHUB_OUTPUT"
+          echo "tag_latest=latest" >> "$GITHUB_OUTPUT"
 
       - name: Build and push service-auth
         uses: docker/build-push-action@v7

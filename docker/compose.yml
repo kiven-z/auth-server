@@ -4,12 +4,12 @@ name: auth-app
 #
 # 变量：
 #   IMAGE_PREFIX              镜像仓库前缀，例：registry.cn-hangzhou.aliyuncs.com/kiven-z-auth（默认 auth，本地构建）
-#   IMAGE_TAG                 例：pro-latest、pro-<sha> 或 local（本地构建，默认 local）
+#   IMAGE_TAG                 例：latest、<sha> 或 local（本地构建，默认 local）
 #   SPRING_PROFILES_ACTIVE    Spring / Nacos 命名空间 profile（默认 dev；生产写 prod）
 #
 # 远程部署：本文件 + docker/.env；先 docker login 再：
 #   export IMAGE_PREFIX=registry.cn-hangzhou.aliyuncs.com/kiven-z-auth
-#   export IMAGE_TAG=pro-latest
+#   export IMAGE_TAG=latest
 #   export SPRING_PROFILES_ACTIVE=prod
 # 宿主机需准备：/opt/ipdb/ip2region_v4.xdb、ip2region_v6.xdb（与 Nacos auth.common.ip-tool 路径一致）
 
