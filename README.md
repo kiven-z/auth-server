@@ -77,6 +77,4 @@ git config core.hooksPath .githooks
 
 Copyright 2024-2026 Bunny。
 
-源码基于 [PolyForm Noncommercial License 1.0.0](./LICENSE) 发布，**商业使用须另行购买授权**
-
-详见 [COMMERCIAL.md](./COMMERCIAL.md)。
+源码基于 [Apache License 2.0](./LICENSE) 发布。
