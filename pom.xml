@@ -10,10 +10,10 @@
     </parent>
 
     <groupId>com.auth</groupId>
-    <artifactId>auth-server-pro</artifactId>
+    <artifactId>auth-server</artifactId>
     <version>${revision}</version>
     <packaging>pom</packaging>
-    <name>auth-server-pro</name>
+    <name>auth-server</name>
     <description>auth-admin</description>
 
     <modules>

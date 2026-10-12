@@ -1,16 +1,16 @@
-# auth-server-community
+# auth-server
 
 Auth 管理后台 **Community Edition** 后端仓库。基于 Spring Boot 3.5、Spring Cloud 2025、Spring Cloud Alibaba
 构建，提供鉴权与系统业务能力。
 
-配套前端：[auth-web-community](https://github.com/kiven-z/auth-web-community)
+配套前端：[auth-web](https://github.com/kiven-z/auth-web)
 
 配套文档：https://github.com/kiven-z/auth-docs
 
 ## 模块结构
 
 ```
-auth-server-community
+auth-server
 ├── commons/                 # 公共基础库
 │   ├── common-core
 │   ├── common-data
