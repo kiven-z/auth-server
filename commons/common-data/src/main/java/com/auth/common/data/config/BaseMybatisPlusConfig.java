@@ -20,7 +20,7 @@ public interface BaseMybatisPlusConfig extends MetaObjectHandler {
 
 	/**
 	 * 配置并注入 MyBatis Plus 拦截器（全应用仅此一处注册外层插件）
-	 * @param extraInnerInterceptors 各模块贡献的 InnerInterceptor（须排在分页之前）
+	 * @param extraInnerInterceptors 各模块贡献的 InnerInterceptor
 	 * @return 拦截器
 	 */
 	@Bean

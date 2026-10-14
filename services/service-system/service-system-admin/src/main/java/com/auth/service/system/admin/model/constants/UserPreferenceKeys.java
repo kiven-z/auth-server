@@ -32,7 +32,7 @@ public class UserPreferenceKeys {
 	public static final String UI_LAYOUT = "ui.layout";
 
 	/**
-	 * 界面显示开关 + 标签风格 + 页宽
+	 * 色弱模式与隐藏页脚
 	 */
 	public static final String UI_DISPLAY = "ui.display";
 
